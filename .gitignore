@@ -15,4 +15,4 @@ licenses.json
 THIRD-PARTY-LICENSES.txt
 
 # IMPORTANT: do not ignore .kiro
-# !.kiro
+!.kiro
