@@ -1,14 +1,16 @@
-## Tech Stack
+# Tech
+
+## Stack
 
 - **Language**: TypeScript
-- **Package Manager**: pnpm (monorepo with workspaces)
-- **Build Tool**: tsup
-- **Testing**: Vitest
-- **Validation**: AJV (JSON schema validation)
-- **CLI Framework**: yargs
-- **Development**: Kiro (specs, hooks, steering docs)
+- **Packages**: pnpm workspaces
+- **Build**: tsup
+- **Tests**: Vitest
+- **Validation**: AJV (JSON Schema)
+- **CLI**: yargs
+- **Dev process**: Kiro (specs, hooks, steering)
 
-## Common Commands
+## Common commands
 
 ```bash
 # Install dependencies
@@ -20,16 +22,12 @@ pnpm -r build
 # Run tests across all packages
 pnpm -r test
 
-# CLI usage
+# CLI help
 pnpm kaiord --help
 ```
 
-## Build System
+## Notes
 
-This is a pnpm workspace monorepo. Use the `-r` (recursive) flag to run commands across all packages. Individual packages can be targeted using `--filter` or by navigating to their directory.
-
-## Code Quality
-
-- All code should be fully typed (no `any` types without justification)
-- Schema validation is critical for data integrity
-- Maintain round-trip conversion safety between formats
+- Use `-r` (recursive) to run across workspaces
+- Target individual packages with `--filter` or `cd packages/<name>`
+- Keep code fully typed; prioritize schema-driven and round-trip safe workflows
