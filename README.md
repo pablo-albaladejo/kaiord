@@ -59,6 +59,22 @@ pnpm kaiord --help
 
 ---
 
+## 📚 References & Resources
+
+### Format Specifications
+
+- [Garmin FIT SDK (JavaScript)](https://github.com/garmin/fit-javascript-sdk) - Official FIT protocol implementation
+- [FIT Workout Files Cookbook](https://developer.garmin.com/fit/cookbook/encoding-workout-files/) - Guide to encoding workout files
+- [FIT File Types: Workout](https://developer.garmin.com/fit/file-types/workout/) - Workout file type specification
+- [Training Center XML (TCX)](https://en.wikipedia.org/wiki/Training_Center_XML) - Garmin's XML-based format
+- [PWX (TrainingPeaks)](https://www.trainingpeaks.com/) - TrainingPeaks workout format
+
+### Related Projects
+
+- [Kiro](https://kiro.dev) - AI-powered development environment
+
+---
+
 ## 📜 License
 
 MIT © 2025 Pablo Albaladejo  
