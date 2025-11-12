@@ -1,12 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 import type { KRD } from "../../../domain/schemas/krd";
-import type {
-  RepetitionBlock,
-  WorkoutStep,
-} from "../../../domain/schemas/workout";
+import { RepetitionBlock, WorkoutStep } from "../../../domain/schemas/workout";
 import { FitParsingError } from "../../../domain/types/errors";
-import { buildKRD, buildKRDMetadata } from "../../../tests/fixtures/krd.fixtures";
-import { buildWorkout } from "../../../tests/fixtures/workout.fixtures";
+import {
+  buildKRD,
+  buildKRDMetadata,
+} from "../../../tests/fixtures/krd.fixtures";
+import {
+  buildWorkout,
+  buildWorkoutStep,
+} from "../../../tests/fixtures/workout.fixtures";
 import { createMockLogger } from "../../../tests/helpers/test-utils";
 import { FIT_DURATION_TYPE, FIT_MESSAGE_KEY } from "../constants";
 import { convertKRDToMessages } from "./krd-to-fit.converter";
@@ -38,11 +41,16 @@ describe("convertKRDToMessages", () => {
         type: string;
         fileIdMesg: Record<string, unknown>;
       };
-      expect(fileIdMsg.type).toBe(FIT_MESSAGE_KEY.FILE_ID);
-      expect(fileIdMsg.fileIdMesg.type).toBe("workout");
-      expect(fileIdMsg.fileIdMesg.manufacturer).toBe("garmin");
-      expect(fileIdMsg.fileIdMesg.product).toBe("fenix7");
-      expect(fileIdMsg.fileIdMesg.serialNumber).toBe(1234567890);
+      expect(fileIdMsg).toStrictEqual({
+        type: FIT_MESSAGE_KEY.FILE_ID,
+        fileIdMesg: {
+          type: "workout",
+          manufacturer: krd.metadata.manufacturer,
+          product: krd.metadata.product,
+          serialNumber: Number(krd.metadata.serialNumber),
+          timeCreated: fileIdMsg.fileIdMesg.timeCreated,
+        },
+      });
     });
 
     it("should use default manufacturer when not provided", () => {
@@ -90,7 +98,7 @@ describe("convertKRDToMessages", () => {
       };
       expect(fileIdMsg.fileIdMesg.timeCreated).toBeInstanceOf(Date);
       expect((fileIdMsg.fileIdMesg.timeCreated as Date).toISOString()).toBe(
-        "2025-01-15T10:30:00.000Z"
+        krd.metadata.created
       );
     });
   });
@@ -115,16 +123,21 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutMesg: Record<string, unknown>;
       };
-      expect(workoutMsg.type).toBe(FIT_MESSAGE_KEY.WORKOUT);
-      expect(workoutMsg.workoutMesg.wktName).toBe("Test Workout");
-      expect(workoutMsg.workoutMesg.sport).toBe("running");
+      expect(workoutMsg).toStrictEqual({
+        type: FIT_MESSAGE_KEY.WORKOUT,
+        workoutMesg: {
+          wktName: workout.name,
+          sport: workout.sport,
+          numValidSteps: workoutMsg.workoutMesg.numValidSteps,
+        },
+      });
     });
 
     it("should calculate numValidSteps for individual steps", () => {
       // Arrange
       const logger = createMockLogger();
-      const steps: Array<WorkoutStep> = [
-        {
+      const steps = [
+        buildWorkoutStep.build({
           stepIndex: 0,
           durationType: "time",
           duration: { type: "time", seconds: 300 },
@@ -133,8 +146,8 @@ describe("convertKRDToMessages", () => {
             type: "power",
             value: { unit: "watts", value: 200 },
           },
-        },
-        {
+        }),
+        buildWorkoutStep.build({
           stepIndex: 1,
           durationType: "time",
           duration: { type: "time", seconds: 600 },
@@ -143,7 +156,7 @@ describe("convertKRDToMessages", () => {
             type: "power",
             value: { unit: "watts", value: 250 },
           },
-        },
+        }),
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
@@ -248,10 +261,20 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(stepMsg.type).toBe(FIT_MESSAGE_KEY.WORKOUT_STEP);
-      expect(stepMsg.workoutStepMesg.messageIndex).toBe(0);
-      expect(stepMsg.workoutStepMesg.durationType).toBe(FIT_DURATION_TYPE.TIME);
-      expect(stepMsg.workoutStepMesg.durationTime).toBe(300);
+      const step = steps[0];
+      expect(stepMsg).toStrictEqual({
+        type: FIT_MESSAGE_KEY.WORKOUT_STEP,
+        workoutStepMesg: {
+          messageIndex: step.stepIndex,
+          durationType: FIT_DURATION_TYPE.TIME,
+          durationTime:
+            step.duration.type === "time" ? step.duration.seconds : undefined,
+          targetType: stepMsg.workoutStepMesg.targetType,
+          targetValue: stepMsg.workoutStepMesg.targetValue,
+          customTargetPowerLow: stepMsg.workoutStepMesg.customTargetPowerLow,
+          customTargetPowerHigh: stepMsg.workoutStepMesg.customTargetPowerHigh,
+        },
+      });
     });
 
     it("should convert distance-based duration step", () => {
@@ -282,10 +305,17 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(stepMsg.workoutStepMesg.durationType).toBe(
-        FIT_DURATION_TYPE.DISTANCE
-      );
-      expect(stepMsg.workoutStepMesg.durationDistance).toBe(5000);
+      const step = steps[0];
+      expect(stepMsg.workoutStepMesg).toStrictEqual({
+        messageIndex: step.stepIndex,
+        durationType: FIT_DURATION_TYPE.DISTANCE,
+        durationDistance:
+          step.duration.type === "distance" ? step.duration.meters : undefined,
+        targetType: stepMsg.workoutStepMesg.targetType,
+        targetValue: stepMsg.workoutStepMesg.targetValue,
+        customTargetSpeedLow: stepMsg.workoutStepMesg.customTargetSpeedLow,
+        customTargetSpeedHigh: stepMsg.workoutStepMesg.customTargetSpeedHigh,
+      });
     });
 
     it("should convert open duration step", () => {
@@ -346,9 +376,16 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(stepMsg.workoutStepMesg.targetType).toBe("power");
-      expect(stepMsg.workoutStepMesg.customTargetPowerLow).toBe(250);
-      expect(stepMsg.workoutStepMesg.customTargetPowerHigh).toBe(250);
+      const step = steps[0];
+      const targetValue =
+        step.target.type === "power" && step.target.value.unit === "watts"
+          ? step.target.value.value
+          : undefined;
+      expect(stepMsg.workoutStepMesg).toMatchObject({
+        targetType: "power",
+        customTargetPowerLow: targetValue,
+        customTargetPowerHigh: targetValue,
+      });
     });
 
     it("should convert power target in percent FTP", () => {
@@ -379,9 +416,16 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(stepMsg.workoutStepMesg.targetType).toBe("power");
-      expect(stepMsg.workoutStepMesg.customTargetPowerLow).toBe(85);
-      expect(stepMsg.workoutStepMesg.customTargetPowerHigh).toBe(85);
+      const step = steps[0];
+      const targetValue =
+        step.target.type === "power" && step.target.value.unit === "percent_ftp"
+          ? step.target.value.value
+          : undefined;
+      expect(stepMsg.workoutStepMesg).toMatchObject({
+        targetType: "power",
+        customTargetPowerLow: targetValue,
+        customTargetPowerHigh: targetValue,
+      });
     });
 
     it("should convert power zone target", () => {
@@ -412,8 +456,15 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(stepMsg.workoutStepMesg.targetType).toBe("power");
-      expect(stepMsg.workoutStepMesg.targetPowerZone).toBe(3);
+      const step = steps[0];
+      const targetZone =
+        step.target.type === "power" && step.target.value.unit === "zone"
+          ? step.target.value.value
+          : undefined;
+      expect(stepMsg.workoutStepMesg).toMatchObject({
+        targetType: "power",
+        targetPowerZone: targetZone,
+      });
     });
 
     it("should convert power range target", () => {
@@ -444,9 +495,20 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(stepMsg.workoutStepMesg.targetType).toBe("power");
-      expect(stepMsg.workoutStepMesg.customTargetPowerLow).toBe(200);
-      expect(stepMsg.workoutStepMesg.customTargetPowerHigh).toBe(250);
+      const step = steps[0];
+      const targetMin =
+        step.target.type === "power" && step.target.value.unit === "range"
+          ? step.target.value.min
+          : undefined;
+      const targetMax =
+        step.target.type === "power" && step.target.value.unit === "range"
+          ? step.target.value.max
+          : undefined;
+      expect(stepMsg.workoutStepMesg).toMatchObject({
+        targetType: "power",
+        customTargetPowerLow: targetMin,
+        customTargetPowerHigh: targetMax,
+      });
     });
 
     it("should convert heart rate target in bpm", () => {
@@ -477,9 +539,16 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(stepMsg.workoutStepMesg.targetType).toBe("heartRate");
-      expect(stepMsg.workoutStepMesg.customTargetHeartRateLow).toBe(150);
-      expect(stepMsg.workoutStepMesg.customTargetHeartRateHigh).toBe(150);
+      const step = steps[0];
+      const targetValue =
+        step.target.type === "heart_rate" && step.target.value.unit === "bpm"
+          ? step.target.value.value
+          : undefined;
+      expect(stepMsg.workoutStepMesg).toMatchObject({
+        targetType: "heartRate",
+        customTargetHeartRateLow: targetValue,
+        customTargetHeartRateHigh: targetValue,
+      });
     });
 
     it("should convert heart rate zone target", () => {
@@ -510,8 +579,15 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(stepMsg.workoutStepMesg.targetType).toBe("heartRate");
-      expect(stepMsg.workoutStepMesg.targetHrZone).toBe(4);
+      const step = steps[0];
+      const targetZone =
+        step.target.type === "heart_rate" && step.target.value.unit === "zone"
+          ? step.target.value.value
+          : undefined;
+      expect(stepMsg.workoutStepMesg).toMatchObject({
+        targetType: "heartRate",
+        targetHrZone: targetZone,
+      });
     });
 
     it("should convert cadence target in rpm", () => {
@@ -542,9 +618,16 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(stepMsg.workoutStepMesg.targetType).toBe("cadence");
-      expect(stepMsg.workoutStepMesg.customTargetCadenceLow).toBe(90);
-      expect(stepMsg.workoutStepMesg.customTargetCadenceHigh).toBe(90);
+      const step = steps[0];
+      const targetValue =
+        step.target.type === "cadence" && step.target.value.unit === "rpm"
+          ? step.target.value.value
+          : undefined;
+      expect(stepMsg.workoutStepMesg).toMatchObject({
+        targetType: "cadence",
+        customTargetCadenceLow: targetValue,
+        customTargetCadenceHigh: targetValue,
+      });
     });
 
     it("should convert pace target in mps", () => {
@@ -575,9 +658,16 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(stepMsg.workoutStepMesg.targetType).toBe("speed");
-      expect(stepMsg.workoutStepMesg.customTargetSpeedLow).toBe(3.5);
-      expect(stepMsg.workoutStepMesg.customTargetSpeedHigh).toBe(3.5);
+      const step = steps[0];
+      const targetValue =
+        step.target.type === "pace" && step.target.value.unit === "mps"
+          ? step.target.value.value
+          : undefined;
+      expect(stepMsg.workoutStepMesg).toMatchObject({
+        targetType: "speed",
+        customTargetSpeedLow: targetValue,
+        customTargetSpeedHigh: targetValue,
+      });
     });
 
     it("should convert open target", () => {
@@ -653,12 +743,16 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(repeatMsg.type).toBe(FIT_MESSAGE_KEY.WORKOUT_STEP);
-      expect(repeatMsg.workoutStepMesg.durationType).toBe(
-        FIT_DURATION_TYPE.REPEAT_UNTIL_STEPS_COMPLETE
-      );
-      expect(repeatMsg.workoutStepMesg.durationStep).toBe(0);
-      expect(repeatMsg.workoutStepMesg.repeatSteps).toBe(3);
+      expect(repeatMsg).toStrictEqual({
+        type: FIT_MESSAGE_KEY.WORKOUT_STEP,
+        workoutStepMesg: {
+          messageIndex: repeatMsg.workoutStepMesg.messageIndex,
+          durationType: FIT_DURATION_TYPE.REPEAT_UNTIL_STEPS_COMPLETE,
+          durationStep: 0,
+          repeatSteps: repetitionBlock.repeatCount,
+          targetType: repeatMsg.workoutStepMesg.targetType,
+        },
+      });
     });
 
     it("should encode multiple repetition blocks", () => {
@@ -709,15 +803,19 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(repeat1Msg.workoutStepMesg.repeatSteps).toBe(2);
-      expect(repeat1Msg.workoutStepMesg.durationStep).toBe(0);
+      expect(repeat1Msg.workoutStepMesg).toMatchObject({
+        repeatSteps: block1.repeatCount,
+        durationStep: 0,
+      });
 
       const repeat2Msg = messages[5] as {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      expect(repeat2Msg.workoutStepMesg.repeatSteps).toBe(3);
-      expect(repeat2Msg.workoutStepMesg.durationStep).toBe(2);
+      expect(repeat2Msg.workoutStepMesg).toMatchObject({
+        repeatSteps: block2.repeatCount,
+        durationStep: 2,
+      });
     });
   });
 
