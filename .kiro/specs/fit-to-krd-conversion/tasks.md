@@ -212,7 +212,7 @@ Each task follows Test-Driven Development:
     - Define writeFromKRD contract
     - _Requirements: 11.2_
     - _Commit: "feat: add FIT writer port"_
-  - [ ] 9.2 Implement FIT writer adapter skeleton
+  - [x] 9.2 Implement FIT writer adapter skeleton
     - Add createGarminFitSdkWriter factory to adapters/fit/garmin-fitsdk.ts
     - Implement writeFromKRD using @garmin/fitsdk Encoder
     - Handle errors with createFitParsingError

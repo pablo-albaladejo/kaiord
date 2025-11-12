@@ -3,10 +3,11 @@
  * References: https://developer.garmin.com/fit/file-types/workout/
  */
 
-import { Decoder, Stream } from "@garmin/fitsdk";
+import { Decoder, Encoder, Stream } from "@garmin/fitsdk";
 import type { KRD } from "../../domain/schemas/krd";
 import { createFitParsingError } from "../../domain/types/errors";
 import type { FitReader } from "../../ports/fit-reader";
+import type { FitWriter } from "../../ports/fit-writer";
 import type { Logger } from "../../ports/logger";
 import { FIT_MESSAGE_KEY } from "./constants";
 import { mapMetadata } from "./metadata.mapper";
@@ -159,4 +160,34 @@ const extractDeveloperFields = (
   }
 
   return devFields;
+};
+
+export const createGarminFitSdkWriter = (logger: Logger): FitWriter => ({
+  writeFromKRD: async (krd: KRD): Promise<Uint8Array> => {
+    try {
+      logger.debug("Encoding KRD to FIT");
+
+      const encoder = new Encoder();
+      const messages = convertKRDToMessages(krd, logger);
+
+      for (const message of messages) {
+        encoder.write(message);
+      }
+
+      const buffer = encoder.finish();
+      logger.info("KRD encoded to FIT successfully");
+      return new Uint8Array(buffer);
+    } catch (error) {
+      if (error instanceof Error && error.name === "FitParsingError") {
+        throw error;
+      }
+      logger.error("Failed to write FIT file", { error });
+      throw createFitParsingError("Failed to write FIT file", error);
+    }
+  },
+});
+
+const convertKRDToMessages = (krd: KRD, logger: Logger): Array<unknown> => {
+  logger.debug("Converting KRD to FIT messages");
+  throw createFitParsingError("KRD to FIT conversion not yet implemented");
 };

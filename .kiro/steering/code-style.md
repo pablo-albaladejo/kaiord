@@ -3,13 +3,26 @@
 ## General
 
 - TS strict; ESLint + Prettier; **NO `any` types allowed** (implicit or explicit) without explicit justification
-- **Files ≤ 100 lines** (excluding test files) - split into smaller modules if needed
-- Functions < 40 LOC; SRP; SOLID
+- **Files ≤ 100 lines** (excluding test files) - enforced by ESLint `max-lines` rule - split into smaller modules if needed
+- Functions < 40 LOC; SRP; SOLID - enforced by ESLint `max-lines-per-function` rule
 - No `console.log` in libraries (inject logger if needed)
 - Naming: `toKRD`, `fromKRD`, `parseX`, `writeX`
 - Prefer `Array<T>` for public types
 - **Avoid redundant type annotations** - let TypeScript infer types when possible
 - **Use constants for magic strings** - define protocol/API constants in `constants.ts`
+
+## ESLint Configuration
+
+The project uses ESLint with the following key rules:
+
+- **max-lines**: Maximum 100 lines per file (excluding blank lines and comments)
+  - Automatically disabled for test files (`*.test.ts`, `*.spec.ts`, `tests/**/*.ts`)
+- **max-lines-per-function**: Maximum 40 lines per function (warning level)
+- **@typescript-eslint/no-explicit-any**: Error on explicit `any` types
+- **@typescript-eslint/consistent-type-definitions**: Enforce `type` over `interface`
+- **@typescript-eslint/consistent-type-imports**: Enforce separate type imports
+
+Run `pnpm lint` to check all files, or `pnpm lint:packages` to check each package individually.
 
 ```typescript
 // ✅ Preferred - Constants defined and used
