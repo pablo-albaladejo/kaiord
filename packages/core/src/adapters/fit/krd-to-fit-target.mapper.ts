@@ -1,21 +1,22 @@
 import type { WorkoutStep } from "../../domain/schemas/workout";
+import { FIT_TARGET_TYPE, KRD_TARGET_TYPE, KRD_TARGET_UNIT } from "./constants";
 
 export const convertTarget = (
   step: WorkoutStep,
   message: Record<string, unknown>
 ): void => {
-  if (step.target.type === "open") {
-    message.targetType = "open";
+  if (step.target.type === KRD_TARGET_TYPE.OPEN) {
+    message.targetType = FIT_TARGET_TYPE.OPEN;
     return;
   }
 
-  if (step.target.type === "power") {
+  if (step.target.type === KRD_TARGET_TYPE.POWER) {
     convertPowerTarget(step, message);
-  } else if (step.target.type === "heart_rate") {
+  } else if (step.target.type === KRD_TARGET_TYPE.HEART_RATE) {
     convertHeartRateTarget(step, message);
-  } else if (step.target.type === "cadence") {
+  } else if (step.target.type === KRD_TARGET_TYPE.CADENCE) {
     convertCadenceTarget(step, message);
-  } else if (step.target.type === "pace") {
+  } else if (step.target.type === KRD_TARGET_TYPE.PACE) {
     convertPaceTarget(step, message);
   }
 };
@@ -24,13 +25,13 @@ const convertPowerTarget = (
   step: WorkoutStep,
   message: Record<string, unknown>
 ): void => {
-  message.targetType = "power";
-  if (step.target.type !== "power") return;
+  message.targetType = FIT_TARGET_TYPE.POWER;
+  if (step.target.type !== KRD_TARGET_TYPE.POWER) return;
 
   const value = step.target.value;
-  if (value.unit === "zone") {
+  if (value.unit === KRD_TARGET_UNIT.ZONE) {
     message.targetPowerZone = value.value;
-  } else if (value.unit === "range") {
+  } else if (value.unit === KRD_TARGET_UNIT.RANGE) {
     message.targetValue = 0;
     message.customTargetPowerLow = value.min;
     message.customTargetPowerHigh = value.max;
@@ -45,13 +46,13 @@ const convertHeartRateTarget = (
   step: WorkoutStep,
   message: Record<string, unknown>
 ): void => {
-  message.targetType = "heartRate";
-  if (step.target.type !== "heart_rate") return;
+  message.targetType = FIT_TARGET_TYPE.HEART_RATE;
+  if (step.target.type !== KRD_TARGET_TYPE.HEART_RATE) return;
 
   const value = step.target.value;
-  if (value.unit === "zone") {
+  if (value.unit === KRD_TARGET_UNIT.ZONE) {
     message.targetHrZone = value.value;
-  } else if (value.unit === "range") {
+  } else if (value.unit === KRD_TARGET_UNIT.RANGE) {
     message.targetValue = 0;
     message.customTargetHeartRateLow = value.min;
     message.customTargetHeartRateHigh = value.max;
@@ -66,11 +67,11 @@ const convertCadenceTarget = (
   step: WorkoutStep,
   message: Record<string, unknown>
 ): void => {
-  message.targetType = "cadence";
-  if (step.target.type !== "cadence") return;
+  message.targetType = FIT_TARGET_TYPE.CADENCE;
+  if (step.target.type !== KRD_TARGET_TYPE.CADENCE) return;
 
   const value = step.target.value;
-  if (value.unit === "range") {
+  if (value.unit === KRD_TARGET_UNIT.RANGE) {
     message.targetValue = 0;
     message.customTargetCadenceLow = value.min;
     message.customTargetCadenceHigh = value.max;
@@ -85,13 +86,13 @@ const convertPaceTarget = (
   step: WorkoutStep,
   message: Record<string, unknown>
 ): void => {
-  message.targetType = "speed";
-  if (step.target.type !== "pace") return;
+  message.targetType = FIT_TARGET_TYPE.SPEED;
+  if (step.target.type !== KRD_TARGET_TYPE.PACE) return;
 
   const value = step.target.value;
-  if (value.unit === "zone") {
+  if (value.unit === KRD_TARGET_UNIT.ZONE) {
     message.targetSpeedZone = value.value;
-  } else if (value.unit === "range") {
+  } else if (value.unit === KRD_TARGET_UNIT.RANGE) {
     message.targetValue = 0;
     message.customTargetSpeedLow = value.min;
     message.customTargetSpeedHigh = value.max;

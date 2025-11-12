@@ -35,5 +35,28 @@ export const FIT_MESSAGE_KEY = {
   WORKOUT_STEP: "workoutStepMesgs",
 } as const;
 
+// KRD target types (domain model)
+export const KRD_TARGET_TYPE = {
+  POWER: "power",
+  HEART_RATE: "heart_rate",
+  CADENCE: "cadence",
+  PACE: "pace",
+  OPEN: "open",
+} as const;
+
+// KRD target value units (domain model)
+export const KRD_TARGET_UNIT = {
+  ZONE: "zone",
+  RANGE: "range",
+  WATTS: "watts",
+  PERCENT_FTP: "percent_ftp",
+  BPM: "bpm",
+  PERCENT_MAX: "percent_max",
+  RPM: "rpm",
+  SPM: "spm",
+  MPS: "mps",
+  MIN_PER_KM: "min_per_km",
+} as const;
+
 // Default values
 export const DEFAULT_SPORT = FIT_SPORT_TYPE.CYCLING;
