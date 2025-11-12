@@ -33,6 +33,7 @@ export type FitMessages = {
     targetPowerZone?: number;
     targetCadenceZone?: number;
     targetSpeedZone?: number;
+    targetSwimStroke?: number;
     customTargetValueLow?: number;
     customTargetValueHigh?: number;
     customTargetPowerLow?: number;
