@@ -16,6 +16,27 @@
 - **DO NOT test type definitions** - If it compiles, the types are correct
 - **DO NOT test that objects match their type** - This is what TypeScript does
 
+## Fixture Rules
+
+- **DO NOT validate in fixtures** - Fixtures should NOT call `.parse()` or `.safeParse()` in `.after()` hooks
+- **Fixtures generate data, tests validate** - Validation is the responsibility of tests, not fixtures
+- **Keep fixtures simple** - Only generate realistic data using faker, no validation logic
+
+```typescript
+// ❌ Bad - Validating in fixture
+export const buildKRDMetadata = new Factory<KRDMetadata>()
+  .attr("created", () => faker.date.recent().toISOString())
+  .attr("sport", () => faker.helpers.arrayElement(["running", "cycling"]))
+  .after((metadata) => {
+    krdMetadataSchema.parse(metadata); // DON'T DO THIS
+  });
+
+// ✅ Good - No validation in fixture
+export const buildKRDMetadata = new Factory<KRDMetadata>()
+  .attr("created", () => faker.date.recent().toISOString())
+  .attr("sport", () => faker.helpers.arrayElement(["running", "cycling"]));
+```
+
 ## What TO Test
 
 - **Business logic** - Converters, mappers, validators, transformations
