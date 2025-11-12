@@ -147,7 +147,7 @@ Each task follows Test-Driven Development:
     - _Requirements: 2.3, 2.4, 3.4, 3.5, 4.3, 5.2, 5.1.3_
     - _Commit: "feat: add tolerance checker"_
 
-- [ ] 7. Add test fixtures to repository
+- [x] 7. Add test fixtures to repository
 
   - Copy WorkoutCustomTargetValues.fit to src/**fixtures**/fit-files/
   - Copy WorkoutIndividualSteps.fit to src/**fixtures**/fit-files/
