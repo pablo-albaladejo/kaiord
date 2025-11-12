@@ -1,8 +1,17 @@
+/**
+ * Garmin FIT SDK Adapter - converts FIT workout files to KRD format
+ * References: https://developer.garmin.com/fit/file-types/workout/
+ */
+
 import { Decoder, Stream } from "@garmin/fitsdk";
 import type { KRD } from "../../domain/schemas/krd";
 import { createFitParsingError } from "../../domain/types/errors";
 import type { FitReader } from "../../ports/fit-reader";
 import type { Logger } from "../../ports/logger";
+import { FIT_MESSAGE_KEY } from "./constants";
+import { mapMetadata } from "./metadata.mapper";
+import type { FitMessages } from "./types";
+import { mapWorkout } from "./workout.mapper";
 
 export const createGarminFitSdkReader = (logger: Logger): FitReader => ({
   readToKRD: async (buffer: Uint8Array): Promise<KRD> => {
@@ -24,7 +33,7 @@ export const createGarminFitSdkReader = (logger: Logger): FitReader => ({
       }
 
       logger.info("FIT file parsed successfully");
-      return convertMessagesToKRD(messages, logger);
+      return mapMessagesToKRD(messages as FitMessages, logger);
     } catch (error) {
       if (error instanceof Error && error.name === "FitParsingError") {
         throw error;
@@ -35,24 +44,48 @@ export const createGarminFitSdkReader = (logger: Logger): FitReader => ({
   },
 });
 
-const convertMessagesToKRD = (
-  messages: Record<string, unknown>,
-  logger: Logger
-): KRD => {
-  logger.debug("Converting FIT messages to KRD", {
+const mapMessagesToKRD = (messages: FitMessages, logger: Logger): KRD => {
+  logger.debug("Mapping FIT messages to KRD", {
     messageCount: Object.keys(messages).length,
   });
 
-  // Minimal skeleton implementation to satisfy the contract
-  // This will be expanded in task 8.3
-  const krd: KRD = {
+  const fileId = messages[FIT_MESSAGE_KEY.FILE_ID]?.[0];
+  const workoutMsg = messages[FIT_MESSAGE_KEY.WORKOUT]?.[0];
+  const workoutSteps = messages[FIT_MESSAGE_KEY.WORKOUT_STEP] || [];
+
+  validateMessages(fileId, workoutMsg, messages, logger);
+
+  const metadata = mapMetadata(fileId, workoutMsg, logger);
+  const workout = mapWorkout(workoutMsg, workoutSteps, logger);
+
+  return {
     version: "1.0",
     type: "workout",
-    metadata: {
-      created: new Date().toISOString(),
-      sport: "cycling",
+    metadata,
+    extensions: {
+      workout,
     },
   };
+};
 
-  return krd;
+const validateMessages = (
+  fileId: unknown,
+  workoutMsg: unknown,
+  messages: FitMessages,
+  logger: Logger
+): void => {
+  if (!fileId) {
+    logger.warn("No fileId message found in FIT file");
+  }
+
+  if (!workoutMsg) {
+    logger.warn("No workout message found in FIT file");
+  }
+
+  const workoutMessages = messages[FIT_MESSAGE_KEY.WORKOUT];
+  if (workoutMessages && workoutMessages.length > 1) {
+    logger.warn("Multiple workout messages found, using first one", {
+      count: workoutMessages.length,
+    });
+  }
 };
