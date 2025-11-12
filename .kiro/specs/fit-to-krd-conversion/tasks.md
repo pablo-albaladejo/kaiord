@@ -163,7 +163,7 @@ Each task follows Test-Driven Development:
     - Define readToKRD contract
     - _Requirements: 1.1_
     - _Commit: "feat: add FIT reader port"_
-  - [ ] 8.2 Implement FIT reader adapter skeleton
+  - [x] 8.2 Implement FIT reader adapter skeleton
     - Create adapters/fit/garmin-fitsdk.ts
     - Implement createGarminFitSdkReader factory with logger injection
     - Implement readToKRD using @garmin/fitsdk Decoder
