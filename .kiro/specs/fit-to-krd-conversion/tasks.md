@@ -116,7 +116,7 @@ Each task follows Test-Driven Development:
     - _Requirements: 9.2_
     - _Commit: "feat: add console logger adapter"_
 
-- [ ] 5. Implement schema validation and JSON generation
+- [x] 5. Implement schema validation and JSON generation
 
   - [x] 5.1 Implement schema validator
     - Create domain/validation/schema-validator.ts
@@ -136,9 +136,9 @@ Each task follows Test-Driven Development:
     - _Requirements: 1.4_
     - _Commit: "feat: add JSON Schema generation from Zod"_
 
-- [ ] 6. Implement tolerance checker
+- [x] 6. Implement tolerance checker
 
-  - [ ] 6.1 Implement tolerance checker
+  - [x] 6.1 Implement tolerance checker
     - Create domain/validation/tolerance-checker.ts
     - Define ToleranceConfig, ToleranceViolation, ToleranceChecker types
     - Implement createToleranceChecker factory with DEFAULT_TOLERANCES
