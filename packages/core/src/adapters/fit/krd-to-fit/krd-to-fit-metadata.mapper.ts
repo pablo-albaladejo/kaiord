@@ -1,12 +1,12 @@
-import type { KRD } from "../../domain/schemas/krd";
-import type { Workout } from "../../domain/schemas/workout";
-import type { Logger } from "../../ports/logger";
+import type { KRD } from "../../../domain/schemas/krd";
+import type { Workout } from "../../../domain/schemas/workout";
+import type { Logger } from "../../../ports/logger";
 import {
   DEFAULT_MANUFACTURER,
   FIT_FILE_TYPE,
   FIT_MESSAGE_KEY,
   TYPE_GUARD_PROPERTY,
-} from "./constants";
+} from "../constants";
 
 export const convertMetadataToFileId = (krd: KRD, logger: Logger): unknown => {
   logger.debug("Converting metadata to file_id message");

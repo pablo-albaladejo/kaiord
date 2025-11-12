@@ -1,5 +1,5 @@
-import { durationTypeEnum, type Duration } from "../../domain/schemas/duration";
-import { FIT_DURATION_TYPE } from "./constants";
+import { durationTypeEnum, type Duration } from "../../../domain/schemas/duration";
+import { FIT_DURATION_TYPE } from "../constants";
 
 export type FitDurationData = {
   durationType?: string;

@@ -1,7 +1,7 @@
-import type { KRDMetadata } from "../../domain/schemas/krd";
-import type { Logger } from "../../ports/logger";
-import { DEFAULT_SPORT } from "./constants";
-import type { FitFileId, FitWorkoutMessage } from "./types";
+import type { KRDMetadata } from "../../../domain/schemas/krd";
+import type { Logger } from "../../../ports/logger";
+import { DEFAULT_SPORT } from "../constants";
+import type { FitFileId, FitWorkoutMessage } from "../types";
 
 export const mapMetadata = (
   fileId: FitFileId | undefined,

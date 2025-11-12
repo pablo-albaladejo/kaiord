@@ -1,7 +1,7 @@
-import type { KRD } from "../../domain/schemas/krd";
-import type { Workout } from "../../domain/schemas/workout";
-import { createFitParsingError } from "../../domain/types/errors";
-import type { Logger } from "../../ports/logger";
+import type { KRD } from "../../../domain/schemas/krd";
+import type { Workout } from "../../../domain/schemas/workout";
+import { createFitParsingError } from "../../../domain/types/errors";
+import type { Logger } from "../../../ports/logger";
 import {
   convertMetadataToFileId,
   convertWorkoutMetadata,

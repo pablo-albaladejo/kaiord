@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import type { Target } from "../../domain/schemas/target";
-import { buildFitTargetData } from "../../tests/fixtures/fit-target.fixtures";
+import type { Target } from "../../../domain/schemas/target";
+import { buildFitTargetData } from "../../../tests/fixtures/fit-target.fixtures";
 import { convertFitTarget } from "./target.converter";
 
 describe("convertFitTarget", () => {

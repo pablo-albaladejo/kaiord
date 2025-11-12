@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { Duration } from "../../domain/schemas/duration";
-import { buildFitDurationData } from "../../tests/fixtures/fit-duration.fixtures";
-import { convertFitDuration } from "./duration.converter";
+import type { Duration } from "../../../domain/schemas/duration";
+import { buildFitDurationData } from "../../../tests/fixtures/fit-duration.fixtures";
+import { convertFitDuration } from "../duration/duration.converter";
 
 describe("convertFitDuration", () => {
   describe("time-based durations", () => {

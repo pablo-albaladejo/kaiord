@@ -1,14 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
-import type { KRD } from "../../domain/schemas/krd";
+import type { KRD } from "../../../domain/schemas/krd";
 import type {
   RepetitionBlock,
   WorkoutStep,
-} from "../../domain/schemas/workout";
-import { FitParsingError } from "../../domain/types/errors";
-import { buildKRD, buildKRDMetadata } from "../../tests/fixtures/krd.fixtures";
-import { buildWorkout } from "../../tests/fixtures/workout.fixtures";
-import { createMockLogger } from "../../tests/helpers/test-utils";
-import { FIT_DURATION_TYPE, FIT_MESSAGE_KEY } from "./constants";
+} from "../../../domain/schemas/workout";
+import { FitParsingError } from "../../../domain/types/errors";
+import { buildKRD, buildKRDMetadata } from "../../../tests/fixtures/krd.fixtures";
+import { buildWorkout } from "../../../tests/fixtures/workout.fixtures";
+import { createMockLogger } from "../../../tests/helpers/test-utils";
+import { FIT_DURATION_TYPE, FIT_MESSAGE_KEY } from "../constants";
 import { convertKRDToMessages } from "./krd-to-fit.converter";
 
 describe("convertKRDToMessages", () => {

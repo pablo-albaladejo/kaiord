@@ -1,5 +1,5 @@
-import type { WorkoutStep } from "../../domain/schemas/workout";
-import { FIT_TARGET_TYPE, KRD_TARGET_TYPE, KRD_TARGET_UNIT } from "./constants";
+import type { WorkoutStep } from "../../../domain/schemas/workout";
+import { FIT_TARGET_TYPE, KRD_TARGET_TYPE, KRD_TARGET_UNIT } from "../constants";
 
 export const convertTarget = (
   step: WorkoutStep,
