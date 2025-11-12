@@ -53,13 +53,19 @@ const buildHeartRateRangeTarget = (data: FitTargetData): Target | null => {
 
 const buildHeartRateZoneTarget = (data: FitTargetData): Target | null => {
   if (data.targetHrZone !== undefined) {
-    return {
-      type: targetTypeEnum.enum.heart_rate,
-      value: {
-        unit: targetUnitEnum.enum.zone,
-        value: data.targetHrZone,
-      },
-    };
+    // Validate zone is in valid range (1-5)
+    // If not, treat as BPM value instead
+    if (data.targetHrZone >= 1 && data.targetHrZone <= 5) {
+      return {
+        type: targetTypeEnum.enum.heart_rate,
+        value: {
+          unit: targetUnitEnum.enum.zone,
+          value: data.targetHrZone,
+        },
+      };
+    }
+    // Invalid zone value, treat as BPM
+    return convertHeartRateValue(data.targetHrZone);
   }
   return null;
 };

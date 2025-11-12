@@ -1,13 +1,22 @@
 import { z } from "zod";
 import { durationSchema } from "./duration";
+import { intensityEnum } from "./intensity";
 import { targetSchema } from "./target";
 
 export const workoutStepSchema = z.object({
   stepIndex: z.number().int().nonnegative(),
-  durationType: z.enum(["time", "distance", "open"]),
+  name: z.string().optional(),
+  durationType: z.enum([
+    "time",
+    "distance",
+    "heart_rate_less_than",
+    "heart_rate_greater_than",
+    "open",
+  ]),
   duration: durationSchema,
   targetType: z.enum(["power", "heart_rate", "cadence", "pace", "open"]),
   target: targetSchema,
+  intensity: intensityEnum.optional(),
 });
 
 export const repetitionBlockSchema = z.object({

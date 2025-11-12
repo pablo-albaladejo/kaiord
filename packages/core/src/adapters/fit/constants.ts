@@ -9,7 +9,9 @@ export const FIT_DURATION_TYPE = {
   TIME: "time",
   DISTANCE: "distance",
   REPEAT_UNTIL_STEPS_COMPLETE: "repeatUntilStepsCmplt",
+  REPEAT_UNTIL_HR_GREATER_THAN: "repeatUntilHrGreaterThan",
   HR_LESS_THAN: "hrLessThan",
+  HR_GREATER_THAN: "hrGreaterThan",
   OPEN: "open",
 } as const;
 
@@ -78,6 +80,15 @@ export const FIT_FILE_TYPE = {
 // Default values
 export const DEFAULT_SPORT = FIT_SPORT_TYPE.CYCLING;
 export const DEFAULT_MANUFACTURER = "development" as const;
+
+// FIT intensity types
+export const FIT_INTENSITY = {
+  WARMUP: "warmup",
+  ACTIVE: "active",
+  COOLDOWN: "cooldown",
+  REST: "rest",
+  RECOVERY: "recovery",
+} as const;
 
 // Type guard property names
 export const TYPE_GUARD_PROPERTY = {

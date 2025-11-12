@@ -45,6 +45,7 @@ export type FitMessages = {
     customTargetSpeedHigh?: number;
     intensity?: string;
     repeatSteps?: number;
+    repeatHr?: number;
   }>;
   [key: string]: Array<Record<string, unknown>> | undefined;
 };

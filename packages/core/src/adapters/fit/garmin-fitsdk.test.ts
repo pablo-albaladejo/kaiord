@@ -89,7 +89,7 @@ describe("createGarminFitSdkReader", () => {
       });
       expect(workout.steps[3]).toMatchObject({
         stepIndex: 3,
-        durationType: "open",
+        durationType: "heart_rate_less_than",
       });
     });
 

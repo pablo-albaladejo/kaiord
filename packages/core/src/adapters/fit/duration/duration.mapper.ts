@@ -18,5 +18,9 @@ export const mapDurationType = (
     return durationTypeEnum.enum.time;
   if (fitDurationType === FIT_DURATION_TYPE.DISTANCE)
     return durationTypeEnum.enum.distance;
+  if (fitDurationType === FIT_DURATION_TYPE.HR_LESS_THAN)
+    return durationTypeEnum.enum.heart_rate_less_than;
+  if (fitDurationType === FIT_DURATION_TYPE.REPEAT_UNTIL_HR_GREATER_THAN)
+    return durationTypeEnum.enum.heart_rate_greater_than;
   return durationTypeEnum.enum.open;
 };
