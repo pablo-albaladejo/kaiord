@@ -207,7 +207,7 @@ Each task follows Test-Driven Development:
 
 - [ ] 9. Implement FIT writer adapter (KRD → FIT)
 
-  - [ ] 9.1 Create FIT writer port
+  - [x] 9.1 Create FIT writer port
     - Create ports/fit-writer.ts with FitWriter type
     - Define writeFromKRD contract
     - _Requirements: 11.2_
