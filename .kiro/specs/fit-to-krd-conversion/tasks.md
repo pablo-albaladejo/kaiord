@@ -44,31 +44,50 @@ Each task follows Test-Driven Development:
   - _Requirements: 17.5_
   - _Commit: "chore: set up project structure and test infrastructure"_
 
-- [x] 2. Create domain types
+- [ ] 2. Migrate to Zod schemas (Schema-First Approach)
 
-  - [x] 2.1 Write tests for KRD types
-    - Create KRD type fixtures with faker + rosie
-    - Test type structure and constraints
-    - _Requirements: 1.2, 8.1_
-  - [x] 2.2 Implement KRD types
-    - Define KRD, KRDMetadata, KRDSession, KRDLap, KRDRecord, KRDEvent types
-    - _Requirements: 1.2, 8.1_
-    - _Commit: "feat: add KRD domain types"_
-  - [-] 2.3 Implement Workout types
-    - Create workout.fixtures.ts with faker + rosie factories
-    - Define Workout, WorkoutStep, RepetitionBlock types in domain/types/workout.ts
-    - _Requirements: 6.1, 6.2, 7.1, 7.2_
-    - _Commit: "feat: add Workout domain types with fixtures"_
-  - [ ] 2.4 Implement Duration types
-    - Create duration.fixtures.ts with faker + rosie factories
-    - Define DurationType enum and Duration union type in domain/types/duration.ts
+  - [ ] 2.1 Create domain/schemas directory structure
+    - Create domain/schemas/ directory
+    - Move existing fixtures to use schema imports (will be updated in subsequent tasks)
+    - _Requirements: 1.3_
+    - _Commit: "refactor: create schemas directory structure"_
+  - [ ] 2.2 Implement Duration Zod schema
+    - Create domain/schemas/duration.ts with durationSchema using z.discriminatedUnion
+    - Define time, distance, and open duration variants
+    - Export Duration type using z.infer
+    - Remove domain/types/duration.ts (enum-based approach)
+    - Update duration.fixtures.ts to import from schemas and validate with .after() hook
+    - Write schema tests in duration.test.ts (co-located)
     - _Requirements: 2.1, 2.2, 2.5_
-    - _Commit: "feat: add Duration domain types with fixtures"_
-  - [ ] 2.5 Implement Target types
-    - Create target.fixtures.ts with faker + rosie factories
-    - Define TargetType enum and Target union types in domain/types/target.ts
+    - _Commit: "refactor: migrate Duration to Zod schema"_
+  - [ ] 2.3 Implement Target Zod schema
+    - Create domain/schemas/target.ts with targetSchema using z.discriminatedUnion
+    - Define power, heart_rate, cadence, pace, and open target variants
+    - Define nested value schemas (powerValueSchema, heartRateValueSchema, etc.)
+    - Export Target and value types using z.infer
+    - Remove domain/types/target.ts (enum-based approach)
+    - Update target.fixtures.ts to import from schemas and validate with .after() hook
+    - Write schema tests in target.test.ts (co-located)
     - _Requirements: 3.1, 3.2, 4.1, 4.2, 5.1, 5.1.2_
-    - _Commit: "feat: add Target domain types with fixtures"_
+    - _Commit: "refactor: migrate Target to Zod schema"_
+  - [ ] 2.4 Implement Workout Zod schema
+    - Create domain/schemas/workout.ts with workoutSchema, workoutStepSchema, repetitionBlockSchema
+    - Compose with durationSchema and targetSchema
+    - Export Workout, WorkoutStep, RepetitionBlock types using z.infer
+    - Remove domain/types/workout.ts (manual type approach)
+    - Update workout.fixtures.ts to import from schemas and validate with .after() hook
+    - Write schema tests in workout.test.ts (co-located)
+    - _Requirements: 6.1, 6.2, 7.1, 7.2_
+    - _Commit: "refactor: migrate Workout to Zod schema"_
+  - [ ] 2.5 Implement KRD Zod schema
+    - Create domain/schemas/krd.ts with krdSchema and component schemas
+    - Define krdMetadataSchema, krdSessionSchema, krdLapSchema, krdRecordSchema, krdEventSchema
+    - Export KRD and component types using z.infer
+    - Remove domain/types/krd.ts (manual type approach)
+    - Update krd.fixtures.ts to import from schemas and validate with .after() hook
+    - Write schema tests in krd.test.ts (co-located)
+    - _Requirements: 1.2, 8.1_
+    - _Commit: "refactor: migrate KRD to Zod schema"_
 
 - [ ] 3. Create error types
 
@@ -93,20 +112,23 @@ Each task follows Test-Driven Development:
     - _Requirements: 9.2_
     - _Commit: "feat: add console logger adapter"_
 
-- [ ] 5. Implement Zod schema and validation
+- [ ] 5. Implement schema validation and JSON generation
 
-  - [ ] 5.1 Implement Zod schema and validator
-    - Create domain/validation/schema-validator.ts with complete krdSchema
+  - [ ] 5.1 Implement schema validator
+    - Create domain/validation/schema-validator.ts
+    - Import krdSchema from domain/schemas/krd.ts
     - Define ValidationError type and SchemaValidator type
     - Implement createSchemaValidator factory with logger injection
+    - Use krdSchema.safeParse() for validation
     - Write co-located tests in schema-validator.test.ts (valid/invalid KRD, error mapping)
-    - Export krdSchema for JSON generation
     - _Requirements: 1.3, 1.5, 9.3_
-    - _Commit: "feat: add Zod schema and validator"_
+    - _Commit: "feat: add schema validator using Zod"_
   - [ ] 5.2 Create JSON Schema generation script
     - Write scripts/generate-schema.ts using zod-to-json-schema
-    - Generate packages/core/schema/workout.json
+    - Import krdSchema from domain/schemas/krd.ts
+    - Generate packages/core/schema/workout.json from Zod schema
     - Add "generate:schema" and "prebuild" scripts to package.json
+    - Test that JSON Schema is generated correctly
     - _Requirements: 1.4_
     - _Commit: "feat: add JSON Schema generation from Zod"_
 
