@@ -14,7 +14,14 @@ export const workoutStepSchema = z.object({
     "open",
   ]),
   duration: durationSchema,
-  targetType: z.enum(["power", "heart_rate", "cadence", "pace", "open"]),
+  targetType: z.enum([
+    "power",
+    "heart_rate",
+    "cadence",
+    "pace",
+    "stroke_type",
+    "open",
+  ]),
   target: targetSchema,
   intensity: intensityEnum.optional(),
 });

@@ -97,11 +97,13 @@ export const DEFAULT_MANUFACTURER = "development" as const;
 
 // FIT intensity types
 export const FIT_INTENSITY = {
-  WARMUP: "warmup",
   ACTIVE: "active",
-  COOLDOWN: "cooldown",
   REST: "rest",
+  WARMUP: "warmup",
+  COOLDOWN: "cooldown",
   RECOVERY: "recovery",
+  INTERVAL: "interval",
+  OTHER: "other",
 } as const;
 
 // Type guard property names
