@@ -61,7 +61,7 @@ Each task follows Test-Driven Development:
     - DO NOT create tests for fixtures (they are test utilities, not production code)
     - _Requirements: 2.1, 2.2, 2.5_
     - _Commit: "refactor: migrate Duration to Zod schema"_
-  - [ ] 2.3 Implement Target Zod schema
+  - [x] 2.3 Implement Target Zod schema
     - Create domain/schemas/target.ts with targetSchema using z.discriminatedUnion
     - Define power, heart_rate, cadence, pace, and open target variants
     - Define nested value schemas (powerValueSchema, heartRateValueSchema, etc.)

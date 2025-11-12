@@ -1,7 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
 import type { DurationType } from "../../domain/types/duration";
-import type { TargetType } from "../../domain/types/target";
 import type {
   RepetitionBlock,
   Workout,
@@ -34,14 +33,14 @@ export const buildWorkoutStep = new Factory<WorkoutStep>()
   })
   .attr("targetType", () =>
     faker.helpers.arrayElement([
-      "power" as TargetType.Power,
-      "heart_rate" as TargetType.HeartRate,
-      "cadence" as TargetType.Cadence,
-      "pace" as TargetType.Pace,
-      "open" as TargetType.Open,
-    ])
+      "power",
+      "heart_rate",
+      "cadence",
+      "pace",
+      "open",
+    ] as const)
   )
-  .attr("target", ["targetType"], (targetType: TargetType) => {
+  .attr("target", ["targetType"], (targetType: string) => {
     if (targetType === "power") {
       const unit = faker.helpers.arrayElement([
         "watts",
