@@ -158,7 +158,7 @@ Each task follows Test-Driven Development:
 
 - [ ] 8. Implement FIT reader adapter (FIT → KRD)
 
-  - [ ] 8.1 Create FIT reader port
+  - [x] 8.1 Create FIT reader port
     - Create ports/fit-reader.ts with FitReader type
     - Define readToKRD contract
     - _Requirements: 1.1_
