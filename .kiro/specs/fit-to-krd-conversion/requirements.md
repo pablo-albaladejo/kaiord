@@ -45,9 +45,10 @@ Within each workout, intervals can have durations specified by:
 
 1. WHEN THE FIT_Parser receives a valid FIT workout file, THE FIT_Parser SHALL use the Garmin_FIT_SDK to decode the binary data into structured workout objects
 2. WHEN THE KRD_Converter processes decoded FIT workout data, THE KRD_Converter SHALL produce a KRD document with version set to "1.0"
-3. WHEN THE KRD_Converter completes conversion, THE Schema_Validator SHALL validate the output against the workout.json schema
-4. IF THE Schema_Validator detects validation errors, THEN THE KRD_Converter SHALL report the specific validation failures with actionable error messages
-5. WHEN THE KRD_Converter writes the output file, THE KRD_Converter SHALL use the .krd file extension
+3. WHEN THE Schema_Validator validates KRD output, THE Schema_Validator SHALL use the Zod schema as the source of truth
+4. WHEN THE build process runs, THE build system SHALL automatically generate workout.json from the Zod schema
+5. IF THE Schema_Validator detects validation errors, THEN THE KRD_Converter SHALL report the specific validation failures with actionable error messages
+6. WHEN THE KRD_Converter writes the output file, THE KRD_Converter SHALL use the .krd file extension
 
 ### Requirement 2
 
