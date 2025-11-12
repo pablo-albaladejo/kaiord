@@ -12,7 +12,7 @@
 ## What NOT to Test
 
 - **DO NOT test types** - TypeScript validates types at compile time, no runtime tests needed
-- **DO NOT test fixtures** - Fixtures are test utilities, not production code
+- **DO NOT test fixtures** - Fixtures are test utilities, not production code. NEVER create `.test.ts` files for fixture files.
 - **DO NOT test type definitions** - If it compiles, the types are correct
 - **DO NOT test that objects match their type** - This is what TypeScript does
 

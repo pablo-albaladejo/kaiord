@@ -46,7 +46,7 @@ Each task follows Test-Driven Development:
 
 - [ ] 2. Migrate to Zod schemas (Schema-First Approach)
 
-  - [ ] 2.1 Create domain/schemas directory structure
+  - [x] 2.1 Create domain/schemas directory structure
     - Create domain/schemas/ directory
     - Move existing fixtures to use schema imports (will be updated in subsequent tasks)
     - _Requirements: 1.3_

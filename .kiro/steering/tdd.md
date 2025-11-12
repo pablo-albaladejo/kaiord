@@ -110,7 +110,7 @@ src/
 ### DO NOT Test
 
 - **Type definitions** - TypeScript validates types at compile time
-- **Fixtures** - They are test utilities, not production code
+- **Fixtures** - They are test utilities, not production code. NEVER create `.test.ts` files for fixture files.
 - **Type assignments** - If `const x: Type = value` compiles, it's correct
 
 ### DO Test
