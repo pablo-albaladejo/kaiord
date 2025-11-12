@@ -93,9 +93,9 @@ Each task follows Test-Driven Development:
     - _Requirements: 1.2, 8.1_
     - _Commit: "refactor: migrate KRD to Zod schema"_
 
-- [ ] 3. Create error types
+- [x] 3. Create error types
 
-  - [ ] 3.1 Implement error types and factories
+  - [x] 3.1 Implement error types and factories
     - Define FitParsingError, KrdValidationError, ToleranceExceededError types in domain/types/errors.ts
     - Create factory functions: createFitParsingError, createKrdValidationError, createToleranceExceededError
     - _Requirements: 9.1, 9.3, 9.4, 9.5_
