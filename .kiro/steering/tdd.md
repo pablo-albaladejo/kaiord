@@ -56,25 +56,24 @@ export const buildEntity = new Factory<EntityType>()
 
 ### Fixture Organization
 
-**Tests MUST be co-located with source files:**
+**Tests MUST be co-located with source files (ONLY for logic, NOT for types):**
 
 ```
 src/
 ├── domain/
 │   ├── types/
-│   │   ├── krd.ts
-│   │   └── krd.test.ts           # Test next to implementation
+│   │   └── krd.ts                # NO test file - types validated by TypeScript
 │   └── validation/
 │       ├── schema-validator.ts
-│       └── schema-validator.test.ts
+│       └── schema-validator.test.ts  # Test logic, not types
 ├── adapters/
 │   └── fit/
 │       ├── garmin-fitsdk.ts
-│       └── garmin-fitsdk.test.ts
+│       └── garmin-fitsdk.test.ts     # Test conversion logic
 └── application/
     └── use-cases/
         ├── convert-fit-to-krd.ts
-        └── convert-fit-to-krd.test.ts
+        └── convert-fit-to-krd.test.ts # Test use case logic
 ```
 
 **All fixtures MUST be in `src/tests/` directory:**
@@ -106,17 +105,22 @@ src/
 .attr('count', () => 42)
 ```
 
-## What to Test vs What to Mock
+## What to Test vs What NOT to Test
 
-### Pure Functions: NO MOCKS
+### DO NOT Test
 
-Pure functions should be tested directly, never mocked:
+- **Type definitions** - TypeScript validates types at compile time
+- **Fixtures** - They are test utilities, not production code
+- **Type assignments** - If `const x: Type = value` compiles, it's correct
 
-- Data transformers
-- Validators
-- Formatters
-- Mappers
-- Calculators
+### DO Test
+
+- **Pure functions** - Test directly, never mock:
+  - Data transformers
+  - Validators
+  - Formatters
+  - Mappers
+  - Calculators
 
 ```typescript
 // ✅ Good - Test real pure function
@@ -129,6 +133,10 @@ expect(result).toStrictEqual(expectedKrd);
 vi.mock("./converter", () => ({
   convertFitToKrd: vi.fn(() => mockKrd),
 }));
+
+// ❌ Bad - Testing types
+const metadata: KRDMetadata = buildKRDMetadata.build();
+expect(metadata).toBeDefined(); // Unnecessary - TypeScript validates this
 ```
 
 ### Non-Pure Functions: MOCK THESE
@@ -212,7 +220,8 @@ const reader = async (buffer: Uint8Array) => {
 
 ### File Naming
 
-- Co-locate with source: `converter.ts` → `converter.test.ts`
+- Co-locate with source: `converter.ts` → `converter.test.ts` (ONLY for logic files)
+- **DO NOT** create test files for type definitions (`types/*.ts` should NOT have `.test.ts` files)
 - Use descriptive test names
 - Prefer `when` over `if` in test descriptions
 
@@ -255,6 +264,28 @@ Commits should be atomic and functional - the codebase should work after each co
 
 ## Anti-Patterns to Avoid
 
+### Don't Test Types
+
+```typescript
+// ❌ Bad - Testing type definitions
+it("should create valid metadata with required fields", () => {
+  const metadata: KRDMetadata = buildKRDMetadata.build();
+  expect(metadata).toBeDefined();
+  expect(metadata.created).toBeDefined();
+  expect(metadata.sport).toBeDefined();
+});
+
+// ✅ Good - Test logic, not types
+it("should convert metadata from FIT format", () => {
+  const fitMetadata = { timestamp: 123456, sport: 1 };
+  const result = convertFitMetadata(fitMetadata);
+  expect(result).toStrictEqual({
+    created: "2024-01-01T00:00:00Z",
+    sport: "cycling",
+  });
+});
+```
+
 ### Don't Hardcode Test Data
 
 ```typescript
@@ -269,6 +300,25 @@ const krd = {
 const krd = buildKrd.build({
   type: "workout",
   metadata: buildMetadata.build({ sport: "cycling" }),
+});
+```
+
+### Don't Test Multiple Properties Individually
+
+```typescript
+// ❌ Bad - Multiple expects for same object
+expect(metadata.created).toBe("2025-01-15T10:30:00Z");
+expect(metadata.sport).toBe("running");
+expect(metadata.manufacturer).toBe("garmin");
+
+// ✅ Good - Single expect for complete object
+expect(metadata).toStrictEqual({
+  created: "2025-01-15T10:30:00Z",
+  manufacturer: "garmin",
+  product: metadata.product,
+  serialNumber: metadata.serialNumber,
+  sport: "running",
+  subSport: metadata.subSport,
 });
 ```
 
