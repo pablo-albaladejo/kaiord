@@ -19,7 +19,14 @@ export const convertHeartRateTarget = (
     message.targetValue = 0;
     message.customTargetHeartRateLow = value.min;
     message.customTargetHeartRateHigh = value.max;
+  } else if (value.unit === KRD_TARGET_UNIT.BPM) {
+    // Garmin encoding: Absolute bpm needs +100 offset
+    message.targetValue = value.value + 100;
+  } else if (value.unit === KRD_TARGET_UNIT.PERCENT_MAX) {
+    // Garmin encoding: Percentage max HR has no offset
+    message.targetValue = value.value;
   } else {
+    // Fallback: use custom range with same value
     message.targetValue = 0;
     message.customTargetHeartRateLow = value.value;
     message.customTargetHeartRateHigh = value.value;

@@ -262,6 +262,7 @@ describe("convertKRDToMessages", () => {
         workoutStepMesg: Record<string, unknown>;
       };
       const step = steps[0];
+      // Garmin encoding: 200 watts = 1200 (200 + 1000 offset)
       expect(stepMsg).toStrictEqual({
         type: FIT_MESSAGE_KEY.WORKOUT_STEP,
         workoutStepMesg: {
@@ -270,9 +271,7 @@ describe("convertKRDToMessages", () => {
           durationTime:
             step.duration.type === "time" ? step.duration.seconds : undefined,
           targetType: stepMsg.workoutStepMesg.targetType,
-          targetValue: stepMsg.workoutStepMesg.targetValue,
-          customTargetPowerLow: stepMsg.workoutStepMesg.customTargetPowerLow,
-          customTargetPowerHigh: stepMsg.workoutStepMesg.customTargetPowerHigh,
+          targetValue: 1200,
         },
       });
     });
@@ -376,15 +375,10 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      const step = steps[0];
-      const targetValue =
-        step.target.type === "power" && step.target.value.unit === "watts"
-          ? step.target.value.value
-          : undefined;
+      // Garmin encoding: 250 watts = 1250 (250 + 1000 offset)
       expect(stepMsg.workoutStepMesg).toMatchObject({
         targetType: "power",
-        customTargetPowerLow: targetValue,
-        customTargetPowerHigh: targetValue,
+        targetValue: 1250,
       });
     });
 
@@ -416,15 +410,10 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      const step = steps[0];
-      const targetValue =
-        step.target.type === "power" && step.target.value.unit === "percent_ftp"
-          ? step.target.value.value
-          : undefined;
+      // Garmin encoding: 85% FTP = 85 (no offset for percentages)
       expect(stepMsg.workoutStepMesg).toMatchObject({
         targetType: "power",
-        customTargetPowerLow: targetValue,
-        customTargetPowerHigh: targetValue,
+        targetValue: 85,
       });
     });
 
@@ -539,15 +528,10 @@ describe("convertKRDToMessages", () => {
         type: string;
         workoutStepMesg: Record<string, unknown>;
       };
-      const step = steps[0];
-      const targetValue =
-        step.target.type === "heart_rate" && step.target.value.unit === "bpm"
-          ? step.target.value.value
-          : undefined;
+      // Garmin encoding: 150 bpm = 250 (150 + 100 offset)
       expect(stepMsg.workoutStepMesg).toMatchObject({
         targetType: "heartRate",
-        customTargetHeartRateLow: targetValue,
-        customTargetHeartRateHigh: targetValue,
+        targetValue: 250,
       });
     });
 
