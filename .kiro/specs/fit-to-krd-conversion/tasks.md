@@ -24,7 +24,7 @@ Each task follows Test-Driven Development:
 
 - [ ] 2. Create domain types
 
-  - [ ] 2.1 Write tests for KRD types
+  - [x] 2.1 Write tests for KRD types
     - Create KRD type fixtures with faker + rosie
     - Test type structure and constraints
     - _Requirements: 1.2, 8.1_

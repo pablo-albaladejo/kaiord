@@ -2,11 +2,22 @@
 
 ## General
 
-- TS strict; ESLint + Prettier; no implicit `any`
+- TS strict; ESLint + Prettier; **NO `any` types allowed** (implicit or explicit) without explicit justification
 - Functions < 40 LOC; SRP; SOLID
 - No `console.log` in libraries (inject logger if needed)
 - Naming: `toKRD`, `fromKRD`, `parseX`, `writeX`
 - Prefer `Array<T>` for public types
+- **Avoid redundant type annotations** - let TypeScript infer types when possible
+
+```typescript
+// ✅ Preferred - Type inference
+const metadata = buildKRDMetadata.build({ created: "2025-01-15T10:30:00Z" });
+
+// ❌ Avoid - Redundant annotation
+const metadata: KRDMetadata = buildKRDMetadata.build({
+  created: "2025-01-15T10:30:00Z",
+});
+```
 
 ## Type Definitions
 
