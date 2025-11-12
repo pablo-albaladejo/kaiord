@@ -65,11 +65,14 @@ const buildPowerZoneTarget = (data: FitTargetData): Target | null => {
 };
 
 const convertPowerValue = (value: number): Target => {
+  // Garmin FIT encoding:
+  // - Values > 1000: Absolute watts (offset by 1000)
+  // - Values 0-1000: Percentage of FTP
   if (value > 1000) {
     return {
       type: targetTypeEnum.enum.power,
       value: {
-        unit: targetUnitEnum.enum.percent_ftp,
+        unit: targetUnitEnum.enum.watts,
         value: value - 1000,
       },
     };
@@ -79,7 +82,7 @@ const convertPowerValue = (value: number): Target => {
     return {
       type: targetTypeEnum.enum.power,
       value: {
-        unit: targetUnitEnum.enum.watts,
+        unit: targetUnitEnum.enum.percent_ftp,
         value,
       },
     };

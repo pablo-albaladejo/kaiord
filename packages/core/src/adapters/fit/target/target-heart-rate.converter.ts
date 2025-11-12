@@ -71,21 +71,24 @@ const buildHeartRateZoneTarget = (data: FitTargetData): Target | null => {
 };
 
 const convertHeartRateValue = (value: number): Target => {
-  if (value > 100 && value <= 200) {
-    return {
-      type: targetTypeEnum.enum.heart_rate,
-      value: {
-        unit: targetUnitEnum.enum.percent_max,
-        value,
-      },
-    };
-  }
-
-  if (value > 0 && value <= 300) {
+  // Garmin FIT encoding:
+  // - Values > 100: Absolute bpm (offset by 100)
+  // - Values 0-100: Percentage of max HR
+  if (value > 100) {
     return {
       type: targetTypeEnum.enum.heart_rate,
       value: {
         unit: targetUnitEnum.enum.bpm,
+        value: value - 100,
+      },
+    };
+  }
+
+  if (value > 0) {
+    return {
+      type: targetTypeEnum.enum.heart_rate,
+      value: {
+        unit: targetUnitEnum.enum.percent_max,
         value,
       },
     };

@@ -7,9 +7,10 @@ describe("convertFitTarget", () => {
   describe("power targets", () => {
     it("should convert absolute power target in watts", () => {
       // Arrange
+      // Garmin encoding: 325 watts = 1325 (325 + 1000 offset)
       const data = buildFitTargetData.build({
         targetType: "power",
-        targetValue: 250,
+        targetValue: 1325,
       });
 
       // Act
@@ -20,16 +21,17 @@ describe("convertFitTarget", () => {
         type: "power",
         value: {
           unit: "watts",
-          value: 250,
+          value: 325,
         },
       });
     });
 
     it("should convert FTP-based power target", () => {
       // Arrange
+      // Garmin encoding: 85% FTP = 85 (no offset for percentages)
       const data = buildFitTargetData.build({
         targetType: "power",
-        targetValue: 1085,
+        targetValue: 85,
       });
 
       // Act
@@ -127,9 +129,10 @@ describe("convertFitTarget", () => {
 
     it("should handle high wattage values", () => {
       // Arrange
+      // Garmin encoding: 500 watts = 1500 (500 + 1000 offset)
       const data = buildFitTargetData.build({
         targetType: "power",
-        targetValue: 500,
+        targetValue: 1500,
       });
 
       // Act
@@ -189,9 +192,10 @@ describe("convertFitTarget", () => {
   describe("heart rate targets", () => {
     it("should convert absolute heart rate target in bpm", () => {
       // Arrange
+      // Garmin encoding: 125 bpm = 225 (125 + 100 offset)
       const data = buildFitTargetData.build({
         targetType: "heartRate",
-        targetValue: 85,
+        targetValue: 225,
       });
 
       // Act
@@ -202,7 +206,7 @@ describe("convertFitTarget", () => {
         type: "heart_rate",
         value: {
           unit: "bpm",
-          value: 85,
+          value: 125,
         },
       });
     });
@@ -273,9 +277,10 @@ describe("convertFitTarget", () => {
 
     it("should handle percentage of max heart rate", () => {
       // Arrange
+      // Garmin encoding: 85% max HR = 85 (no offset for percentages)
       const data = buildFitTargetData.build({
         targetType: "heartRate",
-        targetValue: 150,
+        targetValue: 85,
       });
 
       // Act
@@ -286,7 +291,7 @@ describe("convertFitTarget", () => {
         type: "heart_rate",
         value: {
           unit: "percent_max",
-          value: 150,
+          value: 85,
         },
       });
     });
@@ -333,6 +338,7 @@ describe("convertFitTarget", () => {
 
     it("should handle low heart rate values", () => {
       // Arrange
+      // Garmin encoding: 60% max HR = 60 (no offset for percentages)
       const data = buildFitTargetData.build({
         targetType: "heartRate",
         targetValue: 60,
@@ -345,7 +351,7 @@ describe("convertFitTarget", () => {
       expect(result).toStrictEqual({
         type: "heart_rate",
         value: {
-          unit: "bpm",
+          unit: "percent_max",
           value: 60,
         },
       });
@@ -353,9 +359,10 @@ describe("convertFitTarget", () => {
 
     it("should handle high heart rate values", () => {
       // Arrange
+      // Garmin encoding: 180 bpm = 280 (180 + 100 offset)
       const data = buildFitTargetData.build({
         targetType: "heartRate",
-        targetValue: 200,
+        targetValue: 280,
       });
 
       // Act
@@ -365,8 +372,8 @@ describe("convertFitTarget", () => {
       expect(result).toStrictEqual({
         type: "heart_rate",
         value: {
-          unit: "percent_max",
-          value: 200,
+          unit: "bpm",
+          value: 180,
         },
       });
     });

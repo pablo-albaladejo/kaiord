@@ -19,7 +19,14 @@ export const convertPowerTarget = (
     message.targetValue = 0;
     message.customTargetPowerLow = value.min;
     message.customTargetPowerHigh = value.max;
+  } else if (value.unit === KRD_TARGET_UNIT.WATTS) {
+    // Garmin encoding: Absolute watts need +1000 offset
+    message.targetValue = value.value + 1000;
+  } else if (value.unit === KRD_TARGET_UNIT.PERCENT_FTP) {
+    // Garmin encoding: Percentage FTP has no offset
+    message.targetValue = value.value;
   } else {
+    // Fallback: use custom range with same value
     message.targetValue = 0;
     message.customTargetPowerLow = value.value;
     message.customTargetPowerHigh = value.value;
