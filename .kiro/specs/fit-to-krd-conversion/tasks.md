@@ -54,7 +54,7 @@ Each task follows Test-Driven Development:
     - Define KRD, KRDMetadata, KRDSession, KRDLap, KRDRecord, KRDEvent types
     - _Requirements: 1.2, 8.1_
     - _Commit: "feat: add KRD domain types"_
-  - [ ] 2.3 Implement Workout types
+  - [-] 2.3 Implement Workout types
     - Create workout.fixtures.ts with faker + rosie factories
     - Define Workout, WorkoutStep, RepetitionBlock types in domain/types/workout.ts
     - _Requirements: 6.1, 6.2, 7.1, 7.2_
