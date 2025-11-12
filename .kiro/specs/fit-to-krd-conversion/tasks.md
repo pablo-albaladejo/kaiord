@@ -127,7 +127,7 @@ Each task follows Test-Driven Development:
     - Write co-located tests in schema-validator.test.ts (valid/invalid KRD, error mapping)
     - _Requirements: 1.3, 1.5, 9.3_
     - _Commit: "feat: add schema validator using Zod"_
-  - [ ] 5.2 Create JSON Schema generation script
+  - [x] 5.2 Create JSON Schema generation script
     - Write scripts/generate-schema.ts using zod-to-json-schema
     - Import krdSchema from domain/schemas/krd.ts
     - Generate packages/core/schema/workout.json from Zod schema
