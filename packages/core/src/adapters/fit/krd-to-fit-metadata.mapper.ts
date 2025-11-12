@@ -1,7 +1,12 @@
 import type { KRD } from "../../domain/schemas/krd";
 import type { Workout } from "../../domain/schemas/workout";
 import type { Logger } from "../../ports/logger";
-import { FIT_MESSAGE_KEY } from "./constants";
+import {
+  DEFAULT_MANUFACTURER,
+  FIT_FILE_TYPE,
+  FIT_MESSAGE_KEY,
+  TYPE_GUARD_PROPERTY,
+} from "./constants";
 
 export const convertMetadataToFileId = (krd: KRD, logger: Logger): unknown => {
   logger.debug("Converting metadata to file_id message");
@@ -11,8 +16,8 @@ export const convertMetadataToFileId = (krd: KRD, logger: Logger): unknown => {
   return {
     type: FIT_MESSAGE_KEY.FILE_ID,
     fileIdMesg: {
-      type: "workout",
-      manufacturer: krd.metadata.manufacturer || "development",
+      type: FIT_FILE_TYPE.WORKOUT,
+      manufacturer: krd.metadata.manufacturer || DEFAULT_MANUFACTURER,
       product: krd.metadata.product,
       serialNumber: krd.metadata.serialNumber
         ? parseInt(krd.metadata.serialNumber, 10)
@@ -48,7 +53,7 @@ const countValidSteps = (
 ): number => {
   let count = 0;
   for (const step of steps) {
-    if ("repeatCount" in step) {
+    if (TYPE_GUARD_PROPERTY.REPEAT_COUNT in step) {
       count += step.steps.length + 1;
     } else {
       count += 1;

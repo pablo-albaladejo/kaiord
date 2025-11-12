@@ -1,5 +1,6 @@
 import type { KRDMetadata } from "../../domain/schemas/krd";
 import type { Logger } from "../../ports/logger";
+import { DEFAULT_SPORT } from "./constants";
 import type { FitFileId, FitWorkoutMessage } from "./types";
 
 export const mapMetadata = (
@@ -39,7 +40,7 @@ const mapCreatedTimestamp = (fileId: FitFileId | undefined): string => {
 
 const mapSportType = (fitSport: string | undefined): string => {
   if (!fitSport) {
-    return "cycling";
+    return DEFAULT_SPORT;
   }
   return fitSport.toLowerCase();
 };
