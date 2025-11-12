@@ -1,0 +1,270 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://kaiord.dev/schema/krd.json",
+  "title": "KRD Schema",
+  "description": "Kaiord Representation Definition (KRD) for workout and activity data",
+  "$ref": "#/definitions/KRD",
+  "definitions": {
+    "KRD": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "pattern": "^\\d+\\.\\d+$"
+        },
+        "type": {
+          "type": "string",
+          "enum": [
+            "workout",
+            "activity",
+            "course"
+          ]
+        },
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "created": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "manufacturer": {
+              "type": "string"
+            },
+            "product": {
+              "type": "string"
+            },
+            "serialNumber": {
+              "type": "string"
+            },
+            "sport": {
+              "type": "string"
+            },
+            "subSport": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "created",
+            "sport"
+          ],
+          "additionalProperties": false
+        },
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "startTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "totalElapsedTime": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalTimerTime": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalDistance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "sport": {
+                "type": "string"
+              },
+              "subSport": {
+                "type": "string"
+              },
+              "avgHeartRate": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              },
+              "maxHeartRate": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              },
+              "avgCadence": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avgPower": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalCalories": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "startTime",
+              "totalElapsedTime",
+              "sport"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "laps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "startTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "totalElapsedTime": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalDistance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avgHeartRate": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              },
+              "maxHeartRate": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              },
+              "avgCadence": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avgPower": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "startTime",
+              "totalElapsedTime"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "position": {
+                "type": "object",
+                "properties": {
+                  "lat": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "lon": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  }
+                },
+                "required": [
+                  "lat",
+                  "lon"
+                ],
+                "additionalProperties": false
+              },
+              "altitude": {
+                "type": "number"
+              },
+              "heartRate": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              },
+              "cadence": {
+                "type": "number",
+                "minimum": 0
+              },
+              "power": {
+                "type": "number",
+                "minimum": 0
+              },
+              "speed": {
+                "type": "number",
+                "minimum": 0
+              },
+              "distance": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "timestamp"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "eventType": {
+                "type": "string",
+                "enum": [
+                  "start",
+                  "stop",
+                  "pause",
+                  "resume",
+                  "lap",
+                  "marker",
+                  "timer"
+                ]
+              },
+              "eventGroup": {
+                "type": "integer"
+              },
+              "data": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "timestamp",
+              "eventType"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "extensions": {
+          "type": "object",
+          "properties": {
+            "workout": {
+              "$ref": "workout.json#/definitions/Workout"
+            },
+            "fit": {
+              "type": "object",
+              "additionalProperties": true
+            }
+          },
+          "additionalProperties": true
+        }
+      },
+      "required": [
+        "version",
+        "type",
+        "metadata"
+      ],
+      "additionalProperties": false
+    }
+  }
+}

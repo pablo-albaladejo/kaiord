@@ -14,6 +14,14 @@ export const convertWorkoutStep = (
     messageIndex,
   };
 
+  if (step.name) {
+    workoutStepMesg.wktStepName = step.name;
+  }
+
+  if (step.intensity) {
+    workoutStepMesg.intensity = step.intensity;
+  }
+
   convertDuration(step, workoutStepMesg);
   convertTarget(step, workoutStepMesg);
 
@@ -33,6 +41,13 @@ const convertDuration = (
   } else if (step.duration.type === "distance") {
     message.durationType = FIT_DURATION_TYPE.DISTANCE;
     message.durationDistance = step.duration.meters;
+  } else if (step.duration.type === "heart_rate_less_than") {
+    message.durationType = FIT_DURATION_TYPE.HR_LESS_THAN;
+    message.durationHr = step.duration.bpm;
+  } else if (step.duration.type === "heart_rate_greater_than") {
+    message.durationType = FIT_DURATION_TYPE.REPEAT_UNTIL_HR_GREATER_THAN;
+    message.durationHr = step.duration.bpm;
+    message.durationStep = step.duration.repeatFrom;
   } else {
     message.durationType = FIT_DURATION_TYPE.OPEN;
   }

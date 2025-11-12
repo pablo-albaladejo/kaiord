@@ -220,7 +220,7 @@ describe("convertFitDuration", () => {
   });
 
   describe("edge cases", () => {
-    it("should handle HR_LESS_THAN duration type as open", () => {
+    it("should handle HR_LESS_THAN duration type correctly", () => {
       // Arrange
       const data = buildFitDurationData.build({
         durationType: "hrLessThan",
@@ -232,7 +232,8 @@ describe("convertFitDuration", () => {
 
       // Assert
       expect(result).toStrictEqual({
-        type: "open",
+        type: "heart_rate_less_than",
+        bpm: 150,
       });
     });
 
