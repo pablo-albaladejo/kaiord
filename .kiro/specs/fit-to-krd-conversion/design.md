@@ -83,10 +83,114 @@ CLI → Application (use-cases) → Ports (contracts) → Adapters (implementati
 
 ### Domain Layer
 
-#### KRD Type Definitions
+#### Zod Schema Approach
+
+**IMPORTANT**: This project follows a **schema-first approach** using Zod as the single source of truth. All types are inferred from Zod schemas, not defined manually.
+
+- Schemas live in `domain/schemas/` (not `domain/types/`)
+- Types are inferred using `z.infer<typeof schema>`
+- No manual type definitions or separate enums
+- Use `z.discriminatedUnion` for variant types
+- JSON Schema is auto-generated from Zod schemas
+
+See `.kiro/steering/zod-patterns.md` for complete patterns and conventions.
+
+#### KRD Schema Definitions
 
 ```typescript
-// domain/types/krd.ts
+// domain/schemas/krd.ts
+import { z } from "zod";
+
+export const krdMetadataSchema = z.object({
+  created: z.string().datetime(),
+  manufacturer: z.string().optional(),
+  product: z.string().optional(),
+  serialNumber: z.string().optional(),
+  sport: z.string(),
+  subSport: z.string().optional(),
+});
+
+export const krdSessionSchema = z.object({
+  startTime: z.string().datetime(),
+  totalElapsedTime: z.number().min(0),
+  totalTimerTime: z.number().min(0).optional(),
+  totalDistance: z.number().min(0).optional(),
+  sport: z.string(),
+  subSport: z.string().optional(),
+  avgHeartRate: z.number().int().min(0).max(300).optional(),
+  maxHeartRate: z.number().int().min(0).max(300).optional(),
+  avgCadence: z.number().min(0).optional(),
+  avgPower: z.number().min(0).optional(),
+  totalCalories: z.number().int().min(0).optional(),
+});
+
+export const krdLapSchema = z.object({
+  startTime: z.string().datetime(),
+  totalElapsedTime: z.number().min(0),
+  totalDistance: z.number().min(0).optional(),
+  avgHeartRate: z.number().int().min(0).max(300).optional(),
+  maxHeartRate: z.number().int().min(0).max(300).optional(),
+  avgCadence: z.number().min(0).optional(),
+  avgPower: z.number().min(0).optional(),
+});
+
+export const krdRecordSchema = z.object({
+  timestamp: z.string().datetime(),
+  position: z
+    .object({
+      lat: z.number().min(-90).max(90),
+      lon: z.number().min(-180).max(180),
+    })
+    .optional(),
+  altitude: z.number().optional(),
+  heartRate: z.number().int().min(0).max(300).optional(),
+  cadence: z.number().min(0).optional(),
+  power: z.number().min(0).optional(),
+  speed: z.number().min(0).optional(),
+  distance: z.number().min(0).optional(),
+});
+
+export const krdEventSchema = z.object({
+  timestamp: z.string().datetime(),
+  eventType: z.enum([
+    "start",
+    "stop",
+    "pause",
+    "resume",
+    "lap",
+    "marker",
+    "timer",
+  ]),
+  eventGroup: z.number().int().optional(),
+  data: z.number().int().optional(),
+});
+
+export const krdSchema = z.object({
+  version: z.string().regex(/^\d+\.\d+$/),
+  type: z.enum(["workout", "activity", "course"]),
+  metadata: krdMetadataSchema,
+  sessions: z.array(krdSessionSchema).optional(),
+  laps: z.array(krdLapSchema).optional(),
+  records: z.array(krdRecordSchema).optional(),
+  events: z.array(krdEventSchema).optional(),
+  extensions: z.record(z.unknown()).optional(),
+});
+
+// Infer types from schemas
+export type KRDMetadata = z.infer<typeof krdMetadataSchema>;
+export type KRDSession = z.infer<typeof krdSessionSchema>;
+export type KRDLap = z.infer<typeof krdLapSchema>;
+export type KRDRecord = z.infer<typeof krdRecordSchema>;
+export type KRDEvent = z.infer<typeof krdEventSchema>;
+export type KRD = z.infer<typeof krdSchema>;
+```
+
+#### Legacy Type Definitions (TO BE MIGRATED)
+
+The following shows the old manual type approach. **These will be replaced by Zod schemas**:
+
+```typescript
+// OLD APPROACH - domain/types/krd.ts (TO BE REMOVED)
 export type KRD = {
   version: string;
   type: "workout" | "activity" | "course";
@@ -153,10 +257,43 @@ export type KRDEvent = {
 };
 ```
 
-#### Workout Domain Models
+#### Workout Schema Definitions
 
 ```typescript
-// domain/types/workout.ts
+// domain/schemas/workout.ts
+import { z } from "zod";
+import { durationSchema } from "./duration";
+import { targetSchema } from "./target";
+
+export const workoutStepSchema = z.object({
+  stepIndex: z.number().int().nonnegative(),
+  durationType: z.enum(["time", "distance", "open"]),
+  duration: durationSchema,
+  targetType: z.enum(["power", "heart_rate", "cadence", "pace", "open"]),
+  target: targetSchema,
+});
+
+export const repetitionBlockSchema = z.object({
+  repeatCount: z.number().int().min(2),
+  steps: z.array(workoutStepSchema),
+});
+
+export const workoutSchema = z.object({
+  name: z.string().optional(),
+  sport: z.string(),
+  steps: z.array(z.union([workoutStepSchema, repetitionBlockSchema])),
+});
+
+// Infer types from schemas
+export type WorkoutStep = z.infer<typeof workoutStepSchema>;
+export type RepetitionBlock = z.infer<typeof repetitionBlockSchema>;
+export type Workout = z.infer<typeof workoutSchema>;
+```
+
+#### Legacy Workout Models (TO BE MIGRATED)
+
+```typescript
+// OLD APPROACH - domain/types/workout.ts (TO BE REMOVED)
 export type WorkoutStep = {
   stepIndex: number;
   durationType: DurationType;
@@ -177,10 +314,36 @@ export type Workout = {
 };
 ```
 
-#### Duration Specifications
+#### Duration Schema Definitions
 
 ```typescript
-// domain/types/duration.ts
+// domain/schemas/duration.ts
+import { z } from "zod";
+
+export const durationSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("time"),
+    seconds: z.number().positive(),
+  }),
+  z.object({
+    type: z.literal("distance"),
+    meters: z.number().positive(),
+  }),
+  z.object({
+    type: z.literal("open"),
+  }),
+]);
+
+// Infer type from schema
+export type Duration = z.infer<typeof durationSchema>;
+
+// NO separate enum - use discriminated union
+```
+
+#### Legacy Duration Types (TO BE MIGRATED)
+
+```typescript
+// OLD APPROACH - domain/types/duration.ts (TO BE REMOVED)
 export enum DurationType {
   Time = "time",
   Distance = "distance",
@@ -193,10 +356,71 @@ export type Duration =
   | { type: DurationType.Open };
 ```
 
-#### Target Specifications
+#### Target Schema Definitions
 
 ```typescript
-// domain/types/target.ts
+// domain/schemas/target.ts
+import { z } from "zod";
+
+const powerValueSchema = z.discriminatedUnion("unit", [
+  z.object({ unit: z.literal("watts"), value: z.number() }),
+  z.object({ unit: z.literal("percent_ftp"), value: z.number() }),
+  z.object({ unit: z.literal("zone"), value: z.number().int().min(1).max(7) }),
+  z.object({ unit: z.literal("range"), min: z.number(), max: z.number() }),
+]);
+
+const heartRateValueSchema = z.discriminatedUnion("unit", [
+  z.object({ unit: z.literal("bpm"), value: z.number() }),
+  z.object({ unit: z.literal("zone"), value: z.number().int().min(1).max(5) }),
+  z.object({ unit: z.literal("percent_max"), value: z.number() }),
+  z.object({ unit: z.literal("range"), min: z.number(), max: z.number() }),
+]);
+
+const cadenceValueSchema = z.discriminatedUnion("unit", [
+  z.object({ unit: z.literal("rpm"), value: z.number() }),
+  z.object({ unit: z.literal("range"), min: z.number(), max: z.number() }),
+]);
+
+const paceValueSchema = z.discriminatedUnion("unit", [
+  z.object({ unit: z.literal("mps"), value: z.number() }), // meters per second
+  z.object({ unit: z.literal("zone"), value: z.number().int().min(1).max(5) }),
+  z.object({ unit: z.literal("range"), min: z.number(), max: z.number() }),
+]);
+
+export const targetSchema = z.discriminatedUnion("type", [
+  z.object({
+    type: z.literal("power"),
+    value: powerValueSchema,
+  }),
+  z.object({
+    type: z.literal("heart_rate"),
+    value: heartRateValueSchema,
+  }),
+  z.object({
+    type: z.literal("cadence"),
+    value: cadenceValueSchema,
+  }),
+  z.object({
+    type: z.literal("pace"),
+    value: paceValueSchema,
+  }),
+  z.object({ type: z.literal("open") }),
+]);
+
+// Infer types from schemas
+export type Target = z.infer<typeof targetSchema>;
+export type PowerValue = z.infer<typeof powerValueSchema>;
+export type HeartRateValue = z.infer<typeof heartRateValueSchema>;
+export type CadenceValue = z.infer<typeof cadenceValueSchema>;
+export type PaceValue = z.infer<typeof paceValueSchema>;
+
+// NO separate enums - use discriminated unions
+```
+
+#### Legacy Target Types (TO BE MIGRATED)
+
+```typescript
+// OLD APPROACH - domain/types/target.ts (TO BE REMOVED)
 export enum TargetType {
   Power = "power",
   HeartRate = "heart_rate",
