@@ -46,6 +46,21 @@ export type FitMessages = {
     intensity?: string;
     repeatSteps?: number;
   }>;
+  [key: string]: Array<Record<string, unknown>> | undefined;
+};
+
+export type FitDeveloperField = {
+  fieldDefinitionNumber: number;
+  fieldName: string;
+  nativeMesgNum: number;
+  nativeFieldNum: number;
+  units?: string;
+  value: unknown;
+};
+
+export type FitExtensions = {
+  developerFields?: Array<FitDeveloperField>;
+  unknownMessages?: Record<string, Array<Record<string, unknown>>>;
 };
 
 export type FitFileId = NonNullable<

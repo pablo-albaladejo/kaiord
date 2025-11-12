@@ -1,7 +1,7 @@
 # Hook: Task Code Review
 
-**Event**: manual  
-**Trigger**: After completing a task from `.kiro/specs/**/tasks.md`
+**Event**: on file save  
+**Trigger**: `.kiro/specs/**/tasks.md`
 
 ## Purpose
 

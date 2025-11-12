@@ -57,6 +57,7 @@ const mapMessagesToKRD = (messages: FitMessages, logger: Logger): KRD => {
 
   const metadata = mapMetadata(fileId, workoutMsg, logger);
   const workout = mapWorkout(workoutMsg, workoutSteps, logger);
+  const fitExtensions = extractFitExtensions(messages, logger);
 
   return {
     version: "1.0",
@@ -64,6 +65,7 @@ const mapMessagesToKRD = (messages: FitMessages, logger: Logger): KRD => {
     metadata,
     extensions: {
       workout,
+      fit: fitExtensions,
     },
   };
 };
@@ -88,4 +90,73 @@ const validateMessages = (
       count: workoutMessages.length,
     });
   }
+};
+
+const extractFitExtensions = (
+  messages: FitMessages,
+  logger: Logger
+): Record<string, unknown> => {
+  logger.debug("Extracting FIT extensions");
+
+  const knownMessageKeys = new Set<string>([
+    FIT_MESSAGE_KEY.FILE_ID,
+    FIT_MESSAGE_KEY.WORKOUT,
+    FIT_MESSAGE_KEY.WORKOUT_STEP,
+  ]);
+
+  const unknownMessages: Record<string, Array<Record<string, unknown>>> = {};
+  const developerFields: Array<Record<string, unknown>> = [];
+
+  for (const [key, value] of Object.entries(messages)) {
+    if (!knownMessageKeys.has(key) && value && Array.isArray(value)) {
+      logger.debug("Found unknown message type", { messageType: key });
+      unknownMessages[key] = value;
+    }
+
+    if (value && Array.isArray(value)) {
+      for (const message of value) {
+        if (message && typeof message === "object") {
+          const devFields = extractDeveloperFields(message);
+          if (devFields.length > 0) {
+            developerFields.push(...devFields);
+          }
+        }
+      }
+    }
+  }
+
+  const extensions: Record<string, unknown> = {};
+
+  if (developerFields.length > 0) {
+    logger.info("Preserved developer fields", {
+      count: developerFields.length,
+    });
+    extensions.developerFields = developerFields;
+  }
+
+  if (Object.keys(unknownMessages).length > 0) {
+    logger.info("Preserved unknown message types", {
+      types: Object.keys(unknownMessages),
+    });
+    extensions.unknownMessages = unknownMessages;
+  }
+
+  return extensions;
+};
+
+const extractDeveloperFields = (
+  message: Record<string, unknown>
+): Array<Record<string, unknown>> => {
+  const devFields: Array<Record<string, unknown>> = [];
+
+  for (const [key, value] of Object.entries(message)) {
+    if (key.startsWith("developer_") || key.includes("DeveloperField")) {
+      devFields.push({
+        fieldName: key,
+        value,
+      });
+    }
+  }
+
+  return devFields;
 };

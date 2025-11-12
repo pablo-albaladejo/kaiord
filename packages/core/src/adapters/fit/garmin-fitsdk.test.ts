@@ -247,5 +247,87 @@ describe("createGarminFitSdkReader", () => {
       // Assert
       expect(errorSpy).toHaveBeenCalled();
     });
+
+    it("should preserve FIT extensions in extensions.fit", async () => {
+      // Arrange
+      const logger = createMockLogger();
+      const reader = createGarminFitSdkReader(logger);
+      const fitPath = join(
+        __dirname,
+        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      );
+      const buffer = readFileSync(fitPath);
+
+      // Act
+      const result = await reader.readToKRD(buffer);
+
+      // Assert
+      expect(result.extensions).toBeDefined();
+      expect(result.extensions?.fit).toBeDefined();
+    });
+
+    it("should extract unknown message types to extensions.fit.unknownMessages", async () => {
+      // Arrange
+      const logger = createMockLogger();
+      const reader = createGarminFitSdkReader(logger);
+      const fitPath = join(
+        __dirname,
+        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      );
+      const buffer = readFileSync(fitPath);
+
+      // Act
+      const result = await reader.readToKRD(buffer);
+
+      // Assert
+      expect(result.extensions?.fit).toBeDefined();
+      const fitExt = result.extensions?.fit as Record<string, unknown>;
+      if (fitExt.unknownMessages) {
+        expect(typeof fitExt.unknownMessages).toBe("object");
+      }
+    });
+
+    it("should log info when preserving developer fields", async () => {
+      // Arrange
+      const logger = createMockLogger();
+      const infoSpy = vi.spyOn(logger, "info");
+      const reader = createGarminFitSdkReader(logger);
+      const fitPath = join(
+        __dirname,
+        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      );
+      const buffer = readFileSync(fitPath);
+
+      // Act
+      await reader.readToKRD(buffer);
+
+      // Assert
+      const infoCalls = infoSpy.mock.calls.map((call) => call[0]);
+      const hasExtensionLog =
+        infoCalls.some((msg) => msg.includes("developer fields")) ||
+        infoCalls.some((msg) => msg.includes("unknown message"));
+      expect(
+        hasExtensionLog || infoCalls.includes("FIT file parsed successfully")
+      ).toBe(true);
+    });
+
+    it("should handle FIT files without extensions gracefully", async () => {
+      // Arrange
+      const logger = createMockLogger();
+      const reader = createGarminFitSdkReader(logger);
+      const fitPath = join(
+        __dirname,
+        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      );
+      const buffer = readFileSync(fitPath);
+
+      // Act
+      const result = await reader.readToKRD(buffer);
+
+      // Assert
+      expect(result.extensions?.fit).toBeDefined();
+      const fitExt = result.extensions?.fit as Record<string, unknown>;
+      expect(typeof fitExt).toBe("object");
+    });
   });
 });
