@@ -44,7 +44,7 @@ Each task follows Test-Driven Development:
   - _Requirements: 17.5_
   - _Commit: "chore: set up project structure and test infrastructure"_
 
-- [ ] 2. Migrate to Zod schemas (Schema-First Approach)
+- [x] 2. Migrate to Zod schemas (Schema-First Approach)
 
   - [x] 2.1 Create domain/schemas directory structure
     - Create domain/schemas/ directory
@@ -82,7 +82,7 @@ Each task follows Test-Driven Development:
     - DO NOT create tests for fixtures (they are test utilities, not production code)
     - _Requirements: 6.1, 6.2, 7.1, 7.2_
     - _Commit: "refactor: migrate Workout to Zod schema"_
-  - [ ] 2.5 Implement KRD Zod schema
+  - [x] 2.5 Implement KRD Zod schema
     - Create domain/schemas/krd.ts with krdSchema and component schemas
     - Define krdMetadataSchema, krdSessionSchema, krdLapSchema, krdRecordSchema, krdEventSchema
     - Export KRD and component types using z.infer
