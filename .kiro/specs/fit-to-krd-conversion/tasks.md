@@ -180,7 +180,7 @@ Each task follows Test-Driven Development:
     - Add tests for message conversion, metadata extraction, step order, repetitions
     - _Requirements: 1.2, 6.1, 6.2, 7.1, 7.2, 8.1, 8.2, 8.3_
     - _Commit: "feat: implement FIT message to KRD conversion"_
-  - [ ] 8.4 Implement duration conversion (FIT → KRD)
+  - [x] 8.4 Implement duration conversion (FIT → KRD)
     - Add duration conversion functions to garmin-fitsdk.ts
     - Convert FIT time to seconds
     - Convert FIT distance to meters
