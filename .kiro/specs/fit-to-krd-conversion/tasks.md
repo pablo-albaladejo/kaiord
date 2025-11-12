@@ -51,13 +51,14 @@ Each task follows Test-Driven Development:
     - Move existing fixtures to use schema imports (will be updated in subsequent tasks)
     - _Requirements: 1.3_
     - _Commit: "refactor: create schemas directory structure"_
-  - [ ] 2.2 Implement Duration Zod schema
+  - [x] 2.2 Implement Duration Zod schema
     - Create domain/schemas/duration.ts with durationSchema using z.discriminatedUnion
     - Define time, distance, and open duration variants
     - Export Duration type using z.infer
     - Remove domain/types/duration.ts (enum-based approach)
-    - Update duration.fixtures.ts to import from schemas and validate with .after() hook
-    - Write schema tests in duration.test.ts (co-located)
+    - Create duration.fixtures.ts to import from schemas and validate with .after() hook
+    - DO NOT create tests for schemas (TypeScript validates types at compile time)
+    - DO NOT create tests for fixtures (they are test utilities, not production code)
     - _Requirements: 2.1, 2.2, 2.5_
     - _Commit: "refactor: migrate Duration to Zod schema"_
   - [ ] 2.3 Implement Target Zod schema
@@ -66,8 +67,9 @@ Each task follows Test-Driven Development:
     - Define nested value schemas (powerValueSchema, heartRateValueSchema, etc.)
     - Export Target and value types using z.infer
     - Remove domain/types/target.ts (enum-based approach)
-    - Update target.fixtures.ts to import from schemas and validate with .after() hook
-    - Write schema tests in target.test.ts (co-located)
+    - Create target.fixtures.ts to import from schemas and validate with .after() hook
+    - DO NOT create tests for schemas (TypeScript validates types at compile time)
+    - DO NOT create tests for fixtures (they are test utilities, not production code)
     - _Requirements: 3.1, 3.2, 4.1, 4.2, 5.1, 5.1.2_
     - _Commit: "refactor: migrate Target to Zod schema"_
   - [ ] 2.4 Implement Workout Zod schema
@@ -76,7 +78,8 @@ Each task follows Test-Driven Development:
     - Export Workout, WorkoutStep, RepetitionBlock types using z.infer
     - Remove domain/types/workout.ts (manual type approach)
     - Update workout.fixtures.ts to import from schemas and validate with .after() hook
-    - Write schema tests in workout.test.ts (co-located)
+    - DO NOT create tests for schemas (TypeScript validates types at compile time)
+    - DO NOT create tests for fixtures (they are test utilities, not production code)
     - _Requirements: 6.1, 6.2, 7.1, 7.2_
     - _Commit: "refactor: migrate Workout to Zod schema"_
   - [ ] 2.5 Implement KRD Zod schema
@@ -85,7 +88,8 @@ Each task follows Test-Driven Development:
     - Export KRD and component types using z.infer
     - Remove domain/types/krd.ts (manual type approach)
     - Update krd.fixtures.ts to import from schemas and validate with .after() hook
-    - Write schema tests in krd.test.ts (co-located)
+    - DO NOT create tests for schemas (TypeScript validates types at compile time)
+    - DO NOT create tests for fixtures (they are test utilities, not production code)
     - _Requirements: 1.2, 8.1_
     - _Commit: "refactor: migrate KRD to Zod schema"_
 
