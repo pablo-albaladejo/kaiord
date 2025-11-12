@@ -220,7 +220,7 @@ Each task follows Test-Driven Development:
     - Add tests for valid KRD, error handling, logger injection
     - _Requirements: 11.2, 11.5_
     - _Commit: "feat: add FIT writer adapter skeleton"_
-  - [ ] 9.3 Implement KRD to FIT message conversion
+  - [x] 9.3 Implement KRD to FIT message conversion
     - Implement convertKRDToMessages function in garmin-fitsdk.ts
     - Convert KRD metadata to workout messages
     - Convert KRD steps to workout_step messages
