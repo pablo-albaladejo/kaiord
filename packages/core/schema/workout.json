@@ -3,344 +3,259 @@
   "$id": "https://kaiord.dev/schema/workout.json",
   "title": "KRD Workout Schema",
   "description": "Kaiord Representation Definition (KRD) for workout data",
-  "type": "object",
-  "required": ["version", "type", "metadata"],
-  "properties": {
-    "version": {
-      "type": "string",
-      "description": "KRD schema version",
-      "pattern": "^\\d+\\.\\d+$",
-      "examples": ["1.0"]
-    },
-    "type": {
-      "type": "string",
-      "description": "File type",
-      "enum": ["workout", "activity", "course"]
-    },
-    "metadata": {
-      "$ref": "#/definitions/Metadata"
-    },
-    "sessions": {
-      "type": "array",
-      "description": "Training sessions",
-      "items": {
-        "$ref": "#/definitions/Session"
-      }
-    },
-    "laps": {
-      "type": "array",
-      "description": "Lap/interval data",
-      "items": {
-        "$ref": "#/definitions/Lap"
-      }
-    },
-    "records": {
-      "type": "array",
-      "description": "Time-series data points",
-      "items": {
-        "$ref": "#/definitions/Record"
-      }
-    },
-    "events": {
-      "type": "array",
-      "description": "Workout events",
-      "items": {
-        "$ref": "#/definitions/Event"
-      }
-    },
-    "extensions": {
-      "type": "object",
-      "description": "Format-specific extensions",
-      "additionalProperties": true
-    }
-  },
+  "$ref": "#/definitions/KRD",
   "definitions": {
-    "Metadata": {
+    "KRD": {
       "type": "object",
-      "required": ["created", "sport"],
       "properties": {
-        "created": {
+        "version": {
           "type": "string",
-          "format": "date-time",
-          "description": "File creation timestamp (ISO 8601)"
+          "pattern": "^\\d+\\.\\d+$"
         },
-        "manufacturer": {
+        "type": {
           "type": "string",
-          "description": "Device manufacturer"
+          "enum": [
+            "workout",
+            "activity",
+            "course"
+          ]
         },
-        "product": {
-          "type": "string",
-          "description": "Device model"
+        "metadata": {
+          "type": "object",
+          "properties": {
+            "created": {
+              "type": "string",
+              "format": "date-time"
+            },
+            "manufacturer": {
+              "type": "string"
+            },
+            "product": {
+              "type": "string"
+            },
+            "serialNumber": {
+              "type": "string"
+            },
+            "sport": {
+              "type": "string"
+            },
+            "subSport": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "created",
+            "sport"
+          ],
+          "additionalProperties": false
         },
-        "serialNumber": {
-          "type": "string",
-          "description": "Device serial number"
+        "sessions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "startTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "totalElapsedTime": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalTimerTime": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalDistance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "sport": {
+                "type": "string"
+              },
+              "subSport": {
+                "type": "string"
+              },
+              "avgHeartRate": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              },
+              "maxHeartRate": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              },
+              "avgCadence": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avgPower": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalCalories": {
+                "type": "integer",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "startTime",
+              "totalElapsedTime",
+              "sport"
+            ],
+            "additionalProperties": false
+          }
         },
-        "sport": {
-          "type": "string",
-          "description": "Primary sport type",
-          "examples": ["running", "cycling", "swimming", "hiking"]
+        "laps": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "startTime": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "totalElapsedTime": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalDistance": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avgHeartRate": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              },
+              "maxHeartRate": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              },
+              "avgCadence": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avgPower": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "startTime",
+              "totalElapsedTime"
+            ],
+            "additionalProperties": false
+          }
         },
-        "subSport": {
-          "type": "string",
-          "description": "Sport subtype",
-          "examples": ["trail", "road", "mountain", "indoor"]
+        "records": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "position": {
+                "type": "object",
+                "properties": {
+                  "lat": {
+                    "type": "number",
+                    "minimum": -90,
+                    "maximum": 90
+                  },
+                  "lon": {
+                    "type": "number",
+                    "minimum": -180,
+                    "maximum": 180
+                  }
+                },
+                "required": [
+                  "lat",
+                  "lon"
+                ],
+                "additionalProperties": false
+              },
+              "altitude": {
+                "type": "number"
+              },
+              "heartRate": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 300
+              },
+              "cadence": {
+                "type": "number",
+                "minimum": 0
+              },
+              "power": {
+                "type": "number",
+                "minimum": 0
+              },
+              "speed": {
+                "type": "number",
+                "minimum": 0
+              },
+              "distance": {
+                "type": "number",
+                "minimum": 0
+              }
+            },
+            "required": [
+              "timestamp"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "events": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "timestamp": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "eventType": {
+                "type": "string",
+                "enum": [
+                  "start",
+                  "stop",
+                  "pause",
+                  "resume",
+                  "lap",
+                  "marker",
+                  "timer"
+                ]
+              },
+              "eventGroup": {
+                "type": "integer"
+              },
+              "data": {
+                "type": "integer"
+              }
+            },
+            "required": [
+              "timestamp",
+              "eventType"
+            ],
+            "additionalProperties": false
+          }
+        },
+        "extensions": {
+          "type": "object",
+          "additionalProperties": {}
         }
-      }
-    },
-    "Session": {
-      "type": "object",
-      "required": ["startTime", "totalElapsedTime", "sport"],
-      "properties": {
-        "startTime": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Session start timestamp (ISO 8601)"
-        },
-        "totalElapsedTime": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Total elapsed time in seconds"
-        },
-        "totalTimerTime": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Active time in seconds (excludes pauses)"
-        },
-        "totalDistance": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Distance in meters"
-        },
-        "sport": {
-          "type": "string",
-          "description": "Sport type for this session"
-        },
-        "subSport": {
-          "type": "string",
-          "description": "Sport subtype"
-        },
-        "avgHeartRate": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 300,
-          "description": "Average heart rate in bpm"
-        },
-        "maxHeartRate": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 300,
-          "description": "Maximum heart rate in bpm"
-        },
-        "avgCadence": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Average cadence in rpm"
-        },
-        "maxCadence": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Maximum cadence in rpm"
-        },
-        "avgPower": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Average power in watts"
-        },
-        "maxPower": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Maximum power in watts"
-        },
-        "avgSpeed": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Average speed in m/s"
-        },
-        "maxSpeed": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Maximum speed in m/s"
-        },
-        "totalCalories": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Total calories burned"
-        },
-        "totalAscent": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Total elevation gain in meters"
-        },
-        "totalDescent": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Total elevation loss in meters"
-        }
-      }
-    },
-    "Lap": {
-      "type": "object",
-      "required": ["startTime", "totalElapsedTime"],
-      "properties": {
-        "startTime": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Lap start timestamp (ISO 8601)"
-        },
-        "totalElapsedTime": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Lap elapsed time in seconds"
-        },
-        "totalTimerTime": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Lap active time in seconds"
-        },
-        "totalDistance": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Lap distance in meters"
-        },
-        "avgHeartRate": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 300,
-          "description": "Average heart rate in bpm"
-        },
-        "maxHeartRate": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 300,
-          "description": "Maximum heart rate in bpm"
-        },
-        "avgCadence": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Average cadence in rpm"
-        },
-        "maxCadence": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Maximum cadence in rpm"
-        },
-        "avgPower": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Average power in watts"
-        },
-        "maxPower": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Maximum power in watts"
-        },
-        "avgSpeed": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Average speed in m/s"
-        },
-        "maxSpeed": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Maximum speed in m/s"
-        },
-        "totalCalories": {
-          "type": "integer",
-          "minimum": 0,
-          "description": "Calories burned in this lap"
-        }
-      }
-    },
-    "Record": {
-      "type": "object",
-      "required": ["timestamp"],
-      "properties": {
-        "timestamp": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Record timestamp (ISO 8601)"
-        },
-        "position": {
-          "$ref": "#/definitions/Position"
-        },
-        "altitude": {
-          "type": "number",
-          "description": "Elevation in meters"
-        },
-        "heartRate": {
-          "type": "integer",
-          "minimum": 0,
-          "maximum": 300,
-          "description": "Heart rate in bpm"
-        },
-        "cadence": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Cadence in rpm (running: spm/2)"
-        },
-        "power": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Power in watts"
-        },
-        "speed": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Speed in m/s"
-        },
-        "distance": {
-          "type": "number",
-          "minimum": 0,
-          "description": "Cumulative distance in meters"
-        },
-        "temperature": {
-          "type": "number",
-          "description": "Temperature in degrees Celsius"
-        }
-      }
-    },
-    "Position": {
-      "type": "object",
-      "required": ["lat", "lon"],
-      "properties": {
-        "lat": {
-          "type": "number",
-          "minimum": -90,
-          "maximum": 90,
-          "description": "Latitude in degrees"
-        },
-        "lon": {
-          "type": "number",
-          "minimum": -180,
-          "maximum": 180,
-          "description": "Longitude in degrees"
-        }
-      }
-    },
-    "Event": {
-      "type": "object",
-      "required": ["timestamp", "eventType"],
-      "properties": {
-        "timestamp": {
-          "type": "string",
-          "format": "date-time",
-          "description": "Event timestamp (ISO 8601)"
-        },
-        "eventType": {
-          "type": "string",
-          "description": "Type of event",
-          "enum": ["start", "stop", "pause", "resume", "lap", "marker", "timer"]
-        },
-        "eventGroup": {
-          "type": "integer",
-          "description": "Event group identifier"
-        },
-        "data": {
-          "type": "integer",
-          "description": "Event-specific data"
-        }
-      }
+      },
+      "required": [
+        "version",
+        "type",
+        "metadata"
+      ],
+      "additionalProperties": false
     }
   }
 }

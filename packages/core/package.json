@@ -16,7 +16,9 @@
     "schema"
   ],
   "scripts": {
-    "build": "tsup",
+    "generate:schema": "tsx scripts/generate-schema.ts",
+    "prebuild": "pnpm run generate:schema",
+    "build": "pnpm run generate:schema && tsup",
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
@@ -35,6 +37,7 @@
     "@vitest/coverage-v8": "^1.2.0",
     "rosie": "^2.1.1",
     "tsup": "^8.0.1",
+    "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "vitest": "^1.2.0"
   }
