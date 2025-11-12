@@ -28,6 +28,146 @@ describe("createGarminFitSdkReader", () => {
       expect(result.metadata.sport).toBeDefined();
     });
 
+    it("should extract metadata from fileId and workout messages", async () => {
+      // Arrange
+      const logger = createMockLogger();
+      const reader = createGarminFitSdkReader(logger);
+      const fitPath = join(
+        __dirname,
+        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      );
+      const buffer = readFileSync(fitPath);
+
+      // Act
+      const result = await reader.readToKRD(buffer);
+
+      // Assert
+      expect(result.metadata.created).toBe("2009-09-09T20:38:00.000Z");
+      expect(result.metadata.manufacturer).toBe("dynastream");
+      expect(result.metadata.product).toBe("hrmFitSingleByteProductId");
+      expect(result.metadata.serialNumber).toBe("1234");
+      expect(result.metadata.sport).toBe("cycling");
+    });
+
+    it("should convert workout steps in correct order", async () => {
+      // Arrange
+      const logger = createMockLogger();
+      const reader = createGarminFitSdkReader(logger);
+      const fitPath = join(
+        __dirname,
+        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      );
+      const buffer = readFileSync(fitPath);
+
+      // Act
+      const result = await reader.readToKRD(buffer);
+
+      // Assert
+      expect(result.extensions?.workout).toBeDefined();
+      const workout = result.extensions?.workout as {
+        name?: string;
+        sport: string;
+        steps: Array<unknown>;
+      };
+      expect(workout.name).toBe("Example 1");
+      expect(workout.steps).toHaveLength(4);
+      expect(workout.steps[0]).toMatchObject({
+        stepIndex: 0,
+        durationType: "time",
+      });
+      expect(workout.steps[1]).toMatchObject({
+        stepIndex: 1,
+        durationType: "distance",
+      });
+      expect(workout.steps[2]).toMatchObject({
+        stepIndex: 2,
+        durationType: "distance",
+      });
+      expect(workout.steps[3]).toMatchObject({
+        stepIndex: 3,
+        durationType: "open",
+      });
+    });
+
+    it("should handle repetition blocks correctly", async () => {
+      // Arrange
+      const logger = createMockLogger();
+      const reader = createGarminFitSdkReader(logger);
+      const fitPath = join(
+        __dirname,
+        "../../tests/fixtures/fit-files/WorkoutRepeatSteps.fit"
+      );
+      const buffer = readFileSync(fitPath);
+
+      // Act
+      const result = await reader.readToKRD(buffer);
+
+      // Assert
+      expect(result.extensions?.workout).toBeDefined();
+      const workout = result.extensions?.workout as {
+        name?: string;
+        sport: string;
+        steps: Array<unknown>;
+      };
+      expect(workout.name).toBe("Example 2");
+      expect(workout.steps).toHaveLength(3);
+
+      const repetitionBlock = workout.steps[1] as {
+        repeatCount: number;
+        steps: Array<unknown>;
+      };
+      expect(repetitionBlock.repeatCount).toBe(3);
+      expect(repetitionBlock.steps).toHaveLength(2);
+    });
+
+    it("should handle WorkoutRepeatGreaterThanStep correctly", async () => {
+      // Arrange
+      const logger = createMockLogger();
+      const reader = createGarminFitSdkReader(logger);
+      const fitPath = join(
+        __dirname,
+        "../../tests/fixtures/fit-files/WorkoutRepeatGreaterThanStep.fit"
+      );
+      const buffer = readFileSync(fitPath);
+
+      // Act
+      const result = await reader.readToKRD(buffer);
+
+      // Assert
+      expect(result.extensions?.workout).toBeDefined();
+      const workout = result.extensions?.workout as {
+        name?: string;
+        sport: string;
+        steps: Array<unknown>;
+      };
+      expect(workout.steps).toBeDefined();
+      expect(Array.isArray(workout.steps)).toBe(true);
+    });
+
+    it("should handle WorkoutCustomTargetValues correctly", async () => {
+      // Arrange
+      const logger = createMockLogger();
+      const reader = createGarminFitSdkReader(logger);
+      const fitPath = join(
+        __dirname,
+        "../../tests/fixtures/fit-files/WorkoutCustomTargetValues.fit"
+      );
+      const buffer = readFileSync(fitPath);
+
+      // Act
+      const result = await reader.readToKRD(buffer);
+
+      // Assert
+      expect(result.extensions?.workout).toBeDefined();
+      const workout = result.extensions?.workout as {
+        name?: string;
+        sport: string;
+        steps: Array<unknown>;
+      };
+      expect(workout.steps).toBeDefined();
+      expect(Array.isArray(workout.steps)).toBe(true);
+    });
+
     it("should throw FitParsingError when buffer is corrupted", async () => {
       // Arrange
       const logger = createMockLogger();

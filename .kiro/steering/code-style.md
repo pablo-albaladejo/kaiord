@@ -3,11 +3,39 @@
 ## General
 
 - TS strict; ESLint + Prettier; **NO `any` types allowed** (implicit or explicit) without explicit justification
+- **Files ≤ 100 lines** (excluding test files) - split into smaller modules if needed
 - Functions < 40 LOC; SRP; SOLID
 - No `console.log` in libraries (inject logger if needed)
 - Naming: `toKRD`, `fromKRD`, `parseX`, `writeX`
 - Prefer `Array<T>` for public types
 - **Avoid redundant type annotations** - let TypeScript infer types when possible
+- **Use constants for magic strings** - define protocol/API constants in `constants.ts`
+
+```typescript
+// ✅ Preferred - Constants defined and used
+// constants.ts
+export const FIT_TARGET_TYPE = {
+  POWER: "power",
+  HEART_RATE: "heartRate",
+  CADENCE: "cadence",
+} as const;
+
+export const KRD_TARGET_TYPE = {
+  POWER: "power",
+  HEART_RATE: "heart_rate",
+  CADENCE: "cadence",
+} as const;
+
+// mapper.ts
+if (targetType === FIT_TARGET_TYPE.POWER) {
+  return { type: KRD_TARGET_TYPE.POWER };
+}
+
+// ❌ Avoid - Hardcoded strings
+if (targetType === "power") {
+  return { type: "power" };
+}
+```
 
 ```typescript
 // ✅ Preferred - Type inference
@@ -116,11 +144,36 @@ const findZone = (cadence: number, zones: Array<Zone>): Zone => {
 };
 ```
 
+## File Organization
+
+- **Maximum 100 lines per file** (excluding test files)
+- **Split large files by responsibility**:
+  - Types → `types.ts`
+  - Mappers → `*.mapper.ts` (data transformation between formats)
+  - Validators → `*.validator.ts`
+  - Utilities → `*.utils.ts`
+- **Co-locate related files** in the same directory
+- **Use descriptive file names** that indicate purpose
+- **Use dot notation** for file suffixes (e.g., `duration.mapper.ts` not `duration-mapper.ts`)
+
+```typescript
+// Example: FIT adapter split into focused modules
+adapters/fit/
+├── garmin-fitsdk.ts          // Main entry point (< 100 lines)
+├── types.ts                   // Type definitions
+├── metadata.mapper.ts         // Metadata mapping logic
+├── duration.mapper.ts         // Duration mapping logic
+├── target.mapper.ts           // Target mapping logic
+├── step.mapper.ts             // Step mapping logic
+└── workout.mapper.ts          // Workout mapping logic
+```
+
 ## Testing
 
 - **Follow AAA pattern** (Arrange, Act, Assert) for all tests
 - Use blank lines to separate the three sections
 - Keep each section focused and minimal
+- **Test files are exempt from the 100-line limit**
 
 ```typescript
 // ✅ Preferred - AAA pattern

@@ -171,7 +171,7 @@ Each task follows Test-Driven Development:
     - Write co-located tests in garmin-fitsdk.test.ts (valid buffer, corrupted files, logger)
     - _Requirements: 1.1, 9.1_
     - _Commit: "feat: add FIT reader adapter skeleton"_
-  - [ ] 8.3 Implement FIT message to KRD conversion
+  - [x] 8.3 Implement FIT message to KRD conversion
     - Implement convertMessagesToKRD function in garmin-fitsdk.ts
     - Extract workout messages to KRD metadata
     - Convert workout_step messages to KRD steps
