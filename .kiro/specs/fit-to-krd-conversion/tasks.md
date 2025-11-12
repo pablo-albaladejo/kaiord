@@ -197,7 +197,7 @@ Each task follows Test-Driven Development:
     - Add tests for all target types and conversions
     - _Requirements: 3.1, 3.2, 3.3, 4.1, 4.2, 4.4, 4.5, 5.1, 5.1.2, 5.1.4, 5.4_
     - _Commit: "feat: implement FIT target conversion"_
-  - [ ] 8.6 Implement FIT extensions preservation
+  - [x] 8.6 Implement FIT extensions preservation
     - Add extension handling to convertMessagesToKRD
     - Store developer fields in extensions.fit
     - Store unknown message types in extensions.fit
