@@ -7,7 +7,15 @@ import type {
   KRDMetadata,
   KRDRecord,
   KRDSession,
-} from "../../domain/types/krd";
+} from "../../domain/schemas/krd";
+import {
+  krdEventSchema,
+  krdLapSchema,
+  krdMetadataSchema,
+  krdRecordSchema,
+  krdSchema,
+  krdSessionSchema,
+} from "../../domain/schemas/krd";
 
 export const buildKRDMetadata = new Factory<KRDMetadata>()
   .attr("created", () => faker.date.recent().toISOString())
@@ -23,7 +31,10 @@ export const buildKRDMetadata = new Factory<KRDMetadata>()
   )
   .attr("subSport", () =>
     faker.helpers.arrayElement(["trail", "road", "track", "indoor"])
-  );
+  )
+  .after((metadata) => {
+    krdMetadataSchema.parse(metadata);
+  });
 
 export const buildKRDSession = new Factory<KRDSession>()
   .attr("startTime", () => faker.date.recent().toISOString())
@@ -40,7 +51,10 @@ export const buildKRDSession = new Factory<KRDSession>()
   .attr("maxHeartRate", () => faker.number.int({ max: 220, min: 100 }))
   .attr("avgCadence", () => faker.number.int({ max: 120, min: 60 }))
   .attr("avgPower", () => faker.number.int({ max: 400, min: 100 }))
-  .attr("totalCalories", () => faker.number.int({ max: 2000, min: 100 }));
+  .attr("totalCalories", () => faker.number.int({ max: 2000, min: 100 }))
+  .after((session) => {
+    krdSessionSchema.parse(session);
+  });
 
 export const buildKRDLap = new Factory<KRDLap>()
   .attr("startTime", () => faker.date.recent().toISOString())
@@ -49,7 +63,10 @@ export const buildKRDLap = new Factory<KRDLap>()
   .attr("avgHeartRate", () => faker.number.int({ max: 200, min: 60 }))
   .attr("maxHeartRate", () => faker.number.int({ max: 220, min: 100 }))
   .attr("avgCadence", () => faker.number.int({ max: 120, min: 60 }))
-  .attr("avgPower", () => faker.number.int({ max: 400, min: 100 }));
+  .attr("avgPower", () => faker.number.int({ max: 400, min: 100 }))
+  .after((lap) => {
+    krdLapSchema.parse(lap);
+  });
 
 export const buildKRDRecord = new Factory<KRDRecord>()
   .attr("timestamp", () => faker.date.recent().toISOString())
@@ -64,7 +81,10 @@ export const buildKRDRecord = new Factory<KRDRecord>()
   .attr("speed", () =>
     faker.number.float({ fractionDigits: 2, max: 15, min: 0 })
   )
-  .attr("distance", () => faker.number.int({ max: 50000, min: 0 }));
+  .attr("distance", () => faker.number.int({ max: 50000, min: 0 }))
+  .after((record) => {
+    krdRecordSchema.parse(record);
+  });
 
 export const buildKRDEvent = new Factory<KRDEvent>()
   .attr("timestamp", () => faker.date.recent().toISOString())
@@ -80,7 +100,10 @@ export const buildKRDEvent = new Factory<KRDEvent>()
     ] as const)
   )
   .attr("eventGroup", () => faker.number.int({ max: 10, min: 0 }))
-  .attr("data", () => faker.number.int({ max: 255, min: 0 }));
+  .attr("data", () => faker.number.int({ max: 255, min: 0 }))
+  .after((event) => {
+    krdEventSchema.parse(event);
+  });
 
 export const buildKRD = new Factory<KRD>()
   .attr("version", () => "1.0")
@@ -100,4 +123,7 @@ export const buildKRD = new Factory<KRD>()
     fit: {
       developerFields: [],
     },
-  }));
+  }))
+  .after((krd) => {
+    krdSchema.parse(krd);
+  });
