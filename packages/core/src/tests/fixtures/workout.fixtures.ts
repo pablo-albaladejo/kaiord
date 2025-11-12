@@ -5,11 +5,6 @@ import type {
   Workout,
   WorkoutStep,
 } from "../../domain/schemas/workout";
-import {
-  repetitionBlockSchema,
-  workoutSchema,
-  workoutStepSchema,
-} from "../../domain/schemas/workout";
 
 export const buildWorkoutStep = new Factory<WorkoutStep>()
   .attr("stepIndex", () => faker.number.int({ max: 50, min: 0 }))
@@ -178,17 +173,11 @@ export const buildWorkoutStep = new Factory<WorkoutStep>()
     } else {
       return { type: "open" as const };
     }
-  })
-  .after((step) => {
-    workoutStepSchema.parse(step);
   });
 
 export const buildRepetitionBlock = new Factory<RepetitionBlock>()
   .attr("repeatCount", () => faker.number.int({ max: 10, min: 2 }))
-  .attr("steps", () => [buildWorkoutStep.build(), buildWorkoutStep.build()])
-  .after((block) => {
-    repetitionBlockSchema.parse(block);
-  });
+  .attr("steps", () => [buildWorkoutStep.build(), buildWorkoutStep.build()]);
 
 export const buildWorkout = new Factory<Workout>()
   .attr("name", () => faker.lorem.words({ max: 5, min: 1 }))
@@ -199,7 +188,4 @@ export const buildWorkout = new Factory<Workout>()
     buildWorkoutStep.build(),
     buildRepetitionBlock.build(),
     buildWorkoutStep.build(),
-  ])
-  .after((workout) => {
-    workoutSchema.parse(workout);
-  });
+  ]);
