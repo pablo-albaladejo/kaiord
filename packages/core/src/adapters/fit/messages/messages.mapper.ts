@@ -1,11 +1,11 @@
-import type { KRD } from "../../domain/schemas/krd";
-import type { Logger } from "../../ports/logger";
-import { FIT_MESSAGE_KEY, KRD_FILE_TYPE, KRD_VERSION } from "./constants";
-import { extractFitExtensions } from "./extensions.extractor";
+import type { KRD } from "../../../domain/schemas/krd";
+import type { Logger } from "../../../ports/logger";
+import { FIT_MESSAGE_KEY, KRD_FILE_TYPE, KRD_VERSION } from "../constants";
+import { extractFitExtensions } from "../extensions/extensions.extractor";
 import { validateMessages } from "./messages.validator";
-import { mapMetadata } from "./metadata.mapper";
-import type { FitMessages } from "./types";
-import { mapWorkout } from "./workout.mapper";
+import { mapMetadata } from "../metadata/metadata.mapper";
+import type { FitMessages } from "../types";
+import { mapWorkout } from "../workout/workout.mapper";
 
 export const mapMessagesToKRD = (
   messages: FitMessages,

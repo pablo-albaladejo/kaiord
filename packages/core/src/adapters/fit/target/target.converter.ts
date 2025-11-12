@@ -1,5 +1,5 @@
-import { targetTypeEnum, type Target } from "../../domain/schemas/target";
-import { FIT_TARGET_TYPE } from "./constants";
+import { targetTypeEnum, type Target } from "../../../domain/schemas/target";
+import { FIT_TARGET_TYPE } from "../constants";
 import { convertCadenceTarget } from "./target-cadence.converter";
 import { convertHeartRateTarget } from "./target-heart-rate.converter";
 import { convertPaceTarget } from "./target-pace.converter";

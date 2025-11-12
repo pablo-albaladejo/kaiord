@@ -2,10 +2,10 @@ import {
   durationTypeEnum,
   type Duration,
   type DurationType,
-} from "../../domain/schemas/duration";
-import { FIT_DURATION_TYPE } from "./constants";
-import { convertFitDuration } from "./duration.converter";
-import type { FitWorkoutStep } from "./types";
+} from "../../../domain/schemas/duration";
+import { FIT_DURATION_TYPE } from "../constants";
+import { convertFitDuration } from "../duration/duration.converter";
+import type { FitWorkoutStep } from "../types";
 
 export const mapDuration = (step: FitWorkoutStep): Duration => {
   return convertFitDuration(step);

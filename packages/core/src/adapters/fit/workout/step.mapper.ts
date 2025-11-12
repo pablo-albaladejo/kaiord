@@ -1,7 +1,7 @@
-import type { WorkoutStep } from "../../domain/schemas/workout";
-import { mapDuration, mapDurationType } from "./duration.mapper";
-import { mapTarget, mapTargetType } from "./target.mapper";
-import type { FitWorkoutStep } from "./types";
+import type { WorkoutStep } from "../../../domain/schemas/workout";
+import { mapDuration, mapDurationType } from "../duration/duration.mapper";
+import { mapTarget, mapTargetType } from "../target/target.mapper";
+import type { FitWorkoutStep } from "../types";
 
 export const mapStep = (step: FitWorkoutStep, index: number): WorkoutStep => {
   const duration = mapDuration(step);

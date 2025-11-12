@@ -1,11 +1,11 @@
-import type { RepetitionBlock, Workout } from "../../domain/schemas/workout";
-import type { Logger } from "../../ports/logger";
+import type { RepetitionBlock, Workout } from "../../../domain/schemas/workout";
+import type { Logger } from "../../../ports/logger";
 import {
   FIT_DURATION_TYPE,
   FIT_MESSAGE_KEY,
   FIT_TARGET_TYPE,
   TYPE_GUARD_PROPERTY,
-} from "./constants";
+} from "../constants";
 import { convertWorkoutStep } from "./krd-to-fit-step.mapper";
 
 export const convertWorkoutSteps = (

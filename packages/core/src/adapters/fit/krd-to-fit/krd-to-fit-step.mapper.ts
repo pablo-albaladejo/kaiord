@@ -1,6 +1,6 @@
-import type { WorkoutStep } from "../../domain/schemas/workout";
-import type { Logger } from "../../ports/logger";
-import { FIT_DURATION_TYPE, FIT_MESSAGE_KEY } from "./constants";
+import type { WorkoutStep } from "../../../domain/schemas/workout";
+import type { Logger } from "../../../ports/logger";
+import { FIT_DURATION_TYPE, FIT_MESSAGE_KEY } from "../constants";
 import { convertTarget } from "./krd-to-fit-target.mapper";
 
 export const convertWorkoutStep = (

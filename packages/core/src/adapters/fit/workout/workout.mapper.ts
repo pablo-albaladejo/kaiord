@@ -2,11 +2,11 @@ import type {
   RepetitionBlock,
   Workout,
   WorkoutStep,
-} from "../../domain/schemas/workout";
-import type { Logger } from "../../ports/logger";
-import { DEFAULT_SPORT, FIT_DURATION_TYPE } from "./constants";
+} from "../../../domain/schemas/workout";
+import type { Logger } from "../../../ports/logger";
+import { DEFAULT_SPORT, FIT_DURATION_TYPE } from "../constants";
 import { mapStep } from "./step.mapper";
-import type { FitWorkoutMessage, FitWorkoutStep } from "./types";
+import type { FitWorkoutMessage, FitWorkoutStep } from "../types";
 
 export const mapWorkout = (
   workoutMsg: FitWorkoutMessage | undefined,

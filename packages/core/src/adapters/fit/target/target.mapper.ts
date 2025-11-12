@@ -2,10 +2,10 @@ import {
   targetTypeEnum,
   type Target,
   type TargetType,
-} from "../../domain/schemas/target";
-import { FIT_TARGET_TYPE } from "./constants";
+} from "../../../domain/schemas/target";
+import { FIT_TARGET_TYPE } from "../constants";
 import { convertFitTarget } from "./target.converter";
-import type { FitWorkoutStep } from "./types";
+import type { FitWorkoutStep } from "../types";
 
 export const mapTarget = (step: FitWorkoutStep): Target => {
   return convertFitTarget(step);

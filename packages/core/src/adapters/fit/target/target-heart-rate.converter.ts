@@ -2,7 +2,7 @@ import {
   targetTypeEnum,
   targetUnitEnum,
   type Target,
-} from "../../domain/schemas/target";
+} from "../../../domain/schemas/target";
 import type { FitTargetData } from "./target.types";
 
 export const convertHeartRateTarget = (data: FitTargetData): Target => {
