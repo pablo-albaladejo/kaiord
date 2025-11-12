@@ -56,17 +56,41 @@ export const buildEntity = new Factory<EntityType>()
 
 ### Fixture Organization
 
+**Tests MUST be co-located with source files:**
+
 ```
-tests/
-├── fixtures/
-│   ├── krd.fixtures.ts           # KRD document fixtures
-│   ├── workout.fixtures.ts       # Workout domain fixtures
-│   ├── duration.fixtures.ts      # Duration fixtures
-│   └── target.fixtures.ts        # Target fixtures
-└── unit/
-    ├── domain/
-    ├── adapters/
-    └── application/
+src/
+├── domain/
+│   ├── types/
+│   │   ├── krd.ts
+│   │   └── krd.test.ts           # Test next to implementation
+│   └── validation/
+│       ├── schema-validator.ts
+│       └── schema-validator.test.ts
+├── adapters/
+│   └── fit/
+│       ├── garmin-fitsdk.ts
+│       └── garmin-fitsdk.test.ts
+└── application/
+    └── use-cases/
+        ├── convert-fit-to-krd.ts
+        └── convert-fit-to-krd.test.ts
+```
+
+**All fixtures MUST be in `src/tests/` directory:**
+
+```
+src/
+├── tests/
+│   ├── fixtures/
+│   │   ├── krd.fixtures.ts       # KRD fixtures
+│   │   ├── metadata.fixtures.ts  # Metadata fixtures
+│   │   ├── workout.fixtures.ts   # Workout fixtures
+│   │   └── fit-files/            # Binary FIT test files
+│   │       ├── WorkoutIndividualSteps.fit
+│   │       └── WorkoutRepeatSteps.fit
+│   └── helpers/
+│       └── test-utils.ts         # Test utilities (mock logger, etc.)
 ```
 
 ### Faker Best Practices

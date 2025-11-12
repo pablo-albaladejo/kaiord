@@ -1,18 +1,29 @@
-# Node
-node_modules
-dist
-coverage
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+*.tsbuildinfo
+
+# Test coverage
+coverage/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
 *.log
+npm-debug.log*
+pnpm-debug.log*
 
-# Build artifacts
-packages/*/dist
-
-# Editor
-.vscode
-
-# Licenses output
-licenses.json
-THIRD-PARTY-LICENSES.txt
-
-# IMPORTANT: do not ignore .kiro
-!.kiro
+# Environment
+.env
+.env.local

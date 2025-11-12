@@ -12,12 +12,13 @@ Each task follows Test-Driven Development:
 
 ## Tasks
 
-- [ ] 1. Set up project structure and test infrastructure
+- [x] 1. Set up project structure and test infrastructure
 
   - Create directory structure (domain, application, ports, adapters)
   - Install dependencies (zod, zod-to-json-schema, @garmin/fitsdk, faker, rosie, vitest)
-  - Configure vitest
-  - Create base fixture structure
+  - Configure vitest with co-located tests (file.ts → file.test.ts)
+  - Create fixtures structure in src/tests/fixtures/
+  - Create helpers structure in src/tests/helpers/
   - _Requirements: 17.5_
   - _Commit: "chore: set up project structure and test infrastructure"_
 
@@ -126,10 +127,10 @@ Each task follows Test-Driven Development:
 
 - [ ] 7. Add test fixtures to repository
 
-  - Copy WorkoutCustomTargetValues.fit to tests/fixtures
-  - Copy WorkoutIndividualSteps.fit to tests/fixtures
-  - Copy WorkoutRepeatGreaterThanStep.fit to tests/fixtures
-  - Copy WorkoutRepeatSteps.fit to tests/fixtures
+  - Copy WorkoutCustomTargetValues.fit to src/**fixtures**/fit-files/
+  - Copy WorkoutIndividualSteps.fit to src/**fixtures**/fit-files/
+  - Copy WorkoutRepeatGreaterThanStep.fit to src/**fixtures**/fit-files/
+  - Copy WorkoutRepeatSteps.fit to src/**fixtures**/fit-files/
   - _Requirements: 17.1, 17.2, 17.3, 17.4_
   - _Commit: "test: add FIT test fixtures"_
 
