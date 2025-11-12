@@ -72,7 +72,7 @@ Each task follows Test-Driven Development:
     - DO NOT create tests for fixtures (they are test utilities, not production code)
     - _Requirements: 3.1, 3.2, 4.1, 4.2, 5.1, 5.1.2_
     - _Commit: "refactor: migrate Target to Zod schema"_
-  - [ ] 2.4 Implement Workout Zod schema
+  - [x] 2.4 Implement Workout Zod schema
     - Create domain/schemas/workout.ts with workoutSchema, workoutStepSchema, repetitionBlockSchema
     - Compose with durationSchema and targetSchema
     - Export Workout, WorkoutStep, RepetitionBlock types using z.infer
