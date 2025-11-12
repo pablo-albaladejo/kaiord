@@ -5,6 +5,7 @@ export const targetTypeEnum = z.enum([
   "heart_rate",
   "cadence",
   "pace",
+  "stroke_type",
   "open",
 ]);
 export const targetUnitEnum = z.enum([
@@ -16,6 +17,7 @@ export const targetUnitEnum = z.enum([
   "percent_max",
   "rpm",
   "mps",
+  "swim_stroke",
 ]);
 
 const powerValueSchema = z.discriminatedUnion("unit", [
@@ -74,6 +76,11 @@ const paceValueSchema = z.discriminatedUnion("unit", [
   }),
 ]);
 
+const strokeTypeValueSchema = z.object({
+  unit: z.literal(targetUnitEnum.enum.swim_stroke),
+  value: z.number().int().min(0).max(5),
+});
+
 export const targetSchema = z.discriminatedUnion("type", [
   z.object({
     type: z.literal(targetTypeEnum.enum.power),
@@ -91,6 +98,10 @@ export const targetSchema = z.discriminatedUnion("type", [
     type: z.literal(targetTypeEnum.enum.pace),
     value: paceValueSchema,
   }),
+  z.object({
+    type: z.literal(targetTypeEnum.enum.stroke_type),
+    value: strokeTypeValueSchema,
+  }),
   z.object({ type: z.literal(targetTypeEnum.enum.open) }),
 ]);
 
@@ -101,3 +112,4 @@ export type PowerValue = z.infer<typeof powerValueSchema>;
 export type HeartRateValue = z.infer<typeof heartRateValueSchema>;
 export type CadenceValue = z.infer<typeof cadenceValueSchema>;
 export type PaceValue = z.infer<typeof paceValueSchema>;
+export type StrokeTypeValue = z.infer<typeof strokeTypeValueSchema>;

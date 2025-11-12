@@ -864,5 +864,157 @@ describe("convertFitTarget", () => {
       // Assert
       expect(result.type).toBe("open");
     });
+
+    it("should return Target type for stroke_type target", () => {
+      // Arrange
+      const data = buildFitTargetData.build({
+        targetType: "swimStroke",
+        targetSwimStroke: 0,
+      });
+
+      // Act
+      const result: Target = convertFitTarget(data);
+
+      // Assert
+      expect(result.type).toBe("stroke_type");
+    });
+  });
+
+  describe("stroke_type targets", () => {
+    it("should convert freestyle stroke target", () => {
+      // Arrange
+      const data = buildFitTargetData.build({
+        targetType: "swimStroke",
+        targetSwimStroke: 0,
+      });
+
+      // Act
+      const result = convertFitTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "stroke_type",
+        value: {
+          unit: "swim_stroke",
+          value: 0,
+        },
+      });
+    });
+
+    it("should convert backstroke target", () => {
+      // Arrange
+      const data = buildFitTargetData.build({
+        targetType: "swimStroke",
+        targetSwimStroke: 1,
+      });
+
+      // Act
+      const result = convertFitTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "stroke_type",
+        value: {
+          unit: "swim_stroke",
+          value: 1,
+        },
+      });
+    });
+
+    it("should convert breaststroke target", () => {
+      // Arrange
+      const data = buildFitTargetData.build({
+        targetType: "swimStroke",
+        targetSwimStroke: 2,
+      });
+
+      // Act
+      const result = convertFitTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "stroke_type",
+        value: {
+          unit: "swim_stroke",
+          value: 2,
+        },
+      });
+    });
+
+    it("should convert butterfly stroke target", () => {
+      // Arrange
+      const data = buildFitTargetData.build({
+        targetType: "swimStroke",
+        targetSwimStroke: 3,
+      });
+
+      // Act
+      const result = convertFitTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "stroke_type",
+        value: {
+          unit: "swim_stroke",
+          value: 3,
+        },
+      });
+    });
+
+    it("should convert drill stroke target", () => {
+      // Arrange
+      const data = buildFitTargetData.build({
+        targetType: "swimStroke",
+        targetSwimStroke: 4,
+      });
+
+      // Act
+      const result = convertFitTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "stroke_type",
+        value: {
+          unit: "swim_stroke",
+          value: 4,
+        },
+      });
+    });
+
+    it("should convert mixed/IM stroke target", () => {
+      // Arrange
+      const data = buildFitTargetData.build({
+        targetType: "swimStroke",
+        targetSwimStroke: 5,
+      });
+
+      // Act
+      const result = convertFitTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "stroke_type",
+        value: {
+          unit: "swim_stroke",
+          value: 5,
+        },
+      });
+    });
+
+    it("should return open target when targetSwimStroke is undefined", () => {
+      // Arrange
+      const data = buildFitTargetData.build({
+        targetType: "swimStroke",
+        targetSwimStroke: undefined,
+      });
+
+      // Act
+      const result = convertFitTarget(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
   });
 });

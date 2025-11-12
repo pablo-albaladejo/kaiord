@@ -5,6 +5,7 @@ export type FitTargetData = {
   targetHrZone?: number;
   targetCadenceZone?: number;
   targetSpeedZone?: number;
+  targetSwimStroke?: number;
   customTargetValueLow?: number;
   customTargetValueHigh?: number;
   customTargetPowerLow?: number;

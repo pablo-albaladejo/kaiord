@@ -4,8 +4,8 @@ import {
   type TargetType,
 } from "../../../domain/schemas/target";
 import { FIT_TARGET_TYPE } from "../constants";
-import { convertFitTarget } from "./target.converter";
 import type { FitWorkoutStep } from "../types";
+import { convertFitTarget } from "./target.converter";
 
 export const mapTarget = (step: FitWorkoutStep): Target => {
   return convertFitTarget(step);
@@ -20,5 +20,7 @@ export const mapTargetType = (
   if (fitTargetType === FIT_TARGET_TYPE.CADENCE)
     return targetTypeEnum.enum.cadence;
   if (fitTargetType === FIT_TARGET_TYPE.SPEED) return targetTypeEnum.enum.pace;
+  if (fitTargetType === FIT_TARGET_TYPE.STROKE_TYPE)
+    return targetTypeEnum.enum.stroke_type;
   return targetTypeEnum.enum.open;
 };

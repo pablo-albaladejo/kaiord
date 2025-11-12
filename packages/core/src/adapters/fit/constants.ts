@@ -20,6 +20,7 @@ export const FIT_TARGET_TYPE = {
   HEART_RATE: "heartRate",
   CADENCE: "cadence",
   SPEED: "speed",
+  STROKE_TYPE: "swimStroke",
   OPEN: "open",
 } as const;
 
@@ -43,6 +44,7 @@ export const KRD_TARGET_TYPE = {
   HEART_RATE: "heart_rate",
   CADENCE: "cadence",
   PACE: "pace",
+  STROKE_TYPE: "stroke_type",
   OPEN: "open",
 } as const;
 
@@ -58,6 +60,18 @@ export const KRD_TARGET_UNIT = {
   SPM: "spm",
   MPS: "mps",
   MIN_PER_KM: "min_per_km",
+  SWIM_STROKE: "swim_stroke",
+} as const;
+
+// FIT swim stroke types
+export const FIT_SWIM_STROKE = {
+  FREESTYLE: 0,
+  BACKSTROKE: 1,
+  BREASTSTROKE: 2,
+  BUTTERFLY: 3,
+  DRILL: 4,
+  MIXED: 5,
+  IM: 5,
 } as const;
 
 // KRD file types
