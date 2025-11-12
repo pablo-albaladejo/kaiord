@@ -1,22 +1,22 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
-import type { DurationType } from "../../domain/types/duration";
 import type {
   RepetitionBlock,
   Workout,
   WorkoutStep,
-} from "../../domain/types/workout";
+} from "../../domain/schemas/workout";
+import {
+  repetitionBlockSchema,
+  workoutSchema,
+  workoutStepSchema,
+} from "../../domain/schemas/workout";
 
 export const buildWorkoutStep = new Factory<WorkoutStep>()
   .attr("stepIndex", () => faker.number.int({ max: 50, min: 0 }))
   .attr("durationType", () =>
-    faker.helpers.arrayElement([
-      "time" as DurationType.Time,
-      "distance" as DurationType.Distance,
-      "open" as DurationType.Open,
-    ])
+    faker.helpers.arrayElement(["time", "distance", "open"] as const)
   )
-  .attr("duration", ["durationType"], (durationType: DurationType) => {
+  .attr("duration", ["durationType"], (durationType: string) => {
     if (durationType === "time") {
       return {
         type: "time" as const,
@@ -178,11 +178,17 @@ export const buildWorkoutStep = new Factory<WorkoutStep>()
     } else {
       return { type: "open" as const };
     }
+  })
+  .after((step) => {
+    workoutStepSchema.parse(step);
   });
 
 export const buildRepetitionBlock = new Factory<RepetitionBlock>()
   .attr("repeatCount", () => faker.number.int({ max: 10, min: 2 }))
-  .attr("steps", () => [buildWorkoutStep.build(), buildWorkoutStep.build()]);
+  .attr("steps", () => [buildWorkoutStep.build(), buildWorkoutStep.build()])
+  .after((block) => {
+    repetitionBlockSchema.parse(block);
+  });
 
 export const buildWorkout = new Factory<Workout>()
   .attr("name", () => faker.lorem.words({ max: 5, min: 1 }))
@@ -193,4 +199,7 @@ export const buildWorkout = new Factory<Workout>()
     buildWorkoutStep.build(),
     buildRepetitionBlock.build(),
     buildWorkoutStep.build(),
-  ]);
+  ])
+  .after((workout) => {
+    workoutSchema.parse(workout);
+  });
