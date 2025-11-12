@@ -1,0 +1,37 @@
+import type { KRD } from "../../domain/schemas/krd";
+import type { Logger } from "../../ports/logger";
+import { FIT_MESSAGE_KEY } from "./constants";
+import { extractFitExtensions } from "./extensions.extractor";
+import { validateMessages } from "./messages.validator";
+import { mapMetadata } from "./metadata.mapper";
+import type { FitMessages } from "./types";
+import { mapWorkout } from "./workout.mapper";
+
+export const mapMessagesToKRD = (
+  messages: FitMessages,
+  logger: Logger
+): KRD => {
+  logger.debug("Mapping FIT messages to KRD", {
+    messageCount: Object.keys(messages).length,
+  });
+
+  const fileId = messages[FIT_MESSAGE_KEY.FILE_ID]?.[0];
+  const workoutMsg = messages[FIT_MESSAGE_KEY.WORKOUT]?.[0];
+  const workoutSteps = messages[FIT_MESSAGE_KEY.WORKOUT_STEP] || [];
+
+  validateMessages(fileId, workoutMsg, messages, logger);
+
+  const metadata = mapMetadata(fileId, workoutMsg, logger);
+  const workout = mapWorkout(workoutMsg, workoutSteps, logger);
+  const fitExtensions = extractFitExtensions(messages, logger);
+
+  return {
+    version: "1.0",
+    type: "workout",
+    metadata,
+    extensions: {
+      workout,
+      fit: fitExtensions,
+    },
+  };
+};

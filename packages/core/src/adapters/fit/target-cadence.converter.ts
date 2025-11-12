@@ -1,0 +1,77 @@
+import {
+  targetTypeEnum,
+  targetUnitEnum,
+  type Target,
+} from "../../domain/schemas/target";
+import type { FitTargetData } from "./target.types";
+
+export const convertCadenceTarget = (data: FitTargetData): Target => {
+  const rangeTarget = buildCadenceRangeTarget(data);
+  if (rangeTarget) return rangeTarget;
+
+  const zoneTarget = buildCadenceZoneTarget(data);
+  if (zoneTarget) return zoneTarget;
+
+  const valueTarget = buildCadenceValueTarget(data);
+  if (valueTarget) return valueTarget;
+
+  return { type: targetTypeEnum.enum.open };
+};
+
+const buildCadenceRangeTarget = (data: FitTargetData): Target | null => {
+  if (
+    data.customTargetCadenceLow !== undefined &&
+    data.customTargetCadenceHigh !== undefined
+  ) {
+    return {
+      type: targetTypeEnum.enum.cadence,
+      value: {
+        unit: targetUnitEnum.enum.range,
+        min: data.customTargetCadenceLow,
+        max: data.customTargetCadenceHigh,
+      },
+    };
+  }
+
+  if (
+    data.customTargetValueLow !== undefined &&
+    data.customTargetValueHigh !== undefined
+  ) {
+    return {
+      type: targetTypeEnum.enum.cadence,
+      value: {
+        unit: targetUnitEnum.enum.range,
+        min: data.customTargetValueLow,
+        max: data.customTargetValueHigh,
+      },
+    };
+  }
+
+  return null;
+};
+
+const buildCadenceZoneTarget = (data: FitTargetData): Target | null => {
+  if (data.targetCadenceZone !== undefined) {
+    return {
+      type: targetTypeEnum.enum.cadence,
+      value: {
+        unit: targetUnitEnum.enum.rpm,
+        value: data.targetCadenceZone,
+      },
+    };
+  }
+  return null;
+};
+
+const buildCadenceValueTarget = (data: FitTargetData): Target | null => {
+  if (data.targetValue !== undefined) {
+    return {
+      type: targetTypeEnum.enum.cadence,
+      value: {
+        unit: targetUnitEnum.enum.rpm,
+        value: data.targetValue,
+      },
+    };
+  }
+  return null;
+};
