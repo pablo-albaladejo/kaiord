@@ -58,5 +58,29 @@ export const KRD_TARGET_UNIT = {
   MIN_PER_KM: "min_per_km",
 } as const;
 
+// KRD file types
+export const KRD_FILE_TYPE = {
+  WORKOUT: "workout",
+  ACTIVITY: "activity",
+  COURSE: "course",
+} as const;
+
+// KRD version
+export const KRD_VERSION = "1.0" as const;
+
+// FIT file types
+export const FIT_FILE_TYPE = {
+  WORKOUT: "workout",
+  ACTIVITY: "activity",
+  COURSE: "course",
+} as const;
+
 // Default values
 export const DEFAULT_SPORT = FIT_SPORT_TYPE.CYCLING;
+export const DEFAULT_MANUFACTURER = "development" as const;
+
+// Type guard property names
+export const TYPE_GUARD_PROPERTY = {
+  REPEAT_COUNT: "repeatCount",
+  STEP_INDEX: "stepIndex",
+} as const;

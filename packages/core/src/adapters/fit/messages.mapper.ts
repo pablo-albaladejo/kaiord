@@ -1,6 +1,6 @@
 import type { KRD } from "../../domain/schemas/krd";
 import type { Logger } from "../../ports/logger";
-import { FIT_MESSAGE_KEY } from "./constants";
+import { FIT_MESSAGE_KEY, KRD_FILE_TYPE, KRD_VERSION } from "./constants";
 import { extractFitExtensions } from "./extensions.extractor";
 import { validateMessages } from "./messages.validator";
 import { mapMetadata } from "./metadata.mapper";
@@ -26,8 +26,8 @@ export const mapMessagesToKRD = (
   const fitExtensions = extractFitExtensions(messages, logger);
 
   return {
-    version: "1.0",
-    type: "workout",
+    version: KRD_VERSION,
+    type: KRD_FILE_TYPE.WORKOUT,
     metadata,
     extensions: {
       workout,
