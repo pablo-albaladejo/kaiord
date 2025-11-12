@@ -6,6 +6,8 @@ export const intensityEnum = z.enum([
   "cooldown",
   "rest",
   "recovery",
+  "interval",
+  "other",
 ]);
 
 export type Intensity = z.infer<typeof intensityEnum>;
