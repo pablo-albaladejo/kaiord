@@ -1,20 +1,19 @@
 import { describe, expect, it } from "vitest";
 import type { Duration } from "../../domain/schemas/duration";
-import { FIT_DURATION_TYPE } from "./constants";
-import { mapDuration, mapDurationType } from "./duration.mapper";
-import type { FitWorkoutStep } from "./types";
+import { buildFitDurationData } from "../../tests/fixtures/fit-duration.fixtures";
+import { convertFitDuration } from "./duration.converter";
 
-describe("mapDuration", () => {
+describe("convertFitDuration", () => {
   describe("time-based durations", () => {
     it("should convert FIT time duration to seconds", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.TIME,
+      const data = buildFitDurationData.build({
+        durationType: "time",
         durationTime: 300,
-      };
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -25,13 +24,13 @@ describe("mapDuration", () => {
 
     it("should handle zero seconds", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.TIME,
+      const data = buildFitDurationData.build({
+        durationType: "time",
         durationTime: 0,
-      };
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -42,13 +41,13 @@ describe("mapDuration", () => {
 
     it("should handle large time values", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.TIME,
+      const data = buildFitDurationData.build({
+        durationType: "time",
         durationTime: 7200,
-      };
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -59,13 +58,13 @@ describe("mapDuration", () => {
 
     it("should handle fractional seconds", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.TIME,
+      const data = buildFitDurationData.build({
+        durationType: "time",
         durationTime: 90.5,
-      };
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -78,13 +77,13 @@ describe("mapDuration", () => {
   describe("distance-based durations", () => {
     it("should convert FIT distance duration to meters", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.DISTANCE,
+      const data = buildFitDurationData.build({
+        durationType: "distance",
         durationDistance: 1000,
-      };
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -95,13 +94,13 @@ describe("mapDuration", () => {
 
     it("should handle zero meters", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.DISTANCE,
+      const data = buildFitDurationData.build({
+        durationType: "distance",
         durationDistance: 0,
-      };
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -112,13 +111,13 @@ describe("mapDuration", () => {
 
     it("should handle large distance values", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.DISTANCE,
+      const data = buildFitDurationData.build({
+        durationType: "distance",
         durationDistance: 42195,
-      };
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -129,13 +128,13 @@ describe("mapDuration", () => {
 
     it("should handle fractional meters", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.DISTANCE,
+      const data = buildFitDurationData.build({
+        durationType: "distance",
         durationDistance: 1609.34,
-      };
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -148,12 +147,12 @@ describe("mapDuration", () => {
   describe("open durations", () => {
     it("should convert FIT open duration", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.OPEN,
-      };
+      const data = buildFitDurationData.build({
+        durationType: "open",
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -163,10 +162,10 @@ describe("mapDuration", () => {
 
     it("should handle missing duration type as open", () => {
       // Arrange
-      const step: FitWorkoutStep = {};
+      const data = buildFitDurationData.build({});
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -176,12 +175,12 @@ describe("mapDuration", () => {
 
     it("should handle unknown duration type as open", () => {
       // Arrange
-      const step: FitWorkoutStep = {
+      const data = buildFitDurationData.build({
         durationType: "unknown_type",
-      };
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -191,12 +190,12 @@ describe("mapDuration", () => {
 
     it("should handle time duration type without durationTime value as open", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.TIME,
-      };
+      const data = buildFitDurationData.build({
+        durationType: "time",
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -206,12 +205,12 @@ describe("mapDuration", () => {
 
     it("should handle distance duration type without durationDistance value as open", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.DISTANCE,
-      };
+      const data = buildFitDurationData.build({
+        durationType: "distance",
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -223,13 +222,13 @@ describe("mapDuration", () => {
   describe("edge cases", () => {
     it("should handle HR_LESS_THAN duration type as open", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.HR_LESS_THAN,
+      const data = buildFitDurationData.build({
+        durationType: "hrLessThan",
         durationHr: 150,
-      };
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -239,13 +238,13 @@ describe("mapDuration", () => {
 
     it("should handle REPEAT_UNTIL_STEPS_COMPLETE duration type as open", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.REPEAT_UNTIL_STEPS_COMPLETE,
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilStepsCmplt",
         durationStep: 5,
-      };
+      });
 
       // Act
-      const result = mapDuration(step);
+      const result = convertFitDuration(data);
 
       // Assert
       expect(result).toStrictEqual({
@@ -257,13 +256,13 @@ describe("mapDuration", () => {
   describe("type validation", () => {
     it("should return Duration type for time duration", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.TIME,
+      const data = buildFitDurationData.build({
+        durationType: "time",
         durationTime: 60,
-      };
+      });
 
       // Act
-      const result: Duration = mapDuration(step);
+      const result: Duration = convertFitDuration(data);
 
       // Assert
       expect(result.type).toBe("time");
@@ -274,13 +273,13 @@ describe("mapDuration", () => {
 
     it("should return Duration type for distance duration", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.DISTANCE,
+      const data = buildFitDurationData.build({
+        durationType: "distance",
         durationDistance: 500,
-      };
+      });
 
       // Act
-      const result: Duration = mapDuration(step);
+      const result: Duration = convertFitDuration(data);
 
       // Assert
       expect(result.type).toBe("distance");
@@ -291,94 +290,15 @@ describe("mapDuration", () => {
 
     it("should return Duration type for open duration", () => {
       // Arrange
-      const step: FitWorkoutStep = {
-        durationType: FIT_DURATION_TYPE.OPEN,
-      };
+      const data = buildFitDurationData.build({
+        durationType: "open",
+      });
 
       // Act
-      const result: Duration = mapDuration(step);
+      const result: Duration = convertFitDuration(data);
 
       // Assert
       expect(result.type).toBe("open");
     });
-  });
-});
-
-describe("mapDurationType", () => {
-  it("should map FIT time duration type to KRD time", () => {
-    // Arrange
-    const fitType = FIT_DURATION_TYPE.TIME;
-
-    // Act
-    const result = mapDurationType(fitType);
-
-    // Assert
-    expect(result).toBe("time");
-  });
-
-  it("should map FIT distance duration type to KRD distance", () => {
-    // Arrange
-    const fitType = FIT_DURATION_TYPE.DISTANCE;
-
-    // Act
-    const result = mapDurationType(fitType);
-
-    // Assert
-    expect(result).toBe("distance");
-  });
-
-  it("should map FIT open duration type to KRD open", () => {
-    // Arrange
-    const fitType = FIT_DURATION_TYPE.OPEN;
-
-    // Act
-    const result = mapDurationType(fitType);
-
-    // Assert
-    expect(result).toBe("open");
-  });
-
-  it("should map undefined duration type to KRD open", () => {
-    // Arrange
-    const fitType = undefined;
-
-    // Act
-    const result = mapDurationType(fitType);
-
-    // Assert
-    expect(result).toBe("open");
-  });
-
-  it("should map unknown duration type to KRD open", () => {
-    // Arrange
-    const fitType = "unknown_type";
-
-    // Act
-    const result = mapDurationType(fitType);
-
-    // Assert
-    expect(result).toBe("open");
-  });
-
-  it("should map HR_LESS_THAN duration type to KRD open", () => {
-    // Arrange
-    const fitType = FIT_DURATION_TYPE.HR_LESS_THAN;
-
-    // Act
-    const result = mapDurationType(fitType);
-
-    // Assert
-    expect(result).toBe("open");
-  });
-
-  it("should map REPEAT_UNTIL_STEPS_COMPLETE duration type to KRD open", () => {
-    // Arrange
-    const fitType = FIT_DURATION_TYPE.REPEAT_UNTIL_STEPS_COMPLETE;
-
-    // Act
-    const result = mapDurationType(fitType);
-
-    // Assert
-    expect(result).toBe("open");
   });
 });

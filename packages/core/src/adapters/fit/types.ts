@@ -35,6 +35,14 @@ export type FitMessages = {
     targetSpeedZone?: number;
     customTargetValueLow?: number;
     customTargetValueHigh?: number;
+    customTargetPowerLow?: number;
+    customTargetPowerHigh?: number;
+    customTargetHeartRateLow?: number;
+    customTargetHeartRateHigh?: number;
+    customTargetCadenceLow?: number;
+    customTargetCadenceHigh?: number;
+    customTargetSpeedLow?: number;
+    customTargetSpeedHigh?: number;
     intensity?: string;
     repeatSteps?: number;
   }>;
