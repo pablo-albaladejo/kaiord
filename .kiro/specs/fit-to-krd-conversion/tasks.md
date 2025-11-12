@@ -118,7 +118,7 @@ Each task follows Test-Driven Development:
 
 - [ ] 5. Implement schema validation and JSON generation
 
-  - [ ] 5.1 Implement schema validator
+  - [x] 5.1 Implement schema validator
     - Create domain/validation/schema-validator.ts
     - Import krdSchema from domain/schemas/krd.ts
     - Define ValidationError type and SchemaValidator type
