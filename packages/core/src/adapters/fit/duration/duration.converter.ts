@@ -13,49 +13,72 @@ export type FitDurationData = {
   repeatHr?: number;
 };
 
-export const convertFitDuration = (data: FitDurationData): Duration => {
-  const durationType = data.durationType;
-
-  if (
-    durationType === FIT_DURATION_TYPE.TIME &&
-    data.durationTime !== undefined
-  ) {
+const convertTimeDuration = (data: FitDurationData): Duration | null => {
+  if (data.durationTime !== undefined) {
     return {
       type: durationTypeEnum.enum.time,
       seconds: data.durationTime,
     };
   }
+  return null;
+};
 
-  if (
-    durationType === FIT_DURATION_TYPE.DISTANCE &&
-    data.durationDistance !== undefined
-  ) {
+const convertDistanceDuration = (data: FitDurationData): Duration | null => {
+  if (data.durationDistance !== undefined) {
     return {
       type: durationTypeEnum.enum.distance,
       meters: data.durationDistance,
     };
   }
+  return null;
+};
 
-  if (
-    durationType === FIT_DURATION_TYPE.HR_LESS_THAN &&
-    data.durationHr !== undefined
-  ) {
+const convertHeartRateLessThan = (data: FitDurationData): Duration | null => {
+  if (data.durationHr !== undefined) {
     return {
       type: durationTypeEnum.enum.heart_rate_less_than,
       bpm: data.durationHr,
     };
   }
+  return null;
+};
 
-  if (
-    durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_HR_GREATER_THAN &&
-    data.repeatHr !== undefined &&
-    data.durationStep !== undefined
-  ) {
+const convertHeartRateGreaterThan = (
+  data: FitDurationData
+): Duration | null => {
+  if (data.repeatHr !== undefined && data.durationStep !== undefined) {
     return {
       type: durationTypeEnum.enum.heart_rate_greater_than,
       bpm: data.repeatHr,
       repeatFrom: data.durationStep,
     };
+  }
+  return null;
+};
+
+export const convertFitDuration = (data: FitDurationData): Duration => {
+  const durationType = data.durationType;
+
+  if (durationType === FIT_DURATION_TYPE.TIME) {
+    return convertTimeDuration(data) || { type: durationTypeEnum.enum.open };
+  }
+
+  if (durationType === FIT_DURATION_TYPE.DISTANCE) {
+    return (
+      convertDistanceDuration(data) || { type: durationTypeEnum.enum.open }
+    );
+  }
+
+  if (durationType === FIT_DURATION_TYPE.HR_LESS_THAN) {
+    return (
+      convertHeartRateLessThan(data) || { type: durationTypeEnum.enum.open }
+    );
+  }
+
+  if (durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_HR_GREATER_THAN) {
+    return (
+      convertHeartRateGreaterThan(data) || { type: durationTypeEnum.enum.open }
+    );
   }
 
   return { type: durationTypeEnum.enum.open };

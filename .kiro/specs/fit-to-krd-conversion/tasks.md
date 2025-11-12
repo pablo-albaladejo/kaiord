@@ -12,25 +12,27 @@ Each task follows Test-Driven Development:
 
 ## Current Status
 
-**Completed:**
+**Completed (161 tests passing):**
 
 - ✅ Project structure and test infrastructure
-- ✅ KRD domain types (KRD, KRDMetadata, KRDSession, KRDLap, KRDRecord, KRDEvent)
-- ✅ KRD fixtures with faker + rosie
-- ✅ Logger port interface
-- ✅ Test helpers (mock logger)
+- ✅ All Zod schemas (KRD, Workout, Duration, Target, Intensity)
+- ✅ Error types and factories with tests
+- ✅ Schema validator with Zod and tests
+- ✅ Tolerance checker with tests
+- ✅ JSON Schema generation script (krd.json + workout.json)
+- ✅ Logger port interface and test helpers
+- ✅ FIT reader/writer ports
+- ✅ FIT reader adapter (FIT → KRD) with all conversions and tests
+- ✅ FIT writer adapter (KRD → FIT) with all conversions and tests
+- ✅ All fixtures (KRD, Workout, Duration, Target, FIT files)
 
-**In Progress:**
+**Remaining (5 tasks):**
 
-- 🔄 Console logger adapter (needs tests and implementation)
-
-**Next Steps:**
-
-- Workout domain types (WorkoutStep, RepetitionBlock, Duration, Target)
-- Error types and factories
-- Zod schema and validation
-- FIT adapters (reader/writer)
-- Use cases and DI provider
+1. **Console logger adapter** - Simple implementation + tests
+2. **Use cases** - ConvertFitToKrd, ConvertKrdToFit, ValidateRoundTrip
+3. **Dependency injection provider** - Wire all components together
+4. **Integration & round-trip tests** - Test with real FIT fixtures
+5. **Public API exports** - Export all public types and functions
 
 ## Tasks
 
@@ -112,7 +114,8 @@ Each task follows Test-Driven Development:
     - _Commit: "feat: add logger port"_
   - [ ] 4.3 Implement console logger adapter
     - Create adapters/logger/console-logger.ts with createConsoleLogger factory
-    - Write co-located tests in console-logger.test.ts
+    - Implement debug, info, warn, error methods using console
+    - Write co-located tests in console-logger.test.ts (test all log levels)
     - _Requirements: 9.2_
     - _Commit: "feat: add console logger adapter"_
 
@@ -156,7 +159,7 @@ Each task follows Test-Driven Development:
   - _Requirements: 17.1, 17.2, 17.3, 17.4_
   - _Commit: "test: add FIT test fixtures"_
 
-- [ ] 8. Implement FIT reader adapter (FIT → KRD)
+- [x] 8. Implement FIT reader adapter (FIT → KRD)
 
   - [x] 8.1 Create FIT reader port
     - Create ports/fit-reader.ts with FitReader type
@@ -205,7 +208,7 @@ Each task follows Test-Driven Development:
     - _Requirements: 10.1, 10.2, 10.3_
     - _Commit: "feat: preserve FIT extensions in KRD"_
 
-- [ ] 9. Implement FIT writer adapter (KRD → FIT)
+- [x] 9. Implement FIT writer adapter (KRD → FIT)
 
   - [x] 9.1 Create FIT writer port
     - Create ports/fit-writer.ts with FitWriter type
@@ -228,7 +231,7 @@ Each task follows Test-Driven Development:
     - Add tests for metadata, steps, and repetition encoding
     - _Requirements: 11.3, 11.4_
     - _Commit: "feat: implement KRD to FIT message conversion"_
-  - [ ] 9.4 Implement duration conversion (KRD → FIT)
+  - [x] 9.4 Implement duration conversion (KRD → FIT)
     - Add duration conversion functions to garmin-fitsdk.ts
     - Convert seconds to FIT time format
     - Convert meters to FIT distance format
@@ -236,7 +239,7 @@ Each task follows Test-Driven Development:
     - Add tests for all duration conversions
     - _Requirements: 12.1, 12.2, 12.5_
     - _Commit: "feat: implement KRD duration conversion"_
-  - [ ] 9.5 Implement target conversion (KRD → FIT)
+  - [x] 9.5 Implement target conversion (KRD → FIT)
     - Add target conversion functions to garmin-fitsdk.ts
     - Convert power targets to FIT format
     - Convert heart rate targets to FIT format
@@ -245,7 +248,7 @@ Each task follows Test-Driven Development:
     - Add tests for all target conversions
     - _Requirements: 13.1, 13.2, 13.3, 14.1, 14.2, 14.5_
     - _Commit: "feat: implement KRD target conversion"_
-  - [ ] 9.6 Implement FIT extensions restoration
+  - [x] 9.6 Implement FIT extensions restoration
     - Add extension restoration to convertKRDToMessages
     - Restore developer fields from extensions.fit
     - Restore unknown message types from extensions.fit
@@ -297,42 +300,48 @@ Each task follows Test-Driven Development:
     - _Requirements: 1.1, 1.2, 11.1, 11.2_
     - _Commit: "feat: add dependency injection provider"_
 
-- [ ] 12. Integration tests with real fixtures
+- [ ] 12. Integration and round-trip tests with real fixtures
 
   - [ ] 12.1 Write FIT → KRD integration tests
-    - Create src/tests/integration/fit-to-krd.test.ts
+    - Create src/tests/integration/fit-to-krd.integration.test.ts
     - Test with WorkoutIndividualSteps.fit
     - Test with WorkoutRepeatSteps.fit
     - Test with WorkoutRepeatGreaterThanStep.fit
     - Test with WorkoutCustomTargetValues.fit
     - Verify complete KRD structure for each fixture
+    - Use createDefaultProviders() to get fully wired system
     - _Requirements: 6.5, 7.4, 16.1, 16.2_
   - [ ] 12.2 Write KRD → FIT integration tests
-    - Create src/tests/integration/krd-to-fit.test.ts
+    - Create src/tests/integration/krd-to-fit.integration.test.ts
     - Test with generated KRD documents using fixtures
     - Verify FIT file can be parsed by @garmin/fitsdk
+    - Use createDefaultProviders() to get fully wired system
     - _Requirements: 11.1, 11.2_
   - [ ] 12.3 Write round-trip tests (FIT → KRD → FIT)
-    - Create src/tests/round-trip/fit-krd-fit.test.ts
+    - Create src/tests/integration/fit-krd-fit.roundtrip.test.ts
     - Test with all 4 fixtures
+    - Use ValidateRoundTrip use case
     - Verify tolerance compliance for all conversions
     - Test mixed interval types (time/distance)
     - Test mixed target types (power/HR/cadence/pace)
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 16.1, 16.2, 16.3, 16.4, 16.5_
   - [ ] 12.4 Write round-trip tests (KRD → FIT → KRD)
-    - Create src/tests/round-trip/krd-fit-krd.test.ts
+    - Create src/tests/integration/krd-fit-krd.roundtrip.test.ts
     - Test with generated KRD documents using fixtures
+    - Use ValidateRoundTrip use case
     - Verify tolerance compliance
     - _Requirements: 15.5, 15.6_
   - _Commit: "test: add integration and round-trip tests"_
 
 - [ ] 13. Export public API
-  - Update src/index.ts with public exports
-  - Export domain types (KRD, KRDMetadata, Workout, Duration, Target, etc.)
-  - Export error types and factories
-  - Export use case types (ConvertFitToKrd, ConvertKrdToFit, ValidateRoundTrip)
-  - Export createDefaultProviders factory
-  - Export Logger type for custom implementations
-  - Verify all components are accessible
-  - _Requirements: 1.1, 1.2, 11.1, 11.2_
-  - _Commit: "feat: export public API"_
+  - [ ] 13.1 Update src/index.ts with public exports
+    - Export domain schemas and types (krdSchema, workoutSchema, durationSchema, targetSchema)
+    - Export inferred types (KRD, KRDMetadata, Workout, WorkoutStep, Duration, Target, etc.)
+    - Export error types and factories (FitParsingError, KrdValidationError, ToleranceExceededError)
+    - Export use case types (ConvertFitToKrd, ConvertKrdToFit, ValidateRoundTrip)
+    - Export createDefaultProviders factory
+    - Export Logger type for custom implementations
+    - Export ValidationError and ToleranceViolation types
+    - Verify all components are accessible
+    - _Requirements: 1.1, 1.2, 11.1, 11.2_
+    - _Commit: "feat: export public API"_
