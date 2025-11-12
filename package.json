@@ -1,6 +1,7 @@
 {
   "name": "kaiord",
   "version": "0.1.0",
+  "type": "module",
   "private": true,
   "description": "Open-source toolkit for structured workout data",
   "repository": {
@@ -15,11 +16,15 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "lint": "pnpm -r lint",
+    "lint": "eslint .",
+    "lint:packages": "pnpm -r lint",
     "clean": "pnpm -r clean"
   },
   "devDependencies": {
+    "@eslint/js": "^9.15.0",
     "@types/node": "^20.11.0",
-    "typescript": "^5.3.3"
+    "eslint": "^9.15.0",
+    "typescript": "^5.3.3",
+    "typescript-eslint": "^8.14.0"
   }
 }
