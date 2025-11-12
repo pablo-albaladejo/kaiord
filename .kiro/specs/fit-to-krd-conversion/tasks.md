@@ -188,7 +188,7 @@ Each task follows Test-Driven Development:
     - Add tests for time, distance, and open duration conversions
     - _Requirements: 2.1, 2.2, 2.5_
     - _Commit: "feat: implement FIT duration conversion"_
-  - [ ] 8.5 Implement target conversion (FIT → KRD)
+  - [x] 8.5 Implement target conversion (FIT → KRD)
     - Add target conversion functions to garmin-fitsdk.ts
     - Convert power targets (watts, %FTP, zones)
     - Convert heart rate targets (bpm, zones, %max)
