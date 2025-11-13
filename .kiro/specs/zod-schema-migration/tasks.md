@@ -33,65 +33,48 @@
   - Define `FIT_TO_SWIM_STROKE` mapping object for reverse conversion
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [x] 1.5 Write tests for domain schemas
-
-  - Test sport schema validates correct values and rejects invalid values
-  - Test sub-sport schema validates all 60+ values
-  - Test file-type schema validates correct values
-  - Test swim-stroke schema validates correct values and numeric mappings
-  - _Requirements: 15.1, 15.2, 15.4_
-
-- [ ] 2. Create adapter schema files for FIT SDK format
+- [x] 2. Create adapter schema files for FIT SDK format
 
   - Create schemas directory in adapters/fit/
   - Define Zod enum schemas for FIT-specific concepts in camelCase format
   - Export inferred TypeScript types from each schema
   - _Requirements: 1.4, 2.3, 2.4, 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 4.4, 9.1, 9.2, 9.3, 12.3, 12.4, 13.2_
 
-- [ ] 2.1 Create adapters/fit/schemas directory
+- [x] 2.1 Create adapters/fit/schemas directory
 
   - Create new directory for FIT adapter schemas
   - _Requirements: 13.2_
 
-- [ ] 2.2 Create FIT sport schema in adapters/fit/schemas/fit-sport.ts
+- [x] 2.2 Create FIT sport schema in adapters/fit/schemas/fit-sport.ts
 
   - Define `fitSportEnum` with z.enum() containing: "cycling", "running", "swimming", "generic"
   - Export `FitSport` type using z.infer
   - _Requirements: 1.4_
 
-- [ ] 2.3 Create FIT sub-sport schema in adapters/fit/schemas/fit-sub-sport.ts
+- [x] 2.3 Create FIT sub-sport schema in adapters/fit/schemas/fit-sub-sport.ts
 
   - Define `fitSubSportEnum` with all 60+ sub-sport values in camelCase
   - Include values like "indoorCycling", "handCycling", "lapSwimming", etc.
   - Export `FitSubSport` type using z.infer
   - _Requirements: 2.3, 2.4, 2.7_
 
-- [ ] 2.4 Create FIT duration schema in adapters/fit/schemas/fit-duration.ts
+- [x] 2.4 Create FIT duration schema in adapters/fit/schemas/fit-duration.ts
 
   - Define `fitDurationTypeEnum` with values: "time", "distance", "repeatUntilStepsCmplt", "repeatUntilHrGreaterThan", "hrLessThan", "hrGreaterThan", "open"
   - Export `FitDurationType` type using z.infer
   - _Requirements: 3.1, 3.2, 3.3, 3.4_
 
-- [ ] 2.5 Create FIT target schema in adapters/fit/schemas/fit-target.ts
+- [x] 2.5 Create FIT target schema in adapters/fit/schemas/fit-target.ts
 
   - Define `fitTargetTypeEnum` with values: "power", "heartRate", "cadence", "speed", "swimStroke", "open"
   - Export `FitTargetType` type using z.infer
   - _Requirements: 4.1, 4.2, 4.3, 4.4_
 
-- [ ] 2.6 Create FIT message keys schema in adapters/fit/schemas/fit-message-keys.ts
+- [x] 2.6 Create FIT message keys schema in adapters/fit/schemas/fit-message-keys.ts
 
   - Define `fitMessageKeyEnum` with values: "fileIdMesgs", "workoutMesgs", "workoutStepMesgs"
   - Export `FitMessageKey` type using z.infer
   - _Requirements: 9.1, 9.2, 9.3_
-
-- [ ] 2.7 Write tests for adapter schemas
-
-  - Test FIT sport schema validates correct values
-  - Test FIT sub-sport schema validates all 60+ camelCase values
-  - Test FIT duration schema validates correct values
-  - Test FIT target schema validates correct values
-  - Test FIT message keys schema validates correct values
-  - _Requirements: 15.1, 15.2, 15.4_
 
 - [ ] 3. Update sub-sport mapper to use Zod schemas
 
