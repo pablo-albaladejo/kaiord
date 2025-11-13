@@ -148,7 +148,7 @@ Before marking any task as complete, verify that:
     - Ensure no hardcoded strings in mappers (use enum schema values)
     - _Requirements: 4.1, 5.1, 5.7, 5.8, 6.1, 6.2_
 
-  - [ ] 6.3 Implement FIT → KRD duration converters
+  - [x] 6.3 Implement FIT → KRD duration converters
 
     - Convert calorie-based durations (calories, repeatUntilCalories)
     - Convert power-based durations (powerLessThan, powerGreaterThan, repeatUntilPowerLessThan, repeatUntilPowerGreaterThan)
