@@ -1,5 +1,5 @@
 import type { Logger } from "../../../ports/logger";
-import { fitMessageKeyEnum } from "../schemas/fit-message-keys";
+import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import type { FitMessages } from "../types";
 
 export const extractFitExtensions = (
@@ -19,9 +19,9 @@ const extractUnknownMessages = (
   logger: Logger
 ): Record<string, Array<Record<string, unknown>>> => {
   const knownMessageKeys = new Set<string>([
-    fitMessageKeyEnum.enum.fileIdMesgs,
-    fitMessageKeyEnum.enum.workoutMesgs,
-    fitMessageKeyEnum.enum.workoutStepMesgs,
+    fitMessageKeySchema.enum.fileIdMesgs,
+    fitMessageKeySchema.enum.workoutMesgs,
+    fitMessageKeySchema.enum.workoutStepMesgs,
   ]);
 
   const unknownMessages: Record<string, Array<Record<string, unknown>>> = {};

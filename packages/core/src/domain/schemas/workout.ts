@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { durationSchema } from "./duration";
-import { equipmentEnum } from "./equipment";
-import { intensityEnum } from "./intensity";
+import { equipmentSchema } from "./equipment";
+import { intensitySchema } from "./intensity";
 import { targetSchema } from "./target";
 
 export const workoutStepSchema = z.object({
@@ -33,9 +33,9 @@ export const workoutStepSchema = z.object({
     "open",
   ]),
   target: targetSchema,
-  intensity: intensityEnum.optional(),
+  intensity: intensitySchema.optional(),
   notes: z.string().max(256).optional(),
-  equipment: equipmentEnum.optional(),
+  equipment: equipmentSchema.optional(),
 });
 
 export const repetitionBlockSchema = z.object({

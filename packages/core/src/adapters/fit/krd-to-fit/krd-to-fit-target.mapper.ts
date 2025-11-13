@@ -1,6 +1,6 @@
-import { targetTypeEnum } from "../../../domain/schemas/target";
+import { targetTypeSchema } from "../../../domain/schemas/target";
 import type { WorkoutStep } from "../../../domain/schemas/workout";
-import { fitTargetTypeEnum } from "../schemas/fit-target";
+import { fitTargetTypeSchema } from "../schemas/fit-target";
 import { convertCadenceTarget } from "./krd-to-fit-target-cadence.mapper";
 import { convertHeartRateTarget } from "./krd-to-fit-target-heart-rate.mapper";
 import { convertPaceTarget } from "./krd-to-fit-target-pace.mapper";
@@ -10,18 +10,18 @@ export const convertTarget = (
   step: WorkoutStep,
   message: Record<string, unknown>
 ): void => {
-  if (step.target.type === targetTypeEnum.enum.open) {
-    message.targetType = fitTargetTypeEnum.enum.open;
+  if (step.target.type === targetTypeSchema.enum.open) {
+    message.targetType = fitTargetTypeSchema.enum.open;
     return;
   }
 
-  if (step.target.type === targetTypeEnum.enum.power) {
+  if (step.target.type === targetTypeSchema.enum.power) {
     convertPowerTarget(step, message);
-  } else if (step.target.type === targetTypeEnum.enum.heart_rate) {
+  } else if (step.target.type === targetTypeSchema.enum.heart_rate) {
     convertHeartRateTarget(step, message);
-  } else if (step.target.type === targetTypeEnum.enum.cadence) {
+  } else if (step.target.type === targetTypeSchema.enum.cadence) {
     convertCadenceTarget(step, message);
-  } else if (step.target.type === targetTypeEnum.enum.pace) {
+  } else if (step.target.type === targetTypeSchema.enum.pace) {
     convertPaceTarget(step, message);
   }
 };

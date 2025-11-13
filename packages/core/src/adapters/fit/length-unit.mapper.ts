@@ -1,5 +1,5 @@
 import {
-  lengthUnitEnum,
+  lengthUnitSchema,
   type LengthUnit,
 } from "../../domain/schemas/length-unit";
 
@@ -10,14 +10,14 @@ const FIT_LENGTH_UNIT_MAP: Record<number, LengthUnit> = {
 
 export const mapLengthUnitToKrd = (fitUnit: number | undefined): LengthUnit => {
   if (fitUnit === undefined) {
-    return lengthUnitEnum.enum.meters;
+    return lengthUnitSchema.enum.meters;
   }
 
-  return FIT_LENGTH_UNIT_MAP[fitUnit] || lengthUnitEnum.enum.meters;
+  return FIT_LENGTH_UNIT_MAP[fitUnit] || lengthUnitSchema.enum.meters;
 };
 
 export const mapLengthUnitToFit = (krdUnit: LengthUnit): number => {
-  if (krdUnit === lengthUnitEnum.enum.yards) {
+  if (krdUnit === lengthUnitSchema.enum.yards) {
     return 1;
   }
 

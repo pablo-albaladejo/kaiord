@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const intensityEnum = z.enum([
+export const intensitySchema = z.enum([
   "warmup",
   "active",
   "cooldown",
@@ -10,4 +10,4 @@ export const intensityEnum = z.enum([
   "other",
 ]);
 
-export type Intensity = z.infer<typeof intensityEnum>;
+export type Intensity = z.infer<typeof intensitySchema>;

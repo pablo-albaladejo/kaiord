@@ -1,5 +1,5 @@
-import { equipmentEnum, type Equipment } from "../../domain/schemas/equipment";
-import { fitEquipmentEnum, type FitEquipment } from "./schemas/fit-equipment";
+import { equipmentSchema, type Equipment } from "../../domain/schemas/equipment";
+import { fitEquipmentSchema, type FitEquipment } from "./schemas/fit-equipment";
 
 const FIT_TO_KRD_EQUIPMENT_MAP: Record<FitEquipment, Equipment> = {
   none: "none",
@@ -16,21 +16,21 @@ const KRD_TO_FIT_EQUIPMENT_MAP: Record<Equipment, FitEquipment> =
   ) as Record<Equipment, FitEquipment>;
 
 export const mapEquipmentToKrd = (fitEquipment: unknown): Equipment => {
-  const result = fitEquipmentEnum.safeParse(fitEquipment);
+  const result = fitEquipmentSchema.safeParse(fitEquipment);
 
   if (!result.success) {
-    return equipmentEnum.enum.none;
+    return equipmentSchema.enum.none;
   }
 
-  return FIT_TO_KRD_EQUIPMENT_MAP[result.data] || equipmentEnum.enum.none;
+  return FIT_TO_KRD_EQUIPMENT_MAP[result.data] || equipmentSchema.enum.none;
 };
 
 export const mapEquipmentToFit = (krdEquipment: unknown): FitEquipment => {
-  const result = equipmentEnum.safeParse(krdEquipment);
+  const result = equipmentSchema.safeParse(krdEquipment);
 
   if (!result.success) {
-    return fitEquipmentEnum.enum.none;
+    return fitEquipmentSchema.enum.none;
   }
 
-  return KRD_TO_FIT_EQUIPMENT_MAP[result.data] || fitEquipmentEnum.enum.none;
+  return KRD_TO_FIT_EQUIPMENT_MAP[result.data] || fitEquipmentSchema.enum.none;
 };

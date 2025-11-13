@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const fitTargetTypeEnum = z.enum([
+export const fitTargetTypeSchema = z.enum([
   "power",
   "heartRate",
   "cadence",
@@ -9,4 +9,4 @@ export const fitTargetTypeEnum = z.enum([
   "open",
 ]);
 
-export type FitTargetType = z.infer<typeof fitTargetTypeEnum>;
+export type FitTargetType = z.infer<typeof fitTargetTypeSchema>;

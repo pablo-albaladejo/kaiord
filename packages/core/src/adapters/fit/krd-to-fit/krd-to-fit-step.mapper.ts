@@ -1,9 +1,9 @@
-import { durationTypeEnum } from "../../../domain/schemas/duration";
+import { durationTypeSchema } from "../../../domain/schemas/duration";
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
 import { mapEquipmentToFit } from "../equipment.mapper";
-import { fitDurationTypeEnum } from "../schemas/fit-duration";
-import { fitMessageKeyEnum } from "../schemas/fit-message-keys";
+import { fitDurationTypeSchema } from "../schemas/fit-duration";
+import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { convertTarget } from "./krd-to-fit-target.mapper";
 
 export const convertWorkoutStep = (
@@ -44,7 +44,7 @@ export const convertWorkoutStep = (
   convertTarget(step, workoutStepMesg);
 
   return {
-    type: fitMessageKeyEnum.enum.workoutStepMesgs,
+    type: fitMessageKeySchema.enum.workoutStepMesgs,
     workoutStepMesg,
   };
 };
@@ -53,25 +53,25 @@ const convertDuration = (
   step: WorkoutStep,
   message: Record<string, unknown>
 ): void => {
-  if (step.duration.type === durationTypeEnum.enum.time) {
-    message.durationType = fitDurationTypeEnum.enum.time;
+  if (step.duration.type === durationTypeSchema.enum.time) {
+    message.durationType = fitDurationTypeSchema.enum.time;
     message.durationTime = step.duration.seconds;
-  } else if (step.duration.type === durationTypeEnum.enum.distance) {
-    message.durationType = fitDurationTypeEnum.enum.distance;
+  } else if (step.duration.type === durationTypeSchema.enum.distance) {
+    message.durationType = fitDurationTypeSchema.enum.distance;
     message.durationDistance = step.duration.meters;
   } else if (
-    step.duration.type === durationTypeEnum.enum.heart_rate_less_than
+    step.duration.type === durationTypeSchema.enum.heart_rate_less_than
   ) {
-    message.durationType = fitDurationTypeEnum.enum.hrLessThan;
+    message.durationType = fitDurationTypeSchema.enum.hrLessThan;
     message.durationHr = step.duration.bpm;
   } else if (
     step.duration.type ===
-    durationTypeEnum.enum.repeat_until_heart_rate_greater_than
+    durationTypeSchema.enum.repeat_until_heart_rate_greater_than
   ) {
-    message.durationType = fitDurationTypeEnum.enum.repeatUntilHrGreaterThan;
+    message.durationType = fitDurationTypeSchema.enum.repeatUntilHrGreaterThan;
     message.durationHr = step.duration.bpm;
     message.durationStep = step.duration.repeatFrom;
   } else {
-    message.durationType = fitDurationTypeEnum.enum.open;
+    message.durationType = fitDurationTypeSchema.enum.open;
   }
 };
