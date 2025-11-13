@@ -45,7 +45,16 @@
                       "time",
                       "distance",
                       "heart_rate_less_than",
-                      "heart_rate_greater_than",
+                      "repeat_until_heart_rate_greater_than",
+                      "calories",
+                      "power_less_than",
+                      "power_greater_than",
+                      "repeat_until_time",
+                      "repeat_until_distance",
+                      "repeat_until_calories",
+                      "repeat_until_heart_rate_less_than",
+                      "repeat_until_power_less_than",
+                      "repeat_until_power_greater_than",
                       "open"
                     ]
                   },
@@ -110,7 +119,7 @@
                         "properties": {
                           "type": {
                             "type": "string",
-                            "const": "heart_rate_greater_than"
+                            "const": "repeat_until_heart_rate_greater_than"
                           },
                           "bpm": {
                             "type": "integer",
@@ -124,6 +133,198 @@
                         "required": [
                           "type",
                           "bpm",
+                          "repeatFrom"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "calories"
+                          },
+                          "calories": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "calories"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "power_less_than"
+                          },
+                          "watts": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "watts"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "power_greater_than"
+                          },
+                          "watts": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "watts"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "repeat_until_time"
+                          },
+                          "seconds": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "repeatFrom": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "seconds",
+                          "repeatFrom"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "repeat_until_distance"
+                          },
+                          "meters": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "repeatFrom": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "meters",
+                          "repeatFrom"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "repeat_until_calories"
+                          },
+                          "calories": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0
+                          },
+                          "repeatFrom": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "calories",
+                          "repeatFrom"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "repeat_until_heart_rate_less_than"
+                          },
+                          "bpm": {
+                            "type": "integer",
+                            "exclusiveMinimum": 0
+                          },
+                          "repeatFrom": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "bpm",
+                          "repeatFrom"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "repeat_until_power_less_than"
+                          },
+                          "watts": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "repeatFrom": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "watts",
+                          "repeatFrom"
+                        ],
+                        "additionalProperties": false
+                      },
+                      {
+                        "type": "object",
+                        "properties": {
+                          "type": {
+                            "type": "string",
+                            "const": "repeat_until_power_greater_than"
+                          },
+                          "watts": {
+                            "type": "number",
+                            "exclusiveMinimum": 0
+                          },
+                          "repeatFrom": {
+                            "type": "integer",
+                            "minimum": 0
+                          }
+                        },
+                        "required": [
+                          "type",
+                          "watts",
                           "repeatFrom"
                         ],
                         "additionalProperties": false
@@ -581,7 +782,16 @@
                             "time",
                             "distance",
                             "heart_rate_less_than",
-                            "heart_rate_greater_than",
+                            "repeat_until_heart_rate_greater_than",
+                            "calories",
+                            "power_less_than",
+                            "power_greater_than",
+                            "repeat_until_time",
+                            "repeat_until_distance",
+                            "repeat_until_calories",
+                            "repeat_until_heart_rate_less_than",
+                            "repeat_until_power_less_than",
+                            "repeat_until_power_greater_than",
                             "open"
                           ]
                         },
@@ -646,7 +856,7 @@
                               "properties": {
                                 "type": {
                                   "type": "string",
-                                  "const": "heart_rate_greater_than"
+                                  "const": "repeat_until_heart_rate_greater_than"
                                 },
                                 "bpm": {
                                   "type": "integer",
@@ -660,6 +870,198 @@
                               "required": [
                                 "type",
                                 "bpm",
+                                "repeatFrom"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "const": "calories"
+                                },
+                                "calories": {
+                                  "type": "integer",
+                                  "exclusiveMinimum": 0
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "calories"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "const": "power_less_than"
+                                },
+                                "watts": {
+                                  "type": "number",
+                                  "exclusiveMinimum": 0
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "watts"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "const": "power_greater_than"
+                                },
+                                "watts": {
+                                  "type": "number",
+                                  "exclusiveMinimum": 0
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "watts"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "const": "repeat_until_time"
+                                },
+                                "seconds": {
+                                  "type": "number",
+                                  "exclusiveMinimum": 0
+                                },
+                                "repeatFrom": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "seconds",
+                                "repeatFrom"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "const": "repeat_until_distance"
+                                },
+                                "meters": {
+                                  "type": "number",
+                                  "exclusiveMinimum": 0
+                                },
+                                "repeatFrom": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "meters",
+                                "repeatFrom"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "const": "repeat_until_calories"
+                                },
+                                "calories": {
+                                  "type": "integer",
+                                  "exclusiveMinimum": 0
+                                },
+                                "repeatFrom": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "calories",
+                                "repeatFrom"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "const": "repeat_until_heart_rate_less_than"
+                                },
+                                "bpm": {
+                                  "type": "integer",
+                                  "exclusiveMinimum": 0
+                                },
+                                "repeatFrom": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "bpm",
+                                "repeatFrom"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "const": "repeat_until_power_less_than"
+                                },
+                                "watts": {
+                                  "type": "number",
+                                  "exclusiveMinimum": 0
+                                },
+                                "repeatFrom": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "watts",
+                                "repeatFrom"
+                              ],
+                              "additionalProperties": false
+                            },
+                            {
+                              "type": "object",
+                              "properties": {
+                                "type": {
+                                  "type": "string",
+                                  "const": "repeat_until_power_greater_than"
+                                },
+                                "watts": {
+                                  "type": "number",
+                                  "exclusiveMinimum": 0
+                                },
+                                "repeatFrom": {
+                                  "type": "integer",
+                                  "minimum": 0
+                                }
+                              },
+                              "required": [
+                                "type",
+                                "watts",
                                 "repeatFrom"
                               ],
                               "additionalProperties": false

@@ -1,3 +1,4 @@
+import { durationTypeEnum } from "../../../domain/schemas/duration";
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
 import { mapEquipmentToFit } from "../equipment.mapper";
@@ -52,16 +53,21 @@ const convertDuration = (
   step: WorkoutStep,
   message: Record<string, unknown>
 ): void => {
-  if (step.duration.type === "time") {
+  if (step.duration.type === durationTypeEnum.enum.time) {
     message.durationType = fitDurationTypeEnum.enum.time;
     message.durationTime = step.duration.seconds;
-  } else if (step.duration.type === "distance") {
+  } else if (step.duration.type === durationTypeEnum.enum.distance) {
     message.durationType = fitDurationTypeEnum.enum.distance;
     message.durationDistance = step.duration.meters;
-  } else if (step.duration.type === "heart_rate_less_than") {
+  } else if (
+    step.duration.type === durationTypeEnum.enum.heart_rate_less_than
+  ) {
     message.durationType = fitDurationTypeEnum.enum.hrLessThan;
     message.durationHr = step.duration.bpm;
-  } else if (step.duration.type === "heart_rate_greater_than") {
+  } else if (
+    step.duration.type ===
+    durationTypeEnum.enum.repeat_until_heart_rate_greater_than
+  ) {
     message.durationType = fitDurationTypeEnum.enum.repeatUntilHrGreaterThan;
     message.durationHr = step.duration.bpm;
     message.durationStep = step.duration.repeatFrom;
