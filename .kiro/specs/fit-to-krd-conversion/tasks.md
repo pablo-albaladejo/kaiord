@@ -318,8 +318,8 @@ Each task follows Test-Driven Development:
     - _Requirements: 1.1, 1.2, 11.1, 11.2_
     - _Commit: "feat: add dependency injection provider"_
 
-- [ ] 11. Export public API
-  - [ ] 11.1 Update src/index.ts with public exports
+- [x] 11. Export public API
+  - [x] 11.1 Update src/index.ts with public exports
     - Export domain schemas (krdSchema, workoutSchema, durationSchema, targetSchema, sportEnum, subSportEnum, intensityEnum, equipmentEnum, swimStrokeEnum)
     - Export inferred types (KRD, KRDMetadata, Workout, WorkoutStep, Duration, Target, Sport, SubSport, Intensity, Equipment, SwimStroke, etc.)
     - Export error types and factories (FitParsingError, KrdValidationError, ToleranceExceededError, createFitParsingError, createKrdValidationError, createToleranceExceededError)
