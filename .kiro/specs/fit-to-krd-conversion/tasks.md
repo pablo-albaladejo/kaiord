@@ -33,7 +33,7 @@ Each task follows Test-Driven Development:
 **Remaining (3 tasks):**
 
 1. **Console logger adapter** - Simple implementation + tests (adapters/logger/console-logger.ts)
-2. **Use cases & DI provider** - ConvertFitToKrd, ConvertKrdToFit, ValidateRoundTrip, createDefaultProviders (application layer)
+2. **DI provider** - createDefaultProviders to wire all components (application/providers.ts)
 3. **Public API exports** - Export all public types and functions (src/index.ts)
 
 **Architecture Status:**
@@ -41,7 +41,9 @@ Each task follows Test-Driven Development:
 - ✅ Domain layer: Complete (schemas, validation, error types)
 - ✅ Ports layer: Complete (FitReader, FitWriter, Logger contracts)
 - ✅ Adapters layer: Complete (Garmin FIT SDK implementation with full round-trip support)
-- ⏳ Application layer: Use cases and DI provider needed
+- ✅ Application layer: Use cases complete (ConvertFitToKrd, ConvertKrdToFit, ValidateRoundTrip)
+- ⏳ Infrastructure: Console logger adapter needed
+- ⏳ DI Provider: createDefaultProviders needed to wire all components
 - ⏳ Public API: Exports needed
 
 **Test Coverage:** 318 tests passing across 20 test files, covering unit tests, mappers, converters, and comprehensive round-trip validation.
@@ -124,12 +126,6 @@ Each task follows Test-Driven Development:
     - Define Logger type
     - _Requirements: 9.2_
     - _Commit: "feat: add logger port"_
-  - [ ] 4.3 Implement console logger adapter
-    - Create adapters/logger/console-logger.ts with createConsoleLogger factory
-    - Implement debug, info, warn, error methods using console
-    - Write co-located tests in console-logger.test.ts (test all log levels)
-    - _Requirements: 9.2_
-    - _Commit: "feat: add console logger adapter"_
 
 - [x] 5. Implement schema validation and JSON generation
 
@@ -298,20 +294,25 @@ Each task follows Test-Driven Development:
     - _Requirements: 11.1, 11.2, 11.3_
     - _Commit: "feat: add ConvertKrdToFit use case"_
   - [x] 10.3 Implement ValidateRoundTrip use case
-    - Create application/use-cases/validate-round-trip.ts
-    - Define ValidateRoundTrip type and createValidateRoundTrip factory
-    - Implement validateFitToKrdToFit function
-    - Implement validateKrdToFitToKrd function
-    - Implement compareKRDs helper with tolerance checking
-    - Inject logger
-    - Write co-located tests with mocks (both directions, compareKRDs, violations, logger)
+    - ValidateRoundTrip already exists in tests/round-trip/validate-round-trip.ts
+    - Implementation follows functional currying pattern with proper type exports
+    - Includes both validateFitToKrdToFit and validateKrdToFitToKrd functions
+    - Uses compareKRDs helper for tolerance checking
+    - Properly injects logger and tolerance checker
     - _Requirements: 15.1, 15.2, 15.3, 15.4, 15.5, 15.6_
-    - _Commit: "feat: add ValidateRoundTrip use case"_
-  - [ ] 10.4 Implement createDefaultProviders
+    - _Note: Already implemented and tested_
+  - [ ] 10.4 Implement console logger adapter
+    - Create adapters/logger/console-logger.ts
+    - Implement createConsoleLogger factory returning Logger type
+    - Implement debug, info, warn, error methods using console
+    - Write co-located tests in console-logger.test.ts (test all log levels)
+    - _Requirements: 9.2_
+    - _Commit: "feat: add console logger adapter"_
+  - [ ] 10.5 Implement createDefaultProviders
     - Create application/providers.ts
-    - Define Providers type with all components
+    - Define Providers type with all components (fitReader, fitWriter, schemaValidator, toleranceChecker, convertFitToKrd, convertKrdToFit, validateRoundTrip, logger)
     - Implement createDefaultProviders factory function
-    - Wire all adapters, validators, and use cases
+    - Wire all adapters, validators, and use cases using functional composition
     - Support optional logger injection (default to console logger)
     - Write co-located tests in providers.test.ts (component creation, wiring, logger injection)
     - _Requirements: 1.1, 1.2, 11.1, 11.2_
@@ -319,13 +320,15 @@ Each task follows Test-Driven Development:
 
 - [ ] 11. Export public API
   - [ ] 11.1 Update src/index.ts with public exports
-    - Export domain schemas and types (krdSchema, workoutSchema, durationSchema, targetSchema)
-    - Export inferred types (KRD, KRDMetadata, Workout, WorkoutStep, Duration, Target, etc.)
-    - Export error types and factories (FitParsingError, KrdValidationError, ToleranceExceededError)
+    - Export domain schemas (krdSchema, workoutSchema, durationSchema, targetSchema, sportEnum, subSportEnum, intensityEnum, equipmentEnum, swimStrokeEnum)
+    - Export inferred types (KRD, KRDMetadata, Workout, WorkoutStep, Duration, Target, Sport, SubSport, Intensity, Equipment, SwimStroke, etc.)
+    - Export error types and factories (FitParsingError, KrdValidationError, ToleranceExceededError, createFitParsingError, createKrdValidationError, createToleranceExceededError)
     - Export use case types (ConvertFitToKrd, ConvertKrdToFit, ValidateRoundTrip)
-    - Export createDefaultProviders factory
+    - Export createDefaultProviders factory and Providers type
     - Export Logger type for custom implementations
     - Export ValidationError and ToleranceViolation types
-    - Verify all components are accessible
+    - Export SchemaValidator and ToleranceChecker types
+    - Export FitReader and FitWriter port types
+    - Verify all components are accessible and properly typed
     - _Requirements: 1.1, 1.2, 11.1, 11.2_
     - _Commit: "feat: export public API"_
