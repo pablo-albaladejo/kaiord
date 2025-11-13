@@ -183,33 +183,33 @@
   - Ensure existing tests pass without modification
   - _Requirements: 15.3, 15.4_
 
-- [ ] 6. Update step and workout mappers to use Zod schemas
+- [x] 6. Update step and workout mappers to use Zod schemas
 
   - Replace duration and target constants with schemas
   - Update message key access
   - _Requirements: 10.1, 10.3, 10.5_
 
-- [ ] 6.1 Update krd-to-fit-step.mapper.ts
+- [x] 6.1 Update krd-to-fit-step.mapper.ts
 
   - Import `fitDurationTypeEnum` from adapters/fit/schemas/fit-duration
   - Import `fitMessageKeyEnum` from adapters/fit/schemas/fit-message-keys
   - Update duration type assignments to use `fitDurationTypeEnum.enum.value`
   - _Requirements: 10.1, 10.3_
 
-- [ ] 6.2 Update krd-to-fit-workout.mapper.ts
+- [x] 6.2 Update krd-to-fit-workout.mapper.ts
 
   - Import schemas instead of constants
   - Update duration and target type assignments
   - Update message key access if needed
   - _Requirements: 10.1, 10.3_
 
-- [ ] 6.3 Update workout/workout.mapper.ts
+- [x] 6.3 Update workout/workout.mapper.ts
 
   - Import `fitDurationTypeEnum` from adapters/fit/schemas/fit-duration
   - Update duration type comparisons to use `fitDurationTypeEnum.enum.value`
   - _Requirements: 10.1, 10.3_
 
-- [ ] 6.4 Update step and workout mapper tests
+- [x] 6.4 Update step and workout mapper tests
 
   - Verify all conversions still work correctly
   - Ensure existing round-trip tests pass

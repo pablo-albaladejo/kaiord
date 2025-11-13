@@ -4,9 +4,10 @@ import type {
   WorkoutStep,
 } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
-import { DEFAULT_SPORT, FIT_DURATION_TYPE } from "../constants";
-import { mapStep } from "./step.mapper";
+import { DEFAULT_SPORT } from "../constants";
+import { fitDurationTypeEnum } from "../schemas/fit-duration";
 import type { FitWorkoutMessage, FitWorkoutStep } from "../types";
+import { mapStep } from "./step.mapper";
 
 export const mapWorkout = (
   workoutMsg: FitWorkoutMessage | undefined,
@@ -34,7 +35,7 @@ const findRepetitionStepIndices = (
 
   for (let i = 0; i < workoutSteps.length; i++) {
     const step = workoutSteps[i];
-    if (step.durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_STEPS_COMPLETE) {
+    if (step.durationType === fitDurationTypeEnum.enum.repeatUntilStepsCmplt) {
       const startIndex = (step.durationStep || 0) as number;
       for (let j = startIndex; j < i; j++) {
         indices.add(j);
@@ -55,7 +56,7 @@ const buildWorkoutSteps = (
     const step = workoutSteps[i];
 
     if (
-      step.durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_STEPS_COMPLETE &&
+      step.durationType === fitDurationTypeEnum.enum.repeatUntilStepsCmplt &&
       step.repeatSteps
     ) {
       const repetitionBlock = buildRepetitionBlock(step, workoutSteps, i);

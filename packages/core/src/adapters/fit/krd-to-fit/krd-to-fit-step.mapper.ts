@@ -1,6 +1,7 @@
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
-import { FIT_DURATION_TYPE, FIT_MESSAGE_KEY } from "../constants";
+import { fitDurationTypeEnum } from "../schemas/fit-duration";
+import { fitMessageKeyEnum } from "../schemas/fit-message-keys";
 import { convertTarget } from "./krd-to-fit-target.mapper";
 
 export const convertWorkoutStep = (
@@ -26,7 +27,7 @@ export const convertWorkoutStep = (
   convertTarget(step, workoutStepMesg);
 
   return {
-    type: FIT_MESSAGE_KEY.WORKOUT_STEP,
+    type: fitMessageKeyEnum.enum.workoutStepMesgs,
     workoutStepMesg,
   };
 };
@@ -36,19 +37,19 @@ const convertDuration = (
   message: Record<string, unknown>
 ): void => {
   if (step.duration.type === "time") {
-    message.durationType = FIT_DURATION_TYPE.TIME;
+    message.durationType = fitDurationTypeEnum.enum.time;
     message.durationTime = step.duration.seconds;
   } else if (step.duration.type === "distance") {
-    message.durationType = FIT_DURATION_TYPE.DISTANCE;
+    message.durationType = fitDurationTypeEnum.enum.distance;
     message.durationDistance = step.duration.meters;
   } else if (step.duration.type === "heart_rate_less_than") {
-    message.durationType = FIT_DURATION_TYPE.HR_LESS_THAN;
+    message.durationType = fitDurationTypeEnum.enum.hrLessThan;
     message.durationHr = step.duration.bpm;
   } else if (step.duration.type === "heart_rate_greater_than") {
-    message.durationType = FIT_DURATION_TYPE.REPEAT_UNTIL_HR_GREATER_THAN;
+    message.durationType = fitDurationTypeEnum.enum.repeatUntilHrGreaterThan;
     message.durationHr = step.duration.bpm;
     message.durationStep = step.duration.repeatFrom;
   } else {
-    message.durationType = FIT_DURATION_TYPE.OPEN;
+    message.durationType = fitDurationTypeEnum.enum.open;
   }
 };
