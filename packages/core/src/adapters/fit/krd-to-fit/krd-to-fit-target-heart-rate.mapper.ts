@@ -25,10 +25,5 @@ export const convertHeartRateTarget = (
   } else if (value.unit === KRD_TARGET_UNIT.PERCENT_MAX) {
     // Garmin encoding: Percentage max HR has no offset
     message.targetValue = value.value;
-  } else {
-    // Fallback: use custom range with same value
-    message.targetValue = 0;
-    message.customTargetHeartRateLow = value.value;
-    message.customTargetHeartRateHigh = value.value;
   }
 };
