@@ -64,7 +64,102 @@
 - **product** (string): Device model
 - **serialNumber** (string, optional): Device serial number
 - **sport** (string): Primary sport type
-- **subSport** (string, optional): Sport subtype
+- **subSport** (string, optional): Sport subtype (e.g., "trail", "indoor_cycling", "lap_swimming")
+
+## Workout Object
+
+Represents a structured workout definition.
+
+```json
+{
+  "workout": {
+    "name": "Trail Run Workout",
+    "sport": "running",
+    "subSport": "trail",
+    "poolLength": 25,
+    "poolLengthUnit": "meters",
+    "steps": [...]
+  }
+}
+```
+
+### Fields
+
+- **name** (string, optional): Workout name
+- **sport** (string): Primary sport type
+- **subSport** (string, optional): Sport subtype for detailed categorization
+- **poolLength** (number, optional): Pool length in meters (swimming workouts)
+- **poolLengthUnit** (string, optional): Always "meters" in KRD
+- **steps** (array): Array of workout steps or repetition blocks
+
+## Workout Step Object
+
+Represents an individual interval or segment within a workout.
+
+```json
+{
+  "stepIndex": 0,
+  "durationType": "time",
+  "duration": {
+    "type": "time",
+    "seconds": 600
+  },
+  "targetType": "heart_rate",
+  "target": {
+    "type": "heart_rate",
+    "value": {
+      "unit": "zone",
+      "value": 2
+    }
+  },
+  "intensity": "warmup",
+  "notes": "Easy warmup, focus on form",
+  "equipment": "swim_fins"
+}
+```
+
+### Fields
+
+- **stepIndex** (number): Step sequence number
+- **durationType** (string): Type of duration (time, distance, calories, power_less_than, etc.)
+- **duration** (object): Duration specification
+- **targetType** (string): Type of target (power, heart_rate, pace, cadence, open)
+- **target** (object): Target specification
+- **intensity** (string, optional): Intensity level (warmup, active, cooldown, rest)
+- **notes** (string, optional): Coaching instructions (max 256 characters)
+- **equipment** (string, optional): Required equipment (swim_fins, swim_kickboard, etc.)
+
+## Duration Types
+
+### Standard Durations
+
+- **time**: Duration in seconds
+- **distance**: Duration in meters
+- **open**: Open-ended duration (manual lap button)
+
+### Calorie-Based Durations
+
+- **calories**: Step ends after burning specified calories
+- **repeat_until_calories**: Repeat until total calories reached
+
+### Power-Based Durations
+
+- **power_less_than**: Step ends when power drops below threshold (watts)
+- **power_greater_than**: Step ends when power exceeds threshold (watts)
+- **repeat_until_power_less_than**: Repeat until power drops below threshold
+- **repeat_until_power_greater_than**: Repeat until power exceeds threshold
+
+### Heart Rate Conditionals
+
+- **heart_rate_less_than**: Step ends when HR drops below threshold (bpm)
+- **repeat_until_heart_rate_less_than**: Repeat until HR drops below threshold
+- **repeat_until_heart_rate_greater_than**: Repeat until HR exceeds threshold
+
+### Additional Repeat Conditionals
+
+- **repeat_until_time**: Repeat until cumulative time reached
+- **repeat_until_distance**: Repeat until cumulative distance reached
+- **repeat_until_steps_complete**: Repeat specified number of times
 
 ## Session Object
 

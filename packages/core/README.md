@@ -2,6 +2,23 @@
 
 Core library for Kaiord workout data conversion.
 
+## Features
+
+- **FIT file support**: Read and write Garmin FIT workout files
+- **KRD canonical format**: JSON-based workout representation
+- **Schema validation**: Zod schemas with TypeScript type inference
+- **Round-trip safety**: Lossless conversions with defined tolerances
+- **Hexagonal architecture**: Clean separation of concerns
+
+### Supported FIT Fields
+
+- **Workout metadata**: Sub-sport categorization, pool dimensions
+- **Workout steps**: Coaching notes, swimming equipment
+- **Duration types**: Time, distance, calories, power thresholds, heart rate conditionals, repeat blocks
+- **Target types**: Power (watts, %FTP, zones), heart rate (bpm, zones, %max), pace, cadence, open
+
+See [NEW_FIELDS.md](../../docs/NEW_FIELDS.md) for detailed documentation and examples.
+
 ## Project Structure
 
 ```

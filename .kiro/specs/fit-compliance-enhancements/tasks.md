@@ -227,7 +227,7 @@ Before marking any task as complete, verify that:
     - Confirm optional fields are truly optional (omitted, not null)
     - _Requirements: 10.1, 10.2, 10.3, 10.4_
 
-  - [ ] 8.4 Update project documentation
+  - [x] 8.4 Update project documentation
     - Update README with new field support
     - Add examples of new fields in documentation
     - Document swimming-specific fields
