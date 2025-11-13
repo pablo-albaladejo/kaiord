@@ -24,6 +24,7 @@ export const workoutStepSchema = z.object({
   ]),
   target: targetSchema,
   intensity: intensityEnum.optional(),
+  notes: z.string().max(256).optional(),
 });
 
 export const repetitionBlockSchema = z.object({
@@ -34,6 +35,7 @@ export const repetitionBlockSchema = z.object({
 export const workoutSchema = z.object({
   name: z.string().optional(),
   sport: z.string(),
+  subSport: z.string().optional(),
   steps: z.array(z.union([workoutStepSchema, repetitionBlockSchema])),
 });
 
