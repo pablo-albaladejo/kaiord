@@ -104,16 +104,17 @@ Before marking any task as complete, verify that:
   - Update Zod schemas as source of truth
   - _Requirements: 3.1, 3.2, 3.4, 8.1, 8.5_
 
-- [ ] 5. Implement Priority 2 swimming FIT converters
+- [x] 5. Implement Priority 2 swimming FIT converters
 
-  - [ ] 5.1 Add FIT constants for swimming fields
+  - [x] 5.1 Add FIT equipment schemas and mappers
 
-    - Define `FIT_EQUIPMENT` constants (strings, camelCase)
-    - Define `KRD_EQUIPMENT` constants (strings, snake_case)
-    - Add mapping functions between FIT and KRD formats
+    - Create FIT equipment enum schema in `adapters/fit/schemas/fit-equipment.ts` (camelCase values)
+    - KRD equipment enum already exists in `domain/schemas/equipment.ts` (snake_case values)
+    - Create equipment mapper in `adapters/fit/equipment.mapper.ts` with bidirectional mapping
+    - Add unit tests for equipment mapper functions
     - _Requirements: 3.4, 3.7_
 
-  - [ ] 5.2 Implement FIT → KRD converters for swimming fields
+  - [x] 5.2 Implement FIT → KRD converters for swimming fields
 
     - Map `poolLength` and `poolLengthUnit` from FIT to KRD
     - Convert pool length to meters (handle unit conversion)
@@ -121,7 +122,7 @@ Before marking any task as complete, verify that:
     - Handle undefined values (omit rather than null)
     - _Requirements: 3.1, 3.2, 3.4, 10.1, 10.5_
 
-  - [ ] 5.3 Implement KRD → FIT converters for swimming fields
+  - [x] 5.3 Implement KRD → FIT converters for swimming fields
     - Map `poolLength` from KRD to FIT (always in meters)
     - Set `poolLengthUnit` to meters (0) in FIT
     - Map `equipment` from KRD to FIT WorkoutStep
@@ -139,19 +140,20 @@ Before marking any task as complete, verify that:
     - Add additional repeat conditional types to Zod schema (repeat_until_time, repeat_until_distance, repeat_until_heart_rate_less_than)
     - _Requirements: 4.1, 4.2, 5.1, 5.2, 6.1, 6.2, 7.2, 8.1_
 
-  - [ ] 6.2 Add FIT constants for advanced duration types
+  - [ ] 6.2 Add FIT duration type schemas for advanced types
 
-    - Define `FIT_DURATION_TYPE` constants for new types (strings, camelCase)
-    - Define `KRD_DURATION_TYPE` constants for new types (strings, snake_case)
-    - Ensure no hardcoded strings in constants
+    - Create/update FIT duration type enum schema in `adapters/fit/schemas/fit-duration.ts` (camelCase values)
+    - KRD duration type enum already exists in `domain/schemas/duration.ts` (snake_case values)
+    - Update duration mapper to handle new types with bidirectional mapping
+    - Ensure no hardcoded strings in mappers (use enum schema values)
     - _Requirements: 4.1, 5.1, 5.7, 5.8, 6.1, 6.2_
 
   - [ ] 6.3 Implement FIT → KRD duration converters
 
-    - Convert calorie-based durations (CALORIES, REPEAT_UNTIL_CALORIES)
-    - Convert power-based durations (POWER*LESS_THAN, POWER_GREATER_THAN, REPEAT_UNTIL_POWER*\*)
-    - Convert additional repeat conditionals (REPEAT_UNTIL_TIME, REPEAT_UNTIL_DISTANCE, REPEAT_UNTIL_HR_LESS_THAN)
-    - Use constants for all type comparisons (no hardcoded strings)
+    - Convert calorie-based durations (calories, repeatUntilCalories)
+    - Convert power-based durations (powerLessThan, powerGreaterThan, repeatUntilPowerLessThan, repeatUntilPowerGreaterThan)
+    - Convert additional repeat conditionals (repeatUntilTime, repeatUntilDistance, repeatUntilHrLessThan)
+    - Use enum schema values for all type comparisons (no hardcoded strings)
     - _Requirements: 4.1, 4.2, 4.6, 5.1, 5.2, 5.7, 5.8, 6.1, 6.2, 6.3, 6.4_
 
   - [ ] 6.4 Implement KRD → FIT duration converters
@@ -159,7 +161,7 @@ Before marking any task as complete, verify that:
     - Convert power-based durations to FIT format
     - Convert repeat conditionals to FIT format
     - Map to correct FIT dynamic fields (durationCalories, durationPower, etc.)
-    - Use constants for all type comparisons (no hardcoded strings)
+    - Use enum schema values for all type comparisons (no hardcoded strings)
     - _Requirements: 4.3, 5.4, 6.5_
 
 - [ ] 7. Test Priority 2 enhancements

@@ -185,6 +185,57 @@ describe("convertKRDToMessages", () => {
       expect(workoutMsg.workoutMesg).not.toHaveProperty("subSport");
     });
 
+    it("should convert workout with poolLength to workout message", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const workout = buildWorkout.build({
+        name: "Swimming Workout",
+        sport: "swimming",
+        poolLength: 25,
+        poolLengthUnit: "meters" as const,
+      });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const workoutMsg = messages[1] as {
+        type: string;
+        workoutMesg: Record<string, unknown>;
+      };
+      expect(workoutMsg.workoutMesg).toMatchObject({
+        poolLength: 25,
+        poolLengthUnit: 0,
+      });
+    });
+
+    it("should omit poolLength when undefined", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const workout = buildWorkout.build({
+        name: "Running Workout",
+        sport: "running",
+        poolLength: undefined,
+      });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const workoutMsg = messages[1] as {
+        type: string;
+        workoutMesg: Record<string, unknown>;
+      };
+      expect(workoutMsg.workoutMesg).not.toHaveProperty("poolLength");
+      expect(workoutMsg.workoutMesg).not.toHaveProperty("poolLengthUnit");
+    });
+
     it("should calculate numValidSteps for individual steps", () => {
       // Arrange
       const logger = createMockLogger();
@@ -497,6 +548,66 @@ describe("convertKRDToMessages", () => {
       expect(stepMsg.workoutStepMesg.durationType).toBe(
         fitDurationTypeEnum.enum.open
       );
+    });
+
+    it("should convert workout step with equipment", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+          equipment: "swim_fins",
+        },
+      ];
+      const workout = buildWorkout.build({ steps, subSport: undefined });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toMatchObject({
+        equipment: "swimFins",
+      });
+    });
+
+    it("should omit equipment when undefined", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+          equipment: undefined,
+        },
+      ];
+      const workout = buildWorkout.build({ steps, subSport: undefined });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).not.toHaveProperty("equipment");
     });
   });
 

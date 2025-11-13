@@ -1,9 +1,11 @@
+import { convertLengthToMeters } from "../../../domain/converters/length-unit.converter";
 import type {
   RepetitionBlock,
   Workout,
   WorkoutStep,
 } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
+import { mapLengthUnitToKrd } from "../length-unit.mapper";
 import { fitDurationTypeEnum } from "../schemas/fit-duration";
 import { mapSubSportToKrd } from "../sub-sport.mapper";
 import { mapSportType } from "../type-guards";
@@ -30,6 +32,12 @@ export const mapWorkout = (
 
   if (workoutMsg?.subSport !== undefined) {
     workout.subSport = mapSubSportToKrd(workoutMsg.subSport);
+  }
+
+  if (workoutMsg?.poolLength !== undefined) {
+    const unit = mapLengthUnitToKrd(workoutMsg.poolLengthUnit);
+    workout.poolLength = convertLengthToMeters(workoutMsg.poolLength, unit);
+    workout.poolLengthUnit = "meters";
   }
 
   return workout;

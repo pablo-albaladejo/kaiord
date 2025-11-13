@@ -25,6 +25,10 @@ export const mapStep = (step: FitWorkoutStep, index: number): WorkoutStep => {
     workoutStep.notes = step.notes;
   }
 
+  if (step.equipment !== undefined) {
+    workoutStep.equipment = mapEquipmentToKrd(step.equipment);
+  }
+
   return workoutStep;
 };
 
