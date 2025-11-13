@@ -50,7 +50,7 @@ packages/
 │   │   │   ├── target-values.ts # targetUnitSchema + type TargetUnit
 │   │   │   ├── sport.ts         # sportSchema + type Sport
 │   │   │   ├── sub-sport.ts     # subSportSchema + type SubSport (snake_case)
-│   │   │   ├── file-type.ts     # fileTypeEnum + type FileType
+│   │   │   ├── file-type.ts     # fileTypeSchema + type FileType
 │   │   │   ├── swim-stroke.ts   # swimStrokeSchema + type SwimStroke
 │   │   │   └── intensity.ts     # intensitySchema + type Intensity
 │   │   └── validation/          # Business validators (not Zod)
@@ -58,11 +58,11 @@ packages/
 │   ├── adapters/
 │   │   └── fit/
 │   │       ├── schemas/         # ✅ FIT SDK-specific schemas (camelCase)
-│   │       │   ├── fit-sport.ts        # fitSportEnum + type FitSport
+│   │       │   ├── fit-sport.ts        # fitSportSchema + type FitSport
 │   │       │   ├── fit-sub-sport.ts    # fitSubSportSchema + type FitSubSport (camelCase)
 │   │       │   ├── fit-duration.ts     # fitDurationTypeSchema + type FitDurationType
-│   │       │   ├── fit-target.ts       # fitTargetTypeEnum + type FitTargetType
-│   │       │   └── fit-message-keys.ts # fitMessageKeyEnum + type FitMessageKey
+│   │       │   ├── fit-target.ts       # fitTargetTypeSchema + type FitTargetType
+│   │       │   └── fit-message-keys.ts # fitMessageKeySchema + type FitMessageKey
 │   │       └── garmin-fitsdk.ts # Validates external responses with Zod
 │   ├── application/
 │   │   └── use-cases/           # NO validation, receives inferred types
@@ -540,23 +540,23 @@ if (sport === FIT_SPORT_TYPE.CYCLING) {
 
 ```typescript
 // adapters/fit/schemas/fit-sport.ts
-export const fitSportEnum = z.enum([
+export const fitSportSchema = z.enum([
   "cycling",
   "running",
   "swimming",
   "generic",
 ]);
-export type FitSport = z.infer<typeof fitSportEnum>;
+export type FitSport = z.infer<typeof fitSportSchema>;
 
 // mapper.ts
-import { fitSportEnum } from "./schemas/fit-sport";
+import { fitSportSchema } from "./schemas/fit-sport";
 
-const result = fitSportEnum.safeParse(sport);
+const result = fitSportSchema.safeParse(sport);
 if (!result.success) {
-  return fitSportEnum.enum.generic;
+  return fitSportSchema.enum.generic;
 }
 
-if (result.data === fitSportEnum.enum.cycling) {
+if (result.data === fitSportSchema.enum.cycling) {
   return "cycling";
 }
 ```
