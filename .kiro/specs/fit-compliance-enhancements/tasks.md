@@ -29,7 +29,7 @@ Before marking any task as complete, verify that:
 
 ## Tasks
 
-- [ ] 1. Add Priority 1 fields to domain schemas
+- [x] 1. Add Priority 1 fields to domain schemas
 
   - Update Workout schema with `subSport` field
   - Update WorkoutStep schema with `notes` field

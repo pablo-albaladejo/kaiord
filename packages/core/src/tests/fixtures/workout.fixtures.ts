@@ -8,6 +8,7 @@ import type {
 
 export const buildWorkoutStep = new Factory<WorkoutStep>()
   .attr("stepIndex", () => faker.number.int({ max: 50, min: 0 }))
+  .attr("name", () => faker.lorem.words({ max: 3, min: 1 }))
   .attr("durationType", () =>
     faker.helpers.arrayElement(["time", "distance", "open"] as const)
   )
@@ -173,7 +174,19 @@ export const buildWorkoutStep = new Factory<WorkoutStep>()
     } else {
       return { type: "open" as const };
     }
-  });
+  })
+  .attr("intensity", () =>
+    faker.helpers.arrayElement([
+      "warmup",
+      "active",
+      "cooldown",
+      "rest",
+      "recovery",
+      "interval",
+      "other",
+    ] as const)
+  )
+  .attr("notes", () => faker.lorem.sentence({ max: 20, min: 3 }).slice(0, 256));
 
 export const buildRepetitionBlock = new Factory<RepetitionBlock>()
   .attr("repeatCount", () => faker.number.int({ max: 10, min: 2 }))
@@ -184,6 +197,15 @@ export const buildWorkout = new Factory<Workout>()
   .attr("sport", () =>
     faker.helpers.arrayElement(["running", "cycling", "swimming"])
   )
+  .attr("subSport", ["sport"], (sport: string) => {
+    const subSports: Record<string, Array<string>> = {
+      running: ["trail", "road", "track", "treadmill"],
+      cycling: ["road", "mountain", "gravel", "indoor_cycling"],
+      swimming: ["pool", "open_water"],
+    };
+    const options = subSports[sport] || ["generic"];
+    return faker.helpers.arrayElement(options);
+  })
   .attr("steps", () => [
     buildWorkoutStep.build(),
     buildRepetitionBlock.build(),
