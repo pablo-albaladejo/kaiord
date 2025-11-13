@@ -17,7 +17,7 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Manually set subSport for testing (since test files may not have it)
     if (krd.extensions?.workout) {
@@ -57,7 +57,7 @@ describe("Round-trip: Workout metadata - subSport field", () => {
 
     for (const subSport of subSportValues) {
       // Act - FIT → KRD
-      const krd = await reader.readToKRD(originalBuffer);
+      const krd = await reader(originalBuffer);
 
       // Set subSport
       if (krd.extensions?.workout) {
@@ -93,7 +93,7 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Ensure subSport is undefined
     if (krd.extensions?.workout) {

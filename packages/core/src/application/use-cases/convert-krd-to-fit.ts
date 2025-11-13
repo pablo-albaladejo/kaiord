@@ -29,7 +29,7 @@ export const convertKrdToFit =
       );
     }
 
-    const fitBuffer = await fitWriter.writeFromKRD(params.krd);
+    const fitBuffer = await fitWriter(params.krd);
 
     logger.info("KRD to FIT conversion successful");
     return fitBuffer;

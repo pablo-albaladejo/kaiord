@@ -12,9 +12,7 @@ describe("convertFitToKrd", () => {
     const fitBuffer = new Uint8Array([1, 2, 3, 4]);
     const expectedKrd = buildKRD.build();
 
-    const mockFitReader: FitReader = {
-      readToKRD: vi.fn().mockResolvedValue(expectedKrd),
-    };
+    const mockFitReader = vi.fn<FitReader>().mockResolvedValue(expectedKrd);
     const mockValidator: SchemaValidator = {
       validate: vi.fn().mockReturnValue([]),
     };
@@ -29,7 +27,7 @@ describe("convertFitToKrd", () => {
 
     // Assert
     expect(result).toStrictEqual(expectedKrd);
-    expect(mockFitReader.readToKRD).toHaveBeenCalledWith(fitBuffer);
+    expect(mockFitReader).toHaveBeenCalledWith(fitBuffer);
     expect(mockValidator.validate).toHaveBeenCalledWith(expectedKrd);
   });
 
@@ -42,9 +40,7 @@ describe("convertFitToKrd", () => {
       { field: "type", message: "Invalid type value" },
     ];
 
-    const mockFitReader: FitReader = {
-      readToKRD: vi.fn().mockResolvedValue(krd),
-    };
+    const mockFitReader = vi.fn<FitReader>().mockResolvedValue(krd);
     const mockValidator: SchemaValidator = {
       validate: vi.fn().mockReturnValue(validationErrors),
     };
@@ -68,9 +64,7 @@ describe("convertFitToKrd", () => {
       { field: "type", message: "Invalid type value" },
     ];
 
-    const mockFitReader: FitReader = {
-      readToKRD: vi.fn().mockResolvedValue(krd),
-    };
+    const mockFitReader = vi.fn<FitReader>().mockResolvedValue(krd);
     const mockValidator: SchemaValidator = {
       validate: vi.fn().mockReturnValue(validationErrors),
     };
@@ -99,9 +93,7 @@ describe("convertFitToKrd", () => {
     const fitBuffer = new Uint8Array([1, 2, 3, 4]);
     const readerError = new Error("Failed to read FIT file");
 
-    const mockFitReader: FitReader = {
-      readToKRD: vi.fn().mockRejectedValue(readerError),
-    };
+    const mockFitReader = vi.fn<FitReader>().mockRejectedValue(readerError);
     const mockValidator: SchemaValidator = {
       validate: vi.fn(),
     };
@@ -119,9 +111,7 @@ describe("convertFitToKrd", () => {
     const fitBuffer = new Uint8Array([1, 2, 3, 4]);
     const krd = buildKRD.build();
 
-    const mockFitReader: FitReader = {
-      readToKRD: vi.fn().mockResolvedValue(krd),
-    };
+    const mockFitReader = vi.fn<FitReader>().mockResolvedValue(krd);
     const mockValidator: SchemaValidator = {
       validate: vi.fn().mockReturnValue([]),
     };
@@ -131,7 +121,7 @@ describe("convertFitToKrd", () => {
     await convertFitToKrd(mockFitReader, mockValidator, logger)({ fitBuffer });
 
     // Assert
-    expect(mockFitReader.readToKRD).toHaveBeenCalledWith(fitBuffer);
+    expect(mockFitReader).toHaveBeenCalledWith(fitBuffer);
     expect(mockValidator.validate).toHaveBeenCalledWith(krd);
   });
 });

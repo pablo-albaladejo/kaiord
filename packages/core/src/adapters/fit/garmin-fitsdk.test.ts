@@ -11,7 +11,7 @@ import {
 } from "./garmin-fitsdk";
 
 describe("createGarminFitSdkReader", () => {
-  describe("readToKRD", () => {
+  describe("FitReader", () => {
     it("should parse valid FIT file and return KRD", async () => {
       // Arrange
       const logger = createMockLogger();
@@ -23,7 +23,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      const result = await reader.readToKRD(buffer);
+      const result = await reader(buffer);
 
       // Assert
       expect(result).toBeDefined();
@@ -44,7 +44,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      const result = await reader.readToKRD(buffer);
+      const result = await reader(buffer);
 
       // Assert
       expect(result.metadata.created).toBe("2009-09-09T20:38:00.000Z");
@@ -65,7 +65,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      const result = await reader.readToKRD(buffer);
+      const result = await reader(buffer);
 
       // Assert
       expect(result.extensions?.workout).toBeDefined();
@@ -105,7 +105,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      const result = await reader.readToKRD(buffer);
+      const result = await reader(buffer);
 
       // Assert
       expect(result.extensions?.workout).toBeDefined();
@@ -136,7 +136,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      const result = await reader.readToKRD(buffer);
+      const result = await reader(buffer);
 
       // Assert
       expect(result.extensions?.workout).toBeDefined();
@@ -160,7 +160,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      const result = await reader.readToKRD(buffer);
+      const result = await reader(buffer);
 
       // Assert
       expect(result.extensions?.workout).toBeDefined();
@@ -180,9 +180,7 @@ describe("createGarminFitSdkReader", () => {
       const corruptedBuffer = new Uint8Array([0, 0, 0, 0]);
 
       // Act & Assert
-      await expect(reader.readToKRD(corruptedBuffer)).rejects.toThrow(
-        FitParsingError
-      );
+      await expect(reader(corruptedBuffer)).rejects.toThrow(FitParsingError);
     });
 
     it("should throw FitParsingError when buffer is empty", async () => {
@@ -192,9 +190,7 @@ describe("createGarminFitSdkReader", () => {
       const emptyBuffer = new Uint8Array([]);
 
       // Act & Assert
-      await expect(reader.readToKRD(emptyBuffer)).rejects.toThrow(
-        FitParsingError
-      );
+      await expect(reader(emptyBuffer)).rejects.toThrow(FitParsingError);
     });
 
     it("should log debug message when parsing starts", async () => {
@@ -209,7 +205,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      await reader.readToKRD(buffer);
+      await reader(buffer);
 
       // Assert
       expect(debugSpy).toHaveBeenCalledWith("Parsing FIT file", {
@@ -229,7 +225,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      await reader.readToKRD(buffer);
+      await reader(buffer);
 
       // Assert
       expect(infoSpy).toHaveBeenCalledWith("FIT file parsed successfully");
@@ -244,7 +240,7 @@ describe("createGarminFitSdkReader", () => {
 
       // Act
       try {
-        await reader.readToKRD(corruptedBuffer);
+        await reader(corruptedBuffer);
       } catch {
         // Expected to throw
       }
@@ -264,7 +260,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      const result = await reader.readToKRD(buffer);
+      const result = await reader(buffer);
 
       // Assert
       expect(result.extensions).toBeDefined();
@@ -282,7 +278,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      const result = await reader.readToKRD(buffer);
+      const result = await reader(buffer);
 
       // Assert
       expect(result.extensions?.fit).toBeDefined();
@@ -304,7 +300,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      await reader.readToKRD(buffer);
+      await reader(buffer);
 
       // Assert
       const infoCalls = infoSpy.mock.calls.map((call) => call[0]);
@@ -327,7 +323,7 @@ describe("createGarminFitSdkReader", () => {
       const buffer = readFileSync(fitPath);
 
       // Act
-      const result = await reader.readToKRD(buffer);
+      const result = await reader(buffer);
 
       // Assert
       expect(result.extensions?.fit).toBeDefined();
@@ -338,7 +334,7 @@ describe("createGarminFitSdkReader", () => {
 });
 
 describe("createGarminFitSdkWriter", () => {
-  describe("writeFromKRD", () => {
+  describe("FitWriter", () => {
     it("should throw FitParsingError when conversion not implemented", async () => {
       // Arrange
       const logger = createMockLogger();
@@ -349,7 +345,7 @@ describe("createGarminFitSdkWriter", () => {
       });
 
       // Act & Assert
-      await expect(writer.writeFromKRD(krd)).rejects.toThrow(FitParsingError);
+      await expect(writer(krd)).rejects.toThrow(FitParsingError);
     });
 
     it("should log debug message when encoding starts", async () => {
@@ -362,14 +358,8 @@ describe("createGarminFitSdkWriter", () => {
         type: "workout",
       });
 
-      // Act
-      try {
-        await writer.writeFromKRD(krd);
-      } catch {
-        // Expected to throw
-      }
-
-      // Assert
+      // Act & Assert
+      await expect(writer(krd)).rejects.toThrow();
       expect(debugSpy).toHaveBeenCalledWith("Encoding KRD to FIT");
     });
 
@@ -383,14 +373,8 @@ describe("createGarminFitSdkWriter", () => {
         type: "workout",
       });
 
-      // Act
-      try {
-        await writer.writeFromKRD(krd);
-      } catch {
-        // Expected to throw
-      }
-
-      // Assert
+      // Act & Assert
+      await expect(writer(krd)).rejects.toThrow();
       expect(debugSpy).toHaveBeenCalledWith("Converting KRD to FIT messages");
     });
 
@@ -404,14 +388,8 @@ describe("createGarminFitSdkWriter", () => {
         type: "workout",
       });
 
-      // Act
-      try {
-        await writer.writeFromKRD(krd);
-      } catch {
-        // Expected to throw
-      }
-
-      // Assert
+      // Act & Assert
+      await expect(writer(krd)).rejects.toThrow();
       expect(debugSpy).toHaveBeenCalled();
     });
 
@@ -428,7 +406,7 @@ describe("createGarminFitSdkWriter", () => {
       });
 
       // Act & Assert
-      await expect(writer.writeFromKRD(krd)).rejects.toThrow(FitParsingError);
+      await expect(writer(krd)).rejects.toThrow(FitParsingError);
     });
 
     it("should propagate FitParsingError without wrapping", async () => {
@@ -440,15 +418,8 @@ describe("createGarminFitSdkWriter", () => {
         type: "workout",
       });
 
-      // Act
-      try {
-        await writer.writeFromKRD(krd);
-        expect.fail("Should have thrown");
-      } catch (error) {
-        // Assert
-        expect(error).toBeInstanceOf(FitParsingError);
-        expect((error as FitParsingError).name).toBe("FitParsingError");
-      }
+      // Act & Assert
+      await expect(writer(krd)).rejects.toThrow(FitParsingError);
     });
   });
 });

@@ -1,5 +1,3 @@
 import type { KRD } from "../domain/schemas/krd";
 
-export type FitWriter = {
-  writeFromKRD: (krd: KRD) => Promise<Uint8Array>;
-};
+export type FitWriter = (krd: KRD) => Promise<Uint8Array>;
