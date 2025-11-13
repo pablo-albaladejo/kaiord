@@ -17,6 +17,26 @@ It provides:
 - Round-trip safe conversions between FIT / TCX / PWX / KRD
 - Clean architecture & fully typed API
 
+### Supported FIT Fields
+
+#### Workout Metadata
+
+- **Sub-sport categorization**: Detailed sport types (trail running, indoor cycling, lap swimming, etc.)
+- **Pool dimensions**: Pool length and unit for swimming workouts
+
+#### Workout Steps
+
+- **Coaching notes**: Instructional text for each step (max 256 characters)
+- **Swimming equipment**: Fins, kickboard, paddles, pull buoy, snorkel
+
+#### Duration Types
+
+- **Time & distance**: Standard interval durations
+- **Calorie-based**: Steps ending after burning specified calories
+- **Power-based**: Steps ending based on power thresholds (watts)
+- **Heart rate conditionals**: Steps ending based on HR thresholds (bpm)
+- **Repeat conditionals**: Repeat blocks until time/distance/calories/HR/power targets reached
+
 ### Known Limitations
 
 - **Training Stress Score (TSS)**: The `training_peaks_tss` duration type is not yet implemented in the FIT converter. This is a TrainingPeaks-specific metric that requires additional mapping logic. Contributions welcome!
@@ -62,6 +82,12 @@ pnpm kaiord --help
 ```
 
 ---
+
+## 📚 Documentation
+
+- [NEW_FIELDS.md](./docs/NEW_FIELDS.md) - Detailed guide to new field support with examples
+- [CHANGELOG.md](./CHANGELOG.md) - Version history and release notes
+- [KRD Format Specification](./.kiro/steering/krd-format.md) - Complete KRD format documentation
 
 ## 📚 References & Resources
 
