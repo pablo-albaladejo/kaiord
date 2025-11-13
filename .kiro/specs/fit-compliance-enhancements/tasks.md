@@ -65,7 +65,7 @@ Before marking any task as complete, verify that:
     - Add unit tests for mapper functions ✓
     - _Requirements: 1.1, 1.2, 1.5_
 
-  - [ ] 2.2 Implement FIT → KRD converters for Priority 1 fields
+  - [x] 2.2 Implement FIT → KRD converters for Priority 1 fields
 
     - Map `subSport` from FIT Workout message to KRD
     - Map `notes` from FIT WorkoutStep message to KRD

@@ -11,7 +11,7 @@ export const mapStep = (step: FitWorkoutStep, index: number): WorkoutStep => {
   const duration = mapDuration(step);
   const target = mapTarget(step);
 
-  return {
+  const workoutStep: WorkoutStep = {
     stepIndex: step.messageIndex ?? index,
     name: step.wktStepName,
     durationType: mapDurationType(step.durationType),
@@ -20,6 +20,12 @@ export const mapStep = (step: FitWorkoutStep, index: number): WorkoutStep => {
     target,
     intensity: mapIntensity(step.intensity),
   };
+
+  if (step.notes !== undefined) {
+    workoutStep.notes = step.notes;
+  }
+
+  return workoutStep;
 };
 
 const mapIntensity = (intensity: string | undefined): Intensity | undefined => {
