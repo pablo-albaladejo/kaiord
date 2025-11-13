@@ -4,6 +4,7 @@ import {
 } from "../../../domain/schemas/intensity";
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import { mapDuration, mapDurationType } from "../duration/duration.mapper";
+import { mapEquipmentToKrd } from "../equipment.mapper";
 import { mapTarget, mapTargetType } from "../target/target.mapper";
 import type { FitWorkoutStep } from "../types";
 
