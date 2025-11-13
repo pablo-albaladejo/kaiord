@@ -1,31 +1,31 @@
 # Implementation Plan
 
-- [ ] 1. Create domain schema files for KRD format
+- [x] 1. Create domain schema files for KRD format
 
   - Create Zod enum schemas for core domain concepts in snake_case format
   - Export inferred TypeScript types from each schema
   - _Requirements: 1.1, 1.2, 1.3, 2.1, 2.2, 6.1, 6.2, 6.3, 7.1, 7.2, 7.3, 12.1, 12.4, 13.1_
 
-- [ ] 1.1 Create sport schema in domain/schemas/sport.ts
+- [x] 1.1 Create sport schema in domain/schemas/sport.ts
 
   - Define `sportEnum` with z.enum() containing: "cycling", "running", "swimming", "generic"
   - Export `Sport` type using z.infer
   - _Requirements: 1.1, 1.2, 1.3_
 
-- [ ] 1.2 Create sub-sport schema in domain/schemas/sub-sport.ts
+- [x] 1.2 Create sub-sport schema in domain/schemas/sub-sport.ts
 
   - Define `subSportEnum` with all 60+ sub-sport values in snake_case
   - Include values like "indoor_cycling", "hand_cycling", "lap_swimming", etc.
   - Export `SubSport` type using z.infer
   - _Requirements: 2.1, 2.2, 2.6_
 
-- [ ] 1.3 Create file-type schema in domain/schemas/file-type.ts
+- [x] 1.3 Create file-type schema in domain/schemas/file-type.ts
 
   - Define `fileTypeEnum` with z.enum() containing: "workout", "activity", "course"
   - Export `FileType` type using z.infer
   - _Requirements: 7.1, 7.2, 7.3_
 
-- [ ] 1.4 Create swim-stroke schema in domain/schemas/swim-stroke.ts
+- [x] 1.4 Create swim-stroke schema in domain/schemas/swim-stroke.ts
 
   - Define `swimStrokeEnum` with values: "freestyle", "backstroke", "breaststroke", "butterfly", "drill", "mixed", "im"
   - Export `SwimStroke` type using z.infer
@@ -33,7 +33,7 @@
   - Define `FIT_TO_SWIM_STROKE` mapping object for reverse conversion
   - _Requirements: 6.1, 6.2, 6.3, 6.4, 6.5_
 
-- [ ] 1.5 Write tests for domain schemas
+- [x] 1.5 Write tests for domain schemas
 
   - Test sport schema validates correct values and rejects invalid values
   - Test sub-sport schema validates all 60+ values
