@@ -80,7 +80,7 @@ Before marking any task as complete, verify that:
 
 - [ ] 3. Test Priority 1 fields
 
-  - [ ] 3.1 Write integration tests for Priority 1 converters
+  - [x] 3.1 Write integration tests for Priority 1 converters
 
     - Test subSport mapping in workout converter (FIT → KRD)
     - Test subSport mapping in workout converter (KRD → FIT)

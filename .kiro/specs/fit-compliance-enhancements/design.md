@@ -20,10 +20,17 @@ This design document outlines the implementation approach for enhancing the Kaio
 domain/schemas/          # Update Zod schemas for KRD types
 ├── workout.ts          # Add subSport, poolLength, poolLengthUnit
 ├── workout-step.ts     # Add notes, equipment
-└── duration.ts         # Add advanced duration types
+├── duration.ts         # Add advanced duration types
+├── sub-sport.ts        # NEW: Domain sub-sport enum (snake_case)
+└── equipment.ts        # NEW: Domain equipment enum (snake_case)
 
 adapters/fit/
-├── constants.ts        # Add new FIT constants
+├── schemas/            # NEW: FIT adapter Zod schemas (camelCase)
+│   ├── fit-sub-sport.ts       # FIT sub-sport enum
+│   ├── fit-equipment.ts       # FIT equipment enum
+│   └── fit-duration-type.ts   # FIT duration type enum
+├── sub-sport.mapper.ts        # NEW: Bidirectional sub-sport mapping
+├── equipment.mapper.ts        # NEW: Bidirectional equipment mapping
 ├── duration/
 │   └── duration.converter.ts  # Add advanced duration converters
 ├── fit-to-krd/
@@ -154,89 +161,106 @@ export const durationSchema = z.discriminatedUnion("type", [
 - Each duration type has specific value fields (seconds, meters, watts, calories, bpm)
 - Naming: `repeat_until_heart_rate_*` (not `heart_rate_*`) for consistency
 
-### 2. FIT Constants
+### 2. FIT Adapter Schemas
+
+Following the Zod patterns, we define enum schemas for FIT adapter-specific types (not constant objects).
+
+#### FIT Sub-Sport Schema
 
 ```typescript
-// adapters/fit/constants.ts
+// adapters/fit/schemas/fit-sub-sport.ts
+import { z } from "zod";
 
-// NEW: Sub-sport values (matching Garmin JavaScript SDK)
-export const FIT_SUB_SPORT = {
-  GENERIC: "generic",
-  TREADMILL: "treadmill",
-  STREET: "street",
-  TRAIL: "trail",
-  TRACK: "track",
-  SPIN: "spin",
-  INDOOR_CYCLING: "indoorCycling",
-  ROAD: "road",
-  MOUNTAIN: "mountain",
+export const fitSubSportEnum = z.enum([
+  "generic",
+  "treadmill",
+  "street",
+  "trail",
+  "track",
+  "spin",
+  "indoorCycling", // camelCase for FIT SDK
+  "road",
+  "mountain",
+  "gravel",
+  "cyclocross",
+  "handCycling",
+  "trackCycling",
+  "indoorRowing",
+  "elliptical",
+  "stairClimbing",
+  "lapSwimming",
+  "openWater",
   // ... additional sub-sports
-} as const;
+]);
 
-// NEW: Equipment values (matching Garmin JavaScript SDK)
-export const FIT_EQUIPMENT = {
-  NONE: "none",
-  SWIM_FINS: "swimFins",
-  SWIM_KICKBOARD: "swimKickboard",
-  SWIM_PADDLES: "swimPaddles",
-  SWIM_PULL_BUOY: "swimPullBuoy",
-  SWIM_SNORKEL: "swimSnorkel",
-} as const;
+export type FitSubSport = z.infer<typeof fitSubSportEnum>;
+```
 
-// NEW: Duration types (matching Garmin JavaScript SDK field names)
-export const FIT_DURATION_TYPE = {
-  // ... existing
-  TIME: "time",
-  DISTANCE: "distance",
-  HR_LESS_THAN: "hrLessThan",
-  OPEN: "open",
-  REPEAT_UNTIL_STEPS_COMPLETE: "repeatUntilStepsCmplt",
-  REPEAT_UNTIL_HR_GREATER_THAN: "repeatUntilHrGreaterThan",
-  // NEW:
-  CALORIES: "calories",
-  POWER_LESS_THAN: "powerLessThan",
-  POWER_GREATER_THAN: "powerGreaterThan",
-  REPEAT_UNTIL_TIME: "repeatUntilTime",
-  REPEAT_UNTIL_DISTANCE: "repeatUntilDistance",
-  REPEAT_UNTIL_CALORIES: "repeatUntilCalories",
-  REPEAT_UNTIL_HR_LESS_THAN: "repeatUntilHrLessThan",
-  REPEAT_UNTIL_POWER_LESS_THAN: "repeatUntilPowerLessThan",
-  REPEAT_UNTIL_POWER_GREATER_THAN: "repeatUntilPowerGreaterThan",
-} as const;
+#### FIT Equipment Schema
 
-// NEW: KRD duration type constants (for use in converters)
-export const KRD_DURATION_TYPE = {
-  TIME: "time",
-  DISTANCE: "distance",
-  HEART_RATE_LESS_THAN: "heart_rate_less_than",
-  OPEN: "open",
-  CALORIES: "calories",
-  POWER_LESS_THAN: "power_less_than",
-  POWER_GREATER_THAN: "power_greater_than",
-  REPEAT_UNTIL_TIME: "repeat_until_time",
-  REPEAT_UNTIL_DISTANCE: "repeat_until_distance",
-  REPEAT_UNTIL_CALORIES: "repeat_until_calories",
-  REPEAT_UNTIL_HEART_RATE_LESS_THAN: "repeat_until_heart_rate_less_than",
-  REPEAT_UNTIL_HEART_RATE_GREATER_THAN: "repeat_until_heart_rate_greater_than",
-  REPEAT_UNTIL_POWER_LESS_THAN: "repeat_until_power_less_than",
-  REPEAT_UNTIL_POWER_GREATER_THAN: "repeat_until_power_greater_than",
-} as const;
+```typescript
+// adapters/fit/schemas/fit-equipment.ts
+import { z } from "zod";
+
+export const fitEquipmentEnum = z.enum([
+  "none",
+  "swimFins", // camelCase for FIT SDK
+  "swimKickboard",
+  "swimPaddles",
+  "swimPullBuoy",
+  "swimSnorkel",
+]);
+
+export type FitEquipment = z.infer<typeof fitEquipmentEnum>;
+```
+
+#### FIT Duration Type Schema
+
+```typescript
+// adapters/fit/schemas/fit-duration-type.ts
+import { z } from "zod";
+
+export const fitDurationTypeEnum = z.enum([
+  // Existing
+  "time",
+  "distance",
+  "hrLessThan",
+  "open",
+  "repeatUntilStepsCmplt",
+  "repeatUntilHrGreaterThan",
+  // NEW: Advanced duration types
+  "calories",
+  "powerLessThan",
+  "powerGreaterThan",
+  "repeatUntilTime",
+  "repeatUntilDistance",
+  "repeatUntilCalories",
+  "repeatUntilHrLessThan",
+  "repeatUntilPowerLessThan",
+  "repeatUntilPowerGreaterThan",
+]);
+
+export type FitDurationType = z.infer<typeof fitDurationTypeEnum>;
 ```
 
 **Design Decisions:**
 
-- FIT constants are strings matching Garmin JavaScript SDK field names (camelCase)
-- KRD constants are strings for KRD format (snake_case)
-- Use `as const` for type inference
-- Group related constants together
-- **No hardcoded strings in converters** - always use constants from `KRD_DURATION_TYPE` and `FIT_DURATION_TYPE`
+- **Zod enum schemas** instead of constant objects (following `zod-patterns.md`)
+- **camelCase values** for FIT adapter schemas (matching Garmin JavaScript SDK)
+- **Runtime validation** available via `.safeParse()` for external data
+- **Type inference** via `z.infer<typeof schema>`
+- **Access enum values** via `.enum` property (e.g., `fitSubSportEnum.enum.indoorCycling`)
+- **No hardcoded strings in converters** - always use enum schema values
 
 ### 3. FIT → KRD Converters
 
 #### Workout Message Converter
 
-```typescript
-// adapters/fit/fit-to-krd/fit-to-krd.converter.ts
+````typescript
+// adapters/fit/fit-to-krd/fit-to-krd-metadata.mapper.ts
+import { mapSubSportToKrd } from "../sub-sport.mapper";
+import type { Workout } from "../../../domain/schemas/workout";
+import type { FitWorkoutMessage } from "../types";
 
 const convertWorkoutMessage = (fitWorkout: FitWorkoutMessage): Workout => {
   return {
@@ -244,8 +268,8 @@ const convertWorkoutMessage = (fitWorkout: FitWorkoutMessage): Workout => {
     sport: convertSport(fitWorkout.sport),
     subSport:
       fitWorkout.subSport !== undefined
-        ? convertSubSport(fitWorkout.subSport)
-        : undefined, // NEW
+        ? mapSubSportToKrd(fitWorkout.subSport) // NEW: Use mapper with validation
+        : undefined,
     poolLength:
       fitWorkout.poolLength !== undefined
         ? convertPoolLength(fitWorkout.poolLength, fitWorkout.poolLengthUnit)
@@ -266,6 +290,11 @@ const convertPoolLength = (length: number, unit?: number): number => {
 #### WorkoutStep Message Converter
 
 ```typescript
+// adapters/fit/fit-to-krd/fit-to-krd-step.mapper.ts
+import { mapEquipmentToKrd } from "../equipment.mapper";
+import type { WorkoutStep } from "../../../domain/schemas/workout-step";
+import type { FitWorkoutStepMessage } from "../types";
+
 const convertWorkoutStepMessage = (
   fitStep: FitWorkoutStepMessage
 ): WorkoutStep => {
@@ -279,80 +308,83 @@ const convertWorkoutStepMessage = (
       fitStep.intensity !== undefined
         ? convertIntensity(fitStep.intensity)
         : undefined,
-    notes: fitStep.notes, // NEW: Direct mapping
+    notes: fitStep.notes, // NEW: Direct mapping (string)
     equipment:
       fitStep.equipment !== undefined
-        ? convertEquipment(fitStep.equipment)
-        : undefined, // NEW
+        ? mapEquipmentToKrd(fitStep.equipment) // NEW: Use mapper with validation
+        : undefined,
   };
 };
-```
+````
 
 #### Duration Converter
 
 ```typescript
 // adapters/fit/duration/duration.converter.ts
+import { fitDurationTypeEnum } from "../schemas/fit-duration-type";
+import type { Duration } from "../../../domain/schemas/duration";
+import type { FitWorkoutStepMessage } from "../types";
 
 const convertDuration = (fitStep: FitWorkoutStepMessage): Duration => {
   const durationType = fitStep.durationType;
 
   // Existing types
-  if (durationType === FIT_DURATION_TYPE.TIME) {
+  if (durationType === fitDurationTypeEnum.enum.time) {
     return { type: "time", seconds: fitStep.durationTime };
   }
 
   // NEW: Calorie-based
-  if (durationType === FIT_DURATION_TYPE.CALORIES) {
+  if (durationType === fitDurationTypeEnum.enum.calories) {
     return { type: "calories", calories: fitStep.durationCalories };
   }
 
   // NEW: Power-based
-  if (durationType === FIT_DURATION_TYPE.POWER_LESS_THAN) {
+  if (durationType === fitDurationTypeEnum.enum.powerLessThan) {
     return { type: "power_less_than", watts: fitStep.durationPower };
   }
 
-  if (durationType === FIT_DURATION_TYPE.POWER_GREATER_THAN) {
+  if (durationType === fitDurationTypeEnum.enum.powerGreaterThan) {
     return { type: "power_greater_than", watts: fitStep.durationPower };
   }
 
   // NEW: Repeat conditionals
-  if (durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_TIME) {
+  if (durationType === fitDurationTypeEnum.enum.repeatUntilTime) {
     return { type: "repeat_until_time", seconds: fitStep.durationTime };
   }
 
-  if (durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_DISTANCE) {
+  if (durationType === fitDurationTypeEnum.enum.repeatUntilDistance) {
     return { type: "repeat_until_distance", meters: fitStep.durationDistance };
   }
 
-  if (durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_CALORIES) {
+  if (durationType === fitDurationTypeEnum.enum.repeatUntilCalories) {
     return {
       type: "repeat_until_calories",
       calories: fitStep.durationCalories,
     };
   }
 
-  if (durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_HR_LESS_THAN) {
+  if (durationType === fitDurationTypeEnum.enum.repeatUntilHrLessThan) {
     return {
       type: "repeat_until_heart_rate_less_than",
       bpm: fitStep.durationHr,
     };
   }
 
-  if (durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_HR_GREATER_THAN) {
+  if (durationType === fitDurationTypeEnum.enum.repeatUntilHrGreaterThan) {
     return {
       type: "repeat_until_heart_rate_greater_than",
       bpm: fitStep.durationHr,
     };
   }
 
-  if (durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_POWER_LESS_THAN) {
+  if (durationType === fitDurationTypeEnum.enum.repeatUntilPowerLessThan) {
     return {
       type: "repeat_until_power_less_than",
       watts: fitStep.durationPower,
     };
   }
 
-  if (durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_POWER_GREATER_THAN) {
+  if (durationType === fitDurationTypeEnum.enum.repeatUntilPowerGreaterThan) {
     return {
       type: "repeat_until_power_greater_than",
       watts: fitStep.durationPower,
@@ -366,16 +398,21 @@ const convertDuration = (fitStep: FitWorkoutStepMessage): Duration => {
 
 **Design Decisions:**
 
+- **Use enum schema values** via `.enum` property (no hardcoded strings)
 - Each duration type maps to specific FIT dynamic field
 - Consistent naming: `repeat_until_heart_rate_*` (not `heart_rate_*`)
 - Fallback to "open" for unknown types
+- Type-safe comparisons with enum values
 
 ### 4. KRD → FIT Converters
 
 #### Workout Converter
 
 ```typescript
-// adapters/fit/krd-to-fit/krd-to-fit.converter.ts
+// adapters/fit/krd-to-fit/krd-to-fit-metadata.mapper.ts
+import { mapSubSportToFit } from "../sub-sport.mapper";
+import type { Workout } from "../../../domain/schemas/workout";
+import type { FitWorkoutMessage } from "../types";
 
 const convertWorkoutToFit = (workout: Workout): FitWorkoutMessage => {
   const message: FitWorkoutMessage = {
@@ -386,7 +423,7 @@ const convertWorkoutToFit = (workout: Workout): FitWorkoutMessage => {
 
   // NEW: Optional fields
   if (workout.subSport !== undefined) {
-    message.subSport = convertSubSportToFit(workout.subSport);
+    message.subSport = mapSubSportToFit(workout.subSport); // Use mapper
   }
 
   if (workout.poolLength !== undefined) {
@@ -401,6 +438,11 @@ const convertWorkoutToFit = (workout: Workout): FitWorkoutMessage => {
 #### WorkoutStep Converter
 
 ```typescript
+// adapters/fit/krd-to-fit/krd-to-fit-step.mapper.ts
+import { mapEquipmentToFit } from "../equipment.mapper";
+import type { WorkoutStep } from "../../../domain/schemas/workout-step";
+import type { FitWorkoutStepMessage } from "../types";
+
 const convertWorkoutStepToFit = (
   step: WorkoutStep,
   index: number
@@ -415,11 +457,11 @@ const convertWorkoutStepToFit = (
 
   // NEW: Optional fields
   if (step.notes !== undefined) {
-    message.notes = step.notes;
+    message.notes = step.notes; // Direct mapping (string)
   }
 
   if (step.equipment !== undefined) {
-    message.equipment = convertEquipmentToFit(step.equipment);
+    message.equipment = mapEquipmentToFit(step.equipment); // Use mapper
   }
 
   if (step.intensity !== undefined) {
@@ -524,23 +566,59 @@ export type Duration = z.infer<typeof durationSchema>;
 
 ### Enumeration Mappings
 
+Bidirectional mappings between FIT adapter schemas (camelCase) and domain schemas (snake_case).
+
 ```typescript
-// Sub-sport mapping (FIT camelCase → KRD snake_case)
-const SUB_SPORT_MAP: Record<string, string> = {
+// adapters/fit/sub-sport.mapper.ts
+import { subSportEnum, type SubSport } from "../../domain/schemas/sub-sport";
+import { fitSubSportEnum, type FitSubSport } from "./schemas/fit-sub-sport";
+
+// FIT → KRD mapping
+const FIT_TO_KRD_SUB_SPORT: Record<FitSubSport, SubSport> = {
   generic: "generic",
   treadmill: "treadmill",
   street: "street",
   trail: "trail",
   track: "track",
   spin: "spin",
-  indoorCycling: "indoor_cycling",
+  indoorCycling: "indoor_cycling", // camelCase → snake_case
   road: "road",
   mountain: "mountain",
-  // ... additional mappings
+  gravel: "gravel",
+  cyclocross: "cyclocross",
+  handCycling: "hand_cycling",
+  trackCycling: "track_cycling",
+  indoorRowing: "indoor_rowing",
+  elliptical: "elliptical",
+  stairClimbing: "stair_climbing",
+  lapSwimming: "lap_swimming",
+  openWater: "open_water",
 };
 
-// Equipment mapping (FIT camelCase → KRD snake_case)
-const EQUIPMENT_MAP: Record<string, string> = {
+export const mapSubSportToKrd = (fitSubSport: unknown): SubSport => {
+  const result = fitSubSportEnum.safeParse(fitSubSport);
+  if (!result.success) {
+    return subSportEnum.enum.generic; // Safe default
+  }
+  return FIT_TO_KRD_SUB_SPORT[result.data] || subSportEnum.enum.generic;
+};
+
+export const mapSubSportToFit = (krdSubSport: SubSport): FitSubSport => {
+  // Reverse mapping
+  const entry = Object.entries(FIT_TO_KRD_SUB_SPORT).find(
+    ([_, krd]) => krd === krdSubSport
+  );
+  return entry ? (entry[0] as FitSubSport) : fitSubSportEnum.enum.generic;
+};
+```
+
+```typescript
+// adapters/fit/equipment.mapper.ts
+import { equipmentEnum, type Equipment } from "../../domain/schemas/equipment";
+import { fitEquipmentEnum, type FitEquipment } from "./schemas/fit-equipment";
+
+// FIT → KRD mapping
+const FIT_TO_KRD_EQUIPMENT: Record<FitEquipment, Equipment> = {
   none: "none",
   swimFins: "swim_fins",
   swimKickboard: "swim_kickboard",
@@ -548,7 +626,31 @@ const EQUIPMENT_MAP: Record<string, string> = {
   swimPullBuoy: "swim_pull_buoy",
   swimSnorkel: "swim_snorkel",
 };
+
+export const mapEquipmentToKrd = (fitEquipment: unknown): Equipment => {
+  const result = fitEquipmentEnum.safeParse(fitEquipment);
+  if (!result.success) {
+    return equipmentEnum.enum.none; // Safe default
+  }
+  return FIT_TO_KRD_EQUIPMENT[result.data] || equipmentEnum.enum.none;
+};
+
+export const mapEquipmentToFit = (krdEquipment: Equipment): FitEquipment => {
+  // Reverse mapping
+  const entry = Object.entries(FIT_TO_KRD_EQUIPMENT).find(
+    ([_, krd]) => krd === krdEquipment
+  );
+  return entry ? (entry[0] as FitEquipment) : fitEquipmentEnum.enum.none;
+};
 ```
+
+**Design Decisions:**
+
+- **Validation at adapter boundary** using `.safeParse()`
+- **Safe defaults** for invalid values (generic, none)
+- **Bidirectional mappers** for FIT ↔ KRD conversions
+- **Type-safe mappings** using Record types
+- **Access enum values** via `.enum` property for comparisons
 
 ## Error Handling
 
@@ -770,29 +872,72 @@ const newKrd: KRD = {
 
 ### Naming Consistency Fix
 
-Since the project hasn't been published yet, we can fix the naming inconsistency directly:
+**Requirement**: Maintain backward compatibility with existing `heart_rate_greater_than` duration type while introducing consistent naming.
 
-**Change**: `heart_rate_greater_than` → `repeat_until_heart_rate_greater_than`
+**Strategy**: Support both old and new naming during a transition period:
 
 ```typescript
-// Update existing duration type to use consistent naming
+// Support both old and new naming for backward compatibility
 export const durationSchema = z.discriminatedUnion("type", [
-  // OLD (remove):
-  // z.object({ type: z.literal("heart_rate_greater_than"), bpm: z.number().positive() }),
+  // DEPRECATED: Old naming (maintained for backward compatibility)
+  z.object({
+    type: z.literal("heart_rate_greater_than"),
+    bpm: z.number().positive(),
+  }),
 
-  // NEW (consistent naming):
+  // NEW: Consistent naming (preferred)
   z.object({
     type: z.literal("repeat_until_heart_rate_greater_than"),
     bpm: z.number().positive(),
   }),
+
+  // ... other duration types
 ]);
 ```
 
+**Converter Behavior**:
+
+- **FIT → KRD**: Always use new naming (`repeat_until_heart_rate_greater_than`)
+- **KRD → FIT**: Accept both old and new naming, convert to FIT format
+- **Validation**: Both variants pass schema validation
+
+**Migration Path**:
+
+```typescript
+// Old KRD files continue to work
+const oldKrd = {
+  duration: {
+    type: "heart_rate_greater_than", // DEPRECATED but supported
+    bpm: 160,
+  },
+};
+
+// New KRD files use consistent naming
+const newKrd = {
+  duration: {
+    type: "repeat_until_heart_rate_greater_than", // PREFERRED
+    bpm: 160,
+  },
+};
+
+// Converter normalizes to new naming
+const normalized = normalizeDuration(oldKrd.duration);
+// Result: { type: "repeat_until_heart_rate_greater_than", bpm: 160 }
+```
+
+**Documentation Requirements**:
+
+1. Mark `heart_rate_greater_than` as DEPRECATED in schema documentation
+2. Add migration guide showing how to update existing KRD files
+3. Include deprecation warnings in converter logs when old naming is detected
+4. Plan for removal in future major version (e.g., v2.0.0)
+
 **Impact**:
 
-- Update all existing tests and fixtures
-- Update any example KRD files in documentation
-- No backward compatibility needed (pre-release)
+- Existing KRD files with old naming continue to work
+- New conversions from FIT always use new naming
+- Gradual migration path for users
+- Clear deprecation timeline
 
 ## Implementation Phases
 
@@ -863,6 +1008,48 @@ export const durationSchema = z.discriminatedUnion("type", [
 4. **Enumeration validation**: Sub-sport and equipment validated against FIT spec
 5. **No injection risks**: Pure data transformation, no code execution
 
+## Deprecation Strategy
+
+### Deprecated Duration Type
+
+**Type**: `heart_rate_greater_than` (deprecated in favor of `repeat_until_heart_rate_greater_than`)
+
+**Deprecation Timeline**:
+
+1. **Current version (1.x)**: Both variants supported, old naming deprecated
+2. **Next major version (2.0)**: Remove support for old naming
+
+**Implementation**:
+
+```typescript
+// Helper function to normalize deprecated duration types
+const normalizeDurationType = (type: string): string => {
+  if (type === "heart_rate_greater_than") {
+    logger.warn("Duration type 'heart_rate_greater_than' is deprecated", {
+      deprecatedType: "heart_rate_greater_than",
+      preferredType: "repeat_until_heart_rate_greater_than",
+      migrationGuide: "https://kaiord.dev/migration/duration-naming",
+    });
+    return "repeat_until_heart_rate_greater_than";
+  }
+  return type;
+};
+
+// Use in converters
+const convertDuration = (fitStep: FitWorkoutStepMessage): Duration => {
+  // ... conversion logic
+  const normalizedType = normalizeDurationType(duration.type);
+  return { ...duration, type: normalizedType };
+};
+```
+
+**User Communication**:
+
+- Add deprecation notice to CHANGELOG
+- Update documentation with migration examples
+- Log warnings when deprecated types are encountered
+- Provide automated migration tool (optional)
+
 ## Monitoring & Observability
 
 ### Logging
@@ -875,6 +1062,9 @@ logger.debug("Converting workout with new fields", {
   advancedDurationTypes: workout.steps
     .map((s) => s.duration.type)
     .filter((t) => isAdvancedDurationType(t)),
+  deprecatedTypesUsed: workout.steps.filter(
+    (s) => s.duration.type === "heart_rate_greater_than"
+  ).length,
 });
 ```
 
@@ -884,6 +1074,7 @@ logger.debug("Converting workout with new fields", {
 - Distribution of sub-sport values
 - Distribution of equipment types
 - Usage of advanced duration types
+- **Deprecation tracking**: Count of deprecated duration types encountered
 
 ## Success Criteria
 
