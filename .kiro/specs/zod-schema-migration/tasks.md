@@ -228,14 +228,14 @@
   - Remove import of `FIT_MESSAGE_KEY` from constants
   - _Requirements: 9.4, 10.1_
 
-- [ ] 8. Remove obsolete constants files
+- [x] 8. Remove obsolete constants files
 
   - Delete constants.ts after verifying no imports remain
   - Delete sub-sport constants files
   - Update sub-sport.ts exports
   - _Requirements: 11.1, 11.2, 11.3, 11.4, 11.5_
 
-- [ ] 8.1 Verify no imports from constants files remain
+- [x] 8.1 Verify no imports from constants files remain
 
   - Search codebase for imports from constants.ts
   - Search for imports from sub-sport-fit.constants.ts
@@ -243,22 +243,22 @@
   - Ensure all mappers have been updated
   - _Requirements: 11.4_
 
-- [ ] 8.2 Delete adapters/fit/constants.ts
+- [x] 8.2 Delete adapters/fit/constants.ts
 
   - Remove the main constants file
   - _Requirements: 11.1_
 
-- [ ] 8.3 Delete adapters/fit/sub-sport-fit.constants.ts
+- [x] 8.3 Delete adapters/fit/sub-sport-fit.constants.ts
 
   - Remove FIT sub-sport constants file
   - _Requirements: 11.2_
 
-- [ ] 8.4 Delete adapters/fit/sub-sport-krd.constants.ts
+- [x] 8.4 Delete adapters/fit/sub-sport-krd.constants.ts
 
   - Remove KRD sub-sport constants file
   - _Requirements: 11.3_
 
-- [ ] 8.5 Update adapters/fit/sub-sport.ts exports
+- [x] 8.5 Update adapters/fit/sub-sport.ts exports
 
   - Remove exports of constant objects
   - Export schemas and types from schema files instead

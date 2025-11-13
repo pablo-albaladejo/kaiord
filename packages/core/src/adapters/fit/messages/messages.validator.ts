@@ -1,5 +1,5 @@
 import type { Logger } from "../../../ports/logger";
-import { FIT_MESSAGE_KEY } from "../constants";
+import { fitMessageKeyEnum } from "../schemas/fit-message-keys";
 import type { FitMessages } from "../types";
 
 export const validateMessages = (
@@ -16,7 +16,7 @@ export const validateMessages = (
     logger.warn("No workout message found in FIT file");
   }
 
-  const workoutMessages = messages[FIT_MESSAGE_KEY.WORKOUT];
+  const workoutMessages = messages[fitMessageKeyEnum.enum.workoutMesgs];
   if (workoutMessages && workoutMessages.length > 1) {
     logger.warn("Multiple workout messages found, using first one", {
       count: workoutMessages.length,

@@ -3,8 +3,8 @@ import {
   type Duration,
   type DurationType,
 } from "../../../domain/schemas/duration";
-import { FIT_DURATION_TYPE } from "../constants";
 import { convertFitDuration } from "../duration/duration.converter";
+import { fitDurationTypeEnum } from "../schemas/fit-duration";
 import type { FitWorkoutStep } from "../types";
 
 export const mapDuration = (step: FitWorkoutStep): Duration => {
@@ -14,13 +14,13 @@ export const mapDuration = (step: FitWorkoutStep): Duration => {
 export const mapDurationType = (
   fitDurationType: string | undefined
 ): DurationType => {
-  if (fitDurationType === FIT_DURATION_TYPE.TIME)
+  if (fitDurationType === fitDurationTypeEnum.enum.time)
     return durationTypeEnum.enum.time;
-  if (fitDurationType === FIT_DURATION_TYPE.DISTANCE)
+  if (fitDurationType === fitDurationTypeEnum.enum.distance)
     return durationTypeEnum.enum.distance;
-  if (fitDurationType === FIT_DURATION_TYPE.HR_LESS_THAN)
+  if (fitDurationType === fitDurationTypeEnum.enum.hrLessThan)
     return durationTypeEnum.enum.heart_rate_less_than;
-  if (fitDurationType === FIT_DURATION_TYPE.REPEAT_UNTIL_HR_GREATER_THAN)
+  if (fitDurationType === fitDurationTypeEnum.enum.repeatUntilHrGreaterThan)
     return durationTypeEnum.enum.heart_rate_greater_than;
   return durationTypeEnum.enum.open;
 };

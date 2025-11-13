@@ -4,8 +4,8 @@ import type {
   WorkoutStep,
 } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
-import { DEFAULT_SPORT } from "../constants";
 import { fitDurationTypeEnum } from "../schemas/fit-duration";
+import { mapSportType } from "../type-guards";
 import type { FitWorkoutMessage, FitWorkoutStep } from "../types";
 import { mapStep } from "./step.mapper";
 
@@ -86,11 +86,4 @@ const buildRepetitionBlock = (
     repeatCount,
     steps: repeatedSteps,
   };
-};
-
-const mapSportType = (fitSport: string | undefined): string => {
-  if (!fitSport) {
-    return DEFAULT_SPORT;
-  }
-  return fitSport.toLowerCase();
 };
