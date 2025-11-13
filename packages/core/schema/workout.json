@@ -17,6 +17,14 @@
         "subSport": {
           "type": "string"
         },
+        "poolLength": {
+          "type": "number",
+          "exclusiveMinimum": 0
+        },
+        "poolLengthUnit": {
+          "type": "string",
+          "const": "meters"
+        },
         "steps": {
           "type": "array",
           "items": {
@@ -526,6 +534,17 @@
                   "notes": {
                     "type": "string",
                     "maxLength": 256
+                  },
+                  "equipment": {
+                    "type": "string",
+                    "enum": [
+                      "none",
+                      "swim_fins",
+                      "swim_kickboard",
+                      "swim_paddles",
+                      "swim_pull_buoy",
+                      "swim_snorkel"
+                    ]
                   }
                 },
                 "required": [
@@ -1051,6 +1070,17 @@
                         "notes": {
                           "type": "string",
                           "maxLength": 256
+                        },
+                        "equipment": {
+                          "type": "string",
+                          "enum": [
+                            "none",
+                            "swim_fins",
+                            "swim_kickboard",
+                            "swim_paddles",
+                            "swim_pull_buoy",
+                            "swim_snorkel"
+                          ]
                         }
                       },
                       "required": [

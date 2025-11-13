@@ -97,7 +97,7 @@ Before marking any task as complete, verify that:
     - Test with real FIT files containing these fields
     - _Requirements: 1.3, 2.3, 9.1, 9.5_
 
-- [ ] 4. Add Priority 2 swimming fields to domain schemas
+- [x] 4. Add Priority 2 swimming fields to domain schemas
 
   - Update Workout schema with `poolLength` and `poolLengthUnit` fields
   - Update WorkoutStep schema with `equipment` field
