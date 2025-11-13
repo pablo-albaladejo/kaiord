@@ -18,6 +18,8 @@ export type FitMessages = {
     numValidSteps?: number;
     sport?: string;
     subSport?: string;
+    poolLength?: number;
+    poolLengthUnit?: number;
   }>;
   [fitMessageKeyEnum.enum.workoutStepMesgs]?: Array<{
     messageIndex?: number;
@@ -49,6 +51,7 @@ export type FitMessages = {
     repeatSteps?: number;
     repeatHr?: number;
     notes?: string;
+    equipment?: string;
   }>;
   [key: string]: Array<Record<string, unknown>> | undefined;
 };

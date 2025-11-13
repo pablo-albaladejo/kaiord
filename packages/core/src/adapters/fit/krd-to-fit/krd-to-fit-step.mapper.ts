@@ -1,5 +1,6 @@
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
+import { mapEquipmentToFit } from "../equipment.mapper";
 import { fitDurationTypeEnum } from "../schemas/fit-duration";
 import { fitMessageKeyEnum } from "../schemas/fit-message-keys";
 import { convertTarget } from "./krd-to-fit-target.mapper";
@@ -32,6 +33,10 @@ export const convertWorkoutStep = (
     } else {
       workoutStepMesg.notes = step.notes;
     }
+  }
+
+  if (step.equipment !== undefined) {
+    workoutStepMesg.equipment = mapEquipmentToFit(step.equipment);
   }
 
   convertDuration(step, workoutStepMesg);

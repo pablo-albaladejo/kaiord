@@ -47,6 +47,11 @@ export const convertWorkoutMetadata = (
     workoutMesg.subSport = mapSubSportToFit(workout.subSport);
   }
 
+  if (workout.poolLength !== undefined) {
+    workoutMesg.poolLength = workout.poolLength;
+    workoutMesg.poolLengthUnit = 0;
+  }
+
   return {
     type: fitMessageKeyEnum.enum.workoutMesgs,
     workoutMesg,
