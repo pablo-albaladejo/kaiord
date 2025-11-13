@@ -210,7 +210,7 @@ Before marking any task as complete, verify that:
     - Run `pnpm -r build` to trigger schema generation
     - _Requirements: 8.1, 8.4_
 
-  - [ ] 8.2 Update naming consistency
+  - [x] 8.2 Update naming consistency
 
     - Verify `heart_rate_greater_than` is correctly named `repeat_until_heart_rate_greater_than` in duration schema
     - Update all tests using old naming (if any exist)

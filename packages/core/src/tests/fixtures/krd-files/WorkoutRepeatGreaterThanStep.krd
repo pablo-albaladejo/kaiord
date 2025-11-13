@@ -70,9 +70,9 @@
         {
           "stepIndex": 3,
           "name": "Rep",
-          "durationType": "heart_rate_greater_than",
+          "durationType": "repeat_until_heart_rate_greater_than",
           "duration": {
-            "type": "heart_rate_greater_than",
+            "type": "repeat_until_heart_rate_greater_than",
             "bpm": 80,
             "repeatFrom": 1
           },
