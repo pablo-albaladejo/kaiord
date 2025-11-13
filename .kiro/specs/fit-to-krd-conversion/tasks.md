@@ -297,7 +297,7 @@ Each task follows Test-Driven Development:
     - Write co-located tests with mocks (execute, pre-validation, errors, logger)
     - _Requirements: 11.1, 11.2, 11.3_
     - _Commit: "feat: add ConvertKrdToFit use case"_
-  - [ ] 10.3 Implement ValidateRoundTrip use case
+  - [x] 10.3 Implement ValidateRoundTrip use case
     - Create application/use-cases/validate-round-trip.ts
     - Define ValidateRoundTrip type and createValidateRoundTrip factory
     - Implement validateFitToKrdToFit function
