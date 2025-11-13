@@ -22,14 +22,17 @@ export const mapWorkout = (
   const repetitionStepIndices = findRepetitionStepIndices(workoutSteps);
   const steps = buildWorkoutSteps(workoutSteps, repetitionStepIndices);
 
-  return {
+  const workout: Workout = {
     name: workoutMsg?.wktName,
     sport: mapSportType(workoutMsg?.sport),
     steps,
-    ...(workoutMsg?.subSport !== undefined && {
-      subSport: mapSubSportToKrd(workoutMsg.subSport),
-    }),
   };
+
+  if (workoutMsg?.subSport !== undefined) {
+    workout.subSport = mapSubSportToKrd(workoutMsg.subSport);
+  }
+
+  return workout;
 };
 
 const findRepetitionStepIndices = (
