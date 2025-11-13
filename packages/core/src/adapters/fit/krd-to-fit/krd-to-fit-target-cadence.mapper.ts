@@ -1,19 +1,16 @@
+import { targetTypeEnum, targetUnitEnum } from "../../../domain/schemas/target";
 import type { WorkoutStep } from "../../../domain/schemas/workout";
-import {
-  FIT_TARGET_TYPE,
-  KRD_TARGET_TYPE,
-  KRD_TARGET_UNIT,
-} from "../constants";
+import { fitTargetTypeEnum } from "../schemas/fit-target";
 
 export const convertCadenceTarget = (
   step: WorkoutStep,
   message: Record<string, unknown>
 ): void => {
-  message.targetType = FIT_TARGET_TYPE.CADENCE;
-  if (step.target.type !== KRD_TARGET_TYPE.CADENCE) return;
+  message.targetType = fitTargetTypeEnum.enum.cadence;
+  if (step.target.type !== targetTypeEnum.enum.cadence) return;
 
   const value = step.target.value;
-  if (value.unit === KRD_TARGET_UNIT.RANGE) {
+  if (value.unit === targetUnitEnum.enum.range) {
     message.targetValue = 0;
     message.customTargetCadenceLow = value.min;
     message.customTargetCadenceHigh = value.max;
