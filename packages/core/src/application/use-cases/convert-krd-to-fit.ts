@@ -1,23 +1,21 @@
 import type { KRD } from "../../domain/schemas/krd";
 import { createKrdValidationError } from "../../domain/types/errors";
 import type { SchemaValidator } from "../../domain/validation/schema-validator";
-import type { FitReader } from "../../ports/fit-reader";
+import type { FitWriter } from "../../ports/fit-writer";
 import type { Logger } from "../../ports/logger";
 
-type ConvertFitToKrdParams = {
-  fitBuffer: Uint8Array;
+type ConvertKrdToFitParams = {
+  krd: KRD;
 };
 
-export type ConvertFitToKrd = ReturnType<typeof convertFitToKrd>;
+export type ConvertKrdToFit = ReturnType<typeof convertKrdToFit>;
 
-export const convertFitToKrd =
-  (fitReader: FitReader, validator: SchemaValidator, logger: Logger) =>
-  async (params: ConvertFitToKrdParams): Promise<KRD> => {
-    logger.info("Converting FIT to KRD");
+export const convertKrdToFit =
+  (fitWriter: FitWriter, validator: SchemaValidator, logger: Logger) =>
+  async (params: ConvertKrdToFitParams): Promise<Uint8Array> => {
+    logger.info("Converting KRD to FIT");
 
-    const krd = await fitReader.readToKRD(params.fitBuffer);
-
-    const errors = validator.validate(krd);
+    const errors = validator.validate(params.krd);
     if (errors.length > 0) {
       logger.error("KRD validation failed", {
         errorCount: errors.length,
@@ -31,6 +29,8 @@ export const convertFitToKrd =
       );
     }
 
-    logger.info("FIT to KRD conversion successful");
-    return krd;
+    const fitBuffer = await fitWriter.writeFromKRD(params.krd);
+
+    logger.info("KRD to FIT conversion successful");
+    return fitBuffer;
   };

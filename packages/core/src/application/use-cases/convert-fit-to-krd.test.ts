@@ -4,30 +4,9 @@ import type { SchemaValidator } from "../../domain/validation/schema-validator";
 import type { FitReader } from "../../ports/fit-reader";
 import { buildKRD } from "../../tests/fixtures/krd/krd.fixtures.js";
 import { createMockLogger } from "../../tests/helpers/test-utils.js";
-import { createConvertFitToKrd } from "./convert-fit-to-krd.js";
+import { convertFitToKrd } from "./convert-fit-to-krd.js";
 
-describe("createConvertFitToKrd", () => {
-  it("should create a use case with execute method", () => {
-    // Arrange
-    const mockFitReader: FitReader = {
-      readToKRD: vi.fn(),
-    };
-    const mockValidator: SchemaValidator = {
-      validate: vi.fn(),
-    };
-    const logger = createMockLogger();
-
-    // Act
-    const useCase = createConvertFitToKrd(mockFitReader, mockValidator, logger);
-
-    // Assert
-    expect(useCase).toBeDefined();
-    expect(useCase.execute).toBeDefined();
-    expect(typeof useCase.execute).toBe("function");
-  });
-});
-
-describe("ConvertFitToKrd.execute", () => {
+describe("convertFitToKrd", () => {
   it("should convert FIT buffer to KRD when validation passes", async () => {
     // Arrange
     const fitBuffer = new Uint8Array([1, 2, 3, 4]);
@@ -41,10 +20,12 @@ describe("ConvertFitToKrd.execute", () => {
     };
     const logger = createMockLogger();
 
-    const useCase = createConvertFitToKrd(mockFitReader, mockValidator, logger);
-
     // Act
-    const result = await useCase.execute(fitBuffer);
+    const result = await convertFitToKrd(
+      mockFitReader,
+      mockValidator,
+      logger
+    )({ fitBuffer });
 
     // Assert
     expect(result).toStrictEqual(expectedKrd);
@@ -69,15 +50,13 @@ describe("ConvertFitToKrd.execute", () => {
     };
     const logger = createMockLogger();
 
-    const useCase = createConvertFitToKrd(mockFitReader, mockValidator, logger);
-
     // Act & Assert
-    await expect(useCase.execute(fitBuffer)).rejects.toThrow(
-      KrdValidationError
-    );
-    await expect(useCase.execute(fitBuffer)).rejects.toThrow(
-      "KRD validation failed"
-    );
+    await expect(
+      convertFitToKrd(mockFitReader, mockValidator, logger)({ fitBuffer })
+    ).rejects.toThrow(KrdValidationError);
+    await expect(
+      convertFitToKrd(mockFitReader, mockValidator, logger)({ fitBuffer })
+    ).rejects.toThrow("KRD validation failed");
   });
 
   it("should include validation errors in thrown KrdValidationError", async () => {
@@ -97,11 +76,15 @@ describe("ConvertFitToKrd.execute", () => {
     };
     const logger = createMockLogger();
 
-    const useCase = createConvertFitToKrd(mockFitReader, mockValidator, logger);
-
     // Act & Assert
     try {
-      await useCase.execute(fitBuffer);
+      await convertFitToKrd(
+        mockFitReader,
+        mockValidator,
+        logger
+      )({
+        fitBuffer,
+      });
       expect.fail("Should have thrown KrdValidationError");
     } catch (error) {
       expect(error).toBeInstanceOf(KrdValidationError);
@@ -124,10 +107,10 @@ describe("ConvertFitToKrd.execute", () => {
     };
     const logger = createMockLogger();
 
-    const useCase = createConvertFitToKrd(mockFitReader, mockValidator, logger);
-
     // Act & Assert
-    await expect(useCase.execute(fitBuffer)).rejects.toThrow(readerError);
+    await expect(
+      convertFitToKrd(mockFitReader, mockValidator, logger)({ fitBuffer })
+    ).rejects.toThrow(readerError);
     expect(mockValidator.validate).not.toHaveBeenCalled();
   });
 
@@ -144,10 +127,8 @@ describe("ConvertFitToKrd.execute", () => {
     };
     const logger = createMockLogger();
 
-    const useCase = createConvertFitToKrd(mockFitReader, mockValidator, logger);
-
     // Act
-    await useCase.execute(fitBuffer);
+    await convertFitToKrd(mockFitReader, mockValidator, logger)({ fitBuffer });
 
     // Assert
     expect(mockFitReader.readToKRD).toHaveBeenCalledWith(fitBuffer);
