@@ -202,7 +202,7 @@ Before marking any task as complete, verify that:
 
 - [ ] 8. Update documentation and finalize
 
-  - [ ] 8.1 Update JSON Schema generation
+  - [x] 8.1 Update JSON Schema generation
 
     - Regenerate JSON Schema from updated Zod schemas
     - Verify all new fields are included (subSport, notes, poolLength, poolLengthUnit, equipment)
