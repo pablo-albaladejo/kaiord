@@ -403,4 +403,338 @@ describe("convertFitDuration", () => {
       expect(result.type).toBe("open");
     });
   });
+
+  describe("calorie-based durations", () => {
+    it("should convert FIT calories duration", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "calories",
+        durationCalories: 500,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "calories",
+        calories: 500,
+      });
+    });
+
+    it("should convert FIT repeatUntilCalories duration", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilCalories",
+        durationCalories: 1000,
+        durationStep: 2,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "repeat_until_calories",
+        calories: 1000,
+        repeatFrom: 2,
+      });
+    });
+
+    it("should handle calories duration without value as open", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "calories",
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+
+    it("should handle repeatUntilCalories without durationStep as open", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilCalories",
+        durationCalories: 800,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+  });
+
+  describe("power-based durations", () => {
+    it("should convert FIT powerLessThan duration", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "powerLessThan",
+        durationPower: 200,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "power_less_than",
+        watts: 200,
+      });
+    });
+
+    it("should convert FIT powerGreaterThan duration", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "powerGreaterThan",
+        durationPower: 250,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "power_greater_than",
+        watts: 250,
+      });
+    });
+
+    it("should convert FIT repeatUntilPowerLessThan duration", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilPowerLessThan",
+        durationPower: 180,
+        durationStep: 3,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "repeat_until_power_less_than",
+        watts: 180,
+        repeatFrom: 3,
+      });
+    });
+
+    it("should convert FIT repeatUntilPowerGreaterThan duration", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilPowerGreaterThan",
+        durationPower: 300,
+        durationStep: 1,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "repeat_until_power_greater_than",
+        watts: 300,
+        repeatFrom: 1,
+      });
+    });
+
+    it("should handle powerLessThan duration without value as open", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "powerLessThan",
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+
+    it("should handle repeatUntilPowerLessThan without durationStep as open", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilPowerLessThan",
+        durationPower: 150,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+  });
+
+  describe("repeat conditional durations", () => {
+    it("should convert FIT repeatUntilTime duration", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilTime",
+        durationTime: 1800,
+        durationStep: 0,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "repeat_until_time",
+        seconds: 1800,
+        repeatFrom: 0,
+      });
+    });
+
+    it("should convert FIT repeatUntilDistance duration", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilDistance",
+        durationDistance: 5000,
+        durationStep: 1,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "repeat_until_distance",
+        meters: 5000,
+        repeatFrom: 1,
+      });
+    });
+
+    it("should convert FIT repeatUntilHrLessThan duration", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilHrLessThan",
+        durationHr: 120,
+        durationStep: 2,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "repeat_until_heart_rate_less_than",
+        bpm: 120,
+        repeatFrom: 2,
+      });
+    });
+
+    it("should handle repeatUntilTime without durationStep as open", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilTime",
+        durationTime: 600,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+
+    it("should handle repeatUntilDistance without durationStep as open", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilDistance",
+        durationDistance: 3000,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+
+    it("should handle repeatUntilHrLessThan without durationStep as open", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilHrLessThan",
+        durationHr: 130,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+  });
+
+  describe("repeatUntilHrGreaterThan duration", () => {
+    it("should convert FIT repeatUntilHrGreaterThan duration", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilHrGreaterThan",
+        repeatHr: 160,
+        durationStep: 0,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "repeat_until_heart_rate_greater_than",
+        bpm: 160,
+        repeatFrom: 0,
+      });
+    });
+
+    it("should handle repeatUntilHrGreaterThan without durationStep as open", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilHrGreaterThan",
+        repeatHr: 170,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+
+    it("should handle repeatUntilHrGreaterThan without repeatHr as open", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "repeatUntilHrGreaterThan",
+        durationStep: 1,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+  });
 });
