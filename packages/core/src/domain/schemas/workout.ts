@@ -1,5 +1,6 @@
 import { z } from "zod";
 import { durationSchema } from "./duration";
+import { equipmentEnum } from "./equipment";
 import { intensityEnum } from "./intensity";
 import { targetSchema } from "./target";
 
@@ -25,6 +26,7 @@ export const workoutStepSchema = z.object({
   target: targetSchema,
   intensity: intensityEnum.optional(),
   notes: z.string().max(256).optional(),
+  equipment: equipmentEnum.optional(),
 });
 
 export const repetitionBlockSchema = z.object({
@@ -36,6 +38,8 @@ export const workoutSchema = z.object({
   name: z.string().optional(),
   sport: z.string(),
   subSport: z.string().optional(),
+  poolLength: z.number().positive().optional(),
+  poolLengthUnit: z.literal("meters").optional(),
   steps: z.array(z.union([workoutStepSchema, repetitionBlockSchema])),
 });
 
