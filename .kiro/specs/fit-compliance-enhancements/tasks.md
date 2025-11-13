@@ -183,7 +183,7 @@ Before marking any task as complete, verify that:
     - Use enum schema values in all test assertions (no hardcoded strings)
     - _Requirements: 4.4, 4.5, 5.5, 5.6, 6.6, 6.7, 8.2_
 
-  - [ ] 7.3 Write round-trip tests for all new fields
+  - [x] 7.3 Write round-trip tests for all new fields
 
     - Test swimming fields preservation (pool length within ±0.01m tolerance)
     - Test calorie duration preservation (exact values)
