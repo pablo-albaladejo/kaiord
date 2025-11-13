@@ -40,7 +40,7 @@ Before marking any task as complete, verify that:
 
 - [ ] 2. Implement Priority 1 FIT converters
 
-  - [ ] 2.1 Add FIT constants for sub-sport values
+  - [x] 2.1 Add FIT constants for sub-sport values
 
     - Define `FIT_SUB_SPORT` constants (strings, camelCase)
     - Define `KRD_SUB_SPORT` constants (strings, snake_case)
