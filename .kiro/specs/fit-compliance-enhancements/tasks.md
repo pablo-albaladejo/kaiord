@@ -55,7 +55,7 @@ Before marking any task as complete, verify that:
   - **Verify against**: [Garmin FIT Workout Spec](https://developer.garmin.com/fit/file-types/workout/) and [FIT SDK Documentation](https://github.com/garmin/fit-javascript-sdk)
   - _Requirements: 1.1, 1.2, 2.1, 2.2, 8.1, 8.5_
 
-- [ ] 2. Implement Priority 1 FIT converters
+- [x] 2. Implement Priority 1 FIT converters
 
   - [x] 2.1 Add FIT constants for sub-sport values
 
