@@ -4,19 +4,18 @@ import type { SchemaValidator } from "../../domain/validation/schema-validator";
 import type { FitReader } from "../../ports/fit-reader";
 import type { Logger } from "../../ports/logger";
 
-export type ConvertFitToKrd = {
-  execute: (fitBuffer: Uint8Array) => Promise<KRD>;
+type ConvertFitToKrdParams = {
+  fitBuffer: Uint8Array;
 };
 
-export const createConvertFitToKrd = (
-  fitReader: FitReader,
-  validator: SchemaValidator,
-  logger: Logger
-): ConvertFitToKrd => ({
-  execute: async (fitBuffer: Uint8Array): Promise<KRD> => {
+export type ConvertFitToKrd = ReturnType<typeof convertFitToKrd>;
+
+export const convertFitToKrd =
+  (fitReader: FitReader, validator: SchemaValidator, logger: Logger) =>
+  async (params: ConvertFitToKrdParams): Promise<KRD> => {
     logger.info("Converting FIT to KRD");
 
-    const krd = await fitReader.readToKRD(fitBuffer);
+    const krd = await fitReader.readToKRD(params.fitBuffer);
 
     const errors = validator.validate(krd);
     if (errors.length > 0) {
@@ -34,5 +33,4 @@ export const createConvertFitToKrd = (
 
     logger.info("FIT to KRD conversion successful");
     return krd;
-  },
-});
+  };

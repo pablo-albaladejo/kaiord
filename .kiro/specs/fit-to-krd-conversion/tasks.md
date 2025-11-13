@@ -287,7 +287,7 @@ Each task follows Test-Driven Development:
     - Write co-located tests with mocks (execute, validation errors, logger)
     - _Requirements: 1.1, 1.2, 1.3, 1.5_
     - _Commit: "feat: add ConvertFitToKrd use case"_
-  - [ ] 10.2 Implement ConvertKrdToFit use case
+  - [x] 10.2 Implement ConvertKrdToFit use case
     - Create application/use-cases/convert-krd-to-fit.ts
     - Define ConvertKrdToFit type and createConvertKrdToFit factory
     - Compose FitWriter and SchemaValidator
