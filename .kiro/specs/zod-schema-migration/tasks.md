@@ -111,28 +111,28 @@
   - Ensure existing round-trip tests still pass
   - _Requirements: 15.3, 15.4_
 
-- [ ] 4. Update duration converter to use Zod schemas
+- [x] 4. Update duration converter to use Zod schemas
 
   - Replace FIT_DURATION_TYPE constant with fitDurationTypeEnum
   - Add validation at adapter boundary
   - Update all duration type comparisons
   - _Requirements: 3.5, 10.1, 10.2, 10.3, 10.5_
 
-- [ ] 4.1 Update duration.converter.ts imports
+- [x] 4.1 Update duration.converter.ts imports
 
   - Import `fitDurationTypeEnum` from adapters/fit/schemas/fit-duration
   - Import `durationTypeEnum` from domain/schemas/duration
   - Remove import of `FIT_DURATION_TYPE` from constants
   - _Requirements: 10.1_
 
-- [ ] 4.2 Add validation to convertFitDuration function
+- [x] 4.2 Add validation to convertFitDuration function
 
   - Use `fitDurationTypeEnum.safeParse()` to validate durationType
   - Return open duration for invalid values
   - Update all duration type comparisons to use `fitDurationTypeEnum.enum.value`
   - _Requirements: 10.2, 10.3, 10.5_
 
-- [ ] 4.3 Update duration converter tests
+- [x] 4.3 Update duration converter tests
 
   - Add tests for validation with invalid duration types
   - Verify open duration fallback behavior
