@@ -78,7 +78,7 @@ Before marking any task as complete, verify that:
     - Validate notes length (max 256 characters)
     - _Requirements: 1.2, 2.2, 2.5, 10.1_
 
-- [ ] 3. Test Priority 1 fields
+- [x] 3. Test Priority 1 fields
 
   - [x] 3.1 Write integration tests for Priority 1 converters
 
@@ -90,7 +90,7 @@ Before marking any task as complete, verify that:
     - Test notes length validation (max 256 characters)
     - _Requirements: 1.3, 2.3, 8.2, 9.6_
 
-  - [ ] 3.2 Write round-trip tests for Priority 1 fields
+  - [x] 3.2 Write round-trip tests for Priority 1 fields
     - Test subSport preservation through FIT → KRD → FIT
     - Test notes preservation through FIT → KRD → FIT
     - Verify exact string values preserved
