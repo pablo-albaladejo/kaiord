@@ -128,7 +128,7 @@ Before marking any task as complete, verify that:
     - Map `equipment` from KRD to FIT WorkoutStep
     - _Requirements: 3.3, 3.4, 10.1_
 
-- [ ] 6. Implement Priority 2 advanced duration types
+- [x] 6. Implement Priority 2 advanced duration types
 
   - [x] 6.1 Update duration schema with advanced types and fix naming
 
@@ -156,7 +156,7 @@ Before marking any task as complete, verify that:
     - Use enum schema values for all type comparisons (no hardcoded strings)
     - _Requirements: 4.1, 4.2, 4.6, 5.1, 5.2, 5.7, 5.8, 6.1, 6.2, 6.3, 6.4_
 
-  - [ ] 6.4 Implement KRD → FIT duration converters
+  - [x] 6.4 Implement KRD → FIT duration converters
     - Convert calorie-based durations to FIT format
     - Convert power-based durations to FIT format
     - Convert repeat conditionals to FIT format
