@@ -7,6 +7,7 @@ import type {
 } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
 import { fitMessageKeyEnum } from "../schemas/fit-message-keys";
+import { mapSubSportToFit } from "../sub-sport.mapper";
 import { DEFAULT_MANUFACTURER, isRepetitionBlock } from "../type-guards";
 
 export const convertMetadataToFileId = (krd: KRD, logger: Logger): unknown => {
@@ -36,13 +37,19 @@ export const convertWorkoutMetadata = (
 
   const numValidSteps = countValidSteps(workout.steps);
 
+  const workoutMesg: Record<string, unknown> = {
+    wktName: workout.name,
+    sport: workout.sport,
+    numValidSteps,
+  };
+
+  if (workout.subSport !== undefined) {
+    workoutMesg.subSport = mapSubSportToFit(workout.subSport);
+  }
+
   return {
     type: fitMessageKeyEnum.enum.workoutMesgs,
-    workoutMesg: {
-      wktName: workout.name,
-      sport: workout.sport,
-      numValidSteps,
-    },
+    workoutMesg,
   };
 };
 

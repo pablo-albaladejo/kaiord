@@ -23,6 +23,17 @@ export const convertWorkoutStep = (
     workoutStepMesg.intensity = step.intensity;
   }
 
+  if (step.notes !== undefined) {
+    if (step.notes.length > 256) {
+      logger.warn("Notes exceed 256 characters, truncating", {
+        originalLength: step.notes.length,
+      });
+      workoutStepMesg.notes = step.notes.substring(0, 256);
+    } else {
+      workoutStepMesg.notes = step.notes;
+    }
+  }
+
   convertDuration(step, workoutStepMesg);
   convertTarget(step, workoutStepMesg);
 
