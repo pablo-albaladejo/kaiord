@@ -192,7 +192,7 @@ Before marking any task as complete, verify that:
     - Test with real FIT files containing these fields
     - _Requirements: 9.1, 9.2, 9.3, 9.4, 9.6_
 
-  - [ ] 7.4 Create test fixtures for new field types
+  - [x] 7.4 Create test fixtures for new field types
     - Build fixtures for workouts with subSport (already exists, verify completeness)
     - Build fixtures for workout steps with notes
     - Build fixtures for swimming workouts (poolLength, equipment)
