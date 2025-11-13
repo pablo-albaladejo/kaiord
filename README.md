@@ -17,6 +17,10 @@ It provides:
 - Round-trip safe conversions between FIT / TCX / PWX / KRD
 - Clean architecture & fully typed API
 
+### Known Limitations
+
+- **Training Stress Score (TSS)**: The `training_peaks_tss` duration type is not yet implemented in the FIT converter. This is a TrainingPeaks-specific metric that requires additional mapping logic. Contributions welcome!
+
 ---
 
 ## 🧩 Tech Stack
