@@ -2,7 +2,7 @@ import {
   durationTypeEnum,
   type Duration,
 } from "../../../domain/schemas/duration";
-import { FIT_DURATION_TYPE } from "../constants";
+import { fitDurationTypeEnum } from "../schemas/fit-duration";
 
 export type FitDurationData = {
   durationType?: string;
@@ -57,25 +57,32 @@ const convertHeartRateGreaterThan = (
 };
 
 export const convertFitDuration = (data: FitDurationData): Duration => {
-  const durationType = data.durationType;
+  // Validate at boundary
+  const result = fitDurationTypeEnum.safeParse(data.durationType);
 
-  if (durationType === FIT_DURATION_TYPE.TIME) {
+  if (!result.success) {
+    return { type: durationTypeEnum.enum.open };
+  }
+
+  const durationType = result.data;
+
+  if (durationType === fitDurationTypeEnum.enum.time) {
     return convertTimeDuration(data) || { type: durationTypeEnum.enum.open };
   }
 
-  if (durationType === FIT_DURATION_TYPE.DISTANCE) {
+  if (durationType === fitDurationTypeEnum.enum.distance) {
     return (
       convertDistanceDuration(data) || { type: durationTypeEnum.enum.open }
     );
   }
 
-  if (durationType === FIT_DURATION_TYPE.HR_LESS_THAN) {
+  if (durationType === fitDurationTypeEnum.enum.hrLessThan) {
     return (
       convertHeartRateLessThan(data) || { type: durationTypeEnum.enum.open }
     );
   }
 
-  if (durationType === FIT_DURATION_TYPE.REPEAT_UNTIL_HR_GREATER_THAN) {
+  if (durationType === fitDurationTypeEnum.enum.repeatUntilHrGreaterThan) {
     return (
       convertHeartRateGreaterThan(data) || { type: durationTypeEnum.enum.open }
     );

@@ -219,6 +219,107 @@ describe("convertFitDuration", () => {
     });
   });
 
+  describe("validation", () => {
+    it("should return open duration for invalid duration type", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "invalid_type",
+        durationTime: 300,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+
+    it("should return open duration for null duration type", () => {
+      // Arrange
+      const data = {
+        durationType: null as unknown as string,
+        durationTime: 300,
+      };
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+
+    it("should return open duration for numeric duration type", () => {
+      // Arrange
+      const data = {
+        durationType: 123 as unknown as string,
+        durationTime: 300,
+      };
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "open",
+      });
+    });
+
+    it("should validate and convert valid time duration type", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "time",
+        durationTime: 600,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "time",
+        seconds: 600,
+      });
+    });
+
+    it("should validate and convert valid distance duration type", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "distance",
+        durationDistance: 5000,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "distance",
+        meters: 5000,
+      });
+    });
+
+    it("should validate and convert valid hrLessThan duration type", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "hrLessThan",
+        durationHr: 140,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "heart_rate_less_than",
+        bpm: 140,
+      });
+    });
+  });
+
   describe("edge cases", () => {
     it("should handle HR_LESS_THAN duration type correctly", () => {
       // Arrange
