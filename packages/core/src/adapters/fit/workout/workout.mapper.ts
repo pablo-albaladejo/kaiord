@@ -5,6 +5,7 @@ import type {
 } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
 import { fitDurationTypeEnum } from "../schemas/fit-duration";
+import { mapSubSportToKrd } from "../sub-sport.mapper";
 import { mapSportType } from "../type-guards";
 import type { FitWorkoutMessage, FitWorkoutStep } from "../types";
 import { mapStep } from "./step.mapper";
@@ -25,6 +26,9 @@ export const mapWorkout = (
     name: workoutMsg?.wktName,
     sport: mapSportType(workoutMsg?.sport),
     steps,
+    ...(workoutMsg?.subSport !== undefined && {
+      subSport: mapSubSportToKrd(workoutMsg.subSport),
+    }),
   };
 };
 
@@ -50,7 +54,7 @@ const buildWorkoutSteps = (
   workoutSteps: Array<FitWorkoutStep>,
   repetitionStepIndices: Set<number>
 ): Array<WorkoutStep | RepetitionBlock> => {
-  const steps: Array<WorkoutStep | RepetitionBlock> = [];
+  const steps = [];
 
   for (let i = 0; i < workoutSteps.length; i++) {
     const step = workoutSteps[i];
@@ -76,7 +80,7 @@ const buildRepetitionBlock = (
 ): RepetitionBlock => {
   const repeatCount = step.repeatSteps!;
   const startIndex = (step.durationStep || 0) as number;
-  const repeatedSteps: Array<WorkoutStep> = [];
+  const repeatedSteps = [];
 
   for (let j = startIndex; j < currentIndex; j++) {
     repeatedSteps.push(mapStep(workoutSteps[j], j));
