@@ -9,7 +9,7 @@
 - Naming: `toKRD`, `fromKRD`, `parseX`, `writeX`
 - Prefer `Array<T>` for public types
 - **Avoid redundant type annotations** - let TypeScript infer types when possible
-- **Use constants for magic strings** - define protocol/API constants in `constants.ts`
+- **Use Zod schemas for enumerations** - define enum schemas instead of constant objects (see Schema Naming Conventions below)
 
 ## ESLint Configuration
 
@@ -24,25 +24,56 @@ The project uses ESLint with the following key rules:
 
 Run `pnpm lint` to check all files, or `pnpm lint:packages` to check each package individually.
 
+## Schema Naming Conventions
+
+All enumeration types MUST be defined as Zod schemas, not constant objects. This provides runtime validation and type inference.
+
+### Naming Pattern
+
+| Element                      | Pattern                  | Example                                           |
+| ---------------------------- | ------------------------ | ------------------------------------------------- |
+| Enum schema variable         | `{concept}Enum`          | `sportEnum`, `subSportEnum`, `intensityEnum`      |
+| Object/Union schema variable | `{concept}Schema`        | `durationSchema`, `targetSchema`, `workoutSchema` |
+| Inferred type                | `{Concept}` (PascalCase) | `Sport`, `SubSport`, `Duration`                   |
+| FIT adapter enum             | `fit{Concept}Enum`       | `fitSportEnum`, `fitSubSportEnum`                 |
+| FIT adapter type             | `Fit{Concept}`           | `FitSport`, `FitSubSport`                         |
+
+### Domain vs Adapter Schemas
+
+- **Domain schemas** (in `domain/schemas/`) use **snake_case** for multi-word enum values
+- **Adapter schemas** (in `adapters/fit/schemas/`) use **camelCase** to match external SDKs
+
 ```typescript
-// ✅ Preferred - Constants defined and used
-// constants.ts
+// ✅ Preferred - Zod enum schemas
+// domain/schemas/sub-sport.ts
+export const subSportEnum = z.enum([
+  "generic",
+  "indoor_cycling", // snake_case for KRD
+  "lap_swimming",
+]);
+export type SubSport = z.infer<typeof subSportEnum>;
+
+// adapters/fit/schemas/fit-sub-sport.ts
+export const fitSubSportEnum = z.enum([
+  "generic",
+  "indoorCycling", // camelCase for FIT SDK
+  "lapSwimming",
+]);
+export type FitSubSport = z.infer<typeof fitSubSportEnum>;
+
+// mapper.ts - Access enum values via .enum property
+import { subSportEnum } from "../../domain/schemas/sub-sport";
+import { fitSubSportEnum } from "./schemas/fit-sub-sport";
+
+if (fitSubSport === fitSubSportEnum.enum.indoorCycling) {
+  return subSportEnum.enum.indoor_cycling;
+}
+
+// ❌ Avoid - Constant objects (deprecated pattern)
 export const FIT_TARGET_TYPE = {
   POWER: "power",
   HEART_RATE: "heartRate",
-  CADENCE: "cadence",
 } as const;
-
-export const KRD_TARGET_TYPE = {
-  POWER: "power",
-  HEART_RATE: "heart_rate",
-  CADENCE: "cadence",
-} as const;
-
-// mapper.ts
-if (targetType === FIT_TARGET_TYPE.POWER) {
-  return { type: KRD_TARGET_TYPE.POWER };
-}
 
 // ❌ Avoid - Hardcoded strings
 if (targetType === "power") {

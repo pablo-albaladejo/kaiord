@@ -264,7 +264,7 @@
   - Export schemas and types from schema files instead
   - _Requirements: 11.4_
 
-- [ ] 9. Run full test suite and verify
+- [x] 9. Run full test suite and verify
 
   - Run all unit tests
   - Run round-trip tests
@@ -272,26 +272,26 @@
   - Check for any remaining references to old constants
   - _Requirements: 11.5, 14.1, 14.2, 14.3, 14.4, 14.5, 15.4, 15.5_
 
-- [ ] 9.1 Run all tests and verify they pass
+- [x] 9.1 Run all tests and verify they pass
 
   - Execute `pnpm -r test` to run all tests
   - Verify no test failures
   - _Requirements: 11.5, 14.4_
 
-- [ ] 9.2 Verify round-trip tests pass
+- [x] 9.2 Verify round-trip tests pass
 
   - Specifically check round-trip conversion tests
   - Ensure no data loss in FIT ↔ KRD conversions
   - _Requirements: 14.1, 14.2, 14.3_
 
-- [ ] 9.3 Check test coverage
+- [x] 9.3 Check test coverage
 
   - Run coverage report
   - Verify overall coverage ≥ 80%
   - Verify mapper coverage ≥ 90%
   - _Requirements: 15.4, 15.5_
 
-- [ ] 9.4 Verify no remaining constant references
+- [x] 9.4 Verify no remaining constant references
 
   - Search for `FIT_DURATION_TYPE`, `FIT_TARGET_TYPE`, `FIT_SPORT_TYPE`
   - Search for `KRD_TARGET_TYPE`, `KRD_TARGET_UNIT`
@@ -299,7 +299,7 @@
   - Ensure all have been replaced with schema references
   - _Requirements: 11.4_
 
-- [ ] 10. Update documentation
+- [x] 10. Update documentation
   - Update architecture steering rules to document schema organization
   - Update code-style guide with schema naming conventions
   - Add examples of schema usage to zod-patterns guide
