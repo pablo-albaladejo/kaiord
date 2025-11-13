@@ -1,9 +1,9 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
-import { createMockLogger } from "../../tests/helpers/test-utils";
-import { createGarminFitSdkReader } from "./garmin-fitsdk";
-import { convertKRDToMessages } from "./krd-to-fit/krd-to-fit.converter";
+import { createMockLogger } from "../../../tests/helpers/test-utils";
+import { createGarminFitSdkReader } from "../garmin-fitsdk";
+import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 
 describe("Round-trip: Swimming workouts - pool length conversion and unit handling", () => {
   it("should preserve poolLength in meters through KRD → FIT conversion", async () => {
@@ -12,7 +12,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -50,7 +50,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
     const poolLengths = [25, 50, 33.33];
@@ -90,7 +90,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -127,7 +127,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -167,7 +167,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -210,7 +210,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -266,7 +266,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -309,7 +309,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
     const equipmentArray = [
@@ -366,7 +366,7 @@ describe("Round-trip: Swimming workouts - combined pool length and equipment", (
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
     const testPoolLength = 50;

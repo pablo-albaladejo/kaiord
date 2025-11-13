@@ -11,7 +11,7 @@ import type { FitWriter } from "../../ports/fit-writer";
 import type { Logger } from "../../ports/logger";
 import { convertKRDToMessages } from "./krd-to-fit/krd-to-fit.converter";
 import { mapMessagesToKRD } from "./messages/messages.mapper";
-import type { FitMessages } from "./types";
+import type { FitMessages } from "./shared/types";
 
 export const createGarminFitSdkReader = (logger: Logger): FitReader => ({
   readToKRD: async (buffer: Uint8Array): Promise<KRD> => {

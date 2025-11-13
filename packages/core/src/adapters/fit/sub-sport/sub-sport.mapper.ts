@@ -1,5 +1,8 @@
-import { subSportSchema, type SubSport } from "../../domain/schemas/sub-sport";
-import { fitSubSportSchema, type FitSubSport } from "./schemas/fit-sub-sport";
+import {
+  subSportSchema,
+  type SubSport,
+} from "../../../domain/schemas/sub-sport";
+import { fitSubSportSchema, type FitSubSport } from "../schemas/fit-sub-sport";
 
 const FIT_TO_KRD_SUB_SPORT_MAP: Record<FitSubSport, SubSport> = {
   generic: "generic",
@@ -87,5 +90,7 @@ export const mapSubSportToFit = (krdSubSport: unknown): FitSubSport => {
     return fitSubSportSchema.enum.generic;
   }
 
-  return KRD_TO_FIT_SUB_SPORT_MAP[result.data] || fitSubSportSchema.enum.generic;
+  return (
+    KRD_TO_FIT_SUB_SPORT_MAP[result.data] || fitSubSportSchema.enum.generic
+  );
 };

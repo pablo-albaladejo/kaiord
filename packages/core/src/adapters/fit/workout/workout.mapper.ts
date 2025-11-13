@@ -5,11 +5,11 @@ import type {
   WorkoutStep,
 } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
-import { mapLengthUnitToKrd } from "../length-unit.mapper";
+import { mapLengthUnitToKrd } from "../length-unit/length-unit.mapper";
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
-import { mapSubSportToKrd } from "../sub-sport.mapper";
-import { mapSportType } from "../type-guards";
-import type { FitWorkoutMessage, FitWorkoutStep } from "../types";
+import { mapSportType } from "../shared/type-guards";
+import type { FitWorkoutMessage, FitWorkoutStep } from "../shared/types";
+import { mapSubSportToKrd } from "../sub-sport/sub-sport.mapper";
 import { mapStep } from "./step.mapper";
 
 export const mapWorkout = (
@@ -50,7 +50,9 @@ const findRepetitionStepIndices = (
 
   for (let i = 0; i < workoutSteps.length; i++) {
     const step = workoutSteps[i];
-    if (step.durationType === fitDurationTypeSchema.enum.repeatUntilStepsCmplt) {
+    if (
+      step.durationType === fitDurationTypeSchema.enum.repeatUntilStepsCmplt
+    ) {
       const startIndex = (step.durationStep || 0) as number;
       for (let j = startIndex; j < i; j++) {
         indices.add(j);

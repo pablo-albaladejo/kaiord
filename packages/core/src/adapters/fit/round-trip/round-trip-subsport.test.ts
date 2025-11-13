@@ -1,9 +1,9 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
-import { createMockLogger } from "../../tests/helpers/test-utils";
-import { createGarminFitSdkReader } from "./garmin-fitsdk";
-import { convertKRDToMessages } from "./krd-to-fit/krd-to-fit.converter";
+import { createMockLogger } from "../../../tests/helpers/test-utils";
+import { createGarminFitSdkReader } from "../garmin-fitsdk";
+import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 
 describe("Round-trip: Workout metadata - subSport field", () => {
   it("should preserve subSport through FIT → KRD → FIT conversion", async () => {
@@ -12,7 +12,7 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -48,7 +48,7 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -88,7 +88,7 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 

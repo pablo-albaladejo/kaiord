@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
-import type { FitWorkoutMessage } from "../../../adapters/fit/types";
+import type { FitWorkoutMessage } from "../../../adapters/fit/shared/types";
 
 export const buildFitWorkoutMessage = new Factory<FitWorkoutMessage>()
   .attr("wktName", () => faker.lorem.words({ max: 5, min: 1 }))

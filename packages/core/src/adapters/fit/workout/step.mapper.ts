@@ -4,9 +4,9 @@ import {
 } from "../../../domain/schemas/intensity";
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import { mapDuration, mapDurationType } from "../duration/duration.mapper";
-import { mapEquipmentToKrd } from "../equipment.mapper";
+import { mapEquipmentToKrd } from "../equipment/equipment.mapper";
+import type { FitWorkoutStep } from "../shared/types";
 import { mapTarget, mapTargetType } from "../target/target.mapper";
-import type { FitWorkoutStep } from "../types";
 
 export const mapStep = (step: FitWorkoutStep, index: number): WorkoutStep => {
   const duration = mapDuration(step);

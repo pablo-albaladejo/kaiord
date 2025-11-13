@@ -1,9 +1,9 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
-import { createMockLogger } from "../../tests/helpers/test-utils";
-import { createGarminFitSdkReader } from "./garmin-fitsdk";
-import { convertKRDToMessages } from "./krd-to-fit/krd-to-fit.converter";
+import { createMockLogger } from "../../../tests/helpers/test-utils";
+import { createGarminFitSdkReader } from "../garmin-fitsdk";
+import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 
 describe("Round-trip: Advanced duration types - calorie duration", () => {
   it("should preserve calorie duration through KRD → FIT conversion", async () => {
@@ -12,7 +12,7 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -58,7 +58,7 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
     const calorieValues = [100, 250, 500, 1000];
@@ -110,7 +110,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -156,7 +156,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -202,7 +202,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
     const powerValues = [150, 200, 250, 300, 350];
@@ -255,7 +255,7 @@ describe("Round-trip: Repeat step conditionals - calories", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -308,7 +308,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -361,7 +361,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -414,7 +414,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
     const powerValues = [150, 200, 250, 300];
@@ -471,7 +471,7 @@ describe("Round-trip: Combined advanced duration types", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 

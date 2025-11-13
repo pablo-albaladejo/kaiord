@@ -1,8 +1,8 @@
-import { sportSchema } from "../../domain/schemas/sport";
+import { sportSchema } from "../../../domain/schemas/sport";
 import type {
   RepetitionBlock,
   WorkoutStep,
-} from "../../domain/schemas/workout";
+} from "../../../domain/schemas/workout";
 
 /**
  * Type guard to check if a step is a RepetitionBlock

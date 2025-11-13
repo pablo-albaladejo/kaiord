@@ -1,9 +1,9 @@
 import { readFileSync } from "fs";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
-import { createMockLogger } from "../../tests/helpers/test-utils";
-import { createGarminFitSdkReader } from "./garmin-fitsdk";
-import { convertKRDToMessages } from "./krd-to-fit/krd-to-fit.converter";
+import { createMockLogger } from "../../../tests/helpers/test-utils";
+import { createGarminFitSdkReader } from "../garmin-fitsdk";
+import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 
 describe("Round-trip: Workout step - notes field", () => {
   it("should preserve notes through FIT → KRD → FIT conversion", async () => {
@@ -12,7 +12,7 @@ describe("Round-trip: Workout step - notes field", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
     const testNotes = "Focus on form and breathing";
@@ -57,7 +57,7 @@ describe("Round-trip: Workout step - notes field", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -113,7 +113,7 @@ describe("Round-trip: Workout step - notes field", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
     const longNotes = "a".repeat(300);
@@ -158,7 +158,7 @@ describe("Round-trip: Workout step - notes field", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
 
@@ -201,7 +201,7 @@ describe("Round-trip: Workout step - notes field", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
     const notesArray = [
@@ -258,7 +258,7 @@ describe("Round-trip: Combined fields - subSport and notes", () => {
     const reader = createGarminFitSdkReader(logger);
     const fitPath = join(
       __dirname,
-      "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
     );
     const originalBuffer = readFileSync(fitPath);
     const testSubSport = "trail";

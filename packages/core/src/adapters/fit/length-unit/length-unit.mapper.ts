@@ -1,7 +1,7 @@
 import {
   lengthUnitSchema,
   type LengthUnit,
-} from "../../domain/schemas/length-unit";
+} from "../../../domain/schemas/length-unit";
 
 const FIT_LENGTH_UNIT_MAP: Record<number, LengthUnit> = {
   0: "meters",
