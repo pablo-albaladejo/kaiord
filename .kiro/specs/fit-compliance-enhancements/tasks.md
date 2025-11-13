@@ -166,7 +166,7 @@ Before marking any task as complete, verify that:
 
 - [ ] 7. Test Priority 2 enhancements
 
-  - [ ] 7.1 Write integration tests for swimming converters
+  - [x] 7.1 Write integration tests for swimming converters
 
     - Test pool length conversion and unit handling (FIT → KRD)
     - Test pool length conversion (KRD → FIT, always meters)
