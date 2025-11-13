@@ -1,11 +1,9 @@
 import type { RepetitionBlock, Workout } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
-import {
-  FIT_DURATION_TYPE,
-  FIT_MESSAGE_KEY,
-  FIT_TARGET_TYPE,
-  TYPE_GUARD_PROPERTY,
-} from "../constants";
+import { TYPE_GUARD_PROPERTY } from "../constants";
+import { fitDurationTypeEnum } from "../schemas/fit-duration";
+import { fitMessageKeyEnum } from "../schemas/fit-message-keys";
+import { fitTargetTypeEnum } from "../schemas/fit-target";
 import { convertWorkoutStep } from "./krd-to-fit-step.mapper";
 
 export const convertWorkoutSteps = (
@@ -56,13 +54,13 @@ const convertRepetitionBlock = (
   }
 
   const repeatMessage = {
-    type: FIT_MESSAGE_KEY.WORKOUT_STEP,
+    type: fitMessageKeyEnum.enum.workoutStepMesgs,
     workoutStepMesg: {
       messageIndex,
-      durationType: FIT_DURATION_TYPE.REPEAT_UNTIL_STEPS_COMPLETE,
+      durationType: fitDurationTypeEnum.enum.repeatUntilStepsCmplt,
       durationStep: startIndex,
       repeatSteps: block.repeatCount,
-      targetType: FIT_TARGET_TYPE.OPEN,
+      targetType: fitTargetTypeEnum.enum.open,
     },
   };
   messages.push(repeatMessage);
