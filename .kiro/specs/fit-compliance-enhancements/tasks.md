@@ -174,7 +174,7 @@ Before marking any task as complete, verify that:
     - Test undefined value handling (fields omitted, not null)
     - _Requirements: 3.5, 3.6, 8.2, 9.6_
 
-  - [ ] 7.2 Write integration tests for advanced duration converters
+  - [x] 7.2 Write integration tests for advanced duration converters
 
     - Test each new duration type conversion (FIT → KRD)
     - Test each new duration type conversion (KRD → FIT)
