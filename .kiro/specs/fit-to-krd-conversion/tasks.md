@@ -308,9 +308,9 @@ Each task follows Test-Driven Development:
     - Write co-located tests in console-logger.test.ts (test all log levels)
     - _Requirements: 9.2_
     - _Commit: "feat: add console logger adapter"_
-  - [ ] 10.5 Implement createDefaultProviders
+  - [x] 10.5 Implement createDefaultProviders
     - Create application/providers.ts
-    - Define Providers type with all components (fitReader, fitWriter, schemaValidator, toleranceChecker, convertFitToKrd, convertKrdToFit, validateRoundTrip, logger)
+    - Define Providers type with all components (fitReader, fitWriter, schemaValidator, toleranceChecker, convertFitToKrd, convertKrdToFit, logger)
     - Implement createDefaultProviders factory function
     - Wire all adapters, validators, and use cases using functional composition
     - Support optional logger injection (default to console logger)
