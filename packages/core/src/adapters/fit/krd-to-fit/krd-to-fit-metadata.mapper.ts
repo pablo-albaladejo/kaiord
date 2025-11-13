@@ -1,12 +1,13 @@
+import { fileTypeEnum } from "../../../domain/schemas/file-type";
 import type { KRD } from "../../../domain/schemas/krd";
-import type { Workout } from "../../../domain/schemas/workout";
+import type {
+  RepetitionBlock,
+  Workout,
+  WorkoutStep,
+} from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
-import {
-  DEFAULT_MANUFACTURER,
-  FIT_FILE_TYPE,
-  FIT_MESSAGE_KEY,
-  TYPE_GUARD_PROPERTY,
-} from "../constants";
+import { fitMessageKeyEnum } from "../schemas/fit-message-keys";
+import { DEFAULT_MANUFACTURER, isRepetitionBlock } from "../type-guards";
 
 export const convertMetadataToFileId = (krd: KRD, logger: Logger): unknown => {
   logger.debug("Converting metadata to file_id message");
@@ -14,9 +15,9 @@ export const convertMetadataToFileId = (krd: KRD, logger: Logger): unknown => {
   const timeCreated = new Date(krd.metadata.created);
 
   return {
-    type: FIT_MESSAGE_KEY.FILE_ID,
+    type: fitMessageKeyEnum.enum.fileIdMesgs,
     fileIdMesg: {
-      type: FIT_FILE_TYPE.WORKOUT,
+      type: fileTypeEnum.enum.workout,
       manufacturer: krd.metadata.manufacturer || DEFAULT_MANUFACTURER,
       product: krd.metadata.product,
       serialNumber: krd.metadata.serialNumber
@@ -36,7 +37,7 @@ export const convertWorkoutMetadata = (
   const numValidSteps = countValidSteps(workout.steps);
 
   return {
-    type: FIT_MESSAGE_KEY.WORKOUT,
+    type: fitMessageKeyEnum.enum.workoutMesgs,
     workoutMesg: {
       wktName: workout.name,
       sport: workout.sport,
@@ -46,14 +47,11 @@ export const convertWorkoutMetadata = (
 };
 
 const countValidSteps = (
-  steps: Array<
-    | { stepIndex: number }
-    | { repeatCount: number; steps: Array<{ stepIndex: number }> }
-  >
+  steps: Array<WorkoutStep | RepetitionBlock>
 ): number => {
   let count = 0;
   for (const step of steps) {
-    if (TYPE_GUARD_PROPERTY.REPEAT_COUNT in step) {
+    if (isRepetitionBlock(step)) {
       count += step.steps.length + 1;
     } else {
       count += 1;

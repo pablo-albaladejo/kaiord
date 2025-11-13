@@ -181,6 +181,62 @@ adapters/fit/
 └── workout.mapper.ts          // Workout mapping logic
 ```
 
+## Type Guards
+
+- **Use type guard functions instead of hardcoded property checks**
+- **Never use `"propertyName" in object`** - create type-safe guard functions
+- **Co-locate type guards** in a dedicated file (e.g., `type-guards.ts`)
+
+```typescript
+// ✅ Preferred - Type guard functions
+// type-guards.ts
+import type {
+  RepetitionBlock,
+  WorkoutStep,
+} from "../../domain/schemas/workout";
+
+export const isRepetitionBlock = (
+  step: WorkoutStep | RepetitionBlock
+): step is RepetitionBlock => {
+  return "repeatCount" in step;
+};
+
+export const isWorkoutStep = (
+  step: WorkoutStep | RepetitionBlock
+): step is WorkoutStep => {
+  return "stepIndex" in step;
+};
+
+// Usage in mapper
+import { isRepetitionBlock } from "../type-guards";
+
+for (const step of workout.steps) {
+  if (isRepetitionBlock(step)) {
+    // TypeScript knows step is RepetitionBlock here
+    processRepetition(step.repeatCount);
+  } else {
+    // TypeScript knows step is WorkoutStep here
+    processStep(step.stepIndex);
+  }
+}
+
+// ❌ Avoid - Hardcoded property checks
+if ("repeatCount" in step) {
+  // No type safety, magic string
+  processRepetition(step.repeatCount);
+}
+
+// ❌ Avoid - Constants for property names
+const TYPE_GUARD_PROPERTY = {
+  REPEAT_COUNT: "repeatCount",
+} as const;
+
+if (TYPE_GUARD_PROPERTY.REPEAT_COUNT in step) {
+  // Still not type-safe, adds unnecessary indirection
+  processRepetition(step.repeatCount);
+}
+```
+
 ## Testing
 
 - **Follow AAA pattern** (Arrange, Act, Assert) for all tests
