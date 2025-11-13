@@ -29,9 +29,9 @@ export const validateRoundTrip = (
   ): Promise<Array<ToleranceViolation>> => {
     logger.info("Validating FIT → KRD → FIT round-trip");
 
-    const krd = await fitReader.readToKRD(params.originalFit);
-    const convertedFit = await fitWriter.writeFromKRD(krd);
-    const krd2 = await fitReader.readToKRD(convertedFit);
+    const krd = await fitReader(params.originalFit);
+    const convertedFit = await fitWriter(krd);
+    const krd2 = await fitReader(convertedFit);
 
     const violations = compareKRDs(krd, krd2, toleranceChecker, logger);
 
@@ -51,10 +51,10 @@ export const validateRoundTrip = (
   ): Promise<Array<ToleranceViolation>> => {
     logger.info("Validating KRD → FIT → KRD round-trip");
 
-    const fit = await fitWriter.writeFromKRD(params.originalKrd);
-    const convertedKrd = await fitReader.readToKRD(fit);
-    const fit2 = await fitWriter.writeFromKRD(convertedKrd);
-    const krd2 = await fitReader.readToKRD(fit2);
+    const fit = await fitWriter(params.originalKrd);
+    const convertedKrd = await fitReader(fit);
+    const fit2 = await fitWriter(convertedKrd);
+    const krd2 = await fitReader(fit2);
 
     const violations = compareKRDs(
       params.originalKrd,

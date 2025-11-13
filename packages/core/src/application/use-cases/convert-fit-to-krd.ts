@@ -15,7 +15,7 @@ export const convertFitToKrd =
   async (params: ConvertFitToKrdParams): Promise<KRD> => {
     logger.info("Converting FIT to KRD");
 
-    const krd = await fitReader.readToKRD(params.fitBuffer);
+    const krd = await fitReader(params.fitBuffer);
 
     const errors = validator.validate(krd);
     if (errors.length > 0) {

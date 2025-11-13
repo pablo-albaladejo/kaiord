@@ -17,7 +17,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set poolLength
     if (krd.extensions?.workout) {
@@ -57,7 +57,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
 
     for (const poolLength of poolLengths) {
       // Act - FIT → KRD
-      const krd = await reader.readToKRD(originalBuffer);
+      const krd = await reader(originalBuffer);
 
       // Set poolLength
       if (krd.extensions?.workout) {
@@ -95,7 +95,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set poolLength (KRD always stores in meters)
     if (krd.extensions?.workout) {
@@ -132,7 +132,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Ensure poolLength is undefined
     if (krd.extensions?.workout) {
@@ -172,7 +172,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set equipment on first step
     if (krd.extensions?.workout) {
@@ -225,7 +225,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
 
     for (const equipment of equipmentValues) {
       // Act - FIT → KRD
-      const krd = await reader.readToKRD(originalBuffer);
+      const krd = await reader(originalBuffer);
 
       // Set equipment
       if (krd.extensions?.workout) {
@@ -271,7 +271,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Ensure equipment is undefined
     if (krd.extensions?.workout) {
@@ -320,7 +320,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     ];
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Add equipment to all steps
     if (krd.extensions?.workout) {
@@ -373,7 +373,7 @@ describe("Round-trip: Swimming workouts - combined pool length and equipment", (
     const testEquipment = "swim_fins";
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set both poolLength and equipment
     if (krd.extensions?.workout) {

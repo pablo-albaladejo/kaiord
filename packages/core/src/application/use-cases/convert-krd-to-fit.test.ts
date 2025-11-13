@@ -12,9 +12,7 @@ describe("convertKrdToFit", () => {
     const krd = buildKRD.build();
     const expectedBuffer = new Uint8Array([1, 2, 3, 4]);
 
-    const mockFitWriter: FitWriter = {
-      writeFromKRD: vi.fn().mockResolvedValue(expectedBuffer),
-    };
+    const mockFitWriter = vi.fn<FitWriter>().mockResolvedValue(expectedBuffer);
     const mockValidator: SchemaValidator = {
       validate: vi.fn().mockReturnValue([]),
     };
@@ -30,7 +28,7 @@ describe("convertKrdToFit", () => {
     // Assert
     expect(result).toStrictEqual(expectedBuffer);
     expect(mockValidator.validate).toHaveBeenCalledWith(krd);
-    expect(mockFitWriter.writeFromKRD).toHaveBeenCalledWith(krd);
+    expect(mockFitWriter).toHaveBeenCalledWith(krd);
   });
 
   it("should throw KrdValidationError when pre-validation fails", async () => {
@@ -41,9 +39,7 @@ describe("convertKrdToFit", () => {
       { field: "type", message: "Invalid type value" },
     ];
 
-    const mockFitWriter: FitWriter = {
-      writeFromKRD: vi.fn(),
-    };
+    const mockFitWriter = vi.fn<FitWriter>();
     const mockValidator: SchemaValidator = {
       validate: vi.fn().mockReturnValue(validationErrors),
     };
@@ -56,7 +52,7 @@ describe("convertKrdToFit", () => {
     await expect(
       convertKrdToFit(mockFitWriter, mockValidator, logger)({ krd })
     ).rejects.toThrow("KRD validation failed");
-    expect(mockFitWriter.writeFromKRD).not.toHaveBeenCalled();
+    expect(mockFitWriter).not.toHaveBeenCalled();
   });
 
   it("should include validation errors in thrown KrdValidationError", async () => {
@@ -67,9 +63,7 @@ describe("convertKrdToFit", () => {
       { field: "type", message: "Invalid type value" },
     ];
 
-    const mockFitWriter: FitWriter = {
-      writeFromKRD: vi.fn(),
-    };
+    const mockFitWriter = vi.fn<FitWriter>();
     const mockValidator: SchemaValidator = {
       validate: vi.fn().mockReturnValue(validationErrors),
     };
@@ -91,9 +85,7 @@ describe("convertKrdToFit", () => {
     const krd = buildKRD.build();
     const writerError = new Error("Failed to write FIT file");
 
-    const mockFitWriter: FitWriter = {
-      writeFromKRD: vi.fn().mockRejectedValue(writerError),
-    };
+    const mockFitWriter = vi.fn<FitWriter>().mockRejectedValue(writerError);
     const mockValidator: SchemaValidator = {
       validate: vi.fn().mockReturnValue([]),
     };
@@ -110,9 +102,7 @@ describe("convertKrdToFit", () => {
     const krd = buildKRD.build();
     const fitBuffer = new Uint8Array([1, 2, 3, 4]);
 
-    const mockFitWriter: FitWriter = {
-      writeFromKRD: vi.fn().mockResolvedValue(fitBuffer),
-    };
+    const mockFitWriter = vi.fn<FitWriter>().mockResolvedValue(fitBuffer);
     const mockValidator: SchemaValidator = {
       validate: vi.fn().mockReturnValue([]),
     };
@@ -123,6 +113,6 @@ describe("convertKrdToFit", () => {
 
     // Assert
     expect(mockValidator.validate).toHaveBeenCalledWith(krd);
-    expect(mockFitWriter.writeFromKRD).toHaveBeenCalledWith(krd);
+    expect(mockFitWriter).toHaveBeenCalledWith(krd);
   });
 });

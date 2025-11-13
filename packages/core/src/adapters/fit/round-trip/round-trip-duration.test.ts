@@ -17,7 +17,7 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set calorie duration on first step
     if (krd.extensions?.workout) {
@@ -65,7 +65,7 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
 
     for (const calories of calorieValues) {
       // Act - FIT → KRD
-      const krd = await reader.readToKRD(originalBuffer);
+      const krd = await reader(originalBuffer);
 
       // Set calorie duration
       if (krd.extensions?.workout) {
@@ -115,7 +115,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set power_less_than duration
     if (krd.extensions?.workout) {
@@ -161,7 +161,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set power_greater_than duration
     if (krd.extensions?.workout) {
@@ -209,7 +209,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
 
     for (const watts of powerValues) {
       // Act - FIT → KRD
-      const krd = await reader.readToKRD(originalBuffer);
+      const krd = await reader(originalBuffer);
 
       // Set power duration
       if (krd.extensions?.workout) {
@@ -260,7 +260,7 @@ describe("Round-trip: Repeat step conditionals - calories", () => {
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set repeat_until_calories duration on first step
     if (krd.extensions?.workout) {
@@ -313,7 +313,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set power conditional
     if (krd.extensions?.workout) {
@@ -366,7 +366,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set power conditional
     if (krd.extensions?.workout) {
@@ -421,7 +421,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
 
     for (const watts of powerValues) {
       // Act - FIT → KRD
-      const krd = await reader.readToKRD(originalBuffer);
+      const krd = await reader(originalBuffer);
 
       // Set power conditional
       if (krd.extensions?.workout) {
@@ -476,7 +476,7 @@ describe("Round-trip: Combined advanced duration types", () => {
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set different duration types on different steps
     if (krd.extensions?.workout) {

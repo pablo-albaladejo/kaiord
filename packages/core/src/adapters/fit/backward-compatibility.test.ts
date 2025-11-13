@@ -65,7 +65,7 @@ describe("Backward Compatibility", () => {
       const fitBuffer = readFileSync(fitPath);
 
       // Act
-      const krd = await fitReader.readToKRD(fitBuffer);
+      const krd = await fitReader(fitBuffer);
 
       // Assert - Verify no new fields are present
       const workout = krd.extensions?.workout as Record<string, unknown>;
@@ -92,7 +92,7 @@ describe("Backward Compatibility", () => {
       const fitBuffer = readFileSync(fitPath);
 
       // Act
-      const krd = await fitReader.readToKRD(fitBuffer);
+      const krd = await fitReader(fitBuffer);
 
       // Assert - Verify no new fields are present
       const workout = krd.extensions?.workout as Record<string, unknown>;
@@ -111,7 +111,7 @@ describe("Backward Compatibility", () => {
       const fitBuffer = readFileSync(fitPath);
 
       // Act
-      const krd = await fitReader.readToKRD(fitBuffer);
+      const krd = await fitReader(fitBuffer);
 
       // Assert - Fields should be undefined, not null
       const workout = krd.extensions?.workout as Record<string, unknown>;
@@ -143,7 +143,7 @@ describe("Backward Compatibility", () => {
       const fitBuffer = readFileSync(fitPath);
 
       // Act - Use existing API methods
-      const krd = await fitReader.readToKRD(fitBuffer);
+      const krd = await fitReader(fitBuffer);
 
       // Assert - API methods work as before
       expect(krd).toBeDefined();

@@ -18,7 +18,7 @@ describe("Round-trip: Workout step - notes field", () => {
     const testNotes = "Focus on form and breathing";
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Add notes to first step
     if (krd.extensions?.workout) {
@@ -72,7 +72,7 @@ describe("Round-trip: Workout step - notes field", () => {
 
     for (const notes of notesValues) {
       // Act - FIT → KRD
-      const krd = await reader.readToKRD(originalBuffer);
+      const krd = await reader(originalBuffer);
 
       // Add notes to first step
       if (krd.extensions?.workout) {
@@ -119,7 +119,7 @@ describe("Round-trip: Workout step - notes field", () => {
     const longNotes = "a".repeat(300);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Add long notes to first step
     if (krd.extensions?.workout) {
@@ -163,7 +163,7 @@ describe("Round-trip: Workout step - notes field", () => {
     const originalBuffer = readFileSync(fitPath);
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Ensure notes is undefined
     if (krd.extensions?.workout) {
@@ -212,7 +212,7 @@ describe("Round-trip: Workout step - notes field", () => {
     ];
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Add notes to all steps
     if (krd.extensions?.workout) {
@@ -265,7 +265,7 @@ describe("Round-trip: Combined fields - subSport and notes", () => {
     const testNotes = "Focus on technique";
 
     // Act - FIT → KRD
-    const krd = await reader.readToKRD(originalBuffer);
+    const krd = await reader(originalBuffer);
 
     // Set both subSport and notes
     if (krd.extensions?.workout) {
