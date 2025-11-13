@@ -1097,6 +1097,833 @@ describe("convertKRDToMessages", () => {
     });
   });
 
+  describe("advanced duration types - calorie-based", () => {
+    it("should convert calories duration to FIT", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "calories",
+          duration: { type: "calories", calories: 500 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toStrictEqual({
+        messageIndex: 0,
+        durationType: fitDurationTypeSchema.enum.calories,
+        durationCalories: 500,
+        targetType: stepMsg.workoutStepMesg.targetType,
+      });
+    });
+
+    it("should convert repeatUntilCalories duration to FIT", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "repeat_until_calories",
+          duration: {
+            type: "repeat_until_calories",
+            calories: 1000,
+            repeatFrom: 0,
+          },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toStrictEqual({
+        messageIndex: 1,
+        durationType: fitDurationTypeSchema.enum.repeatUntilCalories,
+        durationCalories: 1000,
+        durationStep: 0,
+        targetType: stepMsg.workoutStepMesg.targetType,
+      });
+    });
+
+    it("should handle boundary calorie values", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "calories",
+          duration: { type: "calories", calories: 1 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "calories",
+          duration: { type: "calories", calories: 10000 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const step1Msg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(step1Msg.workoutStepMesg.durationCalories).toBe(1);
+
+      const step2Msg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(step2Msg.workoutStepMesg.durationCalories).toBe(10000);
+    });
+  });
+
+  describe("advanced duration types - power-based", () => {
+    it("should convert powerLessThan duration to FIT", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "power_less_than",
+          duration: { type: "power_less_than", watts: 200 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toStrictEqual({
+        messageIndex: 0,
+        durationType: fitDurationTypeSchema.enum.powerLessThan,
+        durationPower: 200,
+        targetType: stepMsg.workoutStepMesg.targetType,
+      });
+    });
+
+    it("should convert powerGreaterThan duration to FIT", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "power_greater_than",
+          duration: { type: "power_greater_than", watts: 250 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toStrictEqual({
+        messageIndex: 0,
+        durationType: fitDurationTypeSchema.enum.powerGreaterThan,
+        durationPower: 250,
+        targetType: stepMsg.workoutStepMesg.targetType,
+      });
+    });
+
+    it("should convert repeatUntilPowerLessThan duration to FIT", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "repeat_until_power_less_than",
+          duration: {
+            type: "repeat_until_power_less_than",
+            watts: 180,
+            repeatFrom: 0,
+          },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toStrictEqual({
+        messageIndex: 1,
+        durationType: fitDurationTypeSchema.enum.repeatUntilPowerLessThan,
+        durationPower: 180,
+        durationStep: 0,
+        targetType: stepMsg.workoutStepMesg.targetType,
+      });
+    });
+
+    it("should convert repeatUntilPowerGreaterThan duration to FIT", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "repeat_until_power_greater_than",
+          duration: {
+            type: "repeat_until_power_greater_than",
+            watts: 300,
+            repeatFrom: 0,
+          },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toStrictEqual({
+        messageIndex: 1,
+        durationType: fitDurationTypeSchema.enum.repeatUntilPowerGreaterThan,
+        durationPower: 300,
+        durationStep: 0,
+        targetType: stepMsg.workoutStepMesg.targetType,
+      });
+    });
+
+    it("should handle boundary power values", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "power_less_than",
+          duration: { type: "power_less_than", watts: 50 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "power_greater_than",
+          duration: { type: "power_greater_than", watts: 1000 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const step1Msg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(step1Msg.workoutStepMesg.durationPower).toBe(50);
+
+      const step2Msg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(step2Msg.workoutStepMesg.durationPower).toBe(1000);
+    });
+  });
+
+  describe("advanced duration types - repeat conditionals", () => {
+    it("should convert repeatUntilTime duration to FIT", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "repeat_until_time",
+          duration: {
+            type: "repeat_until_time",
+            seconds: 1800,
+            repeatFrom: 0,
+          },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toStrictEqual({
+        messageIndex: 1,
+        durationType: fitDurationTypeSchema.enum.repeatUntilTime,
+        durationTime: 1800,
+        durationStep: 0,
+        targetType: stepMsg.workoutStepMesg.targetType,
+      });
+    });
+
+    it("should convert repeatUntilDistance duration to FIT", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "distance",
+          duration: { type: "distance", meters: 1000 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "repeat_until_distance",
+          duration: {
+            type: "repeat_until_distance",
+            meters: 5000,
+            repeatFrom: 0,
+          },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toStrictEqual({
+        messageIndex: 1,
+        durationType: fitDurationTypeSchema.enum.repeatUntilDistance,
+        durationDistance: 5000,
+        durationStep: 0,
+        targetType: stepMsg.workoutStepMesg.targetType,
+      });
+    });
+
+    it("should convert repeatUntilHrLessThan duration to FIT", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "repeat_until_heart_rate_less_than",
+          duration: {
+            type: "repeat_until_heart_rate_less_than",
+            bpm: 120,
+            repeatFrom: 0,
+          },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toStrictEqual({
+        messageIndex: 1,
+        durationType: fitDurationTypeSchema.enum.repeatUntilHrLessThan,
+        durationHr: 120,
+        durationStep: 0,
+        targetType: stepMsg.workoutStepMesg.targetType,
+      });
+    });
+
+    it("should handle multiple repeat conditionals in sequence", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "repeat_until_time",
+          duration: {
+            type: "repeat_until_time",
+            seconds: 600,
+            repeatFrom: 0,
+          },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 2,
+          durationType: "distance",
+          duration: { type: "distance", meters: 1000 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 3,
+          durationType: "repeat_until_distance",
+          duration: {
+            type: "repeat_until_distance",
+            meters: 3000,
+            repeatFrom: 2,
+          },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      expect(messages.length).toBe(6);
+
+      const step2Msg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(step2Msg.workoutStepMesg).toMatchObject({
+        durationType: fitDurationTypeSchema.enum.repeatUntilTime,
+        durationTime: 600,
+        durationStep: 0,
+      });
+
+      const step4Msg = messages[5] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(step4Msg.workoutStepMesg).toMatchObject({
+        durationType: fitDurationTypeSchema.enum.repeatUntilDistance,
+        durationDistance: 3000,
+        durationStep: 2,
+      });
+    });
+  });
+
+  describe("advanced duration types - dynamic field mapping", () => {
+    it("should map durationCalories field correctly", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "calories",
+          duration: { type: "calories", calories: 750 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toHaveProperty("durationCalories");
+      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationTime");
+      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationDistance");
+      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationPower");
+      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationHr");
+    });
+
+    it("should map durationPower field correctly", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "power_less_than",
+          duration: { type: "power_less_than", watts: 225 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toHaveProperty("durationPower");
+      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationTime");
+      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationDistance");
+      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationCalories");
+      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationHr");
+    });
+
+    it("should map durationStep field for repeat conditionals", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "repeat_until_calories",
+          duration: {
+            type: "repeat_until_calories",
+            calories: 800,
+            repeatFrom: 0,
+          },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toHaveProperty("durationStep");
+      expect(stepMsg.workoutStepMesg.durationStep).toBe(0);
+    });
+
+    it("should not include durationStep for non-repeat durations", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "calories",
+          duration: { type: "calories", calories: 500 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "power_less_than",
+          duration: { type: "power_less_than", watts: 200 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const step1Msg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(step1Msg.workoutStepMesg).not.toHaveProperty("durationStep");
+
+      const step2Msg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(step2Msg.workoutStepMesg).not.toHaveProperty("durationStep");
+    });
+  });
+
+  describe("advanced duration types - edge cases", () => {
+    it("should handle zero calorie values", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "calories",
+          duration: { type: "calories", calories: 0 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg.durationCalories).toBe(0);
+    });
+
+    it("should handle zero power values", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "power_less_than",
+          duration: { type: "power_less_than", watts: 0 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg.durationPower).toBe(0);
+    });
+
+    it("should handle repeatFrom index 0", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "repeat_until_time",
+          duration: {
+            type: "repeat_until_time",
+            seconds: 600,
+            repeatFrom: 0,
+          },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[3] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg.durationStep).toBe(0);
+    });
+
+    it("should handle large repeatFrom index", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 1,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 2,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          stepIndex: 3,
+          durationType: "repeat_until_distance",
+          duration: {
+            type: "repeat_until_distance",
+            meters: 10000,
+            repeatFrom: 0,
+          },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ];
+      const workout = buildWorkout.build({ steps });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[5] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg.durationStep).toBe(0);
+    });
+  });
+
   describe("logging", () => {
     it("should log debug message when conversion starts", () => {
       // Arrange
