@@ -72,7 +72,7 @@ Before marking any task as complete, verify that:
     - Handle undefined values (omit rather than null)
     - _Requirements: 1.1, 2.1, 10.1, 10.5_
 
-  - [ ] 2.3 Implement KRD → FIT converters for Priority 1 fields
+  - [x] 2.3 Implement KRD → FIT converters for Priority 1 fields
     - Map `subSport` from KRD to FIT Workout message
     - Map `notes` from KRD to FIT WorkoutStep message
     - Validate notes length (max 256 characters)

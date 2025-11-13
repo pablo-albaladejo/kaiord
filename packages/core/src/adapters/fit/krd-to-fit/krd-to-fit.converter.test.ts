@@ -107,6 +107,7 @@ describe("convertKRDToMessages", () => {
       const workout = buildWorkout.build({
         name: "Test Workout",
         sport: "running",
+        subSport: undefined,
       });
       const krd = buildKRD.build({
         extensions: { workout },
@@ -128,6 +129,60 @@ describe("convertKRDToMessages", () => {
           numValidSteps: workoutMsg.workoutMesg.numValidSteps,
         },
       });
+    });
+
+    it("should convert workout with subSport to workout message", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const workout = buildWorkout.build({
+        name: "Trail Run",
+        sport: "running",
+        subSport: "trail",
+      });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const workoutMsg = messages[1] as {
+        type: string;
+        workoutMesg: Record<string, unknown>;
+      };
+      expect(workoutMsg).toStrictEqual({
+        type: fitMessageKeyEnum.enum.workoutMesgs,
+        workoutMesg: {
+          wktName: workout.name,
+          sport: workout.sport,
+          subSport: "trail",
+          numValidSteps: workoutMsg.workoutMesg.numValidSteps,
+        },
+      });
+    });
+
+    it("should omit subSport when undefined", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const workout = buildWorkout.build({
+        name: "Generic Workout",
+        sport: "cycling",
+        subSport: undefined,
+      });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const workoutMsg = messages[1] as {
+        type: string;
+        workoutMesg: Record<string, unknown>;
+      };
+      expect(workoutMsg.workoutMesg).not.toHaveProperty("subSport");
     });
 
     it("should calculate numValidSteps for individual steps", () => {
@@ -245,7 +300,7 @@ describe("convertKRDToMessages", () => {
           },
         },
       ];
-      const workout = buildWorkout.build({ steps });
+      const workout = buildWorkout.build({ steps, subSport: undefined });
       const krd = buildKRD.build({
         extensions: { workout },
       });
@@ -271,6 +326,106 @@ describe("convertKRDToMessages", () => {
           targetValue: 1200,
         },
       });
+    });
+
+    it("should convert workout step with notes", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "power",
+          target: {
+            type: "power",
+            value: { unit: "watts", value: 200 },
+          },
+          notes: "Focus on form and breathing",
+        },
+      ];
+      const workout = buildWorkout.build({ steps, subSport: undefined });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).toMatchObject({
+        notes: "Focus on form and breathing",
+      });
+    });
+
+    it("should omit notes when undefined", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "power",
+          target: {
+            type: "power",
+            value: { unit: "watts", value: 200 },
+          },
+          notes: undefined,
+        },
+      ];
+      const workout = buildWorkout.build({ steps, subSport: undefined });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg).not.toHaveProperty("notes");
+    });
+
+    it("should truncate notes exceeding 256 characters", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const longNotes = "a".repeat(300);
+      const steps: Array<WorkoutStep> = [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "power",
+          target: {
+            type: "power",
+            value: { unit: "watts", value: 200 },
+          },
+          notes: longNotes,
+        },
+      ];
+      const workout = buildWorkout.build({ steps, subSport: undefined });
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act
+      const messages = convertKRDToMessages(krd, logger);
+
+      // Assert
+      const stepMsg = messages[2] as {
+        type: string;
+        workoutStepMesg: Record<string, unknown>;
+      };
+      expect(stepMsg.workoutStepMesg.notes).toBe("a".repeat(256));
+      expect((stepMsg.workoutStepMesg.notes as string).length).toBe(256);
     });
 
     it("should convert distance-based duration step", () => {
