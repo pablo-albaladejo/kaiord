@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
-import type { FitWorkoutStep } from "../../../adapters/fit/types";
+import type { FitWorkoutStep } from "../../../adapters/fit/shared/types";
 
 export const buildFitWorkoutStep = new Factory<FitWorkoutStep>()
   .attr("messageIndex", () => faker.number.int({ max: 50, min: 0 }))

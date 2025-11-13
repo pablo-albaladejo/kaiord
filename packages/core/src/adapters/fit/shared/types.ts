@@ -2,7 +2,7 @@
  * Type definitions for Garmin FIT SDK messages
  */
 
-import type { fitMessageKeySchema } from "./schemas/fit-message-keys";
+import type { fitMessageKeySchema } from "../schemas/fit-message-keys";
 
 export type FitMessages = {
   [fitMessageKeySchema.enum.fileIdMesgs]?: Array<{

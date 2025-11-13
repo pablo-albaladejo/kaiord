@@ -1,6 +1,6 @@
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
-import { mapEquipmentToFit } from "../equipment.mapper";
+import { mapEquipmentToFit } from "../equipment/equipment.mapper";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { convertDuration } from "./krd-to-fit-duration.mapper";
 import { convertTarget } from "./krd-to-fit-target.mapper";

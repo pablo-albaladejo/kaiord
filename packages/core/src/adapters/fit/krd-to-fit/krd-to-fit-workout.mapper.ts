@@ -3,7 +3,7 @@ import type { Logger } from "../../../ports/logger";
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { fitTargetTypeSchema } from "../schemas/fit-target";
-import { isRepetitionBlock } from "../type-guards";
+import { isRepetitionBlock } from "../shared/type-guards";
 import { convertWorkoutStep } from "./krd-to-fit-step.mapper";
 
 export const convertWorkoutSteps = (

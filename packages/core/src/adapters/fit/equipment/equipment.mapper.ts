@@ -1,5 +1,11 @@
-import { equipmentSchema, type Equipment } from "../../domain/schemas/equipment";
-import { fitEquipmentSchema, type FitEquipment } from "./schemas/fit-equipment";
+import {
+  equipmentSchema,
+  type Equipment,
+} from "../../../domain/schemas/equipment";
+import {
+  fitEquipmentSchema,
+  type FitEquipment,
+} from "../schemas/fit-equipment";
 
 const FIT_TO_KRD_EQUIPMENT_MAP: Record<FitEquipment, Equipment> = {
   none: "none",

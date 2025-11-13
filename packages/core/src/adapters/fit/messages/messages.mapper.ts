@@ -4,7 +4,7 @@ import type { Logger } from "../../../ports/logger";
 import { extractFitExtensions } from "../extensions/extensions.extractor";
 import { mapMetadata } from "../metadata/metadata.mapper";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
-import type { FitMessages } from "../types";
+import type { FitMessages } from "../shared/types";
 import { mapWorkout } from "../workout/workout.mapper";
 import { validateMessages } from "./messages.validator";
 
@@ -20,7 +20,8 @@ export const mapMessagesToKRD = (
 
   const fileId = messages[fitMessageKeySchema.enum.fileIdMesgs]?.[0];
   const workoutMsg = messages[fitMessageKeySchema.enum.workoutMesgs]?.[0];
-  const workoutSteps = messages[fitMessageKeySchema.enum.workoutStepMesgs] || [];
+  const workoutSteps =
+    messages[fitMessageKeySchema.enum.workoutStepMesgs] || [];
 
   validateMessages(fileId, workoutMsg, messages, logger);
 

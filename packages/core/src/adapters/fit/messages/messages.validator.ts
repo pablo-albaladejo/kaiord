@@ -1,6 +1,6 @@
 import type { Logger } from "../../../ports/logger";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
-import type { FitMessages } from "../types";
+import type { FitMessages } from "../shared/types";
 
 export const validateMessages = (
   fileId: unknown,

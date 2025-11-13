@@ -7,8 +7,8 @@ import type {
 } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
-import { mapSubSportToFit } from "../sub-sport.mapper";
-import { DEFAULT_MANUFACTURER, isRepetitionBlock } from "../type-guards";
+import { DEFAULT_MANUFACTURER, isRepetitionBlock } from "../shared/type-guards";
+import { mapSubSportToFit } from "../sub-sport/sub-sport.mapper";
 
 export const convertMetadataToFileId = (krd: KRD, logger: Logger): unknown => {
   logger.debug("Converting metadata to file_id message");
