@@ -3,6 +3,23 @@ import {
   type Duration,
 } from "../../../domain/schemas/duration";
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
+import {
+  convertCaloriesDuration,
+  convertDistanceDuration,
+  convertHeartRateGreaterThan,
+  convertHeartRateLessThan,
+  convertPowerGreaterThan,
+  convertPowerLessThan,
+  convertTimeDuration,
+} from "./duration-converters";
+import {
+  convertRepeatUntilCalories,
+  convertRepeatUntilDistance,
+  convertRepeatUntilHrLessThan,
+  convertRepeatUntilPowerGreaterThan,
+  convertRepeatUntilPowerLessThan,
+  convertRepeatUntilTime,
+} from "./repeat-duration-converters";
 
 export type FitDurationData = {
   durationType?: string;
@@ -11,81 +28,43 @@ export type FitDurationData = {
   durationHr?: number;
   durationStep?: number;
   repeatHr?: number;
+  durationCalories?: number;
+  durationPower?: number;
 };
 
-const convertTimeDuration = (data: FitDurationData): Duration | null => {
-  if (data.durationTime !== undefined) {
-    return {
-      type: durationTypeSchema.enum.time,
-      seconds: data.durationTime,
-    };
-  }
-  return null;
-};
-
-const convertDistanceDuration = (data: FitDurationData): Duration | null => {
-  if (data.durationDistance !== undefined) {
-    return {
-      type: durationTypeSchema.enum.distance,
-      meters: data.durationDistance,
-    };
-  }
-  return null;
-};
-
-const convertHeartRateLessThan = (data: FitDurationData): Duration | null => {
-  if (data.durationHr !== undefined) {
-    return {
-      type: durationTypeSchema.enum.heart_rate_less_than,
-      bpm: data.durationHr,
-    };
-  }
-  return null;
-};
-
-const convertHeartRateGreaterThan = (
-  data: FitDurationData
-): Duration | null => {
-  if (data.repeatHr !== undefined && data.durationStep !== undefined) {
-    return {
-      type: durationTypeSchema.enum.repeat_until_heart_rate_greater_than,
-      bpm: data.repeatHr,
-      repeatFrom: data.durationStep,
-    };
-  }
-  return null;
+const DURATION_CONVERTERS: Record<
+  string,
+  (data: FitDurationData) => Duration | null
+> = {
+  [fitDurationTypeSchema.enum.time]: convertTimeDuration,
+  [fitDurationTypeSchema.enum.distance]: convertDistanceDuration,
+  [fitDurationTypeSchema.enum.hrLessThan]: convertHeartRateLessThan,
+  [fitDurationTypeSchema.enum.repeatUntilHrGreaterThan]:
+    convertHeartRateGreaterThan,
+  [fitDurationTypeSchema.enum.calories]: convertCaloriesDuration,
+  [fitDurationTypeSchema.enum.powerLessThan]: convertPowerLessThan,
+  [fitDurationTypeSchema.enum.powerGreaterThan]: convertPowerGreaterThan,
+  [fitDurationTypeSchema.enum.repeatUntilTime]: convertRepeatUntilTime,
+  [fitDurationTypeSchema.enum.repeatUntilDistance]: convertRepeatUntilDistance,
+  [fitDurationTypeSchema.enum.repeatUntilCalories]: convertRepeatUntilCalories,
+  [fitDurationTypeSchema.enum.repeatUntilHrLessThan]:
+    convertRepeatUntilHrLessThan,
+  [fitDurationTypeSchema.enum.repeatUntilPowerLessThan]:
+    convertRepeatUntilPowerLessThan,
+  [fitDurationTypeSchema.enum.repeatUntilPowerGreaterThan]:
+    convertRepeatUntilPowerGreaterThan,
 };
 
 export const convertFitDuration = (data: FitDurationData): Duration => {
-  // Validate at boundary
   const result = fitDurationTypeSchema.safeParse(data.durationType);
 
   if (!result.success) {
     return { type: durationTypeSchema.enum.open };
   }
 
-  const durationType = result.data;
-
-  if (durationType === fitDurationTypeSchema.enum.time) {
-    return convertTimeDuration(data) || { type: durationTypeSchema.enum.open };
-  }
-
-  if (durationType === fitDurationTypeSchema.enum.distance) {
-    return (
-      convertDistanceDuration(data) || { type: durationTypeSchema.enum.open }
-    );
-  }
-
-  if (durationType === fitDurationTypeSchema.enum.hrLessThan) {
-    return (
-      convertHeartRateLessThan(data) || { type: durationTypeSchema.enum.open }
-    );
-  }
-
-  if (durationType === fitDurationTypeSchema.enum.repeatUntilHrGreaterThan) {
-    return (
-      convertHeartRateGreaterThan(data) || { type: durationTypeSchema.enum.open }
-    );
+  const converter = DURATION_CONVERTERS[result.data];
+  if (converter) {
+    return converter(data) || { type: durationTypeSchema.enum.open };
   }
 
   return { type: durationTypeSchema.enum.open };
