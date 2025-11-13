@@ -1,5 +1,5 @@
-import { targetTypeEnum, type Target } from "../../../domain/schemas/target";
-import { fitTargetTypeEnum } from "../schemas/fit-target";
+import { targetTypeSchema, type Target } from "../../../domain/schemas/target";
+import { fitTargetTypeSchema } from "../schemas/fit-target";
 import { convertCadenceTarget } from "./target-cadence.converter";
 import { convertHeartRateTarget } from "./target-heart-rate.converter";
 import { convertPaceTarget } from "./target-pace.converter";
@@ -10,25 +10,25 @@ import type { FitTargetData } from "./target.types";
 export type { FitTargetData };
 
 export const convertFitTarget = (data: FitTargetData): Target => {
-  if (data.targetType === fitTargetTypeEnum.enum.power) {
+  if (data.targetType === fitTargetTypeSchema.enum.power) {
     return convertPowerTarget(data);
   }
 
-  if (data.targetType === fitTargetTypeEnum.enum.heartRate) {
+  if (data.targetType === fitTargetTypeSchema.enum.heartRate) {
     return convertHeartRateTarget(data);
   }
 
-  if (data.targetType === fitTargetTypeEnum.enum.cadence) {
+  if (data.targetType === fitTargetTypeSchema.enum.cadence) {
     return convertCadenceTarget(data);
   }
 
-  if (data.targetType === fitTargetTypeEnum.enum.speed) {
+  if (data.targetType === fitTargetTypeSchema.enum.speed) {
     return convertPaceTarget(data);
   }
 
-  if (data.targetType === fitTargetTypeEnum.enum.swimStroke) {
+  if (data.targetType === fitTargetTypeSchema.enum.swimStroke) {
     return convertStrokeTypeTarget(data);
   }
 
-  return { type: targetTypeEnum.enum.open };
+  return { type: targetTypeSchema.enum.open };
 };

@@ -1,6 +1,6 @@
 import {
-  targetTypeEnum,
-  targetUnitEnum,
+  targetTypeSchema,
+  targetUnitSchema,
   type Target,
 } from "../../../domain/schemas/target";
 import type { FitTargetData } from "./target.types";
@@ -16,7 +16,7 @@ export const convertPowerTarget = (data: FitTargetData): Target => {
     return convertPowerValue(data.targetValue);
   }
 
-  return { type: targetTypeEnum.enum.open };
+  return { type: targetTypeSchema.enum.open };
 };
 
 const buildPowerRangeTarget = (data: FitTargetData): Target | null => {
@@ -25,9 +25,9 @@ const buildPowerRangeTarget = (data: FitTargetData): Target | null => {
     data.customTargetPowerHigh !== undefined
   ) {
     return {
-      type: targetTypeEnum.enum.power,
+      type: targetTypeSchema.enum.power,
       value: {
-        unit: targetUnitEnum.enum.range,
+        unit: targetUnitSchema.enum.range,
         min: data.customTargetPowerLow,
         max: data.customTargetPowerHigh,
       },
@@ -39,9 +39,9 @@ const buildPowerRangeTarget = (data: FitTargetData): Target | null => {
     data.customTargetValueHigh !== undefined
   ) {
     return {
-      type: targetTypeEnum.enum.power,
+      type: targetTypeSchema.enum.power,
       value: {
-        unit: targetUnitEnum.enum.range,
+        unit: targetUnitSchema.enum.range,
         min: data.customTargetValueLow,
         max: data.customTargetValueHigh,
       },
@@ -54,9 +54,9 @@ const buildPowerRangeTarget = (data: FitTargetData): Target | null => {
 const buildPowerZoneTarget = (data: FitTargetData): Target | null => {
   if (data.targetPowerZone !== undefined) {
     return {
-      type: targetTypeEnum.enum.power,
+      type: targetTypeSchema.enum.power,
       value: {
-        unit: targetUnitEnum.enum.zone,
+        unit: targetUnitSchema.enum.zone,
         value: data.targetPowerZone,
       },
     };
@@ -70,9 +70,9 @@ const convertPowerValue = (value: number): Target => {
   // - Values 0-1000: Percentage of FTP
   if (value > 1000) {
     return {
-      type: targetTypeEnum.enum.power,
+      type: targetTypeSchema.enum.power,
       value: {
-        unit: targetUnitEnum.enum.watts,
+        unit: targetUnitSchema.enum.watts,
         value: value - 1000,
       },
     };
@@ -80,13 +80,13 @@ const convertPowerValue = (value: number): Target => {
 
   if (value > 0) {
     return {
-      type: targetTypeEnum.enum.power,
+      type: targetTypeSchema.enum.power,
       value: {
-        unit: targetUnitEnum.enum.percent_ftp,
+        unit: targetUnitSchema.enum.percent_ftp,
         value,
       },
     };
   }
 
-  return { type: targetTypeEnum.enum.open };
+  return { type: targetTypeSchema.enum.open };
 };

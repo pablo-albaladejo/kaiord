@@ -1,9 +1,9 @@
 import { z } from "zod";
 
-export const fitMessageKeyEnum = z.enum([
+export const fitMessageKeySchema = z.enum([
   "fileIdMesgs",
   "workoutMesgs",
   "workoutStepMesgs",
 ]);
 
-export type FitMessageKey = z.infer<typeof fitMessageKeyEnum>;
+export type FitMessageKey = z.infer<typeof fitMessageKeySchema>;

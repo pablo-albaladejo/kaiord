@@ -1,8 +1,8 @@
 import {
-  durationTypeEnum,
+  durationTypeSchema,
   type Duration,
 } from "../../../domain/schemas/duration";
-import { fitDurationTypeEnum } from "../schemas/fit-duration";
+import { fitDurationTypeSchema } from "../schemas/fit-duration";
 
 export type FitDurationData = {
   durationType?: string;
@@ -16,7 +16,7 @@ export type FitDurationData = {
 const convertTimeDuration = (data: FitDurationData): Duration | null => {
   if (data.durationTime !== undefined) {
     return {
-      type: durationTypeEnum.enum.time,
+      type: durationTypeSchema.enum.time,
       seconds: data.durationTime,
     };
   }
@@ -26,7 +26,7 @@ const convertTimeDuration = (data: FitDurationData): Duration | null => {
 const convertDistanceDuration = (data: FitDurationData): Duration | null => {
   if (data.durationDistance !== undefined) {
     return {
-      type: durationTypeEnum.enum.distance,
+      type: durationTypeSchema.enum.distance,
       meters: data.durationDistance,
     };
   }
@@ -36,7 +36,7 @@ const convertDistanceDuration = (data: FitDurationData): Duration | null => {
 const convertHeartRateLessThan = (data: FitDurationData): Duration | null => {
   if (data.durationHr !== undefined) {
     return {
-      type: durationTypeEnum.enum.heart_rate_less_than,
+      type: durationTypeSchema.enum.heart_rate_less_than,
       bpm: data.durationHr,
     };
   }
@@ -48,7 +48,7 @@ const convertHeartRateGreaterThan = (
 ): Duration | null => {
   if (data.repeatHr !== undefined && data.durationStep !== undefined) {
     return {
-      type: durationTypeEnum.enum.repeat_until_heart_rate_greater_than,
+      type: durationTypeSchema.enum.repeat_until_heart_rate_greater_than,
       bpm: data.repeatHr,
       repeatFrom: data.durationStep,
     };
@@ -58,35 +58,35 @@ const convertHeartRateGreaterThan = (
 
 export const convertFitDuration = (data: FitDurationData): Duration => {
   // Validate at boundary
-  const result = fitDurationTypeEnum.safeParse(data.durationType);
+  const result = fitDurationTypeSchema.safeParse(data.durationType);
 
   if (!result.success) {
-    return { type: durationTypeEnum.enum.open };
+    return { type: durationTypeSchema.enum.open };
   }
 
   const durationType = result.data;
 
-  if (durationType === fitDurationTypeEnum.enum.time) {
-    return convertTimeDuration(data) || { type: durationTypeEnum.enum.open };
+  if (durationType === fitDurationTypeSchema.enum.time) {
+    return convertTimeDuration(data) || { type: durationTypeSchema.enum.open };
   }
 
-  if (durationType === fitDurationTypeEnum.enum.distance) {
+  if (durationType === fitDurationTypeSchema.enum.distance) {
     return (
-      convertDistanceDuration(data) || { type: durationTypeEnum.enum.open }
+      convertDistanceDuration(data) || { type: durationTypeSchema.enum.open }
     );
   }
 
-  if (durationType === fitDurationTypeEnum.enum.hrLessThan) {
+  if (durationType === fitDurationTypeSchema.enum.hrLessThan) {
     return (
-      convertHeartRateLessThan(data) || { type: durationTypeEnum.enum.open }
+      convertHeartRateLessThan(data) || { type: durationTypeSchema.enum.open }
     );
   }
 
-  if (durationType === fitDurationTypeEnum.enum.repeatUntilHrGreaterThan) {
+  if (durationType === fitDurationTypeSchema.enum.repeatUntilHrGreaterThan) {
     return (
-      convertHeartRateGreaterThan(data) || { type: durationTypeEnum.enum.open }
+      convertHeartRateGreaterThan(data) || { type: durationTypeSchema.enum.open }
     );
   }
 
-  return { type: durationTypeEnum.enum.open };
+  return { type: durationTypeSchema.enum.open };
 };

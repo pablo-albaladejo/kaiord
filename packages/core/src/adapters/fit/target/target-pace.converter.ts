@@ -1,6 +1,6 @@
 import {
-  targetTypeEnum,
-  targetUnitEnum,
+  targetTypeSchema,
+  targetUnitSchema,
   type Target,
 } from "../../../domain/schemas/target";
 import type { FitTargetData } from "./target.types";
@@ -15,7 +15,7 @@ export const convertPaceTarget = (data: FitTargetData): Target => {
   const valueTarget = buildPaceValueTarget(data);
   if (valueTarget) return valueTarget;
 
-  return { type: targetTypeEnum.enum.open };
+  return { type: targetTypeSchema.enum.open };
 };
 
 const buildPaceRangeTarget = (data: FitTargetData): Target | null => {
@@ -24,9 +24,9 @@ const buildPaceRangeTarget = (data: FitTargetData): Target | null => {
     data.customTargetSpeedHigh !== undefined
   ) {
     return {
-      type: targetTypeEnum.enum.pace,
+      type: targetTypeSchema.enum.pace,
       value: {
-        unit: targetUnitEnum.enum.range,
+        unit: targetUnitSchema.enum.range,
         min: data.customTargetSpeedLow,
         max: data.customTargetSpeedHigh,
       },
@@ -38,9 +38,9 @@ const buildPaceRangeTarget = (data: FitTargetData): Target | null => {
     data.customTargetValueHigh !== undefined
   ) {
     return {
-      type: targetTypeEnum.enum.pace,
+      type: targetTypeSchema.enum.pace,
       value: {
-        unit: targetUnitEnum.enum.range,
+        unit: targetUnitSchema.enum.range,
         min: data.customTargetValueLow,
         max: data.customTargetValueHigh,
       },
@@ -53,9 +53,9 @@ const buildPaceRangeTarget = (data: FitTargetData): Target | null => {
 const buildPaceZoneTarget = (data: FitTargetData): Target | null => {
   if (data.targetSpeedZone !== undefined) {
     return {
-      type: targetTypeEnum.enum.pace,
+      type: targetTypeSchema.enum.pace,
       value: {
-        unit: targetUnitEnum.enum.zone,
+        unit: targetUnitSchema.enum.zone,
         value: data.targetSpeedZone,
       },
     };
@@ -66,9 +66,9 @@ const buildPaceZoneTarget = (data: FitTargetData): Target | null => {
 const buildPaceValueTarget = (data: FitTargetData): Target | null => {
   if (data.targetValue !== undefined) {
     return {
-      type: targetTypeEnum.enum.pace,
+      type: targetTypeSchema.enum.pace,
       value: {
-        unit: targetUnitEnum.enum.mps,
+        unit: targetUnitSchema.enum.mps,
         value: data.targetValue,
       },
     };

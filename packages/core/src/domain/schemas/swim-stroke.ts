@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const swimStrokeEnum = z.enum([
+export const swimStrokeSchema = z.enum([
   "freestyle",
   "backstroke",
   "breaststroke",
@@ -10,7 +10,7 @@ export const swimStrokeEnum = z.enum([
   "im",
 ]);
 
-export type SwimStroke = z.infer<typeof swimStrokeEnum>;
+export type SwimStroke = z.infer<typeof swimStrokeSchema>;
 
 export const SWIM_STROKE_TO_FIT = {
   freestyle: 0,

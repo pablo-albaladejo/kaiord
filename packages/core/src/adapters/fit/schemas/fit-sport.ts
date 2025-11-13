@@ -1,10 +1,10 @@
 import { z } from "zod";
 
-export const fitSportEnum = z.enum([
+export const fitSportSchema = z.enum([
   "cycling",
   "running",
   "swimming",
   "generic",
 ]);
 
-export type FitSport = z.infer<typeof fitSportEnum>;
+export type FitSport = z.infer<typeof fitSportSchema>;

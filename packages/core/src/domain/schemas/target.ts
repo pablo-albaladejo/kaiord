@@ -7,7 +7,7 @@ import {
   strokeTypeValueSchema,
 } from "./target-values";
 
-export const targetTypeEnum = z.enum([
+export const targetTypeSchema = z.enum([
   "power",
   "heart_rate",
   "cadence",
@@ -18,32 +18,32 @@ export const targetTypeEnum = z.enum([
 
 export const targetSchema = z.discriminatedUnion("type", [
   z.object({
-    type: z.literal(targetTypeEnum.enum.power),
+    type: z.literal(targetTypeSchema.enum.power),
     value: powerValueSchema,
   }),
   z.object({
-    type: z.literal(targetTypeEnum.enum.heart_rate),
+    type: z.literal(targetTypeSchema.enum.heart_rate),
     value: heartRateValueSchema,
   }),
   z.object({
-    type: z.literal(targetTypeEnum.enum.cadence),
+    type: z.literal(targetTypeSchema.enum.cadence),
     value: cadenceValueSchema,
   }),
   z.object({
-    type: z.literal(targetTypeEnum.enum.pace),
+    type: z.literal(targetTypeSchema.enum.pace),
     value: paceValueSchema,
   }),
   z.object({
-    type: z.literal(targetTypeEnum.enum.stroke_type),
+    type: z.literal(targetTypeSchema.enum.stroke_type),
     value: strokeTypeValueSchema,
   }),
-  z.object({ type: z.literal(targetTypeEnum.enum.open) }),
+  z.object({ type: z.literal(targetTypeSchema.enum.open) }),
 ]);
 
 export type Target = z.infer<typeof targetSchema>;
-export type TargetType = z.infer<typeof targetTypeEnum>;
+export type TargetType = z.infer<typeof targetTypeSchema>;
 
-export { targetUnitEnum } from "./target-values";
+export { targetUnitSchema } from "./target-values";
 export type {
   CadenceValue,
   HeartRateValue,

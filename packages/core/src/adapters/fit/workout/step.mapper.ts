@@ -1,5 +1,5 @@
 import {
-  intensityEnum,
+  intensitySchema,
   type Intensity,
 } from "../../../domain/schemas/intensity";
 import type { WorkoutStep } from "../../../domain/schemas/workout";
@@ -37,7 +37,7 @@ const mapIntensity = (intensity: string | undefined): Intensity | undefined => {
   if (!intensity) return undefined;
 
   const normalized = intensity.toLowerCase();
-  const validIntensities = intensityEnum.options;
+  const validIntensities = intensitySchema.options;
 
   if (validIntensities.includes(normalized as Intensity)) {
     return normalized as Intensity;

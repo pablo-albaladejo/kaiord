@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const equipmentEnum = z.enum([
+export const equipmentSchema = z.enum([
   "none",
   "swim_fins",
   "swim_kickboard",
@@ -9,4 +9,4 @@ export const equipmentEnum = z.enum([
   "swim_snorkel",
 ]);
 
-export type Equipment = z.infer<typeof equipmentEnum>;
+export type Equipment = z.infer<typeof equipmentSchema>;

@@ -1,4 +1,4 @@
-import { fileTypeEnum } from "../../../domain/schemas/file-type";
+import { fileTypeSchema } from "../../../domain/schemas/file-type";
 import type { KRD } from "../../../domain/schemas/krd";
 import type {
   RepetitionBlock,
@@ -6,7 +6,7 @@ import type {
   WorkoutStep,
 } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
-import { fitMessageKeyEnum } from "../schemas/fit-message-keys";
+import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { mapSubSportToFit } from "../sub-sport.mapper";
 import { DEFAULT_MANUFACTURER, isRepetitionBlock } from "../type-guards";
 
@@ -16,9 +16,9 @@ export const convertMetadataToFileId = (krd: KRD, logger: Logger): unknown => {
   const timeCreated = new Date(krd.metadata.created);
 
   return {
-    type: fitMessageKeyEnum.enum.fileIdMesgs,
+    type: fitMessageKeySchema.enum.fileIdMesgs,
     fileIdMesg: {
-      type: fileTypeEnum.enum.workout,
+      type: fileTypeSchema.enum.workout,
       manufacturer: krd.metadata.manufacturer || DEFAULT_MANUFACTURER,
       product: krd.metadata.product,
       serialNumber: krd.metadata.serialNumber
@@ -53,7 +53,7 @@ export const convertWorkoutMetadata = (
   }
 
   return {
-    type: fitMessageKeyEnum.enum.workoutMesgs,
+    type: fitMessageKeySchema.enum.workoutMesgs,
     workoutMesg,
   };
 };

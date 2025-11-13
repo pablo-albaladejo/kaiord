@@ -1,4 +1,4 @@
-import { sportEnum } from "../../domain/schemas/sport";
+import { sportSchema } from "../../domain/schemas/sport";
 import type {
   RepetitionBlock,
   WorkoutStep,
@@ -26,7 +26,7 @@ export const isWorkoutStep = (
  * Default values for FIT file generation and mapping
  */
 export const DEFAULT_MANUFACTURER = "development" as const;
-export const DEFAULT_SPORT = sportEnum.enum.cycling;
+export const DEFAULT_SPORT = sportSchema.enum.cycling;
 
 /**
  * Maps FIT sport type to KRD sport type

@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const fitDurationTypeEnum = z.enum([
+export const fitDurationTypeSchema = z.enum([
   "time",
   "distance",
   "repeatUntilStepsCmplt",
@@ -10,4 +10,4 @@ export const fitDurationTypeEnum = z.enum([
   "open",
 ]);
 
-export type FitDurationType = z.infer<typeof fitDurationTypeEnum>;
+export type FitDurationType = z.infer<typeof fitDurationTypeSchema>;

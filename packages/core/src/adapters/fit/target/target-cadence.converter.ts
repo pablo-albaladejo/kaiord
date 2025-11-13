@@ -1,6 +1,6 @@
 import {
-  targetTypeEnum,
-  targetUnitEnum,
+  targetTypeSchema,
+  targetUnitSchema,
   type Target,
 } from "../../../domain/schemas/target";
 import type { FitTargetData } from "./target.types";
@@ -15,7 +15,7 @@ export const convertCadenceTarget = (data: FitTargetData): Target => {
   const valueTarget = buildCadenceValueTarget(data);
   if (valueTarget) return valueTarget;
 
-  return { type: targetTypeEnum.enum.open };
+  return { type: targetTypeSchema.enum.open };
 };
 
 const buildCadenceRangeTarget = (data: FitTargetData): Target | null => {
@@ -24,9 +24,9 @@ const buildCadenceRangeTarget = (data: FitTargetData): Target | null => {
     data.customTargetCadenceHigh !== undefined
   ) {
     return {
-      type: targetTypeEnum.enum.cadence,
+      type: targetTypeSchema.enum.cadence,
       value: {
-        unit: targetUnitEnum.enum.range,
+        unit: targetUnitSchema.enum.range,
         min: data.customTargetCadenceLow,
         max: data.customTargetCadenceHigh,
       },
@@ -38,9 +38,9 @@ const buildCadenceRangeTarget = (data: FitTargetData): Target | null => {
     data.customTargetValueHigh !== undefined
   ) {
     return {
-      type: targetTypeEnum.enum.cadence,
+      type: targetTypeSchema.enum.cadence,
       value: {
-        unit: targetUnitEnum.enum.range,
+        unit: targetUnitSchema.enum.range,
         min: data.customTargetValueLow,
         max: data.customTargetValueHigh,
       },
@@ -53,9 +53,9 @@ const buildCadenceRangeTarget = (data: FitTargetData): Target | null => {
 const buildCadenceZoneTarget = (data: FitTargetData): Target | null => {
   if (data.targetCadenceZone !== undefined) {
     return {
-      type: targetTypeEnum.enum.cadence,
+      type: targetTypeSchema.enum.cadence,
       value: {
-        unit: targetUnitEnum.enum.rpm,
+        unit: targetUnitSchema.enum.rpm,
         value: data.targetCadenceZone,
       },
     };
@@ -66,9 +66,9 @@ const buildCadenceZoneTarget = (data: FitTargetData): Target | null => {
 const buildCadenceValueTarget = (data: FitTargetData): Target | null => {
   if (data.targetValue !== undefined) {
     return {
-      type: targetTypeEnum.enum.cadence,
+      type: targetTypeSchema.enum.cadence,
       value: {
-        unit: targetUnitEnum.enum.rpm,
+        unit: targetUnitSchema.enum.rpm,
         value: data.targetValue,
       },
     };

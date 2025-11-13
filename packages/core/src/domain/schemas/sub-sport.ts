@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const subSportEnum = z.enum([
+export const subSportSchema = z.enum([
   "generic",
   "treadmill",
   "street",
@@ -64,4 +64,4 @@ export const subSportEnum = z.enum([
   "all",
 ]);
 
-export type SubSport = z.infer<typeof subSportEnum>;
+export type SubSport = z.infer<typeof subSportSchema>;

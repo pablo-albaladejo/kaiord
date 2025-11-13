@@ -7,8 +7,8 @@ import { buildKRDMetadata } from "../../../tests/fixtures/krd/metadata.fixtures"
 import { buildWorkoutStep } from "../../../tests/fixtures/workout/workout-step.fixtures";
 import { buildWorkout } from "../../../tests/fixtures/workout/workout.fixtures";
 import { createMockLogger } from "../../../tests/helpers/test-utils";
-import { fitDurationTypeEnum } from "../schemas/fit-duration";
-import { fitMessageKeyEnum } from "../schemas/fit-message-keys";
+import { fitDurationTypeSchema } from "../schemas/fit-duration";
+import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { convertKRDToMessages } from "./krd-to-fit.converter";
 
 describe("convertKRDToMessages", () => {
@@ -39,7 +39,7 @@ describe("convertKRDToMessages", () => {
         fileIdMesg: Record<string, unknown>;
       };
       expect(fileIdMsg).toStrictEqual({
-        type: fitMessageKeyEnum.enum.fileIdMesgs,
+        type: fitMessageKeySchema.enum.fileIdMesgs,
         fileIdMesg: {
           type: "workout",
           manufacturer: krd.metadata.manufacturer,
@@ -122,7 +122,7 @@ describe("convertKRDToMessages", () => {
         workoutMesg: Record<string, unknown>;
       };
       expect(workoutMsg).toStrictEqual({
-        type: fitMessageKeyEnum.enum.workoutMesgs,
+        type: fitMessageKeySchema.enum.workoutMesgs,
         workoutMesg: {
           wktName: workout.name,
           sport: workout.sport,
@@ -152,7 +152,7 @@ describe("convertKRDToMessages", () => {
         workoutMesg: Record<string, unknown>;
       };
       expect(workoutMsg).toStrictEqual({
-        type: fitMessageKeyEnum.enum.workoutMesgs,
+        type: fitMessageKeySchema.enum.workoutMesgs,
         workoutMesg: {
           wktName: workout.name,
           sport: workout.sport,
@@ -367,10 +367,10 @@ describe("convertKRDToMessages", () => {
       const step = steps[0];
       // Garmin encoding: 200 watts = 1200 (200 + 1000 offset)
       expect(stepMsg).toStrictEqual({
-        type: fitMessageKeyEnum.enum.workoutStepMesgs,
+        type: fitMessageKeySchema.enum.workoutStepMesgs,
         workoutStepMesg: {
           messageIndex: step.stepIndex,
-          durationType: fitDurationTypeEnum.enum.time,
+          durationType: fitDurationTypeSchema.enum.time,
           durationTime:
             step.duration.type === "time" ? step.duration.seconds : undefined,
           targetType: stepMsg.workoutStepMesg.targetType,
@@ -510,7 +510,7 @@ describe("convertKRDToMessages", () => {
       const step = steps[0];
       expect(stepMsg.workoutStepMesg).toStrictEqual({
         messageIndex: step.stepIndex,
-        durationType: fitDurationTypeEnum.enum.distance,
+        durationType: fitDurationTypeSchema.enum.distance,
         durationDistance:
           step.duration.type === "distance" ? step.duration.meters : undefined,
         targetType: stepMsg.workoutStepMesg.targetType,
@@ -546,7 +546,7 @@ describe("convertKRDToMessages", () => {
         workoutStepMesg: Record<string, unknown>;
       };
       expect(stepMsg.workoutStepMesg.durationType).toBe(
-        fitDurationTypeEnum.enum.open
+        fitDurationTypeSchema.enum.open
       );
     });
 
@@ -993,10 +993,10 @@ describe("convertKRDToMessages", () => {
         workoutStepMesg: Record<string, unknown>;
       };
       expect(repeatMsg).toStrictEqual({
-        type: fitMessageKeyEnum.enum.workoutStepMesgs,
+        type: fitMessageKeySchema.enum.workoutStepMesgs,
         workoutStepMesg: {
           messageIndex: repeatMsg.workoutStepMesg.messageIndex,
-          durationType: fitDurationTypeEnum.enum.repeatUntilStepsCmplt,
+          durationType: fitDurationTypeSchema.enum.repeatUntilStepsCmplt,
           durationStep: 0,
           repeatSteps: repetitionBlock.repeatCount,
           targetType: repeatMsg.workoutStepMesg.targetType,

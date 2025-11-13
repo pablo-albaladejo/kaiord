@@ -1,6 +1,6 @@
 import {
-  targetTypeEnum,
-  targetUnitEnum,
+  targetTypeSchema,
+  targetUnitSchema,
   type Target,
 } from "../../../domain/schemas/target";
 import type { FitTargetData } from "./target.types";
@@ -16,7 +16,7 @@ export const convertHeartRateTarget = (data: FitTargetData): Target => {
     return convertHeartRateValue(data.targetValue);
   }
 
-  return { type: targetTypeEnum.enum.open };
+  return { type: targetTypeSchema.enum.open };
 };
 
 const buildHeartRateRangeTarget = (data: FitTargetData): Target | null => {
@@ -25,9 +25,9 @@ const buildHeartRateRangeTarget = (data: FitTargetData): Target | null => {
     data.customTargetHeartRateHigh !== undefined
   ) {
     return {
-      type: targetTypeEnum.enum.heart_rate,
+      type: targetTypeSchema.enum.heart_rate,
       value: {
-        unit: targetUnitEnum.enum.range,
+        unit: targetUnitSchema.enum.range,
         min: data.customTargetHeartRateLow,
         max: data.customTargetHeartRateHigh,
       },
@@ -39,9 +39,9 @@ const buildHeartRateRangeTarget = (data: FitTargetData): Target | null => {
     data.customTargetValueHigh !== undefined
   ) {
     return {
-      type: targetTypeEnum.enum.heart_rate,
+      type: targetTypeSchema.enum.heart_rate,
       value: {
-        unit: targetUnitEnum.enum.range,
+        unit: targetUnitSchema.enum.range,
         min: data.customTargetValueLow,
         max: data.customTargetValueHigh,
       },
@@ -57,9 +57,9 @@ const buildHeartRateZoneTarget = (data: FitTargetData): Target | null => {
     // If not, treat as BPM value instead
     if (data.targetHrZone >= 1 && data.targetHrZone <= 5) {
       return {
-        type: targetTypeEnum.enum.heart_rate,
+        type: targetTypeSchema.enum.heart_rate,
         value: {
-          unit: targetUnitEnum.enum.zone,
+          unit: targetUnitSchema.enum.zone,
           value: data.targetHrZone,
         },
       };
@@ -76,9 +76,9 @@ const convertHeartRateValue = (value: number): Target => {
   // - Values 0-100: Percentage of max HR
   if (value > 100) {
     return {
-      type: targetTypeEnum.enum.heart_rate,
+      type: targetTypeSchema.enum.heart_rate,
       value: {
-        unit: targetUnitEnum.enum.bpm,
+        unit: targetUnitSchema.enum.bpm,
         value: value - 100,
       },
     };
@@ -86,13 +86,13 @@ const convertHeartRateValue = (value: number): Target => {
 
   if (value > 0) {
     return {
-      type: targetTypeEnum.enum.heart_rate,
+      type: targetTypeSchema.enum.heart_rate,
       value: {
-        unit: targetUnitEnum.enum.percent_max,
+        unit: targetUnitSchema.enum.percent_max,
         value,
       },
     };
   }
 
-  return { type: targetTypeEnum.enum.open };
+  return { type: targetTypeSchema.enum.open };
 };

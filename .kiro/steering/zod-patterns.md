@@ -12,28 +12,28 @@ Kaiord uses **Zod as the single source of truth** for schemas and TypeScript typ
 ## Naming Conventions
 
 ```typescript
-// ✅ CORRECT: camelCase + "Schema" suffix for objects/unions
+// ✅ CORRECT: camelCase + "Schema" suffix for ALL Zod schemas
 export const krdMetadataSchema = z.object({ ... });
 export const workoutStepSchema = z.object({ ... });
 export const durationSchema = z.discriminatedUnion('type', [...]);
 
-// ✅ CORRECT: camelCase + "Enum" suffix for enums
-export const sportEnum = z.enum(["cycling", "running", "swimming", "generic"]);
-export const subSportEnum = z.enum(["generic", "indoor_cycling", "lap_swimming"]);
-export const intensityEnum = z.enum(["warmup", "active", "cooldown", "rest"]);
+// ✅ CORRECT: camelCase + "Schema" suffix for enums too
+export const sportSchema = z.enum(["cycling", "running", "swimming", "generic"]);
+export const subSportSchema = z.enum(["generic", "indoor_cycling", "lap_swimming"]);
+export const intensitySchema = z.enum(["warmup", "active", "cooldown", "rest"]);
 
 // ✅ Infer types with z.infer
 export type KRDMetadata = z.infer<typeof krdMetadataSchema>;
 export type WorkoutStep = z.infer<typeof workoutStepSchema>;
 export type Duration = z.infer<typeof durationSchema>;
-export type Sport = z.infer<typeof sportEnum>;
-export type SubSport = z.infer<typeof subSportEnum>;
+export type Sport = z.infer<typeof sportSchema>;
+export type SubSport = z.infer<typeof subSportSchema>;
 
 // ❌ INCORRECT
 export type KRDMetadata = { ... };  // Don't define types manually
 const KRDMetadata = z.object({ ... }); // PascalCase
 const krd_metadata = z.object({ ... }); // snake_case
-export const sportSchema = z.enum([...]); // Use "Enum" suffix for enums, not "Schema"
+export const sportEnum = z.enum([...]); // Don't use "Enum" suffix, use "Schema"
 ```
 
 ## File Structure
@@ -47,20 +47,20 @@ packages/
 │   │   │   ├── workout.ts       # workoutSchema + type Workout
 │   │   │   ├── duration.ts      # durationSchema + type Duration
 │   │   │   ├── target.ts        # targetSchema + type Target
-│   │   │   ├── target-values.ts # targetUnitEnum + type TargetUnit
-│   │   │   ├── sport.ts         # sportEnum + type Sport
-│   │   │   ├── sub-sport.ts     # subSportEnum + type SubSport (snake_case)
+│   │   │   ├── target-values.ts # targetUnitSchema + type TargetUnit
+│   │   │   ├── sport.ts         # sportSchema + type Sport
+│   │   │   ├── sub-sport.ts     # subSportSchema + type SubSport (snake_case)
 │   │   │   ├── file-type.ts     # fileTypeEnum + type FileType
-│   │   │   ├── swim-stroke.ts   # swimStrokeEnum + type SwimStroke
-│   │   │   └── intensity.ts     # intensityEnum + type Intensity
+│   │   │   ├── swim-stroke.ts   # swimStrokeSchema + type SwimStroke
+│   │   │   └── intensity.ts     # intensitySchema + type Intensity
 │   │   └── validation/          # Business validators (not Zod)
 │   │       └── round-trip.ts
 │   ├── adapters/
 │   │   └── fit/
 │   │       ├── schemas/         # ✅ FIT SDK-specific schemas (camelCase)
 │   │       │   ├── fit-sport.ts        # fitSportEnum + type FitSport
-│   │       │   ├── fit-sub-sport.ts    # fitSubSportEnum + type FitSubSport (camelCase)
-│   │       │   ├── fit-duration.ts     # fitDurationTypeEnum + type FitDurationType
+│   │       │   ├── fit-sub-sport.ts    # fitSubSportSchema + type FitSubSport (camelCase)
+│   │       │   ├── fit-duration.ts     # fitDurationTypeSchema + type FitDurationType
 │   │       │   ├── fit-target.ts       # fitTargetTypeEnum + type FitTargetType
 │   │       │   └── fit-message-keys.ts # fitMessageKeyEnum + type FitMessageKey
 │   │       └── garmin-fitsdk.ts # Validates external responses with Zod
@@ -107,15 +107,20 @@ For enumeration types, use `z.enum()` instead of constant objects:
 // domain/schemas/sport.ts
 import { z } from "zod";
 
-export const sportEnum = z.enum(["cycling", "running", "swimming", "generic"]);
-export type Sport = z.infer<typeof sportEnum>;
+export const sportSchema = z.enum([
+  "cycling",
+  "running",
+  "swimming",
+  "generic",
+]);
+export type Sport = z.infer<typeof sportSchema>;
 
 // Access enum values via .enum property
-sportEnum.enum.cycling; // "cycling"
-sportEnum.enum.running; // "running"
+sportSchema.enum.cycling; // "cycling"
+sportSchema.enum.running; // "running"
 
 // Validate at runtime
-const result = sportEnum.safeParse("cycling");
+const result = sportSchema.safeParse("cycling");
 if (result.success) {
   console.log(result.data); // "cycling"
 }
@@ -133,36 +138,36 @@ export const SPORT_TYPE = {
 
 ```typescript
 // domain/schemas/sub-sport.ts
-export const subSportEnum = z.enum([
+export const subSportSchema = z.enum([
   "generic",
   "indoor_cycling", // snake_case
   "hand_cycling",
   "lap_swimming",
   "open_water",
 ]);
-export type SubSport = z.infer<typeof subSportEnum>;
+export type SubSport = z.infer<typeof subSportSchema>;
 ```
 
 **Adapter enums** (FIT SDK format) use **camelCase** to match external SDKs:
 
 ```typescript
 // adapters/fit/schemas/fit-sub-sport.ts
-export const fitSubSportEnum = z.enum([
+export const fitSubSportSchema = z.enum([
   "generic",
   "indoorCycling", // camelCase
   "handCycling",
   "lapSwimming",
   "openWater",
 ]);
-export type FitSubSport = z.infer<typeof fitSubSportEnum>;
+export type FitSubSport = z.infer<typeof fitSubSportSchema>;
 ```
 
 ### Using Enum Schemas in Mappers
 
 ```typescript
 // adapters/fit/sub-sport.mapper.ts
-import { subSportEnum, type SubSport } from "../../domain/schemas/sub-sport";
-import { fitSubSportEnum, type FitSubSport } from "./schemas/fit-sub-sport";
+import { subSportSchema, type SubSport } from "../../domain/schemas/sub-sport";
+import { fitSubSportSchema, type FitSubSport } from "./schemas/fit-sub-sport";
 
 // Bidirectional mapping
 const FIT_TO_KRD_MAP: Record<FitSubSport, SubSport> = {
@@ -174,18 +179,18 @@ const FIT_TO_KRD_MAP: Record<FitSubSport, SubSport> = {
 
 export const mapSubSportToKrd = (fitSubSport: unknown): SubSport => {
   // Validate at adapter boundary
-  const result = fitSubSportEnum.safeParse(fitSubSport);
+  const result = fitSubSportSchema.safeParse(fitSubSport);
 
   if (!result.success) {
     // Return safe default for invalid values
-    return subSportEnum.enum.generic;
+    return subSportSchema.enum.generic;
   }
 
-  return FIT_TO_KRD_MAP[result.data] || subSportEnum.enum.generic;
+  return FIT_TO_KRD_MAP[result.data] || subSportSchema.enum.generic;
 };
 
 // Use enum values for comparisons
-if (durationType === fitDurationTypeEnum.enum.time) {
+if (durationType === fitDurationTypeSchema.enum.time) {
   // Handle time duration
 }
 ```
@@ -198,7 +203,7 @@ For enums that need numeric conversions (e.g., FIT protocol):
 // domain/schemas/swim-stroke.ts
 import { z } from "zod";
 
-export const swimStrokeEnum = z.enum([
+export const swimStrokeSchema = z.enum([
   "freestyle",
   "backstroke",
   "breaststroke",
@@ -208,7 +213,7 @@ export const swimStrokeEnum = z.enum([
   "im",
 ]);
 
-export type SwimStroke = z.infer<typeof swimStrokeEnum>;
+export type SwimStroke = z.infer<typeof swimStrokeSchema>;
 
 // Bidirectional numeric mappings
 export const SWIM_STROKE_TO_FIT = {
@@ -484,7 +489,7 @@ export const buildWorkoutStep = new Factory<WorkoutStep>()
 2. **Use `z.enum()` for enumeration types** (not constant objects)
 3. **Use `z.discriminatedUnion` for variants** (Duration, Target, etc.)
 4. **Validate at boundaries** (CLI, external adapters)
-5. **Access enum values via `.enum` property** (e.g., `sportEnum.enum.cycling`)
+5. **Access enum values via `.enum` property** (e.g., `sportSchema.enum.cycling`)
 6. **Use `.safeParse()` for validation** (returns success/error result)
 7. **Generate JSON Schema from Zod** (not manually)
 8. **Separate domain and adapter schemas** (different naming conventions)
