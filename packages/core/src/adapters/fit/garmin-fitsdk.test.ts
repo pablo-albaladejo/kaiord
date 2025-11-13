@@ -2,7 +2,8 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { describe, expect, it, vi } from "vitest";
 import { FitParsingError } from "../../domain/types/errors";
-import { buildKRD, buildKRDMetadata } from "../../tests/fixtures/krd.fixtures";
+import { buildKRD } from "../../tests/fixtures/krd/krd.fixtures";
+import { buildKRDMetadata } from "../../tests/fixtures/krd/metadata.fixtures";
 import { createMockLogger } from "../../tests/helpers/test-utils";
 import {
   createGarminFitSdkReader,

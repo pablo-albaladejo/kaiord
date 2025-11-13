@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildKRD } from "../../tests/fixtures/krd.fixtures.js";
+import { buildKRD } from "../../tests/fixtures/krd/krd.fixtures.js";
 import { createMockLogger } from "../../tests/helpers/test-utils.js";
 import { createSchemaValidator } from "./schema-validator.js";
 
