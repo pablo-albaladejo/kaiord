@@ -215,13 +215,13 @@
   - Ensure existing round-trip tests pass
   - _Requirements: 15.3, 15.4, 15.5_
 
-- [ ] 7. Update types.ts to use schema for FIT message keys
+- [x] 7. Update types.ts to use schema for FIT message keys
 
   - Replace FIT_MESSAGE_KEY type import with fitMessageKeyEnum
   - Update FitMessages type definition
   - _Requirements: 9.4, 10.1_
 
-- [ ] 7.1 Update adapters/fit/types.ts
+- [x] 7.1 Update adapters/fit/types.ts
 
   - Import `fitMessageKeyEnum` from ./schemas/fit-message-keys
   - Update `FitMessages` type to use inferred type if needed

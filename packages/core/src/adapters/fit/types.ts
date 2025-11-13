@@ -2,10 +2,10 @@
  * Type definitions for Garmin FIT SDK messages
  */
 
-import type { FIT_MESSAGE_KEY } from "./constants";
+import type { fitMessageKeyEnum } from "./schemas/fit-message-keys";
 
 export type FitMessages = {
-  [FIT_MESSAGE_KEY.FILE_ID]?: Array<{
+  [fitMessageKeyEnum.enum.fileIdMesgs]?: Array<{
     type?: string;
     manufacturer?: string;
     product?: number;
@@ -13,12 +13,12 @@ export type FitMessages = {
     timeCreated?: string | Date;
     garminProduct?: string;
   }>;
-  [FIT_MESSAGE_KEY.WORKOUT]?: Array<{
+  [fitMessageKeyEnum.enum.workoutMesgs]?: Array<{
     wktName?: string;
     numValidSteps?: number;
     sport?: string;
   }>;
-  [FIT_MESSAGE_KEY.WORKOUT_STEP]?: Array<{
+  [fitMessageKeyEnum.enum.workoutStepMesgs]?: Array<{
     messageIndex?: number;
     wktStepName?: string;
     durationType?: string;
@@ -66,11 +66,11 @@ export type FitExtensions = {
 };
 
 export type FitFileId = NonNullable<
-  FitMessages[typeof FIT_MESSAGE_KEY.FILE_ID]
+  FitMessages[typeof fitMessageKeyEnum.enum.fileIdMesgs]
 >[number];
 export type FitWorkoutMessage = NonNullable<
-  FitMessages[typeof FIT_MESSAGE_KEY.WORKOUT]
+  FitMessages[typeof fitMessageKeyEnum.enum.workoutMesgs]
 >[number];
 export type FitWorkoutStep = NonNullable<
-  FitMessages[typeof FIT_MESSAGE_KEY.WORKOUT_STEP]
+  FitMessages[typeof fitMessageKeyEnum.enum.workoutStepMesgs]
 >[number];
