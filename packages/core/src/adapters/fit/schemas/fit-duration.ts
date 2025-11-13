@@ -7,6 +7,15 @@ export const fitDurationTypeSchema = z.enum([
   "repeatUntilHrGreaterThan",
   "hrLessThan",
   "hrGreaterThan",
+  "calories",
+  "powerLessThan",
+  "powerGreaterThan",
+  "repeatUntilTime",
+  "repeatUntilDistance",
+  "repeatUntilCalories",
+  "repeatUntilHrLessThan",
+  "repeatUntilPowerLessThan",
+  "repeatUntilPowerGreaterThan",
   "open",
 ]);
 

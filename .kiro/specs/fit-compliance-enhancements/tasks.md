@@ -140,7 +140,7 @@ Before marking any task as complete, verify that:
     - Add additional repeat conditional types to Zod schema (repeat_until_time, repeat_until_distance, repeat_until_heart_rate_less_than)
     - _Requirements: 4.1, 4.2, 5.1, 5.2, 6.1, 6.2, 7.2, 8.1_
 
-  - [ ] 6.2 Add FIT duration type schemas for advanced types
+  - [x] 6.2 Add FIT duration type schemas for advanced types
 
     - Create/update FIT duration type enum schema in `adapters/fit/schemas/fit-duration.ts` (camelCase values)
     - KRD duration type enum already exists in `domain/schemas/duration.ts` (snake_case values)
