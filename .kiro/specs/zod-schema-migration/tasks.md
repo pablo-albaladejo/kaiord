@@ -139,45 +139,45 @@
   - Ensure existing conversion tests still pass
   - _Requirements: 15.3, 15.4_
 
-- [ ] 5. Update target mappers to use Zod schemas
+- [x] 5. Update target mappers to use Zod schemas
 
   - Replace FIT_TARGET_TYPE and KRD_TARGET_TYPE constants with schemas
   - Update all target type comparisons
   - Update target unit comparisons
   - _Requirements: 4.5, 5.3, 10.1, 10.2, 10.3, 10.5_
 
-- [ ] 5.1 Update krd-to-fit-target.mapper.ts
+- [x] 5.1 Update krd-to-fit-target.mapper.ts
 
   - Import `fitTargetTypeEnum` from adapters/fit/schemas/fit-target
   - Import `targetTypeEnum` from domain/schemas/target
   - Update all target type comparisons to use `enum.enum.value`
   - _Requirements: 10.1, 10.3_
 
-- [ ] 5.2 Update krd-to-fit-target-power.mapper.ts
+- [x] 5.2 Update krd-to-fit-target-power.mapper.ts
 
   - Import schemas instead of constants
   - Update target type and unit comparisons to use `enum.enum.value`
   - _Requirements: 10.1, 10.3_
 
-- [ ] 5.3 Update krd-to-fit-target-heart-rate.mapper.ts
+- [x] 5.3 Update krd-to-fit-target-heart-rate.mapper.ts
 
   - Import schemas instead of constants
   - Update target type and unit comparisons to use `enum.enum.value`
   - _Requirements: 10.1, 10.3_
 
-- [ ] 5.4 Update krd-to-fit-target-cadence.mapper.ts
+- [x] 5.4 Update krd-to-fit-target-cadence.mapper.ts
 
   - Import schemas instead of constants
   - Update target type and unit comparisons to use `enum.enum.value`
   - _Requirements: 10.1, 10.3_
 
-- [ ] 5.5 Update krd-to-fit-target-pace.mapper.ts
+- [x] 5.5 Update krd-to-fit-target-pace.mapper.ts
 
   - Import schemas instead of constants
   - Update target type and unit comparisons to use `enum.enum.value`
   - _Requirements: 10.1, 10.3_
 
-- [ ] 5.6 Update target mapper tests
+- [x] 5.6 Update target mapper tests
 
   - Verify all target type conversions still work
   - Ensure existing tests pass without modification
