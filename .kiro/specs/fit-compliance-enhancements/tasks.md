@@ -130,7 +130,7 @@ Before marking any task as complete, verify that:
 
 - [ ] 6. Implement Priority 2 advanced duration types
 
-  - [ ] 6.1 Update duration schema with advanced types and fix naming
+  - [x] 6.1 Update duration schema with advanced types and fix naming
 
     - Fix naming: `heart_rate_greater_than` → `repeat_until_heart_rate_greater_than` in duration schema
     - Update all references in converters and mappers to use new naming

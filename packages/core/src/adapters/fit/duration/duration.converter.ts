@@ -48,7 +48,7 @@ const convertHeartRateGreaterThan = (
 ): Duration | null => {
   if (data.repeatHr !== undefined && data.durationStep !== undefined) {
     return {
-      type: durationTypeEnum.enum.heart_rate_greater_than,
+      type: durationTypeEnum.enum.repeat_until_heart_rate_greater_than,
       bpm: data.repeatHr,
       repeatFrom: data.durationStep,
     };

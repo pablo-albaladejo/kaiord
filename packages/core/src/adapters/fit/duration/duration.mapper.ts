@@ -21,6 +21,6 @@ export const mapDurationType = (
   if (fitDurationType === fitDurationTypeEnum.enum.hrLessThan)
     return durationTypeEnum.enum.heart_rate_less_than;
   if (fitDurationType === fitDurationTypeEnum.enum.repeatUntilHrGreaterThan)
-    return durationTypeEnum.enum.heart_rate_greater_than;
+    return durationTypeEnum.enum.repeat_until_heart_rate_greater_than;
   return durationTypeEnum.enum.open;
 };
