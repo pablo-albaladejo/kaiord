@@ -76,35 +76,35 @@
   - Export `FitMessageKey` type using z.infer
   - _Requirements: 9.1, 9.2, 9.3_
 
-- [ ] 3. Update sub-sport mapper to use Zod schemas
+- [x] 3. Update sub-sport mapper to use Zod schemas
 
   - Replace constant imports with schema imports
   - Add runtime validation using safeParse()
   - Update mapping logic to use enum.enum.value
   - _Requirements: 2.5, 10.1, 10.2, 10.3, 10.4, 10.5_
 
-- [ ] 3.1 Update sub-sport.mapper.ts imports and types
+- [x] 3.1 Update sub-sport.mapper.ts imports and types
 
   - Import `subSportEnum` and `SubSport` from domain/schemas/sub-sport
   - Import `fitSubSportEnum` and `FitSubSport` from adapters/fit/schemas/fit-sub-sport
   - Update mapping object types to use `Record<FitSubSport, SubSport>`
   - _Requirements: 10.1, 10.3_
 
-- [ ] 3.2 Add validation to mapSubSportToKrd function
+- [x] 3.2 Add validation to mapSubSportToKrd function
 
   - Use `fitSubSportEnum.safeParse()` to validate input
   - Return `subSportEnum.enum.generic` for invalid values
   - Use validated value for mapping lookup
   - _Requirements: 10.2, 10.5_
 
-- [ ] 3.3 Add validation to mapSubSportToFit function
+- [x] 3.3 Add validation to mapSubSportToFit function
 
   - Use `subSportEnum.safeParse()` to validate input
   - Return `fitSubSportEnum.enum.generic` for invalid values
   - Use validated value for mapping lookup
   - _Requirements: 10.2, 10.5_
 
-- [ ] 3.4 Update sub-sport mapper tests
+- [x] 3.4 Update sub-sport mapper tests
 
   - Add tests for validation with invalid inputs
   - Verify generic fallback behavior

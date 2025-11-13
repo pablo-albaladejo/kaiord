@@ -1,79 +1,91 @@
-import { FIT_SUB_SPORT } from "./sub-sport-fit.constants";
-import { KRD_SUB_SPORT } from "./sub-sport-krd.constants";
+import { subSportEnum, type SubSport } from "../../domain/schemas/sub-sport";
+import { fitSubSportEnum, type FitSubSport } from "./schemas/fit-sub-sport";
 
-const FIT_TO_KRD_SUB_SPORT_MAP: Record<string, string> = {
-  [FIT_SUB_SPORT.GENERIC]: KRD_SUB_SPORT.GENERIC,
-  [FIT_SUB_SPORT.TREADMILL]: KRD_SUB_SPORT.TREADMILL,
-  [FIT_SUB_SPORT.STREET]: KRD_SUB_SPORT.STREET,
-  [FIT_SUB_SPORT.TRAIL]: KRD_SUB_SPORT.TRAIL,
-  [FIT_SUB_SPORT.TRACK]: KRD_SUB_SPORT.TRACK,
-  [FIT_SUB_SPORT.SPIN]: KRD_SUB_SPORT.SPIN,
-  [FIT_SUB_SPORT.INDOOR_CYCLING]: KRD_SUB_SPORT.INDOOR_CYCLING,
-  [FIT_SUB_SPORT.ROAD]: KRD_SUB_SPORT.ROAD,
-  [FIT_SUB_SPORT.MOUNTAIN]: KRD_SUB_SPORT.MOUNTAIN,
-  [FIT_SUB_SPORT.DOWNHILL]: KRD_SUB_SPORT.DOWNHILL,
-  [FIT_SUB_SPORT.RECUMBENT]: KRD_SUB_SPORT.RECUMBENT,
-  [FIT_SUB_SPORT.CYCLOCROSS]: KRD_SUB_SPORT.CYCLOCROSS,
-  [FIT_SUB_SPORT.HAND_CYCLING]: KRD_SUB_SPORT.HAND_CYCLING,
-  [FIT_SUB_SPORT.TRACK_CYCLING]: KRD_SUB_SPORT.TRACK_CYCLING,
-  [FIT_SUB_SPORT.INDOOR_ROWING]: KRD_SUB_SPORT.INDOOR_ROWING,
-  [FIT_SUB_SPORT.ELLIPTICAL]: KRD_SUB_SPORT.ELLIPTICAL,
-  [FIT_SUB_SPORT.STAIR_CLIMBING]: KRD_SUB_SPORT.STAIR_CLIMBING,
-  [FIT_SUB_SPORT.LAP_SWIMMING]: KRD_SUB_SPORT.LAP_SWIMMING,
-  [FIT_SUB_SPORT.OPEN_WATER]: KRD_SUB_SPORT.OPEN_WATER,
-  [FIT_SUB_SPORT.FLEXIBILITY_TRAINING]: KRD_SUB_SPORT.FLEXIBILITY_TRAINING,
-  [FIT_SUB_SPORT.STRENGTH_TRAINING]: KRD_SUB_SPORT.STRENGTH_TRAINING,
-  [FIT_SUB_SPORT.WARM_UP]: KRD_SUB_SPORT.WARM_UP,
-  [FIT_SUB_SPORT.MATCH]: KRD_SUB_SPORT.MATCH,
-  [FIT_SUB_SPORT.EXERCISE]: KRD_SUB_SPORT.EXERCISE,
-  [FIT_SUB_SPORT.CHALLENGE]: KRD_SUB_SPORT.CHALLENGE,
-  [FIT_SUB_SPORT.INDOOR_SKIING]: KRD_SUB_SPORT.INDOOR_SKIING,
-  [FIT_SUB_SPORT.CARDIO_TRAINING]: KRD_SUB_SPORT.CARDIO_TRAINING,
-  [FIT_SUB_SPORT.INDOOR_WALKING]: KRD_SUB_SPORT.INDOOR_WALKING,
-  [FIT_SUB_SPORT.E_BIKE_FITNESS]: KRD_SUB_SPORT.E_BIKE_FITNESS,
-  [FIT_SUB_SPORT.BMX]: KRD_SUB_SPORT.BMX,
-  [FIT_SUB_SPORT.CASUAL_WALKING]: KRD_SUB_SPORT.CASUAL_WALKING,
-  [FIT_SUB_SPORT.SPEED_WALKING]: KRD_SUB_SPORT.SPEED_WALKING,
-  [FIT_SUB_SPORT.BIKE_TO_RUN_TRANSITION]: KRD_SUB_SPORT.BIKE_TO_RUN_TRANSITION,
-  [FIT_SUB_SPORT.RUN_TO_BIKE_TRANSITION]: KRD_SUB_SPORT.RUN_TO_BIKE_TRANSITION,
-  [FIT_SUB_SPORT.SWIM_TO_BIKE_TRANSITION]:
-    KRD_SUB_SPORT.SWIM_TO_BIKE_TRANSITION,
-  [FIT_SUB_SPORT.ATV]: KRD_SUB_SPORT.ATV,
-  [FIT_SUB_SPORT.MOTOCROSS]: KRD_SUB_SPORT.MOTOCROSS,
-  [FIT_SUB_SPORT.BACKCOUNTRY]: KRD_SUB_SPORT.BACKCOUNTRY,
-  [FIT_SUB_SPORT.RESORT]: KRD_SUB_SPORT.RESORT,
-  [FIT_SUB_SPORT.RC_DRONE]: KRD_SUB_SPORT.RC_DRONE,
-  [FIT_SUB_SPORT.WINGSUIT]: KRD_SUB_SPORT.WINGSUIT,
-  [FIT_SUB_SPORT.WHITEWATER]: KRD_SUB_SPORT.WHITEWATER,
-  [FIT_SUB_SPORT.SKATE_SKIING]: KRD_SUB_SPORT.SKATE_SKIING,
-  [FIT_SUB_SPORT.YOGA]: KRD_SUB_SPORT.YOGA,
-  [FIT_SUB_SPORT.PILATES]: KRD_SUB_SPORT.PILATES,
-  [FIT_SUB_SPORT.INDOOR_RUNNING]: KRD_SUB_SPORT.INDOOR_RUNNING,
-  [FIT_SUB_SPORT.GRAVEL_CYCLING]: KRD_SUB_SPORT.GRAVEL_CYCLING,
-  [FIT_SUB_SPORT.E_BIKE_MOUNTAIN]: KRD_SUB_SPORT.E_BIKE_MOUNTAIN,
-  [FIT_SUB_SPORT.COMMUTING]: KRD_SUB_SPORT.COMMUTING,
-  [FIT_SUB_SPORT.MIXED_SURFACE]: KRD_SUB_SPORT.MIXED_SURFACE,
-  [FIT_SUB_SPORT.NAVIGATE]: KRD_SUB_SPORT.NAVIGATE,
-  [FIT_SUB_SPORT.TRACK_ME]: KRD_SUB_SPORT.TRACK_ME,
-  [FIT_SUB_SPORT.MAP]: KRD_SUB_SPORT.MAP,
-  [FIT_SUB_SPORT.SINGLE_GAS_DIVING]: KRD_SUB_SPORT.SINGLE_GAS_DIVING,
-  [FIT_SUB_SPORT.MULTI_GAS_DIVING]: KRD_SUB_SPORT.MULTI_GAS_DIVING,
-  [FIT_SUB_SPORT.GAUGE_DIVING]: KRD_SUB_SPORT.GAUGE_DIVING,
-  [FIT_SUB_SPORT.APNEA_DIVING]: KRD_SUB_SPORT.APNEA_DIVING,
-  [FIT_SUB_SPORT.APNEA_HUNTING]: KRD_SUB_SPORT.APNEA_HUNTING,
-  [FIT_SUB_SPORT.VIRTUAL_ACTIVITY]: KRD_SUB_SPORT.VIRTUAL_ACTIVITY,
-  [FIT_SUB_SPORT.OBSTACLE]: KRD_SUB_SPORT.OBSTACLE,
-  [FIT_SUB_SPORT.ALL]: KRD_SUB_SPORT.ALL,
+const FIT_TO_KRD_SUB_SPORT_MAP: Record<FitSubSport, SubSport> = {
+  generic: "generic",
+  treadmill: "treadmill",
+  street: "street",
+  trail: "trail",
+  track: "track",
+  spin: "spin",
+  indoorCycling: "indoor_cycling",
+  road: "road",
+  mountain: "mountain",
+  downhill: "downhill",
+  recumbent: "recumbent",
+  cyclocross: "cyclocross",
+  handCycling: "hand_cycling",
+  trackCycling: "track_cycling",
+  indoorRowing: "indoor_rowing",
+  elliptical: "elliptical",
+  stairClimbing: "stair_climbing",
+  lapSwimming: "lap_swimming",
+  openWater: "open_water",
+  flexibilityTraining: "flexibility_training",
+  strengthTraining: "strength_training",
+  warmUp: "warm_up",
+  match: "match",
+  exercise: "exercise",
+  challenge: "challenge",
+  indoorSkiing: "indoor_skiing",
+  cardioTraining: "cardio_training",
+  indoorWalking: "indoor_walking",
+  eBikeFitness: "e_bike_fitness",
+  bmx: "bmx",
+  casualWalking: "casual_walking",
+  speedWalking: "speed_walking",
+  bikeToRunTransition: "bike_to_run_transition",
+  runToBikeTransition: "run_to_bike_transition",
+  swimToBikeTransition: "swim_to_bike_transition",
+  atv: "atv",
+  motocross: "motocross",
+  backcountry: "backcountry",
+  resort: "resort",
+  rcDrone: "rc_drone",
+  wingsuit: "wingsuit",
+  whitewater: "whitewater",
+  skateSkiing: "skate_skiing",
+  yoga: "yoga",
+  pilates: "pilates",
+  indoorRunning: "indoor_running",
+  gravelCycling: "gravel_cycling",
+  eBikeMountain: "e_bike_mountain",
+  commuting: "commuting",
+  mixedSurface: "mixed_surface",
+  navigate: "navigate",
+  trackMe: "track_me",
+  map: "map",
+  singleGasDiving: "single_gas_diving",
+  multiGasDiving: "multi_gas_diving",
+  gaugeDiving: "gauge_diving",
+  apneaDiving: "apnea_diving",
+  apneaHunting: "apnea_hunting",
+  virtualActivity: "virtual_activity",
+  obstacle: "obstacle",
+  all: "all",
 };
 
-const KRD_TO_FIT_SUB_SPORT_MAP: Record<string, string> = Object.fromEntries(
-  Object.entries(FIT_TO_KRD_SUB_SPORT_MAP).map(([fit, krd]) => [krd, fit])
-);
+const KRD_TO_FIT_SUB_SPORT_MAP: Record<SubSport, FitSubSport> =
+  Object.fromEntries(
+    Object.entries(FIT_TO_KRD_SUB_SPORT_MAP).map(([fit, krd]) => [krd, fit])
+  ) as Record<SubSport, FitSubSport>;
 
-export const mapSubSportToKrd = (fitSubSport: string): string => {
-  return FIT_TO_KRD_SUB_SPORT_MAP[fitSubSport] || KRD_SUB_SPORT.GENERIC;
+export const mapSubSportToKrd = (fitSubSport: unknown): SubSport => {
+  const result = fitSubSportEnum.safeParse(fitSubSport);
+
+  if (!result.success) {
+    return subSportEnum.enum.generic;
+  }
+
+  return FIT_TO_KRD_SUB_SPORT_MAP[result.data] || subSportEnum.enum.generic;
 };
 
-export const mapSubSportToFit = (krdSubSport: string): string => {
-  return KRD_TO_FIT_SUB_SPORT_MAP[krdSubSport] || FIT_SUB_SPORT.GENERIC;
+export const mapSubSportToFit = (krdSubSport: unknown): FitSubSport => {
+  const result = subSportEnum.safeParse(krdSubSport);
+
+  if (!result.success) {
+    return fitSubSportEnum.enum.generic;
+  }
+
+  return KRD_TO_FIT_SUB_SPORT_MAP[result.data] || fitSubSportEnum.enum.generic;
 };
