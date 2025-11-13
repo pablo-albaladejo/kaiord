@@ -278,7 +278,7 @@ Each task follows Test-Driven Development:
 
 - [ ] 10. Implement use cases and dependency injection
 
-  - [ ] 10.1 Implement ConvertFitToKrd use case
+  - [x] 10.1 Implement ConvertFitToKrd use case
     - Create application/use-cases/convert-fit-to-krd.ts
     - Define ConvertFitToKrd type and createConvertFitToKrd factory
     - Compose FitReader and SchemaValidator
