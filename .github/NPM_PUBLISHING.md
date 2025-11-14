@@ -4,49 +4,20 @@ This document explains how to publish packages to npm using the automated CI/CD 
 
 ## Prerequisites
 
-### Quick Setup (Recommended)
-
-Run the automated setup script:
-
-```bash
-pnpm setup:npm
-```
-
-This will guide you through:
-
-1. npm authentication
-2. Token creation
-3. GitHub secret configuration
-4. Verification
-
-### Manual Setup
-
-If you prefer to configure manually:
-
-#### 1. npm Account Setup
+### 1. npm Account Setup
 
 1. Create an account at https://www.npmjs.com/
 2. Verify your email address
 3. (Optional) Enable 2FA for additional security
 
-#### 2. Generate npm Granular Access Token
+### 2. Generate npm Token
 
-1. Go to https://www.npmjs.com/settings/[YOUR_USERNAME]/tokens/granular-access-tokens/new
-2. Configure the token:
-   - **Token name:** `kaiord-ci-cd` (or your preference)
-   - **Expiration:** 90 days (recommended for security)
-   - **Packages and scopes:**
-     - Click "Select packages and scopes"
-     - Select `@kaiord/core`
-     - Permissions: **Read and write**
-   - **Organizations:** Leave empty
-   - **IP ranges:** Leave empty (allow from any IP)
-3. Click "Generate Token"
+1. Go to https://www.npmjs.com/settings/[YOUR_USERNAME]/tokens
+2. Click "Generate New Token"
+3. Select **"Automation"** token type
 4. Copy the token (it will only be shown once)
 
-**Note:** Granular access tokens provide better security by limiting access to specific packages.
-
-#### 3. Configure GitHub Secret
+### 3. Configure GitHub Secret
 
 1. Go to https://github.com/pablo-albaladejo/kaiord/settings/secrets/actions
 2. Click "New repository secret"
@@ -70,7 +41,6 @@ pnpm exec changeset
 ```
 
 Answer the prompts:
-
 - **Which packages changed?** Select the packages you modified
 - **What type of change?** Choose:
   - `patch` (0.1.1 → 0.1.2) - Bug fixes
@@ -138,7 +108,6 @@ npm view @kaiord/core
 Triggered when a GitHub Release is published.
 
 **Features:**
-
 - Builds all packages with production optimizations
 - Detects packages with version changes
 - Publishes only changed packages
@@ -147,7 +116,6 @@ Triggered when a GitHub Release is published.
 - Notifies maintainers on errors
 
 **Environment Variables:**
-
 - `NODE_AUTH_TOKEN`: Set from `secrets.NPM_TOKEN`
 
 ### Changesets Workflow (`.github/workflows/changesets.yml`)
@@ -155,7 +123,6 @@ Triggered when a GitHub Release is published.
 Triggered on push to `main` branch.
 
 **Features:**
-
 - Creates/updates "Version Packages" PR
 - Bumps versions according to changesets
 - Generates CHANGELOG.md entries
@@ -168,7 +135,6 @@ Triggered on push to `main` branch.
 **Cause:** Invalid or expired npm token
 
 **Solution:**
-
 1. Generate a new npm token
 2. Update the `NPM_TOKEN` secret in GitHub
 3. Re-run the failed workflow
@@ -178,7 +144,6 @@ Triggered on push to `main` branch.
 **Cause:** Token lacks publish permissions or package name is taken
 
 **Solution:**
-
 1. Verify token type is "Automation"
 2. Check package name is available on npm
 3. Verify you have publish permissions for the `@kaiord` scope
@@ -188,7 +153,6 @@ Triggered on push to `main` branch.
 **Cause:** Trying to publish a version that already exists
 
 **Solution:**
-
 1. Bump the version in `package.json`
 2. Create a new changeset
 3. Follow the normal publishing workflow
@@ -198,7 +162,6 @@ Triggered on push to `main` branch.
 **Cause:** TypeScript errors or test failures
 
 **Solution:**
-
 1. Fix the errors locally
 2. Run `pnpm -r build` and `pnpm -r test`
 3. Commit and push fixes
@@ -222,14 +185,16 @@ Triggered on push to `main` branch.
       "types": "./dist/index.d.ts"
     }
   },
-  "files": ["dist", "schema"]
+  "files": [
+    "dist",
+    "schema"
+  ]
 }
 ```
 
 ### Files Included in Package
 
 Only files listed in the `files` array are published:
-
 - `dist/` - Compiled JavaScript and TypeScript declarations
 - `schema/` - JSON schemas for validation
 
