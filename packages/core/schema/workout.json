@@ -72,10 +72,7 @@
                             "exclusiveMinimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "seconds"
-                        ],
+                        "required": ["type", "seconds"],
                         "additionalProperties": false
                       },
                       {
@@ -90,10 +87,7 @@
                             "exclusiveMinimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "meters"
-                        ],
+                        "required": ["type", "meters"],
                         "additionalProperties": false
                       },
                       {
@@ -108,10 +102,7 @@
                             "exclusiveMinimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "bpm"
-                        ],
+                        "required": ["type", "bpm"],
                         "additionalProperties": false
                       },
                       {
@@ -130,11 +121,7 @@
                             "minimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "bpm",
-                          "repeatFrom"
-                        ],
+                        "required": ["type", "bpm", "repeatFrom"],
                         "additionalProperties": false
                       },
                       {
@@ -149,10 +136,7 @@
                             "exclusiveMinimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "calories"
-                        ],
+                        "required": ["type", "calories"],
                         "additionalProperties": false
                       },
                       {
@@ -167,10 +151,7 @@
                             "exclusiveMinimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "watts"
-                        ],
+                        "required": ["type", "watts"],
                         "additionalProperties": false
                       },
                       {
@@ -185,10 +166,7 @@
                             "exclusiveMinimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "watts"
-                        ],
+                        "required": ["type", "watts"],
                         "additionalProperties": false
                       },
                       {
@@ -207,11 +185,7 @@
                             "minimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "seconds",
-                          "repeatFrom"
-                        ],
+                        "required": ["type", "seconds", "repeatFrom"],
                         "additionalProperties": false
                       },
                       {
@@ -230,11 +204,7 @@
                             "minimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "meters",
-                          "repeatFrom"
-                        ],
+                        "required": ["type", "meters", "repeatFrom"],
                         "additionalProperties": false
                       },
                       {
@@ -253,11 +223,7 @@
                             "minimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "calories",
-                          "repeatFrom"
-                        ],
+                        "required": ["type", "calories", "repeatFrom"],
                         "additionalProperties": false
                       },
                       {
@@ -276,11 +242,7 @@
                             "minimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "bpm",
-                          "repeatFrom"
-                        ],
+                        "required": ["type", "bpm", "repeatFrom"],
                         "additionalProperties": false
                       },
                       {
@@ -299,11 +261,7 @@
                             "minimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "watts",
-                          "repeatFrom"
-                        ],
+                        "required": ["type", "watts", "repeatFrom"],
                         "additionalProperties": false
                       },
                       {
@@ -322,11 +280,7 @@
                             "minimum": 0
                           }
                         },
-                        "required": [
-                          "type",
-                          "watts",
-                          "repeatFrom"
-                        ],
+                        "required": ["type", "watts", "repeatFrom"],
                         "additionalProperties": false
                       },
                       {
@@ -337,9 +291,7 @@
                             "const": "open"
                           }
                         },
-                        "required": [
-                          "type"
-                        ],
+                        "required": ["type"],
                         "additionalProperties": false
                       }
                     ]
@@ -377,10 +329,7 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "value"
-                                ],
+                                "required": ["unit", "value"],
                                 "additionalProperties": false
                               },
                               {
@@ -394,10 +343,7 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "value"
-                                ],
+                                "required": ["unit", "value"],
                                 "additionalProperties": false
                               },
                               {
@@ -413,10 +359,7 @@
                                     "maximum": 7
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "value"
-                                ],
+                                "required": ["unit", "value"],
                                 "additionalProperties": false
                               },
                               {
@@ -433,20 +376,13 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "min",
-                                  "max"
-                                ],
+                                "required": ["unit", "min", "max"],
                                 "additionalProperties": false
                               }
                             ]
                           }
                         },
-                        "required": [
-                          "type",
-                          "value"
-                        ],
+                        "required": ["type", "value"],
                         "additionalProperties": false
                       },
                       {
@@ -469,10 +405,7 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "value"
-                                ],
+                                "required": ["unit", "value"],
                                 "additionalProperties": false
                               },
                               {
@@ -488,10 +421,7 @@
                                     "maximum": 5
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "value"
-                                ],
+                                "required": ["unit", "value"],
                                 "additionalProperties": false
                               },
                               {
@@ -505,10 +435,7 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "value"
-                                ],
+                                "required": ["unit", "value"],
                                 "additionalProperties": false
                               },
                               {
@@ -525,20 +452,13 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "min",
-                                  "max"
-                                ],
+                                "required": ["unit", "min", "max"],
                                 "additionalProperties": false
                               }
                             ]
                           }
                         },
-                        "required": [
-                          "type",
-                          "value"
-                        ],
+                        "required": ["type", "value"],
                         "additionalProperties": false
                       },
                       {
@@ -561,10 +481,7 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "value"
-                                ],
+                                "required": ["unit", "value"],
                                 "additionalProperties": false
                               },
                               {
@@ -581,20 +498,13 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "min",
-                                  "max"
-                                ],
+                                "required": ["unit", "min", "max"],
                                 "additionalProperties": false
                               }
                             ]
                           }
                         },
-                        "required": [
-                          "type",
-                          "value"
-                        ],
+                        "required": ["type", "value"],
                         "additionalProperties": false
                       },
                       {
@@ -617,10 +527,7 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "value"
-                                ],
+                                "required": ["unit", "value"],
                                 "additionalProperties": false
                               },
                               {
@@ -636,10 +543,7 @@
                                     "maximum": 5
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "value"
-                                ],
+                                "required": ["unit", "value"],
                                 "additionalProperties": false
                               },
                               {
@@ -656,20 +560,13 @@
                                     "type": "number"
                                   }
                                 },
-                                "required": [
-                                  "unit",
-                                  "min",
-                                  "max"
-                                ],
+                                "required": ["unit", "min", "max"],
                                 "additionalProperties": false
                               }
                             ]
                           }
                         },
-                        "required": [
-                          "type",
-                          "value"
-                        ],
+                        "required": ["type", "value"],
                         "additionalProperties": false
                       },
                       {
@@ -692,17 +589,11 @@
                                 "maximum": 5
                               }
                             },
-                            "required": [
-                              "unit",
-                              "value"
-                            ],
+                            "required": ["unit", "value"],
                             "additionalProperties": false
                           }
                         },
-                        "required": [
-                          "type",
-                          "value"
-                        ],
+                        "required": ["type", "value"],
                         "additionalProperties": false
                       },
                       {
@@ -713,9 +604,7 @@
                             "const": "open"
                           }
                         },
-                        "required": [
-                          "type"
-                        ],
+                        "required": ["type"],
                         "additionalProperties": false
                       }
                     ]
@@ -809,10 +698,7 @@
                                   "exclusiveMinimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "seconds"
-                              ],
+                              "required": ["type", "seconds"],
                               "additionalProperties": false
                             },
                             {
@@ -827,10 +713,7 @@
                                   "exclusiveMinimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "meters"
-                              ],
+                              "required": ["type", "meters"],
                               "additionalProperties": false
                             },
                             {
@@ -845,10 +728,7 @@
                                   "exclusiveMinimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "bpm"
-                              ],
+                              "required": ["type", "bpm"],
                               "additionalProperties": false
                             },
                             {
@@ -867,11 +747,7 @@
                                   "minimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "bpm",
-                                "repeatFrom"
-                              ],
+                              "required": ["type", "bpm", "repeatFrom"],
                               "additionalProperties": false
                             },
                             {
@@ -886,10 +762,7 @@
                                   "exclusiveMinimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "calories"
-                              ],
+                              "required": ["type", "calories"],
                               "additionalProperties": false
                             },
                             {
@@ -904,10 +777,7 @@
                                   "exclusiveMinimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "watts"
-                              ],
+                              "required": ["type", "watts"],
                               "additionalProperties": false
                             },
                             {
@@ -922,10 +792,7 @@
                                   "exclusiveMinimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "watts"
-                              ],
+                              "required": ["type", "watts"],
                               "additionalProperties": false
                             },
                             {
@@ -944,11 +811,7 @@
                                   "minimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "seconds",
-                                "repeatFrom"
-                              ],
+                              "required": ["type", "seconds", "repeatFrom"],
                               "additionalProperties": false
                             },
                             {
@@ -967,11 +830,7 @@
                                   "minimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "meters",
-                                "repeatFrom"
-                              ],
+                              "required": ["type", "meters", "repeatFrom"],
                               "additionalProperties": false
                             },
                             {
@@ -990,11 +849,7 @@
                                   "minimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "calories",
-                                "repeatFrom"
-                              ],
+                              "required": ["type", "calories", "repeatFrom"],
                               "additionalProperties": false
                             },
                             {
@@ -1013,11 +868,7 @@
                                   "minimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "bpm",
-                                "repeatFrom"
-                              ],
+                              "required": ["type", "bpm", "repeatFrom"],
                               "additionalProperties": false
                             },
                             {
@@ -1036,11 +887,7 @@
                                   "minimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "watts",
-                                "repeatFrom"
-                              ],
+                              "required": ["type", "watts", "repeatFrom"],
                               "additionalProperties": false
                             },
                             {
@@ -1059,11 +906,7 @@
                                   "minimum": 0
                                 }
                               },
-                              "required": [
-                                "type",
-                                "watts",
-                                "repeatFrom"
-                              ],
+                              "required": ["type", "watts", "repeatFrom"],
                               "additionalProperties": false
                             },
                             {
@@ -1074,9 +917,7 @@
                                   "const": "open"
                                 }
                               },
-                              "required": [
-                                "type"
-                              ],
+                              "required": ["type"],
                               "additionalProperties": false
                             }
                           ]
@@ -1114,10 +955,7 @@
                                           "type": "number"
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "value"
-                                      ],
+                                      "required": ["unit", "value"],
                                       "additionalProperties": false
                                     },
                                     {
@@ -1131,10 +969,7 @@
                                           "type": "number"
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "value"
-                                      ],
+                                      "required": ["unit", "value"],
                                       "additionalProperties": false
                                     },
                                     {
@@ -1150,10 +985,7 @@
                                           "maximum": 7
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "value"
-                                      ],
+                                      "required": ["unit", "value"],
                                       "additionalProperties": false
                                     },
                                     {
@@ -1170,20 +1002,13 @@
                                           "type": "number"
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "min",
-                                        "max"
-                                      ],
+                                      "required": ["unit", "min", "max"],
                                       "additionalProperties": false
                                     }
                                   ]
                                 }
                               },
-                              "required": [
-                                "type",
-                                "value"
-                              ],
+                              "required": ["type", "value"],
                               "additionalProperties": false
                             },
                             {
@@ -1206,10 +1031,7 @@
                                           "type": "number"
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "value"
-                                      ],
+                                      "required": ["unit", "value"],
                                       "additionalProperties": false
                                     },
                                     {
@@ -1225,10 +1047,7 @@
                                           "maximum": 5
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "value"
-                                      ],
+                                      "required": ["unit", "value"],
                                       "additionalProperties": false
                                     },
                                     {
@@ -1242,10 +1061,7 @@
                                           "type": "number"
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "value"
-                                      ],
+                                      "required": ["unit", "value"],
                                       "additionalProperties": false
                                     },
                                     {
@@ -1262,20 +1078,13 @@
                                           "type": "number"
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "min",
-                                        "max"
-                                      ],
+                                      "required": ["unit", "min", "max"],
                                       "additionalProperties": false
                                     }
                                   ]
                                 }
                               },
-                              "required": [
-                                "type",
-                                "value"
-                              ],
+                              "required": ["type", "value"],
                               "additionalProperties": false
                             },
                             {
@@ -1298,10 +1107,7 @@
                                           "type": "number"
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "value"
-                                      ],
+                                      "required": ["unit", "value"],
                                       "additionalProperties": false
                                     },
                                     {
@@ -1318,20 +1124,13 @@
                                           "type": "number"
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "min",
-                                        "max"
-                                      ],
+                                      "required": ["unit", "min", "max"],
                                       "additionalProperties": false
                                     }
                                   ]
                                 }
                               },
-                              "required": [
-                                "type",
-                                "value"
-                              ],
+                              "required": ["type", "value"],
                               "additionalProperties": false
                             },
                             {
@@ -1354,10 +1153,7 @@
                                           "type": "number"
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "value"
-                                      ],
+                                      "required": ["unit", "value"],
                                       "additionalProperties": false
                                     },
                                     {
@@ -1373,10 +1169,7 @@
                                           "maximum": 5
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "value"
-                                      ],
+                                      "required": ["unit", "value"],
                                       "additionalProperties": false
                                     },
                                     {
@@ -1393,20 +1186,13 @@
                                           "type": "number"
                                         }
                                       },
-                                      "required": [
-                                        "unit",
-                                        "min",
-                                        "max"
-                                      ],
+                                      "required": ["unit", "min", "max"],
                                       "additionalProperties": false
                                     }
                                   ]
                                 }
                               },
-                              "required": [
-                                "type",
-                                "value"
-                              ],
+                              "required": ["type", "value"],
                               "additionalProperties": false
                             },
                             {
@@ -1429,17 +1215,11 @@
                                       "maximum": 5
                                     }
                                   },
-                                  "required": [
-                                    "unit",
-                                    "value"
-                                  ],
+                                  "required": ["unit", "value"],
                                   "additionalProperties": false
                                 }
                               },
-                              "required": [
-                                "type",
-                                "value"
-                              ],
+                              "required": ["type", "value"],
                               "additionalProperties": false
                             },
                             {
@@ -1450,9 +1230,7 @@
                                   "const": "open"
                                 }
                               },
-                              "required": [
-                                "type"
-                              ],
+                              "required": ["type"],
                               "additionalProperties": false
                             }
                           ]
@@ -1496,20 +1274,14 @@
                     }
                   }
                 },
-                "required": [
-                  "repeatCount",
-                  "steps"
-                ],
+                "required": ["repeatCount", "steps"],
                 "additionalProperties": false
               }
             ]
           }
         }
       },
-      "required": [
-        "sport",
-        "steps"
-      ],
+      "required": ["sport", "steps"],
       "additionalProperties": false
     }
   }
