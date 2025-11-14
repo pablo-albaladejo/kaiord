@@ -257,7 +257,7 @@ if: needs.detect-changes.outputs.should-test == 'true'
 
 The GitHub Actions UI shows parallel execution visually:
 
-```
+```text
 detect-changes ✓ (30s)
 ├─ lint ✓ (60s)
 ├─ typecheck ✓ (45s)

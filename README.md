@@ -95,7 +95,7 @@ pnpm kaiord --help
 
 ---
 
-## � CI/CD Ptipeline
+## 🚀 CI/CD Pipeline
 
 Kaiord uses GitHub Actions for continuous integration and deployment. The pipeline includes:
 
