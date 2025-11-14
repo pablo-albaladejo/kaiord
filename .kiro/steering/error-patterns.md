@@ -34,7 +34,10 @@ All domain errors extend `Error` and follow this pattern:
 export class DomainErrorName extends Error {
   public override readonly name = "DomainErrorName";
 
-  constructor(message: string, public readonly additionalContext?: unknown) {
+  constructor(
+    message: string,
+    public readonly additionalContext?: unknown
+  ) {
     super(message);
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, DomainErrorName);
