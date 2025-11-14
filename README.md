@@ -136,12 +136,29 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 
 For maintainers publishing packages to npm:
 
-1. **Configure npm token** (one-time setup) - See [Setup Checklist](./.github/SETUP_CHECKLIST.md)
-2. **Create changeset**: `pnpm exec changeset`
-3. **Merge "Version Packages" PR** when ready
-4. **Automatic publishing** to npm via GitHub Actions
+**🎉 Recommended: Trusted Publishing (No Tokens!)**
 
-See [npm Publishing Guide](./.github/NPM_PUBLISHING.md) for complete documentation.
+1. **Publish manually once:**
+
+   ```bash
+   npm login
+   pnpm -r build
+   pnpm --filter @kaiord/core publish --access public
+   ```
+
+2. **Configure on npm:** Go to package settings and add GitHub Actions as trusted publisher
+
+3. **Done!** Future releases publish automatically with cryptographic provenance.
+
+See [Trusted Publishing Guide](./.github/NPM_TRUSTED_PUBLISHING.md) for details.
+
+**Alternative: Token-Based (Legacy)**
+
+```bash
+pnpm setup:npm  # Automated token setup
+```
+
+See [Setup Checklist](./.github/SETUP_CHECKLIST.md) for all options.
 
 ---
 
