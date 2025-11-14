@@ -400,3 +400,104 @@ jobs:
           name: coverage-${{ matrix.package }}-${{ matrix.node-version }}
           path: ./packages/${{ matrix.package }}/coverage/
           retention-days: 30
+
+  build:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.should-test == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.15.0
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm store cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Setup node_modules cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build affected packages
+        run: |
+          echo "Building affected packages based on changes..."
+
+          CORE_CHANGED="${{ needs.detect-changes.outputs.core-changed }}"
+          CLI_CHANGED="${{ needs.detect-changes.outputs.cli-changed }}"
+
+          if [ "$CORE_CHANGED" == "true" ]; then
+            echo "Building @kaiord/core..."
+            pnpm --filter @kaiord/core build
+          fi
+
+          if [ "$CLI_CHANGED" == "true" ]; then
+            echo "Building @kaiord/cli..."
+            # CLI depends on core, so build core first if not already built
+            if [ "$CORE_CHANGED" != "true" ]; then
+              echo "Building @kaiord/core (dependency of cli)..."
+              pnpm --filter @kaiord/core build
+            fi
+            pnpm --filter @kaiord/cli build
+          fi
+
+          echo "Build completed successfully"
+
+      - name: Verify build outputs
+        run: |
+          echo "Verifying build artifacts..."
+
+          CORE_CHANGED="${{ needs.detect-changes.outputs.core-changed }}"
+          CLI_CHANGED="${{ needs.detect-changes.outputs.cli-changed }}"
+
+          if [ "$CORE_CHANGED" == "true" ]; then
+            if [ ! -d "packages/core/dist" ]; then
+              echo "Error: @kaiord/core build output not found"
+              exit 1
+            fi
+            echo "✓ @kaiord/core build output verified"
+          fi
+
+          if [ "$CLI_CHANGED" == "true" ]; then
+            if [ ! -d "packages/cli/dist" ]; then
+              echo "Error: @kaiord/cli build output not found"
+              exit 1
+            fi
+            echo "✓ @kaiord/cli build output verified"
+          fi
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: build-artifacts
+          path: |
+            packages/*/dist/
+            packages/*/package.json
+          retention-days: 7
