@@ -1,16 +1,14 @@
 import { convertLengthToMeters } from "../../../domain/converters/length-unit.converter";
-import type {
-  RepetitionBlock,
-  Workout,
-  WorkoutStep,
-} from "../../../domain/schemas/workout";
+import type { Workout } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
 import { mapLengthUnitToKrd } from "../length-unit/length-unit.mapper";
-import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import { mapSportType } from "../shared/type-guards";
 import type { FitWorkoutMessage, FitWorkoutStep } from "../shared/types";
 import { mapSubSportToKrd } from "../sub-sport/sub-sport.mapper";
-import { mapStep } from "./step.mapper";
+import {
+  buildWorkoutSteps,
+  findRepetitionStepIndices,
+} from "./repetition.builder";
 
 export const mapWorkout = (
   workoutMsg: FitWorkoutMessage | undefined,
@@ -41,66 +39,4 @@ export const mapWorkout = (
   }
 
   return workout;
-};
-
-const findRepetitionStepIndices = (
-  workoutSteps: Array<FitWorkoutStep>
-): Set<number> => {
-  const indices = new Set<number>();
-
-  for (let i = 0; i < workoutSteps.length; i++) {
-    const step = workoutSteps[i];
-    if (
-      step.durationType === fitDurationTypeSchema.enum.repeatUntilStepsCmplt
-    ) {
-      const startIndex = (step.durationStep || 0) as number;
-      for (let j = startIndex; j < i; j++) {
-        indices.add(j);
-      }
-    }
-  }
-
-  return indices;
-};
-
-const buildWorkoutSteps = (
-  workoutSteps: Array<FitWorkoutStep>,
-  repetitionStepIndices: Set<number>
-): Array<WorkoutStep | RepetitionBlock> => {
-  const steps = [];
-
-  for (let i = 0; i < workoutSteps.length; i++) {
-    const step = workoutSteps[i];
-
-    if (
-      step.durationType === fitDurationTypeSchema.enum.repeatUntilStepsCmplt &&
-      step.repeatSteps
-    ) {
-      const repetitionBlock = buildRepetitionBlock(step, workoutSteps, i);
-      steps.push(repetitionBlock);
-    } else if (!repetitionStepIndices.has(i)) {
-      steps.push(mapStep(step, i));
-    }
-  }
-
-  return steps;
-};
-
-const buildRepetitionBlock = (
-  step: FitWorkoutStep,
-  workoutSteps: Array<FitWorkoutStep>,
-  currentIndex: number
-): RepetitionBlock => {
-  const repeatCount = step.repeatSteps!;
-  const startIndex = (step.durationStep || 0) as number;
-  const repeatedSteps = [];
-
-  for (let j = startIndex; j < currentIndex; j++) {
-    repeatedSteps.push(mapStep(workoutSteps[j], j));
-  }
-
-  return {
-    repeatCount,
-    steps: repeatedSteps,
-  };
 };
