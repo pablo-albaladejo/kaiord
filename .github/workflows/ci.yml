@@ -189,7 +189,7 @@ jobs:
 
       - name: Upload coverage artifact
         if: steps.should-test-package.outputs.should-test == 'true' && always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: coverage-${{ matrix.package }}-${{ matrix.node-version }}
           path: ./packages/${{ matrix.package }}/coverage/
@@ -213,7 +213,7 @@ jobs:
         run: bash .github/scripts/verify-build.sh "${{ needs.detect-changes.outputs.core-changed }}" "${{ needs.detect-changes.outputs.cli-changed }}"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: build-artifacts
           path: |
@@ -289,7 +289,7 @@ jobs:
 
       - name: Upload round-trip test results
         if: steps.should-test-package.outputs.should-test == 'true' && always()
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: round-trip-results-${{ matrix.package }}
           path: round-trip-output.txt
