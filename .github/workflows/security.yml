@@ -1,0 +1,276 @@
+name: Security Audit
+
+on:
+  # Weekly schedule - Mondays at 9 AM UTC
+  schedule:
+    - cron: "0 9 * * 1"
+
+  # PR with dependency changes
+  pull_request:
+    paths:
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "packages/*/package.json"
+
+  # Manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  audit:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run security audit
+        id: audit
+        continue-on-error: true
+        run: |
+          echo "Running pnpm audit..."
+          pnpm audit --audit-level=moderate --json > audit-results.json || true
+
+          # Parse audit results
+          if [ -f audit-results.json ]; then
+            # Extract vulnerability counts by severity
+            INFO=$(jq '[.advisories | to_entries[] | select(.value.severity == "info")] | length' audit-results.json 2>/dev/null || echo "0")
+            LOW=$(jq '[.advisories | to_entries[] | select(.value.severity == "low")] | length' audit-results.json 2>/dev/null || echo "0")
+            MODERATE=$(jq '[.advisories | to_entries[] | select(.value.severity == "moderate")] | length' audit-results.json 2>/dev/null || echo "0")
+            HIGH=$(jq '[.advisories | to_entries[] | select(.value.severity == "high")] | length' audit-results.json 2>/dev/null || echo "0")
+            CRITICAL=$(jq '[.advisories | to_entries[] | select(.value.severity == "critical")] | length' audit-results.json 2>/dev/null || echo "0")
+            
+            echo "info=$INFO" >> $GITHUB_OUTPUT
+            echo "low=$LOW" >> $GITHUB_OUTPUT
+            echo "moderate=$MODERATE" >> $GITHUB_OUTPUT
+            echo "high=$HIGH" >> $GITHUB_OUTPUT
+            echo "critical=$CRITICAL" >> $GITHUB_OUTPUT
+            
+            TOTAL=$((INFO + LOW + MODERATE + HIGH + CRITICAL))
+            echo "total=$TOTAL" >> $GITHUB_OUTPUT
+            
+            # Determine if we should fail
+            if [ "$HIGH" -gt 0 ] || [ "$CRITICAL" -gt 0 ]; then
+              echo "has_critical=true" >> $GITHUB_OUTPUT
+              echo "status=failed" >> $GITHUB_OUTPUT
+            elif [ "$MODERATE" -gt 0 ] || [ "$LOW" -gt 0 ]; then
+              echo "has_critical=false" >> $GITHUB_OUTPUT
+              echo "status=warning" >> $GITHUB_OUTPUT
+            else
+              echo "has_critical=false" >> $GITHUB_OUTPUT
+              echo "status=passed" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "has_critical=false" >> $GITHUB_OUTPUT
+            echo "status=passed" >> $GITHUB_OUTPUT
+            echo "total=0" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Display audit summary
+        if: always()
+        run: |
+          echo "## Security Audit Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical | ${{ steps.audit.outputs.critical || 0 }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| High | ${{ steps.audit.outputs.high || 0 }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Moderate | ${{ steps.audit.outputs.moderate || 0 }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Low | ${{ steps.audit.outputs.low || 0 }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Info | ${{ steps.audit.outputs.info || 0 }} |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**Total vulnerabilities:** ${{ steps.audit.outputs.total || 0 }}" >> $GITHUB_STEP_SUMMARY
+
+          if [ "${{ steps.audit.outputs.status }}" = "failed" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "❌ **Status:** Failed - High or critical vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+          elif [ "${{ steps.audit.outputs.status }}" = "warning" ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **Status:** Warning - Moderate or low vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **Status:** Passed - No vulnerabilities detected" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Comment on PR with vulnerability summary
+        if: github.event_name == 'pull_request' && steps.audit.outputs.total != '0'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const info = ${{ steps.audit.outputs.info || 0 }};
+            const low = ${{ steps.audit.outputs.low || 0 }};
+            const moderate = ${{ steps.audit.outputs.moderate || 0 }};
+            const high = ${{ steps.audit.outputs.high || 0 }};
+            const critical = ${{ steps.audit.outputs.critical || 0 }};
+            const total = ${{ steps.audit.outputs.total || 0 }};
+            const status = '${{ steps.audit.outputs.status }}';
+
+            let emoji = '✅';
+            let statusText = 'No vulnerabilities detected';
+
+            if (status === 'failed') {
+              emoji = '❌';
+              statusText = 'High or critical vulnerabilities detected';
+            } else if (status === 'warning') {
+              emoji = '⚠️';
+              statusText = 'Moderate or low vulnerabilities detected';
+            }
+
+            const body = `## ${emoji} Security Audit Results
+
+            **Status:** ${statusText}
+
+            | Severity | Count |
+            |----------|-------|
+            | Critical | ${critical} |
+            | High | ${high} |
+            | Moderate | ${moderate} |
+            | Low | ${low} |
+            | Info | ${info} |
+
+            **Total vulnerabilities:** ${total}
+
+            ${high > 0 || critical > 0 ? '⚠️ **Action Required:** Please review and fix high/critical vulnerabilities before merging.' : ''}
+            ${moderate > 0 || low > 0 ? 'ℹ️ Consider addressing moderate/low vulnerabilities in a follow-up PR.' : ''}
+
+            <details>
+            <summary>Remediation Steps</summary>
+
+            1. Review the audit results: \`pnpm audit\`
+            2. Update vulnerable dependencies: \`pnpm update\`
+            3. For breaking changes, check package changelogs
+            4. Run tests to ensure compatibility: \`pnpm test\`
+            5. If no fix is available, consider:
+               - Finding alternative packages
+               - Waiting for upstream fixes
+               - Applying workarounds if risk is acceptable
+
+            </details>`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: body
+            });
+
+      - name: Create GitHub issue for critical vulnerabilities
+        if: steps.audit.outputs.has_critical == 'true' && github.event_name != 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const critical = ${{ steps.audit.outputs.critical || 0 }};
+            const high = ${{ steps.audit.outputs.high || 0 }};
+            const moderate = ${{ steps.audit.outputs.moderate || 0 }};
+            const low = ${{ steps.audit.outputs.low || 0 }};
+            const info = ${{ steps.audit.outputs.info || 0 }};
+
+            const title = `🚨 Security Alert: ${critical} Critical and ${high} High Vulnerabilities Detected`;
+
+            const body = `## Security Audit Alert
+
+            The weekly security audit has detected **critical or high severity vulnerabilities** in our dependencies.
+
+            ### Vulnerability Summary
+
+            | Severity | Count |
+            |----------|-------|
+            | Critical | ${critical} |
+            | High | ${high} |
+            | Moderate | ${moderate} |
+            | Low | ${low} |
+            | Info | ${info} |
+
+            ### Workflow Details
+
+            - **Workflow Run:** [View Details](${context.payload.repository.html_url}/actions/runs/${context.runId})
+            - **Triggered:** ${new Date().toISOString()}
+            - **Branch:** ${context.ref}
+
+            ### Remediation Steps
+
+            1. **Review the audit results:**
+               \`\`\`bash
+               pnpm audit
+               \`\`\`
+
+            2. **Update vulnerable dependencies:**
+               \`\`\`bash
+               pnpm update
+               \`\`\`
+
+            3. **For specific packages:**
+               \`\`\`bash
+               pnpm update <package-name>
+               \`\`\`
+
+            4. **Check for breaking changes:**
+               - Review package changelogs
+               - Test thoroughly after updates
+
+            5. **Run tests to ensure compatibility:**
+               \`\`\`bash
+               pnpm test
+               \`\`\`
+
+            6. **If no fix is available:**
+               - Look for alternative packages
+               - Wait for upstream fixes
+               - Apply workarounds if risk is acceptable
+               - Document the decision
+
+            ### Priority
+
+            ${critical > 0 ? '🔴 **CRITICAL:** Immediate action required' : '🟠 **HIGH:** Address within 48 hours'}
+
+            ### Additional Resources
+
+            - [npm Security Best Practices](https://docs.npmjs.com/packages-and-modules/securing-your-code)
+            - [OWASP Dependency Check](https://owasp.org/www-project-dependency-check/)
+            - [Snyk Vulnerability Database](https://snyk.io/vuln/)
+
+            ---
+
+            This issue was automatically created by the Security Audit workflow.`;
+
+            github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: title,
+              body: body,
+              labels: ['security', 'dependencies', 'automated']
+            });
+
+      - name: Fail workflow if critical vulnerabilities found
+        if: steps.audit.outputs.has_critical == 'true'
+        run: |
+          echo "❌ Security audit failed: High or critical vulnerabilities detected"
+          echo "Critical: ${{ steps.audit.outputs.critical }}"
+          echo "High: ${{ steps.audit.outputs.high }}"
+          exit 1
+
+      - name: Pass with warning for moderate/low vulnerabilities
+        if: steps.audit.outputs.status == 'warning'
+        run: |
+          echo "⚠️ Security audit passed with warnings"
+          echo "Moderate: ${{ steps.audit.outputs.moderate }}"
+          echo "Low: ${{ steps.audit.outputs.low }}"
+          echo "Consider addressing these vulnerabilities in a follow-up PR"
