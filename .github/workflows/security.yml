@@ -53,7 +53,7 @@ jobs:
 
           # Parse audit results using jq
           # Extract vulnerability counts by severity for detailed reporting
-          
+
           # Validate JSON before parsing
           if ! jq empty audit-results.json 2>/dev/null; then
             echo "warn: Failed to parse audit results JSON, assuming no vulnerabilities"
