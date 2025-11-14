@@ -116,7 +116,7 @@ jobs:
         uses: ./.github/actions/setup-pnpm
 
       - name: Run TypeScript type checking
-        run: pnpm exec tsc --noEmit
+        run: pnpm -r exec tsc --noEmit
 
   test:
     runs-on: ubuntu-latest

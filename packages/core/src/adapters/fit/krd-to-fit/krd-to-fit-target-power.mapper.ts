@@ -1,4 +1,7 @@
-import { targetTypeSchema, targetUnitSchema } from "../../../domain/schemas/target";
+import {
+  targetTypeSchema,
+  targetUnitSchema,
+} from "../../../domain/schemas/target";
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import { fitTargetTypeSchema } from "../schemas/fit-target";
 

@@ -92,22 +92,28 @@ Status check names correspond to job IDs in `.github/workflows/ci.yml`:
 
 ```yaml
 jobs:
-  detect-changes:# ← Status check: "detect-changes"
+  detect-changes:# ← Status check:
+    "detect-changes"
     # ...
 
-  lint:# ← Status check: "lint"
+  lint:# ← Status check:
+    "lint"
     # ...
 
-  typecheck:# ← Status check: "typecheck"
+  typecheck:# ← Status check:
+    "typecheck"
     # ...
 
-  test:# ← Status check: "test"
+  test:# ← Status check:
+    "test"
     # ...
 
-  build:# ← Status check: "build"
+  build:# ← Status check:
+    "build"
     # ...
 
-  round-trip:# ← Status check: "round-trip"
+  round-trip:# ← Status check:
+    "round-trip"
     # ...
 ```
 
