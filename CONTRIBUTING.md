@@ -99,8 +99,14 @@ pnpm -r test
 # Run tests with coverage
 pnpm -r test:coverage
 
-# Run linting
+# Run linting (ESLint + Prettier)
 pnpm lint
+
+# Auto-fix linting issues
+pnpm lint:fix
+
+# Format code
+pnpm format
 
 # Run type checking
 pnpm exec tsc --noEmit
