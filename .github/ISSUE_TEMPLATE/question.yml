@@ -1,0 +1,60 @@
+name: Question
+description: Ask a question about usage or implementation
+title: "[Question]: "
+labels: ["question"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Have a question? We're here to help!
+
+  - type: input
+    id: title
+    attributes:
+      label: Question Title
+      description: A clear and concise title for your question
+      placeholder: "Example: How do I convert FIT files with custom fields?"
+    validations:
+      required: true
+
+  - type: textarea
+    id: question
+    attributes:
+      label: Question
+      description: What would you like to know?
+      placeholder: Ask your question in detail
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Provide any relevant context (what you're trying to accomplish, your setup, etc.)
+      placeholder: |
+        I'm trying to...
+        My setup is...
+        I'm using...
+    validations:
+      required: false
+
+  - type: textarea
+    id: tried
+    attributes:
+      label: What Have You Tried?
+      description: What have you already attempted?
+      placeholder: |
+        I tried...
+        I looked at...
+        I read...
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information
+      description: Any other information that might help us answer your question
+      placeholder: Code snippets, error messages, etc.
+    validations:
+      required: false
