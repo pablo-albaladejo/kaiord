@@ -201,7 +201,7 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 
 ## Phase 6: Status Badges and Documentation
 
-- [ ] 13. Add status badges to README
+- [x] 13. Add status badges to README
 
   - Add CI workflow status badge for main branch
   - Add Codecov coverage badge
