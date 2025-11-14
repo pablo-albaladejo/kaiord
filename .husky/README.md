@@ -9,11 +9,9 @@ This directory contains Git hooks managed by [Husky](https://typicode.github.io/
 Runs automatically before every commit.
 
 **What it does:**
-
 - Placeholder for future pre-commit checks
 
 **To skip (not recommended):**
-
 ```bash
 git commit --no-verify
 ```
@@ -25,14 +23,12 @@ git commit --no-verify
 Runs automatically before every push.
 
 **What it does:**
-
 1. Runs `pnpm lint:fix` to auto-fix linting issues
 2. Checks if any files were modified by lint:fix
 3. If changes were made, blocks the push and asks you to commit them
 4. If no changes, allows the push to proceed
 
 **Example workflow:**
-
 ```bash
 # Make changes
 git add .
@@ -58,7 +54,6 @@ git push
 ```
 
 **To skip (not recommended):**
-
 ```bash
 git push --no-verify
 ```
@@ -70,7 +65,6 @@ git push --no-verify
 ### pre-push with lint:fix
 
 **Benefits:**
-
 - ✅ Ensures code is properly formatted before pushing
 - ✅ Catches linting issues early
 - ✅ Prevents CI failures due to formatting
@@ -78,7 +72,6 @@ git push --no-verify
 - ✅ Auto-fixes issues when possible
 
 **Why pre-push instead of pre-commit?**
-
 - Faster local development (no delay on every commit)
 - Allows WIP commits without formatting
 - Still catches issues before they reach CI
@@ -115,13 +108,11 @@ rm -rf .husky
 ### Hook not running
 
 **Check if Husky is installed:**
-
 ```bash
 pnpm install
 ```
 
 **Check if hooks are executable:**
-
 ```bash
 chmod +x .husky/pre-push
 chmod +x .husky/pre-commit
@@ -130,14 +121,12 @@ chmod +x .husky/pre-commit
 ### Hook fails with "command not found"
 
 **Ensure pnpm is in PATH:**
-
 ```bash
 which pnpm
 # Should output: /path/to/pnpm
 ```
 
 **If not found, add to PATH or use full path in hook:**
-
 ```bash
 # In .husky/pre-push
 /path/to/pnpm lint:fix
@@ -146,7 +135,6 @@ which pnpm
 ### Want to modify a hook
 
 Edit the hook file directly:
-
 ```bash
 # Edit pre-push hook
 nano .husky/pre-push
