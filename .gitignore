@@ -27,3 +27,7 @@ pnpm-debug.log*
 # Environment
 .env
 .env.local
+
+# GitHub Actions local testing (act)
+.secrets
+.actrc.local
