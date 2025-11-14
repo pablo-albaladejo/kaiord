@@ -72,23 +72,23 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 
 ## Phase 3: Testing and Coverage
 
-- [-] 6. Implement test job with intelligent filtering
+- [x] 6. Implement test job with intelligent filtering
 
-  - [ ] 6.1 Create test job with matrix strategy
+  - [x] 6.1 Create test job with matrix strategy
 
     - Configure matrix: Node.js versions (20.x, 22.x) and packages (core, cli)
     - Add dynamic matrix exclusions based on `detect-changes` outputs
     - Add condition to skip if `should-test == false`
     - _Requirements: 1.1, 1.2, 5.1, 5.2, 5.3, 10.2, 10.3_
 
-  - [ ] 6.2 Implement test execution with coverage
+  - [x] 6.2 Implement test execution with coverage
 
     - Build dependencies if needed (e.g., build core when testing cli)
     - Run tests with coverage: `pnpm --filter @kaiord/${{ matrix.package }} test:coverage`
     - Generate coverage report in LCOV format
     - _Requirements: 1.1, 1.2, 1.3, 4.1, 10.6, 10.8_
 
-  - [ ] 6.3 Add coverage reporting and validation
+  - [x] 6.3 Add coverage reporting and validation
     - Upload coverage to Codecov using `codecov/codecov-action@v3` (only on Node 20.x)
     - Check coverage threshold (80%) and fail if below
     - Upload coverage artifact for workflow summary
