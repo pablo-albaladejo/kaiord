@@ -95,12 +95,55 @@ pnpm kaiord --help
 
 ---
 
+## � CI/CD Ptipeline
+
+Kaiord uses GitHub Actions for continuous integration and deployment. The pipeline includes:
+
+### Automated Testing
+
+- **Multi-version testing**: Tests run on Node.js 20.x and 22.x
+- **Intelligent change detection**: Only affected packages are tested
+- **Coverage reporting**: Automatic coverage reports with Codecov
+- **Round-trip validation**: Ensures lossless format conversions
+
+### Code Quality
+
+- **Linting**: ESLint and Prettier checks on every PR
+- **Type checking**: TypeScript strict mode validation
+- **Security scanning**: Weekly dependency vulnerability audits
+
+### Release Automation
+
+- **Changesets**: Automated version management and changelog generation
+- **npm Publishing**: Automatic package publishing on release
+- **GitHub Releases**: Automated release notes from changesets
+
+### Contributing
+
+To contribute to Kaiord:
+
+1. **Fork and clone** the repository
+2. **Create a feature branch**: `git checkout -b feature/my-feature`
+3. **Make your changes** following the code style guidelines
+4. **Add a changeset**: `pnpm exec changeset` (for version-worthy changes)
+5. **Test locally**: `pnpm -r test` and `pnpm -r build`
+6. **Test workflows**: Use `act` to test GitHub Actions locally (see [TESTING_WORKFLOWS.md](./.github/TESTING_WORKFLOWS.md))
+7. **Submit a PR**: All checks must pass before merging
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+
+---
+
 ## 📚 Documentation
 
 - [NEW_FIELDS.md](./docs/NEW_FIELDS.md) - Detailed guide to new field support with examples
 - [CHANGELOG.md](./CHANGELOG.md) - Version history and release notes
 - [KRD Format Specification](./.kiro/steering/krd-format.md) - Complete KRD format documentation
+- [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guidelines and workflow
+- [CI/CD Workflows](./.github/workflows/README.md) - Complete CI/CD documentation
 - [Testing Workflows Locally](./.github/TESTING_WORKFLOWS.md) - Guide to testing GitHub Actions with `act`
+
+---
 
 ## 📚 References & Resources
 
