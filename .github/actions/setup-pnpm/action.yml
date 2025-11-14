@@ -31,22 +31,50 @@ runs:
         echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
 
     - name: Setup pnpm store cache
+      id: cache-pnpm-store
       uses: actions/cache@v3
       with:
         path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-        key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+        key: ${{ runner.os }}-pnpm-store-${{ inputs.pnpm-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
+          ${{ runner.os }}-pnpm-store-${{ inputs.pnpm-version }}-
           ${{ runner.os }}-pnpm-store-
 
     - name: Setup node_modules cache
+      id: cache-node-modules
       uses: actions/cache@v3
       with:
         path: |
           node_modules
           packages/*/node_modules
-        key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+        key: ${{ runner.os }}-node-modules-${{ inputs.node-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
         restore-keys: |
+          ${{ runner.os }}-node-modules-${{ inputs.node-version }}-
           ${{ runner.os }}-node-modules-
+
+    - name: Setup TypeScript build cache
+      id: cache-typescript
+      uses: actions/cache@v3
+      with:
+        path: |
+          packages/*/dist
+          packages/*/.tsbuildinfo
+          packages/*/tsconfig.tsbuildinfo
+        key: ${{ runner.os }}-typescript-${{ inputs.node-version }}-${{ hashFiles('packages/*/tsconfig.json', 'packages/*/src/**/*.ts') }}
+        restore-keys: |
+          ${{ runner.os }}-typescript-${{ inputs.node-version }}-${{ hashFiles('packages/*/tsconfig.json') }}
+          ${{ runner.os }}-typescript-${{ inputs.node-version }}-
+          ${{ runner.os }}-typescript-
+
+    - name: Display cache hit status
+      shell: bash
+      run: |
+        echo "📦 Cache Status Report"
+        echo "====================="
+        echo "pnpm store cache: ${{ steps.cache-pnpm-store.outputs.cache-hit == 'true' && '✅ HIT' || '❌ MISS' }}"
+        echo "node_modules cache: ${{ steps.cache-node-modules.outputs.cache-hit == 'true' && '✅ HIT' || '❌ MISS' }}"
+        echo "TypeScript build cache: ${{ steps.cache-typescript.outputs.cache-hit == 'true' && '✅ HIT' || '❌ MISS' }}"
+        echo "====================="
 
     - name: Install dependencies
       shell: bash
