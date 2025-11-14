@@ -1,0 +1,12 @@
+# act configuration for Kaiord
+# This file configures default settings for local workflow testing
+
+# Use linux/amd64 architecture (required for Apple M-series chips)
+--container-architecture linux/amd64
+
+# Use medium-sized runner image for better compatibility
+-P ubuntu-latest=catthehacker/ubuntu:act-latest
+
+# Verbose output for better debugging
+# Uncomment if you want detailed logs by default
+# -v

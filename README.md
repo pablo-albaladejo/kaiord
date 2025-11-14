@@ -95,6 +95,7 @@ pnpm kaiord --help
 - [NEW_FIELDS.md](./docs/NEW_FIELDS.md) - Detailed guide to new field support with examples
 - [CHANGELOG.md](./CHANGELOG.md) - Version history and release notes
 - [KRD Format Specification](./.kiro/steering/krd-format.md) - Complete KRD format documentation
+- [Testing Workflows Locally](./.github/TESTING_WORKFLOWS.md) - Guide to testing GitHub Actions with `act`
 
 ## 📚 References & Resources
 
