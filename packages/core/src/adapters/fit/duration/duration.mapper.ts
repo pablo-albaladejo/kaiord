@@ -5,7 +5,7 @@ import {
 } from "../../../domain/schemas/duration";
 import { convertFitDuration } from "../duration/duration.converter";
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
-import type { FitWorkoutStep } from "../types";
+import type { FitWorkoutStep } from "../shared/types";
 
 export const mapDuration = (step: FitWorkoutStep): Duration => {
   return convertFitDuration(step);

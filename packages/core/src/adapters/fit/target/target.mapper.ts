@@ -4,7 +4,7 @@ import {
   type TargetType,
 } from "../../../domain/schemas/target";
 import { fitTargetTypeSchema } from "../schemas/fit-target";
-import type { FitWorkoutStep } from "../types";
+import type { FitWorkoutStep } from "../shared/types";
 import { convertFitTarget } from "./target.converter";
 
 export const mapTarget = (step: FitWorkoutStep): Target => {
