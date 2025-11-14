@@ -29,13 +29,15 @@
     "format:check": "prettier --check .",
     "clean": "pnpm -r clean",
     "setup:npm": "./scripts/quick-setup-npm.sh",
-    "setup:npm:full": "./scripts/setup-npm-publishing.sh"
+    "setup:npm:full": "./scripts/setup-npm-publishing.sh",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
     "@eslint/js": "^9.15.0",
     "@types/node": "^20.11.0",
     "eslint": "^9.15.0",
+    "husky": "^9.1.7",
     "prettier": "^3.6.2",
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.14.0"
