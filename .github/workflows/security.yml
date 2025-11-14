@@ -46,18 +46,21 @@ jobs:
         id: audit
         continue-on-error: true
         run: |
+          # Run npm audit and parse results
+          # Audit level: moderate (catches moderate, high, and critical vulnerabilities)
           echo "Running pnpm audit..."
           pnpm audit --audit-level=moderate --json > audit-results.json || true
 
-          # Parse audit results
+          # Parse audit results using jq
+          # Extract vulnerability counts by severity for detailed reporting
           if [ -f audit-results.json ]; then
-            # Extract vulnerability counts by severity
             INFO=$(jq '[.advisories | to_entries[] | select(.value.severity == "info")] | length' audit-results.json 2>/dev/null || echo "0")
             LOW=$(jq '[.advisories | to_entries[] | select(.value.severity == "low")] | length' audit-results.json 2>/dev/null || echo "0")
             MODERATE=$(jq '[.advisories | to_entries[] | select(.value.severity == "moderate")] | length' audit-results.json 2>/dev/null || echo "0")
             HIGH=$(jq '[.advisories | to_entries[] | select(.value.severity == "high")] | length' audit-results.json 2>/dev/null || echo "0")
             CRITICAL=$(jq '[.advisories | to_entries[] | select(.value.severity == "critical")] | length' audit-results.json 2>/dev/null || echo "0")
             
+            # Output vulnerability counts for downstream steps
             echo "info=$INFO" >> $GITHUB_OUTPUT
             echo "low=$LOW" >> $GITHUB_OUTPUT
             echo "moderate=$MODERATE" >> $GITHUB_OUTPUT
@@ -67,7 +70,10 @@ jobs:
             TOTAL=$((INFO + LOW + MODERATE + HIGH + CRITICAL))
             echo "total=$TOTAL" >> $GITHUB_OUTPUT
             
-            # Determine if we should fail
+            # Determine workflow status based on severity
+            # FAIL: High or critical vulnerabilities (immediate action required)
+            # WARN: Moderate or low vulnerabilities (address in follow-up)
+            # PASS: No vulnerabilities detected
             if [ "$HIGH" -gt 0 ] || [ "$CRITICAL" -gt 0 ]; then
               echo "has_critical=true" >> $GITHUB_OUTPUT
               echo "status=failed" >> $GITHUB_OUTPUT
