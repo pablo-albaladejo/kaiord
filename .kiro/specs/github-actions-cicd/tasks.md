@@ -104,7 +104,7 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
   - Mark PR check as failed if build fails
   - _Requirements: 3.1, 3.2, 3.3, 3.4, 10.6, 10.8_
 
-- [ ] 8. Add round-trip tests
+- [x] 8. Add round-trip tests
   - Run round-trip tests with tolerance validation (±1s, ±1W, ±1bpm, ±1rpm)
   - Execute tests only for affected packages
   - Mark PR check as failed if tolerances exceeded

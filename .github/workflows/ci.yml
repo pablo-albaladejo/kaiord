@@ -501,3 +501,115 @@ jobs:
             packages/*/dist/
             packages/*/package.json
           retention-days: 7
+
+  round-trip:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.should-test == 'true'
+    strategy:
+      matrix:
+        package: ["core"]
+    steps:
+      - name: Check if package should be tested
+        id: should-test-package
+        run: |
+          PACKAGE="${{ matrix.package }}"
+
+          if [ "$PACKAGE" == "core" ]; then
+            if [ "${{ needs.detect-changes.outputs.core-changed }}" == "true" ]; then
+              echo "should-test=true" >> $GITHUB_OUTPUT
+            else
+              echo "should-test=false" >> $GITHUB_OUTPUT
+            fi
+          elif [ "$PACKAGE" == "cli" ]; then
+            if [ "${{ needs.detect-changes.outputs.cli-changed }}" == "true" ]; then
+              echo "should-test=true" >> $GITHUB_OUTPUT
+            else
+              echo "should-test=false" >> $GITHUB_OUTPUT
+            fi
+          else
+            echo "should-test=true" >> $GITHUB_OUTPUT
+          fi
+
+          echo "Testing round-trip for $PACKAGE: $(cat $GITHUB_OUTPUT | grep should-test | cut -d= -f2)"
+
+      - name: Checkout code
+        if: steps.should-test-package.outputs.should-test == 'true'
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        if: steps.should-test-package.outputs.should-test == 'true'
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Setup pnpm
+        if: steps.should-test-package.outputs.should-test == 'true'
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.15.0
+
+      - name: Get pnpm store directory
+        if: steps.should-test-package.outputs.should-test == 'true'
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm store cache
+        if: steps.should-test-package.outputs.should-test == 'true'
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Setup node_modules cache
+        if: steps.should-test-package.outputs.should-test == 'true'
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        if: steps.should-test-package.outputs.should-test == 'true'
+        run: pnpm install --frozen-lockfile
+
+      - name: Run round-trip tests
+        if: steps.should-test-package.outputs.should-test == 'true'
+        run: |
+          echo "Running round-trip tests for @kaiord/${{ matrix.package }}..."
+          echo "Tolerance validation: ±1s (time), ±1W (power), ±1bpm (heart rate), ±1rpm (cadence)"
+
+          # Run tests matching round-trip pattern
+          pnpm --filter @kaiord/${{ matrix.package }} exec vitest --run --reporter=verbose \
+            --testNamePattern="round.?trip|Round.?trip|tolerance|Tolerance" 2>&1 | tee round-trip-output.txt
+
+          # Check if any tests failed
+          if [ ${PIPESTATUS[0]} -ne 0 ]; then
+            echo "❌ Round-trip tests failed"
+            echo ""
+            echo "Tolerance violations detected. The following metrics exceeded acceptable tolerances:"
+            echo "  - Time: ±1 second"
+            echo "  - Power: ±1 watt or ±1% FTP"
+            echo "  - Heart Rate: ±1 bpm"
+            echo "  - Cadence: ±1 rpm"
+            echo ""
+            echo "Please review the test output above for specific violations."
+            exit 1
+          fi
+
+          echo "✅ All round-trip tests passed with acceptable tolerances"
+
+      - name: Upload round-trip test results
+        if: steps.should-test-package.outputs.should-test == 'true' && always()
+        uses: actions/upload-artifact@v3
+        with:
+          name: round-trip-results-${{ matrix.package }}
+          path: round-trip-output.txt
+          retention-days: 30
