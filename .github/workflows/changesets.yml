@@ -1,0 +1,149 @@
+name: Changesets
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency: ${{ github.workflow }}-${{ github.ref }}
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  version:
+    name: Version Packages
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.15.0
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Create Release Pull Request or Publish
+        id: changesets
+        # Changesets action handles version bumping and changelog generation
+        # Creates/updates "Version Packages" PR when changesets are present
+        uses: changesets/action@v1
+        with:
+          version: pnpm exec changeset version
+          commit: "chore: version packages"
+          title: "chore: version packages"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub Release
+        # Automatically create GitHub release when Version Packages PR is merged
+        # Extracts version info and changelog content from package files
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const path = require('path');
+
+            // Read package.json files to get versions and changelogs
+            const packages = [];
+
+            // Check @kaiord/core
+            if (fs.existsSync('packages/core/package.json')) {
+              const corePackage = JSON.parse(fs.readFileSync('packages/core/package.json', 'utf8'));
+              let coreChangelog = '';
+              if (fs.existsSync('packages/core/CHANGELOG.md')) {
+                coreChangelog = fs.readFileSync('packages/core/CHANGELOG.md', 'utf8');
+              }
+              packages.push({
+                name: corePackage.name,
+                version: corePackage.version,
+                changelog: coreChangelog
+              });
+            }
+
+            // Check @kaiord/cli
+            if (fs.existsSync('packages/cli/package.json')) {
+              const cliPackage = JSON.parse(fs.readFileSync('packages/cli/package.json', 'utf8'));
+              let cliChangelog = '';
+              if (fs.existsSync('packages/cli/CHANGELOG.md')) {
+                cliChangelog = fs.readFileSync('packages/cli/CHANGELOG.md', 'utf8');
+              }
+              packages.push({
+                name: cliPackage.name,
+                version: cliPackage.version,
+                changelog: cliChangelog
+              });
+            }
+
+            if (packages.length === 0) {
+              console.log('No packages found to release');
+              return;
+            }
+
+            // Use the first package version as the release tag
+            const releaseVersion = packages[0].version;
+            const tagName = `v${releaseVersion}`;
+
+            // Build release notes
+            let releaseNotes = '## 📦 Published Packages\n\n';
+            packages.forEach(pkg => {
+              releaseNotes += `- ${pkg.name}@${pkg.version}\n`;
+            });
+            releaseNotes += '\n';
+
+            // Add changelogs
+            packages.forEach(pkg => {
+              if (pkg.changelog) {
+                releaseNotes += `## ${pkg.name}\n\n`;
+                // Extract the latest version section from changelog
+                const versionSection = pkg.changelog.split(/^## /m)[1];
+                if (versionSection) {
+                  releaseNotes += versionSection + '\n';
+                }
+              }
+            });
+
+            // Create the release
+            try {
+              const release = await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tagName,
+                name: `Release ${releaseVersion}`,
+                body: releaseNotes,
+                draft: false,
+                prerelease: false
+              });
+              
+              console.log(`✅ Created release: ${release.data.html_url}`);
+            } catch (error) {
+              console.error('Failed to create release:', error);
+              throw error;
+            }

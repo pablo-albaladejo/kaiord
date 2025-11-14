@@ -51,7 +51,6 @@ Each task follows Test-Driven Development:
 ## Tasks
 
 - [x] 1. Set up project structure and test infrastructure
-
   - Create directory structure (domain, application, ports, adapters)
   - Install dependencies (zod, zod-to-json-schema, @garmin/fitsdk, faker, rosie, vitest)
   - Configure vitest with co-located tests (file.ts → file.test.ts)
@@ -61,7 +60,6 @@ Each task follows Test-Driven Development:
   - _Commit: "chore: set up project structure and test infrastructure"_
 
 - [x] 2. Migrate to Zod schemas (Schema-First Approach)
-
   - [x] 2.1 Create domain/schemas directory structure
     - Create domain/schemas/ directory
     - Move existing fixtures to use schema imports (will be updated in subsequent tasks)
@@ -110,7 +108,6 @@ Each task follows Test-Driven Development:
     - _Commit: "refactor: migrate KRD to Zod schema"_
 
 - [x] 3. Create error types
-
   - [x] 3.1 Implement error types and factories
     - Define FitParsingError, KrdValidationError, ToleranceExceededError types in domain/types/errors.ts
     - Create factory functions: createFitParsingError, createKrdValidationError, createToleranceExceededError
@@ -118,7 +115,6 @@ Each task follows Test-Driven Development:
     - _Commit: "feat: add error types and factories"_
 
 - [x] 4. Implement logger port and adapter
-
   - [x] 4.1 Write tests for logger interface
     - Test logger contract (debug, info, warn, error)
     - _Requirements: 9.2_
@@ -128,7 +124,6 @@ Each task follows Test-Driven Development:
     - _Commit: "feat: add logger port"_
 
 - [x] 5. Implement schema validation and JSON generation
-
   - [x] 5.1 Implement schema validator
     - Create domain/validation/schema-validator.ts
     - Import krdSchema from domain/schemas/krd.ts
@@ -148,7 +143,6 @@ Each task follows Test-Driven Development:
     - _Commit: "feat: add JSON Schema generation from Zod"_
 
 - [x] 6. Implement tolerance checker
-
   - [x] 6.1 Implement tolerance checker
     - Create domain/validation/tolerance-checker.ts
     - Define ToleranceConfig, ToleranceViolation, ToleranceChecker types
@@ -159,7 +153,6 @@ Each task follows Test-Driven Development:
     - _Commit: "feat: add tolerance checker"_
 
 - [x] 7. Add test fixtures to repository
-
   - Copy WorkoutCustomTargetValues.fit to src/**fixtures**/fit-files/
   - Copy WorkoutIndividualSteps.fit to src/**fixtures**/fit-files/
   - Copy WorkoutRepeatGreaterThanStep.fit to src/**fixtures**/fit-files/
@@ -168,7 +161,6 @@ Each task follows Test-Driven Development:
   - _Commit: "test: add FIT test fixtures"_
 
 - [x] 8. Implement FIT reader adapter (FIT → KRD)
-
   - [x] 8.1 Create FIT reader port
     - Create ports/fit-reader.ts with FitReader type
     - Define readToKRD contract
@@ -217,7 +209,6 @@ Each task follows Test-Driven Development:
     - _Commit: "feat: preserve FIT extensions in KRD"_
 
 - [x] 9. Implement FIT writer adapter (KRD → FIT)
-
   - [x] 9.1 Create FIT writer port
     - Create ports/fit-writer.ts with FitWriter type
     - Define writeFromKRD contract
@@ -273,7 +264,6 @@ Each task follows Test-Driven Development:
   All 318 tests are passing, validating FIT ↔ KRD conversions with proper tolerance checking.
 
 - [ ] 10. Implement use cases and dependency injection
-
   - [x] 10.1 Implement ConvertFitToKrd use case
     - Create application/use-cases/convert-fit-to-krd.ts
     - Define ConvertFitToKrd type and createConvertFitToKrd factory

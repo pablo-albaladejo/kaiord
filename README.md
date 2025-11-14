@@ -1,11 +1,16 @@
-# 🧬 Kaiord Monorepo
+# ⏱️ Kaiord — Structured Workout Data Toolkit
 
 [![Kiroween Hackathon](https://img.shields.io/badge/Kiroween-Hackathon-orange?style=flat&logo=devpost)](https://kiroween.devpost.com/)
 [![Built with Kiro](https://img.shields.io/badge/Built%20with-Kiro-blueviolet?style=flat)](https://kiro.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 
-> 🎃 **Built for [Kiroween Hackathon](https://kiroween.devpost.com/)** - Showcasing AI-assisted development with [Kiro](https://kiro.dev)
+[![CI](https://github.com/pablo-albaladejo/kaiord/actions/workflows/ci.yml/badge.svg)](https://github.com/pablo-albaladejo/kaiord/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/pablo-albaladejo/kaiord/branch/main/graph/badge.svg)](https://codecov.io/gh/pablo-albaladejo/kaiord)
+[![npm version](https://badge.fury.io/js/@kaiord%2Fcore.svg)](https://www.npmjs.com/package/@kaiord/core)
+[![npm version](https://badge.fury.io/js/@kaiord%2Fcli.svg)](https://www.npmjs.com/package/@kaiord/cli)
+
+> 👻 **Built for [Kiroween Hackathon](https://kiroween.devpost.com/)** - Showcasing AI-assisted development with [Kiro](https://kiro.dev)
 
 **Kaiord** is an open-source toolkit for structured workout data.
 
@@ -90,11 +95,55 @@ pnpm kaiord --help
 
 ---
 
+## 🚀 CI/CD Pipeline
+
+Kaiord uses GitHub Actions for continuous integration and deployment. The pipeline includes:
+
+### Automated Testing
+
+- **Multi-version testing**: Tests run on Node.js 20.x and 22.x
+- **Intelligent change detection**: Only affected packages are tested
+- **Coverage reporting**: Automatic coverage reports with Codecov
+- **Round-trip validation**: Ensures lossless format conversions
+
+### Code Quality
+
+- **Linting**: ESLint and Prettier checks on every PR
+- **Type checking**: TypeScript strict mode validation
+- **Security scanning**: Weekly dependency vulnerability audits
+
+### Release Automation
+
+- **Changesets**: Automated version management and changelog generation
+- **npm Publishing**: Automatic package publishing on release
+- **GitHub Releases**: Automated release notes from changesets
+
+### Contributing
+
+To contribute to Kaiord:
+
+1. **Fork and clone** the repository
+2. **Create a feature branch**: `git checkout -b feature/my-feature`
+3. **Make your changes** following the code style guidelines
+4. **Add a changeset**: `pnpm exec changeset` (for version-worthy changes)
+5. **Test locally**: `pnpm -r test` and `pnpm -r build`
+6. **Test workflows**: Use `act` to test GitHub Actions locally (see [TESTING_WORKFLOWS.md](./.github/TESTING_WORKFLOWS.md))
+7. **Submit a PR**: All checks must pass before merging
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
+
+---
+
 ## 📚 Documentation
 
 - [NEW_FIELDS.md](./docs/NEW_FIELDS.md) - Detailed guide to new field support with examples
 - [CHANGELOG.md](./CHANGELOG.md) - Version history and release notes
 - [KRD Format Specification](./.kiro/steering/krd-format.md) - Complete KRD format documentation
+- [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guidelines and workflow
+- [CI/CD Workflows](./.github/workflows/README.md) - Complete CI/CD documentation
+- [Testing Workflows Locally](./.github/TESTING_WORKFLOWS.md) - Guide to testing GitHub Actions with `act`
+
+---
 
 ## 📚 References & Resources
 

@@ -286,18 +286,15 @@ export const createDefaultProviders = (logger?: Logger) => {
 ## Pattern Benefits
 
 1. **Dependency Inversion:**
-
    - Application doesn't depend on Infrastructure
    - Infrastructure implements Application contracts
 
 2. **Testability:**
-
    - Use-cases tested with simple mocks
    - Services tested with real implementations
    - Independent and fast tests
 
 3. **Flexibility:**
-
    - Change implementation without touching use-cases
    - Multiple implementations of same PORT (fake, real, mock)
 
