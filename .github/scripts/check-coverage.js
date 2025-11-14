@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
-const fs = require("fs");
+import fs from "fs";
+
 const path = process.argv[2];
 const threshold = 80;
 
