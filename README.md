@@ -132,6 +132,17 @@ To contribute to Kaiord:
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 
+### Publishing to npm
+
+For maintainers publishing packages to npm:
+
+1. **Configure npm token** (one-time setup) - See [Setup Checklist](./.github/SETUP_CHECKLIST.md)
+2. **Create changeset**: `pnpm exec changeset`
+3. **Merge "Version Packages" PR** when ready
+4. **Automatic publishing** to npm via GitHub Actions
+
+See [npm Publishing Guide](./.github/NPM_PUBLISHING.md) for complete documentation.
+
 ---
 
 ## 📚 Documentation
