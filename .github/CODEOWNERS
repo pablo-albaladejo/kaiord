@@ -1,0 +1,21 @@
+# CODEOWNERS file for Kaiord repository
+# This file defines code ownership rules for automatic review requests
+
+# Global owner - all files
+* @pablo-albaladejo
+
+# Core package
+/packages/core/ @pablo-albaladejo
+
+# CLI package
+/packages/cli/ @pablo-albaladejo
+
+# Documentation
+/docs/ @pablo-albaladejo
+*.md @pablo-albaladejo
+
+# CI/CD workflows
+/.github/ @pablo-albaladejo
+
+# Kiro specs
+/.kiro/specs/ @pablo-albaladejo
