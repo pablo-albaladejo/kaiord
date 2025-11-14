@@ -31,7 +31,9 @@ export const durationSchema = z.discriminatedUnion("type", [
     bpm: z.number().int().positive(),
   }),
   z.object({
-    type: z.literal(durationTypeSchema.enum.repeat_until_heart_rate_greater_than),
+    type: z.literal(
+      durationTypeSchema.enum.repeat_until_heart_rate_greater_than
+    ),
     bpm: z.number().int().positive(),
     repeatFrom: z.number().int().nonnegative(),
   }),
