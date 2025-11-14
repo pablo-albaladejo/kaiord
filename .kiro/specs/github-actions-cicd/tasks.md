@@ -29,15 +29,15 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 
 ## Phase 2: Basic CI Workflow
 
-- [ ] 3. Create CI workflow foundation
+- [x] 3. Create CI workflow foundation
 
-  - [ ] 3.1 Create `.github/workflows/ci.yml` file with workflow name and triggers
+  - [x] 3.1 Create `.github/workflows/ci.yml` file with workflow name and triggers
 
     - Configure triggers: `pull_request` (opened, synchronize, reopened) and `push` to main
     - Set workflow permissions (contents: read, pull-requests: write, checks: write)
     - _Requirements: 1.1, 1.2, 1.3, 9.1, 9.2, 9.3_
 
-  - [ ] 3.2 Implement detect-changes job
+  - [x] 3.2 Implement detect-changes job
 
     - Add job to analyze git diff using `tj-actions/changed-files@v40`
     - Detect changes in `packages/core/**`, `packages/cli/**`, root dependencies
@@ -45,7 +45,7 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
     - Handle docs-only changes by setting `should-test=false`
     - _Requirements: 10.1, 10.2, 10.3, 10.4, 10.5_
 
-  - [ ] 3.3 Add pnpm caching setup
+  - [x] 3.3 Add pnpm caching setup
     - Create reusable setup steps for Node.js and pnpm
     - Configure pnpm store cache with key based on `pnpm-lock.yaml` hash
     - Configure node_modules cache for faster installs

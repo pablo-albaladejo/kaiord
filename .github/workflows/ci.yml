@@ -1,0 +1,132 @@
+name: CI
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+  pull-requests: write
+  checks: write
+
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    outputs:
+      core-changed: ${{ steps.changes.outputs.core-changed }}
+      cli-changed: ${{ steps.changes.outputs.cli-changed }}
+      should-test: ${{ steps.changes.outputs.should-test }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v40
+        with:
+          files_yaml: |
+            core:
+              - 'packages/core/**'
+            cli:
+              - 'packages/cli/**'
+            root_deps:
+              - 'package.json'
+              - 'pnpm-lock.yaml'
+            docs:
+              - '**.md'
+              - 'docs/**'
+              - '.github/**/*.md'
+
+      - name: Analyze changes
+        id: changes
+        run: |
+          # Check if core package changed
+          if [[ "${{ steps.changed-files.outputs.core_any_changed }}" == "true" ]] || \
+             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
+            echo "core-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "core-changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Check if cli package changed
+          if [[ "${{ steps.changed-files.outputs.cli_any_changed }}" == "true" ]] || \
+             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
+            echo "cli-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "cli-changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          # Determine if we should run tests
+          # Skip tests only if ONLY docs changed
+          if [[ "${{ steps.changed-files.outputs.docs_any_changed }}" == "true" ]] && \
+             [[ "${{ steps.changed-files.outputs.core_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.cli_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "false" ]]; then
+            echo "should-test=false" >> $GITHUB_OUTPUT
+          else
+            echo "should-test=true" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Display change detection results
+        run: |
+          echo "Core changed: ${{ steps.changes.outputs.core-changed }}"
+          echo "CLI changed: ${{ steps.changes.outputs.cli-changed }}"
+          echo "Should test: ${{ steps.changes.outputs.should-test }}"
+
+  # Example job demonstrating pnpm caching setup
+  # This pattern will be reused in lint, typecheck, test, and build jobs
+  setup-example:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.should-test == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.15.0
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm store cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Setup node_modules cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            node_modules
+            packages/*/node_modules
+          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-node-modules-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify setup
+        run: |
+          echo "Node version: $(node --version)"
+          echo "pnpm version: $(pnpm --version)"
+          echo "Setup complete with caching enabled"
