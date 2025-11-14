@@ -51,7 +51,7 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
     - Configure node_modules cache for faster installs
     - _Requirements: 8.1, 8.5_
 
-- [ ] 4. Implement lint job
+- [x] 4. Implement lint job
 
   - Add lint job that depends on `detect-changes`
   - Add condition to skip if `should-test == false`
