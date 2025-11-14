@@ -33,7 +33,7 @@ export type SubSport = z.infer<typeof subSportSchema>;
 export type KRDMetadata = { ... };  // Don't define types manually
 const KRDMetadata = z.object({ ... }); // PascalCase
 const krd_metadata = z.object({ ... }); // snake_case
-export const sportEnum = z.enum([...]); // Don't use "Enum" suffix, use "Schema"
+export const sportEnum = z.enum([...]); // Wrong suffix - use "Schema" not "Enum"
 ```
 
 ## File Structure

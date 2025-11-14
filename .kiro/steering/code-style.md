@@ -30,13 +30,15 @@ All enumeration types MUST be defined as Zod schemas, not constant objects. This
 
 ### Naming Pattern
 
-| Element                      | Pattern                  | Example                                           |
-| ---------------------------- | ------------------------ | ------------------------------------------------- |
-| Enum schema variable         | `{concept}Enum`          | `sportEnum`, `subSportEnum`, `intensityEnum`      |
-| Object/Union schema variable | `{concept}Schema`        | `durationSchema`, `targetSchema`, `workoutSchema` |
-| Inferred type                | `{Concept}` (PascalCase) | `Sport`, `SubSport`, `Duration`                   |
-| FIT adapter enum             | `fit{Concept}Enum`       | `fitSportEnum`, `fitSubSportEnum`                 |
-| FIT adapter type             | `Fit{Concept}`           | `FitSport`, `FitSubSport`                         |
+| Element                      | Pattern                  | Example                                            |
+| ---------------------------- | ------------------------ | -------------------------------------------------- |
+| Enum schema variable         | `{concept}Schema`        | `sportSchema`, `subSportSchema`, `intensitySchema` |
+| Object/Union schema variable | `{concept}Schema`        | `durationSchema`, `targetSchema`, `workoutSchema`  |
+| Inferred type                | `{Concept}` (PascalCase) | `Sport`, `SubSport`, `Duration`                    |
+| FIT adapter enum             | `fit{Concept}Schema`     | `fitSportSchema`, `fitSubSportSchema`              |
+| FIT adapter type             | `Fit{Concept}`           | `FitSport`, `FitSubSport`                          |
+
+**Note**: All Zod schemas use the `Schema` suffix, regardless of whether they are enums, objects, or unions. This provides consistency and clarity.
 
 ### Domain vs Adapter Schemas
 
@@ -46,27 +48,27 @@ All enumeration types MUST be defined as Zod schemas, not constant objects. This
 ```typescript
 // ✅ Preferred - Zod enum schemas
 // domain/schemas/sub-sport.ts
-export const subSportEnum = z.enum([
+export const subSportSchema = z.enum([
   "generic",
   "indoor_cycling", // snake_case for KRD
   "lap_swimming",
 ]);
-export type SubSport = z.infer<typeof subSportEnum>;
+export type SubSport = z.infer<typeof subSportSchema>;
 
 // adapters/fit/schemas/fit-sub-sport.ts
-export const fitSubSportEnum = z.enum([
+export const fitSubSportSchema = z.enum([
   "generic",
   "indoorCycling", // camelCase for FIT SDK
   "lapSwimming",
 ]);
-export type FitSubSport = z.infer<typeof fitSubSportEnum>;
+export type FitSubSport = z.infer<typeof fitSubSportSchema>;
 
 // mapper.ts - Access enum values via .enum property
-import { subSportEnum } from "../../domain/schemas/sub-sport";
-import { fitSubSportEnum } from "./schemas/fit-sub-sport";
+import { subSportSchema } from "../../domain/schemas/sub-sport";
+import { fitSubSportSchema } from "./schemas/fit-sub-sport";
 
-if (fitSubSport === fitSubSportEnum.enum.indoorCycling) {
-  return subSportEnum.enum.indoor_cycling;
+if (fitSubSport === fitSubSportSchema.enum.indoorCycling) {
+  return subSportSchema.enum.indoor_cycling;
 }
 
 // ❌ Avoid - Constant objects (deprecated pattern)
