@@ -78,59 +78,6 @@ jobs:
           echo "CLI changed: ${{ steps.changes.outputs.cli-changed }}"
           echo "Should test: ${{ steps.changes.outputs.should-test }}"
 
-  # Example job demonstrating pnpm caching setup
-  # This pattern will be reused in lint, typecheck, test, and build jobs
-  setup-example:
-    runs-on: ubuntu-latest
-    needs: detect-changes
-    if: needs.detect-changes.outputs.should-test == 'true'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.x"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8.15.0
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm store cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Setup node_modules cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
-
-      - name: Verify setup
-        run: |
-          echo "Node version: $(node --version)"
-          echo "pnpm version: $(pnpm --version)"
-          echo "Setup complete with caching enabled"
-
   lint:
     runs-on: ubuntu-latest
     needs: detect-changes
@@ -142,42 +89,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
-        uses: actions/setup-node@v4
+      - name: Setup pnpm with caching
+        uses: ./.github/actions/setup-pnpm
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8.15.0
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm store cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Setup node_modules cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
 
       - name: Run ESLint
         run: pnpm lint
@@ -193,42 +108,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.x"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8.15.0
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm store cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Setup node_modules cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Setup pnpm with caching
+        uses: ./.github/actions/setup-pnpm
 
       - name: Run TypeScript type checking
         run: pnpm exec tsc --noEmit
@@ -269,48 +150,11 @@ jobs:
         if: steps.should-test-package.outputs.should-test == 'true'
         uses: actions/checkout@v4
 
-      - name: Setup Node.js ${{ matrix.node-version }}
+      - name: Setup pnpm with caching
         if: steps.should-test-package.outputs.should-test == 'true'
-        uses: actions/setup-node@v4
+        uses: ./.github/actions/setup-pnpm
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Setup pnpm
-        if: steps.should-test-package.outputs.should-test == 'true'
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8.15.0
-
-      - name: Get pnpm store directory
-        if: steps.should-test-package.outputs.should-test == 'true'
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm store cache
-        if: steps.should-test-package.outputs.should-test == 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Setup node_modules cache
-        if: steps.should-test-package.outputs.should-test == 'true'
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - name: Install dependencies
-        if: steps.should-test-package.outputs.should-test == 'true'
-        run: pnpm install --frozen-lockfile
 
       - name: Build dependencies
         if: steps.should-test-package.outputs.should-test == 'true' && matrix.package == 'cli' && needs.detect-changes.outputs.core-changed == 'true'
@@ -331,67 +175,7 @@ jobs:
 
       - name: Check coverage threshold
         if: steps.should-test-package.outputs.should-test == 'true'
-        run: |
-          COVERAGE_FILE="./packages/${{ matrix.package }}/coverage/coverage-final.json"
-
-          if [ ! -f "$COVERAGE_FILE" ]; then
-            echo "Error: Coverage file not found at $COVERAGE_FILE"
-            exit 1
-          fi
-
-          # Extract coverage percentages using node
-          node -e "
-            const fs = require('fs');
-            const coverage = JSON.parse(fs.readFileSync('$COVERAGE_FILE', 'utf8'));
-            
-            let totalStatements = 0;
-            let coveredStatements = 0;
-            let totalBranches = 0;
-            let coveredBranches = 0;
-            let totalFunctions = 0;
-            let coveredFunctions = 0;
-            let totalLines = 0;
-            let coveredLines = 0;
-            
-            for (const file in coverage) {
-              const fileCov = coverage[file];
-              totalStatements += fileCov.s ? Object.keys(fileCov.s).length : 0;
-              coveredStatements += fileCov.s ? Object.values(fileCov.s).filter(v => v > 0).length : 0;
-              totalBranches += fileCov.b ? Object.keys(fileCov.b).length : 0;
-              coveredBranches += fileCov.b ? Object.values(fileCov.b).flat().filter(v => v > 0).length : 0;
-              totalFunctions += fileCov.f ? Object.keys(fileCov.f).length : 0;
-              coveredFunctions += fileCov.f ? Object.values(fileCov.f).filter(v => v > 0).length : 0;
-              totalLines += fileCov.l ? Object.keys(fileCov.l).length : 0;
-              coveredLines += fileCov.l ? Object.values(fileCov.l).filter(v => v > 0).length : 0;
-            }
-            
-            const stmtPct = totalStatements > 0 ? (coveredStatements / totalStatements * 100).toFixed(2) : 100;
-            const branchPct = totalBranches > 0 ? (coveredBranches / totalBranches * 100).toFixed(2) : 100;
-            const funcPct = totalFunctions > 0 ? (coveredFunctions / totalFunctions * 100).toFixed(2) : 100;
-            const linePct = totalLines > 0 ? (coveredLines / totalLines * 100).toFixed(2) : 100;
-            
-            console.log('Coverage Summary for ${{ matrix.package }}:');
-            console.log('  Statements: ' + stmtPct + '%');
-            console.log('  Branches: ' + branchPct + '%');
-            console.log('  Functions: ' + funcPct + '%');
-            console.log('  Lines: ' + linePct + '%');
-            
-            const threshold = 80;
-            const failed = [];
-            
-            if (parseFloat(stmtPct) < threshold) failed.push('Statements: ' + stmtPct + '%');
-            if (parseFloat(branchPct) < threshold) failed.push('Branches: ' + branchPct + '%');
-            if (parseFloat(funcPct) < threshold) failed.push('Functions: ' + funcPct + '%');
-            if (parseFloat(linePct) < threshold) failed.push('Lines: ' + linePct + '%');
-            
-            if (failed.length > 0) {
-              console.error('\\nCoverage threshold of ' + threshold + '% not met:');
-              failed.forEach(f => console.error('  ❌ ' + f));
-              process.exit(1);
-            } else {
-              console.log('\\n✅ All coverage thresholds met (>= ' + threshold + '%)');
-            }
-          "
+        run: node .github/scripts/check-coverage.js ./packages/${{ matrix.package }}/coverage/coverage-final.json
 
       - name: Upload coverage artifact
         if: steps.should-test-package.outputs.should-test == 'true' && always()
@@ -409,89 +193,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.x"
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8.15.0
-
-      - name: Get pnpm store directory
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm store cache
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Setup node_modules cache
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+      - name: Setup pnpm with caching
+        uses: ./.github/actions/setup-pnpm
 
       - name: Build affected packages
-        run: |
-          echo "Building affected packages based on changes..."
-
-          CORE_CHANGED="${{ needs.detect-changes.outputs.core-changed }}"
-          CLI_CHANGED="${{ needs.detect-changes.outputs.cli-changed }}"
-
-          if [ "$CORE_CHANGED" == "true" ]; then
-            echo "Building @kaiord/core..."
-            pnpm --filter @kaiord/core build
-          fi
-
-          if [ "$CLI_CHANGED" == "true" ]; then
-            echo "Building @kaiord/cli..."
-            # CLI depends on core, so build core first if not already built
-            if [ "$CORE_CHANGED" != "true" ]; then
-              echo "Building @kaiord/core (dependency of cli)..."
-              pnpm --filter @kaiord/core build
-            fi
-            pnpm --filter @kaiord/cli build
-          fi
-
-          echo "Build completed successfully"
+        run: bash .github/scripts/build-affected.sh "${{ needs.detect-changes.outputs.core-changed }}" "${{ needs.detect-changes.outputs.cli-changed }}"
 
       - name: Verify build outputs
-        run: |
-          echo "Verifying build artifacts..."
-
-          CORE_CHANGED="${{ needs.detect-changes.outputs.core-changed }}"
-          CLI_CHANGED="${{ needs.detect-changes.outputs.cli-changed }}"
-
-          if [ "$CORE_CHANGED" == "true" ]; then
-            if [ ! -d "packages/core/dist" ]; then
-              echo "Error: @kaiord/core build output not found"
-              exit 1
-            fi
-            echo "✓ @kaiord/core build output verified"
-          fi
-
-          if [ "$CLI_CHANGED" == "true" ]; then
-            if [ ! -d "packages/cli/dist" ]; then
-              echo "Error: @kaiord/cli build output not found"
-              exit 1
-            fi
-            echo "✓ @kaiord/cli build output verified"
-          fi
+        run: bash .github/scripts/verify-build.sh "${{ needs.detect-changes.outputs.core-changed }}" "${{ needs.detect-changes.outputs.cli-changed }}"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v3
@@ -537,48 +246,9 @@ jobs:
         if: steps.should-test-package.outputs.should-test == 'true'
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup pnpm with caching
         if: steps.should-test-package.outputs.should-test == 'true'
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.x"
-
-      - name: Setup pnpm
-        if: steps.should-test-package.outputs.should-test == 'true'
-        uses: pnpm/action-setup@v2
-        with:
-          version: 8.15.0
-
-      - name: Get pnpm store directory
-        if: steps.should-test-package.outputs.should-test == 'true'
-        id: pnpm-cache
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
-
-      - name: Setup pnpm store cache
-        if: steps.should-test-package.outputs.should-test == 'true'
-        uses: actions/cache@v3
-        with:
-          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Setup node_modules cache
-        if: steps.should-test-package.outputs.should-test == 'true'
-        uses: actions/cache@v3
-        with:
-          path: |
-            node_modules
-            packages/*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-node-modules-
-
-      - name: Install dependencies
-        if: steps.should-test-package.outputs.should-test == 'true'
-        run: pnpm install --frozen-lockfile
+        uses: ./.github/actions/setup-pnpm
 
       - name: Run round-trip tests
         if: steps.should-test-package.outputs.should-test == 'true'
