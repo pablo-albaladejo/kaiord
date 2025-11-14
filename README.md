@@ -1,4 +1,4 @@
-# 🧬 Kaiord Monorepo
+# ⏱️ Kaiord — Structured Workout Data Toolkit
 
 [![Kiroween Hackathon](https://img.shields.io/badge/Kiroween-Hackathon-orange?style=flat&logo=devpost)](https://kiroween.devpost.com/)
 [![Built with Kiro](https://img.shields.io/badge/Built%20with-Kiro-blueviolet?style=flat)](https://kiro.dev)
