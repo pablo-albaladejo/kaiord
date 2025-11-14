@@ -63,10 +63,11 @@ cat > "$TEMP_JSON" <<EOF
     "contexts": ${REQUIRED_CHECKS}
   },
   "required_pull_request_reviews": {
-    "required_approving_review_count": 1,
-    "dismiss_stale_reviews": true
+    "dismiss_stale_reviews": true,
+    "require_code_owner_reviews": true,
+    "required_approving_review_count": 0
   },
-  "enforce_admins": false,
+  "enforce_admins": true,
   "required_linear_history": false,
   "allow_force_pushes": false,
   "allow_deletions": false,
