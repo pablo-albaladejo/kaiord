@@ -1,0 +1,13 @@
+{
+  "enabled": true,
+  "name": "Create GitHub PR to main",
+  "description": "Manual action that creates a pull request automatically on GitHub targeting the main branch",
+  "version": "1",
+  "when": {
+    "type": "userTriggered"
+  },
+  "then": {
+    "type": "askAgent",
+    "prompt": "Create a pull request on GitHub from the current branch to main. Include:\n1. Use the GitHub CLI (gh) to create the PR\n2. Set the title based on the most recent commit message\n3. Set the body with a summary of changes from recent commits\n4. Target the main branch\n5. Auto-assign to the current user\n6. Add appropriate labels if the branch name contains keywords (feat, fix, docs, etc.)\n7. Output the PR URL when successful\n\nCommand structure:\n- Get current branch: git branch --show-current\n- Get commit messages: git log main..HEAD --pretty=format:\"%s\"\n- Create PR: gh pr create --base main --head [branch] --title \"[title]\" --body \"[body]\"\n\nHandle errors gracefully and provide clear feedback."
+  }
+}
