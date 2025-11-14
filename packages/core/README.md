@@ -9,6 +9,7 @@ Core library for Kaiord workout data conversion.
 - **Schema validation**: Zod schemas with TypeScript type inference
 - **Round-trip safety**: Lossless conversions with defined tolerances
 - **Hexagonal architecture**: Clean separation of concerns
+- **Tree-shakeable**: Import only what you need for minimal bundle size
 
 ### Supported FIT Fields
 
@@ -80,6 +81,27 @@ This package follows **hexagonal architecture** with clear separation of concern
 - `rosie` - Test fixture factories
 - `tsup` - TypeScript bundler
 - `@vitest/coverage-v8` - Code coverage
+
+## Tree-Shaking
+
+`@kaiord/core` is fully optimized for tree-shaking. Import only what you need:
+
+```typescript
+// ✅ Good: Import specific items (smaller bundle)
+import { krdSchema, sportSchema } from "@kaiord/core";
+import type { KRD, Sport } from "@kaiord/core";
+
+// ❌ Avoid: Import everything (larger bundle)
+import * as Kaiord from "@kaiord/core";
+```
+
+**Bundle sizes** (minified + gzipped):
+
+- Types only: 0 KB (compile-time)
+- Schema validation: ~15 KB
+- Full conversion: ~80 KB
+
+See [TREE_SHAKING.md](./TREE_SHAKING.md) for detailed guide and best practices.
 
 ## Scripts
 

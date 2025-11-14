@@ -17,6 +17,8 @@ The project uses ESLint with the following key rules:
 
 - **max-lines**: Maximum 100 lines per file (excluding blank lines and comments)
   - Automatically disabled for test files (`*.test.ts`, `*.spec.ts`, `tests/**/*.ts`)
+  - Automatically disabled for public API entry points (`**/src/index.ts`, `**/index.ts`)
+    - Reason: These files only contain exports with no logic
 - **max-lines-per-function**: Maximum 40 lines per function (warning level)
 - **@typescript-eslint/no-explicit-any**: Error on explicit `any` types
 - **@typescript-eslint/consistent-type-definitions**: Enforce `type` over `interface`
