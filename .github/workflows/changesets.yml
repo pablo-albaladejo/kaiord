@@ -51,6 +51,8 @@ jobs:
 
       - name: Create Release Pull Request or Publish
         id: changesets
+        # Changesets action handles version bumping and changelog generation
+        # Creates/updates "Version Packages" PR when changesets are present
         uses: changesets/action@v1
         with:
           version: pnpm exec changeset version
@@ -60,6 +62,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Create GitHub Release
+        # Automatically create GitHub release when Version Packages PR is merged
+        # Extracts version info and changelog content from package files
         if: steps.changesets.outputs.hasChangesets == 'false'
         uses: actions/github-script@v7
         with:

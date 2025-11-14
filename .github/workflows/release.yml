@@ -50,10 +50,12 @@ jobs:
       - name: Detect packages with version changes
         id: detect-changes
         run: |
+          # Smart publishing: Only publish packages with version changes
+          # This prevents unnecessary publishes and potential npm registry errors
           echo "Detecting packages with version changes..."
           CHANGED_PACKAGES=""
 
-          # Check @kaiord/core
+          # Check @kaiord/core version against npm registry
           CORE_VERSION=$(node -p "require('./packages/core/package.json').version")
           CORE_NPM_VERSION=$(npm view @kaiord/core version 2>/dev/null || echo "0.0.0")
 
@@ -64,7 +66,7 @@ jobs:
             echo "✗ @kaiord/core version unchanged: $CORE_VERSION"
           fi
 
-          # Check @kaiord/cli (if it exists)
+          # Check @kaiord/cli version against npm registry (if package exists)
           if [ -d "packages/cli" ]; then
             CLI_VERSION=$(node -p "require('./packages/cli/package.json').version")
             CLI_NPM_VERSION=$(npm view @kaiord/cli version 2>/dev/null || echo "0.0.0")
@@ -87,9 +89,11 @@ jobs:
         if: contains(steps.detect-changes.outputs.changed-packages, 'core')
         id: publish-core
         run: |
+          # Publish with retry logic and exponential backoff
+          # Handles transient npm registry failures gracefully
           echo "Publishing @kaiord/core with retry logic..."
 
-          # Retry function with exponential backoff
+          # Retry function with exponential backoff (5s, 10s, 20s)
           retry_publish() {
             local max_attempts=3
             local attempt=1
@@ -106,7 +110,7 @@ jobs:
               if [ $attempt -lt $max_attempts ]; then
                 echo "⚠️  Publish failed, retrying in ${delay}s..."
                 sleep $delay
-                delay=$((delay * 2))  # Exponential backoff: 5s, 10s, 20s
+                delay=$((delay * 2))  # Exponential backoff
               fi
               
               attempt=$((attempt + 1))
@@ -125,9 +129,11 @@ jobs:
         if: contains(steps.detect-changes.outputs.changed-packages, 'cli')
         id: publish-cli
         run: |
+          # Publish with retry logic and exponential backoff
+          # Handles transient npm registry failures gracefully
           echo "Publishing @kaiord/cli with retry logic..."
 
-          # Retry function with exponential backoff
+          # Retry function with exponential backoff (5s, 10s, 20s)
           retry_publish() {
             local max_attempts=3
             local attempt=1
@@ -144,7 +150,7 @@ jobs:
               if [ $attempt -lt $max_attempts ]; then
                 echo "⚠️  Publish failed, retrying in ${delay}s..."
                 sleep $delay
-                delay=$((delay * 2))  # Exponential backoff: 5s, 10s, 20s
+                delay=$((delay * 2))  # Exponential backoff
               fi
               
               attempt=$((attempt + 1))

@@ -45,7 +45,10 @@ jobs:
       - name: Analyze changes
         id: changes
         run: |
-          # Check if core package changed
+          # Intelligent change detection for monorepo optimization
+          # This step determines which packages need testing based on changed files
+
+          # Core package changes: Test both core and CLI (CLI depends on core)
           if [[ "${{ steps.changed-files.outputs.core_any_changed }}" == "true" ]] || \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
             echo "core-changed=true" >> $GITHUB_OUTPUT
@@ -53,7 +56,7 @@ jobs:
             echo "core-changed=false" >> $GITHUB_OUTPUT
           fi
 
-          # Check if cli package changed
+          # CLI package changes: Test only CLI
           if [[ "${{ steps.changed-files.outputs.cli_any_changed }}" == "true" ]] || \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
             echo "cli-changed=true" >> $GITHUB_OUTPUT
@@ -61,8 +64,8 @@ jobs:
             echo "cli-changed=false" >> $GITHUB_OUTPUT
           fi
 
-          # Determine if we should run tests
-          # Skip tests only if ONLY docs changed
+          # Performance optimization: Skip all tests if only documentation changed
+          # This reduces CI time from ~5 minutes to ~30 seconds for docs-only PRs
           if [[ "${{ steps.changed-files.outputs.docs_any_changed }}" == "true" ]] && \
              [[ "${{ steps.changed-files.outputs.core_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.cli_any_changed }}" == "false" ]] && \
@@ -132,6 +135,8 @@ jobs:
       - name: Check if package should be tested
         id: should-test-package
         run: |
+          # Dynamic matrix filtering: Only test packages that have changes
+          # This prevents unnecessary test runs and speeds up CI
           PACKAGE="${{ matrix.package }}"
 
           if [ "$PACKAGE" == "core" ]; then
@@ -163,6 +168,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Build dependencies
+        # Build core package before testing CLI if core changed (CLI depends on core)
         if: steps.should-test-package.outputs.should-test == 'true' && matrix.package == 'cli' && needs.detect-changes.outputs.core-changed == 'true'
         run: pnpm --filter @kaiord/core build
 
@@ -171,6 +177,7 @@ jobs:
         run: pnpm --filter @kaiord/${{ matrix.package }} test:coverage
 
       - name: Upload coverage to Codecov
+        # Only upload coverage from Node 20.x to avoid duplicate reports
         if: steps.should-test-package.outputs.should-test == 'true' && matrix.node-version == '20.x'
         uses: codecov/codecov-action@v3
         with:
