@@ -51,12 +51,35 @@ echo ""
 # contexts: array of required status check names (requirement 9.4)
 echo "Applying branch protection rules..."
 
+# Create a temporary JSON file for the request
+TEMP_JSON=$(mktemp)
+trap "rm -f $TEMP_JSON" EXIT
+
+# Build the JSON payload
+cat > "$TEMP_JSON" <<EOF
+{
+  "required_status_checks": {
+    "strict": true,
+    "contexts": ${REQUIRED_CHECKS}
+  },
+  "required_pull_request_reviews": {
+    "required_approving_review_count": 1,
+    "dismiss_stale_reviews": true
+  },
+  "enforce_admins": false,
+  "required_linear_history": false,
+  "allow_force_pushes": false,
+  "allow_deletions": false,
+  "restrictions": null
+}
+EOF
+
+# Update branch protection
 gh api \
   --method PUT \
   -H "Accept: application/vnd.github+json" \
-  repos/${REPO_OWNER}/${REPO_NAME}/branches/${BRANCH}/protection/required_status_checks \
-  -f strict=true \
-  -f contexts="${REQUIRED_CHECKS}" \
+  repos/${REPO_OWNER}/${REPO_NAME}/branches/${BRANCH}/protection \
+  --input "$TEMP_JSON" \
   > /dev/null
 
 echo "✓ Branch protection configured successfully"
