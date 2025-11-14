@@ -21,7 +21,9 @@
     "lint:packages": "pnpm -r lint",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "clean": "pnpm -r clean"
+    "clean": "pnpm -r clean",
+    "setup:npm": "./scripts/quick-setup-npm.sh",
+    "setup:npm:full": "./scripts/setup-npm-publishing.sh"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.7",
