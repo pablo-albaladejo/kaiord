@@ -69,6 +69,14 @@ export default tseslint.config(
     },
   },
   {
+    // Public API entry points: disable max-lines
+    // These files only contain exports and have no logic
+    files: ["**/src/index.ts", "**/index.ts"],
+    rules: {
+      "max-lines": "off",
+    },
+  },
+  {
     // Ignore patterns
     ignores: [
       "**/dist/**",
