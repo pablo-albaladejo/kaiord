@@ -24,58 +24,17 @@ The following are already set up and working:
 
 **Status:** Workflows are ready, but requires user configuration
 
-**🎉 Option A: Trusted Publishing (Recommended - No Tokens!)**
-
-npm's new secure method - no secrets needed:
-
-1. **Publish manually once:**
-
-   ```bash
-   npm login
-   pnpm -r build
-   pnpm --filter @kaiord/core publish --access public
-   ```
-
-2. **Configure on npm:**
-   - Go to https://www.npmjs.com/package/@kaiord/core/access
-   - Click "Configure trusted publishers"
-   - Provider: GitHub Actions
-   - Repository: `pablo-albaladejo/kaiord`
-   - Workflow: `release.yml`
-   - Click "Add"
-
-3. **Done!** No tokens, no secrets, automatic provenance.
-
-📖 **Detailed guide:** `.github/NPM_TRUSTED_PUBLISHING.md`
-
----
-
-**Option B: Token-Based (Legacy)**
-
-If you prefer using tokens:
-
-**Quick Setup:**
-
-```bash
-pnpm setup:npm
-```
-
-**Manual Setup:**
-
-If you prefer manual configuration:
+**Steps:**
 
 1. **Create npm Account** (if you don't have one)
    - Go to https://www.npmjs.com/signup
    - Verify your email
    - (Optional) Enable 2FA
 
-2. **Generate npm Granular Access Token**
-   - Go to https://www.npmjs.com/settings/[YOUR_USERNAME]/tokens/granular-access-tokens/new
-   - Configure:
-     - Token name: `kaiord-ci-cd`
-     - Expiration: 90 days
-     - Packages: Select `@kaiord/core` with Read and write permissions
-   - Click "Generate Token"
+2. **Generate npm Token**
+   - Go to https://www.npmjs.com/settings/[YOUR_USERNAME]/tokens
+   - Click "Generate New Token"
+   - Select **"Automation"** type
    - Copy the token (shown only once)
 
 3. **Configure GitHub Secret**
@@ -86,35 +45,33 @@ If you prefer manual configuration:
    - Click "Add secret"
 
 4. **Test Publishing**
-
+   
    **Option A: Manual Test (Recommended First Time)**
-
    ```bash
    # Login to npm
    npm login
-
+   
    # Build packages
    pnpm -r build
-
+   
    # Publish manually
    pnpm --filter @kaiord/core publish --access public
-
+   
    # Verify
    npm view @kaiord/core
    ```
-
+   
    **Option B: Automated Test (After Manual Success)**
-
    ```bash
    # Create a changeset
    pnpm exec changeset
    # Select @kaiord/core, choose patch, describe changes
-
+   
    # Commit and push
    git add .changeset/
    git commit -m "chore: test npm publishing workflow"
    git push
-
+   
    # Wait for "Version Packages" PR to be created
    # Review and merge the PR
    # GitHub Release will be created automatically
@@ -132,7 +89,6 @@ If you prefer manual configuration:
 **Status:** Workflow uploads coverage, but account setup is optional
 
 **Benefits:**
-
 - Coverage tracking over time
 - PR comments with coverage diff
 - Coverage trends and insights
@@ -247,42 +203,34 @@ open https://github.com/pablo-albaladejo/kaiord/releases
 ### npm Publishing Fails
 
 **Error:** `401 Unauthorized`
-
 - **Cause:** Invalid or expired npm token
 - **Solution:** Generate new token and update `NPM_TOKEN` secret
 
 **Error:** `403 Forbidden`
-
 - **Cause:** Token lacks permissions or package name taken
 - **Solution:** Verify token type is "Automation" and package name is available
 
 **Error:** `Version already published`
-
 - **Cause:** Trying to publish existing version
 - **Solution:** Bump version with changeset or manually in package.json
 
 ### CI Workflow Fails
 
 **Error:** Tests fail
-
 - **Solution:** Run `pnpm -r test` locally to debug
 
 **Error:** Linting fails
-
 - **Solution:** Run `pnpm lint:fix` to auto-fix issues
 
 **Error:** Build fails
-
 - **Solution:** Run `pnpm -r build` locally to see errors
 
 ### Codecov Issues
 
 **Error:** Coverage not uploading
-
 - **Solution:** Check Codecov token in repository settings
 
 **Error:** Badge not updating
-
 - **Solution:** Clear browser cache or wait a few minutes
 
 ---
