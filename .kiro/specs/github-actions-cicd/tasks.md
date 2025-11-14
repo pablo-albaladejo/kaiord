@@ -61,7 +61,7 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
   - Mark PR check as failed if linting errors detected
   - _Requirements: 2.1, 2.2, 2.4, 2.5, 5.1, 5.2, 5.3_
 
-- [ ] 5. Implement typecheck job
+- [x] 5. Implement typecheck job
   - Add typecheck job that depends on `detect-changes`
   - Add condition to skip if `should-test == false`
   - Run TypeScript compiler: `pnpm exec tsc --noEmit`
