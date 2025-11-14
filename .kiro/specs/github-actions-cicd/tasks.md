@@ -95,7 +95,7 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
     - Display coverage percentage in workflow output
     - _Requirements: 4.2, 4.3, 4.4, 4.5_
 
-- [ ] 7. Implement build job
+- [x] 7. Implement build job
 
   - Add build job that depends on `detect-changes`
   - Add condition to skip if `should-test == false`
