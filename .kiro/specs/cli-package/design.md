@@ -750,7 +750,7 @@ const showKiroEasterEgg = () => {
     chalk.cyan(`
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
-║   🎃 Built with Kiro AI during Kiroween Hackathon 🎃    ║
+║   👻 Built with Kiro AI during Kiroween Hackathon 👻    ║
 ║                                                           ║
 ║   Kiro helped design, architect, and implement this      ║
 ║   entire CLI tool through spec-driven development.       ║
