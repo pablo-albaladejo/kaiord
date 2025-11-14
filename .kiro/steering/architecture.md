@@ -28,14 +28,14 @@ Domain schemas represent the canonical KRD format and use **snake_case** for mul
 
 ```
 domain/schemas/
-├── sport.ts              # sportEnum + Sport type
-├── sub-sport.ts          # subSportEnum + SubSport type (snake_case values)
-├── file-type.ts          # fileTypeEnum + FileType type
-├── swim-stroke.ts        # swimStrokeEnum + SwimStroke type + numeric mappings
+├── sport.ts              # sportSchema + Sport type
+├── sub-sport.ts          # subSportSchema + SubSport type (snake_case values)
+├── file-type.ts          # fileTypeSchema + FileType type
+├── swim-stroke.ts        # swimStrokeSchema + SwimStroke type + numeric mappings
 ├── duration.ts           # durationSchema + Duration type
-├── intensity.ts          # intensityEnum + Intensity type
+├── intensity.ts          # intensitySchema + Intensity type
 ├── target.ts             # targetSchema + Target type
-├── target-values.ts      # targetUnitEnum + TargetUnit type
+├── target-values.ts      # targetUnitSchema + TargetUnit type
 ├── workout.ts            # workoutSchema + Workout type
 └── krd.ts                # krdSchema + KRD type
 ```
@@ -44,7 +44,7 @@ domain/schemas/
 
 ```typescript
 // domain/schemas/sub-sport.ts
-export const subSportEnum = z.enum([
+export const subSportSchema = z.enum([
   "generic",
   "indoor_cycling", // snake_case
   "hand_cycling", // snake_case
@@ -59,18 +59,18 @@ Adapter schemas represent external format-specific concepts and use **camelCase*
 
 ```
 adapters/fit/schemas/
-├── fit-sport.ts          # fitSportEnum + FitSport type
-├── fit-sub-sport.ts      # fitSubSportEnum + FitSubSport type (camelCase values)
-├── fit-duration.ts       # fitDurationTypeEnum + FitDurationType type
-├── fit-target.ts         # fitTargetTypeEnum + FitTargetType type
-└── fit-message-keys.ts   # fitMessageKeyEnum + FitMessageKey type
+├── fit-sport.ts          # fitSportSchema + FitSport type
+├── fit-sub-sport.ts      # fitSubSportSchema + FitSubSport type (camelCase values)
+├── fit-duration.ts       # fitDurationTypeSchema + FitDurationType type
+├── fit-target.ts         # fitTargetTypeSchema + FitTargetType type
+└── fit-message-keys.ts   # fitMessageKeySchema + FitMessageKey type
 ```
 
 **Example:**
 
 ```typescript
 // adapters/fit/schemas/fit-sub-sport.ts
-export const fitSubSportEnum = z.enum([
+export const fitSubSportSchema = z.enum([
   "generic",
   "indoorCycling", // camelCase
   "handCycling", // camelCase
