@@ -1,13 +1,13 @@
 {
   "enabled": true,
   "name": "Create GitHub PR to main",
-  "description": "Manual action that creates a pull request automatically on GitHub targeting the main branch",
-  "version": "1",
+  "description": "Manual action that creates a pull request automatically on GitHub targeting the main branch, using the PR template and spec documentation",
+  "version": "2",
   "when": {
     "type": "userTriggered"
   },
   "then": {
     "type": "askAgent",
-    "prompt": "Create a pull request on GitHub from the current branch to main. Include:\n1. Use the GitHub CLI (gh) to create the PR\n2. Set the title based on the most recent commit message\n3. Set the body with a summary of changes from recent commits\n4. Target the main branch\n5. Auto-assign to the current user\n6. Add appropriate labels if the branch name contains keywords (feat, fix, docs, etc.)\n7. Output the PR URL when successful\n\nCommand structure:\n- Get current branch: git branch --show-current\n- Get commit messages: git log main..HEAD --pretty=format:\"%s\"\n- Create PR: gh pr create --base main --head [branch] --title \"[title]\" --body \"[body]\"\n\nHandle errors gracefully and provide clear feedback."
+    "prompt": "Create a pull request on GitHub from the current branch to main. Follow these steps:\n\n1. Get the current branch name: git branch --show-current\n2. Read the PR template from .github/pull_request_template.md\n3. Look for a spec directory matching the branch name in .kiro/specs/[branch-name]/\n4. If spec exists, read requirements.md, design.md, and tasks.md to understand the feature\n5. Generate PR title based on the spec's main goal (from requirements.md introduction)\n6. Fill the PR template with:\n   - Description: Summary from spec requirements\n   - What does this PR do: Based on spec design overview\n   - Why is this change needed: From spec requirements user stories\n   - Type of Change: Infer from spec content\n   - Checklist: Mark completed items based on tasks.md status\n   - Testing: Reference spec testing strategy\n   - Related Issues: Extract from spec if mentioned\n7. Use GitHub CLI to create PR: gh pr create --base main --head [branch] --title \"[title]\" --body \"[body]\" --assignee @me\n8. Add labels based on branch name keywords (feat, fix, docs, ci, test, refactor, etc.)\n9. Output the PR URL when successful\n\nIf no spec exists for the branch, fall back to using recent commit messages for title and body.\n\nHandle errors gracefully and provide clear feedback."
   }
 }
