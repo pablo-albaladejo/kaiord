@@ -305,25 +305,21 @@ type CacheKey = {
 **Strategy:** Fail fast with clear error messages
 
 1. **Test Failures:**
-
    - Display failed test names in workflow summary
    - Upload test results as artifacts
    - Mark PR check as failed with link to logs
 
 2. **Build Failures:**
-
    - Display TypeScript errors in workflow summary
    - Upload build logs as artifacts
    - Mark PR check as failed
 
 3. **Lint Failures:**
-
    - Display ESLint/Prettier errors inline in PR
    - Provide auto-fix suggestions when possible
    - Mark PR check as failed
 
 4. **Coverage Failures:**
-
    - Display coverage diff in PR comment
    - Highlight files below threshold
    - Mark PR check as failed
@@ -361,25 +357,21 @@ type CacheKey = {
 **Test Cases:**
 
 1. **Core package changes:**
-
    - Verify both core and cli are tested
    - Verify both packages are built
    - Verify coverage for both packages
 
 2. **CLI package changes only:**
-
    - Verify only cli is tested
    - Verify only cli is built
    - Verify coverage for cli only
 
 3. **Documentation changes only:**
-
    - Verify no tests run
    - Verify no builds run
    - Verify workflow completes quickly
 
 4. **Root dependency changes:**
-
    - Verify all packages are tested
    - Verify all packages are built
    - Verify full coverage report
@@ -597,7 +589,6 @@ permissions:
 ### External Services
 
 - **Codecov:** Coverage reporting and tracking
-
   - Free for open-source projects
   - Requires GitHub App installation
   - Provides coverage badges
@@ -730,17 +721,14 @@ permissions:
 **Sections:**
 
 1. **Description:**
-
    - What does this PR do?
    - Why is this change needed?
 
 2. **Related Issues:**
-
    - Closes #XXX
    - Relates to #XXX
 
 3. **Type of Change:**
-
    - [ ] Bug fix (non-breaking change)
    - [ ] New feature (non-breaking change)
    - [ ] Breaking change
@@ -749,7 +737,6 @@ permissions:
    - [ ] Performance improvement
 
 4. **Checklist:**
-
    - [ ] Tests added/updated
    - [ ] Documentation updated
    - [ ] Changelog entry added (if applicable)
@@ -758,7 +745,6 @@ permissions:
    - [ ] Coverage maintained/improved
 
 5. **Testing:**
-
    - How was this tested?
    - Test coverage: X%
 
@@ -858,13 +844,11 @@ updates:
 ### Short-term (Next 3 months)
 
 1. **E2E Testing:**
-
    - Add end-to-end tests for CLI
    - Test round-trip conversions with real files
    - Run in CI on every PR
 
 2. **Performance Benchmarks:**
-
    - Track conversion performance over time
    - Fail if performance regresses > 10%
    - Display benchmark results in PR
@@ -877,13 +861,11 @@ updates:
 ### Long-term (Next 6 months)
 
 1. **Multi-platform Testing:**
-
    - Test on Windows, macOS, Linux
    - Verify cross-platform compatibility
    - Add platform badges
 
 2. **Canary Releases:**
-
    - Publish canary versions on every commit to main
    - Allow users to test latest features
    - Automated rollback on failures

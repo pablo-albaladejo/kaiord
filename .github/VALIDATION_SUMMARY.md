@@ -129,18 +129,15 @@ Outstanding tasks are non-blocking and can be completed post-merge without impac
 ## Next Steps
 
 1. **Review validation reports:**
-
    - Read `.github/FINAL_VALIDATION.md` for detailed findings
    - Review this summary for quick overview
 
 2. **Merge to main:**
-
    - Create PR from `github-actions-cicd` branch
    - All CI checks should pass
    - Merge when approved
 
 3. **Post-merge configuration:**
-
    - Configure branch protection rules
    - Add NPM_TOKEN secret
    - Set up Codecov account

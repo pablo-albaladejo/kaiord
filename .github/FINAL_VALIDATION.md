@@ -78,9 +78,11 @@ All required badges are present and correctly formatted:
   - Updates automatically on workflow completion
 
 - ✅ **Codecov Coverage Badge**
+
   ```markdown
   [![codecov](https://codecov.io/gh/pablo-albaladejo/kaiord/branch/main/graph/badge.svg)](https://codecov.io/gh/pablo-albaladejo/kaiord)
   ```
+
   - Shows current test coverage percentage
   - Links to detailed coverage report
   - Updates on every coverage upload
@@ -98,9 +100,11 @@ All required badges are present and correctly formatted:
   - Updates automatically on publish
 
 - ✅ **@kaiord/cli npm Badge**
+
   ```markdown
   [![npm version](https://badge.fury.io/js/@kaiord%2Fcli.svg)](https://www.npmjs.com/package/@kaiord/cli)
   ```
+
   - Shows published version on npm
   - Links to npm package page
   - Updates automatically on publish
@@ -123,32 +127,27 @@ The CI workflow defines the following jobs that serve as status checks:
 #### Core Jobs
 
 1. ✅ **detect-changes**
-
    - Analyzes changed files
    - Determines which packages need testing
    - Optimizes CI performance
 
 2. ✅ **lint** (Matrix: Node 20.x, 22.x)
-
    - ESLint validation
    - Prettier format checking
    - Runs only when code changes detected
 
 3. ✅ **typecheck**
-
    - TypeScript strict mode validation
    - Ensures type safety across codebase
    - Runs only when code changes detected
 
 4. ✅ **test** (Matrix: Node 20.x, 22.x × packages: core, cli)
-
    - Unit tests with coverage
    - Integration tests
    - Coverage threshold validation (80%)
    - Intelligent package filtering
 
 5. ✅ **build**
-
    - Verifies packages build successfully
    - Generates build artifacts
    - Validates build outputs
@@ -199,7 +198,6 @@ Additional settings:
 The release automation is configured with:
 
 1. ✅ **Changesets Workflow** (`.github/workflows/changesets.yml`)
-
    - Triggers on push to main
    - Creates/updates "Version Packages" PR
    - Generates changelogs automatically
@@ -259,14 +257,12 @@ For release workflow to function:
 ### Current Limitations
 
 1. **Codecov Integration** (Task 19 - Not Started)
-
    - Codecov account not yet created
    - Coverage badge will show "unknown" until configured
    - Coverage uploads work but reports not visible
    - **Action Required:** Create Codecov account and link repository
 
 2. **Performance Validation** (Task 17 - Not Started)
-
    - Performance targets defined but not measured
    - Target: < 5 min full suite, < 30s docs-only
    - **Action Required:** Run workflows with different change patterns and measure
@@ -289,13 +285,11 @@ For release workflow to function:
 ### Future Enhancements
 
 1. **E2E Testing** (Planned)
-
    - Add end-to-end tests for CLI
    - Test round-trip conversions with real files
    - Run in CI on every PR
 
 2. **Performance Benchmarks** (Planned)
-
    - Track conversion performance over time
    - Fail if performance regresses > 10%
    - Display benchmark results in PR
@@ -328,21 +322,18 @@ For release workflow to function:
 ### Post-Merge Actions
 
 1. **Configure Branch Protection**
-
    - Navigate to repository settings
    - Enable required status checks
    - Require branches to be up to date
    - Require conversation resolution
 
 2. **Set Up Codecov**
-
    - Create Codecov account
    - Link GitHub repository
    - Configure coverage thresholds
    - Verify badge displays correctly
 
 3. **Measure Performance**
-
    - Create test PRs with different change patterns
    - Measure workflow execution times
    - Validate against performance targets

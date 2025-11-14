@@ -47,7 +47,6 @@ Before marking any task as complete, verify that:
 ## Tasks
 
 - [x] 1. Add Priority 1 fields to domain schemas
-
   - Update Workout schema with `subSport` field ✓
   - Update WorkoutStep schema with `notes` field ✓
   - Update Zod schemas as source of truth ✓
@@ -56,9 +55,7 @@ Before marking any task as complete, verify that:
   - _Requirements: 1.1, 1.2, 2.1, 2.2, 8.1, 8.5_
 
 - [x] 2. Implement Priority 1 FIT converters
-
   - [x] 2.1 Add FIT constants for sub-sport values
-
     - Define FIT sub-sport enum schema (camelCase) ✓
     - Define KRD sub-sport enum schema (snake_case) ✓
     - Add mapping functions between FIT and KRD formats ✓
@@ -66,7 +63,6 @@ Before marking any task as complete, verify that:
     - _Requirements: 1.1, 1.2, 1.5_
 
   - [x] 2.2 Implement FIT → KRD converters for Priority 1 fields
-
     - Map `subSport` from FIT Workout message to KRD
     - Map `notes` from FIT WorkoutStep message to KRD
     - Handle undefined values (omit rather than null)
@@ -79,9 +75,7 @@ Before marking any task as complete, verify that:
     - _Requirements: 1.2, 2.2, 2.5, 10.1_
 
 - [x] 3. Test Priority 1 fields
-
   - [x] 3.1 Write integration tests for Priority 1 converters
-
     - Test subSport mapping in workout converter (FIT → KRD)
     - Test subSport mapping in workout converter (KRD → FIT)
     - Test notes mapping in step converter (FIT → KRD)
@@ -98,16 +92,13 @@ Before marking any task as complete, verify that:
     - _Requirements: 1.3, 2.3, 9.1, 9.5_
 
 - [x] 4. Add Priority 2 swimming fields to domain schemas
-
   - Update Workout schema with `poolLength` and `poolLengthUnit` fields
   - Update WorkoutStep schema with `equipment` field
   - Update Zod schemas as source of truth
   - _Requirements: 3.1, 3.2, 3.4, 8.1, 8.5_
 
 - [x] 5. Implement Priority 2 swimming FIT converters
-
   - [x] 5.1 Add FIT equipment schemas and mappers
-
     - Create FIT equipment enum schema in `adapters/fit/schemas/fit-equipment.ts` (camelCase values)
     - KRD equipment enum already exists in `domain/schemas/equipment.ts` (snake_case values)
     - Create equipment mapper in `adapters/fit/equipment.mapper.ts` with bidirectional mapping
@@ -115,7 +106,6 @@ Before marking any task as complete, verify that:
     - _Requirements: 3.4, 3.7_
 
   - [x] 5.2 Implement FIT → KRD converters for swimming fields
-
     - Map `poolLength` and `poolLengthUnit` from FIT to KRD
     - Convert pool length to meters (handle unit conversion)
     - Map `equipment` from FIT WorkoutStep to KRD
@@ -129,9 +119,7 @@ Before marking any task as complete, verify that:
     - _Requirements: 3.3, 3.4, 10.1_
 
 - [x] 6. Implement Priority 2 advanced duration types
-
   - [x] 6.1 Update duration schema with advanced types and fix naming
-
     - Fix naming: `heart_rate_greater_than` → `repeat_until_heart_rate_greater_than` in duration schema
     - Update all references in converters and mappers to use new naming
     - Update durationTypeEnum in workout schema to use new naming
@@ -141,7 +129,6 @@ Before marking any task as complete, verify that:
     - _Requirements: 4.1, 4.2, 5.1, 5.2, 6.1, 6.2, 7.2, 8.1_
 
   - [x] 6.2 Add FIT duration type schemas for advanced types
-
     - Create/update FIT duration type enum schema in `adapters/fit/schemas/fit-duration.ts` (camelCase values)
     - KRD duration type enum already exists in `domain/schemas/duration.ts` (snake_case values)
     - Update duration mapper to handle new types with bidirectional mapping
@@ -149,7 +136,6 @@ Before marking any task as complete, verify that:
     - _Requirements: 4.1, 5.1, 5.7, 5.8, 6.1, 6.2_
 
   - [x] 6.3 Implement FIT → KRD duration converters
-
     - Convert calorie-based durations (calories, repeatUntilCalories)
     - Convert power-based durations (powerLessThan, powerGreaterThan, repeatUntilPowerLessThan, repeatUntilPowerGreaterThan)
     - Convert additional repeat conditionals (repeatUntilTime, repeatUntilDistance, repeatUntilHrLessThan)
@@ -165,9 +151,7 @@ Before marking any task as complete, verify that:
     - _Requirements: 4.3, 5.4, 6.5_
 
 - [ ] 7. Test Priority 2 enhancements
-
   - [x] 7.1 Write integration tests for swimming converters
-
     - Test pool length conversion and unit handling (FIT → KRD)
     - Test pool length conversion (KRD → FIT, always meters)
     - Test equipment mapping (FIT ↔ KRD)
@@ -175,7 +159,6 @@ Before marking any task as complete, verify that:
     - _Requirements: 3.5, 3.6, 8.2, 9.6_
 
   - [x] 7.2 Write integration tests for advanced duration converters
-
     - Test each new duration type conversion (FIT → KRD)
     - Test each new duration type conversion (KRD → FIT)
     - Test dynamic field mapping (durationCalories, durationPower, etc.)
@@ -184,7 +167,6 @@ Before marking any task as complete, verify that:
     - _Requirements: 4.4, 4.5, 5.5, 5.6, 6.6, 6.7, 8.2_
 
   - [x] 7.3 Write round-trip tests for all new fields
-
     - Test swimming fields preservation (pool length within ±0.01m tolerance)
     - Test calorie duration preservation (exact values)
     - Test power duration preservation (within ±1W tolerance)
@@ -201,9 +183,7 @@ Before marking any task as complete, verify that:
     - _Requirements: 8.2, 9.6_
 
 - [ ] 8. Update documentation and finalize
-
   - [x] 8.1 Update JSON Schema generation
-
     - Regenerate JSON Schema from updated Zod schemas
     - Verify all new fields are included (subSport, notes, poolLength, poolLengthUnit, equipment)
     - Verify new duration types are included in schema
@@ -211,7 +191,6 @@ Before marking any task as complete, verify that:
     - _Requirements: 8.1, 8.4_
 
   - [x] 8.2 Update naming consistency
-
     - Verify `heart_rate_greater_than` is correctly named `repeat_until_heart_rate_greater_than` in duration schema
     - Update all tests using old naming (if any exist)
     - Update all fixtures using old naming (if any exist)
@@ -219,7 +198,6 @@ Before marking any task as complete, verify that:
     - _Requirements: 7.2, 7.3, 7.4_
 
   - [x] 8.3 Verify backward compatibility
-
     - Run full test suite to ensure all existing tests pass
     - Test that KRD files without new fields still work
     - Test that FIT files without new fields still work

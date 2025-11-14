@@ -12,7 +12,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Priority 1: Workout Metadata & Step Notes
 
 - **Sub-sport field support**: Workouts now support the `subSport` field for more detailed sport categorization (e.g., "trail" for running, "indoor_cycling" for cycling)
-
   - FIT → KRD: Maps `sub_sport` from FIT Workout message to KRD `subSport`
   - KRD → FIT: Maps KRD `subSport` to FIT `sub_sport` field
   - Round-trip safe with exact value preservation
@@ -27,7 +26,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Priority 2: Swimming Workouts
 
 - **Pool length support**: Swimming workouts now support pool dimensions
-
   - `poolLength`: Pool length in meters
   - `poolLengthUnit`: Always "meters" in KRD (converted from FIT units)
   - Automatic unit conversion from yards to meters
@@ -42,12 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 #### Priority 2: Advanced Duration Types
 
 - **Calorie-based durations**:
-
   - `calories`: Step ends after burning specified calories
   - `repeat_until_calories`: Repeat block until total calories reached
 
 - **Power-based durations**:
-
   - `power_less_than`: Step ends when power drops below threshold
   - `power_greater_than`: Step ends when power exceeds threshold
   - `repeat_until_power_less_than`: Repeat until power drops below threshold

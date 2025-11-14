@@ -9,7 +9,6 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 ## Phase 1: GitHub Templates and Configuration
 
 - [x] 1. Create GitHub issue and PR templates
-
   - Create `.github/ISSUE_TEMPLATE/` directory structure
   - Create bug report template (`bug_report.yml`) with required fields for package, Node version, OS
   - Create feature request template (`feature_request.yml`) with use case and alternatives sections
@@ -30,15 +29,12 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 ## Phase 2: Basic CI Workflow
 
 - [x] 3. Create CI workflow foundation
-
   - [x] 3.1 Create `.github/workflows/ci.yml` file with workflow name and triggers
-
     - Configure triggers: `pull_request` (opened, synchronize, reopened) and `push` to main
     - Set workflow permissions (contents: read, pull-requests: write, checks: write)
     - _Requirements: 1.1, 1.2, 1.3, 9.1, 9.2, 9.3_
 
   - [x] 3.2 Implement detect-changes job
-
     - Add job to analyze git diff using `tj-actions/changed-files@v40`
     - Detect changes in `packages/core/**`, `packages/cli/**`, root dependencies
     - Output boolean flags: `core-changed`, `cli-changed`, `should-test`
@@ -52,7 +48,6 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
     - _Requirements: 8.1, 8.5_
 
 - [x] 4. Implement lint job
-
   - Add lint job that depends on `detect-changes`
   - Add condition to skip if `should-test == false`
   - Configure matrix strategy for Node.js versions (20.x, 22.x)
@@ -73,16 +68,13 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 ## Phase 3: Testing and Coverage
 
 - [x] 6. Implement test job with intelligent filtering
-
   - [x] 6.1 Create test job with matrix strategy
-
     - Configure matrix: Node.js versions (20.x, 22.x) and packages (core, cli)
     - Add dynamic matrix exclusions based on `detect-changes` outputs
     - Add condition to skip if `should-test == false`
     - _Requirements: 1.1, 1.2, 5.1, 5.2, 5.3, 10.2, 10.3_
 
   - [x] 6.2 Implement test execution with coverage
-
     - Build dependencies if needed (e.g., build core when testing cli)
     - Run tests with coverage: `pnpm --filter @kaiord/${{ matrix.package }} test:coverage`
     - Generate coverage report in LCOV format
@@ -96,7 +88,6 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
     - _Requirements: 4.2, 4.3, 4.4, 4.5_
 
 - [x] 7. Implement build job
-
   - Add build job that depends on `detect-changes`
   - Add condition to skip if `should-test == false`
   - Build affected packages using pnpm filtering
@@ -115,15 +106,12 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 ## Phase 4: Security and Quality Gates
 
 - [x] 9. Create security audit workflow
-
   - [x] 9.1 Create `.github/workflows/security.yml` file
-
     - Configure triggers: weekly schedule (Mondays 9 AM UTC), PR with dependency changes, manual dispatch
     - Set workflow permissions (contents: read, issues: write)
     - _Requirements: 7.5_
 
   - [x] 9.2 Implement audit job
-
     - Run npm audit: `pnpm audit --audit-level=moderate`
     - Parse audit results and count vulnerabilities by severity
     - Fail workflow if high/critical vulnerabilities detected
@@ -147,16 +135,13 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 ## Phase 5: Release Automation
 
 - [x] 11. Set up Changesets
-
   - [x] 11.1 Install and configure Changesets
-
     - Install `@changesets/cli` as dev dependency
     - Initialize Changesets: `pnpm exec changeset init`
     - Configure `.changeset/config.json` with package settings
     - _Requirements: 11.1_
 
   - [x] 11.2 Create Changesets workflow
-
     - Create `.github/workflows/changesets.yml` file
     - Configure trigger: push to main branch
     - Use `changesets/action@v1` to create/update "Version Packages" PR
@@ -169,23 +154,19 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
     - _Requirements: 11.4_
 
 - [x] 12. Create release workflow
-
   - [x] 12.1 Create `.github/workflows/release.yml` file
-
     - Configure trigger: release published event
     - Set workflow permissions (contents: write, packages: write)
     - Set up Node.js with npm registry authentication
     - _Requirements: 6.1_
 
   - [x] 12.2 Implement package publishing
-
     - Build all packages: `pnpm -r build`
     - Detect packages with version changes by comparing package.json with npm registry
     - Publish changed packages: `pnpm --filter <package> publish --access public --no-git-checks`
     - _Requirements: 6.2, 6.3, 6.4, 10.7_
 
   - [x] 12.3 Add publish error handling
-
     - Implement retry logic (3 attempts with exponential backoff)
     - Create GitHub issue if publishing fails
     - Send notification to maintainers on failure
@@ -202,7 +183,6 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 ## Phase 6: Status Badges and Documentation
 
 - [x] 13. Add status badges to README
-
   - Add CI workflow status badge for main branch
   - Add Codecov coverage badge
   - Add npm version badge for @kaiord/core
@@ -222,9 +202,7 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 ## Phase 7: Performance Optimization
 
 - [x] 15. Optimize caching strategy
-
   - [x] 15.1 Implement TypeScript build cache
-
     - Add cache for TypeScript compilation output
     - Configure cache key based on tsconfig.json hash
     - Measure build time improvement
@@ -237,7 +215,6 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
     - _Requirements: 8.5_
 
 - [x] 16. Implement parallel job execution
-
   - Configure jobs to run in parallel when possible
   - Use `needs` to define job dependencies
   - Optimize matrix strategy to reduce redundant runs
@@ -254,9 +231,7 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 ## Phase 8: Monitoring and Notifications
 
 - [x] 18. Implement workflow failure notifications
-
   - [x] 18.1 Add failure detection for main branch
-
     - Detect when workflow fails on main branch
     - Create GitHub issue with failure details and logs
     - Include workflow run URL in issue
@@ -280,23 +255,19 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 ## Phase 9: Testing and Validation
 
 - [x] 20. Test CI workflow with different scenarios
-
   - [x] 20.1 Test core package changes
-
     - Create test PR with changes only in packages/core
     - Verify both core and cli are tested and built
     - Verify coverage reports for both packages
     - _Requirements: 10.2_
 
   - [x] 20.2 Test CLI package changes
-
     - Create test PR with changes only in packages/cli
     - Verify only cli is tested and built
     - Verify coverage report for cli only
     - _Requirements: 10.3_
 
   - [x] 20.3 Test documentation changes
-
     - Create test PR with changes only in docs or README
     - Verify no tests or builds run
     - Verify workflow completes in < 30 seconds
@@ -309,7 +280,6 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
     - _Requirements: 10.5_
 
 - [x] 21. Test release workflow
-
   - Test Changesets PR creation with sample changeset
   - Test version bumping and changelog generation
   - Test npm publishing in dry-run mode
@@ -328,14 +298,12 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 ## Phase 10: Final Polish and Documentation
 
 - [x] 23. Update project documentation
-
   - Update main README with CI/CD information
   - Add CONTRIBUTING.md with workflow guidelines
   - Document how to run workflows locally with `act`
   - Add CI/CD section to project documentation
 
 - [x] 24. Clean up and optimize
-
   - Remove any temporary test files or branches
   - Optimize workflow YAML for readability
   - Add comments to complex workflow steps

@@ -7,7 +7,6 @@ This document summarizes the cleanup and optimization performed on the GitHub Ac
 The following temporary test files and documentation were removed:
 
 1. **Test Scripts:**
-
    - `test-security-workflow.sh` - Temporary security workflow test script
    - `test-release-workflow.sh` - Temporary release workflow test script
 

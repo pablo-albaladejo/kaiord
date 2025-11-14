@@ -98,11 +98,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Run ESLint
+      - name: Run linting (ESLint + Prettier)
         run: pnpm lint
-
-      - name: Run Prettier check
-        run: pnpm exec prettier --check .
 
   typecheck:
     runs-on: ubuntu-latest
