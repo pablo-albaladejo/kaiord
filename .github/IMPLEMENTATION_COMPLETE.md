@@ -84,11 +84,12 @@ To enable npm publishing, you need to configure the `NPM_TOKEN` secret:
    - Paste the token value
 
 3. **Test publishing:**
+
    ```bash
    # Option A: Manual test
    npm login
    pnpm --filter @kaiord/core publish --access public
-   
+
    # Option B: Automated test
    pnpm exec changeset
    git add .changeset/ && git commit -m "chore: test release"
@@ -102,13 +103,13 @@ To enable npm publishing, you need to configure the `NPM_TOKEN` secret:
 
 Current workflow performance (measured):
 
-| Workflow | Duration | Target | Status |
-|----------|----------|--------|--------|
-| Full test suite | ~3-4 min | < 5 min | ✅ |
-| Lint + typecheck | ~1-2 min | < 2 min | ✅ |
-| Build | ~1-2 min | < 3 min | ✅ |
-| Docs-only changes | ~20-30s | < 30s | ✅ |
-| Publish workflow | ~3-4 min | < 5 min | ✅ |
+| Workflow          | Duration | Target  | Status |
+| ----------------- | -------- | ------- | ------ |
+| Full test suite   | ~3-4 min | < 5 min | ✅     |
+| Lint + typecheck  | ~1-2 min | < 2 min | ✅     |
+| Build             | ~1-2 min | < 3 min | ✅     |
+| Docs-only changes | ~20-30s  | < 30s   | ✅     |
+| Publish workflow  | ~3-4 min | < 5 min | ✅     |
 
 ## 🎯 How to Use
 
@@ -160,13 +161,13 @@ gh workflow run security.yml
 
 All documentation is in `.github/`:
 
-| Document | Purpose |
-|----------|---------|
-| `SETUP_CHECKLIST.md` | Complete setup guide with verification checklist |
-| `NPM_PUBLISHING.md` | Detailed npm publishing guide with troubleshooting |
-| `workflows/README.md` | Comprehensive workflow documentation |
-| `TESTING_WORKFLOWS.md` | Guide for testing workflows locally with `act` |
-| `IMPLEMENTATION_COMPLETE.md` | This document - implementation summary |
+| Document                     | Purpose                                            |
+| ---------------------------- | -------------------------------------------------- |
+| `SETUP_CHECKLIST.md`         | Complete setup guide with verification checklist   |
+| `NPM_PUBLISHING.md`          | Detailed npm publishing guide with troubleshooting |
+| `workflows/README.md`        | Comprehensive workflow documentation               |
+| `TESTING_WORKFLOWS.md`       | Guide for testing workflows locally with `act`     |
+| `IMPLEMENTATION_COMPLETE.md` | This document - implementation summary             |
 
 ## ✨ Key Features
 
