@@ -193,7 +193,8 @@ const findZone = (cadence: number, zones: Array<Zone>): Zone => {
 - **Maximum 100 lines per file** (excluding test files)
 - **Split large files by responsibility**:
   - Types → `types.ts`
-  - Mappers → `*.mapper.ts` (data transformation between formats)
+  - Mappers → `*.mapper.ts` (simple data transformation, NO logic)
+  - Converters → `*.converter.ts` (complex transformations WITH logic)
   - Validators → `*.validator.ts`
   - Utilities → `*.utils.ts`
 - **Co-locate related files** in the same directory
@@ -205,12 +206,81 @@ const findZone = (cadence: number, zones: Array<Zone>): Zone => {
 adapters/fit/
 ├── garmin-fitsdk.ts          // Main entry point (< 100 lines)
 ├── types.ts                   // Type definitions
-├── metadata.mapper.ts         // Metadata mapping logic
-├── duration.mapper.ts         // Duration mapping logic
-├── target.mapper.ts           // Target mapping logic
-├── step.mapper.ts             // Step mapping logic
-└── workout.mapper.ts          // Workout mapping logic
+├── metadata.mapper.ts         // Simple metadata mapping (no logic)
+├── duration/
+│   ├── duration.mapper.ts    // Simple duration mapping (delegates to converter)
+│   └── duration.converter.ts // Duration conversion logic (has tests)
+├── target/
+│   ├── target.mapper.ts      // Simple target mapping (delegates to converter)
+│   └── target.converter.ts   // Target conversion logic (has tests)
+└── workout.mapper.ts          // Workout mapping (no logic)
 ```
+
+## Mappers vs Converters
+
+### Mappers (\*.mapper.ts)
+
+**Purpose**: Simple, declarative data transformation with NO business logic
+
+**Characteristics**:
+
+- Direct field mapping (e.g., `fitField` → `krdField`)
+- Enum lookups from static maps
+- Simple validation with `.safeParse()` and default fallback
+- Delegates complex logic to converters
+- **NO tests** - coverage comes from integration/round-trip tests
+
+```typescript
+// ✅ Good mapper - Simple, no logic
+export const mapSubSportToKrd = (fitSubSport: unknown): SubSport => {
+  const result = fitSubSportSchema.safeParse(fitSubSport);
+  if (!result.success) return subSportSchema.enum.generic;
+  return FIT_TO_KRD_MAP[result.data] || subSportSchema.enum.generic;
+};
+
+// ❌ Bad mapper - Has logic, should be a converter
+export const mapDuration = (step: FitWorkoutStep): Duration => {
+  if (step.durationType === "time") {
+    return { type: "time", seconds: step.durationValue * 1000 }; // Calculation!
+  }
+  if (step.durationType === "distance") {
+    return { type: "distance", meters: step.durationValue / 100 }; // Calculation!
+  }
+  return { type: "open" };
+};
+```
+
+### Converters (\*.converter.ts)
+
+**Purpose**: Complex transformations with business logic, calculations, or conditional behavior
+
+**Characteristics**:
+
+- Mathematical calculations (unit conversions, offsets)
+- Conditional logic based on multiple fields
+- Data validation with error handling
+- Complex object construction
+- **MUST have tests** - coverage target ≥ 90%
+
+```typescript
+// ✅ Good converter - Has logic, needs tests
+export const convertPowerTarget = (step: WorkoutStep): FitTarget => {
+  if (step.target.value.unit === "watts") {
+    // Garmin encoding: absolute watts need +1000 offset
+    return { targetValue: step.target.value.value + 1000 };
+  }
+  if (step.target.value.unit === "percent_ftp") {
+    // Garmin encoding: percentage FTP has no offset
+    return { targetValue: step.target.value.value };
+  }
+  if (step.target.value.unit === "zone") {
+    return { targetPowerZone: step.target.value.value };
+  }
+  throw new Error(`Unsupported power unit: ${step.target.value.unit}`);
+};
+```
+
+**Rule of thumb**: If you're writing a test for a mapper, it has too much logic and should be refactored into a converter.
 
 ## Type Guards
 
