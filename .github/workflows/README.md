@@ -153,13 +153,11 @@ The command creates a markdown file in `.changeset/` with your changes.
 ### Changeset Types
 
 - **Major (breaking change):** `1.0.0` → `2.0.0`
-
   - Breaking API changes
   - Removed features
   - Incompatible changes
 
 - **Minor (new feature):** `1.0.0` → `1.1.0`
-
   - New features
   - Backward-compatible additions
   - New functionality
@@ -234,7 +232,6 @@ The workflows require the following secrets to be configured in your repository 
    npm token create --type=automation
    ```
 2. **Add to GitHub:**
-
    - Go to repository **Settings** → **Secrets and variables** → **Actions**
    - Click **New repository secret**
    - Name: `NPM_TOKEN`
@@ -242,7 +239,6 @@ The workflows require the following secrets to be configured in your repository 
    - Click **Add secret**
 
 3. **Token requirements:**
-
    - Type: Automation token (recommended)
    - Scope: Publish access to `@kaiord/*` packages
    - Expiration: Set according to your security policy (90 days recommended)
@@ -259,7 +255,6 @@ The workflows require the following secrets to be configured in your repository 
 **Setup Instructions:**
 
 1. **Get token from Codecov:**
-
    - Sign up at [codecov.io](https://codecov.io)
    - Add your repository
    - Copy the upload token

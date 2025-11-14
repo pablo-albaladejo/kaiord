@@ -1,0 +1,19 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+build/
+coverage/
+*.tsbuildinfo
+
+# Generated files
+*.log
+.DS_Store
+
+# Git
+.git/
+
+# IDE
+.vscode/
+.idea/

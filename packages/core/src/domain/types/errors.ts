@@ -26,7 +26,10 @@ export type ToleranceViolation = {
 export class FitParsingError extends Error {
   public override readonly name = "FitParsingError";
 
-  constructor(message: string, public readonly cause?: unknown) {
+  constructor(
+    message: string,
+    public readonly cause?: unknown
+  ) {
     super(message);
     // Maintains proper stack trace for where error was thrown (V8 only)
     if (Error.captureStackTrace) {
@@ -51,7 +54,10 @@ export const createFitParsingError = (
 export class KrdValidationError extends Error {
   public override readonly name = "KrdValidationError";
 
-  constructor(message: string, public readonly errors: Array<ValidationError>) {
+  constructor(
+    message: string,
+    public readonly errors: Array<ValidationError>
+  ) {
     super(message);
     if (Error.captureStackTrace) {
       Error.captureStackTrace(this, KrdValidationError);
