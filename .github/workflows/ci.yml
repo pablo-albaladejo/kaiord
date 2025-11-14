@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       core-changed: ${{ steps.changes.outputs.core-changed }}
-      cli-changed: ${{ steps.changes.outputs.cli-changed }}
       should-test: ${{ steps.changes.outputs.should-test }}
     steps:
       - name: Checkout code
@@ -32,8 +31,6 @@ jobs:
           files_yaml: |
             core:
               - 'packages/core/**'
-            cli:
-              - 'packages/cli/**'
             root_deps:
               - 'package.json'
               - 'pnpm-lock.yaml'
@@ -48,7 +45,7 @@ jobs:
           # Intelligent change detection for monorepo optimization
           # This step determines which packages need testing based on changed files
 
-          # Core package changes: Test both core and CLI (CLI depends on core)
+          # Core package changes
           if [[ "${{ steps.changed-files.outputs.core_any_changed }}" == "true" ]] || \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
             echo "core-changed=true" >> $GITHUB_OUTPUT
@@ -56,19 +53,10 @@ jobs:
             echo "core-changed=false" >> $GITHUB_OUTPUT
           fi
 
-          # CLI package changes: Test only CLI
-          if [[ "${{ steps.changed-files.outputs.cli_any_changed }}" == "true" ]] || \
-             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
-            echo "cli-changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "cli-changed=false" >> $GITHUB_OUTPUT
-          fi
-
           # Performance optimization: Skip all tests if only documentation changed
           # This reduces CI time from ~5 minutes to ~30 seconds for docs-only PRs
           if [[ "${{ steps.changed-files.outputs.docs_any_changed }}" == "true" ]] && \
              [[ "${{ steps.changed-files.outputs.core_any_changed }}" == "false" ]] && \
-             [[ "${{ steps.changed-files.outputs.cli_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "false" ]]; then
             echo "should-test=false" >> $GITHUB_OUTPUT
           else
@@ -78,7 +66,6 @@ jobs:
       - name: Display change detection results
         run: |
           echo "Core changed: ${{ steps.changes.outputs.core-changed }}"
-          echo "CLI changed: ${{ steps.changes.outputs.cli-changed }}"
           echo "Should test: ${{ steps.changes.outputs.should-test }}"
 
   lint:
@@ -123,76 +110,38 @@ jobs:
       fail-fast: false
       matrix:
         node-version: ["20.x", "22.x"]
-        package: ["core", "cli"]
-        exclude:
-          # Skip CLI tests on Node 22.x if CLI didn't change (reduce redundant runs)
-          - package: cli
-            node-version: "22.x"
+        package: ["core"]
     steps:
-      - name: Check if package should be tested
-        id: should-test-package
-        run: |
-          # Dynamic matrix filtering: Only test packages that have changes
-          # This prevents unnecessary test runs and speeds up CI
-          PACKAGE="${{ matrix.package }}"
-
-          if [ "$PACKAGE" == "core" ]; then
-            if [ "${{ needs.detect-changes.outputs.core-changed }}" == "true" ]; then
-              echo "should-test=true" >> $GITHUB_OUTPUT
-            else
-              echo "should-test=false" >> $GITHUB_OUTPUT
-            fi
-          elif [ "$PACKAGE" == "cli" ]; then
-            if [ "${{ needs.detect-changes.outputs.cli-changed }}" == "true" ]; then
-              echo "should-test=true" >> $GITHUB_OUTPUT
-            else
-              echo "should-test=false" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "should-test=true" >> $GITHUB_OUTPUT
-          fi
-
-          echo "Testing $PACKAGE: $(cat $GITHUB_OUTPUT | grep should-test | cut -d= -f2)"
-
       - name: Checkout code
-        if: steps.should-test-package.outputs.should-test == 'true'
         uses: actions/checkout@v4
 
       - name: Setup pnpm with caching
-        if: steps.should-test-package.outputs.should-test == 'true'
         uses: ./.github/actions/setup-pnpm
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build dependencies
-        # Build core package before testing CLI if core changed (CLI depends on core)
-        if: steps.should-test-package.outputs.should-test == 'true' && matrix.package == 'cli' && needs.detect-changes.outputs.core-changed == 'true'
-        run: pnpm --filter @kaiord/core build
-
       - name: Run tests with coverage
-        if: steps.should-test-package.outputs.should-test == 'true'
-        run: pnpm --filter @kaiord/${{ matrix.package }} test:coverage
+        run: pnpm --filter @kaiord/core test:coverage
 
       - name: Upload coverage to Codecov
         # Only upload coverage from Node 20.x to avoid duplicate reports
-        if: steps.should-test-package.outputs.should-test == 'true' && matrix.node-version == '20.x'
+        if: matrix.node-version == '20.x'
         uses: codecov/codecov-action@v3
         with:
-          files: ./packages/${{ matrix.package }}/coverage/coverage-final.json
-          flags: ${{ matrix.package }}
-          name: ${{ matrix.package }}-${{ matrix.node-version }}
+          files: ./packages/core/coverage/coverage-final.json
+          flags: core
+          name: core-${{ matrix.node-version }}
           fail_ci_if_error: false
 
       - name: Check coverage threshold
-        if: steps.should-test-package.outputs.should-test == 'true'
-        run: node .github/scripts/check-coverage.js ./packages/${{ matrix.package }}/coverage/coverage-final.json
+        run: node .github/scripts/check-coverage.js ./packages/core/coverage/coverage-final.json
 
       - name: Upload coverage artifact
-        if: steps.should-test-package.outputs.should-test == 'true' && always()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.package }}-${{ matrix.node-version }}
-          path: ./packages/${{ matrix.package }}/coverage/
+          name: coverage-core-${{ matrix.node-version }}
+          path: ./packages/core/coverage/
           retention-days: 30
 
   build:
@@ -206,11 +155,16 @@ jobs:
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
 
-      - name: Build affected packages
-        run: bash .github/scripts/build-affected.sh "${{ needs.detect-changes.outputs.core-changed }}" "${{ needs.detect-changes.outputs.cli-changed }}"
+      - name: Build core package
+        run: pnpm --filter @kaiord/core build
 
       - name: Verify build outputs
-        run: bash .github/scripts/verify-build.sh "${{ needs.detect-changes.outputs.core-changed }}" "${{ needs.detect-changes.outputs.cli-changed }}"
+        run: |
+          if [ ! -d "packages/core/dist" ]; then
+            echo "❌ @kaiord/core build output not found"
+            exit 1
+          fi
+          echo "✅ @kaiord/core build verified"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
@@ -228,47 +182,21 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: ["core", "cli"]
+        package: ["core"]
     steps:
-      - name: Check if package should be tested
-        id: should-test-package
-        run: |
-          PACKAGE="${{ matrix.package }}"
-
-          if [ "$PACKAGE" == "core" ]; then
-            if [ "${{ needs.detect-changes.outputs.core-changed }}" == "true" ]; then
-              echo "should-test=true" >> $GITHUB_OUTPUT
-            else
-              echo "should-test=false" >> $GITHUB_OUTPUT
-            fi
-          elif [ "$PACKAGE" == "cli" ]; then
-            if [ "${{ needs.detect-changes.outputs.cli-changed }}" == "true" ]; then
-              echo "should-test=true" >> $GITHUB_OUTPUT
-            else
-              echo "should-test=false" >> $GITHUB_OUTPUT
-            fi
-          else
-            echo "should-test=true" >> $GITHUB_OUTPUT
-          fi
-
-          echo "Testing round-trip for $PACKAGE: $(cat $GITHUB_OUTPUT | grep should-test | cut -d= -f2)"
-
       - name: Checkout code
-        if: steps.should-test-package.outputs.should-test == 'true'
         uses: actions/checkout@v4
 
       - name: Setup pnpm with caching
-        if: steps.should-test-package.outputs.should-test == 'true'
         uses: ./.github/actions/setup-pnpm
 
       - name: Run round-trip tests
-        if: steps.should-test-package.outputs.should-test == 'true'
         run: |
-          echo "Running round-trip tests for @kaiord/${{ matrix.package }}..."
+          echo "Running round-trip tests for @kaiord/core..."
           echo "Tolerance validation: ±1s (time), ±1W (power), ±1bpm (heart rate), ±1rpm (cadence)"
 
           # Run tests matching round-trip pattern
-          pnpm --filter @kaiord/${{ matrix.package }} exec vitest --run --reporter=verbose \
+          pnpm --filter @kaiord/core exec vitest --run --reporter=verbose \
             --testNamePattern="round.?trip|Round.?trip|tolerance|Tolerance" 2>&1 | tee round-trip-output.txt
 
           # Check if any tests failed
@@ -288,10 +216,10 @@ jobs:
           echo "✅ All round-trip tests passed with acceptable tolerances"
 
       - name: Upload round-trip test results
-        if: steps.should-test-package.outputs.should-test == 'true' && always()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: round-trip-results-${{ matrix.package }}
+          name: round-trip-results-core
           path: round-trip-output.txt
           retention-days: 30
 
