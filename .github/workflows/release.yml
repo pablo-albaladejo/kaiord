@@ -1,0 +1,244 @@
+name: Release
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+  packages: write
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20.x
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8.15.0
+
+      - name: Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: |
+          echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: Setup pnpm cache
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build all packages
+        run: pnpm -r build
+
+      - name: Detect packages with version changes
+        id: detect-changes
+        run: |
+          echo "Detecting packages with version changes..."
+          CHANGED_PACKAGES=""
+
+          # Check @kaiord/core
+          CORE_VERSION=$(node -p "require('./packages/core/package.json').version")
+          CORE_NPM_VERSION=$(npm view @kaiord/core version 2>/dev/null || echo "0.0.0")
+
+          if [ "$CORE_VERSION" != "$CORE_NPM_VERSION" ]; then
+            echo "✓ @kaiord/core version changed: $CORE_NPM_VERSION → $CORE_VERSION"
+            CHANGED_PACKAGES="$CHANGED_PACKAGES core"
+          else
+            echo "✗ @kaiord/core version unchanged: $CORE_VERSION"
+          fi
+
+          # Check @kaiord/cli (if it exists)
+          if [ -d "packages/cli" ]; then
+            CLI_VERSION=$(node -p "require('./packages/cli/package.json').version")
+            CLI_NPM_VERSION=$(npm view @kaiord/cli version 2>/dev/null || echo "0.0.0")
+            
+            if [ "$CLI_VERSION" != "$CLI_NPM_VERSION" ]; then
+              echo "✓ @kaiord/cli version changed: $CLI_NPM_VERSION → $CLI_VERSION"
+              CHANGED_PACKAGES="$CHANGED_PACKAGES cli"
+            else
+              echo "✗ @kaiord/cli version unchanged: $CLI_VERSION"
+            fi
+          fi
+
+          echo "changed-packages=$CHANGED_PACKAGES" >> $GITHUB_OUTPUT
+
+          if [ -z "$CHANGED_PACKAGES" ]; then
+            echo "⚠️  No packages with version changes detected"
+          fi
+
+      - name: Publish @kaiord/core
+        if: contains(steps.detect-changes.outputs.changed-packages, 'core')
+        id: publish-core
+        run: |
+          echo "Publishing @kaiord/core with retry logic..."
+
+          # Retry function with exponential backoff
+          retry_publish() {
+            local max_attempts=3
+            local attempt=1
+            local delay=5
+            
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt of $max_attempts..."
+              
+              if pnpm --filter @kaiord/core publish --access public --no-git-checks; then
+                echo "✅ Successfully published @kaiord/core"
+                return 0
+              fi
+              
+              if [ $attempt -lt $max_attempts ]; then
+                echo "⚠️  Publish failed, retrying in ${delay}s..."
+                sleep $delay
+                delay=$((delay * 2))  # Exponential backoff: 5s, 10s, 20s
+              fi
+              
+              attempt=$((attempt + 1))
+            done
+            
+            echo "❌ Failed to publish @kaiord/core after $max_attempts attempts"
+            return 1
+          }
+
+          retry_publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
+
+      - name: Publish @kaiord/cli
+        if: contains(steps.detect-changes.outputs.changed-packages, 'cli')
+        id: publish-cli
+        run: |
+          echo "Publishing @kaiord/cli with retry logic..."
+
+          # Retry function with exponential backoff
+          retry_publish() {
+            local max_attempts=3
+            local attempt=1
+            local delay=5
+            
+            while [ $attempt -le $max_attempts ]; do
+              echo "Attempt $attempt of $max_attempts..."
+              
+              if pnpm --filter @kaiord/cli publish --access public --no-git-checks; then
+                echo "✅ Successfully published @kaiord/cli"
+                return 0
+              fi
+              
+              if [ $attempt -lt $max_attempts ]; then
+                echo "⚠️  Publish failed, retrying in ${delay}s..."
+                sleep $delay
+                delay=$((delay * 2))  # Exponential backoff: 5s, 10s, 20s
+              fi
+              
+              attempt=$((attempt + 1))
+            done
+            
+            echo "❌ Failed to publish @kaiord/cli after $max_attempts attempts"
+            return 1
+          }
+
+          retry_publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        continue-on-error: true
+
+      - name: Create failure issue
+        if: |
+          (steps.publish-core.outcome == 'failure' && contains(steps.detect-changes.outputs.changed-packages, 'core')) ||
+          (steps.publish-cli.outcome == 'failure' && contains(steps.detect-changes.outputs.changed-packages, 'cli'))
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const failedPackages = [];
+
+            if ('${{ steps.publish-core.outcome }}' === 'failure') {
+              failedPackages.push('@kaiord/core');
+            }
+            if ('${{ steps.publish-cli.outcome }}' === 'failure') {
+              failedPackages.push('@kaiord/cli');
+            }
+
+            const issueBody = `## 🚨 Release Publishing Failed
+
+            **Release:** ${{ github.event.release.tag_name }}
+            **Workflow Run:** ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+            **Triggered by:** @${{ github.actor }}
+
+            ### Failed Packages
+
+            ${failedPackages.map(pkg => `- ❌ ${pkg}`).join('\n')}
+
+            ### Error Details
+
+            The publish workflow failed after 3 retry attempts with exponential backoff (5s, 10s, 20s).
+
+            ### Remediation Steps
+
+            1. Check the [workflow logs](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for detailed error messages
+            2. Verify NPM_TOKEN secret is valid and has publish permissions
+            3. Ensure package versions are correctly bumped
+            4. Check npm registry status: https://status.npmjs.org/
+            5. Manually publish if needed: \`pnpm --filter <package> publish --access public\`
+
+            ### Next Steps
+
+            - [ ] Investigate root cause
+            - [ ] Fix the issue
+            - [ ] Re-run the workflow or manually publish
+            - [ ] Close this issue once resolved
+
+            ---
+
+            **Note:** This issue was automatically created by the release workflow.`;
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `🚨 Release publishing failed for ${failedPackages.join(', ')}`,
+              body: issueBody,
+              labels: ['release', 'bug', 'automated']
+            });
+
+      - name: Fail workflow if publishing failed
+        if: |
+          (steps.publish-core.outcome == 'failure' && contains(steps.detect-changes.outputs.changed-packages, 'core')) ||
+          (steps.publish-cli.outcome == 'failure' && contains(steps.detect-changes.outputs.changed-packages, 'cli'))
+        run: |
+          echo "❌ One or more packages failed to publish"
+          exit 1
+
+      - name: Summary
+        run: |
+          echo "## 📦 Published Packages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [[ "${{ steps.detect-changes.outputs.changed-packages }}" == *"core"* ]]; then
+            CORE_VERSION=$(node -p "require('./packages/core/package.json').version")
+            echo "- ✅ @kaiord/core@$CORE_VERSION" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [[ "${{ steps.detect-changes.outputs.changed-packages }}" == *"cli"* ]]; then
+            CLI_VERSION=$(node -p "require('./packages/cli/package.json').version")
+            echo "- ✅ @kaiord/cli@$CLI_VERSION" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ -z "${{ steps.detect-changes.outputs.changed-packages }}" ]; then
+            echo "⚠️ No packages were published (no version changes detected)" >> $GITHUB_STEP_SUMMARY
+          fi
