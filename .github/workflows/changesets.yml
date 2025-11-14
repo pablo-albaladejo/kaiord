@@ -54,24 +54,92 @@ jobs:
         uses: changesets/action@v1
         with:
           version: pnpm exec changeset version
-          publish: pnpm exec changeset publish
           commit: "chore: version packages"
           title: "chore: version packages"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Release
-        if: steps.changesets.outputs.published == 'true'
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        if: steps.changesets.outputs.hasChangesets == 'false'
+        uses: actions/github-script@v7
         with:
-          tag_name: ${{ steps.changesets.outputs.publishedPackages[0].version }}
-          release_name: Release ${{ steps.changesets.outputs.publishedPackages[0].version }}
-          body: |
-            ## Changes
+          script: |
+            const fs = require('fs');
+            const path = require('path');
 
-            ${{ steps.changesets.outputs.publishedPackages[0].changelog }}
-          draft: false
-          prerelease: false
+            // Read package.json files to get versions and changelogs
+            const packages = [];
+
+            // Check @kaiord/core
+            if (fs.existsSync('packages/core/package.json')) {
+              const corePackage = JSON.parse(fs.readFileSync('packages/core/package.json', 'utf8'));
+              let coreChangelog = '';
+              if (fs.existsSync('packages/core/CHANGELOG.md')) {
+                coreChangelog = fs.readFileSync('packages/core/CHANGELOG.md', 'utf8');
+              }
+              packages.push({
+                name: corePackage.name,
+                version: corePackage.version,
+                changelog: coreChangelog
+              });
+            }
+
+            // Check @kaiord/cli
+            if (fs.existsSync('packages/cli/package.json')) {
+              const cliPackage = JSON.parse(fs.readFileSync('packages/cli/package.json', 'utf8'));
+              let cliChangelog = '';
+              if (fs.existsSync('packages/cli/CHANGELOG.md')) {
+                cliChangelog = fs.readFileSync('packages/cli/CHANGELOG.md', 'utf8');
+              }
+              packages.push({
+                name: cliPackage.name,
+                version: cliPackage.version,
+                changelog: cliChangelog
+              });
+            }
+
+            if (packages.length === 0) {
+              console.log('No packages found to release');
+              return;
+            }
+
+            // Use the first package version as the release tag
+            const releaseVersion = packages[0].version;
+            const tagName = `v${releaseVersion}`;
+
+            // Build release notes
+            let releaseNotes = '## 📦 Published Packages\n\n';
+            packages.forEach(pkg => {
+              releaseNotes += `- ${pkg.name}@${pkg.version}\n`;
+            });
+            releaseNotes += '\n';
+
+            // Add changelogs
+            packages.forEach(pkg => {
+              if (pkg.changelog) {
+                releaseNotes += `## ${pkg.name}\n\n`;
+                // Extract the latest version section from changelog
+                const versionSection = pkg.changelog.split(/^## /m)[1];
+                if (versionSection) {
+                  releaseNotes += versionSection + '\n';
+                }
+              }
+            });
+
+            // Create the release
+            try {
+              const release = await github.rest.repos.createRelease({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag_name: tagName,
+                name: `Release ${releaseVersion}`,
+                body: releaseNotes,
+                draft: false,
+                prerelease: false
+              });
+              
+              console.log(`✅ Created release: ${release.data.html_url}`);
+            } catch (error) {
+              console.error('Failed to create release:', error);
+              throw error;
+            }
