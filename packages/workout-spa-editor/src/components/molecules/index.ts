@@ -6,3 +6,6 @@ export type { FileUploadProps } from "./FileUpload";
 
 export { DurationPicker } from "./DurationPicker";
 export type { DurationPickerProps } from "./DurationPicker";
+
+export { TargetPicker } from "./TargetPicker";
+export type { TargetPickerProps } from "./TargetPicker";

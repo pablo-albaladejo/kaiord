@@ -142,7 +142,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - Show real-time validation errors
   - _Requirements: 2, 3, 17_
 
-- [ ] P1.7.2 Create TargetPicker molecule
+- [x] P1.7.2 Create TargetPicker molecule
   - Support power, heart_rate, pace, cadence, open targets
   - Dynamic unit selection (zone, watts, bpm, range)
   - Add input validation
