@@ -154,7 +154,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - Add save and cancel buttons
   - _Requirements: 3_
 
-- [ ] P1.7.4 Implement step editing flow
+- [-] P1.7.4 Implement step editing flow
   - Open StepEditor on step selection
   - Update workout state on save
   - Revert changes on cancel

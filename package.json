@@ -15,7 +15,8 @@
   "packageManager": "pnpm@8.15.0",
   "pnpm": {
     "overrides": {
-      "js-yaml@<4.1.1": ">=4.1.1"
+      "js-yaml@<4.1.1": ">=4.1.1",
+      "esbuild@<=0.24.2": ">=0.25.0"
     }
   },
   "scripts": {
