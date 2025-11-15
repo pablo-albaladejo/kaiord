@@ -1,7 +1,7 @@
 /**
- * Format Helpers for WorkoutStats
+ * Format Helper Functions for WorkoutStats
  *
- * Utility functions for formatting duration and other statistics.
+ * Utilities for formatting duration and distance values.
  */
 
 /**
@@ -15,6 +15,16 @@ export const formatDuration = (seconds: number): string => {
   if (hours > 0) {
     return `${hours}:${minutes.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
   }
-
   return `${minutes}:${secs.toString().padStart(2, "0")}`;
+};
+
+/**
+ * Format distance in meters to human-readable format
+ */
+export const formatDistance = (meters: number): string => {
+  if (meters >= 1000) {
+    const km = meters / 1000;
+    return `${km.toFixed(2)} km`;
+  }
+  return `${meters.toFixed(0)} m`;
 };

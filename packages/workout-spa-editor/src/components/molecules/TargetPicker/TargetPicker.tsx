@@ -1,6 +1,4 @@
 import { useState } from "react";
-import { Input } from "../../atoms/Input/Input";
-import type { TargetPickerProps, TargetTypeOption } from "./TargetPicker.types";
 import {
   getCurrentUnit,
   getRangeMaxString,
@@ -17,14 +15,8 @@ import {
   useUnitChange,
   useValueChange,
 } from "./hooks";
-
-const TARGET_TYPE_OPTIONS: Array<TargetTypeOption> = [
-  { value: "power", label: "Power" },
-  { value: "heart_rate", label: "Heart Rate" },
-  { value: "pace", label: "Pace" },
-  { value: "cadence", label: "Cadence" },
-  { value: "open", label: "Open" },
-];
+import type { TargetPickerProps } from "./TargetPicker.types";
+import { TargetPickerFields } from "./TargetPickerFields";
 
 export const TargetPicker = ({
   value,
@@ -76,12 +68,14 @@ export const TargetPicker = ({
     setValidationError
   );
 
-  const handleMinChange = (newMin: string) => {
+  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newMin = e.target.value;
     setMinValue(newMin);
     handleRangeChange(newMin, maxValue);
   };
 
-  const handleMaxChange = (newMax: string) => {
+  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newMax = e.target.value;
     setMaxValue(newMax);
     handleRangeChange(minValue, newMax);
   };
@@ -91,88 +85,23 @@ export const TargetPicker = ({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <Input
-        variant="select"
-        label="Target Type"
-        value={targetType}
-        onChange={handleTypeChange}
+      <TargetPickerFields
+        targetType={targetType}
+        unit={unit}
+        targetValue={targetValue}
+        minValue={minValue}
+        maxValue={maxValue}
+        displayError={displayError}
         disabled={disabled}
-        options={TARGET_TYPE_OPTIONS.map((opt) => ({
-          value: opt.value,
-          label: opt.label,
-        }))}
-        aria-label="Select target type"
+        unitOptions={unitOptions}
+        onTypeChange={handleTypeChange}
+        onUnitChange={handleUnitChange}
+        onValueChange={handleValueChange}
+        onMinChange={handleMinChange}
+        onMaxChange={handleMaxChange}
+        getValueLabel={getValueLabel}
+        getValuePlaceholder={getValuePlaceholder}
       />
-
-      {targetType !== "open" && unitOptions && unitOptions.length > 0 && (
-        <Input
-          variant="select"
-          label="Unit"
-          value={unit}
-          onChange={handleUnitChange}
-          disabled={disabled}
-          options={unitOptions.map((opt) => ({
-            value: opt.value,
-            label: opt.label,
-          }))}
-          aria-label="Select target unit"
-        />
-      )}
-
-      {targetType !== "open" && unit && unit !== "range" && (
-        <Input
-          variant="number"
-          label={getValueLabel(targetType, unit)}
-          value={targetValue}
-          onChange={handleValueChange}
-          disabled={disabled}
-          error={displayError}
-          placeholder={getValuePlaceholder(targetType, unit)}
-          min="0"
-          step={unit === "zone" ? "1" : "0.01"}
-          aria-label={getValueLabel(targetType, unit)}
-          aria-invalid={Boolean(displayError)}
-          aria-describedby={displayError ? "target-error" : undefined}
-        />
-      )}
-
-      {targetType !== "open" && unit === "range" && (
-        <div className="space-y-3">
-          <Input
-            variant="number"
-            label="Minimum"
-            value={minValue}
-            onChange={handleMinChange}
-            disabled={disabled}
-            error={displayError}
-            placeholder="Enter minimum value"
-            min="0"
-            step="0.01"
-            aria-label="Minimum value"
-            aria-invalid={Boolean(displayError)}
-          />
-          <Input
-            variant="number"
-            label="Maximum"
-            value={maxValue}
-            onChange={handleMaxChange}
-            disabled={disabled}
-            error={displayError}
-            placeholder="Enter maximum value"
-            min="0"
-            step="0.01"
-            aria-label="Maximum value"
-            aria-invalid={Boolean(displayError)}
-            aria-describedby={displayError ? "target-error" : undefined}
-          />
-        </div>
-      )}
-
-      {targetType === "open" && (
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Open target (no specific intensity goal)
-        </p>
-      )}
     </div>
   );
 };

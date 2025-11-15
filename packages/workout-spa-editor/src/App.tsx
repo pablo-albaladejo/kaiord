@@ -54,9 +54,10 @@ function App() {
             onFileError={handleFileError}
           />
         )}
-        {workout && (
+        {workout && currentWorkout && (
           <WorkoutSection
             workout={workout}
+            krd={currentWorkout}
             selectedStepId={selectedStepId}
             onStepSelect={handleStepSelect}
           />

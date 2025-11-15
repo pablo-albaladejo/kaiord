@@ -26,6 +26,18 @@ export const StepEditor = ({
   const [durationError, setDurationError] = useState<string>("");
   const [targetError, setTargetError] = useState<string>("");
 
+  const handleDurationChange = (newDuration: Duration | null) => {
+    if (newDuration) {
+      setDuration(newDuration);
+    }
+  };
+
+  const handleTargetChange = (newTarget: Target | null) => {
+    if (newTarget) {
+      setTarget(newTarget);
+    }
+  };
+
   const handleSave = () => {
     if (durationError || targetError) {
       return;
@@ -71,11 +83,15 @@ export const StepEditor = ({
       <div className="space-y-6">
         <DurationPicker
           value={duration}
-          onChange={setDuration}
+          onChange={handleDurationChange}
           error={durationError}
         />
 
-        <TargetPicker value={target} onChange={setTarget} error={targetError} />
+        <TargetPicker
+          value={target}
+          onChange={handleTargetChange}
+          error={targetError}
+        />
 
         <div className="flex justify-end gap-3 border-t border-gray-200 pt-6 dark:border-gray-700">
           <Button variant="secondary" onClick={handleCancel}>
