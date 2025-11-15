@@ -10,11 +10,16 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./test-utils": {
+      "import": "./dist/test-utils/index.js",
+      "types": "./dist/test-utils/index.d.ts"
     }
   },
   "files": [
     "dist",
-    "schema"
+    "schema",
+    "src/tests/fixtures"
   ],
   "scripts": {
     "generate:schema": "tsx scripts/generate-schema.ts",

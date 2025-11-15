@@ -91,6 +91,9 @@ This package follows **hexagonal architecture** with clear separation of concern
 import { krdSchema, sportSchema } from "@kaiord/core";
 import type { KRD, Sport } from "@kaiord/core";
 
+// Test utilities (separate export, not included in main bundle)
+import { loadKrdFixture } from "@kaiord/core/test-utils";
+
 // ❌ Avoid: Import everything (larger bundle)
 import * as Kaiord from "@kaiord/core";
 ```
@@ -100,6 +103,7 @@ import * as Kaiord from "@kaiord/core";
 - Types only: 0 KB (compile-time)
 - Schema validation: ~15 KB
 - Full conversion: ~80 KB
+- Test utilities: Not included in production bundles
 
 See [TREE_SHAKING.md](./TREE_SHAKING.md) for detailed guide and best practices.
 
@@ -130,3 +134,23 @@ Coverage targets:
 - Overall: ≥ 80%
 - Mappers/converters: ≥ 90%
 - Domain logic: 100%
+
+### Test Utilities
+
+The package exports test utilities for other packages to use:
+
+```typescript
+import {
+  loadFitFixture,
+  loadKrdFixture,
+  loadFixturePair,
+  FIXTURE_NAMES,
+} from "@kaiord/core/test-utils";
+
+// Load fixtures for testing
+const fitBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
+const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
+
+// Load both for round-trip tests
+const { fit, krd } = loadFixturePair(FIXTURE_NAMES.INDIVIDUAL_STEPS);
+```
