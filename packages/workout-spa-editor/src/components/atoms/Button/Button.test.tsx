@@ -173,6 +173,20 @@ describe("Button", () => {
       expect(ref).toHaveBeenCalled();
     });
 
+    it("should have type button by default", () => {
+      render(<Button>Default Type</Button>);
+
+      const button = screen.getByRole("button");
+      expect(button).toHaveAttribute("type", "button");
+    });
+
+    it("should allow type override to submit", () => {
+      render(<Button type="submit">Submit</Button>);
+
+      const button = screen.getByRole("button");
+      expect(button).toHaveAttribute("type", "submit");
+    });
+
     it("should pass through HTML button attributes", () => {
       render(
         <Button type="submit" aria-label="Submit form">

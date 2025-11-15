@@ -58,6 +58,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       loading = false,
       disabled,
       className = "",
+      type = "button",
       children,
       ...props
     },
@@ -76,7 +77,13 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
       .join(" ");
 
     return (
-      <button ref={ref} disabled={isDisabled} className={classes} {...props}>
+      <button
+        ref={ref}
+        type={type}
+        disabled={isDisabled}
+        className={classes}
+        {...props}
+      >
         {loading && <LoadingSpinner />}
         {children}
       </button>
