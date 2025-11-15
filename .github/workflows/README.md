@@ -580,6 +580,14 @@ Monitor workflow health:
 
 ## Additional Resources
 
+### Internal Documentation
+
+- **[Setup Checklist](../SETUP_CHECKLIST.md)** - Complete setup guide for CI/CD configuration
+- **[npm Publishing Guide](../NPM_PUBLISHING.md)** - Detailed guide for publishing packages to npm
+- **[Testing Workflows Locally](../TESTING_WORKFLOWS.md)** - Guide for testing workflows with `act`
+
+### External Resources
+
 - [GitHub Actions Documentation](https://docs.github.com/en/actions)
 - [pnpm CI Guide](https://pnpm.io/continuous-integration)
 - [Changesets Documentation](https://github.com/changesets/changesets)

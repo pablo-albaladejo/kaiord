@@ -7,6 +7,7 @@ on:
 permissions:
   contents: write
   packages: write
+  id-token: write # Required for npm provenance
 
 jobs:
   publish:
@@ -102,7 +103,7 @@ jobs:
             while [ $attempt -le $max_attempts ]; do
               echo "Attempt $attempt of $max_attempts..."
               
-              if pnpm --filter @kaiord/core publish --access public --no-git-checks; then
+              if pnpm --filter @kaiord/core publish --access public --no-git-checks --provenance; then
                 echo "✅ Successfully published @kaiord/core"
                 return 0
               fi
@@ -142,7 +143,7 @@ jobs:
             while [ $attempt -le $max_attempts ]; do
               echo "Attempt $attempt of $max_attempts..."
               
-              if pnpm --filter @kaiord/cli publish --access public --no-git-checks; then
+              if pnpm --filter @kaiord/cli publish --access public --no-git-checks --provenance; then
                 echo "✅ Successfully published @kaiord/cli"
                 return 0
               fi

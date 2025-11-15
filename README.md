@@ -132,6 +132,34 @@ To contribute to Kaiord:
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed guidelines.
 
+### Publishing to npm
+
+For maintainers publishing packages to npm:
+
+**🎉 Recommended: Trusted Publishing (No Tokens!)**
+
+1. **Publish manually once:**
+
+   ```bash
+   npm login
+   pnpm -r build
+   pnpm --filter @kaiord/core publish --access public
+   ```
+
+2. **Configure on npm:** Go to package settings and add GitHub Actions as trusted publisher
+
+3. **Done!** Future releases publish automatically with cryptographic provenance.
+
+See [Trusted Publishing Guide](./.github/NPM_TRUSTED_PUBLISHING.md) for details.
+
+**Alternative: Token-Based (Legacy)**
+
+```bash
+pnpm setup:npm  # Automated token setup
+```
+
+See [Setup Checklist](./.github/SETUP_CHECKLIST.md) for all options.
+
 ---
 
 ## 📚 Documentation
