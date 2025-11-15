@@ -136,7 +136,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 ### P1.7 Step Editing
 
-- [ ] P1.7.1 Create DurationPicker molecule
+- [x] P1.7.1 Create DurationPicker molecule
   - Support time, distance, open duration types
   - Add input validation
   - Show real-time validation errors
