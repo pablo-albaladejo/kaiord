@@ -22,7 +22,7 @@ This project follows a code of conduct to ensure a welcoming environment for all
 ### Prerequisites
 
 - **Node.js**: Version 20.x or higher
-- **pnpm**: Version 8.x or higher
+- **pnpm**: Version 9.x or higher
 - **Git**: For version control
 - **Docker**: For testing workflows locally (optional)
 
