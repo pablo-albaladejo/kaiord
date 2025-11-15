@@ -148,41 +148,49 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - Add input validation
   - _Requirements: 2, 3, 17_
 
-- [ ] P1.7.3 Create StepEditor organism
+- [x] P1.7.3 Create StepEditor organism
   - Form for editing step properties
   - Include DurationPicker and TargetPicker
   - Add save and cancel buttons
   - _Requirements: 3_
 
 - [ ] P1.7.4 Implement step editing flow
-  - Open StepEditor on step selection
-  - Update workout state on save
+  - Open StepEditor on step selection in WorkoutSection
+  - Update workout state on save via store actions
   - Revert changes on cancel
+  - Close editor after save/cancel
   - _Requirements: 3_
 
 ### P1.8 Step Management
 
 - [ ] P1.8.1 Implement step creation
-  - Add "New Step" button
-  - Create step with default values
-  - Insert at end of workout
+  - Add "New Step" button to WorkoutSection
+  - Create step with default values (open duration, open target)
+  - Add createStep action to workout store
+  - Insert at end of workout.steps array
+  - Recalculate stepIndex for all steps
   - _Requirements: 2_
 
 - [ ] P1.8.2 Implement step deletion
   - Add delete button to StepCard
-  - Show confirmation dialog
-  - Remove step and recalculate indices
+  - Show confirmation dialog using Radix Dialog
+  - Add deleteStep action to workout store
+  - Remove step from workout.steps array
+  - Recalculate stepIndex for all subsequent steps
+  - Handle deletion within repetition blocks
   - _Requirements: 5_
 
 - [ ] P1.8.3 Implement step duplication
   - Add duplicate button to StepCard
-  - Create exact copy of step
-  - Insert after original step
+  - Add duplicateStep action to workout store
+  - Create exact copy of step with new stepIndex
+  - Insert after original step in workout.steps array
+  - Recalculate stepIndex for all subsequent steps
   - _Requirements: 16_
 
 ### P1.9 File Saving
 
-- [ ] P1.9.1 Implement workout save functionality
+- [x] P1.9.1 Implement workout save functionality
   - Validate workout against KRD schema
   - Generate JSON file
   - Trigger browser download
@@ -196,13 +204,13 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 ### P1.10 Workout Statistics
 
-- [ ] P1.10.1 Create WorkoutStats organism
+- [x] P1.10.1 Create WorkoutStats organism
   - Calculate total duration
   - Calculate total distance
   - Handle repetition blocks in calculations
   - _Requirements: 9_
 
-- [ ] P1.10.2 Display statistics in UI
+- [x] P1.10.2 Display statistics in UI
   - Add stats panel to layout
   - Update in real-time on workout changes
   - Show estimates for open-ended steps
