@@ -103,8 +103,12 @@ export const formatPaceTarget = (value: unknown): string => {
   }
 
   if (v.unit === "min_per_km" && "value" in v && typeof v.value === "number") {
-    const minutes = Math.floor(v.value);
-    const seconds = Math.round((v.value - minutes) * 60);
+    let minutes = Math.floor(v.value);
+    let seconds = Math.round((v.value - minutes) * 60);
+    if (seconds === 60) {
+      minutes += 1;
+      seconds = 0;
+    }
     return `${minutes}:${seconds.toString().padStart(2, "0")}/km`;
   }
   if (v.unit === "zone" && "value" in v) {
