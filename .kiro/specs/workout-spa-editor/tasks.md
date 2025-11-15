@@ -9,685 +9,686 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 - **P2 (Enhanced)**: Medium impact + Low/Medium complexity - Nice-to-have features
 - **P3 (Advanced)**: Low impact or High complexity - Optional/future features
 
-## Phase 1: MVP Foundation (P0)
+## P0: MVP Foundation
 
-### 1. Project Setup and Infrastructure
+### P0.1 Project Setup and Infrastructure
 
-- [ ] 1.1 Initialize Vite + React + TypeScript project
+- [x] P0.1.1 Initialize Vite + React + TypeScript project
   - Create project with `npm create vite@latest`
   - Configure TypeScript strict mode
   - Set up ESLint and Prettier
   - _Requirements: 33_
 
-- [ ] 1.2 Install and configure core dependencies
+- [x] P0.1.2 Install and configure core dependencies
   - Install Zustand, Zod, Tailwind CSS, Radix UI
   - Configure Tailwind with base theme
   - Set up path aliases (@/ for src/)
   - _Requirements: 33_
 
-- [ ] 1.3 Set up project structure
+- [x] P0.1.3 Set up project structure
   - Create folder structure (components/atoms, molecules, organisms, pages, hooks, store, types)
   - Create barrel exports for clean imports
   - Set up absolute imports
   - _Requirements: 33_
 
-- [ ] 1.4 Configure GitHub Pages deployment
+- [x] P0.1.4 Configure GitHub Pages deployment
   - Create GitHub Actions workflow for build and deploy
   - Configure base path for GitHub Pages
   - Set up environment variables
   - _Requirements: 33_
 
-### 2. Core Domain Types and Validation
+### P0.2 Core Domain Types and Validation
 
-- [ ] 2.1 Define KRD types from @kaiord/core
-  - Import and re-export KRD types
-  - Create type guards for WorkoutStep vs RepetitionBlock
-  - Define helper types for UI state
+- [x] P0.2.1 Define KRD types from @kaiord/core
+  - ✅ Import and re-export KRD types from @kaiord/core package
+  - ✅ Create type guards for WorkoutStep vs RepetitionBlock
+  - ✅ Define helper types for UI state
   - _Requirements: 1, 2, 3_
+  - _Note: @kaiord/core dependency added to package.json_
 
-- [ ] 2.2 Create Zod schemas for validation
-  - Create schemas for WorkoutStep, RepetitionBlock, Workout
-  - Add real-time validation helpers
-  - Create validation error formatters
+- [x] P0.2.2 Create Zod schemas for validation
+  - ✅ Re-export schemas from @kaiord/core (workoutSchema, workoutStepSchema, etc.)
+  - ✅ Add UI-specific schemas (WorkoutLibraryItemSchema, UserProfileSchema)
+  - ✅ Create validation error formatters
   - _Requirements: 6, 7, 17_
 
-### 3. Basic State Management
+### P0.3 Basic State Management
 
-- [ ] 3.1 Create Zustand store for workout state
+- [x] P0.3.1 Create Zustand store for workout state
   - Define store interface with workout, selectedStepId, isEditing
   - Implement loadWorkout, updateWorkout actions
   - Implement selectStep action
   - _Requirements: 1, 2, 3_
 
-- [ ] 3.2 Implement undo/redo functionality
+- [x] P0.3.2 Implement undo/redo functionality
   - Add workoutHistory and historyIndex to store
   - Implement undo() and redo() actions
   - Limit history to 50 states
   - _Requirements: 15_
 
-### 4. Basic UI Components (Atoms)
+### P0.4 Basic UI Components (Atoms)
 
-- [ ] 4.1 Create Button component
+- [x] P0.4.1 Create Button component
   - Implement variants (primary, secondary, ghost, danger)
   - Add size variants (sm, md, lg)
   - Add loading and disabled states
   - _Requirements: 2, 3, 5_
 
-- [ ] 4.2 Create Input component
+- [x] P0.4.2 Create Input component
   - Implement text, number, select variants
   - Add error state styling
   - Add label and helper text support
   - _Requirements: 2, 3, 17_
 
-- [ ] 4.3 Create Badge component
+- [x] P0.4.3 Create Badge component
   - Implement color variants for intensity levels
   - Add size variants
   - Support icons
   - _Requirements: 1, 10_
 
-- [ ] 4.4 Create Icon component
+- [x] P0.4.4 Create Icon component
   - Set up icon library (lucide-react)
   - Create icon wrapper with size variants
   - Add color support
   - _Requirements: 10_
 
-### 5. Workout Visualization (MVP)
+### P0.5 Workout Visualization (MVP)
 
-- [ ] 5.1 Create StepCard molecule
+- [x] P0.5.1 Create StepCard molecule
   - Display step index, duration, target, intensity
   - Show color coding by intensity
   - Add icons for target types
   - _Requirements: 1, 10_
 
-- [ ] 5.2 Create WorkoutList organism
+- [x] P0.5.2 Create WorkoutList organism
   - Render list of StepCard components
   - Handle step selection
   - Display repetition blocks visually grouped
   - _Requirements: 1_
 
-- [ ] 5.3 Create basic page layout
+- [x] P0.5.3 Create basic page layout
   - Create MainLayout template with header and content area
   - Add app title and basic navigation
   - Make responsive for mobile
   - _Requirements: 1, 8_
 
-### 6. File Loading (MVP)
+### P0.6 File Loading (MVP)
 
-- [ ] 6.1 Implement file upload functionality
+- [x] P0.6.1 Implement file upload functionality
   - Create file input component
   - Parse JSON file content
   - Validate against KRD schema
   - _Requirements: 7_
 
-- [ ] 6.2 Handle file loading errors
+- [x] P0.6.2 Handle file loading errors
   - Display validation errors with field references
   - Show user-friendly error messages
   - Add retry functionality
   - _Requirements: 7, 36_
 
-- [ ] 6.3 Load workout into state
+- [x] P0.6.3 Load workout into state
   - Parse KRD file
   - Load into Zustand store
   - Display in WorkoutList
   - _Requirements: 1, 7_
 
-## Phase 2: Core Editing Features (P1)
+## P1: Core Editing Features
 
-### 7. Step Editing
+### P1.7 Step Editing
 
-- [ ] 7.1 Create DurationPicker molecule
+- [x] P1.7.1 Create DurationPicker molecule
   - Support time, distance, open duration types
   - Add input validation
   - Show real-time validation errors
   - _Requirements: 2, 3, 17_
 
-- [ ] 7.2 Create TargetPicker molecule
+- [ ] P1.7.2 Create TargetPicker molecule
   - Support power, heart_rate, pace, cadence, open targets
   - Dynamic unit selection (zone, watts, bpm, range)
   - Add input validation
   - _Requirements: 2, 3, 17_
 
-- [ ] 7.3 Create StepEditor organism
+- [ ] P1.7.3 Create StepEditor organism
   - Form for editing step properties
   - Include DurationPicker and TargetPicker
   - Add save and cancel buttons
   - _Requirements: 3_
 
-- [ ] 7.4 Implement step editing flow
+- [ ] P1.7.4 Implement step editing flow
   - Open StepEditor on step selection
   - Update workout state on save
   - Revert changes on cancel
   - _Requirements: 3_
 
-### 8. Step Management
+### P1.8 Step Management
 
-- [ ] 8.1 Implement step creation
+- [ ] P1.8.1 Implement step creation
   - Add "New Step" button
   - Create step with default values
   - Insert at end of workout
   - _Requirements: 2_
 
-- [ ] 8.2 Implement step deletion
+- [ ] P1.8.2 Implement step deletion
   - Add delete button to StepCard
   - Show confirmation dialog
   - Remove step and recalculate indices
   - _Requirements: 5_
 
-- [ ] 8.3 Implement step duplication
+- [ ] P1.8.3 Implement step duplication
   - Add duplicate button to StepCard
   - Create exact copy of step
   - Insert after original step
   - _Requirements: 16_
 
-### 9. File Saving
+### P1.9 File Saving
 
-- [ ] 9.1 Implement workout save functionality
+- [ ] P1.9.1 Implement workout save functionality
   - Validate workout against KRD schema
   - Generate JSON file
   - Trigger browser download
   - _Requirements: 6_
 
-- [ ] 9.2 Handle save errors
+- [ ] P1.9.2 Handle save errors
   - Display validation errors
   - Show user-friendly messages
   - Allow fixing errors before retry
   - _Requirements: 6, 36_
 
-### 10. Workout Statistics
+### P1.10 Workout Statistics
 
-- [ ] 10.1 Create WorkoutStats organism
+- [ ] P1.10.1 Create WorkoutStats organism
   - Calculate total duration
   - Calculate total distance
   - Handle repetition blocks in calculations
   - _Requirements: 9_
 
-- [ ] 10.2 Display statistics in UI
+- [ ] P1.10.2 Display statistics in UI
   - Add stats panel to layout
   - Update in real-time on workout changes
   - Show estimates for open-ended steps
   - _Requirements: 9_
 
-## Phase 3: Enhanced Features (P2)
+## P2: Enhanced Features
 
-### 11. Drag and Drop Reordering
+### P2.11 Drag and Drop Reordering
 
-- [ ] 11.1 Install and configure @dnd-kit
+- [ ] P2.11.1 Install and configure @dnd-kit
   - Set up DndContext
   - Configure sensors for mouse and touch
   - Add collision detection
   - _Requirements: 4_
 
-- [ ] 11.2 Make WorkoutList draggable
+- [ ] P2.11.2 Make WorkoutList draggable
   - Wrap StepCard in draggable component
   - Add drag handle
   - Show visual feedback during drag
   - _Requirements: 4_
 
-- [ ] 11.3 Implement drop logic
+- [ ] P2.11.3 Implement drop logic
   - Handle step reordering
   - Recalculate step indices
   - Update workout state
   - _Requirements: 4_
 
-### 12. User Profiles
+### P2.12 User Profiles
 
-- [ ] 12.1 Create UserProfile types and schemas
+- [ ] P2.12.1 Create UserProfile types and schemas
   - Define profile interface with zones
   - Create Zod schemas for validation
   - Add default zone configurations
   - _Requirements: 30_
 
-- [ ] 12.2 Create ProfileForm organism
+- [ ] P2.12.2 Create ProfileForm organism
   - Form for name, weight, FTP, max HR
   - Zone configuration inputs
   - Save and cancel buttons
   - _Requirements: 30_
 
-- [ ] 12.3 Implement profile storage
+- [ ] P2.12.3 Implement profile storage
   - Save profiles to IndexedDB using Dexie
   - Load profiles on app init
   - Handle storage errors
   - _Requirements: 30, 32_
 
-- [ ] 12.4 Create profile selector
+- [ ] P2.12.4 Create profile selector
   - Dropdown to switch between profiles
   - Show active profile indicator
   - Add "New Profile" option
   - _Requirements: 31_
 
-### 13. Workout Library
+### P2.13 Workout Library
 
-- [ ] 13.1 Create WorkoutLibrary types
+- [ ] P2.13.1 Create WorkoutLibrary types
   - Define WorkoutLibraryItem interface
   - Add metadata (tags, dates)
   - Create Zod schemas
   - _Requirements: 21_
 
-- [ ] 13.2 Implement library storage
+- [ ] P2.13.2 Implement library storage
   - Save workouts to IndexedDB
   - Load library on app init
   - Handle storage quota exceeded
   - _Requirements: 21_
 
-- [ ] 13.3 Create WorkoutLibrary UI
+- [ ] P2.13.3 Create WorkoutLibrary UI
   - List view of saved workouts
   - Search and filter functionality
   - Load, delete, duplicate actions
   - _Requirements: 21_
 
-### 14. Theme System
+### P2.14 Theme System
 
-- [ ] 14.1 Implement theme provider
+- [ ] P2.14.1 Implement theme provider
   - Create ThemeContext with light/dark themes
   - Detect system preference
   - Persist theme choice in localStorage
   - _Requirements: 13_
 
-- [ ] 14.2 Create theme toggle UI
+- [ ] P2.14.2 Create theme toggle UI
   - Add theme switcher button
   - Show current theme icon
   - Smooth transition between themes
   - _Requirements: 13_
 
-- [ ] 14.3 Implement Kiroween theme
+- [ ] P2.14.3 Implement Kiroween theme
   - Add Kiroween color palette
   - Create ghost decoration components
   - Add feature flag for easy removal
   - _Requirements: 13_
 
-### 15. Copy/Paste Functionality
+### P2.15 Copy/Paste Functionality
 
-- [ ] 15.1 Implement copy to clipboard
+- [ ] P2.15.1 Implement copy to clipboard
   - Add copy button to StepCard
   - Store step data in Zustand clipboard state
   - Show confirmation notification
   - _Requirements: 20_
 
-- [ ] 15.2 Implement paste from clipboard
+- [ ] P2.15.2 Implement paste from clipboard
   - Add paste button to UI
   - Insert copied step at cursor position
   - Recalculate step indices
   - _Requirements: 20_
 
-### 16. Keyboard Shortcuts
+### P2.16 Keyboard Shortcuts
 
-- [ ] 16.1 Implement global keyboard shortcuts
+- [ ] P2.16.1 Implement global keyboard shortcuts
   - Ctrl/Cmd+Z for undo
   - Ctrl/Cmd+Y for redo
   - Ctrl/Cmd+S for save
   - _Requirements: 29_
 
-- [ ] 16.2 Implement context-specific shortcuts
+- [ ] P2.16.2 Implement context-specific shortcuts
   - Ctrl/Cmd+D for duplicate (when step selected)
   - Delete for delete (when step selected)
   - Escape to cancel editing
   - _Requirements: 29_
 
-## Phase 4: Advanced Features (P3)
+## P3: Advanced Features
 
-### 17. Workout Templates
+### P3.17 Workout Templates
 
-- [ ] 17.1 Create template types and data
+- [ ] P3.17.1 Create template types and data
   - Define WorkoutTemplate interface
   - Create 5 predefined templates (intervals, pyramid, threshold, recovery, endurance)
   - Add template metadata
   - _Requirements: 11_
 
-- [ ] 17.2 Create TemplateLibrary UI
+- [ ] P3.17.2 Create TemplateLibrary UI
   - Grid view of templates
   - Template preview
   - Apply template button
   - _Requirements: 11_
 
-- [ ] 17.3 Implement custom templates
+- [ ] P3.17.3 Implement custom templates
   - Save current workout as template
   - Store in IndexedDB
   - Edit and delete custom templates
   - _Requirements: 11_
 
-### 18. Export to FIT/TCX/PWX
+### P3.18 Export to FIT/TCX/PWX
 
-- [ ] 18.1 Integrate @kaiord/core conversion
+- [ ] P3.18.1 Integrate @kaiord/core conversion
   - Import conversion functions
   - Handle async conversion
   - Manage conversion errors
   - _Requirements: 12_
 
-- [ ] 18.2 Create export UI
+- [ ] P3.18.2 Create export UI
   - Format selector (FIT, TCX, PWX)
   - Export button
   - Show conversion progress
   - _Requirements: 12_
 
-- [ ] 18.3 Trigger file download
+- [ ] P3.18.3 Trigger file download
   - Generate file with correct extension
   - Use workout name as filename
   - Show success notification
   - _Requirements: 12_
 
-### 19. Workout Chart Visualization
+### P3.19 Workout Chart Visualization
 
-- [ ] 19.1 Install and configure Recharts
+- [ ] P3.19.1 Install and configure Recharts
   - Set up chart components
   - Configure responsive container
   - Style charts for themes
   - _Requirements: 18_
 
-- [ ] 19.2 Create WorkoutChart organism
+- [ ] P3.19.2 Create WorkoutChart organism
   - Plot intensity/power over time
   - Handle time-based and distance-based workouts
   - Show repetition blocks
   - _Requirements: 18_
 
-- [ ] 19.3 Add chart interactivity
+- [ ] P3.19.3 Add chart interactivity
   - Hover tooltips with step details
   - Click to select step
   - Highlight selected step
   - _Requirements: 18_
 
-### 20. Search and Filter
+### P3.20 Search and Filter
 
-- [ ] 20.1 Create SearchBar molecule
+- [ ] P3.20.1 Create SearchBar molecule
   - Text input for search
   - Clear button
   - Debounced search
   - _Requirements: 19_
 
-- [ ] 20.2 Implement search logic
+- [ ] P3.20.2 Implement search logic
   - Filter steps by name
   - Highlight matching steps
   - Show "no results" message
   - _Requirements: 19_
 
-- [ ] 20.3 Add filter controls
+- [ ] P3.20.3 Add filter controls
   - Filter by target type
   - Filter by intensity
   - Combine with search
   - _Requirements: 19_
 
-### 21. Internationalization
+### P3.21 Internationalization
 
-- [ ] 21.1 Set up react-i18next
+- [ ] P3.21.1 Set up react-i18next
   - Install and configure i18next
   - Create translation files for 5 languages
   - Set up language detection
   - _Requirements: 14_
 
-- [ ] 21.2 Translate UI strings
+- [ ] P3.21.2 Translate UI strings
   - Extract all hardcoded strings
   - Add translation keys
   - Implement useTranslation hook
   - _Requirements: 14_
 
-- [ ] 21.3 Add language selector
+- [ ] P3.21.3 Add language selector
   - Dropdown with language options
   - Persist language choice
   - Update on selection
   - _Requirements: 14_
 
-- [ ] 21.4 Implement locale formatting
+- [ ] P3.21.4 Implement locale formatting
   - Format numbers by locale
   - Format dates by locale
   - Handle pluralization
   - _Requirements: 14_
 
-### 22. Advanced Calculations
+### P3.22 Advanced Calculations
 
-- [ ] 22.1 Implement TSS/IF calculator
+- [ ] P3.22.1 Implement TSS/IF calculator
   - Calculate Training Stress Score
   - Calculate Intensity Factor
   - Use profile FTP for calculations
   - _Requirements: 24_
 
-- [ ] 22.2 Implement calorie estimator
+- [ ] P3.22.2 Implement calorie estimator
   - Calculate based on power data
   - Calculate based on heart rate data
   - Use profile body weight
   - _Requirements: 25_
 
-- [ ] 22.3 Display calculations in UI
+- [ ] P3.22.3 Display calculations in UI
   - Add to WorkoutStats component
   - Show when profile data available
   - Update in real-time
   - _Requirements: 24, 25_
 
-### 23. Unit System
+### P3.23 Unit System
 
-- [ ] 23.1 Implement unit conversion utilities
+- [ ] P3.23.1 Implement unit conversion utilities
   - Metric to imperial conversions
   - Imperial to metric conversions
   - Handle distance, speed, weight
   - _Requirements: 26_
 
-- [ ] 23.2 Add unit system selector
+- [ ] P3.23.2 Add unit system selector
   - Toggle between metric/imperial
   - Persist preference
   - Update all displays
   - _Requirements: 26_
 
-### 24. Swimming-Specific Features
+### P3.24 Swimming-Specific Features
 
-- [ ] 24.1 Add pool configuration
+- [ ] P3.24.1 Add pool configuration
   - Pool length selector (25m, 50m, 25yd, custom)
   - Show when sport is swimming
   - Persist with workout
   - _Requirements: 27_
 
-- [ ] 24.2 Add swim stroke selector
+- [ ] P3.24.2 Add swim stroke selector
   - Dropdown with stroke types
   - Show in StepEditor for swimming
   - Display in StepCard
   - _Requirements: 27_
 
-- [ ] 24.3 Add equipment selector
+- [ ] P3.24.3 Add equipment selector
   - Multi-select for equipment
   - Show in StepEditor for swimming
   - Display in StepCard
   - _Requirements: 27_
 
-- [ ] 24.4 Implement lap counter
+- [ ] P3.24.4 Implement lap counter
   - Calculate laps from distance and pool length
   - Display in StepCard
   - Show total laps in WorkoutStats
   - _Requirements: 28_
 
-### 25. Import from URL
+### P3.25 Import from URL
 
-- [ ] 25.1 Create URL import UI
+- [ ] P3.25.1 Create URL import UI
   - Input field for URL
   - Import button
   - Loading state
   - _Requirements: 22_
 
-- [ ] 25.2 Implement fetch and parse
+- [ ] P3.25.2 Implement fetch and parse
   - Fetch content from URL
   - Parse as JSON
   - Validate as KRD
   - _Requirements: 22_
 
-- [ ] 25.3 Handle import errors
+- [ ] P3.25.3 Handle import errors
   - Network errors
   - Invalid JSON
   - Invalid KRD
   - _Requirements: 22, 36_
 
-### 26. Workout Sharing
+### P3.26 Workout Sharing
 
-- [ ] 26.1 Implement share link generation
+- [ ] P3.26.1 Implement share link generation
   - Encode workout data in URL
   - Generate shareable link
   - Copy to clipboard
   - _Requirements: 23_
 
-- [ ] 26.2 Implement share code generation
+- [ ] P3.26.2 Implement share code generation
   - Generate short alphanumeric code (6-8 chars)
   - Store workout with code (future backend)
   - Copy code to clipboard
   - _Requirements: 23_
 
-- [ ] 26.3 Implement share code import
+- [ ] P3.26.3 Implement share code import
   - Input field for share code
   - Retrieve workout (future backend)
   - Load into editor
   - _Requirements: 23_
 
-### 27. Profile Import/Export
+### P3.27 Profile Import/Export
 
-- [ ] 27.1 Implement profile export
+- [ ] P3.27.1 Implement profile export
   - Generate JSON with all profile data
   - Trigger file download
   - Show success notification
   - _Requirements: 38_
 
-- [ ] 27.2 Implement profile import
+- [ ] P3.27.2 Implement profile import
   - File input for profile JSON
   - Validate profile data
   - Add to profile list
   - _Requirements: 38_
 
-### 28. Notifications System
+### P3.28 Notifications System
 
-- [ ] 28.1 Create Toast/Snackbar component
+- [ ] P3.28.1 Create Toast/Snackbar component
   - Success, error, warning, info variants
   - Auto-dismiss after timeout
   - Manual dismiss button
   - _Requirements: 39_
 
-- [ ] 28.2 Implement notification manager
+- [ ] P3.28.2 Implement notification manager
   - Queue for multiple notifications
   - Position configuration
   - Animation transitions
   - _Requirements: 39_
 
-- [ ] 28.3 Add notifications throughout app
+- [ ] P3.28.3 Add notifications throughout app
   - Save success
   - Copy confirmation
   - Delete with undo
   - Profile switch
   - _Requirements: 39_
 
-### 29. Onboarding and Help
+### P3.29 Onboarding and Help
 
-- [ ] 29.1 Create onboarding tutorial
+- [ ] P3.29.1 Create onboarding tutorial
   - Welcome screen
   - Feature highlights
   - Interactive walkthrough
   - Skip option
   - _Requirements: 37_
 
-- [ ] 29.2 Add contextual tooltips
+- [ ] P3.29.2 Add contextual tooltips
   - Tooltip component
   - Add to complex UI elements
   - Keyboard shortcut hints
   - _Requirements: 37_
 
-- [ ] 29.3 Create help documentation
+- [ ] P3.29.3 Create help documentation
   - Help page with sections
   - Examples and screenshots
   - FAQ section
   - _Requirements: 37_
 
-### 30. PWA Features
+### P3.30 PWA Features
 
-- [ ] 30.1 Configure Vite PWA plugin
+- [ ] P3.30.1 Configure Vite PWA plugin
   - Install vite-plugin-pwa
   - Configure manifest.json
   - Set up service worker
   - _Requirements: 34_
 
-- [ ] 30.2 Implement offline functionality
+- [ ] P3.30.2 Implement offline functionality
   - Cache static assets
   - Cache workout data
   - Queue offline changes
   - _Requirements: 34_
 
-- [ ] 30.3 Add update notification
+- [ ] P3.30.3 Add update notification
   - Detect new version
   - Show update prompt
   - Reload to update
   - _Requirements: 34_
 
-### 31. Accessibility Enhancements
+### P3.31 Accessibility Enhancements
 
-- [ ] 31.1 Add ARIA labels and roles
+- [ ] P3.31.1 Add ARIA labels and roles
   - Label all interactive elements
   - Add proper roles
   - Implement focus management
   - _Requirements: 35_
 
-- [ ] 31.2 Ensure color contrast
+- [ ] P3.31.2 Ensure color contrast
   - Audit all color combinations
   - Fix contrast issues
   - Test with color blindness simulators
   - _Requirements: 35_
 
-- [ ] 31.3 Add keyboard navigation
+- [ ] P3.31.3 Add keyboard navigation
   - Tab order for all interactive elements
   - Focus indicators
   - Keyboard shortcuts documentation
   - _Requirements: 35_
 
-### 32. Performance Optimization
+### P3.32 Performance Optimization
 
-- [ ] 32.1 Implement code splitting
+- [ ] P3.32.1 Implement code splitting
   - Split routes with React.lazy
   - Split heavy components
   - Measure bundle sizes
   - _Requirements: 33_
 
-- [ ] 32.2 Add virtualization for large lists
+- [ ] P3.32.2 Add virtualization for large lists
   - Install @tanstack/react-virtual
   - Virtualize WorkoutList for >50 steps
   - Test performance
   - _Requirements: 33_
 
-- [ ] 32.3 Optimize re-renders
+- [ ] P3.32.3 Optimize re-renders
   - Add React.memo where needed
   - Use useMemo for expensive calculations
   - Use useCallback for stable callbacks
   - _Requirements: 33_
 
-### 33. Analytics and Monitoring
+### P3.33 Analytics and Monitoring
 
-- [ ] 33.1 Implement analytics service
+- [ ] P3.33.1 Implement analytics service
   - Create AnalyticsProvider interface
   - Add Plausible provider (privacy-friendly)
   - Track key events
   - _Requirements: N/A (design feature)_
 
-- [ ] 33.2 Add Web Vitals tracking
+- [ ] P3.33.2 Add Web Vitals tracking
   - Track CLS, FID, FCP, LCP, TTFB
   - Report to analytics
   - Monitor performance
   - _Requirements: 33_
 
-- [ ] 33.3 Set up error tracking
+- [ ] P3.33.3 Set up error tracking
   - Configure Sentry (optional)
   - Track errors with context
   - Filter sensitive data
   - _Requirements: 36_
 
-### 34. Testing
+### P3.34 Testing
 
-- [ ]\* 34.1 Set up testing infrastructure
+- [ ]\* P3.34.1 Set up testing infrastructure
   - Configure Vitest
   - Set up React Testing Library
   - Configure test coverage
   - _Requirements: N/A (quality assurance)_
 
-- [ ]\* 34.2 Write unit tests for core logic
+- [ ]\* P3.34.2 Write unit tests for core logic
   - Test state management
   - Test validation functions
   - Test calculation utilities
   - _Requirements: N/A (quality assurance)_
 
-- [ ]\* 34.3 Write component tests
+- [ ]\* P3.34.3 Write component tests
   - Test key components
   - Test user interactions
   - Test accessibility
   - _Requirements: N/A (quality assurance)_
 
-- [ ]\* 34.4 Set up E2E tests with Playwright
+- [ ]\* P3.34.4 Set up E2E tests with Playwright
   - Configure Playwright
   - Write critical path tests
   - Add to CI pipeline

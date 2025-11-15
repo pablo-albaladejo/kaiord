@@ -5,8 +5,24 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
+    // Ignore patterns first
+    ignores: [
+      "**/dist/**",
+      "**/coverage/**",
+      "**/node_modules/**",
+      "**/*.config.js",
+      "**/*.config.ts",
+      "**/scripts/**",
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/*.stories.ts",
+      "**/*.stories.tsx",
+      "**/tests/**/*.ts",
+    ],
+  },
+  {
     files: ["**/*.ts", "**/*.tsx"],
-    ignores: ["**/*.test.ts", "**/*.spec.ts", "**/tests/**/*.ts"],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
@@ -75,16 +91,5 @@ export default tseslint.config(
     rules: {
       "max-lines": "off",
     },
-  },
-  {
-    // Ignore patterns
-    ignores: [
-      "**/dist/**",
-      "**/coverage/**",
-      "**/node_modules/**",
-      "**/*.config.js",
-      "**/*.config.ts",
-      "**/scripts/**",
-    ],
   }
 );
