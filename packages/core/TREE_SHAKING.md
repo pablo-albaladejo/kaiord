@@ -11,9 +11,12 @@ Tree-shaking is a technique used by modern bundlers (webpack, rollup, esbuild, v
 ### ✅ Good: Import Only What You Need
 
 ```typescript
-// Import specific items
+// Import specific items from main package
 import { krdSchema, sportSchema } from "@kaiord/core";
 import type { KRD, Sport } from "@kaiord/core";
+
+// Import test utilities separately (not included in production bundles)
+import { loadKrdFixture } from "@kaiord/core/test-utils";
 
 // Only krdSchema, sportSchema, and their dependencies are bundled
 ```
@@ -124,6 +127,10 @@ Excludes Garmin FIT SDK if not imported.
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./test-utils": {
+      "import": "./dist/test-utils/index.js",
+      "types": "./dist/test-utils/index.d.ts"
     }
   }
 }
@@ -131,7 +138,7 @@ Excludes Garmin FIT SDK if not imported.
 
 - **`type: "module"`**: Uses ES modules
 - **`sideEffects: false`**: No side effects, safe to tree-shake
-- **`exports`**: Explicit entry points
+- **`exports`**: Explicit entry points (main package + test utilities)
 
 ### tsup.config.ts
 
@@ -151,13 +158,16 @@ Excludes Garmin FIT SDK if not imported.
 
 Real-world bundle sizes (minified + gzipped):
 
-| Import Pattern    | Size   | What's Included         |
-| ----------------- | ------ | ----------------------- |
-| Types only        | 0 KB   | Compile-time only       |
-| Schema validation | ~15 KB | Zod schemas             |
-| Domain schemas    | ~20 KB | All KRD schemas         |
-| Single use case   | ~40 KB | Use case + dependencies |
-| Full providers    | ~80 KB | Everything              |
+| Import Pattern    | Size   | What's Included                  |
+| ----------------- | ------ | -------------------------------- |
+| Types only        | 0 KB   | Compile-time only                |
+| Schema validation | ~15 KB | Zod schemas                      |
+| Domain schemas    | ~20 KB | All KRD schemas                  |
+| Single use case   | ~40 KB | Use case + dependencies          |
+| Full providers    | ~80 KB | Everything                       |
+| Test utilities    | N/A    | Not included in production build |
+
+**Note:** Test utilities (`@kaiord/core/test-utils`) are separate exports intended for development/testing only and should not be included in production bundles.
 
 ## 🧪 Testing Tree-Shaking
 
