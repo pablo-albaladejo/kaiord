@@ -33,7 +33,7 @@ function App() {
 
 ## Layout Structure
 
-```
+```text
 ┌─────────────────────────────────────┐
 │ Header (sticky)                     │
 │ - Logo + Title                      │

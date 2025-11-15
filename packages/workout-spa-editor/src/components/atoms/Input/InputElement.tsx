@@ -1,6 +1,7 @@
 import {
   forwardRef,
   type InputHTMLAttributes,
+  type Ref,
   type SelectHTMLAttributes,
 } from "react";
 import type { InputVariant, SelectInputProps } from "./Input.types";
@@ -32,7 +33,7 @@ export const InputElement = forwardRef<
     const { options, ...selectProps } = props as SelectInputProps;
     return (
       <select
-        ref={ref as React.Ref<HTMLSelectElement>}
+        ref={ref as Ref<HTMLSelectElement>}
         id={inputId}
         className={inputClasses}
         aria-invalid={hasError}
@@ -51,7 +52,7 @@ export const InputElement = forwardRef<
   const inputType = variant === "number" ? "number" : "text";
   return (
     <input
-      ref={ref as React.Ref<HTMLInputElement>}
+      ref={ref as Ref<HTMLInputElement>}
       type={inputType}
       id={inputId}
       className={inputClasses}

@@ -20,15 +20,15 @@ src/
 
 ## Import Conventions
 
-**NO BARREL EXPORTS** - Import directly from source files to enable optimal tree-shaking and bundle optimization.
+**DIRECT IMPORTS ONLY** - Always import directly from source files to enable optimal tree-shaking and bundle optimization.
 
-### ✅ Correct - Direct imports
+### ✅ Correct - Direct imports from source files
 
 ```typescript
-// Import components directly from their files
-import { Button } from "@/components/atoms/Button";
-import { StepCard } from "@/components/molecules/StepCard";
-import { WorkoutList } from "@/components/organisms/WorkoutList";
+// Import components directly from their source files
+import { Button } from "@/components/atoms/Button/Button";
+import { StepCard } from "@/components/molecules/StepCard/StepCard";
+import { WorkoutList } from "@/components/organisms/WorkoutList/WorkoutList";
 
 // Import hooks directly
 import { useWorkout } from "@/hooks/useWorkout";
@@ -46,10 +46,20 @@ import { formatDuration } from "@/utils/formatters";
 ### ❌ Incorrect - Barrel exports (DO NOT USE)
 
 ```typescript
-// DON'T create or use index.ts barrel exports
+// DON'T use index.ts barrel exports (even though they exist)
 import { Button } from "@/components/atoms"; // ❌ NO
+import { Button } from "@/components/atoms/Button"; // ❌ NO (uses index.ts)
 import { useWorkout } from "@/hooks"; // ❌ NO
 ```
+
+### Note on Existing index.ts Files
+
+Some `index.ts` files exist in the codebase for legacy reasons or future extensibility, but they are **not used** in imports. Always import directly from the source file (e.g., `Button.tsx`, `StepCard.tsx`) to ensure:
+
+- **Optimal tree-shaking**: Bundler can eliminate unused code more effectively
+- **Faster builds**: No intermediate re-export resolution
+- **Clear dependencies**: Explicit file paths make refactoring safer
+- **Better IDE support**: Direct imports provide more accurate jump-to-definition
 
 ## Path Aliases
 
