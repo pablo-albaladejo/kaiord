@@ -783,6 +783,7 @@ describe("useWorkoutStore", () => {
     });
   });
 
+<<<<<<< HEAD
   describe("createStep", () => {
     it("should add a new step with default values to the end of the workout", () => {
       // Arrange
@@ -1223,6 +1224,8 @@ describe("useWorkoutStore", () => {
     });
   });
 
+=======
+>>>>>>> bc5ff7c (feat(workout-spa-editor): Implement core component library and deployment pipeline)
   describe("selector hooks", () => {
     it("should provide access to currentWorkout", () => {
       // Arrange
