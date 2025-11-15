@@ -13,6 +13,8 @@ export default tseslint.config(
       "**/*.test.ts",
       "**/*.test.tsx",
       "**/*.spec.ts",
+      "**/*.stories.ts",
+      "**/*.stories.tsx",
       "**/tests/**/*.ts",
     ],
     languageOptions: {

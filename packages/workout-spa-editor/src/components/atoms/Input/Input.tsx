@@ -25,6 +25,21 @@ const buildInputClasses = (
     .join(" ");
 };
 
+const buildInputClasses = (
+  hasError: boolean,
+  size: "sm" | "md" | "lg",
+  className: string
+): string => {
+  return [
+    baseInputClasses,
+    hasError ? errorStateClasses : normalStateClasses,
+    sizeClasses[size],
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+};
+
 export const Input = forwardRef<
   HTMLInputElement | HTMLSelectElement,
   InputProps
