@@ -94,9 +94,9 @@ describe("FileUpload", () => {
 
     // Assert
     await waitFor(() => {
-      expect(onError).toHaveBeenCalledWith(
-        expect.stringContaining("Failed to parse JSON")
-      );
+      expect(onError).toHaveBeenCalled();
+      const [[errorMessage]] = vi.mocked(onError).mock.calls;
+      expect(errorMessage).toContain("Failed to parse JSON");
     });
   });
 

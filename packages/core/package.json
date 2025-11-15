@@ -18,6 +18,7 @@
   ],
   "scripts": {
     "generate:schema": "tsx scripts/generate-schema.ts",
+    "generate:krd-fixtures": "tsx scripts/generate-krd-fixtures.ts",
     "prebuild": "pnpm run generate:schema",
     "build": "pnpm run generate:schema && tsup",
     "test": "vitest --run",

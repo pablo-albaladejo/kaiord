@@ -80,7 +80,7 @@
           "target": {
             "type": "heart_rate",
             "value": {
-              "unit": "bpm",
+              "unit": "percent_max",
               "value": 80
             }
           },

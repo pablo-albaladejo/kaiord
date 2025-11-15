@@ -24,8 +24,14 @@ fixtures/
 ├── target/                      # Target-related fixtures
 ├── fit/                         # FIT-specific fixtures
 ├── krd/                         # KRD-specific fixtures
-├── fit-files/                   # Binary FIT test files
-├── krd-files/                   # JSON KRD test files
+├── fit-files/                   # Binary FIT test files (source)
+├── krd-files/                   # JSON KRD test files (generated from FIT)
+│   ├── WorkoutIndividualSteps.krd
+│   ├── WorkoutRepeatSteps.krd
+│   ├── WorkoutRepeatGreaterThanStep.krd
+│   ├── WorkoutCustomTargetValues.krd
+│   ├── README.md
+│   └── krd-fixtures.test.ts
 └── metadata.fixtures.ts         # Metadata fixtures
 ```
 
@@ -113,7 +119,28 @@ const buildCustomStep = new Factory()
 - Use `.build()` to generate a single instance
 - Use `.buildList(n)` to generate multiple instances
 
+## KRD Test Files
+
+The `krd-files/` directory contains JSON files in KRD format, automatically generated from the FIT test files. These are used for:
+
+- **Golden tests** - Verifying KRD schema compliance
+- **Round-trip tests** - Testing KRD → FIT → KRD conversions
+- **Integration tests** - Testing the complete conversion pipeline
+- **Documentation** - Examples of valid KRD format
+
+### Regenerating KRD Files
+
+If FIT fixtures are updated or conversion logic changes, regenerate the KRD files:
+
+```bash
+cd packages/core
+pnpm run generate:krd-fixtures
+```
+
+This ensures KRD fixtures stay in sync with the source FIT files.
+
 ## References
 
 - [Faker.js Documentation](https://fakerjs.dev/)
 - [Rosie Factory Documentation](https://github.com/rosiejs/rosie)
+- [KRD Format Specification](../../../docs/krd-format.md)

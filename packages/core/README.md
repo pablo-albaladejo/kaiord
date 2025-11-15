@@ -106,11 +106,13 @@ See [TREE_SHAKING.md](./TREE_SHAKING.md) for detailed guide and best practices.
 ## Scripts
 
 ```bash
-pnpm build          # Build the library
-pnpm test           # Run tests once
-pnpm test:watch     # Run tests in watch mode
-pnpm test:coverage  # Run tests with coverage report
-pnpm clean          # Clean build artifacts
+pnpm build                  # Build the library
+pnpm test                   # Run tests once
+pnpm test:watch             # Run tests in watch mode
+pnpm test:coverage          # Run tests with coverage report
+pnpm generate:schema        # Generate JSON Schema from Zod schemas
+pnpm generate:krd-fixtures  # Generate KRD test fixtures from FIT files
+pnpm clean                  # Clean build artifacts
 ```
 
 ## Testing
