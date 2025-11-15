@@ -52,6 +52,17 @@ The Workout SPA Editor is a modern, mobile-first React application built with Ty
 └─────────────────────────────────────────────────────────────┘
 ```
 
+**@kaiord/core Integration:**
+
+The application leverages `@kaiord/core` as a workspace dependency to:
+
+- Import canonical KRD types (`Workout`, `WorkoutStep`, `RepetitionBlock`, `Duration`, `Target`, etc.)
+- Re-export Zod schemas for validation (`workoutSchema`, `workoutStepSchema`, etc.)
+- Enable format conversion (KRD ↔ FIT/TCX/PWX) for import/export features
+- Ensure type consistency across the Kaiord ecosystem
+
+This integration eliminates type duplication and ensures the SPA editor works with the same data structures used by the CLI and core library.
+
 ### Technology Stack
 
 **Core:**
@@ -74,7 +85,7 @@ The Workout SPA Editor is a modern, mobile-first React application built with Ty
 **Data & Validation:**
 
 - Zod (schema validation)
-- @kaiord/core (KRD conversion)
+- @kaiord/core (KRD types, schemas, and format conversion)
 
 **Charts & Visualization:**
 
@@ -178,6 +189,8 @@ interface WorkoutChartProps {
 ## Data Models
 
 ### Core Domain Types
+
+**Note:** Core KRD types (`Workout`, `WorkoutStep`, `RepetitionBlock`, `Duration`, `Target`, etc.) are imported from `@kaiord/core` to ensure consistency with the canonical format and enable seamless conversion to/from FIT, TCX, and PWX formats.
 
 **UserProfile:**
 

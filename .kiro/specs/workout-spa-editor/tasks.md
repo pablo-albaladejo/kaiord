@@ -19,19 +19,19 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - Set up ESLint and Prettier
   - _Requirements: 33_
 
-- [ ] P0.1.2 Install and configure core dependencies
+- [x] P0.1.2 Install and configure core dependencies
   - Install Zustand, Zod, Tailwind CSS, Radix UI
   - Configure Tailwind with base theme
   - Set up path aliases (@/ for src/)
   - _Requirements: 33_
 
-- [ ] P0.1.3 Set up project structure
+- [x] P0.1.3 Set up project structure
   - Create folder structure (components/atoms, molecules, organisms, pages, hooks, store, types)
   - Create barrel exports for clean imports
   - Set up absolute imports
   - _Requirements: 33_
 
-- [ ] P0.1.4 Configure GitHub Pages deployment
+- [x] P0.1.4 Configure GitHub Pages deployment
   - Create GitHub Actions workflow for build and deploy
   - Configure base path for GitHub Pages
   - Set up environment variables
@@ -39,27 +39,28 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 ### P0.2 Core Domain Types and Validation
 
-- [ ] P0.2.1 Define KRD types from @kaiord/core
-  - Import and re-export KRD types
-  - Create type guards for WorkoutStep vs RepetitionBlock
-  - Define helper types for UI state
+- [x] P0.2.1 Define KRD types from @kaiord/core
+  - ✅ Import and re-export KRD types from @kaiord/core package
+  - ✅ Create type guards for WorkoutStep vs RepetitionBlock
+  - ✅ Define helper types for UI state
   - _Requirements: 1, 2, 3_
+  - _Note: @kaiord/core dependency added to package.json_
 
-- [ ] P0.2.2 Create Zod schemas for validation
-  - Create schemas for WorkoutStep, RepetitionBlock, Workout
-  - Add real-time validation helpers
-  - Create validation error formatters
+- [x] P0.2.2 Create Zod schemas for validation
+  - ✅ Re-export schemas from @kaiord/core (workoutSchema, workoutStepSchema, etc.)
+  - ✅ Add UI-specific schemas (WorkoutLibraryItemSchema, UserProfileSchema)
+  - ✅ Create validation error formatters
   - _Requirements: 6, 7, 17_
 
 ### P0.3 Basic State Management
 
-- [ ] P0.3.1 Create Zustand store for workout state
+- [x] P0.3.1 Create Zustand store for workout state
   - Define store interface with workout, selectedStepId, isEditing
   - Implement loadWorkout, updateWorkout actions
   - Implement selectStep action
   - _Requirements: 1, 2, 3_
 
-- [ ] P0.3.2 Implement undo/redo functionality
+- [x] P0.3.2 Implement undo/redo functionality
   - Add workoutHistory and historyIndex to store
   - Implement undo() and redo() actions
   - Limit history to 50 states
@@ -67,25 +68,25 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 ### P0.4 Basic UI Components (Atoms)
 
-- [ ] P0.4.1 Create Button component
+- [x] P0.4.1 Create Button component
   - Implement variants (primary, secondary, ghost, danger)
   - Add size variants (sm, md, lg)
   - Add loading and disabled states
   - _Requirements: 2, 3, 5_
 
-- [ ] P0.4.2 Create Input component
+- [x] P0.4.2 Create Input component
   - Implement text, number, select variants
   - Add error state styling
   - Add label and helper text support
   - _Requirements: 2, 3, 17_
 
-- [ ] P0.4.3 Create Badge component
+- [x] P0.4.3 Create Badge component
   - Implement color variants for intensity levels
   - Add size variants
   - Support icons
   - _Requirements: 1, 10_
 
-- [ ] P0.4.4 Create Icon component
+- [x] P0.4.4 Create Icon component
   - Set up icon library (lucide-react)
   - Create icon wrapper with size variants
   - Add color support
@@ -93,19 +94,19 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 ### P0.5 Workout Visualization (MVP)
 
-- [ ] P0.5.1 Create StepCard molecule
+- [x] P0.5.1 Create StepCard molecule
   - Display step index, duration, target, intensity
   - Show color coding by intensity
   - Add icons for target types
   - _Requirements: 1, 10_
 
-- [ ] P0.5.2 Create WorkoutList organism
+- [x] P0.5.2 Create WorkoutList organism
   - Render list of StepCard components
   - Handle step selection
   - Display repetition blocks visually grouped
   - _Requirements: 1_
 
-- [ ] P0.5.3 Create basic page layout
+- [x] P0.5.3 Create basic page layout
   - Create MainLayout template with header and content area
   - Add app title and basic navigation
   - Make responsive for mobile
@@ -113,19 +114,19 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 ### P0.6 File Loading (MVP)
 
-- [ ] P0.6.1 Implement file upload functionality
+- [x] P0.6.1 Implement file upload functionality
   - Create file input component
   - Parse JSON file content
   - Validate against KRD schema
   - _Requirements: 7_
 
-- [ ] P0.6.2 Handle file loading errors
+- [x] P0.6.2 Handle file loading errors
   - Display validation errors with field references
   - Show user-friendly error messages
   - Add retry functionality
   - _Requirements: 7, 36_
 
-- [ ] P0.6.3 Load workout into state
+- [x] P0.6.3 Load workout into state
   - Parse KRD file
   - Load into Zustand store
   - Display in WorkoutList

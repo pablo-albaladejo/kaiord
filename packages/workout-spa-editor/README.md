@@ -17,11 +17,13 @@ A mobile-first single-page application for creating, editing, and managing KRD w
 - **React 19** - UI framework
 - **TypeScript 5** - Type safety
 - **Vite 7** - Build tool and dev server
+- **@kaiord/core** - Core KRD types, schemas, and conversion utilities
+- **Zustand 5** - State management (to be added)
+- **Zod 3** - Schema validation (to be added)
+- **Tailwind CSS 4** - Utility-first CSS framework (to be added)
+- **Radix UI** - Accessible component primitives (to be added)
+  - Dialog, Dropdown Menu, Select, Tabs, Toast, Tooltip, Switch, Slider
 - **Prettier 3** - Code formatting
-- **Zustand** - State management (to be added)
-- **Zod** - Schema validation (to be added)
-- **Tailwind CSS** - Styling (to be added)
-- **Radix UI** - Accessible components (to be added)
 
 ## Development
 

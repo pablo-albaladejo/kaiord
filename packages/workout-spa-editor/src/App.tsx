@@ -1,34 +1,68 @@
-import { useState } from "react";
-import reactLogo from "./assets/react.svg";
-import viteLogo from "/vite.svg";
 import "./App.css";
+import { WelcomeSection } from "./components/pages/WelcomeSection";
+import { WorkoutSection } from "./components/pages/WorkoutSection";
+import { MainLayout } from "./components/templates/MainLayout";
+import {
+  useCurrentWorkout,
+  useLoadWorkout,
+  useSelectStep,
+  useSelectedStepId,
+} from "./store/workout-store-selectors";
+import type { KRD, ValidationError, Workout } from "./types/krd";
 
+/**
+ * Main App Component
+ *
+ * Integrates file upload, workout state management, and workout display.
+ * Implements Requirements 1 and 7:
+ * - Requirement 1: Display workout structure in clear visual format
+ * - Requirement 7: Load existing KRD files
+ */
 function App() {
-  const [count, setCount] = useState(0);
+  const currentWorkout = useCurrentWorkout();
+  const selectedStepId = useSelectedStepId();
+  const loadWorkout = useLoadWorkout();
+  const selectStep = useSelectStep();
+
+  // Extract workout from KRD extensions (type assertion needed due to z.record(z.unknown()))
+  const workout = currentWorkout?.extensions?.workout as Workout | undefined;
+
+  const handleFileLoad = (krd: KRD) => {
+    // Load the workout into the store (Requirement 7)
+    loadWorkout(krd);
+  };
+
+  const handleFileError = (
+    error: string,
+    validationErrors?: Array<ValidationError>
+  ) => {
+    // Error handling is done by FileUpload component
+    console.error("File load error:", error, validationErrors);
+  };
+
+  const handleStepSelect = (stepIndex: number) => {
+    // Select step by creating a unique ID (Requirement 1)
+    selectStep(`step-${stepIndex}`);
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+    <MainLayout>
+      <div className="space-y-6">
+        {!workout && (
+          <WelcomeSection
+            onFileLoad={handleFileLoad}
+            onFileError={handleFileError}
+          />
+        )}
+        {workout && (
+          <WorkoutSection
+            workout={workout}
+            selectedStepId={selectedStepId}
+            onStepSelect={handleStepSelect}
+          />
+        )}
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
+    </MainLayout>
   );
 }
 
