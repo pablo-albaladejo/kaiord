@@ -1,22 +1,8 @@
-import { useState } from "react";
-import {
-  getCurrentUnit,
-  getRangeMaxString,
-  getRangeMinString,
-  getTargetTypeFromValue,
-  getUnitOptions,
-  getValueLabel,
-  getValuePlaceholder,
-  getValueString,
-} from "./helpers";
-import {
-  useRangeChange,
-  useTypeChange,
-  useUnitChange,
-  useValueChange,
-} from "./hooks";
+import { getUnitOptions, getValueLabel, getValuePlaceholder } from "./helpers";
 import type { TargetPickerProps } from "./TargetPicker.types";
 import { TargetPickerFields } from "./TargetPickerFields";
+import { useTargetPickerHandlers } from "./useTargetPickerHandlers";
+import { useTargetPickerState } from "./useTargetPickerState";
 
 export const TargetPicker = ({
   value,
@@ -25,80 +11,41 @@ export const TargetPicker = ({
   disabled = false,
   className = "",
 }: TargetPickerProps) => {
-  const [targetType, setTargetType] = useState<
-    "power" | "heart_rate" | "pace" | "cadence" | "open"
-  >(getTargetTypeFromValue(value));
-  const [unit, setUnit] = useState<string>(getCurrentUnit(value));
-  const [targetValue, setTargetValue] = useState<string>(getValueString(value));
-  const [minValue, setMinValue] = useState<string>(getRangeMinString(value));
-  const [maxValue, setMaxValue] = useState<string>(getRangeMaxString(value));
-  const [validationError, setValidationError] = useState<string>("");
+  const state = useTargetPickerState(value);
 
-  const handleTypeChange = useTypeChange(
+  const handlers = useTargetPickerHandlers({
+    targetType: state.targetType,
+    unit: state.unit,
+    maxValue: state.maxValue,
+    minValue: state.minValue,
     onChange,
-    setTargetType,
-    setValidationError,
-    setUnit,
-    setTargetValue,
-    setMinValue,
-    setMaxValue
-  );
+    setTargetType: state.setTargetType,
+    setValidationError: state.setValidationError,
+    setUnit: state.setUnit,
+    setTargetValue: state.setTargetValue,
+    setMinValue: state.setMinValue,
+    setMaxValue: state.setMaxValue,
+  });
 
-  const handleUnitChange = useUnitChange(
-    onChange,
-    setUnit,
-    setValidationError,
-    setTargetValue,
-    setMinValue,
-    setMaxValue
-  );
-
-  const handleValueChange = useValueChange(
-    targetType,
-    unit,
-    onChange,
-    setTargetValue,
-    setValidationError
-  );
-
-  const handleRangeChange = useRangeChange(
-    targetType,
-    unit,
-    onChange,
-    setValidationError
-  );
-
-  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMin = e.target.value;
-    setMinValue(newMin);
-    handleRangeChange(newMin, maxValue);
-  };
-
-  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMax = e.target.value;
-    setMaxValue(newMax);
-    handleRangeChange(minValue, newMax);
-  };
-
-  const displayError = error || validationError;
-  const unitOptions = getUnitOptions(targetType) || [];
+  const displayError = error || state.validationError;
+  const unitOptions = getUnitOptions(state.targetType) || [];
 
   return (
     <div className={`space-y-4 ${className}`}>
       <TargetPickerFields
-        targetType={targetType}
-        unit={unit}
-        targetValue={targetValue}
-        minValue={minValue}
-        maxValue={maxValue}
+        targetType={state.targetType}
+        unit={state.unit}
+        targetValue={state.targetValue}
+        minValue={state.minValue}
+        maxValue={state.maxValue}
         displayError={displayError}
         disabled={disabled}
         unitOptions={unitOptions}
-        onTypeChange={handleTypeChange}
-        onUnitChange={handleUnitChange}
-        onValueChange={handleValueChange}
-        onMinChange={handleMinChange}
-        onMaxChange={handleMaxChange}
+        onTypeChange={handlers.handleTypeChange}
+        onUnitChange={handlers.handleUnitChange}
+        onValueChange={handlers.handleValueChange}
+        onMinChange={handlers.handleMinChange}
+        onMaxChange={handlers.handleMaxChange}
         getValueLabel={getValueLabel}
         getValuePlaceholder={getValuePlaceholder}
       />

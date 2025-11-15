@@ -1,8 +1,7 @@
-import { useState } from "react";
-import type { Duration, Target, WorkoutStep } from "../../../types/krd";
-import { Button } from "../../atoms/Button/Button";
-import { DurationPicker } from "../../molecules/DurationPicker/DurationPicker";
-import { TargetPicker } from "../../molecules/TargetPicker/TargetPicker";
+import type { WorkoutStep } from "../../../types/krd";
+import { StepEditorContent } from "./StepEditorContent";
+import { useStepEditorHandlers } from "./useStepEditorHandlers";
+import { useStepEditorState } from "./useStepEditorState";
 
 export type StepEditorProps = {
   step: WorkoutStep | null;
@@ -17,96 +16,44 @@ export const StepEditor = ({
   onCancel,
   className = "",
 }: StepEditorProps) => {
-  const [duration, setDuration] = useState<Duration>(
-    step?.duration || { type: "time", seconds: 300 }
-  );
-  const [target, setTarget] = useState<Target>(
-    step?.target || { type: "open" }
-  );
-  const [durationError, setDurationError] = useState<string>("");
-  const [targetError, setTargetError] = useState<string>("");
+  const state = useStepEditorState(step);
 
-  const handleDurationChange = (newDuration: Duration | null) => {
-    if (newDuration) {
-      setDuration(newDuration);
-    }
-  };
-
-  const handleTargetChange = (newTarget: Target | null) => {
-    if (newTarget) {
-      setTarget(newTarget);
-    }
-  };
-
-  const handleSave = () => {
-    if (durationError || targetError) {
-      return;
-    }
-
-    if (!step) {
-      return;
-    }
-
-    const updatedStep: WorkoutStep = {
-      ...step,
-      duration,
-      durationType: duration.type,
-      target,
-      targetType: target.type,
-    };
-
-    onSave(updatedStep);
-  };
-
-  const handleCancel = () => {
-    setDuration(step?.duration || { type: "time", seconds: 300 });
-    setTarget(step?.target || { type: "open" });
-    setDurationError("");
-    setTargetError("");
-    onCancel();
-  };
+  const handlers = useStepEditorHandlers({
+    step,
+    duration: state.duration,
+    target: state.target,
+    durationError: state.durationError,
+    targetError: state.targetError,
+    setDuration: state.setDuration,
+    setTarget: state.setTarget,
+    setDurationError: state.setDurationError,
+    setTargetError: state.setTargetError,
+    onSave,
+    onCancel,
+  });
 
   if (!step) {
     return null;
   }
 
-  const hasErrors = Boolean(durationError || targetError);
+  const hasErrors = Boolean(state.durationError || state.targetError);
 
   return (
     <div
       className={`rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 ${className}`}
     >
-      <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-gray-100">
-        Edit Step {step.stepIndex + 1}
-      </h2>
-
-      <div className="space-y-6">
-        <DurationPicker
-          value={duration}
-          onChange={handleDurationChange}
-          error={durationError}
-        />
-
-        <TargetPicker
-          value={target}
-          onChange={handleTargetChange}
-          error={targetError}
-        />
-
-        <div className="flex justify-end gap-3 border-t border-gray-200 pt-6 dark:border-gray-700">
-          <Button variant="secondary" onClick={handleCancel}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={handleSave}
-            disabled={hasErrors}
-            aria-label="Save step changes"
-          >
-            Save
-          </Button>
-        </div>
-      </div>
+      <StepEditorContent
+        stepIndex={step.stepIndex}
+        duration={state.duration}
+        target={state.target}
+        durationError={state.durationError}
+        targetError={state.targetError}
+        hasErrors={hasErrors}
+        onDurationChange={handlers.handleDurationChange}
+        onTargetChange={handlers.handleTargetChange}
+        onSave={handlers.handleSave}
+        onCancel={handlers.handleCancel}
+      />
     </div>
   );
 };
