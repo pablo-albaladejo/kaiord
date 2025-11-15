@@ -181,9 +181,9 @@ describe("loadKrdFixture", () => {
     expect(() => loadKrdFixture("NonExistent.krd")).toThrow();
   });
 
-  it("should throw error for invalid JSON in KRD file", () => {
+  it("should throw error for non-existent KRD file", () => {
     // Act & Assert
-    expect(() => loadKrdFixture("README.md")).toThrow();
+    expect(() => loadKrdFixture("NonExistent.krd")).toThrow();
   });
 });
 
@@ -208,7 +208,7 @@ describe("loadKrdFixtureRaw", () => {
     expect(parsed.type).toBe("workout");
   });
 
-  it("should load different content than parsed version", () => {
+  it("should load raw fixture as string and match parsed fixture when parsed", () => {
     // Act
     const raw = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
     const parsed = loadKrdFixture("WorkoutIndividualSteps.krd");

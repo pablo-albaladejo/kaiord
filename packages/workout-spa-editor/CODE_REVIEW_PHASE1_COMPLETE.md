@@ -41,7 +41,7 @@ Successfully completed Phase 1 of the comprehensive code review, eliminating all
 
 **New Structure**:
 
-```
+```plaintext
 src/types/validation/
 ├── validators.ts      (60 lines) - Core validation functions
 ├── formatters.ts      (35 lines) - Error formatting utilities
@@ -73,7 +73,7 @@ src/types/validation/
 
 **New Structure**:
 
-```
+```plaintext
 src/types/schemas/
 ├── core-exports.ts    (27 lines) - Re-exports from @kaiord/core
 ├── form-schemas.ts    (78 lines) - Form validation schemas
@@ -105,7 +105,7 @@ src/types/schemas/
 
 **New Structure**:
 
-```
+```plaintext
 src/components/molecules/FileUpload/
 ├── FileUpload.tsx      (67 lines) - Presentational component
 ├── useFileUpload.ts    (125 lines) - Business logic hook
