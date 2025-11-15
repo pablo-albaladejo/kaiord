@@ -11,8 +11,9 @@
 
 import { AlertCircle } from "lucide-react";
 import type { ValidationError } from "../../../types/krd";
-import { Button } from "../Button/Button";
 import { Icon } from "../Icon/Icon";
+import { ErrorActions } from "./ErrorActions";
+import { ValidationErrorList } from "./ValidationErrorList";
 
 export type ErrorMessageProps = {
   title: string;
@@ -48,53 +49,10 @@ export const ErrorMessage = ({
               {message}
             </p>
           )}
-          {validationErrors && validationErrors.length > 0 && (
-            <div className="mt-2">
-              <p className="text-sm font-medium text-red-800 dark:text-red-200">
-                Validation errors:
-              </p>
-              <ul className="mt-1 list-inside list-disc space-y-1 text-sm text-red-700 dark:text-red-300">
-                {validationErrors.map((error, index) => {
-                  const fieldPath = error.path.join(".");
-                  return (
-                    <li key={index}>
-                      {fieldPath && (
-                        <>
-                          <span className="font-mono text-xs">{fieldPath}</span>
-                          :{" "}
-                        </>
-                      )}
-                      {error.message}
-                    </li>
-                  );
-                })}
-              </ul>
-            </div>
+          {validationErrors && (
+            <ValidationErrorList errors={validationErrors} />
           )}
-          {(onRetry || onDismiss) && (
-            <div className="mt-3 flex gap-2">
-              {onRetry && (
-                <Button
-                  onClick={onRetry}
-                  variant="secondary"
-                  size="sm"
-                  className="text-red-700 hover:bg-red-100 dark:text-red-300 dark:hover:bg-red-900"
-                >
-                  Try Again
-                </Button>
-              )}
-              {onDismiss && (
-                <Button
-                  onClick={onDismiss}
-                  variant="ghost"
-                  size="sm"
-                  className="text-red-700 hover:bg-red-100 dark:text-red-300 dark:hover:bg-red-900"
-                >
-                  Dismiss
-                </Button>
-              )}
-            </div>
-          )}
+          <ErrorActions onRetry={onRetry} onDismiss={onDismiss} />
         </div>
       </div>
     </div>

@@ -3,8 +3,9 @@ import type { WorkoutStep } from "../../../types/krd";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Icon } from "../../atoms/Icon/Icon";
 import { formatDuration } from "./format-duration";
-import { formatTarget } from "./format-target";
-import { getDurationIcon, getTargetIcon } from "./icons";
+import { getTargetIcon } from "./icons";
+import { StepDetails } from "./StepDetails";
+import { StepHeader } from "./StepHeader";
 
 export type StepCardProps = HTMLAttributes<HTMLDivElement> & {
   step: WorkoutStep;
@@ -15,12 +16,18 @@ export type StepCardProps = HTMLAttributes<HTMLDivElement> & {
 export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
   ({ step, isSelected = false, onSelect, className = "", ...props }, ref) => {
     const targetIcon = getTargetIcon(step.targetType);
-    const durationIcon = getDurationIcon(step.durationType);
     const intensity = step.intensity || "other";
 
     const handleClick = () => {
       if (onSelect) {
         onSelect(step.stepIndex);
+      }
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        handleClick();
       }
     };
 
@@ -40,43 +47,12 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
         onClick={handleClick}
         role="button"
         tabIndex={0}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleClick();
-          }
-        }}
+        onKeyDown={handleKeyDown}
         aria-label={`Step ${step.stepIndex + 1}: ${step.name || formatDuration(step)}`}
         {...props}
       >
-        <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-semibold text-gray-600 dark:text-gray-400">
-            Step {step.stepIndex + 1}
-          </span>
-          <Badge variant={intensity} size="sm">
-            {intensity}
-          </Badge>
-        </div>
-
-        {step.name && (
-          <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
-            {step.name}
-          </h3>
-        )}
-
-        <div className="flex items-center gap-2 mb-2">
-          <Icon icon={durationIcon} size="sm" color="secondary" />
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            {formatDuration(step)}
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 mb-2">
-          <Icon icon={targetIcon} size="sm" color="secondary" />
-          <span className="text-sm text-gray-700 dark:text-gray-300">
-            {formatTarget(step)}
-          </span>
-        </div>
+        <StepHeader stepIndex={step.stepIndex} intensity={intensity} />
+        <StepDetails step={step} />
 
         <div className="mt-3">
           <Badge

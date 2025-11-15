@@ -11,6 +11,21 @@ import {
 import type { InputProps } from "./Input.types";
 import { InputElement } from "./InputElement";
 
+const buildInputClasses = (
+  hasError: boolean,
+  size: "sm" | "md" | "lg",
+  className: string
+): string => {
+  return [
+    baseInputClasses,
+    hasError ? errorStateClasses : normalStateClasses,
+    sizeClasses[size],
+    className,
+  ]
+    .filter(Boolean)
+    .join(" ");
+};
+
 export const Input = forwardRef<
   HTMLInputElement | HTMLSelectElement,
   InputProps
@@ -29,15 +44,7 @@ export const Input = forwardRef<
   const generatedId = useId();
   const inputId = id || generatedId;
   const hasError = Boolean(error);
-
-  const inputClasses = [
-    baseInputClasses,
-    hasError ? errorStateClasses : normalStateClasses,
-    sizeClasses[size],
-    className,
-  ]
-    .filter(Boolean)
-    .join(" ");
+  const inputClasses = buildInputClasses(hasError, size, className);
 
   return (
     <div className="w-full">
