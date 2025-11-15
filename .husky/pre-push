@@ -1,0 +1,15 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run lint:fix before pushing
+echo "🔍 Running lint:fix before push..."
+pnpm lint:fix
+
+# Check if lint:fix made any changes
+if [ -n "$(git status --porcelain)" ]; then
+  echo "⚠️  Lint fixes were applied. Please review and commit the changes."
+  echo "Run: git add . && git commit --amend --no-edit"
+  exit 1
+fi
+
+echo "✅ Lint check passed!"
