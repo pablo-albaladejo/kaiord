@@ -8,15 +8,22 @@ export default tseslint.config(
   js.configs.recommended,
   ...tseslint.configs.recommended,
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    // Ignore patterns first
     ignores: [
+      "**/dist/**",
+      "**/coverage/**",
+      "**/node_modules/**",
+      "**/*.config.js",
+      "**/*.config.ts",
       "**/*.test.ts",
       "**/*.test.tsx",
       "**/*.spec.ts",
       "**/*.stories.ts",
       "**/*.stories.tsx",
-      "**/tests/**/*.ts",
     ],
+  },
+  {
+    files: ["**/*.ts", "**/*.tsx"],
     languageOptions: {
       ecmaVersion: 2020,
       globals: globals.browser,
@@ -98,15 +105,5 @@ export default tseslint.config(
     rules: {
       "max-lines": "off",
     },
-  },
-  {
-    // Ignore patterns
-    ignores: [
-      "**/dist/**",
-      "**/coverage/**",
-      "**/node_modules/**",
-      "**/*.config.js",
-      "**/*.config.ts",
-    ],
   }
 );
