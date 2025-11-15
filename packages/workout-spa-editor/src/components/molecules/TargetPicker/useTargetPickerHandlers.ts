@@ -5,6 +5,7 @@ import {
   useUnitChange,
   useValueChange,
 } from "./hooks";
+import { useTargetPickerRangeHandlers } from "./useTargetPickerRangeHandlers";
 
 type UseTargetPickerHandlersParams = {
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open";
@@ -69,23 +70,19 @@ export const useTargetPickerHandlers = ({
     setValidationError
   );
 
-  const handleMinChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMin = e.target.value;
-    setMinValue(newMin);
-    handleRangeChange(newMin, maxValue);
-  };
-
-  const handleMaxChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newMax = e.target.value;
-    setMaxValue(newMax);
-    handleRangeChange(minValue, newMax);
-  };
+  const rangeHandlers = useTargetPickerRangeHandlers(
+    minValue,
+    maxValue,
+    setMinValue,
+    setMaxValue,
+    handleRangeChange
+  );
 
   return {
     handleTypeChange,
     handleUnitChange,
     handleValueChange,
-    handleMinChange,
-    handleMaxChange,
+    handleMinChange: rangeHandlers.handleMinChange,
+    handleMaxChange: rangeHandlers.handleMaxChange,
   };
 };
