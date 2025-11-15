@@ -44,8 +44,8 @@ jobs:
       - name: Build SPA Editor
         working-directory: packages/workout-spa-editor
         env:
-          # Set base path for GitHub Pages (format: /repo-name/)
-          VITE_BASE_PATH: ${{ github.event.repository.name != github.repository_owner && format('/{0}/', github.event.repository.name) || '/' }}
+          # Set base path for GitHub Pages: '/' for user/org pages (owner.github.io), '/repo-name/' for project pages
+          VITE_BASE_PATH: ${{ github.event.repository.name == format('{0}.github.io', github.repository_owner) && '/' || format('/{0}/', github.event.repository.name) }}
         run: pnpm build
 
       - name: Setup Pages
