@@ -142,12 +142,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - Show real-time validation errors
   - _Requirements: 2, 3, 17_
 
-<<<<<<< HEAD
-
-- [x] # P1.7.2 Create TargetPicker molecule
-- [ ] P1.7.2 Create TargetPicker molecule
-
-  > > > > > > > d6210bb (feat(workout-spa-editor): Implement P0 MVP Foundation - Project Setup and Core Components (#12))
+- [x] P1.7.2 Create TargetPicker molecule
   - Support power, heart_rate, pace, cadence, open targets
   - Dynamic unit selection (zone, watts, bpm, range)
   - Add input validation
@@ -159,11 +154,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - Add save and cancel buttons
   - _Requirements: 3_
 
-<<<<<<< HEAD
-
-- # [-] P1.7.4 Implement step editing flow
 - [ ] P1.7.4 Implement step editing flow
-  > > > > > > > d6210bb (feat(workout-spa-editor): Implement P0 MVP Foundation - Project Setup and Core Components (#12))
   - Open StepEditor on step selection
   - Update workout state on save
   - Revert changes on cancel
