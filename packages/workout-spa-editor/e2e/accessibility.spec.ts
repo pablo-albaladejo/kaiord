@@ -6,6 +6,7 @@ import { expect, test } from "@playwright/test";
  * Requirements covered:
  * - Requirement 35: Accessibility compliance
  * - Requirement 29: Keyboard shortcuts
+ * - Requirement 13: Theme switching
  */
 test.describe("Accessibility", () => {
   test("should support keyboard navigation", async ({ page }) => {
@@ -239,5 +240,153 @@ test.describe("Accessibility", () => {
 
     // Note: Actual contrast ratio testing would require additional tools
     // like axe-core or lighthouse, which can be integrated separately
+  });
+
+  test("should toggle between light and dark themes", async ({ page }) => {
+    // Requirement 13: Theme switching
+    await page.goto("/");
+
+    // Get initial theme state
+    const html = page.locator("html");
+    const initialHasDarkClass = await html.evaluate((el) =>
+      el.classList.contains("dark")
+    );
+
+    // Click theme toggle
+    const themeToggle = page.getByRole("button", {
+      name: /switch to (light|dark) mode/i,
+    });
+    await themeToggle.click();
+
+    // Wait for theme to apply
+    await page.waitForTimeout(500);
+
+    // Verify theme changed
+    const newHasDarkClass = await html.evaluate((el) =>
+      el.classList.contains("dark")
+    );
+    expect(newHasDarkClass).not.toBe(initialHasDarkClass);
+  });
+
+  test("should persist theme preference across page reloads", async ({
+    page,
+  }) => {
+    // Requirement 13: Theme persistence in localStorage
+    await page.goto("/");
+
+    // Get initial theme
+    const html = page.locator("html");
+    const initialHasDarkClass = await html.evaluate((el) =>
+      el.classList.contains("dark")
+    );
+
+    // Toggle theme
+    const themeToggle = page.getByRole("button", {
+      name: /switch to (light|dark) mode/i,
+    });
+    await themeToggle.click();
+    await page.waitForTimeout(500);
+
+    // Get new theme state
+    const hasDarkClass = await html.evaluate((el) =>
+      el.classList.contains("dark")
+    );
+    expect(hasDarkClass).not.toBe(initialHasDarkClass);
+
+    // Reload page
+    await page.reload();
+    await page.waitForTimeout(500);
+
+    // Verify theme persisted
+    const persistedHasDarkClass = await html.evaluate((el) =>
+      el.classList.contains("dark")
+    );
+    expect(persistedHasDarkClass).toBe(hasDarkClass);
+  });
+
+  test("should apply theme to all UI elements", async ({ page }) => {
+    // Requirement 13: Theme applies to entire application
+    await page.goto("/");
+
+    // Load a workout to have more UI elements
+    const fileInput = page.locator('input[type="file"]');
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "cycling",
+      },
+      extensions: {
+        workout: {
+          name: "Theme Test",
+          sport: "cycling",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 300 },
+              targetType: "power",
+              target: {
+                type: "power",
+                value: { unit: "watts", value: 200 },
+              },
+              intensity: "active",
+            },
+          ],
+        },
+      },
+    };
+
+    await fileInput.setInputFiles({
+      name: "theme-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
+
+    // Wait for workout to load
+    await expect(page.getByText("Theme Test")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Toggle theme
+    const themeToggle = page.getByRole("button", {
+      name: /switch to (light|dark) mode/i,
+    });
+    await themeToggle.click();
+    await page.waitForTimeout(500);
+
+    // Verify theme applied - all elements should still be visible
+    const header = page.locator("header");
+    const main = page.getByRole("main");
+    const stepCard = page.locator('[data-testid="step-card"]').first();
+
+    await expect(header).toBeVisible();
+    await expect(main).toBeVisible();
+    await expect(stepCard).toBeVisible();
+  });
+
+  test("should have smooth theme transitions", async ({ page }) => {
+    // Requirement 13: Smooth transitions between themes
+    await page.goto("/");
+
+    // Verify transition CSS is applied
+    const body = page.locator("body");
+    const hasTransition = await body.evaluate((el) => {
+      const computed = window.getComputedStyle(el);
+      return computed.transition.includes("background-color");
+    });
+
+    expect(hasTransition).toBe(true);
+
+    // Toggle theme
+    const themeToggle = page.getByRole("button", {
+      name: /switch to (light|dark) mode/i,
+    });
+    await themeToggle.click();
+    await page.waitForTimeout(500);
+
+    // Verify page is still functional
+    await expect(page.getByText("Workout Editor")).toBeVisible();
   });
 });

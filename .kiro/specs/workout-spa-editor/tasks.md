@@ -606,7 +606,7 @@ Critical fixes needed before v1.0.0 release:
 
 ### P2.14 Theme System
 
-- [ ] P2.14.1 Implement theme provider
+- [x] P2.14.1 Implement theme provider
   - Create ThemeContext with light/dark themes
   - Detect system preference
   - Persist theme choice in localStorage
@@ -618,7 +618,7 @@ Critical fixes needed before v1.0.0 release:
   - Smooth transition between themes
   - _Requirements: 13_
 
-- [ ] P2.14.3 Implement Kiroween theme
+- [x] P2.14.3 Implement Kiroween theme
   - Add Kiroween color palette
   - Create ghost decoration components
   - Add feature flag for easy removal

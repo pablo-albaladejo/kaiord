@@ -1,11 +1,16 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { ThemeProvider } from "../../../contexts/ThemeContext";
 import { MainLayout } from "./MainLayout";
+
+const renderWithTheme = (ui: React.ReactElement) => {
+  return render(<ThemeProvider defaultTheme="light">{ui}</ThemeProvider>);
+};
 
 describe("MainLayout", () => {
   it("should render children content", () => {
     // Arrange & Act
-    render(
+    renderWithTheme(
       <MainLayout>
         <div>Test Content</div>
       </MainLayout>
@@ -17,7 +22,7 @@ describe("MainLayout", () => {
 
   it("should render app title", () => {
     // Arrange & Act
-    render(
+    renderWithTheme(
       <MainLayout>
         <div>Content</div>
       </MainLayout>
@@ -29,7 +34,7 @@ describe("MainLayout", () => {
 
   it("should render header with logo", () => {
     // Arrange & Act
-    render(
+    renderWithTheme(
       <MainLayout>
         <div>Content</div>
       </MainLayout>
@@ -43,7 +48,7 @@ describe("MainLayout", () => {
 
   it("should render main content area", () => {
     // Arrange & Act
-    render(
+    renderWithTheme(
       <MainLayout>
         <div>Main Content</div>
       </MainLayout>
@@ -57,7 +62,7 @@ describe("MainLayout", () => {
 
   it("should render navigation landmark", () => {
     // Arrange & Act
-    render(
+    renderWithTheme(
       <MainLayout>
         <div>Content</div>
       </MainLayout>
@@ -70,7 +75,7 @@ describe("MainLayout", () => {
 
   it("should have responsive classes", () => {
     // Arrange & Act
-    render(
+    renderWithTheme(
       <MainLayout>
         <div>Content</div>
       </MainLayout>
@@ -83,7 +88,7 @@ describe("MainLayout", () => {
 
   it("should have mobile-first layout structure", () => {
     // Arrange & Act
-    render(
+    renderWithTheme(
       <MainLayout>
         <div>Content</div>
       </MainLayout>
@@ -92,5 +97,20 @@ describe("MainLayout", () => {
     // Assert
     const container = screen.getByRole("main").parentElement;
     expect(container).toHaveClass("min-h-screen", "flex-col");
+  });
+
+  it("should render theme toggle button", () => {
+    // Arrange & Act
+    renderWithTheme(
+      <MainLayout>
+        <div>Content</div>
+      </MainLayout>
+    );
+
+    // Assert
+    const themeToggle = screen.getByRole("button", {
+      name: /switch to (light|dark) mode/i,
+    });
+    expect(themeToggle).toBeInTheDocument();
   });
 });
