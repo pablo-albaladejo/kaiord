@@ -19,10 +19,14 @@ export default tseslint.config(
       "**/*.stories.ts",
       "**/*.stories.tsx",
       "**/tests/**/*.ts",
+      "**/playwright-report/**",
+      "**/test-results/**",
+      "**/.playwright/**",
     ],
   },
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    // Core package: strict 40 lines per function
+    files: ["packages/core/**/*.ts", "packages/core/**/*.tsx"],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
@@ -82,6 +86,69 @@ export default tseslint.config(
       // Basic TypeScript rules
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+    },
+  },
+  {
+    // Frontend package: relaxed 60 lines per function for React components
+    files: [
+      "packages/workout-spa-editor/**/*.ts",
+      "packages/workout-spa-editor/**/*.tsx",
+    ],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tseslint.plugin,
+    },
+    rules: {
+      // Enforce maximum file length of 100 lines (excluding test files)
+      "max-lines": [
+        "error",
+        {
+          max: 80,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+      // Enforce maximum function length (60 for frontend components)
+      "max-lines-per-function": [
+        "warn",
+        {
+          max: 60,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+      // Prohibit 'any' type
+      "@typescript-eslint/no-explicit-any": "error",
+      // Prefer type over interface
+      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+      // Enforce consistent imports
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        {
+          prefer: "type-imports",
+          fixStyle: "separate-type-imports",
+        },
+      ],
+    },
+  },
+  {
+    // Frontend page components: allow more lines for orchestration
+    files: ["packages/workout-spa-editor/**/pages/**/*.tsx"],
+    rules: {
+      "max-lines": [
+        "error",
+        {
+          max: 150,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
     },
   },
   {

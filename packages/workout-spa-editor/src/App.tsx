@@ -1,6 +1,6 @@
 import "./App.css";
 import { WelcomeSection } from "./components/pages/WelcomeSection";
-import { WorkoutSection } from "./components/pages/WorkoutSection";
+import { WorkoutSection } from "./components/pages/WorkoutSection/WorkoutSection";
 import { MainLayout } from "./components/templates/MainLayout";
 import {
   useCurrentWorkout,
@@ -54,9 +54,10 @@ function App() {
             onFileError={handleFileError}
           />
         )}
-        {workout && (
+        {workout && currentWorkout && (
           <WorkoutSection
             workout={workout}
+            krd={currentWorkout}
             selectedStepId={selectedStepId}
             onStepSelect={handleStepSelect}
           />

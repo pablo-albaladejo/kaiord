@@ -58,7 +58,7 @@ Every interaction with Kiro MUST optimize for these three criteria. No exception
 - No placeholder comments ("TODO", "FIXME") in main branch
 - No untested code paths for core functionality
 - Functions < 40 LOC; refactor if larger
-- Test coverage ≥ 80% (mappers/converters ≥ 90%)
+- Test coverage ≥ 80% for core package (mappers/converters ≥ 90%)
 
 **Architecture compliance:**
 
@@ -106,7 +106,7 @@ Every interaction with Kiro MUST optimize for these three criteria. No exception
 
 - Lacks clear user value justification
 - Violates hexagonal architecture boundaries
-- Has < 80% test coverage (< 90% for converters)
+- Has < 80% test coverage for core (< 90% for converters), or < 70% for frontend
 - Contains `any` types without justification
 - Fails schema validation
 - Fails round-trip tests

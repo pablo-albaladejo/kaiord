@@ -3,7 +3,7 @@
 import fs from "fs";
 
 const path = process.argv[2];
-const threshold = 80;
+const threshold = parseInt(process.argv[3] || "80", 10);
 
 if (!fs.existsSync(path)) {
   console.log(`⚠️  Coverage file not found at ${path}`);

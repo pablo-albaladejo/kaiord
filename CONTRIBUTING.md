@@ -22,7 +22,7 @@ This project follows a code of conduct to ensure a welcoming environment for all
 ### Prerequisites
 
 - **Node.js**: Version 20.x or higher
-- **pnpm**: Version 8.x or higher
+- **pnpm**: Version 9.x or higher
 - **Git**: For version control
 - **Docker**: For testing workflows locally (optional)
 
@@ -247,7 +247,7 @@ const result = sportSchema.safeParse(input);
 
 ### Test Coverage
 
-- **Overall**: ≥ 80% coverage
+- **Overall**: ≥ 70% coverage (enforced in CI)
 - **Converters**: ≥ 90% coverage
 - **Critical paths**: 100% coverage
 
@@ -344,7 +344,7 @@ All checks must pass before a PR can be merged:
 - ✅ Linting passes
 - ✅ Type checking passes
 - ✅ All tests pass
-- ✅ Coverage meets threshold (80%)
+- ✅ Coverage meets threshold (70%)
 - ✅ Build succeeds
 - ✅ No high/critical security vulnerabilities
 

@@ -44,6 +44,8 @@ export const useLoadWorkout = () =>
 export const useUpdateWorkout = () =>
   useWorkoutStore((state) => state.updateWorkout);
 
+export const useCreateStep = () => useWorkoutStore((state) => state.createStep);
+
 export const useSelectStep = () => useWorkoutStore((state) => state.selectStep);
 
 export const useSetEditing = () => useWorkoutStore((state) => state.setEditing);
@@ -54,3 +56,8 @@ export const useClearWorkout = () =>
 export const useUndo = () => useWorkoutStore((state) => state.undo);
 
 export const useRedo = () => useWorkoutStore((state) => state.redo);
+
+export const useDeleteStep = () => useWorkoutStore((state) => state.deleteStep);
+
+export const useDuplicateStep = () =>
+  useWorkoutStore((state) => state.duplicateStep);

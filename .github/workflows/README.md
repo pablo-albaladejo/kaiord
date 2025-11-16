@@ -284,7 +284,7 @@ The workflows require the following secrets to be configured in your repository 
 ```yaml
 - uses: pnpm/action-setup@v2
   with:
-    version: 8
+    version: 9
 - uses: actions/setup-node@v4
   with:
     node-version: 20.x

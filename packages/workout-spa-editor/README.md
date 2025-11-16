@@ -40,6 +40,18 @@ pnpm build
 # Preview production build
 pnpm preview
 
+# Run unit tests
+pnpm test
+
+# Run unit tests in watch mode
+pnpm test:watch
+
+# Run E2E tests
+pnpm test:e2e
+
+# Run E2E tests in UI mode
+pnpm test:e2e:ui
+
 # Lint code
 pnpm lint
 
