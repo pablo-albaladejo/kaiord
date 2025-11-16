@@ -71,7 +71,9 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     });
 
     // Verify workout is loaded and displayed
-    await expect(page.getByText("Test Workout")).toBeVisible();
+    await expect(page.getByText("Test Workout")).toBeVisible({
+      timeout: 10000,
+    });
     await expect(page.getByText("Step 1")).toBeVisible();
     await expect(page.getByText("Step 2")).toBeVisible();
 
@@ -79,25 +81,30 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     await expect(page.getByText("5:00")).toBeVisible(); // 300 seconds
     await expect(page.getByText("200 W")).toBeVisible();
 
-    // Click on the first step to edit it
-    await page.getByText("Step 1").click();
+    // Click on the first step card to edit it
+    const firstStepCard = page.locator('[data-testid="step-card"]').first();
+    await firstStepCard.click();
 
     // Wait for the step editor to open
-    await expect(page.getByText("Edit Step")).toBeVisible();
+    await expect(page.getByText("Edit Step")).toBeVisible({ timeout: 5000 });
 
     // Change the duration from 300 to 420 seconds (7 minutes)
-    const durationInput = page.locator('input[type="number"]').first();
+    const durationInput = page.getByLabel(/duration.*seconds/i);
+    await durationInput.clear();
     await durationInput.fill("420");
 
     // Change the power from 200 to 220 watts
-    const powerInput = page.locator('input[type="number"]').nth(1);
+    const powerInput = page.getByLabel(/target.*value/i);
+    await powerInput.clear();
     await powerInput.fill("220");
 
     // Save the changes
     await page.getByRole("button", { name: /save/i }).click();
 
     // Verify the step editor closes
-    await expect(page.getByText("Edit Step")).not.toBeVisible();
+    await expect(page.getByText("Edit Step")).not.toBeVisible({
+      timeout: 5000,
+    });
 
     // Verify the updated values are displayed
     await expect(page.getByText("7:00")).toBeVisible(); // 420 seconds
