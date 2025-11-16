@@ -783,7 +783,6 @@ describe("useWorkoutStore", () => {
     });
   });
 
-
   describe("createStep", () => {
     it("should add a new step with default values to the end of the workout", () => {
       // Arrange
@@ -1223,7 +1222,6 @@ describe("useWorkoutStore", () => {
       });
     });
   });
-
 
   describe("selector hooks", () => {
     it("should provide access to currentWorkout", () => {

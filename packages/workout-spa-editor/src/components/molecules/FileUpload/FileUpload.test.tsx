@@ -93,8 +93,7 @@ describe("FileUpload", () => {
     await user.upload(fileInput, file);
 
     // Assert
-    await waitFor(() => {
-    });
+    await waitFor(() => {});
   });
 
   it("should display error message with retry button for invalid JSON", async () => {
