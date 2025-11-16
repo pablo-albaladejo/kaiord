@@ -193,3 +193,130 @@ test: {
 - [Vitest Documentation](https://vitest.dev/)
 - [React Testing Library](https://testing-library.com/react)
 - [Testing Library Best Practices](https://kentcdodds.com/blog/common-mistakes-with-react-testing-library)
+
+## E2E Testing with Playwright
+
+The project includes end-to-end tests using Playwright to validate critical user flows across different browsers and devices.
+
+### E2E Test Stack
+
+- **Test Runner**: Playwright 1.56+
+- **Browsers**: Chromium, Firefox, WebKit
+- **Mobile Devices**: Pixel 5, iPhone 12
+- **Configuration**: `playwright.config.ts`
+
+### Running E2E Tests
+
+```bash
+# Install Playwright browsers (first time only)
+pnpm test:e2e:install
+
+# Run all E2E tests
+pnpm test:e2e
+
+# Run tests in UI mode (interactive)
+pnpm test:e2e:ui
+
+# Run tests in debug mode
+pnpm test:e2e:debug
+
+# View test report
+pnpm test:e2e:report
+
+# Run specific browser
+pnpm test:e2e --project=chromium
+pnpm test:e2e --project=firefox
+pnpm test:e2e --project=webkit
+
+# Run mobile tests
+pnpm test:e2e --project="Mobile Chrome"
+pnpm test:e2e --project="Mobile Safari"
+```
+
+### E2E Test Coverage
+
+The E2E tests validate the following critical paths:
+
+1. **Workout Load, Edit, and Save**
+   - Load existing KRD file
+   - View workout structure
+   - Edit workout steps
+   - Save modified workout
+   - Validate file format errors
+
+2. **Workout Creation**
+   - Create new workout from scratch
+   - Add multiple steps
+   - Configure step properties
+   - View workout statistics
+   - Input validation
+
+3. **Mobile Responsiveness**
+   - Mobile-optimized layout
+   - Touch interactions
+   - Smooth scrolling
+   - Tablet adaptation
+
+4. **Accessibility**
+   - Keyboard navigation
+   - ARIA labels and roles
+   - Keyboard shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+S)
+   - Focus indicators
+
+### E2E Test Files
+
+All E2E tests are located in the `e2e/` directory:
+
+- `workout-load-edit-save.spec.ts` - File loading and editing flow
+- `workout-creation.spec.ts` - Workout creation flow
+- `mobile-responsive.spec.ts` - Mobile and tablet responsiveness
+- `accessibility.spec.ts` - Accessibility and keyboard navigation
+
+See `e2e/README.md` for detailed documentation.
+
+### CI/CD Integration
+
+E2E tests run automatically in GitHub Actions:
+
+- **Workflow**: `.github/workflows/workout-spa-editor-e2e.yml`
+- **Triggers**: Push to main/develop, pull requests
+- **Matrix**: All browsers + mobile devices
+- **Artifacts**: Test reports and screenshots (7-day retention)
+
+### Writing E2E Tests
+
+Follow these best practices:
+
+1. Use semantic selectors (`getByRole`, `getByLabel`, `getByText`)
+2. Wait for elements with `await expect(...).toBeVisible()`
+3. Test user behavior, not implementation details
+4. Keep tests independent and isolated
+5. Add comments documenting requirements covered
+
+Example:
+
+```typescript
+test("should load and edit workout", async ({ page }) => {
+  // Arrange
+  await page.goto("/");
+
+  // Act
+  await page.getByRole("button", { name: /load workout/i }).click();
+
+  // Assert
+  await expect(page.getByText("Workout loaded")).toBeVisible();
+});
+```
+
+### Debugging E2E Tests
+
+```bash
+# Run in headed mode (see browser)
+pnpm test:e2e --headed
+
+# Slow down execution
+pnpm test:e2e --slow-mo=1000
+
+# Debug specific test
+pnpm test:e2e:debug workout-load-edit-save.spec.ts
+```

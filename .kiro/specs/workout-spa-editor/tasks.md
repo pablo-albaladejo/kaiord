@@ -696,7 +696,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - Test accessibility
   - _Requirements: N/A (quality assurance)_
 
-- [ ]\* P3.34.4 Set up E2E tests with Playwright
+- [x] P3.34.4 Set up E2E tests with Playwright
   - Configure Playwright
   - Write critical path tests
   - Add to CI pipeline
