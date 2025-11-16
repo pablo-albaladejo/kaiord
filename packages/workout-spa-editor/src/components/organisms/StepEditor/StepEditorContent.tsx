@@ -1,7 +1,7 @@
 import type { Duration, Target } from "../../../types/krd";
-import { Button } from "../../atoms/Button/Button";
 import { DurationPicker } from "../../molecules/DurationPicker/DurationPicker";
 import { TargetPicker } from "../../molecules/TargetPicker/TargetPicker";
+import { StepEditorActions } from "./StepEditorActions";
 
 type StepEditorContentProps = {
   stepIndex: number;
@@ -33,33 +33,22 @@ export const StepEditorContent = ({
       <h2 className="mb-6 text-xl font-semibold text-gray-900 dark:text-gray-100">
         Edit Step {stepIndex + 1}
       </h2>
-
       <div className="space-y-6">
         <DurationPicker
           value={duration}
           onChange={onDurationChange}
           error={durationError}
         />
-
         <TargetPicker
           value={target}
           onChange={onTargetChange}
           error={targetError}
         />
-
-        <div className="flex justify-end gap-3 border-t border-gray-200 pt-6 dark:border-gray-700">
-          <Button variant="secondary" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button
-            variant="primary"
-            onClick={onSave}
-            disabled={hasErrors}
-            aria-label="Save step changes"
-          >
-            Save
-          </Button>
-        </div>
+        <StepEditorActions
+          hasErrors={hasErrors}
+          onSave={onSave}
+          onCancel={onCancel}
+        />
       </div>
     </>
   );

@@ -1,53 +1,32 @@
 import { useTypeChange, useUnitChange, useValueChange } from "./hooks";
-import type { UseTargetPickerHandlersParams } from "./useTargetPickerHandlers.types";
+import type { BasicHandlersParams } from "./useTargetPickerBasicHandlers.types";
 
-export function useTargetPickerBasicHandlers({
-  targetType,
-  unit,
-  onChange,
-  setTargetType,
-  setValidationError,
-  setUnit,
-  setTargetValue,
-  setMinValue,
-  setMaxValue,
-}: Pick<
-  UseTargetPickerHandlersParams,
-  | "targetType"
-  | "unit"
-  | "onChange"
-  | "setTargetType"
-  | "setValidationError"
-  | "setUnit"
-  | "setTargetValue"
-  | "setMinValue"
-  | "setMaxValue"
->) {
+export function useTargetPickerBasicHandlers(params: BasicHandlersParams) {
   const handleTypeChange = useTypeChange(
-    onChange,
-    setTargetType,
-    setValidationError,
-    setUnit,
-    setTargetValue,
-    setMinValue,
-    setMaxValue
+    params.onChange,
+    params.setTargetType,
+    params.setValidationError,
+    params.setUnit,
+    params.setTargetValue,
+    params.setMinValue,
+    params.setMaxValue
   );
 
   const handleUnitChange = useUnitChange(
-    onChange,
-    setUnit,
-    setValidationError,
-    setTargetValue,
-    setMinValue,
-    setMaxValue
+    params.onChange,
+    params.setUnit,
+    params.setValidationError,
+    params.setTargetValue,
+    params.setMinValue,
+    params.setMaxValue
   );
 
   const handleValueChange = useValueChange(
-    targetType,
-    unit,
-    onChange,
-    setTargetValue,
-    setValidationError
+    params.targetType,
+    params.unit,
+    params.onChange,
+    params.setTargetValue,
+    params.setValidationError
   );
 
   return {

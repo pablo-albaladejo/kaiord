@@ -1,5 +1,6 @@
 import type { WorkoutStep } from "../../../types/krd";
 import { StepEditorContent } from "./StepEditorContent";
+import { StepEditorWrapper } from "./StepEditorWrapper";
 import { useStepEditorHandlers } from "./useStepEditorHandlers";
 import { useStepEditorState } from "./useStepEditorState";
 
@@ -17,31 +18,19 @@ export const StepEditor = ({
   className = "",
 }: StepEditorProps) => {
   const state = useStepEditorState(step);
-
   const handlers = useStepEditorHandlers({
     step,
-    duration: state.duration,
-    target: state.target,
-    durationError: state.durationError,
-    targetError: state.targetError,
-    setDuration: state.setDuration,
-    setTarget: state.setTarget,
-    setDurationError: state.setDurationError,
-    setTargetError: state.setTargetError,
+    ...state,
     onSave,
     onCancel,
   });
 
-  if (!step) {
-    return null;
-  }
+  if (!step) return null;
 
   const hasErrors = Boolean(state.durationError || state.targetError);
 
   return (
-    <div
-      className={`rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 ${className}`}
-    >
+    <StepEditorWrapper className={className}>
       <StepEditorContent
         stepIndex={step.stepIndex}
         duration={state.duration}
@@ -54,6 +43,6 @@ export const StepEditor = ({
         onSave={handlers.handleSave}
         onCancel={handlers.handleCancel}
       />
-    </div>
+    </StepEditorWrapper>
   );
 };

@@ -1,13 +1,7 @@
-import {
-  useCreateStep,
-  useDuplicateStep,
-  useIsEditing,
-} from "../../../store/workout-store-selectors";
 import type { KRD, Workout } from "../../../types/krd";
 import { DeleteConfirmDialog } from "../../molecules";
 import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
-import { useSelectedStep } from "./useSelectedStep";
-import { useWorkoutSectionHandlers } from "./useWorkoutSectionHandlers";
+import { useWorkoutSectionState } from "./useWorkoutSectionState";
 import { WorkoutHeader } from "./WorkoutHeader";
 import { WorkoutSectionEditor } from "./WorkoutSectionEditor";
 import { WorkoutStepsList } from "./WorkoutStepsList";
@@ -19,49 +13,37 @@ export type WorkoutSectionProps = {
   onStepSelect: (stepIndex: number) => void;
 };
 
-export function WorkoutSection({
-  workout,
-  krd,
-  selectedStepId,
-  onStepSelect,
-}: WorkoutSectionProps) {
-  const isEditing = useIsEditing();
-  const createStep = useCreateStep();
-  const duplicateStep = useDuplicateStep();
-  const selectedStep = useSelectedStep(selectedStepId, workout);
-  const {
-    handleStepSelect,
-    handleSave,
-    handleCancel,
-    handleDeleteRequest,
-    handleDeleteConfirm,
-    handleDeleteCancel,
-    stepToDelete,
-  } = useWorkoutSectionHandlers(workout, krd, onStepSelect);
+export function WorkoutSection(props: WorkoutSectionProps) {
+  const state = useWorkoutSectionState(
+    props.workout,
+    props.krd,
+    props.selectedStepId,
+    props.onStepSelect
+  );
 
   return (
     <div className="space-y-6">
-      <WorkoutHeader workout={workout} krd={krd} />
-      <WorkoutStats workout={workout} />
+      <WorkoutHeader workout={props.workout} krd={props.krd} />
+      <WorkoutStats workout={props.workout} />
       <WorkoutSectionEditor
-        isEditing={isEditing}
-        selectedStep={selectedStep}
-        onSave={handleSave}
-        onCancel={handleCancel}
+        isEditing={state.isEditing}
+        selectedStep={state.selectedStep}
+        onSave={state.handleSave}
+        onCancel={state.handleCancel}
       />
       <WorkoutStepsList
-        workout={workout}
-        selectedStepId={selectedStepId}
-        onStepSelect={handleStepSelect}
-        onStepDelete={handleDeleteRequest}
-        onStepDuplicate={duplicateStep}
-        onAddStep={createStep}
+        workout={props.workout}
+        selectedStepId={props.selectedStepId}
+        onStepSelect={state.handleStepSelect}
+        onStepDelete={state.handleDeleteRequest}
+        onStepDuplicate={state.duplicateStep}
+        onAddStep={state.createStep}
       />
-      {stepToDelete !== null && (
+      {state.stepToDelete !== null && (
         <DeleteConfirmDialog
-          stepIndex={stepToDelete}
-          onConfirm={handleDeleteConfirm}
-          onCancel={handleDeleteCancel}
+          stepIndex={state.stepToDelete}
+          onConfirm={state.handleDeleteConfirm}
+          onCancel={state.handleDeleteCancel}
         />
       )}
     </div>

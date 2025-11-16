@@ -1,6 +1,6 @@
-import { getUnitOptions, getValueLabel, getValuePlaceholder } from "./helpers";
 import type { TargetPickerProps } from "./TargetPicker.types";
 import { TargetPickerFields } from "./TargetPickerFields";
+import { useTargetPickerProps } from "./use-target-picker-props";
 import { useTargetPickerHandlers } from "./useTargetPickerHandlers";
 import { useTargetPickerState } from "./useTargetPickerState";
 
@@ -12,42 +12,22 @@ export const TargetPicker = ({
   className = "",
 }: TargetPickerProps) => {
   const state = useTargetPickerState(value);
-
   const handlers = useTargetPickerHandlers({
-    targetType: state.targetType,
-    unit: state.unit,
-    maxValue: state.maxValue,
-    minValue: state.minValue,
+    ...state,
     onChange,
-    setTargetType: state.setTargetType,
-    setValidationError: state.setValidationError,
-    setUnit: state.setUnit,
-    setTargetValue: state.setTargetValue,
-    setMinValue: state.setMinValue,
-    setMaxValue: state.setMaxValue,
   });
-
-  const displayError = error || state.validationError;
-  const unitOptions = getUnitOptions(state.targetType) || [];
+  const props = useTargetPickerProps(state, error);
 
   return (
     <div className={`space-y-4 ${className}`}>
       <TargetPickerFields
-        targetType={state.targetType}
-        unit={state.unit}
-        targetValue={state.targetValue}
-        minValue={state.minValue}
-        maxValue={state.maxValue}
-        displayError={displayError}
+        {...props}
         disabled={disabled}
-        unitOptions={unitOptions}
         onTypeChange={handlers.handleTypeChange}
         onUnitChange={handlers.handleUnitChange}
         onValueChange={handlers.handleValueChange}
         onMinChange={handlers.handleMinChange}
         onMaxChange={handlers.handleMaxChange}
-        getValueLabel={getValueLabel}
-        getValuePlaceholder={getValuePlaceholder}
       />
     </div>
   );
