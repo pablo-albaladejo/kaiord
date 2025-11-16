@@ -4,7 +4,13 @@
  * Action for duplicating a workout step and inserting it after the original.
  */
 
-import type { KRD, WorkoutStep } from "../../types/krd";
+import type {
+  KRD,
+  RepetitionBlock,
+  Workout,
+  WorkoutStep,
+} from "../../types/krd";
+import { isWorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -17,12 +23,17 @@ export const duplicateStepAction = (
     return {};
   }
 
-  const workout = krd.extensions.workout;
+  const workout = krd.extensions.workout as Workout;
 
   // Find the step to duplicate
   const stepToDuplicate = workout.steps.find(
-    (step) => step.stepIndex === stepIndex
-  );
+    (step: WorkoutStep | RepetitionBlock) => {
+      if (isWorkoutStep(step)) {
+        return step.stepIndex === stepIndex;
+      }
+      return false;
+    }
+  ) as WorkoutStep | undefined;
 
   if (!stepToDuplicate) {
     return {};

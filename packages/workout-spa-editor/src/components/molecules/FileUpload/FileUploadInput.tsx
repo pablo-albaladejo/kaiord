@@ -1,7 +1,7 @@
 import type { RefObject } from "react";
 
 type FileUploadInputProps = {
-  fileInputRef: RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
   accept: string;
   disabled: boolean;
   isLoading: boolean;
