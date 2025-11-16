@@ -37,36 +37,35 @@
   --animate-float-delayed: float 6s ease-in-out 3s infinite;
 }
 
-/* Kiroween theme color overrides - Dark lilac palette */
-.kiroween {
-  /* Primary colors - Vibrant lilac tones */
-  --color-primary-50: #e9d5ff;
-  --color-primary-100: #d8b4fe;
-  --color-primary-200: #c084fc;
-  --color-primary-300: #a855f7;
-  --color-primary-400: #9333ea;
-  --color-primary-500: #7e22ce;
-  --color-primary-600: #8b5cf6;
-  --color-primary-700: #a78bfa;
-  --color-primary-800: #7c3aed;
-  --color-primary-900: #6d28d9;
-  --color-primary-950: #4c1d95;
-
-  /* Gray colors - Dark lilac background tones (no whites) */
-  --color-gray-50: #4d3b6e;
-  --color-gray-100: #e9d5ff; /* Light text */
-  --color-gray-200: #d8b4fe; /* Lighter text */
-  --color-gray-300: #c4b5fd; /* Medium-light text - more visible */
-  --color-gray-400: #a78bfa; /* Medium text - more visible */
-  --color-gray-500: #8d6bae;
-  --color-gray-600: #8d6bae;
-  --color-gray-700: #4d3b6e; /* Dark backgrounds */
-  --color-gray-800: #3d2b5e; /* Darker backgrounds */
-  --color-gray-900: #2d1b4e; /* Darkest backgrounds */
-  --color-gray-950: #1d0b3e; /* Body background */
-}
-
 @layer base {
+  /* Kiroween theme color overrides - Dark lilac palette */
+  .kiroween {
+    /* Primary colors - Vibrant lilac tones */
+    --color-primary-50: #e9d5ff;
+    --color-primary-100: #d8b4fe;
+    --color-primary-200: #c084fc;
+    --color-primary-300: #a855f7;
+    --color-primary-400: #9333ea;
+    --color-primary-500: #7e22ce;
+    --color-primary-600: #8b5cf6;
+    --color-primary-700: #a78bfa;
+    --color-primary-800: #7c3aed;
+    --color-primary-900: #6d28d9;
+    --color-primary-950: #4c1d95;
+
+    /* Gray colors - Dark lilac background tones (no whites) */
+    --color-gray-50: #4d3b6e;
+    --color-gray-100: #e9d5ff; /* Light text */
+    --color-gray-200: #d8b4fe; /* Lighter text */
+    --color-gray-300: #c4b5fd; /* Medium-light text - more visible */
+    --color-gray-400: #a78bfa; /* Medium text - more visible */
+    --color-gray-500: #8d6bae;
+    --color-gray-600: #8d6bae;
+    --color-gray-700: #4d3b6e; /* Dark backgrounds */
+    --color-gray-800: #3d2b5e; /* Darker backgrounds */
+    --color-gray-900: #2d1b4e; /* Darkest backgrounds */
+    --color-gray-950: #1d0b3e; /* Body background */
+  }
   :root {
     font-synthesis: none;
     text-rendering: optimizeLegibility;
