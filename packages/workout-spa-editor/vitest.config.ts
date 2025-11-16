@@ -30,6 +30,20 @@ export default defineConfig({
         "**/*.d.ts",
         "**/main.tsx",
         "**/vite-env.d.ts",
+        // Storybook stories - documentation, not production code
+        "**/*.stories.tsx",
+        "**/*.stories.ts",
+        // Type definition files - validated by TypeScript at compile-time
+        "**/*.types.ts",
+        // Re-export index files - no logic to test
+        "**/index.ts",
+        "src/components/atoms/index.ts",
+        "src/components/molecules/index.ts",
+        "src/components/organisms/index.ts",
+        "src/components/pages/index.ts",
+        "src/components/templates/index.ts",
+        "src/store/index.ts",
+        "src/utils/index.ts",
       ],
       thresholds: {
         lines: 70,

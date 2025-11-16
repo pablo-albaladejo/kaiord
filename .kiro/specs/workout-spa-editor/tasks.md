@@ -191,7 +191,7 @@ Future enhancements include drag-and-drop reordering, user profiles, workout tem
   - Close editor after save/cancel
   - _Requirements: 3_
 
-### P1.8 Step Management
+### P1.8 Step Management + Full Review
 
 - [x] P1.8.1 Implement step creation
   - Add "Add Step" button to WorkoutSection (below WorkoutList)
@@ -222,6 +222,101 @@ Future enhancements include drag-and-drop reordering, user profiles, workout tem
   - Update workout via updateWorkout action (triggers history)
   - Add unit tests for duplicateStep action
   - _Requirements: 16_
+
+- [ ] P1.8.4 Full Frontend Review and Quality Assurance
+  - **Folder Structure Audit**
+    - Review all folders in `packages/workout-spa-editor/src/`
+    - Verify adherence to atomic design pattern (atoms, molecules, organisms, pages)
+    - Ensure proper separation of concerns (components, hooks, store, types, utils)
+    - Check for any misplaced files or inconsistent organization
+    - Validate that all barrel exports (index.ts) are present and correct
+  - **Component Testing Coverage**
+    - Verify ALL components have corresponding `.test.tsx` files
+    - Check test coverage meets thresholds: atoms ≥80%, molecules ≥80%, organisms ≥80%
+    - Ensure all user interactions are tested with @testing-library/user-event
+    - Validate accessibility tests are present for interactive components
+    - Review test quality: AAA pattern, descriptive names, proper assertions
+  - **Storybook Implementation**
+    - Verify ALL components have corresponding `.stories.tsx` files
+    - Check stories cover all variants, states, and props
+    - Ensure stories include:
+      - Default story
+      - All variant combinations
+      - Interactive controls for props
+      - Accessibility addon enabled
+    - Add `pnpm storybook` script to package.json for local development
+    - Add `pnpm build-storybook` script for static build
+    - Configure Storybook for Vite + React + TypeScript + Tailwind
+    - Test that Storybook runs locally without errors
+  - **E2E Testing Coverage**
+    - Review all E2E tests in `e2e/` directory
+    - Verify critical user flows are covered:
+      - Load workout → Edit step → Save workout
+      - Create new step → Configure → Save
+      - Delete step with confirmation → Undo
+      - Duplicate step → Verify copy
+      - Undo/redo operations
+      - Error handling flows
+    - Check mobile-specific tests exist
+    - Validate accessibility tests cover WCAG 2.1 AA requirements
+    - Ensure all tests pass in CI/CD pipeline
+  - **Store and State Management**
+    - Review all store actions have unit tests
+    - Verify undo/redo functionality is thoroughly tested
+    - Check selectors are tested and optimized
+    - Validate state updates trigger proper re-renders
+    - Ensure no unnecessary re-renders (use React DevTools Profiler)
+  - **Type Safety and Validation**
+    - Verify NO `any` types exist (run `pnpm lint` and check for violations)
+    - Check all Zod schemas are properly defined and used
+    - Validate all form inputs have proper validation
+    - Ensure error messages are user-friendly and actionable
+  - **Code Quality and Standards**
+    - Run `pnpm lint` and fix all errors/warnings
+    - Run `pnpm format` to ensure consistent formatting
+    - Check all files are ≤100 lines (excluding tests)
+    - Verify functions are <40 lines
+    - Ensure no `console.log` statements in production code
+    - Review all comments for clarity and necessity
+  - **Accessibility (a11y)**
+    - Run axe DevTools on all pages
+    - Verify all interactive elements have proper ARIA labels
+    - Check keyboard navigation works for all features
+    - Validate color contrast meets WCAG 2.1 AA standards
+    - Test with screen reader (VoiceOver/NVDA)
+  - **Performance**
+    - Run Lighthouse audit (target: Performance ≥90, Accessibility ≥95)
+    - Check bundle size with `pnpm build` and analyze
+    - Verify no memory leaks (use Chrome DevTools Memory Profiler)
+    - Ensure large lists are performant (test with 100+ steps)
+  - **Documentation**
+    - Review README.md is up-to-date with all features
+    - Check inline code comments are clear and necessary
+    - Verify all public APIs are documented
+    - Ensure setup instructions are accurate
+  - **CI/CD Pipeline**
+    - Verify all tests pass in GitHub Actions
+    - Check coverage reports are generated
+    - Validate deployment to GitHub Pages works
+    - Ensure no flaky tests exist
+  - **Missing Features Check**
+    - Review requirements.md against implemented features
+    - Identify any gaps in P0-P1 implementation
+    - Document any technical debt or known issues
+    - Create follow-up tasks for P2+ features
+  - **User Experience Polish**
+    - Test all user flows end-to-end manually
+    - Verify loading states are present and clear
+    - Check error messages are helpful and actionable
+    - Ensure success feedback is provided for all actions
+    - Validate responsive design works on mobile/tablet/desktop
+  - **Security Review**
+    - Check for XSS vulnerabilities in user inputs
+    - Verify file upload validation is secure
+    - Ensure no sensitive data is logged
+    - Review dependencies for known vulnerabilities (`pnpm audit`)
+
+  _Requirements: All P0-P1 requirements_
 
 ### P1.9 File Saving
 
