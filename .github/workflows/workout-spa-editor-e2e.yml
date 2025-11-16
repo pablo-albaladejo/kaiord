@@ -60,7 +60,7 @@ jobs:
         run: pnpm --filter @kaiord/core build
 
       - name: Run E2E tests
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=${{ matrix.browser }}
+        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=${{ matrix.browser }} --reporter=list
         env:
           CI: true
 
@@ -127,7 +127,7 @@ jobs:
         run: pnpm --filter @kaiord/core build
 
       - name: Run mobile E2E tests
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project="${{ matrix.device }}"
+        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project="${{ matrix.device }}" --reporter=list
         env:
           CI: true
 
