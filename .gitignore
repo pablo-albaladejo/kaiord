@@ -7,6 +7,8 @@ dist/
 
 # Test coverage
 coverage/
+coverage-summary.json
+*.coverage.json
 
 # IDE
 .vscode/

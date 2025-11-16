@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { render, screen, waitFor } from "@testing-library/react";
 import { beforeEach } from "node:test";
 import { describe, expect, it, vi } from "vitest";
 import { useWorkoutStore } from "../../store/workout-store";
@@ -151,7 +151,7 @@ describe("WorkoutSection", () => {
     expect(screen.getByText(/Edit Step/)).toBeInTheDocument();
   });
 
-  it("should close editor and clear selection on cancel", () => {
+  it("should close editor and clear selection on cancel", async () => {
     // Arrange
     const workout = createMockWorkout([createMockStep(0)]);
     const krd = createMockKRD(workout);
@@ -175,8 +175,10 @@ describe("WorkoutSection", () => {
     const cancelButton = screen.getByText(/Cancel/);
     cancelButton.click();
 
-    // Assert
-    expect(useWorkoutStore.getState().isEditing).toBe(false);
-    expect(useWorkoutStore.getState().selectedStepId).toBe(null);
+    // Assert - Wait for state updates
+    await waitFor(() => {
+      expect(useWorkoutStore.getState().isEditing).toBe(false);
+      expect(useWorkoutStore.getState().selectedStepId).toBe(null);
+    });
   });
 });
