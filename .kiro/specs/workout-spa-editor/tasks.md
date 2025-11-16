@@ -684,13 +684,13 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - Configure test coverage
   - _Requirements: N/A (quality assurance)_
 
-- [ ]\* P3.34.2 Write unit tests for core logic
+- [x] P3.34.2 Write unit tests for core logic
   - Test state management
   - Test validation functions
   - Test calculation utilities
   - _Requirements: N/A (quality assurance)_
 
-- [ ]\* P3.34.3 Write component tests
+- [x] P3.34.3 Write component tests
   - Test key components
   - Test user interactions
   - Test accessibility

@@ -17,6 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       core-changed: ${{ steps.changes.outputs.core-changed }}
+      frontend-changed: ${{ steps.changes.outputs.frontend-changed }}
       should-test: ${{ steps.changes.outputs.should-test }}
     steps:
       - name: Checkout code
@@ -31,6 +32,8 @@ jobs:
           files_yaml: |
             core:
               - 'packages/core/**'
+            frontend:
+              - 'packages/workout-spa-editor/**'
             root_deps:
               - 'package.json'
               - 'pnpm-lock.yaml'
@@ -53,10 +56,19 @@ jobs:
             echo "core-changed=false" >> $GITHUB_OUTPUT
           fi
 
+          # Frontend package changes
+          if [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "true" ]] || \
+             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
+            echo "frontend-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "frontend-changed=false" >> $GITHUB_OUTPUT
+          fi
+
           # Performance optimization: Skip all tests if only documentation changed
           # This reduces CI time from ~5 minutes to ~30 seconds for docs-only PRs
           if [[ "${{ steps.changed-files.outputs.docs_any_changed }}" == "true" ]] && \
              [[ "${{ steps.changed-files.outputs.core_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "false" ]]; then
             echo "should-test=false" >> $GITHUB_OUTPUT
           else
@@ -66,6 +78,7 @@ jobs:
       - name: Display change detection results
         run: |
           echo "Core changed: ${{ steps.changes.outputs.core-changed }}"
+          echo "Frontend changed: ${{ steps.changes.outputs.frontend-changed }}"
           echo "Should test: ${{ steps.changes.outputs.should-test }}"
 
   lint:
@@ -175,6 +188,106 @@ jobs:
             packages/*/package.json
           retention-days: 7
 
+  test-frontend:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.should-test == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["20.x", "22.x"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm with caching
+        uses: ./.github/actions/setup-pnpm
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build core package (dependency)
+        run: pnpm --filter @kaiord/core build
+
+      - name: Run frontend tests with coverage
+        run: pnpm --filter @kaiord/workout-spa-editor test -- --coverage
+
+      - name: Check coverage threshold
+        run: |
+          cd packages/workout-spa-editor
+          if [ ! -f coverage/coverage-final.json ]; then
+            echo "❌ Coverage file not found"
+            exit 1
+          fi
+
+          echo "Checking coverage thresholds (≥70% required)..."
+
+          # Use Node.js to parse coverage and check thresholds
+          node -e "
+            const fs = require('fs');
+            const coverage = JSON.parse(fs.readFileSync('coverage/coverage-final.json', 'utf8'));
+            
+            let totalLines = 0, coveredLines = 0;
+            let totalFunctions = 0, coveredFunctions = 0;
+            let totalBranches = 0, coveredBranches = 0;
+            let totalStatements = 0, coveredStatements = 0;
+            
+            Object.values(coverage).forEach(file => {
+              totalLines += file.lines.total;
+              coveredLines += file.lines.covered;
+              totalFunctions += file.functions.total;
+              coveredFunctions += file.functions.covered;
+              totalBranches += file.branches.total;
+              coveredBranches += file.branches.covered;
+              totalStatements += file.statements.total;
+              coveredStatements += file.statements.covered;
+            });
+            
+            const linesPct = (coveredLines / totalLines) * 100;
+            const functionsPct = (coveredFunctions / totalFunctions) * 100;
+            const branchesPct = (coveredBranches / totalBranches) * 100;
+            const statementsPct = (coveredStatements / totalStatements) * 100;
+            
+            console.log('Coverage Summary:');
+            console.log('  Lines:      ' + linesPct.toFixed(2) + '%');
+            console.log('  Functions:  ' + functionsPct.toFixed(2) + '%');
+            console.log('  Branches:   ' + branchesPct.toFixed(2) + '%');
+            console.log('  Statements: ' + statementsPct.toFixed(2) + '%');
+            console.log('');
+            
+            const threshold = 70;
+            const failed = [];
+            
+            if (linesPct < threshold) failed.push('Lines: ' + linesPct.toFixed(2) + '%');
+            if (functionsPct < threshold) failed.push('Functions: ' + functionsPct.toFixed(2) + '%');
+            if (branchesPct < threshold) failed.push('Branches: ' + branchesPct.toFixed(2) + '%');
+            if (statementsPct < threshold) failed.push('Statements: ' + statementsPct.toFixed(2) + '%');
+            
+            if (failed.length > 0) {
+              console.error('❌ Coverage threshold not met (≥70% required):');
+              failed.forEach(f => console.error('   ' + f));
+              process.exit(1);
+            }
+            
+            console.log('✅ Coverage threshold met (≥70%)');
+          "
+
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == '20.x'
+        uses: codecov/codecov-action@v4
+        with:
+          files: ./packages/workout-spa-editor/coverage/coverage-final.json
+          flags: frontend
+          name: frontend-${{ matrix.node-version }}
+          fail_ci_if_error: false
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-frontend-${{ matrix.node-version }}
+          path: ./packages/workout-spa-editor/coverage/
+          retention-days: 30
+
   round-trip:
     runs-on: ubuntu-latest
     needs: detect-changes
@@ -267,16 +380,32 @@ jobs:
           fi
           echo "Round-trip tests passed"
 
+  test-frontend-summary:
+    name: test-frontend
+    runs-on: ubuntu-latest
+    needs: test-frontend
+    if: always()
+    steps:
+      - name: Check frontend test status
+        run: |
+          if [ "${{ needs.test-frontend.result }}" != "success" ]; then
+            echo "Frontend tests failed"
+            exit 1
+          fi
+          echo "Frontend tests passed"
+
   notify-failure:
     name: Notify on Failure
     runs-on: ubuntu-latest
-    needs: [detect-changes, lint, typecheck, test, build, round-trip]
+    needs:
+      [detect-changes, lint, typecheck, test, test-frontend, build, round-trip]
     if: |
       always() &&
       github.ref == 'refs/heads/main' &&
       (needs.lint.result == 'failure' ||
        needs.typecheck.result == 'failure' ||
        needs.test.result == 'failure' ||
+       needs.test-frontend.result == 'failure' ||
        needs.build.result == 'failure' ||
        needs.round-trip.result == 'failure')
     permissions:
@@ -295,7 +424,10 @@ jobs:
               failedJobs.push('Type Check');
             }
             if ('${{ needs.test.result }}' === 'failure') {
-              failedJobs.push('Tests');
+              failedJobs.push('Tests (Core)');
+            }
+            if ('${{ needs.test-frontend.result }}' === 'failure') {
+              failedJobs.push('Tests (Frontend)');
             }
             if ('${{ needs.build.result }}' === 'failure') {
               failedJobs.push('Build');

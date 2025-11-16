@@ -1,1 +1,22 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+echo "🧪 Running tests before commit..."
+
+# Run all tests in the monorepo
 pnpm test
+
+# Check exit code
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Tests failed! Commit blocked."
+  echo ""
+  echo "Fix the failing tests and try again:"
+  echo "  pnpm test:watch"
+  echo ""
+  echo "To skip this check (NOT RECOMMENDED):"
+  echo "  git commit --no-verify"
+  exit 1
+fi
+
+echo "✅ All tests passed!"
