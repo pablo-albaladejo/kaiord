@@ -236,7 +236,7 @@ Future enhancements include drag-and-drop reordering, user profiles, workout tem
 
 ## P1b: Full Frontend Review and Quality Assurance
 
-- [ ] P1b.1 **Storybook Setup and Implementation**
+- [x] P1b.1 **Storybook Setup and Implementation**
   - Install Storybook dependencies (@storybook/react-vite, @storybook/addon-essentials, @storybook/addon-a11y)
   - Configure Storybook for Vite + React + TypeScript + Tailwind
   - Add `pnpm storybook` and `pnpm build-storybook` scripts to package.json
@@ -244,7 +244,7 @@ Future enhancements include drag-and-drop reordering, user profiles, workout tem
   - Ensure Tailwind CSS is properly loaded in Storybook
   - Test that Storybook runs locally without errors
   - _Requirements: 33 (documentation and component showcase)_
-- [ ] P1b.2 **Create Storybook Stories for All Components**
+- [x] P1b.2 **Create Storybook Stories for All Components**
   - Create `.stories.tsx` files for all atoms (Button, Input, Badge, Icon, ErrorMessage)
   - Create `.stories.tsx` files for all molecules (StepCard, DurationPicker, TargetPicker, FileUpload, SaveButton, DeleteConfirmDialog, SaveErrorDialog)
   - Create `.stories.tsx` files for all organisms (WorkoutList, StepEditor, WorkoutStats)
@@ -257,7 +257,7 @@ Future enhancements include drag-and-drop reordering, user profiles, workout tem
     - Accessibility addon enabled for a11y testing
   - Document component props and usage in story descriptions
   - _Requirements: 33 (component documentation)_
-- [ ] P1b.3 **Component Testing Coverage Audit**
+- [-] P1b.3 **Component Testing Coverage Audit**
   - Verify ALL components have corresponding `.test.tsx` files (currently complete)
   - Run `pnpm test -- --coverage` to check coverage thresholds
   - Ensure coverage meets targets: atoms ≥80%, molecules ≥80%, organisms ≥80%
