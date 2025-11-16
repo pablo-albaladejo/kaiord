@@ -5,12 +5,14 @@ type RenderStepProps = {
   step: WorkoutStep;
   selectedStepId?: string | null;
   onStepSelect?: (stepIndex: number) => void;
+  onStepDelete?: (stepIndex: number) => void;
 };
 
 export const renderStep = ({
   step,
   selectedStepId,
   onStepSelect,
+  onStepDelete,
 }: RenderStepProps) => {
   const isSelected = selectedStepId === `step-${step.stepIndex}`;
 
@@ -20,6 +22,7 @@ export const renderStep = ({
       step={step}
       isSelected={isSelected}
       onSelect={onStepSelect ? () => onStepSelect(step.stepIndex) : undefined}
+      onDelete={onStepDelete ? () => onStepDelete(step.stepIndex) : undefined}
     />
   );
 };
@@ -29,6 +32,7 @@ type RenderRepetitionBlockProps = {
   blockIndex: number;
   selectedStepId?: string | null;
   onStepSelect?: (stepIndex: number) => void;
+  onStepDelete?: (stepIndex: number) => void;
 };
 
 export const renderRepetitionBlock = ({
@@ -36,6 +40,7 @@ export const renderRepetitionBlock = ({
   blockIndex,
   selectedStepId,
   onStepSelect,
+  onStepDelete,
 }: RenderRepetitionBlockProps) => {
   return (
     <div
@@ -50,7 +55,7 @@ export const renderRepetitionBlock = ({
 
       <div className="flex flex-col gap-3 pl-4 border-l-4 border-primary-300 dark:border-primary-700">
         {block.steps.map((step) =>
-          renderStep({ step, selectedStepId, onStepSelect })
+          renderStep({ step, selectedStepId, onStepSelect, onStepDelete })
         )}
       </div>
     </div>

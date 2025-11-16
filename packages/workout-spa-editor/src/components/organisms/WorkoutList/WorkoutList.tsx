@@ -7,12 +7,14 @@ export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
   workout: Workout;
   selectedStepId?: string | null;
   onStepSelect?: (stepIndex: number) => void;
+  onStepDelete?: (stepIndex: number) => void;
 };
 
 export const WorkoutList = ({
   workout,
   selectedStepId,
   onStepSelect,
+  onStepDelete,
   className = "",
   ...props
 }: WorkoutListProps) => {
@@ -28,9 +30,15 @@ export const WorkoutList = ({
             blockIndex: index,
             selectedStepId,
             onStepSelect,
+            onStepDelete,
           });
         }
-        return renderStep({ step: item, selectedStepId, onStepSelect });
+        return renderStep({
+          step: item,
+          selectedStepId,
+          onStepSelect,
+          onStepDelete,
+        });
       })}
     </div>
   );

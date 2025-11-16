@@ -2,6 +2,7 @@ import { forwardRef, type HTMLAttributes } from "react";
 import type { WorkoutStep } from "../../../types/krd";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Icon } from "../../atoms/Icon/Icon";
+import { DeleteButton } from "./DeleteButton";
 import { formatDuration } from "./format-duration";
 import { getTargetIcon } from "./icons";
 import { StepDetails } from "./StepDetails";
@@ -11,10 +12,14 @@ export type StepCardProps = HTMLAttributes<HTMLDivElement> & {
   step: WorkoutStep;
   isSelected?: boolean;
   onSelect?: (stepIndex: number) => void;
+  onDelete?: (stepIndex: number) => void;
 };
 
 export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
-  ({ step, isSelected = false, onSelect, className = "", ...props }, ref) => {
+  (
+    { step, isSelected = false, onSelect, onDelete, className = "", ...props },
+    ref
+  ) => {
     const targetIcon = getTargetIcon(step.targetType);
     const intensity = step.intensity || "other";
 
@@ -32,7 +37,7 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
     };
 
     const baseClasses =
-      "rounded-lg border-2 p-4 transition-all duration-200 cursor-pointer hover:shadow-md";
+      "rounded-lg border-2 p-4 transition-all duration-200 cursor-pointer hover:shadow-md relative";
     const selectedClasses = isSelected
       ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
       : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800";
@@ -51,6 +56,10 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
         aria-label={`Step ${step.stepIndex + 1}: ${step.name || formatDuration(step)}`}
         {...props}
       >
+        {onDelete && (
+          <DeleteButton stepIndex={step.stepIndex} onDelete={onDelete} />
+        )}
+
         <StepHeader stepIndex={step.stepIndex} intensity={intensity} />
         <StepDetails step={step} />
 

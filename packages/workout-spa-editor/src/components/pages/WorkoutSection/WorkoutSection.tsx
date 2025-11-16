@@ -3,13 +3,13 @@ import {
   useIsEditing,
 } from "../../../store/workout-store-selectors";
 import type { KRD, Workout } from "../../../types/krd";
-import { Button } from "../../atoms/Button/Button";
-import { SaveButton } from "../../molecules";
+import { DeleteConfirmDialog } from "../../molecules";
 import { StepEditor } from "../../organisms/StepEditor/StepEditor";
-import { WorkoutList } from "../../organisms/WorkoutList/WorkoutList";
 import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
 import { useSelectedStep } from "./useSelectedStep";
 import { useWorkoutSectionHandlers } from "./useWorkoutSectionHandlers";
+import { WorkoutHeader } from "./WorkoutHeader";
+import { WorkoutStepsList } from "./WorkoutStepsList";
 
 export type WorkoutSectionProps = {
   workout: Workout;
@@ -38,26 +38,19 @@ export function WorkoutSection({
   const isEditing = useIsEditing();
   const createStep = useCreateStep();
   const selectedStep = useSelectedStep(selectedStepId, workout);
-  const { handleStepSelect, handleSave, handleCancel } =
-    useWorkoutSectionHandlers(workout, krd, onStepSelect);
+  const {
+    handleStepSelect,
+    handleSave,
+    handleCancel,
+    handleDeleteRequest,
+    handleDeleteConfirm,
+    handleDeleteCancel,
+    stepToDelete,
+  } = useWorkoutSectionHandlers(workout, krd, onStepSelect);
 
   return (
     <div className="space-y-6">
-      {/* Workout Header */}
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-              {workout.name || "Untitled Workout"}
-            </h2>
-            <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
-              Sport: {workout.sport}
-              {workout.subSport && ` • ${workout.subSport}`}
-            </p>
-          </div>
-          <SaveButton workout={krd} />
-        </div>
-      </div>
+      <WorkoutHeader workout={workout} krd={krd} />
 
       <WorkoutStats workout={workout} />
 
@@ -69,23 +62,21 @@ export function WorkoutSection({
         />
       )}
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <WorkoutList
-          workout={workout}
-          selectedStepId={selectedStepId}
-          onStepSelect={handleStepSelect}
-        />
+      <WorkoutStepsList
+        workout={workout}
+        selectedStepId={selectedStepId}
+        onStepSelect={handleStepSelect}
+        onStepDelete={handleDeleteRequest}
+        onAddStep={createStep}
+      />
 
-        <div className="mt-4 flex justify-center">
-          <Button
-            variant="secondary"
-            onClick={createStep}
-            aria-label="Add new step to workout"
-          >
-            Add Step
-          </Button>
-        </div>
-      </div>
+      {stepToDelete !== null && (
+        <DeleteConfirmDialog
+          stepIndex={stepToDelete}
+          onConfirm={handleDeleteConfirm}
+          onCancel={handleDeleteCancel}
+        />
+      )}
     </div>
   );
 }

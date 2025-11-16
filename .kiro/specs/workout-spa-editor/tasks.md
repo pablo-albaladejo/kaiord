@@ -202,7 +202,7 @@ Future enhancements include drag-and-drop reordering, user profiles, workout tem
   - Add unit tests for createStep action
   - _Requirements: 2_
 
-- [ ] P1.8.2 Implement step deletion
+- [x] P1.8.2 Implement step deletion
   - Add delete button (trash icon) to StepCard
   - Create DeleteConfirmDialog molecule using Radix Dialog
   - Create deleteStep action in workout-actions.ts

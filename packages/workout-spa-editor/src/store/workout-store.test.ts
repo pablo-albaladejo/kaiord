@@ -943,6 +943,286 @@ describe("useWorkoutStore", () => {
     });
   });
 
+  describe("deleteStep", () => {
+    it("should remove step from workout", () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "running",
+        },
+        extensions: {
+          workout: {
+            name: "Test Workout",
+            sport: "running",
+            steps: [
+              {
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 300 },
+                targetType: "power",
+                target: {
+                  type: "power",
+                  value: { unit: "watts", value: 200 },
+                },
+              },
+              {
+                stepIndex: 1,
+                durationType: "distance",
+                duration: { type: "distance", meters: 1000 },
+                targetType: "heart_rate",
+                target: {
+                  type: "heart_rate",
+                  value: { unit: "bpm", value: 150 },
+                },
+              },
+              {
+                stepIndex: 2,
+                durationType: "open",
+                duration: { type: "open" },
+                targetType: "open",
+                target: { type: "open" },
+              },
+            ],
+          },
+        },
+      };
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+
+      // Act
+      useWorkoutStore.getState().deleteStep(1);
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      const workout = state.currentWorkout?.extensions?.workout;
+      expect(workout?.steps).toHaveLength(2);
+      expect(workout?.steps[0].stepIndex).toBe(0);
+      expect(workout?.steps[1].stepIndex).toBe(1);
+    });
+
+    it("should recalculate stepIndex for all subsequent steps", () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "cycling",
+        },
+        extensions: {
+          workout: {
+            sport: "cycling",
+            steps: [
+              {
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 300 },
+                targetType: "power",
+                target: {
+                  type: "power",
+                  value: { unit: "watts", value: 200 },
+                },
+              },
+              {
+                stepIndex: 1,
+                durationType: "time",
+                duration: { type: "time", seconds: 600 },
+                targetType: "power",
+                target: {
+                  type: "power",
+                  value: { unit: "watts", value: 250 },
+                },
+              },
+              {
+                stepIndex: 2,
+                durationType: "time",
+                duration: { type: "time", seconds: 900 },
+                targetType: "power",
+                target: {
+                  type: "power",
+                  value: { unit: "watts", value: 300 },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+
+      // Act - Delete first step
+      useWorkoutStore.getState().deleteStep(0);
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      const workout = state.currentWorkout?.extensions?.workout;
+      expect(workout?.steps).toHaveLength(2);
+      expect(workout?.steps[0].stepIndex).toBe(0);
+      expect(workout?.steps[0].duration).toEqual({
+        type: "time",
+        seconds: 600,
+      });
+      expect(workout?.steps[1].stepIndex).toBe(1);
+      expect(workout?.steps[1].duration).toEqual({
+        type: "time",
+        seconds: 900,
+      });
+    });
+
+    it("should add deletion to history", () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "swimming",
+        },
+        extensions: {
+          workout: {
+            sport: "swimming",
+            steps: [
+              {
+                stepIndex: 0,
+                durationType: "distance",
+                duration: { type: "distance", meters: 500 },
+                targetType: "open",
+                target: { type: "open" },
+              },
+              {
+                stepIndex: 1,
+                durationType: "distance",
+                duration: { type: "distance", meters: 1000 },
+                targetType: "open",
+                target: { type: "open" },
+              },
+            ],
+          },
+        },
+      };
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+
+      // Act
+      useWorkoutStore.getState().deleteStep(0);
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      expect(state.workoutHistory).toHaveLength(2);
+      expect(state.historyIndex).toBe(1);
+    });
+
+    it("should do nothing when no workout is loaded", () => {
+      // Arrange
+      useWorkoutStore.setState({
+        currentWorkout: null,
+        workoutHistory: [],
+        historyIndex: -1,
+      });
+
+      // Act
+      useWorkoutStore.getState().deleteStep(0);
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      expect(state.currentWorkout).toBeNull();
+      expect(state.workoutHistory).toHaveLength(0);
+    });
+
+    it("should handle deleting the only step in workout", () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "running",
+        },
+        extensions: {
+          workout: {
+            sport: "running",
+            steps: [
+              {
+                stepIndex: 0,
+                durationType: "open",
+                duration: { type: "open" },
+                targetType: "open",
+                target: { type: "open" },
+              },
+            ],
+          },
+        },
+      };
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+
+      // Act
+      useWorkoutStore.getState().deleteStep(0);
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      const workout = state.currentWorkout?.extensions?.workout;
+      expect(workout?.steps).toHaveLength(0);
+    });
+
+    it("should handle deleting last step in workout", () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "cycling",
+        },
+        extensions: {
+          workout: {
+            sport: "cycling",
+            steps: [
+              {
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 300 },
+                targetType: "power",
+                target: {
+                  type: "power",
+                  value: { unit: "watts", value: 200 },
+                },
+              },
+              {
+                stepIndex: 1,
+                durationType: "time",
+                duration: { type: "time", seconds: 600 },
+                targetType: "power",
+                target: {
+                  type: "power",
+                  value: { unit: "watts", value: 250 },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+
+      // Act
+      useWorkoutStore.getState().deleteStep(1);
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      const workout = state.currentWorkout?.extensions?.workout;
+      expect(workout?.steps).toHaveLength(1);
+      expect(workout?.steps[0].stepIndex).toBe(0);
+      expect(workout?.steps[0].duration).toEqual({
+        type: "time",
+        seconds: 300,
+      });
+    });
+  });
+
   describe("selector hooks", () => {
     it("should provide access to currentWorkout", () => {
       // Arrange

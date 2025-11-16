@@ -6,6 +6,7 @@ import {
 } from "../../../store/workout-store-selectors";
 import type { KRD, Workout, WorkoutStep } from "../../../types/krd";
 import { isRepetitionBlock } from "../../../types/krd";
+import { useDeleteHandlers } from "./useDeleteHandlers";
 
 export const useWorkoutSectionHandlers = (
   workout: Workout,
@@ -15,6 +16,7 @@ export const useWorkoutSectionHandlers = (
   const setEditing = useSetEditing();
   const selectStep = useSelectStep();
   const updateWorkout = useUpdateWorkout();
+  const deleteHandlers = useDeleteHandlers();
 
   const handleStepSelect = useCallback(
     (stepIndex: number) => {
@@ -65,5 +67,6 @@ export const useWorkoutSectionHandlers = (
     handleStepSelect,
     handleSave,
     handleCancel,
+    ...deleteHandlers,
   };
 };

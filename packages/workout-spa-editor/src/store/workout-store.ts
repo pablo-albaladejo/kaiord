@@ -10,11 +10,12 @@
 
 import { create } from "zustand";
 import type { KRD } from "../types/krd";
+import { createStepAction } from "./actions/create-step-action";
+import { deleteStepAction } from "./actions/delete-step-action";
 import {
   createClearWorkoutAction,
   createLoadWorkoutAction,
   createRedoAction,
-  createStepAction,
   createUndoAction,
   createUpdateWorkoutAction,
 } from "./workout-actions";
@@ -35,6 +36,7 @@ export type WorkoutStore = {
   loadWorkout: (krd: KRD) => void;
   updateWorkout: (krd: KRD) => void;
   createStep: () => void;
+  deleteStep: (stepIndex: number) => void;
   selectStep: (id: string | null) => void;
   setEditing: (editing: boolean) => void;
   clearWorkout: () => void;
@@ -68,6 +70,12 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
     set((state) => {
       if (!state.currentWorkout) return {};
       return createStepAction(state.currentWorkout, state);
+    }),
+
+  deleteStep: (stepIndex: number) =>
+    set((state) => {
+      if (!state.currentWorkout) return {};
+      return deleteStepAction(state.currentWorkout, stepIndex, state);
     }),
 
   selectStep: (id: string | null) => set({ selectedStepId: id }),

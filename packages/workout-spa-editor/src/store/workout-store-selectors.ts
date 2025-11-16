@@ -56,3 +56,5 @@ export const useClearWorkout = () =>
 export const useUndo = () => useWorkoutStore((state) => state.undo);
 
 export const useRedo = () => useWorkoutStore((state) => state.redo);
+
+export const useDeleteStep = () => useWorkoutStore((state) => state.deleteStep);

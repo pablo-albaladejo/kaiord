@@ -1,4 +1,5 @@
 import { render, screen } from "@testing-library/react";
+import { beforeEach } from "node:test";
 import { describe, expect, it, vi } from "vitest";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { KRD, Workout, WorkoutStep } from "../../types/krd";
@@ -14,6 +15,17 @@ import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
  * - Closing editor after save/cancel
  */
 describe("WorkoutSection", () => {
+  beforeEach(() => {
+    // Reset store state before each test
+    useWorkoutStore.setState({
+      currentWorkout: null,
+      workoutHistory: [],
+      historyIndex: -1,
+      selectedStepId: null,
+      isEditing: false,
+    });
+  });
+
   const createMockStep = (stepIndex: number): WorkoutStep => ({
     stepIndex,
     durationType: "time",
