@@ -19,6 +19,9 @@ export default tseslint.config(
       "**/*.stories.ts",
       "**/*.stories.tsx",
       "**/tests/**/*.ts",
+      "**/playwright-report/**",
+      "**/test-results/**",
+      "**/.playwright/**",
     ],
   },
   {
