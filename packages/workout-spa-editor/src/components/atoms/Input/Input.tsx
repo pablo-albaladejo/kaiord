@@ -2,14 +2,13 @@ import { forwardRef, useId } from "react";
 import {
   baseInputClasses,
   errorStateClasses,
-  errorTextClasses,
-  helperTextClasses,
   labelClasses,
   normalStateClasses,
   sizeClasses,
 } from "./Input.styles";
 import type { InputProps } from "./Input.types";
 import { InputElement } from "./InputElement";
+import { InputMessages } from "./InputMessages";
 
 const buildInputClasses = (
   hasError: boolean,
@@ -62,16 +61,7 @@ export const Input = forwardRef<
         helperText={helperText}
         {...restProps}
       />
-      {error && (
-        <p id={`${inputId}-error`} className={errorTextClasses} role="alert">
-          {error}
-        </p>
-      )}
-      {!error && helperText && (
-        <p id={`${inputId}-helper`} className={helperTextClasses}>
-          {helperText}
-        </p>
-      )}
+      <InputMessages inputId={inputId} error={error} helperText={helperText} />
     </div>
   );
 });

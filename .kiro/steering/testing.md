@@ -1,6 +1,6 @@
 # Testing
 
-- Vitest; coverage ≥ 80% (converters ≥ 90%)
+- Vitest; coverage ≥ 80% for core package (converters ≥ 90%)
 - **Co-located tests**: `file.ts` → `file.test.ts` (same directory)
 - **All fixtures**: `src/tests/fixtures/` directory (faker + rosie factories, binary files)
 - **Test helpers**: `src/tests/helpers/` directory (mock utilities, test utils)

@@ -1,11 +1,4 @@
-/**
- * Core Validation Functions
- *
- * Validation utilities for workout data.
- */
-
 import type { ZodSchema } from "zod";
-import type { ValidationError } from "../krd";
 import {
   partialRepetitionBlockSchema,
   partialWorkoutStepSchema,
@@ -15,41 +8,10 @@ import {
   workoutStepSchema,
 } from "../schemas";
 import { formatZodError } from "./formatters";
+import { validate } from "./validate-helper";
+import type { ValidationResult } from "./validation-types";
 
-// ============================================
-// Validation Result Types
-// ============================================
-
-export type ValidationResult<T> =
-  | { success: true; data: T; errors: [] }
-  | { success: false; data?: undefined; errors: Array<ValidationError> };
-
-// ============================================
-// Generic Validation Helper
-// ============================================
-
-/**
- * Generic validation helper
- */
-const validate = <T>(
-  schema: ZodSchema<T>,
-  data: unknown
-): ValidationResult<T> => {
-  const result = schema.safeParse(data);
-
-  if (result.success) {
-    return {
-      success: true,
-      data: result.data,
-      errors: [],
-    };
-  }
-
-  return {
-    success: false,
-    errors: formatZodError(result.error),
-  };
-};
+export type { ValidationResult } from "./validation-types";
 
 // ============================================
 // Validation Functions

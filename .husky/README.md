@@ -10,13 +10,42 @@ Runs automatically before every commit.
 
 **What it does:**
 
-- Placeholder for future pre-commit checks
+1. Runs `pnpm test` to execute all tests in the monorepo
+2. Blocks commit if any tests fail
+3. Shows which tests failed with clear error messages
 
-**To skip (not recommended):**
+**Why this is important:**
+
+- ✅ Catches bugs before they reach the repository
+- ✅ Ensures all tests pass locally before CI/CD
+- ✅ Prevents broken code from being committed
+- ✅ Saves CI/CD time and resources
+- ✅ Maintains code quality standards
+
+**Example workflow:**
+
+```bash
+# Make changes
+git add .
+git commit -m "feat: add new feature"
+
+# Husky runs tests automatically
+# 🧪 Running tests before commit...
+# ✅ All tests passed!
+
+# If tests fail:
+# ❌ Tests failed! Commit blocked.
+# Fix the failing tests and try again:
+#   pnpm test:watch
+```
+
+**To skip (NOT RECOMMENDED):**
 
 ```bash
 git commit --no-verify
 ```
+
+**Note:** Skipping tests is strongly discouraged. If you must skip, ensure tests pass before pushing.
 
 ---
 

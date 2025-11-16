@@ -8,6 +8,7 @@ export {
   useCanRedo,
   useCanUndo,
   useClearWorkout,
+  useCreateStep,
   useCurrentWorkout,
   useIsEditing,
   useLoadWorkout,
