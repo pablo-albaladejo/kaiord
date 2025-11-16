@@ -2,6 +2,8 @@ import "./App.css";
 import { WelcomeSection } from "./components/pages/WelcomeSection";
 import { WorkoutSection } from "./components/pages/WorkoutSection/WorkoutSection";
 import { MainLayout } from "./components/templates/MainLayout";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { useWorkoutStore } from "./store/workout-store";
 import {
   useCurrentWorkout,
   useLoadWorkout,
@@ -9,6 +11,8 @@ import {
   useSelectedStepId,
 } from "./store/workout-store-selectors";
 import type { KRD, Workout } from "./types/krd";
+import type { Sport } from "./types/krd-core";
+import { saveWorkout } from "./utils/save-workout";
 
 /**
  * Main App Component
@@ -23,9 +27,35 @@ function App() {
   const selectedStepId = useSelectedStepId();
   const loadWorkout = useLoadWorkout();
   const selectStep = useSelectStep();
+  const createEmptyWorkout = useWorkoutStore(
+    (state) => state.createEmptyWorkout
+  );
+  const undo = useWorkoutStore((state) => state.undo);
+  const redo = useWorkoutStore((state) => state.redo);
+  const canUndo = useWorkoutStore((state) => state.canUndo());
+  const canRedo = useWorkoutStore((state) => state.canRedo());
 
   // Extract workout from KRD extensions (type assertion needed due to z.record(z.unknown()))
   const workout = currentWorkout?.extensions?.workout as Workout | undefined;
+
+  // Keyboard shortcuts (Requirement 16)
+  useKeyboardShortcuts({
+    onSave: () => {
+      if (currentWorkout) {
+        saveWorkout(currentWorkout);
+      }
+    },
+    onUndo: () => {
+      if (canUndo) {
+        undo();
+      }
+    },
+    onRedo: () => {
+      if (canRedo) {
+        redo();
+      }
+    },
+  });
 
   const handleFileLoad = (krd: KRD) => {
     // Load the workout into the store (Requirement 7)
@@ -42,6 +72,11 @@ function App() {
     selectStep(`step-${stepIndex}`);
   };
 
+  const handleCreateWorkout = (name: string, sport: Sport) => {
+    // Create a new empty workout (Requirement 2)
+    createEmptyWorkout(name, sport);
+  };
+
   return (
     <MainLayout>
       <div className="space-y-6">
@@ -49,6 +84,7 @@ function App() {
           <WelcomeSection
             onFileLoad={handleFileLoad}
             onFileError={handleFileError}
+            onCreateWorkout={handleCreateWorkout}
           />
         )}
         {workout && currentWorkout && (
