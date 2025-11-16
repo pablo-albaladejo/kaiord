@@ -6,6 +6,7 @@ type RenderStepProps = {
   selectedStepId?: string | null;
   onStepSelect?: (stepIndex: number) => void;
   onStepDelete?: (stepIndex: number) => void;
+  onStepDuplicate?: (stepIndex: number) => void;
 };
 
 export const renderStep = ({
@@ -13,6 +14,7 @@ export const renderStep = ({
   selectedStepId,
   onStepSelect,
   onStepDelete,
+  onStepDuplicate,
 }: RenderStepProps) => {
   const isSelected = selectedStepId === `step-${step.stepIndex}`;
 
@@ -23,6 +25,9 @@ export const renderStep = ({
       isSelected={isSelected}
       onSelect={onStepSelect ? () => onStepSelect(step.stepIndex) : undefined}
       onDelete={onStepDelete ? () => onStepDelete(step.stepIndex) : undefined}
+      onDuplicate={
+        onStepDuplicate ? () => onStepDuplicate(step.stepIndex) : undefined
+      }
     />
   );
 };
@@ -33,6 +38,7 @@ type RenderRepetitionBlockProps = {
   selectedStepId?: string | null;
   onStepSelect?: (stepIndex: number) => void;
   onStepDelete?: (stepIndex: number) => void;
+  onStepDuplicate?: (stepIndex: number) => void;
 };
 
 export const renderRepetitionBlock = ({
@@ -41,6 +47,7 @@ export const renderRepetitionBlock = ({
   selectedStepId,
   onStepSelect,
   onStepDelete,
+  onStepDuplicate,
 }: RenderRepetitionBlockProps) => {
   return (
     <div
@@ -55,7 +62,13 @@ export const renderRepetitionBlock = ({
 
       <div className="flex flex-col gap-3 pl-4 border-l-4 border-primary-300 dark:border-primary-700">
         {block.steps.map((step) =>
-          renderStep({ step, selectedStepId, onStepSelect, onStepDelete })
+          renderStep({
+            step,
+            selectedStepId,
+            onStepSelect,
+            onStepDelete,
+            onStepDuplicate,
+          })
         )}
       </div>
     </div>

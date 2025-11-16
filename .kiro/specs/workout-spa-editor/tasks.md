@@ -213,7 +213,7 @@ Future enhancements include drag-and-drop reordering, user profiles, workout tem
   - Add unit tests for deleteStep action
   - _Requirements: 5_
 
-- [ ] P1.8.3 Implement step duplication
+- [x] P1.8.3 Implement step duplication
   - Add duplicate button (copy icon) to StepCard
   - Create duplicateStep action in workout-actions.ts
   - Create exact copy of step (deep clone)

@@ -7,6 +7,7 @@ type WorkoutStepsListProps = {
   selectedStepId: string | null;
   onStepSelect: (stepIndex: number) => void;
   onStepDelete: (stepIndex: number) => void;
+  onStepDuplicate: (stepIndex: number) => void;
   onAddStep: () => void;
 };
 
@@ -15,6 +16,7 @@ export function WorkoutStepsList({
   selectedStepId,
   onStepSelect,
   onStepDelete,
+  onStepDuplicate,
   onAddStep,
 }: WorkoutStepsListProps) {
   return (
@@ -24,6 +26,7 @@ export function WorkoutStepsList({
         selectedStepId={selectedStepId}
         onStepSelect={onStepSelect}
         onStepDelete={onStepDelete}
+        onStepDuplicate={onStepDuplicate}
       />
 
       <div className="mt-4 flex justify-center">

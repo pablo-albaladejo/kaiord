@@ -13,11 +13,20 @@ export type StepCardProps = HTMLAttributes<HTMLDivElement> & {
   isSelected?: boolean;
   onSelect?: (stepIndex: number) => void;
   onDelete?: (stepIndex: number) => void;
+  onDuplicate?: (stepIndex: number) => void;
 };
 
 export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
   (
-    { step, isSelected = false, onSelect, onDelete, className = "", ...props },
+    {
+      step,
+      isSelected = false,
+      onSelect,
+      onDelete,
+      onDuplicate,
+      className = "",
+      ...props
+    },
     ref
   ) => {
     const targetIcon = getTargetIcon(step.targetType);
@@ -41,7 +50,7 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
     const selectedClasses = isSelected
       ? "border-primary-500 bg-primary-50 dark:bg-primary-900/20"
       : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800";
-    const paddingClasses = onDelete ? "pb-12" : "";
+    const paddingClasses = onDelete || onDuplicate ? "pb-12" : "";
     const classes = [baseClasses, selectedClasses, paddingClasses, className]
       .filter(Boolean)
       .join(" ");
@@ -59,6 +68,13 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
       >
         {onDelete && (
           <DeleteButton stepIndex={step.stepIndex} onDelete={onDelete} />
+        )}
+
+        {onDuplicate && (
+          <DuplicateButton
+            stepIndex={step.stepIndex}
+            onDuplicate={onDuplicate}
+          />
         )}
 
         <StepHeader stepIndex={step.stepIndex} intensity={intensity} />

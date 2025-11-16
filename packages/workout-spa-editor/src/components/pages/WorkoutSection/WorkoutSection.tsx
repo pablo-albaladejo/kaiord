@@ -37,6 +37,7 @@ export function WorkoutSection({
 }: WorkoutSectionProps) {
   const isEditing = useIsEditing();
   const createStep = useCreateStep();
+  const duplicateStep = useDuplicateStep();
   const selectedStep = useSelectedStep(selectedStepId, workout);
   const {
     handleStepSelect,
@@ -67,6 +68,7 @@ export function WorkoutSection({
         selectedStepId={selectedStepId}
         onStepSelect={handleStepSelect}
         onStepDelete={handleDeleteRequest}
+        onStepDuplicate={duplicateStep}
         onAddStep={createStep}
       />
 

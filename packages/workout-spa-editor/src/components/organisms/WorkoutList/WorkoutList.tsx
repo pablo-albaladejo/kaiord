@@ -8,6 +8,7 @@ export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
   selectedStepId?: string | null;
   onStepSelect?: (stepIndex: number) => void;
   onStepDelete?: (stepIndex: number) => void;
+  onStepDuplicate?: (stepIndex: number) => void;
 };
 
 export const WorkoutList = ({
@@ -15,6 +16,7 @@ export const WorkoutList = ({
   selectedStepId,
   onStepSelect,
   onStepDelete,
+  onStepDuplicate,
   className = "",
   ...props
 }: WorkoutListProps) => {
@@ -31,6 +33,7 @@ export const WorkoutList = ({
             selectedStepId,
             onStepSelect,
             onStepDelete,
+            onStepDuplicate,
           });
         }
         return renderStep({
@@ -38,6 +41,7 @@ export const WorkoutList = ({
           selectedStepId,
           onStepSelect,
           onStepDelete,
+          onStepDuplicate,
         });
       })}
     </div>
