@@ -4,7 +4,7 @@
  * Action for creating a new workout step with default values.
  */
 
-import type { KRD } from "../../types/krd";
+import type { KRD, Workout } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -16,7 +16,7 @@ export const createStepAction = (
     return {};
   }
 
-  const workout = krd.extensions.workout;
+  const workout = krd.extensions.workout as Workout;
   const newStepIndex = workout.steps.length;
 
   const newStep = {
