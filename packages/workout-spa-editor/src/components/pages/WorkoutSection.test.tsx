@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { KRD, Workout, WorkoutStep } from "../../types/krd";
-import { WorkoutSection } from "./WorkoutSection";
+import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
 
 /**
  * WorkoutSection Tests

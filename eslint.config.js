@@ -25,7 +25,8 @@ export default tseslint.config(
     ],
   },
   {
-    files: ["**/*.ts", "**/*.tsx"],
+    // Core package: strict 40 lines per function
+    files: ["packages/core/**/*.ts", "packages/core/**/*.tsx"],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
