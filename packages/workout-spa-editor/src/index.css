@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+@variant dark (&:where(.dark, .dark *));
+@variant kiroween (&:where(.kiroween, .kiroween *));
+
 @theme {
   --color-primary-50: #f0f9ff;
   --color-primary-100: #e0f2fe;
@@ -28,6 +31,39 @@
   --font-family-sans:
     Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
     sans-serif;
+
+  /* Kiroween theme animations */
+  --animate-float: float 6s ease-in-out infinite;
+  --animate-float-delayed: float 6s ease-in-out 3s infinite;
+}
+
+/* Kiroween theme color overrides - Dark lilac palette */
+.kiroween {
+  /* Primary colors - Vibrant lilac tones */
+  --color-primary-50: #e9d5ff;
+  --color-primary-100: #d8b4fe;
+  --color-primary-200: #c084fc;
+  --color-primary-300: #a855f7;
+  --color-primary-400: #9333ea;
+  --color-primary-500: #7e22ce;
+  --color-primary-600: #8b5cf6;
+  --color-primary-700: #a78bfa;
+  --color-primary-800: #7c3aed;
+  --color-primary-900: #6d28d9;
+  --color-primary-950: #4c1d95;
+
+  /* Gray colors - Dark lilac background tones (no whites) */
+  --color-gray-50: #4d3b6e;
+  --color-gray-100: #e9d5ff; /* Light text */
+  --color-gray-200: #d8b4fe; /* Lighter text */
+  --color-gray-300: #c4b5fd; /* Medium-light text - more visible */
+  --color-gray-400: #a78bfa; /* Medium text - more visible */
+  --color-gray-500: #8d6bae;
+  --color-gray-600: #8d6bae;
+  --color-gray-700: #4d3b6e; /* Dark backgrounds */
+  --color-gray-800: #3d2b5e; /* Darker backgrounds */
+  --color-gray-900: #2d1b4e; /* Darkest backgrounds */
+  --color-gray-950: #1d0b3e; /* Body background */
 }
 
 @layer base {
@@ -38,8 +74,41 @@
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* Smooth theme transitions - Requirement 13 */
+  html {
+    transition:
+      background-color 0.3s ease,
+      color 0.3s ease;
+  }
+
+  * {
+    transition:
+      background-color 0.3s ease,
+      border-color 0.3s ease,
+      color 0.3s ease;
+  }
+
   body {
-    @apply m-0 min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100;
+    @apply m-0 min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 kiroween:bg-gray-950 kiroween:text-gray-100;
+  }
+
+  /* Floating animation for ghost decorations */
+  @keyframes float {
+    0%,
+    100% {
+      transform: translateY(0px);
+    }
+    50% {
+      transform: translateY(-20px);
+    }
+  }
+
+  .animate-float {
+    animation: float 6s ease-in-out infinite;
+  }
+
+  .animate-float-delayed {
+    animation: float 6s ease-in-out 3s infinite;
   }
 }
 
@@ -49,6 +118,20 @@
   }
 
   .btn-secondary {
-    @apply rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700;
+    @apply rounded-lg border border-gray-300 bg-white px-4 py-2 font-medium text-gray-700 transition-colors hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 dark:border-gray-600 dark:bg-gray-800 dark:text-gray-200 dark:hover:bg-gray-700 kiroween:border-gray-600 kiroween:bg-gray-800 kiroween:text-gray-100 kiroween:hover:bg-gray-700;
+  }
+
+  /* Kiroween theme component overrides - Requirement 13 */
+  .kiroween .btn-primary {
+    @apply shadow-[0_0_15px_rgba(139,92,246,0.6)];
+  }
+
+  .kiroween .btn-secondary {
+    @apply shadow-[0_0_10px_rgba(167,139,250,0.3)];
+  }
+
+  /* Kiroween button glow effect */
+  .kiroween button {
+    @apply shadow-[0_0_12px_rgba(167,139,250,0.3)];
   }
 }
