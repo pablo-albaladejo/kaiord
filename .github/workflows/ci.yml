@@ -21,7 +21,7 @@ jobs:
       should-test: ${{ steps.changes.outputs.should-test }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
@@ -91,7 +91,7 @@ jobs:
         node-version: ["20.x", "22.x"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -107,7 +107,7 @@ jobs:
     if: needs.detect-changes.outputs.should-test == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -126,7 +126,7 @@ jobs:
         package: ["core"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -163,7 +163,7 @@ jobs:
     if: needs.detect-changes.outputs.should-test == 'true'
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -198,7 +198,7 @@ jobs:
         node-version: ["20.x", "22.x"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -241,7 +241,7 @@ jobs:
         package: ["core"]
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
