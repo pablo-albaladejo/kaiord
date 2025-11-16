@@ -1,72 +1,31 @@
-import {
-  useRangeChange,
-  useTypeChange,
-  useUnitChange,
-  useValueChange,
-} from "./hooks";
+import { useRangeChange } from "./hooks";
+import { useTargetPickerBasicHandlers } from "./useTargetPickerBasicHandlers";
 import type { UseTargetPickerHandlersParams } from "./useTargetPickerHandlers.types";
 import { useTargetPickerRangeHandlers } from "./useTargetPickerRangeHandlers";
 
-export const useTargetPickerHandlers = ({
-  targetType,
-  unit,
-  maxValue,
-  minValue,
-  onChange,
-  setTargetType,
-  setValidationError,
-  setUnit,
-  setTargetValue,
-  setMinValue,
-  setMaxValue,
-}: UseTargetPickerHandlersParams) => {
-  const handleTypeChange = useTypeChange(
-    onChange,
-    setTargetType,
-    setValidationError,
-    setUnit,
-    setTargetValue,
-    setMinValue,
-    setMaxValue
-  );
-
-  const handleUnitChange = useUnitChange(
-    onChange,
-    setUnit,
-    setValidationError,
-    setTargetValue,
-    setMinValue,
-    setMaxValue
-  );
-
-  const handleValueChange = useValueChange(
-    targetType,
-    unit,
-    onChange,
-    setTargetValue,
-    setValidationError
-  );
+export const useTargetPickerHandlers = (
+  params: UseTargetPickerHandlersParams
+) => {
+  const basicHandlers = useTargetPickerBasicHandlers(params);
 
   const handleRangeChange = useRangeChange(
-    targetType,
-    unit,
-    onChange,
-    setValidationError
+    params.targetType,
+    params.unit,
+    params.onChange,
+    params.setValidationError
   );
 
-  const { handleMinChange, handleMaxChange } = useTargetPickerRangeHandlers(
-    minValue,
-    maxValue,
-    setMinValue,
-    setMaxValue,
+  const rangeHandlers = useTargetPickerRangeHandlers(
+    params.minValue,
+    params.maxValue,
+    params.setMinValue,
+    params.setMaxValue,
     handleRangeChange
   );
 
   return {
-    handleTypeChange,
-    handleUnitChange,
-    handleValueChange,
-    handleMinChange,
-    handleMaxChange,
+    ...basicHandlers,
+    handleMinChange: rangeHandlers.handleMinChange,
+    handleMaxChange: rangeHandlers.handleMaxChange,
   };
 };

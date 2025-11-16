@@ -1,5 +1,6 @@
 import { useCallback } from "react";
 import type { Target } from "../../../types/krd";
+import { getDefaultUnit, resetFieldValues } from "./hooks-type-unit-helpers";
 
 export const useTypeChange = (
   onChange: (target: Target | null) => void,
@@ -20,25 +21,16 @@ export const useTypeChange = (
         | "pace"
         | "cadence"
         | "open";
+
       setTargetType(type);
       setValidationError("");
-      setValue("");
-      setMinValue("");
-      setMaxValue("");
+      resetFieldValues(setValue, setMinValue, setMaxValue);
 
       if (type === "open") {
         setUnit("");
         onChange({ type: "open" });
       } else {
-        const defaultUnit =
-          type === "power"
-            ? "watts"
-            : type === "heart_rate"
-              ? "bpm"
-              : type === "pace"
-                ? "mps"
-                : "rpm";
-        setUnit(defaultUnit);
+        setUnit(getDefaultUnit(type));
         onChange(null);
       }
     },
@@ -64,12 +56,9 @@ export const useUnitChange = (
 ) => {
   return useCallback(
     (e: React.ChangeEvent<HTMLSelectElement>) => {
-      const newUnit = e.target.value;
-      setUnit(newUnit);
+      setUnit(e.target.value);
       setValidationError("");
-      setValue("");
-      setMinValue("");
-      setMaxValue("");
+      resetFieldValues(setValue, setMinValue, setMaxValue);
       onChange(null);
     },
     [onChange, setUnit, setValidationError, setValue, setMinValue, setMaxValue]

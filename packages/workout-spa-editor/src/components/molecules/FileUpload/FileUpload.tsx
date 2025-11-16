@@ -1,6 +1,7 @@
 import type { KRD, ValidationError } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
-import { ErrorMessage } from "../../atoms/ErrorMessage/ErrorMessage";
+import { FileUploadInput } from "./FileUploadInput";
+import { FileUploadStatus } from "./FileUploadStatus";
 import { useFileUpload } from "./useFileUpload";
 
 export type FileUploadProps = {
@@ -31,14 +32,12 @@ export const FileUpload = ({
 
   return (
     <div className={`flex flex-col gap-3 ${className}`}>
-      <input
-        ref={fileInputRef}
-        type="file"
+      <FileUploadInput
+        fileInputRef={fileInputRef}
         accept={accept}
-        onChange={(e) => handleFileChange(e.target.files?.[0])}
-        className="hidden"
-        disabled={disabled || isLoading}
-        aria-label="Upload workout file"
+        disabled={disabled}
+        isLoading={isLoading}
+        onFileChange={handleFileChange}
       />
       <Button
         onClick={triggerFileInput}
@@ -49,20 +48,13 @@ export const FileUpload = ({
       >
         {isLoading ? "Loading..." : "Upload Workout File"}
       </Button>
-      {fileName && !isLoading && !error && (
-        <p className="text-sm text-gray-600 dark:text-gray-400">
-          Loaded: {fileName}
-        </p>
-      )}
-      {error && (
-        <ErrorMessage
-          title={error.title}
-          message={error.message}
-          validationErrors={error.validationErrors}
-          onRetry={handleRetry}
-          onDismiss={handleDismiss}
-        />
-      )}
+      <FileUploadStatus
+        fileName={fileName}
+        isLoading={isLoading}
+        error={error}
+        onRetry={handleRetry}
+        onDismiss={handleDismiss}
+      />
     </div>
   );
 };

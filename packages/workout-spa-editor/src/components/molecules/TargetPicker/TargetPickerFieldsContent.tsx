@@ -1,72 +1,42 @@
 import { TargetOpenMessage } from "./TargetOpenMessage";
 import type { TargetPickerFieldsProps } from "./TargetPickerFields.types";
-import { TargetPickerRangeFields } from "./TargetPickerRangeFields";
-import { TargetUnitSelect } from "./TargetUnitSelect";
-import { TargetValueInput } from "./TargetValueInput";
+import { TargetPickerFieldsUnit } from "./TargetPickerFieldsUnit";
+import { TargetPickerFieldsValue } from "./TargetPickerFieldsValue";
 
 type TargetPickerFieldsContentProps = Omit<
   TargetPickerFieldsProps,
   "onTypeChange"
 >;
 
-export function TargetPickerFieldsContent({
-  targetType,
-  unit,
-  targetValue,
-  minValue,
-  maxValue,
-  displayError,
-  disabled,
-  unitOptions,
-  onUnitChange,
-  onValueChange,
-  onMinChange,
-  onMaxChange,
-  getValueLabel,
-  getValuePlaceholder,
-}: TargetPickerFieldsContentProps) {
-  if (targetType === "open") {
-    return <TargetOpenMessage error={displayError} />;
+export function TargetPickerFieldsContent(
+  props: TargetPickerFieldsContentProps
+) {
+  if (props.targetType === "open") {
+    return <TargetOpenMessage error={props.displayError} />;
   }
-
-  const showUnitSelect = unitOptions && unitOptions.length > 0;
-  const showValueInput = unit && unit !== "range";
-  const showRangeFields = unit === "range";
 
   return (
     <>
-      {showUnitSelect && (
-        <TargetUnitSelect
-          value={unit}
-          onChange={onUnitChange}
-          disabled={disabled}
-          options={unitOptions}
-        />
-      )}
-
-      {showValueInput && (
-        <TargetValueInput
-          targetType={targetType}
-          unit={unit}
-          value={targetValue}
-          onChange={onValueChange}
-          disabled={disabled}
-          error={displayError}
-          getValueLabel={getValueLabel}
-          getValuePlaceholder={getValuePlaceholder}
-        />
-      )}
-
-      {showRangeFields && (
-        <TargetPickerRangeFields
-          minValue={minValue}
-          maxValue={maxValue}
-          displayError={displayError}
-          disabled={disabled}
-          onMinChange={onMinChange}
-          onMaxChange={onMaxChange}
-        />
-      )}
+      <TargetPickerFieldsUnit
+        unit={props.unit}
+        disabled={props.disabled}
+        unitOptions={props.unitOptions}
+        onUnitChange={props.onUnitChange}
+      />
+      <TargetPickerFieldsValue
+        targetType={props.targetType}
+        unit={props.unit}
+        targetValue={props.targetValue}
+        minValue={props.minValue}
+        maxValue={props.maxValue}
+        displayError={props.displayError}
+        disabled={props.disabled}
+        onValueChange={props.onValueChange}
+        onMinChange={props.onMinChange}
+        onMaxChange={props.onMaxChange}
+        getValueLabel={props.getValueLabel}
+        getValuePlaceholder={props.getValuePlaceholder}
+      />
     </>
   );
 }

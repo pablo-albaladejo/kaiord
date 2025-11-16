@@ -1,4 +1,4 @@
-import { Input } from "../../atoms/Input/Input";
+import { TargetPickerRangeInput } from "./TargetPickerRangeInput";
 
 type TargetPickerRangeFieldsProps = {
   minValue: string;
@@ -17,31 +17,27 @@ export const TargetPickerRangeFields = ({
   onMinChange,
   onMaxChange,
 }: TargetPickerRangeFieldsProps) => {
+  const hasError = Boolean(displayError);
+
   return (
     <div className="space-y-3">
-      <Input
-        variant="number"
+      <TargetPickerRangeInput
         label="Minimum"
         value={minValue}
         onChange={onMinChange}
         disabled={disabled}
         placeholder="Enter minimum value"
-        min="0"
-        step="0.01"
-        aria-label="Minimum value"
-        aria-invalid={Boolean(displayError)}
+        ariaLabel="Minimum value"
+        hasError={hasError}
       />
-      <Input
-        variant="number"
+      <TargetPickerRangeInput
         label="Maximum"
         value={maxValue}
         onChange={onMaxChange}
         disabled={disabled}
         placeholder="Enter maximum value"
-        min="0"
-        step="0.01"
-        aria-label="Maximum value"
-        aria-invalid={Boolean(displayError)}
+        ariaLabel="Maximum value"
+        hasError={hasError}
       />
       {displayError && (
         <p
