@@ -1,27 +1,11 @@
-import type { Target } from "../../../types/krd";
 import {
   useRangeChange,
   useTypeChange,
   useUnitChange,
   useValueChange,
 } from "./hooks";
+import type { UseTargetPickerHandlersParams } from "./useTargetPickerHandlers.types";
 import { useTargetPickerRangeHandlers } from "./useTargetPickerRangeHandlers";
-
-type UseTargetPickerHandlersParams = {
-  targetType: "power" | "heart_rate" | "pace" | "cadence" | "open";
-  unit: string;
-  maxValue: string;
-  minValue: string;
-  onChange: (target: Target | null) => void;
-  setTargetType: (
-    type: "power" | "heart_rate" | "pace" | "cadence" | "open"
-  ) => void;
-  setValidationError: (error: string) => void;
-  setUnit: (unit: string) => void;
-  setTargetValue: (value: string) => void;
-  setMinValue: (value: string) => void;
-  setMaxValue: (value: string) => void;
-};
 
 export const useTargetPickerHandlers = ({
   targetType,
