@@ -9,7 +9,7 @@ type ErrorState = {
 } | null;
 
 type FileUploadActionsParams = {
-  fileInputRef: RefObject<HTMLInputElement>;
+  fileInputRef: RefObject<HTMLInputElement | null>;
   setIsLoading: (loading: boolean) => void;
   setFileName: (name: string | null) => void;
   setError: (error: ErrorState) => void;

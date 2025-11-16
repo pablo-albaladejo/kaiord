@@ -10,7 +10,9 @@ export default defineConfig({
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
   workers: process.env.CI ? 1 : undefined,
-  reporter: process.env.CI ? [["html"], ["github"]] : [["html"], ["list"]],
+  reporter: process.env.CI
+    ? [["html"], ["github"]]
+    : [["html", { open: "never" }], ["list"]],
 
   use: {
     baseURL: "http://localhost:5173",
@@ -29,7 +31,7 @@ export default defineConfig({
     },
     {
       name: "webkit",
-      use: { ...devices["Desktop Safari"] },
+      use: { ...devices["Desktop Safari"], hasTouch: true },
     },
     // Mobile viewports
     {

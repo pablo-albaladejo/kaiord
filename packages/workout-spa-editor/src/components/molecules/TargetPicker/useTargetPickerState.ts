@@ -8,7 +8,26 @@ import {
   getValueString,
 } from "./helpers";
 
-export const useTargetPickerState = (value: Target | null) => {
+export type TargetPickerState = {
+  targetType: "power" | "heart_rate" | "pace" | "cadence" | "open";
+  setTargetType: (
+    value: "power" | "heart_rate" | "pace" | "cadence" | "open"
+  ) => void;
+  unit: string;
+  setUnit: (value: string) => void;
+  targetValue: string;
+  setTargetValue: (value: string) => void;
+  minValue: string;
+  setMinValue: (value: string) => void;
+  maxValue: string;
+  setMaxValue: (value: string) => void;
+  validationError: string;
+  setValidationError: (value: string) => void;
+};
+
+export const useTargetPickerState = (
+  value: Target | null
+): TargetPickerState => {
   const [targetType, setTargetType] = useState<
     "power" | "heart_rate" | "pace" | "cadence" | "open"
   >(getTargetTypeFromValue(value));

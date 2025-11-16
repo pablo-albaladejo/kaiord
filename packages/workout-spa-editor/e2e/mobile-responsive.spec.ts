@@ -31,27 +31,52 @@ test.describe("Mobile Responsive Design", () => {
   test("should support touch gestures for navigation", async ({ page }) => {
     await page.goto("/");
 
-    // Create a simple workout
-    await page.getByRole("button", { name: /create new workout/i }).click();
-    await page.getByLabel(/workout name/i).fill("Mobile Test");
-    await page.getByLabel(/sport/i).click();
-    await page.getByRole("option", { name: /running/i }).click();
-    await page.getByRole("button", { name: /create/i }).click();
+    // Load a workout
+    const fileInput = page.locator('input[type="file"]');
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "running",
+      },
+      extensions: {
+        workout: {
+          name: "Mobile Test",
+          sport: "running",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 600 },
+              targetType: "pace",
+              target: {
+                type: "pace",
+                value: { unit: "min_per_km", value: 5.0 },
+              },
+              intensity: "active",
+            },
+          ],
+        },
+      },
+    };
 
-    // Add a step
-    await page.getByRole("button", { name: /add step/i }).click();
-    await page.getByLabel(/duration value/i).fill("600");
-    await page.getByLabel(/target value/i).fill("150");
-    await page.getByRole("button", { name: /save step/i }).click();
+    await fileInput.setInputFiles({
+      name: "mobile-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
 
-    // Verify step is visible
+    // Wait for workout to load
+    await expect(page.getByText("Mobile Test")).toBeVisible({ timeout: 10000 });
     await expect(page.getByText("Step 1")).toBeVisible();
 
     // Tap on the step to edit (touch interaction)
-    await page.getByText("Step 1").tap();
+    const stepCard = page.locator('[data-testid="step-card"]').first();
+    await stepCard.tap();
 
     // Verify editor opens
-    await expect(page.getByText("Edit Step")).toBeVisible();
+    await expect(page.getByText("Edit Step")).toBeVisible({ timeout: 5000 });
   });
 
   test("should scroll smoothly on mobile", async ({ page }) => {

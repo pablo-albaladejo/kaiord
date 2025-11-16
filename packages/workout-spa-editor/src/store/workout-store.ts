@@ -9,46 +9,20 @@
  */
 
 import { create } from "zustand";
-import type { KRD } from "../types/krd";
 import { createStepAction } from "./actions/create-step-action";
 import { deleteStepAction } from "./actions/delete-step-action";
 import { duplicateStepAction } from "./actions/duplicate-step-action";
 import {
   createClearWorkoutAction,
+  createEmptyWorkoutAction,
   createLoadWorkoutAction,
   createRedoAction,
   createUndoAction,
   createUpdateWorkoutAction,
 } from "./workout-actions";
+import type { WorkoutStore } from "./workout-store-types";
 
-// ============================================
-// Store State Types
-// ============================================
-
-export type WorkoutStore = {
-  // State
-  currentWorkout: KRD | null;
-  workoutHistory: Array<KRD>;
-  historyIndex: number;
-  selectedStepId: string | null;
-  isEditing: boolean;
-
-  // Actions
-  loadWorkout: (krd: KRD) => void;
-  updateWorkout: (krd: KRD) => void;
-  createStep: () => void;
-  deleteStep: (stepIndex: number) => void;
-  duplicateStep: (stepIndex: number) => void;
-  selectStep: (id: string | null) => void;
-  setEditing: (editing: boolean) => void;
-  clearWorkout: () => void;
-  undo: () => void;
-  redo: () => void;
-
-  // Computed
-  canUndo: () => boolean;
-  canRedo: () => boolean;
-};
+export type { WorkoutStore } from "./workout-store-types";
 
 // ============================================
 // Store Implementation
@@ -64,6 +38,9 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
 
   // Actions
   loadWorkout: (krd: KRD) => set(createLoadWorkoutAction(krd)),
+
+  createEmptyWorkout: (name: string, sport: Sport) =>
+    set(createEmptyWorkoutAction(name, sport)),
 
   updateWorkout: (krd: KRD) =>
     set((state) => createUpdateWorkoutAction(krd, state)),

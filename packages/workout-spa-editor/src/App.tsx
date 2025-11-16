@@ -2,13 +2,15 @@ import "./App.css";
 import { WelcomeSection } from "./components/pages/WelcomeSection";
 import { WorkoutSection } from "./components/pages/WorkoutSection/WorkoutSection";
 import { MainLayout } from "./components/templates/MainLayout";
+import { useAppHandlers } from "./hooks/useAppHandlers";
+import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
+import { useWorkoutStore } from "./store/workout-store";
 import {
   useCurrentWorkout,
-  useLoadWorkout,
-  useSelectStep,
   useSelectedStepId,
 } from "./store/workout-store-selectors";
-import type { KRD, ValidationError, Workout } from "./types/krd";
+import type { Workout } from "./types/krd";
+import { saveWorkout } from "./utils/save-workout";
 
 /**
  * Main App Component
@@ -21,29 +23,37 @@ import type { KRD, ValidationError, Workout } from "./types/krd";
 function App() {
   const currentWorkout = useCurrentWorkout();
   const selectedStepId = useSelectedStepId();
-  const loadWorkout = useLoadWorkout();
-  const selectStep = useSelectStep();
+  const undo = useWorkoutStore((state) => state.undo);
+  const redo = useWorkoutStore((state) => state.redo);
+  const canUndo = useWorkoutStore((state) => state.canUndo());
+  const canRedo = useWorkoutStore((state) => state.canRedo());
 
-  // Extract workout from KRD extensions (type assertion needed due to z.record(z.unknown()))
+  const {
+    handleFileLoad,
+    handleFileError,
+    handleStepSelect,
+    handleCreateWorkout,
+  } = useAppHandlers();
+
   const workout = currentWorkout?.extensions?.workout as Workout | undefined;
 
-  const handleFileLoad = (krd: KRD) => {
-    // Load the workout into the store (Requirement 7)
-    loadWorkout(krd);
-  };
-
-  const handleFileError = (
-    error: string,
-    validationErrors?: Array<ValidationError>
-  ) => {
-    // Error handling is done by FileUpload component
-    console.error("File load error:", error, validationErrors);
-  };
-
-  const handleStepSelect = (stepIndex: number) => {
-    // Select step by creating a unique ID (Requirement 1)
-    selectStep(`step-${stepIndex}`);
-  };
+  useKeyboardShortcuts({
+    onSave: () => {
+      if (currentWorkout) {
+        saveWorkout(currentWorkout);
+      }
+    },
+    onUndo: () => {
+      if (canUndo) {
+        undo();
+      }
+    },
+    onRedo: () => {
+      if (canRedo) {
+        redo();
+      }
+    },
+  });
 
   return (
     <MainLayout>
@@ -52,6 +62,7 @@ function App() {
           <WelcomeSection
             onFileLoad={handleFileLoad}
             onFileError={handleFileError}
+            onCreateWorkout={handleCreateWorkout}
           />
         )}
         {workout && currentWorkout && (

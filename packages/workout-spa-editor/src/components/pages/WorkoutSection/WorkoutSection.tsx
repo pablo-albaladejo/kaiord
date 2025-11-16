@@ -1,5 +1,5 @@
 import type { KRD, Workout } from "../../../types/krd";
-import { DeleteConfirmDialog } from "../../molecules";
+import { DeleteConfirmDialog } from "../../molecules/DeleteConfirmDialog/DeleteConfirmDialog";
 import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
 import { useWorkoutSectionState } from "./useWorkoutSectionState";
 import { WorkoutHeader } from "./WorkoutHeader";
