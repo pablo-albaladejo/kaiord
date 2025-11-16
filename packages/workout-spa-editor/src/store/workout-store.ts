@@ -10,11 +10,13 @@
 
 import { create } from "zustand";
 import type { KRD } from "../types/krd";
+import type { Sport } from "../types/krd-core";
 import { createStepAction } from "./actions/create-step-action";
 import { deleteStepAction } from "./actions/delete-step-action";
 import { duplicateStepAction } from "./actions/duplicate-step-action";
 import {
   createClearWorkoutAction,
+  createEmptyWorkoutAction,
   createLoadWorkoutAction,
   createRedoAction,
   createUndoAction,
@@ -35,6 +37,7 @@ export type WorkoutStore = {
 
   // Actions
   loadWorkout: (krd: KRD) => void;
+  createEmptyWorkout: (name: string, sport: Sport) => void;
   updateWorkout: (krd: KRD) => void;
   createStep: () => void;
   deleteStep: (stepIndex: number) => void;
@@ -64,6 +67,9 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
 
   // Actions
   loadWorkout: (krd: KRD) => set(createLoadWorkoutAction(krd)),
+
+  createEmptyWorkout: (name: string, sport: Sport) =>
+    set(createEmptyWorkoutAction(name, sport)),
 
   updateWorkout: (krd: KRD) =>
     set((state) => createUpdateWorkoutAction(krd, state)),
