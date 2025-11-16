@@ -8,7 +8,7 @@ import {
   useSelectStep,
   useSelectedStepId,
 } from "./store/workout-store-selectors";
-import type { KRD, ValidationError, Workout } from "./types/krd";
+import type { KRD, Workout } from "./types/krd";
 
 /**
  * Main App Component
@@ -32,12 +32,9 @@ function App() {
     loadWorkout(krd);
   };
 
-  const handleFileError = (
-    error: string,
-    validationErrors?: Array<ValidationError>
-  ) => {
+  const handleFileError = () => {
     // Error handling is done by FileUpload component
-    console.error("File load error:", error, validationErrors);
+    // Errors are displayed to the user via FileUpload's ErrorMessage component
   };
 
   const handleStepSelect = (stepIndex: number) => {
