@@ -2,58 +2,67 @@
 
 This implementation plan prioritizes tasks by **impact** and **complexity** to deliver value quickly while building a solid foundation.
 
-## Current Status: ✅ v1.0.0 (MVP) COMPLETE
+## Current Status: ⚠️ v1.0.0 (MVP) - Final Polish Needed
 
-**Release Date:** 2025-01-16  
-**Status:** Production Ready - Minor E2E Test Fixes Needed
+**Release Date:** TBD (pending P1c completion)  
+**Status:** Feature Complete - E2E Test Fixes & Notifications Needed
 
 ### Implementation Summary
 
 - ✅ **P0 Requirements (MVP):** 10/10 complete (100%)
 - ✅ **P1 Requirements (Core):** 8/8 complete (100%)
 - ✅ **P1b Quality Assurance:** 12/12 tasks complete (100%)
+- ⚠️ **P1c Bug Fixes:** 0/9 tasks complete (0%) - **BLOCKING v1.0.0**
 - ✅ **Test Coverage:** 86.54% (exceeds 70% target)
-- ⚠️ **E2E Tests:** Some failures due to strict mode violations (fixable)
+- ⚠️ **E2E Tests:** 60/95 passing (63%) - 35 tests failing
 - ✅ **CI/CD Pipeline:** Core functionality passing
 - ✅ **Documentation:** Complete (README, TESTING, ARCHITECTURE)
 
 ### Key Features Delivered
 
-- Workout visualization with color-coded intensity
-- Create, edit, delete, and duplicate workout steps
-- Load and save KRD files with validation
-- Undo/redo functionality (50-state history)
-- Mobile-responsive design (touch-friendly)
-- Accessibility support (WCAG 2.1 AA compliant)
-- Comprehensive testing (380+ unit tests passing)
-- Component documentation (Storybook)
-- GitHub Pages deployment
+- ✅ Workout visualization with color-coded intensity
+- ✅ Create, edit, delete, and duplicate workout steps
+- ✅ Load and save KRD files with validation
+- ✅ Undo/redo functionality (50-state history)
+- ✅ Keyboard shortcuts (Ctrl+S, Ctrl+Z, Ctrl+Y) - **IMPLEMENTED**
+- ✅ Mobile-responsive design (touch-friendly)
+- ✅ Accessibility support (WCAG 2.1 AA compliant)
+- ✅ Comprehensive testing (380+ unit tests passing)
+- ✅ Component documentation (Storybook)
+- ✅ GitHub Pages deployment
+- ✅ Theme system (light/dark/Kiroween)
 
-### Known Issues to Fix
+### Known Issues to Fix (P1c)
 
-- ⚠️ **55/75 E2E tests failing** - Multiple issues:
-  - "Create New Workout" button not found (timeouts)
-  - Strict mode violations (duplicate selectors)
-  - Touch gestures not enabled in webkit
-  - Button sizes below 44px minimum (accessibility)
-  - Keyboard shortcuts not implemented (Ctrl+S, Ctrl+Z)
-  - Error messages not displaying correctly
-- ⚠️ Success notification not implemented (TODO in SaveButton.tsx)
+- ⚠️ **35/95 E2E tests failing (63% passing)** - Timeout issues:
+  - Workflow tests timing out (create, edit, save flows)
+  - Smooth scrolling tests failing
+  - Theme transition tests failing
+  - Focus indicator tests timing out on webkit/mobile
+  - Tablet layout tests timing out
+  - Keyboard shortcut tests timing out (shortcuts ARE implemented)
+- ❌ **Success notifications not implemented** (TODO in SaveButton.tsx line 39)
+  - @radix-ui/react-toast is installed but not integrated
+  - Need Toast component, ToastProvider, and useToast hook
+  - Need notifications for save, copy, delete actions
 
 ### Known Limitations (P2+ Features)
 
 - ❌ Repetition blocks not yet supported (planned for v1.1.0)
 - ❌ Drag-and-drop reordering not available (planned for v1.1.0)
 - ❌ User profiles and workout library (planned for v1.2.0)
-- ❌ Export to FIT/TCX/PWX formats (planned for v2.0.0)
+- ❌ Export to FIT/TCX/PWX formats (planne
 
-## 📋 IMMEDIATE: Bug Fixes & Polish
+## 📋 IMMEDIATE: P1c Bug Fixes & Polish (v1.0.0 Blockers)
 
-Critical fixes needed before v1.0.0 release:
+**Critical fixes needed before v1.0.0 release:**
 
-- Fix E2E test strict mode violations
-- Implement success notifications (Requirement 39)
-- Verify all E2E tests pass across browsers
+1. **Fix 35 failing E2E tests** (P1c.1) - Timeout issues in workflows, scrolling, themes, focus
+2. **Implement success notifications** (P1c.2) - Toast system for save, copy, delete actions
+3. **Verify all E2E tests pass** (P1c.3) - Target 100% passing (95/95 tests)
+
+**Estimated Effort:** 6-8 hours
+**Priority:** HIGH - Blocking v1.0.0 release
 
 ## Priority Matrix
 
@@ -66,104 +75,134 @@ Critical fixes needed before v1.0.0 release:
 
 ## P1c: Critical Bug Fixes (v1.0.0 Release Blockers)
 
-### P1c.1 Fix E2E Test Failures (55 failing tests)
+### P1c.1 Fix E2E Test Failures (35 failing tests)
 
-**Summary:** 55/75 tests failing across all browsers. Main issues:
+**Summary:** 35/95 tests failing across all browsers (63% passing). Main issues:
 
-1. Strict mode violations (duplicate text selectors)
-2. Timeouts waiting for "Create New Workout" button
-3. Touch gesture support not enabled in webkit
-4. Button size expectations (44px minimum not met)
-5. Keyboard shortcuts not working (Ctrl+S, Ctrl+Z)
+1. ✅ Keyboard shortcuts implemented but tests timing out (30s)
+2. ✅ Touch support enabled but some tests still failing
+3. ❌ Workflow tests timing out (create, edit, save flows)
+4. ❌ Smooth scrolling tests failing
+5. ❌ Theme transition tests failing
+6. ❌ Focus indicator tests timing out on webkit/mobile
 
-- [x] P1c.1.1 Fix "Create New Workout" button visibility
-  - Tests timeout waiting for this button across all browsers
-  - Verify button exists and is visible on initial load
-  - Check if button is hidden behind modal or z-index issue
-  - Affects: workout-creation.spec.ts, mobile-responsive.spec.ts, accessibility.spec.ts
-  - _Requirements: 1, 2_
-  - _Files: WelcomeSection.tsx, WorkoutSection.tsx_
+**Status:** Most infrastructure is in place. Failures are primarily timeout issues in complex workflows, suggesting performance or selector problems rather than missing features.
 
-- [x] P1c.1.2 Fix strict mode violations in selectors
-  - "Workout Editor" text appears in 2 headings (h1 and h2)
-  - "required" error appears in multiple list items
-  - Change to `getByRole('heading', { name: 'Workout Editor', level: 1 })`
-  - Use `.first()` or more specific selectors for error messages
-  - _Requirements: N/A (test infrastructure)_
-  - _Files: e2e/workout-load-edit-save.spec.ts_
+- [ ] P1c.1.1 Fix workflow test timeouts (create, edit, save)
+  - Tests timeout after 30s waiting for elements
+  - Affects: workout-creation.spec.ts (create, duplicate, delete, undo/redo)
+  - Affects: workout-load-edit-save.spec.ts (load, edit, save flow)
+  - Debug: Check if elements are rendering, improve selectors
+  - Consider: Add data-testid attributes for complex workflows
+  - _Requirements: 2, 3, 6, 7, 15, 16_
+  - _Files: e2e/workout-creation.spec.ts, e2e/workout-load-edit-save.spec.ts_
 
-- [x] P1c.1.3 Enable touch support in webkit tests
-  - Error: "The page does not support tap. Use hasTouch context option"
-  - Update playwright.config.ts to enable hasTouch for webkit
-  - Test tap gestures work on mobile
-  - _Requirements: 31_
-  - _Files: playwright.config.ts_
+- [ ] P1c.1.2 Fix smooth scrolling tests
+  - Tests timeout waiting for smooth scroll behavior
+  - Affects: mobile-responsive.spec.ts (scroll smoothly on mobile)
+  - Debug: Verify scroll-behavior CSS property is applied
+  - Consider: Adjust test expectations or implementation
+  - _Requirements: 8_
+  - _Files: e2e/mobile-responsive.spec.ts, index.css_
 
-- [x] P1c.1.4 Fix button size for mobile (44px minimum)
-  - Buttons are 40px but tests expect 44px (WCAG touch target size)
-  - Update button styles to meet 44x44px minimum
-  - Verify on all mobile viewports
-  - _Requirements: 35 (accessibility)_
-  - _Files: components/atoms/Button/Button.tsx, index.css_
+- [ ] P1c.1.3 Fix theme transition tests
+  - Tests fail checking for transition classes
+  - Affects: accessibility.spec.ts (smooth theme transitions)
+  - Debug: Verify transition CSS is applied during theme change
+  - Consider: Add explicit transition classes or adjust test
+  - _Requirements: 13_
+  - _Files: e2e/accessibility.spec.ts, ThemeContext.tsx_
 
-- [x] P1c.1.5 Implement keyboard shortcuts (Ctrl+S, Ctrl+Z)
-  - Tests expect Ctrl+S to trigger download (currently times out)
-  - Tests expect Ctrl+Z for undo (currently times out)
-  - Add keyboard event listeners in App.tsx or MainLayout
-  - Wire to save and undo actions
-  - _Requirements: 16 (keyboard shortcuts)_
-  - _Files: App.tsx or MainLayout.tsx_
+- [ ] P1c.1.4 Fix focus indicator tests on webkit/mobile
+  - Tests timeout waiting for focus indicators
+  - Affects: accessibility.spec.ts (visible focus indicators) on webkit/Mobile Safari
+  - Debug: Verify focus-visible styles work on webkit
+  - Consider: Webkit-specific focus styles or polyfill
+  - _Requirements: 35_
+  - _Files: e2e/accessibility.spec.ts, index.css_
 
-- [x] P1c.1.6 Fix error message display for parsing errors
-  - Test expects error message to be visible but it's not found
-  - Verify FileUpload component shows errors correctly
-  - Ensure error text includes "error" and "parse" keywords
-  - _Requirements: 7, 36_
-  - _Files: components/molecules/FileUpload/FileUpload.tsx_
+- [ ] P1c.1.5 Fix tablet layout tests
+  - Tests timeout waiting for tablet-specific layout
+  - Affects: mobile-responsive.spec.ts (adapt layout for tablet)
+  - Debug: Verify breakpoints and responsive classes
+  - Consider: Add explicit tablet breakpoint styles
+  - _Requirements: 8_
+  - _Files: e2e/mobile-responsive.spec.ts, tailwind.config.js_
+
+- [ ] P1c.1.6 Fix keyboard shortcut tests
+  - Tests timeout waiting for keyboard shortcut actions
+  - Keyboard shortcuts ARE implemented (useKeyboardShortcuts hook)
+  - Debug: Verify shortcuts work in test environment
+  - Consider: Add explicit wait for action completion
+  - _Requirements: 29_
+  - _Files: e2e/accessibility.spec.ts, hooks/useKeyboardShortcuts.ts_
 
 ### P1c.2 Implement Success Notifications
 
-- [ ] P1c.2.1 Add Toast notification system
-  - Install @radix-ui/react-toast (already in package.json)
+**Status:** @radix-ui/react-toast is already installed. Need to create components and integrate.
+
+- [ ] P1c.2.1 Create Toast component system
   - Create Toast component in components/atoms/Toast/
-  - Add ToastProvider to App.tsx
+  - Create ToastProvider wrapper component
   - Create useToast hook for easy access
+  - Add ToastProvider to App.tsx root
+  - Test toast rendering and auto-dismiss
   - _Requirements: 39_
+  - _Files: components/atoms/Toast/Toast.tsx, components/atoms/Toast/ToastProvider.tsx, hooks/useToast.ts_
 
 - [ ] P1c.2.2 Implement save success notification
-  - Remove TODO comment from SaveButton.tsx
+  - Remove TODO comment from SaveButton.tsx (line 39)
   - Show success toast when workout saves successfully
-  - Include workout name in notification
-  - Auto-dismiss after 3 seconds
+  - Include workout name in notification7y8
+  - Test with E2E tests
   - _Requirements: 39.1_
+  - _Files: components/molecules/SaveButton/SaveButton.tsx_
 
 - [ ] P1c.2.3 Implement copy success notification
   - Add toast notification when step is duplicated
   - Show "Step duplicated" message
   - Auto-dismiss after 2 seconds
+  - Test with E2E tests
   - _Requirements: 39.2_
+  - _Files: components/organisms/WorkoutList/WorkoutList.tsx or StepCard.tsx_
 
 - [ ] P1c.2.4 Implement delete with undo notification
   - Add toast notification when step is deleted
   - Include "Undo" button in toast
   - Keep toast visible for 5 seconds
-  - Implement undo functionality
+  - Wire undo button to history action
+  - Test with E2E tests
   - _Requirements: 39.3_
+  - _Files: components/molecules/DeleteConfirmDialog/DeleteConfirmDialog.tsx_
 
 ### P1c.3 E2E Test Verification
 
-- [ ] P1c.3.1 Run full E2E test suite
+**Current Status:** 60/95 tests passing (63%). Need to fix remaining 35 failing tests.
+
+- [ ] P1c.3.1 Run full E2E test suite after fixes
   - Execute `pnpm test:e2e` for all browsers
-  - Verify all tests pass (chromium, firefox, webkit)
-  - Verify mobile tests pass (Mobile Chrome, Mobile Safari)
-  - Document any remaining failures
+  - Target: 100% tests passing (95/95)
+  - Verify chromium, firefox, webkit all pass
+  - Verify Mobile Chrome and Mobile Safari all pass
+  - Document any remaining failures with root cause
   - _Requirements: All P0-P1 requirements_
 
 - [ ] P1c.3.2 Update E2E test documentation
-  - Update e2e/README.md with current status
+  - Update e2e/README.md with final status
+  - Remove TDD warnings (tests are now passing)
   - Document any known flaky tests
-  - Add troubleshooting guide
+  - Add troubleshooting guide for common issues
+  - Update test coverage matrix
   - _Requirements: N/A (documentation)_
+
+- [ ] P1c.3.3 Add E2E tests for notifications
+  - Test save success notification appears
+  - Test copy success notification appears
+  - Test delete with undo notification appears
+  - Test notification auto-dismiss timing
+  - Test undo button in delete notification
+  - _Requirements: 39_
+  - _Files: e2e/workout-creation.spec.ts, e2e/workout-load-edit-save.spec.ts_
 
 ## P0: MVP Foundation
 
@@ -1039,10 +1078,12 @@ Critical fixes needed before v1.0.0 release:
 
 - **Tasks marked with `*` are optional** - These are primarily testing tasks that can be skipped for faster MVP delivery
 - **Each task references requirements** - See requirements.md for detailed acceptance criteria
-- **MVP is functionally complete** - P0, P1, and P1b are done, application works
-- **Next milestone: P1c** - Fix E2E tests and add success notifications before v1.0.0 release
+- **MVP is feature complete** - P0, P1, and P1b are done, all core features implemented
+- **Next milestone: P1c (BLOCKING v1.0.0)** - Fix 35 failing E2E tests and implement success notifications
 - **P2+ are enhancements** - Not required for core functionality but improve UX
-- **E2E test failures are minor** - Strict mode violations, easily fixable with better selectors
+- **E2E test failures are fixable** - Mostly timeout issues in complex workflows, not missing features
+- **Keyboard shortcuts ARE implemented** - useKeyboardShortcuts hook exists and works, tests just timing out
+- **Toast library is installed** - @radix-ui/react-toast ready to use, just needs integration
 
 ## Implementation Guidelines
 
