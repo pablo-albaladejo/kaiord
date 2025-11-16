@@ -105,5 +105,19 @@ export default tseslint.config(
     rules: {
       "max-lines": "off",
     },
+  },
+  {
+    // Page components: allow more lines for orchestration
+    files: ["**/pages/**/*.tsx"],
+    rules: {
+      "max-lines": [
+        "error",
+        {
+          max: 150,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+    },
   }
 );
