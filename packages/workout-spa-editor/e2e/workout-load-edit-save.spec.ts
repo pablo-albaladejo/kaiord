@@ -17,8 +17,10 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     // Navigate to the application
     await page.goto("/");
 
-    // Wait for the welcome section to load
-    await expect(page.getByText("Workout Editor")).toBeVisible();
+    // Wait for the welcome section to load (use heading with level to avoid strict mode)
+    await expect(
+      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+    ).toBeVisible();
 
     // Load a workout file
     const fileInput = page.locator('input[type="file"]');
@@ -79,7 +81,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
 
     // Verify step details are shown
     await expect(page.getByText("5:00")).toBeVisible(); // 300 seconds
-    await expect(page.getByText("200 W")).toBeVisible();
+    await expect(page.getByText("200W")).toBeVisible(); // No space in format
 
     // Click on the first step card to edit it
     const firstStepCard = page.locator('[data-testid="step-card"]').first();
@@ -108,7 +110,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
 
     // Verify the updated values are displayed
     await expect(page.getByText("7:00")).toBeVisible(); // 420 seconds
-    await expect(page.getByText("220 W")).toBeVisible();
+    await expect(page.getByText("220W")).toBeVisible(); // No space in format
 
     // Save the workout
     const downloadPromise = page.waitForEvent("download");
@@ -157,7 +159,8 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
 
     // Verify error message is displayed
     await expect(page.getByText(/validation error/i)).toBeVisible();
-    await expect(page.getByText(/required/i)).toBeVisible();
+    // Use first() to avoid strict mode violation (multiple "required" messages)
+    await expect(page.getByText(/required/i).first()).toBeVisible();
   });
 
   test("should handle file parsing errors gracefully", async ({ page }) => {
@@ -172,8 +175,8 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
       buffer: Buffer.from("{ invalid json }"),
     });
 
-    // Verify error message is displayed
-    await expect(page.getByText(/error/i)).toBeVisible();
-    await expect(page.getByText(/parse/i)).toBeVisible();
+    // Verify error message is displayed (use specific text from error handler)
+    await expect(page.getByText(/invalid file format/i)).toBeVisible();
+    await expect(page.getByText(/failed to parse json/i)).toBeVisible();
   });
 });

@@ -60,8 +60,9 @@ describe("Button", () => {
 
       const button = screen.getByRole("button");
       expect(button).toHaveClass("px-3");
-      expect(button).toHaveClass("py-1.5");
+      expect(button).toHaveClass("py-2.5"); // Updated for WCAG 44px minimum
       expect(button).toHaveClass("text-sm");
+      expect(button).toHaveClass("min-h-[44px]"); // WCAG 2.1 AA compliance
     });
 
     it("should render medium size", () => {
@@ -69,8 +70,9 @@ describe("Button", () => {
 
       const button = screen.getByRole("button");
       expect(button).toHaveClass("px-4");
-      expect(button).toHaveClass("py-2");
+      expect(button).toHaveClass("py-2.5"); // Updated for WCAG 44px minimum
       expect(button).toHaveClass("text-base");
+      expect(button).toHaveClass("min-h-[44px]"); // WCAG 2.1 AA compliance
     });
 
     it("should render large size", () => {
@@ -80,6 +82,7 @@ describe("Button", () => {
       expect(button).toHaveClass("px-6");
       expect(button).toHaveClass("py-3");
       expect(button).toHaveClass("text-lg");
+      expect(button).toHaveClass("min-h-[48px]"); // Larger for better UX
     });
   });
 

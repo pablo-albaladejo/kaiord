@@ -5,6 +5,7 @@
  */
 
 import type { KRD } from "../types/krd";
+import type { Sport } from "../types/krd-core";
 
 const MAX_HISTORY_SIZE = 50;
 
@@ -75,4 +76,33 @@ export const createRedoAction = (
     };
   }
   return {};
+};
+
+export const createEmptyWorkoutAction = (
+  name: string,
+  sport: Sport
+): Partial<WorkoutState> => {
+  const emptyWorkout: KRD = {
+    version: "1.0",
+    type: "workout",
+    metadata: {
+      created: new Date().toISOString(),
+      sport,
+    },
+    extensions: {
+      workout: {
+        name,
+        sport,
+        steps: [],
+      },
+    },
+  };
+
+  return {
+    currentWorkout: emptyWorkout,
+    workoutHistory: [emptyWorkout],
+    historyIndex: 0,
+    selectedStepId: null,
+    isEditing: false,
+  };
 };
