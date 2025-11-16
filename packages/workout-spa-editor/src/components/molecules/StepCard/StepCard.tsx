@@ -50,6 +50,7 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
         tabIndex={0}
         onKeyDown={handleKeyDown}
         aria-label={`Step ${step.stepIndex + 1}: ${step.name || formatDuration(step)}`}
+        data-testid="step-card"
         {...props}
       >
         <StepCardActions

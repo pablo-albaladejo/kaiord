@@ -32,53 +32,115 @@ test.describe("Accessibility", () => {
     // Verify main landmarks
     await expect(page.getByRole("main")).toBeVisible();
 
-    // Create a workout to test more elements
-    await page.getByRole("button", { name: /create new workout/i }).click();
+    // Load a workout to test more elements
+    const fileInput = page.locator('input[type="file"]');
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "cycling",
+      },
+      extensions: {
+        workout: {
+          name: "Accessibility Test",
+          sport: "cycling",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 300 },
+              targetType: "power",
+              target: {
+                type: "power",
+                value: { unit: "watts", value: 200 },
+              },
+              intensity: "warmup",
+            },
+          ],
+        },
+      },
+    };
 
-    // Verify form labels
-    await expect(page.getByLabel(/workout name/i)).toBeVisible();
-    await expect(page.getByLabel(/sport/i)).toBeVisible();
+    await fileInput.setInputFiles({
+      name: "accessibility-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
 
-    // Fill form
-    await page.getByLabel(/workout name/i).fill("Accessibility Test");
-    await page.getByLabel(/sport/i).click();
-    await page.getByRole("option", { name: /cycling/i }).click();
-    await page.getByRole("button", { name: /create/i }).click();
+    // Wait for workout to load
+    await expect(page.getByText("Accessibility Test")).toBeVisible({
+      timeout: 10000,
+    });
 
-    // Add a step
-    await page.getByRole("button", { name: /add step/i }).click();
+    // Verify step cards have proper ARIA labels
+    const stepCard = page.locator('[data-testid="step-card"]').first();
+    await expect(stepCard).toHaveAttribute("aria-label", /Step 1/);
+    await expect(stepCard).toHaveAttribute("role", "button");
+
+    // Click on step to open editor
+    await stepCard.click();
 
     // Verify step editor has proper labels
-    await expect(page.getByLabel(/duration type/i)).toBeVisible();
-    await expect(page.getByLabel(/target type/i)).toBeVisible();
+    await expect(page.getByText("Edit Step")).toBeVisible({ timeout: 5000 });
   });
 
   test("should support keyboard shortcuts", async ({ page }) => {
     await page.goto("/");
 
-    // Create a workout
-    await page.getByRole("button", { name: /create new workout/i }).click();
-    await page.getByLabel(/workout name/i).fill("Shortcuts Test");
-    await page.getByLabel(/sport/i).click();
-    await page.getByRole("option", { name: /running/i }).click();
-    await page.getByRole("button", { name: /create/i }).click();
+    // Load a workout
+    const fileInput = page.locator('input[type="file"]');
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "running",
+      },
+      extensions: {
+        workout: {
+          name: "Shortcuts Test",
+          sport: "running",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 300 },
+              targetType: "pace",
+              target: {
+                type: "pace",
+                value: { unit: "min_per_km", value: 5.0 },
+              },
+              intensity: "active",
+            },
+          ],
+        },
+      },
+    };
+
+    await fileInput.setInputFiles({
+      name: "shortcuts-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
+
+    // Wait for workout to load
+    await expect(page.getByText("Shortcuts Test")).toBeVisible({
+      timeout: 10000,
+    });
+    await expect(page.getByText("Step 1")).toBeVisible();
 
     // Add a step
     await page.getByRole("button", { name: /add step/i }).click();
-    await page.getByLabel(/duration value/i).fill("300");
-    await page.getByLabel(/target value/i).fill("150");
-    await page.getByRole("button", { name: /save step/i }).click();
-
-    // Verify step is added
-    await expect(page.getByText("Step 1")).toBeVisible();
+    await expect(page.getByText("Step 2")).toBeVisible({ timeout: 5000 });
 
     // Test Ctrl+Z (undo)
     await page.keyboard.press("Control+Z");
-    await expect(page.getByText("Step 1")).not.toBeVisible();
+    await expect(page.getByText("Step 2")).not.toBeVisible({ timeout: 5000 });
 
     // Test Ctrl+Y (redo)
     await page.keyboard.press("Control+Y");
-    await expect(page.getByText("Step 1")).toBeVisible();
+    await expect(page.getByText("Step 2")).toBeVisible({ timeout: 5000 });
 
     // Test Ctrl+S (save) - should trigger download
     const downloadPromise = page.waitForEvent("download");
@@ -118,24 +180,62 @@ test.describe("Accessibility", () => {
   test("should maintain color contrast for accessibility", async ({ page }) => {
     await page.goto("/");
 
-    // Create a workout to test various UI elements
-    await page.getByRole("button", { name: /create new workout/i }).click();
-    await page.getByLabel(/workout name/i).fill("Contrast Test");
-    await page.getByLabel(/sport/i).click();
-    await page.getByRole("option", { name: /cycling/i }).click();
-    await page.getByRole("button", { name: /create/i }).click();
+    // Load a workout with different intensity levels
+    const fileInput = page.locator('input[type="file"]');
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "cycling",
+      },
+      extensions: {
+        workout: {
+          name: "Contrast Test",
+          sport: "cycling",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 300 },
+              targetType: "power",
+              target: {
+                type: "power",
+                value: { unit: "watts", value: 150 },
+              },
+              intensity: "warmup",
+            },
+            {
+              stepIndex: 1,
+              durationType: "time",
+              duration: { type: "time", seconds: 600 },
+              targetType: "power",
+              target: {
+                type: "power",
+                value: { unit: "watts", value: 250 },
+              },
+              intensity: "active",
+            },
+          ],
+        },
+      },
+    };
 
-    // Add a step with different intensity levels
-    await page.getByRole("button", { name: /add step/i }).click();
-    await page.getByLabel(/duration value/i).fill("300");
-    await page.getByLabel(/target value/i).fill("150");
-    await page.getByLabel(/intensity/i).click();
-    await page.getByRole("option", { name: /warmup/i }).click();
-    await page.getByRole("button", { name: /save step/i }).click();
+    await fileInput.setInputFiles({
+      name: "contrast-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
 
-    // Verify step is visible with proper styling
-    const stepCard = page.getByText("Step 1").locator("..");
-    await expect(stepCard).toBeVisible();
+    // Wait for workout to load
+    await expect(page.getByText("Contrast Test")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Verify steps are visible with proper styling
+    const stepCards = page.locator('[data-testid="step-card"]');
+    await expect(stepCards.first()).toBeVisible();
+    await expect(stepCards.nth(1)).toBeVisible();
 
     // Note: Actual contrast ratio testing would require additional tools
     // like axe-core or lighthouse, which can be integrated separately

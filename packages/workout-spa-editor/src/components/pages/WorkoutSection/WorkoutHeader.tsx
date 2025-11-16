@@ -1,5 +1,5 @@
 import type { KRD, Workout } from "../../../types/krd";
-import { SaveButton } from "../../molecules";
+import { SaveButton } from "../../molecules/SaveButton/SaveButton";
 
 type WorkoutHeaderProps = {
   workout: Workout;
