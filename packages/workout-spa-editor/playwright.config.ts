@@ -12,7 +12,7 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: process.env.CI
     ? [["list"], ["html"], ["github"]]
-    : [["html"], ["list"]],
+    : [["html", { open: "never" }], ["list"]],
 
   use: {
     baseURL: "http://localhost:5173",
