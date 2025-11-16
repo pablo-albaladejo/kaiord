@@ -257,7 +257,7 @@ Future enhancements include drag-and-drop reordering, user profiles, workout tem
     - Accessibility addon enabled for a11y testing
   - Document component props and usage in story descriptions
   - _Requirements: 33 (component documentation)_
-- [-] P1b.3 **Component Testing Coverage Audit**
+- [x] P1b.3 **Component Testing Coverage Audit**
   - Verify ALL components have corresponding `.test.tsx` files (currently complete)
   - Run `pnpm test -- --coverage` to check coverage thresholds
   - Ensure coverage meets targets: atoms ≥80%, molecules ≥80%, organisms ≥80%
@@ -322,7 +322,7 @@ Future enhancements include drag-and-drop reordering, user profiles, workout tem
   - Update TESTING.md with current test coverage
   - Create or update ARCHITECTURE.md if needed
   - _Requirements: 33 (documentation)_
-- [ ] P1b.9 **CI/CD Pipeline Verification**
+- [-] P1b.9 **CI/CD Pipeline Verification**
   - Verify all tests pass in GitHub Actions (ci.yml)
   - Check E2E tests pass in GitHub Actions (workout-spa-editor-e2e.yml)
   - Verify deployment to GitHub Pages works (deploy-spa-editor.yml)
