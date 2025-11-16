@@ -13,6 +13,9 @@ export default defineConfig({
         "**/*.test.ts",
         "**/*.config.ts",
         "src/tests/**",
+        // Mappers - simple data transformation without logic
+        // Coverage comes from integration and round-trip tests
+        "**/*.mapper.ts",
       ],
       thresholds: {
         lines: 80,

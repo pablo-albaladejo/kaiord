@@ -4,7 +4,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 ## Current Status
 
-**✅ COMPLETED: P0 (MVP) + Most of P1 (Core)**
+## ✅ COMPLETED: P0 (MVP) + Most of P1 (Core)
 
 The application has a working MVP with:
 
@@ -20,7 +20,7 @@ The application has a working MVP with:
 - GitHub Pages deployment configured
 - Comprehensive testing (unit + E2E with Playwright)
 
-**🚧 IN PROGRESS: P1.8 (Step Management)**
+## 🚧 IN PROGRESS: P1.8 (Step Management)
 
 Next immediate tasks:
 
@@ -28,7 +28,7 @@ Next immediate tasks:
 2. **P1.8.2**: Add step deletion (Delete button with confirmation)
 3. **P1.8.3**: Add step duplication (Duplicate button)
 
-**📋 PLANNED: P2 (Enhanced) + P3 (Advanced)**
+## 📋 PLANNED: P2 (Enhanced) + P3 (Advanced)
 
 Future enhancements include drag-and-drop reordering, user profiles, workout templates, themes, internationalization, and more.
 

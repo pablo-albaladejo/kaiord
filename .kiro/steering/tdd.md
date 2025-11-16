@@ -167,9 +167,10 @@ Every function must test:
 
 ### Coverage Targets
 
-- Overall: ≥ 80%
-- Mappers/converters: ≥ 90%
-- Domain logic: 100%
+- **Core package**: ≥ 80% overall
+- **Frontend package**: ≥ 70% overall (see frontend-testing.md for component-specific targets)
+- **Mappers/converters**: ≥ 90%
+- **Domain logic**: 100%
 
 ## TypeScript in Tests
 
