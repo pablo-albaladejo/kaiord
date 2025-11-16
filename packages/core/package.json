@@ -31,7 +31,6 @@
     "test:coverage": "vitest --run --coverage",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "lint:fix": "eslint . --fix",
     "clean": "rm -rf dist"
   },
   "dependencies": {

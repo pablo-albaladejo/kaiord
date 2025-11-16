@@ -3,6 +3,7 @@ import type { WorkoutStep } from "../../../types/krd";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Icon } from "../../atoms/Icon/Icon";
 import { DeleteButton } from "./DeleteButton";
+import { DuplicateButton } from "./DuplicateButton";
 import { formatDuration } from "./format-duration";
 import { getTargetIcon } from "./icons";
 import { StepDetails } from "./StepDetails";

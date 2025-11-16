@@ -1,5 +1,6 @@
 import {
   useCreateStep,
+  useDuplicateStep,
   useIsEditing,
 } from "../../../store/workout-store-selectors";
 import type { KRD, Workout } from "../../../types/krd";
