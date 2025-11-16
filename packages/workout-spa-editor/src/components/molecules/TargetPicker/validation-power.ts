@@ -1,3 +1,8 @@
+import {
+  validatePowerPercent,
+  validatePowerWatts,
+  validatePowerZone,
+} from "./validation-power-helpers";
 import type { ValidationResult } from "./validation-types";
 
 export const validatePowerTarget = (
@@ -5,30 +10,14 @@ export const validatePowerTarget = (
   numericValue: number
 ): ValidationResult => {
   if (unit === "zone") {
-    if (
-      !Number.isInteger(numericValue) ||
-      numericValue < 1 ||
-      numericValue > 7
-    ) {
-      return {
-        isValid: false,
-        error: "Power zone must be between 1 and 7",
-      };
-    }
+    const error = validatePowerZone(numericValue);
+    if (error) return error;
   } else if (unit === "watts") {
-    if (numericValue > 2000) {
-      return {
-        isValid: false,
-        error: "Power cannot exceed 2000 watts",
-      };
-    }
+    const error = validatePowerWatts(numericValue);
+    if (error) return error;
   } else if (unit === "percent_ftp") {
-    if (numericValue > 200) {
-      return {
-        isValid: false,
-        error: "Percentage cannot exceed 200%",
-      };
-    }
+    const error = validatePowerPercent(numericValue);
+    if (error) return error;
   }
 
   return {

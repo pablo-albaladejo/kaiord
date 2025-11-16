@@ -5,8 +5,11 @@ import {
   useUpdateWorkout,
 } from "../../../store/workout-store-selectors";
 import type { KRD, Workout, WorkoutStep } from "../../../types/krd";
-import { isRepetitionBlock } from "../../../types/krd";
 import { useDeleteHandlers } from "./useDeleteHandlers";
+import {
+  createUpdatedKrd,
+  createUpdatedWorkout,
+} from "./workout-section-handlers-helpers";
 
 export const useWorkoutSectionHandlers = (
   workout: Workout,
@@ -28,28 +31,8 @@ export const useWorkoutSectionHandlers = (
 
   const handleSave = useCallback(
     (updatedStep: WorkoutStep) => {
-      const updatedWorkout: Workout = {
-        ...workout,
-        steps: workout.steps.map((item) => {
-          if (isRepetitionBlock(item)) {
-            return {
-              ...item,
-              steps: item.steps.map((s) =>
-                s.stepIndex === updatedStep.stepIndex ? updatedStep : s
-              ),
-            };
-          }
-          return item.stepIndex === updatedStep.stepIndex ? updatedStep : item;
-        }),
-      };
-
-      const updatedKrd: KRD = {
-        ...krd,
-        extensions: {
-          ...krd.extensions,
-          workout: updatedWorkout,
-        },
-      };
+      const updatedWorkout = createUpdatedWorkout(workout, updatedStep);
+      const updatedKrd = createUpdatedKrd(krd, updatedWorkout);
 
       updateWorkout(updatedKrd);
       setEditing(false);

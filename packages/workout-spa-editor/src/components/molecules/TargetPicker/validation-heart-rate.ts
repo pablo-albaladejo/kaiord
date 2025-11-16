@@ -1,3 +1,8 @@
+import {
+  validateHeartRateBpm,
+  validateHeartRatePercent,
+  validateHeartRateZone,
+} from "./validation-heart-rate-helpers";
 import type { ValidationResult } from "./validation-types";
 
 export const validateHeartRateTarget = (
@@ -5,30 +10,14 @@ export const validateHeartRateTarget = (
   numericValue: number
 ): ValidationResult => {
   if (unit === "zone") {
-    if (
-      !Number.isInteger(numericValue) ||
-      numericValue < 1 ||
-      numericValue > 5
-    ) {
-      return {
-        isValid: false,
-        error: "Heart rate zone must be between 1 and 5",
-      };
-    }
+    const error = validateHeartRateZone(numericValue);
+    if (error) return error;
   } else if (unit === "bpm") {
-    if (numericValue > 250) {
-      return {
-        isValid: false,
-        error: "Heart rate cannot exceed 250 BPM",
-      };
-    }
+    const error = validateHeartRateBpm(numericValue);
+    if (error) return error;
   } else if (unit === "percent_max") {
-    if (numericValue > 100) {
-      return {
-        isValid: false,
-        error: "Percentage cannot exceed 100%",
-      };
-    }
+    const error = validateHeartRatePercent(numericValue);
+    if (error) return error;
   }
 
   return {

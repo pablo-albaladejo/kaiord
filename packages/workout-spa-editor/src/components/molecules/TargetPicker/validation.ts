@@ -1,4 +1,5 @@
 import { validateHeartRateTarget } from "./validation-heart-rate";
+import { validateValueString } from "./validation-helpers";
 import {
   validateCadenceTarget,
   validatePaceTarget,
@@ -27,46 +28,15 @@ export const validateTargetValue = (
     return validateRangeInput(type, minValue, maxValue);
   }
 
-  const valueStr = String(value || "");
+  const valueError = validateValueString(value);
+  if (valueError) return valueError;
 
-  if (!valueStr || valueStr.trim() === "") {
-    return {
-      isValid: false,
-      error: "Value is required",
-    };
-  }
+  const numericValue = Number(value);
 
-  const numericValue = Number(valueStr);
-
-  if (isNaN(numericValue)) {
-    return {
-      isValid: false,
-      error: "Must be a valid number",
-    };
-  }
-
-  if (numericValue <= 0) {
-    return {
-      isValid: false,
-      error: "Must be greater than 0",
-    };
-  }
-
-  if (type === "power") {
-    return validatePowerTarget(unit, numericValue);
-  }
-
-  if (type === "heart_rate") {
-    return validateHeartRateTarget(unit, numericValue);
-  }
-
-  if (type === "pace") {
-    return validatePaceTarget(unit, numericValue);
-  }
-
-  if (type === "cadence") {
-    return validateCadenceTarget(unit, numericValue);
-  }
+  if (type === "power") return validatePowerTarget(unit, numericValue);
+  if (type === "heart_rate") return validateHeartRateTarget(unit, numericValue);
+  if (type === "pace") return validatePaceTarget(unit, numericValue);
+  if (type === "cadence") return validateCadenceTarget(unit, numericValue);
 
   return {
     isValid: false,

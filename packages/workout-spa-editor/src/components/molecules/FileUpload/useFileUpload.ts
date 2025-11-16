@@ -1,12 +1,6 @@
-/**
- * useFileUpload Hook
- *
- * Custom hook for handling file upload logic.
- */
-
 import { useRef, useState } from "react";
 import type { KRD, ValidationError } from "../../../types/krd";
-import { createParseError, parseFile, validateKRD } from "./file-parser";
+import { createFileUploadHandlers } from "./use-file-upload-handlers";
 
 type ErrorState = {
   title: string;
@@ -31,37 +25,14 @@ export const useFileUpload = ({ onFileLoad, onError }: UseFileUploadProps) => {
     }
   };
 
-  const handleError = (errorState: ErrorState) => {
-    setError(errorState);
-    setIsLoading(false);
-    setFileName(null);
-    resetInput();
-
-    if (errorState && onError) {
-      onError(
-        errorState.message || errorState.title,
-        errorState.validationErrors
-      );
-    }
-  };
-
-  const handleFileChange = async (file: File | undefined) => {
-    if (!file) return;
-
-    setFileName(file.name);
-    setIsLoading(true);
-
-    try {
-      const jsonData = await parseFile(file);
-      const krd = validateKRD(jsonData);
-
-      setError(null);
-      onFileLoad(krd);
-      setIsLoading(false);
-    } catch (error) {
-      handleError(createParseError(error));
-    }
-  };
+  const { handleFileChange } = createFileUploadHandlers({
+    onFileLoad,
+    onError,
+    setError,
+    setIsLoading,
+    setFileName,
+    resetInput,
+  });
 
   const triggerFileInput = () => {
     setError(null);
@@ -73,9 +44,7 @@ export const useFileUpload = ({ onFileLoad, onError }: UseFileUploadProps) => {
     fileInputRef.current?.click();
   };
 
-  const handleDismiss = () => {
-    setError(null);
-  };
+  const handleDismiss = () => setError(null);
 
   return {
     fileInputRef,

@@ -4,29 +4,40 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 ## Current Status
 
-## ✅ COMPLETED: P0 (MVP) + Most of P1 (Core)
+## ✅ COMPLETED: P0 (MVP) + P1 (Core Features)
 
-The application has a working MVP with:
+The application has a fully functional MVP with all core features:
 
 - Project setup and infrastructure (Vite, React, TypeScript, Tailwind, Radix UI)
 - Core domain types from @kaiord/core
 - State management with Zustand (including undo/redo)
-- Basic UI components (Button, Input, Badge, Icon)
+- Basic UI components (Button, Input, Badge, Icon, ErrorMessage)
 - Workout visualization (StepCard, WorkoutList)
-- File loading and validation
+- File loading and validation with error handling
 - Step editing with DurationPicker and TargetPicker
+- Step management (create, delete, duplicate)
 - File saving with error handling
-- Workout statistics calculation
+- Workout statistics calculation with real-time updates
 - GitHub Pages deployment configured
 - Comprehensive testing (unit + E2E with Playwright)
+- Code review complete (all critical issues resolved)
 
-## 🚧 IN PROGRESS: P1.8 (Step Management)
+## 🚧 NEXT: P1b (Full Frontend Review & Quality Assurance)
 
-Next immediate tasks:
+Before moving to P2 features, complete comprehensive quality review with 12 focused tasks:
 
-1. **P1.8.1**: Add step creation (Add Step button)
-2. **P1.8.2**: Add step deletion (Delete button with confirmation)
-3. **P1.8.3**: Add step duplication (Duplicate button)
+1. **Storybook setup** - Install and configure
+2. **Create stories** - All components documented
+3. **Test coverage audit** - Verify thresholds
+4. **E2E verification** - All tests passing
+5. **Code quality** - Lint, format, audit
+6. **Accessibility audit** - WCAG 2.1 AA
+7. **Performance audit** - Lighthouse, bundle
+8. **Documentation** - README, inline docs
+9. **CI/CD verification** - All pipelines green
+10. **Manual testing** - End-to-end flows
+11. **Security review** - XSS, validation, audit
+12. **Final sign-off** - Gap analysis, release prep
 
 ## 📋 PLANNED: P2 (Enhanced) + P3 (Advanced)
 
@@ -194,129 +205,164 @@ Future enhancements include drag-and-drop reordering, user profiles, workout tem
 ### P1.8 Step Management + Full Review
 
 - [x] P1.8.1 Implement step creation
-  - Add "Add Step" button to WorkoutSection (below WorkoutList)
-  - Create createStep action in workout-actions.ts
-  - Generate new step with default values: open duration, open target, stepIndex = steps.length
-  - Add step to end of workout.steps array
-  - Update workout via updateWorkout action (triggers history)
-  - Add unit tests for createStep action
+  - ✅ Add "Add Step" button to WorkoutSection (below WorkoutList)
+  - ✅ Create createStep action in workout-actions.ts
+  - ✅ Generate new step with default values: open duration, open target, stepIndex = steps.length
+  - ✅ Add step to end of workout.steps array
+  - ✅ Update workout via updateWorkout action (triggers history)
+  - ✅ Add unit tests for createStep action
   - _Requirements: 2_
 
 - [x] P1.8.2 Implement step deletion
-  - Add delete button (trash icon) to StepCard
-  - Create DeleteConfirmDialog molecule using Radix Dialog
-  - Create deleteStep action in workout-actions.ts
-  - Remove step from workout.steps array by stepIndex
-  - Recalculate stepIndex for all subsequent steps (map with new indices)
-  - Update workout via updateWorkout action (triggers history)
-  - Handle deletion within repetition blocks (if step is in block, remove from block.steps)
-  - Add unit tests for deleteStep action
+  - ✅ Add delete button (trash icon) to StepCard
+  - ✅ Create DeleteConfirmDialog molecule using Radix Dialog
+  - ✅ Create deleteStep action in workout-actions.ts
+  - ✅ Remove step from workout.steps array by stepIndex
+  - ✅ Recalculate stepIndex for all subsequent steps (map with new indices)
+  - ✅ Update workout via updateWorkout action (triggers history)
+  - ✅ Handle deletion within repetition blocks (if step is in block, remove from block.steps)
+  - ✅ Add unit tests for deleteStep action
   - _Requirements: 5_
 
 - [x] P1.8.3 Implement step duplication
-  - Add duplicate button (copy icon) to StepCard
-  - Create duplicateStep action in workout-actions.ts
-  - Create exact copy of step (deep clone)
-  - Insert after original step in workout.steps array (splice at index + 1)
-  - Recalculate stepIndex for all subsequent steps
-  - Update workout via updateWorkout action (triggers history)
-  - Add unit tests for duplicateStep action
+  - ✅ Add duplicate button (copy icon) to StepCard
+  - ✅ Create duplicateStep action in workout-actions.ts
+  - ✅ Create exact copy of step (deep clone)
+  - ✅ Insert after original step in workout.steps array (splice at index + 1)
+  - ✅ Recalculate stepIndex for all subsequent steps
+  - ✅ Update workout via updateWorkout action (triggers history)
+  - ✅ Add unit tests for duplicateStep action
   - _Requirements: 16_
 
-- [ ] P1.8.4 Full Frontend Review and Quality Assurance
-  - **Folder Structure Audit**
-    - Review all folders in `packages/workout-spa-editor/src/`
-    - Verify adherence to atomic design pattern (atoms, molecules, organisms, pages)
-    - Ensure proper separation of concerns (components, hooks, store, types, utils)
-    - Check for any misplaced files or inconsistent organization
-    - Validate that all barrel exports (index.ts) are present and correct
-  - **Component Testing Coverage**
-    - Verify ALL components have corresponding `.test.tsx` files
-    - Check test coverage meets thresholds: atoms ≥80%, molecules ≥80%, organisms ≥80%
-    - Ensure all user interactions are tested with @testing-library/user-event
-    - Validate accessibility tests are present for interactive components
-    - Review test quality: AAA pattern, descriptive names, proper assertions
-  - **Storybook Implementation**
-    - Verify ALL components have corresponding `.stories.tsx` files
-    - Check stories cover all variants, states, and props
-    - Ensure stories include:
-      - Default story
-      - All variant combinations
-      - Interactive controls for props
-      - Accessibility addon enabled
-    - Add `pnpm storybook` script to package.json for local development
-    - Add `pnpm build-storybook` script for static build
-    - Configure Storybook for Vite + React + TypeScript + Tailwind
-    - Test that Storybook runs locally without errors
-  - **E2E Testing Coverage**
-    - Review all E2E tests in `e2e/` directory
-    - Verify critical user flows are covered:
-      - Load workout → Edit step → Save workout
-      - Create new step → Configure → Save
-      - Delete step with confirmation → Undo
-      - Duplicate step → Verify copy
-      - Undo/redo operations
-      - Error handling flows
-    - Check mobile-specific tests exist
-    - Validate accessibility tests cover WCAG 2.1 AA requirements
-    - Ensure all tests pass in CI/CD pipeline
-  - **Store and State Management**
-    - Review all store actions have unit tests
-    - Verify undo/redo functionality is thoroughly tested
-    - Check selectors are tested and optimized
-    - Validate state updates trigger proper re-renders
-    - Ensure no unnecessary re-renders (use React DevTools Profiler)
-  - **Type Safety and Validation**
-    - Verify NO `any` types exist (run `pnpm lint` and check for violations)
-    - Check all Zod schemas are properly defined and used
-    - Validate all form inputs have proper validation
-    - Ensure error messages are user-friendly and actionable
-  - **Code Quality and Standards**
-    - Run `pnpm lint` and fix all errors/warnings
-    - Run `pnpm format` to ensure consistent formatting
-    - Check all files are ≤100 lines (excluding tests)
-    - Verify functions are <40 lines
-    - Ensure no `console.log` statements in production code
-    - Review all comments for clarity and necessity
-  - **Accessibility (a11y)**
-    - Run axe DevTools on all pages
-    - Verify all interactive elements have proper ARIA labels
-    - Check keyboard navigation works for all features
-    - Validate color contrast meets WCAG 2.1 AA standards
-    - Test with screen reader (VoiceOver/NVDA)
-  - **Performance**
-    - Run Lighthouse audit (target: Performance ≥90, Accessibility ≥95)
-    - Check bundle size with `pnpm build` and analyze
-    - Verify no memory leaks (use Chrome DevTools Memory Profiler)
-    - Ensure large lists are performant (test with 100+ steps)
-  - **Documentation**
-    - Review README.md is up-to-date with all features
-    - Check inline code comments are clear and necessary
-    - Verify all public APIs are documented
-    - Ensure setup instructions are accurate
-  - **CI/CD Pipeline**
-    - Verify all tests pass in GitHub Actions
-    - Check coverage reports are generated
-    - Validate deployment to GitHub Pages works
-    - Ensure no flaky tests exist
-  - **Missing Features Check**
-    - Review requirements.md against implemented features
-    - Identify any gaps in P0-P1 implementation
-    - Document any technical debt or known issues
-    - Create follow-up tasks for P2+ features
-  - **User Experience Polish**
-    - Test all user flows end-to-end manually
-    - Verify loading states are present and clear
-    - Check error messages are helpful and actionable
-    - Ensure success feedback is provided for all actions
-    - Validate responsive design works on mobile/tablet/desktop
-  - **Security Review**
-    - Check for XSS vulnerabilities in user inputs
-    - Verify file upload validation is secure
-    - Ensure no sensitive data is logged
-    - Review dependencies for known vulnerabilities (`pnpm audit`)
+## P1b: Full Frontend Review and Quality Assurance
 
-  _Requirements: All P0-P1 requirements_
+- [ ] P1b.1 **Storybook Setup and Implementation**
+  - Install Storybook dependencies (@storybook/react-vite, @storybook/addon-essentials, @storybook/addon-a11y)
+  - Configure Storybook for Vite + React + TypeScript + Tailwind
+  - Add `pnpm storybook` and `pnpm build-storybook` scripts to package.json
+  - Create `.storybook/main.ts` and `.storybook/preview.ts` configuration files
+  - Ensure Tailwind CSS is properly loaded in Storybook
+  - Test that Storybook runs locally without errors
+  - _Requirements: 33 (documentation and component showcase)_
+- [ ] P1b.2 **Create Storybook Stories for All Components**
+  - Create `.stories.tsx` files for all atoms (Button, Input, Badge, Icon, ErrorMessage)
+  - Create `.stories.tsx` files for all molecules (StepCard, DurationPicker, TargetPicker, FileUpload, SaveButton, DeleteConfirmDialog, SaveErrorDialog)
+  - Create `.stories.tsx` files for all organisms (WorkoutList, StepEditor, WorkoutStats)
+  - Create `.stories.tsx` files for templates (MainLayout)
+  - Each story must include:
+    - Default story showing typical usage
+    - All variant combinations (e.g., Button: primary, secondary, ghost, danger)
+    - All state variations (e.g., loading, disabled, error)
+    - Interactive controls using Storybook args
+    - Accessibility addon enabled for a11y testing
+  - Document component props and usage in story descriptions
+  - _Requirements: 33 (component documentation)_
+- [ ] P1b.3 **Component Testing Coverage Audit**
+  - Verify ALL components have corresponding `.test.tsx` files (currently complete)
+  - Run `pnpm test -- --coverage` to check coverage thresholds
+  - Ensure coverage meets targets: atoms ≥80%, molecules ≥80%, organisms ≥80%
+  - Review test quality: AAA pattern, descriptive names, proper assertions
+  - Add missing tests for any uncovered edge cases
+  - Ensure all user interactions are tested with @testing-library/user-event
+  - Validate accessibility tests are present for interactive components
+  - _Requirements: All P0-P1 requirements (quality assurance)_
+- [ ] P1b.4 **E2E Testing Verification**
+  - Run all E2E tests: `pnpm test:e2e`
+  - Verify all critical user flows pass:
+    - ✅ Load workout → Edit step → Save workout
+    - ✅ Create new step → Configure → Save
+    - ✅ Delete step with confirmation → Undo
+    - ✅ Duplicate step → Verify copy
+    - ✅ Undo/redo operations
+    - ✅ Error handling flows
+  - Check mobile-specific tests pass (Pixel 5, iPhone 12)
+  - Validate accessibility tests pass (keyboard navigation, ARIA labels)
+  - Ensure all tests pass in CI/CD pipeline (GitHub Actions)
+  - Fix any flaky or failing tests
+  - _Requirements: 1, 2, 3, 5, 6, 7, 8, 9, 15, 16, 29, 35_
+- [ ] P1b.5 **Code Quality and Standards Enforcement**
+  - Run `pnpm lint` and fix all errors/warnings
+  - Run `pnpm format` to ensure consistent formatting
+  - Verify NO `any` types exist (already complete from code review)
+  - Check all files are ≤100 lines (already complete from code review)
+  - Verify functions are <40 lines (4 acceptable warnings remaining)
+  - Ensure no `console.log` statements in production code
+  - Review all comments for clarity and necessity
+  - Run `pnpm audit` to check for dependency vulnerabilities
+  - _Requirements: 33 (code quality)_
+- [ ] P1b.6 **Accessibility (a11y) Audit**
+  - Install and run axe DevTools on all pages
+  - Verify all interactive elements have proper ARIA labels
+  - Test keyboard navigation for all features (Tab, Enter, Escape, Ctrl+Z, Ctrl+Y, Ctrl+S)
+  - Validate color contrast meets WCAG 2.1 AA standards (4.5:1 for normal text)
+  - Test with screen reader (VoiceOver on Mac or NVDA on Windows)
+  - Fix any accessibility violations found
+  - Document accessibility features in README.md
+  - _Requirements: 35 (accessibility)_
+- [ ] P1b.7 **Performance Optimization and Audit**
+  - Run Lighthouse audit in Chrome DevTools
+  - Target scores: Performance ≥90, Accessibility ≥95, Best Practices ≥90, SEO ≥90
+  - Run `pnpm build` and analyze bundle size
+  - Check for code splitting opportunities (React.lazy for routes/heavy components)
+  - Verify no memory leaks (use Chrome DevTools Memory Profiler)
+  - Test performance with large workouts (100+ steps)
+  - Consider virtualization for large lists if needed (@tanstack/react-virtual)
+  - Optimize images and assets
+  - _Requirements: 33 (performance)_
+- [ ] P1b.8 **Documentation Review and Update**
+  - Review and update README.md with:
+    - Current feature list (P0 + P1 complete)
+    - Setup instructions (install, dev, build, test)
+    - Architecture overview (atomic design, Zustand, Radix UI)
+    - Testing instructions (unit, E2E, Storybook)
+    - Deployment instructions (GitHub Pages)
+    - Contributing guidelines
+  - Ensure all inline code comments are clear and necessary
+  - Document all public APIs and component props
+  - Update TESTING.md with current test coverage
+  - Create or update ARCHITECTURE.md if needed
+  - _Requirements: 33 (documentation)_
+- [ ] P1b.9 **CI/CD Pipeline Verification**
+  - Verify all tests pass in GitHub Actions (ci.yml)
+  - Check E2E tests pass in GitHub Actions (workout-spa-editor-e2e.yml)
+  - Verify deployment to GitHub Pages works (deploy-spa-editor.yml)
+  - Check coverage reports are generated and uploaded
+  - Ensure no flaky tests exist (run tests multiple times)
+  - Validate build succeeds in CI environment
+  - Check that all required checks pass before merge
+  - _Requirements: 33 (CI/CD)_
+- [ ] P1b.10 **User Experience Polish and Manual Testing**
+  - Test all user flows end-to-end manually on desktop
+  - Test all user flows on mobile devices (iOS Safari, Android Chrome)
+  - Test all user flows on tablet devices
+  - Verify loading states are present and clear
+  - Check error messages are helpful and actionable
+  - Ensure success feedback is provided for all actions (save, delete, duplicate)
+  - Validate responsive design works on all screen sizes (mobile, tablet, desktop)
+  - Test with different workout sizes (empty, 1 step, 10 steps, 100 steps)
+  - Test edge cases (invalid files, corrupted data, network errors)
+  - _Requirements: 1, 2, 3, 5, 6, 7, 8, 9, 36_
+- [ ] P1b.11 **Security Review**
+  - Check for XSS vulnerabilities in user inputs (workout name, step notes)
+  - Verify file upload validation is secure (file type, size, content)
+  - Ensure no sensitive data is logged to console
+  - Review dependencies for known vulnerabilities (`pnpm audit`)
+  - Validate Content Security Policy (CSP) if applicable
+  - Check for any exposed API keys or secrets
+  - _Requirements: 36 (error handling and security)_
+- [ ] P1b.12 **Final Gap Analysis and Sign-off**
+  - Review requirements.md against implemented features
+  - Verify all P0 requirements are fully implemented (Requirements 1-10)
+  - Verify all P1 requirements are fully implemented (Requirements 2, 3, 5, 6, 9, 15, 16)
+  - Document any known issues or technical debt
+  - Create follow-up tasks for P2+ features (drag-and-drop, profiles, templates, etc.)
+  - Get stakeholder sign-off on P0+P1 completion
+  - Prepare release notes for v1.0.0 (MVP)
+  - _Requirements: All P0-P1 requirements_
+
+  _Requirements: All P0-P1 requirements (1-10, 15, 16, 17)_
+
+**Note**: P1b is a quality assurance phase, not new feature development. All P1 features are already implemented. This phase ensures production readiness through comprehensive testing, documentation, and polish.
 
 ### P1.9 File Saving
 

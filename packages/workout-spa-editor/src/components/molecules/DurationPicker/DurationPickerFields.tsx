@@ -1,11 +1,5 @@
-import { Input } from "../../atoms/Input/Input";
-import type { DurationTypeOption } from "./DurationPicker.types";
-
-const DURATION_TYPE_OPTIONS: Array<DurationTypeOption> = [
-  { value: "time", label: "Time" },
-  { value: "distance", label: "Distance" },
-  { value: "open", label: "Open" },
-];
+import { DurationTypeSelect } from "./DurationTypeSelect";
+import { DurationValueInput } from "./DurationValueInput";
 
 type DurationPickerFieldsProps = {
   durationType: "time" | "distance" | "open";
@@ -30,33 +24,21 @@ export const DurationPickerFields = ({
 }: DurationPickerFieldsProps) => {
   return (
     <>
-      <Input
-        variant="select"
-        label="Duration Type"
+      <DurationTypeSelect
         value={durationType}
         onChange={onTypeChange}
         disabled={disabled}
-        options={DURATION_TYPE_OPTIONS.map((opt) => ({
-          value: opt.value,
-          label: opt.label,
-        }))}
-        aria-label="Select duration type"
       />
 
       {durationType !== "open" && (
-        <Input
-          variant="number"
-          label={getValueLabel(durationType)}
+        <DurationValueInput
+          durationType={durationType}
           value={durationValue}
           onChange={onValueChange}
           disabled={disabled}
           error={displayError}
-          placeholder={getValuePlaceholder(durationType)}
-          min="0"
-          step={durationType === "time" ? "1" : "0.01"}
-          aria-label={getValueLabel(durationType)}
-          aria-invalid={Boolean(displayError)}
-          aria-describedby={displayError ? "duration-error" : undefined}
+          getValueLabel={getValueLabel}
+          getValuePlaceholder={getValuePlaceholder}
         />
       )}
 

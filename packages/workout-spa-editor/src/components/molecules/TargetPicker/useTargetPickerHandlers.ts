@@ -54,7 +54,7 @@ export const useTargetPickerHandlers = ({
     setValidationError
   );
 
-  const rangeHandlers = useTargetPickerRangeHandlers(
+  const { handleMinChange, handleMaxChange } = useTargetPickerRangeHandlers(
     minValue,
     maxValue,
     setMinValue,
@@ -66,7 +66,7 @@ export const useTargetPickerHandlers = ({
     handleTypeChange,
     handleUnitChange,
     handleValueChange,
-    handleMinChange: rangeHandlers.handleMinChange,
-    handleMaxChange: rangeHandlers.handleMaxChange,
+    handleMinChange,
+    handleMaxChange,
   };
 };
