@@ -33,11 +33,6 @@ function App() {
 
 ## Layout Structure
 
-<<<<<<< HEAD
-```text
-=======
-```
->>>>>>> bc5ff7c (feat(workout-spa-editor): Implement core component library and deployment pipeline)
 ┌─────────────────────────────────────┐
 │ Header (sticky)                     │
 │ - Logo + Title                      │

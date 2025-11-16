@@ -94,15 +94,6 @@ describe("FileUpload", () => {
 
     // Assert
     await waitFor(() => {
-<<<<<<< HEAD
-      expect(onError).toHaveBeenCalled();
-      const [[errorMessage]] = vi.mocked(onError).mock.calls;
-      expect(errorMessage).toContain("Failed to parse JSON");
-=======
-      expect(onError).toHaveBeenCalledWith(
-        expect.stringContaining("Failed to parse JSON")
-      );
->>>>>>> bc5ff7c (feat(workout-spa-editor): Implement core component library and deployment pipeline)
     });
   });
 
