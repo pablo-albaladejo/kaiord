@@ -211,7 +211,7 @@ jobs:
       - name: Run frontend tests with coverage
         run: pnpm --filter @kaiord/workout-spa-editor test -- --coverage
 
-      - name: Check coverage threshold
+      - name: Check coverage threshold (70%)
         run: node .github/scripts/check-coverage.js ./packages/workout-spa-editor/coverage/coverage-final.json 70
 
       - name: Upload coverage to Codecov
