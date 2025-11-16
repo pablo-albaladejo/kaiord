@@ -783,6 +783,166 @@ describe("useWorkoutStore", () => {
     });
   });
 
+  describe("createStep", () => {
+    it("should add a new step with default values to the end of the workout", () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "running",
+        },
+        extensions: {
+          workout: {
+            name: "Test Workout",
+            sport: "running",
+            steps: [
+              {
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 300 },
+                targetType: "power",
+                target: {
+                  type: "power",
+                  value: { unit: "watts", value: 200 },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+
+      // Act
+      useWorkoutStore.getState().createStep();
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      const workout = state.currentWorkout?.extensions?.workout;
+      expect(workout?.steps).toHaveLength(2);
+
+      const newStep = workout?.steps[1];
+      expect(newStep).toEqual({
+        stepIndex: 1,
+        durationType: "open",
+        duration: { type: "open" },
+        targetType: "open",
+        target: { type: "open" },
+      });
+    });
+
+    it("should add step to history", () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "cycling",
+        },
+        extensions: {
+          workout: {
+            sport: "cycling",
+            steps: [],
+          },
+        },
+      };
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+
+      // Act
+      useWorkoutStore.getState().createStep();
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      expect(state.workoutHistory).toHaveLength(2);
+      expect(state.historyIndex).toBe(1);
+    });
+
+    it("should assign correct stepIndex when adding to empty workout", () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "swimming",
+        },
+        extensions: {
+          workout: {
+            sport: "swimming",
+            steps: [],
+          },
+        },
+      };
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+
+      // Act
+      useWorkoutStore.getState().createStep();
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      const workout = state.currentWorkout?.extensions?.workout;
+      expect(workout?.steps).toHaveLength(1);
+      expect(workout?.steps[0]).toMatchObject({
+        stepIndex: 0,
+      });
+    });
+
+    it("should do nothing when no workout is loaded", () => {
+      // Arrange
+      useWorkoutStore.setState({
+        currentWorkout: null,
+        workoutHistory: [],
+        historyIndex: -1,
+      });
+
+      // Act
+      useWorkoutStore.getState().createStep();
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      expect(state.currentWorkout).toBeNull();
+      expect(state.workoutHistory).toHaveLength(0);
+    });
+
+    it("should create step with open duration and open target", () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "running",
+        },
+        extensions: {
+          workout: {
+            sport: "running",
+            steps: [],
+          },
+        },
+      };
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+
+      // Act
+      useWorkoutStore.getState().createStep();
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      const workout = state.currentWorkout?.extensions?.workout;
+      const newStep = workout?.steps[0];
+
+      expect(newStep?.durationType).toBe("open");
+      expect(newStep?.duration).toEqual({ type: "open" });
+      expect(newStep?.targetType).toBe("open");
+      expect(newStep?.target).toEqual({ type: "open" });
+    });
+  });
+
   describe("selector hooks", () => {
     it("should provide access to currentWorkout", () => {
       // Arrange

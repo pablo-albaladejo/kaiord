@@ -2,12 +2,42 @@
 
 This implementation plan prioritizes tasks by **impact** and **complexity** to deliver value quickly while building a solid foundation.
 
+## Current Status
+
+**✅ COMPLETED: P0 (MVP) + Most of P1 (Core)**
+
+The application has a working MVP with:
+
+- Project setup and infrastructure (Vite, React, TypeScript, Tailwind, Radix UI)
+- Core domain types from @kaiord/core
+- State management with Zustand (including undo/redo)
+- Basic UI components (Button, Input, Badge, Icon)
+- Workout visualization (StepCard, WorkoutList)
+- File loading and validation
+- Step editing with DurationPicker and TargetPicker
+- File saving with error handling
+- Workout statistics calculation
+- GitHub Pages deployment configured
+- Comprehensive testing (unit + E2E with Playwright)
+
+**🚧 IN PROGRESS: P1.8 (Step Management)**
+
+Next immediate tasks:
+
+1. **P1.8.1**: Add step creation (Add Step button)
+2. **P1.8.2**: Add step deletion (Delete button with confirmation)
+3. **P1.8.3**: Add step duplication (Duplicate button)
+
+**📋 PLANNED: P2 (Enhanced) + P3 (Advanced)**
+
+Future enhancements include drag-and-drop reordering, user profiles, workout templates, themes, internationalization, and more.
+
 ## Priority Matrix
 
-- **P0 (MVP)**: High impact + Low complexity - Core features for basic functionality
-- **P1 (Core)**: High impact + Medium complexity - Essential features
-- **P2 (Enhanced)**: Medium impact + Low/Medium complexity - Nice-to-have features
-- **P3 (Advanced)**: Low impact or High complexity - Optional/future features
+- **P0 (MVP)**: High impact + Low complexity - Core features for basic functionality ✅ **COMPLETE**
+- **P1 (Core)**: High impact + Medium complexity - Essential features ⚠️ **MOSTLY COMPLETE** (P1.8 remaining)
+- **P2 (Enhanced)**: Medium impact + Low/Medium complexity - Nice-to-have features 📋 **PLANNED**
+- **P3 (Advanced)**: Low impact or High complexity - Optional/future features 📋 **PLANNED**
 
 ## P0: MVP Foundation
 
@@ -163,29 +193,34 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 ### P1.8 Step Management
 
-- [ ] P1.8.1 Implement step creation
-  - Add "New Step" button to WorkoutSection
-  - Create step with default values (open duration, open target)
-  - Add createStep action to workout store
-  - Insert at end of workout.steps array
-  - Recalculate stepIndex for all steps
+- [x] P1.8.1 Implement step creation
+  - Add "Add Step" button to WorkoutSection (below WorkoutList)
+  - Create createStep action in workout-actions.ts
+  - Generate new step with default values: open duration, open target, stepIndex = steps.length
+  - Add step to end of workout.steps array
+  - Update workout via updateWorkout action (triggers history)
+  - Add unit tests for createStep action
   - _Requirements: 2_
 
 - [ ] P1.8.2 Implement step deletion
-  - Add delete button to StepCard
-  - Show confirmation dialog using Radix Dialog
-  - Add deleteStep action to workout store
-  - Remove step from workout.steps array
-  - Recalculate stepIndex for all subsequent steps
-  - Handle deletion within repetition blocks
+  - Add delete button (trash icon) to StepCard
+  - Create DeleteConfirmDialog molecule using Radix Dialog
+  - Create deleteStep action in workout-actions.ts
+  - Remove step from workout.steps array by stepIndex
+  - Recalculate stepIndex for all subsequent steps (map with new indices)
+  - Update workout via updateWorkout action (triggers history)
+  - Handle deletion within repetition blocks (if step is in block, remove from block.steps)
+  - Add unit tests for deleteStep action
   - _Requirements: 5_
 
 - [ ] P1.8.3 Implement step duplication
-  - Add duplicate button to StepCard
-  - Add duplicateStep action to workout store
-  - Create exact copy of step with new stepIndex
-  - Insert after original step in workout.steps array
+  - Add duplicate button (copy icon) to StepCard
+  - Create duplicateStep action in workout-actions.ts
+  - Create exact copy of step (deep clone)
+  - Insert after original step in workout.steps array (splice at index + 1)
   - Recalculate stepIndex for all subsequent steps
+  - Update workout via updateWorkout action (triggers history)
+  - Add unit tests for duplicateStep action
   - _Requirements: 16_
 
 ### P1.9 File Saving
@@ -221,47 +256,65 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 ### P2.11 Drag and Drop Reordering
 
 - [ ] P2.11.1 Install and configure @dnd-kit
-  - Set up DndContext
-  - Configure sensors for mouse and touch
-  - Add collision detection
+  - Install @dnd-kit/core, @dnd-kit/sortable, @dnd-kit/utilities
+  - Wrap WorkoutList in DndContext in WorkoutSection
+  - Configure PointerSensor and KeyboardSensor for mouse, touch, and keyboard
+  - Add closestCenter collision detection
   - _Requirements: 4_
 
 - [ ] P2.11.2 Make WorkoutList draggable
-  - Wrap StepCard in draggable component
-  - Add drag handle
-  - Show visual feedback during drag
+  - Convert WorkoutList to use SortableContext from @dnd-kit/sortable
+  - Wrap each StepCard in useSortable hook
+  - Add drag handle icon (GripVertical from lucide-react) to StepCard
+  - Apply transform and transition styles during drag
+  - Show visual feedback (opacity, scale) during drag
   - _Requirements: 4_
 
 - [ ] P2.11.3 Implement drop logic
-  - Handle step reordering
-  - Recalculate step indices
-  - Update workout state
+  - Create reorderSteps action in workout-actions.ts
+  - Handle onDragEnd event in WorkoutSection
+  - Use arrayMove from @dnd-kit/sortable to reorder steps
+  - Recalculate stepIndex for all steps after reorder
+  - Update workout via updateWorkout action (triggers history)
+  - Add unit tests for reorderSteps action
   - _Requirements: 4_
 
 ### P2.12 User Profiles
 
 - [ ] P2.12.1 Create UserProfile types and schemas
-  - Define profile interface with zones
-  - Create Zod schemas for validation
-  - Add default zone configurations
+  - Define UserProfile type in types/schemas/ui-schemas.ts
+  - Include: id, name, bodyWeight, ftp, maxHeartRate, powerZones (7), heartRateZones (5), preferences
+  - Create userProfileSchema with Zod validation
+  - Add default zone configurations (power: 7 zones, HR: 5 zones)
+  - Export PowerZone and HRZone types
   - _Requirements: 30_
 
 - [ ] P2.12.2 Create ProfileForm organism
-  - Form for name, weight, FTP, max HR
-  - Zone configuration inputs
-  - Save and cancel buttons
+  - Create ProfileForm component with sections: Basic Info, Power Zones, HR Zones
+  - Basic Info: name (text), bodyWeight (number, kg), FTP (number, watts), maxHeartRate (number, bpm)
+  - Power Zones: 7 zone inputs with min/max percentage of FTP
+  - HR Zones: 5 zone inputs with min/max BPM
+  - Save and Cancel buttons
+  - Validate with userProfileSchema on submit
   - _Requirements: 30_
 
 - [ ] P2.12.3 Implement profile storage
-  - Save profiles to IndexedDB using Dexie
-  - Load profiles on app init
-  - Handle storage errors
+  - Install dexie for IndexedDB wrapper
+  - Create db.ts with Dexie database schema for profiles
+  - Create profile-store.ts Zustand store with: profiles array, activeProfileId
+  - Add actions: createProfile, updateProfile, deleteProfile, setActiveProfile
+  - Load profiles from IndexedDB on app init
+  - Persist changes to IndexedDB on every action
+  - Handle storage errors with error boundaries
   - _Requirements: 30, 32_
 
 - [ ] P2.12.4 Create profile selector
-  - Dropdown to switch between profiles
-  - Show active profile indicator
-  - Add "New Profile" option
+  - Create ProfileSelector molecule using Radix Select
+  - Display list of profile names
+  - Show active profile with checkmark icon
+  - Add "New Profile" option at bottom
+  - Add "Manage Profiles" option to open ProfileForm dialog
+  - Update activeProfileId in profile store on selection
   - _Requirements: 31_
 
 ### P2.13 Workout Library
@@ -307,29 +360,40 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 ### P2.15 Copy/Paste Functionality
 
 - [ ] P2.15.1 Implement copy to clipboard
-  - Add copy button to StepCard
-  - Store step data in Zustand clipboard state
-  - Show confirmation notification
+  - Add copy button (Copy icon from lucide-react) to StepCard
+  - Add clipboard state to workout-store.ts: clipboardStep: WorkoutStep | null
+  - Create copyStep action in workout-actions.ts (stores step in clipboard state)
+  - Show toast notification "Step copied" using Radix Toast
   - _Requirements: 20_
 
 - [ ] P2.15.2 Implement paste from clipboard
-  - Add paste button to UI
-  - Insert copied step at cursor position
-  - Recalculate step indices
+  - Add "Paste Step" button to WorkoutSection (enabled only when clipboard has step)
+  - Create pasteStep action in workout-actions.ts
+  - Insert copied step at end of workout.steps array (or after selected step)
+  - Assign new stepIndex to pasted step
+  - Recalculate stepIndex for all subsequent steps
+  - Update workout via updateWorkout action (triggers history)
+  - Show toast notification "Step pasted"
   - _Requirements: 20_
 
 ### P2.16 Keyboard Shortcuts
 
 - [ ] P2.16.1 Implement global keyboard shortcuts
-  - Ctrl/Cmd+Z for undo
-  - Ctrl/Cmd+Y for redo
-  - Ctrl/Cmd+S for save
+  - Create useKeyboardShortcuts hook in hooks/
+  - Listen for keydown events on window
+  - Ctrl/Cmd+Z: call undo() from workout store
+  - Ctrl/Cmd+Y (or Cmd+Shift+Z on Mac): call redo() from workout store
+  - Ctrl/Cmd+S: trigger save workout (prevent default browser save)
+  - Prevent default browser behavior for all shortcuts
+  - Add hook to App.tsx
   - _Requirements: 29_
 
 - [ ] P2.16.2 Implement context-specific shortcuts
-  - Ctrl/Cmd+D for duplicate (when step selected)
-  - Delete for delete (when step selected)
-  - Escape to cancel editing
+  - Extend useKeyboardShortcuts hook with context parameter
+  - Ctrl/Cmd+D: duplicate selected step (when selectedStepId is not null)
+  - Delete/Backspace: delete selected step (when selectedStepId is not null, show confirmation)
+  - Escape: cancel editing (call setEditing(false) and selectStep(null))
+  - Add visual indicator in UI showing available shortcuts (tooltip or help panel)
   - _Requirements: 29_
 
 ## P3: Advanced Features
@@ -676,36 +740,51 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - Filter sensitive data
   - _Requirements: 36_
 
-### P3.34 Testing
+### P3.34 Testing (COMPLETED)
 
 - [x] P3.34.1 Set up testing infrastructure
-  - Configure Vitest
-  - Set up React Testing Library
-  - Configure test coverage
+  - ✅ Vitest configured with coverage
+  - ✅ React Testing Library set up
+  - ✅ Test coverage thresholds configured (70% overall)
   - _Requirements: N/A (quality assurance)_
 
 - [x] P3.34.2 Write unit tests for core logic
-  - Test state management
-  - Test validation functions
-  - Test calculation utilities
+  - ✅ Store tests (workout-store.test.ts)
+  - ✅ Validation tests (validation.test.ts, formatters.test.ts, helpers.test.ts)
+  - ✅ Utility tests (workout-stats.test.ts, save-workout.test.ts)
   - _Requirements: N/A (quality assurance)_
 
 - [x] P3.34.3 Write component tests
-  - Test key components
-  - Test user interactions
-  - Test accessibility
+  - ✅ Component tests for atoms, molecules, organisms
+  - ✅ User interaction tests with @testing-library/user-event
+  - ✅ Accessibility tests in components
   - _Requirements: N/A (quality assurance)_
 
 - [x] P3.34.4 Set up E2E tests with Playwright
-  - Configure Playwright
-  - Write critical path tests
-  - Add to CI pipeline
+  - ✅ Playwright configured (playwright.config.ts)
+  - ✅ Critical path tests (workout-load-edit-save.spec.ts, workout-creation.spec.ts)
+  - ✅ Accessibility tests (accessibility.spec.ts)
+  - ✅ Mobile tests (mobile-responsive.spec.ts)
+  - ✅ CI pipeline configured (.github/workflows/workout-spa-editor-e2e.yml)
   - _Requirements: N/A (quality assurance)_
 
 ## Notes
 
-- Tasks marked with `*` are optional testing tasks
-- Each task references the requirements it implements
-- Prioritization allows for incremental delivery
-- MVP (Phase 1-2) delivers core value quickly
-- Enhanced features (Phase 3-4) add polish and advanced functionality
+- **Tasks marked with `*` are optional** - These are primarily testing tasks that can be skipped for faster MVP delivery
+- **Each task references requirements** - See requirements.md for detailed acceptance criteria
+- **Prioritization enables incremental delivery** - Complete P1.8 before moving to P2
+- **MVP is complete** - P0 and most of P1 are done, application is functional
+- **Next milestone: P1.8** - Complete step management (create, delete, duplicate)
+- **P2+ are enhancements** - Not required for core functionality but improve UX
+
+## Implementation Guidelines
+
+When implementing tasks:
+
+1. **Read requirements first** - Understand acceptance criteria before coding
+2. **Write tests** - Follow TDD: test → implement → refactor
+3. **Update store actions** - Add new actions to workout-actions.ts, not directly in store
+4. **Use existing patterns** - Follow established component structure and naming
+5. **Validate with Zod** - Use schemas from types/schemas/ for validation
+6. **Test E2E flows** - Add Playwright tests for user-facing features
+7. **Update documentation** - Keep README and inline comments current

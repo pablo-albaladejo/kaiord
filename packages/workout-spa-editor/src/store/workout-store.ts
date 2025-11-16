@@ -14,6 +14,7 @@ import {
   createClearWorkoutAction,
   createLoadWorkoutAction,
   createRedoAction,
+  createStepAction,
   createUndoAction,
   createUpdateWorkoutAction,
 } from "./workout-actions";
@@ -33,6 +34,7 @@ export type WorkoutStore = {
   // Actions
   loadWorkout: (krd: KRD) => void;
   updateWorkout: (krd: KRD) => void;
+  createStep: () => void;
   selectStep: (id: string | null) => void;
   setEditing: (editing: boolean) => void;
   clearWorkout: () => void;
@@ -61,6 +63,12 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
 
   updateWorkout: (krd: KRD) =>
     set((state) => createUpdateWorkoutAction(krd, state)),
+
+  createStep: () =>
+    set((state) => {
+      if (!state.currentWorkout) return {};
+      return createStepAction(state.currentWorkout, state);
+    }),
 
   selectStep: (id: string | null) => set({ selectedStepId: id }),
 

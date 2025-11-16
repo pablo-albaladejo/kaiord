@@ -1,5 +1,9 @@
-import { useIsEditing } from "../../../store/workout-store-selectors";
+import {
+  useCreateStep,
+  useIsEditing,
+} from "../../../store/workout-store-selectors";
 import type { KRD, Workout } from "../../../types/krd";
+import { Button } from "../../atoms/Button/Button";
 import { SaveButton } from "../../molecules";
 import { StepEditor } from "../../organisms/StepEditor/StepEditor";
 import { WorkoutList } from "../../organisms/WorkoutList/WorkoutList";
@@ -32,6 +36,7 @@ export function WorkoutSection({
   onStepSelect,
 }: WorkoutSectionProps) {
   const isEditing = useIsEditing();
+  const createStep = useCreateStep();
   const selectedStep = useSelectedStep(selectedStepId, workout);
   const { handleStepSelect, handleSave, handleCancel } =
     useWorkoutSectionHandlers(workout, krd, onStepSelect);
@@ -70,6 +75,16 @@ export function WorkoutSection({
           selectedStepId={selectedStepId}
           onStepSelect={handleStepSelect}
         />
+
+        <div className="mt-4 flex justify-center">
+          <Button
+            variant="secondary"
+            onClick={createStep}
+            aria-label="Add new step to workout"
+          >
+            Add Step
+          </Button>
+        </div>
       </div>
     </div>
   );
