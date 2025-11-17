@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd">
+  <Workouts>
+    <Workout Sport="Running">
+      <Name>Speed Workout</Name>
+      <Step xsi:type="Step_t">
+        <StepId>1</StepId>
+        <Name>Easy Run</Name>
+        <Duration xsi:type="Distance_t">
+          <Meters>1600</Meters>
+        </Duration>
+        <Intensity>Active</Intensity>
+        <Target xsi:type="Speed_t">
+          <SpeedZone xsi:type="CustomSpeedZone_t">
+            <ViewAs>Pace</ViewAs>
+            <LowInMetersPerSecond>2.5</LowInMetersPerSecond>
+            <HighInMetersPerSecond>3.0</HighInMetersPerSecond>
+          </SpeedZone>
+        </Target>
+      </Step>
+      <Step xsi:type="Step_t">
+        <StepId>2</StepId>
+        <Name>Fast Run</Name>
+        <Duration xsi:type="Distance_t">
+          <Meters>800</Meters>
+        </Duration>
+        <Intensity>Active</Intensity>
+        <Target xsi:type="Speed_t">
+          <SpeedZone xsi:type="CustomSpeedZone_t">
+            <ViewAs>Pace</ViewAs>
+            <LowInMetersPerSecond>3.5</LowInMetersPerSecond>
+            <HighInMetersPerSecond>4.0</HighInMetersPerSecond>
+          </SpeedZone>
+        </Target>
+      </Step>
+      <Step xsi:type="Step_t">
+        <StepId>3</StepId>
+        <Name>Recovery</Name>
+        <Duration xsi:type="Time_t">
+          <Seconds>180</Seconds>
+        </Duration>
+        <Intensity>Resting</Intensity>
+        <Target xsi:type="None_t"/>
+      </Step>
+    </Workout>
+  </Workouts>
+</TrainingCenterDatabase>

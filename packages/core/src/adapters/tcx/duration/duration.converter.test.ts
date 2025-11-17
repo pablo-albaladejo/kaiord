@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { convertTcxDuration } from "./duration.converter";
+import {
+  convertKrdDurationToTcx,
+  convertTcxDuration,
+} from "./duration.converter";
 
 describe("convertTcxDuration", () => {
   describe("time-based durations", () => {
@@ -436,6 +439,370 @@ describe("convertTcxDuration", () => {
         duration: {
           type: "open",
         },
+      });
+    });
+  });
+});
+
+describe("convertKrdDurationToTcx", () => {
+  describe("standard duration conversions", () => {
+    it("should convert time duration to TCX Time_t", () => {
+      // Arrange
+      const duration = {
+        type: "time" as const,
+        seconds: 300,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "Time_t",
+          Seconds: 300,
+        },
+        wasRestored: false,
+      });
+    });
+
+    it("should convert distance duration to TCX Distance_t", () => {
+      // Arrange
+      const duration = {
+        type: "distance" as const,
+        meters: 1000,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "Distance_t",
+          Meters: 1000,
+        },
+        wasRestored: false,
+      });
+    });
+
+    it("should convert open duration to TCX LapButton_t", () => {
+      // Arrange
+      const duration = {
+        type: "open" as const,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "LapButton_t",
+        },
+        wasRestored: false,
+      });
+    });
+
+    it("should handle large time values", () => {
+      // Arrange
+      const duration = {
+        type: "time" as const,
+        seconds: 7200,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "Time_t",
+          Seconds: 7200,
+        },
+        wasRestored: false,
+      });
+    });
+
+    it("should handle fractional seconds", () => {
+      // Arrange
+      const duration = {
+        type: "time" as const,
+        seconds: 90.5,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "Time_t",
+          Seconds: 90.5,
+        },
+        wasRestored: false,
+      });
+    });
+
+    it("should handle fractional meters", () => {
+      // Arrange
+      const duration = {
+        type: "distance" as const,
+        meters: 1609.34,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "Distance_t",
+          Meters: 1609.34,
+        },
+        wasRestored: false,
+      });
+    });
+  });
+
+  describe("extension restoration", () => {
+    it("should restore HeartRateAbove from extensions", () => {
+      // Arrange
+      const duration = {
+        type: "open" as const,
+      };
+      const extensions = {
+        heartRateAbove: 160,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration, extensions);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "HeartRateAbove_t",
+          HeartRate: {
+            "@_xsi:type": "HeartRateAbove_t",
+            Value: 160,
+          },
+        },
+        wasRestored: true,
+      });
+    });
+
+    it("should restore HeartRateBelow from extensions", () => {
+      // Arrange
+      const duration = {
+        type: "open" as const,
+      };
+      const extensions = {
+        heartRateBelow: 120,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration, extensions);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "HeartRateBelow_t",
+          HeartRate: {
+            "@_xsi:type": "HeartRateBelow_t",
+            Value: 120,
+          },
+        },
+        wasRestored: true,
+      });
+    });
+
+    it("should restore CaloriesBurned from extensions", () => {
+      // Arrange
+      const duration = {
+        type: "open" as const,
+      };
+      const extensions = {
+        caloriesBurned: 500,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration, extensions);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "CaloriesBurned_t",
+          Calories: 500,
+        },
+        wasRestored: true,
+      });
+    });
+
+    it("should prioritize HeartRateAbove over other extensions", () => {
+      // Arrange
+      const duration = {
+        type: "open" as const,
+      };
+      const extensions = {
+        heartRateAbove: 160,
+        heartRateBelow: 120,
+        caloriesBurned: 500,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration, extensions);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "HeartRateAbove_t",
+          HeartRate: {
+            "@_xsi:type": "HeartRateAbove_t",
+            Value: 160,
+          },
+        },
+        wasRestored: true,
+      });
+    });
+
+    it("should not restore if extension value is not a number", () => {
+      // Arrange
+      const duration = {
+        type: "open" as const,
+      };
+      const extensions = {
+        heartRateAbove: "160" as unknown as number,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration, extensions);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "LapButton_t",
+        },
+        wasRestored: false,
+      });
+    });
+
+    it("should convert standard duration when extensions are empty", () => {
+      // Arrange
+      const duration = {
+        type: "time" as const,
+        seconds: 300,
+      };
+      const extensions = {};
+
+      // Act
+      const result = convertKrdDurationToTcx(duration, extensions);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "Time_t",
+          Seconds: 300,
+        },
+        wasRestored: false,
+      });
+    });
+
+    it("should convert standard duration when extensions are undefined", () => {
+      // Arrange
+      const duration = {
+        type: "time" as const,
+        seconds: 300,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration, undefined);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "Time_t",
+          Seconds: 300,
+        },
+        wasRestored: false,
+      });
+    });
+  });
+
+  describe("unsupported duration types", () => {
+    it("should convert unsupported KRD duration to LapButton", () => {
+      // Arrange
+      const duration = {
+        type: "heart_rate_less_than" as const,
+        bpm: 140,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "LapButton_t",
+        },
+        wasRestored: false,
+      });
+    });
+
+    it("should convert calories duration to LapButton", () => {
+      // Arrange
+      const duration = {
+        type: "calories" as const,
+        calories: 500,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "LapButton_t",
+        },
+        wasRestored: false,
+      });
+    });
+
+    it("should convert power_less_than duration to LapButton", () => {
+      // Arrange
+      const duration = {
+        type: "power_less_than" as const,
+        watts: 200,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "LapButton_t",
+        },
+        wasRestored: false,
+      });
+    });
+
+    it("should convert repeat_until_time duration to LapButton", () => {
+      // Arrange
+      const duration = {
+        type: "repeat_until_time" as const,
+        seconds: 600,
+        repeatFrom: 0,
+      };
+
+      // Act
+      const result = convertKrdDurationToTcx(duration);
+
+      // Assert
+      expect(result).toStrictEqual({
+        tcxDuration: {
+          "@_xsi:type": "LapButton_t",
+        },
+        wasRestored: false,
       });
     });
   });

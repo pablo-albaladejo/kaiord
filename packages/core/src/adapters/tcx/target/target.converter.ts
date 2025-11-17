@@ -109,3 +109,185 @@ const convertCadenceTarget = (data: TcxTargetData): Target => {
 
   return { type: targetTypeSchema.enum.open };
 };
+
+// KRD → TCX converters
+
+export type KrdTargetData = {
+  target: Target;
+  sport?: string;
+};
+
+export const convertKrdTargetToTcx = (
+  data: KrdTargetData
+): Record<string, unknown> => {
+  const { target, sport } = data;
+
+  if (target.type === targetTypeSchema.enum.heart_rate) {
+    return convertHeartRateTargetToTcx(target);
+  }
+
+  if (target.type === targetTypeSchema.enum.pace) {
+    return convertPaceTargetToTcx(target);
+  }
+
+  if (target.type === targetTypeSchema.enum.cadence) {
+    return convertCadenceTargetToTcx(target, sport);
+  }
+
+  if (target.type === targetTypeSchema.enum.open) {
+    return { "@_xsi:type": "None_t" };
+  }
+
+  // Unsupported target types (power, stroke_type) default to None
+  return { "@_xsi:type": "None_t" };
+};
+
+const convertHeartRateTargetToTcx = (
+  target: Target
+): Record<string, unknown> => {
+  if (target.type !== "heart_rate") {
+    return { "@_xsi:type": "None_t" };
+  }
+
+  const value = target.value;
+
+  // Heart rate zone (1-5)
+  if (value.unit === targetUnitSchema.enum.zone) {
+    return {
+      "@_xsi:type": "HeartRate_t",
+      HeartRateZone: {
+        "@_xsi:type": "PredefinedHeartRateZone_t",
+        Number: value.value,
+      },
+    };
+  }
+
+  // Heart rate range (low/high bpm)
+  if (value.unit === targetUnitSchema.enum.range) {
+    return {
+      "@_xsi:type": "HeartRate_t",
+      HeartRateZone: {
+        "@_xsi:type": "CustomHeartRateZone_t",
+        Low: value.min,
+        High: value.max,
+      },
+    };
+  }
+
+  // Single bpm value → custom zone with same low/high
+  if (value.unit === targetUnitSchema.enum.bpm) {
+    return {
+      "@_xsi:type": "HeartRate_t",
+      HeartRateZone: {
+        "@_xsi:type": "CustomHeartRateZone_t",
+        Low: value.value,
+        High: value.value,
+      },
+    };
+  }
+
+  // Percent max → custom zone (not directly supported, use as-is)
+  if (value.unit === targetUnitSchema.enum.percent_max) {
+    return {
+      "@_xsi:type": "HeartRate_t",
+      HeartRateZone: {
+        "@_xsi:type": "CustomHeartRateZone_t",
+        Low: value.value,
+        High: value.value,
+      },
+    };
+  }
+
+  return { "@_xsi:type": "None_t" };
+};
+
+const convertPaceTargetToTcx = (target: Target): Record<string, unknown> => {
+  if (target.type !== "pace") {
+    return { "@_xsi:type": "None_t" };
+  }
+
+  const value = target.value;
+
+  // Speed zone
+  if (value.unit === targetUnitSchema.enum.zone) {
+    // TCX doesn't have predefined speed zones, use custom zone
+    return {
+      "@_xsi:type": "Speed_t",
+      SpeedZone: {
+        "@_xsi:type": "CustomSpeedZone_t",
+        LowInMetersPerSecond: value.value,
+        HighInMetersPerSecond: value.value,
+      },
+    };
+  }
+
+  // Speed range (low/high m/s)
+  if (value.unit === targetUnitSchema.enum.range) {
+    return {
+      "@_xsi:type": "Speed_t",
+      SpeedZone: {
+        "@_xsi:type": "CustomSpeedZone_t",
+        LowInMetersPerSecond: value.min,
+        HighInMetersPerSecond: value.max,
+      },
+    };
+  }
+
+  // Single mps value → custom zone with same low/high
+  if (value.unit === targetUnitSchema.enum.mps) {
+    return {
+      "@_xsi:type": "Speed_t",
+      SpeedZone: {
+        "@_xsi:type": "CustomSpeedZone_t",
+        LowInMetersPerSecond: value.value,
+        HighInMetersPerSecond: value.value,
+      },
+    };
+  }
+
+  return { "@_xsi:type": "None_t" };
+};
+
+const convertCadenceTargetToTcx = (
+  target: Target,
+  sport?: string
+): Record<string, unknown> => {
+  if (target.type !== "cadence") {
+    return { "@_xsi:type": "None_t" };
+  }
+
+  const value = target.value;
+  const isRunning = sport === "running" || sport === "Running";
+
+  // Cadence range (low/high rpm)
+  if (value.unit === targetUnitSchema.enum.range) {
+    // For running, KRD stores rpm, TCX stores spm (rpm * 2)
+    const minCadence = isRunning ? value.min * 2 : value.min;
+    const maxCadence = isRunning ? value.max * 2 : value.max;
+
+    return {
+      "@_xsi:type": "Cadence_t",
+      CadenceZone: {
+        "@_xsi:type": "CustomCadenceZone_t",
+        Low: minCadence,
+        High: maxCadence,
+      },
+    };
+  }
+
+  // Single rpm value → custom zone with same low/high
+  if (value.unit === targetUnitSchema.enum.rpm) {
+    const cadenceValue = isRunning ? value.value * 2 : value.value;
+
+    return {
+      "@_xsi:type": "Cadence_t",
+      CadenceZone: {
+        "@_xsi:type": "CustomCadenceZone_t",
+        Low: cadenceValue,
+        High: cadenceValue,
+      },
+    };
+  }
+
+  return { "@_xsi:type": "None_t" };
+};

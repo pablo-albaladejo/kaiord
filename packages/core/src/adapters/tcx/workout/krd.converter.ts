@@ -3,6 +3,23 @@ import { createTcxParsingError } from "../../../domain/types/errors";
 import type { Logger } from "../../../ports/logger";
 import { convertTcxWorkout } from "./workout.converter";
 
+const extractTcxExtensions = (
+  trainingCenterDatabase: Record<string, unknown>,
+  logger: Logger
+): Record<string, unknown> | undefined => {
+  const extensions = trainingCenterDatabase.Extensions as
+    | Record<string, unknown>
+    | undefined;
+  if (!extensions) {
+    return undefined;
+  }
+
+  logger.debug("Extracting TCX extensions from TrainingCenterDatabase");
+
+  // Store the raw TCX extensions for round-trip preservation
+  return { ...extensions };
+};
+
 export const convertTcxToKRD = (
   tcxData: Record<string, unknown>,
   logger: Logger
@@ -32,6 +49,8 @@ export const convertTcxToKRD = (
   const tcxWorkout = workoutArray[0] as Record<string, unknown>;
   const workout = convertTcxWorkout(tcxWorkout, logger);
 
+  const tcxExtensions = extractTcxExtensions(trainingCenterDatabase, logger);
+
   const krd: KRD = {
     version: "1.0",
     type: "workout",
@@ -42,6 +61,7 @@ export const convertTcxToKRD = (
     },
     extensions: {
       workout,
+      ...(tcxExtensions && { tcx: tcxExtensions }),
     },
   };
 

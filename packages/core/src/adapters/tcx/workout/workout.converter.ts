@@ -3,6 +3,23 @@ import type { Logger } from "../../../ports/logger";
 import { TCX_TO_KRD_SPORT, tcxSportSchema } from "../schemas/tcx-sport";
 import { convertTcxStep } from "./step.converter";
 
+const extractWorkoutExtensions = (
+  tcxWorkout: Record<string, unknown>,
+  logger: Logger
+): Record<string, unknown> | undefined => {
+  const extensions = tcxWorkout.Extensions as
+    | Record<string, unknown>
+    | undefined;
+  if (!extensions) {
+    return undefined;
+  }
+
+  logger.debug("Extracting TCX extensions from workout");
+
+  // Store the raw TCX extensions for round-trip preservation
+  return { ...extensions };
+};
+
 export const convertTcxWorkout = (
   tcxWorkout: Record<string, unknown>,
   logger: Logger
@@ -37,9 +54,23 @@ export const convertTcxWorkout = (
     }
   }
 
-  return {
+  const extensions = extractWorkoutExtensions(tcxWorkout, logger);
+
+  const workout: Workout = {
     name,
     sport,
     steps,
   };
+
+  // Add extensions to workout if present
+  if (extensions) {
+    return {
+      ...workout,
+      extensions: {
+        tcx: extensions,
+      },
+    };
+  }
+
+  return workout;
 };
