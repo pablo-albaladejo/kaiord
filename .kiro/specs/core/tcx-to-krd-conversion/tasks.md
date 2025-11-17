@@ -131,8 +131,8 @@ Each task follows Test-Driven Development:
     - _Requirements: 2.1, 2.2, 2.5_
     - _Commit: "feat: add TCX duration converters"_
 
-- [ ] 5. Implement TCX target conversion
-  - [ ] 5.1 Implement target mappers (TCX → KRD)
+- [x] 5. Implement TCX target conversion
+  - [x] 5.1 Implement target mappers (TCX → KRD)
     - Create adapters/tcx/target/target.mapper.ts
     - Map HeartRate → heart_rate target
     - Map Speed → pace target (convert m/s)
@@ -142,7 +142,7 @@ Each task follows Test-Driven Development:
     - DO NOT test mappers (simple data transformation, no logic)
     - _Requirements: 3.1, 4.1, 5.1_
     - _Commit: "feat: add TCX target mappers"_
-  - [ ] 5.2 Implement target converters (TCX → KRD)
+  - [x] 5.2 Implement target converters (TCX → KRD)
     - Create adapters/tcx/target/target.converter.ts
     - Convert heart rate zones (1-5)
     - Convert heart rate ranges (low/high bpm)
