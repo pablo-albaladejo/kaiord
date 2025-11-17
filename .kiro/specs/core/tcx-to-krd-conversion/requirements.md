@@ -2,7 +2,9 @@
 
 ## Introduction
 
-This feature enables bidirectional conversion between Training Center XML (TCX) workout files and the Kaiord Representation Definition (KRD) format. TCX is an XML-based format developed by Garmin for storing structured workout data, widely used across fitness platforms including TrainingPeaks, Strava, and Garmin Connect. Users can convert TCX files to KRD for editing and validation, then convert back to TCX for use with fitness devices and platforms. TCX files contain structured workout data including workout steps, durations, targets (heart rate, speed, cadence), and repetitions. The conversion must preserve all workout structure and training targets in both directions, ensuring round-trip safety (TCX → KRD → TCX and KRD → TCX → KRD) within defined tolerances. This capability is essential for users who want to edit, validate, and re-export workout files consistently across different fitness platforms.
+This feature enables bidirectional conversion between Training Center XML (TCX) workout files and the Kaiord Representation Definition (KRD) format. TCX is an XML-based format developed by Garmin for storing structured workout data, widely used across fitness platforms including TrainingPeaks, Strava, and Garmin Connect.
+
+**TCX Schema Reference**: [Garmin Training Center Database v2 XSD](https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd) Users can convert TCX files to KRD for editing and validation, then convert back to TCX for use with fitness devices and platforms. TCX files contain structured workout data including workout steps, durations, targets (heart rate, speed, cadence), and repetitions. The conversion must preserve all workout structure and training targets in both directions, ensuring round-trip safety (TCX → KRD → TCX and KRD → TCX → KRD) within defined tolerances. This capability is essential for users who want to edit, validate, and re-export workout files consistently across different fitness platforms.
 
 ## Workout Types
 

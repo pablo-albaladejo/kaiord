@@ -4,6 +4,8 @@
 
 This design implements bidirectional conversion between Training Center XML (TCX) workout files and KRD (Kaiord Representation Definition) format. The system follows hexagonal architecture with clear separation between domain logic, application use cases, ports (contracts), and adapters (implementations).
 
+**TCX Schema Reference**: [Garmin Training Center Database v2 XSD](https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd)
+
 ### Key Design Goals
 
 1. **Round-trip safety**: TCX → KRD → TCX and KRD → TCX → KRD preserve data within tolerances
