@@ -41,7 +41,10 @@ export const Toast = forwardRef<HTMLLIElement, ToastProps>(
             {title}
           </ToastPrimitive.Title>
           {description && (
-            <ToastPrimitive.Description className="text-sm opacity-90">
+            <ToastPrimitive.Description
+              className="text-sm opacity-90"
+              data-testid="toast-description"
+            >
               {description}
             </ToastPrimitive.Description>
           )}

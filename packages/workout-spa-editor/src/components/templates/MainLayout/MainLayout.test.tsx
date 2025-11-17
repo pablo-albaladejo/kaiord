@@ -1,19 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { ThemeProvider } from "../../../contexts/ThemeContext";
+import { renderWithProviders } from "../../../test-utils";
 import { MainLayout } from "./MainLayout";
-
-const renderWithTheme = (ui: React.ReactElement) => {
-  return render(<ThemeProvider defaultTheme="light">{ui}</ThemeProvider>);
-};
 
 describe("MainLayout", () => {
   it("should render children content", () => {
     // Arrange & Act
-    renderWithTheme(
+    renderWithProviders(
       <MainLayout>
         <div>Test Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -22,10 +19,11 @@ describe("MainLayout", () => {
 
   it("should render app title", () => {
     // Arrange & Act
-    renderWithTheme(
+    renderWithProviders(
       <MainLayout>
         <div>Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -34,10 +32,11 @@ describe("MainLayout", () => {
 
   it("should render header with logo", () => {
     // Arrange & Act
-    renderWithTheme(
+    renderWithProviders(
       <MainLayout>
         <div>Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -48,10 +47,11 @@ describe("MainLayout", () => {
 
   it("should render main content area", () => {
     // Arrange & Act
-    renderWithTheme(
+    renderWithProviders(
       <MainLayout>
         <div>Main Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -62,10 +62,11 @@ describe("MainLayout", () => {
 
   it("should render navigation landmark", () => {
     // Arrange & Act
-    renderWithTheme(
+    renderWithProviders(
       <MainLayout>
         <div>Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -75,10 +76,11 @@ describe("MainLayout", () => {
 
   it("should have responsive classes", () => {
     // Arrange & Act
-    renderWithTheme(
+    renderWithProviders(
       <MainLayout>
         <div>Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -88,10 +90,11 @@ describe("MainLayout", () => {
 
   it("should have mobile-first layout structure", () => {
     // Arrange & Act
-    renderWithTheme(
+    renderWithProviders(
       <MainLayout>
         <div>Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -101,10 +104,11 @@ describe("MainLayout", () => {
 
   it("should render theme toggle button", () => {
     // Arrange & Act
-    renderWithTheme(
+    renderWithProviders(
       <MainLayout>
         <div>Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
