@@ -1,6 +1,3 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 # Run lint:fix before pushing
 echo "🔍 Running lint:fix before push..."
 pnpm lint:fix
