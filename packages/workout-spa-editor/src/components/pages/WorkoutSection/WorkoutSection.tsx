@@ -22,7 +22,7 @@ export function WorkoutSection(props: WorkoutSectionProps) {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="workout-section">
       <WorkoutHeader workout={props.workout} krd={props.krd} />
       <WorkoutStats workout={props.workout} />
       <WorkoutSectionEditor

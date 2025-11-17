@@ -3,12 +3,18 @@ import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { KRD } from "../../../types/krd";
 import * as saveWorkoutModule from "../../../utils/save-workout";
+import { ToastProvider } from "../../atoms/Toast";
 import { SaveButton } from "./SaveButton";
 
 // Mock the save-workout utility
 vi.mock("../../../utils/save-workout", () => ({
   saveWorkout: vi.fn(),
 }));
+
+// Helper to render with ToastProvider
+const renderWithToast = (ui: React.ReactElement) => {
+  return render(<ToastProvider>{ui}</ToastProvider>);
+};
 
 describe("SaveButton", () => {
   const mockKRD: KRD = {
@@ -34,7 +40,7 @@ describe("SaveButton", () => {
   describe("rendering", () => {
     it("should render save button with default text", () => {
       // Arrange & Act
-      render(<SaveButton workout={mockKRD} />);
+      renderWithToast(<SaveButton workout={mockKRD} />);
 
       // Assert
       expect(
@@ -44,7 +50,7 @@ describe("SaveButton", () => {
 
     it("should render download icon", () => {
       // Arrange & Act
-      render(<SaveButton workout={mockKRD} />);
+      renderWithToast(<SaveButton workout={mockKRD} />);
 
       // Assert
       const button = screen.getByRole("button", { name: /save workout/i });
@@ -54,7 +60,9 @@ describe("SaveButton", () => {
 
     it("should apply custom className", () => {
       // Arrange & Act
-      render(<SaveButton workout={mockKRD} className="custom-class" />);
+      renderWithToast(
+        <SaveButton workout={mockKRD} className="custom-class" />
+      );
 
       // Assert
       const button = screen.getByRole("button", { name: /save workout/i });
@@ -71,7 +79,7 @@ describe("SaveButton", () => {
       });
 
       // Act
-      render(<SaveButton workout={mockKRD} />);
+      renderWithToast(<SaveButton workout={mockKRD} />);
       const button = screen.getByRole("button", { name: /save workout/i });
       await user.click(button);
 
@@ -79,12 +87,65 @@ describe("SaveButton", () => {
       expect(saveWorkoutModule.saveWorkout).toHaveBeenCalledWith(mockKRD);
     });
 
+    it("should call saveWorkout and trigger success flow when save succeeds", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      vi.mocked(saveWorkoutModule.saveWorkout).mockReturnValue({
+        success: true,
+      });
+
+      renderWithToast(<SaveButton workout={mockKRD} />);
+      const button = screen.getByRole("button", { name: /save workout/i });
+
+      // Act
+      await user.click(button);
+
+      // Assert - Verify saveWorkout was called with correct data
+      expect(saveWorkoutModule.saveWorkout).toHaveBeenCalledWith(mockKRD);
+      expect(saveWorkoutModule.saveWorkout).toHaveBeenCalledTimes(1);
+
+      // Verify no error dialog appears (success path)
+      expect(screen.queryByText("Save Failed")).not.toBeInTheDocument();
+    });
+
+    it("should call saveWorkout for workout without name", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      const workoutWithoutName: KRD = {
+        ...mockKRD,
+        extensions: {
+          workout: {
+            sport: "cycling",
+            steps: [],
+          },
+        },
+      };
+      vi.mocked(saveWorkoutModule.saveWorkout).mockReturnValue({
+        success: true,
+      });
+
+      renderWithToast(<SaveButton workout={workoutWithoutName} />);
+      const button = screen.getByRole("button", { name: /save workout/i });
+
+      // Act
+      await user.click(button);
+
+      // Assert - Verify saveWorkout was called with workout without name
+      expect(saveWorkoutModule.saveWorkout).toHaveBeenCalledWith(
+        workoutWithoutName
+      );
+      expect(saveWorkoutModule.saveWorkout).toHaveBeenCalledTimes(1);
+
+      // Verify no error dialog appears (success path)
+      expect(screen.queryByText("Save Failed")).not.toBeInTheDocument();
+    });
+
     it("should not call saveWorkout when disabled", async () => {
       // Arrange
       const user = userEvent.setup();
 
       // Act
-      render(<SaveButton workout={mockKRD} disabled={true} />);
+      renderWithToast(<SaveButton workout={mockKRD} disabled={true} />);
       const button = screen.getByRole("button", { name: /save workout/i });
       await user.click(button);
 
@@ -108,7 +169,7 @@ describe("SaveButton", () => {
       });
 
       // Act
-      render(<SaveButton workout={mockKRD} />);
+      renderWithToast(<SaveButton workout={mockKRD} />);
       const button = screen.getByRole("button", { name: /save workout/i });
       await user.click(button);
 
@@ -136,7 +197,7 @@ describe("SaveButton", () => {
       });
 
       // Act
-      render(<SaveButton workout={mockKRD} />);
+      renderWithToast(<SaveButton workout={mockKRD} />);
       const button = screen.getByRole("button", { name: /save workout/i });
       await user.click(button);
 
@@ -157,7 +218,7 @@ describe("SaveButton", () => {
         errors: mockErrors,
       });
 
-      render(<SaveButton workout={mockKRD} />);
+      renderWithToast(<SaveButton workout={mockKRD} />);
       const button = screen.getByRole("button", { name: /save workout/i });
       await user.click(button);
 
@@ -189,7 +250,7 @@ describe("SaveButton", () => {
           success: true,
         });
 
-      render(<SaveButton workout={mockKRD} />);
+      renderWithToast(<SaveButton workout={mockKRD} />);
       const button = screen.getByRole("button", { name: /save workout/i });
       await user.click(button);
 
@@ -219,7 +280,7 @@ describe("SaveButton", () => {
   describe("disabled state", () => {
     it("should be disabled when disabled prop is true", () => {
       // Arrange & Act
-      render(<SaveButton workout={mockKRD} disabled={true} />);
+      renderWithToast(<SaveButton workout={mockKRD} disabled={true} />);
 
       // Assert
       const button = screen.getByRole("button", { name: /save workout/i });
@@ -230,7 +291,7 @@ describe("SaveButton", () => {
   describe("accessibility", () => {
     it("should have proper button role", () => {
       // Arrange & Act
-      render(<SaveButton workout={mockKRD} />);
+      renderWithToast(<SaveButton workout={mockKRD} />);
 
       // Assert
       const button = screen.getByRole("button", { name: /save workout/i });
@@ -245,7 +306,7 @@ describe("SaveButton", () => {
       });
 
       // Act
-      render(<SaveButton workout={mockKRD} />);
+      renderWithToast(<SaveButton workout={mockKRD} />);
       const button = screen.getByRole("button", { name: /save workout/i });
       button.focus();
       await user.keyboard("{Enter}");

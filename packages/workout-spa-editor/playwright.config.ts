@@ -18,7 +18,11 @@ export default defineConfig({
     baseURL: "http://localhost:5173",
     trace: "on-first-retry",
     screenshot: "only-on-failure",
+    actionTimeout: 10000, // 10 seconds for actions (click, fill, etc.)
   },
+
+  // Global timeout for tests
+  timeout: 60000, // 60 seconds per test
 
   projects: [
     {

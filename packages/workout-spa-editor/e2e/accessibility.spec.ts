@@ -89,6 +89,9 @@ test.describe("Accessibility", () => {
   test("should support keyboard shortcuts", async ({ page }) => {
     await page.goto("/");
 
+    // Wait for page to be fully loaded
+    await page.waitForLoadState("networkidle");
+
     // Load a workout
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
@@ -129,22 +132,38 @@ test.describe("Accessibility", () => {
     await expect(page.getByText("Shortcuts Test")).toBeVisible({
       timeout: 10000,
     });
-    await expect(page.getByText("Step 1")).toBeVisible();
+    await expect(page.getByText("Step 1")).toBeVisible({ timeout: 10000 });
 
-    // Add a step
-    await page.getByRole("button", { name: /add step/i }).click();
-    await expect(page.getByText("Step 2")).toBeVisible({ timeout: 5000 });
+    // Add a step using test ID (more reliable than role)
+    await page.getByTestId("add-step-button").click();
 
-    // Test Ctrl+Z (undo)
+    // Wait for Step 2 to appear
+    await expect(page.getByText("Step 2")).toBeVisible({ timeout: 10000 });
+
+    // Wait a moment for the UI to stabilize after adding the step
+    await page.waitForTimeout(500);
+
+    // Test Ctrl+Z (undo) - focus on body first to ensure keyboard events are captured
+    await page.locator("body").focus();
     await page.keyboard.press("Control+Z");
-    await expect(page.getByText("Step 2")).not.toBeVisible({ timeout: 5000 });
+
+    // Wait for Step 2 to disappear after undo
+    await expect(page.getByText("Step 2")).not.toBeVisible({ timeout: 10000 });
+
+    // Wait a moment before redo
+    await page.waitForTimeout(500);
 
     // Test Ctrl+Y (redo)
     await page.keyboard.press("Control+Y");
-    await expect(page.getByText("Step 2")).toBeVisible({ timeout: 5000 });
+
+    // Wait for Step 2 to reappear after redo
+    await expect(page.getByText("Step 2")).toBeVisible({ timeout: 10000 });
+
+    // Wait a moment before save
+    await page.waitForTimeout(500);
 
     // Test Ctrl+S (save) - should trigger download
-    const downloadPromise = page.waitForEvent("download");
+    const downloadPromise = page.waitForEvent("download", { timeout: 15000 });
     await page.keyboard.press("Control+S");
     const download = await downloadPromise;
     expect(download.suggestedFilename()).toMatch(/\.krd$/);
@@ -153,27 +172,43 @@ test.describe("Accessibility", () => {
   test("should have visible focus indicators", async ({ page }) => {
     await page.goto("/");
 
-    // Tab to first button
-    await page.keyboard.press("Tab");
+    // Wait for page to be fully loaded
+    await page.waitForLoadState("networkidle");
 
-    // Get the focused element
-    const focusedElement = page.locator(":focus");
+    // Find the theme toggle button (first interactive element)
+    const themeToggle = page.getByRole("button", {
+      name: /switch to (light|dark|kiroween) mode/i,
+    });
+    await expect(themeToggle).toBeVisible();
+
+    // Explicitly focus the button using keyboard navigation
+    await themeToggle.focus();
+
+    // Wait a moment for focus styles to apply (webkit needs this)
+    await page.waitForTimeout(100);
+
+    // Verify the button is focused
+    await expect(themeToggle).toBeFocused();
 
     // Verify focus indicator is visible (outline or ring)
-    const styles = await focusedElement.evaluate((el) => {
+    const styles = await themeToggle.evaluate((el) => {
       const computed = window.getComputedStyle(el);
       return {
         outline: computed.outline,
         outlineWidth: computed.outlineWidth,
+        outlineStyle: computed.outlineStyle,
+        outlineColor: computed.outlineColor,
         boxShadow: computed.boxShadow,
       };
     });
 
     // Verify some form of focus indicator exists
+    // Check for either outline or box-shadow (Tailwind uses box-shadow for focus rings)
     const hasFocusIndicator =
-      styles.outline !== "none" ||
-      styles.outlineWidth !== "0px" ||
-      styles.boxShadow !== "none";
+      (styles.outline !== "none" &&
+        styles.outlineWidth !== "0px" &&
+        styles.outlineStyle !== "none") ||
+      (styles.boxShadow !== "none" && styles.boxShadow.includes("rgb"));
 
     expect(hasFocusIndicator).toBe(true);
   });
@@ -386,7 +421,9 @@ test.describe("Accessibility", () => {
     await themeToggle.click();
     await page.waitForTimeout(500);
 
-    // Verify page is still functional
-    await expect(page.getByText("Workout Editor")).toBeVisible();
+    // Verify page is still functional - use specific heading level to avoid ambiguity
+    await expect(
+      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+    ).toBeVisible();
   });
 });

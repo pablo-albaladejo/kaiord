@@ -78,6 +78,8 @@
     transition:
       background-color 0.3s ease,
       color 0.3s ease;
+    /* Smooth scrolling for mobile - Requirement 8 */
+    scroll-behavior: smooth;
   }
 
   * {
@@ -89,6 +91,27 @@
 
   body {
     @apply m-0 min-h-screen bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100 kiroween:bg-gray-950 kiroween:text-gray-100;
+  }
+
+  /* Webkit-specific focus styles for better Safari/iOS support - Requirement 35 */
+  button:focus,
+  a:focus,
+  input:focus,
+  textarea:focus,
+  select:focus {
+    /* Ensure focus outline is visible on webkit browsers */
+    outline-offset: 2px;
+  }
+
+  /* Force focus-visible styles on webkit for keyboard navigation */
+  button:focus-visible,
+  a:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible,
+  select:focus-visible {
+    /* Webkit needs explicit focus-visible styles */
+    outline: 2px solid currentColor;
+    outline-offset: 2px;
   }
 
   /* Floating animation for ghost decorations */
