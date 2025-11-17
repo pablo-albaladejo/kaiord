@@ -79,8 +79,8 @@ Each task follows Test-Driven Development:
     - _Requirements: 1.2, 6.1, 6.2, 7.1, 7.2, 8.1, 8.2, 8.3_
     - _Commit: "feat: implement TCX to KRD conversion"_
 
-- [ ] 4. Implement TCX duration conversion
-  - [ ] 4.1 Implement duration mappers (TCX → KRD)
+- [x] 4. Implement TCX duration conversion
+  - [x] 4.1 Implement duration mappers (TCX → KRD)
     - Create adapters/tcx/duration/duration.mapper.ts
     - Map Time → time duration with seconds
     - Map Distance → distance duration with meters
@@ -89,7 +89,7 @@ Each task follows Test-Driven Development:
     - DO NOT test mappers (simple data transformation, no logic)
     - _Requirements: 2.1, 2.2, 2.5_
     - _Commit: "feat: add TCX duration mappers"_
-  - [ ] 4.2 Implement duration converters (TCX → KRD)
+  - [x] 4.2 Implement duration converters (TCX → KRD)
     - Create adapters/tcx/duration/duration.converter.ts
     - Convert HeartRateAbove/Below to extensions (not standard KRD)
     - Convert CaloriesBurned to extensions (not standard KRD)
