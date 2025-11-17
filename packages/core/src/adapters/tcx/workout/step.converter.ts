@@ -2,60 +2,40 @@ import type { WorkoutStep } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
 import { convertTcxDuration } from "../duration/duration.mapper";
 import { convertTcxTarget } from "../target/target.mapper";
+import {
+  extractExtensions,
+  extractIntensity,
+  extractPowerFromExtensions,
+} from "./step-helpers";
 
-const extractIntensity = (
-  tcxStep: Record<string, unknown>
-): "warmup" | "active" | "cooldown" | "rest" | undefined => {
-  const intensityValue = tcxStep.Intensity as string | undefined;
-  return intensityValue?.toLowerCase() as
-    | "warmup"
-    | "active"
-    | "cooldown"
-    | "rest"
-    | undefined;
-};
-
-const extractPowerFromExtensions = (
-  extensions: Record<string, unknown>,
+const convertTargetWithExtensions = (
+  tcxStep: Record<string, unknown>,
+  extensions: Record<string, unknown> | null,
   logger: Logger
-): number | undefined => {
-  // Extract power data if present (common TCX extension)
-  // Power data is often in extensions like:
-  // <Extensions><TPX xmlns="..."><Watts>250</Watts></TPX></Extensions>
-  if (extensions.TPX) {
-    const tpx = extensions.TPX as Record<string, unknown>;
-    if (typeof tpx.Watts === "number") {
-      logger.debug("Found power data in TCX extensions", {
-        watts: tpx.Watts,
+): Target | null => {
+  const target = convertTcxTarget(
+    tcxStep.Target as Record<string, unknown> | undefined,
+    logger
+  );
+  if (!target) return null;
+
+  if (target.type === "open" && extensions) {
+    const powerWatts = extractPowerFromExtensions(extensions, logger);
+    if (powerWatts !== undefined) {
+      logger.debug("Converting open target to power target from extensions", {
+        watts: powerWatts,
       });
-      return tpx.Watts;
+      return {
+        type: "power",
+        value: {
+          unit: "watts",
+          value: powerWatts,
+        },
+      };
     }
   }
 
-  // Check for other common power extension formats
-  if (extensions.Power && typeof extensions.Power === "number") {
-    logger.debug("Found power data in TCX extensions", {
-      watts: extensions.Power,
-    });
-    return extensions.Power;
-  }
-
-  return undefined;
-};
-
-const extractExtensions = (
-  tcxStep: Record<string, unknown>,
-  logger: Logger
-): Record<string, unknown> | undefined => {
-  const extensions = tcxStep.Extensions as Record<string, unknown> | undefined;
-  if (!extensions) {
-    return undefined;
-  }
-
-  logger.debug("Extracting TCX extensions from step");
-
-  // Store the raw TCX extensions for round-trip preservation
-  return { ...extensions };
+  return target;
 };
 
 export const convertTcxStep = (
@@ -82,32 +62,11 @@ export const convertTcxStep = (
     return null;
   }
 
-  let target = convertTcxTarget(
-    tcxStep.Target as Record<string, unknown> | undefined,
-    logger
-  );
+  const extensions = extractExtensions(tcxStep, logger);
+  const target = convertTargetWithExtensions(tcxStep, extensions, logger);
   if (!target) {
     logger.warn("Step has no valid target, skipping", { stepIndex });
     return null;
-  }
-
-  const extensions = extractExtensions(tcxStep, logger);
-
-  // If target is "open" but we have power data in extensions, convert to power target
-  if (target.type === "open" && extensions) {
-    const powerWatts = extractPowerFromExtensions(extensions, logger);
-    if (powerWatts !== undefined) {
-      logger.debug("Converting open target to power target from extensions", {
-        watts: powerWatts,
-      });
-      target = {
-        type: "power",
-        value: {
-          unit: "watts",
-          value: powerWatts,
-        },
-      };
-    }
   }
 
   const step: WorkoutStep = {
@@ -120,7 +79,6 @@ export const convertTcxStep = (
     intensity: extractIntensity(tcxStep),
   };
 
-  // Add extensions to step if present
   if (extensions) {
     return {
       ...step,

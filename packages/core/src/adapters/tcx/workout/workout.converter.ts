@@ -20,6 +20,32 @@ const extractWorkoutExtensions = (
   return { ...extensions };
 };
 
+const convertSteps = (
+  tcxSteps: unknown,
+  logger: Logger
+): Array<WorkoutStep> => {
+  const steps: Array<WorkoutStep> = [];
+
+  if (!tcxSteps) return steps;
+
+  const stepArray = Array.isArray(tcxSteps) ? tcxSteps : [tcxSteps];
+  let stepIndex = 0;
+
+  for (const tcxStep of stepArray) {
+    const step = convertTcxStep(
+      tcxStep as Record<string, unknown>,
+      stepIndex,
+      logger
+    );
+    if (step) {
+      steps.push(step);
+      stepIndex++;
+    }
+  }
+
+  return steps;
+};
+
 export const convertTcxWorkout = (
   tcxWorkout: Record<string, unknown>,
   logger: Logger
@@ -33,27 +59,7 @@ export const convertTcxWorkout = (
     : "generic";
 
   const name = tcxWorkout.Name as string | undefined;
-
-  const steps: Array<WorkoutStep> = [];
-  const tcxSteps = tcxWorkout.Step;
-
-  if (tcxSteps) {
-    const stepArray = Array.isArray(tcxSteps) ? tcxSteps : [tcxSteps];
-    let stepIndex = 0;
-
-    for (const tcxStep of stepArray) {
-      const step = convertTcxStep(
-        tcxStep as Record<string, unknown>,
-        stepIndex,
-        logger
-      );
-      if (step) {
-        steps.push(step);
-        stepIndex++;
-      }
-    }
-  }
-
+  const steps = convertSteps(tcxWorkout.Step, logger);
   const extensions = extractWorkoutExtensions(tcxWorkout, logger);
 
   const workout: Workout = {
@@ -62,7 +68,6 @@ export const convertTcxWorkout = (
     steps,
   };
 
-  // Add extensions to workout if present
   if (extensions) {
     return {
       ...workout,

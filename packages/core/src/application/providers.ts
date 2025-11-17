@@ -42,50 +42,51 @@ export type Providers = {
   logger: Logger;
 };
 
+const createAdapters = (log: Logger, tcxValidator: TcxValidator) => ({
+  fitReader: createGarminFitSdkReader(log),
+  fitWriter: createGarminFitSdkWriter(log),
+  tcxValidator,
+  tcxReader: createFastXmlTcxReader(log),
+  tcxWriter: createFastXmlTcxWriter(log, tcxValidator),
+  schemaValidator: createSchemaValidator(log),
+  toleranceChecker: createToleranceChecker(),
+});
+
+const createUseCases = (
+  adapters: ReturnType<typeof createAdapters>,
+  log: Logger
+) => ({
+  convertFitToKrd: convertFitToKrd(
+    adapters.fitReader,
+    adapters.schemaValidator,
+    log
+  ),
+  convertKrdToFit: convertKrdToFit(
+    adapters.fitWriter,
+    adapters.schemaValidator,
+    log
+  ),
+  convertTcxToKrd: convertTcxToKrd(
+    adapters.tcxReader,
+    adapters.schemaValidator,
+    log
+  ),
+  convertKrdToTcx: convertKrdToTcx(
+    adapters.tcxWriter,
+    adapters.schemaValidator,
+    log
+  ),
+});
+
 export const createDefaultProviders = (logger?: Logger): Providers => {
   const log = logger || createConsoleLogger();
-
-  const fitReader = createGarminFitSdkReader(log);
-  const fitWriter = createGarminFitSdkWriter(log);
   const tcxValidator = createXsdTcxValidator(log);
-  const tcxReader = createFastXmlTcxReader(log);
-  const tcxWriter = createFastXmlTcxWriter(log, tcxValidator);
-  const schemaValidator = createSchemaValidator(log);
-  const toleranceChecker = createToleranceChecker();
-
-  const convertFitToKrdUseCase = convertFitToKrd(
-    fitReader,
-    schemaValidator,
-    log
-  );
-  const convertKrdToFitUseCase = convertKrdToFit(
-    fitWriter,
-    schemaValidator,
-    log
-  );
-  const convertTcxToKrdUseCase = convertTcxToKrd(
-    tcxReader,
-    schemaValidator,
-    log
-  );
-  const convertKrdToTcxUseCase = convertKrdToTcx(
-    tcxWriter,
-    schemaValidator,
-    log
-  );
+  const adapters = createAdapters(log, tcxValidator);
+  const useCases = createUseCases(adapters, log);
 
   return {
-    fitReader,
-    fitWriter,
-    tcxValidator,
-    tcxReader,
-    tcxWriter,
-    schemaValidator,
-    toleranceChecker,
-    convertFitToKrd: convertFitToKrdUseCase,
-    convertKrdToFit: convertKrdToFitUseCase,
-    convertTcxToKrd: convertTcxToKrdUseCase,
-    convertKrdToTcx: convertKrdToTcxUseCase,
+    ...adapters,
+    ...useCases,
     logger: log,
   };
 };
