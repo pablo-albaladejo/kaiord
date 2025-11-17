@@ -28,7 +28,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.1, 12.5_
   - _Files: utils/file-format-detector.ts_
 
-- [ ] 2. Implement FIT file import
+- [x] 2. Implement FIT file import
   - Use @kaiord/core toKRD function for FIT → KRD conversion
   - Handle FIT parsing errors gracefully
   - Display conversion progress for large files
