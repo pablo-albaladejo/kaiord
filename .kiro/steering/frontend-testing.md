@@ -413,6 +413,59 @@ test("should load and edit workout", async ({ page }) => {
 3. **Test user flows** - Complete scenarios, not isolated actions
 4. **Keep tests independent** - Each test should work in isolation
 5. **Add requirement comments** - Document what requirement is being tested
+6. **Update E2E tests for UI changes** - MANDATORY: When adding or modifying UI functionality, ALWAYS update corresponding E2E tests
+
+### CRITICAL: E2E Test Updates for UI Changes
+
+**MANDATORY RULE**: Every UI functionality change MUST include E2E test updates.
+
+**When to update E2E tests:**
+
+- ✅ Adding new interactive elements (buttons, inputs, toggles)
+- ✅ Modifying existing user flows (navigation, forms, dialogs)
+- ✅ Adding new pages or sections
+- ✅ Changing keyboard shortcuts or accessibility features
+- ✅ Modifying theme or visual modes
+- ✅ Adding new user actions (save, delete, copy, etc.)
+
+**Examples:**
+
+```typescript
+// ❌ BAD: Added theme toggle to UI but no E2E test
+// Component: ThemeToggle.tsx added to header
+// E2E: No test added ← REJECTED
+
+// ✅ GOOD: Added theme toggle with E2E test
+// Component: ThemeToggle.tsx added to header
+// E2E: accessibility.spec.ts updated with theme toggle tests
+
+test("should toggle between light and dark themes", async ({ page }) => {
+  await page.goto("/");
+
+  // Verify initial theme
+  const html = page.locator("html");
+  const initialHasClass = await html.evaluate((el) =>
+    el.classList.contains("dark")
+  );
+
+  // Click theme toggle
+  await page
+    .getByRole("button", { name: /switch to (light|dark) mode/i })
+    .click();
+
+  // Verify theme changed
+  const newHasClass = await html.evaluate((el) =>
+    el.classList.contains("dark")
+  );
+  expect(newHasClass).not.toBe(initialHasClass);
+});
+```
+
+**Enforcement:**
+
+- Code review will reject PRs with UI changes but no E2E test updates
+- CI/CD pipeline must show E2E tests covering new functionality
+- Document which E2E test file was updated in PR description
 
 ### Running E2E Tests
 

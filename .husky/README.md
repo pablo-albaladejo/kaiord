@@ -39,7 +39,7 @@ git commit -m "feat: add new feature"
 #   pnpm test:watch
 ```
 
-**To skip (NOT RECOMMENDED):**
+**To skip (not recommended):**
 
 ```bash
 git commit --no-verify

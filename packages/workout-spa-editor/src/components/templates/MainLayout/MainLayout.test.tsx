@@ -1,14 +1,16 @@
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+import { renderWithProviders } from "../../../test-utils";
 import { MainLayout } from "./MainLayout";
 
 describe("MainLayout", () => {
   it("should render children content", () => {
     // Arrange & Act
-    render(
+    renderWithProviders(
       <MainLayout>
         <div>Test Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -17,10 +19,11 @@ describe("MainLayout", () => {
 
   it("should render app title", () => {
     // Arrange & Act
-    render(
+    renderWithProviders(
       <MainLayout>
         <div>Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -29,10 +32,11 @@ describe("MainLayout", () => {
 
   it("should render header with logo", () => {
     // Arrange & Act
-    render(
+    renderWithProviders(
       <MainLayout>
         <div>Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -43,10 +47,11 @@ describe("MainLayout", () => {
 
   it("should render main content area", () => {
     // Arrange & Act
-    render(
+    renderWithProviders(
       <MainLayout>
         <div>Main Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -57,10 +62,11 @@ describe("MainLayout", () => {
 
   it("should render navigation landmark", () => {
     // Arrange & Act
-    render(
+    renderWithProviders(
       <MainLayout>
         <div>Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -70,10 +76,11 @@ describe("MainLayout", () => {
 
   it("should have responsive classes", () => {
     // Arrange & Act
-    render(
+    renderWithProviders(
       <MainLayout>
         <div>Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
@@ -83,14 +90,31 @@ describe("MainLayout", () => {
 
   it("should have mobile-first layout structure", () => {
     // Arrange & Act
-    render(
+    renderWithProviders(
       <MainLayout>
         <div>Content</div>
-      </MainLayout>
+      </MainLayout>,
+      { defaultTheme: "light" }
     );
 
     // Assert
     const container = screen.getByRole("main").parentElement;
     expect(container).toHaveClass("min-h-screen", "flex-col");
+  });
+
+  it("should render theme toggle button", () => {
+    // Arrange & Act
+    renderWithProviders(
+      <MainLayout>
+        <div>Content</div>
+      </MainLayout>,
+      { defaultTheme: "light" }
+    );
+
+    // Assert
+    const themeToggle = screen.getByRole("button", {
+      name: /switch to (light|dark) mode/i,
+    });
+    expect(themeToggle).toBeInTheDocument();
   });
 });

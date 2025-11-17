@@ -50,7 +50,7 @@ export function DeleteConfirmDialog({
 }: DeleteConfirmDialogProps) {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800">
+      <div className="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800 kiroween:bg-gray-800">
         <DialogHeader onCancel={onCancel} />
 
         <div className="p-4">
@@ -61,10 +61,18 @@ export function DeleteConfirmDialog({
         </div>
 
         <div className="flex justify-end gap-2 border-t border-gray-200 p-4 dark:border-gray-700">
-          <Button variant="secondary" onClick={onCancel}>
+          <Button
+            variant="secondary"
+            onClick={onCancel}
+            data-testid="cancel-delete-button"
+          >
             Cancel
           </Button>
-          <Button variant="danger" onClick={onConfirm}>
+          <Button
+            variant="danger"
+            onClick={onConfirm}
+            data-testid="confirm-delete-button"
+          >
             Delete Step
           </Button>
         </div>

@@ -33,18 +33,18 @@ function App() {
 
 ## Layout Structure
 
-```text
 ┌─────────────────────────────────────┐
-│ Header (sticky)                     │
-│ - Logo + Title                      │
-│ - Navigation (future)               │
+│ Header (sticky) │
+│ - Logo + Title │
+│ - Navigation (future) │
 ├─────────────────────────────────────┤
-│                                     │
-│ Main Content Area                   │
-│ (children rendered here)            │
-│                                     │
-│                                     │
+│ │
+│ Main Content Area │
+│ (children rendered here) │
+│ │
+│ │
 └─────────────────────────────────────┘
+
 ```
 
 ## Responsive Behavior
@@ -66,3 +66,4 @@ Implements:
 - Theme toggle button
 - Breadcrumb navigation
 - Footer with links and version info
+```

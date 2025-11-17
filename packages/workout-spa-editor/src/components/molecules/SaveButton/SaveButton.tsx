@@ -10,9 +10,11 @@
 
 import { Download } from "lucide-react";
 import { useState } from "react";
+import { useToast } from "../../../hooks/useToast";
 import type { KRD, ValidationError } from "../../../types/krd";
 import { saveWorkout } from "../../../utils/save-workout";
 import { Button } from "../../atoms/Button/Button";
+import { Toast } from "../../atoms/Toast";
 import { SaveErrorDialog } from "../SaveErrorDialog/SaveErrorDialog";
 
 export type SaveButtonProps = {
@@ -29,6 +31,7 @@ function useSaveWorkout(workout: KRD) {
     null
   );
   const [isSaving, setIsSaving] = useState(false);
+  const { success } = useToast();
 
   const handleSave = () => {
     setIsSaving(true);
@@ -36,7 +39,12 @@ function useSaveWorkout(workout: KRD) {
 
     if (result.success) {
       setSaveErrors(null);
-      // TODO: Show success notification (Requirement 39)
+      // Show success notification (Requirement 39.1)
+      const workoutData = workout.extensions?.workout as
+        | { name?: string }
+        | undefined;
+      const workoutName = workoutData?.name || "Untitled Workout";
+      success("Workout Saved", `"${workoutName}" has been saved successfully`);
     } else {
       // Type guard ensures result has errors property
       setSaveErrors(result.errors);
@@ -56,6 +64,7 @@ function useSaveWorkout(workout: KRD) {
 export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
   const { saveErrors, isSaving, handleSave, clearErrors } =
     useSaveWorkout(workout);
+  const { toasts, dismiss } = useToast();
 
   return (
     <>
@@ -76,6 +85,21 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
           onRetry={clearErrors}
         />
       )}
+
+      {toasts.map((toast) => (
+        <Toast
+          key={toast.id}
+          title={toast.title}
+          description={toast.description}
+          variant={toast.variant}
+          action={toast.action}
+          open={toast.open}
+          onOpenChange={(open) => {
+            if (!open) dismiss(toast.id);
+          }}
+          duration={toast.duration}
+        />
+      ))}
     </>
   );
 }

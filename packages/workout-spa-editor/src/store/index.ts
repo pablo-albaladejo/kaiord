@@ -10,6 +10,8 @@ export {
   useClearWorkout,
   useCreateStep,
   useCurrentWorkout,
+  useDeleteStep,
+  useDuplicateStep,
   useIsEditing,
   useLoadWorkout,
   useRedo,
