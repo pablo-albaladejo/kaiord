@@ -63,7 +63,7 @@ jobs:
         # Automatically create GitHub release when Version Packages PR is merged
         # Extracts version info and changelog content from package files
         if: steps.changesets.outputs.hasChangesets == 'false'
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
