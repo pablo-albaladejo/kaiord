@@ -54,13 +54,13 @@ Each task follows Test-Driven Development:
     - _Requirements: 3.1, 4.1, 5.1_
     - _Commit: "feat: add TCX target schema"_
 
-- [ ] 3. Implement TCX reader port and adapter
-  - [ ] 3.1 Create TCX reader port
+- [x] 3. Implement TCX reader port and adapter
+  - [x] 3.1 Create TCX reader port
     - Create ports/tcx-reader.ts with TcxReader type
     - Define function signature: (xmlString: string) => Promise<KRD>
     - _Requirements: 1.1_
     - _Commit: "feat: add TCX reader port"_
-  - [ ] 3.2 Implement TCX reader adapter skeleton
+  - [x] 3.2 Implement TCX reader adapter skeleton
     - Create adapters/tcx/fast-xml-parser.ts
     - Implement createFastXmlTcxReader factory with logger injection
     - Use fast-xml-parser XMLParser to parse XML
@@ -68,7 +68,7 @@ Each task follows Test-Driven Development:
     - Write co-located tests in fast-xml-parser.test.ts (valid XML, malformed XML, logger)
     - _Requirements: 1.1, 9.1_
     - _Commit: "feat: add TCX reader adapter skeleton"_
-  - [ ] 3.3 Implement TCX to KRD conversion
+  - [x] 3.3 Implement TCX to KRD conversion
     - Implement convertTcxToKRD function in fast-xml-parser.ts
     - Extract TrainingCenterDatabase/Workouts/Workout structure
     - Convert workout metadata (name, sport)

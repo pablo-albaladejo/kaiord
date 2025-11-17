@@ -181,6 +181,7 @@ See [Setup Checklist](./.github/SETUP_CHECKLIST.md) for all options.
 - [FIT Workout Files Cookbook](https://developer.garmin.com/fit/cookbook/encoding-workout-files/) - Guide to encoding workout files
 - [FIT File Types: Workout](https://developer.garmin.com/fit/file-types/workout/) - Workout file type specification
 - [Training Center XML (TCX)](https://en.wikipedia.org/wiki/Training_Center_XML) - Garmin's XML-based format
+- [TCX Schema (XSD)](https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd) - Official Garmin TCX schema definition
 - [PWX (TrainingPeaks)](https://www.trainingpeaks.com/) - TrainingPeaks workout format
 
 ### Related Projects
