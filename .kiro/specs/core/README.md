@@ -94,6 +94,40 @@ This directory contains specifications for the `@kaiord/core` package, which pro
 
 ---
 
+### 🔄 Zwift ↔ KRD Conversion (PLANNED)
+
+**Status:** Spec complete, implementation pending
+
+**Directory:** `zwift-to-krd-conversion/`
+
+**Description:** Bidirectional conversion between Zwift workout files (.zwo format) and KRD format. Zwift is an XML-based format used by the Zwift virtual cycling and running platform.
+
+**Key Features:**
+
+- Zwift → KRD and KRD → Zwift conversion
+- Support for all Zwift interval types (SteadyState, Warmup, Ramp, Cooldown, IntervalsT, FreeRide)
+- Power targets (FTP percentage), pace targets (sec/km), cadence targets
+- Time and distance-based durations
+- Text events (coaching cues with time/distance offsets)
+- Tags and metadata preservation
+- Extension preservation
+- Round-trip validation with tolerances
+
+**Implementation Plan:**
+
+- Uses `fast-xml-parser` for XML parsing/building
+- Reuses domain schemas from FIT conversion
+- Reuses validation and tolerance checking
+- Reuses XML patterns from TCX conversion
+- Independent implementation (no FIT/TCX/PWX dependencies)
+
+**Dependencies:**
+
+- `fast-xml-parser` (^4.3.0)
+- Shared domain layer with FIT conversion
+
+---
+
 ## Architecture
 
 All three conversions follow the same hexagonal architecture:
@@ -174,6 +208,11 @@ The following components are shared across all three conversions:
    - Reuses XML parsing patterns from TCX
    - Independent of FIT/TCX implementations
 
+4. 🔄 **Zwift ↔ KRD** (After PWX)
+   - Reuses domain schemas
+   - Reuses XML parsing patterns from TCX
+   - Independent of FIT/TCX/PWX implementations
+
 ## Testing Strategy
 
 All three conversions follow the same testing approach:
@@ -231,6 +270,7 @@ The `@kaiord/core` package exports:
 - `convertFitToKrd`, `convertKrdToFit`
 - `convertTcxToKrd`, `convertKrdToTcx` (planned)
 - `convertPwxToKrd`, `convertKrdToPwx` (planned)
+- `convertZwiftToKrd`, `convertKrdToZwift` (planned)
 
 ### Providers
 
@@ -241,6 +281,7 @@ The `@kaiord/core` package exports:
 - FitReader, FitWriter
 - TcxReader, TcxWriter (planned)
 - PwxReader, PwxWriter (planned)
+- ZwiftReader, ZwiftWriter (planned)
 - Logger
 
 ## Dependencies
@@ -263,5 +304,6 @@ The `@kaiord/core` package exports:
 - [FIT SDK Documentation](https://github.com/garmin/fit-javascript-sdk)
 - [TCX Schema](https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd)
 - [PWX Schema](http://www.peaksware.com/PWX/1/0/pwx.xsd)
+- [Zwift Workout Format](https://zwift.com) - XML-based workout format
 - [Zod Documentation](https://zod.dev)
 - [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/)
