@@ -1,0 +1,284 @@
+# Implementation Plan: TCX ↔ KRD Bidirectional Conversion
+
+## Overview
+
+This feature enables bidirectional conversion between Training Center XML (TCX) workout files and KRD format. TCX is an XML-based format widely used across fitness platforms. The implementation follows hexagonal architecture and reuses domain schemas and validation from the FIT conversion implementation.
+
+## Prerequisites
+
+- ✅ FIT ↔ KRD conversion complete (domain schemas, validation, error types)
+- ✅ Zod schemas for KRD, Workout, Duration, Target
+- ✅ SchemaValidator and ToleranceChecker implemented
+- ✅ Logger port and console adapter implemented
+
+## TDD Workflow
+
+Each task follows Test-Driven Development:
+
+1. Write test with fixtures/mocks
+2. Run test (should fail - red)
+3. Implement minimal code to pass
+4. Refactor if needed
+5. Commit (functional commit)
+
+## Tasks
+
+- [x] 1. Add TCX error type
+  - [x] 1.1 Implement TcxParsingError type and factory
+    - Add TcxParsingError type to domain/types/errors.ts
+    - Create createTcxParsingError factory function
+    - Write co-located tests in errors.test.ts (error creation, cause preservation)
+    - _Requirements: 9.1_
+    - _Commit: "feat: add TCX parsing error type"_
+
+- [ ] 2. Create TCX adapter schemas
+  - [ ] 2.1 Implement TCX sport schema
+    - Create adapters/tcx/schemas/tcx-sport.ts with tcxSportSchema
+    - Define TCX_TO_KRD_SPORT mapping (Running → running, Biking → cycling)
+    - Export TcxSport type using z.infer
+    - DO NOT create tests for schemas (TypeScript validates types)
+    - _Requirements: 8.2_
+    - _Commit: "feat: add TCX sport schema"_
+  - [ ] 2.2 Implement TCX duration schema
+    - Create adapters/tcx/schemas/tcx-duration.ts with tcxDurationTypeSchema
+    - Define duration types (Time, Distance, LapButton, HeartRateAbove, HeartRateBelow, CaloriesBurned)
+    - Export TcxDurationType type using z.infer
+    - DO NOT create tests for schemas (TypeScript validates types)
+    - _Requirements: 2.1, 2.2, 2.5_
+    - _Commit: "feat: add TCX duration schema"_
+  - [ ] 2.3 Implement TCX target schema
+    - Create adapters/tcx/schemas/tcx-target.ts with tcxTargetTypeSchema
+    - Define target types (HeartRate, Speed, Cadence, None)
+    - Export TcxTargetType type using z.infer
+    - DO NOT create tests for schemas (TypeScript validates types)
+    - _Requirements: 3.1, 4.1, 5.1_
+    - _Commit: "feat: add TCX target schema"_
+
+- [ ] 3. Implement TCX reader port and adapter
+  - [ ] 3.1 Create TCX reader port
+    - Create ports/tcx-reader.ts with TcxReader type
+    - Define function signature: (xmlString: string) => Promise<KRD>
+    - _Requirements: 1.1_
+    - _Commit: "feat: add TCX reader port"_
+  - [ ] 3.2 Implement TCX reader adapter skeleton
+    - Create adapters/tcx/fast-xml-parser.ts
+    - Implement createFastXmlTcxReader factory with logger injection
+    - Use fast-xml-parser XMLParser to parse XML
+    - Handle errors with createTcxParsingError
+    - Write co-located tests in fast-xml-parser.test.ts (valid XML, malformed XML, logger)
+    - _Requirements: 1.1, 9.1_
+    - _Commit: "feat: add TCX reader adapter skeleton"_
+  - [ ] 3.3 Implement TCX to KRD conversion
+    - Implement convertTcxToKRD function in fast-xml-parser.ts
+    - Extract TrainingCenterDatabase/Workouts/Workout structure
+    - Convert workout metadata (name, sport)
+    - Convert workout steps
+    - Handle repetition blocks (Repeat elements)
+    - Preserve step order
+    - Add tests for metadata extraction, step conversion, repetitions
+    - _Requirements: 1.2, 6.1, 6.2, 7.1, 7.2, 8.1, 8.2, 8.3_
+    - _Commit: "feat: implement TCX to KRD conversion"_
+
+- [ ] 4. Implement TCX duration conversion
+  - [ ] 4.1 Implement duration mappers (TCX → KRD)
+    - Create adapters/tcx/duration/duration.mapper.ts
+    - Map Time → time duration with seconds
+    - Map Distance → distance duration with meters
+    - Map LapButton → open duration
+    - Use .safeParse() for validation with default fallback
+    - DO NOT test mappers (simple data transformation, no logic)
+    - _Requirements: 2.1, 2.2, 2.5_
+    - _Commit: "feat: add TCX duration mappers"_
+  - [ ] 4.2 Implement duration converters (TCX → KRD)
+    - Create adapters/tcx/duration/duration.converter.ts
+    - Convert HeartRateAbove/Below to extensions (not standard KRD)
+    - Convert CaloriesBurned to extensions (not standard KRD)
+    - Write co-located tests in duration.converter.test.ts (all duration types, edge cases)
+    - _Requirements: 2.1, 2.2, 2.5_
+    - _Commit: "feat: add TCX duration converters"_
+
+- [ ] 5. Implement TCX target conversion
+  - [ ] 5.1 Implement target mappers (TCX → KRD)
+    - Create adapters/tcx/target/target.mapper.ts
+    - Map HeartRate → heart_rate target
+    - Map Speed → pace target (convert m/s)
+    - Map Cadence → cadence target
+    - Map None → open target
+    - Use .safeParse() for validation with default fallback
+    - DO NOT test mappers (simple data transformation, no logic)
+    - _Requirements: 3.1, 4.1, 5.1_
+    - _Commit: "feat: add TCX target mappers"_
+  - [ ] 5.2 Implement target converters (TCX → KRD)
+    - Create adapters/tcx/target/target.converter.ts
+    - Convert heart rate zones (1-5)
+    - Convert heart rate ranges (low/high bpm)
+    - Convert speed zones and ranges
+    - Convert cadence ranges
+    - Handle running cadence (spm/2 → rpm)
+    - Write co-located tests in target.converter.test.ts (all target types, zones, ranges)
+    - _Requirements: 3.1, 3.2, 3.3, 3.4, 4.1, 4.2, 4.3, 5.1, 5.2, 5.3, 5.4_
+    - _Commit: "feat: add TCX target converters"_
+
+- [ ] 6. Implement TCX extensions preservation
+  - [ ] 6.1 Implement extension handling (TCX → KRD)
+    - Add extension extraction to convertTcxToKRD
+    - Store TCX extension elements in extensions.tcx
+    - Extract power data from extensions (if present)
+    - Store custom fields in extensions
+    - Write tests for extension preservation, power extraction
+    - _Requirements: 10.1, 10.2, 10.3_
+    - _Commit: "feat: preserve TCX extensions in KRD"_
+
+- [ ] 7. Implement TCX writer port and adapter
+  - [ ] 7.1 Create TCX writer port
+    - Create ports/tcx-writer.ts with TcxWriter type
+    - Define function signature: (krd: KRD) => Promise<string>
+    - _Requirements: 11.2_
+    - _Commit: "feat: add TCX writer port"_
+  - [ ] 7.2 Implement TCX writer adapter skeleton
+    - Add createFastXmlTcxWriter factory to adapters/tcx/fast-xml-parser.ts
+    - Implement function using fast-xml-parser XMLBuilder
+    - Handle errors with createTcxParsingError
+    - Inject logger
+    - Add tests for valid KRD, error handling, logger injection
+    - _Requirements: 11.2, 11.5_
+    - _Commit: "feat: add TCX writer adapter skeleton"_
+  - [ ] 7.3 Implement KRD to TCX conversion
+    - Implement convertKRDToTcx function in fast-xml-parser.ts
+    - Create TrainingCenterDatabase structure with namespaces
+    - Convert KRD metadata to Workout element
+    - Convert KRD steps to Step elements
+    - Encode repetition blocks as Repeat elements
+    - Add tests for metadata, steps, and repetition encoding
+    - _Requirements: 11.3, 11.4_
+    - _Commit: "feat: implement KRD to TCX conversion"_
+
+- [ ] 8. Implement TCX duration conversion (KRD → TCX)
+  - [ ] 8.1 Implement duration mappers (KRD → TCX)
+    - Add duration mapping functions to adapters/tcx/duration/duration.mapper.ts
+    - Map time duration → Time element with Seconds
+    - Map distance duration → Distance element with Meters
+    - Map open duration → LapButton element
+    - DO NOT test mappers (simple data transformation, no logic)
+    - _Requirements: 12.1, 12.2, 12.5_
+    - _Commit: "feat: add KRD to TCX duration mappers"_
+  - [ ] 8.2 Implement duration converters (KRD → TCX)
+    - Add duration conversion functions to adapters/tcx/duration/duration.converter.ts
+    - Restore HeartRateAbove/Below from extensions
+    - Restore CaloriesBurned from extensions
+    - Write tests for all duration conversions
+    - _Requirements: 12.1, 12.2, 12.5_
+    - _Commit: "feat: add KRD to TCX duration converters"_
+
+- [ ] 9. Implement TCX target conversion (KRD → TCX)
+  - [ ] 9.1 Implement target mappers (KRD → TCX)
+    - Add target mapping functions to adapters/tcx/target/target.mapper.ts
+    - Map heart_rate target → HeartRate element
+    - Map pace target → Speed element (convert from m/s)
+    - Map cadence target → Cadence element
+    - Map open target → None
+    - DO NOT test mappers (simple data transformation, no logic)
+    - _Requirements: 13.1, 13.2, 13.5_
+    - _Commit: "feat: add KRD to TCX target mappers"_
+  - [ ] 9.2 Implement target converters (KRD → TCX)
+    - Add target conversion functions to adapters/tcx/target/target.converter.ts
+    - Convert heart rate zones to PredefinedHeartRateZone
+    - Convert heart rate ranges to CustomHeartRateZone
+    - Convert speed zones and ranges to CustomSpeedZone
+    - Convert cadence ranges
+    - Handle running cadence (rpm → spm\*2)
+    - Write tests for all target conversions
+    - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
+    - _Commit: "feat: add KRD to TCX target converters"_
+
+- [ ] 10. Implement TCX extensions restoration
+  - [ ] 10.1 Implement extension restoration (KRD → TCX)
+    - Add extension restoration to convertKRDToTcx
+    - Restore TCX extension elements from extensions.tcx
+    - Restore power data to extensions (if present)
+    - Restore custom fields
+    - Write tests for extension restoration, power encoding
+    - _Requirements: 10.1, 10.2, 10.3, 10.5_
+    - _Commit: "feat: restore TCX extensions from KRD"_
+
+- [ ] 11. Implement use cases
+  - [ ] 11.1 Implement ConvertTcxToKrd use case
+    - Create application/use-cases/convert-tcx-to-krd.ts
+    - Define ConvertTcxToKrd type using ReturnType<typeof convertTcxToKrd>
+    - Implement convertTcxToKrd factory with currying (tcxReader, validator, logger)
+    - Compose TcxReader and SchemaValidator
+    - Handle validation errors with createKrdValidationError
+    - Write co-located tests with mocks (execute, validation errors, logger)
+    - _Requirements: 1.1, 1.2, 1.3, 1.4_
+    - _Commit: "feat: add ConvertTcxToKrd use case"_
+  - [ ] 11.2 Implement ConvertKrdToTcx use case
+    - Create application/use-cases/convert-krd-to-tcx.ts
+    - Define ConvertKrdToTcx type using ReturnType<typeof convertKrdToTcx>
+    - Implement convertKrdToTcx factory with currying (tcxWriter, validator, logger)
+    - Compose TcxWriter and SchemaValidator
+    - Pre-validate KRD before conversion
+    - Handle validation errors with createKrdValidationError
+    - Write co-located tests with mocks (execute, pre-validation, errors, logger)
+    - _Requirements: 11.1, 11.2, 11.3_
+    - _Commit: "feat: add ConvertKrdToTcx use case"_
+
+- [ ] 12. Add TCX test fixtures
+  - [ ] 12.1 Add TCX test fixture files
+    - Create src/tests/fixtures/tcx-files/ directory
+    - Add sample TCX workout with heart rate targets
+    - Add sample TCX workout with speed targets
+    - Add sample TCX workout with repetition blocks
+    - Add sample TCX workout with mixed duration types
+    - _Requirements: 16.1, 16.2, 16.3, 16.4_
+    - _Commit: "test: add TCX test fixtures"_
+
+- [ ] 13. Implement round-trip tests
+  - [ ] 13.1 Implement TCX round-trip tests
+    - Create adapters/tcx/round-trip/ directory
+    - Create round-trip test files for each fixture
+    - Test TCX → KRD → TCX with tolerance checking
+    - Test KRD → TCX → KRD with tolerance checking
+    - Verify duration conversions within tolerances
+    - Verify target conversions within tolerances
+    - Verify repetition blocks preserved
+    - Verify extensions preserved
+    - _Requirements: 14.1, 14.2, 14.3, 14.4, 14.5_
+    - _Commit: "test: add TCX round-trip validation tests"_
+
+- [ ] 14. Update dependency injection
+  - [ ] 14.1 Update createDefaultProviders
+    - Update application/providers.ts to include TCX components
+    - Add tcxReader: TcxReader to Providers type
+    - Add tcxWriter: TcxWriter to Providers type
+    - Add convertTcxToKrd: ConvertTcxToKrd to Providers type
+    - Add convertKrdToTcx: ConvertKrdToTcx to Providers type
+    - Wire TCX adapters and use cases using functional composition
+    - Update tests in providers.test.ts (TCX component creation, wiring)
+    - _Requirements: 1.1, 1.2, 11.1, 11.2_
+    - _Commit: "feat: add TCX support to dependency injection"_
+
+- [ ] 15. Export public API
+  - [ ] 15.1 Update src/index.ts with TCX exports
+    - Export TcxReader and TcxWriter port types
+    - Export ConvertTcxToKrd and ConvertKrdToTcx use case types
+    - Export TcxParsingError type and createTcxParsingError factory
+    - Verify all TCX components are accessible and properly typed
+    - _Requirements: 1.1, 1.2, 11.1, 11.2_
+    - _Commit: "feat: export TCX public API"_
+
+## Notes
+
+- **Reuse domain layer**: All domain schemas (KRD, Workout, Duration, Target) are shared with FIT conversion
+- **Reuse validation**: SchemaValidator and ToleranceChecker are shared with FIT conversion
+- **Reuse logger**: Logger port and console adapter are shared with FIT conversion
+- **Independent implementation**: TCX conversion can be implemented without modifying FIT conversion
+- **Mappers vs Converters**: Follow the same pattern as FIT - mappers have no logic (no tests), converters have logic (must have tests)
+- **Functional style**: Use currying for dependency injection, no classes
+- **Type safety**: Use Zod schemas for all TCX-specific types, infer TypeScript types with z.infer
+
+## Dependencies
+
+- **fast-xml-parser** (^4.3.0) - XML parsing and building
+- **@kaiord/core domain** - Reuse KRD, Workout, Duration, Target schemas
+- **@kaiord/core validation** - Reuse SchemaValidator and ToleranceChecker
+- **@kaiord/core logger** - Reuse Logger port and console adapter
