@@ -41,7 +41,6 @@ export const useThemeProvider = (defaultTheme: Theme = "system") => {
     const handleChange = (e: MediaQueryListEvent) => {
       const newResolvedTheme = e.matches ? "dark" : "light";
       setResolvedTheme(newResolvedTheme);
-      applyTheme(newResolvedTheme);
     };
 
     // Modern browsers

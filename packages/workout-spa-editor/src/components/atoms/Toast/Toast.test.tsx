@@ -45,9 +45,9 @@ describe("Toast", () => {
         </ToastProvider>
       );
 
-      // Assert
+      // Assert: title is present, but no description node exists
       expect(screen.getByText("Simple notification")).toBeInTheDocument();
-      expect(screen.queryByRole("paragraph")).not.toBeInTheDocument();
+      expect(screen.queryByTestId("toast-description")).not.toBeInTheDocument();
     });
 
     it("should render close button", () => {

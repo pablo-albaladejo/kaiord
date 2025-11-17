@@ -38,21 +38,11 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 - ⚠️ **2/95 E2E tests failing on webkit/Mobile Safari** - Browser-specific keyboard navigation focus issue
   - Tests: "should support keyboard navigation" on webkit and Mobile Safari
-  - Issue: `:focus` selector not working reliably on webkit browsers
-  - Impact: Low - keyboard navigation works in practice, test selector issue only
-  - Workaround: Use data-testid or role-based selectors in future
-  - Not blocking v1.0.0 release (98% E2E pass rate)
-
-### Known Limitations (Not Blocking v1.0.0)
-
-**Browser-Specific Test Issues:**
-
-- ⚠️ 2 E2E tests fail on webkit/Mobile Safari: "should support keyboard navigation"
+  - Root cause: Webkit browser limitation with focus pseudo-selector in automated tests
   - Issue: `:focus` CSS selector not reliable on webkit browsers in test environment
   - Impact: Low - keyboard navigation works correctly in actual usage
-  - Root cause: Webkit browser limitation with focus pseudo-selector in automated tests
-  - Workaround for future: Use data-testid or role-based selectors instead of `:focus`
-  - Status: Not blocking release (98% E2E pass rate, functionality works in practice)
+  - Workaround: Use data-testid or role-based selectors instead of `:focus`
+  - Status: Not blocking v1.0.0 release (98% E2E pass rate, functionality works in practice)
 
 **Future Features (P2+ Planned):**
 
