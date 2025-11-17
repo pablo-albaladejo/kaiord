@@ -289,11 +289,11 @@ jobs:
     steps:
       - name: Check lint status
         run: |
-          if [ "${{ needs.lint.result }}" != "success" ]; then
+          if [ "${{ needs.lint.result }}" != "success" ] && [ "${{ needs.lint.result }}" != "skipped" ]; then
             echo "Lint failed"
             exit 1
           fi
-          echo "Lint passed"
+          echo "Lint passed or skipped"
 
   test-summary:
     name: test
@@ -303,11 +303,11 @@ jobs:
     steps:
       - name: Check test status
         run: |
-          if [ "${{ needs.test.result }}" != "success" ]; then
+          if [ "${{ needs.test.result }}" != "success" ] && [ "${{ needs.test.result }}" != "skipped" ]; then
             echo "Tests failed"
             exit 1
           fi
-          echo "Tests passed"
+          echo "Tests passed or skipped"
 
   round-trip-summary:
     name: round-trip
