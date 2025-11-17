@@ -55,7 +55,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.1, 12.5_
   - _Files: components/molecules/FileUpload/FileUpload.tsx_
 
-- [ ] 5. Implement FIT file export
+- [x] 5. Implement FIT file export
   - Use @kaiord/core fromKRD function for KRD → FIT conversion
   - Handle FIT encoding errors gracefully
   - Generate correct .fit file extension
