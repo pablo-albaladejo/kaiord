@@ -64,7 +64,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.7_
   - _Files: utils/export-workout.ts_
 
-- [ ] 6. Implement TCX and PWX file export
+- [x] 6. Implement TCX and PWX file export
   - Use @kaiord/core fromKRD function for KRD → TCX conversion
   - Use @kaiord/core fromKRD function for KRD → PWX conversion
   - Handle XML encoding errors gracefully
