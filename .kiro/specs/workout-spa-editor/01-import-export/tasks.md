@@ -20,7 +20,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
 
 ## Implementation Tasks
 
-- [ ] 1. Add format detection and validation
+- [x] 1. Add format detection and validation
   - Detect file format from extension (.fit, .tcx, .pwx, .krd)
   - Validate file format before conversion
   - Show format-specific error messages
