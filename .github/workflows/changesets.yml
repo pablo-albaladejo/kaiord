@@ -109,6 +109,23 @@ jobs:
             const releaseVersion = packages[0].version;
             const tagName = `v${releaseVersion}`;
 
+            // Check if release already exists
+            try {
+              const existingRelease = await github.rest.repos.getReleaseByTag({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                tag: tagName
+              });
+              console.log(`ℹ️ Release ${tagName} already exists: ${existingRelease.data.html_url}`);
+              return;
+            } catch (error) {
+              if (error.status !== 404) {
+                console.error('Error checking for existing release:', error);
+                throw error;
+              }
+              // Release doesn't exist, continue to create it
+            }
+
             // Build release notes
             let releaseNotes = '## 📦 Published Packages\n\n';
             packages.forEach(pkg => {
