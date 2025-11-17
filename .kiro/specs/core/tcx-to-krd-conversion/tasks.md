@@ -31,22 +31,22 @@ Each task follows Test-Driven Development:
     - _Requirements: 9.1_
     - _Commit: "feat: add TCX parsing error type"_
 
-- [ ] 2. Create TCX adapter schemas
-  - [ ] 2.1 Implement TCX sport schema
+- [x] 2. Create TCX adapter schemas
+  - [x] 2.1 Implement TCX sport schema
     - Create adapters/tcx/schemas/tcx-sport.ts with tcxSportSchema
     - Define TCX_TO_KRD_SPORT mapping (Running → running, Biking → cycling)
     - Export TcxSport type using z.infer
     - DO NOT create tests for schemas (TypeScript validates types)
     - _Requirements: 8.2_
     - _Commit: "feat: add TCX sport schema"_
-  - [ ] 2.2 Implement TCX duration schema
+  - [x] 2.2 Implement TCX duration schema
     - Create adapters/tcx/schemas/tcx-duration.ts with tcxDurationTypeSchema
     - Define duration types (Time, Distance, LapButton, HeartRateAbove, HeartRateBelow, CaloriesBurned)
     - Export TcxDurationType type using z.infer
     - DO NOT create tests for schemas (TypeScript validates types)
     - _Requirements: 2.1, 2.2, 2.5_
     - _Commit: "feat: add TCX duration schema"_
-  - [ ] 2.3 Implement TCX target schema
+  - [x] 2.3 Implement TCX target schema
     - Create adapters/tcx/schemas/tcx-target.ts with tcxTargetTypeSchema
     - Define target types (HeartRate, Speed, Cadence, None)
     - Export TcxTargetType type using z.infer
