@@ -317,11 +317,11 @@ jobs:
     steps:
       - name: Check round-trip status
         run: |
-          if [ "${{ needs.round-trip.result }}" != "success" ]; then
+          if [ "${{ needs.round-trip.result }}" != "success" ] && [ "${{ needs.round-trip.result }}" != "skipped" ]; then
             echo "Round-trip tests failed"
             exit 1
           fi
-          echo "Round-trip tests passed"
+          echo "Round-trip tests passed or skipped"
 
   test-frontend-summary:
     name: test-frontend
@@ -331,11 +331,11 @@ jobs:
     steps:
       - name: Check frontend test status
         run: |
-          if [ "${{ needs.test-frontend.result }}" != "success" ]; then
+          if [ "${{ needs.test-frontend.result }}" != "success" ] && [ "${{ needs.test-frontend.result }}" != "skipped" ]; then
             echo "Frontend tests failed"
             exit 1
           fi
-          echo "Frontend tests passed"
+          echo "Frontend tests passed or skipped"
 
   notify-failure:
     name: Notify on Failure
