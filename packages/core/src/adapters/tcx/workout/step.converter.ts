@@ -38,6 +38,27 @@ const convertTargetWithExtensions = (
   return target;
 };
 
+const buildWorkoutStep = (
+  stepIndex: number,
+  name: string | undefined,
+  duration: { type: string },
+  target: { type: string },
+  tcxStep: Record<string, unknown>,
+  extensions: Record<string, unknown> | null
+): WorkoutStep => {
+  const step: WorkoutStep = {
+    stepIndex,
+    name,
+    durationType: duration.type,
+    duration,
+    targetType: target.type,
+    target,
+    intensity: extractIntensity(tcxStep),
+  };
+
+  return extensions ? { ...step, extensions: { tcx: extensions } } : step;
+};
+
 export const convertTcxStep = (
   tcxStep: Record<string, unknown>,
   stepIndex: number,
@@ -50,8 +71,6 @@ export const convertTcxStep = (
     logger.warn("Repetition blocks not yet supported", { stepIndex });
     return null;
   }
-
-  const name = tcxStep.Name as string | undefined;
 
   const duration = convertTcxDuration(
     tcxStep.Duration as Record<string, unknown> | undefined,
@@ -69,24 +88,12 @@ export const convertTcxStep = (
     return null;
   }
 
-  const step: WorkoutStep = {
+  return buildWorkoutStep(
     stepIndex,
-    name,
-    durationType: duration.type,
+    tcxStep.Name as string | undefined,
     duration,
-    targetType: target.type,
     target,
-    intensity: extractIntensity(tcxStep),
-  };
-
-  if (extensions) {
-    return {
-      ...step,
-      extensions: {
-        tcx: extensions,
-      },
-    };
-  }
-
-  return step;
+    tcxStep,
+    extensions
+  );
 };

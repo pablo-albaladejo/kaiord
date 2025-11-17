@@ -1,5 +1,19 @@
 import { targetUnitSchema } from "../../../domain/schemas/target-values";
 
+const createHeartRateZone = (
+  type: string,
+  low: number,
+  high: number
+): Record<string, unknown> => ({
+  "@_xsi:type": "HeartRate_t",
+  HeartRateZone: {
+    "@_xsi:type": type,
+    ...(type === "PredefinedHeartRateZone_t"
+      ? { Number: low }
+      : { Low: low, High: high }),
+  },
+});
+
 export const convertHeartRateZone = (value: {
   unit: string;
   value?: number;
@@ -7,46 +21,31 @@ export const convertHeartRateZone = (value: {
   max?: number;
 }): Record<string, unknown> => {
   if (value.unit === targetUnitSchema.enum.zone) {
-    return {
-      "@_xsi:type": "HeartRate_t",
-      HeartRateZone: {
-        "@_xsi:type": "PredefinedHeartRateZone_t",
-        Number: value.value,
-      },
-    };
+    return createHeartRateZone(
+      "PredefinedHeartRateZone_t",
+      value.value!,
+      value.value!
+    );
   }
 
   if (value.unit === targetUnitSchema.enum.range) {
-    return {
-      "@_xsi:type": "HeartRate_t",
-      HeartRateZone: {
-        "@_xsi:type": "CustomHeartRateZone_t",
-        Low: value.min,
-        High: value.max,
-      },
-    };
+    return createHeartRateZone("CustomHeartRateZone_t", value.min!, value.max!);
   }
 
   if (value.unit === targetUnitSchema.enum.bpm) {
-    return {
-      "@_xsi:type": "HeartRate_t",
-      HeartRateZone: {
-        "@_xsi:type": "CustomHeartRateZone_t",
-        Low: value.value,
-        High: value.value,
-      },
-    };
+    return createHeartRateZone(
+      "CustomHeartRateZone_t",
+      value.value!,
+      value.value!
+    );
   }
 
   if (value.unit === targetUnitSchema.enum.percent_max) {
-    return {
-      "@_xsi:type": "HeartRate_t",
-      HeartRateZone: {
-        "@_xsi:type": "CustomHeartRateZone_t",
-        Low: value.value,
-        High: value.value,
-      },
-    };
+    return createHeartRateZone(
+      "CustomHeartRateZone_t",
+      value.value!,
+      value.value!
+    );
   }
 
   return { "@_xsi:type": "None_t" };

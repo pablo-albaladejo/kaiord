@@ -50,6 +50,20 @@ const restoreTcxDurationFromExtensions = (
   return null;
 };
 
+const convertStandardDuration = (
+  duration: Duration
+): Record<string, unknown> => {
+  if (duration.type === durationTypeSchema.enum.time) {
+    return { "@_xsi:type": "Time_t", Seconds: duration.seconds };
+  }
+
+  if (duration.type === durationTypeSchema.enum.distance) {
+    return { "@_xsi:type": "Distance_t", Meters: duration.meters };
+  }
+
+  return { "@_xsi:type": "LapButton_t" };
+};
+
 export const convertKrdDurationToTcx = (
   duration: Duration,
   extensions?: Record<string, unknown>
@@ -61,39 +75,8 @@ export const convertKrdDurationToTcx = (
     }
   }
 
-  if (duration.type === durationTypeSchema.enum.time) {
-    return {
-      tcxDuration: {
-        "@_xsi:type": "Time_t",
-        Seconds: duration.seconds,
-      },
-      wasRestored: false,
-    };
-  }
-
-  if (duration.type === durationTypeSchema.enum.distance) {
-    return {
-      tcxDuration: {
-        "@_xsi:type": "Distance_t",
-        Meters: duration.meters,
-      },
-      wasRestored: false,
-    };
-  }
-
-  if (duration.type === durationTypeSchema.enum.open) {
-    return {
-      tcxDuration: {
-        "@_xsi:type": "LapButton_t",
-      },
-      wasRestored: false,
-    };
-  }
-
   return {
-    tcxDuration: {
-      "@_xsi:type": "LapButton_t",
-    },
+    tcxDuration: convertStandardDuration(duration),
     wasRestored: false,
   };
 };
