@@ -9,6 +9,7 @@
  */
 
 import { create } from "zustand";
+import type { KRD, Sport } from "../types/krd";
 import { createStepAction } from "./actions/create-step-action";
 import { deleteStepAction } from "./actions/delete-step-action";
 import { duplicateStepAction } from "./actions/duplicate-step-action";

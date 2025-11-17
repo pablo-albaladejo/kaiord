@@ -59,16 +59,14 @@ test.describe("Step Management Flow", () => {
     await expect(page.getByText("Step 1")).toBeVisible();
 
     // Test: Create a new step
-    await page.getByRole("button", { name: /add step/i }).click();
+    await page.getByTestId("add-step-button").click();
 
     // Verify a new step was added (should be Step 2)
     await expect(page.getByText("Step 2")).toBeVisible({ timeout: 5000 });
 
     // Test: Duplicate the first step
     const firstStepCard = page.locator('[data-testid="step-card"]').first();
-    const duplicateButton = firstStepCard.getByRole("button", {
-      name: /duplicate/i,
-    });
+    const duplicateButton = firstStepCard.getByTestId("duplicate-step-button");
     await duplicateButton.click();
 
     // Verify step was duplicated (should now have 3 steps)
@@ -76,13 +74,11 @@ test.describe("Step Management Flow", () => {
 
     // Test: Delete the second step
     const secondStepCard = page.locator('[data-testid="step-card"]').nth(1);
-    const deleteButton = secondStepCard.getByRole("button", {
-      name: /delete/i,
-    });
+    const deleteButton = secondStepCard.getByTestId("delete-step-button");
     await deleteButton.click();
 
     // Confirm deletion in dialog
-    await page.getByRole("button", { name: /confirm/i }).click();
+    await page.getByTestId("confirm-delete-button").click();
 
     // Verify step was deleted (should only have 2 steps now)
     await expect(page.getByText("Step 2")).toBeVisible();
@@ -133,7 +129,7 @@ test.describe("Step Management Flow", () => {
     await expect(page.getByText("Step 1")).toBeVisible();
 
     // Add a step
-    await page.getByRole("button", { name: /add step/i }).click();
+    await page.getByTestId("add-step-button").click();
     await expect(page.getByText("Step 2")).toBeVisible({ timeout: 5000 });
 
     // Undo the step addition

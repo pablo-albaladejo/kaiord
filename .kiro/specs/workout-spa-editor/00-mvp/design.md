@@ -79,6 +79,59 @@ The application leverages `@kaiord/core` as a workspace dependency to:
 
 This integration eliminates type duplication and ensures the SPA editor works with the same data structures used by the CLI and core library.
 
+**Format Conversion Architecture:**
+
+```typescript
+// Import: FIT/TCX/PWX → KRD
+import { toKRD } from "@kaiord/core";
+
+const handleFileImport = async (file: File) => {
+  const buffer = await file.arrayBuffer();
+  const uint8Array = new Uint8Array(buffer);
+
+  // Detect format from file extension
+  const format = file.name.endsWith(".fit")
+    ? "fit"
+    : file.name.endsWith(".tcx")
+      ? "tcx"
+      : file.name.endsWith(".pwx")
+        ? "pwx"
+        : "krd";
+
+  if (format === "krd") {
+    // Parse JSON directly
+    const text = new TextDecoder().decode(uint8Array);
+    return JSON.parse(text);
+  }
+
+  // Convert to KRD using @kaiord/core
+  const krd = await toKRD(uint8Array, { type: format });
+  return krd;
+};
+
+// Export: KRD → FIT/TCX/PWX
+import { fromKRD } from "@kaiord/core";
+
+const handleFileExport = async (
+  krd: KRD,
+  format: "fit" | "tcx" | "pwx" | "krd"
+) => {
+  if (format === "krd") {
+    // Export as JSON
+    const json = JSON.stringify(krd, null, 2);
+    return new Blob([json], { type: "application/json" });
+  }
+
+  // Convert from KRD using @kaiord/core
+  const buffer = await fromKRD(krd, { type: format });
+
+  const mimeType =
+    format === "fit" ? "application/octet-stream" : "application/xml";
+
+  return new Blob([buffer], { type: mimeType });
+};
+```
+
 ### Technology Stack
 
 **Core:**

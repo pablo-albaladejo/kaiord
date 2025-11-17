@@ -1,0 +1,1 @@
+export { KiroGhostDecoration } from "./KiroGhostDecoration";
