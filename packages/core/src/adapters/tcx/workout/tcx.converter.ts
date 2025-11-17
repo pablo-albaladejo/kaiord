@@ -16,7 +16,8 @@ export const convertKRDToTcx = (krd: KRD, logger: Logger): unknown => {
 
   const workout = krd.extensions.workout as Workout;
 
-  const tcxSport = KRD_TO_TCX_SPORT[workout.sport] || "Other";
+  const tcxSport =
+    KRD_TO_TCX_SPORT[workout.sport as keyof typeof KRD_TO_TCX_SPORT] || "Other";
 
   const tcxSteps = workout.steps.map((step, index) =>
     convertStepToTcx(step as WorkoutStep, index, logger)

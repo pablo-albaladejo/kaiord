@@ -6,7 +6,11 @@ export const convertCadenceTargetToTcx = (
 ): Record<string, unknown> => {
   const isRunning = sport === "running" || sport === "Running";
 
-  if (value.unit === targetUnitSchema.enum.range) {
+  if (
+    value.unit === targetUnitSchema.enum.range &&
+    value.min !== undefined &&
+    value.max !== undefined
+  ) {
     const minCadence = isRunning ? value.min * 2 : value.min;
     const maxCadence = isRunning ? value.max * 2 : value.max;
 
@@ -20,7 +24,7 @@ export const convertCadenceTargetToTcx = (
     };
   }
 
-  if (value.unit === targetUnitSchema.enum.rpm) {
+  if (value.unit === targetUnitSchema.enum.rpm && value.value !== undefined) {
     const cadenceValue = isRunning ? value.value * 2 : value.value;
 
     return {
