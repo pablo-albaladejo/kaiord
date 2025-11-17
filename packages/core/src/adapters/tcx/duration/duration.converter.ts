@@ -2,7 +2,10 @@ import {
   durationTypeSchema,
   type Duration,
 } from "../../../domain/schemas/duration";
-import { tcxDurationTypeSchema } from "../schemas/tcx-duration";
+import {
+  tcxDurationTypeSchema,
+  type TcxDurationType,
+} from "../schemas/tcx-duration";
 
 export type TcxDurationData = {
   durationType?: string;
@@ -23,6 +26,72 @@ export type TcxDurationConversionResult = {
   extensions?: TcxDurationExtensions;
 };
 
+const convertStandardDuration = (
+  durationType: TcxDurationType,
+  data: TcxDurationData
+): TcxDurationConversionResult | null => {
+  if (
+    durationType === tcxDurationTypeSchema.enum.Time &&
+    data.seconds !== undefined
+  ) {
+    return {
+      duration: { type: durationTypeSchema.enum.time, seconds: data.seconds },
+    };
+  }
+
+  if (
+    durationType === tcxDurationTypeSchema.enum.Distance &&
+    data.meters !== undefined
+  ) {
+    return {
+      duration: { type: durationTypeSchema.enum.distance, meters: data.meters },
+    };
+  }
+
+  if (durationType === tcxDurationTypeSchema.enum.LapButton) {
+    return { duration: { type: durationTypeSchema.enum.open } };
+  }
+
+  return null;
+};
+
+const convertExtendedDuration = (
+  durationType: TcxDurationType,
+  data: TcxDurationData
+): TcxDurationConversionResult | null => {
+  if (
+    durationType === tcxDurationTypeSchema.enum.HeartRateAbove &&
+    data.bpm !== undefined
+  ) {
+    return {
+      duration: { type: durationTypeSchema.enum.open },
+      extensions: { heartRateAbove: data.bpm },
+    };
+  }
+
+  if (
+    durationType === tcxDurationTypeSchema.enum.HeartRateBelow &&
+    data.bpm !== undefined
+  ) {
+    return {
+      duration: { type: durationTypeSchema.enum.open },
+      extensions: { heartRateBelow: data.bpm },
+    };
+  }
+
+  if (
+    durationType === tcxDurationTypeSchema.enum.CaloriesBurned &&
+    data.calories !== undefined
+  ) {
+    return {
+      duration: { type: durationTypeSchema.enum.open },
+      extensions: { caloriesBurned: data.calories },
+    };
+  }
+
+  return null;
+};
+
 export const convertTcxDuration = (
   data: TcxDurationData
 ): TcxDurationConversionResult => {
@@ -32,86 +101,11 @@ export const convertTcxDuration = (
     return { duration: { type: durationTypeSchema.enum.open } };
   }
 
-  // Time duration
-  if (
-    result.data === tcxDurationTypeSchema.enum.Time &&
-    data.seconds !== undefined
-  ) {
-    return {
-      duration: {
-        type: durationTypeSchema.enum.time,
-        seconds: data.seconds,
-      },
-    };
-  }
+  const standardResult = convertStandardDuration(result.data, data);
+  if (standardResult) return standardResult;
 
-  // Distance duration
-  if (
-    result.data === tcxDurationTypeSchema.enum.Distance &&
-    data.meters !== undefined
-  ) {
-    return {
-      duration: {
-        type: durationTypeSchema.enum.distance,
-        meters: data.meters,
-      },
-    };
-  }
+  const extendedResult = convertExtendedDuration(result.data, data);
+  if (extendedResult) return extendedResult;
 
-  // LapButton duration
-  if (result.data === tcxDurationTypeSchema.enum.LapButton) {
-    return {
-      duration: {
-        type: durationTypeSchema.enum.open,
-      },
-    };
-  }
-
-  // HeartRateAbove - store in extensions
-  if (
-    result.data === tcxDurationTypeSchema.enum.HeartRateAbove &&
-    data.bpm !== undefined
-  ) {
-    return {
-      duration: {
-        type: durationTypeSchema.enum.open,
-      },
-      extensions: {
-        heartRateAbove: data.bpm,
-      },
-    };
-  }
-
-  // HeartRateBelow - store in extensions
-  if (
-    result.data === tcxDurationTypeSchema.enum.HeartRateBelow &&
-    data.bpm !== undefined
-  ) {
-    return {
-      duration: {
-        type: durationTypeSchema.enum.open,
-      },
-      extensions: {
-        heartRateBelow: data.bpm,
-      },
-    };
-  }
-
-  // CaloriesBurned - store in extensions
-  if (
-    result.data === tcxDurationTypeSchema.enum.CaloriesBurned &&
-    data.calories !== undefined
-  ) {
-    return {
-      duration: {
-        type: durationTypeSchema.enum.open,
-      },
-      extensions: {
-        caloriesBurned: data.calories,
-      },
-    };
-  }
-
-  // Default to open for any other cases
   return { duration: { type: durationTypeSchema.enum.open } };
 };
