@@ -168,7 +168,7 @@ jobs:
         if: |
           (steps.publish-core.outcome == 'failure' && contains(steps.detect-changes.outputs.changed-packages, 'core')) ||
           (steps.publish-cli.outcome == 'failure' && contains(steps.detect-changes.outputs.changed-packages, 'cli'))
-        uses: actions/github-script@v7
+        uses: actions/github-script@v8
         with:
           script: |
             const failedPackages = [];
