@@ -1,6 +1,11 @@
 import type { KRD } from "@kaiord/core";
-import { createDefaultProviders } from "@kaiord/core";
-import { detectFormat, getFormatErrorMessage } from "./file-format-detector";
+import { detectFormat } from "./file-format-detector";
+import {
+  importFitFile,
+  importKrdFile,
+  importPwxFile,
+  importTcxFile,
+} from "./import-workout-helpers";
 
 /**
  * Import a workout file and convert it to KRD format
@@ -14,7 +19,6 @@ export const importWorkout = async (
   file: File,
   onProgress?: (progress: number) => void
 ): Promise<KRD> => {
-  // Detect format from filename
   const format = detectFormat(file.name);
 
   if (!format) {
@@ -23,49 +27,21 @@ export const importWorkout = async (
     );
   }
 
-  // Report initial progress
   onProgress?.(10);
 
-  // Read file as buffer
   const buffer = await file.arrayBuffer();
   const uint8Array = new Uint8Array(buffer);
 
   onProgress?.(30);
 
-  // Handle KRD/JSON files directly
-  if (format === "krd") {
-    try {
-      const text = new TextDecoder().decode(uint8Array);
-      const krd = JSON.parse(text) as KRD;
-      onProgress?.(100);
-      return krd;
-    } catch (error) {
-      throw new Error(
-        `Failed to parse KRD JSON: ${error instanceof Error ? error.message : "Unknown error"}`
-      );
-    }
+  switch (format) {
+    case "krd":
+      return importKrdFile(uint8Array, onProgress);
+    case "fit":
+      return importFitFile(uint8Array, onProgress);
+    case "tcx":
+      return importTcxFile(uint8Array, onProgress);
+    case "pwx":
+      return importPwxFile(uint8Array, onProgress);
   }
-
-  // Convert FIT files using @kaiord/core
-  if (format === "fit") {
-    try {
-      const providers = createDefaultProviders();
-      onProgress?.(50);
-
-      const krd = await providers.convertFitToKrd({ fitBuffer: uint8Array });
-      onProgress?.(100);
-
-      return krd;
-    } catch (error) {
-      const errorMessage = getFormatErrorMessage(format);
-      throw new Error(
-        `${errorMessage} ${error instanceof Error ? error.message : ""}`
-      );
-    }
-  }
-
-  // TCX and PWX not yet implemented
-  throw new Error(
-    `${format.toUpperCase()} format conversion is not yet implemented`
-  );
 };

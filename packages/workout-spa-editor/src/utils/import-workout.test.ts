@@ -294,7 +294,33 @@ describe("importWorkout", () => {
 
       // Act & Assert
       await expect(importWorkout(file)).rejects.toThrow(
-        "TCX format conversion is not yet implemented"
+        /Failed to parse TCX XML.*not yet implemented/i
+      );
+    });
+
+    it("should call progress callback for TCX import attempt", async () => {
+      // Arrange
+      const tcxContent = '<?xml version="1.0"?><TrainingCenterDatabase/>';
+      const file = createMockFile(tcxContent, "workout.tcx", "application/xml");
+      const onProgress = vi.fn();
+
+      // Act & Assert
+      await expect(importWorkout(file, onProgress)).rejects.toThrow();
+
+      // Assert progress was called
+      expect(onProgress).toHaveBeenCalledWith(10);
+      expect(onProgress).toHaveBeenCalledWith(30);
+      expect(onProgress).toHaveBeenCalledWith(50);
+    });
+
+    it("should handle XML parsing errors gracefully", async () => {
+      // Arrange
+      const invalidXml = "not valid xml";
+      const file = createMockFile(invalidXml, "workout.tcx", "application/xml");
+
+      // Act & Assert
+      await expect(importWorkout(file)).rejects.toThrow(
+        /Failed to parse TCX XML/i
       );
     });
   });
@@ -307,7 +333,33 @@ describe("importWorkout", () => {
 
       // Act & Assert
       await expect(importWorkout(file)).rejects.toThrow(
-        "PWX format conversion is not yet implemented"
+        /Failed to parse PWX XML.*not yet implemented/i
+      );
+    });
+
+    it("should call progress callback for PWX import attempt", async () => {
+      // Arrange
+      const pwxContent = '<?xml version="1.0"?><workout/>';
+      const file = createMockFile(pwxContent, "workout.pwx", "application/xml");
+      const onProgress = vi.fn();
+
+      // Act & Assert
+      await expect(importWorkout(file, onProgress)).rejects.toThrow();
+
+      // Assert progress was called
+      expect(onProgress).toHaveBeenCalledWith(10);
+      expect(onProgress).toHaveBeenCalledWith(30);
+      expect(onProgress).toHaveBeenCalledWith(50);
+    });
+
+    it("should handle XML parsing errors gracefully", async () => {
+      // Arrange
+      const invalidXml = "not valid xml";
+      const file = createMockFile(invalidXml, "workout.pwx", "application/xml");
+
+      // Act & Assert
+      await expect(importWorkout(file)).rejects.toThrow(
+        /Failed to parse PWX XML/i
       );
     });
   });

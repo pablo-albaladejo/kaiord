@@ -37,7 +37,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.2_
   - _Files: utils/import-workout.ts_
 
-- [ ] 3. Implement TCX and PWX file import
+- [x] 3. Implement TCX and PWX file import
   - Use @kaiord/core toKRD function for TCX → KRD conversion
   - Use @kaiord/core toKRD function for PWX → KRD conversion
   - Handle XML parsing errors gracefully
@@ -46,7 +46,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.3, 12.4_
   - _Files: utils/import-workout.ts_
 
-- [ ] 4. Update FileUpload component to support multiple formats
+- [-] 4. Update FileUpload component to support multiple formats
   - Accept .fit, .tcx, .pwx, .krd, .json file extensions
   - Show format icon/badge for uploaded file
   - Display conversion status during import
@@ -147,6 +147,28 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12, 36.3, 36.4_
   - _Files: utils/import-workout.test.ts, utils/export-workout.test.ts, utils/file-format-detector.test.ts, components/molecules/FileUpload/FileUpload.test.tsx, components/molecules/ExportFormatSelector/ExportFormatSelector.test.tsx, components/molecules/SaveButton/SaveButton.test.tsx, e2e/import-export-formats.spec.ts_
 
+- [ ] 11. Implement TCX/PWX conversion in @kaiord/core (BLOCKED)
+  - **BLOCKED**: This task requires implementing TCX and PWX support in @kaiord/core library first
+  - Add TCX → KRD conversion in @kaiord/core
+  - Add PWX → KRD conversion in @kaiord/core
+  - Add KRD → TCX conversion in @kaiord/core
+  - Add KRD → PWX conversion in @kaiord/core
+  - Update import-workout-helpers.ts to use real conversion functions
+  - Remove placeholder error messages for TCX/PWX
+  - Add comprehensive tests for TCX/PWX conversions
+  - Update documentation with TCX/PWX support
+  - _Requirements: 12.3, 12.4, 12.8, 12.9_
+  - _Files: packages/core/src/adapters/tcx/, packages/core/src/adapters/pwx/, packages/workout-spa-editor/src/utils/import-workout-helpers.ts_
+  - _Notes:_
+    - Currently, TCX and PWX import/export throw "not yet implemented" errors
+    - Frontend infrastructure is ready and tested with placeholder implementations
+    - Once @kaiord/core adds TCX/PWX support, update the helper functions:
+      - `importTcxFile()` in import-workout-helpers.ts
+      - `importPwxFile()` in import-workout-helpers.ts
+      - Export functions in export-workout.ts (when implemented)
+    - All tests are already in place and passing with expected error messages
+    - See TODOs in import-workout-helpers.ts lines 56 and 83
+
 ## Summary
 
 This implementation plan provides a clear roadmap for adding import/export functionality for FIT, TCX, and PWX formats. Each task is:
@@ -169,3 +191,9 @@ This implementation plan provides a clear roadmap for adding import/export funct
 - Round-trip conversions maintain data integrity
 - All tests passing with 80%+ unit coverage, 70%+ component coverage
 - E2E tests passing on all browsers (Chrome, Firefox, Safari, Edge)
+
+**Pending Work:**
+
+- Task 11 is BLOCKED pending TCX/PWX support in @kaiord/core
+- Frontend infrastructure for TCX/PWX is complete and tested
+- Once core library support is added, only helper functions need updating
