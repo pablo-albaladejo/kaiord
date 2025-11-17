@@ -20,6 +20,18 @@ beforeEach(() => {
       dispatchEvent: vi.fn(),
     })),
   });
+
+  // Mock Pointer Capture API for Radix UI Toast
+  // jsdom doesn't implement these methods, causing errors in Radix UI components
+  if (!Element.prototype.hasPointerCapture) {
+    Element.prototype.hasPointerCapture = vi.fn().mockReturnValue(false);
+  }
+  if (!Element.prototype.setPointerCapture) {
+    Element.prototype.setPointerCapture = vi.fn();
+  }
+  if (!Element.prototype.releasePointerCapture) {
+    Element.prototype.releasePointerCapture = vi.fn();
+  }
 });
 
 // Cleanup after each test

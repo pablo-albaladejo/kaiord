@@ -34,6 +34,7 @@ export function WorkoutStepsList({
           variant="secondary"
           onClick={onAddStep}
           aria-label="Add new step to workout"
+          data-testid="add-step-button"
         >
           Add Step
         </Button>

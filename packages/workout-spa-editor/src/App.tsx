@@ -1,4 +1,5 @@
 import "./App.css";
+import { ToastProvider } from "./components/atoms/Toast";
 import { WelcomeSection } from "./components/pages/WelcomeSection";
 import { WorkoutSection } from "./components/pages/WorkoutSection/WorkoutSection";
 import { MainLayout } from "./components/templates/MainLayout";
@@ -56,25 +57,27 @@ function App() {
   });
 
   return (
-    <MainLayout>
-      <div className="space-y-6">
-        {!workout && (
-          <WelcomeSection
-            onFileLoad={handleFileLoad}
-            onFileError={handleFileError}
-            onCreateWorkout={handleCreateWorkout}
-          />
-        )}
-        {workout && currentWorkout && (
-          <WorkoutSection
-            workout={workout}
-            krd={currentWorkout}
-            selectedStepId={selectedStepId}
-            onStepSelect={handleStepSelect}
-          />
-        )}
-      </div>
-    </MainLayout>
+    <ToastProvider>
+      <MainLayout>
+        <div className="space-y-6">
+          {!workout && (
+            <WelcomeSection
+              onFileLoad={handleFileLoad}
+              onFileError={handleFileError}
+              onCreateWorkout={handleCreateWorkout}
+            />
+          )}
+          {workout && currentWorkout && (
+            <WorkoutSection
+              workout={workout}
+              krd={currentWorkout}
+              selectedStepId={selectedStepId}
+              onStepSelect={handleStepSelect}
+            />
+          )}
+        </div>
+      </MainLayout>
+    </ToastProvider>
   );
 }
 

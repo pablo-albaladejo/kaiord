@@ -61,10 +61,18 @@ export function DeleteConfirmDialog({
         </div>
 
         <div className="flex justify-end gap-2 border-t border-gray-200 p-4 dark:border-gray-700">
-          <Button variant="secondary" onClick={onCancel}>
+          <Button
+            variant="secondary"
+            onClick={onCancel}
+            data-testid="cancel-delete-button"
+          >
             Cancel
           </Button>
-          <Button variant="danger" onClick={onConfirm}>
+          <Button
+            variant="danger"
+            onClick={onConfirm}
+            data-testid="confirm-delete-button"
+          >
             Delete Step
           </Button>
         </div>

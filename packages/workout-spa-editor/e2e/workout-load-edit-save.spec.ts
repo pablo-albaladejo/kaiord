@@ -91,17 +91,17 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     await expect(page.getByText("Edit Step")).toBeVisible({ timeout: 5000 });
 
     // Change the duration from 300 to 420 seconds (7 minutes)
-    const durationInput = page.getByLabel(/duration.*seconds/i);
+    const durationInput = page.getByLabel("Duration (seconds)");
     await durationInput.clear();
     await durationInput.fill("420");
 
     // Change the power from 200 to 220 watts
-    const powerInput = page.getByLabel(/target.*value/i);
+    const powerInput = page.getByLabel("Power (watts)");
     await powerInput.clear();
     await powerInput.fill("220");
 
-    // Save the changes
-    await page.getByRole("button", { name: /save/i }).click();
+    // Save the changes (use exact match to avoid ambiguity)
+    await page.getByRole("button", { name: "Save step changes" }).click();
 
     // Verify the step editor closes
     await expect(page.getByText("Edit Step")).not.toBeVisible({
