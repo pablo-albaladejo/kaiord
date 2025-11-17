@@ -48,8 +48,8 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 - ❌ Repetition blocks not yet supported (planned for v1.1.0)
 - ❌ Drag-and-drop reordering not available (planned for v1.1.0)
+- ❌ **Import/Export FIT/TCX/PWX formats (HIGH PRIORITY for v1.1.0)**
 - ❌ User profiles and workout library (planned for v1.2.0)
-- ❌ Export to FIT/TCX/PWX formats (planned for v2.0.0)
 
 ## ✅ COMPLETE: v1.0.0 MVP Ready for Release
 
@@ -164,15 +164,23 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - ✅ All SaveButton tests passing (14/14)
   - _Files: components/molecules/SaveButton/SaveButton.test.tsx_
 
-## P2: Enhanced Features (v1.1.0 - Nice-to-Have)
+## P2: Enhanced Features (v1.1.0 - High Priority)
 
 **Target Release:** v1.1.0  
-**Estimated Effort:** 20-30 hours  
-**Priority:** MEDIUM - Enhances user experience
+**Estimated Effort:** 30-40 hours  
+**Priority:** HIGH - Critical for device compatibility and user workflows
 
 ### P2.1 Repetition Blocks Support
 
 **Status:** Not started. Core step functionality is complete, need to add repetition block support.
+
+**Testing Requirements:** All tasks must include comprehensive testing following the Testing Strategy:
+
+- Unit tests for type guards and validation (80%+ coverage)
+- Component tests for RepetitionBlockCard (70%+ coverage)
+- Integration tests for repetition block workflows
+- E2E tests for creating and editing repetition blocks
+- Performance tests for nested repetitions
 
 - [ ] P2.1.1 Create RepetitionBlock type and schema
   - Define RepetitionBlock type with repeatCount and steps array
@@ -207,17 +215,43 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 4, 5_
   - _Files: utils/workout-stats.ts, components/organisms/WorkoutStats/WorkoutStats.tsx_
 
-- [ ] P2.1.5 Add E2E tests for repetition blocks
-  - Test creating repetition block from steps
-  - Test editing repeat count
-  - Test adding/removing steps within block
-  - Test stats calculation with repetitions
+- [ ] P2.1.5 Implement comprehensive testing strategy for repetition blocks
+  - **Unit Tests** (Coverage target: 80%+)
+    - Test RepetitionBlock type guard functions
+    - Test repetition block validation
+    - Test stats calculation with repetitions
+    - Test step index recalculation
+  - **Component Tests** (Coverage target: 70%+)
+    - Test RepetitionBlockCard renders correctly
+    - Test expand/collapse functionality
+    - Test editing repeat count
+    - Test adding/removing steps within block
+  - **Integration Tests**
+    - Test creating repetition block from selected steps
+    - Test moving steps in/out of repetition blocks
+    - Test undo/redo with repetition blocks
+  - **E2E Tests**
+    - Test creating repetition block from steps
+    - Test editing repeat count
+    - Test adding/removing steps within block
+    - Test stats calculation with repetitions
+  - **Performance Tests**
+    - Test rendering large repetition blocks (>20 steps)
+    - Test deeply nested repetitions
   - _Requirements: 4_
-  - _Files: e2e/repetition-blocks.spec.ts_
+  - _Files: types/krd-guards.test.ts, utils/workout-stats.test.ts, components/molecules/RepetitionBlockCard/RepetitionBlockCard.test.tsx, e2e/repetition-blocks.spec.ts_
 
 ### P2.2 Drag-and-Drop Reordering
 
 **Status:** Not started. Need to add drag-and-drop library and implement reordering.
+
+**Testing Requirements:** All tasks must include comprehensive testing following the Testing Strategy:
+
+- Unit tests for reordering logic (80%+ coverage)
+- Component tests for drag interactions (70%+ coverage)
+- Integration tests for drag-and-drop workflows
+- E2E tests for mouse and touch drag operations
+- Accessibility tests for keyboard reordering
 
 - [ ] P2.2.1 Install and configure drag-and-drop library
   - Install @dnd-kit/core and @dnd-kit/sortable
@@ -252,17 +286,43 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 3, 29_
   - _Files: hooks/useKeyboardShortcuts.ts_
 
-- [ ] P2.2.5 Add E2E tests for drag-and-drop
-  - Test dragging step to new position
-  - Test keyboard reordering
-  - Test undo/redo after reordering
-  - Test mobile touch drag
-  - _Requirements: 3_
-  - _Files: e2e/drag-and-drop.spec.ts_
+- [ ] P2.2.5 Implement comprehensive testing strategy for drag-and-drop
+  - **Unit Tests** (Coverage target: 80%+)
+    - Test reorder steps action
+    - Test step index recalculation
+    - Test undo/redo with reordering
+    - Test edge cases (drag to same position, out of bounds)
+  - **Component Tests** (Coverage target: 70%+)
+    - Test StepCard drag handle renders
+    - Test drag visual feedback
+    - Test drop zone indicators
+    - Test accessibility announcements
+  - **Integration Tests**
+    - Test complete drag-and-drop flow
+    - Test reordering within repetition blocks
+    - Test moving steps between blocks
+  - **E2E Tests**
+    - Test dragging step to new position (mouse)
+    - Test keyboard reordering (Alt+Up/Down)
+    - Test undo/redo after reordering
+    - Test mobile touch drag
+    - Test accessibility with screen readers
+  - **Performance Tests**
+    - Test drag performance with large workout lists (>50 steps)
+  - _Requirements: 3, 29_
+  - _Files: store/actions/reorder-steps-action.test.ts, components/molecules/StepCard/StepCard.test.tsx, e2e/drag-and-drop.spec.ts_
 
 ### P2.3 Copy/Paste Step Functionality
 
 **Status:** Not started. Need to implement clipboard operations.
+
+**Testing Requirements:** All tasks must include comprehensive testing following the Testing Strategy:
+
+- Unit tests for clipboard operations (80%+ coverage)
+- Component tests for copy/paste UI (70%+ coverage)
+- Integration tests for copy/paste workflows
+- E2E tests for keyboard shortcuts and button clicks
+- Cross-browser clipboard API compatibility tests
 
 - [ ] P2.3.1 Implement copy step to clipboard
   - Add "Copy" button to StepCard
@@ -290,17 +350,43 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 29, 39.2_
   - _Files: hooks/useKeyboardShortcuts.ts_
 
-- [ ] P2.3.4 Add E2E tests for copy/paste
-  - Test copying step
-  - Test pasting step
-  - Test keyboard shortcuts
-  - Test notification appears
-  - _Requirements: 39.2_
-  - _Files: e2e/copy-paste.spec.ts_
+- [ ] P2.3.4 Implement comprehensive testing strategy for copy/paste
+  - **Unit Tests** (Coverage target: 80%+)
+    - Test copy step action
+    - Test paste step action
+    - Test clipboard data validation
+    - Test step insertion logic
+  - **Component Tests** (Coverage target: 70%+)
+    - Test copy button renders and works
+    - Test paste button renders and works
+    - Test success notifications appear
+    - Test disabled state when clipboard empty
+  - **Integration Tests**
+    - Test complete copy/paste flow
+    - Test copy/paste with repetition blocks
+    - Test undo/redo with copy/paste
+  - **E2E Tests**
+    - Test copying step with button
+    - Test pasting step with button
+    - Test keyboard shortcuts (Ctrl+C, Ctrl+V)
+    - Test notification appears
+    - Test cross-browser clipboard API
+  - **Performance Tests**
+    - Test copying large repetition blocks
+  - _Requirements: 29, 39.2_
+  - _Files: store/actions/copy-step-action.test.ts, store/actions/paste-step-action.test.ts, components/molecules/StepCard/StepCard.test.tsx, e2e/copy-paste.spec.ts_
 
 ### P2.4 Delete Confirmation with Undo
 
 **Status:** Not started. Need to add undo notification for delete actions.
+
+**Testing Requirements:** All tasks must include comprehensive testing following the Testing Strategy:
+
+- Unit tests for undo notification logic (80%+ coverage)
+- Component tests for notification UI (70%+ coverage)
+- Integration tests for delete and undo workflows
+- E2E tests for notification timing and interaction
+- Accessibility tests for screen reader announcements
 
 - [ ] P2.4.1 Add undo notification for delete
   - Show notification with "Undo" button for 5 seconds
@@ -310,18 +396,180 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 39.3_
   - _Files: components/molecules/StepCard/StepCard.tsx, hooks/useToast.ts_
 
-- [ ] P2.4.2 Add E2E tests for delete with undo
-  - Test deleting step shows notification
-  - Test clicking "Undo" restores step
-  - Test auto-dismiss after 5 seconds
+- [ ] P2.4.2 Implement comprehensive testing strategy for delete with undo
+  - **Unit Tests** (Coverage target: 80%+)
+    - Test undo notification creation
+    - Test undo action restores step
+    - Test auto-dismiss timer logic
+  - **Component Tests** (Coverage target: 70%+)
+    - Test notification renders with undo button
+    - Test clicking undo button works
+    - Test notification auto-dismisses
+  - **Integration Tests**
+    - Test complete delete and undo flow
+    - Test undo with history state
+  - **E2E Tests**
+    - Test deleting step shows notification
+    - Test clicking "Undo" restores step
+    - Test auto-dismiss after 5 seconds
+    - Test accessibility announcements
   - _Requirements: 39.3_
-  - _Files: e2e/delete-undo.spec.ts_
+  - _Files: hooks/useToast.test.ts, components/molecules/StepCard/StepCard.test.tsx, e2e/delete-undo.spec.ts_
 
-### P2.5 Enhanced Error Handling
+### P2.5 Import/Export FIT, TCX, and PWX Formats
+
+**Status:** Not started. Requires integration with @kaiord/core converters.
+
+**Priority:** HIGH - Critical for device compatibility and interoperability with training platforms.
+
+**Testing Requirements:** All tasks must include comprehensive testing following the Testing Strategy:
+
+- Unit tests for all utility functions (80%+ coverage)
+- Component tests for all UI components (70%+ coverage)
+- Integration tests for complete user flows
+- E2E tests for critical paths across all browsers
+- Performance tests for large files and complex workouts
+
+- [ ] P2.5.1 Add format detection and validation
+  - Detect file format from extension (.fit, .tcx, .pwx, .krd)
+  - Validate file format before conversion
+  - Show format-specific error messages
+  - Write unit tests for format detection
+  - _Requirements: 12.1, 12.5_
+  - _Files: utils/file-format-detector.ts_
+
+- [ ] P2.5.2 Implement FIT file import
+  - Use @kaiord/core toKRD function for FIT → KRD conversion
+  - Handle FIT parsing errors gracefully
+  - Display conversion progress for large files
+  - Validate converted KRD against schema
+  - Write unit tests for FIT import
+  - _Requirements: 12.2_
+  - _Files: utils/import-workout.ts_
+
+- [ ] P2.5.3 Implement TCX and PWX file import
+  - Use @kaiord/core toKRD function for TCX → KRD conversion
+  - Use @kaiord/core toKRD function for PWX → KRD conversion
+  - Handle XML parsing errors gracefully
+  - Display conversion progress for large files
+  - Write unit tests for TCX/PWX import
+  - _Requirements: 12.3, 12.4_
+  - _Files: utils/import-workout.ts_
+
+- [ ] P2.5.4 Update FileUpload component to support multiple formats
+  - Accept .fit, .tcx, .pwx, .krd, .json file extensions
+  - Show format icon/badge for uploaded file
+  - Display conversion status during import
+  - Handle conversion errors with user-friendly messages
+  - Write unit tests for FileUpload component
+  - _Requirements: 12.1, 12.5_
+  - _Files: components/molecules/FileUpload/FileUpload.tsx_
+
+- [ ] P2.5.5 Implement FIT file export
+  - Use @kaiord/core fromKRD function for KRD → FIT conversion
+  - Handle FIT encoding errors gracefully
+  - Generate correct .fit file extension
+  - Trigger browser download with FIT binary
+  - Write unit tests for FIT export
+  - _Requirements: 12.7_
+  - _Files: utils/export-workout.ts_
+
+- [ ] P2.5.6 Implement TCX and PWX file export
+  - Use @kaiord/core fromKRD function for KRD → TCX conversion
+  - Use @kaiord/core fromKRD function for KRD → PWX conversion
+  - Handle XML encoding errors gracefully
+  - Generate correct file extensions (.tcx, .pwx)
+  - Write unit tests for TCX/PWX export
+  - _Requirements: 12.8, 12.9_
+  - _Files: utils/export-workout.ts_
+
+- [ ] P2.5.7 Create ExportFormatSelector component
+  - Dropdown to select format (FIT, TCX, PWX, KRD)
+  - Show format description and compatibility info
+  - Display format-specific warnings (e.g., "FIT may not support all features")
+  - Validate workout before export
+  - Write unit tests for selector component
+  - _Requirements: 12.6_
+  - _Files: components/molecules/ExportFormatSelector/ExportFormatSelector.tsx_
+
+- [ ] P2.5.8 Update SaveButton to support multiple export formats
+  - Integrate ExportFormatSelector into save flow
+  - Add format parameter to save function
+  - Generate correct file extension based on format
+  - Update download filename with format extension
+  - Show success notification with format name
+  - Write unit tests for multi-format save
+  - _Requirements: 12.6, 12.10_
+  - _Files: components/molecules/SaveButton/SaveButton.tsx_
+
+- [ ] P2.5.9 Add loading states for conversion operations
+  - Show spinner during file import conversion
+  - Show progress bar for large file conversions
+  - Disable UI during conversion processing
+  - Display conversion time estimates
+  - Write unit tests for loading states
+  - _Requirements: 36.3_
+  - _Files: components/molecules/FileUpload/FileUpload.tsx, components/molecules/SaveButton/SaveButton.tsx_
+
+- [ ] P2.5.10 Implement comprehensive testing strategy for import/export
+  - **Unit Tests** (Coverage target: 80%+)
+    - Test file format detection utility
+    - Test FIT/TCX/PWX import functions with valid files
+    - Test FIT/TCX/PWX export functions with valid KRD
+    - Test error handling for invalid files
+    - Test error handling for conversion failures
+    - Test MIME type detection
+    - Test file extension validation
+  - **Component Tests** (Coverage target: 70%+)
+    - Test FileUpload component renders correctly
+    - Test FileUpload accepts multiple file formats
+    - Test FileUpload shows format icon/badge
+    - Test FileUpload displays conversion status
+    - Test FileUpload handles errors gracefully
+    - Test ExportFormatSelector component renders
+    - Test ExportFormatSelector shows format descriptions
+    - Test ExportFormatSelector validates before export
+    - Test SaveButton with format selection
+    - Test SaveButton generates correct filename
+    - Test SaveButton shows success notification
+  - **Integration Tests** (Complete user flows)
+    - Test complete import flow: select file → convert → validate → load
+    - Test complete export flow: select format → convert → download
+    - Test round-trip flow: import FIT → edit → export FIT
+    - Test error recovery: invalid file → show error → retry
+    - Test format switching: load KRD → export as FIT/TCX/PWX
+  - **E2E Tests** (Critical paths)
+    - Test importing FIT file and editing workout
+    - Test importing TCX file and editing workout
+    - Test importing PWX file and editing workout
+    - Test exporting to FIT format
+    - Test exporting to TCX format
+    - Test exporting to PWX format
+    - Test round-trip conversion (import → edit → export)
+    - Test conversion error handling
+    - Test keyboard shortcuts work with import/export
+    - Test mobile file upload flow
+  - **Performance Tests**
+    - Test large FIT file import performance (>1MB)
+    - Test conversion time for complex workouts (>50 steps)
+    - Test bundle size impact of @kaiord/core integration
+    - Monitor memory usage during conversion
+  - _Requirements: 12, 36.3, 36.4_
+  - _Files: utils/import-workout.test.ts, utils/export-workout.test.ts, utils/file-format-detector.test.ts, components/molecules/FileUpload/FileUpload.test.tsx, components/molecules/ExportFormatSelector/ExportFormatSelector.test.tsx, components/molecules/SaveButton/SaveButton.test.tsx, e2e/import-export-formats.spec.ts_
+
+### P2.6 Enhanced Error Handling
 
 **Status:** Not started. Need to improve error messages and recovery.
 
-- [ ] P2.5.1 Add specific error messages for file parsing
+**Testing Requirements:** All tasks must include comprehensive testing following the Testing Strategy:
+
+- Unit tests for error detection and recovery (80%+ coverage)
+- Component tests for error UI states (70%+ coverage)
+- Integration tests for error recovery workflows
+- E2E tests for error scenarios across browsers
+- Performance tests for error handling overhead
+
+- [ ] P2.6.1 Add specific error messages for file parsing
   - Detect invalid JSON format
   - Detect missing required fields
   - Detect invalid field values
@@ -330,7 +578,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 36.4_
   - _Files: utils/save-workout.ts, types/validation.ts_
 
-- [ ] P2.5.2 Add error recovery mechanisms
+- [ ] P2.6.2 Add error recovery mechanisms
   - Restore previous state on error
   - Offer to download backup before risky operations
   - Add "Safe Mode" to disable advanced features
@@ -338,13 +586,31 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 36.5_
   - _Files: store/workout-store.ts, hooks/useAppHandlers.ts_
 
-- [ ] P2.5.3 Add loading states for async operations
-  - Show spinner during file load
-  - Show progress bar for large files
-  - Disable UI during processing
-  - Write unit tests for loading states
-  - _Requirements: 36.3_
-  - _Files: components/molecules/FileUpload/FileUpload.tsx_
+- [ ] P2.6.3 Implement comprehensive testing strategy for error handling
+  - **Unit Tests** (Coverage target: 80%+)
+    - Test error detection for invalid JSON
+    - Test error detection for missing fields
+    - Test error detection for invalid values
+    - Test error recovery mechanisms
+    - Test conversion error handling
+  - **Component Tests** (Coverage target: 70%+)
+    - Test error message display
+    - Test loading states during operations
+    - Test error recovery UI
+  - **Integration Tests**
+    - Test complete error recovery flow
+    - Test backup creation before risky operations
+    - Test safe mode activation
+  - **E2E Tests**
+    - Test file parsing errors
+    - Test conversion errors
+    - Test network errors
+    - Test error recovery
+  - **Performance Tests**
+    - Test error handling overhead
+    - Test large file error detection
+  - _Requirements: 12.5, 36.3, 36.4, 36.5_
+  - _Files: utils/save-workout.test.ts, types/validation.test.ts, utils/import-workout.test.ts, utils/export-workout.test.ts, components/molecules/FileUpload/FileUpload.test.tsx, e2e/error-handling.spec.ts_
 
 ## P3: Advanced Features (v1.2.0+ - Future)
 
@@ -355,6 +621,14 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 ### P3.1 User Profiles and Zone Configuration
 
 **Status:** Not started. Requires backend or local storage implementation.
+
+**Testing Requirements:** All tasks must include comprehensive testing following the Testing Strategy:
+
+- Unit tests for profile store and validation (80%+ coverage)
+- Component tests for profile UI components (70%+ coverage)
+- Integration tests for profile management workflows
+- E2E tests for profile creation and switching
+- Performance tests for profile persistence
 
 - [ ] P3.1.1 Create Profile data model
   - Define Profile type with FTP, max HR, zones
@@ -405,17 +679,43 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 9_
   - _Files: utils/profile-storage.ts_
 
-- [ ] P3.1.7 Add E2E tests for profiles
-  - Test creating profile
-  - Test editing zones
-  - Test switching profiles
-  - Test import/export
+- [ ] P3.1.7 Implement comprehensive testing strategy for profiles
+  - **Unit Tests** (Coverage target: 80%+)
+    - Test profile store actions
+    - Test profile validation
+    - Test zone calculations
+    - Test profile persistence
+  - **Component Tests** (Coverage target: 70%+)
+    - Test ProfileManager renders
+    - Test ZoneEditor functionality
+    - Test profile switching UI
+    - Test import/export buttons
+  - **Integration Tests**
+    - Test complete profile creation flow
+    - Test zone configuration workflow
+    - Test profile switching with workout recalculation
+  - **E2E Tests**
+    - Test creating profile
+    - Test editing zones
+    - Test switching profiles
+    - Test import/export profile
+  - **Performance Tests**
+    - Test profile switching performance
+    - Test zone recalculation performance
   - _Requirements: 9, 10, 11, 38_
-  - _Files: e2e/profiles.spec.ts_
+  - _Files: store/profile-store.test.ts, components/organisms/ProfileManager/ProfileManager.test.tsx, components/organisms/ZoneEditor/ZoneEditor.test.tsx, utils/profile-storage.test.ts, e2e/profiles.spec.ts_
 
 ### P3.2 Workout Library and Templates
 
 **Status:** Not started. Requires backend or local storage implementation.
+
+**Testing Requirements:** All tasks must include comprehensive testing following the Testing Strategy:
+
+- Unit tests for library store and search (80%+ coverage)
+- Component tests for library UI (70%+ coverage)
+- Integration tests for save/load workflows
+- E2E tests for library management
+- Performance tests for large libraries (>100 workouts)
 
 - [ ] P3.2.1 Create WorkoutLibrary data model
   - Define WorkoutTemplate type
@@ -458,55 +758,38 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 17_
   - _Files: utils/library-storage.ts_
 
-- [ ] P3.2.6 Add E2E tests for library
-  - Test saving workout to library
-  - Test loading workout from library
-  - Test search and filter
-  - Test delete from library
+- [ ] P3.2.6 Implement comprehensive testing strategy for library
+  - **Unit Tests** (Coverage target: 80%+)
+    - Test library store actions
+    - Test search and filter logic
+    - Test library persistence
+    - Test thumbnail generation
+  - **Component Tests** (Coverage target: 70%+)
+    - Test WorkoutLibrary renders
+    - Test search functionality
+    - Test filter functionality
+    - Test save/load buttons
+  - **Integration Tests**
+    - Test complete save to library flow
+    - Test complete load from library flow
+    - Test search and filter workflow
+  - **E2E Tests**
+    - Test saving workout to library
+    - Test loading workout from library
+    - Test search and filter
+    - Test delete from library
+  - **Performance Tests**
+    - Test library with >100 workouts
+    - Test search performance
+    - Test thumbnail rendering performance
   - _Requirements: 17, 18_
-  - _Files: e2e/workout-library.spec.ts_
+  - _Files: store/library-store.test.ts, components/organisms/WorkoutLibrary/WorkoutLibrary.test.tsx, utils/library-storage.test.ts, e2e/workout-library.spec.ts_
 
-### P3.3 Export to FIT/TCX/PWX Formats
-
-**Status:** Not started. Requires integration with @kaiord/core converters.
-
-- [ ] P3.3.1 Add export format selector
-  - Dropdown to select format (FIT, TCX, PWX, KRD)
-  - Show format description
-  - Validate workout before export
-  - Write unit tests for selector
-  - _Requirements: 19_
-  - _Files: components/molecules/ExportFormatSelector/ExportFormatSelector.tsx_
-
-- [ ] P3.3.2 Integrate @kaiord/core converters
-  - Import fromKRD function from @kaiord/core
-  - Handle conversion errors
-  - Show progress during conversion
-  - Write unit tests for integration
-  - _Requirements: 19_
-  - _Files: utils/export-workout.ts_
-
-- [ ] P3.3.3 Update SaveButton to support multiple formats
-  - Add format parameter to save function
-  - Generate correct file extension
-  - Update download filename
-  - Write unit tests for multi-format save
-  - _Requirements: 19_
-  - _Files: components/molecules/SaveButton/SaveButton.tsx, utils/save-workout.ts_
-
-- [ ] P3.3.4 Add E2E tests for export
-  - Test exporting to FIT format
-  - Test exporting to TCX format
-  - Test exporting to PWX format
-  - Test export error handling
-  - _Requirements: 19_
-  - _Files: e2e/export-formats.spec.ts_
-
-### P3.4 Onboarding and Help System
+### P3.3 Onboarding and Help System
 
 **Status:** Not started. Requires tutorial component and help documentation.
 
-- [ ] P3.4.1 Create OnboardingTutorial component
+- [ ] P3.3.1 Create OnboardingTutorial component
   - Step-by-step tutorial overlay
   - Highlight key UI elements
   - Skip or replay option
@@ -515,7 +798,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 37.1, 37.5_
   - _Files: components/organisms/OnboardingTutorial/OnboardingTutorial.tsx_
 
-- [ ] P3.4.2 Add contextual tooltips
+- [ ] P3.3.2 Add contextual tooltips
   - Tooltip component with Radix UI
   - Add tooltips to complex UI elements
   - Explain purpose and usage
@@ -523,7 +806,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 37.2_
   - _Files: components/atoms/Tooltip/Tooltip.tsx_
 
-- [ ] P3.4.3 Create inline hints for first workout
+- [ ] P3.3.3 Create inline hints for first workout
   - Detect first-time user
   - Show hints during workout creation
   - Dismiss hints after completion
@@ -531,7 +814,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 37.3_
   - _Files: components/organisms/StepEditor/FirstTimeHints.tsx_
 
-- [ ] P3.4.4 Create HelpSection component
+- [ ] P3.3.4 Create HelpSection component
   - Documentation with examples
   - Screenshots and GIFs
   - Keyboard shortcuts reference
@@ -540,7 +823,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 37.4_
   - _Files: components/pages/HelpSection/HelpSection.tsx_
 
-- [ ] P3.4.5 Add E2E tests for onboarding
+- [ ] P3.3.5 Add E2E tests for onboarding
   - Test tutorial appears for first-time user
   - Test skipping tutorial
   - Test replaying tutorial from settings
@@ -548,11 +831,11 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 37_
   - _Files: e2e/onboarding.spec.ts_
 
-### P3.5 Advanced Workout Features
+### P3.4 Advanced Workout Features
 
 **Status:** Not started. Requires additional workout step types and features.
 
-- [ ] P3.5.1 Add swimming-specific features
+- [ ] P3.4.1 Add swimming-specific features
   - Pool length configuration
   - Stroke type selection
   - Drill equipment selection
@@ -560,7 +843,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 20, 21, 22_
   - _Files: components/molecules/SwimmingStepEditor/SwimmingStepEditor.tsx_
 
-- [ ] P3.5.2 Add advanced duration types
+- [ ] P3.4.2 Add advanced duration types
   - Calorie-based duration
   - Power threshold duration
   - Heart rate threshold duration
@@ -569,7 +852,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 23, 24, 25, 26, 27, 28_
   - _Files: components/molecules/DurationPicker/AdvancedDurationPicker.tsx_
 
-- [ ] P3.5.3 Add workout notes and coaching cues
+- [ ] P3.4.3 Add workout notes and coaching cues
   - Notes field for each step
   - Rich text editor for formatting
   - Character limit (256 chars)
@@ -577,7 +860,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 30_
   - _Files: components/molecules/StepNotesEditor/StepNotesEditor.tsx_
 
-- [ ] P3.5.4 Add workout metadata editor
+- [ ] P3.4.4 Add workout metadata editor
   - Edit workout name
   - Edit sport and sub-sport
   - Add workout description
@@ -585,11 +868,11 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 1_
   - _Files: components/molecules/WorkoutMetadataEditor/WorkoutMetadataEditor.tsx_
 
-### P3.6 Performance Optimization
+### P3.5 Performance Optimization
 
 **Status:** Not started. Requires profiling and optimization work.
 
-- [ ] P3.6.1 Implement virtual scrolling for large workouts
+- [ ] P3.5.1 Implement virtual scrolling for large workouts
   - Use react-window or react-virtual
   - Render only visible steps
   - Maintain scroll position
@@ -597,7 +880,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: Performance_
   - _Files: components/organisms/WorkoutList/VirtualWorkoutList.tsx_
 
-- [ ] P3.6.2 Add service worker for offline support
+- [ ] P3.5.2 Add service worker for offline support
   - Cache static assets
   - Cache workout files
   - Sync when online
@@ -605,7 +888,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 31_
   - _Files: service-worker.ts_
 
-- [ ] P3.6.3 Optimize bundle size
+- [ ] P3.5.3 Optimize bundle size
   - Code splitting by route
   - Lazy load heavy components
   - Tree-shake unused code
@@ -613,7 +896,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: Performance_
   - _Files: vite.config.ts_
 
-- [ ] P3.6.4 Add performance monitoring
+- [ ] P3.5.4 Add performance monitoring
   - Track page load time
   - Track interaction latency
   - Track memory usage
@@ -621,11 +904,11 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: Performance_
   - _Files: utils/performance-monitoring.ts_
 
-### P3.7 Accessibility Enhancements
+### P3.6 Accessibility Enhancements
 
 **Status:** Not started. Requires additional accessibility features.
 
-- [ ] P3.7.1 Add screen reader announcements
+- [ ] P3.6.1 Add screen reader announcements
   - Announce step creation/deletion
   - Announce undo/redo actions
   - Announce validation errors
@@ -633,7 +916,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 35_
   - _Files: hooks/useScreenReaderAnnouncements.ts_
 
-- [ ] P3.7.2 Add high contrast mode
+- [ ] P3.6.2 Add high contrast mode
   - High contrast color scheme
   - Increased border widths
   - Larger focus indicators
@@ -641,7 +924,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 35_
   - _Files: contexts/ThemeContext.tsx_
 
-- [ ] P3.7.3 Add keyboard navigation improvements
+- [ ] P3.6.3 Add keyboard navigation improvements
   - Tab order optimization
   - Skip links for main content
   - Keyboard shortcuts help dialog
@@ -649,32 +932,32 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
   - _Requirements: 35_
   - _Files: components/atoms/SkipLink/SkipLink.tsx_
 
-### P3.8 Testing and Quality Improvements
+### P3.7 Testing and Quality Improvements
 
 **Status:** Not started. Requires additional testing infrastructure.
 
-- [ ] P3.8.1 Add visual regression testing
+- [ ] P3.7.1 Add visual regression testing
   - Set up Percy or Chromatic
   - Capture screenshots of all components
   - Compare against baseline
   - _Requirements: Testing_
   - _Files: .github/workflows/visual-regression.yml_
 
-- [ ] P3.8.2 Add performance testing
+- [ ] P3.7.2 Add performance testing
   - Set up Lighthouse CI
   - Test page load performance
   - Test interaction performance
   - _Requirements: Testing_
   - _Files: .github/workflows/performance.yml_
 
-- [ ] P3.8.3 Add cross-browser testing
+- [ ] P3.7.3 Add cross-browser testing
   - Test on Safari, Firefox, Edge
   - Test on iOS Safari, Chrome Mobile
   - Test on different screen sizes
   - _Requirements: Testing_
   - _Files: playwright.config.ts_
 
-- [ ] P3.8.4 Increase test coverage to 90%
+- [ ] P3.7.4 Increase test coverage to 90%
   - Add missing unit tests
   - Add missing integration tests
   - Add missing E2E tests
