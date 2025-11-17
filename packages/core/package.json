@@ -35,7 +35,7 @@
   },
   "dependencies": {
     "@garmin/fitsdk": "^21.141.0",
-    "zod": "^3.22.4",
+    "zod": "^4.1.12",
     "zod-to-json-schema": "^3.22.4"
   },
   "devDependencies": {
