@@ -61,22 +61,22 @@ Each task follows Test-Driven Development:
     - _Requirements: 3.1, 4.1, 5.1_
     - _Commit: "feat: add TCX target schema"_
 
-- [ ] 2.5. Download and add TCX XSD schema
-  - [ ] 2.5.1 Download Garmin TCX XSD schema
+- [x] 2.5. Download and add TCX XSD schema
+  - [x] 2.5.1 Download Garmin TCX XSD schema
     - Download TrainingCenterDatabasev2.xsd from https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd
     - Save to packages/core/schema/TrainingCenterDatabasev2.xsd
     - Add schema file to git repository
     - _Requirements: 17.1_
     - _Commit: "feat: add Garmin TCX XSD schema"_
 
-- [ ] 2.6. Implement TCX XSD validator
-  - [ ] 2.6.1 Create TCX validator port
+- [x] 2.6. Implement TCX XSD validator
+  - [x] 2.6.1 Create TCX validator port
     - Create ports/tcx-validator.ts with TcxValidator type
     - Define TcxValidationResult type with valid flag and errors array
     - Define function signature: (xmlString: string) => Promise<TcxValidationResult>
     - _Requirements: 17.1_
     - _Commit: "feat: add TCX validator port"_
-  - [ ] 2.6.2 Implement XSD validator adapter
+  - [x] 2.6.2 Implement XSD validator adapter
     - Create adapters/tcx/xsd-validator.ts
     - Implement createXsdTcxValidator factory with logger injection
     - Use fast-xml-parser XMLValidator for XML structure validation

@@ -126,3 +126,29 @@ export const createTcxParsingError = (
   message: string,
   cause?: unknown
 ): TcxParsingError => new TcxParsingError(message, cause);
+
+/**
+ * TcxValidationError
+ * Thrown when TCX XSD schema validation fails
+ */
+export class TcxValidationError extends Error {
+  public override readonly name = "TcxValidationError";
+
+  constructor(
+    message: string,
+    public readonly errors: Array<{ path: string; message: string }>
+  ) {
+    super(message);
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, TcxValidationError);
+    }
+  }
+}
+
+/**
+ * Factory function for TcxValidationError
+ */
+export const createTcxValidationError = (
+  message: string,
+  errors: Array<{ path: string; message: string }>
+): TcxValidationError => new TcxValidationError(message, errors);
