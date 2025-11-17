@@ -40,6 +40,7 @@ Within each workout, intervals can have durations specified by:
 - **Schema_Validator**: The component that validates KRD output against the JSON schema
 - **Tolerance_Checker**: The component that verifies conversion accuracy within acceptable tolerances
 - **Round_Trip_Validator**: The component that validates TCX → KRD → TCX conversions preserve data within tolerances
+- **XSD_Validator**: The component that validates TCX XML files against the official Garmin Training Center Database v2 XSD schema
 
 ## Requirements
 
@@ -234,3 +235,15 @@ Within each workout, intervals can have durations specified by:
 3. WHEN THE development environment is set up, THE repository SHALL contain TCX files with speed targets in the test fixtures directory
 4. WHEN THE development environment is set up, THE repository SHALL contain TCX files with repetition blocks in the test fixtures directory
 5. WHEN THE test suite runs, THE test framework SHALL have access to all fixture files for golden file testing and round-trip validation
+
+### Requirement 17
+
+**User Story:** As a quality assurance engineer, I want TCX files to be validated against the official XSD schema, so that I can ensure generated TCX files are compliant with the Garmin standard and detect invalid input files before processing.
+
+#### Acceptance Criteria
+
+1. WHEN THE XSD_Validator receives a TCX XML string, THE XSD_Validator SHALL validate it against the Garmin Training Center Database v2 XSD schema
+2. IF THE XSD_Validator detects schema violations, THEN THE XSD_Validator SHALL report all validation errors with element paths and violation descriptions
+3. WHEN THE TCX_Parser receives an input TCX file, THE TCX_Parser SHALL validate the XML against the XSD schema before attempting conversion
+4. WHEN THE TCX_Writer generates a TCX file from KRD, THE TCX_Writer SHALL validate the generated XML against the XSD schema before returning the result
+5. IF THE XSD_Validator detects that a TCX file does not conform to the XSD schema, THEN THE System SHALL throw a TcxValidationError with actionable error messages

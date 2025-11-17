@@ -23,13 +23,20 @@ Each task follows Test-Driven Development:
 
 ## Tasks
 
-- [x] 1. Add TCX error type
+- [x] 1. Add TCX error types
   - [x] 1.1 Implement TcxParsingError type and factory
     - Add TcxParsingError type to domain/types/errors.ts
     - Create createTcxParsingError factory function
     - Write co-located tests in errors.test.ts (error creation, cause preservation)
     - _Requirements: 9.1_
     - _Commit: "feat: add TCX parsing error type"_
+  - [ ] 1.2 Implement TcxValidationError type and factory
+    - Add TcxValidationError type to domain/types/errors.ts
+    - Create createTcxValidationError factory function
+    - Include errors array with path and message for each validation error
+    - Write co-located tests in errors.test.ts (error creation, errors array)
+    - _Requirements: 17.2, 17.5_
+    - _Commit: "feat: add TCX validation error type"_
 
 - [x] 2. Create TCX adapter schemas
   - [x] 2.1 Implement TCX sport schema
@@ -54,6 +61,31 @@ Each task follows Test-Driven Development:
     - _Requirements: 3.1, 4.1, 5.1_
     - _Commit: "feat: add TCX target schema"_
 
+- [ ] 2.5. Download and add TCX XSD schema
+  - [ ] 2.5.1 Download Garmin TCX XSD schema
+    - Download TrainingCenterDatabasev2.xsd from https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd
+    - Save to packages/core/schema/TrainingCenterDatabasev2.xsd
+    - Add schema file to git repository
+    - _Requirements: 17.1_
+    - _Commit: "feat: add Garmin TCX XSD schema"_
+
+- [ ] 2.6. Implement TCX XSD validator
+  - [ ] 2.6.1 Create TCX validator port
+    - Create ports/tcx-validator.ts with TcxValidator type
+    - Define TcxValidationResult type with valid flag and errors array
+    - Define function signature: (xmlString: string) => Promise<TcxValidationResult>
+    - _Requirements: 17.1_
+    - _Commit: "feat: add TCX validator port"_
+  - [ ] 2.6.2 Implement XSD validator adapter
+    - Create adapters/tcx/xsd-validator.ts
+    - Implement createXsdTcxValidator factory with logger injection
+    - Use fast-xml-parser XMLValidator for XML structure validation
+    - Load XSD schema from packages/core/schema/TrainingCenterDatabasev2.xsd
+    - Return validation result with errors array
+    - Write co-located tests in xsd-validator.test.ts (valid XML, invalid XML, schema violations)
+    - _Requirements: 17.1, 17.2_
+    - _Commit: "feat: add TCX XSD validator adapter"_
+
 - [x] 3. Implement TCX reader port and adapter
   - [x] 3.1 Create TCX reader port
     - Create ports/tcx-reader.ts with TcxReader type
@@ -62,12 +94,14 @@ Each task follows Test-Driven Development:
     - _Commit: "feat: add TCX reader port"_
   - [x] 3.2 Implement TCX reader adapter skeleton
     - Create adapters/tcx/fast-xml-parser.ts
-    - Implement createFastXmlTcxReader factory with logger injection
+    - Implement createFastXmlTcxReader factory with logger and validator injection
+    - Validate XML against XSD before parsing using TcxValidator
     - Use fast-xml-parser XMLParser to parse XML
-    - Handle errors with createTcxParsingError
-    - Write co-located tests in fast-xml-parser.test.ts (valid XML, malformed XML, logger)
-    - _Requirements: 1.1, 9.1_
-    - _Commit: "feat: add TCX reader adapter skeleton"_
+    - Handle validation errors with createTcxValidationError
+    - Handle parsing errors with createTcxParsingError
+    - Write co-located tests in fast-xml-parser.test.ts (valid XML, malformed XML, XSD violations, logger)
+    - _Requirements: 1.1, 9.1, 17.3_
+    - _Commit: "feat: add TCX reader adapter skeleton with XSD validation"_
   - [x] 3.3 Implement TCX to KRD conversion
     - Implement convertTcxToKRD function in fast-xml-parser.ts
     - Extract TrainingCenterDatabase/Workouts/Workout structure
@@ -138,11 +172,13 @@ Each task follows Test-Driven Development:
   - [ ] 7.2 Implement TCX writer adapter skeleton
     - Add createFastXmlTcxWriter factory to adapters/tcx/fast-xml-parser.ts
     - Implement function using fast-xml-parser XMLBuilder
-    - Handle errors with createTcxParsingError
-    - Inject logger
-    - Add tests for valid KRD, error handling, logger injection
-    - _Requirements: 11.2, 11.5_
-    - _Commit: "feat: add TCX writer adapter skeleton"_
+    - Validate generated XML against XSD using TcxValidator
+    - Handle validation errors with createTcxValidationError
+    - Handle parsing errors with createTcxParsingError
+    - Inject logger and validator
+    - Add tests for valid KRD, error handling, XSD validation, logger injection
+    - _Requirements: 11.2, 11.5, 17.4_
+    - _Commit: "feat: add TCX writer adapter skeleton with XSD validation"_
   - [ ] 7.3 Implement KRD to TCX conversion
     - Implement convertKRDToTcx function in fast-xml-parser.ts
     - Create TrainingCenterDatabase structure with namespaces
@@ -248,22 +284,25 @@ Each task follows Test-Driven Development:
 - [ ] 14. Update dependency injection
   - [ ] 14.1 Update createDefaultProviders
     - Update application/providers.ts to include TCX components
+    - Add tcxValidator: TcxValidator to Providers type
     - Add tcxReader: TcxReader to Providers type
     - Add tcxWriter: TcxWriter to Providers type
     - Add convertTcxToKrd: ConvertTcxToKrd to Providers type
     - Add convertKrdToTcx: ConvertKrdToTcx to Providers type
-    - Wire TCX adapters and use cases using functional composition
+    - Wire TCX validator, adapters and use cases using functional composition
     - Update tests in providers.test.ts (TCX component creation, wiring)
-    - _Requirements: 1.1, 1.2, 11.1, 11.2_
+    - _Requirements: 1.1, 1.2, 11.1, 11.2, 17.1_
     - _Commit: "feat: add TCX support to dependency injection"_
 
 - [ ] 15. Export public API
   - [ ] 15.1 Update src/index.ts with TCX exports
-    - Export TcxReader and TcxWriter port types
+    - Export TcxValidator, TcxReader and TcxWriter port types
+    - Export TcxValidationResult type
     - Export ConvertTcxToKrd and ConvertKrdToTcx use case types
     - Export TcxParsingError type and createTcxParsingError factory
+    - Export TcxValidationError type and createTcxValidationError factory
     - Verify all TCX components are accessible and properly typed
-    - _Requirements: 1.1, 1.2, 11.1, 11.2_
+    - _Requirements: 1.1, 1.2, 11.1, 11.2, 17.1, 17.2_
     - _Commit: "feat: export TCX public API"_
 
 ## Notes
@@ -275,6 +314,8 @@ Each task follows Test-Driven Development:
 - **Mappers vs Converters**: Follow the same pattern as FIT - mappers have no logic (no tests), converters have logic (must have tests)
 - **Functional style**: Use currying for dependency injection, no classes
 - **Type safety**: Use Zod schemas for all TCX-specific types, infer TypeScript types with z.infer
+- **XSD Validation**: TCX files are validated against the official Garmin XSD schema both on input (before parsing) and output (after generation) to ensure compliance with the TCX standard
+- **Validation applies to all formats**: The XSD validation pattern for TCX should be replicated for other formats (FIT, PWX) to ensure input/output validation across all supported formats
 
 ## Dependencies
 

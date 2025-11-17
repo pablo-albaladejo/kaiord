@@ -128,6 +128,21 @@ export const createTcxParsingError = (
   message,
   cause,
 });
+
+export type TcxValidationError = {
+  name: "TcxValidationError";
+  message: string;
+  errors: Array<{ path: string; message: string }>;
+};
+
+export const createTcxValidationError = (
+  message: string,
+  errors: Array<{ path: string; message: string }>
+): TcxValidationError => ({
+  name: "TcxValidationError",
+  message,
+  errors,
+});
 ```
 
 ### Ports Layer
@@ -150,7 +165,81 @@ import type { KRD } from "../domain/schemas/krd";
 export type TcxWriter = (krd: KRD) => Promise<string>;
 ```
 
+#### TCX Validator Contract
+
+```typescript
+// ports/tcx-validator.ts
+export type TcxValidationResult = {
+  valid: boolean;
+  errors: Array<{ path: string; message: string }>;
+};
+
+export type TcxValidator = (xmlString: string) => Promise<TcxValidationResult>;
+```
+
 ### Adapters Layer
+
+#### XSD Validator Adapter
+
+```typescript
+// adapters/tcx/xsd-validator.ts
+import type {
+  TcxValidator,
+  TcxValidationResult,
+} from "../../ports/tcx-validator";
+import type { Logger } from "../../ports/logger";
+import { XMLValidator } from "fast-xml-parser";
+import { readFileSync } from "fs";
+import { join } from "path";
+
+export const createXsdTcxValidator =
+  (logger: Logger): TcxValidator =>
+  async (xmlString: string): Promise<TcxValidationResult> => {
+    try {
+      logger.debug("Validating TCX against XSD schema");
+
+      // Load XSD schema from file
+      const xsdPath = join(
+        __dirname,
+        "../../../schema/TrainingCenterDatabasev2.xsd"
+      );
+      const xsdSchema = readFileSync(xsdPath, "utf-8");
+
+      // Validate XML structure first
+      const xmlValidation = XMLValidator.validate(xmlString, {
+        allowBooleanAttributes: true,
+      });
+
+      if (xmlValidation !== true) {
+        return {
+          valid: false,
+          errors: [
+            {
+              path: "root",
+              message: `XML validation failed: ${xmlValidation.err.msg}`,
+            },
+          ],
+        };
+      }
+
+      // TODO: Implement XSD validation using libxmljs2 or similar
+      // For now, we validate XML structure only
+      logger.info("TCX XML structure is valid");
+      return { valid: true, errors: [] };
+    } catch (error) {
+      logger.error("TCX validation failed", { error });
+      return {
+        valid: false,
+        errors: [
+          {
+            path: "root",
+            message: error instanceof Error ? error.message : "Unknown error",
+          },
+        ],
+      };
+    }
+  };
+```
 
 #### TCX Adapter Schemas
 
@@ -214,10 +303,23 @@ import type { Logger } from "../../ports/logger";
 import { createTcxParsingError } from "../../domain/types/errors";
 
 export const createFastXmlTcxReader =
-  (logger: Logger): TcxReader =>
+  (logger: Logger, validator: TcxValidator): TcxReader =>
   async (xmlString: string): Promise<KRD> => {
     try {
-      logger.debug("Parsing TCX file", { xmlLength: xmlString.length });
+      logger.debug("Validating TCX file against XSD", {
+        xmlLength: xmlString.length,
+      });
+
+      // Validate against XSD before parsing
+      const validationResult = await validator(xmlString);
+      if (!validationResult.valid) {
+        throw createTcxValidationError(
+          "TCX file does not conform to XSD schema",
+          validationResult.errors
+        );
+      }
+
+      logger.debug("Parsing TCX file");
 
       const parser = new XMLParser({
         ignoreAttributes: false,
@@ -237,12 +339,18 @@ export const createFastXmlTcxReader =
       return convertTcxToKRD(tcxData, logger);
     } catch (error) {
       logger.error("Failed to parse TCX file", { error });
+      if (
+        error.name === "TcxValidationError" ||
+        error.name === "TcxParsingError"
+      ) {
+        throw error;
+      }
       throw createTcxParsingError("Failed to parse TCX file", error);
     }
   };
 
 export const createFastXmlTcxWriter =
-  (logger: Logger): TcxWriter =>
+  (logger: Logger, validator: TcxValidator): TcxWriter =>
   async (krd: KRD): Promise<string> => {
     try {
       logger.debug("Encoding KRD to TCX");
@@ -257,10 +365,28 @@ export const createFastXmlTcxWriter =
       });
 
       const xmlString = builder.build(tcxData);
+
+      logger.debug("Validating generated TCX against XSD");
+
+      // Validate generated XML against XSD
+      const validationResult = await validator(xmlString);
+      if (!validationResult.valid) {
+        throw createTcxValidationError(
+          "Generated TCX file does not conform to XSD schema",
+          validationResult.errors
+        );
+      }
+
       logger.info("KRD encoded to TCX successfully");
       return xmlString;
     } catch (error) {
       logger.error("Failed to write TCX file", { error });
+      if (
+        error.name === "TcxValidationError" ||
+        error.name === "TcxParsingError"
+      ) {
+        throw error;
+      }
       throw createTcxParsingError("Failed to write TCX file", error);
     }
   };
@@ -436,13 +562,15 @@ export const convertKrdToTcx =
 ### Error Types
 
 1. **TcxParsingError** - XML parsing failures, invalid TCX structure
-2. **KrdValidationError** - KRD schema validation failures (reused)
-3. **ToleranceExceededError** - Round-trip tolerance violations (reused)
+2. **TcxValidationError** - XSD schema validation failures
+3. **KrdValidationError** - KRD schema validation failures (reused)
+4. **ToleranceExceededError** - Round-trip tolerance violations (reused)
 
 ### Error Flow
 
 ```
-TCX Adapter → TcxParsingError → Use Case → CLI
+TCX Adapter → TcxValidationError → Use Case → CLI
+           → TcxParsingError → Use Case → CLI
                                     ↓
                             KrdValidationError → CLI
 ```
@@ -484,12 +612,21 @@ TCX Adapter → TcxParsingError → Use Case → CLI
   - Lightweight and fast
   - Supports attributes and namespaces
   - TypeScript support
+  - Built-in XML validation
+- **libxmljs2** (^0.33.0) - XSD schema validation (optional, for full XSD support)
+  - Native XML parsing with XSD validation
+  - Alternative: Use online XSD validation service or implement basic validation
 
 ### Internal Dependencies
 
 - **@kaiord/core domain schemas** - Reuse KRD, Workout, Duration, Target schemas
 - **@kaiord/core validation** - Reuse SchemaValidator and ToleranceChecker
 - **@kaiord/core logger** - Reuse Logger port and console adapter
+
+### XSD Schema File
+
+- **TrainingCenterDatabasev2.xsd** - Downloaded from Garmin and stored in `packages/core/schema/`
+- URL: https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd
 
 ## Implementation Notes
 
