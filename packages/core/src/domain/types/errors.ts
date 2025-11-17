@@ -98,3 +98,31 @@ export const createToleranceExceededError = (
   message: string,
   violations: Array<ToleranceViolation>
 ): ToleranceExceededError => new ToleranceExceededError(message, violations);
+
+/**
+ * TcxParsingError
+ * Thrown when TCX file parsing fails in the adapter layer
+ */
+export class TcxParsingError extends Error {
+  public override readonly name = "TcxParsingError";
+
+  constructor(
+    message: string,
+    public readonly cause?: unknown
+  ) {
+    super(message);
+    // Maintains proper stack trace for where error was thrown (V8 only)
+    if (Error.captureStackTrace) {
+      Error.captureStackTrace(this, TcxParsingError);
+    }
+  }
+}
+
+/**
+ * Factory function for TcxParsingError
+ * Provides functional interface while maintaining Error class benefits
+ */
+export const createTcxParsingError = (
+  message: string,
+  cause?: unknown
+): TcxParsingError => new TcxParsingError(message, cause);
