@@ -1,5 +1,7 @@
 import type { ValidationError } from "../../../types/krd";
+import { detectFormat } from "../../../utils/file-format-detector";
 import { ErrorMessage } from "../../atoms/ErrorMessage/ErrorMessage";
+import { FormatBadge } from "./FormatBadge";
 
 type ErrorState = {
   title: string;
@@ -23,10 +25,14 @@ export function FileUploadStatus({
   onDismiss,
 }: FileUploadStatusProps) {
   if (fileName && !isLoading && !error) {
+    const format = detectFormat(fileName);
     return (
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        Loaded: {fileName}
-      </p>
+      <div className="flex items-center gap-2">
+        {format && <FormatBadge format={format} />}
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          Loaded: {fileName}
+        </p>
+      </div>
     );
   }
 

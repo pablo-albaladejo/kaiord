@@ -46,7 +46,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.3, 12.4_
   - _Files: utils/import-workout.ts_
 
-- [-] 4. Update FileUpload component to support multiple formats
+- [x] 4. Update FileUpload component to support multiple formats
   - Accept .fit, .tcx, .pwx, .krd, .json file extensions
   - Show format icon/badge for uploaded file
   - Display conversion status during import

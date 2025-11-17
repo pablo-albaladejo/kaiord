@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import type { KRD, ValidationError } from "../../../types/krd";
-import { createParseError, parseFile, validateKRD } from "./file-parser";
+import { createParseError, parseFile } from "./file-parser";
 
 type ErrorState = {
   title: string;
@@ -44,9 +44,9 @@ export function useFileUploadActions({
     if (!file) return;
     setFileName(file.name);
     setIsLoading(true);
+    setError(null);
     try {
-      const krd = validateKRD(await parseFile(file));
-      setError(null);
+      const krd = await parseFile(file);
       onFileLoad(krd);
       setIsLoading(false);
     } catch (error) {

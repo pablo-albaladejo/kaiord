@@ -5,6 +5,11 @@
 import type { KRD, ValidationError } from "../../../types/krd";
 import { krdSchema } from "../../../types/schemas";
 import { formatZodError } from "../../../types/validation";
+import {
+  detectFormat,
+  getFormatName,
+} from "../../../utils/file-format-detector";
+import { importWorkout } from "../../../utils/import-workout";
 
 type ErrorState = {
   title: string;
@@ -12,9 +17,33 @@ type ErrorState = {
   validationErrors?: Array<ValidationError>;
 };
 
-export const parseFile = async (file: File): Promise<unknown> => {
-  const text = await file.text();
-  return JSON.parse(text);
+export const parseFile = async (
+  file: File,
+  onProgress?: (progress: number) => void
+): Promise<KRD> => {
+  const format = detectFormat(file.name);
+
+  if (!format) {
+    throw {
+      title: "Unsupported Format",
+      message: "Supported formats: .fit, .tcx, .pwx, .krd, .json",
+    };
+  }
+
+  try {
+    const krd = await importWorkout(file, onProgress);
+    return validateKRD(krd);
+  } catch (error) {
+    // If it's already a structured error (like validation error), re-throw it
+    if (error && typeof error === "object" && "title" in error) {
+      throw error;
+    }
+
+    throw {
+      title: `${getFormatName(format)} Import Failed`,
+      message: error instanceof Error ? error.message : "Unknown error",
+    };
+  }
 };
 
 export const validateKRD = (data: unknown): KRD => {
