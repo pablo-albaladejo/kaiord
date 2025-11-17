@@ -201,17 +201,16 @@ chmod +x .husky/pre-push
 ### Create a new hook
 
 ```bash
-# Create the hook file
-echo '#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Your commands here
+# Create the hook file (Husky v9+ format - no shebang needed)
+echo '# Your commands here
 echo "Running custom hook..."
 ' > .husky/my-hook
 
 # Make it executable
 chmod +x .husky/my-hook
 ```
+
+**Note:** Husky v9+ uses a simplified format without the `#!/usr/bin/env sh` shebang and `. "$(dirname -- "$0")/_/husky.sh"` line. These are deprecated and will fail in v10.
 
 ### Available Git hooks
 
