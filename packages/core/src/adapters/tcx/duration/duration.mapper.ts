@@ -83,3 +83,29 @@ export const convertTcxDuration = (
   logger.warn("Unsupported duration type", { durationType });
   return null;
 };
+
+// KRD → TCX duration mappers
+
+export type TcxDurationElement = Record<string, unknown>;
+
+export const mapTimeDurationToTcx = (seconds: number): TcxDurationElement => {
+  return {
+    "@_xsi:type": "Time_t",
+    Seconds: seconds,
+  };
+};
+
+export const mapDistanceDurationToTcx = (
+  meters: number
+): TcxDurationElement => {
+  return {
+    "@_xsi:type": "Distance_t",
+    Meters: meters,
+  };
+};
+
+export const mapOpenDurationToTcx = (): TcxDurationElement => {
+  return {
+    "@_xsi:type": "LapButton_t",
+  };
+};

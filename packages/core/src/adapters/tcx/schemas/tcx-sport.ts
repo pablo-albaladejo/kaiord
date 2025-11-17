@@ -10,3 +10,10 @@ export const TCX_TO_KRD_SPORT: Record<TcxSport, Sport> = {
   Biking: "cycling",
   Other: "generic",
 };
+
+export const KRD_TO_TCX_SPORT: Record<Sport, TcxSport> = {
+  running: "Running",
+  cycling: "Biking",
+  swimming: "Other",
+  generic: "Other",
+};
