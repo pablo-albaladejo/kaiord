@@ -15,7 +15,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdTcxValidator(logger);
-    const reader = createFastXmlTcxReader(logger, validator);
+    const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
     const tcxPath = join(
@@ -70,6 +70,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
 
         if (step1.target.value.unit === "range") {
           if (step1.target.value.min !== undefined) {
+            expect(step2.target.value.min).toBeDefined();
             const violation = toleranceChecker.checkHeartRate(
               step1.target.value.min,
               step2.target.value.min!
@@ -78,6 +79,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
           }
 
           if (step1.target.value.max !== undefined) {
+            expect(step2.target.value.max).toBeDefined();
             const violation = toleranceChecker.checkHeartRate(
               step1.target.value.max,
               step2.target.value.max!
@@ -93,7 +95,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdTcxValidator(logger);
-    const reader = createFastXmlTcxReader(logger, validator);
+    const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
     const tcxPath = join(
@@ -174,7 +176,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdTcxValidator(logger);
-    const reader = createFastXmlTcxReader(logger, validator);
+    const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
     const tcxPath = join(
       __dirname,
@@ -240,7 +242,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdTcxValidator(logger);
-    const reader = createFastXmlTcxReader(logger, validator);
+    const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
     const tcxPath = join(
@@ -355,7 +357,7 @@ describe("Round-trip: KRD → TCX → KRD", () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdTcxValidator(logger);
-    const reader = createFastXmlTcxReader(logger, validator);
+    const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
 

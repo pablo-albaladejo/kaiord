@@ -583,7 +583,6 @@ describe("convertKrdDurationToTcx", () => {
         tcxDuration: {
           "@_xsi:type": "HeartRateAbove_t",
           HeartRate: {
-            "@_xsi:type": "HeartRateAbove_t",
             Value: 160,
           },
         },
@@ -608,7 +607,6 @@ describe("convertKrdDurationToTcx", () => {
         tcxDuration: {
           "@_xsi:type": "HeartRateBelow_t",
           HeartRate: {
-            "@_xsi:type": "HeartRateBelow_t",
             Value: 120,
           },
         },
@@ -657,7 +655,6 @@ describe("convertKrdDurationToTcx", () => {
         tcxDuration: {
           "@_xsi:type": "HeartRateAbove_t",
           HeartRate: {
-            "@_xsi:type": "HeartRateAbove_t",
             Value: 160,
           },
         },

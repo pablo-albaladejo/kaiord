@@ -1,3 +1,4 @@
+import type { Duration } from "../../../domain/schemas/duration";
 import type { Target } from "../../../domain/schemas/target";
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
@@ -11,7 +12,7 @@ import {
 
 const convertTargetWithExtensions = (
   tcxStep: Record<string, unknown>,
-  extensions: Record<string, unknown> | null,
+  extensions: Record<string, unknown> | undefined,
   logger: Logger
 ): Target | null => {
   const target = convertTcxTarget(
@@ -42,10 +43,10 @@ const convertTargetWithExtensions = (
 const buildWorkoutStep = (
   stepIndex: number,
   name: string | undefined,
-  duration: WorkoutStep["duration"],
+  duration: Duration,
   target: Target,
   tcxStep: Record<string, unknown>,
-  extensions: Record<string, unknown> | null
+  extensions: Record<string, unknown> | undefined
 ): WorkoutStep => {
   const step: WorkoutStep = {
     stepIndex,
@@ -82,7 +83,7 @@ export const convertTcxStep = (
     return null;
   }
 
-  const extensions = extractExtensions(tcxStep, logger) ?? null;
+  const extensions = extractExtensions(tcxStep, logger);
   const target = convertTargetWithExtensions(tcxStep, extensions, logger);
   if (!target) {
     logger.warn("Step has no valid target, skipping", { stepIndex });
