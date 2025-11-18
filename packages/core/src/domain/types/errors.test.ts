@@ -2,9 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   FitParsingError,
   KrdValidationError,
+  TcxParsingError,
   ToleranceExceededError,
   createFitParsingError,
   createKrdValidationError,
+  createTcxParsingError,
   createToleranceExceededError,
 } from "./errors";
 
@@ -235,6 +237,85 @@ describe("Domain Errors", () => {
     });
   });
 
+  describe("TcxParsingError", () => {
+    it("should create error with message", () => {
+      // Arrange
+      const message = "Failed to parse TCX file";
+
+      // Act
+      const error = new TcxParsingError(message);
+
+      // Assert
+      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(TcxParsingError);
+      expect(error.name).toBe("TcxParsingError");
+      expect(error.message).toBe("Failed to parse TCX file");
+      expect(error.cause).toBeUndefined();
+      expect(error.stack).toBeDefined();
+    });
+
+    it("should create error with message and cause", () => {
+      // Arrange
+      const message = "Failed to parse TCX file";
+      const cause = new Error("Invalid XML structure");
+
+      // Act
+      const error = new TcxParsingError(message, cause);
+
+      // Assert
+      expect(error).toBeInstanceOf(TcxParsingError);
+      expect(error.message).toBe("Failed to parse TCX file");
+      expect(error.cause).toBe(cause);
+    });
+
+    it("should work with instanceof checks", () => {
+      // Arrange
+      const error = new TcxParsingError("Test");
+
+      // Act & Assert
+      expect(error instanceof Error).toBe(true);
+      expect(error instanceof TcxParsingError).toBe(true);
+      expect(error instanceof FitParsingError).toBe(false);
+      expect(error instanceof KrdValidationError).toBe(false);
+    });
+
+    it("should preserve stack trace", () => {
+      // Arrange & Act
+      const error = new TcxParsingError("Test error");
+
+      // Assert
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain("TcxParsingError");
+      expect(error.stack).toContain("Test error");
+    });
+  });
+
+  describe("createTcxParsingError factory", () => {
+    it("should create TcxParsingError via factory function", () => {
+      // Arrange
+      const message = "Factory test";
+
+      // Act
+      const error = createTcxParsingError(message);
+
+      // Assert
+      expect(error).toBeInstanceOf(TcxParsingError);
+      expect(error.message).toBe("Factory test");
+    });
+
+    it("should create error with cause via factory", () => {
+      // Arrange
+      const message = "Factory test";
+      const cause = new Error("Original error");
+
+      // Act
+      const error = createTcxParsingError(message, cause);
+
+      // Assert
+      expect(error.cause).toBe(cause);
+    });
+  });
+
   describe("Error catching patterns", () => {
     it("should catch specific error types", () => {
       // Arrange
@@ -254,10 +335,29 @@ describe("Domain Errors", () => {
       }
     });
 
+    it("should catch TCX parsing errors", () => {
+      // Arrange
+      const throwTcxError = () => {
+        throw new TcxParsingError("TCX parse failed");
+      };
+
+      // Act & Assert
+      try {
+        throwTcxError();
+        expect.fail("Should have thrown");
+      } catch (error) {
+        expect(error).toBeInstanceOf(TcxParsingError);
+        if (error instanceof TcxParsingError) {
+          expect(error.message).toBe("TCX parse failed");
+        }
+      }
+    });
+
     it("should distinguish between error types", () => {
       // Arrange
       const errors = [
         new FitParsingError("FIT error"),
+        new TcxParsingError("TCX error"),
         new KrdValidationError("Validation error", []),
         new ToleranceExceededError("Tolerance error", []),
       ];
@@ -266,6 +366,8 @@ describe("Domain Errors", () => {
       for (const error of errors) {
         if (error instanceof FitParsingError) {
           expect(error.name).toBe("FitParsingError");
+        } else if (error instanceof TcxParsingError) {
+          expect(error.name).toBe("TcxParsingError");
         } else if (error instanceof KrdValidationError) {
           expect(error.name).toBe("KrdValidationError");
         } else if (error instanceof ToleranceExceededError) {

@@ -10,10 +10,15 @@ describe("createDefaultProviders", () => {
     // Assert
     expect(providers.fitReader).toBeDefined();
     expect(providers.fitWriter).toBeDefined();
+    expect(providers.tcxValidator).toBeDefined();
+    expect(providers.tcxReader).toBeDefined();
+    expect(providers.tcxWriter).toBeDefined();
     expect(providers.schemaValidator).toBeDefined();
     expect(providers.toleranceChecker).toBeDefined();
     expect(providers.convertFitToKrd).toBeDefined();
     expect(providers.convertKrdToFit).toBeDefined();
+    expect(providers.convertTcxToKrd).toBeDefined();
+    expect(providers.convertKrdToTcx).toBeDefined();
     expect(providers.logger).toBeDefined();
   });
 
@@ -80,5 +85,74 @@ describe("createDefaultProviders", () => {
     expect(providers.toleranceChecker.checkHeartRate).toBeDefined();
     expect(providers.toleranceChecker.checkCadence).toBeDefined();
     expect(providers.toleranceChecker.checkPace).toBeDefined();
+  });
+
+  it("should create tcxValidator with logger", () => {
+    // Arrange
+    const mockLogger: Logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+
+    // Act
+    const providers = createDefaultProviders(mockLogger);
+
+    // Assert
+    expect(providers.tcxValidator).toBeDefined();
+    expect(typeof providers.tcxValidator).toBe("function");
+  });
+
+  it("should create tcxReader with logger", () => {
+    // Arrange
+    const mockLogger: Logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+
+    // Act
+    const providers = createDefaultProviders(mockLogger);
+
+    // Assert
+    expect(providers.tcxReader).toBeDefined();
+    expect(typeof providers.tcxReader).toBe("function");
+  });
+
+  it("should create tcxWriter with logger and validator", () => {
+    // Arrange
+    const mockLogger: Logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+
+    // Act
+    const providers = createDefaultProviders(mockLogger);
+
+    // Assert
+    expect(providers.tcxWriter).toBeDefined();
+    expect(typeof providers.tcxWriter).toBe("function");
+  });
+
+  it("should wire tcxReader to convertTcxToKrd use case", () => {
+    // Arrange
+    const providers = createDefaultProviders();
+
+    // Assert
+    expect(providers.convertTcxToKrd).toBeDefined();
+    expect(typeof providers.convertTcxToKrd).toBe("function");
+  });
+
+  it("should wire tcxWriter to convertKrdToTcx use case", () => {
+    // Arrange
+    const providers = createDefaultProviders();
+
+    // Assert
+    expect(providers.convertKrdToTcx).toBeDefined();
+    expect(typeof providers.convertKrdToTcx).toBe("function");
   });
 });

@@ -36,6 +36,7 @@ export const workoutStepSchema = z.object({
   intensity: intensitySchema.optional(),
   notes: z.string().max(256).optional(),
   equipment: equipmentSchema.optional(),
+  extensions: z.record(z.unknown()).optional(),
 });
 
 export const repetitionBlockSchema = z.object({
@@ -50,6 +51,7 @@ export const workoutSchema = z.object({
   poolLength: z.number().positive().optional(),
   poolLengthUnit: z.literal("meters").optional(),
   steps: z.array(z.union([workoutStepSchema, repetitionBlockSchema])),
+  extensions: z.record(z.unknown()).optional(),
 });
 
 export type WorkoutStep = z.infer<typeof workoutStepSchema>;

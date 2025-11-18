@@ -4,7 +4,7 @@
   "description": "Analyzes PR review comments, categorizes them, implements fixes, and posts responses to GitHub",
   "version": "1",
   "when": {
-    "type": "manual"
+    "type": "userTriggered"
   },
   "then": {
     "type": "askAgent",
