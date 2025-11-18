@@ -4,6 +4,8 @@ import {
 } from "../../../domain/schemas/duration";
 import type { Logger } from "../../../ports/logger";
 import { tcxDurationTypeSchema } from "../schemas/tcx-duration";
+import { restoreKaiordDuration } from "./duration-kaiord-restorer";
+import { convertStandardTcxDuration } from "./duration-standard-converter";
 
 export type TcxDurationData = {
   durationType?: string;
@@ -60,26 +62,19 @@ export const convertTcxDuration = (
     return null;
   }
 
+  // First check for kaiord attributes to restore advanced duration types
+  const kaiordDuration = restoreKaiordDuration(tcxDuration, logger);
+  if (kaiordDuration) {
+    return kaiordDuration;
+  }
+
+  // Then check for standard TCX duration types
+  const standardDuration = convertStandardTcxDuration(tcxDuration);
+  if (standardDuration) {
+    return standardDuration;
+  }
+
   const durationType = tcxDuration["@_xsi:type"] as string | undefined;
-
-  if (durationType === "Time_t") {
-    const seconds = tcxDuration.Seconds as number | undefined;
-    if (typeof seconds === "number" && seconds > 0) {
-      return { type: "time", seconds };
-    }
-  }
-
-  if (durationType === "Distance_t") {
-    const meters = tcxDuration.Meters as number | undefined;
-    if (typeof meters === "number" && meters > 0) {
-      return { type: "distance", meters };
-    }
-  }
-
-  if (durationType === "LapButton_t") {
-    return { type: "open" };
-  }
-
   logger.warn("Unsupported duration type", { durationType });
   return null;
 };
