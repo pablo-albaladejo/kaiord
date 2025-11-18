@@ -1,5 +1,5 @@
-import { readFileSync } from "fs";
-import { join } from "path";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createToleranceChecker } from "../../../domain/validation/tolerance-checker";
 import { createMockLogger } from "../../../tests/helpers/test-utils";
@@ -8,6 +8,7 @@ import {
   createFastXmlZwiftWriter,
 } from "../fast-xml-parser";
 import { createXsdZwiftValidator } from "../xsd-validator";
+import { compareRepetitionBlocks } from "./repetition-block-comparer";
 
 describe("Round-trip: Zwift → KRD → Zwift", () => {
   it("should preserve SteadyState intervals through round-trip", async () => {
@@ -155,43 +156,11 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
 
     // Find and compare repetition blocks
     for (let i = 0; i < workout1.steps.length; i++) {
-      const step1 = workout1.steps[i];
-      const step2 = workout2.steps[i];
-
-      if ("repeatCount" in step1 && "repeatCount" in step2) {
-        expect(step2.repeatCount).toBe(step1.repeatCount);
-        expect(step2.steps.length).toBe(step1.steps.length);
-
-        // Check nested steps with tolerance
-        for (let j = 0; j < step1.steps.length; j++) {
-          const nestedStep1 = step1.steps[j];
-          const nestedStep2 = step2.steps[j];
-
-          expect(nestedStep2.durationType).toBe(nestedStep1.durationType);
-          expect(nestedStep2.targetType).toBe(nestedStep1.targetType);
-
-          // Check duration with tolerance
-          if (nestedStep1.duration.seconds !== undefined) {
-            const violation = toleranceChecker.checkTime(
-              nestedStep1.duration.seconds,
-              nestedStep2.duration.seconds!
-            );
-            expect(violation).toBeNull();
-          }
-
-          // Check power with tolerance
-          if (
-            nestedStep1.targetType === "power" &&
-            nestedStep1.target.value.unit === "percent_ftp"
-          ) {
-            const violation = toleranceChecker.checkPower(
-              nestedStep1.target.value.value!,
-              nestedStep2.target.value.value!
-            );
-            expect(violation).toBeNull();
-          }
-        }
-      }
+      compareRepetitionBlocks(
+        workout1.steps[i],
+        workout2.steps[i],
+        toleranceChecker
+      );
     }
   });
 });
