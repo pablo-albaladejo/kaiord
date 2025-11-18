@@ -150,19 +150,19 @@ The Workout SPA Editor is a mobile-first single-page application built with Reac
 
 ### Requirement 12
 
-**User Story:** As an athlete, I want to import and export my workout to FIT, TCX, and PWX formats, so that I can load it directly into my training device and edit existing workout files
+**User Story:** As an athlete, I want to import and export my workout to FIT, TCX, and ZWO formats, so that I can load it directly into my training device and edit existing workout files
 
 #### Acceptance Criteria
 
-1. WHEN THE user initiates file loading, THE Workout SPA Editor SHALL provide a file input accepting .krd, .json, .fit, .tcx, and .pwx files
+1. WHEN THE user initiates file loading, THE Workout SPA Editor SHALL provide a file input accepting .krd, .json, .fit, .tcx, and .zwo files
 2. WHEN THE user selects a FIT file, THE Workout SPA Editor SHALL convert the FIT binary to KRD format using the @kaiord/core library
 3. WHEN THE user selects a TCX file, THE Workout SPA Editor SHALL convert the TCX XML to KRD format using the @kaiord/core library
-4. WHEN THE user selects a PWX file, THE Workout SPA Editor SHALL convert the PWX XML to KRD format using the @kaiord/core library
+4. WHEN THE user selects a ZWO file, THE Workout SPA Editor SHALL convert the ZWO XML to KRD format using the @kaiord/core library
 5. WHEN THE import conversion fails, THE Workout SPA Editor SHALL display an error message with specific conversion issues
-6. WHEN THE user initiates export, THE Workout SPA Editor SHALL provide format selection options (FIT, TCX, PWX, KRD)
+6. WHEN THE user initiates export, THE Workout SPA Editor SHALL provide format selection options (FIT, TCX, ZWO, KRD)
 7. WHEN THE user selects FIT format for export, THE Workout SPA Editor SHALL convert the KRD workout to FIT binary format using the @kaiord/core library
 8. WHEN THE user selects TCX format for export, THE Workout SPA Editor SHALL convert the KRD workout to TCX XML format using the @kaiord/core library
-9. WHEN THE user selects PWX format for export, THE Workout SPA Editor SHALL convert the KRD workout to PWX XML format using the @kaiord/core library
+9. WHEN THE user selects ZWO format for export, THE Workout SPA Editor SHALL convert the KRD workout to ZWO XML format using the @kaiord/core library
 10. WHEN THE export conversion succeeds, THE Workout SPA Editor SHALL trigger a file download with the appropriate file extension
 
 ### Requirement 13

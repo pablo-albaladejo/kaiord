@@ -296,7 +296,7 @@ try {
     "fit",
     "garmin",
     "tcx",
-    "pwx",
+    "zwo",
     "krd",
     "fitness",
     "training",
@@ -670,4 +670,4 @@ Users can debug into the library code with proper source mapping.
 - **Changelog Automation**: Use conventional commits + standard-version
 - **Bundle Size Monitoring**: Track bundle size in CI
 - **Performance Benchmarks**: Track conversion performance over time
-- **Additional Formats**: TCX and PWX support
+- **Additional Formats**: TCX and ZWO support

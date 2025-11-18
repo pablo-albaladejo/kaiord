@@ -2,7 +2,7 @@
 
 ## Introduction
 
-This specification defines the requirements for **@kaiord/cli**, a command-line interface tool that exposes the functionality of @kaiord/core for converting workout files between different formats (FIT, KRD, TCX, PWX). The CLI will be installable globally via npm and provide an intuitive interface for file conversion operations.
+This specification defines the requirements for **@kaiord/cli**, a command-line interface tool that exposes the functionality of @kaiord/core for converting workout files between different formats (FIT, KRD, TCX, ZWO). The CLI will be installable globally via npm and provide an intuitive interface for file conversion operations.
 
 ## Glossary
 
@@ -10,7 +10,7 @@ This specification defines the requirements for **@kaiord/cli**, a command-line 
 - **KRD**: Kaiord Representation Definition - the canonical JSON format for workout data
 - **FIT**: Flexible and Interoperable Data Transfer - Garmin's binary workout file format
 - **TCX**: Training Center XML - Garmin's XML-based workout file format
-- **PWX**: PowerAgent Workout XML - TrainingPeaks' XML-based workout file format
+- **ZWO**: Zwift Workout XML - Zwift's XML-based workout file format
 - **Kaiord Core**: The @kaiord/core library that provides conversion functionality
 - **Global Installation**: Installing an npm package with the -g flag to make it available system-wide
 - **Exit Code**: A numeric value returned by a program to indicate success (0) or failure (non-zero)
@@ -60,7 +60,7 @@ This specification defines the requirements for **@kaiord/cli**, a command-line 
 1. WHEN THE user provides a file with `.fit` extension, THE Kaiord CLI SHALL automatically detect it as FIT format
 2. WHEN THE user provides a file with `.krd` extension, THE Kaiord CLI SHALL automatically detect it as KRD format
 3. WHEN THE user provides a file with `.tcx` extension, THE Kaiord CLI SHALL automatically detect it as TCX format
-4. WHEN THE user provides a file with `.pwx` extension, THE Kaiord CLI SHALL automatically detect it as PWX format
+4. WHEN THE user provides a file with `.zwo` extension, THE Kaiord CLI SHALL automatically detect it as ZWO format
 5. WHEN THE file extension is not recognized, THE Kaiord CLI SHALL display an error message listing supported formats and exit with code 1
 
 ### Requirement 5
@@ -72,7 +72,7 @@ This specification defines the requirements for **@kaiord/cli**, a command-line 
 1. WHEN THE user executes `kaiord convert --input data.bin --input-format fit --output workout.krd`, THE Kaiord CLI SHALL treat the input as FIT format regardless of extension
 2. WHEN THE user specifies `--output-format`, THE Kaiord CLI SHALL use the specified format for the output file
 3. WHEN THE user specifies both automatic detection and explicit format flags, THE Kaiord CLI SHALL prioritize the explicit format flags
-4. WHEN THE user specifies an invalid format value, THE Kaiord CLI SHALL display an error message listing valid formats (fit, krd, tcx, pwx) and exit with code 1
+4. WHEN THE user specifies an invalid format value, THE Kaiord CLI SHALL display an error message listing valid formats (fit, krd, tcx, zwo) and exit with code 1
 
 ### Requirement 6
 

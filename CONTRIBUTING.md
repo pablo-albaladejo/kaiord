@@ -211,7 +211,7 @@ packages/core/src/
 ├── domain/          # Pure business logic (no external dependencies)
 ├── application/     # Use cases (depends on ports only)
 ├── ports/           # Interface contracts
-└── adapters/        # External integrations (FIT, TCX, PWX)
+└── adapters/        # External integrations (FIT, TCX, ZWO)
 ```
 
 **Rules:**

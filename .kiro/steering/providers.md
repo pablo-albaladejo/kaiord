@@ -1,12 +1,12 @@
 # Providers & Dependency Injection
 
-Goal: replace `.fit`/`.tcx`/`.pwx` providers without touching business code.
+Goal: replace `.fit`/`.tcx`/`.zwo` providers without touching business code.
 
 Contracts (ports)
 
 - `FitReader.readToKRD(buf: Uint8Array): Promise<KRD>`
 - `FitWriter.writeFromKRD(krd: KRD): Promise<Uint8Array>`
-- Equivalent pairs for TCX & PWX
+- Equivalent pairs for TCX & Zwift
 
 Implementations (adapters)
 

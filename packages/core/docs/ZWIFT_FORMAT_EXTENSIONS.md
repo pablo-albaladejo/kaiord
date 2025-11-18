@@ -2,7 +2,7 @@
 
 ## Overview
 
-Kaiord extends the standard Zwift workout format (.zwo) to support additional workout data that is not natively supported by Zwift but is necessary for round-trip conversions with other formats (FIT, TCX, PWX).
+Kaiord extends the standard Zwift workout format (.zwo) to support additional workout data that is not natively supported by Zwift but is necessary for round-trip conversions with other formats (FIT, TCX).
 
 ## Standard Zwift Format Limitations
 
