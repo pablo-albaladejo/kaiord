@@ -10,6 +10,7 @@ coverage/
 # Generated files
 *.log
 .DS_Store
+packages/core/schema/*.json
 
 # Git
 .git/

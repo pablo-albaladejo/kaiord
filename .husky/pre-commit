@@ -1,6 +1,22 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+echo "🏗️  Running build before commit..."
 
+# Build all packages
+pnpm build
+
+# Check exit code
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Build failed! Commit blocked."
+  echo ""
+  echo "Fix the build errors and try again."
+  echo ""
+  echo "To skip this check (NOT RECOMMENDED):"
+  echo "  git commit --no-verify"
+  exit 1
+fi
+
+echo "✅ Build passed!"
+echo ""
 echo "🧪 Running tests before commit..."
 
 # Run all tests in the monorepo

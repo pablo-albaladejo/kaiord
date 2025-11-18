@@ -10,12 +10,16 @@ Runs automatically before every commit.
 
 **What it does:**
 
-1. Runs `pnpm test` to execute all tests in the monorepo
-2. Blocks commit if any tests fail
-3. Shows which tests failed with clear error messages
+1. Runs `pnpm build` to build all packages in the monorepo
+2. Blocks commit if build fails
+3. Runs `pnpm test` to execute all tests in the monorepo
+4. Blocks commit if any tests fail
+5. Shows clear error messages for failures
 
 **Why this is important:**
 
+- ✅ Ensures code compiles before committing
+- ✅ Catches TypeScript errors early
 - ✅ Catches bugs before they reach the repository
 - ✅ Ensures all tests pass locally before CI/CD
 - ✅ Prevents broken code from being committed
@@ -29,9 +33,15 @@ Runs automatically before every commit.
 git add .
 git commit -m "feat: add new feature"
 
-# Husky runs tests automatically
+# Husky runs build and tests automatically
+# 🏗️  Running build before commit...
+# ✅ Build passed!
 # 🧪 Running tests before commit...
 # ✅ All tests passed!
+
+# If build fails:
+# ❌ Build failed! Commit blocked.
+# Fix the build errors and try again.
 
 # If tests fail:
 # ❌ Tests failed! Commit blocked.
@@ -45,7 +55,7 @@ git commit -m "feat: add new feature"
 git commit --no-verify
 ```
 
-**Note:** Skipping tests is strongly discouraged. If you must skip, ensure tests pass before pushing.
+**Note:** Skipping build and tests is strongly discouraged. If you must skip, ensure both build and tests pass before pushing.
 
 ---
 
@@ -191,17 +201,16 @@ chmod +x .husky/pre-push
 ### Create a new hook
 
 ```bash
-# Create the hook file
-echo '#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
-# Your commands here
+# Create the hook file (Husky v9+ format - no shebang needed)
+echo '# Your commands here
 echo "Running custom hook..."
 ' > .husky/my-hook
 
 # Make it executable
 chmod +x .husky/my-hook
 ```
+
+**Note:** Husky v9+ uses a simplified format without the `#!/usr/bin/env sh` shebang and `. "$(dirname -- "$0")/_/husky.sh"` line. These are deprecated and will fail in v10.
 
 ### Available Git hooks
 
