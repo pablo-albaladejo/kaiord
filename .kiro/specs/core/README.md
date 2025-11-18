@@ -63,7 +63,6 @@ This directory contains specifications for the `@kaiord/core` package, which pro
 
 ---
 
-
 ### 🔄 Zwift ↔ KRD Conversion (PLANNED)
 
 **Status:** Spec complete, implementation pending
