@@ -63,36 +63,6 @@ This directory contains specifications for the `@kaiord/core` package, which pro
 
 ---
 
-### 🔄 PWX ↔ KRD Conversion (PLANNED)
-
-**Status:** Spec complete, implementation pending
-
-**Directory:** `pwx-to-krd-conversion/`
-
-**Description:** Bidirectional conversion between PowerAgent Workout XML (PWX) files and KRD format. PWX is TrainingPeaks' XML-based format for structured workouts.
-
-**Key Features:**
-
-- PWX → KRD and KRD → PWX conversion
-- Support for power, heart rate, speed, and cadence targets
-- Time, distance, and open durations
-- Repetition blocks
-- Extension preservation
-- Round-trip validation with tolerances
-
-**Implementation Plan:**
-
-- Uses `fast-xml-parser` for XML parsing/building
-- Reuses domain schemas from FIT conversion
-- Reuses validation and tolerance checking
-- Independent implementation (no FIT/TCX dependencies)
-
-**Dependencies:**
-
-- `fast-xml-parser` (^4.3.0)
-- Shared domain layer with FIT conversion
-
----
 
 ### 🔄 Zwift ↔ KRD Conversion (PLANNED)
 
@@ -119,7 +89,7 @@ This directory contains specifications for the `@kaiord/core` package, which pro
 - Reuses domain schemas from FIT conversion
 - Reuses validation and tolerance checking
 - Reuses XML patterns from TCX conversion
-- Independent implementation (no FIT/TCX/PWX dependencies)
+- Independent implementation (no FIT/TCX dependencies)
 
 **Dependencies:**
 
@@ -143,7 +113,7 @@ packages/core/
 │   │   ├── sport.ts
 │   │   └── intensity.ts
 │   ├── types/
-│   │   └── errors.ts           # Error types (FitParsingError, TcxParsingError, PwxParsingError)
+│   │   └── errors.ts           # Error types (FitParsingError, TcxParsingError, ZwiftParsingError)
 │   └── validation/             # Validation (SHARED)
 │       ├── schema-validator.ts
 │       └── tolerance-checker.ts
@@ -153,8 +123,8 @@ packages/core/
 │   │   ├── convert-krd-to-fit.ts
 │   │   ├── convert-tcx-to-krd.ts
 │   │   ├── convert-krd-to-tcx.ts
-│   │   ├── convert-pwx-to-krd.ts
-│   │   ├── convert-krd-to-pwx.ts
+│   │   ├── convert-zwift-to-krd.ts
+│   │   ├── convert-krd-to-zwift.ts
 │   │   └── validate-round-trip.ts
 │   └── providers.ts            # DI wiring for all formats
 ├── ports/
@@ -162,15 +132,15 @@ packages/core/
 │   ├── fit-writer.ts
 │   ├── tcx-reader.ts
 │   ├── tcx-writer.ts
-│   ├── pwx-reader.ts
-│   ├── pwx-writer.ts
+│   ├── zwift-reader.ts
+│   ├── zwift-writer.ts
 │   └── logger.ts               # Logger contract (SHARED)
 └── adapters/
     ├── fit/
     │   └── garmin-fitsdk.ts    # @garmin/fitsdk implementation
     ├── tcx/
     │   └── fast-xml-parser.ts  # fast-xml-parser implementation
-    ├── pwx/
+    ├── zwift/
     │   └── fast-xml-parser.ts  # fast-xml-parser implementation
     └── logger/
         └── console-logger.ts   # Console logger (SHARED)
@@ -203,19 +173,14 @@ The following components are shared across all three conversions:
    - Adds XML parsing capability
    - Independent of FIT implementation
 
-3. 🔄 **PWX ↔ KRD** (After TCX)
+3. 🔄 **Zwift ↔ KRD** (After TCX)
    - Reuses domain schemas
    - Reuses XML parsing patterns from TCX
    - Independent of FIT/TCX implementations
 
-4. 🔄 **Zwift ↔ KRD** (After PWX)
-   - Reuses domain schemas
-   - Reuses XML parsing patterns from TCX
-   - Independent of FIT/TCX/PWX implementations
-
 ## Testing Strategy
 
-All three conversions follow the same testing approach:
+All conversions follow the same testing approach:
 
 ### Unit Tests
 
@@ -269,7 +234,6 @@ The `@kaiord/core` package exports:
 
 - `convertFitToKrd`, `convertKrdToFit`
 - `convertTcxToKrd`, `convertKrdToTcx` (planned)
-- `convertPwxToKrd`, `convertKrdToPwx` (planned)
 - `convertZwiftToKrd`, `convertKrdToZwift` (planned)
 
 ### Providers
@@ -280,7 +244,6 @@ The `@kaiord/core` package exports:
 
 - FitReader, FitWriter
 - TcxReader, TcxWriter (planned)
-- PwxReader, PwxWriter (planned)
 - ZwiftReader, ZwiftWriter (planned)
 - Logger
 
@@ -289,7 +252,7 @@ The `@kaiord/core` package exports:
 ### External Libraries
 
 - `@garmin/fitsdk` - FIT parsing/encoding
-- `fast-xml-parser` - XML parsing/building (TCX, PWX)
+- `fast-xml-parser` - XML parsing/building (TCX, Zwift)
 - `zod` - Schema validation
 - `zod-to-json-schema` - JSON Schema generation
 
@@ -303,7 +266,6 @@ The `@kaiord/core` package exports:
 
 - [FIT SDK Documentation](https://github.com/garmin/fit-javascript-sdk)
 - [TCX Schema](https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd)
-- [PWX Schema](http://www.peaksware.com/PWX/1/0/pwx.xsd)
 - [Zwift Workout Format](https://zwift.com) - XML-based workout format
 - [Zod Documentation](https://zod.dev)
 - [Hexagonal Architecture](https://alistair.cockburn.us/hexagonal-architecture/)

@@ -74,7 +74,7 @@ The application leverages `@kaiord/core` as a workspace dependency to:
 
 - Import canonical KRD types (`Workout`, `WorkoutStep`, `RepetitionBlock`, `Duration`, `Target`, etc.)
 - Re-export Zod schemas for validation (`workoutSchema`, `workoutStepSchema`, etc.)
-- Enable format conversion (KRD ↔ FIT/TCX/PWX) for import/export features
+- Enable format conversion (KRD ↔ FIT/TCX/ZWO) for import/export features
 - Ensure type consistency across the Kaiord ecosystem
 
 This integration eliminates type duplication and ensures the SPA editor works with the same data structures used by the CLI and core library.
@@ -82,7 +82,7 @@ This integration eliminates type duplication and ensures the SPA editor works wi
 **Format Conversion Architecture:**
 
 ```typescript
-// Import: FIT/TCX/PWX → KRD
+// Import: FIT/TCX/ZWO → KRD
 import { toKRD } from "@kaiord/core";
 
 const handleFileImport = async (file: File) => {
@@ -94,8 +94,8 @@ const handleFileImport = async (file: File) => {
     ? "fit"
     : file.name.endsWith(".tcx")
       ? "tcx"
-      : file.name.endsWith(".pwx")
-        ? "pwx"
+      : file.name.endsWith(".zwo")
+        ? "zwo"
         : "krd";
 
   if (format === "krd") {
@@ -109,12 +109,12 @@ const handleFileImport = async (file: File) => {
   return krd;
 };
 
-// Export: KRD → FIT/TCX/PWX
+// Export: KRD → FIT/TCX/ZWO
 import { fromKRD } from "@kaiord/core";
 
 const handleFileExport = async (
   krd: KRD,
-  format: "fit" | "tcx" | "pwx" | "krd"
+  format: "fit" | "tcx" | "zwo" | "krd"
 ) => {
   if (format === "krd") {
     // Export as JSON
@@ -259,7 +259,7 @@ interface WorkoutChartProps {
 
 ### Core Domain Types
 
-**Note:** Core KRD types (`Workout`, `WorkoutStep`, `RepetitionBlock`, `Duration`, `Target`, etc.) are imported from `@kaiord/core` to ensure consistency with the canonical format and enable seamless conversion to/from FIT, TCX, and PWX formats.
+**Note:** Core KRD types (`Workout`, `WorkoutStep`, `RepetitionBlock`, `Duration`, `Target`, etc.) are imported from `@kaiord/core` to ensure consistency with the canonical format and enable seamless conversion to/from FIT, TCX, and ZWO formats.
 
 **UserProfile:**
 
@@ -1084,7 +1084,7 @@ const trackWorkoutCreated = (workout: KRD) => {
   });
 };
 
-const trackWorkoutExported = (format: "fit" | "tcx" | "pwx" | "krd") => {
+const trackWorkoutExported = (format: "fit" | "tcx" | "zwo" | "krd") => {
   analytics.trackEvent("workout_exported", {
     format,
     timestamp: new Date().toISOString(),

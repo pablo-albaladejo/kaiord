@@ -26,7 +26,7 @@ The application has a fully functional MVP with all core features:
 - 🔄 Drag-and-drop step reordering
 - 👤 User profiles with training zones
 - 📚 Workout library with local storage
-- 📤 Export to FIT/TCX/PWX formats
+- 📤 Export to FIT/TCX/ZWO formats
 - 🎨 Theme system (light/dark modes)
 - 🌍 Internationalization (i18n)
 - 📱 PWA support for offline usage

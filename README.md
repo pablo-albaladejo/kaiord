@@ -16,7 +16,7 @@
 
 It provides:
 
-- `@kaiord/core`: a TypeScript library to read/write **.fit**, **.tcx**, **.pwx** and **.krd** (Kaiord) files.
+- `@kaiord/core`: a TypeScript library to read/write **.fit**, **.tcx**, **.zwo** and **.krd** (Kaiord) files.
 - `@kaiord/cli`: a command-line tool to convert between formats.
 
 ---
@@ -26,7 +26,7 @@ It provides:
 - Unified JSON-based format `.krd` (Kaiord Representation Definition)
 - Schema validation (AJV)
 - Spec-driven development with [Kiro](https://kiro.dev)
-- Round-trip safe conversions between FIT / TCX / PWX / KRD
+- Round-trip safe conversions between FIT / TCX / ZWO / KRD
 - Clean architecture & fully typed API
 
 ### Supported FIT Fields
@@ -182,7 +182,7 @@ See [Setup Checklist](./.github/SETUP_CHECKLIST.md) for all options.
 - [FIT File Types: Workout](https://developer.garmin.com/fit/file-types/workout/) - Workout file type specification
 - [Training Center XML (TCX)](https://en.wikipedia.org/wiki/Training_Center_XML) - Garmin's XML-based format
 - [TCX Schema (XSD)](https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd) - Official Garmin TCX schema definition
-- [PWX (TrainingPeaks)](https://www.trainingpeaks.com/) - TrainingPeaks workout format
+- [Zwift Workout Format (ZWO)](https://zwift.com) - Zwift's XML-based workout format
 
 ### Related Projects
 

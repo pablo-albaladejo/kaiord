@@ -2,7 +2,7 @@
 
 ## Overview
 
-The @kaiord/cli package provides a command-line interface for converting workout files between different formats (FIT, KRD, TCX, PWX). It wraps the @kaiord/core library with a user-friendly CLI that supports both interactive terminal usage and CI/CD automation.
+The @kaiord/cli package provides a command-line interface for converting workout files between different formats (FIT, KRD, TCX, ZWO). It wraps the @kaiord/core library with a user-friendly CLI that supports both interactive terminal usage and CI/CD automation.
 
 The CLI follows hexagonal architecture principles, treating the terminal as an adapter that presents the core library's functionality to end users.
 
@@ -87,8 +87,8 @@ const main = async (): Promise<void> => {
 type ConvertOptions = {
   input: string;
   output: string;
-  inputFormat?: "fit" | "krd" | "tcx" | "pwx";
-  outputFormat?: "fit" | "krd" | "tcx" | "pwx";
+  inputFormat?: "fit" | "krd" | "tcx" | "zwo";
+  outputFormat?: "fit" | "krd" | "tcx" | "zwo";
   verbose?: boolean;
   quiet?: boolean;
   json?: boolean;
@@ -139,7 +139,7 @@ export const validateCommand = async (
 **Interface:**
 
 ```typescript
-export type FileFormat = "fit" | "krd" | "tcx" | "pwx";
+export type FileFormat = "fit" | "krd" | "tcx" | "zwo";
 
 export const readFile = async (
   path: string,

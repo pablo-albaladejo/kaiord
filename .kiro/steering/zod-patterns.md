@@ -313,7 +313,7 @@ import { z } from "zod";
 const cliArgsSchema = z.object({
   input: z.string(),
   output: z.string(),
-  format: z.enum(["fit", "tcx", "pwx"]),
+  format: z.enum(["fit", "tcx", "zwo"]),
 });
 
 export const convertCommand = async (args: unknown) => {
