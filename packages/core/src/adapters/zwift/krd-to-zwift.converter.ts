@@ -29,12 +29,18 @@ const buildXmlString = (workoutFile: Record<string, unknown>): string => {
     indentBy: "  ",
   });
 
+  // Add kaiord namespace for round-trip data preservation
+  const workoutFileWithNamespace = {
+    "@_xmlns:kaiord": "http://kaiord.dev/zwift-extensions/1.0",
+    ...workoutFile,
+  };
+
   const xmlObj = {
     "?xml": {
       "@_version": "1.0",
       "@_encoding": "UTF-8",
     },
-    workout_file: workoutFile,
+    workout_file: workoutFileWithNamespace,
   };
 
   return builder.build(xmlObj) as string;
@@ -49,7 +55,13 @@ export const convertKRDToZwift = (krd: KRD, logger: Logger): string => {
     unknown
   >;
 
-  const workoutFile = buildWorkoutFile(workoutData, zwiftExtensions);
+  const workoutFile = buildWorkoutFile(
+    workoutData,
+    zwiftExtensions,
+    krd.metadata,
+    krd.extensions?.fit as Record<string, unknown> | undefined,
+    logger
+  );
   const xmlString = buildXmlString(workoutFile);
 
   logger.debug("Zwift XML structure built successfully");

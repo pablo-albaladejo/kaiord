@@ -19,7 +19,7 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
     const toleranceChecker = createToleranceChecker();
     const zwoPath = join(
       __dirname,
-      "../../../tests/fixtures/zwift-files/WorkoutSteadyState.zwo"
+      "../../../tests/fixtures/zwift-files/WorkoutIndividualSteps.zwo"
     );
     const originalXml = readFileSync(zwoPath, "utf-8");
 
@@ -103,7 +103,7 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
     const toleranceChecker = createToleranceChecker();
     const zwoPath = join(
       __dirname,
-      "../../../tests/fixtures/zwift-files/WorkoutIntervalsT.zwo"
+      "../../../tests/fixtures/zwift-files/WorkoutRepeatSteps.zwo"
     );
     const originalXml = readFileSync(zwoPath, "utf-8");
 
