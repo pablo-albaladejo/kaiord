@@ -10,6 +10,7 @@ export type ZwiftFreeRideData = {
   durationType?: "time" | "distance";
   Cadence?: number;
   FlatRoad?: number;
+  "@_FlatRoad"?: number;
   stepIndex: number;
   textevent?: ZwiftTextEvent | Array<ZwiftTextEvent>;
 };
@@ -39,12 +40,13 @@ export const mapFreeRideToKrd = (data: ZwiftFreeRideData): WorkoutStep => {
   };
 
   // Store FlatRoad attribute in extensions for round-trip preservation
-  if (data.FlatRoad !== undefined) {
+  const flatRoad = data["@_FlatRoad"] ?? data.FlatRoad;
+  if (flatRoad !== undefined) {
     step.extensions = {
       ...step.extensions,
       zwift: {
         ...((step.extensions?.zwift as Record<string, unknown>) || {}),
-        FlatRoad: data.FlatRoad,
+        FlatRoad: flatRoad,
       },
     };
   }
