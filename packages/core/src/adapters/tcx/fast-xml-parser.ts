@@ -84,7 +84,10 @@ export const createFastXmlTcxWriter =
       });
       throw createTcxValidationError(
         "Generated TCX file does not conform to XSD schema",
-        validationResult.errors
+        validationResult.errors.map((err) => ({
+          field: err.path,
+          message: err.message,
+        }))
       );
     }
 

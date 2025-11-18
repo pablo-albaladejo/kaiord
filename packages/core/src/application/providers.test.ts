@@ -13,12 +13,17 @@ describe("createDefaultProviders", () => {
     expect(providers.tcxValidator).toBeDefined();
     expect(providers.tcxReader).toBeDefined();
     expect(providers.tcxWriter).toBeDefined();
+    expect(providers.zwiftValidator).toBeDefined();
+    expect(providers.zwiftReader).toBeDefined();
+    expect(providers.zwiftWriter).toBeDefined();
     expect(providers.schemaValidator).toBeDefined();
     expect(providers.toleranceChecker).toBeDefined();
     expect(providers.convertFitToKrd).toBeDefined();
     expect(providers.convertKrdToFit).toBeDefined();
     expect(providers.convertTcxToKrd).toBeDefined();
     expect(providers.convertKrdToTcx).toBeDefined();
+    expect(providers.convertZwiftToKrd).toBeDefined();
+    expect(providers.convertKrdToZwift).toBeDefined();
     expect(providers.logger).toBeDefined();
   });
 
@@ -154,5 +159,74 @@ describe("createDefaultProviders", () => {
     // Assert
     expect(providers.convertKrdToTcx).toBeDefined();
     expect(typeof providers.convertKrdToTcx).toBe("function");
+  });
+
+  it("should create zwiftValidator with logger", () => {
+    // Arrange
+    const mockLogger: Logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+
+    // Act
+    const providers = createDefaultProviders(mockLogger);
+
+    // Assert
+    expect(providers.zwiftValidator).toBeDefined();
+    expect(typeof providers.zwiftValidator).toBe("function");
+  });
+
+  it("should create zwiftReader with logger and validator", () => {
+    // Arrange
+    const mockLogger: Logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+
+    // Act
+    const providers = createDefaultProviders(mockLogger);
+
+    // Assert
+    expect(providers.zwiftReader).toBeDefined();
+    expect(typeof providers.zwiftReader).toBe("function");
+  });
+
+  it("should create zwiftWriter with logger and validator", () => {
+    // Arrange
+    const mockLogger: Logger = {
+      debug: vi.fn(),
+      info: vi.fn(),
+      warn: vi.fn(),
+      error: vi.fn(),
+    };
+
+    // Act
+    const providers = createDefaultProviders(mockLogger);
+
+    // Assert
+    expect(providers.zwiftWriter).toBeDefined();
+    expect(typeof providers.zwiftWriter).toBe("function");
+  });
+
+  it("should wire zwiftReader to convertZwiftToKrd use case", () => {
+    // Arrange
+    const providers = createDefaultProviders();
+
+    // Assert
+    expect(providers.convertZwiftToKrd).toBeDefined();
+    expect(typeof providers.convertZwiftToKrd).toBe("function");
+  });
+
+  it("should wire zwiftWriter to convertKrdToZwift use case", () => {
+    // Arrange
+    const providers = createDefaultProviders();
+
+    // Assert
+    expect(providers.convertKrdToZwift).toBeDefined();
+    expect(typeof providers.convertKrdToZwift).toBe("function");
   });
 });

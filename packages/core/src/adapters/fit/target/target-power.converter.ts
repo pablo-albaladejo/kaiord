@@ -24,12 +24,18 @@ const buildPowerRangeTarget = (data: FitTargetData): Target | null => {
     data.customTargetPowerLow !== undefined &&
     data.customTargetPowerHigh !== undefined
   ) {
+    // FIT workoutPower encoding:
+    // - Values 0-999: Percentage of FTP (direct)
+    // - Values >= 1000: Absolute watts (value - 1000)
+    const minValue = interpretWorkoutPower(data.customTargetPowerLow);
+    const maxValue = interpretWorkoutPower(data.customTargetPowerHigh);
+
     return {
       type: targetTypeSchema.enum.power,
       value: {
         unit: targetUnitSchema.enum.range,
-        min: data.customTargetPowerLow,
-        max: data.customTargetPowerHigh,
+        min: minValue.value,
+        max: maxValue.value,
       },
     };
   }
@@ -38,17 +44,43 @@ const buildPowerRangeTarget = (data: FitTargetData): Target | null => {
     data.customTargetValueLow !== undefined &&
     data.customTargetValueHigh !== undefined
   ) {
+    // FIT workoutPower encoding:
+    // - Values 0-999: Percentage of FTP (direct)
+    // - Values >= 1000: Absolute watts (value - 1000)
+    const minValue = interpretWorkoutPower(data.customTargetValueLow);
+    const maxValue = interpretWorkoutPower(data.customTargetValueHigh);
+
     return {
       type: targetTypeSchema.enum.power,
       value: {
         unit: targetUnitSchema.enum.range,
-        min: data.customTargetValueLow,
-        max: data.customTargetValueHigh,
+        min: minValue.value,
+        max: maxValue.value,
       },
     };
   }
 
   return null;
+};
+
+/**
+ * Interprets a workoutPower value from FIT SDK
+ * - Values 0-999: Percentage of FTP (direct)
+ * - Values >= 1000: Absolute watts (value - 1000)
+ */
+const interpretWorkoutPower = (
+  value: number
+): { type: "watts" | "percentage"; value: number } => {
+  if (value >= 1000) {
+    return {
+      type: "watts",
+      value: value - 1000,
+    };
+  }
+  return {
+    type: "percentage",
+    value,
+  };
 };
 
 const buildPowerZoneTarget = (data: FitTargetData): Target | null => {
