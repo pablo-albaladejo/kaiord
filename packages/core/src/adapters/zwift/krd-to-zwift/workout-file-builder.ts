@@ -1,8 +1,12 @@
+import type { KRDMetadata } from "../../../domain/schemas/krd";
 import type {
   RepetitionBlock,
   WorkoutStep,
 } from "../../../domain/schemas/workout";
+import type { Logger } from "../../../ports/logger";
 import { convertStepsToZwiftIntervals } from "./intervals-encoder";
+import { addKrdMetadata } from "./metadata-builder";
+import { addWorkoutProperties, mapSportType } from "./workout-properties";
 
 type WorkoutData = {
   name?: string;
@@ -11,49 +15,29 @@ type WorkoutData = {
 };
 
 type ZwiftExtensions = Record<string, unknown>;
+type FitExtensions = Record<string, unknown>;
 
 export const buildWorkoutFile = (
   workoutData: WorkoutData,
-  zwiftExtensions: ZwiftExtensions
+  zwiftExtensions: ZwiftExtensions,
+  metadata: KRDMetadata,
+  fitExtensions?: FitExtensions,
+  logger?: Logger
 ): Record<string, unknown> => {
-  const sportType =
-    workoutData.sport === "cycling"
-      ? "bike"
-      : workoutData.sport === "running"
-        ? "run"
-        : "bike";
+  const workoutFile: Record<string, unknown> = {};
 
-  const workoutFile: Record<string, unknown> = {
-    "@_xmlns": "http://www.zwift.com/workouts",
-  };
+  // Add author and name first (XSD requires this order)
+  addWorkoutProperties(workoutFile, workoutData.name, zwiftExtensions);
+  // Then sportType
+  workoutFile.sportType = mapSportType(workoutData.sport);
 
-  if (zwiftExtensions.author) {
-    workoutFile.author = zwiftExtensions.author;
-  }
-  if (workoutData.name) {
-    workoutFile.name = workoutData.name;
-  }
-  if (zwiftExtensions.description) {
-    workoutFile.description = zwiftExtensions.description;
-  }
-  workoutFile.sportType = sportType;
-
-  if (zwiftExtensions.durationType) {
-    workoutFile.durationType = zwiftExtensions.durationType;
-  }
-  if (zwiftExtensions.thresholdSecPerKm !== undefined) {
-    workoutFile.thresholdSecPerKm = zwiftExtensions.thresholdSecPerKm;
-  }
-
-  const tags = zwiftExtensions.tags as Array<string> | undefined;
-  if (tags && tags.length > 0) {
-    workoutFile.tags = {
-      tag: tags.map((name) => ({ "@_name": name })),
-    };
-  }
-
-  const intervals = convertStepsToZwiftIntervals(workoutData.steps || []);
+  const intervals = convertStepsToZwiftIntervals(
+    workoutData.steps || [],
+    logger
+  );
   workoutFile.workout = intervals;
+
+  addKrdMetadata(workoutFile, metadata, fitExtensions);
 
   return workoutFile;
 };

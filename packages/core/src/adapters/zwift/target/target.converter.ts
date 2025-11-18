@@ -108,3 +108,28 @@ export const convertKrdCadenceToZwift = (
 ): number => {
   return isRunning ? rpm * 2 : rpm;
 };
+
+/**
+ * Convert power zone (1-7) to percent FTP
+ * Uses typical power zone definitions:
+ * Zone 1 (Recovery): 55% FTP
+ * Zone 2 (Endurance): 75% FTP
+ * Zone 3 (Tempo): 90% FTP
+ * Zone 4 (Threshold): 105% FTP
+ * Zone 5 (VO2 Max): 120% FTP
+ * Zone 6 (Anaerobic): 150% FTP
+ * Zone 7 (Neuromuscular): 200% FTP
+ */
+export const convertPowerZoneToPercentFtp = (zone: number): number => {
+  const zoneMap: Record<number, number> = {
+    1: 55,
+    2: 75,
+    3: 90,
+    4: 105,
+    5: 120,
+    6: 150,
+    7: 200,
+  };
+
+  return zoneMap[zone] || 100; // Default to 100% if zone is invalid
+};

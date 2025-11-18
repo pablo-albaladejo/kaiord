@@ -205,6 +205,7 @@ import type { Logger } from "../../ports/logger";
 import { XMLValidator } from "fast-xml-parser";
 import { readFileSync } from "fs";
 import { join } from "path";
+import { validator } from "xsd-schema-validator";
 
 export const createXsdZwiftValidator =
   (logger: Logger): ZwiftValidator =>
@@ -212,11 +213,7 @@ export const createXsdZwiftValidator =
     try {
       logger.debug("Validating Zwift file against XSD schema");
 
-      // Load XSD schema from file
-      const xsdPath = join(__dirname, "../../../schema/zwift-workout.xsd");
-      const xsdSchema = readFileSync(xsdPath, "utf-8");
-
-      // Validate XML structure first
+      // Step 1: Validate XML well-formedness using fast-xml-parser
       const xmlValidation = XMLValidator.validate(xmlString, {
         allowBooleanAttributes: true,
       });
@@ -226,14 +223,29 @@ export const createXsdZwiftValidator =
           valid: false,
           errors: [
             {
-              path: "root",
+              field: "root",
               message: `XML validation failed: ${xmlValidation.err.msg}`,
             },
           ],
         };
       }
 
-      logger.info("Zwift XML structure is valid");
+      // Step 2: Validate against XSD schema using xsd-schema-validator
+      // Note: validateXML expects file path, not file content
+      const xsdPath = join(__dirname, "../../../schema/zwift-workout.xsd");
+      const xsdValidationResult = await validateXML(xmlString, xsdPath);
+
+      if (!xsdValidationResult.valid) {
+        return {
+          valid: false,
+          errors: xsdValidationResult.messages.map((msg) => ({
+            field: "schema",
+            message: msg,
+          })),
+        };
+      }
+
+      logger.info("Zwift XML validated successfully against XSD schema");
       return { valid: true, errors: [] };
     } catch (error) {
       logger.error("Zwift validation failed", { error });
@@ -241,7 +253,7 @@ export const createXsdZwiftValidator =
         valid: false,
         errors: [
           {
-            path: "root",
+            field: "root",
             message: error instanceof Error ? error.message : "Unknown error",
           },
         ],

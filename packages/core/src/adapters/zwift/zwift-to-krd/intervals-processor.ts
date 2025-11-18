@@ -17,12 +17,25 @@ type ProcessResult = {
   indexIncrement: number;
 };
 
+const normalizeAttributeNames = (
+  data: Record<string, unknown>
+): Record<string, unknown> => {
+  const normalized: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(data)) {
+    // Remove @_ prefix from attribute names
+    const normalizedKey = key.startsWith("@_") ? key.substring(2) : key;
+    normalized[normalizedKey] = value;
+  }
+  return normalized;
+};
+
 const processSingleStep = (
   interval: IntervalData,
   stepIndex: number,
   durationType: "time" | "distance"
 ): ProcessResult => {
-  const data = { ...interval.data, stepIndex, durationType };
+  const normalizedData = normalizeAttributeNames(interval.data);
+  const data = { ...normalizedData, stepIndex, durationType };
 
   if (interval.type === "SteadyState") {
     return { step: mapSteadyStateToKrd(data), indexIncrement: 1 };
@@ -45,8 +58,9 @@ const processInterval = (
   durationType: "time" | "distance"
 ): ProcessResult => {
   if (interval.type === "IntervalsT") {
+    const normalizedData = normalizeAttributeNames(interval.data);
     const repetitionBlock = mapIntervalsTToKrd({
-      ...(interval.data as Record<string, unknown>),
+      ...normalizedData,
       stepIndex,
       durationType,
     } as Parameters<typeof mapIntervalsTToKrd>[0]);

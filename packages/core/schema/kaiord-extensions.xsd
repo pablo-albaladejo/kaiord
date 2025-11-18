@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           targetNamespace="http://kaiord.dev/zwift-extensions/1.0"
+           xmlns:kaiord="http://kaiord.dev/zwift-extensions/1.0"
+           elementFormDefault="qualified"
+           attributeFormDefault="unqualified">
+  
+  <xs:annotation>
+    <xs:documentation>
+      Kaiord Extensions for Zwift Workout Files
+      These attributes preserve data for round-trip conversions
+    </xs:documentation>
+  </xs:annotation>
+
+  <!-- Allow any attribute from kaiord namespace -->
+  <xs:attribute name="timeCreated" type="xs:string"/>
+  <xs:attribute name="manufacturer" type="xs:string"/>
+  <xs:attribute name="product" type="xs:string"/>
+  <xs:attribute name="serialNumber" type="xs:string"/>
+  <xs:attribute name="fitType" type="xs:string"/>
+  <xs:attribute name="hrmFitProductId" type="xs:int"/>
+  <xs:attribute name="name" type="xs:string"/>
+  <xs:attribute name="intensity" type="xs:string"/>
+  <xs:attribute name="equipment" type="xs:string"/>
+  <xs:attribute name="originalDurationType" type="xs:string"/>
+  <xs:attribute name="originalDurationMeters" type="xs:decimal"/>
+  <xs:attribute name="originalDurationBpm" type="xs:decimal"/>
+  <xs:attribute name="originalDurationWatts" type="xs:decimal"/>
+  <xs:attribute name="hrTargetLow" type="xs:decimal"/>
+  <xs:attribute name="hrTargetHigh" type="xs:decimal"/>
+  <xs:attribute name="hrTargetBpm" type="xs:decimal"/>
+  <xs:attribute name="hrTargetZone" type="xs:int"/>
+  <xs:attribute name="hrTargetPercentMax" type="xs:decimal"/>
+  <xs:attribute name="powerUnit" type="xs:string"/>
+  <xs:attribute name="originalWatts" type="xs:decimal"/>
+  <xs:attribute name="originalWattsLow" type="xs:decimal"/>
+  <xs:attribute name="originalWattsHigh" type="xs:decimal"/>
+  <xs:attribute name="powerZone" type="xs:int"/>
+  <xs:attribute name="assumedFtp" type="xs:decimal"/>
+
+</xs:schema>

@@ -1,4 +1,9 @@
 export {
+  convertKrdCadenceToZwift,
+  convertKrdPaceToZwift,
+  convertKrdPowerRangeToZwift,
+  convertKrdPowerToZwift,
+  convertPowerZoneToPercentFtp,
   convertZwiftCadenceTarget,
   convertZwiftPaceTarget,
   convertZwiftPowerRange,

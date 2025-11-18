@@ -1426,7 +1426,9 @@ describe("createFastXmlZwiftWriter", () => {
       const result = await writer(krd);
 
       // Assert
-      expect(result).toContain("<durationType>distance</durationType>");
+      // Note: durationType is not included in generated XML as it's not part of Zwift XSD schema
+      // It's stored in extensions for round-trip preservation but not written to XML
+      expect(result).not.toContain("<durationType>");
     });
 
     it("should restore thresholdSecPerKm from extensions", async () => {
@@ -1619,7 +1621,7 @@ describe("createFastXmlZwiftWriter", () => {
       );
       expect(result).toContain('name="Test"');
       expect(result).toContain('name="Extensions"');
-      expect(result).toContain("<durationType>distance</durationType>");
+      // Note: durationType is not included in generated XML as it's not part of Zwift XSD schema
       expect(result).toContain("<thresholdSecPerKm>240</thresholdSecPerKm>");
     });
 

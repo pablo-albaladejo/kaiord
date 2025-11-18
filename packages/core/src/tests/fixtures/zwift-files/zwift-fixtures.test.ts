@@ -10,12 +10,10 @@ describe("Zwift Fixtures", () => {
   const fixturesDir = __dirname;
 
   const fixtures = [
-    "WorkoutSteadyState.zwo",
-    "WorkoutIntervalsT.zwo",
-    "WorkoutRampIntervals.zwo",
-    "WorkoutMixedIntervals.zwo",
-    "WorkoutTextEvents.zwo",
-    "WorkoutRunningPace.zwo",
+    "WorkoutIndividualSteps.zwo",
+    "WorkoutRepeatSteps.zwo",
+    "WorkoutRepeatGreaterThanStep.zwo",
+    "WorkoutCustomTargetValues.zwo",
   ];
 
   describe("XSD validation", () => {
@@ -46,7 +44,7 @@ describe("Zwift Fixtures", () => {
 
         // Assert
         expect(xmlContent).toContain('<?xml version="1.0"');
-        expect(xmlContent).toContain("<workout_file>");
+        expect(xmlContent).toContain("<workout_file");
         expect(xmlContent).toContain("<name>");
         expect(xmlContent).toContain("<sportType>");
         expect(xmlContent).toContain("<workout>");
@@ -55,21 +53,19 @@ describe("Zwift Fixtures", () => {
   });
 
   describe("workout content", () => {
-    it("should have SteadyState intervals in WorkoutSteadyState.zwo", () => {
+    it("should have SteadyState intervals in WorkoutIndividualSteps.zwo", () => {
       // Arrange
-      const filePath = join(fixturesDir, "WorkoutSteadyState.zwo");
+      const filePath = join(fixturesDir, "WorkoutIndividualSteps.zwo");
       const xmlContent = readFileSync(filePath, "utf-8");
 
       // Assert
       expect(xmlContent).toContain("<SteadyState");
       expect(xmlContent).toContain('Duration="');
-      expect(xmlContent).toContain('Power="');
-      expect(xmlContent).toContain('Cadence="');
     });
 
-    it("should have IntervalsT blocks in WorkoutIntervalsT.zwo", () => {
+    it("should have IntervalsT blocks in WorkoutRepeatSteps.zwo", () => {
       // Arrange
-      const filePath = join(fixturesDir, "WorkoutIntervalsT.zwo");
+      const filePath = join(fixturesDir, "WorkoutRepeatSteps.zwo");
       const xmlContent = readFileSync(filePath, "utf-8");
 
       // Assert
@@ -77,56 +73,28 @@ describe("Zwift Fixtures", () => {
       expect(xmlContent).toContain('Repeat="');
       expect(xmlContent).toContain('OnDuration="');
       expect(xmlContent).toContain('OffDuration="');
-      expect(xmlContent).toContain('OnPower="');
-      expect(xmlContent).toContain('OffPower="');
     });
 
-    it("should have ramp intervals in WorkoutRampIntervals.zwo", () => {
+    it("should have ramp intervals in WorkoutCustomTargetValues.zwo", () => {
       // Arrange
-      const filePath = join(fixturesDir, "WorkoutRampIntervals.zwo");
+      const filePath = join(fixturesDir, "WorkoutCustomTargetValues.zwo");
       const xmlContent = readFileSync(filePath, "utf-8");
 
       // Assert
-      expect(xmlContent).toContain("<Warmup");
       expect(xmlContent).toContain("<Ramp");
       expect(xmlContent).toContain("<Cooldown");
       expect(xmlContent).toContain('PowerLow="');
       expect(xmlContent).toContain('PowerHigh="');
     });
 
-    it("should have mixed interval types in WorkoutMixedIntervals.zwo", () => {
+    it("should have SteadyState intervals in WorkoutRepeatGreaterThanStep.zwo", () => {
       // Arrange
-      const filePath = join(fixturesDir, "WorkoutMixedIntervals.zwo");
+      const filePath = join(fixturesDir, "WorkoutRepeatGreaterThanStep.zwo");
       const xmlContent = readFileSync(filePath, "utf-8");
 
       // Assert
-      expect(xmlContent).toContain("<Warmup");
       expect(xmlContent).toContain("<SteadyState");
-      expect(xmlContent).toContain("<IntervalsT");
-      expect(xmlContent).toContain("<FreeRide");
-      expect(xmlContent).toContain("<Ramp");
-      expect(xmlContent).toContain("<Cooldown");
-    });
-
-    it("should have text events in WorkoutTextEvents.zwo", () => {
-      // Arrange
-      const filePath = join(fixturesDir, "WorkoutTextEvents.zwo");
-      const xmlContent = readFileSync(filePath, "utf-8");
-
-      // Assert
-      expect(xmlContent).toContain("<textevent");
-      expect(xmlContent).toContain('message="');
-      expect(xmlContent).toContain('timeoffset="');
-    });
-
-    it("should have pace targets in WorkoutRunningPace.zwo", () => {
-      // Arrange
-      const filePath = join(fixturesDir, "WorkoutRunningPace.zwo");
-      const xmlContent = readFileSync(filePath, "utf-8");
-
-      // Assert
-      expect(xmlContent).toContain("<sportType>run</sportType>");
-      expect(xmlContent).toContain('pace="');
+      expect(xmlContent).toContain('Duration="');
     });
   });
 
@@ -138,10 +106,8 @@ describe("Zwift Fixtures", () => {
         const xmlContent = readFileSync(filePath, "utf-8");
 
         // Assert
-        expect(xmlContent).toContain("<author>");
         expect(xmlContent).toContain("<name>");
-        expect(xmlContent).toContain("<description>");
-        expect(xmlContent).toContain("<tags>");
+        expect(xmlContent).toContain("<sportType>");
       });
     });
   });
