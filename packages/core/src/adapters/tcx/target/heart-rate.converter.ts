@@ -14,6 +14,26 @@ const createHeartRateZone = (
   },
 });
 
+const validateSingleValue = (
+  value: number | undefined,
+  unit: string
+): number => {
+  if (value === undefined) {
+    throw new Error(`${unit} unit requires value to be defined`);
+  }
+  return value;
+};
+
+const validateRange = (
+  min: number | undefined,
+  max: number | undefined
+): [number, number] => {
+  if (min === undefined || max === undefined) {
+    throw new Error("range unit requires min and max to be defined");
+  }
+  return [min, max];
+};
+
 export const convertHeartRateZone = (value: {
   unit: string;
   value?: number;
@@ -21,43 +41,23 @@ export const convertHeartRateZone = (value: {
   max?: number;
 }): Record<string, unknown> => {
   if (value.unit === targetUnitSchema.enum.zone) {
-    if (value.value === undefined) {
-      throw new Error("zone unit requires value to be defined");
-    }
-    return createHeartRateZone(
-      "PredefinedHeartRateZone_t",
-      value.value,
-      value.value
-    );
+    const val = validateSingleValue(value.value, "zone");
+    return createHeartRateZone("PredefinedHeartRateZone_t", val, val);
   }
 
   if (value.unit === targetUnitSchema.enum.range) {
-    if (value.min === undefined || value.max === undefined) {
-      throw new Error("range unit requires min and max to be defined");
-    }
-    return createHeartRateZone("CustomHeartRateZone_t", value.min, value.max);
+    const [min, max] = validateRange(value.min, value.max);
+    return createHeartRateZone("CustomHeartRateZone_t", min, max);
   }
 
   if (value.unit === targetUnitSchema.enum.bpm) {
-    if (value.value === undefined) {
-      throw new Error("bpm unit requires value to be defined");
-    }
-    return createHeartRateZone(
-      "CustomHeartRateZone_t",
-      value.value,
-      value.value
-    );
+    const val = validateSingleValue(value.value, "bpm");
+    return createHeartRateZone("CustomHeartRateZone_t", val, val);
   }
 
   if (value.unit === targetUnitSchema.enum.percent_max) {
-    if (value.value === undefined) {
-      throw new Error("percent_max unit requires value to be defined");
-    }
-    return createHeartRateZone(
-      "CustomHeartRateZone_t",
-      value.value,
-      value.value
-    );
+    const val = validateSingleValue(value.value, "percent_max");
+    return createHeartRateZone("CustomHeartRateZone_t", val, val);
   }
 
   return { "@_xsi:type": "None_t" };
