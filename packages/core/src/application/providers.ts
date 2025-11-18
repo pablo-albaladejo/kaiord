@@ -59,69 +59,37 @@ export type Providers = {
   logger: Logger;
 };
 
-const createAdapters = (
-  log: Logger,
-  tcxValidator: TcxValidator,
-  zwiftValidator: ZwiftValidator
-) => ({
-  fitReader: createGarminFitSdkReader(log),
-  fitWriter: createGarminFitSdkWriter(log),
-  tcxValidator,
-  tcxReader: createFastXmlTcxReader(log),
-  tcxWriter: createFastXmlTcxWriter(log, tcxValidator),
-  zwiftValidator,
-  zwiftReader: createFastXmlZwiftReader(log, zwiftValidator),
-  zwiftWriter: createFastXmlZwiftWriter(log, zwiftValidator),
-  schemaValidator: createSchemaValidator(log),
-  toleranceChecker: createToleranceChecker(),
-});
-
-const createUseCases = (
-  adapters: ReturnType<typeof createAdapters>,
-  log: Logger
-) => ({
-  convertFitToKrd: convertFitToKrd(
-    adapters.fitReader,
-    adapters.schemaValidator,
-    log
-  ),
-  convertKrdToFit: convertKrdToFit(
-    adapters.fitWriter,
-    adapters.schemaValidator,
-    log
-  ),
-  convertTcxToKrd: convertTcxToKrd(
-    adapters.tcxReader,
-    adapters.schemaValidator,
-    log
-  ),
-  convertKrdToTcx: convertKrdToTcx(
-    adapters.tcxWriter,
-    adapters.schemaValidator,
-    log
-  ),
-  convertZwiftToKrd: convertZwiftToKrd(
-    adapters.zwiftReader,
-    adapters.schemaValidator,
-    log
-  ),
-  convertKrdToZwift: convertKrdToZwift(
-    adapters.zwiftWriter,
-    adapters.schemaValidator,
-    log
-  ),
-});
-
 export const createDefaultProviders = (logger?: Logger): Providers => {
   const log = logger || createConsoleLogger();
   const tcxValidator = createXsdTcxValidator(log);
   const zwiftValidator = createXsdZwiftValidator(log);
-  const adapters = createAdapters(log, tcxValidator, zwiftValidator);
-  const useCases = createUseCases(adapters, log);
+
+  const fitReader = createGarminFitSdkReader(log);
+  const fitWriter = createGarminFitSdkWriter(log);
+  const tcxReader = createFastXmlTcxReader(log);
+  const tcxWriter = createFastXmlTcxWriter(log, tcxValidator);
+  const zwiftReader = createFastXmlZwiftReader(log, zwiftValidator);
+  const zwiftWriter = createFastXmlZwiftWriter(log, zwiftValidator);
+  const schemaValidator = createSchemaValidator(log);
+  const toleranceChecker = createToleranceChecker();
 
   return {
-    ...adapters,
-    ...useCases,
+    fitReader,
+    fitWriter,
+    tcxValidator,
+    tcxReader,
+    tcxWriter,
+    zwiftValidator,
+    zwiftReader,
+    zwiftWriter,
+    schemaValidator,
+    toleranceChecker,
+    convertFitToKrd: convertFitToKrd(fitReader, schemaValidator, log),
+    convertKrdToFit: convertKrdToFit(fitWriter, schemaValidator, log),
+    convertTcxToKrd: convertTcxToKrd(tcxReader, schemaValidator, log),
+    convertKrdToTcx: convertKrdToTcx(tcxWriter, schemaValidator, log),
+    convertZwiftToKrd: convertZwiftToKrd(zwiftReader, schemaValidator, log),
+    convertKrdToZwift: convertKrdToZwift(zwiftWriter, schemaValidator, log),
     logger: log,
   };
 };
