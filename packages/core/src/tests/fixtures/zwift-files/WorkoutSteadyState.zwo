@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <author>Kaiord Test Suite</author>
+  <name>Steady State Power Workout</name>
+  <description>Simple workout with constant power intervals for testing SteadyState conversion</description>
+  <sportType>bike</sportType>
+  <tags>
+    <tag>test</tag>
+    <tag>steady-state</tag>
+  </tags>
+  <workout>
+    <SteadyState Duration="300" Power="0.60" Cadence="85"/>
+    <SteadyState Duration="600" Power="0.75" Cadence="90"/>
+    <SteadyState Duration="900" Power="0.85" Cadence="95"/>
+    <SteadyState Duration="300" Power="0.50" Cadence="80"/>
+  </workout>
+</workout_file>
