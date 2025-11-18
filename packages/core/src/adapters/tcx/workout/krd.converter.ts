@@ -1,6 +1,7 @@
 import type { KRD } from "../../../domain/schemas/krd";
 import { createTcxParsingError } from "../../../domain/types/errors";
 import type { Logger } from "../../../ports/logger";
+import { extractKaiordMetadata } from "./metadata-extractor";
 import { convertTcxWorkout } from "./workout.converter";
 
 const extractTcxExtensions = (
@@ -20,16 +21,9 @@ const extractTcxExtensions = (
   return { ...extensions };
 };
 
-export const convertTcxToKRD = (
-  tcxData: Record<string, unknown>,
-  logger: Logger
-): KRD => {
-  logger.debug("Converting TCX to KRD");
-
-  const trainingCenterDatabase = tcxData.TrainingCenterDatabase as Record<
-    string,
-    unknown
-  >;
+const extractWorkoutData = (
+  trainingCenterDatabase: Record<string, unknown>
+): Record<string, unknown> => {
   const workouts = trainingCenterDatabase.Workouts as
     | Record<string, unknown>
     | undefined;
@@ -46,19 +40,29 @@ export const convertTcxToKRD = (
     throw createTcxParsingError("No workout data found in TCX file");
   }
 
-  const tcxWorkout = workoutArray[0] as Record<string, unknown>;
-  const workout = convertTcxWorkout(tcxWorkout, logger);
+  return workoutArray[0] as Record<string, unknown>;
+};
 
+export const convertTcxToKRD = (
+  tcxData: Record<string, unknown>,
+  logger: Logger
+): KRD => {
+  logger.debug("Converting TCX to KRD");
+
+  const trainingCenterDatabase = tcxData.TrainingCenterDatabase as Record<
+    string,
+    unknown
+  >;
+
+  const tcxWorkout = extractWorkoutData(trainingCenterDatabase);
+  const workout = convertTcxWorkout(tcxWorkout, logger);
   const tcxExtensions = extractTcxExtensions(trainingCenterDatabase, logger);
+  const metadata = extractKaiordMetadata(trainingCenterDatabase, workout);
 
   const krd: KRD = {
     version: "1.0",
     type: "workout",
-    metadata: {
-      created: new Date().toISOString(),
-      sport: workout.sport,
-      subSport: workout.subSport,
-    },
+    metadata,
     extensions: {
       workout,
       ...(tcxExtensions && { tcx: tcxExtensions }),

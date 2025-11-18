@@ -3,19 +3,13 @@ import type { Workout, WorkoutStep } from "../../../domain/schemas/workout";
 import { createTcxParsingError } from "../../../domain/types/errors";
 import type { Logger } from "../../../ports/logger";
 import { KRD_TO_TCX_SPORT } from "../schemas/tcx-sport";
+import { addKaiordMetadata } from "./metadata-builder";
 import { convertStepToTcx } from "./step-to-tcx.converter";
 
-export const convertKRDToTcx = (krd: KRD, logger: Logger): unknown => {
-  logger.debug("Converting KRD to TCX structure");
-
-  if (!krd.extensions?.workout) {
-    throw createTcxParsingError(
-      "KRD does not contain workout data in extensions"
-    );
-  }
-
-  const workout = krd.extensions.workout as Workout;
-
+const buildTcxWorkout = (
+  workout: Workout,
+  logger: Logger
+): Record<string, unknown> => {
   const tcxSport =
     KRD_TO_TCX_SPORT[workout.sport as keyof typeof KRD_TO_TCX_SPORT] || "Other";
 
@@ -34,18 +28,49 @@ export const convertKRDToTcx = (krd: KRD, logger: Logger): unknown => {
     tcxWorkout.Extensions = workout.extensions.tcx;
   }
 
+  return tcxWorkout;
+};
+
+const buildTrainingCenterDatabase = (
+  tcxWorkout: Record<string, unknown>,
+  krd: KRD,
+  logger: Logger
+): Record<string, unknown> => {
   const trainingCenterDatabase: Record<string, unknown> = {
     "@_xmlns": "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2",
     "@_xmlns:xsi": "http://www.w3.org/2001/XMLSchema-instance",
+    "@_xmlns:kaiord": "http://kaiord.dev/tcx-extensions/1.0",
     Workouts: {
       Workout: tcxWorkout,
     },
   };
 
+  addKaiordMetadata(trainingCenterDatabase, krd);
+
   if (krd.extensions?.tcx) {
     logger.debug("Restoring TrainingCenterDatabase-level TCX extensions");
     trainingCenterDatabase.Extensions = krd.extensions.tcx;
   }
+
+  return trainingCenterDatabase;
+};
+
+export const convertKRDToTcx = (krd: KRD, logger: Logger): unknown => {
+  logger.debug("Converting KRD to TCX structure");
+
+  if (!krd.extensions?.workout) {
+    throw createTcxParsingError(
+      "KRD does not contain workout data in extensions"
+    );
+  }
+
+  const workout = krd.extensions.workout as Workout;
+  const tcxWorkout = buildTcxWorkout(workout, logger);
+  const trainingCenterDatabase = buildTrainingCenterDatabase(
+    tcxWorkout,
+    krd,
+    logger
+  );
 
   return {
     TrainingCenterDatabase: trainingCenterDatabase,

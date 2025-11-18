@@ -319,12 +319,27 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       }
 
       // Check extensions preserved (calories, HR conditionals)
+      // With kaiord extensions, these should now be preserved as duration types
       if (step1.duration.calories !== undefined) {
         expect(step2.duration.calories).toBe(step1.duration.calories);
       }
 
       if (step1.duration.bpm !== undefined) {
         expect(step2.duration.bpm).toBe(step1.duration.bpm);
+      }
+
+      // Check advanced duration types preserved via kaiord extensions
+      if (step1.durationType === "heart_rate_less_than") {
+        expect(step2.durationType).toBe("heart_rate_less_than");
+        expect(step2.duration.bpm).toBe(step1.duration.bpm);
+      }
+      if (step1.durationType === "power_less_than") {
+        expect(step2.durationType).toBe("power_less_than");
+        expect(step2.duration.watts).toBe(step1.duration.watts);
+      }
+      if (step1.durationType === "power_greater_than") {
+        expect(step2.durationType).toBe("power_greater_than");
+        expect(step2.duration.watts).toBe(step1.duration.watts);
       }
 
       // Check cadence targets with tolerance
@@ -353,6 +368,115 @@ describe("Round-trip: TCX → KRD → TCX", () => {
 });
 
 describe("Round-trip: KRD → TCX → KRD", () => {
+  it("should preserve advanced duration types with kaiord extensions", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const validator = createXsdTcxValidator(logger);
+    const reader = createFastXmlTcxReader(logger);
+    const writer = createFastXmlTcxWriter(logger, validator);
+
+    const originalKrd: KRD = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: "2009-09-09T20:38:00.000Z",
+        sport: "cycling",
+        manufacturer: "dynastream",
+        product: "hrmFitSingleByteProductId",
+        serialNumber: "1234",
+      },
+      extensions: {
+        workout: {
+          name: "Advanced Duration Test",
+          sport: "cycling",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "heart_rate_less_than",
+              duration: { type: "heart_rate_less_than", bpm: 225 },
+              targetType: "open",
+              target: { type: "open" },
+            },
+            {
+              stepIndex: 1,
+              durationType: "power_less_than",
+              duration: { type: "power_less_than", watts: 300 },
+              targetType: "open",
+              target: { type: "open" },
+            },
+            {
+              stepIndex: 2,
+              durationType: "calories",
+              duration: { type: "calories", calories: 100 },
+              targetType: "open",
+              target: { type: "open" },
+            },
+          ],
+        },
+      },
+    };
+
+    // Act - KRD → TCX → KRD
+    const tcxXml = await writer(originalKrd);
+    const convertedKrd = await reader(tcxXml);
+
+    // Assert - Advanced duration types should be preserved via kaiord extensions
+    const originalWorkout = originalKrd.extensions?.workout as {
+      steps: Array<{
+        durationType: string;
+        duration: {
+          type: string;
+          bpm?: number;
+          watts?: number;
+          calories?: number;
+        };
+      }>;
+    };
+
+    const convertedWorkout = convertedKrd.extensions?.workout as {
+      steps: Array<{
+        durationType: string;
+        duration: {
+          type: string;
+          bpm?: number;
+          watts?: number;
+          calories?: number;
+        };
+      }>;
+    };
+
+    expect(convertedWorkout.steps.length).toBe(originalWorkout.steps.length);
+
+    for (let i = 0; i < originalWorkout.steps.length; i++) {
+      const originalStep = originalWorkout.steps[i];
+      const convertedStep = convertedWorkout.steps[i];
+
+      expect(convertedStep.durationType).toBe(originalStep.durationType);
+      if (originalStep.duration.bpm !== undefined) {
+        expect(convertedStep.duration.bpm).toBe(originalStep.duration.bpm);
+      }
+      if (originalStep.duration.watts !== undefined) {
+        expect(convertedStep.duration.watts).toBe(originalStep.duration.watts);
+      }
+      if (originalStep.duration.calories !== undefined) {
+        expect(convertedStep.duration.calories).toBe(
+          originalStep.duration.calories
+        );
+      }
+    }
+
+    // Metadata should also be preserved
+    expect(convertedKrd.metadata.created).toBe(originalKrd.metadata.created);
+    expect(convertedKrd.metadata.manufacturer).toBe(
+      originalKrd.metadata.manufacturer
+    );
+    expect(convertedKrd.metadata.product).toBe(originalKrd.metadata.product);
+    // serialNumber may be parsed as number by XML parser
+    expect(String(convertedKrd.metadata.serialNumber)).toBe(
+      String(originalKrd.metadata.serialNumber)
+    );
+  });
+
   it("should preserve workout structure through KRD → TCX → KRD", async () => {
     // Arrange
     const logger = createMockLogger();

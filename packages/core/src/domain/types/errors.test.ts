@@ -3,11 +3,16 @@ import {
   FitParsingError,
   KrdValidationError,
   TcxParsingError,
+  TcxValidationError,
   ToleranceExceededError,
+  ZwiftParsingError,
+  ZwiftValidationError,
   createFitParsingError,
   createKrdValidationError,
   createTcxParsingError,
   createToleranceExceededError,
+  createZwiftParsingError,
+  createZwiftValidationError,
 } from "./errors";
 
 describe("Domain Errors", () => {
@@ -316,6 +321,148 @@ describe("Domain Errors", () => {
     });
   });
 
+  describe("ZwiftParsingError", () => {
+    it("should create error with message", () => {
+      // Arrange
+      const message = "Failed to parse Zwift file";
+
+      // Act
+      const error = new ZwiftParsingError(message);
+
+      // Assert
+      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(ZwiftParsingError);
+      expect(error.name).toBe("ZwiftParsingError");
+      expect(error.message).toBe("Failed to parse Zwift file");
+      expect(error.cause).toBeUndefined();
+      expect(error.stack).toBeDefined();
+    });
+
+    it("should create error with message and cause", () => {
+      // Arrange
+      const message = "Failed to parse Zwift file";
+      const cause = new Error("Invalid XML structure");
+
+      // Act
+      const error = new ZwiftParsingError(message, cause);
+
+      // Assert
+      expect(error).toBeInstanceOf(ZwiftParsingError);
+      expect(error.message).toBe("Failed to parse Zwift file");
+      expect(error.cause).toBe(cause);
+    });
+
+    it("should work with instanceof checks", () => {
+      // Arrange
+      const error = new ZwiftParsingError("Test");
+
+      // Act & Assert
+      expect(error instanceof Error).toBe(true);
+      expect(error instanceof ZwiftParsingError).toBe(true);
+      expect(error instanceof FitParsingError).toBe(false);
+      expect(error instanceof TcxParsingError).toBe(false);
+      expect(error instanceof KrdValidationError).toBe(false);
+    });
+
+    it("should preserve stack trace", () => {
+      // Arrange & Act
+      const error = new ZwiftParsingError("Test error");
+
+      // Assert
+      expect(error.stack).toBeDefined();
+      expect(error.stack).toContain("ZwiftParsingError");
+      expect(error.stack).toContain("Test error");
+    });
+  });
+
+  describe("createZwiftParsingError factory", () => {
+    it("should create ZwiftParsingError via factory function", () => {
+      // Arrange
+      const message = "Factory test";
+
+      // Act
+      const error = createZwiftParsingError(message);
+
+      // Assert
+      expect(error).toBeInstanceOf(ZwiftParsingError);
+      expect(error.message).toBe("Factory test");
+    });
+
+    it("should create error with cause via factory", () => {
+      // Arrange
+      const message = "Factory test";
+      const cause = new Error("Original error");
+
+      // Act
+      const error = createZwiftParsingError(message, cause);
+
+      // Assert
+      expect(error.cause).toBe(cause);
+    });
+  });
+
+  describe("ZwiftValidationError", () => {
+    it("should create error with message and errors", () => {
+      // Arrange
+      const message = "Zwift validation failed";
+      const errors = [
+        { path: "workout_file.name", message: "Required attribute missing" },
+        { path: "workout_file.sportType", message: "Invalid value" },
+      ];
+
+      // Act
+      const error = new ZwiftValidationError(message, errors);
+
+      // Assert
+      expect(error).toBeInstanceOf(Error);
+      expect(error).toBeInstanceOf(ZwiftValidationError);
+      expect(error.name).toBe("ZwiftValidationError");
+      expect(error.message).toBe("Zwift validation failed");
+      expect(error.errors).toEqual(errors);
+      expect(error.stack).toBeDefined();
+    });
+
+    it("should create error with empty errors array", () => {
+      // Arrange
+      const message = "Validation failed";
+      const errors: Array<{ path: string; message: string }> = [];
+
+      // Act
+      const error = new ZwiftValidationError(message, errors);
+
+      // Assert
+      expect(error.errors).toEqual([]);
+      expect(error.errors).toHaveLength(0);
+    });
+
+    it("should work with instanceof checks", () => {
+      // Arrange
+      const error = new ZwiftValidationError("Test", []);
+
+      // Act & Assert
+      expect(error instanceof Error).toBe(true);
+      expect(error instanceof ZwiftValidationError).toBe(true);
+      expect(error instanceof TcxValidationError).toBe(false);
+      expect(error instanceof FitParsingError).toBe(false);
+    });
+  });
+
+  describe("createZwiftValidationError factory", () => {
+    it("should create ZwiftValidationError via factory function", () => {
+      // Arrange
+      const message = "Factory test";
+      const errors = [{ path: "test.field", message: "test error" }];
+
+      // Act
+      const error = createZwiftValidationError(message, errors);
+
+      // Assert
+      expect(error).toBeInstanceOf(ZwiftValidationError);
+      expect(error.message).toBe("Factory test");
+      expect(error.errors).toEqual(errors);
+    });
+  });
+
   describe("Error catching patterns", () => {
     it("should catch specific error types", () => {
       // Arrange
@@ -353,13 +500,33 @@ describe("Domain Errors", () => {
       }
     });
 
+    it("should catch Zwift parsing errors", () => {
+      // Arrange
+      const throwZwiftError = () => {
+        throw new ZwiftParsingError("Zwift parse failed");
+      };
+
+      // Act & Assert
+      try {
+        throwZwiftError();
+        expect.fail("Should have thrown");
+      } catch (error) {
+        expect(error).toBeInstanceOf(ZwiftParsingError);
+        if (error instanceof ZwiftParsingError) {
+          expect(error.message).toBe("Zwift parse failed");
+        }
+      }
+    });
+
     it("should distinguish between error types", () => {
       // Arrange
       const errors = [
         new FitParsingError("FIT error"),
         new TcxParsingError("TCX error"),
+        new ZwiftParsingError("Zwift error"),
         new KrdValidationError("Validation error", []),
         new ToleranceExceededError("Tolerance error", []),
+        new ZwiftValidationError("Zwift validation error", []),
       ];
 
       // Act & Assert
@@ -368,10 +535,14 @@ describe("Domain Errors", () => {
           expect(error.name).toBe("FitParsingError");
         } else if (error instanceof TcxParsingError) {
           expect(error.name).toBe("TcxParsingError");
+        } else if (error instanceof ZwiftParsingError) {
+          expect(error.name).toBe("ZwiftParsingError");
         } else if (error instanceof KrdValidationError) {
           expect(error.name).toBe("KrdValidationError");
         } else if (error instanceof ToleranceExceededError) {
           expect(error.name).toBe("ToleranceExceededError");
+        } else if (error instanceof ZwiftValidationError) {
+          expect(error.name).toBe("ZwiftValidationError");
         }
       }
     });

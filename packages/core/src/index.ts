@@ -88,11 +88,15 @@ export {
   TcxParsingError,
   TcxValidationError,
   ToleranceExceededError,
+  ZwiftParsingError,
+  ZwiftValidationError,
   createFitParsingError,
   createKrdValidationError,
   createTcxParsingError,
   createTcxValidationError,
   createToleranceExceededError,
+  createZwiftParsingError,
+  createZwiftValidationError,
 } from "./domain/types/errors";
 
 export type {
@@ -128,6 +132,12 @@ export type { LogLevel, Logger } from "./ports/logger";
 export type { TcxReader } from "./ports/tcx-reader";
 export type { TcxValidationResult, TcxValidator } from "./ports/tcx-validator";
 export type { TcxWriter } from "./ports/tcx-writer";
+export type { ZwiftReader } from "./ports/zwift-reader";
+export type {
+  ZwiftValidationResult,
+  ZwiftValidator,
+} from "./ports/zwift-validator";
+export type { ZwiftWriter } from "./ports/zwift-writer";
 
 // ============================================
 // Use Cases
@@ -144,6 +154,12 @@ export type { ConvertTcxToKrd } from "./application/use-cases/convert-tcx-to-krd
 
 export { convertKrdToTcx } from "./application/use-cases/convert-krd-to-tcx";
 export type { ConvertKrdToTcx } from "./application/use-cases/convert-krd-to-tcx";
+
+export { convertZwiftToKrd } from "./application/use-cases/convert-zwift-to-krd";
+export type { ConvertZwiftToKrd } from "./application/use-cases/convert-zwift-to-krd";
+
+export { convertKrdToZwift } from "./application/use-cases/convert-krd-to-zwift";
+export type { ConvertKrdToZwift } from "./application/use-cases/convert-krd-to-zwift";
 
 export { validateRoundTrip } from "./tests/round-trip/validate-round-trip";
 export type { ValidateRoundTrip } from "./tests/round-trip/validate-round-trip";

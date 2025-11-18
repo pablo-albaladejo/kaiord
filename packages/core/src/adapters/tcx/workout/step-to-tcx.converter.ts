@@ -1,32 +1,7 @@
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
+import { convertDurationToTcx } from "./duration-to-tcx-encoder";
 import { convertTargetToTcx } from "./target-to-tcx.converter";
-
-const convertDurationToTcx = (step: WorkoutStep): Record<string, unknown> => {
-  if (step.duration.type === "time") {
-    return {
-      "@_xsi:type": "Time_t",
-      Seconds: step.duration.seconds,
-    };
-  }
-
-  if (step.duration.type === "distance") {
-    return {
-      "@_xsi:type": "Distance_t",
-      Meters: step.duration.meters,
-    };
-  }
-
-  if (step.duration.type === "open") {
-    return {
-      "@_xsi:type": "LapButton_t",
-    };
-  }
-
-  return {
-    "@_xsi:type": "LapButton_t",
-  };
-};
 
 const capitalizeFirst = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1);
