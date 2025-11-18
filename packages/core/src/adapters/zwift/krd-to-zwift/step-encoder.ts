@@ -21,7 +21,7 @@ const encodeSteadyStateTargets = (
     step.target.value.unit === "percent_ftp"
   ) {
     interval["@_Power"] = step.target.value.value / 100;
-  } else if (step.target.type === "pace") {
+  } else if (step.target.type === "pace" && step.target.value.unit === "mps") {
     interval["@_pace"] = 1000 / step.target.value.value;
   }
 };

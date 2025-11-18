@@ -10,3 +10,19 @@ if [ -n "$(git status --porcelain)" ]; then
 fi
 
 echo "✅ Lint check passed!"
+echo ""
+echo "🔍 Running TypeScript type check..."
+
+# Type check all packages
+pnpm -r exec tsc --noEmit
+
+# Check exit code
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ TypeScript type check failed! Push blocked."
+  echo ""
+  echo "Fix the type errors and try again."
+  exit 1
+fi
+
+echo "✅ Type check passed!"
