@@ -13,7 +13,7 @@ body:
     attributes:
       label: Feature Title
       description: A clear and concise title for the feature
-      placeholder: "Example: Add support for PWX format"
+      placeholder: "Example: Add support for ZWO format"
     validations:
       required: true
 

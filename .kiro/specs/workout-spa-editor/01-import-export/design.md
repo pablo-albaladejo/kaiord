@@ -1,8 +1,8 @@
-# Design Document - Import/Export FIT, TCX, and PWX Formats
+# Design Document - Import/Export FIT, TCX, and ZWO Formats
 
 ## Overview
 
-This feature integrates `@kaiord/core` library to enable importing and exporting workout files in FIT, TCX, and PWX formats. The design follows clean architecture principles with clear separation between UI components, business logic, and format conversion.
+This feature integrates `@kaiord/core` library to enable importing and exporting workout files in FIT, TCX, and ZWO formats. The design follows clean architecture principles with clear separation between UI components, business logic, and format conversion.
 
 ## Architecture
 
@@ -41,7 +41,7 @@ This feature integrates `@kaiord/core` library to enable importing and exporting
 File → FileUpload Component
 
 // 2. Detect format
-const format = detectFormat(file.name); // .fit, .tcx, .pwx, .krd
+const format = detectFormat(file.name); // .fit, .tcx, .zwo, .krd
 
 // 3. Read file as buffer
 const buffer = await file.arrayBuffer();
@@ -102,7 +102,7 @@ showSuccessNotification(`Exported as ${format.toUpperCase()}`);
 interface FileUploadProps {
   onFileLoad: (krd: KRD) => void;
   onError: (error: Error) => void;
-  acceptedFormats?: string[]; // ['.fit', '.tcx', '.pwx', '.krd', '.json']
+  acceptedFormats?: string[]; // ['.fit', '.tcx', '.zwo', '.krd', '.json']
 }
 ```
 
@@ -110,13 +110,13 @@ interface FileUploadProps {
 
 ```typescript
 interface ExportFormatSelectorProps {
-  currentFormat: "fit" | "tcx" | "pwx" | "krd";
-  onFormatChange: (format: "fit" | "tcx" | "pwx" | "krd") => void;
+  currentFormat: "fit" | "tcx" | "zwo" | "krd";
+  onFormatChange: (format: "fit" | "tcx" | "zwo" | "krd") => void;
   disabled?: boolean;
 }
 
 interface FormatOption {
-  value: "fit" | "tcx" | "pwx" | "krd";
+  value: "fit" | "tcx" | "zwo" | "krd";
   label: string;
   description: string;
   icon: React.ReactNode;
@@ -129,7 +129,7 @@ interface FormatOption {
 ```typescript
 interface SaveButtonProps {
   workout: KRD;
-  format: "fit" | "tcx" | "pwx" | "krd";
+  format: "fit" | "tcx" | "zwo" | "krd";
   onSave: () => void;
   onError: (error: Error) => void;
   disabled?: boolean;
@@ -144,7 +144,7 @@ interface SaveButtonProps {
 // utils/file-format-detector.ts
 export const detectFormat = (
   filename: string
-): "fit" | "tcx" | "pwx" | "krd" | null => {
+): "fit" | "tcx" | "zwo" | "krd" | null => {
   const ext = filename.toLowerCase().split(".").pop();
 
   switch (ext) {
@@ -152,8 +152,8 @@ export const detectFormat = (
       return "fit";
     case "tcx":
       return "tcx";
-    case "pwx":
-      return "pwx";
+    case "zwo":
+      return "zwo";
     case "krd":
     case "json":
       return "krd";
@@ -162,12 +162,12 @@ export const detectFormat = (
   }
 };
 
-export const getMimeType = (format: "fit" | "tcx" | "pwx" | "krd"): string => {
+export const getMimeType = (format: "fit" | "tcx" | "zwo" | "krd"): string => {
   switch (format) {
     case "fit":
       return "application/octet-stream";
     case "tcx":
-    case "pwx":
+    case "zwo":
       return "application/xml";
     case "krd":
       return "application/json";
@@ -190,7 +190,7 @@ export const importWorkout = async (
 
   if (!format) {
     throw new Error(
-      `Unsupported file format. Supported: .fit, .tcx, .pwx, .krd`
+      `Unsupported file format. Supported: .fit, .tcx, .zwo, .krd`
     );
   }
 
@@ -223,7 +223,7 @@ import type { KRD } from "@kaiord/core";
 
 export const exportWorkout = async (
   krd: KRD,
-  format: "fit" | "tcx" | "pwx" | "krd"
+  format: "fit" | "tcx" | "zwo" | "krd"
 ): Promise<Blob> => {
   if (format === "krd") {
     const json = JSON.stringify(krd, null, 2);
@@ -327,8 +327,8 @@ export class ValidationError extends Error {
 
 ### E2E Tests
 
-- Import FIT/TCX/PWX files
-- Export to FIT/TCX/PWX formats
+- Import FIT/TCX/ZWO files
+- Export to FIT/TCX/ZWO formats
 - Cross-browser compatibility
 - Mobile file upload
 

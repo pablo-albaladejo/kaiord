@@ -7,7 +7,7 @@ Layers:
   - **domain/validation/** — Business validators (not Zod)
   - **domain/types/** — Error types and domain-specific types
 - **application/** — use-cases; depends on `ports/` only
-- **ports/** — I/O contracts (Fit/Tcx/Pwx Reader/Writer)
+- **ports/** — I/O contracts (Fit/Tcx/Zwift Reader/Writer)
 - **adapters/** — concrete implementations (e.g., @garmin/fitsdk, XML parsers)
   - **adapters/fit/schemas/** — Zod schemas for FIT SDK format (camelCase conventions)
   - **adapters/fit/** — FIT-specific mappers and converters
@@ -82,7 +82,7 @@ export const fitSubSportSchema = z.enum([
 ### Schema Separation Rationale
 
 - **Domain schemas** define the canonical KRD format (our single source of truth)
-- **Adapter schemas** define external format-specific concepts (FIT SDK, TCX, PWX)
+- **Adapter schemas** define external format-specific concepts (FIT SDK, TCX, Zwift)
 - **Clear boundaries** prevent domain contamination with adapter-specific details
 - **Bidirectional mapping** between domain and adapter schemas happens in mappers
 - **Domain never imports adapters** - maintains hexagonal architecture integrity

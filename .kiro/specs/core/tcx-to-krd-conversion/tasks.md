@@ -316,7 +316,7 @@ Each task follows Test-Driven Development:
 - **Functional style**: Use currying for dependency injection, no classes
 - **Type safety**: Use Zod schemas for all TCX-specific types, infer TypeScript types with z.infer
 - **XSD Validation**: TCX files are validated against the official Garmin XSD schema both on input (before parsing) and output (after generation) to ensure compliance with the TCX standard
-- **Validation applies to all formats**: The XSD validation pattern for TCX should be replicated for other formats (FIT, PWX) to ensure input/output validation across all supported formats
+- **Validation applies to all formats**: The XSD validation pattern for TCX should be replicated for other formats (FIT, Zwift) to ensure input/output validation across all supported formats
 
 ## Dependencies
 
