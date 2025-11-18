@@ -570,7 +570,7 @@ Visual documentation and testing:
 - **Drag-and-drop**: Reorder steps with @dnd-kit
 - **User profiles**: Training zones and preferences
 - **Workout library**: Local storage with IndexedDB
-- **Export formats**: FIT, TCX, PWX conversion
+- **Export formats**: FIT, TCX, ZWO conversion
 - **Theme system**: Light/dark modes
 - **Internationalization**: Multi-language support
 - **PWA**: Offline support with service workers

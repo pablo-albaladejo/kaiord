@@ -27,7 +27,7 @@ Specs for the Workout SPA Editor (React application).
 **Implementation Order (v1.0.0 - v1.1.0):**
 
 1. `00-mvp/` - ✅ v1.0.0 MVP (COMPLETE)
-2. `01-import-export/` - v1.1.0 Import/Export FIT/TCX/PWX (HIGH, 15-20h)
+2. `01-import-export/` - v1.1.0 Import/Export FIT/TCX/ZWO (HIGH, 15-20h)
 3. `02-repetition-blocks/` - v1.1.0 Repetition Blocks (MEDIUM, 10-12h)
 4. `03-error-handling/` - v1.1.0 Enhanced Error Handling (MEDIUM, 6-8h)
 5. `04-drag-drop/` - v1.1.0 Drag-and-Drop Reordering (MEDIUM, 8-10h)

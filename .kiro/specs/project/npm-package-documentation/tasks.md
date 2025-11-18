@@ -104,7 +104,7 @@
 - [ ] 4. Configure package for npm publishing
   - [ ] 4.1 Update package.json with publishing metadata
     - Add comprehensive description
-    - Add keywords array (workout, fit, garmin, tcx, pwx, krd, fitness, training, conversion)
+    - Add keywords array (workout, fit, garmin, tcx, zwo, krd, fitness, training, conversion)
     - Add author field
     - Add repository field with directory
     - Add bugs field with issue tracker URL

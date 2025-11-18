@@ -22,8 +22,8 @@
 
   - [ ] 2.1 Create format detector utility with tests
     - Write `src/utils/format-detector.ts` with detectFormat function
-    - Define FileFormat type as z.enum(["fit", "krd", "tcx", "pwx"]) using Zod
-    - Map file extensions (.fit, .krd, .tcx, .pwx) to format types
+    - Define FileFormat type as z.enum(["fit", "krd", "tcx", "zwo"]) using Zod
+    - Map file extensions (.fit, .krd, .tcx, .zwo) to format types
     - Implement validateFormat type guard using Zod schema
     - Write co-located `src/utils/format-detector.test.ts` with tests for extension mapping
     - Test all supported extensions and unknown extensions
@@ -31,7 +31,7 @@
 
   - [ ] 2.2 Create file handler utility with tests
     - Write `src/utils/file-handler.ts` with readFile and writeFile functions
-    - Handle binary files (FIT) and text files (KRD, TCX, PWX) differently
+    - Handle binary files (FIT) and text files (KRD, TCX, ZWO) differently
     - Implement proper error handling for missing files and permission errors
     - Add findFiles function for glob pattern expansion using glob library
     - Write co-located `src/utils/file-handler.test.ts` with tests for file I/O operations
@@ -300,7 +300,7 @@
     - Configure files array to include only ["dist"]
     - Add repository field pointing to GitHub repo
     - Add license field: "MIT"
-    - Add keywords: ["kaiord", "fit", "workout", "garmin", "tcx", "pwx", "cli"]
+    - Add keywords: ["kaiord", "fit", "workout", "garmin", "tcx", "zwo", "cli"]
     - Add description: "Command-line interface for Kaiord workout file conversion"
     - Set publishConfig.access to "public" for scoped package
     - _Requirements: 1.1_

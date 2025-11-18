@@ -86,7 +86,7 @@ This directory contains the complete specification for the Workout SPA Editor, a
 - ❌ Repetition blocks not yet supported (planned for v1.1.0)
 - ❌ Drag-and-drop reordering not available (planned for v1.1.0)
 - ❌ User profiles and workout library (planned for v1.2.0)
-- ❌ Export to FIT/TCX/PWX formats (planned for v2.0.0)
+- ❌ Export to FIT/TCX/ZWO formats (planned for v2.0.0)
 
 ## Documentation Structure
 
@@ -144,7 +144,7 @@ The following completion/status files have been removed as their information is 
 
 ### Long-term (v2.0.0)
 
-1. 📋 Export to FIT/TCX/PWX formats (P3.18)
+1. 📋 Export to FIT/TCX/ZWO formats (P3.18)
 2. 📋 Workout templates (P3.17)
 3. 📋 Internationalization (P3.21)
 4. 📋 PWA support (P3.30)

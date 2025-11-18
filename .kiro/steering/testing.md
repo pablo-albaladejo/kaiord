@@ -5,8 +5,8 @@
 - **All fixtures**: `src/tests/fixtures/` directory (faker + rosie factories, binary files)
 - **Test helpers**: `src/tests/helpers/` directory (mock utilities, test utils)
 - **Unit** (converters with logic, validators)
-- **Golden** (KRD snapshots, normalized TCX/PWX fragments)
-- **Round‑trip** (FIT/TCX/PWX ↔ KRD) with tolerances (±1s, ±1W, ±1bpm, ±1rpm)
+- **Golden** (KRD snapshots, normalized TCX/Zwift fragments)
+- **Round‑trip** (FIT/TCX/ZWO ↔ KRD) with tolerances (±1s, ±1W, ±1bpm, ±1rpm)
 - **CLI smoke** (tiny anonymized fixtures < 20KB)
 
 ## Mappers vs Converters

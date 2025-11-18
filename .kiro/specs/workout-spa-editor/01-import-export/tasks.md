@@ -1,8 +1,8 @@
-# Implementation Plan - Import/Export FIT, TCX, and PWX Formats
+# Implementation Plan - Import/Export FIT, TCX, and ZWO Formats
 
 ## Overview
 
-This feature enables importing and exporting workout files in FIT, TCX, and PWX formats using the `@kaiord/core` library. This is critical for device compatibility and interoperability with training platforms.
+This feature enables importing and exporting workout files in FIT, TCX, and ZWO formats using the `@kaiord/core` library. This is critical for device compatibility and interoperability with training platforms.
 
 **Target Release:** v1.1.0  
 **Estimated Effort:** 15-20 hours  
@@ -21,7 +21,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
 ## Implementation Tasks
 
 - [ ] 1. Add format detection and validation
-  - Detect file format from extension (.fit, .tcx, .pwx, .krd)
+  - Detect file format from extension (.fit, .tcx, .zwo, .krd)
   - Validate file format before conversion
   - Show format-specific error messages
   - Write unit tests for format detection
@@ -37,17 +37,17 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.2_
   - _Files: utils/import-workout.ts_
 
-- [ ] 3. Implement TCX and PWX file import
+- [ ] 3. Implement TCX and ZWO file import
   - Use @kaiord/core toKRD function for TCX → KRD conversion
-  - Use @kaiord/core toKRD function for PWX → KRD conversion
+  - Use @kaiord/core toKRD function for ZWO → KRD conversion
   - Handle XML parsing errors gracefully
   - Display conversion progress for large files
-  - Write unit tests for TCX/PWX import
+  - Write unit tests for TCX/ZWO import
   - _Requirements: 12.3, 12.4_
   - _Files: utils/import-workout.ts_
 
 - [ ] 4. Update FileUpload component to support multiple formats
-  - Accept .fit, .tcx, .pwx, .krd, .json file extensions
+  - Accept .fit, .tcx, .zwo, .krd, .json file extensions
   - Show format icon/badge for uploaded file
   - Display conversion status during import
   - Handle conversion errors with user-friendly messages
@@ -64,17 +64,17 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.7_
   - _Files: utils/export-workout.ts_
 
-- [ ] 6. Implement TCX and PWX file export
+- [ ] 6. Implement TCX and ZWO file export
   - Use @kaiord/core fromKRD function for KRD → TCX conversion
-  - Use @kaiord/core fromKRD function for KRD → PWX conversion
+  - Use @kaiord/core fromKRD function for KRD → ZWO conversion
   - Handle XML encoding errors gracefully
-  - Generate correct file extensions (.tcx, .pwx)
-  - Write unit tests for TCX/PWX export
+  - Generate correct file extensions (.tcx, .zwo)
+  - Write unit tests for TCX/ZWO export
   - _Requirements: 12.8, 12.9_
   - _Files: utils/export-workout.ts_
 
 - [ ] 7. Create ExportFormatSelector component
-  - Dropdown to select format (FIT, TCX, PWX, KRD)
+  - Dropdown to select format (FIT, TCX, ZWO, KRD)
   - Show format description and compatibility info
   - Display format-specific warnings (e.g., "FIT may not support all features")
   - Validate workout before export
@@ -104,8 +104,8 @@ All tasks must include comprehensive testing following the Testing Strategy:
 - [ ] 10. Implement comprehensive testing strategy for import/export
   - **Unit Tests** (Coverage target: 80%+)
     - Test file format detection utility
-    - Test FIT/TCX/PWX import functions with valid files
-    - Test FIT/TCX/PWX export functions with valid KRD
+    - Test FIT/TCX/ZWO import functions with valid files
+    - Test FIT/TCX/ZWO export functions with valid KRD
     - Test error handling for invalid files
     - Test error handling for conversion failures
     - Test MIME type detection
@@ -127,14 +127,14 @@ All tasks must include comprehensive testing following the Testing Strategy:
     - Test complete export flow: select format → convert → download
     - Test round-trip flow: import FIT → edit → export FIT
     - Test error recovery: invalid file → show error → retry
-    - Test format switching: load KRD → export as FIT/TCX/PWX
+    - Test format switching: load KRD → export as FIT/TCX/ZWO
   - **E2E Tests** (Critical paths)
     - Test importing FIT file and editing workout
     - Test importing TCX file and editing workout
-    - Test importing PWX file and editing workout
+    - Test importing ZWO file and editing workout
     - Test exporting to FIT format
     - Test exporting to TCX format
-    - Test exporting to PWX format
+    - Test exporting to ZWO format
     - Test round-trip conversion (import → edit → export)
     - Test conversion error handling
     - Test keyboard shortcuts work with import/export
@@ -149,7 +149,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
 
 ## Summary
 
-This implementation plan provides a clear roadmap for adding import/export functionality for FIT, TCX, and PWX formats. Each task is:
+This implementation plan provides a clear roadmap for adding import/export functionality for FIT, TCX, and ZWO formats. Each task is:
 
 - **Actionable**: Clear implementation steps
 - **Testable**: Includes comprehensive test requirements
@@ -164,8 +164,8 @@ This implementation plan provides a clear roadmap for adding import/export funct
 
 **Success Criteria:**
 
-- Users can import FIT/TCX/PWX files and edit them
-- Users can export workouts to FIT/TCX/PWX formats
+- Users can import FIT/TCX/ZWO files and edit them
+- Users can export workouts to FIT/TCX/ZWO formats
 - Round-trip conversions maintain data integrity
 - All tests passing with 80%+ unit coverage, 70%+ component coverage
 - E2E tests passing on all browsers (Chrome, Firefox, Safari, Edge)

@@ -355,4 +355,4 @@ Los fixtures ahora están centralizados en `@kaiord/core` con helpers convenient
 
 1. Migrar tests existentes en CLI (si hay fixtures duplicados)
 2. Agregar más fixtures según necesidad
-3. Considerar fixtures para otros formatos (TCX, PWX)
+3. Considerar fixtures para otros formatos (TCX, ZWO)

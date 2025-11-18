@@ -20,15 +20,15 @@
 ## Public API surface
 
 ```ts
-toKRD(input: Uint8Array | string, opts: { type: "fit"|"tcx"|"pwx"|"krd" }): Promise<KRD>
-fromKRD(krd: KRD, opts: { type: "fit"|"tcx"|"pwx"|"krd" }): Promise<Uint8Array>
+toKRD(input: Uint8Array | string, opts: { type: "fit"|"tcx"|"zwo"|"krd" }): Promise<KRD>
+fromKRD(krd: KRD, opts: { type: "fit"|"tcx"|"zwo"|"krd" }): Promise<Uint8Array>
 ```
 
 ## Testing
 
 - Unit for pure mappers/validators
 - Golden for representative KRD
-- Round‑trip (FIT/TCX/PWX ↔ KRD) with tolerances: time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm
+- Round‑trip (FIT/TCX/ZWO ↔ KRD) with tolerances: time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm
 - CLI smoke: `kaiord convert --in sample.krd --out out.tcx`
 - Test utilities: `@kaiord/core/test-utils` exports fixture loaders for cross-package testing
 

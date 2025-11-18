@@ -1,6 +1,6 @@
 # Overview
 
-**Kaiord** is an open-source toolkit for structured workout data. It provides a unified JSON-based format (**.krd**) and conversion tools for popular fitness file formats (**FIT**, **TCX**, **PWX**).
+**Kaiord** is an open-source toolkit for structured workout data. It provides a unified JSON-based format (**.krd**) and conversion tools for popular fitness file formats (**FIT**, **TCX**, **ZWO**).
 
 ## Packages
 

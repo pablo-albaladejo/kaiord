@@ -8,7 +8,7 @@
 
 ## Design Principles
 
-- **Round-trip safe**: Convert FIT/TCX/PWX → KRD → FIT/TCX/PWX without data loss
+- **Round-trip safe**: Convert FIT/TCX/ZWO → KRD → FIT/TCX/ZWO without data loss
 - **Schema-validated**: All KRD files must validate against `packages/core/schema/workout.json`
 - **Normalized**: Consistent units and naming across all source formats
 - **Extensible**: Support for custom fields via `extensions` object

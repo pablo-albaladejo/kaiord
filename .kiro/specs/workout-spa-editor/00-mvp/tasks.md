@@ -48,7 +48,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 - ❌ Repetition blocks not yet supported (planned for v1.1.0)
 - ❌ Drag-and-drop reordering not available (planned for v1.1.0)
-- ❌ **Import/Export FIT/TCX/PWX formats (HIGH PRIORITY for v1.1.0)**
+- ❌ **Import/Export FIT/TCX/ZWO formats (HIGH PRIORITY for v1.1.0)**
 - ❌ User profiles and workout library (planned for v1.2.0)
 
 ## ✅ COMPLETE: v1.0.0 MVP Ready for Release
@@ -170,7 +170,7 @@ This implementation plan prioritizes tasks by **impact** and **complexity** to d
 
 **See individual specs (in implementation order):**
 
-1. `.kiro/specs/workout-spa-editor/01-import-export/` - Import/Export FIT/TCX/PWX (HIGH priority, 15-20h)
+1. `.kiro/specs/workout-spa-editor/01-import-export/` - Import/Export FIT/TCX/ZWO (HIGH priority, 15-20h)
 2. `.kiro/specs/workout-spa-editor/02-repetition-blocks/` - Repetition Blocks Support (MEDIUM priority, 10-12h)
 3. `.kiro/specs/workout-spa-editor/03-error-handling/` - Enhanced Error Handling (MEDIUM priority, 6-8h)
 4. `.kiro/specs/workout-spa-editor/04-drag-drop/` - Drag-and-Drop Reordering (MEDIUM priority, 8-10h)
