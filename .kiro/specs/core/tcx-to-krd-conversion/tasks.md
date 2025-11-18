@@ -156,7 +156,7 @@ Each task follows Test-Driven Development:
 
 - [x] 6. Implement TCX extensions preservation
   - [x] 6.1 Implement extension handling (TCX → KRD)
-    - Add extension extraction to convertTcxToKRD7u
+    - Add extension extraction to convertTcxToKrd
     - Store TCX extension elements in extensions.tcx
     - Extract power data from extensions (if present)
     - Store custom fields in extensions

@@ -18,7 +18,6 @@ const restoreTcxDurationFromExtensions = (
     return {
       "@_xsi:type": "HeartRateAbove_t",
       HeartRate: {
-        "@_xsi:type": "HeartRateAbove_t",
         Value: extensions.heartRateAbove,
       },
     };
@@ -31,7 +30,6 @@ const restoreTcxDurationFromExtensions = (
     return {
       "@_xsi:type": "HeartRateBelow_t",
       HeartRate: {
-        "@_xsi:type": "HeartRateBelow_t",
         Value: extensions.heartRateBelow,
       },
     };

@@ -3,13 +3,20 @@ import type { Logger } from "../../../ports/logger";
 export const extractIntensity = (
   tcxStep: Record<string, unknown>
 ): "warmup" | "active" | "cooldown" | "rest" | undefined => {
-  const intensityValue = tcxStep.Intensity as string | undefined;
-  return intensityValue?.toLowerCase() as
-    | "warmup"
-    | "active"
-    | "cooldown"
-    | "rest"
-    | undefined;
+  const raw = tcxStep.Intensity as string | undefined;
+  const value = raw?.toLowerCase();
+
+  switch (value) {
+    case "warmup":
+    case "active":
+    case "cooldown":
+    case "rest":
+      return value;
+    case "resting":
+      return "rest";
+    default:
+      return undefined;
+  }
 };
 
 export const extractPowerFromExtensions = (

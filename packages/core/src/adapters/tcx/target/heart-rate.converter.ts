@@ -21,30 +21,42 @@ export const convertHeartRateZone = (value: {
   max?: number;
 }): Record<string, unknown> => {
   if (value.unit === targetUnitSchema.enum.zone) {
+    if (value.value === undefined) {
+      throw new Error("zone unit requires value to be defined");
+    }
     return createHeartRateZone(
       "PredefinedHeartRateZone_t",
-      value.value!,
-      value.value!
+      value.value,
+      value.value
     );
   }
 
   if (value.unit === targetUnitSchema.enum.range) {
-    return createHeartRateZone("CustomHeartRateZone_t", value.min!, value.max!);
+    if (value.min === undefined || value.max === undefined) {
+      throw new Error("range unit requires min and max to be defined");
+    }
+    return createHeartRateZone("CustomHeartRateZone_t", value.min, value.max);
   }
 
   if (value.unit === targetUnitSchema.enum.bpm) {
+    if (value.value === undefined) {
+      throw new Error("bpm unit requires value to be defined");
+    }
     return createHeartRateZone(
       "CustomHeartRateZone_t",
-      value.value!,
-      value.value!
+      value.value,
+      value.value
     );
   }
 
   if (value.unit === targetUnitSchema.enum.percent_max) {
+    if (value.value === undefined) {
+      throw new Error("percent_max unit requires value to be defined");
+    }
     return createHeartRateZone(
       "CustomHeartRateZone_t",
-      value.value!,
-      value.value!
+      value.value,
+      value.value
     );
   }
 
