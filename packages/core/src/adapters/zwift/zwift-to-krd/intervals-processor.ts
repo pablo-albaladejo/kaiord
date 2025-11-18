@@ -20,7 +20,7 @@ type ProcessResult = {
 const processSingleStep = (
   interval: IntervalData,
   stepIndex: number,
-  durationType: string
+  durationType: "time" | "distance"
 ): ProcessResult => {
   const data = { ...interval.data, stepIndex, durationType };
 
@@ -42,14 +42,14 @@ const processSingleStep = (
 const processInterval = (
   interval: IntervalData,
   stepIndex: number,
-  durationType: string
+  durationType: "time" | "distance"
 ): ProcessResult => {
   if (interval.type === "IntervalsT") {
     const repetitionBlock = mapIntervalsTToKrd({
-      ...interval.data,
+      ...(interval.data as Record<string, unknown>),
       stepIndex,
       durationType,
-    });
+    } as Parameters<typeof mapIntervalsTToKrd>[0]);
     return {
       step: repetitionBlock,
       indexIncrement: repetitionBlock.steps.length,
@@ -61,7 +61,7 @@ const processInterval = (
 
 export const processIntervals = (
   intervals: Array<IntervalData>,
-  durationType: string
+  durationType: "time" | "distance"
 ): Array<WorkoutStep | RepetitionBlock> => {
   const steps: Array<WorkoutStep | RepetitionBlock> = [];
   let stepIndex = 0;

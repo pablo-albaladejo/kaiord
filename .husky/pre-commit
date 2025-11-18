@@ -17,6 +17,25 @@ fi
 
 echo "✅ Build passed!"
 echo ""
+echo "🔍 Running TypeScript type check..."
+
+# Type check all packages
+pnpm -r exec tsc --noEmit
+
+# Check exit code
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ TypeScript type check failed! Commit blocked."
+  echo ""
+  echo "Fix the type errors and try again."
+  echo ""
+  echo "To skip this check (NOT RECOMMENDED):"
+  echo "  git commit --no-verify"
+  exit 1
+fi
+
+echo "✅ Type check passed!"
+echo ""
 echo "🧪 Running tests before commit..."
 
 # Run all tests in the monorepo
