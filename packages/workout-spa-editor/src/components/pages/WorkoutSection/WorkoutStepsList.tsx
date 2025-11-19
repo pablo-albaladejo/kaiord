@@ -13,6 +13,7 @@ type WorkoutStepsListProps = {
   onStepDuplicate: (stepIndex: number) => void;
   onAddStep: () => void;
   onCreateRepetitionBlock: () => void;
+  onCreateEmptyRepetitionBlock: () => void;
   onEditRepetitionBlock: (blockIndex: number, repeatCount: number) => void;
   onAddStepToRepetitionBlock: (blockIndex: number) => void;
 };
@@ -27,6 +28,7 @@ export function WorkoutStepsList({
   onStepDuplicate,
   onAddStep,
   onCreateRepetitionBlock,
+  onCreateEmptyRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
 }: WorkoutStepsListProps) {
@@ -58,6 +60,15 @@ export function WorkoutStepsList({
             Create Repetition Block ({selectedStepIds.length} steps)
           </Button>
         )}
+        <Button
+          variant="secondary"
+          onClick={onCreateEmptyRepetitionBlock}
+          aria-label="Add repetition block"
+          data-testid="create-empty-repetition-block-button"
+        >
+          <Repeat className="mr-2 h-4 w-4" />
+          Add Repetition
+        </Button>
         <Button
           variant="secondary"
           onClick={onAddStep}

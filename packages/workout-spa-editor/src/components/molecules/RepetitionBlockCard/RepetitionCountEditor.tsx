@@ -27,7 +27,7 @@ export const RepetitionCountEditor = ({
       <div className="flex items-center gap-2">
         <Input
           type="number"
-          min="2"
+          min="1"
           value={editValue}
           onChange={(e) => onEditValueChange(e.target.value)}
           onKeyDown={onKeyDown}

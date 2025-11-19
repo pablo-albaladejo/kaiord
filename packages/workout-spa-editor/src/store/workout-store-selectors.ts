@@ -26,6 +26,8 @@ export const useClearStepSelection = () =>
   useWorkoutStore((state) => state.clearStepSelection);
 export const useCreateRepetitionBlock = () =>
   useWorkoutStore((state) => state.createRepetitionBlock);
+export const useCreateEmptyRepetitionBlock = () =>
+  useWorkoutStore((state) => state.createEmptyRepetitionBlock);
 export const useEditRepetitionBlock = () =>
   useWorkoutStore((state) => state.editRepetitionBlock);
 export const useAddStepToRepetitionBlock = () =>

@@ -6,6 +6,7 @@ import { StepCardFooter } from "./StepCardFooter";
 import { StepDetails } from "./StepDetails";
 import { StepHeader } from "./StepHeader";
 import { getStepCardClasses } from "./use-step-card-classes";
+import { useStepCardHandlers } from "./use-step-card-handlers";
 
 export type StepCardProps = HTMLAttributes<HTMLDivElement> & {
   step: WorkoutStep;
@@ -40,40 +41,9 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
       className
     );
 
-    const handleClick = (e: React.MouseEvent) => {
-      const isCtrlOrMeta =
-        e.ctrlKey ||
-        e.metaKey ||
-        e.getModifierState("Control") ||
-        e.getModifierState("Meta");
-      if (isCtrlOrMeta) {
-        e.preventDefault();
-        e.stopPropagation();
-        onToggleMultiSelect?.(step.stepIndex);
-      } else {
-        onSelect?.(step.stepIndex);
-      }
-    };
-
-    const handleMouseDown = (e: React.MouseEvent) => {
-      const isCtrlOrMeta =
-        e.ctrlKey ||
-        e.metaKey ||
-        e.getModifierState("Control") ||
-        e.getModifierState("Meta");
-      if (isCtrlOrMeta) {
-        e.preventDefault();
-        e.stopPropagation();
-        onToggleMultiSelect?.(step.stepIndex);
-      }
-    };
-
-    const handleKeyDown = (e: React.KeyboardEvent) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        handleClick(e as unknown as React.MouseEvent);
-      }
-    };
+    const { handleClick, handleMouseDown, handleKeyDown } = useStepCardHandlers(
+      { step, onSelect, onToggleMultiSelect }
+    );
 
     return (
       <div
@@ -86,6 +56,7 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
         onKeyDown={handleKeyDown}
         aria-label={`Step ${step.stepIndex + 1}: ${step.name || formatDuration(step)}`}
         data-testid="step-card"
+        data-selected={isSelected || isMultiSelected ? "true" : "false"}
         {...props}
       >
         <StepCardActions

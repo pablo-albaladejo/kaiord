@@ -17,7 +17,7 @@ import { createUpdateWorkoutAction } from "../workout-actions";
  *
  * @param krd - Current KRD workout
  * @param blockIndex - Index of the repetition block in the workout steps array
- * @param repeatCount - New repeat count (minimum 2)
+ * @param repeatCount - New repeat count (minimum 1)
  * @param state - Current workout state
  * @returns Updated workout state
  */
@@ -31,7 +31,7 @@ export const editRepetitionBlockAction = (
     return {};
   }
 
-  if (repeatCount < 2) {
+  if (repeatCount < 1) {
     return {};
   }
 

@@ -1,7 +1,7 @@
 import { Input } from "../../atoms/Input/Input";
 
 type DialogContentProps = {
-  stepCount: number;
+  stepCount?: number;
   repeatCount: string;
   error: string | null;
   onRepeatCountChange: (value: string) => void;
@@ -15,11 +15,15 @@ export function DialogContent({
   onRepeatCountChange,
   onKeyDown,
 }: DialogContentProps) {
+  const isCreatingFromSteps = stepCount !== undefined && stepCount > 0;
   return (
     <div className="p-4">
       <p className="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        Create a repetition block from {stepCount}{" "}
-        {stepCount === 1 ? "step" : "steps"}.
+        {isCreatingFromSteps
+          ? `Create a repetition block from ${stepCount} ${
+              stepCount === 1 ? "step" : "steps"
+            }.`
+          : "Create an empty repetition block. You can add steps to it later."}
       </p>
 
       <div className="space-y-2">
@@ -32,7 +36,7 @@ export function DialogContent({
         <Input
           id="repeat-count-input"
           type="number"
-          min="2"
+          min="1"
           value={repeatCount}
           onChange={(e) => onRepeatCountChange(e.target.value)}
           onKeyDown={onKeyDown}
@@ -44,7 +48,7 @@ export function DialogContent({
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
         )}
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          Minimum: 2 repetitions
+          Minimum: 1 repetition
         </p>
       </div>
     </div>

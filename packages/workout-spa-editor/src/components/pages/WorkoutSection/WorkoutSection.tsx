@@ -42,6 +42,7 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         onStepDuplicate={state.duplicateStep}
         onAddStep={state.createStep}
         onCreateRepetitionBlock={state.handleCreateRepetitionBlock}
+        onCreateEmptyRepetitionBlock={state.handleCreateEmptyRepetitionBlock}
         onEditRepetitionBlock={state.handleEditRepetitionBlock}
         onAddStepToRepetitionBlock={state.handleAddStepToRepetitionBlock}
       />
@@ -54,7 +55,11 @@ export function WorkoutSection(props: WorkoutSectionProps) {
       )}
       {state.showCreateBlockDialog && (
         <CreateRepetitionBlockDialog
-          stepCount={state.selectedStepIds.length}
+          stepCount={
+            state.selectedStepIds.length >= 2
+              ? state.selectedStepIds.length
+              : undefined
+          }
           onConfirm={state.handleConfirmCreateBlock}
           onCancel={state.handleCancelCreateBlock}
         />

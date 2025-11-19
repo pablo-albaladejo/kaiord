@@ -77,4 +77,3 @@ export const addStepToRepetitionBlockAction = (
 
   return createUpdateWorkoutAction(updatedKrd, state);
 };
-
