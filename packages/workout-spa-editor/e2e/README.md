@@ -35,7 +35,12 @@ The E2E tests validate critical user flows and ensure the application works corr
 4. **Accessibility** (`accessibility.spec.ts`)
    - Keyboard navigation
    - ARIA labels and roles
-   - Keyboard shortcuts (Ctrl+Z, Ctrl+Y, Ctrl+S)
+   - Keyboard shortcuts:
+     - Ctrl+Z / Cmd+Z: Undo
+     - Ctrl+Y / Cmd+Y: Redo
+     - Ctrl+S / Cmd+S: Save
+     - Alt+Up: Move step up
+     - Alt+Down: Move step down
    - Focus indicators
    - Color contrast
 

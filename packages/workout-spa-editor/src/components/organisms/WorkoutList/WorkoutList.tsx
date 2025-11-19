@@ -1,7 +1,13 @@
+import { DndContext } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
 import type { HTMLAttributes } from "react";
 import type { Workout } from "../../../types/krd";
-import { isRepetitionBlock } from "../../../types/krd";
-import { renderRepetitionBlock, renderStep } from "./WorkoutListItem";
+import { dndAnnouncements } from "./dnd-announcements";
+import { useWorkoutListDnd } from "./use-workout-list-dnd";
+import { WorkoutListContent } from "./WorkoutListContent";
 
 export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
   workout: Workout;
@@ -17,6 +23,12 @@ export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
   ) => void;
   onEditRepetitionBlock?: (blockIndex: number, repeatCount: number) => void;
   onAddStepToRepetitionBlock?: (blockIndex: number) => void;
+  onStepReorder?: (activeIndex: number, overIndex: number) => void;
+  onReorderStepsInBlock?: (
+    blockIndex: number,
+    activeIndex: number,
+    overIndex: number
+  ) => void;
 };
 
 export const WorkoutList = ({
@@ -30,41 +42,49 @@ export const WorkoutList = ({
   onDuplicateStepInRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
+  onStepReorder,
+  onReorderStepsInBlock,
   className = "",
   ...props
 }: WorkoutListProps) => {
   const baseClasses = "flex flex-col gap-4";
   const classes = [baseClasses, className].filter(Boolean).join(" ");
 
+  const { sensors, sortableIds, handleDragEnd, collisionDetection } =
+    useWorkoutListDnd(workout, onStepReorder);
+
   return (
-    <div className={classes} role="list" aria-label="Workout steps" {...props}>
-      {workout.steps.map((item, index) => {
-        if (isRepetitionBlock(item)) {
-          return renderRepetitionBlock({
-            block: item,
-            blockIndex: index,
-            selectedStepId,
-            onStepSelect,
-            onStepDelete,
-            onStepDuplicate: onDuplicateStepInRepetitionBlock,
-            onEditRepeatCount: onEditRepetitionBlock
-              ? (count: number) => onEditRepetitionBlock(index, count)
-              : undefined,
-            onAddStep: onAddStepToRepetitionBlock
-              ? () => onAddStepToRepetitionBlock(index)
-              : undefined,
-          });
-        }
-        return renderStep({
-          step: item,
-          selectedStepId,
-          selectedStepIds,
-          onStepSelect,
-          onToggleStepSelection,
-          onStepDelete,
-          onStepDuplicate,
-        });
-      })}
-    </div>
+    <DndContext
+      sensors={sensors}
+      collisionDetection={collisionDetection}
+      onDragEnd={handleDragEnd}
+      accessibility={{ announcements: dndAnnouncements }}
+    >
+      <SortableContext
+        items={sortableIds}
+        strategy={verticalListSortingStrategy}
+      >
+        <div
+          className={classes}
+          role="list"
+          aria-label="Workout steps"
+          {...props}
+        >
+          <WorkoutListContent
+            workout={workout}
+            selectedStepId={selectedStepId}
+            selectedStepIds={selectedStepIds}
+            onStepSelect={onStepSelect}
+            onToggleStepSelection={onToggleStepSelection}
+            onStepDelete={onStepDelete}
+            onStepDuplicate={onStepDuplicate}
+            onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
+            onEditRepetitionBlock={onEditRepetitionBlock}
+            onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
+            onReorderStepsInBlock={onReorderStepsInBlock}
+          />
+        </div>
+      </SortableContext>
+    </DndContext>
   );
 };

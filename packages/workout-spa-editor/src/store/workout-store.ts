@@ -3,7 +3,7 @@ import { create } from "zustand";
 // prettier-ignore
 import { createBackupAction, disableSafeModeAction, enableSafeModeAction, restoreFromBackupAction } from "./actions/error-recovery-actions";
 // prettier-ignore
-import { createClearWorkoutAction, createRedoAction, createUndoAction } from "./workout-actions";
+import { createClearWorkoutAction, createRedoAction, createUndoAction, type WorkoutState } from "./workout-actions";
 import { createWorkoutStoreActions } from "./workout-store-actions";
 import { createSelectionActions } from "./workout-store-selection-actions";
 import type { WorkoutStore } from "./workout-store-types";
@@ -29,6 +29,25 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => {
       set((state) => actions.deleteStep(stepIndex, state)),
     duplicateStep: (stepIndex) =>
       set((state) => actions.duplicateStep(stepIndex, state)),
+    reorderStep: (activeIndex, overIndex) => {
+      console.log("🏪 Store reorderStep called", { activeIndex, overIndex });
+      set((state) => {
+        console.log("🏪 Store state before:", {
+          hasCurrentWorkout: !!state.currentWorkout,
+          historyLength: state.workoutHistory.length,
+        });
+        const result = actions.reorderStep(activeIndex, overIndex, state);
+        console.log("🏪 Store result:", {
+          hasCurrentWorkout: !!(result as WorkoutState).currentWorkout,
+          historyLength: (result as WorkoutState).workoutHistory?.length,
+        });
+        return result;
+      });
+    },
+    reorderStepsInBlock: (blockIndex, activeIndex, overIndex) =>
+      set((state) =>
+        actions.reorderStepsInBlock(blockIndex, activeIndex, overIndex, state)
+      ),
     createRepetitionBlock: (stepIndices, repeatCount) =>
       set((state) =>
         actions.createRepetitionBlock(stepIndices, repeatCount, state)

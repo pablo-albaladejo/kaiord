@@ -2,6 +2,7 @@ import {
   useCreateStep,
   useDuplicateStep,
   useIsEditing,
+  useReorderStep,
   useToggleStepSelection,
 } from "../../../store/workout-store-selectors";
 import type { KRD, Workout } from "../../../types/krd";
@@ -13,11 +14,18 @@ export function useWorkoutSectionState(
   workout: Workout,
   krd: KRD,
   selectedStepId: string | null,
-  onStepSelect: (stepIndex: number) => void
+  onStepSelect: (stepIndex: number) => void,
+  onStepReorder?: (activeIndex: number, overIndex: number) => void,
+  onReorderStepsInBlock?: (
+    blockIndex: number,
+    activeIndex: number,
+    overIndex: number
+  ) => void
 ) {
   const isEditing = useIsEditing();
   const createStep = useCreateStep();
   const duplicateStep = useDuplicateStep();
+  const reorderStep = onStepReorder || useReorderStep();
   const selectedStep = useSelectedStep(selectedStepId, workout);
   const handlers = useWorkoutSectionHandlers(workout, krd, onStepSelect);
 
@@ -32,6 +40,8 @@ export function useWorkoutSectionState(
     isEditing,
     createStep,
     duplicateStep,
+    reorderStep,
+    reorderStepsInBlock: onReorderStepsInBlock,
     selectedStep,
     selectedStepIds: repetitionBlockHandlers.selectedStepIds,
     showCreateBlockDialog: repetitionBlockHandlers.showCreateBlockDialog,

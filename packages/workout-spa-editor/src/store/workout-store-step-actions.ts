@@ -1,6 +1,8 @@
 import { createStepAction } from "./actions/create-step-action";
 import { deleteStepAction } from "./actions/delete-step-action";
 import { duplicateStepAction } from "./actions/duplicate-step-action";
+import { reorderStepAction } from "./actions/reorder-step-action";
+import { reorderStepsInBlockAction } from "./actions/reorder-steps-in-block-action";
 import type { WorkoutState } from "./workout-actions";
 
 /**
@@ -13,6 +15,8 @@ export function createStepActions(state: WorkoutState) {
       createStep: () => ({}),
       deleteStep: () => ({}),
       duplicateStep: () => ({}),
+      reorderStep: () => ({}),
+      reorderStepsInBlock: () => ({}),
     };
   }
 
@@ -22,5 +26,19 @@ export function createStepActions(state: WorkoutState) {
       deleteStepAction(currentWorkout, stepIndex, state),
     duplicateStep: (stepIndex: number) =>
       duplicateStepAction(currentWorkout, stepIndex, state),
+    reorderStep: (activeIndex: number, overIndex: number) =>
+      reorderStepAction(currentWorkout, activeIndex, overIndex, state),
+    reorderStepsInBlock: (
+      blockIndex: number,
+      activeIndex: number,
+      overIndex: number
+    ) =>
+      reorderStepsInBlockAction(
+        currentWorkout,
+        blockIndex,
+        activeIndex,
+        overIndex,
+        state
+      ),
   };
 }

@@ -12,6 +12,12 @@ export type WorkoutSectionProps = {
   krd: KRD;
   selectedStepId: string | null;
   onStepSelect: (stepIndex: number) => void;
+  onStepReorder?: (activeIndex: number, overIndex: number) => void;
+  onReorderStepsInBlock?: (
+    blockIndex: number,
+    activeIndex: number,
+    overIndex: number
+  ) => void;
 };
 
 export function WorkoutSection(props: WorkoutSectionProps) {
@@ -19,7 +25,9 @@ export function WorkoutSection(props: WorkoutSectionProps) {
     props.workout,
     props.krd,
     props.selectedStepId,
-    props.onStepSelect
+    props.onStepSelect,
+    props.onStepReorder,
+    props.onReorderStepsInBlock
   );
 
   return (
@@ -40,6 +48,8 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         onToggleStepSelection={state.handleToggleStepSelection}
         onStepDelete={state.handleDeleteRequest}
         onStepDuplicate={state.duplicateStep}
+        onStepReorder={state.reorderStep}
+        onReorderStepsInBlock={state.reorderStepsInBlock}
         onAddStep={state.createStep}
         onCreateRepetitionBlock={state.handleCreateRepetitionBlock}
         onCreateEmptyRepetitionBlock={state.handleCreateEmptyRepetitionBlock}

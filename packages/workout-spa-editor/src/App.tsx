@@ -26,6 +26,10 @@ function App() {
   const selectedStepId = useSelectedStepId();
   const undo = useWorkoutStore((state) => state.undo);
   const redo = useWorkoutStore((state) => state.redo);
+  const reorderStep = useWorkoutStore((state) => state.reorderStep);
+  const reorderStepsInBlock = useWorkoutStore(
+    (state) => state.reorderStepsInBlock
+  );
   const canUndo = useWorkoutStore((state) => state.canUndo());
   const canRedo = useWorkoutStore((state) => state.canRedo());
 
@@ -37,6 +41,22 @@ function App() {
   } = useAppHandlers();
 
   const workout = currentWorkout?.extensions?.workout as Workout | undefined;
+
+  // Helper function to get step index from selected step ID
+  const getSelectedStepIndex = (): number | null => {
+    if (!selectedStepId || !workout) return null;
+
+    // Step ID format is "step-{stepIndex}"
+    const match = selectedStepId.match(/^step-(\d+)$/);
+    if (!match) return null;
+
+    const stepIndex = parseInt(match[1], 10);
+
+    // Validate that the step exists at this index
+    if (stepIndex < 0 || stepIndex >= workout.steps.length) return null;
+
+    return stepIndex;
+  };
 
   useKeyboardShortcuts({
     onSave: () => {
@@ -52,6 +72,22 @@ function App() {
     onRedo: () => {
       if (canRedo) {
         redo();
+      }
+    },
+    onMoveStepUp: () => {
+      const stepIndex = getSelectedStepIndex();
+      if (stepIndex !== null && stepIndex > 0) {
+        reorderStep(stepIndex, stepIndex - 1);
+      }
+    },
+    onMoveStepDown: () => {
+      const stepIndex = getSelectedStepIndex();
+      if (
+        stepIndex !== null &&
+        workout &&
+        stepIndex < workout.steps.length - 1
+      ) {
+        reorderStep(stepIndex, stepIndex + 1);
       }
     },
   });
@@ -73,6 +109,8 @@ function App() {
               krd={currentWorkout}
               selectedStepId={selectedStepId}
               onStepSelect={handleStepSelect}
+              onStepReorder={reorderStep}
+              onReorderStepsInBlock={reorderStepsInBlock}
             />
           )}
         </div>
