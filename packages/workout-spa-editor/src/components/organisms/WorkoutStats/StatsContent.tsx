@@ -50,9 +50,15 @@ export const StatsContent: React.FC<StatsContentProps> = ({ stats }) => (
   <>
     <DurationRow stats={stats} />
     <DistanceRow stats={stats} />
-    <StatRow label="Total Steps:" value={stats.stepCount} />
+    <StatRow
+      label="Total Steps:"
+      value={`${stats.stepCount} ${stats.stepCount === 1 ? "step" : "steps"}`}
+    />
     {stats.repetitionCount > 0 && (
-      <StatRow label="Repetition Blocks:" value={stats.repetitionCount} />
+      <StatRow
+        label="Repetition Blocks:"
+        value={`${stats.repetitionCount} ${stats.repetitionCount === 1 ? "repetition" : "repetitions"}`}
+      />
     )}
     {stats.hasOpenSteps && (
       <div className="mt-3 border-t border-gray-200 pt-2">

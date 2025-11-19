@@ -14,6 +14,7 @@ export type WorkoutState = {
   workoutHistory: Array<KRD>;
   historyIndex: number;
   selectedStepId: string | null;
+  selectedStepIds: Array<string>;
   isEditing: boolean;
 };
 
@@ -22,6 +23,7 @@ export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => ({
   workoutHistory: [krd],
   historyIndex: 0,
   selectedStepId: null,
+  selectedStepIds: [],
   isEditing: false,
 });
 
@@ -49,6 +51,7 @@ export const createClearWorkoutAction = (): Partial<WorkoutState> => ({
   workoutHistory: [],
   historyIndex: -1,
   selectedStepId: null,
+  selectedStepIds: [],
   isEditing: false,
 });
 
