@@ -24,6 +24,7 @@ export function FileUploadInput({
       className="hidden"
       disabled={disabled || isLoading}
       aria-label="Upload workout file"
+      data-testid="file-upload-input"
     />
   );
 }

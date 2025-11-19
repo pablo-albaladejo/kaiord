@@ -2,11 +2,15 @@
  * File Parsing Utilities
  */
 
-import { KrdValidationError } from "@kaiord/core";
 import type { KRD, ValidationError } from "../../../types/krd";
-import { ValidationError as CustomValidationError } from "../../../types/errors";
-import { getFormatName } from "../../../utils/file-format-metadata";
 import { ImportError, importWorkout } from "../../../utils/import-workout";
+import { createImportErrorState } from "./file-parser-error-builders";
+import {
+  createFileParsingErrorState,
+  createGenericErrorState,
+  createSyntaxErrorState,
+  createUnrecoverableErrorState,
+} from "./file-parser-error-fallbacks";
 
 type ErrorState = {
   title: string;
@@ -23,49 +27,44 @@ export const parseFile = async (
   return await importWorkout(file, onProgress);
 };
 
-const convertToValidationErrors = (
-  errors: Array<{ field: string; message: string }>
-): Array<ValidationError> => {
-  return errors.map((err) => ({
-    path: err.field.split("."),
-    message: err.message,
-  }));
-};
-
 export const createParseError = (error: unknown): ErrorState => {
   if (error && typeof error === "object" && "title" in error) {
     return error as ErrorState;
   }
 
   if (error instanceof ImportError) {
-    const formatName = error.format ? getFormatName(error.format) : "file";
-    let validationErrors: Array<ValidationError> | undefined;
-    if (error.cause instanceof CustomValidationError) {
-      validationErrors = convertToValidationErrors(error.cause.errors);
-    } else if (error.cause instanceof KrdValidationError) {
-      validationErrors = convertToValidationErrors(error.cause.errors);
-    }
-    const message =
-      error.message.startsWith("Failed to import") ||
-      error.message.startsWith("Failed to parse")
-        ? error.message
-        : `Failed to import ${formatName} file: ${error.message}`;
-    return {
-      title: "Import Failed",
-      message,
-      validationErrors,
+    return createImportErrorState(error);
+  }
+
+  // Handle FileParsingError directly (from json-parser)
+  if (
+    error &&
+    typeof error === "object" &&
+    "name" in error &&
+    error.name === "FileParsingError" &&
+    "message" in error
+  ) {
+    const parsingError = error as {
+      message: string;
+      line?: number;
+      column?: number;
     };
+    return createFileParsingErrorState(parsingError);
   }
 
   if (error instanceof SyntaxError) {
-    return {
-      title: "Invalid File Format",
-      message: `Failed to parse JSON: ${error.message}`,
-    };
+    return createSyntaxErrorState(error);
   }
 
-  return {
-    title: "File Read Error",
-    message: `Failed to read file: ${error instanceof Error ? error.message : "Unknown error"}`,
-  };
+  // For unrecoverable errors (like corrupted FIT files), add helpful message
+  if (
+    error instanceof Error &&
+    (error.message.includes("corrupted") ||
+      error.message.includes("not a FIT file") ||
+      error.message.includes("input is not a FIT file"))
+  ) {
+    return createUnrecoverableErrorState(error);
+  }
+
+  return createGenericErrorState(error);
 };

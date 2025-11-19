@@ -59,6 +59,7 @@ export function useFileUploadActions({
   const handleRetry = () => {
     setError(null);
     setConversionProgress(0);
+    resetInput(); // Reset input to allow selecting the same file again
     fileInputRef.current?.click();
   };
 
