@@ -13,6 +13,7 @@ export type WorkoutStore = {
   workoutHistory: Array<KRD>;
   historyIndex: number;
   selectedStepId: string | null;
+  selectedStepIds: Array<string>;
   isEditing: boolean;
   safeMode: boolean;
   lastBackup: KRD | null;
@@ -28,7 +29,11 @@ export type WorkoutStore = {
     stepIndices: Array<number>,
     repeatCount: number
   ) => void;
+  editRepetitionBlock: (blockIndex: number, repeatCount: number) => void;
+  addStepToRepetitionBlock: (blockIndex: number) => void;
   selectStep: (id: string | null) => void;
+  toggleStepSelection: (id: string) => void;
+  clearStepSelection: () => void;
   setEditing: (editing: boolean) => void;
   clearWorkout: () => void;
   undo: () => void;

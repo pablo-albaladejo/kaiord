@@ -1,7 +1,10 @@
+/* eslint-disable max-lines */
 /** Workout Store - Zustand store for managing workout state with undo/redo. Requirements: 15 (undo/redo), 16 (track editing state) */
 import { create } from "zustand";
 import type { KRD, Sport } from "../types/krd";
+import { addStepToRepetitionBlockAction } from "./actions/add-step-to-repetition-block-action";
 import { createRepetitionBlockAction } from "./actions/create-repetition-block-action";
+import { editRepetitionBlockAction } from "./actions/edit-repetition-block-action";
 import { createStepAction } from "./actions/create-step-action";
 import { deleteStepAction } from "./actions/delete-step-action";
 import { duplicateStepAction } from "./actions/duplicate-step-action";
@@ -16,6 +19,7 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
   workoutHistory: [],
   historyIndex: -1,
   selectedStepId: null,
+  selectedStepIds: [],
   isEditing: false,
   safeMode: false,
   lastBackup: null,
@@ -51,7 +55,40 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
             state
           )
     ),
-  selectStep: (id: string | null) => set({ selectedStepId: id }),
+  editRepetitionBlock: (blockIndex: number, repeatCount: number) =>
+    set((state) =>
+      !state.currentWorkout
+        ? {}
+        : editRepetitionBlockAction(
+            state.currentWorkout,
+            blockIndex,
+            repeatCount,
+            state
+          )
+    ),
+  addStepToRepetitionBlock: (blockIndex: number) =>
+    set((state) =>
+      !state.currentWorkout
+        ? {}
+        : addStepToRepetitionBlockAction(
+            state.currentWorkout,
+            blockIndex,
+            state
+          )
+    ),
+  selectStep: (id: string | null) =>
+    set({ selectedStepId: id, selectedStepIds: [] }),
+  toggleStepSelection: (id: string) =>
+    set((state) => {
+      const isSelected = state.selectedStepIds.includes(id);
+      return {
+        selectedStepIds: isSelected
+          ? state.selectedStepIds.filter((stepId) => stepId !== id)
+          : [...state.selectedStepIds, id],
+        selectedStepId: null,
+      };
+    }),
+  clearStepSelection: () => set({ selectedStepIds: [] }),
   setEditing: (editing: boolean) => set({ isEditing: editing }),
   clearWorkout: () => set(createClearWorkoutAction()),
   undo: () => set((state) => createUndoAction(state)),

@@ -5,7 +5,9 @@ import { StepCard } from "../../molecules/StepCard/StepCard";
 type RenderStepProps = {
   step: WorkoutStep;
   selectedStepId?: string | null;
+  selectedStepIds?: Array<string>;
   onStepSelect?: (stepIndex: number) => void;
+  onToggleStepSelection?: (stepIndex: number) => void;
   onStepDelete?: (stepIndex: number) => void;
   onStepDuplicate?: (stepIndex: number) => void;
 };
@@ -13,18 +15,28 @@ type RenderStepProps = {
 export const renderStep = ({
   step,
   selectedStepId,
+  selectedStepIds = [],
   onStepSelect,
+  onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
 }: RenderStepProps) => {
-  const isSelected = selectedStepId === `step-${step.stepIndex}`;
+  const stepId = `step-${step.stepIndex}`;
+  const isSelected = selectedStepId === stepId;
+  const isMultiSelected = selectedStepIds.includes(stepId);
 
   return (
     <StepCard
-      key={`step-${step.stepIndex}`}
+      key={stepId}
       step={step}
       isSelected={isSelected}
+      isMultiSelected={isMultiSelected}
       onSelect={onStepSelect ? () => onStepSelect(step.stepIndex) : undefined}
+      onToggleMultiSelect={
+        onToggleStepSelection
+          ? () => onToggleStepSelection(step.stepIndex)
+          : undefined
+      }
       onDelete={onStepDelete ? () => onStepDelete(step.stepIndex) : undefined}
       onDuplicate={
         onStepDuplicate ? () => onStepDuplicate(step.stepIndex) : undefined
@@ -39,6 +51,8 @@ type RenderRepetitionBlockProps = {
   selectedStepId?: string | null;
   onStepSelect?: (stepIndex: number) => void;
   onStepDelete?: (stepIndex: number) => void;
+  onEditRepeatCount?: (count: number) => void;
+  onAddStep?: () => void;
 };
 
 export const renderRepetitionBlock = ({
@@ -47,6 +61,8 @@ export const renderRepetitionBlock = ({
   selectedStepId,
   onStepSelect,
   onStepDelete,
+  onEditRepeatCount,
+  onAddStep,
 }: RenderRepetitionBlockProps) => {
   // Extract selected step index from selectedStepId (format: "step-{index}")
   const selectedStepIndex = selectedStepId?.startsWith("step-")
@@ -60,6 +76,8 @@ export const renderRepetitionBlock = ({
       selectedStepIndex={selectedStepIndex}
       onSelectStep={onStepSelect}
       onRemoveStep={onStepDelete}
+      onEditRepeatCount={onEditRepeatCount}
+      onAddStep={onAddStep}
     />
   );
 };

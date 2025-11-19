@@ -16,7 +16,7 @@ test.describe("Repetition Blocks", () => {
     await page.goto("/");
 
     // Load a workout with multiple steps
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
       type: "workout",
@@ -93,8 +93,16 @@ test.describe("Repetition Blocks", () => {
     const step2 = page.locator('[data-testid="step-card"]').nth(1);
     const step3 = page.locator('[data-testid="step-card"]').nth(2);
 
-    await step2.click({ modifiers: ["Control"] });
-    await step3.click({ modifiers: ["Control"] });
+    // Use keyboard to hold Control key while clicking
+    await page.keyboard.down("Control");
+    await step2.click();
+    await step3.click();
+    await page.keyboard.up("Control");
+
+    // Wait for the button to appear
+    await expect(
+      page.getByTestId("create-repetition-block-button")
+    ).toBeVisible({ timeout: 5000 });
 
     // Click "Create Repetition Block" button
     await page.getByTestId("create-repetition-block-button").click();
@@ -116,7 +124,7 @@ test.describe("Repetition Blocks", () => {
     await page.goto("/");
 
     // Load a workout with a repetition block
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
       type: "workout",
@@ -192,7 +200,7 @@ test.describe("Repetition Blocks", () => {
     await page.goto("/");
 
     // Load a workout with a repetition block
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
       type: "workout",
@@ -365,7 +373,7 @@ test.describe("Repetition Blocks", () => {
     await page.goto("/");
 
     // Load a workout with a repetition block
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
       type: "workout",
@@ -413,8 +421,8 @@ test.describe("Repetition Blocks", () => {
     // Verify initial state
     await expect(page.getByText("1 step")).toBeVisible();
 
-    // Click add step button within the block
-    await page.getByTestId("add-step-button").click();
+    // Click add step button within the block (use first() to get the one inside the repetition block)
+    await page.getByTestId("add-step-button").first().click();
 
     // Verify step was added
     await expect(page.getByText("2 steps")).toBeVisible({ timeout: 5000 });
@@ -479,8 +487,16 @@ test.describe("Repetition Blocks", () => {
     const step1 = page.locator('[data-testid="step-card"]').first();
     const step2 = page.locator('[data-testid="step-card"]').nth(1);
 
-    await step1.click({ modifiers: ["Control"] });
-    await step2.click({ modifiers: ["Control"] });
+    // Use keyboard to hold Control key while clicking
+    await page.keyboard.down("Control");
+    await step1.click();
+    await step2.click();
+    await page.keyboard.up("Control");
+
+    // Wait for the button to appear
+    await expect(
+      page.getByTestId("create-repetition-block-button")
+    ).toBeVisible({ timeout: 5000 });
 
     // Create repetition block
     await page.getByTestId("create-repetition-block-button").click();
