@@ -14,6 +14,8 @@ export type WorkoutStore = {
   historyIndex: number;
   selectedStepId: string | null;
   isEditing: boolean;
+  safeMode: boolean;
+  lastBackup: KRD | null;
 
   // Actions
   loadWorkout: (krd: KRD) => void;
@@ -22,13 +24,24 @@ export type WorkoutStore = {
   createStep: () => void;
   deleteStep: (stepIndex: number) => void;
   duplicateStep: (stepIndex: number) => void;
+  createRepetitionBlock: (
+    stepIndices: Array<number>,
+    repeatCount: number
+  ) => void;
   selectStep: (id: string | null) => void;
   setEditing: (editing: boolean) => void;
   clearWorkout: () => void;
   undo: () => void;
   redo: () => void;
 
+  // Error Recovery Actions
+  createBackup: () => void;
+  restoreFromBackup: () => boolean;
+  enableSafeMode: () => void;
+  disableSafeMode: () => void;
+
   // Computed
   canUndo: () => boolean;
   canRedo: () => boolean;
+  hasBackup: () => boolean;
 };

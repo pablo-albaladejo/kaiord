@@ -52,7 +52,8 @@ describe("WorkoutList", () => {
     render(<WorkoutList workout={workout} />);
 
     // Assert
-    expect(screen.getByText("Repeat 3x")).toBeInTheDocument();
+    expect(screen.getByText("3x")).toBeInTheDocument(); // RepetitionBlockCard shows count as "3x"
+    expect(screen.getByText("Repeat Block")).toBeInTheDocument(); // Badge text
     expect(screen.getByText("Step 1")).toBeInTheDocument();
     expect(screen.getByText("Step 2")).toBeInTheDocument();
   });
@@ -101,7 +102,8 @@ describe("WorkoutList", () => {
 
     // Assert
     expect(screen.getByText("Step 1")).toBeInTheDocument();
-    expect(screen.getByText("Repeat 2x")).toBeInTheDocument();
+    expect(screen.getByText("2x")).toBeInTheDocument(); // RepetitionBlockCard shows count as "2x"
+    expect(screen.getByText("Repeat Block")).toBeInTheDocument(); // Badge text
     expect(screen.getByText("Step 2")).toBeInTheDocument();
     expect(screen.getByText("Step 3")).toBeInTheDocument();
   });

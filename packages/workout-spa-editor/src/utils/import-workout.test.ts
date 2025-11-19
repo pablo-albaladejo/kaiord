@@ -98,8 +98,58 @@ describe("importWorkout", () => {
       // Act & Assert
       await expect(importWorkout(file)).rejects.toThrow(ImportError);
       await expect(importWorkout(file)).rejects.toThrow(
-        /Failed to parse KRD JSON/
+        /Failed to parse KRD file/
       );
+    });
+
+    it("should include line and column in error for invalid JSON", async () => {
+      // Arrange
+      const invalidJson = '{\n  "name": "test",\n  "value": invalid\n}';
+      const file = createMockFile(invalidJson, "invalid.krd");
+
+      // Act & Assert
+      try {
+        await importWorkout(file);
+        expect.fail("Should have thrown ImportError");
+      } catch (error) {
+        expect(error).toBeInstanceOf(ImportError);
+        expect((error as ImportError).message).toMatch(/line \d+, column \d+/);
+      }
+    });
+
+    it("should throw ValidationError for missing required fields", async () => {
+      // Arrange
+      const invalidKrd = JSON.stringify({
+        version: "1.0",
+        // missing type and metadata
+      });
+      const file = createMockFile(invalidKrd, "invalid.krd");
+
+      // Act & Assert
+      await expect(importWorkout(file)).rejects.toThrow(ImportError);
+      await expect(importWorkout(file)).rejects.toThrow(/Validation failed/);
+    });
+
+    it("should list all missing fields in validation error", async () => {
+      // Arrange
+      const invalidKrd = JSON.stringify({
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          // missing created and sport
+        },
+      });
+      const file = createMockFile(invalidKrd, "invalid.krd");
+
+      // Act & Assert
+      try {
+        await importWorkout(file);
+        expect.fail("Should have thrown ImportError");
+      } catch (error) {
+        expect(error).toBeInstanceOf(ImportError);
+        expect((error as ImportError).message).toContain("metadata.created");
+        expect((error as ImportError).message).toContain("metadata.sport");
+      }
     });
 
     it("should call progress callback during KRD import", async () => {
@@ -132,7 +182,8 @@ describe("importWorkout", () => {
       expect(onProgress).toHaveBeenCalled();
       expect(onProgress).toHaveBeenCalledWith(10);
       expect(onProgress).toHaveBeenCalledWith(30);
-      expect(onProgress).toHaveBeenCalledWith(60);
+      expect(onProgress).toHaveBeenCalledWith(40);
+      expect(onProgress).toHaveBeenCalledWith(70);
       expect(onProgress).toHaveBeenCalledWith(100);
     });
   });
