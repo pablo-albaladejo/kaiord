@@ -56,7 +56,7 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
           variant="primary"
           onClick={handleSave}
           disabled={disabled || isSaving}
-          className={className}
+          className={`w-full sm:w-auto ${className || ""}`}
         >
           {isSaving ? (
             <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />

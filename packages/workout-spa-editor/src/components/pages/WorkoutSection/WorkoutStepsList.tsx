@@ -1,21 +1,27 @@
-import { Repeat } from "lucide-react";
 import type { Workout } from "../../../types/krd";
-import { Button } from "../../atoms/Button/Button";
 import { WorkoutList } from "../../organisms/WorkoutList/WorkoutList";
+import { WorkoutStepsListActions } from "./WorkoutStepsListActions";
 
 type WorkoutStepsListProps = {
-  workout: Workout;
-  selectedStepId: string | null;
-  selectedStepIds: Array<string>;
-  onStepSelect: (stepIndex: number) => void;
-  onToggleStepSelection: (stepIndex: number) => void;
-  onStepDelete: (stepIndex: number) => void;
-  onStepDuplicate: (stepIndex: number) => void;
-  onAddStep: () => void;
-  onCreateRepetitionBlock: () => void;
-  onCreateEmptyRepetitionBlock: () => void;
-  onEditRepetitionBlock: (blockIndex: number, repeatCount: number) => void;
-  onAddStepToRepetitionBlock: (blockIndex: number) => void;
+  readonly workout: Workout;
+  readonly selectedStepId: string | null;
+  readonly selectedStepIds: readonly string[];
+  readonly onStepSelect: (stepIndex: number) => void;
+  readonly onToggleStepSelection: (stepIndex: number) => void;
+  readonly onStepDelete: (stepIndex: number) => void;
+  readonly onStepDuplicate: (stepIndex: number) => void;
+  readonly onAddStep: () => void;
+  readonly onCreateRepetitionBlock: () => void;
+  readonly onCreateEmptyRepetitionBlock: () => void;
+  readonly onEditRepetitionBlock: (
+    blockIndex: number,
+    repeatCount: number
+  ) => void;
+  readonly onAddStepToRepetitionBlock: (blockIndex: number) => void;
+  readonly onDuplicateStepInRepetitionBlock: (
+    blockIndex: number,
+    stepIndex: number
+  ) => void;
 };
 
 export function WorkoutStepsList({
@@ -31,6 +37,7 @@ export function WorkoutStepsList({
   onCreateEmptyRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
+  onDuplicateStepInRepetitionBlock,
 }: WorkoutStepsListProps) {
   const hasMultipleSelection = selectedStepIds.length >= 2;
 
@@ -44,40 +51,18 @@ export function WorkoutStepsList({
         onToggleStepSelection={onToggleStepSelection}
         onStepDelete={onStepDelete}
         onStepDuplicate={onStepDuplicate}
+        onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
         onEditRepetitionBlock={onEditRepetitionBlock}
         onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
       />
 
-      <div className="mt-4 flex justify-center gap-2">
-        {hasMultipleSelection && (
-          <Button
-            variant="primary"
-            onClick={onCreateRepetitionBlock}
-            aria-label="Create repetition block from selected steps"
-            data-testid="create-repetition-block-button"
-          >
-            <Repeat className="mr-2 h-4 w-4" />
-            Create Repetition Block ({selectedStepIds.length} steps)
-          </Button>
-        )}
-        <Button
-          variant="secondary"
-          onClick={onCreateEmptyRepetitionBlock}
-          aria-label="Add repetition block"
-          data-testid="create-empty-repetition-block-button"
-        >
-          <Repeat className="mr-2 h-4 w-4" />
-          Add Repetition
-        </Button>
-        <Button
-          variant="secondary"
-          onClick={onAddStep}
-          aria-label="Add new step to workout"
-          data-testid="add-step-button"
-        >
-          Add Step
-        </Button>
-      </div>
+      <WorkoutStepsListActions
+        hasMultipleSelection={hasMultipleSelection}
+        selectedStepCount={selectedStepIds.length}
+        onCreateRepetitionBlock={onCreateRepetitionBlock}
+        onCreateEmptyRepetitionBlock={onCreateEmptyRepetitionBlock}
+        onAddStep={onAddStep}
+      />
     </div>
   );
 }

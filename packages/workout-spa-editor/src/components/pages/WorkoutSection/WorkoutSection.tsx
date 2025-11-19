@@ -45,6 +45,9 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         onCreateEmptyRepetitionBlock={state.handleCreateEmptyRepetitionBlock}
         onEditRepetitionBlock={state.handleEditRepetitionBlock}
         onAddStepToRepetitionBlock={state.handleAddStepToRepetitionBlock}
+        onDuplicateStepInRepetitionBlock={
+          state.handleDuplicateStepInRepetitionBlock
+        }
       />
       {state.stepToDelete !== null && (
         <DeleteConfirmDialog

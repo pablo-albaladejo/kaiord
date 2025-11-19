@@ -46,6 +46,8 @@ export function useWorkoutSectionState(
       repetitionBlockHandlers.handleEditRepetitionBlock,
     handleAddStepToRepetitionBlock:
       repetitionBlockHandlers.handleAddStepToRepetitionBlock,
+    handleDuplicateStepInRepetitionBlock:
+      repetitionBlockHandlers.handleDuplicateStepInRepetitionBlock,
     ...handlers,
   };
 }

@@ -9,6 +9,7 @@ export type RepetitionBlockCardProps = HTMLAttributes<HTMLDivElement> & {
   onEditRepeatCount?: (count: number) => void;
   onAddStep?: () => void;
   onRemoveStep?: (index: number) => void;
+  onDuplicateStep?: (index: number) => void;
   onSelectStep?: (index: number) => void;
   selectedStepIndex?: number;
 };
@@ -23,6 +24,7 @@ export const RepetitionBlockCard = forwardRef<
       onEditRepeatCount,
       onAddStep,
       onRemoveStep,
+      onDuplicateStep,
       onSelectStep,
       selectedStepIndex,
       className = "",
@@ -72,6 +74,7 @@ export const RepetitionBlockCard = forwardRef<
             selectedStepIndex={selectedStepIndex}
             onSelectStep={onSelectStep}
             onRemoveStep={onRemoveStep}
+            onDuplicateStep={onDuplicateStep}
             onAddStep={onAddStep}
           />
         )}

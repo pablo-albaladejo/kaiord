@@ -3,9 +3,9 @@ import type { ValidationError } from "../../../types/krd";
 import { getFormatWarnings } from "./format-helpers";
 
 type FormatWarningsProps = {
-  format: string;
-  workout?: unknown;
-  validationErrors: ValidationError[];
+  readonly format: string;
+  readonly workout?: unknown;
+  readonly validationErrors: readonly ValidationError[];
 };
 
 export function FormatWarnings({
@@ -32,11 +32,14 @@ export function FormatWarnings({
             Cannot export workout:
           </p>
           <ul className="text-sm text-red-700 dark:text-red-300 list-disc list-inside">
-            {validationErrors.map((error, index) => (
-              <li key={index}>
-                {error.path.join(".")}: {error.message}
-              </li>
-            ))}
+            {validationErrors.map((error) => {
+              const errorKey = error.path.join(".") || error.message;
+              return (
+                <li key={errorKey}>
+                  {error.path.join(".")}: {error.message}
+                </li>
+              );
+            })}
           </ul>
         </div>
       )}
