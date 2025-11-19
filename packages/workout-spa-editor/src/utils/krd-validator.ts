@@ -15,18 +15,20 @@ export const validateKRD = (data: unknown): KRD => {
   }
   const krd = data as Record<string, unknown>;
   if (!krd.version)
-    errors.push({ field: "version", message: "Required field missing" });
+    errors.push({ field: "version", message: "Missing required field" });
   else if (typeof krd.version !== "string")
-    errors.push({ field: "version", message: "Must be a string" });
+    errors.push({ field: "version", message: "Invalid value" });
   if (!krd.type)
-    errors.push({ field: "type", message: "Required field missing" });
+    errors.push({ field: "type", message: "Missing required field" });
   else if (typeof krd.type !== "string")
-    errors.push({ field: "type", message: "Must be a string" });
+    errors.push({ field: "type", message: "Invalid value" });
   else if (krd.type !== "workout" && krd.type !== "activity")
-    errors.push({ field: "type", message: 'Must be "workout" or "activity"' });
-  if (!krd.metadata)
-    errors.push({ field: "metadata", message: "Required field missing" });
-  else validateMetadata(krd.metadata, errors);
+    errors.push({ field: "type", message: "Invalid value" });
+  if (krd.metadata) {
+    validateMetadata(krd.metadata, errors);
+  } else {
+    errors.push({ field: "metadata", message: "Missing required field" });
+  }
   if (krd.type === "workout") validateWorkout(krd, errors);
   if (errors.length > 0)
     throw new ValidationError("KRD validation failed", errors);

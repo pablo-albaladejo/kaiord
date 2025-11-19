@@ -71,7 +71,7 @@ describe("validateKRD", () => {
         if (error instanceof ValidationError) {
           expect(error.errors).toContainEqual({
             field: "version",
-            message: "Required field missing",
+            message: "Missing required field",
           });
         }
       }
@@ -96,7 +96,7 @@ describe("validateKRD", () => {
         if (error instanceof ValidationError) {
           expect(error.errors).toContainEqual({
             field: "type",
-            message: "Required field missing",
+            message: "Missing required field",
           });
         }
       }
@@ -118,7 +118,7 @@ describe("validateKRD", () => {
         if (error instanceof ValidationError) {
           expect(error.errors).toContainEqual({
             field: "metadata",
-            message: "Required field missing",
+            message: "Missing required field",
           });
         }
       }
@@ -143,7 +143,7 @@ describe("validateKRD", () => {
         if (error instanceof ValidationError) {
           expect(error.errors).toContainEqual({
             field: "metadata.created",
-            message: "Required field missing",
+            message: "Missing required field",
           });
         }
       }
@@ -168,7 +168,7 @@ describe("validateKRD", () => {
         if (error instanceof ValidationError) {
           expect(error.errors).toContainEqual({
             field: "metadata.sport",
-            message: "Required field missing",
+            message: "Missing required field",
           });
         }
       }
@@ -195,7 +195,7 @@ describe("validateKRD", () => {
         if (error instanceof ValidationError) {
           expect(error.errors).toContainEqual({
             field: "extensions.workout",
-            message: "Required field missing for workout type",
+            message: "Missing required field for workout type",
           });
         }
       }
@@ -240,7 +240,7 @@ describe("validateKRD", () => {
         if (error instanceof ValidationError) {
           expect(error.errors).toContainEqual({
             field: "version",
-            message: "Must be a string",
+            message: "Invalid value",
           });
         }
       }
@@ -266,7 +266,7 @@ describe("validateKRD", () => {
         if (error instanceof ValidationError) {
           expect(error.errors).toContainEqual({
             field: "type",
-            message: 'Must be "workout" or "activity"',
+            message: "Invalid value",
           });
         }
       }
