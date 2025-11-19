@@ -52,7 +52,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.11_
   - _Files: packages/core/src/adapters/zwift/index.ts, packages/core/src/adapters/zwift/well-formedness-validator.ts_
 
-- [ ] 3. Implement TCX and ZWO file import with browser compatibility
+- [x] 3. Implement TCX and ZWO file import with browser compatibility
   - Use @kaiord/core toKRD function for TCX → KRD conversion
   - Use @kaiord/core toKRD function for ZWO → KRD conversion
   - Handle XML parsing errors gracefully
@@ -82,7 +82,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.7_
   - _Files: utils/export-workout.ts_
 
-- [ ] 6. Implement TCX and ZWO file export with browser compatibility
+- [x] 6. Implement TCX and ZWO file export with browser compatibility
   - Use @kaiord/core fromKRD function for KRD → TCX conversion
   - Use @kaiord/core fromKRD function for KRD → ZWO conversion
   - Handle XML encoding errors gracefully
