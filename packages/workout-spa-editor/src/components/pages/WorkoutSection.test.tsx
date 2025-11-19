@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach } from "node:test";
 import { describe, expect, it, vi } from "vitest";
 import { useWorkoutStore } from "../../store/workout-store";
@@ -173,7 +173,9 @@ describe("WorkoutSection", () => {
 
     // Act - Click cancel button
     const cancelButton = screen.getByText(/Cancel/);
-    cancelButton.click();
+    await act(async () => {
+      cancelButton.click();
+    });
 
     // Assert - Wait for state updates
     await waitFor(() => {

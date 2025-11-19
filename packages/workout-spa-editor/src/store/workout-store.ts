@@ -5,6 +5,7 @@ import { createBackupAction, disableSafeModeAction, enableSafeModeAction, restor
 // prettier-ignore
 import { createClearWorkoutAction, createRedoAction, createUndoAction } from "./workout-actions";
 import { createWorkoutStoreActions } from "./workout-store-actions";
+import { createSelectionActions } from "./workout-store-selection-actions";
 import type { WorkoutStore } from "./workout-store-types";
 export type { WorkoutStore } from "./workout-store-types";
 
@@ -40,18 +41,11 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => {
       ),
     addStepToRepetitionBlock: (blockIndex) =>
       set((state) => actions.addStepToRepetitionBlock(blockIndex, state)),
-    selectStep: (id) => set({ selectedStepId: id, selectedStepIds: [] }),
-    toggleStepSelection: (id) =>
-      set((state) => {
-        const isSelected = state.selectedStepIds.includes(id);
-        return {
-          selectedStepIds: isSelected
-            ? state.selectedStepIds.filter((stepId) => stepId !== id)
-            : [...state.selectedStepIds, id],
-          selectedStepId: null,
-        };
-      }),
-    clearStepSelection: () => set({ selectedStepIds: [] }),
+    duplicateStepInRepetitionBlock: (blockIndex, stepIndex) =>
+      set((state) =>
+        actions.duplicateStepInRepetitionBlock(blockIndex, stepIndex, state)
+      ),
+    ...createSelectionActions(set),
     setEditing: (editing) => set({ isEditing: editing }),
     clearWorkout: () => set(createClearWorkoutAction()),
     undo: () => set((state) => createUndoAction(state)),

@@ -50,13 +50,13 @@ export const createRepetitionBlockAction = (
   const stepsToWrap: Array<WorkoutStep> = [];
   const remainingSteps: Array<WorkoutStep | RepetitionBlock> = [];
 
-  workout.steps.forEach((step) => {
+  for (const step of workout.steps) {
     if (isWorkoutStep(step) && sortedIndices.includes(step.stepIndex)) {
       stepsToWrap.push(step);
     } else {
       remainingSteps.push(step);
     }
-  });
+  }
 
   // Create the repetition block
   const repetitionBlock: RepetitionBlock = {

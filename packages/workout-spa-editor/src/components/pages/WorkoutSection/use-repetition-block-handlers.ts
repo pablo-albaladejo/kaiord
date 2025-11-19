@@ -4,9 +4,37 @@ import {
   useClearStepSelection,
   useCreateEmptyRepetitionBlock,
   useCreateRepetitionBlock,
+  useDuplicateStepInRepetitionBlock,
   useEditRepetitionBlock,
   useSelectedStepIds,
 } from "../../../store/workout-store-selectors";
+
+function extractStepIndices(selectedStepIds: readonly string[]): Array<number> {
+  return selectedStepIds
+    .map((id) => {
+      const match = id.match(/^step-(\d+)$/);
+      return match ? Number.parseInt(match[1], 10) : null;
+    })
+    .filter((index): index is number => index !== null);
+}
+
+function useDialogState() {
+  const [showCreateBlockDialog, setShowCreateBlockDialog] = useState(false);
+  const [isCreatingEmptyBlock, setIsCreatingEmptyBlock] = useState(false);
+
+  const closeDialog = () => {
+    setShowCreateBlockDialog(false);
+    setIsCreatingEmptyBlock(false);
+  };
+
+  return {
+    showCreateBlockDialog,
+    isCreatingEmptyBlock,
+    setShowCreateBlockDialog,
+    setIsCreatingEmptyBlock,
+    closeDialog,
+  };
+}
 
 export function useRepetitionBlockHandlers() {
   const selectedStepIds = useSelectedStepIds();
@@ -14,64 +42,42 @@ export function useRepetitionBlockHandlers() {
   const createEmptyRepetitionBlock = useCreateEmptyRepetitionBlock();
   const editRepetitionBlock = useEditRepetitionBlock();
   const addStepToRepetitionBlock = useAddStepToRepetitionBlock();
+  const duplicateStepInRepetitionBlock = useDuplicateStepInRepetitionBlock();
   const clearStepSelection = useClearStepSelection();
-  const [showCreateBlockDialog, setShowCreateBlockDialog] = useState(false);
-  const [isCreatingEmptyBlock, setIsCreatingEmptyBlock] = useState(false);
+  const dialog = useDialogState();
 
   const handleCreateRepetitionBlock = () => {
-    setIsCreatingEmptyBlock(false);
-    setShowCreateBlockDialog(true);
+    dialog.setIsCreatingEmptyBlock(false);
+    dialog.setShowCreateBlockDialog(true);
   };
 
   const handleCreateEmptyRepetitionBlock = () => {
-    setIsCreatingEmptyBlock(true);
-    setShowCreateBlockDialog(true);
+    dialog.setIsCreatingEmptyBlock(true);
+    dialog.setShowCreateBlockDialog(true);
   };
 
   const handleConfirmCreateBlock = (repeatCount: number) => {
-    if (isCreatingEmptyBlock) {
+    if (dialog.isCreatingEmptyBlock) {
       createEmptyRepetitionBlock(repeatCount);
     } else {
-      const stepIndices = selectedStepIds
-        .map((id) => {
-          const match = id.match(/^step-(\d+)$/);
-          return match ? Number.parseInt(match[1], 10) : null;
-        })
-        .filter((index): index is number => index !== null);
-
+      const stepIndices = extractStepIndices(selectedStepIds);
       if (stepIndices.length >= 2) {
         createRepetitionBlock(stepIndices, repeatCount);
         clearStepSelection();
       }
     }
-    setShowCreateBlockDialog(false);
-    setIsCreatingEmptyBlock(false);
-  };
-
-  const handleCancelCreateBlock = () => {
-    setShowCreateBlockDialog(false);
-    setIsCreatingEmptyBlock(false);
-  };
-
-  const handleEditRepetitionBlock = (
-    blockIndex: number,
-    repeatCount: number
-  ) => {
-    editRepetitionBlock(blockIndex, repeatCount);
-  };
-
-  const handleAddStepToRepetitionBlock = (blockIndex: number) => {
-    addStepToRepetitionBlock(blockIndex);
+    dialog.closeDialog();
   };
 
   return {
     selectedStepIds,
-    showCreateBlockDialog,
+    showCreateBlockDialog: dialog.showCreateBlockDialog,
     handleCreateRepetitionBlock,
     handleCreateEmptyRepetitionBlock,
     handleConfirmCreateBlock,
-    handleCancelCreateBlock,
-    handleEditRepetitionBlock,
-    handleAddStepToRepetitionBlock,
+    handleCancelCreateBlock: dialog.closeDialog,
+    handleEditRepetitionBlock: editRepetitionBlock,
+    handleAddStepToRepetitionBlock: addStepToRepetitionBlock,
+    handleDuplicateStepInRepetitionBlock: duplicateStepInRepetitionBlock,
   };
 }

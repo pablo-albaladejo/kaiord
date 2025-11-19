@@ -9,6 +9,7 @@ type RepetitionBlockStepsProps = {
   selectedStepIndex?: number;
   onSelectStep?: (index: number) => void;
   onRemoveStep?: (index: number) => void;
+  onDuplicateStep?: (index: number) => void;
   onAddStep?: () => void;
 };
 
@@ -17,6 +18,7 @@ export const RepetitionBlockSteps = ({
   selectedStepIndex,
   onSelectStep,
   onRemoveStep,
+  onDuplicateStep,
   onAddStep,
 }: RepetitionBlockStepsProps) => {
   return (
@@ -28,6 +30,9 @@ export const RepetitionBlockSteps = ({
             isSelected={selectedStepIndex === index}
             onSelect={() => onSelectStep?.(index)}
             onDelete={onRemoveStep ? () => onRemoveStep(index) : undefined}
+            onDuplicate={
+              onDuplicateStep ? () => onDuplicateStep(index) : undefined
+            }
           />
         </div>
       ))}

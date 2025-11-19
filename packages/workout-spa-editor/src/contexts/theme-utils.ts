@@ -38,7 +38,12 @@ export const getStoredTheme = (): Theme | null => {
       return stored;
     }
   } catch (error) {
-    console.warn("Failed to read theme from localStorage:", error);
+    // Silently fail - theme preference is not critical
+    // In production, consider logging to error tracking service
+    // Only log in development/test for debugging
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("Failed to read theme from localStorage:", error);
+    }
   }
 
   return null;
@@ -53,7 +58,12 @@ export const storeTheme = (theme: Theme): void => {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   } catch (error) {
-    console.warn("Failed to store theme in localStorage:", error);
+    // Silently fail - theme preference is not critical
+    // In production, consider logging to error tracking service
+    // Only log in development/test for debugging
+    if (process.env.NODE_ENV !== "production") {
+      console.warn("Failed to store theme in localStorage:", error);
+    }
   }
 };
 

@@ -6,11 +6,15 @@ import { renderRepetitionBlock, renderStep } from "./WorkoutListItem";
 export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
   workout: Workout;
   selectedStepId?: string | null;
-  selectedStepIds?: Array<string>;
+  selectedStepIds?: readonly string[];
   onStepSelect?: (stepIndex: number) => void;
   onToggleStepSelection?: (stepIndex: number) => void;
   onStepDelete?: (stepIndex: number) => void;
   onStepDuplicate?: (stepIndex: number) => void;
+  onDuplicateStepInRepetitionBlock?: (
+    blockIndex: number,
+    stepIndex: number
+  ) => void;
   onEditRepetitionBlock?: (blockIndex: number, repeatCount: number) => void;
   onAddStepToRepetitionBlock?: (blockIndex: number) => void;
 };
@@ -23,6 +27,7 @@ export const WorkoutList = ({
   onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
+  onDuplicateStepInRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
   className = "",
@@ -41,6 +46,7 @@ export const WorkoutList = ({
             selectedStepId,
             onStepSelect,
             onStepDelete,
+            onStepDuplicate: onDuplicateStepInRepetitionBlock,
             onEditRepeatCount: onEditRepetitionBlock
               ? (count: number) => onEditRepetitionBlock(index, count)
               : undefined,

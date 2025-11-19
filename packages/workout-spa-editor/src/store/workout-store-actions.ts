@@ -1,14 +1,9 @@
 import type { KRD, Sport } from "../types/krd";
-import { addStepToRepetitionBlockAction } from "./actions/add-step-to-repetition-block-action";
-import { createEmptyRepetitionBlockAction } from "./actions/create-empty-repetition-block-action";
-import { createRepetitionBlockAction } from "./actions/create-repetition-block-action";
-import { createStepAction } from "./actions/create-step-action";
-import { deleteStepAction } from "./actions/delete-step-action";
-import { duplicateStepAction } from "./actions/duplicate-step-action";
-import { editRepetitionBlockAction } from "./actions/edit-repetition-block-action";
 // prettier-ignore
 import { createEmptyWorkoutAction, createLoadWorkoutAction, createUpdateWorkoutAction } from "./workout-actions";
 import type { WorkoutState } from "./workout-actions";
+import { createRepetitionBlockActions } from "./workout-store-repetition-actions";
+import { createStepActions } from "./workout-store-step-actions";
 
 /**
  * Creates action handlers for the workout store
@@ -20,59 +15,43 @@ export function createWorkoutStoreActions() {
       createEmptyWorkoutAction(name, sport),
     updateWorkout: (krd: KRD, state: WorkoutState) =>
       createUpdateWorkoutAction(krd, state),
-    createStep: (state: WorkoutState) =>
-      !state.currentWorkout
-        ? {}
-        : createStepAction(state.currentWorkout, state),
+    createStep: (state: WorkoutState) => createStepActions(state).createStep(),
     deleteStep: (stepIndex: number, state: WorkoutState) =>
-      !state.currentWorkout
-        ? {}
-        : deleteStepAction(state.currentWorkout, stepIndex, state),
+      createStepActions(state).deleteStep(stepIndex),
     duplicateStep: (stepIndex: number, state: WorkoutState) =>
-      !state.currentWorkout
-        ? {}
-        : duplicateStepAction(state.currentWorkout, stepIndex, state),
+      createStepActions(state).duplicateStep(stepIndex),
     createRepetitionBlock: (
       stepIndices: Array<number>,
       repeatCount: number,
       state: WorkoutState
     ) =>
-      !state.currentWorkout
-        ? {}
-        : createRepetitionBlockAction(
-            state.currentWorkout,
-            stepIndices,
-            repeatCount,
-            state
-          ),
+      createRepetitionBlockActions(state).createRepetitionBlock(
+        stepIndices,
+        repeatCount
+      ),
     createEmptyRepetitionBlock: (repeatCount: number, state: WorkoutState) =>
-      !state.currentWorkout
-        ? {}
-        : createEmptyRepetitionBlockAction(
-            state.currentWorkout,
-            repeatCount,
-            state
-          ),
+      createRepetitionBlockActions(state).createEmptyRepetitionBlock(
+        repeatCount
+      ),
     editRepetitionBlock: (
       blockIndex: number,
       repeatCount: number,
       state: WorkoutState
     ) =>
-      !state.currentWorkout
-        ? {}
-        : editRepetitionBlockAction(
-            state.currentWorkout,
-            blockIndex,
-            repeatCount,
-            state
-          ),
+      createRepetitionBlockActions(state).editRepetitionBlock(
+        blockIndex,
+        repeatCount
+      ),
     addStepToRepetitionBlock: (blockIndex: number, state: WorkoutState) =>
-      !state.currentWorkout
-        ? {}
-        : addStepToRepetitionBlockAction(
-            state.currentWorkout,
-            blockIndex,
-            state
-          ),
+      createRepetitionBlockActions(state).addStepToRepetitionBlock(blockIndex),
+    duplicateStepInRepetitionBlock: (
+      blockIndex: number,
+      stepIndex: number,
+      state: WorkoutState
+    ) =>
+      createRepetitionBlockActions(state).duplicateStepInRepetitionBlock(
+        blockIndex,
+        stepIndex
+      ),
   };
 }

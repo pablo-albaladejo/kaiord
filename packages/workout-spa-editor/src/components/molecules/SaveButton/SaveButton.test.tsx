@@ -1,5 +1,6 @@
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import type { ReactElement } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { KRD } from "../../../types/krd";
 import { ToastProvider } from "../../atoms/Toast";
@@ -32,7 +33,6 @@ vi.mock("../ExportFormatSelector/ExportFormatSelector", () => ({
       </button>
       <button
         type="button"
-        role="option"
         aria-label="FIT"
         disabled={disabled}
         onClick={() => onFormatChange("fit")}
@@ -41,7 +41,6 @@ vi.mock("../ExportFormatSelector/ExportFormatSelector", () => ({
       </button>
       <button
         type="button"
-        role="option"
         aria-label="TCX"
         disabled={disabled}
         onClick={() => onFormatChange("tcx")}
@@ -50,7 +49,6 @@ vi.mock("../ExportFormatSelector/ExportFormatSelector", () => ({
       </button>
       <button
         type="button"
-        role="option"
         aria-label="ZWO"
         disabled={disabled}
         onClick={() => onFormatChange("zwo")}
@@ -67,7 +65,7 @@ const { exportWorkout, downloadWorkout } = await import(
 );
 
 // Helper to render with ToastProvider
-const renderWithToast = (ui: React.ReactElement) => {
+const renderWithToast = (ui: ReactElement) => {
   return render(<ToastProvider>{ui}</ToastProvider>);
 };
 
@@ -248,7 +246,7 @@ describe("SaveButton", () => {
       renderWithToast(<SaveButton workout={mockKRD} />);
 
       // Act - Select FIT format
-      const fitOption = screen.getByRole("option", { name: /FIT/i });
+      const fitOption = screen.getByRole("button", { name: /FIT/i });
       await user.click(fitOption);
 
       // Click save button
@@ -279,7 +277,7 @@ describe("SaveButton", () => {
       renderWithToast(<SaveButton workout={mockKRD} />);
 
       // Act - Select TCX format
-      const tcxOption = screen.getByRole("option", { name: /TCX/i });
+      const tcxOption = screen.getByRole("button", { name: /TCX/i });
       await user.click(tcxOption);
 
       // Click save button
@@ -310,7 +308,7 @@ describe("SaveButton", () => {
       renderWithToast(<SaveButton workout={mockKRD} />);
 
       // Act - Select ZWO format
-      const zwoOption = screen.getByRole("option", { name: /ZWO/i });
+      const zwoOption = screen.getByRole("button", { name: /ZWO/i });
       await user.click(zwoOption);
 
       // Click save button
@@ -341,7 +339,7 @@ describe("SaveButton", () => {
       renderWithToast(<SaveButton workout={mockKRD} />);
 
       // Act - Select FIT format
-      const fitOption = screen.getByRole("option", { name: /FIT/i });
+      const fitOption = screen.getByRole("button", { name: /FIT/i });
       await user.click(fitOption);
 
       // Click save button
@@ -372,7 +370,7 @@ describe("SaveButton", () => {
       renderWithToast(<SaveButton workout={mockKRD} />);
 
       // Act - Select TCX format
-      const tcxOption = screen.getByRole("option", { name: /TCX/i });
+      const tcxOption = screen.getByRole("button", { name: /TCX/i });
       await user.click(tcxOption);
 
       // Click save button
