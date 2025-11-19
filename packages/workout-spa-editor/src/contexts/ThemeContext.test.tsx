@@ -299,8 +299,8 @@ describe("ThemeContext", () => {
       // Assert
       expect(result.current.theme).toBe("dark");
       expect(consoleWarnSpy).toHaveBeenCalledWith(
-        "Failed to store theme in localStorage:",
-        expect.any(Error)
+        "Failed to store theme in localStorage",
+        { error: expect.any(Error) }
       );
 
       // Cleanup
