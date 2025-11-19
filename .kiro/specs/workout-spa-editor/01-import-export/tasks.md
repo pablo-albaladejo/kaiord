@@ -37,7 +37,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.2_
   - _Files: utils/import-workout.ts_
 
-- [ ] 2.1. Fix @kaiord/core browser compatibility for Zwift validation
+- [x] 2.1. Fix @kaiord/core browser compatibility for Zwift validation
   - Detect browser environment using `typeof window !== 'undefined'` BEFORE attempting XSD validation
   - Create `createWellFormednessValidator` function that only validates XML structure
   - Update `createZwiftValidator` to automatically use well-formedness validator in browsers
