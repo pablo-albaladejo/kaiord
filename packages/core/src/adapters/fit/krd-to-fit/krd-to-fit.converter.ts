@@ -18,9 +18,10 @@ export const convertKRDToMessages = (
   const messages: Array<unknown> = [];
 
   const fileIdMessage = convertMetadataToFileId(krd, logger);
-  messages.push(
-    Object.assign({ mesgNum: FIT_MESSAGE_NUMBERS.FILE_ID }, fileIdMessage)
-  );
+  messages.push({
+    mesgNum: FIT_MESSAGE_NUMBERS.FILE_ID,
+    ...fileIdMessage,
+  });
 
   const workout = krd.extensions?.workout as Workout | undefined;
   if (!workout) {
@@ -28,15 +29,17 @@ export const convertKRDToMessages = (
   }
 
   const workoutMessage = convertWorkoutMetadata(workout, logger);
-  messages.push(
-    Object.assign({ mesgNum: FIT_MESSAGE_NUMBERS.WORKOUT }, workoutMessage)
-  );
+  messages.push({
+    mesgNum: FIT_MESSAGE_NUMBERS.WORKOUT,
+    ...workoutMessage,
+  });
 
   const workoutStepMessages = convertWorkoutSteps(workout, logger);
   for (const stepMessage of workoutStepMessages) {
-    messages.push(
-      Object.assign({ mesgNum: FIT_MESSAGE_NUMBERS.WORKOUT_STEP }, stepMessage)
-    );
+    messages.push({
+      mesgNum: FIT_MESSAGE_NUMBERS.WORKOUT_STEP,
+      ...(stepMessage as Record<string, unknown>),
+    });
   }
 
   logger.debug("Converted KRD to FIT messages", {

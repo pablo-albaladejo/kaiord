@@ -1,6 +1,9 @@
 import type { RefObject } from "react";
 import type { KRD, ValidationError } from "../../../types/krd";
-import { createParseError, parseFile } from "./file-parser";
+import {
+  createErrorHandler,
+  createFileChangeHandler,
+} from "./file-upload-handlers";
 
 type ErrorState = {
   title: string;
@@ -29,38 +32,23 @@ export function useFileUploadActions({
   onFileLoad,
   onError,
 }: FileUploadActionsParams) {
-  const handleError = (errorState: ErrorState) => {
-    setError(errorState);
-    setIsLoading(false);
-    setFileName(null);
-    setConversionProgress(0);
-    resetInput();
-    if (errorState && onError) {
-      onError(
-        errorState.message || errorState.title,
-        errorState.validationErrors
-      );
-    }
-  };
+  const handleError = createErrorHandler(
+    setError,
+    setIsLoading,
+    setFileName,
+    setConversionProgress,
+    resetInput,
+    onError
+  );
 
-  const handleFileChange = async (file: File | undefined) => {
-    if (!file) return;
-    setFileName(file.name);
-    setIsLoading(true);
-    setConversionProgress(0);
-    setError(null);
-    try {
-      const krd = await parseFile(file, (progress) => {
-        setConversionProgress(progress);
-      });
-      setError(null);
-      setConversionProgress(100);
-      onFileLoad(krd);
-      setIsLoading(false);
-    } catch (error) {
-      handleError(createParseError(error));
-    }
-  };
+  const handleFileChange = createFileChangeHandler(
+    setFileName,
+    setIsLoading,
+    setConversionProgress,
+    setError,
+    onFileLoad,
+    handleError
+  );
 
   const triggerFileInput = () => {
     setError(null);
