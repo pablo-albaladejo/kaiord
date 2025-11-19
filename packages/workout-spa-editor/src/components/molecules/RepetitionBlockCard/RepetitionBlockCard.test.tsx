@@ -312,7 +312,7 @@ describe("RepetitionBlockCard", () => {
       expect(onEditRepeatCount).not.toHaveBeenCalled();
     });
 
-    it("should not save invalid count (less than 2)", async () => {
+    it("should save valid count (minimum 1)", async () => {
       // Arrange
       const onEditRepeatCount = vi.fn();
       const user = userEvent.setup();
@@ -330,6 +330,32 @@ describe("RepetitionBlockCard", () => {
       const input = screen.getByTestId("repeat-count-input");
       await user.clear(input);
       await user.type(input, "1");
+
+      const saveButton = screen.getByTestId("save-count-button");
+      await user.click(saveButton);
+
+      // Assert
+      expect(onEditRepeatCount).toHaveBeenCalledWith(1);
+    });
+
+    it("should not save invalid count (less than 1)", async () => {
+      // Arrange
+      const onEditRepeatCount = vi.fn();
+      const user = userEvent.setup();
+      render(
+        <RepetitionBlockCard
+          block={mockBlock}
+          onEditRepeatCount={onEditRepeatCount}
+        />
+      );
+
+      // Act
+      const editButton = screen.getByTestId("edit-count-button");
+      await user.click(editButton);
+
+      const input = screen.getByTestId("repeat-count-input");
+      await user.clear(input);
+      await user.type(input, "0");
 
       const saveButton = screen.getByTestId("save-count-button");
       await user.click(saveButton);

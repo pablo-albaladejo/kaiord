@@ -20,7 +20,7 @@ export const useRepetitionBlockState = (
 
   const handleSaveCount = () => {
     const newCount = parseInt(editValue, 10);
-    if (!isNaN(newCount) && newCount >= 2) {
+    if (!isNaN(newCount) && newCount >= 1) {
       onEditRepeatCount?.(newCount);
       setIsEditingCount(false);
     }
