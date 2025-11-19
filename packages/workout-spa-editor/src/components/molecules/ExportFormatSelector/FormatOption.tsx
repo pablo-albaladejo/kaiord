@@ -2,9 +2,9 @@ import { Check } from "lucide-react";
 import { getFileExtensionForFormat, type FormatOption } from "./format-options";
 
 type FormatOptionProps = {
-  option: FormatOption;
-  isSelected: boolean;
-  onSelect: () => void;
+  readonly option: FormatOption;
+  readonly isSelected: boolean;
+  readonly onSelect: () => void;
 };
 
 export function FormatOptionItem({
@@ -24,6 +24,8 @@ export function FormatOptionItem({
       `}
       role="option"
       aria-selected={isSelected}
+      aria-label={option.label}
+      data-testid={`export-format-option-${option.value}`}
     >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1">

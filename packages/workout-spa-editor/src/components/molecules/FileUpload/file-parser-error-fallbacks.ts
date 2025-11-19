@@ -18,7 +18,8 @@ export const createFileParsingErrorState = (error: {
   column?: number;
 }): ErrorState => {
   let message = `Failed to parse JSON: ${error.message}`;
-  const positionMatch = error.message.match(/position (\d+)/i);
+  const positionRegex = /position (\d+)/i;
+  const positionMatch = positionRegex.exec(error.message);
   const positionText = positionMatch ? ` at position ${positionMatch[1]}` : "";
   if (error.line !== undefined && error.column !== undefined) {
     message = `Failed to parse JSON${positionText} (line ${error.line}, column ${error.column})`;
@@ -35,7 +36,8 @@ export const createFileParsingErrorState = (error: {
 
 export const createSyntaxErrorState = (error: SyntaxError): ErrorState => {
   let message = `Failed to parse JSON: ${error.message}`;
-  const positionMatch = error.message.match(/position (\d+)/i);
+  const positionRegex = /position (\d+)/i;
+  const positionMatch = positionRegex.exec(error.message);
 
   if (positionMatch) {
     message += `. Please check your file and try again.`;
