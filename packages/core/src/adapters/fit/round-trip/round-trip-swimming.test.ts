@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { createMockLogger } from "../../../tests/helpers/test-utils";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
+import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 
 describe("Round-trip: Swimming workouts - pool length conversion and unit handling", () => {
   it("should preserve poolLength in meters through KRD → FIT conversion", async () => {
@@ -37,11 +38,12 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
 
     // Assert
     const workoutMsg = messages.find(
-      (msg: unknown) => (msg as { type: string }).type === "workoutMesgs"
-    ) as { type: string; workoutMesg: Record<string, unknown> } | undefined;
+      (msg: unknown) =>
+        (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(workoutMsg?.workoutMesg.poolLength).toBe(25);
-    expect(workoutMsg?.workoutMesg.poolLengthUnit).toBe(0);
+    expect(workoutMsg?.poolLength).toBe(25);
+    expect(workoutMsg?.poolLengthUnit).toBe(0);
   });
 
   it("should preserve poolLength within tolerance through round-trip", async () => {
@@ -77,10 +79,11 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
 
       // Assert - Within ±0.01 meters tolerance
       const workoutMsg = messages.find(
-        (msg: unknown) => (msg as { type: string }).type === "workoutMesgs"
-      ) as { type: string; workoutMesg: Record<string, unknown> } | undefined;
+        (msg: unknown) =>
+          (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+      ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-      expect(workoutMsg?.workoutMesg.poolLength).toBeCloseTo(poolLength, 2);
+      expect(workoutMsg?.poolLength).toBeCloseTo(poolLength, 2);
     }
   });
 
@@ -115,10 +118,11 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
 
     // Assert - poolLengthUnit should always be 0 (meters)
     const workoutMsg = messages.find(
-      (msg: unknown) => (msg as { type: string }).type === "workoutMesgs"
-    ) as { type: string; workoutMesg: Record<string, unknown> } | undefined;
+      (msg: unknown) =>
+        (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(workoutMsg?.workoutMesg.poolLengthUnit).toBe(0);
+    expect(workoutMsg?.poolLengthUnit).toBe(0);
   });
 
   it("should omit poolLength when undefined in round-trip", async () => {
@@ -152,11 +156,12 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
 
     // Assert
     const workoutMsg = messages.find(
-      (msg: unknown) => (msg as { type: string }).type === "workoutMesgs"
-    ) as { type: string; workoutMesg: Record<string, unknown> } | undefined;
+      (msg: unknown) =>
+        (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(workoutMsg?.workoutMesg).not.toHaveProperty("poolLength");
-    expect(workoutMsg?.workoutMesg).not.toHaveProperty("poolLengthUnit");
+    expect(workoutMsg)?.not.toHaveProperty("poolLength");
+    expect(workoutMsg)?.not.toHaveProperty("poolLengthUnit");
   });
 });
 
@@ -196,12 +201,12 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     // Assert
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; equipment: string } | undefined;
 
-    expect(stepMsg?.workoutStepMesg.equipment).toBe("swimFins");
+    expect(stepMsg?.equipment).toBe("swimFins");
   });
 
   it("should preserve exact equipment values through round-trip", async () => {
@@ -249,14 +254,12 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
       // Assert
       const stepMsg = messages.find(
         (msg: unknown) =>
-          (msg as { type: string }).type === "workoutStepMesgs" &&
-          (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-            .messageIndex === 0
-      ) as
-        | { type: string; workoutStepMesg: Record<string, unknown> }
-        | undefined;
+          (msg as { mesgNum?: number }).mesgNum ===
+            FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+          (msg as { messageIndex?: number }).messageIndex === 0
+      ) as { mesgNum: number; equipment: string } | undefined;
 
-      expect(stepMsg?.workoutStepMesg.equipment).toBe(equipment.fit);
+      expect(stepMsg?.equipment).toBe(equipment.fit);
     }
   });
 
@@ -295,12 +298,12 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     // Assert
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(stepMsg?.workoutStepMesg).not.toHaveProperty("equipment");
+    expect(stepMsg).not.toHaveProperty("equipment");
   });
 
   it("should preserve equipment on multiple steps", async () => {
@@ -347,14 +350,12 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     for (let i = 0; i < equipmentArray.length; i++) {
       const stepMsg = messages.find(
         (msg: unknown) =>
-          (msg as { type: string }).type === "workoutStepMesgs" &&
-          (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-            .messageIndex === i
-      ) as
-        | { type: string; workoutStepMesg: Record<string, unknown> }
-        | undefined;
+          (msg as { mesgNum?: number }).mesgNum ===
+            FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+          (msg as { messageIndex?: number }).messageIndex === i
+      ) as { mesgNum: number; equipment: string } | undefined;
 
-      expect(stepMsg?.workoutStepMesg.equipment).toBe(equipmentArray[i].fit);
+      expect(stepMsg?.equipment).toBe(equipmentArray[i].fit);
     }
   });
 });
@@ -400,20 +401,23 @@ describe("Round-trip: Swimming workouts - combined pool length and equipment", (
 
     // Assert - Check workout message has poolLength
     const workoutMsg = messages.find(
-      (msg: unknown) => (msg as { type: string }).type === "workoutMesgs"
-    ) as { type: string; workoutMesg: Record<string, unknown> } | undefined;
+      (msg: unknown) =>
+        (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+    ) as
+      | { mesgNum: number; poolLength: number; poolLengthUnit: number }
+      | undefined;
 
-    expect(workoutMsg?.workoutMesg.poolLength).toBe(testPoolLength);
-    expect(workoutMsg?.workoutMesg.poolLengthUnit).toBe(0);
+    expect(workoutMsg?.poolLength).toBe(testPoolLength);
+    expect(workoutMsg?.poolLengthUnit).toBe(0);
 
     // Assert - Check step message has equipment
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; equipment: string } | undefined;
 
-    expect(stepMsg?.workoutStepMesg.equipment).toBe("swimFins");
+    expect(stepMsg?.equipment).toBe("swimFins");
   });
 });

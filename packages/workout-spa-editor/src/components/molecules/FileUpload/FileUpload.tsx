@@ -15,7 +15,7 @@ export type FileUploadProps = {
 export const FileUpload = ({
   onFileLoad,
   onError,
-  accept = ".krd,.json",
+  accept = ".fit,.tcx,.zwo,.krd,.json",
   className = "",
   disabled = false,
 }: FileUploadProps) => {
@@ -38,6 +38,7 @@ export const FileUpload = ({
       <FileUploadStatus
         fileName={upload.fileName}
         isLoading={upload.isLoading}
+        conversionProgress={upload.conversionProgress}
         error={upload.error}
         onRetry={upload.handleRetry}
         onDismiss={upload.handleDismiss}

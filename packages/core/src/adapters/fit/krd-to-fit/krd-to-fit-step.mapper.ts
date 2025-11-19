@@ -1,7 +1,6 @@
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
 import { mapEquipmentToFit } from "../equipment/equipment.mapper";
-import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { convertDuration } from "./krd-to-fit-duration.mapper";
 import { convertTarget } from "./krd-to-fit-target.mapper";
 
@@ -9,7 +8,7 @@ export const convertWorkoutStep = (
   step: WorkoutStep,
   messageIndex: number,
   logger: Logger
-): unknown => {
+): Record<string, unknown> => {
   logger.debug("Converting workout step", { stepIndex: step.stepIndex });
 
   const workoutStepMesg: Record<string, unknown> = {
@@ -42,8 +41,5 @@ export const convertWorkoutStep = (
   convertDuration(step, workoutStepMesg);
   convertTarget(step, workoutStepMesg);
 
-  return {
-    type: fitMessageKeySchema.enum.workoutStepMesgs,
-    workoutStepMesg,
-  };
+  return workoutStepMesg;
 };

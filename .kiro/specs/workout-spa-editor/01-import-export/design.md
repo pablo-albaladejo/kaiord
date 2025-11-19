@@ -254,6 +254,117 @@ export const downloadFile = (blob: Blob, filename: string): void => {
 };
 ```
 
+## Browser Compatibility
+
+### XSD Validation Limitation
+
+The `@kaiord/core` library uses XSD schema validation for Zwift XML files, which requires Node.js-specific modules (`xsd-schema-validator`, `module`, `path`, `url`). These modules are not available in browser environments.
+
+**Current Issue**: The library attempts to load XSD validation before checking if it's running in a browser, causing the error: `"XSD validation is only available in Node.js environments"`.
+
+**Important**: The `xsd-schema-validator` dependency should **remain** in `package.json` because:
+
+- It's used in Node.js environments (CLI, tests, development)
+- Modern bundlers (Vite, Webpack) automatically exclude it from browser bundles via tree-shaking
+- The issue is the **order of operations**, not the dependency itself
+
+### Solution: Graceful Degradation
+
+```typescript
+// Catch XSD validation errors and fall back to basic XML validation
+try {
+  const krd = await toKRD(uint8Array, { type: "zwo" });
+  return krd;
+} catch (error) {
+  if (error.message?.includes("XSD validation is only available in Node.js")) {
+    // XSD validation not available in browser - this is expected
+    // The core library should handle this gracefully by using XML well-formedness validation
+    throw new Error(
+      "ZWO import requires server-side processing. Please use the CLI tool or contact support."
+    );
+  }
+  throw error;
+}
+```
+
+### Core Library Enhancement Required
+
+The `@kaiord/core` library needs to be updated to:
+
+1. Detect browser environment before attempting XSD validation
+2. Fall back to XML well-formedness validation in browsers
+3. Provide a browser-compatible Zwift validator option
+
+**Why not use browser-based XSD validators?**
+
+- Libraries like `libxmljs2` or `xmllint-wasm` add 2-3MB to bundle size
+- XSD validation is primarily for development/CLI use
+- XML well-formedness validation catches 95% of issues
+- Zwift's XML format is well-defined and stable
+
+**Recommended approach:**
+
+```typescript
+// packages/core/src/adapters/zwift/index.ts
+import { validateXmlWellFormedness } from "./xml-well-formedness-validator";
+import { createXsdZwiftValidator } from "./xsd-validator";
+
+export const createZwiftValidator = (
+  logger: Logger,
+  options?: {
+    skipXsdValidation?: boolean;
+  }
+): ZwiftValidator => {
+  // In browser environments, automatically skip XSD validation
+  const isBrowser = typeof window !== "undefined";
+
+  if (isBrowser || options?.skipXsdValidation) {
+    logger.info(
+      "Using XML well-formedness validation (XSD validation unavailable in browser)"
+    );
+    return createWellFormednessValidator(logger);
+  }
+
+  return createXsdZwiftValidator(logger);
+};
+
+// Create well-formedness-only validator
+const createWellFormednessValidator =
+  (logger: Logger): ZwiftValidator =>
+  async (xmlString: string): Promise<ZwiftValidationResult> => {
+    try {
+      logger.debug("Validating Zwift XML well-formedness");
+
+      const error = validateXmlWellFormedness(xmlString, logger);
+      if (error) {
+        return error;
+      }
+
+      logger.info("Zwift XML validated successfully (well-formedness only)");
+      return { valid: true, errors: [] };
+    } catch (error) {
+      logger.error("Zwift validation failed", { error });
+      return {
+        valid: false,
+        errors: [
+          {
+            field: "root",
+            message: error instanceof Error ? error.message : "Unknown error",
+          },
+        ],
+      };
+    }
+  };
+```
+
+**Usage in SPA:**
+
+```typescript
+// The toKRD function will automatically use well-formedness validation in browsers
+const krd = await toKRD(uint8Array, { type: "zwo" });
+// No special handling needed - it just works!
+```
+
 ## Error Handling
 
 ### Error Types
@@ -285,6 +396,15 @@ export class ValidationError extends Error {
   ) {
     super(`Validation failed: ${errors.length} errors`);
     this.name = "ValidationError";
+  }
+}
+
+export class BrowserCompatibilityError extends Error {
+  constructor(feature: string) {
+    super(
+      `${feature} is not available in browser environments. Please use the CLI tool for full validation.`
+    );
+    this.name = "BrowserCompatibilityError";
   }
 }
 ```

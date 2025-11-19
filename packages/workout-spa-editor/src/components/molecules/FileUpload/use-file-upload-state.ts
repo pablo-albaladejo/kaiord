@@ -12,6 +12,7 @@ export function useFileUploadState() {
   const [isLoading, setIsLoading] = useState(false);
   const [fileName, setFileName] = useState<string | null>(null);
   const [error, setError] = useState<ErrorState>(null);
+  const [conversionProgress, setConversionProgress] = useState(0);
 
   const resetInput = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
@@ -25,6 +26,8 @@ export function useFileUploadState() {
     setFileName,
     error,
     setError,
+    conversionProgress,
+    setConversionProgress,
     resetInput,
   };
 }

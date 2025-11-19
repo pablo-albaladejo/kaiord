@@ -53,11 +53,23 @@ export const createGarminFitSdkWriter =
       const encoder = new Encoder();
       const messages = convertKRDToMessages(krd, logger);
 
-      for (const message of messages) {
-        encoder.write(message);
+      for (let i = 0; i < messages.length; i++) {
+        const message = messages[i];
+        try {
+          logger.debug(`Writing message ${i + 1}/${messages.length}`, {
+            mesgNum: (message as { mesgNum?: number }).mesgNum,
+          });
+          encoder.writeMesg(message);
+        } catch (error) {
+          logger.error(`Failed to write message ${i + 1}`, {
+            message: JSON.stringify(message, null, 2),
+            error,
+          });
+          throw error;
+        }
       }
 
-      const buffer = encoder.finish();
+      const buffer = encoder.close();
       logger.info("KRD encoded to FIT successfully");
       return new Uint8Array(buffer);
     } catch (error) {
