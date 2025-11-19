@@ -7,7 +7,7 @@ import {
 } from "../../adapters/tcx/fast-xml-parser";
 import { createXsdTcxValidator } from "../../adapters/tcx/xsd-validator";
 import { createFastXmlZwiftReader } from "../../adapters/zwift/fast-xml-parser";
-import { createXsdZwiftValidator } from "../../adapters/zwift/xsd-validator";
+import { createZwiftValidator } from "../../adapters/zwift/xsd-validator";
 import { createToleranceChecker } from "../../domain/validation/tolerance-checker";
 import { createMockLogger } from "../helpers/test-utils";
 import { compareWorkoutStructures } from "./workout-structure-comparer";
@@ -22,7 +22,7 @@ describe("Multi-format round-trip: Testing conversions across all formats", () =
     const tcxValidator = createXsdTcxValidator(logger);
     const tcxReader = createFastXmlTcxReader(logger);
     const tcxWriter = createFastXmlTcxWriter(logger, tcxValidator);
-    const zwiftValidator = createXsdZwiftValidator(logger);
+    const zwiftValidator = createZwiftValidator(logger);
     const zwiftReader = createFastXmlZwiftReader(logger, zwiftValidator);
 
     // Load original Zwift file (known to work)
@@ -73,7 +73,7 @@ describe("Multi-format round-trip: Testing conversions across all formats", () =
     const tcxValidator = createXsdTcxValidator(logger);
     const tcxReader = createFastXmlTcxReader(logger);
     const tcxWriter = createFastXmlTcxWriter(logger, tcxValidator);
-    const zwiftValidator = createXsdZwiftValidator(logger);
+    const zwiftValidator = createZwiftValidator(logger);
     const zwiftReader = createFastXmlZwiftReader(logger, zwiftValidator);
 
     // Load original Zwift file

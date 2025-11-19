@@ -1,76 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { createConsoleLogger } from "../logger/console-logger";
-import { createXsdZwiftValidator, createZwiftValidator } from "./xsd-validator";
+import { createMockLogger } from "../../tests/helpers/test-utils";
+import { createWellFormednessValidator } from "./well-formedness-validator";
 
-describe("createZwiftValidator", () => {
-  const logger = createConsoleLogger();
-
-  describe("environment detection", () => {
-    it("should use well-formedness validator in browser environment", async () => {
-      // Arrange
-      // Simulate browser environment by setting window
-      const originalWindow = global.window;
-      // @ts-expect-error - Simulating browser environment
-      global.window = {};
-
-      const validator = createZwiftValidator(logger);
-      const validXml = `<?xml version="1.0" encoding="UTF-8"?>
-<workout_file>
-  <name>Test Workout</name>
-  <sportType>bike</sportType>
-  <workout>
-    <SteadyState Duration="300" Power="0.75"/>
-  </workout>
-</workout_file>`;
-
-      // Act
-      const result = await validator(validXml);
-
-      // Assert
-      expect(result.valid).toBe(true);
-      expect(result.errors).toHaveLength(0);
-
-      // Cleanup
-      global.window = originalWindow;
-    });
-
-    it("should use XSD validator in Node.js environment", async () => {
-      // Arrange
-      // Ensure we're in Node.js environment (window should be undefined)
-      const originalWindow = global.window;
-      // @ts-expect-error - Ensuring Node.js environment
-      global.window = undefined;
-
-      const validator = createZwiftValidator(logger);
-      const validXml = `<?xml version="1.0" encoding="UTF-8"?>
-<workout_file>
-  <name>Test Workout</name>
-  <sportType>bike</sportType>
-  <workout>
-    <SteadyState Duration="300" Power="0.75"/>
-  </workout>
-</workout_file>`;
-
-      // Act
-      const result = await validator(validXml);
-
-      // Assert
-      expect(result.valid).toBe(true);
-      expect(result.errors).toHaveLength(0);
-
-      // Cleanup
-      global.window = originalWindow;
-    });
-  });
-});
-
-describe("createXsdZwiftValidator", () => {
-  const logger = createConsoleLogger();
+describe("createWellFormednessValidator", () => {
+  const logger = createMockLogger();
 
   describe("valid XML", () => {
     it("should validate well-formed Zwift XML", async () => {
       // Arrange
-      const validator = createXsdZwiftValidator(logger);
+      const validator = createWellFormednessValidator(logger);
       const validXml = `<?xml version="1.0" encoding="UTF-8"?>
 <workout_file>
   <author>Test Author</author>
@@ -92,7 +30,7 @@ describe("createXsdZwiftValidator", () => {
 
     it("should validate Zwift with multiple intervals", async () => {
       // Arrange
-      const validator = createXsdZwiftValidator(logger);
+      const validator = createWellFormednessValidator(logger);
       const validXml = `<?xml version="1.0" encoding="UTF-8"?>
 <workout_file>
   <author>Test Author</author>
@@ -115,7 +53,7 @@ describe("createXsdZwiftValidator", () => {
 
     it("should validate Zwift with IntervalsT", async () => {
       // Arrange
-      const validator = createXsdZwiftValidator(logger);
+      const validator = createWellFormednessValidator(logger);
       const validXml = `<?xml version="1.0" encoding="UTF-8"?>
 <workout_file>
   <author>Test Author</author>
@@ -138,7 +76,7 @@ describe("createXsdZwiftValidator", () => {
   describe("invalid XML", () => {
     it("should reject malformed XML", async () => {
       // Arrange
-      const validator = createXsdZwiftValidator(logger);
+      const validator = createWellFormednessValidator(logger);
       const invalidXml = `<?xml version="1.0" encoding="UTF-8"?>
 <workout_file>
   <author>Test Author</author>
@@ -157,7 +95,7 @@ describe("createXsdZwiftValidator", () => {
 
     it("should reject XML with unclosed tags", async () => {
       // Arrange
-      const validator = createXsdZwiftValidator(logger);
+      const validator = createWellFormednessValidator(logger);
       const invalidXml = `<?xml version="1.0" encoding="UTF-8"?>
 <workout_file>
   <author>Test Author</author>
@@ -175,7 +113,7 @@ describe("createXsdZwiftValidator", () => {
 
     it("should reject empty string", async () => {
       // Arrange
-      const validator = createXsdZwiftValidator(logger);
+      const validator = createWellFormednessValidator(logger);
       const invalidXml = "";
 
       // Act
@@ -188,7 +126,7 @@ describe("createXsdZwiftValidator", () => {
 
     it("should reject non-XML content", async () => {
       // Arrange
-      const validator = createXsdZwiftValidator(logger);
+      const validator = createWellFormednessValidator(logger);
       const invalidXml = "This is not XML";
 
       // Act
@@ -200,10 +138,10 @@ describe("createXsdZwiftValidator", () => {
     });
   });
 
-  describe("schema violations", () => {
+  describe("schema violations (not detected in well-formedness mode)", () => {
     it("should accept XML with missing optional fields", async () => {
       // Arrange
-      const validator = createXsdZwiftValidator(logger);
+      const validator = createWellFormednessValidator(logger);
       const validXml = `<?xml version="1.0" encoding="UTF-8"?>
 <workout_file>
   <name>Minimal Workout</name>
@@ -215,6 +153,27 @@ describe("createXsdZwiftValidator", () => {
 
       // Act
       const result = await validator(validXml);
+
+      // Assert
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+    });
+
+    it("should accept XML with unknown elements (no XSD validation)", async () => {
+      // Arrange
+      const validator = createWellFormednessValidator(logger);
+      const xmlWithUnknownElement = `<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <name>Test Workout</name>
+  <sportType>bike</sportType>
+  <unknownElement>This would fail XSD validation</unknownElement>
+  <workout>
+    <SteadyState Duration="300" Power="0.75"/>
+  </workout>
+</workout_file>`;
+
+      // Act
+      const result = await validator(xmlWithUnknownElement);
 
       // Assert
       expect(result.valid).toBe(true);

@@ -282,7 +282,7 @@ describe("importWorkout", () => {
       // Act & Assert
       await expect(importWorkout(file)).rejects.toThrow(ImportError);
       await expect(importWorkout(file)).rejects.toThrow(
-        /Failed to import ZWO file/
+        /Failed to parse ZWO file/
       );
     });
 
