@@ -33,7 +33,6 @@ export const WorkoutList = ({
             selectedStepId,
             onStepSelect,
             onStepDelete,
-            onStepDuplicate,
           });
         }
         return renderStep({

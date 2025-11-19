@@ -1,4 +1,5 @@
 import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
+import { RepetitionBlockCard } from "../../molecules/RepetitionBlockCard/RepetitionBlockCard";
 import { StepCard } from "../../molecules/StepCard/StepCard";
 
 type RenderStepProps = {
@@ -38,7 +39,6 @@ type RenderRepetitionBlockProps = {
   selectedStepId?: string | null;
   onStepSelect?: (stepIndex: number) => void;
   onStepDelete?: (stepIndex: number) => void;
-  onStepDuplicate?: (stepIndex: number) => void;
 };
 
 export const renderRepetitionBlock = ({
@@ -47,30 +47,19 @@ export const renderRepetitionBlock = ({
   selectedStepId,
   onStepSelect,
   onStepDelete,
-  onStepDuplicate,
 }: RenderRepetitionBlockProps) => {
-  return (
-    <div
-      key={`block-${blockIndex}`}
-      className="border-2 border-dashed border-primary-300 dark:border-primary-700 rounded-lg p-4 bg-primary-50/30 dark:bg-primary-900/10"
-    >
-      <div className="flex items-center gap-2 mb-4">
-        <span className="text-sm font-semibold text-primary-700 dark:text-primary-300">
-          Repeat {block.repeatCount}x
-        </span>
-      </div>
+  // Extract selected step index from selectedStepId (format: "step-{index}")
+  const selectedStepIndex = selectedStepId?.startsWith("step-")
+    ? parseInt(selectedStepId.split("-")[1], 10)
+    : undefined;
 
-      <div className="flex flex-col gap-3 pl-4 border-l-4 border-primary-300 dark:border-primary-700">
-        {block.steps.map((step) =>
-          renderStep({
-            step,
-            selectedStepId,
-            onStepSelect,
-            onStepDelete,
-            onStepDuplicate,
-          })
-        )}
-      </div>
-    </div>
+  return (
+    <RepetitionBlockCard
+      key={`block-${blockIndex}`}
+      block={block}
+      selectedStepIndex={selectedStepIndex}
+      onSelectStep={onStepSelect}
+      onRemoveStep={onStepDelete}
+    />
   );
 };

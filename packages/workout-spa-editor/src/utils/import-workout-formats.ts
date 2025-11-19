@@ -7,27 +7,25 @@
 import type { KRD } from "@kaiord/core";
 import { createDefaultProviders } from "@kaiord/core";
 import type { ImportProgressCallback } from "./import-workout";
-import { ImportError } from "./import-workout";
+import { parseJSON } from "./json-parser";
+import { validateKRD } from "./krd-validator";
 
 export const importKrdFile = async (
   buffer: Uint8Array,
   onProgress?: ImportProgressCallback
 ): Promise<KRD> => {
-  try {
-    const text = new TextDecoder().decode(buffer);
-    onProgress?.(60);
+  const text = new TextDecoder().decode(buffer);
+  onProgress?.(40);
 
-    const krd = JSON.parse(text) as KRD;
-    onProgress?.(100);
+  // Parse JSON with enhanced error messages
+  const data = parseJSON(text);
+  onProgress?.(70);
 
-    return krd;
-  } catch (error) {
-    throw new ImportError(
-      `Failed to parse KRD JSON: ${error instanceof Error ? error.message : String(error)}`,
-      "krd",
-      error
-    );
-  }
+  // Validate KRD structure
+  const krd = validateKRD(data);
+  onProgress?.(100);
+
+  return krd;
 };
 
 export const importFitFile = async (
