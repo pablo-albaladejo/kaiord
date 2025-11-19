@@ -14,14 +14,14 @@ export const validateMetadata = (
   if (!meta.created)
     errors.push({
       field: "metadata.created",
-      message: "Required field missing",
+      message: "Missing required field",
     });
   else if (typeof meta.created !== "string")
-    errors.push({ field: "metadata.created", message: "Must be a string" });
+    errors.push({ field: "metadata.created", message: "Invalid value" });
   if (!meta.sport)
-    errors.push({ field: "metadata.sport", message: "Required field missing" });
+    errors.push({ field: "metadata.sport", message: "Missing required field" });
   else if (typeof meta.sport !== "string")
-    errors.push({ field: "metadata.sport", message: "Must be a string" });
+    errors.push({ field: "metadata.sport", message: "Invalid value" });
 };
 
 export const validateWorkout = (
@@ -31,7 +31,7 @@ export const validateWorkout = (
   if (!krd.extensions) {
     errors.push({
       field: "extensions",
-      message: "Required field missing for workout type",
+      message: "Missing required field for workout type",
     });
     return;
   }
@@ -43,7 +43,7 @@ export const validateWorkout = (
   if (!extensions.workout) {
     errors.push({
       field: "extensions.workout",
-      message: "Required field missing for workout type",
+      message: "Missing required field for workout type",
     });
     return;
   }
@@ -55,7 +55,7 @@ export const validateWorkout = (
   if (!workout.sport)
     errors.push({
       field: "extensions.workout.sport",
-      message: "Required field missing",
+      message: "Missing required field",
     });
   if (!Array.isArray(workout.steps))
     errors.push({

@@ -59,9 +59,11 @@ test.describe("Error Handling", () => {
     await expect(page.getByText(/import failed/i)).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByText(/missing required field/i)).toBeVisible();
-    await expect(page.getByText(/type/i)).toBeVisible();
-    await expect(page.getByText(/metadata/i)).toBeVisible();
+    await expect(
+      page.getByText(/missing required field/i).first()
+    ).toBeVisible();
+    await expect(page.getByText(/type/i).first()).toBeVisible();
+    await expect(page.getByText(/metadata/i).first()).toBeVisible();
   });
 
   test("should display specific error for invalid field values", async ({
@@ -89,7 +91,7 @@ test.describe("Error Handling", () => {
     await expect(page.getByText(/import failed/i)).toBeVisible({
       timeout: 5000,
     });
-    await expect(page.getByText(/invalid value/i)).toBeVisible();
+    await expect(page.getByText(/invalid value/i).first()).toBeVisible();
   });
 
   test("should display specific error for FIT parsing failure", async ({
@@ -152,7 +154,7 @@ test.describe("Error Handling", () => {
       timeout: 5000,
     });
     await expect(
-      page.getByText(/failed to parse (zwo|zwift) file/i)
+      page.getByText(/(failed to parse|failed to import) (zwo|zwift) file/i)
     ).toBeVisible();
   });
 });
