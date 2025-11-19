@@ -2,6 +2,7 @@ import type { KRD } from "../../../domain/schemas/krd";
 import type { Workout } from "../../../domain/schemas/workout";
 import { createFitParsingError } from "../../../domain/types/errors";
 import type { Logger } from "../../../ports/logger";
+import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import {
   convertMetadataToFileId,
   convertWorkoutMetadata,
@@ -17,7 +18,10 @@ export const convertKRDToMessages = (
   const messages: Array<unknown> = [];
 
   const fileIdMessage = convertMetadataToFileId(krd, logger);
-  messages.push(fileIdMessage);
+  messages.push({
+    mesgNum: FIT_MESSAGE_NUMBERS.FILE_ID,
+    ...fileIdMessage,
+  });
 
   const workout = krd.extensions?.workout as Workout | undefined;
   if (!workout) {
@@ -25,10 +29,18 @@ export const convertKRDToMessages = (
   }
 
   const workoutMessage = convertWorkoutMetadata(workout, logger);
-  messages.push(workoutMessage);
+  messages.push({
+    mesgNum: FIT_MESSAGE_NUMBERS.WORKOUT,
+    ...workoutMessage,
+  });
 
   const workoutStepMessages = convertWorkoutSteps(workout, logger);
-  messages.push(...workoutStepMessages);
+  for (const stepMessage of workoutStepMessages) {
+    messages.push({
+      mesgNum: FIT_MESSAGE_NUMBERS.WORKOUT_STEP,
+      ...(stepMessage as Record<string, unknown>),
+    });
+  }
 
   logger.debug("Converted KRD to FIT messages", {
     messageCount: messages.length,

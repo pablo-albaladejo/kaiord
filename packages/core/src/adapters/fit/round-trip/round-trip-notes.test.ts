@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { createMockLogger } from "../../../tests/helpers/test-utils";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
+import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 
 describe("Round-trip: Workout step - notes field", () => {
   it("should preserve notes through FIT → KRD → FIT conversion", async () => {
@@ -42,13 +43,13 @@ describe("Round-trip: Workout step - notes field", () => {
     // Assert - Check first workout step has notes
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
     expect(stepMsg).toBeDefined();
-    expect(stepMsg?.workoutStepMesg.notes).toBe(testNotes);
+    expect(stepMsg?.notes).toBe(testNotes);
   });
 
   it("should preserve exact notes string value", async () => {
@@ -96,14 +97,12 @@ describe("Round-trip: Workout step - notes field", () => {
       // Assert
       const stepMsg = messages.find(
         (msg: unknown) =>
-          (msg as { type: string }).type === "workoutStepMesgs" &&
-          (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-            .messageIndex === 0
-      ) as
-        | { type: string; workoutStepMesg: Record<string, unknown> }
-        | undefined;
+          (msg as { mesgNum?: number }).mesgNum ===
+            FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+          (msg as { messageIndex?: number }).messageIndex === 0
+      ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-      expect(stepMsg?.workoutStepMesg.notes).toBe(notes);
+      expect(stepMsg?.notes).toBe(notes);
     }
   });
 
@@ -143,13 +142,13 @@ describe("Round-trip: Workout step - notes field", () => {
     // Assert - Notes should be truncated to 256 characters
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(stepMsg?.workoutStepMesg.notes).toBe("a".repeat(256));
-    expect((stepMsg?.workoutStepMesg.notes as string).length).toBe(256);
+    expect(stepMsg?.notes).toBe("a".repeat(256));
+    expect((stepMsg?.notes as string).length).toBe(256);
   });
 
   it("should omit notes when undefined in round-trip", async () => {
@@ -187,12 +186,12 @@ describe("Round-trip: Workout step - notes field", () => {
     // Assert
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(stepMsg?.workoutStepMesg).not.toHaveProperty("notes");
+    expect(stepMsg)?.not.toHaveProperty("notes");
   });
 
   it("should preserve notes on multiple steps", async () => {
@@ -239,14 +238,12 @@ describe("Round-trip: Workout step - notes field", () => {
     for (let i = 0; i < notesArray.length; i++) {
       const stepMsg = messages.find(
         (msg: unknown) =>
-          (msg as { type: string }).type === "workoutStepMesgs" &&
-          (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-            .messageIndex === i
-      ) as
-        | { type: string; workoutStepMesg: Record<string, unknown> }
-        | undefined;
+          (msg as { mesgNum?: number }).mesgNum ===
+            FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+          (msg as { messageIndex?: number }).messageIndex === i
+      ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-      expect(stepMsg?.workoutStepMesg.notes).toBe(notesArray[i]);
+      expect(stepMsg?.notes).toBe(notesArray[i]);
     }
   });
 });
@@ -290,19 +287,20 @@ describe("Round-trip: Combined fields - subSport and notes", () => {
 
     // Assert - Check workout message has subSport
     const workoutMsg = messages.find(
-      (msg: unknown) => (msg as { type: string }).type === "workoutMesgs"
-    ) as { type: string; workoutMesg: Record<string, unknown> } | undefined;
+      (msg: unknown) =>
+        (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(workoutMsg?.workoutMesg.subSport).toBe(testSubSport);
+    expect(workoutMsg?.subSport).toBe(testSubSport);
 
     // Assert - Check step message has notes
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(stepMsg?.workoutStepMesg.notes).toBe(testNotes);
+    expect(stepMsg?.notes).toBe(testNotes);
   });
 });

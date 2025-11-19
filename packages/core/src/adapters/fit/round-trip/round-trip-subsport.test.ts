@@ -2,6 +2,7 @@ import { readFileSync } from "fs";
 import { join } from "path";
 import { describe, expect, it } from "vitest";
 import { createMockLogger } from "../../../tests/helpers/test-utils";
+import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 
@@ -35,11 +36,12 @@ describe("Round-trip: Workout metadata - subSport field", () => {
 
     // Assert - Check workout message has subSport
     const workoutMsg = messages.find(
-      (msg: unknown) => (msg as { type: string }).type === "workoutMesgs"
-    ) as { type: string; workoutMesg: Record<string, unknown> } | undefined;
+      (msg: unknown) =>
+        (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
     expect(workoutMsg).toBeDefined();
-    expect(workoutMsg?.workoutMesg.subSport).toBe("trail");
+    expect(workoutMsg?.subSport).toBe("trail");
   });
 
   it("should preserve exact subSport string value", async () => {
@@ -75,10 +77,11 @@ describe("Round-trip: Workout metadata - subSport field", () => {
 
       // Assert
       const workoutMsg = messages.find(
-        (msg: unknown) => (msg as { type: string }).type === "workoutMesgs"
-      ) as { type: string; workoutMesg: Record<string, unknown> } | undefined;
+        (msg: unknown) =>
+          (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+      ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-      expect(workoutMsg?.workoutMesg.subSport).toBe(subSport);
+      expect(workoutMsg?.subSport).toBe(subSport);
     }
   });
 
@@ -111,9 +114,10 @@ describe("Round-trip: Workout metadata - subSport field", () => {
 
     // Assert
     const workoutMsg = messages.find(
-      (msg: unknown) => (msg as { type: string }).type === "workoutMesgs"
-    ) as { type: string; workoutMesg: Record<string, unknown> } | undefined;
+      (msg: unknown) =>
+        (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(workoutMsg?.workoutMesg).not.toHaveProperty("subSport");
+    expect(workoutMsg)?.not.toHaveProperty("subSport");
   });
 });

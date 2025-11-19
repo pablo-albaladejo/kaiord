@@ -2,6 +2,8 @@
  * Theme utility functions
  */
 
+import { logger } from "@/utils/logger";
+
 export type Theme = "light" | "dark" | "kiroween" | "system";
 export type ResolvedTheme = "light" | "dark" | "kiroween";
 
@@ -38,7 +40,9 @@ export const getStoredTheme = (): Theme | null => {
       return stored;
     }
   } catch (error) {
-    console.warn("Failed to read theme from localStorage:", error);
+    // Silently fail - theme preference is not critical
+    // Logger handles NODE_ENV check internally
+    logger.warn("Failed to read theme from localStorage", { error });
   }
 
   return null;
@@ -53,7 +57,9 @@ export const storeTheme = (theme: Theme): void => {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, theme);
   } catch (error) {
-    console.warn("Failed to store theme in localStorage:", error);
+    // Silently fail - theme preference is not critical
+    // Logger handles NODE_ENV check internally
+    logger.warn("Failed to store theme in localStorage", { error });
   }
 };
 

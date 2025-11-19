@@ -1,81 +1,68 @@
-/**
- * Workout Store
- *
- * Zustand store for managing workout state with undo/redo functionality.
- *
- * Requirements:
- * - Requirement 15: Undo/redo functionality for workout editing
- * - Requirement 16: Track workout editing state
- */
-
+/** Workout Store - Zustand store for managing workout state with undo/redo. Requirements: 15 (undo/redo), 16 (track editing state) */
 import { create } from "zustand";
-import type { KRD, Sport } from "../types/krd";
-import { createStepAction } from "./actions/create-step-action";
-import { deleteStepAction } from "./actions/delete-step-action";
-import { duplicateStepAction } from "./actions/duplicate-step-action";
-import {
-  createClearWorkoutAction,
-  createEmptyWorkoutAction,
-  createLoadWorkoutAction,
-  createRedoAction,
-  createUndoAction,
-  createUpdateWorkoutAction,
-} from "./workout-actions";
+// prettier-ignore
+import { createBackupAction, disableSafeModeAction, enableSafeModeAction, restoreFromBackupAction } from "./actions/error-recovery-actions";
+// prettier-ignore
+import { createClearWorkoutAction, createRedoAction, createUndoAction } from "./workout-actions";
+import { createWorkoutStoreActions } from "./workout-store-actions";
+import { createSelectionActions } from "./workout-store-selection-actions";
 import type { WorkoutStore } from "./workout-store-types";
-
 export type { WorkoutStore } from "./workout-store-types";
 
-// ============================================
-// Store Implementation
-// ============================================
-
-export const useWorkoutStore = create<WorkoutStore>((set, get) => ({
-  // Initial state
-  currentWorkout: null,
-  workoutHistory: [],
-  historyIndex: -1,
-  selectedStepId: null,
-  isEditing: false,
-
-  // Actions
-  loadWorkout: (krd: KRD) => set(createLoadWorkoutAction(krd)),
-
-  createEmptyWorkout: (name: string, sport: Sport) =>
-    set(createEmptyWorkoutAction(name, sport)),
-
-  updateWorkout: (krd: KRD) =>
-    set((state) => createUpdateWorkoutAction(krd, state)),
-
-  createStep: () =>
-    set((state) => {
-      if (!state.currentWorkout) return {};
-      return createStepAction(state.currentWorkout, state);
-    }),
-
-  deleteStep: (stepIndex: number) =>
-    set((state) => {
-      if (!state.currentWorkout) return {};
-      return deleteStepAction(state.currentWorkout, stepIndex, state);
-    }),
-
-  duplicateStep: (stepIndex: number) =>
-    set((state) => {
-      if (!state.currentWorkout) return {};
-      return duplicateStepAction(state.currentWorkout, stepIndex, state);
-    }),
-
-  selectStep: (id: string | null) => set({ selectedStepId: id }),
-
-  setEditing: (editing: boolean) => set({ isEditing: editing }),
-
-  clearWorkout: () => set(createClearWorkoutAction()),
-
-  undo: () => set((state) => createUndoAction(state)),
-
-  redo: () => set((state) => createRedoAction(state)),
-
-  // Computed
-  canUndo: () => get().historyIndex > 0,
-
-  canRedo: () => get().historyIndex < get().workoutHistory.length - 1,
-}));
+export const useWorkoutStore = create<WorkoutStore>((set, get) => {
+  const actions = createWorkoutStoreActions();
+  return {
+    currentWorkout: null,
+    workoutHistory: [],
+    historyIndex: -1,
+    selectedStepId: null,
+    selectedStepIds: [],
+    isEditing: false,
+    safeMode: false,
+    lastBackup: null,
+    loadWorkout: (krd) => set(actions.loadWorkout(krd)),
+    createEmptyWorkout: (name, sport) =>
+      set(actions.createEmptyWorkout(name, sport)),
+    updateWorkout: (krd) => set((state) => actions.updateWorkout(krd, state)),
+    createStep: () => set((state) => actions.createStep(state)),
+    deleteStep: (stepIndex) =>
+      set((state) => actions.deleteStep(stepIndex, state)),
+    duplicateStep: (stepIndex) =>
+      set((state) => actions.duplicateStep(stepIndex, state)),
+    createRepetitionBlock: (stepIndices, repeatCount) =>
+      set((state) =>
+        actions.createRepetitionBlock(stepIndices, repeatCount, state)
+      ),
+    createEmptyRepetitionBlock: (repeatCount) =>
+      set((state) => actions.createEmptyRepetitionBlock(repeatCount, state)),
+    editRepetitionBlock: (blockIndex, repeatCount) =>
+      set((state) =>
+        actions.editRepetitionBlock(blockIndex, repeatCount, state)
+      ),
+    addStepToRepetitionBlock: (blockIndex) =>
+      set((state) => actions.addStepToRepetitionBlock(blockIndex, state)),
+    duplicateStepInRepetitionBlock: (blockIndex, stepIndex) =>
+      set((state) =>
+        actions.duplicateStepInRepetitionBlock(blockIndex, stepIndex, state)
+      ),
+    ...createSelectionActions(set),
+    setEditing: (editing) => set({ isEditing: editing }),
+    clearWorkout: () => set(createClearWorkoutAction()),
+    undo: () => set((state) => createUndoAction(state)),
+    redo: () => set((state) => createRedoAction(state)),
+    createBackup: () => set((state) => createBackupAction(state)),
+    restoreFromBackup: () => {
+      const result = restoreFromBackupAction(get());
+      if (result.success) {
+        set(result);
+        return true;
+      }
+      return false;
+    },
+    enableSafeMode: () => set(enableSafeModeAction()),
+    disableSafeMode: () => set(disableSafeModeAction()),
+    canUndo: () => get().historyIndex > 0,
+    canRedo: () => get().historyIndex < get().workoutHistory.length - 1,
+    hasBackup: () => get().lastBackup !== null,
+  };
+});

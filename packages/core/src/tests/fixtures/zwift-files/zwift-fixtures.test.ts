@@ -2,11 +2,11 @@ import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createConsoleLogger } from "../../../adapters/logger/console-logger";
-import { createXsdZwiftValidator } from "../../../adapters/zwift/xsd-validator";
+import { createZwiftValidator } from "../../../adapters/zwift/xsd-validator";
 
 describe("Zwift Fixtures", () => {
   const logger = createConsoleLogger();
-  const validator = createXsdZwiftValidator(logger);
+  const validator = createZwiftValidator(logger);
   const fixturesDir = __dirname;
 
   const fixtures = [

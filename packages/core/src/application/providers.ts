@@ -12,7 +12,7 @@ import {
   createFastXmlZwiftReader,
   createFastXmlZwiftWriter,
 } from "../adapters/zwift/fast-xml-parser";
-import { createXsdZwiftValidator } from "../adapters/zwift/xsd-validator";
+import { createZwiftValidator } from "../adapters/zwift/xsd-validator";
 import type { SchemaValidator } from "../domain/validation/schema-validator";
 import { createSchemaValidator } from "../domain/validation/schema-validator";
 import type { ToleranceChecker } from "../domain/validation/tolerance-checker";
@@ -62,7 +62,7 @@ export type Providers = {
 export const createDefaultProviders = (logger?: Logger): Providers => {
   const log = logger || createConsoleLogger();
   const tcxValidator = createXsdTcxValidator(log);
-  const zwiftValidator = createXsdZwiftValidator(log);
+  const zwiftValidator = createZwiftValidator(log);
 
   const fitReader = createGarminFitSdkReader(log);
   const fitWriter = createGarminFitSdkWriter(log);

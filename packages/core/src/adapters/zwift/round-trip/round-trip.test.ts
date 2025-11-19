@@ -7,14 +7,14 @@ import {
   createFastXmlZwiftReader,
   createFastXmlZwiftWriter,
 } from "../fast-xml-parser";
-import { createXsdZwiftValidator } from "../xsd-validator";
+import { createZwiftValidator } from "../xsd-validator";
 import { compareRepetitionBlocks } from "./repetition-block-comparer";
 
 describe("Round-trip: Zwift → KRD → Zwift", () => {
   it("should preserve SteadyState intervals through round-trip", async () => {
     // Arrange
     const logger = createMockLogger();
-    const validator = createXsdZwiftValidator(logger);
+    const validator = createZwiftValidator(logger);
     const reader = createFastXmlZwiftReader(logger, validator);
     const writer = createFastXmlZwiftWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
@@ -98,7 +98,7 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
   it("should preserve IntervalsT blocks through round-trip", async () => {
     // Arrange
     const logger = createMockLogger();
-    const validator = createXsdZwiftValidator(logger);
+    const validator = createZwiftValidator(logger);
     const reader = createFastXmlZwiftReader(logger, validator);
     const writer = createFastXmlZwiftWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();

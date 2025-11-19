@@ -766,7 +766,7 @@
                 "properties": {
                   "repeatCount": {
                     "type": "integer",
-                    "minimum": 2
+                    "minimum": 1
                   },
                   "steps": {
                     "type": "array",

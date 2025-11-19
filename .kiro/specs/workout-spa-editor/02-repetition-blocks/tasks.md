@@ -18,7 +18,7 @@ Add support for repetition blocks to enable interval training and structured wor
 
 ## Implementation Tasks
 
-- [ ] 1. Create RepetitionBlock type and schema
+- [x] 1. Create RepetitionBlock type and schema
   - Define RepetitionBlock type with repeatCount and steps array
   - Add Zod schema for validation
   - Update KRD type to support union of WorkoutStep | RepetitionBlock
@@ -26,7 +26,7 @@ Add support for repetition blocks to enable interval training and structured wor
   - _Requirements: 4_
   - _Files: types/krd.ts, types/schemas.ts, types/krd-guards.ts_
 
-- [ ] 2. Create RepetitionBlockCard component
+- [x] 2. Create RepetitionBlockCard component
   - Visual container showing repeat count and nested steps
   - Collapsible/expandable view of nested steps
   - Edit repeat count inline
@@ -35,7 +35,7 @@ Add support for repetition blocks to enable interval training and structured wor
   - _Requirements: 4_
   - _Files: components/molecules/RepetitionBlockCard/RepetitionBlockCard.tsx_
 
-- [ ] 3. Add "Create Repetition Block" action
+- [x] 3. Add "Create Repetition Block" action
   - Button to wrap selected steps in repetition block
   - Dialog to set repeat count
   - Update store actions to handle repetition blocks
@@ -43,7 +43,7 @@ Add support for repetition blocks to enable interval training and structured wor
   - _Requirements: 4_
   - _Files: store/actions/create-repetition-block-action.ts, components/organisms/StepEditor/StepEditor.tsx_
 
-- [ ] 4. Update workout stats to calculate repetition blocks
+- [x] 4. Update workout stats to calculate repetition blocks
   - Calculate total duration including repetitions
   - Calculate total distance including repetitions
   - Update WorkoutStats component to display correctly
@@ -51,7 +51,7 @@ Add support for repetition blocks to enable interval training and structured wor
   - _Requirements: 4, 5_
   - _Files: utils/workout-stats.ts, components/organisms/WorkoutStats/WorkoutStats.tsx_
 
-- [ ] 5. Implement comprehensive testing strategy for repetition blocks
+- [x] 5. Implement comprehensive testing strategy for repetition blocks
   - **Unit Tests** (Coverage target: 80%+)
     - Test RepetitionBlock type guard functions
     - Test repetition block validation

@@ -5,17 +5,18 @@
  *
  * Requirements:
  * - Requirement 6: Save workout as KRD file
+ * - Requirement 12.6: Provide format selection options (FIT, TCX, ZWO, KRD)
+ * - Requirement 12.10: Generate correct file extension based on format
  * - Requirement 36: Clear error feedback with retry options
  */
 
 import { Download } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "../../../hooks/useToast";
-import type { KRD, ValidationError } from "../../../types/krd";
-import { saveWorkout } from "../../../utils/save-workout";
+import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
-import { Toast } from "../../atoms/Toast";
+import { ExportFormatSelector } from "../ExportFormatSelector/ExportFormatSelector";
 import { SaveErrorDialog } from "../SaveErrorDialog/SaveErrorDialog";
+import { SaveButtonToasts } from "./SaveButtonToasts";
+import { useSaveWorkout } from "./use-save-workout";
 
 export type SaveButtonProps = {
   workout: KRD;
@@ -24,59 +25,61 @@ export type SaveButtonProps = {
 };
 
 /**
- * Custom hook for save functionality
- */
-function useSaveWorkout(workout: KRD) {
-  const [saveErrors, setSaveErrors] = useState<Array<ValidationError> | null>(
-    null
-  );
-  const [isSaving, setIsSaving] = useState(false);
-  const { success } = useToast();
-
-  const handleSave = () => {
-    setIsSaving(true);
-    const result = saveWorkout(workout);
-
-    if (result.success) {
-      setSaveErrors(null);
-      // Show success notification (Requirement 39.1)
-      const workoutData = workout.extensions?.workout as
-        | { name?: string }
-        | undefined;
-      const workoutName = workoutData?.name || "Untitled Workout";
-      success("Workout Saved", `"${workoutName}" has been saved successfully`);
-    } else {
-      // Type guard ensures result has errors property
-      setSaveErrors(result.errors);
-    }
-
-    setIsSaving(false);
-  };
-
-  const clearErrors = () => setSaveErrors(null);
-
-  return { saveErrors, isSaving, handleSave, clearErrors };
-}
-
-/**
- * Button that saves workout with validation and error handling
+ * Button that saves workout with format selection and error handling
  */
 export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
-  const { saveErrors, isSaving, handleSave, clearErrors } =
-    useSaveWorkout(workout);
-  const { toasts, dismiss } = useToast();
+  const {
+    saveErrors,
+    isSaving,
+    exportProgress,
+    handleSave,
+    clearErrors,
+    selectedFormat,
+    setSelectedFormat,
+    toast,
+  } = useSaveWorkout(workout);
+  const { toasts, dismiss } = toast;
+
+  const showProgress = isSaving && exportProgress > 0 && exportProgress < 100;
 
   return (
-    <>
-      <Button
-        variant="primary"
-        onClick={handleSave}
+    <div className="space-y-4">
+      <ExportFormatSelector
+        currentFormat={selectedFormat}
+        onFormatChange={setSelectedFormat}
+        workout={workout}
         disabled={disabled || isSaving}
-        className={className}
-      >
-        <Download className="h-4 w-4" />
-        {isSaving ? "Saving..." : "Save Workout"}
-      </Button>
+      />
+
+      <div className="space-y-2">
+        <Button
+          variant="primary"
+          onClick={handleSave}
+          disabled={disabled || isSaving}
+          className={`w-full sm:w-auto ${className || ""}`}
+        >
+          {isSaving ? (
+            <div className="animate-spin h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
+          ) : (
+            <Download className="h-4 w-4" />
+          )}
+          {isSaving ? "Saving..." : "Save Workout"}
+        </Button>
+
+        {showProgress && (
+          <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
+            <div
+              className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+              style={{ width: `${exportProgress}%` }}
+              role="progressbar"
+              aria-valuenow={exportProgress}
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-label={`Export progress: ${exportProgress}%`}
+            />
+          </div>
+        )}
+      </div>
 
       {saveErrors && saveErrors.length > 0 && (
         <SaveErrorDialog
@@ -86,20 +89,7 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
         />
       )}
 
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          title={toast.title}
-          description={toast.description}
-          variant={toast.variant}
-          action={toast.action}
-          open={toast.open}
-          onOpenChange={(open) => {
-            if (!open) dismiss(toast.id);
-          }}
-          duration={toast.duration}
-        />
-      ))}
-    </>
+      <SaveButtonToasts toasts={toasts} onDismiss={dismiss} />
+    </div>
   );
 }

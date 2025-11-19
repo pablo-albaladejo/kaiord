@@ -54,7 +54,7 @@ export const partialWorkoutStepSchema = z.object({
  * Partial repetition block schema for form validation
  */
 export const partialRepetitionBlockSchema = z.object({
-  repeatCount: z.number().int().min(2).optional(),
+  repeatCount: z.number().int().min(1).optional(),
   steps: z.array(partialWorkoutStepSchema).optional(),
 });
 

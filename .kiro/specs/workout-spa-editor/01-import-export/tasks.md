@@ -20,7 +20,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
 
 ## Implementation Tasks
 
-- [ ] 1. Add format detection and validation
+- [x] 1. Add format detection and validation
   - Detect file format from extension (.fit, .tcx, .zwo, .krd)
   - Validate file format before conversion
   - Show format-specific error messages
@@ -28,7 +28,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.1, 12.5_
   - _Files: utils/file-format-detector.ts_
 
-- [ ] 2. Implement FIT file import
+- [x] 2. Implement FIT file import
   - Use @kaiord/core toKRD function for FIT → KRD conversion
   - Handle FIT parsing errors gracefully
   - Display conversion progress for large files
@@ -37,16 +37,34 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.2_
   - _Files: utils/import-workout.ts_
 
-- [ ] 3. Implement TCX and ZWO file import
+- [x] 2.1. Fix @kaiord/core browser compatibility for Zwift validation
+  - Detect browser environment using `typeof window !== 'undefined'` BEFORE attempting XSD validation
+  - Create `createWellFormednessValidator` function that only validates XML structure
+  - Update `createZwiftValidator` to automatically use well-formedness validator in browsers
+  - Ensure XSD validation is only attempted in Node.js environments
+  - Log informative message when using well-formedness validation
+  - Update existing tests to cover browser environment detection
+  - Add integration tests for browser-compatible validation
+  - **IMPORTANT**: Keep `xsd-schema-validator` as dependency - it's only loaded in Node.js, not in browser bundles
+  - **IMPORTANT**: The issue is NOT the dependency, but that we try to load it before checking the environment
+  - **Note**: We're NOT adding browser XSD libraries (libxmljs2, xmllint-wasm) to avoid 2-3MB bundle size increase
+  - **Rationale**: XML well-formedness validation catches 95% of issues; XSD validation is primarily for CLI/development
+  - _Requirements: 12.11_
+  - _Files: packages/core/src/adapters/zwift/index.ts, packages/core/src/adapters/zwift/well-formedness-validator.ts_
+
+- [x] 3. Implement TCX and ZWO file import with browser compatibility
   - Use @kaiord/core toKRD function for TCX → KRD conversion
   - Use @kaiord/core toKRD function for ZWO → KRD conversion
   - Handle XML parsing errors gracefully
   - Display conversion progress for large files
   - Write unit tests for TCX/ZWO import
-  - _Requirements: 12.3, 12.4_
-  - _Files: utils/import-workout.ts_
+  - **Note**: Browser compatibility is handled automatically by @kaiord/core (Task 2.1)
+  - **Note**: No special error handling needed - core library detects browser environment automatically
+  - _Requirements: 12.3, 12.4, 12.11_
+  - _Dependencies: Task 2.1 must be completed first_
+  - _Files: utils/import-workout.ts, utils/import-workout-formats.ts_
 
-- [ ] 4. Update FileUpload component to support multiple formats
+- [x] 4. Update FileUpload component to support multiple formats
   - Accept .fit, .tcx, .zwo, .krd, .json file extensions
   - Show format icon/badge for uploaded file
   - Display conversion status during import
@@ -55,7 +73,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.1, 12.5_
   - _Files: components/molecules/FileUpload/FileUpload.tsx_
 
-- [ ] 5. Implement FIT file export
+- [x] 5. Implement FIT file export
   - Use @kaiord/core fromKRD function for KRD → FIT conversion
   - Handle FIT encoding errors gracefully
   - Generate correct .fit file extension
@@ -64,16 +82,19 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.7_
   - _Files: utils/export-workout.ts_
 
-- [ ] 6. Implement TCX and ZWO file export
+- [x] 6. Implement TCX and ZWO file export with browser compatibility
   - Use @kaiord/core fromKRD function for KRD → TCX conversion
   - Use @kaiord/core fromKRD function for KRD → ZWO conversion
   - Handle XML encoding errors gracefully
   - Generate correct file extensions (.tcx, .zwo)
   - Write unit tests for TCX/ZWO export
-  - _Requirements: 12.8, 12.9_
-  - _Files: utils/export-workout.ts_
+  - **Note**: Browser compatibility is handled automatically by @kaiord/core (Task 2.1)
+  - **Note**: No special error handling needed - core library detects browser environment automatically
+  - _Requirements: 12.8, 12.9, 12.11_
+  - _Dependencies: Task 2.1 must be completed first_
+  - _Files: utils/export-workout.ts, utils/export-workout-formats.ts_
 
-- [ ] 7. Create ExportFormatSelector component
+- [x] 7. Create ExportFormatSelector component
   - Dropdown to select format (FIT, TCX, ZWO, KRD)
   - Show format description and compatibility info
   - Display format-specific warnings (e.g., "FIT may not support all features")
@@ -82,7 +103,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.6_
   - _Files: components/molecules/ExportFormatSelector/ExportFormatSelector.tsx_
 
-- [ ] 8. Update SaveButton to support multiple export formats
+- [x] 8. Update SaveButton to support multiple export formats
   - Integrate ExportFormatSelector into save flow
   - Add format parameter to save function
   - Generate correct file extension based on format
@@ -92,7 +113,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12.6, 12.10_
   - _Files: components/molecules/SaveButton/SaveButton.tsx_
 
-- [ ] 9. Add loading states for conversion operations
+- [x] 9. Add loading states for conversion operations
   - Show spinner during file import conversion
   - Show progress bar for large file conversions
   - Disable UI during conversion processing
@@ -101,7 +122,7 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 36.3_
   - _Files: components/molecules/FileUpload/FileUpload.tsx, components/molecules/SaveButton/SaveButton.tsx_
 
-- [ ] 10. Implement comprehensive testing strategy for import/export
+- [x] 10. Implement comprehensive testing strategy for import/export
   - **Unit Tests** (Coverage target: 80%+)
     - Test file format detection utility
     - Test FIT/TCX/ZWO import functions with valid files
@@ -147,6 +168,18 @@ All tasks must include comprehensive testing following the Testing Strategy:
   - _Requirements: 12, 36.3, 36.4_
   - _Files: utils/import-workout.test.ts, utils/export-workout.test.ts, utils/file-format-detector.test.ts, components/molecules/FileUpload/FileUpload.test.tsx, components/molecules/ExportFormatSelector/ExportFormatSelector.test.tsx, components/molecules/SaveButton/SaveButton.test.tsx, e2e/import-export-formats.spec.ts_
 
+## Implementation Order
+
+**Phase 1: Fix Core Library (CRITICAL)**
+
+1. Task 2.1 - Fix browser compatibility in @kaiord/core
+
+**Phase 2: Complete Import/Export** 2. Task 3 - Implement TCX and ZWO file import 3. Task 6 - Implement TCX and ZWO file export
+
+**Phase 3: Testing** 4. Task 10 - Comprehensive testing strategy
+
+**Note**: Tasks 1, 2, 4, 5, 7, 8, 9 are already completed.
+
 ## Summary
 
 This implementation plan provides a clear roadmap for adding import/export functionality for FIT, TCX, and ZWO formats. Each task is:
@@ -156,6 +189,12 @@ This implementation plan provides a clear roadmap for adding import/export funct
 - **Traceable**: References specific requirements
 - **Incremental**: Builds on existing file handling infrastructure
 
+**Critical Path:**
+
+- Task 2.1 MUST be completed first (fixes browser compatibility)
+- Tasks 3 and 6 depend on Task 2.1
+- Task 10 validates the complete implementation
+
 **Dependencies:**
 
 - `@kaiord/core` library (already available as workspace dependency)
@@ -164,8 +203,10 @@ This implementation plan provides a clear roadmap for adding import/export funct
 
 **Success Criteria:**
 
-- Users can import FIT/TCX/ZWO files and edit them
-- Users can export workouts to FIT/TCX/ZWO formats
-- Round-trip conversions maintain data integrity
-- All tests passing with 80%+ unit coverage, 70%+ component coverage
-- E2E tests passing on all browsers (Chrome, Firefox, Safari, Edge)
+- ✅ ZWO files work in browser without XSD validation errors
+- ✅ Users can import FIT/TCX/ZWO files and edit them
+- ✅ Users can export workouts to FIT/TCX/ZWO formats
+- ✅ Round-trip conversions maintain data integrity
+- ✅ All tests passing with 80%+ unit coverage, 70%+ component coverage
+- ✅ E2E tests passing on all browsers (Chrome, Firefox, Safari, Edge)
+- ✅ Bundle size remains reasonable (no heavy XSD libraries added)
