@@ -175,7 +175,11 @@ describe("SaveButton", () => {
       await user.click(button);
 
       // Assert - Wait for toast to appear
-      const title = await screen.findByText("Workout Saved", {}, { timeout: 3000 });
+      const title = await screen.findByText(
+        "Workout Saved",
+        {},
+        { timeout: 3000 }
+      );
       expect(title).toBeInTheDocument();
       const description = await screen.findByText(
         /"Test Workout" has been saved as KRD/,
@@ -341,7 +345,11 @@ describe("SaveButton", () => {
       await user.click(saveButton);
 
       // Assert - Wait for toast to appear
-      const title = await screen.findByText("Workout Saved", {}, { timeout: 3000 });
+      const title = await screen.findByText(
+        "Workout Saved",
+        {},
+        { timeout: 3000 }
+      );
       expect(title).toBeInTheDocument();
       const description = await screen.findByText(
         /"Test Workout" has been saved as FIT/,
@@ -392,10 +400,18 @@ describe("SaveButton", () => {
       await user.click(button);
 
       // Assert - Wait for error toast to appear
-      const errorTitle = await screen.findByText("Export Failed", {}, { timeout: 3000 });
+      const errorTitle = await screen.findByText(
+        "Export Failed",
+        {},
+        { timeout: 3000 }
+      );
       expect(errorTitle).toBeInTheDocument();
       // Find error message in toast description (more specific)
-      const errorMessages = await screen.findAllByText("Export failed", {}, { timeout: 3000 });
+      const errorMessages = await screen.findAllByText(
+        "Export failed",
+        {},
+        { timeout: 3000 }
+      );
       expect(errorMessages.length).toBeGreaterThan(0);
     });
 
@@ -420,18 +436,29 @@ describe("SaveButton", () => {
       await user.click(button);
 
       // Wait for error toast
-      const errorTitle = await screen.findByText("Export Failed", {}, { timeout: 3000 });
+      const errorTitle = await screen.findByText(
+        "Export Failed",
+        {},
+        { timeout: 3000 }
+      );
       expect(errorTitle).toBeInTheDocument();
 
       // Act - Click save button again
       await user.click(button);
 
       // Assert - Second save should succeed
-      await waitFor(() => {
-        expect(callCount).toBe(2);
-      }, { timeout: 3000 });
-      
-      const successTitle = await screen.findByText("Workout Saved", {}, { timeout: 3000 });
+      await waitFor(
+        () => {
+          expect(callCount).toBe(2);
+        },
+        { timeout: 3000 }
+      );
+
+      const successTitle = await screen.findByText(
+        "Workout Saved",
+        {},
+        { timeout: 3000 }
+      );
       expect(successTitle).toBeInTheDocument();
     });
   });

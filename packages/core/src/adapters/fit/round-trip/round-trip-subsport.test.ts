@@ -36,7 +36,8 @@ describe("Round-trip: Workout metadata - subSport field", () => {
 
     // Assert - Check workout message has subSport
     const workoutMsg = messages.find(
-      (msg: unknown) => (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+      (msg: unknown) =>
+        (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
     expect(workoutMsg).toBeDefined();
@@ -76,7 +77,8 @@ describe("Round-trip: Workout metadata - subSport field", () => {
 
       // Assert
       const workoutMsg = messages.find(
-        (msg: unknown) => (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+        (msg: unknown) =>
+          (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
       ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
       expect(workoutMsg?.subSport).toBe(subSport);
@@ -112,7 +114,8 @@ describe("Round-trip: Workout metadata - subSport field", () => {
 
     // Assert
     const workoutMsg = messages.find(
-      (msg: unknown) => (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+      (msg: unknown) =>
+        (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
     expect(workoutMsg)?.not.toHaveProperty("subSport");

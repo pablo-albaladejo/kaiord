@@ -11,107 +11,18 @@
  */
 
 import { Download } from "lucide-react";
-import { useState } from "react";
-import { useToast } from "../../../hooks/useToast";
-import type { KRD, ValidationError } from "../../../types/krd";
-import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
-import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
-import { getFileExtension } from "../../../utils/file-format-metadata";
+import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
-import { Toast } from "../../atoms/Toast";
 import { ExportFormatSelector } from "../ExportFormatSelector/ExportFormatSelector";
 import { SaveErrorDialog } from "../SaveErrorDialog/SaveErrorDialog";
+import { SaveButtonToasts } from "./SaveButtonToasts";
+import { useSaveWorkout } from "./use-save-workout";
 
 export type SaveButtonProps = {
   workout: KRD;
   disabled?: boolean;
   className?: string;
 };
-
-/**
- * Custom hook for save functionality with format selection
- */
-function useSaveWorkout(workout: KRD) {
-  const [saveErrors, setSaveErrors] = useState<Array<ValidationError> | null>(
-    null
-  );
-  const [isSaving, setIsSaving] = useState(false);
-  const [exportProgress, setExportProgress] = useState(0);
-  const [selectedFormat, setSelectedFormat] =
-    useState<WorkoutFileFormat>("krd");
-  const toast = useToast();
-  const { success, error: showError } = toast;
-
-  const handleSave = async () => {
-    setIsSaving(true);
-    setSaveErrors(null);
-    setExportProgress(0);
-
-    try {
-      // Export workout to selected format with progress tracking
-      const buffer = await exportWorkout(
-        workout,
-        selectedFormat,
-        (progress) => {
-          setExportProgress(progress);
-        }
-      );
-
-      setExportProgress(100);
-
-      // Generate filename with correct extension
-      const workoutData = workout.extensions?.workout as
-        | { name?: string }
-        | undefined;
-      const workoutName = workoutData?.name || "workout";
-      const sanitizedName = workoutName
-        .replace(/[^a-z0-9_-]/gi, "_")
-        .replace(/_+/g, "_")
-        .replace(/^_|_$/g, "")
-        .toLowerCase()
-        .slice(0, 50);
-      const extension = getFileExtension(selectedFormat);
-      const filename = `${sanitizedName}.${extension}`;
-
-      // Trigger download
-      downloadWorkout(buffer, filename, selectedFormat);
-
-      // Show success notification with format name
-      const formatLabel = selectedFormat.toUpperCase();
-      success(
-        "Workout Saved",
-        `"${workoutName}" has been saved as ${formatLabel}`
-      );
-    } catch (err) {
-      // Handle export errors
-      const errorMessage =
-        err instanceof Error ? err.message : "Failed to export workout";
-      showError("Export Failed", errorMessage);
-      setSaveErrors([
-        {
-          path: ["export"],
-          message: errorMessage,
-        },
-      ]);
-    } finally {
-      setIsSaving(false);
-      setExportProgress(0);
-    }
-  };
-
-  const clearErrors = () => setSaveErrors(null);
-
-  return {
-    saveErrors,
-    isSaving,
-    exportProgress,
-    handleSave,
-    clearErrors,
-    selectedFormat,
-    setSelectedFormat,
-    toast, // Return the toast instance so SaveButton can use the same one
-  };
-}
 
 /**
  * Button that saves workout with format selection and error handling
@@ -178,20 +89,7 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
         />
       )}
 
-      {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          title={toast.title}
-          description={toast.description}
-          variant={toast.variant}
-          action={toast.action}
-          open={toast.open}
-          onOpenChange={(open) => {
-            if (!open) dismiss(toast.id);
-          }}
-          duration={toast.duration}
-        />
-      ))}
+      <SaveButtonToasts toasts={toasts} onDismiss={dismiss} />
     </div>
   );
 }
