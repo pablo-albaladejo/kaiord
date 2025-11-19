@@ -183,7 +183,7 @@ describe("WorkoutStats", () => {
 
       // Assert
       expect(screen.getByText("Total Steps:")).toBeInTheDocument();
-      expect(screen.getByText("3")).toBeInTheDocument();
+      expect(screen.getByText("3 steps")).toBeInTheDocument();
     });
 
     it("should count steps within repetition blocks", () => {
@@ -206,7 +206,7 @@ describe("WorkoutStats", () => {
       // Assert
       // 1 regular step + (2 steps * 3 repeats) = 7 total steps
       expect(screen.getByText("Total Steps:")).toBeInTheDocument();
-      expect(screen.getByText("7")).toBeInTheDocument();
+      expect(screen.getByText("7 steps")).toBeInTheDocument();
     });
   });
 
@@ -318,7 +318,7 @@ describe("WorkoutStats", () => {
       // Assert
       expect(screen.getByText("Workout Stats")).toBeInTheDocument();
       expect(screen.getByText("Total Steps:")).toBeInTheDocument();
-      expect(screen.getByText("0")).toBeInTheDocument();
+      expect(screen.getByText("0 steps")).toBeInTheDocument();
     });
 
     it("should handle workout with only open-ended steps", () => {
@@ -333,7 +333,7 @@ describe("WorkoutStats", () => {
 
       // Assert
       expect(screen.getByText("Total Steps:")).toBeInTheDocument();
-      expect(screen.getByText("2")).toBeInTheDocument();
+      expect(screen.getByText("2 steps")).toBeInTheDocument();
     });
 
     it("should handle very large durations", () => {

@@ -1,5 +1,7 @@
 import type { ValidationError } from "../../../types/krd";
 import { ErrorMessage } from "../../atoms/ErrorMessage/ErrorMessage";
+import { LoadingStatus } from "./LoadingStatus";
+import { SuccessStatus } from "./SuccessStatus";
 
 type ErrorState = {
   title: string;
@@ -10,6 +12,7 @@ type ErrorState = {
 type FileUploadStatusProps = {
   fileName: string | null;
   isLoading: boolean;
+  conversionProgress: number;
   error: ErrorState;
   onRetry: () => void;
   onDismiss: () => void;
@@ -18,16 +21,22 @@ type FileUploadStatusProps = {
 export function FileUploadStatus({
   fileName,
   isLoading,
+  conversionProgress,
   error,
   onRetry,
   onDismiss,
 }: FileUploadStatusProps) {
-  if (fileName && !isLoading && !error) {
+  if (isLoading && fileName) {
     return (
-      <p className="text-sm text-gray-600 dark:text-gray-400">
-        Loaded: {fileName}
-      </p>
+      <LoadingStatus
+        fileName={fileName}
+        conversionProgress={conversionProgress}
+      />
     );
+  }
+
+  if (fileName && !isLoading && !error) {
+    return <SuccessStatus fileName={fileName} />;
   }
 
   if (error) {

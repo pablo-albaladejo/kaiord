@@ -1,6 +1,9 @@
 import type { RefObject } from "react";
 import type { KRD, ValidationError } from "../../../types/krd";
-import { createParseError, parseFile, validateKRD } from "./file-parser";
+import {
+  createErrorHandler,
+  createFileChangeHandler,
+} from "./file-upload-handlers";
 
 type ErrorState = {
   title: string;
@@ -13,6 +16,7 @@ type FileUploadActionsParams = {
   setIsLoading: (loading: boolean) => void;
   setFileName: (name: string | null) => void;
   setError: (error: ErrorState) => void;
+  setConversionProgress: (progress: number) => void;
   resetInput: () => void;
   onFileLoad: (krd: KRD) => void;
   onError?: (error: string, validationErrors?: Array<ValidationError>) => void;
@@ -23,48 +27,46 @@ export function useFileUploadActions({
   setIsLoading,
   setFileName,
   setError,
+  setConversionProgress,
   resetInput,
   onFileLoad,
   onError,
 }: FileUploadActionsParams) {
-  const handleError = (errorState: ErrorState) => {
-    setError(errorState);
-    setIsLoading(false);
-    setFileName(null);
-    resetInput();
-    if (errorState && onError) {
-      onError(
-        errorState.message || errorState.title,
-        errorState.validationErrors
-      );
-    }
-  };
+  const handleError = createErrorHandler(
+    setError,
+    setIsLoading,
+    setFileName,
+    setConversionProgress,
+    resetInput,
+    onError
+  );
 
-  const handleFileChange = async (file: File | undefined) => {
-    if (!file) return;
-    setFileName(file.name);
-    setIsLoading(true);
-    try {
-      const krd = validateKRD(await parseFile(file));
-      setError(null);
-      onFileLoad(krd);
-      setIsLoading(false);
-    } catch (error) {
-      handleError(createParseError(error));
-    }
-  };
+  const handleFileChange = createFileChangeHandler(
+    setFileName,
+    setIsLoading,
+    setConversionProgress,
+    setError,
+    onFileLoad,
+    handleError
+  );
 
   const triggerFileInput = () => {
     setError(null);
+    setConversionProgress(0);
     fileInputRef.current?.click();
   };
 
   const handleRetry = () => {
     setError(null);
+    setConversionProgress(0);
+    resetInput(); // Reset input to allow selecting the same file again
     fileInputRef.current?.click();
   };
 
-  const handleDismiss = () => setError(null);
+  const handleDismiss = () => {
+    setError(null);
+    setConversionProgress(0);
+  };
 
   return {
     handleFileChange,

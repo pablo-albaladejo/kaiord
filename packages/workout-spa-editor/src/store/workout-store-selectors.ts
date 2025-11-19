@@ -18,6 +18,22 @@ export const useCurrentWorkout = () =>
  */
 export const useSelectedStepId = () =>
   useWorkoutStore((state) => state.selectedStepId);
+export const useSelectedStepIds = () =>
+  useWorkoutStore((state) => state.selectedStepIds);
+export const useToggleStepSelection = () =>
+  useWorkoutStore((state) => state.toggleStepSelection);
+export const useClearStepSelection = () =>
+  useWorkoutStore((state) => state.clearStepSelection);
+export const useCreateRepetitionBlock = () =>
+  useWorkoutStore((state) => state.createRepetitionBlock);
+export const useCreateEmptyRepetitionBlock = () =>
+  useWorkoutStore((state) => state.createEmptyRepetitionBlock);
+export const useEditRepetitionBlock = () =>
+  useWorkoutStore((state) => state.editRepetitionBlock);
+export const useAddStepToRepetitionBlock = () =>
+  useWorkoutStore((state) => state.addStepToRepetitionBlock);
+export const useDuplicateStepInRepetitionBlock = () =>
+  useWorkoutStore((state) => state.duplicateStepInRepetitionBlock);
 
 /**
  * Get the editing state

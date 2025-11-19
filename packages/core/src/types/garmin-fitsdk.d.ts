@@ -12,7 +12,15 @@ declare module "@garmin/fitsdk" {
   }
 
   export class Encoder {
-    write(message: unknown): void;
-    finish(): Array<number>;
+    writeMesg(message: unknown): void;
+    close(): Array<number>;
   }
+
+  export const Profile: {
+    types: {
+      manufacturer: Record<number, string>;
+      [key: string]: Record<number, string> | unknown;
+    };
+    [key: string]: unknown;
+  };
 }

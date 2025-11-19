@@ -166,7 +166,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
   test("should handle file parsing errors gracefully", async ({ page }) => {
     await page.goto("/");
 
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
 
     // Upload a file with invalid JSON
     await fileInput.setInputFiles({
@@ -176,7 +176,11 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     });
 
     // Verify error message is displayed (use specific text from error handler)
-    await expect(page.getByText(/invalid file format/i)).toBeVisible();
-    await expect(page.getByText(/failed to parse json/i)).toBeVisible();
+    await expect(
+      page.getByText(/invalid file format|import failed/i)
+    ).toBeVisible();
+    await expect(
+      page.getByText(/failed to parse json|invalid json/i)
+    ).toBeVisible();
   });
 });

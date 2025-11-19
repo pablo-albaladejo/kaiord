@@ -1,6 +1,68 @@
 import { describe, expect, it } from "vitest";
 import { createConsoleLogger } from "../logger/console-logger";
-import { createXsdZwiftValidator } from "./xsd-validator";
+import { createXsdZwiftValidator, createZwiftValidator } from "./xsd-validator";
+
+describe("createZwiftValidator", () => {
+  const logger = createConsoleLogger();
+
+  describe("environment detection", () => {
+    it("should use well-formedness validator in browser environment", async () => {
+      // Arrange
+      // Simulate browser environment by setting window
+      const originalWindow = global.window;
+      // @ts-expect-error - Simulating browser environment
+      global.window = {};
+
+      const validator = createZwiftValidator(logger);
+      const validXml = `<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <name>Test Workout</name>
+  <sportType>bike</sportType>
+  <workout>
+    <SteadyState Duration="300" Power="0.75"/>
+  </workout>
+</workout_file>`;
+
+      // Act
+      const result = await validator(validXml);
+
+      // Assert
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+
+      // Cleanup
+      global.window = originalWindow;
+    });
+
+    it("should use XSD validator in Node.js environment", async () => {
+      // Arrange
+      // Ensure we're in Node.js environment (window should be undefined)
+      const originalWindow = global.window;
+      // @ts-expect-error - Ensuring Node.js environment
+      global.window = undefined;
+
+      const validator = createZwiftValidator(logger);
+      const validXml = `<?xml version="1.0" encoding="UTF-8"?>
+<workout_file>
+  <name>Test Workout</name>
+  <sportType>bike</sportType>
+  <workout>
+    <SteadyState Duration="300" Power="0.75"/>
+  </workout>
+</workout_file>`;
+
+      // Act
+      const result = await validator(validXml);
+
+      // Assert
+      expect(result.valid).toBe(true);
+      expect(result.errors).toHaveLength(0);
+
+      // Cleanup
+      global.window = originalWindow;
+    });
+  });
+});
 
 describe("createXsdZwiftValidator", () => {
   const logger = createConsoleLogger();

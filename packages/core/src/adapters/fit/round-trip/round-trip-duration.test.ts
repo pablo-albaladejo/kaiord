@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { createMockLogger } from "../../../tests/helpers/test-utils";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
+import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 
 describe("Round-trip: Advanced duration types - calorie duration", () => {
   it("should preserve calorie duration through KRD → FIT conversion", async () => {
@@ -43,13 +44,13 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
     // Assert
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(stepMsg?.workoutStepMesg.durationType).toBe("calories");
-    expect(stepMsg?.workoutStepMesg.durationCalories).toBe(250);
+    expect(stepMsg?.durationType).toBe("calories");
+    expect(stepMsg?.durationCalories).toBe(250);
   });
 
   it("should preserve exact calorie values through round-trip", async () => {
@@ -91,14 +92,12 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
       // Assert - Exact value preservation
       const stepMsg = messages.find(
         (msg: unknown) =>
-          (msg as { type: string }).type === "workoutStepMesgs" &&
-          (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-            .messageIndex === 0
-      ) as
-        | { type: string; workoutStepMesg: Record<string, unknown> }
-        | undefined;
+          (msg as { mesgNum?: number }).mesgNum ===
+            FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+          (msg as { messageIndex?: number }).messageIndex === 0
+      ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-      expect(stepMsg?.workoutStepMesg.durationCalories).toBe(calories);
+      expect(stepMsg?.durationCalories).toBe(calories);
     }
   });
 });
@@ -141,13 +140,13 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     // Assert
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(stepMsg?.workoutStepMesg.durationType).toBe("powerLessThan");
-    expect(stepMsg?.workoutStepMesg.durationPower).toBe(200);
+    expect(stepMsg?.durationType).toBe("powerLessThan");
+    expect(stepMsg?.durationPower).toBe(200);
   });
 
   it("should preserve power_greater_than duration through round-trip", async () => {
@@ -187,13 +186,13 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     // Assert
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(stepMsg?.workoutStepMesg.durationType).toBe("powerGreaterThan");
-    expect(stepMsg?.workoutStepMesg.durationPower).toBe(300);
+    expect(stepMsg?.durationType).toBe("powerGreaterThan");
+    expect(stepMsg?.durationPower).toBe(300);
   });
 
   it("should preserve power values within ±1W tolerance", async () => {
@@ -235,14 +234,12 @@ describe("Round-trip: Advanced duration types - power duration", () => {
       // Assert - Within ±1W tolerance
       const stepMsg = messages.find(
         (msg: unknown) =>
-          (msg as { type: string }).type === "workoutStepMesgs" &&
-          (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-            .messageIndex === 0
-      ) as
-        | { type: string; workoutStepMesg: Record<string, unknown> }
-        | undefined;
+          (msg as { mesgNum?: number }).mesgNum ===
+            FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+          (msg as { messageIndex?: number }).messageIndex === 0
+      ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-      const actualValue = stepMsg?.workoutStepMesg.durationPower as number;
+      const actualValue = stepMsg?.durationPower as number;
       expect(Math.abs(actualValue - watts)).toBeLessThanOrEqual(1);
     }
   });
@@ -290,14 +287,14 @@ describe("Round-trip: Repeat step conditionals - calories", () => {
     // Assert
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(stepMsg?.workoutStepMesg.durationType).toBe("repeatUntilCalories");
-    expect(stepMsg?.workoutStepMesg.durationCalories).toBe(500);
-    expect(stepMsg?.workoutStepMesg.durationStep).toBe(0);
+    expect(stepMsg?.durationType).toBe("repeatUntilCalories");
+    expect(stepMsg?.durationCalories).toBe(500);
+    expect(stepMsg?.durationStep).toBe(0);
   });
 });
 
@@ -343,16 +340,14 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     // Assert
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(stepMsg?.workoutStepMesg.durationType).toBe(
-      "repeatUntilPowerLessThan"
-    );
-    expect(stepMsg?.workoutStepMesg.durationPower).toBe(180);
-    expect(stepMsg?.workoutStepMesg.durationStep).toBe(0);
+    expect(stepMsg?.durationType).toBe("repeatUntilPowerLessThan");
+    expect(stepMsg?.durationPower).toBe(180);
+    expect(stepMsg?.durationStep).toBe(0);
   });
 
   it("should preserve repeat_until_power_greater_than conditional", async () => {
@@ -396,16 +391,14 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     // Assert
     const stepMsg = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(stepMsg?.workoutStepMesg.durationType).toBe(
-      "repeatUntilPowerGreaterThan"
-    );
-    expect(stepMsg?.workoutStepMesg.durationPower).toBe(250);
-    expect(stepMsg?.workoutStepMesg.durationStep).toBe(0);
+    expect(stepMsg?.durationType).toBe("repeatUntilPowerGreaterThan");
+    expect(stepMsg?.durationPower).toBe(250);
+    expect(stepMsg?.durationStep).toBe(0);
   });
 
   it("should preserve power conditional values within ±1W tolerance", async () => {
@@ -451,14 +444,12 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
       // Assert - Within ±1W tolerance
       const stepMsg = messages.find(
         (msg: unknown) =>
-          (msg as { type: string }).type === "workoutStepMesgs" &&
-          (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-            .messageIndex === 0
-      ) as
-        | { type: string; workoutStepMesg: Record<string, unknown> }
-        | undefined;
+          (msg as { mesgNum?: number }).mesgNum ===
+            FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+          (msg as { messageIndex?: number }).messageIndex === 0
+      ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-      const actualValue = stepMsg?.workoutStepMesg.durationPower as number;
+      const actualValue = stepMsg?.durationPower as number;
       expect(Math.abs(actualValue - watts)).toBeLessThanOrEqual(1);
     }
   });
@@ -511,32 +502,32 @@ describe("Round-trip: Combined advanced duration types", () => {
     // Assert - Check all steps have correct duration types
     const step0 = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 0
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 0
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
     const step1 = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 1
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 1
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
     const step2 = messages.find(
       (msg: unknown) =>
-        (msg as { type: string }).type === "workoutStepMesgs" &&
-        (msg as { workoutStepMesg: { messageIndex: number } }).workoutStepMesg
-          .messageIndex === 2
-    ) as { type: string; workoutStepMesg: Record<string, unknown> } | undefined;
+        (msg as { mesgNum?: number }).mesgNum ===
+          FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
+        (msg as { messageIndex?: number }).messageIndex === 2
+    ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(step0?.workoutStepMesg.durationType).toBe("calories");
-    expect(step0?.workoutStepMesg.durationCalories).toBe(200);
+    expect(step0?.durationType).toBe("calories");
+    expect(step0?.durationCalories).toBe(200);
 
-    expect(step1?.workoutStepMesg.durationType).toBe("powerLessThan");
-    expect(step1?.workoutStepMesg.durationPower).toBe(180);
+    expect(step1?.durationType).toBe("powerLessThan");
+    expect(step1?.durationPower).toBe(180);
 
-    expect(step2?.workoutStepMesg.durationType).toBe("powerGreaterThan");
-    expect(step2?.workoutStepMesg.durationPower).toBe(250);
+    expect(step2?.durationType).toBe("powerGreaterThan");
+    expect(step2?.durationPower).toBe(250);
   });
 });

@@ -17,7 +17,7 @@ export const variantStyles: Record<ToastVariant, string> = {
  * Base toast styles
  */
 export const baseToastStyles = `
-  group pointer-events-auto relative flex w-full items-center justify-between
+  group pointer-events-auto relative flex w-full items-center justify-center
   space-x-4 overflow-hidden rounded-lg border-2 p-4 pr-8 shadow-lg
   transition-all data-[swipe=cancel]:translate-x-0
   data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)]
