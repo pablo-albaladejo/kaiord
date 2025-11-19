@@ -36,7 +36,8 @@ const addPositionInfo = (
     result += ` (line ${parsingError.line})`;
   }
   if (parsingError.message) {
-    const positionMatch = parsingError.message.match(/position (\d+)/i);
+    const positionRegex = /position (\d+)/i;
+    const positionMatch = positionRegex.exec(parsingError.message);
     if (positionMatch && !result.includes("position")) {
       result += ` at position ${positionMatch[1]}`;
     }
@@ -48,10 +49,12 @@ export const createImportErrorState = (error: ImportError): ErrorState => {
   const formatName = error.format ? getFormatName(error.format) : "file";
   let validationErrors: Array<ValidationError> | undefined;
 
-  if (error.cause instanceof CustomValidationError) {
-    validationErrors = convertToValidationErrors(error.cause.errors);
-  } else if (error.cause instanceof KrdValidationError) {
-    validationErrors = convertToValidationErrors(error.cause.errors);
+  if (
+    error.cause instanceof CustomValidationError ||
+    error.cause instanceof KrdValidationError
+  ) {
+    const cause = error.cause as CustomValidationError | KrdValidationError;
+    validationErrors = convertToValidationErrors(cause.errors);
   }
 
   let message =

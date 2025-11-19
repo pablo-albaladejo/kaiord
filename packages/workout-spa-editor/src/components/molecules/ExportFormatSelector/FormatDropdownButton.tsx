@@ -3,11 +3,11 @@ import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getFileExtensionForFormat, type FormatOption } from "./format-options";
 
 type FormatDropdownButtonProps = {
-  currentFormat: WorkoutFileFormat;
-  currentOption: FormatOption | undefined;
-  isOpen: boolean;
-  onToggle: () => void;
-  disabled: boolean;
+  readonly currentFormat: WorkoutFileFormat;
+  readonly currentOption: FormatOption | undefined;
+  readonly isOpen: boolean;
+  readonly onToggle: () => void;
+  readonly disabled: boolean;
 };
 
 export function FormatDropdownButton({
@@ -34,6 +34,7 @@ export function FormatDropdownButton({
       aria-label="Select export format"
       aria-expanded={isOpen}
       aria-haspopup="listbox"
+      data-testid="export-format-selector-button"
     >
       <span className="flex items-center gap-2">
         <span className="font-semibold">{currentOption?.label}</span>

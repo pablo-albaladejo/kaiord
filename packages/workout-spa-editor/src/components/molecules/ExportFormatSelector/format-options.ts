@@ -40,3 +40,4 @@ export const getFileExtensionForFormat = (
 ): string => {
   return getFileExtension(format);
 };
+

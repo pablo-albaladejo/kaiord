@@ -16,7 +16,7 @@
  */
 
 import { expect, test } from "@playwright/test";
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 
 test.describe("Import/Export Multiple Formats", () => {
   const testWorkout = {
@@ -56,7 +56,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should import KRD file and display workout", async ({ page }) => {
     // Arrange
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Upload KRD file
     await fileInput.setInputFiles({
@@ -76,7 +76,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should export workout to FIT format", async ({ page }) => {
     // Arrange - Load workout first
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
@@ -88,12 +88,15 @@ test.describe("Import/Export Multiple Formats", () => {
     });
 
     // Act - Select FIT format
-    const formatSelector = page.getByRole("button", {
-      name: /select export format/i,
-    });
+    const formatSelector = page.getByTestId("export-format-selector-button");
     await formatSelector.click();
 
-    const fitOption = page.getByRole("option", { name: /^FIT$/i });
+    // Wait for dropdown to open
+    await expect(page.getByTestId("export-format-option-fit")).toBeVisible({
+      timeout: 2000,
+    });
+
+    const fitOption = page.getByTestId("export-format-option-fit");
     await fitOption.click();
 
     // Save workout
@@ -107,7 +110,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should export workout to TCX format", async ({ page }) => {
     // Arrange - Load workout first
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
@@ -119,12 +122,15 @@ test.describe("Import/Export Multiple Formats", () => {
     });
 
     // Act - Select TCX format
-    const formatSelector = page.getByRole("button", {
-      name: /select export format/i,
-    });
+    const formatSelector = page.getByTestId("export-format-selector-button");
     await formatSelector.click();
 
-    const tcxOption = page.getByRole("option", { name: /^TCX$/i });
+    // Wait for dropdown to open
+    await expect(page.getByTestId("export-format-option-tcx")).toBeVisible({
+      timeout: 2000,
+    });
+
+    const tcxOption = page.getByTestId("export-format-option-tcx");
     await tcxOption.click();
 
     // Save workout
@@ -146,7 +152,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should export workout to ZWO format", async ({ page }) => {
     // Arrange - Load workout first
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
@@ -158,12 +164,15 @@ test.describe("Import/Export Multiple Formats", () => {
     });
 
     // Act - Select ZWO format
-    const formatSelector = page.getByRole("button", {
-      name: /select export format/i,
-    });
+    const formatSelector = page.getByTestId("export-format-selector-button");
     await formatSelector.click();
 
-    const zwoOption = page.getByRole("option", { name: /^ZWO$/i });
+    // Wait for dropdown to open
+    await expect(page.getByTestId("export-format-option-zwo")).toBeVisible({
+      timeout: 2000,
+    });
+
+    const zwoOption = page.getByTestId("export-format-option-zwo");
     await zwoOption.click();
 
     // Save workout
@@ -190,7 +199,7 @@ test.describe("Import/Export Multiple Formats", () => {
     // For now, we'll test the KRD round-trip as a proxy
 
     // Arrange - Load workout
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
@@ -235,7 +244,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should handle conversion errors gracefully", async ({ page }) => {
     // Arrange - Upload invalid file
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "invalid.fit",
       mimeType: "application/octet-stream",
@@ -256,7 +265,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should show loading state during import", async ({ page }) => {
     // Arrange
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Upload file
     const uploadPromise = fileInput.setInputFiles({
@@ -277,7 +286,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should show loading state during export", async ({ page }) => {
     // Arrange - Load workout first
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
@@ -302,7 +311,7 @@ test.describe("Import/Export Multiple Formats", () => {
     page,
   }) => {
     // Arrange - Load workout
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
@@ -323,14 +332,18 @@ test.describe("Import/Export Multiple Formats", () => {
 
     for (const format of formats) {
       // Select format
-      const formatSelector = page.getByRole("button", {
-        name: /select export format/i,
-      });
+      const formatSelector = page.getByTestId("export-format-selector-button");
       await formatSelector.click();
 
-      const option = page.getByRole("option", {
-        name: new RegExp(`^${format.name}$`, "i"),
+      // Wait for dropdown to open
+      const formatValue = format.name.toLowerCase();
+      await expect(
+        page.getByTestId(`export-format-option-${formatValue}`)
+      ).toBeVisible({
+        timeout: 2000,
       });
+
+      const option = page.getByTestId(`export-format-option-${formatValue}`);
       await option.click();
 
       // Save and verify extension
@@ -346,7 +359,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should display format-specific warnings", async ({ page }) => {
     // Arrange - Load workout
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
@@ -358,12 +371,15 @@ test.describe("Import/Export Multiple Formats", () => {
     });
 
     // Act - Select FIT format
-    const formatSelector = page.getByRole("button", {
-      name: /select export format/i,
-    });
+    const formatSelector = page.getByTestId("export-format-selector-button");
     await formatSelector.click();
 
-    const fitOption = page.getByRole("option", { name: /^FIT$/i });
+    // Wait for dropdown to open
+    await expect(page.getByTestId("export-format-option-fit")).toBeVisible({
+      timeout: 2000,
+    });
+
+    const fitOption = page.getByTestId("export-format-option-fit");
     await fitOption.click();
 
     // Assert - Warning message displayed
@@ -376,7 +392,7 @@ test.describe("Import/Export Multiple Formats", () => {
     page,
   }) => {
     // Arrange - Load workout
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
       mimeType: "application/json",
@@ -432,7 +448,7 @@ test.describe("Import/Export Mobile Flow", () => {
     };
 
     // Act - Upload file on mobile
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "mobile-workout.krd",
       mimeType: "application/json",
@@ -465,7 +481,7 @@ test.describe("Import/Export Mobile Flow", () => {
       },
     };
 
-    const fileInput = page.locator('input[type="file"]');
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "mobile-workout.krd",
       mimeType: "application/json",
@@ -477,12 +493,15 @@ test.describe("Import/Export Mobile Flow", () => {
     });
 
     // Act - Select format on mobile
-    const formatSelector = page.getByRole("button", {
-      name: /select export format/i,
-    });
+    const formatSelector = page.getByTestId("export-format-selector-button");
     await formatSelector.click();
 
-    const tcxOption = page.getByRole("option", { name: /^TCX$/i });
+    // Wait for dropdown to open
+    await expect(page.getByTestId("export-format-option-tcx")).toBeVisible({
+      timeout: 2000,
+    });
+
+    const tcxOption = page.getByTestId("export-format-option-tcx");
     await tcxOption.click();
 
     // Save workout

@@ -37,13 +37,9 @@ export const createRepetitionBlockAction = (
   }
 
   // Validate inputs
-  if (stepIndices.length === 0) {
-    return {};
-  }
+  if (stepIndices.length === 0) return {};
 
-  if (repeatCount < 2) {
-    return {};
-  }
+  if (repeatCount < 2) return {};
 
   const workout = krd.extensions.workout as Workout;
 
