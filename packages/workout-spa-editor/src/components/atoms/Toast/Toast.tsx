@@ -36,7 +36,7 @@ export const Toast = forwardRef<HTMLLIElement, ToastProps>(
         duration={duration}
         className={`${baseToastStyles} ${variantStyles[variant]}`}
       >
-        <div className="grid gap-1">
+        <div className="grid gap-1 flex-1 text-center">
           <ToastPrimitive.Title className="text-sm font-semibold">
             {title}
           </ToastPrimitive.Title>

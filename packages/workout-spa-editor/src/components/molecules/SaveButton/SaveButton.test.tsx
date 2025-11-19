@@ -503,6 +503,10 @@ describe("SaveButton", () => {
       });
 
       await clickPromise;
+      // Wait for all async operations to complete
+      await waitFor(() => {
+        expect(screen.queryByText("Saving...")).not.toBeInTheDocument();
+      });
     });
 
     it("should show Saving... text during export", async () => {
@@ -528,6 +532,10 @@ describe("SaveButton", () => {
       });
 
       await clickPromise;
+      // Wait for all async operations to complete
+      await waitFor(() => {
+        expect(screen.queryByText("Saving...")).not.toBeInTheDocument();
+      });
     });
 
     it("should disable button during export", async () => {
@@ -554,6 +562,10 @@ describe("SaveButton", () => {
       });
 
       await clickPromise;
+      // Wait for all async operations to complete
+      await waitFor(() => {
+        expect(screen.queryByText("Saving...")).not.toBeInTheDocument();
+      });
     });
 
     it("should disable format selector during export", async () => {
@@ -582,6 +594,10 @@ describe("SaveButton", () => {
       });
 
       await clickPromise;
+      // Wait for all async operations to complete
+      await waitFor(() => {
+        expect(screen.queryByText("Saving...")).not.toBeInTheDocument();
+      });
     });
 
     it("should display progress bar during export", async () => {
@@ -610,6 +626,10 @@ describe("SaveButton", () => {
       });
 
       await clickPromise;
+      // Wait for all async operations to complete
+      await waitFor(() => {
+        expect(screen.queryByText("Saving...")).not.toBeInTheDocument();
+      });
     });
 
     it("should update progress bar value during export", async () => {
@@ -639,6 +659,10 @@ describe("SaveButton", () => {
       });
 
       await clickPromise;
+      // Wait for all async operations to complete
+      await waitFor(() => {
+        expect(screen.queryByText("Saving...")).not.toBeInTheDocument();
+      });
     });
   });
 
