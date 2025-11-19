@@ -9,6 +9,7 @@ export const convertSimpleDuration = (
   if (duration.type === durationTypeSchema.enum.time) {
     message.durationType = fitDurationTypeSchema.enum.time;
     message.durationTime = duration.seconds;
+    message.durationValue = duration.seconds * 1000; // durationValue is in milliseconds
     return true;
   }
 

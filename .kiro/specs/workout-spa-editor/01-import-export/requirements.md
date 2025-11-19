@@ -12,6 +12,8 @@ This feature enables the Workout SPA Editor to import and export workout files i
 - **KRD**: Kaiord Representation Definition - JSON-based canonical format
 - **Round-trip Conversion**: Converting from one format to another and back without data loss
 - **@kaiord/core**: Core library providing format conversion functions (toKRD, fromKRD)
+- **Browser Environment**: JavaScript runtime in web browsers (Chrome, Firefox, Safari, Edge) without Node.js APIs
+- **XSD Validation**: XML Schema Definition validation - validates XML structure against a schema file
 
 ## Requirements
 
@@ -31,6 +33,18 @@ This feature enables the Workout SPA Editor to import and export workout files i
 8. WHEN THE user selects TCX format for export, THE Workout SPA Editor SHALL convert the KRD workout to TCX XML format using the @kaiord/core library
 9. WHEN THE user selects ZWO format for export, THE Workout SPA Editor SHALL convert the KRD workout to ZWO XML format using the @kaiord/core library
 10. WHEN THE export conversion succeeds, THE Workout SPA Editor SHALL trigger a file download with the appropriate file extension
+
+### Requirement 12.11 (Browser Compatibility for Format Conversion)
+
+**User Story:** As a user, I want format conversion to work in my web browser without requiring a server, so that I can use the editor offline and maintain privacy
+
+#### Acceptance Criteria
+
+1. WHEN THE @kaiord/core library requires Node.js-specific APIs, THE Workout SPA Editor SHALL provide browser-compatible alternatives or graceful degradation
+2. WHEN THE Zwift XML validation requires XSD schema validation, THE Workout SPA Editor SHALL use XML well-formedness validation instead in browser environments
+3. WHEN THE conversion operation is not supported in the browser, THE Workout SPA Editor SHALL display a clear error message explaining the limitation
+4. WHEN THE user imports a ZWO file in the browser, THE Workout SPA Editor SHALL validate XML well-formedness without requiring XSD validation
+5. WHEN THE user exports to ZWO format in the browser, THE Workout SPA Editor SHALL generate valid Zwift XML without requiring XSD validation
 
 ### Requirement 36.3 (Loading States)
 

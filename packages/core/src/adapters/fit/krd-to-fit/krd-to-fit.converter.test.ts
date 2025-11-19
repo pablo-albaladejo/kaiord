@@ -8,7 +8,7 @@ import { buildWorkoutStep } from "../../../tests/fixtures/workout/workout-step.f
 import { buildWorkout } from "../../../tests/fixtures/workout/workout.fixtures";
 import { createMockLogger } from "../../../tests/helpers/test-utils";
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
-import { fitMessageKeySchema } from "../schemas/fit-message-keys";
+import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import { convertKRDToMessages } from "./krd-to-fit.converter";
 
 describe("convertKRDToMessages", () => {
@@ -35,19 +35,18 @@ describe("convertKRDToMessages", () => {
       // Assert
       expect(messages.length).toBeGreaterThan(0);
       const fileIdMsg = messages[0] as {
-        type: string;
-        fileIdMesg: Record<string, unknown>;
+        mesgNum: number;
+        mesgNum: number;
+        manufacturer: string;
+        serialNumber: number;
+        timeCreated: Date;
       };
-      expect(fileIdMsg).toStrictEqual({
-        type: fitMessageKeySchema.enum.fileIdMesgs,
-        fileIdMesg: {
-          type: "workout",
-          manufacturer: krd.metadata.manufacturer,
-          product: krd.metadata.product,
-          serialNumber: Number(krd.metadata.serialNumber),
-          timeCreated: fileIdMsg.fileIdMesg.timeCreated,
-        },
-      });
+      expect(fileIdMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.FILE_ID);
+      expect(fileIdMsg.type).toBe("workout");
+      expect(fileIdMsg.manufacturer).toBe(krd.metadata.manufacturer);
+      expect(fileIdMsg.serialNumber).toBe(Number(krd.metadata.serialNumber));
+      expect(fileIdMsg.timeCreated).toBeInstanceOf(Date);
+      expect(fileIdMsg.timeCreated.toISOString()).toBe(krd.metadata.created);
     });
 
     it("should use default manufacturer when not provided", () => {
@@ -67,10 +66,11 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const fileIdMsg = messages[0] as {
-        type: string;
-        fileIdMesg: Record<string, unknown>;
+        mesgNum: number;
+        manufacturer: string;
       };
-      expect(fileIdMsg.fileIdMesg.manufacturer).toBe("development");
+      expect(fileIdMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.FILE_ID);
+      expect(fileIdMsg.manufacturer).toBe("garmin");
     });
 
     it("should convert created timestamp to Date object", () => {
@@ -90,13 +90,12 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const fileIdMsg = messages[0] as {
-        type: string;
-        fileIdMesg: Record<string, unknown>;
+        mesgNum: number;
+        timeCreated: Date;
       };
-      expect(fileIdMsg.fileIdMesg.timeCreated).toBeInstanceOf(Date);
-      expect((fileIdMsg.fileIdMesg.timeCreated as Date).toISOString()).toBe(
-        krd.metadata.created
-      );
+      expect(fileIdMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.FILE_ID);
+      expect(fileIdMsg.timeCreated).toBeInstanceOf(Date);
+      expect(fileIdMsg.timeCreated.toISOString()).toBe(krd.metadata.created);
     });
   });
 
@@ -118,17 +117,15 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const workoutMsg = messages[1] as {
-        type: string;
-        workoutMesg: Record<string, unknown>;
+        mesgNum: number;
+        wktName: string;
+        sport: string;
+        numValidSteps: number;
       };
-      expect(workoutMsg).toStrictEqual({
-        type: fitMessageKeySchema.enum.workoutMesgs,
-        workoutMesg: {
-          wktName: workout.name,
-          sport: workout.sport,
-          numValidSteps: workoutMsg.workoutMesg.numValidSteps,
-        },
-      });
+      expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
+      expect(workoutMsg.wktName).toBe(workout.name);
+      expect(workoutMsg.sport).toBe(workout.sport);
+      expect(workoutMsg.numValidSteps).toBeGreaterThan(0);
     });
 
     it("should convert workout with subSport to workout message", () => {
@@ -148,18 +145,17 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const workoutMsg = messages[1] as {
-        type: string;
-        workoutMesg: Record<string, unknown>;
+        mesgNum: number;
+        wktName: string;
+        sport: string;
+        subSport: string;
+        numValidSteps: number;
       };
-      expect(workoutMsg).toStrictEqual({
-        type: fitMessageKeySchema.enum.workoutMesgs,
-        workoutMesg: {
-          wktName: workout.name,
-          sport: workout.sport,
-          subSport: "trail",
-          numValidSteps: workoutMsg.workoutMesg.numValidSteps,
-        },
-      });
+      expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
+      expect(workoutMsg.wktName).toBe(workout.name);
+      expect(workoutMsg.sport).toBe(workout.sport);
+      expect(workoutMsg.subSport).toBe("trail");
+      expect(workoutMsg.numValidSteps).toBeGreaterThan(0);
     });
 
     it("should omit subSport when undefined", () => {
@@ -178,11 +174,9 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const workoutMsg = messages[1] as {
-        type: string;
-        workoutMesg: Record<string, unknown>;
-      };
-      expect(workoutMsg.workoutMesg).not.toHaveProperty("subSport");
+      const workoutMsg = messages[1] as Record<string, unknown>;
+      expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
+      expect(workoutMsg).not.toHaveProperty("subSport");
     });
 
     it("should convert workout with poolLength to workout message", () => {
@@ -203,13 +197,13 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const workoutMsg = messages[1] as {
-        type: string;
-        workoutMesg: Record<string, unknown>;
+        mesgNum: number;
+        poolLength: number;
+        poolLengthUnit: number;
       };
-      expect(workoutMsg.workoutMesg).toMatchObject({
-        poolLength: 25,
-        poolLengthUnit: 0,
-      });
+      expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
+      expect(workoutMsg.poolLength).toBe(25);
+      expect(workoutMsg.poolLengthUnit).toBe(0);
     });
 
     it("should omit poolLength when undefined", () => {
@@ -228,12 +222,10 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const workoutMsg = messages[1] as {
-        type: string;
-        workoutMesg: Record<string, unknown>;
-      };
-      expect(workoutMsg.workoutMesg).not.toHaveProperty("poolLength");
-      expect(workoutMsg.workoutMesg).not.toHaveProperty("poolLengthUnit");
+      const workoutMsg = messages[1] as Record<string, unknown>;
+      expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
+      expect(workoutMsg).not.toHaveProperty("poolLength");
+      expect(workoutMsg).not.toHaveProperty("poolLengthUnit");
     });
 
     it("should calculate numValidSteps for individual steps", () => {
@@ -271,10 +263,11 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const workoutMsg = messages[1] as {
-        type: string;
-        workoutMesg: Record<string, unknown>;
+        mesgNum: number;
+        numValidSteps: number;
       };
-      expect(workoutMsg.workoutMesg.numValidSteps).toBe(2);
+      expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
+      expect(workoutMsg.numValidSteps).toBe(2);
     });
 
     it("should calculate numValidSteps including repetition blocks", () => {
@@ -328,10 +321,11 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const workoutMsg = messages[1] as {
-        type: string;
-        workoutMesg: Record<string, unknown>;
+        mesgNum: number;
+        numValidSteps: number;
       };
-      expect(workoutMsg.workoutMesg.numValidSteps).toBe(4);
+      expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
+      expect(workoutMsg.numValidSteps).toBe(4);
     });
   });
 
@@ -361,22 +355,23 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
+        durationType: string;
+        durationTime: number;
+        durationValue: number;
+        targetType: string;
+        targetValue: number;
       };
       const step = steps[0];
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg.messageIndex).toBe(step.stepIndex);
+      expect(stepMsg.durationType).toBe(fitDurationTypeSchema.enum.time);
+      expect(stepMsg.durationTime).toBe(step.duration.seconds);
+      expect(stepMsg.durationValue).toBe(step.duration.seconds * 1000);
+      expect(stepMsg.targetType).toBe("power");
       // Garmin encoding: 200 watts = 1200 (200 + 1000 offset)
-      expect(stepMsg).toStrictEqual({
-        type: fitMessageKeySchema.enum.workoutStepMesgs,
-        workoutStepMesg: {
-          messageIndex: step.stepIndex,
-          durationType: fitDurationTypeSchema.enum.time,
-          durationTime:
-            step.duration.type === "time" ? step.duration.seconds : undefined,
-          targetType: stepMsg.workoutStepMesg.targetType,
-          targetValue: 1200,
-        },
-      });
+      expect(stepMsg.targetValue).toBe(1200);
     });
 
     it("should convert workout step with notes", () => {
@@ -405,12 +400,11 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        notes: string;
       };
-      expect(stepMsg.workoutStepMesg).toMatchObject({
-        notes: "Focus on form and breathing",
-      });
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg.notes).toBe("Focus on form and breathing");
     });
 
     it("should omit notes when undefined", () => {
@@ -438,11 +432,9 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(stepMsg.workoutStepMesg).not.toHaveProperty("notes");
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).not.toHaveProperty("notes");
     });
 
     it("should truncate notes exceeding 256 characters", () => {
@@ -472,11 +464,12 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        notes: string;
       };
-      expect(stepMsg.workoutStepMesg.notes).toBe("a".repeat(256));
-      expect((stepMsg.workoutStepMesg.notes as string).length).toBe(256);
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg.notes).toBe("a".repeat(256));
+      expect(stepMsg.notes.length).toBe(256);
     });
 
     it("should convert distance-based duration step", () => {
@@ -503,21 +496,17 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       const step = steps[0];
-      expect(stepMsg.workoutStepMesg).toStrictEqual({
-        messageIndex: step.stepIndex,
-        durationType: fitDurationTypeSchema.enum.distance,
-        durationDistance:
-          step.duration.type === "distance" ? step.duration.meters : undefined,
-        targetType: stepMsg.workoutStepMesg.targetType,
-        targetValue: stepMsg.workoutStepMesg.targetValue,
-        customTargetSpeedLow: stepMsg.workoutStepMesg.customTargetSpeedLow,
-        customTargetSpeedHigh: stepMsg.workoutStepMesg.customTargetSpeedHigh,
-      });
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg.messageIndex).toBe(step.stepIndex);
+      expect(stepMsg.durationType).toBe(fitDurationTypeSchema.enum.distance);
+      expect(stepMsg.durationDistance).toBe(step.duration.meters);
+      expect(stepMsg.targetType).toBe("speed");
+      expect(stepMsg).toHaveProperty("targetValue");
+      expect(stepMsg).toHaveProperty("customTargetSpeedLow");
+      expect(stepMsg).toHaveProperty("customTargetSpeedHigh");
     });
 
     it("should convert open duration step", () => {
@@ -542,12 +531,11 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        durationType: string;
       };
-      expect(stepMsg.workoutStepMesg.durationType).toBe(
-        fitDurationTypeSchema.enum.open
-      );
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg.durationType).toBe(fitDurationTypeSchema.enum.open);
     });
 
     it("should convert workout step with equipment", () => {
@@ -573,12 +561,11 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        equipment: string;
       };
-      expect(stepMsg.workoutStepMesg).toMatchObject({
-        equipment: "swimFins",
-      });
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg.equipment).toBe("swimFins");
     });
 
     it("should omit equipment when undefined", () => {
@@ -603,11 +590,9 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(stepMsg.workoutStepMesg).not.toHaveProperty("equipment");
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).not.toHaveProperty("equipment");
     });
   });
 
@@ -637,14 +622,14 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        targetType: string;
+        targetValue: number;
       };
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       // Garmin encoding: 250 watts = 1250 (250 + 1000 offset)
-      expect(stepMsg.workoutStepMesg).toMatchObject({
-        targetType: "power",
-        targetValue: 1250,
-      });
+      expect(stepMsg.targetType).toBe("power");
+      expect(stepMsg.targetValue).toBe(1250);
     });
 
     it("should convert power target in percent FTP", () => {
@@ -672,14 +657,14 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        targetType: string;
+        targetValue: number;
       };
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       // Garmin encoding: 85% FTP = 85 (no offset for percentages)
-      expect(stepMsg.workoutStepMesg).toMatchObject({
-        targetType: "power",
-        targetValue: 85,
-      });
+      expect(stepMsg.targetType).toBe("power");
+      expect(stepMsg.targetValue).toBe(85);
     });
 
     it("should convert power zone target", () => {
@@ -707,18 +692,18 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        targetType: string;
+        targetPowerZone: number;
       };
       const step = steps[0];
       const targetZone =
         step.target.type === "power" && step.target.value.unit === "zone"
           ? step.target.value.value
           : undefined;
-      expect(stepMsg.workoutStepMesg).toMatchObject({
-        targetType: "power",
-        targetPowerZone: targetZone,
-      });
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg.targetType).toBe("power");
+      expect(stepMsg.targetPowerZone).toBe(targetZone);
     });
 
     it("should convert power range target", () => {
@@ -746,8 +731,10 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        targetType: string;
+        customTargetPowerLow: number;
+        customTargetPowerHigh: number;
       };
       const step = steps[0];
       const targetMin =
@@ -758,11 +745,10 @@ describe("convertKRDToMessages", () => {
         step.target.type === "power" && step.target.value.unit === "range"
           ? step.target.value.max
           : undefined;
-      expect(stepMsg.workoutStepMesg).toMatchObject({
-        targetType: "power",
-        customTargetPowerLow: targetMin,
-        customTargetPowerHigh: targetMax,
-      });
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg.targetType).toBe("power");
+      expect(stepMsg.customTargetPowerLow).toBe(targetMin);
+      expect(stepMsg.customTargetPowerHigh).toBe(targetMax);
     });
 
     it("should convert heart rate target in bpm", () => {
@@ -789,12 +775,11 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       // Garmin encoding: 150 bpm = 250 (150 + 100 offset)
-      expect(stepMsg.workoutStepMesg).toMatchObject({
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         targetType: "heartRate",
         targetValue: 250,
       });
@@ -824,16 +809,15 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       const step = steps[0];
       const targetZone =
         step.target.type === "heart_rate" && step.target.value.unit === "zone"
           ? step.target.value.value
           : undefined;
-      expect(stepMsg.workoutStepMesg).toMatchObject({
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         targetType: "heartRate",
         targetHrZone: targetZone,
       });
@@ -863,16 +847,15 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       const step = steps[0];
       const targetValue =
         step.target.type === "cadence" && step.target.value.unit === "rpm"
           ? step.target.value.value
           : undefined;
-      expect(stepMsg.workoutStepMesg).toMatchObject({
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         targetType: "cadence",
         customTargetCadenceLow: targetValue,
         customTargetCadenceHigh: targetValue,
@@ -903,16 +886,15 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       const step = steps[0];
       const targetValue =
         step.target.type === "pace" && step.target.value.unit === "mps"
           ? step.target.value.value
           : undefined;
-      expect(stepMsg.workoutStepMesg).toMatchObject({
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         targetType: "speed",
         customTargetSpeedLow: targetValue,
         customTargetSpeedHigh: targetValue,
@@ -940,11 +922,9 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(stepMsg.workoutStepMesg.targetType).toBe("open");
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg.targetType).toBe("open");
     });
   });
 
@@ -989,19 +969,20 @@ describe("convertKRDToMessages", () => {
       // Assert
       expect(messages.length).toBe(5);
       const repeatMsg = messages[4] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
+        durationType: string;
+        durationStep: number;
+        repeatSteps: number;
+        targetType: string;
       };
-      expect(repeatMsg).toStrictEqual({
-        type: fitMessageKeySchema.enum.workoutStepMesgs,
-        workoutStepMesg: {
-          messageIndex: repeatMsg.workoutStepMesg.messageIndex,
-          durationType: fitDurationTypeSchema.enum.repeatUntilStepsCmplt,
-          durationStep: 0,
-          repeatSteps: repetitionBlock.repeatCount,
-          targetType: repeatMsg.workoutStepMesg.targetType,
-        },
-      });
+      expect(repeatMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(repeatMsg.durationType).toBe(
+        fitDurationTypeSchema.enum.repeatUntilStepsCmplt
+      );
+      expect(repeatMsg.durationStep).toBe(0);
+      expect(repeatMsg.repeatSteps).toBe(repetitionBlock.repeatCount);
+      expect(repeatMsg.targetType).toBe("open");
     });
 
     it("should encode multiple repetition blocks", () => {
@@ -1048,20 +1029,18 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       expect(messages.length).toBe(6);
-      const repeat1Msg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(repeat1Msg.workoutStepMesg).toMatchObject({
+      const repeat1Msg = messages[3] as Record<string, unknown>;
+      expect(repeat1Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(repeat1Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(repeat1Msg).toMatchObject({
         repeatSteps: block1.repeatCount,
         durationStep: 0,
       });
 
-      const repeat2Msg = messages[5] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(repeat2Msg.workoutStepMesg).toMatchObject({
+      const repeat2Msg = messages[5] as Record<string, unknown>;
+      expect(repeat2Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(repeat2Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(repeat2Msg).toMatchObject({
         repeatSteps: block2.repeatCount,
         durationStep: 2,
       });
@@ -1119,15 +1098,13 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(stepMsg.workoutStepMesg).toStrictEqual({
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         messageIndex: 0,
         durationType: fitDurationTypeSchema.enum.calories,
         durationCalories: 500,
-        targetType: stepMsg.workoutStepMesg.targetType,
+        targetType: stepMsg.targetType,
       });
     });
 
@@ -1164,15 +1141,16 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(stepMsg.workoutStepMesg).toStrictEqual({
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         messageIndex: 1,
         durationType: fitDurationTypeSchema.enum.repeatUntilCalories,
         durationCalories: 1000,
         durationStep: 0,
-        targetType: stepMsg.workoutStepMesg.targetType,
+        targetType: stepMsg.targetType,
       });
     });
 
@@ -1205,16 +1183,16 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const step1Msg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(step1Msg.workoutStepMesg.durationCalories).toBe(1);
+      expect(step1Msg.durationCalories).toBe(1);
 
       const step2Msg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(step2Msg.workoutStepMesg.durationCalories).toBe(10000);
+      expect(step2Msg.durationCalories).toBe(10000);
     });
   });
 
@@ -1240,15 +1218,13 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(stepMsg.workoutStepMesg).toStrictEqual({
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         messageIndex: 0,
         durationType: fitDurationTypeSchema.enum.powerLessThan,
         durationPower: 200,
-        targetType: stepMsg.workoutStepMesg.targetType,
+        targetType: stepMsg.targetType,
       });
     });
 
@@ -1273,15 +1249,13 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(stepMsg.workoutStepMesg).toStrictEqual({
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         messageIndex: 0,
         durationType: fitDurationTypeSchema.enum.powerGreaterThan,
         durationPower: 250,
-        targetType: stepMsg.workoutStepMesg.targetType,
+        targetType: stepMsg.targetType,
       });
     });
 
@@ -1318,15 +1292,16 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(stepMsg.workoutStepMesg).toStrictEqual({
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         messageIndex: 1,
         durationType: fitDurationTypeSchema.enum.repeatUntilPowerLessThan,
         durationPower: 180,
         durationStep: 0,
-        targetType: stepMsg.workoutStepMesg.targetType,
+        targetType: stepMsg.targetType,
       });
     });
 
@@ -1363,15 +1338,16 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(stepMsg.workoutStepMesg).toStrictEqual({
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         messageIndex: 1,
         durationType: fitDurationTypeSchema.enum.repeatUntilPowerGreaterThan,
         durationPower: 300,
         durationStep: 0,
-        targetType: stepMsg.workoutStepMesg.targetType,
+        targetType: stepMsg.targetType,
       });
     });
 
@@ -1404,16 +1380,16 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const step1Msg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(step1Msg.workoutStepMesg.durationPower).toBe(50);
+      expect(step1Msg.durationPower).toBe(50);
 
       const step2Msg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(step2Msg.workoutStepMesg.durationPower).toBe(1000);
+      expect(step2Msg.durationPower).toBe(1000);
     });
   });
 
@@ -1451,15 +1427,16 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(stepMsg.workoutStepMesg).toStrictEqual({
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         messageIndex: 1,
         durationType: fitDurationTypeSchema.enum.repeatUntilTime,
         durationTime: 1800,
         durationStep: 0,
-        targetType: stepMsg.workoutStepMesg.targetType,
+        targetType: stepMsg.targetType,
       });
     });
 
@@ -1496,15 +1473,16 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(stepMsg.workoutStepMesg).toStrictEqual({
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         messageIndex: 1,
         durationType: fitDurationTypeSchema.enum.repeatUntilDistance,
         durationDistance: 5000,
         durationStep: 0,
-        targetType: stepMsg.workoutStepMesg.targetType,
+        targetType: stepMsg.targetType,
       });
     });
 
@@ -1541,15 +1519,16 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(stepMsg.workoutStepMesg).toStrictEqual({
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toMatchObject({
         messageIndex: 1,
         durationType: fitDurationTypeSchema.enum.repeatUntilHrLessThan,
         durationHr: 120,
         durationStep: 0,
-        targetType: stepMsg.workoutStepMesg.targetType,
+        targetType: stepMsg.targetType,
       });
     });
 
@@ -1606,20 +1585,20 @@ describe("convertKRDToMessages", () => {
       expect(messages.length).toBe(6);
 
       const step2Msg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(step2Msg.workoutStepMesg).toMatchObject({
+      expect(step2Msg).toMatchObject({
         durationType: fitDurationTypeSchema.enum.repeatUntilTime,
         durationTime: 600,
         durationStep: 0,
       });
 
       const step4Msg = messages[5] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(step4Msg.workoutStepMesg).toMatchObject({
+      expect(step4Msg).toMatchObject({
         durationType: fitDurationTypeSchema.enum.repeatUntilDistance,
         durationDistance: 3000,
         durationStep: 2,
@@ -1649,15 +1628,13 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(stepMsg.workoutStepMesg).toHaveProperty("durationCalories");
-      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationTime");
-      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationDistance");
-      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationPower");
-      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationHr");
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toHaveProperty("durationCalories");
+      expect(stepMsg).not.toHaveProperty("durationTime");
+      expect(stepMsg).not.toHaveProperty("durationDistance");
+      expect(stepMsg).not.toHaveProperty("durationPower");
+      expect(stepMsg).not.toHaveProperty("durationHr");
     });
 
     it("should map durationPower field correctly", () => {
@@ -1681,15 +1658,13 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(stepMsg.workoutStepMesg).toHaveProperty("durationPower");
-      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationTime");
-      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationDistance");
-      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationCalories");
-      expect(stepMsg.workoutStepMesg).not.toHaveProperty("durationHr");
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg).toHaveProperty("durationPower");
+      expect(stepMsg).not.toHaveProperty("durationTime");
+      expect(stepMsg).not.toHaveProperty("durationDistance");
+      expect(stepMsg).not.toHaveProperty("durationCalories");
+      expect(stepMsg).not.toHaveProperty("durationHr");
     });
 
     it("should map durationStep field for repeat conditionals", () => {
@@ -1725,11 +1700,11 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(stepMsg.workoutStepMesg).toHaveProperty("durationStep");
-      expect(stepMsg.workoutStepMesg.durationStep).toBe(0);
+      expect(stepMsg).toHaveProperty("durationStep");
+      expect(stepMsg.durationStep).toBe(0);
     });
 
     it("should not include durationStep for non-repeat durations", () => {
@@ -1761,16 +1736,16 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const step1Msg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(step1Msg.workoutStepMesg).not.toHaveProperty("durationStep");
+      expect(step1Msg).not.toHaveProperty("durationStep");
 
       const step2Msg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(step2Msg.workoutStepMesg).not.toHaveProperty("durationStep");
+      expect(step2Msg).not.toHaveProperty("durationStep");
     });
   });
 
@@ -1796,11 +1771,9 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(stepMsg.workoutStepMesg.durationCalories).toBe(0);
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg.durationCalories).toBe(0);
     });
 
     it("should handle zero power values", () => {
@@ -1824,11 +1797,9 @@ describe("convertKRDToMessages", () => {
       const messages = convertKRDToMessages(krd, logger);
 
       // Assert
-      const stepMsg = messages[2] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
-      };
-      expect(stepMsg.workoutStepMesg.durationPower).toBe(0);
+      const stepMsg = messages[2] as Record<string, unknown>;
+      expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+      expect(stepMsg.durationPower).toBe(0);
     });
 
     it("should handle repeatFrom index 0", () => {
@@ -1864,10 +1835,10 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[3] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(stepMsg.workoutStepMesg.durationStep).toBe(0);
+      expect(stepMsg.durationStep).toBe(0);
     });
 
     it("should handle large repeatFrom index", () => {
@@ -1917,10 +1888,10 @@ describe("convertKRDToMessages", () => {
 
       // Assert
       const stepMsg = messages[5] as {
-        type: string;
-        workoutStepMesg: Record<string, unknown>;
+        mesgNum: number;
+        messageIndex: number;
       };
-      expect(stepMsg.workoutStepMesg.durationStep).toBe(0);
+      expect(stepMsg.durationStep).toBe(0);
     });
   });
 

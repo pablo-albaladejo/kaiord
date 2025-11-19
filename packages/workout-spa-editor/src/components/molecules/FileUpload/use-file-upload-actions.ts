@@ -1,6 +1,6 @@
 import type { RefObject } from "react";
 import type { KRD, ValidationError } from "../../../types/krd";
-import { createParseError, parseFile, validateKRD } from "./file-parser";
+import { createParseError, parseFile } from "./file-parser";
 
 type ErrorState = {
   title: string;
@@ -13,6 +13,7 @@ type FileUploadActionsParams = {
   setIsLoading: (loading: boolean) => void;
   setFileName: (name: string | null) => void;
   setError: (error: ErrorState) => void;
+  setConversionProgress: (progress: number) => void;
   resetInput: () => void;
   onFileLoad: (krd: KRD) => void;
   onError?: (error: string, validationErrors?: Array<ValidationError>) => void;
@@ -23,6 +24,7 @@ export function useFileUploadActions({
   setIsLoading,
   setFileName,
   setError,
+  setConversionProgress,
   resetInput,
   onFileLoad,
   onError,
@@ -31,6 +33,7 @@ export function useFileUploadActions({
     setError(errorState);
     setIsLoading(false);
     setFileName(null);
+    setConversionProgress(0);
     resetInput();
     if (errorState && onError) {
       onError(
@@ -44,9 +47,14 @@ export function useFileUploadActions({
     if (!file) return;
     setFileName(file.name);
     setIsLoading(true);
+    setConversionProgress(0);
+    setError(null);
     try {
-      const krd = validateKRD(await parseFile(file));
+      const krd = await parseFile(file, (progress) => {
+        setConversionProgress(progress);
+      });
       setError(null);
+      setConversionProgress(100);
       onFileLoad(krd);
       setIsLoading(false);
     } catch (error) {
@@ -56,15 +64,20 @@ export function useFileUploadActions({
 
   const triggerFileInput = () => {
     setError(null);
+    setConversionProgress(0);
     fileInputRef.current?.click();
   };
 
   const handleRetry = () => {
     setError(null);
+    setConversionProgress(0);
     fileInputRef.current?.click();
   };
 
-  const handleDismiss = () => setError(null);
+  const handleDismiss = () => {
+    setError(null);
+    setConversionProgress(0);
+  };
 
   return {
     handleFileChange,
