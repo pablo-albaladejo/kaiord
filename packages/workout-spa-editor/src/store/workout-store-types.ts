@@ -29,6 +29,7 @@ export type WorkoutStore = {
     stepIndices: Array<number>,
     repeatCount: number
   ) => void;
+  createEmptyRepetitionBlock: (repeatCount: number) => void;
   editRepetitionBlock: (blockIndex: number, repeatCount: number) => void;
   addStepToRepetitionBlock: (blockIndex: number) => void;
   selectStep: (id: string | null) => void;

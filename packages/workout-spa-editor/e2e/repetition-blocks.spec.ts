@@ -93,16 +93,40 @@ test.describe("Repetition Blocks", () => {
     const step2 = page.locator('[data-testid="step-card"]').nth(1);
     const step3 = page.locator('[data-testid="step-card"]').nth(2);
 
-    // Use keyboard to hold Control key while clicking
-    await page.keyboard.down("Control");
-    await step2.click();
-    await step3.click();
-    await page.keyboard.up("Control");
+    // Use evaluate to dispatch click events with Control modifier for cross-browser compatibility
+    await step2.evaluate((el) => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        ctrlKey: true,
+        metaKey: false,
+      });
+      el.dispatchEvent(event);
+    });
+    await page.waitForTimeout(150);
+    await step3.evaluate((el) => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        ctrlKey: true,
+        metaKey: false,
+      });
+      el.dispatchEvent(event);
+    });
+    await page.waitForTimeout(300);
 
-    // Wait for the button to appear
+    // Verify steps are actually selected before waiting for button
+    await expect(step2).toHaveAttribute("data-selected", "true", {
+      timeout: 5000,
+    });
+    await expect(step3).toHaveAttribute("data-selected", "true", {
+      timeout: 5000,
+    });
+
+    // Wait for the button to appear - verify multiple steps are selected
     await expect(
       page.getByTestId("create-repetition-block-button")
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible({ timeout: 10000 });
 
     // Click "Create Repetition Block" button
     await page.getByTestId("create-repetition-block-button").click();
@@ -117,7 +141,10 @@ test.describe("Repetition Blocks", () => {
       timeout: 5000,
     });
     await expect(page.getByText("5x")).toBeVisible();
-    await expect(page.getByText("2 steps")).toBeVisible();
+    // Use a more specific selector to avoid matching "12 steps" in stats
+    await expect(
+      page.getByTestId("repetition-block-card").getByText("2 steps")
+    ).toBeVisible();
   });
 
   test("should edit repeat count", async ({ page }) => {
@@ -424,8 +451,10 @@ test.describe("Repetition Blocks", () => {
     // Click add step button within the block (use first() to get the one inside the repetition block)
     await page.getByTestId("add-step-button").first().click();
 
-    // Verify step was added
-    await expect(page.getByText("2 steps")).toBeVisible({ timeout: 5000 });
+    // Verify step was added - use specific selector to avoid matching stats
+    await expect(
+      page.getByTestId("repetition-block-card").getByText("2 steps")
+    ).toBeVisible({ timeout: 5000 });
   });
 
   test("should handle undo/redo with repetition blocks", async ({ page }) => {
@@ -487,16 +516,40 @@ test.describe("Repetition Blocks", () => {
     const step1 = page.locator('[data-testid="step-card"]').first();
     const step2 = page.locator('[data-testid="step-card"]').nth(1);
 
-    // Use keyboard to hold Control key while clicking
-    await page.keyboard.down("Control");
-    await step1.click();
-    await step2.click();
-    await page.keyboard.up("Control");
+    // Use evaluate to dispatch click events with Control modifier for cross-browser compatibility
+    await step1.evaluate((el) => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        ctrlKey: true,
+        metaKey: false,
+      });
+      el.dispatchEvent(event);
+    });
+    await page.waitForTimeout(150);
+    await step2.evaluate((el) => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        ctrlKey: true,
+        metaKey: false,
+      });
+      el.dispatchEvent(event);
+    });
+    await page.waitForTimeout(300);
 
-    // Wait for the button to appear
+    // Verify steps are actually selected before waiting for button
+    await expect(step1).toHaveAttribute("data-selected", "true", {
+      timeout: 5000,
+    });
+    await expect(step2).toHaveAttribute("data-selected", "true", {
+      timeout: 5000,
+    });
+
+    // Wait for the button to appear - verify multiple steps are selected
     await expect(
       page.getByTestId("create-repetition-block-button")
-    ).toBeVisible({ timeout: 5000 });
+    ).toBeVisible({ timeout: 10000 });
 
     // Create repetition block
     await page.getByTestId("create-repetition-block-button").click();

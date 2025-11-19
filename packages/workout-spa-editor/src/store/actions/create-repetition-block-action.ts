@@ -22,7 +22,7 @@ import { createUpdateWorkoutAction } from "../workout-actions";
  *
  * @param krd - Current KRD workout
  * @param stepIndices - Array of step indices to wrap in a repetition block
- * @param repeatCount - Number of times to repeat (minimum 2)
+ * @param repeatCount - Number of times to repeat (minimum 1)
  * @param state - Current workout state
  * @returns Updated workout state
  */

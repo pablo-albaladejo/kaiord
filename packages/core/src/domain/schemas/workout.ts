@@ -40,7 +40,7 @@ export const workoutStepSchema = z.object({
 });
 
 export const repetitionBlockSchema = z.object({
-  repeatCount: z.number().int().min(2),
+  repeatCount: z.number().int().min(1),
   steps: z.array(workoutStepSchema),
 });
 

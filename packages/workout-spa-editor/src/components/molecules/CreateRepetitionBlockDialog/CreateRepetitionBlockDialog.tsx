@@ -13,7 +13,7 @@ import { DialogFooter } from "./DialogFooter";
 import { DialogHeader } from "./DialogHeader";
 
 export type CreateRepetitionBlockDialogProps = {
-  stepCount: number;
+  stepCount?: number;
   onConfirm: (repeatCount: number) => void;
   onCancel: () => void;
 };
@@ -26,13 +26,13 @@ export function CreateRepetitionBlockDialog({
   onConfirm,
   onCancel,
 }: CreateRepetitionBlockDialogProps) {
-  const [repeatCount, setRepeatCount] = useState("2");
+  const [repeatCount, setRepeatCount] = useState("1");
   const [error, setError] = useState<string | null>(null);
 
   const handleConfirm = () => {
     const count = Number.parseInt(repeatCount, 10);
-    if (Number.isNaN(count) || count < 2) {
-      setError("Repeat count must be at least 2");
+    if (Number.isNaN(count) || count < 1) {
+      setError("Repeat count must be at least 1");
       return;
     }
     onConfirm(count);
