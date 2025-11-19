@@ -178,3 +178,18 @@ This specification defines the requirements for **@kaiord/cli**, a command-line 
 5. WHEN THE CLI includes third-party code, THE package SHALL include proper attribution in LICENSE or NOTICE file
 6. WHEN THE maintainer adds a new dependency, THE CI SHALL automatically check the dependency's license compatibility
 7. WHEN THE CLI is published, THE package SHALL include a LICENSE file with MIT license (matching project license)
+
+### Requirement 15
+
+**User Story:** As a package maintainer, I want to publish the CLI package to npm registry, so that users can install it globally and use it from any directory.
+
+#### Acceptance Criteria
+
+1. WHEN THE maintainer publishes the CLI, THE package SHALL be published to npm registry at https://www.npmjs.com/package/@kaiord/cli
+2. WHEN THE package is published, THE package SHALL follow semantic versioning (semver) consistent with @kaiord/core
+3. WHEN THE package is published, THE package SHALL include a README.md with installation and usage instructions
+4. WHEN THE package is published, THE package SHALL be configured as a public scoped package with publishConfig.access set to "public"
+5. WHEN THE package is published, THE dist/ directory SHALL contain the compiled JavaScript with proper shebang for CLI execution
+6. WHEN THE package is published, THE package.json SHALL specify the correct bin entry pointing to the CLI executable
+7. WHEN THE CI/CD pipeline runs, THE pipeline SHALL automatically publish new versions to npm on tagged releases
+8. WHEN THE package is published, THE package SHALL be accessible via `npm install -g @kaiord/cli` from the public npm registry

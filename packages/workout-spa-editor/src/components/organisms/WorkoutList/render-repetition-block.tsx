@@ -10,6 +10,11 @@ type RenderRepetitionBlockProps = {
   readonly onStepDuplicate?: (blockIndex: number, stepIndex: number) => void;
   readonly onEditRepeatCount?: (count: number) => void;
   readonly onAddStep?: () => void;
+  readonly onReorderSteps?: (
+    blockIndex: number,
+    activeIndex: number,
+    overIndex: number
+  ) => void;
 };
 
 export const renderRepetitionBlock = ({
@@ -21,6 +26,7 @@ export const renderRepetitionBlock = ({
   onStepDuplicate,
   onEditRepeatCount,
   onAddStep,
+  onReorderSteps,
 }: RenderRepetitionBlockProps) => {
   // Extract selected step index from selectedStepId (format: "step-{index}")
   const selectedStepIndex = selectedStepId?.startsWith("step-")
@@ -41,6 +47,12 @@ export const renderRepetitionBlock = ({
       }
       onEditRepeatCount={onEditRepeatCount}
       onAddStep={onAddStep}
+      onReorderSteps={
+        onReorderSteps
+          ? (activeIndex: number, overIndex: number) =>
+              onReorderSteps(blockIndex, activeIndex, overIndex)
+          : undefined
+      }
     />
   );
 };

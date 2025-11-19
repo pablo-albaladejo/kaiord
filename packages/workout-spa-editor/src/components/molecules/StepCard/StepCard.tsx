@@ -1,5 +1,6 @@
 import { forwardRef, type HTMLAttributes } from "react";
 import type { WorkoutStep } from "../../../types/krd";
+import { DragHandle } from "./DragHandle";
 import { formatDuration } from "./format-duration";
 import { StepCardActions } from "./StepCardActions";
 import { StepCardFooter } from "./StepCardFooter";
@@ -16,6 +17,8 @@ export type StepCardProps = HTMLAttributes<HTMLDivElement> & {
   onToggleMultiSelect?: (stepIndex: number) => void;
   onDelete?: (stepIndex: number) => void;
   onDuplicate?: (stepIndex: number) => void;
+  isDragging?: boolean;
+  dragHandleProps?: HTMLAttributes<HTMLDivElement>;
 };
 
 export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
@@ -28,6 +31,8 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
       onToggleMultiSelect,
       onDelete,
       onDuplicate,
+      isDragging = false,
+      dragHandleProps,
       className = "",
       ...props
     },
@@ -35,9 +40,11 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
   ) => {
     const intensity = step.intensity || "other";
     const hasActions = Boolean(onDelete || onDuplicate);
+    const hasDragHandle = Boolean(dragHandleProps);
     const classes = getStepCardClasses(
       isSelected || isMultiSelected,
       hasActions,
+      hasDragHandle,
       className
     );
 
@@ -59,6 +66,9 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
         data-selected={isSelected || isMultiSelected ? "true" : "false"}
         {...props}
       >
+        {dragHandleProps && (
+          <DragHandle isDragging={isDragging} {...dragHandleProps} />
+        )}
         <StepCardActions
           stepIndex={step.stepIndex}
           onDelete={onDelete}

@@ -11,6 +11,7 @@ export type RepetitionBlockCardProps = HTMLAttributes<HTMLDivElement> & {
   onRemoveStep?: (index: number) => void;
   onDuplicateStep?: (index: number) => void;
   onSelectStep?: (index: number) => void;
+  onReorderSteps?: (activeIndex: number, overIndex: number) => void;
   selectedStepIndex?: number;
 };
 
@@ -26,6 +27,7 @@ export const RepetitionBlockCard = forwardRef<
       onRemoveStep,
       onDuplicateStep,
       onSelectStep,
+      onReorderSteps,
       selectedStepIndex,
       className = "",
       ...props
@@ -76,6 +78,7 @@ export const RepetitionBlockCard = forwardRef<
             onRemoveStep={onRemoveStep}
             onDuplicateStep={onDuplicateStep}
             onAddStep={onAddStep}
+            onReorderSteps={onReorderSteps}
           />
         )}
       </div>

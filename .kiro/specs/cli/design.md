@@ -86,7 +86,8 @@ const main = async (): Promise<void> => {
 ```typescript
 type ConvertOptions = {
   input: string;
-  output: string;
+  output?: string; // Optional for batch mode
+  outputDir?: string; // For batch conversion (Requirement 8.1)
   inputFormat?: "fit" | "krd" | "tcx" | "zwo";
   outputFormat?: "fit" | "krd" | "tcx" | "zwo";
   verbose?: boolean;
@@ -99,23 +100,24 @@ export const convertCommand = async (
   options: ConvertOptions
 ): Promise<void> => {
   // 1. Detect or validate formats
-  // 2. Read input file
-  // 3. Convert using @kaiord/core
-  // 4. Write output file
-  // 5. Display success message
+  // 2. Check for glob patterns (batch mode - Requirement 8)
+  // 3. Read input file(s)
+  // 4. Convert using @kaiord/core
+  // 5. Write output file(s)
+  // 6. Display success message or batch summary
 };
 ```
 
 ### 3. Validate Command (`commands/validate.ts`)
 
-**Responsibility:** Perform round-trip validation to verify data integrity.
+**Responsibility:** Perform round-trip validation to verify data integrity (Requirement 7).
 
 **Interface:**
 
 ```typescript
 type ValidateOptions = {
   input: string;
-  toleranceConfig?: string;
+  toleranceConfig?: string; // Path to custom tolerance JSON (Requirement 7.4)
   verbose?: boolean;
   quiet?: boolean;
   json?: boolean;
@@ -126,10 +128,27 @@ export const validateCommand = async (
   options: ValidateOptions
 ): Promise<void> => {
   // 1. Read input file
-  // 2. Perform round-trip conversion
-  // 3. Check tolerances
-  // 4. Display validation results
+  // 2. Detect format from extension
+  // 3. Perform round-trip conversion (e.g., FIT → KRD → FIT) (Requirement 7.1)
+  // 4. Load custom tolerances if provided (Requirement 7.4)
+  // 5. Check tolerances using @kaiord/core validation
+  // 6. Display validation results:
+  //    - Success message if within tolerances (Requirement 7.2)
+  //    - Detailed violations with field names, expected, actual, deviations (Requirement 7.3)
+  // 7. Exit with code 0 on success, 1 on failure
 };
+```
+
+**Tolerance Configuration Format:**
+
+```typescript
+// tolerance.json
+{
+  "time": { "absolute": 1, "unit": "seconds" },
+  "power": { "absolute": 1, "percentage": 1, "unit": "watts" },
+  "heartRate": { "absolute": 1, "unit": "bpm" },
+  "cadence": { "absolute": 1, "unit": "rpm" }
+}
 ```
 
 ### 4. File Handler (`utils/file-handler.ts`)
@@ -160,8 +179,9 @@ export const writeFile = async (
 };
 
 export const findFiles = async (pattern: string): Promise<Array<string>> => {
-  // Expand glob patterns for batch processing
+  // Expand glob patterns for batch processing (Requirement 8.1)
   // Return sorted list of matching files
+  // Example: "workouts/*.fit" → ["workouts/workout1.fit", "workouts/workout2.fit"]
 };
 ```
 
@@ -266,17 +286,25 @@ export const formatError = (
 export const formatValidationErrors = (
   errors: Array<ValidationError>
 ): string => {
-  // Format validation errors with field paths
+  // Format validation errors with field paths (Requirement 9.3)
   // Group by error type
   // Add color coding for terminal
+  // Example output:
+  //   Validation errors:
+  //     - metadata.sport: Required field missing
+  //     - steps[0].duration: Invalid duration type
 };
 
 export const formatToleranceViolations = (
   violations: Array<ToleranceViolation>
 ): string => {
-  // Format tolerance violations with expected/actual values
+  // Format tolerance violations with expected/actual values (Requirement 7.3)
   // Calculate deviation percentages
   // Highlight fields that exceeded tolerance
+  // Example output:
+  //   Tolerance violations:
+  //     - steps[0].duration.seconds: expected 300, got 301 (deviation: 1s, tolerance: ±1s)
+  //     - steps[1].target.value: expected 250W, got 252W (deviation: 2W, tolerance: ±1W)
 };
 ```
 
@@ -335,16 +363,18 @@ type ValidationResult = {
 
 ### Error Types and Exit Codes
 
-| Error Type         | Exit Code | Description                       |
-| ------------------ | --------- | --------------------------------- |
-| Success            | 0         | Operation completed successfully  |
-| Invalid Arguments  | 1         | Missing or invalid CLI arguments  |
-| File Not Found     | 2         | Input file does not exist         |
-| Permission Error   | 3         | Cannot read input or write output |
-| Parsing Error      | 4         | Failed to parse input file        |
-| Validation Error   | 5         | Schema validation failed          |
-| Tolerance Exceeded | 6         | Round-trip validation failed      |
-| Unknown Error      | 99        | Unexpected error                  |
+**Note:** Requirements specify exit code 1 for most errors (Requirements 2.4, 2.5, 3.3, 3.4, 4.5, 5.4). The table below provides more granular codes for internal implementation, but the CLI may simplify to 0 (success) and 1 (any error) for user-facing behavior.
+
+| Error Type         | Exit Code | Description                       | Requirement          |
+| ------------------ | --------- | --------------------------------- | -------------------- |
+| Success            | 0         | Operation completed successfully  | 2.3, 7.2, 12.1, 13.5 |
+| Invalid Arguments  | 1         | Missing or invalid CLI arguments  | 2.4, 4.5, 5.4        |
+| File Not Found     | 1         | Input file does not exist         | 2.4                  |
+| Permission Error   | 1         | Cannot read input or write output | 3.4                  |
+| Parsing Error      | 1         | Failed to parse input file        | 2.5                  |
+| Validation Error   | 1         | Schema validation failed          | 3.3                  |
+| Tolerance Exceeded | 1         | Round-trip validation failed      | 7.3                  |
+| Unknown Error      | 1         | Unexpected error                  | 12.2                 |
 
 ### Error Message Format
 
@@ -583,25 +613,63 @@ Copy these to `packages/cli/tests/fixtures/` for CLI-specific tests.
 
 ### Production Dependencies
 
-- **yargs** (^17.7.2) - CLI argument parsing with type safety
-- **chalk** (^5.3.0) - Terminal colors (ESM-only)
-- **ora** (^8.0.1) - Terminal spinners and progress indicators (ESM-only)
-- **winston** (^3.11.0) - Structured logging for CI/CD
-- **glob** (^10.3.10) - File pattern matching for batch processing
-- **@kaiord/core** (workspace:\*) - Core conversion library
+All production dependencies MUST use permissive licenses (MIT, Apache-2.0, BSD, ISC) per Requirement 14.1:
+
+- **yargs** (^17.7.2) - CLI argument parsing with type safety (MIT)
+- **chalk** (^5.3.0) - Terminal colors (ESM-only) (MIT)
+- **ora** (^8.0.1) - Terminal spinners and progress indicators (ESM-only) (MIT)
+- **winston** (^3.11.0) - Structured logging for CI/CD (MIT)
+- **glob** (^10.3.10) - File pattern matching for batch processing (ISC)
+- **@kaiord/core** (workspace:\*) - Core conversion library (MIT)
 
 ### Development Dependencies
 
-- **@types/yargs** (^17.0.32) - TypeScript types for yargs
-- **vitest** (^1.2.0) - Testing framework
-- **tsx** (^4.7.0) - TypeScript execution for development
-- **execa** (^8.0.1) - Execute CLI as child process for integration tests
-- **tmp-promise** (^3.0.3) - Create temporary directories for test files
-- **strip-ansi** (^7.1.0) - Remove ANSI color codes from output for assertions
+- **@types/yargs** (^17.0.32) - TypeScript types for yargs (MIT)
+- **vitest** (^1.2.0) - Testing framework (MIT)
+- **tsx** (^4.7.0) - TypeScript execution for development (MIT)
+- **execa** (^8.0.1) - Execute CLI as child process for integration tests (MIT)
+- **tmp-promise** (^3.0.3) - Create temporary directories for test files (MIT)
+- **strip-ansi** (^7.1.0) - Remove ANSI color codes from output for assertions (MIT)
+
+### License Compliance (Requirement 14)
+
+**Automated License Checking:**
+
+The project MUST enforce license compatibility through automated checks:
+
+1. **Pre-commit Hook**: Run license checker before allowing commits
+2. **CI/CD Pipeline**: Verify all dependencies have compatible licenses
+3. **Dependency Updates**: Check new dependencies automatically
+
+**License Checker Configuration:**
+
+```json
+// package.json
+{
+  "scripts": {
+    "check-licenses": "license-checker --onlyAllow 'MIT;Apache-2.0;BSD;BSD-2-Clause;BSD-3-Clause;ISC' --production"
+  },
+  "devDependencies": {
+    "license-checker": "^25.0.1"
+  }
+}
+```
+
+**Prohibited Licenses:**
+
+- GPL (any version) - Copyleft license incompatible with MIT
+- AGPL (any version) - Strong copyleft license
+- Any proprietary or restrictive licenses
+
+**Attribution Requirements:**
+
+- LICENSE file MUST include MIT license (matching project license)
+- NOTICE file MUST include attribution for third-party code
+- THIRD-PARTY-LICENSES.md MUST list all dependency licenses
 
 ## Package Configuration
 
-### package.json
+### package.json (Requirement 15)
 
 ```json
 {
@@ -612,11 +680,38 @@ Copy these to `packages/cli/tests/fixtures/` for CLI-specific tests.
   "bin": {
     "kaiord": "./dist/bin/kaiord.js"
   },
-  "files": ["dist"],
+  "files": ["dist", "README.md", "LICENSE"],
   "scripts": {
     "build": "tsup",
     "test": "vitest --run",
-    "dev": "tsx bin/kaiord.ts"
+    "dev": "tsx bin/kaiord.ts",
+    "prepublishOnly": "pnpm build && pnpm test",
+    "check-licenses": "license-checker --onlyAllow 'MIT;Apache-2.0;BSD;BSD-2-Clause;BSD-3-Clause;ISC' --production"
+  },
+  "keywords": [
+    "kaiord",
+    "fit",
+    "tcx",
+    "zwo",
+    "workout",
+    "garmin",
+    "zwift",
+    "cli",
+    "converter"
+  ],
+  "author": "Kaiord Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/your-org/kaiord.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://www.npmjs.com/package/@kaiord/cli",
+  "bugs": {
+    "url": "https://github.com/your-org/kaiord/issues"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "dependencies": {
     "@kaiord/core": "workspace:*",
@@ -631,7 +726,11 @@ Copy these to `packages/cli/tests/fixtures/` for CLI-specific tests.
     "tsup": "^8.0.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.2.0"
+    "vitest": "^1.2.0",
+    "execa": "^8.0.1",
+    "tmp-promise": "^3.0.3",
+    "strip-ansi": "^7.1.0",
+    "license-checker": "^25.0.1"
   }
 }
 ```
@@ -682,7 +781,7 @@ try {
 }
 ```
 
-### Batch Processing
+### Batch Processing (Requirement 8)
 
 Process files sequentially to avoid memory issues:
 
@@ -691,18 +790,56 @@ const files = await findFiles(pattern);
 const results: Array<ConversionResult> = [];
 
 for (const [index, file] of files.entries()) {
+  // Requirement 8.2: Display progress for each file
   logger.info(`Converting ${index + 1}/${files.length}: ${file}`);
+
   try {
     const result = await convertFile(file, outputDir);
     results.push(result);
   } catch (error) {
-    results.push({ success: false, error: error.message });
+    // Requirement 8.3: Continue processing on error
+    results.push({ success: false, file, error: error.message });
   }
 }
 
-// Display summary
+// Requirement 8.4: Display summary with counts and timing
 const successful = results.filter((r) => r.success).length;
-logger.info(`Completed: ${successful}/${files.length} successful`);
+const failed = results.filter((r) => !r.success).length;
+const totalTime = Date.now() - startTime;
+
+logger.info(`Batch conversion complete:`);
+logger.info(`  Successful: ${successful}/${files.length}`);
+logger.info(`  Failed: ${failed}/${files.length}`);
+logger.info(`  Total time: ${(totalTime / 1000).toFixed(2)}s`);
+
+// Report all errors at the end (Requirement 8.3)
+if (failed > 0) {
+  logger.error(`Failed conversions:`);
+  results
+    .filter((r) => !r.success)
+    .forEach((r) => logger.error(`  ${r.file}: ${r.error}`));
+}
+```
+
+**Batch Mode Detection:**
+
+```typescript
+const isBatchMode = (input: string): boolean => {
+  return input.includes("*") || input.includes("?");
+};
+```
+
+**Output Directory Handling:**
+
+```typescript
+// For batch mode, require --output-dir instead of --output
+if (isBatchMode(options.input)) {
+  if (!options.outputDir) {
+    throw new Error("Batch mode requires --output-dir flag");
+  }
+  // Create output directory if it doesn't exist
+  await fs.mkdir(options.outputDir, { recursive: true });
+}
 ```
 
 ## Design Decisions
@@ -734,6 +871,14 @@ logger.info(`Completed: ${successful}/${files.length} successful`);
 - Adds unnecessary complexity
 - yargs provides everything we need
 - Keeps bundle size small
+
+### Why publish CLI separately from core?
+
+- **Separation of concerns**: Core is a library, CLI is a tool
+- **Independent versioning**: CLI can have breaking changes without affecting core users
+- **Smaller install size**: Users who only need the library don't install CLI dependencies
+- **Clear boundaries**: Library users vs CLI users have different needs
+- **Follows npm best practices**: Scoped packages with clear purposes (@kaiord/core, @kaiord/cli)
 
 ## Easter Egg Implementation
 
@@ -794,6 +939,173 @@ yargs
 - Links to Kiroween hackathon
 - Credits Kiro for helping build the tool
 - Exits cleanly with code 0
+
+## NPM Publishing Strategy (Requirement 15)
+
+### Package Registry
+
+The CLI package MUST be published to the public npm registry at:
+
+**https://www.npmjs.com/package/@kaiord/cli**
+
+This ensures users can install it globally with:
+
+```bash
+npm install -g @kaiord/cli
+# or
+pnpm add -g @kaiord/cli
+```
+
+### Publishing Workflow
+
+**Manual Publishing:**
+
+```bash
+# 1. Ensure all tests pass
+pnpm test
+
+# 2. Build the package
+pnpm build
+
+# 3. Verify package contents
+npm pack --dry-run
+
+# 4. Publish to npm (requires authentication)
+npm publish --access public
+
+# 5. Verify publication
+npm view @kaiord/cli
+```
+
+**Automated Publishing via CI/CD:**
+
+The project uses GitHub Actions to automatically publish new versions:
+
+1. **Version Bump**: Use changesets to manage versions
+
+   ```bash
+   pnpm changeset
+   pnpm changeset version
+   ```
+
+2. **Create Release**: Push a git tag
+
+   ```bash
+   git tag v0.1.0
+   git push origin v0.1.0
+   ```
+
+3. **CI/CD Pipeline**: GitHub Actions automatically:
+   - Runs all tests
+   - Builds the package
+   - Checks licenses
+   - Publishes to npm registry
+
+**GitHub Actions Workflow:**
+
+```yaml
+# .github/workflows/publish-cli.yml
+name: Publish CLI to NPM
+
+on:
+  push:
+    tags:
+      - "cli-v*"
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build packages
+        run: pnpm -r build
+
+      - name: Run tests
+        run: pnpm -r test
+
+      - name: Check licenses
+        run: pnpm --filter @kaiord/cli check-licenses
+
+      - name: Publish to NPM
+        run: pnpm --filter @kaiord/cli publish --no-git-checks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+```
+
+### Version Synchronization
+
+The CLI version should be synchronized with @kaiord/core:
+
+- **Major versions**: Breaking changes in core API
+- **Minor versions**: New features in core or CLI
+- **Patch versions**: Bug fixes
+
+**Example:**
+
+- `@kaiord/core@1.2.3` → `@kaiord/cli@1.2.3`
+- Both packages share the same version number for consistency
+
+### Pre-publish Checklist
+
+Before publishing to https://www.npmjs.com/package/@kaiord/cli, ensure:
+
+- [ ] All tests pass (`pnpm test`)
+- [ ] Build succeeds (`pnpm build`)
+- [ ] License check passes (`pnpm check-licenses`)
+- [ ] README.md is up to date
+- [ ] CHANGELOG.md includes release notes
+- [ ] Version number follows semver
+- [ ] Git tag matches package version
+- [ ] NPM authentication is configured (`npm whoami`)
+- [ ] Package name is available or you have publish rights
+
+### Post-publish Verification
+
+After publishing, verify the package:
+
+```bash
+# 1. Check package page
+open https://www.npmjs.com/package/@kaiord/cli
+
+# 2. Verify package metadata
+npm view @kaiord/cli
+
+# 3. Test global installation
+npm install -g @kaiord/cli
+
+# 4. Verify CLI works
+kaiord --version
+kaiord --help
+
+# 5. Test conversion
+kaiord convert --input sample.fit --output sample.krd
+```
+
+### Package Distribution
+
+**What gets published:**
+
+- `dist/` - Compiled JavaScript with shebang
+- `README.md` - Installation and usage instructions
+- `LICENSE` - MIT license file
+- `package.json` - Package metadata
+
+**What does NOT get published:**
+
+- `src/` - TypeScript source files
+- `tests/` - Test files
+- `node_modules/` - Dependencies (installed by npm)
+- `.github/` - CI/CD configuration
+- Development configuration files
 
 ## Future Enhancements
 

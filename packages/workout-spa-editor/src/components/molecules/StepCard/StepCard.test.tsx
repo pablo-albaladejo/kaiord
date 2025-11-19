@@ -210,4 +210,94 @@ describe("StepCard", () => {
 
     expect(onSelect).toHaveBeenCalledWith(0);
   });
+
+  describe("drag interactions", () => {
+    it("should render drag handle when dragHandleProps are provided", () => {
+      const dragHandleProps = {
+        onPointerDown: vi.fn(),
+      };
+
+      render(<StepCard step={mockStep} dragHandleProps={dragHandleProps} />);
+
+      const dragHandle = screen.getByTestId("drag-handle");
+      expect(dragHandle).toBeInTheDocument();
+      expect(dragHandle).toHaveAttribute("aria-label", "Drag to reorder");
+    });
+
+    it("should not render drag handle when dragHandleProps are not provided", () => {
+      render(<StepCard step={mockStep} />);
+
+      const dragHandle = screen.queryByTestId("drag-handle");
+      expect(dragHandle).not.toBeInTheDocument();
+    });
+
+    it("should apply dragging styles when isDragging is true", () => {
+      const dragHandleProps = {
+        onPointerDown: vi.fn(),
+      };
+
+      render(
+        <StepCard
+          step={mockStep}
+          isDragging={true}
+          dragHandleProps={dragHandleProps}
+        />
+      );
+
+      const dragHandle = screen.getByTestId("drag-handle");
+      expect(dragHandle).toHaveClass("text-primary-500");
+    });
+
+    it("should apply default styles when isDragging is false", () => {
+      const dragHandleProps = {
+        onPointerDown: vi.fn(),
+      };
+
+      render(
+        <StepCard
+          step={mockStep}
+          isDragging={false}
+          dragHandleProps={dragHandleProps}
+        />
+      );
+
+      const dragHandle = screen.getByTestId("drag-handle");
+      expect(dragHandle).toHaveClass("text-neutral-400");
+    });
+
+    it("should apply left padding when drag handle is present", () => {
+      const dragHandleProps = {
+        onPointerDown: vi.fn(),
+      };
+
+      render(<StepCard step={mockStep} dragHandleProps={dragHandleProps} />);
+
+      const card = screen.getByRole("button");
+      expect(card).toHaveClass("pl-10");
+    });
+
+    it("should not apply left padding when drag handle is not present", () => {
+      render(<StepCard step={mockStep} />);
+
+      const card = screen.getByRole("button");
+      expect(card).toHaveClass("p-4");
+      expect(card).not.toHaveClass("pl-10");
+    });
+
+    it("should pass drag handle props to the drag handle element", () => {
+      const handlePointerDown = vi.fn();
+      const dragHandleProps = {
+        onPointerDown: handlePointerDown,
+      };
+
+      render(<StepCard step={mockStep} dragHandleProps={dragHandleProps} />);
+
+      const dragHandle = screen.getByTestId("drag-handle");
+      dragHandle.dispatchEvent(
+        new PointerEvent("pointerdown", { bubbles: true })
+      );
+
+      expect(handlePointerDown).toHaveBeenCalled();
+    });
+  });
 });

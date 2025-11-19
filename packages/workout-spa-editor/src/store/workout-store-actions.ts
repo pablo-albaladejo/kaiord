@@ -1,7 +1,11 @@
 import type { KRD, Sport } from "../types/krd";
 // prettier-ignore
-import { createEmptyWorkoutAction, createLoadWorkoutAction, createUpdateWorkoutAction } from "./workout-actions";
 import type { WorkoutState } from "./workout-actions";
+import {
+  createEmptyWorkoutAction,
+  createLoadWorkoutAction,
+  createUpdateWorkoutAction,
+} from "./workout-actions";
 import { createRepetitionBlockActions } from "./workout-store-repetition-actions";
 import { createStepActions } from "./workout-store-step-actions";
 
@@ -20,6 +24,22 @@ export function createWorkoutStoreActions() {
       createStepActions(state).deleteStep(stepIndex),
     duplicateStep: (stepIndex: number, state: WorkoutState) =>
       createStepActions(state).duplicateStep(stepIndex),
+    reorderStep: (
+      activeIndex: number,
+      overIndex: number,
+      state: WorkoutState
+    ) => createStepActions(state).reorderStep(activeIndex, overIndex),
+    reorderStepsInBlock: (
+      blockIndex: number,
+      activeIndex: number,
+      overIndex: number,
+      state: WorkoutState
+    ) =>
+      createStepActions(state).reorderStepsInBlock(
+        blockIndex,
+        activeIndex,
+        overIndex
+      ),
     createRepetitionBlock: (
       stepIndices: Array<number>,
       repeatCount: number,

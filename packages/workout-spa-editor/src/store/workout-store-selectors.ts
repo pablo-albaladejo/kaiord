@@ -69,6 +69,9 @@ export const useSelectStep = () => useWorkoutStore((state) => state.selectStep);
 export const useDuplicateStep = () =>
   useWorkoutStore((state) => state.duplicateStep);
 
+export const useReorderStep = () =>
+  useWorkoutStore((state) => state.reorderStep);
+
 export const useSetEditing = () => useWorkoutStore((state) => state.setEditing);
 
 export const useClearWorkout = () =>

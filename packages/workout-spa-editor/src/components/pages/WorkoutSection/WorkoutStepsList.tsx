@@ -10,6 +10,12 @@ type WorkoutStepsListProps = {
   readonly onToggleStepSelection: (stepIndex: number) => void;
   readonly onStepDelete: (stepIndex: number) => void;
   readonly onStepDuplicate: (stepIndex: number) => void;
+  readonly onStepReorder: (activeIndex: number, overIndex: number) => void;
+  readonly onReorderStepsInBlock?: (
+    blockIndex: number,
+    activeIndex: number,
+    overIndex: number
+  ) => void;
   readonly onAddStep: () => void;
   readonly onCreateRepetitionBlock: () => void;
   readonly onCreateEmptyRepetitionBlock: () => void;
@@ -32,6 +38,8 @@ export function WorkoutStepsList({
   onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
+  onStepReorder,
+  onReorderStepsInBlock,
   onAddStep,
   onCreateRepetitionBlock,
   onCreateEmptyRepetitionBlock,
@@ -51,6 +59,8 @@ export function WorkoutStepsList({
         onToggleStepSelection={onToggleStepSelection}
         onStepDelete={onStepDelete}
         onStepDuplicate={onStepDuplicate}
+        onStepReorder={onStepReorder}
+        onReorderStepsInBlock={onReorderStepsInBlock}
         onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
         onEditRepetitionBlock={onEditRepetitionBlock}
         onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
