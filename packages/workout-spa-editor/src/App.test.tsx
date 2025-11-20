@@ -30,7 +30,10 @@ describe("App", () => {
   });
 
   describe("keyboard shortcuts for reordering (Requirement 29)", () => {
-    const createMockStep = (stepIndex: number, powerValue: number): WorkoutStep => ({
+    const createMockStep = (
+      stepIndex: number,
+      powerValue: number
+    ): WorkoutStep => ({
       stepIndex,
       durationType: "time",
       duration: { type: "time", seconds: 300 },
@@ -73,8 +76,10 @@ describe("App", () => {
       // Capture initial step identities by power value
       const initialWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.workout as Workout | undefined;
-      const initialStep0Power = (initialWorkout?.steps[0] as WorkoutStep).target.value?.value;
-      const initialStep1Power = (initialWorkout?.steps[1] as WorkoutStep).target.value?.value;
+      const initialStep0Power = (initialWorkout?.steps[0] as WorkoutStep).target
+        .value?.value;
+      const initialStep1Power = (initialWorkout?.steps[1] as WorkoutStep).target
+        .value?.value;
 
       // Act
       const event = new KeyboardEvent("keydown", {
@@ -119,8 +124,10 @@ describe("App", () => {
       // Capture initial step identities by power value
       const initialWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.workout as Workout | undefined;
-      const initialStep1Power = (initialWorkout?.steps[1] as WorkoutStep).target.value?.value;
-      const initialStep2Power = (initialWorkout?.steps[2] as WorkoutStep).target.value?.value;
+      const initialStep1Power = (initialWorkout?.steps[1] as WorkoutStep).target
+        .value?.value;
+      const initialStep2Power = (initialWorkout?.steps[2] as WorkoutStep).target
+        .value?.value;
 
       // Act
       const event = new KeyboardEvent("keydown", {
