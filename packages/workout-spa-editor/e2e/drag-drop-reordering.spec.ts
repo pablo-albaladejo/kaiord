@@ -75,14 +75,11 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await thirdStep.hover();
     await page.mouse.up();
 
-    // Wait for reorder to complete
-    await page.waitForTimeout(500);
-
-    // Verify new order (Step 2, Step 3, Step 1)
+    // Wait for reorder to complete by checking the expected DOM state
     const reorderedSteps = page.locator('[data-testid="step-card"]');
-    await expect(reorderedSteps.nth(0)).toContainText("Step 1");
-    await expect(reorderedSteps.nth(1)).toContainText("Step 2");
-    await expect(reorderedSteps.nth(2)).toContainText("Step 3");
+    await expect(reorderedSteps.nth(0)).toContainText("Step 2");
+    await expect(reorderedSteps.nth(1)).toContainText("Step 3");
+    await expect(reorderedSteps.nth(2)).toContainText("Step 1");
   });
 
   test("should reorder steps using keyboard shortcuts (Alt+Down)", async ({
@@ -111,13 +108,10 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     // Move step down using Alt+Down
     await page.keyboard.press("Alt+ArrowDown");
 
-    // Wait for reorder to complete
-    await page.waitForTimeout(500);
-
-    // Verify new order (Step 2 should now be first)
+    // Wait for reorder to complete by checking the expected DOM state
     const reorderedSteps = page.locator('[data-testid="step-card"]');
-    await expect(reorderedSteps.nth(0)).toContainText("Step 1");
-    await expect(reorderedSteps.nth(1)).toContainText("Step 2");
+    await expect(reorderedSteps.nth(0)).toContainText("Step 2");
+    await expect(reorderedSteps.nth(1)).toContainText("Step 1");
   });
 
   test("should reorder steps using keyboard shortcuts (Alt+Up)", async ({
@@ -146,13 +140,10 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     // Move step up using Alt+Up
     await page.keyboard.press("Alt+ArrowUp");
 
-    // Wait for reorder to complete
-    await page.waitForTimeout(500);
-
-    // Verify new order (Step 2 should now be first)
+    // Wait for reorder to complete by checking the expected DOM state
     const reorderedSteps = page.locator('[data-testid="step-card"]');
-    await expect(reorderedSteps.nth(0)).toContainText("Step 1");
-    await expect(reorderedSteps.nth(1)).toContainText("Step 2");
+    await expect(reorderedSteps.nth(0)).toContainText("Step 2");
+    await expect(reorderedSteps.nth(1)).toContainText("Step 1");
   });
 
   test("should not move first step up", async ({ page }) => {
@@ -175,9 +166,8 @@ test.describe("Drag-and-Drop Step Reordering", () => {
 
     // Try to move step up (should not move)
     await page.keyboard.press("Alt+ArrowUp");
-    await page.waitForTimeout(500);
 
-    // Verify order unchanged
+    // Verify order unchanged by checking the expected DOM state
     const steps = page.locator('[data-testid="step-card"]');
     await expect(steps.nth(0)).toContainText("Step 1");
     await expect(steps.nth(1)).toContainText("Step 2");
@@ -204,9 +194,8 @@ test.describe("Drag-and-Drop Step Reordering", () => {
 
     // Try to move step down (should not move)
     await page.keyboard.press("Alt+ArrowDown");
-    await page.waitForTimeout(500);
 
-    // Verify order unchanged
+    // Verify order unchanged by checking the expected DOM state
     const steps = page.locator('[data-testid="step-card"]');
     await expect(steps.nth(0)).toContainText("Step 1");
     await expect(steps.nth(1)).toContainText("Step 2");
@@ -231,25 +220,25 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     const firstStep = page.locator('[data-testid="step-card"]').nth(0);
     await firstStep.click();
     await page.keyboard.press("Alt+ArrowDown");
-    await page.waitForTimeout(500);
+
+    // Wait for reorder by checking expected state (Step 2, Step 1, Step 3)
+    const steps = page.locator('[data-testid="step-card"]');
+    await expect(steps.nth(0)).toContainText("Step 2");
 
     // Undo the reorder
     await page.keyboard.press("Control+Z");
-    await page.waitForTimeout(500);
 
-    // Verify original order restored
-    const steps = page.locator('[data-testid="step-card"]');
+    // Verify original order restored by checking expected state
     await expect(steps.nth(0)).toContainText("Step 1");
     await expect(steps.nth(1)).toContainText("Step 2");
     await expect(steps.nth(2)).toContainText("Step 3");
 
     // Redo the reorder
     await page.keyboard.press("Control+Y");
-    await page.waitForTimeout(500);
 
-    // Verify reorder is reapplied
-    await expect(steps.nth(0)).toContainText("Step 1");
-    await expect(steps.nth(1)).toContainText("Step 2");
+    // Verify reorder is reapplied by checking expected state
+    await expect(steps.nth(0)).toContainText("Step 2");
+    await expect(steps.nth(1)).toContainText("Step 1");
   });
 
   test("should handle reordering with large number of steps", async ({
@@ -276,11 +265,14 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     const middleStep = stepCards.nth(25);
     await middleStep.scrollIntoViewIfNeeded();
     await middleStep.click();
-    await page.keyboard.press("Alt+ArrowDown");
-    await page.waitForTimeout(500);
 
-    // Verify step moved (performance test - should complete quickly)
-    await expect(stepCards.nth(25)).toBeVisible();
+    // Get the text of step at position 26 before the move
+    const step26Text = await stepCards.nth(26).textContent();
+
+    await page.keyboard.press("Alt+ArrowDown");
+
+    // Verify step moved by checking that position 25 now has the text from position 26
+    await expect(stepCards.nth(25)).toContainText(step26Text || "");
   });
 
   test("should maintain step data integrity after reordering", async ({
@@ -299,22 +291,44 @@ test.describe("Drag-and-Drop Step Reordering", () => {
       timeout: 10000,
     });
 
-    // Get initial step data
+    // Capture specific field values from the first step before reordering
+    // Based on createTestWorkout(3):
+    // - Step 1 (index 0): 300s = 5:00, 200W, warmup
+    // - Step 2 (index 1): 360s = 6:00, 210W, active
+    // - Step 3 (index 2): 420s = 7:00, 220W, active
     const firstStepInitial = page.locator('[data-testid="step-card"]').nth(0);
-    const firstStepText = await firstStepInitial.textContent();
 
-    // Reorder steps
+    // Capture duration and power values from first step
+    await expect(firstStepInitial).toContainText("5:00");
+    await expect(firstStepInitial).toContainText("200W");
+    await expect(firstStepInitial).toContainText("Step 1");
+
+    // Verify second step has different values before reordering
+    const secondStepInitial = page.locator('[data-testid="step-card"]').nth(1);
+    await expect(secondStepInitial).toContainText("6:00");
+    await expect(secondStepInitial).toContainText("210W");
+
+    // Reorder steps - move first step down
     await firstStepInitial.click();
     await page.keyboard.press("Alt+ArrowDown");
-    await page.waitForTimeout(500);
 
-    // Verify step data is preserved
+    // Re-query the DOM after the reorder operation
+    const firstStepAfter = page.locator('[data-testid="step-card"]').nth(0);
     const secondStepAfter = page.locator('[data-testid="step-card"]').nth(1);
-    const secondStepText = await secondStepAfter.textContent();
 
-    // Step content should be preserved (excluding step number)
-    expect(firstStepText).toBeTruthy();
-    expect(secondStepText).toBeTruthy();
+    // Wait for reorder by verifying that the original second step moved up to position 1
+    await expect(firstStepAfter).toContainText("6:00");
+
+    // Verify that the step that moved to position 2 still has its original field values
+    // The original first step (5:00, 200W) should now be at index 1
+    await expect(secondStepAfter).toContainText("5:00");
+    await expect(secondStepAfter).toContainText("200W");
+    await expect(secondStepAfter).toContainText("Step 2");
+
+    // Verify that the original second step moved up to position 1
+    await expect(firstStepAfter).toContainText("6:00");
+    await expect(firstStepAfter).toContainText("210W");
+    await expect(firstStepAfter).toContainText("Step 1");
   });
 });
 
@@ -386,10 +400,13 @@ test.describe("Drag-and-Drop Mobile Touch", () => {
     // Touch interactions work with keyboard shortcuts on mobile
     const firstStep = stepCards.nth(0);
     await firstStep.tap();
-    await page.keyboard.press("Alt+ArrowDown");
-    await page.waitForTimeout(500);
 
-    // Verify reorder worked
-    await expect(stepCards.nth(0)).toBeVisible();
+    // Get content of second step before reorder
+    const secondStepText = await stepCards.nth(1).textContent();
+
+    await page.keyboard.press("Alt+ArrowDown");
+
+    // Verify reorder worked by checking that position 0 now has the second step's content
+    await expect(stepCards.nth(0)).toContainText(secondStepText || "");
   });
 });

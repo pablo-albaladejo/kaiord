@@ -1,11 +1,11 @@
 import { forwardRef } from "react";
 import { getStepLabel } from "./get-step-label";
 import { renderStepCardContent } from "./render-step-card-content";
-import type { StepCardProps } from "./StepCard.types";
+import type { DragHandleProps, StepCardProps } from "./StepCard.types";
 import { getStepCardClasses } from "./use-step-card-classes";
 import { useStepCardHandlers } from "./use-step-card-handlers";
 
-export type { StepCardProps };
+export type { DragHandleProps, StepCardProps };
 
 export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
   (

@@ -1,6 +1,7 @@
 /* eslint-disable max-lines, max-lines-per-function */
 import { forwardRef, type HTMLAttributes } from "react";
 import type { RepetitionBlock } from "../../../types/krd";
+import type { DragHandleProps } from "../StepCard/StepCard";
 import { RepetitionBlockHeader } from "./RepetitionBlockHeader";
 import { RepetitionBlockSteps } from "./RepetitionBlockSteps";
 import { useRepetitionBlockState } from "./use-repetition-block-state";
@@ -15,7 +16,7 @@ export type RepetitionBlockCardProps = HTMLAttributes<HTMLDivElement> & {
   onReorderSteps?: (activeIndex: number, overIndex: number) => void;
   selectedStepIndex?: number;
   isDragging?: boolean;
-  dragHandleProps?: Record<string, unknown>;
+  dragHandleProps?: DragHandleProps;
 };
 
 export const RepetitionBlockCard = forwardRef<

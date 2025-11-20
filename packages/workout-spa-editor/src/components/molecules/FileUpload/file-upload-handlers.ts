@@ -36,23 +36,31 @@ export function createFileChangeHandler(
   setConversionProgress: (progress: number) => void,
   setError: (error: ErrorState) => void,
   onFileLoad: (krd: KRD) => void,
-  handleError: (errorState: ErrorState) => void
+  handleError: (errorState: ErrorState) => void,
+  createAbortController: () => AbortController
 ) {
   return async (file: File | undefined) => {
     if (!file) return;
+
+    const controller = createAbortController();
     setFileName(file.name);
     setIsLoading(true);
     setConversionProgress(0);
     setError(null);
+
     try {
       const krd = await parseFile(file, (progress) => {
         setConversionProgress(progress);
-      });
+      }, controller.signal);
       setError(null);
       setConversionProgress(100);
       onFileLoad(krd);
       setIsLoading(false);
     } catch (error) {
+      // Ignore AbortError - this is an expected cancellation, not a real error
+      if (error instanceof Error && error.name === 'AbortError') {
+        return;
+      }
       handleError(createParseError(error));
     }
   };

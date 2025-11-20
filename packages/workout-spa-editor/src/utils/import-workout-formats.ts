@@ -12,15 +12,19 @@ import { validateKRD } from "./krd-validator";
 
 export const importKrdFile = async (
   buffer: Uint8Array,
-  onProgress?: ImportProgressCallback
+  onProgress?: ImportProgressCallback,
+  signal?: AbortSignal
 ): Promise<KRD> => {
+  signal?.throwIfAborted();
   const text = new TextDecoder().decode(buffer);
   onProgress?.(40);
 
+  signal?.throwIfAborted();
   // Parse JSON with enhanced error messages
   const data = parseJSON(text);
   onProgress?.(70);
 
+  signal?.throwIfAborted();
   // Validate KRD structure
   const krd = validateKRD(data);
   onProgress?.(100);
@@ -30,11 +34,14 @@ export const importKrdFile = async (
 
 export const importFitFile = async (
   buffer: Uint8Array,
-  onProgress?: ImportProgressCallback
+  onProgress?: ImportProgressCallback,
+  signal?: AbortSignal
 ): Promise<KRD> => {
+  signal?.throwIfAborted();
   const providers = createDefaultProviders();
 
   onProgress?.(50);
+  signal?.throwIfAborted();
 
   const krd = await providers.convertFitToKrd({ fitBuffer: buffer });
 
@@ -45,12 +52,15 @@ export const importFitFile = async (
 
 export const importTcxFile = async (
   buffer: Uint8Array,
-  onProgress?: ImportProgressCallback
+  onProgress?: ImportProgressCallback,
+  signal?: AbortSignal
 ): Promise<KRD> => {
+  signal?.throwIfAborted();
   const providers = createDefaultProviders();
   const text = new TextDecoder().decode(buffer);
 
   onProgress?.(50);
+  signal?.throwIfAborted();
 
   const krd = await providers.convertTcxToKrd({ tcxString: text });
 
@@ -61,12 +71,15 @@ export const importTcxFile = async (
 
 export const importZwoFile = async (
   buffer: Uint8Array,
-  onProgress?: ImportProgressCallback
+  onProgress?: ImportProgressCallback,
+  signal?: AbortSignal
 ): Promise<KRD> => {
+  signal?.throwIfAborted();
   const providers = createDefaultProviders();
   const text = new TextDecoder().decode(buffer);
 
   onProgress?.(50);
+  signal?.throwIfAborted();
 
   const krd = await providers.convertZwiftToKrd({ zwiftString: text });
 
