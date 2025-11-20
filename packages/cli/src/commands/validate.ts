@@ -1,0 +1,181 @@
+import type { ToleranceConfig } from "@kaiord/core";
+import {
+  createDefaultProviders,
+  createToleranceChecker,
+  toleranceConfigSchema,
+  validateRoundTrip,
+} from "@kaiord/core";
+import { readFile as fsReadFile } from "fs/promises";
+import ora from "ora";
+import { z } from "zod";
+import {
+  formatError,
+  formatToleranceViolations,
+} from "../utils/error-formatter.js";
+import { readFile } from "../utils/file-handler.js";
+import { detectFormat } from "../utils/format-detector.js";
+import { createLogger } from "../utils/logger-factory.js";
+
+const validateOptionsSchema = z.object({
+  input: z.string(),
+  toleranceConfig: z.string().optional(),
+  verbose: z.boolean().optional(),
+  quiet: z.boolean().optional(),
+  json: z.boolean().optional(),
+  logFormat: z.enum(["pretty", "json"]).optional(),
+});
+
+export const validateCommand = async (options: unknown): Promise<void> => {
+  // Parse and validate options
+  const opts = validateOptionsSchema.parse(options);
+
+  // Create logger
+  const loggerType = opts.logFormat === "json" ? "structured" : opts.logFormat;
+  const logger = await createLogger({
+    type: loggerType,
+    level: opts.verbose ? "debug" : opts.quiet ? "error" : "info",
+    quiet: opts.quiet,
+  });
+
+  try {
+    // Detect format from file extension
+    const format = detectFormat(opts.input);
+    if (!format) {
+      throw new Error(`Unable to detect format from file: ${opts.input}`);
+    }
+
+    if (format !== "fit") {
+      throw new Error(
+        `Validation currently only supports FIT files. Got: ${format}`
+      );
+    }
+
+    // Read input file
+    logger.debug("Reading input file", { path: opts.input, format });
+    const inputData = await readFile(opts.input, format);
+
+    if (typeof inputData === "string") {
+      throw new Error("Expected binary data for FIT file");
+    }
+
+    // Load custom tolerance config if provided
+    let toleranceConfig: ToleranceConfig | undefined;
+    if (opts.toleranceConfig) {
+      logger.debug("Loading custom tolerance config", {
+        path: opts.toleranceConfig,
+      });
+      const configContent = await fsReadFile(opts.toleranceConfig, "utf-8");
+      const configJson = JSON.parse(configContent);
+      toleranceConfig = toleranceConfigSchema.parse(configJson);
+      logger.debug("Custom tolerance config loaded", {
+        config: toleranceConfig,
+      });
+    }
+
+    // Get providers
+    const providers = createDefaultProviders(logger);
+
+    // Create tolerance checker with custom config if provided
+    const toleranceChecker = toleranceConfig
+      ? createToleranceChecker(toleranceConfig)
+      : providers.toleranceChecker;
+
+    // Create validateRoundTrip function with dependencies
+    const roundTripValidator = validateRoundTrip(
+      providers.fitReader,
+      providers.fitWriter,
+      toleranceChecker,
+      logger
+    );
+
+    // Start spinner if not in quiet mode
+    const spinner =
+      opts.quiet || opts.json
+        ? null
+        : ora("Validating round-trip conversion...").start();
+
+    // Perform round-trip validation (FIT → KRD → FIT)
+    logger.info("Starting round-trip validation", { file: opts.input });
+    const violations = await roundTripValidator.validateFitToKrdToFit({
+      originalFit: inputData,
+    });
+
+    if (spinner) {
+      if (violations.length === 0) {
+        spinner.succeed("Validation complete - no tolerance violations");
+      } else {
+        spinner.fail(
+          `Validation failed - ${violations.length} tolerance violation(s)`
+        );
+      }
+    }
+
+    // Handle validation results
+    if (violations.length === 0) {
+      logger.info("Round-trip validation passed");
+
+      if (opts.json) {
+        console.log(
+          JSON.stringify(
+            {
+              success: true,
+              file: opts.input,
+              format,
+              violations: [],
+            },
+            null,
+            2
+          )
+        );
+      } else if (!opts.quiet) {
+        console.log("✓ Round-trip validation passed");
+      }
+
+      process.exit(0);
+    } else {
+      // Violations found - format and display them
+      logger.warn("Round-trip validation failed", {
+        violationCount: violations.length,
+      });
+
+      if (opts.json) {
+        console.log(
+          JSON.stringify(
+            {
+              success: false,
+              file: opts.input,
+              format,
+              violations,
+            },
+            null,
+            2
+          )
+        );
+      } else {
+        console.error("✖ Round-trip validation failed\n");
+        console.error(formatToleranceViolations(violations));
+      }
+
+      process.exit(1);
+    }
+  } catch (error) {
+    logger.error("Validation failed", { error });
+
+    if (opts.json) {
+      console.log(
+        JSON.stringify(
+          {
+            success: false,
+            error: formatError(error, { json: true }),
+          },
+          null,
+          2
+        )
+      );
+    } else {
+      console.error(formatError(error, { json: false }));
+    }
+
+    process.exit(1);
+  }
+};

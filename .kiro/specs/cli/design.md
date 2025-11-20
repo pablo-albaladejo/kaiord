@@ -620,6 +620,7 @@ All production dependencies MUST use permissive licenses (MIT, Apache-2.0, BSD, 
 - **ora** (^8.0.1) - Terminal spinners and progress indicators (ESM-only) (MIT)
 - **winston** (^3.11.0) - Structured logging for CI/CD (MIT)
 - **glob** (^10.3.10) - File pattern matching for batch processing (ISC)
+- **zod** (^3.22.4) - Schema validation and type inference (MIT)
 - **@kaiord/core** (workspace:\*) - Core conversion library (MIT)
 
 ### Development Dependencies
@@ -719,7 +720,8 @@ The project MUST enforce license compatibility through automated checks:
     "chalk": "^5.3.0",
     "ora": "^8.0.1",
     "winston": "^3.11.0",
-    "glob": "^10.3.10"
+    "glob": "^10.3.10",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/yargs": "^17.0.32",
