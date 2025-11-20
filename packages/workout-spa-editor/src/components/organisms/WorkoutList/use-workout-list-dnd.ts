@@ -11,17 +11,17 @@ import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { isWorkoutStep } from "../../../types/krd";
 
 /**
- * Generates a stable ID for a workout step based on its content
- * This ensures the ID doesn't change when the step is reordered
+ * Generates a stable ID for a workout step based on its stepIndex
+ * This ensures the ID matches the selection system format: step-{stepIndex}
  */
 const generateStepId = (
   step: WorkoutStep | RepetitionBlock,
   index: number
 ): string => {
   if (isWorkoutStep(step)) {
-    // Use a combination of properties that uniquely identify the step
-    // Format: step-{durationType}-{targetType}-{index}
-    return `step-${step.durationType}-${step.targetType}-${index}`;
+    // Use stepIndex to match the selection system format
+    // Format: step-{stepIndex}
+    return `step-${step.stepIndex}`;
   }
   // For repetition blocks, use the repeat count and index
   return `block-${step.repeatCount}-${index}`;

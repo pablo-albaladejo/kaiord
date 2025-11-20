@@ -30,9 +30,9 @@ describe("useWorkoutListDnd", () => {
 
       // Assert
       expect(result.current.sortableIds).toEqual([
-        "step-time-power-0",
-        "step-time-power-1",
-        "step-time-power-2",
+        "step-0",
+        "step-1",
+        "step-2",
       ]);
     });
 
@@ -77,7 +77,7 @@ describe("useWorkoutListDnd", () => {
 
       // Assert
       expect(result.current.sortableIds).toEqual([
-        "step-time-power-0",
+        "step-0",
         "block-3-1",
       ]);
     });
@@ -94,8 +94,8 @@ describe("useWorkoutListDnd", () => {
 
       // Act
       result.current.handleDragEnd({
-        active: { id: "step-time-power-0", data: { current: undefined } },
-        over: { id: "step-time-power-2", data: { current: undefined } },
+        active: { id: "step-0", data: { current: undefined } },
+        over: { id: "step-2", data: { current: undefined } },
         delta: { x: 0, y: 0 },
         activatorEvent: new MouseEvent("mousedown"),
         collisions: null,
@@ -115,8 +115,8 @@ describe("useWorkoutListDnd", () => {
 
       // Act
       result.current.handleDragEnd({
-        active: { id: "step-time-power-1", data: { current: undefined } },
-        over: { id: "step-time-power-1", data: { current: undefined } },
+        active: { id: "step-1", data: { current: undefined } },
+        over: { id: "step-1", data: { current: undefined } },
         delta: { x: 0, y: 0 },
         activatorEvent: new MouseEvent("mousedown"),
         collisions: null,
@@ -136,7 +136,7 @@ describe("useWorkoutListDnd", () => {
 
       // Act
       result.current.handleDragEnd({
-        active: { id: "step-time-power-0", data: { current: undefined } },
+        active: { id: "step-0", data: { current: undefined } },
         over: null,
         delta: { x: 0, y: 0 },
         activatorEvent: new MouseEvent("mousedown"),
@@ -155,8 +155,8 @@ describe("useWorkoutListDnd", () => {
       // Act & Assert - should not throw
       expect(() => {
         result.current.handleDragEnd({
-          active: { id: "step-time-power-0", data: { current: undefined } },
-          over: { id: "step-time-power-2", data: { current: undefined } },
+          active: { id: "step-0", data: { current: undefined } },
+          over: { id: "step-2", data: { current: undefined } },
           delta: { x: 0, y: 0 },
           activatorEvent: new MouseEvent("mousedown"),
           collisions: null,
