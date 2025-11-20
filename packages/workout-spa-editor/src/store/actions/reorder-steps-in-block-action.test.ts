@@ -88,10 +88,10 @@ describe("reorderStepsInBlockAction", () => {
     expect(updatedBlock.steps[1].duration.seconds).toBe(300); // Was third
     expect(updatedBlock.steps[2].duration.seconds).toBe(300); // Was first
 
-    // Check that stepIndex was recalculated
-    expect(updatedBlock.steps[0].stepIndex).toBe(0);
-    expect(updatedBlock.steps[1].stepIndex).toBe(1);
-    expect(updatedBlock.steps[2].stepIndex).toBe(2);
+    // Check that stepIndex remains stable (not recalculated)
+    expect(updatedBlock.steps[0].stepIndex).toBe(1); // Was step1, keeps stepIndex=1
+    expect(updatedBlock.steps[1].stepIndex).toBe(2); // Was step2, keeps stepIndex=2
+    expect(updatedBlock.steps[2].stepIndex).toBe(0); // Was step0, keeps stepIndex=0
   });
 
   it("should return empty object when activeIndex equals overIndex", () => {

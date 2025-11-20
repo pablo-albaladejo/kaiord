@@ -187,16 +187,16 @@ describe("useWorkoutListDnd", () => {
     });
   });
 
-  describe("Property 1: Position-based ID generation", () => {
+  describe("Property 1: Content-based ID generation for steps", () => {
     /**
-     * **Feature: dnd-stable-ids-fix, Property 1: Position-based ID generation**
+     * **Feature: dnd-stable-ids-fix, Property 1: Content-based ID generation for steps**
      * **Validates: Requirements 2.1**
      *
-     * For any workout step or repetition block at array position i,
-     * the generated ID SHALL be step-{i} or block-{i} respectively,
-     * using only the array index and not any content properties.
+     * For any workout step, the generated ID SHALL be step-{stepIndex},
+     * using the stepIndex property from the step content.
+     * For repetition blocks, the ID SHALL be block-{i} using array position.
      */
-    it("should generate IDs based on array position, not content properties", () => {
+    it("should generate IDs based on stepIndex for steps, position for blocks", () => {
       // Arrange - Create steps with arbitrary stepIndex values (content)
       const steps: Array<WorkoutStep | RepetitionBlock> = [
         {
@@ -249,27 +249,27 @@ describe("useWorkoutListDnd", () => {
       const { result } = renderHook(() => useWorkoutListDnd(workout));
       const ids = result.current.sortableIds;
 
-      // Assert - IDs should be based on array position (0, 1, 2), not content
+      // Assert - IDs should be based on stepIndex (content), not array position
       expect(ids).toEqual([
-        "step-0", // Position 0, NOT step-99
-        "step-1", // Position 1, NOT step-42
-        "block-2", // Position 2, NOT block-5-2
+        "step-99", // stepIndex=99
+        "step-42", // stepIndex=42
+        "block-2", // Position 2 (blocks use position)
       ]);
 
       // Verify generateStepId function directly
       const generateStepId = result.current.generateStepId;
-      expect(generateStepId(steps[0], 0)).toBe("step-0");
-      expect(generateStepId(steps[1], 1)).toBe("step-1");
+      expect(generateStepId(steps[0], 0)).toBe("step-99");
+      expect(generateStepId(steps[1], 1)).toBe("step-42");
       expect(generateStepId(steps[2], 2)).toBe("block-2");
     });
 
-    it("should generate position-based IDs for various array positions", () => {
+    it("should generate stepIndex-based IDs for steps, position-based for blocks", () => {
       // Arrange - Test with multiple positions
       const positions = [0, 1, 5, 10, 99];
 
       for (const position of positions) {
         const step: WorkoutStep = {
-          stepIndex: 999, // Arbitrary content value
+          stepIndex: 999, // Content value used for ID
           durationType: "time" as const,
           duration: { type: "time" as const, seconds: 300 },
           targetType: "power" as const,
@@ -295,23 +295,23 @@ describe("useWorkoutListDnd", () => {
         const { result } = renderHook(() => useWorkoutListDnd(workout));
         const generateStepId = result.current.generateStepId;
 
-        // Assert
-        expect(generateStepId(step, position)).toBe(`step-${position}`);
-        expect(generateStepId(block, position)).toBe(`block-${position}`);
+        // Assert - Steps use stepIndex, blocks use position
+        expect(generateStepId(step, position)).toBe(`step-999`); // Uses stepIndex
+        expect(generateStepId(block, position)).toBe(`block-${position}`); // Uses position
       }
     });
   });
 
-  describe("Property 2: Stable IDs during content changes", () => {
+  describe("Property 2: IDs reflect stepIndex changes", () => {
     /**
-     * **Feature: dnd-stable-ids-fix, Property 2: Stable IDs during content changes**
+     * **Feature: dnd-stable-ids-fix, Property 2: IDs reflect stepIndex changes**
      * **Validates: Requirements 2.2**
      *
-     * For any workout step at array position i, if the step's content changes
-     * (including stepIndex), the generated ID SHALL remain step-{i} as long as
-     * the array position hasn't changed.
+     * For any workout step, the generated ID SHALL be step-{stepIndex}.
+     * If the stepIndex changes, the ID will change accordingly.
+     * This ensures IDs are stable as long as stepIndex doesn't change.
      */
-    it("should maintain stable IDs when stepIndex changes", () => {
+    it("should update IDs when stepIndex changes", () => {
       // Arrange - Create a step at position 0
       const step: WorkoutStep = {
         stepIndex: 0,
@@ -339,13 +339,13 @@ describe("useWorkoutListDnd", () => {
       const { result: result2 } = renderHook(() => useWorkoutListDnd(workout));
       const id2 = result2.current.generateStepId(step, 0);
 
-      // Assert - ID should remain stable despite stepIndex change
+      // Assert - ID should change when stepIndex changes (IDs are based on stepIndex)
       expect(id1).toBe("step-0");
-      expect(id2).toBe("step-0");
-      expect(id1).toBe(id2);
+      expect(id2).toBe("step-5");
+      expect(id1).not.toBe(id2);
     });
 
-    it("should maintain stable IDs when other content properties change", () => {
+    it("should maintain stable IDs when non-stepIndex properties change", () => {
       // Arrange - Create a step at position 1
       const step: WorkoutStep = {
         stepIndex: 1,
@@ -649,11 +649,12 @@ describe("useWorkoutListDnd", () => {
       const newId = result2.current.generateStepId(step, 0);
       const newSortableId = result2.current.sortableIds[0];
 
-      // Assert - IDs should remain stable and matching
-      expect(initialId).toBe(newId);
-      expect(initialSortableId).toBe(newSortableId);
+      // Assert - IDs should change when stepIndex changes
+      expect(initialId).toBe("step-0");
+      expect(newId).toBe("step-99");
+      expect(initialSortableId).toBe("step-0");
+      expect(newSortableId).toBe("step-99");
       expect(newId).toBe(newSortableId);
-      expect(newId).toBe("step-0");
     });
   });
 
@@ -1057,16 +1058,16 @@ describe("useWorkoutListDnd", () => {
     });
   });
 
-  describe("Property 3: ID regeneration after reorder", () => {
+  describe("Property 3: IDs remain stable after reorder", () => {
     /**
-     * **Feature: dnd-stable-ids-fix, Property 3: ID regeneration after reorder**
+     * **Feature: dnd-stable-ids-fix, Property 3: IDs remain stable after reorder**
      * **Validates: Requirements 2.3**
      *
      * For any reorder operation that moves a step from position i to position j,
-     * the ID generation SHALL produce IDs that reflect the new array positions
-     * for all affected steps.
+     * the ID generation SHALL continue to use the step's stepIndex value,
+     * which remains unchanged during reordering (no reindexing).
      */
-    it("should regenerate IDs based on new positions after reordering", () => {
+    it("should maintain stepIndex-based IDs after reordering", () => {
       // Arrange - Create workout with 3 steps
       const steps: WorkoutStep[] = [
         {
@@ -1127,27 +1128,27 @@ describe("useWorkoutListDnd", () => {
       );
       const newIds = result2.current.sortableIds;
 
-      // Assert - IDs should reflect new array positions
+      // Assert - IDs should reflect stepIndex values (not array positions)
       expect(initialIds).toEqual(["step-0", "step-1", "step-2"]);
       expect(newIds).toEqual([
-        "step-0", // step1 is now at position 0
-        "step-1", // step2 is now at position 1
-        "step-2", // step0 is now at position 2
+        "step-1", // step1 has stepIndex=1
+        "step-2", // step2 has stepIndex=2
+        "step-0", // step0 has stepIndex=0
       ]);
 
-      // Verify each step gets ID based on its new position
+      // Verify each step gets ID based on its stepIndex
       expect(result2.current.generateStepId(reorderedSteps[0], 0)).toBe(
-        "step-0"
-      );
-      expect(result2.current.generateStepId(reorderedSteps[1], 1)).toBe(
         "step-1"
       );
-      expect(result2.current.generateStepId(reorderedSteps[2], 2)).toBe(
+      expect(result2.current.generateStepId(reorderedSteps[1], 1)).toBe(
         "step-2"
+      );
+      expect(result2.current.generateStepId(reorderedSteps[2], 2)).toBe(
+        "step-0"
       );
     });
 
-    it("should regenerate IDs for all positions after multiple reorders", () => {
+    it("should maintain stepIndex-based IDs after multiple reorders", () => {
       // Arrange - Create workout with mixed steps and blocks
       const steps: Array<WorkoutStep | RepetitionBlock> = [
         {
@@ -1206,11 +1207,11 @@ describe("useWorkoutListDnd", () => {
       const { result } = renderHook(() => useWorkoutListDnd(reorderedWorkout));
       const newIds = result.current.sortableIds;
 
-      // Assert - All IDs should reflect new positions
+      // Assert - IDs should reflect stepIndex values (steps) and positions (blocks)
       expect(newIds).toEqual([
-        "block-0", // Block moved to position 0
-        "step-1", // Step moved to position 1
-        "step-2", // Step remains at position 2
+        "block-0", // Block at position 0
+        "step-0", // Step has stepIndex=0
+        "step-2", // Step has stepIndex=2
       ]);
     });
   });

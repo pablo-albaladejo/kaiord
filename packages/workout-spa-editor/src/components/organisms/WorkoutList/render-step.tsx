@@ -29,7 +29,6 @@ export const renderStep = ({
 
   return (
     <SortableStepCard
-      key={id}
       id={id}
       step={step}
       visualIndex={visualIndex}

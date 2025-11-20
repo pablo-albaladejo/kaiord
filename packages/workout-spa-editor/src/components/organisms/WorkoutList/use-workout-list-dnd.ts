@@ -13,21 +13,21 @@ import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { isWorkoutStep } from "../../../types/krd";
 
 /**
- * Generates a stable ID for a workout step based on its array position
- * This ensures React can correctly track element identity during reordering
- * by using position-based IDs instead of content-based IDs
+ * Generates a stable ID for a workout step based on its stepIndex
+ * The stepIndex gets updated after reorder, which forces React to recreate the DOM elements
+ * This ensures correct reconciliation during drag-and-drop operations
  */
 const generateStepId = (
   step: WorkoutStep | RepetitionBlock,
   index: number
 ): string => {
   if (isWorkoutStep(step)) {
-    // Use array index for position-based ID
-    // Format: step-{index}
-    return `step-${index}`;
+    // Use stepIndex which gets reindexed after reorder
+    // This makes the ID change when content moves, forcing React to recreate elements
+    return `step-${step.stepIndex}`;
   }
+
   // For repetition blocks, use array index
-  // Format: block-{index}
   return `block-${index}`;
 };
 

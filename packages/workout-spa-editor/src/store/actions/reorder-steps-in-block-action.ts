@@ -66,16 +66,14 @@ export const reorderStepsInBlockAction = (
   const [movedStep] = blockSteps.splice(activeIndex, 1);
   blockSteps.splice(overIndex, 0, movedStep);
 
-  // Recalculate stepIndex for all steps in the block
-  const reindexedSteps = blockSteps.map((step, index) => ({
-    ...step,
-    stepIndex: index,
-  }));
+  // NOTE: We do NOT update stepIndex during reorder to maintain stable React keys
+  // The stepIndex will be updated on the next save/export operation
+  // This preserves the original stepIndex values which are used for React keys
 
-  // Update the block with reordered steps
+  // Update the block with reordered steps (without reindexing)
   const updatedBlock: RepetitionBlock = {
     ...block,
-    steps: reindexedSteps,
+    steps: blockSteps,
   };
 
   // Update the workout with the modified block

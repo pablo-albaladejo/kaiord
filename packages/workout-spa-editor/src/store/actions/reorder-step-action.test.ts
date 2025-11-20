@@ -92,18 +92,18 @@ describe("reorderStepAction", () => {
         type: "time",
         seconds: 300,
       });
-      expect(workout?.steps[2].stepIndex).toBe(2);
+      expect(workout?.steps[2].stepIndex).toBe(0); // Keeps original stepIndex
 
       // Original step 1 (1000m) should now be at position 0
       expect(workout?.steps[0].duration).toEqual({
         type: "distance",
         meters: 1000,
       });
-      expect(workout?.steps[0].stepIndex).toBe(0);
+      expect(workout?.steps[0].stepIndex).toBe(1); // Keeps original stepIndex
 
       // Original step 2 (open) should now be at position 1
       expect(workout?.steps[1].duration).toEqual({ type: "open" });
-      expect(workout?.steps[1].stepIndex).toBe(1);
+      expect(workout?.steps[1].stepIndex).toBe(2); // Keeps original stepIndex
     });
 
     it("should move step from position 2 to position 0", () => {
@@ -125,21 +125,21 @@ describe("reorderStepAction", () => {
 
       // Original step 2 (open) should now be at position 0
       expect(workout?.steps[0].duration).toEqual({ type: "open" });
-      expect(workout?.steps[0].stepIndex).toBe(0);
+      expect(workout?.steps[0].stepIndex).toBe(2); // Keeps original stepIndex
 
       // Original step 0 (300s) should now be at position 1
       expect(workout?.steps[1].duration).toEqual({
         type: "time",
         seconds: 300,
       });
-      expect(workout?.steps[1].stepIndex).toBe(1);
+      expect(workout?.steps[1].stepIndex).toBe(0); // Keeps original stepIndex
 
       // Original step 1 (1000m) should now be at position 2
       expect(workout?.steps[2].duration).toEqual({
         type: "distance",
         meters: 1000,
       });
-      expect(workout?.steps[2].stepIndex).toBe(2);
+      expect(workout?.steps[2].stepIndex).toBe(1); // Keeps original stepIndex
     });
 
     it("should move step from position 1 to position 0", () => {
@@ -164,14 +164,14 @@ describe("reorderStepAction", () => {
         type: "distance",
         meters: 1000,
       });
-      expect(workout?.steps[0].stepIndex).toBe(0);
+      expect(workout?.steps[0].stepIndex).toBe(1); // Keeps original stepIndex
 
       // Original step 0 (300s) should now be at position 1
       expect(workout?.steps[1].duration).toEqual({
         type: "time",
         seconds: 300,
       });
-      expect(workout?.steps[1].stepIndex).toBe(1);
+      expect(workout?.steps[1].stepIndex).toBe(0); // Keeps original stepIndex
     });
   });
 
@@ -316,8 +316,8 @@ describe("reorderStepAction", () => {
     });
   });
 
-  describe("step index recalculation", () => {
-    it("should recalculate all step indices after reordering", () => {
+  describe("step index stability", () => {
+    it("should preserve original stepIndex values after reordering", () => {
       // Arrange
       const activeIndex = 0;
       const overIndex = 2;
@@ -330,14 +330,14 @@ describe("reorderStepAction", () => {
         mockState
       );
 
-      // Assert
+      // Assert - stepIndex values remain stable (not recalculated)
       const workout = result.currentWorkout?.extensions?.workout;
-      expect(workout?.steps[0].stepIndex).toBe(0);
-      expect(workout?.steps[1].stepIndex).toBe(1);
-      expect(workout?.steps[2].stepIndex).toBe(2);
+      expect(workout?.steps[0].stepIndex).toBe(1); // Was step1, keeps stepIndex=1
+      expect(workout?.steps[1].stepIndex).toBe(2); // Was step2, keeps stepIndex=2
+      expect(workout?.steps[2].stepIndex).toBe(0); // Was step0, keeps stepIndex=0
     });
 
-    it("should maintain correct step indices for all steps", () => {
+    it("should maintain stable stepIndex for all steps after reordering", () => {
       // Arrange
       const activeIndex = 2;
       const overIndex = 0;
@@ -350,11 +350,11 @@ describe("reorderStepAction", () => {
         mockState
       );
 
-      // Assert
+      // Assert - stepIndex values remain stable
       const workout = result.currentWorkout?.extensions?.workout;
-      for (let i = 0; i < workout!.steps.length; i++) {
-        expect(workout?.steps[i].stepIndex).toBe(i);
-      }
+      expect(workout?.steps[0].stepIndex).toBe(2); // Was step2, keeps stepIndex=2
+      expect(workout?.steps[1].stepIndex).toBe(0); // Was step0, keeps stepIndex=0
+      expect(workout?.steps[2].stepIndex).toBe(1); // Was step1, keeps stepIndex=1
     });
   });
 
@@ -417,26 +417,26 @@ describe("reorderStepAction", () => {
 
       // Original step 2 should now be at position 1
       expect(workout?.steps[1].duration).toEqual({ type: "open" });
-      expect(workout?.steps[1].stepIndex).toBe(1);
+      expect(workout?.steps[1].stepIndex).toBe(1); // Keeps original stepIndex
 
       // Original step 0 should now be at position 2
       expect(workout?.steps[2].duration).toEqual({
         type: "time",
         seconds: 300,
       });
-      expect(workout?.steps[2].stepIndex).toBe(2);
+      expect(workout?.steps[2].stepIndex).toBe(0); // Keeps original stepIndex
     });
   });
 
-  describe("Property 4: Sequential stepIndex after reorder", () => {
+  describe("Property 4: Stable stepIndex after reorder", () => {
     /**
-     * **Feature: dnd-stable-ids-fix, Property 4: Sequential stepIndex after reorder**
+     * **Feature: dnd-stable-ids-fix, Property 4: Stable stepIndex after reorder**
      * **Validates: Requirements 1.3**
      *
-     * For any workout after a reorder operation, the stepIndex values SHALL be
-     * sequential starting from 0, matching the array positions.
+     * For any workout after a reorder operation, the stepIndex values SHALL remain
+     * stable (unchanged from their original values), NOT recalculated to match array positions.
      */
-    it("should ensure stepIndex values are sequential after any reorder operation", () => {
+    it("should preserve original stepIndex values after any reorder operation", () => {
       // Arrange - Create workout with various initial stepIndex values
       const krdWithNonSequentialIndices: KRD = {
         version: "1.0",
@@ -490,25 +490,18 @@ describe("reorderStepAction", () => {
         mockState
       );
 
-      // Assert - All stepIndex values should be sequential starting from 0
+      // Assert - stepIndex values should remain stable (not recalculated)
       const workout = result.currentWorkout?.extensions?.workout;
       expect(workout?.steps).toHaveLength(3);
 
-      // Verify each step has stepIndex matching its array position
-      for (let i = 0; i < workout!.steps.length; i++) {
-        const step = workout!.steps[i];
-        if ("stepIndex" in step) {
-          expect(step.stepIndex).toBe(i);
-        }
-      }
-
-      // Explicitly verify the sequence
-      expect(workout?.steps[0].stepIndex).toBe(0);
-      expect(workout?.steps[1].stepIndex).toBe(1);
-      expect(workout?.steps[2].stepIndex).toBe(2);
+      // After reorder: [step1, step2, step0]
+      // stepIndex values should be preserved from original values
+      expect(workout?.steps[0].stepIndex).toBe(10); // Was step1, keeps stepIndex=10
+      expect(workout?.steps[1].stepIndex).toBe(3); // Was step2, keeps stepIndex=3
+      expect(workout?.steps[2].stepIndex).toBe(5); // Was step0, keeps stepIndex=5
     });
 
-    it("should maintain sequential stepIndex for workouts with repetition blocks", () => {
+    it("should maintain stable stepIndex for workouts with repetition blocks", () => {
       // Arrange - Create workout with steps and repetition blocks
       const krdWithMixedItems: KRD = {
         version: "1.0",
@@ -572,21 +565,20 @@ describe("reorderStepAction", () => {
       // Act - Reorder: move repetition block from position 1 to position 3
       const result = reorderStepAction(krdWithMixedItems, 1, 3, mockState);
 
-      // Assert - All WorkoutStep items should have sequential stepIndex based on their array position
+      // Assert - All WorkoutStep items should preserve their original stepIndex
       const workout = result.currentWorkout?.extensions?.workout;
       expect(workout?.steps).toHaveLength(4);
 
       // After reorder, the array is: [step0, step1, step2, block]
-      // The reindexSteps function assigns stepIndex based on array position
-      // So: step0 gets stepIndex=0, step1 gets stepIndex=1, step2 gets stepIndex=2
-      expect(workout?.steps[0].stepIndex).toBe(0); // First step at position 0
-      expect(workout?.steps[1].stepIndex).toBe(1); // Second step at position 1
-      expect(workout?.steps[2].stepIndex).toBe(2); // Third step at position 2
+      // stepIndex values remain stable (not recalculated)
+      expect(workout?.steps[0].stepIndex).toBe(0); // Was step0, keeps stepIndex=0
+      expect(workout?.steps[1].stepIndex).toBe(1); // Was step1, keeps stepIndex=1
+      expect(workout?.steps[2].stepIndex).toBe(2); // Was step2, keeps stepIndex=2
       // Position 3 is RepetitionBlock (no stepIndex property)
       expect(workout?.steps[3]).toHaveProperty("repeatCount");
     });
 
-    it("should ensure sequential stepIndex after multiple reorder operations", () => {
+    it("should preserve stable stepIndex after multiple reorder operations", () => {
       // Arrange - Start with a workout
       const initialKrd: KRD = {
         version: "1.0",
@@ -646,33 +638,38 @@ describe("reorderStepAction", () => {
       const result1 = reorderStepAction(initialKrd, 0, 2, mockState);
       const krd1 = result1.currentWorkout!;
 
-      // Verify sequential after first reorder
+      // Verify stable stepIndex after first reorder
+      // After reorder: [step1, step2, step0, step3]
       let workout = krd1.extensions?.workout;
-      for (let i = 0; i < workout!.steps.length; i++) {
-        expect(workout!.steps[i].stepIndex).toBe(i);
-      }
+      expect(workout!.steps[0].stepIndex).toBe(1); // Was step1
+      expect(workout!.steps[1].stepIndex).toBe(2); // Was step2
+      expect(workout!.steps[2].stepIndex).toBe(0); // Was step0
+      expect(workout!.steps[3].stepIndex).toBe(3); // Was step3
 
       // Act - Perform second reorder (move 3 to 0)
       const result2 = reorderStepAction(krd1, 3, 0, mockState);
       const krd2 = result2.currentWorkout!;
 
-      // Verify sequential after second reorder
+      // Verify stable stepIndex after second reorder
+      // After reorder: [step3, step1, step2, step0]
       workout = krd2.extensions?.workout;
-      for (let i = 0; i < workout!.steps.length; i++) {
-        expect(workout!.steps[i].stepIndex).toBe(i);
-      }
+      expect(workout!.steps[0].stepIndex).toBe(3); // Was step3
+      expect(workout!.steps[1].stepIndex).toBe(1); // Was step1
+      expect(workout!.steps[2].stepIndex).toBe(2); // Was step2
+      expect(workout!.steps[3].stepIndex).toBe(0); // Was step0
 
       // Act - Perform third reorder (move 1 to 2)
       const result3 = reorderStepAction(krd2, 1, 2, mockState);
       const krd3 = result3.currentWorkout!;
 
-      // Assert - Final state should still have sequential stepIndex
+      // Assert - Final state should still have stable stepIndex
+      // After reorder: [step3, step2, step1, step0]
       workout = krd3.extensions?.workout;
       expect(workout?.steps).toHaveLength(4);
-
-      for (let i = 0; i < workout!.steps.length; i++) {
-        expect(workout!.steps[i].stepIndex).toBe(i);
-      }
+      expect(workout!.steps[0].stepIndex).toBe(3); // Was step3
+      expect(workout!.steps[1].stepIndex).toBe(2); // Was step2
+      expect(workout!.steps[2].stepIndex).toBe(1); // Was step1
+      expect(workout!.steps[3].stepIndex).toBe(0); // Was step0
     });
 
     it("should handle edge case of single step workout", () => {
@@ -711,7 +708,7 @@ describe("reorderStepAction", () => {
       expect(result).toEqual({});
     });
 
-    it("should ensure sequential stepIndex for large workouts", () => {
+    it("should preserve stable stepIndex for large workouts", () => {
       // Arrange - Create workout with many steps
       const largeWorkoutSteps = Array.from({ length: 20 }, (_, i) => ({
         stepIndex: i * 5, // Non-sequential initial values
@@ -743,13 +740,15 @@ describe("reorderStepAction", () => {
       // Act - Reorder: move first step to last position
       const result = reorderStepAction(largeKrd, 0, 19, mockState);
 
-      // Assert - All stepIndex values should be sequential
+      // Assert - All stepIndex values should remain stable
       const workout = result.currentWorkout?.extensions?.workout;
       expect(workout?.steps).toHaveLength(20);
 
-      for (let i = 0; i < workout!.steps.length; i++) {
-        expect(workout!.steps[i].stepIndex).toBe(i);
-      }
+      // After reorder: [step1, step2, ..., step19, step0]
+      // First step (was step1) keeps stepIndex=5
+      expect(workout!.steps[0].stepIndex).toBe(5);
+      // Last step (was step0) keeps stepIndex=0
+      expect(workout!.steps[19].stepIndex).toBe(0);
     });
   });
 });

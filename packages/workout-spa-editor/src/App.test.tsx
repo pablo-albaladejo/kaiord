@@ -103,9 +103,9 @@ describe("App", () => {
       expect(updatedStep1.target.value?.value).toBe(initialStep0Power);
       expect(updatedStep1.target.value?.value).toBe(100);
 
-      // Verify stepIndex properties are also updated correctly
-      expect(updatedStep0.stepIndex).toBe(0);
-      expect(updatedStep1.stepIndex).toBe(1);
+      // Verify stepIndex properties remain stable (no reindexing)
+      expect(updatedStep0.stepIndex).toBe(1); // Was step1, keeps stepIndex=1
+      expect(updatedStep1.stepIndex).toBe(0); // Was step0, keeps stepIndex=0
     });
 
     it("should move step down when Alt+ArrowDown is pressed with a selected step", () => {
@@ -151,9 +151,9 @@ describe("App", () => {
       expect(updatedStep2.target.value?.value).toBe(initialStep1Power);
       expect(updatedStep2.target.value?.value).toBe(200);
 
-      // Verify stepIndex properties are also updated correctly
-      expect(updatedStep1.stepIndex).toBe(1);
-      expect(updatedStep2.stepIndex).toBe(2);
+      // Verify stepIndex properties remain stable (no reindexing)
+      expect(updatedStep1.stepIndex).toBe(2); // Was step2, keeps stepIndex=2
+      expect(updatedStep2.stepIndex).toBe(1); // Was step1, keeps stepIndex=1
     });
 
     it("should not move step up when it is already at the top", () => {
