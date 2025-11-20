@@ -23,7 +23,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test",
-    "lint": "eslint . && prettier --check .",
+    "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix && prettier --write .",
     "lint:packages": "pnpm -r lint",
     "format": "prettier --write .",
