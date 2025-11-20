@@ -1,3 +1,4 @@
+/* eslint-disable max-lines, max-lines-per-function */
 import {
   closestCenter,
   DndContext,
@@ -63,6 +64,7 @@ const SortableStep = ({
   };
 
   // Remove role="button" from attributes to avoid conflict with StepCard's button role
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { role, ...restAttributes } = attributes;
 
   return (

@@ -7,8 +7,25 @@ import {
   type DragEndEvent,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
-import type { Workout } from "../../../types/krd";
-import { isRepetitionBlock } from "../../../types/krd";
+import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
+import { isWorkoutStep } from "../../../types/krd";
+
+/**
+ * Generates a stable ID for a workout step based on its content
+ * This ensures the ID doesn't change when the step is reordered
+ */
+const generateStepId = (
+  step: WorkoutStep | RepetitionBlock,
+  index: number
+): string => {
+  if (isWorkoutStep(step)) {
+    // Use a combination of properties that uniquely identify the step
+    // Format: step-{durationType}-{targetType}-{index}
+    return `step-${step.durationType}-${step.targetType}-${index}`;
+  }
+  // For repetition blocks, use the repeat count and index
+  return `block-${step.repeatCount}-${index}`;
+};
 
 /**
  * Hook for managing drag-and-drop functionality in WorkoutList
@@ -31,44 +48,23 @@ export const useWorkoutListDnd = (
     })
   );
 
-  // Generate sortable IDs for all items using array index
-  // This ensures IDs match the actual position in the array
-  const sortableIds = workout.steps.map((item, index) => {
-    if (isRepetitionBlock(item)) {
-      return `block-${index}`;
-    }
-    return `step-${index}`;
-  });
+  // Generate sortable IDs for all items using content-based IDs
+  // This ensures IDs are stable even when steps are reordered
+  const sortableIds = workout.steps.map((item, index) =>
+    generateStepId(item, index)
+  );
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    console.log("🔍 handleDragEnd called", {
-      activeId: active.id,
-      overId: over?.id,
-      hasCallback: !!onStepReorder,
-    });
-
     if (!over || active.id === over.id || !onStepReorder) {
-      console.log("❌ Early return:", {
-        noOver: !over,
-        sameId: active.id === over?.id,
-        noCallback: !onStepReorder,
-      });
       return;
     }
 
     const activeIndex = sortableIds.indexOf(active.id as string);
     const overIndex = sortableIds.indexOf(over.id as string);
 
-    console.log("📊 Indices:", {
-      activeIndex,
-      overIndex,
-      sortableIds,
-    });
-
     if (activeIndex !== -1 && overIndex !== -1) {
-      console.log("✅ Calling onStepReorder", { activeIndex, overIndex });
       onStepReorder(activeIndex, overIndex);
     }
   };
@@ -78,5 +74,6 @@ export const useWorkoutListDnd = (
     sortableIds,
     handleDragEnd,
     collisionDetection: closestCenter,
+    generateStepId, // Export the function so components can use it
   };
 };

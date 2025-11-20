@@ -78,7 +78,9 @@ describe("WorkoutList", () => {
     const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
 
     // Act
-    render(<WorkoutList workout={workout} selectedStepId="step-0" />);
+    render(
+      <WorkoutList workout={workout} selectedStepId="step-time-power-0" />
+    );
 
     // Assert
     const selectedStep = screen.getByRole("button", { name: /Step 1/ });

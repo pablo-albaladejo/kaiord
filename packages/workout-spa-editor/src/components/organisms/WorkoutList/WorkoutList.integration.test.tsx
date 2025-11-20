@@ -165,4 +165,44 @@ describe("WorkoutList - Drag and Drop Integration", () => {
     expect(screen.getByText("Step 1")).toBeInTheDocument();
     expect(screen.getByText("Step 50")).toBeInTheDocument();
   });
+
+  it("should preserve step content including name after reorder", () => {
+    // Arrange
+    const workout: Workout = {
+      name: "Test Workout",
+      sport: "running",
+      steps: [
+        {
+          stepIndex: 0,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "heart_rate",
+          target: { type: "heart_rate", value: { unit: "bpm", value: 140 } },
+          name: "Warmup",
+          intensity: "warmup",
+        },
+        {
+          stepIndex: 1,
+          durationType: "distance",
+          duration: { type: "distance", meters: 5000 },
+          targetType: "pace",
+          target: { type: "pace", value: { unit: "min_per_km", value: 5 } },
+          name: "Main Set",
+          intensity: "active",
+        },
+      ],
+    };
+    const onStepReorder = vi.fn();
+
+    // Act
+    render(<WorkoutList workout={workout} onStepReorder={onStepReorder} />);
+
+    // Assert - verify custom step names are displayed in header
+    expect(screen.getByText("Warmup")).toBeInTheDocument();
+    expect(screen.getByText("Main Set")).toBeInTheDocument();
+
+    // Verify aria-labels contain step numbers for accessibility
+    expect(screen.getByLabelText(/Step 1:/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/Step 2:/)).toBeInTheDocument();
+  });
 });

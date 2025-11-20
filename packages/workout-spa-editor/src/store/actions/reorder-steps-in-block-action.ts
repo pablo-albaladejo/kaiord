@@ -26,21 +26,12 @@ export const reorderStepsInBlockAction = (
   overIndex: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  console.log("🔄 [Block] reorderStepsInBlockAction called", {
-    blockIndex,
-    activeIndex,
-    overIndex,
-    hasWorkout: !!krd.extensions?.workout,
-  });
-
   if (!krd.extensions?.workout) {
-    console.log("❌ [Block] No workout in extensions");
     return {};
   }
 
   // Handle edge cases
   if (activeIndex === overIndex) {
-    console.log("❌ [Block] Same index, no change");
     return {}; // No change needed
   }
 
@@ -102,11 +93,6 @@ export const reorderStepsInBlockAction = (
       workout: updatedWorkout,
     },
   };
-
-  console.log("✅ [Block] Reorder complete, updating workout", {
-    oldSteps: block.steps.map((s) => s.stepIndex),
-    newSteps: reindexedSteps.map((s) => s.stepIndex),
-  });
 
   return createUpdateWorkoutAction(updatedKrd, state);
 };

@@ -52,8 +52,7 @@ export function useRepetitionBlockHandlers() {
   };
 
   const handleCreateEmptyRepetitionBlock = () => {
-    dialog.setIsCreatingEmptyBlock(true);
-    dialog.setShowCreateBlockDialog(true);
+    createEmptyRepetitionBlock(1);
   };
 
   const handleConfirmCreateBlock = (repeatCount: number) => {

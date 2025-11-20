@@ -1,6 +1,6 @@
-import type { Workout } from "../../../types/krd";
-import { isRepetitionBlock } from "../../../types/krd";
-import { renderRepetitionBlock, renderStep } from "./WorkoutListItem";
+import { Fragment } from "react";
+import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
+import { renderWorkoutItem } from "./render-workout-item";
 
 type WorkoutListContentProps = {
   workout: Workout;
@@ -21,6 +21,10 @@ type WorkoutListContentProps = {
     activeIndex: number,
     overIndex: number
   ) => void;
+  generateStepId: (
+    item: WorkoutStep | RepetitionBlock,
+    index: number
+  ) => string;
 };
 
 export const WorkoutListContent = ({
@@ -35,37 +39,31 @@ export const WorkoutListContent = ({
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
   onReorderStepsInBlock,
+  generateStepId,
 }: WorkoutListContentProps) => {
   return (
     <>
       {workout.steps.map((item, index) => {
-        if (isRepetitionBlock(item)) {
-          return renderRepetitionBlock({
-            block: item,
-            blockIndex: index,
-            selectedStepId,
-            onStepSelect,
-            onStepDelete,
-            onStepDuplicate: onDuplicateStepInRepetitionBlock,
-            onEditRepeatCount: onEditRepetitionBlock
-              ? (count: number) => onEditRepetitionBlock(index, count)
-              : undefined,
-            onAddStep: onAddStepToRepetitionBlock
-              ? () => onAddStepToRepetitionBlock(index)
-              : undefined,
-            onReorderSteps: onReorderStepsInBlock,
-          });
-        }
-        return renderStep({
-          step: item,
-          index,
-          selectedStepId,
-          selectedStepIds,
-          onStepSelect,
-          onToggleStepSelection,
-          onStepDelete,
-          onStepDuplicate,
-        });
+        const itemId = generateStepId(item, index);
+        return (
+          <Fragment key={itemId}>
+            {renderWorkoutItem({
+              item,
+              index,
+              itemId,
+              selectedStepId,
+              selectedStepIds,
+              onStepSelect,
+              onToggleStepSelection,
+              onStepDelete,
+              onStepDuplicate,
+              onDuplicateStepInRepetitionBlock,
+              onEditRepetitionBlock,
+              onAddStepToRepetitionBlock,
+              onReorderStepsInBlock,
+            })}
+          </Fragment>
+        );
       })}
     </>
   );

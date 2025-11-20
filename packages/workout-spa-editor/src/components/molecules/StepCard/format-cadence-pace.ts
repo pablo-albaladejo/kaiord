@@ -31,6 +31,19 @@ export const formatCadenceTarget = (value: unknown): string => {
 };
 
 /**
+ * Convert meters per second to min/km format
+ */
+const convertMpsToMinPerKm = (mps: number): string => {
+  const minPerKm = 1000 / (mps * 60);
+  const minutes = Math.floor(minPerKm);
+  const seconds = Math.round((minPerKm - minutes) * 60);
+  if (seconds === 60) {
+    return `${minutes + 1}:00`;
+  }
+  return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+};
+
+/**
  * Format pace target for display
  */
 export const formatPaceTarget = (value: unknown): string => {
@@ -44,14 +57,8 @@ export const formatPaceTarget = (value: unknown): string => {
     return "Pace";
   }
 
-  if (v.unit === "min_per_km" && "value" in v && isValidNumber(v.value)) {
-    let minutes = Math.floor(v.value);
-    let seconds = Math.round((v.value - minutes) * 60);
-    if (seconds === 60) {
-      minutes += 1;
-      seconds = 0;
-    }
-    return `${minutes}:${seconds.toString().padStart(2, "0")}/km`;
+  if (v.unit === "mps" && "value" in v && isValidNumber(v.value)) {
+    return `${convertMpsToMinPerKm(v.value)} min/km`;
   }
   if (v.unit === "zone" && "value" in v && isValidNumber(v.value)) {
     return `Zone ${v.value}`;
@@ -63,7 +70,8 @@ export const formatPaceTarget = (value: unknown): string => {
     isValidNumber(v.min) &&
     isValidNumber(v.max)
   ) {
-    return `${v.min}-${v.max} min/km`;
+    // In pace, lower m/s = slower (higher min/km), so we swap to show faster-slower
+    return `${convertMpsToMinPerKm(v.max)}-${convertMpsToMinPerKm(v.min)} min/km`;
   }
 
   return "Pace";

@@ -59,14 +59,7 @@ export const reorderStepAction = (
   overIndex: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  console.log("🔄 reorderStepAction called", {
-    activeIndex,
-    overIndex,
-    hasWorkout: !!krd.extensions?.workout,
-  });
-
   if (!krd.extensions?.workout || activeIndex === overIndex) {
-    console.log("❌ No workout or same index");
     return {};
   }
 
@@ -74,7 +67,6 @@ export const reorderStepAction = (
   const steps = [...workout.steps];
 
   if (!validateIndices(activeIndex, overIndex, steps.length)) {
-    console.log("❌ Indices out of bounds");
     return {};
   }
 
@@ -92,17 +84,5 @@ export const reorderStepAction = (
     },
   };
 
-  console.log("✅ Calling createUpdateWorkoutAction");
-  const result = createUpdateWorkoutAction(updatedKrd, state);
-  const resultState = result as WorkoutState;
-  const resultWorkout = resultState.currentWorkout?.extensions?.workout as
-    | Workout
-    | undefined;
-  console.log("📦 Result from createUpdateWorkoutAction:", {
-    hasCurrentWorkout: !!resultState.currentWorkout,
-    historyLength: resultState.workoutHistory?.length,
-    historyIndex: resultState.historyIndex,
-    stepsInWorkout: resultWorkout?.steps?.length,
-  });
-  return result;
+  return createUpdateWorkoutAction(updatedKrd, state);
 };
