@@ -1,8 +1,11 @@
-import { DndContext } from "@dnd-kit/core";
+import { DndContext, DragOverlay } from "@dnd-kit/core";
 import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+import { isRepetitionBlock } from "../../../types/krd";
+import { RepetitionBlockCard } from "../../molecules/RepetitionBlockCard/RepetitionBlockCard";
+import { StepCard } from "../../molecules/StepCard/StepCard";
 import { dndAnnouncements } from "./dnd-announcements";
 import { useWorkoutListDnd } from "./use-workout-list-dnd";
 import type { WorkoutListProps } from "./WorkoutList.types";
@@ -34,6 +37,7 @@ export const WorkoutList = ({
     <DndContext
       sensors={dnd.sensors}
       collisionDetection={dnd.collisionDetection}
+      onDragStart={dnd.handleDragStart}
       onDragEnd={dnd.handleDragEnd}
       accessibility={{ announcements: dndAnnouncements }}
     >
@@ -63,6 +67,28 @@ export const WorkoutList = ({
           />
         </div>
       </SortableContext>
+      <DragOverlay>
+        {dnd.activeItem ? (
+          isRepetitionBlock(dnd.activeItem) ? (
+            <div style={{ opacity: 0.5 }}>
+              <RepetitionBlockCard
+                block={dnd.activeItem}
+                selectedStepIndex={undefined}
+                isDragging={true}
+              />
+            </div>
+          ) : (
+            <div style={{ opacity: 0.5 }}>
+              <StepCard
+                step={dnd.activeItem}
+                visualIndex={dnd.activeItem.stepIndex}
+                isSelected={false}
+                isDragging={true}
+              />
+            </div>
+          )
+        ) : null}
+      </DragOverlay>
     </DndContext>
   );
 };
