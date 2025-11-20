@@ -76,7 +76,7 @@ test.describe("Step Management Flow", () => {
     // Check for the third step card first, then verify the text
     const stepCards = page.locator('[data-testid="step-card"]');
     await expect(stepCards).toHaveCount(3, { timeout: 5000 });
-    
+
     // Verify the third step exists by checking its content
     // The third step should have stepIndex 2, so displayIndex + 1 = 3
     const thirdStepCard = stepCards.nth(2);

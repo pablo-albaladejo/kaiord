@@ -76,10 +76,7 @@ describe("useWorkoutListDnd", () => {
       const { result } = renderHook(() => useWorkoutListDnd(workout));
 
       // Assert
-      expect(result.current.sortableIds).toEqual([
-        "step-0",
-        "block-3-1",
-      ]);
+      expect(result.current.sortableIds).toEqual(["step-0", "block-3-1"]);
     });
   });
 
