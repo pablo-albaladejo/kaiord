@@ -25,7 +25,10 @@ export function isModifierKeyPressed(e: React.MouseEvent): boolean {
 
   // For synthetic events, check if the event was created with modifier keys
   // This handles cases where testing frameworks create events with ctrlKey/metaKey
-  const syntheticEvent = e as unknown as { ctrlKey?: boolean; metaKey?: boolean };
+  const syntheticEvent = e as unknown as {
+    ctrlKey?: boolean;
+    metaKey?: boolean;
+  };
   if (syntheticEvent.ctrlKey || syntheticEvent.metaKey) {
     return true;
   }
