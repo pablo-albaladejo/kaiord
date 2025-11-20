@@ -5,26 +5,30 @@ import {
   useSensor,
   useSensors,
   type DragEndEvent,
+  type DragStartEvent,
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
+import { useState } from "react";
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { isWorkoutStep } from "../../../types/krd";
 
 /**
- * Generates a stable ID for a workout step based on its stepIndex
- * This ensures the ID matches the selection system format: step-{stepIndex}
+ * Generates a stable ID for a workout step based on its array position
+ * This ensures React can correctly track element identity during reordering
+ * by using position-based IDs instead of content-based IDs
  */
 const generateStepId = (
   step: WorkoutStep | RepetitionBlock,
   index: number
 ): string => {
   if (isWorkoutStep(step)) {
-    // Use stepIndex to match the selection system format
-    // Format: step-{stepIndex}
-    return `step-${step.stepIndex}`;
+    // Use array index for position-based ID
+    // Format: step-{index}
+    return `step-${index}`;
   }
-  // For repetition blocks, use the repeat count and index
-  return `block-${step.repeatCount}-${index}`;
+  // For repetition blocks, use array index
+  // Format: block-{index}
+  return `block-${index}`;
 };
 
 /**
@@ -36,6 +40,9 @@ export const useWorkoutListDnd = (
   workout: Workout,
   onStepReorder?: (activeIndex: number, overIndex: number) => void
 ) => {
+  // Track active drag item for DragOverlay
+  const [activeId, setActiveId] = useState<string | null>(null);
+
   // Configure sensors for drag interactions
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -48,14 +55,21 @@ export const useWorkoutListDnd = (
     })
   );
 
-  // Generate sortable IDs for all items using content-based IDs
-  // This ensures IDs are stable even when steps are reordered
+  // Generate sortable IDs for all items using position-based IDs
+  // This ensures React can correctly track element identity during reordering
   const sortableIds = workout.steps.map((item, index) =>
     generateStepId(item, index)
   );
 
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
+
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
+
+    // Clear active ID
+    setActiveId(null);
 
     if (!over || active.id === over.id || !onStepReorder) {
       return;
@@ -69,9 +83,17 @@ export const useWorkoutListDnd = (
     }
   };
 
+  // Get the active item for DragOverlay
+  const activeItem = activeId
+    ? workout.steps[sortableIds.indexOf(activeId)]
+    : null;
+
   return {
     sensors,
     sortableIds,
+    activeId,
+    activeItem,
+    handleDragStart,
     handleDragEnd,
     collisionDetection: closestCenter,
     generateStepId, // Export the function so components can use it
