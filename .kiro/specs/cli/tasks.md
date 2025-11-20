@@ -1,9 +1,9 @@
 # Implementation Plan
 
-- [ ] 1. Set up CLI package structure and configuration
+- [x] 1. Set up CLI package structure and configuration
   - Create `packages/cli/` directory with package.json
   - Configure tsup for CLI bundling with shebang banner
-  - Add production dependencies: yargs (^17.7.2), chalk (^5.3.0), ora (^8.0.1), winston (^3.11.0), glob (^10.3.10), @kaiord/core (workspace:\*)
+  - Add production dependencies: yargs (^17.7.2), chalk (^5.3.0), ora (^8.0.1), winston (^3.11.0), glob (^10.3.10), zod (^3.22.4), @kaiord/core (workspace:\*)
   - Add dev dependencies: execa (^8.0.1), tmp-promise (^3.0.3), strip-ansi (^7.1.0), vitest (^1.2.0), tsx (^4.7.0), @types/yargs (^17.0.32)
   - Create src/bin/kaiord.ts entry point file
   - Configure TypeScript for ESM modules with strict mode
@@ -12,15 +12,15 @@
   - Configure vitest.config.ts for test patterns
   - _Requirements: 1.1, 1.2_
 
-- [ ] 2. Implement format detection and file handling utilities
-  - [ ] 2.0 Create test helpers and fixtures
+- [x] 2. Implement format detection and file handling utilities
+  - [x] 2.0 Create test helpers and fixtures
     - Create `src/tests/helpers/cli-test-utils.ts` with runCli and createTempDir utilities
     - Copy fixture files from @kaiord/core to `src/tests/fixtures/fit-files/` directory
     - Include WorkoutIndividualSteps.fit, WorkoutRepeatSteps.fit, and corresponding KRD files
     - Create minimal test fixtures (< 20KB each) for smoke tests
     - _Requirements: Testing infrastructure_
 
-  - [ ] 2.1 Create format detector utility with tests
+  - [x] 2.1 Create format detector utility with tests
     - Write `src/utils/format-detector.ts` with detectFormat function
     - Define FileFormat type as z.enum(["fit", "krd", "tcx", "zwo"]) using Zod
     - Map file extensions (.fit, .krd, .tcx, .zwo) to format types
@@ -29,7 +29,7 @@
     - Test all supported extensions and unknown extensions
     - _Requirements: 4.1, 4.2, 4.3, 4.4, 4.5_
 
-  - [ ] 2.2 Create file handler utility with tests
+  - [x] 2.2 Create file handler utility with tests
     - Write `src/utils/file-handler.ts` with readFile and writeFile functions
     - Handle binary files (FIT) and text files (KRD, TCX, ZWO) differently
     - Implement proper error handling for missing files and permission errors
@@ -39,8 +39,8 @@
     - Test error handling for missing files and permission errors
     - _Requirements: 2.4, 3.4, 8.1_
 
-- [ ] 3. Implement logger factory with environment detection
-  - [ ] 3.1 Create logger factory utility with tests
+- [x] 3. Implement logger factory with environment detection
+  - [x] 3.1 Create logger factory utility with tests
     - Write `src/utils/logger-factory.ts` with createLogger function
     - Implement Logger type matching @kaiord/core Logger interface (debug, info, warn, error)
     - Detect environment (TTY, CI, NODE_ENV) for automatic logger selection
@@ -50,7 +50,7 @@
     - Mock process.stdout.isTTY and process.env for testing
     - _Requirements: 10.5, 11.1_
 
-  - [ ] 3.2 Implement pretty terminal logger
+  - [x] 3.2 Implement pretty terminal logger
     - Create pretty logger adapter in `src/adapters/logger/pretty-logger.ts`
     - Use chalk for colors (ESM import)
     - Add emoji/icon prefixes for different log levels (ℹ, ⚠, ✖, 🐛)
@@ -58,7 +58,7 @@
     - Return Logger interface compatible with @kaiord/core
     - _Requirements: 10.1, 10.2, 10.3_
 
-  - [ ] 3.3 Implement structured JSON logger
+  - [x] 3.3 Implement structured JSON logger
     - Create structured logger adapter in `src/adapters/logger/structured-logger.ts`
     - Use winston for structured logging
     - Configure JSON format with timestamp, level, message, and context
@@ -66,8 +66,8 @@
     - Return Logger interface compatible with @kaiord/core
     - _Requirements: 11.2, 11.3_
 
-- [ ] 4. Implement error formatting utilities
-  - [ ] 4.1 Create error formatter utility with tests
+- [x] 4. Implement error formatting utilities
+  - [x] 4.1 Create error formatter utility with tests
     - Write `src/utils/error-formatter.ts` with formatError function
     - Import error types from @kaiord/core (FitParsingError, KrdValidationError, ToleranceExceededError)
     - Handle all domain error types with instanceof checks
@@ -82,8 +82,8 @@
     - Use strip-ansi to test colored output
     - _Requirements: 3.3, 7.3, 9.3, 12.3_
 
-- [ ] 5. Implement convert command
-  - [ ] 5.1 Create convert command handler
+- [x] 5. Implement convert command
+  - [x] 5.1 Create convert command handler
     - Write `src/commands/convert.ts` with convertCommand function
     - Define ConvertOptions type with input, output, inputFormat, outputFormat, verbose, quiet, json, logFormat
     - Parse and validate command options using Zod schemas
@@ -92,7 +92,7 @@
     - Get providers from @kaiord/core using createDefaultProviders(logger)
     - _Requirements: 2.1, 3.1, 4.1, 4.2, 4.3, 4.4, 5.1, 5.2, 5.3, 5.4_
 
-  - [ ] 5.2 Implement single file conversion logic
+  - [x] 5.2 Implement single file conversion logic
     - Read input file using file-handler utility
     - Determine conversion direction (FIT→KRD or KRD→FIT)
     - Call appropriate use case from providers (convertFitToKrd or convertKrdToFit)
@@ -101,7 +101,7 @@
     - Handle TTY detection to disable spinners in non-interactive mode
     - _Requirements: 2.1, 2.2, 2.3, 3.1, 3.2, 10.4_
 
-  - [ ] 5.3 Implement error handling for convert command
+  - [x] 5.3 Implement error handling for convert command
     - Wrap conversion logic in try-catch block
     - Catch domain errors from @kaiord/core (FitParsingError, KrdValidationError)
     - Format errors using error-formatter utility
@@ -110,7 +110,7 @@
     - Log errors using logger before exiting
     - _Requirements: 2.4, 2.5, 3.3, 3.4, 9.1, 9.2, 9.3, 12.1, 12.2_
 
-  - [ ] 5.4 Write integration tests for convert command
+  - [x] 5.4 Write integration tests for convert command
     - Create `src/commands/convert-integration.test.ts` using execa to execute CLI
     - Build CLI before tests using tsx or compiled dist
     - Test FIT to KRD conversion with WorkoutIndividualSteps.fit fixture
@@ -123,8 +123,8 @@
     - Use strip-ansi to remove color codes before assertions
     - _Requirements: 2.1, 3.1, 4.1, 5.1_
 
-- [ ] 6. Implement batch conversion support
-  - [ ] 6.1 Add batch processing to convert command
+- [x] 6. Implement batch conversion support
+  - [x] 6.1 Add batch processing to convert command
     - Detect glob patterns in input argument (contains \* or ?)
     - Expand glob patterns using findFiles utility from file-handler
     - Process files sequentially with for loop
@@ -133,7 +133,7 @@
     - Use ora spinner for overall progress
     - _Requirements: 8.1, 8.2, 8.3_
 
-  - [ ] 6.2 Implement batch conversion summary
+  - [x] 6.2 Implement batch conversion summary
     - Display progress for each file (e.g., "Converting 3/10: workout3.fit")
     - Collect successful and failed conversions in separate arrays
     - Show summary with successful/failed counts after completion
@@ -141,7 +141,7 @@
     - Format summary with colors (green for success, red for failures)
     - _Requirements: 8.2, 8.4_
 
-  - [ ] 6.3 Write integration tests for batch conversion
+  - [x] 6.3 Write integration tests for batch conversion
     - Add batch conversion tests to `src/commands/convert-integration.test.ts`
     - Create multiple test fixture files in temporary directory
     - Test glob pattern expansion with "\*.fit" pattern
@@ -152,8 +152,8 @@
     - Use strip-ansi to remove color codes before assertions
     - _Requirements: 8.1, 8.2, 8.3, 8.4_
 
-- [ ] 7. Implement validate command
-  - [ ] 7.1 Create validate command handler
+- [x] 7. Implement validate command
+  - [x] 7.1 Create validate command handler
     - Write `src/commands/validate.ts` with validateCommand function
     - Define ValidateOptions type with input, toleranceConfig, verbose, quiet, json, logFormat
     - Parse and validate command options using Zod schemas
@@ -162,7 +162,7 @@
     - Create logger using logger-factory based on options
     - _Requirements: 7.1_
 
-  - [ ] 7.2 Implement round-trip validation logic
+  - [x] 7.2 Implement round-trip validation logic
     - Get providers from @kaiord/core using createDefaultProviders(logger)
     - Load custom tolerance config if --tolerance-config provided
     - Parse tolerance config JSON using toleranceConfigSchema from @kaiord/core
@@ -172,7 +172,7 @@
     - Handle successful validation (no violations)
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-  - [ ] 7.3 Implement error handling for validate command
+  - [x] 7.3 Implement error handling for validate command
     - Wrap validation logic in try-catch block
     - Catch ToleranceExceededError from @kaiord/core
     - Format tolerance violations with field names, expected, actual, deviation
@@ -181,7 +181,7 @@
     - Log errors using logger before exiting
     - _Requirements: 7.3, 12.1, 12.2_
 
-  - [ ] 7.4 Write integration tests for validate command
+  - [x] 7.4 Write integration tests for validate command
     - Create `src/commands/validate-integration.test.ts` using execa
     - Test successful round-trip validation with valid FIT file (verify exit code 0)
     - Test validation failures with tolerance violations (verify exit code 6)
@@ -191,8 +191,8 @@
     - Use strip-ansi to remove color codes before assertions
     - _Requirements: 7.1, 7.2, 7.3, 7.4_
 
-- [ ] 8. Implement CLI entry point and argument parsing
-  - [ ] 8.1 Create main CLI entry point
+- [x] 8. Implement CLI entry point and argument parsing
+  - [x] 8.1 Create main CLI entry point
     - Write `src/bin/kaiord.ts` with main async function
     - Add shebang line: #!/usr/bin/env node
     - Set up yargs for command parsing with .scriptName('kaiord')
@@ -203,7 +203,7 @@
     - Call main() and handle process.exit codes
     - _Requirements: 1.3, 1.4, 6.1, 6.2, 6.3, 11.4, 11.5_
 
-  - [ ] 8.2 Wire convert command to CLI
+  - [x] 8.2 Wire convert command to CLI
     - Register convert command with yargs.command()
     - Define command signature: "convert"
     - Add required options: --input (-i), --output (-o)
@@ -213,7 +213,7 @@
     - Wire to convertCommand handler from commands/convert
     - _Requirements: 2.1, 5.1, 9.1_
 
-  - [ ] 8.3 Wire validate command to CLI
+  - [x] 8.3 Wire validate command to CLI
     - Register validate command with yargs.command()
     - Define command signature: "validate"
     - Add required option: --input (-i)
@@ -223,7 +223,7 @@
     - Wire to validateCommand handler from commands/validate
     - _Requirements: 7.1, 9.1_
 
-  - [ ] 8.4 Implement top-level error handling
+  - [x] 8.4 Implement top-level error handling
     - Wrap main() in try-catch block
     - Catch all unhandled errors at process level
     - Format errors using error-formatter utility
@@ -234,7 +234,7 @@
     - Add process.on('uncaughtException') handler
     - _Requirements: 9.4, 12.1, 12.2_
 
-  - [ ] 8.5 Implement easter egg display
+  - [x] 8.5 Implement easter egg display
     - Create showKiroEasterEgg function in bin/kaiord.ts
     - Use chalk.cyan for colored ASCII art box
     - Include message about Kiro AI and Kiroween hackathon
@@ -244,7 +244,7 @@
     - Exit with code 0 after displaying
     - _Requirements: 13.1, 13.2, 13.3, 13.4, 13.5_
 
-  - [ ] 8.6 Write CLI smoke tests
+  - [x] 8.6 Write CLI smoke tests
     - Create `src/tests/cli-smoke.test.ts` using execa
     - Test `kaiord --help` displays usage information (verify "kaiord" in output)
     - Test `kaiord --version` displays version number (verify semver pattern /\d+\.\d+\.\d+/)
@@ -255,8 +255,8 @@
     - Build CLI before running tests
     - _Requirements: 1.3, 1.4, 9.1, 9.4, 13.1_
 
-- [ ] 9. Implement verbosity and output control
-  - [ ] 9.1 Add verbosity flags to commands
+- [x] 9. Implement verbosity and output control
+  - [x] 9.1 Add verbosity flags to commands
     - Update convertCommand to accept verbose and quiet options
     - Update validateCommand to accept verbose and quiet options
     - Pass verbosity level to logger-factory (debug for verbose, error for quiet)
@@ -264,7 +264,7 @@
     - Suppress ora spinners when quiet flag is set
     - _Requirements: 6.1, 6.2, 6.3, 6.4_
 
-  - [ ] 9.2 Add JSON output support
+  - [x] 9.2 Add JSON output support
     - Update convertCommand to accept json option
     - Format conversion results as JSON object to stdout when --json flag set
     - Update validateCommand to accept json option
@@ -274,7 +274,7 @@
     - Use JSON.stringify with 2-space indentation for readability
     - _Requirements: 11.3, 12.3_
 
-  - [ ] 9.3 Implement automatic TTY detection
+  - [x] 9.3 Implement automatic TTY detection
     - Check process.stdout.isTTY in logger-factory
     - Disable colored output when not TTY (use plain logger)
     - Check process.stdout.isTTY before creating ora spinners
@@ -282,7 +282,7 @@
     - Add isTTY helper function in utils
     - _Requirements: 10.5, 12.4_
 
-  - [ ] 9.4 Write tests for output control
+  - [x] 9.4 Write tests for output control
     - Add verbosity tests to `src/commands/convert-integration.test.ts`
     - Test --verbose flag increases log output (verify "debug" or detailed messages in stderr)
     - Test --quiet flag suppresses non-error output (verify minimal output)
@@ -294,8 +294,8 @@
     - Use strip-ansi to remove color codes before assertions where needed
     - _Requirements: 6.1, 6.2, 6.3, 12.3, 12.4_
 
-- [ ] 10. Package and publish configuration
-  - [ ] 10.1 Configure package for npm publishing
+- [x] 10. Package and publish configuration
+  - [x] 10.1 Configure package for npm publishing
     - Update package.json with correct bin entry: { "kaiord": "./dist/bin/kaiord.js" }
     - Configure files array to include only ["dist"]
     - Add repository field pointing to GitHub repo
@@ -305,7 +305,7 @@
     - Set publishConfig.access to "public" for scoped package
     - _Requirements: 1.1_
 
-  - [ ] 10.2 Test global installation locally
+  - [x] 10.2 Test global installation locally
     - Build the CLI package with `pnpm build`
     - Test `pnpm link --global` for local global installation
     - Verify `kaiord` command is available globally in new terminal
@@ -316,7 +316,7 @@
     - Unlink after testing with `pnpm unlink --global`
     - _Requirements: 1.1, 1.2_
 
-  - [ ] 10.3 Verify all tests pass before publishing
+  - [x] 10.3 Verify all tests pass before publishing
     - Run `pnpm test` to execute all test suites
     - Verify unit tests pass with `pnpm test:unit`
     - Verify integration tests pass with `pnpm test:integration`
@@ -326,7 +326,7 @@
     - Verify no TypeScript errors with `pnpm tsc --noEmit`
     - _Requirements: Testing verification_
 
-  - [ ] 10.4 Write installation documentation
+  - [x] 10.4 Write installation documentation
     - Create packages/cli/README.md
     - Document installation: `npm install -g @kaiord/cli` or `pnpm add -g @kaiord/cli`
     - Document convert command with examples (FIT→KRD, KRD→FIT, batch conversion)
