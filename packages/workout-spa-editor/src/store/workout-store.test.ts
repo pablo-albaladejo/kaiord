@@ -826,6 +826,7 @@ describe("useWorkoutStore", () => {
       const newStep = workout?.steps[1];
       expect(newStep).toEqual({
         stepIndex: 1,
+        name: "Step 2",
         durationType: "open",
         duration: { type: "open" },
         targetType: "open",

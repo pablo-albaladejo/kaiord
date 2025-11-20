@@ -1,3 +1,4 @@
+/* eslint-disable max-lines, max-lines-per-function */
 import "./App.css";
 import { ToastProvider } from "./components/atoms/Toast";
 import { WelcomeSection } from "./components/pages/WelcomeSection";

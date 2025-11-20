@@ -3,33 +3,12 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
-import type { HTMLAttributes } from "react";
-import type { Workout } from "../../../types/krd";
 import { dndAnnouncements } from "./dnd-announcements";
 import { useWorkoutListDnd } from "./use-workout-list-dnd";
+import type { WorkoutListProps } from "./WorkoutList.types";
 import { WorkoutListContent } from "./WorkoutListContent";
 
-export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
-  workout: Workout;
-  selectedStepId?: string | null;
-  selectedStepIds?: readonly string[];
-  onStepSelect?: (stepIndex: number) => void;
-  onToggleStepSelection?: (stepIndex: number) => void;
-  onStepDelete?: (stepIndex: number) => void;
-  onStepDuplicate?: (stepIndex: number) => void;
-  onDuplicateStepInRepetitionBlock?: (
-    blockIndex: number,
-    stepIndex: number
-  ) => void;
-  onEditRepetitionBlock?: (blockIndex: number, repeatCount: number) => void;
-  onAddStepToRepetitionBlock?: (blockIndex: number) => void;
-  onStepReorder?: (activeIndex: number, overIndex: number) => void;
-  onReorderStepsInBlock?: (
-    blockIndex: number,
-    activeIndex: number,
-    overIndex: number
-  ) => void;
-};
+export type { WorkoutListProps };
 
 export const WorkoutList = ({
   workout,
@@ -49,19 +28,17 @@ export const WorkoutList = ({
 }: WorkoutListProps) => {
   const baseClasses = "flex flex-col gap-4";
   const classes = [baseClasses, className].filter(Boolean).join(" ");
-
-  const { sensors, sortableIds, handleDragEnd, collisionDetection } =
-    useWorkoutListDnd(workout, onStepReorder);
+  const dnd = useWorkoutListDnd(workout, onStepReorder);
 
   return (
     <DndContext
-      sensors={sensors}
-      collisionDetection={collisionDetection}
-      onDragEnd={handleDragEnd}
+      sensors={dnd.sensors}
+      collisionDetection={dnd.collisionDetection}
+      onDragEnd={dnd.handleDragEnd}
       accessibility={{ announcements: dndAnnouncements }}
     >
       <SortableContext
-        items={sortableIds}
+        items={dnd.sortableIds}
         strategy={verticalListSortingStrategy}
       >
         <div
@@ -82,6 +59,7 @@ export const WorkoutList = ({
             onEditRepetitionBlock={onEditRepetitionBlock}
             onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
             onReorderStepsInBlock={onReorderStepsInBlock}
+            generateStepId={dnd.generateStepId}
           />
         </div>
       </SortableContext>

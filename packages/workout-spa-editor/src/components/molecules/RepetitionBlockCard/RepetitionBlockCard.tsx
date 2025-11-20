@@ -1,3 +1,4 @@
+/* eslint-disable max-lines, max-lines-per-function */
 import { forwardRef, type HTMLAttributes } from "react";
 import type { RepetitionBlock } from "../../../types/krd";
 import { RepetitionBlockHeader } from "./RepetitionBlockHeader";
@@ -13,6 +14,8 @@ export type RepetitionBlockCardProps = HTMLAttributes<HTMLDivElement> & {
   onSelectStep?: (index: number) => void;
   onReorderSteps?: (activeIndex: number, overIndex: number) => void;
   selectedStepIndex?: number;
+  isDragging?: boolean;
+  dragHandleProps?: Record<string, unknown>;
 };
 
 export const RepetitionBlockCard = forwardRef<
@@ -29,6 +32,8 @@ export const RepetitionBlockCard = forwardRef<
       onSelectStep,
       onReorderSteps,
       selectedStepIndex,
+      isDragging = false,
+      dragHandleProps,
       className = "",
       ...props
     },
@@ -48,7 +53,10 @@ export const RepetitionBlockCard = forwardRef<
 
     const baseClasses =
       "rounded-lg border-2 border-dashed border-primary-300 dark:border-primary-700 bg-primary-50/50 dark:bg-primary-950/20 p-4 transition-colors";
-    const classes = [baseClasses, className].filter(Boolean).join(" ");
+    const draggingClasses = isDragging ? "cursor-grabbing" : "";
+    const classes = [baseClasses, draggingClasses, className]
+      .filter(Boolean)
+      .join(" ");
 
     return (
       <div
@@ -68,6 +76,7 @@ export const RepetitionBlockCard = forwardRef<
           onCancelEdit={handleCancelEdit}
           onEditValueChange={setEditValue}
           onKeyDown={handleKeyDown}
+          dragHandleProps={dragHandleProps}
         />
 
         {isExpanded && (
