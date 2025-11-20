@@ -280,7 +280,10 @@ describe("StepCard", () => {
       render(<StepCard step={mockStep} />);
 
       const card = screen.getByRole("button");
-      expect(card).toHaveClass("p-4");
+      expect(card).toHaveClass("pb-4");
+      expect(card).toHaveClass("pl-4");
+      expect(card).toHaveClass("pr-4");
+      expect(card).toHaveClass("pt-4");
       expect(card).not.toHaveClass("pl-10");
     });
 

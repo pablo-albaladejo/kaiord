@@ -69,9 +69,6 @@ test.describe("Step Management Flow", () => {
     const duplicateButton = firstStepCard.getByTestId("duplicate-step-button");
     await duplicateButton.click();
 
-    // Wait for the duplication to complete and DOM to update
-    await page.waitForTimeout(500);
-
     // Verify step was duplicated (should now have 3 steps)
     // Check for the third step card first, then verify the text
     const stepCards = page.locator('[data-testid="step-card"]');

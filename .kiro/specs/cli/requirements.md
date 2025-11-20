@@ -37,8 +37,8 @@ This specification defines the requirements for **@kaiord/cli**, a command-line 
 1. WHEN THE user executes `kaiord convert --input workout.fit --output workout.krd`, THE Kaiord CLI SHALL read the FIT file and convert it to KRD format
 2. WHEN THE conversion succeeds, THE Kaiord CLI SHALL write the KRD data to the specified output file
 3. WHEN THE conversion succeeds, THE Kaiord CLI SHALL display a success message and exit with code 0
-4. WHEN THE input file does not exist, THE Kaiord CLI SHALL display an error message and exit with code 1
-5. WHEN THE input file is corrupted or invalid, THE Kaiord CLI SHALL display a descriptive error message and exit with code 1
+4. WHEN THE input file does not exist, THE Kaiord CLI SHALL display an error message and exit with code 2 (file not found)
+5. WHEN THE input file is corrupted or invalid due to parsing errors, THE Kaiord CLI SHALL display a descriptive error message and exit with code 4 (parsing error); WHEN THE input file fails schema validation, THE Kaiord CLI SHALL display a descriptive error message and exit with code 5 (validation error)
 
 ### Requirement 3
 

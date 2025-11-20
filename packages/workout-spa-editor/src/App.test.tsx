@@ -30,14 +30,14 @@ describe("App", () => {
   });
 
   describe("keyboard shortcuts for reordering (Requirement 29)", () => {
-    const createMockStep = (stepIndex: number): WorkoutStep => ({
+    const createMockStep = (stepIndex: number, powerValue: number): WorkoutStep => ({
       stepIndex,
       durationType: "time",
       duration: { type: "time", seconds: 300 },
       targetType: "power",
       target: {
         type: "power",
-        value: { unit: "watts", value: 200 },
+        value: { unit: "watts", value: powerValue },
       },
     });
 
@@ -59,9 +59,9 @@ describe("App", () => {
 
     it("should move step up when Alt+ArrowUp is pressed with a selected step", () => {
       // Arrange
-      const step1 = createMockStep(0);
-      const step2 = createMockStep(1);
-      const step3 = createMockStep(2);
+      const step1 = createMockStep(0, 100); // 100W
+      const step2 = createMockStep(1, 200); // 200W
+      const step3 = createMockStep(2, 300); // 300W
       const workout = createMockWorkout([step1, step2, step3]);
       const krd = createMockKRD(workout);
 
@@ -69,6 +69,12 @@ describe("App", () => {
       useWorkoutStore.getState().selectStep("step-1"); // Select step at index 1
 
       renderWithProviders(<App />);
+
+      // Capture initial step identities by power value
+      const initialWorkout = useWorkoutStore.getState().currentWorkout
+        ?.extensions?.workout as Workout | undefined;
+      const initialStep0Power = (initialWorkout?.steps[0] as WorkoutStep).target.value?.value;
+      const initialStep1Power = (initialWorkout?.steps[1] as WorkoutStep).target.value?.value;
 
       // Act
       const event = new KeyboardEvent("keydown", {
@@ -81,15 +87,27 @@ describe("App", () => {
       // Assert
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.workout as Workout | undefined;
-      expect(updatedWorkout?.steps[0]).toMatchObject({ stepIndex: 0 });
-      expect(updatedWorkout?.steps[1]).toMatchObject({ stepIndex: 1 });
+      const updatedStep0 = updatedWorkout?.steps[0] as WorkoutStep;
+      const updatedStep1 = updatedWorkout?.steps[1] as WorkoutStep;
+
+      // Verify that the step that was at index 1 is now at index 0
+      expect(updatedStep0.target.value?.value).toBe(initialStep1Power);
+      expect(updatedStep0.target.value?.value).toBe(200);
+
+      // Verify that the step that was at index 0 is now at index 1
+      expect(updatedStep1.target.value?.value).toBe(initialStep0Power);
+      expect(updatedStep1.target.value?.value).toBe(100);
+
+      // Verify stepIndex properties are also updated correctly
+      expect(updatedStep0.stepIndex).toBe(0);
+      expect(updatedStep1.stepIndex).toBe(1);
     });
 
     it("should move step down when Alt+ArrowDown is pressed with a selected step", () => {
       // Arrange
-      const step1 = createMockStep(0);
-      const step2 = createMockStep(1);
-      const step3 = createMockStep(2);
+      const step1 = createMockStep(0, 100); // 100W
+      const step2 = createMockStep(1, 200); // 200W
+      const step3 = createMockStep(2, 300); // 300W
       const workout = createMockWorkout([step1, step2, step3]);
       const krd = createMockKRD(workout);
 
@@ -97,6 +115,12 @@ describe("App", () => {
       useWorkoutStore.getState().selectStep("step-1"); // Select step at index 1
 
       renderWithProviders(<App />);
+
+      // Capture initial step identities by power value
+      const initialWorkout = useWorkoutStore.getState().currentWorkout
+        ?.extensions?.workout as Workout | undefined;
+      const initialStep1Power = (initialWorkout?.steps[1] as WorkoutStep).target.value?.value;
+      const initialStep2Power = (initialWorkout?.steps[2] as WorkoutStep).target.value?.value;
 
       // Act
       const event = new KeyboardEvent("keydown", {
@@ -109,14 +133,26 @@ describe("App", () => {
       // Assert
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
         ?.extensions?.workout as Workout | undefined;
-      expect(updatedWorkout?.steps[1]).toMatchObject({ stepIndex: 1 });
-      expect(updatedWorkout?.steps[2]).toMatchObject({ stepIndex: 2 });
+      const updatedStep1 = updatedWorkout?.steps[1] as WorkoutStep;
+      const updatedStep2 = updatedWorkout?.steps[2] as WorkoutStep;
+
+      // Verify that the step that was at index 2 is now at index 1
+      expect(updatedStep1.target.value?.value).toBe(initialStep2Power);
+      expect(updatedStep1.target.value?.value).toBe(300);
+
+      // Verify that the step that was at index 1 is now at index 2
+      expect(updatedStep2.target.value?.value).toBe(initialStep1Power);
+      expect(updatedStep2.target.value?.value).toBe(200);
+
+      // Verify stepIndex properties are also updated correctly
+      expect(updatedStep1.stepIndex).toBe(1);
+      expect(updatedStep2.stepIndex).toBe(2);
     });
 
     it("should not move step up when it is already at the top", () => {
       // Arrange
-      const step1 = createMockStep(0);
-      const step2 = createMockStep(1);
+      const step1 = createMockStep(0, 100);
+      const step2 = createMockStep(1, 200);
       const workout = createMockWorkout([step1, step2]);
       const krd = createMockKRD(workout);
 
@@ -144,8 +180,8 @@ describe("App", () => {
 
     it("should not move step down when it is already at the bottom", () => {
       // Arrange
-      const step1 = createMockStep(0);
-      const step2 = createMockStep(1);
+      const step1 = createMockStep(0, 100);
+      const step2 = createMockStep(1, 200);
       const workout = createMockWorkout([step1, step2]);
       const krd = createMockKRD(workout);
 
@@ -173,8 +209,8 @@ describe("App", () => {
 
     it("should not move step when no step is selected", () => {
       // Arrange
-      const step1 = createMockStep(0);
-      const step2 = createMockStep(1);
+      const step1 = createMockStep(0, 100);
+      const step2 = createMockStep(1, 200);
       const workout = createMockWorkout([step1, step2]);
       const krd = createMockKRD(workout);
 
