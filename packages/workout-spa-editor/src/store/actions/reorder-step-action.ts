@@ -11,7 +11,6 @@ import type {
   Workout,
   WorkoutStep,
 } from "../../types/krd";
-import { isWorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -33,16 +32,15 @@ const validateIndices = (
 
 /**
  * Reindexes workout steps after reordering
+ * NOTE: We do NOT update stepIndex during reorder to maintain stable React keys
+ * The stepIndex will be updated on the next save/export operation
  */
 const reindexSteps = (
   steps: Array<WorkoutStep | RepetitionBlock>
 ): Array<WorkoutStep | RepetitionBlock> => {
-  return steps.map((step, index) => {
-    if (isWorkoutStep(step)) {
-      return { ...step, stepIndex: index };
-    }
-    return step;
-  });
+  // Return steps as-is without reindexing
+  // This preserves the original stepIndex values which are used for React keys
+  return steps;
 };
 
 /**
@@ -73,13 +71,15 @@ export const reorderStepAction = (
   const [movedStep] = steps.splice(activeIndex, 1);
   steps.splice(overIndex, 0, movedStep);
 
+  const reindexedSteps = reindexSteps(steps);
+
   const updatedKrd: KRD = {
     ...krd,
     extensions: {
       ...krd.extensions,
       workout: {
         ...workout,
-        steps: reindexSteps(steps),
+        steps: reindexedSteps,
       },
     },
   };

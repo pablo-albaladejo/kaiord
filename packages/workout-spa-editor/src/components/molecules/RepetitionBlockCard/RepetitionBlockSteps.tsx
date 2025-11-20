@@ -102,40 +102,20 @@ export const RepetitionBlockSteps = ({
     })
   );
 
-  const sortableIds = steps.map((_, index) => `block-step-${index}`);
+  // Use stepIndex for stable IDs that persist across reorders
+  const sortableIds = steps.map((step) => `block-step-${step.stepIndex}`);
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    console.log("🔍 [Block] handleDragEnd called", {
-      activeId: active.id,
-      overId: over?.id,
-      hasCallback: !!onReorderSteps,
-    });
-
     if (!over || active.id === over.id || !onReorderSteps) {
-      console.log("❌ [Block] Early return:", {
-        noOver: !over,
-        sameId: active.id === over?.id,
-        noCallback: !onReorderSteps,
-      });
       return;
     }
 
     const activeIndex = sortableIds.indexOf(active.id as string);
     const overIndex = sortableIds.indexOf(over.id as string);
 
-    console.log("📊 [Block] Indices:", {
-      activeIndex,
-      overIndex,
-      sortableIds,
-    });
-
     if (activeIndex !== -1 && overIndex !== -1) {
-      console.log("✅ [Block] Calling onReorderSteps", {
-        activeIndex,
-        overIndex,
-      });
       onReorderSteps(activeIndex, overIndex);
     }
   };
