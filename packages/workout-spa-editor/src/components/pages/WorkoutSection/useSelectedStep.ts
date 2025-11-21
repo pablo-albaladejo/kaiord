@@ -1,6 +1,7 @@
 import { useMemo } from "react";
 import type { Workout, WorkoutStep } from "../../../types/krd";
 import { isRepetitionBlock } from "../../../types/krd";
+import { parseStepId } from "../../../utils/step-id-parser";
 
 export const useSelectedStep = (
   selectedStepId: string | null,
@@ -9,18 +10,43 @@ export const useSelectedStep = (
   return useMemo(() => {
     if (!selectedStepId) return null;
 
-    const stepIndex = Number.parseInt(selectedStepId.replace("step-", ""), 10);
-    if (Number.isNaN(stepIndex)) return null;
+    try {
+      const parsed = parseStepId(selectedStepId);
 
-    for (const item of workout.steps) {
-      if (isRepetitionBlock(item)) {
-        const step = item.steps.find((s) => s.stepIndex === stepIndex);
-        if (step) return step;
-      } else if (item.stepIndex === stepIndex) {
-        return item;
+      // Only handle step IDs, not block IDs
+      if (parsed.type !== "step" || parsed.stepIndex === undefined) {
+        return null;
       }
-    }
 
-    return null;
+      // If blockIndex is present, search in that specific block
+      if (parsed.blockIndex !== undefined) {
+        let currentBlockIndex = 0;
+        for (const item of workout.steps) {
+          if (isRepetitionBlock(item)) {
+            if (currentBlockIndex === parsed.blockIndex) {
+              const step = item.steps.find(
+                (s) => s.stepIndex === parsed.stepIndex
+              );
+              if (step) return step;
+            }
+            currentBlockIndex++;
+          }
+        }
+        return null;
+      }
+
+      // No blockIndex: search in main workout steps only
+      for (const item of workout.steps) {
+        if (!isRepetitionBlock(item) && item.stepIndex === parsed.stepIndex) {
+          return item;
+        }
+      }
+
+      return null;
+    } catch (error) {
+      // Invalid ID format - return null
+      console.warn("Invalid step ID format", { selectedStepId, error });
+      return null;
+    }
   }, [selectedStepId, workout.steps]);
 };

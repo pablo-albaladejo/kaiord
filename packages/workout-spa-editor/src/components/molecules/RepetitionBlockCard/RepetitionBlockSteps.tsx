@@ -24,18 +24,23 @@ import { StepCard } from "../StepCard/StepCard";
 type RepetitionBlockStepsProps = {
   steps: WorkoutStep[];
   selectedStepIndex?: number;
-  onSelectStep?: (index: number) => void;
+  selectedStepIds?: readonly string[];
+  onSelectStep?: (stepId: string) => void;
+  onToggleStepSelection?: (stepId: string) => void;
   onRemoveStep?: (index: number) => void;
   onDuplicateStep?: (index: number) => void;
   onAddStep?: () => void;
   onReorderSteps?: (activeIndex: number, overIndex: number) => void;
+  blockIndex?: number;
 };
 
 type SortableStepProps = {
   step: WorkoutStep;
   id: string;
   isSelected: boolean;
+  isMultiSelected: boolean;
   onSelect?: () => void;
+  onToggleMultiSelect?: () => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
 };
@@ -44,7 +49,9 @@ const SortableStep = ({
   step,
   id,
   isSelected,
+  isMultiSelected,
   onSelect,
+  onToggleMultiSelect,
   onDelete,
   onDuplicate,
 }: SortableStepProps) => {
@@ -72,7 +79,9 @@ const SortableStep = ({
       <StepCard
         step={step}
         isSelected={isSelected}
+        isMultiSelected={isMultiSelected}
         onSelect={onSelect}
+        onToggleMultiSelect={onToggleMultiSelect}
         onDelete={onDelete}
         onDuplicate={onDuplicate}
         isDragging={isDragging}
@@ -85,11 +94,14 @@ const SortableStep = ({
 export const RepetitionBlockSteps = ({
   steps,
   selectedStepIndex,
+  selectedStepIds = [],
   onSelectStep,
+  onToggleStepSelection,
   onRemoveStep,
   onDuplicateStep,
   onAddStep,
   onReorderSteps,
+  blockIndex,
 }: RepetitionBlockStepsProps) => {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -102,8 +114,13 @@ export const RepetitionBlockSteps = ({
     })
   );
 
-  // Use stepIndex for stable IDs that persist across reorders
-  const sortableIds = steps.map((step) => `block-step-${step.stepIndex}`);
+  // Generate unique IDs for steps within the block using hierarchical format
+  // Format: "block-{blockIndex}-step-{stepIndex}"
+  const sortableIds = steps.map((step) =>
+    blockIndex !== undefined
+      ? `block-${blockIndex}-step-${step.stepIndex}`
+      : `block-step-${step.stepIndex}`
+  );
 
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
@@ -131,19 +148,25 @@ export const RepetitionBlockSteps = ({
           items={sortableIds}
           strategy={verticalListSortingStrategy}
         >
-          {steps.map((step, index) => (
-            <SortableStep
-              key={sortableIds[index]}
-              id={sortableIds[index]}
-              step={step}
-              isSelected={selectedStepIndex === index}
-              onSelect={() => onSelectStep?.(index)}
-              onDelete={onRemoveStep ? () => onRemoveStep(index) : undefined}
-              onDuplicate={
-                onDuplicateStep ? () => onDuplicateStep(index) : undefined
-              }
-            />
-          ))}
+          {steps.map((step, index) => {
+            const stepId = sortableIds[index];
+            const isMultiSelected = selectedStepIds.includes(stepId);
+            return (
+              <SortableStep
+                key={stepId}
+                id={stepId}
+                step={step}
+                isSelected={selectedStepIndex === index}
+                isMultiSelected={isMultiSelected}
+                onSelect={() => onSelectStep?.(stepId)}
+                onToggleMultiSelect={() => onToggleStepSelection?.(stepId)}
+                onDelete={onRemoveStep ? () => onRemoveStep(index) : undefined}
+                onDuplicate={
+                  onDuplicateStep ? () => onDuplicateStep(index) : undefined
+                }
+              />
+            );
+          })}
         </SortableContext>
       </DndContext>
 

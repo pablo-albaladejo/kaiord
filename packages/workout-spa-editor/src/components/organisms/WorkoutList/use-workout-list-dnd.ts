@@ -13,21 +13,45 @@ import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { isWorkoutStep } from "../../../types/krd";
 
 /**
- * Generates a stable ID for a workout step based on its stepIndex
- * The stepIndex gets updated after reorder, which forces React to recreate the DOM elements
- * This ensures correct reconciliation during drag-and-drop operations
+ * Generates a globally unique ID for a workout item
+ *
+ * ID Format:
+ * - Main workout step: `step-{stepIndex}`
+ * - Step inside block: `block-{blockIndex}-step-{stepIndex}`
+ * - Repetition block: `block-{index}`
+ *
+ * @param item - The workout step or repetition block
+ * @param index - The item's position in the parent container
+ * @param parentBlockIndex - Optional parent block index for nested steps
+ * @returns A unique identifier string
+ *
+ * @example
+ * // Main workout step
+ * generateStepId(step, 0) // "step-1"
+ *
+ * @example
+ * // Step inside repetition block at index 2
+ * generateStepId(step, 0, 2) // "block-2-step-1"
+ *
+ * @example
+ * // Repetition block
+ * generateStepId(block, 2) // "block-2"
  */
 const generateStepId = (
-  step: WorkoutStep | RepetitionBlock,
-  index: number
+  item: WorkoutStep | RepetitionBlock,
+  index: number,
+  parentBlockIndex?: number
 ): string => {
-  if (isWorkoutStep(step)) {
-    // Use stepIndex which gets reindexed after reorder
-    // This makes the ID change when content moves, forcing React to recreate elements
-    return `step-${step.stepIndex}`;
+  if (isWorkoutStep(item)) {
+    // Steps in main workout: "step-{stepIndex}"
+    // Steps in blocks: "block-{blockIndex}-step-{stepIndex}"
+    if (parentBlockIndex !== undefined) {
+      return `block-${parentBlockIndex}-step-${item.stepIndex}`;
+    }
+    return `step-${item.stepIndex}`;
   }
 
-  // For repetition blocks, use array index
+  // Repetition blocks: "block-{index}"
   return `block-${index}`;
 };
 

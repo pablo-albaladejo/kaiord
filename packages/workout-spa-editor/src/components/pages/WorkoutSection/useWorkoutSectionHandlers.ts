@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import {
   useSelectStep,
+  useSelectedStepId,
   useSetEditing,
   useUpdateWorkout,
 } from "../../../store/workout-store-selectors";
@@ -14,16 +15,17 @@ import {
 export const useWorkoutSectionHandlers = (
   workout: Workout,
   krd: KRD,
-  onStepSelect: (stepIndex: number) => void
+  onStepSelect: (stepId: string) => void
 ) => {
   const setEditing = useSetEditing();
   const selectStep = useSelectStep();
+  const selectedStepId = useSelectedStepId();
   const updateWorkout = useUpdateWorkout();
   const deleteHandlers = useDeleteHandlers();
 
   const handleStepSelect = useCallback(
-    (stepIndex: number) => {
-      onStepSelect(stepIndex);
+    (stepId: string) => {
+      onStepSelect(stepId);
       setEditing(true);
     },
     [onStepSelect, setEditing]
@@ -31,14 +33,18 @@ export const useWorkoutSectionHandlers = (
 
   const handleSave = useCallback(
     (updatedStep: WorkoutStep) => {
-      const updatedWorkout = createUpdatedWorkout(workout, updatedStep);
+      const updatedWorkout = createUpdatedWorkout(
+        workout,
+        updatedStep,
+        selectedStepId
+      );
       const updatedKrd = createUpdatedKrd(krd, updatedWorkout);
 
       updateWorkout(updatedKrd);
       setEditing(false);
       selectStep(null);
     },
-    [workout, krd, updateWorkout, setEditing, selectStep]
+    [workout, krd, selectedStepId, updateWorkout, setEditing, selectStep]
   );
 
   const handleCancel = useCallback(() => {

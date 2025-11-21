@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
 import { isRepetitionBlock } from "../../../types/krd";
 import { SortableRepetitionBlockCard } from "./SortableRepetitionBlockCard";
@@ -9,8 +10,8 @@ type RenderWorkoutItemProps = {
   itemId: string;
   selectedStepId?: string | null;
   selectedStepIds?: readonly string[];
-  onStepSelect?: (stepIndex: number) => void;
-  onToggleStepSelection?: (stepIndex: number) => void;
+  onStepSelect?: (stepId: string) => void;
+  onToggleStepSelection?: (stepId: string) => void;
   onStepDelete?: (stepIndex: number) => void;
   onStepDuplicate?: (stepIndex: number) => void;
   onDuplicateStepInRepetitionBlock?: (
@@ -24,6 +25,12 @@ type RenderWorkoutItemProps = {
     activeIndex: number,
     overIndex: number
   ) => void;
+  // generateStepId will be used in task 5 to pass to SortableRepetitionBlockCard
+  generateStepId: (
+    item: WorkoutStep | RepetitionBlock,
+    index: number,
+    parentBlockIndex?: number
+  ) => string;
 };
 
 export const renderWorkoutItem = ({
@@ -40,6 +47,7 @@ export const renderWorkoutItem = ({
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
   onReorderStepsInBlock,
+  generateStepId,
 }: RenderWorkoutItemProps) => {
   if (isRepetitionBlock(item)) {
     return (
@@ -48,7 +56,9 @@ export const renderWorkoutItem = ({
         block={item}
         blockIndex={index}
         selectedStepId={selectedStepId}
+        selectedStepIds={selectedStepIds}
         onStepSelect={onStepSelect}
+        onToggleStepSelection={onToggleStepSelection}
         onStepDelete={onStepDelete}
         onStepDuplicate={onDuplicateStepInRepetitionBlock}
         onEditRepeatCount={
@@ -62,6 +72,8 @@ export const renderWorkoutItem = ({
             : undefined
         }
         onReorderSteps={onReorderStepsInBlock}
+        generateStepId={generateStepId}
+        parentBlockIndex={index}
       />
     );
   }
