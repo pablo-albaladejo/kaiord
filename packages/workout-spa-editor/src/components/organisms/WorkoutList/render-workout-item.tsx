@@ -81,7 +81,7 @@ export const renderWorkoutItem = ({
   return renderStep({
     id: itemId,
     step: item,
-    visualIndex: item.stepIndex,
+    visualIndex: index,
     selectedStepId,
     selectedStepIds,
     onStepSelect,

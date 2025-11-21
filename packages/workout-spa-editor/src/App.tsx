@@ -45,6 +45,7 @@ function App() {
   const workout = currentWorkout?.extensions?.workout as Workout | undefined;
 
   // Helper function to get step index from selected step ID
+  // Returns the current array position of the selected step
   const getSelectedStepIndex = (): number | null => {
     if (!selectedStepId || !workout) return null;
 
@@ -63,10 +64,15 @@ function App() {
 
       const stepIndex = parsed.stepIndex;
 
-      // Validate that the step exists at this index
-      if (stepIndex < 0 || stepIndex >= workout.steps.length) return null;
+      // Find the current position of this step in the array
+      // After reordering, stepIndex may not match array position
+      const currentPosition = workout.steps.findIndex(
+        (step) => "stepIndex" in step && step.stepIndex === stepIndex
+      );
 
-      return stepIndex;
+      if (currentPosition === -1) return null;
+
+      return currentPosition;
     } catch {
       return null;
     }
