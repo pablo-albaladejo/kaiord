@@ -44,6 +44,7 @@ export const addStepToRepetitionBlockAction = (
   const newStepIndex = block.steps.length;
   const newStep = {
     stepIndex: newStepIndex,
+    name: `Step ${newStepIndex + 1}`,
     durationType: "time" as const,
     duration: { type: "time" as const, seconds: 300 },
     targetType: "power" as const,

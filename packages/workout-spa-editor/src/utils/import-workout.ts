@@ -36,8 +36,11 @@ export type ImportProgressCallback = (progress: number) => void;
 
 export const importWorkout = async (
   file: File,
-  onProgress?: ImportProgressCallback
+  onProgress?: ImportProgressCallback,
+  signal?: AbortSignal
 ): Promise<KRD> => {
+  signal?.throwIfAborted();
+
   const formatResult = detectFormat(file.name);
 
   if (!formatResult.success) {
@@ -48,20 +51,22 @@ export const importWorkout = async (
 
   try {
     onProgress?.(10);
+    signal?.throwIfAborted();
 
     const buffer = await file.arrayBuffer();
     const uint8Array = new Uint8Array(buffer);
 
     onProgress?.(30);
+    signal?.throwIfAborted();
 
     if (format === "krd") {
-      return await importKrdFile(uint8Array, onProgress);
+      return await importKrdFile(uint8Array, onProgress, signal);
     } else if (format === "fit") {
-      return await importFitFile(uint8Array, onProgress);
+      return await importFitFile(uint8Array, onProgress, signal);
     } else if (format === "tcx") {
-      return await importTcxFile(uint8Array, onProgress);
+      return await importTcxFile(uint8Array, onProgress, signal);
     } else if (format === "zwo") {
-      return await importZwoFile(uint8Array, onProgress);
+      return await importZwoFile(uint8Array, onProgress, signal);
     }
 
     throw new ImportError(`Unsupported format: ${format}`, format);

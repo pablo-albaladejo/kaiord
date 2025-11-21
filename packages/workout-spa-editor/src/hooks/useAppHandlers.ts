@@ -27,8 +27,8 @@ export const useAppHandlers = () => {
     // Error handling is done by FileUpload component
   };
 
-  const handleStepSelect = (stepIndex: number) => {
-    selectStep(`step-${stepIndex}`);
+  const handleStepSelect = (stepId: string) => {
+    selectStep(stepId);
   };
 
   const handleCreateWorkout = (name: string, sport: Sport) => {

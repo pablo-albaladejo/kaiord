@@ -70,7 +70,7 @@ describe("WorkoutList", () => {
     await user.click(stepCard);
 
     // Assert
-    expect(onStepSelect).toHaveBeenCalledWith(0);
+    expect(onStepSelect).toHaveBeenCalledWith("step-0");
   });
 
   it("should highlight selected step", () => {

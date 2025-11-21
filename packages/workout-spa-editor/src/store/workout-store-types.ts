@@ -25,6 +25,12 @@ export type WorkoutStore = {
   createStep: () => void;
   deleteStep: (stepIndex: number) => void;
   duplicateStep: (stepIndex: number) => void;
+  reorderStep: (activeIndex: number, overIndex: number) => void;
+  reorderStepsInBlock: (
+    blockIndex: number,
+    activeIndex: number,
+    overIndex: number
+  ) => void;
   createRepetitionBlock: (
     stepIndices: Array<number>,
     repeatCount: number

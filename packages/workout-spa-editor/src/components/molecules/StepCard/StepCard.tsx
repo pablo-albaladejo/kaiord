@@ -1,75 +1,71 @@
-import { forwardRef, type HTMLAttributes } from "react";
-import type { WorkoutStep } from "../../../types/krd";
-import { formatDuration } from "./format-duration";
-import { StepCardActions } from "./StepCardActions";
-import { StepCardFooter } from "./StepCardFooter";
-import { StepDetails } from "./StepDetails";
-import { StepHeader } from "./StepHeader";
+import { forwardRef } from "react";
+import { getStepLabel } from "./get-step-label";
+import { renderStepCardContent } from "./render-step-card-content";
+import type { DragHandleProps, StepCardProps } from "./StepCard.types";
 import { getStepCardClasses } from "./use-step-card-classes";
 import { useStepCardHandlers } from "./use-step-card-handlers";
 
-export type StepCardProps = HTMLAttributes<HTMLDivElement> & {
-  step: WorkoutStep;
-  isSelected?: boolean;
-  isMultiSelected?: boolean;
-  onSelect?: (stepIndex: number) => void;
-  onToggleMultiSelect?: (stepIndex: number) => void;
-  onDelete?: (stepIndex: number) => void;
-  onDuplicate?: (stepIndex: number) => void;
-};
+export type { DragHandleProps, StepCardProps };
 
 export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
   (
     {
       step,
+      visualIndex,
       isSelected = false,
       isMultiSelected = false,
       onSelect,
       onToggleMultiSelect,
       onDelete,
       onDuplicate,
+      isDragging = false,
+      dragHandleProps,
       className = "",
       ...props
     },
     ref
   ) => {
     const intensity = step.intensity || "other";
-    const hasActions = Boolean(onDelete || onDuplicate);
+    const selected = isSelected || isMultiSelected;
     const classes = getStepCardClasses(
-      isSelected || isMultiSelected,
-      hasActions,
+      selected,
+      Boolean(onDelete || onDuplicate),
+      Boolean(dragHandleProps),
       className
     );
-
-    const { handleClick, handleMouseDown, handleKeyDown } = useStepCardHandlers(
-      { step, onSelect, onToggleMultiSelect }
-    );
+    const handlers = useStepCardHandlers({
+      step,
+      onSelect,
+      onToggleMultiSelect,
+    });
+    const displayIndex = visualIndex ?? step.stepIndex;
+    const label = getStepLabel(displayIndex, step.name, step);
 
     return (
       <div
         ref={ref}
         className={classes}
-        onClick={handleClick}
-        onMouseDown={handleMouseDown}
+        onClick={handlers.handleClick}
+        onMouseDown={handlers.handleMouseDown}
         role="button"
         tabIndex={0}
-        onKeyDown={handleKeyDown}
-        aria-label={`Step ${step.stepIndex + 1}: ${step.name || formatDuration(step)}`}
+        onKeyDown={handlers.handleKeyDown}
+        aria-label={label}
         data-testid="step-card"
-        data-selected={isSelected || isMultiSelected ? "true" : "false"}
+        data-selected={selected ? "true" : "false"}
         {...props}
       >
-        <StepCardActions
-          stepIndex={step.stepIndex}
-          onDelete={onDelete}
-          onDuplicate={onDuplicate}
-        />
-        <StepHeader stepIndex={step.stepIndex} intensity={intensity} />
-        <StepDetails step={step} />
-        <StepCardFooter step={step} />
+        {renderStepCardContent({
+          step,
+          displayIndex,
+          intensity,
+          dragHandleProps,
+          isDragging,
+          onDelete,
+          onDuplicate,
+        })}
       </div>
     );
   }
 );
-
 StepCard.displayName = "StepCard";

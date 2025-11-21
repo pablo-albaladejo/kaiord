@@ -21,6 +21,7 @@ export const createStepAction = (
 
   const newStep = {
     stepIndex: newStepIndex,
+    name: `Step ${newStepIndex + 1}`,
     durationType: "open" as const,
     duration: { type: "open" as const },
     targetType: "open" as const,

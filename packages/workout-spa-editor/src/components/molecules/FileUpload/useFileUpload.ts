@@ -21,6 +21,7 @@ export const useFileUpload = ({ onFileLoad, onError }: UseFileUploadProps) => {
     fileName: state.fileName,
     error: state.error,
     conversionProgress: state.conversionProgress,
+    abortCurrentOperation: state.abortCurrentOperation,
     ...actions,
   };
 };

@@ -1,23 +1,15 @@
-import type { HTMLAttributes } from "react";
-import type { Workout } from "../../../types/krd";
-import { isRepetitionBlock } from "../../../types/krd";
-import { renderRepetitionBlock, renderStep } from "./WorkoutListItem";
+import { DndContext, DragOverlay } from "@dnd-kit/core";
+import {
+  SortableContext,
+  verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { dndAnnouncements } from "./dnd-announcements";
+import { useWorkoutListDnd } from "./use-workout-list-dnd";
+import type { WorkoutListProps } from "./WorkoutList.types";
+import { WorkoutListContent } from "./WorkoutListContent";
+import { WorkoutListDragOverlay } from "./WorkoutListDragOverlay";
 
-export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
-  workout: Workout;
-  selectedStepId?: string | null;
-  selectedStepIds?: readonly string[];
-  onStepSelect?: (stepIndex: number) => void;
-  onToggleStepSelection?: (stepIndex: number) => void;
-  onStepDelete?: (stepIndex: number) => void;
-  onStepDuplicate?: (stepIndex: number) => void;
-  onDuplicateStepInRepetitionBlock?: (
-    blockIndex: number,
-    stepIndex: number
-  ) => void;
-  onEditRepetitionBlock?: (blockIndex: number, repeatCount: number) => void;
-  onAddStepToRepetitionBlock?: (blockIndex: number) => void;
-};
+export type { WorkoutListProps };
 
 export const WorkoutList = ({
   workout,
@@ -30,41 +22,52 @@ export const WorkoutList = ({
   onDuplicateStepInRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
+  onStepReorder,
+  onReorderStepsInBlock,
   className = "",
   ...props
 }: WorkoutListProps) => {
   const baseClasses = "flex flex-col gap-4";
   const classes = [baseClasses, className].filter(Boolean).join(" ");
+  const dnd = useWorkoutListDnd(workout, onStepReorder);
 
   return (
-    <div className={classes} role="list" aria-label="Workout steps" {...props}>
-      {workout.steps.map((item, index) => {
-        if (isRepetitionBlock(item)) {
-          return renderRepetitionBlock({
-            block: item,
-            blockIndex: index,
-            selectedStepId,
-            onStepSelect,
-            onStepDelete,
-            onStepDuplicate: onDuplicateStepInRepetitionBlock,
-            onEditRepeatCount: onEditRepetitionBlock
-              ? (count: number) => onEditRepetitionBlock(index, count)
-              : undefined,
-            onAddStep: onAddStepToRepetitionBlock
-              ? () => onAddStepToRepetitionBlock(index)
-              : undefined,
-          });
-        }
-        return renderStep({
-          step: item,
-          selectedStepId,
-          selectedStepIds,
-          onStepSelect,
-          onToggleStepSelection,
-          onStepDelete,
-          onStepDuplicate,
-        });
-      })}
-    </div>
+    <DndContext
+      sensors={dnd.sensors}
+      collisionDetection={dnd.collisionDetection}
+      onDragStart={dnd.handleDragStart}
+      onDragEnd={dnd.handleDragEnd}
+      accessibility={{ announcements: dndAnnouncements }}
+    >
+      <SortableContext
+        items={dnd.sortableIds}
+        strategy={verticalListSortingStrategy}
+      >
+        <div
+          className={classes}
+          role="list"
+          aria-label="Workout steps"
+          {...props}
+        >
+          <WorkoutListContent
+            workout={workout}
+            selectedStepId={selectedStepId}
+            selectedStepIds={selectedStepIds}
+            onStepSelect={onStepSelect}
+            onToggleStepSelection={onToggleStepSelection}
+            onStepDelete={onStepDelete}
+            onStepDuplicate={onStepDuplicate}
+            onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
+            onEditRepetitionBlock={onEditRepetitionBlock}
+            onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
+            onReorderStepsInBlock={onReorderStepsInBlock}
+            generateStepId={dnd.generateStepId}
+          />
+        </div>
+      </SortableContext>
+      <DragOverlay>
+        <WorkoutListDragOverlay activeItem={dnd.activeItem} />
+      </DragOverlay>
+    </DndContext>
   );
 };
