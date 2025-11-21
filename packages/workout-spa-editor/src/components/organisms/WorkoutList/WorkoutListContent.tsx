@@ -6,8 +6,8 @@ type WorkoutListContentProps = {
   workout: Workout;
   selectedStepId?: string | null;
   selectedStepIds?: readonly string[];
-  onStepSelect?: (stepIndex: number) => void;
-  onToggleStepSelection?: (stepIndex: number) => void;
+  onStepSelect?: (stepId: string) => void;
+  onToggleStepSelection?: (stepId: string) => void;
   onStepDelete?: (stepIndex: number) => void;
   onStepDuplicate?: (stepIndex: number) => void;
   onDuplicateStepInRepetitionBlock?: (
@@ -23,7 +23,8 @@ type WorkoutListContentProps = {
   ) => void;
   generateStepId: (
     item: WorkoutStep | RepetitionBlock,
-    index: number
+    index: number,
+    parentBlockIndex?: number
   ) => string;
 };
 
@@ -61,6 +62,7 @@ export const WorkoutListContent = ({
               onEditRepetitionBlock,
               onAddStepToRepetitionBlock,
               onReorderStepsInBlock,
+              generateStepId,
             })}
           </Fragment>
         );

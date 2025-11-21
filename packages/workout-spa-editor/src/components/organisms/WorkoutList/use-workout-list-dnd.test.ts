@@ -1215,4 +1215,311 @@ describe("useWorkoutListDnd", () => {
       ]);
     });
   });
+
+  describe("Property 1: ID Uniqueness Across Workout (Hierarchical IDs)", () => {
+    /**
+     * **Feature: step-selection-unique-ids, Property 1: ID Uniqueness Across Workout**
+     * **Validates: Requirements 1.3, 2.1, 2.2, 2.3**
+     *
+     * For any workout with steps and repetition blocks, all generated step IDs
+     * must be unique across the entire workout structure, including steps inside blocks.
+     */
+    it("should generate unique IDs for main workout steps", () => {
+      // Arrange
+      const workout: Workout = {
+        name: "Test Workout",
+        sport: "cycling",
+        steps: [
+          {
+            stepIndex: 1,
+            durationType: "time" as const,
+            duration: { type: "time" as const, seconds: 300 },
+            targetType: "power" as const,
+            target: {
+              type: "power" as const,
+              value: { unit: "watts" as const, value: 200 },
+            },
+            intensity: "active" as const,
+          },
+          {
+            stepIndex: 2,
+            durationType: "time" as const,
+            duration: { type: "time" as const, seconds: 600 },
+            targetType: "power" as const,
+            target: {
+              type: "power" as const,
+              value: { unit: "watts" as const, value: 250 },
+            },
+            intensity: "active" as const,
+          },
+        ],
+      };
+
+      // Act
+      const { result } = renderHook(() => useWorkoutListDnd(workout));
+      const ids = result.current.sortableIds;
+
+      // Assert
+      expect(ids).toEqual(["step-1", "step-2"]);
+      expect(new Set(ids).size).toBe(ids.length); // All IDs are unique
+    });
+
+    it("should generate unique IDs for repetition blocks", () => {
+      // Arrange
+      const workout: Workout = {
+        name: "Test Workout",
+        sport: "cycling",
+        steps: [
+          {
+            repeatCount: 3,
+            steps: [
+              {
+                stepIndex: 1,
+                durationType: "time" as const,
+                duration: { type: "time" as const, seconds: 60 },
+                targetType: "power" as const,
+                target: {
+                  type: "power" as const,
+                  value: { unit: "watts" as const, value: 250 },
+                },
+                intensity: "active" as const,
+              },
+            ],
+          },
+          {
+            repeatCount: 5,
+            steps: [
+              {
+                stepIndex: 1,
+                durationType: "time" as const,
+                duration: { type: "time" as const, seconds: 90 },
+                targetType: "power" as const,
+                target: {
+                  type: "power" as const,
+                  value: { unit: "watts" as const, value: 300 },
+                },
+                intensity: "active" as const,
+              },
+            ],
+          },
+        ],
+      };
+
+      // Act
+      const { result } = renderHook(() => useWorkoutListDnd(workout));
+      const ids = result.current.sortableIds;
+
+      // Assert
+      expect(ids).toEqual(["block-0", "block-1"]);
+      expect(new Set(ids).size).toBe(ids.length); // All IDs are unique
+    });
+
+    it("should generate hierarchical IDs for steps inside blocks with parent context", () => {
+      // Arrange
+      const step: WorkoutStep = {
+        stepIndex: 1,
+        durationType: "time" as const,
+        duration: { type: "time" as const, seconds: 60 },
+        targetType: "power" as const,
+        target: {
+          type: "power" as const,
+          value: { unit: "watts" as const, value: 250 },
+        },
+        intensity: "active" as const,
+      };
+
+      const workout: Workout = {
+        name: "Test Workout",
+        sport: "cycling",
+        steps: [],
+      };
+
+      // Act
+      const { result } = renderHook(() => useWorkoutListDnd(workout));
+      const generateStepId = result.current.generateStepId;
+
+      // Test with different parent block indices
+      const id1 = generateStepId(step, 0, 2); // Step in block at index 2
+      const id2 = generateStepId(step, 0, 5); // Step in block at index 5
+      const id3 = generateStepId(step, 0, undefined); // Step in main workout
+
+      // Assert
+      expect(id1).toBe("block-2-step-1");
+      expect(id2).toBe("block-5-step-1");
+      expect(id3).toBe("step-1");
+      expect(new Set([id1, id2, id3]).size).toBe(3); // All IDs are unique
+    });
+
+    it("should generate unique IDs across complex workout with duplicate stepIndex values", () => {
+      // Arrange - Workout with steps having same stepIndex in different contexts
+      const workout: Workout = {
+        name: "Test Workout",
+        sport: "cycling",
+        steps: [
+          {
+            stepIndex: 1,
+            durationType: "time" as const,
+            duration: { type: "time" as const, seconds: 300 },
+            targetType: "power" as const,
+            target: {
+              type: "power" as const,
+              value: { unit: "watts" as const, value: 200 },
+            },
+            intensity: "warmup" as const,
+          },
+          {
+            repeatCount: 3,
+            steps: [
+              {
+                stepIndex: 1, // Same stepIndex as main workout step
+                durationType: "time" as const,
+                duration: { type: "time" as const, seconds: 60 },
+                targetType: "power" as const,
+                target: {
+                  type: "power" as const,
+                  value: { unit: "watts" as const, value: 300 },
+                },
+                intensity: "active" as const,
+              },
+            ],
+          },
+          {
+            repeatCount: 5,
+            steps: [
+              {
+                stepIndex: 1, // Same stepIndex again
+                durationType: "time" as const,
+                duration: { type: "time" as const, seconds: 90 },
+                targetType: "power" as const,
+                target: {
+                  type: "power" as const,
+                  value: { unit: "watts" as const, value: 350 },
+                },
+                intensity: "active" as const,
+              },
+            ],
+          },
+          {
+            stepIndex: 2,
+            durationType: "time" as const,
+            duration: { type: "time" as const, seconds: 300 },
+            targetType: "power" as const,
+            target: {
+              type: "power" as const,
+              value: { unit: "watts" as const, value: 150 },
+            },
+            intensity: "cooldown" as const,
+          },
+        ],
+      };
+
+      // Act
+      const { result } = renderHook(() => useWorkoutListDnd(workout));
+      const generateStepId = result.current.generateStepId;
+
+      // Generate IDs for all items including nested steps
+      const mainStepIds = result.current.sortableIds; // Main level IDs
+      const block1StepIds = (workout.steps[1] as RepetitionBlock).steps.map(
+        (step, idx) => generateStepId(step, idx, 1)
+      );
+      const block2StepIds = (workout.steps[2] as RepetitionBlock).steps.map(
+        (step, idx) => generateStepId(step, idx, 2)
+      );
+
+      const allIds = [...mainStepIds, ...block1StepIds, ...block2StepIds];
+
+      // Assert - All IDs must be unique
+      expect(mainStepIds).toEqual(["step-1", "block-1", "block-2", "step-2"]);
+      expect(block1StepIds).toEqual(["block-1-step-1"]);
+      expect(block2StepIds).toEqual(["block-2-step-1"]);
+      expect(new Set(allIds).size).toBe(allIds.length); // All IDs are unique
+    });
+
+    it("should generate unique IDs for multiple blocks with multiple steps each", () => {
+      // Arrange
+      const workout: Workout = {
+        name: "Test Workout",
+        sport: "cycling",
+        steps: [
+          {
+            repeatCount: 3,
+            steps: [
+              {
+                stepIndex: 0,
+                durationType: "time" as const,
+                duration: { type: "time" as const, seconds: 60 },
+                targetType: "power" as const,
+                target: {
+                  type: "power" as const,
+                  value: { unit: "watts" as const, value: 250 },
+                },
+                intensity: "active" as const,
+              },
+              {
+                stepIndex: 1,
+                durationType: "time" as const,
+                duration: { type: "time" as const, seconds: 30 },
+                targetType: "power" as const,
+                target: {
+                  type: "power" as const,
+                  value: { unit: "watts" as const, value: 150 },
+                },
+                intensity: "rest" as const,
+              },
+            ],
+          },
+          {
+            repeatCount: 5,
+            steps: [
+              {
+                stepIndex: 0, // Same stepIndex as block 0
+                durationType: "time" as const,
+                duration: { type: "time" as const, seconds: 90 },
+                targetType: "power" as const,
+                target: {
+                  type: "power" as const,
+                  value: { unit: "watts" as const, value: 300 },
+                },
+                intensity: "active" as const,
+              },
+              {
+                stepIndex: 1, // Same stepIndex as block 0
+                durationType: "time" as const,
+                duration: { type: "time" as const, seconds: 45 },
+                targetType: "power" as const,
+                target: {
+                  type: "power" as const,
+                  value: { unit: "watts" as const, value: 200 },
+                },
+                intensity: "rest" as const,
+              },
+            ],
+          },
+        ],
+      };
+
+      // Act
+      const { result } = renderHook(() => useWorkoutListDnd(workout));
+      const generateStepId = result.current.generateStepId;
+
+      // Generate IDs for all nested steps
+      const block0StepIds = (workout.steps[0] as RepetitionBlock).steps.map(
+        (step, idx) => generateStepId(step, idx, 0)
+      );
+      const block1StepIds = (workout.steps[1] as RepetitionBlock).steps.map(
+        (step, idx) => generateStepId(step, idx, 1)
+      );
+
+      const allIds = [
+        ...result.current.sortableIds,
+        ...block0StepIds,
+        ...block1StepIds,
+      ];
+
+      // Assert
+      expect(block0StepIds).toEqual(["block-0-step-0", "block-0-step-1"]);
+      expect(block1StepIds).toEqual(["block-1-step-0", "block-1-step-1"]);
+      expect(new Set(allIds).size).toBe(allIds.length); // All IDs are unique
+    });
+  });
 });

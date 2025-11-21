@@ -7,8 +7,8 @@ type RenderStepProps = {
   readonly visualIndex: number;
   readonly selectedStepId?: string | null;
   readonly selectedStepIds?: readonly string[];
-  readonly onStepSelect?: (stepIndex: number) => void;
-  readonly onToggleStepSelection?: (stepIndex: number) => void;
+  readonly onStepSelect?: (stepId: string) => void;
+  readonly onToggleStepSelection?: (stepId: string) => void;
   readonly onStepDelete?: (stepIndex: number) => void;
   readonly onStepDuplicate?: (stepIndex: number) => void;
 };
@@ -34,11 +34,9 @@ export const renderStep = ({
       visualIndex={visualIndex}
       isSelected={isSelected}
       isMultiSelected={isMultiSelected}
-      onSelect={onStepSelect ? () => onStepSelect(step.stepIndex) : undefined}
+      onSelect={onStepSelect ? () => onStepSelect(id) : undefined}
       onToggleMultiSelect={
-        onToggleStepSelection
-          ? () => onToggleStepSelection(step.stepIndex)
-          : undefined
+        onToggleStepSelection ? () => onToggleStepSelection(id) : undefined
       }
       onDelete={onStepDelete ? () => onStepDelete(step.stepIndex) : undefined}
       onDuplicate={

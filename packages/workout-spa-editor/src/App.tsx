@@ -13,6 +13,7 @@ import {
 } from "./store/workout-store-selectors";
 import type { Workout } from "./types/krd";
 import { saveWorkout } from "./utils/save-workout";
+import { parseStepId } from "./utils/step-id-parser";
 
 /**
  * Main App Component
@@ -47,16 +48,28 @@ function App() {
   const getSelectedStepIndex = (): number | null => {
     if (!selectedStepId || !workout) return null;
 
-    // Step ID format is "step-{stepIndex}"
-    const match = selectedStepId.match(/^step-(\d+)$/);
-    if (!match) return null;
+    try {
+      const parsed = parseStepId(selectedStepId);
 
-    const stepIndex = parseInt(match[1], 10);
+      // Only handle main workout steps (not block steps) for keyboard shortcuts
+      if (parsed.type !== "step" || parsed.stepIndex === undefined) {
+        return null;
+      }
 
-    // Validate that the step exists at this index
-    if (stepIndex < 0 || stepIndex >= workout.steps.length) return null;
+      // For keyboard shortcuts, only handle main workout steps (no blockIndex)
+      if (parsed.blockIndex !== undefined) {
+        return null;
+      }
 
-    return stepIndex;
+      const stepIndex = parsed.stepIndex;
+
+      // Validate that the step exists at this index
+      if (stepIndex < 0 || stepIndex >= workout.steps.length) return null;
+
+      return stepIndex;
+    } catch {
+      return null;
+    }
   };
 
   useKeyboardShortcuts({

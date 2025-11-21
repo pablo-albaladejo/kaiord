@@ -58,3 +58,4 @@ export const validateWorkoutForExport = (workout?: KRD): ValidationError[] => {
 
   return errors;
 };
+

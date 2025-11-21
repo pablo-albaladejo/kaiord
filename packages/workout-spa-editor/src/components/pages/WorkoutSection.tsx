@@ -4,7 +4,7 @@ import { WorkoutList } from "../organisms/WorkoutList/WorkoutList";
 export type WorkoutSectionProps = {
   workout: Workout;
   selectedStepId: string | null;
-  onStepSelect: (stepIndex: number) => void;
+  onStepSelect: (stepId: string) => void;
 };
 
 export function WorkoutSection({

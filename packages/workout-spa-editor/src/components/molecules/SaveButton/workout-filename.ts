@@ -23,3 +23,4 @@ export function generateWorkoutFilename(
   const extension = getFileExtension(format);
   return `${sanitizedName}.${extension}`;
 }
+

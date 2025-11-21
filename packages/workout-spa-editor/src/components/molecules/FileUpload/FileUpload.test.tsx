@@ -40,8 +40,12 @@ describe("FileUpload", () => {
     vi.clearAllMocks();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
     cleanup();
+    // Wait for any pending async operations to complete before tearing down
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    vi.clearAllTimers();
+    vi.useRealTimers();
   });
 
   it("should render upload button", () => {

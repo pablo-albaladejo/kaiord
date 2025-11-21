@@ -14,7 +14,7 @@ export function useWorkoutSectionState(
   workout: Workout,
   krd: KRD,
   selectedStepId: string | null,
-  onStepSelect: (stepIndex: number) => void,
+  onStepSelect: (stepId: string) => void,
   onStepReorder?: (activeIndex: number, overIndex: number) => void,
   onReorderStepsInBlock?: (
     blockIndex: number,
@@ -32,8 +32,8 @@ export function useWorkoutSectionState(
   const toggleStepSelection = useToggleStepSelection();
   const repetitionBlockHandlers = useRepetitionBlockHandlers();
 
-  const handleToggleStepSelection = (stepIndex: number) => {
-    toggleStepSelection(`step-${stepIndex}`);
+  const handleToggleStepSelection = (stepId: string) => {
+    toggleStepSelection(stepId);
   };
 
   return {
