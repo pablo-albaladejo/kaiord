@@ -29,8 +29,8 @@
     "test": "vitest --run",
     "test:watch": "vitest",
     "test:coverage": "vitest --run --coverage",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "tsc --noEmit && eslint . && prettier --check src scripts",
+    "lint:fix": "eslint . --fix && prettier --write src scripts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

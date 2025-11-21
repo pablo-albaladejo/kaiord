@@ -1,7 +1,8 @@
-import { ChevronDown, ChevronRight, Repeat } from "lucide-react";
+import { ChevronDown, ChevronRight, GripVertical, Repeat } from "lucide-react";
 import type { RepetitionBlock } from "../../../types/krd";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Icon } from "../../atoms/Icon/Icon";
+import type { DragHandleProps } from "../StepCard/StepCard";
 import { RepetitionCountEditor } from "./RepetitionCountEditor";
 
 type RepetitionBlockHeaderProps = {
@@ -15,6 +16,7 @@ type RepetitionBlockHeaderProps = {
   onCancelEdit: () => void;
   onEditValueChange: (value: string) => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLInputElement>) => void;
+  dragHandleProps?: DragHandleProps;
 };
 
 export const RepetitionBlockHeader = ({
@@ -28,10 +30,22 @@ export const RepetitionBlockHeader = ({
   onCancelEdit,
   onEditValueChange,
   onKeyDown,
+  dragHandleProps,
 }: RepetitionBlockHeaderProps) => {
   return (
     <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2">
+        {dragHandleProps && (
+          <div
+            {...dragHandleProps}
+            className="p-1 hover:bg-primary-100 dark:hover:bg-primary-900 rounded transition-colors cursor-grab active:cursor-grabbing touch-none"
+            aria-label="Drag to reorder block"
+            data-testid="drag-handle"
+          >
+            <Icon icon={GripVertical} size="sm" color="primary" />
+          </div>
+        )}
+
         <button
           onClick={onToggleExpand}
           className="p-1 hover:bg-primary-100 dark:hover:bg-primary-900 rounded transition-colors"

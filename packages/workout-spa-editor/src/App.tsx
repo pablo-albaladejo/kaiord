@@ -1,3 +1,4 @@
+/* eslint-disable max-lines, max-lines-per-function */
 import "./App.css";
 import { ToastProvider } from "./components/atoms/Toast";
 import { WelcomeSection } from "./components/pages/WelcomeSection";
@@ -12,6 +13,7 @@ import {
 } from "./store/workout-store-selectors";
 import type { Workout } from "./types/krd";
 import { saveWorkout } from "./utils/save-workout";
+import { parseStepId } from "./utils/step-id-parser";
 
 /**
  * Main App Component
@@ -26,6 +28,10 @@ function App() {
   const selectedStepId = useSelectedStepId();
   const undo = useWorkoutStore((state) => state.undo);
   const redo = useWorkoutStore((state) => state.redo);
+  const reorderStep = useWorkoutStore((state) => state.reorderStep);
+  const reorderStepsInBlock = useWorkoutStore(
+    (state) => state.reorderStepsInBlock
+  );
   const canUndo = useWorkoutStore((state) => state.canUndo());
   const canRedo = useWorkoutStore((state) => state.canRedo());
 
@@ -37,6 +43,40 @@ function App() {
   } = useAppHandlers();
 
   const workout = currentWorkout?.extensions?.workout as Workout | undefined;
+
+  // Helper function to get step index from selected step ID
+  // Returns the current array position of the selected step
+  const getSelectedStepIndex = (): number | null => {
+    if (!selectedStepId || !workout) return null;
+
+    try {
+      const parsed = parseStepId(selectedStepId);
+
+      // Only handle main workout steps (not block steps) for keyboard shortcuts
+      if (parsed.type !== "step" || parsed.stepIndex === undefined) {
+        return null;
+      }
+
+      // For keyboard shortcuts, only handle main workout steps (no blockIndex)
+      if (parsed.blockIndex !== undefined) {
+        return null;
+      }
+
+      const stepIndex = parsed.stepIndex;
+
+      // Find the current position of this step in the array
+      // After reordering, stepIndex may not match array position
+      const currentPosition = workout.steps.findIndex(
+        (step) => "stepIndex" in step && step.stepIndex === stepIndex
+      );
+
+      if (currentPosition === -1) return null;
+
+      return currentPosition;
+    } catch {
+      return null;
+    }
+  };
 
   useKeyboardShortcuts({
     onSave: () => {
@@ -52,6 +92,22 @@ function App() {
     onRedo: () => {
       if (canRedo) {
         redo();
+      }
+    },
+    onMoveStepUp: () => {
+      const stepIndex = getSelectedStepIndex();
+      if (stepIndex !== null && stepIndex > 0) {
+        reorderStep(stepIndex, stepIndex - 1);
+      }
+    },
+    onMoveStepDown: () => {
+      const stepIndex = getSelectedStepIndex();
+      if (
+        stepIndex !== null &&
+        workout &&
+        stepIndex < workout.steps.length - 1
+      ) {
+        reorderStep(stepIndex, stepIndex + 1);
       }
     },
   });
@@ -73,6 +129,8 @@ function App() {
               krd={currentWorkout}
               selectedStepId={selectedStepId}
               onStepSelect={handleStepSelect}
+              onStepReorder={reorderStep}
+              onReorderStepsInBlock={reorderStepsInBlock}
             />
           )}
         </div>

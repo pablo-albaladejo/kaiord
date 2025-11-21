@@ -4,17 +4,35 @@ type KeyboardShortcutHandlers = {
   onSave?: () => void;
   onUndo?: () => void;
   onRedo?: () => void;
+  onMoveStepUp?: () => void;
+  onMoveStepDown?: () => void;
 };
 
 export function useKeyboardShortcuts({
   onSave,
   onUndo,
   onRedo,
+  onMoveStepUp,
+  onMoveStepDown,
 }: KeyboardShortcutHandlers) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       // Check for Ctrl (Windows/Linux) or Cmd (Mac)
       const isModifier = event.ctrlKey || event.metaKey;
+
+      // Alt+Up/Down for reordering (Requirement 29)
+      if (event.altKey && !isModifier) {
+        if (event.key === "ArrowUp") {
+          event.preventDefault();
+          onMoveStepUp?.();
+          return;
+        }
+        if (event.key === "ArrowDown") {
+          event.preventDefault();
+          onMoveStepDown?.();
+          return;
+        }
+      }
 
       if (!isModifier) return;
 
@@ -51,5 +69,5 @@ export function useKeyboardShortcuts({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onSave, onUndo, onRedo]);
+  }, [onSave, onUndo, onRedo, onMoveStepUp, onMoveStepDown]);
 }

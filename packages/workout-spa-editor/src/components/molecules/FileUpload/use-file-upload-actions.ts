@@ -18,6 +18,7 @@ type FileUploadActionsParams = {
   setError: (error: ErrorState) => void;
   setConversionProgress: (progress: number) => void;
   resetInput: () => void;
+  createAbortController: () => AbortController;
   onFileLoad: (krd: KRD) => void;
   onError?: (error: string, validationErrors?: Array<ValidationError>) => void;
 };
@@ -29,6 +30,7 @@ export function useFileUploadActions({
   setError,
   setConversionProgress,
   resetInput,
+  createAbortController,
   onFileLoad,
   onError,
 }: FileUploadActionsParams) {
@@ -47,7 +49,8 @@ export function useFileUploadActions({
     setConversionProgress,
     setError,
     onFileLoad,
-    handleError
+    handleError,
+    createAbortController
   );
 
   const triggerFileInput = () => {
