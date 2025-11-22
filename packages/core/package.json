@@ -50,5 +50,30 @@
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "vitest": "^4.0.9"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pablo-albaladejo/kaiord.git",
+    "directory": "packages/core"
+  },
+  "homepage": "https://www.npmjs.com/package/@kaiord/core",
+  "bugs": {
+    "url": "https://github.com/pablo-albaladejo/kaiord/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "kaiord",
+    "fit",
+    "tcx",
+    "zwo",
+    "workout",
+    "garmin",
+    "zwift",
+    "converter",
+    "fitness"
+  ],
+  "author": "Kaiord Contributors",
+  "license": "MIT"
 }

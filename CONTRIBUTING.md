@@ -33,7 +33,7 @@ This project follows a code of conduct to ensure a welcoming environment for all
 2. **Clone your fork**:
 
    ```bash
-   git clone https://github.com/YOUR_USERNAME/kaiord.git
+   git clone https://github.com/pablo-albaladejo/kaiord.git
    cd kaiord
    ```
 
@@ -335,7 +335,7 @@ act pull_request -j lint
 act pull_request -l
 ```
 
-See [TESTING_WORKFLOWS.md](./.github/TESTING_WORKFLOWS.md) for detailed instructions.
+See the CI/CD Workflows section above for detailed instructions.
 
 ### Required Checks
 
