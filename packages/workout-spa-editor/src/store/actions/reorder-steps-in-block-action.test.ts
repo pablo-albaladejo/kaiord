@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type { WorkoutState } from "../workout-store";
 import { reorderStepsInBlockAction } from "./reorder-steps-in-block-action";
 
 describe("reorderStepsInBlockAction", () => {
@@ -15,10 +16,13 @@ describe("reorderStepsInBlockAction", () => {
     },
   });
 
-  const createMockState = () => ({
+  const createMockState = (): Partial<WorkoutState> => ({
     currentWorkout: null,
     workoutHistory: [],
     historyIndex: -1,
+    selectedStepId: null,
+    selectedStepIds: [],
+    isEditing: false,
   });
 
   it("should reorder steps within a repetition block", () => {
