@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "packages/workout-spa-editor/**"
+      - "packages/core/**"
       - ".github/workflows/deploy-spa-editor.yml"
   workflow_dispatch:
 
@@ -39,12 +40,38 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
+      - name: Build core package
+        run: pnpm --filter @kaiord/core build
+
+      - name: Verify core build
+        run: |
+          if [ ! -d "packages/core/dist" ]; then
+            echo "❌ Core package build output not found"
+            exit 1
+          fi
+          if [ ! -f "packages/core/dist/index.d.ts" ]; then
+            echo "❌ Core package TypeScript declaration files not found"
+            exit 1
+          fi
+          echo "✅ Core package build verified"
+
       - name: Build SPA Editor
-        working-directory: packages/workout-spa-editor
         env:
           # Set base path for GitHub Pages: '/' for user/org pages (owner.github.io), '/repo-name/' for project pages
           VITE_BASE_PATH: ${{ github.event.repository.name == format('{0}.github.io', github.repository_owner) && '/' || format('/{0}/', github.event.repository.name) }}
-        run: pnpm build
+        run: pnpm --filter @kaiord/workout-spa-editor build
+
+      - name: Verify SPA build
+        run: |
+          if [ ! -d "packages/workout-spa-editor/dist" ]; then
+            echo "❌ SPA build output not found"
+            exit 1
+          fi
+          if [ ! -f "packages/workout-spa-editor/dist/index.html" ]; then
+            echo "❌ SPA index.html not found"
+            exit 1
+          fi
+          echo "✅ SPA build verified"
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
