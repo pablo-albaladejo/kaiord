@@ -34,6 +34,9 @@ export const formatCadenceTarget = (value: unknown): string => {
  * Convert meters per second to min/km format
  */
 const convertMpsToMinPerKm = (mps: number): string => {
+  if (mps <= 0 || !isFinite(mps)) {
+    return "--:--";
+  }
   const minPerKm = 1000 / (mps * 60);
   const minutes = Math.floor(minPerKm);
   const seconds = Math.round((minPerKm - minutes) * 60);

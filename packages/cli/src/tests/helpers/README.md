@@ -8,4 +8,4 @@ This directory contains shared test utilities for CLI tests.
   - `runCli()` - Execute CLI as child process
   - `createTempDir()` - Create temporary directories for test files
 
-These utilities will be implemented in subsequent tasks.
+These utilities are implemented and tested as part of the CLI package test suite.

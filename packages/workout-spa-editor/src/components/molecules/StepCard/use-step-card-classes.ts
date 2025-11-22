@@ -11,7 +11,7 @@ export function getStepCardClasses(
     : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800";
   const paddingClasses = [
     hasActions ? "pb-12" : "pb-4",
-    hasDragHandle ? "pl-10 pr-4 pt-4" : "pl-4 pr-4 pt-4",
+    hasDragHandle ? "pl-10 pr-4 pt-4" : "px-4 pt-4",
   ]
     .filter(Boolean)
     .join(" ");

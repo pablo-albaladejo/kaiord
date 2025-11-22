@@ -398,20 +398,20 @@ export const convertCommand = async (
       console.error(formattedError);
     }
 
-    // Set appropriate exit codes
-    let exitCode = 1; // Default error code
+    // Set appropriate exit codes per CLI spec
+    let exitCode = 99; // Unknown error code
 
     if (error instanceof Error) {
       if (error.message.includes("File not found")) {
-        exitCode = 1; // File not found (Requirement 2.4)
+        exitCode = 2; // File not found (Requirement 2.4)
       } else if (error.message.includes("Permission denied")) {
-        exitCode = 1; // Permission error (Requirement 3.4)
+        exitCode = 3; // Permission error (Requirement 3.4)
       } else if (error instanceof FitParsingError) {
-        exitCode = 1; // Parsing error (Requirement 2.5)
+        exitCode = 4; // Parsing error (Requirement 2.5)
       } else if (error instanceof KrdValidationError) {
-        exitCode = 1; // Validation error (Requirement 3.3)
+        exitCode = 5; // Validation error (Requirement 3.3)
       } else if (error instanceof ToleranceExceededError) {
-        exitCode = 1; // Tolerance exceeded (Requirement 7.3)
+        exitCode = 6; // Tolerance exceeded (Requirement 7.3)
       } else if (error.name === "InvalidArgumentError") {
         exitCode = 1; // Invalid arguments (Requirements 2.4, 4.5, 5.4)
       }

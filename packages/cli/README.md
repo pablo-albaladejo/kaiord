@@ -213,9 +213,9 @@ npm unlink -g
 
 For more information about the Kaiord project and the KRD format, see:
 
-- [Kaiord Core Library](https://github.com/your-org/kaiord/tree/main/packages/core)
-- [KRD Format Specification](https://github.com/your-org/kaiord/blob/main/docs/KRD_FORMAT.md)
-- [Contributing Guide](https://github.com/your-org/kaiord/blob/main/CONTRIBUTING.md)
+- [Kaiord Core Library](https://github.com/pablo-albaladejo/kaiord/tree/main/packages/core)
+- [KRD Format Specification](https://github.com/pablo-albaladejo/kaiord/blob/main/docs/KRD_FORMAT.md)
+- [Contributing Guide](https://github.com/pablo-albaladejo/kaiord/blob/main/CONTRIBUTING.md)
 
 ## License
 
@@ -223,5 +223,5 @@ MIT - See [LICENSE](../../LICENSE) file for details.
 
 ## Support
 
-- Report issues: [GitHub Issues](https://github.com/your-org/kaiord/issues)
-- Ask questions: [GitHub Discussions](https://github.com/your-org/kaiord/discussions)
+- Report issues: [GitHub Issues](https://github.com/pablo-albaladejo/kaiord/issues)
+- Ask questions: [GitHub Discussions](https://github.com/pablo-albaladejo/kaiord/discussions)

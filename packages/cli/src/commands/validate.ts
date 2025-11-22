@@ -26,18 +26,21 @@ const validateOptionsSchema = z.object({
 });
 
 export const validateCommand = async (options: unknown): Promise<void> => {
-  // Parse and validate options
-  const opts = validateOptionsSchema.parse(options);
-
-  // Create logger
-  const loggerType = opts.logFormat === "json" ? "structured" : opts.logFormat;
-  const logger = await createLogger({
-    type: loggerType,
-    level: opts.verbose ? "debug" : opts.quiet ? "error" : "info",
-    quiet: opts.quiet,
-  });
+  let logger: Awaited<ReturnType<typeof createLogger>> | undefined;
+  let spinner: ReturnType<typeof ora> | null = null;
 
   try {
+    // Parse and validate options
+    const opts = validateOptionsSchema.parse(options);
+
+    // Create logger
+    const loggerType =
+      opts.logFormat === "json" ? "structured" : opts.logFormat;
+    logger = await createLogger({
+      type: loggerType,
+      level: opts.verbose ? "debug" : opts.quiet ? "error" : "info",
+      quiet: opts.quiet,
+    });
     // Detect format from file extension
     const format = detectFormat(opts.input);
     if (!format) {
@@ -51,7 +54,7 @@ export const validateCommand = async (options: unknown): Promise<void> => {
     }
 
     // Read input file
-    logger.debug("Reading input file", { path: opts.input, format });
+    logger?.debug("Reading input file", { path: opts.input, format });
     const inputData = await readFile(opts.input, format);
 
     if (typeof inputData === "string") {
@@ -61,13 +64,13 @@ export const validateCommand = async (options: unknown): Promise<void> => {
     // Load custom tolerance config if provided
     let toleranceConfig: ToleranceConfig | undefined;
     if (opts.toleranceConfig) {
-      logger.debug("Loading custom tolerance config", {
+      logger?.debug("Loading custom tolerance config", {
         path: opts.toleranceConfig,
       });
       const configContent = await fsReadFile(opts.toleranceConfig, "utf-8");
       const configJson = JSON.parse(configContent);
       toleranceConfig = toleranceConfigSchema.parse(configJson);
-      logger.debug("Custom tolerance config loaded", {
+      logger?.debug("Custom tolerance config loaded", {
         config: toleranceConfig,
       });
     }
@@ -89,13 +92,13 @@ export const validateCommand = async (options: unknown): Promise<void> => {
     );
 
     // Start spinner if not in quiet mode
-    const spinner =
+    spinner =
       opts.quiet || opts.json
         ? null
         : ora("Validating round-trip conversion...").start();
 
     // Perform round-trip validation (FIT → KRD → FIT)
-    logger.info("Starting round-trip validation", { file: opts.input });
+    logger?.info("Starting round-trip validation", { file: opts.input });
     const violations = await roundTripValidator.validateFitToKrdToFit({
       originalFit: inputData,
     });
@@ -112,7 +115,7 @@ export const validateCommand = async (options: unknown): Promise<void> => {
 
     // Handle validation results
     if (violations.length === 0) {
-      logger.info("Round-trip validation passed");
+      logger?.info("Round-trip validation passed");
 
       if (opts.json) {
         console.log(
@@ -134,7 +137,7 @@ export const validateCommand = async (options: unknown): Promise<void> => {
       process.exit(0);
     } else {
       // Violations found - format and display them
-      logger.warn("Round-trip validation failed", {
+      logger?.warn("Round-trip validation failed", {
         violationCount: violations.length,
       });
 
@@ -159,14 +162,27 @@ export const validateCommand = async (options: unknown): Promise<void> => {
       process.exit(1);
     }
   } catch (error) {
-    logger.error("Validation failed", { error });
+    logger?.error("Validation failed", { error });
 
-    if (opts.json) {
+    // Parse options for error formatting (may fail if error is in parsing)
+    let jsonOutput = false;
+    try {
+      const opts = validateOptionsSchema.parse(options);
+      jsonOutput = opts.json || false;
+    } catch {
+      // If options parsing failed, use default formatting
+    }
+
+    if (jsonOutput) {
+      const errorObj = formatError(error, { json: true });
+      // formatError with json:true returns a string, parse it back to object
+      const errorData =
+        typeof errorObj === "string" ? JSON.parse(errorObj) : errorObj;
       console.log(
         JSON.stringify(
           {
             success: false,
-            error: formatError(error, { json: true }),
+            error: errorData,
           },
           null,
           2
@@ -177,5 +193,8 @@ export const validateCommand = async (options: unknown): Promise<void> => {
     }
 
     process.exit(1);
+  } finally {
+    // Ensure spinner is stopped on all paths
+    spinner?.stop();
   }
 };
