@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Changed
+
+#### Documentation Reorganization
+
+- **Centralized documentation**: All documentation has been consolidated into the `/docs` directory for easier discovery and maintenance
+  - Created `/docs` directory with comprehensive documentation index
+  - Moved and merged content from `.kiro/steering`, `.github`, and package-specific docs
+  - Organized documentation by category: getting started, architecture, testing, deployment, contributing, format specs, and agents
+
+- **Removed historical files**: Cleaned up outdated and historical documentation files
+  - Deleted 20+ historical files (CI_BUILD_FIXES.md, FIT_TO_ZWIFT_CONVERSION_SUMMARY.md, etc.)
+  - Removed redundant GitHub workflow documentation
+  - Cleaned up package-specific historical files
+
+- **Simplified package READMEs**: Package README files now focus on package-specific information and link to centralized docs
+  - `packages/core/README.md`: Links to architecture, testing, and format documentation
+  - `packages/cli/README.md`: Links to getting started and format documentation
+  - `packages/workout-spa-editor/README.md`: Links to architecture, testing, and deployment documentation
+
+- **Updated references**: All internal links and script references updated to point to new documentation locations
+  - Updated scripts to reference `docs/deployment.md` instead of deleted files
+  - Updated spec files to reference new documentation structure
+  - See migration guide in `docs/README.md` for old → new file mappings
+
 ### Added
 
 #### Priority 1: Workout Metadata & Step Notes
@@ -81,5 +105,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Hexagonal architecture with ports/adapters
 - Comprehensive test coverage
 
-[Unreleased]: https://github.com/yourusername/kaiord/compare/v1.0.0...HEAD
-[1.0.0]: https://github.com/yourusername/kaiord/releases/tag/v1.0.0
+[Unreleased]: https://github.com/pablo-albaladejo/kaiord/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/pablo-albaladejo/kaiord/releases/tag/v1.0.0

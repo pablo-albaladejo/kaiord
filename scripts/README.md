@@ -292,7 +292,123 @@ Configures npm publishing with token-based authentication (legacy method).
 
 ### quick-setup-npm.sh
 
-Quick setup script for npm publishing configuration.
+Quick setup script for npm publishing configuration for `@kaiord/core` package.
+
+### quick-setup-npm-cli.sh
+
+Quick setup script for npm publishing configuration for `@kaiord/cli` package using **token-based authentication** (legacy method).
+
+**⚠️ Note:** Consider using `setup-trusted-publishing-cli.sh` instead for better security.
+
+**Usage:**
+
+```bash
+# Make script executable (first time only)
+chmod +x scripts/quick-setup-npm-cli.sh
+
+# Run the setup
+./scripts/quick-setup-npm-cli.sh
+```
+
+**What it does:**
+
+1. Verifies npm authentication
+2. Checks @kaiord scope access
+3. Optionally creates/updates npm token
+4. Configures GitHub secret (NPM_TOKEN)
+5. Verifies package status on npm
+6. Runs pre-publish checks (build, tests)
+7. Provides next steps for publishing
+
+**Next steps after running:**
+
+```bash
+# 1. Build the package
+pnpm --filter @kaiord/cli build
+
+# 2. Create changeset
+pnpm exec changeset
+# Select: @kaiord/cli
+# Version: patch/minor/major
+
+# 3. Commit and push
+git add .changeset/ && git commit -m 'chore: release cli' && git push
+
+# 4. Merge 'Version Packages' PR
+
+# 5. Watch CI/CD
+# https://github.com/pablo-albaladejo/kaiord/actions
+```
+
+**Manual publish (if needed):**
+
+```bash
+cd packages/cli && npm publish --access public
+```
+
+### setup-trusted-publishing-cli.sh
+
+🔒 **Recommended:** Setup script for npm Trusted Publishing for `@kaiord/cli` package.
+
+Trusted Publishing is more secure than tokens because:
+
+- ✅ No secrets needed (uses OpenID Connect)
+- ✅ Automatic verification by npm
+- ✅ Cryptographic provenance attestation
+- ✅ No token rotation required
+- ✅ Eliminates token theft risk
+
+**Usage:**
+
+```bash
+# Make script executable (first time only)
+chmod +x scripts/setup-trusted-publishing-cli.sh
+
+# Run the setup
+./scripts/setup-trusted-publishing-cli.sh
+```
+
+**What it does:**
+
+1. Verifies npm authentication
+2. Checks if package is published (required for trusted publishing)
+3. Optionally publishes package for the first time
+4. Guides you through configuring trusted publishing on npm
+5. Verifies workflow has correct permissions
+6. Provides testing instructions
+7. Suggests cleanup of old NPM_TOKEN (if exists)
+
+**Configuration on npm:**
+
+The script will guide you to configure on npm:
+
+- Provider: **GitHub Actions**
+- Repository owner: `pablo-albaladejo`
+- Repository name: `kaiord`
+- Workflow name: `release.yml` (or leave empty)
+- Environment: (leave empty)
+
+**Note:** `@kaiord` is an npm organization. Make sure you have admin access to configure trusted publishing.
+
+**Testing trusted publishing:**
+
+```bash
+# 1. Create changeset
+pnpm exec changeset
+# Select: @kaiord/cli, Version: patch
+
+# 2. Commit and push
+git add .changeset/ && git commit -m 'chore: test trusted publishing' && git push
+
+# 3. Merge 'Version Packages' PR
+
+# 4. Verify provenance
+npm view @kaiord/cli --json | jq '.dist.attestations'
+```
+
+**Documentation:**
+
+See [NPM_TRUSTED_PUBLISHING.md](../.github/NPM_TRUSTED_PUBLISHING.md) for detailed information.
 
 ### test-workflow.sh
 
