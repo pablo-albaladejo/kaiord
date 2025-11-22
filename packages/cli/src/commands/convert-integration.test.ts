@@ -85,7 +85,7 @@ describe("convert command integration tests", () => {
     );
 
     // Assert
-    expect(result.exitCode).toBe(1);
+    expect(result.exitCode).toBe(2); // Exit code 2 for file not found
     const output = stripAnsi(result.stderr);
     expect(output).toContain("File not found");
   });
@@ -107,7 +107,7 @@ describe("convert command integration tests", () => {
     );
 
     // Assert
-    expect(result.exitCode).toBe(1);
+    expect(result.exitCode).toBe(4); // Exit code 4 for parsing errors
     const output = stripAnsi(result.stderr);
     expect(output).toContain("Error");
   });

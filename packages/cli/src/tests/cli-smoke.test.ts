@@ -7,18 +7,10 @@ import { beforeAll, describe, expect, it } from "vitest";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-// Path to the CLI entry point
-const cliPath = join(__dirname, "../bin/kaiord.ts");
-
 describe("CLI smoke tests", () => {
   beforeAll(async () => {
     // Build the CLI before running tests
     await execa("pnpm", ["build"], {
-      cwd: join(__dirname, "../.."),
-    });
-
-    // Make the CLI executable
-    await execa("chmod", ["+x", "dist/bin/kaiord.js"], {
       cwd: join(__dirname, "../.."),
     });
   });
