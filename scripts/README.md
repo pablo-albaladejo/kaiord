@@ -2,370 +2,300 @@
 
 This directory contains utility scripts for the Kaiord project.
 
-## npm Publishing Setup Scripts
+## test-ci-workflows.sh
 
-### Quick Setup (Recommended)
+Simulates GitHub Actions CI workflows locally to catch deployment issues before pushing to GitHub.
 
-```bash
-pnpm setup:npm
-```
+### Purpose
 
-**What it does:**
+This script validates the complete deployment process by:
 
-- Checks npm authentication (prompts login if needed)
-- Opens browser to create automation token
-- Configures GitHub secret using GitHub CLI
-- Verifies configuration
+1. **Core Build Test** - Ensures `@kaiord/core` builds successfully in a clean environment
+2. **SPA Build Test** - Verifies the SPA builds with the core dependency
+3. **Dependency Order Test** - Confirms the SPA fails without core and succeeds with it
+4. **Deployment Simulation** - Validates GitHub Pages deployment requirements
+5. **Build Reproducibility** - Ensures frozen lockfile is up to date
 
-**Requirements:**
-
-- npm installed
-- GitHub CLI (`gh`) installed
-- Internet connection
-
-**Time:** ~2 minutes
-
----
-
-### Full Setup (Advanced)
+### Usage
 
 ```bash
-pnpm setup:npm:full
+# Make script executable (first time only)
+chmod +x scripts/test-ci-workflows.sh
+
+# Run all tests
+./scripts/test-ci-workflows.sh
 ```
 
-**What it does:**
+### When to Run
 
-- All features from quick setup
-- Additional validation checks
-- More detailed output
-- Option to save token to ~/.npmrc
+Run this script before:
 
-**Requirements:**
+- Pushing changes to `main` branch
+- Creating a pull request that affects deployment
+- Making changes to:
+  - `packages/workout-spa-editor/**`
+  - `packages/core/**`
+  - `.github/workflows/deploy-spa-editor.yml`
+  - `pnpm-lock.yaml`
 
-- npm installed
-- GitHub CLI (`gh`) installed (optional)
-- jq installed (optional, for JSON parsing)
+### What It Tests
 
-**Time:** ~5 minutes
+#### Test 1: Core Build Test
 
----
-
-## Script Details
-
-### `quick-setup-npm.sh`
-
-Simple, streamlined setup script.
-
-**Features:**
-
-- Minimal prompts
-- Automatic browser opening for token creation
-- GitHub CLI integration
-- Quick verification
-
-**Usage:**
+Simulates a clean CI environment:
 
 ```bash
-./scripts/quick-setup-npm.sh
+# Removes build artifacts
+rm -rf packages/core/dist
+
+# Installs dependencies
+pnpm install --frozen-lockfile
+
+# Builds core package
+pnpm --filter @kaiord/core build
+
+# Verifies artifacts exist
+- packages/core/dist/
+- packages/core/dist/index.d.ts
+- packages/core/dist/index.js
 ```
 
-**Exit codes:**
+#### Test 2: SPA Build Test
 
-- `0` - Success
-- `1` - Error (missing prerequisites, authentication failed, etc.)
-
----
-
-### `setup-npm-publishing.sh`
-
-Comprehensive setup script with detailed checks.
-
-**Features:**
-
-- Step-by-step guidance
-- Prerequisite checking
-- Multiple authentication methods
-- Detailed verification
-- Optional token saving to ~/.npmrc
-- Fallback for manual configuration
-
-**Usage:**
+Builds the SPA with core dependency:
 
 ```bash
-./scripts/setup-npm-publishing.sh
+# Removes SPA build artifacts
+rm -rf packages/workout-spa-editor/dist
+
+# Builds SPA with base path
+VITE_BASE_PATH="/kaiord/" pnpm --filter @kaiord/workout-spa-editor build
+
+# Verifies artifacts exist
+- packages/workout-spa-editor/dist/
+- packages/workout-spa-editor/dist/index.html
+- packages/workout-spa-editor/dist/assets/
 ```
 
-**Exit codes:**
+#### Test 3: Dependency Order Test
 
-- `0` - Success
-- `1` - Error (missing prerequisites, authentication failed, etc.)
-
----
-
-## Prerequisites
-
-### Required
-
-- **Node.js & npm** - For npm authentication and token creation
-
-  ```bash
-  # Check if installed
-  node --version
-  npm --version
-  ```
-
-- **GitHub CLI** - For automatic secret configuration
-
-  ```bash
-  # Install on macOS
-  brew install gh
-
-  # Install on Linux
-  curl -fsSL https://cli.github.com/packages/githubcli-archive-keyring.gpg | sudo dd of=/usr/share/keyrings/githubcli-archive-keyring.gpg
-  echo "deb [arch=$(dpkg --print-architecture) signed-by=/usr/share/keyrings/githubcli-archive-keyring.gpg] https://cli.github.com/packages stable main" | sudo tee /etc/apt/sources.list.d/github-cli.list > /dev/null
-  sudo apt update
-  sudo apt install gh
-
-  # Verify installation
-  gh --version
-  ```
-
-### Optional
-
-- **jq** - For JSON parsing (full setup script only)
-
-  ```bash
-  # Install on macOS
-  brew install jq
-
-  # Install on Linux
-  sudo apt install jq
-  ```
-
----
-
-## Troubleshooting
-
-### "npm: command not found"
-
-**Solution:** Install Node.js and npm
+Validates build dependency order:
 
 ```bash
-# macOS
-brew install node
+# Removes core dist
+rm -rf packages/core/dist
 
-# Linux (Ubuntu/Debian)
-curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
-sudo apt-get install -y nodejs
+# Attempts to build SPA (should fail)
+pnpm --filter @kaiord/workout-spa-editor build  # ❌ Expected to fail
 
-# Verify
-node --version
-npm --version
+# Rebuilds core
+pnpm --filter @kaiord/core build
+
+# Builds SPA (should succeed)
+pnpm --filter @kaiord/workout-spa-editor build  # ✅ Expected to succeed
 ```
 
-### "gh: command not found"
+#### Test 4: Deployment Simulation
 
-**Solution:** Install GitHub CLI
+Validates GitHub Pages requirements:
 
 ```bash
-# macOS
-brew install gh
+# Checks base path in index.html
+grep 'src="/kaiord/' packages/workout-spa-editor/dist/index.html
 
-# Linux
-# See prerequisites section above
+# Verifies no hardcoded absolute URLs
+! grep 'src="http' packages/workout-spa-editor/dist/index.html
 
-# Verify
-gh --version
+# Validates artifact structure
+- index.html at root
+- assets/ directory exists
+- JavaScript bundles present
+- CSS bundles present
+- Sourcemaps generated
 ```
 
-### "gh auth status" fails
+#### Test 5: Build Reproducibility
 
-**Solution:** Authenticate with GitHub
+Ensures consistent builds:
 
 ```bash
-gh auth login
-# Follow the prompts to authenticate
+# Validates frozen lockfile
+pnpm install --frozen-lockfile
+
+# Checks lockfile is up to date
+git diff --exit-code pnpm-lock.yaml
 ```
 
-### npm login fails
+### Expected Output
 
-**Possible causes:**
+```
+🧪 Testing CI Workflows Locally
+================================
 
-- Incorrect credentials
-- 2FA not configured
-- Network issues
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Test 1: Core Build Test (Clean Environment)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ℹ️  Simulating CI environment by removing build artifacts...
+ℹ️  Installing dependencies with frozen lockfile...
+✅ Dependencies installed successfully
+ℹ️  Building core package...
+✅ Core package built successfully
+ℹ️  Verifying core dist artifacts exist...
+✅ Core dist directory exists
+ℹ️  Verifying TypeScript declaration files...
+✅ TypeScript declaration files present
+ℹ️  Verifying JavaScript output files...
+✅ JavaScript output files present
 
-**Solution:**
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Test 2: SPA Build Test (With Core Dependency)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ℹ️  Removing SPA build artifacts...
+ℹ️  Building SPA with core dependency...
+✅ SPA built successfully
+ℹ️  Verifying SPA dist artifacts exist...
+✅ SPA dist directory exists
+ℹ️  Verifying index.html exists...
+✅ index.html present
+ℹ️  Verifying assets directory exists...
+✅ Assets directory present
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Test 3: Dependency Order Validation
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ℹ️  Removing core dist to simulate missing dependency...
+ℹ️  Attempting to build SPA without core (should fail)...
+✅ SPA correctly fails without core dependency
+ℹ️  Rebuilding core package...
+✅ Core package rebuilt
+ℹ️  Building SPA with core dependency...
+✅ SPA builds successfully with core dependency
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Test 4: Deployment Simulation (GitHub Pages)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ℹ️  Verifying base path configuration in index.html...
+✅ Base path correctly configured in index.html
+ℹ️  Verifying no hardcoded absolute paths...
+✅ No hardcoded absolute paths found
+ℹ️  Verifying artifact structure matches GitHub Pages requirements...
+✅ index.html at root of dist
+✅ assets directory present
+ℹ️  Checking for JavaScript bundles in assets...
+✅ JavaScript bundles present (3 files)
+ℹ️  Checking for CSS bundles in assets...
+✅ CSS bundles present (1 files)
+ℹ️  Verifying sourcemaps are generated...
+✅ Sourcemaps present (4 files)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Test 5: Build Reproducibility
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+ℹ️  Testing frozen lockfile enforcement...
+✅ Frozen lockfile validation passed
+ℹ️  Verifying pnpm-lock.yaml is up to date...
+✅ pnpm-lock.yaml is up to date
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+Test Summary
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✅ Tests Passed: 20
+❌ Tests Failed: 0
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+================================
+✅ All CI workflow tests passed!
+================================
+
+You can now safely push to GitHub.
+The deployment workflow should succeed.
+```
+
+### Troubleshooting
+
+#### Script Fails: "Permission denied"
+
+Make the script executable:
 
 ```bash
-# Try logging in manually
-npm login
-
-# If 2FA is enabled, you'll need:
-# - Username
-# - Password
-# - 2FA code from authenticator app
+chmod +x scripts/test-ci-workflows.sh
 ```
 
-### Token creation fails
+#### Test Fails: "Core build failed"
 
-**Solution:** Create token manually
-
-1. Go to https://www.npmjs.com/settings/[YOUR_USERNAME]/tokens
-2. Click "Generate New Token"
-3. Select "Automation" type
-4. Copy the token
-5. Paste when prompted by script
-
-### GitHub secret configuration fails
-
-**Possible causes:**
-
-- Not authenticated with GitHub CLI
-- Insufficient permissions
-- Network issues
-
-**Solution:**
+Check for TypeScript errors:
 
 ```bash
-# Re-authenticate with GitHub CLI
-gh auth login
-
-# Or configure manually:
-# 1. Go to https://github.com/pablo-albaladejo/kaiord/settings/secrets/actions
-# 2. Create secret named NPM_TOKEN
-# 3. Paste token value
+cd packages/core
+pnpm build
 ```
 
----
+Fix any compilation errors and run the script again.
 
-## Manual Configuration
+#### Test Fails: "SPA build failed"
 
-If the scripts don't work for your environment, you can configure manually:
-
-### 1. Create npm Token
+Ensure core is built first:
 
 ```bash
-# Login to npm
-npm login
-
-# Visit token creation page
-open https://www.npmjs.com/settings/$(npm whoami)/tokens/create
-
-# Or use this command (may require manual interaction)
-npm token create --type=automation
+pnpm --filter @kaiord/core build
+pnpm --filter @kaiord/workout-spa-editor build
 ```
 
-### 2. Configure GitHub Secret
+#### Test Fails: "Frozen lockfile validation failed"
 
-**Option A: Using GitHub CLI**
+Update the lockfile:
 
 ```bash
-# Set the secret
-echo "YOUR_NPM_TOKEN" | gh secret set NPM_TOKEN --repo pablo-albaladejo/kaiord
+pnpm install
+git add pnpm-lock.yaml
+git commit -m "chore: update pnpm lockfile"
 ```
 
-**Option B: Using GitHub Web UI**
+#### Test Fails: "Base path not found"
 
-1. Go to https://github.com/pablo-albaladejo/kaiord/settings/secrets/actions
-2. Click "New repository secret"
-3. Name: `NPM_TOKEN`
-4. Value: [paste your token]
-5. Click "Add secret"
-
-### 3. Verify Configuration
+Ensure `VITE_BASE_PATH` is set:
 
 ```bash
-# Check npm authentication
-npm whoami
-
-# Check package access
-npm access list packages
-
-# Check GitHub secret (won't show value, just confirms it exists)
-gh secret list --repo pablo-albaladejo/kaiord
+VITE_BASE_PATH="/kaiord/" pnpm --filter @kaiord/workout-spa-editor build
 ```
 
----
+### Exit Codes
 
-## Security Notes
+- `0` - All tests passed
+- `1` - One or more tests failed
 
-### Token Security
+### Integration with CI/CD
 
-- **Never commit tokens** to git
-- **Never share tokens** publicly
-- **Rotate tokens** every 90 days
-- **Use automation tokens** for CI/CD (not publish tokens)
-- **Revoke old tokens** after creating new ones
+This script mirrors the GitHub Actions workflow (`.github/workflows/deploy-spa-editor.yml`):
 
-### Token Storage
+| Script Test                   | Workflow Step                |
+| ----------------------------- | ---------------------------- |
+| Test 1: Core Build            | Build core package           |
+| Test 2: SPA Build             | Build SPA Editor             |
+| Test 3: Dependency Order      | (Implicit in workflow order) |
+| Test 4: Deployment Simulation | Verify SPA build             |
+| Test 5: Build Reproducibility | Install dependencies         |
 
-The scripts offer to save tokens to `~/.npmrc`:
+### Related Documentation
 
-```bash
-# Token is stored in this format
-//registry.npmjs.org/:_authToken=npm_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
+- [DEPLOYMENT.md](../DEPLOYMENT.md) - Complete deployment guide
+- [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
+- [.github/workflows/deploy-spa-editor.yml](../.github/workflows/deploy-spa-editor.yml) - Deployment workflow
 
-**Important:**
+## Other Scripts
 
-- This file should have restricted permissions: `chmod 600 ~/.npmrc`
-- Never commit this file to git
-- Add to `.gitignore` if not already present
+### setup-npm-publishing.sh
 
-### GitHub Secret Security
+Configures npm publishing with token-based authentication (legacy method).
 
-- Secrets are encrypted at rest
-- Only visible to workflow runs
-- Can be rotated without changing workflows
-- Access is logged in audit trail
+**Recommended**: Use [Trusted Publishing](../.github/NPM_TRUSTED_PUBLISHING.md) instead.
 
----
+### quick-setup-npm.sh
 
-## Next Steps
+Quick setup script for npm publishing configuration.
 
-After running the setup script:
+### test-workflow.sh
 
-1. **Test manual publishing** (optional):
+Tests individual GitHub Actions workflows locally using `act`.
 
-   ```bash
-   pnpm -r build
-   pnpm --filter @kaiord/core publish --access public --dry-run
-   ```
-
-2. **Test automated publishing**:
-
-   ```bash
-   pnpm exec changeset
-   git add .changeset/
-   git commit -m "chore: test release"
-   git push
-   ```
-
-3. **Monitor workflow**:
-   - Go to https://github.com/pablo-albaladejo/kaiord/actions
-   - Watch for "Changesets" workflow
-   - Review "Version Packages" PR when created
-   - Merge PR to trigger release
-
----
-
-## Additional Resources
-
-- **npm Publishing Guide:** `.github/NPM_PUBLISHING.md`
-- **Setup Checklist:** `.github/SETUP_CHECKLIST.md`
-- **Workflow Documentation:** `.github/workflows/README.md`
-- **npm Token Documentation:** https://docs.npmjs.com/creating-and-viewing-access-tokens
-- **GitHub CLI Documentation:** https://cli.github.com/manual/
-
----
-
-## Support
-
-If you encounter issues:
-
-1. Check the troubleshooting section above
-2. Review script output for error messages
-3. Check prerequisites are installed
-4. Try manual configuration
-5. Create an issue: https://github.com/pablo-albaladejo/kaiord/issues
+See [TESTING_WORKFLOWS.md](../.github/TESTING_WORKFLOWS.md) for details.

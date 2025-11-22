@@ -93,6 +93,27 @@ pnpm -r test
 pnpm kaiord --help
 ```
 
+### Testing Deployment Locally
+
+Before pushing changes that affect the SPA deployment, test the CI workflow locally:
+
+```bash
+# Make script executable (first time only)
+chmod +x scripts/test-ci-workflows.sh
+
+# Run all CI tests
+./scripts/test-ci-workflows.sh
+```
+
+This simulates the GitHub Actions deployment workflow and validates:
+
+- Core package builds successfully
+- SPA builds with core dependency
+- Build artifacts are correct
+- Base path configuration is valid
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment documentation.
+
 ---
 
 ## 🚀 CI/CD Pipeline
@@ -168,6 +189,7 @@ See [Setup Checklist](./.github/SETUP_CHECKLIST.md) for all options.
 - [CHANGELOG.md](./CHANGELOG.md) - Version history and release notes
 - [KRD Format Specification](./.kiro/steering/krd-format.md) - Complete KRD format documentation
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guidelines and workflow
+- [DEPLOYMENT.md](./DEPLOYMENT.md) - Deployment guide for GitHub Pages
 - [CI/CD Workflows](./.github/workflows/README.md) - Complete CI/CD documentation
 - [Testing Workflows Locally](./.github/TESTING_WORKFLOWS.md) - Guide to testing GitHub Actions with `act`
 

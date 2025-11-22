@@ -338,10 +338,44 @@ See [TESTING.md](./TESTING.md) for detailed testing documentation.
 
 The application is automatically deployed to GitHub Pages on every push to `main`:
 
+- **Live URL**: https://pablo-albaladejo.github.io/kaiord/
 - **Workflow**: `.github/workflows/deploy-spa-editor.yml`
 - **Build**: Vite production build with optimizations
-- **Base Path**: Automatically configured for GitHub Pages
+- **Base Path**: Automatically configured for GitHub Pages (`/kaiord/`)
 - **Deployment**: Automated via GitHub Actions
+
+### Deployment Process
+
+The deployment workflow automatically:
+
+1. Builds the `@kaiord/core` package (required dependency)
+2. Builds the SPA with the correct base path
+3. Verifies build artifacts exist
+4. Deploys to GitHub Pages
+
+**Triggers**:
+
+- Push to `main` branch with changes to:
+  - `packages/workout-spa-editor/**`
+  - `packages/core/**`
+  - `.github/workflows/deploy-spa-editor.yml`
+- Manual trigger via GitHub Actions UI
+
+### Local Testing
+
+Before pushing, test the deployment process locally:
+
+```bash
+# Run CI testing script
+./scripts/test-ci-workflows.sh
+```
+
+This validates:
+
+- Core package builds successfully
+- SPA builds with core dependency
+- Build artifacts exist and are valid
+- Base path is correctly configured
 
 ### Manual Deployment
 
@@ -362,6 +396,16 @@ git push origin main
 - **Source Maps**: Enabled for debugging
 - **Target**: ES2020 for modern browser support
 - **Code Splitting**: Automatic chunk optimization
+- **Base Path**: `/kaiord/` for GitHub Pages routing
+
+### Troubleshooting
+
+For deployment issues, see the [Deployment Guide](../../DEPLOYMENT.md) which covers:
+
+- Common deployment problems and solutions
+- Manual deployment procedures
+- Local testing strategies
+- Workflow debugging techniques
 
 ## 🤝 Contributing
 
