@@ -178,5 +178,5 @@ For detailed documentation, see the [README.md](./README.md).
 
 ---
 
-[0.1.1]: https://github.com/your-org/kaiord/releases/tag/cli-v0.1.1
-[0.1.0]: https://github.com/your-org/kaiord/releases/tag/cli-v0.1.0
+[0.1.1]: https://github.com/pablo-albaladejo/kaiord/releases/tag/cli-v0.1.1
+[0.1.0]: https://github.com/pablo-albaladejo/kaiord/releases/tag/cli-v0.1.0

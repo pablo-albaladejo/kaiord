@@ -704,12 +704,12 @@ The project MUST enforce license compatibility through automated checks:
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/kaiord.git",
+    "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/cli"
   },
   "homepage": "https://www.npmjs.com/package/@kaiord/cli",
   "bugs": {
-    "url": "https://github.com/your-org/kaiord/issues"
+    "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
   "publishConfig": {
     "access": "public"
