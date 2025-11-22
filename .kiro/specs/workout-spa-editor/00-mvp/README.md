@@ -154,7 +154,7 @@ The following completion/status files have been removed as their information is 
 - [Kaiord Core Package](../../packages/core)
 - [Workout SPA Editor Package](../../packages/workout-spa-editor)
 - [GitHub Repository](https://github.com/pablo-albaladejo/kaiord)
-- [KRD Format Specification](../../.kiro/steering/krd-format.md)
+- [KRD Format Specification](../../../../docs/krd-format.md)
 
 ## Changelog
 

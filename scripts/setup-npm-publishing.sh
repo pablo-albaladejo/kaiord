@@ -315,7 +315,7 @@ main() {
     echo "   ${BLUE}https://github.com/pablo-albaladejo/kaiord/actions${NC}"
     echo ""
     
-    print_info "For more information, see: .github/NPM_PUBLISHING.md"
+    print_info "For more information, see: docs/deployment.md"
     
     # Save token to a secure location (optional)
     echo ""

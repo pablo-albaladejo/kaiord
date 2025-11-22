@@ -413,7 +413,7 @@ To enable npm publishing, the repository owner must:
 3. **Configure GitHub secret** `NPM_TOKEN` in repository settings
 4. **Test publishing** using changeset workflow or manual publish
 
-See `.github/NPM_PUBLISHING.md` for detailed instructions.
+See `docs/deployment.md` for detailed instructions.
 
 ### 📊 Performance Metrics
 
@@ -474,4 +474,4 @@ Future improvements that could be added:
    npm view @kaiord/core
    ```
 
-See `.github/NPM_PUBLISHING.md` for complete documentation.
+See `docs/deployment.md` for complete documentation.
