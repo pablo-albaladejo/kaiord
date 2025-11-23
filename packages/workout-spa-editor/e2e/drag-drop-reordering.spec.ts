@@ -11,8 +11,6 @@ import { expect, test } from "@playwright/test";
  * - Mouse drag-and-drop
  * - Keyboard reordering shortcuts
  * - Touch interactions (mobile)
- * - Visual feedback during drag
- * - Accessibility announcements
  */
 
 test.describe("Drag-and-Drop Step Reordering", () => {
@@ -79,15 +77,13 @@ test.describe("Drag-and-Drop Step Reordering", () => {
 
     // First move down
     await page.keyboard.press("Alt+ArrowDown");
-    await page.waitForTimeout(500);
 
-    // Verify first move worked - position 0 should now have 6 min
+    // Wait for first move to complete by checking the data moved correctly
     await expect(stepCards.nth(0)).toContainText("6 min");
 
     // Second move down - need to re-select the step that's now at position 1
     await stepCards.nth(1).click();
     await page.keyboard.press("Alt+ArrowDown");
-    await page.waitForTimeout(500);
 
     // Wait for reorder to complete by checking the data moved correctly
     // After moving down twice: position 0 should have step 2's data (6 min, 210W)
@@ -273,6 +269,8 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await expect(steps.nth(0)).toContainText("210W");
     await expect(steps.nth(1)).toContainText("5 min");
     await expect(steps.nth(1)).toContainText("200W");
+    await expect(steps.nth(2)).toContainText("7 min");
+    await expect(steps.nth(2)).toContainText("220W");
   });
 
   test("should handle reordering with large number of steps", async ({
@@ -402,10 +400,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await stepCards.nth(0).click();
     await page.keyboard.press("Alt+ArrowDown");
 
-    // Wait for reorder to complete
-    await page.waitForTimeout(500);
-
-    // Re-query the DOM after reorder
+    // Wait for reorder to complete by verifying the DOM change
     const stepCardsAfter = page.locator('[data-testid="step-card"]');
 
     // Verify physical position swap occurred:
@@ -460,10 +455,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await stepCards.nth(0).click();
     await page.keyboard.press("Alt+ArrowDown");
 
-    // Wait for reorder
-    await page.waitForTimeout(500);
-
-    // Verify the data integrity by checking displayed values
+    // Wait for reorder by verifying the data integrity
     const stepCardsAfter = page.locator('[data-testid="step-card"]');
 
     // Position 0 should now have step 1's data
@@ -592,10 +584,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     await blockCard.click();
     await page.keyboard.press("Alt+ArrowDown");
 
-    // Wait for reorder to complete
-    await page.waitForTimeout(500);
-
-    // Get dimensions after drop
+    // Wait for reorder to complete by getting dimensions after drop
     const finalBox = await blockCard.boundingBox();
     expect(finalBox).not.toBeNull();
 

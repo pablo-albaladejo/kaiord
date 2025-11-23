@@ -64,7 +64,7 @@ const krdJson = readFileSync(
 );
 ```
 
-### Desde @kaiord/workout-spa-editor
+### Desde @kaiord/workout-spa-editor (Unit Tests)
 
 ```typescript
 // ✅ Recommended: Use test-utils helpers from @kaiord/core
@@ -83,10 +83,20 @@ const krdPath = join(
 );
 ```
 
-### Desde @kaiord/cli
+### Desde @kaiord/cli (Integration Tests)
 
 ```typescript
-import { readFileSync } from "fs";
+// ✅ Recommended: Use fixture path helpers
+import { getFixturePath, getFixturesDir } from "../helpers/fixture-paths";
+
+// For single file
+const inputPath = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
+
+// For glob patterns
+const fixturesDir = getFixturesDir("fit-files");
+const globPattern = `${fixturesDir}/*.fit`;
+
+// ❌ Avoid: Manual path resolution
 import { resolve } from "path";
 
 const fixturePath = resolve(

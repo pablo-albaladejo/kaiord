@@ -839,6 +839,62 @@ updates:
       - "github-actions"
 ```
 
+## Bot Commit Detection
+
+### Problem
+
+When automated workflows (like auto-changeset) commit files to a PR, they trigger the CI workflows again, creating an infinite loop where:
+
+1. PR is opened → auto-changeset runs → commits changeset
+2. New commit triggers CI checks → they wait for status
+3. But the checks are waiting for themselves to complete
+
+### Solution
+
+Add a condition to all CI jobs to skip execution when the commit is made by a bot:
+
+```yaml
+jobs:
+  detect-changes:
+    runs-on: ubuntu-latest
+    # Skip if commit is from github-actions bot
+    if: github.actor != 'github-actions[bot]'
+    # ... rest of job
+```
+
+### Implementation
+
+**Detection Method:**
+
+- Check `github.actor` context variable
+- Skip if actor is `github-actions[bot]`
+- Apply to all jobs in CI workflow
+
+**Affected Workflows:**
+
+- `ci.yml` - All jobs should skip for bot commits
+- Other workflows can continue normally
+
+**Benefits:**
+
+- Prevents infinite CI loops
+- Saves CI resources
+- Faster PR feedback for developers
+- No impact on human commits
+
+**Logging:**
+
+Add a step to log when jobs are skipped:
+
+```yaml
+- name: Log bot commit skip
+  if: github.actor == 'github-actions[bot]'
+  run: |
+    echo "Skipping CI jobs for bot commit"
+    echo "Actor: ${{ github.actor }}"
+    echo "Commit: ${{ github.sha }}"
+```
+
 ## Future Enhancements
 
 ### Short-term (Next 3 months)
