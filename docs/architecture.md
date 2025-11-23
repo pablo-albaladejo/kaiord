@@ -75,13 +75,14 @@ export type FitReader = (buffer: Uint8Array) => Promise<KRD>;
 ```typescript
 // adapters/fit/garmin-fitsdk.ts
 import type { FitReader } from "../../ports/fit-reader";
-import { Decoder } from "@garmin/fitsdk";
+import { Decoder, Stream } from "@garmin/fitsdk";
 
 export const createGarminFitSdkReader =
   (logger: Logger): FitReader =>
   async (buffer: Uint8Array): Promise<KRD> => {
+    const stream = Stream.fromByteArray(Array.from(buffer));
     const decoder = new Decoder(stream);
-    const { messages } = decoder.read(buffer);
+    const { messages } = decoder.read();
     return convertMessagesToKRD(messages);
   };
 ```
@@ -401,13 +402,15 @@ export const convertCommand = async (args: unknown) => {
 
 ```typescript
 // adapters/fit/garmin-fitsdk.ts
+import { Decoder, Stream } from "@garmin/fitsdk";
 import { krdSchema } from "../../domain/schemas/krd";
 
 export const createFitReader =
   (logger: Logger): FitReader =>
   async (buffer: Uint8Array): Promise<KRD> => {
+    const stream = Stream.fromByteArray(Array.from(buffer));
     const decoder = new Decoder(stream);
-    const rawData = decoder.read(buffer);
+    const rawData = decoder.read();
 
     // Convert to KRD
     const krd = convertFitMessagesToKRD(rawData.messages);
@@ -517,12 +520,16 @@ Adapters catch external library errors and transform to domain errors:
 
 ```typescript
 // adapters/fit/garmin-fitsdk.ts
+import { Decoder, Stream } from "@garmin/fitsdk";
+
 export const createFitReader =
   (logger: Logger): FitReader =>
   async (buffer: Uint8Array): Promise<KRD> => {
     try {
+      const stream = Stream.fromByteArray(Array.from(buffer));
       const decoder = new Decoder(stream);
-      return decoder.read(buffer);
+      const { messages } = decoder.read();
+      return convertMessagesToKRD(messages);
     } catch (error) {
       // Transform external error to domain error
       throw new FitParsingError("Failed to parse FIT file", error);
@@ -557,8 +564,12 @@ CLI commands catch all errors, log them, and format user-friendly messages:
 
 ```typescript
 // packages/cli/src/commands/convert.ts
+import { readFileSync } from "fs";
+
 export const convertCommand = async (args: ConvertArgs) => {
   try {
+    // Read input file
+    const buffer = readFileSync(args.input);
     const result = await convertFitToKrd({ fitBuffer: buffer });
     console.log("✓ Conversion successful");
     return result;
