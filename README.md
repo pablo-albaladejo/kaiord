@@ -183,6 +183,77 @@ See [Setup Checklist](./.github/SETUP_CHECKLIST.md) for all options.
 
 ---
 
+## 📦 Releases
+
+Kaiord uses **package-scoped release tags** to clearly identify which package is being released in our monorepo.
+
+### Tag Format
+
+Each release tag includes the package name and version:
+
+```
+@kaiord/core@1.2.3
+@kaiord/cli@0.5.0
+```
+
+This format provides clear traceability and makes it easy to identify which package a release belongs to.
+
+### Viewing Releases
+
+**View all releases:**
+
+```bash
+git tag
+```
+
+**View releases for a specific package:**
+
+```bash
+# Core package releases
+git tag -l "@kaiord/core@*"
+
+# CLI package releases
+git tag -l "@kaiord/cli@*"
+```
+
+**View latest release for a package:**
+
+```bash
+# Core package
+git tag -l "@kaiord/core@*" | sort -V | tail -n 1
+
+# CLI package
+git tag -l "@kaiord/cli@*" | sort -V | tail -n 1
+```
+
+### GitHub Releases
+
+Each package has its own GitHub releases with package-specific changelogs:
+
+- **Core releases**: Filter by `@kaiord/core` in the [Releases page](https://github.com/pablo-albaladejo/kaiord/releases)
+- **CLI releases**: Filter by `@kaiord/cli` in the [Releases page](https://github.com/pablo-albaladejo/kaiord/releases)
+
+Each GitHub release includes:
+
+- Package-specific changelog entries
+- Direct link to the npm package
+- Version comparison links
+
+### Release Process
+
+Releases are automated using [Changesets](https://github.com/changesets/changesets):
+
+1. **Add a changeset**: `pnpm exec changeset`
+2. **Merge "Version Packages" PR**: Changesets creates a PR with version bumps
+3. **Automatic publishing**: Merging the PR triggers:
+   - Package-scoped tag creation (e.g., `@kaiord/core@1.2.3`)
+   - npm package publishing
+   - GitHub release creation with changelog
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for detailed release guidelines.
+
+---
+
 ## 📚 Documentation
 
 - [NEW_FIELDS.md](./docs/NEW_FIELDS.md) - Detailed guide to new field support with examples
@@ -227,5 +298,23 @@ This project is built using **Kiro** for:
 - **Steering docs** → maintain clean-code and testing principles.
 - **Specs** → spec-driven implementation flow.
 - **Hooks** → local automated validations (`.kiro/hooks/*`).
+- **GitHub MCP** → direct GitHub integration for PR/issue management.
 
 All configuration lives under `.kiro/` and is version-controlled for reproducibility.
+
+### GitHub MCP Setup
+
+Kaiord uses the GitHub MCP server to enable direct GitHub interactions from Kiro:
+
+```bash
+# Run the automated setup script
+./scripts/setup-github-mcp.sh
+```
+
+This configures:
+
+- GitHub Personal Access Token authentication
+- Docker-based MCP server
+- Automatic PR/issue management capabilities
+
+See [GitHub MCP Integration](./.kiro/steering/github-mcp.md) for complete documentation.

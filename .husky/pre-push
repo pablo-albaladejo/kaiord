@@ -4,12 +4,18 @@ pnpm lint:fix
 
 # Check if lint:fix made any changes
 if [ -n "$(git status --porcelain)" ]; then
-  echo "⚠️  Lint fixes were applied. Please review and commit the changes."
-  echo "Run: git add . && git commit --amend --no-edit"
-  exit 1
+  echo "⚠️  Lint fixes were applied. Adding to commit automatically..."
+  
+  # Add all changes
+  git add .
+  
+  # Amend the commit without changing the message
+  git commit --amend --no-edit --no-verify
+  
+  echo "✅ Lint fixes added to commit automatically!"
+else
+  echo "✅ Lint check passed!"
 fi
-
-echo "✅ Lint check passed!"
 echo ""
 echo "🔍 Running TypeScript type check..."
 

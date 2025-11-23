@@ -59,15 +59,24 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create GitHub Release
-        # Automatically create GitHub release when Version Packages PR is merged
-        # Extracts version info and changelog content from package files
+      - name: Create GitHub Releases
+        # Automatically create GitHub releases when Version Packages PR is merged
+        # Creates separate release for each updated package with package-scoped tags
+        # Handles failures independently - continues processing other packages if one fails
         if: steps.changesets.outputs.hasChangesets == 'false'
         uses: actions/github-script@v8
         with:
           script: |
             const fs = require('fs');
             const path = require('path');
+            const { execSync } = require('child_process');
+
+            // Track results for summary
+            const results = {
+              successful: [],
+              failed: [],
+              skipped: []
+            };
 
             // Read package.json files to get versions and changelogs
             const packages = [];
@@ -82,7 +91,8 @@ jobs:
               packages.push({
                 name: corePackage.name,
                 version: corePackage.version,
-                changelog: coreChangelog
+                changelog: coreChangelog,
+                dir: 'packages/core'
               });
             }
 
@@ -96,7 +106,8 @@ jobs:
               packages.push({
                 name: cliPackage.name,
                 version: cliPackage.version,
-                changelog: cliChangelog
+                changelog: cliChangelog,
+                dir: 'packages/cli'
               });
             }
 
@@ -105,60 +116,139 @@ jobs:
               return;
             }
 
-            // Use the first package version as the release tag
-            const releaseVersion = packages[0].version;
-            const tagName = `v${releaseVersion}`;
+            // Get the commit that triggered this workflow
+            const commit = context.sha;
 
-            // Check if release already exists
-            try {
-              const existingRelease = await github.rest.repos.getReleaseByTag({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag: tagName
-              });
-              console.log(`ℹ️ Release ${tagName} already exists: ${existingRelease.data.html_url}`);
+            // Check which packages were actually updated in this commit
+            const changedFiles = execSync(`git diff-tree --no-commit-id --name-only -r ${commit}`, { encoding: 'utf8' });
+
+            const updatedPackages = packages.filter(pkg => {
+              const packageJsonPath = `${pkg.dir}/package.json`;
+              return changedFiles.includes(packageJsonPath);
+            });
+
+            if (updatedPackages.length === 0) {
+              console.log('No packages were updated in this commit');
               return;
-            } catch (error) {
-              if (error.status !== 404) {
-                console.error('Error checking for existing release:', error);
-                throw error;
-              }
-              // Release doesn't exist, continue to create it
             }
 
-            // Build release notes
-            let releaseNotes = '## 📦 Published Packages\n\n';
-            packages.forEach(pkg => {
-              releaseNotes += `- ${pkg.name}@${pkg.version}\n`;
-            });
-            releaseNotes += '\n';
+            console.log(`\n📦 Processing ${updatedPackages.length} package(s) for release...\n`);
 
-            // Add changelogs
-            packages.forEach(pkg => {
-              if (pkg.changelog) {
-                releaseNotes += `## ${pkg.name}\n\n`;
-                // Extract the latest version section from changelog
-                const versionSection = pkg.changelog.split(/^## /m)[1];
-                if (versionSection) {
-                  releaseNotes += versionSection + '\n';
-                }
-              }
-            });
-
-            // Create the release
-            try {
-              const release = await github.rest.repos.createRelease({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                tag_name: tagName,
-                name: `Release ${releaseVersion}`,
-                body: releaseNotes,
-                draft: false,
-                prerelease: false
-              });
+            // Create a release for each updated package
+            // Process independently - failures don't block other packages
+            for (const pkg of updatedPackages) {
+              const tagName = `${pkg.name}@${pkg.version}`;
               
-              console.log(`✅ Created release: ${release.data.html_url}`);
-            } catch (error) {
-              console.error('Failed to create release:', error);
-              throw error;
+              try {
+                // Check if release already exists
+                try {
+                  const existingRelease = await github.rest.repos.getReleaseByTag({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    tag: tagName
+                  });
+                  console.log(`ℹ️  Release ${tagName} already exists: ${existingRelease.data.html_url}`);
+                  results.skipped.push({
+                    package: pkg.name,
+                    version: pkg.version,
+                    reason: 'Release already exists',
+                    url: existingRelease.data.html_url
+                  });
+                  continue;
+                } catch (error) {
+                  if (error.status !== 404) {
+                    throw error;
+                  }
+                  // Release doesn't exist, continue to create it
+                }
+
+                // Build release notes
+                let releaseNotes = `## 📦 ${pkg.name}\n\n`;
+                releaseNotes += `**Version:** ${pkg.version}\n`;
+                releaseNotes += `**npm:** [${pkg.name}@${pkg.version}](https://www.npmjs.com/package/${pkg.name}/v/${pkg.version})\n\n`;
+
+                // Extract version-specific changelog section
+                if (pkg.changelog) {
+                  try {
+                    // Use extract-changelog.sh script to extract version-specific section
+                    const changelogPath = `${pkg.dir}/CHANGELOG.md`;
+                    const extractedChangelog = execSync(
+                      `./scripts/extract-changelog.sh "${changelogPath}" "${pkg.version}"`,
+                      { encoding: 'utf8' }
+                    ).trim();
+                    
+                    if (extractedChangelog) {
+                      releaseNotes += `## Changelog\n\n${extractedChangelog}\n`;
+                    }
+                  } catch (error) {
+                    // Handle missing changelog gracefully
+                    console.warn(`⚠️  Could not extract changelog for ${pkg.name}@${pkg.version}:`, error.message);
+                    // Fallback to simple message if extraction fails
+                    releaseNotes += `## Changelog\n\nSee [CHANGELOG.md](${pkg.dir}/CHANGELOG.md) for details.\n`;
+                  }
+                }
+
+                // Create the release
+                const release = await github.rest.repos.createRelease({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  tag_name: tagName,
+                  name: `${pkg.name} v${pkg.version}`,
+                  body: releaseNotes,
+                  draft: false,
+                  prerelease: false
+                });
+                
+                console.log(`✅ Created release: ${release.data.html_url}`);
+                results.successful.push({
+                  package: pkg.name,
+                  version: pkg.version,
+                  url: release.data.html_url
+                });
+              } catch (error) {
+                // Log error but continue processing other packages
+                console.error(`❌ Failed to create release for ${tagName}:`, error.message);
+                results.failed.push({
+                  package: pkg.name,
+                  version: pkg.version,
+                  error: error.message
+                });
+                // Continue to next package instead of throwing
+                continue;
+              }
+            }
+
+            // Print summary
+            console.log('\n' + '='.repeat(60));
+            console.log('📊 RELEASE SUMMARY');
+            console.log('='.repeat(60));
+
+            if (results.successful.length > 0) {
+              console.log(`\n✅ Successfully created ${results.successful.length} release(s):`);
+              results.successful.forEach(r => {
+                console.log(`   • ${r.package}@${r.version}`);
+                console.log(`     ${r.url}`);
+              });
+            }
+
+            if (results.skipped.length > 0) {
+              console.log(`\nℹ️  Skipped ${results.skipped.length} release(s):`);
+              results.skipped.forEach(r => {
+                console.log(`   • ${r.package}@${r.version} - ${r.reason}`);
+              });
+            }
+
+            if (results.failed.length > 0) {
+              console.log(`\n❌ Failed to create ${results.failed.length} release(s):`);
+              results.failed.forEach(r => {
+                console.log(`   • ${r.package}@${r.version}`);
+                console.log(`     Error: ${r.error}`);
+              });
+            }
+
+            console.log('\n' + '='.repeat(60));
+
+            // If all packages failed, throw error to fail the workflow
+            if (results.failed.length > 0 && results.successful.length === 0) {
+              throw new Error(`All ${results.failed.length} package release(s) failed`);
             }

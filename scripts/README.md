@@ -282,6 +282,170 @@ This script mirrors the GitHub Actions workflow (`.github/workflows/deploy-spa-e
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
 - [.github/workflows/deploy-spa-editor.yml](../.github/workflows/deploy-spa-editor.yml) - Deployment workflow
 
+## setup-github-mcp.sh
+
+Automated setup script for GitHub MCP (Model Context Protocol) server integration with Kiro.
+
+### Purpose
+
+This script configures the GitHub MCP server to enable direct GitHub interactions from Kiro, including:
+
+- Creating and managing pull requests
+- Adding comments and reviews
+- Managing issues
+- Searching code and repositories
+- And much more
+
+### Prerequisites
+
+1. **Docker** - Must be running
+2. **GitHub Personal Access Token (PAT)** - Fine-grained token with appropriate permissions
+
+### Usage
+
+```bash
+# Make script executable (first time only)
+chmod +x scripts/setup-github-mcp.sh
+
+# Run the setup
+./scripts/setup-github-mcp.sh
+```
+
+### What It Does
+
+The script performs the following steps:
+
+1. **Checks Docker** - Verifies Docker is running
+2. **Manages Token** - Checks for token in `.env`, prompts if missing
+3. **Validates Token** - Verifies token format (starts with `ghp_` or `github_pat_`)
+4. **Configures Shell** - Adds token to `~/.zshrc` for persistence
+5. **Tests API Access** - Validates authentication with GitHub API
+6. **Verifies MCP Config** - Ensures `.kiro/settings/mcp.json` exists
+7. **Cleans Up** - Stops any existing GitHub MCP containers
+
+### Expected Output
+
+```
+=== GitHub MCP Server Setup ===
+
+[1/6] Checking Docker...
+✓ Docker is running
+
+[2/6] Checking for GitHub token in .env...
+✓ Token found in .env
+
+[3/6] Verifying token format...
+✓ Token format looks valid
+
+[4/6] Configuring shell environment...
+✓ Token already in ~/.zshrc
+
+[5/6] Testing GitHub API access...
+✓ GitHub API authentication successful
+
+[6/6] Verifying MCP configuration...
+✓ MCP configuration found
+
+Cleaning up existing containers...
+✓ No existing containers to clean up
+
+=== Setup Complete! ===
+
+Next steps:
+  1. Restart Kiro completely (quit and reopen)
+  2. Reconnect the GitHub MCP server from the MCP Server panel
+  3. Test the connection by asking Kiro to use GitHub tools
+
+Note: If you opened Kiro from Finder/Dock, you may need to:
+  - Open a new terminal
+  - Run: source ~/.zshrc
+  - Launch Kiro from that terminal: open -a Kiro
+
+Token is configured and ready to use!
+```
+
+### Creating a GitHub Personal Access Token
+
+If you don't have a token yet:
+
+1. Go to GitHub → **Settings** → **Developer settings** → **Personal access tokens** → **Fine-grained tokens**
+2. Click **Generate new token**
+3. Configure:
+   - **Token name**: "Kiro MCP - Kaiord"
+   - **Expiration**: Choose your preferred expiration
+   - **Repository access**: Select repositories you want to access
+   - **Permissions**:
+     - `Contents`: Read and write
+     - `Issues`: Read and write
+     - `Pull requests`: Read and write
+     - `Metadata`: Read-only (automatic)
+4. Copy the token (starts with `ghp_`)
+
+### After Setup
+
+1. **Restart Kiro** - Completely quit and reopen Kiro
+2. **Reconnect MCP Server** - From the MCP Server panel in Kiro
+3. **Test Connection** - Ask Kiro to list pull requests or create an issue
+
+### Usage Examples
+
+Once configured, you can ask Kiro:
+
+```
+Show me all open pull requests in this repository
+```
+
+```
+Create an issue titled "Bug: Fix validation error"
+```
+
+```
+Add a comment to PR #27 saying "LGTM, ready to merge"
+```
+
+### Troubleshooting
+
+#### Docker Not Running
+
+```
+✗ Docker is not running. Please start Docker and try again.
+```
+
+**Solution:** Start Docker Desktop and run the script again.
+
+#### Token Authentication Failed
+
+```
+✗ GitHub API authentication failed (HTTP 401)
+```
+
+**Solution:**
+
+- Verify your token is correct
+- Check token permissions on GitHub
+- Ensure token hasn't expired
+
+#### MCP Configuration Not Found
+
+```
+✗ .kiro/settings/mcp.json not found
+```
+
+**Solution:** The configuration should exist in the repository. If missing, check that you're in the correct directory.
+
+### Security Notes
+
+- ✅ Token is stored in `.env` (gitignored)
+- ✅ Token is added to `~/.zshrc` for persistence
+- ⚠️ Never commit tokens to version control
+- 🔄 Rotate tokens regularly for security
+
+### Related Documentation
+
+- [GitHub MCP Integration](./.kiro/steering/github-mcp.md) - Complete MCP documentation
+- [MCP Configuration](./.kiro/settings/README-mcp-github.md) - Detailed setup instructions
+- [GitHub MCP Server](https://github.com/github/github-mcp-server) - Official GitHub MCP server
+
 ## Other Scripts
 
 ### setup-npm-publishing.sh
@@ -415,3 +579,387 @@ See [NPM_TRUSTED_PUBLISHING.md](../.github/NPM_TRUSTED_PUBLISHING.md) for detail
 Tests individual GitHub Actions workflows locally using `act`.
 
 See [TESTING_WORKFLOWS.md](../.github/TESTING_WORKFLOWS.md) for details.
+
+## Release Tag Scripts
+
+### parse-release-tag.sh
+
+Parses package-scoped release tags to extract package name and version.
+
+**Usage:**
+
+```bash
+./scripts/parse-release-tag.sh @kaiord/core@1.2.3
+```
+
+**Output:**
+
+```
+PACKAGE_NAME=@kaiord/core
+VERSION=1.2.3
+```
+
+**Exit codes:**
+
+- `0` - Success
+- `1` - Invalid tag format
+
+**Tests:** Run `./scripts/test-parse-release-tag.sh`
+
+### validate-package.sh
+
+Validates that a package exists and its version matches the release tag.
+
+**Usage:**
+
+```bash
+./scripts/validate-package.sh @kaiord/core 1.2.3
+```
+
+**Exit codes:**
+
+- `0` - Success
+- `1` - Invalid arguments
+- `2` - Package not found
+- `3` - Version mismatch
+
+**Tests:** Run `./scripts/test-validate-package.sh`
+
+### extract-changelog.sh
+
+Extracts version-specific changelog section from CHANGELOG.md files.
+
+**Purpose:**
+
+This script parses CHANGELOG.md files to extract the content for a specific version, which is then included in GitHub release notes. It handles various changelog formats and edge cases gracefully.
+
+**Usage:**
+
+```bash
+./scripts/extract-changelog.sh <changelog-file> <version>
+```
+
+**Examples:**
+
+```bash
+# Extract changelog for @kaiord/core v1.2.3
+./scripts/extract-changelog.sh packages/core/CHANGELOG.md 1.2.3
+
+# Extract changelog for @kaiord/cli v0.5.0
+./scripts/extract-changelog.sh packages/cli/CHANGELOG.md 0.5.0
+
+# Extract pre-release version
+./scripts/extract-changelog.sh packages/core/CHANGELOG.md 2.0.0-beta.1
+```
+
+**Output:**
+
+The script outputs the changelog content for the specified version, excluding the version header itself:
+
+```markdown
+### Patch Changes
+
+- Fixed bug in parser
+- Updated dependencies
+- Improved error messages
+```
+
+**Exit codes:**
+
+- `0` - Success (changelog extracted)
+- `1` - Invalid arguments (wrong number of arguments)
+- `2` - Changelog file not found
+- `3` - Version not found in changelog
+
+**Changelog Format:**
+
+The script expects CHANGELOG.md files to follow the standard format:
+
+```markdown
+# @kaiord/core
+
+## 1.2.3
+
+### Patch Changes
+
+- Change description
+
+## 1.2.2
+
+### Patch Changes
+
+- Previous change
+```
+
+**Features:**
+
+- ✅ Extracts content between version headers
+- ✅ Handles multiple versions in same file
+- ✅ Supports pre-release versions (e.g., `2.0.0-beta.1`)
+- ✅ Preserves markdown formatting
+- ✅ Handles complex changelog structures (Major/Minor/Patch sections)
+- ✅ Gracefully handles missing changelogs
+- ✅ Provides clear error messages
+
+**Integration:**
+
+This script is used by the Changesets workflow (`.github/workflows/changesets.yml`) to automatically extract version-specific changelog content for GitHub releases.
+
+**Tests:**
+
+Run the comprehensive test suite:
+
+```bash
+# Unit tests (12 test cases)
+./scripts/test-extract-changelog.sh
+
+# Integration tests (with real package files)
+./scripts/test-changelog-integration.sh
+```
+
+**Test Coverage:**
+
+- ✅ Single version extraction
+- ✅ Multiple versions extraction
+- ✅ Middle version extraction
+- ✅ Oldest version extraction
+- ✅ Missing changelog file handling
+- ✅ Version not found handling
+- ✅ Malformed changelog handling
+- ✅ Empty changelog handling
+- ✅ Complex formatting preservation
+- ✅ Invalid arguments handling
+- ✅ Pre-release version support
+- ✅ Real package integration
+
+**Error Handling:**
+
+The script provides clear error messages for common issues:
+
+```bash
+# Missing file
+Error: Changelog file not found: packages/core/CHANGELOG.md
+
+# Version not found
+Error: Version 9.9.9 not found in packages/core/CHANGELOG.md
+
+# Invalid arguments
+Error: Invalid number of arguments
+Usage: ./extract-changelog.sh <changelog-file> <version>
+```
+
+**Related Documentation:**
+
+- [Package-Scoped Release Tags Design](../.kiro/specs/project/package-scoped-release-tags/design.md)
+- [Changesets Workflow](../.github/workflows/changesets.yml)
+- [Release Workflow](../.github/workflows/release.yml)
+
+### create-release.sh
+
+CLI helper for creating manual package releases with package-scoped tags.
+
+**Purpose:**
+
+This script provides a convenient way to manually create package releases with the correct package-scoped tag format. It validates inputs, checks for version consistency, and optionally creates and pushes the release tag.
+
+**Usage:**
+
+```bash
+./scripts/create-release.sh <package-name> <version> [--dry-run]
+```
+
+**Examples:**
+
+```bash
+# Create release for @kaiord/core v1.2.3
+./scripts/create-release.sh @kaiord/core 1.2.3
+
+# Preview release without creating tag (dry-run)
+./scripts/create-release.sh @kaiord/cli 0.5.0 --dry-run
+
+# Create pre-release
+./scripts/create-release.sh @kaiord/core 2.0.0-beta.1
+```
+
+**Options:**
+
+- `--dry-run` - Preview the tag without creating or pushing it
+
+**Exit codes:**
+
+- `0` - Success (tag created and pushed, or dry-run completed)
+- `1` - Invalid arguments or usage
+- `2` - Package validation failed (unknown package or version mismatch)
+- `3` - Tag creation failed
+- `4` - Tag push failed
+
+**What it does:**
+
+1. **Validates tag format** - Ensures tag matches `{packageName}@{version}` pattern
+2. **Validates package** - Verifies package exists in monorepo
+3. **Checks version consistency** - Ensures tag version matches package.json version
+4. **Checks for existing tag** - Prevents duplicate tag creation
+5. **Creates tag** - Creates git tag locally (unless dry-run)
+6. **Pushes tag** - Pushes tag to remote repository (unless dry-run)
+
+**Dry-run mode:**
+
+Use `--dry-run` to preview what would happen without making any changes:
+
+```bash
+./scripts/create-release.sh @kaiord/core 1.2.3 --dry-run
+```
+
+**Output:**
+
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📦 Kaiord Release Helper
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Package: @kaiord/core
+Version: 1.2.3
+Tag: @kaiord/core@1.2.3
+Mode: Dry run (preview only)
+
+[1/4] Validating tag format...
+✅ Tag format is valid
+
+[2/4] Validating package...
+✅ Package validated
+   Directory: packages/core
+
+[3/4] Checking for existing tag...
+✅ Tag does not exist yet
+
+[4/4] Dry run - preview only
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+📋 Dry Run Summary
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+The following commands would be executed:
+
+1. Create tag:
+   git tag @kaiord/core@1.2.3
+
+2. Push tag:
+   git push origin @kaiord/core@1.2.3
+
+ℹ️  No changes were made (dry-run mode)
+
+To create the release for real, run:
+  ./scripts/create-release.sh @kaiord/core 1.2.3
+```
+
+**Validation:**
+
+The script performs comprehensive validation:
+
+- ✅ Tag format matches package-scoped pattern
+- ✅ Package name is valid (@kaiord/core or @kaiord/cli)
+- ✅ Package directory exists
+- ✅ package.json exists and is valid
+- ✅ Version in tag matches version in package.json
+- ✅ Tag doesn't already exist
+
+**Error messages:**
+
+The script provides clear, actionable error messages:
+
+```bash
+# Invalid tag format
+Error: Invalid tag format: core@1.2.3
+
+Expected format: {packageName}@{version}
+  - packageName: scoped npm package (e.g., @kaiord/core)
+  - version: semantic version (e.g., 1.2.3, 1.0.0-beta.1)
+
+Valid examples:
+  @kaiord/core@1.2.3
+  @kaiord/cli@0.5.0
+
+# Unknown package
+Error: Unknown package: @kaiord/unknown
+
+Valid packages:
+  @kaiord/core
+  @kaiord/cli
+
+# Version mismatch
+Error: Version mismatch!
+
+Tag version:         1.2.3
+package.json version: 0.1.1
+
+The version in the release tag must match the version in package.json
+Package: @kaiord/core
+Location: packages/core/package.json
+
+# Tag already exists
+Error: Tag already exists: @kaiord/core@1.2.3
+
+This tag has already been created. To view it:
+  git show @kaiord/core@1.2.3
+
+To delete and recreate (use with caution):
+  git tag -d @kaiord/core@1.2.3
+  git push origin :refs/tags/@kaiord/core@1.2.3
+```
+
+**Integration with release workflow:**
+
+When you push a tag created by this script, it automatically triggers the release workflow:
+
+1. Tag is pushed to GitHub
+2. Release workflow detects the tag
+3. Package is published to npm
+4. GitHub release is created with changelog
+
+**Tests:**
+
+Run the comprehensive test suite:
+
+```bash
+# Unit tests (23 test cases)
+./scripts/test-create-release.sh
+```
+
+**Test Coverage:**
+
+- ✅ Valid package names and versions
+- ✅ Invalid inputs (missing args, unknown packages, invalid versions)
+- ✅ Dry-run mode
+- ✅ Version mismatch detection
+- ✅ Argument parsing
+- ✅ Output format validation
+- ✅ Error message clarity
+
+**When to use:**
+
+Use this script when you need to create a manual release:
+
+- Emergency hotfix that bypasses normal changeset flow
+- Re-releasing a package after fixing a publishing issue
+- Creating a release for testing purposes
+
+**Normal release process:**
+
+For regular releases, use the automated changeset flow:
+
+```bash
+# 1. Create changeset
+pnpm changeset
+
+# 2. Commit and push
+git add .changeset/ && git commit -m 'chore: add changeset' && git push
+
+# 3. Merge "Version Packages" PR
+# (Changesets will automatically create package-scoped tags)
+```
+
+**Related Documentation:**
+
+- [Package-Scoped Release Tags Design](../.kiro/specs/project/package-scoped-release-tags/design.md)
+- [Release Workflow](../.github/workflows/release.yml)
+- [CONTRIBUTING.md](../CONTRIBUTING.md) - Release process documentation
