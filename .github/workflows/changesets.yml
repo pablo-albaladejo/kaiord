@@ -51,7 +51,7 @@ jobs:
         id: changesets
         # Changesets action handles version bumping and changelog generation
         # Creates/updates "Version Packages" PR when changesets are present
-        uses: changesets/action@v2
+        uses: changesets/action@v1
         with:
           version: pnpm exec changeset version
           commit: "chore: version packages"
