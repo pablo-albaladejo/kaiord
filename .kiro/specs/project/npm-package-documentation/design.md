@@ -424,7 +424,7 @@ pnpm unlink --global @kaiord/core
 // packages/cli/package.json
 {
   "dependencies": {
-    "@kaiord/core": "workspace:*"
+    "@kaiord/core": "workspace:^"
   }
 }
 ```

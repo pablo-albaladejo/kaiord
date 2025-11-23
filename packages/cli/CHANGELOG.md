@@ -95,7 +95,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Dependencies
 
 - **Production**:
-  - @kaiord/core (workspace:\*) - Core conversion library
+  - @kaiord/core (workspace:^) - Core conversion library
   - yargs (^17.7.2) - CLI argument parsing
   - chalk (^5.3.0) - Terminal colors
   - ora (^8.0.1) - Terminal spinners

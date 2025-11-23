@@ -77,7 +77,7 @@ packages:
 // packages/workout-spa-editor/package.json
 {
   "dependencies": {
-    "@kaiord/core": "workspace:*"
+    "@kaiord/core": "workspace:^"
   }
 }
 ```

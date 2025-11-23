@@ -196,7 +196,7 @@
 
 - [ ] 7. Verify workspace integration
   - [ ] 7.1 Verify CLI package uses workspace protocol
-    - Check packages/cli/package.json has "@kaiord/core": "workspace:\*"
+    - Check packages/cli/package.json has "@kaiord/core": "workspace:^"
     - Verify pnpm resolves to local package
     - _Requirements: 14.1_
 
