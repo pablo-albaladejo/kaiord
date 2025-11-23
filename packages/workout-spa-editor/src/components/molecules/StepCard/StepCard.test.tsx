@@ -281,8 +281,7 @@ describe("StepCard", () => {
 
       const card = screen.getByRole("button");
       expect(card).toHaveClass("pb-4");
-      expect(card).toHaveClass("pl-4");
-      expect(card).toHaveClass("pr-4");
+      expect(card).toHaveClass("px-4"); // px-4 includes both pl-4 and pr-4
       expect(card).toHaveClass("pt-4");
       expect(card).not.toHaveClass("pl-10");
     });

@@ -184,7 +184,7 @@ This specification defines the requirements for documenting and improving the pu
 
 #### Acceptance Criteria
 
-1. WHEN THE CLI package imports from @kaiord/core using `workspace:*` protocol, THE import SHALL resolve to the local workspace package
+1. WHEN THE CLI package imports from @kaiord/core using `workspace:^` protocol, THE import SHALL resolve to the local workspace package
 2. WHEN THE developer makes changes to @kaiord/core, THE CLI and other workspace packages SHALL see the changes without republishing
 3. WHEN THE developer uses TypeScript in workspace packages, THE IDE SHALL provide full type information from @kaiord/core's type definitions
 4. WHEN THE workspace packages are built, THE build SHALL use the local @kaiord/core dist/ output

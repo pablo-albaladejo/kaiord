@@ -1,0 +1,70 @@
+{
+  "name": "@kaiord/cli",
+  "version": "0.1.1",
+  "description": "Command-line interface for Kaiord workout file conversion",
+  "type": "module",
+  "bin": {
+    "kaiord": "./dist/bin/kaiord.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest run",
+    "test:unit": "vitest run --exclude '**/*-{integration,smoke,snapshot}.test.ts'",
+    "test:integration": "vitest run src/commands/convert-integration.test.ts src/commands/validate-integration.test.ts",
+    "test:smoke": "vitest run src/tests/cli-smoke.test.ts",
+    "test:watch": "vitest",
+    "dev": "tsx src/bin/kaiord.ts",
+    "prepublishOnly": "pnpm build && pnpm test",
+    "check-licenses": "license-checker --onlyAllow 'MIT;Apache-2.0;BSD;BSD-2-Clause;BSD-3-Clause;ISC' --production"
+  },
+  "keywords": [
+    "kaiord",
+    "fit",
+    "tcx",
+    "zwo",
+    "workout",
+    "garmin",
+    "zwift",
+    "cli",
+    "converter"
+  ],
+  "author": "Kaiord Contributors",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pablo-albaladejo/kaiord.git",
+    "directory": "packages/cli"
+  },
+  "homepage": "https://www.npmjs.com/package/@kaiord/cli",
+  "bugs": {
+    "url": "https://github.com/pablo-albaladejo/kaiord/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@kaiord/core": "workspace:^",
+    "chalk": "^5.3.0",
+    "glob": "^10.3.10",
+    "ora": "^8.0.1",
+    "winston": "^3.11.0",
+    "yargs": "^17.7.2",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/yargs": "^17.0.32",
+    "execa": "^8.0.1",
+    "license-checker": "^25.0.1",
+    "strip-ansi": "^7.1.0",
+    "tmp-promise": "^3.0.3",
+    "tsup": "^8.0.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^1.2.0"
+  }
+}

@@ -25,7 +25,8 @@ export function useWorkoutSectionState(
   const isEditing = useIsEditing();
   const createStep = useCreateStep();
   const duplicateStep = useDuplicateStep();
-  const reorderStep = onStepReorder || useReorderStep();
+  const defaultReorderStep = useReorderStep();
+  const reorderStep = onStepReorder || defaultReorderStep;
   const selectedStep = useSelectedStep(selectedStepId, workout);
   const handlers = useWorkoutSectionHandlers(workout, krd, onStepSelect);
 

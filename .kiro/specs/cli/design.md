@@ -620,6 +620,7 @@ All production dependencies MUST use permissive licenses (MIT, Apache-2.0, BSD, 
 - **ora** (^8.0.1) - Terminal spinners and progress indicators (ESM-only) (MIT)
 - **winston** (^3.11.0) - Structured logging for CI/CD (MIT)
 - **glob** (^10.3.10) - File pattern matching for batch processing (ISC)
+- **zod** (^3.22.4) - Schema validation and type inference (MIT)
 - **@kaiord/core** (workspace:\*) - Core conversion library (MIT)
 
 ### Development Dependencies
@@ -703,23 +704,24 @@ The project MUST enforce license compatibility through automated checks:
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/your-org/kaiord.git",
+    "url": "https://github.com/pablo-albaladejo/kaiord.git",
     "directory": "packages/cli"
   },
   "homepage": "https://www.npmjs.com/package/@kaiord/cli",
   "bugs": {
-    "url": "https://github.com/your-org/kaiord/issues"
+    "url": "https://github.com/pablo-albaladejo/kaiord/issues"
   },
   "publishConfig": {
     "access": "public"
   },
   "dependencies": {
-    "@kaiord/core": "workspace:*",
+    "@kaiord/core": "workspace:^",
     "yargs": "^17.7.2",
     "chalk": "^5.3.0",
     "ora": "^8.0.1",
     "winston": "^3.11.0",
-    "glob": "^10.3.10"
+    "glob": "^10.3.10",
+    "zod": "^3.22.4"
   },
   "devDependencies": {
     "@types/yargs": "^17.0.32",

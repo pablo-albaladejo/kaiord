@@ -183,3 +183,15 @@ This document defines the requirements for implementing a comprehensive Continuo
 3. THE README SHALL display a badge showing the npm version for @kaiord/core package
 4. THE README SHALL display a badge showing the npm version for @kaiord/cli package
 5. WHEN a workflow status changes, THE Badge SHALL update automatically to reflect the new status within 1 minute
+
+### Requirement 14: Prevent CI Loop from Bot Commits
+
+**User Story:** As a developer, I want CI workflows to skip when automated bots commit changes, so that workflows don't trigger infinite loops and waste CI resources.
+
+#### Acceptance Criteria
+
+1. WHEN the auto-changeset workflow commits a changeset file, THE CI/CD Pipeline SHALL skip all test and build jobs
+2. WHEN github-actions bot commits any file, THE CI/CD Pipeline SHALL skip all test and build jobs
+3. WHEN a human developer commits changes, THE CI/CD Pipeline SHALL execute all required jobs normally
+4. THE CI/CD Pipeline SHALL detect bot commits by checking the commit author
+5. THE CI/CD Pipeline SHALL log a message indicating that jobs were skipped due to bot commit
