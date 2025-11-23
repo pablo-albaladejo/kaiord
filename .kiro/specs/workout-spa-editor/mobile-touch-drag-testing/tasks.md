@@ -15,8 +15,8 @@ Implementation tasks for adding comprehensive mobile touch drag testing to the W
 
 ## Task Breakdown
 
-- [ ] 1. Touch Drag Utilities
-  - [ ] 1.1 Create Touch Helper Utilities
+- [x] 1. Touch Drag Utilities
+  - [x] 1.1 Create Touch Helper Utilities
 
 **Priority:** High  
 **Estimated Time:** 4 hours  
@@ -27,14 +27,14 @@ Create reusable touch drag helper functions for E2E tests that use Playwright's 
 
 **Acceptance Criteria:**
 
-- [ ] Create `packages/workout-spa-editor/e2e/test-utils/` directory
-- [ ] Create `packages/workout-spa-editor/e2e/test-utils/touch-helpers.ts`
-- [ ] Implement `touchDrag()` function with smooth interpolation using `page.touchscreen` API
-- [ ] Implement `touchDragNative()` function with native touch events (touchstart, touchmove, touchend)
-- [ ] Implement `verifyStepOrder()` helper for data validation
-- [ ] Implement `measureDragPerformance()` helper for timing
-- [ ] Add JSDoc comments for all exported functions
-- [ ] Create `packages/workout-spa-editor/e2e/test-utils/index.ts` to export all helpers
+- [x] Create `packages/workout-spa-editor/e2e/test-utils/` directory
+- [-] Create `packages/workout-spa-editor/e2e/test-utils/touch-helpers.ts`
+- [x] Implement `touchDrag()` function with smooth interpolation using `page.touchscreen` API
+- [x] Implement `touchDragNative()` function with native touch events (touchstart, touchmove, touchend)
+- [-] Implement `verifyStepOrder()` helper for data validation
+- [x] Implement `measureDragPerformance()` helper for timing
+- [x] Add JSDoc comments for all exported functions
+- [-] Create `packages/workout-spa-editor/e2e/test-utils/index.ts` to export all helpers
 
 **Implementation Notes:**
 
@@ -50,7 +50,7 @@ Create reusable touch drag helper functions for E2E tests that use Playwright's 
 
 **Requirements:** Requirement 1 (Touch Drag Implementation), Requirement 2 (Touch Gesture Validation)
 
-- [ ] 1.2 Create Viewport Configuration Utilities
+- [x] 1.2 Create Viewport Configuration Utilities
 
 **Priority:** Medium  
 **Estimated Time:** 1 hour  
@@ -61,11 +61,11 @@ Create viewport configuration utilities for easy reuse across tests. Note: Playw
 
 **Acceptance Criteria:**
 
-- [ ] Create `packages/workout-spa-editor/e2e/test-utils/viewport-configs.ts`
-- [ ] Export viewport presets that match Playwright's device configurations
-- [ ] Add additional viewport presets for iPhone SE, iPhone 14 Pro Max, Galaxy S21, iPad Mini
-- [ ] Export typed viewport configurations
-- [ ] Add JSDoc comments explaining each viewport and when to use it
+- [-] Create `packages/workout-spa-editor/e2e/test-utils/viewport-configs.ts`
+- [-] Export viewport presets that match Playwright's device configurations
+- [-] Add additional viewport presets for iPhone SE, iPhone 14 Pro Max, Galaxy S21, iPad Mini
+- [-] Export typed viewport configurations
+- [-] Add JSDoc comments explaining each viewport and when to use it
 
 **Implementation Notes:**
 
@@ -83,8 +83,8 @@ export const MOBILE_VIEWPORTS = {
 
 **Requirements:** Requirement 5 (Cross-Device Compatibility)
 
-- [ ] 2. Basic Touch Drag Tests
-  - [ ] 2.1 Create Mobile Touch Drag Test File
+- [x] 2. Basic Touch Drag Tests
+  - [x] 2.1 Create Mobile Touch Drag Test File
 
 **Priority:** High  
 **Estimated Time:** 3 hours  
@@ -95,13 +95,13 @@ Create new E2E test file specifically for mobile touch drag functionality using 
 
 **Acceptance Criteria:**
 
-- [ ] Create `packages/workout-spa-editor/e2e/mobile-touch-drag.spec.ts`
-- [ ] Import touch helpers from test-utils
-- [ ] Reuse `createTestWorkout()` helper from existing drag-drop-reordering.spec.ts
-- [ ] Add test setup with mobile viewport configuration
-- [ ] Add `beforeEach` hook to navigate to app
-- [ ] Follow AAA pattern (Arrange-Act-Assert) for all tests
-- [ ] Add descriptive test names and requirement comments
+- [-] Create `packages/workout-spa-editor/e2e/mobile-touch-drag.spec.ts`
+- [-] Import touch helpers from test-utils
+- [x] Reuse `createTestWorkout()` helper from existing drag-drop-reordering.spec.ts
+- [x] Add test setup with mobile viewport configuration
+- [-] Add `beforeEach` hook to navigate to app
+- [x] Follow AAA pattern (Arrange-Act-Assert) for all tests
+- [x] Add descriptive test names and requirement comments
 
 **Implementation Notes:**
 
@@ -123,7 +123,7 @@ test.describe("Mobile Touch Drag", () => {
 
 **Requirements:** Requirement 1 (Touch Drag Implementation), Requirement 2 (Touch Gesture Validation)
 
-- [ ] 2.2 Implement Basic Touch Drag Test
+- [x] 2.2 Implement Basic Touch Drag Test
 
 **Priority:** High  
 **Estimated Time:** 4 hours  
@@ -134,14 +134,14 @@ Implement test for basic touch drag reordering using Playwright's touchscreen AP
 
 **Acceptance Criteria:**
 
-- [ ] Test loads workout with 3 steps
-- [ ] Test verifies initial step order using data (duration, power)
-- [ ] Test performs touch drag using `touchDrag()` helper from position 0 to position 1
-- [ ] Test verifies step order changed correctly by checking data
-- [ ] Test verifies step data integrity (duration, power values preserved)
-- [ ] Test verifies stepIndex values are sequential after reorder
-- [ ] Test uses deterministic waits (no arbitrary timeouts)
-- [ ] Test covers Requirement 1 (Touch Drag Implementation)
+- [x] Test loads workout with 3 steps
+- [x] Test verifies initial step order using data (duration, power)
+- [x] Test performs touch drag using `touchDrag()` helper from position 0 to position 1
+- [x] Test verifies step order changed correctly by checking data
+- [x] Test verifies step data integrity (duration, power values preserved)
+- [x] Test verifies stepIndex values are sequential after reorder
+- [x] Test uses deterministic waits (no arbitrary timeouts)
+- [x] Test covers Requirement 1 (Touch Drag Implementation)
 
 **Implementation Notes:**
 
@@ -178,7 +178,7 @@ test("should reorder steps using touch drag", async ({ page }) => {
 
 **Requirements:** Requirement 1 (Touch Drag Implementation), Requirement 2 (Touch Gesture Validation)
 
-- [ ] 2.3 Add Cross-Viewport Touch Drag Tests
+- [x] 2.3 Add Cross-Viewport Touch Drag Tests
 
 **Priority:** High  
 **Estimated Time:** 3 hours  
@@ -189,12 +189,12 @@ Add tests that run across multiple mobile viewports to ensure touch drag works o
 
 **Acceptance Criteria:**
 
-- [ ] Create test suites for iPhone 12 (iOS Safari) and Pixel 5 (Android Chrome)
-- [ ] Each suite runs basic touch drag test
-- [ ] Tests verify touch drag works on WebKit browser (iOS Safari)
-- [ ] Tests verify touch drag works on Chromium browser (Android Chrome)
-- [ ] Tests use `test.use()` to configure viewport per suite
-- [ ] Tests cover Requirement 5 (Cross-Device Compatibility)
+- [-] Create test suites for iPhone 12 (iOS Safari) and Pixel 5 (Android Chrome)
+- [-] Each suite runs basic touch drag test
+- [x] Tests verify touch drag works on WebKit browser (iOS Safari)
+- [x] Tests verify touch drag works on Chromium browser (Android Chrome)
+- [-] Tests use `test.use()` to configure viewport per suite
+- [-] Tests cover Requirement 5 (Cross-Device Compatibility)
 
 **Implementation Notes:**
 
@@ -217,8 +217,8 @@ for (const device of MOBILE_DEVICES) {
 
 **Requirements:** Requirement 5 (Cross-Device Compatibility)
 
-- [ ] 3. Visual Feedback Tests
-  - [ ] 3.1 Add Drag Preview Styling Test
+- [x] 3. Visual Feedback Tests
+  - [x] 3.1 Add Drag Preview Styling Test
 
 **Priority:** Medium  
 **Estimated Time:** 3 hours  
@@ -267,7 +267,7 @@ test("should show drag preview during touch drag", async ({ page }) => {
 
 **Requirements:** Requirement 3 (Visual Feedback Testing)
 
-- [ ] 3.2 Add Drop Zone Indicator Test
+- [x] 3.2 Add Drop Zone Indicator Test
 
 **Priority:** Low  
 **Estimated Time:** 2 hours  
@@ -311,8 +311,8 @@ test("should show drop zone indicator during drag", async ({ page }) => {
 
 **Requirements:** Requirement 3 (Visual Feedback Testing)
 
-- [ ] 4. Edge Cases
-  - [ ] 4.1 Add First/Last Step Edge Case Tests
+- [x] 4. Edge Cases
+  - [x] 4.1 Add First/Last Step Edge Case Tests
 
 **Priority:** Medium  
 **Estimated Time:** 2 hours  
@@ -358,7 +358,7 @@ test("should not move last step down with touch", async ({ page }) => {
 
 **Requirements:** Requirement 4 (Touch Drag Edge Cases)
 
-- [ ] 4.2 Add Cancelled Drag Test
+- [x] 4.2 Add Cancelled Drag Test
 
 **Priority:** Low  
 **Estimated Time:** 2 hours  
@@ -408,7 +408,7 @@ test("should handle cancelled touch drag", async ({ page }) => {
 
 **Requirements:** Requirement 4 (Touch Drag Edge Cases)
 
-- [ ] 4.3 Add Repetition Block Touch Drag Test
+- [x] 4.3 Add Repetition Block Touch Drag Test
 
 **Priority:** Medium  
 **Estimated Time:** 3 hours  
