@@ -112,14 +112,6 @@ kaiord convert --input workout.fit --output workout.krd --log-format pretty
 kaiord convert --input workout.fit --output workout.krd --log-format json
 ```
 
-## Environment Variables
-
-The CLI automatically detects the environment and adjusts its behavior:
-
-- **CI=true**: Enables structured JSON logging
-- **NODE_ENV=production**: Enables structured JSON logging
-- **TTY detection**: Automatically disables colors and spinners in non-interactive environments
-
 ## Supported Formats
 
 - **FIT** (.fit) - Garmin's binary workout file format
@@ -132,42 +124,34 @@ The CLI automatically detects the environment and adjusts its behavior:
 - **0**: Success
 - **1**: Error (invalid arguments, file not found, parsing error, validation error)
 
-## Troubleshooting
+## Documentation
 
-### File Not Found
+### Main Documentation
 
-Ensure the input file path is correct and the file exists:
+- **[Getting Started](../../docs/getting-started.md)** - Installation and basic usage
+- **[KRD Format Specification](../../docs/krd-format.md)** - Complete format documentation
+- **[Deployment Guide](../../docs/deployment.md)** - CI/CD and npm publishing
 
-```bash
-ls -la workout.fit
-kaiord convert --input workout.fit --output workout.krd
-```
+### Package-Specific Documentation
 
-### Permission Errors
+- **[npm Publish Verification](./docs/npm-publish-verification.md)** - Publishing checklist and verification
 
-Check file permissions:
-
-```bash
-chmod 644 workout.fit
-kaiord convert --input workout.fit --output workout.krd
-```
-
-### Format Detection Issues
-
-If automatic format detection fails, use explicit format flags:
+## Development
 
 ```bash
-kaiord convert --input data.bin --input-format fit --output workout.krd --output-format krd
-```
+# Install dependencies
+pnpm install
 
-### Corrupted Files
+# Build the CLI
+pnpm build
 
-If a file is corrupted, the CLI will display a descriptive error message:
+# Run in development mode
+pnpm dev -- convert --input workout.fit --output workout.krd
 
-```bash
-kaiord convert --input corrupted.fit --output workout.krd
-# Error: Failed to parse FIT file
-# Details: Corrupted file header
+# Link for local testing
+npm link
+kaiord --version
+npm unlink -g
 ```
 
 ## Testing
@@ -191,37 +175,6 @@ pnpm test:smoke
 pnpm test:watch
 ```
 
-## Development
-
-```bash
-# Install dependencies
-pnpm install
-
-# Build the CLI
-pnpm build
-
-# Run in development mode
-pnpm dev -- convert --input workout.fit --output workout.krd
-
-# Link for local testing
-npm link
-kaiord --version
-npm unlink -g
-```
-
-## Documentation
-
-For more information about the Kaiord project and the KRD format, see:
-
-- [Kaiord Core Library](https://github.com/pablo-albaladejo/kaiord/tree/main/packages/core)
-- [KRD Format Specification](https://github.com/pablo-albaladejo/kaiord/blob/main/docs/KRD_FORMAT.md)
-- [Contributing Guide](https://github.com/pablo-albaladejo/kaiord/blob/main/CONTRIBUTING.md)
-
 ## License
 
 MIT - See [LICENSE](../../LICENSE) file for details.
-
-## Support
-
-- Report issues: [GitHub Issues](https://github.com/pablo-albaladejo/kaiord/issues)
-- Ask questions: [GitHub Discussions](https://github.com/pablo-albaladejo/kaiord/discussions)

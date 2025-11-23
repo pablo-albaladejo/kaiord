@@ -13,10 +13,10 @@
   ],
   "scripts": {
     "build": "tsup",
-    "test": "vitest run",
+    "test": "pnpm build && vitest run",
     "test:unit": "vitest run --exclude '**/*-{integration,smoke,snapshot}.test.ts'",
-    "test:integration": "vitest run src/commands/convert-integration.test.ts src/commands/validate-integration.test.ts",
-    "test:smoke": "vitest run src/tests/cli-smoke.test.ts",
+    "test:integration": "pnpm build && vitest run src/commands/convert-integration.test.ts src/commands/validate-integration.test.ts",
+    "test:smoke": "pnpm build && vitest run src/tests/cli-smoke.test.ts",
     "test:watch": "vitest",
     "dev": "tsx src/bin/kaiord.ts",
     "prepublishOnly": "pnpm build && pnpm test",
