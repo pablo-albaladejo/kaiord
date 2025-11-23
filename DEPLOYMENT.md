@@ -1,17 +1,751 @@
 # Deployment Guide
 
-This document provides comprehensive information about deploying the Kaiord Workout SPA Editor to GitHub Pages.
+This document provides comprehensive information about deploying Kaiord packages to npm and the Workout SPA Editor to GitHub Pages.
 
 ## Table of Contents
 
-- [Overview](#overview)
-- [Automated Deployment](#automated-deployment)
-- [Manual Deployment](#manual-deployment)
-- [Local Testing](#local-testing)
-- [Troubleshooting](#troubleshooting)
-- [Configuration](#configuration)
+- [Package Release Process](#package-release-process)
+  - [Overview](#release-overview)
+  - [Package-Scoped Release Tags](#package-scoped-release-tags)
+  - [Automated Release Workflow](#automated-release-workflow)
+  - [Manual Package Release](#manual-package-release)
+  - [Release Troubleshooting](#release-troubleshooting)
+- [SPA Deployment](#spa-deployment)
+  - [Overview](#spa-overview)
+  - [Automated Deployment](#automated-deployment)
+  - [Manual Deployment](#manual-deployment)
+  - [Local Testing](#local-testing)
+  - [Troubleshooting](#troubleshooting)
+  - [Configuration](#configuration)
 
-## Overview
+---
+
+## Package Release Process
+
+### Release Overview
+
+Kaiord uses an automated release process powered by [Changesets](https://github.com/changesets/changesets) to manage versioning and publishing of npm packages. The monorepo contains two independently versioned packages:
+
+- **@kaiord/core** - Core library for workout data conversion
+- **@kaiord/cli** - Command-line interface tool
+
+Each package is released independently with **package-scoped tags** (e.g., `@kaiord/core@1.2.3`, `@kaiord/cli@0.5.0`) to provide clear traceability and better release management.
+
+### Package-Scoped Release Tags
+
+#### Tag Format
+
+Release tags follow the npm package naming convention:
+
+```
+{packageName}@{version}
+```
+
+**Examples:**
+
+- `@kaiord/core@1.2.3` - Core library version 1.2.3
+- `@kaiord/cli@0.5.0` - CLI tool version 0.5.0
+- `@kaiord/core@2.0.0-beta.1` - Pre-release version with pre-release identifier
+- `@kaiord/core@1.0.0+build.123` - Version with build metadata
+- `@kaiord/core@1.0.0-beta.1+exp.sha.5114f85` - Combined pre-release and build metadata
+
+**Tag Format Specification:**
+
+The tag format follows this pattern:
+
+```
+{scope}/{package}@{major}.{minor}.{patch}[-{prerelease}][+{buildmetadata}]
+```
+
+Where:
+
+- **scope**: npm scope (e.g., `@kaiord`)
+- **package**: package name (e.g., `core`, `cli`)
+- **major.minor.patch**: semantic version numbers
+- **prerelease** (optional): pre-release identifier (e.g., `beta.1`, `alpha.2`, `rc.1`)
+- **buildmetadata** (optional): build metadata (e.g., `build.123`, `exp.sha.5114f85`)
+
+**Validation Rules:**
+
+1. ✅ Must include scope prefix (`@kaiord/`)
+2. ✅ Must use `@` separator between package and version
+3. ✅ Version must follow semantic versioning (MAJOR.MINOR.PATCH)
+4. ✅ Pre-release identifiers must start with `-`
+5. ✅ Build metadata must start with `+`
+6. ❌ Generic tags like `v1.2.3` are not allowed
+7. ❌ Unscoped packages like `core@1.2.3` are not allowed
+8. ❌ Wrong separators like `@kaiord/core-1.2.3` are not allowed
+
+**Benefits:**
+
+- ✅ Clear package identification in git history
+- ✅ Easy filtering of releases per package
+- ✅ Selective publishing (only tagged package is published)
+- ✅ Better traceability in monorepo
+- ✅ Follows npm conventions
+- ✅ Supports pre-release versions and build metadata
+- ✅ Prevents accidental cross-package releases
+
+#### Viewing Releases by Package
+
+```bash
+# List all core releases
+git tag -l '@kaiord/core@*'
+
+# List all CLI releases
+git tag -l '@kaiord/cli@*'
+
+# View latest release for a package
+git tag -l '@kaiord/core@*' | sort -V | tail -n 1
+
+# View all pre-release versions
+git tag -l '@kaiord/core@*-*'
+
+# Count releases per package
+echo "Core releases: $(git tag -l '@kaiord/core@*' | wc -l)"
+echo "CLI releases: $(git tag -l '@kaiord/cli@*' | wc -l)"
+```
+
+### Automated Release Workflow
+
+#### Release Process Flow
+
+```
+1. Developer creates changeset
+   ↓
+2. Changeset PR is created/updated
+   ↓
+3. Maintainer merges "Version Packages" PR
+   ↓
+4. Changesets creates package-scoped tags
+   ↓
+5. Release workflow publishes to npm
+   ↓
+6. GitHub releases are created with changelog
+```
+
+#### Step-by-Step Process
+
+**1. Create a Changeset**
+
+When you make changes that should trigger a release:
+
+```bash
+# Run changeset CLI
+pnpm changeset
+
+# Follow prompts:
+# - Select packages to release (core, cli, or both)
+# - Select version bump type (major, minor, patch)
+# - Write changelog summary
+```
+
+This creates a changeset file in `.changeset/` directory.
+
+**2. Commit and Push**
+
+```bash
+git add .changeset/
+git commit -m "feat: add new feature"
+git push origin your-branch
+```
+
+**3. Merge PR**
+
+After your PR is reviewed and merged to `main`, the Changesets workflow automatically:
+
+- Creates or updates a "Version Packages" PR
+- Bumps versions in `package.json`
+- Updates `CHANGELOG.md` files
+- Aggregates multiple changesets
+
+**4. Merge "Version Packages" PR**
+
+When ready to release, merge the "Version Packages" PR. This triggers:
+
+- Changesets creates package-scoped tags (e.g., `@kaiord/core@1.2.3`)
+- Tags are pushed to GitHub
+- GitHub releases are created automatically
+
+**5. Automated Publishing**
+
+The Release workflow (`.github/workflows/release.yml`) automatically:
+
+- Parses the release tag to extract package name and version
+- Validates the package and version
+- Publishes only the tagged package to npm
+- Creates GitHub release with changelog
+
+#### Release Workflow Steps
+
+The release workflow performs these steps:
+
+1. **Parse Release Tag**
+   - Uses `scripts/parse-release-tag.sh` to parse and validate tag
+   - Extracts package name and version from tag
+   - Validates tag format matches `{packageName}@{version}` pattern
+   - Supports scoped packages, pre-release versions, and build metadata
+   - Example: `@kaiord/core@1.2.3` → package=`@kaiord/core`, version=`1.2.3`
+   - Example: `@kaiord/cli@0.5.0-beta.1` → package=`@kaiord/cli`, version=`0.5.0-beta.1`
+   - Fails immediately with clear error if tag format is invalid
+
+2. **Validate Package**
+   - Uses `scripts/validate-package.sh` to validate package and version
+   - Verifies package name is known (`@kaiord/core` or `@kaiord/cli`)
+   - Checks package directory exists (`packages/core/` or `packages/cli/`)
+   - Validates `package.json` exists and is valid JSON
+   - Compares tag version with `package.json` version
+   - Ensures exact version match before publishing
+   - Fails with detailed error if validation fails
+
+3. **Build Packages**
+   - Runs `pnpm -r build` to build all packages
+   - Ensures dependencies are built correctly (core is built before CLI)
+   - Validates build artifacts exist in `dist/` directories
+   - Checks for TypeScript declarations (`.d.ts` files)
+   - Verifies both ESM and CommonJS outputs are generated
+
+4. **Publish to npm**
+   - Publishes only the tagged package using `pnpm --filter {packageName}`
+   - Uses retry logic with exponential backoff (3 attempts: 5s, 10s, 20s delays)
+   - Includes npm provenance for supply chain security (`--provenance` flag)
+   - Uses `--no-git-checks` to skip git status validation
+   - Uses `--access public` for public package publishing
+   - Requires `NPM_TOKEN` secret with publish permissions
+   - Logs each retry attempt with delay information
+
+5. **Create GitHub Release**
+   - Creates release with package-scoped tag
+   - Includes version-specific changelog extracted from `CHANGELOG.md`
+   - Adds npm package link with version-specific URL
+   - Formats release notes with package information
+   - Uses `scripts/extract-changelog.sh` to extract relevant changelog section
+   - Skips if release already exists (idempotent)
+
+6. **Handle Failures**
+   - Creates GitHub issue on failure with detailed diagnostics
+   - Notifies maintainers via issue comments with `@` mention
+   - Includes remediation steps and troubleshooting guide
+   - Provides workflow run URL for debugging
+   - Lists common causes and solutions
+   - Adds critical priority label for immediate attention
+   - Workflow fails to prevent silent errors and ensure visibility
+
+### Manual Package Release
+
+If you need to create a manual release (not recommended):
+
+#### Using Scripts
+
+The repository provides utility scripts for tag parsing and package validation:
+
+**1. Parse and Validate Tag Format:**
+
+```bash
+# Parse a release tag
+./scripts/parse-release-tag.sh "@kaiord/core@1.2.3"
+
+# Output (on success):
+# PACKAGE_NAME=@kaiord/core
+# VERSION=1.2.3
+
+# Test with pre-release version
+./scripts/parse-release-tag.sh "@kaiord/core@2.0.0-beta.1"
+
+# Output:
+# PACKAGE_NAME=@kaiord/core
+# VERSION=2.0.0-beta.1
+
+# Test with invalid tag (will fail)
+./scripts/parse-release-tag.sh "v1.2.3"
+# Error: Invalid tag format: v1.2.3
+# Expected format: {packageName}@{version}
+```
+
+**2. Validate Package and Version:**
+
+```bash
+# Validate package exists and version matches
+./scripts/validate-package.sh "@kaiord/core" "1.2.3"
+
+# Output (on success):
+# PACKAGE_DIR=packages/core
+
+# Test with version mismatch (will fail)
+./scripts/validate-package.sh "@kaiord/core" "9.9.9"
+# Error: Version mismatch!
+# Tag version:          9.9.9
+# package.json version: 1.2.3
+
+# Test with unknown package (will fail)
+./scripts/validate-package.sh "@kaiord/unknown" "1.0.0"
+# Error: Unknown package: @kaiord/unknown
+# Valid packages:
+#   @kaiord/core
+#   @kaiord/cli
+```
+
+**3. Extract Changelog for Version:**
+
+```bash
+# Extract changelog section for specific version
+./scripts/extract-changelog.sh packages/core/CHANGELOG.md 1.2.3
+
+# Output: Changelog content for version 1.2.3
+
+# Test with non-existent version (will fail)
+./scripts/extract-changelog.sh packages/core/CHANGELOG.md 9.9.9
+# Error: Version 9.9.9 not found in packages/core/CHANGELOG.md
+```
+
+**Script Exit Codes:**
+
+- `0` - Success
+- `1` - Invalid arguments or tag format
+- `2` - Unknown package name
+- `3` - Package directory or version not found
+- `4` - package.json not found
+- `5` - Invalid package.json (not valid JSON)
+- `6` - Version mismatch
+
+#### Manual Tag Creation
+
+```bash
+# 1. Ensure package.json version is updated
+cat packages/core/package.json | grep version
+# "version": "1.2.3"
+
+# 2. Validate tag before creating
+./scripts/parse-release-tag.sh "@kaiord/core@1.2.3"
+./scripts/validate-package.sh "@kaiord/core" "1.2.3"
+
+# 3. Create package-scoped tag
+git tag @kaiord/core@1.2.3
+
+# 4. Push tag to trigger release
+git push origin @kaiord/core@1.2.3
+
+# 5. Monitor release workflow
+# Go to: https://github.com/pablo-albaladejo/kaiord/actions
+```
+
+**⚠️ Warning:** Manual releases bypass changeset validation and may cause inconsistencies. Always use the automated changeset workflow when possible.
+
+**When to Use Manual Releases:**
+
+- ✅ Emergency hotfix that can't wait for changeset PR
+- ✅ Fixing a failed automated release
+- ✅ Testing release workflow changes
+- ❌ Regular feature releases (use changesets)
+- ❌ Multiple package releases (use changesets)
+
+#### Manual npm Publishing
+
+If automated publishing fails and you need to publish manually:
+
+```bash
+# 1. Authenticate with npm
+npm login
+# Follow prompts to enter credentials
+
+# 2. Verify authentication
+npm whoami
+# Should output your npm username
+
+# 3. Build all packages
+pnpm -r build
+
+# 4. Verify build artifacts
+ls packages/core/dist/
+# Should contain: index.js, index.cjs, index.d.ts
+
+# 5. Publish specific package
+pnpm --filter @kaiord/core publish --access public
+
+# Or for CLI
+pnpm --filter @kaiord/cli publish --access public
+
+# 6. Verify publication
+npm view @kaiord/core version
+# Should show the newly published version
+
+# 7. Create GitHub release manually (if needed)
+gh release create @kaiord/core@1.2.3 \
+  --title "@kaiord/core v1.2.3" \
+  --notes "$(./scripts/extract-changelog.sh packages/core/CHANGELOG.md 1.2.3)"
+```
+
+**Manual Publishing Checklist:**
+
+- [ ] Verify `package.json` version matches intended release version
+- [ ] Run `pnpm -r build` successfully
+- [ ] Verify build artifacts exist in `dist/` directory
+- [ ] Authenticate with npm (`npm login`)
+- [ ] Publish package with `pnpm --filter {package} publish --access public`
+- [ ] Verify package appears on npm registry
+- [ ] Create GitHub release with correct tag
+- [ ] Update CHANGELOG.md if not already updated
+- [ ] Notify team of manual release
+
+### Release Troubleshooting
+
+#### Tag Parsing Failures
+
+**Symptom:** Release workflow fails at "Parse release tag" step
+
+**Common Causes:**
+
+- Invalid tag format (e.g., `v1.2.3` instead of `@kaiord/core@1.2.3`)
+- Missing `@` separator
+- Unscoped package name
+- Invalid semantic version
+
+**Solution:**
+
+```bash
+# Verify tag format
+./scripts/parse-release-tag.sh "your-tag-here"
+
+# Valid examples:
+./scripts/parse-release-tag.sh "@kaiord/core@1.2.3"
+./scripts/parse-release-tag.sh "@kaiord/cli@0.5.0"
+
+# Invalid examples (will fail):
+./scripts/parse-release-tag.sh "v1.2.3"           # Generic tag
+./scripts/parse-release-tag.sh "core@1.2.3"      # Unscoped
+./scripts/parse-release-tag.sh "@kaiord/core-1.2.3"  # Wrong separator
+```
+
+**Expected Output:**
+
+```
+PACKAGE_NAME=@kaiord/core
+VERSION=1.2.3
+```
+
+#### Package Validation Failures
+
+**Symptom:** Release workflow fails at "Validate package" step
+
+**Common Causes:**
+
+- Unknown package name
+- Package directory doesn't exist
+- Version mismatch between tag and `package.json`
+- Invalid `package.json` file
+
+**Solution:**
+
+```bash
+# Validate package and version
+./scripts/validate-package.sh "@kaiord/core" "1.2.3"
+
+# Check package.json version
+node -p "require('./packages/core/package.json').version"
+
+# Verify package directory exists
+ls -la packages/core/
+```
+
+**Expected Output:**
+
+```
+PACKAGE_DIR=packages/core
+```
+
+**Version Mismatch Error:**
+
+```
+Error: Version mismatch!
+
+Tag version:          1.2.3
+package.json version: 1.2.2
+
+The version in the release tag must match the version in package.json
+```
+
+**Fix:** Ensure the "Version Packages" PR was merged before creating the release tag.
+
+#### Publishing Failures
+
+**Symptom:** Release workflow fails at "Publish package" step
+
+**Common Causes:**
+
+1. **Invalid NPM_TOKEN**
+   - Token expired
+   - Token lacks publish permissions
+   - Token not configured in repository secrets
+
+2. **Network Issues**
+   - npm registry temporarily unavailable
+   - Connection timeout
+
+3. **Version Conflict**
+   - Version already published to npm
+   - Cannot republish same version
+
+4. **Package Configuration**
+   - Invalid `package.json`
+   - Missing required fields
+   - Build artifacts missing
+
+**Solutions:**
+
+**1. Verify NPM Token:**
+
+```bash
+# Check token validity (requires npm CLI)
+npm whoami --registry https://registry.npmjs.org
+
+# Expected output: your-npm-username
+```
+
+**2. Check npm Registry Status:**
+
+- Visit: https://status.npmjs.org/
+- Verify no ongoing incidents
+
+**3. Verify Package Version:**
+
+```bash
+# Check current published version
+npm view @kaiord/core version
+
+# Check local version
+node -p "require('./packages/core/package.json').version"
+
+# If versions match, the version is already published
+```
+
+**4. Check Build Artifacts:**
+
+```bash
+# Verify build succeeded
+ls -la packages/core/dist/
+
+# Should contain:
+# - index.js (ESM)
+# - index.cjs (CommonJS)
+# - index.d.ts (TypeScript declarations)
+```
+
+**5. Manual Publishing (if needed):**
+
+```bash
+# Authenticate
+npm login
+
+# Build packages
+pnpm -r build
+
+# Publish manually
+pnpm --filter @kaiord/core publish --access public
+```
+
+#### GitHub Release Creation Failures
+
+**Symptom:** Package published successfully but GitHub release not created
+
+**Common Causes:**
+
+- Changelog extraction failed
+- GitHub API rate limit
+- Insufficient permissions
+- Release already exists
+
+**Solution:**
+
+```bash
+# Extract changelog manually
+./scripts/extract-changelog.sh packages/core/CHANGELOG.md 1.2.3
+
+# Check if release already exists
+gh release view @kaiord/core@1.2.3
+
+# Create release manually if needed
+gh release create @kaiord/core@1.2.3 \
+  --title "@kaiord/core v1.2.3" \
+  --notes "$(./scripts/extract-changelog.sh packages/core/CHANGELOG.md 1.2.3)"
+```
+
+#### Retry Logic
+
+The release workflow includes automatic retry logic for npm publishing:
+
+- **Attempts:** 3 retries with exponential backoff
+- **Delays:** 5s, 10s, 20s between attempts
+- **Reason:** Handles transient network issues
+
+If all retries fail:
+
+- Workflow creates a GitHub issue with detailed diagnostics
+- Maintainers are notified via issue comments
+- Issue includes remediation steps and troubleshooting guide
+
+#### Failure Notifications
+
+When a release fails, the workflow automatically:
+
+1. **Creates GitHub Issue:**
+   - Title: `🚨 Release failed: {package}@{version} ({tag})`
+   - Labels: `release`, `bug`, `automated`, `priority-critical`
+   - Assigned to: Repository owner
+
+2. **Issue Contents:**
+   - Package and version information
+   - Workflow run link
+   - Error details
+   - Common causes
+   - Remediation steps
+   - Troubleshooting checklist
+
+3. **Notification Comment:**
+   - Mentions repository owner
+   - Provides immediate alert
+   - Links to workflow logs
+
+#### Debugging Workflow Failures
+
+**1. View Workflow Logs:**
+
+- Go to [Actions tab](https://github.com/pablo-albaladejo/kaiord/actions)
+- Click on failed workflow run
+- Expand failed step to see error details
+
+**2. Enable Debug Logging:**
+
+- Go to repository Settings → Secrets and variables → Actions
+- Add secret: `ACTIONS_STEP_DEBUG` = `true`
+- Re-run workflow
+
+**3. Test Locally:**
+
+```bash
+# Test tag parsing
+./scripts/parse-release-tag.sh "@kaiord/core@1.2.3"
+
+# Test package validation
+./scripts/validate-package.sh "@kaiord/core" "1.2.3"
+
+# Test changelog extraction
+./scripts/extract-changelog.sh packages/core/CHANGELOG.md 1.2.3
+
+# Test build
+pnpm -r build
+
+# Test publish (dry-run)
+pnpm --filter @kaiord/core publish --dry-run --access public
+```
+
+**4. Check Workflow Configuration:**
+
+```bash
+# Verify workflow syntax
+cat .github/workflows/release.yml
+
+# Verify changesets configuration
+cat .changeset/config.json
+
+# Verify package.json versions
+cat packages/core/package.json | grep version
+cat packages/cli/package.json | grep version
+```
+
+#### Common Error Messages
+
+**"Invalid tag format"**
+
+```
+❌ Invalid tag format: v1.2.3
+Expected format: {packageName}@{version}
+Examples: @kaiord/core@1.2.3, @kaiord/cli@0.5.0
+```
+
+**Fix:** Use package-scoped tag format
+
+**"Unknown package"**
+
+```
+❌ Unknown package: @kaiord/unknown
+Valid packages: @kaiord/core, @kaiord/cli
+```
+
+**Fix:** Use valid package name
+
+**"Version mismatch"**
+
+```
+❌ Version mismatch!
+Tag version: 1.2.3
+package.json version: 1.2.2
+```
+
+**Fix:** Merge "Version Packages" PR first
+
+**"Failed to publish after 3 attempts"**
+
+```
+❌ Failed to publish @kaiord/core@1.2.3 after 3 attempts
+```
+
+**Fix:** Check npm registry status, verify token, try manual publishing
+
+### Release Best Practices
+
+**Before Creating Changeset:**
+
+1. ✅ Run tests: `pnpm -r test`
+2. ✅ Run linting: `pnpm -r lint`
+3. ✅ Build packages: `pnpm -r build`
+4. ✅ Test locally: `pnpm -r test:watch`
+
+**When Creating Changeset:**
+
+1. ✅ Select correct packages (core, cli, or both)
+2. ✅ Choose appropriate version bump (major, minor, patch)
+3. ✅ Write clear, descriptive changelog summary
+4. ✅ Follow [Conventional Commits](https://www.conventionalcommits.org/)
+
+**Before Merging "Version Packages" PR:**
+
+1. ✅ Review version bumps are correct
+2. ✅ Review changelog entries are accurate
+3. ✅ Verify all tests pass in CI
+4. ✅ Ensure no breaking changes without major version bump
+
+**After Release:**
+
+1. ✅ Verify package published to npm
+2. ✅ Verify GitHub release created
+3. ✅ Test installation: `npm install @kaiord/core@latest`
+4. ✅ Verify changelog on npm package page
+
+### Monitoring Releases
+
+**GitHub Actions:**
+
+- Monitor workflow runs in [Actions tab](https://github.com/pablo-albaladejo/kaiord/actions)
+- Check for failed workflows
+- Review workflow logs for warnings
+
+**npm Registry:**
+
+- Verify packages published: https://www.npmjs.com/package/@kaiord/core
+- Check download statistics
+- Monitor package health
+
+**GitHub Releases:**
+
+- View releases: https://github.com/pablo-albaladejo/kaiord/releases
+- Filter by package using tag search
+- Review release notes and changelogs
+
+---
+
+## SPA Deployment
+
+### SPA Overview
 
 The Workout SPA Editor is automatically deployed to GitHub Pages whenever changes are pushed to the `main` branch. The deployment process:
 
