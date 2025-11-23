@@ -35,9 +35,17 @@ jobs:
       - name: Generate changeset from conventional commits
         id: generate
         run: |
+          set -e
+
           # Get all commits in this PR
-          git fetch origin main
-          COMMITS=$(git log origin/main..HEAD --pretty=format:"%s" --no-merges)
+          if ! git fetch origin main --depth=1; then
+            echo "Failed to fetch origin/main. Ensure the branch exists."
+            echo "has-changeset=false" >> $GITHUB_OUTPUT
+            echo "changeset-created=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          COMMITS=$(git log origin/main..HEAD --pretty=format:"%s" --no-merges || echo "")
 
           echo "Analyzing commits:"
           echo "$COMMITS"
@@ -54,6 +62,12 @@ jobs:
               TYPE="${BASH_REMATCH[1]}"
               SCOPE="${BASH_REMATCH[3]}"
               MESSAGE="${BASH_REMATCH[4]}"
+              
+              # Validate message doesn't contain problematic characters for YAML
+              if [[ $MESSAGE =~ ([\"\$\`\!]) ]]; then
+                echo "⚠️ Warning: Skipping commit with problematic characters: $commit"
+                continue
+              fi
               
               # Determine bump type
               BUMP_TYPE="patch"
@@ -104,29 +118,29 @@ jobs:
           if [[ -n $CORE_BUMP ]] || [[ -n $CLI_BUMP ]]; then
             CHANGESET_FILE=".changeset/auto-$(date +%s).md"
             
-            echo "---" > $CHANGESET_FILE
+            echo "---" > "$CHANGESET_FILE"
             
             if [[ -n $CORE_BUMP ]]; then
-              echo "\"@kaiord/core\": $CORE_BUMP" >> $CHANGESET_FILE
+              echo "\"@kaiord/core\": \"$CORE_BUMP\"" >> "$CHANGESET_FILE"
             fi
             
             if [[ -n $CLI_BUMP ]]; then
-              echo "\"@kaiord/cli\": $CLI_BUMP" >> $CHANGESET_FILE
+              echo "\"@kaiord/cli\": \"$CLI_BUMP\"" >> "$CHANGESET_FILE"
             fi
             
-            echo "---" >> $CHANGESET_FILE
-            echo "" >> $CHANGESET_FILE
+            echo "---" >> "$CHANGESET_FILE"
+            echo "" >> "$CHANGESET_FILE"
             
             if [[ -n $CORE_CHANGES ]]; then
-              echo "### @kaiord/core" >> $CHANGESET_FILE
-              echo "" >> $CHANGESET_FILE
-              echo -e "$CORE_CHANGES" >> $CHANGESET_FILE
+              echo "### @kaiord/core" >> "$CHANGESET_FILE"
+              echo "" >> "$CHANGESET_FILE"
+              printf "%b\n" "$CORE_CHANGES" >> "$CHANGESET_FILE"
             fi
             
             if [[ -n $CLI_CHANGES ]]; then
-              echo "### @kaiord/cli" >> $CHANGESET_FILE
-              echo "" >> $CHANGESET_FILE
-              echo -e "$CLI_CHANGES" >> $CHANGESET_FILE
+              echo "### @kaiord/cli" >> "$CHANGESET_FILE"
+              echo "" >> "$CHANGESET_FILE"
+              printf "%b\n" "$CLI_CHANGES" >> "$CHANGESET_FILE"
             fi
             
             echo "Generated changeset:"
@@ -143,11 +157,15 @@ jobs:
       - name: Commit changeset
         if: steps.generate.outputs.changeset-created == 'true'
         run: |
+          set -e
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .changeset
           git commit -m "chore: add auto-generated changeset"
-          git push --no-verify
+          if ! git push --no-verify; then
+            echo "Failed to push changeset. Please check repository permissions and try again."
+            exit 1
+          fi
 
       - name: Comment on PR
         if: steps.generate.outputs.changeset-created == 'true'

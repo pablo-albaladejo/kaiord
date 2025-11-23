@@ -111,7 +111,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Package Configuration
 
-- Configured for npm publishing at https://www.npmjs.com/package/@kaiord/cli
+- Configured for npm publishing at [@kaiord/cli](https://www.npmjs.com/package/@kaiord/cli)
 - Public scoped package with MIT license
 - Binary entry point: `kaiord` command
 - Includes only dist/ directory in published package

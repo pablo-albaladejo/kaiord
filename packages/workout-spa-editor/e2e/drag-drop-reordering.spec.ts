@@ -11,8 +11,6 @@ import { expect, test } from "@playwright/test";
  * - Mouse drag-and-drop
  * - Keyboard reordering shortcuts
  * - Touch interactions (mobile)
- * - Visual feedback during drag
- * - Accessibility announcements
  */
 
 test.describe("Drag-and-Drop Step Reordering", () => {
