@@ -8,13 +8,10 @@
 
 import { test } from "@playwright/test";
 import {
-  DESKTOP_VIEWPORTS,
   MOBILE_VIEWPORTS,
-  VIEWPORTS,
-  getMobileViewports,
+  getAllViewports,
+  getPrimaryViewports,
   getViewportConfig,
-  getViewportDimensions,
-  isMobileViewport,
   measureDragPerformance,
   touchDrag,
   touchDragNative,
@@ -22,10 +19,10 @@ import {
   verifyDropZone,
   verifyStepOrder,
   type ExpectedStepOrder,
+  type MobileViewportName,
   type PerformanceResult,
   type TouchDragOptions,
   type ViewportConfig,
-  type ViewportName,
 } from "./index";
 
 test.describe("Touch Helpers Verification", () => {
@@ -40,9 +37,8 @@ test.describe("Touch Helpers Verification", () => {
       verifyDragPreview,
       verifyDropZone,
       getViewportConfig,
-      getMobileViewports,
-      isMobileViewport,
-      getViewportDimensions,
+      getAllViewports,
+      getPrimaryViewports,
     ];
 
     functions.forEach((fn) => {
@@ -52,7 +48,7 @@ test.describe("Touch Helpers Verification", () => {
     });
 
     // Verify viewport configs are defined
-    const viewportConfigs = [MOBILE_VIEWPORTS, DESKTOP_VIEWPORTS, VIEWPORTS];
+    const viewportConfigs = [MOBILE_VIEWPORTS];
 
     viewportConfigs.forEach((config) => {
       if (typeof config !== "object") {
@@ -69,7 +65,7 @@ test.describe("Touch Helpers Verification", () => {
       endTime: 100,
     };
     const _viewport: ViewportConfig = MOBILE_VIEWPORTS.pixel5;
-    const _name: ViewportName = "pixel5";
+    const _name: MobileViewportName = "pixel5";
 
     // Suppress unused variable warnings
     void _options;
