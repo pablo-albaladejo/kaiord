@@ -251,7 +251,7 @@ graph TD
    - Create GitHub release
    - Trigger release workflow
 
-**Uses:** `changesets/action@v2`
+**Uses:** `changesets/action@v1` (latest: `v1.5.3`)
 
 ## Data Models
 
