@@ -13,8 +13,22 @@ permissions:
   checks: write
 
 jobs:
+  # Log when CI is skipped for bot commits
+  log-bot-skip:
+    runs-on: ubuntu-latest
+    if: github.actor == 'github-actions[bot]'
+    steps:
+      - name: Log bot commit skip
+        run: |
+          echo "⏭️ Skipping CI jobs for bot commit"
+          echo "Actor: ${{ github.actor }}"
+          echo "Commit: ${{ github.sha }}"
+          echo "Reason: Automated bot commits should not trigger full CI to prevent infinite loops"
+
   detect-changes:
     runs-on: ubuntu-latest
+    # Skip CI jobs for bot commits to prevent infinite loops
+    if: github.actor != 'github-actions[bot]'
     outputs:
       core-changed: ${{ steps.changes.outputs.core-changed }}
       frontend-changed: ${{ steps.changes.outputs.frontend-changed }}

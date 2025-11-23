@@ -320,7 +320,35 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
 
 ---
 
-## Phase 11: npm Publishing Configuration
+## Phase 11: Fix CI Loop from Bot Commits
+
+- [x] 26. Prevent CI loop from bot commits
+  - [x] 26.1 Add bot detection to detect-changes job
+    - Add condition `if: github.actor != 'github-actions[bot]'` to detect-changes job
+    - Test with auto-changeset workflow commit
+    - Verify CI jobs are skipped for bot commits
+    - _Requirements: 14.1, 14.2, 14.4_
+
+  - [x] 26.2 Add bot detection to all CI jobs
+    - Add condition to lint, typecheck, test, build, round-trip jobs
+    - Ensure all jobs skip when detect-changes is skipped
+    - Test with manual bot commit simulation
+    - _Requirements: 14.1, 14.2_
+
+  - [x] 26.3 Add logging for bot commit skips
+    - Add step to log when jobs are skipped due to bot commit
+    - Include actor name, commit SHA in log
+    - Verify log appears in workflow output
+    - _Requirements: 14.5_
+
+  - [x] 26.4 Test bot commit detection
+    - Create test PR with auto-changeset workflow
+    - Verify CI jobs are skipped after changeset commit
+    - Verify CI jobs run normally for human commits
+    - Verify no infinite loop occurs
+    - _Requirements: 14.1, 14.2, 14.3_
+
+## Phase 12: npm Publishing Configuration
 
 - [x] 26. Document npm publishing workflow
   - Create comprehensive npm publishing guide (`.github/NPM_PUBLISHING.md`)
