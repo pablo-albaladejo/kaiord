@@ -69,7 +69,7 @@ describe("convert command integration tests", () => {
     expect(outputBuffer.length).toBeGreaterThan(0);
   });
 
-  it("should handle missing files with exit code 1", async () => {
+  it("should handle missing files with exit code 2", async () => {
     // Arrange
     const cliPath = resolve(__dirname, "../bin/kaiord.ts");
     const inputPath = "nonexistent.fit";
@@ -90,7 +90,7 @@ describe("convert command integration tests", () => {
     expect(output).toContain("File not found");
   });
 
-  it("should handle invalid/corrupted files with exit code 1", async () => {
+  it("should handle invalid/corrupted files with exit code 4", async () => {
     // Arrange
     const cliPath = resolve(__dirname, "../bin/kaiord.ts");
     const corruptedPath = join(tempDir.path, "corrupted.fit");
