@@ -715,7 +715,7 @@ The project MUST enforce license compatibility through automated checks:
     "access": "public"
   },
   "dependencies": {
-    "@kaiord/core": "workspace:*",
+    "@kaiord/core": "workspace:^",
     "yargs": "^17.7.2",
     "chalk": "^5.3.0",
     "ora": "^8.0.1",

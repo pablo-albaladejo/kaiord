@@ -21,7 +21,7 @@ The CLI is production-ready and can be published to npm at https://www.npmjs.com
 - [x] 1. Set up CLI package structure and configuration
   - Create `packages/cli/` directory with package.json
   - Configure tsup for CLI bundling with shebang banner
-  - Add production dependencies: yargs (^17.7.2), chalk (^5.3.0), ora (^8.0.1), winston (^3.11.0), glob (^10.3.10), zod (^3.22.4), @kaiord/core (workspace:\*)
+  - Add production dependencies: yargs (^17.7.2), chalk (^5.3.0), ora (^8.0.1), winston (^3.11.0), glob (^10.3.10), zod (^3.22.4), @kaiord/core (workspace:^)
   - Add dev dependencies: execa (^8.0.1), tmp-promise (^3.0.3), strip-ansi (^7.1.0), vitest (^1.2.0), tsx (^4.7.0), @types/yargs (^17.0.32)
   - Create src/bin/kaiord.ts entry point file
   - Configure TypeScript for ESM modules with strict mode
