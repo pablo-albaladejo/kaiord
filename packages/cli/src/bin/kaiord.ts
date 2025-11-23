@@ -101,7 +101,7 @@ const main = async (): Promise<void> => {
             );
         },
         async (argv) => {
-          await convertCommand({
+          const exitCode = await convertCommand({
             input: argv.input,
             output: argv.output,
             outputDir: argv.outputDir,
@@ -122,6 +122,9 @@ const main = async (): Promise<void> => {
             json: argv.json as boolean | undefined,
             logFormat: argv.logFormat as "pretty" | "structured" | undefined,
           });
+          if (exitCode !== 0) {
+            process.exit(exitCode);
+          }
         }
       )
       .command(

@@ -107,7 +107,7 @@ const convertSingleFile = async (
 
 export const convertCommand = async (
   options: ConvertOptions
-): Promise<void> => {
+): Promise<number> => {
   // Parse and validate command options using Zod schemas
   const validatedOptions = convertOptionsSchema.parse(options);
 
@@ -417,6 +417,8 @@ export const convertCommand = async (
       }
     }
 
-    process.exit(exitCode);
+    return exitCode;
   }
+
+  return 0; // Success
 };
