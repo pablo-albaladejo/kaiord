@@ -144,7 +144,7 @@ This implementation plan breaks down the GitHub Actions CI/CD setup into discret
   - [x] 11.2 Create Changesets workflow
     - Create `.github/workflows/changesets.yml` file
     - Configure trigger: push to main branch
-    - Use `changesets/action@v1` to create/update "Version Packages" PR
+    - Use `changesets/action@v2` to create/update "Version Packages" PR
     - _Requirements: 11.2, 11.3_
 
   - [x] 11.3 Configure changelog generation
