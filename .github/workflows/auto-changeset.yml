@@ -50,7 +50,7 @@ jobs:
 
           while IFS= read -r commit; do
             # Parse conventional commit format
-            if [[ $commit =~ ^(feat|fix|perf|refactor|docs|style|test|chore|build|ci)(\(([^)]+)\))?:(.+)$ ]]; then
+            if [[ $commit =~ ^(feat|fix|perf|refactor|docs|style|test|chore|build|ci)(\(([^\)]+)\))?:(.+)$ ]]; then
               TYPE="${BASH_REMATCH[1]}"
               SCOPE="${BASH_REMATCH[3]}"
               MESSAGE="${BASH_REMATCH[4]}"
