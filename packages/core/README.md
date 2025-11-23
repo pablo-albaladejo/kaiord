@@ -1,6 +1,6 @@
 # @kaiord/core
 
-Core library for Kaiord workout data conversion.
+Core library for Kaiord workout data conversion between FIT, TCX, ZWO, and KRD formats.
 
 ## Features
 
@@ -11,76 +11,67 @@ Core library for Kaiord workout data conversion.
 - **Hexagonal architecture**: Clean separation of concerns
 - **Tree-shakeable**: Import only what you need for minimal bundle size
 
-### Supported FIT Fields
+## Installation
 
-- **Workout metadata**: Sub-sport categorization, pool dimensions
-- **Workout steps**: Coaching notes, swimming equipment
-- **Duration types**: Time, distance, calories, power thresholds, heart rate conditionals, repeat blocks
-- **Target types**: Power (watts, %FTP, zones), heart rate (bpm, zones, %max), pace, cadence, open
-
-See [NEW_FIELDS.md](../../docs/NEW_FIELDS.md) for detailed documentation and examples.
-
-## Project Structure
-
-```
-packages/core/
-├── src/
-│   ├── domain/              # Pure domain logic (no external dependencies)
-│   │   ├── types/           # Type definitions (KRD, Workout, Duration, Target, etc.)
-│   │   │   ├── krd.ts
-│   │   │   └── krd.test.ts  # Tests co-located with implementation
-│   │   └── validation/      # Schema validator, tolerance checker
-│   │       ├── schema-validator.ts
-│   │       └── schema-validator.test.ts
-│   ├── application/         # Use cases and business logic
-│   │   └── use-cases/       # Convert FIT↔KRD, validate round-trip
-│   │       ├── convert-fit-to-krd.ts
-│   │       └── convert-fit-to-krd.test.ts
-│   ├── ports/               # Contracts/interfaces
-│   │   ├── logger.ts        # Logger interface
-│   │   └── logger.test.ts
-│   ├── adapters/            # External implementations
-│   │   ├── fit/             # Garmin FIT SDK adapter
-│   │   │   ├── garmin-fitsdk.ts
-│   │   │   └── garmin-fitsdk.test.ts
-│   │   └── logger/          # Console logger implementation
-│   │       ├── console-logger.ts
-│   │       └── console-logger.test.ts
-│   └── tests/               # Test fixtures and helpers
-│       ├── fixtures/        # Test data factories (faker + rosie)
-│       │   ├── krd.fixtures.ts
-│       │   ├── metadata.fixtures.ts
-│       │   └── fit-files/   # Binary FIT test files
-│       └── helpers/         # Test utilities
-│           └── test-utils.ts
-└── schema/
-    └── workout.json         # JSON Schema (generated from Zod)
+```bash
+npm install @kaiord/core
 ```
 
-## Architecture
+or
 
-This package follows **hexagonal architecture** with clear separation of concerns:
+```bash
+pnpm add @kaiord/core
+```
 
-- **Domain**: Pure business logic, no external dependencies
-- **Application**: Use cases that orchestrate domain logic
-- **Ports**: Contracts that define how external systems interact
-- **Adapters**: Implementations of ports using external libraries
+## Quick Usage
 
-## Dependencies
+```typescript
+import { toKRD, fromKRD } from "@kaiord/core";
+import type { KRD } from "@kaiord/core";
 
-### Production
+// Convert FIT to KRD
+const fitBuffer = await readFile("workout.fit");
+const krd: KRD = await toKRD(fitBuffer, { type: "fit" });
 
-- `@garmin/fitsdk` - FIT file parsing and encoding
-- `zod` - Schema validation with TypeScript type inference
-- `zod-to-json-schema` - Generate JSON Schema from Zod schemas
+// Convert KRD to FIT
+const outputBuffer = await fromKRD(krd, { type: "fit" });
+await writeFile("output.fit", outputBuffer);
 
-### Development
+// Validate KRD against schema
+import { krdSchema } from "@kaiord/core";
+const result = krdSchema.safeParse(krd);
+if (!result.success) {
+  console.error("Validation errors:", result.error);
+}
+```
 
-- `vitest` - Testing framework
-- `@faker-js/faker` - Realistic test data generation
-- `rosie` - Test fixture factories
-- `tsup` - TypeScript bundler
-- `@vitest/coverage-v8` - Code coverage
+## Documentation
+
+### Main Documentation
+
+- **[Getting Started](../../docs/getting-started.md)** - Quick start guide
+- **[Architecture](../../docs/architecture.md)** - Hexagonal architecture, ports & adapters pattern
+- **[Testing Guidelines](../../docs/testing.md)** - Testing patterns and best practices
+- **[KRD Format Specification](../../docs/krd-format.md)** - Complete format documentation
+
+### Package-Specific Documentation
+
+- **[Tree Shaking Guide](./docs/tree-shaking.md)** - Optimize bundle size
+- **[KRD Fixtures Generation](./docs/krd-fixtures-generation.md)** - Generate test fixtures
+- **[Zwift Format Extensions](./docs/zwift-format-extensions.md)** - Zwift-specific features
+- **[Zwift Kaiord Attributes](./docs/zwift-kaiord-attributes.md)** - Custom Zwift attributes
+
+## Scripts
+
+```bash
+pnpm build                  # Build the library
+pnpm test                   # Run tests once
+pnpm test:watch             # Run tests in watch mode
+pnpm test:coverage          # Run tests with coverage report
+pnpm generate:schema        # Generate JSON Schema from Zod schemas
+pnpm generate:krd-fixtures  # Generate KRD test fixtures from FIT files
+pnpm clean                  # Clean build artifacts
+```
 
 ## Tree-Shaking
 
@@ -105,37 +96,9 @@ import * as Kaiord from "@kaiord/core";
 - Full conversion: ~80 KB
 - Test utilities: Not included in production bundles
 
-See [TREE_SHAKING.md](./TREE_SHAKING.md) for detailed guide and best practices.
+See [docs/tree-shaking.md](./docs/tree-shaking.md) for detailed guide and best practices.
 
-## Scripts
-
-```bash
-pnpm build                  # Build the library
-pnpm test                   # Run tests once
-pnpm test:watch             # Run tests in watch mode
-pnpm test:coverage          # Run tests with coverage report
-pnpm generate:schema        # Generate JSON Schema from Zod schemas
-pnpm generate:krd-fixtures  # Generate KRD test fixtures from FIT files
-pnpm clean                  # Clean build artifacts
-```
-
-## Testing
-
-Tests are **co-located** with source files (`file.ts` → `file.test.ts`) and follow the **AAA pattern** (Arrange, Act, Assert):
-
-- **Faker** for realistic test data
-- **Rosie** for fixture factories
-- **Vitest** as the test runner
-- **All fixtures** in `src/tests/fixtures/` directory
-- **Test helpers** in `src/tests/helpers/` directory
-
-Coverage targets:
-
-- Overall: ≥ 80%
-- Mappers/converters: ≥ 90%
-- Domain logic: 100%
-
-### Test Utilities
+## Test Utilities
 
 The package exports test utilities for other packages to use:
 
@@ -154,3 +117,5 @@ const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
 // Load both for round-trip tests
 const { fit, krd } = loadFixturePair(FIXTURE_NAMES.INDIVIDUAL_STEPS);
 ```
+
+See [docs/krd-fixtures-generation.md](./docs/krd-fixtures-generation.md) for details on fixture generation.

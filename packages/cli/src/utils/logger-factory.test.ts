@@ -15,12 +15,10 @@ describe("logger-factory", () => {
 
   afterEach(() => {
     // Restore original values
-    if (originalIsTTY !== undefined) {
-      Object.defineProperty(process.stdout, "isTTY", {
-        value: originalIsTTY,
-        writable: true,
-      });
-    }
+    Object.defineProperty(process.stdout, "isTTY", {
+      value: originalIsTTY,
+      writable: true,
+    });
     if (originalCI !== undefined) {
       process.env.CI = originalCI;
     } else {

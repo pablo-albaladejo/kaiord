@@ -102,5 +102,5 @@ echo "  2. Commit and push: ${BLUE}git add .changeset/ && git commit -m 'chore: 
 echo "  3. Merge 'Version Packages' PR"
 echo "  4. Watch: ${BLUE}https://github.com/pablo-albaladejo/kaiord/actions${NC}"
 echo ""
-echo "Documentation: ${BLUE}.github/NPM_PUBLISHING.md${NC}"
+echo "Documentation: ${BLUE}docs/deployment.md${NC}"
 
