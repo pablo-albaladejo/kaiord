@@ -38,7 +38,7 @@
 #
 # Requirements: 3.1, 3.2, 3.3, 9.1, 9.2, 9.4
 
-set -e  # Exit on error
+set -euo pipefail  # Exit on error, unset variables, and pipeline failures
 
 # Check if tag argument is provided
 if [[ $# -ne 1 ]]; then
