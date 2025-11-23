@@ -419,7 +419,7 @@ All `/docs` files follow this consistent structure:
 ✅ **All documentation uses:**
 
 - Triple backticks for code blocks
-- Language hints (e.g., `typescript, `bash, ```json)
+- Language hints (e.g., `typescript`, `bash`, `json`)
 - Consistent indentation (2 spaces)
 - Syntax highlighting appropriate for language
 
