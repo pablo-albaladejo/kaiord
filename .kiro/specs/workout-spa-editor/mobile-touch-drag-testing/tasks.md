@@ -25,16 +25,16 @@ Implementation tasks for adding comprehensive mobile touch drag testing to the W
 **Description:**
 Create reusable touch drag helper functions for E2E tests that use Playwright's touchscreen API.
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [x] Create `packages/workout-spa-editor/e2e/test-utils/` directory
-- [-] Create `packages/workout-spa-editor/e2e/test-utils/touch-helpers.ts`
-- [x] Implement `touchDrag()` function with smooth interpolation using `page.touchscreen` API
-- [x] Implement `touchDragNative()` function with native touch events (touchstart, touchmove, touchend)
-- [-] Implement `verifyStepOrder()` helper for data validation
-- [x] Implement `measureDragPerformance()` helper for timing
-- [x] Add JSDoc comments for all exported functions
-- [-] Create `packages/workout-spa-editor/e2e/test-utils/index.ts` to export all helpers
+    - [x] Create `packages/workout-spa-editor/e2e/test-utils/` directory
+    - [-] Create `packages/workout-spa-editor/e2e/test-utils/touch-helpers.ts`
+    - [x] Implement `touchDrag()` function with smooth interpolation using `page.touchscreen` API
+    - [x] Implement `touchDragNative()` function with native touch events (touchstart, touchmove, touchend)
+    - [x] Implement `verifyStepOrder()` helper for data validation
+    - [x] Implement `measureDragPerformance()` helper for timing
+    - [x] Add JSDoc comments for all exported functions
+    - [x] Create `packages/workout-spa-editor/e2e/test-utils/index.ts` to export all helpers
 
 **Implementation Notes:**
 
@@ -59,13 +59,13 @@ Create reusable touch drag helper functions for E2E tests that use Playwright's 
 **Description:**
 Create viewport configuration utilities for easy reuse across tests. Note: Playwright config already has Mobile Chrome (Pixel 5) and Mobile Safari (iPhone 12) configured.
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [-] Create `packages/workout-spa-editor/e2e/test-utils/viewport-configs.ts`
-- [-] Export viewport presets that match Playwright's device configurations
-- [-] Add additional viewport presets for iPhone SE, iPhone 14 Pro Max, Galaxy S21, iPad Mini
-- [-] Export typed viewport configurations
-- [-] Add JSDoc comments explaining each viewport and when to use it
+    - [-] Create `packages/workout-spa-editor/e2e/test-utils/viewport-configs.ts`
+    - [-] Export viewport presets that match Playwright's device configurations
+    - [-] Add additional viewport presets for iPhone SE, iPhone 14 Pro Max, Galaxy S21, iPad Mini
+    - [-] Export typed viewport configurations
+    - [-] Add JSDoc comments explaining each viewport and when to use it
 
 **Implementation Notes:**
 
@@ -93,15 +93,15 @@ export const MOBILE_VIEWPORTS = {
 **Description:**
 Create new E2E test file specifically for mobile touch drag functionality using actual touch gestures (not keyboard shortcuts).
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [-] Create `packages/workout-spa-editor/e2e/mobile-touch-drag.spec.ts`
-- [-] Import touch helpers from test-utils
-- [x] Reuse `createTestWorkout()` helper from existing drag-drop-reordering.spec.ts
-- [x] Add test setup with mobile viewport configuration
-- [-] Add `beforeEach` hook to navigate to app
-- [x] Follow AAA pattern (Arrange-Act-Assert) for all tests
-- [x] Add descriptive test names and requirement comments
+    - [-] Create `packages/workout-spa-editor/e2e/mobile-touch-drag.spec.ts`
+    - [-] Import touch helpers from test-utils
+    - [x] Reuse `createTestWorkout()` helper from existing drag-drop-reordering.spec.ts
+    - [x] Add test setup with mobile viewport configuration
+    - [-] Add `beforeEach` hook to navigate to app
+    - [x] Follow AAA pattern (Arrange-Act-Assert) for all tests
+    - [x] Add descriptive test names and requirement comments
 
 **Implementation Notes:**
 
@@ -132,16 +132,16 @@ test.describe("Mobile Touch Drag", () => {
 **Description:**
 Implement test for basic touch drag reordering using Playwright's touchscreen API (not keyboard shortcuts).
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [x] Test loads workout with 3 steps
-- [x] Test verifies initial step order using data (duration, power)
-- [x] Test performs touch drag using `touchDrag()` helper from position 0 to position 1
-- [x] Test verifies step order changed correctly by checking data
-- [x] Test verifies step data integrity (duration, power values preserved)
-- [x] Test verifies stepIndex values are sequential after reorder
-- [x] Test uses deterministic waits (no arbitrary timeouts)
-- [x] Test covers Requirement 1 (Touch Drag Implementation)
+    - [x] Test loads workout with 3 steps
+    - [x] Test verifies initial step order using data (duration, power)
+    - [x] Test performs touch drag using `touchDrag()` helper from position 0 to position 1
+    - [x] Test verifies step order changed correctly by checking data
+    - [x] Test verifies step data integrity (duration, power values preserved)
+    - [x] Test verifies stepIndex values are sequential after reorder
+    - [x] Test uses deterministic waits (no arbitrary timeouts)
+    - [x] Test covers Requirement 1 (Touch Drag Implementation)
 
 **Implementation Notes:**
 
@@ -187,14 +187,14 @@ test("should reorder steps using touch drag", async ({ page }) => {
 **Description:**
 Add tests that run across multiple mobile viewports to ensure touch drag works on different devices.
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [-] Create test suites for iPhone 12 (iOS Safari) and Pixel 5 (Android Chrome)
-- [-] Each suite runs basic touch drag test
-- [x] Tests verify touch drag works on WebKit browser (iOS Safari)
-- [x] Tests verify touch drag works on Chromium browser (Android Chrome)
-- [-] Tests use `test.use()` to configure viewport per suite
-- [-] Tests cover Requirement 5 (Cross-Device Compatibility)
+    - [-] Create test suites for iPhone 12 (iOS Safari) and Pixel 5 (Android Chrome)
+    - [-] Each suite runs basic touch drag test
+    - [x] Tests verify touch drag works on WebKit browser (iOS Safari)
+    - [x] Tests verify touch drag works on Chromium browser (Android Chrome)
+    - [-] Tests use `test.use()` to configure viewport per suite
+    - [-] Tests cover Requirement 5 (Cross-Device Compatibility)
 
 **Implementation Notes:**
 
@@ -227,13 +227,13 @@ for (const device of MOBILE_DEVICES) {
 **Description:**
 Test that visual feedback is shown during touch drag operation. This validates that the DnD Kit touch sensor provides proper visual cues.
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [ ] Test verifies drag preview has correct CSS classes during drag
-- [ ] Test verifies drag overlay is visible during drag (if applicable)
-- [ ] Test verifies opacity or other visual changes during drag
-- [ ] Test verifies drag preview is removed after drop
-- [ ] Test covers Requirement 3 (Visual Feedback Testing)
+    - [ ] Test verifies drag preview has correct CSS classes during drag
+    - [ ] Test verifies drag overlay is visible during drag (if applicable)
+    - [ ] Test verifies opacity or other visual changes during drag
+    - [ ] Test verifies drag preview is removed after drop
+    - [ ] Test covers Requirement 3 (Visual Feedback Testing)
 
 **Implementation Notes:**
 
@@ -276,12 +276,12 @@ test("should show drag preview during touch drag", async ({ page }) => {
 **Description:**
 Test that drop zone indicators are shown during drag (if implemented in the UI).
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [ ] Test verifies drop indicator appears at target position (if UI implements this)
-- [ ] Test verifies drop indicator has correct styling
-- [ ] Test verifies drop indicator is removed after drop
-- [ ] Test covers Requirement 3 (Visual Feedback Testing)
+    - [ ] Test verifies drop indicator appears at target position (if UI implements this)
+    - [ ] Test verifies drop indicator has correct styling
+    - [ ] Test verifies drop indicator is removed after drop
+    - [ ] Test covers Requirement 3 (Visual Feedback Testing)
 
 **Implementation Notes:**
 
@@ -321,14 +321,14 @@ test("should show drop zone indicator during drag", async ({ page }) => {
 **Description:**
 Test edge cases for dragging first and last steps using touch gestures. Note: Existing keyboard tests already cover this logic, but we need to verify it works with touch.
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [ ] Test verifies first step can be dragged down using touch
-- [ ] Test verifies first step cannot be dragged up (no-op) using touch
-- [ ] Test verifies last step can be dragged up using touch
-- [ ] Test verifies last step cannot be dragged down (no-op) using touch
-- [ ] Test verifies step order unchanged for invalid drags
-- [ ] Test covers Requirement 4 (Touch Drag Edge Cases)
+    - [ ] Test verifies first step can be dragged down using touch
+    - [ ] Test verifies first step cannot be dragged up (no-op) using touch
+    - [ ] Test verifies last step can be dragged up using touch
+    - [ ] Test verifies last step cannot be dragged down (no-op) using touch
+    - [ ] Test verifies step order unchanged for invalid drags
+    - [ ] Test covers Requirement 4 (Touch Drag Edge Cases)
 
 **Implementation Notes:**
 
@@ -367,14 +367,14 @@ test("should not move last step down with touch", async ({ page }) => {
 **Description:**
 Test that cancelled drag operations return step to original position when using touch gestures.
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [ ] Test starts drag operation with touch
-- [ ] Test moves finger slightly (< threshold distance)
-- [ ] Test releases finger (cancels drag)
-- [ ] Test verifies step returned to original position
-- [ ] Test verifies step order unchanged
-- [ ] Test covers Requirement 4 (Touch Drag Edge Cases)
+    - [ ] Test starts drag operation with touch
+    - [ ] Test moves finger slightly (< threshold distance)
+    - [ ] Test releases finger (cancels drag)
+    - [ ] Test verifies step returned to original position
+    - [ ] Test verifies step order unchanged
+    - [ ] Test covers Requirement 4 (Touch Drag Edge Cases)
 
 **Implementation Notes:**
 
@@ -417,14 +417,14 @@ test("should handle cancelled touch drag", async ({ page }) => {
 **Description:**
 Test touch drag for repetition blocks. Note: Existing keyboard test already validates block dimensions, but we need to verify touch drag works.
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [ ] Test loads workout with repetition block
-- [ ] Test performs touch drag on repetition block using `touchDrag()` helper
-- [ ] Test verifies block moved to new position
-- [ ] Test verifies block dimensions maintained (within 10% tolerance)
-- [ ] Test verifies nested steps remain intact
-- [ ] Test covers Requirement 4 (Touch Drag Edge Cases)
+    - [ ] Test loads workout with repetition block
+    - [ ] Test performs touch drag on repetition block using `touchDrag()` helper
+    - [ ] Test verifies block moved to new position
+    - [ ] Test verifies block dimensions maintained (within 10% tolerance)
+    - [ ] Test verifies nested steps remain intact
+    - [ ] Test covers Requirement 4 (Touch Drag Edge Cases)
 
 **Implementation Notes:**
 
@@ -483,13 +483,13 @@ test("should handle repetition block touch drag", async ({ page }) => {
 **Description:**
 Test that touch drag operations complete within performance budget (500ms).
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [ ] Test measures touch drag operation duration
-- [ ] Test verifies operation completes within 500ms
-- [ ] Test uses `measureDragPerformance()` helper from test-utils
-- [ ] Test logs performance metrics for debugging
-- [ ] Test covers Requirement 6 (Performance and Responsiveness)
+    - [ ] Test measures touch drag operation duration
+    - [ ] Test verifies operation completes within 500ms
+    - [ ] Test uses `measureDragPerformance()` helper from test-utils
+    - [ ] Test logs performance metrics for debugging
+    - [ ] Test covers Requirement 6 (Performance and Responsiveness)
 
 **Implementation Notes:**
 
@@ -521,13 +521,13 @@ test("should complete touch drag within 500ms", async ({ page }) => {
 **Description:**
 Test touch drag performance with large workout (50+ steps). Note: Existing keyboard test already validates large workouts, but we need to verify touch performance.
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [ ] Test loads workout with 50 steps
-- [ ] Test performs touch drag on middle step (position 25)
-- [ ] Test verifies operation completes within 500ms
-- [ ] Test verifies smooth scrolling during drag
-- [ ] Test covers Requirement 6 (Performance and Responsiveness)
+    - [ ] Test loads workout with 50 steps
+    - [ ] Test performs touch drag on middle step (position 25)
+    - [ ] Test verifies operation completes within 500ms
+    - [ ] Test verifies smooth scrolling during drag
+    - [ ] Test covers Requirement 6 (Performance and Responsiveness)
 
 **Implementation Notes:**
 
@@ -574,13 +574,13 @@ test("should handle large workout touch drag performance", async ({ page }) => {
 **Description:**
 Update E2E test documentation to include mobile touch drag tests and utilities.
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [ ] Update `packages/workout-spa-editor/e2e/README.md`
-- [ ] Document touch drag test utilities in test-utils section
-- [ ] Add examples of running mobile touch tests
-- [ ] Add troubleshooting section for common touch test issues
-- [ ] Document test coverage and requirements mapping
+    - [ ] Update `packages/workout-spa-editor/e2e/README.md`
+    - [ ] Document touch drag test utilities in test-utils section
+    - [ ] Add examples of running mobile touch tests
+    - [ ] Add troubleshooting section for common touch test issues
+    - [ ] Document test coverage and requirements mapping
 
 **Implementation Notes:**
 
@@ -635,13 +635,13 @@ Located in `e2e/test-utils/`:
 **Description:**
 Update frontend testing steering rule to include mobile touch drag testing requirements.
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [ ] Update `.kiro/steering/frontend-testing.md`
-- [ ] Add section on mobile touch drag testing requirements
-- [ ] Document when to use touch drag tests vs keyboard shortcut tests
-- [ ] Add mobile viewport testing requirements
-- [ ] Add examples of touch drag test patterns
+    - [ ] Update `.kiro/steering/frontend-testing.md`
+    - [ ] Add section on mobile touch drag testing requirements
+    - [ ] Document when to use touch drag tests vs keyboard shortcut tests
+    - [ ] Add mobile viewport testing requirements
+    - [ ] Add examples of touch drag test patterns
 
 **Implementation Notes:**
 
@@ -676,13 +676,13 @@ Use `touchDrag()` helper from `test-utils/touch-helpers.ts`.
 **Description:**
 Verify CI pipeline is configured to run mobile touch drag tests. Note: Playwright config already has Mobile Chrome and Mobile Safari projects configured.
 
-**Acceptance Criteria:**
+    **Acceptance Criteria:**
 
-- [ ] Verify `.github/workflows/workout-spa-editor-e2e.yml` runs all Playwright projects
-- [ ] Verify mobile viewports (Mobile Chrome, Mobile Safari) are in Playwright config
-- [ ] Verify tests run on both WebKit and Chromium browsers
-- [ ] Verify test results are reported correctly in CI
-- [ ] Confirm new test file will be picked up automatically
+    - [ ] Verify `.github/workflows/workout-spa-editor-e2e.yml` runs all Playwright projects
+    - [ ] Verify mobile viewports (Mobile Chrome, Mobile Safari) are in Playwright config
+    - [ ] Verify tests run on both WebKit and Chromium browsers
+    - [ ] Verify test results are reported correctly in CI
+    - [ ] Confirm new test file will be picked up automatically
 
 **Implementation Notes:**
 
