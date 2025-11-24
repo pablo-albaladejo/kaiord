@@ -19,6 +19,7 @@ export const WorkoutList = ({
   onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
+  onStepCopy,
   onDuplicateStepInRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
@@ -57,6 +58,7 @@ export const WorkoutList = ({
             onToggleStepSelection={onToggleStepSelection}
             onStepDelete={onStepDelete}
             onStepDuplicate={onStepDuplicate}
+            onStepCopy={onStepCopy}
             onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
             onEditRepetitionBlock={onEditRepetitionBlock}
             onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}

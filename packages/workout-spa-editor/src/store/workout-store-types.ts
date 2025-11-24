@@ -34,6 +34,12 @@ export type WorkoutStore = {
   undoDelete: (timestamp: number) => void;
   clearExpiredDeletes: () => void;
   duplicateStep: (stepIndex: number) => void;
+  copyStep: (
+    stepIndex: number
+  ) => Promise<{ success: boolean; message: string }>;
+  pasteStep: (
+    insertIndex?: number
+  ) => Promise<{ success: boolean; message: string }>;
   reorderStep: (activeIndex: number, overIndex: number) => void;
   reorderStepsInBlock: (
     blockIndex: number,

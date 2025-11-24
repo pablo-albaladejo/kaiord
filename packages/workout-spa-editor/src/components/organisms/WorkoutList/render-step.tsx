@@ -11,6 +11,7 @@ type RenderStepProps = {
   readonly onToggleStepSelection?: (stepId: string) => void;
   readonly onStepDelete?: (stepIndex: number) => void;
   readonly onStepDuplicate?: (stepIndex: number) => void;
+  readonly onStepCopy?: (stepIndex: number) => void;
 };
 
 export const renderStep = ({
@@ -23,6 +24,7 @@ export const renderStep = ({
   onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
+  onStepCopy,
 }: RenderStepProps) => {
   const isSelected = selectedStepId === id;
   const isMultiSelected = selectedStepIds.includes(id);
@@ -42,6 +44,7 @@ export const renderStep = ({
       onDuplicate={
         onStepDuplicate ? () => onStepDuplicate(step.stepIndex) : undefined
       }
+      onCopy={onStepCopy ? () => onStepCopy(step.stepIndex) : undefined}
     />
   );
 };

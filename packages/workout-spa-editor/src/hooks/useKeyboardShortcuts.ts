@@ -6,6 +6,8 @@ type KeyboardShortcutHandlers = {
   onRedo?: () => void;
   onMoveStepUp?: () => void;
   onMoveStepDown?: () => void;
+  onCopy?: () => void;
+  onPaste?: () => void;
 };
 
 export function useKeyboardShortcuts({
@@ -14,6 +16,8 @@ export function useKeyboardShortcuts({
   onRedo,
   onMoveStepUp,
   onMoveStepDown,
+  onCopy,
+  onPaste,
 }: KeyboardShortcutHandlers) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -62,6 +66,20 @@ export function useKeyboardShortcuts({
         onRedo?.();
         return;
       }
+
+      // Ctrl+C / Cmd+C - Copy (Requirement 39.2)
+      if (event.key === "c" || event.key === "C") {
+        event.preventDefault();
+        onCopy?.();
+        return;
+      }
+
+      // Ctrl+V / Cmd+V - Paste (Requirement 39.2)
+      if (event.key === "v" || event.key === "V") {
+        event.preventDefault();
+        onPaste?.();
+        return;
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
@@ -69,5 +87,5 @@ export function useKeyboardShortcuts({
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
     };
-  }, [onSave, onUndo, onRedo, onMoveStepUp, onMoveStepDown]);
+  }, [onSave, onUndo, onRedo, onMoveStepUp, onMoveStepDown, onCopy, onPaste]);
 }

@@ -10,6 +10,7 @@ type WorkoutListContentProps = {
   onToggleStepSelection?: (stepId: string) => void;
   onStepDelete?: (stepIndex: number) => void;
   onStepDuplicate?: (stepIndex: number) => void;
+  onStepCopy?: (stepIndex: number) => void;
   onDuplicateStepInRepetitionBlock?: (
     blockIndex: number,
     stepIndex: number
@@ -36,6 +37,7 @@ export const WorkoutListContent = ({
   onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
+  onStepCopy,
   onDuplicateStepInRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
@@ -58,6 +60,7 @@ export const WorkoutListContent = ({
               onToggleStepSelection,
               onStepDelete,
               onStepDuplicate,
+              onStepCopy,
               onDuplicateStepInRepetitionBlock,
               onEditRepetitionBlock,
               onAddStepToRepetitionBlock,

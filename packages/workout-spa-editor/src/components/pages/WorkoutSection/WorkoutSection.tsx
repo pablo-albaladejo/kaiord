@@ -48,6 +48,8 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         onToggleStepSelection={state.handleToggleStepSelection}
         onStepDelete={state.handleDeleteRequest}
         onStepDuplicate={state.duplicateStep}
+        onStepCopy={state.copyStep}
+        onStepPaste={state.pasteStep}
         onStepReorder={state.reorderStep}
         onReorderStepsInBlock={state.reorderStepsInBlock}
         onAddStep={state.createStep}

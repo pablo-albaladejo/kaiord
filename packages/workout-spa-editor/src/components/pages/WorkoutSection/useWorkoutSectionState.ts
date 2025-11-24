@@ -7,6 +7,8 @@ import {
 } from "../../../store/workout-store-selectors";
 import type { KRD, Workout } from "../../../types/krd";
 import { useRepetitionBlockHandlers } from "./use-repetition-block-handlers";
+import { useCopyStep } from "./useCopyStep";
+import { usePasteStep } from "./usePasteStep";
 import { useSelectedStep } from "./useSelectedStep";
 import { useWorkoutSectionHandlers } from "./useWorkoutSectionHandlers";
 
@@ -25,6 +27,8 @@ export function useWorkoutSectionState(
   const isEditing = useIsEditing();
   const createStep = useCreateStep();
   const duplicateStep = useDuplicateStep();
+  const copyStep = useCopyStep();
+  const pasteStep = usePasteStep();
   const defaultReorderStep = useReorderStep();
   const reorderStep = onStepReorder || defaultReorderStep;
   const selectedStep = useSelectedStep(selectedStepId, workout);
@@ -41,6 +45,8 @@ export function useWorkoutSectionState(
     isEditing,
     createStep,
     duplicateStep,
+    copyStep,
+    pasteStep,
     reorderStep,
     reorderStepsInBlock: onReorderStepsInBlock,
     selectedStep,
