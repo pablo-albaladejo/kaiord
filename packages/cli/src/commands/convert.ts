@@ -9,6 +9,7 @@ import chalk from "chalk";
 import ora from "ora";
 import { basename, join } from "path";
 import { z } from "zod";
+import { loadConfig, mergeWithConfig } from "../utils/config-loader.js";
 import { formatError } from "../utils/error-formatter";
 import { findFiles, readFile, writeFile } from "../utils/file-handler";
 import {
@@ -108,8 +109,26 @@ const convertSingleFile = async (
 export const convertCommand = async (
   options: ConvertOptions
 ): Promise<number> => {
+  // Load config file defaults
+  const config = await loadConfig();
+
+  // Merge CLI options with config defaults (CLI takes precedence)
+  const mergedOptions = mergeWithConfig(options, config);
+
+  // Apply config defaults to options
+  const optionsWithDefaults = {
+    ...mergedOptions,
+    inputFormat: mergedOptions.inputFormat || config.defaultInputFormat,
+    outputFormat: mergedOptions.outputFormat || config.defaultOutputFormat,
+    outputDir: mergedOptions.outputDir || config.defaultOutputDir,
+    verbose: mergedOptions.verbose ?? config.verbose,
+    quiet: mergedOptions.quiet ?? config.quiet,
+    json: mergedOptions.json ?? config.json,
+    logFormat: mergedOptions.logFormat || config.logFormat,
+  };
+
   // Parse and validate command options using Zod schemas
-  const validatedOptions = convertOptionsSchema.parse(options);
+  const validatedOptions = convertOptionsSchema.parse(optionsWithDefaults);
 
   // Create logger using logger-factory based on options
   const logger = await createLogger({
