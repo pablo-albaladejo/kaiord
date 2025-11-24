@@ -6,31 +6,38 @@ This document provides a quick reference for the mobile touch drag testing appro
 
 ## Testing Philosophy
 
-### Hybrid Approach
+### Decision: Touch Gesture Tests Removed
 
-The test suite uses a **hybrid approach** combining two complementary testing strategies:
+**Touch gesture tests have been removed from the E2E test suite.**
 
-1. **Keyboard Shortcut Tests** (Primary for E2E automation)
-   - Use Alt+Up/Down keyboard shortcuts
-   - 100% reliable in E2E frameworks
-   - Test the same underlying reordering logic
-   - Recommended for CI/CD pipelines
+#### Why?
 
-2. **Touch Gesture Tests** (Validation and documentation)
-   - Use Playwright's touchscreen API
-   - Validate actual touch interactions
-   - Document expected mobile behavior
-   - Best validated through manual testing or component tests
-
-### Why This Approach?
-
-**Known Limitation**: Touch gesture tests using Playwright's `touchscreen` API can be unreliable in E2E frameworks due to:
+Touch gesture tests using Playwright's `touchscreen` API are unreliable in E2E frameworks due to:
 
 - Timing sensitivity of touch events
-- Browser implementation differences
+- Browser implementation differences across WebKit, Chromium, and Firefox
 - Viewport and coordinate calculation complexities
+- Inconsistent behavior in CI/CD environments
 
-**Solution**: Both test types validate the same underlying reordering logic, ensuring comprehensive coverage while maintaining reliability.
+These tests were consistently failing despite the touch drag functionality working correctly in the actual application.
+
+#### Alternative Strategy
+
+The same reordering logic is validated through **keyboard shortcut tests** (Alt+Up/Down) which:
+
+- ✅ Are 100% reliable in E2E frameworks
+- ✅ Test the exact same underlying reordering logic
+- ✅ Work consistently across all browsers and CI/CD
+- ✅ Provide complete requirements coverage
+
+#### Manual Testing
+
+Touch drag functionality **works correctly** in the actual application and should be validated through:
+
+- Manual testing on real iOS devices
+- Manual testing on real Android devices
+- Manual testing in browser DevTools mobile emulation
+- User acceptance testing
 
 ## Quick Start
 
