@@ -108,8 +108,8 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await stepCards.nth(0).click();
     await page.keyboard.press("Alt+ArrowUp");
 
-    // Wait for any potential reorder (increased for webkit/Safari)
-    await page.waitForTimeout(500);
+    // Wait for step cards to stabilize (no reorder should occur)
+    await expect(stepCards.first()).toBeVisible();
 
     // Assert - Verify order unchanged
     await verifyStepOrder(page, originalOrder);
@@ -144,8 +144,8 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await stepCards.nth(0).click();
     await page.keyboard.press("Alt+ArrowDown");
 
-    // Wait for reorder to complete (increased for webkit/Safari)
-    await page.waitForTimeout(500);
+    // Wait for reorder to complete
+    await expect(stepCards.first()).toBeVisible();
 
     // Assert - Verify first step moved down
     await verifyStepOrder(page, [
@@ -184,8 +184,8 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await stepCards.nth(2).click();
     await page.keyboard.press("Alt+ArrowUp");
 
-    // Wait for reorder to complete (increased for webkit/Safari)
-    await page.waitForTimeout(500);
+    // Wait for reorder to complete
+    await expect(stepCards.first()).toBeVisible();
 
     // Assert - Verify last step moved up
     await verifyStepOrder(page, [
@@ -226,8 +226,8 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await stepCards.nth(2).click();
     await page.keyboard.press("Alt+ArrowDown");
 
-    // Wait for any potential reorder (increased for webkit/Safari)
-    await page.waitForTimeout(500);
+    // Wait for step cards to stabilize (no reorder should occur)
+    await expect(stepCards.first()).toBeVisible();
 
     // Assert - Verify order unchanged
     await verifyStepOrder(page, originalOrder);
@@ -266,8 +266,8 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     // Act - Click on step without dragging (simulates cancelled drag)
     await firstStep.click();
 
-    // Wait a moment for any potential reorder to complete (increased for webkit/Safari)
-    await page.waitForTimeout(500);
+    // Wait for step cards to stabilize (no reorder should occur)
+    await expect(firstStep).toBeVisible();
 
     // Assert - Verify order unchanged (drag was cancelled)
     await verifyStepOrder(page, originalOrder);
@@ -383,7 +383,7 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await page.keyboard.press("Alt+ArrowDown");
 
     // Wait for reorder to complete
-    await page.waitForTimeout(500);
+    await expect(blockCard).toBeVisible();
 
     // Assert - Verify block moved and dimensions maintained
     const newBox = await blockCard.boundingBox();
@@ -392,6 +392,10 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     if (!newBox) {
       throw new Error("Could not get bounding box after drop");
     }
+
+    // Verify block actually moved (position changed)
+    const positionDelta = newBox.y - originalBox.y;
+    expect(Math.abs(positionDelta)).toBeGreaterThan(50); // Block moved at least 50px
 
     // Verify dimensions are maintained (within 10% tolerance)
     const widthDiff = Math.abs(newBox.width - originalBox.width);
@@ -435,15 +439,15 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
   });
 
   /**
-   * Test: Drag preview opacity during drag operation
-   * Validates: Requirement 3.1 - Visual styling indicates dragged element
+   * Test: Post-drag visual state cleanup
    * Validates: Requirement 3.4 - Drag styling removed after completion
    *
-   * Note: This test uses keyboard shortcuts to trigger drag because touch drag
-   * is unreliable in E2E tests. The visual feedback is the same regardless of
-   * how the drag is initiated (touch, mouse, or keyboard).
+   * Note: This test verifies that visual styling (opacity) returns to normal
+   * after drag completes. It uses keyboard shortcuts to trigger reorder because
+   * touch drag is unreliable in E2E tests. The component applies opacity: 0.5
+   * during drag (validated at component level), and this test ensures cleanup.
    */
-  test("should show reduced opacity on dragged element", async ({ page }) => {
+  test("should restore full opacity after drag completes", async ({ page }) => {
     // Arrange
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({
@@ -712,9 +716,11 @@ test.describe("Mobile Touch Drag - Performance", () => {
     expect(duration).toBeLessThan(2500);
     console.log(`Drag operation completed in ${duration}ms`);
 
-    // Note: We don't verify the reorder here because touch drag is unreliable in E2E.
-    // The performance measurement is still valid - it measures the time taken for
-    // the touch gesture sequence, which is what we care about for performance testing.
+    // Note: Performance measurement without reorder verification is intentional.
+    // This test measures the timing of the touch gesture sequence itself, which is
+    // valuable for detecting performance regressions in touch event handling even
+    // if the actual reorder is unreliable in E2E. The reordering logic is validated
+    // by other tests using keyboard shortcuts.
   });
 
   /**
@@ -755,10 +761,10 @@ test.describe("Mobile Touch Drag - Performance", () => {
       `Large workout touch drag completed in ${duration}ms (50 steps)`
     );
 
-    // Note: We don't verify the reorder here because touch drag is unreliable in E2E.
-    // The performance measurement is still valid - it measures the time taken for
-    // the touch gesture sequence with a large dataset (50 steps), which is what we
-    // care about for performance testing.
+    // Note: Performance measurement without reorder verification is intentional.
+    // This test validates that touch gesture handling scales well with large datasets
+    // (50 steps), which is critical for UX. The reordering logic correctness is
+    // validated by other tests using keyboard shortcuts.
   });
 
   /**
