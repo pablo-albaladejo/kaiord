@@ -72,6 +72,8 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+    // Wait for app to be fully loaded (critical for webkit/Safari)
+    await page.waitForLoadState("networkidle");
   });
 
   /**
@@ -106,8 +108,8 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await stepCards.nth(0).click();
     await page.keyboard.press("Alt+ArrowUp");
 
-    // Wait for any potential reorder
-    await page.waitForTimeout(300);
+    // Wait for any potential reorder (increased for webkit/Safari)
+    await page.waitForTimeout(500);
 
     // Assert - Verify order unchanged
     await verifyStepOrder(page, originalOrder);
@@ -142,8 +144,8 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await stepCards.nth(0).click();
     await page.keyboard.press("Alt+ArrowDown");
 
-    // Wait for reorder to complete
-    await page.waitForTimeout(300);
+    // Wait for reorder to complete (increased for webkit/Safari)
+    await page.waitForTimeout(500);
 
     // Assert - Verify first step moved down
     await verifyStepOrder(page, [
@@ -182,8 +184,8 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await stepCards.nth(2).click();
     await page.keyboard.press("Alt+ArrowUp");
 
-    // Wait for reorder to complete
-    await page.waitForTimeout(300);
+    // Wait for reorder to complete (increased for webkit/Safari)
+    await page.waitForTimeout(500);
 
     // Assert - Verify last step moved up
     await verifyStepOrder(page, [
@@ -224,8 +226,8 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     await stepCards.nth(2).click();
     await page.keyboard.press("Alt+ArrowDown");
 
-    // Wait for any potential reorder
-    await page.waitForTimeout(300);
+    // Wait for any potential reorder (increased for webkit/Safari)
+    await page.waitForTimeout(500);
 
     // Assert - Verify order unchanged
     await verifyStepOrder(page, originalOrder);
@@ -264,8 +266,8 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     // Act - Click on step without dragging (simulates cancelled drag)
     await firstStep.click();
 
-    // Wait a moment for any potential reorder to complete
-    await page.waitForTimeout(300);
+    // Wait a moment for any potential reorder to complete (increased for webkit/Safari)
+    await page.waitForTimeout(500);
 
     // Assert - Verify order unchanged (drag was cancelled)
     await verifyStepOrder(page, originalOrder);
@@ -428,6 +430,8 @@ test.describe("Mobile Touch Drag - Visual Feedback", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+    // Wait for app to be fully loaded (critical for webkit/Safari)
+    await page.waitForLoadState("networkidle");
   });
 
   /**
@@ -669,6 +673,8 @@ test.describe("Mobile Touch Drag - Performance", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+    // Wait for app to be fully loaded (critical for webkit/Safari)
+    await page.waitForLoadState("networkidle");
   });
 
   /**
