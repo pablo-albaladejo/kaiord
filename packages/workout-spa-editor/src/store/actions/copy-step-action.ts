@@ -66,7 +66,7 @@ export const copyStepAction = async (
       success: true,
       message,
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       message: "Failed to copy to clipboard",
