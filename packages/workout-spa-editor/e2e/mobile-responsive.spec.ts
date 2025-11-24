@@ -28,10 +28,7 @@ test.describe("Mobile Responsive Design", () => {
     }
   });
 
-  test("should support touch gestures for navigation", async ({
-    page,
-    browserName,
-  }) => {
+  test("should support touch gestures for navigation", async ({ page }) => {
     await page.goto("/");
 
     // Load a workout
@@ -264,7 +261,7 @@ test.describe("Tablet Responsive Design", () => {
 
     // Verify content width is appropriate for tablet
     const workoutSectionWidth = await workoutSection.evaluate(
-      (el) => el.offsetWidth
+      (el) => (el as HTMLElement).offsetWidth
     );
     // Content should use available space but not be too narrow
     expect(workoutSectionWidth).toBeGreaterThan(400);

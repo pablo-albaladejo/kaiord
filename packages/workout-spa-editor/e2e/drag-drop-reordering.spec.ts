@@ -301,9 +301,6 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     // Capture the power value of step at position 26 before the move
     // Step 26 (index 25): 300 + 25*60 = 1800s = 30 min, 200 + 25*10 = 450W
     // Step 27 (index 26): 300 + 26*60 = 1860s = 31 min, 200 + 26*10 = 460W
-    const step26PowerBefore = await stepCards.nth(26).textContent();
-    const hasPower460 = step26PowerBefore?.includes("460W");
-
     await page.keyboard.press("Alt+ArrowDown");
 
     // Verify step moved by checking that position 25 now has step 27's power (460W)
@@ -385,11 +382,6 @@ test.describe("Drag-and-Drop Step Reordering", () => {
 
     // Get initial DOM element references and their content
     const stepCards = page.locator('[data-testid="step-card"]');
-
-    // Capture the text content of each card before reordering
-    const card0TextBefore = await stepCards.nth(0).textContent();
-    const card1TextBefore = await stepCards.nth(1).textContent();
-    const card2TextBefore = await stepCards.nth(2).textContent();
 
     // Verify initial order
     await expect(stepCards.nth(0)).toContainText("5 min"); // Step 1
