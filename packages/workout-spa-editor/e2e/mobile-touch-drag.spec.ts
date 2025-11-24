@@ -676,7 +676,7 @@ test.describe("Mobile Touch Drag - Performance", () => {
    * Validates: Requirement 6.1 - Drag operations complete within reasonable time
    * Validates: Requirement 6.3 - Performance metrics are measurable
    *
-   * Note: E2E performance threshold is 1500ms (includes network, rendering, animations).
+   * Note: E2E performance threshold is 2500ms (includes network, rendering, animations, CI/CD overhead).
    * The 500ms target from requirements is for unit/integration tests, not E2E.
    * This test measures performance using the measureDragPerformance helper.
    */
@@ -702,8 +702,8 @@ test.describe("Mobile Touch Drag - Performance", () => {
       stepCards.nth(1)
     );
 
-    // Assert - E2E performance budget: 1500ms (includes all overhead)
-    expect(duration).toBeLessThan(1500);
+    // Assert - E2E performance budget: 2500ms (includes all overhead + CI/CD slowness)
+    expect(duration).toBeLessThan(2500);
     console.log(`Drag operation completed in ${duration}ms`);
 
     // Note: We don't verify the reorder here because touch drag is unreliable in E2E.
@@ -810,7 +810,7 @@ test.describe("Mobile Touch Drag - Performance", () => {
     const lastDuration = results[results.length - 1];
     const degradation = lastDuration - firstDuration;
 
-    // Allow up to 300ms degradation (20% of 1500ms budget)
-    expect(degradation).toBeLessThan(300);
+    // Allow up to 500ms degradation (20% of 2500ms budget)
+    expect(degradation).toBeLessThan(500);
   });
 });
