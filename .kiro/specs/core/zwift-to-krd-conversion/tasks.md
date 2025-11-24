@@ -133,8 +133,8 @@ Each task follows Test-Driven Development:
     - _Requirements: 3.1, 3.2, 3.3, 3.4_
     - _Commit: "feat: add Zwift duration converters"_
 
-- [ ] 5. Implement Zwift target conversion
-  - [ ] 5.1 Implement target mappers (Zwift → KRD)
+- [x] 5. Implement Zwift target conversion
+  - [x] 5.1 Implement target mappers (Zwift → KRD)
     - Create adapters/zwift/target/target.mapper.ts
     - Map Power attribute → power target with percent_ftp unit
     - Map pace attribute → pace target (convert sec/km to m/s)
@@ -144,7 +144,7 @@ Each task follows Test-Driven Development:
     - DO NOT test mappers (simple data transformation, no logic)
     - _Requirements: 4.1, 5.1, 6.1, 10.1_
     - _Commit: "feat: add Zwift target mappers"_
-  - [ ] 5.2 Implement target converters (Zwift → KRD)
+  - [x] 5.2 Implement target converters (Zwift → KRD)
     - Create adapters/zwift/target/target.converter.ts
     - Convert FTP percentage to percent_ftp (multiply by 100)
     - Convert PowerLow/PowerHigh to range targets
@@ -349,7 +349,7 @@ Each task follows Test-Driven Development:
     - _Commit: "test: add Zwift test fixtures"_
 
 - [x] 17. Implement round-trip tests
-  - [ ] 17.1 Implement Zwift round-trip tests
+  - [x] 17.1 Implement Zwift round-trip tests
     - Create adapters/zwift/round-trip/ directory
     - Create round-trip test files for each fixture
     - Test Zwift → KRD → Zwift with tolerance checking
@@ -387,7 +387,7 @@ Each task follows Test-Driven Development:
     - _Requirements: 1.1, 1.2, 15.1, 15.2, 18.1, 18.2_
     - _Commit: "feat: export Zwift public API"_
 
-- [ ] 20. Update CLI to support Zwift format
+- [x] 20. Update CLI to support Zwift format
   - [x] 20.1 Add .zwo file extension support
     - Update CLI to recognize .zwo file extension
     - Add Zwift to format detection logic
