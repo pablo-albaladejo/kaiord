@@ -411,16 +411,19 @@ e2e-mobile:
 Mobile touch drag tests validate:
 
 - **Requirement 1**: Touch Drag Implementation
-  - Tests: Basic touch drag reordering
-  - Validates: Touch gestures trigger drag operations
+  - Tests: Keyboard-driven reordering on mobile viewports (automated)
+  - Validates: Underlying reordering logic works correctly
+  - Note: Touch gestures validated manually on real devices
 
 - **Requirement 2**: Touch Gesture Validation
-  - Tests: Data integrity preservation
-  - Validates: Step data unchanged after drag
+  - Tests: Data integrity preservation (automated)
+  - Validates: Step data unchanged after reorder
+  - Note: Touch gesture interactions validated manually/component-level
 
 - **Requirement 5**: Cross-Device Compatibility
-  - Tests: iPhone 12 and Pixel 5 test suites
-  - Validates: Works on iOS Safari (WebKit) and Android Chrome (Chromium)
+  - Tests: iPhone 12 and Pixel 5 viewport tests (automated)
+  - Validates: Works on iOS Safari (WebKit) and Android Chrome (Chromium) viewports
+  - Note: Actual device testing done manually
 
 ## Resources
 
@@ -520,7 +523,7 @@ The flakiness measurement script:
 
 **Example Output**:
 
-```
+```text
 ==========================================
 Mobile Touch Drag Test Flakiness Analysis
 ==========================================

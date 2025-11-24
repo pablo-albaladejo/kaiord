@@ -520,11 +520,11 @@ await page.keyboard.press("Alt+ArrowDown"); // Claims to test touch
 **Mobile viewport configuration**:
 
 ```typescript
-import { MOBILE_DEVICES } from "./test-utils/viewport-configs";
+import { getAllViewports } from "./test-utils/viewport-configs";
 
-for (const device of MOBILE_DEVICES) {
-  test.describe(`${device.name}`, () => {
-    test.use({ ...device.viewport });
+for (const { name, config } of getAllViewports()) {
+  test.describe(name, () => {
+    test.use({ viewport: config });
 
     test("should work on mobile", async ({ page }) => {
       // Test with actual touch gestures
@@ -610,11 +610,11 @@ test("should preserve data during touch drag", async ({ page }) => {
 #### Pattern 3: Cross-Device Testing
 
 ```typescript
-import { MOBILE_DEVICES } from "./test-utils/viewport-configs";
+import { getAllViewports } from "./test-utils/viewport-configs";
 
-for (const device of MOBILE_DEVICES) {
-  test.describe(`${device.name} - Touch Drag`, () => {
-    test.use({ ...device.viewport });
+for (const { name, config } of getAllViewports()) {
+  test.describe(`${name} - Touch Drag`, () => {
+    test.use({ viewport: config });
 
     test("should work on this device", async ({ page }) => {
       await page.goto("/");
@@ -768,17 +768,17 @@ Use predefined mobile device configurations from `e2e/test-utils/viewport-config
 
 ```typescript
 import {
-  MOBILE_DEVICES,
-  getMobileViewport,
+  getAllViewports,
+  getViewportConfig,
 } from "./test-utils/viewport-configs";
 
 // Test on all devices
-for (const device of MOBILE_DEVICES) {
-  test.use({ ...device.viewport });
+for (const { config } of getAllViewports()) {
+  test.use({ viewport: config });
 }
 
 // Test on specific device
-test.use({ ...getMobileViewport("iPhone 12") });
+test.use({ viewport: getViewportConfig("iphone12") });
 ```
 
 ### Best Practices
@@ -880,9 +880,9 @@ Both approaches test the same underlying reordering logic, ensuring comprehensiv
 
 For complete mobile touch drag testing documentation, see:
 
-- [E2E README - Mobile Touch Drag Testing](../packages/workout-spa-editor/e2e/README.md#mobile-touch-drag-testing)
-- [Flakiness Testing Guide](../packages/workout-spa-editor/e2e/FLAKINESS-TESTING.md)
-- [Touch Drag Requirements](.kiro/specs/workout-spa-editor/mobile-touch-drag-testing/requirements.md)
+- [E2E README - Mobile Touch Drag Testing](../../packages/workout-spa-editor/e2e/README.md#mobile-touch-drag-testing)
+- [Flakiness Testing Guide](../../packages/workout-spa-editor/e2e/FLAKINESS-TESTING.md)
+- [Touch Drag Requirements](../specs/workout-spa-editor/mobile-touch-drag-testing/requirements.md)
 
 ### Running E2E Tests
 

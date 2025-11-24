@@ -77,24 +77,25 @@ import {
 
 ### What's Tested
 
-✅ **Basic Touch Drag** - Reordering steps with touch gestures  
-✅ **Data Integrity** - Step data preserved after drag  
-✅ **Cross-Device** - iPhone 12 (iOS) and Pixel 5 (Android)  
-✅ **Visual Feedback** - Drag preview and styling  
-✅ **Edge Cases** - First/last step, cancelled drag, repetition blocks  
-✅ **Performance** - Operations complete within budget
+✅ **Reordering Logic** - Keyboard-driven tests on mobile viewports (automated)  
+✅ **Data Integrity** - Step data preserved after reorder (automated)  
+✅ **Cross-Device** - iPhone 12 (iOS) and Pixel 5 (Android) viewports (automated)  
+✅ **Visual Feedback** - Drag preview and styling (automated)  
+✅ **Edge Cases** - First/last step, cancelled drag, repetition blocks (automated)  
+✅ **Performance** - Operations complete within budget (automated)  
+✅ **Touch Gestures** - Actual touch drag functionality (manual/device testing)
 
 ### Requirements Coverage
 
-| Requirement                       | Test Coverage                 |
-| --------------------------------- | ----------------------------- |
-| Req 1: Touch Drag Implementation  | Basic touch drag tests        |
-| Req 2: Touch Gesture Validation   | All tests use touchscreen API |
-| Req 3: Visual Feedback Testing    | Visual feedback tests         |
-| Req 4: Touch Drag Edge Cases      | Edge case tests               |
-| Req 5: Cross-Device Compatibility | Tests on iOS and Android      |
-| Req 6: Performance                | Performance timing tests      |
-| Req 7: Accessibility              | Keyboard shortcut tests       |
+| Requirement                       | Test Coverage                                  |
+| --------------------------------- | ---------------------------------------------- |
+| Req 1: Touch Drag Implementation  | Automated — keyboard tests on mobile viewports |
+| Req 2: Touch Gesture Validation   | Manual — touch validation on real devices      |
+| Req 3: Visual Feedback Testing    | Automated — visual feedback tests              |
+| Req 4: Touch Drag Edge Cases      | Automated — edge case tests                    |
+| Req 5: Cross-Device Compatibility | Automated — tests on iOS and Android viewports |
+| Req 6: Performance                | Automated — performance timing tests           |
+| Req 7: Accessibility              | Automated — keyboard shortcut tests            |
 
 ## Writing New Tests
 
