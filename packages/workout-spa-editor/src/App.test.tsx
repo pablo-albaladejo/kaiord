@@ -16,6 +16,7 @@ describe("App", () => {
       isEditing: false,
       safeMode: false,
       lastBackup: null,
+      deletedSteps: [],
     });
   });
 

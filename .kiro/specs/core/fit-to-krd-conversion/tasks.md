@@ -263,7 +263,7 @@ Each task follows Test-Driven Development:
 - Backward compatibility
   All 318 tests are passing, validating FIT ↔ KRD conversions with proper tolerance checking.
 
-- [ ] 10. Implement use cases and dependency injection
+- [x] 10. Implement use cases and dependency injection
   - [x] 10.1 Implement ConvertFitToKrd use case
     - Create application/use-cases/convert-fit-to-krd.ts
     - Define ConvertFitToKrd type and createConvertFitToKrd factory

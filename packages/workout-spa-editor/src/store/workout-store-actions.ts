@@ -1,3 +1,5 @@
+import { clearExpiredDeletesAction } from "./actions/clear-expired-deletes-action";
+import { undoDeleteAction } from "./actions/undo-delete-action";
 import { createAllBlockActions } from "./create-all-block-actions";
 import { createAllStepActions } from "./create-all-step-actions";
 import { createBaseWorkoutActions } from "./create-base-workout-actions";
@@ -11,6 +13,13 @@ export function createWorkoutStoreActions() {
       createAllStepActions(state).createStep(),
     deleteStep: (stepIndex: number, state: WorkoutState) =>
       createAllStepActions(state).deleteStep(stepIndex),
+    undoDelete: (timestamp: number, state: WorkoutState) => {
+      const currentWorkout = state.currentWorkout;
+      if (!currentWorkout) return {};
+      return undoDeleteAction(currentWorkout, timestamp, state);
+    },
+    clearExpiredDeletes: (state: WorkoutState) =>
+      clearExpiredDeletesAction(state),
     duplicateStep: (stepIndex: number, state: WorkoutState) =>
       createAllStepActions(state).duplicateStep(stepIndex),
     reorderStep: (

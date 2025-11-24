@@ -1273,4 +1273,172 @@ describe("useWorkoutStore", () => {
       expect(editing).toBe(true);
     });
   });
+
+  describe("undo delete", () => {
+    beforeEach(() => {
+      useWorkoutStore.setState({
+        currentWorkout: null,
+        workoutHistory: [],
+        historyIndex: -1,
+        selectedStepId: null,
+        selectedStepIds: [],
+        isEditing: false,
+        safeMode: false,
+        lastBackup: null,
+        deletedSteps: [],
+      });
+    });
+
+    it("should track deleted steps", () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "cycling",
+        },
+        extensions: {
+          workout: {
+            name: "Test Workout",
+            sport: "cycling",
+            steps: [
+              {
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 300 },
+                targetType: "power",
+                target: {
+                  type: "power",
+                  value: { unit: "watts", value: 200 },
+                },
+              },
+              {
+                stepIndex: 1,
+                durationType: "time",
+                duration: { type: "time", seconds: 600 },
+                targetType: "power",
+                target: {
+                  type: "power",
+                  value: { unit: "watts", value: 250 },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+
+      // Act
+      useWorkoutStore.getState().deleteStep(0);
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      expect(state.deletedSteps).toHaveLength(1);
+      expect(state.deletedSteps[0].index).toBe(0);
+      expect(state.deletedSteps[0].step.stepIndex).toBe(0);
+    });
+
+    it("should restore deleted step with undo", () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "cycling",
+        },
+        extensions: {
+          workout: {
+            name: "Test Workout",
+            sport: "cycling",
+            steps: [
+              {
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 300 },
+                targetType: "power",
+                target: {
+                  type: "power",
+                  value: { unit: "watts", value: 200 },
+                },
+              },
+              {
+                stepIndex: 1,
+                durationType: "time",
+                duration: { type: "time", seconds: 600 },
+                targetType: "power",
+                target: {
+                  type: "power",
+                  value: { unit: "watts", value: 250 },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+      useWorkoutStore.getState().deleteStep(0);
+      const deletedTimestamp =
+        useWorkoutStore.getState().deletedSteps[0].timestamp;
+
+      // Act
+      useWorkoutStore.getState().undoDelete(deletedTimestamp);
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      const workout = state.currentWorkout?.extensions?.workout;
+      expect(workout?.steps).toHaveLength(2);
+      expect(workout?.steps[0].stepIndex).toBe(0);
+      expect(workout?.steps[1].stepIndex).toBe(1);
+      expect(state.deletedSteps).toHaveLength(0);
+    });
+
+    it("should clear expired deleted steps", () => {
+      // Arrange
+      const now = Date.now();
+      useWorkoutStore.setState({
+        deletedSteps: [
+          {
+            step: {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 300 },
+              targetType: "power",
+              target: {
+                type: "power",
+                value: { unit: "watts", value: 200 },
+              },
+            },
+            index: 0,
+            timestamp: now - 6000, // 6 seconds ago (expired)
+          },
+          {
+            step: {
+              stepIndex: 1,
+              durationType: "time",
+              duration: { type: "time", seconds: 600 },
+              targetType: "power",
+              target: {
+                type: "power",
+                value: { unit: "watts", value: 250 },
+              },
+            },
+            index: 1,
+            timestamp: now - 2000, // 2 seconds ago (not expired)
+          },
+        ],
+      });
+
+      // Act
+      useWorkoutStore.getState().clearExpiredDeletes();
+      const state = useWorkoutStore.getState();
+
+      // Assert
+      expect(state.deletedSteps).toHaveLength(1);
+      expect(state.deletedSteps[0].index).toBe(1);
+    });
+  });
 });
