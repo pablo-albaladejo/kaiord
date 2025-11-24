@@ -2,6 +2,7 @@
  * Delete Step Action
  *
  * Action for deleting a workout step and recalculating indices.
+ * Tracks deleted steps for undo functionality.
  */
 
 import type {
@@ -13,6 +14,7 @@ import type {
 import { isWorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import type { DeletedStep } from "../workout-store-types";
 
 export const deleteStepAction = (
   krd: KRD,
@@ -24,6 +26,15 @@ export const deleteStepAction = (
   }
 
   const workout = krd.extensions.workout as Workout;
+
+  // Find the step to delete
+  let deletedStep: WorkoutStep | RepetitionBlock | null = null;
+  for (const step of workout.steps) {
+    if (isWorkoutStep(step) && step.stepIndex === stepIndex) {
+      deletedStep = step;
+      break;
+    }
+  }
 
   // Remove the step at the specified index
   const updatedSteps = workout.steps.filter(
@@ -61,5 +72,21 @@ export const deleteStepAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  // Track deleted step for undo
+  const deletedSteps = state.deletedSteps || [];
+  const newDeletedSteps = deletedStep
+    ? [
+        ...deletedSteps,
+        {
+          step: deletedStep,
+          index: stepIndex,
+          timestamp: Date.now(),
+        } as DeletedStep,
+      ]
+    : deletedSteps;
+
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    deletedSteps: newDeletedSteps,
+  };
 };

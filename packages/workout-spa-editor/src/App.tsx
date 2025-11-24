@@ -1,10 +1,11 @@
 /* eslint-disable max-lines, max-lines-per-function */
 import "./App.css";
-import { ToastProvider } from "./components/atoms/Toast";
 import { WelcomeSection } from "./components/pages/WelcomeSection";
 import { WorkoutSection } from "./components/pages/WorkoutSection/WorkoutSection";
+import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { useAppHandlers } from "./hooks/useAppHandlers";
+import { useDeleteCleanup } from "./hooks/useDeleteCleanup";
 import { useKeyboardShortcuts } from "./hooks/useKeyboardShortcuts";
 import { useWorkoutStore } from "./store/workout-store";
 import {
@@ -41,6 +42,9 @@ function App() {
     handleStepSelect,
     handleCreateWorkout,
   } = useAppHandlers();
+
+  // Cleanup expired deleted steps
+  useDeleteCleanup();
 
   const workout = currentWorkout?.extensions?.workout as Workout | undefined;
 
@@ -113,7 +117,7 @@ function App() {
   });
 
   return (
-    <ToastProvider>
+    <AppToastProvider>
       <MainLayout>
         <div className="space-y-6">
           {!workout && (
@@ -135,7 +139,7 @@ function App() {
           )}
         </div>
       </MainLayout>
-    </ToastProvider>
+    </AppToastProvider>
   );
 }
 

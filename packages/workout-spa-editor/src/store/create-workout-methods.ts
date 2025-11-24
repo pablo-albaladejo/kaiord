@@ -18,6 +18,9 @@ export const createWorkoutMethods = (
   createStep: () => set((state) => actions.createStep(state)),
   deleteStep: (stepIndex: number) =>
     set((state) => actions.deleteStep(stepIndex, state)),
+  undoDelete: (timestamp: number) =>
+    set((state) => actions.undoDelete(timestamp, state)),
+  clearExpiredDeletes: () => set((state) => actions.clearExpiredDeletes(state)),
   duplicateStep: (stepIndex: number) =>
     set((state) => actions.duplicateStep(stepIndex, state)),
   reorderStep: (activeIndex: number, overIndex: number) => {

@@ -1,7 +1,8 @@
-import { act, render, screen, waitFor } from "@testing-library/react";
+import { act, screen, waitFor } from "@testing-library/react";
 import { beforeEach } from "node:test";
 import { describe, expect, it, vi } from "vitest";
 import { useWorkoutStore } from "../../store/workout-store";
+import { renderWithProviders } from "../../test-utils";
 import type { KRD, Workout, WorkoutStep } from "../../types/krd";
 import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
 
@@ -62,7 +63,7 @@ describe("WorkoutSection", () => {
     const krd = createMockKRD(workout);
 
     // Act
-    render(
+    renderWithProviders(
       <WorkoutSection
         workout={workout}
         krd={krd}
@@ -88,7 +89,7 @@ describe("WorkoutSection", () => {
     useWorkoutStore.setState({ isEditing: true });
 
     // Act
-    render(
+    renderWithProviders(
       <WorkoutSection
         workout={workout}
         krd={krd}
@@ -113,7 +114,7 @@ describe("WorkoutSection", () => {
     useWorkoutStore.setState({ isEditing: false });
 
     // Act
-    render(
+    renderWithProviders(
       <WorkoutSection
         workout={workout}
         krd={krd}
@@ -138,7 +139,7 @@ describe("WorkoutSection", () => {
     });
 
     // Act
-    render(
+    renderWithProviders(
       <WorkoutSection
         workout={workout}
         krd={krd}
@@ -162,7 +163,7 @@ describe("WorkoutSection", () => {
       selectedStepId,
     });
 
-    render(
+    renderWithProviders(
       <WorkoutSection
         workout={workout}
         krd={krd}
