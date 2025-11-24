@@ -107,6 +107,15 @@ pnpm test:e2e:report
 
 # Install Playwright browsers (first time only)
 pnpm test:e2e:install
+
+# Measure E2E test flakiness (100 runs)
+pnpm test:e2e:flakiness
+
+# Quick flakiness test (10 runs)
+pnpm test:e2e:flakiness:quick
+
+# iOS flakiness test (100 runs on Mobile Safari)
+pnpm test:e2e:flakiness:ios
 ```
 
 ### Component Documentation
