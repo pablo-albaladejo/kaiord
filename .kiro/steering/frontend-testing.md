@@ -467,6 +467,423 @@ test("should toggle between light and dark themes", async ({ page }) => {
 - CI/CD pipeline must show E2E tests covering new functionality
 - Document which E2E test file was updated in PR description
 
+### Mobile Touch Drag Testing
+
+When adding or modifying drag-and-drop functionality, you MUST add touch drag tests for mobile viewports.
+
+**Requirements**:
+
+1. **MUST** add touch drag tests for mobile viewports
+2. **MUST** test on both iOS (WebKit) and Android (Chromium)
+3. **MUST** verify visual feedback during drag
+4. **MUST** verify data integrity after drag
+5. **SHOULD** test performance (< 500ms for unit tests, < 1500ms for E2E)
+
+**Use touch drag helpers** from `e2e/test-utils/touch-helpers.ts`:
+
+```typescript
+import { touchDrag, verifyStepOrder } from "./test-utils";
+
+test("should reorder with touch drag", async ({ page }) => {
+  // Arrange
+  const stepCards = page.locator('[data-testid="step-card"]');
+
+  // Act
+  await touchDrag(page, stepCards.nth(0), stepCards.nth(1));
+
+  // Assert
+  await verifyStepOrder(page, expectedOrder);
+});
+```
+
+**When to use touch tests vs keyboard tests**:
+
+- **Touch tests**: Validate actual touch gestures on mobile devices
+- **Keyboard tests**: Validate keyboard shortcuts (Alt+Up/Down)
+- **Both are required** for comprehensive coverage
+- **Known limitation**: Touch gesture tests in E2E frameworks can be unreliable
+- **Recommended approach**: Use keyboard tests for E2E automation, validate touch gestures through manual testing or component-level tests
+
+**Touch test patterns**:
+
+```typescript
+// ✅ Good - Uses touchscreen API (for manual validation)
+await touchDrag(page, source, target);
+
+// ✅ Good - Uses keyboard shortcuts (reliable for E2E automation)
+await page.keyboard.press("Alt+ArrowDown");
+
+// ❌ Bad - Mixing approaches without clear purpose
+await page.keyboard.press("Alt+ArrowDown"); // Claims to test touch
+```
+
+**Mobile viewport configuration**:
+
+```typescript
+import { MOBILE_DEVICES } from "./test-utils/viewport-configs";
+
+for (const device of MOBILE_DEVICES) {
+  test.describe(`${device.name}`, () => {
+    test.use({ ...device.viewport });
+
+    test("should work on mobile", async ({ page }) => {
+      // Test with actual touch gestures
+    });
+  });
+}
+```
+
+## Mobile Touch Drag Testing Requirements
+
+### When to Add Mobile Touch Drag Tests
+
+Mobile touch drag tests are REQUIRED when:
+
+1. **Adding drag-and-drop functionality** - Any new drag-drop feature must include mobile tests
+2. **Modifying drag behavior** - Changes to drag logic require updated mobile tests
+3. **Changing touch event handlers** - Updates to touch event handling need validation
+4. **Adding mobile-specific features** - Features targeting mobile devices need touch tests
+5. **Fixing mobile drag bugs** - Bug fixes must include regression tests
+
+### Test Coverage Requirements
+
+Every mobile touch drag feature MUST include:
+
+1. **Basic touch drag test** - Verify drag-and-drop works with touch gestures
+2. **Data integrity test** - Verify data is preserved after drag operations
+3. **Cross-device test** - Validate on both iOS (WebKit) and Android (Chromium)
+4. **Visual feedback test** - Verify drag preview and drop indicators
+5. **Edge case tests** - Test first/last item, cancelled drag, rapid operations
+6. **Performance test** - Verify operations complete within budget (< 1500ms E2E)
+
+### Touch Drag Test Patterns
+
+#### Pattern 1: Basic Touch Drag
+
+```typescript
+test("should reorder items with touch drag", async ({ page }) => {
+  // Arrange
+  await page.goto("/");
+  const items = page.locator('[data-testid="draggable-item"]');
+
+  // Verify initial order
+  await expect(items.nth(0)).toHaveText("Item 1");
+  await expect(items.nth(1)).toHaveText("Item 2");
+
+  // Act - Touch drag first item to second position
+  await touchDrag(page, items.nth(0), items.nth(1));
+
+  // Assert - Verify new order
+  await expect(items.nth(0)).toHaveText("Item 2");
+  await expect(items.nth(1)).toHaveText("Item 1");
+});
+```
+
+#### Pattern 2: Data Integrity Validation
+
+```typescript
+test("should preserve data during touch drag", async ({ page }) => {
+  // Arrange
+  await page.goto("/");
+  const items = page.locator('[data-testid="step-card"]');
+
+  const originalData = [
+    { duration: 300, power: 200 },
+    { duration: 360, power: 210 },
+  ];
+
+  await verifyStepOrder(page, originalData);
+
+  // Act
+  await touchDrag(page, items.nth(0), items.nth(1));
+
+  // Assert - Data preserved, only order changed
+  const expectedData = [
+    { duration: 360, power: 210 },
+    { duration: 300, power: 200 },
+  ];
+
+  await verifyStepOrder(page, expectedData);
+});
+```
+
+#### Pattern 3: Cross-Device Testing
+
+```typescript
+import { MOBILE_DEVICES } from "./test-utils/viewport-configs";
+
+for (const device of MOBILE_DEVICES) {
+  test.describe(`${device.name} - Touch Drag`, () => {
+    test.use({ ...device.viewport });
+
+    test("should work on this device", async ({ page }) => {
+      await page.goto("/");
+      const items = page.locator('[data-testid="draggable-item"]');
+
+      // Test touch drag on this specific device
+      await touchDrag(page, items.nth(0), items.nth(1));
+
+      // Verify it worked
+      await expect(items.nth(0)).toHaveText("Item 2");
+    });
+  });
+}
+```
+
+#### Pattern 4: Visual Feedback Validation
+
+```typescript
+test("should show visual feedback during drag", async ({ page }) => {
+  // Arrange
+  await page.goto("/");
+  const item = page.locator('[data-testid="draggable-item"]').first();
+
+  // Act - Start drag (don't complete)
+  const box = await item.boundingBox();
+  await page.touchscreen.tap(box.x + box.width / 2, box.y + box.height / 2);
+  await page.touchscreen.move(
+    box.x + box.width / 2,
+    box.y + box.height / 2 + 50
+  );
+
+  // Assert - Visual feedback is visible
+  await expect(item).toHaveClass(/drag-active/);
+  await expect(page.locator('[data-testid="drag-preview"]')).toBeVisible();
+
+  // Complete drag
+  await page.touchscreen.move(
+    box.x + box.width / 2,
+    box.y + box.height / 2 + 100
+  );
+});
+```
+
+#### Pattern 5: Performance Testing
+
+```typescript
+test("should complete drag within performance budget", async ({ page }) => {
+  // Arrange
+  await page.goto("/");
+  const items = page.locator('[data-testid="draggable-item"]');
+
+  // Act & Measure
+  const duration = await measureDragPerformance(
+    page,
+    items.nth(0),
+    items.nth(1)
+  );
+
+  // Assert - E2E budget is 1500ms (includes network, rendering, animations)
+  expect(duration).toBeLessThan(1500);
+});
+```
+
+### Touch Drag Helper Utilities
+
+The following utilities are available in `e2e/test-utils/touch-helpers.ts`:
+
+#### `touchDrag(page, source, target, options?)`
+
+Performs smooth touch drag gesture using Playwright's touchscreen API.
+
+**Parameters**:
+
+- `page` - Playwright page object
+- `source` - Source element locator
+- `target` - Target element locator
+- `options` - Optional configuration:
+  - `duration` - Drag duration in ms (default: 300)
+  - `steps` - Number of interpolation steps (default: 10)
+
+**Example**:
+
+```typescript
+await touchDrag(page, sourceElement, targetElement, {
+  duration: 500,
+  steps: 20,
+});
+```
+
+#### `touchDragNative(page, source, target, options?)`
+
+Alternative implementation using native touch events (touchstart, touchmove, touchend).
+
+**Use when**: Debugging touch-specific issues or testing different touch behaviors.
+
+#### `verifyStepOrder(page, expectedOrder)`
+
+Validates workout step order by checking data attributes.
+
+**Parameters**:
+
+- `page` - Playwright page object
+- `expectedOrder` - Array of expected step data: `[{ duration, power }, ...]`
+
+**Example**:
+
+```typescript
+await verifyStepOrder(page, [
+  { duration: 300, power: 200 },
+  { duration: 360, power: 210 },
+]);
+```
+
+#### `verifyVisualFeedback(page, element, expectedClasses)`
+
+Validates visual feedback during drag operations.
+
+**Parameters**:
+
+- `page` - Playwright page object
+- `element` - Element locator to check
+- `expectedClasses` - Array of expected CSS classes
+
+#### `measureDragPerformance(page, source, target)`
+
+Measures touch drag operation duration.
+
+**Returns**: Duration in milliseconds
+
+**Example**:
+
+```typescript
+const duration = await measureDragPerformance(page, source, target);
+expect(duration).toBeLessThan(1500);
+```
+
+### Mobile Viewport Configuration
+
+Use predefined mobile device configurations from `e2e/test-utils/viewport-configs.ts`:
+
+**Available Devices**:
+
+- `iPhone 12` - iOS Safari (WebKit), 390x844
+- `Pixel 5` - Android Chrome (Chromium), 393x851
+- `iPhone SE` - Compact screen, 375x667
+- `iPhone 14 Pro Max` - Large screen, 430x932
+- `Galaxy S21` - Android, 360x800
+- `iPad Mini` - Tablet, 768x1024
+
+**Usage**:
+
+```typescript
+import {
+  MOBILE_DEVICES,
+  getMobileViewport,
+} from "./test-utils/viewport-configs";
+
+// Test on all devices
+for (const device of MOBILE_DEVICES) {
+  test.use({ ...device.viewport });
+}
+
+// Test on specific device
+test.use({ ...getMobileViewport("iPhone 12") });
+```
+
+### Best Practices
+
+#### ✅ DO
+
+1. **Use touch drag helpers** - Always use provided utilities, don't implement touch logic manually
+2. **Test on multiple devices** - Validate on both iOS (WebKit) and Android (Chromium)
+3. **Verify data integrity** - Check that data is preserved after drag operations
+4. **Use deterministic waits** - Wait for stable state, not arbitrary timeouts
+5. **Test visual feedback** - Verify drag preview and drop indicators are visible
+6. **Measure performance** - Ensure operations complete within budget
+7. **Document requirements** - Add comments linking tests to requirements
+8. **Use keyboard tests for E2E** - Keyboard shortcuts are more reliable for automation
+
+#### ❌ DON'T
+
+1. **Don't implement touch logic manually** - Use provided helpers
+2. **Don't use arbitrary timeouts** - Use `waitForSelector` with stable state
+3. **Don't test only on one device** - Always test iOS and Android
+4. **Don't ignore flakiness** - Investigate and fix flaky tests
+5. **Don't skip visual feedback tests** - Users need to see drag feedback
+6. **Don't skip performance tests** - Slow drag operations hurt UX
+7. **Don't rely solely on touch tests for E2E** - Use keyboard tests for reliable automation
+
+### Troubleshooting
+
+#### Touch drag not working
+
+**Symptoms**: Touch gestures don't trigger drag operation
+
+**Solutions**:
+
+1. Ensure `hasTouch: true` in viewport config
+2. Verify element is visible: `await element.scrollIntoViewIfNeeded()`
+3. Check element has proper touch event handlers
+4. Try `touchDragNative()` as alternative implementation
+
+#### Flaky tests
+
+**Symptoms**: Tests pass sometimes but fail intermittently
+
+**Solutions**:
+
+1. Use deterministic waits: `await page.waitForSelector('[data-testid="item"]', { state: "stable" })`
+2. Avoid arbitrary timeouts like `page.waitForTimeout()`
+3. Ensure elements are fully loaded before interacting
+4. Add explicit waits for animations to complete
+5. Consider using keyboard tests for E2E automation instead
+
+#### Elements not found
+
+**Symptoms**: Selectors don't match elements
+
+**Solutions**:
+
+1. Verify data-testid attributes are present in components
+2. Use `page.locator('[data-testid="item"]').count()` to debug
+3. Check elements are rendered in mobile viewport
+4. Ensure viewport configuration matches test expectations
+
+#### Performance issues
+
+**Symptoms**: Touch drag operations are slow
+
+**Solutions**:
+
+1. Reduce interpolation steps in `touchDrag()` options
+2. Check for unnecessary animations or transitions
+3. Verify no network requests blocking UI
+4. Use `measureDragPerformance()` to identify bottlenecks
+
+### Flakiness Measurement
+
+Mobile touch drag tests should maintain < 5% flakiness rate over 100 runs.
+
+**Measure flakiness**:
+
+```bash
+# Quick validation (10 runs)
+pnpm test:e2e:flakiness:quick
+
+# Full measurement (100 runs)
+pnpm test:e2e:flakiness
+
+# iOS testing
+pnpm test:e2e:flakiness:ios
+```
+
+**Known limitation**: Touch gesture tests using Playwright's `touchscreen` API can be unreliable in E2E frameworks. The recommended approach is:
+
+1. **Use keyboard tests for E2E automation** - 100% reliable
+2. **Validate touch gestures manually** - Test on real devices
+3. **Use component-level tests** - Test touch handling at component level
+
+Both approaches test the same underlying reordering logic, ensuring comprehensive coverage.
+
+### Documentation
+
+For complete mobile touch drag testing documentation, see:
+
+- [E2E README - Mobile Touch Drag Testing](../packages/workout-spa-editor/e2e/README.md#mobile-touch-drag-testing)
+- [Flakiness Testing Guide](../packages/workout-spa-editor/e2e/FLAKINESS-TESTING.md)
+- [Touch Drag Requirements](.kiro/specs/workout-spa-editor/mobile-touch-drag-testing/requirements.md)
+
 ### Running E2E Tests
 
 ```bash
@@ -481,6 +898,9 @@ pnpm test:e2e --project=chromium
 
 # Run mobile tests
 pnpm test:e2e --project="Mobile Chrome"
+
+# Run mobile touch drag tests specifically
+pnpm test:e2e mobile-touch-drag.spec.ts
 ```
 
 ## What NOT to Test
