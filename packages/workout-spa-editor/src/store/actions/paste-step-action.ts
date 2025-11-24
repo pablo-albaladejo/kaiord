@@ -11,63 +11,17 @@ import type {
   Workout,
   WorkoutStep,
 } from "../../types/krd";
-import { isRepetitionBlock, isWorkoutStep } from "../../types/krd";
+import { isRepetitionBlock } from "../../types/krd";
+import {
+  isValidRepetitionBlock,
+  isValidWorkoutStep,
+} from "./paste-step-validators";
+import { recalculateStepIndices } from "./recalculate-step-indices";
 
 export type PasteStepResult = {
   success: boolean;
   message: string;
   updatedKrd?: KRD;
-};
-
-/**
- * Validate if the parsed data is a valid WorkoutStep
- */
-const isValidWorkoutStep = (data: unknown): data is WorkoutStep => {
-  if (!data || typeof data !== "object") return false;
-  const step = data as Partial<WorkoutStep>;
-  return (
-    typeof step.stepIndex === "number" &&
-    typeof step.durationType === "string" &&
-    typeof step.duration === "object" &&
-    typeof step.targetType === "string" &&
-    typeof step.target === "object"
-  );
-};
-
-/**
- * Validate if the parsed data is a valid RepetitionBlock
- */
-const isValidRepetitionBlock = (data: unknown): data is RepetitionBlock => {
-  if (!data || typeof data !== "object") return false;
-  const block = data as Partial<RepetitionBlock>;
-  return (
-    typeof block.repeatCount === "number" &&
-    Array.isArray(block.steps) &&
-    block.steps.every(isValidWorkoutStep)
-  );
-};
-
-/**
- * Recalculate step indices for all steps in the workout
- */
-const recalculateStepIndices = (
-  steps: Array<WorkoutStep | RepetitionBlock>
-): Array<WorkoutStep | RepetitionBlock> => {
-  let currentIndex = 0;
-
-  return steps.map((step) => {
-    if (isWorkoutStep(step)) {
-      return { ...step, stepIndex: currentIndex++ };
-    }
-    if (isRepetitionBlock(step)) {
-      const updatedSteps = step.steps.map((s) => ({
-        ...s,
-        stepIndex: currentIndex++,
-      }));
-      return { ...step, steps: updatedSteps };
-    }
-    return step;
-  });
 };
 
 export const pasteStepAction = async (
@@ -153,7 +107,7 @@ export const pasteStepAction = async (
       message,
       updatedKrd,
     };
-  } catch (error) {
+  } catch {
     return {
       success: false,
       message: "Failed to paste from clipboard",
