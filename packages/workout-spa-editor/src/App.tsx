@@ -33,6 +33,8 @@ function App() {
   const reorderStepsInBlock = useWorkoutStore(
     (state) => state.reorderStepsInBlock
   );
+  const copyStep = useWorkoutStore((state) => state.copyStep);
+  const pasteStep = useWorkoutStore((state) => state.pasteStep);
   const canUndo = useWorkoutStore((state) => state.canUndo());
   const canRedo = useWorkoutStore((state) => state.canRedo());
 
@@ -112,6 +114,23 @@ function App() {
         stepIndex < workout.steps.length - 1
       ) {
         reorderStep(stepIndex, stepIndex + 1);
+      }
+    },
+    onCopy: () => {
+      const stepIndex = getSelectedStepIndex();
+      if (stepIndex !== null && workout) {
+        const step = workout.steps[stepIndex];
+        if (step && "stepIndex" in step) {
+          copyStep(step.stepIndex);
+        }
+      }
+    },
+    onPaste: () => {
+      const stepIndex = getSelectedStepIndex();
+      if (stepIndex !== null) {
+        pasteStep(stepIndex + 1);
+      } else if (workout) {
+        pasteStep(workout.steps.length);
       }
     },
   });

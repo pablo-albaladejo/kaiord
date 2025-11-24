@@ -1,4 +1,6 @@
 import type { StoreApi } from "zustand";
+import { copyStepAction } from "./actions/copy-step-action";
+import { pasteStepAction } from "./actions/paste-step-action";
 import type { createWorkoutStoreActions } from "./workout-store-actions";
 import type { WorkoutStore } from "./workout-store-types";
 
@@ -23,6 +25,24 @@ export const createWorkoutMethods = (
   clearExpiredDeletes: () => set((state) => actions.clearExpiredDeletes(state)),
   duplicateStep: (stepIndex: number) =>
     set((state) => actions.duplicateStep(stepIndex, state)),
+  copyStep: async (stepIndex: number) => {
+    const state = get();
+    if (!state.currentWorkout) {
+      return { success: false, message: "No workout loaded" };
+    }
+    return copyStepAction(state.currentWorkout, stepIndex);
+  },
+  pasteStep: async (insertIndex?: number) => {
+    const state = get();
+    if (!state.currentWorkout) {
+      return { success: false, message: "No workout loaded" };
+    }
+    const result = await pasteStepAction(state.currentWorkout, insertIndex);
+    if (result.success && result.updatedKrd) {
+      set((state) => actions.updateWorkout(result.updatedKrd!, state));
+    }
+    return { success: result.success, message: result.message };
+  },
   reorderStep: (activeIndex: number, overIndex: number) => {
     const result = actions.reorderStep(activeIndex, overIndex, get());
     set(result);

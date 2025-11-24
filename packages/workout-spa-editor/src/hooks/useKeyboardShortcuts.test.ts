@@ -291,6 +291,144 @@ describe("useKeyboardShortcuts", () => {
     });
   });
 
+  describe("copy shortcut (Requirement 39.2)", () => {
+    it("should call onCopy when Ctrl+C is pressed", () => {
+      // Arrange
+      const onCopy = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "c",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCopy).toHaveBeenCalledOnce();
+    });
+
+    it("should call onCopy when Cmd+C is pressed", () => {
+      // Arrange
+      const onCopy = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "c",
+        metaKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCopy).toHaveBeenCalledOnce();
+    });
+
+    it("should handle uppercase C", () => {
+      // Arrange
+      const onCopy = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "C",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCopy).toHaveBeenCalledOnce();
+    });
+
+    it("should not call onCopy when only C is pressed", () => {
+      // Arrange
+      const onCopy = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "c",
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCopy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("paste shortcut (Requirement 39.2)", () => {
+    it("should call onPaste when Ctrl+V is pressed", () => {
+      // Arrange
+      const onPaste = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onPaste }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "v",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onPaste).toHaveBeenCalledOnce();
+    });
+
+    it("should call onPaste when Cmd+V is pressed", () => {
+      // Arrange
+      const onPaste = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onPaste }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "v",
+        metaKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onPaste).toHaveBeenCalledOnce();
+    });
+
+    it("should handle uppercase V", () => {
+      // Arrange
+      const onPaste = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onPaste }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "V",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onPaste).toHaveBeenCalledOnce();
+    });
+
+    it("should not call onPaste when only V is pressed", () => {
+      // Arrange
+      const onPaste = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onPaste }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "v",
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onPaste).not.toHaveBeenCalled();
+    });
+  });
+
   describe("optional handlers", () => {
     it("should not throw when handlers are undefined", () => {
       // Arrange & Act
@@ -310,6 +448,20 @@ describe("useKeyboardShortcuts", () => {
         bubbles: true,
       });
       expect(() => window.dispatchEvent(moveUpEvent)).not.toThrow();
+
+      const copyEvent = new KeyboardEvent("keydown", {
+        key: "c",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      expect(() => window.dispatchEvent(copyEvent)).not.toThrow();
+
+      const pasteEvent = new KeyboardEvent("keydown", {
+        key: "v",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      expect(() => window.dispatchEvent(pasteEvent)).not.toThrow();
     });
   });
 });

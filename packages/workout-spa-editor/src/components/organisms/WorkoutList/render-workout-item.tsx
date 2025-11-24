@@ -14,6 +14,7 @@ type RenderWorkoutItemProps = {
   onToggleStepSelection?: (stepId: string) => void;
   onStepDelete?: (stepIndex: number) => void;
   onStepDuplicate?: (stepIndex: number) => void;
+  onStepCopy?: (stepIndex: number) => void;
   onDuplicateStepInRepetitionBlock?: (
     blockIndex: number,
     stepIndex: number
@@ -43,6 +44,7 @@ export const renderWorkoutItem = ({
   onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
+  onStepCopy,
   onDuplicateStepInRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
@@ -88,5 +90,6 @@ export const renderWorkoutItem = ({
     onToggleStepSelection,
     onStepDelete,
     onStepDuplicate,
+    onStepCopy,
   });
 };

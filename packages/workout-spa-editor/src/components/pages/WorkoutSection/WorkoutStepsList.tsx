@@ -10,6 +10,8 @@ type WorkoutStepsListProps = {
   readonly onToggleStepSelection: (stepId: string) => void;
   readonly onStepDelete: (stepIndex: number) => void;
   readonly onStepDuplicate: (stepIndex: number) => void;
+  readonly onStepCopy: (stepIndex: number) => void;
+  readonly onStepPaste?: () => void;
   readonly onStepReorder: (activeIndex: number, overIndex: number) => void;
   readonly onReorderStepsInBlock?: (
     blockIndex: number,
@@ -38,6 +40,8 @@ export function WorkoutStepsList({
   onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
+  onStepCopy,
+  onStepPaste,
   onStepReorder,
   onReorderStepsInBlock,
   onAddStep,
@@ -59,6 +63,7 @@ export function WorkoutStepsList({
         onToggleStepSelection={onToggleStepSelection}
         onStepDelete={onStepDelete}
         onStepDuplicate={onStepDuplicate}
+        onStepCopy={onStepCopy}
         onStepReorder={onStepReorder}
         onReorderStepsInBlock={onReorderStepsInBlock}
         onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
@@ -72,6 +77,7 @@ export function WorkoutStepsList({
         onCreateRepetitionBlock={onCreateRepetitionBlock}
         onCreateEmptyRepetitionBlock={onCreateEmptyRepetitionBlock}
         onAddStep={onAddStep}
+        onPasteStep={onStepPaste}
       />
     </div>
   );
