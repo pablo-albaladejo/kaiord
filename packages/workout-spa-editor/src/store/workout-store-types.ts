@@ -57,6 +57,7 @@ export type WorkoutStore = {
     blockIndex: number,
     stepIndex: number
   ) => void;
+  ungroupRepetitionBlock: (blockIndex: number) => void;
   selectStep: (id: string | null) => void;
   toggleStepSelection: (id: string) => void;
   clearStepSelection: () => void;

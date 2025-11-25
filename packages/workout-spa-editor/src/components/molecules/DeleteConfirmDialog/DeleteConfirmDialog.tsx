@@ -12,7 +12,7 @@ import { AlertTriangle, X } from "lucide-react";
 import { Button } from "../../atoms/Button/Button";
 
 export type DeleteConfirmDialogProps = {
-  stepIndex: number;
+  stepIndex: number | null;
   onConfirm: () => void;
   onCancel: () => void;
 };
@@ -48,6 +48,10 @@ export function DeleteConfirmDialog({
   onConfirm,
   onCancel,
 }: DeleteConfirmDialogProps) {
+  if (stepIndex === null) {
+    return null;
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800 kiroween:bg-gray-800">

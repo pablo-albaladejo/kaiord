@@ -63,6 +63,8 @@ export function useWorkoutSectionState(
       repetitionBlockHandlers.handleEditRepetitionBlock,
     handleAddStepToRepetitionBlock:
       repetitionBlockHandlers.handleAddStepToRepetitionBlock,
+    handleUngroupRepetitionBlock: repetitionBlockHandlers.handleUngroup,
+    handleDeleteRepetitionBlock: repetitionBlockHandlers.handleDelete,
     handleDuplicateStepInRepetitionBlock:
       repetitionBlockHandlers.handleDuplicateStepInRepetitionBlock,
     ...handlers,

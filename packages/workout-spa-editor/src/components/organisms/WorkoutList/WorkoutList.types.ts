@@ -16,6 +16,8 @@ export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
   ) => void;
   onEditRepetitionBlock?: (blockIndex: number, repeatCount: number) => void;
   onAddStepToRepetitionBlock?: (blockIndex: number) => void;
+  onUngroupRepetitionBlock?: (blockIndex: number) => void;
+  onDeleteRepetitionBlock?: (blockIndex: number) => void;
   onStepReorder?: (activeIndex: number, overIndex: number) => void;
   onReorderStepsInBlock?: (
     blockIndex: number,

@@ -14,7 +14,41 @@ import type {
 import { isWorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
-import type { DeletedStep } from "../workout-store-types";
+
+const findStepToDelete = (
+  workout: Workout,
+  stepIndex: number
+): WorkoutStep | RepetitionBlock | null => {
+  for (const step of workout.steps) {
+    if (isWorkoutStep(step) && step.stepIndex === stepIndex) {
+      return step;
+    }
+  }
+  return null;
+};
+
+const filterSteps = (
+  steps: Array<WorkoutStep | RepetitionBlock>,
+  stepIndex: number
+): Array<WorkoutStep | RepetitionBlock> => {
+  return steps.filter((step: WorkoutStep | RepetitionBlock) => {
+    if (isWorkoutStep(step)) {
+      return step.stepIndex !== stepIndex;
+    }
+    return true;
+  });
+};
+
+const reindexSteps = (
+  steps: Array<WorkoutStep | RepetitionBlock>
+): Array<WorkoutStep | RepetitionBlock> => {
+  return steps.map((step: WorkoutStep | RepetitionBlock, index: number) => {
+    if (isWorkoutStep(step)) {
+      return { ...step, stepIndex: index };
+    }
+    return step;
+  });
+};
 
 export const deleteStepAction = (
   krd: KRD,
@@ -26,62 +60,21 @@ export const deleteStepAction = (
   }
 
   const workout = krd.extensions.workout as Workout;
+  const deletedStep = findStepToDelete(workout, stepIndex);
+  const updatedSteps = filterSteps(workout.steps, stepIndex);
+  const reindexedSteps = reindexSteps(updatedSteps);
 
-  // Find the step to delete
-  let deletedStep: WorkoutStep | RepetitionBlock | null = null;
-  for (const step of workout.steps) {
-    if (isWorkoutStep(step) && step.stepIndex === stepIndex) {
-      deletedStep = step;
-      break;
-    }
-  }
-
-  // Remove the step at the specified index
-  const updatedSteps = workout.steps.filter(
-    (step: WorkoutStep | RepetitionBlock) => {
-      if (isWorkoutStep(step)) {
-        return step.stepIndex !== stepIndex;
-      }
-      return true; // Keep repetition blocks
-    }
-  );
-
-  // Recalculate stepIndex for all steps
-  const reindexedSteps = updatedSteps.map(
-    (step: WorkoutStep | RepetitionBlock, index: number) => {
-      if (isWorkoutStep(step)) {
-        return {
-          ...step,
-          stepIndex: index,
-        };
-      }
-      return step; // Repetition blocks don't have stepIndex
-    }
-  );
-
-  const updatedWorkout = {
-    ...workout,
-    steps: reindexedSteps,
-  };
-
+  const updatedWorkout = { ...workout, steps: reindexedSteps };
   const updatedKrd: KRD = {
     ...krd,
-    extensions: {
-      ...krd.extensions,
-      workout: updatedWorkout,
-    },
+    extensions: { ...krd.extensions, workout: updatedWorkout },
   };
 
-  // Track deleted step for undo
   const deletedSteps = state.deletedSteps || [];
   const newDeletedSteps = deletedStep
     ? [
         ...deletedSteps,
-        {
-          step: deletedStep,
-          index: stepIndex,
-          timestamp: Date.now(),
-        } as DeletedStep,
+        { step: deletedStep, index: stepIndex, timestamp: Date.now() },
       ]
     : deletedSteps;
 
