@@ -43,19 +43,29 @@ export const createRepetitionBlockAction = (
 
   const workout = krd.extensions.workout as Workout;
 
-  // Sort indices to ensure correct order
-  const sortedIndices = [...stepIndices].sort((a, b) => a - b);
+  // Use Set for O(1) lookup of selected indices
+  const selectedIndices = new Set(stepIndices);
 
-  // Extract steps to be wrapped
+  // Extract steps to be wrapped and track insertion position
   const stepsToWrap: Array<WorkoutStep> = [];
   const remainingSteps: Array<WorkoutStep | RepetitionBlock> = [];
+  let insertPosition: number | null = null;
 
-  for (const step of workout.steps) {
-    if (isWorkoutStep(step) && sortedIndices.includes(step.stepIndex)) {
+  workout.steps.forEach((step, index) => {
+    if (isWorkoutStep(step) && selectedIndices.has(step.stepIndex)) {
+      // Track the array index of the first selected step
+      if (insertPosition === null) {
+        insertPosition = index;
+      }
       stepsToWrap.push(step);
     } else {
       remainingSteps.push(step);
     }
+  });
+
+  // Handle edge case: no steps matched
+  if (insertPosition === null || stepsToWrap.length === 0) {
+    return {};
   }
 
   // Create the repetition block
@@ -64,12 +74,24 @@ export const createRepetitionBlockAction = (
     steps: stepsToWrap,
   };
 
-  // Insert the repetition block at the position of the first selected step
-  const insertPosition = sortedIndices[0];
+  // Calculate the correct insertion position in remainingSteps array
+  // We need to count how many items before insertPosition are in remainingSteps
+  let adjustedInsertPosition = 0;
+  for (let i = 0; i < insertPosition; i++) {
+    const step = workout.steps[i];
+    if (
+      !isWorkoutStep(step) ||
+      !selectedIndices.has((step as WorkoutStep).stepIndex)
+    ) {
+      adjustedInsertPosition++;
+    }
+  }
+
+  // Insert the repetition block at the correct position
   const newSteps = [
-    ...remainingSteps.slice(0, insertPosition),
+    ...remainingSteps.slice(0, adjustedInsertPosition),
     repetitionBlock,
-    ...remainingSteps.slice(insertPosition),
+    ...remainingSteps.slice(adjustedInsertPosition),
   ];
 
   // Recalculate stepIndex for all remaining WorkoutSteps

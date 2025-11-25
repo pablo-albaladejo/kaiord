@@ -42,8 +42,9 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
         (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(workoutMsg?.poolLength).toBe(25);
-    expect(workoutMsg?.poolLengthUnit).toBe(0);
+    expect(workoutMsg).toBeDefined();
+    expect(workoutMsg.poolLength).toBe(25);
+    expect(workoutMsg.poolLengthUnit).toBe(0);
   });
 
   it("should preserve poolLength within tolerance through round-trip", async () => {
@@ -83,7 +84,8 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
           (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
       ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-      expect(workoutMsg?.poolLength).toBeCloseTo(poolLength, 2);
+      expect(workoutMsg).toBeDefined();
+      expect(workoutMsg.poolLength).toBeCloseTo(poolLength, 2);
     }
   });
 
@@ -122,7 +124,8 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
         (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(workoutMsg?.poolLengthUnit).toBe(0);
+    expect(workoutMsg).toBeDefined();
+    expect(workoutMsg.poolLengthUnit).toBe(0);
   });
 
   it("should omit poolLength when undefined in round-trip", async () => {
@@ -160,8 +163,9 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
         (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(workoutMsg)?.not.toHaveProperty("poolLength");
-    expect(workoutMsg)?.not.toHaveProperty("poolLengthUnit");
+    expect(workoutMsg).toBeDefined();
+    expect(workoutMsg).not.toHaveProperty("poolLength");
+    expect(workoutMsg).not.toHaveProperty("poolLengthUnit");
   });
 });
 
@@ -407,8 +411,9 @@ describe("Round-trip: Swimming workouts - combined pool length and equipment", (
       | { mesgNum: number; poolLength: number; poolLengthUnit: number }
       | undefined;
 
-    expect(workoutMsg?.poolLength).toBe(testPoolLength);
-    expect(workoutMsg?.poolLengthUnit).toBe(0);
+    expect(workoutMsg).toBeDefined();
+    expect(workoutMsg.poolLength).toBe(testPoolLength);
+    expect(workoutMsg.poolLengthUnit).toBe(0);
 
     // Assert - Check step message has equipment
     const stepMsg = messages.find(

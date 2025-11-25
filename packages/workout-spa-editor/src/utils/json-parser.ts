@@ -48,12 +48,11 @@ export const parseJSON = <T = unknown>(text: string): T => {
         );
       }
 
-      // If we can't extract position, try to find the error location manually
-      const { line, column } = findErrorLocation(text);
+      // If we can't extract position, return undefined for line and column
       throw new FileParsingError(
         `Invalid JSON: ${error.message}`,
-        line,
-        column,
+        undefined,
+        undefined,
         error
       );
     }
@@ -78,29 +77,4 @@ const getLineAndColumn = (
     line: lines.length,
     column: lines[lines.length - 1].length + 1,
   };
-};
-
-/**
- * Try to find error location by parsing character by character
- */
-const findErrorLocation = (text: string): { line: number; column: number } => {
-  let line = 1;
-  let column = 1;
-
-  for (let i = 0; i < text.length; i++) {
-    try {
-      JSON.parse(text.substring(0, i + 1));
-    } catch {
-      // Continue until we find the error
-    }
-
-    if (text[i] === "\n") {
-      line++;
-      column = 1;
-    } else {
-      column++;
-    }
-  }
-
-  return { line, column };
 };
