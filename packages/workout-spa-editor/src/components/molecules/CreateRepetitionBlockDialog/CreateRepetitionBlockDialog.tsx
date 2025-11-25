@@ -16,6 +16,7 @@ export type CreateRepetitionBlockDialogProps = {
   stepCount?: number;
   onConfirm: (repeatCount: number) => void;
   onCancel: () => void;
+  isOpen: boolean;
 };
 
 /**
@@ -25,14 +26,19 @@ export function CreateRepetitionBlockDialog({
   stepCount,
   onConfirm,
   onCancel,
+  isOpen,
 }: CreateRepetitionBlockDialogProps) {
-  const [repeatCount, setRepeatCount] = useState("1");
+  const [repeatCount, setRepeatCount] = useState("2");
   const [error, setError] = useState<string | null>(null);
+
+  if (!isOpen) {
+    return null;
+  }
 
   const handleConfirm = () => {
     const count = Number.parseInt(repeatCount, 10);
-    if (Number.isNaN(count) || count < 1) {
-      setError("Repeat count must be at least 1");
+    if (Number.isNaN(count) || count < 2) {
+      setError("Repeat count must be at least 2");
       return;
     }
     onConfirm(count);

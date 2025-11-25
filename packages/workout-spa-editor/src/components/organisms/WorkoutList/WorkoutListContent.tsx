@@ -17,6 +17,8 @@ type WorkoutListContentProps = {
   ) => void;
   onEditRepetitionBlock?: (blockIndex: number, repeatCount: number) => void;
   onAddStepToRepetitionBlock?: (blockIndex: number) => void;
+  onUngroupRepetitionBlock?: (blockIndex: number) => void;
+  onDeleteRepetitionBlock?: (blockIndex: number) => void;
   onReorderStepsInBlock?: (
     blockIndex: number,
     activeIndex: number,
@@ -41,6 +43,8 @@ export const WorkoutListContent = ({
   onDuplicateStepInRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
+  onUngroupRepetitionBlock,
+  onDeleteRepetitionBlock,
   onReorderStepsInBlock,
   generateStepId,
 }: WorkoutListContentProps) => {
@@ -64,6 +68,8 @@ export const WorkoutListContent = ({
               onDuplicateStepInRepetitionBlock,
               onEditRepetitionBlock,
               onAddStepToRepetitionBlock,
+              onUngroupRepetitionBlock,
+              onDeleteRepetitionBlock,
               onReorderStepsInBlock,
               generateStepId,
             })}

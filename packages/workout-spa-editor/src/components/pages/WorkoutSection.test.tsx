@@ -184,4 +184,238 @@ describe("WorkoutSection", () => {
       expect(useWorkoutStore.getState().selectedStepId).toBe(null);
     });
   });
+
+  describe("CreateRepetitionBlockButton integration (Requirement 7.1)", () => {
+    it("should not show create repetition block button when no steps selected", () => {
+      // Arrange
+      const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
+      const krd = createMockKRD(workout);
+
+      useWorkoutStore.setState({
+        selectedStepIds: [],
+      });
+
+      // Act
+      renderWithProviders(
+        <WorkoutSection
+          workout={workout}
+          krd={krd}
+          selectedStepId={null}
+          onStepSelect={vi.fn()}
+        />
+      );
+
+      // Assert
+      expect(
+        screen.queryByTestId("create-repetition-block-button")
+      ).not.toBeInTheDocument();
+    });
+
+    it("should not show create repetition block button when only 1 step selected", () => {
+      // Arrange
+      const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
+      const krd = createMockKRD(workout);
+
+      useWorkoutStore.setState({
+        selectedStepIds: ["step-0"],
+      });
+
+      // Act
+      renderWithProviders(
+        <WorkoutSection
+          workout={workout}
+          krd={krd}
+          selectedStepId={null}
+          onStepSelect={vi.fn()}
+        />
+      );
+
+      // Assert
+      expect(
+        screen.queryByTestId("create-repetition-block-button")
+      ).not.toBeInTheDocument();
+    });
+
+    it("should show create repetition block button when 2+ steps selected", () => {
+      // Arrange
+      const workout = createMockWorkout([
+        createMockStep(0),
+        createMockStep(1),
+        createMockStep(2),
+      ]);
+      const krd = createMockKRD(workout);
+
+      useWorkoutStore.setState({
+        selectedStepIds: ["step-0", "step-1"],
+      });
+
+      // Act
+      renderWithProviders(
+        <WorkoutSection
+          workout={workout}
+          krd={krd}
+          selectedStepId={null}
+          onStepSelect={vi.fn()}
+        />
+      );
+
+      // Assert
+      const button = screen.getByTestId("create-repetition-block-button");
+      expect(button).toBeInTheDocument();
+      expect(button).toHaveTextContent("Create Repetition Block (2 steps)");
+    });
+
+    it("should open CreateRepetitionBlockDialog when button clicked", async () => {
+      // Arrange
+      const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
+      const krd = createMockKRD(workout);
+
+      useWorkoutStore.setState({
+        selectedStepIds: ["step-0", "step-1"],
+      });
+
+      renderWithProviders(
+        <WorkoutSection
+          workout={workout}
+          krd={krd}
+          selectedStepId={null}
+          onStepSelect={vi.fn()}
+        />
+      );
+
+      // Act - Click create repetition block button
+      const button = screen.getByTestId("create-repetition-block-button");
+      await act(async () => {
+        button.click();
+      });
+
+      // Assert - Dialog should be visible
+      await waitFor(() => {
+        expect(screen.getByText("Create Repetition Block")).toBeInTheDocument();
+        expect(screen.getByLabelText("Repeat Count")).toBeInTheDocument();
+      });
+    });
+
+    it("should create repetition block and clear selection on confirm", async () => {
+      // Arrange
+      const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
+      const krd = createMockKRD(workout);
+
+      useWorkoutStore.setState({
+        currentWorkout: krd,
+        selectedStepIds: ["step-0", "step-1"],
+      });
+
+      renderWithProviders(
+        <WorkoutSection
+          workout={workout}
+          krd={krd}
+          selectedStepId={null}
+          onStepSelect={vi.fn()}
+        />
+      );
+
+      // Act - Open dialog
+      const button = screen.getByTestId("create-repetition-block-button");
+      await act(async () => {
+        button.click();
+      });
+
+      // Act - Confirm with repeat count
+      await waitFor(() => {
+        expect(screen.getByLabelText("Repeat Count")).toBeInTheDocument();
+      });
+
+      const input = screen.getByLabelText("Repeat Count");
+      await act(async () => {
+        input.focus();
+        // Input already has default value of "2"
+      });
+
+      const confirmButton = screen.getByTestId("confirm-create-block-button");
+      await act(async () => {
+        confirmButton.click();
+      });
+
+      // Assert - Dialog should close and selection should be cleared
+      await waitFor(() => {
+        expect(
+          screen.queryByText("Create Repetition Block")
+        ).not.toBeInTheDocument();
+        expect(useWorkoutStore.getState().selectedStepIds).toHaveLength(0);
+      });
+    });
+
+    it("should close dialog without creating block on cancel", async () => {
+      // Arrange
+      const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
+      const krd = createMockKRD(workout);
+
+      useWorkoutStore.setState({
+        selectedStepIds: ["step-0", "step-1"],
+      });
+
+      renderWithProviders(
+        <WorkoutSection
+          workout={workout}
+          krd={krd}
+          selectedStepId={null}
+          onStepSelect={vi.fn()}
+        />
+      );
+
+      // Act - Open dialog
+      const button = screen.getByTestId("create-repetition-block-button");
+      await act(async () => {
+        button.click();
+      });
+
+      await waitFor(() => {
+        expect(screen.getByText("Create Repetition Block")).toBeInTheDocument();
+      });
+
+      // Act - Cancel
+      const cancelButton = screen.getByRole("button", { name: /Cancel/i });
+      await act(async () => {
+        cancelButton.click();
+      });
+
+      // Assert - Dialog should close, selection should remain
+      await waitFor(() => {
+        expect(
+          screen.queryByText("Create Repetition Block")
+        ).not.toBeInTheDocument();
+        expect(useWorkoutStore.getState().selectedStepIds).toHaveLength(2);
+      });
+    });
+
+    it("should display correct step count in button text", () => {
+      // Arrange
+      const workout = createMockWorkout([
+        createMockStep(0),
+        createMockStep(1),
+        createMockStep(2),
+        createMockStep(3),
+      ]);
+      const krd = createMockKRD(workout);
+
+      useWorkoutStore.setState({
+        selectedStepIds: ["step-0", "step-1", "step-2"],
+      });
+
+      // Act
+      renderWithProviders(
+        <WorkoutSection
+          workout={workout}
+          krd={krd}
+          selectedStepId={null}
+          onStepSelect={vi.fn()}
+        />
+      );
+
+      // Assert
+      const button = screen.getByTestId("create-repetition-block-button");
+      expect(button).toHaveTextContent("Create Repetition Block (3 steps)");
+    });
+  });
 });

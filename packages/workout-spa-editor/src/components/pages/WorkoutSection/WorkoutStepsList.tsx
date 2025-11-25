@@ -26,6 +26,8 @@ type WorkoutStepsListProps = {
     repeatCount: number
   ) => void;
   readonly onAddStepToRepetitionBlock: (blockIndex: number) => void;
+  readonly onUngroupRepetitionBlock?: (blockIndex: number) => void;
+  readonly onDeleteRepetitionBlock?: (blockIndex: number) => void;
   readonly onDuplicateStepInRepetitionBlock: (
     blockIndex: number,
     stepIndex: number
@@ -49,6 +51,8 @@ export function WorkoutStepsList({
   onCreateEmptyRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
+  onUngroupRepetitionBlock,
+  onDeleteRepetitionBlock,
   onDuplicateStepInRepetitionBlock,
 }: WorkoutStepsListProps) {
   const hasMultipleSelection = selectedStepIds.length >= 2;
@@ -69,6 +73,8 @@ export function WorkoutStepsList({
         onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
         onEditRepetitionBlock={onEditRepetitionBlock}
         onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
+        onUngroupRepetitionBlock={onUngroupRepetitionBlock}
+        onDeleteRepetitionBlock={onDeleteRepetitionBlock}
       />
 
       <WorkoutStepsListActions

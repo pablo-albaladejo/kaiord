@@ -11,23 +11,9 @@ import { WorkoutListDragOverlay } from "./WorkoutListDragOverlay";
 
 export type { WorkoutListProps };
 
-export const WorkoutList = ({
-  workout,
-  selectedStepId,
-  selectedStepIds = [],
-  onStepSelect,
-  onToggleStepSelection,
-  onStepDelete,
-  onStepDuplicate,
-  onStepCopy,
-  onDuplicateStepInRepetitionBlock,
-  onEditRepetitionBlock,
-  onAddStepToRepetitionBlock,
-  onStepReorder,
-  onReorderStepsInBlock,
-  className = "",
-  ...props
-}: WorkoutListProps) => {
+export const WorkoutList = (props: WorkoutListProps) => {
+  const { workout, className = "", onStepReorder, ...restProps } = props;
+
   const baseClasses = "flex flex-col gap-4";
   const classes = [baseClasses, className].filter(Boolean).join(" ");
   const dnd = useWorkoutListDnd(workout, onStepReorder);
@@ -48,21 +34,25 @@ export const WorkoutList = ({
           className={classes}
           role="list"
           aria-label="Workout steps"
-          {...props}
+          {...restProps}
         >
           <WorkoutListContent
             workout={workout}
-            selectedStepId={selectedStepId}
-            selectedStepIds={selectedStepIds}
-            onStepSelect={onStepSelect}
-            onToggleStepSelection={onToggleStepSelection}
-            onStepDelete={onStepDelete}
-            onStepDuplicate={onStepDuplicate}
-            onStepCopy={onStepCopy}
-            onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
-            onEditRepetitionBlock={onEditRepetitionBlock}
-            onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
-            onReorderStepsInBlock={onReorderStepsInBlock}
+            selectedStepId={props.selectedStepId}
+            selectedStepIds={props.selectedStepIds || []}
+            onStepSelect={props.onStepSelect}
+            onToggleStepSelection={props.onToggleStepSelection}
+            onStepDelete={props.onStepDelete}
+            onStepDuplicate={props.onStepDuplicate}
+            onStepCopy={props.onStepCopy}
+            onDuplicateStepInRepetitionBlock={
+              props.onDuplicateStepInRepetitionBlock
+            }
+            onEditRepetitionBlock={props.onEditRepetitionBlock}
+            onAddStepToRepetitionBlock={props.onAddStepToRepetitionBlock}
+            onUngroupRepetitionBlock={props.onUngroupRepetitionBlock}
+            onDeleteRepetitionBlock={props.onDeleteRepetitionBlock}
+            onReorderStepsInBlock={props.onReorderStepsInBlock}
             generateStepId={dnd.generateStepId}
           />
         </div>
