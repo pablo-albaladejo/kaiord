@@ -39,6 +39,26 @@ import { convertTcxToKrd } from "./use-cases/convert-tcx-to-krd";
 import type { ConvertZwiftToKrd } from "./use-cases/convert-zwift-to-krd";
 import { convertZwiftToKrd } from "./use-cases/convert-zwift-to-krd";
 
+/**
+ * Container for all application dependencies and use cases.
+ *
+ * Provides access to readers, writers, validators, and pre-configured use cases
+ * for converting between FIT, TCX, Zwift, and KRD formats.
+ *
+ * @example
+ * ```typescript
+ * import { createDefaultProviders } from '@kaiord/core';
+ *
+ * const providers = createDefaultProviders();
+ *
+ * // Access readers/writers
+ * const fitBuffer = await providers.fitReader(buffer);
+ * const krdBuffer = await providers.fitWriter(krd);
+ *
+ * // Access use cases
+ * const krd = await providers.convertFitToKrd({ fitBuffer });
+ * ```
+ */
 export type Providers = {
   fitReader: FitReader;
   fitWriter: FitWriter;
@@ -59,6 +79,69 @@ export type Providers = {
   logger: Logger;
 };
 
+/**
+ * Creates default providers with all dependencies wired together.
+ *
+ * This is the main entry point for dependency injection in Kaiord. It creates
+ * all necessary adapters (FIT, TCX, Zwift readers/writers), validators, and
+ * pre-configured use cases with sensible defaults.
+ *
+ * @param logger - Optional custom logger. If not provided, uses console logger.
+ * @returns Providers object with all dependencies and use cases
+ *
+ * @example
+ * ```typescript
+ * import { createDefaultProviders } from '@kaiord/core';
+ * import { readFileSync, writeFileSync } from 'fs';
+ *
+ * // Create providers with default console logger
+ * const providers = createDefaultProviders();
+ *
+ * // Convert FIT to KRD
+ * const fitBuffer = readFileSync('workout.fit');
+ * const krd = await providers.convertFitToKrd({ fitBuffer });
+ *
+ * // Convert KRD to TCX
+ * const tcxString = await providers.convertKrdToTcx({ krd });
+ * writeFileSync('workout.tcx', tcxString);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // With custom logger
+ * import { createDefaultProviders } from '@kaiord/core';
+ * import winston from 'winston';
+ *
+ * const winstonLogger = winston.createLogger({
+ *   level: 'info',
+ *   format: winston.format.json(),
+ *   transports: [new winston.transports.Console()]
+ * });
+ *
+ * const customLogger = {
+ *   debug: (msg, ctx) => winstonLogger.debug(msg, ctx),
+ *   info: (msg, ctx) => winstonLogger.info(msg, ctx),
+ *   warn: (msg, ctx) => winstonLogger.warn(msg, ctx),
+ *   error: (msg, ctx) => winstonLogger.error(msg, ctx)
+ * };
+ *
+ * const providers = createDefaultProviders(customLogger);
+ * ```
+ *
+ * @example
+ * ```typescript
+ * // Access individual components
+ * const providers = createDefaultProviders();
+ *
+ * // Use readers/writers directly
+ * const krd = await providers.fitReader(fitBuffer);
+ * const fitBuffer = await providers.fitWriter(krd);
+ *
+ * // Use validators
+ * const errors = providers.schemaValidator.validate(krd);
+ * const violations = providers.toleranceChecker.check(original, converted);
+ * ```
+ */
 export const createDefaultProviders = (logger?: Logger): Providers => {
   const log = logger || createConsoleLogger();
   const tcxValidator = createXsdTcxValidator(log);
