@@ -9,12 +9,14 @@
  */
 
 import * as Dialog from "@radix-ui/react-dialog";
+import { useState } from "react";
 import { useLibraryStore } from "../../../store/library-store";
 import type { WorkoutTemplate } from "../../../types/workout-library";
 import { LibraryContent } from "./components/LibraryContent";
 import { LibraryDialogHeader } from "./components/LibraryDialogHeader";
 import { LibraryFilters } from "./components/LibraryFilters";
 import { LoadConfirmDialog } from "./components/LoadConfirmDialog";
+import { PreviewDialog } from "./components/PreviewDialog";
 import { DIALOG_CONTENT_CLASSES, DIALOG_OVERLAY_CLASSES } from "./constants";
 import { useLibraryFilters } from "./hooks/useLibraryFilters";
 import { useWorkoutLoader } from "./hooks/useWorkoutLoader";
@@ -40,6 +42,9 @@ export const WorkoutLibrary: React.FC<WorkoutLibraryProps> = ({
     setSportFilter,
     difficultyFilter,
     setDifficultyFilter,
+    selectedTags,
+    allTags,
+    handleTagToggle,
     sortBy,
     setSortBy,
     sortOrder,
@@ -55,6 +60,18 @@ export const WorkoutLibrary: React.FC<WorkoutLibraryProps> = ({
     confirmLoadWorkout,
     cancelLoadWorkout,
   } = useWorkoutLoader(hasCurrentWorkout, onLoadWorkout, onOpenChange);
+
+  const [previewTemplate, setPreviewTemplate] =
+    useState<WorkoutTemplate | null>(null);
+
+  const handlePreview = (template: WorkoutTemplate) => {
+    setPreviewTemplate(template);
+  };
+
+  const handleLoadFromPreview = (template: WorkoutTemplate) => {
+    setPreviewTemplate(null);
+    handleLoadWorkout(template);
+  };
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -77,12 +94,19 @@ export const WorkoutLibrary: React.FC<WorkoutLibraryProps> = ({
             onClearFilters={clearFilters}
           />
 
+          <TagFilterButtons
+            allTags={allTags}
+            selectedTags={selectedTags}
+            onTagToggle={handleTagToggle}
+          />
+
           <LibraryContent
             templates={templates}
             filteredTemplates={filteredAndSortedTemplates}
             hasActiveFilters={hasActiveFilters}
             onLoadWorkout={handleLoadWorkout}
             onDeleteWorkout={deleteTemplate}
+            onPreviewWorkout={handlePreview}
             onClearFilters={clearFilters}
           />
 
@@ -90,6 +114,12 @@ export const WorkoutLibrary: React.FC<WorkoutLibraryProps> = ({
             template={loadConfirmTemplate}
             onConfirm={confirmLoadWorkout}
             onCancel={cancelLoadWorkout}
+          />
+
+          <PreviewDialog
+            template={previewTemplate}
+            onClose={() => setPreviewTemplate(null)}
+            onLoad={handleLoadFromPreview}
           />
         </Dialog.Content>
       </Dialog.Portal>

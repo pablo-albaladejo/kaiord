@@ -14,8 +14,9 @@ type LibraryContentProps = {
   hasActiveFilters: boolean;
   onLoadWorkout: (template: WorkoutTemplate) => void;
   onDeleteWorkout: (templateId: string) => void;
+  onPreviewWorkout: (template: WorkoutTemplate) => void;
   onClearFilters: () => void;
-}
+};
 
 export function LibraryContent({
   templates,
@@ -23,6 +24,7 @@ export function LibraryContent({
   hasActiveFilters,
   onLoadWorkout,
   onDeleteWorkout,
+  onPreviewWorkout,
   onClearFilters,
 }: LibraryContentProps) {
   if (filteredTemplates.length === 0) {
@@ -43,6 +45,7 @@ export function LibraryContent({
             template={template}
             onLoad={onLoadWorkout}
             onDelete={onDeleteWorkout}
+            onPreview={onPreviewWorkout}
           />
         ))}
       </div>

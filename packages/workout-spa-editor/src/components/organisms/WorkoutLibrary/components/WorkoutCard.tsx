@@ -13,9 +13,15 @@ type WorkoutCardProps = {
   template: WorkoutTemplate;
   onLoad: (template: WorkoutTemplate) => void;
   onDelete: (templateId: string) => void;
-}
+  onPreview: (template: WorkoutTemplate) => void;
+};
 
-export function WorkoutCard({ template, onLoad, onDelete }: WorkoutCardProps) {
+export function WorkoutCard({
+  template,
+  onLoad,
+  onDelete,
+  onPreview,
+}: WorkoutCardProps) {
   const handleDelete = () => {
     if (confirm(`Are you sure you want to delete "${template.name}"?`)) {
       onDelete(template.id);
@@ -117,10 +123,21 @@ export function WorkoutCard({ template, onLoad, onDelete }: WorkoutCardProps) {
           </p>
         )}
 
-        <Button onClick={() => onLoad(template)} className="w-full" size="sm">
-          <Play className="mr-2 h-4 w-4" />
-          Load Workout
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            onClick={() => onPreview(template)}
+            variant="secondary"
+            className="flex-1"
+            size="sm"
+          >
+            <Eye className="mr-2 h-4 w-4" />
+            Preview
+          </Button>
+          <Button onClick={() => onLoad(template)} className="flex-1" size="sm">
+            <Play className="mr-2 h-4 w-4" />
+            Load
+          </Button>
+        </div>
 
         <p className="text-xs text-gray-500 dark:text-gray-400">
           Created {new Date(template.createdAt).toLocaleDateString()}
