@@ -16,8 +16,13 @@ export function useLibraryFilters(templates: WorkoutTemplate[]) {
   const [difficultyFilter, setDifficultyFilter] = useState<Difficulty | "all">(
     "all"
   );
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [sortBy, setSortBy] = useState<"name" | "date" | "difficulty">("date");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("desc");
+
+  const allTags = Array.from(
+    new Set(templates.flatMap((t) => t.tags || []))
+  ).sort();
 
   const filteredAndSortedTemplates = useMemo(() => {
     let filtered = templates;
@@ -39,6 +44,12 @@ export function useLibraryFilters(templates: WorkoutTemplate[]) {
     if (difficultyFilter !== "all") {
       filtered = filtered.filter(
         (template) => template.difficulty === difficultyFilter
+      );
+    }
+
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter((template) =>
+        selectedTags.every((tag) => template.tags?.includes(tag))
       );
     }
 
@@ -68,18 +79,36 @@ export function useLibraryFilters(templates: WorkoutTemplate[]) {
     });
 
     return filtered;
-  }, [templates, searchTerm, sportFilter, difficultyFilter, sortBy, sortOrder]);
+  }, [
+    templates,
+    searchTerm,
+    sportFilter,
+    difficultyFilter,
+    selectedTags,
+    sortBy,
+    sortOrder,
+  ]);
+
+  const handleTagToggle = (tag: string) => {
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
+    );
+  };
 
   const clearFilters = () => {
     setSearchTerm("");
     setSportFilter("all");
     setDifficultyFilter("all");
+    setSelectedTags([]);
     setSortBy("date");
     setSortOrder("desc");
   };
 
   const hasActiveFilters =
-    Boolean(searchTerm) || sportFilter !== "all" || difficultyFilter !== "all";
+    Boolean(searchTerm) ||
+    sportFilter !== "all" ||
+    difficultyFilter !== "all" ||
+    selectedTags.length > 0;
 
   return {
     searchTerm,
@@ -88,6 +117,9 @@ export function useLibraryFilters(templates: WorkoutTemplate[]) {
     setSportFilter,
     difficultyFilter,
     setDifficultyFilter,
+    selectedTags,
+    allTags,
+    handleTagToggle,
     sortBy,
     setSortBy,
     sortOrder,
