@@ -23,12 +23,32 @@ export function WorkoutMetadataEditor({
   onSave,
   onCancel,
 }: WorkoutMetadataEditorProps) {
-  const workout = krd.extensions?.workout;
-  const [name, setName] = useState(workout?.name || "");
-  const [sport, setSport] = useState<Sport>(workout?.sport || "cycling");
-  const [subSport, setSubSport] = useState<SubSport>(
-    workout?.subSport || "generic"
-  );
+  const workoutData = krd.extensions?.workout;
+  const workoutName =
+    workoutData &&
+    typeof workoutData === "object" &&
+    "name" in workoutData &&
+    typeof workoutData.name === "string"
+      ? workoutData.name
+      : undefined;
+  const workoutSport =
+    workoutData &&
+    typeof workoutData === "object" &&
+    "sport" in workoutData &&
+    typeof workoutData.sport === "string"
+      ? (workoutData.sport as Sport)
+      : "cycling";
+  const workoutSubSport =
+    workoutData &&
+    typeof workoutData === "object" &&
+    "subSport" in workoutData &&
+    typeof workoutData.subSport === "string"
+      ? (workoutData.subSport as SubSport)
+      : "generic";
+
+  const [name, setName] = useState(workoutName || "");
+  const [sport, setSport] = useState<Sport>(workoutSport);
+  const [subSport, setSubSport] = useState<SubSport>(workoutSubSport);
 
   const handleSportChange = (newSport: Sport) => {
     setSport(newSport);
@@ -46,13 +66,22 @@ export function WorkoutMetadataEditor({
       },
       extensions: {
         ...krd.extensions,
-        workout: {
-          ...workout,
-          name,
-          sport,
-          subSport,
-          steps: workout?.steps || [],
-        },
+        workout:
+          workoutData &&
+          typeof workoutData === "object" &&
+          "steps" in workoutData
+            ? {
+                ...(workoutData as any),
+                name,
+                sport,
+                subSport,
+              }
+            : {
+                name,
+                sport,
+                subSport,
+                steps: [],
+              },
       },
     };
 

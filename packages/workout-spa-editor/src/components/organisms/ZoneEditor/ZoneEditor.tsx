@@ -45,33 +45,33 @@ export const ZoneEditor: React.FC<ZoneEditorProps> = ({
     ? profile.powerZones
     : profile.heartRateZones;
 
-  const [zones, setZones] = useState(initialZones);
+  const [zones, setZones] = useState<Array<PowerZone> | Array<HeartRateZone>>(
+    initialZones
+  );
   const [validationErrors, setValidationErrors] = useState<
     Array<ZoneValidationError>
   >([]);
 
   // Validate zones for overlaps and gaps
   const validateZones = (
-    zonesToValidate: Array<PowerZone> | Array<HeartRateZone>
+    zonesToValidate: Array<PowerZone | HeartRateZone>
   ): Array<ZoneValidationError> => {
     const errors: Array<ZoneValidationError> = [];
 
     for (let i = 0; i < zonesToValidate.length; i++) {
       const zone = zonesToValidate[i];
 
-      if (isPowerZones) {
-        const powerZone = zone as PowerZone;
-        if (powerZone.minPercent >= powerZone.maxPercent) {
+      if (isPowerZones && "minPercent" in zone && "maxPercent" in zone) {
+        if (zone.minPercent >= zone.maxPercent) {
           errors.push({
-            zone: powerZone.zone,
+            zone: zone.zone,
             message: "Min must be less than max",
           });
         }
-      } else {
-        const hrZone = zone as HeartRateZone;
-        if (hrZone.minBpm >= hrZone.maxBpm) {
+      } else if (!isPowerZones && "minBpm" in zone && "maxBpm" in zone) {
+        if (zone.minBpm >= zone.maxBpm) {
           errors.push({
-            zone: hrZone.zone,
+            zone: zone.zone,
             message: "Min must be less than max",
           });
         }
@@ -80,21 +80,17 @@ export const ZoneEditor: React.FC<ZoneEditorProps> = ({
       // Check for overlaps with next zone
       if (i < zonesToValidate.length - 1) {
         const nextZone = zonesToValidate[i + 1];
-        if (isPowerZones) {
-          const currentMax = (zone as PowerZone).maxPercent;
-          const nextMin = (nextZone as PowerZone).minPercent;
-          if (currentMax >= nextMin) {
+        if (isPowerZones && "maxPercent" in zone && "minPercent" in nextZone) {
+          if (zone.maxPercent >= nextZone.minPercent) {
             errors.push({
-              zone: (zone as PowerZone).zone,
+              zone: zone.zone,
               message: "Overlaps with next zone",
             });
           }
-        } else {
-          const currentMax = (zone as HeartRateZone).maxBpm;
-          const nextMin = (nextZone as HeartRateZone).minBpm;
-          if (currentMax >= nextMin) {
+        } else if (!isPowerZones && "maxBpm" in zone && "minBpm" in nextZone) {
+          if (zone.maxBpm >= nextZone.minBpm) {
             errors.push({
-              zone: (zone as HeartRateZone).zone,
+              zone: zone.zone,
               message: "Overlaps with next zone",
             });
           }
@@ -125,13 +121,15 @@ export const ZoneEditor: React.FC<ZoneEditorProps> = ({
       (zone as HeartRateZone)[field] = Number(value);
     }
 
-    setZones(updatedZones);
-    setValidationErrors(validateZones(updatedZones));
+    setZones(updatedZones as Array<PowerZone> | Array<HeartRateZone>);
+    setValidationErrors(
+      validateZones(updatedZones as Array<PowerZone | HeartRateZone>)
+    );
   };
 
   // Handle save
   const handleSave = () => {
-    const errors = validateZones(zones);
+    const errors = validateZones(zones as Array<PowerZone | HeartRateZone>);
     if (errors.length === 0) {
       onSave(zones);
     } else {

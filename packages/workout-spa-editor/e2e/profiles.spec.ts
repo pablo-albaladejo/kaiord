@@ -228,7 +228,7 @@ test.describe("Zone Configuration", () => {
     await page.getByRole("button", { name: /create profile/i }).click();
   });
 
-  test("should edit power zones", async ({ page }) => {
+  test("should edit power zones", async () => {
     // Arrange - Open zone editor (this would require a button in ProfileManager)
     // For now, this test is a placeholder as the zone editor integration
     // with ProfileManager needs to be implemented
@@ -238,14 +238,14 @@ test.describe("Zone Configuration", () => {
     test.skip();
   });
 
-  test("should edit heart rate zones", async ({ page }) => {
+  test("should edit heart rate zones", async () => {
     // Arrange - Open zone editor
     // Similar to power zones test, this is a placeholder
 
     test.skip();
   });
 
-  test("should validate zone ranges", async ({ page }) => {
+  test("should validate zone ranges", async () => {
     // Test that overlapping zones show validation errors
     test.skip();
   });
