@@ -9,7 +9,7 @@ import type { WorkoutTemplate } from "../../../../types/workout-library";
 import { Badge } from "../../../atoms/Badge/Badge";
 import { Button } from "../../../atoms/Button/Button";
 
-interface WorkoutCardProps {
+type WorkoutCardProps = {
   template: WorkoutTemplate;
   onLoad: (template: WorkoutTemplate) => void;
   onDelete: (templateId: string) => void;

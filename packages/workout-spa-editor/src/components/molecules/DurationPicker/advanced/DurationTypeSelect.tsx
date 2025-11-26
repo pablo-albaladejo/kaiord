@@ -7,7 +7,7 @@
 import type { AdvancedDurationType } from "./duration-type-options";
 import { DURATION_TYPE_OPTIONS } from "./duration-type-options";
 
-interface DurationTypeSelectProps {
+type DurationTypeSelectProps = {
   value: AdvancedDurationType;
   onChange: (value: AdvancedDurationType) => void;
   disabled?: boolean;
