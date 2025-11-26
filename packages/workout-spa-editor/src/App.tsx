@@ -1,5 +1,11 @@
 /* eslint-disable max-lines, max-lines-per-function */
+import { useEffect, useState } from "react";
 import "./App.css";
+import {
+  hasCompletedOnboarding,
+  OnboardingTutorial,
+  type TutorialStep,
+} from "./components/organisms/OnboardingTutorial/OnboardingTutorial";
 import { WelcomeSection } from "./components/pages/WelcomeSection";
 import { WorkoutSection } from "./components/pages/WorkoutSection/WorkoutSection";
 import { AppToastProvider } from "./components/providers/AppToastProvider";
@@ -16,13 +22,58 @@ import type { Workout } from "./types/krd";
 import { saveWorkout } from "./utils/save-workout";
 import { parseStepId } from "./utils/step-id-parser";
 
+// ============================================
+// Tutorial Steps Configuration
+// ============================================
+
+const TUTORIAL_STEPS: Array<TutorialStep> = [
+  {
+    title: "Welcome to Workout Editor",
+    description:
+      "This tutorial will guide you through the key features of the Workout Editor. You can skip at any time or replay this tutorial from the Help section.",
+    position: "center",
+  },
+  {
+    title: "Create or Load Workouts",
+    description:
+      "Start by creating a new workout or loading an existing one. Supported formats include KRD, FIT, TCX, and ZWO.",
+    position: "center",
+  },
+  {
+    title: "Add Workout Steps",
+    description:
+      "Build your workout by adding steps with specific durations and target intensities. Each step can be customized for time, distance, or open duration.",
+    position: "center",
+  },
+  {
+    title: "Organize with Drag & Drop",
+    description:
+      "Reorder steps by dragging them, or use keyboard shortcuts (Alt+Up/Down) for quick adjustments.",
+    position: "center",
+  },
+  {
+    title: "Create Repetition Blocks",
+    description:
+      "Group multiple steps into repetition blocks to create interval workouts. Select steps and press Ctrl+G (Cmd+G on Mac).",
+    position: "center",
+  },
+  {
+    title: "Save Your Work",
+    description:
+      "Save your workout using Ctrl+S (Cmd+S on Mac) or the Save button. You can also save to your library for quick access later.",
+    position: "center",
+  },
+];
+
 /**
  * Main App Component
  *
  * Integrates file upload, workout state management, and workout display.
- * Implements Requirements 1 and 7:
+ * Implements Requirements 1, 7, 37.1, and 37.5:
  * - Requirement 1: Display workout structure in clear visual format
  * - Requirement 7: Load existing KRD files
+ * - Requirement 37.1: Display onboarding tutorial on first visit
+ * - Requirement 37.5: Allow skipping or replaying tutorial
  */
 function App() {
   const currentWorkout = useCurrentWorkout();
@@ -44,6 +95,17 @@ function App() {
     handleStepSelect,
     handleCreateWorkout,
   } = useAppHandlers();
+
+  // Onboarding tutorial state
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Check if user has completed onboarding on first mount
+  useEffect(() => {
+    const completed = hasCompletedOnboarding();
+    if (!completed) {
+      setShowTutorial(true);
+    }
+  }, []);
 
   // Cleanup expired deleted steps
   useDeleteCleanup();
@@ -137,7 +199,7 @@ function App() {
 
   return (
     <AppToastProvider>
-      <MainLayout>
+      <MainLayout onReplayTutorial={() => setShowTutorial(true)}>
         <div className="space-y-6">
           {!workout && (
             <WelcomeSection
@@ -158,6 +220,13 @@ function App() {
           )}
         </div>
       </MainLayout>
+
+      {/* Onboarding Tutorial */}
+      <OnboardingTutorial
+        steps={TUTORIAL_STEPS}
+        open={showTutorial}
+        onOpenChange={setShowTutorial}
+      />
     </AppToastProvider>
   );
 }

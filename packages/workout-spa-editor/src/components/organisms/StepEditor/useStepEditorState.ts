@@ -8,6 +8,7 @@ export const useStepEditorState = (step: WorkoutStep | null) => {
   const [target, setTarget] = useState<Target>(
     step?.target || { type: "open" }
   );
+  const [notes, setNotes] = useState<string>(step?.notes || "");
   const [durationError, setDurationError] = useState<string>("");
   const [targetError, setTargetError] = useState<string>("");
 
@@ -16,6 +17,8 @@ export const useStepEditorState = (step: WorkoutStep | null) => {
     setDuration,
     target,
     setTarget,
+    notes,
+    setNotes,
     durationError,
     setDurationError,
     targetError,
