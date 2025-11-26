@@ -71,7 +71,7 @@ export function WorkoutMetadataEditor({
           typeof workoutData === "object" &&
           "steps" in workoutData
             ? {
-                ...(workoutData as any),
+                ...(workoutData as Record<string, unknown>),
                 name,
                 sport,
                 subSport,

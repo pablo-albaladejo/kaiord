@@ -144,11 +144,10 @@ describe("SaveToLibraryDialog", () => {
       await waitFor(() => {
         expect(mockAddTemplate).toHaveBeenCalledWith(
           "Test Workout",
-          expect.any(String),
+          "cycling",
           workout,
           expect.objectContaining({
             tags: [],
-            thumbnailData: "data:image/png;base64,mock",
           })
         );
       });
@@ -181,13 +180,12 @@ describe("SaveToLibraryDialog", () => {
       await waitFor(() => {
         expect(mockAddTemplate).toHaveBeenCalledWith(
           "Test Workout",
-          expect.any(String),
+          "cycling",
           workout,
           expect.objectContaining({
             tags: ["intervals", "endurance"],
             difficulty: "hard",
             notes: "Great workout",
-            thumbnailData: "data:image/png;base64,mock",
           })
         );
       });
