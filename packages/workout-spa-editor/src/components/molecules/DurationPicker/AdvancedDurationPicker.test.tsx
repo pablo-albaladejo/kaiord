@@ -114,9 +114,7 @@ describe("AdvancedDurationPicker", () => {
       await user.type(input, "15000");
 
       // Assert
-      expect(
-        screen.getByText(/calories cannot exceed 10,000/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/maximum 10000 calories/i)).toBeInTheDocument();
     });
   });
 
@@ -178,9 +176,7 @@ describe("AdvancedDurationPicker", () => {
       await user.type(input, "3000");
 
       // Assert
-      expect(
-        screen.getByText(/power cannot exceed 2,000 watts/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/maximum 2000 watts/i)).toBeInTheDocument();
     });
   });
 
@@ -221,9 +217,7 @@ describe("AdvancedDurationPicker", () => {
       await user.type(input, "250");
 
       // Assert
-      expect(
-        screen.getByText(/heart rate cannot exceed 220 bpm/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/maximum 220 bpm/i)).toBeInTheDocument();
     });
   });
 
@@ -524,9 +518,7 @@ describe("AdvancedDurationPicker", () => {
       await user.type(input, "90000");
 
       // Assert
-      expect(
-        screen.getByText(/time cannot exceed 24 hours/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/maximum 24 hours/i)).toBeInTheDocument();
     });
 
     it("should validate distance not exceeding 1,000 km for repeat_until_distance", async () => {
@@ -544,9 +536,7 @@ describe("AdvancedDurationPicker", () => {
       await user.type(input, "2000000");
 
       // Assert
-      expect(
-        screen.getByText(/distance cannot exceed 1,000 km/i)
-      ).toBeInTheDocument();
+      expect(screen.getByText(/maximum 1000 km/i)).toBeInTheDocument();
     });
   });
 });

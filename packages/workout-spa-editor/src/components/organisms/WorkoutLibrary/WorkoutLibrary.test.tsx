@@ -148,9 +148,10 @@ describe("WorkoutLibrary", () => {
       );
 
       // Assert
+      expect(screen.getByText("Your library is empty")).toBeInTheDocument();
       expect(
         screen.getByText(
-          "No workouts saved yet. Create and save a workout to get started."
+          "Create your first workout and save it to your library to get started."
         )
       ).toBeInTheDocument();
     });
@@ -236,9 +237,7 @@ describe("WorkoutLibrary", () => {
       );
 
       // Act
-      const searchInput = screen.getByPlaceholderText(
-        "Search workouts by name..."
-      );
+      const searchInput = screen.getByPlaceholderText("Search workouts...");
       await user.type(searchInput, "run");
 
       // Assert
@@ -261,15 +260,14 @@ describe("WorkoutLibrary", () => {
       );
 
       // Act
-      const searchInput = screen.getByPlaceholderText(
-        "Search workouts by name..."
-      );
+      const searchInput = screen.getByPlaceholderText("Search workouts...");
       await user.type(searchInput, "nonexistent");
 
       // Assert
       await waitFor(() => {
+        expect(screen.getByText("No workouts found")).toBeInTheDocument();
         expect(
-          screen.getByText("No workouts match your search criteria.")
+          screen.getByText("No workouts match your current filters.")
         ).toBeInTheDocument();
       });
     });
@@ -286,9 +284,7 @@ describe("WorkoutLibrary", () => {
       );
 
       // Act
-      const searchInput = screen.getByPlaceholderText(
-        "Search workouts by name..."
-      );
+      const searchInput = screen.getByPlaceholderText("Search workouts...");
       await user.type(searchInput, "MORNING");
 
       // Assert
@@ -803,9 +799,7 @@ describe("WorkoutLibrary", () => {
       );
 
       // Act
-      const searchInput = screen.getByPlaceholderText(
-        "Search workouts by name..."
-      );
+      const searchInput = screen.getByPlaceholderText("Search workouts...");
       await user.type(searchInput, "run");
 
       // Assert

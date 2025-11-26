@@ -9,6 +9,14 @@
 
 import type { KRD } from "../../../types/krd";
 
+// Type guards for workout step data
+type StepWithDuration = {
+  duration: {
+    type: string;
+    seconds?: number;
+  };
+};
+
 /**
  * Generate a thumbnail preview of the workout
  *
@@ -73,7 +81,7 @@ export async function generateThumbnail(workout: KRD): Promise<string> {
       Array.isArray(step.steps)
     ) {
       // Repetition block
-      const blockDuration = step.steps.reduce((sum: number, s: any) => {
+      const blockDuration = step.steps.reduce((sum: number, s: unknown) => {
         if (
           typeof s === "object" &&
           s !== null &&
@@ -82,9 +90,10 @@ export async function generateThumbnail(workout: KRD): Promise<string> {
           s.duration !== null &&
           "type" in s.duration &&
           s.duration.type === "time" &&
-          "seconds" in s.duration
+          "seconds" in s.duration &&
+          typeof (s as StepWithDuration).duration.seconds === "number"
         ) {
-          return sum + s.duration.seconds;
+          return sum + (s as StepWithDuration).duration.seconds!;
         }
         return sum + 300; // Default 5 minutes for non-time durations
       }, 0);
@@ -101,8 +110,9 @@ export async function generateThumbnail(workout: KRD): Promise<string> {
       step.duration.type === "time" &&
       "seconds" in step.duration
     ) {
-      stepDurations.push((step.duration as any).seconds);
-      totalDuration += (step.duration as any).seconds;
+      const seconds = (step as StepWithDuration).duration.seconds!;
+      stepDurations.push(seconds);
+      totalDuration += seconds;
     } else {
       // Default duration for non-time steps
       stepDurations.push(300);

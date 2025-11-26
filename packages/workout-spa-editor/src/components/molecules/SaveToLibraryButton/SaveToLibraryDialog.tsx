@@ -221,6 +221,14 @@ export function SaveToLibraryDialog({
   );
 }
 
+// Type guards for workout step data
+type StepWithDuration = {
+  duration: {
+    type: string;
+    seconds?: number;
+  };
+};
+
 /**
  * Calculate total workout duration in seconds
  */
@@ -248,7 +256,7 @@ function calculateWorkoutDuration(workout: KRD): number | undefined {
       Array.isArray(step.steps)
     ) {
       // Repetition block
-      const blockDuration = step.steps.reduce((sum: number, s: any) => {
+      const blockDuration = step.steps.reduce((sum: number, s: unknown) => {
         if (
           typeof s === "object" &&
           s !== null &&
@@ -257,9 +265,10 @@ function calculateWorkoutDuration(workout: KRD): number | undefined {
           s.duration !== null &&
           "type" in s.duration &&
           s.duration.type === "time" &&
-          "seconds" in s.duration
+          "seconds" in s.duration &&
+          typeof (s as StepWithDuration).duration.seconds === "number"
         ) {
-          return sum + s.duration.seconds;
+          return sum + (s as StepWithDuration).duration.seconds!;
         }
         return sum;
       }, 0);
@@ -275,7 +284,10 @@ function calculateWorkoutDuration(workout: KRD): number | undefined {
       "seconds" in step.duration
     ) {
       // Regular step with time duration
-      totalSeconds += (step.duration as any).seconds;
+      const seconds = (step as StepWithDuration).duration.seconds;
+      if (typeof seconds === "number") {
+        totalSeconds += seconds;
+      }
     }
   }
 
