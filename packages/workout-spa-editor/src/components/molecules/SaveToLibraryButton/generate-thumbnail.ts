@@ -34,13 +34,28 @@ export async function generateThumbnail(workout: KRD): Promise<string> {
   ctx.fillRect(0, 0, width, height);
 
   // Get workout steps
-  const steps = workout.extensions?.workout?.steps || [];
+  const workoutData = workout.extensions?.workout;
+  if (
+    !workoutData ||
+    typeof workoutData !== "object" ||
+    !("steps" in workoutData) ||
+    !Array.isArray(workoutData.steps)
+  ) {
+    // Empty workout - show placeholder
+    ctx.fillStyle = "#9ca3af";
+    ctx.font = "14px sans-serif";
+    ctx.textAlign = "center";
+    ctx.fillText("Empty Workout", width / 2, height / 2);
+    return canvas.toDataURL("image/png");
+  }
+  const steps = workoutData.steps;
 
   if (steps.length === 0) {
     // Empty workout - show placeholder
     ctx.fillStyle = "#9ca3af";
     ctx.font = "14px sans-serif";
     ctx.textAlign = "center";
+    ctx.textBaseline = "middle";
     ctx.fillText("Empty Workout", width / 2, height / 2);
     return canvas.toDataURL("image/png");
   }
@@ -50,20 +65,44 @@ export async function generateThumbnail(workout: KRD): Promise<string> {
   const stepDurations: number[] = [];
 
   for (const step of steps) {
-    if ("repeatCount" in step) {
+    if (
+      typeof step === "object" &&
+      step !== null &&
+      "repeatCount" in step &&
+      "steps" in step &&
+      Array.isArray(step.steps)
+    ) {
       // Repetition block
-      const blockDuration = step.steps.reduce((sum, s) => {
-        if (s.duration.type === "time") {
+      const blockDuration = step.steps.reduce((sum: number, s: any) => {
+        if (
+          typeof s === "object" &&
+          s !== null &&
+          "duration" in s &&
+          typeof s.duration === "object" &&
+          s.duration !== null &&
+          "type" in s.duration &&
+          s.duration.type === "time" &&
+          "seconds" in s.duration
+        ) {
           return sum + s.duration.seconds;
         }
         return sum + 300; // Default 5 minutes for non-time durations
       }, 0);
-      const duration = blockDuration * step.repeatCount;
+      const duration = blockDuration * (step.repeatCount as number);
       stepDurations.push(duration);
       totalDuration += duration;
-    } else if (step.duration.type === "time") {
-      stepDurations.push(step.duration.seconds);
-      totalDuration += step.duration.seconds;
+    } else if (
+      typeof step === "object" &&
+      step !== null &&
+      "duration" in step &&
+      typeof step.duration === "object" &&
+      step.duration !== null &&
+      "type" in step.duration &&
+      step.duration.type === "time" &&
+      "seconds" in step.duration
+    ) {
+      stepDurations.push((step.duration as any).seconds);
+      totalDuration += (step.duration as any).seconds;
     } else {
       // Default duration for non-time steps
       stepDurations.push(300);

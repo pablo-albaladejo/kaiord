@@ -77,13 +77,13 @@ test.describe("Onboarding", () => {
     await expect(page.getByText("Step 1 of")).toBeVisible();
 
     // Act - Navigate to next step
-    await page.getByLabelText("Next step").click();
+    await page.getByRole("button", { name: /next/i }).click();
 
     // Assert - Second step
     await expect(page.getByText("Step 2 of")).toBeVisible();
 
     // Act - Navigate back
-    await page.getByLabelText("Previous step").click();
+    await page.getByRole("button", { name: /previous/i }).click();
 
     // Assert - Back to first step
     await expect(page.getByText("Step 1 of")).toBeVisible();
@@ -95,7 +95,7 @@ test.describe("Onboarding", () => {
     await page.waitForLoadState("networkidle");
 
     // Act - Navigate to last step
-    const nextButton = page.getByLabelText("Next step");
+    const nextButton = page.getByRole("button", { name: /next/i });
 
     // Click next until we reach the last step
     while (await nextButton.isVisible()) {
@@ -155,7 +155,7 @@ test.describe("Onboarding", () => {
     await expect(progressBar).toHaveAttribute("aria-valuenow", "1");
 
     // Act - Navigate to next step
-    await page.getByLabelText("Next step").click();
+    await page.getByRole("button", { name: /next/i }).click();
 
     // Assert - Progress should update
     await expect(progressBar).toHaveAttribute("aria-valuenow", "2");
@@ -293,7 +293,7 @@ test.describe("First-Time Hints", () => {
     });
 
     // Act - Dismiss hints (if they appear)
-    const dismissButton = page.getByLabelText("Dismiss hints");
+    const dismissButton = page.getByRole("button", { name: /dismiss/i });
     if (await dismissButton.isVisible()) {
       await dismissButton.click();
 
@@ -373,8 +373,8 @@ test.describe("Accessibility - Onboarding", () => {
     await expect(dialog).toHaveAttribute("aria-describedby");
 
     // Navigation buttons should have proper labels
-    await expect(page.getByLabelText("Next step")).toBeVisible();
-    await expect(page.getByLabelText("Skip tutorial")).toBeVisible();
+    await expect(page.getByRole("button", { name: /next/i })).toBeVisible();
+    await expect(page.getByRole("button", { name: /skip/i })).toBeVisible();
 
     // Progress bar should have proper ARIA attributes
     const progressBar = page.getByRole("progressbar");
@@ -413,7 +413,7 @@ test.describe("Accessibility - Onboarding", () => {
     });
 
     // Act - If hints are visible, test keyboard navigation
-    const dismissButton = page.getByLabelText("Dismiss hints");
+    const dismissButton = page.getByRole("button", { name: /dismiss/i });
     if (await dismissButton.isVisible()) {
       // Tab to dismiss button
       await page.keyboard.press("Tab");

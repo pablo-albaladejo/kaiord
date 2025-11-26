@@ -32,7 +32,7 @@ export function SaveToLibraryDialog({
   onOpenChange,
 }: SaveToLibraryDialogProps) {
   const { addTemplate } = useLibraryStore();
-  const { show } = useToastContext();
+  const { success, error: showError } = useToastContext();
 
   const [name, setName] = useState("");
   const [tags, setTags] = useState("");
@@ -59,7 +59,14 @@ export function SaveToLibraryDialog({
       const duration = calculateWorkoutDuration(workout);
 
       // Get sport from workout
-      const sport = workout.extensions?.workout?.sport || "cycling";
+      const workoutData = workout.extensions?.workout;
+      const sport =
+        workoutData &&
+        typeof workoutData === "object" &&
+        "sport" in workoutData &&
+        typeof workoutData.sport === "string"
+          ? workoutData.sport
+          : "cycling";
 
       // Add to library
       addTemplate(name.trim(), sport, workout, {
@@ -71,12 +78,11 @@ export function SaveToLibraryDialog({
       });
 
       // Show success toast
-      show({
-        title: "Workout Saved",
-        description: `"${name.trim()}" has been added to your library`,
-        variant: "success",
-        duration: 3000,
-      });
+      success(
+        "Workout Saved",
+        `"${name.trim()}" has been added to your library`,
+        { duration: 3000 }
+      );
 
       // Reset form and close dialog
       setName("");
@@ -84,14 +90,12 @@ export function SaveToLibraryDialog({
       setDifficulty("");
       setNotes("");
       onOpenChange(false);
-    } catch (error) {
-      show({
-        title: "Save Failed",
-        description:
-          error instanceof Error ? error.message : "Failed to save workout",
-        variant: "error",
-        duration: 5000,
-      });
+    } catch (err) {
+      showError(
+        "Save Failed",
+        err instanceof Error ? err.message : "Failed to save workout",
+        { duration: 5000 }
+      );
     } finally {
       setIsSaving(false);
     }
@@ -221,24 +225,57 @@ export function SaveToLibraryDialog({
  * Calculate total workout duration in seconds
  */
 function calculateWorkoutDuration(workout: KRD): number | undefined {
-  const steps = workout.extensions?.workout?.steps;
-  if (!steps || steps.length === 0) return undefined;
+  const workoutData = workout.extensions?.workout;
+  if (
+    !workoutData ||
+    typeof workoutData !== "object" ||
+    !("steps" in workoutData) ||
+    !Array.isArray(workoutData.steps)
+  )
+    return undefined;
+
+  const steps = workoutData.steps;
+  if (steps.length === 0) return undefined;
 
   let totalSeconds = 0;
 
   for (const step of steps) {
-    if ("repeatCount" in step) {
+    if (
+      typeof step === "object" &&
+      step !== null &&
+      "repeatCount" in step &&
+      "steps" in step &&
+      Array.isArray(step.steps)
+    ) {
       // Repetition block
-      const blockDuration = step.steps.reduce((sum, s) => {
-        if (s.duration.type === "time") {
+      const blockDuration = step.steps.reduce((sum: number, s: any) => {
+        if (
+          typeof s === "object" &&
+          s !== null &&
+          "duration" in s &&
+          typeof s.duration === "object" &&
+          s.duration !== null &&
+          "type" in s.duration &&
+          s.duration.type === "time" &&
+          "seconds" in s.duration
+        ) {
           return sum + s.duration.seconds;
         }
         return sum;
       }, 0);
-      totalSeconds += blockDuration * step.repeatCount;
-    } else if (step.duration.type === "time") {
+      totalSeconds += blockDuration * (step.repeatCount as number);
+    } else if (
+      typeof step === "object" &&
+      step !== null &&
+      "duration" in step &&
+      typeof step.duration === "object" &&
+      step.duration !== null &&
+      "type" in step.duration &&
+      step.duration.type === "time" &&
+      "seconds" in step.duration
+    ) {
       // Regular step with time duration
-      totalSeconds += step.duration.seconds;
+      totalSeconds += (step.duration as any).seconds;
     }
   }
 
