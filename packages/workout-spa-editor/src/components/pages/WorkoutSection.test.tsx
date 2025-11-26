@@ -79,6 +79,27 @@ describe("WorkoutSection", () => {
     expect(screen.getByText(/Sport:/)).toBeInTheDocument();
   });
 
+  it("should render SaveToLibraryButton when workout is loaded (Requirement 17)", () => {
+    // Arrange
+    const workout = createMockWorkout([createMockStep(0)]);
+    const krd = createMockKRD(workout);
+
+    // Act
+    renderWithProviders(
+      <WorkoutSection
+        workout={workout}
+        krd={krd}
+        selectedStepId={null}
+        onStepSelect={vi.fn()}
+      />
+    );
+
+    // Assert
+    expect(
+      screen.getByRole("button", { name: /Save to Library/i })
+    ).toBeInTheDocument();
+  });
+
   it("should open StepEditor when step is selected and editing is enabled", () => {
     // Arrange
     const workout = createMockWorkout([createMockStep(0)]);

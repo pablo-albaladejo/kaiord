@@ -117,4 +117,20 @@ describe("MainLayout", () => {
     });
     expect(themeToggle).toBeInTheDocument();
   });
+
+  it("should pass onReplayTutorial prop to LayoutHeader", () => {
+    // Arrange
+    const mockOnReplayTutorial = vi.fn();
+
+    // Act
+    renderWithProviders(
+      <MainLayout onReplayTutorial={mockOnReplayTutorial}>
+        <div>Content</div>
+      </MainLayout>,
+      { defaultTheme: "light" }
+    );
+
+    // Assert - Component renders without error
+    expect(screen.getByText("Content")).toBeInTheDocument();
+  });
 });

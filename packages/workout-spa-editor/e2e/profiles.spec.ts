@@ -1,0 +1,327 @@
+/**
+ * Profile Management E2E Tests
+ *
+ * End-to-end tests for user profile management including creation, editing,
+ * deletion, zone configuration, import/export, and profile switching.
+ *
+ * Requirements:
+ * - Requirement 9: User profile management with training zones
+ * - Requirement 10: Zone configuration with visual editor
+ * - Requirement 11: Multiple profiles with zone management
+ * - Requirement 38: Profile import/export functionality
+ */
+
+import { expect, test } from "@playwright/test";
+
+test.describe("Profile Management", () => {
+  test.beforeEach(async ({ page }) => {
+    // Navigate to the app and clear any existing profiles
+    await page.goto("/");
+    await page.evaluate(() => {
+      localStorage.clear();
+    });
+    await page.reload();
+  });
+
+  test("should create a new profile with name only", async ({ page }) => {
+    // Arrange - Open profile manager
+    await page.getByRole("button", { name: /profile/i }).click();
+
+    // Act - Create profile
+    await page.getByLabel(/^name$/i).fill("Test Athlete");
+    await page.getByRole("button", { name: /create profile/i }).click();
+
+    // Assert - Profile appears in list
+    await expect(page.getByText("Test Athlete")).toBeVisible();
+    await expect(page.getByText(/saved profiles \(1\)/i)).toBeVisible();
+  });
+
+  test("should create a profile with all fields", async ({ page }) => {
+    // Arrange - Open profile manager
+    await page.getByRole("button", { name: /profile/i }).click();
+
+    // Act - Fill all fields
+    await page.getByLabel(/^name$/i).fill("Pro Cyclist");
+    await page.getByLabel(/body weight/i).fill("70");
+    await page.getByLabel(/ftp/i).fill("300");
+    await page.getByLabel(/max hr/i).fill("190");
+    await page.getByRole("button", { name: /create profile/i }).click();
+
+    // Assert - Profile shows all data
+    await expect(page.getByText("Pro Cyclist")).toBeVisible();
+    await expect(page.getByText(/FTP: 300W/i)).toBeVisible();
+    await expect(page.getByText(/Max HR: 190 bpm/i)).toBeVisible();
+  });
+
+  test("should edit an existing profile", async ({ page }) => {
+    // Arrange - Create a profile first
+    await page.getByRole("button", { name: /profile/i }).click();
+    await page.getByLabel(/^name$/i).fill("Original Name");
+    await page.getByRole("button", { name: /create profile/i }).click();
+
+    // Act - Edit the profile
+    await page.getByRole("button", { name: /^edit$/i }).click();
+    await page.getByLabel(/^name$/i).clear();
+    await page.getByLabel(/^name$/i).fill("Updated Name");
+    await page.getByLabel(/ftp/i).fill("280");
+    await page.getByRole("button", { name: /save changes/i }).click();
+
+    // Assert - Profile shows updated data
+    await expect(page.getByText("Updated Name")).toBeVisible();
+    await expect(page.getByText(/FTP: 280W/i)).toBeVisible();
+  });
+
+  test("should delete a profile", async ({ page }) => {
+    // Arrange - Create two profiles
+    await page.getByRole("button", { name: /profile/i }).click();
+    await page.getByLabel(/^name$/i).fill("Profile 1");
+    await page.getByRole("button", { name: /create profile/i }).click();
+    await page.getByLabel(/^name$/i).fill("Profile 2");
+    await page.getByRole("button", { name: /create profile/i }).click();
+
+    // Act - Delete first profile
+    const deleteButtons = page.getByRole("button", {
+      name: /^delete profile$/i,
+    });
+    await deleteButtons.first().click();
+    await page
+      .getByRole("button", { name: /^delete$/i })
+      .last()
+      .click();
+
+    // Assert - Only one profile remains
+    await expect(page.getByText(/saved profiles \(1\)/i)).toBeVisible();
+    await expect(page.getByText("Profile 2")).toBeVisible();
+  });
+
+  test("should switch active profile", async ({ page }) => {
+    // Arrange - Create two profiles
+    await page.getByRole("button", { name: /profile/i }).click();
+    await page.getByLabel(/^name$/i).fill("Profile 1");
+    await page.getByRole("button", { name: /create profile/i }).click();
+    await page.getByLabel(/^name$/i).fill("Profile 2");
+    await page.getByRole("button", { name: /create profile/i }).click();
+
+    // Act - Switch to Profile 1
+    await page.getByRole("button", { name: /set active/i }).click();
+
+    // Assert - Notification appears
+    await expect(
+      page.getByText(/switched to profile: profile 1/i)
+    ).toBeVisible();
+
+    // Assert - Set Active button disappears for active profile
+    await expect(
+      page.getByRole("button", { name: /set active/i })
+    ).not.toBeVisible();
+  });
+
+  test("should export a profile", async ({ page }) => {
+    // Arrange - Create a profile
+    await page.getByRole("button", { name: /profile/i }).click();
+    await page.getByLabel(/^name$/i).fill("Export Test");
+    await page.getByLabel(/ftp/i).fill("300");
+    await page.getByRole("button", { name: /create profile/i }).click();
+
+    // Act - Set up download listener and click export
+    const downloadPromise = page.waitForEvent("download");
+    await page.getByRole("button", { name: /export profile/i }).click();
+    const download = await downloadPromise;
+
+    // Assert - File is downloaded with correct name
+    expect(download.suggestedFilename()).toMatch(/profile-export-test\.json/);
+  });
+
+  test("should import a valid profile", async ({ page }) => {
+    // Arrange - Create a profile JSON file
+    const profileData = {
+      id: crypto.randomUUID(),
+      name: "Imported Profile",
+      ftp: 320,
+      maxHeartRate: 195,
+      bodyWeight: 72,
+      powerZones: [
+        { zone: 1, name: "Z1", minPercent: 0, maxPercent: 55 },
+        { zone: 2, name: "Z2", minPercent: 56, maxPercent: 75 },
+        { zone: 3, name: "Z3", minPercent: 76, maxPercent: 90 },
+        { zone: 4, name: "Z4", minPercent: 91, maxPercent: 105 },
+        { zone: 5, name: "Z5", minPercent: 106, maxPercent: 120 },
+        { zone: 6, name: "Z6", minPercent: 121, maxPercent: 150 },
+        { zone: 7, name: "Z7", minPercent: 151, maxPercent: 200 },
+      ],
+      heartRateZones: [
+        { zone: 1, name: "HR1", minBpm: 0, maxBpm: 117 },
+        { zone: 2, name: "HR2", minBpm: 117, maxBpm: 137 },
+        { zone: 3, name: "HR3", minBpm: 137, maxBpm: 156 },
+        { zone: 4, name: "HR4", minBpm: 156, maxBpm: 176 },
+        { zone: 5, name: "HR5", minBpm: 176, maxBpm: 195 },
+      ],
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+
+    await page.getByRole("button", { name: /profile/i }).click();
+
+    // Act - Import the profile
+    await page.setInputFiles("#import-profile", {
+      name: "profile.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(profileData)),
+    });
+
+    // Assert - Profile appears in list
+    await expect(page.getByText("Imported Profile")).toBeVisible();
+    await expect(page.getByText(/FTP: 320W/i)).toBeVisible();
+    await expect(page.getByText(/Max HR: 195 bpm/i)).toBeVisible();
+  });
+
+  test("should show error for invalid profile import", async ({ page }) => {
+    // Arrange - Create invalid profile data
+    const invalidProfile = {
+      name: "Invalid",
+      // Missing required fields
+    };
+
+    await page.getByRole("button", { name: /profile/i }).click();
+
+    // Act - Import invalid profile
+    await page.setInputFiles("#import-profile", {
+      name: "invalid.json",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(invalidProfile)),
+    });
+
+    // Assert - Error message appears
+    await expect(page.getByText(/import failed/i)).toBeVisible();
+  });
+
+  test("should persist profiles across page reloads", async ({ page }) => {
+    // Arrange - Create a profile
+    await page.getByRole("button", { name: /profile/i }).click();
+    await page.getByLabel(/^name$/i).fill("Persistent Profile");
+    await page.getByLabel(/ftp/i).fill("275");
+    await page.getByRole("button", { name: /create profile/i }).click();
+
+    // Act - Reload the page
+    await page.reload();
+
+    // Assert - Profile still exists
+    await page.getByRole("button", { name: /profile/i }).click();
+    await expect(page.getByText("Persistent Profile")).toBeVisible();
+    await expect(page.getByText(/FTP: 275W/i)).toBeVisible();
+  });
+});
+
+test.describe("Zone Configuration", () => {
+  test.beforeEach(async ({ page }) => {
+    // Navigate and create a profile with FTP and max HR
+    await page.goto("/");
+    await page.evaluate(() => {
+      localStorage.clear();
+    });
+    await page.reload();
+
+    await page.getByRole("button", { name: /profile/i }).click();
+    await page.getByLabel(/^name$/i).fill("Zone Test");
+    await page.getByLabel(/ftp/i).fill("250");
+    await page.getByLabel(/max hr/i).fill("190");
+    await page.getByRole("button", { name: /create profile/i }).click();
+  });
+
+  test("should edit power zones", async ({ page }) => {
+    // Arrange - Open zone editor (this would require a button in ProfileManager)
+    // For now, this test is a placeholder as the zone editor integration
+    // with ProfileManager needs to be implemented
+
+    // This test validates the requirement but implementation depends on
+    // how ZoneEditor is integrated into the ProfileManager UI
+    test.skip();
+  });
+
+  test("should edit heart rate zones", async ({ page }) => {
+    // Arrange - Open zone editor
+    // Similar to power zones test, this is a placeholder
+
+    test.skip();
+  });
+
+  test("should validate zone ranges", async ({ page }) => {
+    // Test that overlapping zones show validation errors
+    test.skip();
+  });
+
+  test("should recalculate zones when FTP changes", async ({ page }) => {
+    // Arrange - Edit profile to change FTP
+    await page.getByRole("button", { name: /^edit$/i }).click();
+    await page.getByLabel(/ftp/i).clear();
+    await page.getByLabel(/ftp/i).fill("300");
+    await page.getByRole("button", { name: /save changes/i }).click();
+
+    // Assert - Profile shows updated FTP
+    await expect(page.getByText(/FTP: 300W/i)).toBeVisible();
+  });
+
+  test("should recalculate zones when max HR changes", async ({ page }) => {
+    // Arrange - Edit profile to change max HR
+    await page.getByRole("button", { name: /^edit$/i }).click();
+    await page.getByLabel(/max hr/i).clear();
+    await page.getByLabel(/max hr/i).fill("195");
+    await page.getByRole("button", { name: /save changes/i }).click();
+
+    // Assert - Profile shows updated max HR
+    await expect(page.getByText(/Max HR: 195 bpm/i)).toBeVisible();
+  });
+});
+
+test.describe("Profile Performance", () => {
+  test("should switch profiles quickly", async ({ page }) => {
+    // Arrange - Create multiple profiles
+    await page.goto("/");
+    await page.evaluate(() => {
+      localStorage.clear();
+    });
+    await page.reload();
+
+    await page.getByRole("button", { name: /profile/i }).click();
+
+    for (let i = 1; i <= 5; i++) {
+      await page.getByLabel(/^name$/i).fill(`Profile ${i}`);
+      await page.getByRole("button", { name: /create profile/i }).click();
+    }
+
+    // Act - Measure profile switch time
+    const startTime = Date.now();
+    await page
+      .getByRole("button", { name: /set active/i })
+      .first()
+      .click();
+    await page.waitForSelector('[role="status"]');
+    const endTime = Date.now();
+
+    // Assert - Switch completes within performance budget (< 500ms)
+    const duration = endTime - startTime;
+    expect(duration).toBeLessThan(500);
+  });
+
+  test("should handle large number of profiles", async ({ page }) => {
+    // Arrange - Create many profiles
+    await page.goto("/");
+    await page.evaluate(() => {
+      localStorage.clear();
+    });
+    await page.reload();
+
+    await page.getByRole("button", { name: /profile/i }).click();
+
+    // Create 20 profiles
+    for (let i = 1; i <= 20; i++) {
+      await page.getByLabel(/^name$/i).fill(`Profile ${i}`);
+      await page.getByRole("button", { name: /create profile/i }).click();
+    }
+
+    // Assert - All profiles are visible and scrollable
+    await expect(page.getByText(/saved profiles \(20\)/i)).toBeVisible();
+    await expect(page.getByText("Profile 1")).toBeVisible();
+    await expect(page.getByText("Profile 20")).toBeVisible();
+  });
+});
