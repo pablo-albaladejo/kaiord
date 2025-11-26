@@ -4,7 +4,7 @@
  * Input field for repeat-from step index.
  */
 
-interface RepeatFromInputProps {
+type RepeatFromInputProps = {
   value: string;
   onChange: (value: string) => void;
   disabled?: boolean;

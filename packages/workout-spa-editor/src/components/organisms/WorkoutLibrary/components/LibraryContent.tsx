@@ -8,7 +8,7 @@ import type { WorkoutTemplate } from "../../../../types/workout-library";
 import { EmptyLibrary } from "./EmptyLibrary";
 import { WorkoutCard } from "./WorkoutCard";
 
-interface LibraryContentProps {
+type LibraryContentProps = {
   templates: WorkoutTemplate[];
   filteredTemplates: WorkoutTemplate[];
   hasActiveFilters: boolean;

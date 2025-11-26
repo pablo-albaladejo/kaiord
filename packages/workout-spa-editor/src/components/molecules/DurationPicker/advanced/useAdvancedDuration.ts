@@ -12,9 +12,9 @@ import {
   getRepeatFromValue,
   getValueFromDuration,
   isRepeatType,
-  validateValue,
 } from "./duration-helpers";
 import type { AdvancedDurationType } from "./duration-type-options";
+import { validateValue } from "./duration-validation";
 
 export function useAdvancedDuration(
   value: Duration | null,
