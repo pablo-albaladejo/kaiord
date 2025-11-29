@@ -51,10 +51,14 @@ export function LibraryFilters({
 
       <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="sport-filter-select"
+            className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Sport
           </label>
           <select
+            id="sport-filter-select"
             value={sportFilter}
             onChange={(e) =>
               onSportFilterChange(e.target.value as Sport | "all")
@@ -70,10 +74,14 @@ export function LibraryFilters({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="difficulty-filter-select"
+            className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Difficulty
           </label>
           <select
+            id="difficulty-filter-select"
             value={difficultyFilter}
             onChange={(e) =>
               onDifficultyFilterChange(e.target.value as Difficulty | "all")
@@ -88,10 +96,14 @@ export function LibraryFilters({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="sort-by-select"
+            className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Sort By
           </label>
           <select
+            id="sort-by-select"
             value={sortBy}
             onChange={(e) =>
               onSortByChange(e.target.value as "name" | "date" | "difficulty")
@@ -105,10 +117,14 @@ export function LibraryFilters({
         </div>
 
         <div>
-          <label className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300">
+          <label
+            htmlFor="sort-order-select"
+            className="mb-1 block text-sm font-medium text-gray-700 dark:text-gray-300"
+          >
             Order
           </label>
           <select
+            id="sort-order-select"
             value={sortOrder}
             onChange={(e) =>
               onSortOrderChange(e.target.value as "asc" | "desc")
