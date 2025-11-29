@@ -17,6 +17,7 @@ import { LibraryDialogHeader } from "./components/LibraryDialogHeader";
 import { LibraryFilters } from "./components/LibraryFilters";
 import { LoadConfirmDialog } from "./components/LoadConfirmDialog";
 import { PreviewDialog } from "./components/PreviewDialog";
+import { TagFilterButtons } from "./components/TagFilterButtons";
 import { DIALOG_CONTENT_CLASSES, DIALOG_OVERLAY_CLASSES } from "./constants";
 import { useLibraryFilters } from "./hooks/useLibraryFilters";
 import { useWorkoutLoader } from "./hooks/useWorkoutLoader";
