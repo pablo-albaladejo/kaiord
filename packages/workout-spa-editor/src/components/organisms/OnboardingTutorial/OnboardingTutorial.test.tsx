@@ -10,7 +10,7 @@
  */
 
 import { waitFor } from "@testing-library/react";
-import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { renderWithProviders, screen, userEvent } from "../../../test-utils";
 import {
   OnboardingTutorial,
@@ -52,11 +52,6 @@ describe("OnboardingTutorial", () => {
     // Clear localStorage before each test
     localStorage.clear();
     vi.clearAllMocks();
-  });
-
-  afterEach(() => {
-    // Clean up any DOM elements
-    document.body.innerHTML = "";
   });
 
   // ============================================

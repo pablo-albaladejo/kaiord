@@ -350,7 +350,7 @@ describe("LayoutHeader", () => {
       );
 
       // Act - Load workout
-      const loadButton = screen.getByRole("button", { name: /load workout/i });
+      const loadButton = screen.getByRole("button", { name: /^load$/i });
       await user.click(loadButton);
 
       // Assert - Workout should be loaded
