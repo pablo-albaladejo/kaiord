@@ -18,6 +18,7 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => {
     isEditing: false,
     safeMode: false,
     lastBackup: null,
+    deletedSteps: [],
     ...createWorkoutMethods(actions, set, get),
     ...createSelectionActions(set),
     setEditing: (editing) => set({ isEditing: editing }),

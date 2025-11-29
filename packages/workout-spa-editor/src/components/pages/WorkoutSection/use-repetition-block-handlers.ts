@@ -8,6 +8,7 @@ import {
   useEditRepetitionBlock,
   useSelectedStepIds,
 } from "../../../store/workout-store-selectors";
+import { createPlaceholderHandlers } from "./repetition-block-placeholder-handlers";
 
 function extractStepIndices(selectedStepIds: readonly string[]): Array<number> {
   return selectedStepIds
@@ -21,12 +22,10 @@ function extractStepIndices(selectedStepIds: readonly string[]): Array<number> {
 function useDialogState() {
   const [showCreateBlockDialog, setShowCreateBlockDialog] = useState(false);
   const [isCreatingEmptyBlock, setIsCreatingEmptyBlock] = useState(false);
-
   const closeDialog = () => {
     setShowCreateBlockDialog(false);
     setIsCreatingEmptyBlock(false);
   };
-
   return {
     showCreateBlockDialog,
     isCreatingEmptyBlock,
@@ -45,16 +44,13 @@ export function useRepetitionBlockHandlers() {
   const duplicateStepInRepetitionBlock = useDuplicateStepInRepetitionBlock();
   const clearStepSelection = useClearStepSelection();
   const dialog = useDialogState();
-
   const handleCreateRepetitionBlock = () => {
     dialog.setIsCreatingEmptyBlock(false);
     dialog.setShowCreateBlockDialog(true);
   };
-
   const handleCreateEmptyRepetitionBlock = () => {
     createEmptyRepetitionBlock(1);
   };
-
   const handleConfirmCreateBlock = (repeatCount: number) => {
     if (dialog.isCreatingEmptyBlock) {
       createEmptyRepetitionBlock(repeatCount);
@@ -67,7 +63,7 @@ export function useRepetitionBlockHandlers() {
     }
     dialog.closeDialog();
   };
-
+  const placeholders = createPlaceholderHandlers();
   return {
     selectedStepIds,
     showCreateBlockDialog: dialog.showCreateBlockDialog,
@@ -78,5 +74,7 @@ export function useRepetitionBlockHandlers() {
     handleEditRepetitionBlock: editRepetitionBlock,
     handleAddStepToRepetitionBlock: addStepToRepetitionBlock,
     handleDuplicateStepInRepetitionBlock: duplicateStepInRepetitionBlock,
+    handleUngroup: placeholders.handleUngroup,
+    handleDelete: placeholders.handleDelete,
   };
 }

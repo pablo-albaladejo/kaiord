@@ -1,5 +1,7 @@
-import type { DraggableAttributes } from "@dnd-kit/core";
-import type { DraggableSyntheticListeners } from "@dnd-kit/core";
+import type {
+  DraggableAttributes,
+  DraggableSyntheticListeners,
+} from "@dnd-kit/core";
 import type { HTMLAttributes } from "react";
 import type { WorkoutStep } from "../../../types/krd";
 
@@ -18,6 +20,7 @@ export type StepCardProps = HTMLAttributes<HTMLDivElement> & {
   onToggleMultiSelect?: (stepIndex: number) => void;
   onDelete?: (stepIndex: number) => void;
   onDuplicate?: (stepIndex: number) => void;
+  onCopy?: (stepIndex: number) => void;
   isDragging?: boolean;
   dragHandleProps?: DragHandleProps;
 };

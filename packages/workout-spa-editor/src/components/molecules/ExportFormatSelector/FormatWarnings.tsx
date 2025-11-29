@@ -1,10 +1,11 @@
 import { AlertCircle } from "lucide-react";
-import type { ValidationError } from "../../../types/krd";
+import type { KRD, ValidationError } from "../../../types/krd";
+import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getFormatWarnings } from "./format-helpers";
 
 type FormatWarningsProps = {
-  readonly format: string;
-  readonly workout?: unknown;
+  readonly format: WorkoutFileFormat;
+  readonly workout?: KRD;
   readonly validationErrors: readonly ValidationError[];
 };
 
@@ -13,7 +14,7 @@ export function FormatWarnings({
   workout,
   validationErrors,
 }: FormatWarningsProps) {
-  const warning = getFormatWarnings(format as never, workout as never);
+  const warning = getFormatWarnings(format, workout);
 
   return (
     <>

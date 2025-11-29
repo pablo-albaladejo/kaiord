@@ -1,0 +1,1 @@
+export { PasteButton } from "./PasteButton";

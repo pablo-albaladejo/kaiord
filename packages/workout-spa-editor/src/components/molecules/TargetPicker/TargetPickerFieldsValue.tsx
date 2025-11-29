@@ -11,6 +11,7 @@ type TargetPickerFieldsValueProps = Pick<
   | "maxValue"
   | "displayError"
   | "disabled"
+  | "activeProfile"
   | "onValueChange"
   | "onMinChange"
   | "onMaxChange"
@@ -26,6 +27,7 @@ export function TargetPickerFieldsValue({
   maxValue,
   displayError,
   disabled,
+  activeProfile,
   onValueChange,
   onMinChange,
   onMaxChange,
@@ -55,6 +57,7 @@ export function TargetPickerFieldsValue({
       onChange={onValueChange}
       disabled={disabled}
       error={displayError}
+      activeProfile={activeProfile}
       getValueLabel={getValueLabel}
       getValuePlaceholder={getValuePlaceholder}
     />

@@ -540,3 +540,334 @@ describe("createRepetitionBlock", () => {
     }
   });
 });
+
+/**
+ * Property-Based Tests
+ *
+ * Feature: workout-spa-editor/08-pr25-fixes, Property 1: Insertion order preservation
+ * Validates: Requirements 1.1, 1.2, 1.3
+ */
+describe("createRepetitionBlock - Property Tests", () => {
+  beforeEach(() => {
+    useWorkoutStore.setState({
+      currentWorkout: null,
+      workoutHistory: [],
+      historyIndex: -1,
+      selectedStepId: null,
+      isEditing: false,
+    });
+  });
+
+  /**
+   * Edge Case Tests
+   */
+  it("should handle empty workout (workout with no steps)", () => {
+    // Arrange
+    const mockKrd: KRD = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: "2025-01-15T10:30:00Z",
+        sport: "running",
+      },
+      extensions: {
+        workout: {
+          sport: "running",
+          steps: [],
+        },
+      },
+    };
+
+    useWorkoutStore.getState().loadWorkout(mockKrd);
+
+    // Act
+    useWorkoutStore.getState().createRepetitionBlock([0, 1], 2);
+    const state = useWorkoutStore.getState();
+
+    // Assert
+    const workout = state.currentWorkout?.extensions?.workout;
+    expect(workout?.steps).toHaveLength(0);
+    expect(state.workoutHistory).toHaveLength(1); // Only the initial load
+  });
+
+  it("should handle workout with existing repetition blocks", () => {
+    // Arrange
+    const mockKrd: KRD = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: "2025-01-15T10:30:00Z",
+        sport: "cycling",
+      },
+      extensions: {
+        workout: {
+          sport: "cycling",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 300 },
+              targetType: "open",
+              target: { type: "open" },
+            },
+            {
+              repeatCount: 3,
+              steps: [
+                {
+                  stepIndex: 1,
+                  durationType: "time",
+                  duration: { type: "time", seconds: 600 },
+                  targetType: "power",
+                  target: {
+                    type: "power",
+                    value: { unit: "watts", value: 200 },
+                  },
+                },
+                {
+                  stepIndex: 2,
+                  durationType: "time",
+                  duration: { type: "time", seconds: 300 },
+                  targetType: "power",
+                  target: {
+                    type: "power",
+                    value: { unit: "watts", value: 150 },
+                  },
+                },
+              ],
+            },
+            {
+              stepIndex: 3,
+              durationType: "time",
+              duration: { type: "time", seconds: 900 },
+              targetType: "open",
+              target: { type: "open" },
+            },
+          ],
+        },
+      },
+    };
+
+    useWorkoutStore.getState().loadWorkout(mockKrd);
+
+    // Act - Wrap steps 0 and 3 (skipping the existing repetition block)
+    useWorkoutStore.getState().createRepetitionBlock([0, 3], 2);
+    const state = useWorkoutStore.getState();
+
+    // Assert
+    const workout = state.currentWorkout?.extensions?.workout;
+    expect(workout?.steps).toHaveLength(2);
+
+    // First item should be the new repetition block
+    const firstItem = workout?.steps[0];
+    expect(isRepetitionBlock(firstItem)).toBe(true);
+
+    if (isRepetitionBlock(firstItem)) {
+      expect(firstItem.repeatCount).toBe(2);
+      expect(firstItem.steps).toHaveLength(2);
+      expect(firstItem.steps[0].duration).toEqual({
+        type: "time",
+        seconds: 300,
+      });
+      expect(firstItem.steps[1].duration).toEqual({
+        type: "time",
+        seconds: 900,
+      });
+    }
+
+    // Second item should be the existing repetition block (preserved)
+    const secondItem = workout?.steps[1];
+    expect(isRepetitionBlock(secondItem)).toBe(true);
+
+    if (isRepetitionBlock(secondItem)) {
+      expect(secondItem.repeatCount).toBe(3);
+      expect(secondItem.steps).toHaveLength(2);
+    }
+  });
+
+  it("should handle mixed steps and blocks correctly", () => {
+    // Arrange
+    const mockKrd: KRD = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: "2025-01-15T10:30:00Z",
+        sport: "running",
+      },
+      extensions: {
+        workout: {
+          sport: "running",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 300 },
+              targetType: "open",
+              target: { type: "open" },
+            },
+            {
+              repeatCount: 2,
+              steps: [
+                {
+                  stepIndex: 1,
+                  durationType: "time",
+                  duration: { type: "time", seconds: 600 },
+                  targetType: "open",
+                  target: { type: "open" },
+                },
+              ],
+            },
+            {
+              stepIndex: 2,
+              durationType: "time",
+              duration: { type: "time", seconds: 900 },
+              targetType: "open",
+              target: { type: "open" },
+            },
+            {
+              stepIndex: 3,
+              durationType: "time",
+              duration: { type: "time", seconds: 1200 },
+              targetType: "open",
+              target: { type: "open" },
+            },
+          ],
+        },
+      },
+    };
+
+    useWorkoutStore.getState().loadWorkout(mockKrd);
+
+    // Act - Wrap steps 2 and 3 (after the existing block)
+    useWorkoutStore.getState().createRepetitionBlock([2, 3], 4);
+    const state = useWorkoutStore.getState();
+
+    // Assert
+    const workout = state.currentWorkout?.extensions?.workout;
+    expect(workout?.steps).toHaveLength(3);
+
+    // First item should be step 0
+    const firstItem = workout?.steps[0];
+    expect(isWorkoutStep(firstItem)).toBe(true);
+    if (isWorkoutStep(firstItem)) {
+      expect(firstItem.stepIndex).toBe(0);
+      expect(firstItem.duration).toEqual({ type: "time", seconds: 300 });
+    }
+
+    // Second item should be the existing repetition block
+    const secondItem = workout?.steps[1];
+    expect(isRepetitionBlock(secondItem)).toBe(true);
+    if (isRepetitionBlock(secondItem)) {
+      expect(secondItem.repeatCount).toBe(2);
+    }
+
+    // Third item should be the new repetition block
+    const thirdItem = workout?.steps[2];
+    expect(isRepetitionBlock(thirdItem)).toBe(true);
+    if (isRepetitionBlock(thirdItem)) {
+      expect(thirdItem.repeatCount).toBe(4);
+      expect(thirdItem.steps).toHaveLength(2);
+      expect(thirdItem.steps[0].duration).toEqual({
+        type: "time",
+        seconds: 900,
+      });
+      expect(thirdItem.steps[1].duration).toEqual({
+        type: "time",
+        seconds: 1200,
+      });
+    }
+  });
+
+  /**
+   * Property 1: Insertion order preservation
+   *
+   * For any workout with existing steps and repetition blocks, when creating
+   * a new repetition block from selected steps, the relative order of all
+   * non-selected steps and existing blocks should remain unchanged.
+   */
+  it("should preserve relative order of non-selected items (property test)", () => {
+    // Run property test with multiple iterations
+    const iterations = 100;
+
+    for (let i = 0; i < iterations; i++) {
+      // Arrange - Generate random workout structure
+      const numSteps = Math.floor(Math.random() * 10) + 3; // 3-12 steps
+      const steps = Array.from({ length: numSteps }, (_, idx) => ({
+        stepIndex: idx,
+        durationType: "time" as const,
+        duration: { type: "time" as const, seconds: 300 + idx * 60 },
+        targetType: "open" as const,
+        target: { type: "open" as const },
+      }));
+
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "running",
+        },
+        extensions: {
+          workout: {
+            sport: "running",
+            steps,
+          },
+        },
+      };
+
+      // Select random subset of steps (at least 1, at most numSteps-1)
+      const numToSelect = Math.floor(Math.random() * (numSteps - 1)) + 1;
+      const selectedIndices: number[] = [];
+      const availableIndices = Array.from(
+        { length: numSteps },
+        (_, idx) => idx
+      );
+
+      for (let j = 0; j < numToSelect; j++) {
+        const randomIdx = Math.floor(Math.random() * availableIndices.length);
+        selectedIndices.push(availableIndices[randomIdx]);
+        availableIndices.splice(randomIdx, 1);
+      }
+
+      // Track non-selected steps before transformation
+      const nonSelectedSteps = steps.filter(
+        (step) => !selectedIndices.includes(step.stepIndex)
+      );
+      const nonSelectedDurations = nonSelectedSteps.map(
+        (step) => step.duration.seconds
+      );
+
+      useWorkoutStore.getState().loadWorkout(mockKrd);
+
+      // Act
+      useWorkoutStore.getState().createRepetitionBlock(selectedIndices, 2);
+      const state = useWorkoutStore.getState();
+
+      // Assert - Verify non-selected items maintain relative order
+      const workout = state.currentWorkout?.extensions?.workout;
+      expect(workout).toBeDefined();
+
+      if (workout) {
+        // Extract non-selected steps from result (skip repetition blocks)
+        const resultNonSelectedSteps = workout.steps.filter(
+          (item) => isWorkoutStep(item) && item
+        );
+        const resultDurations = resultNonSelectedSteps.map((step) => {
+          if (isWorkoutStep(step)) {
+            return step.duration.seconds;
+          }
+          return -1;
+        });
+
+        // Verify same durations in same order
+        expect(resultDurations).toEqual(nonSelectedDurations);
+      }
+
+      // Reset for next iteration
+      useWorkoutStore.setState({
+        currentWorkout: null,
+        workoutHistory: [],
+        historyIndex: -1,
+      });
+    }
+  });
+});

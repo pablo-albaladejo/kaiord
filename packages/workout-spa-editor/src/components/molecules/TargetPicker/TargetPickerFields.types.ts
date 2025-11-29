@@ -1,3 +1,5 @@
+import type { Profile } from "../../../types/profile";
+
 export type TargetPickerFieldsProps = {
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open";
   unit: string;
@@ -7,6 +9,7 @@ export type TargetPickerFieldsProps = {
   displayError: string;
   disabled: boolean;
   unitOptions: Array<{ value: string; label: string }>;
+  activeProfile?: Profile | null;
   onTypeChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onUnitChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   onValueChange: (e: React.ChangeEvent<HTMLInputElement>) => void;

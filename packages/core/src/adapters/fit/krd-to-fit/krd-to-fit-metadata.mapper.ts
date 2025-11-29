@@ -48,7 +48,10 @@ export const convertMetadataToFileId = (
   }
 
   if (krd.metadata.serialNumber) {
-    fileId.serialNumber = parseInt(krd.metadata.serialNumber, 10);
+    const serialNumber = parseInt(krd.metadata.serialNumber, 10);
+    if (!isNaN(serialNumber)) {
+      fileId.serialNumber = serialNumber;
+    }
   }
 
   return fileId;

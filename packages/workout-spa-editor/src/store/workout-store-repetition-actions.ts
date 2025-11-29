@@ -3,6 +3,7 @@ import { createEmptyRepetitionBlockAction } from "./actions/create-empty-repetit
 import { createRepetitionBlockAction } from "./actions/create-repetition-block-action";
 import { duplicateStepInRepetitionBlockAction } from "./actions/duplicate-step-in-repetition-block-action";
 import { editRepetitionBlockAction } from "./actions/edit-repetition-block-action";
+import { ungroupRepetitionBlockAction } from "./actions/ungroup-repetition-block-action";
 import type { WorkoutState } from "./workout-actions";
 
 /**
@@ -17,6 +18,7 @@ export function createRepetitionBlockActions(state: WorkoutState) {
       editRepetitionBlock: () => ({}),
       addStepToRepetitionBlock: () => ({}),
       duplicateStepInRepetitionBlock: () => ({}),
+      ungroupRepetitionBlock: () => ({}),
     };
   }
 
@@ -33,5 +35,7 @@ export function createRepetitionBlockActions(state: WorkoutState) {
       addStepToRepetitionBlockAction(krd, blockIndex, state),
     duplicateStepInRepetitionBlock: (blockIndex: number, stepIndex: number) =>
       duplicateStepInRepetitionBlockAction(krd, blockIndex, stepIndex, state),
+    ungroupRepetitionBlock: (blockIndex: number) =>
+      ungroupRepetitionBlockAction(krd, blockIndex, state),
   };
 }

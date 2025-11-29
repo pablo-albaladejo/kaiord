@@ -87,6 +87,62 @@ Example `tolerance.json`:
 }
 ```
 
+## Configuration File
+
+You can create a `.kaiordrc.json` file to set default options. The CLI will search for this file in:
+
+1. Current working directory
+2. User home directory (`~/.kaiordrc.json`)
+
+CLI options always take precedence over config file defaults.
+
+### Example Configuration
+
+Create `.kaiordrc.json` in your project or home directory:
+
+```json
+{
+  "defaultInputFormat": "fit",
+  "defaultOutputFormat": "krd",
+  "defaultOutputDir": "./converted",
+  "defaultToleranceConfig": "./tolerance.json",
+  "verbose": false,
+  "quiet": false,
+  "json": false,
+  "logFormat": "pretty"
+}
+```
+
+### Configuration Options
+
+- **defaultInputFormat**: Default input format (`fit`, `krd`, `tcx`, `zwo`)
+- **defaultOutputFormat**: Default output format (`fit`, `krd`, `tcx`, `zwo`)
+- **defaultOutputDir**: Default output directory for batch conversions
+- **defaultToleranceConfig**: Path to default tolerance configuration file
+- **verbose**: Enable verbose logging by default
+- **quiet**: Enable quiet mode by default
+- **json**: Enable JSON output by default
+- **logFormat**: Default log format (`pretty` or `structured`)
+
+### Usage with Config File
+
+With a config file, you can simplify your commands:
+
+```bash
+# Without config file
+kaiord convert --input workout.fit --output workout.krd --output-format krd
+
+# With config file (defaultOutputFormat: "krd")
+kaiord convert --input workout.fit --output workout.krd
+```
+
+CLI options override config defaults:
+
+```bash
+# Config has verbose: true, but --quiet overrides it
+kaiord convert --input workout.fit --output workout.krd --quiet
+```
+
 ## Global Options
 
 ### Verbosity Control
@@ -118,6 +174,30 @@ kaiord convert --input workout.fit --output workout.krd --log-format json
 - **KRD** (.krd) - Kaiord's canonical JSON format
 - **TCX** (.tcx) - Training Center XML format
 - **ZWO** (.zwo) - Zwift workout XML format
+
+### Plugin System (Future Enhancement)
+
+The CLI is designed with a plugin architecture that will allow third-party developers to add support for custom workout file formats without modifying the core library. See [Plugin Architecture Documentation](./docs/plugin-architecture.md) for details on the design.
+
+**Planned Features:**
+
+- Dynamic plugin discovery and loading
+- Type-safe plugin interface
+- Automatic format detection for plugin formats
+- Plugin configuration via `.kaiordrc.json`
+- Plugin management commands (`kaiord plugins list`, `install`, etc.)
+
+**Example Plugin Usage (Future):**
+
+```bash
+# Install a plugin
+npm install -g @kaiord/plugin-gpx
+
+# Use plugin format
+kaiord convert --input workout.gpx --output workout.krd
+```
+
+See [Example GPX Plugin](./docs/example-plugin-gpx.md) for a complete plugin implementation example.
 
 ## Exit Codes
 

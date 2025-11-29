@@ -1,8 +1,7 @@
-/* eslint-disable max-lines */
 import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
 import { isRepetitionBlock } from "../../../types/krd";
-import { SortableRepetitionBlockCard } from "./SortableRepetitionBlockCard";
 import { renderStep } from "./WorkoutListItem";
+import { renderRepetitionBlock } from "./render-repetition-block";
 
 type RenderWorkoutItemProps = {
   item: WorkoutStep | RepetitionBlock;
@@ -14,18 +13,20 @@ type RenderWorkoutItemProps = {
   onToggleStepSelection?: (stepId: string) => void;
   onStepDelete?: (stepIndex: number) => void;
   onStepDuplicate?: (stepIndex: number) => void;
+  onStepCopy?: (stepIndex: number) => void;
   onDuplicateStepInRepetitionBlock?: (
     blockIndex: number,
     stepIndex: number
   ) => void;
   onEditRepetitionBlock?: (blockIndex: number, repeatCount: number) => void;
   onAddStepToRepetitionBlock?: (blockIndex: number) => void;
+  onUngroupRepetitionBlock?: (blockIndex: number) => void;
+  onDeleteRepetitionBlock?: (blockIndex: number) => void;
   onReorderStepsInBlock?: (
     blockIndex: number,
     activeIndex: number,
     overIndex: number
   ) => void;
-  // generateStepId will be used in task 5 to pass to SortableRepetitionBlockCard
   generateStepId: (
     item: WorkoutStep | RepetitionBlock,
     index: number,
@@ -33,60 +34,24 @@ type RenderWorkoutItemProps = {
   ) => string;
 };
 
-export const renderWorkoutItem = ({
-  item,
-  index,
-  itemId,
-  selectedStepId,
-  selectedStepIds = [],
-  onStepSelect,
-  onToggleStepSelection,
-  onStepDelete,
-  onStepDuplicate,
-  onDuplicateStepInRepetitionBlock,
-  onEditRepetitionBlock,
-  onAddStepToRepetitionBlock,
-  onReorderStepsInBlock,
-  generateStepId,
-}: RenderWorkoutItemProps) => {
-  if (isRepetitionBlock(item)) {
-    return (
-      <SortableRepetitionBlockCard
-        id={itemId}
-        block={item}
-        blockIndex={index}
-        selectedStepId={selectedStepId}
-        selectedStepIds={selectedStepIds}
-        onStepSelect={onStepSelect}
-        onToggleStepSelection={onToggleStepSelection}
-        onStepDelete={onStepDelete}
-        onStepDuplicate={onDuplicateStepInRepetitionBlock}
-        onEditRepeatCount={
-          onEditRepetitionBlock
-            ? (count: number) => onEditRepetitionBlock(index, count)
-            : undefined
-        }
-        onAddStep={
-          onAddStepToRepetitionBlock
-            ? () => onAddStepToRepetitionBlock(index)
-            : undefined
-        }
-        onReorderSteps={onReorderStepsInBlock}
-        generateStepId={generateStepId}
-        parentBlockIndex={index}
-      />
-    );
+export const renderWorkoutItem = (props: RenderWorkoutItemProps) => {
+  if (isRepetitionBlock(props.item)) {
+    return renderRepetitionBlock({
+      ...props,
+      item: props.item,
+    });
   }
 
   return renderStep({
-    id: itemId,
-    step: item,
-    visualIndex: index,
-    selectedStepId,
-    selectedStepIds,
-    onStepSelect,
-    onToggleStepSelection,
-    onStepDelete,
-    onStepDuplicate,
+    id: props.itemId,
+    step: props.item,
+    visualIndex: props.index,
+    selectedStepId: props.selectedStepId,
+    selectedStepIds: props.selectedStepIds,
+    onStepSelect: props.onStepSelect,
+    onToggleStepSelection: props.onToggleStepSelection,
+    onStepDelete: props.onStepDelete,
+    onStepDuplicate: props.onStepDuplicate,
+    onStepCopy: props.onStepCopy,
   });
 };

@@ -1,5 +1,6 @@
 import { Plus, Repeat } from "lucide-react";
 import { Button } from "../../atoms/Button/Button";
+import { PasteButton } from "../../molecules/PasteButton";
 
 type WorkoutStepsListActionsProps = {
   readonly hasMultipleSelection: boolean;
@@ -7,6 +8,7 @@ type WorkoutStepsListActionsProps = {
   readonly onCreateRepetitionBlock: () => void;
   readonly onCreateEmptyRepetitionBlock: () => void;
   readonly onAddStep: () => void;
+  readonly onPasteStep?: () => void;
 };
 
 export function WorkoutStepsListActions({
@@ -15,6 +17,7 @@ export function WorkoutStepsListActions({
   onCreateRepetitionBlock,
   onCreateEmptyRepetitionBlock,
   onAddStep,
+  onPasteStep,
 }: WorkoutStepsListActionsProps) {
   return (
     <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:justify-center">
@@ -50,6 +53,9 @@ export function WorkoutStepsListActions({
         <Plus className="mr-2 h-4 w-4" />
         Add Step
       </Button>
+      {onPasteStep && (
+        <PasteButton onPaste={onPasteStep} className="w-full sm:w-auto" />
+      )}
     </div>
   );
 }

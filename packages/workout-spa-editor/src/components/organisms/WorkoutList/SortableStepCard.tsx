@@ -13,6 +13,7 @@ type SortableStepCardProps = {
   onToggleMultiSelect?: () => void;
   onDelete?: () => void;
   onDuplicate?: () => void;
+  onCopy?: () => void;
 };
 
 export const SortableStepCard = ({
@@ -25,6 +26,7 @@ export const SortableStepCard = ({
   onToggleMultiSelect,
   onDelete,
   onDuplicate,
+  onCopy,
 }: SortableStepCardProps) => {
   const {
     attributes,
@@ -55,6 +57,7 @@ export const SortableStepCard = ({
         onToggleMultiSelect={onToggleMultiSelect}
         onDelete={onDelete}
         onDuplicate={onDuplicate}
+        onCopy={onCopy}
         isDragging={isDragging}
         dragHandleProps={listeners}
       />

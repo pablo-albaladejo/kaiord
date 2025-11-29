@@ -10,12 +10,15 @@ type WorkoutListContentProps = {
   onToggleStepSelection?: (stepId: string) => void;
   onStepDelete?: (stepIndex: number) => void;
   onStepDuplicate?: (stepIndex: number) => void;
+  onStepCopy?: (stepIndex: number) => void;
   onDuplicateStepInRepetitionBlock?: (
     blockIndex: number,
     stepIndex: number
   ) => void;
   onEditRepetitionBlock?: (blockIndex: number, repeatCount: number) => void;
   onAddStepToRepetitionBlock?: (blockIndex: number) => void;
+  onUngroupRepetitionBlock?: (blockIndex: number) => void;
+  onDeleteRepetitionBlock?: (blockIndex: number) => void;
   onReorderStepsInBlock?: (
     blockIndex: number,
     activeIndex: number,
@@ -36,9 +39,12 @@ export const WorkoutListContent = ({
   onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
+  onStepCopy,
   onDuplicateStepInRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
+  onUngroupRepetitionBlock,
+  onDeleteRepetitionBlock,
   onReorderStepsInBlock,
   generateStepId,
 }: WorkoutListContentProps) => {
@@ -58,9 +64,12 @@ export const WorkoutListContent = ({
               onToggleStepSelection,
               onStepDelete,
               onStepDuplicate,
+              onStepCopy,
               onDuplicateStepInRepetitionBlock,
               onEditRepetitionBlock,
               onAddStepToRepetitionBlock,
+              onUngroupRepetitionBlock,
+              onDeleteRepetitionBlock,
               onReorderStepsInBlock,
               generateStepId,
             })}

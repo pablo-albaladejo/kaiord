@@ -1,3 +1,4 @@
+import { writeFileSync } from "fs";
 import { defineConfig } from "tsup";
 
 export default defineConfig({
@@ -10,5 +11,12 @@ export default defineConfig({
   shims: true,
   banner: {
     js: "#!/usr/bin/env node",
+  },
+  onSuccess: async () => {
+    // Create package.json in dist to mark it as ESM
+    writeFileSync(
+      "dist/package.json",
+      JSON.stringify({ type: "module" }, null, 2)
+    );
   },
 });

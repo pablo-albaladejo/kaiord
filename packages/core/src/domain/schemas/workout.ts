@@ -4,6 +4,26 @@ import { equipmentSchema } from "./equipment";
 import { intensitySchema } from "./intensity";
 import { targetSchema } from "./target";
 
+/**
+ * Zod schema for a workout step.
+ *
+ * Validates an individual interval or segment within a workout, including duration, target, and intensity.
+ *
+ * @example
+ * ```typescript
+ * import { workoutStepSchema } from '@kaiord/core';
+ *
+ * const step = workoutStepSchema.parse({
+ *   stepIndex: 0,
+ *   durationType: 'time',
+ *   duration: { type: 'time', seconds: 600 },
+ *   targetType: 'heart_rate',
+ *   target: { type: 'heart_rate', value: { unit: 'zone', value: 2 } },
+ *   intensity: 'warmup',
+ *   notes: 'Easy warmup, focus on form'
+ * });
+ * ```
+ */
 export const workoutStepSchema = z.object({
   stepIndex: z.number().int().nonnegative(),
   name: z.string().optional(),
@@ -39,11 +59,60 @@ export const workoutStepSchema = z.object({
   extensions: z.record(z.unknown()).optional(),
 });
 
+/**
+ * Zod schema for a repetition block.
+ *
+ * Validates a group of workout steps that repeat multiple times.
+ *
+ * @example
+ * ```typescript
+ * import { repetitionBlockSchema } from '@kaiord/core';
+ *
+ * const block = repetitionBlockSchema.parse({
+ *   repeatCount: 5,
+ *   steps: [
+ *     {
+ *       stepIndex: 0,
+ *       durationType: 'time',
+ *       duration: { type: 'time', seconds: 300 },
+ *       targetType: 'power',
+ *       target: { type: 'power', value: { unit: 'watts', value: 250 } }
+ *     }
+ *   ]
+ * });
+ * ```
+ */
 export const repetitionBlockSchema = z.object({
   repeatCount: z.number().int().min(1),
   steps: z.array(workoutStepSchema),
 });
 
+/**
+ * Zod schema for a complete workout definition.
+ *
+ * Validates a structured workout with metadata and a sequence of steps or repetition blocks.
+ *
+ * @example
+ * ```typescript
+ * import { workoutSchema } from '@kaiord/core';
+ *
+ * const workout = workoutSchema.parse({
+ *   name: 'Trail Run Workout',
+ *   sport: 'running',
+ *   subSport: 'trail',
+ *   steps: [
+ *     {
+ *       stepIndex: 0,
+ *       durationType: 'time',
+ *       duration: { type: 'time', seconds: 600 },
+ *       targetType: 'heart_rate',
+ *       target: { type: 'heart_rate', value: { unit: 'zone', value: 2 } },
+ *       intensity: 'warmup'
+ *     }
+ *   ]
+ * });
+ * ```
+ */
 export const workoutSchema = z.object({
   name: z.string().optional(),
   sport: z.string(),
@@ -54,6 +123,23 @@ export const workoutSchema = z.object({
   extensions: z.record(z.unknown()).optional(),
 });
 
+/**
+ * TypeScript type for a workout step, inferred from {@link workoutStepSchema}.
+ *
+ * Represents an individual interval or segment within a workout.
+ */
 export type WorkoutStep = z.infer<typeof workoutStepSchema>;
+
+/**
+ * TypeScript type for a repetition block, inferred from {@link repetitionBlockSchema}.
+ *
+ * Represents a group of workout steps that repeat multiple times.
+ */
 export type RepetitionBlock = z.infer<typeof repetitionBlockSchema>;
+
+/**
+ * TypeScript type for a complete workout, inferred from {@link workoutSchema}.
+ *
+ * Represents a structured workout definition with metadata and steps.
+ */
 export type Workout = z.infer<typeof workoutSchema>;

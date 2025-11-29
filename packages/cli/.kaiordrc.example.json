@@ -1,0 +1,10 @@
+{
+  "defaultInputFormat": "fit",
+  "defaultOutputFormat": "krd",
+  "defaultOutputDir": "./converted",
+  "defaultToleranceConfig": "./tolerance.json",
+  "verbose": false,
+  "quiet": false,
+  "json": false,
+  "logFormat": "pretty"
+}

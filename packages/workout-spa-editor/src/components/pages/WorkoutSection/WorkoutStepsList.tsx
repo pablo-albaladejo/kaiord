@@ -10,6 +10,8 @@ type WorkoutStepsListProps = {
   readonly onToggleStepSelection: (stepId: string) => void;
   readonly onStepDelete: (stepIndex: number) => void;
   readonly onStepDuplicate: (stepIndex: number) => void;
+  readonly onStepCopy: (stepIndex: number) => void;
+  readonly onStepPaste?: () => void;
   readonly onStepReorder: (activeIndex: number, overIndex: number) => void;
   readonly onReorderStepsInBlock?: (
     blockIndex: number,
@@ -24,6 +26,8 @@ type WorkoutStepsListProps = {
     repeatCount: number
   ) => void;
   readonly onAddStepToRepetitionBlock: (blockIndex: number) => void;
+  readonly onUngroupRepetitionBlock?: (blockIndex: number) => void;
+  readonly onDeleteRepetitionBlock?: (blockIndex: number) => void;
   readonly onDuplicateStepInRepetitionBlock: (
     blockIndex: number,
     stepIndex: number
@@ -38,6 +42,8 @@ export function WorkoutStepsList({
   onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
+  onStepCopy,
+  onStepPaste,
   onStepReorder,
   onReorderStepsInBlock,
   onAddStep,
@@ -45,6 +51,8 @@ export function WorkoutStepsList({
   onCreateEmptyRepetitionBlock,
   onEditRepetitionBlock,
   onAddStepToRepetitionBlock,
+  onUngroupRepetitionBlock,
+  onDeleteRepetitionBlock,
   onDuplicateStepInRepetitionBlock,
 }: WorkoutStepsListProps) {
   const hasMultipleSelection = selectedStepIds.length >= 2;
@@ -59,11 +67,14 @@ export function WorkoutStepsList({
         onToggleStepSelection={onToggleStepSelection}
         onStepDelete={onStepDelete}
         onStepDuplicate={onStepDuplicate}
+        onStepCopy={onStepCopy}
         onStepReorder={onStepReorder}
         onReorderStepsInBlock={onReorderStepsInBlock}
         onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
         onEditRepetitionBlock={onEditRepetitionBlock}
         onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
+        onUngroupRepetitionBlock={onUngroupRepetitionBlock}
+        onDeleteRepetitionBlock={onDeleteRepetitionBlock}
       />
 
       <WorkoutStepsListActions
@@ -72,6 +83,7 @@ export function WorkoutStepsList({
         onCreateRepetitionBlock={onCreateRepetitionBlock}
         onCreateEmptyRepetitionBlock={onCreateEmptyRepetitionBlock}
         onAddStep={onAddStep}
+        onPasteStep={onStepPaste}
       />
     </div>
   );

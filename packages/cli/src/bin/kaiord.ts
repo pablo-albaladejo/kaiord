@@ -9,6 +9,7 @@ import { fileURLToPath } from "url";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { convertCommand } from "../commands/convert.js";
+import { diffCommand } from "../commands/diff.js";
 import { validateCommand } from "../commands/validate.js";
 import { formatError } from "../utils/error-formatter.js";
 
@@ -160,6 +161,61 @@ const main = async (): Promise<void> => {
             json: argv.json as boolean | undefined,
             logFormat: argv.logFormat as "pretty" | "structured" | undefined,
           });
+        }
+      )
+      .command(
+        "diff",
+        "Compare two workout files and show differences",
+        (yargs) => {
+          return yargs
+            .option("file1", {
+              type: "string",
+              description: "First file to compare",
+              demandOption: true,
+            })
+            .option("file2", {
+              type: "string",
+              description: "Second file to compare",
+              demandOption: true,
+            })
+            .option("format1", {
+              type: "string",
+              choices: ["fit", "krd", "tcx", "zwo"],
+              description: "Override format detection for first file",
+            })
+            .option("format2", {
+              type: "string",
+              choices: ["fit", "krd", "tcx", "zwo"],
+              description: "Override format detection for second file",
+            })
+            .example(
+              "$0 diff --file1 workout1.fit --file2 workout2.fit",
+              "Compare two FIT files"
+            )
+            .example(
+              "$0 diff --file1 workout.fit --file2 workout.krd",
+              "Compare FIT and KRD files"
+            )
+            .example(
+              "$0 diff --file1 workout1.krd --file2 workout2.krd --json",
+              "Compare with JSON output"
+            );
+        },
+        async (argv) => {
+          const exitCode = await diffCommand({
+            file1: argv.file1,
+            file2: argv.file2,
+            format1: argv.format1 as "fit" | "krd" | "tcx" | "zwo" | undefined,
+            format2: argv.format2 as "fit" | "krd" | "tcx" | "zwo" | undefined,
+            verbose: argv.verbose as boolean | undefined,
+            quiet: argv.quiet as boolean | undefined,
+            json: argv.json as boolean | undefined,
+            logFormat: argv.logFormat as "pretty" | "structured" | undefined,
+          });
+          if (exitCode !== 0 && exitCode !== 1) {
+            // Exit code 1 means files are different (expected), only exit on errors
+            process.exit(exitCode);
+          }
         }
       )
       .option("verbose", {
