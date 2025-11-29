@@ -9,6 +9,7 @@ import { X } from "lucide-react";
 import type { WorkoutTemplate } from "../../../../types/workout-library";
 import { Badge } from "../../../atoms/Badge/Badge";
 import { Button } from "../../../atoms/Button/Button";
+import { formatDuration } from "../utils/card-helpers";
 
 type PreviewDialogProps = {
   template: WorkoutTemplate | null;
@@ -22,14 +23,6 @@ export function PreviewDialog({
   onLoad,
 }: PreviewDialogProps) {
   if (!template) return null;
-
-  const formatDuration = (seconds?: number) => {
-    if (!seconds) return "Unknown";
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    if (hours > 0) return `${hours}h ${minutes}m`;
-    return `${minutes}m`;
-  };
 
   return (
     <Dialog.Root open={!!template} onOpenChange={(open) => !open && onClose()}>
