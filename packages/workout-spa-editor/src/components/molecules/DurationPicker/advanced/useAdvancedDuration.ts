@@ -39,42 +39,33 @@ export function useAdvancedDuration(
     onChange(null);
   };
 
+  const updateDuration = (value: string, repeat: string) => {
+    const numValue = Number(value);
+    const repeatValue = isRepeatType(durationType) ? Number(repeat) : undefined;
+    const duration = buildDuration(durationType, numValue, repeatValue);
+    onChange(duration);
+    setValidationError("");
+  };
+
   const handleValueChange = (newValue: string) => {
     setDurationValue(newValue);
-
     const validation = validateValue(durationType, newValue);
     if (!validation.isValid) {
       setValidationError(validation.error || "");
       onChange(null);
       return;
     }
-
-    const numValue = Number(newValue);
-    const repeatValue = isRepeatType(durationType)
-      ? Number(repeatFrom)
-      : undefined;
-    const duration = buildDuration(durationType, numValue, repeatValue);
-
-    onChange(duration);
-    setValidationError("");
+    updateDuration(newValue, repeatFrom);
   };
 
   const handleRepeatFromChange = (newValue: string) => {
     setRepeatFrom(newValue);
-
     const validation = validateRepeatFrom(newValue);
     if (!validation.isValid) {
       setValidationError(validation.error || "");
       return;
     }
-
-    if (durationValue) {
-      const numValue = Number(durationValue);
-      const repeatValue = Number(newValue);
-      const duration = buildDuration(durationType, numValue, repeatValue);
-      onChange(duration);
-      setValidationError("");
-    }
+    if (durationValue) updateDuration(durationValue, newValue);
   };
 
   return {

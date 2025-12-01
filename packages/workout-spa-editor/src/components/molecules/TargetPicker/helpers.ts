@@ -1,8 +1,14 @@
 import type { Target } from "../../../types/krd";
-import type { HeartRateZone, PowerZone, Profile } from "../../../types/profile";
+import type { Profile } from "../../../types/profile";
 import type { TargetUnitOption } from "./TargetPicker.types";
 import { getValueLabel, getValuePlaceholder } from "./helpers-labels";
 
+export {
+  calculateHeartRateFromZone,
+  calculatePowerFromZone,
+  getHeartRateZoneName,
+  getPowerZoneName,
+} from "./helpers-zones";
 export { getValueLabel, getValuePlaceholder };
 
 export const getTargetTypeFromValue = (
@@ -62,69 +68,9 @@ export const getUnitOptions = (
   }
 };
 
-export const getCurrentUnit = (value: Target | null): string => {
-  if (!value || value.type === "open") return "";
-  return value.value.unit;
-};
-
-export const getValueString = (value: Target | null): string => {
-  if (!value || value.type === "open") return "";
-  if (value.value.unit === "range") return "";
-  return String(value.value.value || "");
-};
-
-export const getRangeMinString = (value: Target | null): string => {
-  if (!value || value.type === "open") return "";
-  if (value.value.unit !== "range") return "";
-  return String(value.value.min || "");
-};
-
-export const getRangeMaxString = (value: Target | null): string => {
-  if (!value || value.type === "open") return "";
-  if (value.value.unit !== "range") return "";
-  return String(value.value.max || "");
-};
-
-export const getPowerZoneName = (
-  zoneNumber: number,
-  powerZones: Array<PowerZone>
-): string | null => {
-  const zone = powerZones.find((z) => z.zone === zoneNumber);
-  return zone ? zone.name : null;
-};
-
-export const getHeartRateZoneName = (
-  zoneNumber: number,
-  heartRateZones: Array<HeartRateZone>
-): string | null => {
-  const zone = heartRateZones.find((z) => z.zone === zoneNumber);
-  return zone ? zone.name : null;
-};
-
-export const calculatePowerFromZone = (
-  zoneNumber: number,
-  powerZones: Array<PowerZone>,
-  ftp?: number
-): { min: number; max: number } | null => {
-  if (!ftp) return null;
-  const zone = powerZones.find((z) => z.zone === zoneNumber);
-  if (!zone) return null;
-
-  return {
-    min: Math.round((ftp * zone.minPercent) / 100),
-    max: Math.round((ftp * zone.maxPercent) / 100),
-  };
-};
-
-export const calculateHeartRateFromZone = (
-  zoneNumber: number,
-  heartRateZones: Array<HeartRateZone>
-): { min: number; max: number } | null => {
-  const zone = heartRateZones.find((z) => z.zone === zoneNumber);
-  if (!zone) return null;
-
-  return {
-    min: zone.minBpm,
-    max: zone.maxBpm,
-  };
-};
+export {
+  getCurrentUnit,
+  getRangeMaxString,
+  getRangeMinString,
+  getValueString,
+} from "./helpers-values";
