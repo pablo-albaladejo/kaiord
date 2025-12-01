@@ -220,11 +220,9 @@ describe("useLibraryStore", () => {
         .addTemplate("Workout", "cycling", mockKRD);
 
       // Act
-      useLibraryStore
-        .getState()
-        .updateTemplate(template.id, {
-          thumbnailData: "data:image/png;base64,xyz",
-        });
+      useLibraryStore.getState().updateTemplate(template.id, {
+        thumbnailData: "data:image/png;base64,xyz",
+      });
       const state = useLibraryStore.getState();
 
       // Assert
@@ -450,21 +448,15 @@ describe("useLibraryStore", () => {
 
     it("should filter templates by single tag", () => {
       // Arrange
-      useLibraryStore
-        .getState()
-        .addTemplate("Workout 1", "cycling", mockKRD, {
-          tags: ["easy", "endurance"],
-        });
-      useLibraryStore
-        .getState()
-        .addTemplate("Workout 2", "running", mockKRD, {
-          tags: ["hard", "intervals"],
-        });
-      useLibraryStore
-        .getState()
-        .addTemplate("Workout 3", "swimming", mockKRD, {
-          tags: ["easy", "recovery"],
-        });
+      useLibraryStore.getState().addTemplate("Workout 1", "cycling", mockKRD, {
+        tags: ["easy", "endurance"],
+      });
+      useLibraryStore.getState().addTemplate("Workout 2", "running", mockKRD, {
+        tags: ["hard", "intervals"],
+      });
+      useLibraryStore.getState().addTemplate("Workout 3", "swimming", mockKRD, {
+        tags: ["easy", "recovery"],
+      });
 
       // Act
       const results = useLibraryStore.getState().filterByTags(["easy"]);
@@ -477,21 +469,15 @@ describe("useLibraryStore", () => {
 
     it("should filter templates by multiple tags (AND logic)", () => {
       // Arrange
-      useLibraryStore
-        .getState()
-        .addTemplate("Workout 1", "cycling", mockKRD, {
-          tags: ["easy", "endurance"],
-        });
-      useLibraryStore
-        .getState()
-        .addTemplate("Workout 2", "running", mockKRD, {
-          tags: ["hard", "intervals"],
-        });
-      useLibraryStore
-        .getState()
-        .addTemplate("Workout 3", "swimming", mockKRD, {
-          tags: ["easy", "recovery"],
-        });
+      useLibraryStore.getState().addTemplate("Workout 1", "cycling", mockKRD, {
+        tags: ["easy", "endurance"],
+      });
+      useLibraryStore.getState().addTemplate("Workout 2", "running", mockKRD, {
+        tags: ["hard", "intervals"],
+      });
+      useLibraryStore.getState().addTemplate("Workout 3", "swimming", mockKRD, {
+        tags: ["easy", "recovery"],
+      });
 
       // Act
       const results = useLibraryStore
@@ -556,21 +542,15 @@ describe("useLibraryStore", () => {
 
     it("should return all unique tags sorted alphabetically", () => {
       // Arrange
-      useLibraryStore
-        .getState()
-        .addTemplate("Workout 1", "cycling", mockKRD, {
-          tags: ["easy", "endurance"],
-        });
-      useLibraryStore
-        .getState()
-        .addTemplate("Workout 2", "running", mockKRD, {
-          tags: ["hard", "intervals"],
-        });
-      useLibraryStore
-        .getState()
-        .addTemplate("Workout 3", "swimming", mockKRD, {
-          tags: ["easy", "recovery"],
-        });
+      useLibraryStore.getState().addTemplate("Workout 1", "cycling", mockKRD, {
+        tags: ["easy", "endurance"],
+      });
+      useLibraryStore.getState().addTemplate("Workout 2", "running", mockKRD, {
+        tags: ["hard", "intervals"],
+      });
+      useLibraryStore.getState().addTemplate("Workout 3", "swimming", mockKRD, {
+        tags: ["easy", "recovery"],
+      });
 
       // Act
       const tags = useLibraryStore.getState().getAllTags();
@@ -587,16 +567,12 @@ describe("useLibraryStore", () => {
 
     it("should not include duplicate tags", () => {
       // Arrange
-      useLibraryStore
-        .getState()
-        .addTemplate("Workout 1", "cycling", mockKRD, {
-          tags: ["easy", "endurance"],
-        });
-      useLibraryStore
-        .getState()
-        .addTemplate("Workout 2", "running", mockKRD, {
-          tags: ["easy", "recovery"],
-        });
+      useLibraryStore.getState().addTemplate("Workout 1", "cycling", mockKRD, {
+        tags: ["easy", "endurance"],
+      });
+      useLibraryStore.getState().addTemplate("Workout 2", "running", mockKRD, {
+        tags: ["easy", "recovery"],
+      });
 
       // Act
       const tags = useLibraryStore.getState().getAllTags();

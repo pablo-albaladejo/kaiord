@@ -10,12 +10,7 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import type { WorkoutTemplate } from "../../../types/workout-library";
-import { LibraryContent } from "./components/LibraryContent";
-import { LibraryDialogHeader } from "./components/LibraryDialogHeader";
-import { LibraryFilters } from "./components/LibraryFilters";
-import { LoadConfirmDialog } from "./components/LoadConfirmDialog";
-import { PreviewDialog } from "./components/PreviewDialog";
-import { TagFilterButtons } from "./components/TagFilterButtons";
+import { LibraryDialogContent } from "./components/LibraryDialogContent";
 import { DIALOG_CONTENT_CLASSES, DIALOG_OVERLAY_CLASSES } from "./constants";
 import { useWorkoutLibrary } from "./hooks/useWorkoutLibrary";
 
@@ -48,48 +43,15 @@ export const WorkoutLibrary: React.FC<WorkoutLibraryProps> = ({
       <Dialog.Portal>
         <Dialog.Overlay className={DIALOG_OVERLAY_CLASSES} />
         <Dialog.Content className={DIALOG_CONTENT_CLASSES}>
-          <LibraryDialogHeader />
-
-          <LibraryFilters
-            searchTerm={filters.searchTerm}
-            onSearchChange={filters.setSearchTerm}
-            sportFilter={filters.sportFilter}
-            onSportFilterChange={filters.setSportFilter}
-            difficultyFilter={filters.difficultyFilter}
-            onDifficultyFilterChange={filters.setDifficultyFilter}
-            sortBy={filters.sortBy}
-            onSortByChange={filters.setSortBy}
-            sortOrder={filters.sortOrder}
-            onSortOrderChange={filters.setSortOrder}
-            onClearFilters={filters.clearFilters}
-          />
-
-          <TagFilterButtons
-            allTags={filters.allTags}
-            selectedTags={filters.selectedTags}
-            onTagToggle={filters.handleTagToggle}
-          />
-
-          <LibraryContent
+          <LibraryDialogContent
             templates={templates}
-            filteredTemplates={filters.filteredAndSortedTemplates}
-            hasActiveFilters={filters.hasActiveFilters}
-            onLoadWorkout={loader.handleLoadWorkout}
+            previewTemplate={previewTemplate}
+            filters={filters}
+            loader={loader}
             onDeleteWorkout={deleteTemplate}
             onPreviewWorkout={handlePreview}
-            onClearFilters={filters.clearFilters}
-          />
-
-          <LoadConfirmDialog
-            template={loader.loadConfirmTemplate}
-            onConfirm={loader.confirmLoadWorkout}
-            onCancel={loader.cancelLoadWorkout}
-          />
-
-          <PreviewDialog
-            template={previewTemplate}
-            onClose={() => setPreviewTemplate(null)}
-            onLoad={handleLoadFromPreview}
+            onClosePreview={() => setPreviewTemplate(null)}
+            onLoadFromPreview={handleLoadFromPreview}
           />
         </Dialog.Content>
       </Dialog.Portal>
