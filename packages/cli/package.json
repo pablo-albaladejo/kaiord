@@ -13,12 +13,13 @@
   ],
   "scripts": {
     "build": "tsup",
-    "test": "pnpm build && vitest run",
+    "test": "vitest run",
     "test:unit": "vitest run --exclude '**/*-{integration,smoke,snapshot}.test.ts'",
     "test:integration": "pnpm build && vitest run src/commands/convert-integration.test.ts src/commands/validate-integration.test.ts",
     "test:smoke": "pnpm build && vitest run src/tests/cli-smoke.test.ts",
     "test:watch": "vitest",
     "dev": "tsx src/bin/kaiord.ts",
+    "prebuild": "echo 'Building CLI...'",
     "prepublishOnly": "pnpm build && pnpm test",
     "check-licenses": "license-checker --onlyAllow 'MIT;Apache-2.0;BSD;BSD-2-Clause;BSD-3-Clause;ISC' --production"
   },
