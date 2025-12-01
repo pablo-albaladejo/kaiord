@@ -1,20 +1,20 @@
 # Implementation Plan
 
-- [ ] 1. Implement default step in empty repetition blocks
+- [x] 1. Implement default step in empty repetition blocks
   - Create default step template constant
   - Modify `createEmptyRepetitionBlockAction` to add default step
   - Update step index calculation to include default step
   - _Requirements: 1.1, 1.2, 1.3, 1.4, 1.5_
 
-- [ ] 1.1 Write property test for default step creation
+- [x] 1.1 Write property test for default step creation
   - **Property 1: Empty blocks always contain default step**
   - **Validates: Requirements 1.1, 1.2, 1.3, 1.4, 1.5**
 
-- [ ] 1.2 Write property test for blocks from selected steps
+- [x] 1.2 Write property test for blocks from selected steps
   - **Property 2: Blocks from selected steps preserve step count**
   - **Validates: Requirements 1.6, 7.1**
 
-- [ ] 2. Implement block deletion action
+- [x] 2. Implement block deletion action
   - Create `deleteRepetitionBlockAction` in store actions
   - Implement block removal logic
   - Implement step index recalculation after deletion
@@ -23,61 +23,61 @@
   - Update workout statistics after deletion
   - _Requirements: 2.1, 2.2, 2.3, 2.5, 2.7_
 
-- [ ] 2.1 Write property test for block deletion
+- [x] 2.1 Write property test for block deletion
   - **Property 3: Block deletion removes all contained steps**
   - **Validates: Requirements 2.1**
 
-- [ ] 2.2 Write property test for sequential indices
+- [x] 2.2 Write property test for sequential indices
   - **Property 4: Step indices remain sequential after deletion**
   - **Validates: Requirements 2.2**
 
-- [ ] 2.3 Write property test for deletion round-trip
+- [x] 2.3 Write property test for deletion round-trip
   - **Property 5: Block deletion is undoable (round-trip)**
   - **Validates: Requirements 2.3, 2.4**
 
-- [ ] 2.4 Write property test for selection clearing
+- [x] 2.4 Write property test for selection clearing
   - **Property 6: Deletion clears affected selections**
   - **Validates: Requirements 2.5**
 
-- [ ] 2.5 Write property test for statistics consistency
+- [x] 2.5 Write property test for statistics consistency
   - **Property 7: Statistics consistency after deletion**
   - **Validates: Requirements 2.7**
 
-- [ ] 3. Add delete button to RepetitionBlockCard
+- [x] 3. Add delete button to RepetitionBlockCard
   - Add delete button to block header
   - Implement onClick handler to call store action
   - Add tooltip "Delete repetition block"
   - Style button appropriately (destructive variant)
   - _Requirements: 3.1, 3.2, 3.4_
 
-- [ ] 3.1 Write unit test for delete button rendering
+- [x] 3.1 Write unit test for delete button rendering
   - Verify delete button appears in block header
   - Verify tooltip text is correct
   - _Requirements: 3.1, 3.4_
 
-- [ ] 3.2 Write property test for UI delete action
+- [x] 3.2 Write property test for UI delete action
   - **Property 8: UI delete triggers actual deletion**
   - **Validates: Requirements 3.2**
 
-- [ ] 4. Implement keyboard shortcuts for block deletion
+- [x] 4. Implement keyboard shortcuts for block deletion
   - Add keyboard event handlers to RepetitionBlockCard
   - Handle Delete and Backspace keys when block is selected
   - Implement focus management after deletion
   - Move focus to next/previous block or add button
   - _Requirements: 3.6, 4.1, 4.4_
 
-- [ ] 4.1 Write property test for keyboard delete equivalence
+- [x] 4.1 Write property test for keyboard delete equivalence
   - **Property 9: Keyboard delete equivalence**
   - **Validates: Requirements 3.6, 4.1, 4.6**
 
-- [ ] 4.2 Write property test for focus management
+- [x] 4.2 Write property test for focus management
   - **Property 10: Focus management after deletion**
   - **Validates: Requirements 4.4**
 
-- [ ] 5. Checkpoint - Ensure all tests pass
+- [x] 5. Checkpoint - Ensure all tests pass
   - Ensure all tests pass, ask the user if questions arise.
 
-- [ ] 6. Create ConfirmationModal component
+- [x] 6. Create ConfirmationModal component
   - Create new component in `components/molecules/ConfirmationModal`
   - Implement modal structure with Radix UI Dialog
   - Add backdrop with dim effect
@@ -87,29 +87,29 @@
   - Style modal for desktop and mobile
   - _Requirements: 6.2, 6.3, 6.5, 6.6, 6.7, 6.9_
 
-- [ ] 6.1 Write unit tests for ConfirmationModal
+- [x] 6.1 Write unit tests for ConfirmationModal
   - Test modal rendering with different props
   - Test backdrop click dismissal
   - Test button click handlers
   - _Requirements: 6.2, 6.4, 6.8_
 
-- [ ] 6.2 Write property test for focus trap
+- [x] 6.2 Write property test for focus trap
   - **Property 14: Modal focus trap**
   - **Validates: Requirements 6.3**
 
-- [ ] 6.3 Write property test for Escape dismissal
+- [x] 6.3 Write property test for Escape dismissal
   - **Property 15: Modal dismissal with Escape**
   - **Validates: Requirements 6.5**
 
-- [ ] 6.4 Write property test for background blocking
+- [x] 6.4 Write property test for background blocking
   - **Property 16: Modal blocks background interaction**
   - **Validates: Requirements 6.6**
 
-- [ ] 6.5 Write property test for focus restoration
+- [x] 6.5 Write property test for focus restoration
   - **Property 17: Focus restoration after modal**
   - **Validates: Requirements 6.7**
 
-- [ ] 6.6 Write property test for responsive modal
+- [x] 6.6 Write property test for responsive modal
   - **Property 18: Responsive modal layout**
   - **Validates: Requirements 6.9**
 

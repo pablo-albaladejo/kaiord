@@ -62,6 +62,20 @@ export const RepetitionBlockCard = forwardRef<
       handleKeyDown,
     } = useRepetitionBlockState(block, onEditRepeatCount);
 
+    const handleBlockKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+      // Handle Delete and Backspace keys for block deletion
+      if (
+        (event.key === "Delete" || event.key === "Backspace") &&
+        onDelete &&
+        !isEditingCount
+      ) {
+        // Prevent default behavior (e.g., browser back navigation for Backspace)
+        event.preventDefault();
+        event.stopPropagation();
+        onDelete();
+      }
+    };
+
     const baseClasses =
       "rounded-lg border-2 border-dashed border-primary-300 dark:border-primary-700 bg-primary-50/50 dark:bg-primary-950/20 p-4 transition-colors";
     const draggingClasses = isDragging ? "cursor-grabbing" : "";
@@ -74,6 +88,8 @@ export const RepetitionBlockCard = forwardRef<
         ref={ref}
         className={classes}
         data-testid="repetition-block-card"
+        tabIndex={0}
+        onKeyDown={handleBlockKeyDown}
         {...props}
       >
         <RepetitionBlockHeader

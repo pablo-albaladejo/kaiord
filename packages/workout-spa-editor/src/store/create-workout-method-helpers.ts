@@ -27,6 +27,8 @@ export const createBlockMethods = (
     ),
   ungroupRepetitionBlock: (blockIndex: number) =>
     set((state) => actions.ungroupRepetitionBlock(blockIndex, state)),
+  deleteRepetitionBlock: (blockIndex: number) =>
+    set((state) => actions.deleteRepetitionBlock(blockIndex, state)),
 });
 
 export const createAllWorkoutMethods = (

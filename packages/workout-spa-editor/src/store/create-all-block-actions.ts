@@ -16,5 +16,7 @@ export const createAllBlockActions = (state: WorkoutState) => {
       blockActions.duplicateStepInRepetitionBlock(blockIndex, stepIndex),
     ungroupRepetitionBlock: (blockIndex: number) =>
       blockActions.ungroupRepetitionBlock(blockIndex),
+    deleteRepetitionBlock: (blockIndex: number) =>
+      blockActions.deleteRepetitionBlock(blockIndex),
   };
 };

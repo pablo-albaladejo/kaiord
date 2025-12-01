@@ -1,19 +1,44 @@
 /**
  * Create Empty Repetition Block Action
  *
- * Action for creating an empty repetition block (with no steps).
+ * Action for creating an empty repetition block with a default step.
  *
  * Requirements:
  * - Allow users to create repetition blocks from scratch
+ * - Automatically add a default step (5 minutes, open target, active intensity)
  */
 
-import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type {
+  KRD,
+  RepetitionBlock,
+  Workout,
+  WorkoutStep,
+} from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
 /**
- * Creates an empty repetition block at the end of the workout
+ * Default step template for new empty repetition blocks
+ * - Duration: 5 minutes (300 seconds)
+ * - Target: Open (no specific target)
+ * - Intensity: Active
+ */
+const DEFAULT_STEP: Omit<WorkoutStep, "stepIndex"> = {
+  durationType: "time",
+  duration: {
+    type: "time",
+    seconds: 300, // 5 minutes
+  },
+  targetType: "open",
+  target: {
+    type: "open",
+  },
+  intensity: "active",
+};
+
+/**
+ * Creates an empty repetition block with a default step at the end of the workout
  *
  * @param krd - Current KRD workout
  * @param repeatCount - Number of times to repeat (minimum 1)
@@ -34,10 +59,16 @@ export const createEmptyRepetitionBlockAction = (
 
   const workout = krd.extensions.workout as Workout;
 
-  // Create an empty repetition block
+  // Create default step with stepIndex 0 (within the block context)
+  const defaultStep: WorkoutStep = {
+    ...DEFAULT_STEP,
+    stepIndex: 0,
+  };
+
+  // Create a repetition block with the default step
   const repetitionBlock: RepetitionBlock = {
     repeatCount,
-    steps: [],
+    steps: [defaultStep],
   };
 
   // Add the repetition block at the end
