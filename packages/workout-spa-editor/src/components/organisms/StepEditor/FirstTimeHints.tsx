@@ -9,81 +9,40 @@
 
 import { Info, X } from "lucide-react";
 import { useEffect, useState } from "react";
-
-// ============================================
-// Types
-// ============================================
+import { DEFAULT_STORAGE_KEY } from "./hints/constants";
+import { HintProgressDots } from "./hints/HintProgressDots";
+import {
+  hasCompletedFirstWorkout,
+  resetFirstWorkoutState,
+  saveCompletionState,
+} from "./hints/storage-utils";
+import { useHintRotation } from "./hints/useHintRotation";
 
 export type FirstTimeHintsProps = {
   storageKey?: string;
   onDismiss?: () => void;
 };
 
-// ============================================
-// Constants
-// ============================================
-
-const DEFAULT_STORAGE_KEY = "workout-spa-first-workout-hints-dismissed";
-
-const HINTS = [
-  {
-    id: "duration",
-    title: "Set Duration",
-    message:
-      "Choose how long this step should last - by time, distance, or open-ended.",
-  },
-  {
-    id: "target",
-    title: "Set Target",
-    message:
-      "Define your training intensity using power, heart rate, pace, or cadence zones.",
-  },
-  {
-    id: "save",
-    title: "Save Your Step",
-    message:
-      "Click Save to add this step to your workout. You can edit it anytime.",
-  },
-];
-
-// ============================================
-// Component
-// ============================================
-
 export const FirstTimeHints: React.FC<FirstTimeHintsProps> = ({
   storageKey = DEFAULT_STORAGE_KEY,
   onDismiss,
 }) => {
   const [visible, setVisible] = useState(false);
-  const [currentHintIndex, setCurrentHintIndex] = useState(0);
 
-  // Check if hints should be shown
   useEffect(() => {
     const shouldShow = !hasCompletedFirstWorkout(storageKey);
     setVisible(shouldShow);
   }, [storageKey]);
 
-  // Handle dismiss
+  const { currentHintIndex, currentHint } = useHintRotation(visible);
+
   const handleDismiss = () => {
     saveCompletionState(storageKey);
     setVisible(false);
     onDismiss?.();
   };
 
-  // Cycle through hints
-  useEffect(() => {
-    if (!visible) return;
-
-    const interval = setInterval(() => {
-      setCurrentHintIndex((prev) => (prev + 1) % HINTS.length);
-    }, 5000); // Change hint every 5 seconds
-
-    return () => clearInterval(interval);
-  }, [visible]);
-
   if (!visible) return null;
-
-  const currentHint = HINTS[currentHintIndex];
 
   return (
     <div
@@ -114,61 +73,10 @@ export const FirstTimeHints: React.FC<FirstTimeHintsProps> = ({
         </button>
       </div>
 
-      {/* Progress dots */}
-      <div className="mt-3 flex items-center justify-center gap-2">
-        {HINTS.map((hint, index) => (
-          <div
-            key={hint.id}
-            className={`h-2 w-2 rounded-full transition-colors ${
-              index === currentHintIndex
-                ? "bg-primary-600 dark:bg-primary-400"
-                : "bg-primary-300 dark:bg-primary-700"
-            }`}
-            aria-label={`Hint ${index + 1} of ${HINTS.length}${index === currentHintIndex ? " (current)" : ""}`}
-          />
-        ))}
-      </div>
+      <HintProgressDots currentIndex={currentHintIndex} />
     </div>
   );
 };
 
-// ============================================
-// Utility Functions
-// ============================================
-
-/**
- * Check if user has completed their first workout
- */
-export const hasCompletedFirstWorkout = (
-  storageKey: string = DEFAULT_STORAGE_KEY
-): boolean => {
-  try {
-    return localStorage.getItem(storageKey) === "true";
-  } catch {
-    return false;
-  }
-};
-
-/**
- * Save completion state to localStorage
- */
-const saveCompletionState = (storageKey: string): void => {
-  try {
-    localStorage.setItem(storageKey, "true");
-  } catch (error) {
-    console.error("Failed to save first workout completion state:", error);
-  }
-};
-
-/**
- * Reset first workout completion state (for testing)
- */
-export const resetFirstWorkoutState = (
-  storageKey: string = DEFAULT_STORAGE_KEY
-): void => {
-  try {
-    localStorage.removeItem(storageKey);
-  } catch (error) {
-    console.error("Failed to reset first workout state:", error);
-  }
-};
+// Re-export utilities for testing
+export { hasCompletedFirstWorkout, resetFirstWorkoutState };

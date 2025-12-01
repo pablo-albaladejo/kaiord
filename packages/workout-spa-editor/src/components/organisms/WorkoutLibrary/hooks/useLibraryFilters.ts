@@ -6,6 +6,13 @@
 
 import { useMemo, useState } from "react";
 import type { WorkoutTemplate } from "../../../../types/workout-library";
+import {
+  filterByDifficulty,
+  filterBySearch,
+  filterBySport,
+  filterByTags,
+} from "./filters/filter-utils";
+import { sortTemplates } from "./filters/sort-utils";
 
 type Difficulty = "easy" | "medium" | "hard";
 type Sport = "cycling" | "running" | "swimming" | "generic";
@@ -27,58 +34,12 @@ export function useLibraryFilters(templates: WorkoutTemplate[]) {
   const filteredAndSortedTemplates = useMemo(() => {
     let filtered = templates;
 
-    if (searchTerm) {
-      const term = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (template) =>
-          template.name.toLowerCase().includes(term) ||
-          template.notes?.toLowerCase().includes(term) ||
-          template.tags?.some((tag) => tag.toLowerCase().includes(term))
-      );
-    }
+    filtered = filterBySearch(filtered, searchTerm);
+    filtered = filterBySport(filtered, sportFilter);
+    filtered = filterByDifficulty(filtered, difficultyFilter);
+    filtered = filterByTags(filtered, selectedTags);
 
-    if (sportFilter !== "all") {
-      filtered = filtered.filter((template) => template.sport === sportFilter);
-    }
-
-    if (difficultyFilter !== "all") {
-      filtered = filtered.filter(
-        (template) => template.difficulty === difficultyFilter
-      );
-    }
-
-    if (selectedTags.length > 0) {
-      filtered = filtered.filter((template) =>
-        selectedTags.every((tag) => template.tags?.includes(tag))
-      );
-    }
-
-    filtered.sort((a, b) => {
-      let comparison = 0;
-
-      switch (sortBy) {
-        case "name":
-          comparison = a.name.localeCompare(b.name);
-          break;
-        case "date":
-          comparison =
-            new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-          break;
-        case "difficulty": {
-          const difficultyOrder = { easy: 1, medium: 2, hard: 3 };
-          const aDiff =
-            difficultyOrder[a.difficulty as keyof typeof difficultyOrder] || 0;
-          const bDiff =
-            difficultyOrder[b.difficulty as keyof typeof difficultyOrder] || 0;
-          comparison = aDiff - bDiff;
-          break;
-        }
-      }
-
-      return sortOrder === "asc" ? comparison : -comparison;
-    });
-
-    return filtered;
+    return sortTemplates(filtered, sortBy, sortOrder);
   }, [
     templates,
     searchTerm,
