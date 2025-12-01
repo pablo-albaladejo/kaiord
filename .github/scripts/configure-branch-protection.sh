@@ -34,16 +34,16 @@ fi
 echo ""
 
 # Define required status checks
-# These correspond to the job names in .github/workflows/ci.yml
-REQUIRED_CHECKS='["detect-changes","lint","typecheck","test","build","round-trip"]'
+# These correspond to the summary job names in .github/workflows/ci.yml
+# Using summary jobs ensures branch protection works even when jobs are skipped
+REQUIRED_CHECKS='["lint","test","test-frontend","round-trip","e2e"]'
 
 echo "Configuring required status checks:"
-echo "  - detect-changes"
-echo "  - lint"
-echo "  - typecheck"
-echo "  - test"
-echo "  - build"
-echo "  - round-trip"
+echo "  - lint (summary job)"
+echo "  - test (summary job)"
+echo "  - test-frontend (summary job)"
+echo "  - round-trip (summary job)"
+echo "  - e2e (summary job)"
 echo ""
 
 # Update branch protection with required status checks
