@@ -7,79 +7,50 @@
 import type { Duration } from "../../../../types/krd";
 import type { AdvancedDurationType } from "./duration-type-options";
 
+const buildSimpleDuration = (
+  type: AdvancedDurationType,
+  value: number
+): Duration => {
+  const numValue = Math.floor(value);
+  if (type === "calories") return { type, calories: numValue };
+  if (type === "power_less_than") return { type, watts: value };
+  if (type === "power_greater_than") return { type, watts: value };
+  return { type: "heart_rate_less_than", bpm: numValue };
+};
+
+const buildRepeatDuration = (
+  type: AdvancedDurationType,
+  value: number,
+  repeatFrom: number
+): Duration => {
+  const numValue = Math.floor(value);
+  const baseProps = { type, repeatFrom } as const;
+
+  if (type === "repeat_until_time") return { ...baseProps, seconds: numValue };
+  if (type === "repeat_until_distance")
+    return { ...baseProps, meters: numValue };
+  if (type === "repeat_until_calories")
+    return { ...baseProps, calories: numValue };
+  if (type === "repeat_until_heart_rate_greater_than")
+    return { ...baseProps, bpm: numValue };
+  if (type === "repeat_until_heart_rate_less_than")
+    return { ...baseProps, bpm: numValue };
+  if (type === "repeat_until_power_less_than")
+    return { ...baseProps, watts: value };
+  return { ...baseProps, watts: value };
+};
+
 export const buildDuration = (
   durationType: AdvancedDurationType,
   value: number,
   repeatFrom?: number
 ): Duration | null => {
-  const numValue = Math.floor(value);
-  const repeatValue = repeatFrom !== undefined ? Math.floor(repeatFrom) : 0;
-
-  switch (durationType) {
-    case "calories":
-      return { type: "calories", calories: numValue };
-
-    case "power_less_than":
-      return { type: "power_less_than", watts: value };
-
-    case "power_greater_than":
-      return { type: "power_greater_than", watts: value };
-
-    case "heart_rate_less_than":
-      return { type: "heart_rate_less_than", bpm: numValue };
-
-    case "repeat_until_time":
-      return {
-        type: "repeat_until_time",
-        seconds: numValue,
-        repeatFrom: repeatValue,
-      };
-
-    case "repeat_until_distance":
-      return {
-        type: "repeat_until_distance",
-        meters: numValue,
-        repeatFrom: repeatValue,
-      };
-
-    case "repeat_until_calories":
-      return {
-        type: "repeat_until_calories",
-        calories: numValue,
-        repeatFrom: repeatValue,
-      };
-
-    case "repeat_until_heart_rate_greater_than":
-      return {
-        type: "repeat_until_heart_rate_greater_than",
-        bpm: numValue,
-        repeatFrom: repeatValue,
-      };
-
-    case "repeat_until_heart_rate_less_than":
-      return {
-        type: "repeat_until_heart_rate_less_than",
-        bpm: numValue,
-        repeatFrom: repeatValue,
-      };
-
-    case "repeat_until_power_less_than":
-      return {
-        type: "repeat_until_power_less_than",
-        watts: value,
-        repeatFrom: repeatValue,
-      };
-
-    case "repeat_until_power_greater_than":
-      return {
-        type: "repeat_until_power_greater_than",
-        watts: value,
-        repeatFrom: repeatValue,
-      };
-
-    default:
-      return null;
+  const isRepeat = durationType.startsWith("repeat_until_");
+  if (isRepeat) {
+    const repeatValue = repeatFrom !== undefined ? Math.floor(repeatFrom) : 0;
+    return buildRepeatDuration(durationType, value, repeatValue);
   }
+  return buildSimpleDuration(durationType, value);
 };
 
 export const validateRepeatFrom = (
