@@ -9,8 +9,6 @@
  */
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { useState } from "react";
-import { useLibraryStore } from "../../../store/library-store";
 import type { WorkoutTemplate } from "../../../types/workout-library";
 import { LibraryContent } from "./components/LibraryContent";
 import { LibraryDialogHeader } from "./components/LibraryDialogHeader";
@@ -19,8 +17,7 @@ import { LoadConfirmDialog } from "./components/LoadConfirmDialog";
 import { PreviewDialog } from "./components/PreviewDialog";
 import { TagFilterButtons } from "./components/TagFilterButtons";
 import { DIALOG_CONTENT_CLASSES, DIALOG_OVERLAY_CLASSES } from "./constants";
-import { useLibraryFilters } from "./hooks/useLibraryFilters";
-import { useWorkoutLoader } from "./hooks/useWorkoutLoader";
+import { useWorkoutLibrary } from "./hooks/useWorkoutLibrary";
 
 export type WorkoutLibraryProps = {
   open: boolean;
@@ -35,44 +32,16 @@ export const WorkoutLibrary: React.FC<WorkoutLibraryProps> = ({
   onLoadWorkout,
   hasCurrentWorkout = false,
 }) => {
-  const { templates, deleteTemplate } = useLibraryStore();
   const {
-    searchTerm,
-    setSearchTerm,
-    sportFilter,
-    setSportFilter,
-    difficultyFilter,
-    setDifficultyFilter,
-    selectedTags,
-    allTags,
-    handleTagToggle,
-    sortBy,
-    setSortBy,
-    sortOrder,
-    setSortOrder,
-    filteredAndSortedTemplates,
-    clearFilters,
-    hasActiveFilters,
-  } = useLibraryFilters(templates);
-
-  const {
-    loadConfirmTemplate,
-    handleLoadWorkout,
-    confirmLoadWorkout,
-    cancelLoadWorkout,
-  } = useWorkoutLoader(hasCurrentWorkout, onLoadWorkout, onOpenChange);
-
-  const [previewTemplate, setPreviewTemplate] =
-    useState<WorkoutTemplate | null>(null);
-
-  const handlePreview = (template: WorkoutTemplate) => {
-    setPreviewTemplate(template);
-  };
-
-  const handleLoadFromPreview = (template: WorkoutTemplate) => {
-    setPreviewTemplate(null);
-    handleLoadWorkout(template);
-  };
+    templates,
+    deleteTemplate,
+    previewTemplate,
+    setPreviewTemplate,
+    handlePreview,
+    handleLoadFromPreview,
+    filters,
+    loader,
+  } = useWorkoutLibrary(hasCurrentWorkout, onLoadWorkout, onOpenChange);
 
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
@@ -82,39 +51,39 @@ export const WorkoutLibrary: React.FC<WorkoutLibraryProps> = ({
           <LibraryDialogHeader />
 
           <LibraryFilters
-            searchTerm={searchTerm}
-            onSearchChange={setSearchTerm}
-            sportFilter={sportFilter}
-            onSportFilterChange={setSportFilter}
-            difficultyFilter={difficultyFilter}
-            onDifficultyFilterChange={setDifficultyFilter}
-            sortBy={sortBy}
-            onSortByChange={setSortBy}
-            sortOrder={sortOrder}
-            onSortOrderChange={setSortOrder}
-            onClearFilters={clearFilters}
+            searchTerm={filters.searchTerm}
+            onSearchChange={filters.setSearchTerm}
+            sportFilter={filters.sportFilter}
+            onSportFilterChange={filters.setSportFilter}
+            difficultyFilter={filters.difficultyFilter}
+            onDifficultyFilterChange={filters.setDifficultyFilter}
+            sortBy={filters.sortBy}
+            onSortByChange={filters.setSortBy}
+            sortOrder={filters.sortOrder}
+            onSortOrderChange={filters.setSortOrder}
+            onClearFilters={filters.clearFilters}
           />
 
           <TagFilterButtons
-            allTags={allTags}
-            selectedTags={selectedTags}
-            onTagToggle={handleTagToggle}
+            allTags={filters.allTags}
+            selectedTags={filters.selectedTags}
+            onTagToggle={filters.handleTagToggle}
           />
 
           <LibraryContent
             templates={templates}
-            filteredTemplates={filteredAndSortedTemplates}
-            hasActiveFilters={hasActiveFilters}
-            onLoadWorkout={handleLoadWorkout}
+            filteredTemplates={filters.filteredAndSortedTemplates}
+            hasActiveFilters={filters.hasActiveFilters}
+            onLoadWorkout={loader.handleLoadWorkout}
             onDeleteWorkout={deleteTemplate}
             onPreviewWorkout={handlePreview}
-            onClearFilters={clearFilters}
+            onClearFilters={filters.clearFilters}
           />
 
           <LoadConfirmDialog
-            template={loadConfirmTemplate}
-            onConfirm={confirmLoadWorkout}
-            onCancel={cancelLoadWorkout}
+            template={loader.loadConfirmTemplate}
+            onConfirm={loader.confirmLoadWorkout}
+            onCancel={loader.cancelLoadWorkout}
           />
 
           <PreviewDialog
