@@ -132,8 +132,9 @@ describe("OnboardingTutorial", () => {
         />
       );
 
-      // Assert
-      expect(screen.getByText("Skip Tutorial")).toBeInTheDocument();
+      // Assert - There are two skip buttons (X icon and Skip text button)
+      const skipButtons = screen.getAllByRole("button", { name: /skip/i });
+      expect(skipButtons.length).toBeGreaterThanOrEqual(1);
     });
 
     it("should display close button", () => {
@@ -168,7 +169,7 @@ describe("OnboardingTutorial", () => {
       );
 
       // Act
-      await user.click(screen.getByLabelText("Next step"));
+      await user.click(screen.getByRole("button", { name: /next/i }));
 
       // Assert
       expect(screen.getByText("Create Workout")).toBeInTheDocument();
@@ -187,17 +188,19 @@ describe("OnboardingTutorial", () => {
       );
 
       // Navigate to second step
-      await user.click(screen.getByLabelText("Next step"));
+      await user.click(screen.getByRole("button", { name: /next/i }));
 
       // Act
-      await user.click(screen.getByLabelText("Previous step"));
+      const prevButtons = screen.getAllByRole("button");
+      const prevButton = prevButtons.find((btn) => btn.querySelector("svg")); // Button with ChevronLeft icon
+      await user.click(prevButton!);
 
       // Assert
       expect(screen.getByText("Welcome")).toBeInTheDocument();
       expect(screen.getByText("Step 1 of 3")).toBeInTheDocument();
     });
 
-    it("should not show previous button on first step", () => {
+    it("should disable previous button on first step", () => {
       // Arrange & Act
       renderWithProviders(
         <OnboardingTutorial
@@ -207,8 +210,12 @@ describe("OnboardingTutorial", () => {
         />
       );
 
-      // Assert
-      expect(screen.queryByLabelText("Previous step")).not.toBeInTheDocument();
+      // Assert - Previous button exists but is disabled
+      const buttons = screen.getAllByRole("button");
+      const prevButton = buttons.find(
+        (btn) => btn.querySelector("svg") && btn.disabled
+      );
+      expect(prevButton).toBeDefined();
     });
 
     it("should show complete button on last step", async () => {
@@ -223,11 +230,13 @@ describe("OnboardingTutorial", () => {
       );
 
       // Act - Navigate to last step
-      await user.click(screen.getByLabelText("Next step"));
-      await user.click(screen.getByLabelText("Next step"));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
 
       // Assert
-      expect(screen.getByText("Complete")).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /finish/i })
+      ).toBeInTheDocument();
       expect(screen.getByText("Step 3 of 3")).toBeInTheDocument();
     });
 
@@ -248,7 +257,7 @@ describe("OnboardingTutorial", () => {
       expect(progressBar).toHaveAttribute("aria-valuenow", "1");
 
       // Act - Navigate to second step
-      await user.click(screen.getByLabelText("Next step"));
+      await user.click(screen.getByRole("button", { name: /next/i }));
 
       // Assert
       expect(progressBar).toHaveAttribute("aria-valuenow", "2");
@@ -273,7 +282,7 @@ describe("OnboardingTutorial", () => {
       );
 
       // Act
-      await user.click(screen.getByText("Skip Tutorial"));
+      await user.click(screen.getByRole("button", { name: /^skip$/i }));
 
       // Assert
       expect(onOpenChange).toHaveBeenCalledWith(false);
@@ -312,11 +321,11 @@ describe("OnboardingTutorial", () => {
       );
 
       // Navigate to last step
-      await user.click(screen.getByLabelText("Next step"));
-      await user.click(screen.getByLabelText("Next step"));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
 
       // Act
-      await user.click(screen.getByText("Complete"));
+      await user.click(screen.getByRole("button", { name: /finish/i }));
 
       // Assert
       expect(onComplete).toHaveBeenCalled();
@@ -334,7 +343,7 @@ describe("OnboardingTutorial", () => {
       );
 
       // Act
-      await user.click(screen.getByText("Skip Tutorial"));
+      await user.click(screen.getByRole("button", { name: /^skip$/i }));
 
       // Assert
       expect(localStorage.getItem("workout-spa-onboarding-completed")).toBe(
@@ -354,11 +363,11 @@ describe("OnboardingTutorial", () => {
       );
 
       // Navigate to last step
-      await user.click(screen.getByLabelText("Next step"));
-      await user.click(screen.getByLabelText("Next step"));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
 
       // Act
-      await user.click(screen.getByText("Complete"));
+      await user.click(screen.getByRole("button", { name: /finish/i }));
 
       // Assert
       expect(localStorage.getItem("workout-spa-onboarding-completed")).toBe(
@@ -380,7 +389,7 @@ describe("OnboardingTutorial", () => {
       );
 
       // Act
-      await user.click(screen.getByText("Skip Tutorial"));
+      await user.click(screen.getByRole("button", { name: /^skip$/i }));
 
       // Assert
       expect(localStorage.getItem(customKey)).toBe("true");
@@ -399,9 +408,9 @@ describe("OnboardingTutorial", () => {
       );
 
       // Navigate to last step and complete
-      await user.click(screen.getByLabelText("Next step"));
-      await user.click(screen.getByLabelText("Next step"));
-      await user.click(screen.getByText("Complete"));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+      await user.click(screen.getByRole("button", { name: /finish/i }));
 
       // Act - Reopen tutorial
       rerender(
@@ -463,7 +472,7 @@ describe("OnboardingTutorial", () => {
 
       // Navigate to step with target
       const user = userEvent.setup();
-      await user.click(screen.getByLabelText("Next step"));
+      await user.click(screen.getByRole("button", { name: /next/i }));
 
       // Assert
       await waitFor(() => {
@@ -601,7 +610,7 @@ describe("OnboardingTutorial", () => {
       );
 
       // Act - Navigate to step with bottom position
-      await user.click(screen.getByLabelText("Next step"));
+      await user.click(screen.getByRole("button", { name: /next/i }));
 
       // Assert
       const dialog = screen.getByRole("dialog");
@@ -620,8 +629,8 @@ describe("OnboardingTutorial", () => {
       );
 
       // Act - Navigate to step with right position
-      await user.click(screen.getByLabelText("Next step"));
-      await user.click(screen.getByLabelText("Next step"));
+      await user.click(screen.getByRole("button", { name: /next/i }));
+      await user.click(screen.getByRole("button", { name: /next/i }));
 
       // Assert
       const dialog = screen.getByRole("dialog");
@@ -646,7 +655,7 @@ describe("OnboardingTutorial", () => {
 
       // Assert
       expect(screen.getByLabelText("Skip tutorial")).toBeInTheDocument();
-      expect(screen.getByLabelText("Next step")).toBeInTheDocument();
+      expect(screen.getByRole("button", { name: /next/i })).toBeInTheDocument();
       expect(
         screen.getByLabelText(/Tutorial progress: step 1 of 3/)
       ).toBeInTheDocument();

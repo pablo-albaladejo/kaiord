@@ -105,7 +105,7 @@ describe("ZoneEditor - rendering", () => {
     });
   });
 
-  it("should render zone preview chart", () => {
+  it("should render zone preview with power values", () => {
     // Arrange & Act
     render(
       <ZoneEditor
@@ -116,8 +116,9 @@ describe("ZoneEditor - rendering", () => {
       />
     );
 
-    // Assert
-    expect(screen.getByText("Zone Preview")).toBeInTheDocument();
+    // Assert - Zone preview shows calculated watts based on FTP (multiple zones)
+    const previews = screen.getAllByText(/W -/);
+    expect(previews.length).toBeGreaterThan(0);
   });
 
   it("should display calculated power values when FTP is set", () => {

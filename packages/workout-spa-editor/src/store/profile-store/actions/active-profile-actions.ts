@@ -8,10 +8,17 @@ import type { StateCreator } from "zustand";
 import { persistState } from "../persistence";
 import type { ProfileStore } from "../types";
 
-export const createActiveProfileActions: StateCreator<ProfileStore> = (
-  set,
-  get
-) => ({
+type ActiveProfileActions = Pick<
+  ProfileStore,
+  "setActiveProfile" | "getActiveProfile"
+>;
+
+export const createActiveProfileActions: StateCreator<
+  ProfileStore,
+  [],
+  [],
+  ActiveProfileActions
+> = (set, get) => ({
   setActiveProfile: (profileId) => {
     set((state) => {
       persistState(state.profiles, profileId);
