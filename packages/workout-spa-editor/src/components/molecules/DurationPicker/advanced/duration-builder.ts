@@ -24,20 +24,20 @@ const buildRepeatDuration = (
   repeatFrom: number
 ): Duration => {
   const numValue = Math.floor(value);
-  const baseProps = { type, repeatFrom } as const;
 
-  if (type === "repeat_until_time") return { ...baseProps, seconds: numValue };
+  if (type === "repeat_until_time")
+    return { type, seconds: numValue, repeatFrom };
   if (type === "repeat_until_distance")
-    return { ...baseProps, meters: numValue };
+    return { type, meters: numValue, repeatFrom };
   if (type === "repeat_until_calories")
-    return { ...baseProps, calories: numValue };
+    return { type, calories: numValue, repeatFrom };
   if (type === "repeat_until_heart_rate_greater_than")
-    return { ...baseProps, bpm: numValue };
+    return { type, bpm: numValue, repeatFrom };
   if (type === "repeat_until_heart_rate_less_than")
-    return { ...baseProps, bpm: numValue };
+    return { type, bpm: numValue, repeatFrom };
   if (type === "repeat_until_power_less_than")
-    return { ...baseProps, watts: value };
-  return { ...baseProps, watts: value };
+    return { type, watts: value, repeatFrom };
+  return { type: "repeat_until_power_greater_than", watts: value, repeatFrom };
 };
 
 export const buildDuration = (
