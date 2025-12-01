@@ -64,6 +64,8 @@ const createBlockActions = () => ({
     ),
   ungroupRepetitionBlock: (blockIndex: number, state: WorkoutState) =>
     createAllBlockActions(state).ungroupRepetitionBlock(blockIndex),
+  deleteRepetitionBlock: (blockIndex: number, state: WorkoutState) =>
+    createAllBlockActions(state).deleteRepetitionBlock(blockIndex),
 });
 
 export function createWorkoutStoreActions() {

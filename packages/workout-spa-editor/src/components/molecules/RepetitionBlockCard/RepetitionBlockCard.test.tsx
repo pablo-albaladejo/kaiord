@@ -441,6 +441,74 @@ describe("RepetitionBlockCard", () => {
     });
   });
 
+  describe("delete button", () => {
+    it("should render delete button in block header", () => {
+      // Arrange
+      const onDelete = vi.fn();
+
+      // Act
+      render(<RepetitionBlockCard block={mockBlock} onDelete={onDelete} />);
+
+      // Assert
+      const deleteButton = screen.getByTestId("delete-block-button");
+      expect(deleteButton).toBeInTheDocument();
+    });
+
+    it("should show tooltip on delete button", async () => {
+      // Arrange
+      const onDelete = vi.fn();
+      const user = userEvent.setup();
+
+      // Act
+      render(<RepetitionBlockCard block={mockBlock} onDelete={onDelete} />);
+      const deleteButton = screen.getByTestId("delete-block-button");
+      await user.hover(deleteButton);
+
+      // Assert
+      await waitFor(() => {
+        const tooltips = screen.getAllByText("Delete repetition block");
+        expect(tooltips.length).toBeGreaterThan(0);
+      });
+    });
+
+    it("should not render delete button when onDelete is not provided", () => {
+      // Arrange & Act
+      render(<RepetitionBlockCard block={mockBlock} />);
+
+      // Assert
+      expect(
+        screen.queryByTestId("delete-block-button")
+      ).not.toBeInTheDocument();
+    });
+
+    it("should call onDelete when delete button is clicked", async () => {
+      // Arrange
+      const onDelete = vi.fn();
+      const user = userEvent.setup();
+
+      // Act
+      render(<RepetitionBlockCard block={mockBlock} onDelete={onDelete} />);
+      const deleteButton = screen.getByTestId("delete-block-button");
+      await user.click(deleteButton);
+
+      // Assert
+      expect(onDelete).toHaveBeenCalledOnce();
+    });
+
+    it("should style delete button as destructive variant", () => {
+      // Arrange
+      const onDelete = vi.fn();
+
+      // Act
+      render(<RepetitionBlockCard block={mockBlock} onDelete={onDelete} />);
+
+      // Assert
+      const deleteButton = screen.getByTestId("delete-block-button");
+      // Check for red/destructive styling classes
+      expect(deleteButton).toHaveClass("text-red-600");
+    });
+  });
+
   describe("block context preservation", () => {
     /**
      * Property 5: Block Context Preservation
