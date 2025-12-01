@@ -12,6 +12,23 @@ import type { DifficultyLevel } from "../../../types/workout-library";
 import { calculateWorkoutDuration } from "./calculate-duration";
 import { generateThumbnail } from "./generate-thumbnail";
 
+function extractSportFromWorkout(workout: KRD): string {
+  const workoutData = workout.extensions?.workout;
+  return workoutData &&
+    typeof workoutData === "object" &&
+    "sport" in workoutData &&
+    typeof workoutData.sport === "string"
+    ? workoutData.sport
+    : "cycling";
+}
+
+function parseTags(tagsString: string): string[] {
+  return tagsString
+    .split(",")
+    .map((t) => t.trim())
+    .filter((t) => t.length > 0);
+}
+
 export function useSaveToLibrary(workout: KRD, onClose: () => void) {
   const { addTemplate } = useLibraryStore();
   const { success, error: showError } = useToastContext();
@@ -29,22 +46,9 @@ export function useSaveToLibrary(workout: KRD, onClose: () => void) {
 
     try {
       const thumbnailData = await generateThumbnail(workout);
-
-      const tagArray = tags
-        .split(",")
-        .map((t) => t.trim())
-        .filter((t) => t.length > 0);
-
+      const tagArray = parseTags(tags);
       const duration = calculateWorkoutDuration(workout);
-
-      const workoutData = workout.extensions?.workout;
-      const sport =
-        workoutData &&
-        typeof workoutData === "object" &&
-        "sport" in workoutData &&
-        typeof workoutData.sport === "string"
-          ? workoutData.sport
-          : "cycling";
+      const sport = extractSportFromWorkout(workout);
 
       addTemplate(name.trim(), sport, workout, {
         tags: tagArray,

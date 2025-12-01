@@ -1,23 +1,11 @@
-/**
- * ProfileManagerDialog Component
- *
- * Dialog content for the profile manager.
- */
-
 import type { Profile } from "../../../../types/profile";
 import { DeleteConfirmDialog } from "../DeleteConfirmDialog";
 import { ImportExportActions } from "../ImportExportActions";
 import { ProfileForm } from "../ProfileForm";
+import type { ProfileFormData } from "../types";
 import { DialogHeader } from "./DialogHeader";
 import { ProfileListSection } from "./ProfileListSection";
 import { ProfileNotifications } from "./ProfileNotifications";
-
-type ProfileFormData = {
-  name: string;
-  bodyWeight?: number;
-  ftp?: number;
-  maxHeartRate?: number;
-};
 
 type ProfileManagerDialogProps = {
   profiles: Profile[];
@@ -28,6 +16,7 @@ type ProfileManagerDialogProps = {
   importError: string | null;
   switchNotification: string | null;
   setFormData: (data: ProfileFormData) => void;
+  setDeleteConfirmId: (id: string | null) => void;
   handleCreate: () => void;
   handleEdit: (profile: Profile) => void;
   handleSave: () => void;
@@ -37,7 +26,6 @@ type ProfileManagerDialogProps = {
   confirmDelete: () => void;
   handleExport: (profile: Profile) => void;
   handleImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  setDeleteConfirmId: (id: string | null) => void;
 };
 
 export function ProfileManagerDialog({

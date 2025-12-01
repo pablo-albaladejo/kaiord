@@ -11,7 +11,7 @@ type DurationTypeSelectProps = {
   value: AdvancedDurationType;
   onChange: (value: AdvancedDurationType) => void;
   disabled?: boolean;
-}
+};
 
 export function DurationTypeSelect({
   value,
