@@ -4,7 +4,7 @@
  * Action creators for workout store operations.
  */
 
-import type { KRD } from "../types/krd";
+import type { KRD, RepetitionBlock, WorkoutStep } from "../types/krd";
 import type { Sport } from "../types/krd-core";
 
 const MAX_HISTORY_SIZE = 50;
@@ -16,6 +16,11 @@ export type WorkoutState = {
   selectedStepId: string | null;
   selectedStepIds: Array<string>;
   isEditing: boolean;
+  deletedSteps?: Array<{
+    step: WorkoutStep | RepetitionBlock;
+    index: number;
+    timestamp: number;
+  }>;
 };
 
 export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => ({

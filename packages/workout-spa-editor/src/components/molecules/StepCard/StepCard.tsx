@@ -18,6 +18,7 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
       onToggleMultiSelect,
       onDelete,
       onDuplicate,
+      onCopy,
       isDragging = false,
       dragHandleProps,
       className = "",
@@ -29,7 +30,7 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
     const selected = isSelected || isMultiSelected;
     const classes = getStepCardClasses(
       selected,
-      Boolean(onDelete || onDuplicate),
+      Boolean(onDelete || onDuplicate || onCopy),
       Boolean(dragHandleProps),
       className
     );
@@ -63,6 +64,7 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
           isDragging,
           onDelete,
           onDuplicate,
+          onCopy,
         })}
       </div>
     );

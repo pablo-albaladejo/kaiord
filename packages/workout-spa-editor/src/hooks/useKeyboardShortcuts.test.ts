@@ -291,6 +291,408 @@ describe("useKeyboardShortcuts", () => {
     });
   });
 
+  describe("copy shortcut (Requirement 39.2)", () => {
+    it("should call onCopy when Ctrl+C is pressed", () => {
+      // Arrange
+      const onCopy = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "c",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCopy).toHaveBeenCalledOnce();
+    });
+
+    it("should call onCopy when Cmd+C is pressed", () => {
+      // Arrange
+      const onCopy = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "c",
+        metaKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCopy).toHaveBeenCalledOnce();
+    });
+
+    it("should handle uppercase C", () => {
+      // Arrange
+      const onCopy = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "C",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCopy).toHaveBeenCalledOnce();
+    });
+
+    it("should not call onCopy when only C is pressed", () => {
+      // Arrange
+      const onCopy = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "c",
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCopy).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("paste shortcut (Requirement 39.2)", () => {
+    it("should call onPaste when Ctrl+V is pressed", () => {
+      // Arrange
+      const onPaste = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onPaste }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "v",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onPaste).toHaveBeenCalledOnce();
+    });
+
+    it("should call onPaste when Cmd+V is pressed", () => {
+      // Arrange
+      const onPaste = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onPaste }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "v",
+        metaKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onPaste).toHaveBeenCalledOnce();
+    });
+
+    it("should handle uppercase V", () => {
+      // Arrange
+      const onPaste = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onPaste }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "V",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onPaste).toHaveBeenCalledOnce();
+    });
+
+    it("should not call onPaste when only V is pressed", () => {
+      // Arrange
+      const onPaste = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onPaste }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "v",
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onPaste).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("create block shortcut (Requirement 7.6.1)", () => {
+    it("should call onCreateBlock when Ctrl+G is pressed", () => {
+      // Arrange
+      const onCreateBlock = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCreateBlock }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "g",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCreateBlock).toHaveBeenCalledOnce();
+    });
+
+    it("should call onCreateBlock when Cmd+G is pressed", () => {
+      // Arrange
+      const onCreateBlock = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCreateBlock }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "g",
+        metaKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCreateBlock).toHaveBeenCalledOnce();
+    });
+
+    it("should handle uppercase G", () => {
+      // Arrange
+      const onCreateBlock = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCreateBlock }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "G",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCreateBlock).toHaveBeenCalledOnce();
+    });
+
+    it("should not call onCreateBlock when Ctrl+Shift+G is pressed", () => {
+      // Arrange
+      const onCreateBlock = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCreateBlock }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "g",
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCreateBlock).not.toHaveBeenCalled();
+    });
+
+    it("should not call onCreateBlock when only G is pressed", () => {
+      // Arrange
+      const onCreateBlock = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCreateBlock }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "g",
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onCreateBlock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("ungroup block shortcut (Requirement 7.6.2)", () => {
+    it("should call onUngroupBlock when Ctrl+Shift+G is pressed", () => {
+      // Arrange
+      const onUngroupBlock = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onUngroupBlock }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "g",
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onUngroupBlock).toHaveBeenCalledOnce();
+    });
+
+    it("should call onUngroupBlock when Cmd+Shift+G is pressed", () => {
+      // Arrange
+      const onUngroupBlock = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onUngroupBlock }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "g",
+        metaKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onUngroupBlock).toHaveBeenCalledOnce();
+    });
+
+    it("should handle uppercase G with Shift", () => {
+      // Arrange
+      const onUngroupBlock = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onUngroupBlock }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "G",
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onUngroupBlock).toHaveBeenCalledOnce();
+    });
+
+    it("should not call onUngroupBlock when only Ctrl+G is pressed", () => {
+      // Arrange
+      const onUngroupBlock = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onUngroupBlock }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "g",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onUngroupBlock).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("select all shortcut (Requirement 7.6.3)", () => {
+    it("should call onSelectAll when Ctrl+A is pressed", () => {
+      // Arrange
+      const onSelectAll = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onSelectAll }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "a",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onSelectAll).toHaveBeenCalledOnce();
+    });
+
+    it("should call onSelectAll when Cmd+A is pressed", () => {
+      // Arrange
+      const onSelectAll = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onSelectAll }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "a",
+        metaKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onSelectAll).toHaveBeenCalledOnce();
+    });
+
+    it("should handle uppercase A", () => {
+      // Arrange
+      const onSelectAll = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onSelectAll }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "A",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onSelectAll).toHaveBeenCalledOnce();
+    });
+
+    it("should not call onSelectAll when only A is pressed", () => {
+      // Arrange
+      const onSelectAll = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onSelectAll }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "a",
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onSelectAll).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("clear selection shortcut (Requirement 7.6.4)", () => {
+    it("should call onClearSelection when Escape is pressed", () => {
+      // Arrange
+      const onClearSelection = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onClearSelection }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onClearSelection).toHaveBeenCalledOnce();
+    });
+
+    it("should call onClearSelection when Escape is pressed with modifiers", () => {
+      // Arrange
+      const onClearSelection = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onClearSelection }));
+
+      // Act
+      const event = new KeyboardEvent("keydown", {
+        key: "Escape",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      // Assert
+      expect(onClearSelection).toHaveBeenCalledOnce();
+    });
+  });
+
   describe("optional handlers", () => {
     it("should not throw when handlers are undefined", () => {
       // Arrange & Act
@@ -310,6 +712,48 @@ describe("useKeyboardShortcuts", () => {
         bubbles: true,
       });
       expect(() => window.dispatchEvent(moveUpEvent)).not.toThrow();
+
+      const copyEvent = new KeyboardEvent("keydown", {
+        key: "c",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      expect(() => window.dispatchEvent(copyEvent)).not.toThrow();
+
+      const pasteEvent = new KeyboardEvent("keydown", {
+        key: "v",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      expect(() => window.dispatchEvent(pasteEvent)).not.toThrow();
+
+      const createBlockEvent = new KeyboardEvent("keydown", {
+        key: "g",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      expect(() => window.dispatchEvent(createBlockEvent)).not.toThrow();
+
+      const ungroupBlockEvent = new KeyboardEvent("keydown", {
+        key: "g",
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      expect(() => window.dispatchEvent(ungroupBlockEvent)).not.toThrow();
+
+      const selectAllEvent = new KeyboardEvent("keydown", {
+        key: "a",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      expect(() => window.dispatchEvent(selectAllEvent)).not.toThrow();
+
+      const escapeEvent = new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+      });
+      expect(() => window.dispatchEvent(escapeEvent)).not.toThrow();
     });
   });
 });

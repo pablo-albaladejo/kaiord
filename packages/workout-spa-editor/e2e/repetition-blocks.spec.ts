@@ -582,6 +582,665 @@ test.describe("Repetition Blocks", () => {
   });
 });
 
+test.describe("Repetition Blocks - Ungroup", () => {
+  test("should ungroup repetition block via context menu", async ({ page }) => {
+    await page.goto("/");
+
+    // Load a workout with a repetition block
+    const fileInput = page.getByTestId("file-upload-input");
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "cycling",
+      },
+      extensions: {
+        workout: {
+          name: "Ungroup Test",
+          sport: "cycling",
+          steps: [
+            {
+              repeatCount: 3,
+              steps: [
+                {
+                  stepIndex: 0,
+                  durationType: "time",
+                  duration: { type: "time", seconds: 60 },
+                  targetType: "power",
+                  target: {
+                    type: "power",
+                    value: { unit: "watts", value: 250 },
+                  },
+                  intensity: "active",
+                },
+                {
+                  stepIndex: 1,
+                  durationType: "time",
+                  duration: { type: "time", seconds: 120 },
+                  targetType: "power",
+                  target: {
+                    type: "power",
+                    value: { unit: "watts", value: 150 },
+                  },
+                  intensity: "rest",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    await fileInput.setInputFiles({
+      name: "ungroup-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
+
+    // Wait for workout to load
+    await expect(page.getByText("Ungroup Test")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Verify repetition block exists
+    await expect(page.getByText("Repeat Block")).toBeVisible();
+    await expect(page.getByText("3x")).toBeVisible();
+
+    // Open context menu
+    await page.getByTestId("block-context-menu-trigger").click();
+
+    // Click "Ungroup" option
+    await page.getByRole("menuitem", { name: /ungroup/i }).click();
+
+    // Verify repetition block is removed
+    await expect(page.getByText("Repeat Block")).not.toBeVisible({
+      timeout: 5000,
+    });
+
+    // Verify steps are extracted correctly
+    await expect(page.getByText("Step 1")).toBeVisible();
+    await expect(page.getByText("Step 2")).toBeVisible();
+
+    // Verify step indices are recalculated
+    const stepCards = page.locator('[data-testid="step-card"]');
+    await expect(stepCards).toHaveCount(2);
+  });
+});
+
+test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
+  test("should create block with Ctrl+G", async ({ page }) => {
+    await page.goto("/");
+
+    // Load a workout with multiple steps
+    const fileInput = page.getByTestId("file-upload-input");
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "running",
+      },
+      extensions: {
+        workout: {
+          name: "Keyboard Test",
+          sport: "running",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 60 },
+              targetType: "pace",
+              target: {
+                type: "pace",
+                value: { unit: "min_per_km", value: 4.0 },
+              },
+              intensity: "active",
+            },
+            {
+              stepIndex: 1,
+              durationType: "time",
+              duration: { type: "time", seconds: 120 },
+              targetType: "pace",
+              target: {
+                type: "pace",
+                value: { unit: "min_per_km", value: 6.0 },
+              },
+              intensity: "rest",
+            },
+          ],
+        },
+      },
+    };
+
+    await fileInput.setInputFiles({
+      name: "keyboard-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
+
+    // Wait for workout to load
+    await expect(page.getByText("Keyboard Test")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Select both steps
+    const step1 = page.locator('[data-testid="step-card"]').first();
+    const step2 = page.locator('[data-testid="step-card"]').nth(1);
+
+    await step1.evaluate((el) => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        ctrlKey: true,
+        metaKey: false,
+      });
+      el.dispatchEvent(event);
+    });
+    await page.waitForTimeout(150);
+    await step2.evaluate((el) => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        ctrlKey: true,
+        metaKey: false,
+      });
+      el.dispatchEvent(event);
+    });
+    await page.waitForTimeout(300);
+
+    // Verify steps are selected
+    await expect(step1).toHaveAttribute("data-selected", "true", {
+      timeout: 5000,
+    });
+    await expect(step2).toHaveAttribute("data-selected", "true", {
+      timeout: 5000,
+    });
+
+    // Press Ctrl+G to create block
+    await page.keyboard.press("Control+KeyG");
+
+    // Verify dialog opens
+    await expect(page.getByTestId("repeat-count-input")).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Set repeat count and confirm
+    await page.getByTestId("repeat-count-input").fill("4");
+    await page.getByTestId("confirm-create-block-button").click();
+
+    // Verify block was created
+    await expect(page.getByText("Repeat Block")).toBeVisible({
+      timeout: 5000,
+    });
+    await expect(page.getByText("4x")).toBeVisible();
+  });
+
+  test("should ungroup block with Ctrl+Shift+G", async ({ page }) => {
+    await page.goto("/");
+
+    // Load a workout with a repetition block
+    const fileInput = page.getByTestId("file-upload-input");
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "cycling",
+      },
+      extensions: {
+        workout: {
+          name: "Ungroup Shortcut Test",
+          sport: "cycling",
+          steps: [
+            {
+              repeatCount: 2,
+              steps: [
+                {
+                  stepIndex: 0,
+                  durationType: "time",
+                  duration: { type: "time", seconds: 60 },
+                  targetType: "power",
+                  target: {
+                    type: "power",
+                    value: { unit: "watts", value: 200 },
+                  },
+                  intensity: "active",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    await fileInput.setInputFiles({
+      name: "ungroup-shortcut-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
+
+    // Wait for workout to load
+    await expect(page.getByText("Ungroup Shortcut Test")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Verify block exists
+    await expect(page.getByText("Repeat Block")).toBeVisible();
+
+    // Select the repetition block
+    const block = page.getByTestId("repetition-block-card");
+    await block.click();
+
+    // Press Ctrl+Shift+G to ungroup
+    await page.keyboard.press("Control+Shift+KeyG");
+
+    // Verify block is removed
+    await expect(page.getByText("Repeat Block")).not.toBeVisible({
+      timeout: 5000,
+    });
+
+    // Verify step is extracted
+    await expect(page.getByText("Step 1")).toBeVisible();
+  });
+
+  test("should select all steps with Ctrl+A", async ({ page }) => {
+    await page.goto("/");
+
+    // Load a workout with multiple steps
+    const fileInput = page.getByTestId("file-upload-input");
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "running",
+      },
+      extensions: {
+        workout: {
+          name: "Select All Test",
+          sport: "running",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 60 },
+              targetType: "pace",
+              target: {
+                type: "pace",
+                value: { unit: "min_per_km", value: 4.0 },
+              },
+              intensity: "active",
+            },
+            {
+              stepIndex: 1,
+              durationType: "time",
+              duration: { type: "time", seconds: 120 },
+              targetType: "pace",
+              target: {
+                type: "pace",
+                value: { unit: "min_per_km", value: 6.0 },
+              },
+              intensity: "rest",
+            },
+            {
+              stepIndex: 2,
+              durationType: "time",
+              duration: { type: "time", seconds: 60 },
+              targetType: "pace",
+              target: {
+                type: "pace",
+                value: { unit: "min_per_km", value: 4.0 },
+              },
+              intensity: "active",
+            },
+          ],
+        },
+      },
+    };
+
+    await fileInput.setInputFiles({
+      name: "select-all-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
+
+    // Wait for workout to load
+    await expect(page.getByText("Select All Test")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Press Ctrl+A to select all steps
+    await page.keyboard.press("Control+KeyA");
+
+    // Verify all steps are selected
+    const stepCards = page.locator('[data-testid="step-card"]');
+    await expect(stepCards.first()).toHaveAttribute("data-selected", "true", {
+      timeout: 5000,
+    });
+    await expect(stepCards.nth(1)).toHaveAttribute("data-selected", "true");
+    await expect(stepCards.nth(2)).toHaveAttribute("data-selected", "true");
+
+    // Verify create block button appears
+    await expect(
+      page.getByTestId("create-repetition-block-button")
+    ).toBeVisible();
+  });
+
+  test("should clear selection with Escape", async ({ page }) => {
+    await page.goto("/");
+
+    // Load a workout with multiple steps
+    const fileInput = page.getByTestId("file-upload-input");
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "cycling",
+      },
+      extensions: {
+        workout: {
+          name: "Clear Selection Test",
+          sport: "cycling",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 60 },
+              targetType: "power",
+              target: {
+                type: "power",
+                value: { unit: "watts", value: 200 },
+              },
+              intensity: "active",
+            },
+            {
+              stepIndex: 1,
+              durationType: "time",
+              duration: { type: "time", seconds: 120 },
+              targetType: "power",
+              target: {
+                type: "power",
+                value: { unit: "watts", value: 150 },
+              },
+              intensity: "rest",
+            },
+          ],
+        },
+      },
+    };
+
+    await fileInput.setInputFiles({
+      name: "clear-selection-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
+
+    // Wait for workout to load
+    await expect(page.getByText("Clear Selection Test")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Select both steps
+    const step1 = page.locator('[data-testid="step-card"]').first();
+    const step2 = page.locator('[data-testid="step-card"]').nth(1);
+
+    await step1.evaluate((el) => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        ctrlKey: true,
+        metaKey: false,
+      });
+      el.dispatchEvent(event);
+    });
+    await page.waitForTimeout(150);
+    await step2.evaluate((el) => {
+      const event = new MouseEvent("click", {
+        bubbles: true,
+        cancelable: true,
+        ctrlKey: true,
+        metaKey: false,
+      });
+      el.dispatchEvent(event);
+    });
+    await page.waitForTimeout(300);
+
+    // Verify steps are selected
+    await expect(step1).toHaveAttribute("data-selected", "true", {
+      timeout: 5000,
+    });
+    await expect(step2).toHaveAttribute("data-selected", "true");
+
+    // Press Escape to clear selection
+    await page.keyboard.press("Escape");
+
+    // Verify selection is cleared
+    await expect(step1).not.toHaveAttribute("data-selected", "true", {
+      timeout: 5000,
+    });
+    await expect(step2).not.toHaveAttribute("data-selected", "true");
+
+    // Verify create block button is hidden
+    await expect(
+      page.getByTestId("create-repetition-block-button")
+    ).not.toBeVisible();
+  });
+});
+
+test.describe("Repetition Blocks - Context Menu Actions", () => {
+  test("should open inline editor via Edit Count menu item", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    // Load a workout with a repetition block
+    const fileInput = page.getByTestId("file-upload-input");
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "running",
+      },
+      extensions: {
+        workout: {
+          name: "Edit Count Menu Test",
+          sport: "running",
+          steps: [
+            {
+              repeatCount: 3,
+              steps: [
+                {
+                  stepIndex: 0,
+                  durationType: "time",
+                  duration: { type: "time", seconds: 60 },
+                  targetType: "pace",
+                  target: {
+                    type: "pace",
+                    value: { unit: "min_per_km", value: 4.0 },
+                  },
+                  intensity: "active",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    await fileInput.setInputFiles({
+      name: "edit-count-menu-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
+
+    // Wait for workout to load
+    await expect(page.getByText("Edit Count Menu Test")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Open context menu
+    await page.getByTestId("block-context-menu-trigger").click();
+
+    // Click "Edit Count" option
+    await page.getByRole("menuitem", { name: /edit count/i }).click();
+
+    // Verify inline editor is visible
+    await expect(page.getByTestId("repeat-count-input")).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Change count
+    await page.getByTestId("repeat-count-input").fill("5");
+    await page.getByTestId("save-count-button").click();
+
+    // Verify count was updated
+    await expect(page.getByText("5x")).toBeVisible({ timeout: 5000 });
+  });
+
+  test("should add step via context menu", async ({ page }) => {
+    await page.goto("/");
+
+    // Load a workout with a repetition block
+    const fileInput = page.getByTestId("file-upload-input");
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "cycling",
+      },
+      extensions: {
+        workout: {
+          name: "Add Step Menu Test",
+          sport: "cycling",
+          steps: [
+            {
+              repeatCount: 2,
+              steps: [
+                {
+                  stepIndex: 0,
+                  durationType: "time",
+                  duration: { type: "time", seconds: 60 },
+                  targetType: "power",
+                  target: {
+                    type: "power",
+                    value: { unit: "watts", value: 200 },
+                  },
+                  intensity: "active",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    await fileInput.setInputFiles({
+      name: "add-step-menu-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
+
+    // Wait for workout to load
+    await expect(page.getByText("Add Step Menu Test")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Verify initial state
+    await expect(
+      page.getByTestId("repetition-block-card").getByText("1 step")
+    ).toBeVisible();
+
+    // Open context menu
+    await page.getByTestId("block-context-menu-trigger").click();
+
+    // Click "Add Step" option
+    await page.getByRole("menuitem", { name: /add step/i }).click();
+
+    // Verify step was added
+    await expect(
+      page.getByTestId("repetition-block-card").getByText("2 steps")
+    ).toBeVisible({ timeout: 5000 });
+  });
+
+  test("should delete block via context menu with confirmation", async ({
+    page,
+  }) => {
+    await page.goto("/");
+
+    // Load a workout with a repetition block
+    const fileInput = page.getByTestId("file-upload-input");
+    const testWorkout = {
+      version: "1.0",
+      type: "workout",
+      metadata: {
+        created: new Date().toISOString(),
+        sport: "running",
+      },
+      extensions: {
+        workout: {
+          name: "Delete Menu Test",
+          sport: "running",
+          steps: [
+            {
+              repeatCount: 3,
+              steps: [
+                {
+                  stepIndex: 0,
+                  durationType: "time",
+                  duration: { type: "time", seconds: 60 },
+                  targetType: "pace",
+                  target: {
+                    type: "pace",
+                    value: { unit: "min_per_km", value: 4.0 },
+                  },
+                  intensity: "active",
+                },
+              ],
+            },
+          ],
+        },
+      },
+    };
+
+    await fileInput.setInputFiles({
+      name: "delete-menu-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
+
+    // Wait for workout to load
+    await expect(page.getByText("Delete Menu Test")).toBeVisible({
+      timeout: 10000,
+    });
+
+    // Verify block exists
+    await expect(page.getByText("Repeat Block")).toBeVisible();
+
+    // Open context menu
+    await page.getByTestId("block-context-menu-trigger").click();
+
+    // Click "Delete" option
+    await page.getByRole("menuitem", { name: /delete/i }).click();
+
+    // Verify confirmation dialog appears
+    await expect(
+      page.getByText(/are you sure you want to delete/i)
+    ).toBeVisible({ timeout: 5000 });
+
+    // Confirm deletion
+    await page.getByRole("button", { name: /delete/i }).click();
+
+    // Verify block is removed
+    await expect(page.getByText("Repeat Block")).not.toBeVisible({
+      timeout: 5000,
+    });
+  });
+});
+
 test.describe("Repetition Blocks - Performance", () => {
   test("should render large repetition blocks efficiently", async ({
     page,

@@ -2,6 +2,7 @@ import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { type FormatOption } from "./format-options";
 import { FormatDropdownButton } from "./FormatDropdownButton";
 import { FormatOptionItem } from "./FormatOption";
+import { useKeyboardNavigation } from "./useKeyboardNavigation";
 
 type FormatDropdownProps = {
   isOpen: boolean;
@@ -20,12 +21,21 @@ export function FormatDropdown({
   onFormatSelect,
   disabled,
 }: FormatDropdownProps) {
+  const { focusedIndex, optionRefs, handleKeyDown } = useKeyboardNavigation({
+    isOpen,
+    currentFormat,
+    formatOptions,
+    onFormatSelect,
+    onToggle,
+    disabled,
+  });
+
   const currentOption = formatOptions.find(
     (opt) => opt.value === currentFormat
   );
 
   return (
-    <div className="relative">
+    <div className="relative" onKeyDown={handleKeyDown}>
       <FormatDropdownButton
         currentFormat={currentFormat}
         currentOption={currentOption}
@@ -39,14 +49,20 @@ export function FormatDropdown({
           className="absolute z-10 mt-2 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg"
           role="listbox"
         >
-          {formatOptions.map((option) => {
+          {formatOptions.map((option, index) => {
             const isSelected = option.value === currentFormat;
+            const isFocused = index === focusedIndex;
             return (
               <FormatOptionItem
                 key={option.value}
+                ref={(el) => {
+                  optionRefs.current[index] = el;
+                }}
                 option={option}
                 isSelected={isSelected}
+                isFocused={isFocused}
                 onSelect={() => onFormatSelect(option.value)}
+                disabled={disabled}
               />
             );
           })}

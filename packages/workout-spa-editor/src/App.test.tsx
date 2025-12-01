@@ -1,7 +1,9 @@
+import { waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 import App from "./App";
 import { useWorkoutStore } from "./store/workout-store";
-import { renderWithProviders } from "./test-utils";
+import { renderWithProviders, screen } from "./test-utils";
 import type { KRD, Workout, WorkoutStep } from "./types/krd";
 
 describe("App", () => {
@@ -16,6 +18,32 @@ describe("App", () => {
       isEditing: false,
       safeMode: false,
       lastBackup: null,
+      deletedSteps: [],
+    });
+
+    // Clear localStorage before each test
+    localStorage.clear();
+
+    // Mock localStorage
+    const localStorageMock = (() => {
+      let store: Record<string, string> = {};
+      return {
+        getItem: (key: string) => store[key] || null,
+        setItem: (key: string, value: string) => {
+          store[key] = value;
+        },
+        removeItem: (key: string) => {
+          delete store[key];
+        },
+        clear: () => {
+          store = {};
+        },
+      };
+    })();
+
+    Object.defineProperty(window, "localStorage", {
+      value: localStorageMock,
+      writable: true,
     });
   });
 
@@ -27,6 +55,134 @@ describe("App", () => {
   it("should render the welcome section when no workout is loaded", () => {
     const { container } = renderWithProviders(<App />);
     expect(container.querySelector(".space-y-6")).toBeInTheDocument();
+  });
+
+  describe("onboarding tutorial integration (Requirements 37.1, 37.5)", () => {
+    it("should show tutorial on first visit", async () => {
+      // Arrange - localStorage is empty (first visit)
+
+      // Act
+      renderWithProviders(<App />);
+
+      // Assert - Tutorial should appear (check for unique tutorial content)
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText(
+              /this tutorial will guide you through the key features/i
+            )
+          ).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+    });
+
+    it("should not show tutorial if already completed", () => {
+      // Arrange - Mark tutorial as completed
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
+
+      // Act
+      renderWithProviders(<App />);
+
+      // Assert - Tutorial should not appear (check for unique tutorial content)
+      expect(
+        screen.queryByText(
+          /this tutorial will guide you through the key features/i
+        )
+      ).not.toBeInTheDocument();
+    });
+
+    it("should allow skipping tutorial", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      renderWithProviders(<App />);
+
+      // Wait for tutorial to appear
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText(
+              /this tutorial will guide you through the key features/i
+            )
+          ).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+
+      // Act - Click the "Skip" button
+      const skipButton = screen.getByRole("button", { name: /^skip$/i });
+      await user.click(skipButton);
+
+      // Assert - Tutorial should be closed
+      await waitFor(
+        () => {
+          expect(
+            screen.queryByText(
+              /this tutorial will guide you through the key features/i
+            )
+          ).not.toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+
+      // Verify completion state was saved
+      expect(localStorage.getItem("workout-spa-onboarding-completed")).toBe(
+        "true"
+      );
+    });
+
+    it("should save completion state when tutorial is completed", async () => {
+      // Arrange
+      const user = userEvent.setup();
+      renderWithProviders(<App />);
+
+      // Wait for tutorial to appear
+      await waitFor(
+        () => {
+          expect(
+            screen.getByText(
+              /this tutorial will guide you through the key features/i
+            )
+          ).toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+
+      // Act - Navigate through all steps and complete
+      // Click through all 6 steps (0-5)
+      for (let i = 0; i < 6; i++) {
+        // On the last step, the button says "Finish", otherwise "Next"
+        const buttonName = i === 5 ? /finish/i : /next/i;
+        const button = screen.getByRole("button", {
+          name: buttonName,
+        });
+        await user.click(button);
+
+        // Wait a bit for the state to update between clicks
+        if (i < 5) {
+          await waitFor(() => {
+            expect(screen.getByText(`Step ${i + 2} of 6`)).toBeInTheDocument();
+          });
+        }
+      }
+
+      // Assert - Tutorial should be closed
+      await waitFor(
+        () => {
+          expect(
+            screen.queryByText(
+              /this tutorial will guide you through the key features/i
+            )
+          ).not.toBeInTheDocument();
+        },
+        { timeout: 2000 }
+      );
+
+      // Verify completion state was saved
+      expect(localStorage.getItem("workout-spa-onboarding-completed")).toBe(
+        "true"
+      );
+    });
   });
 
   describe("keyboard shortcuts for reordering (Requirement 29)", () => {

@@ -64,6 +64,14 @@ export const useCreateStep = () => useWorkoutStore((state) => state.createStep);
 
 export const useDeleteStep = () => useWorkoutStore((state) => state.deleteStep);
 
+export const useUndoDelete = () => useWorkoutStore((state) => state.undoDelete);
+
+export const useClearExpiredDeletes = () =>
+  useWorkoutStore((state) => state.clearExpiredDeletes);
+
+export const useDeletedSteps = () =>
+  useWorkoutStore((state) => state.deletedSteps);
+
 export const useSelectStep = () => useWorkoutStore((state) => state.selectStep);
 
 export const useDuplicateStep = () =>

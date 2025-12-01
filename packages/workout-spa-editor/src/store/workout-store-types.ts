@@ -4,8 +4,14 @@
  * Type definitions for the workout store.
  */
 
-import type { KRD } from "../types/krd";
+import type { KRD, RepetitionBlock, WorkoutStep } from "../types/krd";
 import type { Sport } from "../types/krd-core";
+
+export type DeletedStep = {
+  step: WorkoutStep | RepetitionBlock;
+  index: number;
+  timestamp: number;
+};
 
 export type WorkoutStore = {
   // State
@@ -17,6 +23,7 @@ export type WorkoutStore = {
   isEditing: boolean;
   safeMode: boolean;
   lastBackup: KRD | null;
+  deletedSteps: Array<DeletedStep>;
 
   // Actions
   loadWorkout: (krd: KRD) => void;
@@ -24,7 +31,15 @@ export type WorkoutStore = {
   updateWorkout: (krd: KRD) => void;
   createStep: () => void;
   deleteStep: (stepIndex: number) => void;
+  undoDelete: (timestamp: number) => void;
+  clearExpiredDeletes: () => void;
   duplicateStep: (stepIndex: number) => void;
+  copyStep: (
+    stepIndex: number
+  ) => Promise<{ success: boolean; message: string }>;
+  pasteStep: (
+    insertIndex?: number
+  ) => Promise<{ success: boolean; message: string }>;
   reorderStep: (activeIndex: number, overIndex: number) => void;
   reorderStepsInBlock: (
     blockIndex: number,
@@ -42,6 +57,7 @@ export type WorkoutStore = {
     blockIndex: number,
     stepIndex: number
   ) => void;
+  ungroupRepetitionBlock: (blockIndex: number) => void;
   selectStep: (id: string | null) => void;
   toggleStepSelection: (id: string) => void;
   clearStepSelection: () => void;

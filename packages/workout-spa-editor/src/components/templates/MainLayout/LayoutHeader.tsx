@@ -1,35 +1,58 @@
-import { ThemeToggle } from "../../atoms/ThemeToggle";
+import { useState } from "react";
+import { useLibraryStore } from "../../../store/library-store";
+import { useProfileStore } from "../../../store/profile-store";
+import { useWorkoutStore } from "../../../store/workout-store";
+import { ProfileManager } from "../../organisms/ProfileManager/ProfileManager";
+import { WorkoutLibrary } from "../../organisms/WorkoutLibrary/WorkoutLibrary";
+import { HeaderLogo } from "./components/HeaderLogo";
+import { HeaderNav } from "./components/HeaderNav";
+import { HelpDialog } from "./components/HelpDialog";
 
-export const LayoutHeader = () => {
+type LayoutHeaderProps = {
+  onReplayTutorial?: () => void;
+};
+
+export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
+  const [profileManagerOpen, setProfileManagerOpen] = useState(false);
+  const [libraryOpen, setLibraryOpen] = useState(false);
+  const [helpDialogOpen, setHelpDialogOpen] = useState(false);
+  const { getActiveProfile } = useProfileStore();
+  const activeProfile = getActiveProfile();
+  const { templates } = useLibraryStore();
+  const { currentWorkout, loadWorkout } = useWorkoutStore();
+
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm dark:border-gray-800 dark:bg-gray-950 kiroween:border-gray-800 kiroween:bg-gray-950">
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600 text-white">
-            <svg
-              className="h-6 w-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M13 10V3L4 14h7v7l9-11h-7z"
-              />
-            </svg>
-          </div>
-          <h1 className="text-xl font-bold text-gray-900 dark:text-white kiroween:text-white sm:text-2xl">
-            Workout Editor
-          </h1>
-        </div>
-
-        <nav className="flex items-center gap-2" aria-label="Main navigation">
-          <ThemeToggle />
-        </nav>
+        <HeaderLogo />
+        <HeaderNav
+          activeProfileName={activeProfile?.name || null}
+          libraryCount={templates.length}
+          onProfileClick={() => setProfileManagerOpen(true)}
+          onLibraryClick={() => setLibraryOpen(true)}
+          onHelpClick={() => setHelpDialogOpen(true)}
+        />
       </div>
+
+      <ProfileManager
+        open={profileManagerOpen}
+        onOpenChange={setProfileManagerOpen}
+      />
+
+      <WorkoutLibrary
+        open={libraryOpen}
+        onOpenChange={setLibraryOpen}
+        onLoadWorkout={(template) => {
+          loadWorkout(template.krd);
+        }}
+        hasCurrentWorkout={currentWorkout !== null}
+      />
+
+      <HelpDialog
+        open={helpDialogOpen}
+        onOpenChange={setHelpDialogOpen}
+        onReplayTutorial={onReplayTutorial}
+      />
     </header>
   );
 };

@@ -17,6 +17,8 @@ type SortableRepetitionBlockCardProps = {
   onStepDuplicate?: (blockIndex: number, stepIndex: number) => void;
   onEditRepeatCount?: (count: number) => void;
   onAddStep?: () => void;
+  onUngroup?: () => void;
+  onDelete?: () => void;
   onReorderSteps?: (
     blockIndex: number,
     activeIndex: number,
@@ -42,6 +44,8 @@ export const SortableRepetitionBlockCard = ({
   onStepDuplicate,
   onEditRepeatCount,
   onAddStep,
+  onUngroup,
+  onDelete,
   onReorderSteps,
   parentBlockIndex,
 }: SortableRepetitionBlockCardProps) => {
@@ -110,6 +114,8 @@ export const SortableRepetitionBlockCard = ({
         }
         onEditRepeatCount={onEditRepeatCount}
         onAddStep={onAddStep}
+        onUngroup={onUngroup}
+        onDelete={onDelete}
         onReorderSteps={
           onReorderSteps
             ? (activeIndex: number, overIndex: number) =>

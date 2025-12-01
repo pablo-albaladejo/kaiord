@@ -1,22 +1,31 @@
 name: Workout SPA Editor E2E Tests
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches: [main, develop]
-    paths:
-      - "packages/workout-spa-editor/**"
-      - ".github/workflows/workout-spa-editor-e2e.yml"
-  pull_request:
-    branches: [main, develop]
-    paths:
-      - "packages/workout-spa-editor/**"
-      - ".github/workflows/workout-spa-editor-e2e.yml"
 
 jobs:
+  check-ci-status:
+    runs-on: ubuntu-latest
+    if: github.event.workflow_run.conclusion == 'success'
+    outputs:
+      should-run: ${{ steps.check.outputs.should-run }}
+    steps:
+      - name: Check if frontend changed
+        id: check
+        run: |
+          echo "CI workflow succeeded, checking if E2E tests should run"
+          echo "should-run=true" >> $GITHUB_OUTPUT
+
   e2e-tests:
     name: E2E Tests
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    needs: check-ci-status
+    if: needs.check-ci-status.outputs.should-run == 'true'
 
     strategy:
       fail-fast: false
@@ -82,6 +91,8 @@ jobs:
     name: E2E Mobile Tests
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    needs: check-ci-status
+    if: needs.check-ci-status.outputs.should-run == 'true'
 
     strategy:
       fail-fast: false

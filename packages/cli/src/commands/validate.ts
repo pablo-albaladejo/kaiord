@@ -8,6 +8,7 @@ import {
 import { readFile as fsReadFile } from "fs/promises";
 import ora from "ora";
 import { z } from "zod";
+import { loadConfig, mergeWithConfig } from "../utils/config-loader.js";
 import {
   formatError,
   formatToleranceViolations,
@@ -30,8 +31,28 @@ export const validateCommand = async (options: unknown): Promise<void> => {
   let spinner: ReturnType<typeof ora> | null = null;
 
   try {
+    // Load config file defaults
+    const config = await loadConfig();
+
+    // Merge CLI options with config defaults (CLI takes precedence)
+    const mergedOptions = mergeWithConfig(
+      options as Record<string, unknown>,
+      config
+    );
+
+    // Apply config defaults to options
+    const optionsWithDefaults = {
+      ...mergedOptions,
+      toleranceConfig:
+        mergedOptions.toleranceConfig || config.defaultToleranceConfig,
+      verbose: mergedOptions.verbose ?? config.verbose,
+      quiet: mergedOptions.quiet ?? config.quiet,
+      json: mergedOptions.json ?? config.json,
+      logFormat: mergedOptions.logFormat || config.logFormat,
+    };
+
     // Parse and validate options
-    const opts = validateOptionsSchema.parse(options);
+    const opts = validateOptionsSchema.parse(optionsWithDefaults);
 
     // Create logger
     const loggerType =

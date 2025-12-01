@@ -15,6 +15,8 @@ export type RepetitionBlockCardProps = HTMLAttributes<HTMLDivElement> & {
   onSelectStep?: (stepId: string) => void;
   onToggleStepSelection?: (stepId: string) => void;
   onReorderSteps?: (activeIndex: number, overIndex: number) => void;
+  onUngroup?: () => void;
+  onDelete?: () => void;
   selectedStepIndex?: number;
   selectedStepIds?: readonly string[];
   isDragging?: boolean;
@@ -36,6 +38,8 @@ export const RepetitionBlockCard = forwardRef<
       onSelectStep,
       onToggleStepSelection,
       onReorderSteps,
+      onUngroup,
+      onDelete,
       selectedStepIndex,
       selectedStepIds,
       isDragging = false,
@@ -83,6 +87,9 @@ export const RepetitionBlockCard = forwardRef<
           onCancelEdit={handleCancelEdit}
           onEditValueChange={setEditValue}
           onKeyDown={handleKeyDown}
+          onAddStep={onAddStep}
+          onUngroup={onUngroup}
+          onDelete={onDelete}
           dragHandleProps={dragHandleProps}
         />
 

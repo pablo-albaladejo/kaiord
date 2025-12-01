@@ -1,30 +1,40 @@
 import { Check } from "lucide-react";
+import { forwardRef } from "react";
 import { getFileExtensionForFormat, type FormatOption } from "./format-options";
 
 type FormatOptionProps = {
   readonly option: FormatOption;
   readonly isSelected: boolean;
+  readonly isFocused: boolean;
   readonly onSelect: () => void;
+  readonly disabled: boolean;
 };
 
-export function FormatOptionItem({
-  option,
-  isSelected,
-  onSelect,
-}: FormatOptionProps) {
+export const FormatOptionItem = forwardRef<
+  HTMLButtonElement,
+  FormatOptionProps
+>(function FormatOptionItem(
+  { option, isSelected, isFocused, onSelect, disabled },
+  ref
+) {
   return (
     <button
+      ref={ref}
       type="button"
       onClick={onSelect}
+      disabled={disabled}
       className={`
-        w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700
-        first:rounded-t-lg last:rounded-b-lg
-        transition-colors
-        ${isSelected ? "bg-primary-50 dark:bg-primary-900/20" : ""}
-      `}
+          w-full text-left px-4 py-3 hover:bg-gray-50 dark:hover:bg-gray-700
+          first:rounded-t-lg last:rounded-b-lg
+          transition-colors
+          ${isSelected ? "bg-primary-50 dark:bg-primary-900/20" : ""}
+          ${isFocused ? "ring-2 ring-primary-500 ring-inset" : ""}
+          ${disabled ? "cursor-not-allowed opacity-50" : ""}
+        `}
       role="option"
       aria-selected={isSelected}
       aria-label={option.label}
+      tabIndex={isFocused ? 0 : -1}
       data-testid={`export-format-option-${option.value}`}
     >
       <div className="flex items-start justify-between gap-2">
@@ -57,4 +67,4 @@ export function FormatOptionItem({
       </div>
     </button>
   );
-}
+});
