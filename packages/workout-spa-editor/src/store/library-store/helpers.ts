@@ -4,15 +4,19 @@
  * Helper functions for library store operations.
  */
 
-import type { WorkoutTemplate } from "../../types/workout-library";
+import type { KRD } from "../../types/schemas";
+import type {
+  DifficultyLevel,
+  WorkoutTemplate,
+} from "../../types/workout-library";
 
 export function createNewTemplate(
   name: string,
   sport: string,
-  krd: unknown,
+  krd: KRD,
   options: {
     tags?: string[];
-    difficulty?: string;
+    difficulty?: DifficultyLevel;
     duration?: number;
     notes?: string;
     thumbnailData?: string;

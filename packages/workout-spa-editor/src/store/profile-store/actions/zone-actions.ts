@@ -9,7 +9,17 @@ import { updateProfileZones } from "../helpers/profile-updater";
 import { persistState } from "../persistence";
 import type { ProfileStore } from "../types";
 
-export const createZoneActions: StateCreator<ProfileStore> = (set) => ({
+type ZoneActions = Pick<
+  ProfileStore,
+  "updatePowerZones" | "updateHeartRateZones"
+>;
+
+export const createZoneActions: StateCreator<
+  ProfileStore,
+  [],
+  [],
+  ZoneActions
+> = (set) => ({
   updatePowerZones: (profileId, zones) => {
     set((state) => {
       const profileIndex = state.profiles.findIndex((p) => p.id === profileId);

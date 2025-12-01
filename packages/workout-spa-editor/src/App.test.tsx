@@ -109,12 +109,9 @@ describe("App", () => {
         { timeout: 2000 }
       );
 
-      // Act - Click the "Skip Tutorial" button (not the X button)
-      const skipButtons = screen.getAllByRole("button", {
-        name: /skip tutorial/i,
-      });
-      // The second button is the actual "Skip Tutorial" button with text
-      await user.click(skipButtons[1]);
+      // Act - Click the "Skip" button
+      const skipButton = screen.getByRole("button", { name: /^skip$/i });
+      await user.click(skipButton);
 
       // Assert - Tutorial should be closed
       await waitFor(
@@ -154,8 +151,8 @@ describe("App", () => {
       // Act - Navigate through all steps and complete
       // Click through all 6 steps (0-5)
       for (let i = 0; i < 6; i++) {
-        // On the last step, the button says "Complete", otherwise "Next step"
-        const buttonName = i === 5 ? /complete tutorial/i : /next step/i;
+        // On the last step, the button says "Finish", otherwise "Next"
+        const buttonName = i === 5 ? /finish/i : /next/i;
         const button = screen.getByRole("button", {
           name: buttonName,
         });

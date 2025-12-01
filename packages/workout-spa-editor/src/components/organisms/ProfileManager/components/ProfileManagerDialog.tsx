@@ -12,15 +12,22 @@ import { DialogHeader } from "./DialogHeader";
 import { ProfileListSection } from "./ProfileListSection";
 import { ProfileNotifications } from "./ProfileNotifications";
 
+type ProfileFormData = {
+  name: string;
+  bodyWeight?: number;
+  ftp?: number;
+  maxHeartRate?: number;
+};
+
 type ProfileManagerDialogProps = {
   profiles: Profile[];
   activeProfileId: string | null;
   editingProfile: Profile | null;
-  formData: Partial<Profile>;
+  formData: ProfileFormData;
   deleteConfirmId: string | null;
   importError: string | null;
   switchNotification: string | null;
-  setFormData: (data: Partial<Profile>) => void;
+  setFormData: (data: ProfileFormData) => void;
   handleCreate: () => void;
   handleEdit: (profile: Profile) => void;
   handleSave: () => void;
@@ -29,7 +36,7 @@ type ProfileManagerDialogProps = {
   handleDelete: (profileId: string) => void;
   confirmDelete: () => void;
   handleExport: (profile: Profile) => void;
-  handleImport: (file: File) => void;
+  handleImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
   setDeleteConfirmId: (id: string | null) => void;
 };
 

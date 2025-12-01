@@ -11,7 +11,25 @@ import { getNewActiveProfileId } from "../helpers/profile-utils";
 import { persistState } from "../persistence";
 import type { ProfileStore } from "../types";
 
-export const createCrudActions: StateCreator<ProfileStore> = (set, get) => ({
+type CrudActions = Pick<
+  ProfileStore,
+  | "profiles"
+  | "activeProfileId"
+  | "createProfile"
+  | "updateProfile"
+  | "deleteProfile"
+  | "getProfile"
+>;
+
+export const createCrudActions: StateCreator<
+  ProfileStore,
+  [],
+  [],
+  CrudActions
+> = (set, get) => ({
+  profiles: [],
+  activeProfileId: null,
+
   createProfile: (name, options = {}) => {
     const newProfile = createNewProfile(name, options);
 

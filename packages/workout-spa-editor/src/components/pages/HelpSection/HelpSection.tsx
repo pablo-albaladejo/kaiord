@@ -16,10 +16,12 @@ type HelpSectionProps = {
 };
 
 export function HelpSection({ onReplayTutorial }: HelpSectionProps) {
-  const handleReplayTutorial = () => {
-    resetOnboarding();
-    onReplayTutorial?.();
-  };
+  const handleReplayTutorial = onReplayTutorial
+    ? () => {
+        resetOnboarding();
+        onReplayTutorial();
+      }
+    : undefined;
 
   return (
     <div className="space-y-6">
