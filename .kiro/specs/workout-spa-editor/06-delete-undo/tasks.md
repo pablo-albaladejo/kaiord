@@ -5,21 +5,34 @@
 Add undo notifications for delete actions to prevent accidental data loss.
 
 **Target Release:** v1.1.0  
-**Estimated Effort:** 4-6 hours  
+**Estimated Effort:** 2-3 hours  
 **Priority:** LOW - Nice-to-have safety feature
 
-## Implementation Tasks
+## Implementation Status
 
-- [ ] 1. Add undo notification for delete
-  - Show notification with "Undo" button for 5 seconds
-  - Clicking "Undo" restores deleted step
-  - Auto-dismiss after 5 seconds
-  - Write unit tests for undo notification
-  - _Requirements: 39.3_
+✅ **Core functionality implemented:**
 
-- [ ] 2. Implement comprehensive testing strategy
-  - **Unit Tests** (80%+): undo logic, timer, cleanup
-  - **Component Tests** (70%+): notification UI, undo button
-  - **Integration Tests**: complete delete and undo flow
-  - **E2E Tests**: delete, undo, auto-dismiss, accessibility
-  - _Requirements: 39.3_
+- Store actions: `deleteStepAction`, `undoDeleteAction`, `clearExpiredDeletesAction`
+- Store integration: `deletedSteps` state, `undoDelete`, `clearExpiredDeletes` methods
+- UI integration: `useDeleteHandlers` hook with toast notification
+- Auto-cleanup: `useDeleteCleanup` hook integrated in App.tsx
+- Unit tests: All store actions and hooks tested (9/9 tests passing)
+
+## Remaining Tasks
+
+- [x] 1. Add unit tests for delete-step-action
+  - Test step deletion tracking
+  - Test deletedSteps array updates
+  - Test timestamp recording
+  - _Requirements: 39.3.1_
+
+- [x] 2. Add E2E tests for delete with undo flow
+  - Test delete step shows undo notification
+  - Test undo button restores deleted step
+  - Test notification auto-dismisses after 5 seconds
+  - Test multiple delete operations show separate notifications
+  - Test undo works correctly with step reindexing
+  - _Requirements: 39.3.1, 39.3.2, 39.3.3, 39.3.4_
+
+- [x] 3. Checkpoint - Ensure all tests pass
+  - Ensure all tests pass, ask the user if questions arise.

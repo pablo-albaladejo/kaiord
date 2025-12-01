@@ -55,15 +55,6 @@
     - Organize in clear sections with examples
     - _Requirements: 2.2, 2.5, 4.3_
 
-- [ ] 6. Create contributing documentation
-  - [ ] 6.1 Move and simplify docs/contributing.md
-    - Move CONTRIBUTING.md to docs/contributing.md
-    - Simplify language to B1 level
-    - Add clear step-by-step workflow
-    - Add links to architecture, testing, and deployment docs
-    - Remove redundant information
-    - _Requirements: 3.1, 3.2, 4.4_
-
 - [x] 7. Create format specification documentation
   - [x] 7.1 Create docs/krd-format.md
     - Move .kiro/steering/krd-format.md to docs/krd-format.md

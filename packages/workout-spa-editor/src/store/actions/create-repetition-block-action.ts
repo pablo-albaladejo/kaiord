@@ -7,24 +7,17 @@
  * - Requirement 4: Create repetition blocks from selected steps
  */
 
-import type {
-  KRD,
-  RepetitionBlock,
-  Workout,
-  WorkoutStep,
-} from "../../types/krd";
-import { isWorkoutStep } from "../../types/krd";
+import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import {
+  calculateInsertPosition,
+  extractSteps,
+  reindexSteps,
+} from "./repetition-block-helpers";
 
 /**
  * Creates a repetition block from selected step indices
- *
- * @param krd - Current KRD workout
- * @param stepIndices - Array of step indices to wrap in a repetition block
- * @param repeatCount - Number of times to repeat (minimum 1)
- * @param state - Current workout state
- * @returns Updated workout state
  */
 export const createRepetitionBlockAction = (
   krd: KRD,
@@ -32,71 +25,39 @@ export const createRepetitionBlockAction = (
   repeatCount: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.workout || stepIndices.length === 0 || repeatCount < 2) {
     return {};
   }
 
-  // Validate inputs
-  if (stepIndices.length === 0) return {};
-
-  if (repeatCount < 2) return {};
-
   const workout = krd.extensions.workout as Workout;
+  const selectedIndices = new Set(stepIndices);
 
-  // Sort indices to ensure correct order
-  const sortedIndices = [...stepIndices].sort((a, b) => a - b);
+  const { stepsToWrap, remainingSteps, insertPosition } = extractSteps(
+    workout,
+    selectedIndices
+  );
 
-  // Extract steps to be wrapped
-  const stepsToWrap: Array<WorkoutStep> = [];
-  const remainingSteps: Array<WorkoutStep | RepetitionBlock> = [];
-
-  for (const step of workout.steps) {
-    if (isWorkoutStep(step) && sortedIndices.includes(step.stepIndex)) {
-      stepsToWrap.push(step);
-    } else {
-      remainingSteps.push(step);
-    }
+  if (insertPosition === null || stepsToWrap.length === 0) {
+    return {};
   }
 
-  // Create the repetition block
-  const repetitionBlock: RepetitionBlock = {
-    repeatCount,
-    steps: stepsToWrap,
-  };
+  const repetitionBlock: RepetitionBlock = { repeatCount, steps: stepsToWrap };
+  const adjustedPosition = calculateInsertPosition(
+    workout,
+    insertPosition,
+    selectedIndices
+  );
 
-  // Insert the repetition block at the position of the first selected step
-  const insertPosition = sortedIndices[0];
   const newSteps = [
-    ...remainingSteps.slice(0, insertPosition),
+    ...remainingSteps.slice(0, adjustedPosition),
     repetitionBlock,
-    ...remainingSteps.slice(insertPosition),
+    ...remainingSteps.slice(adjustedPosition),
   ];
 
-  // Recalculate stepIndex for all remaining WorkoutSteps
-  let currentIndex = 0;
-  const reindexedSteps = newSteps.map((step) => {
-    if (isWorkoutStep(step)) {
-      const reindexedStep = {
-        ...step,
-        stepIndex: currentIndex,
-      };
-      currentIndex++;
-      return reindexedStep;
-    }
-    return step;
-  });
-
-  const updatedWorkout = {
-    ...workout,
-    steps: reindexedSteps,
-  };
-
+  const updatedWorkout = { ...workout, steps: reindexSteps(newSteps) };
   const updatedKrd: KRD = {
     ...krd,
-    extensions: {
-      ...krd.extensions,
-      workout: updatedWorkout,
-    },
+    extensions: { ...krd.extensions, workout: updatedWorkout },
   };
 
   return createUpdateWorkoutAction(updatedKrd, state);

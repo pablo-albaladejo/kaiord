@@ -1,5 +1,26 @@
 import { z } from "zod";
 
+/**
+ * Zod schema for sub-sport type enumeration.
+ *
+ * Defines detailed sport subtypes for more specific categorization.
+ * Uses snake_case for multi-word values following KRD format conventions.
+ *
+ * @example
+ * ```typescript
+ * import { subSportSchema } from '@kaiord/core';
+ *
+ * // Access enum values
+ * const trail = subSportSchema.enum.trail;
+ * const indoorCycling = subSportSchema.enum.indoor_cycling;
+ *
+ * // Validate sub-sport
+ * const result = subSportSchema.safeParse('trail');
+ * if (result.success) {
+ *   console.log('Valid sub-sport:', result.data);
+ * }
+ * ```
+ */
 export const subSportSchema = z.enum([
   "generic",
   "treadmill",
@@ -64,4 +85,9 @@ export const subSportSchema = z.enum([
   "all",
 ]);
 
+/**
+ * TypeScript type for sub-sport, inferred from {@link subSportSchema}.
+ *
+ * String literal union of supported sub-sport types.
+ */
 export type SubSport = z.infer<typeof subSportSchema>;

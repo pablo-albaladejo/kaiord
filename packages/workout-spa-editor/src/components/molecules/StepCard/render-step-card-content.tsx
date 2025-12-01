@@ -20,6 +20,7 @@ type RenderStepCardContentProps = {
   isDragging: boolean;
   onDelete?: StepCardProps["onDelete"];
   onDuplicate?: StepCardProps["onDuplicate"];
+  onCopy?: StepCardProps["onCopy"];
 };
 
 export const renderStepCardContent = ({
@@ -30,6 +31,7 @@ export const renderStepCardContent = ({
   isDragging,
   onDelete,
   onDuplicate,
+  onCopy,
 }: RenderStepCardContentProps) => (
   <>
     {dragHandleProps && (
@@ -39,6 +41,7 @@ export const renderStepCardContent = ({
       stepIndex={step.stepIndex}
       onDelete={onDelete}
       onDuplicate={onDuplicate}
+      onCopy={onCopy}
     />
     <StepHeader
       stepName={step.name || `Step ${displayIndex + 1}`}

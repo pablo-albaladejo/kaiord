@@ -5,7 +5,7 @@
 Complete the repetition block functionality by implementing UI controls for creating, editing, and managing repetition blocks.
 
 **Target Release:** v1.2.0  
-**Estimated Effort:** 12-16 hours  
+**Estimated Effort:** 8-12 hours  
 **Priority:** HIGH - Core feature missing UI
 
 ## Current State Analysis
@@ -13,41 +13,35 @@ Complete the repetition block functionality by implementing UI controls for crea
 **Already Implemented:**
 
 - ✅ RepetitionBlockCard component (display, expand/collapse, edit count)
+- ✅ CreateRepetitionBlockDialog component (basic dialog structure)
 - ✅ createRepetitionBlockAction (store action)
 - ✅ Type guards (isRepetitionBlock, isWorkoutStep)
 - ✅ Workout stats calculation with repetitions
+- ✅ Multi-select state management (selectedStepIds in store)
+- ✅ Step selection with Ctrl/Cmd+Click (toggleStepSelection action)
+- ✅ E2E tests for basic repetition block creation and editing
 
 **Missing:**
 
-- ❌ Multi-select functionality for steps
-- ❌ "Create Repetition Block" button and dialog
-- ❌ Ungroup repetition block action
-- ❌ Context menu for block actions
-- ❌ Keyboard shortcuts
-- ❌ E2E tests for block creation workflow
+- ❌ CreateRepetitionBlockButton component (shows when 2+ steps selected)
+- ❌ Ungroup repetition block action and UI
+- ❌ Context menu for block actions (Edit Count, Add Step, Ungroup, Delete)
+- ❌ Keyboard shortcuts (Ctrl+G, Ctrl+Shift+G, Ctrl+A, Escape)
+- ❌ Validation utilities for block creation
+- ❌ Integration of CreateRepetitionBlockButton into WorkoutStepsList
+- ❌ E2E tests for ungroup workflow and keyboard shortcuts
 
 ## Implementation Tasks
 
-- [ ] 1. Implement multi-select functionality
-  - Create useMultiSelect hook for selection state management
-  - Support Ctrl/Cmd+Click for toggle selection
-  - Support Shift+Click for range selection
-  - Support regular click for single selection
-  - Add clearSelection and selectAll methods
-  - Write unit tests for hook (80%+ coverage)
+- [x] 1. Multi-select functionality (COMPLETED)
+  - ✅ Store already has selectedStepIds state
+  - ✅ toggleStepSelection action implemented
+  - ✅ StepCard supports multi-select with Ctrl/Cmd+Click
+  - ✅ E2E tests verify multi-selection works
   - _Requirements: 7.2_
-  - _Files: hooks/useMultiSelect.ts, hooks/useMultiSelect.test.ts_
+  - _Note: Multi-select is fully functional, no additional work needed_
 
-- [ ] 2. Update StepCard to support multi-select
-  - Add isMultiSelected prop and styling
-  - Add onMultiSelect handler
-  - Update click handler to detect modifier keys
-  - Add visual indicator for multi-selected state
-  - Write component tests (70%+ coverage)
-  - _Requirements: 7.2.5_
-  - _Files: components/molecules/StepCard/StepCard.tsx, components/molecules/StepCard/StepCard.test.tsx_
-
-- [ ] 3. Create CreateRepetitionBlockButton component
+- [x] 2. Create CreateRepetitionBlockButton component
   - Show button only when 2+ steps selected
   - Display selected step count
   - Handle onClick to open dialog
@@ -56,66 +50,65 @@ Complete the repetition block functionality by implementing UI controls for crea
   - _Requirements: 7.1.1_
   - _Files: components/molecules/CreateRepetitionBlockButton/CreateRepetitionBlockButton.tsx, components/molecules/CreateRepetitionBlockButton/CreateRepetitionBlockButton.test.tsx_
 
-- [ ] 4. Create CreateRepetitionBlockDialog component
-  - Dialog with repeat count input (min: 2)
-  - Show selected step count
-  - Validate repeat count on confirm
-  - Handle confirm/cancel actions
-  - Show error messages for invalid input
-  - Write component tests (70%+ coverage)
-  - _Requirements: 7.1.2, 7.1.3, 7.1.5_
+- [x] 3. Update CreateRepetitionBlockDialog validation
+  - Change minimum repeat count from 1 to 2
+  - Update error message to reflect minimum of 2
+  - Update tests to verify new validation
+  - _Requirements: 7.1.5_
   - _Files: components/molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog.tsx, components/molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog.test.tsx_
 
-- [ ] 5. Integrate multi-select into WorkoutSection
-  - Add selectedStepIndices to workout store state
-  - Update WorkoutStepsList to pass multi-select props
-  - Connect CreateRepetitionBlockButton to store
-  - Connect CreateRepetitionBlockDialog to store action
-  - Handle block creation workflow
+- [x] 4. Integrate CreateRepetitionBlockButton into WorkoutStepsList
+  - Add CreateRepetitionBlockButton above AddStepButton
+  - Show button only when selectedStepIds.length >= 2
+  - Connect button to open CreateRepetitionBlockDialog
+  - Connect dialog to createRepetitionBlock store action
+  - Handle block creation workflow (create block, clear selection)
+  - Add spacing and visual hierarchy
+  - Ensure mobile responsiveness
   - Write integration tests
   - _Requirements: 7.1_
-  - _Files: store/workout-store.ts, components/pages/WorkoutSection/WorkoutSection.tsx, components/pages/WorkoutSection/useWorkoutSectionState.ts_
+  - _Files: components/pages/WorkoutSection/WorkoutStepsList.tsx, components/pages/WorkoutSection/WorkoutSection.tsx_
 
-- [ ] 6. Implement ungroup repetition block action
+- [x] 5. Implement ungroup repetition block action
   - Create ungroupRepetitionBlockAction store action
   - Extract steps from block
-  - Recalculate step indices
+  - Recalculate step indices using existing recalculateStepIndices utility
   - Update workout and trigger re-render
+  - Add ungroupRepetitionBlock method to workout store
   - Write unit tests for action (80%+ coverage)
   - _Requirements: 7.4_
-  - _Files: store/actions/ungroup-repetition-block-action.ts, store/actions/ungroup-repetition-block-action.test.ts_
+  - _Files: store/actions/ungroup-repetition-block-action.ts, store/actions/ungroup-repetition-block-action.test.ts, store/workout-store.ts_
 
-- [ ] 7. Create RepetitionBlockContextMenu component
+- [x] 6. Create RepetitionBlockContextMenu component
   - Dropdown menu with actions: Edit Count, Add Step, Ungroup, Delete
   - Handle all menu item clicks
-  - Add proper icons for each action
+  - Add proper icons for each action (Edit, Plus, Ungroup, Trash)
   - Write component tests (70%+ coverage)
   - _Requirements: 7.5_
   - _Files: components/molecules/RepetitionBlockCard/RepetitionBlockContextMenu.tsx, components/molecules/RepetitionBlockCard/RepetitionBlockContextMenu.test.tsx_
 
-- [ ] 8. Integrate context menu into RepetitionBlockCard
-  - Add context menu trigger button
-  - Connect menu actions to store
+- [x] 7. Integrate context menu into RepetitionBlockCard
+  - Add context menu trigger button to RepetitionBlockHeader
+  - Connect menu actions to store methods
   - Handle Edit Count (activate inline editing)
-  - Handle Add Step (add step inside block)
-  - Handle Ungroup (call ungroup action)
-  - Handle Delete (show confirmation dialog)
+  - Handle Add Step (call addStepToRepetitionBlock)
+  - Handle Ungroup (call ungroupRepetitionBlock)
+  - Handle Delete (show DeleteConfirmDialog, then delete block)
   - Write integration tests
   - _Requirements: 7.5_
-  - _Files: components/molecules/RepetitionBlockCard/RepetitionBlockCard.tsx_
+  - _Files: components/molecules/RepetitionBlockCard/RepetitionBlockCard.tsx, components/molecules/RepetitionBlockCard/RepetitionBlockHeader.tsx_
 
-- [ ] 9. Implement keyboard shortcuts
-  - Create useRepetitionBlockShortcuts hook
-  - Ctrl/Cmd+G: Create block from selection
-  - Ctrl/Cmd+Shift+G: Ungroup selected block
-  - Ctrl/Cmd+A: Select all steps
-  - Escape: Clear selection
-  - Delete: Delete selected block
-  - Write unit tests for hook (80%+ coverage)
+- [x] 8. Implement keyboard shortcuts for repetition blocks
+  - Extend existing useKeyboardShortcuts hook with new handlers
+  - Add Ctrl/Cmd+G: Create block from selection (if 2+ steps selected)
+  - Add Ctrl/Cmd+Shift+G: Ungroup selected block (if block is selected)
+  - Add Ctrl/Cmd+A: Select all steps
+  - Add Escape: Clear selection
+  - Update tests to verify new shortcuts
   - _Requirements: 7.6_
-  - _Files: hooks/useRepetitionBlockShortcuts.ts, hooks/useRepetitionBlockShortcuts.test.ts_
+  - _Files: hooks/useKeyboardShortcuts.ts, hooks/useKeyboardShortcuts.test.ts_
 
-- [ ] 10. Add validation utilities
+- [x] 9. Add validation utilities
   - Create validateRepetitionBlockCreation function
   - Validate minimum steps (2+)
   - Validate minimum repeat count (2+)
@@ -124,50 +117,28 @@ Complete the repetition block functionality by implementing UI controls for crea
   - _Requirements: 7.1.5_
   - _Files: utils/repetition-block-validation.ts, utils/repetition-block-validation.test.ts_
 
-- [ ] 11. Update WorkoutStepsList layout
-  - Add CreateRepetitionBlockButton above AddStepButton
-  - Show button only when steps are selected
-  - Add spacing and visual hierarchy
-  - Ensure mobile responsiveness
-  - Write component tests
-  - _Requirements: 7.1.1_
-  - _Files: components/pages/WorkoutSection/WorkoutStepsList.tsx_
-
-- [ ] 12. Implement comprehensive E2E tests
-  - **Create Block Flow**
-    - Select multiple steps with Ctrl+Click
-    - Click "Create Repetition Block"
-    - Set repeat count
-    - Verify block created
-    - Verify stats updated
-  - **Edit Block Flow**
-    - Click block to expand
-    - Edit repeat count
-    - Verify stats recalculated
-  - **Ungroup Block Flow**
+- [x] 10. Update E2E tests for new functionality
+  - Add tests to existing e2e/repetition-blocks.spec.ts file
+  - **Ungroup Block Flow** (NEW)
+    - Create repetition block
     - Open context menu
     - Click "Ungroup"
-    - Verify steps extracted
-  - **Keyboard Shortcuts**
-    - Test Ctrl+G creates block
-    - Test Ctrl+Shift+G ungroups block
-    - Test Ctrl+A selects all
+    - Verify steps extracted correctly
+    - Verify step indices recalculated
+  - **Keyboard Shortcuts** (NEW)
+    - Test Ctrl+G creates block from selected steps
+    - Test Ctrl+Shift+G ungroups selected block
+    - Test Ctrl+A selects all steps
     - Test Escape clears selection
-  - **Multi-Select**
-    - Test Ctrl+Click toggles selection
-    - Test Shift+Click selects range
-    - Test regular click selects single
-  - **Mobile Flow**
-    - Test touch selection
-    - Test block creation on mobile
-  - _Requirements: 7.1, 7.2, 7.3, 7.4, 7.5, 7.6_
-  - _Files: e2e/repetition-block-ui.spec.ts_
+  - **Context Menu Actions** (NEW)
+    - Test Edit Count opens inline editor
+    - Test Add Step adds step to block
+    - Test Delete shows confirmation and removes block
+  - _Requirements: 7.4, 7.5, 7.6_
+  - _Files: e2e/repetition-blocks.spec.ts_
+  - _Note: Basic block creation and editing E2E tests already exist_
 
-- [ ]\* 13. Add property-based tests
-  - **Property 1: Multi-select consistency**
-    - Generate random selection sequences
-    - Verify selected indices are always valid
-    - **Validates: Requirements 7.2.1, 7.2.2, 7.2.3**
+- [x] 11. Add property-based tests (OPTIONAL)
   - **Property 2: Block creation preserves steps**
     - Generate random step selections
     - Create block and verify step data unchanged
@@ -180,8 +151,9 @@ Complete the repetition block functionality by implementing UI controls for crea
     - Perform random operations
     - Verify all indices unique and sequential
     - **Validates: Requirements 7.1.4, 7.4.4**
-  - _Requirements: 7.1, 7.2, 7.4_
-  - _Files: hooks/useMultiSelect.property.test.ts, store/actions/repetition-block-actions.property.test.ts_
+  - _Requirements: 7.1, 7.4_
+  - _Files: store/actions/create-repetition-block-action.property.test.ts, store/actions/ungroup-repetition-block-action.property.test.ts_
+  - _Note: Multi-select property tests already exist in WorkoutList.multi-selection.test.tsx_
 
 ## Testing Requirements
 

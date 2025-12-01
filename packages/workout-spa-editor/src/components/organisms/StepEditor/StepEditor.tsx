@@ -35,11 +35,13 @@ export const StepEditor = ({
         stepIndex={step.stepIndex}
         duration={state.duration}
         target={state.target}
+        notes={state.notes}
         durationError={state.durationError}
         targetError={state.targetError}
         hasErrors={hasErrors}
         onDurationChange={handlers.handleDurationChange}
         onTargetChange={handlers.handleTargetChange}
+        onNotesChange={handlers.handleNotesChange}
         onSave={handlers.handleSave}
         onCancel={handlers.handleCancel}
       />

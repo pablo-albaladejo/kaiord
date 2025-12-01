@@ -6,7 +6,7 @@
  * This module consolidates schema exports from focused submodules.
  */
 
-// Re-export core schemas from @kaiord/core
+// Re-export core schemas and types from @kaiord/core
 export {
   durationSchema,
   durationTypeSchema,
@@ -27,6 +27,28 @@ export {
   targetUnitSchema,
   workoutSchema,
   workoutStepSchema,
+} from "./schemas/core-exports";
+
+export type {
+  Duration,
+  DurationType,
+  Equipment,
+  Intensity,
+  KRD,
+  KRDEvent,
+  KRDLap,
+  KRDMetadata,
+  KRDRecord,
+  KRDSession,
+  RepetitionBlock,
+  Sport,
+  SubSport,
+  SwimStroke,
+  Target,
+  TargetType,
+  TargetUnit,
+  Workout,
+  WorkoutStep,
 } from "./schemas/core-exports";
 
 // Re-export form validation schemas

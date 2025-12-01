@@ -1,10 +1,18 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+import { useProfileStore } from "../../../store/profile-store";
 import type { Target } from "../../../types/krd";
 import { TargetPicker } from "./TargetPicker";
 
 describe("TargetPicker", () => {
+  beforeEach(() => {
+    useProfileStore.setState({
+      profiles: [],
+      activeProfileId: null,
+    });
+  });
+
   it("should render with open target by default", () => {
     const onChange = vi.fn();
 
@@ -188,7 +196,7 @@ describe("TargetPicker", () => {
     expect(screen.getByRole("option", { name: "Watts" })).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "% FTP" })).toBeInTheDocument();
     expect(
-      screen.getByRole("option", { name: "Power Zone" })
+      screen.getByRole("option", { name: "Power Zone (no profile)" })
     ).toBeInTheDocument();
     expect(screen.getByRole("option", { name: "Range" })).toBeInTheDocument();
   });
@@ -209,5 +217,156 @@ describe("TargetPicker", () => {
     // Value should be cleared
     const input = screen.getByLabelText("Heart Rate (BPM)");
     expect(input).toHaveValue(null);
+  });
+
+  describe("Profile Integration", () => {
+    it("should show zone name when profile is active and zone is selected", () => {
+      // Arrange
+      const profile = useProfileStore.getState().createProfile("Test Profile", {
+        ftp: 250,
+        maxHeartRate: 180,
+      });
+      useProfileStore.getState().setActiveProfile(profile.id);
+
+      const onChange = vi.fn();
+      const value: Target = {
+        type: "power",
+        value: { unit: "zone", value: 3 },
+      };
+
+      // Act
+      render(<TargetPicker value={value} onChange={onChange} />);
+
+      // Assert
+      expect(screen.getByText(/Tempo/)).toBeInTheDocument();
+      expect(screen.getByText(/190-225W/)).toBeInTheDocument();
+    });
+
+    it("should show heart rate zone name when profile is active", () => {
+      // Arrange
+      const profile = useProfileStore.getState().createProfile("Test Profile", {
+        maxHeartRate: 180,
+      });
+      useProfileStore.getState().setActiveProfile(profile.id);
+
+      const onChange = vi.fn();
+      const value: Target = {
+        type: "heart_rate",
+        value: { unit: "zone", value: 2 },
+      };
+
+      // Act
+      render(<TargetPicker value={value} onChange={onChange} />);
+
+      // Assert
+      expect(screen.getByText(/Aerobic/)).toBeInTheDocument();
+      expect(screen.getByText(/108-126 BPM/)).toBeInTheDocument();
+    });
+
+    it("should not show zone info when no profile is active", () => {
+      // Arrange
+      const onChange = vi.fn();
+      const value: Target = {
+        type: "power",
+        value: { unit: "zone", value: 3 },
+      };
+
+      // Act
+      render(<TargetPicker value={value} onChange={onChange} />);
+
+      // Assert
+      expect(screen.queryByText(/Tempo/)).not.toBeInTheDocument();
+    });
+
+    it("should update zone info when profile changes", () => {
+      // Arrange
+      const profile1 = useProfileStore.getState().createProfile("Profile 1", {
+        ftp: 250,
+      });
+      useProfileStore.getState().setActiveProfile(profile1.id);
+
+      const onChange = vi.fn();
+      const value: Target = {
+        type: "power",
+        value: { unit: "zone", value: 3 },
+      };
+
+      const { rerender } = render(
+        <TargetPicker value={value} onChange={onChange} />
+      );
+
+      // Assert initial zone info
+      expect(screen.getByText(/190-225W/)).toBeInTheDocument();
+
+      // Act - Change profile
+      const profile2 = useProfileStore.getState().createProfile("Profile 2", {
+        ftp: 300,
+      });
+      useProfileStore.getState().setActiveProfile(profile2.id);
+
+      rerender(<TargetPicker value={value} onChange={onChange} />);
+
+      // Assert updated zone info
+      expect(screen.getByText(/228-270W/)).toBeInTheDocument();
+    });
+
+    it("should show zone label with no profile indicator when no profile", () => {
+      // Arrange
+      const onChange = vi.fn();
+      const value: Target = {
+        type: "power",
+        value: { unit: "zone", value: 1 },
+      };
+
+      // Act
+      render(<TargetPicker value={value} onChange={onChange} />);
+
+      // Assert
+      const unitSelect = screen.getByLabelText("Select target unit");
+      const zoneOption = Array.from(unitSelect.querySelectorAll("option")).find(
+        (opt) => opt.value === "zone"
+      );
+      expect(zoneOption?.textContent).toBe("Power Zone (no profile)");
+    });
+
+    it("should calculate absolute power values from zone and FTP", () => {
+      // Arrange
+      const profile = useProfileStore.getState().createProfile("Test Profile", {
+        ftp: 200,
+      });
+      useProfileStore.getState().setActiveProfile(profile.id);
+
+      const onChange = vi.fn();
+      const value: Target = {
+        type: "power",
+        value: { unit: "zone", value: 4 },
+      };
+
+      // Act
+      render(<TargetPicker value={value} onChange={onChange} />);
+
+      // Assert - Zone 4 is 91-105% of FTP
+      expect(screen.getByText(/182-210W/)).toBeInTheDocument();
+    });
+
+    it("should not show power range when FTP is not set", () => {
+      // Arrange
+      const profile = useProfileStore.getState().createProfile("Test Profile");
+      useProfileStore.getState().setActiveProfile(profile.id);
+
+      const onChange = vi.fn();
+      const value: Target = {
+        type: "power",
+        value: { unit: "zone", value: 3 },
+      };
+
+      // Act
+      render(<TargetPicker value={value} onChange={onChange} />);
+
+      // Assert - Should show zone name but not power range
+      expect(screen.getByText(/Tempo/)).toBeInTheDocument();
+      // Should not show power range in watts (e.g., "190-225W")
+      expect(screen.queryByText(/\d+-\d+W/)).not.toBeInTheDocument();
+    });
   });
 });

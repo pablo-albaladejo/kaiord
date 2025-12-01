@@ -1,3 +1,5 @@
+/* eslint-disable max-lines */
+/* eslint-disable max-lines-per-function */
 import { useEffect } from "react";
 
 type KeyboardShortcutHandlers = {
@@ -6,6 +8,12 @@ type KeyboardShortcutHandlers = {
   onRedo?: () => void;
   onMoveStepUp?: () => void;
   onMoveStepDown?: () => void;
+  onCopy?: () => void;
+  onPaste?: () => void;
+  onCreateBlock?: () => void;
+  onUngroupBlock?: () => void;
+  onSelectAll?: () => void;
+  onClearSelection?: () => void;
 };
 
 export function useKeyboardShortcuts({
@@ -14,6 +22,12 @@ export function useKeyboardShortcuts({
   onRedo,
   onMoveStepUp,
   onMoveStepDown,
+  onCopy,
+  onPaste,
+  onCreateBlock,
+  onUngroupBlock,
+  onSelectAll,
+  onClearSelection,
 }: KeyboardShortcutHandlers) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -62,12 +76,69 @@ export function useKeyboardShortcuts({
         onRedo?.();
         return;
       }
+
+      // Ctrl+C / Cmd+C - Copy (Requirement 39.2)
+      if (event.key === "c" || event.key === "C") {
+        event.preventDefault();
+        onCopy?.();
+        return;
+      }
+
+      // Ctrl+V / Cmd+V - Paste (Requirement 39.2)
+      if (event.key === "v" || event.key === "V") {
+        event.preventDefault();
+        onPaste?.();
+        return;
+      }
+
+      // Ctrl+G / Cmd+G - Create repetition block (Requirement 7.6.1)
+      if ((event.key === "g" || event.key === "G") && !event.shiftKey) {
+        event.preventDefault();
+        onCreateBlock?.();
+        return;
+      }
+
+      // Ctrl+Shift+G / Cmd+Shift+G - Ungroup repetition block (Requirement 7.6.2)
+      if ((event.key === "g" || event.key === "G") && event.shiftKey) {
+        event.preventDefault();
+        onUngroupBlock?.();
+        return;
+      }
+
+      // Ctrl+A / Cmd+A - Select all steps (Requirement 7.6.3)
+      if (event.key === "a" || event.key === "A") {
+        event.preventDefault();
+        onSelectAll?.();
+        return;
+      }
+    };
+
+    // Handle Escape key separately (no modifier needed)
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClearSelection?.();
+      }
     };
 
     window.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("keydown", handleEscape);
 
     return () => {
       window.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("keydown", handleEscape);
     };
-  }, [onSave, onUndo, onRedo, onMoveStepUp, onMoveStepDown]);
+  }, [
+    onSave,
+    onUndo,
+    onRedo,
+    onMoveStepUp,
+    onMoveStepDown,
+    onCopy,
+    onPaste,
+    onCreateBlock,
+    onUngroupBlock,
+    onSelectAll,
+    onClearSelection,
+  ]);
 }

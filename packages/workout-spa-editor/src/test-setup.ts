@@ -32,6 +32,14 @@ beforeEach(() => {
   if (!Element.prototype.releasePointerCapture) {
     Element.prototype.releasePointerCapture = vi.fn();
   }
+
+  // Mock ResizeObserver for Radix UI Tooltip
+  // jsdom doesn't implement ResizeObserver
+  global.ResizeObserver = vi.fn().mockImplementation(() => ({
+    observe: vi.fn(),
+    unobserve: vi.fn(),
+    disconnect: vi.fn(),
+  }));
 });
 
 // Cleanup after each test

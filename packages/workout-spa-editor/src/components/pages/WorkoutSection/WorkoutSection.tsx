@@ -48,6 +48,8 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         onToggleStepSelection={state.handleToggleStepSelection}
         onStepDelete={state.handleDeleteRequest}
         onStepDuplicate={state.duplicateStep}
+        onStepCopy={state.copyStep}
+        onStepPaste={state.pasteStep}
         onStepReorder={state.reorderStep}
         onReorderStepsInBlock={state.reorderStepsInBlock}
         onAddStep={state.createStep}
@@ -55,28 +57,27 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         onCreateEmptyRepetitionBlock={state.handleCreateEmptyRepetitionBlock}
         onEditRepetitionBlock={state.handleEditRepetitionBlock}
         onAddStepToRepetitionBlock={state.handleAddStepToRepetitionBlock}
+        onUngroupRepetitionBlock={state.handleUngroupRepetitionBlock}
+        onDeleteRepetitionBlock={state.handleDeleteRepetitionBlock}
         onDuplicateStepInRepetitionBlock={
           state.handleDuplicateStepInRepetitionBlock
         }
       />
-      {state.stepToDelete !== null && (
-        <DeleteConfirmDialog
-          stepIndex={state.stepToDelete}
-          onConfirm={state.handleDeleteConfirm}
-          onCancel={state.handleDeleteCancel}
-        />
-      )}
-      {state.showCreateBlockDialog && (
-        <CreateRepetitionBlockDialog
-          stepCount={
-            state.selectedStepIds.length >= 2
-              ? state.selectedStepIds.length
-              : undefined
-          }
-          onConfirm={state.handleConfirmCreateBlock}
-          onCancel={state.handleCancelCreateBlock}
-        />
-      )}
+      <DeleteConfirmDialog
+        stepIndex={state.stepToDelete}
+        onConfirm={state.handleDeleteConfirm}
+        onCancel={state.handleDeleteCancel}
+      />
+      <CreateRepetitionBlockDialog
+        stepCount={
+          state.selectedStepIds.length >= 2
+            ? state.selectedStepIds.length
+            : undefined
+        }
+        onConfirm={state.handleConfirmCreateBlock}
+        onCancel={state.handleCancelCreateBlock}
+        isOpen={state.showCreateBlockDialog}
+      />
     </div>
   );
 }

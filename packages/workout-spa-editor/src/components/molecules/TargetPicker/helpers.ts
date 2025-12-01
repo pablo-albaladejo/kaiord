@@ -1,7 +1,14 @@
 import type { Target } from "../../../types/krd";
+import type { Profile } from "../../../types/profile";
 import type { TargetUnitOption } from "./TargetPicker.types";
 import { getValueLabel, getValuePlaceholder } from "./helpers-labels";
 
+export {
+  calculateHeartRateFromZone,
+  calculatePowerFromZone,
+  getHeartRateZoneName,
+  getPowerZoneName,
+} from "./helpers-zones";
 export { getValueLabel, getValuePlaceholder };
 
 export const getTargetTypeFromValue = (
@@ -21,20 +28,27 @@ export const getTargetTypeFromValue = (
 };
 
 export const getUnitOptions = (
-  targetType: "power" | "heart_rate" | "pace" | "cadence" | "open"
+  targetType: "power" | "heart_rate" | "pace" | "cadence" | "open",
+  activeProfile?: Profile | null
 ): Array<TargetUnitOption> => {
   switch (targetType) {
     case "power":
       return [
         { value: "watts", label: "Watts" },
         { value: "percent_ftp", label: "% FTP" },
-        { value: "zone", label: "Power Zone" },
+        {
+          value: "zone",
+          label: activeProfile ? "Power Zone" : "Power Zone (no profile)",
+        },
         { value: "range", label: "Range" },
       ];
     case "heart_rate":
       return [
         { value: "bpm", label: "BPM" },
-        { value: "zone", label: "HR Zone" },
+        {
+          value: "zone",
+          label: activeProfile ? "HR Zone" : "HR Zone (no profile)",
+        },
         { value: "percent_max", label: "% Max HR" },
         { value: "range", label: "Range" },
       ];
@@ -54,25 +68,9 @@ export const getUnitOptions = (
   }
 };
 
-export const getCurrentUnit = (value: Target | null): string => {
-  if (!value || value.type === "open") return "";
-  return value.value.unit;
-};
-
-export const getValueString = (value: Target | null): string => {
-  if (!value || value.type === "open") return "";
-  if (value.value.unit === "range") return "";
-  return String(value.value.value || "");
-};
-
-export const getRangeMinString = (value: Target | null): string => {
-  if (!value || value.type === "open") return "";
-  if (value.value.unit !== "range") return "";
-  return String(value.value.min || "");
-};
-
-export const getRangeMaxString = (value: Target | null): string => {
-  if (!value || value.type === "open") return "";
-  if (value.value.unit !== "range") return "";
-  return String(value.value.max || "");
-};
+export {
+  getCurrentUnit,
+  getRangeMaxString,
+  getRangeMinString,
+  getValueString,
+} from "./helpers-values";
