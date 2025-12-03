@@ -17,16 +17,18 @@ export const createBlockMethods = (
     ),
   createEmptyRepetitionBlock: (repeatCount: number) =>
     set((state) => actions.createEmptyRepetitionBlock(repeatCount, state)),
-  editRepetitionBlock: (blockIndex: number, repeatCount: number) =>
-    set((state) => actions.editRepetitionBlock(blockIndex, repeatCount, state)),
-  addStepToRepetitionBlock: (blockIndex: number) =>
-    set((state) => actions.addStepToRepetitionBlock(blockIndex, state)),
-  duplicateStepInRepetitionBlock: (blockIndex: number, stepIndex: number) =>
+  editRepetitionBlock: (blockId: string, repeatCount: number) =>
+    set((state) => actions.editRepetitionBlock(blockId, repeatCount, state)),
+  addStepToRepetitionBlock: (blockId: string) =>
+    set((state) => actions.addStepToRepetitionBlock(blockId, state)),
+  duplicateStepInRepetitionBlock: (blockId: string, stepIndex: number) =>
     set((state) =>
-      actions.duplicateStepInRepetitionBlock(blockIndex, stepIndex, state)
+      actions.duplicateStepInRepetitionBlock(blockId, stepIndex, state)
     ),
-  ungroupRepetitionBlock: (blockIndex: number) =>
-    set((state) => actions.ungroupRepetitionBlock(blockIndex, state)),
+  ungroupRepetitionBlock: (blockId: string) =>
+    set((state) => actions.ungroupRepetitionBlock(blockId, state)),
+  deleteRepetitionBlock: (blockId: string) =>
+    set((state) => actions.deleteRepetitionBlock(blockId, state)),
 });
 
 export const createAllWorkoutMethods = (

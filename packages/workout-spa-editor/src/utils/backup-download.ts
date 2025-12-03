@@ -33,31 +33,60 @@ export const downloadBackup = (workout: KRD, filename?: string): void => {
 
 /**
  * Create a backup prompt that offers to download before proceeding
+ * This function uses the modal system instead of browser alerts
  * Returns a promise that resolves to true if user wants to proceed
  */
-export const promptBackupDownload = async (
+export const promptBackupDownload = (
   workout: KRD,
-  operationName: string
+  operationName: string,
+  showModal: (config: {
+    title: string;
+    message: string;
+    confirmLabel: string;
+    cancelLabel: string;
+    onConfirm: () => void;
+    onCancel: () => void;
+    variant: "default" | "destructive";
+  }) => void
 ): Promise<boolean> => {
-  const message = `This operation (${operationName}) may modify your workout significantly. Would you like to download a backup first?`;
+  return new Promise((resolve) => {
+    const message = `This operation (${operationName}) may modify your workout significantly. Would you like to download a backup first?`;
 
-  const shouldDownload = window.confirm(message);
+    showModal({
+      title: "Download Backup?",
+      message,
+      confirmLabel: "Download Backup",
+      cancelLabel: "Skip Backup",
+      variant: "default",
+      onConfirm: () => {
+        downloadBackup(workout);
 
-  if (shouldDownload) {
-    downloadBackup(workout);
-
-    // Give user time to see the download
-    await new Promise((resolve) => setTimeout(resolve, 500));
-
-    const proceed = window.confirm(
-      "Backup downloaded. Do you want to proceed with the operation?"
-    );
-    return proceed;
-  }
-
-  // User declined backup, ask if they still want to proceed
-  const proceedWithoutBackup = window.confirm(
-    "Are you sure you want to proceed without a backup?"
-  );
-  return proceedWithoutBackup;
+        // Give user time to see the download, then ask to proceed
+        setTimeout(() => {
+          showModal({
+            title: "Proceed with Operation?",
+            message:
+              "Backup downloaded. Do you want to proceed with the operation?",
+            confirmLabel: "Proceed",
+            cancelLabel: "Cancel",
+            variant: "default",
+            onConfirm: () => resolve(true),
+            onCancel: () => resolve(false),
+          });
+        }, 500);
+      },
+      onCancel: () => {
+        // User declined backup, ask if they still want to proceed
+        showModal({
+          title: "Proceed Without Backup?",
+          message: "Are you sure you want to proceed without a backup?",
+          confirmLabel: "Proceed Anyway",
+          cancelLabel: "Cancel",
+          variant: "destructive",
+          onConfirm: () => resolve(true),
+          onCancel: () => resolve(false),
+        });
+      },
+    });
+  });
 };

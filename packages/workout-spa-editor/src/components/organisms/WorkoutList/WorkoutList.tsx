@@ -12,7 +12,7 @@ import { WorkoutListDragOverlay } from "./WorkoutListDragOverlay";
 export type { WorkoutListProps };
 
 export const WorkoutList = (props: WorkoutListProps) => {
-  const { workout, className = "", onStepReorder, ...restProps } = props;
+  const { workout, className = "", onStepReorder } = props;
 
   const baseClasses = "flex flex-col gap-4";
   const classes = [baseClasses, className].filter(Boolean).join(" ");
@@ -30,12 +30,7 @@ export const WorkoutList = (props: WorkoutListProps) => {
         items={dnd.sortableIds}
         strategy={verticalListSortingStrategy}
       >
-        <div
-          className={classes}
-          role="list"
-          aria-label="Workout steps"
-          {...restProps}
-        >
+        <div className={classes} role="list" aria-label="Workout steps">
           <WorkoutListContent
             workout={workout}
             selectedStepId={props.selectedStepId}

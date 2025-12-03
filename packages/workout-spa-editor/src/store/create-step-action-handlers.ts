@@ -10,9 +10,9 @@ export const createStepActionHandlers = (state: WorkoutState) => {
     reorderStep: (activeIndex: number, overIndex: number) =>
       stepActions.reorderStep(activeIndex, overIndex),
     reorderStepsInBlock: (
-      blockIndex: number,
+      blockId: string,
       activeIndex: number,
       overIndex: number
-    ) => stepActions.reorderStepsInBlock(blockIndex, activeIndex, overIndex),
+    ) => stepActions.reorderStepsInBlock(blockId, activeIndex, overIndex),
   };
 };

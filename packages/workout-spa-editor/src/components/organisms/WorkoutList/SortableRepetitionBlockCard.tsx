@@ -24,7 +24,7 @@ type SortableRepetitionBlockCardProps = {
     activeIndex: number,
     overIndex: number
   ) => void;
-  generateStepId: (
+  generateStepId?: (
     item: WorkoutStep | RepetitionBlock,
     index: number,
     parentBlockIndex?: number
@@ -32,6 +32,16 @@ type SortableRepetitionBlockCardProps = {
   parentBlockIndex: number;
 };
 
+/**
+ * SortableRepetitionBlockCard wraps RepetitionBlockCard with drag-and-drop functionality.
+ *
+ * Prop Handling:
+ * - All component-specific props are explicitly destructured to prevent them from
+ *   being passed to DOM elements via spread operators
+ * - Only `restAttributes` from dnd-kit (which contains valid HTML attributes like
+ *   data-*, aria-*, etc.) is spread onto the wrapper div
+ * - This ensures no React warnings about unrecognized props
+ */
 export const SortableRepetitionBlockCard = ({
   id,
   block,
@@ -47,6 +57,8 @@ export const SortableRepetitionBlockCard = ({
   onUngroup,
   onDelete,
   onReorderSteps,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  generateStepId: _generateStepId, // Explicitly destructure but don't use (passed by parent but not needed)
   parentBlockIndex,
 }: SortableRepetitionBlockCardProps) => {
   const {
@@ -64,8 +76,10 @@ export const SortableRepetitionBlockCard = ({
     opacity: isDragging ? 0.5 : 1,
   };
 
+  // Remove 'role' from attributes to avoid conflicts with accessibility
+  // Only spread valid HTML attributes (data-*, aria-*, etc.) to the wrapper div
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  const { role, ...restAttributes } = attributes;
+  const { role, ...htmlAttributes } = attributes;
 
   // Extract selected step index from selectedStepId using parseStepId utility
   // Handle hierarchical ID format: "step-{index}" or "block-{blockIndex}-step-{stepIndex}"
@@ -99,7 +113,7 @@ export const SortableRepetitionBlockCard = ({
   })();
 
   return (
-    <div ref={setNodeRef} style={style} {...restAttributes}>
+    <div ref={setNodeRef} style={style} {...htmlAttributes}>
       <RepetitionBlockCard
         block={block}
         selectedStepIndex={selectedStepIndex}

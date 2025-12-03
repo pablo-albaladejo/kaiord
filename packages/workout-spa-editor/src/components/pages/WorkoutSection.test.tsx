@@ -14,6 +14,9 @@ import { WorkoutSection } from "./WorkoutSection/WorkoutSection";
  * - Updating workout state on save
  * - Reverting changes on cancel
  * - Closing editor after save/cancel
+ * - Immediate step deletion without modal (Requirement 1.1)
+ * - Undo toast after deletion (Requirement 1.2)
+ * - Step restoration via undo (Requirement 1.3)
  */
 describe("WorkoutSection", () => {
   beforeEach(() => {
@@ -24,6 +27,7 @@ describe("WorkoutSection", () => {
       historyIndex: -1,
       selectedStepId: null,
       isEditing: false,
+      deletedSteps: [],
     });
   });
 
@@ -437,6 +441,133 @@ describe("WorkoutSection", () => {
       // Assert
       const button = screen.getByTestId("create-repetition-block-button");
       expect(button).toHaveTextContent("Create Repetition Block (3 steps)");
+    });
+  });
+
+  describe("step deletion without modal (Requirement 1.1, 1.2, 1.3)", () => {
+    it("should delete step immediately without modal", () => {
+      // Arrange
+      const step1 = createMockStep(0);
+      const step2 = createMockStep(1);
+      const workout = createMockWorkout([step1, step2]);
+      const krd = createMockKRD(workout);
+
+      useWorkoutStore.setState({
+        currentWorkout: krd,
+      });
+
+      renderWithProviders(
+        <WorkoutSection
+          workout={workout}
+          krd={krd}
+          selectedStepId={null}
+          onStepSelect={vi.fn()}
+        />
+      );
+
+      // Act - Delete the first step
+      act(() => {
+        useWorkoutStore.getState().deleteStep(0);
+      });
+
+      // Assert - Step should be deleted immediately
+      const state = useWorkoutStore.getState();
+      const updatedWorkout = state.currentWorkout?.extensions
+        ?.workout as Workout;
+      expect(updatedWorkout.steps).toHaveLength(1);
+      expect((updatedWorkout.steps[0] as WorkoutStep).stepIndex).toBe(0); // Reindexed
+
+      // Assert - No modal should appear
+      expect(screen.queryByText("Delete Step")).not.toBeInTheDocument();
+      expect(screen.queryByText("Are you sure")).not.toBeInTheDocument();
+    });
+
+    it("should show undo toast after deletion", async () => {
+      // Arrange
+      const step1 = createMockStep(0);
+      const step2 = createMockStep(1);
+      const workout = createMockWorkout([step1, step2]);
+      const krd = createMockKRD(workout);
+
+      // Ensure clean state
+      useWorkoutStore.setState({
+        currentWorkout: krd,
+        deletedSteps: [],
+      });
+
+      renderWithProviders(
+        <WorkoutSection
+          workout={workout}
+          krd={krd}
+          selectedStepId={null}
+          onStepSelect={vi.fn()}
+        />
+      );
+
+      // Verify initial state
+      expect(useWorkoutStore.getState().deletedSteps).toHaveLength(0);
+
+      // Act - Delete the first step
+      act(() => {
+        useWorkoutStore.getState().deleteStep(0);
+      });
+
+      // Assert - Deleted step should be tracked for undo
+      await waitFor(() => {
+        const state = useWorkoutStore.getState();
+        expect(state.deletedSteps).toHaveLength(1);
+        expect(state.deletedSteps[0].step).toEqual(step1);
+        expect(state.deletedSteps[0].index).toBe(0);
+        expect(state.deletedSteps[0].timestamp).toBeDefined();
+      });
+    });
+
+    it("should restore step when undo is clicked", async () => {
+      // Arrange
+      const step1 = createMockStep(0);
+      const step2 = createMockStep(1);
+      const workout = createMockWorkout([step1, step2]);
+      const krd = createMockKRD(workout);
+
+      useWorkoutStore.setState({
+        currentWorkout: krd,
+      });
+
+      renderWithProviders(
+        <WorkoutSection
+          workout={workout}
+          krd={krd}
+          selectedStepId={null}
+          onStepSelect={vi.fn()}
+        />
+      );
+
+      // Act - Delete the first step
+      let deletedTimestamp: number;
+      act(() => {
+        useWorkoutStore.getState().deleteStep(0);
+        const state = useWorkoutStore.getState();
+        deletedTimestamp = state.deletedSteps[0].timestamp;
+      });
+
+      // Verify step was deleted
+      let state = useWorkoutStore.getState();
+      let updatedWorkout = state.currentWorkout?.extensions?.workout as Workout;
+      expect(updatedWorkout.steps).toHaveLength(1);
+
+      // Act - Undo the deletion
+      act(() => {
+        useWorkoutStore.getState().undoDelete(deletedTimestamp);
+      });
+
+      // Assert - Step should be restored
+      await waitFor(() => {
+        state = useWorkoutStore.getState();
+        updatedWorkout = state.currentWorkout?.extensions?.workout as Workout;
+        expect(updatedWorkout.steps).toHaveLength(2);
+        expect((updatedWorkout.steps[0] as WorkoutStep).stepIndex).toBe(0);
+        expect((updatedWorkout.steps[1] as WorkoutStep).stepIndex).toBe(1);
+      });
     });
   });
 });

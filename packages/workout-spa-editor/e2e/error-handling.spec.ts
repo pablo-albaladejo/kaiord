@@ -8,7 +8,7 @@
  * - Requirement 36.5: Error recovery mechanisms
  */
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
 
 test.describe("Error Handling", () => {
   test.beforeEach(async ({ page }) => {

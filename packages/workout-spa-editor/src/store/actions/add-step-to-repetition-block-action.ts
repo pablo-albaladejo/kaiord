@@ -5,24 +5,25 @@
  *
  * Requirements:
  * - Requirement 4: Create repetition blocks from selected steps
+ * - Requirement 2.4: Use block ID for operations
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
-import { isRepetitionBlock } from "../../types/krd";
+import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
 /**
- * Adds a new step to a repetition block at the given index
+ * Adds a new step to a repetition block by its ID
  *
  * @param krd - Current KRD workout
- * @param blockIndex - Index of the repetition block in the workout steps array
+ * @param blockId - Unique ID of the repetition block
  * @param state - Current workout state
  * @returns Updated workout state
  */
 export const addStepToRepetitionBlockAction = (
   krd: KRD,
-  blockIndex: number,
+  blockId: string,
   state: WorkoutState
 ): Partial<WorkoutState> => {
   if (!krd.extensions?.workout) {
@@ -31,14 +32,14 @@ export const addStepToRepetitionBlockAction = (
 
   const workout = krd.extensions.workout as Workout;
 
-  if (blockIndex < 0 || blockIndex >= workout.steps.length) {
+  // Find block by ID
+  const blockInfo = findBlockById(workout, blockId);
+
+  if (!blockInfo) {
     return {};
   }
 
-  const block = workout.steps[blockIndex];
-  if (!isRepetitionBlock(block)) {
-    return {};
-  }
+  const { block, position } = blockInfo;
 
   // Create a new default step
   const newStepIndex = block.steps.length;
@@ -61,7 +62,7 @@ export const addStepToRepetitionBlockAction = (
   };
 
   const updatedSteps = [...workout.steps];
-  updatedSteps[blockIndex] = updatedBlock;
+  updatedSteps[position] = updatedBlock;
 
   const updatedWorkout: Workout = {
     ...workout,

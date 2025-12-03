@@ -359,4 +359,36 @@ describe("importWorkout", () => {
       expect(onProgress).toHaveBeenCalledWith(50);
     });
   });
+
+  describe("abort signal support", () => {
+    it("should abort KRD import when signal is aborted", async () => {
+      // Arrange
+      const mockKrd: KRD = {
+        version: "1.0",
+        type: "workout",
+        metadata: {
+          created: "2025-01-15T10:30:00Z",
+          sport: "running",
+        },
+        extensions: {
+          workout: {
+            name: "Test",
+            sport: "running",
+            steps: [],
+          },
+        },
+      };
+
+      const jsonContent = JSON.stringify(mockKrd);
+      const file = createMockFile(jsonContent, "workout.krd");
+
+      const controller = new AbortController();
+      controller.abort();
+
+      // Act & Assert
+      await expect(
+        importWorkout(file, undefined, controller.signal)
+      ).rejects.toThrow();
+    });
+  });
 });

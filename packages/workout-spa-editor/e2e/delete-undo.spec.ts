@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
 
 /**
  * E2E Tests: Delete with Undo Flow
@@ -12,6 +12,15 @@ import { expect, test } from "@playwright/test";
 test.describe("Delete with Undo Flow", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
+
+    // Wait for the page to be fully loaded
+    await page.waitForLoadState("networkidle");
+
+    // Close the tutorial modal if it appears
+    const skipButton = page.getByRole("button", { name: /skip tutorial/i });
+    if (await skipButton.isVisible()) {
+      await skipButton.click();
+    }
 
     // Load a test workout with multiple steps
     const fileInput = page.locator('input[type="file"]');
@@ -81,6 +90,7 @@ test.describe("Delete with Undo Flow", () => {
     page,
   }) => {
     // Requirement 39.3.1: Display notification with undo option for 5 seconds
+    // Requirement 1.1: Delete step immediately without confirmation modal
 
     // Verify initial state - 3 steps
     const stepCards = page.locator('[data-testid="step-card"]');
@@ -91,8 +101,9 @@ test.describe("Delete with Undo Flow", () => {
     const deleteButton = secondStepCard.getByTestId("delete-step-button");
     await deleteButton.click();
 
-    // Confirm deletion in dialog
-    await page.getByTestId("confirm-delete-button").click();
+    // Requirement 1.1: No confirmation modal - deletion is immediate
+    // Wait a short time for deletion to process
+    await page.waitForTimeout(300);
 
     // Verify undo notification appears
     const toast = page
@@ -112,6 +123,7 @@ test.describe("Delete with Undo Flow", () => {
     page,
   }) => {
     // Requirement 39.3.2: Restore deleted step to original position on undo
+    // Requirement 1.3: Clicking undo should restore the step
 
     const stepCards = page.locator('[data-testid="step-card"]');
     await expect(stepCards).toHaveCount(3);
@@ -123,7 +135,9 @@ test.describe("Delete with Undo Flow", () => {
     // Delete the second step
     const deleteButton = secondStepCard.getByTestId("delete-step-button");
     await deleteButton.click();
-    await page.getByTestId("confirm-delete-button").click();
+
+    // Wait for immediate deletion
+    await page.waitForTimeout(300);
 
     // Verify step was deleted
     await expect(stepCards).toHaveCount(2);
@@ -149,6 +163,7 @@ test.describe("Delete with Undo Flow", () => {
 
   test("should auto-dismiss notification after 5 seconds", async ({ page }) => {
     // Requirement 39.3.3: Permanently delete step after notification dismisses
+    // Requirement 1.4: Toast auto-dismisses after 5 seconds
 
     const stepCards = page.locator('[data-testid="step-card"]');
     await expect(stepCards).toHaveCount(3);
@@ -157,7 +172,9 @@ test.describe("Delete with Undo Flow", () => {
     const secondStepCard = stepCards.nth(1);
     const deleteButton = secondStepCard.getByTestId("delete-step-button");
     await deleteButton.click();
-    await page.getByTestId("confirm-delete-button").click();
+
+    // Wait for immediate deletion
+    await page.waitForTimeout(300);
 
     // Verify notification appears
     const toast = page
@@ -176,6 +193,7 @@ test.describe("Delete with Undo Flow", () => {
     page,
   }) => {
     // Requirement 39.3.4: Show separate notifications for multiple deletions
+    // Requirement 1.5: Show separate undo notifications for each deletion
 
     const stepCards = page.locator('[data-testid="step-card"]');
     await expect(stepCards).toHaveCount(3);
@@ -184,7 +202,9 @@ test.describe("Delete with Undo Flow", () => {
     const firstStepCard = stepCards.nth(0);
     const firstDeleteButton = firstStepCard.getByTestId("delete-step-button");
     await firstDeleteButton.click();
-    await page.getByTestId("confirm-delete-button").click();
+
+    // Wait for immediate deletion
+    await page.waitForTimeout(300);
 
     // Verify first notification appears
     const toasts = page
@@ -200,7 +220,9 @@ test.describe("Delete with Undo Flow", () => {
       .nth(0)
       .getByTestId("delete-step-button");
     await secondDeleteButton.click();
-    await page.getByTestId("confirm-delete-button").click();
+
+    // Wait for immediate deletion
+    await page.waitForTimeout(300);
 
     // Verify second notification appears
     // Both notifications should be visible simultaneously
@@ -226,7 +248,9 @@ test.describe("Delete with Undo Flow", () => {
     const firstStepCard = stepCards.nth(0);
     const deleteButton = firstStepCard.getByTestId("delete-step-button");
     await deleteButton.click();
-    await page.getByTestId("confirm-delete-button").click();
+
+    // Wait for immediate deletion
+    await page.waitForTimeout(300);
 
     // Verify step was deleted (2 steps remain)
     await expect(stepCards).toHaveCount(2);
@@ -260,7 +284,9 @@ test.describe("Delete with Undo Flow", () => {
     const secondStepCard = stepCards.nth(1);
     const deleteButton = secondStepCard.getByTestId("delete-step-button");
     await deleteButton.click();
-    await page.getByTestId("confirm-delete-button").click();
+
+    // Wait for immediate deletion
+    await page.waitForTimeout(300);
 
     // Verify notification appears
     const toast = page

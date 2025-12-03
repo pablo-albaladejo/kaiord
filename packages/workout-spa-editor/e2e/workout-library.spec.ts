@@ -10,7 +10,7 @@
  * Requirements: 17, 18
  */
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
 
 test.describe("Workout Library", () => {
   test.beforeEach(async ({ page }) => {

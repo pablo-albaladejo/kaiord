@@ -29,13 +29,13 @@ export function createStepActions(state: WorkoutState) {
     reorderStep: (activeIndex: number, overIndex: number) =>
       reorderStepAction(currentWorkout, activeIndex, overIndex, state),
     reorderStepsInBlock: (
-      blockIndex: number,
+      blockId: string,
       activeIndex: number,
       overIndex: number
     ) =>
       reorderStepsInBlockAction(
         currentWorkout,
-        blockIndex,
+        blockId,
         activeIndex,
         overIndex,
         state
