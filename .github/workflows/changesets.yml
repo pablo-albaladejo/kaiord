@@ -97,9 +97,12 @@ jobs:
           git commit -m "chore: version packages [skip ci]"
           git push
 
-      - name: Build all packages
+      - name: Build publishable packages
         if: steps.detect-changes.outputs.has-changes == 'true'
-        run: pnpm -r build
+        run: |
+          echo "Building only publishable packages (core, cli)..."
+          pnpm --filter @kaiord/core build
+          pnpm --filter @kaiord/cli build
 
       - name: Publish changed packages to npm
         if: steps.detect-changes.outputs.has-changes == 'true'
