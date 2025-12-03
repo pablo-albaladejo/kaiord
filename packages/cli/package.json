@@ -62,7 +62,7 @@
     "license-checker": "^25.0.1",
     "strip-ansi": "^7.1.0",
     "tmp-promise": "^3.0.3",
-    "tsup": "^8.0.1",
+    "tsup": "^8.5.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
     "vitest": "^1.2.0"
