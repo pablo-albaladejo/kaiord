@@ -1166,9 +1166,10 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     ).toBeVisible({ timeout: 5000 });
   });
 
-  test("should delete block via context menu with confirmation", async ({
+  test("should delete block via context menu immediately with undo toast", async ({
     page,
   }) => {
+    // Requirements: 1.1, 1.2, 1.3
     await page.goto("/");
 
     // Load a workout with a repetition block
@@ -1226,18 +1227,37 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     // Click "Delete" option
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
-    // Verify confirmation dialog appears
-    await expect(
-      page.getByText(/are you sure you want to delete/i)
-    ).toBeVisible({ timeout: 5000 });
+    // Requirement 1.1: Block should be deleted immediately without confirmation modal
+    // Wait a short time for deletion to process
+    await page.waitForTimeout(300);
 
-    // Confirm deletion
-    await page.getByRole("button", { name: /delete/i }).click();
-
-    // Verify block is removed
+    // Verify block is removed immediately (no modal)
     await expect(page.getByText("Repeat Block")).not.toBeVisible({
+      timeout: 2000,
+    });
+
+    // Requirement 1.2: Undo toast should appear
+    await expect(
+      page.getByText("Repetition block deleted").first()
+    ).toBeVisible({
       timeout: 5000,
     });
+
+    // Verify undo button is present
+    const undoButton = page.getByTestId("undo-delete-block-button");
+    await expect(undoButton).toBeVisible({ timeout: 5000 });
+
+    // Requirement 1.3: Clicking undo should restore the block
+    await undoButton.click();
+
+    // Wait for restoration
+    await page.waitForTimeout(500);
+
+    // Verify block is restored
+    await expect(page.getByText("Repeat Block")).toBeVisible({
+      timeout: 2000,
+    });
+    await expect(page.getByText("3x")).toBeVisible();
   });
 });
 
