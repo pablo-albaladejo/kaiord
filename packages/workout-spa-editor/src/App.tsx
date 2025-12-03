@@ -100,7 +100,20 @@ function App() {
   const [showTutorial, setShowTutorial] = useState(false);
 
   // Check if user has completed onboarding on first mount
+  // Skip tutorial in E2E testing environment
   useEffect(() => {
+    // Disable tutorial during E2E tests
+    // Check for Playwright's user agent or window property set by tests
+    const isE2ETesting =
+      window.location.search.includes("e2e=true") ||
+      window.location.search.includes("skipTutorial=true") ||
+      // @ts-expect-error - Playwright sets this property during tests
+      window.__PLAYWRIGHT__ === true;
+
+    if (isE2ETesting) {
+      return;
+    }
+
     const completed = hasCompletedOnboarding();
     if (!completed) {
       setShowTutorial(true);
