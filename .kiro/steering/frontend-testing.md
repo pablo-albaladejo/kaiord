@@ -901,6 +901,19 @@ pnpm test:e2e --project="Mobile Chrome"
 
 # Run mobile touch drag tests specifically
 pnpm test:e2e mobile-touch-drag.spec.ts
+
+# ⚠️ DEBUGGING E2E TESTS - IMPORTANT
+# When debugging E2E tests, NEVER run all tests at once
+# Always run a specific test file to avoid long execution times
+
+# ✅ CORRECT - Run specific test file
+pnpm --filter workout-spa-editor test:e2e modal-interactions.spec.ts
+
+# ✅ CORRECT - Run specific test within a file
+pnpm --filter workout-spa-editor test:e2e modal-interactions.spec.ts --grep "should open and close modal"
+
+# ❌ INCORRECT - Running all tests during debugging
+pnpm test:e2e  # This will take too long and make debugging difficult
 ```
 
 ## What NOT to Test

@@ -11,7 +11,7 @@
  * - Requirement 38: Profile import/export functionality
  */
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
 
 test.describe("Profile Management", () => {
   test.beforeEach(async ({ page }) => {

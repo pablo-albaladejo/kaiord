@@ -12,7 +12,7 @@
  * - 29: Keyboard shortcuts
  */
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
 
 test.describe("Copy/Paste Functionality", () => {
   test.beforeEach(async ({ page }) => {

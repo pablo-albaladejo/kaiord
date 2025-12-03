@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
 
 /**
  * E2E Tests: Delete with Undo Flow
