@@ -193,7 +193,7 @@ importers:
         specifier: ^9.39.1
         version: 9.39.1
       "@fast-check/vitest":
-        specifier: ^0.2.3
+        specifier: ^0.2.2
         version: 0.2.3(vitest@3.2.4)
       "@playwright/test":
         specifier: ^1.56.1
