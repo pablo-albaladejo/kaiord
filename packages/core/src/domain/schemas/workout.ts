@@ -69,6 +69,7 @@ export const workoutStepSchema = z.object({
  * import { repetitionBlockSchema } from '@kaiord/core';
  *
  * const block = repetitionBlockSchema.parse({
+ *   id: 'block-123',
  *   repeatCount: 5,
  *   steps: [
  *     {
@@ -83,6 +84,7 @@ export const workoutStepSchema = z.object({
  * ```
  */
 export const repetitionBlockSchema = z.object({
+  id: z.string().optional(),
   repeatCount: z.number().int().min(1),
   steps: z.array(workoutStepSchema),
 });

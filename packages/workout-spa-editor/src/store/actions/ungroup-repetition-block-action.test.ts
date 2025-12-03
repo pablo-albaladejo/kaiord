@@ -54,7 +54,9 @@ describe("ungroupRepetitionBlockAction", () => {
       // Arrange
       const step1 = createMockStep(0);
       const step2 = createMockStep(1);
+      const blockId = "block-123";
       const repetitionBlock: RepetitionBlock = {
+        id: blockId,
         repeatCount: 3,
         steps: [step1, step2],
       };
@@ -64,7 +66,7 @@ describe("ungroupRepetitionBlockAction", () => {
       const state = createMockState();
 
       // Act
-      const result = ungroupRepetitionBlockAction(krd, 0, state);
+      const result = ungroupRepetitionBlockAction(krd, blockId, state);
 
       // Assert
       expect(result.currentWorkout).toBeDefined();
@@ -79,7 +81,9 @@ describe("ungroupRepetitionBlockAction", () => {
       // Arrange
       const step1 = createMockStep(0);
       const step2 = createMockStep(1);
+      const blockId = "block-456";
       const repetitionBlock: RepetitionBlock = {
+        id: blockId,
         repeatCount: 2,
         steps: [step1, step2],
       };
@@ -90,7 +94,7 @@ describe("ungroupRepetitionBlockAction", () => {
       const state = createMockState();
 
       // Act
-      const result = ungroupRepetitionBlockAction(krd, 1, state);
+      const result = ungroupRepetitionBlockAction(krd, blockId, state);
 
       // Assert
       const updatedWorkout = result.currentWorkout?.extensions?.workout;
@@ -126,7 +130,9 @@ describe("ungroupRepetitionBlockAction", () => {
         },
       };
 
+      const blockId = "block-789";
       const repetitionBlock: RepetitionBlock = {
+        id: blockId,
         repeatCount: 4,
         steps: [step1, step2],
       };
@@ -135,7 +141,7 @@ describe("ungroupRepetitionBlockAction", () => {
       const state = createMockState();
 
       // Act
-      const result = ungroupRepetitionBlockAction(krd, 0, state);
+      const result = ungroupRepetitionBlockAction(krd, blockId, state);
 
       // Assert
       const updatedWorkout = result.currentWorkout?.extensions?.workout;
@@ -176,20 +182,20 @@ describe("ungroupRepetitionBlockAction", () => {
       const state = createMockState();
 
       // Act
-      const result = ungroupRepetitionBlockAction(krd, 0, state);
+      const result = ungroupRepetitionBlockAction(krd, "nonexistent-id", state);
 
       // Assert
       expect(result).toEqual({});
     });
 
-    it("should return empty object when block index is out of bounds", () => {
+    it("should return empty object when block ID is not found", () => {
       // Arrange
       const step1 = createMockStep(0);
       const krd = createMockKRD([step1]);
       const state = createMockState();
 
       // Act
-      const result = ungroupRepetitionBlockAction(krd, 5, state);
+      const result = ungroupRepetitionBlockAction(krd, "nonexistent-id", state);
 
       // Assert
       expect(result).toEqual({});
@@ -203,7 +209,7 @@ describe("ungroupRepetitionBlockAction", () => {
       const state = createMockState();
 
       // Act
-      const result = ungroupRepetitionBlockAction(krd, 0, state);
+      const result = ungroupRepetitionBlockAction(krd, "nonexistent-id", state);
 
       // Assert
       expect(result).toEqual({});
@@ -212,7 +218,9 @@ describe("ungroupRepetitionBlockAction", () => {
     it("should handle ungrouping a block with single step", () => {
       // Arrange
       const step1 = createMockStep(0);
+      const blockId = "block-single";
       const repetitionBlock: RepetitionBlock = {
+        id: blockId,
         repeatCount: 5,
         steps: [step1],
       };
@@ -221,7 +229,7 @@ describe("ungroupRepetitionBlockAction", () => {
       const state = createMockState();
 
       // Act
-      const result = ungroupRepetitionBlockAction(krd, 0, state);
+      const result = ungroupRepetitionBlockAction(krd, blockId, state);
 
       // Assert
       const updatedWorkout = result.currentWorkout?.extensions?.workout;
@@ -234,7 +242,9 @@ describe("ungroupRepetitionBlockAction", () => {
       const step1 = createMockStep(0);
       const step2 = createMockStep(1);
       const step3 = createMockStep(2);
+      const blockId = "block-end";
       const repetitionBlock: RepetitionBlock = {
+        id: blockId,
         repeatCount: 2,
         steps: [step2, step3],
       };
@@ -243,7 +253,7 @@ describe("ungroupRepetitionBlockAction", () => {
       const state = createMockState();
 
       // Act
-      const result = ungroupRepetitionBlockAction(krd, 1, state);
+      const result = ungroupRepetitionBlockAction(krd, blockId, state);
 
       // Assert
       const updatedWorkout = result.currentWorkout?.extensions?.workout;
@@ -259,7 +269,9 @@ describe("ungroupRepetitionBlockAction", () => {
       // Arrange
       const step1 = createMockStep(0);
       const step2 = createMockStep(1);
+      const blockId = "block-history";
       const repetitionBlock: RepetitionBlock = {
+        id: blockId,
         repeatCount: 3,
         steps: [step1, step2],
       };
@@ -273,7 +285,7 @@ describe("ungroupRepetitionBlockAction", () => {
       };
 
       // Act
-      const result = ungroupRepetitionBlockAction(krd, 0, state);
+      const result = ungroupRepetitionBlockAction(krd, blockId, state);
 
       // Assert
       expect(result.workoutHistory).toBeDefined();

@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+import { expectNoReactWarnings } from "../../../test-utils/console-spy";
 import type { WorkoutStep } from "../../../types/krd";
 import { StepCard } from "./StepCard";
 
@@ -209,6 +210,49 @@ describe("StepCard", () => {
     );
 
     expect(onSelect).toHaveBeenCalledWith(0);
+  });
+
+  describe("React warnings", () => {
+    it("should not produce React warnings when rendering with component props", () => {
+      // Arrange
+      const warningChecker = expectNoReactWarnings();
+
+      // Act
+      render(
+        <StepCard
+          step={mockStep}
+          visualIndex={1}
+          isSelected={true}
+          isMultiSelected={false}
+          onSelect={vi.fn()}
+          onToggleMultiSelect={vi.fn()}
+          onDelete={vi.fn()}
+          onDuplicate={vi.fn()}
+          onCopy={vi.fn()}
+          isDragging={false}
+          dragHandleProps={{ onPointerDown: vi.fn() }}
+        />
+      );
+
+      // Assert
+      warningChecker.verify();
+    });
+
+    it("should forward HTML attributes to DOM element", () => {
+      // Arrange & Act
+      render(
+        <StepCard
+          step={mockStep}
+          data-custom="test-value"
+          aria-describedby="description-id"
+        />
+      );
+
+      // Assert
+      const card = screen.getByRole("button");
+      expect(card).toHaveAttribute("data-custom", "test-value");
+      expect(card).toHaveAttribute("aria-describedby", "description-id");
+    });
   });
 
   describe("drag interactions", () => {

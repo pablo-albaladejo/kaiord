@@ -1,5 +1,5 @@
 import * as Tooltip from "@radix-ui/react-tooltip";
-import { Trash } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import type { RepetitionBlock } from "../../../types/krd";
 import { RepetitionBlockContextMenu } from "./RepetitionBlockContextMenu";
 
@@ -30,11 +30,11 @@ export const RepetitionBlockHeaderRight = ({
             <Tooltip.Trigger asChild>
               <button
                 onClick={onDelete}
-                className="p-1 hover:bg-red-50 dark:hover:bg-red-900/20 rounded transition-colors text-red-600 dark:text-red-400"
+                className="p-1 text-red-600 hover:text-red-700 hover:bg-red-50 dark:text-red-400 dark:hover:text-red-300 dark:hover:bg-red-900/30 rounded transition-colors"
                 aria-label="Delete repetition block"
                 data-testid="delete-block-button"
               >
-                <Trash className="h-5 w-5" />
+                <Trash2 className="h-4 w-4" />
               </button>
             </Tooltip.Trigger>
             <Tooltip.Portal>

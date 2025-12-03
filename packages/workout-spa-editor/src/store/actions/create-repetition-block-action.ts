@@ -8,6 +8,7 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import { generateBlockId } from "../../utils/id-generation";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 import {
@@ -41,7 +42,11 @@ export const createRepetitionBlockAction = (
     return {};
   }
 
-  const repetitionBlock: RepetitionBlock = { repeatCount, steps: stepsToWrap };
+  const repetitionBlock: RepetitionBlock = {
+    id: generateBlockId(),
+    repeatCount,
+    steps: stepsToWrap,
+  };
   const adjustedPosition = calculateInsertPosition(
     workout,
     insertPosition,

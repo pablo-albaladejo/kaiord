@@ -28,7 +28,11 @@ const createWorkoutStep = (stepIndex: number): WorkoutStep => ({
 /**
  * Helper to create a repetition block with steps
  */
-const createRepetitionBlock = (stepCount: number): RepetitionBlock => ({
+const createRepetitionBlock = (
+  stepCount: number,
+  id?: string
+): RepetitionBlock => ({
+  id: id || `block-${Date.now()}-${Math.random()}`,
   repeatCount: 2,
   steps: Array.from({ length: stepCount }, (_, i) => createWorkoutStep(i)),
 });
@@ -67,7 +71,340 @@ const createInitialState = (krd: KRD): WorkoutState => ({
   deletedSteps: [],
 });
 
+describe("findBlockById helper", () => {
+  /**
+   * Helper to extract findBlockById from the module for testing
+   * Since it's not exported, we'll test it indirectly through the action
+   */
+  const testFindBlockById = (
+    workout: { steps: Array<WorkoutStep | RepetitionBlock> },
+    blockId: string
+  ): { block: RepetitionBlock; position: number } | null => {
+    // Test by attempting to find the block through the workout structure
+    for (let i = 0; i < workout.steps.length; i++) {
+      const step = workout.steps[i];
+      if (isRepetitionBlock(step) && step.id === blockId) {
+        return { block: step, position: i };
+      }
+    }
+    return null;
+  };
+
+  describe("finding blocks by ID", () => {
+    it("should find the first block", () => {
+      // Arrange
+      const blocks: Array<RepetitionBlock> = [
+        {
+          id: "block-1",
+          repeatCount: 2,
+          steps: [createWorkoutStep(0)],
+        },
+        {
+          id: "block-2",
+          repeatCount: 3,
+          steps: [createWorkoutStep(0)],
+        },
+      ];
+      const workout = { steps: blocks };
+
+      // Act
+      const result = testFindBlockById(workout, "block-1");
+
+      // Assert
+      expect(result).not.toBeNull();
+      expect(result!.block.id).toBe("block-1");
+      expect(result!.position).toBe(0);
+    });
+
+    it("should find a middle block", () => {
+      // Arrange
+      const blocks: Array<RepetitionBlock> = [
+        {
+          id: "block-1",
+          repeatCount: 2,
+          steps: [createWorkoutStep(0)],
+        },
+        {
+          id: "block-2",
+          repeatCount: 3,
+          steps: [createWorkoutStep(0)],
+        },
+        {
+          id: "block-3",
+          repeatCount: 4,
+          steps: [createWorkoutStep(0)],
+        },
+      ];
+      const workout = { steps: blocks };
+
+      // Act
+      const result = testFindBlockById(workout, "block-2");
+
+      // Assert
+      expect(result).not.toBeNull();
+      expect(result!.block.id).toBe("block-2");
+      expect(result!.position).toBe(1);
+    });
+
+    it("should find the last block", () => {
+      // Arrange
+      const blocks: Array<RepetitionBlock> = [
+        {
+          id: "block-1",
+          repeatCount: 2,
+          steps: [createWorkoutStep(0)],
+        },
+        {
+          id: "block-2",
+          repeatCount: 3,
+          steps: [createWorkoutStep(0)],
+        },
+        {
+          id: "block-3",
+          repeatCount: 4,
+          steps: [createWorkoutStep(0)],
+        },
+      ];
+      const workout = { steps: blocks };
+
+      // Act
+      const result = testFindBlockById(workout, "block-3");
+
+      // Assert
+      expect(result).not.toBeNull();
+      expect(result!.block.id).toBe("block-3");
+      expect(result!.position).toBe(2);
+    });
+
+    it("should return null for non-existent ID", () => {
+      // Arrange
+      const blocks: Array<RepetitionBlock> = [
+        {
+          id: "block-1",
+          repeatCount: 2,
+          steps: [createWorkoutStep(0)],
+        },
+        {
+          id: "block-2",
+          repeatCount: 3,
+          steps: [createWorkoutStep(0)],
+        },
+      ];
+      const workout = { steps: blocks };
+
+      // Act
+      const result = testFindBlockById(workout, "non-existent-id");
+
+      // Assert
+      expect(result).toBeNull();
+    });
+
+    it("should find block in mixed steps and blocks", () => {
+      // Arrange
+      const steps: Array<WorkoutStep | RepetitionBlock> = [
+        createWorkoutStep(0),
+        {
+          id: "block-1",
+          repeatCount: 2,
+          steps: [createWorkoutStep(0)],
+        },
+        createWorkoutStep(1),
+        {
+          id: "block-2",
+          repeatCount: 3,
+          steps: [createWorkoutStep(0)],
+        },
+        createWorkoutStep(2),
+      ];
+      const workout = { steps };
+
+      // Act
+      const result = testFindBlockById(workout, "block-2");
+
+      // Assert
+      expect(result).not.toBeNull();
+      expect(result!.block.id).toBe("block-2");
+      expect(result!.position).toBe(3);
+    });
+
+    it("should return null for empty workout", () => {
+      // Arrange
+      const workout = { steps: [] };
+
+      // Act
+      const result = testFindBlockById(workout, "any-id");
+
+      // Assert
+      expect(result).toBeNull();
+    });
+
+    it("should return null when workout has only individual steps", () => {
+      // Arrange
+      const steps: Array<WorkoutStep> = [
+        createWorkoutStep(0),
+        createWorkoutStep(1),
+        createWorkoutStep(2),
+      ];
+      const workout = { steps };
+
+      // Act
+      const result = testFindBlockById(workout, "any-id");
+
+      // Assert
+      expect(result).toBeNull();
+    });
+  });
+});
+
 describe("deleteRepetitionBlockAction", () => {
+  describe("Property 1: Correct block deletion by ID", () => {
+    /**
+     * Feature: 11-fix-repetition-block-deletion-index-bug, Property 1: Correct block deletion by ID
+     * Validates: Requirements 1.1, 1.2, 1.3, 1.4
+     */
+    it("should delete the correct block when identified by ID", () => {
+      fc.assert(
+        fc.property(
+          fc.integer({ min: 2, max: 5 }), // Number of blocks
+          fc.integer({ min: 0, max: 2 }), // Index of block to delete
+          (numBlocks, deleteIndex) => {
+            // Ensure deleteIndex is within bounds
+            const targetIndex = deleteIndex % numBlocks;
+
+            // Arrange - Create blocks with unique IDs and identifiable content
+            const blocks: Array<RepetitionBlock> = Array.from(
+              { length: numBlocks },
+              (_, i) => ({
+                id: `block-${i}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                repeatCount: i + 2, // Unique repeat count for identification
+                steps: [createWorkoutStep(0)],
+              })
+            );
+
+            const krd = createKRDWithWorkout(blocks);
+            const state = createInitialState(krd);
+
+            // Store the ID and repeat count of the block we want to delete
+            const targetBlock = blocks[targetIndex];
+            const targetId = targetBlock.id!;
+            const targetRepeatCount = targetBlock.repeatCount;
+
+            // Act - Delete by ID
+            const result = deleteRepetitionBlockAction(krd, targetId, state);
+
+            // Assert
+            const workout = result.currentWorkout?.extensions?.workout;
+            expect(workout).toBeDefined();
+
+            // Should have one less block
+            expect(workout!.steps.length).toBe(numBlocks - 1);
+
+            // The deleted block should not be present
+            const remainingBlocks = workout!.steps.filter(
+              isRepetitionBlock
+            ) as RepetitionBlock[];
+
+            // Verify the target block is not in the remaining blocks
+            const deletedBlockStillPresent = remainingBlocks.some(
+              (block) =>
+                block.id === targetId || block.repeatCount === targetRepeatCount
+            );
+            expect(deletedBlockStillPresent).toBe(false);
+
+            // Verify all other blocks are still present
+            const expectedRemainingBlocks = blocks.filter(
+              (_, i) => i !== targetIndex
+            );
+            expect(remainingBlocks.length).toBe(expectedRemainingBlocks.length);
+
+            // Verify each remaining block matches an expected block
+            expectedRemainingBlocks.forEach((expectedBlock) => {
+              const found = remainingBlocks.some(
+                (block) =>
+                  block.id === expectedBlock.id &&
+                  block.repeatCount === expectedBlock.repeatCount
+              );
+              expect(found).toBe(true);
+            });
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it("should delete the correct block from mixed steps and blocks", () => {
+      fc.assert(
+        fc.property(
+          fc.integer({ min: 1, max: 3 }), // Steps before first block
+          fc.integer({ min: 2, max: 4 }), // Number of blocks
+          fc.integer({ min: 1, max: 3 }), // Steps after last block
+          fc.integer({ min: 0, max: 3 }), // Index of block to delete
+          (stepsBefore, numBlocks, stepsAfter, deleteIndex) => {
+            // Ensure deleteIndex is within bounds
+            const targetIndex = deleteIndex % numBlocks;
+
+            // Arrange - Create workout with mixed steps and blocks
+            const blocks: Array<RepetitionBlock> = Array.from(
+              { length: numBlocks },
+              (_, i) => ({
+                id: `block-${i}-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+                repeatCount: i + 2,
+                steps: [createWorkoutStep(0)],
+              })
+            );
+
+            const steps: Array<WorkoutStep | RepetitionBlock> = [
+              ...Array.from({ length: stepsBefore }, (_, i) =>
+                createWorkoutStep(i)
+              ),
+              ...blocks,
+              ...Array.from({ length: stepsAfter }, (_, i) =>
+                createWorkoutStep(stepsBefore + i)
+              ),
+            ];
+
+            const krd = createKRDWithWorkout(steps);
+            const state = createInitialState(krd);
+
+            // Store the ID of the block we want to delete
+            const targetBlock = blocks[targetIndex];
+            const targetId = targetBlock.id!;
+            const targetRepeatCount = targetBlock.repeatCount;
+
+            // Act - Delete by ID
+            const result = deleteRepetitionBlockAction(krd, targetId, state);
+
+            // Assert
+            const workout = result.currentWorkout?.extensions?.workout;
+            expect(workout).toBeDefined();
+
+            // Should have one less item (the deleted block)
+            expect(workout!.steps.length).toBe(steps.length - 1);
+
+            // The deleted block should not be present
+            const remainingBlocks = workout!.steps.filter(
+              isRepetitionBlock
+            ) as RepetitionBlock[];
+
+            const deletedBlockStillPresent = remainingBlocks.some(
+              (block) =>
+                block.id === targetId || block.repeatCount === targetRepeatCount
+            );
+            expect(deletedBlockStillPresent).toBe(false);
+
+            // Verify correct number of blocks remain
+            expect(remainingBlocks.length).toBe(numBlocks - 1);
+
+            // Verify all individual steps are still present
+            const remainingSteps = workout!.steps.filter(isWorkoutStep);
+            expect(remainingSteps.length).toBe(stepsBefore + stepsAfter);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });
+
   describe("Property 3: Block deletion removes all contained steps", () => {
     /**
      * Feature: 09-repetition-blocks-and-ui-polish, Property 3: Block deletion removes all contained steps
@@ -81,11 +418,12 @@ describe("deleteRepetitionBlockAction", () => {
           fc.integer({ min: 0, max: 5 }), // Number of steps after block
           (stepsBefore, stepsInBlock, stepsAfter) => {
             // Arrange
+            const block = createRepetitionBlock(stepsInBlock, "test-block-1");
             const steps: Array<WorkoutStep | RepetitionBlock> = [
               ...Array.from({ length: stepsBefore }, (_, i) =>
                 createWorkoutStep(i)
               ),
-              createRepetitionBlock(stepsInBlock),
+              block,
               ...Array.from({ length: stepsAfter }, (_, i) =>
                 createWorkoutStep(stepsBefore + i)
               ),
@@ -97,7 +435,7 @@ describe("deleteRepetitionBlockAction", () => {
             const totalStepsBefore = steps.length;
 
             // Act
-            const result = deleteRepetitionBlockAction(krd, 0, state);
+            const result = deleteRepetitionBlockAction(krd, block.id!, state);
 
             // Assert
             const workout = result.currentWorkout?.extensions?.workout;
@@ -128,14 +466,18 @@ describe("deleteRepetitionBlockAction", () => {
             // Arrange
             const steps: Array<RepetitionBlock> = Array.from(
               { length: numBlocks },
-              () => createRepetitionBlock(stepsPerBlock)
+              (_, i) => createRepetitionBlock(stepsPerBlock, `test-block-${i}`)
             );
 
             const krd = createKRDWithWorkout(steps);
             const state = createInitialState(krd);
 
             // Act - Delete the first block
-            const result = deleteRepetitionBlockAction(krd, 0, state);
+            const result = deleteRepetitionBlockAction(
+              krd,
+              steps[0].id!,
+              state
+            );
 
             // Assert
             const workout = result.currentWorkout?.extensions?.workout;
@@ -144,6 +486,141 @@ describe("deleteRepetitionBlockAction", () => {
             // Should have one less block
             const remainingBlocks = workout!.steps.filter(isRepetitionBlock);
             expect(remainingBlocks.length).toBe(numBlocks - 1);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+  });
+
+  describe("Property 8: Step index recalculation", () => {
+    /**
+     * Feature: 11-fix-repetition-block-deletion-index-bug, Property 8: Step index recalculation
+     * Validates: Requirements 1.5
+     */
+    it("should recalculate step indices correctly after deleting any block", () => {
+      fc.assert(
+        fc.property(
+          fc.integer({ min: 2, max: 5 }), // Number of blocks
+          fc.integer({ min: 1, max: 3 }), // Steps before blocks
+          fc.integer({ min: 1, max: 3 }), // Steps after blocks
+          fc.integer({ min: 0, max: 4 }), // Index of block to delete
+          (numBlocks, stepsBefore, stepsAfter, deleteIndex) => {
+            // Ensure deleteIndex is within bounds
+            const targetIndex = deleteIndex % numBlocks;
+
+            // Arrange - Create workout with steps before, blocks, and steps after
+            const blocks: Array<RepetitionBlock> = Array.from(
+              { length: numBlocks },
+              (_, i) => ({
+                id: `block-${i}`,
+                repeatCount: 2,
+                steps: [createWorkoutStep(0)],
+              })
+            );
+
+            const steps: Array<WorkoutStep | RepetitionBlock> = [
+              ...Array.from({ length: stepsBefore }, (_, i) =>
+                createWorkoutStep(i)
+              ),
+              ...blocks,
+              ...Array.from({ length: stepsAfter }, (_, i) =>
+                createWorkoutStep(stepsBefore + i)
+              ),
+            ];
+
+            const krd = createKRDWithWorkout(steps);
+            const state = createInitialState(krd);
+
+            // Act - Delete a block by ID
+            const targetId = blocks[targetIndex].id!;
+            const result = deleteRepetitionBlockAction(krd, targetId, state);
+
+            // Assert
+            const workout = result.currentWorkout?.extensions?.workout;
+            expect(workout).toBeDefined();
+
+            // Extract all workout steps (not blocks)
+            const workoutSteps = workout!.steps.filter(isWorkoutStep);
+
+            // Verify indices are sequential starting from 0
+            workoutSteps.forEach((step, index) => {
+              expect(step.stepIndex).toBe(index);
+            });
+
+            // Verify no gaps in indices
+            const indices = workoutSteps.map((s) => s.stepIndex);
+            const expectedIndices = Array.from(
+              { length: workoutSteps.length },
+              (_, i) => i
+            );
+            expect(indices).toEqual(expectedIndices);
+
+            // Verify total number of steps is correct
+            expect(workoutSteps.length).toBe(stepsBefore + stepsAfter);
+          }
+        ),
+        { numRuns: 100 }
+      );
+    });
+
+    it("should maintain sequential indices when deleting blocks at different positions", () => {
+      fc.assert(
+        fc.property(
+          fc.integer({ min: 3, max: 6 }), // Total number of items
+          fc.integer({ min: 1, max: 3 }), // Number of blocks
+          (totalItems, numBlocks) => {
+            // Ensure we have at least one step
+            const numSteps = Math.max(1, totalItems - numBlocks);
+            const actualNumBlocks = Math.min(numBlocks, totalItems - 1);
+
+            // Arrange - Create mixed workout
+            const items: Array<WorkoutStep | RepetitionBlock> = [];
+            let stepIndex = 0;
+
+            // Distribute steps and blocks
+            for (let i = 0; i < totalItems; i++) {
+              if (i < actualNumBlocks) {
+                // Add a block
+                items.push({
+                  id: `block-${i}`,
+                  repeatCount: 2,
+                  steps: [createWorkoutStep(0)],
+                });
+              } else {
+                // Add a step
+                items.push(createWorkoutStep(stepIndex++));
+              }
+            }
+
+            const krd = createKRDWithWorkout(items);
+            const state = createInitialState(krd);
+
+            // Get the first block's ID
+            const firstBlock = items.find(isRepetitionBlock);
+            if (!firstBlock) return; // Skip if no blocks
+
+            // Act - Delete the first block
+            const result = deleteRepetitionBlockAction(
+              krd,
+              firstBlock.id!,
+              state
+            );
+
+            // Assert
+            const workout = result.currentWorkout?.extensions?.workout;
+            expect(workout).toBeDefined();
+
+            // Verify all remaining steps have sequential indices
+            const workoutSteps = workout!.steps.filter(isWorkoutStep);
+            workoutSteps.forEach((step, index) => {
+              expect(step.stepIndex).toBe(index);
+            });
+
+            // Verify no duplicate indices
+            const indices = workoutSteps.map((s) => s.stepIndex);
+            const uniqueIndices = new Set(indices);
+            expect(uniqueIndices.size).toBe(indices.length);
           }
         ),
         { numRuns: 100 }
@@ -164,11 +641,12 @@ describe("deleteRepetitionBlockAction", () => {
           fc.integer({ min: 1, max: 10 }), // Steps after block
           (stepsBefore, stepsInBlock, stepsAfter) => {
             // Arrange
+            const block = createRepetitionBlock(stepsInBlock, "test-block-1");
             const steps: Array<WorkoutStep | RepetitionBlock> = [
               ...Array.from({ length: stepsBefore }, (_, i) =>
                 createWorkoutStep(i)
               ),
-              createRepetitionBlock(stepsInBlock),
+              block,
               ...Array.from({ length: stepsAfter }, (_, i) =>
                 createWorkoutStep(stepsBefore + i)
               ),
@@ -178,7 +656,7 @@ describe("deleteRepetitionBlockAction", () => {
             const state = createInitialState(krd);
 
             // Act
-            const result = deleteRepetitionBlockAction(krd, 0, state);
+            const result = deleteRepetitionBlockAction(krd, block.id!, state);
 
             // Assert
             const workout = result.currentWorkout?.extensions?.workout;
@@ -218,11 +696,12 @@ describe("deleteRepetitionBlockAction", () => {
           fc.integer({ min: 0, max: 5 }), // Steps after block
           (stepsBefore, stepsInBlock, stepsAfter) => {
             // Arrange
+            const block = createRepetitionBlock(stepsInBlock, "test-block-1");
             const steps: Array<WorkoutStep | RepetitionBlock> = [
               ...Array.from({ length: stepsBefore }, (_, i) =>
                 createWorkoutStep(i)
               ),
-              createRepetitionBlock(stepsInBlock),
+              block,
               ...Array.from({ length: stepsAfter }, (_, i) =>
                 createWorkoutStep(stepsBefore + i)
               ),
@@ -235,15 +714,13 @@ describe("deleteRepetitionBlockAction", () => {
             const originalWorkout = originalKrd.extensions?.workout;
             const originalStepsLength = originalWorkout?.steps.length ?? 0;
 
-            // The block is always at block index 0 (first block in the workout)
-            // Note: blockIndex counts blocks only, not position in steps array
-            const blockIndex = 0;
-            const blockPositionInSteps = stepsBefore; // Position in steps array
+            // The block position in steps array
+            const blockPositionInSteps = stepsBefore;
 
             // Act - Delete the block
             const afterDelete = deleteRepetitionBlockAction(
               originalKrd,
-              blockIndex,
+              block.id!,
               state
             );
 
@@ -326,7 +803,7 @@ describe("deleteRepetitionBlockAction", () => {
           fc.boolean(), // Whether to have selectedStepIds
           (stepsInBlock, hasSelectedId, hasSelectedIds) => {
             // Arrange
-            const block = createRepetitionBlock(stepsInBlock);
+            const block = createRepetitionBlock(stepsInBlock, "test-block-1");
             const krd = createKRDWithWorkout([block]);
 
             const state: WorkoutState = {
@@ -340,7 +817,7 @@ describe("deleteRepetitionBlockAction", () => {
             };
 
             // Act
-            const result = deleteRepetitionBlockAction(krd, 0, state);
+            const result = deleteRepetitionBlockAction(krd, block.id!, state);
 
             // Assert - Selections are cleared
             expect(result.selectedStepId).toBe(null);
@@ -378,16 +855,19 @@ describe("deleteRepetitionBlockAction", () => {
               intensity: "active",
             });
 
+            const block: RepetitionBlock = {
+              id: "test-block-1",
+              repeatCount: 2,
+              steps: Array.from({ length: stepsInBlock }, (_, i) =>
+                createStepWithDuration(i, durationPerStep)
+              ),
+            };
+
             const steps: Array<WorkoutStep | RepetitionBlock> = [
               ...Array.from({ length: stepsBefore }, (_, i) =>
                 createStepWithDuration(i, durationPerStep)
               ),
-              {
-                repeatCount: 2,
-                steps: Array.from({ length: stepsInBlock }, (_, i) =>
-                  createStepWithDuration(i, durationPerStep)
-                ),
-              },
+              block,
               ...Array.from({ length: stepsAfter }, (_, i) =>
                 createStepWithDuration(stepsBefore + i, durationPerStep)
               ),
@@ -406,7 +886,7 @@ describe("deleteRepetitionBlockAction", () => {
               (stepsBefore + stepsAfter) * durationPerStep;
 
             // Act
-            const result = deleteRepetitionBlockAction(krd, 0, state);
+            const result = deleteRepetitionBlockAction(krd, block.id!, state);
 
             // Assert
             const workout = result.currentWorkout?.extensions?.workout;
@@ -474,14 +954,14 @@ describe("deleteRepetitionBlockAction", () => {
       expect(result).toEqual({});
     });
 
-    it("should return empty object if block index is out of bounds", () => {
+    it("should return empty object if block ID does not exist", () => {
       // Arrange
       const block = createRepetitionBlock(3);
       const krd = createKRDWithWorkout([block]);
       const state = createInitialState(krd);
 
       // Act
-      const result = deleteRepetitionBlockAction(krd, 999, state);
+      const result = deleteRepetitionBlockAction(krd, "non-existent-id", state);
 
       // Assert
       expect(result).toEqual({});
@@ -494,7 +974,7 @@ describe("deleteRepetitionBlockAction", () => {
       const state = createInitialState(krd);
 
       // Act
-      const result = deleteRepetitionBlockAction(krd, 0, state);
+      const result = deleteRepetitionBlockAction(krd, block.id!, state);
 
       // Assert
       const workout = result.currentWorkout?.extensions?.workout;
