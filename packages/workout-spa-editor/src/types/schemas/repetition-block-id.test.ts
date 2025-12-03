@@ -10,13 +10,7 @@
 import type { RepetitionBlock } from "@kaiord/core";
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
-
-/**
- * Generates a unique block ID
- */
-const generateBlockId = (): string => {
-  return `block-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-};
+import { generateBlockId } from "../../utils/id-generation";
 
 /**
  * Creates a repetition block with an ID

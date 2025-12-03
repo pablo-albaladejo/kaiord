@@ -126,6 +126,10 @@ describe("promptBackupDownload", () => {
     vi.useFakeTimers();
   });
 
+  afterEach(() => {
+    vi.useRealTimers();
+  });
+
   it("should download backup and proceed when user confirms", async () => {
     // Arrange
     const mockWorkout: KRD = {

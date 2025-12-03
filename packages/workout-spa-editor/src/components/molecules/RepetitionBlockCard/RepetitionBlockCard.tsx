@@ -134,6 +134,9 @@ export const RepetitionBlockCard = forwardRef<
         onDelete &&
         !isEditingCount
       ) {
+        // Only delete when the block card itself is focused, not inner controls
+        if (event.currentTarget !== event.target) return;
+
         // Prevent default behavior (e.g., browser back navigation for Backspace)
         event.preventDefault();
         event.stopPropagation();

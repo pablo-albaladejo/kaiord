@@ -9,26 +9,9 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
-import { isRepetitionBlock } from "../../types/krd";
+import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
-
-/**
- * Finds a repetition block by its unique ID
- */
-export const findBlockById = (
-  workout: Workout,
-  blockId: string
-): { block: RepetitionBlock; position: number } | null => {
-  for (let i = 0; i < workout.steps.length; i++) {
-    const step = workout.steps[i];
-    if (isRepetitionBlock(step) && step.id === blockId) {
-      return { block: step, position: i };
-    }
-  }
-
-  return null;
-};
 
 /**
  * Adds a new step to a repetition block by its ID

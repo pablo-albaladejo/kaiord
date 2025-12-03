@@ -8,28 +8,11 @@
  * - Requirement 2.4: Use block ID for operations
  */
 
-import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
-import { isRepetitionBlock } from "../../types/krd";
+import type { KRD, Workout } from "../../types/krd";
+import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 import { recalculateStepIndices } from "./recalculate-step-indices";
-
-/**
- * Finds a repetition block by its unique ID
- */
-export const findBlockById = (
-  workout: Workout,
-  blockId: string
-): { block: RepetitionBlock; position: number } | null => {
-  for (let i = 0; i < workout.steps.length; i++) {
-    const step = workout.steps[i];
-    if (isRepetitionBlock(step) && step.id === blockId) {
-      return { block: step, position: i };
-    }
-  }
-
-  return null;
-};
 
 /**
  * Ungroups a repetition block by its ID, extracting its steps back into the workout
