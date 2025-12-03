@@ -14,7 +14,7 @@ type WorkoutStepsListProps = {
   readonly onStepPaste?: () => void;
   readonly onStepReorder: (activeIndex: number, overIndex: number) => void;
   readonly onReorderStepsInBlock?: (
-    blockIndex: number,
+    blockId: string,
     activeIndex: number,
     overIndex: number
   ) => void;
@@ -22,14 +22,14 @@ type WorkoutStepsListProps = {
   readonly onCreateRepetitionBlock: () => void;
   readonly onCreateEmptyRepetitionBlock: () => void;
   readonly onEditRepetitionBlock: (
-    blockIndex: number,
+    blockId: string,
     repeatCount: number
   ) => void;
-  readonly onAddStepToRepetitionBlock: (blockIndex: number) => void;
-  readonly onUngroupRepetitionBlock?: (blockIndex: number) => void;
-  readonly onDeleteRepetitionBlock?: (blockIndex: number) => void;
+  readonly onAddStepToRepetitionBlock: (blockId: string) => void;
+  readonly onUngroupRepetitionBlock?: (blockId: string) => void;
+  readonly onDeleteRepetitionBlock?: (blockId: string) => void;
   readonly onDuplicateStepInRepetitionBlock: (
-    blockIndex: number,
+    blockId: string,
     stepIndex: number
   ) => void;
 };

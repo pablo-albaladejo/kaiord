@@ -23,6 +23,7 @@ export default tseslint.config(
       "**/test-results/**",
       "**/.playwright/**",
       "**/.storybook/**",
+      "**/storybook-static/**",
     ],
   },
   {

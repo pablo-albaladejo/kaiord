@@ -14,7 +14,7 @@ export type WorkoutSectionProps = {
   onStepSelect: (stepId: string) => void;
   onStepReorder?: (activeIndex: number, overIndex: number) => void;
   onReorderStepsInBlock?: (
-    blockIndex: number,
+    blockId: string,
     activeIndex: number,
     overIndex: number
   ) => void;

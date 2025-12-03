@@ -6,6 +6,28 @@ import { RepetitionBlockHeader } from "./RepetitionBlockHeader";
 import { RepetitionBlockSteps } from "./RepetitionBlockSteps";
 import { useRepetitionBlockState } from "./use-repetition-block-state";
 
+/**
+ * Props for the RepetitionBlockCard component.
+ *
+ * This component displays a repetition block with its contained steps.
+ * Each block has a unique ID that persists across operations.
+ *
+ * @property block - The repetition block to display (must have a unique `id`)
+ * @property onEditRepeatCount - Callback when repeat count is edited
+ * @property onAddStep - Callback to add a new step to the block
+ * @property onRemoveStep - Callback to remove a step by index
+ * @property onDuplicateStep - Callback to duplicate a step by index
+ * @property onSelectStep - Callback when a step is selected
+ * @property onToggleStepSelection - Callback to toggle step selection
+ * @property onReorderSteps - Callback when steps are reordered via drag-and-drop
+ * @property onUngroup - Callback to ungroup the block into individual steps
+ * @property onDelete - Callback to delete the entire block (uses block.id internally)
+ * @property selectedStepIndex - Currently selected step index (deprecated, use selectedStepIds)
+ * @property selectedStepIds - Set of selected step IDs
+ * @property isDragging - Whether the block is currently being dragged
+ * @property dragHandleProps - Props for the drag handle (from dnd-kit)
+ * @property blockIndex - Visual index of the block (for display only, not used for operations)
+ */
 export type RepetitionBlockCardProps = HTMLAttributes<HTMLDivElement> & {
   block: RepetitionBlock;
   onEditRepeatCount?: (count: number) => void;
@@ -24,6 +46,49 @@ export type RepetitionBlockCardProps = HTMLAttributes<HTMLDivElement> & {
   blockIndex?: number;
 };
 
+/**
+ * RepetitionBlockCard Component
+ *
+ * Displays a repetition block with its contained steps. Each block has a unique ID
+ * that ensures correct identification across all operations (deletion, editing, reordering).
+ *
+ * ## Block ID System
+ *
+ * Each block must have a unique `id` field:
+ * - Format: `block-{timestamp}-{random}` (e.g., "block-1704123456789-x7k2m9p4q")
+ * - Generated automatically when blocks are created
+ * - Persists across all operations (edit, move, undo/redo)
+ * - Used for deletion to ensure the correct block is removed
+ *
+ * ## Features
+ *
+ * - **Expandable/Collapsible**: Click header to toggle step visibility
+ * - **Editable Repeat Count**: Click count to edit inline
+ * - **Drag and Drop**: Reorder blocks and steps within blocks
+ * - **Keyboard Navigation**: Full keyboard support (Delete/Backspace to delete)
+ * - **Undo/Redo**: All operations are undoable
+ *
+ * ## Deletion Behavior
+ *
+ * When `onDelete` is called:
+ * 1. The block's unique ID is used to locate it in the workout
+ * 2. The entire block and all its steps are removed
+ * 3. Step indices are recalculated for remaining steps
+ * 4. The operation is added to undo history
+ *
+ * This ensures the correct block is always deleted, even if blocks have been
+ * reordered via drag-and-drop.
+ *
+ * @example
+ * ```tsx
+ * <RepetitionBlockCard
+ *   block={block} // Must have block.id
+ *   onDelete={() => deleteRepetitionBlock(block.id)} // Uses ID, not index
+ *   onEditRepeatCount={(count) => editBlock(block.id, count)}
+ *   onUngroup={() => ungroupBlock(block.id)}
+ * />
+ * ```
+ */
 export const RepetitionBlockCard = forwardRef<
   HTMLDivElement,
   RepetitionBlockCardProps
@@ -46,7 +111,7 @@ export const RepetitionBlockCard = forwardRef<
       dragHandleProps,
       blockIndex,
       className = "",
-      ...props
+      ...htmlProps
     },
     ref
   ) => {
@@ -90,7 +155,7 @@ export const RepetitionBlockCard = forwardRef<
         data-testid="repetition-block-card"
         tabIndex={0}
         onKeyDown={handleBlockKeyDown}
-        {...props}
+        {...htmlProps}
       >
         <RepetitionBlockHeader
           block={block}

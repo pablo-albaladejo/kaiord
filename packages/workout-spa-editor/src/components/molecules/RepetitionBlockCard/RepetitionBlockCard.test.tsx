@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+import { expectNoReactWarnings } from "../../../test-utils/console-spy";
 import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
 import { parseStepId } from "../../../utils/step-id-parser";
 import { RepetitionBlockCard } from "./RepetitionBlockCard";
@@ -731,6 +732,111 @@ describe("RepetitionBlockCard", () => {
       expect(id1).not.toBe(id2);
       expect(id1).toBe("block-0-step-5");
       expect(id2).toBe("block-1-step-5");
+    });
+  });
+
+  describe("prop handling", () => {
+    it("should not pass component-specific props to DOM element", () => {
+      // Arrange
+      const warningChecker = expectNoReactWarnings();
+      const onEditRepeatCount = vi.fn();
+      const onAddStep = vi.fn();
+      const onRemoveStep = vi.fn();
+      const onDuplicateStep = vi.fn();
+      const onSelectStep = vi.fn();
+      const onToggleStepSelection = vi.fn();
+      const onReorderSteps = vi.fn();
+      const onUngroup = vi.fn();
+      const onDelete = vi.fn();
+
+      // Act
+      render(
+        <RepetitionBlockCard
+          block={mockBlock}
+          onEditRepeatCount={onEditRepeatCount}
+          onAddStep={onAddStep}
+          onRemoveStep={onRemoveStep}
+          onDuplicateStep={onDuplicateStep}
+          onSelectStep={onSelectStep}
+          onToggleStepSelection={onToggleStepSelection}
+          onReorderSteps={onReorderSteps}
+          onUngroup={onUngroup}
+          onDelete={onDelete}
+          selectedStepIndex={0}
+          selectedStepIds={["step-1"]}
+          isDragging={false}
+          blockIndex={0}
+          data-testid="custom-attr"
+        />
+      );
+
+      // Assert
+      warningChecker.verify();
+    });
+
+    it("should forward HTML attributes to DOM element", () => {
+      // Arrange
+      const warningChecker = expectNoReactWarnings();
+
+      // Act
+      render(
+        <RepetitionBlockCard
+          block={mockBlock}
+          data-custom="test-value"
+          aria-label="Test block"
+          role="region"
+        />
+      );
+
+      // Assert
+      const element = screen.getByTestId("repetition-block-card");
+      expect(element).toHaveAttribute("data-custom", "test-value");
+      expect(element).toHaveAttribute("aria-label", "Test block");
+      expect(element).toHaveAttribute("role", "region");
+
+      warningChecker.verify();
+    });
+
+    it("should not produce warnings with all props provided", () => {
+      // Arrange
+      const warningChecker = expectNoReactWarnings();
+
+      // Act
+      render(
+        <RepetitionBlockCard
+          block={mockBlock}
+          onEditRepeatCount={vi.fn()}
+          onAddStep={vi.fn()}
+          onRemoveStep={vi.fn()}
+          onDuplicateStep={vi.fn()}
+          onSelectStep={vi.fn()}
+          onToggleStepSelection={vi.fn()}
+          onReorderSteps={vi.fn()}
+          onUngroup={vi.fn()}
+          onDelete={vi.fn()}
+          selectedStepIndex={0}
+          selectedStepIds={["step-1", "step-2"]}
+          isDragging={true}
+          dragHandleProps={{
+            attributes: {
+              role: "button",
+              tabIndex: 0,
+              "aria-disabled": false,
+              "aria-pressed": undefined,
+              "aria-roledescription": "sortable",
+              "aria-describedby": "DndContext-0",
+            },
+            listeners: {},
+          }}
+          blockIndex={2}
+          className="custom-class"
+          data-testid="test-block"
+          aria-describedby="description"
+        />
+      );
+
+      // Assert
+      warningChecker.verify();
     });
   });
 });

@@ -8,15 +8,15 @@ export const createBlockActionHandlers = (state: WorkoutState) => {
       blockActions.createRepetitionBlock(stepIndices, repeatCount),
     createEmptyRepetitionBlock: (repeatCount: number) =>
       blockActions.createEmptyRepetitionBlock(repeatCount),
-    editRepetitionBlock: (blockIndex: number, repeatCount: number) =>
-      blockActions.editRepetitionBlock(blockIndex, repeatCount),
-    addStepToRepetitionBlock: (blockIndex: number) =>
-      blockActions.addStepToRepetitionBlock(blockIndex),
-    duplicateStepInRepetitionBlock: (blockIndex: number, stepIndex: number) =>
-      blockActions.duplicateStepInRepetitionBlock(blockIndex, stepIndex),
-    ungroupRepetitionBlock: (blockIndex: number) =>
-      blockActions.ungroupRepetitionBlock(blockIndex),
-    deleteRepetitionBlock: (blockIndex: number) =>
-      blockActions.deleteRepetitionBlock(blockIndex),
+    editRepetitionBlock: (blockId: string, repeatCount: number) =>
+      blockActions.editRepetitionBlock(blockId, repeatCount),
+    addStepToRepetitionBlock: (blockId: string) =>
+      blockActions.addStepToRepetitionBlock(blockId),
+    duplicateStepInRepetitionBlock: (blockId: string, stepIndex: number) =>
+      blockActions.duplicateStepInRepetitionBlock(blockId, stepIndex),
+    ungroupRepetitionBlock: (blockId: string) =>
+      blockActions.ungroupRepetitionBlock(blockId),
+    deleteRepetitionBlock: (blockId: string) =>
+      blockActions.deleteRepetitionBlock(blockId),
   };
 };

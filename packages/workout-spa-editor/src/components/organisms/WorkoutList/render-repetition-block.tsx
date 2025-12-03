@@ -1,63 +1,50 @@
-import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
 import { SortableRepetitionBlockCard } from "./SortableRepetitionBlockCard";
-
-type RenderRepetitionBlockProps = {
-  item: RepetitionBlock;
-  index: number;
-  itemId: string;
-  selectedStepId?: string | null;
-  selectedStepIds?: readonly string[];
-  onStepSelect?: (stepId: string) => void;
-  onToggleStepSelection?: (stepId: string) => void;
-  onStepDelete?: (stepIndex: number) => void;
-  onDuplicateStepInRepetitionBlock?: (
-    blockIndex: number,
-    stepIndex: number
-  ) => void;
-  onEditRepetitionBlock?: (blockIndex: number, repeatCount: number) => void;
-  onAddStepToRepetitionBlock?: (blockIndex: number) => void;
-  onUngroupRepetitionBlock?: (blockIndex: number) => void;
-  onDeleteRepetitionBlock?: (blockIndex: number) => void;
-  onReorderStepsInBlock?: (
-    blockIndex: number,
-    activeIndex: number,
-    overIndex: number
-  ) => void;
-  generateStepId: (
-    item: WorkoutStep | RepetitionBlock,
-    index: number,
-    parentBlockIndex?: number
-  ) => string;
-};
+import type { RenderRepetitionBlockProps } from "./render-repetition-block.types";
 
 const createHandlers = (
-  index: number,
-  onEditRepetitionBlock?: (blockIndex: number, repeatCount: number) => void,
-  onAddStepToRepetitionBlock?: (blockIndex: number) => void,
-  onUngroupRepetitionBlock?: (blockIndex: number) => void,
-  onDeleteRepetitionBlock?: (blockIndex: number) => void
-) => ({
-  onEditRepeatCount: onEditRepetitionBlock
-    ? (count: number) => onEditRepetitionBlock(index, count)
-    : undefined,
-  onAddStep: onAddStepToRepetitionBlock
-    ? () => onAddStepToRepetitionBlock(index)
-    : undefined,
-  onUngroup: onUngroupRepetitionBlock
-    ? () => onUngroupRepetitionBlock(index)
-    : undefined,
-  onDelete: onDeleteRepetitionBlock
-    ? () => onDeleteRepetitionBlock(index)
-    : undefined,
-});
+  blockId: string | undefined,
+  onEdit?: (blockId: string, repeatCount: number) => void,
+  onAdd?: (blockId: string) => void,
+  onUngroup?: (blockId: string) => void,
+  onDelete?: (blockId: string) => void,
+  onDuplicate?: (blockId: string, stepIndex: number) => void,
+  onReorder?: (blockId: string, activeIndex: number, overIndex: number) => void
+) => {
+  if (!blockId)
+    return {
+      onEditRepeatCount: undefined,
+      onAddStep: undefined,
+      onUngroup: undefined,
+      onDelete: undefined,
+      onStepDuplicate: undefined,
+      onReorderSteps: undefined,
+    };
+  return {
+    onEditRepeatCount: onEdit
+      ? (count: number) => onEdit(blockId, count)
+      : undefined,
+    onAddStep: onAdd ? () => onAdd(blockId) : undefined,
+    onUngroup: onUngroup ? () => onUngroup(blockId) : undefined,
+    onDelete: onDelete ? () => onDelete(blockId) : undefined,
+    onStepDuplicate: onDuplicate
+      ? (_: number, stepIndex: number) => onDuplicate(blockId, stepIndex)
+      : undefined,
+    onReorderSteps: onReorder
+      ? (_: number, activeIndex: number, overIndex: number) =>
+          onReorder(blockId, activeIndex, overIndex)
+      : undefined,
+  };
+};
 
 export const renderRepetitionBlock = (props: RenderRepetitionBlockProps) => {
   const handlers = createHandlers(
-    props.index,
+    props.item.id,
     props.onEditRepetitionBlock,
     props.onAddStepToRepetitionBlock,
     props.onUngroupRepetitionBlock,
-    props.onDeleteRepetitionBlock
+    props.onDeleteRepetitionBlock,
+    props.onDuplicateStepInRepetitionBlock,
+    props.onReorderStepsInBlock
   );
 
   return (
@@ -70,8 +57,6 @@ export const renderRepetitionBlock = (props: RenderRepetitionBlockProps) => {
       onStepSelect={props.onStepSelect}
       onToggleStepSelection={props.onToggleStepSelection}
       onStepDelete={props.onStepDelete}
-      onStepDuplicate={props.onDuplicateStepInRepetitionBlock}
-      onReorderSteps={props.onReorderStepsInBlock}
       generateStepId={props.generateStepId}
       parentBlockIndex={props.index}
       {...handlers}

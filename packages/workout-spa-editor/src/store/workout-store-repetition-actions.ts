@@ -31,15 +31,15 @@ export function createRepetitionBlockActions(state: WorkoutState) {
       createRepetitionBlockAction(krd, stepIndices, repeatCount, state),
     createEmptyRepetitionBlock: (repeatCount: number) =>
       createEmptyRepetitionBlockAction(krd, repeatCount, state),
-    editRepetitionBlock: (blockIndex: number, repeatCount: number) =>
-      editRepetitionBlockAction(krd, blockIndex, repeatCount, state),
-    addStepToRepetitionBlock: (blockIndex: number) =>
-      addStepToRepetitionBlockAction(krd, blockIndex, state),
-    duplicateStepInRepetitionBlock: (blockIndex: number, stepIndex: number) =>
-      duplicateStepInRepetitionBlockAction(krd, blockIndex, stepIndex, state),
-    ungroupRepetitionBlock: (blockIndex: number) =>
-      ungroupRepetitionBlockAction(krd, blockIndex, state),
-    deleteRepetitionBlock: (blockIndex: number) =>
-      deleteRepetitionBlockAction(krd, blockIndex, state),
+    editRepetitionBlock: (blockId: string, repeatCount: number) =>
+      editRepetitionBlockAction(krd, blockId, repeatCount, state),
+    addStepToRepetitionBlock: (blockId: string) =>
+      addStepToRepetitionBlockAction(krd, blockId, state),
+    duplicateStepInRepetitionBlock: (blockId: string, stepIndex: number) =>
+      duplicateStepInRepetitionBlockAction(krd, blockId, stepIndex, state),
+    ungroupRepetitionBlock: (blockId: string) =>
+      ungroupRepetitionBlockAction(krd, blockId, state),
+    deleteRepetitionBlock: (blockId: string) =>
+      deleteRepetitionBlockAction(krd, blockId, state),
   };
 }

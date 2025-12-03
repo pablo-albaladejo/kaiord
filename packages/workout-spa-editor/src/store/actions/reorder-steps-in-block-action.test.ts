@@ -28,6 +28,7 @@ describe("reorderStepsInBlockAction", () => {
   it("should reorder steps within a repetition block", () => {
     // Arrange
     const block: RepetitionBlock = {
+      id: "block-test-1",
       repeatCount: 3,
       steps: [
         {
@@ -76,7 +77,7 @@ describe("reorderStepsInBlockAction", () => {
     const state = createMockState();
 
     // Act - move first step to last position
-    const result = reorderStepsInBlockAction(krd, 0, 0, 2, state);
+    const result = reorderStepsInBlockAction(krd, "block-test-1", 0, 2, state);
 
     // Assert
     expect(result.currentWorkout).toBeDefined();
@@ -101,6 +102,7 @@ describe("reorderStepsInBlockAction", () => {
   it("should return empty object when activeIndex equals overIndex", () => {
     // Arrange
     const block: RepetitionBlock = {
+      id: "block-test-2",
       repeatCount: 2,
       steps: [
         {
@@ -127,13 +129,13 @@ describe("reorderStepsInBlockAction", () => {
     const state = createMockState();
 
     // Act
-    const result = reorderStepsInBlockAction(krd, 0, 0, 0, state);
+    const result = reorderStepsInBlockAction(krd, "block-test-2", 0, 0, state);
 
     // Assert
     expect(result).toEqual({});
   });
 
-  it("should return empty object when blockIndex is out of bounds", () => {
+  it("should return empty object when block is not found", () => {
     // Arrange
     const workout: Workout = {
       name: "Test Workout",
@@ -145,7 +147,13 @@ describe("reorderStepsInBlockAction", () => {
     const state = createMockState();
 
     // Act
-    const result = reorderStepsInBlockAction(krd, 0, 0, 1, state);
+    const result = reorderStepsInBlockAction(
+      krd,
+      "non-existent-block",
+      0,
+      1,
+      state
+    );
 
     // Assert
     expect(result).toEqual({});
@@ -154,6 +162,7 @@ describe("reorderStepsInBlockAction", () => {
   it("should return empty object when step indices are out of bounds", () => {
     // Arrange
     const block: RepetitionBlock = {
+      id: "block-test-3",
       repeatCount: 2,
       steps: [
         {
@@ -180,7 +189,7 @@ describe("reorderStepsInBlockAction", () => {
     const state = createMockState();
 
     // Act
-    const result = reorderStepsInBlockAction(krd, 0, 0, 5, state);
+    const result = reorderStepsInBlockAction(krd, "block-test-3", 0, 5, state);
 
     // Assert
     expect(result).toEqual({});
@@ -210,7 +219,13 @@ describe("reorderStepsInBlockAction", () => {
     const state = createMockState();
 
     // Act
-    const result = reorderStepsInBlockAction(krd, 0, 0, 1, state);
+    const result = reorderStepsInBlockAction(
+      krd,
+      "non-existent-block",
+      0,
+      1,
+      state
+    );
 
     // Assert
     expect(result).toEqual({});
@@ -230,7 +245,7 @@ describe("reorderStepsInBlockAction", () => {
     const state = createMockState();
 
     // Act
-    const result = reorderStepsInBlockAction(krd, 0, 0, 1, state);
+    const result = reorderStepsInBlockAction(krd, "any-block-id", 0, 1, state);
 
     // Assert
     expect(result).toEqual({});

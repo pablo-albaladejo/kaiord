@@ -764,6 +764,9 @@
               {
                 "type": "object",
                 "properties": {
+                  "id": {
+                    "type": "string"
+                  },
                   "repeatCount": {
                     "type": "integer",
                     "minimum": 1

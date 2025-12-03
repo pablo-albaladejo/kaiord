@@ -1,49 +1,45 @@
-/**
- * Workout Store Actions
- *
- * Action creators for workout store operations.
- */
-
-import type { KRD, RepetitionBlock, WorkoutStep } from "../types/krd";
+import type { KRD, Workout } from "../types/krd";
 import type { Sport } from "../types/krd-core";
+import { migrateRepetitionBlocks } from "../utils/workout-migration";
+import type { WorkoutState } from "./workout-state.types";
+
+export type { WorkoutState };
 
 const MAX_HISTORY_SIZE = 50;
 
-export type WorkoutState = {
-  currentWorkout: KRD | null;
-  workoutHistory: Array<KRD>;
-  historyIndex: number;
-  selectedStepId: string | null;
-  selectedStepIds: Array<string>;
-  isEditing: boolean;
-  deletedSteps?: Array<{
-    step: WorkoutStep | RepetitionBlock;
-    index: number;
-    timestamp: number;
-  }>;
+export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => {
+  const workout = krd.extensions?.workout as Workout | undefined;
+  const migratedKrd = workout
+    ? {
+        ...krd,
+        extensions: {
+          ...krd.extensions,
+          workout: migrateRepetitionBlocks(workout),
+        },
+      }
+    : krd;
+  return {
+    currentWorkout: migratedKrd,
+    workoutHistory: [migratedKrd],
+    historyIndex: 0,
+    selectedStepId: null,
+    selectedStepIds: [],
+    isEditing: false,
+  };
 };
-
-export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => ({
-  currentWorkout: krd,
-  workoutHistory: [krd],
-  historyIndex: 0,
-  selectedStepId: null,
-  selectedStepIds: [],
-  isEditing: false,
-});
 
 export const createUpdateWorkoutAction = (
   krd: KRD,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  const newHistory = state.workoutHistory.slice(0, state.historyIndex + 1);
-  newHistory.push(krd);
-
+  const newHistory = [
+    ...state.workoutHistory.slice(0, state.historyIndex + 1),
+    krd,
+  ];
   const trimmedHistory =
     newHistory.length > MAX_HISTORY_SIZE
       ? newHistory.slice(newHistory.length - MAX_HISTORY_SIZE)
       : newHistory;
-
   return {
     currentWorkout: krd,
     workoutHistory: trimmedHistory,
@@ -67,19 +63,9 @@ export const createEmptyWorkoutAction = (
   const emptyWorkout: KRD = {
     version: "1.0",
     type: "workout",
-    metadata: {
-      created: new Date().toISOString(),
-      sport,
-    },
-    extensions: {
-      workout: {
-        name,
-        sport,
-        steps: [],
-      },
-    },
+    metadata: { created: new Date().toISOString(), sport },
+    extensions: { workout: { name, sport, steps: [] } },
   };
-
   return {
     currentWorkout: emptyWorkout,
     workoutHistory: [emptyWorkout],

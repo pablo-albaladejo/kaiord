@@ -5,22 +5,22 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
-import { isRepetitionBlock } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import { findBlockById } from "./delete-repetition-block-action";
 
 /**
- * Duplicates a step within a repetition block at the given indices
+ * Duplicates a step within a repetition block
  *
  * @param krd - Current KRD workout
- * @param blockIndex - Index of the repetition block in the workout steps array
+ * @param blockId - Unique ID of the repetition block
  * @param stepIndex - Index of the step within the repetition block
  * @param state - Current workout state
  * @returns Updated workout state
  */
 export const duplicateStepInRepetitionBlockAction = (
   krd: KRD,
-  blockIndex: number,
+  blockId: string,
   stepIndex: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
@@ -29,15 +29,13 @@ export const duplicateStepInRepetitionBlockAction = (
   }
 
   const workout = krd.extensions.workout as Workout;
+  const blockInfo = findBlockById(workout, blockId);
 
-  if (blockIndex < 0 || blockIndex >= workout.steps.length) {
+  if (!blockInfo) {
     return {};
   }
 
-  const block = workout.steps[blockIndex];
-  if (!isRepetitionBlock(block)) {
-    return {};
-  }
+  const { block, position: blockIndex } = blockInfo;
 
   if (stepIndex < 0 || stepIndex >= block.steps.length) {
     return {};

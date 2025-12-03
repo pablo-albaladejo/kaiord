@@ -13,6 +13,16 @@ export type DeletedStep = {
   timestamp: number;
 };
 
+export type ModalConfig = {
+  title: string;
+  message: string;
+  confirmLabel: string;
+  cancelLabel: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+  variant: "default" | "destructive";
+};
+
 export type WorkoutStore = {
   // State
   currentWorkout: KRD | null;
@@ -24,6 +34,8 @@ export type WorkoutStore = {
   safeMode: boolean;
   lastBackup: KRD | null;
   deletedSteps: Array<DeletedStep>;
+  isModalOpen: boolean;
+  modalConfig: ModalConfig | null;
 
   // Actions
   loadWorkout: (krd: KRD) => void;
@@ -42,7 +54,7 @@ export type WorkoutStore = {
   ) => Promise<{ success: boolean; message: string }>;
   reorderStep: (activeIndex: number, overIndex: number) => void;
   reorderStepsInBlock: (
-    blockIndex: number,
+    blockId: string,
     activeIndex: number,
     overIndex: number
   ) => void;
@@ -51,13 +63,11 @@ export type WorkoutStore = {
     repeatCount: number
   ) => void;
   createEmptyRepetitionBlock: (repeatCount: number) => void;
-  editRepetitionBlock: (blockIndex: number, repeatCount: number) => void;
-  addStepToRepetitionBlock: (blockIndex: number) => void;
-  duplicateStepInRepetitionBlock: (
-    blockIndex: number,
-    stepIndex: number
-  ) => void;
-  ungroupRepetitionBlock: (blockIndex: number) => void;
+  editRepetitionBlock: (blockId: string, repeatCount: number) => void;
+  addStepToRepetitionBlock: (blockId: string) => void;
+  duplicateStepInRepetitionBlock: (blockId: string, stepIndex: number) => void;
+  ungroupRepetitionBlock: (blockId: string) => void;
+  deleteRepetitionBlock: (blockId: string) => void;
   selectStep: (id: string | null) => void;
   toggleStepSelection: (id: string) => void;
   clearStepSelection: () => void;
@@ -71,6 +81,10 @@ export type WorkoutStore = {
   restoreFromBackup: () => boolean;
   enableSafeMode: () => void;
   disableSafeMode: () => void;
+
+  // Modal Actions
+  showConfirmationModal: (config: ModalConfig) => void;
+  hideConfirmationModal: () => void;
 
   // Computed
   canUndo: () => boolean;

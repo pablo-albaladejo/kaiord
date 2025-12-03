@@ -5,6 +5,7 @@
  *
  * Requirements:
  * - Requirement 4: Create repetition blocks from selected steps
+ * - Requirement 2.4: Use block ID for operations
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
@@ -13,17 +14,34 @@ import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
 /**
- * Updates the repeat count of a repetition block at the given index
+ * Finds a repetition block by its unique ID
+ */
+export const findBlockById = (
+  workout: Workout,
+  blockId: string
+): { block: RepetitionBlock; position: number } | null => {
+  for (let i = 0; i < workout.steps.length; i++) {
+    const step = workout.steps[i];
+    if (isRepetitionBlock(step) && step.id === blockId) {
+      return { block: step, position: i };
+    }
+  }
+
+  return null;
+};
+
+/**
+ * Updates the repeat count of a repetition block by its ID
  *
  * @param krd - Current KRD workout
- * @param blockIndex - Index of the repetition block in the workout steps array
+ * @param blockId - Unique ID of the repetition block
  * @param repeatCount - New repeat count (minimum 1)
  * @param state - Current workout state
  * @returns Updated workout state
  */
 export const editRepetitionBlockAction = (
   krd: KRD,
-  blockIndex: number,
+  blockId: string,
   repeatCount: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
@@ -37,22 +55,22 @@ export const editRepetitionBlockAction = (
 
   const workout = krd.extensions.workout as Workout;
 
-  if (blockIndex < 0 || blockIndex >= workout.steps.length) {
+  // Find block by ID
+  const blockInfo = findBlockById(workout, blockId);
+
+  if (!blockInfo) {
     return {};
   }
 
-  const block = workout.steps[blockIndex];
-  if (!isRepetitionBlock(block)) {
-    return {};
-  }
+  const { position } = blockInfo;
 
   const updatedBlock: RepetitionBlock = {
-    ...block,
+    ...blockInfo.block,
     repeatCount,
   };
 
   const updatedSteps = [...workout.steps];
-  updatedSteps[blockIndex] = updatedBlock;
+  updatedSteps[position] = updatedBlock;
 
   const updatedWorkout: Workout = {
     ...workout,

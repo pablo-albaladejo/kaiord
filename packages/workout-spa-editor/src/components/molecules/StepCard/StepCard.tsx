@@ -22,7 +22,7 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
       isDragging = false,
       dragHandleProps,
       className = "",
-      ...props
+      ...htmlProps
     },
     ref
   ) => {
@@ -54,7 +54,7 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
         aria-label={label}
         data-testid="step-card"
         data-selected={selected ? "true" : "false"}
-        {...props}
+        {...htmlProps}
       >
         {renderStepCardContent({
           step,

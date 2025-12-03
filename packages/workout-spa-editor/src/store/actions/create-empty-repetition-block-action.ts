@@ -15,6 +15,7 @@ import type {
   WorkoutStep,
 } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
+import { generateBlockId } from "../../utils/id-generation";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -67,6 +68,7 @@ export const createEmptyRepetitionBlockAction = (
 
   // Create a repetition block with the default step
   const repetitionBlock: RepetitionBlock = {
+    id: generateBlockId(),
     repeatCount,
     steps: [defaultStep],
   };
