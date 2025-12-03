@@ -1,6 +1,5 @@
 import type { KRD, Workout } from "../../../types/krd";
 import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
-import { DeleteConfirmDialog } from "../../molecules/DeleteConfirmDialog/DeleteConfirmDialog";
 import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
 import { useWorkoutSectionState } from "./useWorkoutSectionState";
 import { WorkoutHeader } from "./WorkoutHeader";
@@ -46,7 +45,7 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         selectedStepIds={state.selectedStepIds}
         onStepSelect={state.handleStepSelect}
         onToggleStepSelection={state.handleToggleStepSelection}
-        onStepDelete={state.handleDeleteRequest}
+        onStepDelete={state.deleteStep}
         onStepDuplicate={state.duplicateStep}
         onStepCopy={state.copyStep}
         onStepPaste={state.pasteStep}
@@ -62,11 +61,6 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         onDuplicateStepInRepetitionBlock={
           state.handleDuplicateStepInRepetitionBlock
         }
-      />
-      <DeleteConfirmDialog
-        stepIndex={state.stepToDelete}
-        onConfirm={state.handleDeleteConfirm}
-        onCancel={state.handleDeleteCancel}
       />
       <CreateRepetitionBlockDialog
         stepCount={

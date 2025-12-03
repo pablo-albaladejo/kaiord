@@ -6,7 +6,6 @@ import {
   useUpdateWorkout,
 } from "../../../store/workout-store-selectors";
 import type { KRD, Workout, WorkoutStep } from "../../../types/krd";
-import { useDeleteHandlers } from "./useDeleteHandlers";
 import {
   createUpdatedKrd,
   createUpdatedWorkout,
@@ -21,7 +20,6 @@ export const useWorkoutSectionHandlers = (
   const selectStep = useSelectStep();
   const selectedStepId = useSelectedStepId();
   const updateWorkout = useUpdateWorkout();
-  const deleteHandlers = useDeleteHandlers();
 
   const handleStepSelect = useCallback(
     (stepId: string) => {
@@ -56,6 +54,5 @@ export const useWorkoutSectionHandlers = (
     handleStepSelect,
     handleSave,
     handleCancel,
-    ...deleteHandlers,
   };
 };

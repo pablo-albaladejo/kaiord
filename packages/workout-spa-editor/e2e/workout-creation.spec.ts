@@ -86,8 +86,9 @@ test.describe("Step Management Flow", () => {
     const deleteButton = secondStepCard.getByTestId("delete-step-button");
     await deleteButton.click();
 
-    // Confirm deletion in dialog
-    await page.getByTestId("confirm-delete-button").click();
+    // Requirement 1.1: Deletion is immediate without confirmation modal
+    // Wait for immediate deletion
+    await page.waitForTimeout(300);
 
     // Verify step was deleted (should only have 2 steps now)
     await expect(page.getByText("Step 2")).toBeVisible();
