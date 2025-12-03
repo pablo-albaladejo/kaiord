@@ -526,8 +526,9 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     expect(confirmBox).not.toBeNull();
 
     if (cancelBox && confirmBox) {
-      expect(cancelBox.height).toBeGreaterThanOrEqual(36); // Reasonable touch target
-      expect(confirmBox.height).toBeGreaterThanOrEqual(36);
+      // WCAG 2.1 AA recommends 44x44px minimum touch targets
+      expect(cancelBox.height).toBeGreaterThanOrEqual(44);
+      expect(confirmBox.height).toBeGreaterThanOrEqual(44);
     }
 
     // Test interaction on mobile

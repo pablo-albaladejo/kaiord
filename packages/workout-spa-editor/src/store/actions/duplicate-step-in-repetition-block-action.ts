@@ -5,9 +5,9 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
-import { findBlockById } from "./delete-repetition-block-action";
 
 /**
  * Duplicates a step within a repetition block
