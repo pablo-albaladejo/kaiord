@@ -617,7 +617,6 @@ describe("WorkoutLibrary", () => {
   describe("delete workout", () => {
     it("should show confirmation dialog when delete is clicked", async () => {
       // Arrange
-      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
       const user = userEvent.setup();
       render(
         <WorkoutLibrary
@@ -633,17 +632,15 @@ describe("WorkoutLibrary", () => {
       await user.click(deleteButton);
 
       // Assert
-      expect(confirmSpy).toHaveBeenCalledWith(
-        'Are you sure you want to delete "Easy Swim"?'
-      );
+      expect(screen.getByText("Delete Workout")).toBeInTheDocument();
+      expect(
+        screen.getByText(/Are you sure you want to delete "Easy Swim"\?/)
+      ).toBeInTheDocument();
       expect(mockDeleteTemplate).not.toHaveBeenCalled();
-
-      confirmSpy.mockRestore();
     });
 
     it("should delete workout when confirmed", async () => {
       // Arrange
-      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(true);
       const user = userEvent.setup();
       render(
         <WorkoutLibrary
@@ -657,17 +654,18 @@ describe("WorkoutLibrary", () => {
       const cards = screen.getAllByTestId("workout-card");
       const deleteButton = within(cards[0]).getByLabelText("Delete Easy Swim");
       await user.click(deleteButton);
+
+      // Click the Delete button in the modal
+      const confirmButton = screen.getByRole("button", { name: /delete/i });
+      await user.click(confirmButton);
 
       // Assert
       // Cards are sorted by date desc, so first card is Easy Swim (id: "3")
       expect(mockDeleteTemplate).toHaveBeenCalledWith("3");
-
-      confirmSpy.mockRestore();
     });
 
     it("should cancel delete when Cancel is clicked", async () => {
       // Arrange
-      const confirmSpy = vi.spyOn(window, "confirm").mockReturnValue(false);
       const user = userEvent.setup();
       render(
         <WorkoutLibrary
@@ -682,10 +680,12 @@ describe("WorkoutLibrary", () => {
       const deleteButton = within(cards[0]).getByLabelText("Delete Easy Swim");
       await user.click(deleteButton);
 
+      // Click the Cancel button in the modal
+      const cancelButton = screen.getByRole("button", { name: /cancel/i });
+      await user.click(cancelButton);
+
       // Assert
       expect(mockDeleteTemplate).not.toHaveBeenCalled();
-
-      confirmSpy.mockRestore();
     });
   });
 

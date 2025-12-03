@@ -158,7 +158,12 @@ pnpm clean
 
 ### Package-Specific Documentation
 
+- **[Block ID System](./docs/block-id-system.md)** - Block identification and migration system
+- **[Repetition Block Deletion](./docs/repetition-block-deletion.md)** - Block deletion feature documentation
 - **[Keyboard Shortcuts](./docs/keyboard-shortcuts.md)** - Complete keyboard navigation guide
+- **[Modal System](./docs/modal-system.md)** - Confirmation modal system documentation
+- **[Performance Optimization](./docs/performance-optimization.md)** - Performance testing and optimization guide
+- **[Delete Button Styling](./docs/delete-button-styling-comparison.md)** - Button styling consistency documentation
 - **[Kiroween Theme](./docs/kiroween-theme.md)** - Special Halloween theme documentation
 
 ## 🔧 Requirements

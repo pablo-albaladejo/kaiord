@@ -61,11 +61,11 @@ export const createReorderMethods = (
     set(result);
   },
   reorderStepsInBlock: (
-    blockIndex: number,
+    blockId: string,
     activeIndex: number,
     overIndex: number
   ) =>
     set((state) =>
-      actions.reorderStepsInBlock(blockIndex, activeIndex, overIndex, state)
+      actions.reorderStepsInBlock(blockId, activeIndex, overIndex, state)
     ),
 });

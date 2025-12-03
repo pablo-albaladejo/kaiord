@@ -1,6 +1,7 @@
 import { addStepToRepetitionBlockAction } from "./actions/add-step-to-repetition-block-action";
 import { createEmptyRepetitionBlockAction } from "./actions/create-empty-repetition-block-action";
 import { createRepetitionBlockAction } from "./actions/create-repetition-block-action";
+import { deleteRepetitionBlockAction } from "./actions/delete-repetition-block-action";
 import { duplicateStepInRepetitionBlockAction } from "./actions/duplicate-step-in-repetition-block-action";
 import { editRepetitionBlockAction } from "./actions/edit-repetition-block-action";
 import { ungroupRepetitionBlockAction } from "./actions/ungroup-repetition-block-action";
@@ -19,6 +20,7 @@ export function createRepetitionBlockActions(state: WorkoutState) {
       addStepToRepetitionBlock: () => ({}),
       duplicateStepInRepetitionBlock: () => ({}),
       ungroupRepetitionBlock: () => ({}),
+      deleteRepetitionBlock: () => ({}),
     };
   }
 
@@ -29,13 +31,15 @@ export function createRepetitionBlockActions(state: WorkoutState) {
       createRepetitionBlockAction(krd, stepIndices, repeatCount, state),
     createEmptyRepetitionBlock: (repeatCount: number) =>
       createEmptyRepetitionBlockAction(krd, repeatCount, state),
-    editRepetitionBlock: (blockIndex: number, repeatCount: number) =>
-      editRepetitionBlockAction(krd, blockIndex, repeatCount, state),
-    addStepToRepetitionBlock: (blockIndex: number) =>
-      addStepToRepetitionBlockAction(krd, blockIndex, state),
-    duplicateStepInRepetitionBlock: (blockIndex: number, stepIndex: number) =>
-      duplicateStepInRepetitionBlockAction(krd, blockIndex, stepIndex, state),
-    ungroupRepetitionBlock: (blockIndex: number) =>
-      ungroupRepetitionBlockAction(krd, blockIndex, state),
+    editRepetitionBlock: (blockId: string, repeatCount: number) =>
+      editRepetitionBlockAction(krd, blockId, repeatCount, state),
+    addStepToRepetitionBlock: (blockId: string) =>
+      addStepToRepetitionBlockAction(krd, blockId, state),
+    duplicateStepInRepetitionBlock: (blockId: string, stepIndex: number) =>
+      duplicateStepInRepetitionBlockAction(krd, blockId, stepIndex, state),
+    ungroupRepetitionBlock: (blockId: string) =>
+      ungroupRepetitionBlockAction(krd, blockId, state),
+    deleteRepetitionBlock: (blockId: string) =>
+      deleteRepetitionBlockAction(krd, blockId, state),
   };
 }

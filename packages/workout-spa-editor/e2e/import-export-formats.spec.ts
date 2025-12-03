@@ -15,7 +15,7 @@
  * - Requirement 36.4: Handle conversion errors gracefully
  */
 
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
 import { readFileSync } from "node:fs";
 
 test.describe("Import/Export Multiple Formats", () => {

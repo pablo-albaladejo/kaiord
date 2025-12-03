@@ -6,14 +6,14 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
-import { isRepetitionBlock } from "../../types/krd";
+import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
 /**
  * Reorders steps within a repetition block
  * @param krd - Current KRD workout
- * @param blockIndex - Index of the repetition block in the workout
+ * @param blockId - Unique ID of the repetition block
  * @param activeIndex - Index of the step being moved within the block
  * @param overIndex - Index where the step should be moved to within the block
  * @param state - Current workout state
@@ -21,7 +21,7 @@ import { createUpdateWorkoutAction } from "../workout-actions";
  */
 export const reorderStepsInBlockAction = (
   krd: KRD,
-  blockIndex: number,
+  blockId: string,
   activeIndex: number,
   overIndex: number,
   state: WorkoutState
@@ -30,25 +30,19 @@ export const reorderStepsInBlockAction = (
     return {};
   }
 
-  // Handle edge cases
   if (activeIndex === overIndex) {
-    return {}; // No change needed
+    return {};
   }
 
   const workout = krd.extensions.workout as Workout;
+  const blockInfo = findBlockById(workout, blockId);
+
+  if (!blockInfo) {
+    return {};
+  }
+
+  const { block, position: blockIndex } = blockInfo;
   const steps = [...workout.steps];
-
-  // Validate block index
-  if (blockIndex < 0 || blockIndex >= steps.length) {
-    return {}; // Out of bounds
-  }
-
-  const block = steps[blockIndex];
-
-  // Ensure it's a repetition block
-  if (!isRepetitionBlock(block)) {
-    return {}; // Not a repetition block
-  }
 
   const blockSteps = [...block.steps];
 

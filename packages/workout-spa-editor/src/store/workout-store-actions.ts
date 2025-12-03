@@ -21,13 +21,13 @@ const createStepActions = () => ({
   reorderStep: (activeIndex: number, overIndex: number, state: WorkoutState) =>
     createAllStepActions(state).reorderStep(activeIndex, overIndex),
   reorderStepsInBlock: (
-    blockIndex: number,
+    blockId: string,
     activeIndex: number,
     overIndex: number,
     state: WorkoutState
   ) =>
     createAllStepActions(state).reorderStepsInBlock(
-      blockIndex,
+      blockId,
       activeIndex,
       overIndex
     ),
@@ -46,24 +46,25 @@ const createBlockActions = () => ({
   createEmptyRepetitionBlock: (repeatCount: number, state: WorkoutState) =>
     createAllBlockActions(state).createEmptyRepetitionBlock(repeatCount),
   editRepetitionBlock: (
-    blockIndex: number,
+    blockId: string,
     repeatCount: number,
     state: WorkoutState
-  ) =>
-    createAllBlockActions(state).editRepetitionBlock(blockIndex, repeatCount),
-  addStepToRepetitionBlock: (blockIndex: number, state: WorkoutState) =>
-    createAllBlockActions(state).addStepToRepetitionBlock(blockIndex),
+  ) => createAllBlockActions(state).editRepetitionBlock(blockId, repeatCount),
+  addStepToRepetitionBlock: (blockId: string, state: WorkoutState) =>
+    createAllBlockActions(state).addStepToRepetitionBlock(blockId),
   duplicateStepInRepetitionBlock: (
-    blockIndex: number,
+    blockId: string,
     stepIndex: number,
     state: WorkoutState
   ) =>
     createAllBlockActions(state).duplicateStepInRepetitionBlock(
-      blockIndex,
+      blockId,
       stepIndex
     ),
-  ungroupRepetitionBlock: (blockIndex: number, state: WorkoutState) =>
-    createAllBlockActions(state).ungroupRepetitionBlock(blockIndex),
+  ungroupRepetitionBlock: (blockId: string, state: WorkoutState) =>
+    createAllBlockActions(state).ungroupRepetitionBlock(blockId),
+  deleteRepetitionBlock: (blockId: string, state: WorkoutState) =>
+    createAllBlockActions(state).deleteRepetitionBlock(blockId),
 });
 
 export function createWorkoutStoreActions() {

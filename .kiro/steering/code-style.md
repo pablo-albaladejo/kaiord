@@ -342,6 +342,215 @@ if (TYPE_GUARD_PROPERTY.REPEAT_COUNT in step) {
 }
 ```
 
+## React Component Prop Spreading
+
+When creating React components that forward props to DOM elements, you must explicitly destructure all component-specific props to avoid React warnings about unrecognized DOM attributes.
+
+### The Problem
+
+React warns when component-specific props are spread onto DOM elements:
+
+```typescript
+// ❌ Avoid - Component props leak to DOM
+export const MyComponent = forwardRef<HTMLDivElement, MyComponentProps>(
+  ({ customProp, onCustomEvent, className = "", ...props }, ref) => {
+    return (
+      <div ref={ref} className={className} {...props}>
+        {/* Warning: React does not recognize `customProp` on a DOM element */}
+      </div>
+    );
+  }
+);
+```
+
+### The Solution
+
+Explicitly destructure ALL component-specific props before spreading:
+
+```typescript
+// ✅ Preferred - Only HTML attributes spread to DOM
+export const MyComponent = forwardRef<HTMLDivElement, MyComponentProps>(
+  (
+    {
+      // Component-specific props (explicitly destructured)
+      customProp,
+      onCustomEvent,
+      anotherCustomProp,
+      // HTML attributes (can be spread)
+      className = "",
+      ...htmlProps // Only contains valid HTML attributes
+    },
+    ref
+  ) => {
+    return (
+      <div ref={ref} className={className} {...htmlProps}>
+        {/* No warnings - only HTML attributes are spread */}
+      </div>
+    );
+  }
+);
+```
+
+### Type Definition Pattern
+
+Define component props by extending HTML element attributes:
+
+```typescript
+// ✅ Preferred - Clear separation of concerns
+export type MyComponentProps = HTMLAttributes<HTMLDivElement> & {
+  customProp: string;
+  onCustomEvent?: () => void;
+  anotherCustomProp?: number;
+};
+
+// Alternative: Explicit separation with Omit (for complex cases)
+type MyComponentOwnProps = {
+  customProp: string;
+  onCustomEvent?: () => void;
+  anotherCustomProp?: number;
+};
+
+export type MyComponentProps = MyComponentOwnProps &
+  Omit<HTMLAttributes<HTMLDivElement>, keyof MyComponentOwnProps>;
+```
+
+### Naming Convention
+
+Use descriptive names for the spread variable:
+
+```typescript
+// ✅ Preferred - Clear intent
+const MyComponent = ({ customProp, ...htmlProps }, ref) => (
+  <div {...htmlProps} />
+);
+
+// ✅ Also acceptable
+const MyComponent = ({ customProp, ...domProps }, ref) => (
+  <div {...domProps} />
+);
+
+// ❌ Avoid - Generic names
+const MyComponent = ({ customProp, ...rest }, ref) => <div {...rest} />;
+const MyComponent = ({ customProp, ...props }, ref) => <div {...props} />;
+```
+
+### Complete Example
+
+```typescript
+import { forwardRef, type HTMLAttributes } from "react";
+
+// Type definition
+export type RepetitionBlockCardProps = HTMLAttributes<HTMLDivElement> & {
+  block: RepetitionBlock;
+  onEditRepeatCount?: (count: number) => void;
+  onAddStep?: () => void;
+  onRemoveStep?: (index: number) => void;
+  onDelete?: () => void;
+  selectedStepIds?: readonly string[];
+  isDragging?: boolean;
+};
+
+// Component implementation
+export const RepetitionBlockCard = forwardRef<
+  HTMLDivElement,
+  RepetitionBlockCardProps
+>(
+  (
+    {
+      // Component-specific props (ALL explicitly destructured)
+      block,
+      onEditRepeatCount,
+      onAddStep,
+      onRemoveStep,
+      onDelete,
+      selectedStepIds,
+      isDragging = false,
+      // HTML attributes
+      className = "",
+      ...htmlProps // Only HTML attributes remain
+    },
+    ref
+  ) => {
+    const classes = `base-classes ${isDragging ? "dragging" : ""} ${className}`;
+
+    return (
+      <div
+        ref={ref}
+        className={classes}
+        data-testid="repetition-block-card"
+        {...htmlProps} // Safe to spread - only HTML attributes
+      >
+        {/* Component content */}
+      </div>
+    );
+  }
+);
+
+RepetitionBlockCard.displayName = "RepetitionBlockCard";
+```
+
+### Testing Prop Spreading
+
+Verify components don't produce React warnings:
+
+```typescript
+import { expectNoReactWarnings } from "@/test-utils/console-spy";
+
+describe("MyComponent prop handling", () => {
+  it("should not produce React warnings", () => {
+    // Arrange
+    const warningChecker = expectNoReactWarnings();
+
+    // Act
+    render(
+      <MyComponent
+        customProp="value"
+        onCustomEvent={vi.fn()}
+        data-testid="test" // Valid HTML attribute
+        aria-label="Test" // Valid HTML attribute
+      />
+    );
+
+    // Assert
+    warningChecker.verify();
+  });
+
+  it("should forward HTML attributes to DOM element", () => {
+    // Arrange & Act
+    render(
+      <MyComponent
+        customProp="value"
+        data-testid="custom-attr"
+        aria-label="Custom Label"
+      />
+    );
+
+    // Assert
+    const element = screen.getByTestId("custom-attr");
+    expect(element).toHaveAttribute("aria-label", "Custom Label");
+  });
+});
+```
+
+### Best Practices
+
+#### ✅ DO
+
+1. **Explicitly destructure ALL component-specific props** before spreading
+2. **Use descriptive names** like `htmlProps` or `domProps` for the spread
+3. **Extend HTML element types** (`HTMLAttributes<HTMLDivElement>`)
+4. **Test for absence of warnings** using console spy utilities
+5. **Forward refs** when components wrap DOM elements
+6. **Preserve HTML attributes** (data-\*, aria-\*, etc.)
+
+#### ❌ DON'T
+
+1. **Don't spread props without destructuring** component-specific ones
+2. **Don't use generic names** like `...rest` or `...props` for DOM spreads
+3. **Don't ignore React warnings** in the console
+4. **Don't mix component and HTML props** in the same spread
+5. **Don't forget to test** that HTML attributes are forwarded correctly
+
 ## Testing
 
 - **Follow AAA pattern** (Arrange, Act, Assert) for all tests

@@ -121,6 +121,13 @@ describe("promptBackupDownload", () => {
     vi.spyOn(document.body, "removeChild").mockImplementation(
       () => mockLink as unknown as Node
     );
+
+    // Mock setTimeout to execute immediately
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("should download backup and proceed when user confirms", async () => {
@@ -141,16 +148,43 @@ describe("promptBackupDownload", () => {
       },
     };
 
-    vi.spyOn(window, "confirm")
-      .mockReturnValueOnce(true) // Download backup
-      .mockReturnValueOnce(true); // Proceed
+    const mockShowModal = vi.fn((config) => {
+      // Simulate user confirming download
+      if (config.title === "Download Backup?") {
+        config.onConfirm();
+        vi.advanceTimersByTime(500);
+      }
+      // Simulate user confirming proceed
+      else if (config.title === "Proceed with Operation?") {
+        config.onConfirm();
+      }
+    });
 
     // Act
-    const result = await promptBackupDownload(mockWorkout, "Delete All Steps");
+    const resultPromise = promptBackupDownload(
+      mockWorkout,
+      "Delete All Steps",
+      mockShowModal
+    );
+    const result = await resultPromise;
 
     // Assert
     expect(result).toBe(true);
-    expect(window.confirm).toHaveBeenCalledTimes(2);
+    expect(mockShowModal).toHaveBeenCalledTimes(2);
+    expect(mockShowModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Download Backup?",
+        variant: "default",
+      })
+    );
+    expect(mockShowModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Proceed with Operation?",
+        variant: "default",
+      })
+    );
+
+    vi.useRealTimers();
   });
 
   it("should not proceed when user cancels after download", async () => {
@@ -171,15 +205,30 @@ describe("promptBackupDownload", () => {
       },
     };
 
-    vi.spyOn(window, "confirm")
-      .mockReturnValueOnce(true) // Download backup
-      .mockReturnValueOnce(false); // Don't proceed
+    const mockShowModal = vi.fn((config) => {
+      // Simulate user confirming download
+      if (config.title === "Download Backup?") {
+        config.onConfirm();
+        vi.advanceTimersByTime(500);
+      }
+      // Simulate user canceling proceed
+      else if (config.title === "Proceed with Operation?") {
+        config.onCancel();
+      }
+    });
 
     // Act
-    const result = await promptBackupDownload(mockWorkout, "Delete All Steps");
+    const resultPromise = promptBackupDownload(
+      mockWorkout,
+      "Delete All Steps",
+      mockShowModal
+    );
+    const result = await resultPromise;
 
     // Assert
     expect(result).toBe(false);
+
+    vi.useRealTimers();
   });
 
   it("should ask to proceed without backup when user declines download", async () => {
@@ -200,15 +249,41 @@ describe("promptBackupDownload", () => {
       },
     };
 
-    vi.spyOn(window, "confirm")
-      .mockReturnValueOnce(false) // Don't download backup
-      .mockReturnValueOnce(true); // Proceed without backup
+    const mockShowModal = vi.fn((config) => {
+      // Simulate user declining download
+      if (config.title === "Download Backup?") {
+        config.onCancel();
+      }
+      // Simulate user confirming proceed without backup
+      else if (config.title === "Proceed Without Backup?") {
+        config.onConfirm();
+      }
+    });
 
     // Act
-    const result = await promptBackupDownload(mockWorkout, "Delete All Steps");
+    const resultPromise = promptBackupDownload(
+      mockWorkout,
+      "Delete All Steps",
+      mockShowModal
+    );
+    const result = await resultPromise;
 
     // Assert
     expect(result).toBe(true);
-    expect(window.confirm).toHaveBeenCalledTimes(2);
+    expect(mockShowModal).toHaveBeenCalledTimes(2);
+    expect(mockShowModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Download Backup?",
+        variant: "default",
+      })
+    );
+    expect(mockShowModal).toHaveBeenCalledWith(
+      expect.objectContaining({
+        title: "Proceed Without Backup?",
+        variant: "destructive",
+      })
+    );
+
+    vi.useRealTimers();
   });
 });

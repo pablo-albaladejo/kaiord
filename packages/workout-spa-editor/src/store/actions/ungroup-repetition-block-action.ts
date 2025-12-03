@@ -5,25 +5,26 @@
  *
  * Requirements:
  * - Requirement 7.4: Ungroup repetition blocks
+ * - Requirement 2.4: Use block ID for operations
  */
 
 import type { KRD, Workout } from "../../types/krd";
-import { isRepetitionBlock } from "../../types/krd";
+import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 import { recalculateStepIndices } from "./recalculate-step-indices";
 
 /**
- * Ungroups a repetition block, extracting its steps back into the workout
+ * Ungroups a repetition block by its ID, extracting its steps back into the workout
  *
  * @param krd - Current KRD workout
- * @param blockIndex - Index of the repetition block to ungroup
+ * @param blockId - Unique ID of the repetition block to ungroup
  * @param state - Current workout state
  * @returns Updated workout state
  */
 export const ungroupRepetitionBlockAction = (
   krd: KRD,
-  blockIndex: number,
+  blockId: string,
   state: WorkoutState
 ): Partial<WorkoutState> => {
   if (!krd.extensions?.workout) {
@@ -32,26 +33,23 @@ export const ungroupRepetitionBlockAction = (
 
   const workout = krd.extensions.workout as Workout;
 
-  // Validate block index
-  if (blockIndex < 0 || blockIndex >= workout.steps.length) {
+  // Find block by ID
+  const blockInfo = findBlockById(workout, blockId);
+
+  if (!blockInfo) {
     return {};
   }
 
-  const block = workout.steps[blockIndex];
-
-  // Validate that the target is a repetition block
-  if (!isRepetitionBlock(block)) {
-    return {};
-  }
+  const { block, position } = blockInfo;
 
   // Extract steps from the block
   const extractedSteps = block.steps;
 
   // Remove the block and insert the extracted steps at its position
   const newSteps = [
-    ...workout.steps.slice(0, blockIndex),
+    ...workout.steps.slice(0, position),
     ...extractedSteps,
-    ...workout.steps.slice(blockIndex + 1),
+    ...workout.steps.slice(position + 1),
   ];
 
   // Recalculate step indices for all steps

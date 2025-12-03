@@ -19,6 +19,7 @@
     "test:smoke": "pnpm build && vitest run src/tests/cli-smoke.test.ts",
     "test:watch": "vitest",
     "dev": "tsx src/bin/kaiord.ts",
+    "prebuild": "echo 'Building CLI...'",
     "prepublishOnly": "pnpm build && pnpm test",
     "check-licenses": "license-checker --onlyAllow 'MIT;Apache-2.0;BSD;BSD-2-Clause;BSD-3-Clause;ISC' --production"
   },
