@@ -303,6 +303,7 @@ _For any_ step, when the user clicks the delete button, the step should be remov
    ```
 
 2. **Undo toast test**
+
    ```typescript
    it("should show undo toast after deletion", () => {
      // Arrange
