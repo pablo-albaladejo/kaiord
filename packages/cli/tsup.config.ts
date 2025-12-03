@@ -9,6 +9,8 @@ export default defineConfig({
   dts: false,
   clean: true,
   shims: true,
+  splitting: false, // Disable code splitting to avoid hash-based chunk files
+  bundle: true, // Bundle all dependencies into single file
   banner: {
     js: "#!/usr/bin/env node",
   },
