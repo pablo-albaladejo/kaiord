@@ -19,6 +19,24 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     actionTimeout: 10000, // 10 seconds for actions (click, fill, etc.)
+    // Disable onboarding tutorial for all E2E tests
+    // This script runs before each page navigation
+    contextOptions: {
+      storageState: {
+        cookies: [],
+        origins: [
+          {
+            origin: "http://localhost:5173",
+            localStorage: [
+              {
+                name: "workout-spa-onboarding-completed",
+                value: "true",
+              },
+            ],
+          },
+        ],
+      },
+    },
   },
 
   // Global timeout for tests
