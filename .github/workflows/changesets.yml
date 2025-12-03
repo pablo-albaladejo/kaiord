@@ -1,20 +1,23 @@
-name: Changesets
+name: Publish to npm
 
 on:
   push:
     branches:
       - main
+    paths:
+      - "packages/*/src/**"
+      - "packages/*/package.json"
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   contents: write
-  pull-requests: write
   issues: write
+  id-token: write # Required for npm provenance
 
 jobs:
-  version:
-    name: Version Packages
+  publish:
+    name: Publish to npm
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -26,6 +29,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20.x
+          registry-url: "https://registry.npmjs.org"
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -47,208 +51,80 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Create Release Pull Request or Publish
-        id: changesets
-        # Changesets action handles version bumping and changelog generation
-        # Creates/updates "Version Packages" PR when changesets are present
-        uses: changesets/action@v1
-        with:
-          version: pnpm exec changeset version
-          commit: "chore: version packages"
-          title: "chore: version packages"
+      - name: Detect changed packages
+        id: detect-changes
+        run: |
+          # Skip if commit message contains [skip ci] or chore: version packages
+          if echo "${{ github.event.head_commit.message }}" | grep -qE '\[skip ci\]|chore: version packages'; then
+            echo "⏭️  Skipping - version commit detected"
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+
+          # Use script to detect changes
+          OUTPUT=$(./scripts/detect-package-changes.sh HEAD~1 HEAD)
+          echo "$OUTPUT"
+
+          # Parse script output
+          CORE_CHANGED=$(echo "$OUTPUT" | grep "CORE_CHANGED=" | cut -d'=' -f2)
+          CLI_CHANGED=$(echo "$OUTPUT" | grep "CLI_CHANGED=" | cut -d'=' -f2)
+          HAS_CHANGES=$(echo "$OUTPUT" | grep "HAS_CHANGES=" | cut -d'=' -f2)
+
+          # Set outputs
+          echo "core-changed=$CORE_CHANGED" >> $GITHUB_OUTPUT
+          echo "cli-changed=$CLI_CHANGED" >> $GITHUB_OUTPUT
+          echo "has-changes=$HAS_CHANGES" >> $GITHUB_OUTPUT
+
+      - name: Auto-generate changesets
+        if: steps.detect-changes.outputs.has-changes == 'true'
+        run: |
+          ./scripts/generate-changesets.sh \
+            "${{ steps.detect-changes.outputs.core-changed }}" \
+            "${{ steps.detect-changes.outputs.cli-changed }}" \
+            "${{ github.sha }}"
+
+      - name: Version packages
+        if: steps.detect-changes.outputs.has-changes == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          pnpm exec changeset version
+
+          git add .
+          git commit -m "chore: version packages [skip ci]"
+          git push
+
+      - name: Build all packages
+        if: steps.detect-changes.outputs.has-changes == 'true'
+        run: pnpm -r build
+
+      - name: Publish changed packages to npm
+        if: steps.detect-changes.outputs.has-changes == 'true'
+        run: |
+          echo "Publishing only changed packages to npm..."
+          pnpm exec changeset publish --access public
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
       - name: Create GitHub Releases
-        # Automatically create GitHub releases when Version Packages PR is merged
-        # Creates separate release for each updated package with package-scoped tags
-        # Handles failures independently - continues processing other packages if one fails
-        if: steps.changesets.outputs.hasChangesets == 'false'
-        uses: actions/github-script@v8
-        with:
-          script: |
-            const fs = require('fs');
-            const path = require('path');
-            const { execSync } = require('child_process');
+        if: steps.detect-changes.outputs.has-changes == 'true'
+        run: node scripts/create-github-releases.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
 
-            // Track results for summary
-            const results = {
-              successful: [],
-              failed: [],
-              skipped: []
-            };
+      - name: Summary
+        if: steps.detect-changes.outputs.has-changes == 'true'
+        run: |
+          echo "## 📦 Published Packages" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
 
-            // Read package.json files to get versions and changelogs
-            const packages = [];
-
-            // Check @kaiord/core
-            if (fs.existsSync('packages/core/package.json')) {
-              const corePackage = JSON.parse(fs.readFileSync('packages/core/package.json', 'utf8'));
-              let coreChangelog = '';
-              if (fs.existsSync('packages/core/CHANGELOG.md')) {
-                coreChangelog = fs.readFileSync('packages/core/CHANGELOG.md', 'utf8');
-              }
-              packages.push({
-                name: corePackage.name,
-                version: corePackage.version,
-                changelog: coreChangelog,
-                dir: 'packages/core'
-              });
-            }
-
-            // Check @kaiord/cli
-            if (fs.existsSync('packages/cli/package.json')) {
-              const cliPackage = JSON.parse(fs.readFileSync('packages/cli/package.json', 'utf8'));
-              let cliChangelog = '';
-              if (fs.existsSync('packages/cli/CHANGELOG.md')) {
-                cliChangelog = fs.readFileSync('packages/cli/CHANGELOG.md', 'utf8');
-              }
-              packages.push({
-                name: cliPackage.name,
-                version: cliPackage.version,
-                changelog: cliChangelog,
-                dir: 'packages/cli'
-              });
-            }
-
-            if (packages.length === 0) {
-              console.log('No packages found to release');
-              return;
-            }
-
-            // Get the commit that triggered this workflow
-            const commit = context.sha;
-
-            // Check which packages were actually updated in this commit
-            const changedFiles = execSync(`git diff-tree --no-commit-id --name-only -r ${commit}`, { encoding: 'utf8' });
-
-            const updatedPackages = packages.filter(pkg => {
-              const packageJsonPath = `${pkg.dir}/package.json`;
-              return changedFiles.includes(packageJsonPath);
-            });
-
-            if (updatedPackages.length === 0) {
-              console.log('No packages were updated in this commit');
-              return;
-            }
-
-            console.log(`\n📦 Processing ${updatedPackages.length} package(s) for release...\n`);
-
-            // Create a release for each updated package
-            // Process independently - failures don't block other packages
-            for (const pkg of updatedPackages) {
-              const tagName = `${pkg.name}@${pkg.version}`;
-              
-              try {
-                // Check if release already exists
-                try {
-                  const existingRelease = await github.rest.repos.getReleaseByTag({
-                    owner: context.repo.owner,
-                    repo: context.repo.repo,
-                    tag: tagName
-                  });
-                  console.log(`ℹ️  Release ${tagName} already exists: ${existingRelease.data.html_url}`);
-                  results.skipped.push({
-                    package: pkg.name,
-                    version: pkg.version,
-                    reason: 'Release already exists',
-                    url: existingRelease.data.html_url
-                  });
-                  continue;
-                } catch (error) {
-                  if (error.status !== 404) {
-                    throw error;
-                  }
-                  // Release doesn't exist, continue to create it
-                }
-
-                // Build release notes
-                let releaseNotes = `## 📦 ${pkg.name}\n\n`;
-                releaseNotes += `**Version:** ${pkg.version}\n`;
-                releaseNotes += `**npm:** [${pkg.name}@${pkg.version}](https://www.npmjs.com/package/${pkg.name}/v/${pkg.version})\n\n`;
-
-                // Extract version-specific changelog section
-                if (pkg.changelog) {
-                  try {
-                    // Use extract-changelog.sh script to extract version-specific section
-                    const changelogPath = `${pkg.dir}/CHANGELOG.md`;
-                    const extractedChangelog = execSync(
-                      `./scripts/extract-changelog.sh "${changelogPath}" "${pkg.version}"`,
-                      { encoding: 'utf8' }
-                    ).trim();
-                    
-                    if (extractedChangelog) {
-                      releaseNotes += `## Changelog\n\n${extractedChangelog}\n`;
-                    }
-                  } catch (error) {
-                    // Handle missing changelog gracefully
-                    console.warn(`⚠️  Could not extract changelog for ${pkg.name}@${pkg.version}:`, error.message);
-                    // Fallback to simple message if extraction fails
-                    releaseNotes += `## Changelog\n\nSee [CHANGELOG.md](${pkg.dir}/CHANGELOG.md) for details.\n`;
-                  }
-                }
-
-                // Create the release
-                const release = await github.rest.repos.createRelease({
-                  owner: context.repo.owner,
-                  repo: context.repo.repo,
-                  tag_name: tagName,
-                  name: `${pkg.name} v${pkg.version}`,
-                  body: releaseNotes,
-                  draft: false,
-                  prerelease: false
-                });
-                
-                console.log(`✅ Created release: ${release.data.html_url}`);
-                results.successful.push({
-                  package: pkg.name,
-                  version: pkg.version,
-                  url: release.data.html_url
-                });
-              } catch (error) {
-                // Log error but continue processing other packages
-                console.error(`❌ Failed to create release for ${tagName}:`, error.message);
-                results.failed.push({
-                  package: pkg.name,
-                  version: pkg.version,
-                  error: error.message
-                });
-                // Continue to next package instead of throwing
-                continue;
-              }
-            }
-
-            // Print summary
-            console.log('\n' + '='.repeat(60));
-            console.log('📊 RELEASE SUMMARY');
-            console.log('='.repeat(60));
-
-            if (results.successful.length > 0) {
-              console.log(`\n✅ Successfully created ${results.successful.length} release(s):`);
-              results.successful.forEach(r => {
-                console.log(`   • ${r.package}@${r.version}`);
-                console.log(`     ${r.url}`);
-              });
-            }
-
-            if (results.skipped.length > 0) {
-              console.log(`\nℹ️  Skipped ${results.skipped.length} release(s):`);
-              results.skipped.forEach(r => {
-                console.log(`   • ${r.package}@${r.version} - ${r.reason}`);
-              });
-            }
-
-            if (results.failed.length > 0) {
-              console.log(`\n❌ Failed to create ${results.failed.length} release(s):`);
-              results.failed.forEach(r => {
-                console.log(`   • ${r.package}@${r.version}`);
-                console.log(`     Error: ${r.error}`);
-              });
-            }
-
-            console.log('\n' + '='.repeat(60));
-
-            // If all packages failed, throw error to fail the workflow
-            if (results.failed.length > 0 && results.successful.length === 0) {
-              throw new Error(`All ${results.failed.length} package release(s) failed`);
-            }
+          # List published packages
+          for dir in packages/*/; do
+            if [ -f "$dir/package.json" ]; then
+              name=$(node -p "require('./$dir/package.json').name")
+              version=$(node -p "require('./$dir/package.json').version")
+              echo "- ✅ [$name@$version](https://www.npmjs.com/package/$name/v/$version)" >> $GITHUB_STEP_SUMMARY
+            fi
+          done
