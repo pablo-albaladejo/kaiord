@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
 
 /**
  * E2E Tests: Modal Interactions
@@ -81,7 +81,7 @@ test.describe("Modal Interactions", () => {
     });
 
     // Open context menu and click delete
-    await page.getByTestId("block-context-menu-trigger").click();
+    await page.getByTestId("block-actions-trigger").click();
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal appears (not browser alert)
@@ -152,7 +152,7 @@ test.describe("Modal Interactions", () => {
     await expect(page.getByText("Repeat Block")).toBeVisible();
 
     // Open context menu and click delete to show modal
-    await page.getByTestId("block-context-menu-trigger").click();
+    await page.getByTestId("block-actions-trigger").click();
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -226,7 +226,7 @@ test.describe("Modal Interactions", () => {
     await expect(page.getByText("Repeat Block")).toBeVisible();
 
     // Open context menu and click delete to show modal
-    await page.getByTestId("block-context-menu-trigger").click();
+    await page.getByTestId("block-actions-trigger").click();
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -294,7 +294,7 @@ test.describe("Modal Interactions", () => {
     });
 
     // Open context menu and click delete to show modal
-    await page.getByTestId("block-context-menu-trigger").click();
+    await page.getByTestId("block-actions-trigger").click();
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -399,7 +399,7 @@ test.describe("Modal Interactions", () => {
     await expect(blocks).toHaveCount(2);
 
     // Open modal for first block
-    await blocks.first().getByTestId("block-context-menu-trigger").click();
+    await blocks.first().getByTestId("block-actions-trigger").click();
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -495,7 +495,7 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     });
 
     // Open context menu and click delete
-    await page.getByTestId("block-context-menu-trigger").click();
+    await page.getByTestId("block-actions-trigger").click();
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -593,7 +593,7 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     });
 
     // Open context menu and click delete
-    await page.getByTestId("block-context-menu-trigger").click();
+    await page.getByTestId("block-actions-trigger").click();
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible and properly sized for tablet

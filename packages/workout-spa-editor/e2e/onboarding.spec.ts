@@ -1,3 +1,5 @@
+// Onboarding tests need to show the tutorial, so we use the base Playwright test
+// instead of our fixture that disables the tutorial
 import { expect, test } from "@playwright/test";
 
 /**

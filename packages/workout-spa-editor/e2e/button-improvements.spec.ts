@@ -1,4 +1,5 @@
-import { expect, test, type Page } from "@playwright/test";
+import { expect, test } from "./fixtures/base";
+import type { Page } from "@playwright/test";
 
 /**
  * E2E Tests for Button Improvements
