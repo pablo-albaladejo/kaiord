@@ -30,15 +30,15 @@ const showKiroEasterEgg = (): void => {
     chalk.cyan(`
 ╔═══════════════════════════════════════════════════════════╗
 ║                                                           ║
-║   👻 Built with Kiro AI during Kiroween Hackathon 👻    ║
+║   👻 Built with Kiro AI during Kiroween Hackathon 👻      ║
 ║                                                           ║
-║   Kiro helped design, architect, and implement this      ║
-║   entire CLI tool through spec-driven development.       ║
+║   Kiro helped design, architect, and implement this       ║
+║   entire CLI tool through spec-driven development.        ║
 ║                                                           ║
-║   Learn more about Kiroween:                             ║
-║   👉 http://kiroween.devpost.com/                        ║
+║   Learn more about Kiroween:                              ║
+║   👉 http://kiroween.devpost.com/                         ║
 ║                                                           ║
-║   Kiro: Your AI pair programmer for building better      ║
+║   Kiro: Your AI pair programmer for building better       ║
 ║   software, faster. 🚀                                    ║
 ║                                                           ║
 ╚═══════════════════════════════════════════════════════════╝
