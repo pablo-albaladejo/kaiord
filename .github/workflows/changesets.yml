@@ -5,8 +5,12 @@ on:
     branches:
       - main
     paths:
-      - "packages/*/src/**"
-      - "packages/*/package.json"
+      # Only trigger for publishable packages (core, cli)
+      # Excludes workout-spa-editor to avoid unnecessary workflow runs
+      - "packages/core/src/**"
+      - "packages/core/package.json"
+      - "packages/cli/src/**"
+      - "packages/cli/package.json"
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
 
@@ -51,7 +55,10 @@ jobs:
             ${{ runner.os }}-pnpm-store-
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: |
+          echo "Installing dependencies for all packages..."
+          echo "Note: workout-spa-editor deps are installed but not built/tested in this workflow."
+          pnpm install --frozen-lockfile
 
       - name: Detect changed packages
         id: detect-changes
