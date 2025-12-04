@@ -1,6 +1,8 @@
 /**
  * @kaiord/core - Public API
  * Bidirectional conversion between FIT workout files and KRD format
+ *
+ * Test: Verify fixed packages workflow - core and cli should update together
  */
 
 // ============================================
