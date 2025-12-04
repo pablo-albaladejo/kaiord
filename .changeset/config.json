@@ -3,10 +3,10 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [],
+  "linked": [["@kaiord/core", "@kaiord/cli"]],
   "access": "public",
   "baseBranch": "main",
-  "updateInternalDependencies": "patch",
+  "updateInternalDependencies": "minor",
   "ignore": [],
   "tagFormat": "${packageName}@${version}",
   "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
