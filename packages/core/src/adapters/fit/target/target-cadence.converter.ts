@@ -1,8 +1,5 @@
-import {
-  targetTypeSchema,
-  targetUnitSchema,
-  type Target,
-} from "../../../domain/schemas/target";
+import { targetTypeSchema, type Target } from "../../../domain/schemas/target";
+import { targetUnitSchema } from "../../../domain/schemas/target-values";
 import type { FitTargetData } from "./target.types";
 
 export const convertCadenceTarget = (data: FitTargetData): Target => {
