@@ -170,3 +170,4 @@ export type { ValidateRoundTrip } from "./tests/round-trip/validate-round-trip";
 
 export { createDefaultProviders } from "./application/providers";
 export type { Providers } from "./application/providers";
+// Test: verify fixed packages configuration in CI/CD pipeline
