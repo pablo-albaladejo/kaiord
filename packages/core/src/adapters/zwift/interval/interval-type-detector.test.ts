@@ -1,9 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { intensitySchema } from "../../../domain/schemas/intensity";
-import {
-  targetTypeSchema,
-  targetUnitSchema,
-} from "../../../domain/schemas/target";
+import { targetTypeSchema } from "../../../domain/schemas/target";
+import { targetUnitSchema } from "../../../domain/schemas/target-values";
 import type { WorkoutStep } from "../../../domain/schemas/workout";
 import { detectIntervalType } from "./interval-type-detector";
 
