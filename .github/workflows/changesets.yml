@@ -119,9 +119,7 @@ jobs:
         if: steps.detect-changes.outputs.has-changes == 'true'
         run: |
           echo "Publishing only changed packages to npm..."
-          pnpm exec changeset publish --access public
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          pnpm exec changeset publish --access public --provenance
 
       - name: Create GitHub Releases
         if: steps.detect-changes.outputs.has-changes == 'true'
