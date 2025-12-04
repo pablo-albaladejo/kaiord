@@ -1,5 +1,11 @@
 # @kaiord/core
 
+## 0.1.3
+
+### Patch Changes
+
+- Automated release from commit d18d6fdd24b9ab5907f3f724fce46e6576145a8f
+
 ## 0.1.2
 
 ### Patch Changes
