@@ -1,11 +1,12 @@
 # Changelog
 
-## 0.1.3
+## 1.0.0
 
-### Patch Changes
+### Major Changes
 
+- **Production Release**: First stable release of @kaiord/cli
 - Updated dependencies
-  - @kaiord/core@0.1.3
+  - @kaiord/core@1.0.0
 
 All notable changes to the @kaiord/cli package will be documented in this file.
 
