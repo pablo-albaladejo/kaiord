@@ -181,6 +181,8 @@ Then create a pull request on GitHub with:
 
 ## Code Style Guidelines
 
+For complete code style rules and ESLint configuration, see [ESLint Configuration](./.eslintrc.md).
+
 ### TypeScript
 
 - **Strict mode**: All code must pass TypeScript strict checks

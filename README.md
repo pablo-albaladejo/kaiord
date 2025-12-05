@@ -131,7 +131,7 @@ Kaiord uses GitHub Actions for continuous integration and deployment:
 - **Release Automation**: Changesets for version management and npm publishing
 - **Security**: Weekly dependency vulnerability audits
 
-For complete CI/CD documentation, deployment guides, and npm publishing instructions, see **[Deployment](./docs/deployment.md)**.
+For complete CI/CD documentation, deployment guides, and npm publishing instructions, see **[Deployment Guide](./docs/deployment.md)**.
 
 ### Contributing
 
