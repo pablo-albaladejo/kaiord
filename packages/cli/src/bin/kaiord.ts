@@ -102,7 +102,7 @@ const main = async (): Promise<void> => {
       )
       .command(
         "validate",
-        "Validate round-trip conversion of workout files",
+        "Validate round-trip conversion of FIT files (FIT only)",
         (yargs) => {
           return yargs
             .option("input", {
@@ -144,11 +144,13 @@ const main = async (): Promise<void> => {
         (yargs) => {
           return yargs
             .option("file1", {
+              alias: "1",
               type: "string",
               description: "First file to compare",
               demandOption: true,
             })
             .option("file2", {
+              alias: "2",
               type: "string",
               description: "Second file to compare",
               demandOption: true,
@@ -187,8 +189,16 @@ const main = async (): Promise<void> => {
             json: argv.json as boolean | undefined,
             logFormat: argv.logFormat as "pretty" | "structured" | undefined,
           });
-          if (exitCode !== 0 && exitCode !== 1) {
-            // Exit code 1 means files are different (expected), only exit on errors
+          // Exit code 10 = files different (not an error), 0 = identical
+          // Only call process.exit for actual errors
+          if (
+            exitCode !== ExitCode.SUCCESS &&
+            exitCode !== ExitCode.DIFFERENCES_FOUND
+          ) {
+            process.exit(exitCode);
+          }
+          // Pass through the exit code for scripting (0 or 10)
+          if (exitCode === ExitCode.DIFFERENCES_FOUND) {
             process.exit(exitCode);
           }
         }
@@ -235,6 +245,8 @@ const main = async (): Promise<void> => {
         process.exit(ExitCode.VALIDATION_ERROR);
       } else if (errorName === "ToleranceExceededError") {
         process.exit(ExitCode.TOLERANCE_EXCEEDED);
+      } else if (errorName === "InvalidArgumentError") {
+        process.exit(ExitCode.INVALID_ARGUMENT);
       }
     }
 

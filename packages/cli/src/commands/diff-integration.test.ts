@@ -3,6 +3,7 @@ import { dirname, join, resolve } from "path";
 import stripAnsi from "strip-ansi";
 import { fileURLToPath } from "url";
 import { describe, expect, it } from "vitest";
+import { ExitCode } from "../utils/exit-codes";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -39,19 +40,16 @@ describe("diff command integration", () => {
     const file1 = join(FIXTURES_PATH, "fit-files/WorkoutIndividualSteps.fit");
     const file2 = join(FIXTURES_PATH, "fit-files/WorkoutRepeatSteps.fit");
 
-    // Act
-    const { stdout, exitCode } = await execa("node", [
-      CLI_PATH,
-      "diff",
-      "--file1",
-      file1,
-      "--file2",
-      file2,
-    ]);
+    // Act - use reject: false to capture non-zero exit codes
+    const { stdout, exitCode } = await execa(
+      "node",
+      [CLI_PATH, "diff", "--file1", file1, "--file2", file2],
+      { reject: false }
+    );
 
     // Assert
-    // Exit code 0 or 1 depending on whether files are identical after conversion
-    expect([0, 1]).toContain(exitCode);
+    // Exit code 0 = identical, 10 = differences found (not an error)
+    expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(exitCode);
     const output = stripAnsi(stdout);
     expect(output).toBeTruthy();
   });
@@ -136,19 +134,16 @@ describe("diff command integration", () => {
     const fitFile = join(FIXTURES_PATH, "fit-files/WorkoutIndividualSteps.fit");
     const krdFile = join(FIXTURES_PATH, "krd-files/WorkoutIndividualSteps.krd");
 
-    // Act
-    const { stdout, exitCode } = await execa("node", [
-      CLI_PATH,
-      "diff",
-      "--file1",
-      fitFile,
-      "--file2",
-      krdFile,
-    ]);
+    // Act - use reject: false to capture non-zero exit codes
+    const { stdout, exitCode } = await execa(
+      "node",
+      [CLI_PATH, "diff", "--file1", fitFile, "--file2", krdFile],
+      { reject: false }
+    );
 
     // Assert
-    // Exit code 0 or 1 depending on whether files are identical after conversion
-    expect([0, 1]).toContain(exitCode);
+    // Exit code 0 = identical, 10 = differences found (not an error)
+    expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(exitCode);
     const output = stripAnsi(stdout);
     expect(output).toBeTruthy();
   });

@@ -8,7 +8,10 @@ import {
 import { readFile as fsReadFile } from "fs/promises";
 import ora from "ora";
 import { z } from "zod";
-import { loadConfig, mergeWithConfig } from "../utils/config-loader.js";
+import {
+  loadConfigWithMetadata,
+  mergeWithConfig,
+} from "../utils/config-loader.js";
 import {
   formatError,
   formatToleranceViolations,
@@ -32,8 +35,9 @@ export const validateCommand = async (options: unknown): Promise<number> => {
   let spinner: ReturnType<typeof ora> | null = null;
 
   try {
-    // Load config file defaults
-    const config = await loadConfig();
+    // Load config file defaults with metadata for logging
+    const configResult = await loadConfigWithMetadata();
+    const { config } = configResult;
 
     // Merge CLI options with config defaults (CLI takes precedence)
     const mergedOptions = mergeWithConfig(
@@ -63,6 +67,16 @@ export const validateCommand = async (options: unknown): Promise<number> => {
       level: opts.verbose ? "debug" : opts.quiet ? "error" : "info",
       quiet: opts.quiet,
     });
+
+    // Log config discovery in verbose mode
+    if (configResult.loadedFrom) {
+      logger.debug("Configuration loaded", { path: configResult.loadedFrom });
+    } else {
+      logger.debug("No configuration file found", {
+        searchedPaths: configResult.searchedPaths,
+      });
+    }
+
     // Detect format from file extension
     const format = detectFormat(opts.input);
     if (!format) {
