@@ -2,14 +2,11 @@
   "$schema": "https://unpkg.com/@changesets/config@3.1.1/schema.json",
   "changelog": "@changesets/cli/changelog",
   "commit": false,
-  "fixed": [["@kaiord/core", "@kaiord/cli"]],
-  "linked": [],
+  "fixed": [],
+  "linked": [["@kaiord/core", "@kaiord/cli"]],
   "access": "public",
   "baseBranch": "main",
-  "updateInternalDependencies": "minor",
-  "ignore": [],
-  "tagFormat": "${packageName}@${version}",
-  "___experimentalUnsafeOptions_WILL_CHANGE_IN_PATCH": {
-    "onlyUpdatePeerDependentsWhenOutOfRange": true
-  }
+  "updateInternalDependencies": "patch",
+  "ignore": ["@kaiord/workout-spa-editor"],
+  "tagFormat": "${packageName}@${version}"
 }
