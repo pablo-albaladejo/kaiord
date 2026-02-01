@@ -25,11 +25,11 @@
 
 ### Implemented Message Types
 
-| Message | ID | Status | File Location |
-|---------|-----|--------|---------------|
-| FILE_ID | 0 | ✅ Complete | `adapters/fit/metadata/` |
-| WORKOUT | 26 | ✅ Complete | `adapters/fit/messages/` |
-| WORKOUT_STEP | 27 | ✅ Complete | `adapters/fit/krd-to-fit/` |
+| Message      | ID  | Status      | File Location              |
+| ------------ | --- | ----------- | -------------------------- |
+| FILE_ID      | 0   | ✅ Complete | `adapters/fit/metadata/`   |
+| WORKOUT      | 26  | ✅ Complete | `adapters/fit/messages/`   |
+| WORKOUT_STEP | 27  | ✅ Complete | `adapters/fit/krd-to-fit/` |
 
 ### Implemented Features
 
@@ -48,15 +48,15 @@
 
 ### Test Coverage
 
-| Area | Lines | Status |
-|------|-------|--------|
-| Duration conversion | 861 | ✅ Comprehensive |
-| Target conversion | 1,027 | ✅ Comprehensive |
-| KRD↔FIT roundtrip | 2,028 | ✅ Comprehensive |
-| Swimming | 428 | ✅ Good |
-| Notes handling | 340 | ✅ Good |
-| Metadata | 185 | ✅ Good |
-| **Total** | **6,522** | |
+| Area                | Lines     | Status           |
+| ------------------- | --------- | ---------------- |
+| Duration conversion | 861       | ✅ Comprehensive |
+| Target conversion   | 1,027     | ✅ Comprehensive |
+| KRD↔FIT roundtrip  | 2,028     | ✅ Comprehensive |
+| Swimming            | 428       | ✅ Good          |
+| Notes handling      | 340       | ✅ Good          |
+| Metadata            | 185       | ✅ Good          |
+| **Total**           | **6,522** |                  |
 
 ---
 
@@ -80,43 +80,43 @@ SESSION messages contain aggregate statistics for the entire workout/activity. R
 ```typescript
 type FitSessionMessage = {
   // Timing
-  timestamp: number;           // FIT timestamp (seconds since epoch)
-  startTime: number;           // Activity start time
-  totalElapsedTime: number;    // Total time including pauses (ms)
-  totalTimerTime: number;      // Active time only (ms)
+  timestamp: number; // FIT timestamp (seconds since epoch)
+  startTime: number; // Activity start time
+  totalElapsedTime: number; // Total time including pauses (ms)
+  totalTimerTime: number; // Active time only (ms)
 
   // Distance & Calories
-  totalDistance: number;       // meters
-  totalCalories: number;       // kcal
-  totalFatCalories?: number;   // kcal from fat
+  totalDistance: number; // meters
+  totalCalories: number; // kcal
+  totalFatCalories?: number; // kcal from fat
 
   // Speed
-  avgSpeed?: number;           // m/s
-  maxSpeed?: number;           // m/s
-  enhancedAvgSpeed?: number;   // m/s (higher precision)
-  enhancedMaxSpeed?: number;   // m/s (higher precision)
+  avgSpeed?: number; // m/s
+  maxSpeed?: number; // m/s
+  enhancedAvgSpeed?: number; // m/s (higher precision)
+  enhancedMaxSpeed?: number; // m/s (higher precision)
 
   // Heart Rate
-  avgHeartRate?: number;       // bpm
-  maxHeartRate?: number;       // bpm
-  minHeartRate?: number;       // bpm
+  avgHeartRate?: number; // bpm
+  maxHeartRate?: number; // bpm
+  minHeartRate?: number; // bpm
 
   // Cadence
-  avgCadence?: number;         // rpm or spm
-  maxCadence?: number;         // rpm or spm
+  avgCadence?: number; // rpm or spm
+  maxCadence?: number; // rpm or spm
   avgFractionalCadence?: number;
 
   // Power (cycling)
-  avgPower?: number;           // watts
-  maxPower?: number;           // watts
-  normalizedPower?: number;    // watts (NP)
+  avgPower?: number; // watts
+  maxPower?: number; // watts
+  normalizedPower?: number; // watts (NP)
   trainingStressScore?: number; // TSS
-  intensityFactor?: number;    // IF
+  intensityFactor?: number; // IF
   leftRightBalance?: number;
 
   // Elevation
-  totalAscent?: number;        // meters
-  totalDescent?: number;       // meters
+  totalAscent?: number; // meters
+  totalDescent?: number; // meters
 
   // Classification
   sport: FitSport;
@@ -125,8 +125,8 @@ type FitSessionMessage = {
   // Swimming specific
   numLengths?: number;
   numActiveLengths?: number;
-  poolLength?: number;         // meters
-  poolLengthUnit?: 'metric' | 'statute';
+  poolLength?: number; // meters
+  poolLengthUnit?: "metric" | "statute";
   avgStrokeCount?: number;
   avgStrokeDistance?: number;
   swimStroke?: FitSwimStroke;
@@ -207,28 +207,28 @@ RECORD messages contain time-series data points (typically 1 per second). Essent
 
 ```typescript
 type FitRecordMessage = {
-  timestamp: number;           // FIT timestamp
+  timestamp: number; // FIT timestamp
 
   // Position
-  positionLat?: number;        // semicircles
-  positionLong?: number;       // semicircles
-  altitude?: number;           // meters (with offset)
-  enhancedAltitude?: number;   // meters (higher precision)
+  positionLat?: number; // semicircles
+  positionLong?: number; // semicircles
+  altitude?: number; // meters (with offset)
+  enhancedAltitude?: number; // meters (higher precision)
 
   // Speed & Distance
-  speed?: number;              // m/s
-  enhancedSpeed?: number;      // m/s (higher precision)
-  distance?: number;           // cumulative meters
+  speed?: number; // m/s
+  enhancedSpeed?: number; // m/s (higher precision)
+  distance?: number; // cumulative meters
 
   // Heart Rate
-  heartRate?: number;          // bpm
+  heartRate?: number; // bpm
 
   // Cadence
-  cadence?: number;            // rpm or spm
-  fractionalCadence?: number;  // fractional part
+  cadence?: number; // rpm or spm
+  fractionalCadence?: number; // fractional part
 
   // Power
-  power?: number;              // watts
+  power?: number; // watts
   leftRightBalance?: number;
   leftPedalSmoothness?: number;
   rightPedalSmoothness?: number;
@@ -236,7 +236,7 @@ type FitRecordMessage = {
   rightTorqueEffectiveness?: number;
 
   // Environment
-  temperature?: number;        // celsius
+  temperature?: number; // celsius
 
   // Cycling dynamics
   leftPlatformCenterOffset?: number;
@@ -316,9 +316,9 @@ packages/core/src/
 // Use streaming/chunked processing for large files
 
 type RecordProcessingOptions = {
-  chunkSize?: number;          // Default: 1000 records
-  skipFields?: string[];       // Fields to ignore for performance
-  downsample?: number;         // Keep every Nth record
+  chunkSize?: number; // Default: 1000 records
+  skipFields?: string[]; // Fields to ignore for performance
+  downsample?: number; // Keep every Nth record
 };
 ```
 
@@ -431,16 +431,16 @@ enum FitEventType {
 ```typescript
 // Add to domain/schemas/event.ts
 const eventTypeSchema = z.enum([
-  'start',
-  'stop',
-  'pause',
-  'resume',
-  'lap',
-  'marker',
-  'workout_step',
-  'alert',
-  'gear_change',
-  'user_marker',
+  "start",
+  "stop",
+  "pause",
+  "resume",
+  "lap",
+  "marker",
+  "workout_step",
+  "alert",
+  "gear_change",
+  "user_marker",
 ]);
 
 const eventSchema = z.object({
@@ -496,7 +496,7 @@ packages/core/src/
 ```typescript
 // Add to krd-to-fit-target.mapper.ts
 
-import { SWIM_STROKE_TO_FIT } from '../../shared/swim-stroke-mapping';
+import { SWIM_STROKE_TO_FIT } from "../../shared/swim-stroke-mapping";
 
 export function convertStrokeTypeTarget(
   step: WorkoutStep,
@@ -507,7 +507,11 @@ export function convertStrokeTypeTarget(
   }
 
   const strokeValue = step.target.value;
-  if (!strokeValue || typeof strokeValue !== 'object' || !('value' in strokeValue)) {
+  if (
+    !strokeValue ||
+    typeof strokeValue !== "object" ||
+    !("value" in strokeValue)
+  ) {
     return;
   }
 
@@ -521,7 +525,9 @@ export function convertStrokeTypeTarget(
 }
 
 // Update convertTarget() to include stroke handling
-export function convertTarget(step: WorkoutStep): Partial<FitWorkoutStepMessage> {
+export function convertTarget(
+  step: WorkoutStep
+): Partial<FitWorkoutStepMessage> {
   const message: Partial<FitWorkoutStepMessage> = {};
 
   if (!step.target) {
@@ -542,7 +548,7 @@ export function convertTarget(step: WorkoutStep): Partial<FitWorkoutStepMessage>
     case targetTypeSchema.enum.pace:
       convertPaceTarget(step, message);
       break;
-    case targetTypeSchema.enum.stroke_type:  // ADD THIS
+    case targetTypeSchema.enum.stroke_type: // ADD THIS
       convertStrokeTypeTarget(step, message);
       break;
     default:
@@ -558,14 +564,14 @@ export function convertTarget(step: WorkoutStep): Partial<FitWorkoutStepMessage>
 ```typescript
 // Add to krd-to-fit-target.mapper.test.ts
 
-describe('stroke_type target conversion', () => {
-  it('should convert freestyle stroke target', () => {
+describe("stroke_type target conversion", () => {
+  it("should convert freestyle stroke target", () => {
     const step: WorkoutStep = {
-      type: 'active',
-      duration: { type: 'distance', value: 100 },
+      type: "active",
+      duration: { type: "distance", value: 100 },
       target: {
-        type: 'stroke_type',
-        value: { value: 'freestyle' },
+        type: "stroke_type",
+        value: { value: "freestyle" },
       },
     };
 
@@ -575,14 +581,21 @@ describe('stroke_type target conversion', () => {
     expect(result.targetSwimStroke).toBe(0); // freestyle = 0
   });
 
-  it('should handle all swim stroke types', () => {
-    const strokes = ['freestyle', 'backstroke', 'breaststroke', 'butterfly', 'drill', 'mixed'];
+  it("should handle all swim stroke types", () => {
+    const strokes = [
+      "freestyle",
+      "backstroke",
+      "breaststroke",
+      "butterfly",
+      "drill",
+      "mixed",
+    ];
 
     strokes.forEach((stroke, index) => {
       const step: WorkoutStep = {
-        type: 'active',
-        duration: { type: 'time', value: 60 },
-        target: { type: 'stroke_type', value: { value: stroke } },
+        type: "active",
+        duration: { type: "time", value: 60 },
+        target: { type: "stroke_type", value: { value: stroke } },
       };
 
       const result = convertTarget(step);
@@ -720,7 +733,7 @@ const lapSchema = z.object({
   total_ascent: z.number().nonnegative().optional(),
   total_descent: z.number().nonnegative().optional(),
   intensity: intensitySchema.optional(),
-  trigger: z.enum(['manual', 'time', 'distance', 'position', 'session_end']),
+  trigger: z.enum(["manual", "time", "distance", "position", "session_end"]),
   sport: sportSchema.optional(),
   sub_sport: subSportSchema.optional(),
   workout_step_index: z.number().int().nonnegative().optional(),
@@ -784,8 +797,8 @@ enum FitFileType {
   SEGMENT = 34,
   SEGMENT_LIST = 35,
   EXD_CONFIGURATION = 40,
-  MFG_RANGE_MIN = 0xF7,
-  MFG_RANGE_MAX = 0xFE,
+  MFG_RANGE_MIN = 0xf7,
+  MFG_RANGE_MAX = 0xfe,
 }
 ```
 
@@ -796,14 +809,14 @@ enum FitFileType {
 // Update to handle different file types
 
 export function createFitMessages(krd: KRD): FitMessages {
-  const fileType = krd.metadata?.file_type ?? 'workout';
+  const fileType = krd.metadata?.file_type ?? "workout";
 
   switch (fileType) {
-    case 'workout':
+    case "workout":
       return createWorkoutMessages(krd);
-    case 'activity':
+    case "activity":
       return createActivityMessages(krd);
-    case 'course':
+    case "course":
       return createCourseMessages(krd);
     default:
       throw new Error(`Unsupported file type: ${fileType}`);
@@ -1026,7 +1039,9 @@ export function calculateTrainingStressScore(
   ftp: number
 ): number {
   const intensityFactor = calculateIntensityFactor(normalizedPower, ftp);
-  return (durationSeconds * normalizedPower * intensityFactor) / (ftp * 3600) * 100;
+  return (
+    ((durationSeconds * normalizedPower * intensityFactor) / (ftp * 3600)) * 100
+  );
 }
 
 export function calculateElevationGain(
@@ -1061,15 +1076,19 @@ export function degreesToSemicircles(degrees: number): number {
 }
 
 export function calculateDistance(
-  lat1: number, lon1: number,
-  lat2: number, lon2: number
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
 ): number {
   // Haversine formula
 }
 
 export function calculateBearing(
-  lat1: number, lon1: number,
-  lat2: number, lon2: number
+  lat1: number,
+  lon1: number,
+  lat2: number,
+  lon2: number
 ): number {
   // Bearing calculation
 }
@@ -1078,14 +1097,12 @@ export function calculateBearing(
 
 export function smoothTrack(
   records: FitRecordMessage[],
-  algorithm: 'kalman' | 'douglas-peucker' | 'moving-average'
+  algorithm: "kalman" | "douglas-peucker" | "moving-average"
 ): FitRecordMessage[] {
   // Track smoothing for noisy GPS data
 }
 
-export function calculateGrade(
-  records: FitRecordMessage[]
-): number[] {
+export function calculateGrade(records: FitRecordMessage[]): number[] {
   // Grade/slope calculation from altitude and distance
 }
 ```
@@ -1215,39 +1232,39 @@ export const FIT_MESSAGE_NUMBERS = {
 
 export const FIT_TOLERANCES = {
   // Timing
-  timestamp: 1,           // ±1 second
-  duration: 1,            // ±1 second
+  timestamp: 1, // ±1 second
+  duration: 1, // ±1 second
 
   // Power
-  power: 1,               // ±1 watt
-  powerPercent: 1,        // ±1% FTP
-  normalizedPower: 1,     // ±1 watt
+  power: 1, // ±1 watt
+  powerPercent: 1, // ±1% FTP
+  normalizedPower: 1, // ±1 watt
 
   // Heart Rate
-  heartRate: 1,           // ±1 bpm
-  heartRatePercent: 1,    // ±1% max HR
+  heartRate: 1, // ±1 bpm
+  heartRatePercent: 1, // ±1% max HR
 
   // Cadence
-  cadence: 1,             // ±1 rpm/spm
+  cadence: 1, // ±1 rpm/spm
 
   // Speed/Pace
-  speed: 0.01,            // ±0.01 m/s
+  speed: 0.01, // ±0.01 m/s
 
   // Distance
-  distance: 1,            // ±1 meter
+  distance: 1, // ±1 meter
 
   // Coordinates
-  latitude: 0.000001,     // ~0.1m precision
-  longitude: 0.000001,    // ~0.1m precision
+  latitude: 0.000001, // ~0.1m precision
+  longitude: 0.000001, // ~0.1m precision
 
   // Elevation
-  altitude: 0.2,          // ±0.2 meters
+  altitude: 0.2, // ±0.2 meters
 
   // Calories
-  calories: 1,            // ±1 kcal
+  calories: 1, // ±1 kcal
 
   // Temperature
-  temperature: 0.5,       // ±0.5°C
+  temperature: 0.5, // ±0.5°C
 };
 ```
 
@@ -1337,33 +1354,53 @@ packages/core/src/
 // Each new message type needs:
 
 // 1. Unit tests for mapper
-describe('SessionMapper', () => {
-  describe('fitToKrd', () => { /* ... */ });
-  describe('krdToFit', () => { /* ... */ });
+describe("SessionMapper", () => {
+  describe("fitToKrd", () => {
+    /* ... */
+  });
+  describe("krdToFit", () => {
+    /* ... */
+  });
 });
 
 // 2. Integration tests for converter
-describe('SessionConverter', () => {
-  describe('full conversion pipeline', () => { /* ... */ });
+describe("SessionConverter", () => {
+  describe("full conversion pipeline", () => {
+    /* ... */
+  });
 });
 
 // 3. Round-trip tests
-describe('Session round-trip', () => {
-  it('should preserve all fields within tolerances', () => { /* ... */ });
+describe("Session round-trip", () => {
+  it("should preserve all fields within tolerances", () => {
+    /* ... */
+  });
 });
 
 // 4. Edge case tests
-describe('Session edge cases', () => {
-  it('should handle missing optional fields', () => { /* ... */ });
-  it('should handle maximum values', () => { /* ... */ });
-  it('should handle minimum values', () => { /* ... */ });
+describe("Session edge cases", () => {
+  it("should handle missing optional fields", () => {
+    /* ... */
+  });
+  it("should handle maximum values", () => {
+    /* ... */
+  });
+  it("should handle minimum values", () => {
+    /* ... */
+  });
 });
 
 // 5. Real-world file tests
-describe('Session with real FIT files', () => {
-  it('should parse Garmin Connect export', async () => { /* ... */ });
-  it('should parse Wahoo export', async () => { /* ... */ });
-  it('should parse Zwift export', async () => { /* ... */ });
+describe("Session with real FIT files", () => {
+  it("should parse Garmin Connect export", async () => {
+    /* ... */
+  });
+  it("should parse Wahoo export", async () => {
+    /* ... */
+  });
+  it("should parse Zwift export", async () => {
+    /* ... */
+  });
 });
 ```
 
@@ -1398,17 +1435,17 @@ When implementing new features, the KRD schema version should be bumped:
 ```typescript
 // domain/schemas/krd.ts
 
-export const KRD_SCHEMA_VERSION = '2.0.0'; // Bump from 1.x
+export const KRD_SCHEMA_VERSION = "2.0.0"; // Bump from 1.x
 
 // Add migration utilities
 export function migrateKrdV1ToV2(krdV1: KrdV1): KrdV2 {
   return {
     ...krdV1,
-    version: '2.0.0',
-    sessions: [],      // New field
-    records: [],       // New field
-    events: [],        // New field
-    laps: [],          // New field
+    version: "2.0.0",
+    sessions: [], // New field
+    records: [], // New field
+    events: [], // New field
+    laps: [], // New field
   };
 }
 ```
@@ -1418,29 +1455,29 @@ export function migrateKrdV1ToV2(krdV1: KrdV1): KrdV2 {
 ```typescript
 // Maintain compatibility with existing workout-only KRD files
 export function isWorkoutOnlyKrd(krd: KRD): boolean {
-  return (
-    !krd.sessions?.length &&
-    !krd.records?.length &&
-    !krd.laps?.length
-  );
+  return !krd.sessions?.length && !krd.records?.length && !krd.laps?.length;
 }
 
 // Existing toKRD/fromKRD functions remain unchanged
 // New functions added for full activity support:
-export async function activityToKRD(/* ... */): Promise<KRD> { /* ... */ }
-export async function krdToActivity(/* ... */): Promise<Uint8Array> { /* ... */ }
+export async function activityToKRD(/* ... */): Promise<KRD> {
+  /* ... */
+}
+export async function krdToActivity(/* ... */): Promise<Uint8Array> {
+  /* ... */
+}
 ```
 
 ---
 
 ## Summary
 
-| Phase | Features | Effort | Impact |
-|-------|----------|--------|--------|
-| **Phase 1** | SESSION, RECORD, EVENT, stroke_type fix | 10-12 days | Enables activity files |
-| **Phase 2** | LAP, file types, DEVICE | 5-7 days | Complete FIT support |
-| **Phase 3** | Developer fields, metrics, geo | 5-7 days | Advanced features |
-| **Total** | Full FIT SDK parity | **20-26 days** | Production-ready |
+| Phase       | Features                                | Effort         | Impact                 |
+| ----------- | --------------------------------------- | -------------- | ---------------------- |
+| **Phase 1** | SESSION, RECORD, EVENT, stroke_type fix | 10-12 days     | Enables activity files |
+| **Phase 2** | LAP, file types, DEVICE                 | 5-7 days       | Complete FIT support   |
+| **Phase 3** | Developer fields, metrics, geo          | 5-7 days       | Advanced features      |
+| **Total**   | Full FIT SDK parity                     | **20-26 days** | Production-ready       |
 
 ### Quick Wins (Can be done independently)
 
