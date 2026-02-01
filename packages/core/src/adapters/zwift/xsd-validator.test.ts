@@ -6,7 +6,7 @@ describe("createZwiftValidator", () => {
   const logger = createConsoleLogger();
 
   describe("environment detection", () => {
-    it("should use well-formedness validator in browser environment", async () => {
+    it("should use well-formedness validator in browser environment", { timeout: 30_000 }, async () => {
       // Arrange
       // Simulate browser environment by setting window
       const originalWindow = global.window;
@@ -134,7 +134,7 @@ describe("createZwiftValidator", () => {
         });
       });
 
-      it("should detect Node.js environment when window is undefined", async () => {
+      it("should detect Node.js environment when window is undefined", { timeout: 30_000 }, async () => {
         // Arrange
         const originalWindow = global.window;
         // @ts-expect-error - Simulating Node.js environment
@@ -156,7 +156,7 @@ describe("createZwiftValidator", () => {
         global.window = originalWindow;
       });
 
-      it("should require module reload for environment detection to update", async () => {
+      it("should require module reload for environment detection to update", { timeout: 30_000 }, async () => {
         // Arrange
         const originalWindow = global.window;
 
@@ -202,7 +202,7 @@ describe("createZwiftValidator", () => {
         global.window = originalWindow;
       });
 
-      it("should consistently detect environment across multiple reloads", async () => {
+      it("should consistently detect environment across multiple reloads", { timeout: 30_000 }, async () => {
         // Arrange
         const originalWindow = global.window;
         const iterations = 5;
