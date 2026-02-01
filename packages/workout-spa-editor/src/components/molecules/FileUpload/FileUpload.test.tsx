@@ -266,6 +266,30 @@ describe("FileUpload", () => {
     expect(fileInput).toHaveAttribute("accept", ".json");
   });
 
+  it("should reject files larger than 10 MB", async () => {
+    // Arrange
+    const onError = vi.fn();
+    const user = userEvent.setup();
+    render(<FileUpload onFileLoad={vi.fn()} onError={onError} />);
+
+    const fileInput = screen.getByLabelText(/upload workout file/i);
+
+    // Create a file larger than 10 MB (11 MB)
+    const largeContent = new ArrayBuffer(11 * 1024 * 1024);
+    const file = new File([largeContent], "large-workout.krd", {
+      type: "application/json",
+    });
+
+    // Act
+    await user.upload(fileInput, file);
+
+    // Assert
+    await waitFor(() => {
+      expect(onError).toHaveBeenCalled();
+      expect(screen.getByText("File too large")).toBeInTheDocument();
+    });
+  });
+
   it("should retry file upload when Try Again button is clicked", async () => {
     // Arrange
     const { importWorkout, ImportError } = await import(

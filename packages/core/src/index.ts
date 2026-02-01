@@ -1,8 +1,6 @@
 /**
  * @kaiord/core - Public API
  * Bidirectional conversion between FIT workout files and KRD format
- *
- * Test: Verify fixed packages workflow - core and cli should update together
  */
 
 // ============================================
@@ -172,4 +170,3 @@ export type { ValidateRoundTrip } from "./tests/round-trip/validate-round-trip";
 
 export { createDefaultProviders } from "./application/providers";
 export type { Providers } from "./application/providers";
-// Test: verify fixed packages configuration in CI/CD pipeline

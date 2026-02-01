@@ -13,6 +13,7 @@ import {
   formatError,
   formatToleranceViolations,
 } from "../utils/error-formatter.js";
+import { ExitCode } from "../utils/exit-codes.js";
 import { readFile } from "../utils/file-handler.js";
 import { detectFormat } from "../utils/format-detector.js";
 import { createLogger } from "../utils/logger-factory.js";
@@ -26,7 +27,7 @@ const validateOptionsSchema = z.object({
   logFormat: z.enum(["pretty", "json"]).optional(),
 });
 
-export const validateCommand = async (options: unknown): Promise<void> => {
+export const validateCommand = async (options: unknown): Promise<number> => {
   let logger: Awaited<ReturnType<typeof createLogger>> | undefined;
   let spinner: ReturnType<typeof ora> | null = null;
 
@@ -152,10 +153,10 @@ export const validateCommand = async (options: unknown): Promise<void> => {
           )
         );
       } else if (!opts.quiet) {
-        console.log("✓ Round-trip validation passed");
+        console.log("Round-trip validation passed");
       }
 
-      process.exit(0);
+      return ExitCode.SUCCESS;
     } else {
       // Violations found - format and display them
       logger?.warn("Round-trip validation failed", {
@@ -176,11 +177,11 @@ export const validateCommand = async (options: unknown): Promise<void> => {
           )
         );
       } else {
-        console.error("✖ Round-trip validation failed\n");
+        console.error("Round-trip validation failed\n");
         console.error(formatToleranceViolations(violations));
       }
 
-      process.exit(1);
+      return ExitCode.TOLERANCE_EXCEEDED;
     }
   } catch (error) {
     logger?.error("Validation failed", { error });
@@ -213,7 +214,20 @@ export const validateCommand = async (options: unknown): Promise<void> => {
       console.error(formatError(error, { json: false }));
     }
 
-    process.exit(1);
+    // Determine appropriate exit code based on error type
+    if (error instanceof Error) {
+      if (error.message.includes("File not found")) {
+        return ExitCode.FILE_NOT_FOUND;
+      }
+      if (
+        error.message.includes("only supports") ||
+        error.message.includes("Unable to detect")
+      ) {
+        return ExitCode.INVALID_ARGUMENT;
+      }
+    }
+
+    return ExitCode.UNKNOWN_ERROR;
   } finally {
     // Ensure spinner is stopped on all paths
     spinner?.stop();

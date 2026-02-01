@@ -1,7 +1,13 @@
 import { writeFile as fsWriteFile, mkdir, rm } from "fs/promises";
 import { join } from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
-import { findFiles, readFile, writeFile } from "./file-handler";
+import {
+  findFiles,
+  isNodeSystemError,
+  readFile,
+  validatePathSecurity,
+  writeFile,
+} from "./file-handler";
 
 const TEST_DIR = join(process.cwd(), "test-temp");
 
@@ -84,6 +90,16 @@ describe("readFile", () => {
 
     // Act & Assert
     await expect(readFile(filePath, "fit")).rejects.toThrow();
+  });
+
+  it("should throw error for path with null bytes", async () => {
+    // Arrange
+    const filePath = "/valid/path\0/injection";
+
+    // Act & Assert
+    await expect(readFile(filePath, "krd")).rejects.toThrow(
+      "Invalid path: null byte detected"
+    );
   });
 });
 
@@ -185,6 +201,80 @@ describe("writeFile", () => {
     await expect(writeFile(filePath, testData, "krd")).rejects.toThrow(
       "Text files require string data"
     );
+  });
+
+  it("should throw error for path with shell metacharacters", async () => {
+    // Arrange
+    const filePath = "path;rm -rf /";
+
+    // Act & Assert
+    await expect(writeFile(filePath, "data", "krd")).rejects.toThrow(
+      "Invalid path: shell metacharacters detected"
+    );
+  });
+});
+
+describe("validatePathSecurity", () => {
+  it("should allow absolute paths", () => {
+    // Arrange
+    const validPath = "/Users/test/file.txt";
+
+    // Act & Assert
+    expect(() => validatePathSecurity(validPath)).not.toThrow();
+  });
+
+  it("should allow relative paths including parent traversal", () => {
+    // Arrange - CLI tools legitimately need to access parent directories
+    const validPath = "../other-project/file.txt";
+
+    // Act & Assert
+    expect(() => validatePathSecurity(validPath)).not.toThrow();
+  });
+
+  it("should reject paths with null bytes", () => {
+    // Arrange
+    const invalidPath = "/valid/path\0/injection";
+
+    // Act & Assert
+    expect(() => validatePathSecurity(invalidPath)).toThrow(
+      "Invalid path: null byte detected"
+    );
+  });
+
+  it("should reject paths with shell metacharacters", () => {
+    // Arrange
+    const invalidPath = "path|cat /etc/passwd";
+
+    // Act & Assert
+    expect(() => validatePathSecurity(invalidPath)).toThrow(
+      "Invalid path: shell metacharacters detected"
+    );
+  });
+});
+
+describe("isNodeSystemError", () => {
+  it("should return true for errors with code property", () => {
+    // Arrange
+    const error = Object.assign(new Error("test"), { code: "ENOENT" });
+
+    // Act & Assert
+    expect(isNodeSystemError(error)).toBe(true);
+  });
+
+  it("should return false for regular errors", () => {
+    // Arrange
+    const error = new Error("test");
+
+    // Act & Assert
+    expect(isNodeSystemError(error)).toBe(false);
+  });
+
+  it("should return false for non-error values", () => {
+    // Act & Assert
+    expect(isNodeSystemError("string")).toBe(false);
+    expect(isNodeSystemError(null)).toBe(false);
+    expect(isNodeSystemError(undefined)).toBe(false);
+    expect(isNodeSystemError({ code: "ENOENT" })).toBe(false);
   });
 });
 

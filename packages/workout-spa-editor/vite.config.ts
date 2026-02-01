@@ -18,5 +18,27 @@ export default defineConfig({
     // Optimize for production
     minify: "terser",
     target: "es2020",
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          // Core React dependencies
+          "vendor-react": ["react", "react-dom"],
+          // UI components library (Radix)
+          "vendor-ui": [
+            "@radix-ui/react-dialog",
+            "@radix-ui/react-dropdown-menu",
+            "@radix-ui/react-select",
+            "@radix-ui/react-toast",
+            "@radix-ui/react-tooltip",
+          ],
+          // State management
+          "vendor-state": ["zustand"],
+          // Validation and schemas
+          "vendor-zod": ["zod"],
+          // Core conversion library (large)
+          "kaiord-core": ["@kaiord/core"],
+        },
+      },
+    },
   },
 });
