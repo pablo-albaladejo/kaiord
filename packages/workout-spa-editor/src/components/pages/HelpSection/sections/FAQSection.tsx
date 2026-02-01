@@ -9,10 +9,10 @@ import { FAQItem } from "../components/FAQItem";
 
 export function FAQSection() {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 kiroween:border-gray-700 kiroween:bg-gray-800">
+    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="mb-4 flex items-center gap-2">
         <HelpCircle className="h-6 w-6 text-primary-600 dark:text-primary-400" />
-        <h2 className="text-2xl font-bold text-gray-900 dark:text-white kiroween:text-white">
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
           Frequently Asked Questions
         </h2>
       </div>

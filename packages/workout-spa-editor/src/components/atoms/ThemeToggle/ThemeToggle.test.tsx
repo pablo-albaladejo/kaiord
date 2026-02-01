@@ -43,17 +43,6 @@ describe("ThemeToggle", () => {
       );
 
       const button = screen.getByRole("button");
-      expect(button).toHaveAttribute("aria-label", "Switch to Kiroween mode");
-    });
-
-    it("should show ghost icon in kiroween mode", () => {
-      render(
-        <ThemeProvider defaultTheme="kiroween">
-          <ThemeToggle />
-        </ThemeProvider>
-      );
-
-      const button = screen.getByRole("button");
       expect(button).toHaveAttribute("aria-label", "Switch to light mode");
     });
   });
@@ -76,34 +65,14 @@ describe("ThemeToggle", () => {
       await user.click(button);
 
       // Assert - cycles to dark
-      expect(button).toHaveAttribute("aria-label", "Switch to Kiroween mode");
+      expect(button).toHaveAttribute("aria-label", "Switch to light mode");
     });
 
-    it("should cycle from dark to kiroween mode", async () => {
+    it("should cycle from dark to light mode", async () => {
       const user = userEvent.setup();
 
       render(
         <ThemeProvider defaultTheme="dark">
-          <ThemeToggle />
-        </ThemeProvider>
-      );
-
-      const button = screen.getByRole("button", {
-        name: /switch to kiroween mode/i,
-      });
-
-      // Act
-      await user.click(button);
-
-      // Assert - cycles to kiroween
-      expect(button).toHaveAttribute("aria-label", "Switch to light mode");
-    });
-
-    it("should cycle from kiroween to light mode", async () => {
-      const user = userEvent.setup();
-
-      render(
-        <ThemeProvider defaultTheme="kiroween">
           <ThemeToggle />
         </ThemeProvider>
       );
@@ -133,14 +102,14 @@ describe("ThemeToggle", () => {
       // System theme resolves based on actual system preference
       // Just verify the button has an aria-label
       const initialLabel = button.getAttribute("aria-label");
-      expect(initialLabel).toMatch(/Switch to (light|dark|Kiroween) mode/);
+      expect(initialLabel).toMatch(/Switch to (light|dark) mode/);
 
       // Act - click to toggle
       await user.click(button);
 
       // Assert - label should change
       const newLabel = button.getAttribute("aria-label");
-      expect(newLabel).toMatch(/Switch to (light|dark|Kiroween) mode/);
+      expect(newLabel).toMatch(/Switch to (light|dark) mode/);
       expect(newLabel).not.toBe(initialLabel);
     });
   });
@@ -149,17 +118,6 @@ describe("ThemeToggle", () => {
     it("should have proper aria-label in dark mode", () => {
       render(
         <ThemeProvider defaultTheme="dark">
-          <ThemeToggle />
-        </ThemeProvider>
-      );
-
-      const button = screen.getByRole("button");
-      expect(button).toHaveAttribute("aria-label", "Switch to Kiroween mode");
-    });
-
-    it("should have proper aria-label in kiroween mode", () => {
-      render(
-        <ThemeProvider defaultTheme="kiroween">
           <ThemeToggle />
         </ThemeProvider>
       );
@@ -176,7 +134,7 @@ describe("ThemeToggle", () => {
       );
 
       const button = screen.getByRole("button");
-      expect(button).toHaveAttribute("title", "Switch to Kiroween mode");
+      expect(button).toHaveAttribute("title", "Switch to light mode");
     });
 
     it("should have aria-hidden on icon", () => {

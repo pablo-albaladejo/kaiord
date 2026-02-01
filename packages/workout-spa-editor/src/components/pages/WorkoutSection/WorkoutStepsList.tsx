@@ -58,7 +58,7 @@ export function WorkoutStepsList({
   const hasMultipleSelection = selectedStepIds.length >= 2;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 kiroween:border-gray-700 kiroween:bg-gray-800">
+    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <WorkoutList
         workout={workout}
         selectedStepId={selectedStepId}

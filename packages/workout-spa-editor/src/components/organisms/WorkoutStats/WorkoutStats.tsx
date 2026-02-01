@@ -39,7 +39,7 @@ export const WorkoutStats: React.FC<WorkoutStatsProps> = ({
 
   return (
     <div
-      className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 kiroween:border-gray-700 kiroween:bg-gray-800 ${className}`}
+      className={`rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800 ${className}`}
       role="region"
       aria-label="Workout statistics"
     >

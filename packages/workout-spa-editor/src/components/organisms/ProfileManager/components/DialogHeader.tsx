@@ -11,7 +11,7 @@ export function DialogHeader() {
   return (
     <>
       <div className="flex items-center justify-between mb-4">
-        <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-white kiroween:text-white">
+        <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-white">
           Profile Manager
         </Dialog.Title>
         <Dialog.Close asChild>

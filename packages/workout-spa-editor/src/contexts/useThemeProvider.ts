@@ -14,7 +14,7 @@ export const useThemeProvider = (defaultTheme: Theme = "system") => {
     return getStoredTheme() ?? defaultTheme;
   });
 
-  // Resolve theme to actual light/dark/kiroween value
+  // Resolve theme to actual light/dark value
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>(() => {
     const initialTheme = getStoredTheme() ?? defaultTheme;
     return resolveTheme(initialTheme);

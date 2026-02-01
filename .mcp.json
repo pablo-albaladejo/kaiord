@@ -1,0 +1,22 @@
+{
+  "mcpServers": {
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp@latest"],
+      "env": {}
+    },
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp@latest"],
+      "env": {}
+    },
+    "vitest": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@djankies/vitest-mcp"],
+      "env": {}
+    }
+  }
+}
