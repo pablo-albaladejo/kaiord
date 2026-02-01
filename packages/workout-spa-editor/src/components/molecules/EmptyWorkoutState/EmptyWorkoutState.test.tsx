@@ -26,15 +26,6 @@ describe("EmptyWorkoutState", () => {
     expect(onAddStep).toHaveBeenCalledTimes(1);
   });
 
-  it("displays keyboard shortcut hint", () => {
-    const onAddStep = vi.fn();
-
-    render(<EmptyWorkoutState onAddStep={onAddStep} />);
-
-    expect(screen.getByText("A")).toBeInTheDocument();
-    expect(screen.getByText(/to add a step/)).toBeInTheDocument();
-  });
-
   it("has correct accessibility attributes", () => {
     const onAddStep = vi.fn();
 

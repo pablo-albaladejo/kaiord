@@ -30,13 +30,6 @@ export function EmptyWorkoutState({ onAddStep }: EmptyWorkoutStateProps) {
         <ListPlus className="mr-2 h-4 w-4" aria-hidden="true" />
         Add Step
       </Button>
-      <p className="mt-4 text-xs text-gray-400 dark:text-gray-500">
-        Press{" "}
-        <kbd className="rounded bg-gray-100 px-1 py-0.5 dark:bg-gray-700">
-          A
-        </kbd>{" "}
-        to add a step
-      </p>
     </div>
   );
 }
