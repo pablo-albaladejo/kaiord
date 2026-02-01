@@ -165,7 +165,7 @@ jobs:
 
       - name: Upload coverage artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-core-${{ matrix.node-version }}
           path: ./packages/core/coverage/
@@ -194,7 +194,7 @@ jobs:
           echo "✅ @kaiord/core build verified"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: build-artifacts
           path: |
@@ -239,7 +239,7 @@ jobs:
 
       - name: Upload coverage artifact
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: coverage-frontend-${{ matrix.node-version }}
           path: ./packages/workout-spa-editor/coverage/
@@ -287,7 +287,7 @@ jobs:
 
       - name: Upload round-trip test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: round-trip-results-core
           path: round-trip-output.txt

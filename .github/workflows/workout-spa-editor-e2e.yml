@@ -73,7 +73,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-report-${{ matrix.browser }}
           path: packages/workout-spa-editor/playwright-report/
@@ -81,7 +81,7 @@ jobs:
 
       - name: Upload test screenshots
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-screenshots-${{ matrix.browser }}
           path: packages/workout-spa-editor/test-results/
@@ -140,7 +140,7 @@ jobs:
 
       - name: Upload test results
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: playwright-report-mobile-${{ matrix.device }}
           path: packages/workout-spa-editor/playwright-report/
