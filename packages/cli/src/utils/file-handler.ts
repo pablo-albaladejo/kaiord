@@ -1,48 +1,19 @@
-import {
-  readFile as fsReadFile,
-  writeFile as fsWriteFile,
-  mkdir,
-} from "fs/promises";
+/**
+ * File I/O operations for the CLI
+ */
+import { readFile as fsReadFile, writeFile as fsWriteFile } from "fs/promises";
 import { glob } from "glob";
-import { dirname } from "path";
+import { createOutputDirectory } from "./directory-handler";
 import type { FileFormat } from "./format-detector";
+import { isNodeSystemError } from "./fs-errors";
+import { validatePathSecurity } from "./path-security";
 
-/**
- * Type guard for Node.js system errors with error codes
- */
-type NodeSystemError = Error & { code: string };
-
-export const isNodeSystemError = (error: unknown): error is NodeSystemError => {
-  return error instanceof Error && "code" in error;
-};
-
-/**
- * Validate that a path does not contain dangerous path components.
- * CLIs legitimately need to access files anywhere on the filesystem,
- * including using relative paths like "../other-folder".
- * This function blocks only clearly dangerous patterns.
- * @param inputPath - Path to validate
- * @throws Error if dangerous path pattern is detected
- */
-export const validatePathSecurity = (inputPath: string): void => {
-  // Block null bytes which could be used for injection attacks
-  if (inputPath.includes("\0")) {
-    throw new Error(`Invalid path: null byte detected in ${inputPath}`);
-  }
-
-  // Block paths that attempt command injection
-  if (inputPath.includes("|") || inputPath.includes(";")) {
-    throw new Error(
-      `Invalid path: shell metacharacters detected in ${inputPath}`
-    );
-  }
-};
+// Re-export for backwards compatibility
+export { isNodeSystemError } from "./fs-errors";
+export { validatePathSecurity } from "./path-security";
 
 /**
  * Read a file from disk, handling binary and text formats appropriately
- * @param path - Path to the file
- * @param format - File format (determines binary vs text handling)
- * @returns File contents as Uint8Array (binary) or string (text)
  */
 export const readFile = async (
   path: string,
@@ -52,11 +23,9 @@ export const readFile = async (
 
   try {
     if (format === "fit") {
-      // FIT files are binary
       const buffer = await fsReadFile(path);
       return new Uint8Array(buffer);
     } else {
-      // KRD, TCX, ZWO are text files
       return await fsReadFile(path, "utf-8");
     }
   } catch (error) {
@@ -73,34 +42,7 @@ export const readFile = async (
 };
 
 /**
- * Create directory for output file
- * @param path - Path to the output file
- * @throws Error with specific message for directory creation failures
- */
-const createOutputDirectory = async (path: string): Promise<void> => {
-  const dir = dirname(path);
-  try {
-    await mkdir(dir, { recursive: true });
-  } catch (error) {
-    if (isNodeSystemError(error)) {
-      if (error.code === "EACCES") {
-        throw new Error(`Permission denied creating directory: ${dir}`);
-      }
-      if (error.code === "ENOTDIR") {
-        throw new Error(
-          `Cannot create directory (path exists as file): ${dir}`
-        );
-      }
-    }
-    throw new Error(`Failed to create directory: ${dir}`);
-  }
-};
-
-/**
  * Write data to a file, handling binary and text formats appropriately
- * @param path - Path to write to
- * @param data - Data to write (Uint8Array for binary, string for text)
- * @param format - File format (determines binary vs text handling)
  */
 export const writeFile = async (
   path: string,
@@ -109,7 +51,6 @@ export const writeFile = async (
 ): Promise<void> => {
   validatePathSecurity(path);
 
-  // Validate data type before any file operations
   if (format === "fit" && !(data instanceof Uint8Array)) {
     throw new Error("FIT files require Uint8Array data");
   }
@@ -117,10 +58,8 @@ export const writeFile = async (
     throw new Error("Text files require string data");
   }
 
-  // Create directory first (separate error handling)
   await createOutputDirectory(path);
 
-  // Write the file
   try {
     if (format === "fit") {
       await fsWriteFile(path, data as Uint8Array);
@@ -142,8 +81,6 @@ export const writeFile = async (
 
 /**
  * Find files matching a glob pattern
- * @param pattern - Glob pattern (e.g., "workouts/*.fit")
- * @returns Array of matching file paths (sorted)
  */
 export const findFiles = async (pattern: string): Promise<Array<string>> => {
   const files = await glob(pattern, {

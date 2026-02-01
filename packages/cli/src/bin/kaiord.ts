@@ -245,6 +245,8 @@ const main = async (): Promise<void> => {
         process.exit(ExitCode.VALIDATION_ERROR);
       } else if (errorName === "ToleranceExceededError") {
         process.exit(ExitCode.TOLERANCE_EXCEEDED);
+      } else if (errorName === "InvalidArgumentError") {
+        process.exit(ExitCode.INVALID_ARGUMENT);
       }
     }
 
