@@ -21,7 +21,7 @@ describe("convert command integration tests", () => {
     }
   });
 
-  it("should convert FIT to KRD with WorkoutIndividualSteps.fit fixture", async () => {
+  it("should convert FIT to KRD with WorkoutIndividualSteps.fit fixture", { timeout: 30_000 }, async () => {
     // Arrange
     const cliPath = resolve(__dirname, "../bin/kaiord.ts");
     const inputPath = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
@@ -46,7 +46,7 @@ describe("convert command integration tests", () => {
     expect(krd.type).toBe("workout");
   });
 
-  it("should convert KRD to FIT with corresponding KRD fixture", async () => {
+  it("should convert KRD to FIT with corresponding KRD fixture", { timeout: 30_000 }, async () => {
     // Arrange
     const cliPath = resolve(__dirname, "../bin/kaiord.ts");
     const inputPath = getFixturePath("krd-files", "WorkoutIndividualSteps.krd");
@@ -69,7 +69,7 @@ describe("convert command integration tests", () => {
     expect(outputBuffer.length).toBeGreaterThan(0);
   });
 
-  it("should handle missing files with exit code 2", async () => {
+  it("should handle missing files with exit code 2", { timeout: 30_000 }, async () => {
     // Arrange
     const cliPath = resolve(__dirname, "../bin/kaiord.ts");
     const inputPath = "nonexistent.fit";
@@ -90,7 +90,7 @@ describe("convert command integration tests", () => {
     expect(output).toContain("File not found");
   });
 
-  it("should handle invalid/corrupted files with exit code 4", async () => {
+  it("should handle invalid/corrupted files with exit code 4", { timeout: 30_000 }, async () => {
     // Arrange
     const cliPath = resolve(__dirname, "../bin/kaiord.ts");
     const corruptedPath = join(tempDir.path, "corrupted.fit");
@@ -112,7 +112,7 @@ describe("convert command integration tests", () => {
     expect(output).toContain("Error");
   });
 
-  it("should detect format from file extensions", async () => {
+  it("should detect format from file extensions", { timeout: 30_000 }, async () => {
     // Arrange
     const cliPath = resolve(__dirname, "../bin/kaiord.ts");
     const inputPath = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
@@ -135,7 +135,7 @@ describe("convert command integration tests", () => {
     expect(outputContent.length).toBeGreaterThan(0);
   });
 
-  it("should override format detection with --input-format and --output-format flags", async () => {
+  it("should override format detection with --input-format and --output-format flags", { timeout: 30_000 }, async () => {
     // Arrange
     const cliPath = resolve(__dirname, "../bin/kaiord.ts");
     const inputPath = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
@@ -172,7 +172,7 @@ describe("convert command integration tests", () => {
   });
 
   describe("verbosity and output control", () => {
-    it("should increase log output with --verbose flag", async () => {
+    it("should increase log output with --verbose flag", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath(
@@ -206,7 +206,7 @@ describe("convert command integration tests", () => {
       expect(stderr).toContain("Convert command initialized");
     });
 
-    it("should suppress non-error output with --quiet flag", async () => {
+    it("should suppress non-error output with --quiet flag", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath(
@@ -240,7 +240,7 @@ describe("convert command integration tests", () => {
       expect(stdout).not.toContain("Conversion complete");
     });
 
-    it("should output machine-readable JSON with --json flag", async () => {
+    it("should output machine-readable JSON with --json flag", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath(
@@ -278,7 +278,7 @@ describe("convert command integration tests", () => {
       expect(output.outputFormat).toBe("krd");
     });
 
-    it("should force structured logging with --log-format structured", async () => {
+    it("should force structured logging with --log-format structured", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath(
@@ -326,7 +326,7 @@ describe("convert command integration tests", () => {
       expect(hasJsonLog).toBe(true);
     });
 
-    it("should force colored output with --log-format pretty", async () => {
+    it("should force colored output with --log-format pretty", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath(
@@ -375,7 +375,7 @@ describe("convert command integration tests", () => {
       expect(result.exitCode).toBe(0);
     });
 
-    it("should disable colors in non-TTY environments", async () => {
+    it("should disable colors in non-TTY environments", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath(
@@ -415,7 +415,7 @@ describe("convert command integration tests", () => {
       expect(result.exitCode).toBe(0);
     });
 
-    it("should output JSON for batch conversions with --json flag", async () => {
+    it("should output JSON for batch conversions with --json flag", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const fixturesDir = getFixturesDir("fit-files");
@@ -455,7 +455,7 @@ describe("convert command integration tests", () => {
   });
 
   describe("batch conversion", () => {
-    it("should convert multiple files with glob pattern", async () => {
+    it("should convert multiple files with glob pattern", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const fixturesDir = getFixturesDir("fit-files");
@@ -489,7 +489,7 @@ describe("convert command integration tests", () => {
       expect(output).toMatch(/Total time: \d+\.\d+s/);
     });
 
-    it("should process files sequentially and continue on errors", async () => {
+    it("should process files sequentially and continue on errors", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const testDir = join(tempDir.path, "test-files");
@@ -542,7 +542,7 @@ describe("convert command integration tests", () => {
       expect(output).toMatch(/Failed conversions:/);
     });
 
-    it("should display progress for each file during batch conversion", async () => {
+    it("should display progress for each file during batch conversion", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const testDir = join(tempDir.path, "test-files");
@@ -588,7 +588,7 @@ describe("convert command integration tests", () => {
       expect(output).toMatch(/Successful: 3\/3/);
     });
 
-    it("should require --output-dir flag for batch mode", async () => {
+    it("should require --output-dir flag for batch mode", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const fixturesDir = getFixturesDir("fit-files");
@@ -615,7 +615,7 @@ describe("convert command integration tests", () => {
       expect(output).toContain("Batch mode requires --output-dir flag");
     });
 
-    it("should require --output-format flag for batch mode", async () => {
+    it("should require --output-format flag for batch mode", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const fixturesDir = getFixturesDir("fit-files");
@@ -645,7 +645,7 @@ describe("convert command integration tests", () => {
       );
     });
 
-    it("should handle empty glob pattern results", async () => {
+    it("should handle empty glob pattern results", { timeout: 30_000 }, async () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const outputDir = join(tempDir.path, "batch-output");

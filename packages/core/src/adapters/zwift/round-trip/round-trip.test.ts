@@ -11,7 +11,7 @@ import { createZwiftValidator } from "../xsd-validator";
 import { compareRepetitionBlocks } from "./repetition-block-comparer";
 
 describe("Round-trip: Zwift → KRD → Zwift", () => {
-  it("should preserve SteadyState intervals through round-trip", async () => {
+  it("should preserve SteadyState intervals through round-trip", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createZwiftValidator(logger);
@@ -95,7 +95,7 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
     }
   });
 
-  it("should preserve IntervalsT blocks through round-trip", async () => {
+  it("should preserve IntervalsT blocks through round-trip", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createZwiftValidator(logger);

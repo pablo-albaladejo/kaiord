@@ -92,9 +92,74 @@ Review roles: [list of roles or "all"]
 
 The cycle ends when:
 
-- **Successful convergence**: 0 critical AND 0 important
+- **Successful convergence**: 0 critical AND 0 important AND CI/CD passes
 - **Partial convergence**: Only suggestions pending after N cycles
 - **No convergence**: Critical/important persist after N cycles
+
+## CI/CD Validation (MANDATORY)
+
+**CRITICAL**: After creating a PR, you MUST wait for and verify that ALL GitHub Actions CI/CD checks pass. The cycle is NOT complete until CI passes.
+
+### CI/CD Check Process
+
+```
+┌─────────────────────────────────────────┐
+│         CI/CD VALIDATION CYCLE          │
+├─────────────────────────────────────────┤
+│                                         │
+│  1. PUSH & CREATE PR                    │
+│     └── git push && gh pr create        │
+│                                         │
+│  2. WAIT FOR CI                         │
+│     └── gh pr checks --watch            │
+│     └── Or poll: gh pr checks           │
+│                                         │
+│  3. EVALUATE CI RESULTS                 │
+│     ├── All pass → CONVERGENCE ✅       │
+│     └── Any fail → FIX CYCLE ↩️         │
+│                                         │
+│  4. FIX CI FAILURES                     │
+│     └── gh run view <id> --log-failed   │
+│     └── Identify root cause             │
+│     └── Apply fix                       │
+│     └── Commit & push                   │
+│     └── Return to step 2                │
+│                                         │
+└─────────────────────────────────────────┘
+```
+
+### CI Check Commands
+
+```bash
+# Check PR status
+gh pr checks
+
+# Watch CI in real-time
+gh pr checks --watch
+
+# Get failed job logs
+gh run view <run-id> --log-failed
+
+# List recent workflow runs
+gh run list --limit 5
+```
+
+### CI Failure Categories
+
+| Failure Type | Command to Debug | Common Fix |
+| ------------ | ---------------- | ---------- |
+| Lint | `pnpm lint` | `pnpm lint:fix` |
+| TypeScript | `pnpm -r build` | Fix type errors |
+| Tests | `pnpm -r test` | Fix failing tests |
+| Security Audit | `pnpm audit` | Update dependencies |
+| Lockfile | `pnpm install` | Regenerate lockfile |
+
+### Important Rules
+
+1. **NEVER** consider a cycle complete if CI is failing
+2. **ALWAYS** check CI status after every push
+3. **ALWAYS** fix CI failures before declaring convergence
+4. If CI fails 3+ times on the same issue, escalate to user
 
 ## Invocation Example
 

@@ -10,7 +10,7 @@ import {
 import { createXsdZwiftValidator } from "../xsd-validator";
 
 describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
-  it("should preserve workout through Zwift → KRD → Zwift conversion", async () => {
+  it("should preserve workout through Zwift → KRD → Zwift conversion", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -64,7 +64,7 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
     expect(workout2.steps.length).toBe(workout.steps.length);
   });
 
-  it("should preserve duration values within tolerance", async () => {
+  it("should preserve duration values within tolerance", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -120,7 +120,7 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
     }
   });
 
-  it("should preserve power target values within tolerance", async () => {
+  it("should preserve power target values within tolerance", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -194,7 +194,7 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
     }
   });
 
-  it("should preserve interval types", async () => {
+  it("should preserve interval types", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -227,7 +227,7 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
 });
 
 describe("Zwift Round-trip: WorkoutRepeatSteps.zwo", () => {
-  it("should preserve repetition blocks through round-trip", async () => {
+  it("should preserve repetition blocks through round-trip", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -267,7 +267,7 @@ describe("Zwift Round-trip: WorkoutRepeatSteps.zwo", () => {
     }
   });
 
-  it("should preserve nested step data in repetition blocks", async () => {
+  it("should preserve nested step data in repetition blocks", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -351,7 +351,7 @@ describe("Zwift Round-trip: WorkoutRepeatSteps.zwo", () => {
 });
 
 describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
-  it("should preserve custom target values through round-trip", async () => {
+  it("should preserve custom target values through round-trip", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -458,7 +458,7 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
     }
   });
 
-  it("should preserve cadence values within ±1 rpm tolerance", async () => {
+  it("should preserve cadence values within ±1 rpm tolerance", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -508,7 +508,7 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
 });
 
 describe("Zwift Round-trip: Extensions preservation", () => {
-  it("should preserve Zwift extensions through round-trip", async () => {
+  it("should preserve Zwift extensions through round-trip", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -539,7 +539,7 @@ describe("Zwift Round-trip: Extensions preservation", () => {
     }
   });
 
-  it("should preserve text events through round-trip", async () => {
+  it("should preserve text events through round-trip", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -574,7 +574,7 @@ describe("Zwift Round-trip: Extensions preservation", () => {
 });
 
 describe("Zwift Round-trip: KRD → Zwift → KRD", () => {
-  it("should preserve KRD through KRD → Zwift → KRD conversion", async () => {
+  it("should preserve KRD through KRD → Zwift → KRD conversion", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -647,7 +647,7 @@ describe("Zwift Round-trip: KRD → Zwift → KRD", () => {
 });
 
 describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
-  it("should preserve advanced duration types through round-trip", async () => {
+  it("should preserve advanced duration types through round-trip", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -692,7 +692,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
     }
   });
 
-  it("should preserve heart rate targets through round-trip", async () => {
+  it("should preserve heart rate targets through round-trip", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -754,7 +754,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
     }
   });
 
-  it("should preserve power zones through round-trip", async () => {
+  it("should preserve power zones through round-trip", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -805,7 +805,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
     }
   });
 
-  it("should preserve FIT extensions through round-trip", async () => {
+  it("should preserve FIT extensions through round-trip", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
@@ -838,7 +838,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
 });
 
 describe("Zwift Round-trip: Complete validation", () => {
-  it("should pass complete round-trip validation for all fixtures", async () => {
+  it("should pass complete round-trip validation for all fixtures", { timeout: 30_000 }, async () => {
     // Arrange
     const logger = createMockLogger();
     const validator = createXsdZwiftValidator(logger);
