@@ -233,8 +233,38 @@ gh api repos/{owner}/{repo}/pulls/{pr}/reviews
 1. **NEVER** ignore a comment without explaining why
 2. **ALWAYS** reply to every comment before marking resolved
 3. **ALWAYS** commit and push fixes before responding "Fixed in commit X"
-4. If unsure about a suggestion, ask the user for guidance
-5. Track accepted vs ignored ratio - if ignoring >50%, reconsider
+4. **ALWAYS** respond to each comment INDIVIDUALLY - do NOT create a single summary comment for all issues
+5. If unsure about a suggestion, ask the user for guidance
+6. Track accepted vs ignored ratio - if ignoring >50%, reconsider
+
+### How to Reply to Individual Comments
+
+Use the GitHub GraphQL API to reply to each review thread:
+
+```bash
+# Reply to a specific comment thread
+gh api graphql -f query='
+mutation {
+  addPullRequestReviewThreadReply(input: {
+    pullRequestReviewThreadId: "PRRT_xxx"
+    body: "Response text here"
+  }) {
+    comment { id }
+  }
+}'
+
+# Resolve the thread after responding
+gh api graphql -f query='
+mutation {
+  resolveReviewThread(input: {
+    threadId: "PRRT_xxx"
+  }) {
+    thread { isResolved }
+  }
+}'
+```
+
+**IMPORTANT**: Do NOT use `gh pr comment` to post a summary - this creates a general PR comment instead of replying to the specific review thread.
 
 ### CodeRabbit Comment Categories
 
