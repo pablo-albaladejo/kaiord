@@ -6,17 +6,17 @@ import type { Logger } from "@kaiord/core";
  */
 export const createLogger = (): Logger => ({
   debug: (message: string, context?: Record<string, unknown>) => {
-    if (process.env.NODE_ENV !== "production") {
+    if (import.meta.env.MODE !== "production") {
       console.debug(message, context);
     }
   },
   info: (message: string, context?: Record<string, unknown>) => {
-    if (process.env.NODE_ENV !== "production") {
+    if (import.meta.env.MODE !== "production") {
       console.info(message, context);
     }
   },
   warn: (message: string, context?: Record<string, unknown>) => {
-    if (process.env.NODE_ENV !== "production") {
+    if (import.meta.env.MODE !== "production") {
       console.warn(message, context);
     }
   },

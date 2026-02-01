@@ -5,6 +5,18 @@
  */
 
 /**
+ * Helper to capture stack trace in V8-based environments
+ */
+const captureStack = (error: Error, constructor: NewableFunction): void => {
+  const errorWithCapture = Error as typeof Error & {
+    captureStackTrace?: (err: Error, constructor: NewableFunction) => void;
+  };
+  if (typeof errorWithCapture.captureStackTrace === "function") {
+    errorWithCapture.captureStackTrace(error, constructor);
+  }
+};
+
+/**
  * Error thrown when file parsing fails
  */
 export class FileParsingError extends Error {
@@ -23,9 +35,7 @@ export class FileParsingError extends Error {
     this.line = line;
     this.column = column;
     this.cause = cause;
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, FileParsingError);
-    }
+    captureStack(this, FileParsingError);
   }
 }
 
@@ -45,9 +55,7 @@ export class ValidationError extends Error {
     super(message);
     this.errors = errors;
     this.cause = cause;
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ValidationError);
-    }
+    captureStack(this, ValidationError);
   }
 }
 
@@ -70,8 +78,6 @@ export class ConversionError extends Error {
     this.format = format;
     this.details = details;
     this.cause = cause;
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, ConversionError);
-    }
+    captureStack(this, ConversionError);
   }
 }
