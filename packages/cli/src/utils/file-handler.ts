@@ -73,6 +73,28 @@ export const readFile = async (
 };
 
 /**
+ * Create directory for output file
+ * @param path - Path to the output file
+ * @throws Error with specific message for directory creation failures
+ */
+const createOutputDirectory = async (path: string): Promise<void> => {
+  const dir = dirname(path);
+  try {
+    await mkdir(dir, { recursive: true });
+  } catch (error) {
+    if (isNodeSystemError(error)) {
+      if (error.code === "EACCES") {
+        throw new Error(`Permission denied creating directory: ${dir}`);
+      }
+      if (error.code === "ENOTDIR") {
+        throw new Error(`Cannot create directory (path exists as file): ${dir}`);
+      }
+    }
+    throw new Error(`Failed to create directory: ${dir}`);
+  }
+};
+
+/**
  * Write data to a file, handling binary and text formats appropriately
  * @param path - Path to write to
  * @param data - Data to write (Uint8Array for binary, string for text)
@@ -85,32 +107,32 @@ export const writeFile = async (
 ): Promise<void> => {
   validatePathSecurity(path);
 
-  try {
-    // Create directory if it doesn't exist
-    const dir = dirname(path);
-    await mkdir(dir, { recursive: true });
+  // Validate data type before any file operations
+  if (format === "fit" && !(data instanceof Uint8Array)) {
+    throw new Error("FIT files require Uint8Array data");
+  }
+  if (format !== "fit" && typeof data !== "string") {
+    throw new Error("Text files require string data");
+  }
 
+  // Create directory first (separate error handling)
+  await createOutputDirectory(path);
+
+  // Write the file
+  try {
     if (format === "fit") {
-      // FIT files are binary
-      if (!(data instanceof Uint8Array)) {
-        throw new Error("FIT files require Uint8Array data");
-      }
-      await fsWriteFile(path, data);
+      await fsWriteFile(path, data as Uint8Array);
     } else {
-      // KRD, TCX, ZWO are text files
-      if (typeof data !== "string") {
-        throw new Error("Text files require string data");
-      }
-      await fsWriteFile(path, data, "utf-8");
+      await fsWriteFile(path, data as string, "utf-8");
     }
   } catch (error) {
     if (isNodeSystemError(error)) {
       if (error.code === "EACCES") {
-        throw new Error(`Permission denied: ${path}`);
+        throw new Error(`Permission denied writing file: ${path}`);
       }
-    }
-    if (error instanceof Error && error.message.includes("require")) {
-      throw error;
+      if (error.code === "EISDIR") {
+        throw new Error(`Cannot write file (path is a directory): ${path}`);
+      }
     }
     throw new Error(`Failed to write file: ${path}`);
   }

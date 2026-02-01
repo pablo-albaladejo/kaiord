@@ -5,6 +5,7 @@ import stripAnsi from "strip-ansi";
 import { dir } from "tmp-promise";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { getFixturePath, getFixturesDir } from "../tests/helpers/fixture-paths";
+import { ExitCode } from "../utils/exit-codes";
 
 describe("convert command integration tests", () => {
   let tempDir: { path: string; cleanup: () => Promise<void> };
@@ -601,8 +602,8 @@ describe("convert command integration tests", () => {
           }
         );
 
-        // Assert - should exit with error code but continue processing
-        expect(result.exitCode).toBe(1);
+        // Assert - should exit with PARTIAL_SUCCESS since some files succeeded
+        expect(result.exitCode).toBe(ExitCode.PARTIAL_SUCCESS);
 
         // Verify summary shows both successful and failed conversions
         const output = stripAnsi(result.stdout);

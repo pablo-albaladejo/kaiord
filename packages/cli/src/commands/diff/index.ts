@@ -1,4 +1,5 @@
 import { createDefaultProviders } from "@kaiord/core";
+import { loadConfigWithMetadata } from "../../utils/config-loader.js";
 import { formatError } from "../../utils/error-formatter.js";
 import { ExitCode } from "../../utils/exit-codes.js";
 import { loadFileAsKrd } from "../../utils/krd-file-loader.js";
@@ -28,6 +29,17 @@ export const diffCommand = async (options: DiffOptions): Promise<number> => {
         : "info",
     quiet: validatedOptions.quiet,
   });
+
+  // Log config discovery in verbose mode (diff doesn't use config values,
+  // but logging helps debug configuration issues)
+  const configResult = await loadConfigWithMetadata();
+  if (configResult.loadedFrom) {
+    logger.debug("Configuration loaded", { path: configResult.loadedFrom });
+  } else {
+    logger.debug("No configuration file found", {
+      searchedPaths: configResult.searchedPaths,
+    });
+  }
 
   try {
     const providers = createDefaultProviders(logger);
@@ -86,7 +98,7 @@ export const diffCommand = async (options: DiffOptions): Promise<number> => {
       );
     }
 
-    return identical ? ExitCode.SUCCESS : ExitCode.INVALID_ARGUMENT;
+    return identical ? ExitCode.SUCCESS : ExitCode.DIFFERENCES_FOUND;
   } catch (error) {
     logger.error("Diff command failed", { error });
 
