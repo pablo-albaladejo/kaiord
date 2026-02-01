@@ -27,14 +27,20 @@ export const configSchema = z.object({
 
 export type Config = z.infer<typeof configSchema>;
 
+export type ConfigLoadResult = {
+  config: Config;
+  loadedFrom: string | null;
+  searchedPaths: Array<string>;
+};
+
 /**
- * Load configuration from .kaiordrc.json
+ * Load configuration from .kaiordrc.json with metadata
  * Searches in the following order:
  * 1. Current working directory
  * 2. User home directory
  * 3. Returns empty config if not found
  */
-export const loadConfig = async (): Promise<Config> => {
+export const loadConfigWithMetadata = async (): Promise<ConfigLoadResult> => {
   const configPaths = [
     join(process.cwd(), ".kaiordrc.json"),
     join(homedir(), ".kaiordrc.json"),
@@ -45,15 +51,24 @@ export const loadConfig = async (): Promise<Config> => {
       const configContent = await readFile(configPath, "utf-8");
       const configJson = JSON.parse(configContent);
       const config = configSchema.parse(configJson);
-      return config;
-    } catch (error) {
+      return { config, loadedFrom: configPath, searchedPaths: configPaths };
+    } catch {
       // Config file not found or invalid, try next location
       continue;
     }
   }
 
   // No config file found, return empty config
-  return {};
+  return { config: {}, loadedFrom: null, searchedPaths: configPaths };
+};
+
+/**
+ * Load configuration from .kaiordrc.json (simplified API)
+ * For debug logging support, use loadConfigWithMetadata instead.
+ */
+export const loadConfig = async (): Promise<Config> => {
+  const result = await loadConfigWithMetadata();
+  return result.config;
 };
 
 /**

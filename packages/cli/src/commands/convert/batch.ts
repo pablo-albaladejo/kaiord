@@ -137,5 +137,13 @@ export const executeBatchConversion = async (
     );
   }
 
-  return failed.length > 0 ? ExitCode.INVALID_ARGUMENT : ExitCode.SUCCESS;
+  if (failed.length === 0) {
+    return ExitCode.SUCCESS;
+  }
+  // All files failed
+  if (successful.length === 0) {
+    return ExitCode.INVALID_ARGUMENT;
+  }
+  // Partial success - some succeeded, some failed
+  return ExitCode.PARTIAL_SUCCESS;
 };

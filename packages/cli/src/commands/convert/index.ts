@@ -4,7 +4,10 @@ import {
   KrdValidationError,
   ToleranceExceededError,
 } from "@kaiord/core";
-import { loadConfig, mergeWithConfig } from "../../utils/config-loader.js";
+import {
+  loadConfigWithMetadata,
+  mergeWithConfig,
+} from "../../utils/config-loader.js";
 import { formatError } from "../../utils/error-formatter";
 import { ExitCode, type ExitCodeValue } from "../../utils/exit-codes";
 import { createLogger } from "../../utils/logger-factory";
@@ -27,7 +30,8 @@ const isBatchMode = (input: string): boolean => {
 export const convertCommand = async (
   options: ConvertOptions
 ): Promise<number> => {
-  const config = await loadConfig();
+  const configResult = await loadConfigWithMetadata();
+  const { config } = configResult;
   const mergedOptions = mergeWithConfig(options, config);
 
   const optionsWithDefaults = {
@@ -43,6 +47,16 @@ export const convertCommand = async (
 
   const validatedOptions = convertOptionsSchema.parse(optionsWithDefaults);
 
+  // Validate mutual exclusivity of --output and --output-dir
+  if (validatedOptions.output && validatedOptions.outputDir) {
+    const error = new Error(
+      "Cannot use both --output and --output-dir. " +
+        "Use --output for single file, --output-dir for batch conversion."
+    );
+    error.name = "InvalidArgumentError";
+    throw error;
+  }
+
   const logger = await createLogger({
     type: validatedOptions.logFormat,
     level: validatedOptions.verbose
@@ -52,6 +66,15 @@ export const convertCommand = async (
         : "info",
     quiet: validatedOptions.quiet,
   });
+
+  // Log config discovery in verbose mode
+  if (configResult.loadedFrom) {
+    logger.debug("Configuration loaded", { path: configResult.loadedFrom });
+  } else {
+    logger.debug("No configuration file found", {
+      searchedPaths: configResult.searchedPaths,
+    });
+  }
 
   try {
     const providers = createDefaultProviders(logger);

@@ -17,6 +17,12 @@ export const ExitCode = {
   VALIDATION_ERROR: 5,
   /** Tolerance exceeded (round-trip validation failed) */
   TOLERANCE_EXCEEDED: 6,
+  /** Differences found (diff command - files are different, not an error) */
+  DIFFERENCES_FOUND: 10,
+  /** Partial success (batch operations with some failures) */
+  PARTIAL_SUCCESS: 11,
+  /** Directory creation failed */
+  DIRECTORY_CREATE_ERROR: 12,
   /** Unknown or unhandled error */
   UNKNOWN_ERROR: 99,
 } as const;
