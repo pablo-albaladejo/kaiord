@@ -20,10 +20,19 @@ describe("WorkoutActions", () => {
     },
   };
 
+  const defaultProps = {
+    krd: mockKRD,
+    canUndo: false,
+    canRedo: false,
+    onUndo: vi.fn(),
+    onRedo: vi.fn(),
+    onDiscard: vi.fn(),
+  };
+
   describe("button spacing", () => {
     it("should have 12px gap between button groups", () => {
       // Arrange & Act
-      renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={vi.fn()} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
       const container = screen.getByTestId(
@@ -34,7 +43,7 @@ describe("WorkoutActions", () => {
 
     it("should have consistent spacing in button row", () => {
       // Arrange & Act
-      renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={vi.fn()} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
       const discardButton = screen.getByTestId("discard-workout-button");
@@ -47,7 +56,7 @@ describe("WorkoutActions", () => {
   describe("button alignment", () => {
     it("should align buttons in a row on desktop", () => {
       // Arrange & Act
-      renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={vi.fn()} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
       const discardButton = screen.getByTestId("discard-workout-button");
@@ -58,7 +67,7 @@ describe("WorkoutActions", () => {
 
     it("should stack buttons vertically on mobile", () => {
       // Arrange & Act
-      renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={vi.fn()} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
       const discardButton = screen.getByTestId("discard-workout-button");
@@ -71,7 +80,7 @@ describe("WorkoutActions", () => {
   describe("button variants", () => {
     it("should use primary variant for save button", () => {
       // Arrange & Act
-      renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={vi.fn()} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
       const saveButton = screen.getByRole("button", { name: /save workout/i });
@@ -81,7 +90,7 @@ describe("WorkoutActions", () => {
 
     it("should use secondary variant for discard button", () => {
       // Arrange & Act
-      renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={vi.fn()} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
       const discardButton = screen.getByRole("button", { name: /discard/i });
@@ -92,7 +101,7 @@ describe("WorkoutActions", () => {
   describe("button organization", () => {
     it("should render save button before library button", () => {
       // Arrange & Act
-      renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={vi.fn()} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
       const buttons = screen.getAllByRole("button");
@@ -107,7 +116,7 @@ describe("WorkoutActions", () => {
 
     it("should render discard button last", () => {
       // Arrange & Act
-      renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={vi.fn()} />);
+      renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
       const buttons = screen.getAllByRole("button");
@@ -122,7 +131,7 @@ describe("WorkoutActions", () => {
       const handleDiscard = vi.fn();
       const user = userEvent.setup();
       renderWithProviders(
-        <WorkoutActions krd={mockKRD} onDiscard={handleDiscard} />
+        <WorkoutActions {...defaultProps} onDiscard={handleDiscard} />
       );
 
       // Act

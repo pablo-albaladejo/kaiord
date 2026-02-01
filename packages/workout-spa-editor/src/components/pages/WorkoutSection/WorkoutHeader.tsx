@@ -1,5 +1,12 @@
 import { useState } from "react";
-import { useClearWorkout, useUpdateWorkout } from "../../../store";
+import {
+  useCanRedo,
+  useCanUndo,
+  useClearWorkout,
+  useRedo,
+  useUndo,
+  useUpdateWorkout,
+} from "../../../store";
 import type { KRD, Workout } from "../../../types/krd";
 import { MetadataEditMode } from "./MetadataEditMode";
 import { WorkoutActions } from "./WorkoutActions";
@@ -13,6 +20,10 @@ type WorkoutHeaderProps = {
 export function WorkoutHeader({ workout, krd }: WorkoutHeaderProps) {
   const clearWorkout = useClearWorkout();
   const updateWorkout = useUpdateWorkout();
+  const canUndo = useCanUndo();
+  const canRedo = useCanRedo();
+  const undo = useUndo();
+  const redo = useRedo();
   const [isEditingMetadata, setIsEditingMetadata] = useState(false);
 
   const handleDiscard = () => {
@@ -46,7 +57,14 @@ export function WorkoutHeader({ workout, krd }: WorkoutHeaderProps) {
     <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <WorkoutTitle workout={workout} onEdit={handleEditMetadata} />
-        <WorkoutActions krd={krd} onDiscard={handleDiscard} />
+        <WorkoutActions
+          krd={krd}
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={undo}
+          onRedo={redo}
+          onDiscard={handleDiscard}
+        />
       </div>
     </div>
   );

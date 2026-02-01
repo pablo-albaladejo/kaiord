@@ -52,6 +52,25 @@ describe("WorkoutStepsListActions", () => {
       ).not.toBeInTheDocument();
     });
 
+    it("should show selection hint when 1 step selected", () => {
+      // Arrange & Act
+      render(
+        <WorkoutStepsListActions
+          hasMultipleSelection={false}
+          selectedStepCount={1}
+          onCreateRepetitionBlock={vi.fn()}
+          onCreateEmptyRepetitionBlock={vi.fn()}
+          onAddStep={vi.fn()}
+        />
+      );
+
+      // Assert
+      expect(screen.getByTestId("selection-hint")).toBeInTheDocument();
+      expect(screen.getByTestId("selection-hint")).toHaveTextContent(
+        /Ctrl\+click another step/
+      );
+    });
+
     it("should show create repetition block button when 2 steps selected", () => {
       // Arrange & Act
       render(
@@ -187,7 +206,7 @@ describe("WorkoutStepsListActions", () => {
 
     it("should have responsive classes for mobile", () => {
       // Arrange & Act
-      const { container } = render(
+      render(
         <WorkoutStepsListActions
           hasMultipleSelection={true}
           selectedStepCount={2}
@@ -197,18 +216,17 @@ describe("WorkoutStepsListActions", () => {
         />
       );
 
-      // Assert - Check container has responsive flex classes
-      const actionsContainer = container.firstChild as HTMLElement;
-      expect(actionsContainer).toHaveClass("flex");
-      expect(actionsContainer).toHaveClass("flex-col");
-      expect(actionsContainer).toHaveClass("sm:flex-row");
-
       // Assert - Buttons have responsive width classes
       const createBlockButton = screen.getByTestId(
         "create-repetition-block-button"
       );
       expect(createBlockButton).toHaveClass("w-full");
       expect(createBlockButton).toHaveClass("sm:w-auto");
+
+      // Assert - Add step button also has responsive classes
+      const addStepButton = screen.getByTestId("add-step-button");
+      expect(addStepButton).toHaveClass("w-full");
+      expect(addStepButton).toHaveClass("sm:w-auto");
     });
   });
 

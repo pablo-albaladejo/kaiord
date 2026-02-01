@@ -75,6 +75,7 @@ export function WorkoutStepsList({
         onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
         onUngroupRepetitionBlock={onUngroupRepetitionBlock}
         onDeleteRepetitionBlock={onDeleteRepetitionBlock}
+        onAddStep={onAddStep}
       />
 
       <WorkoutStepsListActions

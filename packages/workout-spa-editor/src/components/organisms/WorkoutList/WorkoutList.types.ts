@@ -24,4 +24,5 @@ export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
     activeIndex: number,
     overIndex: number
   ) => void;
+  onAddStep?: () => void;
 };
