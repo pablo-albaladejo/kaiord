@@ -14,7 +14,46 @@
       "WebFetch",
       "mcp__ide__getDiagnostics"
     ],
-    "deny": ["Bash(rm -rf /)", "Bash(rm -rf /*)", "Bash(git push --force *)"]
+    "deny": [
+      "Bash(rm -rf /)",
+      "Bash(rm -rf ~/*)",
+      "Bash(git push --force *)",
+      "Bash(git push -f *)",
+      "Bash(npm publish*)",
+      "Bash(pnpm publish*)"
+    ]
   },
-  "enableAllProjectMcpServers": true
+  "enableAllProjectMcpServers": true,
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-architecture.js"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-schema-naming.js"
+          }
+        ]
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-file-size.js"
+          },
+          {
+            "type": "command",
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-test-needed.js"
+          }
+        ]
+      }
+    ]
+  }
 }
