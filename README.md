@@ -7,6 +7,7 @@
 [![codecov](https://codecov.io/gh/pablo-albaladejo/kaiord/branch/main/graph/badge.svg)](https://codecov.io/gh/pablo-albaladejo/kaiord)
 [![npm version](https://badge.fury.io/js/@kaiord%2Fcore.svg)](https://www.npmjs.com/package/@kaiord/core)
 [![npm version](https://badge.fury.io/js/@kaiord%2Fcli.svg)](https://www.npmjs.com/package/@kaiord/cli)
+[![Sponsor](https://img.shields.io/badge/Sponsor-❤️-pink?logo=github-sponsors)](https://github.com/sponsors/pablo-albaladejo)
 
 **Kaiord** is an open-source toolkit for structured workout data.
 
@@ -152,6 +153,18 @@ For detailed contribution guidelines, development workflow, and code standards, 
 - [Training Center XML (TCX)](https://en.wikipedia.org/wiki/Training_Center_XML) - Garmin's XML-based format
 - [TCX Schema (XSD)](https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd) - Official Garmin TCX schema definition
 - [Zwift Workout Format (ZWO)](https://zwift.com) - Zwift's XML-based workout format
+
+---
+
+## ❤️ Support
+
+If you find Kaiord useful, consider supporting its development:
+
+- ⭐ **Star this repo** to help others discover it
+- 💖 **[Sponsor on GitHub](https://github.com/sponsors/pablo-albaladejo)**
+- ☕ **[Buy me a coffee](https://buymeacoffee.com/pabloalbaladejo)**
+
+Your support helps maintain and improve Kaiord for the fitness community!
 
 ---
 
