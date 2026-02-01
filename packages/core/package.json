@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/core",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Core library for Kaiord workout data conversion",
   "type": "module",
   "main": "./dist/index.js",
