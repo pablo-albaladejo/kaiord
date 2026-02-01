@@ -56,7 +56,7 @@ export function CreateRepetitionBlockDialog({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800 kiroween:bg-gray-800">
+      <div className="w-full max-w-md rounded-lg bg-white shadow-xl dark:bg-gray-800">
         <DialogHeader onCancel={onCancel} />
         <DialogContent
           stepCount={stepCount}

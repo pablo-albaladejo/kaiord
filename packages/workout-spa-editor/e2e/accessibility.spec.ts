@@ -212,7 +212,7 @@ test.describe("Accessibility", () => {
 
     // Find the theme toggle button (first interactive element)
     const themeToggle = page.getByRole("button", {
-      name: /switch to (light|dark|kiroween) mode/i,
+      name: /switch to (light|dark) mode/i,
     });
     await expect(themeToggle).toBeVisible();
 

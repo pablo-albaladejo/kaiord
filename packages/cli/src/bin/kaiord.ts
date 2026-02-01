@@ -2,7 +2,6 @@
  * Kaiord CLI - Command-line interface for workout file conversion
  */
 
-import chalk from "chalk";
 import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
@@ -25,36 +24,8 @@ const packageJsonPath = __dirname.includes("/dist")
 const packageJson = JSON.parse(readFileSync(packageJsonPath, "utf-8"));
 const version = packageJson.version;
 
-const showKiroEasterEgg = (): void => {
-  console.log(
-    chalk.cyan(`
-╔═══════════════════════════════════════════════════════════╗
-║                                                           ║
-║   👻 Built with Kiro AI during Kiroween Hackathon 👻      ║
-║                                                           ║
-║   Kiro helped design, architect, and implement this       ║
-║   entire CLI tool through spec-driven development.        ║
-║                                                           ║
-║   Learn more about Kiroween:                              ║
-║   👉 http://kiroween.devpost.com/                         ║
-║                                                           ║
-║   Kiro: Your AI pair programmer for building better       ║
-║   software, faster. 🚀                                    ║
-║                                                           ║
-╚═══════════════════════════════════════════════════════════╝
-  `)
-  );
-  process.exit(0);
-};
-
 const main = async (): Promise<void> => {
   try {
-    // Check for easter egg flags before yargs processes them
-    const args = process.argv.slice(2);
-    if (args.includes("--kiro") || args.includes("--kiroween")) {
-      showKiroEasterEgg();
-    }
-
     await yargs(hideBin(process.argv))
       .scriptName("kaiord")
       .usage("$0 <command> [options]")

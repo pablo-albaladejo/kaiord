@@ -13,13 +13,13 @@ type HelpHeaderProps = {
 
 export function HelpHeader({ onReplayTutorial }: HelpHeaderProps) {
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 kiroween:border-gray-700 kiroween:bg-gray-800">
+    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white kiroween:text-white">
+          <h1 className="mb-2 text-3xl font-bold text-gray-900 dark:text-white">
             Help & Documentation
           </h1>
-          <p className="text-gray-600 dark:text-gray-400 kiroween:text-gray-300">
+          <p className="text-gray-600 dark:text-gray-400">
             Learn how to use the Workout Editor to create and manage structured
             workout files
           </p>

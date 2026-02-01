@@ -1,4 +1,4 @@
-import { Ghost, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useTheme } from "../../../contexts/ThemeContext";
 import { Button } from "../Button/Button";
 import { Icon } from "../Icon/Icon";
@@ -7,8 +7,8 @@ import { Icon } from "../Icon/Icon";
  * ThemeToggle Component
  *
  * Requirement 13: Theme toggle UI
- * - Shows current theme icon (sun for light, moon for dark, ghost for kiroween)
- * - Cycles between light → dark → kiroween → light
+ * - Shows current theme icon (sun for light, moon for dark)
+ * - Cycles between light → dark → light
  * - Smooth transition between themes (handled by CSS)
  * - Accessible with proper ARIA labels
  */
@@ -16,30 +16,21 @@ export const ThemeToggle = () => {
   const { theme, resolvedTheme, setTheme } = useTheme();
 
   const handleToggle = () => {
-    // Cycle through themes: light → dark → kiroween → light
+    // Cycle through themes: light → dark → light
     if (theme === "system") {
       // If on system, start cycling from resolved theme
-      setTheme(resolvedTheme === "dark" ? "kiroween" : "dark");
+      setTheme(resolvedTheme === "dark" ? "light" : "dark");
     } else if (theme === "light") {
       setTheme("dark");
-    } else if (theme === "dark") {
-      setTheme("kiroween");
-    } else if (theme === "kiroween") {
+    } else {
       setTheme("light");
     }
   };
 
   // Determine icon and label based on resolved theme
-  let currentIcon = Sun;
-  let ariaLabel = "Switch to dark mode";
-
-  if (resolvedTheme === "dark") {
-    currentIcon = Moon;
-    ariaLabel = "Switch to Kiroween mode";
-  } else if (resolvedTheme === "kiroween") {
-    currentIcon = Ghost;
-    ariaLabel = "Switch to light mode";
-  }
+  const currentIcon = resolvedTheme === "dark" ? Moon : Sun;
+  const ariaLabel =
+    resolvedTheme === "dark" ? "Switch to light mode" : "Switch to dark mode";
 
   return (
     <Button

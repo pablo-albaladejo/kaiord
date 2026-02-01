@@ -221,9 +221,6 @@ For complete documentation, see:
 
 - [E2E README - Mobile Touch Drag Testing](./README.md#mobile-touch-drag-testing)
 - [Flakiness Testing Guide](./FLAKINESS-TESTING.md)
-- [Frontend Testing Steering Rule](../../../.kiro/steering/frontend-testing.md#mobile-touch-drag-testing-requirements)
-- [Requirements Document](../../../.kiro/specs/workout-spa-editor/mobile-touch-drag-testing/requirements.md)
-- [Design Document](../../../.kiro/specs/workout-spa-editor/mobile-touch-drag-testing/design.md)
 
 ## CI/CD Integration
 

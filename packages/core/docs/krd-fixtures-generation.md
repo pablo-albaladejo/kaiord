@@ -208,6 +208,6 @@ This script follows Kaiord's architectural principles:
 
 ## References
 
-- [KRD Format Specification](../../.kiro/steering/krd-format.md)
-- [Testing Guidelines](../../.kiro/steering/testing.md)
-- [Architecture Patterns](../../.kiro/steering/architecture.md)
+- [KRD Format Specification](../../../docs/krd-format.md)
+- [Testing Guidelines](../../../docs/testing.md)
+- [Architecture Patterns](../../../docs/architecture.md)

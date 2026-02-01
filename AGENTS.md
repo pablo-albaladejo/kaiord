@@ -1,14 +1,13 @@
 # AGENTS.md — Kaiord
 
-> Guidance for AI/code agents (Kiro, GPT, Claude…). Short, strict, and actionable.
+> Guidance for AI/code agents (GPT, Claude, etc.). Short, strict, and actionable.
 
 ## Non‑negotiables
 
 - **Hexagonal architecture** (domain/application/ports/adapters/cli)
 - **Dependency injection** (no external libs in inner layers)
 - **KRD** as canonical format; MIME `application/vnd.kaiord+json`
-- **Round‑trip safety** and **AJV validation**
-- **Spec‑driven** changes: update `.kiro/specs/**` first
+- **Round‑trip safety** with Zod validation (JSON Schema via AJV for external consumers)
 - **Typed API**: no implicit `any`
 
 ## Ports & adapters (example: FIT)
@@ -24,18 +23,35 @@ toKRD(input: Uint8Array | string, opts: { type: "fit"|"tcx"|"zwo"|"krd" }): Prom
 fromKRD(krd: KRD, opts: { type: "fit"|"tcx"|"zwo"|"krd" }): Promise<Uint8Array>
 ```
 
+## Code style
+
+- Files ≤ 100 lines; functions < 40 LOC (tests exempt)
+- Domain schemas: **snake_case** (`indoor_cycling`, `lap_swimming`)
+- Adapter schemas: **camelCase** (`indoorCycling`, `lapSwimming`)
+- Use `type` not `interface`; separate type imports (`import type { X }`)
+- Mappers (`*.mapper.ts`) = simple transformation, no logic, no tests
+- Converters (`*.converter.ts`) = complex logic, requires tests
+- Access enum values via `.enum`: `subSportSchema.enum.indoor_cycling`
+
 ## Testing
 
-- Unit for pure mappers/validators
-- Golden for representative KRD
+- Unit for pure functions/validators
 - Round‑trip (FIT/TCX/ZWO ↔ KRD) with tolerances: time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm
 - CLI smoke: `kaiord convert --in sample.krd --out out.tcx`
-- Test utilities: `@kaiord/core/test-utils` exports fixture loaders for cross-package testing
+- Test utilities: `@kaiord/core/test-utils` exports fixture loaders
+- AAA pattern: Arrange, Act, Assert (blank lines between sections)
+
+## Commands
+
+```bash
+pnpm -r build && pnpm -r test && pnpm lint:fix  # Before commit
+pnpm exec changeset                              # For version-worthy changes
+```
 
 ## Contribution flow
 
-1. Add/adjust SPEC (`.kiro/specs/<feature>/`)
-2. Implement domain/application/ports → adapters
-3. Add mirrored tests + golden + round‑trip
-4. Run local Kiro hooks (manual where needed)
+1. Implement domain/application/ports → adapters (hexagonal order)
+2. Add tests (unit + round‑trip)
+3. Run: `pnpm -r build && pnpm -r test && pnpm lint:fix`
+4. Add changeset if version-worthy: `pnpm exec changeset`
 5. Update docs if public API changes

@@ -34,11 +34,11 @@ export function TutorialDialog({
 }: TutorialDialogProps) {
   return (
     <Dialog.Content
-      className={`fixed z-50 w-full max-w-md border border-gray-200 bg-white p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg dark:border-gray-700 dark:bg-gray-800 kiroween:border-gray-700 kiroween:bg-gray-800 ${getPositionClasses(step.position)}`}
+      className={`fixed z-50 w-full max-w-md border border-gray-200 bg-white p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg dark:border-gray-700 dark:bg-gray-800 ${getPositionClasses(step.position)}`}
       aria-describedby="tutorial-description"
     >
       <div className="flex items-center justify-between mb-4">
-        <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-white kiroween:text-white">
+        <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-white">
           {step.title}
         </Dialog.Title>
         <button

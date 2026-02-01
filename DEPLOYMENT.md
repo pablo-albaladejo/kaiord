@@ -1298,4 +1298,3 @@ concurrency:
 - [README.md](./README.md) - Project overview and quick start
 - [CONTRIBUTING.md](./CONTRIBUTING.md) - Contribution guidelines
 - [packages/workout-spa-editor/README.md](./packages/workout-spa-editor/README.md) - SPA documentation
-- [.kiro/specs/deployment/fix-spa-deployment/](./. kiro/specs/deployment/fix-spa-deployment/) - Deployment spec

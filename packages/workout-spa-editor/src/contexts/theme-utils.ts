@@ -4,8 +4,8 @@
 
 import { logger } from "@/utils/logger";
 
-export type Theme = "light" | "dark" | "kiroween" | "system";
-export type ResolvedTheme = "light" | "dark" | "kiroween";
+export type Theme = "light" | "dark" | "system";
+export type ResolvedTheme = "light" | "dark";
 
 /**
  * Local storage key for theme preference
@@ -31,12 +31,7 @@ export const getStoredTheme = (): Theme | null => {
 
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    if (
-      stored === "light" ||
-      stored === "dark" ||
-      stored === "kiroween" ||
-      stored === "system"
-    ) {
+    if (stored === "light" || stored === "dark" || stored === "system") {
       return stored;
     }
   } catch (error) {
@@ -81,13 +76,11 @@ export const applyTheme = (resolvedTheme: ResolvedTheme): void => {
 
   const root = document.documentElement;
 
-  // Remove all theme classes
-  root.classList.remove("dark", "kiroween");
+  // Remove dark theme class
+  root.classList.remove("dark");
 
-  // Add appropriate theme class
+  // Add dark theme class if needed
   if (resolvedTheme === "dark") {
     root.classList.add("dark");
-  } else if (resolvedTheme === "kiroween") {
-    root.classList.add("kiroween");
   }
 };
