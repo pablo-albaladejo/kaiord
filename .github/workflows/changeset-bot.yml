@@ -1,0 +1,126 @@
+name: Changeset Bot
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+    branches:
+      - main
+
+permissions:
+  pull-requests: write
+
+jobs:
+  changeset-check:
+    name: Check for Changeset
+    runs-on: ubuntu-latest
+    # Skip for automated PRs and version commits
+    if: |
+      !contains(github.head_ref, 'changeset-release') &&
+      !contains(github.event.pull_request.title, 'Version Packages')
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changesets
+        id: check
+        run: |
+          # Get list of changeset files (excluding README.md and config.json)
+          CHANGESETS=$(find .changeset -name "*.md" ! -name "README.md" 2>/dev/null | wc -l | tr -d ' ')
+
+          echo "Found $CHANGESETS changeset file(s)"
+          echo "count=$CHANGESETS" >> $GITHUB_OUTPUT
+
+          # Check if any publishable package files changed
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+
+          CORE_CHANGED=false
+          CLI_CHANGED=false
+
+          if echo "$CHANGED_FILES" | grep -q "^packages/core/"; then
+            CORE_CHANGED=true
+          fi
+
+          if echo "$CHANGED_FILES" | grep -q "^packages/cli/"; then
+            CLI_CHANGED=true
+          fi
+
+          if [ "$CORE_CHANGED" = "true" ] || [ "$CLI_CHANGED" = "true" ]; then
+            echo "needs-changeset=true" >> $GITHUB_OUTPUT
+          else
+            echo "needs-changeset=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Comment on PR (missing changeset)
+        if: steps.check.outputs.count == '0' && steps.check.outputs.needs-changeset == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `## 📦 Changeset Required
+
+            This PR modifies publishable packages but doesn't include a changeset.
+
+            **To add a changeset:**
+
+            \`\`\`bash
+            pnpm exec changeset
+            \`\`\`
+
+            This will prompt you to:
+            1. Select affected packages (@kaiord/core, @kaiord/cli)
+            2. Choose bump type (patch/minor/major)
+            3. Write a summary of your changes
+
+            **Skip if:**
+            - Changes are internal only (tests, docs, refactoring without API changes)
+            - This is a chore/maintenance PR
+
+            ---
+            *This comment was generated automatically by the Changeset Bot.*`;
+
+            // Check if we already commented
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('Changeset Required')
+            );
+
+            if (!botComment) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body
+              });
+            }
+
+      - name: Comment on PR (changeset found)
+        if: steps.check.outputs.count != '0' && steps.check.outputs.needs-changeset == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Remove any previous "missing changeset" comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' &&
+              c.body.includes('Changeset Required')
+            );
+
+            if (botComment) {
+              await github.rest.issues.deleteComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id
+              });
+            }
