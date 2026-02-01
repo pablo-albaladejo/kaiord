@@ -29,7 +29,7 @@ Analyze test failures, improve coverage, and ensure testing best practices.
 ## AAA Pattern
 
 ```typescript
-it('should describe expected behavior', () => {
+it("should describe expected behavior", () => {
   // Arrange
   const input = buildFixture.build();
 
@@ -43,20 +43,20 @@ it('should describe expected behavior', () => {
 
 ## Coverage Thresholds
 
-| Scope | Threshold |
-|-------|-----------|
-| Core converters | 90% |
-| Core overall | 80% |
-| Frontend overall | 70% |
+| Scope            | Threshold |
+| ---------------- | --------- |
+| Core converters  | 90%       |
+| Core overall     | 80%       |
+| Frontend overall | 70%       |
 
 ## Round-Trip Tolerances
 
-| Field | Tolerance |
-|-------|-----------|
-| Time | ±1s |
-| Power | ±1W or ±1% FTP |
-| HR | ±1 bpm |
-| Cadence | ±1 rpm |
+| Field   | Tolerance      |
+| ------- | -------------- |
+| Time    | ±1s            |
+| Power   | ±1W or ±1% FTP |
+| HR      | ±1 bpm         |
+| Cadence | ±1 rpm         |
 
 ## How to Analyze Failures
 

@@ -10,6 +10,7 @@ Create changeset for current changes.
 ## Process
 
 1. View changed files:
+
    ```bash
    git diff --name-only HEAD~1
    ```
@@ -33,7 +34,7 @@ Create changeset for current changes.
 
 ```md
 ---
-'@kaiord/core': minor
+"@kaiord/core": minor
 ---
 
 Add ZWO format support for Zwift workout import/export

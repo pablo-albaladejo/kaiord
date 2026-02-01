@@ -44,6 +44,7 @@ adapters/ → Implements ports, uses external libs
 ## How to Report
 
 For each violation found:
+
 1. File and line
 2. Type of violation
 3. Problematic import

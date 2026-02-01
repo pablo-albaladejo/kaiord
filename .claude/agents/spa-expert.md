@@ -13,15 +13,15 @@ Help with component development, state management, styling, and testing for the 
 
 ## Tech Stack
 
-| Technology | Use |
-|------------|-----|
-| React 18 | UI Framework |
-| TypeScript | Static typing |
+| Technology   | Use                  |
+| ------------ | -------------------- |
+| React 18     | UI Framework         |
+| TypeScript   | Static typing        |
 | Tailwind CSS | Utility-first styles |
-| dnd-kit | Drag and drop |
-| Zustand | Global state |
-| Vitest | Unit testing |
-| Playwright | E2E testing |
+| dnd-kit      | Drag and drop        |
+| Zustand      | Global state         |
+| Vitest       | Unit testing         |
+| Playwright   | E2E testing          |
 
 ## SPA Structure
 
@@ -42,11 +42,13 @@ packages/workout-spa-editor/
 ## Component Patterns
 
 ### Atomic Design
+
 - **Atoms**: Stateless components, props only
 - **Molecules**: Combine atoms, may have local state
 - **Organisms**: Connect to stores, orchestrate UI
 
 ### Tailwind Styling
+
 ```tsx
 // Prefer inline Tailwind classes
 <button className="px-4 py-2 bg-blue-500 hover:bg-blue-600 rounded">
