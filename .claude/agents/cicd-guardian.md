@@ -13,11 +13,11 @@ Maintain, debug, and optimize the project's CI/CD workflows.
 
 ## Project Workflows
 
-| Workflow | Purpose | Trigger |
-|----------|---------|---------|
-| `ci.yml` | Lint, test, build | PR and push to main |
-| `release.yml` | Versioning with changesets | Push to main |
-| `deploy-spa-editor.yml` | Deploy to GitHub Pages | Manual and release |
+| Workflow                | Purpose                    | Trigger             |
+| ----------------------- | -------------------------- | ------------------- |
+| `ci.yml`                | Lint, test, build          | PR and push to main |
+| `release.yml`           | Versioning with changesets | Push to main        |
+| `deploy-spa-editor.yml` | Deploy to GitHub Pages     | Manual and release  |
 
 ## Workflow Structure
 
@@ -35,11 +35,13 @@ Maintain, debug, and optimize the project's CI/CD workflows.
 ## CI Debugging
 
 1. **Get failed workflow logs**:
+
    ```bash
    gh run view <run-id> --log-failed
    ```
 
 2. **Check recent workflow status**:
+
    ```bash
    gh run list --limit 10
    ```
@@ -51,12 +53,12 @@ Maintain, debug, and optimize the project's CI/CD workflows.
 
 ## Common Failure Patterns
 
-| Symptom | Common Cause | Solution |
-|---------|--------------|----------|
-| Tests pass locally, fail in CI | Node version mismatch | Check `.nvmrc` |
-| Build fails | Outdated dependencies | `pnpm install --frozen-lockfile` |
-| SPA deploy fails | Incorrect base path | Check `vite.config.ts` base |
-| Changeset fails | Token permissions | Check GITHUB_TOKEN scopes |
+| Symptom                        | Common Cause          | Solution                         |
+| ------------------------------ | --------------------- | -------------------------------- |
+| Tests pass locally, fail in CI | Node version mismatch | Check `.nvmrc`                   |
+| Build fails                    | Outdated dependencies | `pnpm install --frozen-lockfile` |
+| SPA deploy fails               | Incorrect base path   | Check `vite.config.ts` base      |
+| Changeset fails                | Token permissions     | Check GITHUB_TOKEN scopes        |
 
 ## Best Practices
 

@@ -21,12 +21,12 @@ pnpm --filter @kaiord/cli dev -- convert -i 'workouts/*.fit' --output-dir conver
 
 ## Supported Formats
 
-| Format | Extension | Description |
-|--------|-----------|-------------|
-| FIT | .fit | Garmin binary format |
-| TCX | .tcx | Training Center XML |
-| ZWO | .zwo | Zwift Workout |
-| KRD | .krd | Kaiord JSON (canonical) |
+| Format | Extension | Description             |
+| ------ | --------- | ----------------------- |
+| FIT    | .fit      | Garmin binary format    |
+| TCX    | .tcx      | Training Center XML     |
+| ZWO    | .zwo      | Zwift Workout           |
+| KRD    | .krd      | Kaiord JSON (canonical) |
 
 ## Examples
 

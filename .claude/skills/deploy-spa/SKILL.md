@@ -10,6 +10,7 @@ Deploy the SPA editor to GitHub Pages.
 ## Prerequisites
 
 Verify local build:
+
 ```bash
 pnpm --filter @kaiord/core build
 pnpm --filter @kaiord/workout-spa-editor build
@@ -34,6 +35,7 @@ https://pablo-albaladejo.github.io/kaiord/
 ## Troubleshooting
 
 If deploy fails:
+
 1. Verify local build works
 2. Review workflow logs in GitHub Actions
 3. Check GitHub Pages permissions in Settings

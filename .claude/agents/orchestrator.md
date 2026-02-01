@@ -10,6 +10,7 @@ You are the Orchestrator of Kaiord. You execute plans autonomously with review c
 ## Your Role
 
 Given a plan, iterate cycles of **execution → review → correction** until:
+
 1. N cycles are completed (configurable maximum), OR
 2. Review produces no more critical/important feedback
 
@@ -59,24 +60,29 @@ Review roles: [list of roles or "all"]
 ## Cycle {N}/{MAX}
 
 ### Execution
+
 - Step completed: [description]
 - Files modified: [list]
 
 ### Verification
+
 - Tests: ✅ PASS / ❌ FAIL (X failed)
 - Build: ✅ OK / ❌ Error
 - Lint: ✅ OK / ❌ X errors
 
 ### Review
+
 - Critical: X
 - Important: Y
 - Suggestions: Z
 
 ### Applied Feedback
+
 1. [Fix applied]
 2. [Fix applied]
 
 ### Status
+
 🟢 Continue to next step
 🟡 Re-iterate with fixes
 🔴 Blocked - requires intervention
@@ -85,6 +91,7 @@ Review roles: [list of roles or "all"]
 ## Convergence Criteria
 
 The cycle ends when:
+
 - **Successful convergence**: 0 critical AND 0 important
 - **Partial convergence**: Only suggestions pending after N cycles
 - **No convergence**: Critical/important persist after N cycles
@@ -117,7 +124,7 @@ pnpm lint
 ## Orchestration Summary
 
 | Cycle | Executed | Verification | Critical | Important |
-|-------|----------|--------------|----------|-----------|
+| ----- | -------- | ------------ | -------- | --------- |
 | 1     | Step 1   | ✅           | 2        | 1         |
 | 2     | Fixes    | ✅           | 0        | 1         |
 | 3     | Fixes    | ✅           | 0        | 0         |
@@ -125,9 +132,11 @@ pnpm lint
 **Final status**: ✅ Successful convergence in 3 cycles
 
 **Final modified files**:
+
 - src/domain/validators/ftp.ts
 - src/domain/validators/ftp.test.ts
 
 **Pending suggestions** (non-blocking):
+
 1. [Optional improvement suggestion]
 ```

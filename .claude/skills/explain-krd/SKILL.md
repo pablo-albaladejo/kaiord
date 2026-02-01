@@ -45,10 +45,10 @@ Explain the KRD (Kaiord Representation Definition) format.
 
 ## Naming Conventions
 
-| Layer | Style | Example |
-|-------|-------|---------|
-| Domain | snake_case | `indoor_cycling`, `lap_swimming` |
-| Adapters | camelCase | `indoorCycling`, `lapSwimming` |
+| Layer    | Style      | Example                          |
+| -------- | ---------- | -------------------------------- |
+| Domain   | snake_case | `indoor_cycling`, `lap_swimming` |
+| Adapters | camelCase  | `indoorCycling`, `lapSwimming`   |
 
 ## MIME Type
 
