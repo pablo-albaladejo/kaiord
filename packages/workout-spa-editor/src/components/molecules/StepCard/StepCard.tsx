@@ -1,4 +1,5 @@
 import { forwardRef } from "react";
+import { SelectionIndicator } from "../SelectionIndicator";
 import { getStepLabel } from "./get-step-label";
 import { renderStepCardContent } from "./render-step-card-content";
 import type { DragHandleProps, StepCardProps } from "./StepCard.types";
@@ -52,10 +53,12 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
         tabIndex={0}
         onKeyDown={handlers.handleKeyDown}
         aria-label={label}
+        aria-selected={selected}
         data-testid="step-card"
         data-selected={selected ? "true" : "false"}
         {...htmlProps}
       >
+        <SelectionIndicator selected={selected} />
         {renderStepCardContent({
           step,
           displayIndex,

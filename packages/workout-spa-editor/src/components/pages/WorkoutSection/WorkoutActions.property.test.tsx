@@ -24,6 +24,15 @@ describe("WorkoutActions - Property Tests", () => {
     },
   };
 
+  const defaultProps = {
+    krd: mockKRD,
+    canUndo: false,
+    canRedo: false,
+    onUndo: () => {},
+    onRedo: () => {},
+    onDiscard: () => {},
+  };
+
   /**
    * Property 11: Button capitalization consistency
    * For all button labels in the metadata section, the text should follow title case capitalization
@@ -31,7 +40,7 @@ describe("WorkoutActions - Property Tests", () => {
    */
   it("should use title case for all button labels", () => {
     // Arrange & Act
-    renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={() => {}} />);
+    renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
     const buttons = screen.getAllByRole("button");
@@ -101,7 +110,7 @@ describe("WorkoutActions - Property Tests", () => {
    */
   it("should have 'Save Workout' button in title case", () => {
     // Arrange & Act
-    renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={() => {}} />);
+    renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
     const saveButton = screen.getByRole("button", { name: /save workout/i });
@@ -110,7 +119,7 @@ describe("WorkoutActions - Property Tests", () => {
 
   it("should have 'Save to Library' button in title case", () => {
     // Arrange & Act
-    renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={() => {}} />);
+    renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
     const libraryButton = screen.getByRole("button", {
@@ -121,7 +130,7 @@ describe("WorkoutActions - Property Tests", () => {
 
   it("should have 'Discard Workout' button in title case", () => {
     // Arrange & Act
-    renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={() => {}} />);
+    renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
     const discardButton = screen.getByRole("button", {
@@ -137,7 +146,7 @@ describe("WorkoutActions - Property Tests", () => {
    */
   it("should have responsive layout classes for mobile and desktop", () => {
     // Arrange & Act
-    renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={() => {}} />);
+    renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
     const discardButton = screen.getByTestId("discard-workout-button");
@@ -161,7 +170,7 @@ describe("WorkoutActions - Property Tests", () => {
 
   it("should have full width buttons on mobile", () => {
     // Arrange & Act
-    renderWithProviders(<WorkoutActions krd={mockKRD} onDiscard={() => {}} />);
+    renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
     const discardButton = screen.getByTestId("discard-workout-button");

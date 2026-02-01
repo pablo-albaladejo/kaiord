@@ -1,35 +1,7 @@
 import { Fragment } from "react";
-import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
+import { EmptyWorkoutState } from "../../molecules/EmptyWorkoutState";
 import { renderWorkoutItem } from "./render-workout-item";
-
-type WorkoutListContentProps = {
-  workout: Workout;
-  selectedStepId?: string | null;
-  selectedStepIds?: readonly string[];
-  onStepSelect?: (stepId: string) => void;
-  onToggleStepSelection?: (stepId: string) => void;
-  onStepDelete?: (stepIndex: number) => void;
-  onStepDuplicate?: (stepIndex: number) => void;
-  onStepCopy?: (stepIndex: number) => void;
-  onDuplicateStepInRepetitionBlock?: (
-    blockId: string,
-    stepIndex: number
-  ) => void;
-  onEditRepetitionBlock?: (blockId: string, repeatCount: number) => void;
-  onAddStepToRepetitionBlock?: (blockId: string) => void;
-  onUngroupRepetitionBlock?: (blockId: string) => void;
-  onDeleteRepetitionBlock?: (blockId: string) => void;
-  onReorderStepsInBlock?: (
-    blockId: string,
-    activeIndex: number,
-    overIndex: number
-  ) => void;
-  generateStepId: (
-    item: WorkoutStep | RepetitionBlock,
-    index: number,
-    parentBlockIndex?: number
-  ) => string;
-};
+import type { WorkoutListContentProps } from "./WorkoutListContent.types";
 
 export const WorkoutListContent = ({
   workout,
@@ -47,7 +19,12 @@ export const WorkoutListContent = ({
   onDeleteRepetitionBlock,
   onReorderStepsInBlock,
   generateStepId,
+  onAddStep,
 }: WorkoutListContentProps) => {
+  if (workout.steps.length === 0 && onAddStep) {
+    return <EmptyWorkoutState onAddStep={onAddStep} />;
+  }
+
   return (
     <>
       {workout.steps.map((item, index) => {

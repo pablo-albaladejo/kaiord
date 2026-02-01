@@ -1,7 +1,6 @@
-import type { HTMLAttributes } from "react";
-import type { Workout } from "../../../types/krd";
+import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 
-export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
+export type WorkoutListContentProps = {
   workout: Workout;
   selectedStepId?: string | null;
   selectedStepIds?: readonly string[];
@@ -18,11 +17,15 @@ export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
   onAddStepToRepetitionBlock?: (blockId: string) => void;
   onUngroupRepetitionBlock?: (blockId: string) => void;
   onDeleteRepetitionBlock?: (blockId: string) => void;
-  onStepReorder?: (activeIndex: number, overIndex: number) => void;
   onReorderStepsInBlock?: (
     blockId: string,
     activeIndex: number,
     overIndex: number
   ) => void;
+  generateStepId: (
+    item: WorkoutStep | RepetitionBlock,
+    index: number,
+    parentBlockIndex?: number
+  ) => string;
   onAddStep?: () => void;
 };
