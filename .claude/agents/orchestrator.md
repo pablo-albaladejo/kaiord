@@ -24,7 +24,7 @@ Review roles: [list of roles or "all"]
 
 ## Orchestration Process
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │           EXECUTION CYCLE               │
 ├─────────────────────────────────────────┤
@@ -108,7 +108,7 @@ The cycle ends when:
 
 ### CI/CD Check Process
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │         CI/CD VALIDATION CYCLE          │
 ├─────────────────────────────────────────┤
@@ -173,7 +173,7 @@ gh run list --limit 5
 
 ### CodeRabbit Comment Process
 
-```
+```text
 ┌─────────────────────────────────────────┐
 │       CODERABBIT COMMENT HANDLING       │
 ├─────────────────────────────────────────┤
