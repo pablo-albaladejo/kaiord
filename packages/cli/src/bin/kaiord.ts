@@ -191,7 +191,10 @@ const main = async (): Promise<void> => {
           });
           // Exit code 10 = files different (not an error), 0 = identical
           // Only call process.exit for actual errors
-          if (exitCode !== ExitCode.SUCCESS && exitCode !== ExitCode.DIFFERENCES_FOUND) {
+          if (
+            exitCode !== ExitCode.SUCCESS &&
+            exitCode !== ExitCode.DIFFERENCES_FOUND
+          ) {
             process.exit(exitCode);
           }
           // Pass through the exit code for scripting (0 or 10)

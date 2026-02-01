@@ -87,7 +87,9 @@ const createOutputDirectory = async (path: string): Promise<void> => {
         throw new Error(`Permission denied creating directory: ${dir}`);
       }
       if (error.code === "ENOTDIR") {
-        throw new Error(`Cannot create directory (path exists as file): ${dir}`);
+        throw new Error(
+          `Cannot create directory (path exists as file): ${dir}`
+        );
       }
     }
     throw new Error(`Failed to create directory: ${dir}`);

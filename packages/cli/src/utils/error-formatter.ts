@@ -5,7 +5,10 @@ import { formatErrorAsJson } from "./error-formatter-json";
 import { formatErrorAsPretty } from "./error-formatter-pretty";
 
 // Re-export violation formatters for backwards compatibility
-export { formatValidationErrors, formatToleranceViolations } from "./format-violations";
+export {
+  formatValidationErrors,
+  formatToleranceViolations,
+} from "./format-violations";
 
 type FormatOptions = {
   json?: boolean;

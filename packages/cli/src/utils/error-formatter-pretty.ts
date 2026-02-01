@@ -8,7 +8,10 @@ import {
 } from "@kaiord/core";
 import chalk from "chalk";
 import { getErrorTitle, getSuggestionForError } from "./error-suggestions";
-import { formatToleranceViolations, formatValidationErrors } from "./format-violations";
+import {
+  formatToleranceViolations,
+  formatValidationErrors,
+} from "./format-violations";
 import { isTTY } from "./is-tty";
 
 const shouldUseColors = (): boolean => {
@@ -40,9 +43,14 @@ export const formatErrorAsPretty = (error: unknown): string => {
   return formatUnknownError(error, useColors);
 };
 
-const formatFitParsingError = (error: FitParsingError, useColors: boolean): string => {
+const formatFitParsingError = (
+  error: FitParsingError,
+  useColors: boolean
+): string => {
   const lines = [
-    useColors ? chalk.red("\u2716 Error: Failed to parse FIT file") : "\u2716 Error: Failed to parse FIT file",
+    useColors
+      ? chalk.red("\u2716 Error: Failed to parse FIT file")
+      : "\u2716 Error: Failed to parse FIT file",
     "",
     useColors ? chalk.gray("Details:") : "Details:",
     `  ${error.message}`,
@@ -63,9 +71,14 @@ const formatFitParsingError = (error: FitParsingError, useColors: boolean): stri
   return lines.join("\n");
 };
 
-const formatKrdValidationError = (error: KrdValidationError, useColors: boolean): string => {
+const formatKrdValidationError = (
+  error: KrdValidationError,
+  useColors: boolean
+): string => {
   const lines = [
-    useColors ? chalk.red("\u2716 Error: Invalid KRD format") : "\u2716 Error: Invalid KRD format",
+    useColors
+      ? chalk.red("\u2716 Error: Invalid KRD format")
+      : "\u2716 Error: Invalid KRD format",
     "",
     formatValidationErrors(error.errors),
     "",
@@ -77,9 +90,14 @@ const formatKrdValidationError = (error: KrdValidationError, useColors: boolean)
   return lines.join("\n");
 };
 
-const formatToleranceError = (error: ToleranceExceededError, useColors: boolean): string => {
+const formatToleranceError = (
+  error: ToleranceExceededError,
+  useColors: boolean
+): string => {
   const lines = [
-    useColors ? chalk.red("\u2716 Error: Round-trip conversion failed") : "\u2716 Error: Round-trip conversion failed",
+    useColors
+      ? chalk.red("\u2716 Error: Round-trip conversion failed")
+      : "\u2716 Error: Round-trip conversion failed",
     "",
     formatToleranceViolations(error.violations),
     "",
@@ -94,14 +112,20 @@ const formatToleranceError = (error: ToleranceExceededError, useColors: boolean)
 const formatGenericError = (error: Error, useColors: boolean): string => {
   const suggestion = getSuggestionForError(error);
   const lines = [
-    useColors ? chalk.red(`\u2716 Error: ${getErrorTitle(error)}`) : `\u2716 Error: ${getErrorTitle(error)}`,
+    useColors
+      ? chalk.red(`\u2716 Error: ${getErrorTitle(error)}`)
+      : `\u2716 Error: ${getErrorTitle(error)}`,
     "",
     useColors ? chalk.gray("Details:") : "Details:",
     `  ${error.message}`,
   ];
 
   if (suggestion) {
-    lines.push("", useColors ? chalk.cyan("Suggestion:") : "Suggestion:", ...suggestion.map((s) => `  ${s}`));
+    lines.push(
+      "",
+      useColors ? chalk.cyan("Suggestion:") : "Suggestion:",
+      ...suggestion.map((s) => `  ${s}`)
+    );
   }
 
   return lines.join("\n");
@@ -109,7 +133,9 @@ const formatGenericError = (error: Error, useColors: boolean): string => {
 
 const formatUnknownError = (error: unknown, useColors: boolean): string => {
   return [
-    useColors ? chalk.red("\u2716 Error: An unexpected error occurred") : "\u2716 Error: An unexpected error occurred",
+    useColors
+      ? chalk.red("\u2716 Error: An unexpected error occurred")
+      : "\u2716 Error: An unexpected error occurred",
     "",
     useColors ? chalk.gray("Details:") : "Details:",
     `  ${String(error)}`,
