@@ -49,6 +49,7 @@ export const WorkoutList = (props: WorkoutListProps) => {
             onDeleteRepetitionBlock={props.onDeleteRepetitionBlock}
             onReorderStepsInBlock={props.onReorderStepsInBlock}
             generateStepId={dnd.generateStepId}
+            onAddStep={props.onAddStep}
           />
         </div>
       </SortableContext>

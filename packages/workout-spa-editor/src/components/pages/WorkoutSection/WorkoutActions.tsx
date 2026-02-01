@@ -3,16 +3,34 @@ import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { SaveButton } from "../../molecules/SaveButton/SaveButton";
 import { SaveToLibraryButton } from "../../molecules/SaveToLibraryButton/SaveToLibraryButton";
+import { UndoRedoButtons } from "../../molecules/UndoRedoButtons";
 
 type WorkoutActionsProps = {
   krd: KRD;
+  canUndo: boolean;
+  canRedo: boolean;
+  onUndo: () => void;
+  onRedo: () => void;
   onDiscard: () => void;
 };
 
-export function WorkoutActions({ krd, onDiscard }: WorkoutActionsProps) {
+export function WorkoutActions({
+  krd,
+  canUndo,
+  canRedo,
+  onUndo,
+  onRedo,
+  onDiscard,
+}: WorkoutActionsProps) {
   return (
     <div className="flex w-full shrink-0 flex-col gap-3 sm:w-auto">
-      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row">
+      <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+        <UndoRedoButtons
+          canUndo={canUndo}
+          canRedo={canRedo}
+          onUndo={onUndo}
+          onRedo={onRedo}
+        />
         <SaveButton workout={krd} />
         <SaveToLibraryButton workout={krd} className="w-full sm:w-auto" />
       </div>

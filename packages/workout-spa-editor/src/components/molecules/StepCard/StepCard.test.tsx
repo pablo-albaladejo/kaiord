@@ -265,7 +265,7 @@ describe("StepCard", () => {
 
       const dragHandle = screen.getByTestId("drag-handle");
       expect(dragHandle).toBeInTheDocument();
-      expect(dragHandle).toHaveAttribute("aria-label", "Drag to reorder");
+      expect(dragHandle).toHaveAttribute("aria-label", "Drag to reorder step");
     });
 
     it("should not render drag handle when dragHandleProps are not provided", () => {
