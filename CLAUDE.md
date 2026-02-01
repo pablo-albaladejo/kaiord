@@ -58,6 +58,15 @@ toKRD(input: Uint8Array | string, opts: { type: "fit"|"tcx"|"zwo"|"krd" }): Prom
 fromKRD(krd: KRD, opts: { type: "fit"|"tcx"|"zwo"|"krd" }): Promise<Uint8Array>
 ```
 
+## Language
+
+**All code, comments, documentation, commit messages, and AI-generated content MUST be in English**, regardless of the language the user communicates in. This includes:
+- Code comments and documentation
+- Commit messages and PR descriptions
+- Changeset descriptions
+- Error messages and logs
+- AI agent responses and plans
+
 ## Code Style
 
 - **TypeScript strict mode** - No implicit `any`
