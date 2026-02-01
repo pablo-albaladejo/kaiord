@@ -220,13 +220,13 @@ gh api repos/{owner}/{repo}/pulls/{pr}/reviews
 
 ### Comment Response Guidelines
 
-| Decision | Response Template |
-| -------- | ----------------- |
-| ACCEPT | "✅ Fixed in commit `abc123`. Changed X to Y as suggested." |
-| IGNORE (false positive) | "ℹ️ Ignoring: This is a false positive because [reason]." |
-| IGNORE (intentional) | "ℹ️ Ignoring: Intentionally done this way because [reason]." |
-| IGNORE (out of scope) | "ℹ️ Ignoring: Out of scope for this PR. Created issue #X to track." |
-| PARTIAL | "✅ Partially addressed: Did X but not Y because [reason]." |
+| Decision                | Response Template                                                   |
+| ----------------------- | ------------------------------------------------------------------- |
+| ACCEPT                  | "✅ Fixed in commit `abc123`. Changed X to Y as suggested."         |
+| IGNORE (false positive) | "ℹ️ Ignoring: This is a false positive because [reason]."           |
+| IGNORE (intentional)    | "ℹ️ Ignoring: Intentionally done this way because [reason]."        |
+| IGNORE (out of scope)   | "ℹ️ Ignoring: Out of scope for this PR. Created issue #X to track." |
+| PARTIAL                 | "✅ Partially addressed: Did X but not Y because [reason]."         |
 
 ### Important Rules for CodeRabbit
 
@@ -238,14 +238,14 @@ gh api repos/{owner}/{repo}/pulls/{pr}/reviews
 
 ### CodeRabbit Comment Categories
 
-| Category | Default Action |
-| -------- | -------------- |
-| Security | ACCEPT (unless false positive) |
-| Bug/Logic | ACCEPT (unless false positive) |
-| Performance | EVALUATE case by case |
+| Category      | Default Action                          |
+| ------------- | --------------------------------------- |
+| Security      | ACCEPT (unless false positive)          |
+| Bug/Logic     | ACCEPT (unless false positive)          |
+| Performance   | EVALUATE case by case                   |
 | Style/Nitpick | ACCEPT if trivial, IGNORE if subjective |
-| Documentation | ACCEPT if adds value |
-| Refactoring | EVALUATE scope vs benefit |
+| Documentation | ACCEPT if adds value                    |
+| Refactoring   | EVALUATE scope vs benefit               |
 
 ## Invocation Example
 
