@@ -23,7 +23,7 @@ export class FileParsingError extends Error {
     this.line = line;
     this.column = column;
     this.cause = cause;
-    if (Error.captureStackTrace) {
+    if (typeof Error.captureStackTrace === "function") {
       Error.captureStackTrace(this, FileParsingError);
     }
   }
@@ -45,7 +45,7 @@ export class ValidationError extends Error {
     super(message);
     this.errors = errors;
     this.cause = cause;
-    if (Error.captureStackTrace) {
+    if (typeof Error.captureStackTrace === "function") {
       Error.captureStackTrace(this, ValidationError);
     }
   }
@@ -70,7 +70,7 @@ export class ConversionError extends Error {
     this.format = format;
     this.details = details;
     this.cause = cause;
-    if (Error.captureStackTrace) {
+    if (typeof Error.captureStackTrace === "function") {
       Error.captureStackTrace(this, ConversionError);
     }
   }
