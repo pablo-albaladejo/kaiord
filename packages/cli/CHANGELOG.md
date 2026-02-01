@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.0.2
+
+### Patch Changes
+
+- Automated release from commit 1dcb02097af637da6b253d0238fb46f872f5f801
+- Updated dependencies
+  - @kaiord/core@1.0.2
+
 ## 1.0.1
 
 ### Patch Changes
