@@ -24,6 +24,8 @@ export default tseslint.config(
       "**/.playwright/**",
       "**/.storybook/**",
       "**/storybook-static/**",
+      "**/test-setup.ts",
+      "**/test-utils/**",
     ],
   },
   {
