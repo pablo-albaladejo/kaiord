@@ -38,11 +38,11 @@ jobs:
           CORE_CHANGED=false
           CLI_CHANGED=false
 
-          if echo "$CHANGED_FILES" | grep -q "^packages/core/src/"; then
+          if echo "$CHANGED_FILES" | grep -q "^packages/core/"; then
             CORE_CHANGED=true
           fi
 
-          if echo "$CHANGED_FILES" | grep -q "^packages/cli/src/"; then
+          if echo "$CHANGED_FILES" | grep -q "^packages/cli/"; then
             CLI_CHANGED=true
           fi
 
