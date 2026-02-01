@@ -1,5 +1,6 @@
 import type { KRD, ValidationError } from "../../../types/krd";
 import { createParseError, parseFile } from "./file-parser";
+import { validateFileSize } from "./file-upload-constants";
 
 type ErrorState = {
   title: string;
@@ -41,6 +42,13 @@ export function createFileChangeHandler(
 ) {
   return async (file: File | undefined) => {
     if (!file) return;
+
+    // Validate file size first
+    const sizeError = validateFileSize(file);
+    if (sizeError) {
+      handleError(sizeError);
+      return;
+    }
 
     const controller = createAbortController();
     setFileName(file.name);
