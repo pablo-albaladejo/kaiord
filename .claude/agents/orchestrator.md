@@ -146,13 +146,13 @@ gh run list --limit 5
 
 ### CI Failure Categories
 
-| Failure Type | Command to Debug | Common Fix |
-| ------------ | ---------------- | ---------- |
-| Lint | `pnpm lint` | `pnpm lint:fix` |
-| TypeScript | `pnpm -r build` | Fix type errors |
-| Tests | `pnpm -r test` | Fix failing tests |
-| Security Audit | `pnpm audit` | Update dependencies |
-| Lockfile | `pnpm install` | Regenerate lockfile |
+| Failure Type   | Command to Debug | Common Fix          |
+| -------------- | ---------------- | ------------------- |
+| Lint           | `pnpm lint`      | `pnpm lint:fix`     |
+| TypeScript     | `pnpm -r build`  | Fix type errors     |
+| Tests          | `pnpm -r test`   | Fix failing tests   |
+| Security Audit | `pnpm audit`     | Update dependencies |
+| Lockfile       | `pnpm install`   | Regenerate lockfile |
 
 ### Important Rules
 
