@@ -5,14 +5,14 @@ import { SaveButton } from "../../molecules/SaveButton/SaveButton";
 import { SaveToLibraryButton } from "../../molecules/SaveToLibraryButton/SaveToLibraryButton";
 import { UndoRedoButtons } from "../../molecules/UndoRedoButtons";
 
-type WorkoutActionsProps = {
+type WorkoutActionsProps = Readonly<{
   krd: KRD;
   canUndo: boolean;
   canRedo: boolean;
   onUndo: () => void;
   onRedo: () => void;
   onDiscard: () => void;
-};
+}>;
 
 export function WorkoutActions({
   krd,
