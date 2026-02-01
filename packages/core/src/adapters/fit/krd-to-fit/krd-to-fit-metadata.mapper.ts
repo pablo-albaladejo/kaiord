@@ -10,36 +10,52 @@ import type { Logger } from "../../../ports/logger";
 import { isRepetitionBlock } from "../shared/type-guards";
 import { mapSubSportToFit } from "../sub-sport/sub-sport.mapper";
 
+const DEFAULT_MANUFACTURER = "garmin";
+
+/**
+ * Maps KRD manufacturer string to valid FIT Profile manufacturer enum value.
+ * Uses fuzzy matching (case-insensitive, prefix matching).
+ */
+const mapManufacturer = (
+  manufacturer: string | undefined,
+  logger: Logger
+): string => {
+  if (!manufacturer) {
+    return DEFAULT_MANUFACTURER;
+  }
+
+  const manufacturerEnum = Profile.types.manufacturer;
+  const manufacturerValues = Object.values(manufacturerEnum);
+  const normalized = manufacturer.toLowerCase();
+
+  const matched = manufacturerValues.find(
+    (value) =>
+      value.toLowerCase() === normalized ||
+      value.toLowerCase().startsWith(normalized) ||
+      normalized.startsWith(value.toLowerCase())
+  );
+
+  if (matched) return matched;
+
+  logger.warn(
+    `Unknown manufacturer "${manufacturer}", using fallback "${DEFAULT_MANUFACTURER}"`,
+    { original: manufacturer, fallback: DEFAULT_MANUFACTURER }
+  );
+  return DEFAULT_MANUFACTURER;
+};
+
 export const convertMetadataToFileId = (
   krd: KRD,
   logger: Logger
 ): Record<string, unknown> => {
   logger.debug("Converting metadata to file_id message");
 
-  const timeCreated = new Date(krd.metadata.created);
-
   const fileId: Record<string, unknown> = {
     type: fileTypeSchema.enum.workout,
-    timeCreated,
+    timeCreated: new Date(krd.metadata.created),
+    manufacturer: mapManufacturer(krd.metadata.manufacturer, logger),
   };
 
-  // Map manufacturer to valid FIT enum values from Profile
-  // The encoder will convert string enum values to numbers automatically
-  const manufacturerEnum = Profile.types.manufacturer;
-  const manufacturerValues = Object.values(manufacturerEnum);
-
-  // Find matching manufacturer: exact match (case-insensitive) or starts with
-  const manufacturer = krd.metadata.manufacturer?.toLowerCase() || "";
-  const matchedManufacturer = manufacturerValues.find(
-    (value) =>
-      value.toLowerCase() === manufacturer ||
-      value.toLowerCase().startsWith(manufacturer) ||
-      manufacturer.startsWith(value.toLowerCase())
-  );
-
-  fileId.manufacturer = matchedManufacturer || "garmin"; // Default to garmin if not found
-
-  // Add product if it's a number or can be parsed as one
   if (krd.metadata.product !== undefined) {
     const productNumber = parseInt(krd.metadata.product, 10);
     if (!isNaN(productNumber)) {

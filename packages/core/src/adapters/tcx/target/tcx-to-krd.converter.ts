@@ -65,9 +65,18 @@ const convertSpeedTarget = (data: TcxTargetData): Target => {
   return { type: targetTypeSchema.enum.open };
 };
 
+/**
+ * Converts TCX cadence target to KRD cadence target.
+ *
+ * Running cadence conversion: TCX uses SPM (steps per minute) for running,
+ * but KRD standardizes on RPM (revolutions per minute). For running,
+ * SPM = 2 * RPM because each revolution (stride) consists of two steps
+ * (left + right foot). Therefore: RPM = SPM / 2
+ */
 const convertCadenceTarget = (data: TcxTargetData): Target => {
   if (data.cadenceLow !== undefined && data.cadenceHigh !== undefined) {
     const isRunning = data.sport === "running" || data.sport === "Running";
+    // Convert SPM to RPM for running (SPM = 2 * RPM, so RPM = SPM / 2)
     const minRpm = isRunning ? data.cadenceLow / 2 : data.cadenceLow;
     const maxRpm = isRunning ? data.cadenceHigh / 2 : data.cadenceHigh;
 
