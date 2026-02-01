@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/cli",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Command-line interface for Kaiord workout file conversion",
   "type": "module",
   "bin": {
