@@ -77,7 +77,8 @@ const formatUnknownError = (error: unknown): string =>
 export const formatErrorAsJson = (error: unknown): string => {
   if (error instanceof FitParsingError) return formatFitError(error);
   if (error instanceof KrdValidationError) return formatKrdError(error);
-  if (error instanceof ToleranceExceededError) return formatToleranceError(error);
+  if (error instanceof ToleranceExceededError)
+    return formatToleranceError(error);
   if (error instanceof Error) return formatGenericError(error);
   return formatUnknownError(error);
 };
