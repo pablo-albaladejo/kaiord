@@ -255,7 +255,6 @@ The modal supports all application themes:
 
 - **Light Mode**: White background, dark text
 - **Dark Mode**: Dark gray background, light text
-- **Kiroween Theme**: Custom Halloween theme colors
 
 ### Responsive Design
 
@@ -381,5 +380,3 @@ showConfirmationModal({
 This feature implements the following requirements from the specification:
 
 - **Requirement 6**: Replace Browser Alerts with Modal Dialogs
-
-See `.kiro/specs/workout-spa-editor/09-repetition-blocks-and-ui-polish/requirements.md` for complete requirements.

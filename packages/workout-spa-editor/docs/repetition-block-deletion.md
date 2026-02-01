@@ -416,5 +416,3 @@ This feature implements the following requirements from the specification:
 - **Requirement 2**: Delete Repetition Block
 - **Requirement 3**: UI for Block Deletion
 - **Requirement 4**: Keyboard Accessibility for Block Operations
-
-See `.kiro/specs/workout-spa-editor/09-repetition-blocks-and-ui-polish/requirements.md` for complete requirements.

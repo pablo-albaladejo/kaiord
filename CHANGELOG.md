@@ -13,7 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Centralized documentation**: All documentation has been consolidated into the `/docs` directory for easier discovery and maintenance
   - Created `/docs` directory with comprehensive documentation index
-  - Moved and merged content from `.kiro/steering`, `.github`, and package-specific docs
+  - Moved and merged content from `.github` and package-specific docs
   - Organized documentation by category: getting started, architecture, testing, deployment, contributing, format specs, and agents
 
 - **Removed historical files**: Cleaned up outdated and historical documentation files

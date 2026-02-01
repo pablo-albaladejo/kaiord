@@ -23,7 +23,7 @@ export function HeaderLogo() {
           />
         </svg>
       </div>
-      <h1 className="text-xl font-bold text-gray-900 dark:text-white kiroween:text-white sm:text-2xl">
+      <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
         Workout Editor
       </h1>
     </div>

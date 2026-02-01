@@ -14,7 +14,7 @@ export function CopyButton({ stepIndex, onCopy }: CopyButtonProps) {
   return (
     <button
       onClick={handleCopy}
-      className="absolute right-28 bottom-3 rounded-full p-2 bg-white dark:bg-gray-700 kiroween:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 kiroween:border-gray-600 text-gray-500 hover:border-green-500 hover:bg-green-50 hover:text-green-600 dark:hover:border-green-400 dark:hover:bg-green-900/30 dark:hover:text-green-400 kiroween:hover:border-green-400 kiroween:hover:bg-green-900/30 kiroween:hover:text-green-400 transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
+      className="absolute right-28 bottom-3 rounded-full p-2 bg-white dark:bg-gray-700 border-2 border-gray-200 dark:border-gray-600 text-gray-500 hover:border-green-500 hover:bg-green-50 hover:text-green-600 dark:hover:border-green-400 dark:hover:bg-green-900/30 dark:hover:text-green-400 transition-all duration-200 shadow-sm hover:shadow-md focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
       aria-label={`Copy step ${stepIndex + 1}`}
       title="Copy step to clipboard"
       data-testid="copy-step-button"

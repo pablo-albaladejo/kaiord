@@ -10,7 +10,7 @@ import { ShortcutRow } from "../../components/ShortcutRow";
 export function SelectionShortcuts() {
   return (
     <div>
-      <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white kiroween:text-white">
+      <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
         Selection
       </h3>
       <div className="space-y-2">

@@ -178,40 +178,6 @@ describe("ThemeContext", () => {
       expect(result.current.theme).toBe("system");
       expect(result.current.resolvedTheme).toMatch(/^(light|dark)$/);
     });
-
-    it("should switch to kiroween theme", () => {
-      // Arrange
-      Object.defineProperty(window, "matchMedia", {
-        writable: true,
-        value: vi.fn().mockImplementation((query) => ({
-          matches: false,
-          media: query,
-          onchange: null,
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        })),
-      });
-
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <ThemeProvider>{children}</ThemeProvider>
-      );
-      const { result } = renderHook(() => useTheme(), { wrapper });
-
-      // Act
-      act(() => {
-        result.current.setTheme("kiroween");
-      });
-
-      // Assert
-      expect(result.current.theme).toBe("kiroween");
-      expect(result.current.resolvedTheme).toBe("kiroween");
-      expect(document.documentElement.classList.contains("kiroween")).toBe(
-        true
-      );
-    });
   });
 
   describe("localStorage persistence", () => {
@@ -460,72 +426,6 @@ describe("ThemeContext", () => {
 
       // Assert
       expect(document.documentElement.classList.contains("dark")).toBe(false);
-    });
-
-    it("should add kiroween class to document root when kiroween theme is active", () => {
-      // Arrange
-      Object.defineProperty(window, "matchMedia", {
-        writable: true,
-        value: vi.fn().mockImplementation((query) => ({
-          matches: false,
-          media: query,
-          onchange: null,
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        })),
-      });
-
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <ThemeProvider>{children}</ThemeProvider>
-      );
-      const { result } = renderHook(() => useTheme(), { wrapper });
-
-      // Act
-      act(() => {
-        result.current.setTheme("kiroween");
-      });
-
-      // Assert
-      expect(document.documentElement.classList.contains("kiroween")).toBe(
-        true
-      );
-      expect(document.documentElement.classList.contains("dark")).toBe(false);
-    });
-
-    it("should remove kiroween class when switching to another theme", () => {
-      // Arrange
-      Object.defineProperty(window, "matchMedia", {
-        writable: true,
-        value: vi.fn().mockImplementation((query) => ({
-          matches: false,
-          media: query,
-          onchange: null,
-          addEventListener: vi.fn(),
-          removeEventListener: vi.fn(),
-          addListener: vi.fn(),
-          removeListener: vi.fn(),
-          dispatchEvent: vi.fn(),
-        })),
-      });
-
-      document.documentElement.classList.add("kiroween");
-      const wrapper = ({ children }: { children: ReactNode }) => (
-        <ThemeProvider>{children}</ThemeProvider>
-      );
-      const { result } = renderHook(() => useTheme(), { wrapper });
-
-      // Act
-      act(() => {
-        result.current.setTheme("light");
-      });
-
-      // Assert
-      expect(document.documentElement.classList.contains("kiroween")).toBe(
-        false
-      );
     });
   });
 

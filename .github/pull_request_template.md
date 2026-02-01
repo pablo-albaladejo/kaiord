@@ -44,7 +44,7 @@
 - [ ] Code follows project style guidelines
 - [ ] Coverage maintained or improved
 - [ ] Round-trip tests passing (if applicable)
-- [ ] Spec updated (if implementing from `.kiro/specs/`)
+- [ ] Spec updated (if implementing from `docs/specs/`)
 
 ## Testing
 

@@ -224,6 +224,6 @@ const { fit, krd } = loadFixturePair(FIXTURE_NAMES.INDIVIDUAL_STEPS);
 
 ## 🔗 Referencias
 
-- [KRD Format Spec](../../../../../../.kiro/steering/krd-format.md)
-- [Testing Guidelines](../../../../../../.kiro/steering/testing.md)
+- [KRD Format Spec](../../../../../docs/krd-format.md)
+- [Testing Guidelines](../../../../../docs/testing.md)
 - [Garmin FIT SDK](https://github.com/garmin/fit-javascript-sdk)

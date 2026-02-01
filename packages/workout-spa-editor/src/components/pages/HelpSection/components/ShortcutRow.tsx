@@ -24,7 +24,7 @@ export function ShortcutRow({
 
   return (
     <div className="flex items-center justify-between">
-      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400 kiroween:text-gray-300">
+      <div className="flex items-center gap-2 text-gray-600 dark:text-gray-400">
         {icon}
         <span>{description}</span>
       </div>
@@ -32,7 +32,7 @@ export function ShortcutRow({
         {displayKeys.map((key, index) => (
           <kbd
             key={index}
-            className="rounded border border-gray-300 bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200 kiroween:border-gray-600 kiroween:bg-gray-700 kiroween:text-gray-200"
+            className="rounded border border-gray-300 bg-gray-100 px-2 py-1 text-xs font-semibold text-gray-800 dark:border-gray-600 dark:bg-gray-700 dark:text-gray-200"
           >
             {key}
           </kbd>

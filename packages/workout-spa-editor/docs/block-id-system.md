@@ -556,5 +556,3 @@ This system implements the following requirements:
 - **Requirement 2.1-2.2**: Block ID uniqueness
 - **Requirement 2.3**: Block ID stability and migration
 - **Requirement 2.4-2.5**: ID-based operations
-
-See `.kiro/specs/workout-spa-editor/11-fix-repetition-block-deletion-index-bug/requirements.md` for complete requirements.

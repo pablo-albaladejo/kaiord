@@ -164,7 +164,6 @@ pnpm clean
 - **[Modal System](./docs/modal-system.md)** - Confirmation modal system documentation
 - **[Performance Optimization](./docs/performance-optimization.md)** - Performance testing and optimization guide
 - **[Delete Button Styling](./docs/delete-button-styling-comparison.md)** - Button styling consistency documentation
-- **[Kiroween Theme](./docs/kiroween-theme.md)** - Special Halloween theme documentation
 
 ## 🔧 Requirements
 
