@@ -44,12 +44,12 @@
     "@faker-js/faker": "^10.1.0",
     "@types/node": "^20.11.0",
     "@types/rosie": "^0.0.45",
-    "@vitest/coverage-v8": "^4.0.9",
+    "@vitest/coverage-v8": "^4.0.18",
     "rosie": "^2.1.1",
     "tsup": "^8.5.1",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
-    "vitest": "^4.0.9"
+    "vitest": "^4.0.18"
   },
   "repository": {
     "type": "git",
