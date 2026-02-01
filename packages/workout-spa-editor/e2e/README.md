@@ -339,8 +339,6 @@ pnpm test:e2e mobile-touch-drag.spec.ts --ui
 ### References
 
 - [MOBILE-TOUCH-DRAG-SUMMARY.md](./MOBILE-TOUCH-DRAG-SUMMARY.md) - Complete testing philosophy
-- [Frontend Testing Steering Rule](../../../.kiro/steering/frontend-testing.md#mobile-touch-drag-testing-requirements)
-- [Mobile Touch Drag Requirements](../../../.kiro/specs/workout-spa-editor/mobile-touch-drag-testing/requirements.md)
 
 **Problem**: Touch gestures don't trigger drag operation
 

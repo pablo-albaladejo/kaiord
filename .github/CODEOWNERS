@@ -17,5 +17,5 @@
 # CI/CD workflows
 /.github/ @pablo-albaladejo
 
-# Kiro specs
-/.kiro/specs/ @pablo-albaladejo
+# Specs documentation
+/docs/specs/ @pablo-albaladejo

@@ -43,7 +43,7 @@ export function WorkoutHeader({ workout, krd }: WorkoutHeaderProps) {
   }
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800 kiroween:border-gray-700 kiroween:bg-gray-800">
+    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <WorkoutTitle workout={workout} onEdit={handleEditMetadata} />
         <WorkoutActions krd={krd} onDiscard={handleDiscard} />

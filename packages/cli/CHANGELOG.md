@@ -44,7 +44,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Comprehensive error handling with descriptive messages and exit codes
 - Version flag (`--version`) displays current package version
 - Help flag (`--help`) displays usage information and examples
-- Easter egg flags (`--kiro`, `--kiroween`) with ASCII art and Kiroween hackathon credits
 
 #### Output Control
 
@@ -89,7 +88,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **98 tests passing** across 8 test files
 - **Unit tests**: Format detection, file handling, logger factory, error formatting
 - **Integration tests**: Convert command, validate command, batch conversion
-- **Smoke tests**: CLI help, version, invalid commands, easter eggs
+- **Smoke tests**: CLI help, version, invalid commands
 - **Test coverage**: Comprehensive coverage of all core functionality
 - **Test utilities**: Shared fixtures, CLI test helpers, temporary directory management
 

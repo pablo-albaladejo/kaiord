@@ -46,14 +46,13 @@ This document compares the delete button styling between RepetitionBlockCard and
 
 ```tsx
 <button
-  className="absolute right-3 bottom-3 rounded-full p-2 
-             bg-white dark:bg-gray-700 kiroween:bg-gray-700 
-             border-2 border-gray-200 dark:border-gray-600 kiroween:border-gray-600 
-             text-gray-500 
-             hover:border-red-500 hover:bg-red-50 hover:text-red-600 
-             dark:hover:border-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-400 
-             kiroween:hover:border-red-400 kiroween:hover:bg-red-900/30 kiroween:hover:text-red-400 
-             transition-all duration-200 shadow-sm hover:shadow-md 
+  className="absolute right-3 bottom-3 rounded-full p-2
+             bg-white dark:bg-gray-700
+             border-2 border-gray-200 dark:border-gray-600
+             text-gray-500
+             hover:border-red-500 hover:bg-red-50 hover:text-red-600
+             dark:hover:border-red-400 dark:hover:bg-red-900/30 dark:hover:text-red-400
+             transition-all duration-200 shadow-sm hover:shadow-md
              focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
 >
   <Trash2 className="h-4 w-4" />
@@ -66,7 +65,6 @@ This document compares the delete button styling between RepetitionBlockCard and
 - Initial state: White/gray background with gray border, gray text
 - Hover state: Red border, light red background, red text
 - Dark mode: Gray-700 background, gray-600 border, red-400 on hover
-- Kiroween theme: Full theme support with gray/red color scheme
 - Border radius: `rounded-full` (circular)
 - Transition: `transition-all duration-200`
 - Shadow: `shadow-sm` with `hover:shadow-md`
@@ -106,8 +104,8 @@ The styling differences are **intentional and appropriate** for the following re
 
 ### 4. Theme Support
 
-- **RepetitionBlock**: Light/dark mode only
-- **StepCard**: Light/dark mode + Kiroween theme (seasonal theme support)
+- **RepetitionBlock**: Light/dark mode
+- **StepCard**: Light/dark mode
 
 ### 5. Focus Indicators
 
@@ -176,7 +174,7 @@ If consistency becomes a concern in the future, consider:
 
 1. **Shared constants**: Extract common colors (red-50, red-600, etc.) to design tokens
 2. **Component variants**: Create a shared DeleteButton component with "inline" and "overlay" variants
-3. **Theme support**: Add Kiroween theme support to RepetitionBlock if needed
+3. **Theme support**: Add additional theme variants to RepetitionBlock if needed
 4. **Focus indicators**: Consider adding explicit focus rings to all interactive elements
 
 However, these are not necessary at this time given the current implementation serves its purpose well.

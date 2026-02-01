@@ -70,30 +70,4 @@ describe("CLI smoke tests", () => {
       expect(execaError.exitCode).toBe(1);
     }
   });
-
-  it("should display easter egg with --kiro flag", async () => {
-    // Arrange & Act
-    const { stdout } = await execa("./dist/bin/kaiord.js", ["--kiro"], {
-      cwd: join(__dirname, "../.."),
-    });
-    const output = stripAnsi(stdout);
-
-    // Assert
-    expect(output).toContain("Kiroween");
-    expect(output).toContain("Kiro");
-    expect(output).toContain("kiroween.devpost.com");
-  });
-
-  it("should display easter egg with --kiroween flag", async () => {
-    // Arrange & Act
-    const { stdout } = await execa("./dist/bin/kaiord.js", ["--kiroween"], {
-      cwd: join(__dirname, "../.."),
-    });
-    const output = stripAnsi(stdout);
-
-    // Assert
-    expect(output).toContain("Kiroween");
-    expect(output).toContain("Kiro");
-    expect(output).toContain("kiroween.devpost.com");
-  });
 });

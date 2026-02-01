@@ -1,7 +1,5 @@
 # ⏱️ Kaiord — Structured Workout Data Toolkit
 
-[![Kiroween Hackathon](https://img.shields.io/badge/Kiroween-Hackathon-orange?style=flat&logo=devpost)](https://kiroween.devpost.com/)
-[![Built with Kiro](https://img.shields.io/badge/Built%20with-Kiro-blueviolet?style=flat)](https://kiro.dev)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 
@@ -9,8 +7,7 @@
 [![codecov](https://codecov.io/gh/pablo-albaladejo/kaiord/branch/main/graph/badge.svg)](https://codecov.io/gh/pablo-albaladejo/kaiord)
 [![npm version](https://badge.fury.io/js/@kaiord%2Fcore.svg)](https://www.npmjs.com/package/@kaiord/core)
 [![npm version](https://badge.fury.io/js/@kaiord%2Fcli.svg)](https://www.npmjs.com/package/@kaiord/cli)
-
-> 👻 **Built for [Kiroween Hackathon](https://kiroween.devpost.com/)** - Showcasing AI-assisted development with [Kiro](https://kiro.dev)
+[![Sponsor](https://img.shields.io/badge/Sponsor-❤️-pink?logo=github-sponsors)](https://github.com/sponsors/pablo-albaladejo)
 
 **Kaiord** is an open-source toolkit for structured workout data.
 
@@ -27,7 +24,6 @@ It provides:
 - **[Visual Workout Editor](https://pablo-albaladejo.github.io/kaiord)** - Create and edit workouts in your browser
 - Unified JSON-based format `.krd` (Kaiord Representation Definition)
 - Schema validation (AJV)
-- Spec-driven development with [Kiro](https://kiro.dev)
 - Round-trip safe conversions between FIT / TCX / ZWO / KRD
 - Clean architecture & fully typed API
 
@@ -67,7 +63,7 @@ Comprehensive documentation is available in the `/docs` directory:
 - **[Deployment](./docs/deployment.md)** - CI/CD pipeline, GitHub Pages deployment, and npm publishing
 - **[Contributing](./CONTRIBUTING.md)** - Contribution guidelines, development workflow, and code standards
 - **[KRD Format](./docs/krd-format.md)** - Complete specification of the Kaiord Representation Definition format
-- **[AI Agents](./AGENTS.md)** - Guidance for AI-assisted development with Kiro and other tools
+- **[AI Agents](./AGENTS.md)** - Guidance for AI-assisted development
 
 ---
 
@@ -78,7 +74,6 @@ Comprehensive documentation is available in the `/docs` directory:
 | Core            | TypeScript, tsup, AJV |
 | CLI             | yargs                 |
 | Testing         | Vitest                |
-| Specs & hooks   | Kiro                  |
 | Package manager | pnpm                  |
 
 ---
@@ -91,7 +86,7 @@ kaiord/
 │  ├─ core/                → library (schema + converters)
 │  ├─ cli/                 → command-line interface
 │  └─ workout-spa-editor/  → web application (https://pablo-albaladejo.github.io/kaiord)
-├─ .kiro/   → steering docs, specs, hooks
+├─ docs/   → documentation
 ├─ LICENSE
 ├─ README.md
 └─ pnpm-workspace.yaml
@@ -159,44 +154,21 @@ For detailed contribution guidelines, development workflow, and code standards, 
 - [TCX Schema (XSD)](https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd) - Official Garmin TCX schema definition
 - [Zwift Workout Format (ZWO)](https://zwift.com) - Zwift's XML-based workout format
 
-### Related Projects
+---
 
-- [Kiro](https://kiro.dev) - AI-powered development environment
+## ❤️ Support
+
+If you find Kaiord useful, consider supporting its development:
+
+- ⭐ **Star this repo** to help others discover it
+- 💖 **[Sponsor on GitHub](https://github.com/sponsors/pablo-albaladejo)**
+- ☕ **[Buy me a coffee](https://buymeacoffee.com/pabloalbaladejo)**
+
+Your support helps maintain and improve Kaiord for the fitness community!
 
 ---
 
 ## 📜 License
 
-MIT © 2025 Pablo Albaladejo  
+MIT © 2025 Pablo Albaladejo
 See [LICENSE](./LICENSE) for details.
-
----
-
-## 🧭 About Kiro Integration
-
-This project is built using **Kiro** for:
-
-- **Vibe coding** → collaborative code generation with AI.
-- **Steering docs** → maintain clean-code and testing principles.
-- **Specs** → spec-driven implementation flow.
-- **Hooks** → local automated validations (`.kiro/hooks/*`).
-- **GitHub MCP** → direct GitHub integration for PR/issue management.
-
-All configuration lives under `.kiro/` and is version-controlled for reproducibility.
-
-### GitHub MCP Setup
-
-Kaiord uses the GitHub MCP server to enable direct GitHub interactions from Kiro:
-
-```bash
-# Run the automated setup script
-./scripts/setup-github-mcp.sh
-```
-
-This configures:
-
-- GitHub Personal Access Token authentication
-- Docker-based MCP server
-- Automatic PR/issue management capabilities
-
-See [GitHub MCP Integration](./.kiro/steering/github-mcp.md) for complete documentation.

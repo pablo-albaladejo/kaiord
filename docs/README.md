@@ -15,7 +15,7 @@ Welcome to the Kaiord documentation. This directory contains comprehensive guide
 - **[Testing Guide](testing.md)** - Unit testing, integration testing, round-trip testing, TDD workflow
 - **[Deployment Guide](deployment.md)** - CI/CD workflows, GitHub Pages, npm publishing
 - **[Contributing Guide](../CONTRIBUTING.md)** - Development workflow, code style, commit conventions, PR process
-- **[AI Agents Guide](../AGENTS.md)** - Guidelines for AI/code agents (Kiro, GPT, Claude)
+- **[AI Agents Guide](../AGENTS.md)** - Guidelines for AI/code agents (GPT, Claude, etc.)
 
 ### Package Documentation
 

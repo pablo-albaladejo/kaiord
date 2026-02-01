@@ -751,7 +751,7 @@ After release:
 
 If you need help:
 
-1. **Documentation**: Check existing docs in `.github/` and `.kiro/steering/`
+1. **Documentation**: Check existing docs in `docs/`
 2. **Issues**: Search existing issues for similar problems
 3. **Discussions**: Use GitHub Discussions for questions
 4. **Maintainers**: Tag maintainers in your PR or issue
