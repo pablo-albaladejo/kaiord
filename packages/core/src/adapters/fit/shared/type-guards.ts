@@ -14,15 +14,6 @@ export const isRepetitionBlock = (
 };
 
 /**
- * Type guard to check if a step is a WorkoutStep
- */
-export const isWorkoutStep = (
-  step: WorkoutStep | RepetitionBlock
-): step is WorkoutStep => {
-  return "stepIndex" in step;
-};
-
-/**
  * Default values for FIT file generation and mapping
  */
 export const DEFAULT_MANUFACTURER = "development" as const;

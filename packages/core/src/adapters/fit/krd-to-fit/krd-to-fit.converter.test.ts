@@ -437,10 +437,41 @@ describe("convertKRDToMessages", () => {
       expect(stepMsg).not.toHaveProperty("notes");
     });
 
-    it("should truncate notes exceeding 256 characters", () => {
+    it("should throw on notes exceeding 256 characters due to schema validation", () => {
       // Arrange
       const logger = createMockLogger();
       const longNotes = "a".repeat(300);
+      // Note: Using type assertion to bypass TypeScript schema validation
+      // to test runtime Zod validation behavior
+      const workout = {
+        name: "Test Workout",
+        sport: "cycling",
+        steps: [
+          {
+            stepIndex: 0,
+            durationType: "time",
+            duration: { type: "time", seconds: 300 },
+            targetType: "power",
+            target: {
+              type: "power",
+              value: { unit: "watts", value: 200 },
+            },
+            notes: longNotes,
+          },
+        ],
+      };
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act & Assert
+      expect(() => convertKRDToMessages(krd, logger)).toThrow(/notes.*256/i);
+    });
+
+    it("should accept notes at exactly 256 characters", () => {
+      // Arrange
+      const logger = createMockLogger();
+      const maxNotes = "a".repeat(256);
       const steps: Array<WorkoutStep> = [
         {
           stepIndex: 0,
@@ -451,7 +482,7 @@ describe("convertKRDToMessages", () => {
             type: "power",
             value: { unit: "watts", value: 200 },
           },
-          notes: longNotes,
+          notes: maxNotes,
         },
       ];
       const workout = buildWorkout.build({ steps, subSport: undefined });
@@ -468,7 +499,7 @@ describe("convertKRDToMessages", () => {
         notes: string;
       };
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
-      expect(stepMsg.notes).toBe("a".repeat(256));
+      expect(stepMsg.notes).toBe(maxNotes);
       expect(stepMsg.notes.length).toBe(256);
     });
 
@@ -1750,14 +1781,38 @@ describe("convertKRDToMessages", () => {
   });
 
   describe("advanced duration types - edge cases", () => {
-    it("should handle zero calorie values", () => {
+    it("should reject zero calorie values due to schema validation", () => {
+      // Arrange - Zero calories is invalid per schema (positive required)
+      const logger = createMockLogger();
+      const workout = {
+        name: "Test",
+        sport: "cycling",
+        steps: [
+          {
+            stepIndex: 0,
+            durationType: "calories",
+            duration: { type: "calories", calories: 0 },
+            targetType: "open",
+            target: { type: "open" },
+          },
+        ],
+      };
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act & Assert
+      expect(() => convertKRDToMessages(krd, logger)).toThrow(/calories/i);
+    });
+
+    it("should handle minimum positive calorie values", () => {
       // Arrange
       const logger = createMockLogger();
       const steps: Array<WorkoutStep> = [
         {
           stepIndex: 0,
           durationType: "calories",
-          duration: { type: "calories", calories: 0 },
+          duration: { type: "calories", calories: 1 },
           targetType: "open",
           target: { type: "open" },
         },
@@ -1773,17 +1828,41 @@ describe("convertKRDToMessages", () => {
       // Assert
       const stepMsg = messages[2] as Record<string, unknown>;
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
-      expect(stepMsg.durationCalories).toBe(0);
+      expect(stepMsg.durationCalories).toBe(1);
     });
 
-    it("should handle zero power values", () => {
+    it("should reject zero power values due to schema validation", () => {
+      // Arrange - Zero power is invalid per schema (positive required)
+      const logger = createMockLogger();
+      const workout = {
+        name: "Test",
+        sport: "cycling",
+        steps: [
+          {
+            stepIndex: 0,
+            durationType: "power_less_than",
+            duration: { type: "power_less_than", watts: 0 },
+            targetType: "open",
+            target: { type: "open" },
+          },
+        ],
+      };
+      const krd = buildKRD.build({
+        extensions: { workout },
+      });
+
+      // Act & Assert
+      expect(() => convertKRDToMessages(krd, logger)).toThrow(/watts/i);
+    });
+
+    it("should handle minimum positive power values", () => {
       // Arrange
       const logger = createMockLogger();
       const steps: Array<WorkoutStep> = [
         {
           stepIndex: 0,
           durationType: "power_less_than",
-          duration: { type: "power_less_than", watts: 0 },
+          duration: { type: "power_less_than", watts: 1 },
           targetType: "open",
           target: { type: "open" },
         },
@@ -1799,7 +1878,7 @@ describe("convertKRDToMessages", () => {
       // Assert
       const stepMsg = messages[2] as Record<string, unknown>;
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
-      expect(stepMsg.durationPower).toBe(0);
+      expect(stepMsg.durationPower).toBe(1);
     });
 
     it("should handle repeatFrom index 0", () => {

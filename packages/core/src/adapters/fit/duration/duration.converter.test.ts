@@ -737,4 +737,125 @@ describe("convertFitDuration", () => {
       });
     });
   });
+
+  describe("boundary value edge cases", () => {
+    it("should handle negative time values", () => {
+      // Arrange - negative values may come from corrupted FIT files
+      const data = buildFitDurationData.build({
+        durationType: "time",
+        durationTime: -100,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert - converter passes value through (validation is separate concern)
+      expect(result).toStrictEqual({
+        type: "time",
+        seconds: -100,
+      });
+    });
+
+    it("should handle negative distance values", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "distance",
+        durationDistance: -500,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "distance",
+        meters: -500,
+      });
+    });
+
+    it("should handle very large time values", () => {
+      // Arrange - 24 hours in seconds
+      const data = buildFitDurationData.build({
+        durationType: "time",
+        durationTime: 86400,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "time",
+        seconds: 86400,
+      });
+    });
+
+    it("should handle very large distance values", () => {
+      // Arrange - 100km marathon in meters
+      const data = buildFitDurationData.build({
+        durationType: "distance",
+        durationDistance: 100000,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "distance",
+        meters: 100000,
+      });
+    });
+
+    it("should handle maximum safe integer time value", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "time",
+        durationTime: Number.MAX_SAFE_INTEGER,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "time",
+        seconds: Number.MAX_SAFE_INTEGER,
+      });
+    });
+
+    it("should handle Infinity as duration value", () => {
+      // Arrange
+      const data = buildFitDurationData.build({
+        durationType: "time",
+        durationTime: Infinity,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert
+      expect(result).toStrictEqual({
+        type: "time",
+        seconds: Infinity,
+      });
+    });
+
+    it("should handle NaN as duration value by treating it as undefined", () => {
+      // Arrange - NaN !== undefined so converter will process it
+      const data = buildFitDurationData.build({
+        durationType: "time",
+        durationTime: NaN,
+      });
+
+      // Act
+      const result = convertFitDuration(data);
+
+      // Assert - NaN is passed through (validation is separate concern)
+      expect(result).toStrictEqual({
+        type: "time",
+        seconds: NaN,
+      });
+    });
+  });
 });

@@ -106,7 +106,7 @@ describe("Round-trip: Workout step - notes field", () => {
     }
   });
 
-  it("should truncate notes exceeding 256 characters in round-trip", async () => {
+  it("should reject notes exceeding 256 characters due to schema validation", async () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
@@ -120,7 +120,7 @@ describe("Round-trip: Workout step - notes field", () => {
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
 
-    // Add long notes to first step
+    // Add long notes to first step (bypassing schema)
     if (krd.extensions?.workout) {
       const workout = krd.extensions.workout as {
         name?: string;
@@ -136,10 +136,44 @@ describe("Round-trip: Workout step - notes field", () => {
       }
     }
 
+    // Act & Assert - Should throw validation error
+    expect(() => convertKRDToMessages(krd, logger)).toThrow(/notes.*256/i);
+  });
+
+  it("should accept notes at exactly 256 characters in round-trip", async () => {
+    // Arrange
+    const logger = createMockLogger();
+    const reader = createGarminFitSdkReader(logger);
+    const fitPath = join(
+      __dirname,
+      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
+    );
+    const originalBuffer = readFileSync(fitPath);
+    const maxNotes = "a".repeat(256);
+
+    // Act - FIT → KRD
+    const krd = await reader(originalBuffer);
+
+    // Add max-length notes to first step
+    if (krd.extensions?.workout) {
+      const workout = krd.extensions.workout as {
+        name?: string;
+        sport: string;
+        steps: Array<{
+          stepIndex: number;
+          notes?: string;
+          [key: string]: unknown;
+        }>;
+      };
+      if (workout.steps.length > 0) {
+        workout.steps[0].notes = maxNotes;
+      }
+    }
+
     // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert - Notes should be truncated to 256 characters
+    // Assert - Notes should be preserved at 256 characters
     const stepMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -147,7 +181,7 @@ describe("Round-trip: Workout step - notes field", () => {
         (msg as { messageIndex?: number }).messageIndex === 0
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
-    expect(stepMsg?.notes).toBe("a".repeat(256));
+    expect(stepMsg?.notes).toBe(maxNotes);
     expect((stepMsg?.notes as string).length).toBe(256);
   });
 

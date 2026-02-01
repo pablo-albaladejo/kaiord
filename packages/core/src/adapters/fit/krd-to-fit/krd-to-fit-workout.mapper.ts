@@ -4,11 +4,17 @@ import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import { fitTargetTypeSchema } from "../schemas/fit-target";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import { isRepetitionBlock } from "../shared/type-guards";
-import { convertWorkoutStep } from "./krd-to-fit-step.mapper";
+import {
+  convertWorkoutStep,
+  type ConvertWorkoutStepOptions,
+} from "./krd-to-fit-step.mapper";
+
+export type ConvertWorkoutStepsOptions = ConvertWorkoutStepOptions;
 
 export const convertWorkoutSteps = (
   workout: Workout,
-  logger: Logger
+  logger: Logger,
+  options: ConvertWorkoutStepsOptions = {}
 ): Array<unknown> => {
   logger.debug("Converting workout steps", { stepCount: workout.steps.length });
 
@@ -20,12 +26,18 @@ export const convertWorkoutSteps = (
       const repetitionMessages = convertRepetitionBlock(
         step,
         messageIndex,
-        logger
+        logger,
+        options
       );
       messages.push(...repetitionMessages);
       messageIndex += repetitionMessages.length;
     } else {
-      const stepMessage = convertWorkoutStep(step, messageIndex, logger);
+      const stepMessage = convertWorkoutStep(
+        step,
+        messageIndex,
+        logger,
+        options
+      );
       messages.push(stepMessage);
       messageIndex += 1;
     }
@@ -37,7 +49,8 @@ export const convertWorkoutSteps = (
 const convertRepetitionBlock = (
   block: RepetitionBlock,
   startIndex: number,
-  logger: Logger
+  logger: Logger,
+  options: ConvertWorkoutStepsOptions
 ): Array<unknown> => {
   logger.debug("Converting repetition block", {
     repeatCount: block.repeatCount,
@@ -48,7 +61,7 @@ const convertRepetitionBlock = (
   let messageIndex = startIndex;
 
   for (const step of block.steps) {
-    const stepMessage = convertWorkoutStep(step, messageIndex, logger);
+    const stepMessage = convertWorkoutStep(step, messageIndex, logger, options);
     messages.push(stepMessage);
     messageIndex += 1;
   }
