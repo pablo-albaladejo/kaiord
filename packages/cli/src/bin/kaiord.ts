@@ -11,6 +11,7 @@ import { convertCommand } from "../commands/convert.js";
 import { diffCommand } from "../commands/diff.js";
 import { validateCommand } from "../commands/validate.js";
 import { formatError } from "../utils/error-formatter.js";
+import { ExitCode } from "../utils/exit-codes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -124,7 +125,7 @@ const main = async (): Promise<void> => {
             );
         },
         async (argv) => {
-          await validateCommand({
+          const exitCode = await validateCommand({
             input: argv.input,
             toleranceConfig: argv.toleranceConfig,
             verbose: argv.verbose as boolean | undefined,
@@ -132,6 +133,9 @@ const main = async (): Promise<void> => {
             json: argv.json as boolean | undefined,
             logFormat: argv.logFormat as "pretty" | "structured" | undefined,
           });
+          if (exitCode !== ExitCode.SUCCESS) {
+            process.exit(exitCode);
+          }
         }
       )
       .command(
@@ -226,32 +230,32 @@ const main = async (): Promise<void> => {
     if (error && typeof error === "object" && "name" in error) {
       const errorName = (error as { name: string }).name;
       if (errorName === "FitParsingError") {
-        process.exit(4);
+        process.exit(ExitCode.PARSING_ERROR);
       } else if (errorName === "KrdValidationError") {
-        process.exit(5);
+        process.exit(ExitCode.VALIDATION_ERROR);
       } else if (errorName === "ToleranceExceededError") {
-        process.exit(6);
+        process.exit(ExitCode.TOLERANCE_EXCEEDED);
       }
     }
 
     // Unknown error
-    process.exit(99);
+    process.exit(ExitCode.UNKNOWN_ERROR);
   }
 };
 
 // Handle unhandled rejections
 process.on("unhandledRejection", (reason) => {
   console.error("Unhandled rejection:", reason);
-  process.exit(99);
+  process.exit(ExitCode.UNKNOWN_ERROR);
 });
 
 // Handle uncaught exceptions
 process.on("uncaughtException", (error) => {
   console.error("Uncaught exception:", error);
-  process.exit(99);
+  process.exit(ExitCode.UNKNOWN_ERROR);
 });
 
 main().catch((error) => {
   console.error("Fatal error:", error);
-  process.exit(99);
+  process.exit(ExitCode.UNKNOWN_ERROR);
 });

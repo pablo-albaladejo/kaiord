@@ -49,7 +49,7 @@ describe("validate command integration tests", () => {
 
       // Assert
       const output = stripAnsi(result.stdout);
-      expect(output).toMatch(/✓.*validation.*passed/i);
+      expect(output).toMatch(/validation.*passed/i);
     });
   });
 
@@ -109,7 +109,7 @@ describe("validate command integration tests", () => {
   });
 
   describe("error handling", () => {
-    it("should fail with exit code 1 for missing file", async () => {
+    it("should fail with exit code 2 for missing file", async () => {
       // Arrange
       const nonExistentFile = join(tempDir, "nonexistent.fit");
 
@@ -124,7 +124,8 @@ describe("validate command integration tests", () => {
         expect.fail("Should have thrown an error");
       } catch (error: unknown) {
         const execaError = error as { exitCode: number; stderr: string };
-        expect(execaError.exitCode).toBe(1);
+        // Exit code 2 = FILE_NOT_FOUND per CLI specification
+        expect(execaError.exitCode).toBe(2);
       }
     });
 

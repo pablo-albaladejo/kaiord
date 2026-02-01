@@ -8,6 +8,37 @@ import { dirname } from "path";
 import type { FileFormat } from "./format-detector";
 
 /**
+ * Type guard for Node.js system errors with error codes
+ */
+type NodeSystemError = Error & { code: string };
+
+export const isNodeSystemError = (error: unknown): error is NodeSystemError => {
+  return error instanceof Error && "code" in error;
+};
+
+/**
+ * Validate that a path does not contain dangerous path components.
+ * CLIs legitimately need to access files anywhere on the filesystem,
+ * including using relative paths like "../other-folder".
+ * This function blocks only clearly dangerous patterns.
+ * @param inputPath - Path to validate
+ * @throws Error if dangerous path pattern is detected
+ */
+export const validatePathSecurity = (inputPath: string): void => {
+  // Block null bytes which could be used for injection attacks
+  if (inputPath.includes("\0")) {
+    throw new Error(`Invalid path: null byte detected in ${inputPath}`);
+  }
+
+  // Block paths that attempt command injection
+  if (inputPath.includes("|") || inputPath.includes(";")) {
+    throw new Error(
+      `Invalid path: shell metacharacters detected in ${inputPath}`
+    );
+  }
+};
+
+/**
  * Read a file from disk, handling binary and text formats appropriately
  * @param path - Path to the file
  * @param format - File format (determines binary vs text handling)
@@ -17,6 +48,8 @@ export const readFile = async (
   path: string,
   format: FileFormat
 ): Promise<Uint8Array | string> => {
+  validatePathSecurity(path);
+
   try {
     if (format === "fit") {
       // FIT files are binary
@@ -27,7 +60,7 @@ export const readFile = async (
       return await fsReadFile(path, "utf-8");
     }
   } catch (error) {
-    if (error instanceof Error && "code" in error) {
+    if (isNodeSystemError(error)) {
       if (error.code === "ENOENT") {
         throw new Error(`File not found: ${path}`);
       }
@@ -50,6 +83,8 @@ export const writeFile = async (
   data: Uint8Array | string,
   format: FileFormat
 ): Promise<void> => {
+  validatePathSecurity(path);
+
   try {
     // Create directory if it doesn't exist
     const dir = dirname(path);
@@ -69,7 +104,7 @@ export const writeFile = async (
       await fsWriteFile(path, data, "utf-8");
     }
   } catch (error) {
-    if (error instanceof Error && "code" in error) {
+    if (isNodeSystemError(error)) {
       if (error.code === "EACCES") {
         throw new Error(`Permission denied: ${path}`);
       }
