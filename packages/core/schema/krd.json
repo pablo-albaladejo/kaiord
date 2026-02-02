@@ -90,12 +90,48 @@
                 "type": "number",
                 "minimum": 0
               },
+              "maxCadence": {
+                "type": "number",
+                "minimum": 0
+              },
               "avgPower": {
+                "type": "number",
+                "minimum": 0
+              },
+              "maxPower": {
+                "type": "number",
+                "minimum": 0
+              },
+              "normalizedPower": {
+                "type": "number",
+                "minimum": 0
+              },
+              "trainingStressScore": {
+                "type": "number",
+                "minimum": 0
+              },
+              "intensityFactor": {
                 "type": "number",
                 "minimum": 0
               },
               "totalCalories": {
                 "type": "integer",
+                "minimum": 0
+              },
+              "totalAscent": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalDescent": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avgSpeed": {
+                "type": "number",
+                "minimum": 0
+              },
+              "maxSpeed": {
+                "type": "number",
                 "minimum": 0
               }
             },
@@ -202,6 +238,21 @@
               "distance": {
                 "type": "number",
                 "minimum": 0
+              },
+              "temperature": {
+                "type": "number"
+              },
+              "verticalOscillation": {
+                "type": "number",
+                "minimum": 0
+              },
+              "stanceTime": {
+                "type": "number",
+                "minimum": 0
+              },
+              "stepLength": {
+                "type": "number",
+                "minimum": 0
               }
             },
             "required": [
@@ -228,7 +279,10 @@
                   "resume",
                   "lap",
                   "marker",
-                  "timer"
+                  "timer",
+                  "workout_step",
+                  "session",
+                  "activity"
                 ]
               },
               "eventGroup": {
@@ -236,6 +290,10 @@
               },
               "data": {
                 "type": "integer"
+              },
+              "message": {
+                "type": "string",
+                "maxLength": 256
               }
             },
             "required": [

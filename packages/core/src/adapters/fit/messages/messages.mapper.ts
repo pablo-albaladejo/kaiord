@@ -1,14 +1,32 @@
-import { fileTypeSchema } from "../../../domain/schemas/file-type";
+import {
+  fileTypeSchema,
+  type FileType,
+} from "../../../domain/schemas/file-type";
 import type { KRD } from "../../../domain/schemas/krd";
 import type { Logger } from "../../../ports/logger";
-import { extractFitExtensions } from "../extensions/extensions.extractor";
-import { mapMetadata } from "../metadata/metadata.mapper";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import type { FitMessages } from "../shared/types";
-import { mapWorkout } from "../workout/workout.mapper";
-import { validateMessages } from "./messages.validator";
+import { mapActivityFileToKRD } from "./activity.mapper";
+import { mapWorkoutFileToKRD } from "./workout.mapper";
 
-const KRD_VERSION = "1.0" as const;
+/**
+ * Detects file type from FIT messages.
+ */
+const detectFileType = (messages: FitMessages): FileType => {
+  const workoutMsgs = messages[fitMessageKeySchema.enum.workoutMesgs];
+  if (workoutMsgs && workoutMsgs.length > 0) return fileTypeSchema.enum.workout;
+
+  const sessionMsgs = messages[fitMessageKeySchema.enum.sessionMesgs];
+  const recordMsgs = messages[fitMessageKeySchema.enum.recordMesgs];
+  if (
+    (sessionMsgs && sessionMsgs.length > 0) ||
+    (recordMsgs && recordMsgs.length > 0)
+  ) {
+    return fileTypeSchema.enum.activity;
+  }
+
+  return fileTypeSchema.enum.workout;
+};
 
 export const mapMessagesToKRD = (
   messages: FitMessages,
@@ -18,24 +36,14 @@ export const mapMessagesToKRD = (
     messageCount: Object.keys(messages).length,
   });
 
-  const fileId = messages[fitMessageKeySchema.enum.fileIdMesgs]?.[0];
-  const workoutMsg = messages[fitMessageKeySchema.enum.workoutMesgs]?.[0];
-  const workoutSteps =
-    messages[fitMessageKeySchema.enum.workoutStepMesgs] || [];
+  const fileType = detectFileType(messages);
+  logger.debug("Detected file type", { fileType });
 
-  validateMessages(fileId, workoutMsg, messages, logger);
-
-  const metadata = mapMetadata(fileId, workoutMsg, logger);
-  const workout = mapWorkout(workoutMsg, workoutSteps, logger);
-  const fitExtensions = extractFitExtensions(messages, logger);
-
-  return {
-    version: KRD_VERSION,
-    type: fileTypeSchema.enum.workout,
-    metadata,
-    extensions: {
-      workout,
-      fit: fitExtensions,
-    },
-  };
+  switch (fileType) {
+    case fileTypeSchema.enum.activity:
+      return mapActivityFileToKRD(messages, logger);
+    case fileTypeSchema.enum.workout:
+    default:
+      return mapWorkoutFileToKRD(messages, logger);
+  }
 };
