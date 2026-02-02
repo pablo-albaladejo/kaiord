@@ -32,6 +32,10 @@ export const krdRecordSchema = z.object({
   power: z.number().min(0).optional(),
   speed: z.number().min(0).optional(),
   distance: z.number().min(0).optional(),
+  temperature: z.number().optional(),
+  verticalOscillation: z.number().min(0).optional(),
+  stanceTime: z.number().min(0).optional(),
+  stepLength: z.number().min(0).optional(),
 });
 
 /**
