@@ -1,8 +1,6 @@
 import { describe, expect, it } from "vitest";
-import {
-  degreesToSemicircles,
-  semicirclesToDegrees,
-} from "../shared/coordinate.converter";
+import { semicirclesToDegrees } from "../shared/coordinate.converter";
+import { convertFitToKrdRecord } from "./fit-to-krd-record.converter";
 import {
   convertKrdToFitRecord,
   convertKrdToFitRecords,
@@ -101,8 +99,11 @@ describe("convertKrdToFitRecord", () => {
       timestamp: "invalid-date",
     };
 
-    // Act & Assert
-    expect(() => convertKrdToFitRecord(invalidRecord)).toThrow();
+    // Act
+    const act = () => convertKrdToFitRecord(invalidRecord);
+
+    // Assert
+    expect(act).toThrow();
   });
 });
 
@@ -127,7 +128,7 @@ describe("convertKrdToFitRecords", () => {
 });
 
 describe("round-trip conversion", () => {
-  it("should preserve coordinates through KRD → FIT → KRD", () => {
+  it("should preserve coordinates through KRD -> FIT -> KRD", () => {
     // Arrange
     const cities = [
       { name: "Barcelona", lat: 41.3851, lon: 2.1734 },
@@ -141,12 +142,72 @@ describe("round-trip conversion", () => {
         position: { lat, lon },
       };
 
-      // Act - convert to FIT
+      // Act - convert to FIT and back to KRD
       const fitResult = convertKrdToFitRecord(originalKrd);
+      const roundTrippedKrd = convertFitToKrdRecord(fitResult);
 
-      // Assert - verify semicircles convert back correctly
-      expect(semicirclesToDegrees(fitResult.positionLat!)).toBeCloseTo(lat, 5);
-      expect(semicirclesToDegrees(fitResult.positionLong!)).toBeCloseTo(lon, 5);
+      // Assert - verify coordinates preserved within tolerance
+      expect(roundTrippedKrd.position?.lat).toBeCloseTo(lat, 5);
+      expect(roundTrippedKrd.position?.lon).toBeCloseTo(lon, 5);
     });
+  });
+
+  it("should preserve metrics through KRD -> FIT -> KRD with tolerances", () => {
+    // Arrange
+    const originalKrd = {
+      timestamp: "2024-01-01T00:00:00.000Z",
+      heartRate: 145,
+      cadence: 90.5,
+      power: 250,
+      distance: 5000,
+      altitude: 105.5,
+      speed: 3.5,
+      temperature: 22,
+    };
+
+    // Act
+    const fitResult = convertKrdToFitRecord(originalKrd);
+    const roundTrippedKrd = convertFitToKrdRecord(fitResult);
+
+    // Assert - timestamp within 1 second tolerance
+    const originalTime = new Date(originalKrd.timestamp).getTime();
+    const roundTrippedTime = new Date(roundTrippedKrd.timestamp).getTime();
+    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(1000);
+
+    // Assert - heart rate within 1 bpm
+    expect(roundTrippedKrd.heartRate).toBe(originalKrd.heartRate);
+
+    // Assert - power within 1W
+    expect(roundTrippedKrd.power).toBe(originalKrd.power);
+
+    // Assert - cadence within 1 rpm (fractional part now preserved)
+    expect(roundTrippedKrd.cadence).toBeCloseTo(originalKrd.cadence, 1);
+
+    // Assert - other fields preserved
+    expect(roundTrippedKrd.distance).toBe(originalKrd.distance);
+    expect(roundTrippedKrd.altitude).toBe(originalKrd.altitude);
+    expect(roundTrippedKrd.speed).toBe(originalKrd.speed);
+    expect(roundTrippedKrd.temperature).toBe(originalKrd.temperature);
+  });
+
+  it("should preserve running dynamics through round-trip", () => {
+    // Arrange
+    const originalKrd = {
+      timestamp: "2024-01-01T00:00:00.000Z",
+      verticalOscillation: 8.5,
+      stanceTime: 250,
+      stepLength: 1.2,
+    };
+
+    // Act
+    const fitResult = convertKrdToFitRecord(originalKrd);
+    const roundTrippedKrd = convertFitToKrdRecord(fitResult);
+
+    // Assert
+    expect(roundTrippedKrd.verticalOscillation).toBe(
+      originalKrd.verticalOscillation
+    );
+    expect(roundTrippedKrd.stanceTime).toBe(originalKrd.stanceTime);
+    expect(roundTrippedKrd.stepLength).toBe(originalKrd.stepLength);
   });
 });

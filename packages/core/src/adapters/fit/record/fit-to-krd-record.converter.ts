@@ -15,12 +15,16 @@ export const convertFitToKrdRecord = (
 ): KRDRecord => {
   const fitRecord = fitRecordSchema.parse(data) as FitRecord;
 
-  // Validate coordinates if present
-  if (
-    fitRecord.positionLat !== undefined &&
-    fitRecord.positionLong !== undefined
-  ) {
-    if (!validateCoordinates(fitRecord.positionLat, fitRecord.positionLong)) {
+  // Validate coordinates if present - both must be present or neither
+  const hasLat = fitRecord.positionLat !== undefined;
+  const hasLon = fitRecord.positionLong !== undefined;
+
+  if (hasLat !== hasLon) {
+    throw new Error("Partial coordinates: both lat and lon must be present");
+  }
+
+  if (hasLat && hasLon) {
+    if (!validateCoordinates(fitRecord.positionLat!, fitRecord.positionLong!)) {
       throw new Error("Invalid coordinates: out of range");
     }
   }

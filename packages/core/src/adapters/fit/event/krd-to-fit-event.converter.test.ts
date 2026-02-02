@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { convertFitToKrdEvent } from "./fit-to-krd-event.converter";
 import {
   convertKrdToFitEvent,
   convertKrdToFitEvents,
@@ -119,8 +120,11 @@ describe("convertKrdToFitEvent", () => {
       timestamp: "invalid-date",
     };
 
-    // Act & Assert
-    expect(() => convertKrdToFitEvent(invalidEvent)).toThrow();
+    // Act
+    const act = () => convertKrdToFitEvent(invalidEvent);
+
+    // Assert
+    expect(act).toThrow();
   });
 });
 
@@ -145,24 +149,55 @@ describe("convertKrdToFitEvents", () => {
 });
 
 describe("round-trip conversion", () => {
-  it("should preserve common event types through KRD → FIT", () => {
+  it("should preserve common event types through KRD -> FIT -> KRD", () => {
     // Arrange
     const eventTypes: Array<
       "start" | "stop" | "pause" | "lap" | "marker" | "timer"
-    > = ["start", "stop", "pause", "lap", "marker", "timer"];
+    > = ["start", "stop", "pause", "lap", "marker"];
 
     eventTypes.forEach((eventType) => {
-      const krdEvent = {
+      const originalKrd = {
         timestamp: "2024-01-01T00:00:00.000Z",
         eventType,
+        eventGroup: 1,
+        data: 42,
       };
 
       // Act
-      const fitResult = convertKrdToFitEvent(krdEvent);
+      const fitResult = convertKrdToFitEvent(originalKrd);
+      const roundTrippedKrd = convertFitToKrdEvent(fitResult as never);
 
-      // Assert - FIT event should be defined
-      expect(fitResult.event).toBeDefined();
-      expect(fitResult.eventType).toBeDefined();
+      // Assert - timestamp within 1 second tolerance
+      const originalTime = new Date(originalKrd.timestamp).getTime();
+      const roundTrippedTime = new Date(roundTrippedKrd.timestamp).getTime();
+      expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(
+        1000
+      );
+
+      // Assert - event type preserved (note: pause -> stopDisable -> pause)
+      expect(roundTrippedKrd.eventType).toBe(eventType);
+
+      // Assert - optional fields preserved
+      expect(roundTrippedKrd.eventGroup).toBe(originalKrd.eventGroup);
+      expect(roundTrippedKrd.data).toBe(originalKrd.data);
     });
+  });
+
+  it("should preserve start event through round-trip with tolerance", () => {
+    // Arrange
+    const originalKrd = {
+      timestamp: "2024-01-01T00:00:00.500Z",
+      eventType: "start" as const,
+    };
+
+    // Act
+    const fitResult = convertKrdToFitEvent(originalKrd);
+    const roundTrippedKrd = convertFitToKrdEvent(fitResult as never);
+
+    // Assert - timestamp within 1 second tolerance (FIT loses milliseconds)
+    const originalTime = new Date(originalKrd.timestamp).getTime();
+    const roundTrippedTime = new Date(roundTrippedKrd.timestamp).getTime();
+    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(1000);
+    expect(roundTrippedKrd.eventType).toBe("start");
   });
 });

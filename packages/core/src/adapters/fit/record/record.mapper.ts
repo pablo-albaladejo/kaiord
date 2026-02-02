@@ -77,7 +77,13 @@ export const mapKrdRecordToFit = (krd: KRDRecord): Partial<FitRecord> => {
   if (krd.speed !== undefined) fit.speed = krd.speed;
   if (krd.distance !== undefined) fit.distance = krd.distance;
   if (krd.heartRate !== undefined) fit.heartRate = krd.heartRate;
-  if (krd.cadence !== undefined) fit.cadence = Math.floor(krd.cadence);
+  if (krd.cadence !== undefined) {
+    fit.cadence = Math.floor(krd.cadence);
+    const fractional = krd.cadence - Math.floor(krd.cadence);
+    if (fractional > 0) {
+      fit.fractionalCadence = fractional;
+    }
+  }
   if (krd.power !== undefined) fit.power = krd.power;
   if (krd.temperature !== undefined) fit.temperature = krd.temperature;
 

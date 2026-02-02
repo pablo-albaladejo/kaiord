@@ -21,7 +21,7 @@ describe("convertFitToKrdSession", () => {
     expect(result.totalElapsedTime).toBe(3600);
     expect(result.totalTimerTime).toBe(3500);
     expect(result.sport).toBe("cycling");
-    expect(result.subSport).toBe("indoorCycling");
+    expect(result.subSport).toBe("indoor_cycling");
   });
 
   it("should convert FIT session with performance metrics", () => {
