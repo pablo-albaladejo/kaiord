@@ -29,8 +29,17 @@ export const krdSessionSchema = z.object({
   avgHeartRate: z.number().int().min(0).max(300).optional(),
   maxHeartRate: z.number().int().min(0).max(300).optional(),
   avgCadence: z.number().min(0).optional(),
+  maxCadence: z.number().min(0).optional(),
   avgPower: z.number().min(0).optional(),
+  maxPower: z.number().min(0).optional(),
+  normalizedPower: z.number().min(0).optional(),
+  trainingStressScore: z.number().min(0).optional(),
+  intensityFactor: z.number().min(0).optional(),
   totalCalories: z.number().int().min(0).optional(),
+  totalAscent: z.number().min(0).optional(),
+  totalDescent: z.number().min(0).optional(),
+  avgSpeed: z.number().min(0).optional(),
+  maxSpeed: z.number().min(0).optional(),
 });
 
 /**

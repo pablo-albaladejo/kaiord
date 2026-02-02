@@ -26,9 +26,13 @@ export const krdEventSchema = z.object({
     "lap",
     "marker",
     "timer",
+    "workout_step",
+    "session",
+    "activity",
   ]),
   eventGroup: z.number().int().optional(),
   data: z.number().int().optional(),
+  message: z.string().max(256).optional(),
 });
 
 /**
