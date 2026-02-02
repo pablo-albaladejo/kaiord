@@ -10,12 +10,12 @@ Implement FIT LAP message (ID 19) bidirectional conversion. LAP messages contain
 
 ## Phase Overview
 
-| Task | Priority | Effort | Files |
-|------|----------|--------|-------|
-| 2.1 Extend KRD Lap Schema | High | 0.5 days | 1 modified |
-| 2.2 FIT LAP Schema | High | 0.5 days | 2 new |
-| 2.3 LAP Converters | High | 1 day | 5 new files |
-| 2.4 Integration | High | 0.5 days | 1 modified |
+| Task                      | Priority | Effort   | Files       |
+| ------------------------- | -------- | -------- | ----------- |
+| 2.1 Extend KRD Lap Schema | High     | 0.5 days | 1 modified  |
+| 2.2 FIT LAP Schema        | High     | 0.5 days | 2 new       |
+| 2.3 LAP Converters        | High     | 1 day    | 5 new files |
+| 2.4 Integration           | High     | 0.5 days | 1 modified  |
 
 ---
 
@@ -24,6 +24,7 @@ Implement FIT LAP message (ID 19) bidirectional conversion. LAP messages contain
 **File**: `packages/core/src/domain/schemas/krd/lap.ts`
 
 ### Current Schema (minimal)
+
 ```typescript
 export const krdLapSchema = z.object({
   startTime: z.string().datetime(),
@@ -37,6 +38,7 @@ export const krdLapSchema = z.object({
 ```
 
 ### Fields to Add
+
 ```typescript
 // Timing
 totalTimerTime: z.number().min(0).optional(),
@@ -89,14 +91,15 @@ export const fitLapTriggerSchema = z.enum([
 ```
 
 ### Trigger Mapping (FIT → KRD)
-| FIT LapTrigger | KRD trigger |
-|----------------|-------------|
-| manual | "manual" |
-| time | "time" |
-| distance | "distance" |
-| positionStart/Lap/Waypoint/Marked | "position" |
-| sessionEnd | "session_end" |
-| fitnessEquipment | "fitness_equipment" |
+
+| FIT LapTrigger                    | KRD trigger         |
+| --------------------------------- | ------------------- |
+| manual                            | "manual"            |
+| time                              | "time"              |
+| distance                          | "distance"          |
+| positionStart/Lap/Waypoint/Marked | "position"          |
+| sessionEnd                        | "session_end"       |
+| fitnessEquipment                  | "fitness_equipment" |
 
 ### File 2: `packages/core/src/adapters/fit/schemas/fit-lap.ts`
 
@@ -136,6 +139,7 @@ export const fitLapSchema = z.object({
 ## 2.3 LAP Converters
 
 ### Directory Structure
+
 ```
 packages/core/src/adapters/fit/lap/
 ├── index.ts
@@ -148,13 +152,13 @@ packages/core/src/adapters/fit/lap/
 ```
 
 ### lap.mapper.ts (Pattern from session.mapper.ts)
+
 ```typescript
 export const mapFitLapToKrd = (fit: FitLap): KRDLap => ({
   startTime: new Date(fit.startTime * 1000).toISOString(),
   totalElapsedTime: fit.totalElapsedTime / 1000,
-  totalTimerTime: fit.totalTimerTime !== undefined
-    ? fit.totalTimerTime / 1000
-    : undefined,
+  totalTimerTime:
+    fit.totalTimerTime !== undefined ? fit.totalTimerTime / 1000 : undefined,
   avgSpeed: fit.enhancedAvgSpeed ?? fit.avgSpeed,
   maxSpeed: fit.enhancedMaxSpeed ?? fit.maxSpeed,
   // ... other fields
@@ -164,14 +168,16 @@ export const mapFitLapToKrd = (fit: FitLap): KRDLap => ({
 export const mapKrdLapToFit = (krd: KRDLap): Partial<FitLap> => ({
   startTime: Math.floor(new Date(krd.startTime).getTime() / 1000),
   totalElapsedTime: krd.totalElapsedTime * 1000,
-  totalTimerTime: krd.totalTimerTime !== undefined
-    ? krd.totalTimerTime * 1000
-    : krd.totalElapsedTime * 1000,
+  totalTimerTime:
+    krd.totalTimerTime !== undefined
+      ? krd.totalTimerTime * 1000
+      : krd.totalElapsedTime * 1000,
   // ... other fields
 });
 ```
 
 ### fit-to-krd-lap.converter.ts
+
 ```typescript
 export const convertFitToKrdLap = (data: Record<string, unknown>): KRDLap => {
   const fitLap = fitLapSchema.parse(data) as FitLap;
@@ -184,6 +190,7 @@ export const convertFitToKrdLaps = (
 ```
 
 ### Test Strategy (AAA pattern)
+
 ```typescript
 describe("convertFitToKrdLap", () => {
   it("should convert FIT lap with required fields", () => {
@@ -200,6 +207,7 @@ describe("convertFitToKrdLap", () => {
 ```
 
 ### Test Cases
+
 - Convert lap with required fields only
 - Convert lap with performance metrics (HR, power, cadence)
 - Prefer enhanced speed over regular
@@ -227,16 +235,16 @@ export const mapActivityFileToKRD = (messages, logger): KRD => {
     sessions: sessionMsgs.length,
     records: recordMsgs.length,
     events: eventMsgs.length,
-    laps: lapMsgs.length,  // Add this
+    laps: lapMsgs.length, // Add this
   });
 
-  const laps = convertFitToKrdLaps(lapMsgs);  // Add this
+  const laps = convertFitToKrdLaps(lapMsgs); // Add this
 
   return {
     // ... existing
     extensions: {
       fit: fitExtensions,
-      activity: { session, records, events, laps },  // Add laps
+      activity: { session, records, events, laps }, // Add laps
     },
   };
 };
@@ -247,6 +255,7 @@ export const mapActivityFileToKRD = (messages, logger): KRD => {
 ## Files Summary
 
 ### New Files (7 files)
+
 ```
 packages/core/src/adapters/fit/
 ├── schemas/
@@ -263,6 +272,7 @@ packages/core/src/adapters/fit/
 ```
 
 ### Modified Files (2 files)
+
 ```
 packages/core/src/
 ├── domain/schemas/krd/lap.ts          # Extend with new fields
