@@ -283,17 +283,17 @@ packages/core/src/
 
 ## Implementation Order
 
-1. [ ] Extend `domain/schemas/krd/lap.ts` with new fields
-2. [ ] Create `schemas/fit-lap-trigger.ts` with trigger enum
-3. [ ] Create `schemas/fit-lap.ts` with FIT LAP schema
-4. [ ] Create `lap/lap-trigger.mapper.ts` with trigger mappings
-5. [ ] Create `lap/lap.mapper.ts` with field translation
-6. [ ] Create `lap/fit-to-krd-lap.converter.ts` + tests
-7. [ ] Create `lap/krd-to-fit-lap.converter.ts` + tests
-8. [ ] Create `lap/index.ts` exports
-9. [ ] Integrate in `activity.mapper.ts`
-10. [ ] Run full test suite
-11. [ ] Create changeset
+1. [x] Extend `domain/schemas/krd/lap.ts` with new fields
+2. [x] Create `schemas/fit-lap-trigger.ts` with trigger enum
+3. [x] Create `schemas/fit-lap.ts` with FIT LAP schema
+4. [x] Create `lap/lap-trigger.mapper.ts` with trigger mappings
+5. [x] Create `lap/lap.mapper.ts` with field translation
+6. [x] Create `lap/fit-to-krd-lap.converter.ts` + tests
+7. [x] Create `lap/krd-to-fit-lap.converter.ts` + tests
+8. [x] Create `lap/index.ts` exports
+9. [x] Integrate in `activity.mapper.ts`
+10. [x] Run full test suite
+11. [x] Create changeset
 
 ---
 
@@ -320,13 +320,13 @@ pnpm -r test && pnpm -r build && pnpm lint
 
 ## Acceptance Criteria
 
-- [ ] FIT LAP messages parse correctly (all trigger types)
-- [ ] KRD lap schema extended with new fields
-- [ ] Bidirectional conversion FIT LAP ↔ KRD lap works
-- [ ] Round-trip tests pass with tolerances (±1s time, ±1W power, ±1bpm HR)
-- [ ] Enhanced speed preferred over regular speed
-- [ ] Zero totalTimerTime preserved through round-trip
-- [ ] activity.mapper.ts extracts and converts laps
-- [ ] Test coverage ≥ 80% for converters
-- [ ] No file exceeds 100 lines (except tests)
-- [ ] Build passes without warnings
+- [x] FIT LAP messages parse correctly (all trigger types)
+- [x] KRD lap schema extended with new fields
+- [x] Bidirectional conversion FIT LAP ↔ KRD lap works
+- [x] Round-trip tests pass with tolerances (±1s time, ±1W power, ±1bpm HR)
+- [x] Enhanced speed preferred over regular speed
+- [x] Zero totalTimerTime preserved through round-trip
+- [x] activity.mapper.ts extracts and converts laps
+- [x] Test coverage ≥ 80% for converters
+- [x] No file exceeds 100 lines (except tests)
+- [x] Build passes without warnings

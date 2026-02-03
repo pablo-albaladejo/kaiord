@@ -57,7 +57,12 @@ export const krdSchema = z.object({
 export type KRD = z.infer<typeof krdSchema>;
 
 export { krdEventSchema, type KRDEvent } from "./event";
-export { krdLapSchema, type KRDLap } from "./lap";
+export {
+  krdLapSchema,
+  krdLapTriggerSchema,
+  type KRDLap,
+  type KRDLapTrigger,
+} from "./lap";
 export { krdMetadataSchema, type KRDMetadata } from "./metadata";
 export { krdRecordSchema, type KRDRecord } from "./record";
 export { krdSessionSchema, type KRDSession } from "./session";

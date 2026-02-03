@@ -156,6 +156,10 @@
                 "type": "number",
                 "minimum": 0
               },
+              "totalTimerTime": {
+                "type": "number",
+                "minimum": 0
+              },
               "totalDistance": {
                 "type": "number",
                 "minimum": 0
@@ -174,9 +178,69 @@
                 "type": "number",
                 "minimum": 0
               },
+              "maxCadence": {
+                "type": "number",
+                "minimum": 0
+              },
               "avgPower": {
                 "type": "number",
                 "minimum": 0
+              },
+              "maxPower": {
+                "type": "number",
+                "minimum": 0
+              },
+              "normalizedPower": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avgSpeed": {
+                "type": "number",
+                "minimum": 0
+              },
+              "maxSpeed": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalAscent": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalDescent": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalCalories": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "trigger": {
+                "type": "string",
+                "enum": [
+                  "manual",
+                  "time",
+                  "distance",
+                  "position",
+                  "session_end",
+                  "fitness_equipment"
+                ]
+              },
+              "sport": {
+                "type": "string"
+              },
+              "subSport": {
+                "type": "string"
+              },
+              "workoutStepIndex": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "numLengths": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "swimStroke": {
+                "type": "string"
               }
             },
             "required": [

@@ -3,6 +3,7 @@ import type { KRD } from "../../../domain/schemas/krd";
 import type { Logger } from "../../../ports/logger";
 import { convertFitToKrdEvents } from "../event";
 import { extractFitExtensions } from "../extensions/extensions.extractor";
+import { convertFitToKrdLaps } from "../lap";
 import { convertFitToKrdRecords } from "../record";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { convertFitToKrdSession } from "../session";
@@ -21,17 +22,20 @@ export const mapActivityFileToKRD = (
   const sessionMsgs = messages[fitMessageKeySchema.enum.sessionMesgs] || [];
   const recordMsgs = messages[fitMessageKeySchema.enum.recordMesgs] || [];
   const eventMsgs = messages[fitMessageKeySchema.enum.eventMesgs] || [];
+  const lapMsgs = messages[fitMessageKeySchema.enum.lapMesgs] || [];
 
   logger.debug("Mapping activity file", {
     sessions: sessionMsgs.length,
     records: recordMsgs.length,
     events: eventMsgs.length,
+    laps: lapMsgs.length,
   });
 
   const session =
     sessionMsgs.length > 0 ? convertFitToKrdSession(sessionMsgs[0]) : undefined;
   const records = convertFitToKrdRecords(recordMsgs);
   const events = convertFitToKrdEvents(eventMsgs);
+  const laps = convertFitToKrdLaps(lapMsgs);
   const fitExtensions = extractFitExtensions(messages, logger);
 
   const timeCreated = fileId?.timeCreated as number | undefined;
@@ -49,7 +53,7 @@ export const mapActivityFileToKRD = (
     },
     extensions: {
       fit: fitExtensions,
-      activity: { session, records, events },
+      activity: { session, records, events, laps },
     },
   };
 };
