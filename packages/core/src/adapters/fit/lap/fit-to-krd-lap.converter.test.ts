@@ -281,4 +281,34 @@ describe("convertFitToKrdLaps", () => {
     expect(results[0].startTime).toBe("2024-01-01T00:00:00.000Z");
     expect(results[1].startTime).toBe("2024-01-01T00:10:00.000Z");
   });
+
+  it("should return empty array for empty input", () => {
+    // Arrange
+    const fitLaps: Record<string, unknown>[] = [];
+
+    // Act
+    const results = convertFitToKrdLaps(fitLaps);
+
+    // Assert
+    expect(results).toEqual([]);
+  });
+
+  it("should convert lap with distance", () => {
+    // Arrange
+    const fitLaps = [
+      {
+        timestamp: 1704067800,
+        startTime: 1704067200,
+        totalElapsedTime: 600000,
+        totalTimerTime: 580000,
+        totalDistance: 5000,
+      },
+    ];
+
+    // Act
+    const results = convertFitToKrdLaps(fitLaps);
+
+    // Assert
+    expect(results[0].totalDistance).toBe(5000);
+  });
 });

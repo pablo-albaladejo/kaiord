@@ -174,6 +174,34 @@ describe("convertKrdToFitLaps", () => {
     expect(results[0].startTime).toBe(1704067200);
     expect(results[1].startTime).toBe(1704067800);
   });
+
+  it("should return empty array for empty input", () => {
+    // Arrange
+    const krdLaps: Record<string, unknown>[] = [];
+
+    // Act
+    const results = convertKrdToFitLaps(krdLaps);
+
+    // Assert
+    expect(results).toEqual([]);
+  });
+
+  it("should convert lap with distance", () => {
+    // Arrange
+    const krdLaps = [
+      {
+        startTime: "2024-01-01T00:00:00.000Z",
+        totalElapsedTime: 600,
+        totalDistance: 5000,
+      },
+    ];
+
+    // Act
+    const results = convertKrdToFitLaps(krdLaps);
+
+    // Assert
+    expect(results[0].totalDistance).toBe(5000);
+  });
 });
 
 describe("round-trip conversion", () => {
@@ -303,5 +331,57 @@ describe("round-trip conversion", () => {
     // Assert
     expect(roundTrippedKrd.totalAscent).toBe(originalKrd.totalAscent);
     expect(roundTrippedKrd.totalDescent).toBe(originalKrd.totalDescent);
+  });
+
+  it("should preserve distance through round-trip", () => {
+    // Arrange
+    const originalKrd = {
+      startTime: "2024-01-01T00:00:00.000Z",
+      totalElapsedTime: 600,
+      totalDistance: 5000,
+    };
+
+    // Act
+    const fitResult = convertKrdToFitLap(originalKrd);
+    const roundTrippedKrd = convertFitToKrdLap(fitResult);
+
+    // Assert
+    expect(roundTrippedKrd.totalDistance).toBe(originalKrd.totalDistance);
+  });
+
+  it("should preserve all trigger types through round-trip", () => {
+    // Arrange
+    const triggers = ["session_end", "fitness_equipment", "position"] as const;
+
+    for (const trigger of triggers) {
+      const originalKrd = {
+        startTime: "2024-01-01T00:00:00.000Z",
+        totalElapsedTime: 600,
+        trigger,
+      };
+
+      // Act
+      const fitResult = convertKrdToFitLap(originalKrd);
+      const roundTrippedKrd = convertFitToKrdLap(fitResult);
+
+      // Assert
+      expect(roundTrippedKrd.trigger).toBe(trigger);
+    }
+  });
+
+  it("should preserve calories through round-trip", () => {
+    // Arrange
+    const originalKrd = {
+      startTime: "2024-01-01T00:00:00.000Z",
+      totalElapsedTime: 600,
+      totalCalories: 250,
+    };
+
+    // Act
+    const fitResult = convertKrdToFitLap(originalKrd);
+    const roundTrippedKrd = convertFitToKrdLap(fitResult);
+
+    // Assert
+    expect(roundTrippedKrd.totalCalories).toBe(originalKrd.totalCalories);
   });
 });
