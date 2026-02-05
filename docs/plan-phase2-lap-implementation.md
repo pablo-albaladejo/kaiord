@@ -140,7 +140,7 @@ export const fitLapSchema = z.object({
 
 ### Directory Structure
 
-```
+```text
 packages/core/src/adapters/fit/lap/
 ├── index.ts
 ├── lap.mapper.ts              # No tests (thin translation)
@@ -256,7 +256,7 @@ export const mapActivityFileToKRD = (messages, logger): KRD => {
 
 ### New Files (7 files)
 
-```
+```text
 packages/core/src/adapters/fit/
 ├── schemas/
 │   ├── fit-lap.ts
@@ -273,7 +273,7 @@ packages/core/src/adapters/fit/
 
 ### Modified Files (2 files)
 
-```
+```text
 packages/core/src/
 ├── domain/schemas/krd/lap.ts          # Extend with new fields
 └── adapters/fit/messages/activity.mapper.ts  # Wire up lap extraction
