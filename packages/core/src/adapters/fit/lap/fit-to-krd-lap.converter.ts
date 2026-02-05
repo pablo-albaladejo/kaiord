@@ -1,5 +1,6 @@
 import type { KRDLap } from "../../../domain/schemas/krd/lap";
-import { fitLapSchema, type FitLap } from "../schemas/fit-lap";
+import type { FitLap } from "../schemas/fit-lap";
+import { fitLapSchema } from "../schemas/fit-lap";
 import { mapFitLapToKrd } from "./lap.mapper";
 
 /**

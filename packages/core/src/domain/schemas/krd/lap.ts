@@ -1,4 +1,7 @@
 import { z } from "zod";
+import { sportSchema } from "../sport";
+import { subSportSchema } from "../sub-sport";
+import { swimStrokeSchema } from "../swim-stroke";
 
 /**
  * KRD lap trigger types - what caused the lap to be recorded.
@@ -54,15 +57,15 @@ export const krdLapSchema = z.object({
 
   // Classification
   trigger: krdLapTriggerSchema.optional(),
-  sport: z.string().optional(),
-  subSport: z.string().optional(),
+  sport: sportSchema.optional(),
+  subSport: subSportSchema.optional(),
 
   // Workout reference
   workoutStepIndex: z.number().int().min(0).optional(),
 
   // Swimming
   numLengths: z.number().int().min(0).optional(),
-  swimStroke: z.string().optional(),
+  swimStroke: swimStrokeSchema.optional(),
 });
 
 /**

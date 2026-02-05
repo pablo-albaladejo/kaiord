@@ -204,7 +204,7 @@ describe("convertFitToKrdLap", () => {
 
     // Assert
     expect(result.numLengths).toBe(4);
-    expect(result.swimStroke).toBe("2");
+    expect(result.swimStroke).toBe("breaststroke"); // FIT 2 = breaststroke
   });
 
   it("should convert lap with workout step index", () => {

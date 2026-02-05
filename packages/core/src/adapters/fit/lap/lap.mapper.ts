@@ -1,4 +1,8 @@
 import type { KRDLap } from "../../../domain/schemas/krd/lap";
+import {
+  FIT_TO_SWIM_STROKE,
+  SWIM_STROKE_TO_FIT,
+} from "../../../domain/schemas/swim-stroke";
 import type { FitLap } from "../schemas/fit-lap";
 import { mapSubSportToFit, mapSubSportToKrd } from "../sub-sport/sub-sport";
 import {
@@ -45,7 +49,7 @@ export const mapFitLapToKrd = (fit: FitLap): KRDLap => ({
 
   // Classification
   trigger: fit.lapTrigger ? mapFitLapTriggerToKrd(fit.lapTrigger) : undefined,
-  sport: fit.sport ? String(fit.sport) : undefined,
+  sport: fit.sport,
   subSport: fit.subSport ? mapSubSportToKrd(fit.subSport) : undefined,
 
   // Workout reference
@@ -53,7 +57,8 @@ export const mapFitLapToKrd = (fit: FitLap): KRDLap => ({
 
   // Swimming
   numLengths: fit.numLengths,
-  swimStroke: fit.swimStroke !== undefined ? String(fit.swimStroke) : undefined,
+  swimStroke:
+    fit.swimStroke !== undefined ? FIT_TO_SWIM_STROKE[fit.swimStroke] : undefined,
 });
 
 /**
@@ -105,7 +110,7 @@ export const mapKrdLapToFit = (krd: KRDLap): Partial<FitLap> => {
 
     // Classification
     lapTrigger: krd.trigger ? mapKrdLapTriggerToFit(krd.trigger) : undefined,
-    sport: krd.sport as FitLap["sport"],
+    sport: krd.sport,
     subSport: krd.subSport ? mapSubSportToFit(krd.subSport) : undefined,
 
     // Workout reference
@@ -114,6 +119,8 @@ export const mapKrdLapToFit = (krd: KRDLap): Partial<FitLap> => {
     // Swimming
     numLengths: krd.numLengths,
     swimStroke:
-      krd.swimStroke !== undefined ? Number(krd.swimStroke) : undefined,
+      krd.swimStroke !== undefined
+        ? SWIM_STROKE_TO_FIT[krd.swimStroke]
+        : undefined,
   };
 };
