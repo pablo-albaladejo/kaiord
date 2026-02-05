@@ -58,7 +58,9 @@ export const mapFitLapToKrd = (fit: FitLap): KRDLap => ({
   // Swimming
   numLengths: fit.numLengths,
   swimStroke:
-    fit.swimStroke !== undefined ? FIT_TO_SWIM_STROKE[fit.swimStroke] : undefined,
+    fit.swimStroke !== undefined
+      ? FIT_TO_SWIM_STROKE[fit.swimStroke]
+      : undefined,
 });
 
 /**

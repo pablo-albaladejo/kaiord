@@ -226,10 +226,79 @@
                 ]
               },
               "sport": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "cycling",
+                  "running",
+                  "swimming",
+                  "generic"
+                ]
               },
               "subSport": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "generic",
+                  "treadmill",
+                  "street",
+                  "trail",
+                  "track",
+                  "spin",
+                  "indoor_cycling",
+                  "road",
+                  "mountain",
+                  "downhill",
+                  "recumbent",
+                  "cyclocross",
+                  "hand_cycling",
+                  "track_cycling",
+                  "indoor_rowing",
+                  "elliptical",
+                  "stair_climbing",
+                  "lap_swimming",
+                  "open_water",
+                  "flexibility_training",
+                  "strength_training",
+                  "warm_up",
+                  "match",
+                  "exercise",
+                  "challenge",
+                  "indoor_skiing",
+                  "cardio_training",
+                  "indoor_walking",
+                  "e_bike_fitness",
+                  "bmx",
+                  "casual_walking",
+                  "speed_walking",
+                  "bike_to_run_transition",
+                  "run_to_bike_transition",
+                  "swim_to_bike_transition",
+                  "atv",
+                  "motocross",
+                  "backcountry",
+                  "resort",
+                  "rc_drone",
+                  "wingsuit",
+                  "whitewater",
+                  "skate_skiing",
+                  "yoga",
+                  "pilates",
+                  "indoor_running",
+                  "gravel_cycling",
+                  "e_bike_mountain",
+                  "commuting",
+                  "mixed_surface",
+                  "navigate",
+                  "track_me",
+                  "map",
+                  "single_gas_diving",
+                  "multi_gas_diving",
+                  "gauge_diving",
+                  "apnea_diving",
+                  "apnea_hunting",
+                  "virtual_activity",
+                  "obstacle",
+                  "all"
+                ]
               },
               "workoutStepIndex": {
                 "type": "integer",
@@ -240,7 +309,16 @@
                 "minimum": 0
               },
               "swimStroke": {
-                "type": "string"
+                "type": "string",
+                "enum": [
+                  "freestyle",
+                  "backstroke",
+                  "breaststroke",
+                  "butterfly",
+                  "drill",
+                  "mixed",
+                  "im"
+                ]
               }
             },
             "required": [
