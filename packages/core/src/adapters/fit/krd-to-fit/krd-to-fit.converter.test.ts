@@ -8,6 +8,7 @@ import { buildWorkoutStep } from "../../../tests/fixtures/workout/workout-step.f
 import { buildWorkout } from "../../../tests/fixtures/workout/workout.fixtures";
 import { createMockLogger } from "../../../tests/helpers/test-utils";
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
+import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import { convertKRDToMessages } from "./krd-to-fit.converter";
 
@@ -36,13 +37,13 @@ describe("convertKRDToMessages", () => {
       expect(messages.length).toBeGreaterThan(0);
       const fileIdMsg = messages[0] as {
         mesgNum: number;
-        mesgNum: number;
+        type: number;
         manufacturer: string;
         serialNumber: number;
         timeCreated: Date;
       };
       expect(fileIdMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.FILE_ID);
-      expect(fileIdMsg.type).toBe("workout");
+      expect(fileIdMsg.type).toBe(FIT_FILE_TYPE_TO_NUMBER.workout);
       expect(fileIdMsg.manufacturer).toBe(krd.metadata.manufacturer);
       expect(fileIdMsg.serialNumber).toBe(Number(krd.metadata.serialNumber));
       expect(fileIdMsg.timeCreated).toBeInstanceOf(Date);

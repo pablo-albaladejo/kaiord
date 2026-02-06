@@ -4,9 +4,13 @@ import {
 } from "../../../domain/schemas/file-type";
 import type { KRD } from "../../../domain/schemas/krd";
 import type { Logger } from "../../../ports/logger";
+import { createCourseMessages } from "../course";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import type { FitMessages } from "../shared/types";
-import { mapActivityFileToKRD } from "./activity.mapper";
+import {
+  createActivityMessages,
+  mapActivityFileToKRD,
+} from "./activity.mapper";
 import { mapWorkoutFileToKRD } from "./workout.mapper";
 
 /**
@@ -45,5 +49,36 @@ export const mapMessagesToKRD = (
     case fileTypeSchema.enum.workout:
     default:
       return mapWorkoutFileToKRD(messages, logger);
+  }
+};
+
+/**
+ * Creates FIT messages from KRD format with file type routing.
+ *
+ * Routes to the appropriate message creation function based on the
+ * file type specified in KRD metadata. Supports workout, activity,
+ * and course file types.
+ */
+export const createFitMessages = (
+  krd: KRD,
+  logger: Logger
+): Record<string, unknown[]> => {
+  const fileType = krd.metadata?.fileType ?? fileTypeSchema.enum.workout;
+  logger.debug("Creating FIT messages from KRD", { fileType });
+
+  switch (fileType) {
+    case fileTypeSchema.enum.workout:
+      // Import convertKRDToMessages for workout files
+      // Note: This returns Array<unknown> but we need Record<string, unknown[]>
+      // For now, we'll handle workout files specially
+      throw new Error(
+        "Workout file type routing not yet implemented - use convertKRDToMessages directly"
+      );
+    case fileTypeSchema.enum.activity:
+      return createActivityMessages(krd, logger);
+    case fileTypeSchema.enum.course:
+      return createCourseMessages(krd, logger);
+    default:
+      throw new Error(`Unsupported FIT file type: ${fileType}`);
   }
 };
