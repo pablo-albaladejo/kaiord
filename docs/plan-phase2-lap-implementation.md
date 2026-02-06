@@ -40,6 +40,11 @@ export const krdLapSchema = z.object({
 ### Fields to Add
 
 ```typescript
+// Import domain schemas (added in implementation)
+import { sportSchema } from "../sport";
+import { subSportSchema } from "../sub-sport";
+import { swimStrokeSchema } from "../swim-stroke";
+
 // Timing
 totalTimerTime: z.number().min(0).optional(),
 
@@ -58,16 +63,16 @@ totalDescent: z.number().min(0).optional(),
 totalCalories: z.number().int().min(0).optional(),
 
 // Classification
-trigger: lapTriggerSchema.optional(),
-sport: z.string().optional(),
-subSport: z.string().optional(),
+trigger: krdLapTriggerSchema.optional(),
+sport: sportSchema.optional(),
+subSport: subSportSchema.optional(),
 
 // Workout reference
 workoutStepIndex: z.number().int().min(0).optional(),
 
 // Swimming (optional)
 numLengths: z.number().int().min(0).optional(),
-swimStroke: z.string().optional(),
+swimStroke: swimStrokeSchema.optional(),
 ```
 
 ---
