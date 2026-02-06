@@ -156,6 +156,10 @@
                 "type": "number",
                 "minimum": 0
               },
+              "totalTimerTime": {
+                "type": "number",
+                "minimum": 0
+              },
               "totalDistance": {
                 "type": "number",
                 "minimum": 0
@@ -174,9 +178,147 @@
                 "type": "number",
                 "minimum": 0
               },
+              "maxCadence": {
+                "type": "number",
+                "minimum": 0
+              },
               "avgPower": {
                 "type": "number",
                 "minimum": 0
+              },
+              "maxPower": {
+                "type": "number",
+                "minimum": 0
+              },
+              "normalizedPower": {
+                "type": "number",
+                "minimum": 0
+              },
+              "avgSpeed": {
+                "type": "number",
+                "minimum": 0
+              },
+              "maxSpeed": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalAscent": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalDescent": {
+                "type": "number",
+                "minimum": 0
+              },
+              "totalCalories": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "trigger": {
+                "type": "string",
+                "enum": [
+                  "manual",
+                  "time",
+                  "distance",
+                  "position",
+                  "session_end",
+                  "fitness_equipment"
+                ]
+              },
+              "sport": {
+                "type": "string",
+                "enum": [
+                  "cycling",
+                  "running",
+                  "swimming",
+                  "generic"
+                ]
+              },
+              "subSport": {
+                "type": "string",
+                "enum": [
+                  "generic",
+                  "treadmill",
+                  "street",
+                  "trail",
+                  "track",
+                  "spin",
+                  "indoor_cycling",
+                  "road",
+                  "mountain",
+                  "downhill",
+                  "recumbent",
+                  "cyclocross",
+                  "hand_cycling",
+                  "track_cycling",
+                  "indoor_rowing",
+                  "elliptical",
+                  "stair_climbing",
+                  "lap_swimming",
+                  "open_water",
+                  "flexibility_training",
+                  "strength_training",
+                  "warm_up",
+                  "match",
+                  "exercise",
+                  "challenge",
+                  "indoor_skiing",
+                  "cardio_training",
+                  "indoor_walking",
+                  "e_bike_fitness",
+                  "bmx",
+                  "casual_walking",
+                  "speed_walking",
+                  "bike_to_run_transition",
+                  "run_to_bike_transition",
+                  "swim_to_bike_transition",
+                  "atv",
+                  "motocross",
+                  "backcountry",
+                  "resort",
+                  "rc_drone",
+                  "wingsuit",
+                  "whitewater",
+                  "skate_skiing",
+                  "yoga",
+                  "pilates",
+                  "indoor_running",
+                  "gravel_cycling",
+                  "e_bike_mountain",
+                  "commuting",
+                  "mixed_surface",
+                  "navigate",
+                  "track_me",
+                  "map",
+                  "single_gas_diving",
+                  "multi_gas_diving",
+                  "gauge_diving",
+                  "apnea_diving",
+                  "apnea_hunting",
+                  "virtual_activity",
+                  "obstacle",
+                  "all"
+                ]
+              },
+              "workoutStepIndex": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "numLengths": {
+                "type": "integer",
+                "minimum": 0
+              },
+              "swimStroke": {
+                "type": "string",
+                "enum": [
+                  "freestyle",
+                  "backstroke",
+                  "breaststroke",
+                  "butterfly",
+                  "drill",
+                  "mixed",
+                  "im"
+                ]
               }
             },
             "required": [
