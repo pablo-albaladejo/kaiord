@@ -5,7 +5,6 @@
 "@kaiord/zwo": patch
 "@kaiord/all": patch
 "@kaiord/cli": patch
-"@kaiord/workout-spa-editor": patch
 ---
 
 feat: add Node.js 24 Active LTS support
