@@ -18,8 +18,7 @@
   },
   "files": [
     "dist",
-    "schema",
-    "src/tests/fixtures"
+    "schema"
   ],
   "scripts": {
     "generate:schema": "tsx scripts/generate-schema.ts",

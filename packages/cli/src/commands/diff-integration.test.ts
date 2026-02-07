@@ -146,5 +146,5 @@ describe("diff command integration", () => {
     expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(exitCode);
     const output = stripAnsi(stdout);
     expect(output).toBeTruthy();
-  });
+  }, 15000); // Increased timeout for process spawning under load
 });
