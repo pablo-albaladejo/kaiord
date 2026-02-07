@@ -58,7 +58,9 @@ export const Interactive: Story = {
   args: {
     onFileLoad: (krd) => {
       console.log("File loaded:", krd);
-      alert(`Workout loaded: ${krd.extensions?.workout?.name || "Unnamed"}`);
+      alert(
+        `Workout loaded: ${krd.extensions?.structured_workout?.name || "Unnamed"}`
+      );
     },
     onError: (error, validationErrors) => {
       console.error("Error:", error);

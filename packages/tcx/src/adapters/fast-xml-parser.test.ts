@@ -38,9 +38,9 @@ describe("createFastXmlTcxReader", () => {
       // Assert
       expect(result).toBeDefined();
       expect(result.version).toBe("1.0");
-      expect(result.type).toBe("workout");
+      expect(result.type).toBe("structured_workout");
       expect(result.metadata.sport).toBe("running");
-      expect(result.extensions?.workout).toBeDefined();
+      expect(result.extensions?.structured_workout).toBeDefined();
     });
 
     it("should throw TcxParsingError on malformed XML", async () => {
@@ -121,8 +121,8 @@ describe("createFastXmlTcxReader", () => {
 
       // Assert
       expect(result.metadata.sport).toBe("cycling");
-      expect(result.extensions?.workout).toBeDefined();
-      const workout = result.extensions?.workout as {
+      expect(result.extensions?.structured_workout).toBeDefined();
+      const workout = result.extensions?.structured_workout as {
         name?: string;
         sport: string;
       };
@@ -152,7 +152,7 @@ describe("createFastXmlTcxReader", () => {
       const result = await reader(tcxWithTimeStep);
 
       // Assert
-      const workout = result.extensions?.workout as {
+      const workout = result.extensions?.structured_workout as {
         steps: Array<{ duration: { type: string; seconds?: number } }>;
       };
       expect(workout.steps).toHaveLength(1);
@@ -182,7 +182,7 @@ describe("createFastXmlTcxReader", () => {
       const result = await reader(tcxWithDistanceStep);
 
       // Assert
-      const workout = result.extensions?.workout as {
+      const workout = result.extensions?.structured_workout as {
         steps: Array<{ duration: { type: string; meters?: number } }>;
       };
       expect(workout.steps).toHaveLength(1);
@@ -216,7 +216,7 @@ describe("createFastXmlTcxReader", () => {
       const result = await reader(tcxWithHRZone);
 
       // Assert
-      const workout = result.extensions?.workout as {
+      const workout = result.extensions?.structured_workout as {
         steps: Array<{
           target: { type: string; value?: { unit: string; value: number } };
         }>;
@@ -267,7 +267,7 @@ describe("createFastXmlTcxReader", () => {
       const result = await reader(tcxWithMultipleSteps);
 
       // Assert
-      const workout = result.extensions?.workout as {
+      const workout = result.extensions?.structured_workout as {
         steps: Array<{ stepIndex: number; name?: string; intensity?: string }>;
       };
       expect(workout.steps).toHaveLength(3);
@@ -307,7 +307,7 @@ describe("createFastXmlTcxReader", () => {
       const result = await reader(tcxWithStepExtensions);
 
       // Assert
-      const workout = result.extensions?.workout as {
+      const workout = result.extensions?.structured_workout as {
         steps: Array<{ extensions?: { tcx: Record<string, unknown> } }>;
       };
       expect(workout.steps).toHaveLength(1);
@@ -343,7 +343,7 @@ describe("createFastXmlTcxReader", () => {
       const result = await reader(tcxWithPowerExtensions);
 
       // Assert
-      const workout = result.extensions?.workout as {
+      const workout = result.extensions?.structured_workout as {
         steps: Array<{ extensions?: { tcx: Record<string, unknown> } }>;
       };
       expect(workout.steps).toHaveLength(1);
@@ -384,7 +384,7 @@ describe("createFastXmlTcxReader", () => {
       const result = await reader(tcxWithPowerExtensions);
 
       // Assert
-      const workout = result.extensions?.workout as {
+      const workout = result.extensions?.structured_workout as {
         steps: Array<{
           targetType: string;
           target: { type: string; value?: { unit: string; value: number } };
@@ -422,7 +422,7 @@ describe("createFastXmlTcxReader", () => {
       const result = await reader(tcxWithWorkoutExtensions);
 
       // Assert
-      const workout = result.extensions?.workout as {
+      const workout = result.extensions?.structured_workout as {
         extensions?: { tcx: Record<string, unknown> };
       };
       expect(workout.extensions).toBeDefined();
@@ -499,7 +499,7 @@ describe("createFastXmlTcxReader", () => {
       expect(tcxExtensions.DatabaseField).toBe("DatabaseValue");
 
       // Workout level
-      const workout = result.extensions?.workout as {
+      const workout = result.extensions?.structured_workout as {
         extensions?: { tcx: Record<string, unknown> };
         steps: Array<{ extensions?: { tcx: Record<string, unknown> } }>;
       };
@@ -526,13 +526,13 @@ describe("createFastXmlTcxWriter", () => {
 
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [
@@ -573,13 +573,13 @@ describe("createFastXmlTcxWriter", () => {
 
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [],
@@ -614,13 +614,13 @@ describe("createFastXmlTcxWriter", () => {
 
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [],
@@ -644,7 +644,7 @@ describe("createFastXmlTcxWriter", () => {
 
       const invalidKrd = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         // Missing required metadata
       } as unknown as KRD;
 
@@ -663,13 +663,13 @@ describe("createFastXmlTcxWriter", () => {
 
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [],
@@ -699,13 +699,13 @@ describe("createFastXmlTcxWriter", () => {
 
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [],
@@ -735,13 +735,13 @@ describe("createFastXmlTcxWriter", () => {
 
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [],
@@ -773,13 +773,13 @@ it("should convert workout metadata correctly", async () => {
 
   const krd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "cycling",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Cycling Intervals",
         sport: "cycling",
         steps: [],
@@ -806,13 +806,13 @@ it("should convert time-based duration steps", async () => {
 
   const krd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps: [
@@ -847,13 +847,13 @@ it("should convert distance-based duration steps", async () => {
 
   const krd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps: [
@@ -888,13 +888,13 @@ it("should convert heart rate zone targets", async () => {
 
   const krd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps: [
@@ -935,13 +935,13 @@ it("should preserve step order", async () => {
 
   const krd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps: [
@@ -1007,13 +1007,13 @@ it("should restore TCX extensions at step level", async () => {
 
   const krd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps: [
@@ -1053,13 +1053,13 @@ it("should restore power data to TCX extensions", async () => {
 
   const krd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "cycling",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "cycling",
         steps: [
@@ -1098,13 +1098,13 @@ it("should restore TCX extensions at workout level", async () => {
 
   const krd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps: [],
@@ -1138,13 +1138,13 @@ it("should restore TCX extensions at TrainingCenterDatabase level", async () => 
 
   const krd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps: [],
@@ -1176,13 +1176,13 @@ it("should restore extensions at all levels simultaneously", async () => {
 
   const krd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps: [

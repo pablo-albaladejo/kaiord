@@ -24,13 +24,13 @@ describe("duplicateStep", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "running",
           steps: [
@@ -66,7 +66,7 @@ describe("duplicateStep", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(3);
 
     // Original step at index 0
@@ -93,13 +93,13 @@ describe("duplicateStep", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "cycling",
           steps: [
             {
@@ -125,7 +125,7 @@ describe("duplicateStep", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
 
     // Verify the duplicated step is a deep clone
@@ -149,13 +149,13 @@ describe("duplicateStep", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "swimming",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "swimming",
           steps: [
             {
@@ -191,7 +191,7 @@ describe("duplicateStep", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(4);
 
     // Verify all stepIndex values are sequential
@@ -224,13 +224,13 @@ describe("duplicateStep", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "running",
           steps: [
             {
@@ -277,13 +277,13 @@ describe("duplicateStep", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "cycling",
           steps: [
             {
@@ -308,7 +308,7 @@ describe("duplicateStep", () => {
     const state = useWorkoutStore.getState();
 
     // Assert - Workout should remain unchanged
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(1);
     expect(state.workoutHistory).toHaveLength(1); // Only the initial load
   });
@@ -317,13 +317,13 @@ describe("duplicateStep", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "running",
           steps: [
             {
@@ -358,7 +358,7 @@ describe("duplicateStep", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(3);
 
     expect(workout?.steps[0].stepIndex).toBe(0);
@@ -377,13 +377,13 @@ describe("duplicateStep", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "cycling",
           steps: [
             {
@@ -410,7 +410,7 @@ describe("duplicateStep", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
 
     // Verify complex structure is preserved

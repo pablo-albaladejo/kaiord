@@ -61,10 +61,10 @@ export const convertTcxToKRD = (
 
   const krd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata,
     extensions: {
-      workout,
+      structured_workout: workout,
       ...(tcxExtensions && { tcx: tcxExtensions }),
     },
   };

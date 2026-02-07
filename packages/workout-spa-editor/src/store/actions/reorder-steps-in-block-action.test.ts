@@ -6,13 +6,13 @@ import { reorderStepsInBlockAction } from "./reorder-steps-in-block-action";
 describe("reorderStepsInBlockAction", () => {
   const createMockKRD = (workout: Workout): KRD => ({
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: new Date().toISOString(),
       sport: "cycling",
     },
     extensions: {
-      workout,
+      structured_workout: workout,
     },
   });
 
@@ -82,7 +82,7 @@ describe("reorderStepsInBlockAction", () => {
     // Assert
     expect(result.currentWorkout).toBeDefined();
     const updatedWorkout = result.currentWorkout?.extensions
-      ?.workout as Workout;
+      ?.structured_workout as Workout;
     expect(updatedWorkout).toBeDefined();
 
     const updatedBlock = updatedWorkout.steps[0] as RepetitionBlock;
@@ -235,7 +235,7 @@ describe("reorderStepsInBlockAction", () => {
     // Arrange
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",

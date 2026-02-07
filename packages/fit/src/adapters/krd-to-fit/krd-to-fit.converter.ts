@@ -25,7 +25,7 @@ const toRecord = (value: unknown): Record<string, unknown> => {
  * Throws if workout is missing or invalid.
  */
 const extractWorkout = (krd: KRD, logger: Logger): Workout => {
-  const rawWorkout = krd.extensions?.workout;
+  const rawWorkout = krd.extensions?.structured_workout;
   if (!rawWorkout) {
     throw createFitParsingError("KRD missing workout data in extensions");
   }

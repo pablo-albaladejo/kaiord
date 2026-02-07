@@ -8,13 +8,13 @@ export type { WorkoutState };
 const MAX_HISTORY_SIZE = 50;
 
 export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => {
-  const workout = krd.extensions?.workout as Workout | undefined;
+  const workout = krd.extensions?.structured_workout as Workout | undefined;
   const migratedKrd = workout
     ? {
         ...krd,
         extensions: {
           ...krd.extensions,
-          workout: migrateRepetitionBlocks(workout),
+          structured_workout: migrateRepetitionBlocks(workout),
         },
       }
     : krd;
@@ -62,9 +62,9 @@ export const createEmptyWorkoutAction = (
 ): Partial<WorkoutState> => {
   const emptyWorkout: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: { created: new Date().toISOString(), sport },
-    extensions: { workout: { name, sport, steps: [] } },
+    extensions: { structured_workout: { name, sport, steps: [] } },
   };
   return {
     currentWorkout: emptyWorkout,

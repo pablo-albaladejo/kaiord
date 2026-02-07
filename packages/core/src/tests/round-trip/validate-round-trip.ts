@@ -73,7 +73,7 @@ export type ValidateRoundTrip = ReturnType<typeof validateRoundTrip>;
  * // Validate KRD → FIT → KRD
  * const krd = {
  *   version: '1.0',
- *   type: 'workout',
+ *   type: 'structured_workout',
  *   metadata: { created: '2025-01-15T10:30:00Z', sport: 'running' }
  * };
  *

@@ -17,13 +17,13 @@ import { createRepetitionBlockAction } from "./create-repetition-block-action";
  */
 const createTestKrd = (workout: Workout): KRD => ({
   version: "1.0",
-  type: "workout",
+  type: "structured_workout",
   metadata: {
     created: new Date().toISOString(),
     sport: workout.sport,
   },
   extensions: {
-    workout,
+    structured_workout: workout,
   },
 });
 
@@ -73,7 +73,8 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
             // Assert
             expect(result.currentWorkout).toBeDefined();
             const updatedKrd = result.currentWorkout as KRD;
-            const updatedWorkout = updatedKrd.extensions?.workout as Workout;
+            const updatedWorkout = updatedKrd.extensions
+              ?.structured_workout as Workout;
 
             // Should have exactly one step (the repetition block)
             expect(updatedWorkout.steps).toHaveLength(1);
@@ -141,7 +142,8 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
 
             // Assert
             const updatedKrd = result.currentWorkout as KRD;
-            const updatedWorkout = updatedKrd.extensions?.workout as Workout;
+            const updatedWorkout = updatedKrd.extensions
+              ?.structured_workout as Workout;
 
             // Should have existing steps + 1 new block
             expect(updatedWorkout.steps).toHaveLength(existingStepCount + 1);
@@ -219,7 +221,8 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
             // Assert
             expect(result.currentWorkout).toBeDefined();
             const updatedKrd = result.currentWorkout as KRD;
-            const updatedWorkout = updatedKrd.extensions?.workout as Workout;
+            const updatedWorkout = updatedKrd.extensions
+              ?.structured_workout as Workout;
 
             // Should have exactly one step (the repetition block)
             expect(updatedWorkout.steps).toHaveLength(1);
@@ -290,7 +293,8 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
 
             // Assert
             const updatedKrd = result.currentWorkout as KRD;
-            const updatedWorkout = updatedKrd.extensions?.workout as Workout;
+            const updatedWorkout = updatedKrd.extensions
+              ?.structured_workout as Workout;
             const block = updatedWorkout.steps[0];
 
             if (isRepetitionBlock(block)) {

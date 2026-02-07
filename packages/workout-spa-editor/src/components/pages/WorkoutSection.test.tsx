@@ -50,13 +50,13 @@ describe("WorkoutSection", () => {
 
   const createMockKRD = (workout: Workout): KRD => ({
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "cycling",
     },
     extensions: {
-      workout,
+      structured_workout: workout,
     },
   });
 
@@ -472,7 +472,7 @@ describe("WorkoutSection", () => {
       // Assert - Step should be deleted immediately
       const state = useWorkoutStore.getState();
       const updatedWorkout = state.currentWorkout?.extensions
-        ?.workout as Workout;
+        ?.structured_workout as Workout;
       expect(updatedWorkout.steps).toHaveLength(1);
       expect((updatedWorkout.steps[0] as WorkoutStep).stepIndex).toBe(0); // Reindexed
 
@@ -551,7 +551,8 @@ describe("WorkoutSection", () => {
 
       // Verify step was deleted
       let state = useWorkoutStore.getState();
-      let updatedWorkout = state.currentWorkout?.extensions?.workout as Workout;
+      let updatedWorkout = state.currentWorkout?.extensions
+        ?.structured_workout as Workout;
       expect(updatedWorkout.steps).toHaveLength(1);
 
       // Act - Undo the deletion
@@ -562,7 +563,8 @@ describe("WorkoutSection", () => {
       // Assert - Step should be restored
       await waitFor(() => {
         state = useWorkoutStore.getState();
-        updatedWorkout = state.currentWorkout?.extensions?.workout as Workout;
+        updatedWorkout = state.currentWorkout?.extensions
+          ?.structured_workout as Workout;
         expect(updatedWorkout.steps).toHaveLength(2);
         expect((updatedWorkout.steps[0] as WorkoutStep).stepIndex).toBe(0);
         expect((updatedWorkout.steps[1] as WorkoutStep).stepIndex).toBe(1);

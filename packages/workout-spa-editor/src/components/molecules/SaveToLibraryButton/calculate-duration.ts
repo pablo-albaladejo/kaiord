@@ -14,7 +14,7 @@ type StepWithDuration = {
 };
 
 export function calculateWorkoutDuration(workout: KRD): number | undefined {
-  const workoutData = workout.extensions?.workout;
+  const workoutData = workout.extensions?.structured_workout;
   if (
     !workoutData ||
     typeof workoutData !== "object" ||

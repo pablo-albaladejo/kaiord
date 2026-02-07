@@ -36,7 +36,7 @@ export async function generateThumbnail(workout: KRD): Promise<string> {
   drawBackground(ctx, THUMBNAIL_CONFIG.width, THUMBNAIL_CONFIG.height);
 
   // Get workout steps
-  const workoutData = workout.extensions?.workout;
+  const workoutData = workout.extensions?.structured_workout;
   if (
     !workoutData ||
     typeof workoutData !== "object" ||

@@ -12,13 +12,13 @@ import { pasteStepAction } from "./paste-step-action";
 describe("pasteStepAction", () => {
   const mockKrd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps: [
@@ -101,9 +101,11 @@ describe("pasteStepAction", () => {
       expect(result.success).toBe(true);
       expect(result.message).toBe("Step pasted successfully");
       expect(result.updatedKrd).toBeDefined();
-      expect(result.updatedKrd!.extensions!.workout!.steps).toHaveLength(3);
+      expect(
+        result.updatedKrd!.extensions!.structured_workout!.steps
+      ).toHaveLength(3);
 
-      const steps = result.updatedKrd!.extensions!.workout!.steps;
+      const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
       expect(steps[2]).toMatchObject({
         durationType: "time",
         duration: { type: "time", seconds: 600 },
@@ -122,9 +124,11 @@ describe("pasteStepAction", () => {
 
       // Assert
       expect(result.success).toBe(true);
-      expect(result.updatedKrd!.extensions!.workout!.steps).toHaveLength(3);
+      expect(
+        result.updatedKrd!.extensions!.structured_workout!.steps
+      ).toHaveLength(3);
 
-      const steps = result.updatedKrd!.extensions!.workout!.steps;
+      const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
       expect(steps[1]).toMatchObject({
         durationType: "time",
         duration: { type: "time", seconds: 600 },
@@ -142,7 +146,7 @@ describe("pasteStepAction", () => {
       const result = await pasteStepAction(mockKrd, 1);
 
       // Assert
-      const steps = result.updatedKrd!.extensions!.workout!.steps;
+      const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
       expect(steps[0]).toHaveProperty("stepIndex", 0);
       expect(steps[1]).toHaveProperty("stepIndex", 1);
       expect(steps[2]).toHaveProperty("stepIndex", 2);
@@ -160,9 +164,12 @@ describe("pasteStepAction", () => {
       // Assert
       expect(result.success).toBe(true);
       expect(result.message).toBe("Repetition block pasted successfully");
-      expect(result.updatedKrd!.extensions!.workout!.steps).toHaveLength(3);
+      expect(
+        result.updatedKrd!.extensions!.structured_workout!.steps
+      ).toHaveLength(3);
 
-      const lastStep = result.updatedKrd!.extensions!.workout!.steps[2];
+      const lastStep =
+        result.updatedKrd!.extensions!.structured_workout!.steps[2];
       expect(lastStep).toHaveProperty("repeatCount", 3);
     });
   });

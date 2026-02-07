@@ -18,6 +18,7 @@ describe("convertKRDToMessages", () => {
       // Arrange
       const logger = createMockLogger();
       const krd = buildKRD.build({
+        type: "structured_workout" as const,
         metadata: buildKRDMetadata.build({
           created: "2025-01-15T10:30:00.000Z",
           manufacturer: "garmin",
@@ -26,7 +27,7 @@ describe("convertKRDToMessages", () => {
           sport: "cycling",
         }),
         extensions: {
-          workout: buildWorkout.build({ sport: "cycling" }),
+          structured_workout: buildWorkout.build({ sport: "cycling" }),
         },
       });
 
@@ -54,11 +55,12 @@ describe("convertKRDToMessages", () => {
       // Arrange
       const logger = createMockLogger();
       const krd = buildKRD.build({
+        type: "structured_workout" as const,
         metadata: buildKRDMetadata.build({
           manufacturer: undefined,
         }),
         extensions: {
-          workout: buildWorkout.build(),
+          structured_workout: buildWorkout.build(),
         },
       });
 
@@ -78,11 +80,12 @@ describe("convertKRDToMessages", () => {
       // Arrange
       const logger = createMockLogger();
       const krd = buildKRD.build({
+        type: "structured_workout" as const,
         metadata: buildKRDMetadata.build({
           created: "2025-01-15T10:30:00.000Z",
         }),
         extensions: {
-          workout: buildWorkout.build(),
+          structured_workout: buildWorkout.build(),
         },
       });
 
@@ -110,7 +113,8 @@ describe("convertKRDToMessages", () => {
         subSport: undefined,
       });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -138,7 +142,8 @@ describe("convertKRDToMessages", () => {
         subSport: "trail",
       });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -168,7 +173,8 @@ describe("convertKRDToMessages", () => {
         subSport: undefined,
       });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -190,7 +196,8 @@ describe("convertKRDToMessages", () => {
         poolLengthUnit: "meters" as const,
       });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -216,7 +223,8 @@ describe("convertKRDToMessages", () => {
         poolLength: undefined,
       });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -256,7 +264,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -314,7 +323,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -348,7 +358,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps, subSport: undefined });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -393,7 +404,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps, subSport: undefined });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -426,7 +438,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps, subSport: undefined });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -462,7 +475,8 @@ describe("convertKRDToMessages", () => {
         ],
       };
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act & Assert
@@ -488,7 +502,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps, subSport: undefined });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -521,7 +536,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -555,7 +571,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -585,7 +602,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps, subSport: undefined });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -615,7 +633,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps, subSport: undefined });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -646,7 +665,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -681,7 +701,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -716,7 +737,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -755,7 +777,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -800,7 +823,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -834,7 +858,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -872,7 +897,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -911,7 +937,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -947,7 +974,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -992,7 +1020,8 @@ describe("convertKRDToMessages", () => {
       const steps: Array<WorkoutStep | RepetitionBlock> = [repetitionBlock];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1053,7 +1082,8 @@ describe("convertKRDToMessages", () => {
       const steps: Array<WorkoutStep | RepetitionBlock> = [block1, block2];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1099,7 +1129,7 @@ describe("convertKRDToMessages", () => {
       const logger = createMockLogger();
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: buildKRDMetadata.build(),
       };
 
@@ -1123,7 +1153,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1165,7 +1196,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1207,7 +1239,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1243,7 +1276,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1274,7 +1308,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1316,7 +1351,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1362,7 +1398,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1404,7 +1441,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1451,7 +1489,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1497,7 +1536,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1543,7 +1583,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1607,7 +1648,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1653,7 +1695,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1683,7 +1726,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1724,7 +1768,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1760,7 +1805,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1799,7 +1845,8 @@ describe("convertKRDToMessages", () => {
         ],
       };
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act & Assert
@@ -1820,7 +1867,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1849,7 +1897,8 @@ describe("convertKRDToMessages", () => {
         ],
       };
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act & Assert
@@ -1870,7 +1919,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1907,7 +1957,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1960,7 +2011,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act
@@ -1981,8 +2033,9 @@ describe("convertKRDToMessages", () => {
       const logger = createMockLogger();
       const debugSpy = vi.spyOn(logger, "debug");
       const krd = buildKRD.build({
+        type: "structured_workout" as const,
         extensions: {
-          workout: buildWorkout.build(),
+          structured_workout: buildWorkout.build(),
         },
       });
 
@@ -2011,7 +2064,8 @@ describe("convertKRDToMessages", () => {
       ];
       const workout = buildWorkout.build({ steps });
       const krd = buildKRD.build({
-        extensions: { workout },
+        type: "structured_workout" as const,
+        extensions: { structured_workout: workout },
       });
 
       // Act

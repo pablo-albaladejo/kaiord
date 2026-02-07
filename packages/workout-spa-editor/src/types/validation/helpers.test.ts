@@ -171,13 +171,23 @@ describe("validation helpers", () => {
       // Arrange
       const errors: Array<ValidationError> = [
         {
-          path: ["extensions", "workout", "steps", 0, "duration", "seconds"],
+          path: [
+            "extensions",
+            "structured_workout",
+            "steps",
+            0,
+            "duration",
+            "seconds",
+          ],
           message: "Must be positive",
         },
       ];
 
       // Act
-      const result = getNestedErrors(errors, ["extensions", "workout"]);
+      const result = getNestedErrors(errors, [
+        "extensions",
+        "structured_workout",
+      ]);
 
       // Assert
       expect(result).toHaveLength(1);

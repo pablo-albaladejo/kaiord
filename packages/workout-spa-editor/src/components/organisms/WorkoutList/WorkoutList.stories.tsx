@@ -56,7 +56,7 @@ const cooldownStep = createStep(3, {
 
 export const SimpleWorkout: Story = {
   args: {
-    workout: {
+    structured_workout: {
       name: "Simple Workout",
       sport: "cycling",
       steps: [warmupStep, intervalStep, cooldownStep],
@@ -66,7 +66,7 @@ export const SimpleWorkout: Story = {
 
 export const WithRepetitionBlock: Story = {
   args: {
-    workout: {
+    structured_workout: {
       name: "Interval Workout",
       sport: "cycling",
       steps: [
@@ -83,7 +83,7 @@ export const WithRepetitionBlock: Story = {
 
 export const WithSelectedStep: Story = {
   args: {
-    workout: {
+    structured_workout: {
       name: "Workout with Selection",
       sport: "cycling",
       steps: [warmupStep, intervalStep, recoveryStep, cooldownStep],
@@ -94,7 +94,7 @@ export const WithSelectedStep: Story = {
 
 export const EmptyWorkout: Story = {
   args: {
-    workout: {
+    structured_workout: {
       name: "Empty Workout",
       sport: "cycling",
       steps: [],

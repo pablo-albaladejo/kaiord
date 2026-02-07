@@ -38,13 +38,13 @@ describe("Block Operations Integration", () => {
 
   const createMockKRD = (steps: Array<WorkoutStep | RepetitionBlock>): KRD => ({
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps,
@@ -76,7 +76,8 @@ describe("Block Operations Integration", () => {
       const result = editRepetitionBlockAction(krd, blockId1, 10, state);
 
       // Assert - Only first block should be updated
-      const updatedWorkout = result.currentWorkout?.extensions?.workout;
+      const updatedWorkout =
+        result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(2);
       const updatedBlock1 = updatedWorkout?.steps[0] as RepetitionBlock;
       const updatedBlock2 = updatedWorkout?.steps[1] as RepetitionBlock;
@@ -107,7 +108,8 @@ describe("Block Operations Integration", () => {
       const result = addStepToRepetitionBlockAction(krd, blockId2, state);
 
       // Assert - Only second block should have new step
-      const updatedWorkout = result.currentWorkout?.extensions?.workout;
+      const updatedWorkout =
+        result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(2);
       const updatedBlock1 = updatedWorkout?.steps[0] as RepetitionBlock;
       const updatedBlock2 = updatedWorkout?.steps[1] as RepetitionBlock;
@@ -139,7 +141,8 @@ describe("Block Operations Integration", () => {
       const result = ungroupRepetitionBlockAction(krd, blockId1, state);
 
       // Assert - First block should be ungrouped, second should remain
-      const updatedWorkout = result.currentWorkout?.extensions?.workout;
+      const updatedWorkout =
+        result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(2);
       // First item should be the ungrouped step
       expect((updatedWorkout?.steps[0] as WorkoutStep).stepIndex).toBe(0);
@@ -176,7 +179,8 @@ describe("Block Operations Integration", () => {
       const result = editRepetitionBlockAction(krd, blockId2, 10, state);
 
       // Assert - Only middle block should be updated
-      const updatedWorkout = result.currentWorkout?.extensions?.workout;
+      const updatedWorkout =
+        result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(3);
       expect((updatedWorkout?.steps[0] as RepetitionBlock).repeatCount).toBe(2);
       expect((updatedWorkout?.steps[1] as RepetitionBlock).repeatCount).toBe(

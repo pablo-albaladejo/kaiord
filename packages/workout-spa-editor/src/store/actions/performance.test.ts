@@ -23,13 +23,13 @@ import { createUndoAction } from "./history-actions";
 describe("Performance Tests", () => {
   const createMockKrd = (steps: Array<WorkoutStep | RepetitionBlock>): KRD => ({
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps,
@@ -155,7 +155,7 @@ describe("Performance Tests", () => {
       expect(duration).toBeLessThan(100); // Should complete in < 100ms
 
       // Verify indices are correct
-      const workout = result.currentWorkout?.extensions?.workout as
+      const workout = result.currentWorkout?.extensions?.structured_workout as
         | Workout
         | undefined;
       if (workout) {
@@ -469,7 +469,8 @@ describe("Performance Tests", () => {
       const startTime = performance.now();
       for (let i = 0; i < 3; i++) {
         // Get the first block's ID from the current workout
-        const workout = state.currentWorkout?.extensions?.workout as Workout;
+        const workout = state.currentWorkout?.extensions
+          ?.structured_workout as Workout;
         const firstBlock = workout.steps.find(
           (step): step is RepetitionBlock => "repeatCount" in step
         );
@@ -494,7 +495,7 @@ describe("Performance Tests", () => {
       const duration = endTime - startTime;
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout as
+      const workout = state.currentWorkout?.extensions?.structured_workout as
         | Workout
         | undefined;
       if (workout) {

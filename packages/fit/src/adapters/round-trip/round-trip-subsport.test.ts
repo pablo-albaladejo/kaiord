@@ -15,8 +15,8 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     const krd = await reader(originalBuffer);
 
     // Manually set subSport for testing (since test files may not have it)
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         subSport?: string;
@@ -52,8 +52,8 @@ describe("Round-trip: Workout metadata - subSport field", () => {
       const krd = await reader(originalBuffer);
 
       // Set subSport
-      if (krd.extensions?.workout) {
-        const workout = krd.extensions.workout as {
+      if (krd.extensions?.structured_workout) {
+        const workout = krd.extensions.structured_workout as {
           name?: string;
           sport: string;
           subSport?: string;
@@ -85,8 +85,8 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     const krd = await reader(originalBuffer);
 
     // Ensure subSport is undefined
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         subSport?: string;

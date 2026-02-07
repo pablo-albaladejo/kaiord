@@ -60,11 +60,18 @@ export const NestedPathErrors: Story = {
   args: {
     errors: [
       {
-        path: ["extensions", "workout", "steps", "0", "duration"],
+        path: ["extensions", "structured_workout", "steps", "0", "duration"],
         message: "Duration must be positive",
       },
       {
-        path: ["extensions", "workout", "steps", "1", "target", "value"],
+        path: [
+          "extensions",
+          "structured_workout",
+          "steps",
+          "1",
+          "target",
+          "value",
+        ],
         message: "Target value out of range",
       },
       {
@@ -88,27 +95,27 @@ export const ManyErrors: Story = {
       { path: ["metadata", "sport"], message: "Must be a valid sport type" },
       { path: ["metadata", "created"], message: "Invalid date format" },
       {
-        path: ["extensions", "workout", "name"],
+        path: ["extensions", "structured_workout", "name"],
         message: "Name is required",
       },
       {
-        path: ["extensions", "workout", "steps", "0"],
+        path: ["extensions", "structured_workout", "steps", "0"],
         message: "Step is invalid",
       },
       {
-        path: ["extensions", "workout", "steps", "1"],
+        path: ["extensions", "structured_workout", "steps", "1"],
         message: "Step is invalid",
       },
       {
-        path: ["extensions", "workout", "steps", "2"],
+        path: ["extensions", "structured_workout", "steps", "2"],
         message: "Step is invalid",
       },
       {
-        path: ["extensions", "workout", "steps", "3"],
+        path: ["extensions", "structured_workout", "steps", "3"],
         message: "Step is invalid",
       },
       {
-        path: ["extensions", "workout", "steps", "4"],
+        path: ["extensions", "structured_workout", "steps", "4"],
         message: "Step is invalid",
       },
     ],

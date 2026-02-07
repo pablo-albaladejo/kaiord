@@ -19,13 +19,13 @@ test.describe("Repetition Blocks", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Interval Workout",
           sport: "cycling",
           steps: [
@@ -154,13 +154,13 @@ test.describe("Repetition Blocks", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Repeat Test",
           sport: "running",
           steps: [
@@ -230,13 +230,13 @@ test.describe("Repetition Blocks", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Collapse Test",
           sport: "cycling",
           steps: [
@@ -309,13 +309,13 @@ test.describe("Repetition Blocks", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Stats Test",
           sport: "running",
           steps: [
@@ -403,13 +403,13 @@ test.describe("Repetition Blocks", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Add Step Test",
           sport: "cycling",
           steps: [
@@ -464,13 +464,13 @@ test.describe("Repetition Blocks", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Undo Test",
           sport: "running",
           steps: [
@@ -590,13 +590,13 @@ test.describe("Repetition Blocks - Ungroup", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Ungroup Test",
           sport: "cycling",
           steps: [
@@ -676,13 +676,13 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Keyboard Test",
           sport: "running",
           steps: [
@@ -783,13 +783,13 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Ungroup Shortcut Test",
           sport: "cycling",
           steps: [
@@ -851,13 +851,13 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Select All Test",
           sport: "running",
           steps: [
@@ -934,13 +934,13 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Clear Selection Test",
           sport: "cycling",
           steps: [
@@ -1039,13 +1039,13 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Edit Count Menu Test",
           sport: "running",
           steps: [
@@ -1107,13 +1107,13 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Add Step Menu Test",
           sport: "cycling",
           steps: [
@@ -1176,13 +1176,13 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Delete Menu Test",
           sport: "running",
           steps: [
@@ -1280,13 +1280,13 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Block Creation Test",
           sport: "cycling",
           steps: [
@@ -1390,13 +1390,13 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Delete Block Test",
           sport: "running",
           steps: [
@@ -1506,13 +1506,13 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Undo Delete Test",
           sport: "cycling",
           steps: [
@@ -1606,13 +1606,13 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Keyboard Delete Test",
           sport: "running",
           steps: [
@@ -1712,13 +1712,13 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Toast Delete Test",
           sport: "cycling",
           steps: [
@@ -1854,13 +1854,13 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Three Blocks Test",
           sport: "cycling",
           steps: [
@@ -2009,13 +2009,13 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Five Blocks Test",
           sport: "cycling",
           steps: [
@@ -2324,13 +2324,13 @@ test.describe("Repetition Blocks - Performance", () => {
 
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Large Block Test",
           sport: "cycling",
           steps: [
@@ -2385,13 +2385,13 @@ test.describe("Repetition Blocks - Performance", () => {
 
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Nested Test",
           sport: "running",
           steps: [
@@ -2453,13 +2453,13 @@ test.describe("Repetition Blocks - Button Styling Consistency (Task 18)", () => 
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Button Styling Test",
           sport: "cycling",
           steps: [

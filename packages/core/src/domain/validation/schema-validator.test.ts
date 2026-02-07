@@ -37,7 +37,7 @@ describe("SchemaValidator.validate", () => {
     const logger = createMockLogger();
     const validator = createSchemaValidator(logger);
     const invalidKrd = {
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
@@ -78,7 +78,7 @@ describe("SchemaValidator.validate", () => {
     const validator = createSchemaValidator(logger);
     const invalidKrd = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
     };
 
     // Act
@@ -95,7 +95,7 @@ describe("SchemaValidator.validate", () => {
     const validator = createSchemaValidator(logger);
     const invalidKrd = {
       version: "invalid",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
@@ -137,7 +137,7 @@ describe("SchemaValidator.validate", () => {
     const validator = createSchemaValidator(logger);
     const invalidKrd = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "invalid-date",
         sport: "running",
@@ -158,7 +158,7 @@ describe("SchemaValidator.validate", () => {
     const validator = createSchemaValidator(logger);
     const invalidKrd = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
       },
@@ -213,7 +213,7 @@ describe("SchemaValidator.validate", () => {
     const validator = createSchemaValidator(logger);
     const invalidKrd = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
@@ -241,7 +241,7 @@ describe("SchemaValidator.validate", () => {
     const validator = createSchemaValidator(logger);
     const invalidKrd = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",

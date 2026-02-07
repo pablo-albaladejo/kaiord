@@ -26,11 +26,11 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
 
       // Assert - KRD structure
       expect(krd.version).toBe("1.0");
-      expect(krd.type).toBe("workout");
+      expect(krd.type).toBe("structured_workout");
       expect(krd.metadata.sport).toBe("cycling");
-      expect(krd.extensions?.workout).toBeDefined();
+      expect(krd.extensions?.structured_workout).toBeDefined();
 
-      const workout = krd.extensions?.workout as {
+      const workout = krd.extensions?.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<unknown>;
@@ -51,7 +51,7 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
       // Assert - Workout metadata preserved
       expect(krd2.metadata.sport).toBe(krd.metadata.sport);
 
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<unknown>;
@@ -81,12 +81,12 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Check duration values
-      const workout = krd.extensions?.workout as {
+      const workout = krd.extensions?.structured_workout as {
         steps: Array<{
           duration: { type: string; seconds?: number; meters?: number };
         }>;
       };
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<{
           duration: { type: string; seconds?: number; meters?: number };
         }>;
@@ -137,7 +137,7 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Check power target values
-      const workout = krd.extensions?.workout as {
+      const workout = krd.extensions?.structured_workout as {
         steps: Array<{
           target: {
             type: string;
@@ -150,7 +150,7 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
           };
         }>;
       };
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<{
           target: {
             type: string;
@@ -217,10 +217,10 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
     const krd2 = await reader(convertedXml);
 
     // Assert - Check intensity values (interval types)
-    const workout = krd.extensions?.workout as {
+    const workout = krd.extensions?.structured_workout as {
       steps: Array<{ intensity?: string }>;
     };
-    const workout2 = krd2.extensions?.workout as {
+    const workout2 = krd2.extensions?.structured_workout as {
       steps: Array<{ intensity?: string }>;
     };
 
@@ -249,10 +249,10 @@ describe("Zwift Round-trip: WorkoutRepeatSteps.zwo", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Check repetition blocks
-      const workout = krd.extensions?.workout as {
+      const workout = krd.extensions?.structured_workout as {
         steps: Array<{ repeatCount?: number; steps?: Array<unknown> }>;
       };
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<{ repeatCount?: number; steps?: Array<unknown> }>;
       };
 
@@ -292,7 +292,7 @@ describe("Zwift Round-trip: WorkoutRepeatSteps.zwo", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Check nested steps in repetition blocks
-      const workout = krd.extensions?.workout as {
+      const workout = krd.extensions?.structured_workout as {
         steps: Array<{
           repeatCount?: number;
           steps?: Array<{
@@ -301,7 +301,7 @@ describe("Zwift Round-trip: WorkoutRepeatSteps.zwo", () => {
           }>;
         }>;
       };
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<{
           repeatCount?: number;
           steps?: Array<{
@@ -378,7 +378,7 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Check all target types
-      const workout = krd.extensions?.workout as {
+      const workout = krd.extensions?.structured_workout as {
         steps: Array<{
           target: {
             type: string;
@@ -391,7 +391,7 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
           };
         }>;
       };
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<{
           target: {
             type: string;
@@ -485,12 +485,12 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Check cadence values
-      const workout = krd.extensions?.workout as {
+      const workout = krd.extensions?.structured_workout as {
         steps: Array<{
           target: { type: string; value?: { value?: number } };
         }>;
       };
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<{
           target: { type: string; value?: { value?: number } };
         }>;
@@ -565,10 +565,10 @@ describe("Zwift Round-trip: Extensions preservation", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Check text events (notes)
-      const workout = krd.extensions?.workout as {
+      const workout = krd.extensions?.structured_workout as {
         steps: Array<{ notes?: string }>;
       };
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<{ notes?: string }>;
       };
 
@@ -608,13 +608,13 @@ describe("Zwift Round-trip: KRD → Zwift → KRD", () => {
       expect(convertedKrd.metadata.sport).toBe(originalKrd.metadata.sport);
 
       // Assert - Workout structure preserved
-      const workout1 = originalKrd.extensions?.workout as {
+      const workout1 = originalKrd.extensions?.structured_workout as {
         steps: Array<{
           duration: { type: string; seconds?: number };
           target: { type: string; value?: { value?: number } };
         }>;
       };
-      const workout2 = convertedKrd.extensions?.workout as {
+      const workout2 = convertedKrd.extensions?.structured_workout as {
         steps: Array<{
           duration: { type: string; seconds?: number };
           target: { type: string; value?: { value?: number } };
@@ -673,13 +673,13 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Check workout structure
-      const workout = krd.extensions?.workout as {
+      const workout = krd.extensions?.structured_workout as {
         steps: Array<{
           durationType: string;
           duration: { type: string };
         }>;
       };
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<{
           durationType: string;
           duration: { type: string };
@@ -719,7 +719,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Check heart rate targets
-      const workout = krd.extensions?.workout as {
+      const workout = krd.extensions?.structured_workout as {
         steps: Array<{
           target: {
             type: string;
@@ -727,7 +727,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
           };
         }>;
       };
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<{
           target: {
             type: string;
@@ -780,7 +780,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Check power zones
-      const workout = krd.extensions?.workout as {
+      const workout = krd.extensions?.structured_workout as {
         steps: Array<{
           target: {
             type: string;
@@ -788,7 +788,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
           };
         }>;
       };
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<{
           target: {
             type: string;
@@ -878,8 +878,12 @@ describe("Zwift Round-trip: Complete validation", () => {
         expect(krd2.type).toBe(krd.type);
         expect(krd2.metadata.sport).toBe(krd.metadata.sport);
 
-        const workout = krd.extensions?.workout as { steps: Array<unknown> };
-        const workout2 = krd2.extensions?.workout as { steps: Array<unknown> };
+        const workout = krd.extensions?.structured_workout as {
+          steps: Array<unknown>;
+        };
+        const workout2 = krd2.extensions?.structured_workout as {
+          steps: Array<unknown>;
+        };
 
         expect(workout2.steps.length).toBe(workout.steps.length);
       }

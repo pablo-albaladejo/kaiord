@@ -22,14 +22,14 @@ export const copyStepAction = async (
   krd: KRD,
   stepIndex: number
 ): Promise<CopyStepResult> => {
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.structured_workout) {
     return {
       success: false,
       message: "No workout found",
     };
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
 
   // Find the step to copy
   const stepToCopy = workout.steps.find(

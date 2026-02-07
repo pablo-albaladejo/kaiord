@@ -26,11 +26,15 @@ export const createRepetitionBlockAction = (
   repeatCount: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.workout || stepIndices.length === 0 || repeatCount < 2) {
+  if (
+    !krd.extensions?.structured_workout ||
+    stepIndices.length === 0 ||
+    repeatCount < 2
+  ) {
     return {};
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
   const selectedIndices = new Set(stepIndices);
 
   const { stepsToWrap, remainingSteps, insertPosition } = extractSteps(
@@ -62,7 +66,7 @@ export const createRepetitionBlockAction = (
   const updatedWorkout = { ...workout, steps: reindexSteps(newSteps) };
   const updatedKrd: KRD = {
     ...krd,
-    extensions: { ...krd.extensions, workout: updatedWorkout },
+    extensions: { ...krd.extensions, structured_workout: updatedWorkout },
   };
 
   return createUpdateWorkoutAction(updatedKrd, state);

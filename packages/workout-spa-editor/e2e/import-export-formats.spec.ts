@@ -21,13 +21,13 @@ import { readFileSync } from "node:fs";
 test.describe("Import/Export Multiple Formats", () => {
   const testWorkout = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: new Date().toISOString(),
       sport: "cycling",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Format Test Workout",
         sport: "cycling",
         steps: [
@@ -236,9 +236,9 @@ test.describe("Import/Export Multiple Formats", () => {
     if (downloadPath) {
       const content = readFileSync(downloadPath, "utf-8");
       const savedWorkout = JSON.parse(content);
-      expect(savedWorkout.extensions.workout.steps[0].target.value.value).toBe(
-        250
-      );
+      expect(
+        savedWorkout.extensions.structured_workout.steps[0].target.value.value
+      ).toBe(250);
     }
   });
 
@@ -433,13 +433,13 @@ test.describe("Import/Export Mobile Flow", () => {
 
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Mobile Test",
           sport: "cycling",
           steps: [],
@@ -467,13 +467,13 @@ test.describe("Import/Export Mobile Flow", () => {
 
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Mobile Export Test",
           sport: "cycling",
           steps: [],

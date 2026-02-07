@@ -48,7 +48,7 @@ describe("test-utils index re-exports", () => {
     // Assert
     expect(krd).toBeDefined();
     expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("workout");
+    expect(krd.type).toBe("structured_workout");
   });
 
   it("should export loadKrdFixtureRaw function", () => {

@@ -64,7 +64,7 @@ export function createUpdatedKrd(krd: KRD, updatedWorkout: Workout): KRD {
     ...krd,
     extensions: {
       ...krd.extensions,
-      workout: updatedWorkout,
+      structured_workout: updatedWorkout,
     },
   };
 }

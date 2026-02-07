@@ -13,7 +13,7 @@ import type { KRD } from "../../../types/krd";
 import type { DifficultyLevel } from "../../../types/workout-library";
 
 function extractSportFromWorkout(workout: KRD): string {
-  const workoutData = workout.extensions?.workout;
+  const workoutData = workout.extensions?.structured_workout;
   return workoutData &&
     typeof workoutData === "object" &&
     "sport" in workoutData &&

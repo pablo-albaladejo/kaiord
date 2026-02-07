@@ -28,7 +28,7 @@ export const editRepetitionBlockAction = (
   repeatCount: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.structured_workout) {
     return {};
   }
 
@@ -36,7 +36,7 @@ export const editRepetitionBlockAction = (
     return {};
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
 
   // Find block by ID
   const blockInfo = findBlockById(workout, blockId);
@@ -64,7 +64,7 @@ export const editRepetitionBlockAction = (
     ...krd,
     extensions: {
       ...krd.extensions,
-      workout: updatedWorkout,
+      structured_workout: updatedWorkout,
     },
   };
 

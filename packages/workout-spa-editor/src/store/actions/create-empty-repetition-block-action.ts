@@ -51,14 +51,14 @@ export const createEmptyRepetitionBlockAction = (
   repeatCount: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.structured_workout) {
     return {};
   }
 
   // Validate inputs
   if (repeatCount < 1) return {};
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
 
   // Create default step with stepIndex 0 (within the block context)
   const defaultStep: WorkoutStep = {
@@ -99,7 +99,7 @@ export const createEmptyRepetitionBlockAction = (
     ...krd,
     extensions: {
       ...krd.extensions,
-      workout: updatedWorkout,
+      structured_workout: updatedWorkout,
     },
   };
 

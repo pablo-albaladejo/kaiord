@@ -72,13 +72,13 @@ test.describe("Accessibility", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Accessibility Test",
           sport: "cycling",
           steps: [
@@ -131,13 +131,13 @@ test.describe("Accessibility", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Shortcuts Test",
           sport: "running",
           steps: [
@@ -255,13 +255,13 @@ test.describe("Accessibility", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Contrast Test",
           sport: "cycling",
           steps: [
@@ -382,13 +382,13 @@ test.describe("Accessibility", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Theme Test",
           sport: "cycling",
           steps: [

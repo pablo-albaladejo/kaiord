@@ -140,7 +140,7 @@ describe("Zwift Round-Trip Conversion", () => {
           serialNumber: "1234",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -158,7 +158,7 @@ describe("Zwift Round-Trip Conversion", () => {
             ],
           },
           fit: {
-            type: "workout",
+            type: "structured_workout",
             hrm_fit_single_byte_product_id: 12,
           },
         },
@@ -203,7 +203,7 @@ describe("Zwift Round-Trip Conversion", () => {
       // Arrange
       const originalKrd = buildKRD.build({
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Power Zone Test",
             sport: "cycling",
             steps: [
@@ -230,12 +230,14 @@ describe("Zwift Round-Trip Conversion", () => {
 
       // Assert
       const originalStep = (
-        originalKrd.extensions?.workout as { steps: Array<unknown> }
+        originalKrd.extensions?.structured_workout as { steps: Array<unknown> }
       ).steps[0] as {
         target: { type: string; value: { unit: string; value: number } };
       };
       const regeneratedStep = (
-        regeneratedKrd.extensions?.workout as { steps: Array<unknown> }
+        regeneratedKrd.extensions?.structured_workout as {
+          steps: Array<unknown>;
+        }
       ).steps[0] as {
         target: { type: string; value: { unit: string; value: number } };
       };
@@ -251,7 +253,7 @@ describe("Zwift Round-Trip Conversion", () => {
       // Arrange
       const originalKrd = buildKRD.build({
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Watts Test",
             sport: "cycling",
             steps: [
@@ -278,12 +280,14 @@ describe("Zwift Round-Trip Conversion", () => {
 
       // Assert
       const originalStep = (
-        originalKrd.extensions?.workout as { steps: Array<unknown> }
+        originalKrd.extensions?.structured_workout as { steps: Array<unknown> }
       ).steps[0] as {
         target: { type: string; value: { unit: string; value: number } };
       };
       const regeneratedStep = (
-        regeneratedKrd.extensions?.workout as { steps: Array<unknown> }
+        regeneratedKrd.extensions?.structured_workout as {
+          steps: Array<unknown>;
+        }
       ).steps[0] as {
         target: { type: string; value: { unit: string; value: number } };
       };
@@ -299,7 +303,7 @@ describe("Zwift Round-Trip Conversion", () => {
       // Arrange
       const originalKrd = buildKRD.build({
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Distance Test",
             sport: "cycling",
             steps: [
@@ -326,10 +330,12 @@ describe("Zwift Round-Trip Conversion", () => {
 
       // Assert
       const originalStep = (
-        originalKrd.extensions?.workout as { steps: Array<unknown> }
+        originalKrd.extensions?.structured_workout as { steps: Array<unknown> }
       ).steps[0] as { duration: { type: string; meters: number } };
       const regeneratedStep = (
-        regeneratedKrd.extensions?.workout as { steps: Array<unknown> }
+        regeneratedKrd.extensions?.structured_workout as {
+          steps: Array<unknown>;
+        }
       ).steps[0] as { duration: { type: string; meters: number } };
 
       expect(regeneratedStep.duration.type).toBe("distance");
@@ -342,7 +348,7 @@ describe("Zwift Round-Trip Conversion", () => {
       // Arrange
       const originalKrd = buildKRD.build({
         extensions: {
-          workout: {
+          structured_workout: {
             name: "HR Test",
             sport: "cycling",
             steps: [
@@ -369,12 +375,14 @@ describe("Zwift Round-Trip Conversion", () => {
 
       // Assert
       const originalStep = (
-        originalKrd.extensions?.workout as { steps: Array<unknown> }
+        originalKrd.extensions?.structured_workout as { steps: Array<unknown> }
       ).steps[0] as {
         target: { type: string; value: { unit: string; value: number } };
       };
       const regeneratedStep = (
-        regeneratedKrd.extensions?.workout as { steps: Array<unknown> }
+        regeneratedKrd.extensions?.structured_workout as {
+          steps: Array<unknown>;
+        }
       ).steps[0] as {
         target: { type: string; value: { unit: string; value: number } };
       };

@@ -30,7 +30,6 @@ export const krdMetadataSchema = z.object({
   serialNumber: z.string().optional(),
   sport: z.string(),
   subSport: z.string().optional(),
-  fileType: z.enum(["workout", "activity", "course"]).optional(),
 });
 
 /**

@@ -7,14 +7,14 @@ import { WorkoutMetadataEditor } from "./WorkoutMetadataEditor";
 describe("WorkoutMetadataEditor", () => {
   const mockKrd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "cycling",
       subSport: "indoor_cycling",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "cycling",
         subSport: "indoor_cycling",
@@ -47,7 +47,7 @@ describe("WorkoutMetadataEditor", () => {
       const krdWithoutName: KRD = {
         ...mockKrd,
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [],
           },
@@ -173,9 +173,11 @@ describe("WorkoutMetadataEditor", () => {
       // Assert
       expect(handleSave).toHaveBeenCalledOnce();
       const updatedKrd = handleSave.mock.calls[0][0];
-      expect(updatedKrd.extensions?.workout?.name).toBe("Updated Workout");
-      expect(updatedKrd.extensions?.workout?.sport).toBe("running");
-      expect(updatedKrd.extensions?.workout?.subSport).toBe("trail");
+      expect(updatedKrd.extensions?.structured_workout?.name).toBe(
+        "Updated Workout"
+      );
+      expect(updatedKrd.extensions?.structured_workout?.sport).toBe("running");
+      expect(updatedKrd.extensions?.structured_workout?.subSport).toBe("trail");
       expect(updatedKrd.metadata.sport).toBe("running");
       expect(updatedKrd.metadata.subSport).toBe("trail");
     });

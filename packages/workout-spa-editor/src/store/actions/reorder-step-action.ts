@@ -57,11 +57,11 @@ export const reorderStepAction = (
   overIndex: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.workout || activeIndex === overIndex) {
+  if (!krd.extensions?.structured_workout || activeIndex === overIndex) {
     return {};
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
   const steps = [...workout.steps];
 
   if (!validateIndices(activeIndex, overIndex, steps.length)) {
@@ -77,7 +77,7 @@ export const reorderStepAction = (
     ...krd,
     extensions: {
       ...krd.extensions,
-      workout: {
+      structured_workout: {
         ...workout,
         steps: reindexedSteps,
       },

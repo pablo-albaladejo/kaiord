@@ -51,9 +51,8 @@ describe("File type detection", () => {
       const krd = mapMessagesToKRD(messages, logger);
 
       // Assert
-      expect(krd.type).toBe(fileTypeSchema.enum.workout);
-      expect(krd.metadata.fileType).toBe("workout");
-      expect(krd.extensions?.workout).toBeDefined();
+      expect(krd.type).toBe(fileTypeSchema.enum.structured_workout);
+      expect(krd.extensions?.structured_workout).toBeDefined();
     });
   });
 
@@ -79,9 +78,8 @@ describe("File type detection", () => {
       const krd = mapMessagesToKRD(messages, logger);
 
       // Assert
-      expect(krd.type).toBe(fileTypeSchema.enum.activity);
-      expect(krd.metadata.fileType).toBe("activity");
-      expect(krd.extensions?.activity).toBeDefined();
+      expect(krd.type).toBe(fileTypeSchema.enum.recorded_activity);
+      expect(krd.sessions).toBeDefined();
     });
 
     it("should detect activity file when recordMesgs present", () => {
@@ -108,8 +106,8 @@ describe("File type detection", () => {
       const krd = mapMessagesToKRD(messages, logger);
 
       // Assert
-      expect(krd.type).toBe(fileTypeSchema.enum.activity);
-      expect(krd.extensions?.activity).toBeDefined();
+      expect(krd.type).toBe(fileTypeSchema.enum.recorded_activity);
+      expect(krd.records).toBeDefined();
     });
   });
 
@@ -146,7 +144,7 @@ describe("File type detection", () => {
       const krd = mapMessagesToKRD(messages, logger);
 
       // Assert
-      expect(krd.type).toBe(fileTypeSchema.enum.workout);
+      expect(krd.type).toBe(fileTypeSchema.enum.structured_workout);
     });
   });
 
@@ -168,10 +166,10 @@ describe("File type detection", () => {
       const krd = mapMessagesToKRD(messages, logger);
 
       // Assert
-      expect(krd.metadata.fileType).toBe("activity");
+      expect(krd.type).toBe(fileTypeSchema.enum.recorded_activity);
     });
 
-    it("should map FILE_ID type 5 to workout", () => {
+    it("should map FILE_ID type 5 to structured workout", () => {
       // Arrange
       const messages: FitMessages = {
         [fitMessageKeySchema.enum.fileIdMesgs]: [
@@ -195,12 +193,11 @@ describe("File type detection", () => {
       const krd = mapMessagesToKRD(messages, logger);
 
       // Assert
-      expect(krd.metadata.fileType).toBe("workout");
+      expect(krd.type).toBe(fileTypeSchema.enum.structured_workout);
     });
 
-    it("should map FILE_ID type 6 to course in metadata", () => {
+    it("should detect activity even with FILE_ID type 6", () => {
       // Arrange - FILE_ID type 6 but sessionMesgs present means detected as activity
-      // However, metadata.fileType should reflect the FILE_ID type
       const messages: FitMessages = {
         [fitMessageKeySchema.enum.fileIdMesgs]: [
           {
@@ -215,11 +212,8 @@ describe("File type detection", () => {
       // Act
       const krd = mapMessagesToKRD(messages, logger);
 
-      // Assert
-      // File is detected as activity (due to sessionMesgs)
-      expect(krd.type).toBe(fileTypeSchema.enum.activity);
-      // But fileType in metadata reflects FILE_ID (course)
-      expect(krd.metadata.fileType).toBe("course");
+      // Assert - File is detected as recorded_activity (due to sessionMesgs)
+      expect(krd.type).toBe(fileTypeSchema.enum.recorded_activity);
     });
 
     it("should handle unknown FILE_ID types gracefully", () => {
@@ -239,7 +233,7 @@ describe("File type detection", () => {
       const krd = mapMessagesToKRD(messages, logger);
 
       // Assert
-      expect(krd.metadata.fileType).toBeUndefined();
+      expect(krd.type).toBe(fileTypeSchema.enum.recorded_activity);
     });
   });
 });

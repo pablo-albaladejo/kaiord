@@ -43,7 +43,7 @@ const generateStepId = (
   parentBlockIndex?: number
 ): string => {
   if (isWorkoutStep(item)) {
-    // Steps in main workout: "step-{stepIndex}"
+    // Steps in main structured_workout: "step-{stepIndex}"
     // Steps in blocks: "block-{blockIndex}-step-{stepIndex}"
     if (parentBlockIndex !== undefined) {
       return `block-${parentBlockIndex}-step-${item.stepIndex}`;

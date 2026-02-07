@@ -24,14 +24,14 @@ describe("convertMetadataToFileId - NaN validation", () => {
     const logger = createMockLogger();
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: faker.date.recent().toISOString(),
         sport: "cycling",
         serialNumber: "not-a-number", // Will parse to NaN
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "cycling",
           steps: [],
@@ -52,14 +52,14 @@ describe("convertMetadataToFileId - NaN validation", () => {
     const validSerialNumber = faker.number.int({ min: 1, max: 999999 });
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: faker.date.recent().toISOString(),
         sport: "cycling",
         serialNumber: validSerialNumber.toString(),
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "cycling",
           steps: [],
@@ -79,14 +79,14 @@ describe("convertMetadataToFileId - NaN validation", () => {
     const logger = createMockLogger();
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: faker.date.recent().toISOString(),
         sport: "cycling",
         product: "invalid-product", // Will parse to NaN
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "cycling",
           steps: [],
@@ -107,14 +107,14 @@ describe("convertMetadataToFileId - NaN validation", () => {
     const validProduct = faker.number.int({ min: 1, max: 9999 });
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: faker.date.recent().toISOString(),
         sport: "cycling",
         product: validProduct.toString(),
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "cycling",
           steps: [],
@@ -134,14 +134,14 @@ describe("convertMetadataToFileId - NaN validation", () => {
     const logger = createMockLogger();
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: faker.date.recent().toISOString(),
         sport: "cycling",
         serialNumber: "", // Empty string
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "cycling",
           steps: [],
@@ -161,14 +161,14 @@ describe("convertMetadataToFileId - NaN validation", () => {
     const logger = createMockLogger();
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: faker.date.recent().toISOString(),
         sport: "cycling",
         // serialNumber is undefined
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "cycling",
           steps: [],

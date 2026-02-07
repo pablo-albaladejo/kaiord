@@ -43,7 +43,7 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
       const onStepSelect = vi.fn();
 
       // Create workout with duplicate stepIndex values:
-      // - Main workout: Step 1 (stepIndex: 0, displays as "Step 1")
+      // - Main structured_workout: Step 1 (stepIndex: 0, displays as "Step 1")
       // - Block A: Step 1 (stepIndex: 0, displays as "Step 1")
       // - Block B: Step 1 (stepIndex: 0, displays as "Step 1")
       const blockA: RepetitionBlock = {
@@ -285,7 +285,7 @@ describe("WorkoutList - Selection Isolation (Property 3)", () => {
       const user = userEvent.setup();
       const onStepSelect = vi.fn();
 
-      // Create a complex workout:
+      // Create a complex structured_workout:
       // - Main: Step 1 (stepIndex: 0), Step 2 (stepIndex: 1)
       // - Block A (index 2): Step 1 (stepIndex: 0), Step 2 (stepIndex: 1)
       // - Main: Step 3 (stepIndex: 2)

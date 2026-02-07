@@ -26,13 +26,13 @@ test.describe("Delete with Undo Flow", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Delete Undo Test",
           sport: "cycling",
           steps: [

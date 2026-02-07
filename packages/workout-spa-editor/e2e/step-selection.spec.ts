@@ -23,13 +23,13 @@ test.describe("Step Selection - Unique IDs", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Selection Test",
           sport: "cycling",
           steps: [
@@ -132,13 +132,13 @@ test.describe("Step Selection - Unique IDs", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Block Selection Test",
           sport: "running",
           steps: [
@@ -230,13 +230,13 @@ test.describe("Step Selection - Unique IDs", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Multi-Selection Test",
           sport: "cycling",
           steps: [
@@ -394,13 +394,13 @@ test.describe("Step Selection - Unique IDs", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Independent Selection Test",
           sport: "running",
           steps: [
@@ -531,13 +531,13 @@ test.describe("Step Selection - Unique IDs", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Selection State Test",
           sport: "cycling",
           steps: [

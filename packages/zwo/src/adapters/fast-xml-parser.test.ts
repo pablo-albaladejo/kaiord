@@ -41,7 +41,7 @@ describe("createFastXmlZwiftReader", () => {
       expect(mockValidator).toHaveBeenCalledWith(validXml);
       expect(result).toBeDefined();
       expect(result.version).toBe("1.0");
-      expect(result.type).toBe("workout");
+      expect(result.type).toBe("structured_workout");
     });
 
     it("should throw ZwiftValidationError when XSD validation fails", async () => {
@@ -100,7 +100,7 @@ describe("createFastXmlZwiftReader", () => {
         "Zwift file parsed successfully"
       );
       expect(result).toBeDefined();
-      expect(result.extensions?.workout?.name).toBe("Test Workout");
+      expect(result.extensions?.structured_workout?.name).toBe("Test Workout");
     });
 
     it("should throw ZwiftParsingError when workout_file element is missing", async () => {
@@ -186,7 +186,7 @@ describe("createFastXmlZwiftReader", () => {
       const result = await reader(xmlWithMetadata);
 
       // Assert
-      expect(result.extensions?.workout).toMatchObject({
+      expect(result.extensions?.structured_workout).toMatchObject({
         name: "FTP Test",
         sport: "cycling",
       });
@@ -271,7 +271,7 @@ describe("createFastXmlZwiftReader", () => {
 
       // Assert
       expect(result.metadata.sport).toBe("cycling");
-      expect(result.extensions?.workout?.sport).toBe("cycling");
+      expect(result.extensions?.structured_workout?.sport).toBe("cycling");
     });
 
     it("should map run sportType to running", async () => {
@@ -297,7 +297,7 @@ describe("createFastXmlZwiftReader", () => {
 
       // Assert
       expect(result.metadata.sport).toBe("running");
-      expect(result.extensions?.workout?.sport).toBe("running");
+      expect(result.extensions?.structured_workout?.sport).toBe("running");
     });
 
     it("should extract tags from workout", async () => {
@@ -383,9 +383,10 @@ describe("createFastXmlZwiftReader", () => {
       const result = await reader(xmlWithFlatRoad);
 
       // Assert
-      expect(result.extensions?.workout?.steps).toHaveLength(1);
+      expect(result.extensions?.structured_workout?.steps).toHaveLength(1);
       expect(
-        result.extensions?.workout?.steps[0].extensions?.zwift?.FlatRoad
+        result.extensions?.structured_workout?.steps[0].extensions?.zwift
+          ?.FlatRoad
       ).toBe(1);
     });
 
@@ -436,13 +437,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [],
@@ -470,13 +471,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [],
@@ -510,7 +511,7 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const invalidKrd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
@@ -540,13 +541,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [],
@@ -586,13 +587,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [],
@@ -628,13 +629,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Cycling Workout",
             sport: "cycling",
             steps: [],
@@ -660,13 +661,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Running Workout",
             sport: "running",
             steps: [],
@@ -694,13 +695,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Intervals Workout",
             sport: "cycling",
             steps: [
@@ -759,13 +760,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Cadence Intervals",
             sport: "cycling",
             steps: [
@@ -824,13 +825,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Distance Intervals",
             sport: "running",
             steps: [
@@ -889,13 +890,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Multiple Intervals",
             sport: "cycling",
             steps: [
@@ -982,13 +983,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Text Event Workout",
             sport: "cycling",
             steps: [
@@ -1039,13 +1040,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Multiple Text Events",
             sport: "cycling",
             steps: [
@@ -1107,13 +1108,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Distance Text Events",
             sport: "running",
             steps: [
@@ -1169,13 +1170,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "IntervalsT with Text Events",
             sport: "cycling",
             steps: [
@@ -1242,13 +1243,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "No Text Events",
             sport: "cycling",
             steps: [
@@ -1286,13 +1287,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Mixed Intervals with Text Events",
             sport: "cycling",
             steps: [
@@ -1386,13 +1387,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Distance Workout",
             sport: "running",
             steps: [
@@ -1435,13 +1436,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Running Workout",
             sport: "running",
             steps: [
@@ -1482,13 +1483,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Tagged Workout",
             sport: "cycling",
             steps: [],
@@ -1519,13 +1520,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "FreeRide Workout",
             sport: "cycling",
             steps: [
@@ -1566,13 +1567,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Complete Workout",
             sport: "running",
             steps: [
@@ -1629,13 +1630,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Simple Workout",
             sport: "cycling",
             steps: [],
@@ -1662,13 +1663,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Simple Workout",
             sport: "cycling",
             steps: [],
@@ -1695,13 +1696,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "FreeRide Without FlatRoad",
             sport: "cycling",
             steps: [
@@ -1737,13 +1738,13 @@ describe("createFastXmlZwiftWriter", () => {
       // Arrange
       const krd = {
         version: "1.0",
-        type: "workout" as const,
+        type: "structured_workout" as const,
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "No Tags Workout",
             sport: "cycling",
             steps: [],

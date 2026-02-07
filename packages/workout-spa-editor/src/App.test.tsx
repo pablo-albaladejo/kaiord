@@ -208,12 +208,12 @@ describe("App", () => {
 
     const createMockKRD = (workout: Workout): KRD => ({
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
-      extensions: { workout },
+      extensions: { structured_workout: workout },
     });
 
     it("should move step up when Alt+ArrowUp is pressed with a selected step", () => {
@@ -231,7 +231,7 @@ describe("App", () => {
 
       // Capture initial step identities by power value
       const initialWorkout = useWorkoutStore.getState().currentWorkout
-        ?.extensions?.workout as Workout | undefined;
+        ?.extensions?.structured_workout as Workout | undefined;
       const initialStep0Power = (initialWorkout?.steps[0] as WorkoutStep).target
         .value?.value;
       const initialStep1Power = (initialWorkout?.steps[1] as WorkoutStep).target
@@ -247,7 +247,7 @@ describe("App", () => {
 
       // Assert
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
-        ?.extensions?.workout as Workout | undefined;
+        ?.extensions?.structured_workout as Workout | undefined;
       const updatedStep0 = updatedWorkout?.steps[0] as WorkoutStep;
       const updatedStep1 = updatedWorkout?.steps[1] as WorkoutStep;
 
@@ -279,7 +279,7 @@ describe("App", () => {
 
       // Capture initial step identities by power value
       const initialWorkout = useWorkoutStore.getState().currentWorkout
-        ?.extensions?.workout as Workout | undefined;
+        ?.extensions?.structured_workout as Workout | undefined;
       const initialStep1Power = (initialWorkout?.steps[1] as WorkoutStep).target
         .value?.value;
       const initialStep2Power = (initialWorkout?.steps[2] as WorkoutStep).target
@@ -295,7 +295,7 @@ describe("App", () => {
 
       // Assert
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
-        ?.extensions?.workout as Workout | undefined;
+        ?.extensions?.structured_workout as Workout | undefined;
       const updatedStep1 = updatedWorkout?.steps[1] as WorkoutStep;
       const updatedStep2 = updatedWorkout?.steps[2] as WorkoutStep;
 
@@ -325,7 +325,7 @@ describe("App", () => {
       renderWithProviders(<App />);
 
       const initialWorkout = useWorkoutStore.getState().currentWorkout
-        ?.extensions?.workout as Workout | undefined;
+        ?.extensions?.structured_workout as Workout | undefined;
 
       // Act
       const event = new KeyboardEvent("keydown", {
@@ -337,7 +337,7 @@ describe("App", () => {
 
       // Assert
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
-        ?.extensions?.workout as Workout | undefined;
+        ?.extensions?.structured_workout as Workout | undefined;
       expect(updatedWorkout?.steps).toEqual(initialWorkout?.steps);
     });
 
@@ -354,7 +354,7 @@ describe("App", () => {
       renderWithProviders(<App />);
 
       const initialWorkout = useWorkoutStore.getState().currentWorkout
-        ?.extensions?.workout as Workout | undefined;
+        ?.extensions?.structured_workout as Workout | undefined;
 
       // Act
       const event = new KeyboardEvent("keydown", {
@@ -366,7 +366,7 @@ describe("App", () => {
 
       // Assert
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
-        ?.extensions?.workout as Workout | undefined;
+        ?.extensions?.structured_workout as Workout | undefined;
       expect(updatedWorkout?.steps).toEqual(initialWorkout?.steps);
     });
 
@@ -383,7 +383,7 @@ describe("App", () => {
       renderWithProviders(<App />);
 
       const initialWorkout = useWorkoutStore.getState().currentWorkout
-        ?.extensions?.workout as Workout | undefined;
+        ?.extensions?.structured_workout as Workout | undefined;
 
       // Act
       const upEvent = new KeyboardEvent("keydown", {
@@ -402,7 +402,7 @@ describe("App", () => {
 
       // Assert
       const updatedWorkout = useWorkoutStore.getState().currentWorkout
-        ?.extensions?.workout as Workout | undefined;
+        ?.extensions?.structured_workout as Workout | undefined;
       expect(updatedWorkout?.steps).toEqual(initialWorkout?.steps);
     });
 

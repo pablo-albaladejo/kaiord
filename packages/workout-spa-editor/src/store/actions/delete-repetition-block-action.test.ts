@@ -44,13 +44,13 @@ const createKRDWithWorkout = (
   steps: Array<WorkoutStep | RepetitionBlock>
 ): KRD => ({
   version: "1.0",
-  type: "workout",
+  type: "structured_workout",
   metadata: {
     created: "2025-01-15T10:30:00Z",
     sport: "cycling",
   },
   extensions: {
-    workout: {
+    structured_workout: {
       name: "Test Workout",
       sport: "cycling",
       steps,
@@ -293,7 +293,8 @@ describe("deleteRepetitionBlockAction", () => {
             const result = deleteRepetitionBlockAction(krd, targetId, state);
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             // Should have one less block
@@ -375,7 +376,8 @@ describe("deleteRepetitionBlockAction", () => {
             const result = deleteRepetitionBlockAction(krd, targetId, state);
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             // Should have one less item (the deleted block)
@@ -438,7 +440,8 @@ describe("deleteRepetitionBlockAction", () => {
             const result = deleteRepetitionBlockAction(krd, block.id!, state);
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             // Block should be removed (1 less item in steps array)
@@ -480,7 +483,8 @@ describe("deleteRepetitionBlockAction", () => {
             );
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             // Should have one less block
@@ -537,7 +541,8 @@ describe("deleteRepetitionBlockAction", () => {
             const result = deleteRepetitionBlockAction(krd, targetId, state);
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             // Extract all workout steps (not blocks)
@@ -608,7 +613,8 @@ describe("deleteRepetitionBlockAction", () => {
             );
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             // Verify all remaining steps have sequential indices
@@ -659,7 +665,8 @@ describe("deleteRepetitionBlockAction", () => {
             const result = deleteRepetitionBlockAction(krd, block.id!, state);
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             const workoutSteps = workout!.steps.filter(isWorkoutStep);
@@ -711,7 +718,7 @@ describe("deleteRepetitionBlockAction", () => {
             const state = createInitialState(originalKrd);
 
             // Store original state for comparison
-            const originalWorkout = originalKrd.extensions?.workout;
+            const originalWorkout = originalKrd.extensions?.structured_workout;
             const originalStepsLength = originalWorkout?.steps.length ?? 0;
 
             // The block position in steps array
@@ -726,7 +733,7 @@ describe("deleteRepetitionBlockAction", () => {
 
             // Verify deletion happened
             const workoutAfterDelete =
-              afterDelete.currentWorkout?.extensions?.workout;
+              afterDelete.currentWorkout?.extensions?.structured_workout;
             expect(workoutAfterDelete?.steps.length).toBe(
               originalStepsLength - 1
             );
@@ -750,7 +757,7 @@ describe("deleteRepetitionBlockAction", () => {
 
             // Assert - Original state is restored
             const workoutAfterUndo =
-              afterUndo.currentWorkout?.extensions?.workout;
+              afterUndo.currentWorkout?.extensions?.structured_workout;
 
             expect(workoutAfterUndo).toBeDefined();
 
@@ -889,7 +896,8 @@ describe("deleteRepetitionBlockAction", () => {
             const result = deleteRepetitionBlockAction(krd, block.id!, state);
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             // Calculate actual total duration from remaining steps
@@ -938,7 +946,7 @@ describe("deleteRepetitionBlockAction", () => {
       // Arrange
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
@@ -977,7 +985,7 @@ describe("deleteRepetitionBlockAction", () => {
       const result = deleteRepetitionBlockAction(krd, block.id!, state);
 
       // Assert
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout).toBeDefined();
       expect(workout!.steps.length).toBe(0);
     });

@@ -10,7 +10,7 @@ describe("convertKrdToFitEvent", () => {
     // Arrange
     const krdEvent = {
       timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "start",
+      eventType: "event_start",
     };
 
     // Act
@@ -26,7 +26,7 @@ describe("convertKrdToFitEvent", () => {
     // Arrange
     const krdEvent = {
       timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "stop",
+      eventType: "event_stop",
     };
 
     // Act
@@ -41,7 +41,7 @@ describe("convertKrdToFitEvent", () => {
     // Arrange
     const krdEvent = {
       timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "pause",
+      eventType: "event_pause",
     };
 
     // Act
@@ -56,7 +56,7 @@ describe("convertKrdToFitEvent", () => {
     // Arrange
     const krdEvent = {
       timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "lap",
+      eventType: "event_lap",
     };
 
     // Act
@@ -71,7 +71,7 @@ describe("convertKrdToFitEvent", () => {
     // Arrange
     const krdEvent = {
       timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "marker",
+      eventType: "event_marker",
     };
 
     // Act
@@ -86,7 +86,7 @@ describe("convertKrdToFitEvent", () => {
     // Arrange
     const krdEvent = {
       timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "workout_step",
+      eventType: "event_workout_step_change",
     };
 
     // Act
@@ -101,7 +101,7 @@ describe("convertKrdToFitEvent", () => {
     // Arrange
     const krdEvent = {
       timestamp: "2024-01-01T00:00:00.000Z",
-      eventType: "start",
+      eventType: "event_start",
       eventGroup: 1,
       data: 42,
     };
@@ -132,9 +132,9 @@ describe("convertKrdToFitEvents", () => {
   it("should batch convert multiple events", () => {
     // Arrange
     const krdEvents = [
-      { timestamp: "2024-01-01T00:00:00.000Z", eventType: "start" },
-      { timestamp: "2024-01-01T00:01:00.000Z", eventType: "lap" },
-      { timestamp: "2024-01-01T00:02:00.000Z", eventType: "stop" },
+      { timestamp: "2024-01-01T00:00:00.000Z", eventType: "event_start" },
+      { timestamp: "2024-01-01T00:01:00.000Z", eventType: "event_lap" },
+      { timestamp: "2024-01-01T00:02:00.000Z", eventType: "event_stop" },
     ];
 
     // Act
@@ -151,9 +151,13 @@ describe("convertKrdToFitEvents", () => {
 describe("round-trip conversion", () => {
   it("should preserve common event types through KRD -> FIT -> KRD", () => {
     // Arrange
-    const eventTypes: Array<
-      "start" | "stop" | "pause" | "lap" | "marker" | "timer"
-    > = ["start", "stop", "pause", "lap", "marker"];
+    const eventTypes = [
+      "event_start",
+      "event_stop",
+      "event_pause",
+      "event_lap",
+      "event_marker",
+    ] as const;
 
     eventTypes.forEach((eventType) => {
       const originalKrd = {
@@ -187,7 +191,7 @@ describe("round-trip conversion", () => {
     // Arrange
     const originalKrd = {
       timestamp: "2024-01-01T00:00:00.500Z",
-      eventType: "start" as const,
+      eventType: "event_start" as const,
     };
 
     // Act
@@ -198,6 +202,6 @@ describe("round-trip conversion", () => {
     const originalTime = new Date(originalKrd.timestamp).getTime();
     const roundTrippedTime = new Date(roundTrippedKrd.timestamp).getTime();
     expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(1000);
-    expect(roundTrippedKrd.eventType).toBe("start");
+    expect(roundTrippedKrd.eventType).toBe("event_start");
   });
 });

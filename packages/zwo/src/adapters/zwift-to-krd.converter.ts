@@ -58,7 +58,7 @@ export const convertZwiftToKRD = (zwiftData: unknown, logger: Logger): KRD => {
   const fitExtensions = extractFitExtensions(workoutFile);
 
   const extensions: Record<string, unknown> = {
-    workout: {
+    structured_workout: {
       name: workoutFile.name,
       sport,
       steps,
@@ -78,7 +78,7 @@ export const convertZwiftToKRD = (zwiftData: unknown, logger: Logger): KRD => {
 
   return {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata,
     extensions,
   };

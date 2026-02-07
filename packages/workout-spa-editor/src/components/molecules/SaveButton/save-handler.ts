@@ -31,7 +31,7 @@ export function createSaveHandler(
       const filename = generateWorkoutFilename(workout, selectedFormat);
       downloadWorkout(buffer, filename, selectedFormat);
 
-      const workoutData = workout.extensions?.workout as
+      const workoutData = workout.extensions?.structured_workout as
         | { name?: string }
         | undefined;
       const workoutName = workoutData?.name || "workout";

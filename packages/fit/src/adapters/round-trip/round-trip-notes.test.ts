@@ -16,8 +16,8 @@ describe("Round-trip: Workout step - notes field", () => {
     const krd = await reader(originalBuffer);
 
     // Add notes to first step
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -66,8 +66,8 @@ describe("Round-trip: Workout step - notes field", () => {
       const krd = await reader(originalBuffer);
 
       // Add notes to first step
-      if (krd.extensions?.workout) {
-        const workout = krd.extensions.workout as {
+      if (krd.extensions?.structured_workout) {
+        const workout = krd.extensions.structured_workout as {
           name?: string;
           sport: string;
           steps: Array<{
@@ -107,8 +107,8 @@ describe("Round-trip: Workout step - notes field", () => {
     const krd = await reader(originalBuffer);
 
     // Add long notes to first step (bypassing schema)
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -137,8 +137,8 @@ describe("Round-trip: Workout step - notes field", () => {
     const krd = await reader(originalBuffer);
 
     // Add max-length notes to first step
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -177,8 +177,8 @@ describe("Round-trip: Workout step - notes field", () => {
     const krd = await reader(originalBuffer);
 
     // Ensure notes is undefined
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -222,8 +222,8 @@ describe("Round-trip: Workout step - notes field", () => {
     const krd = await reader(originalBuffer);
 
     // Add notes to all steps
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -269,8 +269,8 @@ describe("Round-trip: Combined fields - subSport and notes", () => {
     const krd = await reader(originalBuffer);
 
     // Set both subSport and notes
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         subSport?: string;

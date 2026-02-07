@@ -49,13 +49,13 @@ const createKRDWithWorkout = (
   steps: Array<WorkoutStep | RepetitionBlock>
 ): KRD => ({
   version: "1.0",
-  type: "workout",
+  type: "structured_workout",
   metadata: {
     created: "2025-01-15T10:30:00Z",
     sport: "cycling",
   },
   extensions: {
-    workout: {
+    structured_workout: {
       name: "Test Workout",
       sport: "cycling",
       steps,
@@ -113,7 +113,8 @@ describe("Block ID Stability", () => {
             );
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             // Find the block in the updated workout
@@ -165,7 +166,8 @@ describe("Block ID Stability", () => {
             const result = addStepToRepetitionBlockAction(krd, blockId, state);
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             // Find the block in the updated workout
@@ -233,7 +235,8 @@ describe("Block ID Stability", () => {
             );
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             // Find the moved block in the updated workout
@@ -298,7 +301,7 @@ describe("Block ID Stability", () => {
             state = { ...state, ...result };
 
             // Verify ID after operation 1
-            let workout = currentKrd.extensions?.workout;
+            let workout = currentKrd.extensions?.structured_workout;
             let updatedBlock = workout!.steps.find(
               (step) => isRepetitionBlock(step) && step.id === blockId
             ) as RepetitionBlock | undefined;
@@ -311,7 +314,7 @@ describe("Block ID Stability", () => {
             state = { ...state, ...result };
 
             // Verify ID after operation 2
-            workout = currentKrd.extensions?.workout;
+            workout = currentKrd.extensions?.structured_workout;
             updatedBlock = workout!.steps.find(
               (step) => isRepetitionBlock(step) && step.id === blockId
             ) as RepetitionBlock | undefined;
@@ -328,7 +331,7 @@ describe("Block ID Stability", () => {
             currentKrd = result.currentWorkout!;
 
             // Assert - Final verification
-            workout = currentKrd.extensions?.workout;
+            workout = currentKrd.extensions?.structured_workout;
             updatedBlock = workout!.steps.find(
               (step) => isRepetitionBlock(step) && step.id === blockId
             ) as RepetitionBlock | undefined;
@@ -394,7 +397,8 @@ describe("Block ID Stability", () => {
             );
 
             // Assert
-            const workout = result.currentWorkout?.extensions?.workout;
+            const workout =
+              result.currentWorkout?.extensions?.structured_workout;
             expect(workout).toBeDefined();
 
             // Extract all block IDs from the updated workout

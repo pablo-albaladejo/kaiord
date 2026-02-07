@@ -25,13 +25,13 @@ describe("createRepetitionBlock", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "running",
           steps: [
@@ -77,7 +77,7 @@ describe("createRepetitionBlock", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
 
     // First item should be a repetition block
@@ -115,13 +115,13 @@ describe("createRepetitionBlock", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "cycling",
           steps: [
             {
@@ -164,7 +164,7 @@ describe("createRepetitionBlock", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(3);
 
     // First item should be a repetition block with steps 0 and 2
@@ -204,13 +204,13 @@ describe("createRepetitionBlock", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "swimming",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "swimming",
           steps: [
             {
@@ -246,7 +246,7 @@ describe("createRepetitionBlock", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(1);
 
     const block = workout?.steps[0];
@@ -275,13 +275,13 @@ describe("createRepetitionBlock", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "running",
           steps: [
             {
@@ -335,13 +335,13 @@ describe("createRepetitionBlock", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "cycling",
           steps: [
             {
@@ -366,7 +366,7 @@ describe("createRepetitionBlock", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(1);
     expect(state.workoutHistory).toHaveLength(1); // Only the initial load
   });
@@ -375,13 +375,13 @@ describe("createRepetitionBlock", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "running",
           steps: [
             {
@@ -410,7 +410,7 @@ describe("createRepetitionBlock", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
     expect(state.workoutHistory).toHaveLength(1); // Only the initial load
   });
@@ -419,13 +419,13 @@ describe("createRepetitionBlock", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "cycling",
           steps: [
             {
@@ -460,7 +460,7 @@ describe("createRepetitionBlock", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
 
     const firstItem = workout?.steps[0];
@@ -486,13 +486,13 @@ describe("createRepetitionBlock", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "running",
           steps: [
             {
@@ -519,7 +519,7 @@ describe("createRepetitionBlock", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     const block = workout?.steps[0];
 
     expect(isRepetitionBlock(block)).toBe(true);
@@ -565,13 +565,13 @@ describe("createRepetitionBlock - Property Tests", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "running",
           steps: [],
         },
@@ -585,7 +585,7 @@ describe("createRepetitionBlock - Property Tests", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(0);
     expect(state.workoutHistory).toHaveLength(1); // Only the initial load
   });
@@ -594,13 +594,13 @@ describe("createRepetitionBlock - Property Tests", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "cycling",
           steps: [
             {
@@ -654,7 +654,7 @@ describe("createRepetitionBlock - Property Tests", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
 
     // First item should be the new repetition block
@@ -688,13 +688,13 @@ describe("createRepetitionBlock - Property Tests", () => {
     // Arrange
     const mockKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           sport: "running",
           steps: [
             {
@@ -742,7 +742,7 @@ describe("createRepetitionBlock - Property Tests", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    const workout = state.currentWorkout?.extensions?.workout;
+    const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(3);
 
     // First item should be step 0
@@ -801,13 +801,13 @@ describe("createRepetitionBlock - Property Tests", () => {
 
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps,
           },
@@ -843,7 +843,7 @@ describe("createRepetitionBlock - Property Tests", () => {
       const state = useWorkoutStore.getState();
 
       // Assert - Verify non-selected items maintain relative order
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout).toBeDefined();
 
       if (workout) {

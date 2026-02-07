@@ -15,8 +15,8 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const krd = await reader(originalBuffer);
 
     // Set poolLength
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         poolLength?: number;
@@ -53,8 +53,8 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
       const krd = await reader(originalBuffer);
 
       // Set poolLength
-      if (krd.extensions?.workout) {
-        const workout = krd.extensions.workout as {
+      if (krd.extensions?.structured_workout) {
+        const workout = krd.extensions.structured_workout as {
           name?: string;
           sport: string;
           poolLength?: number;
@@ -89,8 +89,8 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const krd = await reader(originalBuffer);
 
     // Set poolLength (KRD always stores in meters)
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         poolLength?: number;
@@ -124,8 +124,8 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const krd = await reader(originalBuffer);
 
     // Ensure poolLength is undefined
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         poolLength?: number;
@@ -162,8 +162,8 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const krd = await reader(originalBuffer);
 
     // Set equipment on first step
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -211,8 +211,8 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
       const krd = await reader(originalBuffer);
 
       // Set equipment
-      if (krd.extensions?.workout) {
-        const workout = krd.extensions.workout as {
+      if (krd.extensions?.structured_workout) {
+        const workout = krd.extensions.structured_workout as {
           name?: string;
           sport: string;
           steps: Array<{
@@ -251,8 +251,8 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const krd = await reader(originalBuffer);
 
     // Ensure equipment is undefined
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -296,8 +296,8 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const krd = await reader(originalBuffer);
 
     // Add equipment to all steps
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -343,8 +343,8 @@ describe("Round-trip: Swimming workouts - combined pool length and equipment", (
     const krd = await reader(originalBuffer);
 
     // Set both poolLength and equipment
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         poolLength?: number;

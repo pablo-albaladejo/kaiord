@@ -1,6 +1,6 @@
 {
   "version": "1.0",
-  "type": "workout",
+  "type": "structured_workout",
   "metadata": {
     "created": "2009-09-09T20:38:00.000Z",
     "manufacturer": "dynastream",
@@ -9,7 +9,7 @@
     "sport": "cycling"
   },
   "extensions": {
-    "workout": {
+    "structured_workout": {
       "name": "Example 1",
       "sport": "cycling",
       "steps": [

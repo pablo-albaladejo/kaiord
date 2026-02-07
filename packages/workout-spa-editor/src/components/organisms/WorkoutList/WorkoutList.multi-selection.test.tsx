@@ -43,7 +43,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       const onToggleStepSelection = vi.fn();
 
       // Create workout with duplicate stepIndex values:
-      // - Main workout: Step 1 (stepIndex: 0) → ID: "step-0"
+      // - Main structured_workout: Step 1 (stepIndex: 0) → ID: "step-0"
       // - Block A: Step 1 (stepIndex: 0) → ID: "block-1-step-0"
       // - Block B: Step 1 (stepIndex: 0) → ID: "block-2-step-0"
       const blockA: RepetitionBlock = {
@@ -341,7 +341,7 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       const user = userEvent.setup();
       const onToggleStepSelection = vi.fn();
 
-      // Create a complex workout:
+      // Create a complex structured_workout:
       // - Main: Step 1 (stepIndex: 0), Step 2 (stepIndex: 1)
       // - Block A (index 2): Step 1 (stepIndex: 0), Step 2 (stepIndex: 1)
       // - Main: Step 3 (stepIndex: 2)

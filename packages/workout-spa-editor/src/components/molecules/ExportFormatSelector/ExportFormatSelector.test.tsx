@@ -13,13 +13,13 @@ import { ExportFormatSelector } from "./ExportFormatSelector";
 describe("ExportFormatSelector", () => {
   const mockWorkout: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps: [],
@@ -310,7 +310,9 @@ describe("ExportFormatSelector", () => {
 
       // Assert
       expect(handleFormatChange).not.toHaveBeenCalled();
-      expect(screen.getByText(/Cannot export workout/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Cannot export structured workout/i)
+      ).toBeInTheDocument();
       expect(
         screen.getByText(/workout: No workout to export/i)
       ).toBeInTheDocument();
@@ -345,7 +347,9 @@ describe("ExportFormatSelector", () => {
       await user.click(fitOption!);
 
       // Assert
-      expect(screen.getByText(/Cannot export workout/i)).toBeInTheDocument();
+      expect(
+        screen.getByText(/Cannot export structured workout/i)
+      ).toBeInTheDocument();
       expect(screen.getByText(/type: Missing type/i)).toBeInTheDocument();
       expect(
         screen.getByText(/metadata: Missing metadata/i)
@@ -381,7 +385,7 @@ describe("ExportFormatSelector", () => {
       // Assert
       expect(handleFormatChange).toHaveBeenCalledWith("fit");
       expect(
-        screen.queryByText(/Cannot export workout/i)
+        screen.queryByText(/Cannot export structured workout/i)
       ).not.toBeInTheDocument();
     });
   });

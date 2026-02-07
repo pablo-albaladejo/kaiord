@@ -55,11 +55,11 @@ export const deleteStepAction = (
   stepIndex: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.structured_workout) {
     return {};
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
   const deletedStep = findStepToDelete(workout, stepIndex);
   const updatedSteps = filterSteps(workout.steps, stepIndex);
   const reindexedSteps = reindexSteps(updatedSteps);
@@ -67,7 +67,7 @@ export const deleteStepAction = (
   const updatedWorkout = { ...workout, steps: reindexedSteps };
   const updatedKrd: KRD = {
     ...krd,
-    extensions: { ...krd.extensions, workout: updatedWorkout },
+    extensions: { ...krd.extensions, structured_workout: updatedWorkout },
   };
 
   const deletedSteps = state.deletedSteps || [];
