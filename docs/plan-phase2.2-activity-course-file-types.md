@@ -10,13 +10,13 @@ Implement support for FIT ACTIVITY (ID 4) and COURSE (ID 6) file types. Currentl
 
 ## Phase Overview
 
-| Task                          | Priority | Effort   | Files       |
-| ----------------------------- | -------- | -------- | ----------- |
-| 2.2.1 FIT File Type Schema    | High     | 0.5 days | 1 new       |
-| 2.2.2 FILE_ID Extension       | High     | 0.5 days | 2 modified  |
-| 2.2.3 Activity File Structure | High     | 0.5 days | 2 new       |
-| 2.2.4 Course Support          | High     | 0.5 days | 4 new       |
-| 2.2.5 Message Router          | High     | 0.5 days | 1 modified  |
+| Task                          | Priority | Effort   | Files      |
+| ----------------------------- | -------- | -------- | ---------- |
+| 2.2.1 FIT File Type Schema    | High     | 0.5 days | 1 new      |
+| 2.2.2 FILE_ID Extension       | High     | 0.5 days | 2 modified |
+| 2.2.3 Activity File Structure | High     | 0.5 days | 2 new      |
+| 2.2.4 Course Support          | High     | 0.5 days | 4 new      |
+| 2.2.5 Message Router          | High     | 0.5 days | 1 modified |
 
 ---
 
@@ -34,23 +34,23 @@ import { z } from "zod";
  * Defines the type of data contained in the FIT file
  */
 export const fitFileTypeSchema = z.enum([
-  "device",           // 1
-  "settings",         // 2
-  "sport",            // 3
-  "activity",         // 4 - Recorded workout with GPS/sensor data
-  "workout",          // 5 - Planned workout (current default)
-  "course",           // 6 - Route/course for navigation
-  "schedules",        // 7
-  "weight",           // 9
-  "totals",           // 10
-  "goals",            // 11
-  "bloodPressure",    // 14
-  "monitoringA",      // 15
-  "activitySummary",  // 20
-  "monitoringDaily",  // 28
-  "monitoringB",      // 32
-  "segment",          // 34
-  "segmentList",      // 35
+  "device", // 1
+  "settings", // 2
+  "sport", // 3
+  "activity", // 4 - Recorded workout with GPS/sensor data
+  "workout", // 5 - Planned workout (current default)
+  "course", // 6 - Route/course for navigation
+  "schedules", // 7
+  "weight", // 9
+  "totals", // 10
+  "goals", // 11
+  "bloodPressure", // 14
+  "monitoringA", // 15
+  "activitySummary", // 20
+  "monitoringDaily", // 28
+  "monitoringB", // 32
+  "segment", // 34
+  "segmentList", // 35
   "exdConfiguration", // 40
 ]);
 
@@ -107,6 +107,7 @@ export const NUMBER_TO_FIT_FILE_TYPE: Record<number, FitFileType> = {
 ## 2.2.2 FILE_ID Extension
 
 **Files to Modify**:
+
 - `packages/core/src/domain/schemas/metadata.ts`
 - `packages/core/src/adapters/fit/metadata/file-id.mapper.ts`
 
@@ -130,18 +131,26 @@ export const metadataSchema = z.object({
 
 ```typescript
 // metadata/file-id.mapper.ts
-import { FIT_FILE_TYPE_TO_NUMBER, NUMBER_TO_FIT_FILE_TYPE } from "../schemas/fit-file-type";
+import {
+  FIT_FILE_TYPE_TO_NUMBER,
+  NUMBER_TO_FIT_FILE_TYPE,
+} from "../schemas/fit-file-type";
 
-export const mapFitFileIdToMetadata = (fileId: FitFileIdMessage): Partial<Metadata> => {
+export const mapFitFileIdToMetadata = (
+  fileId: FitFileIdMessage
+): Partial<Metadata> => {
   return {
     // ... existing fields
-    file_type: fileId.type !== undefined
-      ? NUMBER_TO_FIT_FILE_TYPE[fileId.type]
-      : "workout",
+    file_type:
+      fileId.type !== undefined
+        ? NUMBER_TO_FIT_FILE_TYPE[fileId.type]
+        : "workout",
   };
 };
 
-export const mapMetadataToFitFileId = (metadata: Metadata): Partial<FitFileIdMessage> => {
+export const mapMetadataToFitFileId = (
+  metadata: Metadata
+): Partial<FitFileIdMessage> => {
   return {
     // ... existing fields
     type: metadata.file_type
@@ -156,6 +165,7 @@ export const mapMetadataToFitFileId = (metadata: Metadata): Partial<FitFileIdMes
 ## 2.2.3 Activity File Structure
 
 **Files to Create**:
+
 - `packages/core/src/adapters/fit/messages/activity.mapper.ts` (ALREADY EXISTS)
 - `packages/core/src/adapters/fit/messages/activity-validator.ts` (NEW)
 
@@ -163,7 +173,9 @@ export const mapMetadataToFitFileId = (metadata: Metadata): Partial<FitFileIdMes
 
 ```typescript
 // messages/activity-validator.ts
-export const validateActivityMessages = (messages: Record<string, unknown[]>): void => {
+export const validateActivityMessages = (
+  messages: Record<string, unknown[]>
+): void => {
   const required = ["fileIdMesgs", "sessionMesgs"];
 
   for (const key of required) {
@@ -220,6 +232,7 @@ export const createActivityMessages = (krd: KRD): Record<string, unknown[]> => {
 ## 2.2.4 Course Support
 
 **Files to Create**:
+
 - `packages/core/src/adapters/fit/schemas/fit-course.ts`
 - `packages/core/src/adapters/fit/schemas/fit-course-point.ts`
 - `packages/core/src/adapters/fit/course/course.mapper.ts`
@@ -242,38 +255,38 @@ export type FitCourse = z.infer<typeof fitCourseSchema>;
 ```typescript
 // schemas/fit-course-point.ts
 export const fitCoursePointTypeSchema = z.enum([
-  "generic",       // 0
-  "summit",        // 1
-  "valley",        // 2
-  "water",         // 3
-  "food",          // 4
-  "danger",        // 5
-  "left",          // 6
-  "right",         // 7
-  "straight",      // 8
-  "firstAid",      // 9
-  "fourthCategory",// 10
+  "generic", // 0
+  "summit", // 1
+  "valley", // 2
+  "water", // 3
+  "food", // 4
+  "danger", // 5
+  "left", // 6
+  "right", // 7
+  "straight", // 8
+  "firstAid", // 9
+  "fourthCategory", // 10
   "thirdCategory", // 11
-  "secondCategory",// 12
+  "secondCategory", // 12
   "firstCategory", // 13
-  "horsCategory",  // 14
-  "sprint",        // 15
-  "leftFork",      // 16
-  "rightFork",     // 17
-  "middleFork",    // 18
-  "slightLeft",    // 19
-  "sharpLeft",     // 20
-  "slightRight",   // 21
-  "sharpRight",    // 22
-  "uTurn",         // 23
-  "segmentStart",  // 24
-  "segmentEnd",    // 25
+  "horsCategory", // 14
+  "sprint", // 15
+  "leftFork", // 16
+  "rightFork", // 17
+  "middleFork", // 18
+  "slightLeft", // 19
+  "sharpLeft", // 20
+  "slightRight", // 21
+  "sharpRight", // 22
+  "uTurn", // 23
+  "segmentStart", // 24
+  "segmentEnd", // 25
 ]);
 
 export const fitCoursePointSchema = z.object({
   messageIndex: z.number().optional(),
   timestamp: z.number().optional(),
-  positionLat: z.number(),  // semicircles
+  positionLat: z.number(), // semicircles
   positionLong: z.number(), // semicircles
   distance: z.number().optional(),
   type: fitCoursePointTypeSchema,
@@ -288,7 +301,10 @@ export type FitCoursePoint = z.infer<typeof fitCoursePointSchema>;
 
 ```typescript
 // course/course.mapper.ts
-import { semicirclesToDegrees, degreesToSemicircles } from "../shared/coordinate.converter";
+import {
+  semicirclesToDegrees,
+  degreesToSemicircles,
+} from "../shared/coordinate.converter";
 
 export const mapFitCoursePointToKrd = (point: FitCoursePoint) => ({
   latitude: semicirclesToDegrees(point.positionLat),
@@ -302,7 +318,9 @@ export const mapFitCoursePointToKrd = (point: FitCoursePoint) => ({
     : undefined,
 });
 
-export const mapKrdCoursePointToFit = (point: KRDCoursePoint): FitCoursePoint => ({
+export const mapKrdCoursePointToFit = (
+  point: KRDCoursePoint
+): FitCoursePoint => ({
   messageIndex: point.index,
   positionLat: degreesToSemicircles(point.latitude),
   positionLong: degreesToSemicircles(point.longitude),
@@ -358,7 +376,9 @@ export const createCourseMessages = (krd: KRD): Record<string, unknown[]> => {
   }
 
   if (krd.extensions?.course_points) {
-    messages.coursePointMesgs = krd.extensions.course_points.map(mapKrdCoursePointToFit);
+    messages.coursePointMesgs = krd.extensions.course_points.map(
+      mapKrdCoursePointToFit
+    );
   }
 
   if (krd.extensions?.activity?.records) {
