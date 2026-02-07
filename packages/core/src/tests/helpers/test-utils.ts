@@ -11,6 +11,6 @@ export const createMockLogger = (): Logger => ({
     if (process.env.DEBUG_LOGS) console.log("[WARN]", ...args);
   },
   error: (...args: unknown[]) => {
-    console.error("[ERROR]", ...args);
+    if (process.env.DEBUG_LOGS) console.error("[ERROR]", ...args);
   },
 });

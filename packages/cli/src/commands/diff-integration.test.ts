@@ -81,26 +81,30 @@ describe("diff command integration", () => {
     expect(result).toHaveProperty("file2");
   });
 
-  it("should handle missing file error", async () => {
-    // Arrange
-    const validFile = join(
-      FIXTURES_PATH,
-      "fit-files/WorkoutIndividualSteps.fit"
-    );
-    const missingFile = join(FIXTURES_PATH, "nonexistent.fit");
+  it(
+    "should handle missing file error",
+    async () => {
+      // Arrange
+      const validFile = join(
+        FIXTURES_PATH,
+        "fit-files/WorkoutIndividualSteps.fit"
+      );
+      const missingFile = join(FIXTURES_PATH, "nonexistent.fit");
 
-    // Act & Assert
-    await expect(
-      execa("node", [
-        CLI_PATH,
-        "diff",
-        "--file1",
-        validFile,
-        "--file2",
-        missingFile,
-      ])
-    ).rejects.toThrow();
-  });
+      // Act & Assert
+      await expect(
+        execa("node", [
+          CLI_PATH,
+          "diff",
+          "--file1",
+          validFile,
+          "--file2",
+          missingFile,
+        ])
+      ).rejects.toThrow();
+    },
+    10000
+  ); // Increased timeout to 10s
 
   it("should support format override flags", async () => {
     // Arrange

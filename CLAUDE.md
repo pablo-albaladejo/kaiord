@@ -35,6 +35,11 @@ pnpm format                     # Format with Prettier
 
 # Changesets (for version-worthy changes)
 pnpm exec changeset             # Create changeset before PR
+
+# NPM optimization (Claude Code skills)
+/check-deps                     # Analyze dependencies (unused, duplicates, security)
+/analyze-bundle                 # Check bundle sizes and optimization opportunities
+/optimize-imports               # Refactor imports for better tree-shaking
 ```
 
 ## Architecture (Hexagonal + Plugin)
