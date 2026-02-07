@@ -5,30 +5,6 @@ import { afterEach, beforeEach, expect, vi } from "vitest";
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);
 
-// Filter out act() warnings from Radix UI internal components
-// These are false positives in Node 20.x that don't appear in Node 22.x
-// The warnings come from async state updates in Radix primitives (Tooltip, Presence, Portal, etc.)
-const originalError = console.error;
-beforeEach(() => {
-  console.error = (...args: unknown[]) => {
-    const message = String(args[0]);
-    // Ignore act() warnings from Radix UI components
-    if (
-      message.includes("not wrapped in act(...)") &&
-      (message.includes("Tooltip") ||
-        message.includes("Presence") ||
-        message.includes("Portal") ||
-        message.includes("PopperContent") ||
-        message.includes("DismissableLayer") ||
-        message.includes("FocusScope") ||
-        message.includes("TargetPicker"))
-    ) {
-      return;
-    }
-    originalError(...args);
-  };
-});
-
 // Mock window.matchMedia for theme tests
 beforeEach(() => {
   Object.defineProperty(window, "matchMedia", {
@@ -70,5 +46,4 @@ beforeEach(() => {
 afterEach(() => {
   cleanup();
   vi.restoreAllMocks();
-  console.error = originalError;
 });
