@@ -10,6 +10,7 @@ This directory contains specialized AI agents for the Kaiord project. Agents are
 **Purpose:** Comprehensive npm package optimization
 
 **What it does:**
+
 - Analyzes dependencies (unused, duplicates, security)
 - Checks bundle sizes against thresholds
 - Identifies import optimization opportunities
@@ -17,6 +18,7 @@ This directory contains specialized AI agents for the Kaiord project. Agents are
 - Provides implementation commands
 
 **When to use:**
+
 - Before creating PRs
 - After adding new dependencies
 - Weekly maintenance reviews
@@ -27,12 +29,14 @@ This directory contains specialized AI agents for the Kaiord project. Agents are
 Agents are invoked using the Task tool with the agent's context. Claude Code will automatically detect and use the agent definition.
 
 Example prompt:
+
 ```
 I need a comprehensive npm optimization review of all packages.
 Use the NPM Optimizer Agent.
 ```
 
 **Capabilities:**
+
 - Orchestrates `/check-deps`, `/analyze-bundle`, `/optimize-imports` skills
 - Cross-package analysis
 - Security auditing
@@ -41,6 +45,7 @@ Use the NPM Optimizer Agent.
 
 **Output:**
 Generates a comprehensive markdown report with:
+
 - Executive summary with health score (0-10)
 - Per-package detailed findings
 - Cross-package patterns and duplicates
@@ -54,6 +59,7 @@ Generates a comprehensive markdown report with:
 ### Agent Structure
 
 Agents are markdown files with:
+
 1. **Clear role definition** - What the agent specializes in
 2. **Capabilities** - What skills/tools it can use
 3. **Workflow** - Step-by-step execution plan
@@ -64,6 +70,7 @@ Agents are markdown files with:
 ### Best Practices
 
 **DO:**
+
 - ✅ Define clear scope and responsibilities
 - ✅ List all available skills/tools
 - ✅ Provide structured workflow (phases)
@@ -72,6 +79,7 @@ Agents are markdown files with:
 - ✅ Follow project quality standards
 
 **DON'T:**
+
 - ❌ Make agents too general (be specific)
 - ❌ Forget to integrate with existing skills
 - ❌ Skip quality standards enforcement
@@ -90,6 +98,7 @@ You are the [Agent Name] Agent for the Kaiord project. Your mission is [clear mi
 **Specialization:** [What you specialize in]
 
 **Available Skills:**
+
 - [List of skills this agent can use]
 
 ## Primary Responsibilities
@@ -99,9 +108,11 @@ You are the [Agent Name] Agent for the Kaiord project. Your mission is [clear mi
 ## Execution Workflow
 
 ### Phase 1: [Name]
+
 [Step-by-step instructions]
 
 ### Phase 2: [Name]
+
 [Step-by-step instructions]
 
 ## Quality Standards
@@ -132,20 +143,26 @@ You are the [Agent Name] Agent for the Kaiord project. Your mission is [clear mi
 Agents integrate with the project's quality standards:
 
 ### Zero Tolerance Policy
+
 All agents MUST:
+
 - Report ALL warnings and errors
 - Fix pre-existing issues
 - Follow Boy Scout Rule
 - Provide actionable solutions
 
 ### Before PR Checklist
+
 Relevant agents:
+
 - NPM Optimizer (check dependencies and bundles)
 - [Future: Test Coverage Agent]
 - [Future: Architecture Compliance Agent]
 
 ### Weekly Maintenance
+
 Relevant agents:
+
 - NPM Optimizer (comprehensive review)
 - [Future: Security Audit Agent]
 - [Future: Dependency Update Agent]
@@ -155,30 +172,35 @@ Relevant agents:
 ## Future Agents (Planned)
 
 ### Test Coverage Agent
+
 - Analyze test coverage across packages
 - Identify untested code paths
 - Suggest test scenarios
 - Generate test stubs
 
 ### Architecture Guardian Agent
+
 - Validate hexagonal architecture
 - Detect boundary violations
 - Suggest refactoring opportunities
 - Ensure separation of concerns
 
 ### Security Audit Agent
+
 - Deep security scanning
 - Dependency vulnerability analysis
 - Code pattern security checks
 - Supply chain risk assessment
 
 ### Performance Optimizer Agent
+
 - Bundle size deep dive
 - Code splitting suggestions
 - Lazy loading opportunities
 - Tree-shaking optimization
 
 ### Documentation Generator Agent
+
 - API documentation
 - README updates
 - Changelog generation
@@ -208,6 +230,7 @@ When adding new agents:
 - Good agents save hours of manual work
 
 For questions about agents, see:
+
 - `CLAUDE.md` - Project conventions
 - `.claude/skills/README.md` - Skills documentation
 - `AGENTS.md` - AI guidance
