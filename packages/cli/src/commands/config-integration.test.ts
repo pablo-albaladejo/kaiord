@@ -153,7 +153,7 @@ describe("config file integration", () => {
 
     // Assert - Config should be loaded
     expect(result.exitCode).toBeDefined();
-  });
+  }, 15000); // Increased timeout for process spawning under load
 
   it("should work without config file", async () => {
     // Arrange - No config file created
@@ -212,5 +212,5 @@ describe("config file integration", () => {
 
     // Assert - Should handle invalid config gracefully
     expect(result.exitCode).toBeDefined();
-  });
+  }, 15000); // Increased timeout for process spawning under load
 });

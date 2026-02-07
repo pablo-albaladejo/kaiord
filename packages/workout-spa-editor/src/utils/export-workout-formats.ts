@@ -5,7 +5,7 @@
  */
 
 import type { KRD } from "@kaiord/core";
-import { createDefaultProviders } from "@kaiord/core";
+import { createAllProviders } from "@kaiord/all";
 import type { ExportProgressCallback } from "./export-workout";
 import { ExportError } from "./export-workout";
 
@@ -35,11 +35,11 @@ export const exportFitFile = async (
   krd: KRD,
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
-  const providers = createDefaultProviders();
+  const providers = createAllProviders();
 
   onProgress?.(50);
 
-  const buffer = await providers.convertKrdToFit({ krd });
+  const buffer = await providers.convertKrdToFit!({ krd });
 
   onProgress?.(100);
 
@@ -50,11 +50,11 @@ export const exportTcxFile = async (
   krd: KRD,
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
-  const providers = createDefaultProviders();
+  const providers = createAllProviders();
 
   onProgress?.(50);
 
-  const tcxString = await providers.convertKrdToTcx({ krd });
+  const tcxString = await providers.convertKrdToTcx!({ krd });
   const buffer = new TextEncoder().encode(tcxString);
 
   onProgress?.(100);
@@ -66,11 +66,11 @@ export const exportZwoFile = async (
   krd: KRD,
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
-  const providers = createDefaultProviders();
+  const providers = createAllProviders();
 
   onProgress?.(50);
 
-  const zwoString = await providers.convertKrdToZwift({ krd });
+  const zwoString = await providers.convertKrdToZwift!({ krd });
   const buffer = new TextEncoder().encode(zwoString);
 
   onProgress?.(100);

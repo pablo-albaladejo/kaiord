@@ -42,7 +42,10 @@ export const WorkoutLibrary: React.FC<WorkoutLibraryProps> = ({
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className={DIALOG_OVERLAY_CLASSES} />
-        <Dialog.Content className={DIALOG_CONTENT_CLASSES}>
+        <Dialog.Content
+          aria-describedby={undefined}
+          className={DIALOG_CONTENT_CLASSES}
+        >
           <LibraryDialogContent
             templates={templates}
             previewTemplate={previewTemplate}

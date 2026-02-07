@@ -4,19 +4,20 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://github.com/pablo-albaladejo/kaiord/workflows/CI/badge.svg)](https://github.com/pablo-albaladejo/kaiord/actions)
 
-Core library for Kaiord workout data conversion between FIT, TCX, ZWO, and KRD formats.
+Core library for Kaiord workout data conversion. Contains domain types, schemas, ports, use cases, and the plugin architecture for format adapters.
+
+> **Note**: As of v2.0, format adapters (FIT, TCX, ZWO) are in separate packages.
+> For all formats in one install, use [`@kaiord/all`](https://www.npmjs.com/package/@kaiord/all).
+> See the [Migration Guide](../../docs/migration-v2.md) for details.
 
 ## Features
 
-- ✅ **FIT file support**: Read and write Garmin FIT workout files
-- ✅ **KRD canonical format**: JSON-based workout representation
-- ✅ **Schema validation**: Zod schemas with TypeScript type inference
-- ✅ **Round-trip safety**: Lossless conversions with defined tolerances
-- ✅ **Hexagonal architecture**: Clean separation of concerns
-- ✅ **Tree-shakeable**: Import only what you need for minimal bundle size
-- ✅ **Full TypeScript support**: Complete type definitions and inference
-- ✅ **Custom loggers**: Integrate with your logging infrastructure
-- ✅ **Dependency injection**: Swap providers without changing code
+- KRD canonical format with Zod schema validation
+- Hexagonal architecture with ports and adapters pattern
+- Plugin architecture for format adapters
+- Full TypeScript support with type inference
+- Custom logger injection
+- Tree-shakeable ESM bundle
 
 ## Installation
 
@@ -38,39 +39,35 @@ yarn add @kaiord/core
 
 ## Quick Start
 
-### Basic FIT to KRD Conversion
+### With Adapter Packages (v2.0+)
 
 ```typescript
 import { createDefaultProviders } from "@kaiord/core";
+import { createFitProviders } from "@kaiord/fit";
 import type { KRD } from "@kaiord/core";
 import { readFile } from "fs/promises";
 
-// Read FIT file
-const fitBuffer = await readFile("workout.fit");
-
-// Create providers with default configuration
-const providers = createDefaultProviders();
+// Wire FIT adapter into core
+const providers = createDefaultProviders({
+  fit: createFitProviders(),
+});
 
 // Convert FIT to KRD
-const krd: KRD = await providers.convertFitToKrd({ fitBuffer });
-
-console.log(krd.version); // "1.0"
-console.log(krd.type); // "workout"
-```
-
-### Basic KRD to FIT Conversion
-
-```typescript
-import { createDefaultProviders } from "@kaiord/core";
-import { writeFile } from "fs/promises";
-
-const providers = createDefaultProviders();
+const fitBuffer = await readFile("workout.fit");
+const krd: KRD = await providers.convertFitToKrd!({ fitBuffer });
 
 // Convert KRD to FIT
-const fitBuffer = await providers.convertKrdToFit({ krd });
+const output = await providers.convertKrdToFit!({ krd });
+```
 
-// Write FIT file
-await writeFile("output.fit", fitBuffer);
+### With All Formats (@kaiord/all)
+
+```typescript
+import { createAllProviders } from "@kaiord/all";
+
+const providers = createAllProviders();
+const krd = await providers.convertFitToKrd!({ fitBuffer });
+const tcx = await providers.convertKrdToTcx!({ krd });
 ```
 
 ### Schema Validation
@@ -92,15 +89,20 @@ if (result.success) {
 
 ### Main Functions
 
-#### `createDefaultProviders(logger?: Logger)`
+#### `createDefaultProviders(adapters?, logger?)`
 
-Creates a set of providers with default implementations for FIT conversion.
+Creates a provider container with optional format adapters wired in.
 
 ```typescript
 import { createDefaultProviders } from "@kaiord/core";
+import { createFitProviders } from "@kaiord/fit";
+import { createTcxProviders } from "@kaiord/tcx";
 
-const providers = createDefaultProviders();
-// Returns: { convertFitToKrd, convertKrdToFit, logger }
+const providers = createDefaultProviders({
+  fit: createFitProviders(),
+  tcx: createTcxProviders(),
+});
+// Returns: { schemaValidator, toleranceChecker, logger, convertFitToKrd, ... }
 ```
 
 #### `convertFitToKrd({ fitBuffer })`

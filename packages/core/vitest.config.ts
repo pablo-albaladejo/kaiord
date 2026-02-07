@@ -16,6 +16,9 @@ export default defineConfig({
         // Mappers - simple data transformation without logic
         // Coverage comes from integration and round-trip tests
         "**/*.mapper.ts",
+        // Error classes - infrastructure code with environment-dependent branches
+        // (Error.captureStackTrace only exists in V8/Node, creating untestable branches)
+        "src/domain/types/*-errors.ts",
       ],
       thresholds: {
         lines: 80,
