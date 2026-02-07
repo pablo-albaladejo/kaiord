@@ -23,7 +23,7 @@ describe("validate command integration tests", () => {
       async () => {
         // Arrange
         const fitFile = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
 
@@ -48,7 +48,7 @@ describe("validate command integration tests", () => {
       async () => {
         // Arrange
         const fitFile = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
 
@@ -74,7 +74,7 @@ describe("validate command integration tests", () => {
       async () => {
         // Arrange
         const fitFile = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
         const toleranceConfigPath = join(tempDir, "tolerance.json");
@@ -115,7 +115,7 @@ describe("validate command integration tests", () => {
       async () => {
         // Arrange
         const fitFile = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
         const toleranceConfigPath = join(tempDir, "invalid-tolerance.json");
@@ -183,7 +183,7 @@ describe("validate command integration tests", () => {
 
     it("should fail for non-FIT files", { timeout: 10000 }, async () => {
       // Arrange
-      const krdFile = getFixturePath("krd-files", "WorkoutIndividualSteps.krd");
+      const krdFile = getFixturePath("krd", "WorkoutIndividualSteps.krd");
 
       // Act & Assert
       try {
@@ -210,7 +210,7 @@ describe("validate command integration tests", () => {
       async () => {
         // Arrange
         const fitFile = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
 
@@ -240,7 +240,7 @@ describe("validate command integration tests", () => {
       async () => {
         // Arrange
         const fitFile = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
         const toleranceConfigPath = join(tempDir, "strict-tolerance.json");
@@ -294,7 +294,7 @@ describe("validate command integration tests", () => {
       async () => {
         // Arrange
         const fitFile = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
 
@@ -320,7 +320,7 @@ describe("validate command integration tests", () => {
       async () => {
         // Arrange
         const fitFile = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
 

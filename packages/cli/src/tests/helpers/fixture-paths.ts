@@ -1,53 +1,48 @@
 /**
  * Fixture Path Helpers for CLI Tests
  *
- * Provides centralized access to test fixtures from @kaiord/core.
- * All fixtures are maintained in core package to avoid duplication.
+ * Provides centralized access to test fixtures from monorepo root.
+ * All fixtures are maintained in /test-fixtures/ directory.
  */
 
 import { resolve } from "path";
 
 /**
- * Get absolute path to a fixture file in @kaiord/core
+ * Get absolute path to a fixture file
  *
- * @param type - Fixture type (fit-files, krd-files, tcx-files, zwift-files)
+ * @param type - Fixture type (fit, krd, tcx, zwo)
  * @param filename - Fixture filename
  * @returns Absolute path to fixture file
  *
  * @example
  * ```typescript
- * const fitPath = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
- * const krdPath = getFixturePath("krd-files", "WorkoutIndividualSteps.krd");
+ * const fitPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
+ * const krdPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
  * ```
  */
 export const getFixturePath = (
-  type: "fit-files" | "krd-files" | "tcx-files" | "zwift-files",
+  type: "fit" | "krd" | "tcx" | "zwo",
   filename: string
 ): string => {
-  // Navigate from CLI package to core package fixtures
-  // packages/cli/src/tests/helpers -> packages/core/src/tests/fixtures
-  return resolve(
-    __dirname,
-    `../../../../core/src/tests/fixtures/${type}/${filename}`
-  );
+  // Navigate from CLI package to monorepo root test-fixtures
+  // packages/cli/src/tests/helpers -> test-fixtures
+  return resolve(__dirname, `../../../../../test-fixtures/${type}/${filename}`);
 };
 
 /**
  * Get absolute path to fixtures directory
  *
- * @param type - Fixture type (fit-files, krd-files, tcx-files, zwift-files)
+ * @param type - Fixture type (fit, krd, tcx, zwo)
  * @returns Absolute path to fixtures directory
  *
  * @example
  * ```typescript
- * const fitDir = getFixturesDir("fit-files");
+ * const fitDir = getFixturesDir("fit");
  * // Use with glob: `${fitDir}/*.fit`
  * ```
  */
-export const getFixturesDir = (
-  type: "fit-files" | "krd-files" | "tcx-files" | "zwift-files"
-): string => {
-  return resolve(__dirname, `../../../../core/src/tests/fixtures/${type}`);
+export const getFixturesDir = (type: "fit" | "krd" | "tcx" | "zwo"): string => {
+  return resolve(__dirname, `../../../../../test-fixtures/${type}`);
 };
 
 /**

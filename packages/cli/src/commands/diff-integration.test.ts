@@ -9,14 +9,14 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const CLI_PATH = resolve(__dirname, "../../dist/bin/kaiord.js");
-const FIXTURES_PATH = resolve(__dirname, "../../../core/src/tests/fixtures");
+const FIXTURES_PATH = resolve(__dirname, "../../../../test-fixtures");
 
 describe("diff command integration", () => {
   it("should show files are identical when comparing same file", async () => {
     // Arrange
     const fixturePath = join(
       FIXTURES_PATH,
-      "fit-files/WorkoutIndividualSteps.fit"
+      "fit/WorkoutIndividualSteps.fit"
     );
 
     // Act
@@ -37,8 +37,8 @@ describe("diff command integration", () => {
 
   it("should show differences when comparing different files", async () => {
     // Arrange
-    const file1 = join(FIXTURES_PATH, "fit-files/WorkoutIndividualSteps.fit");
-    const file2 = join(FIXTURES_PATH, "fit-files/WorkoutRepeatSteps.fit");
+    const file1 = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
+    const file2 = join(FIXTURES_PATH, "fit/WorkoutRepeatSteps.fit");
 
     // Act - use reject: false to capture non-zero exit codes
     const { stdout, exitCode } = await execa(
@@ -58,7 +58,7 @@ describe("diff command integration", () => {
     // Arrange
     const fixturePath = join(
       FIXTURES_PATH,
-      "fit-files/WorkoutIndividualSteps.fit"
+      "fit/WorkoutIndividualSteps.fit"
     );
 
     // Act
@@ -85,7 +85,7 @@ describe("diff command integration", () => {
     // Arrange
     const validFile = join(
       FIXTURES_PATH,
-      "fit-files/WorkoutIndividualSteps.fit"
+      "fit/WorkoutIndividualSteps.fit"
     );
     const missingFile = join(FIXTURES_PATH, "nonexistent.fit");
 
@@ -106,7 +106,7 @@ describe("diff command integration", () => {
     // Arrange
     const fixturePath = join(
       FIXTURES_PATH,
-      "fit-files/WorkoutIndividualSteps.fit"
+      "fit/WorkoutIndividualSteps.fit"
     );
 
     // Act
@@ -131,8 +131,8 @@ describe("diff command integration", () => {
 
   it("should compare files of different formats", async () => {
     // Arrange
-    const fitFile = join(FIXTURES_PATH, "fit-files/WorkoutIndividualSteps.fit");
-    const krdFile = join(FIXTURES_PATH, "krd-files/WorkoutIndividualSteps.krd");
+    const fitFile = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
+    const krdFile = join(FIXTURES_PATH, "krd/WorkoutIndividualSteps.krd");
 
     // Act - use reject: false to capture non-zero exit codes
     const { stdout, exitCode } = await execa(

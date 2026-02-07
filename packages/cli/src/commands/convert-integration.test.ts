@@ -29,7 +29,7 @@ describe("convert command integration tests", () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath(
-        "fit-files",
+        "fit",
         "WorkoutIndividualSteps.fit"
       );
       const outputPath = join(tempDir.path, "output.krd");
@@ -61,7 +61,7 @@ describe("convert command integration tests", () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath(
-        "krd-files",
+        "krd",
         "WorkoutIndividualSteps.krd"
       );
       const outputPath = join(tempDir.path, "output.fit");
@@ -142,7 +142,7 @@ describe("convert command integration tests", () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath(
-        "fit-files",
+        "fit",
         "WorkoutIndividualSteps.fit"
       );
       const outputPath = join(tempDir.path, "output.krd");
@@ -172,7 +172,7 @@ describe("convert command integration tests", () => {
       // Arrange
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath(
-        "fit-files",
+        "fit",
         "WorkoutIndividualSteps.fit"
       );
       const outputPath = join(tempDir.path, "output.json");
@@ -216,7 +216,7 @@ describe("convert command integration tests", () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const inputPath = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
         const outputPath = join(tempDir.path, "output.krd");
@@ -254,7 +254,7 @@ describe("convert command integration tests", () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const inputPath = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
         const outputPath = join(tempDir.path, "output.krd");
@@ -292,7 +292,7 @@ describe("convert command integration tests", () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const inputPath = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
         const outputPath = join(tempDir.path, "output.krd");
@@ -334,7 +334,7 @@ describe("convert command integration tests", () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const inputPath = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
         const outputPath = join(tempDir.path, "output.krd");
@@ -386,7 +386,7 @@ describe("convert command integration tests", () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const inputPath = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
         const outputPath = join(tempDir.path, "output.krd");
@@ -439,7 +439,7 @@ describe("convert command integration tests", () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const inputPath = getFixturePath(
-          "fit-files",
+          "fit",
           "WorkoutIndividualSteps.fit"
         );
         const outputPath = join(tempDir.path, "output.krd");
@@ -482,7 +482,7 @@ describe("convert command integration tests", () => {
       async () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
-        const fixturesDir = getFixturesDir("fit-files");
+        const fixturesDir = getFixturesDir("fit");
         const outputDir = join(tempDir.path, "batch-output");
 
         // Act
@@ -526,7 +526,7 @@ describe("convert command integration tests", () => {
       async () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
-        const fixturesDir = getFixturesDir("fit-files");
+        const fixturesDir = getFixturesDir("fit");
         const outputDir = join(tempDir.path, "batch-output");
 
         // Act
@@ -575,13 +575,13 @@ describe("convert command integration tests", () => {
         await writeFile(
           join(testDir, "valid.fit"),
           await readFile(
-            getFixturePath("fit-files", "WorkoutIndividualSteps.fit")
+            getFixturePath("fit", "WorkoutIndividualSteps.fit")
           )
         );
         await writeFile(join(testDir, "corrupted.fit"), Buffer.from([0, 0, 0]));
         await writeFile(
           join(testDir, "valid2.fit"),
-          await readFile(getFixturePath("fit-files", "WorkoutRepeatSteps.fit"))
+          await readFile(getFixturePath("fit", "WorkoutRepeatSteps.fit"))
         );
 
         // Act
@@ -630,7 +630,7 @@ describe("convert command integration tests", () => {
 
         // Create multiple test files
         const fitContent = await readFile(
-          getFixturePath("fit-files", "WorkoutIndividualSteps.fit")
+          getFixturePath("fit", "WorkoutIndividualSteps.fit")
         );
 
         await writeFile(join(testDir, "workout1.fit"), fitContent);
@@ -671,7 +671,7 @@ describe("convert command integration tests", () => {
       async () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
-        const fixturesDir = getFixturesDir("fit-files");
+        const fixturesDir = getFixturesDir("fit");
 
         // Act
         const result = await execa(
@@ -702,7 +702,7 @@ describe("convert command integration tests", () => {
       async () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
-        const fixturesDir = getFixturesDir("fit-files");
+        const fixturesDir = getFixturesDir("fit");
         const outputDir = join(tempDir.path, "batch-output");
 
         // Act
