@@ -18,33 +18,24 @@ export const createActivityMessages = (
     fileIdMesgs: [convertMetadataToFileId(krd, logger)],
   };
 
-  const activity = krd.extensions?.activity as
-    | {
-        session?: unknown;
-        records?: unknown[];
-        laps?: unknown[];
-        events?: unknown[];
-      }
-    | undefined;
-
-  // Add session messages if present in extensions
-  if (activity?.session) {
-    messages.sessionMesgs = [activity.session];
+  // Add session messages from top-level KRD fields
+  if (krd.sessions && krd.sessions.length > 0) {
+    messages.sessionMesgs = krd.sessions;
   }
 
   // Add record messages if present (GPS/sensor data)
-  if (activity?.records) {
-    messages.recordMesgs = activity.records;
+  if (krd.records && krd.records.length > 0) {
+    messages.recordMesgs = krd.records;
   }
 
   // Add lap messages if present
-  if (activity?.laps) {
-    messages.lapMesgs = activity.laps;
+  if (krd.laps && krd.laps.length > 0) {
+    messages.lapMesgs = krd.laps;
   }
 
   // Add event messages if present
-  if (activity?.events) {
-    messages.eventMesgs = activity.events;
+  if (krd.events && krd.events.length > 0) {
+    messages.eventMesgs = krd.events;
   }
 
   logger.debug("Created activity messages", {

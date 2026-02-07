@@ -14,12 +14,10 @@ describe("File type routing", () => {
     it("should route to createActivityMessages for activity type", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
-        type: fileTypeSchema.enum.activity,
-        metadata: buildKRDMetadata.build({
-          fileType: "activity",
-        }),
+        type: fileTypeSchema.enum.recorded_activity,
+        metadata: buildKRDMetadata.build({}),
         extensions: {
-          activity: {
+          recorded_activity: {
             session: {
               sport: "cycling",
               totalDistance: 10000,
@@ -50,9 +48,7 @@ describe("File type routing", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
         type: fileTypeSchema.enum.course,
-        metadata: buildKRDMetadata.build({
-          fileType: "course",
-        }),
+        metadata: buildKRDMetadata.build({}),
         extensions: {
           course: {
             name: "Test Course",
@@ -82,12 +78,10 @@ describe("File type routing", () => {
     it("should route to convertKRDToMessages for workout type", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
-        type: fileTypeSchema.enum.workout,
-        metadata: buildKRDMetadata.build({
-          fileType: "workout",
-        }),
+        type: fileTypeSchema.enum.structured_workout,
+        metadata: buildKRDMetadata.build({}),
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [],
@@ -106,12 +100,10 @@ describe("File type routing", () => {
     it("should default to workout when fileType not specified", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
-        type: fileTypeSchema.enum.workout,
-        metadata: buildKRDMetadata.build({
-          fileType: undefined,
-        }),
+        type: fileTypeSchema.enum.structured_workout,
+        metadata: buildKRDMetadata.build({}),
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [],
@@ -127,22 +119,26 @@ describe("File type routing", () => {
       expect(messages.workoutMesgs).toBeDefined();
     });
 
-    it("should throw for unsupported file type", () => {
+    it("should route structured_workout by default", () => {
       // Arrange
-      const krd: KRD = {
-        version: "1.0",
-        type: "workout" as const,
-        metadata: {
-          created: new Date().toISOString(),
-          sport: "cycling",
-          fileType: "device" as any, // Unsupported type
+      const krd: KRD = buildKRD.build({
+        type: fileTypeSchema.enum.structured_workout,
+        metadata: buildKRDMetadata.build({}),
+        extensions: {
+          structured_workout: {
+            name: "Default Workout",
+            sport: "cycling",
+            steps: [],
+          },
         },
-      };
+      });
 
-      // Act & Assert
-      expect(() => createFitMessages(krd, logger)).toThrow(
-        "Unsupported FIT file type: device"
-      );
+      // Act
+      const messages = createFitMessages(krd, logger);
+
+      // Assert
+      expect(messages.fileIdMesgs).toBeDefined();
+      expect(messages.workoutMesgs).toBeDefined();
     });
   });
 
@@ -150,12 +146,10 @@ describe("File type routing", () => {
     it("should create FILE_ID with correct type for activity", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
-        type: fileTypeSchema.enum.activity,
-        metadata: buildKRDMetadata.build({
-          fileType: "activity",
-        }),
+        type: fileTypeSchema.enum.recorded_activity,
+        metadata: buildKRDMetadata.build({}),
         extensions: {
-          activity: {
+          recorded_activity: {
             session: { sport: "cycling" },
           },
         },
@@ -174,9 +168,7 @@ describe("File type routing", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
         type: fileTypeSchema.enum.course,
-        metadata: buildKRDMetadata.build({
-          fileType: "course",
-        }),
+        metadata: buildKRDMetadata.build({}),
         extensions: {
           course: { name: "Test" },
         },
@@ -196,21 +188,17 @@ describe("File type routing", () => {
     it("should include all activity components when present", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
-        type: fileTypeSchema.enum.activity,
-        metadata: buildKRDMetadata.build({
-          fileType: "activity",
-        }),
-        extensions: {
-          activity: {
-            session: {
-              sport: "running",
-              totalDistance: 5000,
-            },
-            records: [{ timestamp: 1000 }, { timestamp: 2000 }],
-            laps: [{ timestamp: 3000 }],
-            events: [{ timestamp: 1000, event: "timer" }],
+        type: fileTypeSchema.enum.recorded_activity,
+        metadata: buildKRDMetadata.build({}),
+        sessions: [
+          {
+            sport: "running",
+            totalDistance: 5000,
           },
-        },
+        ],
+        records: [{ timestamp: 1000 }, { timestamp: 2000 }],
+        laps: [{ timestamp: 3000 }],
+        events: [{ timestamp: 1000, event: "timer" }],
       });
 
       // Act
@@ -226,17 +214,16 @@ describe("File type routing", () => {
     it("should handle activity with only session", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
-        type: fileTypeSchema.enum.activity,
-        metadata: buildKRDMetadata.build({
-          fileType: "activity",
-        }),
-        extensions: {
-          activity: {
-            session: {
-              sport: "cycling",
-            },
+        type: fileTypeSchema.enum.recorded_activity,
+        metadata: buildKRDMetadata.build({}),
+        sessions: [
+          {
+            sport: "cycling",
           },
-        },
+        ],
+        records: undefined,
+        laps: undefined,
+        events: undefined,
       });
 
       // Act
@@ -255,9 +242,7 @@ describe("File type routing", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
         type: fileTypeSchema.enum.course,
-        metadata: buildKRDMetadata.build({
-          fileType: "course",
-        }),
+        metadata: buildKRDMetadata.build({}),
         extensions: {
           course: {
             name: "Mountain Loop",
@@ -292,16 +277,12 @@ describe("File type routing", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
         type: fileTypeSchema.enum.course,
-        metadata: buildKRDMetadata.build({
-          fileType: "course",
-        }),
+        metadata: buildKRDMetadata.build({}),
+        records: [{ timestamp: 1000 }] as unknown as KRD["records"],
+        laps: [{ timestamp: 2000 }] as unknown as KRD["laps"],
         extensions: {
           course: {
             name: "Route with track",
-          },
-          activity: {
-            records: [{ timestamp: 1000 }],
-            laps: [{ timestamp: 2000 }],
           },
         },
       });

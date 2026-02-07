@@ -8,7 +8,7 @@ import { useState } from "react";
 import type { KRD, Sport, SubSport } from "../../../../types/krd";
 
 export function useMetadataForm(krd: KRD) {
-  const workoutData = krd.extensions?.workout;
+  const workoutData = krd.extensions?.structured_workout;
   const workoutName =
     workoutData &&
     typeof workoutData === "object" &&

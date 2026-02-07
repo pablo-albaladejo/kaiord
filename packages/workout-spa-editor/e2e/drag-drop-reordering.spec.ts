@@ -16,13 +16,13 @@ import { expect, test } from "./fixtures/base";
 test.describe("Drag-and-Drop Step Reordering", () => {
   const createTestWorkout = (stepCount: number) => ({
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: new Date().toISOString(),
       sport: "cycling",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Reorder Test Workout",
         sport: "cycling",
         steps: Array.from({ length: stepCount }, (_, i) => ({
@@ -436,7 +436,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     });
 
     // Capture original step data
-    const originalSteps = testWorkout.extensions.workout.steps;
+    const originalSteps = testWorkout.extensions.structured_workout.steps;
     const step0Duration = originalSteps[0].duration.seconds;
     const step0Power = originalSteps[0].target.value.value;
     const step1Duration = originalSteps[1].duration.seconds;
@@ -475,13 +475,13 @@ test.describe("Drag-and-Drop Step Reordering", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Block Drag Test",
           sport: "cycling",
           steps: [
@@ -610,13 +610,13 @@ test.describe("Drag-and-Drop Mobile Touch", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Mobile Test",
           sport: "cycling",
           steps: [

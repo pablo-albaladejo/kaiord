@@ -48,13 +48,13 @@ describe("Property 13: No browser alerts for confirmations", () => {
     // Arrange
     const mockWorkout: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "running",
           steps: [],
@@ -85,13 +85,13 @@ describe("Property 13: No browser alerts for confirmations", () => {
     // Arrange
     const mockWorkout: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Cycling Workout",
           sport: "cycling",
           steps: [],
@@ -119,13 +119,13 @@ describe("Property 13: No browser alerts for confirmations", () => {
     // Arrange
     const mockWorkout: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "swimming",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Swimming Workout",
           sport: "swimming",
           steps: [],
@@ -157,13 +157,13 @@ describe("Property 13: No browser alerts for confirmations", () => {
     // Arrange
     const mockWorkout: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "running",
           steps: [],

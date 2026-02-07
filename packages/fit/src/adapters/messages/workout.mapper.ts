@@ -30,8 +30,8 @@ export const mapWorkoutFileToKRD = (
 
   return {
     version: KRD_VERSION,
-    type: fileTypeSchema.enum.workout,
+    type: fileTypeSchema.enum.structured_workout,
     metadata,
-    extensions: { workout, fit: fitExtensions },
+    extensions: { structured_workout: workout, fit: fitExtensions },
   };
 };

@@ -59,7 +59,8 @@ export const saveWorkout = (krd: KRD, filename?: string): SaveResult => {
 
   // Generate filename (Requirement 6.5)
   const workoutName =
-    (krd.extensions?.workout as { name?: string })?.name || "workout";
+    (krd.extensions?.structured_workout as { name?: string })?.name ||
+    "workout";
   const finalFilename = filename || `${sanitizeFilename(workoutName)}.krd`;
 
   try {

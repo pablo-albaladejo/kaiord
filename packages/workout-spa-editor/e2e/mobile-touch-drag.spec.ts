@@ -25,13 +25,13 @@ import {
  */
 const createTestWorkout = (stepCount: number) => ({
   version: "1.0",
-  type: "workout",
+  type: "structured_workout",
   metadata: {
     created: new Date().toISOString(),
     sport: "cycling",
   },
   extensions: {
-    workout: {
+    structured_workout: {
       name: "Test Workout",
       sport: "cycling",
       steps: Array.from({ length: stepCount }, (_, i) => ({
@@ -287,13 +287,13 @@ test.describe("Mobile Touch Drag - Edge Cases", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Block Touch Test",
           sport: "cycling",
           steps: [

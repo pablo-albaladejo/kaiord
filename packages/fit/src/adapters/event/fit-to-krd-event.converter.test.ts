@@ -19,7 +19,7 @@ describe("convertFitToKrdEvent", () => {
 
     // Assert
     expect(result.timestamp).toBe("2024-01-01T00:00:00.000Z");
-    expect(result.eventType).toBe("start");
+    expect(result.eventType).toBe("event_start");
   });
 
   it("should convert timer stop event", () => {
@@ -34,7 +34,7 @@ describe("convertFitToKrdEvent", () => {
     const result = convertFitToKrdEvent(fitEvent);
 
     // Assert
-    expect(result.eventType).toBe("stop");
+    expect(result.eventType).toBe("event_stop");
   });
 
   it("should convert timer stopDisable to pause", () => {
@@ -49,7 +49,7 @@ describe("convertFitToKrdEvent", () => {
     const result = convertFitToKrdEvent(fitEvent);
 
     // Assert
-    expect(result.eventType).toBe("pause");
+    expect(result.eventType).toBe("event_pause");
   });
 
   it("should convert lap event", () => {
@@ -64,7 +64,7 @@ describe("convertFitToKrdEvent", () => {
     const result = convertFitToKrdEvent(fitEvent);
 
     // Assert
-    expect(result.eventType).toBe("lap");
+    expect(result.eventType).toBe("event_lap");
   });
 
   it("should convert workout step event", () => {
@@ -79,7 +79,7 @@ describe("convertFitToKrdEvent", () => {
     const result = convertFitToKrdEvent(fitEvent);
 
     // Assert
-    expect(result.eventType).toBe("workout_step");
+    expect(result.eventType).toBe("event_workout_step_change");
   });
 
   it("should convert user marker event", () => {
@@ -94,7 +94,7 @@ describe("convertFitToKrdEvent", () => {
     const result = convertFitToKrdEvent(fitEvent);
 
     // Assert
-    expect(result.eventType).toBe("marker");
+    expect(result.eventType).toBe("event_marker");
   });
 
   it("should preserve event data", () => {
@@ -143,9 +143,9 @@ describe("convertFitToKrdEvents", () => {
 
     // Assert
     expect(results).toHaveLength(3);
-    expect(results[0].eventType).toBe("start");
-    expect(results[1].eventType).toBe("lap");
-    expect(results[2].eventType).toBe("stop");
+    expect(results[0].eventType).toBe("event_start");
+    expect(results[1].eventType).toBe("event_lap");
+    expect(results[2].eventType).toBe("event_stop");
   });
 });
 

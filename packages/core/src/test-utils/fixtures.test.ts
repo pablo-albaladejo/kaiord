@@ -138,7 +138,7 @@ describe("loadKrdFixture", () => {
     // Assert
     expect(krd).toBeDefined();
     expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("workout");
+    expect(krd.type).toBe("structured_workout");
   });
 
   it("should load WorkoutIndividualSteps with expected structure", () => {
@@ -147,7 +147,7 @@ describe("loadKrdFixture", () => {
 
     // Assert
     expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("workout");
+    expect(krd.type).toBe("structured_workout");
     expect(krd.metadata).toBeDefined();
     expect(krd.extensions).toBeDefined();
   });
@@ -158,7 +158,7 @@ describe("loadKrdFixture", () => {
 
     // Assert
     expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("workout");
+    expect(krd.type).toBe("structured_workout");
     expect(krd.metadata).toBeDefined();
     expect(krd.extensions).toBeDefined();
   });
@@ -171,7 +171,7 @@ describe("loadKrdFixture", () => {
     for (const name of fixtureNames) {
       const krd = loadKrdFixture(`${name}.krd`);
       expect(krd.version).toBe("1.0");
-      expect(krd.type).toBe("workout");
+      expect(krd.type).toBe("structured_workout");
       expect(krd.metadata).toBeDefined();
     }
   });
@@ -205,7 +205,7 @@ describe("loadKrdFixtureRaw", () => {
     expect(() => JSON.parse(raw)).not.toThrow();
     const parsed = JSON.parse(raw);
     expect(parsed.version).toBe("1.0");
-    expect(parsed.type).toBe("workout");
+    expect(parsed.type).toBe("structured_workout");
   });
 
   it("should load raw fixture as string and match parsed fixture when parsed", () => {
@@ -248,7 +248,7 @@ describe("loadFixturePair", () => {
     expect(fit.length).toBeGreaterThan(0);
     expect(krd).toBeDefined();
     expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("workout");
+    expect(krd.type).toBe("structured_workout");
   });
 
   it("should load WorkoutIndividualSteps pair correctly", () => {
@@ -258,9 +258,9 @@ describe("loadFixturePair", () => {
     // Assert
     expect(fit).toBeInstanceOf(Uint8Array);
     expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("workout");
+    expect(krd.type).toBe("structured_workout");
     expect(krd.metadata).toBeDefined();
-    expect(krd.extensions?.workout).toBeDefined();
+    expect(krd.extensions?.structured_workout).toBeDefined();
   });
 
   it("should load WorkoutRepeatSteps pair correctly", () => {
@@ -270,7 +270,7 @@ describe("loadFixturePair", () => {
     // Assert
     expect(fit).toBeInstanceOf(Uint8Array);
     expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("workout");
+    expect(krd.type).toBe("structured_workout");
     expect(krd.extensions).toBeDefined();
   });
 
@@ -284,7 +284,7 @@ describe("loadFixturePair", () => {
       expect(fit).toBeInstanceOf(Uint8Array);
       expect(fit.length).toBeGreaterThan(0);
       expect(krd.version).toBe("1.0");
-      expect(krd.type).toBe("workout");
+      expect(krd.type).toBe("structured_workout");
     }
   });
 

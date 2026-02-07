@@ -10,7 +10,7 @@ const meta = {
   },
   tags: ["autodocs"],
   argTypes: {
-    workout: {
+    structured_workout: {
       description: "KRD workout object to save",
       control: { type: "object" },
     },
@@ -31,13 +31,13 @@ type Story = StoryObj<typeof meta>;
 // Sample valid workout
 const validWorkout: KRD = {
   version: "1.0",
-  type: "workout",
+  type: "structured_workout",
   metadata: {
     created: "2025-01-15T10:30:00Z",
     sport: "running",
   },
   extensions: {
-    workout: {
+    structured_workout: {
       name: "Morning Run",
       sport: "running",
       steps: [
@@ -68,10 +68,10 @@ const validWorkout: KRD = {
 // Sample invalid workout (missing required fields)
 const invalidWorkout = {
   version: "1.0",
-  type: "workout",
+  type: "structured_workout",
   // Missing metadata
   extensions: {
-    workout: {
+    structured_workout: {
       name: "Invalid Workout",
       sport: "running",
       steps: [],
@@ -84,7 +84,7 @@ const invalidWorkout = {
  */
 export const Default: Story = {
   args: {
-    workout: validWorkout,
+    structured_workout: validWorkout,
   },
 };
 
@@ -93,7 +93,7 @@ export const Default: Story = {
  */
 export const Disabled: Story = {
   args: {
-    workout: validWorkout,
+    structured_workout: validWorkout,
     disabled: true,
   },
 };
@@ -103,7 +103,7 @@ export const Disabled: Story = {
  */
 export const WithInvalidWorkout: Story = {
   args: {
-    workout: invalidWorkout,
+    structured_workout: invalidWorkout,
   },
 };
 
@@ -112,7 +112,7 @@ export const WithInvalidWorkout: Story = {
  */
 export const CustomStyling: Story = {
   args: {
-    workout: validWorkout,
+    structured_workout: validWorkout,
     className: "w-full",
   },
 };

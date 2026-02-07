@@ -33,10 +33,14 @@ describe("WorkoutLibrary", () => {
       sport: "running",
       krd: {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: { created: "2025-01-15T10:00:00Z", sport: "running" },
         extensions: {
-          workout: { name: "Morning Run", sport: "running", steps: [] },
+          structured_workout: {
+            name: "Morning Run",
+            sport: "running",
+            steps: [],
+          },
         },
       },
       tags: ["easy", "recovery"],
@@ -51,10 +55,14 @@ describe("WorkoutLibrary", () => {
       sport: "cycling",
       krd: {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: { created: "2025-01-16T10:00:00Z", sport: "cycling" },
         extensions: {
-          workout: { name: "Interval Training", sport: "cycling", steps: [] },
+          structured_workout: {
+            name: "Interval Training",
+            sport: "cycling",
+            steps: [],
+          },
         },
       },
       tags: ["hard", "intervals"],
@@ -69,10 +77,14 @@ describe("WorkoutLibrary", () => {
       sport: "swimming",
       krd: {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: { created: "2025-01-17T10:00:00Z", sport: "swimming" },
         extensions: {
-          workout: { name: "Easy Swim", sport: "swimming", steps: [] },
+          structured_workout: {
+            name: "Easy Swim",
+            sport: "swimming",
+            steps: [],
+          },
         },
       },
       tags: ["easy", "technique"],

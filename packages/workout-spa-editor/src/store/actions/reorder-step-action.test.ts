@@ -17,13 +17,13 @@ describe("reorderStepAction", () => {
   beforeEach(() => {
     mockKrd = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "running",
           steps: [
@@ -84,7 +84,7 @@ describe("reorderStepAction", () => {
       );
 
       // Assert
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(3);
 
       // Original step 0 (300s) should now be at position 2
@@ -120,7 +120,7 @@ describe("reorderStepAction", () => {
       );
 
       // Assert
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(3);
 
       // Original step 2 (open) should now be at position 0
@@ -156,7 +156,7 @@ describe("reorderStepAction", () => {
       );
 
       // Assert
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(3);
 
       // Original step 1 (1000m) should now be at position 0
@@ -265,7 +265,7 @@ describe("reorderStepAction", () => {
       // Arrange
       const krdWithoutWorkout: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
@@ -331,7 +331,7 @@ describe("reorderStepAction", () => {
       );
 
       // Assert - stepIndex values remain stable (not recalculated)
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps[0].stepIndex).toBe(1); // Was step1, keeps stepIndex=1
       expect(workout?.steps[1].stepIndex).toBe(2); // Was step2, keeps stepIndex=2
       expect(workout?.steps[2].stepIndex).toBe(0); // Was step0, keeps stepIndex=0
@@ -351,7 +351,7 @@ describe("reorderStepAction", () => {
       );
 
       // Assert - stepIndex values remain stable
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps[0].stepIndex).toBe(2); // Was step2, keeps stepIndex=2
       expect(workout?.steps[1].stepIndex).toBe(0); // Was step0, keeps stepIndex=0
       expect(workout?.steps[2].stepIndex).toBe(1); // Was step1, keeps stepIndex=1
@@ -364,7 +364,7 @@ describe("reorderStepAction", () => {
       const krdWithBlock: KRD = {
         ...mockKrd,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [
@@ -409,7 +409,7 @@ describe("reorderStepAction", () => {
       const result = reorderStepAction(krdWithBlock, 0, 2, mockState);
 
       // Assert
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(3);
 
       // Repetition block should now be at position 0
@@ -440,13 +440,13 @@ describe("reorderStepAction", () => {
       // Arrange - Create workout with various initial stepIndex values
       const krdWithNonSequentialIndices: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [
@@ -491,7 +491,7 @@ describe("reorderStepAction", () => {
       );
 
       // Assert - stepIndex values should remain stable (not recalculated)
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(3);
 
       // After reorder: [step1, step2, step0]
@@ -505,13 +505,13 @@ describe("reorderStepAction", () => {
       // Arrange - Create workout with steps and repetition blocks
       const krdWithMixedItems: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Mixed Workout",
             sport: "cycling",
             steps: [
@@ -566,7 +566,7 @@ describe("reorderStepAction", () => {
       const result = reorderStepAction(krdWithMixedItems, 1, 3, mockState);
 
       // Assert - All WorkoutStep items should preserve their original stepIndex
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(4);
 
       // After reorder, the array is: [step0, step1, step2, block]
@@ -582,13 +582,13 @@ describe("reorderStepAction", () => {
       // Arrange - Start with a workout
       const initialKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [
@@ -640,7 +640,7 @@ describe("reorderStepAction", () => {
 
       // Verify stable stepIndex after first reorder
       // After reorder: [step1, step2, step0, step3]
-      let workout = krd1.extensions?.workout;
+      let workout = krd1.extensions?.structured_workout;
       expect(workout!.steps[0].stepIndex).toBe(1); // Was step1
       expect(workout!.steps[1].stepIndex).toBe(2); // Was step2
       expect(workout!.steps[2].stepIndex).toBe(0); // Was step0
@@ -652,7 +652,7 @@ describe("reorderStepAction", () => {
 
       // Verify stable stepIndex after second reorder
       // After reorder: [step3, step1, step2, step0]
-      workout = krd2.extensions?.workout;
+      workout = krd2.extensions?.structured_workout;
       expect(workout!.steps[0].stepIndex).toBe(3); // Was step3
       expect(workout!.steps[1].stepIndex).toBe(1); // Was step1
       expect(workout!.steps[2].stepIndex).toBe(2); // Was step2
@@ -664,7 +664,7 @@ describe("reorderStepAction", () => {
 
       // Assert - Final state should still have stable stepIndex
       // After reorder: [step3, step2, step1, step0]
-      workout = krd3.extensions?.workout;
+      workout = krd3.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(4);
       expect(workout!.steps[0].stepIndex).toBe(3); // Was step3
       expect(workout!.steps[1].stepIndex).toBe(2); // Was step2
@@ -676,13 +676,13 @@ describe("reorderStepAction", () => {
       // Arrange - Workout with single step
       const singleStepKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Single Step",
             sport: "running",
             steps: [
@@ -723,13 +723,13 @@ describe("reorderStepAction", () => {
 
       const largeKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Large Workout",
             sport: "running",
             steps: largeWorkoutSteps,
@@ -741,7 +741,7 @@ describe("reorderStepAction", () => {
       const result = reorderStepAction(largeKrd, 0, 19, mockState);
 
       // Assert - All stepIndex values should remain stable
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(20);
 
       // After reorder: [step1, step2, ..., step19, step0]

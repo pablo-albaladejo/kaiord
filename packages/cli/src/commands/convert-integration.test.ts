@@ -47,7 +47,7 @@ describe("convert command integration tests", () => {
       const outputContent = await readFile(outputPath, "utf-8");
       const krd = JSON.parse(outputContent);
       expect(krd.version).toBeDefined();
-      expect(krd.type).toBe("workout");
+      expect(krd.type).toBe("structured_workout");
     }
   );
 
@@ -192,7 +192,7 @@ describe("convert command integration tests", () => {
       const outputContent = await readFile(outputPath, "utf-8");
       const krd = JSON.parse(outputContent);
       expect(krd.version).toBeDefined();
-      expect(krd.type).toBe("workout");
+      expect(krd.type).toBe("structured_workout");
     }
   );
 

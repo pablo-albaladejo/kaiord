@@ -17,12 +17,12 @@ describe("FIT Writer Integration", () => {
 
     const krd = buildKRD.build({
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: buildKRDMetadata.build({
         sport: "cycling",
       }),
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "cycling",
           steps: [
@@ -53,7 +53,7 @@ describe("FIT Writer Integration", () => {
 
     // Assert - Basic structure preserved
     expect(decodedKrd.version).toBe("1.0");
-    expect(decodedKrd.type).toBe("workout");
+    expect(decodedKrd.type).toBe("structured_workout");
     expect(decodedKrd.metadata.sport).toBe("cycling");
   });
 });

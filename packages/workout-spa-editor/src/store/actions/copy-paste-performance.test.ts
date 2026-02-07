@@ -17,13 +17,13 @@ import { pasteStepAction } from "./paste-step-action";
 describe("Copy/Paste Performance", () => {
   const createMockKrd = (steps: Array<WorkoutStep | RepetitionBlock>): KRD => ({
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps,
@@ -126,8 +126,8 @@ describe("Copy/Paste Performance", () => {
       expect(pasteResult.success).toBe(true);
 
       // Verify data integrity
-      const pastedBlock = pasteResult.updatedKrd!.extensions!.workout!
-        .steps[1] as RepetitionBlock;
+      const pastedBlock = pasteResult.updatedKrd!.extensions!
+        .structured_workout!.steps[1] as RepetitionBlock;
       expect(pastedBlock.steps).toHaveLength(100);
       expect(pastedBlock.repeatCount).toBe(3);
     });
@@ -185,7 +185,9 @@ describe("Copy/Paste Performance", () => {
       // Assert
       expect(result.success).toBe(true);
       expect(duration).toBeLessThan(500);
-      expect(result.updatedKrd!.extensions!.workout!.steps).toHaveLength(101);
+      expect(
+        result.updatedKrd!.extensions!.structured_workout!.steps
+      ).toHaveLength(101);
     });
 
     it("should recalculate indices for 100 steps efficiently", async () => {
@@ -216,7 +218,7 @@ describe("Copy/Paste Performance", () => {
       expect(duration).toBeLessThan(500);
 
       // Verify all indices are correct
-      const steps = result.updatedKrd!.extensions!.workout!.steps;
+      const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
       steps.forEach((step, index) => {
         if ("stepIndex" in step) {
           expect(step.stepIndex).toBe(index);
@@ -264,9 +266,9 @@ describe("Copy/Paste Performance", () => {
       // Assert
       expect(pasteResult.success).toBe(true);
       expect(duration).toBeLessThan(500);
-      expect(pasteResult.updatedKrd!.extensions!.workout!.steps).toHaveLength(
-        7
-      );
+      expect(
+        pasteResult.updatedKrd!.extensions!.structured_workout!.steps
+      ).toHaveLength(7);
     });
 
     it("should maintain data integrity with large clipboard payload", async () => {
@@ -295,10 +297,10 @@ describe("Copy/Paste Performance", () => {
       const pasteResult = await pasteStepAction(krd);
 
       // Assert - All data is preserved
-      const originalBlock = krd.extensions!.workout!
+      const originalBlock = krd.extensions!.structured_workout!
         .steps[0] as RepetitionBlock;
-      const pastedBlock = pasteResult.updatedKrd!.extensions!.workout!
-        .steps[1] as RepetitionBlock;
+      const pastedBlock = pasteResult.updatedKrd!.extensions!
+        .structured_workout!.steps[1] as RepetitionBlock;
 
       expect(pastedBlock.repeatCount).toBe(originalBlock.repeatCount);
       expect(pastedBlock.steps).toHaveLength(originalBlock.steps.length);
@@ -345,7 +347,7 @@ describe("Copy/Paste Performance", () => {
       }
 
       // Assert - All operations succeeded
-      expect(currentKrd.extensions!.workout!.steps).toHaveLength(51);
+      expect(currentKrd.extensions!.structured_workout!.steps).toHaveLength(51);
       expect(mockWriteText).toHaveBeenCalledTimes(50);
       expect(mockReadText).toHaveBeenCalledTimes(50);
     });

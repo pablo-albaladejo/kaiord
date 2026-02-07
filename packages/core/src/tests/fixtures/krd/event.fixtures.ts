@@ -6,13 +6,13 @@ export const buildKRDEvent = new Factory<KRDEvent>()
   .attr("timestamp", () => faker.date.recent().toISOString())
   .attr("eventType", () =>
     faker.helpers.arrayElement([
-      "start",
-      "stop",
-      "pause",
-      "resume",
-      "lap",
-      "marker",
-      "timer",
+      "event_start",
+      "event_stop",
+      "event_pause",
+      "event_resume",
+      "event_lap",
+      "event_marker",
+      "event_timer",
     ] as const)
   )
   .attr("eventGroup", () => faker.number.int({ max: 10, min: 0 }))

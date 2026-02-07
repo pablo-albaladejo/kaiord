@@ -28,13 +28,13 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     // Create a minimal valid KRD workout
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "cycling",
           steps: [
@@ -126,12 +126,12 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
       const content = readFileSync(downloadPath, "utf-8");
       const savedWorkout = JSON.parse(content);
 
-      expect(savedWorkout.extensions.workout.steps[0].duration.seconds).toBe(
-        420
-      );
-      expect(savedWorkout.extensions.workout.steps[0].target.value.value).toBe(
-        220
-      );
+      expect(
+        savedWorkout.extensions.structured_workout.steps[0].duration.seconds
+      ).toBe(420);
+      expect(
+        savedWorkout.extensions.structured_workout.steps[0].target.value.value
+      ).toBe(220);
     }
   });
 

@@ -25,7 +25,12 @@ describe("validateMessages", () => {
       const logger = createMockLogger();
 
       expect(() =>
-        validateMessages({ type: "workout" }, undefined, emptyMessages, logger)
+        validateMessages(
+          { type: "structured_workout" },
+          undefined,
+          emptyMessages,
+          logger
+        )
       ).toThrow("Missing required workout message in FIT file");
     });
 
@@ -34,7 +39,7 @@ describe("validateMessages", () => {
 
       expect(() =>
         validateMessages(
-          { type: "workout" },
+          { type: "structured_workout" },
           { sport: "cycling" },
           emptyMessages,
           logger
@@ -67,7 +72,7 @@ describe("validateMessages", () => {
 
       expect(() =>
         validateMessages(
-          { type: "workout" },
+          { type: "structured_workout" },
           undefined,
           emptyMessages,
           logger,
@@ -89,7 +94,7 @@ describe("validateMessages", () => {
       };
 
       validateMessages(
-        { type: "workout" },
+        { type: "structured_workout" },
         { sport: "cycling" },
         messages,
         logger

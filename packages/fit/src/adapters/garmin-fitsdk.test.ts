@@ -25,7 +25,7 @@ describe("createGarminFitSdkReader", () => {
       // Assert
       expect(result).toBeDefined();
       expect(result.version).toBe("1.0");
-      expect(result.type).toBe("workout");
+      expect(result.type).toBe("structured_workout");
       expect(result.metadata).toBeDefined();
       expect(result.metadata.sport).toBeDefined();
     });
@@ -57,8 +57,8 @@ describe("createGarminFitSdkReader", () => {
       const result = await reader(buffer);
 
       // Assert
-      expect(result.extensions?.workout).toBeDefined();
-      const workout = result.extensions?.workout as {
+      expect(result.extensions?.structured_workout).toBeDefined();
+      const workout = result.extensions?.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<unknown>;
@@ -93,8 +93,8 @@ describe("createGarminFitSdkReader", () => {
       const result = await reader(buffer);
 
       // Assert
-      expect(result.extensions?.workout).toBeDefined();
-      const workout = result.extensions?.workout as {
+      expect(result.extensions?.structured_workout).toBeDefined();
+      const workout = result.extensions?.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<unknown>;
@@ -120,8 +120,8 @@ describe("createGarminFitSdkReader", () => {
       const result = await reader(buffer);
 
       // Assert
-      expect(result.extensions?.workout).toBeDefined();
-      const workout = result.extensions?.workout as {
+      expect(result.extensions?.structured_workout).toBeDefined();
+      const workout = result.extensions?.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<unknown>;
@@ -140,8 +140,8 @@ describe("createGarminFitSdkReader", () => {
       const result = await reader(buffer);
 
       // Assert
-      expect(result.extensions?.workout).toBeDefined();
-      const workout = result.extensions?.workout as {
+      expect(result.extensions?.structured_workout).toBeDefined();
+      const workout = result.extensions?.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<unknown>;
@@ -294,7 +294,7 @@ describe("createGarminFitSdkWriter", () => {
       const writer = createGarminFitSdkWriter(logger);
       const krd = buildKRD.build({
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
       });
 
       // Act & Assert
@@ -308,7 +308,7 @@ describe("createGarminFitSdkWriter", () => {
       const writer = createGarminFitSdkWriter(logger);
       const krd = buildKRD.build({
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
       });
 
       // Act & Assert
@@ -323,7 +323,7 @@ describe("createGarminFitSdkWriter", () => {
       const writer = createGarminFitSdkWriter(logger);
       const krd = buildKRD.build({
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
       });
 
       // Act & Assert
@@ -338,7 +338,7 @@ describe("createGarminFitSdkWriter", () => {
       const writer = createGarminFitSdkWriter(logger);
       const krd = buildKRD.build({
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
       });
 
       // Act & Assert
@@ -352,7 +352,7 @@ describe("createGarminFitSdkWriter", () => {
       const writer = createGarminFitSdkWriter(logger);
       const krd = buildKRD.build({
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: buildKRDMetadata.build({
           sport: "cycling",
         }),
@@ -368,7 +368,7 @@ describe("createGarminFitSdkWriter", () => {
       const writer = createGarminFitSdkWriter(logger);
       const krd = buildKRD.build({
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
       });
 
       // Act & Assert

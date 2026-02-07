@@ -165,7 +165,14 @@ describe("validation formatters", () => {
       // Arrange
       const errors: Array<ValidationError> = [
         {
-          path: ["extensions", "workout", "steps", 0, "duration", "seconds"],
+          path: [
+            "extensions",
+            "structured_workout",
+            "steps",
+            0,
+            "duration",
+            "seconds",
+          ],
           message: "Must be positive",
         },
       ];
@@ -175,7 +182,7 @@ describe("validation formatters", () => {
 
       // Assert
       expect(result).toBe(
-        "extensions.workout.steps.0.duration.seconds: Must be positive"
+        "extensions.structured_workout.steps.0.duration.seconds: Must be positive"
       );
     });
 

@@ -35,13 +35,13 @@ test.describe("Mobile Responsive Design", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Mobile Test",
           sport: "running",
           steps: [
@@ -89,13 +89,13 @@ test.describe("Mobile Responsive Design", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Long Workout",
           sport: "cycling",
           steps: Array.from({ length: 10 }, (_, i) => ({
@@ -205,13 +205,13 @@ test.describe("Tablet Responsive Design", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "swimming",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Tablet Test",
           sport: "swimming",
           steps: [

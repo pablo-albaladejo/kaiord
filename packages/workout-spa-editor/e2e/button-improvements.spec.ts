@@ -42,13 +42,13 @@ test.describe("Button Improvements - Desktop Layout", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Desktop Test Workout",
           sport: "cycling",
           steps: [
@@ -135,13 +135,13 @@ test.describe("Button Improvements - Desktop Layout", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Spacing Test",
           sport: "running",
           steps: [
@@ -205,13 +205,13 @@ test.describe("Button Improvements - Desktop Layout", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "swimming",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Order Test",
           sport: "swimming",
           steps: [
@@ -290,13 +290,13 @@ test.describe("Button Improvements - Mobile Layout", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Mobile Test Workout",
           sport: "cycling",
           steps: [
@@ -374,13 +374,13 @@ test.describe("Button Improvements - Mobile Layout", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Mobile Width Test",
           sport: "running",
           steps: [
@@ -460,13 +460,13 @@ test.describe("Button Improvements - Mobile Layout", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "swimming",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Mobile Spacing Test",
           sport: "swimming",
           steps: [
@@ -543,13 +543,13 @@ test.describe("Button Improvements - Capitalization", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Capitalization Test",
           sport: "cycling",
           steps: [
@@ -613,13 +613,13 @@ test.describe("Button Improvements - Capitalization", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Minor Words Test",
           sport: "running",
           steps: [
@@ -678,13 +678,13 @@ test.describe("Button Improvements - Capitalization", () => {
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "swimming",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "First Word Test",
           sport: "swimming",
           steps: [

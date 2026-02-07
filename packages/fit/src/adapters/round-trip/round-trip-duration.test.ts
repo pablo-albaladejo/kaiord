@@ -15,8 +15,8 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
     const krd = await reader(originalBuffer);
 
     // Set calorie duration on first step
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -59,8 +59,8 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
       const krd = await reader(originalBuffer);
 
       // Set calorie duration
-      if (krd.extensions?.workout) {
-        const workout = krd.extensions.workout as {
+      if (krd.extensions?.structured_workout) {
+        const workout = krd.extensions.structured_workout as {
           name?: string;
           sport: string;
           steps: Array<{
@@ -103,8 +103,8 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     const krd = await reader(originalBuffer);
 
     // Set power_less_than duration
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -145,8 +145,8 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     const krd = await reader(originalBuffer);
 
     // Set power_greater_than duration
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -189,8 +189,8 @@ describe("Round-trip: Advanced duration types - power duration", () => {
       const krd = await reader(originalBuffer);
 
       // Set power duration
-      if (krd.extensions?.workout) {
-        const workout = krd.extensions.workout as {
+      if (krd.extensions?.structured_workout) {
+        const workout = krd.extensions.structured_workout as {
           name?: string;
           sport: string;
           steps: Array<{
@@ -234,8 +234,8 @@ describe("Round-trip: Repeat step conditionals - calories", () => {
     const krd = await reader(originalBuffer);
 
     // Set repeat_until_calories duration on first step
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -283,8 +283,8 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     const krd = await reader(originalBuffer);
 
     // Set power conditional
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -330,8 +330,8 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     const krd = await reader(originalBuffer);
 
     // Set power conditional
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -379,8 +379,8 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
       const krd = await reader(originalBuffer);
 
       // Set power conditional
-      if (krd.extensions?.workout) {
-        const workout = krd.extensions.workout as {
+      if (krd.extensions?.structured_workout) {
+        const workout = krd.extensions.structured_workout as {
           name?: string;
           sport: string;
           steps: Array<{
@@ -428,8 +428,8 @@ describe("Round-trip: Combined advanced duration types", () => {
     const krd = await reader(originalBuffer);
 
     // Set different duration types on different steps
-    if (krd.extensions?.workout) {
-      const workout = krd.extensions.workout as {
+    if (krd.extensions?.structured_workout) {
+      const workout = krd.extensions.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{

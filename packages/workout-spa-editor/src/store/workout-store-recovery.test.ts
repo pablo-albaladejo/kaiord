@@ -27,13 +27,13 @@ describe("Workout Store - Error Recovery", () => {
       // Arrange
       const mockWorkout: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [],
@@ -67,13 +67,13 @@ describe("Workout Store - Error Recovery", () => {
       // Arrange
       const mockBackup: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Backup Workout",
             sport: "running",
             steps: [],
@@ -106,13 +106,13 @@ describe("Workout Store - Error Recovery", () => {
       // Arrange
       const mockBackup: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Backup Workout",
             sport: "running",
             steps: [],
@@ -122,13 +122,13 @@ describe("Workout Store - Error Recovery", () => {
 
       const mockCurrent: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Current Workout",
             sport: "cycling",
             steps: [],
@@ -184,13 +184,13 @@ describe("Workout Store - Error Recovery", () => {
       // Arrange
       const mockBackup: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Backup Workout",
             sport: "running",
             steps: [],
@@ -221,13 +221,13 @@ describe("Workout Store - Error Recovery", () => {
       // Arrange
       const originalWorkout: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Original Workout",
             sport: "running",
             steps: [],
@@ -238,7 +238,7 @@ describe("Workout Store - Error Recovery", () => {
       const modifiedWorkout: KRD = {
         ...originalWorkout,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Modified Workout",
             sport: "running",
             steps: [],
@@ -256,18 +256,18 @@ describe("Workout Store - Error Recovery", () => {
       const modifiedState = useWorkoutStore.getState();
 
       // Assert - Workout is modified
-      expect(modifiedState.currentWorkout?.extensions?.workout?.name).toBe(
-        "Modified Workout"
-      );
+      expect(
+        modifiedState.currentWorkout?.extensions?.structured_workout?.name
+      ).toBe("Modified Workout");
 
       // Act - Restore from backup
       useWorkoutStore.getState().restoreFromBackup();
       const restoredState = useWorkoutStore.getState();
 
       // Assert - Workout is restored
-      expect(restoredState.currentWorkout?.extensions?.workout?.name).toBe(
-        "Original Workout"
-      );
+      expect(
+        restoredState.currentWorkout?.extensions?.structured_workout?.name
+      ).toBe("Original Workout");
     });
   });
 });

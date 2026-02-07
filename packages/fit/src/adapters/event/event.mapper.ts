@@ -17,17 +17,17 @@ const mapEventTypeToKrd = (
   if (fitEvent === "timer") {
     switch (fitEventType) {
       case "start":
-        return "start";
+        return "event_start";
       case "stop":
-        return "stop";
+        return "event_stop";
       case "stopDisable":
       case "stopDisableAll":
-        return "pause";
+        return "event_pause";
       default:
-        return "timer";
+        return "event_timer";
     }
   }
-  return FIT_EVENT_TO_KRD_TYPE[fitEvent] ?? "marker";
+  return FIT_EVENT_TO_KRD_TYPE[fitEvent] ?? "event_marker";
 };
 
 /** Maps FIT EVENT to KRD event. */

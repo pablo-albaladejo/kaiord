@@ -166,13 +166,13 @@ test.describe("Error Handling", () => {
 test.describe("Error Recovery", () => {
   const validWorkout = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: new Date().toISOString(),
       sport: "cycling",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Recovery Test Workout",
         sport: "cycling",
         steps: [
@@ -388,13 +388,13 @@ test.describe("Error Handling - Mobile", () => {
 
     const validWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Mobile Test",
           sport: "cycling",
           steps: [],

@@ -20,13 +20,13 @@ describe("useWorkoutSectionHandlers", () => {
 
   const mockKrd: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: mockWorkout,
+      structured_workout: mockWorkout,
     },
   };
 

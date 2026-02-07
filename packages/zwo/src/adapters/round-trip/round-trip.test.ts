@@ -27,7 +27,7 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Compare workout structures
-      const workout1 = krd1.extensions?.workout as {
+      const workout1 = krd1.extensions?.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -42,7 +42,7 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
         }>;
       };
 
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<{
@@ -111,7 +111,7 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
       const krd2 = await reader(convertedXml);
 
       // Assert - Check repetition blocks
-      const workout1 = krd1.extensions?.workout as {
+      const workout1 = krd1.extensions?.structured_workout as {
         steps: Array<
           | { stepIndex: number }
           | {
@@ -130,7 +130,7 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
         >;
       };
 
-      const workout2 = krd2.extensions?.workout as {
+      const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<
           | { stepIndex: number }
           | {

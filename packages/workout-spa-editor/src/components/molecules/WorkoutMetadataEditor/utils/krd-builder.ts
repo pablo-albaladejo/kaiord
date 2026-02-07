@@ -12,7 +12,7 @@ export function buildUpdatedKrd(
   sport: Sport,
   subSport: SubSport
 ): KRD {
-  const workoutData = krd.extensions?.workout;
+  const workoutData = krd.extensions?.structured_workout;
 
   return {
     ...krd,
@@ -23,7 +23,7 @@ export function buildUpdatedKrd(
     },
     extensions: {
       ...krd.extensions,
-      workout:
+      structured_workout:
         workoutData && typeof workoutData === "object" && "steps" in workoutData
           ? {
               ...(workoutData as Record<string, unknown>),

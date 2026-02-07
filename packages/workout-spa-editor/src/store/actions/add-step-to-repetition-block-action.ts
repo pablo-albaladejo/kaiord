@@ -26,11 +26,11 @@ export const addStepToRepetitionBlockAction = (
   blockId: string,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.structured_workout) {
     return {};
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
 
   // Find block by ID
   const blockInfo = findBlockById(workout, blockId);
@@ -73,7 +73,7 @@ export const addStepToRepetitionBlockAction = (
     ...krd,
     extensions: {
       ...krd.extensions,
-      workout: updatedWorkout,
+      structured_workout: updatedWorkout,
     },
   };
 

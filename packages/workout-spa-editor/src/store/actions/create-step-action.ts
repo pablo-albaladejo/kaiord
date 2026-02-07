@@ -12,11 +12,11 @@ export const createStepAction = (
   krd: KRD,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.structured_workout) {
     return {};
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
   const newStepIndex = workout.steps.length;
 
   const newStep = {
@@ -37,7 +37,7 @@ export const createStepAction = (
     ...krd,
     extensions: {
       ...krd.extensions,
-      workout: updatedWorkout,
+      structured_workout: updatedWorkout,
     },
   };
 

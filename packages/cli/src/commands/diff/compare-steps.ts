@@ -19,10 +19,10 @@ export const compareSteps = (
   file2Count: number;
   differences: Array<StepDiff>;
 } => {
-  const workout1 = krd1.extensions?.workout as
+  const workout1 = krd1.extensions?.structured_workout as
     | { steps?: Array<unknown> }
     | undefined;
-  const workout2 = krd2.extensions?.workout as
+  const workout2 = krd2.extensions?.structured_workout as
     | { steps?: Array<unknown> }
     | undefined;
 

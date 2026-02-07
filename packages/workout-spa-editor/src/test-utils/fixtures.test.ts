@@ -14,8 +14,8 @@ describe("Shared Fixtures", () => {
 
     // Assert
     expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("workout");
-    expect(krd.extensions?.workout).toBeDefined();
+    expect(krd.type).toBe("structured_workout");
+    expect(krd.extensions?.structured_workout).toBeDefined();
   });
 
   it("should load WorkoutRepeatSteps fixture", () => {
@@ -24,8 +24,8 @@ describe("Shared Fixtures", () => {
 
     // Assert
     expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("workout");
-    expect(krd.extensions?.workout?.steps).toBeDefined();
+    expect(krd.type).toBe("structured_workout");
+    expect(krd.extensions?.structured_workout?.steps).toBeDefined();
   });
 
   it("should load all available fixtures", () => {
@@ -36,7 +36,7 @@ describe("Shared Fixtures", () => {
     for (const name of fixtureNames) {
       const krd = loadKrdFixture(`${name}.krd`);
       expect(krd.version).toBe("1.0");
-      expect(krd.type).toBe("workout");
+      expect(krd.type).toBe("structured_workout");
     }
   });
 });

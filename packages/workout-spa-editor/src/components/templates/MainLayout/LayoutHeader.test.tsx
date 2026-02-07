@@ -17,13 +17,13 @@ import { LayoutHeader } from "./LayoutHeader";
 // Helper to create a minimal KRD for testing
 const createTestKRD = (): KRD => ({
   version: "1.0",
-  type: "workout",
+  type: "structured_workout",
   metadata: {
     created: new Date().toISOString(),
     sport: "running",
   },
   extensions: {
-    workout: {
+    structured_workout: {
       name: "Test Workout",
       sport: "running",
       steps: [],

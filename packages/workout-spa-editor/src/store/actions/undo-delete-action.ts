@@ -19,7 +19,7 @@ export const undoDeleteAction = (
   timestamp: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.structured_workout) {
     return {};
   }
 
@@ -30,7 +30,7 @@ export const undoDeleteAction = (
     return {};
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
   const { step, index } = deletedStepEntry;
 
   // Insert the step back at its original position
@@ -59,7 +59,7 @@ export const undoDeleteAction = (
     ...krd,
     extensions: {
       ...krd.extensions,
-      workout: updatedWorkout,
+      structured_workout: updatedWorkout,
     },
   };
 

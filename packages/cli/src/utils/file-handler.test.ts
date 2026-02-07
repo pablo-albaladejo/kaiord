@@ -37,7 +37,7 @@ describe("readFile", () => {
   it("should read KRD file as string", async () => {
     // Arrange
     const filePath = join(TEST_DIR, "test.krd");
-    const testData = '{"version":"1.0","type":"workout"}';
+    const testData = '{"version":"1.0","type":"structured_workout"}';
     await fsWriteFile(filePath, testData, "utf-8");
 
     // Act
@@ -129,7 +129,7 @@ describe("writeFile", () => {
   it("should write KRD file from string", async () => {
     // Arrange
     const filePath = join(TEST_DIR, "output.krd");
-    const testData = '{"version":"1.0","type":"workout"}';
+    const testData = '{"version":"1.0","type":"structured_workout"}';
 
     // Act
     await writeFile(filePath, testData, "krd");

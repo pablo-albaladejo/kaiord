@@ -37,13 +37,13 @@ describe("importWorkout", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [],
@@ -65,13 +65,13 @@ describe("importWorkout", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Cycling Workout",
             sport: "cycling",
             steps: [],
@@ -86,7 +86,7 @@ describe("importWorkout", () => {
       const result = await importWorkout(file);
 
       // Assert
-      expect(result.type).toBe("workout");
+      expect(result.type).toBe("structured_workout");
       expect(result.metadata.sport).toBe("cycling");
     });
 
@@ -136,7 +136,7 @@ describe("importWorkout", () => {
       // Arrange
       const invalidKrd = JSON.stringify({
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           // missing created and sport
         },
@@ -158,13 +158,13 @@ describe("importWorkout", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test",
             sport: "running",
             steps: [],
@@ -365,13 +365,13 @@ describe("importWorkout", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test",
             sport: "running",
             steps: [],

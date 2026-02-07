@@ -30,7 +30,7 @@ export function FormatWarnings({
       {validationErrors.length > 0 && (
         <div className="mt-2 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg">
           <p className="text-sm font-semibold text-red-800 dark:text-red-200 mb-1">
-            Cannot export workout:
+            Cannot export structured workout:
           </p>
           <ul className="text-sm text-red-700 dark:text-red-300 list-disc list-inside">
             {validationErrors.map((error) => {
