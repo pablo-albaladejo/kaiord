@@ -5,7 +5,17 @@
  */
 
 import type { KRD } from "@kaiord/core";
-import { createAllProviders } from "@kaiord/all";
+import { createDefaultProviders } from "@kaiord/core";
+import { createFitProviders } from "@kaiord/fit";
+import { createTcxProviders } from "@kaiord/tcx";
+import { createZwoProviders } from "@kaiord/zwo";
+
+// Create providers once for all operations
+const providers = createDefaultProviders({
+  fit: createFitProviders(),
+  tcx: createTcxProviders(),
+  zwo: createZwoProviders(),
+});
 import type { ImportProgressCallback } from "./import-workout";
 import { parseJSON } from "./json-parser";
 import { validateKRD } from "./krd-validator";
@@ -38,8 +48,6 @@ export const importFitFile = async (
   signal?: AbortSignal
 ): Promise<KRD> => {
   signal?.throwIfAborted();
-  const providers = createAllProviders();
-
   onProgress?.(50);
   signal?.throwIfAborted();
 
@@ -56,7 +64,7 @@ export const importTcxFile = async (
   signal?: AbortSignal
 ): Promise<KRD> => {
   signal?.throwIfAborted();
-  const providers = createAllProviders();
+
   const text = new TextDecoder().decode(buffer);
 
   onProgress?.(50);
@@ -75,7 +83,7 @@ export const importZwoFile = async (
   signal?: AbortSignal
 ): Promise<KRD> => {
   signal?.throwIfAborted();
-  const providers = createAllProviders();
+
   const text = new TextDecoder().decode(buffer);
 
   onProgress?.(50);

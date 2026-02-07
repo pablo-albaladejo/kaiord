@@ -9,13 +9,14 @@
       "@kaiord/fit",
       "@kaiord/tcx",
       "@kaiord/zwo",
-      "@kaiord/all",
       "@kaiord/cli"
     ]
   ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@kaiord/workout-spa-editor"],
+  "ignore": [
+    "@kaiord/workout-spa-editor"
+  ],
   "tagFormat": "${packageName}@${version}"
 }
