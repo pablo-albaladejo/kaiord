@@ -4,19 +4,11 @@
   "commit": false,
   "fixed": [],
   "linked": [
-    [
-      "@kaiord/core",
-      "@kaiord/fit",
-      "@kaiord/tcx",
-      "@kaiord/zwo",
-      "@kaiord/cli"
-    ]
+    ["@kaiord/core", "@kaiord/fit", "@kaiord/tcx", "@kaiord/zwo", "@kaiord/cli"]
   ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": [
-    "@kaiord/workout-spa-editor"
-  ],
+  "ignore": ["@kaiord/workout-spa-editor"],
   "tagFormat": "${packageName}@${version}"
 }
