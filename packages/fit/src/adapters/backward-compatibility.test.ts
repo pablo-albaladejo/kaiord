@@ -1,8 +1,10 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import type { KRD } from "@kaiord/core";
-import { createMockLogger } from "@kaiord/core/test-utils";
+import {
+  createMockLogger,
+  loadFitFixture,
+  loadKrdFixture,
+} from "@kaiord/core/test-utils";
 import { createGarminFitSdkReader } from "./garmin-fitsdk";
 
 describe("Backward Compatibility", () => {
@@ -12,14 +14,7 @@ describe("Backward Compatibility", () => {
   describe("KRD files without new fields", () => {
     it("should parse WorkoutIndividualSteps.krd without new fields", () => {
       // Arrange
-      const krdPath = resolve(
-        __dirname,
-        "../../tests/fixtures/krd-files/WorkoutIndividualSteps.krd"
-      );
-      const krdContent = readFileSync(krdPath, "utf-8");
-
-      // Act
-      const krd: KRD = JSON.parse(krdContent);
+      const krd: KRD = loadKrdFixture("WorkoutIndividualSteps.krd");
 
       // Assert - Verify no new fields are present in the KRD file
       const workout = krd.extensions?.workout as Record<string, unknown>;
@@ -39,14 +34,7 @@ describe("Backward Compatibility", () => {
 
     it("should parse WorkoutRepeatSteps.krd without new fields", () => {
       // Arrange
-      const krdPath = resolve(
-        __dirname,
-        "../../tests/fixtures/krd-files/WorkoutRepeatSteps.krd"
-      );
-      const krdContent = readFileSync(krdPath, "utf-8");
-
-      // Act
-      const krd: KRD = JSON.parse(krdContent);
+      const krd: KRD = loadKrdFixture("WorkoutRepeatSteps.krd");
 
       // Assert - Verify no new fields are present
       const workout = krd.extensions?.workout as Record<string, unknown>;
@@ -58,11 +46,7 @@ describe("Backward Compatibility", () => {
   describe("FIT files without new fields", () => {
     it("should process WorkoutIndividualSteps.fit without new fields", async () => {
       // Arrange
-      const fitPath = resolve(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const fitBuffer = readFileSync(fitPath);
+      const fitBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act
       const krd = await fitReader(fitBuffer);
@@ -85,11 +69,7 @@ describe("Backward Compatibility", () => {
 
     it("should process WorkoutRepeatSteps.fit without new fields", async () => {
       // Arrange
-      const fitPath = resolve(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutRepeatSteps.fit"
-      );
-      const fitBuffer = readFileSync(fitPath);
+      const fitBuffer = loadFitFixture("WorkoutRepeatSteps.fit");
 
       // Act
       const krd = await fitReader(fitBuffer);
@@ -104,11 +84,7 @@ describe("Backward Compatibility", () => {
   describe("Optional fields are truly optional", () => {
     it("should omit optional fields when undefined, not set to null", async () => {
       // Arrange
-      const fitPath = resolve(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const fitBuffer = readFileSync(fitPath);
+      const fitBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act
       const krd = await fitReader(fitBuffer);
@@ -136,11 +112,7 @@ describe("Backward Compatibility", () => {
   describe("API compatibility", () => {
     it("should maintain existing API surface", async () => {
       // Arrange
-      const fitPath = resolve(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const fitBuffer = readFileSync(fitPath);
+      const fitBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act - Use existing API methods
       const krd = await fitReader(fitBuffer);

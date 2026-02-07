@@ -10,12 +10,11 @@ import type { KRD } from "../domain/schemas/krd";
 
 /**
  * Base path to fixtures directory
- * In development: points to src/tests/fixtures
- * In production: points to published src/tests/fixtures
+ * Points to shared test-fixtures at monorepo root
+ * From packages/core/src/test-utils/ or packages/core/dist/test-utils/
+ * Goes up 4 levels to reach monorepo root, then into test-fixtures/
  */
-const FIXTURES_DIR = __dirname.includes("/dist/")
-  ? join(__dirname, "../../src/tests/fixtures")
-  : join(__dirname, "../tests/fixtures");
+const FIXTURES_DIR = join(__dirname, "../../../../test-fixtures");
 
 /**
  * Load a FIT file fixture as a buffer
@@ -30,7 +29,7 @@ const FIXTURES_DIR = __dirname.includes("/dist/")
  * ```
  */
 export const loadFitFixture = (filename: string): Uint8Array => {
-  const path = join(FIXTURES_DIR, "fit-files", filename);
+  const path = join(FIXTURES_DIR, "fit", filename);
   return readFileSync(path);
 };
 
@@ -47,7 +46,7 @@ export const loadFitFixture = (filename: string): Uint8Array => {
  * ```
  */
 export const loadKrdFixture = (filename: string): KRD => {
-  const path = join(FIXTURES_DIR, "krd-files", filename);
+  const path = join(FIXTURES_DIR, "krd", filename);
   const json = readFileSync(path, "utf-8");
   return JSON.parse(json) as KRD;
 };
@@ -65,14 +64,48 @@ export const loadKrdFixture = (filename: string): KRD => {
  * ```
  */
 export const loadKrdFixtureRaw = (filename: string): string => {
-  const path = join(FIXTURES_DIR, "krd-files", filename);
+  const path = join(FIXTURES_DIR, "krd", filename);
+  return readFileSync(path, "utf-8");
+};
+
+/**
+ * Load a TCX file fixture as a string
+ *
+ * @param filename - Name of the TCX file (e.g., "WorkoutHeartRateTargets.tcx")
+ * @returns TCX XML string
+ *
+ * @example
+ * ```typescript
+ * const tcxString = loadTcxFixture("WorkoutHeartRateTargets.tcx");
+ * const krd = await tcxReader.readToKRD(tcxString);
+ * ```
+ */
+export const loadTcxFixture = (filename: string): string => {
+  const path = join(FIXTURES_DIR, "tcx", filename);
+  return readFileSync(path, "utf-8");
+};
+
+/**
+ * Load a ZWO file fixture as a string
+ *
+ * @param filename - Name of the ZWO file (e.g., "WorkoutIndividualSteps.zwo")
+ * @returns ZWO XML string
+ *
+ * @example
+ * ```typescript
+ * const zwoString = loadZwoFixture("WorkoutIndividualSteps.zwo");
+ * const krd = await zwoReader.readToKRD(zwoString);
+ * ```
+ */
+export const loadZwoFixture = (filename: string): string => {
+  const path = join(FIXTURES_DIR, "zwo", filename);
   return readFileSync(path, "utf-8");
 };
 
 /**
  * Get the full path to a fixture file
  *
- * @param type - Type of fixture ("fit" or "krd")
+ * @param type - Type of fixture ("fit", "krd", "tcx", or "zwo")
  * @param filename - Name of the file
  * @returns Full path to the fixture file
  *
@@ -83,11 +116,10 @@ export const loadKrdFixtureRaw = (filename: string): string => {
  * ```
  */
 export const getFixturePath = (
-  type: "fit" | "krd",
+  type: "fit" | "krd" | "tcx" | "zwo",
   filename: string
 ): string => {
-  const subdir = type === "fit" ? "fit-files" : "krd-files";
-  return join(FIXTURES_DIR, subdir, filename);
+  return join(FIXTURES_DIR, type, filename);
 };
 
 /**

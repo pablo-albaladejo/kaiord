@@ -43,7 +43,7 @@ describe("getFixturePath", () => {
     const path = getFixturePath("fit", "WorkoutIndividualSteps.fit");
 
     // Assert
-    expect(path).toContain("fit-files");
+    expect(path).toContain("test-fixtures/fit");
     expect(path).toContain("WorkoutIndividualSteps.fit");
     expect(existsSync(path)).toBe(true);
   });
@@ -53,7 +53,7 @@ describe("getFixturePath", () => {
     const path = getFixturePath("krd", "WorkoutIndividualSteps.krd");
 
     // Assert
-    expect(path).toContain("krd-files");
+    expect(path).toContain("test-fixtures/krd");
     expect(path).toContain("WorkoutIndividualSteps.krd");
     expect(existsSync(path)).toBe(true);
   });

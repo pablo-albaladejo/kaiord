@@ -1,10 +1,11 @@
-import { readFileSync } from "fs";
-import { join } from "path";
 import { describe, expect, it, vi } from "vitest";
 import { FitParsingError } from "@kaiord/core";
-import { buildKRD } from "@kaiord/core/test-utils";
-import { buildKRDMetadata } from "@kaiord/core/test-utils";
-import { createMockLogger } from "@kaiord/core/test-utils";
+import {
+  buildKRD,
+  buildKRDMetadata,
+  createMockLogger,
+  loadFitFixture,
+} from "@kaiord/core/test-utils";
 import {
   createGarminFitSdkReader,
   createGarminFitSdkWriter,
@@ -16,11 +17,7 @@ describe("createGarminFitSdkReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act
       const result = await reader(buffer);
@@ -37,11 +34,7 @@ describe("createGarminFitSdkReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act
       const result = await reader(buffer);
@@ -58,11 +51,7 @@ describe("createGarminFitSdkReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act
       const result = await reader(buffer);
@@ -98,11 +87,7 @@ describe("createGarminFitSdkReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutRepeatSteps.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutRepeatSteps.fit");
 
       // Act
       const result = await reader(buffer);
@@ -129,11 +114,7 @@ describe("createGarminFitSdkReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutRepeatGreaterThanStep.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutRepeatGreaterThanStep.fit");
 
       // Act
       const result = await reader(buffer);
@@ -153,11 +134,7 @@ describe("createGarminFitSdkReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutCustomTargetValues.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutCustomTargetValues.fit");
 
       // Act
       const result = await reader(buffer);
@@ -198,11 +175,7 @@ describe("createGarminFitSdkReader", () => {
       const logger = createMockLogger();
       const debugSpy = vi.spyOn(logger, "debug");
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act
       await reader(buffer);
@@ -218,11 +191,7 @@ describe("createGarminFitSdkReader", () => {
       const logger = createMockLogger();
       const infoSpy = vi.spyOn(logger, "info");
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act
       await reader(buffer);
@@ -253,11 +222,7 @@ describe("createGarminFitSdkReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act
       const result = await reader(buffer);
@@ -271,11 +236,7 @@ describe("createGarminFitSdkReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act
       const result = await reader(buffer);
@@ -293,11 +254,7 @@ describe("createGarminFitSdkReader", () => {
       const logger = createMockLogger();
       const infoSpy = vi.spyOn(logger, "info");
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act
       await reader(buffer);
@@ -316,11 +273,7 @@ describe("createGarminFitSdkReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
-      const fitPath = join(
-        __dirname,
-        "../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-      );
-      const buffer = readFileSync(fitPath);
+      const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
       // Act
       const result = await reader(buffer);
