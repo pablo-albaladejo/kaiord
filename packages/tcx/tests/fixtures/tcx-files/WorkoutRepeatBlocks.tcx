@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<TrainingCenterDatabase xmlns="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2 http://www.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd">
+  <Workouts>
+    <Workout Sport="Biking">
+      <Name>Interval Workout</Name>
+      <Step xsi:type="Step_t">
+        <StepId>1</StepId>
+        <Name>Warmup</Name>
+        <Duration xsi:type="Time_t">
+          <Seconds>600</Seconds>
+        </Duration>
+        <Intensity>Active</Intensity>
+        <Target xsi:type="None_t"/>
+      </Step>
+      <Step xsi:type="Repeat_t">
+        <StepId>2</StepId>
+        <Repetitions>5</Repetitions>
+        <Child xsi:type="Step_t">
+          <StepId>3</StepId>
+          <Name>Work</Name>
+          <Duration xsi:type="Time_t">
+            <Seconds>240</Seconds>
+          </Duration>
+          <Intensity>Active</Intensity>
+          <Target xsi:type="HeartRate_t">
+            <HeartRateZone xsi:type="PredefinedHeartRateZone_t">
+              <Number>4</Number>
+            </HeartRateZone>
+          </Target>
+        </Child>
+        <Child xsi:type="Step_t">
+          <StepId>4</StepId>
+          <Name>Rest</Name>
+          <Duration xsi:type="Time_t">
+            <Seconds>120</Seconds>
+          </Duration>
+          <Intensity>Resting</Intensity>
+          <Target xsi:type="HeartRate_t">
+            <HeartRateZone xsi:type="PredefinedHeartRateZone_t">
+              <Number>2</Number>
+            </HeartRateZone>
+          </Target>
+        </Child>
+      </Step>
+      <Step xsi:type="Step_t">
+        <StepId>5</StepId>
+        <Name>Cooldown</Name>
+        <Duration xsi:type="Time_t">
+          <Seconds>300</Seconds>
+        </Duration>
+        <Intensity>Resting</Intensity>
+        <Target xsi:type="None_t"/>
+      </Step>
+    </Workout>
+  </Workouts>
+</TrainingCenterDatabase>

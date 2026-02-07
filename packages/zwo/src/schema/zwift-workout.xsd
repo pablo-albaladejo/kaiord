@@ -1,0 +1,119 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+           elementFormDefault="unqualified"
+           attributeFormDefault="unqualified">
+  <xs:annotation>
+    <xs:documentation>
+      Zwift Workout File Format Schema
+      This schema defines the structure of Zwift workout files (.zwo format)
+      Extended to allow custom attributes for round-trip data preservation
+    </xs:documentation>
+  </xs:annotation>
+
+  <!-- Root element -->
+  <xs:element name="workout_file">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="author" type="xs:string" minOccurs="0"/>
+        <xs:element name="name" type="xs:string"/>
+        <xs:element name="description" type="xs:string" minOccurs="0"/>
+        <xs:element name="sportType" type="sportType_t"/>
+        <xs:element name="tags" minOccurs="0">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="tag" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+        <xs:element name="workout" type="workout_t"/>
+      </xs:sequence>
+      <xs:anyAttribute namespace="##any" processContents="lax"/>
+    </xs:complexType>
+  </xs:element>
+
+  <!-- Sport type enumeration -->
+  <xs:simpleType name="sportType_t">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="bike"/>
+      <xs:enumeration value="run"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Workout container -->
+  <xs:complexType name="workout_t">
+    <xs:choice minOccurs="0" maxOccurs="unbounded">
+      <xs:element name="SteadyState" type="steadyState_t"/>
+      <xs:element name="Warmup" type="ramp_t"/>
+      <xs:element name="Ramp" type="ramp_t"/>
+      <xs:element name="Cooldown" type="ramp_t"/>
+      <xs:element name="IntervalsT" type="intervalsT_t"/>
+      <xs:element name="FreeRide" type="freeRide_t"/>
+    </xs:choice>
+  </xs:complexType>
+
+  <!-- SteadyState interval -->
+  <xs:complexType name="steadyState_t">
+    <xs:sequence>
+      <xs:element name="textevent" type="textevent_t" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="Duration" type="xs:decimal" use="required"/>
+    <xs:attribute name="Power" type="powerValue_t" use="optional"/>
+    <xs:attribute name="pace" type="xs:decimal" use="optional"/>
+    <xs:attribute name="Cadence" type="xs:int" use="optional"/>
+    <xs:anyAttribute namespace="##any" processContents="lax"/>
+  </xs:complexType>
+
+  <!-- Ramp interval (Warmup, Ramp, Cooldown) -->
+  <xs:complexType name="ramp_t">
+    <xs:sequence>
+      <xs:element name="textevent" type="textevent_t" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="Duration" type="xs:decimal" use="required"/>
+    <xs:attribute name="PowerLow" type="powerValue_t" use="optional"/>
+    <xs:attribute name="PowerHigh" type="powerValue_t" use="optional"/>
+    <xs:attribute name="pace" type="xs:decimal" use="optional"/>
+    <xs:attribute name="Cadence" type="xs:int" use="optional"/>
+    <xs:anyAttribute namespace="##any" processContents="lax"/>
+  </xs:complexType>
+
+  <!-- IntervalsT (repeated intervals) -->
+  <xs:complexType name="intervalsT_t">
+    <xs:sequence>
+      <xs:element name="textevent" type="textevent_t" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="Repeat" type="xs:int" use="required"/>
+    <xs:attribute name="OnDuration" type="xs:decimal" use="required"/>
+    <xs:attribute name="OffDuration" type="xs:decimal" use="required"/>
+    <xs:attribute name="OnPower" type="powerValue_t" use="optional"/>
+    <xs:attribute name="OffPower" type="powerValue_t" use="optional"/>
+    <xs:attribute name="pace" type="xs:decimal" use="optional"/>
+    <xs:attribute name="Cadence" type="xs:int" use="optional"/>
+    <xs:attribute name="CadenceResting" type="xs:int" use="optional"/>
+    <xs:anyAttribute namespace="##any" processContents="lax"/>
+  </xs:complexType>
+
+  <!-- FreeRide interval -->
+  <xs:complexType name="freeRide_t">
+    <xs:sequence>
+      <xs:element name="textevent" type="textevent_t" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+    <xs:attribute name="Duration" type="xs:decimal" use="required"/>
+    <xs:attribute name="Cadence" type="xs:int" use="optional"/>
+    <xs:attribute name="FlatRoad" type="xs:int" use="optional"/>
+  </xs:complexType>
+
+  <!-- Text event (coaching cue) -->
+  <xs:complexType name="textevent_t">
+    <xs:attribute name="message" type="xs:string" use="required"/>
+    <xs:attribute name="timeoffset" type="xs:decimal" use="optional"/>
+    <xs:attribute name="distoffset" type="xs:decimal" use="optional"/>
+  </xs:complexType>
+
+  <!-- Power value type (FTP percentage 0.0 to 3.0) -->
+  <xs:simpleType name="powerValue_t">
+    <xs:restriction base="xs:decimal">
+      <xs:minInclusive value="0.0"/>
+      <xs:maxInclusive value="3.0"/>
+    </xs:restriction>
+  </xs:simpleType>
+</xs:schema>

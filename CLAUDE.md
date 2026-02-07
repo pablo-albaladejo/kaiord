@@ -8,7 +8,11 @@ Kaiord is a TypeScript monorepo for structured workout data conversion between F
 
 **Packages:**
 
-- `@kaiord/core` - TypeScript library for format conversion
+- `@kaiord/core` - Domain types, schemas, ports, use cases (no adapter implementations)
+- `@kaiord/fit` - FIT format adapter (Garmin FIT SDK)
+- `@kaiord/tcx` - TCX format adapter (fast-xml-parser)
+- `@kaiord/zwo` - ZWO format adapter (fast-xml-parser, XSD validation)
+- `@kaiord/all` - Meta-package re-exporting all adapters for backward compatibility
 - `@kaiord/cli` - Command-line interface
 - `@kaiord/workout-spa-editor` - React web application (private)
 
@@ -33,22 +37,28 @@ pnpm format                     # Format with Prettier
 pnpm exec changeset             # Create changeset before PR
 ```
 
-## Architecture (Hexagonal)
+## Architecture (Hexagonal + Plugin)
 
 ```
-packages/core/src/
-├── domain/           # Pure types & Zod schemas (no dependencies)
-├── application/      # Use cases (depends only on ports)
-├── ports/            # I/O contracts (interfaces)
-├── adapters/         # Implementations (FIT, TCX, ZWO)
-└── cli/              # CLI commands
+packages/
+├── core/src/
+│   ├── domain/           # Pure types & Zod schemas (no dependencies)
+│   ├── application/      # Use cases, provider types (depends only on ports)
+│   ├── ports/            # I/O contracts (interfaces)
+│   └── adapters/logger/  # Console logger only
+├── fit/src/adapters/     # FIT reader/writer implementations
+├── tcx/src/adapters/     # TCX reader/writer/validator implementations
+├── zwo/src/adapters/     # ZWO reader/writer/validator implementations
+├── all/src/              # Meta-package wiring all adapters
+└── cli/src/              # CLI commands
 ```
 
 **Critical rules:**
 
 - `domain` depends on nothing
 - `application` MUST NOT import external libs or adapters
-- Adapters implement ports; wiring in `application/providers.ts`
+- Adapter packages (`fit`, `tcx`, `zwo`) depend on `core` only
+- Wiring in `application/providers.ts` via `AdapterProviders` injection
 - KRD is the canonical format; all conversions go through KRD
 
 ## Public API

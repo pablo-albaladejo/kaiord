@@ -1,9 +1,9 @@
 import {
-  createDefaultProviders,
   FitParsingError,
   KrdValidationError,
   ToleranceExceededError,
 } from "@kaiord/core";
+import { createAllProviders } from "@kaiord/all";
 import {
   loadConfigWithMetadata,
   mergeWithConfig,
@@ -77,7 +77,7 @@ export const convertCommand = async (
   }
 
   try {
-    const providers = createDefaultProviders(logger);
+    const providers = createAllProviders(logger);
 
     if (isBatchMode(validatedOptions.input)) {
       return await executeBatchConversion(validatedOptions, providers, logger);

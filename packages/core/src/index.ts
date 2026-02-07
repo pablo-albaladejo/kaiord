@@ -78,6 +78,21 @@ export {
 } from "./domain/schemas/swim-stroke";
 export type { SwimStroke } from "./domain/schemas/swim-stroke";
 
+// File Type Schema and Types
+export { fileTypeSchema } from "./domain/schemas/file-type";
+export type { FileType } from "./domain/schemas/file-type";
+
+// Length Unit Schema and Types
+export { lengthUnitSchema } from "./domain/schemas/length-unit";
+export type { LengthUnit } from "./domain/schemas/length-unit";
+
+// KRD Lap Trigger Schema and Types
+export { krdLapTriggerSchema } from "./domain/schemas/krd/lap";
+export type { KRDLapTrigger } from "./domain/schemas/krd/lap";
+
+// Domain Converters
+export { convertLengthToMeters } from "./domain/converters/length-unit.converter";
+
 // ============================================
 // Error Types and Factories
 // ============================================
@@ -129,6 +144,7 @@ export type {
 export type { FitReader } from "./ports/fit-reader";
 export type { FitWriter } from "./ports/fit-writer";
 export type { LogLevel, Logger } from "./ports/logger";
+export { createConsoleLogger } from "./adapters/logger/console-logger";
 export type { TcxReader } from "./ports/tcx-reader";
 export type { TcxValidationResult, TcxValidator } from "./ports/tcx-validator";
 export type { TcxWriter } from "./ports/tcx-writer";
@@ -169,4 +185,4 @@ export type { ValidateRoundTrip } from "./tests/round-trip/validate-round-trip";
 // ============================================
 
 export { createDefaultProviders } from "./application/providers";
-export type { Providers } from "./application/providers";
+export type { AdapterProviders, Providers } from "./application/providers";

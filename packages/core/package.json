@@ -34,9 +34,6 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@garmin/fitsdk": "^21.141.0",
-    "fast-xml-parser": "^5.3.4",
-    "xsd-schema-validator": "^0.11.0",
     "zod": "^3.22.4",
     "zod-to-json-schema": "^3.22.4"
   },

@@ -1,178 +1,66 @@
-import {
-  createGarminFitSdkReader,
-  createGarminFitSdkWriter,
-} from "../adapters/fit/garmin-fitsdk";
 import { createConsoleLogger } from "../adapters/logger/console-logger";
-import {
-  createFastXmlTcxReader,
-  createFastXmlTcxWriter,
-} from "../adapters/tcx/fast-xml-parser";
-import { createXsdTcxValidator } from "../adapters/tcx/xsd-validator";
-import {
-  createFastXmlZwiftReader,
-  createFastXmlZwiftWriter,
-} from "../adapters/zwift/fast-xml-parser";
-import { createZwiftValidator } from "../adapters/zwift/xsd-validator";
-import type { SchemaValidator } from "../domain/validation/schema-validator";
 import { createSchemaValidator } from "../domain/validation/schema-validator";
-import type { ToleranceChecker } from "../domain/validation/tolerance-checker";
 import { createToleranceChecker } from "../domain/validation/tolerance-checker";
-import type { FitReader } from "../ports/fit-reader";
-import type { FitWriter } from "../ports/fit-writer";
 import type { Logger } from "../ports/logger";
-import type { TcxReader } from "../ports/tcx-reader";
-import type { TcxValidator } from "../ports/tcx-validator";
-import type { TcxWriter } from "../ports/tcx-writer";
-import type { ZwiftReader } from "../ports/zwift-reader";
-import type { ZwiftValidator } from "../ports/zwift-validator";
-import type { ZwiftWriter } from "../ports/zwift-writer";
-import type { ConvertFitToKrd } from "./use-cases/convert-fit-to-krd";
 import { convertFitToKrd } from "./use-cases/convert-fit-to-krd";
-import type { ConvertKrdToFit } from "./use-cases/convert-krd-to-fit";
 import { convertKrdToFit } from "./use-cases/convert-krd-to-fit";
-import type { ConvertKrdToTcx } from "./use-cases/convert-krd-to-tcx";
 import { convertKrdToTcx } from "./use-cases/convert-krd-to-tcx";
-import type { ConvertKrdToZwift } from "./use-cases/convert-krd-to-zwift";
 import { convertKrdToZwift } from "./use-cases/convert-krd-to-zwift";
-import type { ConvertTcxToKrd } from "./use-cases/convert-tcx-to-krd";
 import { convertTcxToKrd } from "./use-cases/convert-tcx-to-krd";
-import type { ConvertZwiftToKrd } from "./use-cases/convert-zwift-to-krd";
 import { convertZwiftToKrd } from "./use-cases/convert-zwift-to-krd";
+import type { AdapterProviders, Providers } from "./provider-types";
+
+export type { AdapterProviders, Providers } from "./provider-types";
 
 /**
- * Container for all application dependencies and use cases.
+ * Creates default providers with adapter dependencies wired together.
  *
- * Provides access to readers, writers, validators, and pre-configured use cases
- * for converting between FIT, TCX, Zwift, and KRD formats.
- *
- * @example
- * ```typescript
- * import { createDefaultProviders } from '@kaiord/core';
- *
- * const providers = createDefaultProviders();
- *
- * // Access readers/writers
- * const fitBuffer = await providers.fitReader(buffer);
- * const krdBuffer = await providers.fitWriter(krd);
- *
- * // Access use cases
- * const krd = await providers.convertFitToKrd({ fitBuffer });
- * ```
+ * @param adapters - Optional adapter providers (FIT, TCX, ZWO)
+ * @param logger - Optional custom logger
+ * @returns Providers object with available dependencies and use cases
  */
-export type Providers = {
-  fitReader: FitReader;
-  fitWriter: FitWriter;
-  tcxValidator: TcxValidator;
-  tcxReader: TcxReader;
-  tcxWriter: TcxWriter;
-  zwiftValidator: ZwiftValidator;
-  zwiftReader: ZwiftReader;
-  zwiftWriter: ZwiftWriter;
-  schemaValidator: SchemaValidator;
-  toleranceChecker: ToleranceChecker;
-  convertFitToKrd: ConvertFitToKrd;
-  convertKrdToFit: ConvertKrdToFit;
-  convertTcxToKrd: ConvertTcxToKrd;
-  convertKrdToTcx: ConvertKrdToTcx;
-  convertZwiftToKrd: ConvertZwiftToKrd;
-  convertKrdToZwift: ConvertKrdToZwift;
-  logger: Logger;
-};
-
-/**
- * Creates default providers with all dependencies wired together.
- *
- * This is the main entry point for dependency injection in Kaiord. It creates
- * all necessary adapters (FIT, TCX, Zwift readers/writers), validators, and
- * pre-configured use cases with sensible defaults.
- *
- * @param logger - Optional custom logger. If not provided, uses console logger.
- * @returns Providers object with all dependencies and use cases
- *
- * @example
- * ```typescript
- * import { createDefaultProviders } from '@kaiord/core';
- * import { readFileSync, writeFileSync } from 'fs';
- *
- * // Create providers with default console logger
- * const providers = createDefaultProviders();
- *
- * // Convert FIT to KRD
- * const fitBuffer = readFileSync('workout.fit');
- * const krd = await providers.convertFitToKrd({ fitBuffer });
- *
- * // Convert KRD to TCX
- * const tcxString = await providers.convertKrdToTcx({ krd });
- * writeFileSync('workout.tcx', tcxString);
- * ```
- *
- * @example
- * ```typescript
- * // With custom logger
- * import { createDefaultProviders } from '@kaiord/core';
- * import winston from 'winston';
- *
- * const winstonLogger = winston.createLogger({
- *   level: 'info',
- *   format: winston.format.json(),
- *   transports: [new winston.transports.Console()]
- * });
- *
- * const customLogger = {
- *   debug: (msg, ctx) => winstonLogger.debug(msg, ctx),
- *   info: (msg, ctx) => winstonLogger.info(msg, ctx),
- *   warn: (msg, ctx) => winstonLogger.warn(msg, ctx),
- *   error: (msg, ctx) => winstonLogger.error(msg, ctx)
- * };
- *
- * const providers = createDefaultProviders(customLogger);
- * ```
- *
- * @example
- * ```typescript
- * // Access individual components
- * const providers = createDefaultProviders();
- *
- * // Use readers/writers directly
- * const krd = await providers.fitReader(fitBuffer);
- * const fitBuffer = await providers.fitWriter(krd);
- *
- * // Use validators
- * const errors = providers.schemaValidator.validate(krd);
- * const violations = providers.toleranceChecker.check(original, converted);
- * ```
- */
-export const createDefaultProviders = (logger?: Logger): Providers => {
+export const createDefaultProviders = (
+  adapters?: AdapterProviders,
+  logger?: Logger
+): Providers => {
   const log = logger || createConsoleLogger();
-  const tcxValidator = createXsdTcxValidator(log);
-  const zwiftValidator = createZwiftValidator(log);
-
-  const fitReader = createGarminFitSdkReader(log);
-  const fitWriter = createGarminFitSdkWriter(log);
-  const tcxReader = createFastXmlTcxReader(log);
-  const tcxWriter = createFastXmlTcxWriter(log, tcxValidator);
-  const zwiftReader = createFastXmlZwiftReader(log, zwiftValidator);
-  const zwiftWriter = createFastXmlZwiftWriter(log, zwiftValidator);
-  const schemaValidator = createSchemaValidator(log);
-  const toleranceChecker = createToleranceChecker();
-
-  return {
-    fitReader,
-    fitWriter,
-    tcxValidator,
-    tcxReader,
-    tcxWriter,
-    zwiftValidator,
-    zwiftReader,
-    zwiftWriter,
-    schemaValidator,
-    toleranceChecker,
-    convertFitToKrd: convertFitToKrd(fitReader, schemaValidator, log),
-    convertKrdToFit: convertKrdToFit(fitWriter, schemaValidator, log),
-    convertTcxToKrd: convertTcxToKrd(tcxReader, schemaValidator, log),
-    convertKrdToTcx: convertKrdToTcx(tcxWriter, schemaValidator, log),
-    convertZwiftToKrd: convertZwiftToKrd(zwiftReader, schemaValidator, log),
-    convertKrdToZwift: convertKrdToZwift(zwiftWriter, schemaValidator, log),
+  const sv = createSchemaValidator(log);
+  const result: Providers = {
+    schemaValidator: sv,
+    toleranceChecker: createToleranceChecker(),
     logger: log,
   };
+
+  if (adapters?.fit) {
+    result.fitReader = adapters.fit.fitReader;
+    result.fitWriter = adapters.fit.fitWriter;
+    result.convertFitToKrd = convertFitToKrd(adapters.fit.fitReader, sv, log);
+    result.convertKrdToFit = convertKrdToFit(adapters.fit.fitWriter, sv, log);
+  }
+
+  if (adapters?.tcx) {
+    result.tcxReader = adapters.tcx.tcxReader;
+    result.tcxWriter = adapters.tcx.tcxWriter;
+    result.tcxValidator = adapters.tcx.tcxValidator;
+    result.convertTcxToKrd = convertTcxToKrd(adapters.tcx.tcxReader, sv, log);
+    result.convertKrdToTcx = convertKrdToTcx(adapters.tcx.tcxWriter, sv, log);
+  }
+
+  if (adapters?.zwo) {
+    result.zwiftReader = adapters.zwo.zwiftReader;
+    result.zwiftWriter = adapters.zwo.zwiftWriter;
+    result.zwiftValidator = adapters.zwo.zwiftValidator;
+    result.convertZwiftToKrd = convertZwiftToKrd(
+      adapters.zwo.zwiftReader,
+      sv,
+      log
+    );
+    result.convertKrdToZwift = convertKrdToZwift(
+      adapters.zwo.zwiftWriter,
+      sv,
+      log
+    );
+  }
+
+  return result;
 };

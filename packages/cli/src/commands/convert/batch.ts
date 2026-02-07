@@ -1,4 +1,4 @@
-import type { createDefaultProviders, Logger } from "@kaiord/core";
+import type { Logger, Providers } from "@kaiord/core";
 import chalk from "chalk";
 import ora from "ora";
 import { basename, join } from "path";
@@ -13,7 +13,7 @@ import type { ConversionResult, ValidatedConvertOptions } from "./types";
  */
 export const executeBatchConversion = async (
   options: ValidatedConvertOptions,
-  providers: ReturnType<typeof createDefaultProviders>,
+  providers: Providers,
   logger: Logger
 ): Promise<number> => {
   if (!options.outputDir) {
