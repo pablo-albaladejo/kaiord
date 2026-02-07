@@ -31,7 +31,9 @@ Or analyze a specific package:
 ## Analysis Process
 
 ### 1. Build Size Check
+
 For each package in the monorepo:
+
 - Check `dist/` directory sizes after build
 - Compare against typical size thresholds for libraries:
   - Core domain package: < 50KB
@@ -39,23 +41,29 @@ For each package in the monorepo:
   - CLI: < 500KB
 
 ### 2. Heavy Dependencies
+
 Check `package.json` for common heavy dependencies:
+
 - Look for moment.js (suggest date-fns or native Date)
 - Look for lodash (suggest lodash-es for tree-shaking)
 - Identify any duplicate dependencies across packages
 
 ### 3. Import Analysis
+
 Scan TypeScript files for optimization opportunities:
+
 ```typescript
 // ❌ Avoid
-import * as _ from 'lodash'
+import * as _ from "lodash";
 
 // ✅ Better
-import { map, filter } from 'lodash-es'
+import { map, filter } from "lodash-es";
 ```
 
 ### 4. Unused Dependencies
+
 For each package.json:
+
 - Parse all TypeScript files for actual imports
 - Compare with dependencies listed
 - Report any that are declared but never imported
@@ -68,16 +76,20 @@ For each package.json:
 ### Package Size: 156KB (✅ within threshold)
 
 ### Heavy Dependencies:
+
 - fast-xml-parser (89KB) - required for TCX parsing
 - garmin-fitsdk (45KB) - required for FIT binary
 
 ### Import Optimizations:
+
 No wildcard imports found ✅
 
 ### Unused Dependencies:
+
 None found ✅
 
 ### Recommendations:
+
 1. Consider splitting large adapter files if they exceed 100 lines
 2. Evaluate if XSD validation can be optional/lazy-loaded
 ```

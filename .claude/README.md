@@ -20,21 +20,25 @@ This directory contains Claude Code configuration, skills, and hooks for the Kai
 ## Available Skills
 
 ### `/analyze-bundle`
+
 Analyzes bundle sizes across all packages and identifies optimization opportunities.
 
 **What it checks:**
+
 - Built output sizes (dist/ directories)
 - Heavy dependencies (>100KB)
 - Optimization opportunities
 - Package-specific thresholds
 
 **Usage:**
+
 ```bash
 /analyze-bundle                   # All packages
 /analyze-bundle packages/fit      # Specific package
 ```
 
 **When to run:**
+
 - After adding new dependencies
 - Before releases
 - When bundle size seems too large
@@ -43,15 +47,18 @@ Analyzes bundle sizes across all packages and identifies optimization opportunit
 ---
 
 ### `/optimize-imports`
+
 Refactors imports for better tree-shaking and smaller bundles.
 
 **What it does:**
+
 - Converts wildcard imports to named imports
 - Separates type imports
 - Removes unused imports
 - Consolidates duplicate imports
 
 **Usage:**
+
 ```bash
 /optimize-imports                           # All files
 /optimize-imports packages/fit              # Specific package
@@ -59,6 +66,7 @@ Refactors imports for better tree-shaking and smaller bundles.
 ```
 
 **When to run:**
+
 - After adding new imports
 - Before creating PRs
 - When you notice `import *` patterns
@@ -67,9 +75,11 @@ Refactors imports for better tree-shaking and smaller bundles.
 ---
 
 ### `/check-deps`
+
 Comprehensive dependency analysis across the monorepo.
 
 **What it checks:**
+
 - Unused dependencies
 - Duplicate dependencies across packages
 - Outdated packages with updates
@@ -77,6 +87,7 @@ Comprehensive dependency analysis across the monorepo.
 - Architecture boundary violations
 
 **Usage:**
+
 ```bash
 /check-deps                     # All packages
 /check-deps packages/core       # Specific package
@@ -84,6 +95,7 @@ Comprehensive dependency analysis across the monorepo.
 ```
 
 **When to run:**
+
 - After modifying package.json
 - Weekly maintenance
 - Before releases
@@ -96,6 +108,7 @@ Comprehensive dependency analysis across the monorepo.
 ### Automated Checks (via Hooks)
 
 The pre-commit hook automatically reminds you to run optimization checks when:
+
 - TypeScript files are modified
 - package.json is changed
 - Bundle-related files are updated
@@ -103,6 +116,7 @@ The pre-commit hook automatically reminds you to run optimization checks when:
 ### Manual Workflow
 
 **Before Creating a PR:**
+
 ```bash
 # 1. Run all optimization checks
 /check-deps
@@ -122,6 +136,7 @@ git commit -m "feat: your changes"
 ```
 
 **Weekly Maintenance:**
+
 ```bash
 # Run comprehensive analysis
 /check-deps
@@ -136,6 +151,7 @@ pnpm -r test
 ```
 
 **After Adding Dependencies:**
+
 ```bash
 # Immediately check impact
 /check-deps packages/your-package
@@ -168,6 +184,7 @@ pnpm -r test
 ### Import Optimization Rules
 
 Following CLAUDE.md conventions:
+
 - ✅ Use named imports: `import { map } from 'lodash-es'`
 - ✅ Separate type imports: `import type { KRD } from '@kaiord/core'`
 - ❌ Avoid wildcard imports: `import * as _ from 'lodash'`
@@ -178,12 +195,15 @@ Following CLAUDE.md conventions:
 ## Troubleshooting
 
 ### "Skill not found" error
+
 Ensure you're in the project root directory. Skills are project-scoped to this repository.
 
 ### Hooks not running
+
 Check that hooks are executable and follow TypeScript types from `@anthropic-ai/claude-code`.
 
 ### False positives in dependency analysis
+
 Some dependencies may be used only in specific environments (e.g., test-only deps). Review recommendations manually.
 
 ---

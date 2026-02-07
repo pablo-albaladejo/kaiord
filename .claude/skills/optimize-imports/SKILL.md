@@ -17,16 +17,19 @@ Automatically refactor imports across the codebase for better tree-shaking and s
 ## How to use
 
 Optimize all imports in the project:
+
 ```
 /optimize-imports
 ```
 
 Optimize a specific package:
+
 ```
 /optimize-imports packages/fit
 ```
 
 Optimize a single file:
+
 ```
 /optimize-imports packages/fit/src/adapters/krd-to-fit.converter.ts
 ```
@@ -36,60 +39,68 @@ Optimize a single file:
 ### 1. Wildcard to Named Imports
 
 **Before:**
-```typescript
-import * as z from 'zod'
 
-const schema = z.object({ name: z.string() })
+```typescript
+import * as z from "zod";
+
+const schema = z.object({ name: z.string() });
 ```
 
 **After:**
-```typescript
-import { object, string } from 'zod'
 
-const schema = object({ name: string() })
+```typescript
+import { object, string } from "zod";
+
+const schema = object({ name: string() });
 ```
 
 ### 2. Separate Type Imports
 
 **Before:**
+
 ```typescript
-import { KRD, toKRD, fromKRD } from '@kaiord/core'
+import { KRD, toKRD, fromKRD } from "@kaiord/core";
 ```
 
 **After:**
+
 ```typescript
-import type { KRD } from '@kaiord/core'
-import { toKRD, fromKRD } from '@kaiord/core'
+import type { KRD } from "@kaiord/core";
+import { toKRD, fromKRD } from "@kaiord/core";
 ```
 
 ### 3. Remove Unused Imports
 
 **Before:**
-```typescript
-import { map, filter, reduce, sortBy } from 'lodash-es'
 
-const result = map(data, fn)
+```typescript
+import { map, filter, reduce, sortBy } from "lodash-es";
+
+const result = map(data, fn);
 ```
 
 **After:**
-```typescript
-import { map } from 'lodash-es'
 
-const result = map(data, fn)
+```typescript
+import { map } from "lodash-es";
+
+const result = map(data, fn);
 ```
 
 ### 4. Consolidate Duplicate Imports
 
 **Before:**
+
 ```typescript
-import { fitToKRD } from './converters'
+import { fitToKRD } from "./converters";
 // ... 50 lines later
-import { krdToFit } from './converters'
+import { krdToFit } from "./converters";
 ```
 
 **After:**
+
 ```typescript
-import { fitToKRD, krdToFit } from './converters'
+import { fitToKRD, krdToFit } from "./converters";
 ```
 
 ## Process
@@ -108,6 +119,7 @@ import { fitToKRD, krdToFit } from './converters'
 ## Project-Specific Rules
 
 Following CLAUDE.md conventions:
+
 - Use `type` keyword for type-only imports
 - Maintain kebab-case file names
 - Respect the 100-line file limit (may need to split files)
@@ -121,6 +133,7 @@ Following CLAUDE.md conventions:
 ### Files Modified: 23
 
 ### Optimizations Applied:
+
 - ✅ 12 wildcard imports converted to named imports
 - ✅ 8 unused imports removed
 - ✅ 5 type imports separated
@@ -129,10 +142,12 @@ Following CLAUDE.md conventions:
 ### Estimated Bundle Reduction: ~15KB
 
 ### Files Changed:
+
 - packages/fit/src/adapters/krd-to-fit.converter.ts
 - packages/tcx/src/adapters/duration/duration.converter.ts
 - ...
 
 ### Next Steps:
+
 Run: pnpm -r test && pnpm lint
 ```
