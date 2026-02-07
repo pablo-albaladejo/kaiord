@@ -79,19 +79,28 @@ describe("File type routing", () => {
       expect(messages.coursePointMesgs).toHaveLength(1);
     });
 
-    it("should throw for workout type (not yet implemented)", () => {
+    it("should route to convertKRDToMessages for workout type", () => {
       // Arrange
       const krd: KRD = buildKRD.build({
         type: fileTypeSchema.enum.workout,
         metadata: buildKRDMetadata.build({
           fileType: "workout",
         }),
+        extensions: {
+          workout: {
+            name: "Test Workout",
+            sport: "cycling",
+            steps: [],
+          },
+        },
       });
 
-      // Act & Assert
-      expect(() => createFitMessages(krd, logger)).toThrow(
-        "Workout file type routing not yet implemented"
-      );
+      // Act
+      const messages = createFitMessages(krd, logger);
+
+      // Assert
+      expect(messages.fileIdMesgs).toBeDefined();
+      expect(messages.workoutMesgs).toBeDefined();
     });
 
     it("should default to workout when fileType not specified", () => {
@@ -101,12 +110,21 @@ describe("File type routing", () => {
         metadata: buildKRDMetadata.build({
           fileType: undefined,
         }),
+        extensions: {
+          workout: {
+            name: "Test Workout",
+            sport: "running",
+            steps: [],
+          },
+        },
       });
 
-      // Act & Assert
-      expect(() => createFitMessages(krd, logger)).toThrow(
-        "Workout file type routing not yet implemented"
-      );
+      // Act
+      const messages = createFitMessages(krd, logger);
+
+      // Assert - Should route to workout handler
+      expect(messages.fileIdMesgs).toBeDefined();
+      expect(messages.workoutMesgs).toBeDefined();
     });
 
     it("should throw for unsupported file type", () => {

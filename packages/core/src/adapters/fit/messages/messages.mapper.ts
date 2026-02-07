@@ -5,12 +5,12 @@ import {
 import type { KRD } from "../../../domain/schemas/krd";
 import type { Logger } from "../../../ports/logger";
 import { createCourseMessages } from "../course";
+import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
+import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import type { FitMessages } from "../shared/types";
-import {
-  createActivityMessages,
-  mapActivityFileToKRD,
-} from "./activity.mapper";
+import { createActivityMessages } from "./activity-messages.creator";
+import { mapActivityFileToKRD } from "./activity.mapper";
 import { mapWorkoutFileToKRD } from "./workout.mapper";
 
 /**
@@ -67,13 +67,34 @@ export const createFitMessages = (
   logger.debug("Creating FIT messages from KRD", { fileType });
 
   switch (fileType) {
-    case fileTypeSchema.enum.workout:
-      // Import convertKRDToMessages for workout files
-      // Note: This returns Array<unknown> but we need Record<string, unknown[]>
-      // For now, we'll handle workout files specially
-      throw new Error(
-        "Workout file type routing not yet implemented - use convertKRDToMessages directly"
-      );
+    case fileTypeSchema.enum.workout: {
+      // Workout files use array-based format from convertKRDToMessages
+      // Group messages by type for compatibility with record-based format
+      const messages = convertKRDToMessages(krd, logger);
+      const result: Record<string, unknown[]> = {};
+
+      for (const msg of messages) {
+        const message = msg as { mesgNum?: number };
+        if (message.mesgNum === FIT_MESSAGE_NUMBERS.FILE_ID) {
+          result[fitMessageKeySchema.enum.fileIdMesgs] = [
+            ...(result[fitMessageKeySchema.enum.fileIdMesgs] || []),
+            message,
+          ];
+        } else if (message.mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT) {
+          result[fitMessageKeySchema.enum.workoutMesgs] = [
+            ...(result[fitMessageKeySchema.enum.workoutMesgs] || []),
+            message,
+          ];
+        } else if (message.mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT_STEP) {
+          result[fitMessageKeySchema.enum.workoutStepMesgs] = [
+            ...(result[fitMessageKeySchema.enum.workoutStepMesgs] || []),
+            message,
+          ];
+        }
+      }
+
+      return result;
+    }
     case fileTypeSchema.enum.activity:
       return createActivityMessages(krd, logger);
     case fileTypeSchema.enum.course:
