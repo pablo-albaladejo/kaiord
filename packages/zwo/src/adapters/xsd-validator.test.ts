@@ -1,9 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
-import { createConsoleLogger } from "@kaiord/core";
+import { createMockLogger } from "@kaiord/core/test-utils";
 import { createXsdZwiftValidator } from "./xsd-validator";
 
 describe("createZwiftValidator", () => {
-  const logger = createConsoleLogger();
+  const logger = createMockLogger();
 
   describe("environment detection", () => {
     it(
@@ -255,7 +255,7 @@ describe("createZwiftValidator", () => {
 });
 
 describe("createXsdZwiftValidator", () => {
-  const logger = createConsoleLogger();
+  const logger = createMockLogger();
 
   describe("valid XML", () => {
     it("should validate well-formed Zwift XML", async () => {

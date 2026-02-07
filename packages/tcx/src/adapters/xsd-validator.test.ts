@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { createConsoleLogger } from "@kaiord/core";
+import { createMockLogger } from "@kaiord/core/test-utils";
 import { createXsdTcxValidator } from "./xsd-validator";
 
 describe("createXsdTcxValidator", () => {
-  const logger = createConsoleLogger();
+  const logger = createMockLogger();
 
   describe("valid XML", () => {
     it("should validate well-formed TCX XML", async () => {
