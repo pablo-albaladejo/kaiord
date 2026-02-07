@@ -1,3 +1,5 @@
+import type { Logger } from "@kaiord/core";
+
 /**
  * Validates FIT activity file message structure
  *
@@ -5,7 +7,8 @@
  * This validator ensures required messages are present.
  */
 export const validateActivityMessages = (
-  messages: Record<string, unknown[]>
+  messages: Record<string, unknown[]>,
+  logger?: Logger
 ): void => {
   const required = ["fileIdMesgs", "sessionMesgs"];
 
@@ -17,6 +20,6 @@ export const validateActivityMessages = (
 
   // Warn if missing recommended messages
   if (!messages.recordMesgs || messages.recordMesgs.length === 0) {
-    console.warn("Activity file has no record messages (GPS/sensor data)");
+    logger?.warn("Activity file has no record messages (GPS/sensor data)");
   }
 };

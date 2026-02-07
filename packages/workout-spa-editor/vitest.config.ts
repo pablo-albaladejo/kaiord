@@ -14,8 +14,9 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],
     css: true,
-    // Filter out act() warnings from Radix UI components (false positives in Node 20.x)
+    // Suppress unwanted console output during tests
     onConsoleLog(log: string, type: "stdout" | "stderr"): false | void {
+      // Suppress act() warnings from Radix UI (false positives in Node 20.x)
       if (
         type === "stderr" &&
         log.includes("not wrapped in act(...)") &&
@@ -27,6 +28,32 @@ export default defineConfig({
           log.includes("FocusScope") ||
           log.includes("TargetPicker"))
       ) {
+        return false;
+      }
+
+      // Suppress ALL adapter and use case logs during tests
+      // We want completely silent test execution
+      // These patterns catch logs from:
+      // - Conversion use cases (Converting X to Y, validation messages)
+      // - FIT adapter (parsing, validation, activity messages)
+      // - TCX adapter (parsing, structure validation)
+      // - ZWO adapter (parsing, browser environment detection)
+      const suppressPatterns = [
+        "Converting",
+        "Parsing",
+        "validation failed",
+        "validation successful",
+        "Browser environment detected",
+        "FIT parsing errors detected",
+        "Invalid TCX structure",
+        "Invalid Zwift structure",
+        "Converting metadata",
+        "Converting workout steps",
+        "conversion successful",
+        "Activity file has no record messages",
+      ];
+
+      if (suppressPatterns.some((pattern) => log.includes(pattern))) {
         return false; // Suppress this log
       }
     },
