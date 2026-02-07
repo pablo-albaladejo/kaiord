@@ -79,6 +79,18 @@ jobs:
           # Run changeset version
           pnpm exec changeset version
 
+          # Update lockfile after version bump
+          pnpm install --no-frozen-lockfile
+
+          # Build packages so TypeScript can resolve workspace dependencies
+          # This is required for the pre-push hook type check to pass
+          pnpm --filter @kaiord/core build
+          pnpm --filter @kaiord/fit build
+          pnpm --filter @kaiord/tcx build
+          pnpm --filter @kaiord/zwo build
+          pnpm --filter @kaiord/all build
+          pnpm --filter @kaiord/cli build
+
           # Get new versions
           CORE_VERSION_AFTER=$(node -p "require('./packages/core/package.json').version")
           CLI_VERSION_AFTER=$(node -p "require('./packages/cli/package.json').version")
@@ -98,18 +110,12 @@ jobs:
             echo "cli-changed=false" >> $GITHUB_OUTPUT
           fi
 
-          # Commit version changes
+          # Commit version changes (hooks will run but packages are now built)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .
           git commit -m "chore: version packages [skip ci]"
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
-
-      - name: Build packages
-        if: steps.changesets.outputs.has-changesets == 'true'
-        run: |
-          pnpm --filter @kaiord/core build
-          pnpm --filter @kaiord/cli build
 
       - name: Publish to npm
         if: steps.changesets.outputs.has-changesets == 'true'

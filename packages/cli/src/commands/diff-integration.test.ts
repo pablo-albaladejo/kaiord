@@ -14,10 +14,7 @@ const FIXTURES_PATH = resolve(__dirname, "../../../../test-fixtures");
 describe("diff command integration", () => {
   it("should show files are identical when comparing same file", async () => {
     // Arrange
-    const fixturePath = join(
-      FIXTURES_PATH,
-      "fit/WorkoutIndividualSteps.fit"
-    );
+    const fixturePath = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
 
     // Act
     const { stdout, exitCode } = await execa("node", [
@@ -56,10 +53,7 @@ describe("diff command integration", () => {
 
   it("should output JSON format when --json flag is used", async () => {
     // Arrange
-    const fixturePath = join(
-      FIXTURES_PATH,
-      "fit/WorkoutIndividualSteps.fit"
-    );
+    const fixturePath = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
 
     // Act
     const { stdout, exitCode } = await execa("node", [
@@ -83,10 +77,7 @@ describe("diff command integration", () => {
 
   it("should handle missing file error", async () => {
     // Arrange
-    const validFile = join(
-      FIXTURES_PATH,
-      "fit/WorkoutIndividualSteps.fit"
-    );
+    const validFile = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
     const missingFile = join(FIXTURES_PATH, "nonexistent.fit");
 
     // Act & Assert
@@ -104,10 +95,7 @@ describe("diff command integration", () => {
 
   it("should support format override flags", async () => {
     // Arrange
-    const fixturePath = join(
-      FIXTURES_PATH,
-      "fit/WorkoutIndividualSteps.fit"
-    );
+    const fixturePath = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
 
     // Act
     const { stdout, exitCode } = await execa("node", [
