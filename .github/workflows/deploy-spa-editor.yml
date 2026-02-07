@@ -6,6 +6,10 @@ on:
     paths:
       - "packages/workout-spa-editor/**"
       - "packages/core/**"
+      - "packages/all/**"
+      - "packages/fit/**"
+      - "packages/tcx/**"
+      - "packages/zwo/**"
       - ".github/workflows/deploy-spa-editor.yml"
   workflow_dispatch:
 
@@ -40,20 +44,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Build core package
-        run: pnpm --filter @kaiord/core build
+      - name: Build all packages (dependencies for SPA)
+        run: pnpm -r build
 
-      - name: Verify core build
+      - name: Verify packages build
         run: |
+          # Verify core package
           if [ ! -d "packages/core/dist" ]; then
             echo "❌ Core package build output not found"
             exit 1
           fi
-          if [ ! -f "packages/core/dist/index.d.ts" ]; then
-            echo "❌ Core package TypeScript declaration files not found"
-            exit 1
-          fi
-          echo "✅ Core package build verified"
+
+          # Verify adapter packages
+          for pkg in fit tcx zwo all; do
+            if [ ! -d "packages/$pkg/dist" ]; then
+              echo "❌ @kaiord/$pkg package build output not found"
+              exit 1
+            fi
+          done
+
+          echo "✅ All packages build verified"
 
       - name: Build SPA Editor
         env:
