@@ -1,7 +1,5 @@
-import { readFileSync } from "fs";
-import { join } from "path";
 import { describe, expect, it } from "vitest";
-import { createMockLogger } from "@kaiord/core/test-utils";
+import { createMockLogger, loadFitFixture } from "@kaiord/core/test-utils";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
@@ -11,11 +9,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -51,11 +45,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
     const poolLengths = [25, 50, 33.33];
 
     for (const poolLength of poolLengths) {
@@ -93,11 +83,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -132,11 +118,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -174,11 +156,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -217,11 +195,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Test multiple equipment values
     const equipmentValues = [
@@ -271,11 +245,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -314,11 +284,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
     const equipmentArray = [
       { krd: "swim_fins", fit: "swimFins" },
       { krd: "swim_kickboard", fit: "swimKickboard" },
@@ -369,11 +335,7 @@ describe("Round-trip: Swimming workouts - combined pool length and equipment", (
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
     const testPoolLength = 50;
     const testEquipment = "swim_fins";
 
