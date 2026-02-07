@@ -58,4 +58,3 @@ export const mapKrdCoursePointToFit = (
     ? Math.floor(new Date(point.timestamp).getTime() / 1000)
     : undefined,
 });
-
