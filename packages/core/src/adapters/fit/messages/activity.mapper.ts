@@ -6,6 +6,7 @@ import { extractFitExtensions } from "../extensions/extensions.extractor";
 import { convertFitToKrdLaps } from "../lap";
 import { convertFitToKrdRecords } from "../record";
 import { convertMetadataToFileId } from "../krd-to-fit/krd-to-fit-metadata.mapper";
+import { mapFitFileTypeToKrd } from "../metadata/file-type.mapper";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { convertFitToKrdSession } from "../session";
 import type { FitMessages } from "../shared/types";
@@ -44,6 +45,8 @@ export const mapActivityFileToKRD = (
     ? new Date(timeCreated * 1000).toISOString()
     : new Date().toISOString();
 
+  const fileType = mapFitFileTypeToKrd(fileId?.type);
+
   return {
     version: KRD_VERSION,
     type: fileTypeSchema.enum.activity,
@@ -51,6 +54,7 @@ export const mapActivityFileToKRD = (
       created,
       sport: session?.sport ?? "other",
       subSport: session?.subSport,
+      fileType,
     },
     extensions: {
       fit: fitExtensions,
