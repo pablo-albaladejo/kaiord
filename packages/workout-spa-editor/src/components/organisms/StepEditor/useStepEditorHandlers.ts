@@ -1,8 +1,8 @@
-import type { Duration, Target, WorkoutStep } from "../../../types/krd";
 import {
   createUpdatedStep,
   resetEditorState,
 } from "./step-editor-handlers-helpers";
+import type { Duration, Target, WorkoutStep } from "../../../types/krd";
 
 type UseStepEditorHandlersParams = {
   step: WorkoutStep | null;

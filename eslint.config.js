@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import tseslint from "typescript-eslint";
+import importPlugin from "eslint-plugin-import";
 
 export default tseslint.config(
   js.configs.recommended,
@@ -40,6 +41,7 @@ export default tseslint.config(
     },
     plugins: {
       "@typescript-eslint": tseslint.plugin,
+      import: importPlugin,
     },
     rules: {
       // Enforce maximum file length of 100 lines (excluding test files)
@@ -72,6 +74,25 @@ export default tseslint.config(
           fixStyle: "separate-type-imports",
         },
       ],
+      // Enforce import ordering
+      "import/order": [
+        "error",
+        {
+          groups: [
+            "builtin", // Node.js built-in modules
+            "external", // npm packages
+            "internal", // Internal modules
+            ["parent", "sibling"], // Relative imports
+            "index", // index imports
+            "type", // Type imports
+          ],
+          "newlines-between": "never",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+        },
+      ],
     },
   },
   {
@@ -82,6 +103,7 @@ export default tseslint.config(
     },
     plugins: {
       "@typescript-eslint": tseslint.plugin,
+      import: importPlugin,
     },
     rules: {
       // Disable max-lines for test files
@@ -90,6 +112,36 @@ export default tseslint.config(
       // Basic TypeScript rules
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+      // Enforce import ordering
+      "import/order": [
+        "error",
+        {
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            ["parent", "sibling"],
+            "index",
+            "type",
+          ],
+          "newlines-between": "never",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+        },
+      ],
+      // Prevent magic numbers (large timeouts should be constants)
+      "no-magic-numbers": [
+        "warn",
+        {
+          ignore: [0, 1, 2, -1, 100, 200, 400, 404, 500], // Common numbers
+          ignoreArrayIndexes: true,
+          ignoreDefaultValues: true,
+          enforceConst: true,
+          detectObjects: false,
+        },
+      ],
     },
   },
   {
@@ -107,6 +159,7 @@ export default tseslint.config(
     },
     plugins: {
       "@typescript-eslint": tseslint.plugin,
+      import: importPlugin,
     },
     rules: {
       // Enforce maximum file length of 100 lines (excluding test files)
@@ -137,6 +190,25 @@ export default tseslint.config(
         {
           prefer: "type-imports",
           fixStyle: "separate-type-imports",
+        },
+      ],
+      // Enforce import ordering
+      "import/order": [
+        "error",
+        {
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            ["parent", "sibling"],
+            "index",
+            "type",
+          ],
+          "newlines-between": "never",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
         },
       ],
     },

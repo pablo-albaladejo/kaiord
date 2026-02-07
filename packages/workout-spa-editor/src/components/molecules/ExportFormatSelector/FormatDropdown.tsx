@@ -1,8 +1,8 @@
-import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { type FormatOption } from "./format-options";
 import { FormatDropdownButton } from "./FormatDropdownButton";
 import { FormatOptionItem } from "./FormatOption";
 import { useKeyboardNavigation } from "./useKeyboardNavigation";
+import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 
 type FormatDropdownProps = {
   isOpen: boolean;

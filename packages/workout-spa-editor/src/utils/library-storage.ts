@@ -4,11 +4,11 @@
  * Handles persistence of workout library to localStorage with error handling.
  */
 
+import { workoutLibraryStateSchema } from "../types/workout-library";
 import type {
   WorkoutLibraryState,
   WorkoutTemplate,
 } from "../types/workout-library";
-import { workoutLibraryStateSchema } from "../types/workout-library";
 
 const STORAGE_KEY = "workout-spa-library";
 

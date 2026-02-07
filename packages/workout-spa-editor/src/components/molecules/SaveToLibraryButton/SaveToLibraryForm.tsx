@@ -4,11 +4,11 @@
  * Form fields for saving workout to library.
  */
 
-import type { DifficultyLevel } from "../../../types/workout-library";
 import { DifficultySelect } from "./components/DifficultySelect";
 import { NotesTextarea } from "./components/NotesTextarea";
 import { TagsInput } from "./components/TagsInput";
 import { WorkoutNameInput } from "./components/WorkoutNameInput";
+import type { DifficultyLevel } from "../../../types/workout-library";
 
 type SaveToLibraryFormProps = {
   name: string;

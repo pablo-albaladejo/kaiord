@@ -8,16 +8,16 @@
  * - Automatically add a default step (5 minutes, open target, active intensity)
  */
 
+import { isWorkoutStep } from "../../types/krd";
+import { generateBlockId } from "../../utils/id-generation";
+import { createUpdateWorkoutAction } from "../workout-actions";
 import type {
   KRD,
   RepetitionBlock,
   Workout,
   WorkoutStep,
 } from "../../types/krd";
-import { isWorkoutStep } from "../../types/krd";
-import { generateBlockId } from "../../utils/id-generation";
 import type { WorkoutState } from "../workout-actions";
-import { createUpdateWorkoutAction } from "../workout-actions";
 
 /**
  * Default step template for new empty repetition blocks

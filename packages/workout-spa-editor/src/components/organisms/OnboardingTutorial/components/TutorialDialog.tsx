@@ -6,10 +6,10 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import type { TutorialStep } from "../types";
-import { getPositionClasses } from "../utils/position-utils";
 import { TutorialActions } from "./TutorialActions";
 import { TutorialProgress } from "./TutorialProgress";
+import { getPositionClasses } from "../utils/position-utils";
+import type { TutorialStep } from "../types";
 
 type TutorialDialogProps = {
   step: TutorialStep;

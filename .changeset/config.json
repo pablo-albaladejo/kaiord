@@ -4,14 +4,7 @@
   "commit": false,
   "fixed": [],
   "linked": [
-    [
-      "@kaiord/core",
-      "@kaiord/fit",
-      "@kaiord/tcx",
-      "@kaiord/zwo",
-      "@kaiord/all",
-      "@kaiord/cli"
-    ]
+    ["@kaiord/core", "@kaiord/fit", "@kaiord/tcx", "@kaiord/zwo", "@kaiord/cli"]
   ],
   "access": "public",
   "baseBranch": "main",

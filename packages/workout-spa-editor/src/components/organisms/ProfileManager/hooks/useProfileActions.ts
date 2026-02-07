@@ -4,9 +4,9 @@
  * Combines all profile actions.
  */
 
-import type { Profile } from "../../../../types/profile";
 import { useProfileCRUD } from "./useProfileCRUD";
 import { useProfileSwitch } from "./useProfileSwitch";
+import type { Profile } from "../../../../types/profile";
 
 type ProfileFormData = {
   name: string;

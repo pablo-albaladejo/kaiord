@@ -1,7 +1,7 @@
-import type { KRD, Workout } from "../types/krd";
-import type { Sport } from "../types/krd-core";
 import { migrateRepetitionBlocks } from "../utils/workout-migration";
 import type { WorkoutState } from "./workout-state.types";
+import type { KRD, Workout } from "../types/krd";
+import type { Sport } from "../types/krd-core";
 
 export type { WorkoutState };
 

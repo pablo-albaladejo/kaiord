@@ -2,8 +2,8 @@
  * Library Store Persistence
  */
 
-import type { WorkoutTemplate } from "../../types/workout-library";
 import { saveLibrary } from "../../utils/library-storage";
+import type { WorkoutTemplate } from "../../types/workout-library";
 
 export function persistState(templates: Array<WorkoutTemplate>): void {
   const error = saveLibrary(templates);

@@ -4,12 +4,12 @@
  * Provides filtering and sorting controls for the workout library.
  */
 
-import { Button } from "../../../atoms/Button/Button";
 import { DifficultyFilter } from "./filters/DifficultyFilter";
 import { SearchInput } from "./filters/SearchInput";
 import { SortBySelect } from "./filters/SortBySelect";
 import { SortOrderSelect } from "./filters/SortOrderSelect";
 import { SportFilter } from "./filters/SportFilter";
+import { Button } from "../../../atoms/Button/Button";
 
 type Difficulty = "easy" | "medium" | "hard";
 type Sport = "cycling" | "running" | "swimming" | "generic";

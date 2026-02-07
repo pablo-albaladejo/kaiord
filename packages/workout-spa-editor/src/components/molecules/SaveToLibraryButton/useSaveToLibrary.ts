@@ -5,12 +5,12 @@
  */
 
 import { useState } from "react";
+import { calculateWorkoutDuration } from "./calculate-duration";
+import { generateThumbnail } from "./generate-thumbnail";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useLibraryStore } from "../../../store/library-store";
 import type { KRD } from "../../../types/krd";
 import type { DifficultyLevel } from "../../../types/workout-library";
-import { calculateWorkoutDuration } from "./calculate-duration";
-import { generateThumbnail } from "./generate-thumbnail";
 
 function extractSportFromWorkout(workout: KRD): string {
   const workoutData = workout.extensions?.workout;

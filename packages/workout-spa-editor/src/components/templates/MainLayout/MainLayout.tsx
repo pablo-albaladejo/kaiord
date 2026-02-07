@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
 import { LayoutHeader } from "./LayoutHeader";
+import type { ReactNode } from "react";
 
 type MainLayoutProps = {
   children: ReactNode;

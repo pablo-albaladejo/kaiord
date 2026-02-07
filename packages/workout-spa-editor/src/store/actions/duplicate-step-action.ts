@@ -4,15 +4,15 @@
  * Action for duplicating a workout step and inserting it after the original.
  */
 
+import { isWorkoutStep } from "../../types/krd";
+import { createUpdateWorkoutAction } from "../workout-actions";
 import type {
   KRD,
   RepetitionBlock,
   Workout,
   WorkoutStep,
 } from "../../types/krd";
-import { isWorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
-import { createUpdateWorkoutAction } from "../workout-actions";
 
 export const duplicateStepAction = (
   krd: KRD,

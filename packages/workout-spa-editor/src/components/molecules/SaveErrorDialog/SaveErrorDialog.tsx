@@ -9,8 +9,8 @@
  */
 
 import { AlertCircle, X } from "lucide-react";
-import type { ValidationError } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
+import type { ValidationError } from "../../../types/krd";
 
 export type SaveErrorDialogProps = {
   errors: Array<ValidationError>;

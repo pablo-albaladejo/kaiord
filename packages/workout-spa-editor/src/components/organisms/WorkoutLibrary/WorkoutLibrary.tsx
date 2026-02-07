@@ -9,10 +9,10 @@
  */
 
 import * as Dialog from "@radix-ui/react-dialog";
-import type { WorkoutTemplate } from "../../../types/workout-library";
 import { LibraryDialogContent } from "./components/LibraryDialogContent";
 import { DIALOG_CONTENT_CLASSES, DIALOG_OVERLAY_CLASSES } from "./constants";
 import { useWorkoutLibrary } from "./hooks/useWorkoutLibrary";
+import type { WorkoutTemplate } from "../../../types/workout-library";
 
 export type WorkoutLibraryProps = {
   open: boolean;

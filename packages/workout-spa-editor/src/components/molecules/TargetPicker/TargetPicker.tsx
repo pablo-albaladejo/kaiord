@@ -1,9 +1,9 @@
-import { useProfileStore } from "../../../store/profile-store";
-import type { TargetPickerProps } from "./TargetPicker.types";
 import { TargetPickerFields } from "./TargetPickerFields";
 import { useTargetPickerProps } from "./use-target-picker-props";
 import { useTargetPickerHandlers } from "./useTargetPickerHandlers";
 import { useTargetPickerState } from "./useTargetPickerState";
+import { useProfileStore } from "../../../store/profile-store";
+import type { TargetPickerProps } from "./TargetPicker.types";
 
 export const TargetPicker = ({
   value,

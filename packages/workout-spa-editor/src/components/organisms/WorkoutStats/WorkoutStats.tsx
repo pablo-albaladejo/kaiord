@@ -8,9 +8,9 @@
  */
 
 import React, { useMemo } from "react";
-import type { Workout } from "../../../types/krd";
-import { calculateWorkoutStats } from "../../../utils/workout-stats";
 import { StatsContent } from "./StatsContent";
+import { calculateWorkoutStats } from "../../../utils/workout-stats";
+import type { Workout } from "../../../types/krd";
 
 // ============================================
 // Types

@@ -4,10 +4,20 @@
  * Internal utilities for exporting workout files to different formats.
  */
 
-import type { KRD } from "@kaiord/core";
-import { createAllProviders } from "@kaiord/all";
-import type { ExportProgressCallback } from "./export-workout";
+import { createDefaultProviders } from "@kaiord/core";
+import { createFitProviders } from "@kaiord/fit";
+import { createTcxProviders } from "@kaiord/tcx";
+import { createZwoProviders } from "@kaiord/zwo";
 import { ExportError } from "./export-workout";
+import type { ExportProgressCallback } from "./export-workout";
+import type { KRD } from "@kaiord/core";
+
+// Create providers once for all operations
+const providers = createDefaultProviders({
+  fit: createFitProviders(),
+  tcx: createTcxProviders(),
+  zwo: createZwoProviders(),
+});
 
 export const exportKrdFile = async (
   krd: KRD,
@@ -35,8 +45,6 @@ export const exportFitFile = async (
   krd: KRD,
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
-  const providers = createAllProviders();
-
   onProgress?.(50);
 
   const buffer = await providers.convertKrdToFit!({ krd });
@@ -50,8 +58,6 @@ export const exportTcxFile = async (
   krd: KRD,
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
-  const providers = createAllProviders();
-
   onProgress?.(50);
 
   const tcxString = await providers.convertKrdToTcx!({ krd });
@@ -66,8 +72,6 @@ export const exportZwoFile = async (
   krd: KRD,
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
-  const providers = createAllProviders();
-
   onProgress?.(50);
 
   const zwoString = await providers.convertKrdToZwift!({ krd });

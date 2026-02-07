@@ -1,9 +1,9 @@
-import type { Duration } from "../../../types/krd";
 import {
   validateDistanceDuration,
   validateNumericInput,
   validateTimeDuration,
 } from "./validation-helpers";
+import type { Duration } from "../../../types/krd";
 
 export type ValidationResult = {
   isValid: boolean;

@@ -1,8 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { HTMLAttributes } from "react";
-import type { WorkoutStep } from "../../../types/krd";
 import { StepCard } from "../../molecules/StepCard/StepCard";
+import type { WorkoutStep } from "../../../types/krd";
+import type { HTMLAttributes } from "react";
 
 // Component-specific props
 type SortableStepCardOwnProps = {

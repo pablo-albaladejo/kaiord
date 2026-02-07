@@ -4,13 +4,13 @@
  * Editor for workout metadata (name, sport, sub-sport).
  */
 
-import type { KRD } from "../../../types/krd";
-import { Button } from "../../atoms/Button/Button";
-import { Input } from "../../atoms/Input/Input";
 import { SportSelect } from "./components/SportSelect";
 import { SubSportSelect } from "./components/SubSportSelect";
 import { useMetadataForm } from "./hooks/useMetadataForm";
 import { buildUpdatedKrd } from "./utils/krd-builder";
+import { Button } from "../../atoms/Button/Button";
+import { Input } from "../../atoms/Input/Input";
+import type { KRD } from "../../../types/krd";
 
 export type WorkoutMetadataEditorProps = {
   readonly krd: KRD;

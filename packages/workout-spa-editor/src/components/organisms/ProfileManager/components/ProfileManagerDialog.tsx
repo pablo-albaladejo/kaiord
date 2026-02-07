@@ -1,11 +1,11 @@
-import type { Profile } from "../../../../types/profile";
 import { DeleteConfirmDialog } from "../DeleteConfirmDialog";
 import { ImportExportActions } from "../ImportExportActions";
 import { ProfileForm } from "../ProfileForm";
-import type { ProfileFormData } from "../types";
 import { DialogHeader } from "./DialogHeader";
 import { ProfileListSection } from "./ProfileListSection";
 import { ProfileNotifications } from "./ProfileNotifications";
+import type { Profile } from "../../../../types/profile";
+import type { ProfileFormData } from "../types";
 
 type ProfileManagerDialogProps = {
   profiles: Profile[];

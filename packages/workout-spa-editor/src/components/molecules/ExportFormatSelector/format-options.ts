@@ -1,5 +1,5 @@
-import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getFileExtension } from "../../../utils/file-format-metadata";
+import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 
 export type FormatOption = {
   value: WorkoutFileFormat;

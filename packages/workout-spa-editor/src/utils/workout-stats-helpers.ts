@@ -4,13 +4,13 @@
  * Helper functions for calculating step-level statistics.
  */
 
-import type { RepetitionBlock, WorkoutStep } from "../types/krd";
-import type { WorkoutStats } from "./workout-stats";
 import {
   calculateStepDistance,
   calculateStepDuration,
   isOpenDuration,
 } from "./workout-stats-duration";
+import type { WorkoutStats } from "./workout-stats";
+import type { RepetitionBlock, WorkoutStep } from "../types/krd";
 
 /**
  * Calculate statistics for a workout step

@@ -4,8 +4,8 @@
  * Dropdown for selecting advanced duration type.
  */
 
-import type { AdvancedDurationType } from "./duration-type-options";
 import { DURATION_TYPE_OPTIONS } from "./duration-type-options";
+import type { AdvancedDurationType } from "./duration-type-options";
 
 type DurationTypeSelectProps = {
   value: AdvancedDurationType;

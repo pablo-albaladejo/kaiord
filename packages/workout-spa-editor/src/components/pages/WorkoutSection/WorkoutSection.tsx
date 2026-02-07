@@ -1,10 +1,10 @@
-import type { KRD, Workout } from "../../../types/krd";
-import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
-import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
 import { useWorkoutSectionState } from "./useWorkoutSectionState";
 import { WorkoutHeader } from "./WorkoutHeader";
 import { WorkoutSectionEditor } from "./WorkoutSectionEditor";
 import { WorkoutStepsList } from "./WorkoutStepsList";
+import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
+import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
+import type { KRD, Workout } from "../../../types/krd";
 
 export type WorkoutSectionProps = {
   workout: Workout;

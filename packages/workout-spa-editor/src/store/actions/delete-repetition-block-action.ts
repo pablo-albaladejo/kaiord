@@ -11,11 +11,11 @@
  * - Update workout statistics after deletion
  */
 
-import type { KRD, Workout } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
 import { findBlockById } from "../utils/block-utils";
-import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import type { KRD, Workout } from "../../types/krd";
+import type { WorkoutState } from "../workout-actions";
 
 /**
  * Deletes a repetition block and all its contained steps.

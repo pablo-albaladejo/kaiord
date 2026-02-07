@@ -9,8 +9,8 @@ import {
 } from "@dnd-kit/core";
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useState } from "react";
-import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { isWorkoutStep } from "../../../types/krd";
+import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 
 /**
  * Generates a globally unique ID for a workout item

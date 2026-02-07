@@ -1,9 +1,9 @@
-import type { RefObject } from "react";
-import type { KRD, ValidationError } from "../../../types/krd";
 import {
   createErrorHandler,
   createFileChangeHandler,
 } from "./file-upload-handlers";
+import type { KRD, ValidationError } from "../../../types/krd";
+import type { RefObject } from "react";
 
 type ErrorState = {
   title: string;

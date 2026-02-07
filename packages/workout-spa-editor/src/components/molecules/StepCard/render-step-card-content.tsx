@@ -1,9 +1,9 @@
 import { DragHandle } from "./DragHandle";
-import type { StepCardProps } from "./StepCard.types";
 import { StepCardActions } from "./StepCardActions";
 import { StepCardFooter } from "./StepCardFooter";
 import { StepDetails } from "./StepDetails";
 import { StepHeader } from "./StepHeader";
+import type { StepCardProps } from "./StepCard.types";
 
 type RenderStepCardContentProps = {
   step: StepCardProps["step"];

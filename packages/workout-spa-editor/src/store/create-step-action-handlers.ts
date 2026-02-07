@@ -1,5 +1,5 @@
-import type { WorkoutState } from "./workout-actions";
 import { createStepActions } from "./workout-store-step-actions";
+import type { WorkoutState } from "./workout-actions";
 
 export const createStepActionHandlers = (state: WorkoutState) => {
   const stepActions = createStepActions(state);

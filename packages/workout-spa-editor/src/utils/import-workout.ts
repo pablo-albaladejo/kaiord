@@ -5,8 +5,6 @@
  * and converting them to the canonical KRD format.
  */
 
-import type { KRD } from "@kaiord/core";
-import type { WorkoutFileFormat } from "./file-format-detector";
 import { detectFormat } from "./file-format-detector";
 import { transformError } from "./import-workout-errors";
 import {
@@ -15,6 +13,8 @@ import {
   importTcxFile,
   importZwoFile,
 } from "./import-workout-formats";
+import type { WorkoutFileFormat } from "./file-format-detector";
+import type { KRD } from "@kaiord/core";
 
 export class ImportError extends Error {
   public readonly format: WorkoutFileFormat | null;

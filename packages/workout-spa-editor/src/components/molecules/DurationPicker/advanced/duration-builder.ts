@@ -4,8 +4,8 @@
  * Functions to build Duration objects from picker values.
  */
 
-import type { Duration } from "../../../../types/krd";
 import type { AdvancedDurationType } from "./duration-type-options";
+import type { Duration } from "../../../../types/krd";
 
 const buildSimpleDuration = (
   type: AdvancedDurationType,

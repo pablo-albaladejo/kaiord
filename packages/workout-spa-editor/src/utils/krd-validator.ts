@@ -1,8 +1,8 @@
 /** KRD Validator - Validates KRD structure with detailed error messages */
 
-import type { KRD } from "@kaiord/core";
-import { ValidationError } from "../types/errors";
 import { validateMetadata, validateWorkout } from "./krd-validator-helpers";
+import { ValidationError } from "../types/errors";
+import type { KRD } from "@kaiord/core";
 
 type FieldError = { field: string; message: string };
 

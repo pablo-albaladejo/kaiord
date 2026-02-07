@@ -1,6 +1,6 @@
-import type { KRD, ValidationError } from "../../../types/krd";
 import { createParseError, parseFile } from "./file-parser";
 import { validateFileSize } from "./file-upload-constants";
+import type { KRD, ValidationError } from "../../../types/krd";
 
 type ErrorState = {
   title: string;

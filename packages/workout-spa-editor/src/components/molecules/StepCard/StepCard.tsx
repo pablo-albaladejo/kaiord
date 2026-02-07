@@ -2,9 +2,9 @@ import { forwardRef } from "react";
 import { SelectionIndicator } from "../SelectionIndicator";
 import { getStepLabel } from "./get-step-label";
 import { renderStepCardContent } from "./render-step-card-content";
-import type { DragHandleProps, StepCardProps } from "./StepCard.types";
 import { getStepCardClasses } from "./use-step-card-classes";
 import { useStepCardHandlers } from "./use-step-card-handlers";
+import type { DragHandleProps, StepCardProps } from "./StepCard.types";
 
 export type { DragHandleProps, StepCardProps };
 
