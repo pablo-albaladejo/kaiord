@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import type { Target } from "../../../types/krd";
 import { validateTargetValue } from "./validation";
+import type { Target } from "../../../types/krd";
 
 export const useValueChange = (
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open",

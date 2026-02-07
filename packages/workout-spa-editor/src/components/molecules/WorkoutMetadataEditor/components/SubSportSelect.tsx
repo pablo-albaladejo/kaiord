@@ -4,8 +4,8 @@
  * Sub-sport selection dropdown.
  */
 
-import type { Sport, SubSport } from "../../../../types/krd";
 import { SUB_SPORTS } from "../constants";
+import type { Sport, SubSport } from "../../../../types/krd";
 
 type SubSportSelectProps = {
   sport: Sport;

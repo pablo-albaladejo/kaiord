@@ -4,10 +4,10 @@
  * Content section of the workout preview dialog.
  */
 
-import type { WorkoutTemplate } from "../../../../types/workout-library";
 import { Badge } from "../../../atoms/Badge/Badge";
 import { Button } from "../../../atoms/Button/Button";
 import { formatDuration } from "../utils/card-helpers";
+import type { WorkoutTemplate } from "../../../../types/workout-library";
 
 type PreviewDialogContentProps = {
   template: WorkoutTemplate;

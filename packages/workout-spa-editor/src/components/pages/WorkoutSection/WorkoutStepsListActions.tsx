@@ -1,7 +1,7 @@
 import { Plus, Repeat } from "lucide-react";
+import { MultiSelectionHint, SingleSelectionHint } from "./SelectionHints";
 import { Button } from "../../atoms/Button/Button";
 import { PasteButton } from "../../molecules/PasteButton";
-import { MultiSelectionHint, SingleSelectionHint } from "./SelectionHints";
 
 type WorkoutStepsListActionsProps = {
   readonly hasMultipleSelection: boolean;

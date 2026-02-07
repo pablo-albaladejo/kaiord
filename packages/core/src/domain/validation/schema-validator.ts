@@ -1,5 +1,5 @@
-import type { Logger } from "../../ports/logger";
 import { krdSchema } from "../schemas/krd";
+import type { Logger } from "../../ports/logger";
 
 export type ValidationError = {
   field: string;

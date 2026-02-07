@@ -1,5 +1,5 @@
-import type { Sport } from "../../../types/krd-core";
 import { Input } from "../../atoms/Input/Input";
+import type { Sport } from "../../../types/krd-core";
 
 type CreateWorkoutFormProps = {
   name: string;

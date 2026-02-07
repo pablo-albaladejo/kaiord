@@ -1,15 +1,15 @@
 import { useCallback } from "react";
 import {
+  createUpdatedKrd,
+  createUpdatedWorkout,
+} from "./workout-section-handlers-helpers";
+import {
   useSelectStep,
   useSelectedStepId,
   useSetEditing,
   useUpdateWorkout,
 } from "../../../store/workout-store-selectors";
 import type { KRD, Workout, WorkoutStep } from "../../../types/krd";
-import {
-  createUpdatedKrd,
-  createUpdatedWorkout,
-} from "./workout-section-handlers-helpers";
 
 export const useWorkoutSectionHandlers = (
   workout: Workout,

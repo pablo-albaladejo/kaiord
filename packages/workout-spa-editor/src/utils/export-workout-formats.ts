@@ -4,13 +4,13 @@
  * Internal utilities for exporting workout files to different formats.
  */
 
-import type { KRD } from "@kaiord/core";
 import { createDefaultProviders } from "@kaiord/core";
 import { createFitProviders } from "@kaiord/fit";
 import { createTcxProviders } from "@kaiord/tcx";
 import { createZwoProviders } from "@kaiord/zwo";
-import type { ExportProgressCallback } from "./export-workout";
 import { ExportError } from "./export-workout";
+import type { ExportProgressCallback } from "./export-workout";
+import type { KRD } from "@kaiord/core";
 
 // Create providers once for all operations
 const providers = createDefaultProviders({

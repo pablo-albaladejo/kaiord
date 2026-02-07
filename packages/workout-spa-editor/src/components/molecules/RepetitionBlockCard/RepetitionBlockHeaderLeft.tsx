@@ -1,9 +1,9 @@
 import { ChevronDown, ChevronRight, GripVertical, Repeat } from "lucide-react";
-import type { RepetitionBlock } from "../../../types/krd";
+import { RepetitionCountEditor } from "./RepetitionCountEditor";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Icon } from "../../atoms/Icon/Icon";
+import type { RepetitionBlock } from "../../../types/krd";
 import type { DragHandleProps } from "../StepCard/StepCard";
-import { RepetitionCountEditor } from "./RepetitionCountEditor";
 
 type RepetitionBlockHeaderLeftProps = {
   block: RepetitionBlock;

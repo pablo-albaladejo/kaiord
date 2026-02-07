@@ -4,14 +4,14 @@
  * Internal utilities for importing different workout file formats.
  */
 
-import type { KRD } from "@kaiord/core";
 import { createDefaultProviders } from "@kaiord/core";
 import { createFitProviders } from "@kaiord/fit";
 import { createTcxProviders } from "@kaiord/tcx";
 import { createZwoProviders } from "@kaiord/zwo";
-import type { ImportProgressCallback } from "./import-workout";
 import { parseJSON } from "./json-parser";
 import { validateKRD } from "./krd-validator";
+import type { ImportProgressCallback } from "./import-workout";
+import type { KRD } from "@kaiord/core";
 
 // Create providers once for all operations
 const providers = createDefaultProviders({

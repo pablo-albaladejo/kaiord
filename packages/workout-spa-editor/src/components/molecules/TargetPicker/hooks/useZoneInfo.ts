@@ -4,13 +4,13 @@
  * Calculates zone information for power and heart rate targets.
  */
 
-import type { Profile } from "../../../../types/profile";
 import {
   calculateHeartRateFromZone,
   calculatePowerFromZone,
   getHeartRateZoneName,
   getPowerZoneName,
 } from "../helpers";
+import type { Profile } from "../../../../types/profile";
 
 export const useZoneInfo = (
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open",

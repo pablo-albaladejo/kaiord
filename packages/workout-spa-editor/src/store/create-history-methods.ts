@@ -1,10 +1,10 @@
-import type { StoreApi } from "zustand";
 import {
   createClearWorkoutAction,
   createRedoAction,
   createUndoAction,
 } from "./workout-actions";
 import type { WorkoutStore } from "./workout-store-types";
+import type { StoreApi } from "zustand";
 
 export const createHistoryMethods = (
   set: StoreApi<WorkoutStore>["setState"],

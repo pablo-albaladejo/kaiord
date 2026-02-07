@@ -5,15 +5,15 @@
  * from the canonical KRD format.
  */
 
-import type { KRD } from "@kaiord/core";
 import {
   exportFitFile,
   exportKrdFile,
   exportTcxFile,
   exportZwoFile,
 } from "./export-workout-formats";
-import type { WorkoutFileFormat } from "./file-format-detector";
 import { getMimeType } from "./file-format-detector";
+import type { WorkoutFileFormat } from "./file-format-detector";
+import type { KRD } from "@kaiord/core";
 
 export class ExportError extends Error {
   public readonly format: WorkoutFileFormat;

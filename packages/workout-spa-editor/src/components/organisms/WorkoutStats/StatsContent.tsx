@@ -5,10 +5,10 @@
  */
 
 import React from "react";
-import type { WorkoutStats } from "../../../utils/workout-stats";
 import { formatDistance, formatDuration } from "./format-helpers";
 import { StatRow } from "./StatRow";
 import { StatValue } from "./StatValue";
+import type { WorkoutStats } from "../../../utils/workout-stats";
 
 export type StatsContentProps = {
   stats: WorkoutStats;

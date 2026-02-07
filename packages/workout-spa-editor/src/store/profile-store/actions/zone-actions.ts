@@ -4,10 +4,10 @@
  * Actions for updating power and heart rate zones.
  */
 
-import type { StateCreator } from "zustand";
 import { updateProfileZones } from "../helpers/profile-updater";
 import { persistState } from "../persistence";
 import type { ProfileStore } from "../types";
+import type { StateCreator } from "zustand";
 
 type ZoneActions = Pick<
   ProfileStore,

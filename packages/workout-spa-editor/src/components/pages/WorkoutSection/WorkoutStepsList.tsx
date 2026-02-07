@@ -1,6 +1,6 @@
-import type { Workout } from "../../../types/krd";
-import { WorkoutList } from "../../organisms/WorkoutList/WorkoutList";
 import { WorkoutStepsListActions } from "./WorkoutStepsListActions";
+import { WorkoutList } from "../../organisms/WorkoutList/WorkoutList";
+import type { Workout } from "../../../types/krd";
 
 type WorkoutStepsListProps = {
   readonly workout: Workout;

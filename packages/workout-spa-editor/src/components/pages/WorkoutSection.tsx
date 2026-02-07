@@ -1,5 +1,5 @@
-import type { Workout } from "../../types/krd";
 import { WorkoutList } from "../organisms/WorkoutList/WorkoutList";
+import type { Workout } from "../../types/krd";
 
 export type WorkoutSectionProps = {
   workout: Workout;

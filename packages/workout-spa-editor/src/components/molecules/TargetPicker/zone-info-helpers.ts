@@ -4,13 +4,13 @@
  * Utilities for displaying zone information
  */
 
-import type { Profile } from "../../../types/profile";
 import {
   calculateHeartRateFromZone,
   calculatePowerFromZone,
   getHeartRateZoneName,
   getPowerZoneName,
 } from "./helpers";
+import type { Profile } from "../../../types/profile";
 
 export const getZoneInfo = (
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open",

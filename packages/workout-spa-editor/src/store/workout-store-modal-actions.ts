@@ -5,8 +5,8 @@
  * Requirements: 6.1
  */
 
-import type { StateCreator } from "zustand";
 import type { ModalConfig, WorkoutStore } from "./workout-store-types";
+import type { StateCreator } from "zustand";
 
 export type ModalActions = {
   showConfirmationModal: (config: ModalConfig) => void;

@@ -1,8 +1,8 @@
-import type { WorkoutStep } from "../../../types/krd";
 import { StepEditorContent } from "./StepEditorContent";
 import { StepEditorWrapper } from "./StepEditorWrapper";
 import { useStepEditorHandlers } from "./useStepEditorHandlers";
 import { useStepEditorState } from "./useStepEditorState";
+import type { WorkoutStep } from "../../../types/krd";
 
 export type StepEditorProps = {
   step: WorkoutStep | null;

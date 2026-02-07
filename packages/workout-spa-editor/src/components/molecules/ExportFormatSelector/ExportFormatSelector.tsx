@@ -8,12 +8,12 @@
  */
 
 import { useState } from "react";
+import { validateWorkoutForExport } from "./format-helpers";
+import { formatOptions } from "./format-options";
+import { FormatDropdown } from "./FormatDropdown";
+import { FormatWarnings } from "./FormatWarnings";
 import type { KRD, ValidationError } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
-import { FormatDropdown } from "./FormatDropdown";
-import { formatOptions } from "./format-options";
-import { validateWorkoutForExport } from "./format-helpers";
-import { FormatWarnings } from "./FormatWarnings";
 
 export type ExportFormatSelectorProps = {
   currentFormat: WorkoutFileFormat;

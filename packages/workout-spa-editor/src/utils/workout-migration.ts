@@ -4,9 +4,9 @@
  * Functions for migrating workout data structures to support new features.
  */
 
-import type { Workout } from "../types/krd";
-import { isRepetitionBlock } from "../types/krd-guards";
 import { generateBlockId } from "./id-generation";
+import { isRepetitionBlock } from "../types/krd-guards";
+import type { Workout } from "../types/krd";
 
 /**
  * Migrates repetition blocks in a workout to ensure all blocks have unique IDs.

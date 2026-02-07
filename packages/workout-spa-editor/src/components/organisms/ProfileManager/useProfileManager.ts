@@ -5,10 +5,10 @@
  */
 
 import { useState } from "react";
-import { useProfileStore } from "../../../store/profile-store";
-import type { Profile } from "../../../types/profile";
 import { useProfileActions } from "./hooks/useProfileActions";
 import { useProfileImportExport } from "./hooks/useProfileImportExport";
+import { useProfileStore } from "../../../store/profile-store";
+import type { Profile } from "../../../types/profile";
 
 type ProfileFormData = {
   name: string;

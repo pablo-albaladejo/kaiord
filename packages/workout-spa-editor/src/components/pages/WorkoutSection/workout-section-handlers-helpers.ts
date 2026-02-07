@@ -1,6 +1,6 @@
-import type { KRD, Workout, WorkoutStep } from "../../../types/krd";
 import { isRepetitionBlock } from "../../../types/krd";
 import { parseStepId } from "../../../utils/step-id-parser";
+import type { KRD, Workout, WorkoutStep } from "../../../types/krd";
 
 export function createUpdatedWorkout(
   workout: Workout,

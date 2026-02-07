@@ -2,8 +2,8 @@
  * Utility to recalculate step indices in a workout
  */
 
-import type { RepetitionBlock, WorkoutStep } from "../../types/krd";
 import { isRepetitionBlock, isWorkoutStep } from "../../types/krd";
+import type { RepetitionBlock, WorkoutStep } from "../../types/krd";
 
 /**
  * Recalculate step indices for all steps in the workout

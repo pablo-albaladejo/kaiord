@@ -1,6 +1,6 @@
-import { detectFormat } from "../../../utils/file-format-detector";
 import { FormatBadge } from "./FormatBadge";
 import { useConversionTimeEstimate } from "./use-conversion-time-estimate";
+import { detectFormat } from "../../../utils/file-format-detector";
 
 type LoadingStatusProps = {
   fileName: string;

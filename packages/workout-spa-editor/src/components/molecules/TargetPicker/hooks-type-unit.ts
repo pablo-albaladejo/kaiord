@@ -1,6 +1,6 @@
 import { useCallback } from "react";
-import type { Target } from "../../../types/krd";
 import { getDefaultUnit, resetFieldValues } from "./hooks-type-unit-helpers";
+import type { Target } from "../../../types/krd";
 
 export const useTypeChange = (
   onChange: (target: Target | null) => void,

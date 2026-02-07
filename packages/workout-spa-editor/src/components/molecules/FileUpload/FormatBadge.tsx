@@ -1,5 +1,5 @@
-import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getFormatName } from "../../../utils/file-format-metadata";
+import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 
 type FormatBadgeProps = {
   format: WorkoutFileFormat;

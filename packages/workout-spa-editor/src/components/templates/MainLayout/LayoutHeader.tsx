@@ -1,12 +1,12 @@
 import { useState } from "react";
+import { HeaderLogo } from "./components/HeaderLogo";
+import { HeaderNav } from "./components/HeaderNav";
+import { HelpDialog } from "./components/HelpDialog";
 import { useLibraryStore } from "../../../store/library-store";
 import { useProfileStore } from "../../../store/profile-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 import { ProfileManager } from "../../organisms/ProfileManager/ProfileManager";
 import { WorkoutLibrary } from "../../organisms/WorkoutLibrary/WorkoutLibrary";
-import { HeaderLogo } from "./components/HeaderLogo";
-import { HeaderNav } from "./components/HeaderNav";
-import { HelpDialog } from "./components/HelpDialog";
 
 type LayoutHeaderProps = {
   onReplayTutorial?: () => void;

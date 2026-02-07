@@ -4,8 +4,8 @@
  * Helper functions for extracting values from duration objects.
  */
 
-import type { Duration } from "../../../../types/krd";
 import type { AdvancedDurationType } from "./duration-type-options";
+import type { Duration } from "../../../../types/krd";
 
 export const getDurationTypeFromValue = (
   value: Duration | null

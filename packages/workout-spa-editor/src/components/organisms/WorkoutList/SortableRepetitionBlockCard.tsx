@@ -1,9 +1,9 @@
 /* eslint-disable max-lines, max-lines-per-function */
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
 import { parseStepId } from "../../../utils/step-id-parser";
 import { RepetitionBlockCard } from "../../molecules/RepetitionBlockCard/RepetitionBlockCard";
+import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
 
 type SortableRepetitionBlockCardProps = {
   id: string;

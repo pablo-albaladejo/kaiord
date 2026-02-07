@@ -5,6 +5,7 @@
  * Requirement 3: Update step indices and reorder workout structure
  */
 
+import { createUpdateWorkoutAction } from "../workout-actions";
 import type {
   KRD,
   RepetitionBlock,
@@ -12,7 +13,6 @@ import type {
   WorkoutStep,
 } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
-import { createUpdateWorkoutAction } from "../workout-actions";
 
 /**
  * Validates indices for step reordering

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import type { DurationPickerProps } from "./DurationPicker.types";
 import { DurationPickerFields } from "./DurationPickerFields";
 import {
   getDurationTypeFromValue,
@@ -8,6 +7,7 @@ import {
   getValuePlaceholder,
 } from "./helpers";
 import { useTypeChange, useValueChange } from "./hooks";
+import type { DurationPickerProps } from "./DurationPicker.types";
 
 export const DurationPicker = ({
   value,
