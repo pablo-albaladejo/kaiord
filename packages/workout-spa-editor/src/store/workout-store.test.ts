@@ -51,13 +51,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [],
@@ -77,13 +77,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [],
           },
@@ -104,13 +104,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "swimming",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "swimming",
             steps: [],
           },
@@ -133,13 +133,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const initialKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Initial Workout",
             sport: "running",
             steps: [],
@@ -150,7 +150,7 @@ describe("useWorkoutStore", () => {
       const updatedKrd: KRD = {
         ...initialKrd,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Updated Workout",
             sport: "running",
             steps: [],
@@ -167,7 +167,11 @@ describe("useWorkoutStore", () => {
       // Assert
       expect(state.currentWorkout).toEqual(updatedKrd);
       expect(
-        (state.currentWorkout?.extensions?.workout as { name?: string })?.name
+        (
+          state.currentWorkout?.extensions?.structured_workout as {
+            name?: string;
+          }
+        )?.name
       ).toBe("Updated Workout");
     });
 
@@ -175,13 +179,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [],
           },
@@ -205,13 +209,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "swimming",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "swimming",
             steps: [],
           },
@@ -298,13 +302,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [],
           },
@@ -342,13 +346,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [],
@@ -370,13 +374,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const initialKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Initial",
             sport: "running",
             steps: [],
@@ -387,7 +391,7 @@ describe("useWorkoutStore", () => {
       const updatedKrd: KRD = {
         ...initialKrd,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Updated",
             sport: "running",
             steps: [],
@@ -412,13 +416,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const krd1: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Version 1",
             sport: "running",
             steps: [],
@@ -429,7 +433,7 @@ describe("useWorkoutStore", () => {
       const krd2: KRD = {
         ...krd1,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Version 2",
             sport: "running",
             steps: [],
@@ -453,13 +457,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const krd1: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Version 1",
             sport: "cycling",
             steps: [],
@@ -470,7 +474,7 @@ describe("useWorkoutStore", () => {
       const krd2: KRD = {
         ...krd1,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Version 2",
             sport: "cycling",
             steps: [],
@@ -495,13 +499,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "swimming",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "swimming",
             steps: [],
           },
@@ -523,13 +527,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const krd1: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Version 1",
             sport: "running",
             steps: [],
@@ -540,7 +544,7 @@ describe("useWorkoutStore", () => {
       const krd2: KRD = {
         ...krd1,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Version 2",
             sport: "running",
             steps: [],
@@ -564,13 +568,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const krd1: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Version 1",
             sport: "running",
             steps: [],
@@ -581,7 +585,7 @@ describe("useWorkoutStore", () => {
       const krd2: KRD = {
         ...krd1,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Version 2",
             sport: "running",
             steps: [],
@@ -592,7 +596,7 @@ describe("useWorkoutStore", () => {
       const krd3: KRD = {
         ...krd1,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Version 3",
             sport: "running",
             steps: [],
@@ -619,13 +623,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const baseKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Initial",
             sport: "running",
             steps: [],
@@ -640,7 +644,7 @@ describe("useWorkoutStore", () => {
         const updatedKrd: KRD = {
           ...baseKrd,
           extensions: {
-            workout: {
+            structured_workout: {
               name: `Version ${i}`,
               sport: "running",
               steps: [],
@@ -656,11 +660,18 @@ describe("useWorkoutStore", () => {
       expect(state.workoutHistory).toHaveLength(50);
       expect(state.historyIndex).toBe(49);
       expect(
-        (state.workoutHistory[0].extensions?.workout as { name?: string })?.name
+        (
+          state.workoutHistory[0].extensions?.structured_workout as {
+            name?: string;
+          }
+        )?.name
       ).toBe("Version 11");
       expect(
-        (state.workoutHistory[49].extensions?.workout as { name?: string })
-          ?.name
+        (
+          state.workoutHistory[49].extensions?.structured_workout as {
+            name?: string;
+          }
+        )?.name
       ).toBe("Version 60");
     });
 
@@ -668,13 +679,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const krd1: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [],
           },
@@ -684,7 +695,7 @@ describe("useWorkoutStore", () => {
       const krd2: KRD = {
         ...krd1,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Updated",
             sport: "running",
             steps: [],
@@ -712,13 +723,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const krd1: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [],
           },
@@ -728,7 +739,7 @@ describe("useWorkoutStore", () => {
       const krd2: KRD = {
         ...krd1,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Updated",
             sport: "cycling",
             steps: [],
@@ -757,13 +768,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [],
           },
@@ -788,13 +799,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [
@@ -820,7 +831,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(2);
 
       const newStep = workout?.steps[1];
@@ -838,13 +849,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [],
           },
@@ -866,13 +877,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "swimming",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "swimming",
             steps: [],
           },
@@ -886,7 +897,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(1);
       expect(workout?.steps[0]).toMatchObject({
         stepIndex: 0,
@@ -914,13 +925,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [],
           },
@@ -934,7 +945,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       const newStep = workout?.steps[0];
 
       expect(newStep?.durationType).toBe("open");
@@ -949,13 +960,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [
@@ -998,7 +1009,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(2);
       expect(workout?.steps[0].stepIndex).toBe(0);
       expect(workout?.steps[1].stepIndex).toBe(1);
@@ -1008,13 +1019,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [
               {
@@ -1059,7 +1070,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(2);
       expect(workout?.steps[0].stepIndex).toBe(0);
       expect(workout?.steps[0].duration).toEqual({
@@ -1077,13 +1088,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "swimming",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "swimming",
             steps: [
               {
@@ -1137,13 +1148,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [
               {
@@ -1165,7 +1176,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(0);
     });
 
@@ -1173,13 +1184,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [
               {
@@ -1214,7 +1225,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(1);
       expect(workout?.steps[0].stepIndex).toBe(0);
       expect(workout?.steps[0].duration).toEqual({
@@ -1229,13 +1240,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [],
           },
@@ -1293,13 +1304,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -1344,13 +1355,13 @@ describe("useWorkoutStore", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -1389,7 +1400,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(2);
       expect(workout?.steps[0].stepIndex).toBe(0);
       expect(workout?.steps[1].stepIndex).toBe(1);

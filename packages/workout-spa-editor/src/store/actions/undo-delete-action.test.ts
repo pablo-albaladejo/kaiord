@@ -33,13 +33,13 @@ describe("undoDeleteAction", () => {
 
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "cycling",
           steps: [
@@ -85,7 +85,7 @@ describe("undoDeleteAction", () => {
 
     // Assert
     expect(result.currentWorkout).toBeDefined();
-    const workout = result.currentWorkout?.extensions?.workout;
+    const workout = result.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(3);
     expect(workout?.steps[1]).toEqual({
       ...deletedStep,
@@ -98,7 +98,7 @@ describe("undoDeleteAction", () => {
     // Arrange
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
@@ -128,13 +128,13 @@ describe("undoDeleteAction", () => {
     // Arrange
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "cycling",
           steps: [],
@@ -183,13 +183,13 @@ describe("undoDeleteAction", () => {
 
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "cycling",
           steps: [
@@ -224,7 +224,7 @@ describe("undoDeleteAction", () => {
     const result = undoDeleteAction(krd, timestamp, state);
 
     // Assert
-    const workout = result.currentWorkout?.extensions?.workout;
+    const workout = result.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
     expect(workout?.steps[0].stepIndex).toBe(0);
     expect(workout?.steps[1].stepIndex).toBe(1);

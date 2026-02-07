@@ -62,7 +62,7 @@ export const createUpdatedKrd = (krd: KRD, workout: Workout): KRD => ({
   ...krd,
   extensions: {
     ...krd.extensions,
-    workout,
+    structured_workout: workout,
   },
 });
 

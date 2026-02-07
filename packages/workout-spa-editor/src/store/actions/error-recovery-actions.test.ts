@@ -19,13 +19,13 @@ describe("createBackupAction", () => {
     // Arrange
     const mockWorkout: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "running",
           steps: [],
@@ -77,13 +77,13 @@ describe("restoreFromBackupAction", () => {
     // Arrange
     const mockBackup: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Backup Workout",
           sport: "running",
           steps: [],

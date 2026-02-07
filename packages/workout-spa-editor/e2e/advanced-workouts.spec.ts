@@ -28,13 +28,13 @@ test.describe("Advanced Workout Features", () => {
       const fileInput = page.locator('input[type="file"]');
       const swimmingWorkout = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "swimming",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Swimming Technique",
             sport: "swimming",
             poolLength: 25,
@@ -102,13 +102,13 @@ test.describe("Advanced Workout Features", () => {
 
       const swimmingWorkout = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "swimming",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Pool Swim",
             sport: "swimming",
             poolLength: 50,
@@ -159,13 +159,13 @@ test.describe("Advanced Workout Features", () => {
 
       const calorieWorkout = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Calorie Burn",
             sport: "cycling",
             steps: [
@@ -211,13 +211,13 @@ test.describe("Advanced Workout Features", () => {
 
       const powerThresholdWorkout = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Power Threshold Test",
             sport: "cycling",
             steps: [
@@ -260,13 +260,13 @@ test.describe("Advanced Workout Features", () => {
 
       const hrThresholdWorkout = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "HR Recovery Test",
             sport: "running",
             steps: [
@@ -309,13 +309,13 @@ test.describe("Advanced Workout Features", () => {
 
       const repeatWorkout = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Repeat Until Distance",
             sport: "cycling",
             steps: [
@@ -366,13 +366,13 @@ test.describe("Advanced Workout Features", () => {
 
       const workoutWithNotes = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Coached Workout",
             sport: "running",
             steps: [
@@ -436,13 +436,13 @@ test.describe("Advanced Workout Features", () => {
 
       const workoutWithoutNotes = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Simple Workout",
             sport: "cycling",
             steps: [
@@ -487,13 +487,13 @@ test.describe("Advanced Workout Features", () => {
 
       const testWorkout = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Original Name",
             sport: "cycling",
             steps: [
@@ -560,13 +560,13 @@ test.describe("Advanced Workout Features", () => {
 
       const testWorkout = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Sport Change Test",
             sport: "cycling",
             steps: [
@@ -632,13 +632,13 @@ test.describe("Advanced Workout Features", () => {
 
       const testWorkout = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Cancel Test",
             sport: "running",
             steps: [
@@ -720,13 +720,13 @@ test.describe("Advanced Workout Features", () => {
 
       const largeWorkout = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: new Date().toISOString(),
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Large Workout",
             sport: "cycling",
             steps,

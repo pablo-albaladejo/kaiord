@@ -19,11 +19,11 @@ export const duplicateStepAction = (
   stepIndex: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.structured_workout) {
     return {};
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
 
   // Find the step to duplicate
   const stepToDuplicate = workout.steps.find(
@@ -66,7 +66,7 @@ export const duplicateStepAction = (
     ...krd,
     extensions: {
       ...krd.extensions,
-      workout: updatedWorkout,
+      structured_workout: updatedWorkout,
     },
   };
 

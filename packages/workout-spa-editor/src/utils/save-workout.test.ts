@@ -22,13 +22,13 @@ describe("save-workout", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "running",
             steps: [],
@@ -69,13 +69,13 @@ describe("save-workout", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [],
           },
@@ -111,13 +111,13 @@ describe("save-workout", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "My Awesome Workout! @#$%",
             sport: "running",
             steps: [],
@@ -154,13 +154,13 @@ describe("save-workout", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "swimming",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "swimming",
             steps: [],
           },
@@ -218,7 +218,7 @@ describe("save-workout", () => {
       // Arrange
       const invalidKrd = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         // Missing required metadata
       } as unknown as KRD;
 
@@ -237,13 +237,13 @@ describe("save-workout", () => {
       const longName = "a".repeat(100);
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: longName,
             sport: "cycling",
             steps: [],
@@ -322,7 +322,7 @@ describe("save-workout", () => {
       // Arrange
       const errors = [
         {
-          path: ["extensions", "workout", "steps", 0, "duration"],
+          path: ["extensions", "structured_workout", "steps", 0, "duration"],
           message: "Invalid duration",
         },
       ];
@@ -333,7 +333,7 @@ describe("save-workout", () => {
       // Assert
       expect(result).toHaveLength(1);
       expect(result[0]).toBe(
-        "extensions.workout.steps.0.duration: Invalid duration"
+        "extensions.structured_workout.steps.0.duration: Invalid duration"
       );
     });
   });

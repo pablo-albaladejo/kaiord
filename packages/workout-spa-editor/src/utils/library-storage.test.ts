@@ -24,13 +24,13 @@ describe("library-storage", () => {
           sport: "cycling",
           krd: {
             version: "1.0",
-            type: "workout",
+            type: "structured_workout",
             metadata: {
               created: "2025-01-15T10:30:00Z",
               sport: "cycling",
             },
             extensions: {
-              workout: {
+              structured_workout: {
                 name: "Test Workout",
                 sport: "cycling",
                 steps: [],
@@ -84,13 +84,13 @@ describe("library-storage", () => {
           sport: "cycling",
           krd: {
             version: "1.0",
-            type: "workout",
+            type: "structured_workout",
             metadata: {
               created: "2025-01-15T10:30:00Z",
               sport: "cycling",
             },
             extensions: {
-              workout: {
+              structured_workout: {
                 name: "Test Workout",
                 sport: "cycling",
                 steps: [],
@@ -128,13 +128,13 @@ describe("library-storage", () => {
           sport: "cycling",
           krd: {
             version: "1.0",
-            type: "workout",
+            type: "structured_workout",
             metadata: {
               created: "2025-01-15T10:30:00Z",
               sport: "cycling",
             },
             extensions: {
-              workout: {
+              structured_workout: {
                 name: "Test Workout",
                 sport: "cycling",
                 steps: [],
@@ -172,13 +172,13 @@ describe("library-storage", () => {
             sport: "cycling",
             krd: {
               version: "1.0",
-              type: "workout",
+              type: "structured_workout",
               metadata: {
                 created: "2025-01-15T10:30:00Z",
                 sport: "cycling",
               },
               extensions: {
-                workout: {
+                structured_workout: {
                   name: "Test Workout",
                   sport: "cycling",
                   steps: [],
@@ -291,13 +291,13 @@ describe("library-storage", () => {
             sport: "cycling",
             krd: {
               version: "1.0",
-              type: "workout",
+              type: "structured_workout",
               metadata: {
                 created: "2025-01-15T10:30:00Z",
                 sport: "cycling",
               },
               extensions: {
-                workout: {
+                structured_workout: {
                   name: "Test Workout",
                   sport: "cycling",
                   steps: [],
@@ -340,13 +340,13 @@ describe("library-storage", () => {
           sport: "cycling",
           krd: {
             version: "1.0",
-            type: "workout",
+            type: "structured_workout",
             metadata: {
               created: "2025-01-15T10:30:00Z",
               sport: "cycling",
             },
             extensions: {
-              workout: {
+              structured_workout: {
                 name: "Morning Ride",
                 sport: "cycling",
                 steps: [],
@@ -366,13 +366,13 @@ describe("library-storage", () => {
           sport: "running",
           krd: {
             version: "1.0",
-            type: "workout",
+            type: "structured_workout",
             metadata: {
               created: "2025-01-15T11:00:00Z",
               sport: "running",
             },
             extensions: {
-              workout: {
+              structured_workout: {
                 name: "Interval Training",
                 sport: "running",
                 steps: [],
@@ -411,13 +411,13 @@ describe("library-storage", () => {
           sport: "cycling",
           krd: {
             version: "1.0",
-            type: "workout",
+            type: "structured_workout",
             metadata: {
               created: "2025-01-15T10:30:00Z",
               sport: "cycling",
             },
             extensions: {
-              workout: {
+              structured_workout: {
                 name: "Workout 1",
                 sport: "cycling",
                 steps: [],
@@ -438,13 +438,13 @@ describe("library-storage", () => {
           sport: "running",
           krd: {
             version: "1.0",
-            type: "workout",
+            type: "structured_workout",
             metadata: {
               created: "2025-01-15T11:00:00Z",
               sport: "running",
             },
             extensions: {
-              workout: {
+              structured_workout: {
                 name: "Workout 2",
                 sport: "running",
                 steps: [],

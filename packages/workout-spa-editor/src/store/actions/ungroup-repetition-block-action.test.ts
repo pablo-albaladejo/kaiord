@@ -24,13 +24,13 @@ describe("ungroupRepetitionBlockAction", () => {
 
   const createMockKRD = (steps: Array<WorkoutStep | RepetitionBlock>): KRD => ({
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps,
@@ -70,7 +70,8 @@ describe("ungroupRepetitionBlockAction", () => {
 
       // Assert
       expect(result.currentWorkout).toBeDefined();
-      const updatedWorkout = result.currentWorkout?.extensions?.workout;
+      const updatedWorkout =
+        result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(3);
       expect(updatedWorkout?.steps[0]).toEqual({ ...step1, stepIndex: 0 });
       expect(updatedWorkout?.steps[1]).toEqual({ ...step2, stepIndex: 1 });
@@ -97,7 +98,8 @@ describe("ungroupRepetitionBlockAction", () => {
       const result = ungroupRepetitionBlockAction(krd, blockId, state);
 
       // Assert
-      const updatedWorkout = result.currentWorkout?.extensions?.workout;
+      const updatedWorkout =
+        result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(4);
       expect(updatedWorkout?.steps[0]).toMatchObject({ stepIndex: 0 });
       expect(updatedWorkout?.steps[1]).toMatchObject({ stepIndex: 1 });
@@ -144,7 +146,8 @@ describe("ungroupRepetitionBlockAction", () => {
       const result = ungroupRepetitionBlockAction(krd, blockId, state);
 
       // Assert
-      const updatedWorkout = result.currentWorkout?.extensions?.workout;
+      const updatedWorkout =
+        result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(2);
 
       const extractedStep1 = updatedWorkout?.steps[0] as WorkoutStep;
@@ -173,7 +176,7 @@ describe("ungroupRepetitionBlockAction", () => {
       // Arrange
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
@@ -232,7 +235,8 @@ describe("ungroupRepetitionBlockAction", () => {
       const result = ungroupRepetitionBlockAction(krd, blockId, state);
 
       // Assert
-      const updatedWorkout = result.currentWorkout?.extensions?.workout;
+      const updatedWorkout =
+        result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(1);
       expect(updatedWorkout?.steps[0]).toEqual({ ...step1, stepIndex: 0 });
     });
@@ -256,7 +260,8 @@ describe("ungroupRepetitionBlockAction", () => {
       const result = ungroupRepetitionBlockAction(krd, blockId, state);
 
       // Assert
-      const updatedWorkout = result.currentWorkout?.extensions?.workout;
+      const updatedWorkout =
+        result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(3);
       expect(updatedWorkout?.steps[0]).toMatchObject({ stepIndex: 0 });
       expect(updatedWorkout?.steps[1]).toMatchObject({ stepIndex: 1 });

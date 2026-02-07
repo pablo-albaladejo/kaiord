@@ -11,13 +11,13 @@ import { generateThumbnail } from "./generate-thumbnail";
 describe("generateThumbnail", () => {
   const mockKRD: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "cycling",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "cycling",
         steps: [],
@@ -66,7 +66,7 @@ describe("generateThumbnail", () => {
       const workout: KRD = {
         ...mockKRD,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Empty",
             sport: "cycling",
             steps: [],
@@ -99,7 +99,7 @@ describe("generateThumbnail", () => {
       const workout: KRD = {
         ...mockKRD,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test",
             sport: "cycling",
             steps: [step1, step2],
@@ -124,7 +124,7 @@ describe("generateThumbnail", () => {
       const workout: KRD = {
         ...mockKRD,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test",
             sport: "cycling",
             steps: [
@@ -154,7 +154,7 @@ describe("generateThumbnail", () => {
       const workout: KRD = {
         ...mockKRD,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test",
             sport: "running",
             steps: [step],
@@ -217,7 +217,7 @@ describe("generateThumbnail", () => {
       const workout: KRD = {
         ...mockKRD,
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test",
             sport: "cycling",
             steps: [warmup, active, cooldown, rest],

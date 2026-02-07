@@ -123,7 +123,9 @@ function App() {
   // Cleanup expired deleted steps
   useDeleteCleanup();
 
-  const workout = currentWorkout?.extensions?.workout as Workout | undefined;
+  const workout = currentWorkout?.extensions?.structured_workout as
+    | Workout
+    | undefined;
 
   // Helper function to get step index from selected step ID
   // Returns the current array position of the selected step

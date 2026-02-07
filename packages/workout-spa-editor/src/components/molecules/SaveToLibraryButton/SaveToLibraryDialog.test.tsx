@@ -25,13 +25,13 @@ vi.mock("./generate-thumbnail", () => ({
 describe("SaveToLibraryDialog", () => {
   const mockKRD: KRD = {
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "cycling",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "cycling",
         steps: [],

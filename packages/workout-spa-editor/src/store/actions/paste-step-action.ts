@@ -25,11 +25,11 @@ export const pasteStepAction = async (
   krd: KRD,
   insertIndex?: number
 ): Promise<PasteStepResult> => {
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.structured_workout) {
     return { success: false, message: "No workout found" };
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
 
   try {
     const clipboardResult = await readClipboard();

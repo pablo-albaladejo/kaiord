@@ -40,26 +40,32 @@ export const validateWorkout = (
     return;
   }
   const extensions = krd.extensions as Record<string, unknown>;
-  if (!extensions.workout) {
+  if (!extensions.structured_workout) {
     errors.push({
-      field: "extensions.workout",
+      field: "extensions.structured_workout",
       message: "Missing required field for workout type",
     });
     return;
   }
-  if (typeof extensions.workout !== "object" || extensions.workout === null) {
-    errors.push({ field: "extensions.workout", message: "Must be an object" });
+  if (
+    typeof extensions.structured_workout !== "object" ||
+    extensions.structured_workout === null
+  ) {
+    errors.push({
+      field: "extensions.structured_workout",
+      message: "Must be an object",
+    });
     return;
   }
-  const workout = extensions.workout as Record<string, unknown>;
+  const workout = extensions.structured_workout as Record<string, unknown>;
   if (!workout.sport)
     errors.push({
-      field: "extensions.workout.sport",
+      field: "extensions.structured_workout.sport",
       message: "Missing required field",
     });
   if (!Array.isArray(workout.steps))
     errors.push({
-      field: "extensions.workout.steps",
+      field: "extensions.structured_workout.steps",
       message: "Must be an array",
     });
 };

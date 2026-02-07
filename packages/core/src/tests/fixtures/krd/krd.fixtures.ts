@@ -10,7 +10,11 @@ import { buildKRDSession } from "./session.fixtures";
 export const buildKRD = new Factory<KRD>()
   .attr("version", () => "1.0")
   .attr("type", () =>
-    faker.helpers.arrayElement(["workout", "activity", "course"] as const)
+    faker.helpers.arrayElement([
+      "structured_workout",
+      "recorded_activity",
+      "course",
+    ] as const)
   )
   .attr("metadata", () => buildKRDMetadata.build())
   .attr("sessions", () => [buildKRDSession.build()])

@@ -27,13 +27,13 @@ describe("workout loading integration", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [
               {
@@ -62,7 +62,7 @@ describe("workout loading integration", () => {
 
       // Assert
       expect(state.currentWorkout).toBeDefined();
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(1);
 
       const block = workout?.steps[0] as RepetitionBlock;
@@ -75,13 +75,13 @@ describe("workout loading integration", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [
               {
@@ -124,7 +124,7 @@ describe("workout loading integration", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(2);
 
       const block1 = workout?.steps[0] as RepetitionBlock;
@@ -138,13 +138,13 @@ describe("workout loading integration", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [
               {
@@ -192,7 +192,7 @@ describe("workout loading integration", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(3);
 
       const block = workout?.steps[1] as RepetitionBlock;
@@ -207,13 +207,13 @@ describe("workout loading integration", () => {
       const existingId = "block-1234567890-abc123";
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [
               {
@@ -242,7 +242,7 @@ describe("workout loading integration", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       const block = workout?.steps[0] as RepetitionBlock;
       expect(block.id).toBe(existingId);
     });
@@ -253,13 +253,13 @@ describe("workout loading integration", () => {
       const existingId2 = "block-2222222222-bbb222";
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [
               {
@@ -304,7 +304,7 @@ describe("workout loading integration", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       const block1 = workout?.steps[0] as RepetitionBlock;
       const block2 = workout?.steps[1] as RepetitionBlock;
       expect(block1.id).toBe(existingId1);
@@ -316,13 +316,13 @@ describe("workout loading integration", () => {
       const existingId = "block-1234567890-abc123";
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [
               {
@@ -366,7 +366,7 @@ describe("workout loading integration", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       const block1 = workout?.steps[0] as RepetitionBlock;
       const block2 = workout?.steps[1] as RepetitionBlock;
       expect(block1.id).toBe(existingId);
@@ -380,13 +380,13 @@ describe("workout loading integration", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [
               {
@@ -444,7 +444,7 @@ describe("workout loading integration", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(3);
 
       // Verify all blocks have IDs
@@ -465,13 +465,13 @@ describe("workout loading integration", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "cycling",
             steps: [
               {
@@ -500,7 +500,8 @@ describe("workout loading integration", () => {
 
       // Assert
       expect(state.workoutHistory).toHaveLength(1);
-      const historyWorkout = state.workoutHistory[0].extensions?.workout;
+      const historyWorkout =
+        state.workoutHistory[0].extensions?.structured_workout;
       const historyBlock = historyWorkout?.steps[0] as RepetitionBlock;
       expect(historyBlock.id).toBeDefined();
       expect(typeof historyBlock.id).toBe("string");
@@ -510,13 +511,13 @@ describe("workout loading integration", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [],
           },
@@ -529,7 +530,7 @@ describe("workout loading integration", () => {
 
       // Assert
       expect(state.currentWorkout).toBeDefined();
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(0);
     });
 
@@ -537,13 +538,13 @@ describe("workout loading integration", () => {
       // Arrange
       const mockKrd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [
               {
@@ -577,7 +578,7 @@ describe("workout loading integration", () => {
 
       // Assert
       expect(state.currentWorkout).toBeDefined();
-      const workout = state.currentWorkout?.extensions?.workout;
+      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(2);
       // Individual steps don't need IDs, only repetition blocks
     });

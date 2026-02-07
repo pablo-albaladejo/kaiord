@@ -6,7 +6,7 @@ import type { Logger } from "@kaiord/core";
 import { buildWorkoutFile } from "./krd-to-zwift/workout-file-builder";
 
 const extractWorkoutData = (krd: KRD) => {
-  const workout = krd.extensions?.workout;
+  const workout = krd.extensions?.structured_workout;
   if (!workout || typeof workout !== "object") {
     throw createZwiftParsingError("KRD missing workout in extensions");
   }

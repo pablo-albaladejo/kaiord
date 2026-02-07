@@ -58,13 +58,13 @@ const buildTrainingCenterDatabase = (
 export const convertKRDToTcx = (krd: KRD, logger: Logger): unknown => {
   logger.debug("Converting KRD to TCX structure");
 
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.structured_workout) {
     throw createTcxParsingError(
       "KRD does not contain workout data in extensions"
     );
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
   const tcxWorkout = buildTcxWorkout(workout, logger);
   const trainingCenterDatabase = buildTrainingCenterDatabase(
     tcxWorkout,

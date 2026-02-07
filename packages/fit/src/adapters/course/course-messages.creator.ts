@@ -24,10 +24,6 @@ export const createCourseMessages = (
     | {
         course?: unknown;
         course_points?: KRDCoursePoint[];
-        activity?: {
-          records?: unknown[];
-          laps?: unknown[];
-        };
       }
     | undefined;
 
@@ -44,13 +40,13 @@ export const createCourseMessages = (
   }
 
   // Add record messages if present (route track)
-  if (extensions?.activity?.records) {
-    messages.recordMesgs = extensions.activity.records;
+  if (krd.records && krd.records.length > 0) {
+    messages.recordMesgs = krd.records;
   }
 
   // Add lap messages if present (course segments)
-  if (extensions?.activity?.laps) {
-    messages.lapMesgs = extensions.activity.laps;
+  if (krd.laps && krd.laps.length > 0) {
+    messages.lapMesgs = krd.laps;
   }
 
   logger.debug("Created course messages", {

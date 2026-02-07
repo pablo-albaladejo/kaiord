@@ -17,13 +17,13 @@ import { pasteStepAction } from "./paste-step-action";
 describe("Copy/Paste Integration", () => {
   const createMockKrd = (steps: Array<WorkoutStep | RepetitionBlock>): KRD => ({
     version: "1.0",
-    type: "workout",
+    type: "structured_workout",
     metadata: {
       created: "2025-01-15T10:30:00Z",
       sport: "running",
     },
     extensions: {
-      workout: {
+      structured_workout: {
         name: "Test Workout",
         sport: "running",
         steps,
@@ -79,12 +79,13 @@ describe("Copy/Paste Integration", () => {
       // Assert - Paste succeeded
       expect(pasteResult.success).toBe(true);
       expect(pasteResult.updatedKrd).toBeDefined();
-      expect(pasteResult.updatedKrd!.extensions!.workout!.steps).toHaveLength(
-        3
-      );
+      expect(
+        pasteResult.updatedKrd!.extensions!.structured_workout!.steps
+      ).toHaveLength(3);
 
       // Verify pasted step matches original
-      const steps = pasteResult.updatedKrd!.extensions!.workout!.steps;
+      const steps =
+        pasteResult.updatedKrd!.extensions!.structured_workout!.steps;
       const pastedStep = steps[2] as WorkoutStep;
       expect(pastedStep.durationType).toBe("time");
       expect(pastedStep.duration).toEqual({ type: "time", seconds: 300 });
@@ -146,13 +147,13 @@ describe("Copy/Paste Integration", () => {
       // Assert - Paste succeeded
       expect(pasteResult.success).toBe(true);
       expect(pasteResult.message).toBe("Repetition block pasted successfully");
-      expect(pasteResult.updatedKrd!.extensions!.workout!.steps).toHaveLength(
-        2
-      );
+      expect(
+        pasteResult.updatedKrd!.extensions!.structured_workout!.steps
+      ).toHaveLength(2);
 
       // Verify pasted block matches original
-      const pastedBlock = pasteResult.updatedKrd!.extensions!.workout!
-        .steps[1] as RepetitionBlock;
+      const pastedBlock = pasteResult.updatedKrd!.extensions!
+        .structured_workout!.steps[1] as RepetitionBlock;
       expect(pastedBlock.repeatCount).toBe(3);
       expect(pastedBlock.steps).toHaveLength(2);
     });
@@ -203,7 +204,8 @@ describe("Copy/Paste Integration", () => {
       const pasteResult = await pasteStepAction(krd, 1);
 
       // Assert - All step indices are sequential
-      const steps = pasteResult.updatedKrd!.extensions!.workout!.steps;
+      const steps =
+        pasteResult.updatedKrd!.extensions!.structured_workout!.steps;
       expect(steps).toHaveLength(4);
       expect((steps[0] as WorkoutStep).stepIndex).toBe(0);
       expect((steps[1] as WorkoutStep).stepIndex).toBe(1);
@@ -249,7 +251,9 @@ describe("Copy/Paste Integration", () => {
       const paste3 = await pasteStepAction(paste2.updatedKrd!);
 
       // Assert - All operations succeeded
-      expect(paste3.updatedKrd!.extensions!.workout!.steps).toHaveLength(4);
+      expect(
+        paste3.updatedKrd!.extensions!.structured_workout!.steps
+      ).toHaveLength(4);
       expect(mockWriteText).toHaveBeenCalledTimes(3);
       expect(mockReadText).toHaveBeenCalledTimes(3);
     });

@@ -115,8 +115,12 @@ export const compareWorkoutStructures = (
   stepName: string,
   toleranceChecker: ToleranceChecker
 ): void => {
-  const workout1 = original.extensions?.workout as Workout | undefined;
-  const workout2 = converted.extensions?.workout as Workout | undefined;
+  const workout1 = original.extensions?.structured_workout as
+    | Workout
+    | undefined;
+  const workout2 = converted.extensions?.structured_workout as
+    | Workout
+    | undefined;
 
   if (!workout1 || !workout2) {
     return; // Skip if no workout data

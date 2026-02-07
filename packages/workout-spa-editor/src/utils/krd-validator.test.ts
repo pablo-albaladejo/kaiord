@@ -12,13 +12,13 @@ describe("validateKRD", () => {
       // Arrange
       const data = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             sport: "running",
             steps: [],
           },
@@ -32,11 +32,11 @@ describe("validateKRD", () => {
       expect(result).toStrictEqual(data);
     });
 
-    it("should validate activity KRD", () => {
+    it("should validate recorded activity KRD", () => {
       // Arrange
       const data = {
         version: "1.0",
-        type: "activity",
+        type: "recorded_activity",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
@@ -55,7 +55,7 @@ describe("validateKRD", () => {
     it("should throw ValidationError when version is missing", () => {
       // Arrange
       const data = {
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
@@ -106,7 +106,7 @@ describe("validateKRD", () => {
       // Arrange
       const data = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
       };
 
       // Act & Assert
@@ -128,7 +128,7 @@ describe("validateKRD", () => {
       // Arrange
       const data = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           sport: "running",
         },
@@ -153,7 +153,7 @@ describe("validateKRD", () => {
       // Arrange
       const data = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
         },
@@ -174,11 +174,11 @@ describe("validateKRD", () => {
       }
     });
 
-    it("should throw ValidationError when extensions.workout is missing for workout type", () => {
+    it("should throw ValidationError when extensions.structured_workout is missing for workout type", () => {
       // Arrange
       const data = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
@@ -194,7 +194,7 @@ describe("validateKRD", () => {
         expect(error).toBeInstanceOf(ValidationError);
         if (error instanceof ValidationError) {
           expect(error.errors).toContainEqual({
-            field: "extensions.workout",
+            field: "extensions.structured_workout",
             message: "Missing required field for workout type",
           });
         }
@@ -224,7 +224,7 @@ describe("validateKRD", () => {
       // Arrange
       const data = {
         version: 1.0,
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "running",
@@ -276,7 +276,7 @@ describe("validateKRD", () => {
       // Arrange
       const data = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: "invalid",
       };
 

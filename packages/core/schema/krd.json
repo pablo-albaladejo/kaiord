@@ -15,8 +15,8 @@
         "type": {
           "type": "string",
           "enum": [
-            "workout",
-            "activity",
+            "structured_workout",
+            "recorded_activity",
             "course"
           ]
         },
@@ -41,14 +41,6 @@
             },
             "subSport": {
               "type": "string"
-            },
-            "fileType": {
-              "type": "string",
-              "enum": [
-                "workout",
-                "activity",
-                "course"
-              ]
             }
           },
           "required": [
@@ -423,16 +415,16 @@
               "eventType": {
                 "type": "string",
                 "enum": [
-                  "start",
-                  "stop",
-                  "pause",
-                  "resume",
-                  "lap",
-                  "marker",
-                  "timer",
-                  "workout_step",
-                  "session",
-                  "activity"
+                  "event_start",
+                  "event_stop",
+                  "event_pause",
+                  "event_resume",
+                  "event_lap",
+                  "event_marker",
+                  "event_timer",
+                  "event_workout_step_change",
+                  "event_session_start",
+                  "event_activity_start"
                 ]
               },
               "eventGroup": {

@@ -15,13 +15,13 @@ describe("deleteStepAction", () => {
       // Arrange
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -96,13 +96,13 @@ describe("deleteStepAction", () => {
 
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -164,13 +164,13 @@ describe("deleteStepAction", () => {
       // Arrange
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -213,13 +213,13 @@ describe("deleteStepAction", () => {
       // Arrange
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -261,13 +261,13 @@ describe("deleteStepAction", () => {
       // Arrange
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -314,13 +314,13 @@ describe("deleteStepAction", () => {
 
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -369,13 +369,13 @@ describe("deleteStepAction", () => {
       // Arrange
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -442,13 +442,13 @@ describe("deleteStepAction", () => {
       // Arrange
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -493,7 +493,7 @@ describe("deleteStepAction", () => {
       const result = deleteStepAction(krd, 1, state);
 
       // Assert
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(1);
       expect(workout?.steps[0].stepIndex).toBe(0);
     });
@@ -502,13 +502,13 @@ describe("deleteStepAction", () => {
       // Arrange
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",
         },
         extensions: {
-          workout: {
+          structured_workout: {
             name: "Test Workout",
             sport: "cycling",
             steps: [
@@ -563,7 +563,7 @@ describe("deleteStepAction", () => {
       const result = deleteStepAction(krd, 1, state);
 
       // Assert
-      const workout = result.currentWorkout?.extensions?.workout;
+      const workout = result.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(2);
       expect(workout?.steps[0].stepIndex).toBe(0);
       expect(workout?.steps[1].stepIndex).toBe(1);
@@ -573,7 +573,7 @@ describe("deleteStepAction", () => {
       // Arrange
       const krd: KRD = {
         version: "1.0",
-        type: "workout",
+        type: "structured_workout",
         metadata: {
           created: "2025-01-15T10:30:00Z",
           sport: "cycling",

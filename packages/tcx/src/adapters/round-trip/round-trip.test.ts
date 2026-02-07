@@ -24,7 +24,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const krd2 = await reader(convertedXml);
 
     // Assert - Compare workout structures
-    const workout1 = krd1.extensions?.workout as {
+    const workout1 = krd1.extensions?.structured_workout as {
       name?: string;
       sport: string;
       steps: Array<{
@@ -37,7 +37,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       }>;
     };
 
-    const workout2 = krd2.extensions?.workout as {
+    const workout2 = krd2.extensions?.structured_workout as {
       name?: string;
       sport: string;
       steps: Array<{
@@ -100,7 +100,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const krd2 = await reader(convertedXml);
 
     // Assert - Check pace targets with tolerance
-    const workout1 = krd1.extensions?.workout as {
+    const workout1 = krd1.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
         duration: { type: string; meters?: number };
@@ -111,7 +111,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       }>;
     };
 
-    const workout2 = krd2.extensions?.workout as {
+    const workout2 = krd2.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
         duration: { type: string; meters?: number };
@@ -176,7 +176,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const krd2 = await reader(convertedXml);
 
     // Assert - Check repetition blocks
-    const workout1 = krd1.extensions?.workout as {
+    const workout1 = krd1.extensions?.structured_workout as {
       steps: Array<
         | { stepIndex: number }
         | {
@@ -190,7 +190,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       >;
     };
 
-    const workout2 = krd2.extensions?.workout as {
+    const workout2 = krd2.extensions?.structured_workout as {
       steps: Array<
         | { stepIndex: number }
         | {
@@ -239,7 +239,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const krd2 = await reader(convertedXml);
 
     // Assert - Check all duration types
-    const workout1 = krd1.extensions?.workout as {
+    const workout1 = krd1.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
         duration: {
@@ -256,7 +256,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       }>;
     };
 
-    const workout2 = krd2.extensions?.workout as {
+    const workout2 = krd2.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
         duration: {
@@ -359,7 +359,7 @@ describe("Round-trip: KRD → TCX → KRD", () => {
 
     const originalKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2009-09-09T20:38:00.000Z",
         sport: "cycling",
@@ -368,7 +368,7 @@ describe("Round-trip: KRD → TCX → KRD", () => {
         serialNumber: "1234",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Advanced Duration Test",
           sport: "cycling",
           steps: [
@@ -403,7 +403,7 @@ describe("Round-trip: KRD → TCX → KRD", () => {
     const convertedKrd = await reader(tcxXml);
 
     // Assert - Advanced duration types should be preserved via kaiord extensions
-    const originalWorkout = originalKrd.extensions?.workout as {
+    const originalWorkout = originalKrd.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
         duration: {
@@ -415,7 +415,7 @@ describe("Round-trip: KRD → TCX → KRD", () => {
       }>;
     };
 
-    const convertedWorkout = convertedKrd.extensions?.workout as {
+    const convertedWorkout = convertedKrd.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
         duration: {
@@ -469,13 +469,13 @@ describe("Round-trip: KRD → TCX → KRD", () => {
 
     const originalKrd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           sport: "running",
           steps: [
@@ -523,7 +523,7 @@ describe("Round-trip: KRD → TCX → KRD", () => {
     expect(convertedKrd.type).toBe(originalKrd.type);
     expect(convertedKrd.metadata.sport).toBe(originalKrd.metadata.sport);
 
-    const originalWorkout = originalKrd.extensions?.workout as {
+    const originalWorkout = originalKrd.extensions?.structured_workout as {
       name?: string;
       sport: string;
       steps: Array<{
@@ -539,7 +539,7 @@ describe("Round-trip: KRD → TCX → KRD", () => {
       }>;
     };
 
-    const convertedWorkout = convertedKrd.extensions?.workout as {
+    const convertedWorkout = convertedKrd.extensions?.structured_workout as {
       name?: string;
       sport: string;
       steps: Array<{
@@ -626,13 +626,13 @@ describe("Round-trip: KRD → TCX → KRD", () => {
 
     const krd: KRD = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: "2025-01-15T10:30:00Z",
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Valid Test",
           sport: "running",
           steps: [

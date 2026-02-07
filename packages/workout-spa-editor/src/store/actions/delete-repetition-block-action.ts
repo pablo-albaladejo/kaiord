@@ -73,11 +73,11 @@ export const deleteRepetitionBlockAction = (
   blockId: string,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.workout) {
+  if (!krd.extensions?.structured_workout) {
     return {};
   }
 
-  const workout = krd.extensions.workout as Workout;
+  const workout = krd.extensions.structured_workout as Workout;
 
   // Find block by ID
   const blockInfo = findBlockById(workout, blockId);
@@ -102,7 +102,7 @@ export const deleteRepetitionBlockAction = (
     ...krd,
     extensions: {
       ...krd.extensions,
-      workout: { ...workout, steps: reindexedSteps },
+      structured_workout: { ...workout, steps: reindexedSteps },
     },
   };
 

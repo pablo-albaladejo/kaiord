@@ -218,7 +218,7 @@ describe("parseJSON", () => {
     it("should handle valid JSON with nested structures", () => {
       // Arrange
       const json = JSON.stringify({
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           steps: [
             { duration: 300, power: 200 },
@@ -236,7 +236,7 @@ describe("parseJSON", () => {
 
       // Assert
       expect(result).toStrictEqual({
-        workout: {
+        structured_workout: {
           name: "Test Workout",
           steps: [
             { duration: 300, power: 200 },

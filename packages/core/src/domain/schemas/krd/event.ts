@@ -11,7 +11,7 @@ import { z } from "zod";
  *
  * const event = krdEventSchema.parse({
  *   timestamp: '2025-01-15T10:30:00Z',
- *   eventType: 'lap',
+ *   eventType: 'event_lap',
  *   data: 1
  * });
  * ```
@@ -19,16 +19,16 @@ import { z } from "zod";
 export const krdEventSchema = z.object({
   timestamp: z.string().datetime(),
   eventType: z.enum([
-    "start",
-    "stop",
-    "pause",
-    "resume",
-    "lap",
-    "marker",
-    "timer",
-    "workout_step",
-    "session",
-    "activity",
+    "event_start",
+    "event_stop",
+    "event_pause",
+    "event_resume",
+    "event_lap",
+    "event_marker",
+    "event_timer",
+    "event_workout_step_change",
+    "event_session_start",
+    "event_activity_start",
   ]),
   eventGroup: z.number().int().optional(),
   data: z.number().int().optional(),

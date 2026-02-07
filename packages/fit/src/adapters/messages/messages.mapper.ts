@@ -15,7 +15,8 @@ import { mapWorkoutFileToKRD } from "./workout.mapper";
  */
 const detectFileType = (messages: FitMessages): FileType => {
   const workoutMsgs = messages[fitMessageKeySchema.enum.workoutMesgs];
-  if (workoutMsgs && workoutMsgs.length > 0) return fileTypeSchema.enum.workout;
+  if (workoutMsgs && workoutMsgs.length > 0)
+    return fileTypeSchema.enum.structured_workout;
 
   const sessionMsgs = messages[fitMessageKeySchema.enum.sessionMesgs];
   const recordMsgs = messages[fitMessageKeySchema.enum.recordMesgs];
@@ -23,10 +24,10 @@ const detectFileType = (messages: FitMessages): FileType => {
     (sessionMsgs && sessionMsgs.length > 0) ||
     (recordMsgs && recordMsgs.length > 0)
   ) {
-    return fileTypeSchema.enum.activity;
+    return fileTypeSchema.enum.recorded_activity;
   }
 
-  return fileTypeSchema.enum.workout;
+  return fileTypeSchema.enum.structured_workout;
 };
 
 export const mapMessagesToKRD = (
@@ -41,9 +42,9 @@ export const mapMessagesToKRD = (
   logger.debug("Detected file type", { fileType });
 
   switch (fileType) {
-    case fileTypeSchema.enum.activity:
+    case fileTypeSchema.enum.recorded_activity:
       return mapActivityFileToKRD(messages, logger);
-    case fileTypeSchema.enum.workout:
+    case fileTypeSchema.enum.structured_workout:
     default:
       return mapWorkoutFileToKRD(messages, logger);
   }
@@ -60,11 +61,11 @@ export const createFitMessages = (
   krd: KRD,
   logger: Logger
 ): Record<string, unknown[]> => {
-  const fileType = krd.metadata?.fileType ?? fileTypeSchema.enum.workout;
+  const fileType = krd.type;
   logger.debug("Creating FIT messages from KRD", { fileType });
 
   switch (fileType) {
-    case fileTypeSchema.enum.workout: {
+    case "structured_workout": {
       // Workout files use array-based format from convertKRDToMessages
       // Group messages by type for compatibility with record-based format
       const messages = convertKRDToMessages(krd, logger);
@@ -92,9 +93,9 @@ export const createFitMessages = (
 
       return result;
     }
-    case fileTypeSchema.enum.activity:
+    case "recorded_activity":
       return createActivityMessages(krd, logger);
-    case fileTypeSchema.enum.course:
+    case "course":
       return createCourseMessages(krd, logger);
     default:
       throw new Error(`Unsupported FIT file type: ${fileType}`);

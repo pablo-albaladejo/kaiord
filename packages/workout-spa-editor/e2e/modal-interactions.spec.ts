@@ -32,13 +32,13 @@ test.describe("Modal Interactions", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Modal Test",
           sport: "cycling",
           steps: [
@@ -106,13 +106,13 @@ test.describe("Modal Interactions", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Escape Test",
           sport: "running",
           steps: [
@@ -180,13 +180,13 @@ test.describe("Modal Interactions", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Backdrop Test",
           sport: "cycling",
           steps: [
@@ -251,13 +251,13 @@ test.describe("Modal Interactions", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Focus Trap Test",
           sport: "running",
           steps: [
@@ -336,13 +336,13 @@ test.describe("Modal Interactions", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Background Block Test",
           sport: "cycling",
           steps: [
@@ -452,13 +452,13 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "running",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Mobile Modal Test",
           sport: "running",
           steps: [
@@ -551,13 +551,13 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
-      type: "workout",
+      type: "structured_workout",
       metadata: {
         created: new Date().toISOString(),
         sport: "cycling",
       },
       extensions: {
-        workout: {
+        structured_workout: {
           name: "Tablet Modal Test",
           sport: "cycling",
           steps: [
