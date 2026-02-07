@@ -5,11 +5,22 @@ import { convertFitToKrdEvents } from "../event";
 import { extractFitExtensions } from "../extensions/extensions.extractor";
 import { convertFitToKrdLaps } from "../lap";
 import { convertFitToKrdRecords } from "../record";
+import { mapFitFileTypeToKrd } from "../metadata/file-type.mapper";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { convertFitToKrdSession } from "../session";
 import type { FitMessages } from "../shared/types";
 
 const KRD_VERSION = "1.0" as const;
+
+/**
+ * Converts FIT timeCreated to ISO string, handling Date objects and numbers
+ */
+const convertTimeCreated = (timeCreated: unknown): string => {
+  if (timeCreated instanceof Date) return timeCreated.toISOString();
+  if (typeof timeCreated === "number")
+    return new Date(timeCreated * 1000).toISOString();
+  return new Date().toISOString();
+};
 
 /**
  * Maps activity file to KRD format.
@@ -38,10 +49,8 @@ export const mapActivityFileToKRD = (
   const laps = convertFitToKrdLaps(lapMsgs);
   const fitExtensions = extractFitExtensions(messages, logger);
 
-  const timeCreated = fileId?.timeCreated as number | undefined;
-  const created = timeCreated
-    ? new Date(timeCreated * 1000).toISOString()
-    : new Date().toISOString();
+  const created = convertTimeCreated(fileId?.timeCreated);
+  const fileType = mapFitFileTypeToKrd(fileId?.type);
 
   return {
     version: KRD_VERSION,
@@ -50,6 +59,7 @@ export const mapActivityFileToKRD = (
       created,
       sport: session?.sport ?? "other",
       subSport: session?.subSport,
+      fileType,
     },
     extensions: {
       fit: fitExtensions,

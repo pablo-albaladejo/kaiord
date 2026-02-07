@@ -12,7 +12,8 @@
       "mcp__context7__*",
       "WebSearch",
       "WebFetch",
-      "mcp__ide__getDiagnostics"
+      "mcp__ide__getDiagnostics",
+      "Skill(test)"
     ],
     "deny": [
       "Bash(rm -rf /)",

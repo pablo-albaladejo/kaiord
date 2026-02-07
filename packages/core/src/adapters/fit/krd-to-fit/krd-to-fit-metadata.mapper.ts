@@ -1,5 +1,4 @@
 import { Profile } from "@garmin/fitsdk";
-import { fileTypeSchema } from "../../../domain/schemas/file-type";
 import type { KRD } from "../../../domain/schemas/krd";
 import type {
   RepetitionBlock,
@@ -7,6 +6,7 @@ import type {
   WorkoutStep,
 } from "../../../domain/schemas/workout";
 import type { Logger } from "../../../ports/logger";
+import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
 import { isRepetitionBlock } from "../shared/type-guards";
 import { mapSubSportToFit } from "../sub-sport/sub-sport.mapper";
 
@@ -50,8 +50,10 @@ export const convertMetadataToFileId = (
 ): Record<string, unknown> => {
   logger.debug("Converting metadata to file_id message");
 
+  const fileType = krd.metadata.fileType ?? "workout";
+
   const fileId: Record<string, unknown> = {
-    type: fileTypeSchema.enum.workout,
+    type: FIT_FILE_TYPE_TO_NUMBER[fileType] ?? FIT_FILE_TYPE_TO_NUMBER.workout,
     timeCreated: new Date(krd.metadata.created),
     manufacturer: mapManufacturer(krd.metadata.manufacturer, logger),
   };

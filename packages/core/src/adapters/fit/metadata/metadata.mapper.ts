@@ -2,6 +2,7 @@ import type { KRDMetadata } from "../../../domain/schemas/krd";
 import type { Logger } from "../../../ports/logger";
 import { mapSportType } from "../shared/type-guards";
 import type { FitFileId, FitWorkoutMessage } from "../shared/types";
+import { mapFitFileTypeToKrd } from "./file-type.mapper";
 
 export const mapMetadata = (
   fileId: FitFileId | undefined,
@@ -12,6 +13,7 @@ export const mapMetadata = (
 
   const sport = mapSportType(workoutMsg?.sport);
   const created = mapCreatedTimestamp(fileId);
+  const fileType = mapFitFileTypeToKrd(fileId?.type);
 
   return {
     created,
@@ -19,6 +21,7 @@ export const mapMetadata = (
     product: fileId?.garminProduct || fileId?.product?.toString(),
     serialNumber: fileId?.serialNumber?.toString(),
     sport,
+    fileType,
   };
 };
 

@@ -41,6 +41,14 @@
             },
             "subSport": {
               "type": "string"
+            },
+            "fileType": {
+              "type": "string",
+              "enum": [
+                "workout",
+                "activity",
+                "course"
+              ]
             }
           },
           "required": [
