@@ -1,8 +1,9 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { createToleranceChecker } from "@kaiord/core";
-import { createMockLogger } from "@kaiord/core/test-utils";
+import {
+  createMockLogger,
+  loadZwoFixture,
+} from "@kaiord/core/test-utils";
 import {
   createFastXmlZwiftReader,
   createFastXmlZwiftWriter,
@@ -21,11 +22,7 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
       const reader = createFastXmlZwiftReader(logger, validator);
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
-      const zwoPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutIndividualSteps.zwo"
-      );
-      const originalXml = readFileSync(zwoPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
 
       // Act - Zwift → KRD → Zwift → KRD
       const krd1 = await reader(originalXml);
@@ -109,11 +106,7 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
       const reader = createFastXmlZwiftReader(logger, validator);
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
-      const zwoPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutRepeatSteps.zwo"
-      );
-      const originalXml = readFileSync(zwoPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutRepeatSteps.zwo");
 
       // Act - Zwift → KRD → Zwift → KRD
       const krd1 = await reader(originalXml);

@@ -1,7 +1,8 @@
-import { readFileSync } from "fs";
-import { join } from "path";
 import { describe, expect, it } from "vitest";
-import { createMockLogger } from "@kaiord/core/test-utils";
+import {
+  createMockLogger,
+  loadFitFixture,
+} from "@kaiord/core/test-utils";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
@@ -11,11 +12,7 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -48,11 +45,7 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Test multiple subSport values
     const subSportValues = ["trail", "road", "track", "treadmill", "mountain"];
@@ -89,11 +82,7 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);

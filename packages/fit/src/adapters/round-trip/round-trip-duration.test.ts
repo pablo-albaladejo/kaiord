@@ -1,7 +1,8 @@
-import { readFileSync } from "fs";
-import { join } from "path";
 import { describe, expect, it } from "vitest";
-import { createMockLogger } from "@kaiord/core/test-utils";
+import {
+  createMockLogger,
+  loadFitFixture,
+} from "@kaiord/core/test-utils";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
@@ -11,11 +12,7 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -57,11 +54,7 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
     const calorieValues = [100, 250, 500, 1000];
 
     for (const calories of calorieValues) {
@@ -107,11 +100,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -153,11 +142,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -199,11 +184,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
     const powerValues = [150, 200, 250, 300, 350];
 
     for (const watts of powerValues) {
@@ -250,11 +231,7 @@ describe("Round-trip: Repeat step conditionals - calories", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -303,11 +280,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -354,11 +327,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);
@@ -405,11 +374,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
     const powerValues = [150, 200, 250, 300];
 
     for (const watts of powerValues) {
@@ -460,11 +425,7 @@ describe("Round-trip: Combined advanced duration types", () => {
     // Arrange
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
-    const fitPath = join(
-      __dirname,
-      "../../../tests/fixtures/fit-files/WorkoutIndividualSteps.fit"
-    );
-    const originalBuffer = readFileSync(fitPath);
+    const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
     // Act - FIT → KRD
     const krd = await reader(originalBuffer);

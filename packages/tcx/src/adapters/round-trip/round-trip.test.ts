@@ -1,9 +1,10 @@
-import { readFileSync } from "fs";
-import { join } from "path";
 import { describe, expect, it } from "vitest";
 import type { KRD } from "@kaiord/core";
 import { createToleranceChecker } from "@kaiord/core";
-import { createMockLogger } from "@kaiord/core/test-utils";
+import {
+  createMockLogger,
+  loadTcxFixture,
+} from "@kaiord/core/test-utils";
 import {
   createFastXmlTcxReader,
   createFastXmlTcxWriter,
@@ -18,11 +19,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
-    const tcxPath = join(
-      __dirname,
-      "../../../tests/fixtures/tcx-files/WorkoutHeartRateTargets.tcx"
-    );
-    const originalXml = readFileSync(tcxPath, "utf-8");
+    const originalXml = loadTcxFixture("WorkoutHeartRateTargets.tcx");
 
     // Act - TCX → KRD → TCX → KRD
     const krd1 = await reader(originalXml);
@@ -98,11 +95,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
-    const tcxPath = join(
-      __dirname,
-      "../../../tests/fixtures/tcx-files/WorkoutSpeedTargets.tcx"
-    );
-    const originalXml = readFileSync(tcxPath, "utf-8");
+    const originalXml = loadTcxFixture("WorkoutSpeedTargets.tcx");
 
     // Act - TCX → KRD → TCX → KRD
     const krd1 = await reader(originalXml);
@@ -178,11 +171,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const validator = createXsdTcxValidator(logger);
     const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
-    const tcxPath = join(
-      __dirname,
-      "../../../tests/fixtures/tcx-files/WorkoutRepeatBlocks.tcx"
-    );
-    const originalXml = readFileSync(tcxPath, "utf-8");
+    const originalXml = loadTcxFixture("WorkoutRepeatBlocks.tcx");
 
     // Act - TCX → KRD → TCX → KRD
     const krd1 = await reader(originalXml);
@@ -245,11 +234,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
-    const tcxPath = join(
-      __dirname,
-      "../../../tests/fixtures/tcx-files/WorkoutMixedDurations.tcx"
-    );
-    const originalXml = readFileSync(tcxPath, "utf-8");
+    const originalXml = loadTcxFixture("WorkoutMixedDurations.tcx");
 
     // Act - TCX → KRD → TCX → KRD
     const krd1 = await reader(originalXml);
