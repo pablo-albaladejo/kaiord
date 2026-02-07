@@ -100,9 +100,7 @@ describe("CreateRepetitionBlockDialog", () => {
         <CreateRepetitionBlockDialog
           isOpen={true}
           onConfirm={handleConfirm}
-          isOpen={true}
           onCancel={vi.fn()}
-          isOpen={true}
         />
       );
 
@@ -127,9 +125,7 @@ describe("CreateRepetitionBlockDialog", () => {
         <CreateRepetitionBlockDialog
           isOpen={true}
           onConfirm={handleConfirm}
-          isOpen={true}
           onCancel={vi.fn()}
-          isOpen={true}
         />
       );
 
@@ -154,9 +150,7 @@ describe("CreateRepetitionBlockDialog", () => {
         <CreateRepetitionBlockDialog
           isOpen={true}
           onConfirm={handleConfirm}
-          isOpen={true}
           onCancel={vi.fn()}
-          isOpen={true}
         />
       );
 
@@ -181,9 +175,7 @@ describe("CreateRepetitionBlockDialog", () => {
         <CreateRepetitionBlockDialog
           isOpen={true}
           onConfirm={handleConfirm}
-          isOpen={true}
           onCancel={vi.fn()}
-          isOpen={true}
         />
       );
 
@@ -208,9 +200,7 @@ describe("CreateRepetitionBlockDialog", () => {
         <CreateRepetitionBlockDialog
           isOpen={true}
           onConfirm={handleConfirm}
-          isOpen={true}
           onCancel={vi.fn()}
-          isOpen={true}
         />
       );
 
@@ -232,9 +222,7 @@ describe("CreateRepetitionBlockDialog", () => {
         <CreateRepetitionBlockDialog
           isOpen={true}
           onConfirm={handleConfirm}
-          isOpen={true}
           onCancel={vi.fn()}
-          isOpen={true}
         />
       );
 
@@ -256,9 +244,7 @@ describe("CreateRepetitionBlockDialog", () => {
         <CreateRepetitionBlockDialog
           isOpen={true}
           onConfirm={handleConfirm}
-          isOpen={true}
           onCancel={vi.fn()}
-          isOpen={true}
         />
       );
 
@@ -293,9 +279,7 @@ describe("CreateRepetitionBlockDialog", () => {
         <CreateRepetitionBlockDialog
           isOpen={true}
           onConfirm={handleConfirm}
-          isOpen={true}
           onCancel={vi.fn()}
-          isOpen={true}
         />
       );
 
@@ -319,7 +303,6 @@ describe("CreateRepetitionBlockDialog", () => {
           isOpen={true}
           onConfirm={vi.fn()}
           onCancel={handleCancel}
-          isOpen={true}
         />
       );
 
@@ -339,7 +322,6 @@ describe("CreateRepetitionBlockDialog", () => {
           isOpen={true}
           onConfirm={vi.fn()}
           onCancel={handleCancel}
-          isOpen={true}
         />
       );
 
@@ -381,9 +363,7 @@ describe("CreateRepetitionBlockDialog", () => {
         <CreateRepetitionBlockDialog
           isOpen={true}
           onConfirm={handleConfirm}
-          isOpen={true}
           onCancel={vi.fn()}
-          isOpen={true}
         />
       );
 
@@ -406,7 +386,6 @@ describe("CreateRepetitionBlockDialog", () => {
           isOpen={true}
           onConfirm={vi.fn()}
           onCancel={handleCancel}
-          isOpen={true}
         />
       );
 
@@ -427,9 +406,7 @@ describe("CreateRepetitionBlockDialog", () => {
         <CreateRepetitionBlockDialog
           isOpen={true}
           onConfirm={handleConfirm}
-          isOpen={true}
           onCancel={vi.fn()}
-          isOpen={true}
         />
       );
 
