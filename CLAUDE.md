@@ -42,6 +42,26 @@ pnpm exec changeset             # Create changeset before PR
 /optimize-imports               # Refactor imports for better tree-shaking
 ```
 
+## Quality Standards
+
+**CRITICAL: Zero Tolerance for Warnings and Errors**
+
+When working on this codebase, ALL problems must be fixed, regardless of whether they were introduced in the current branch or pre-existing:
+
+- ✅ **Zero ESLint warnings** - All linting rules must pass
+- ✅ **Zero TypeScript errors** - Strict type checking with no `any` escapes
+- ✅ **Zero test warnings** - Clean test output (React act(), accessibility, etc.)
+- ✅ **Zero build warnings** - Vite, ESBuild, etc. must produce clean output
+- ✅ **Coverage thresholds met** - 80% for core packages, 70% for frontend
+- ✅ **All tests passing** - 100% pass rate across all packages
+
+If you encounter warnings or errors during your work:
+1. **Fix them immediately** - Don't defer or document for later
+2. **Fix pre-existing issues** - Clean up technical debt proactively
+3. **Leave the codebase cleaner** - Boy Scout Rule applies
+
+This policy ensures professional code quality and prevents warning/error accumulation.
+
 ## Architecture (Hexagonal + Plugin)
 
 ```
