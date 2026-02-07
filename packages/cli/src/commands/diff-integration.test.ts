@@ -10,6 +10,7 @@ const __dirname = dirname(__filename);
 
 const CLI_PATH = resolve(__dirname, "../../dist/bin/kaiord.js");
 const FIXTURES_PATH = resolve(__dirname, "../../../../test-fixtures");
+const INTEGRATION_TIMEOUT = 15_000; // Increased timeout for process spawning under load
 
 describe("diff command integration", () => {
   it("should show files are identical when comparing same file", async () => {
@@ -30,7 +31,7 @@ describe("diff command integration", () => {
     expect(exitCode).toBe(0);
     const output = stripAnsi(stdout);
     expect(output).toContain("Files are identical");
-  }, 15000); // Increased timeout for process spawning under load
+  }, INTEGRATION_TIMEOUT);
 
   it("should show differences when comparing different files", async () => {
     // Arrange
@@ -49,7 +50,7 @@ describe("diff command integration", () => {
     expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(exitCode);
     const output = stripAnsi(stdout);
     expect(output).toBeTruthy();
-  }, 15000); // Increased timeout for process spawning under load
+  }, INTEGRATION_TIMEOUT);
 
   it("should output JSON format when --json flag is used", async () => {
     // Arrange
@@ -73,7 +74,7 @@ describe("diff command integration", () => {
     expect(result).toHaveProperty("identical", true);
     expect(result).toHaveProperty("file1");
     expect(result).toHaveProperty("file2");
-  }, 15000); // Increased timeout for process spawning under load
+  }, INTEGRATION_TIMEOUT);
 
   it("should handle missing file error", async () => {
     // Arrange
@@ -91,7 +92,7 @@ describe("diff command integration", () => {
         missingFile,
       ])
     ).rejects.toThrow();
-  }, 15000); // Increased timeout for process spawning under load
+  }, INTEGRATION_TIMEOUT);
 
   it("should support format override flags", async () => {
     // Arrange
@@ -115,7 +116,7 @@ describe("diff command integration", () => {
     expect(exitCode).toBe(0);
     const output = stripAnsi(stdout);
     expect(output).toContain("Files are identical");
-  }, 15000); // Increased timeout for process spawning under load
+  }, INTEGRATION_TIMEOUT);
 
   it("should compare files of different formats", async () => {
     // Arrange
@@ -134,5 +135,5 @@ describe("diff command integration", () => {
     expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(exitCode);
     const output = stripAnsi(stdout);
     expect(output).toBeTruthy();
-  }, 15000); // Increased timeout for process spawning under load
+  }, INTEGRATION_TIMEOUT);
 });

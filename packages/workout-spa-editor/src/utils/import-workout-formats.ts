@@ -9,6 +9,9 @@ import { createDefaultProviders } from "@kaiord/core";
 import { createFitProviders } from "@kaiord/fit";
 import { createTcxProviders } from "@kaiord/tcx";
 import { createZwoProviders } from "@kaiord/zwo";
+import type { ImportProgressCallback } from "./import-workout";
+import { parseJSON } from "./json-parser";
+import { validateKRD } from "./krd-validator";
 
 // Create providers once for all operations
 const providers = createDefaultProviders({
@@ -16,9 +19,6 @@ const providers = createDefaultProviders({
   tcx: createTcxProviders(),
   zwo: createZwoProviders(),
 });
-import type { ImportProgressCallback } from "./import-workout";
-import { parseJSON } from "./json-parser";
-import { validateKRD } from "./krd-validator";
 
 export const importKrdFile = async (
   buffer: Uint8Array,
