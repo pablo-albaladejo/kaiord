@@ -6,13 +6,13 @@ This guide covers migrating from `@kaiord/core` v1.x (monolithic) to the v2.0 mo
 
 In v1.x, `@kaiord/core` contained all format adapters (FIT, TCX, ZWO) and their dependencies. In v2.0, adapters have been extracted into separate packages:
 
-| Package | Description | Key Dependencies |
-|---------|-------------|-----------------|
-| `@kaiord/core` | Domain types, schemas, ports, use cases | `zod` |
-| `@kaiord/fit` | FIT format adapter | `@garmin/fitsdk` |
-| `@kaiord/tcx` | TCX format adapter | `fast-xml-parser` |
-| `@kaiord/zwo` | ZWO format adapter | `fast-xml-parser`, `xsd-schema-validator` |
-| `@kaiord/all` | Meta-package (backward compatibility) | All of the above |
+| Package        | Description                             | Key Dependencies                          |
+| -------------- | --------------------------------------- | ----------------------------------------- |
+| `@kaiord/core` | Domain types, schemas, ports, use cases | `zod`                                     |
+| `@kaiord/fit`  | FIT format adapter                      | `@garmin/fitsdk`                          |
+| `@kaiord/tcx`  | TCX format adapter                      | `fast-xml-parser`                         |
+| `@kaiord/zwo`  | ZWO format adapter                      | `fast-xml-parser`, `xsd-schema-validator` |
+| `@kaiord/all`  | Meta-package (backward compatibility)   | All of the above                          |
 
 ## Migration Path 1: Zero-Change (Recommended for Quick Migration)
 
@@ -104,12 +104,12 @@ In v1.x, all provider properties were always defined. In v2.0, adapter-specific 
 const providers = createDefaultProviders({ fit: createFitProviders() });
 
 // These are defined (FIT was provided)
-providers.fitReader;     // FitReader
-providers.convertFitToKrd;  // ConvertFitToKrd
+providers.fitReader; // FitReader
+providers.convertFitToKrd; // ConvertFitToKrd
 
 // These are undefined (TCX/ZWO not provided)
-providers.tcxReader;     // undefined
-providers.convertTcxToKrd;  // undefined
+providers.tcxReader; // undefined
+providers.convertTcxToKrd; // undefined
 ```
 
 ### 3. Direct Adapter Imports Moved
@@ -124,13 +124,13 @@ import { createGarminFitSdkReader } from "@kaiord/fit";
 
 ## Bundle Size Comparison
 
-| Installation | Approximate Size |
-|-------------|-----------------|
-| `@kaiord/core` v1.x | ~22 MB (includes all adapters) |
-| `@kaiord/core` v2.0 alone | ~2 MB (domain + schemas only) |
-| `@kaiord/core` + `@kaiord/fit` | ~21 MB (FIT SDK is large) |
-| `@kaiord/core` + `@kaiord/tcx` + `@kaiord/zwo` | ~5 MB (no FIT SDK) |
-| `@kaiord/all` | ~22 MB (same as v1.x) |
+| Installation                                   | Approximate Size               |
+| ---------------------------------------------- | ------------------------------ |
+| `@kaiord/core` v1.x                            | ~22 MB (includes all adapters) |
+| `@kaiord/core` v2.0 alone                      | ~2 MB (domain + schemas only)  |
+| `@kaiord/core` + `@kaiord/fit`                 | ~21 MB (FIT SDK is large)      |
+| `@kaiord/core` + `@kaiord/tcx` + `@kaiord/zwo` | ~5 MB (no FIT SDK)             |
+| `@kaiord/all`                                  | ~22 MB (same as v1.x)          |
 
 ## Examples
 

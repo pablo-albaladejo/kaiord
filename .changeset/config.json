@@ -3,7 +3,16 @@
   "changelog": "@changesets/cli/changelog",
   "commit": false,
   "fixed": [],
-  "linked": [["@kaiord/core", "@kaiord/fit", "@kaiord/tcx", "@kaiord/zwo", "@kaiord/all", "@kaiord/cli"]],
+  "linked": [
+    [
+      "@kaiord/core",
+      "@kaiord/fit",
+      "@kaiord/tcx",
+      "@kaiord/zwo",
+      "@kaiord/all",
+      "@kaiord/cli"
+    ]
+  ],
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",

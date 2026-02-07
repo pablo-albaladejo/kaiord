@@ -33,7 +33,10 @@ const fitBuffer = await providers.convertKrdToFit!({ krd });
 ### Standalone Adapter Access
 
 ```typescript
-import { createGarminFitSdkReader, createGarminFitSdkWriter } from "@kaiord/fit";
+import {
+  createGarminFitSdkReader,
+  createGarminFitSdkWriter,
+} from "@kaiord/fit";
 import { createConsoleLogger } from "@kaiord/core";
 
 const logger = createConsoleLogger();

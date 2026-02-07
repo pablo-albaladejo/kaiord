@@ -42,13 +42,13 @@ This package re-exports everything from:
 
 ## When to Use @kaiord/all vs Selective Installation
 
-| Scenario | Recommendation |
-|----------|---------------|
-| Need all formats | Use `@kaiord/all` |
-| Bundle size matters | Use `@kaiord/core` + specific adapters |
-| Only need FIT | `@kaiord/core` + `@kaiord/fit` |
+| Scenario            | Recommendation                                 |
+| ------------------- | ---------------------------------------------- |
+| Need all formats    | Use `@kaiord/all`                              |
+| Bundle size matters | Use `@kaiord/core` + specific adapters         |
+| Only need FIT       | `@kaiord/core` + `@kaiord/fit`                 |
 | Only need TCX + ZWO | `@kaiord/core` + `@kaiord/tcx` + `@kaiord/zwo` |
-| Migrating from v1.x | Use `@kaiord/all` for easiest migration |
+| Migrating from v1.x | Use `@kaiord/all` for easiest migration        |
 
 ## Migrating from @kaiord/core v1.x
 
