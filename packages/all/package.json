@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/all",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "description": "Meta-package that includes all Kaiord format adapters for backward compatibility",
   "type": "module",
   "main": "./dist/index.js",
