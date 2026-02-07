@@ -7,15 +7,15 @@
  * - Requirement 4: Create repetition blocks from selected steps
  */
 
-import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
 import { generateBlockId } from "../../utils/id-generation";
-import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 import {
   calculateInsertPosition,
   extractSteps,
   reindexSteps,
 } from "./repetition-block-helpers";
+import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type { WorkoutState } from "../workout-actions";
 
 /**
  * Creates a repetition block from selected step indices

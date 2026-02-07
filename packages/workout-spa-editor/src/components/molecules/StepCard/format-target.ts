@@ -1,10 +1,10 @@
-import type { WorkoutStep } from "../../../types/krd";
 import {
   formatCadenceTarget,
   formatHeartRateTarget,
   formatPaceTarget,
   formatPowerTarget,
 } from "./format-target-helpers";
+import type { WorkoutStep } from "../../../types/krd";
 
 /**
  * Format target for display

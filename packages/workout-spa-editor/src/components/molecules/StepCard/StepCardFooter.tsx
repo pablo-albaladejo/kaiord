@@ -1,7 +1,7 @@
-import type { WorkoutStep } from "../../../types/krd";
+import { getTargetIcon } from "./icons";
 import { Badge } from "../../atoms/Badge/Badge";
 import { Icon } from "../../atoms/Icon/Icon";
-import { getTargetIcon } from "./icons";
+import type { WorkoutStep } from "../../../types/krd";
 
 export type StepCardFooterProps = {
   step: WorkoutStep;

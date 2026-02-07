@@ -1,9 +1,9 @@
 import { Trash2 } from "lucide-react";
-import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { SaveButton } from "../../molecules/SaveButton/SaveButton";
 import { SaveToLibraryButton } from "../../molecules/SaveToLibraryButton/SaveToLibraryButton";
 import { UndoRedoButtons } from "../../molecules/UndoRedoButtons";
+import type { KRD } from "../../../types/krd";
 
 type WorkoutActionsProps = Readonly<{
   krd: KRD;

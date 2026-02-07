@@ -8,10 +8,10 @@
  * - Requirement 2.4: Use block ID for operations
  */
 
-import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
 import { findBlockById } from "../utils/block-utils";
-import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type { WorkoutState } from "../workout-actions";
 
 /**
  * Adds a new step to a repetition block by its ID

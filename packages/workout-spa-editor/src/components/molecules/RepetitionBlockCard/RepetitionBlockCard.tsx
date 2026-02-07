@@ -1,10 +1,10 @@
 /* eslint-disable max-lines, max-lines-per-function */
 import { forwardRef, type HTMLAttributes } from "react";
-import type { RepetitionBlock } from "../../../types/krd";
-import type { DragHandleProps } from "../StepCard/StepCard";
 import { RepetitionBlockHeader } from "./RepetitionBlockHeader";
 import { RepetitionBlockSteps } from "./RepetitionBlockSteps";
 import { useRepetitionBlockState } from "./use-repetition-block-state";
+import type { RepetitionBlock } from "../../../types/krd";
+import type { DragHandleProps } from "../StepCard/StepCard";
 
 /**
  * Props for the RepetitionBlockCard component.

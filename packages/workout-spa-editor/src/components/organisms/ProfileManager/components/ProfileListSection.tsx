@@ -4,8 +4,8 @@
  * Section displaying the list of saved profiles.
  */
 
-import type { Profile } from "../../../../types/profile";
 import { ProfileList } from "../ProfileList";
+import type { Profile } from "../../../../types/profile";
 
 type ProfileListSectionProps = {
   profiles: Profile[];

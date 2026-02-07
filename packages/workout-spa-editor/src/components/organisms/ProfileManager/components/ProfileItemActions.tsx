@@ -5,8 +5,8 @@
  */
 
 import { Download, Trash2 } from "lucide-react";
-import type { Profile } from "../../../../types/profile";
 import { Button } from "../../../atoms/Button/Button";
+import type { Profile } from "../../../../types/profile";
 
 type ProfileItemActionsProps = {
   profile: Profile;

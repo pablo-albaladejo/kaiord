@@ -4,8 +4,8 @@
  * Shared utility functions for working with repetition blocks.
  */
 
-import type { RepetitionBlock, Workout } from "../../types/krd";
 import { isRepetitionBlock } from "../../types/krd";
+import type { RepetitionBlock, Workout } from "../../types/krd";
 
 /**
  * Finds a repetition block by its unique ID.

@@ -1,7 +1,7 @@
 /**
  * Target Values - Re-exports from modular structure
  *
- * This file maintains backward compatibility by re-exporting all target value schemas
+ * This file maintains modular structure by re-exporting all target value schemas
  * from their new modular locations in the target-values/ subdirectory.
  */
 

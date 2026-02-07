@@ -7,7 +7,6 @@
  * - Requirement 17.3: Generate thumbnail preview of the workout
  */
 
-import type { KRD } from "../../../types/krd";
 import { drawWorkoutBars } from "./thumbnail/bar-renderer";
 import {
   createCanvas,
@@ -16,6 +15,7 @@ import {
   getCanvasContext,
 } from "./thumbnail/canvas-setup";
 import { calculateStepDurations } from "./thumbnail/duration-calculator";
+import type { KRD } from "../../../types/krd";
 
 const THUMBNAIL_CONFIG = {
   width: 300,

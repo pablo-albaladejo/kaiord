@@ -1,5 +1,5 @@
-import { Input } from "../../atoms/Input/Input";
 import { TARGET_TYPE_OPTIONS } from "./constants";
+import { Input } from "../../atoms/Input/Input";
 
 type TargetTypeSelectProps = {
   value: string;

@@ -1,7 +1,7 @@
 /**
  * KRD Schema - Re-exports from modular structure
  *
- * This file maintains backward compatibility by re-exporting all KRD schemas
+ * This file maintains modular structure by re-exporting all KRD schemas
  * from their new modular locations in the krd/ subdirectory.
  */
 

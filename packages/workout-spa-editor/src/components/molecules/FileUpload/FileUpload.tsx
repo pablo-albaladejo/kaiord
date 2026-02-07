@@ -1,8 +1,8 @@
-import type { KRD, ValidationError } from "../../../types/krd";
 import { FileUploadButton } from "./FileUploadButton";
 import { FileUploadInput } from "./FileUploadInput";
 import { FileUploadStatus } from "./FileUploadStatus";
 import { useFileUpload } from "./useFileUpload";
+import type { KRD, ValidationError } from "../../../types/krd";
 
 export type FileUploadProps = {
   onFileLoad: (krd: KRD) => void;

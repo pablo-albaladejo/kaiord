@@ -1,7 +1,7 @@
 import { TargetOpenMessage } from "./TargetOpenMessage";
-import type { TargetPickerFieldsProps } from "./TargetPickerFields.types";
 import { TargetPickerFieldsUnit } from "./TargetPickerFieldsUnit";
 import { TargetPickerFieldsValue } from "./TargetPickerFieldsValue";
+import type { TargetPickerFieldsProps } from "./TargetPickerFields.types";
 
 type TargetPickerFieldsContentProps = Omit<
   TargetPickerFieldsProps,

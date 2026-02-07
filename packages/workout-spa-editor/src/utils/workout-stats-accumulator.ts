@@ -1,10 +1,10 @@
-import type { RepetitionBlock, WorkoutStep } from "../types/krd";
-import { isRepetitionBlock } from "../types/krd";
 import {
   calculateRepetitionStats,
   calculateStepStats,
 } from "./workout-stats-helpers";
+import { isRepetitionBlock } from "../types/krd";
 import type { StatsAccumulator, WorkoutStats } from "./workout-stats-types";
+import type { RepetitionBlock, WorkoutStep } from "../types/krd";
 
 export const processItem = (
   item: WorkoutStep | RepetitionBlock,

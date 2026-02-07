@@ -1,7 +1,7 @@
 import * as Tooltip from "@radix-ui/react-tooltip";
 import { Trash2 } from "lucide-react";
-import type { RepetitionBlock } from "../../../types/krd";
 import { RepetitionBlockContextMenu } from "./RepetitionBlockContextMenu";
+import type { RepetitionBlock } from "../../../types/krd";
 
 type RepetitionBlockHeaderRightProps = {
   block: RepetitionBlock;

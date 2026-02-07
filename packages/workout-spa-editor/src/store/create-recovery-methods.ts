@@ -1,4 +1,3 @@
-import type { StoreApi } from "zustand";
 import {
   createBackupAction,
   disableSafeModeAction,
@@ -6,6 +5,7 @@ import {
   restoreFromBackupAction,
 } from "./actions/error-recovery-actions";
 import type { WorkoutStore } from "./workout-store-types";
+import type { StoreApi } from "zustand";
 
 export const createRecoveryMethods = (
   set: StoreApi<WorkoutStore>["setState"],

@@ -12,9 +12,9 @@
 
 import { BookmarkPlus } from "lucide-react";
 import { useState } from "react";
-import type { KRD } from "../../../types/krd";
-import { Button } from "../../atoms/Button/Button";
 import { SaveToLibraryDialog } from "./SaveToLibraryDialog";
+import { Button } from "../../atoms/Button/Button";
+import type { KRD } from "../../../types/krd";
 
 export type SaveToLibraryButtonProps = {
   workout: KRD;

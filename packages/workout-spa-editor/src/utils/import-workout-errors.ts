@@ -6,13 +6,13 @@ import {
   TcxParsingError,
   ZwiftParsingError,
 } from "@kaiord/core";
+import { ImportError } from "./import-workout";
 import {
   ConversionError,
   FileParsingError,
   ValidationError,
 } from "../types/errors";
 import type { WorkoutFileFormat } from "./file-format-detector";
-import { ImportError } from "./import-workout";
 
 const formatValidationError = (
   errors: Array<{ field: string; message: string }>

@@ -1,5 +1,5 @@
 /**
- * Re-exports for backward compatibility
+ * Re-exports for modular structure
  * Converters have been split into separate files for better organization
  */
 

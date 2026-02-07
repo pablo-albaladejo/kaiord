@@ -1,6 +1,6 @@
-import type { Profile } from "../../../types/profile";
-import { Input } from "../../atoms/Input/Input";
 import { useZoneInfo } from "./hooks/useZoneInfo";
+import { Input } from "../../atoms/Input/Input";
+import type { Profile } from "../../../types/profile";
 
 type TargetValueInputProps = {
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open";

@@ -4,15 +4,15 @@
  * Action for restoring a deleted step at its original position.
  */
 
+import { isWorkoutStep } from "../../types/krd";
+import { createUpdateWorkoutAction } from "../workout-actions";
 import type {
   KRD,
   RepetitionBlock,
   Workout,
   WorkoutStep,
 } from "../../types/krd";
-import { isWorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
-import { createUpdateWorkoutAction } from "../workout-actions";
 
 export const undoDeleteAction = (
   krd: KRD,

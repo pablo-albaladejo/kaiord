@@ -4,8 +4,8 @@
  * Profile import/export functionality.
  */
 
-import type { Profile } from "../../../../types/profile";
 import { profileSchema } from "../../../../types/profile";
+import type { Profile } from "../../../../types/profile";
 
 type UseProfileImportExportParams = {
   createProfile: (

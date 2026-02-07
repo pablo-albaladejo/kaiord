@@ -1,5 +1,5 @@
-import type { WorkoutStep } from "../../../types/krd";
 import { StepEditor } from "../../organisms/StepEditor/StepEditor";
+import type { WorkoutStep } from "../../../types/krd";
 
 type WorkoutSectionEditorProps = {
   isEditing: boolean;

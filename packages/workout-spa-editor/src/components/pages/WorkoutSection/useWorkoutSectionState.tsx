@@ -1,4 +1,9 @@
 import { useCallback } from "react";
+import { useRepetitionBlockHandlers } from "./use-repetition-block-handlers";
+import { useCopyStep } from "./useCopyStep";
+import { usePasteStep } from "./usePasteStep";
+import { useSelectedStep } from "./useSelectedStep";
+import { useWorkoutSectionHandlers } from "./useWorkoutSectionHandlers";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useWorkoutStore } from "../../../store/workout-store";
 import {
@@ -11,11 +16,6 @@ import {
   useUndoDelete,
 } from "../../../store/workout-store-selectors";
 import type { KRD, Workout } from "../../../types/krd";
-import { useRepetitionBlockHandlers } from "./use-repetition-block-handlers";
-import { useCopyStep } from "./useCopyStep";
-import { usePasteStep } from "./usePasteStep";
-import { useSelectedStep } from "./useSelectedStep";
-import { useWorkoutSectionHandlers } from "./useWorkoutSectionHandlers";
 
 export function useWorkoutSectionState(
   workout: Workout,

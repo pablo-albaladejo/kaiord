@@ -1,7 +1,7 @@
-import type { ValidationError } from "../../../types/krd";
-import { ErrorMessage } from "../../atoms/ErrorMessage/ErrorMessage";
 import { LoadingStatus } from "./LoadingStatus";
 import { SuccessStatus } from "./SuccessStatus";
+import { ErrorMessage } from "../../atoms/ErrorMessage/ErrorMessage";
+import type { ValidationError } from "../../../types/krd";
 
 type ErrorState = {
   title: string;

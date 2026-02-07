@@ -4,8 +4,8 @@
  * Sport selection dropdown.
  */
 
-import type { Sport } from "../../../../types/krd";
 import { SPORTS } from "../constants";
+import type { Sport } from "../../../../types/krd";
 
 type SportSelectProps = {
   value: Sport;

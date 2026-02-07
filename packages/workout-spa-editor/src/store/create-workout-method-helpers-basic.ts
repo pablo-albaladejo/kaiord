@@ -1,8 +1,8 @@
-import type { StoreApi } from "zustand";
 import { copyStepAction } from "./actions/copy-step-action";
 import { pasteStepAction } from "./actions/paste-step-action";
 import type { createWorkoutStoreActions } from "./workout-store-actions";
 import type { WorkoutStore } from "./workout-store-types";
+import type { StoreApi } from "zustand";
 
 export const createBasicMethods = (
   actions: ReturnType<typeof createWorkoutStoreActions>,

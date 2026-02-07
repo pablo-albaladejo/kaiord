@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import type { FormatOption } from "./format-options";
+import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 
 type UseKeyboardNavigationProps = {
   isOpen: boolean;

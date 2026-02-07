@@ -1,9 +1,9 @@
 import { Plus } from "lucide-react";
 import { useState } from "react";
-import type { KRD, Sport, ValidationError } from "../../types/krd";
 import { Button } from "../atoms/Button/Button";
 import { CreateWorkoutDialog } from "../molecules/CreateWorkoutDialog/CreateWorkoutDialog";
 import { FileUpload } from "../molecules/FileUpload/FileUpload";
+import type { KRD, Sport, ValidationError } from "../../types/krd";
 
 export type WelcomeSectionProps = {
   onFileLoad: (krd: KRD) => void;

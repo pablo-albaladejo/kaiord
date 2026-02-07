@@ -5,7 +5,6 @@
  */
 
 import * as Dialog from "@radix-ui/react-dialog";
-import type { KRD } from "../../../types/krd";
 import { DialogActions } from "./components/DialogActions";
 import { DialogHeader } from "./components/DialogHeader";
 import { DifficultySelect } from "./components/DifficultySelect";
@@ -13,6 +12,7 @@ import { NotesTextarea } from "./components/NotesTextarea";
 import { TagsInput } from "./components/TagsInput";
 import { WorkoutNameInput } from "./components/WorkoutNameInput";
 import { useSaveToLibrary } from "./useSaveToLibrary";
+import type { KRD } from "../../../types/krd";
 
 export type SaveToLibraryDialogProps = {
   workout: KRD;

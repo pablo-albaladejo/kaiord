@@ -1,4 +1,3 @@
-import type { WorkoutTemplate } from "../../../../types/workout-library";
 import {
   filterByDifficulty,
   filterBySearch,
@@ -6,6 +5,7 @@ import {
   filterByTags,
 } from "./filters/filter-utils";
 import type { Difficulty, Sport } from "./useLibraryFilters.types";
+import type { WorkoutTemplate } from "../../../../types/workout-library";
 
 export function applyFilters(
   templates: WorkoutTemplate[],

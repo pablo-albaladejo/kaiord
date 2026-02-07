@@ -8,12 +8,12 @@
  * - Requirement 11: Multiple profiles with zone management
  */
 
-import type { HeartRateZone, PowerZone, Profile } from "../../../types/profile";
 import { ValidationErrors } from "./components/ValidationErrors";
 import { ZoneCard } from "./components/ZoneCard";
 import { ZoneEditorActions } from "./components/ZoneEditorActions";
 import { ZoneEditorHeader } from "./components/ZoneEditorHeader";
 import { useZoneEditor } from "./hooks/useZoneEditor";
+import type { HeartRateZone, PowerZone, Profile } from "../../../types/profile";
 
 export type ZoneEditorProps = {
   profile: Profile;

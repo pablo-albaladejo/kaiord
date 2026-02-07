@@ -4,9 +4,9 @@
  * Single profile item in the list.
  */
 
-import type { Profile } from "../../../../types/profile";
 import { ProfileItemActions } from "./ProfileItemActions";
 import { ProfileItemInfo } from "./ProfileItemInfo";
+import type { Profile } from "../../../../types/profile";
 
 type ProfileListItemProps = {
   profile: Profile;

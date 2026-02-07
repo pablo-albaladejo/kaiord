@@ -4,8 +4,8 @@
  * Functions for updating profile data.
  */
 
-import type { HeartRateZone, PowerZone, Profile } from "../../../types/profile";
 import { calculateHeartRateZones } from "../../../types/profile";
+import type { HeartRateZone, PowerZone, Profile } from "../../../types/profile";
 
 export function updateProfileData(
   profile: Profile,

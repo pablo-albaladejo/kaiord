@@ -1,6 +1,6 @@
-import type { Workout } from "../types/krd";
 import { processItem } from "./workout-stats-accumulator";
 import type { StatsAccumulator, WorkoutStats } from "./workout-stats-types";
+import type { Workout } from "../types/krd";
 
 export type { WorkoutStats } from "./workout-stats-types";
 

@@ -6,9 +6,9 @@ import {
   normalStateClasses,
   sizeClasses,
 } from "./Input.styles";
-import type { InputProps } from "./Input.types";
 import { InputElement } from "./InputElement";
 import { InputMessages } from "./InputMessages";
+import type { InputProps } from "./Input.types";
 
 const buildInputClasses = (
   hasError: boolean,

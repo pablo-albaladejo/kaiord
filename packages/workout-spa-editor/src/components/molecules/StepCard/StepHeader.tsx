@@ -1,5 +1,5 @@
-import type { Intensity } from "../../../types/krd";
 import { Badge } from "../../atoms/Badge/Badge";
+import type { Intensity } from "../../../types/krd";
 
 type StepHeaderProps = {
   stepName: string;

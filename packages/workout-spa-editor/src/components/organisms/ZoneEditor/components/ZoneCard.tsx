@@ -4,15 +4,15 @@
  * Single zone editor card.
  */
 
+import { ZoneInputs } from "./ZoneInputs";
+import { ZonePreview } from "./ZonePreview";
+import { Input } from "../../../atoms/Input/Input";
+import { getZoneColor } from "../utils/zone-colors";
 import type {
   HeartRateZone,
   PowerZone,
   Profile,
 } from "../../../../types/profile";
-import { Input } from "../../../atoms/Input/Input";
-import { getZoneColor } from "../utils/zone-colors";
-import { ZoneInputs } from "./ZoneInputs";
-import { ZonePreview } from "./ZonePreview";
 
 type ZoneCardProps = {
   zone: PowerZone | HeartRateZone;

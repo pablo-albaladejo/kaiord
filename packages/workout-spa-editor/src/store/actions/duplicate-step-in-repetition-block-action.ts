@@ -4,10 +4,10 @@
  * Action for duplicating a step within a repetition block.
  */
 
-import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
 import { findBlockById } from "../utils/block-utils";
-import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type { WorkoutState } from "../workout-actions";
 
 /**
  * Duplicates a step within a repetition block

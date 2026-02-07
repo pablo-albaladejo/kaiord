@@ -1,8 +1,8 @@
 import { useMemo } from "react";
-import type { WorkoutTemplate } from "../../../../types/workout-library";
 import { applyFilters } from "./apply-filters";
 import { sortTemplates } from "./filters/sort-utils";
 import { useFilterState } from "./useFilterState";
+import type { WorkoutTemplate } from "../../../../types/workout-library";
 
 export function useLibraryFilters(templates: WorkoutTemplate[]) {
   const filterState = useFilterState();

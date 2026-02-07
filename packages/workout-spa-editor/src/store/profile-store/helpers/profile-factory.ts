@@ -4,12 +4,12 @@
  * Functions for creating new profiles.
  */
 
-import type { Profile } from "../../../types/profile";
 import {
   calculateHeartRateZones,
   DEFAULT_HEART_RATE_ZONES,
   DEFAULT_POWER_ZONES,
 } from "../../../types/profile";
+import type { Profile } from "../../../types/profile";
 
 export function createNewProfile(
   name: string,

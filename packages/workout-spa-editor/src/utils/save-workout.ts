@@ -8,9 +8,9 @@
  * - Requirement 36: Clear error feedback with retry options
  */
 
-import type { KRD, ValidationError } from "../types/krd";
 import { krdSchema } from "../types/schemas";
 import { formatZodError } from "../types/validation";
+import type { KRD, ValidationError } from "../types/krd";
 
 // ============================================
 // Types

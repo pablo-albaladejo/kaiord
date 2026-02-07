@@ -1,7 +1,7 @@
 import { AlertCircle } from "lucide-react";
+import { getFormatWarnings } from "./format-helpers";
 import type { KRD, ValidationError } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
-import { getFormatWarnings } from "./format-helpers";
 
 type FormatWarningsProps = {
   readonly format: WorkoutFileFormat;

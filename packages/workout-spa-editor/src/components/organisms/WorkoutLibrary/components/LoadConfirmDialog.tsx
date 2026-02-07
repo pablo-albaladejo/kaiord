@@ -6,8 +6,8 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import type { WorkoutTemplate } from "../../../../types/workout-library";
 import { Button } from "../../../atoms/Button";
+import type { WorkoutTemplate } from "../../../../types/workout-library";
 
 type LoadConfirmDialogProps = {
   template: WorkoutTemplate | null;

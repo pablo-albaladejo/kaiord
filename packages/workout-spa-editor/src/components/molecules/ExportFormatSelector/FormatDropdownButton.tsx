@@ -1,6 +1,6 @@
 import { ChevronDown } from "lucide-react";
-import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getFileExtensionForFormat, type FormatOption } from "./format-options";
+import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 
 type FormatDropdownButtonProps = {
   readonly currentFormat: WorkoutFileFormat;

@@ -1,5 +1,5 @@
-import type { WorkoutState } from "./workout-actions";
 import { createRepetitionBlockActions } from "./workout-store-repetition-actions";
+import type { WorkoutState } from "./workout-actions";
 
 export const createBlockActionHandlers = (state: WorkoutState) => {
   const blockActions = createRepetitionBlockActions(state);

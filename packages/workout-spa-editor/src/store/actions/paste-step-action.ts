@@ -1,9 +1,3 @@
-import type {
-  KRD,
-  RepetitionBlock,
-  Workout,
-  WorkoutStep,
-} from "../../types/krd";
 import {
   createUpdatedKrd,
   getSuccessMessage,
@@ -14,6 +8,12 @@ import {
   isValidRepetitionBlock,
   isValidWorkoutStep,
 } from "./paste-step-validators";
+import type {
+  KRD,
+  RepetitionBlock,
+  Workout,
+  WorkoutStep,
+} from "../../types/krd";
 
 export type PasteStepResult = {
   success: boolean;

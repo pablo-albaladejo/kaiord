@@ -1,7 +1,7 @@
-import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
-import { isRepetitionBlock } from "../../../types/krd";
-import { renderStep } from "./WorkoutListItem";
 import { renderRepetitionBlock } from "./render-repetition-block";
+import { renderStep } from "./WorkoutListItem";
+import { isRepetitionBlock } from "../../../types/krd";
+import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
 
 type RenderWorkoutItemProps = {
   item: WorkoutStep | RepetitionBlock;

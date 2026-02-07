@@ -1,6 +1,6 @@
-import type { TargetPickerFieldsProps } from "./TargetPickerFields.types";
 import { TargetPickerRangeFields } from "./TargetPickerRangeFields";
 import { TargetValueInput } from "./TargetValueInput";
+import type { TargetPickerFieldsProps } from "./TargetPickerFields.types";
 
 type TargetPickerFieldsValueProps = Pick<
   TargetPickerFieldsProps,

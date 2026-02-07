@@ -12,7 +12,6 @@ Kaiord is a TypeScript monorepo for structured workout data conversion between F
 - `@kaiord/fit` - FIT format adapter (Garmin FIT SDK)
 - `@kaiord/tcx` - TCX format adapter (fast-xml-parser)
 - `@kaiord/zwo` - ZWO format adapter (fast-xml-parser, XSD validation)
-- `@kaiord/all` - Meta-package re-exporting all adapters for backward compatibility
 - `@kaiord/cli` - Command-line interface
 - `@kaiord/workout-spa-editor` - React web application (private)
 

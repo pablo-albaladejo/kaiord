@@ -1,8 +1,8 @@
-import type { WorkoutStep } from "../../../types/krd";
-import { Icon } from "../../atoms/Icon/Icon";
 import { formatDuration } from "./format-duration";
 import { formatTarget } from "./format-target";
 import { getDurationIcon, getTargetIcon } from "./icons";
+import { Icon } from "../../atoms/Icon/Icon";
+import type { WorkoutStep } from "../../../types/krd";
 
 type StepDetailsProps = {
   step: WorkoutStep;

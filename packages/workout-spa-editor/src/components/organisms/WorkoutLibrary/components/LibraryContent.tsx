@@ -4,9 +4,9 @@
  * Main content area showing workout grid or empty state.
  */
 
-import type { WorkoutTemplate } from "../../../../types/workout-library";
 import { EmptyLibrary } from "./EmptyLibrary";
 import { WorkoutCard } from "./WorkoutCard";
+import type { WorkoutTemplate } from "../../../../types/workout-library";
 
 type LibraryContentProps = {
   templates: WorkoutTemplate[];

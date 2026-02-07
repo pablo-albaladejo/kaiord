@@ -1,9 +1,12 @@
 import {
+  createDefaultProviders,
   FitParsingError,
   KrdValidationError,
   ToleranceExceededError,
 } from "@kaiord/core";
-import { createAllProviders } from "@kaiord/all";
+import { createFitProviders } from "@kaiord/fit";
+import { createTcxProviders } from "@kaiord/tcx";
+import { createZwoProviders } from "@kaiord/zwo";
 import {
   loadConfigWithMetadata,
   mergeWithConfig,
@@ -77,7 +80,14 @@ export const convertCommand = async (
   }
 
   try {
-    const providers = createAllProviders(logger);
+    const providers = createDefaultProviders(
+      {
+        fit: createFitProviders(logger),
+        tcx: createTcxProviders(logger),
+        zwo: createZwoProviders(logger),
+      },
+      logger
+    );
 
     if (isBatchMode(validatedOptions.input)) {
       return await executeBatchConversion(validatedOptions, providers, logger);

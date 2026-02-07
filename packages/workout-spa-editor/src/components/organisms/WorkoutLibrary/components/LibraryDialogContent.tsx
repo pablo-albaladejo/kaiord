@@ -1,14 +1,14 @@
-import type { WorkoutTemplate } from "../../../../types/workout-library";
-import type {
-  LibraryFilters as LibraryFiltersType,
-  LibraryLoader,
-} from "../types";
 import { LibraryContent } from "./LibraryContent";
 import { LibraryDialogHeader } from "./LibraryDialogHeader";
 import { LibraryFilters } from "./LibraryFilters";
 import { LoadConfirmDialog } from "./LoadConfirmDialog";
 import { PreviewDialog } from "./PreviewDialog";
 import { TagFilterButtons } from "./TagFilterButtons";
+import type { WorkoutTemplate } from "../../../../types/workout-library";
+import type {
+  LibraryFilters as LibraryFiltersType,
+  LibraryLoader,
+} from "../types";
 
 type LibraryDialogContentProps = {
   templates: WorkoutTemplate[];

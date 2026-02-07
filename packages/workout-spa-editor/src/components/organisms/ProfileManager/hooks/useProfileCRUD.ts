@@ -4,10 +4,10 @@
  * Combines create, update, delete operations.
  */
 
-import type { Profile } from "../../../../types/profile";
 import { useProfileCreate } from "./useProfileCreate";
 import { useProfileDelete } from "./useProfileDelete";
 import { useProfileEdit } from "./useProfileEdit";
+import type { Profile } from "../../../../types/profile";
 
 type ProfileFormData = {
   name: string;

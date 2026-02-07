@@ -1,9 +1,9 @@
-import type { Duration } from "../../../types/krd";
 import { getValueLabel, isRepeatType } from "./advanced/duration-helpers";
 import { DurationTypeSelect } from "./advanced/DurationTypeSelect";
 import { DurationValueInput } from "./advanced/DurationValueInput";
 import { RepeatFromInput } from "./advanced/RepeatFromInput";
 import { useAdvancedDuration } from "./advanced/useAdvancedDuration";
+import type { Duration } from "../../../types/krd";
 
 export type AdvancedDurationPickerProps = {
   value: Duration | null;

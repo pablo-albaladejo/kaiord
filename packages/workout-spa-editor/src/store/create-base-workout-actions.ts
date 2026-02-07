@@ -1,10 +1,10 @@
-import type { KRD, Sport } from "../types/krd";
-import type { WorkoutState } from "./workout-actions";
 import {
   createEmptyWorkoutAction,
   createLoadWorkoutAction,
   createUpdateWorkoutAction,
 } from "./workout-actions";
+import type { WorkoutState } from "./workout-actions";
+import type { KRD, Sport } from "../types/krd";
 
 export const createBaseWorkoutActions = () => ({
   loadWorkout: (krd: KRD) => createLoadWorkoutAction(krd),

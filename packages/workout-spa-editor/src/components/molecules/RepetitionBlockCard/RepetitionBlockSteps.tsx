@@ -16,10 +16,10 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Plus } from "lucide-react";
-import type { WorkoutStep } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { Icon } from "../../atoms/Icon/Icon";
 import { StepCard } from "../StepCard/StepCard";
+import type { WorkoutStep } from "../../../types/krd";
 
 type RepetitionBlockStepsProps = {
   steps: WorkoutStep[];

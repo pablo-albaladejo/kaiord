@@ -1,6 +1,6 @@
-import type { Profile } from "../../../types/profile";
 import { getUnitOptions, getValueLabel, getValuePlaceholder } from "./helpers";
 import type { TargetPickerState } from "./useTargetPickerState";
+import type { Profile } from "../../../types/profile";
 
 export function useTargetPickerProps(
   state: TargetPickerState,

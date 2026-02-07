@@ -1,4 +1,7 @@
-import { createAllProviders } from "@kaiord/all";
+import { createDefaultProviders } from "@kaiord/core";
+import { createFitProviders } from "@kaiord/fit";
+import { createTcxProviders } from "@kaiord/tcx";
+import { createZwoProviders } from "@kaiord/zwo";
 import { loadConfigWithMetadata } from "../../utils/config-loader.js";
 import { formatError } from "../../utils/error-formatter.js";
 import { ExitCode } from "../../utils/exit-codes.js";
@@ -42,7 +45,14 @@ export const diffCommand = async (options: DiffOptions): Promise<number> => {
   }
 
   try {
-    const providers = createAllProviders(logger);
+    const providers = createDefaultProviders(
+      {
+        fit: createFitProviders(logger),
+        tcx: createTcxProviders(logger),
+        zwo: createZwoProviders(logger),
+      },
+      logger
+    );
 
     logger.debug("Loading files for comparison", {
       file1: validatedOptions.file1,

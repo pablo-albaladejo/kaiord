@@ -18,9 +18,9 @@ import {
   useCurrentWorkout,
   useSelectedStepId,
 } from "./store/workout-store-selectors";
-import type { Workout } from "./types/krd";
 import { saveWorkout } from "./utils/save-workout";
 import { parseStepId } from "./utils/step-id-parser";
+import type { Workout } from "./types/krd";
 
 // ============================================
 // Tutorial Steps Configuration

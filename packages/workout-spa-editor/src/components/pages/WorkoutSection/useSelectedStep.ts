@@ -1,7 +1,7 @@
 import { useMemo } from "react";
-import type { Workout, WorkoutStep } from "../../../types/krd";
 import { isRepetitionBlock } from "../../../types/krd";
 import { parseStepId } from "../../../utils/step-id-parser";
+import type { Workout, WorkoutStep } from "../../../types/krd";
 
 export const useSelectedStep = (
   selectedStepId: string | null,

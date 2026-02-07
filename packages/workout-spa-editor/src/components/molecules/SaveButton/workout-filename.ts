@@ -1,6 +1,6 @@
-import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import { getFileExtension } from "../../../utils/file-format-metadata";
 import type { KRD } from "../../../types/krd";
+import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 
 export function sanitizeWorkoutName(name: string): string {
   return name

@@ -5,10 +5,10 @@
  * Requirement 3.4: Maintain repetition block integrity during reordering
  */
 
-import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
 import { findBlockById } from "../utils/block-utils";
-import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type { WorkoutState } from "../workout-actions";
 
 /**
  * Reorders steps within a repetition block

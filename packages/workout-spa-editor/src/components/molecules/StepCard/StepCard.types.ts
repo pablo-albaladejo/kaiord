@@ -1,9 +1,9 @@
+import type { WorkoutStep } from "../../../types/krd";
 import type {
   DraggableAttributes,
   DraggableSyntheticListeners,
 } from "@dnd-kit/core";
 import type { HTMLAttributes } from "react";
-import type { WorkoutStep } from "../../../types/krd";
 
 export type DragHandleProps = {
   attributes?: DraggableAttributes;

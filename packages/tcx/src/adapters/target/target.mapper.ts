@@ -1,4 +1,4 @@
-// Re-export from split modules for backward compatibility
+// Re-export from split modules for modular structure
 export {
   mapCadenceTargetToTcx,
   mapHeartRateTargetToTcx,

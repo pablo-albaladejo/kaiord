@@ -10,10 +10,10 @@
  */
 
 import { AlertCircle } from "lucide-react";
-import type { ValidationError } from "../../../types/krd";
-import { Icon } from "../Icon/Icon";
 import { ErrorActions } from "./ErrorActions";
 import { ValidationErrorList } from "./ValidationErrorList";
+import { Icon } from "../Icon/Icon";
+import type { ValidationError } from "../../../types/krd";
 
 export type ErrorMessageProps = {
   title: string;

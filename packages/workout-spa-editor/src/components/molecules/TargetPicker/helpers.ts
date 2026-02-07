@@ -1,7 +1,7 @@
+import { getValueLabel, getValuePlaceholder } from "./helpers-labels";
+import type { TargetUnitOption } from "./TargetPicker.types";
 import type { Target } from "../../../types/krd";
 import type { Profile } from "../../../types/profile";
-import type { TargetUnitOption } from "./TargetPicker.types";
-import { getValueLabel, getValuePlaceholder } from "./helpers-labels";
 
 export {
   calculateHeartRateFromZone,

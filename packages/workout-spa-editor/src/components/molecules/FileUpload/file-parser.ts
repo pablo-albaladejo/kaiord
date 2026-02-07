@@ -2,8 +2,6 @@
  * File Parsing Utilities
  */
 
-import type { KRD, ValidationError } from "../../../types/krd";
-import { ImportError, importWorkout } from "../../../utils/import-workout";
 import { createImportErrorState } from "./file-parser-error-builders";
 import {
   createFileParsingErrorState,
@@ -11,6 +9,8 @@ import {
   createSyntaxErrorState,
   createUnrecoverableErrorState,
 } from "./file-parser-error-fallbacks";
+import { ImportError, importWorkout } from "../../../utils/import-workout";
+import type { KRD, ValidationError } from "../../../types/krd";
 
 type ErrorState = {
   title: string;

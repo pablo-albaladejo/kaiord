@@ -4,9 +4,9 @@
  * Form for creating or editing a profile.
  */
 
-import type { Profile } from "../../../types/profile";
 import { ProfileFormActions } from "./components/ProfileFormActions";
 import { ProfileFormFields } from "./components/ProfileFormFields";
+import type { Profile } from "../../../types/profile";
 
 type ProfileFormData = {
   name: string;

@@ -1,4 +1,4 @@
-// Re-export from split modules for backward compatibility
+// Re-export from split modules for modular structure
 export { convertTcxTarget } from "./tcx-to-krd.converter";
 export type { TcxTargetData } from "./tcx-to-krd.converter";
 
