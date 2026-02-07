@@ -88,7 +88,6 @@ jobs:
           pnpm --filter @kaiord/fit build
           pnpm --filter @kaiord/tcx build
           pnpm --filter @kaiord/zwo build
-          pnpm --filter @kaiord/all build
           pnpm --filter @kaiord/cli build
 
           # Get new versions
