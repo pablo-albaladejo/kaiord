@@ -22,10 +22,7 @@ describe("validate command integration tests", () => {
       { timeout: 10000 },
       async () => {
         // Arrange
-        const fitFile = getFixturePath(
-          "fit",
-          "WorkoutIndividualSteps.fit"
-        );
+        const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
 
         // Act
         const result = await execa("tsx", [
@@ -47,10 +44,7 @@ describe("validate command integration tests", () => {
       { timeout: 10000 },
       async () => {
         // Arrange
-        const fitFile = getFixturePath(
-          "fit",
-          "WorkoutIndividualSteps.fit"
-        );
+        const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
 
         // Act
         const result = await execa("tsx", [
@@ -73,10 +67,7 @@ describe("validate command integration tests", () => {
       { timeout: 10000 },
       async () => {
         // Arrange
-        const fitFile = getFixturePath(
-          "fit",
-          "WorkoutIndividualSteps.fit"
-        );
+        const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
         const toleranceConfigPath = join(tempDir, "tolerance.json");
         const toleranceConfig = {
           timeTolerance: 2,
@@ -114,10 +105,7 @@ describe("validate command integration tests", () => {
       { timeout: 10000 },
       async () => {
         // Arrange
-        const fitFile = getFixturePath(
-          "fit",
-          "WorkoutIndividualSteps.fit"
-        );
+        const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
         const toleranceConfigPath = join(tempDir, "invalid-tolerance.json");
         await writeFile(toleranceConfigPath, "{ invalid json }");
 
@@ -209,10 +197,7 @@ describe("validate command integration tests", () => {
       { timeout: 10000 },
       async () => {
         // Arrange
-        const fitFile = getFixturePath(
-          "fit",
-          "WorkoutIndividualSteps.fit"
-        );
+        const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
 
         // Act
         const result = await execa("tsx", [
@@ -239,10 +224,7 @@ describe("validate command integration tests", () => {
       { timeout: 10000 },
       async () => {
         // Arrange
-        const fitFile = getFixturePath(
-          "fit",
-          "WorkoutIndividualSteps.fit"
-        );
+        const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
         const toleranceConfigPath = join(tempDir, "strict-tolerance.json");
         // Create very strict tolerances that will likely fail
         const strictConfig = {
@@ -293,10 +275,7 @@ describe("validate command integration tests", () => {
       { timeout: 10000 },
       async () => {
         // Arrange
-        const fitFile = getFixturePath(
-          "fit",
-          "WorkoutIndividualSteps.fit"
-        );
+        const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
 
         // Act
         const result = await execa("tsx", [
@@ -319,10 +298,7 @@ describe("validate command integration tests", () => {
       { timeout: 10000 },
       async () => {
         // Arrange
-        const fitFile = getFixturePath(
-          "fit",
-          "WorkoutIndividualSteps.fit"
-        );
+        const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
 
         // Act
         const result = await execa("tsx", [
