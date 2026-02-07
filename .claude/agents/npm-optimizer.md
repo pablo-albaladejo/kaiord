@@ -81,7 +81,6 @@ For each package in scope:
 3. Compare against targets:
    - @kaiord/core: < 50KB
    - @kaiord/fit, tcx, zwo: < 200KB
-   - @kaiord/all: < 50KB
    - @kaiord/cli: < 500KB
 
 ### Phase 4: Import Optimization (optional, 5-10 min)

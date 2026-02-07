@@ -154,7 +154,7 @@ Violation found:
 packages/cli/src/commands/convert/index.ts:
 import { fitToKRD } from '@kaiord/fit'
 
-Fix: Use provider pattern from @kaiord/all instead
+Fix: Use createDefaultProviders pattern with adapter providers
 ```
 
 ## Implementation Steps

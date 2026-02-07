@@ -265,7 +265,6 @@ Phase 1/3: Dependency Analysis ⏳
   ✅ @kaiord/fit - CLEAN
   ✅ @kaiord/tcx - CLEAN
   ✅ @kaiord/zwo - CLEAN
-  ✅ @kaiord/all - CLEAN
   ✅ @kaiord/cli - CLEAN
 
 Phase 2/3: Bundle Analysis ⏳
@@ -273,7 +272,6 @@ Phase 2/3: Bundle Analysis ⏳
   ✅ @kaiord/fit - 60KB
   ✅ @kaiord/tcx - 24KB
   ✅ @kaiord/zwo - 40KB
-  ✅ @kaiord/all - 4KB
   ✅ @kaiord/cli - 56KB
 
 Phase 3/3: Import Optimization ⏳

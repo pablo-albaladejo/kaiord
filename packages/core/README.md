@@ -6,9 +6,7 @@
 
 Core library for Kaiord workout data conversion. Contains domain types, schemas, ports, use cases, and the plugin architecture for format adapters.
 
-> **Note**: As of v2.0, format adapters (FIT, TCX, ZWO) are in separate packages.
-> For all formats in one install, use [`@kaiord/all`](https://www.npmjs.com/package/@kaiord/all).
-> See the [Migration Guide](../../docs/migration-v2.md) for details.
+> **Note**: As of v2.0, format adapters (FIT, TCX, ZWO) are in separate packages. Install only the adapters you need for optimal bundle size.
 
 ## Features
 
@@ -39,7 +37,7 @@ yarn add @kaiord/core
 
 ## Quick Start
 
-### With Adapter Packages (v2.0+)
+### Single Format
 
 ```typescript
 import { createDefaultProviders } from "@kaiord/core";
@@ -60,14 +58,25 @@ const krd: KRD = await providers.convertFitToKrd!({ fitBuffer });
 const output = await providers.convertKrdToFit!({ krd });
 ```
 
-### With All Formats (@kaiord/all)
+### Multiple Formats
 
 ```typescript
-import { createAllProviders } from "@kaiord/all";
+import { createDefaultProviders } from "@kaiord/core";
+import { createFitProviders } from "@kaiord/fit";
+import { createTcxProviders } from "@kaiord/tcx";
+import { createZwoProviders } from "@kaiord/zwo";
 
-const providers = createAllProviders();
+// Wire all adapters you need
+const providers = createDefaultProviders({
+  fit: createFitProviders(),
+  tcx: createTcxProviders(),
+  zwo: createZwoProviders(),
+});
+
+// Convert between formats
 const krd = await providers.convertFitToKrd!({ fitBuffer });
 const tcx = await providers.convertKrdToTcx!({ krd });
+const zwo = await providers.convertKrdToZwift!({ krd });
 ```
 
 ### Schema Validation
