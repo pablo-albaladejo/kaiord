@@ -16,6 +16,7 @@ Runs a **complete npm optimization workflow** using the three core optimization 
 3. **Import Optimization** (`/optimize-imports`)
 
 This agent provides:
+
 - Consolidated report across all packages
 - Prioritized action items
 - Cross-package optimization opportunities
@@ -24,16 +25,19 @@ This agent provides:
 ## How to use
 
 Review all packages in the monorepo:
+
 ```
 /npm-review
 ```
 
 Review specific package:
+
 ```
 /npm-review packages/fit
 ```
 
 Quick scan (dependencies + bundles only, no import optimization):
+
 ```
 /npm-review --quick
 ```
@@ -43,7 +47,9 @@ Quick scan (dependencies + bundles only, no import optimization):
 The agent executes skills in this order:
 
 ### Phase 1: Dependency Health Check
+
 Runs `/check-deps` on target packages to identify:
+
 - Unused dependencies
 - Duplicate dependencies across packages
 - Security vulnerabilities
@@ -51,21 +57,27 @@ Runs `/check-deps` on target packages to identify:
 - Architecture violations
 
 ### Phase 2: Bundle Analysis
+
 Runs `/analyze-bundle` on target packages to identify:
+
 - Bundle sizes vs thresholds
 - Heavy dependencies
 - Wildcard imports
 - Optimization opportunities
 
 ### Phase 3: Import Optimization (optional)
+
 If `--quick` flag is NOT used, runs `/optimize-imports` to:
+
 - Convert wildcard imports to named imports
 - Separate type imports
 - Remove unused imports
 - Consolidate duplicate imports
 
 ### Phase 4: Consolidated Report
+
 Generates comprehensive report with:
+
 - Executive summary
 - Per-package findings
 - Cross-package analysis (duplicates, common patterns)
@@ -74,7 +86,7 @@ Generates comprehensive report with:
 
 ## Report Format
 
-```markdown
+````markdown
 # NPM Optimization Review - Kaiord Monorepo
 
 ## Executive Summary
@@ -91,12 +103,14 @@ Generates comprehensive report with:
 ## Package Reviews
 
 ### @kaiord/core
+
 **Dependencies:** ✅ CLEAN (0 unused, 0 duplicates)
 **Bundle Size:** ⚠️ 588KB (target: <50KB) - investigate
 **Imports:** ✅ No wildcard imports
 **Critical:** Move garmin-fitsdk.d.ts to fit package
 
 ### @kaiord/fit
+
 **Dependencies:** ✅ CLEAN
 **Bundle Size:** ✅ 60KB (within threshold)
 **Imports:** ✅ Optimized
@@ -109,10 +123,12 @@ Generates comprehensive report with:
 ## Cross-Package Analysis
 
 ### Duplicate Dependencies
+
 - `zod`: Used in 6 packages (consistent v3.25.76) ✅
 - `fast-xml-parser`: Shared by tcx & zwo ✅
 
 ### Common Patterns
+
 - 4 packages missing `sideEffects: false`
 - Test fixtures handling inconsistent
 
@@ -121,10 +137,12 @@ Generates comprehensive report with:
 ## Prioritized Action Plan
 
 ### Critical (Fix Immediately) - 5 min
+
 1. Move `garmin-fitsdk.d.ts` from core to fit
    Impact: Architecture compliance
 
 ### High Priority (Fix This Sprint) - 30 min
+
 2. Add `sideEffects: false` to fit, tcx, zwo, all
    Impact: Better tree-shaking for consumers
 
@@ -150,8 +168,10 @@ pnpm -r test && pnpm lint
 # 4. Commit
 git add . && git commit -m "fix: npm optimization improvements"
 ```
+````
 
 **Estimated Total Effort:** 35 minutes
+
 ```
 
 ## Implementation
@@ -164,20 +184,22 @@ When this skill is invoked:
    - `--quick`: Skip import optimization
 
 2. Execute skills in sequence:
-   ```
-   /check-deps [scope]
-   /analyze-bundle [scope]
-   /optimize-imports [scope]  # unless --quick
-   ```
+```
+
+/check-deps [scope]
+/analyze-bundle [scope]
+/optimize-imports [scope] # unless --quick
+
+````
 
 3. Aggregate results from all three skills
 
 4. Generate consolidated report with:
-   - Executive summary (scores, critical issues)
-   - Per-package findings (structured)
-   - Cross-package analysis (patterns, duplicates)
-   - Prioritized action plan (Critical/High/Medium/Low)
-   - Next steps with commands
+- Executive summary (scores, critical issues)
+- Per-package findings (structured)
+- Cross-package analysis (patterns, duplicates)
+- Prioritized action plan (Critical/High/Medium/Low)
+- Next steps with commands
 
 5. Save report to `/tmp/npm-review-report-{timestamp}.md`
 
@@ -192,15 +214,17 @@ When this skill is invoked:
 /npm-review  # Full review
 # Review report, fix critical/high items
 pnpm -r test && pnpm lint
-```
+````
 
 **After Adding Dependencies:**
+
 ```bash
 /npm-review packages/your-package
 # Quickly check impact of new dependency
 ```
 
 **Weekly Maintenance:**
+
 ```bash
 /npm-review
 # Comprehensive analysis
@@ -208,6 +232,7 @@ pnpm -r test && pnpm lint
 ```
 
 **CI/CD Integration:**
+
 ```bash
 # In .github/workflows/quality.yml
 /npm-review --quick --json > review.json
@@ -217,11 +242,13 @@ pnpm -r test && pnpm lint
 ## Quality Standards Compliance
 
 Following CLAUDE.md Quality Standards:
+
 - ✅ **Zero tolerance** - All critical issues must be fixed
 - ✅ **Proactive cleanup** - Identifies pre-existing issues
 - ✅ **Boy Scout Rule** - Leaves codebase cleaner
 
 This skill aligns with the project's zero-tolerance policy:
+
 - Reports ALL warnings and errors
 - Prioritizes fixes by severity
 - Provides actionable remediation steps
