@@ -80,6 +80,9 @@ jobs:
           # Run changeset version
           pnpm exec changeset version
 
+          # Update lock file after version bump
+          pnpm install --no-frozen-lockfile
+
           # Get new versions
           CORE_VERSION_AFTER=$(node -p "require('./packages/core/package.json').version")
           CLI_VERSION_AFTER=$(node -p "require('./packages/cli/package.json').version")
