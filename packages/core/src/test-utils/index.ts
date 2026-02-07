@@ -11,6 +11,8 @@ export {
   loadFixturePair,
   loadKrdFixture,
   loadKrdFixtureRaw,
+  loadTcxFixture,
+  loadZwoFixture,
 } from "./fixtures";
 
 // Test helpers

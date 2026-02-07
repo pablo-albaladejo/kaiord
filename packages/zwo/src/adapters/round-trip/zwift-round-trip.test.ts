@@ -1,8 +1,6 @@
-import { readFileSync } from "fs";
-import { join } from "path";
 import { describe, expect, it } from "vitest";
 import { createToleranceChecker } from "@kaiord/core";
-import { createMockLogger } from "@kaiord/core/test-utils";
+import { createMockLogger, loadZwoFixture } from "@kaiord/core/test-utils";
 import {
   createFastXmlZwiftReader,
   createFastXmlZwiftWriter,
@@ -21,11 +19,7 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutIndividualSteps.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
 
       // Act - Zwift → KRD
       const krd = await reader(originalXml);
@@ -79,11 +73,7 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutIndividualSteps.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -139,11 +129,7 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutIndividualSteps.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -223,11 +209,7 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
     const reader = createFastXmlZwiftReader(logger, validator);
     const writer = createFastXmlZwiftWriter(logger, validator);
 
-    const zwiftPath = join(
-      __dirname,
-      "../../../tests/fixtures/zwift-files/WorkoutIndividualSteps.zwo"
-    );
-    const originalXml = readFileSync(zwiftPath, "utf-8");
+    const originalXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
 
     // Act
     const krd = await reader(originalXml);
@@ -259,11 +241,7 @@ describe("Zwift Round-trip: WorkoutRepeatSteps.zwo", () => {
       const reader = createFastXmlZwiftReader(logger, validator);
       const writer = createFastXmlZwiftWriter(logger, validator);
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutRepeatSteps.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutRepeatSteps.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -306,11 +284,7 @@ describe("Zwift Round-trip: WorkoutRepeatSteps.zwo", () => {
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutRepeatSteps.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutRepeatSteps.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -396,11 +370,7 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutCustomTargetValues.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutCustomTargetValues.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -507,11 +477,7 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutCustomTargetValues.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutCustomTargetValues.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -560,11 +526,7 @@ describe("Zwift Round-trip: Extensions preservation", () => {
       const reader = createFastXmlZwiftReader(logger, validator);
       const writer = createFastXmlZwiftWriter(logger, validator);
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutIndividualSteps.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -595,11 +557,7 @@ describe("Zwift Round-trip: Extensions preservation", () => {
       const reader = createFastXmlZwiftReader(logger, validator);
       const writer = createFastXmlZwiftWriter(logger, validator);
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutIndividualSteps.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -635,11 +593,7 @@ describe("Zwift Round-trip: KRD → Zwift → KRD", () => {
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutIndividualSteps.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
 
       // Act - Start with KRD
       const originalKrd = await reader(originalXml);
@@ -711,11 +665,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
       const reader = createFastXmlZwiftReader(logger, validator);
       const writer = createFastXmlZwiftWriter(logger, validator);
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutRepeatGreaterThanStep.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutRepeatGreaterThanStep.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -761,11 +711,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutRepeatGreaterThanStep.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutRepeatGreaterThanStep.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -826,11 +772,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
       const reader = createFastXmlZwiftReader(logger, validator);
       const writer = createFastXmlZwiftWriter(logger, validator);
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutRepeatGreaterThanStep.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutRepeatGreaterThanStep.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -881,11 +823,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
       const reader = createFastXmlZwiftReader(logger, validator);
       const writer = createFastXmlZwiftWriter(logger, validator);
 
-      const zwiftPath = join(
-        __dirname,
-        "../../../tests/fixtures/zwift-files/WorkoutRepeatGreaterThanStep.zwo"
-      );
-      const originalXml = readFileSync(zwiftPath, "utf-8");
+      const originalXml = loadZwoFixture("WorkoutRepeatGreaterThanStep.zwo");
 
       // Act
       const krd = await reader(originalXml);
@@ -929,11 +867,7 @@ describe("Zwift Round-trip: Complete validation", () => {
 
       for (const fixture of fixtures) {
         // Act
-        const zwiftPath = join(
-          __dirname,
-          `../../../tests/fixtures/zwift-files/${fixture}`
-        );
-        const originalXml = readFileSync(zwiftPath, "utf-8");
+        const originalXml = loadZwoFixture(fixture);
 
         const krd = await reader(originalXml);
         const convertedXml = await writer(krd);

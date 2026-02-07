@@ -1,16 +1,16 @@
 import { XMLParser } from "fast-xml-parser";
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { buildKRD } from "@kaiord/core/test-utils";
-import { buildWorkoutStep } from "@kaiord/core/test-utils";
-import { createMockLogger } from "@kaiord/core/test-utils";
+import {
+  buildKRD,
+  buildWorkoutStep,
+  createMockLogger,
+  loadZwoFixture,
+} from "@kaiord/core/test-utils";
 import { convertKRDToZwift } from "./krd-to-zwift.converter";
 import { convertZwiftToKRD } from "./zwift-to-krd.converter";
 
 describe("Zwift Round-Trip Conversion", () => {
   const logger = createMockLogger();
-  const fixturesDir = join(__dirname, "../../tests/fixtures/zwift-files");
 
   const parseZwiftXml = (xmlString: string): unknown => {
     const parser = new XMLParser({
@@ -24,8 +24,7 @@ describe("Zwift Round-Trip Conversion", () => {
   describe("ZWO → KRD → ZWO", () => {
     it("should preserve metadata when converting ZWO → KRD → ZWO", async () => {
       // Arrange
-      const originalZwoPath = join(fixturesDir, "WorkoutIndividualSteps.zwo");
-      const originalZwoXml = readFileSync(originalZwoPath, "utf-8");
+      const originalZwoXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
       const originalZwoData = parseZwiftXml(originalZwoXml);
 
       // Act
@@ -55,8 +54,7 @@ describe("Zwift Round-Trip Conversion", () => {
 
     it("should preserve power zones in ZWO → KRD → ZWO", async () => {
       // Arrange
-      const originalZwoPath = join(fixturesDir, "WorkoutIndividualSteps.zwo");
-      const originalZwoXml = readFileSync(originalZwoPath, "utf-8");
+      const originalZwoXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
       const originalZwoData = parseZwiftXml(originalZwoXml);
 
       // Act
@@ -92,11 +90,7 @@ describe("Zwift Round-Trip Conversion", () => {
 
     it("should preserve watts in ZWO → KRD → ZWO", async () => {
       // Arrange
-      const originalZwoPath = join(
-        fixturesDir,
-        "WorkoutCustomTargetValues.zwo"
-      );
-      const originalZwoXml = readFileSync(originalZwoPath, "utf-8");
+      const originalZwoXml = loadZwoFixture("WorkoutCustomTargetValues.zwo");
       const originalZwoData = parseZwiftXml(originalZwoXml);
 
       // Act
