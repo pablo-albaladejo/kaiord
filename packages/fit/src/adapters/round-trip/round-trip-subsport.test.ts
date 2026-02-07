@@ -1,8 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  createMockLogger,
-  loadFitFixture,
-} from "@kaiord/core/test-utils";
+import { createMockLogger, loadFitFixture } from "@kaiord/core/test-utils";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import { createGarminFitSdkReader } from "../garmin-fitsdk";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";

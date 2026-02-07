@@ -1,10 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { KRD } from "@kaiord/core";
 import { createToleranceChecker } from "@kaiord/core";
-import {
-  createMockLogger,
-  loadTcxFixture,
-} from "@kaiord/core/test-utils";
+import { createMockLogger, loadTcxFixture } from "@kaiord/core/test-utils";
 import {
   createFastXmlTcxReader,
   createFastXmlTcxWriter,
