@@ -35,7 +35,6 @@ describe("CreateRepetitionBlockDialog", () => {
           stepCount={3}
           onConfirm={vi.fn()}
           onCancel={vi.fn()}
-          isOpen={true}
         />
       );
 

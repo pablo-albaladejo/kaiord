@@ -7,10 +7,12 @@ This directory contains Claude Code configuration, skills, and hooks for the Kai
 ```
 .claude/
 ├── README.md                    # This file
+├── agents/                      # Specialized AI agents
+│   └── npm-optimizer.md         # NPM optimization agent
 ├── skills/                      # Custom Claude Code skills
-│   ├── analyze-bundle.md        # Bundle size analysis
-│   ├── optimize-imports.md      # Import optimization
-│   └── check-deps.md            # Dependency analysis
+│   ├── analyze-bundle/          # Bundle size analysis
+│   ├── optimize-imports/        # Import optimization
+│   └── check-deps/              # Dependency analysis
 ├── hooks/                       # Development automation hooks
 │   ├── pre-commit.ts            # Pre-commit checks
 │   └── weekly-maintenance.ts    # Periodic maintenance tasks
