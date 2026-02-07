@@ -5,7 +5,7 @@
  */
 
 import type { KRD } from "@kaiord/core";
-import { createDefaultProviders } from "@kaiord/core";
+import { createAllProviders } from "@kaiord/all";
 import type { ImportProgressCallback } from "./import-workout";
 import { parseJSON } from "./json-parser";
 import { validateKRD } from "./krd-validator";
@@ -38,12 +38,12 @@ export const importFitFile = async (
   signal?: AbortSignal
 ): Promise<KRD> => {
   signal?.throwIfAborted();
-  const providers = createDefaultProviders();
+  const providers = createAllProviders();
 
   onProgress?.(50);
   signal?.throwIfAborted();
 
-  const krd = await providers.convertFitToKrd({ fitBuffer: buffer });
+  const krd = await providers.convertFitToKrd!({ fitBuffer: buffer });
 
   onProgress?.(100);
 
@@ -56,13 +56,13 @@ export const importTcxFile = async (
   signal?: AbortSignal
 ): Promise<KRD> => {
   signal?.throwIfAborted();
-  const providers = createDefaultProviders();
+  const providers = createAllProviders();
   const text = new TextDecoder().decode(buffer);
 
   onProgress?.(50);
   signal?.throwIfAborted();
 
-  const krd = await providers.convertTcxToKrd({ tcxString: text });
+  const krd = await providers.convertTcxToKrd!({ tcxString: text });
 
   onProgress?.(100);
 
@@ -75,13 +75,13 @@ export const importZwoFile = async (
   signal?: AbortSignal
 ): Promise<KRD> => {
   signal?.throwIfAborted();
-  const providers = createDefaultProviders();
+  const providers = createAllProviders();
   const text = new TextDecoder().decode(buffer);
 
   onProgress?.(50);
   signal?.throwIfAborted();
 
-  const krd = await providers.convertZwiftToKrd({ zwiftString: text });
+  const krd = await providers.convertZwiftToKrd!({ zwiftString: text });
 
   onProgress?.(100);
 

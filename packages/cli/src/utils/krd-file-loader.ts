@@ -1,5 +1,4 @@
-import type { KRD } from "@kaiord/core";
-import type { createDefaultProviders } from "@kaiord/core";
+import type { KRD, Providers } from "@kaiord/core";
 import { readFile } from "./file-handler";
 import { detectFormat, type FileFormat } from "./format-detector";
 
@@ -14,7 +13,7 @@ import { detectFormat, type FileFormat } from "./format-detector";
 export const loadFileAsKrd = async (
   filePath: string,
   format: string | undefined,
-  providers: ReturnType<typeof createDefaultProviders>
+  providers: Providers
 ): Promise<KRD> => {
   const detectedFormat = format || detectFormat(filePath);
 
@@ -40,27 +39,27 @@ export const loadFileAsKrd = async (
 export const convertToKrd = async (
   data: Uint8Array | string,
   format: string,
-  providers: ReturnType<typeof createDefaultProviders>
+  providers: Providers
 ): Promise<KRD> => {
   if (format === "fit") {
     if (!(data instanceof Uint8Array)) {
       throw new Error("FIT input must be Uint8Array");
     }
-    return providers.convertFitToKrd({ fitBuffer: data });
+    return providers.convertFitToKrd!({ fitBuffer: data });
   }
 
   if (format === "tcx") {
     if (typeof data !== "string") {
       throw new Error("TCX input must be string");
     }
-    return providers.convertTcxToKrd({ tcxString: data });
+    return providers.convertTcxToKrd!({ tcxString: data });
   }
 
   if (format === "zwo") {
     if (typeof data !== "string") {
       throw new Error("ZWO input must be string");
     }
-    return providers.convertZwiftToKrd({ zwiftString: data });
+    return providers.convertZwiftToKrd!({ zwiftString: data });
   }
 
   if (format === "krd") {
@@ -83,18 +82,18 @@ export const convertToKrd = async (
 export const convertFromKrd = async (
   krd: KRD,
   format: string,
-  providers: ReturnType<typeof createDefaultProviders>
+  providers: Providers
 ): Promise<Uint8Array | string> => {
   if (format === "fit") {
-    return providers.convertKrdToFit({ krd });
+    return providers.convertKrdToFit!({ krd });
   }
 
   if (format === "tcx") {
-    return providers.convertKrdToTcx({ krd });
+    return providers.convertKrdToTcx!({ krd });
   }
 
   if (format === "zwo") {
-    return providers.convertKrdToZwift({ krd });
+    return providers.convertKrdToZwift!({ krd });
   }
 
   if (format === "krd") {

@@ -39,8 +39,42 @@ importers:
         specifier: ^8.54.0
         version: 8.54.0(eslint@9.39.1(jiti@2.6.1))(typescript@5.9.3)
 
+  packages/all:
+    dependencies:
+      "@kaiord/core":
+        specifier: workspace:^
+        version: link:../core
+      "@kaiord/fit":
+        specifier: workspace:^
+        version: link:../fit
+      "@kaiord/tcx":
+        specifier: workspace:^
+        version: link:../tcx
+      "@kaiord/zwo":
+        specifier: workspace:^
+        version: link:../zwo
+    devDependencies:
+      "@types/node":
+        specifier: ^20.11.0
+        version: 20.19.25
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.7.0
+        version: 4.20.6
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
+
   packages/cli:
     dependencies:
+      "@kaiord/all":
+        specifier: workspace:^
+        version: link:../all
       "@kaiord/core":
         specifier: workspace:^
         version: link:../core
@@ -93,15 +127,6 @@ importers:
 
   packages/core:
     dependencies:
-      "@garmin/fitsdk":
-        specifier: ^21.141.0
-        version: 21.178.0
-      fast-xml-parser:
-        specifier: ^5.3.4
-        version: 5.3.4
-      xsd-schema-validator:
-        specifier: ^0.11.0
-        version: 0.11.0
       zod:
         specifier: ^3.22.4
         version: 3.25.76
@@ -137,6 +162,77 @@ importers:
         specifier: ^4.0.18
         version: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
 
+  packages/fit:
+    dependencies:
+      "@garmin/fitsdk":
+        specifier: ^21.141.0
+        version: 21.178.0
+      "@kaiord/core":
+        specifier: workspace:^
+        version: link:../core
+      zod:
+        specifier: ^3.22.4
+        version: 3.25.76
+    devDependencies:
+      "@faker-js/faker":
+        specifier: ^10.1.0
+        version: 10.1.0
+      "@types/node":
+        specifier: ^20.11.0
+        version: 20.19.25
+      "@types/rosie":
+        specifier: ^0.0.45
+        version: 0.0.45
+      "@vitest/coverage-v8":
+        specifier: ^4.0.18
+        version: 4.0.18(vitest@4.0.18)
+      rosie:
+        specifier: ^2.1.1
+        version: 2.1.1
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.7.0
+        version: 4.20.6
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
+
+  packages/tcx:
+    dependencies:
+      "@kaiord/core":
+        specifier: workspace:^
+        version: link:../core
+      fast-xml-parser:
+        specifier: ^5.3.4
+        version: 5.3.4
+      zod:
+        specifier: ^3.22.4
+        version: 3.25.76
+    devDependencies:
+      "@types/node":
+        specifier: ^20.11.0
+        version: 20.19.25
+      "@vitest/coverage-v8":
+        specifier: ^4.0.18
+        version: 4.0.18(vitest@4.0.18)
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.7.0
+        version: 4.20.6
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
+
   packages/workout-spa-editor:
     dependencies:
       "@dnd-kit/core":
@@ -148,6 +244,9 @@ importers:
       "@dnd-kit/utilities":
         specifier: ^3.2.2
         version: 3.2.2(react@19.2.0)
+      "@kaiord/all":
+        specifier: workspace:*
+        version: link:../all
       "@kaiord/core":
         specifier: workspace:*
         version: link:../core
@@ -290,6 +389,40 @@ importers:
       vitest:
         specifier: 4.0.18
         version: 4.0.18(@types/node@24.10.1)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
+
+  packages/zwo:
+    dependencies:
+      "@kaiord/core":
+        specifier: workspace:^
+        version: link:../core
+      fast-xml-parser:
+        specifier: ^5.3.4
+        version: 5.3.4
+      xsd-schema-validator:
+        specifier: ^0.11.0
+        version: 0.11.0
+      zod:
+        specifier: ^3.22.4
+        version: 3.25.76
+    devDependencies:
+      "@types/node":
+        specifier: ^20.11.0
+        version: 20.19.25
+      "@vitest/coverage-v8":
+        specifier: ^4.0.18
+        version: 4.0.18(vitest@4.0.18)
+      tsup:
+        specifier: ^8.5.1
+        version: 8.5.1(jiti@2.6.1)(postcss@8.5.6)(tsx@4.20.6)(typescript@5.9.3)
+      tsx:
+        specifier: ^4.7.0
+        version: 4.20.6
+      typescript:
+        specifier: ^5.3.3
+        version: 5.9.3
+      vitest:
+        specifier: ^4.0.18
+        version: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
 
 packages:
   "@acemir/cssom@0.9.23":
@@ -9024,7 +9157,7 @@ snapshots:
       obug: 2.1.1
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.18(@types/node@24.10.1)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
+      vitest: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
 
   "@vitest/expect@2.0.5":
     dependencies:
@@ -9096,7 +9229,7 @@ snapshots:
       sirv: 3.0.2
       tinyglobby: 0.2.15
       tinyrainbow: 3.0.3
-      vitest: 4.0.18(@types/node@24.10.1)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
+      vitest: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
 
   "@vitest/utils@2.0.5":
     dependencies:

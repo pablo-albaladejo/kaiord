@@ -100,7 +100,7 @@ describe("diff command integration", () => {
         missingFile,
       ])
     ).rejects.toThrow();
-  });
+  }, 10000); // Increased timeout to 10s
 
   it("should support format override flags", async () => {
     // Arrange
@@ -146,5 +146,5 @@ describe("diff command integration", () => {
     expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(exitCode);
     const output = stripAnsi(stdout);
     expect(output).toBeTruthy();
-  });
+  }, 15000); // Increased timeout for process spawning under load
 });

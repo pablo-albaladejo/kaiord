@@ -1,4 +1,4 @@
-import { createDefaultProviders } from "@kaiord/core";
+import { createAllProviders } from "@kaiord/all";
 import { loadConfigWithMetadata } from "../../utils/config-loader.js";
 import { formatError } from "../../utils/error-formatter.js";
 import { ExitCode } from "../../utils/exit-codes.js";
@@ -42,7 +42,7 @@ export const diffCommand = async (options: DiffOptions): Promise<number> => {
   }
 
   try {
-    const providers = createDefaultProviders(logger);
+    const providers = createAllProviders(logger);
 
     logger.debug("Loading files for comparison", {
       file1: validatedOptions.file1,

@@ -14,6 +14,22 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],
     css: true,
+    // Filter out act() warnings from Radix UI components (false positives in Node 20.x)
+    onConsoleLog(log: string, type: "stdout" | "stderr"): false | void {
+      if (
+        type === "stderr" &&
+        log.includes("not wrapped in act(...)") &&
+        (log.includes("Tooltip") ||
+          log.includes("Presence") ||
+          log.includes("Portal") ||
+          log.includes("PopperContent") ||
+          log.includes("DismissableLayer") ||
+          log.includes("FocusScope") ||
+          log.includes("TargetPicker"))
+      ) {
+        return false; // Suppress this log
+      }
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "json", "html", "lcov"],

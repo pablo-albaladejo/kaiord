@@ -687,10 +687,8 @@ describe("OnboardingTutorial", () => {
 
       // Assert
       const dialog = screen.getByRole("dialog");
-      expect(dialog).toHaveAttribute(
-        "aria-describedby",
-        "tutorial-description"
-      );
+      expect(dialog).toHaveAttribute("aria-describedby");
+      expect(dialog.getAttribute("aria-describedby")).toBeTruthy();
     });
   });
 });

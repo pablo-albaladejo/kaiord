@@ -1,0 +1,60 @@
+{
+  "name": "@kaiord/tcx",
+  "version": "1.0.0",
+  "description": "TCX format adapter for Kaiord workout data conversion",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit && eslint . && prettier --check src",
+    "lint:fix": "eslint . --fix && prettier --write src",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@kaiord/core": "workspace:^",
+    "fast-xml-parser": "^5.3.4",
+    "zod": "^3.22.4"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "tsup": "^8.5.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pablo-albaladejo/kaiord.git",
+    "directory": "packages/tcx"
+  },
+  "homepage": "https://www.npmjs.com/package/@kaiord/tcx",
+  "bugs": {
+    "url": "https://github.com/pablo-albaladejo/kaiord/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "kaiord",
+    "tcx",
+    "workout",
+    "converter",
+    "fitness"
+  ],
+  "author": "Kaiord Contributors",
+  "license": "MIT"
+}

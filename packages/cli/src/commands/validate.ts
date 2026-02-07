@@ -1,10 +1,10 @@
 import type { ToleranceConfig } from "@kaiord/core";
 import {
-  createDefaultProviders,
   createToleranceChecker,
   toleranceConfigSchema,
   validateRoundTrip,
 } from "@kaiord/core";
+import { createAllProviders } from "@kaiord/all";
 import { readFile as fsReadFile } from "fs/promises";
 import ora from "ora";
 import { z } from "zod";
@@ -112,7 +112,7 @@ export const validateCommand = async (options: unknown): Promise<number> => {
     }
 
     // Get providers
-    const providers = createDefaultProviders(logger);
+    const providers = createAllProviders(logger);
 
     // Create tolerance checker with custom config if provided
     const toleranceChecker = toleranceConfig
@@ -121,8 +121,8 @@ export const validateCommand = async (options: unknown): Promise<number> => {
 
     // Create validateRoundTrip function with dependencies
     const roundTripValidator = validateRoundTrip(
-      providers.fitReader,
-      providers.fitWriter,
+      providers.fitReader!,
+      providers.fitWriter!,
       toleranceChecker,
       logger
     );

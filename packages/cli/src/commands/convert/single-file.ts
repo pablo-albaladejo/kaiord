@@ -1,4 +1,4 @@
-import type { createDefaultProviders, Logger } from "@kaiord/core";
+import type { Logger, Providers } from "@kaiord/core";
 import ora from "ora";
 import { writeFile } from "../../utils/file-handler";
 import { detectFormat, type FileFormat } from "../../utils/format-detector";
@@ -13,7 +13,7 @@ export const convertSingleFile = async (
   outputFile: string,
   inputFormat: string,
   outputFormat: string,
-  providers: ReturnType<typeof createDefaultProviders>
+  providers: Providers
 ): Promise<void> => {
   const krd = await loadFileAsKrd(inputFile, inputFormat, providers);
   const outputData = await convertFromKrd(krd, outputFormat, providers);
@@ -25,7 +25,7 @@ export const convertSingleFile = async (
  */
 export const executeSingleFileConversion = async (
   options: ValidatedConvertOptions,
-  providers: ReturnType<typeof createDefaultProviders>,
+  providers: Providers,
   logger: Logger
 ): Promise<void> => {
   const inputFormat = options.inputFormat || detectFormat(options.input);
