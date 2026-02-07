@@ -617,7 +617,7 @@ brew install act
 act -j test
 
 # Or match CI environment
-docker run -it node:20-alpine sh
+docker run -it node:24-alpine sh
 ```
 
 #### Workflow Stuck in "Queued" State
