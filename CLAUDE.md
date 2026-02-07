@@ -56,6 +56,7 @@ When working on this codebase, ALL problems must be fixed, regardless of whether
 - ✅ **All tests passing** - 100% pass rate across all packages
 
 If you encounter warnings or errors during your work:
+
 1. **Fix them immediately** - Don't defer or document for later
 2. **Fix pre-existing issues** - Clean up technical debt proactively
 3. **Leave the codebase cleaner** - Boy Scout Rule applies
