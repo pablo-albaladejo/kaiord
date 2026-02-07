@@ -12,6 +12,42 @@ import type { AdapterProviders, Providers } from "./provider-types";
 
 export type { AdapterProviders, Providers } from "./provider-types";
 
+const wireAdapters = (
+  result: Providers,
+  adapters: AdapterProviders | undefined,
+  sv: ReturnType<typeof createSchemaValidator>,
+  log: Logger
+): void => {
+  if (adapters?.fit) {
+    result.fitReader = adapters.fit.fitReader;
+    result.fitWriter = adapters.fit.fitWriter;
+    result.convertFitToKrd = convertFitToKrd(adapters.fit.fitReader, sv, log);
+    result.convertKrdToFit = convertKrdToFit(adapters.fit.fitWriter, sv, log);
+  }
+  if (adapters?.tcx) {
+    result.tcxReader = adapters.tcx.tcxReader;
+    result.tcxWriter = adapters.tcx.tcxWriter;
+    result.tcxValidator = adapters.tcx.tcxValidator;
+    result.convertTcxToKrd = convertTcxToKrd(adapters.tcx.tcxReader, sv, log);
+    result.convertKrdToTcx = convertKrdToTcx(adapters.tcx.tcxWriter, sv, log);
+  }
+  if (adapters?.zwo) {
+    result.zwiftReader = adapters.zwo.zwiftReader;
+    result.zwiftWriter = adapters.zwo.zwiftWriter;
+    result.zwiftValidator = adapters.zwo.zwiftValidator;
+    result.convertZwiftToKrd = convertZwiftToKrd(
+      adapters.zwo.zwiftReader,
+      sv,
+      log
+    );
+    result.convertKrdToZwift = convertKrdToZwift(
+      adapters.zwo.zwiftWriter,
+      sv,
+      log
+    );
+  }
+};
+
 /**
  * Creates default providers with adapter dependencies wired together.
  *
@@ -30,37 +66,6 @@ export const createDefaultProviders = (
     toleranceChecker: createToleranceChecker(),
     logger: log,
   };
-
-  if (adapters?.fit) {
-    result.fitReader = adapters.fit.fitReader;
-    result.fitWriter = adapters.fit.fitWriter;
-    result.convertFitToKrd = convertFitToKrd(adapters.fit.fitReader, sv, log);
-    result.convertKrdToFit = convertKrdToFit(adapters.fit.fitWriter, sv, log);
-  }
-
-  if (adapters?.tcx) {
-    result.tcxReader = adapters.tcx.tcxReader;
-    result.tcxWriter = adapters.tcx.tcxWriter;
-    result.tcxValidator = adapters.tcx.tcxValidator;
-    result.convertTcxToKrd = convertTcxToKrd(adapters.tcx.tcxReader, sv, log);
-    result.convertKrdToTcx = convertKrdToTcx(adapters.tcx.tcxWriter, sv, log);
-  }
-
-  if (adapters?.zwo) {
-    result.zwiftReader = adapters.zwo.zwiftReader;
-    result.zwiftWriter = adapters.zwo.zwiftWriter;
-    result.zwiftValidator = adapters.zwo.zwiftValidator;
-    result.convertZwiftToKrd = convertZwiftToKrd(
-      adapters.zwo.zwiftReader,
-      sv,
-      log
-    );
-    result.convertKrdToZwift = convertKrdToZwift(
-      adapters.zwo.zwiftWriter,
-      sv,
-      log
-    );
-  }
-
+  wireAdapters(result, adapters, sv, log);
   return result;
 };
