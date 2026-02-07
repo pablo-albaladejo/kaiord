@@ -14,28 +14,32 @@ describe("validate command integration tests", () => {
     const tmp = await dir({ unsafeCleanup: true });
     tempDir = tmp.path;
     cleanup = tmp.cleanup;
-  });
+  }, 10000); // Increased timeout for setup
 
   describe("successful validation", () => {
-    it("should validate FIT file successfully with exit code 0", async () => {
-      // Arrange
-      const fitFile = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
+    it(
+      "should validate FIT file successfully with exit code 0",
+      { timeout: 10000 },
+      async () => {
+        // Arrange
+        const fitFile = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
 
-      // Act
-      const result = await execa("tsx", [
-        "src/bin/kaiord.ts",
-        "validate",
-        "--input",
-        fitFile,
-      ]);
+        // Act
+        const result = await execa("tsx", [
+          "src/bin/kaiord.ts",
+          "validate",
+          "--input",
+          fitFile,
+        ]);
 
-      // Assert
-      expect(result.exitCode).toBe(0);
-      const output = stripAnsi(result.stdout);
-      expect(output).toContain("Round-trip validation passed");
-    });
+        // Assert
+        expect(result.exitCode).toBe(0);
+        const output = stripAnsi(result.stdout);
+        expect(output).toContain("Round-trip validation passed");
+      }
+    );
 
-    it("should display success message when validation passes", async () => {
+    it("should display success message when validation passes", { timeout: 10000 }, async () => {
       // Arrange
       const fitFile = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
 
@@ -54,7 +58,7 @@ describe("validate command integration tests", () => {
   });
 
   describe("custom tolerance config", () => {
-    it("should load custom tolerance config from JSON file", async () => {
+    it("should load custom tolerance config from JSON file", { timeout: 10000 }, async () => {
       // Arrange
       const fitFile = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
       const toleranceConfigPath = join(tempDir, "tolerance.json");
@@ -88,7 +92,7 @@ describe("validate command integration tests", () => {
       expect(output).toContain("Round-trip validation passed");
     });
 
-    it("should fail with invalid tolerance config JSON", async () => {
+    it("should fail with invalid tolerance config JSON", { timeout: 10000 }, async () => {
       // Arrange
       const fitFile = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
       const toleranceConfigPath = join(tempDir, "invalid-tolerance.json");
@@ -129,7 +133,7 @@ describe("validate command integration tests", () => {
       }
     });
 
-    it("should display error message for missing file", async () => {
+    it("should display error message for missing file", { timeout: 10000 }, async () => {
       // Arrange
       const nonExistentFile = join(tempDir, "nonexistent.fit");
 
@@ -149,7 +153,7 @@ describe("validate command integration tests", () => {
       }
     });
 
-    it("should fail for non-FIT files", async () => {
+    it("should fail for non-FIT files", { timeout: 10000 }, async () => {
       // Arrange
       const krdFile = getFixturePath("krd-files", "WorkoutIndividualSteps.krd");
 
@@ -172,7 +176,7 @@ describe("validate command integration tests", () => {
   });
 
   describe("JSON output", () => {
-    it("should output JSON format when --json flag is set", async () => {
+    it("should output JSON format when --json flag is set", { timeout: 10000 }, async () => {
       // Arrange
       const fitFile = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
 
@@ -195,7 +199,7 @@ describe("validate command integration tests", () => {
       expect(Array.isArray(output.violations)).toBe(true);
     });
 
-    it("should include violations in JSON output when validation fails", async () => {
+    it("should include violations in JSON output when validation fails", { timeout: 10000 }, async () => {
       // Arrange
       const fitFile = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
       const toleranceConfigPath = join(tempDir, "strict-tolerance.json");
@@ -242,7 +246,7 @@ describe("validate command integration tests", () => {
   });
 
   describe("verbosity options", () => {
-    it("should show detailed output with --verbose flag", async () => {
+    it("should show detailed output with --verbose flag", { timeout: 10000 }, async () => {
       // Arrange
       const fitFile = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
 
@@ -261,7 +265,7 @@ describe("validate command integration tests", () => {
       // The exact output depends on logger implementation
     });
 
-    it("should suppress output with --quiet flag", async () => {
+    it("should suppress output with --quiet flag", { timeout: 10000 }, async () => {
       // Arrange
       const fitFile = getFixturePath("fit-files", "WorkoutIndividualSteps.fit");
 

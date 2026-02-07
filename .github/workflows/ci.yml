@@ -112,6 +112,9 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Build packages (required for type checking)
+        run: pnpm -r build
+
       - name: Run linting (ESLint + Prettier)
         run: pnpm lint
 
@@ -125,6 +128,9 @@ jobs:
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
+
+      - name: Build packages (required for type checking)
+        run: pnpm -r build
 
       - name: Run TypeScript type checking
         run: pnpm -r exec tsc --noEmit
