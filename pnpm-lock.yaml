@@ -16,13 +16,13 @@ importers:
     devDependencies:
       "@changesets/cli":
         specifier: ^2.29.7
-        version: 2.29.7(@types/node@20.19.25)
+        version: 2.29.7(@types/node@24.10.1)
       "@eslint/js":
         specifier: ^9.15.0
         version: 9.39.1
       "@types/node":
-        specifier: ^20.11.0
-        version: 20.19.25
+        specifier: ^24.0.0
+        version: 24.10.1
       eslint:
         specifier: ^9.15.0
         version: 9.39.1(jiti@2.6.1)
@@ -138,8 +138,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       "@types/node":
-        specifier: ^20.11.0
-        version: 20.19.25
+        specifier: ^24.0.0
+        version: 24.10.1
       "@types/rosie":
         specifier: ^0.0.45
         version: 0.0.45
@@ -160,7 +160,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
+        version: 4.0.18(@types/node@24.10.1)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
 
   packages/fit:
     dependencies:
@@ -178,8 +178,8 @@ importers:
         specifier: ^10.1.0
         version: 10.1.0
       "@types/node":
-        specifier: ^20.11.0
-        version: 20.19.25
+        specifier: ^24.0.0
+        version: 24.10.1
       "@types/rosie":
         specifier: ^0.0.45
         version: 0.0.45
@@ -200,7 +200,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
+        version: 4.0.18(@types/node@24.10.1)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
 
   packages/tcx:
     dependencies:
@@ -215,8 +215,8 @@ importers:
         version: 3.25.76
     devDependencies:
       "@types/node":
-        specifier: ^20.11.0
-        version: 20.19.25
+        specifier: ^24.0.0
+        version: 24.10.1
       "@vitest/coverage-v8":
         specifier: ^4.0.18
         version: 4.0.18(vitest@4.0.18)
@@ -231,7 +231,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
+        version: 4.0.18(@types/node@24.10.1)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
 
   packages/workout-spa-editor:
     dependencies:
@@ -406,8 +406,8 @@ importers:
         version: 3.25.76
     devDependencies:
       "@types/node":
-        specifier: ^20.11.0
-        version: 20.19.25
+        specifier: ^24.0.0
+        version: 24.10.1
       "@vitest/coverage-v8":
         specifier: ^4.0.18
         version: 4.0.18(vitest@4.0.18)
@@ -422,7 +422,7 @@ importers:
         version: 5.9.3
       vitest:
         specifier: ^4.0.18
-        version: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
+        version: 4.0.18(@types/node@24.10.1)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
 
 packages:
   "@acemir/cssom@0.9.23":
@@ -7496,7 +7496,7 @@ snapshots:
     dependencies:
       "@changesets/types": 6.1.0
 
-  "@changesets/cli@2.29.7(@types/node@20.19.25)":
+  "@changesets/cli@2.29.7(@types/node@24.10.1)":
     dependencies:
       "@changesets/apply-release-plan": 7.0.13
       "@changesets/assemble-release-plan": 6.0.9
@@ -7512,7 +7512,7 @@ snapshots:
       "@changesets/should-skip-package": 0.1.2
       "@changesets/types": 6.1.0
       "@changesets/write": 0.4.0
-      "@inquirer/external-editor": 1.0.3(@types/node@20.19.25)
+      "@inquirer/external-editor": 1.0.3(@types/node@24.10.1)
       "@manypkg/get-packages": 1.1.3
       ansi-colors: 4.1.3
       ci-info: 3.9.0
@@ -7988,12 +7988,12 @@ snapshots:
 
   "@humanwhocodes/retry@0.4.3": {}
 
-  "@inquirer/external-editor@1.0.3(@types/node@20.19.25)":
+  "@inquirer/external-editor@1.0.3(@types/node@24.10.1)":
     dependencies:
       chardet: 2.1.1
       iconv-lite: 0.7.0
     optionalDependencies:
-      "@types/node": 20.19.25
+      "@types/node": 24.10.1
 
   "@isaacs/balanced-match@4.0.1": {}
 
@@ -9157,7 +9157,7 @@ snapshots:
       obug: 2.1.1
       std-env: 3.10.0
       tinyrainbow: 3.0.3
-      vitest: 4.0.18(@types/node@20.19.25)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
+      vitest: 4.0.18(@types/node@24.10.1)(@vitest/ui@4.0.18)(jiti@2.6.1)(jsdom@27.2.0)(lightningcss@1.30.2)(terser@5.44.1)(tsx@4.20.6)
 
   "@vitest/expect@2.0.5":
     dependencies:

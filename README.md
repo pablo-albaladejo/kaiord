@@ -121,7 +121,7 @@ For detailed installation instructions and usage examples, see the **[Getting St
 
 Kaiord uses GitHub Actions for continuous integration and deployment:
 
-- **Automated Testing**: Multi-version testing on Node.js 20.x and 22.x
+- **Automated Testing**: Multi-version testing on Node.js 20.x, 22.x, and 24.x (Active LTS)
 - **Code Quality**: ESLint, Prettier, and TypeScript strict mode validation
 - **Release Automation**: Changesets for version management and npm publishing
 - **Security**: Weekly dependency vulnerability audits

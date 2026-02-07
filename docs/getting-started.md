@@ -14,13 +14,13 @@ Kaiord is a toolkit for workout data. It helps you:
 
 Before you start, install these tools:
 
-- **Node.js** version 20 or newer ([download here](https://nodejs.org/))
+- **Node.js** version 20 or newer (Node.js 24 recommended) ([download here](https://nodejs.org/))
 - **pnpm** package manager ([install guide](https://pnpm.io/installation))
 
 Check your versions:
 
 ```bash
-node --version  # Should show v20.0.0 or higher
+node --version  # Should show v20.0.0 or higher (v24.x recommended)
 pnpm --version  # Should show 9.15.0 or higher
 ```
 
