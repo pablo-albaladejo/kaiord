@@ -134,7 +134,7 @@ jobs:
         if: steps.changesets.outputs.has-changesets == 'true'
         env:
           NPM_CONFIG_PROVENANCE: true
-        run: pnpm exec changeset publish --provenance
+        run: pnpm exec changeset publish
 
       - name: Create GitHub Releases
         if: steps.changesets.outputs.has-changesets == 'true'
