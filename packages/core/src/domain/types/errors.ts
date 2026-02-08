@@ -25,6 +25,8 @@ export {
   ZwiftValidationError,
 } from "./zwift-errors";
 
+export { createGarminParsingError, GarminParsingError } from "./garmin-errors";
+
 export {
   createToleranceExceededError,
   ToleranceExceededError,

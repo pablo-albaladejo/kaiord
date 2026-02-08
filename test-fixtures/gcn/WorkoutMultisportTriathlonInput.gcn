@@ -1,0 +1,79 @@
+{
+  "sportType": {"sportTypeId": 10, "sportTypeKey": "multi_sport", "displayOrder": 4},
+  "subSportType": null,
+  "workoutName": "MEGA MULTISPORT - Complete Triathlon",
+  "estimatedDistanceUnit": {"unitKey": null},
+  "workoutSegments": [
+    {
+      "segmentOrder": 1,
+      "sportType": {"sportTypeId": 2, "sportTypeKey": "cycling", "displayOrder": 2},
+      "workoutSteps": [
+        {
+          "stepId": 1001,
+          "stepOrder": 1,
+          "stepType": {"stepTypeId": 3, "stepTypeKey": "interval", "displayOrder": 3},
+          "type": "ExecutableStepDTO",
+          "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayOrder": 2, "displayable": true},
+          "endConditionValue": 600,
+          "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target", "displayOrder": 1}
+        }
+      ],
+      "avgTrainingSpeed": 7.0,
+      "estimatedDurationInSecs": 600,
+      "estimatedDistanceInMeters": 4200,
+      "estimateType": "DISTANCE_ESTIMATED",
+      "estimatedDistanceUnit": {"unitKey": "kilometer"}
+    },
+    {
+      "segmentOrder": 2,
+      "sportType": {"sportTypeId": 1, "sportTypeKey": "running", "displayOrder": 1},
+      "workoutSteps": [
+        {
+          "stepId": 2001,
+          "stepOrder": 2,
+          "stepType": {"stepTypeId": 3, "stepTypeKey": "interval", "displayOrder": 3},
+          "type": "ExecutableStepDTO",
+          "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayOrder": 3, "displayable": true},
+          "endConditionValue": 1000,
+          "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target", "displayOrder": 1}
+        }
+      ],
+      "avgTrainingSpeed": 2.5,
+      "estimatedDurationInSecs": 400,
+      "estimatedDistanceInMeters": 1000,
+      "estimateType": "TIME_ESTIMATED",
+      "estimatedDistanceUnit": {"unitKey": "kilometer"}
+    },
+    {
+      "segmentOrder": 3,
+      "sportType": {"sportTypeId": 4, "sportTypeKey": "swimming", "displayOrder": 3},
+      "workoutSteps": [
+        {
+          "stepId": 3001,
+          "stepOrder": 3,
+          "stepType": {"stepTypeId": 3, "stepTypeKey": "interval", "displayOrder": 3},
+          "type": "ExecutableStepDTO",
+          "preferredEndConditionUnit": {"unitKey": "meter"},
+          "strokeType": {"strokeTypeId": 1, "strokeTypeKey": "mixed", "displayOrder": 1},
+          "equipmentType": {"equipmentTypeId": null, "equipmentTypeKey": null, "displayOrder": null},
+          "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayOrder": 3, "displayable": true},
+          "endConditionValue": 500,
+          "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target", "displayOrder": 1}
+        }
+      ],
+      "poolLength": 25,
+      "poolLengthUnit": {"unitId": 1, "unitKey": "meter", "factor": 100},
+      "avgTrainingSpeed": 1.0,
+      "estimatedDurationInSecs": 0,
+      "estimatedDistanceInMeters": 500,
+      "estimateType": "TIME_ESTIMATED",
+      "estimatedDistanceUnit": {"unitKey": null}
+    }
+  ],
+  "estimatedDurationInSecs": 0,
+  "estimatedDistanceInMeters": 0,
+  "estimateType": null,
+  "poolLength": 25,
+  "poolLengthUnit": {"unitId": 1, "unitKey": "meter", "factor": 100},
+  "isWheelchair": false
+}

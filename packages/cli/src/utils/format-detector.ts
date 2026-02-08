@@ -4,7 +4,7 @@ import { z } from "zod";
 /**
  * Supported file formats for workout conversion
  */
-export const fileFormatSchema = z.enum(["fit", "krd", "tcx", "zwo"]);
+export const fileFormatSchema = z.enum(["fit", "gcn", "krd", "tcx", "zwo"]);
 
 export type FileFormat = z.infer<typeof fileFormatSchema>;
 
@@ -13,6 +13,7 @@ export type FileFormat = z.infer<typeof fileFormatSchema>;
  */
 const EXTENSION_TO_FORMAT: Record<string, FileFormat> = {
   ".fit": "fit",
+  ".gcn": "gcn",
   ".krd": "krd",
   ".tcx": "tcx",
   ".zwo": "zwo",

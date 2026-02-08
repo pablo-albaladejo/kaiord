@@ -32,6 +32,8 @@ export const getFormatName = (format: WorkoutFileFormat): string => {
       return "ZWO";
     case "krd":
       return "KRD";
+    case "gcn":
+      return "GCN";
   }
 };
 
@@ -64,6 +66,12 @@ export const getFormatDescription = (
       return {
         description: "Kaiord format - JSON-based canonical workout format",
         compatibility: ["Kaiord tools", "Web editors"],
+      };
+    case "gcn":
+      return {
+        description:
+          "Garmin Connect JSON - Structured workout from Garmin Connect API",
+        compatibility: ["Garmin Connect", "Garmin devices"],
       };
   }
 };

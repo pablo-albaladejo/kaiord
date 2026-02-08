@@ -7,6 +7,7 @@ on:
     paths:
       - ".changeset/**"
       - "packages/core/**"
+      - "packages/garmin/**"
       - "packages/cli/**"
   workflow_dispatch:
 
@@ -75,6 +76,7 @@ jobs:
         run: |
           # Store current versions
           CORE_VERSION_BEFORE=$(node -p "require('./packages/core/package.json').version")
+          GARMIN_VERSION_BEFORE=$(node -p "require('./packages/garmin/package.json').version")
           CLI_VERSION_BEFORE=$(node -p "require('./packages/cli/package.json').version")
 
           # Run changeset version
@@ -88,10 +90,12 @@ jobs:
           pnpm --filter @kaiord/fit build
           pnpm --filter @kaiord/tcx build
           pnpm --filter @kaiord/zwo build
+          pnpm --filter @kaiord/garmin build
           pnpm --filter @kaiord/cli build
 
           # Get new versions
           CORE_VERSION_AFTER=$(node -p "require('./packages/core/package.json').version")
+          GARMIN_VERSION_AFTER=$(node -p "require('./packages/garmin/package.json').version")
           CLI_VERSION_AFTER=$(node -p "require('./packages/cli/package.json').version")
 
           # Determine what changed
@@ -100,6 +104,13 @@ jobs:
             echo "core-version=$CORE_VERSION_AFTER" >> $GITHUB_OUTPUT
           else
             echo "core-changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$GARMIN_VERSION_BEFORE" != "$GARMIN_VERSION_AFTER" ]; then
+            echo "garmin-changed=true" >> $GITHUB_OUTPUT
+            echo "garmin-version=$GARMIN_VERSION_AFTER" >> $GITHUB_OUTPUT
+          else
+            echo "garmin-changed=false" >> $GITHUB_OUTPUT
           fi
 
           if [ "$CLI_VERSION_BEFORE" != "$CLI_VERSION_AFTER" ]; then
@@ -139,8 +150,12 @@ jobs:
             echo "- ✅ [@kaiord/core@${{ steps.version.outputs.core-version }}](https://www.npmjs.com/package/@kaiord/core/v/${{ steps.version.outputs.core-version }})" >> $GITHUB_STEP_SUMMARY
           fi
 
+          if [ "${{ steps.version.outputs.garmin-changed }}" = "true" ]; then
+            echo "- @kaiord/garmin@${{ steps.version.outputs.garmin-version }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
           if [ "${{ steps.version.outputs.cli-changed }}" = "true" ]; then
-            echo "- ✅ [@kaiord/cli@${{ steps.version.outputs.cli-version }}](https://www.npmjs.com/package/@kaiord/cli/v/${{ steps.version.outputs.cli-version }})" >> $GITHUB_STEP_SUMMARY
+            echo "- @kaiord/cli@${{ steps.version.outputs.cli-version }}" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: No changes

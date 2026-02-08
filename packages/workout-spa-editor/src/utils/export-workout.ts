@@ -1,12 +1,13 @@
 /**
  * Export Workout Utility
  *
- * Handles exporting workout files in various formats (FIT, TCX, ZWO, KRD)
+ * Handles exporting workout files in various formats (FIT, TCX, ZWO, KRD, GCN)
  * from the canonical KRD format.
  */
 
 import {
   exportFitFile,
+  exportGcnFile,
   exportKrdFile,
   exportTcxFile,
   exportZwoFile,
@@ -47,6 +48,8 @@ export const exportWorkout = async (
       buffer = await exportTcxFile(krd, onProgress);
     } else if (format === "zwo") {
       buffer = await exportZwoFile(krd, onProgress);
+    } else if (format === "gcn") {
+      buffer = await exportGcnFile(krd, onProgress);
     } else {
       throw new ExportError(`Unsupported format: ${format}`, format);
     }

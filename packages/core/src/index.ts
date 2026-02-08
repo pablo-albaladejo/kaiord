@@ -1,6 +1,6 @@
 /**
  * @kaiord/core - Public API
- * Bidirectional conversion between FIT workout files and KRD format
+ * Bidirectional conversion between workout formats (FIT, TCX, ZWO, Garmin) and KRD
  */
 
 // ============================================
@@ -99,6 +99,7 @@ export { convertLengthToMeters } from "./domain/converters/length-unit.converter
 
 export {
   FitParsingError,
+  GarminParsingError,
   KrdValidationError,
   TcxParsingError,
   TcxValidationError,
@@ -106,6 +107,7 @@ export {
   ZwiftParsingError,
   ZwiftValidationError,
   createFitParsingError,
+  createGarminParsingError,
   createKrdValidationError,
   createTcxParsingError,
   createTcxValidationError,
@@ -143,6 +145,8 @@ export type {
 
 export type { FitReader } from "./ports/fit-reader";
 export type { FitWriter } from "./ports/fit-writer";
+export type { GarminReader } from "./ports/garmin-reader";
+export type { GarminWriter } from "./ports/garmin-writer";
 export type { LogLevel, Logger } from "./ports/logger";
 export { createConsoleLogger } from "./adapters/logger/console-logger";
 export type { TcxReader } from "./ports/tcx-reader";
@@ -176,6 +180,12 @@ export type { ConvertZwiftToKrd } from "./application/use-cases/convert-zwift-to
 
 export { convertKrdToZwift } from "./application/use-cases/convert-krd-to-zwift";
 export type { ConvertKrdToZwift } from "./application/use-cases/convert-krd-to-zwift";
+
+export { convertGarminToKrd } from "./application/use-cases/convert-garmin-to-krd";
+export type { ConvertGarminToKrd } from "./application/use-cases/convert-garmin-to-krd";
+
+export { convertKrdToGarmin } from "./application/use-cases/convert-krd-to-garmin";
+export type { ConvertKrdToGarmin } from "./application/use-cases/convert-krd-to-garmin";
 
 export { validateRoundTrip } from "./tests/round-trip/validate-round-trip";
 export type { ValidateRoundTrip } from "./tests/round-trip/validate-round-trip";

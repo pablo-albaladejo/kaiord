@@ -1,10 +1,12 @@
 import {
   createDefaultProviders,
   FitParsingError,
+  GarminParsingError,
   KrdValidationError,
   ToleranceExceededError,
 } from "@kaiord/core";
 import { createFitProviders } from "@kaiord/fit";
+import { createGarminProviders } from "@kaiord/garmin";
 import { createTcxProviders } from "@kaiord/tcx";
 import { createZwoProviders } from "@kaiord/zwo";
 import {
@@ -83,6 +85,7 @@ export const convertCommand = async (
     const providers = createDefaultProviders(
       {
         fit: createFitProviders(logger),
+        garmin: createGarminProviders(logger),
         tcx: createTcxProviders(logger),
         zwo: createZwoProviders(logger),
       },
@@ -116,6 +119,8 @@ export const convertCommand = async (
       } else if (error.message.includes("Permission denied")) {
         exitCode = ExitCode.PERMISSION_DENIED;
       } else if (error instanceof FitParsingError) {
+        exitCode = ExitCode.PARSING_ERROR;
+      } else if (error instanceof GarminParsingError) {
         exitCode = ExitCode.PARSING_ERROR;
       } else if (error instanceof KrdValidationError) {
         exitCode = ExitCode.VALIDATION_ERROR;

@@ -28,6 +28,13 @@ export const formatOptions: FormatOption[] = [
     compatibility: ["Zwift"],
   },
   {
+    value: "gcn",
+    label: "GCN",
+    description:
+      "Garmin Connect JSON - Structured workout for Garmin Connect API",
+    compatibility: ["Garmin Connect", "Garmin devices"],
+  },
+  {
     value: "krd",
     label: "KRD",
     description: "Kaiord format - JSON-based canonical workout format",

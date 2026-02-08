@@ -1,0 +1,141 @@
+{
+  "sportType": {"sportTypeId": 4, "sportTypeKey": "swimming"},
+  "workoutName": "MEGA SWIM - Complete IM + Equipment",
+  "poolLength": 25,
+  "poolLengthUnit": {"unitKey": "meter"},
+  "workoutSegments": [{
+    "segmentOrder": 1,
+    "sportType": {"sportTypeId": 4, "sportTypeKey": "swimming"},
+    "poolLength": 25,
+    "poolLengthUnit": {"unitKey": "meter"},
+    "workoutSteps": [
+      {
+        "stepId": 1, "stepOrder": 1,
+        "stepType": {"stepTypeId": 1, "stepTypeKey": "warmup"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+        "endConditionValue": 200,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"},
+        "strokeType": {"strokeTypeId": 1}
+      },
+      {
+        "stepId": 2, "stepOrder": 2,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+        "endConditionValue": 100,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"},
+        "strokeType": {"strokeTypeId": 5}
+      },
+      {
+        "stepId": 3, "stepOrder": 3,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+        "endConditionValue": 100,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"},
+        "strokeType": {"strokeTypeId": 2}
+      },
+      {
+        "stepId": 4, "stepOrder": 4,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+        "endConditionValue": 100,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"},
+        "strokeType": {"strokeTypeId": 3}
+      },
+      {
+        "stepId": 5, "stepOrder": 5,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+        "endConditionValue": 100,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"},
+        "strokeType": {"strokeTypeId": 1}
+      },
+      {
+        "stepId": 6, "stepOrder": 6,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+        "endConditionValue": 200,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"},
+        "strokeType": {"strokeTypeId": 4},
+        "equipmentType": {"equipmentTypeId": 2}
+      },
+      {
+        "stepId": 7, "stepOrder": 7,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+        "endConditionValue": 200,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"},
+        "strokeType": {"strokeTypeId": 1},
+        "equipmentType": {"equipmentTypeId": 4}
+      },
+      {
+        "stepId": 8, "stepOrder": 8,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+        "endConditionValue": 200,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"},
+        "strokeType": {"strokeTypeId": 1},
+        "equipmentType": {"equipmentTypeId": 1}
+      },
+      {
+        "stepId": 9, "stepOrder": 9,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+        "endConditionValue": 200,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"},
+        "strokeType": {"strokeTypeId": 1},
+        "equipmentType": {"equipmentTypeId": 3}
+      },
+      {
+        "stepId": 10, "stepOrder": 10,
+        "stepType": {"stepTypeId": 6, "stepTypeKey": "repeat"},
+        "type": "RepeatGroupDTO",
+        "numberOfIterations": 4,
+        "smartRepeat": false,
+        "endCondition": {"conditionTypeId": 7, "conditionTypeKey": "iterations", "displayable": false},
+        "endConditionValue": 4,
+        "workoutSteps": [
+          {
+            "stepId": 11, "stepOrder": 1,
+            "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+            "type": "ExecutableStepDTO",
+            "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+            "endConditionValue": 100,
+            "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"},
+            "strokeType": {"strokeTypeId": 1}
+          },
+          {
+            "stepId": 12, "stepOrder": 2,
+            "stepType": {"stepTypeId": 5, "stepTypeKey": "rest"},
+            "type": "ExecutableStepDTO",
+            "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+            "endConditionValue": 20,
+            "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+          }
+        ]
+      },
+      {
+        "stepId": 13, "stepOrder": 11,
+        "stepType": {"stepTypeId": 2, "stepTypeKey": "cooldown"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+        "endConditionValue": 100,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"},
+        "strokeType": {"strokeTypeId": 1}
+      }
+    ]
+  }],
+  "avgTrainingSpeed": 1.2,
+  "estimatedDurationInSecs": 0,
+  "estimatedDistanceInMeters": 0,
+  "estimateType": null,
+  "isWheelchair": false
+}

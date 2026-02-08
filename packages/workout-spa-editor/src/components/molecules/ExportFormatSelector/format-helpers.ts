@@ -28,6 +28,11 @@ export const getFormatWarnings = (
       format: "zwo",
       message: "ZWO format only supports cycling workouts",
     },
+    {
+      format: "gcn",
+      message:
+        "GCN format is designed for the Garmin Connect API and may not preserve all features",
+    },
   ];
 
   const warning = warnings.find((w) => w.format === format);
