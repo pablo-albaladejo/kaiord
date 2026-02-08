@@ -9,6 +9,7 @@
 3. **Package is published** without manual token management
 
 **Benefits:**
+
 - ✅ No token expiration (no 90-day renewal)
 - ✅ No secrets to manage
 - ✅ Better security (short-lived tokens)
@@ -36,6 +37,7 @@ For **each package** you want to publish:
 6. Click **"Add"**
 
 **Repeat for all packages:**
+
 - @kaiord/core
 - @kaiord/fit
 - @kaiord/tcx
@@ -50,12 +52,12 @@ For **each package** you want to publish:
 Your workflow already has the required configuration:
 
 ```yaml
-name: Release  # ← Must match npm Trusted Publisher config
+name: Release # ← Must match npm Trusted Publisher config
 
 permissions:
-  contents: write  # For git operations
-  issues: write    # For GitHub releases
-  id-token: write  # ← REQUIRED for OIDC
+  contents: write # For git operations
+  issues: write # For GitHub releases
+  id-token: write # ← REQUIRED for OIDC
 
 jobs:
   release:
@@ -63,11 +65,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          registry-url: "https://registry.npmjs.org"  # ← REQUIRED
+          registry-url: "https://registry.npmjs.org" # ← REQUIRED
 
       - name: Publish to npm with provenance
         env:
-          NPM_CONFIG_PROVENANCE: true  # ← Enables provenance
+          NPM_CONFIG_PROVENANCE: true # ← Enables provenance
         run: pnpm exec changeset publish
 ```
 
@@ -103,6 +105,7 @@ git push
 ```
 
 The workflow will:
+
 1. ✅ Generate OIDC token automatically
 2. ✅ Authenticate with npm via Trusted Publisher
 3. ✅ Publish with provenance
@@ -128,6 +131,7 @@ npm view @kaiord/core version
 **Cause:** Trusted Publisher not configured on npm.com
 
 **Solution:**
+
 1. Verify you completed Step 1 for the package
 2. Check workflow name matches exactly: `Release`
 3. Verify repository owner/name are correct
@@ -138,6 +142,7 @@ npm view @kaiord/core version
 **Cause:** Workflow name doesn't match
 
 **Solution:**
+
 - Workflow name in `.github/workflows/release.yml` must be exactly `Release`
 - Check for typos or extra spaces
 
@@ -146,6 +151,7 @@ npm view @kaiord/core version
 **Cause:** Missing paths or no changesets
 
 **Solution:**
+
 - Verify `.changeset/*.md` files exist (except README.md)
 - Check paths in workflow include your package directory
 - Trigger manually: `gh workflow run release.yml`
@@ -155,12 +161,13 @@ npm view @kaiord/core version
 **Cause:** Missing `NPM_CONFIG_PROVENANCE` or `id-token` permission
 
 **Solution:**
+
 ```yaml
 permissions:
-  id-token: write  # Must be present
+  id-token: write # Must be present
 
 env:
-  NPM_CONFIG_PROVENANCE: true  # Must be set
+  NPM_CONFIG_PROVENANCE: true # Must be set
 ```
 
 ## Migration from Token-Based Publishing
@@ -172,12 +179,13 @@ If you previously used `NPM_TOKEN`:
 ```yaml
 - name: Publish to npm
   env:
-    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}  # Fallback
+    NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }} # Fallback
     NPM_CONFIG_PROVENANCE: true
   run: pnpm exec changeset publish
 ```
 
 This works with both:
+
 - Trusted Publishing (when configured on npm)
 - Token-based (when Trusted Publisher not configured)
 
