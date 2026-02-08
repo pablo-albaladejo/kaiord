@@ -9,14 +9,14 @@
 
 ### ✅ All 6 Tests Successful (HTTP 200)
 
-| Test # | Workout Type | workoutId | Steps | Status |
-|--------|--------------|-----------|-------|--------|
-| 1 | Running (Nested Repeats) | 1467223385 | 6 | ✅ |
-| 2 | Cycling (Power + Cadence) | 1467223396 | 6 | ✅ |
-| 3 | Swimming (All Strokes) | 1467223403 | 11 | ✅ |
-| 4 | Strength (Reps) | 1467223413 | 3 | ✅ |
-| 5 | Edge Cases | 1467223419 | 1 | ✅ |
-| 6 | Multisport (Triathlon) | 1467223439 | 1 | ✅ |
+| Test # | Workout Type              | workoutId  | Steps | Status |
+| ------ | ------------------------- | ---------- | ----- | ------ |
+| 1      | Running (Nested Repeats)  | 1467223385 | 6     | ✅     |
+| 2      | Cycling (Power + Cadence) | 1467223396 | 6     | ✅     |
+| 3      | Swimming (All Strokes)    | 1467223403 | 11    | ✅     |
+| 4      | Strength (Reps)           | 1467223413 | 3     | ✅     |
+| 5      | Edge Cases                | 1467223419 | 1     | ✅     |
+| 6      | Multisport (Triathlon)    | 1467223439 | 1     | ✅     |
 
 ---
 
@@ -29,13 +29,14 @@ All 4 issues identified in the schema validation report were **confirmed** with 
 #### 1. RepeatGroupDTO - Missing Fields ✅
 
 **Found in response:**
+
 ```json
 {
   "type": "RepeatGroupDTO",
-  "stepId": 12368371262,              // ✅ Present (server-generated)
-  "preferredEndConditionUnit": null,  // ✅ Present (always null)
-  "endConditionCompare": null,        // ✅ Present (always null)
-  "skipLastRestStep": null            // ✅ Present (always null)
+  "stepId": 12368371262, // ✅ Present (server-generated)
+  "preferredEndConditionUnit": null, // ✅ Present (always null)
+  "endConditionCompare": null, // ✅ Present (always null)
+  "skipLastRestStep": null // ✅ Present (always null)
 }
 ```
 
@@ -44,10 +45,11 @@ All 4 issues identified in the schema validation report were **confirmed** with 
 #### 2. ExecutableStepDTO - Missing Field ✅
 
 **Found in response:**
+
 ```json
 {
   "type": "ExecutableStepDTO",
-  "preferredEndConditionUnit": null   // ✅ Present (always null)
+  "preferredEndConditionUnit": null // ✅ Present (always null)
 }
 ```
 
@@ -56,6 +58,7 @@ All 4 issues identified in the schema validation report were **confirmed** with 
 #### 3. estimatedDistanceUnit - Object with Null Fields ✅
 
 **Found in response:**
+
 ```json
 {
   "estimatedDistanceUnit": {
@@ -83,33 +86,35 @@ All 4 issues identified in the schema validation report were **confirmed** with 
 
 **Input → Output transformations verified:**
 
-| Field | Input | Output | Notes |
-|-------|-------|--------|-------|
-| `workoutId` | ❌ Not present | ✅ 1467223385 | Server-generated |
-| `stepId` | 1 (simple) | 12368371258 | Server replaces with unique ID |
-| `ownerId` | ❌ Not present | ✅ 76086766 | Server adds |
-| `author` | ❌ Not present | ✅ Full object | Server adds user info |
-| `createdDate` | ❌ Not present | ✅ "2026-02-08..." | Server timestamp |
-| `updatedDate` | ❌ Not present | ✅ "2026-02-08..." | Server timestamp |
-| `strokeType.displayOrder` | ❌ Not sent | ✅ 0 | Server adds |
-| `equipmentType.displayOrder` | ❌ Not sent | ✅ 0 | Server adds |
+| Field                        | Input          | Output             | Notes                          |
+| ---------------------------- | -------------- | ------------------ | ------------------------------ |
+| `workoutId`                  | ❌ Not present | ✅ 1467223385      | Server-generated               |
+| `stepId`                     | 1 (simple)     | 12368371258        | Server replaces with unique ID |
+| `ownerId`                    | ❌ Not present | ✅ 76086766        | Server adds                    |
+| `author`                     | ❌ Not present | ✅ Full object     | Server adds user info          |
+| `createdDate`                | ❌ Not present | ✅ "2026-02-08..." | Server timestamp               |
+| `updatedDate`                | ❌ Not present | ✅ "2026-02-08..." | Server timestamp               |
+| `strokeType.displayOrder`    | ❌ Not sent    | ✅ 0               | Server adds                    |
+| `equipmentType.displayOrder` | ❌ Not sent    | ✅ 0               | Server adds                    |
 
 ### Type Expansions
 
 **Input types are minimal:**
+
 ```json
 {
-  "sportType": {"sportTypeId": 1, "sportTypeKey": "running"}
+  "sportType": { "sportTypeId": 1, "sportTypeKey": "running" }
 }
 ```
 
 **Output types are expanded:**
+
 ```json
 {
   "sportType": {
     "sportTypeId": 1,
     "sportTypeKey": "running",
-    "displayOrder": 1    // ← Added by server
+    "displayOrder": 1 // ← Added by server
   }
 }
 ```
@@ -132,14 +137,14 @@ test-fixtures/gcn/
 
 ### Size Comparison
 
-| File | Input Size | Output Size | Growth |
-|------|------------|-------------|--------|
-| Running | ~4 KB | ~15 KB | +275% |
-| Cycling | ~3 KB | ~13 KB | +333% |
-| Swimming | ~4 KB | ~16 KB | +300% |
-| Strength | ~2 KB | ~11 KB | +450% |
-| Edge Cases | ~1 KB | ~4 KB | +300% |
-| Multisport | ~3 KB | ~12 KB | +300% |
+| File       | Input Size | Output Size | Growth |
+| ---------- | ---------- | ----------- | ------ |
+| Running    | ~4 KB      | ~15 KB      | +275%  |
+| Cycling    | ~3 KB      | ~13 KB      | +333%  |
+| Swimming   | ~4 KB      | ~16 KB      | +300%  |
+| Strength   | ~2 KB      | ~11 KB      | +450%  |
+| Edge Cases | ~1 KB      | ~4 KB       | +300%  |
+| Multisport | ~3 KB      | ~12 KB      | +300%  |
 
 **Average output is ~3.5x larger than input** due to server-generated fields.
 
@@ -148,15 +153,18 @@ test-fixtures/gcn/
 ## Schema Validation Status
 
 ### Before Real Tests
+
 - ⚠️ 4 issues identified from fixtures
 - ❓ Not verified against live API
 
 ### After Real Tests
+
 - ✅ 4 issues **confirmed** with live API
 - ✅ 3 issues require schema fixes
 - ✅ 1 issue was false positive (unit.schema.ts already correct)
 
 ### Updated Issue Count
+
 - **3 real schema issues** need fixing
 - **97% accuracy maintained** (18 of 21 schemas perfect)
 
@@ -165,11 +173,13 @@ test-fixtures/gcn/
 ## Action Items
 
 ### Priority 1 - Fix Output Schemas
+
 1. ✅ **VERIFIED** - `repeat.schema.ts` needs 4 fields added
 2. ✅ **VERIFIED** - `step.schema.ts` needs 1 field added
 3. ✅ **FALSE POSITIVE** - `workout.schema.ts` estimatedDistanceUnit is OK as-is
 
 ### Priority 2 - Fix Input Schema
+
 4. ✅ **VERIFIED** - `step-input.schema.ts` should use union types for flexibility
 
 ---
@@ -179,26 +189,32 @@ test-fixtures/gcn/
 ### ✅ 100% API Coverage Confirmed
 
 **Sports:** Running, Cycling, Swimming, Strength, Multisport ✅
+
 - All created successfully
 - All returned proper sportType objects
 
 **Target Types:** Power, HR, Pace, Speed, Cadence, No target ✅
+
 - All tested in various combinations
 - Dual targets work (Power + Cadence, Pace + HR)
 
 **Step Types:** Warmup, Interval, Recovery, Rest, Cooldown, Repeat ✅
+
 - All present in responses
 - Nested repeats work (3 levels deep)
 
 **Condition Types:** Lap, Time, Distance, Calories, Iterations, Reps ✅
+
 - All tested and working
 - Reps condition type works for strength training
 
 **Swimming:** 6 strokes + 6 equipment types ✅
+
 - All strokes present in response
 - Equipment types present in response
 
 **Edge Cases:** ✅
+
 - Long names truncated to 255 chars
 - Single iteration repeats work
 - Global stepOrder in multisport confirmed

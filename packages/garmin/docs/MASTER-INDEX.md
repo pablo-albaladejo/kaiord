@@ -10,6 +10,7 @@
 ## 📋 Quick Navigation
 
 ### 🎯 Start Here
+
 1. **[Final Comprehensive Findings](./garmin-api-final-comprehensive-findings.md)** - **PRIMARY REFERENCE**
    - Complete API documentation (500+ lines)
    - All 6 test results with analysis
@@ -79,6 +80,7 @@
 These schemas are ready to be moved to the actual implementation:
 
 #### Common Schemas
+
 - `common/sport-type.schema.ts` - Sport type definitions
 - `common/step-type.schema.ts` - Step type definitions
 - `common/condition-type.schema.ts` - Condition type definitions
@@ -89,12 +91,14 @@ These schemas are ready to be moved to the actual implementation:
 - `common/unit.schema.ts` - Unit definitions
 
 #### Input Schemas (Flexible)
+
 - `input/workout-input.schema.ts` - Workout input schema
 - `input/segment-input.schema.ts` - Segment input schema (multisport)
 - `input/step-input.schema.ts` - Step input schema
 - `input/repeat-input.schema.ts` - Repeat block input schema
 
 #### Output Schemas (Strict)
+
 - `output/workout.schema.ts` - Workout output schema
 - `output/segment.schema.ts` - Segment output schema
 - `output/step.schema.ts` - Step output schema
@@ -108,6 +112,7 @@ These schemas are ready to be moved to the actual implementation:
 ## 🧪 Test Scripts
 
 ### Minimal Comprehensive Test Suite (RECOMMENDED)
+
 - **`garmin-minimal-comprehensive-tests.sh`** ⭐ **BEST TEST SUITE**
   - 6 MEGA workouts
   - 100% pass rate
@@ -116,6 +121,7 @@ These schemas are ready to be moved to the actual implementation:
   - **Use this for validation**
 
 ### Complete Test Suites
+
 - **`garmin-comprehensive-tests.sh`** - 32 comprehensive tests
   - Swimming strokes (6), equipment (6), subsports (13), other sports (3)
   - 19/32 passed (subsport tests failed)
@@ -126,6 +132,7 @@ These schemas are ready to be moved to the actual implementation:
   - 19/19 passed (100%)
 
 ### Testing Tools
+
 - **`garmin-api-systematic-tests.ts`** - Node.js systematic test script
   - 6 initial systematic tests
   - TypeScript-based
@@ -142,6 +149,7 @@ These schemas are ready to be moved to the actual implementation:
 ## 📊 Test Result Files
 
 ### Minimal Comprehensive Tests (6 files) ⭐
+
 - `garmin-minimal-test-1--mega-running.json` - Running with nested repeats
 - `garmin-minimal-test-2--mega-cycling.json` - Cycling with power/cadence
 - `garmin-minimal-test-3--mega-swimming.json` - Swimming all strokes/equipment
@@ -150,7 +158,9 @@ These schemas are ready to be moved to the actual implementation:
 - `garmin-minimal-test-6--mega-multisport.json` - Multisport triathlon
 
 ### Exhaustive Tests (19 files)
+
 Running tests (6):
+
 - `garmin-exhaustive-1-run:-hr-zone-4.json`
 - `garmin-exhaustive-2-run:-hr-range-150-170.json`
 - `garmin-exhaustive-3-run:-pace-3:30-4:00-km.json`
@@ -159,6 +169,7 @@ Running tests (6):
 - `garmin-exhaustive-6-run:-nested-repeat-pace.json`
 
 Cycling tests (6):
+
 - `garmin-exhaustive-7-bike:-power-zone-3.json`
 - `garmin-exhaustive-8-bike:-power-200-250w.json`
 - `garmin-exhaustive-9-bike:-cadence-80-95.json`
@@ -167,6 +178,7 @@ Cycling tests (6):
 - `garmin-exhaustive-12-bike:-repeat-4x-power.json`
 
 Swimming tests (7):
+
 - `garmin-exhaustive-13-swim:-backstroke-200m.json`
 - `garmin-exhaustive-14-swim:-breaststroke-200m.json`
 - `garmin-exhaustive-15-swim:-butterfly-100m.json`
@@ -176,6 +188,7 @@ Swimming tests (7):
 - `garmin-exhaustive-19-swim:-repeat-mixed.json`
 
 ### Systematic Tests (6 files)
+
 - `garmin-test-1-hr-range.json`
 - `garmin-test-2-repeat.json`
 - `garmin-test-3-cadence.json`
@@ -184,6 +197,7 @@ Swimming tests (7):
 - `garmin-test-6-step-types.json`
 
 ### Comprehensive Tests (50+ files)
+
 - Swimming stroke tests: `garmin-test-*-swimming-stroke-id-*.json` (6 files)
 - Swimming equipment tests: `garmin-test-*-swimming-equipment-id-*.json` (6 files)
 - SubSport tests: `garmin-test-*-subsport-*.json` (13 files - ALL FAILED)
@@ -194,17 +208,22 @@ Swimming tests (7):
 ## 🎯 Implementation Roadmap
 
 ### Phase 1: Schema Implementation ✅ READY
+
 All information gathered. Schemas are in `garmin-schemas-temp/` ready to be moved to:
+
 - `packages/garmin/src/domain/schemas/`
 
 **Action Items:**
+
 1. Create `packages/garmin/` package structure
 2. Move schemas from `docs/garmin-schemas-temp/` to `packages/garmin/src/domain/schemas/`
 3. Update imports and exports
 4. Add tests for schema validation
 
 ### Phase 2: Converter Implementation
+
 **KRD → Garmin:**
+
 - All target types (power, HR, pace, speed, cadence)
 - All step types
 - Nested repeats
@@ -212,11 +231,13 @@ All information gathered. Schemas are in `garmin-schemas-temp/` ready to be move
 - Multisport support
 
 **Garmin → KRD:**
+
 - Parse output (always numbers)
 - Handle server-assigned fields
 - Multisport → multiple KRDs
 
 **Action Items:**
+
 1. Create `packages/garmin/src/adapters/converters/`
 2. Implement `krd-to-garmin.converter.ts`
 3. Implement `garmin-to-krd.converter.ts`
@@ -224,16 +245,20 @@ All information gathered. Schemas are in `garmin-schemas-temp/` ready to be move
 5. Add comprehensive tests
 
 ### Phase 3: API Client
+
 **Authentication:**
+
 - OAuth1/OAuth2 via `garth` library
 - Cookie-based session management
 
 **Endpoints:**
+
 - POST `/workout-service/workout` - Create workout
 - GET `/workout-service/workout/{id}` - Get workout
 - DELETE `/workout-service/workout/{id}` - Delete workout
 
 **Action Items:**
+
 1. Create `packages/garmin/src/infrastructure/api/`
 2. Implement `garmin-api-client.ts`
 3. Implement authentication flow
@@ -241,12 +266,15 @@ All information gathered. Schemas are in `garmin-schemas-temp/` ready to be move
 5. Add integration tests
 
 ### Phase 4: CLI Integration
+
 **Commands:**
+
 - `kaiord convert --in workout.krd --out workout.gcn` - Convert to Garmin format
 - `kaiord convert --in workout.gcn --out workout.krd` - Convert from Garmin format
 - `kaiord upload --file workout.gcn --format garmin` - Upload to Garmin Connect
 
 **Action Items:**
+
 1. Update `packages/cli/src/commands/convert.ts`
 2. Add Garmin format support
 3. Add upload command
@@ -302,15 +330,18 @@ All information gathered. Schemas are in `garmin-schemas-temp/` ready to be move
 **Endpoint:** `POST https://connect.garmin.com/gc-api/workout-service/workout`
 
 **Authentication:**
+
 - Cookie-based: GARMIN-SSO-GUID, GARMIN-SSO-CUST-GUID, session token
 - CSRF token: connect-csrf-token header
 - Use `garth` library for OAuth flow
 
 **Rate Limits:**
+
 - Not officially documented
 - Conservative approach: 2-second delay between requests (used in tests)
 
 **Payload Limits:**
+
 - Max ~50 steps per workout (assumed, not tested)
 - Max 255 characters for workout name (tested)
 - No limit on segments for multisport (tested up to 3)
@@ -320,11 +351,13 @@ All information gathered. Schemas are in `garmin-schemas-temp/` ready to be move
 ## 🎓 Learning Resources
 
 ### External References
+
 1. [Garmin Connect API GitHub Projects](https://github.com/topics/garmin-connect-api) - Community projects
 2. [garth Library](https://github.com/matin/garth) - Python OAuth for Garmin
 3. [garmin-workouts-mcp](https://github.com/st3v/garmin-workouts-mcp/) - MCP server implementation
 
 ### Internal Documents
+
 - **CLAUDE.md** - Project conventions and architecture
 - **AGENTS.md** - AI development guidelines
 - **docs/krd-format.md** - KRD format specification
@@ -334,10 +367,12 @@ All information gathered. Schemas are in `garmin-schemas-temp/` ready to be move
 ## 📝 Notes for Implementation
 
 ### File Extension
+
 - Proposed: `.gcn` (Garmin CoNnect - 3 letters required)
 - Format: JSON (Garmin Connect API payload)
 
 ### Package Structure
+
 ```
 packages/garmin/
 ├── src/
@@ -358,6 +393,7 @@ packages/garmin/
 ```
 
 ### Testing Strategy
+
 1. Unit tests for converters
 2. Schema validation tests
 3. Round-trip tests (KRD → Garmin → KRD)
@@ -391,6 +427,7 @@ Before implementing, verify you have:
 ## 📧 Contact & Support
 
 For questions about this API integration:
+
 1. Check the final comprehensive findings document first
 2. Review test results in JSON files
 3. Consult input vs output schemas document

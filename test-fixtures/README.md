@@ -61,7 +61,8 @@ const fixture = readFileSync(fixturePath);
 
 ### GCN Files (Garmin Connect API) (~158KB)
 
-**Input Files (*Input.gcn)** - Minimal payloads sent to API:
+**Input Files (\*Input.gcn)** - Minimal payloads sent to API:
+
 - WorkoutRunningNestedRepeatsInput.gcn - Running with all step types, HR zones/ranges, nested repeats
 - WorkoutCyclingPowerCadenceInput.gcn - Cycling with power zones/ranges, cadence, speed
 - WorkoutSwimmingAllStrokesInput.gcn - Swimming with all 6 strokes and equipment types
@@ -69,7 +70,8 @@ const fixture = readFileSync(fixturePath);
 - WorkoutEdgeCasesInput.gcn - Edge cases (long names, single iteration repeats)
 - WorkoutMultisportTriathlonInput.gcn - Multisport triathlon (swim + bike + run)
 
-**Output Files (*Output.gcn)** - Complete API responses with server-generated fields:
+**Output Files (\*Output.gcn)** - Complete API responses with server-generated fields:
+
 - WorkoutRunningNestedRepeatsOutput.gcn - API response with workoutId, stepId, timestamps, etc.
 - WorkoutCyclingPowerCadenceOutput.gcn - API response with expanded type objects
 - WorkoutSwimmingAllStrokesOutput.gcn - API response with all stroke/equipment data
@@ -78,6 +80,7 @@ const fixture = readFileSync(fixturePath);
 - WorkoutMultisportTriathlonOutput.gcn - API response with global stepOrder across segments
 
 **Note:** GCN format is the Garmin Connect API JSON format (3-letter extension: Garmin CoNnect)
+
 - `*Input.gcn` = Input schema (flexible, minimal, accepts string|number for targets)
 - `*Output.gcn` = Output schema (strict, complete, always numbers)
 

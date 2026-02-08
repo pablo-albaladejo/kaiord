@@ -76,6 +76,7 @@ packages/garmin/
 **Location:** `test-fixtures/gcn/` (12 files: 6 input + 6 output)
 
 **Input Files** (`*Input.gcn`) - Minimal payloads for API:
+
 - `WorkoutRunningNestedRepeatsInput.gcn` - All step types, HR zones/ranges, nested repeats
 - `WorkoutCyclingPowerCadenceInput.gcn` - Power zones/ranges, cadence, speed
 - `WorkoutSwimmingAllStrokesInput.gcn` - All 6 strokes, all 6 equipment types
@@ -84,6 +85,7 @@ packages/garmin/
 - `WorkoutMultisportTriathlonInput.gcn` - Multisport triathlon
 
 **Output Files** (`*Output.gcn`) - Complete API responses:
+
 - `WorkoutRunningNestedRepeatsOutput.gcn` - With workoutId, stepId, author, timestamps
 - `WorkoutCyclingPowerCadenceOutput.gcn` - With expanded type objects (displayOrder, etc.)
 - `WorkoutSwimmingAllStrokesOutput.gcn` - With full stroke/equipment data
@@ -100,11 +102,13 @@ packages/garmin/
 The Garmin Connect API has fundamentally different input and output schemas:
 
 **Input (Flexible):**
+
 - Accepts strings OR numbers for target values
 - Minimal type objects (just ID + key)
 - Optional displayOrder fields
 
 **Output (Strict):**
+
 - Always returns numbers (floats)
 - Expanded type objects (+ displayOrder, unitId, factor)
 - Server-assigned fields (workoutId, stepId, childStepId, timestamps)

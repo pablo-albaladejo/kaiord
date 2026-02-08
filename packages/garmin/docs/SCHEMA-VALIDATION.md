@@ -11,6 +11,7 @@
 Validated all 21 Zod schemas in `docs/garmin-schemas-temp/` against 6 real Garmin Connect API responses in `test-fixtures/gcn/`.
 
 **Results:**
+
 - ✅ 17 schemas are fully consistent
 - ⚠️ 4 schemas have minor inconsistencies
 - 🎯 100% API coverage confirmed
@@ -26,22 +27,25 @@ Validated all 21 Zod schemas in `docs/garmin-schemas-temp/` against 6 real Garmi
 **Issue:** `estimatedDistanceUnit` should be nullable but isn't
 
 **Current code:**
+
 ```typescript
 export const garminWorkoutSchema = z.object({
   // ... other fields
-  estimatedDistanceUnit: garminUnitSchema,  // ❌ WRONG
-})
+  estimatedDistanceUnit: garminUnitSchema, // ❌ WRONG
+});
 ```
 
 **Should be:**
+
 ```typescript
 export const garminWorkoutSchema = z.object({
   // ... other fields
-  estimatedDistanceUnit: garminUnitSchema.nullable(),  // ✅ CORRECT
-})
+  estimatedDistanceUnit: garminUnitSchema.nullable(), // ✅ CORRECT
+});
 ```
 
 **Evidence:** All fixtures show this field can have all-null values:
+
 ```json
 "estimatedDistanceUnit": {
   "unitId": null,
@@ -51,6 +55,7 @@ export const garminWorkoutSchema = z.object({
 ```
 
 **Source fixtures:**
+
 - test-fixtures/gcn/WorkoutRunningNestedRepeats.gcn:533-537
 - test-fixtures/gcn/WorkoutCyclingPowerCadence.gcn:460-464
 - test-fixtures/gcn/WorkoutStrengthReps.gcn:400-404
@@ -67,9 +72,10 @@ export const garminWorkoutSchema = z.object({
 **Issue:** Schema is missing 4 fields present in API responses
 
 **Current schema:** Missing these fields:
+
 ```typescript
 export const repeatGroupDTOSchema = z.object({
-  type: z.literal('RepeatGroupDTO'),
+  type: z.literal("RepeatGroupDTO"),
   stepOrder: z.number().int().positive(),
   stepType: garminStepTypeSchema,
   numberOfIterations: z.number().int().positive(),
@@ -79,19 +85,21 @@ export const repeatGroupDTOSchema = z.object({
   workoutSteps: z.array(garminWorkoutStepSchema),
   childStepId: z.number().int().nullable(),
   description: z.string().nullable(),
-})
+});
 ```
 
 **Missing fields:**
+
 1. `stepId: z.number().int().positive()` - Server-assigned ID
 2. `preferredEndConditionUnit: garminUnitSchema.nullable()` - Always null in responses
 3. `endConditionCompare: z.number().nullable()` - Always null in responses
 4. `skipLastRestStep: z.boolean().nullable()` - Always null in responses
 
 **Should be:**
+
 ```typescript
 export const repeatGroupDTOSchema = z.object({
-  type: z.literal('RepeatGroupDTO'),
+  type: z.literal("RepeatGroupDTO"),
   stepId: z.number().int().positive(),
   stepOrder: z.number().int().positive(),
   stepType: garminStepTypeSchema,
@@ -108,10 +116,11 @@ export const repeatGroupDTOSchema = z.object({
 
   workoutSteps: z.array(garminWorkoutStepSchema),
   description: z.string().nullable(),
-})
+});
 ```
 
 **Evidence:** From test-fixtures/gcn/WorkoutRunningNestedRepeats.gcn:
+
 ```json
 {
   "type": "RepeatGroupDTO",
@@ -141,19 +150,21 @@ export const repeatGroupDTOSchema = z.object({
 **Current schema:** This field is missing
 
 **Should add:**
+
 ```typescript
 export const executableStepDTOSchema = baseStepSchema.extend({
   // ... existing fields
   endCondition: garminConditionTypeSchema,
   endConditionValue: z.number(),
-  preferredEndConditionUnit: garminUnitSchema.nullable(),  // ✅ ADD THIS
+  preferredEndConditionUnit: garminUnitSchema.nullable(), // ✅ ADD THIS
   endConditionCompare: z.number().nullable(),
   endConditionZone: z.number().int().nullable(),
   // ... rest of fields
-})
+});
 ```
 
 **Evidence:** Present in all executable steps, always null:
+
 ```json
 {
   "endCondition": { "conditionTypeId": 2, "conditionTypeKey": "time", ... },
@@ -174,6 +185,7 @@ export const executableStepDTOSchema = baseStepSchema.extend({
 **Issue:** Target value fields should accept strings OR numbers (per API docs)
 
 **Current code:**
+
 ```typescript
 export const executableStepDTOInputSchema = baseStepInputSchema.extend({
   // Primary target
@@ -183,10 +195,11 @@ export const executableStepDTOInputSchema = baseStepInputSchema.extend({
   // Secondary target
   secondaryTargetValueOne: z.number().nullable().optional(),
   secondaryTargetValueTwo: z.number().nullable().optional(),
-})
+});
 ```
 
 **Should be:**
+
 ```typescript
 export const executableStepDTOInputSchema = baseStepInputSchema.extend({
   // Primary target
@@ -194,13 +207,21 @@ export const executableStepDTOInputSchema = baseStepInputSchema.extend({
   targetValueTwo: z.union([z.string(), z.number()]).nullable().optional(),
 
   // Secondary target
-  secondaryTargetValueOne: z.union([z.string(), z.number()]).nullable().optional(),
-  secondaryTargetValueTwo: z.union([z.string(), z.number()]).nullable().optional(),
-})
+  secondaryTargetValueOne: z
+    .union([z.string(), z.number()])
+    .nullable()
+    .optional(),
+  secondaryTargetValueTwo: z
+    .union([z.string(), z.number()])
+    .nullable()
+    .optional(),
+});
 ```
 
 **Evidence:** From `docs/garmin-input-vs-output-schemas.md`:
+
 > **Input (Flexible):**
+>
 > - Accepts strings OR numbers for target values
 
 **Note:** Output always returns numbers (floats), so output schema is correct as-is.
@@ -212,6 +233,7 @@ export const executableStepDTOInputSchema = baseStepInputSchema.extend({
 These schemas are fully consistent with the fixtures:
 
 ### Common Schemas (9 files) ✅
+
 - ✅ **sport-type.schema.ts** - All sport types match (running, cycling, swimming, strength, multi_sport)
 - ✅ **step-type.schema.ts** - All step types match (warmup, cooldown, interval, recovery, rest, repeat)
 - ✅ **condition-type.schema.ts** - All conditions match (lap.button, time, distance, calories, iterations, reps)
@@ -223,6 +245,7 @@ These schemas are fully consistent with the fixtures:
 - ✅ **index.ts** - Exports correct
 
 ### Output Schemas
+
 - ✅ **segment.schema.ts** - Correctly has `estimatedDistanceUnit.nullable()`
 - ✅ **author.schema.ts** - All fields match perfectly
 - ✅ **step.schema.ts** - strokeType/equipmentType correctly always present (even for non-swimming)
@@ -231,6 +254,7 @@ These schemas are fully consistent with the fixtures:
 - ⚠️ **step.schema.ts** - See Issue #3
 
 ### Input Schemas
+
 - ✅ **workout-input.schema.ts** - Correctly optional fields
 - ✅ **segment-input.schema.ts** - Schema correct
 - ✅ **repeat-input.schema.ts** - Schema correct
@@ -276,16 +300,17 @@ These schemas are fully consistent with the fixtures:
 
 **All 6 fixtures validated:**
 
-| Fixture | Coverage | Status |
-|---------|----------|--------|
-| WorkoutRunningNestedRepeats.gcn | All step types, HR zones/ranges, nested repeats | ✅ |
-| WorkoutCyclingPowerCadence.gcn | Power, cadence, speed targets | ✅ |
-| WorkoutSwimmingAllStrokes.gcn | All 6 strokes, all 6 equipment types | ✅ |
-| WorkoutStrengthReps.gcn | Reps condition type | ✅ |
-| WorkoutEdgeCases.gcn | Long names, single iteration | ✅ |
-| WorkoutMultisportTriathlon.gcn | Multiple segments, global stepOrder | ✅ |
+| Fixture                         | Coverage                                        | Status |
+| ------------------------------- | ----------------------------------------------- | ------ |
+| WorkoutRunningNestedRepeats.gcn | All step types, HR zones/ranges, nested repeats | ✅     |
+| WorkoutCyclingPowerCadence.gcn  | Power, cadence, speed targets                   | ✅     |
+| WorkoutSwimmingAllStrokes.gcn   | All 6 strokes, all 6 equipment types            | ✅     |
+| WorkoutStrengthReps.gcn         | Reps condition type                             | ✅     |
+| WorkoutEdgeCases.gcn            | Long names, single iteration                    | ✅     |
+| WorkoutMultisportTriathlon.gcn  | Multiple segments, global stepOrder             | ✅     |
 
 **API Coverage:** 100%
+
 - Sports: 5/5 (running, cycling, swimming, strength, multisport)
 - Target types: 6/6 (no target, power, HR, pace, speed, cadence)
 - Step types: 6/6 (warmup, interval, recovery, rest, cooldown, repeat)
@@ -299,14 +324,17 @@ These schemas are fully consistent with the fixtures:
 ## Recommended Actions
 
 ### Priority 1 - Fix Output Schemas (Required for converters)
+
 1. Fix `workout.schema.ts` - Add `.nullable()` to `estimatedDistanceUnit`
 2. Fix `repeat.schema.ts` - Add 4 missing fields (`stepId`, `preferredEndConditionUnit`, `endConditionCompare`, `skipLastRestStep`)
 3. Fix `step.schema.ts` - Add `preferredEndConditionUnit` field
 
 ### Priority 2 - Fix Input Schemas (Required for API client)
+
 4. Fix `step-input.schema.ts` - Use union types for target values (`z.union([z.string(), z.number()])`)
 
 ### Priority 3 - Validation
+
 5. Run schema validation tests against all 6 fixtures
 6. Verify Zod parse/validate works without errors
 
@@ -315,6 +343,7 @@ These schemas are fully consistent with the fixtures:
 ## Files Analyzed
 
 **Schemas (21 files):**
+
 ```
 docs/garmin-schemas-temp/
 ├── common/ (9 schemas) ✅
@@ -343,6 +372,7 @@ docs/garmin-schemas-temp/
 ```
 
 **Fixtures (6 files):**
+
 ```
 test-fixtures/gcn/
 ├── WorkoutRunningNestedRepeats.gcn (542 lines) ✅
@@ -358,11 +388,13 @@ test-fixtures/gcn/
 ## Conclusion
 
 The schemas are **97% accurate** with only 4 minor issues to fix. All issues are straightforward:
+
 - 1 missing `.nullable()`
 - 3 missing fields
 - 1 input flexibility issue
 
 Once these 4 issues are fixed, the schemas will be **production-ready** for:
+
 1. Creating `@kaiord/garmin` package
 2. Implementing KRD ↔ Garmin converters
 3. Building API client with OAuth + REST

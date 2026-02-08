@@ -28,11 +28,17 @@ You need two things: **Cookies** and **CSRF Token**
 
 ```javascript
 // Get cookies
-console.log('COOKIES:', document.cookie);
+console.log("COOKIES:", document.cookie);
 
 // Get CSRF token (check all possible locations)
-console.log('CSRF from meta:', document.querySelector('meta[name="csrf-token"]')?.content);
-console.log('CSRF from localStorage:', localStorage.getItem('GARMIN-CSRF-TOKEN'));
+console.log(
+  "CSRF from meta:",
+  document.querySelector('meta[name="csrf-token"]')?.content
+);
+console.log(
+  "CSRF from localStorage:",
+  localStorage.getItem("GARMIN-CSRF-TOKEN")
+);
 ```
 
 ### 2. Update Test Script
@@ -46,11 +52,13 @@ CSRF="your_csrf_token_here"
 ```
 
 **Cookie Example:**
+
 ```
 GARMIN-SSO-GUID=ABC123...; GARMIN-SSO-CUST-GUID=DEF456...; SESSIONID=GHI789...
 ```
 
 **CSRF Example:**
+
 ```
 227acf9d-2bd7-4a8a-9eaf-bd9ce0d95e19
 ```
@@ -91,12 +99,14 @@ cd docs
 ### 4. Verify Results
 
 The script will:
+
 - ✅ Read input files (`.gcn.input`)
 - ✅ Send them to Garmin Connect API
 - ✅ Save responses (`.gcn`)
 - ✅ Display summary of each workout
 
 Check that:
+
 - All 6 tests return HTTP 200
 - workoutId is assigned by server
 - stepId values are generated
@@ -111,6 +121,7 @@ Check that:
 **Problem:** Cookies expired or invalid
 
 **Solution:**
+
 1. Re-login to Garmin Connect
 2. Get fresh cookies and CSRF token
 3. Update script with new values
@@ -120,6 +131,7 @@ Check that:
 **Problem:** CSRF token mismatch
 
 **Solution:**
+
 1. Make sure CSRF token matches your current session
 2. CSRF token changes frequently - get fresh one
 3. Don't copy extra quotes or spaces
@@ -129,6 +141,7 @@ Check that:
 **Problem:** Invalid JSON payload
 
 **Solution:**
+
 1. Check input file is valid JSON: `jq . file.gcn.input`
 2. Verify required fields are present
 3. Check field types (numbers vs strings)
@@ -146,14 +159,14 @@ Update lines 7-8 in `garmin-run-tests-from-fixtures.sh`
 
 The 6 fixtures test **100% of the Garmin Connect API**:
 
-| Test | Coverage |
-|------|----------|
-| **Running** | All step types, HR zones/ranges, nested repeats (3 levels) |
-| **Cycling** | Power zones/ranges, cadence, speed, dual targets |
-| **Swimming** | All 6 strokes, all 6 equipment types, pool settings |
-| **Strength** | Reps condition type, rest periods |
-| **Edge Cases** | Long names (255+ chars), single iteration repeats |
-| **Multisport** | Triathlon (bike + run + swim), global stepOrder |
+| Test           | Coverage                                                   |
+| -------------- | ---------------------------------------------------------- |
+| **Running**    | All step types, HR zones/ranges, nested repeats (3 levels) |
+| **Cycling**    | Power zones/ranges, cadence, speed, dual targets           |
+| **Swimming**   | All 6 strokes, all 6 equipment types, pool settings        |
+| **Strength**   | Reps condition type, rest periods                          |
+| **Edge Cases** | Long names (255+ chars), single iteration repeats          |
+| **Multisport** | Triathlon (bike + run + swim), global stepOrder            |
 
 **Sports:** Running, Cycling, Swimming, Strength, Multisport ✅
 **Target Types:** Power, HR, Pace, Speed, Cadence, No target ✅
@@ -175,6 +188,7 @@ diff <(jq -S . WorkoutRunningNestedRepeatsInput.gcn) \
 ```
 
 **Key differences:**
+
 - ➕ **Added by server:** `workoutId`, `stepId`, `ownerId`, `author`, timestamps
 - ➕ **Expanded types:** Added `displayOrder`, `unitId`, `factor` to type objects
 - ➕ **Computed fields:** `estimatedDistanceUnit`, `avgTrainingSpeed`
