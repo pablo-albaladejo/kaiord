@@ -9,6 +9,7 @@ on:
       - "packages/fit/**"
       - "packages/tcx/**"
       - "packages/zwo/**"
+      - "packages/garmin/**"
       - ".github/workflows/deploy-spa-editor.yml"
   workflow_dispatch:
 
@@ -55,7 +56,7 @@ jobs:
           fi
 
           # Verify adapter packages
-          for pkg in fit tcx zwo; do
+          for pkg in fit tcx zwo garmin; do
             if [ ! -d "packages/$pkg/dist" ]; then
               echo "❌ @kaiord/$pkg package build output not found"
               exit 1

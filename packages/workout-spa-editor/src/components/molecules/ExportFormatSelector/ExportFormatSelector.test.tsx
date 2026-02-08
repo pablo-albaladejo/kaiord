@@ -69,11 +69,12 @@ describe("ExportFormatSelector", () => {
       });
 
       const options = screen.getAllByRole("option");
-      expect(options).toHaveLength(4);
+      expect(options).toHaveLength(5);
 
       expect(screen.getAllByText("FIT")).toHaveLength(1);
       expect(screen.getAllByText("TCX")).toHaveLength(1);
       expect(screen.getAllByText("ZWO")).toHaveLength(1);
+      expect(screen.getAllByText("GCN")).toHaveLength(1);
       expect(screen.getAllByText("KRD")).toHaveLength(2); // One in button, one in dropdown
     });
 
@@ -111,6 +112,11 @@ describe("ExportFormatSelector", () => {
       expect(
         screen.getByText(/Kaiord format - JSON-based canonical workout format/i)
       ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /Garmin Connect JSON - Structured workout for Garmin Connect API/i
+        )
+      ).toBeInTheDocument();
     });
 
     it("should show compatibility information", async () => {
@@ -131,10 +137,10 @@ describe("ExportFormatSelector", () => {
 
       // Assert
       await waitFor(() => {
-        expect(screen.getByText("Garmin devices")).toBeInTheDocument();
+        expect(screen.getAllByText("Garmin devices")).toHaveLength(2); // FIT and GCN
       });
 
-      expect(screen.getAllByText("Garmin Connect")).toHaveLength(2); // FIT and TCX
+      expect(screen.getAllByText("Garmin Connect")).toHaveLength(3); // FIT, TCX, and GCN
       expect(screen.getAllByText("TrainingPeaks")).toHaveLength(2); // FIT and TCX
       expect(screen.getByText("Zwift")).toBeInTheDocument();
     });
@@ -436,6 +442,22 @@ describe("ExportFormatSelector", () => {
       // Assert
       expect(
         screen.getByText(/ZWO format only supports cycling workouts/i)
+      ).toBeInTheDocument();
+    });
+
+    it("should show warning for GCN format", () => {
+      // Arrange & Act
+      render(
+        <ExportFormatSelector
+          currentFormat="gcn"
+          onFormatChange={vi.fn()}
+          workout={mockWorkout}
+        />
+      );
+
+      // Assert
+      expect(
+        screen.getByText(/GCN format is designed for the Garmin Connect API/i)
       ).toBeInTheDocument();
     });
 

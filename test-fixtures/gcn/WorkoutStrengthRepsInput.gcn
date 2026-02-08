@@ -1,0 +1,74 @@
+{
+  "sportType": {"sportTypeId": 5, "sportTypeKey": "strength_training"},
+  "workoutName": "MEGA STRENGTH - Complete Reps Test",
+  "workoutSegments": [{
+    "segmentOrder": 1,
+    "sportType": {"sportTypeId": 5, "sportTypeKey": "strength_training"},
+    "workoutSteps": [
+      {
+        "stepId": 1, "stepOrder": 1,
+        "stepType": {"stepTypeId": 1, "stepTypeKey": "warmup"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+        "endConditionValue": 300,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+      },
+      {
+        "stepId": 2, "stepOrder": 2,
+        "stepType": {"stepTypeId": 6, "stepTypeKey": "repeat"},
+        "type": "RepeatGroupDTO",
+        "numberOfIterations": 3,
+        "smartRepeat": false,
+        "endCondition": {"conditionTypeId": 7, "conditionTypeKey": "iterations", "displayable": false},
+        "endConditionValue": 3,
+        "workoutSteps": [
+          {
+            "stepId": 3, "stepOrder": 1,
+            "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+            "type": "ExecutableStepDTO",
+            "endCondition": {"conditionTypeId": 10, "conditionTypeKey": "reps", "displayable": true},
+            "endConditionValue": 10,
+            "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+          },
+          {
+            "stepId": 4, "stepOrder": 2,
+            "stepType": {"stepTypeId": 5, "stepTypeKey": "rest"},
+            "type": "ExecutableStepDTO",
+            "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+            "endConditionValue": 60,
+            "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+          },
+          {
+            "stepId": 5, "stepOrder": 3,
+            "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+            "type": "ExecutableStepDTO",
+            "endCondition": {"conditionTypeId": 10, "conditionTypeKey": "reps", "displayable": true},
+            "endConditionValue": 15,
+            "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+          },
+          {
+            "stepId": 6, "stepOrder": 4,
+            "stepType": {"stepTypeId": 5, "stepTypeKey": "rest"},
+            "type": "ExecutableStepDTO",
+            "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+            "endConditionValue": 90,
+            "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+          }
+        ]
+      },
+      {
+        "stepId": 7, "stepOrder": 3,
+        "stepType": {"stepTypeId": 2, "stepTypeKey": "cooldown"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+        "endConditionValue": 300,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+      }
+    ]
+  }],
+  "avgTrainingSpeed": 0,
+  "estimatedDurationInSecs": 0,
+  "estimatedDistanceInMeters": 0,
+  "estimateType": null,
+  "isWheelchair": false
+}

@@ -1,5 +1,6 @@
 import { createDefaultProviders } from "@kaiord/core";
 import { createFitProviders } from "@kaiord/fit";
+import { createGarminProviders } from "@kaiord/garmin";
 import { createTcxProviders } from "@kaiord/tcx";
 import { createZwoProviders } from "@kaiord/zwo";
 import { loadConfigWithMetadata } from "../../utils/config-loader.js";
@@ -48,6 +49,7 @@ export const diffCommand = async (options: DiffOptions): Promise<number> => {
     const providers = createDefaultProviders(
       {
         fit: createFitProviders(logger),
+        garmin: createGarminProviders(logger),
         tcx: createTcxProviders(logger),
         zwo: createZwoProviders(logger),
       },

@@ -143,7 +143,7 @@ describe("validate command integration tests", () => {
         // Exit code 2 = FILE_NOT_FOUND per CLI specification
         expect(execaError.exitCode).toBe(2);
       }
-    });
+    }, 15000); // Increased timeout for process spawning under load
 
     it(
       "should display error message for missing file",

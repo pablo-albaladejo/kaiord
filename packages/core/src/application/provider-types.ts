@@ -2,6 +2,8 @@ import type { SchemaValidator } from "../domain/validation/schema-validator";
 import type { ToleranceChecker } from "../domain/validation/tolerance-checker";
 import type { FitReader } from "../ports/fit-reader";
 import type { FitWriter } from "../ports/fit-writer";
+import type { GarminReader } from "../ports/garmin-reader";
+import type { GarminWriter } from "../ports/garmin-writer";
 import type { Logger } from "../ports/logger";
 import type { TcxReader } from "../ports/tcx-reader";
 import type { TcxValidator } from "../ports/tcx-validator";
@@ -10,7 +12,9 @@ import type { ZwiftReader } from "../ports/zwift-reader";
 import type { ZwiftValidator } from "../ports/zwift-validator";
 import type { ZwiftWriter } from "../ports/zwift-writer";
 import type { ConvertFitToKrd } from "./use-cases/convert-fit-to-krd";
+import type { ConvertGarminToKrd } from "./use-cases/convert-garmin-to-krd";
 import type { ConvertKrdToFit } from "./use-cases/convert-krd-to-fit";
+import type { ConvertKrdToGarmin } from "./use-cases/convert-krd-to-garmin";
 import type { ConvertKrdToTcx } from "./use-cases/convert-krd-to-tcx";
 import type { ConvertKrdToZwift } from "./use-cases/convert-krd-to-zwift";
 import type { ConvertTcxToKrd } from "./use-cases/convert-tcx-to-krd";
@@ -32,6 +36,7 @@ export type AdapterProviders = {
     zwiftWriter: ZwiftWriter;
     zwiftValidator: ZwiftValidator;
   };
+  garmin?: { garminReader: GarminReader; garminWriter: GarminWriter };
 };
 
 /**
@@ -57,5 +62,9 @@ export type Providers = {
   convertKrdToTcx?: ConvertKrdToTcx;
   convertZwiftToKrd?: ConvertZwiftToKrd;
   convertKrdToZwift?: ConvertKrdToZwift;
+  garminReader?: GarminReader;
+  garminWriter?: GarminWriter;
+  convertGarminToKrd?: ConvertGarminToKrd;
+  convertKrdToGarmin?: ConvertKrdToGarmin;
   logger: Logger;
 };

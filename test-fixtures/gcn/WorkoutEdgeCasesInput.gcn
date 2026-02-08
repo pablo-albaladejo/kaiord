@@ -1,0 +1,34 @@
+{
+  "sportType": {"sportTypeId": 1, "sportTypeKey": "running"},
+  "workoutName": "EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST-EDGE-TEST",
+  "workoutSegments": [{
+    "segmentOrder": 1,
+    "sportType": {"sportTypeId": 1, "sportTypeKey": "running"},
+    "workoutSteps": [
+      {
+        "stepId": 1, "stepOrder": 1,
+        "stepType": {"stepTypeId": 6, "stepTypeKey": "repeat"},
+        "type": "RepeatGroupDTO",
+        "numberOfIterations": 1,
+        "smartRepeat": false,
+        "endCondition": {"conditionTypeId": 7, "conditionTypeKey": "iterations", "displayable": false},
+        "endConditionValue": 1,
+        "workoutSteps": [{
+          "stepId": 2, "stepOrder": 1,
+          "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+          "type": "ExecutableStepDTO",
+          "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+          "endConditionValue": 1000,
+          "targetType": {"workoutTargetTypeId": 6, "workoutTargetTypeKey": "pace.zone"},
+          "targetValueOne": 3.0,
+          "targetValueTwo": 5.0
+        }]
+      }
+    ]
+  }],
+  "avgTrainingSpeed": 2.5,
+  "estimatedDurationInSecs": 0,
+  "estimatedDistanceInMeters": 0,
+  "estimateType": null,
+  "isWheelchair": false
+}

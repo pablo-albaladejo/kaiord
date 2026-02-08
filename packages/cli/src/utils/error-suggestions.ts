@@ -76,7 +76,7 @@ const ERROR_PATTERNS: Array<ErrorPattern> = [
     title: "Invalid argument",
     suggestions: [
       "Use --input-format to explicitly specify the format.",
-      "Supported formats: fit, krd, tcx, zwo",
+      "Supported formats: fit, gcn, krd, tcx, zwo",
     ],
   },
 ];

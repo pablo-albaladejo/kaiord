@@ -33,7 +33,7 @@ export const executeSingleFileConversion = async (
   if (!inputFormat) {
     const error = new Error(
       `Unable to detect input format from file: ${options.input}. ` +
-        `Supported formats: .fit, .krd, .tcx, .zwo`
+        `Supported formats: .fit, .gcn, .krd, .tcx, .zwo`
     );
     error.name = "InvalidArgumentError";
     throw error;
@@ -50,7 +50,7 @@ export const executeSingleFileConversion = async (
   if (!outputFormat) {
     const error = new Error(
       `Unable to detect output format from file: ${options.output}. ` +
-        `Supported formats: .fit, .krd, .tcx, .zwo`
+        `Supported formats: .fit, .gcn, .krd, .tcx, .zwo`
     );
     error.name = "InvalidArgumentError";
     throw error;

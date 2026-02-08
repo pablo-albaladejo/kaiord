@@ -6,6 +6,7 @@ import {
   validateRoundTrip,
 } from "@kaiord/core";
 import { createFitProviders } from "@kaiord/fit";
+import { createGarminProviders } from "@kaiord/garmin";
 import { createTcxProviders } from "@kaiord/tcx";
 import { createZwoProviders } from "@kaiord/zwo";
 import { readFile as fsReadFile } from "fs/promises";
@@ -118,6 +119,7 @@ export const validateCommand = async (options: unknown): Promise<number> => {
     const providers = createDefaultProviders(
       {
         fit: createFitProviders(logger),
+        garmin: createGarminProviders(logger),
         tcx: createTcxProviders(logger),
         zwo: createZwoProviders(logger),
       },

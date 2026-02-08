@@ -15,7 +15,7 @@ export type FileUploadProps = {
 export const FileUpload = ({
   onFileLoad,
   onError,
-  accept = ".fit,.tcx,.zwo,.krd,.json",
+  accept = ".fit,.tcx,.zwo,.krd,.json,.gcn",
   className = "",
   disabled = false,
 }: FileUploadProps) => {

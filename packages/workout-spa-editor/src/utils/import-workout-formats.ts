@@ -4,21 +4,11 @@
  * Internal utilities for importing different workout file formats.
  */
 
-import { createDefaultProviders } from "@kaiord/core";
-import { createFitProviders } from "@kaiord/fit";
-import { createTcxProviders } from "@kaiord/tcx";
-import { createZwoProviders } from "@kaiord/zwo";
 import { parseJSON } from "./json-parser";
 import { validateKRD } from "./krd-validator";
+import { providers } from "./workout-providers";
 import type { ImportProgressCallback } from "./import-workout";
 import type { KRD } from "@kaiord/core";
-
-// Create providers once for all operations
-const providers = createDefaultProviders({
-  fit: createFitProviders(),
-  tcx: createTcxProviders(),
-  zwo: createZwoProviders(),
-});
 
 export const importKrdFile = async (
   buffer: Uint8Array,
@@ -30,12 +20,10 @@ export const importKrdFile = async (
   onProgress?.(40);
 
   signal?.throwIfAborted();
-  // Parse JSON with enhanced error messages
   const data = parseJSON(text);
   onProgress?.(70);
 
   signal?.throwIfAborted();
-  // Validate KRD structure
   const krd = validateKRD(data);
   onProgress?.(100);
 
@@ -50,11 +38,8 @@ export const importFitFile = async (
   signal?.throwIfAborted();
   onProgress?.(50);
   signal?.throwIfAborted();
-
   const krd = await providers.convertFitToKrd!({ fitBuffer: buffer });
-
   onProgress?.(100);
-
   return krd;
 };
 
@@ -64,16 +49,11 @@ export const importTcxFile = async (
   signal?: AbortSignal
 ): Promise<KRD> => {
   signal?.throwIfAborted();
-
   const text = new TextDecoder().decode(buffer);
-
   onProgress?.(50);
   signal?.throwIfAborted();
-
   const krd = await providers.convertTcxToKrd!({ tcxString: text });
-
   onProgress?.(100);
-
   return krd;
 };
 
@@ -83,15 +63,24 @@ export const importZwoFile = async (
   signal?: AbortSignal
 ): Promise<KRD> => {
   signal?.throwIfAborted();
-
   const text = new TextDecoder().decode(buffer);
-
   onProgress?.(50);
   signal?.throwIfAborted();
-
   const krd = await providers.convertZwiftToKrd!({ zwiftString: text });
-
   onProgress?.(100);
+  return krd;
+};
 
+export const importGcnFile = async (
+  buffer: Uint8Array,
+  onProgress?: ImportProgressCallback,
+  signal?: AbortSignal
+): Promise<KRD> => {
+  signal?.throwIfAborted();
+  const text = new TextDecoder().decode(buffer);
+  onProgress?.(50);
+  signal?.throwIfAborted();
+  const krd = await providers.convertGarminToKrd!({ gcnString: text });
+  onProgress?.(100);
   return krd;
 };
