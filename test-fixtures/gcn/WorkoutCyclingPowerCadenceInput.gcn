@@ -1,0 +1,99 @@
+{
+  "sportType": {"sportTypeId": 2, "sportTypeKey": "cycling"},
+  "workoutName": "MEGA BIKE - Complete Power Test",
+  "workoutSegments": [{
+    "segmentOrder": 1,
+    "sportType": {"sportTypeId": 2, "sportTypeKey": "cycling"},
+    "workoutSteps": [
+      {
+        "stepId": 1, "stepOrder": 1,
+        "stepType": {"stepTypeId": 1, "stepTypeKey": "warmup"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+        "endConditionValue": 600,
+        "targetType": {"workoutTargetTypeId": 2, "workoutTargetTypeKey": "power.zone"},
+        "zoneNumber": 2
+      },
+      {
+        "stepId": 2, "stepOrder": 2,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+        "endConditionValue": 1200,
+        "targetType": {"workoutTargetTypeId": 2, "workoutTargetTypeKey": "power.zone"},
+        "targetValueOne": 200,
+        "targetValueTwo": 250,
+        "secondaryTargetType": {"workoutTargetTypeId": 3, "workoutTargetTypeKey": "cadence.zone"},
+        "secondaryTargetValueOne": 85,
+        "secondaryTargetValueTwo": 95
+      },
+      {
+        "stepId": 3, "stepOrder": 3,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 4, "conditionTypeKey": "calories", "displayable": true},
+        "endConditionValue": 100,
+        "targetType": {"workoutTargetTypeId": 5, "workoutTargetTypeKey": "speed.zone"},
+        "targetValueOne": 7.0,
+        "targetValueTwo": 8.5
+      },
+      {
+        "stepId": 4, "stepOrder": 4,
+        "stepType": {"stepTypeId": 6, "stepTypeKey": "repeat"},
+        "type": "RepeatGroupDTO",
+        "numberOfIterations": 5,
+        "smartRepeat": false,
+        "endCondition": {"conditionTypeId": 7, "conditionTypeKey": "iterations", "displayable": false},
+        "endConditionValue": 5,
+        "workoutSteps": [
+          {
+            "stepId": 5, "stepOrder": 1,
+            "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+            "type": "ExecutableStepDTO",
+            "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+            "endConditionValue": 300,
+            "targetType": {"workoutTargetTypeId": 2, "workoutTargetTypeKey": "power.zone"},
+            "targetValueOne": 280,
+            "targetValueTwo": 320,
+            "secondaryTargetType": {"workoutTargetTypeId": 4, "workoutTargetTypeKey": "heart.rate.zone"},
+            "secondaryTargetValueOne": 165,
+            "secondaryTargetValueTwo": 180
+          },
+          {
+            "stepId": 6, "stepOrder": 2,
+            "stepType": {"stepTypeId": 4, "stepTypeKey": "recovery"},
+            "type": "ExecutableStepDTO",
+            "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+            "endConditionValue": 180,
+            "targetType": {"workoutTargetTypeId": 2, "workoutTargetTypeKey": "power.zone"},
+            "targetValueOne": 100,
+            "targetValueTwo": 150
+          }
+        ]
+      },
+      {
+        "stepId": 7, "stepOrder": 5,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+        "endConditionValue": 600,
+        "targetType": {"workoutTargetTypeId": 3, "workoutTargetTypeKey": "cadence.zone"},
+        "targetValueOne": 95,
+        "targetValueTwo": 105
+      },
+      {
+        "stepId": 8, "stepOrder": 6,
+        "stepType": {"stepTypeId": 2, "stepTypeKey": "cooldown"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 1, "conditionTypeKey": "lap.button", "displayable": true},
+        "endConditionValue": 1200,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+      }
+    ]
+  }],
+  "avgTrainingSpeed": 7.0,
+  "estimatedDurationInSecs": 0,
+  "estimatedDistanceInMeters": 0,
+  "estimateType": null,
+  "isWheelchair": false
+}

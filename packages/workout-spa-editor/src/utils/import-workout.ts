@@ -1,7 +1,7 @@
 /**
  * Import Workout Utility
  *
- * Handles importing workout files in various formats (FIT, TCX, ZWO, KRD)
+ * Handles importing workout files in various formats (FIT, TCX, ZWO, KRD, GCN)
  * and converting them to the canonical KRD format.
  */
 
@@ -9,6 +9,7 @@ import { detectFormat } from "./file-format-detector";
 import { transformError } from "./import-workout-errors";
 import {
   importFitFile,
+  importGcnFile,
   importKrdFile,
   importTcxFile,
   importZwoFile,
@@ -67,6 +68,8 @@ export const importWorkout = async (
       return await importTcxFile(uint8Array, onProgress, signal);
     } else if (format === "zwo") {
       return await importZwoFile(uint8Array, onProgress, signal);
+    } else if (format === "gcn") {
+      return await importGcnFile(uint8Array, onProgress, signal);
     }
 
     throw new ImportError(`Unsupported format: ${format}`, format);
