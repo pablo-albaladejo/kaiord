@@ -109,9 +109,7 @@ const mapWorkoutStep = (
 
   const strokeType =
     step.target.type === "stroke_type"
-      ? mapKrdStrokeToGarmin(
-          fitValueToStroke(extractStrokeValue(step.target))
-        )
+      ? mapKrdStrokeToGarmin(fitValueToStroke(extractStrokeValue(step.target)))
       : mapKrdStrokeToGarmin(undefined);
 
   const equipmentType = mapKrdEquipmentToGarmin(step.equipment);
@@ -189,9 +187,7 @@ const FIT_TO_STROKE: Record<number, string> = {
   5: "mixed",
 };
 
-const extractStrokeValue = (
-  target: { value?: { value: number } }
-): number => {
+const extractStrokeValue = (target: { value?: { value: number } }): number => {
   return target.value?.value ?? 0;
 };
 
