@@ -47,7 +47,7 @@ The @kaiord/garmin package provides format conversion between Garmin Connect API
 
 This package follows the hexagonal (ports & adapters) architecture:
 
-```
+````
 ┌─────────────────────────────────────────────────────────────┐
 │                      @kaiord/garmin                         │
 ├─────────────────────────────────────────────────────────────┤
@@ -108,7 +108,7 @@ This package follows the hexagonal (ports & adapters) architecture:
 ```text
 Schemas → Mappers → Converters → Ports → Providers → Core
 (inner layers don't know about outer layers)
-```
+````
 
 ---
 

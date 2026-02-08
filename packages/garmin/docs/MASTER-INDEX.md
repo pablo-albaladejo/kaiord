@@ -373,7 +373,7 @@ All information gathered. Schemas are in `garmin-schemas-temp/` ready to be move
 
 ### Package Structure
 
-```
+````
 packages/garmin/
 ├── src/
 │   ├── domain/
@@ -439,3 +439,4 @@ For questions about this API integration:
 **Last Updated:** 2026-02-08
 **Version:** 1.0.0
 **Author:** Pablo + Claude Code (Sonnet 4.5)
+````
