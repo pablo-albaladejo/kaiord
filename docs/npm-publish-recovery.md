@@ -25,6 +25,7 @@ The GitHub Actions release workflow failed due to expired npm tokens. This left 
 4. Copy the token (you'll only see it once!)
 
 **Why Automation Token?**
+
 - ✅ Never expires (no 90-day renewal)
 - ✅ Designed for CI/CD
 - ✅ Works with provenance
@@ -66,6 +67,7 @@ gh workflow run release.yml
 ```
 
 The workflow will:
+
 1. Detect the pending changeset
 2. Version packages according to linked configuration
 3. Publish all packages that need updating
@@ -127,6 +129,7 @@ npm view @kaiord/cli version     # Should be 4.1.0
 4. **Backup**: Document token creation process for team members
 
 **If using Granular tokens** (not recommended):
+
 - Set reminder for renewal 7 days before expiration (90 days)
 - See `docs/npm-authentication.md` for migration to Automation tokens
 
@@ -141,6 +144,7 @@ npm view @kaiord/cli version     # Should be 4.1.0
 
 **Cause**: Token doesn't have write permissions for the package.
 **Solution**:
+
 - Check token has `Read and write` permission for `@kaiord/*`
 - Verify you're a maintainer of the packages on npm
 
@@ -161,6 +165,7 @@ npm view @kaiord/cli version     # Should be 4.1.0
    - Set up monitoring to alert on publish failures
 
 2. **Dry Run Testing**:
+
    ```bash
    # Test publish without actually publishing
    pnpm exec changeset publish --dry-run
@@ -183,6 +188,7 @@ The release process uses:
 3. **Linked Packages**: All packages version together for consistency
 
 When a changeset is merged to `main`:
+
 1. Workflow detects changesets in `.changeset/*.md`
 2. Runs `changeset version` to bump versions and generate CHANGELOGs
 3. Builds all packages

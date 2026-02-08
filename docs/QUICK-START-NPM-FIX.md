@@ -13,6 +13,7 @@ Go to: https://www.npmjs.com/settings/YOUR_USERNAME/tokens
 3. Copy the token
 
 **Why Automation Token?**
+
 - ✅ **Never expires** (no 90-day renewal hassle)
 - ✅ Designed for CI/CD
 - ✅ Works with provenance (supply chain security)
@@ -29,6 +30,7 @@ gh secret set NPM_TOKEN --repo pablo-albaladejo/kaiord
 The workflow is already configured with provenance. Next push to main will publish automatically.
 
 Or trigger manually:
+
 ```bash
 gh workflow run release.yml
 ```
@@ -49,10 +51,10 @@ After the fix, these packages will publish:
 I updated `.github/workflows/release.yml`:
 
 ```yaml
-- name: Publish to npm with provenance  # ← Updated
+- name: Publish to npm with provenance # ← Updated
   env:
     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-    NPM_CONFIG_PROVENANCE: true  # ← Added provenance
+    NPM_CONFIG_PROVENANCE: true # ← Added provenance
   run: pnpm exec changeset publish
 ```
 
