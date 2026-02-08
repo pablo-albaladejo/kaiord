@@ -6,12 +6,12 @@ npm provides several authentication methods for publishing packages from GitHub 
 
 ## Authentication Options Comparison
 
-| Method | Expiration | Best For | Setup Complexity |
-|--------|------------|----------|------------------|
-| **Automation Token** | Never* | ✅ CI/CD | Easy |
-| Granular Token | 90 days | Short-term | Easy |
-| Classic Token | Never* | ❌ Deprecated | Easy |
-| OIDC (no token) | N/A | Future | Not yet available |
+| Method               | Expiration | Best For      | Setup Complexity  |
+| -------------------- | ---------- | ------------- | ----------------- |
+| **Automation Token** | Never\*    | ✅ CI/CD      | Easy              |
+| Granular Token       | 90 days    | Short-term    | Easy              |
+| Classic Token        | Never\*    | ❌ Deprecated | Easy              |
+| OIDC (no token)      | N/A        | Future        | Not yet available |
 
 \* Subject to npm policy changes
 
@@ -22,6 +22,7 @@ Automation tokens are designed specifically for CI/CD and don't expire (unless m
 ### What is npm Provenance?
 
 Provenance adds cryptographic proof to your packages showing:
+
 - ✅ Where the package was built (GitHub Actions)
 - ✅ Which commit/workflow published it
 - ✅ Signed attestations for supply chain security
@@ -41,6 +42,7 @@ Provenance adds cryptographic proof to your packages showing:
 4. Copy the token (shown only once!)
 
 **Key difference from Granular tokens:**
+
 - ✅ No expiration
 - ✅ Designed for CI/CD
 - ✅ Can publish to all packages under your account
@@ -68,11 +70,12 @@ The workflow is already configured with provenance:
 - name: Publish to npm with provenance
   env:
     NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-    NPM_CONFIG_PROVENANCE: true  # Enables provenance
+    NPM_CONFIG_PROVENANCE: true # Enables provenance
   run: pnpm exec changeset publish
 ```
 
 **What this does:**
+
 - `NODE_AUTH_TOKEN`: Authenticates with npm (required)
 - `NPM_CONFIG_PROVENANCE: true`: Adds provenance metadata
 - `id-token: write`: Allows GitHub to sign provenance attestations
@@ -100,6 +103,7 @@ npm audit signatures
 ```
 
 On npm website:
+
 - Go to https://www.npmjs.com/package/@kaiord/core
 - Look for the "Provenance" badge
 - Click to see GitHub Actions details
@@ -109,12 +113,14 @@ On npm website:
 ### Automation Token ⭐ (Recommended)
 
 **Pros:**
+
 - ✅ Never expires
 - ✅ Designed for CI/CD
 - ✅ Simple to manage
 - ✅ Works with provenance
 
 **Cons:**
+
 - ⚠️ Access to all packages in your account
 - ⚠️ Less granular permissions
 
@@ -123,11 +129,13 @@ On npm website:
 ### Granular Token
 
 **Pros:**
+
 - ✅ Fine-grained permissions (per-package)
 - ✅ Can restrict by IP (not useful for GH Actions)
 - ✅ Works with provenance
 
 **Cons:**
+
 - ❌ Expires after 90 days (requires renewal)
 - ⚠️ High maintenance overhead
 
@@ -144,6 +152,7 @@ On npm website:
 You might have heard about publishing with OIDC without npm tokens. This is a future npm feature:
 
 **Current Status (2026):**
+
 - ❌ Not yet available
 - 📋 Under discussion in npm/cli repository
 - 🔮 May be available in future npm versions
@@ -155,6 +164,7 @@ You might have heard about publishing with OIDC without npm tokens. This is a fu
 ## Token Security Best Practices
 
 ### 1. Use Automation Tokens for CI/CD
+
 ```bash
 # ✅ Good: Automation token
 gh secret set NPM_TOKEN --repo pablo-albaladejo/kaiord
@@ -164,26 +174,30 @@ gh secret set NPM_TOKEN --repo pablo-albaladejo/kaiord
 ```
 
 ### 2. Enable Provenance
+
 ```yaml
 env:
-  NPM_CONFIG_PROVENANCE: true  # ✅ Always enable
+  NPM_CONFIG_PROVENANCE: true # ✅ Always enable
 ```
 
 ### 3. Restrict Workflow Permissions
+
 ```yaml
 permissions:
-  contents: write    # For git operations
-  issues: write      # For GitHub releases
-  id-token: write    # For provenance signing
+  contents: write # For git operations
+  issues: write # For GitHub releases
+  id-token: write # For provenance signing
   # Don't add unnecessary permissions
 ```
 
 ### 4. Monitor Token Usage
+
 - Set up notifications for failed publishes
 - Regularly check npm account access logs
 - Rotate tokens if compromised
 
 ### 5. Use Separate Tokens per Project
+
 ```bash
 # ✅ Good: Project-specific tokens
 kaiord-ci-token
@@ -200,6 +214,7 @@ my-personal-token (used everywhere)
 **Cause:** Token is missing or invalid
 
 **Solution:**
+
 ```bash
 # 1. Verify secret exists
 gh secret list --repo pablo-albaladejo/kaiord | grep NPM_TOKEN
@@ -214,6 +229,7 @@ gh secret set NPM_TOKEN --repo pablo-albaladejo/kaiord
 **Cause:** Token doesn't have publish permissions
 
 **Solution:**
+
 - Verify you're a maintainer of `@kaiord/*` packages on npm
 - Check token type is "Automation" (not "Read only")
 - Ensure token wasn't revoked
@@ -223,13 +239,14 @@ gh secret set NPM_TOKEN --repo pablo-albaladejo/kaiord
 **Cause:** Provenance flag not set or missing permissions
 
 **Solution:**
+
 ```yaml
 # Ensure workflow has:
 permissions:
-  id-token: write  # Required for provenance
+  id-token: write # Required for provenance
 
 env:
-  NPM_CONFIG_PROVENANCE: true  # Required flag
+  NPM_CONFIG_PROVENANCE: true # Required flag
 ```
 
 ### "npm ERR! need auth" with Valid Token
@@ -237,6 +254,7 @@ env:
 **Cause:** Token not properly passed to npm
 
 **Solution:**
+
 ```yaml
 - uses: actions/setup-node@v6
   with:
