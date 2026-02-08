@@ -1,5 +1,11 @@
 # @kaiord/core
 
+## 4.1.0
+
+### Minor Changes
+
+- 19a12ba: Add Garmin Connect API (GCN) format support with bidirectional KRD conversion, CLI integration, and web editor integration
+
 ## 4.0.0
 
 ### Major Changes
