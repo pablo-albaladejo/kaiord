@@ -7,6 +7,9 @@ on:
     paths:
       - ".changeset/**"
       - "packages/core/**"
+      - "packages/fit/**"
+      - "packages/tcx/**"
+      - "packages/zwo/**"
       - "packages/garmin/**"
       - "packages/cli/**"
   workflow_dispatch:
