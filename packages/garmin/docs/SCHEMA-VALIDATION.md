@@ -10,10 +10,10 @@
 
 - [Executive Summary](#executive-summary)
 - [Issues Found](#issues-found)
-  - [Issue 1: workout.schema.ts - Missing Nullable Type](#1--workoutschemats---missing-nullable-type)
-  - [Issue 2: repeat.schema.ts - Missing Fields](#2--repeatschemats---missing-fields)
-  - [Issue 3: step.schema.ts - Missing Field](#3--stepschemats---missing-field)
-  - [Issue 4: step-input.schema.ts - Wrong Type](#4--step-inputschemats---wrong-type)
+  - [Issue 1: workout.schema.ts - Missing Nullable Type](#1-workoutschemats---missing-nullable-type)
+  - [Issue 2: repeat.schema.ts - Missing Fields](#2-repeatschemats---missing-fields)
+  - [Issue 3: step.schema.ts - Missing Field](#3-stepschemats---missing-field)
+  - [Issue 4: step-input.schema.ts - Wrong Type](#4-step-inputschemats---wrong-type)
 - [Fixtures Analyzed](#fixtures-analyzed)
 - [Validation Methodology](#validation-methodology)
 - [Schema Coverage Summary](#schema-coverage-summary)
@@ -361,7 +361,7 @@ These schemas are fully consistent with the fixtures:
 
 **Schemas (21 files):**
 
-```
+```text
 docs/garmin-schemas-temp/
 ├── common/ (9 schemas) ✅
 │   ├── sport-type.schema.ts
@@ -390,7 +390,7 @@ docs/garmin-schemas-temp/
 
 **Fixtures (6 files):**
 
-```
+```text
 test-fixtures/gcn/
 ├── WorkoutRunningNestedRepeats.gcn (542 lines) ✅
 ├── WorkoutCyclingPowerCadence.gcn (469 lines) ✅

@@ -86,7 +86,7 @@ This package follows the hexagonal (ports & adapters) architecture:
          │  • Use Cases         │
          │  • Domain Types      │
          └──────────────────────┘
-```
+```text
 
 ### Key Components
 
@@ -105,7 +105,7 @@ This package follows the hexagonal (ports & adapters) architecture:
 
 **Dependency Rule:**
 
-```
+```text
 Schemas → Mappers → Converters → Ports → Providers → Core
 (inner layers don't know about outer layers)
 ```
