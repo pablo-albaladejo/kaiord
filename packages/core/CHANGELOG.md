@@ -1,5 +1,11 @@
 # @kaiord/core
 
+## 4.1.2
+
+### Patch Changes
+
+- 9a79fd7: test: verify complete release workflow with ESM fix
+
 ## 4.1.1
 
 ### Patch Changes
