@@ -13,7 +13,7 @@
   - [Issue 1: workout.schema.ts - Missing Nullable Type](#1-workoutschemats---missing-nullable-type)
   - [Issue 2: repeat.schema.ts - Missing Fields](#2-repeatschemats---missing-fields)
   - [Issue 3: step.schema.ts - Missing Field](#3-stepschemats---missing-field)
-  - [Issue 4: step-input.schema.ts - Wrong Type](#4-step-inputschemats---wrong-type)
+  - [Issue 4: step-input.schema.ts - Input Flexibility](#4-step-inputschemats---input-flexibility)
 - [Fixtures Analyzed](#fixtures-analyzed)
 - [Validation Methodology](#validation-methodology)
 - [Schema Coverage Summary](#schema-coverage-summary)
