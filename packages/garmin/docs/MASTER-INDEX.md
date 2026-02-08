@@ -11,7 +11,7 @@
 
 ### 🎯 Start Here
 
-1. **[Final Comprehensive Findings](./garmin-api-final-comprehensive-findings.md)** - **PRIMARY REFERENCE**
+1. **[Final Comprehensive Findings](./API-FINDINGS.md)** - **PRIMARY REFERENCE**
    - Complete API documentation (500+ lines)
    - All 6 test results with analysis
    - Multisport support (NEW)
