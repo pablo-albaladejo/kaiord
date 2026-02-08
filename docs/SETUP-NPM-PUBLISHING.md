@@ -14,6 +14,7 @@ Quick checklist to enable automatic npm publishing with Trusted Publishing (no t
 **For EACH package**, go to the package's npm page and configure:
 
 #### @kaiord/core
+
 - [ ] Go to: https://www.npmjs.com/package/@kaiord/core/access
 - [ ] Click "Configure Trusted Publishers" → "Add Trusted Publisher" → "GitHub Actions"
 - [ ] Fill in:
@@ -24,22 +25,27 @@ Quick checklist to enable automatic npm publishing with Trusted Publishing (no t
 - [ ] Click "Add"
 
 #### @kaiord/fit
+
 - [ ] Go to: https://www.npmjs.com/package/@kaiord/fit/access
 - [ ] Add Trusted Publisher (same settings as above)
 
 #### @kaiord/tcx
+
 - [ ] Go to: https://www.npmjs.com/package/@kaiord/tcx/access
 - [ ] Add Trusted Publisher (same settings as above)
 
 #### @kaiord/zwo
+
 - [ ] Go to: https://www.npmjs.com/package/@kaiord/zwo/access
 - [ ] Add Trusted Publisher (same settings as above)
 
 #### @kaiord/garmin
+
 - [ ] Go to: https://www.npmjs.com/package/@kaiord/garmin/access
 - [ ] Add Trusted Publisher (same settings as above)
 
 #### @kaiord/cli
+
 - [ ] Go to: https://www.npmjs.com/package/@kaiord/cli/access
 - [ ] Add Trusted Publisher (same settings as above)
 
@@ -90,6 +96,7 @@ When you push a changeset:
 **Problem:** Trusted Publisher not configured on npm.com
 
 **Fix:**
+
 1. Complete Step 1 for the failing package
 2. Verify workflow name is exactly `Release`
 3. Wait 2-3 minutes for npm to propagate
@@ -106,6 +113,7 @@ When you push a changeset:
 **Problem:** No changesets or wrong paths
 
 **Fix:**
+
 1. Create a changeset: `pnpm exec changeset`
 2. Verify `.changeset/*.md` files exist
 3. Or trigger manually: `gh workflow run release.yml`
