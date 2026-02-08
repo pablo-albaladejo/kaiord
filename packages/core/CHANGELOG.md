@@ -1,5 +1,11 @@
 # @kaiord/core
 
+## 4.1.1
+
+### Patch Changes
+
+- 0992e52: test: verify npm Trusted Publishing works with OIDC
+
 ## 4.1.0
 
 ### Minor Changes
