@@ -125,29 +125,25 @@ describe("validate command integration tests", () => {
   });
 
   describe("error handling", () => {
-    it(
-      "should fail with exit code 2 for missing file",
-      async () => {
-        // Arrange
-        const nonExistentFile = join(tempDir, "nonexistent.fit");
+    it("should fail with exit code 2 for missing file", async () => {
+      // Arrange
+      const nonExistentFile = join(tempDir, "nonexistent.fit");
 
-        // Act & Assert
-        try {
-          await execa("tsx", [
-            "src/bin/kaiord.ts",
-            "validate",
-            "--input",
-            nonExistentFile,
-          ]);
-          expect.fail("Should have thrown an error");
-        } catch (error: unknown) {
-          const execaError = error as { exitCode: number; stderr: string };
-          // Exit code 2 = FILE_NOT_FOUND per CLI specification
-          expect(execaError.exitCode).toBe(2);
-        }
-      },
-      15000
-    ); // Increased timeout for process spawning under load
+      // Act & Assert
+      try {
+        await execa("tsx", [
+          "src/bin/kaiord.ts",
+          "validate",
+          "--input",
+          nonExistentFile,
+        ]);
+        expect.fail("Should have thrown an error");
+      } catch (error: unknown) {
+        const execaError = error as { exitCode: number; stderr: string };
+        // Exit code 2 = FILE_NOT_FOUND per CLI specification
+        expect(execaError.exitCode).toBe(2);
+      }
+    }, 15000); // Increased timeout for process spawning under load
 
     it(
       "should display error message for missing file",
