@@ -1,5 +1,7 @@
 import { convertFitToKrd } from "./use-cases/convert-fit-to-krd";
+import { convertGarminToKrd } from "./use-cases/convert-garmin-to-krd";
 import { convertKrdToFit } from "./use-cases/convert-krd-to-fit";
+import { convertKrdToGarmin } from "./use-cases/convert-krd-to-garmin";
 import { convertKrdToTcx } from "./use-cases/convert-krd-to-tcx";
 import { convertKrdToZwift } from "./use-cases/convert-krd-to-zwift";
 import { convertTcxToKrd } from "./use-cases/convert-tcx-to-krd";
@@ -12,40 +14,72 @@ import type { Logger } from "../ports/logger";
 
 export type { AdapterProviders, Providers } from "./provider-types";
 
+type WireCtx = {
+  result: Providers;
+  sv: ReturnType<typeof createSchemaValidator>;
+  log: Logger;
+};
+
+const wireFit = (ctx: WireCtx, fit: NonNullable<AdapterProviders["fit"]>) => {
+  ctx.result.fitReader = fit.fitReader;
+  ctx.result.fitWriter = fit.fitWriter;
+  ctx.result.convertFitToKrd = convertFitToKrd(fit.fitReader, ctx.sv, ctx.log);
+  ctx.result.convertKrdToFit = convertKrdToFit(fit.fitWriter, ctx.sv, ctx.log);
+};
+
+const wireTcx = (ctx: WireCtx, tcx: NonNullable<AdapterProviders["tcx"]>) => {
+  ctx.result.tcxReader = tcx.tcxReader;
+  ctx.result.tcxWriter = tcx.tcxWriter;
+  ctx.result.tcxValidator = tcx.tcxValidator;
+  ctx.result.convertTcxToKrd = convertTcxToKrd(tcx.tcxReader, ctx.sv, ctx.log);
+  ctx.result.convertKrdToTcx = convertKrdToTcx(tcx.tcxWriter, ctx.sv, ctx.log);
+};
+
+const wireZwo = (ctx: WireCtx, zwo: NonNullable<AdapterProviders["zwo"]>) => {
+  ctx.result.zwiftReader = zwo.zwiftReader;
+  ctx.result.zwiftWriter = zwo.zwiftWriter;
+  ctx.result.zwiftValidator = zwo.zwiftValidator;
+  ctx.result.convertZwiftToKrd = convertZwiftToKrd(
+    zwo.zwiftReader,
+    ctx.sv,
+    ctx.log
+  );
+  ctx.result.convertKrdToZwift = convertKrdToZwift(
+    zwo.zwiftWriter,
+    ctx.sv,
+    ctx.log
+  );
+};
+
+const wireGarmin = (
+  ctx: WireCtx,
+  g: NonNullable<AdapterProviders["garmin"]>
+) => {
+  ctx.result.garminReader = g.garminReader;
+  ctx.result.garminWriter = g.garminWriter;
+  ctx.result.convertGarminToKrd = convertGarminToKrd(
+    g.garminReader,
+    ctx.sv,
+    ctx.log
+  );
+  ctx.result.convertKrdToGarmin = convertKrdToGarmin(
+    g.garminWriter,
+    ctx.sv,
+    ctx.log
+  );
+};
+
 const wireAdapters = (
   result: Providers,
   adapters: AdapterProviders | undefined,
   sv: ReturnType<typeof createSchemaValidator>,
   log: Logger
 ): void => {
-  if (adapters?.fit) {
-    result.fitReader = adapters.fit.fitReader;
-    result.fitWriter = adapters.fit.fitWriter;
-    result.convertFitToKrd = convertFitToKrd(adapters.fit.fitReader, sv, log);
-    result.convertKrdToFit = convertKrdToFit(adapters.fit.fitWriter, sv, log);
-  }
-  if (adapters?.tcx) {
-    result.tcxReader = adapters.tcx.tcxReader;
-    result.tcxWriter = adapters.tcx.tcxWriter;
-    result.tcxValidator = adapters.tcx.tcxValidator;
-    result.convertTcxToKrd = convertTcxToKrd(adapters.tcx.tcxReader, sv, log);
-    result.convertKrdToTcx = convertKrdToTcx(adapters.tcx.tcxWriter, sv, log);
-  }
-  if (adapters?.zwo) {
-    result.zwiftReader = adapters.zwo.zwiftReader;
-    result.zwiftWriter = adapters.zwo.zwiftWriter;
-    result.zwiftValidator = adapters.zwo.zwiftValidator;
-    result.convertZwiftToKrd = convertZwiftToKrd(
-      adapters.zwo.zwiftReader,
-      sv,
-      log
-    );
-    result.convertKrdToZwift = convertKrdToZwift(
-      adapters.zwo.zwiftWriter,
-      sv,
-      log
-    );
-  }
+  const ctx: WireCtx = { result, sv, log };
+  if (adapters?.fit) wireFit(ctx, adapters.fit);
+  if (adapters?.tcx) wireTcx(ctx, adapters.tcx);
+  if (adapters?.zwo) wireZwo(ctx, adapters.zwo);
+  if (adapters?.garmin) wireGarmin(ctx, adapters.garmin);
 };
 
 /**

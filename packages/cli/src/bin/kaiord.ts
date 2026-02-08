@@ -52,12 +52,12 @@ const main = async (): Promise<void> => {
             })
             .option("input-format", {
               type: "string",
-              choices: ["fit", "krd", "tcx", "zwo"],
+              choices: ["fit", "gcn", "krd", "tcx", "zwo"],
               description: "Override input format detection",
             })
             .option("output-format", {
               type: "string",
-              choices: ["fit", "krd", "tcx", "zwo"],
+              choices: ["fit", "gcn", "krd", "tcx", "zwo"],
               description: "Override output format detection",
             })
             .example(
@@ -80,12 +80,14 @@ const main = async (): Promise<void> => {
             outputDir: argv.outputDir,
             inputFormat: argv.inputFormat as
               | "fit"
+              | "gcn"
               | "krd"
               | "tcx"
               | "zwo"
               | undefined,
             outputFormat: argv.outputFormat as
               | "fit"
+              | "gcn"
               | "krd"
               | "tcx"
               | "zwo"
@@ -157,12 +159,12 @@ const main = async (): Promise<void> => {
             })
             .option("format1", {
               type: "string",
-              choices: ["fit", "krd", "tcx", "zwo"],
+              choices: ["fit", "gcn", "krd", "tcx", "zwo"],
               description: "Override format detection for first file",
             })
             .option("format2", {
               type: "string",
-              choices: ["fit", "krd", "tcx", "zwo"],
+              choices: ["fit", "gcn", "krd", "tcx", "zwo"],
               description: "Override format detection for second file",
             })
             .example(

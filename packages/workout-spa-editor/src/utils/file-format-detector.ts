@@ -5,7 +5,7 @@
  * Supports FIT, TCX, ZWO, and KRD formats.
  */
 
-export type WorkoutFileFormat = "fit" | "tcx" | "zwo" | "krd";
+export type WorkoutFileFormat = "fit" | "tcx" | "zwo" | "krd" | "gcn";
 
 export type FormatDetectionResult =
   | { success: true; format: WorkoutFileFormat }
@@ -52,10 +52,12 @@ export const detectFormat = (filename: string): FormatDetectionResult => {
     case "krd":
     case "json":
       return { success: true, format: "krd" };
+    case "gcn":
+      return { success: true, format: "gcn" };
     default:
       return {
         success: false,
-        error: `Unsupported file format: .${ext}. Supported formats: .fit, .tcx, .zwo, .krd, .json`,
+        error: `Unsupported file format: .${ext}. Supported formats: .fit, .tcx, .zwo, .krd, .json, .gcn`,
       };
   }
 };
@@ -67,7 +69,7 @@ export const detectFormat = (filename: string): FormatDetectionResult => {
  * @returns True if format is supported, false otherwise
  */
 export const isValidFormat = (format: string): format is WorkoutFileFormat => {
-  return ["fit", "tcx", "zwo", "krd"].includes(format);
+  return ["fit", "tcx", "zwo", "krd", "gcn"].includes(format);
 };
 
 /**
@@ -84,6 +86,7 @@ export const getMimeType = (format: WorkoutFileFormat): string => {
     case "zwo":
       return "application/xml";
     case "krd":
+    case "gcn":
       return "application/json";
   }
 };

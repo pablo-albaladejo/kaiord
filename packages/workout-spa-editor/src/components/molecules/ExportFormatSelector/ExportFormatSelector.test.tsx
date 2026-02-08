@@ -69,11 +69,12 @@ describe("ExportFormatSelector", () => {
       });
 
       const options = screen.getAllByRole("option");
-      expect(options).toHaveLength(4);
+      expect(options).toHaveLength(5);
 
       expect(screen.getAllByText("FIT")).toHaveLength(1);
       expect(screen.getAllByText("TCX")).toHaveLength(1);
       expect(screen.getAllByText("ZWO")).toHaveLength(1);
+      expect(screen.getAllByText("GCN")).toHaveLength(1);
       expect(screen.getAllByText("KRD")).toHaveLength(2); // One in button, one in dropdown
     });
 
@@ -131,10 +132,10 @@ describe("ExportFormatSelector", () => {
 
       // Assert
       await waitFor(() => {
-        expect(screen.getByText("Garmin devices")).toBeInTheDocument();
+        expect(screen.getAllByText("Garmin devices")).toHaveLength(2); // FIT and GCN
       });
 
-      expect(screen.getAllByText("Garmin Connect")).toHaveLength(2); // FIT and TCX
+      expect(screen.getAllByText("Garmin Connect")).toHaveLength(3); // FIT, TCX, and GCN
       expect(screen.getAllByText("TrainingPeaks")).toHaveLength(2); // FIT and TCX
       expect(screen.getByText("Zwift")).toBeInTheDocument();
     });

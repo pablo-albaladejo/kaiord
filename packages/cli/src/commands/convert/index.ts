@@ -5,6 +5,7 @@ import {
   ToleranceExceededError,
 } from "@kaiord/core";
 import { createFitProviders } from "@kaiord/fit";
+import { createGarminProviders } from "@kaiord/garmin";
 import { createTcxProviders } from "@kaiord/tcx";
 import { createZwoProviders } from "@kaiord/zwo";
 import {
@@ -83,6 +84,7 @@ export const convertCommand = async (
     const providers = createDefaultProviders(
       {
         fit: createFitProviders(logger),
+        garmin: createGarminProviders(logger),
         tcx: createTcxProviders(logger),
         zwo: createZwoProviders(logger),
       },

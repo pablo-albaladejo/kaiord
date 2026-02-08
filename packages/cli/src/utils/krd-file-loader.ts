@@ -20,7 +20,7 @@ export const loadFileAsKrd = async (
   if (!detectedFormat) {
     throw new Error(
       `Unable to detect format for file: ${filePath}. ` +
-        `Supported formats: .fit, .krd, .tcx, .zwo`
+        `Supported formats: .fit, .gcn, .krd, .tcx, .zwo`
     );
   }
 
@@ -62,6 +62,13 @@ export const convertToKrd = async (
     return providers.convertZwiftToKrd!({ zwiftString: data });
   }
 
+  if (format === "gcn") {
+    if (typeof data !== "string") {
+      throw new Error("GCN input must be string");
+    }
+    return providers.convertGarminToKrd!({ gcnString: data });
+  }
+
   if (format === "krd") {
     if (typeof data !== "string") {
       throw new Error("KRD input must be string");
@@ -94,6 +101,10 @@ export const convertFromKrd = async (
 
   if (format === "zwo") {
     return providers.convertKrdToZwift!({ krd });
+  }
+
+  if (format === "gcn") {
+    return providers.convertKrdToGarmin!({ krd });
   }
 
   if (format === "krd") {

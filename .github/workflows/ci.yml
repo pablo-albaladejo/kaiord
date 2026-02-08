@@ -31,6 +31,7 @@ jobs:
     if: github.actor != 'github-actions[bot]'
     outputs:
       core-changed: ${{ steps.changes.outputs.core-changed }}
+      garmin-changed: ${{ steps.changes.outputs.garmin-changed }}
       frontend-changed: ${{ steps.changes.outputs.frontend-changed }}
       should-test: ${{ steps.changes.outputs.should-test }}
     steps:
@@ -46,6 +47,8 @@ jobs:
           files_yaml: |
             core:
               - 'packages/core/**'
+            garmin:
+              - 'packages/garmin/**'
             frontend:
               - 'packages/workout-spa-editor/**'
             root_deps:
@@ -70,6 +73,14 @@ jobs:
             echo "core-changed=false" >> $GITHUB_OUTPUT
           fi
 
+          # Garmin package changes
+          if [[ "${{ steps.changed-files.outputs.garmin_any_changed }}" == "true" ]] || \
+             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
+            echo "garmin-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "garmin-changed=false" >> $GITHUB_OUTPUT
+          fi
+
           # Frontend package changes
           if [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "true" ]] || \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
@@ -82,6 +93,7 @@ jobs:
           # This reduces CI time from ~5 minutes to ~30 seconds for docs-only PRs
           if [[ "${{ steps.changed-files.outputs.docs_any_changed }}" == "true" ]] && \
              [[ "${{ steps.changed-files.outputs.core_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.garmin_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "false" ]]; then
             echo "should-test=false" >> $GITHUB_OUTPUT
@@ -92,6 +104,7 @@ jobs:
       - name: Display change detection results
         run: |
           echo "Core changed: ${{ steps.changes.outputs.core-changed }}"
+          echo "Garmin changed: ${{ steps.changes.outputs.garmin-changed }}"
           echo "Frontend changed: ${{ steps.changes.outputs.frontend-changed }}"
           echo "Should test: ${{ steps.changes.outputs.should-test }}"
 
@@ -143,7 +156,7 @@ jobs:
       fail-fast: false
       matrix:
         node-version: ["20.x", "22.x", "24.x"]
-        package: ["core"]
+        package: ["core", "garmin"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -153,28 +166,31 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
+      - name: Build dependencies
+        run: pnpm -r build
+
       - name: Run tests with coverage
-        run: pnpm --filter @kaiord/core test:coverage
+        run: pnpm --filter @kaiord/${{ matrix.package }} test:coverage
 
       - name: Upload coverage to Codecov
         # Only upload coverage from Node 20.x to avoid duplicate reports
         if: matrix.node-version == '20.x'
         uses: codecov/codecov-action@v5
         with:
-          files: ./packages/core/coverage/coverage-final.json
-          flags: core
-          name: core-${{ matrix.node-version }}
+          files: ./packages/${{ matrix.package }}/coverage/coverage-final.json
+          flags: ${{ matrix.package }}
+          name: ${{ matrix.package }}-${{ matrix.node-version }}
           fail_ci_if_error: false
 
       - name: Check coverage threshold
-        run: node .github/scripts/check-coverage.js ./packages/core/coverage/coverage-final.json
+        run: node .github/scripts/check-coverage.js ./packages/${{ matrix.package }}/coverage/coverage-final.json
 
       - name: Upload coverage artifact
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: coverage-core-${{ matrix.node-version }}
-          path: ./packages/core/coverage/
+          name: coverage-${{ matrix.package }}-${{ matrix.node-version }}
+          path: ./packages/${{ matrix.package }}/coverage/
           retention-days: 30
 
   build:
@@ -188,16 +204,19 @@ jobs:
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
 
-      - name: Build core package
-        run: pnpm --filter @kaiord/core build
+      - name: Build all packages
+        run: pnpm -r build
 
       - name: Verify build outputs
         run: |
-          if [ ! -d "packages/core/dist" ]; then
-            echo "❌ @kaiord/core build output not found"
-            exit 1
-          fi
-          echo "✅ @kaiord/core build verified"
+          for pkg in core garmin; do
+            if [ ! -d "packages/$pkg/dist" ]; then
+              echo "::error::@kaiord/$pkg build output not found"
+              exit 1
+            fi
+            echo "  @kaiord/$pkg build verified"
+          done
+          echo "All package builds verified"
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v6
@@ -258,7 +277,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        package: ["core"]
+        package: ["core", "garmin"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -266,36 +285,39 @@ jobs:
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
 
+      - name: Build dependencies
+        run: pnpm -r build
+
       - name: Run round-trip tests
         run: |
-          echo "Running round-trip tests for @kaiord/core..."
-          echo "Tolerance validation: ±1s (time), ±1W (power), ±1bpm (heart rate), ±1rpm (cadence)"
+          echo "Running round-trip tests for @kaiord/${{ matrix.package }}..."
+          echo "Tolerance validation: +/-1s (time), +/-1W (power), +/-1bpm (heart rate), +/-1rpm (cadence)"
 
           # Run tests matching round-trip pattern
-          pnpm --filter @kaiord/core exec vitest --run --reporter=verbose \
+          pnpm --filter @kaiord/${{ matrix.package }} exec vitest --run --reporter=verbose \
             --testNamePattern="round.?trip|Round.?trip|tolerance|Tolerance" 2>&1 | tee round-trip-output.txt
 
           # Check if any tests failed
           if [ ${PIPESTATUS[0]} -ne 0 ]; then
-            echo "❌ Round-trip tests failed"
+            echo "Round-trip tests failed"
             echo ""
             echo "Tolerance violations detected. The following metrics exceeded acceptable tolerances:"
-            echo "  - Time: ±1 second"
-            echo "  - Power: ±1 watt or ±1% FTP"
-            echo "  - Heart Rate: ±1 bpm"
-            echo "  - Cadence: ±1 rpm"
+            echo "  - Time: +/-1 second"
+            echo "  - Power: +/-1 watt or +/-1% FTP"
+            echo "  - Heart Rate: +/-1 bpm"
+            echo "  - Cadence: +/-1 rpm"
             echo ""
             echo "Please review the test output above for specific violations."
             exit 1
           fi
 
-          echo "✅ All round-trip tests passed with acceptable tolerances"
+          echo "All round-trip tests passed with acceptable tolerances"
 
       - name: Upload round-trip test results
         if: always()
         uses: actions/upload-artifact@v6
         with:
-          name: round-trip-results-core
+          name: round-trip-results-${{ matrix.package }}
           path: round-trip-output.txt
           retention-days: 30
 

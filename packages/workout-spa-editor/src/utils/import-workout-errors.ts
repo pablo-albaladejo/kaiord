@@ -2,6 +2,7 @@
 
 import {
   FitParsingError,
+  GarminParsingError,
   KrdValidationError,
   TcxParsingError,
   ZwiftParsingError,
@@ -14,9 +15,23 @@ import {
 } from "../types/errors";
 import type { WorkoutFileFormat } from "./file-format-detector";
 
-const formatValidationError = (
+const fmtValidation = (
   errors: Array<{ field: string; message: string }>
 ): string => errors.map((e) => `${e.field}: ${e.message}`).join(", ");
+
+const parsingErrorMap: Record<string, new (...args: never[]) => Error> = {
+  FitParsingError: FitParsingError,
+  TcxParsingError: TcxParsingError,
+  ZwiftParsingError: ZwiftParsingError,
+  GarminParsingError: GarminParsingError,
+};
+
+const formatLabel: Record<string, string> = {
+  FitParsingError: "FIT",
+  TcxParsingError: "TCX",
+  ZwiftParsingError: "ZWO",
+  GarminParsingError: "GCN",
+};
 
 export const transformError = (
   error: unknown,
@@ -24,49 +39,40 @@ export const transformError = (
 ): ImportError => {
   if (error instanceof ImportError) return error;
   if (error instanceof FileParsingError) {
-    const msg = `Failed to parse ${format.toUpperCase()} file: ${error.message}`;
     const loc =
       error.line !== undefined && error.column !== undefined
         ? ` (line ${error.line}, column ${error.column})`
         : "";
+    const msg = `Failed to parse ${format.toUpperCase()} file: ${error.message}`;
     return new ImportError(msg + loc, format, error);
   }
   if (error instanceof ValidationError) {
     return new ImportError(
-      `Validation failed: ${formatValidationError(error.errors)}`,
+      `Validation failed: ${fmtValidation(error.errors)}`,
       format,
       error
     );
   }
   if (error instanceof ConversionError) {
-    const msg = `Conversion failed: ${error.message}`;
     const details = error.details ? ` (${error.details})` : "";
-    return new ImportError(msg + details, format, error);
-  }
-  if (error instanceof FitParsingError) {
     return new ImportError(
-      `Failed to parse FIT file: ${error.message}`,
+      `Conversion failed: ${error.message}${details}`,
       format,
       error
     );
   }
-  if (error instanceof TcxParsingError) {
-    return new ImportError(
-      `Failed to parse TCX file: ${error.message}`,
-      format,
-      error
-    );
-  }
-  if (error instanceof ZwiftParsingError) {
-    return new ImportError(
-      `Failed to parse ZWO file: ${error.message}`,
-      format,
-      error
-    );
+  for (const [name, label] of Object.entries(formatLabel)) {
+    if (error instanceof parsingErrorMap[name]) {
+      return new ImportError(
+        `Failed to parse ${label} file: ${(error as Error).message}`,
+        format,
+        error
+      );
+    }
   }
   if (error instanceof KrdValidationError) {
     return new ImportError(
-      `Validation failed: ${formatValidationError(error.errors)}`,
+      `Validation failed: ${fmtValidation(error.errors)}`,
       format,
       error
     );

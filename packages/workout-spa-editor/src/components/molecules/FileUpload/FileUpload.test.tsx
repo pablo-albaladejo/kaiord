@@ -254,7 +254,7 @@ describe("FileUpload", () => {
 
     // Assert
     const fileInput = screen.getByLabelText(/upload workout file/i);
-    expect(fileInput).toHaveAttribute("accept", ".fit,.tcx,.zwo,.krd,.json");
+    expect(fileInput).toHaveAttribute("accept", ".fit,.tcx,.zwo,.krd,.json,.gcn");
   });
 
   it("should accept custom file types", () => {
