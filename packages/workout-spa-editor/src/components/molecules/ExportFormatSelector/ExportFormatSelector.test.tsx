@@ -457,9 +457,7 @@ describe("ExportFormatSelector", () => {
 
       // Assert
       expect(
-        screen.getByText(
-          /GCN format is designed for the Garmin Connect API/i
-        )
+        screen.getByText(/GCN format is designed for the Garmin Connect API/i)
       ).toBeInTheDocument();
     });
 
