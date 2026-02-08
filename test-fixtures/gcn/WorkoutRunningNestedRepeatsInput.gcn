@@ -1,0 +1,111 @@
+{
+  "sportType": {"sportTypeId": 1, "sportTypeKey": "running"},
+  "workoutName": "MEGA RUN - Complete API Test",
+  "workoutSegments": [{
+    "segmentOrder": 1,
+    "sportType": {"sportTypeId": 1, "sportTypeKey": "running"},
+    "workoutSteps": [
+      {
+        "stepId": 1, "stepOrder": 1,
+        "stepType": {"stepTypeId": 1, "stepTypeKey": "warmup"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 1, "conditionTypeKey": "lap.button", "displayable": true},
+        "endConditionValue": 1000,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+      },
+      {
+        "stepId": 2, "stepOrder": 2,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+        "endConditionValue": 600,
+        "targetType": {"workoutTargetTypeId": 4, "workoutTargetTypeKey": "heart.rate.zone"},
+        "zoneNumber": 4
+      },
+      {
+        "stepId": 3, "stepOrder": 3,
+        "stepType": {"stepTypeId": 4, "stepTypeKey": "recovery"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+        "endConditionValue": 400,
+        "targetType": {"workoutTargetTypeId": 4, "workoutTargetTypeKey": "heart.rate.zone"},
+        "targetValueOne": 120,
+        "targetValueTwo": 140
+      },
+      {
+        "stepId": 4, "stepOrder": 4,
+        "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 4, "conditionTypeKey": "calories", "displayable": true},
+        "endConditionValue": 50,
+        "targetType": {"workoutTargetTypeId": 6, "workoutTargetTypeKey": "pace.zone"},
+        "targetValueOne": 3.5,
+        "targetValueTwo": 4.0,
+        "secondaryTargetType": {"workoutTargetTypeId": 4, "workoutTargetTypeKey": "heart.rate.zone"},
+        "secondaryTargetValueOne": 160,
+        "secondaryTargetValueTwo": 175
+      },
+      {
+        "stepId": 5, "stepOrder": 5,
+        "stepType": {"stepTypeId": 6, "stepTypeKey": "repeat"},
+        "type": "RepeatGroupDTO",
+        "numberOfIterations": 3,
+        "smartRepeat": false,
+        "endCondition": {"conditionTypeId": 7, "conditionTypeKey": "iterations", "displayable": false},
+        "endConditionValue": 3,
+        "workoutSteps": [
+          {
+            "stepId": 6, "stepOrder": 1,
+            "stepType": {"stepTypeId": 6, "stepTypeKey": "repeat"},
+            "type": "RepeatGroupDTO",
+            "numberOfIterations": 4,
+            "smartRepeat": false,
+            "endCondition": {"conditionTypeId": 7, "conditionTypeKey": "iterations", "displayable": false},
+            "endConditionValue": 4,
+            "workoutSteps": [
+              {
+                "stepId": 7, "stepOrder": 1,
+                "stepType": {"stepTypeId": 3, "stepTypeKey": "interval"},
+                "type": "ExecutableStepDTO",
+                "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+                "endConditionValue": 400,
+                "targetType": {"workoutTargetTypeId": 6, "workoutTargetTypeKey": "pace.zone"},
+                "targetValueOne": 4.5,
+                "targetValueTwo": 5.0
+              },
+              {
+                "stepId": 8, "stepOrder": 2,
+                "stepType": {"stepTypeId": 4, "stepTypeKey": "recovery"},
+                "type": "ExecutableStepDTO",
+                "endCondition": {"conditionTypeId": 3, "conditionTypeKey": "distance", "displayable": true},
+                "endConditionValue": 200,
+                "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+              }
+            ]
+          },
+          {
+            "stepId": 9, "stepOrder": 2,
+            "stepType": {"stepTypeId": 5, "stepTypeKey": "rest"},
+            "type": "ExecutableStepDTO",
+            "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+            "endConditionValue": 180,
+            "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+          }
+        ]
+      },
+      {
+        "stepId": 10, "stepOrder": 6,
+        "stepType": {"stepTypeId": 2, "stepTypeKey": "cooldown"},
+        "type": "ExecutableStepDTO",
+        "endCondition": {"conditionTypeId": 1, "conditionTypeKey": "lap.button", "displayable": true},
+        "endConditionValue": 1000,
+        "targetType": {"workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target"}
+      }
+    ]
+  }],
+  "avgTrainingSpeed": 2.5,
+  "estimatedDurationInSecs": 0,
+  "estimatedDistanceInMeters": 0,
+  "estimateType": null,
+  "isWheelchair": false
+}
