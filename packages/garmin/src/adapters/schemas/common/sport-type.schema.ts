@@ -23,7 +23,7 @@ export const sportTypeKeySchema = z.enum([
 export const garminSportTypeSchema = z.object({
   sportTypeId: z.number().int().positive(),
   sportTypeKey: sportTypeKeySchema,
-  displayOrder: z.number().int().nonnegative(),
+  displayOrder: z.number().int().nonnegative().optional(),
 });
 
 export type GarminSportType = z.infer<typeof garminSportTypeSchema>;

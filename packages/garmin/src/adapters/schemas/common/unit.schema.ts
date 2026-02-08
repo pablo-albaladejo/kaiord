@@ -10,4 +10,10 @@ export const garminUnitSchema = z.object({
   factor: z.number().positive().nullable(),
 });
 
+export const garminUnitInputSchema = z.object({
+  unitId: z.number().int().positive().nullable().optional(),
+  unitKey: unitKeySchema,
+  factor: z.number().positive().nullable().optional(),
+});
+
 export type GarminUnit = z.infer<typeof garminUnitSchema>;

@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { garminSportTypeSchema, garminUnitSchema } from "../common";
+import { garminSportTypeSchema } from "../common";
+import { garminUnitInputSchema } from "../common/unit.schema";
 import { garminWorkoutStepInputSchema } from "./repeat-input.schema";
 
 export const garminWorkoutSegmentInputSchema = z.object({
@@ -9,11 +10,11 @@ export const garminWorkoutSegmentInputSchema = z.object({
 
   description: z.string().max(500).optional(),
   poolLength: z.number().positive().optional(),
-  poolLengthUnit: garminUnitSchema.optional(),
+  poolLengthUnit: garminUnitInputSchema.optional(),
   avgTrainingSpeed: z.number().nonnegative().optional(),
   estimatedDurationInSecs: z.number().int().nonnegative().optional(),
   estimatedDistanceInMeters: z.number().nonnegative().optional(),
-  estimatedDistanceUnit: garminUnitSchema.optional(),
+  estimatedDistanceUnit: garminUnitInputSchema.optional(),
   estimateType: z.string().nullable().optional(),
 });
 

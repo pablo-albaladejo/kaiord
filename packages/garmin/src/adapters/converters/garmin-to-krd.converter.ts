@@ -104,11 +104,11 @@ const mapExecutableStep = (
   const { targetType, target } = resolveTarget(step);
   const intensity = mapStepTypeToIntensity(step.stepType.stepTypeKey);
   const equipment = mapGarminEquipmentToKrd(
-    step.equipmentType.equipmentTypeKey
+    step.equipmentType?.equipmentTypeKey
   );
   const stroke = mapGarminStrokeToKrd(
-    step.strokeType.strokeTypeKey,
-    step.strokeType.strokeTypeId
+    step.strokeType?.strokeTypeKey,
+    step.strokeType?.strokeTypeId
   );
 
   const result: WorkoutStep = {

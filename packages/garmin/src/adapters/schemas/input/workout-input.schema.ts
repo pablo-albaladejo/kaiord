@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { garminSportTypeSchema, garminUnitSchema } from "../common";
+import { garminSportTypeSchema } from "../common";
+import { garminUnitInputSchema } from "../common/unit.schema";
 import { garminWorkoutSegmentInputSchema } from "./segment-input.schema";
 
 export const garminWorkoutInputSchema = z.object({
@@ -9,14 +10,14 @@ export const garminWorkoutInputSchema = z.object({
 
   subSportType: z.unknown().nullable().optional(),
   description: z.string().max(2000).optional(),
-  estimatedDistanceUnit: garminUnitSchema.optional(),
+  estimatedDistanceUnit: garminUnitInputSchema.optional(),
   avgTrainingSpeed: z.number().nonnegative().optional(),
   estimatedDurationInSecs: z.number().int().nonnegative().optional(),
   estimatedDistanceInMeters: z.number().nonnegative().optional(),
   estimateType: z.string().nullable().optional(),
 
   poolLength: z.number().positive().optional(),
-  poolLengthUnit: garminUnitSchema.optional(),
+  poolLengthUnit: garminUnitInputSchema.optional(),
 });
 
 export type GarminWorkoutInput = z.infer<typeof garminWorkoutInputSchema>;

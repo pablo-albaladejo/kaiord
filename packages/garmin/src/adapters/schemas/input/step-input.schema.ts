@@ -5,7 +5,7 @@ import {
   garminStepTypeSchema,
   garminStrokeTypeSchema,
   garminTargetTypeSchema,
-  garminUnitSchema,
+  garminUnitInputSchema,
 } from "../common";
 
 export const executableStepDTOInputSchema = z.object({
@@ -24,7 +24,7 @@ export const executableStepDTOInputSchema = z.object({
   targetType: garminTargetTypeSchema,
   targetValueOne: z.union([z.string(), z.number()]).nullable().optional(),
   targetValueTwo: z.union([z.string(), z.number()]).nullable().optional(),
-  targetValueUnit: garminUnitSchema.optional(),
+  targetValueUnit: garminUnitInputSchema.optional(),
   zoneNumber: z.number().int().positive().nullable().optional(),
 
   secondaryTargetType: garminTargetTypeSchema.nullable().optional(),
@@ -36,7 +36,7 @@ export const executableStepDTOInputSchema = z.object({
     .union([z.string(), z.number()])
     .nullable()
     .optional(),
-  secondaryTargetValueUnit: garminUnitSchema.optional(),
+  secondaryTargetValueUnit: garminUnitInputSchema.optional(),
   secondaryZoneNumber: z.number().int().positive().nullable().optional(),
 
   strokeType: garminStrokeTypeSchema.optional(),
@@ -45,7 +45,7 @@ export const executableStepDTOInputSchema = z.object({
   category: z.string().nullable().optional(),
   exerciseName: z.string().nullable().optional(),
   weightValue: z.number().nullable().optional(),
-  weightUnit: garminUnitSchema.optional(),
+  weightUnit: garminUnitInputSchema.optional(),
 
   workoutProvider: z.string().nullable().optional(),
   providerExerciseSourceId: z.string().nullable().optional(),
