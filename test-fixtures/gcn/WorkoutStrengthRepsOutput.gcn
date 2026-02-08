@@ -1,6 +1,6 @@
 {
-  "workoutId": 1467223413,
-  "ownerId": 76086766,
+  "workoutId": 12345683,
+  "ownerId": 99999999,
   "workoutName": "MEGA STRENGTH - Complete Reps Test",
   "description": null,
   "updatedDate": "2026-02-08T00:57:23.0",
@@ -13,12 +13,12 @@
   "subSportType": null,
   "trainingPlanId": null,
   "author": {
-    "userProfilePk": 76086766,
-    "displayName": "038f9efb-7eab-49fe-950f-a84b0cd17bd5",
-    "fullName": "Pablo",
+    "userProfilePk": 99999999,
+    "displayName": "test-user",
+    "fullName": "Test User",
     "profileImgNameLarge": null,
-    "profileImgNameMedium": "a56bc49c-4715-43cc-b31a-68c3ca260fb4-76086766.png",
-    "profileImgNameSmall": "5a119a91-c9a1-44fd-8306-b8299f5f1ac0-76086766.png",
+    "profileImgNameMedium": null,
+    "profileImgNameSmall": null,
     "userPro": false,
     "vivokidUser": false
   },

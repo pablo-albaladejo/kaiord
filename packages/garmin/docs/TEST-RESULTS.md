@@ -88,9 +88,9 @@ All 4 issues identified in the schema validation report were **confirmed** with 
 
 | Field                        | Input          | Output             | Notes                          |
 | ---------------------------- | -------------- | ------------------ | ------------------------------ |
-| `workoutId`                  | ❌ Not present | ✅ 1467223385      | Server-generated               |
-| `stepId`                     | 1 (simple)     | 12368371258        | Server replaces with unique ID |
-| `ownerId`                    | ❌ Not present | ✅ 76086766        | Server adds                    |
+| `workoutId`                  | ❌ Not present | ✅ (server-assigned) | Server-generated               |
+| `stepId`                     | 1 (simple)     | (server-assigned)    | Server replaces with unique ID |
+| `ownerId`                    | ❌ Not present | ✅ (server-assigned) | Server adds                    |
 | `author`                     | ❌ Not present | ✅ Full object     | Server adds user info          |
 | `createdDate`                | ❌ Not present | ✅ "2026-02-08..." | Server timestamp               |
 | `updatedDate`                | ❌ Not present | ✅ "2026-02-08..." | Server timestamp               |
@@ -237,8 +237,10 @@ test-fixtures/gcn/
 ---
 
 **Test Execution Date:** 2026-02-08
-**API Endpoint:** https://connect.garmin.com/gc-api/workout-service/workout
+**API Endpoint:** Garmin Connect Workout Service (redacted for privacy)
 **Success Rate:** 100% (6/6)
 **Total Workouts Created:** 6
 **Total API Calls:** 6
 **Average Response Time:** ~2 seconds per call
+
+> **Note:** Real identifiers (workoutId, ownerId, stepId) have been redacted from this document for privacy.

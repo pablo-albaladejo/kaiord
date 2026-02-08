@@ -27,10 +27,10 @@ export const convertGarminToKRD = (gcnString: string, logger: Logger): KRD => {
     throw createGarminParsingError("Invalid JSON in GCN file", error);
   }
 
-  const gcn = parsed as Record<string, unknown>;
-  if (!gcn || typeof gcn !== "object") {
+  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
     throw createGarminParsingError("GCN data is not an object");
   }
+  const gcn = parsed as Record<string, unknown>;
 
   const sportType = gcn.sportType as {
     sportTypeKey: string;
