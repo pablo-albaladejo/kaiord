@@ -37,6 +37,7 @@ jobs:
         with:
           node-version: 24.x
           registry-url: "https://registry.npmjs.org"
+          always-auth: true
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
@@ -127,10 +128,11 @@ jobs:
           git commit -m "chore: version packages [skip ci]"
           git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
 
-      - name: Publish to npm
+      - name: Publish to npm with provenance
         if: steps.changesets.outputs.has-changesets == 'true'
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+          NPM_CONFIG_PROVENANCE: true
         run: pnpm exec changeset publish
 
       - name: Create GitHub Releases
