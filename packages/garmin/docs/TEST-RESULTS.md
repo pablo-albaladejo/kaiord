@@ -86,16 +86,16 @@ All 4 issues identified in the schema validation report were **confirmed** with 
 
 **Input → Output transformations verified:**
 
-| Field                        | Input          | Output             | Notes                          |
-| ---------------------------- | -------------- | ------------------ | ------------------------------ |
+| Field                        | Input          | Output               | Notes                          |
+| ---------------------------- | -------------- | -------------------- | ------------------------------ |
 | `workoutId`                  | ❌ Not present | ✅ (server-assigned) | Server-generated               |
 | `stepId`                     | 1 (simple)     | (server-assigned)    | Server replaces with unique ID |
 | `ownerId`                    | ❌ Not present | ✅ (server-assigned) | Server adds                    |
-| `author`                     | ❌ Not present | ✅ Full object     | Server adds user info          |
-| `createdDate`                | ❌ Not present | ✅ "2026-02-08..." | Server timestamp               |
-| `updatedDate`                | ❌ Not present | ✅ "2026-02-08..." | Server timestamp               |
-| `strokeType.displayOrder`    | ❌ Not sent    | ✅ 0               | Server adds                    |
-| `equipmentType.displayOrder` | ❌ Not sent    | ✅ 0               | Server adds                    |
+| `author`                     | ❌ Not present | ✅ Full object       | Server adds user info          |
+| `createdDate`                | ❌ Not present | ✅ "2026-02-08..."   | Server timestamp               |
+| `updatedDate`                | ❌ Not present | ✅ "2026-02-08..."   | Server timestamp               |
+| `strokeType.displayOrder`    | ❌ Not sent    | ✅ 0                 | Server adds                    |
+| `equipmentType.displayOrder` | ❌ Not sent    | ✅ 0                 | Server adds                    |
 
 ### Type Expansions
 
