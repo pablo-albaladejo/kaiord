@@ -112,6 +112,11 @@ describe("ExportFormatSelector", () => {
       expect(
         screen.getByText(/Kaiord format - JSON-based canonical workout format/i)
       ).toBeInTheDocument();
+      expect(
+        screen.getByText(
+          /Garmin Connect JSON - Structured workout for Garmin Connect API/i
+        )
+      ).toBeInTheDocument();
     });
 
     it("should show compatibility information", async () => {
@@ -437,6 +442,24 @@ describe("ExportFormatSelector", () => {
       // Assert
       expect(
         screen.getByText(/ZWO format only supports cycling workouts/i)
+      ).toBeInTheDocument();
+    });
+
+    it("should show warning for GCN format", () => {
+      // Arrange & Act
+      render(
+        <ExportFormatSelector
+          currentFormat="gcn"
+          onFormatChange={vi.fn()}
+          workout={mockWorkout}
+        />
+      );
+
+      // Assert
+      expect(
+        screen.getByText(
+          /GCN format is designed for the Garmin Connect API/i
+        )
       ).toBeInTheDocument();
     });
 

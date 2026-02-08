@@ -2,7 +2,7 @@
  * File Format Detector
  *
  * Utility for detecting and validating workout file formats.
- * Supports FIT, TCX, ZWO, and KRD formats.
+ * Supports FIT, TCX, ZWO, KRD, and GCN formats.
  */
 
 export type WorkoutFileFormat = "fit" | "tcx" | "zwo" | "krd" | "gcn";

@@ -85,7 +85,7 @@ const wireAdapters = (
 /**
  * Creates default providers with adapter dependencies wired together.
  *
- * @param adapters - Optional adapter providers (FIT, TCX, ZWO)
+ * @param adapters - Optional adapter providers (FIT, TCX, ZWO, Garmin)
  * @param logger - Optional custom logger
  * @returns Providers object with available dependencies and use cases
  */

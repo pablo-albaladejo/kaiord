@@ -1,7 +1,7 @@
 /**
  * Export Workout Utility
  *
- * Handles exporting workout files in various formats (FIT, TCX, ZWO, KRD)
+ * Handles exporting workout files in various formats (FIT, TCX, ZWO, KRD, GCN)
  * from the canonical KRD format.
  */
 

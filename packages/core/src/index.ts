@@ -1,6 +1,6 @@
 /**
  * @kaiord/core - Public API
- * Bidirectional conversion between FIT workout files and KRD format
+ * Bidirectional conversion between workout formats (FIT, TCX, ZWO, Garmin) and KRD
  */
 
 // ============================================

@@ -409,7 +409,7 @@ jobs:
               failedJobs.push('Type Check');
             }
             if ('${{ needs.test.result }}' === 'failure') {
-              failedJobs.push('Tests (Core)');
+              failedJobs.push('Tests (Core/Garmin)');
             }
             if ('${{ needs.test-frontend.result }}' === 'failure') {
               failedJobs.push('Tests (Frontend)');

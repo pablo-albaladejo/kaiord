@@ -1,7 +1,7 @@
 /**
  * Import Workout Utility
  *
- * Handles importing workout files in various formats (FIT, TCX, ZWO, KRD)
+ * Handles importing workout files in various formats (FIT, TCX, ZWO, KRD, GCN)
  * and converting them to the canonical KRD format.
  */
 

@@ -1,6 +1,7 @@
 import {
   createDefaultProviders,
   FitParsingError,
+  GarminParsingError,
   KrdValidationError,
   ToleranceExceededError,
 } from "@kaiord/core";
@@ -118,6 +119,8 @@ export const convertCommand = async (
       } else if (error.message.includes("Permission denied")) {
         exitCode = ExitCode.PERMISSION_DENIED;
       } else if (error instanceof FitParsingError) {
+        exitCode = ExitCode.PARSING_ERROR;
+      } else if (error instanceof GarminParsingError) {
         exitCode = ExitCode.PARSING_ERROR;
       } else if (error instanceof KrdValidationError) {
         exitCode = ExitCode.VALIDATION_ERROR;

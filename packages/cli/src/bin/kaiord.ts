@@ -184,8 +184,20 @@ const main = async (): Promise<void> => {
           const exitCode = await diffCommand({
             file1: argv.file1,
             file2: argv.file2,
-            format1: argv.format1 as "fit" | "krd" | "tcx" | "zwo" | undefined,
-            format2: argv.format2 as "fit" | "krd" | "tcx" | "zwo" | undefined,
+            format1: argv.format1 as
+              | "fit"
+              | "gcn"
+              | "krd"
+              | "tcx"
+              | "zwo"
+              | undefined,
+            format2: argv.format2 as
+              | "fit"
+              | "gcn"
+              | "krd"
+              | "tcx"
+              | "zwo"
+              | undefined,
             verbose: argv.verbose as boolean | undefined,
             quiet: argv.quiet as boolean | undefined,
             json: argv.json as boolean | undefined,
@@ -242,6 +254,8 @@ const main = async (): Promise<void> => {
     if (error && typeof error === "object" && "name" in error) {
       const errorName = (error as { name: string }).name;
       if (errorName === "FitParsingError") {
+        process.exit(ExitCode.PARSING_ERROR);
+      } else if (errorName === "GarminParsingError") {
         process.exit(ExitCode.PARSING_ERROR);
       } else if (errorName === "KrdValidationError") {
         process.exit(ExitCode.VALIDATION_ERROR);
