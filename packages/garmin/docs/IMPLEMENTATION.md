@@ -91,10 +91,12 @@ This package follows the hexagonal (ports & adapters) architecture:
 ### Key Components
 
 **Ports (in @kaiord/core):**
+
 - `GarminReader`: Interface for reading GCN format
 - `GarminWriter`: Interface for writing GCN format
 
 **Adapters (in @kaiord/garmin):**
+
 - `garmin-reader.ts`: Implementation of GarminReader
 - `garmin-writer.ts`: Implementation of GarminWriter
 - `converters/`: Business logic for format conversion
@@ -102,6 +104,7 @@ This package follows the hexagonal (ports & adapters) architecture:
 - `schemas/`: Zod validation schemas
 
 **Dependency Rule:**
+
 ```
 Schemas → Mappers → Converters → Ports → Providers → Core
 (inner layers don't know about outer layers)
@@ -192,7 +195,10 @@ GCN (Garmin CoNnect) is the JSON format used by the Garmin Connect API for struc
           "stepType": { "stepTypeId": 1, "stepTypeKey": "warmup" },
           "endCondition": { "conditionTypeId": 2, "conditionTypeKey": "time" },
           "endConditionValue": 600,
-          "targetType": { "workoutTargetTypeId": 1, "workoutTargetTypeKey": "no.target" }
+          "targetType": {
+            "workoutTargetTypeId": 1,
+            "workoutTargetTypeKey": "no.target"
+          }
         }
       ]
     }
@@ -205,6 +211,7 @@ GCN (Garmin CoNnect) is the JSON format used by the Garmin Connect API for struc
 The Garmin API has **asymmetric** input/output schemas:
 
 **Input (sending to API):**
+
 ```typescript
 {
   targetValueOne: "200" | 200,  // Accepts string OR number
@@ -213,6 +220,7 @@ The Garmin API has **asymmetric** input/output schemas:
 ```
 
 **Output (receiving from API):**
+
 ```typescript
 {
   targetValueOne: 200.0,  // Always number (float)
@@ -404,6 +412,7 @@ try {
 Converts Garmin Connect API JSON to KRD format.
 
 **Process:**
+
 1. Parse JSON string
 2. Validate with output schema
 3. Map workout metadata
@@ -412,6 +421,7 @@ Converts Garmin Connect API JSON to KRD format.
 6. Return KRD
 
 **Key Transformations:**
+
 - `workoutName` → `workout.name`
 - `sportType.sportTypeKey` → `workout.sport`
 - `workoutSteps` → `workout.steps` (flatten for single sport)
@@ -423,6 +433,7 @@ Converts Garmin Connect API JSON to KRD format.
 Converts KRD format to Garmin Connect API JSON payload.
 
 **Process:**
+
 1. Validate KRD
 2. Map to Garmin input structure
 3. Generate stepOrder sequentially
@@ -431,6 +442,7 @@ Converts KRD format to Garmin Connect API JSON payload.
 6. Return GCN string
 
 **Key Transformations:**
+
 - `workout.name` → `workoutName`
 - `workout.sport` → `sportType`
 - `workout.steps` → `workoutSteps` (single sport) or `workoutSegments` (multisport)
@@ -534,6 +546,7 @@ const krd = await garminReader.readGcn(gcnString); // ✅ Auto-validated
 **Cause:** GCN file contains invalid JSON
 
 **Solution:**
+
 ```bash
 # Validate JSON syntax
 jq . workout.gcn
@@ -549,6 +562,7 @@ cat workout.gcn | python -m json.tool
 **Cause:** GCN structure doesn't match schema
 
 **Solutions:**
+
 1. Check GCN came from Garmin Connect API (not manually created)
 2. Verify all required fields present
 3. Check field types (numbers vs strings)
@@ -560,12 +574,13 @@ cat workout.gcn | python -m json.tool
 **Cause:** Garmin structured workout API doesn't support subsports
 
 **Solution:** Use main sport instead:
+
 ```typescript
 // ❌ DON'T USE: subsports
-workout.sport = "indoor_cycling";  // Not supported
+workout.sport = "indoor_cycling"; // Not supported
 
 // ✅ USE: main sports
-workout.sport = "cycling";  // Supported
+workout.sport = "cycling"; // Supported
 ```
 
 ### Issue: "Workout name truncated"
@@ -581,11 +596,13 @@ workout.sport = "cycling";  // Supported
 **Behavior:** GCN → KRD → GCN produces slightly different output
 
 **Expected:** This is normal due to:
+
 - Server-assigned IDs removed (workoutId, stepId)
 - Type objects simplified (displayOrder removed)
 - Float precision differences (600.0 → 600)
 
 **What's preserved:**
+
 - Workout structure
 - Step sequence
 - Target values (within tolerance)
