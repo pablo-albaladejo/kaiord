@@ -1,11 +1,11 @@
 import { useState } from "react";
 import { MetadataEditMode } from "./MetadataEditMode";
+import { useDiscardConfirmation } from "./use-discard-confirmation";
 import { WorkoutActions } from "./WorkoutActions";
 import { WorkoutTitle } from "./WorkoutTitle";
 import {
   useCanRedo,
   useCanUndo,
-  useClearWorkout,
   useRedo,
   useUndo,
   useUpdateWorkout,
@@ -18,17 +18,13 @@ type WorkoutHeaderProps = {
 };
 
 export function WorkoutHeader({ workout, krd }: WorkoutHeaderProps) {
-  const clearWorkout = useClearWorkout();
   const updateWorkout = useUpdateWorkout();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
   const undo = useUndo();
   const redo = useRedo();
+  const handleDiscard = useDiscardConfirmation();
   const [isEditingMetadata, setIsEditingMetadata] = useState(false);
-
-  const handleDiscard = () => {
-    clearWorkout();
-  };
 
   const handleEditMetadata = () => {
     setIsEditingMetadata(true);

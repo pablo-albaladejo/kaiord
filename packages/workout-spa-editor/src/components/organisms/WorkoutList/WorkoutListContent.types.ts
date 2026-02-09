@@ -5,6 +5,7 @@ export type WorkoutListContentProps = {
   selectedStepId?: string | null;
   selectedStepIds?: readonly string[];
   onStepSelect?: (stepId: string) => void;
+  onBlockSelect?: (blockId: string) => void;
   onToggleStepSelection?: (stepId: string) => void;
   onStepDelete?: (stepIndex: number) => void;
   onStepDuplicate?: (stepIndex: number) => void;

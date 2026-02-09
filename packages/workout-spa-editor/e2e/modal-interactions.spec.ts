@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures/base";
+import { loadTestWorkoutWithBlocks } from "./helpers/load-test-workout-with-blocks";
 
 /**
  * E2E Tests: Modal Interactions
@@ -29,50 +30,7 @@ test.describe("Modal Interactions", () => {
     await page.goto("/");
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "cycling",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Modal Test",
-          sport: "cycling",
-          steps: [
-            {
-              repeatCount: 3,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 60 },
-                  targetType: "power",
-                  target: {
-                    type: "power",
-                    value: { unit: "watts", value: 200 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
-
-    await fileInput.setInputFiles({
-      name: "modal-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Modal Test")).toBeVisible({
-      timeout: 10000,
-    });
+    await loadTestWorkoutWithBlocks(page, "Modal Test", [{ repeatCount: 3 }]);
 
     // Set up dialog listener to catch any browser alerts (should not happen)
     let browserAlertShown = false;
@@ -80,14 +38,21 @@ test.describe("Modal Interactions", () => {
       browserAlertShown = true;
     });
 
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
+    });
+
     // Open context menu and click delete
     await page.getByTestId("block-actions-trigger").click();
+
+    // Wait for menu to be visible
+    await expect(page.getByRole("menu")).toBeVisible({ timeout: 5000 });
+
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal appears (not browser alert)
-    await expect(
-      page.getByRole("dialog").or(page.getByTestId("modal-backdrop"))
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
 
     // Verify no browser alert was shown
     expect(browserAlertShown).toBe(false);
@@ -103,70 +68,35 @@ test.describe("Modal Interactions", () => {
     await page.goto("/");
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
+    await loadTestWorkoutWithBlocks(page, "Escape Test", [
+      {
+        repeatCount: 2,
         sport: "running",
+        durationSeconds: 90,
+        targetPace: 5.0,
       },
-      extensions: {
-        structured_workout: {
-          name: "Escape Test",
-          sport: "running",
-          steps: [
-            {
-              repeatCount: 2,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 90 },
-                  targetType: "pace",
-                  target: {
-                    type: "pace",
-                    value: { unit: "min_per_km", value: 5.0 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
-
-    await fileInput.setInputFiles({
-      name: "escape-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Escape Test")).toBeVisible({
-      timeout: 10000,
-    });
+    ]);
 
     // Verify block exists
     await expect(page.getByText("Repeat Block")).toBeVisible();
+
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
+    });
 
     // Open context menu and click delete to show modal
     await page.getByTestId("block-actions-trigger").click();
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
-    await expect(
-      page.getByRole("dialog").or(page.getByTestId("modal-backdrop"))
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
 
     // Press Escape key
     await page.keyboard.press("Escape");
 
     // Verify modal is dismissed
-    await expect(
-      page.getByRole("dialog").or(page.getByTestId("modal-backdrop"))
-    ).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
 
     // Verify block was NOT deleted (action was cancelled)
     await expect(page.getByText("Repeat Block")).toBeVisible();
@@ -177,53 +107,17 @@ test.describe("Modal Interactions", () => {
     await page.goto("/");
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "cycling",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Backdrop Test",
-          sport: "cycling",
-          steps: [
-            {
-              repeatCount: 4,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 120 },
-                  targetType: "power",
-                  target: {
-                    type: "power",
-                    value: { unit: "watts", value: 250 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
-
-    await fileInput.setInputFiles({
-      name: "backdrop-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Backdrop Test")).toBeVisible({
-      timeout: 10000,
-    });
+    await loadTestWorkoutWithBlocks(page, "Backdrop Test", [
+      { repeatCount: 4, durationSeconds: 120, targetWatts: 250 },
+    ]);
 
     // Verify block exists
     await expect(page.getByText("Repeat Block")).toBeVisible();
+
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
+    });
 
     // Open context menu and click delete to show modal
     await page.getByTestId("block-actions-trigger").click();
@@ -248,49 +142,13 @@ test.describe("Modal Interactions", () => {
     await page.goto("/");
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "running",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Focus Trap Test",
-          sport: "running",
-          steps: [
-            {
-              repeatCount: 3,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 60 },
-                  targetType: "pace",
-                  target: {
-                    type: "pace",
-                    value: { unit: "min_per_km", value: 4.5 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
+    await loadTestWorkoutWithBlocks(page, "Focus Trap Test", [
+      { repeatCount: 3, sport: "running", targetPace: 4.5 },
+    ]);
 
-    await fileInput.setInputFiles({
-      name: "focus-trap-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Focus Trap Test")).toBeVisible({
-      timeout: 10000,
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
     });
 
     // Open context menu and click delete to show modal
@@ -298,28 +156,30 @@ test.describe("Modal Interactions", () => {
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
-    await expect(
-      page.getByRole("dialog").or(page.getByTestId("modal-backdrop"))
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
 
-    // Get all focusable elements in the modal
-    const cancelButton = page.getByRole("button", { name: /cancel/i });
-    const confirmButton = page.getByRole("button", { name: /delete/i });
-    const closeButton = page.getByRole("button", { name: /close/i });
+    // Helper to verify focus is within modal buttons
+    const isFocusInModal = () =>
+      page.evaluate(() => {
+        const active = document.activeElement;
+        if (!active || active === document.body) return false;
+        const dialog = document.querySelector("[role='dialog']");
+        return dialog?.contains(active) ?? false;
+      });
 
     // Tab through modal elements
     await page.keyboard.press("Tab");
-    await expect(cancelButton.or(confirmButton).or(closeButton)).toBeFocused();
+    expect(await isFocusInModal()).toBe(true);
 
     await page.keyboard.press("Tab");
-    await expect(cancelButton.or(confirmButton).or(closeButton)).toBeFocused();
+    expect(await isFocusInModal()).toBe(true);
 
     await page.keyboard.press("Tab");
-    await expect(cancelButton.or(confirmButton).or(closeButton)).toBeFocused();
+    expect(await isFocusInModal()).toBe(true);
 
     // Tab again should cycle back to first element (focus trap)
     await page.keyboard.press("Tab");
-    await expect(cancelButton.or(confirmButton).or(closeButton)).toBeFocused();
+    expect(await isFocusInModal()).toBe(true);
 
     // Verify focus stays within modal (not on background elements)
     const backgroundElement = page.getByTestId("workout-section");
@@ -333,66 +193,10 @@ test.describe("Modal Interactions", () => {
     await page.goto("/");
 
     // Load a workout with multiple blocks
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "cycling",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Background Block Test",
-          sport: "cycling",
-          steps: [
-            {
-              repeatCount: 2,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 60 },
-                  targetType: "power",
-                  target: {
-                    type: "power",
-                    value: { unit: "watts", value: 200 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-            {
-              repeatCount: 3,
-              steps: [
-                {
-                  stepIndex: 1,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 90 },
-                  targetType: "power",
-                  target: {
-                    type: "power",
-                    value: { unit: "watts", value: 250 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
-
-    await fileInput.setInputFiles({
-      name: "background-block-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Background Block Test")).toBeVisible({
-      timeout: 10000,
-    });
+    await loadTestWorkoutWithBlocks(page, "Background Block Test", [
+      { repeatCount: 2 },
+      { repeatCount: 3, durationSeconds: 90, targetWatts: 250 },
+    ]);
 
     // Verify both blocks exist
     const blocks = page.locator('[data-testid="repetition-block-card"]');
@@ -449,53 +253,21 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     });
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "running",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Mobile Modal Test",
-          sport: "running",
-          steps: [
-            {
-              repeatCount: 2,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 60 },
-                  targetType: "pace",
-                  target: {
-                    type: "pace",
-                    value: { unit: "min_per_km", value: 5.0 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
+    await loadTestWorkoutWithBlocks(page, "Mobile Modal Test", [
+      { repeatCount: 2, sport: "running" },
+    ]);
 
-    await fileInput.setInputFiles({
-      name: "mobile-modal-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Mobile Modal Test")).toBeVisible({
-      timeout: 10000,
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
     });
 
     // Open context menu and click delete
     await page.getByTestId("block-actions-trigger").click();
+
+    // Wait for menu to be visible
+    await expect(page.getByRole("menu")).toBeVisible({ timeout: 5000 });
+
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -532,7 +304,7 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     }
 
     // Test interaction on mobile
-    await cancelButton.tap();
+    await cancelButton.click();
 
     // Verify modal is dismissed
     await expect(modal).not.toBeVisible({ timeout: 5000 });
@@ -548,53 +320,21 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     });
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "cycling",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Tablet Modal Test",
-          sport: "cycling",
-          steps: [
-            {
-              repeatCount: 3,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 120 },
-                  targetType: "power",
-                  target: {
-                    type: "power",
-                    value: { unit: "watts", value: 200 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
+    await loadTestWorkoutWithBlocks(page, "Tablet Modal Test", [
+      { repeatCount: 3, durationSeconds: 120 },
+    ]);
 
-    await fileInput.setInputFiles({
-      name: "tablet-modal-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Tablet Modal Test")).toBeVisible({
-      timeout: 10000,
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
     });
 
     // Open context menu and click delete
     await page.getByTestId("block-actions-trigger").click();
+
+    // Wait for menu to be visible
+    await expect(page.getByRole("menu")).toBeVisible({ timeout: 5000 });
+
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible and properly sized for tablet

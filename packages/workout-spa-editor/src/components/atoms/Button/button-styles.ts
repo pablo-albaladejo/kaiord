@@ -12,7 +12,7 @@ export const variantClasses: Record<ButtonVariant, string> = {
 };
 
 export const sizeClasses: Record<ButtonSize, string> = {
-  sm: "px-3 py-2.5 text-sm min-h-[44px]", // WCAG 2.1 AA minimum touch target
-  md: "px-4 py-2.5 text-base min-h-[44px]", // WCAG 2.1 AA minimum touch target
-  lg: "px-6 py-3 text-lg min-h-[48px]", // Larger for better UX
+  sm: "px-3 py-2.5 text-sm min-h-[44px] min-w-[44px]", // WCAG 2.1 AA touch target
+  md: "px-4 py-2.5 text-base min-h-[44px] min-w-[44px]", // WCAG 2.1 AA touch target
+  lg: "px-6 py-3 text-lg min-h-[48px] min-w-[48px]", // Larger for better UX
 };

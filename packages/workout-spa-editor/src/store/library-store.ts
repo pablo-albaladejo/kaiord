@@ -13,6 +13,6 @@ import type { LibraryStore } from "./library-store/types";
 export type { LibraryStore } from "./library-store/types";
 
 export const useLibraryStore = create<LibraryStore>((set, get) => ({
-  ...loadInitialState(),
   ...createActions(set, get, {} as never),
+  ...loadInitialState(),
 }));

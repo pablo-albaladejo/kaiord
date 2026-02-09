@@ -15,30 +15,34 @@ import { expect, test } from "./fixtures/base";
 
 test.describe("Profile Management", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to the app and clear any existing profiles
-    await page.goto("/");
-    await page.evaluate(() => {
+    // Clear localStorage BEFORE any page JS runs using addInitScript
+    // This prevents race conditions where the app reads stale data
+    await page.addInitScript(() => {
       localStorage.clear();
+      // Re-set tutorial completion so the onboarding modal does not appear
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.reload();
+    await page.goto("/");
   });
 
   test("should create a new profile with name only", async ({ page }) => {
     // Arrange - Open profile manager
     await page.getByRole("button", { name: /profile/i }).click();
+    const dialog = page.getByRole("dialog");
 
     // Act - Create profile
     await page.getByLabel(/^name$/i).fill("Test Athlete");
     await page.getByRole("button", { name: /create profile/i }).click();
 
-    // Assert - Profile appears in list
-    await expect(page.getByText("Test Athlete")).toBeVisible();
-    await expect(page.getByText(/saved profiles \(1\)/i)).toBeVisible();
+    // Assert - Profile appears in dialog list
+    await expect(dialog.getByText("Test Athlete")).toBeVisible();
+    await expect(dialog.getByText(/saved profiles \(1\)/i)).toBeVisible();
   });
 
   test("should create a profile with all fields", async ({ page }) => {
     // Arrange - Open profile manager
     await page.getByRole("button", { name: /profile/i }).click();
+    const dialog = page.getByRole("dialog");
 
     // Act - Fill all fields
     await page.getByLabel(/^name$/i).fill("Pro Cyclist");
@@ -47,15 +51,16 @@ test.describe("Profile Management", () => {
     await page.getByLabel(/max hr/i).fill("190");
     await page.getByRole("button", { name: /create profile/i }).click();
 
-    // Assert - Profile shows all data
-    await expect(page.getByText("Pro Cyclist")).toBeVisible();
-    await expect(page.getByText(/FTP: 300W/i)).toBeVisible();
-    await expect(page.getByText(/Max HR: 190 bpm/i)).toBeVisible();
+    // Assert - Profile shows all data in dialog
+    await expect(dialog.getByText("Pro Cyclist")).toBeVisible();
+    await expect(dialog.getByText(/FTP: 300W/i)).toBeVisible();
+    await expect(dialog.getByText(/Max HR: 190 bpm/i)).toBeVisible();
   });
 
   test("should edit an existing profile", async ({ page }) => {
     // Arrange - Create a profile first
     await page.getByRole("button", { name: /profile/i }).click();
+    const dialog = page.getByRole("dialog");
     await page.getByLabel(/^name$/i).fill("Original Name");
     await page.getByRole("button", { name: /create profile/i }).click();
 
@@ -66,21 +71,22 @@ test.describe("Profile Management", () => {
     await page.getByLabel(/ftp/i).fill("280");
     await page.getByRole("button", { name: /save changes/i }).click();
 
-    // Assert - Profile shows updated data
-    await expect(page.getByText("Updated Name")).toBeVisible();
-    await expect(page.getByText(/FTP: 280W/i)).toBeVisible();
+    // Assert - Profile shows updated data in dialog
+    await expect(dialog.getByText("Updated Name")).toBeVisible();
+    await expect(dialog.getByText(/FTP: 280W/i)).toBeVisible();
   });
 
   test("should delete a profile", async ({ page }) => {
     // Arrange - Create two profiles
     await page.getByRole("button", { name: /profile/i }).click();
+    const dialog = page.getByRole("dialog");
     await page.getByLabel(/^name$/i).fill("Profile 1");
     await page.getByRole("button", { name: /create profile/i }).click();
     await page.getByLabel(/^name$/i).fill("Profile 2");
     await page.getByRole("button", { name: /create profile/i }).click();
 
     // Act - Delete first profile
-    const deleteButtons = page.getByRole("button", {
+    const deleteButtons = dialog.getByRole("button", {
       name: /^delete profile$/i,
     });
     await deleteButtons.first().click();
@@ -89,31 +95,32 @@ test.describe("Profile Management", () => {
       .last()
       .click();
 
-    // Assert - Only one profile remains
-    await expect(page.getByText(/saved profiles \(1\)/i)).toBeVisible();
-    await expect(page.getByText("Profile 2")).toBeVisible();
+    // Assert - Only one profile remains in dialog
+    await expect(dialog.getByText(/saved profiles \(1\)/i)).toBeVisible();
+    await expect(dialog.getByText("Profile 2")).toBeVisible();
   });
 
   test("should switch active profile", async ({ page }) => {
-    // Arrange - Create two profiles
+    // Arrange - Create two profiles (first created becomes active automatically)
     await page.getByRole("button", { name: /profile/i }).click();
-    await page.getByLabel(/^name$/i).fill("Profile 1");
+    const dialog = page.getByRole("dialog");
+    await page.getByLabel(/^name$/i).fill("Profile A");
     await page.getByRole("button", { name: /create profile/i }).click();
-    await page.getByLabel(/^name$/i).fill("Profile 2");
+    await page.getByLabel(/^name$/i).fill("Profile B");
     await page.getByRole("button", { name: /create profile/i }).click();
 
-    // Act - Switch to Profile 1
-    await page.getByRole("button", { name: /set active/i }).click();
+    // Act - Click "Set Active" on the non-active profile
+    await dialog.getByRole("button", { name: /set active/i }).click();
 
-    // Assert - Notification appears
+    // Assert - Notification appears for the newly activated profile
     await expect(
-      page.getByText(/switched to profile: profile 1/i)
+      page.getByText(/switched to profile: profile b/i)
     ).toBeVisible();
 
-    // Assert - Set Active button disappears for active profile
+    // Assert - Exactly one "Set Active" button remains (for the now-inactive profile)
     await expect(
-      page.getByRole("button", { name: /set active/i })
-    ).not.toBeVisible();
+      dialog.getByRole("button", { name: /set active/i })
+    ).toHaveCount(1);
   });
 
   test("should export a profile", async ({ page }) => {
@@ -161,6 +168,7 @@ test.describe("Profile Management", () => {
     };
 
     await page.getByRole("button", { name: /profile/i }).click();
+    const dialog = page.getByRole("dialog");
 
     // Act - Import the profile
     await page.setInputFiles("#import-profile", {
@@ -169,10 +177,10 @@ test.describe("Profile Management", () => {
       buffer: Buffer.from(JSON.stringify(profileData)),
     });
 
-    // Assert - Profile appears in list
-    await expect(page.getByText("Imported Profile")).toBeVisible();
-    await expect(page.getByText(/FTP: 320W/i)).toBeVisible();
-    await expect(page.getByText(/Max HR: 195 bpm/i)).toBeVisible();
+    // Assert - Profile appears in dialog list
+    await expect(dialog.getByText("Imported Profile")).toBeVisible();
+    await expect(dialog.getByText(/FTP: 320W/i)).toBeVisible();
+    await expect(dialog.getByText(/Max HR: 195 bpm/i)).toBeVisible();
   });
 
   test("should show error for invalid profile import", async ({ page }) => {
@@ -195,31 +203,53 @@ test.describe("Profile Management", () => {
     await expect(page.getByText(/import failed/i)).toBeVisible();
   });
 
-  test("should persist profiles across page reloads", async ({ page }) => {
+  test("should persist profiles across page reloads", async ({ browser }) => {
+    // Use a fresh browser context so no addInitScript clears localStorage
+    // on reload. The persistence test needs localStorage to survive reloads.
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto("/");
+    await page.evaluate(() => {
+      localStorage.clear();
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
+    });
+    await page.reload();
+
     // Arrange - Create a profile
     await page.getByRole("button", { name: /profile/i }).click();
+    const dialog = page.getByRole("dialog");
     await page.getByLabel(/^name$/i).fill("Persistent Profile");
     await page.getByLabel(/ftp/i).fill("275");
     await page.getByRole("button", { name: /create profile/i }).click();
 
-    // Act - Reload the page
+    // Verify profile was created in dialog before reload
+    await expect(dialog.getByText("Persistent Profile")).toBeVisible();
+
+    // Act - Reload the page (localStorage should persist)
     await page.reload();
 
-    // Assert - Profile still exists
+    // Assert - Profile still exists in dialog after reload
     await page.getByRole("button", { name: /profile/i }).click();
-    await expect(page.getByText("Persistent Profile")).toBeVisible();
-    await expect(page.getByText(/FTP: 275W/i)).toBeVisible();
+    await expect(
+      page.getByRole("dialog").getByText("Persistent Profile")
+    ).toBeVisible();
+    await expect(
+      page.getByRole("dialog").getByText(/FTP: 275W/i)
+    ).toBeVisible();
+
+    await context.close();
   });
 });
 
 test.describe("Zone Configuration", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate and create a profile with FTP and max HR
-    await page.goto("/");
-    await page.evaluate(() => {
+    // Clear localStorage BEFORE any page JS runs using addInitScript
+    await page.addInitScript(() => {
       localStorage.clear();
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.reload();
+    await page.goto("/");
 
     await page.getByRole("button", { name: /profile/i }).click();
     await page.getByLabel(/^name$/i).fill("Zone Test");
@@ -276,11 +306,11 @@ test.describe("Zone Configuration", () => {
 test.describe("Profile Performance", () => {
   test("should switch profiles quickly", async ({ page }) => {
     // Arrange - Create multiple profiles
-    await page.goto("/");
-    await page.evaluate(() => {
+    await page.addInitScript(() => {
       localStorage.clear();
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.reload();
+    await page.goto("/");
 
     await page.getByRole("button", { name: /profile/i }).click();
 
@@ -305,13 +335,14 @@ test.describe("Profile Performance", () => {
 
   test("should handle large number of profiles", async ({ page }) => {
     // Arrange - Create many profiles
-    await page.goto("/");
-    await page.evaluate(() => {
+    await page.addInitScript(() => {
       localStorage.clear();
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.reload();
+    await page.goto("/");
 
     await page.getByRole("button", { name: /profile/i }).click();
+    const dialog = page.getByRole("dialog");
 
     // Create 20 profiles
     for (let i = 1; i <= 20; i++) {
@@ -319,9 +350,9 @@ test.describe("Profile Performance", () => {
       await page.getByRole("button", { name: /create profile/i }).click();
     }
 
-    // Assert - All profiles are visible and scrollable
-    await expect(page.getByText(/saved profiles \(20\)/i)).toBeVisible();
-    await expect(page.getByText("Profile 1")).toBeVisible();
-    await expect(page.getByText("Profile 20")).toBeVisible();
+    // Assert - All profiles are visible and scrollable in dialog
+    await expect(dialog.getByText(/saved profiles \(20\)/i)).toBeVisible();
+    await expect(dialog.getByText("Profile 1", { exact: true })).toBeVisible();
+    await expect(dialog.getByText("Profile 20")).toBeVisible();
   });
 });
