@@ -33,6 +33,7 @@ export function TutorialActions({
           onClick={onPrevious}
           disabled={isFirstStep}
           size="sm"
+          aria-label="Previous"
         >
           <ChevronLeft className="h-4 w-4" />
         </Button>

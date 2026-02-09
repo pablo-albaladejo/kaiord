@@ -35,6 +35,7 @@ export type RepetitionBlockCardProps = HTMLAttributes<HTMLDivElement> & {
   onRemoveStep?: (index: number) => void;
   onDuplicateStep?: (index: number) => void;
   onSelectStep?: (stepId: string) => void;
+  onBlockSelect?: (blockId: string) => void;
   onToggleStepSelection?: (stepId: string) => void;
   onReorderSteps?: (activeIndex: number, overIndex: number) => void;
   onUngroup?: () => void;
@@ -101,6 +102,7 @@ export const RepetitionBlockCard = forwardRef<
       onRemoveStep,
       onDuplicateStep,
       onSelectStep,
+      onBlockSelect,
       onToggleStepSelection,
       onReorderSteps,
       onUngroup,
@@ -126,6 +128,17 @@ export const RepetitionBlockCard = forwardRef<
       handleCancelEdit,
       handleKeyDown,
     } = useRepetitionBlockState(block, onEditRepeatCount);
+
+    const handleBlockClick = (event: React.MouseEvent<HTMLDivElement>) => {
+      // Select block unless click originated from a button, input, or step card
+      const target = event.target as HTMLElement;
+      const isControl = target.closest(
+        "button, input, [data-testid='step-card']"
+      );
+      if (!isControl && block.id && onBlockSelect) {
+        onBlockSelect(block.id);
+      }
+    };
 
     const handleBlockKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
       // Handle Delete and Backspace keys for block deletion
@@ -157,6 +170,7 @@ export const RepetitionBlockCard = forwardRef<
         className={classes}
         data-testid="repetition-block-card"
         tabIndex={0}
+        onClick={handleBlockClick}
         onKeyDown={handleBlockKeyDown}
         {...htmlProps}
       >

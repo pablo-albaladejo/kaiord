@@ -7,6 +7,7 @@ type WorkoutStepsListProps = {
   readonly selectedStepId: string | null;
   readonly selectedStepIds: readonly string[];
   readonly onStepSelect: (stepId: string) => void;
+  readonly onBlockSelect?: (blockId: string) => void;
   readonly onToggleStepSelection: (stepId: string) => void;
   readonly onStepDelete: (stepIndex: number) => void;
   readonly onStepDuplicate: (stepIndex: number) => void;
@@ -39,6 +40,7 @@ export function WorkoutStepsList({
   selectedStepId,
   selectedStepIds,
   onStepSelect,
+  onBlockSelect,
   onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
@@ -64,6 +66,7 @@ export function WorkoutStepsList({
         selectedStepId={selectedStepId}
         selectedStepIds={selectedStepIds}
         onStepSelect={onStepSelect}
+        onBlockSelect={onBlockSelect}
         onToggleStepSelection={onToggleStepSelection}
         onStepDelete={onStepDelete}
         onStepDuplicate={onStepDuplicate}

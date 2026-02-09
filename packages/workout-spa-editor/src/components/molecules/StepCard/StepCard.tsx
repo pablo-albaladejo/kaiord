@@ -1,47 +1,44 @@
-import { forwardRef } from "react";
+import { forwardRef, type HTMLAttributes } from "react";
 import { SelectionIndicator } from "../SelectionIndicator";
-import { getStepLabel } from "./get-step-label";
-import { renderStepCardContent } from "./render-step-card-content";
-import { getStepCardClasses } from "./use-step-card-classes";
+import { useStepCardData } from "./use-step-card-data";
 import { useStepCardHandlers } from "./use-step-card-handlers";
 import type { DragHandleProps, StepCardProps } from "./StepCard.types";
 
 export type { DragHandleProps, StepCardProps };
 
+type HtmlDivProps = HTMLAttributes<HTMLDivElement>;
+
+/** Extract only native HTML div props from StepCardProps. */
+/* eslint-disable @typescript-eslint/no-unused-vars */
+function getHtmlProps(props: StepCardProps): HtmlDivProps {
+  const {
+    step,
+    visualIndex,
+    isSelected,
+    isMultiSelected,
+    onSelect,
+    onToggleMultiSelect,
+    onDelete,
+    onDuplicate,
+    onCopy,
+    isDragging,
+    dragHandleProps,
+    className,
+    ...rest
+  } = props;
+  return rest;
+}
+/* eslint-enable @typescript-eslint/no-unused-vars */
+
 export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
-  (
-    {
-      step,
-      visualIndex,
-      isSelected = false,
-      isMultiSelected = false,
-      onSelect,
-      onToggleMultiSelect,
-      onDelete,
-      onDuplicate,
-      onCopy,
-      isDragging = false,
-      dragHandleProps,
-      className = "",
-      ...htmlProps
-    },
-    ref
-  ) => {
-    const intensity = step.intensity || "other";
-    const selected = isSelected || isMultiSelected;
-    const classes = getStepCardClasses(
-      selected,
-      Boolean(onDelete || onDuplicate || onCopy),
-      Boolean(dragHandleProps),
-      className
-    );
+  (props, ref) => {
+    const { step, onSelect, onToggleMultiSelect } = props;
+    const { selected, label, classes, content } = useStepCardData(props);
     const handlers = useStepCardHandlers({
       step,
       onSelect,
       onToggleMultiSelect,
     });
-    const displayIndex = visualIndex ?? step.stepIndex;
-    const label = getStepLabel(displayIndex, step.name, step);
 
     return (
       <div
@@ -56,19 +53,10 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
         aria-selected={selected}
         data-testid="step-card"
         data-selected={selected ? "true" : "false"}
-        {...htmlProps}
+        {...getHtmlProps(props)}
       >
         <SelectionIndicator selected={selected} />
-        {renderStepCardContent({
-          step,
-          displayIndex,
-          intensity,
-          dragHandleProps,
-          isDragging,
-          onDelete,
-          onDuplicate,
-          onCopy,
-        })}
+        {content}
       </div>
     );
   }

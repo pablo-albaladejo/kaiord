@@ -11,6 +11,8 @@ import type { StateCreator } from "zustand";
 export type ModalActions = {
   showConfirmationModal: (config: ModalConfig) => void;
   hideConfirmationModal: () => void;
+  openCreateBlockDialog: () => void;
+  closeCreateBlockDialog: () => void;
 };
 
 export const createModalActions = (
@@ -28,5 +30,13 @@ export const createModalActions = (
       isModalOpen: false,
       modalConfig: null,
     });
+  },
+
+  openCreateBlockDialog: () => {
+    set({ createBlockDialogOpen: true });
+  },
+
+  closeCreateBlockDialog: () => {
+    set({ createBlockDialogOpen: false });
   },
 });

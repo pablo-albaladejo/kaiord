@@ -36,6 +36,7 @@ export const WorkoutList = (props: WorkoutListProps) => {
             selectedStepId={props.selectedStepId}
             selectedStepIds={props.selectedStepIds || []}
             onStepSelect={props.onStepSelect}
+            onBlockSelect={props.onBlockSelect}
             onToggleStepSelection={props.onToggleStepSelection}
             onStepDelete={props.onStepDelete}
             onStepDuplicate={props.onStepDuplicate}

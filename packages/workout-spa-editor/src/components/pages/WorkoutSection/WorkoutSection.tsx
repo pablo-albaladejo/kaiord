@@ -2,6 +2,7 @@ import { useWorkoutSectionState } from "./useWorkoutSectionState";
 import { WorkoutHeader } from "./WorkoutHeader";
 import { WorkoutSectionEditor } from "./WorkoutSectionEditor";
 import { WorkoutStepsList } from "./WorkoutStepsList";
+import { StoreConfirmationModal } from "../../molecules/ConfirmationModal";
 import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
 import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
 import type { KRD, Workout } from "../../../types/krd";
@@ -44,6 +45,7 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         selectedStepId={props.selectedStepId}
         selectedStepIds={state.selectedStepIds}
         onStepSelect={state.handleStepSelect}
+        onBlockSelect={state.handleBlockSelect}
         onToggleStepSelection={state.handleToggleStepSelection}
         onStepDelete={state.deleteStep}
         onStepDuplicate={state.duplicateStep}
@@ -72,6 +74,7 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         onCancel={state.handleCancelCreateBlock}
         isOpen={state.showCreateBlockDialog}
       />
+      <StoreConfirmationModal />
     </div>
   );
 }

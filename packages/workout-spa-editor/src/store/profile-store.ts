@@ -13,6 +13,6 @@ import type { ProfileStore } from "./profile-store/types";
 export type { ProfileStore } from "./profile-store/types";
 
 export const useProfileStore = create<ProfileStore>((set, get) => ({
-  ...loadInitialState(),
   ...createActions(set, get, {} as never),
+  ...loadInitialState(),
 }));

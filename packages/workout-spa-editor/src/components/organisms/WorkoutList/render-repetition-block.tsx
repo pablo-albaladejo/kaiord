@@ -55,6 +55,7 @@ export const renderRepetitionBlock = (props: RenderRepetitionBlockProps) => {
       selectedStepId={props.selectedStepId}
       selectedStepIds={props.selectedStepIds}
       onStepSelect={props.onStepSelect}
+      onBlockSelect={props.onBlockSelect}
       onToggleStepSelection={props.onToggleStepSelection}
       onStepDelete={props.onStepDelete}
       generateStepId={props.generateStepId}

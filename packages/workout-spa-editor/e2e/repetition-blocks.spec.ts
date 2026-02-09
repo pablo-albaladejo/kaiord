@@ -648,7 +648,7 @@ test.describe("Repetition Blocks - Ungroup", () => {
     await expect(page.getByText("3x")).toBeVisible();
 
     // Open context menu
-    await page.getByTestId("block-context-menu-trigger").click();
+    await page.getByTestId("block-actions-trigger").click();
 
     // Click "Ungroup" option
     await page.getByRole("menuitem", { name: /ungroup/i }).click();
@@ -758,7 +758,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     });
 
     // Press Ctrl+G to create block
-    await page.keyboard.press("Control+KeyG");
+    await page.keyboard.press("Control+g");
 
     // Verify dialog opens
     await expect(page.getByTestId("repeat-count-input")).toBeVisible({
@@ -828,12 +828,12 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     // Verify block exists
     await expect(page.getByText("Repeat Block")).toBeVisible();
 
-    // Select the repetition block
-    const block = page.getByTestId("repetition-block-card");
-    await block.click();
+    // Select the repetition block by clicking its header badge
+    // (clicking the card center would hit the step card inside)
+    await page.getByText("Repeat Block").click();
 
     // Press Ctrl+Shift+G to ungroup
-    await page.keyboard.press("Control+Shift+KeyG");
+    await page.keyboard.press("Control+Shift+g");
 
     // Verify block is removed
     await expect(page.getByText("Repeat Block")).not.toBeVisible({
@@ -911,7 +911,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     });
 
     // Press Ctrl+A to select all steps
-    await page.keyboard.press("Control+KeyA");
+    await page.keyboard.press("Control+a");
 
     // Verify all steps are selected
     const stepCards = page.locator('[data-testid="step-card"]');
@@ -1082,7 +1082,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     });
 
     // Open context menu
-    await page.getByTestId("block-context-menu-trigger").click();
+    await page.getByTestId("block-actions-trigger").click();
 
     // Click "Edit Count" option
     await page.getByRole("menuitem", { name: /edit count/i }).click();
@@ -1155,7 +1155,7 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     ).toBeVisible();
 
     // Open context menu
-    await page.getByTestId("block-context-menu-trigger").click();
+    await page.getByTestId("block-actions-trigger").click();
 
     // Click "Add Step" option
     await page.getByRole("menuitem", { name: /add step/i }).click();
@@ -1222,16 +1222,23 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     await expect(page.getByText("Repeat Block")).toBeVisible();
 
     // Open context menu
-    await page.getByTestId("block-context-menu-trigger").click();
+    await page.getByTestId("block-actions-trigger").click();
 
     // Click "Delete" option
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
-    // Requirement 1.1: Block should be deleted immediately without confirmation modal
+    // Confirm the deletion in the confirmation dialog
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^delete$/i })
+      .click();
+    await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
+
     // Wait a short time for deletion to process
     await page.waitForTimeout(300);
 
-    // Verify block is removed immediately (no modal)
+    // Verify block is removed
     await expect(page.getByText("Repeat Block")).not.toBeVisible({
       timeout: 2000,
     });
@@ -1482,6 +1489,14 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     // Click the delete button directly
     await deleteButton.click();
 
+    // Confirm the deletion in the confirmation dialog
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^delete$/i })
+      .click();
+    await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
+
     // Wait for deletion to process
     await page.waitForTimeout(500);
 
@@ -1569,6 +1584,14 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     // Delete the block
     await page.getByTestId("delete-block-button").click();
 
+    // Confirm the deletion in the confirmation dialog
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^delete$/i })
+      .click();
+    await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
+
     // Wait for deletion to complete
     await page.waitForTimeout(500);
 
@@ -1594,8 +1617,8 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     await expect(stepCards).toHaveCount(2);
 
     // Verify step durations are correct
-    await expect(page.getByText("2:00")).toBeVisible(); // 120 seconds
-    await expect(page.getByText("3:00")).toBeVisible(); // 180 seconds
+    await expect(page.getByText("2 min")).toBeVisible(); // 120 seconds
+    await expect(page.getByText("3 min")).toBeVisible(); // 180 seconds
   });
 
   test("should delete block via keyboard shortcut", async ({ page }) => {
@@ -1684,12 +1707,20 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     const blocks = page.locator('[data-testid="repetition-block-card"]');
     await expect(blocks).toHaveCount(3);
 
-    // Focus on the second block by clicking it
-    await blocks.nth(1).click();
+    // Focus on the second block directly (not a child element)
+    await blocks.nth(1).focus();
     await page.waitForTimeout(300);
 
     // Delete the second block using Delete key
     await page.keyboard.press("Delete");
+
+    // Confirm the deletion in the confirmation dialog
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^delete$/i })
+      .click();
+    await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
 
     // Wait for deletion to complete
     await page.waitForTimeout(500);
@@ -1795,11 +1826,17 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
     const deleteButton = page.getByTestId("delete-block-button");
     await expect(deleteButton).toBeVisible({ timeout: 5000 });
 
-    // Requirement 4.1: No confirmation modal should appear
-    // Click delete button and verify immediate deletion
+    // Click delete button
     await deleteButton.click();
 
-    // Requirement 4.2: Block should be deleted immediately
+    // Confirm the deletion in the confirmation dialog
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^delete$/i })
+      .click();
+    await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
+
     // Wait a short time for deletion to process
     await page.waitForTimeout(300);
 
@@ -1808,7 +1845,7 @@ test.describe("Repetition Blocks - Block Operations (Task 11)", () => {
       timeout: 2000,
     });
 
-    // Requirement 4.3: Toast notification with undo should appear
+    // Toast notification with undo should appear
     // Look for the toast by its title text (use first() to handle duplicate accessibility text)
     await expect(
       page.getByText("Repetition block deleted").first()
@@ -1937,15 +1974,15 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
 
     // Verify block 1: 2x with 100W
     await expect(blocks.nth(0).getByText("2x")).toBeVisible();
-    await expect(blocks.nth(0).getByText("100 W")).toBeVisible();
+    await expect(blocks.nth(0).getByText("100W")).toBeVisible();
 
     // Verify block 2: 3x with 200W (middle block - will be deleted)
     await expect(blocks.nth(1).getByText("3x")).toBeVisible();
-    await expect(blocks.nth(1).getByText("200 W")).toBeVisible();
+    await expect(blocks.nth(1).getByText("200W")).toBeVisible();
 
     // Verify block 3: 4x with 300W
     await expect(blocks.nth(2).getByText("4x")).toBeVisible();
-    await expect(blocks.nth(2).getByText("300 W")).toBeVisible();
+    await expect(blocks.nth(2).getByText("300W")).toBeVisible();
 
     // Get the delete button for the middle block (block 2)
     const middleBlockDeleteButton = blocks
@@ -1953,11 +1990,17 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
       .getByTestId("delete-block-button");
     await expect(middleBlockDeleteButton).toBeVisible({ timeout: 5000 });
 
-    // Requirement 4.1: No confirmation modal should appear
-    // Click delete button and verify immediate deletion
+    // Click delete button
     await middleBlockDeleteButton.click();
 
-    // Requirement 4.2: Block should be deleted immediately
+    // Confirm the deletion in the confirmation dialog
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^delete$/i })
+      .click();
+    await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
+
     // Wait a short time for deletion to process
     await page.waitForTimeout(300);
 
@@ -1967,26 +2010,26 @@ test.describe("Repetition Blocks - Correct Block Deletion (Task 15)", () => {
     // Requirement 1.2, 1.3: Verify the CORRECT block was deleted (middle block with 200W)
     // Block 1 should still be there: 2x with 100W
     await expect(blocks.nth(0).getByText("2x")).toBeVisible();
-    await expect(blocks.nth(0).getByText("100 W")).toBeVisible();
+    await expect(blocks.nth(0).getByText("100W")).toBeVisible();
 
     // Block 3 should still be there: 4x with 300W (now at position 1)
     await expect(blocks.nth(1).getByText("4x")).toBeVisible();
-    await expect(blocks.nth(1).getByText("300 W")).toBeVisible();
+    await expect(blocks.nth(1).getByText("300W")).toBeVisible();
 
     // Requirement 1.2: Verify the middle block (3x with 200W) is gone
     await expect(page.getByText("3x")).not.toBeVisible();
-    await expect(page.getByText("200 W")).not.toBeVisible();
+    await expect(page.getByText("200W")).not.toBeVisible();
 
     // Requirement 1.4: Verify remaining blocks are in correct order
     // First remaining block should be 2x with 100W
     const firstBlock = blocks.nth(0);
     await expect(firstBlock.getByText("2x")).toBeVisible();
-    await expect(firstBlock.getByText("100 W")).toBeVisible();
+    await expect(firstBlock.getByText("100W")).toBeVisible();
 
     // Second remaining block should be 4x with 300W
     const secondBlock = blocks.nth(1);
     await expect(secondBlock.getByText("4x")).toBeVisible();
-    await expect(secondBlock.getByText("300 W")).toBeVisible();
+    await expect(secondBlock.getByText("300W")).toBeVisible();
   });
 });
 
@@ -2146,6 +2189,14 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
       .nth(0)
       .getByTestId("delete-block-button");
     await firstBlockDeleteButton.click();
+
+    // Confirm the deletion in the confirmation dialog
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^delete$/i })
+      .click();
+    await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
     await page.waitForTimeout(300);
 
     // Verify 4 blocks remain
@@ -2175,6 +2226,14 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
       .nth(1)
       .getByTestId("delete-block-button");
     await middleBlockDeleteButton.click();
+
+    // Confirm the deletion in the confirmation dialog
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^delete$/i })
+      .click();
+    await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
     await page.waitForTimeout(300);
 
     // Verify 3 blocks remain
@@ -2201,6 +2260,14 @@ test.describe("Repetition Blocks - Multiple Block Deletion (Task 17)", () => {
       .nth(2)
       .getByTestId("delete-block-button");
     await lastBlockDeleteButton.click();
+
+    // Confirm the deletion in the confirmation dialog
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
+    await page
+      .getByRole("dialog")
+      .getByRole("button", { name: /^delete$/i })
+      .click();
+    await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
     await page.waitForTimeout(300);
 
     // Verify 2 blocks remain

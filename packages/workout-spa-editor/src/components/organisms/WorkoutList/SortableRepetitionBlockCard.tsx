@@ -12,6 +12,7 @@ type SortableRepetitionBlockCardProps = {
   selectedStepId?: string | null;
   selectedStepIds?: readonly string[];
   onStepSelect?: (stepId: string) => void;
+  onBlockSelect?: (blockId: string) => void;
   onToggleStepSelection?: (stepId: string) => void;
   onStepDelete?: (stepIndex: number) => void;
   onStepDuplicate?: (blockIndex: number, stepIndex: number) => void;
@@ -49,6 +50,7 @@ export const SortableRepetitionBlockCard = ({
   selectedStepId,
   selectedStepIds,
   onStepSelect,
+  onBlockSelect,
   onToggleStepSelection,
   onStepDelete,
   onStepDuplicate,
@@ -119,6 +121,7 @@ export const SortableRepetitionBlockCard = ({
         selectedStepIndex={selectedStepIndex}
         selectedStepIds={selectedStepIds}
         onSelectStep={onStepSelect}
+        onBlockSelect={onBlockSelect}
         onToggleStepSelection={onToggleStepSelection}
         onRemoveStep={onStepDelete}
         onDuplicateStep={

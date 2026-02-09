@@ -18,5 +18,7 @@ export function createSelectionActions(
         };
       }),
     clearStepSelection: () => set({ selectedStepIds: [] }),
+    selectAllSteps: (ids: Array<string>) =>
+      set({ selectedStepIds: ids, selectedStepId: null }),
   };
 }

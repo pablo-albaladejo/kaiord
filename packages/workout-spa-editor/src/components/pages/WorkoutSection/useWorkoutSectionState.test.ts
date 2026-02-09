@@ -12,30 +12,16 @@ import { useWorkoutSectionState } from "./useWorkoutSectionState";
 // Mock the store selectors
 vi.mock("../../../store/workout-store-selectors", () => ({
   useCreateStep: vi.fn(() => vi.fn()),
-  useDeleteStep: vi.fn(() => vi.fn()),
-  useUndoDelete: vi.fn(() => vi.fn()),
   useDuplicateStep: vi.fn(() => vi.fn()),
   useIsEditing: vi.fn(() => false),
   useReorderStep: vi.fn(() => vi.fn()),
+  useSelectStep: vi.fn(() => vi.fn()),
   useToggleStepSelection: vi.fn(() => vi.fn()),
 }));
 
-// Mock ToastContext
-vi.mock("../../../contexts/ToastContext", () => ({
-  useToastContext: vi.fn(() => ({
-    toast: vi.fn(),
-    toasts: [],
-    dismiss: vi.fn(),
-  })),
-}));
-
-// Mock WorkoutStore
-vi.mock("../../../store/workout-store", () => ({
-  useWorkoutStore: {
-    getState: vi.fn(() => ({
-      deletedSteps: [],
-    })),
-  },
+// Mock the extracted delete-step-with-toast hook
+vi.mock("./use-delete-step-with-toast", () => ({
+  useDeleteStepWithToast: vi.fn(() => vi.fn()),
 }));
 
 // Mock other hooks
@@ -109,7 +95,7 @@ describe("useWorkoutSectionState", () => {
   });
 
   describe("deleteStep function", () => {
-    it("should return deleteStep function from store", async () => {
+    it("should return deleteStep function", () => {
       // Arrange & Act
       const { result } = renderHook(() =>
         useWorkoutSectionState(
@@ -127,35 +113,13 @@ describe("useWorkoutSectionState", () => {
       expect(typeof result.current.deleteStep).toBe("function");
     });
 
-    it("should call deleteStep with correct step index", async () => {
+    it("should delegate to useDeleteStepWithToast", async () => {
       // Arrange
       const mockDeleteStep = vi.fn();
-      const mockToast = vi.fn();
-      const { useDeleteStep } = await import(
-        "../../../store/workout-store-selectors"
+      const { useDeleteStepWithToast } = await import(
+        "./use-delete-step-with-toast"
       );
-      const { useToastContext } = await import(
-        "../../../contexts/ToastContext"
-      );
-      const { useWorkoutStore } = await import("../../../store/workout-store");
-
-      vi.mocked(useDeleteStep).mockReturnValue(mockDeleteStep);
-      vi.mocked(useToastContext).mockReturnValue({
-        toast: mockToast,
-        toasts: [],
-        dismiss: vi.fn(),
-      });
-
-      // Mock the store to return a deleted step with timestamp
-      vi.mocked(useWorkoutStore.getState).mockReturnValue({
-        deletedSteps: [
-          {
-            step: mockWorkout.steps[0],
-            index: 0,
-            timestamp: Date.now(),
-          },
-        ],
-      } as any);
+      vi.mocked(useDeleteStepWithToast).mockReturnValue(mockDeleteStep);
 
       const { result } = renderHook(() =>
         useWorkoutSectionState(
@@ -171,20 +135,9 @@ describe("useWorkoutSectionState", () => {
       // Act
       result.current.deleteStep(0);
 
-      // Wait for setTimeout to complete
-      await new Promise((resolve) => setTimeout(resolve, 10));
-
       // Assert
       expect(mockDeleteStep).toHaveBeenCalledWith(0);
       expect(mockDeleteStep).toHaveBeenCalledTimes(1);
-      expect(mockToast).toHaveBeenCalledTimes(1);
-      expect(mockToast).toHaveBeenCalledWith(
-        expect.objectContaining({
-          title: "Step deleted",
-          variant: "info",
-          duration: 5000,
-        })
-      );
     });
   });
 });

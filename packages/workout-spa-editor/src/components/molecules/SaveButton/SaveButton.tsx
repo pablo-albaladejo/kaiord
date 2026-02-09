@@ -43,7 +43,7 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
   const showProgress = isSaving && exportProgress > 0 && exportProgress < 100;
 
   return (
-    <div className="space-y-4">
+    <div className="w-full space-y-4 sm:w-auto">
       <ExportFormatSelector
         currentFormat={selectedFormat}
         onFormatChange={setSelectedFormat}
