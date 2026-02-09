@@ -33,24 +33,20 @@ jobs:
           echo "count=$CHANGESETS" >> $GITHUB_OUTPUT
 
           # Check if any publishable package files changed
+          # All packages except workout-spa-editor (private) are published to npm
           CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
 
-          CORE_CHANGED=false
-          CLI_CHANGED=false
+          PUBLISHABLE="packages/core packages/cli packages/fit packages/tcx packages/zwo packages/garmin"
+          NEEDS_CHANGESET=false
 
-          if echo "$CHANGED_FILES" | grep -q "^packages/core/"; then
-            CORE_CHANGED=true
-          fi
+          for pkg in $PUBLISHABLE; do
+            if echo "$CHANGED_FILES" | grep -q "^${pkg}/"; then
+              echo "Changed: $pkg"
+              NEEDS_CHANGESET=true
+            fi
+          done
 
-          if echo "$CHANGED_FILES" | grep -q "^packages/cli/"; then
-            CLI_CHANGED=true
-          fi
-
-          if [ "$CORE_CHANGED" = "true" ] || [ "$CLI_CHANGED" = "true" ]; then
-            echo "needs-changeset=true" >> $GITHUB_OUTPUT
-          else
-            echo "needs-changeset=false" >> $GITHUB_OUTPUT
-          fi
+          echo "needs-changeset=$NEEDS_CHANGESET" >> $GITHUB_OUTPUT
 
       - name: Comment on PR (missing changeset)
         if: steps.check.outputs.count == '0' && steps.check.outputs.needs-changeset == 'true'
@@ -68,7 +64,7 @@ jobs:
             \`\`\`
 
             This will prompt you to:
-            1. Select affected packages (@kaiord/core, @kaiord/cli)
+            1. Select affected packages (@kaiord/core, @kaiord/cli, @kaiord/fit, @kaiord/tcx, @kaiord/zwo, @kaiord/garmin)
             2. Choose bump type (patch/minor/major)
             3. Write a summary of your changes
 
