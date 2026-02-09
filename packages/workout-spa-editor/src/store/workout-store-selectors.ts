@@ -104,3 +104,12 @@ export const useShowConfirmationModal = () =>
 
 export const useHideConfirmationModal = () =>
   useWorkoutStore((state) => state.hideConfirmationModal);
+
+export const useCreateBlockDialogOpen = () =>
+  useWorkoutStore((state) => state.createBlockDialogOpen);
+
+export const useOpenCreateBlockDialog = () =>
+  useWorkoutStore((state) => state.openCreateBlockDialog);
+
+export const useCloseCreateBlockDialog = () =>
+  useWorkoutStore((state) => state.closeCreateBlockDialog);

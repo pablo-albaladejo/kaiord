@@ -45,6 +45,7 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         selectedStepId={props.selectedStepId}
         selectedStepIds={state.selectedStepIds}
         onStepSelect={state.handleStepSelect}
+        onBlockSelect={state.handleBlockSelect}
         onToggleStepSelection={state.handleToggleStepSelection}
         onStepDelete={state.deleteStep}
         onStepDuplicate={state.duplicateStep}

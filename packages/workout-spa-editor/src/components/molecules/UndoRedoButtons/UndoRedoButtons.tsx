@@ -16,7 +16,11 @@ export function UndoRedoButtons({
   onRedo,
 }: UndoRedoButtonsProps) {
   return (
-    <div className="flex gap-1" role="group" aria-label="History controls">
+    <div
+      className="flex w-full gap-1 sm:w-auto"
+      role="group"
+      aria-label="History controls"
+    >
       <Tooltip content="Undo (Ctrl+Z)" disabled={!canUndo}>
         <Button
           variant="secondary"
@@ -25,6 +29,7 @@ export function UndoRedoButtons({
           disabled={!canUndo}
           aria-label="Undo last action"
           data-testid="undo-button"
+          className="w-full sm:w-auto"
         >
           <Undo2 className="h-4 w-4" aria-hidden="true" />
         </Button>
@@ -37,6 +42,7 @@ export function UndoRedoButtons({
           disabled={!canRedo}
           aria-label="Redo last action"
           data-testid="redo-button"
+          className="w-full sm:w-auto"
         >
           <Redo2 className="h-4 w-4" aria-hidden="true" />
         </Button>

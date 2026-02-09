@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures/base";
+import { loadTestWorkoutWithBlocks } from "./helpers/load-test-workout-with-blocks";
 
 /**
  * E2E Tests: Modal Interactions
@@ -29,55 +30,7 @@ test.describe("Modal Interactions", () => {
     await page.goto("/");
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "cycling",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Modal Test",
-          sport: "cycling",
-          steps: [
-            {
-              repeatCount: 3,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 60 },
-                  targetType: "power",
-                  target: {
-                    type: "power",
-                    value: { unit: "watts", value: 200 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
-
-    await fileInput.setInputFiles({
-      name: "modal-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Modal Test")).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Wait for repetition block to appear
-    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
-      timeout: 5000,
-    });
+    await loadTestWorkoutWithBlocks(page, "Modal Test", [{ repeatCount: 3 }]);
 
     // Set up dialog listener to catch any browser alerts (should not happen)
     let browserAlertShown = false;
@@ -115,55 +68,14 @@ test.describe("Modal Interactions", () => {
     await page.goto("/");
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
+    await loadTestWorkoutWithBlocks(page, "Escape Test", [
+      {
+        repeatCount: 2,
         sport: "running",
+        durationSeconds: 90,
+        targetPace: 5.0,
       },
-      extensions: {
-        structured_workout: {
-          name: "Escape Test",
-          sport: "running",
-          steps: [
-            {
-              repeatCount: 2,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 90 },
-                  targetType: "pace",
-                  target: {
-                    type: "pace",
-                    value: { unit: "min_per_km", value: 5.0 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
-
-    await fileInput.setInputFiles({
-      name: "escape-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Escape Test")).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Wait for repetition block to appear
-    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
-      timeout: 5000,
-    });
+    ]);
 
     // Verify block exists
     await expect(page.getByText("Repeat Block")).toBeVisible();
@@ -195,55 +107,9 @@ test.describe("Modal Interactions", () => {
     await page.goto("/");
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "cycling",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Backdrop Test",
-          sport: "cycling",
-          steps: [
-            {
-              repeatCount: 4,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 120 },
-                  targetType: "power",
-                  target: {
-                    type: "power",
-                    value: { unit: "watts", value: 250 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
-
-    await fileInput.setInputFiles({
-      name: "backdrop-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Backdrop Test")).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Wait for repetition block to appear
-    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
-      timeout: 5000,
-    });
+    await loadTestWorkoutWithBlocks(page, "Backdrop Test", [
+      { repeatCount: 4, durationSeconds: 120, targetWatts: 250 },
+    ]);
 
     // Verify block exists
     await expect(page.getByText("Repeat Block")).toBeVisible();
@@ -276,55 +142,9 @@ test.describe("Modal Interactions", () => {
     await page.goto("/");
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "running",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Focus Trap Test",
-          sport: "running",
-          steps: [
-            {
-              repeatCount: 3,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 60 },
-                  targetType: "pace",
-                  target: {
-                    type: "pace",
-                    value: { unit: "min_per_km", value: 4.5 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
-
-    await fileInput.setInputFiles({
-      name: "focus-trap-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Focus Trap Test")).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Wait for repetition block to appear
-    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
-      timeout: 5000,
-    });
+    await loadTestWorkoutWithBlocks(page, "Focus Trap Test", [
+      { repeatCount: 3, sport: "running", targetPace: 4.5 },
+    ]);
 
     // Wait for block actions trigger to be visible
     await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
@@ -373,66 +193,10 @@ test.describe("Modal Interactions", () => {
     await page.goto("/");
 
     // Load a workout with multiple blocks
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "cycling",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Background Block Test",
-          sport: "cycling",
-          steps: [
-            {
-              repeatCount: 2,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 60 },
-                  targetType: "power",
-                  target: {
-                    type: "power",
-                    value: { unit: "watts", value: 200 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-            {
-              repeatCount: 3,
-              steps: [
-                {
-                  stepIndex: 1,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 90 },
-                  targetType: "power",
-                  target: {
-                    type: "power",
-                    value: { unit: "watts", value: 250 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
-
-    await fileInput.setInputFiles({
-      name: "background-block-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Background Block Test")).toBeVisible({
-      timeout: 10000,
-    });
+    await loadTestWorkoutWithBlocks(page, "Background Block Test", [
+      { repeatCount: 2 },
+      { repeatCount: 3, durationSeconds: 90, targetWatts: 250 },
+    ]);
 
     // Verify both blocks exist
     const blocks = page.locator('[data-testid="repetition-block-card"]');
@@ -489,55 +253,9 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     });
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "running",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Mobile Modal Test",
-          sport: "running",
-          steps: [
-            {
-              repeatCount: 2,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 60 },
-                  targetType: "pace",
-                  target: {
-                    type: "pace",
-                    value: { unit: "min_per_km", value: 5.0 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
-
-    await fileInput.setInputFiles({
-      name: "mobile-modal-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Mobile Modal Test")).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Wait for repetition block to appear
-    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
-      timeout: 5000,
-    });
+    await loadTestWorkoutWithBlocks(page, "Mobile Modal Test", [
+      { repeatCount: 2, sport: "running" },
+    ]);
 
     // Wait for block actions trigger to be visible
     await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
@@ -602,55 +320,9 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     });
 
     // Load a workout with a repetition block
-    const fileInput = page.getByTestId("file-upload-input");
-    const testWorkout = {
-      version: "1.0",
-      type: "structured_workout",
-      metadata: {
-        created: new Date().toISOString(),
-        sport: "cycling",
-      },
-      extensions: {
-        structured_workout: {
-          name: "Tablet Modal Test",
-          sport: "cycling",
-          steps: [
-            {
-              repeatCount: 3,
-              steps: [
-                {
-                  stepIndex: 0,
-                  durationType: "time",
-                  duration: { type: "time", seconds: 120 },
-                  targetType: "power",
-                  target: {
-                    type: "power",
-                    value: { unit: "watts", value: 200 },
-                  },
-                  intensity: "active",
-                },
-              ],
-            },
-          ],
-        },
-      },
-    };
-
-    await fileInput.setInputFiles({
-      name: "tablet-modal-test.krd",
-      mimeType: "application/json",
-      buffer: Buffer.from(JSON.stringify(testWorkout)),
-    });
-
-    // Wait for workout to load
-    await expect(page.getByText("Tablet Modal Test")).toBeVisible({
-      timeout: 10000,
-    });
-
-    // Wait for repetition block to appear
-    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
-      timeout: 5000,
-    });
+    await loadTestWorkoutWithBlocks(page, "Tablet Modal Test", [
+      { repeatCount: 3, durationSeconds: 120 },
+    ]);
 
     // Wait for block actions trigger to be visible
     await expect(page.getByTestId("block-actions-trigger")).toBeVisible({

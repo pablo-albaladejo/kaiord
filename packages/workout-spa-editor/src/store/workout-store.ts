@@ -22,6 +22,7 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => {
     deletedSteps: [],
     isModalOpen: false,
     modalConfig: null,
+    createBlockDialogOpen: false,
     ...createWorkoutMethods(actions, set, get),
     ...createSelectionActions(set),
     setEditing: (editing) => set({ isEditing: editing }),

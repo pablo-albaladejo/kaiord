@@ -15,12 +15,14 @@ import { expect, test } from "./fixtures/base";
 
 test.describe("Profile Management", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to the app and clear any existing profiles
-    await page.goto("/");
-    await page.evaluate(() => {
+    // Clear localStorage BEFORE any page JS runs using addInitScript
+    // This prevents race conditions where the app reads stale data
+    await page.addInitScript(() => {
       localStorage.clear();
+      // Re-set tutorial completion so the onboarding modal does not appear
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.reload();
+    await page.goto("/");
   });
 
   test("should create a new profile with name only", async ({ page }) => {
@@ -201,7 +203,19 @@ test.describe("Profile Management", () => {
     await expect(page.getByText(/import failed/i)).toBeVisible();
   });
 
-  test("should persist profiles across page reloads", async ({ page }) => {
+  test("should persist profiles across page reloads", async ({ browser }) => {
+    // Use a fresh browser context so no addInitScript clears localStorage
+    // on reload. The persistence test needs localStorage to survive reloads.
+    const context = await browser.newContext();
+    const page = await context.newPage();
+
+    await page.goto("/");
+    await page.evaluate(() => {
+      localStorage.clear();
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
+    });
+    await page.reload();
+
     // Arrange - Create a profile
     await page.getByRole("button", { name: /profile/i }).click();
     const dialog = page.getByRole("dialog");
@@ -212,7 +226,7 @@ test.describe("Profile Management", () => {
     // Verify profile was created in dialog before reload
     await expect(dialog.getByText("Persistent Profile")).toBeVisible();
 
-    // Act - Reload the page
+    // Act - Reload the page (localStorage should persist)
     await page.reload();
 
     // Assert - Profile still exists in dialog after reload
@@ -223,17 +237,19 @@ test.describe("Profile Management", () => {
     await expect(
       page.getByRole("dialog").getByText(/FTP: 275W/i)
     ).toBeVisible();
+
+    await context.close();
   });
 });
 
 test.describe("Zone Configuration", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate and create a profile with FTP and max HR
-    await page.goto("/");
-    await page.evaluate(() => {
+    // Clear localStorage BEFORE any page JS runs using addInitScript
+    await page.addInitScript(() => {
       localStorage.clear();
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.reload();
+    await page.goto("/");
 
     await page.getByRole("button", { name: /profile/i }).click();
     await page.getByLabel(/^name$/i).fill("Zone Test");
@@ -290,11 +306,11 @@ test.describe("Zone Configuration", () => {
 test.describe("Profile Performance", () => {
   test("should switch profiles quickly", async ({ page }) => {
     // Arrange - Create multiple profiles
-    await page.goto("/");
-    await page.evaluate(() => {
+    await page.addInitScript(() => {
       localStorage.clear();
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.reload();
+    await page.goto("/");
 
     await page.getByRole("button", { name: /profile/i }).click();
 
@@ -319,11 +335,11 @@ test.describe("Profile Performance", () => {
 
   test("should handle large number of profiles", async ({ page }) => {
     // Arrange - Create many profiles
-    await page.goto("/");
-    await page.evaluate(() => {
+    await page.addInitScript(() => {
       localStorage.clear();
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.reload();
+    await page.goto("/");
 
     await page.getByRole("button", { name: /profile/i }).click();
     const dialog = page.getByRole("dialog");

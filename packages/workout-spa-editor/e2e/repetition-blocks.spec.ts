@@ -669,11 +669,7 @@ test.describe("Repetition Blocks - Ungroup", () => {
 });
 
 test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
-  // Note: onCreateBlock, onUngroupBlock, onSelectAll, and onClearSelection
-  // are not yet wired in App.tsx useKeyboardShortcuts call.
-  // These tests are skipped until the shortcuts are integrated.
-
-  test.skip("should create block with Ctrl+G", async ({ page }) => {
+  test("should create block with Ctrl+G", async ({ page }) => {
     await page.goto("/");
 
     // Load a workout with multiple steps
@@ -780,7 +776,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     await expect(page.getByText("4x")).toBeVisible();
   });
 
-  test.skip("should ungroup block with Ctrl+Shift+G", async ({ page }) => {
+  test("should ungroup block with Ctrl+Shift+G", async ({ page }) => {
     await page.goto("/");
 
     // Load a workout with a repetition block
@@ -832,9 +828,9 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     // Verify block exists
     await expect(page.getByText("Repeat Block")).toBeVisible();
 
-    // Select the repetition block
-    const block = page.getByTestId("repetition-block-card");
-    await block.click();
+    // Select the repetition block by clicking its header badge
+    // (clicking the card center would hit the step card inside)
+    await page.getByText("Repeat Block").click();
 
     // Press Ctrl+Shift+G to ungroup
     await page.keyboard.press("Control+Shift+g");
@@ -848,7 +844,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     await expect(page.getByText("Step 1")).toBeVisible();
   });
 
-  test.skip("should select all steps with Ctrl+A", async ({ page }) => {
+  test("should select all steps with Ctrl+A", async ({ page }) => {
     await page.goto("/");
 
     // Load a workout with multiple steps
@@ -931,7 +927,7 @@ test.describe("Repetition Blocks - Keyboard Shortcuts", () => {
     ).toBeVisible();
   });
 
-  test.skip("should clear selection with Escape", async ({ page }) => {
+  test("should clear selection with Escape", async ({ page }) => {
     await page.goto("/");
 
     // Load a workout with multiple steps

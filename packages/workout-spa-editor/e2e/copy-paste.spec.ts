@@ -3,13 +3,11 @@
  *
  * Tests copy/paste functionality including:
  * - Button clicks (shows toast notifications)
- * - Keyboard shortcuts (Ctrl+C, Ctrl+V) - operates on clipboard directly
+ * - Keyboard shortcuts (Ctrl+C, Ctrl+V) - now also shows toast notifications
  * - Notifications
  *
- * Note: The keyboard shortcuts (Ctrl+C/V) in App.tsx use the store's
- * copyStep/pasteStep directly, which do NOT show toast notifications.
- * Only the UI buttons (CopyButton, PasteButton) go through the hooks
- * that display toasts. Tests are written accordingly.
+ * Both keyboard shortcuts and UI buttons now use the toast-enabled hooks
+ * (useCopyStep/usePasteStep), so all operations show toast notifications.
  *
  * Requirements:
  * - 39.2: Copy/paste step functionality
@@ -115,17 +113,13 @@ test.describe("Copy/Paste Functionality", () => {
       // Verify step is selected
       await expect(firstStep).toHaveAttribute("data-selected", "true");
 
-      // Act - Press Ctrl+C (keyboard shortcut uses store directly, no toast)
+      // Act - Press Ctrl+C (now shows toast via useCopyStep hook)
       await page.keyboard.press("Control+c");
 
-      // Assert - Verify clipboard has step data (keyboard shortcut does not
-      // show toast notifications, it only writes to clipboard)
-      const clipboardContent = await page.evaluate(() =>
-        navigator.clipboard.readText()
-      );
-      expect(clipboardContent).toBeTruthy();
-      const parsed = JSON.parse(clipboardContent);
-      expect(parsed).toHaveProperty("stepIndex");
+      // Assert - Toast notification appears
+      await expect(
+        page.getByText(/step copied to clipboard/i).first()
+      ).toBeVisible();
     });
 
     test("should copy step using Cmd+C on Mac", async ({
@@ -142,16 +136,13 @@ test.describe("Copy/Paste Functionality", () => {
       await firstStep.click();
       await expect(firstStep).toHaveAttribute("data-selected", "true");
 
-      // Act - Press Cmd+C
+      // Act - Press Cmd+C (now shows toast via useCopyStep hook)
       await page.keyboard.press("Meta+c");
 
-      // Assert - Verify clipboard has step data
-      const clipboardContent = await page.evaluate(() =>
-        navigator.clipboard.readText()
-      );
-      expect(clipboardContent).toBeTruthy();
-      const parsed = JSON.parse(clipboardContent);
-      expect(parsed).toHaveProperty("stepIndex");
+      // Assert - Toast notification appears
+      await expect(
+        page.getByText(/step copied to clipboard/i).first()
+      ).toBeVisible();
     });
 
     test("should paste step using Ctrl+V", async ({ page }) => {
@@ -170,10 +161,14 @@ test.describe("Copy/Paste Functionality", () => {
       await firstStep.click();
       await expect(firstStep).toHaveAttribute("data-selected", "true");
 
-      // Act - Press Ctrl+V (keyboard shortcut uses store directly, no toast)
+      // Act - Press Ctrl+V (now shows toast via usePasteStep hook)
       await page.keyboard.press("Control+v");
 
-      // Assert - New step appears (verify by step count increase)
+      // Assert - Toast notification and new step appear
+      await expect(
+        page.getByText(/step pasted successfully/i).first()
+      ).toBeVisible();
+
       await expect(page.locator('[data-testid="step-card"]')).toHaveCount(
         initialStepCount + 1,
         { timeout: 5000 }
@@ -204,10 +199,14 @@ test.describe("Copy/Paste Functionality", () => {
       await firstStep.click();
       await expect(firstStep).toHaveAttribute("data-selected", "true");
 
-      // Act - Press Cmd+V
+      // Act - Press Cmd+V (now shows toast via usePasteStep hook)
       await page.keyboard.press("Meta+v");
 
-      // Assert - New step appears (verify by step count increase)
+      // Assert - Toast notification and new step appear
+      await expect(
+        page.getByText(/step pasted successfully/i).first()
+      ).toBeVisible();
+
       await expect(page.locator('[data-testid="step-card"]')).toHaveCount(
         initialStepCount + 1,
         { timeout: 5000 }

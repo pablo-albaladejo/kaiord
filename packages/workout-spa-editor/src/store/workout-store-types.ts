@@ -36,6 +36,7 @@ export type WorkoutStore = {
   deletedSteps: Array<DeletedStep>;
   isModalOpen: boolean;
   modalConfig: ModalConfig | null;
+  createBlockDialogOpen: boolean;
 
   // Actions
   loadWorkout: (krd: KRD) => void;
@@ -71,6 +72,7 @@ export type WorkoutStore = {
   selectStep: (id: string | null) => void;
   toggleStepSelection: (id: string) => void;
   clearStepSelection: () => void;
+  selectAllSteps: (ids: Array<string>) => void;
   setEditing: (editing: boolean) => void;
   clearWorkout: () => void;
   undo: () => void;
@@ -85,6 +87,8 @@ export type WorkoutStore = {
   // Modal Actions
   showConfirmationModal: (config: ModalConfig) => void;
   hideConfirmationModal: () => void;
+  openCreateBlockDialog: () => void;
+  closeCreateBlockDialog: () => void;
 
   // Computed
   canUndo: () => boolean;

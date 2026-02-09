@@ -1,15 +1,18 @@
-import { useCallback, useState } from "react";
+import { useCallback } from "react";
 import { executeDeleteWithToast } from "./delete-block-with-toast";
 import { useToastContext } from "../../../contexts/ToastContext";
 import {
   useAddStepToRepetitionBlock,
   useClearStepSelection,
+  useCloseCreateBlockDialog,
+  useCreateBlockDialogOpen,
   useCreateEmptyRepetitionBlock,
   useCreateRepetitionBlock,
   useDeleteRepetitionBlock,
   useDuplicateStepInRepetitionBlock,
   useEditRepetitionBlock,
   useHideConfirmationModal,
+  useOpenCreateBlockDialog,
   useSelectedStepIds,
   useShowConfirmationModal,
   useUndoDelete,
@@ -23,16 +26,6 @@ function extractStepIndices(ids: readonly string[]): Array<number> {
       return m ? Number.parseInt(m[1], 10) : null;
     })
     .filter((i): i is number => i !== null);
-}
-
-function useDialogState() {
-  const [open, setOpen] = useState(false);
-  const [isEmpty, setIsEmpty] = useState(false);
-  const close = () => {
-    setOpen(false);
-    setIsEmpty(false);
-  };
-  return { open, isEmpty, setOpen, setIsEmpty, close };
 }
 
 function useDeleteWithConfirmation() {
@@ -71,32 +64,29 @@ export function useRepetitionBlockHandlers() {
   const duplicateStep = useDuplicateStepInRepetitionBlock();
   const ungroupBlock = useUngroupRepetitionBlock();
   const clearSelection = useClearStepSelection();
-  const dialog = useDialogState();
+  const dialogOpen = useCreateBlockDialogOpen();
+  const openDialog = useOpenCreateBlockDialog();
+  const closeDialog = useCloseCreateBlockDialog();
   const handleDelete = useDeleteWithConfirmation();
 
   const handleConfirmCreateBlock = (repeatCount: number) => {
-    if (dialog.isEmpty) {
-      createEmptyBlock(repeatCount);
+    const indices = extractStepIndices(selectedStepIds);
+    if (indices.length >= 2) {
+      createRepetitionBlock(indices, repeatCount);
+      clearSelection();
     } else {
-      const indices = extractStepIndices(selectedStepIds);
-      if (indices.length >= 2) {
-        createRepetitionBlock(indices, repeatCount);
-        clearSelection();
-      }
+      createEmptyBlock(repeatCount);
     }
-    dialog.close();
+    closeDialog();
   };
 
   return {
     selectedStepIds,
-    showCreateBlockDialog: dialog.open,
-    handleCreateRepetitionBlock: () => {
-      dialog.setIsEmpty(false);
-      dialog.setOpen(true);
-    },
+    showCreateBlockDialog: dialogOpen,
+    handleCreateRepetitionBlock: openDialog,
     handleCreateEmptyRepetitionBlock: () => createEmptyBlock(1),
     handleConfirmCreateBlock,
-    handleCancelCreateBlock: dialog.close,
+    handleCancelCreateBlock: closeDialog,
     handleEditRepetitionBlock: editRepetitionBlock,
     handleAddStepToRepetitionBlock: addStep,
     handleDuplicateStepInRepetitionBlock: duplicateStep,
