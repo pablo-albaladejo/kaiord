@@ -19,7 +19,6 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     actionTimeout: 10000, // 10 seconds for actions (click, fill, etc.)
-    permissions: ["clipboard-read", "clipboard-write"],
   },
 
   // Global timeout for tests
@@ -28,7 +27,10 @@ export default defineConfig({
   projects: [
     {
       name: "chromium",
-      use: { ...devices["Desktop Chrome"] },
+      use: {
+        ...devices["Desktop Chrome"],
+        permissions: ["clipboard-read", "clipboard-write"],
+      },
     },
     {
       name: "firefox",
