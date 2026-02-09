@@ -1,5 +1,11 @@
 import type { KRD, Logger } from "@kaiord/core";
-import { fromBinary, fromText, toBinary, toText } from "@kaiord/core";
+import {
+  fromBinary,
+  fromText,
+  toBinary,
+  toText,
+  validateKrd,
+} from "@kaiord/core";
 import { createFitReader, createFitWriter } from "@kaiord/fit";
 import { createGarminReader, createGarminWriter } from "@kaiord/garmin";
 import { createTcxReader, createTcxWriter } from "@kaiord/tcx";
@@ -62,7 +68,7 @@ export const convertToKrd = async (
       if (typeof data !== "string") {
         throw new Error("KRD input must be string");
       }
-      return JSON.parse(data) as KRD;
+      return validateKrd(JSON.parse(data));
     }
     default:
       throw new Error(`Unsupported format: ${format}`);
@@ -85,6 +91,7 @@ export const convertFromKrd = async (
     case "gcn":
       return toText(krd, createGarminWriter(logger), logger);
     case "krd":
+      validateKrd(krd);
       return JSON.stringify(krd, null, 2);
     default:
       throw new Error(`Unsupported output format: ${format}`);

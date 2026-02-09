@@ -119,13 +119,18 @@ describe("convertToKrd", () => {
 
   it("should parse KRD JSON string", async () => {
     // Arrange
-    const krdData = JSON.stringify({ metadata: { sport: "running" } });
+    const validKrd = {
+      version: "1.0",
+      type: "structured_workout",
+      metadata: { created: "2025-01-01T00:00:00Z", sport: "running" },
+    };
+    const krdData = JSON.stringify(validKrd);
 
     // Act
     const result = await convertToKrd(krdData, "krd", mockLogger);
 
     // Assert
-    expect(result).toEqual({ metadata: { sport: "running" } });
+    expect(result).toEqual(validKrd);
   });
 
   it("should throw for unsupported format", async () => {
@@ -160,9 +165,11 @@ describe("convertToKrd", () => {
 });
 
 describe("convertFromKrd", () => {
-  const mockKrd = { metadata: { sport: "cycling" } } as Parameters<
-    typeof convertFromKrd
-  >[0];
+  const mockKrd = {
+    version: "1.0",
+    type: "structured_workout",
+    metadata: { created: "2025-01-01T00:00:00Z", sport: "cycling" },
+  } as Parameters<typeof convertFromKrd>[0];
 
   beforeEach(() => {
     vi.clearAllMocks();

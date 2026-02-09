@@ -19,8 +19,11 @@
 ## Public API surface
 
 ```ts
-toKRD(input: Uint8Array | string, opts: { type: "fit"|"tcx"|"zwo"|"krd" }): Promise<KRD>
-fromKRD(krd: KRD, opts: { type: "fit"|"tcx"|"zwo"|"krd" }): Promise<Uint8Array>
+// Strategy pattern: inject reader/writer directly
+fromBinary(buffer: Uint8Array, reader: BinaryReader, logger?: Logger): Promise<KRD>
+fromText(text: string, reader: TextReader, logger?: Logger): Promise<KRD>
+toBinary(krd: KRD, writer: BinaryWriter, logger?: Logger): Promise<Uint8Array>
+toText(krd: KRD, writer: TextWriter, logger?: Logger): Promise<string>
 ```
 
 ## Code style
