@@ -5,10 +5,10 @@ import { WorkoutSection } from "./components/pages/WorkoutSection/WorkoutSection
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { TUTORIAL_STEPS } from "./constants/tutorial-steps";
+import { useAppKeyboardHandlers } from "./hooks/use-app-keyboard-handlers";
+import { useOnboardingTutorial } from "./hooks/use-onboarding-tutorial";
 import { useAppHandlers } from "./hooks/useAppHandlers";
-import { useAppKeyboardHandlers } from "./hooks/useAppKeyboardHandlers";
 import { useDeleteCleanup } from "./hooks/useDeleteCleanup";
-import { useOnboardingTutorial } from "./hooks/useOnboardingTutorial";
 import { useWorkoutStore } from "./store/workout-store";
 import {
   useCurrentWorkout,

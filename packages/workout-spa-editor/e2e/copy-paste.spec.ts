@@ -19,12 +19,9 @@ import { loadTestWorkout } from "./helpers/load-test-workout";
 
 test.describe("Copy/Paste Functionality", () => {
   test.beforeEach(async ({ page }) => {
+    // Clear localStorage before navigation to start fresh
+    await page.addInitScript(() => localStorage.clear());
     await page.goto("/");
-
-    // Clear localStorage to start fresh
-    await page.evaluate(() => {
-      localStorage.clear();
-    });
 
     // Load a test workout
     await loadTestWorkout(page, "Copy Paste Test");
@@ -356,7 +353,11 @@ test.describe("Copy/Paste Functionality", () => {
 
     test("should show error notification when clipboard is empty", async ({
       page,
+      browserName,
     }) => {
+      // navigator.clipboard.writeText only works in Chromium
+      test.skip(browserName !== "chromium");
+
       // Clear clipboard to ensure it's empty
       await page.evaluate(() => navigator.clipboard.writeText(""));
 

@@ -28,7 +28,10 @@ export function StoreConfirmationModal() {
       message={modalConfig.message}
       confirmLabel={modalConfig.confirmLabel}
       cancelLabel={modalConfig.cancelLabel}
-      onConfirm={modalConfig.onConfirm}
+      onConfirm={() => {
+        modalConfig.onConfirm();
+        hideConfirmationModal();
+      }}
       onCancel={modalConfig.onCancel ?? hideConfirmationModal}
       variant={modalConfig.variant}
     />

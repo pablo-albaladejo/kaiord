@@ -9,8 +9,8 @@
   "exports": {
     ".": {
       "browser": {
-        "import": "./dist/browser.js",
-        "types": "./dist/browser.d.ts"
+        "types": "./dist/browser.d.ts",
+        "import": "./dist/browser.js"
       },
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"

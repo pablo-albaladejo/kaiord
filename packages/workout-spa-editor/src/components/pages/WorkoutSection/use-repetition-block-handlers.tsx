@@ -11,7 +11,6 @@ import {
   useDeleteRepetitionBlock,
   useDuplicateStepInRepetitionBlock,
   useEditRepetitionBlock,
-  useHideConfirmationModal,
   useOpenCreateBlockDialog,
   useSelectedStepIds,
   useShowConfirmationModal,
@@ -32,7 +31,6 @@ function useDeleteWithConfirmation() {
   const deleteAction = useDeleteRepetitionBlock();
   const undoDelete = useUndoDelete();
   const showModal = useShowConfirmationModal();
-  const hideModal = useHideConfirmationModal();
   const { toast } = useToastContext();
 
   return useCallback(
@@ -45,13 +43,11 @@ function useDeleteWithConfirmation() {
         cancelLabel: "Cancel",
         variant: "destructive",
         onConfirm: () => {
-          hideModal();
           executeDeleteWithToast(blockId, deleteAction, toast, undoDelete);
         },
-        onCancel: () => hideModal(),
       });
     },
-    [deleteAction, toast, undoDelete, showModal, hideModal]
+    [deleteAction, toast, undoDelete, showModal]
   );
 }
 

@@ -19,7 +19,7 @@ export type ModalConfig = {
   confirmLabel: string;
   cancelLabel: string;
   onConfirm: () => void;
-  onCancel: () => void;
+  onCancel?: () => void;
   variant: "default" | "destructive";
 };
 
