@@ -1,0 +1,49 @@
+coverage:
+  status:
+    project:
+      default:
+        target: 80%
+        threshold: 2%
+      frontend:
+        target: 70%
+        threshold: 2%
+        flags:
+          - frontend
+    patch:
+      default:
+        target: 80%
+
+comment:
+  layout: "reach,diff,flags,files"
+  behavior: default
+  require_changes: true
+
+flags:
+  core:
+    paths:
+      - packages/core/src/
+    carryforward: true
+  fit:
+    paths:
+      - packages/fit/src/
+    carryforward: true
+  tcx:
+    paths:
+      - packages/tcx/src/
+    carryforward: true
+  zwo:
+    paths:
+      - packages/zwo/src/
+    carryforward: true
+  garmin:
+    paths:
+      - packages/garmin/src/
+    carryforward: true
+  cli:
+    paths:
+      - packages/cli/src/
+    carryforward: true
+  frontend:
+    paths:
+      - packages/workout-spa-editor/src/
+    carryforward: true
