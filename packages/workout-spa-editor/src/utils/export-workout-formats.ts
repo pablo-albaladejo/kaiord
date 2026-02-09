@@ -9,7 +9,6 @@ import { fitWriter } from "@kaiord/fit";
 import { garminWriter } from "@kaiord/garmin";
 import { tcxWriter } from "@kaiord/tcx";
 import { zwiftWriter } from "@kaiord/zwo";
-
 import { ExportError } from "./export-workout";
 import type { ExportProgressCallback } from "./export-workout";
 import type { KRD } from "@kaiord/core";

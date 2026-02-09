@@ -9,7 +9,6 @@ import { fitReader } from "@kaiord/fit";
 import { garminReader } from "@kaiord/garmin";
 import { tcxReader } from "@kaiord/tcx";
 import { zwiftReader } from "@kaiord/zwo";
-
 import { parseJSON } from "./json-parser";
 import { validateKRD } from "./krd-validator";
 import type { ImportProgressCallback } from "./import-workout";
