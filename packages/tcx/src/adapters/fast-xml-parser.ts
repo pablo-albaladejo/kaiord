@@ -1,15 +1,13 @@
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
-import type { KRD } from "@kaiord/core";
+import type { KRD, TextReader, TextWriter } from "@kaiord/core";
 import { createTcxParsingError, createTcxValidationError } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
-import type { TcxReader } from "@kaiord/core";
-import type { TcxValidator } from "@kaiord/core";
-import type { TcxWriter } from "@kaiord/core";
+import type { TcxValidator } from "../types";
 import { convertTcxToKRD } from "./workout/krd.converter";
 import { convertKRDToTcx as convertKRDToTcxStructure } from "./workout/tcx.converter";
 
 export const createFastXmlTcxReader =
-  (logger: Logger): TcxReader =>
+  (logger: Logger): TextReader =>
   async (xmlString: string): Promise<KRD> => {
     logger.debug("Parsing TCX file", { xmlLength: xmlString.length });
 
@@ -45,7 +43,7 @@ export const createFastXmlTcxReader =
   };
 
 export const createFastXmlTcxWriter =
-  (logger: Logger, validator: TcxValidator): TcxWriter =>
+  (logger: Logger, validator: TcxValidator): TextWriter =>
   async (krd: KRD): Promise<string> => {
     logger.debug("Encoding KRD to TCX");
 

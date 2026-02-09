@@ -1,6 +1,6 @@
 import { XMLValidator } from "fast-xml-parser";
 import type { Logger } from "@kaiord/core";
-import type { ZwiftValidationResult } from "@kaiord/core";
+import type { ZwiftValidationResult } from "../types";
 
 export const validateXmlWellFormedness = (
   xmlString: string,

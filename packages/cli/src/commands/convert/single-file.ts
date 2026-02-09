@@ -1,8 +1,8 @@
-import type { Logger, Providers } from "@kaiord/core";
+import type { Logger } from "@kaiord/core";
 import ora from "ora";
 import { writeFile } from "../../utils/file-handler";
 import { detectFormat, type FileFormat } from "../../utils/format-detector";
-import { convertFromKrd, loadFileAsKrd } from "../../utils/krd-file-loader";
+import { convertFromKrd, loadFileAsKrd } from "../../utils/krd-converter";
 import type { ValidatedConvertOptions } from "./types";
 
 /**
@@ -13,10 +13,10 @@ export const convertSingleFile = async (
   outputFile: string,
   inputFormat: string,
   outputFormat: string,
-  providers: Providers
+  logger: Logger
 ): Promise<void> => {
-  const krd = await loadFileAsKrd(inputFile, inputFormat, providers);
-  const outputData = await convertFromKrd(krd, outputFormat, providers);
+  const krd = await loadFileAsKrd(inputFile, inputFormat, logger);
+  const outputData = await convertFromKrd(krd, outputFormat, logger);
   await writeFile(outputFile, outputData, outputFormat as FileFormat);
 };
 
@@ -25,7 +25,6 @@ export const convertSingleFile = async (
  */
 export const executeSingleFileConversion = async (
   options: ValidatedConvertOptions,
-  providers: Providers,
   logger: Logger
 ): Promise<void> => {
   const inputFormat = options.inputFormat || detectFormat(options.input);
@@ -72,7 +71,7 @@ export const executeSingleFileConversion = async (
       options.output,
       inputFormat,
       outputFormat,
-      providers
+      logger
     );
 
     if (options.json) {

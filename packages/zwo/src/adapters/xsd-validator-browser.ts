@@ -1,5 +1,5 @@
 import type { Logger } from "@kaiord/core";
-import type { ZwiftValidator } from "@kaiord/core";
+import type { ZwiftValidator } from "../types";
 import { createWellFormednessValidator } from "./well-formedness-validator";
 
 /**

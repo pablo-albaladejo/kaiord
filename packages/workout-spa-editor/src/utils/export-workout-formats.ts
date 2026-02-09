@@ -4,8 +4,12 @@
  * Internal utilities for exporting workout files to different formats.
  */
 
+import { toBinary, toText } from "@kaiord/core";
+import { fitWriter } from "@kaiord/fit";
+import { garminWriter } from "@kaiord/garmin";
+import { tcxWriter } from "@kaiord/tcx";
+import { zwiftWriter } from "@kaiord/zwo";
 import { ExportError } from "./export-workout";
-import { providers } from "./workout-providers";
 import type { ExportProgressCallback } from "./export-workout";
 import type { KRD } from "@kaiord/core";
 
@@ -33,7 +37,7 @@ export const exportFitFile = async (
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
   onProgress?.(50);
-  const buffer = await providers.convertKrdToFit!({ krd });
+  const buffer = await toBinary(krd, fitWriter);
   onProgress?.(100);
   return buffer;
 };
@@ -43,7 +47,7 @@ export const exportTcxFile = async (
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
   onProgress?.(50);
-  const tcxString = await providers.convertKrdToTcx!({ krd });
+  const tcxString = await toText(krd, tcxWriter);
   const buffer = new TextEncoder().encode(tcxString);
   onProgress?.(100);
   return buffer;
@@ -54,7 +58,7 @@ export const exportZwoFile = async (
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
   onProgress?.(50);
-  const zwoString = await providers.convertKrdToZwift!({ krd });
+  const zwoString = await toText(krd, zwiftWriter);
   const buffer = new TextEncoder().encode(zwoString);
   onProgress?.(100);
   return buffer;
@@ -65,7 +69,7 @@ export const exportGcnFile = async (
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
   onProgress?.(50);
-  const gcnString = await providers.convertKrdToGarmin!({ krd });
+  const gcnString = await toText(krd, garminWriter);
   const buffer = new TextEncoder().encode(gcnString);
   onProgress?.(100);
   return buffer;
