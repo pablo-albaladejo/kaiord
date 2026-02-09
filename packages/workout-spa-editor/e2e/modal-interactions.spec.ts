@@ -74,20 +74,32 @@ test.describe("Modal Interactions", () => {
       timeout: 10000,
     });
 
+    // Wait for repetition block to appear
+    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
+      timeout: 5000,
+    });
+
     // Set up dialog listener to catch any browser alerts (should not happen)
     let browserAlertShown = false;
     page.on("dialog", () => {
       browserAlertShown = true;
     });
 
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
+    });
+
     // Open context menu and click delete
     await page.getByTestId("block-actions-trigger").click();
+
+    // Wait for menu to be visible
+    await expect(page.getByRole("menu")).toBeVisible({ timeout: 5000 });
+
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal appears (not browser alert)
-    await expect(
-      page.getByRole("dialog").or(page.getByTestId("modal-backdrop"))
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
 
     // Verify no browser alert was shown
     expect(browserAlertShown).toBe(false);
@@ -148,25 +160,31 @@ test.describe("Modal Interactions", () => {
       timeout: 10000,
     });
 
+    // Wait for repetition block to appear
+    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
+      timeout: 5000,
+    });
+
     // Verify block exists
     await expect(page.getByText("Repeat Block")).toBeVisible();
+
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
+    });
 
     // Open context menu and click delete to show modal
     await page.getByTestId("block-actions-trigger").click();
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
-    await expect(
-      page.getByRole("dialog").or(page.getByTestId("modal-backdrop"))
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
 
     // Press Escape key
     await page.keyboard.press("Escape");
 
     // Verify modal is dismissed
-    await expect(
-      page.getByRole("dialog").or(page.getByTestId("modal-backdrop"))
-    ).not.toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("dialog")).not.toBeVisible({ timeout: 5000 });
 
     // Verify block was NOT deleted (action was cancelled)
     await expect(page.getByText("Repeat Block")).toBeVisible();
@@ -222,8 +240,18 @@ test.describe("Modal Interactions", () => {
       timeout: 10000,
     });
 
+    // Wait for repetition block to appear
+    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
+      timeout: 5000,
+    });
+
     // Verify block exists
     await expect(page.getByText("Repeat Block")).toBeVisible();
+
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
+    });
 
     // Open context menu and click delete to show modal
     await page.getByTestId("block-actions-trigger").click();
@@ -293,33 +321,45 @@ test.describe("Modal Interactions", () => {
       timeout: 10000,
     });
 
+    // Wait for repetition block to appear
+    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
+    });
+
     // Open context menu and click delete to show modal
     await page.getByTestId("block-actions-trigger").click();
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
-    await expect(
-      page.getByRole("dialog").or(page.getByTestId("modal-backdrop"))
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole("dialog")).toBeVisible({ timeout: 5000 });
 
-    // Get all focusable elements in the modal
-    const cancelButton = page.getByRole("button", { name: /cancel/i });
-    const confirmButton = page.getByRole("button", { name: /delete/i });
-    const closeButton = page.getByRole("button", { name: /close/i });
+    // Helper to verify focus is within modal buttons
+    const isFocusInModal = () =>
+      page.evaluate(() => {
+        const active = document.activeElement;
+        if (!active || active === document.body) return false;
+        const dialog = document.querySelector("[role='dialog']");
+        return dialog?.contains(active) ?? false;
+      });
 
     // Tab through modal elements
     await page.keyboard.press("Tab");
-    await expect(cancelButton.or(confirmButton).or(closeButton)).toBeFocused();
+    expect(await isFocusInModal()).toBe(true);
 
     await page.keyboard.press("Tab");
-    await expect(cancelButton.or(confirmButton).or(closeButton)).toBeFocused();
+    expect(await isFocusInModal()).toBe(true);
 
     await page.keyboard.press("Tab");
-    await expect(cancelButton.or(confirmButton).or(closeButton)).toBeFocused();
+    expect(await isFocusInModal()).toBe(true);
 
     // Tab again should cycle back to first element (focus trap)
     await page.keyboard.press("Tab");
-    await expect(cancelButton.or(confirmButton).or(closeButton)).toBeFocused();
+    expect(await isFocusInModal()).toBe(true);
 
     // Verify focus stays within modal (not on background elements)
     const backgroundElement = page.getByTestId("workout-section");
@@ -494,8 +534,22 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
       timeout: 10000,
     });
 
+    // Wait for repetition block to appear
+    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
+    });
+
     // Open context menu and click delete
     await page.getByTestId("block-actions-trigger").click();
+
+    // Wait for menu to be visible
+    await expect(page.getByRole("menu")).toBeVisible({ timeout: 5000 });
+
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -532,7 +586,7 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     }
 
     // Test interaction on mobile
-    await cancelButton.tap();
+    await cancelButton.click();
 
     // Verify modal is dismissed
     await expect(modal).not.toBeVisible({ timeout: 5000 });
@@ -593,8 +647,22 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
       timeout: 10000,
     });
 
+    // Wait for repetition block to appear
+    await expect(page.getByTestId("repetition-block-card")).toBeVisible({
+      timeout: 5000,
+    });
+
+    // Wait for block actions trigger to be visible
+    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
+      timeout: 5000,
+    });
+
     // Open context menu and click delete
     await page.getByTestId("block-actions-trigger").click();
+
+    // Wait for menu to be visible
+    await expect(page.getByRole("menu")).toBeVisible({ timeout: 5000 });
+
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible and properly sized for tablet

@@ -16,8 +16,7 @@
  */
 
 import * as Dialog from "@radix-ui/react-dialog";
-import { X } from "lucide-react";
-import { Button } from "../../atoms/Button/Button";
+import { ConfirmationModalPanel } from "./ConfirmationModalPanel";
 
 export type ConfirmationModalProps = {
   isOpen: boolean;
@@ -46,45 +45,20 @@ export function ConfirmationModal({
   return (
     <Dialog.Root open={isOpen} onOpenChange={(open) => !open && onCancel()}>
       <Dialog.Portal>
-        {/* Backdrop with dim effect */}
         <Dialog.Overlay
           data-testid="modal-backdrop"
           className="fixed inset-0 z-50 bg-black/50 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
         />
-
-        {/* Modal content */}
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-0 shadow-xl dark:bg-gray-800 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:max-w-lg">
-          {/* Header */}
-          <div className="flex items-center justify-between border-b border-gray-200 p-4 dark:border-gray-700">
-            <Dialog.Title className="text-lg font-semibold text-gray-900 dark:text-white">
-              {title}
-            </Dialog.Title>
-            <button
-              onClick={onCancel}
-              className="rounded-lg p-1 text-gray-400 hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-              aria-label="Close"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-
-          {/* Message */}
-          <Dialog.Description className="p-4 text-sm text-gray-600 dark:text-gray-400">
-            {message}
-          </Dialog.Description>
-
-          {/* Actions */}
-          <div className="flex justify-end gap-2 border-t border-gray-200 p-4 dark:border-gray-700">
-            <Button variant="secondary" onClick={onCancel}>
-              {cancelLabel}
-            </Button>
-            <Button
-              variant={variant === "destructive" ? "danger" : "primary"}
-              onClick={onConfirm}
-            >
-              {confirmLabel}
-            </Button>
-          </div>
+          <ConfirmationModalPanel
+            title={title}
+            message={message}
+            confirmLabel={confirmLabel}
+            cancelLabel={cancelLabel}
+            onConfirm={onConfirm}
+            onCancel={onCancel}
+            variant={variant}
+          />
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

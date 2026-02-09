@@ -2,6 +2,7 @@ import { useWorkoutSectionState } from "./useWorkoutSectionState";
 import { WorkoutHeader } from "./WorkoutHeader";
 import { WorkoutSectionEditor } from "./WorkoutSectionEditor";
 import { WorkoutStepsList } from "./WorkoutStepsList";
+import { StoreConfirmationModal } from "../../molecules/ConfirmationModal";
 import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
 import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
 import type { KRD, Workout } from "../../../types/krd";
@@ -72,6 +73,7 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         onCancel={state.handleCancelCreateBlock}
         isOpen={state.showCreateBlockDialog}
       />
+      <StoreConfirmationModal />
     </div>
   );
 }

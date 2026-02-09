@@ -19,6 +19,7 @@ export default defineConfig({
     trace: "on-first-retry",
     screenshot: "only-on-failure",
     actionTimeout: 10000, // 10 seconds for actions (click, fill, etc.)
+    permissions: ["clipboard-read", "clipboard-write"],
   },
 
   // Global timeout for tests

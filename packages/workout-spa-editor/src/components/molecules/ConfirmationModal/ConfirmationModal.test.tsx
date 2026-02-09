@@ -197,7 +197,7 @@ describe("ConfirmationModal", () => {
   describe("backdrop", () => {
     it("should render backdrop with dim effect", () => {
       // Arrange & Act
-      const { container } = render(
+      render(
         <ConfirmationModal
           isOpen={true}
           title="Test Title"
