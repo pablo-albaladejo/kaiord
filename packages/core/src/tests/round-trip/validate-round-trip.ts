@@ -3,8 +3,7 @@ import type {
   ToleranceChecker,
   ToleranceViolation,
 } from "../../domain/validation/tolerance-checker";
-import type { FitReader } from "../../ports/fit-reader";
-import type { FitWriter } from "../../ports/fit-writer";
+import type { BinaryReader, BinaryWriter } from "../../ports/format-strategy";
 import type { Logger } from "../../ports/logger";
 import { compareKRDs } from "./compare-krds";
 
@@ -35,8 +34,8 @@ export type ValidateRoundTrip = ReturnType<typeof validateRoundTrip>;
  * - Heart rate: ±1 BPM
  * - Cadence: ±1 RPM
  *
- * @param fitReader - FIT file reader implementation
- * @param fitWriter - FIT file writer implementation
+ * @param binaryReader - FIT file reader implementation
+ * @param binaryWriter - FIT file writer implementation
  * @param toleranceChecker - Tolerance checker with configured thresholds
  * @param logger - Logger for operation tracking
  * @returns An object with validation methods for both round-trip directions
@@ -48,8 +47,8 @@ export type ValidateRoundTrip = ReturnType<typeof validateRoundTrip>;
  *
  * const providers = createDefaultProviders();
  * const validator = validateRoundTrip(
- *   providers.fitReader,
- *   providers.fitWriter,
+ *   providers.binaryReader,
+ *   providers.binaryWriter,
  *   providers.toleranceChecker,
  *   providers.logger
  * );
@@ -96,16 +95,16 @@ export type ValidateRoundTrip = ReturnType<typeof validateRoundTrip>;
  *
  * const customChecker = createToleranceChecker(customConfig);
  * const validator = validateRoundTrip(
- *   providers.fitReader,
- *   providers.fitWriter,
+ *   providers.binaryReader,
+ *   providers.binaryWriter,
  *   customChecker,
  *   providers.logger
  * );
  * ```
  */
 export const validateRoundTrip = (
-  fitReader: FitReader,
-  fitWriter: FitWriter,
+  binaryReader: BinaryReader,
+  binaryWriter: BinaryWriter,
   toleranceChecker: ToleranceChecker,
   logger: Logger
 ) => ({
@@ -114,9 +113,9 @@ export const validateRoundTrip = (
   ): Promise<Array<ToleranceViolation>> => {
     logger.info("Validating FIT → KRD → FIT round-trip");
 
-    const krd = await fitReader(params.originalFit);
-    const convertedFit = await fitWriter(krd);
-    const krd2 = await fitReader(convertedFit);
+    const krd = await binaryReader(params.originalFit);
+    const convertedFit = await binaryWriter(krd);
+    const krd2 = await binaryReader(convertedFit);
 
     const violations = compareKRDs(krd, krd2, toleranceChecker, logger);
 
@@ -136,10 +135,10 @@ export const validateRoundTrip = (
   ): Promise<Array<ToleranceViolation>> => {
     logger.info("Validating KRD → FIT → KRD round-trip");
 
-    const fit = await fitWriter(params.originalKrd);
-    const convertedKrd = await fitReader(fit);
-    const fit2 = await fitWriter(convertedKrd);
-    const krd2 = await fitReader(fit2);
+    const fit = await binaryWriter(params.originalKrd);
+    const convertedKrd = await binaryReader(fit);
+    const fit2 = await binaryWriter(convertedKrd);
+    const krd2 = await binaryReader(fit2);
 
     const violations = compareKRDs(
       params.originalKrd,

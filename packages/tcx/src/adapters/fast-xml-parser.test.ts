@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import type { KRD } from "@kaiord/core";
 import { TcxParsingError } from "@kaiord/core";
-import type { TcxValidator } from "@kaiord/core";
+import type { TcxValidator } from "../types";
 import { createMockLogger } from "@kaiord/core/test-utils";
 import {
   createFastXmlTcxReader,

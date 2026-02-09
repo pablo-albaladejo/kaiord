@@ -4,9 +4,14 @@
  * Internal utilities for importing different workout file formats.
  */
 
+import { fromBinary, fromText } from "@kaiord/core";
+import { fitReader } from "@kaiord/fit";
+import { garminReader } from "@kaiord/garmin";
+import { tcxReader } from "@kaiord/tcx";
+import { zwiftReader } from "@kaiord/zwo";
+
 import { parseJSON } from "./json-parser";
 import { validateKRD } from "./krd-validator";
-import { providers } from "./workout-providers";
 import type { ImportProgressCallback } from "./import-workout";
 import type { KRD } from "@kaiord/core";
 
@@ -38,7 +43,7 @@ export const importFitFile = async (
   signal?.throwIfAborted();
   onProgress?.(50);
   signal?.throwIfAborted();
-  const krd = await providers.convertFitToKrd!({ fitBuffer: buffer });
+  const krd = await fromBinary(buffer, fitReader);
   onProgress?.(100);
   return krd;
 };
@@ -52,7 +57,7 @@ export const importTcxFile = async (
   const text = new TextDecoder().decode(buffer);
   onProgress?.(50);
   signal?.throwIfAborted();
-  const krd = await providers.convertTcxToKrd!({ tcxString: text });
+  const krd = await fromText(text, tcxReader);
   onProgress?.(100);
   return krd;
 };
@@ -66,7 +71,7 @@ export const importZwoFile = async (
   const text = new TextDecoder().decode(buffer);
   onProgress?.(50);
   signal?.throwIfAborted();
-  const krd = await providers.convertZwiftToKrd!({ zwiftString: text });
+  const krd = await fromText(text, zwiftReader);
   onProgress?.(100);
   return krd;
 };
@@ -80,7 +85,7 @@ export const importGcnFile = async (
   const text = new TextDecoder().decode(buffer);
   onProgress?.(50);
   signal?.throwIfAborted();
-  const krd = await providers.convertGarminToKrd!({ gcnString: text });
+  const krd = await fromText(text, garminReader);
   onProgress?.(100);
   return krd;
 };

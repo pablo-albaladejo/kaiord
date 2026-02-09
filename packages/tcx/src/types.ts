@@ -3,4 +3,6 @@ export type TcxValidationResult = {
   errors: Array<{ path: string; message: string }>;
 };
 
-export type TcxValidator = (xmlString: string) => Promise<TcxValidationResult>;
+export type TcxValidator = (
+  xmlString: string
+) => Promise<TcxValidationResult>;
