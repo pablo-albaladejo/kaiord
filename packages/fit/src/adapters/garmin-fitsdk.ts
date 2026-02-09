@@ -6,15 +6,15 @@
 import { Decoder, Encoder, Stream } from "@garmin/fitsdk";
 import type { KRD } from "@kaiord/core";
 import { createFitParsingError } from "@kaiord/core";
-import type { FitReader } from "@kaiord/core";
-import type { FitWriter } from "@kaiord/core";
+import type { BinaryReader } from "@kaiord/core";
+import type { BinaryWriter } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
 import { convertKRDToMessages } from "./krd-to-fit/krd-to-fit.converter";
 import { mapMessagesToKRD } from "./messages/messages.mapper";
 import type { FitMessages } from "./shared/types";
 
 export const createGarminFitSdkReader =
-  (logger: Logger): FitReader =>
+  (logger: Logger): BinaryReader =>
   async (buffer: Uint8Array): Promise<KRD> => {
     try {
       logger.debug("Parsing FIT file", { bufferSize: buffer.length });
@@ -45,7 +45,7 @@ export const createGarminFitSdkReader =
   };
 
 export const createGarminFitSdkWriter =
-  (logger: Logger): FitWriter =>
+  (logger: Logger): BinaryWriter =>
   async (krd: KRD): Promise<Uint8Array> => {
     try {
       logger.debug("Encoding KRD to FIT");

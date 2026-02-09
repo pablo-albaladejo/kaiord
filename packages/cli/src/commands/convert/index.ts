@@ -1,14 +1,9 @@
 import {
-  createDefaultProviders,
   FitParsingError,
   GarminParsingError,
   KrdValidationError,
   ToleranceExceededError,
 } from "@kaiord/core";
-import { createFitProviders } from "@kaiord/fit";
-import { createGarminProviders } from "@kaiord/garmin";
-import { createTcxProviders } from "@kaiord/tcx";
-import { createZwoProviders } from "@kaiord/zwo";
 import {
   loadConfigWithMetadata,
   mergeWithConfig,
@@ -82,20 +77,10 @@ export const convertCommand = async (
   }
 
   try {
-    const providers = createDefaultProviders(
-      {
-        fit: createFitProviders(logger),
-        garmin: createGarminProviders(logger),
-        tcx: createTcxProviders(logger),
-        zwo: createZwoProviders(logger),
-      },
-      logger
-    );
-
     if (isBatchMode(validatedOptions.input)) {
-      return await executeBatchConversion(validatedOptions, providers, logger);
+      return await executeBatchConversion(validatedOptions, logger);
     } else {
-      await executeSingleFileConversion(validatedOptions, providers, logger);
+      await executeSingleFileConversion(validatedOptions, logger);
       return ExitCode.SUCCESS;
     }
   } catch (error) {

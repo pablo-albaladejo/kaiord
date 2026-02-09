@@ -3,7 +3,7 @@ import {
   createZwiftValidationError,
 } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
-import type { ZwiftValidator } from "@kaiord/core";
+import type { ZwiftValidator } from "../types";
 
 export const validateInputZwiftXml = async (
   xmlString: string,

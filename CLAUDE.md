@@ -83,14 +83,21 @@ packages/
 - `domain` depends on nothing
 - `application` MUST NOT import external libs or adapters
 - Adapter packages (`fit`, `tcx`, `zwo`) depend on `core` only
-- Wiring in `application/providers.ts` via `AdapterProviders` injection
+- Strategy pattern: readers/writers injected into generic core functions
 - KRD is the canonical format; all conversions go through KRD
 
 ## Public API
 
 ```typescript
-toKRD(input: Uint8Array | string, opts: { type: "fit"|"tcx"|"zwo"|"krd" }): Promise<KRD>
-fromKRD(krd: KRD, opts: { type: "fit"|"tcx"|"zwo"|"krd" }): Promise<Uint8Array>
+// Core: format-agnostic conversion with strategy injection
+fromBinary(buffer: Uint8Array, reader: BinaryReader, logger?: Logger): Promise<KRD>
+fromText(text: string, reader: TextReader, logger?: Logger): Promise<KRD>
+toBinary(krd: KRD, writer: BinaryWriter, logger?: Logger): Promise<Uint8Array>
+toText(krd: KRD, writer: TextWriter, logger?: Logger): Promise<string>
+
+// Adapters: dual exports (pre-built + factory)
+import { fitReader } from '@kaiord/fit';        // pre-built
+import { createFitReader } from '@kaiord/fit';   // factory(logger?)
 ```
 
 ## Language

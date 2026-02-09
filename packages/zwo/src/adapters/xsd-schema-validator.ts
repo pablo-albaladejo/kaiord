@@ -1,5 +1,5 @@
 import type { Logger } from "@kaiord/core";
-import type { ZwiftValidationResult } from "@kaiord/core";
+import type { ZwiftValidationResult } from "../types";
 import { loadNodeModules } from "./node-modules-loader";
 
 export const validateAgainstXsdSchema = async (

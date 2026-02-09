@@ -55,45 +55,41 @@ Here's how to use Kaiord in your TypeScript or JavaScript code.
 ### Convert a FIT File to KRD
 
 ```typescript
-import { toKRD } from "@kaiord/core";
+import { fromBinary } from "@kaiord/core";
+import { fitReader } from "@kaiord/fit";
 import { readFile } from "fs/promises";
 
-// Read a FIT file
+// Read a FIT file and convert to KRD
 const buffer = await readFile("workout.fit");
+const krd = await fromBinary(buffer, fitReader);
 
-// Convert to KRD format
-const krd = await toKRD(buffer, { type: "fit" });
-
-console.log(krd.workout.name); // "Morning Run"
-console.log(krd.workout.steps.length); // 5
+console.log(krd.metadata.sport); // "cycling"
 ```
 
 ### Convert KRD to TCX
 
 ```typescript
-import { fromKRD } from "@kaiord/core";
+import { toText } from "@kaiord/core";
+import { tcxWriter } from "@kaiord/tcx";
 import { writeFile } from "fs/promises";
 
 // Convert KRD to TCX format
-const tcxBuffer = await fromKRD(krd, { type: "tcx" });
-
-// Save to file
-await writeFile("workout.tcx", tcxBuffer);
+const tcxString = await toText(krd, tcxWriter);
+await writeFile("workout.tcx", tcxString);
 ```
 
 ### Read a Zwift Workout
 
 ```typescript
-import { toKRD } from "@kaiord/core";
+import { fromText } from "@kaiord/core";
+import { zwiftReader } from "@kaiord/zwo";
 import { readFile } from "fs/promises";
 
-// Read a ZWO file
+// Read a ZWO file and convert to KRD
 const zwoContent = await readFile("workout.zwo", "utf-8");
+const krd = await fromText(zwoContent, zwiftReader);
 
-// Convert to KRD
-const krd = await toKRD(zwoContent, { type: "zwo" });
-
-console.log(krd.workout.sport); // "cycling"
+console.log(krd.metadata.sport); // "cycling"
 ```
 
 ## Quick Start: CLI
@@ -201,10 +197,11 @@ done
 ### Handle Errors
 
 ```typescript
-import { toKRD } from "@kaiord/core";
+import { fromBinary } from "@kaiord/core";
+import { fitReader } from "@kaiord/fit";
 
 try {
-  const krd = await toKRD(buffer, { type: "fit" });
+  const krd = await fromBinary(buffer, fitReader);
   console.log("Success!");
 } catch (error) {
   console.error("Conversion failed:", error.message);

@@ -1,15 +1,35 @@
 /**
  * Browser-specific entry point for @kaiord/zwo
- * Excludes Node.js-specific XSD validation to avoid bundling Node.js modules
+ * Uses well-formedness validation only (no Node.js XSD validation)
  */
 
-export { createZwoProviders } from "./providers-browser";
-export type { ZwoProviders } from "./providers-browser";
-
-export {
+import type { Logger, TextReader, TextWriter } from "@kaiord/core";
+import { createConsoleLogger } from "@kaiord/core";
+import {
   createFastXmlZwiftReader,
   createFastXmlZwiftWriter,
 } from "./adapters/fast-xml-parser";
+import { createZwiftValidator } from "./adapters/xsd-validator-browser";
 
-// Only export createZwiftValidator (browser-compatible), not createXsdZwiftValidator
-export { createZwiftValidator } from "./adapters/xsd-validator-browser";
+export const createZwiftReader = (logger?: Logger): TextReader => {
+  const log = logger || createConsoleLogger();
+  const validator = createZwiftValidator(log);
+  return createFastXmlZwiftReader(log, validator);
+};
+
+export const createZwiftWriter = (logger?: Logger): TextWriter => {
+  const log = logger || createConsoleLogger();
+  const validator = createZwiftValidator(log);
+  return createFastXmlZwiftWriter(log, validator);
+};
+
+export const zwiftReader: TextReader = createZwiftReader();
+export const zwiftWriter: TextWriter = createZwiftWriter();
+
+export { createFastXmlZwiftReader, createFastXmlZwiftWriter };
+export { createZwiftValidator };
+export type {
+  ZwiftValidator,
+  ZwiftValidationResult,
+  ZwiftValidationError,
+} from "./types";

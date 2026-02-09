@@ -1,6 +1,6 @@
 import { XMLValidator } from "fast-xml-parser";
 import type { Logger } from "@kaiord/core";
-import type { TcxValidationResult, TcxValidator } from "@kaiord/core";
+import type { TcxValidationResult, TcxValidator } from "../types";
 
 export const createXsdTcxValidator =
   (logger: Logger): TcxValidator =>

@@ -128,6 +128,8 @@ export type {
 export { createSchemaValidator } from "./domain/validation/schema-validator";
 export type { SchemaValidator } from "./domain/validation/schema-validator";
 
+export { validateKrd } from "./domain/validation/validate-krd";
+
 export {
   DEFAULT_TOLERANCES,
   createToleranceChecker,
@@ -140,59 +142,29 @@ export type {
 } from "./domain/validation/tolerance-checker";
 
 // ============================================
-// Ports (Contracts)
+// Ports (Generic Format Strategy)
 // ============================================
 
-export type { FitReader } from "./ports/fit-reader";
-export type { FitWriter } from "./ports/fit-writer";
-export type { GarminReader } from "./ports/garmin-reader";
-export type { GarminWriter } from "./ports/garmin-writer";
+export type {
+  BinaryReader,
+  BinaryWriter,
+  TextReader,
+  TextWriter,
+} from "./ports/format-strategy";
+
 export type { LogLevel, Logger } from "./ports/logger";
 export { createConsoleLogger } from "./adapters/logger/console-logger";
-export type { TcxReader } from "./ports/tcx-reader";
-export type { TcxValidationResult, TcxValidator } from "./ports/tcx-validator";
-export type { TcxWriter } from "./ports/tcx-writer";
-export type { ZwiftReader } from "./ports/zwift-reader";
-export type {
-  ZwiftValidationResult,
-  ZwiftValidator,
-} from "./ports/zwift-validator";
-export type { ZwiftWriter } from "./ports/zwift-writer";
 
 // ============================================
-// Use Cases
+// Conversion Functions
 // ============================================
 
-export { convertFitToKrd } from "./application/use-cases/convert-fit-to-krd";
-export type { ConvertFitToKrd } from "./application/use-cases/convert-fit-to-krd";
+export { fromBinary, fromText } from "./application/from-format";
+export { toBinary, toText } from "./application/to-format";
 
-export { convertKrdToFit } from "./application/use-cases/convert-krd-to-fit";
-export type { ConvertKrdToFit } from "./application/use-cases/convert-krd-to-fit";
-
-export { convertTcxToKrd } from "./application/use-cases/convert-tcx-to-krd";
-export type { ConvertTcxToKrd } from "./application/use-cases/convert-tcx-to-krd";
-
-export { convertKrdToTcx } from "./application/use-cases/convert-krd-to-tcx";
-export type { ConvertKrdToTcx } from "./application/use-cases/convert-krd-to-tcx";
-
-export { convertZwiftToKrd } from "./application/use-cases/convert-zwift-to-krd";
-export type { ConvertZwiftToKrd } from "./application/use-cases/convert-zwift-to-krd";
-
-export { convertKrdToZwift } from "./application/use-cases/convert-krd-to-zwift";
-export type { ConvertKrdToZwift } from "./application/use-cases/convert-krd-to-zwift";
-
-export { convertGarminToKrd } from "./application/use-cases/convert-garmin-to-krd";
-export type { ConvertGarminToKrd } from "./application/use-cases/convert-garmin-to-krd";
-
-export { convertKrdToGarmin } from "./application/use-cases/convert-krd-to-garmin";
-export type { ConvertKrdToGarmin } from "./application/use-cases/convert-krd-to-garmin";
+// ============================================
+// Round-Trip Validation
+// ============================================
 
 export { validateRoundTrip } from "./tests/round-trip/validate-round-trip";
 export type { ValidateRoundTrip } from "./tests/round-trip/validate-round-trip";
-
-// ============================================
-// Dependency Injection
-// ============================================
-
-export { createDefaultProviders } from "./application/providers";
-export type { AdapterProviders, Providers } from "./application/providers";

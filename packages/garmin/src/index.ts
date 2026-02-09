@@ -1,11 +1,17 @@
 /**
  * @kaiord/garmin - Garmin Connect API (GCN) format adapter for Kaiord
- *
- * Provides Garmin Connect JSON workout reading and writing capabilities.
  */
 
-export { createGarminProviders } from "./providers";
-export type { GarminProviders } from "./providers";
+import type { Logger, TextReader, TextWriter } from "@kaiord/core";
+import { createConsoleLogger } from "@kaiord/core";
+import { createGarminReader as createGarminReaderImpl } from "./adapters/garmin-reader";
+import { createGarminWriter as createGarminWriterImpl } from "./adapters/garmin-writer";
 
-export { createGarminReader } from "./adapters/garmin-reader";
-export { createGarminWriter } from "./adapters/garmin-writer";
+export const createGarminReader = (logger?: Logger): TextReader =>
+  createGarminReaderImpl(logger || createConsoleLogger());
+
+export const createGarminWriter = (logger?: Logger): TextWriter =>
+  createGarminWriterImpl(logger || createConsoleLogger());
+
+export const garminReader: TextReader = createGarminReader();
+export const garminWriter: TextWriter = createGarminWriter();

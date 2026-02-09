@@ -1,10 +1,7 @@
 import { XMLParser } from "fast-xml-parser";
-import type { KRD } from "@kaiord/core";
+import type { KRD, Logger, TextReader, TextWriter } from "@kaiord/core";
 import { createZwiftParsingError } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
-import type { ZwiftReader } from "@kaiord/core";
-import type { ZwiftValidator } from "@kaiord/core";
-import type { ZwiftWriter } from "@kaiord/core";
+import type { ZwiftValidator } from "../types";
 import { convertKRDToZwift } from "./krd-to-zwift.converter";
 import {
   validateGeneratedZwiftXml,
@@ -31,7 +28,7 @@ const parseZwiftXml = (xmlString: string, logger: Logger): unknown => {
 };
 
 export const createFastXmlZwiftReader =
-  (logger: Logger, validator: ZwiftValidator): ZwiftReader =>
+  (logger: Logger, validator: ZwiftValidator): TextReader =>
   async (xmlString: string): Promise<KRD> => {
     await validateInputZwiftXml(xmlString, validator, logger);
     const zwiftData = parseZwiftXml(xmlString, logger);
@@ -42,7 +39,7 @@ export const createFastXmlZwiftReader =
   };
 
 export const createFastXmlZwiftWriter =
-  (logger: Logger, validator: ZwiftValidator): ZwiftWriter =>
+  (logger: Logger, validator: ZwiftValidator): TextWriter =>
   async (krd: KRD): Promise<string> => {
     logger.debug("Converting KRD to Zwift format");
 

@@ -1,12 +1,7 @@
-import { createDefaultProviders } from "@kaiord/core";
-import { createFitProviders } from "@kaiord/fit";
-import { createGarminProviders } from "@kaiord/garmin";
-import { createTcxProviders } from "@kaiord/tcx";
-import { createZwoProviders } from "@kaiord/zwo";
 import { loadConfigWithMetadata } from "../../utils/config-loader.js";
 import { formatError } from "../../utils/error-formatter.js";
 import { ExitCode } from "../../utils/exit-codes.js";
-import { loadFileAsKrd } from "../../utils/krd-file-loader.js";
+import { loadFileAsKrd } from "../../utils/krd-converter.js";
 import { createLogger } from "../../utils/logger-factory.js";
 import {
   compareExtensions,
@@ -46,16 +41,6 @@ export const diffCommand = async (options: DiffOptions): Promise<number> => {
   }
 
   try {
-    const providers = createDefaultProviders(
-      {
-        fit: createFitProviders(logger),
-        garmin: createGarminProviders(logger),
-        tcx: createTcxProviders(logger),
-        zwo: createZwoProviders(logger),
-      },
-      logger
-    );
-
     logger.debug("Loading files for comparison", {
       file1: validatedOptions.file1,
       file2: validatedOptions.file2,
@@ -64,12 +49,12 @@ export const diffCommand = async (options: DiffOptions): Promise<number> => {
     const krd1 = await loadFileAsKrd(
       validatedOptions.file1,
       validatedOptions.format1,
-      providers
+      logger
     );
     const krd2 = await loadFileAsKrd(
       validatedOptions.file2,
       validatedOptions.format2,
-      providers
+      logger
     );
 
     logger.debug("Files loaded successfully");

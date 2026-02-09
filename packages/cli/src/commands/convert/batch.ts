@@ -1,4 +1,4 @@
-import type { Logger, Providers } from "@kaiord/core";
+import type { Logger } from "@kaiord/core";
 import chalk from "chalk";
 import ora from "ora";
 import { basename, join } from "path";
@@ -13,7 +13,6 @@ import type { ConversionResult, ValidatedConvertOptions } from "./types";
  */
 export const executeBatchConversion = async (
   options: ValidatedConvertOptions,
-  providers: Providers,
   logger: Logger
 ): Promise<number> => {
   if (!options.outputDir) {
@@ -82,7 +81,7 @@ export const executeBatchConversion = async (
         outputFile,
         inputFormat,
         outputFormat,
-        providers
+        logger
       );
 
       results.push({ success: true, inputFile: file, outputFile });

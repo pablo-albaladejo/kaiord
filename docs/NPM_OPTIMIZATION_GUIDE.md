@@ -93,7 +93,7 @@ This guide explains how to use the npm optimization skills installed in your Cla
 
 ```typescript
 import * as z from "zod";
-import { KRD, toKRD, fromKRD } from "@kaiord/core";
+import { KRD, fromBinary, toText } from "@kaiord/core";
 ```
 
 **After:**
@@ -101,7 +101,7 @@ import { KRD, toKRD, fromKRD } from "@kaiord/core";
 ```typescript
 import { object, string } from "zod";
 import type { KRD } from "@kaiord/core";
-import { toKRD, fromKRD } from "@kaiord/core";
+import { fromBinary, toText } from "@kaiord/core";
 ```
 
 **When to run:**
