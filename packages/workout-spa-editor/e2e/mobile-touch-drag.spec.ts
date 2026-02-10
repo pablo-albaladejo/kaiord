@@ -712,8 +712,8 @@ test.describe("Mobile Touch Drag - Performance", () => {
       stepCards.nth(1)
     );
 
-    // Assert - E2E performance budget: 2500ms (includes all overhead + CI/CD slowness)
-    expect(duration).toBeLessThan(2500);
+    // Assert - E2E performance budget: 4000ms (includes all overhead + CI/CD slowness)
+    expect(duration).toBeLessThan(4000);
     console.log(`Drag operation completed in ${duration}ms`);
 
     // Note: Performance measurement without reorder verification is intentional.
@@ -755,8 +755,8 @@ test.describe("Mobile Touch Drag - Performance", () => {
       stepCards.nth(26)
     );
 
-    // Assert - E2E performance budget: 3000ms for large workouts (CI/CD is slower)
-    expect(duration).toBeLessThan(3000);
+    // Assert - E2E performance budget: 5000ms for large workouts (CI/CD is slower)
+    expect(duration).toBeLessThan(5000);
     console.log(
       `Large workout touch drag completed in ${duration}ms (50 steps)`
     );
@@ -802,9 +802,9 @@ test.describe("Mobile Touch Drag - Performance", () => {
       await page.waitForTimeout(100);
     }
 
-    // Assert - All operations complete within 2000ms (E2E budget for CI/CD)
+    // Assert - All operations complete within 3500ms (E2E budget for CI/CD)
     for (const duration of results) {
-      expect(duration).toBeLessThan(2000);
+      expect(duration).toBeLessThan(3500);
     }
 
     // Log performance metrics

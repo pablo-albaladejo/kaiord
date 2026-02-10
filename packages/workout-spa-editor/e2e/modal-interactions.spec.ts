@@ -257,10 +257,11 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
       { repeatCount: 2, sport: "running" },
     ]);
 
-    // Wait for block actions trigger to be visible
+    // Wait for block actions trigger to be visible and stable
     await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
       timeout: 5000,
     });
+    await page.waitForTimeout(500);
 
     // Open context menu and click delete
     await page.getByTestId("block-actions-trigger").click();
