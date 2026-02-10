@@ -57,9 +57,10 @@ export async function loadTestWorkout(
     buffer: Buffer.from(JSON.stringify(testWorkout)),
   });
 
-  // Wait for workout to load
+  // Wait for workout to load and UI to stabilize
   await expect(page.getByText(workoutName)).toBeVisible({
     timeout: 10000,
   });
   await expect(page.locator('[data-testid="step-card"]').first()).toBeVisible();
+  await page.waitForLoadState("networkidle");
 }
