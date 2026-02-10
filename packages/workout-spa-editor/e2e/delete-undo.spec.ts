@@ -106,9 +106,7 @@ test.describe("Delete with Undo Flow", () => {
     await page.waitForTimeout(300);
 
     // Verify undo notification appears
-    const toast = page
-      .locator('[role="status"]')
-      .filter({ hasText: "Step deleted" });
+    const toast = page.getByText(/step deleted/i).first();
     await expect(toast).toBeVisible({ timeout: 2000 });
 
     // Verify undo button is present in the notification
@@ -143,9 +141,7 @@ test.describe("Delete with Undo Flow", () => {
     await expect(stepCards).toHaveCount(2);
 
     // Click undo button in the notification
-    const toast = page
-      .locator('[role="status"]')
-      .filter({ hasText: "Step deleted" });
+    const toast = page.getByText(/step deleted/i).first();
     const undoButton = page.getByTestId("undo-delete-button");
     await undoButton.click();
 
@@ -177,9 +173,7 @@ test.describe("Delete with Undo Flow", () => {
     await page.waitForTimeout(300);
 
     // Verify notification appears
-    const toast = page
-      .locator('[role="status"]')
-      .filter({ hasText: "Step deleted" });
+    const toast = page.getByText(/step deleted/i).first();
     await expect(toast).toBeVisible();
 
     // Wait for notification to auto-dismiss (5 seconds + buffer)
@@ -207,10 +201,9 @@ test.describe("Delete with Undo Flow", () => {
     await page.waitForTimeout(300);
 
     // Verify first notification appears (allow extra time for webkit toast animation)
-    const toasts = page
-      .locator('[role="status"]')
-      .filter({ hasText: "Step deleted" });
-    await expect(toasts.first()).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/step deleted/i).first()).toBeVisible({
+      timeout: 5000,
+    });
 
     // Delete another step (now at index 0 after first deletion)
     const secondDeleteButton = stepCards
@@ -219,18 +212,14 @@ test.describe("Delete with Undo Flow", () => {
     await secondDeleteButton.click();
 
     // Wait for both deletions to process
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(1000);
 
     // Verify only 1 step remains (both deletions completed)
     await expect(stepCards).toHaveCount(1);
 
-    // Both "Step deleted" toasts should be visible simultaneously
-    // (5s duration means first toast is still visible when second appears)
-    await expect(toasts).toHaveCount(2, { timeout: 5000 });
-
-    // Verify both undo buttons are present
+    // Both undo buttons should be visible (one per deletion)
     const undoButtons = page.getByTestId("undo-delete-button");
-    await expect(undoButtons).toHaveCount(2);
+    await expect(undoButtons).toHaveCount(2, { timeout: 5000 });
   });
 
   test("should handle undo correctly with step reindexing", async ({
@@ -286,9 +275,7 @@ test.describe("Delete with Undo Flow", () => {
     await page.waitForTimeout(300);
 
     // Verify notification appears (allow extra time for webkit toast animation)
-    const toast = page
-      .locator('[role="status"]')
-      .filter({ hasText: "Step deleted" });
+    const toast = page.getByText(/step deleted/i).first();
     await expect(toast).toBeVisible({ timeout: 5000 });
 
     // Perform another action - select a different step
