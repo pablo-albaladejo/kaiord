@@ -69,13 +69,13 @@ Comprehensive documentation is available in the `/docs` directory:
 
 ## 🧩 Tech Stack
 
-| Layer           | Tooling                          |
-| --------------- | -------------------------------- |
-| Core            | TypeScript, tsup, Zod            |
-| CLI             | yargs                            |
+| Layer           | Tooling                            |
+| --------------- | ---------------------------------- |
+| Core            | TypeScript, tsup, Zod              |
+| CLI             | yargs                              |
 | Web App         | React, Zustand, Tailwind, Radix UI |
-| Testing         | Vitest, Playwright               |
-| Package manager | pnpm                             |
+| Testing         | Vitest, Playwright                 |
+| Package manager | pnpm                               |
 
 ---
 
