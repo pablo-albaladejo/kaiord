@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Build Status](https://github.com/pablo-albaladejo/kaiord/workflows/CI/badge.svg)](https://github.com/pablo-albaladejo/kaiord/actions)
 
-Core library for Kaiord workout data conversion. Contains domain types, schemas, ports, use cases, and the plugin architecture for format adapters.
+Core library for the Kaiord health & fitness data framework. Contains domain types, schemas, ports, use cases, and the plugin architecture for format adapters.
 
 > **Note**: As of v2.0, format adapters (FIT, TCX, ZWO) are in separate packages. Install only the adapters you need for optimal bundle size.
 

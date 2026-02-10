@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@kaiord/tcx.svg)](https://www.npmjs.com/package/@kaiord/tcx)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-TCX format adapter for Kaiord workout data conversion. Provides reading, writing, and XSD validation of Garmin Training Center XML files.
+TCX format adapter for the Kaiord health & fitness data framework. Provides reading, writing, and XSD validation of Garmin Training Center XML files.
 
 ## Installation
 

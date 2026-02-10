@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@kaiord/zwo.svg)](https://www.npmjs.com/package/@kaiord/zwo)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-ZWO format adapter for Kaiord workout data conversion. Provides reading, writing, and validation of Zwift workout XML files.
+ZWO format adapter for the Kaiord health & fitness data framework. Provides reading, writing, and validation of Zwift workout XML files.
 
 ## Installation
 

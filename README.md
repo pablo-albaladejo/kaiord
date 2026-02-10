@@ -1,4 +1,4 @@
-# ⏱️ Kaiord — Structured Workout Data Toolkit
+# Kaiord — Open-Source Health & Fitness Data Framework
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
@@ -9,13 +9,13 @@
 [![npm version](https://badge.fury.io/js/@kaiord%2Fcli.svg)](https://www.npmjs.com/package/@kaiord/cli)
 [![Sponsor](https://img.shields.io/badge/Sponsor-❤️-pink?logo=github-sponsors)](https://github.com/sponsors/pablo-albaladejo)
 
-**Kaiord** is an open-source toolkit for structured workout data.
+**Kaiord** is an open-source framework for creating, converting, and managing health & fitness data.
 
 It provides:
 
-- `@kaiord/core`: a TypeScript library to read/write **.fit**, **.tcx**, **.zwo** and **.krd** (Kaiord) files.
-- `@kaiord/cli`: a command-line tool to convert between formats.
-- **[Workout SPA Editor](https://pablo-albaladejo.github.io/kaiord)**: a web application to create and edit workout files visually.
+- `@kaiord/core`: a TypeScript library with format adapters for **.fit**, **.tcx**, **.zwo**, and **.krd** (Kaiord) files, plus Garmin Connect API integration.
+- `@kaiord/cli`: a command-line tool to convert, validate, and compare files across formats.
+- **[Workout Editor](https://pablo-albaladejo.github.io/kaiord)**: a web application to create and edit workout files visually.
 
 ---
 
@@ -23,9 +23,9 @@ It provides:
 
 - **[Visual Workout Editor](https://pablo-albaladejo.github.io/kaiord)** - Create and edit workouts in your browser
 - Unified JSON-based format `.krd` (Kaiord Representation Definition)
-- Schema validation (AJV)
-- Round-trip safe conversions between FIT / TCX / ZWO / KRD
-- Clean architecture & fully typed API
+- Schema validation (Zod)
+- Round-trip safe conversions between FIT / TCX / ZWO / GCN / KRD
+- Hexagonal architecture & fully typed API
 
 ### Supported FIT Fields
 
@@ -69,12 +69,13 @@ Comprehensive documentation is available in the `/docs` directory:
 
 ## 🧩 Tech Stack
 
-| Layer           | Tooling               |
-| --------------- | --------------------- |
-| Core            | TypeScript, tsup, AJV |
-| CLI             | yargs                 |
-| Testing         | Vitest                |
-| Package manager | pnpm                  |
+| Layer           | Tooling                          |
+| --------------- | -------------------------------- |
+| Core            | TypeScript, tsup, Zod            |
+| CLI             | yargs                            |
+| Web App         | React, Zustand, Tailwind, Radix UI |
+| Testing         | Vitest, Playwright               |
+| Package manager | pnpm                             |
 
 ---
 
@@ -83,7 +84,11 @@ Comprehensive documentation is available in the `/docs` directory:
 ```
 kaiord/
 ├─ packages/
-│  ├─ core/                → library (schema + converters)
+│  ├─ core/                → domain types, schemas, ports & use cases
+│  ├─ fit/                 → Garmin FIT format adapter
+│  ├─ tcx/                 → Training Center XML adapter
+│  ├─ zwo/                 → Zwift ZWO format adapter
+│  ├─ garmin/              → Garmin Connect API adapter
 │  ├─ cli/                 → command-line interface
 │  └─ workout-spa-editor/  → web application (https://pablo-albaladejo.github.io/kaiord)
 ├─ docs/   → documentation

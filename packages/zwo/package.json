@@ -1,7 +1,7 @@
 {
   "name": "@kaiord/zwo",
   "version": "4.0.0",
-  "description": "ZWO format adapter for Kaiord workout data conversion",
+  "description": "ZWO format adapter for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

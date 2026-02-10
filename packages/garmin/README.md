@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@kaiord/garmin.svg)](https://www.npmjs.com/package/@kaiord/garmin)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-Garmin Connect API format adapter for Kaiord workout data conversion. Provides bidirectional conversion between Garmin Connect workout JSON format and KRD.
+Garmin Connect API format adapter for the Kaiord health & fitness data framework. Provides bidirectional conversion between Garmin Connect workout JSON format and KRD.
 
 ## Installation
 
