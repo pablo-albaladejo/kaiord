@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "type": "module",
   "private": true,
-  "description": "Open-source toolkit for structured workout data",
+  "description": "Open-source health & fitness data framework",
   "repository": {
     "type": "git",
     "url": "https://github.com/pablo-albaladejo/kaiord.git"

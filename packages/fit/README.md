@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@kaiord/fit.svg)](https://www.npmjs.com/package/@kaiord/fit)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-FIT format adapter for Kaiord workout data conversion. Provides reading and writing of Garmin FIT workout files using the official Garmin FIT SDK.
+FIT format adapter for the Kaiord health & fitness data framework. Provides reading and writing of Garmin FIT workout files using the official Garmin FIT SDK.
 
 ## Installation
 

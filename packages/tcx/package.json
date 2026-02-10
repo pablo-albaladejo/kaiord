@@ -1,7 +1,7 @@
 {
   "name": "@kaiord/tcx",
   "version": "4.0.0",
-  "description": "TCX format adapter for Kaiord workout data conversion",
+  "description": "TCX format adapter for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

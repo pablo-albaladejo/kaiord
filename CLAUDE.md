@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Kaiord is a TypeScript monorepo for structured workout data conversion between FIT, TCX, ZWO, and KRD (Kaiord Representation Definition) formats.
+Kaiord is an open-source health & fitness data framework. A TypeScript monorepo for creating, converting, and managing data across FIT, TCX, ZWO, GCN, and KRD formats.
 
 **Packages:**
 
@@ -12,6 +12,7 @@ Kaiord is a TypeScript monorepo for structured workout data conversion between F
 - `@kaiord/fit` - FIT format adapter (Garmin FIT SDK)
 - `@kaiord/tcx` - TCX format adapter (fast-xml-parser)
 - `@kaiord/zwo` - ZWO format adapter (fast-xml-parser, XSD validation)
+- `@kaiord/garmin` - Garmin Connect API (GCN) format adapter
 - `@kaiord/cli` - Command-line interface
 - `@kaiord/workout-spa-editor` - React web application (private)
 

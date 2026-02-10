@@ -1,7 +1,7 @@
 {
   "name": "@kaiord/garmin",
   "version": "4.1.0",
-  "description": "Garmin Connect API (GCN) format adapter for Kaiord workout data conversion",
+  "description": "Garmin Connect API (GCN) format adapter for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
