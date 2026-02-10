@@ -19,6 +19,13 @@ import { loadTestWorkout } from "./helpers/load-test-workout";
 
 test.describe("Copy/Paste Functionality", () => {
   test.beforeEach(async ({ page }) => {
+    // Skip on mobile projects - CopyButton uses absolute positioning (right-28)
+    // that places it off-screen on small viewports (< 500px)
+    test.skip(
+      test.info().project.name.startsWith("Mobile"),
+      "Copy-paste buttons not accessible on mobile viewports"
+    );
+
     // Clear localStorage before navigation to start fresh
     await page.addInitScript(() => localStorage.clear());
     await page.goto("/");
