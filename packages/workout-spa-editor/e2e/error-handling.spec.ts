@@ -38,8 +38,10 @@ test.describe("Error Handling", () => {
     });
     await expect(
       page.getByText(/invalid json|failed to parse json/i)
-    ).toBeVisible();
-    await expect(page.getByText(/position|line/i)).toBeVisible();
+    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/position|line/i)).toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test("should display specific error for missing required fields", async ({
