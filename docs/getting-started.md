@@ -4,11 +4,11 @@ This guide helps you start using Kaiord to work with workout files.
 
 ## What is Kaiord?
 
-Kaiord is a toolkit for workout data. It helps you:
+Kaiord is an open-source framework for health & fitness data. It helps you:
 
-- Convert workout files between different formats (FIT, TCX, ZWO, KRD)
-- Read and write workout data in your programs
-- Validate workout files
+- Convert files between different formats (FIT, TCX, ZWO, GCN, KRD)
+- Read and write health & fitness data in your programs
+- Validate and compare files across formats
 
 ## What You Need
 
