@@ -34,3 +34,4 @@ pnpm-debug.log*
 # GitHub Actions local testing (act)
 .secrets
 .actrc.local
+.playwright-mcp/
