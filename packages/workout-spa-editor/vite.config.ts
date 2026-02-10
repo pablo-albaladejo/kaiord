@@ -1,10 +1,18 @@
+import { codecovVitePlugin } from "@codecov/vite-plugin";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
 
 // https://vite.dev/config/
 export default defineConfig({
-  plugins: [react()],
+  plugins: [
+    react(),
+    codecovVitePlugin({
+      enableBundleAnalysis: !!process.env.CODECOV_TOKEN,
+      bundleName: "workout-spa-editor",
+      uploadToken: process.env.CODECOV_TOKEN ?? "",
+    }),
+  ],
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),

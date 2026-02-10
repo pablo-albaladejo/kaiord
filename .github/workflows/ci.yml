@@ -247,6 +247,9 @@ jobs:
           node-version: ${{ matrix.node-version }}
 
       - name: Build dependencies
+        # CODECOV_TOKEN enables bundle analysis upload for SPA (only on Node 20.x)
+        env:
+          CODECOV_TOKEN: ${{ matrix.node-version == '20.x' && secrets.CODECOV_TOKEN || '' }}
         run: pnpm -r build
 
       - name: Run frontend tests with coverage
