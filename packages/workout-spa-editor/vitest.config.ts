@@ -34,7 +34,7 @@ export default defineConfig({
       // These are expected in tests that exercise import/export pipelines.
       if (
         /^(Encoding|Converting|Parsing|Building|Validating|Writing|Converted|Browser environment|Invalid (Zwift|TCX|step)|Zwift XML|KRD (to|encoded)|TCX XML|FIT parsing|Not implemented: navigation)/.test(
-          log,
+          log
         )
       ) {
         return false;
