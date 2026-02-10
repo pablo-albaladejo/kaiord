@@ -123,28 +123,34 @@ jobs:
             echo "cli-changed=false" >> $GITHUB_OUTPUT
           fi
 
-          # Commit version changes
+          # Commit version changes (if any packages were actually bumped)
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "chore: version packages [skip ci]"
-          git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
+          if git diff --cached --quiet; then
+            echo "No version changes to commit (changesets may only affect ignored packages)"
+            echo "has-version-changes=false" >> $GITHUB_OUTPUT
+          else
+            git commit -m "chore: version packages [skip ci]"
+            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
+            echo "has-version-changes=true" >> $GITHUB_OUTPUT
+          fi
 
       - name: Publish to npm with provenance
-        if: steps.changesets.outputs.has-changesets == 'true'
+        if: steps.changesets.outputs.has-changesets == 'true' && steps.version.outputs.has-version-changes == 'true'
         env:
           NPM_CONFIG_PROVENANCE: true
         run: pnpm exec changeset publish
 
       - name: Create GitHub Releases
-        if: steps.changesets.outputs.has-changesets == 'true'
+        if: steps.changesets.outputs.has-changesets == 'true' && steps.version.outputs.has-version-changes == 'true'
         run: node scripts/create-github-releases.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
 
       - name: Summary
-        if: steps.changesets.outputs.has-changesets == 'true'
+        if: steps.changesets.outputs.has-changesets == 'true' && steps.version.outputs.has-version-changes == 'true'
         run: |
           echo "## 📦 Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
