@@ -647,6 +647,9 @@ test.describe("Repetition Blocks - Ungroup", () => {
     await expect(page.getByText("Repeat Block")).toBeVisible();
     await expect(page.getByText("3x")).toBeVisible();
 
+    // Wait for block card to stabilize before interaction
+    await page.waitForTimeout(500);
+
     // Open context menu
     await page.getByTestId("block-actions-trigger").click();
 

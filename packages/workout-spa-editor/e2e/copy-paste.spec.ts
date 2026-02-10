@@ -29,9 +29,13 @@ test.describe("Copy/Paste Functionality", () => {
     // Clear localStorage before navigation to start fresh
     await page.addInitScript(() => localStorage.clear());
     await page.goto("/");
+    await page.waitForLoadState("networkidle");
 
     // Load a test workout
     await loadTestWorkout(page, "Copy Paste Test");
+
+    // Wait for full UI stability after file upload
+    await page.waitForLoadState("networkidle");
   });
 
   test.describe("Copy Button", () => {
