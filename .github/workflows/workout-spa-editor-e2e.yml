@@ -64,7 +64,7 @@ jobs:
         run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install
 
       - name: Build workspace dependencies
-        run: pnpm --filter @kaiord/core build
+        run: pnpm -r build
 
       - name: Run E2E tests
         run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=${{ matrix.browser }}
@@ -131,7 +131,7 @@ jobs:
         run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install
 
       - name: Build workspace dependencies
-        run: pnpm --filter @kaiord/core build
+        run: pnpm -r build
 
       - name: Run mobile E2E tests
         run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project="${{ matrix.device }}"
