@@ -49,12 +49,8 @@ export function createUpdatedWorkout(
         return item;
       }),
     };
-  } catch (error) {
+  } catch {
     // Invalid ID format - return unchanged workout
-    console.warn("Invalid step ID format during update", {
-      selectedStepId,
-      error,
-    });
     return workout;
   }
 }
