@@ -187,9 +187,6 @@ describe("Delete Button Styling Consistency", () => {
       expect(button).toHaveClass("dark:hover:text-red-400");
 
       // Verify appropriate styling for overlay context (Requirement 5.5)
-      expect(button).toHaveClass("absolute"); // Positioned absolutely
-      expect(button).toHaveClass("right-3");
-      expect(button).toHaveClass("bottom-3");
       expect(button).toHaveClass("p-2"); // Larger padding for overlay
       expect(button).toHaveClass("rounded-full"); // Circular shape
       expect(button).toHaveClass("bg-white"); // Background for visibility
@@ -218,8 +215,8 @@ describe("Delete Button Styling Consistency", () => {
       // RepetitionBlock: inline (no absolute positioning)
       expect(blockButton).not.toHaveClass("absolute");
 
-      // StepCard: overlay (absolute positioning)
-      expect(stepButton).toHaveClass("absolute");
+      // StepCard: overlay (positioned via parent container)
+      expect(stepButton).not.toHaveClass("absolute");
     });
 
     it("should have different initial state styling", () => {
