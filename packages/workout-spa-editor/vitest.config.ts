@@ -14,8 +14,8 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/test-setup.ts"],
     css: true,
-    // Filter out act() warnings from Radix UI components (false positives in Node 20.x)
     onConsoleLog(log: string, type: "stdout" | "stderr"): false | void {
+      // Suppress act() warnings from Radix UI components (false positives in Node 20.x)
       if (
         type === "stderr" &&
         log.includes("not wrapped in act(...)") &&
@@ -27,7 +27,17 @@ export default defineConfig({
           log.includes("FocusScope") ||
           log.includes("TargetPicker"))
       ) {
-        return false; // Suppress this log
+        return false;
+      }
+      // Suppress adapter logger output from @kaiord/fit, @kaiord/tcx, @kaiord/zwo.
+      // Pre-built adapters use consoleLogger which outputs during conversions.
+      // These are expected in tests that exercise import/export pipelines.
+      if (
+        /^(Encoding|Converting|Parsing|Building|Validating|Writing|Converted|Browser environment|Invalid (Zwift|TCX|step)|Zwift XML|KRD (to|encoded)|TCX XML|FIT parsing|Not implemented: navigation)/.test(
+          log
+        )
+      ) {
+        return false;
       }
     },
     coverage: {
