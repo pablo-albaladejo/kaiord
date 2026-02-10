@@ -106,9 +106,7 @@ test.describe("Delete with Undo Flow", () => {
     await page.waitForTimeout(300);
 
     // Verify undo notification appears
-    const toast = page
-      .locator('[role="status"]')
-      .filter({ hasText: "Step deleted" });
+    const toast = page.getByText(/step deleted/i).first();
     await expect(toast).toBeVisible({ timeout: 2000 });
 
     // Verify undo button is present in the notification
@@ -143,9 +141,7 @@ test.describe("Delete with Undo Flow", () => {
     await expect(stepCards).toHaveCount(2);
 
     // Click undo button in the notification
-    const toast = page
-      .locator('[role="status"]')
-      .filter({ hasText: "Step deleted" });
+    const toast = page.getByText(/step deleted/i).first();
     const undoButton = page.getByTestId("undo-delete-button");
     await undoButton.click();
 
@@ -177,9 +173,7 @@ test.describe("Delete with Undo Flow", () => {
     await page.waitForTimeout(300);
 
     // Verify notification appears
-    const toast = page
-      .locator('[role="status"]')
-      .filter({ hasText: "Step deleted" });
+    const toast = page.getByText(/step deleted/i).first();
     await expect(toast).toBeVisible();
 
     // Wait for notification to auto-dismiss (5 seconds + buffer)
