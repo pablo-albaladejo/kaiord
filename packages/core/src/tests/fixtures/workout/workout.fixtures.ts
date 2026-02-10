@@ -16,10 +16,10 @@ const SUB_SPORTS: Record<Sport, SubSport[]> = {
 export const buildWorkout = new Factory<Workout>()
   .attr("name", () => faker.lorem.words({ max: 5, min: 1 }))
   .attr("sport", () =>
-    faker.helpers.arrayElement(["running", "cycling", "swimming"] as const),
+    faker.helpers.arrayElement(["running", "cycling", "swimming"] as const)
   )
   .attr("subSport", ["sport"], (sport: Sport) =>
-    faker.helpers.arrayElement(SUB_SPORTS[sport]),
+    faker.helpers.arrayElement(SUB_SPORTS[sport])
   )
   .attr("steps", () => [
     buildWorkoutStep.build(),

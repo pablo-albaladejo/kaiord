@@ -49,14 +49,7 @@ export const workoutStepSchema = z.object({
     .describe("Must match duration.type"),
   duration: durationSchema,
   targetType: z
-    .enum([
-      "power",
-      "heart_rate",
-      "cadence",
-      "pace",
-      "stroke_type",
-      "open",
-    ])
+    .enum(["power", "heart_rate", "cadence", "pace", "stroke_type", "open"])
     .describe("Must match target.type"),
   target: targetSchema,
   intensity: intensitySchema.optional(),
