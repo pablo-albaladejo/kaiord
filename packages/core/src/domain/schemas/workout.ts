@@ -2,6 +2,8 @@ import { z } from "zod";
 import { durationSchema } from "./duration";
 import { equipmentSchema } from "./equipment";
 import { intensitySchema } from "./intensity";
+import { sportSchema } from "./sport";
+import { subSportSchema } from "./sub-sport";
 import { targetSchema } from "./target";
 
 /**
@@ -27,31 +29,28 @@ import { targetSchema } from "./target";
 export const workoutStepSchema = z.object({
   stepIndex: z.number().int().nonnegative(),
   name: z.string().optional(),
-  durationType: z.enum([
-    "time",
-    "distance",
-    "heart_rate_less_than",
-    "repeat_until_heart_rate_greater_than",
-    "calories",
-    "power_less_than",
-    "power_greater_than",
-    "repeat_until_time",
-    "repeat_until_distance",
-    "repeat_until_calories",
-    "repeat_until_heart_rate_less_than",
-    "repeat_until_power_less_than",
-    "repeat_until_power_greater_than",
-    "open",
-  ]),
+  durationType: z
+    .enum([
+      "time",
+      "distance",
+      "heart_rate_less_than",
+      "repeat_until_heart_rate_greater_than",
+      "calories",
+      "power_less_than",
+      "power_greater_than",
+      "repeat_until_time",
+      "repeat_until_distance",
+      "repeat_until_calories",
+      "repeat_until_heart_rate_less_than",
+      "repeat_until_power_less_than",
+      "repeat_until_power_greater_than",
+      "open",
+    ])
+    .describe("Must match duration.type"),
   duration: durationSchema,
-  targetType: z.enum([
-    "power",
-    "heart_rate",
-    "cadence",
-    "pace",
-    "stroke_type",
-    "open",
-  ]),
+  targetType: z
+    .enum(["power", "heart_rate", "cadence", "pace", "stroke_type", "open"])
+    .describe("Must match target.type"),
   target: targetSchema,
   intensity: intensitySchema.optional(),
   notes: z.string().max(256).optional(),
@@ -117,8 +116,8 @@ export const repetitionBlockSchema = z.object({
  */
 export const workoutSchema = z.object({
   name: z.string().optional(),
-  sport: z.string(),
-  subSport: z.string().optional(),
+  sport: sportSchema,
+  subSport: subSportSchema.optional(),
   poolLength: z.number().positive().optional(),
   poolLengthUnit: z.literal("meters").optional(),
   steps: z.array(z.union([workoutStepSchema, repetitionBlockSchema])),

@@ -1,7 +1,8 @@
+import type { Sport } from "@kaiord/core";
 import type { GarminSportType } from "../schemas/common";
 import { SportTypeId } from "../schemas/common";
 
-const GARMIN_TO_KRD_SPORT: Record<string, string> = {
+const GARMIN_TO_KRD_SPORT: Record<string, Sport> = {
   running: "running",
   cycling: "cycling",
   swimming: "swimming",
@@ -34,7 +35,7 @@ const KRD_TO_GARMIN_SPORT: Record<string, GarminSportType> = {
   },
 };
 
-export const mapGarminSportToKrd = (sportTypeKey: string): string =>
+export const mapGarminSportToKrd = (sportTypeKey: string): Sport =>
   GARMIN_TO_KRD_SPORT[sportTypeKey] ?? "generic";
 
 export const mapKrdSportToGarmin = (sport: string): GarminSportType =>

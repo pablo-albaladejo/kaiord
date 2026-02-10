@@ -1,5 +1,5 @@
+import type { RepetitionBlock, Sport, WorkoutStep } from "@kaiord/core";
 import { sportSchema } from "@kaiord/core";
-import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
 
 /**
  * Type guard to check if a step is a RepetitionBlock
@@ -20,9 +20,11 @@ export const DEFAULT_SPORT = sportSchema.enum.cycling;
  * Maps FIT sport type to KRD sport type
  * Returns DEFAULT_SPORT if fitSport is undefined
  */
-export const mapSportType = (fitSport: string | undefined): string => {
+export const mapSportType = (fitSport: string | undefined): Sport => {
   if (!fitSport) {
     return DEFAULT_SPORT;
   }
-  return fitSport.toLowerCase();
+  const lower = fitSport.toLowerCase();
+  const result = sportSchema.safeParse(lower);
+  return result.success ? result.data : DEFAULT_SPORT;
 };

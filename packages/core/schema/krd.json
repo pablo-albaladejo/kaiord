@@ -448,7 +448,7 @@
         "extensions": {
           "type": "object",
           "properties": {
-            "workout": {
+            "structured_workout": {
               "$ref": "workout.json#/definitions/Workout"
             },
             "fit": {

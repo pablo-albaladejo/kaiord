@@ -92,6 +92,7 @@ export type { KRDLapTrigger } from "./domain/schemas/krd/lap";
 
 // Domain Converters
 export { convertLengthToMeters } from "./domain/converters/length-unit.converter";
+export { createWorkoutKRD } from "./domain/converters/workout-to-krd.converter";
 
 // ============================================
 // Error Types and Factories
@@ -129,6 +130,8 @@ export { createSchemaValidator } from "./domain/validation/schema-validator";
 export type { SchemaValidator } from "./domain/validation/schema-validator";
 
 export { validateKrd } from "./domain/validation/validate-krd";
+
+export { extractWorkout } from "./domain/validation/extract-workout";
 
 export {
   DEFAULT_TOLERANCES,
