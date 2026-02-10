@@ -47,3 +47,6 @@ flags:
     paths:
       - packages/workout-spa-editor/src/
     carryforward: true
+
+bundle_analysis:
+  status: informational
