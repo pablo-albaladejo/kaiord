@@ -26,7 +26,7 @@ type ConsoleSpy = ReturnType<typeof vi.spyOn>;
  * ```
  */
 export const expectNoReactWarnings = () => {
-  const consoleSpy = vi.spyOn(console, "error");
+  const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
   return {
     /**
@@ -83,7 +83,7 @@ export const expectNoReactWarnings = () => {
  * ```
  */
 export const setupConsoleErrorSpy = (): ConsoleSpy => {
-  return vi.spyOn(console, "error");
+  return vi.spyOn(console, "error").mockImplementation(() => {});
 };
 
 /**
