@@ -1,11 +1,11 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "$id": "https://kaiord.dev/schema/workout.json",
-  "title": "Workout Schema",
-  "description": "Workout structure for KRD extensions.structured_workout field",
-  "$ref": "#/definitions/Workout",
+  "$id": "https://kaiord.dev/schema/structured-workout-full.json",
+  "title": "Structured Workout - Complete Schema",
+  "description": "Self-contained schema for LLM agents to generate structured workouts. All domain types (sport, duration, target, intensity) are inlined.",
+  "$ref": "#/definitions/StructuredWorkout",
   "definitions": {
-    "Workout": {
+    "StructuredWorkout": {
       "type": "object",
       "properties": {
         "name": {

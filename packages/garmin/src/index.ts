@@ -15,3 +15,8 @@ export const createGarminWriter = (logger?: Logger): TextWriter =>
 
 export const garminReader: TextReader = createGarminReader();
 export const garminWriter: TextWriter = createGarminWriter();
+
+export {
+  createWorkoutToGarmin,
+  workoutToGarmin,
+} from "./adapters/workout-to-garmin";
