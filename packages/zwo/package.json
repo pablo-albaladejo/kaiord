@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/zwo",
-  "version": "4.0.0",
+  "version": "4.1.3",
   "description": "ZWO format adapter for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",

@@ -1,5 +1,11 @@
 # @kaiord/core
 
+## 4.1.3
+
+### Patch Changes
+
+- 74edc44: Update package description to reflect health & fitness data framework branding
+
 ## 4.1.2
 
 ### Patch Changes
