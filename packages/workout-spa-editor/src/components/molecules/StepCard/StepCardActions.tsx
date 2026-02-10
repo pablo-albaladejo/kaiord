@@ -16,12 +16,12 @@ export function StepCardActions({
   onCopy,
 }: StepCardActionsProps) {
   return (
-    <>
-      {onDelete && <DeleteButton stepIndex={stepIndex} onDelete={onDelete} />}
+    <div className="absolute right-3 bottom-3 flex gap-2">
       {onCopy && <CopyButton stepIndex={stepIndex} onCopy={onCopy} />}
       {onDuplicate && (
         <DuplicateButton stepIndex={stepIndex} onDuplicate={onDuplicate} />
       )}
-    </>
+      {onDelete && <DeleteButton stepIndex={stepIndex} onDelete={onDelete} />}
+    </div>
   );
 }

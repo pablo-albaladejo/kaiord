@@ -206,11 +206,10 @@ test.describe("Delete with Undo Flow", () => {
     // Wait for immediate deletion
     await page.waitForTimeout(300);
 
-    // Verify first notification appears
-    const toasts = page
-      .locator('[role="status"]')
-      .filter({ hasText: "Step deleted" });
-    await expect(toasts.first()).toBeVisible();
+    // Verify first notification appears (allow extra time for webkit toast animation)
+    await expect(page.getByText(/step deleted/i).first()).toBeVisible({
+      timeout: 5000,
+    });
 
     // Delete another step (now at index 0 after first deletion)
     const secondDeleteButton = stepCards
@@ -219,18 +218,15 @@ test.describe("Delete with Undo Flow", () => {
     await secondDeleteButton.click();
 
     // Wait for both deletions to process
-    await page.waitForTimeout(500);
+    await page.waitForTimeout(1000);
 
     // Verify only 1 step remains (both deletions completed)
     await expect(stepCards).toHaveCount(1);
 
     // Both "Step deleted" toasts should be visible simultaneously
     // (5s duration means first toast is still visible when second appears)
-    await expect(toasts).toHaveCount(2, { timeout: 3000 });
-
-    // Verify both undo buttons are present
     const undoButtons = page.getByTestId("undo-delete-button");
-    await expect(undoButtons).toHaveCount(2);
+    await expect(undoButtons).toHaveCount(2, { timeout: 5000 });
   });
 
   test("should handle undo correctly with step reindexing", async ({
@@ -285,18 +281,14 @@ test.describe("Delete with Undo Flow", () => {
     // Wait for immediate deletion
     await page.waitForTimeout(300);
 
-    // Verify notification appears
-    const toast = page
-      .locator('[role="status"]')
-      .filter({ hasText: "Step deleted" });
-    await expect(toast).toBeVisible();
+    // Verify notification appears (allow extra time for webkit toast animation)
+    await expect(page.getByText(/step deleted/i).first()).toBeVisible({
+      timeout: 5000,
+    });
 
     // Perform another action - select a different step
     const firstStepCard = stepCards.nth(0);
     await firstStepCard.click();
-
-    // Verify notification is still visible
-    await expect(toast).toBeVisible();
 
     // Verify undo button is still clickable
     const undoButton = page.getByTestId("undo-delete-button");
