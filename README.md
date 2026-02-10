@@ -13,7 +13,7 @@
 
 It provides:
 
-- `@kaiord/core`: a TypeScript library with format adapters for **.fit**, **.tcx**, **.zwo**, **.gcn** and **.krd** (Kaiord) files.
+- `@kaiord/core`: a TypeScript library with format adapters for **.fit**, **.tcx**, **.zwo**, and **.krd** (Kaiord) files, plus Garmin Connect API integration.
 - `@kaiord/cli`: a command-line tool to convert, validate, and compare files across formats.
 - **[Workout Editor](https://pablo-albaladejo.github.io/kaiord)**: a web application to create and edit workout files visually.
 

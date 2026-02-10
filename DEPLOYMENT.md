@@ -26,7 +26,7 @@ This document provides comprehensive information about deploying Kaiord packages
 
 Kaiord uses an automated release process powered by [Changesets](https://github.com/changesets/changesets) to manage versioning and publishing of npm packages. The monorepo contains two independently versioned packages:
 
-- **@kaiord/core** - Core library for health & fitness data conversion
+- **@kaiord/core** - Core library for the Kaiord health & fitness data framework
 - **@kaiord/cli** - Command-line interface tool
 
 Each package is released independently with **package-scoped tags** (e.g., `@kaiord/core@1.2.3`, `@kaiord/cli@0.5.0`) to provide clear traceability and better release management.
