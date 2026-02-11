@@ -1,12 +1,23 @@
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
 import { HeaderLogo } from "./components/HeaderLogo";
 import { HeaderNav } from "./components/HeaderNav";
-import { HelpDialog } from "./components/HelpDialog";
 import { useLibraryStore } from "../../../store/library-store";
 import { useProfileStore } from "../../../store/profile-store";
 import { useWorkoutStore } from "../../../store/workout-store";
-import { ProfileManager } from "../../organisms/ProfileManager/ProfileManager";
-import { WorkoutLibrary } from "../../organisms/WorkoutLibrary/WorkoutLibrary";
+
+const ProfileManager = lazy(() =>
+  import("../../organisms/ProfileManager/ProfileManager").then((m) => ({
+    default: m.ProfileManager,
+  }))
+);
+const WorkoutLibrary = lazy(() =>
+  import("../../organisms/WorkoutLibrary/WorkoutLibrary").then((m) => ({
+    default: m.WorkoutLibrary,
+  }))
+);
+const HelpDialog = lazy(() =>
+  import("./components/HelpDialog").then((m) => ({ default: m.HelpDialog }))
+);
 
 type LayoutHeaderProps = {
   onReplayTutorial?: () => void;
@@ -34,25 +45,37 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
         />
       </div>
 
-      <ProfileManager
-        open={profileManagerOpen}
-        onOpenChange={setProfileManagerOpen}
-      />
+      <Suspense fallback={null}>
+        {profileManagerOpen && (
+          <ProfileManager
+            open={profileManagerOpen}
+            onOpenChange={setProfileManagerOpen}
+          />
+        )}
+      </Suspense>
 
-      <WorkoutLibrary
-        open={libraryOpen}
-        onOpenChange={setLibraryOpen}
-        onLoadWorkout={(template) => {
-          loadWorkout(template.krd);
-        }}
-        hasCurrentWorkout={currentWorkout !== null}
-      />
+      <Suspense fallback={null}>
+        {libraryOpen && (
+          <WorkoutLibrary
+            open={libraryOpen}
+            onOpenChange={setLibraryOpen}
+            onLoadWorkout={(template) => {
+              loadWorkout(template.krd);
+            }}
+            hasCurrentWorkout={currentWorkout !== null}
+          />
+        )}
+      </Suspense>
 
-      <HelpDialog
-        open={helpDialogOpen}
-        onOpenChange={setHelpDialogOpen}
-        onReplayTutorial={onReplayTutorial}
-      />
+      <Suspense fallback={null}>
+        {helpDialogOpen && (
+          <HelpDialog
+            open={helpDialogOpen}
+            onOpenChange={setHelpDialogOpen}
+            onReplayTutorial={onReplayTutorial}
+          />
+        )}
+      </Suspense>
     </header>
   );
 };

@@ -1,5 +1,5 @@
+import { lazy, Suspense } from "react";
 import "./App.css";
-import { OnboardingTutorial } from "./components/organisms/OnboardingTutorial/OnboardingTutorial";
 import { WelcomeSection } from "./components/pages/WelcomeSection";
 import { WorkoutSection } from "./components/pages/WorkoutSection/WorkoutSection";
 import { AppToastProvider } from "./components/providers/AppToastProvider";
@@ -15,6 +15,12 @@ import {
   useSelectedStepId,
 } from "./store/workout-store-selectors";
 import type { Workout } from "./types/krd";
+
+const OnboardingTutorial = lazy(() =>
+  import("./components/organisms/OnboardingTutorial/OnboardingTutorial").then(
+    (m) => ({ default: m.OnboardingTutorial })
+  )
+);
 
 /** Renders keyboard shortcut bindings inside the toast context */
 function AppKeyboardShortcuts() {
@@ -77,11 +83,15 @@ function App() {
         </div>
       </MainLayout>
 
-      <OnboardingTutorial
-        steps={TUTORIAL_STEPS}
-        open={showTutorial}
-        onOpenChange={setShowTutorial}
-      />
+      <Suspense fallback={null}>
+        {showTutorial && (
+          <OnboardingTutorial
+            steps={TUTORIAL_STEPS}
+            open={showTutorial}
+            onOpenChange={setShowTutorial}
+          />
+        )}
+      </Suspense>
     </AppToastProvider>
   );
 }

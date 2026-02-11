@@ -29,22 +29,26 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          // Core React dependencies
           "vendor-react": ["react", "react-dom"],
-          // UI components library (Radix)
           "vendor-ui": [
             "@radix-ui/react-dialog",
             "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-select",
             "@radix-ui/react-toast",
             "@radix-ui/react-tooltip",
           ],
-          // State management
           "vendor-state": ["zustand"],
-          // Validation and schemas
           "vendor-zod": ["zod"],
-          // Core conversion library (large)
+          "vendor-dnd": [
+            "@dnd-kit/core",
+            "@dnd-kit/sortable",
+            "@dnd-kit/utilities",
+          ],
+          "vendor-icons": ["lucide-react"],
           "kaiord-core": ["@kaiord/core"],
+          "kaiord-fit": ["@kaiord/fit"],
+          "kaiord-tcx": ["@kaiord/tcx"],
+          "kaiord-zwo": ["@kaiord/zwo"],
+          "kaiord-garmin": ["@kaiord/garmin"],
         },
       },
     },
