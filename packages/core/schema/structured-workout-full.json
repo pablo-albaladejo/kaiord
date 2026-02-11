@@ -1,8 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kaiord.dev/schema/structured-workout-full.json",
-  "title": "Structured Workout - Complete Schema",
-  "description": "Self-contained schema for LLM agents to generate structured workouts. All domain types (sport, duration, target, intensity) are inlined.",
   "type": "object",
   "properties": {
     "name": {
@@ -1631,5 +1628,8 @@
     "sport",
     "steps"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$id": "https://kaiord.dev/schema/structured-workout-full.json",
+  "title": "Structured Workout - Complete Schema",
+  "description": "Self-contained schema for LLM agents to generate structured workouts. All domain types (sport, duration, target, intensity) are inlined."
 }

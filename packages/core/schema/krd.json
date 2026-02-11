@@ -1,8 +1,5 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://kaiord.dev/schema/krd.json",
-  "title": "KRD Schema",
-  "description": "Kaiord Representation Definition (KRD) for workout and activity data",
   "type": "object",
   "properties": {
     "version": {
@@ -474,5 +471,8 @@
     "type",
     "metadata"
   ],
-  "additionalProperties": false
+  "additionalProperties": false,
+  "$id": "https://kaiord.dev/schema/krd.json",
+  "title": "KRD Schema",
+  "description": "Kaiord Representation Definition (KRD) for workout and activity data"
 }
