@@ -17,11 +17,10 @@ const workoutJsonSchema = z.toJSONSchema(workoutSchema);
 
 const workoutOutputPath = resolve(schemaDir, "workout.json");
 writeSchema(workoutOutputPath, {
-  $schema: "http://json-schema.org/draft-07/schema#",
+  ...workoutJsonSchema,
   $id: "https://kaiord.dev/schema/workout.json",
   title: "Workout Schema",
   description: "Workout structure for KRD extensions.structured_workout field",
-  ...workoutJsonSchema,
 });
 console.log(`✓ Workout Schema generated at ${workoutOutputPath}`);
 
@@ -43,12 +42,11 @@ if (krdJsonSchema.properties?.extensions) {
 
 const krdOutputPath = resolve(schemaDir, "krd.json");
 writeSchema(krdOutputPath, {
-  $schema: "http://json-schema.org/draft-07/schema#",
+  ...krdJsonSchema,
   $id: "https://kaiord.dev/schema/krd.json",
   title: "KRD Schema",
   description:
     "Kaiord Representation Definition (KRD) for workout and activity data",
-  ...krdJsonSchema,
 });
 console.log(`✓ KRD Schema generated at ${krdOutputPath}`);
 
@@ -57,11 +55,10 @@ const fullJsonSchema = z.toJSONSchema(workoutSchema);
 
 const fullOutputPath = resolve(schemaDir, "structured-workout-full.json");
 writeSchema(fullOutputPath, {
-  $schema: "http://json-schema.org/draft-07/schema#",
+  ...fullJsonSchema,
   $id: "https://kaiord.dev/schema/structured-workout-full.json",
   title: "Structured Workout - Complete Schema",
   description:
     "Self-contained schema for LLM agents to generate structured workouts. All domain types (sport, duration, target, intensity) are inlined.",
-  ...fullJsonSchema,
 });
 console.log(`✓ Structured Workout Full Schema generated at ${fullOutputPath}`);

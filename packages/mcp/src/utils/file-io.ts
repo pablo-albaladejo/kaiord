@@ -6,11 +6,17 @@ import {
 import { dirname } from "path";
 
 const DANGEROUS_CHARS = /[\0|;&`$(){}!\n\r]/;
+const PATH_TRAVERSAL = /(?:^|[/\\])\.\.(?:[/\\]|$)/;
 
 export const validatePathSecurity = (inputPath: string): void => {
   if (DANGEROUS_CHARS.test(inputPath)) {
     throw new Error(
       `Invalid path: dangerous characters detected in ${inputPath}`
+    );
+  }
+  if (PATH_TRAVERSAL.test(inputPath)) {
+    throw new Error(
+      `Invalid path: directory traversal detected in ${inputPath}`
     );
   }
 };

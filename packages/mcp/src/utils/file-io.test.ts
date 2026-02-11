@@ -30,6 +30,17 @@ describe("validatePathSecurity", () => {
       );
     }
   );
+
+  it.each(["../../etc/passwd", "/foo/../bar", "..\\windows\\system32"])(
+    "should reject path traversal: %s",
+    (path) => {
+      expect(() => validatePathSecurity(path)).toThrow("directory traversal");
+    }
+  );
+
+  it("should accept paths with double dots in filenames", () => {
+    expect(() => validatePathSecurity("/path/file..name.txt")).not.toThrow();
+  });
 });
 
 describe("file read/write operations", () => {
