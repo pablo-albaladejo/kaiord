@@ -5,6 +5,7 @@
  * Requirement 39.2: Copy step data as JSON to clipboard
  */
 
+import { writeClipboard } from "../clipboard-store";
 import { isRepetitionBlock, isWorkoutStep } from "../../types/krd";
 import type {
   KRD,
@@ -55,7 +56,7 @@ export const copyStepAction = async (
   try {
     // Copy step as JSON to clipboard
     const stepJson = JSON.stringify(stepToCopy, null, 2);
-    await navigator.clipboard.writeText(stepJson);
+    await writeClipboard(stepJson);
 
     // Determine message based on step type
     const message = isRepetitionBlock(stepToCopy)

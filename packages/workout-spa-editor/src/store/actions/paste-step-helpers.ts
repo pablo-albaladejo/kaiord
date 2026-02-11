@@ -2,6 +2,7 @@
  * Helper functions for paste step action
  */
 
+import { readClipboard as readClipboardText } from "../clipboard-store";
 import { recalculateStepIndices } from "./recalculate-step-indices";
 import { isRepetitionBlock } from "../../types/krd";
 import type {
@@ -19,7 +20,7 @@ export const readClipboard = async (): Promise<{
   data?: unknown;
   message?: string;
 }> => {
-  const clipboardText = await navigator.clipboard.readText();
+  const clipboardText = await readClipboardText();
 
   if (!clipboardText || clipboardText.trim() === "") {
     return { success: false, message: "No content in clipboard" };

@@ -109,7 +109,9 @@ test.describe("Copy/Paste Functionality", () => {
   });
 
   test.describe("Keyboard Shortcuts", () => {
-    test("should copy step using Ctrl+C", async ({ page }) => {
+    test("should copy step using Ctrl+C", async ({ page, isMobile }) => {
+      test.skip(isMobile, "Keyboard shortcuts not available on mobile");
+
       // Arrange - Select a step by clicking it
       const firstStep = page.locator('[data-testid="step-card"]').first();
       await firstStep.click();
@@ -149,7 +151,9 @@ test.describe("Copy/Paste Functionality", () => {
       ).toBeVisible();
     });
 
-    test("should paste step using Ctrl+V", async ({ page }) => {
+    test("should paste step using Ctrl+V", async ({ page, isMobile }) => {
+      test.skip(isMobile, "Keyboard shortcuts not available on mobile");
+
       // Arrange - Copy a step using button (to ensure clipboard has data)
       const initialStepCount = await page
         .locator('[data-testid="step-card"]')
@@ -360,18 +364,12 @@ test.describe("Copy/Paste Functionality", () => {
 
     test("should show error notification when clipboard is empty", async ({
       page,
-      browserName,
     }) => {
-      // navigator.clipboard.writeText only works in Chromium
-      test.skip(browserName !== "chromium");
-
-      // Clear clipboard to ensure it's empty
-      await page.evaluate(() => navigator.clipboard.writeText(""));
-
-      // Act - Try to paste without copying (use button which shows toast)
+      // Act - Try to paste without copying first (clipboard is empty)
       await page.locator('[data-testid="paste-step-button"]').click();
 
-      // Assert
+      // Assert - Error notification appears on all browsers
+      // In-memory fallback ensures consistent behavior
       const notification = page
         .getByText(
           /no content in clipboard|no valid step|clipboard does not contain/i
