@@ -43,7 +43,10 @@ export default defineConfig({
     // Mobile viewports
     {
       name: "Mobile Chrome",
-      use: { ...devices["Pixel 5"] },
+      use: {
+        ...devices["Pixel 5"],
+        permissions: ["clipboard-read", "clipboard-write"],
+      },
     },
     {
       name: "Mobile Safari",

@@ -231,7 +231,7 @@ describe("pasteStepAction", () => {
     });
 
     it("should return error when clipboard API fails", async () => {
-      // Arrange
+      // Arrange - clipboard API fails, fallback returns empty
       vi.spyOn(navigator.clipboard, "readText").mockRejectedValue(
         new Error("Clipboard error")
       );
@@ -239,9 +239,9 @@ describe("pasteStepAction", () => {
       // Act
       const result = await pasteStepAction(mockKrd);
 
-      // Assert
+      // Assert - fallback returns empty string, treated as empty clipboard
       expect(result.success).toBe(false);
-      expect(result.message).toBe("Failed to paste from clipboard");
+      expect(result.message).toBe("No content in clipboard");
     });
   });
 });

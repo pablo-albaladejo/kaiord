@@ -6,6 +6,7 @@
  */
 
 import { isRepetitionBlock, isWorkoutStep } from "../../types/krd";
+import { writeClipboard } from "../clipboard-store";
 import type {
   KRD,
   RepetitionBlock,
@@ -55,7 +56,7 @@ export const copyStepAction = async (
   try {
     // Copy step as JSON to clipboard
     const stepJson = JSON.stringify(stepToCopy, null, 2);
-    await navigator.clipboard.writeText(stepJson);
+    await writeClipboard(stepJson);
 
     // Determine message based on step type
     const message = isRepetitionBlock(stepToCopy)
