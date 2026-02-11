@@ -40,15 +40,15 @@ export type HeartRateZone = z.infer<typeof heartRateZoneSchema>;
  * Represents a complete user profile with personal data and training zones.
  */
 export const profileSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().min(1).max(100),
   bodyWeight: z.number().positive().optional(),
   ftp: z.number().int().positive().optional(),
   maxHeartRate: z.number().int().positive().max(250).optional(),
   powerZones: z.array(powerZoneSchema).length(7),
   heartRateZones: z.array(heartRateZoneSchema).length(5),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export type Profile = z.infer<typeof profileSchema>;

@@ -24,7 +24,7 @@ export type KRDLapTrigger = z.infer<typeof krdLapTriggerSchema>;
  */
 export const krdLapSchema = z.object({
   // Timing
-  startTime: z.string().datetime(),
+  startTime: z.iso.datetime(),
   totalElapsedTime: z.number().min(0),
   totalTimerTime: z.number().min(0).optional(),
 

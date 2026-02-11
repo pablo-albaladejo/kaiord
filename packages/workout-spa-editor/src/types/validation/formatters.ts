@@ -11,8 +11,10 @@ import type { ZodError } from "zod";
  * Format Zod errors into a user-friendly structure
  */
 export const formatZodError = (error: ZodError): Array<ValidationError> => {
-  return error.errors.map((err) => ({
-    path: err.path,
+  return error.issues.map((err) => ({
+    path: err.path.filter(
+      (segment): segment is string | number => typeof segment !== "symbol"
+    ),
     message: err.message,
     code: err.code,
   }));

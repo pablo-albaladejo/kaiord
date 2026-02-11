@@ -43,7 +43,7 @@ export const krdSchema = z.object({
   laps: z.array(krdLapSchema).optional(),
   records: z.array(krdRecordSchema).optional(),
   events: z.array(krdEventSchema).optional(),
-  extensions: z.record(z.unknown()).optional(),
+  extensions: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**

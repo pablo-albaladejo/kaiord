@@ -20,7 +20,7 @@ import { z } from "zod";
  * ```
  */
 export const krdSessionSchema = z.object({
-  startTime: z.string().datetime(),
+  startTime: z.iso.datetime(),
   totalElapsedTime: z.number().min(0),
   totalTimerTime: z.number().min(0).optional(),
   totalDistance: z.number().min(0).optional(),

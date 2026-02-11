@@ -19,7 +19,7 @@ import { z } from "zod";
  * ```
  */
 export const krdRecordSchema = z.object({
-  timestamp: z.string().datetime(),
+  timestamp: z.iso.datetime(),
   position: z
     .object({
       lat: z.number().min(-90).max(90),

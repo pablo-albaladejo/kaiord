@@ -1,9 +1,9 @@
 import { formatZodError } from "./formatters";
 import type { ValidationResult } from "./validation-types";
-import type { ZodSchema } from "zod";
+import type { ZodType } from "zod";
 
 export const validate = <T>(
-  schema: ZodSchema<T>,
+  schema: ZodType<T>,
   data: unknown
 ): ValidationResult<T> => {
   const result = schema.safeParse(data);

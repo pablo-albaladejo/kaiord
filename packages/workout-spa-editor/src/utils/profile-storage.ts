@@ -18,7 +18,7 @@ const ACTIVE_PROFILE_KEY = "workout-spa-active-profile";
  */
 const storageStateSchema = z.object({
   profiles: z.array(profileSchema),
-  activeProfileId: z.string().uuid().nullable(),
+  activeProfileId: z.uuid().nullable(),
 });
 
 export type StorageState = z.infer<typeof storageStateSchema>;

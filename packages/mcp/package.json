@@ -1,0 +1,74 @@
+{
+  "name": "@kaiord/mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Kaiord fitness data conversion (FIT, TCX, ZWO, GCN, KRD)",
+  "type": "module",
+  "bin": {
+    "kaiord-mcp": "./dist/bin/kaiord-mcp.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsup",
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage",
+    "lint": "tsc --noEmit && eslint . && prettier --check src",
+    "lint:fix": "eslint . --fix && prettier --write src",
+    "clean": "rm -rf dist",
+    "dev": "tsx src/bin/kaiord-mcp.ts"
+  },
+  "dependencies": {
+    "@kaiord/core": "workspace:^",
+    "@kaiord/fit": "workspace:^",
+    "@kaiord/tcx": "workspace:^",
+    "@kaiord/zwo": "workspace:^",
+    "@kaiord/garmin": "workspace:^",
+    "@modelcontextprotocol/sdk": "^1.26.0",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "tsup": "^8.5.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pablo-albaladejo/kaiord.git",
+    "directory": "packages/mcp"
+  },
+  "homepage": "https://www.npmjs.com/package/@kaiord/mcp",
+  "bugs": {
+    "url": "https://github.com/pablo-albaladejo/kaiord/issues"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "keywords": [
+    "kaiord",
+    "mcp",
+    "model-context-protocol",
+    "fitness",
+    "fit",
+    "tcx",
+    "zwo",
+    "garmin",
+    "workout",
+    "converter",
+    "claude",
+    "llm",
+    "ai"
+  ],
+  "author": "Kaiord Contributors",
+  "license": "MIT"
+}
