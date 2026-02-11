@@ -26,7 +26,7 @@
   },
   "dependencies": {
     "@kaiord/core": "workspace:^",
-    "zod": "^3.22.4"
+    "zod": "^4.0.0"
   },
   "devDependencies": {
     "@types/node": "^24.0.0",

@@ -24,7 +24,7 @@ import { z } from "zod";
  * ```
  */
 export const krdMetadataSchema = z.object({
-  created: z.string().datetime(),
+  created: z.iso.datetime(),
   manufacturer: z.string().optional(),
   product: z.string().optional(),
   serialNumber: z.string().optional(),

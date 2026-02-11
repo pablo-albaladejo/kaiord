@@ -12,7 +12,7 @@ pnpm exec changeset
 
 This will prompt you to:
 
-1. **Select packages**: Choose which packages are affected (`@kaiord/core`, `@kaiord/cli`)
+1. **Select packages**: Choose which packages are affected (`@kaiord/core`, `@kaiord/cli`, `@kaiord/mcp`, etc.)
 2. **Select bump type**: `patch` (bug fixes), `minor` (new features), `major` (breaking changes)
 3. **Write summary**: Describe your changes (this becomes the changelog entry)
 
@@ -43,7 +43,7 @@ This will prompt you to:
 
 ## Configuration
 
-- **Linked packages**: `@kaiord/core` and `@kaiord/cli` are linked (same major/minor versions)
+- **Linked packages**: `@kaiord/core`, `@kaiord/cli`, and `@kaiord/mcp` are linked (same major/minor versions)
 - **Ignored packages**: `@kaiord/workout-spa-editor` (private, not published)
 
 See `config.json` for full configuration.

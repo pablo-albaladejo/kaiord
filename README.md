@@ -15,6 +15,7 @@ It provides:
 
 - `@kaiord/core`: a TypeScript library with format adapters for **.fit**, **.tcx**, **.zwo**, and **.krd** (Kaiord) files, plus Garmin Connect API integration.
 - `@kaiord/cli`: a command-line tool to convert, validate, and compare files across formats.
+- `@kaiord/mcp`: an MCP server exposing Kaiord tools to AI agents (Claude Desktop, Claude Code, etc.).
 - **[Workout Editor](https://pablo-albaladejo.github.io/kaiord)**: a web application to create and edit workout files visually.
 
 ---
@@ -90,6 +91,7 @@ kaiord/
 │  ├─ zwo/                 → Zwift ZWO format adapter
 │  ├─ garmin/              → Garmin Connect API adapter
 │  ├─ cli/                 → command-line interface
+│  ├─ mcp/                 → MCP server for AI/LLM integration
 │  └─ workout-spa-editor/  → web application (https://pablo-albaladejo.github.io/kaiord)
 ├─ docs/   → documentation
 ├─ LICENSE

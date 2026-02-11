@@ -9,7 +9,7 @@ import {
 import { formatZodError } from "./formatters";
 import { validate } from "./validate-helper";
 import type { ValidationResult } from "./validation-types";
-import type { ZodSchema } from "zod";
+import type { ZodType } from "zod";
 
 export type { ValidationResult } from "./validation-types";
 
@@ -73,7 +73,7 @@ export const validateWorkoutMetadata = (
  * Validate a single field
  */
 export const validateField = <T>(
-  schema: ZodSchema<T>,
+  schema: ZodType<T>,
   fieldName: string,
   value: unknown
 ): ValidationResult<T> => {
