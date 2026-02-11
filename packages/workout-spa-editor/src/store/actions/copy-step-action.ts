@@ -5,8 +5,8 @@
  * Requirement 39.2: Copy step data as JSON to clipboard
  */
 
-import { writeClipboard } from "../clipboard-store";
 import { isRepetitionBlock, isWorkoutStep } from "../../types/krd";
+import { writeClipboard } from "../clipboard-store";
 import type {
   KRD,
   RepetitionBlock,
