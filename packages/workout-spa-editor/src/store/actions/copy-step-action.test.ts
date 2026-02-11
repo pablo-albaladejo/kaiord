@@ -153,8 +153,8 @@ describe("copyStepAction", () => {
       expect(result.message).toBe("Step not found");
     });
 
-    it("should return error when clipboard write fails", async () => {
-      // Arrange
+    it("should succeed with fallback when clipboard write fails", async () => {
+      // Arrange - clipboard API fails but in-memory fallback handles it
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "time",
@@ -190,9 +190,9 @@ describe("copyStepAction", () => {
       // Act
       const result = await copyStepAction(krd, 0);
 
-      // Assert
-      expect(result.success).toBe(false);
-      expect(result.message).toBe("Failed to copy to clipboard");
+      // Assert - succeeds via in-memory fallback
+      expect(result.success).toBe(true);
+      expect(result.message).toBe("Step copied to clipboard");
     });
   });
 });
