@@ -19,8 +19,11 @@ import { loadTestWorkout } from "./helpers/load-test-workout";
 
 test.describe("Copy/Paste Functionality", () => {
   test.beforeEach(async ({ page }) => {
-    // Clear localStorage before navigation to start fresh
-    await page.addInitScript(() => localStorage.clear());
+    // Clear localStorage but keep tutorial dismissed to prevent overlay blocking clicks
+    await page.addInitScript(() => {
+      localStorage.clear();
+      localStorage.setItem("workout-spa-onboarding-completed", "true");
+    });
     await page.goto("/");
     await page.waitForLoadState("networkidle");
 
