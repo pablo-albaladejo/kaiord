@@ -28,43 +28,95 @@ jobs:
           prompt: |
             Review this pull request. Focus on code quality, potential bugs, security issues, and compliance with project standards (see CLAUDE.md).
             Write your review as a structured markdown report with sections: Summary, Key Findings, and Recommendations.
+            IMPORTANT: After writing the review, save the full review text to /tmp/claude-review.md using the write file tool.
 
       - name: Post review comment
-        if: always() && steps.claude-review.outputs.execution_file
+        if: always()
         uses: actions/github-script@v7
         with:
           script: |
             const fs = require('fs');
+
+            // Strategy 1: Read review from file written by Claude
+            const reviewFile = '/tmp/claude-review.md';
+            if (fs.existsSync(reviewFile)) {
+              const review = fs.readFileSync(reviewFile, 'utf8').trim();
+              if (review) {
+                const marker = '<!-- claude-code-review -->';
+                const body = `${marker}\n## Claude Code Review\n\n${review}\n\n---\n*Automated review by Claude Code*`;
+                const { data: comments } = await github.rest.issues.listComments({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: context.issue.number,
+                  per_page: 100,
+                });
+                const existing = comments.find(c => c.body?.includes(marker));
+                if (existing) {
+                  await github.rest.issues.updateComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    comment_id: existing.id,
+                    body,
+                  });
+                  console.log(`Updated existing comment ${existing.id}`);
+                } else {
+                  await github.rest.issues.createComment({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    issue_number: context.issue.number,
+                    body,
+                  });
+                  console.log('Created new review comment');
+                }
+                return;
+              }
+            }
+
+            // Strategy 2: Parse execution output file
             const execFile = '${{ steps.claude-review.outputs.execution_file }}';
-            if (!fs.existsSync(execFile)) {
+            if (!execFile || !fs.existsSync(execFile)) {
               console.log('No execution file found, skipping comment');
               return;
             }
             const raw = fs.readFileSync(execFile, 'utf8');
             const lines = raw.trim().split('\n');
-            // Find the last "result" message which contains Claude's final response
             let review = '';
             for (const line of lines) {
               try {
                 const entry = JSON.parse(line);
-                if (entry.type === 'result' && entry.result) {
-                  review = entry.result;
-                } else if (entry.type === 'assistant' && entry.message?.content) {
-                  // Collect text blocks from assistant messages
-                  const texts = entry.message.content
-                    .filter(b => b.type === 'text')
-                    .map(b => b.text);
-                  if (texts.length > 0) review = texts.join('\n');
+                // Try different possible structures
+                if (entry.type === 'assistant') {
+                  let text = '';
+                  if (typeof entry.message === 'string') {
+                    text = entry.message;
+                  } else if (entry.message?.content) {
+                    const blocks = Array.isArray(entry.message.content)
+                      ? entry.message.content
+                      : [entry.message.content];
+                    text = blocks
+                      .filter(b => typeof b === 'string' || b.type === 'text')
+                      .map(b => typeof b === 'string' ? b : b.text)
+                      .join('\n');
+                  }
+                  if (text) review = text;
+                } else if (entry.type === 'result') {
+                  if (entry.result) review = typeof entry.result === 'string' ? entry.result : JSON.stringify(entry.result);
                 }
               } catch {}
             }
             if (!review) {
-              console.log('No review content found in execution output');
+              // Log file structure for debugging
+              console.log('Could not extract review. File entries:');
+              for (const line of lines.slice(0, 5)) {
+                try {
+                  const e = JSON.parse(line);
+                  console.log(`  type=${e.type}, keys=${Object.keys(e).join(',')}`);
+                } catch {}
+              }
               return;
             }
             const marker = '<!-- claude-code-review -->';
             const body = `${marker}\n## Claude Code Review\n\n${review}\n\n---\n*Automated review by Claude Code*`;
-            // Find existing sticky comment
             const { data: comments } = await github.rest.issues.listComments({
               owner: context.repo.owner,
               repo: context.repo.repo,
