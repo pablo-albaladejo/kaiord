@@ -44,9 +44,12 @@ const readBinaryInput = async (
   logger: Logger
 ): Promise<KRD> => {
   const reader = FORMAT_REGISTRY[format].createReader(logger) as BinaryReader;
+  if (!inputFile && inputContent === undefined) {
+    throw new Error("Provide either input_file or input_content");
+  }
   const buffer = inputFile
     ? await readFileAsBuffer(inputFile)
-    : Buffer.from(inputContent!, "base64");
+    : Buffer.from(inputContent as string, "base64");
   return fromBinary(buffer, reader, logger);
 };
 
@@ -57,6 +60,11 @@ const readTextInput = async (
   logger: Logger
 ): Promise<KRD> => {
   const reader = FORMAT_REGISTRY[format].createReader(logger) as TextReader;
-  const text = inputFile ? await readFileAsText(inputFile) : inputContent!;
+  if (!inputFile && inputContent === undefined) {
+    throw new Error("Provide either input_file or input_content");
+  }
+  const text = inputFile
+    ? await readFileAsText(inputFile)
+    : (inputContent as string);
   return fromText(text, reader, logger);
 };
