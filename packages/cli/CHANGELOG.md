@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.5.0
+
+### Patch Changes
+
+- 2ab2077: Harden CLI path security by consolidating dangerous character detection into a single comprehensive regex
+- Updated dependencies [2ab2077]
+- Updated dependencies [2ab2077]
+  - @kaiord/core@4.5.0
+  - @kaiord/garmin@4.5.0
+
 ## 4.3.0
 
 ### Minor Changes

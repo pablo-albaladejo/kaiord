@@ -1,5 +1,11 @@
 # @kaiord/core
 
+## 4.5.0
+
+### Minor Changes
+
+- 2ab2077: Remove Logger dependency from schema-validator (domain-to-ports violation fix) and remove duplicate ValidationError type definition
+
 ## 4.3.0
 
 ### Minor Changes

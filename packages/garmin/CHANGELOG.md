@@ -1,5 +1,13 @@
 # @kaiord/garmin
 
+## 4.5.0
+
+### Patch Changes
+
+- 2ab2077: Add Zod runtime validation for Garmin JSON parsing and remove all unsafe type casts in converters and mappers
+- Updated dependencies [2ab2077]
+  - @kaiord/core@4.5.0
+
 ## 4.3.0
 
 ### Minor Changes
