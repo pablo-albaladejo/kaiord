@@ -111,13 +111,13 @@ Key intra-phase dependencies:
 
 ## Changeset Strategy Reference
 
-| Phase | Semver | Package(s) | Description |
-|-------|--------|-----------|-------------|
-| 1 | minor | @kaiord/core | Remove Logger param, remove ValidationError duplicate |
-| 1 | patch | @kaiord/garmin | Add Zod validation, remove unsafe casts |
-| 1 | patch | @kaiord/cli | Harden path security |
-| 2 | patch | @kaiord/garmin | Split converter files |
-| 2 | patch | @kaiord/cli | Extract validate command, split kaiord.ts |
-| 2 | patch | @kaiord/mcp | Remove non-null assertion |
-| 3 | patch | @kaiord/core | Export isRepetitionBlock type guard |
-| 4 | patch | all adapter packages | Test coverage + thresholds |
+| Phase | Semver | Package(s)           | Description                                           |
+| ----- | ------ | -------------------- | ----------------------------------------------------- |
+| 1     | minor  | @kaiord/core         | Remove Logger param, remove ValidationError duplicate |
+| 1     | patch  | @kaiord/garmin       | Add Zod validation, remove unsafe casts               |
+| 1     | patch  | @kaiord/cli          | Harden path security                                  |
+| 2     | patch  | @kaiord/garmin       | Split converter files                                 |
+| 2     | patch  | @kaiord/cli          | Extract validate command, split kaiord.ts             |
+| 2     | patch  | @kaiord/mcp          | Remove non-null assertion                             |
+| 3     | patch  | @kaiord/core         | Export isRepetitionBlock type guard                   |
+| 4     | patch  | all adapter packages | Test coverage + thresholds                            |
