@@ -1,5 +1,11 @@
 # @kaiord/mcp
 
+## 4.3.2
+
+### Patch Changes
+
+- 3d404a1: fix(mcp): remove duplicate shebang that caused SyntaxError on npx
+
 ## 4.3.1
 
 ### Patch Changes
