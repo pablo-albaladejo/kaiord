@@ -1,6 +1,7 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense } from "react";
 import { HeaderLogo } from "./components/HeaderLogo";
 import { HeaderNav } from "./components/HeaderNav";
+import { useLazyDialog } from "../../../hooks/use-lazy-dialog";
 import { useLibraryStore } from "../../../store/library-store";
 import { useProfileStore } from "../../../store/profile-store";
 import { useWorkoutStore } from "../../../store/workout-store";
@@ -24,12 +25,9 @@ type LayoutHeaderProps = {
 };
 
 export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
-  const [profileManagerOpen, setProfileManagerOpen] = useState(false);
-  const [libraryOpen, setLibraryOpen] = useState(false);
-  const [helpDialogOpen, setHelpDialogOpen] = useState(false);
-  const [profileMounted, setProfileMounted] = useState(false);
-  const [libraryMounted, setLibraryMounted] = useState(false);
-  const [helpMounted, setHelpMounted] = useState(false);
+  const profile = useLazyDialog();
+  const library = useLazyDialog();
+  const help = useLazyDialog();
   const { getActiveProfile } = useProfileStore();
   const activeProfile = getActiveProfile();
   const { templates } = useLibraryStore();
@@ -42,35 +40,23 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
         <HeaderNav
           activeProfileName={activeProfile?.name || null}
           libraryCount={templates.length}
-          onProfileClick={() => {
-            setProfileMounted(true);
-            setProfileManagerOpen(true);
-          }}
-          onLibraryClick={() => {
-            setLibraryMounted(true);
-            setLibraryOpen(true);
-          }}
-          onHelpClick={() => {
-            setHelpMounted(true);
-            setHelpDialogOpen(true);
-          }}
+          onProfileClick={profile.show}
+          onLibraryClick={library.show}
+          onHelpClick={help.show}
         />
       </div>
 
       <Suspense fallback={null}>
-        {profileMounted && (
-          <ProfileManager
-            open={profileManagerOpen}
-            onOpenChange={setProfileManagerOpen}
-          />
+        {profile.mounted && (
+          <ProfileManager open={profile.open} onOpenChange={profile.setOpen} />
         )}
       </Suspense>
 
       <Suspense fallback={null}>
-        {libraryMounted && (
+        {library.mounted && (
           <WorkoutLibrary
-            open={libraryOpen}
-            onOpenChange={setLibraryOpen}
+            open={library.open}
+            onOpenChange={library.setOpen}
             onLoadWorkout={(template) => {
               loadWorkout(template.krd);
             }}
@@ -80,10 +66,10 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
       </Suspense>
 
       <Suspense fallback={null}>
-        {helpMounted && (
+        {help.mounted && (
           <HelpDialog
-            open={helpDialogOpen}
-            onOpenChange={setHelpDialogOpen}
+            open={help.open}
+            onOpenChange={help.setOpen}
             onReplayTutorial={onReplayTutorial}
           />
         )}
