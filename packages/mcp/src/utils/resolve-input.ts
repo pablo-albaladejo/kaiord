@@ -20,5 +20,10 @@ export const resolveTextInput = async (
   if (inputFile) {
     return readFileAsText(inputFile);
   }
-  return inputContent!;
+  if (inputContent === undefined) {
+    throw new Error(
+      "input_content is required when input_file is not provided"
+    );
+  }
+  return inputContent;
 };
