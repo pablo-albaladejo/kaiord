@@ -27,6 +27,9 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
   const [profileManagerOpen, setProfileManagerOpen] = useState(false);
   const [libraryOpen, setLibraryOpen] = useState(false);
   const [helpDialogOpen, setHelpDialogOpen] = useState(false);
+  const [profileMounted, setProfileMounted] = useState(false);
+  const [libraryMounted, setLibraryMounted] = useState(false);
+  const [helpMounted, setHelpMounted] = useState(false);
   const { getActiveProfile } = useProfileStore();
   const activeProfile = getActiveProfile();
   const { templates } = useLibraryStore();
@@ -39,14 +42,23 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
         <HeaderNav
           activeProfileName={activeProfile?.name || null}
           libraryCount={templates.length}
-          onProfileClick={() => setProfileManagerOpen(true)}
-          onLibraryClick={() => setLibraryOpen(true)}
-          onHelpClick={() => setHelpDialogOpen(true)}
+          onProfileClick={() => {
+            setProfileMounted(true);
+            setProfileManagerOpen(true);
+          }}
+          onLibraryClick={() => {
+            setLibraryMounted(true);
+            setLibraryOpen(true);
+          }}
+          onHelpClick={() => {
+            setHelpMounted(true);
+            setHelpDialogOpen(true);
+          }}
         />
       </div>
 
       <Suspense fallback={null}>
-        {profileManagerOpen && (
+        {profileMounted && (
           <ProfileManager
             open={profileManagerOpen}
             onOpenChange={setProfileManagerOpen}
@@ -55,7 +67,7 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
       </Suspense>
 
       <Suspense fallback={null}>
-        {libraryOpen && (
+        {libraryMounted && (
           <WorkoutLibrary
             open={libraryOpen}
             onOpenChange={setLibraryOpen}
@@ -68,7 +80,7 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
       </Suspense>
 
       <Suspense fallback={null}>
-        {helpDialogOpen && (
+        {helpMounted && (
           <HelpDialog
             open={helpDialogOpen}
             onOpenChange={setHelpDialogOpen}
