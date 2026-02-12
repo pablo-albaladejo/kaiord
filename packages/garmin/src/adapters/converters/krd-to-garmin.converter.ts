@@ -5,12 +5,15 @@ import type {
   Workout,
   WorkoutStep,
 } from "@kaiord/core";
-import { createGarminParsingError } from "@kaiord/core";
+import { createGarminParsingError, workoutSchema } from "@kaiord/core";
 import { ConditionTypeId, StepTypeId } from "../schemas/common";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
 import { mapDurationToCondition } from "../mappers/condition.mapper";
 import { mapKrdEquipmentToGarmin } from "../mappers/equipment.mapper";
-import { mapIntensityToStepType } from "../mappers/intensity.mapper";
+import {
+  mapIntensityToStepType,
+  type StepTypeKey,
+} from "../mappers/intensity.mapper";
 import { mapKrdSportToGarmin } from "../mappers/sport.mapper";
 import { mapKrdStrokeToGarmin } from "../mappers/stroke.mapper";
 import { mapKrdTargetToGarmin } from "../mappers/target.mapper";
@@ -57,14 +60,23 @@ export const convertKRDToGarmin = (krd: KRD, logger: Logger): string => {
 const extractWorkout = (krd: KRD): Workout | undefined => {
   const ext = krd.extensions?.structured_workout;
   if (!ext || typeof ext !== "object") return undefined;
-  return ext as Workout;
+
+  const result = workoutSchema.safeParse(ext);
+  if (!result.success) {
+    const issues = result.error.issues
+      .map((i) => `${i.path.join(".")}: ${i.message}`)
+      .join("; ");
+    throw createGarminParsingError(`Invalid workout data: ${issues}`);
+  }
+
+  return result.data;
 };
 
 const isRepetitionBlock = (
   step: WorkoutStep | RepetitionBlock
 ): step is RepetitionBlock => "repeatCount" in step;
 
-const STEP_TYPE_IDS: Record<string, number> = {
+const STEP_TYPE_IDS: Record<StepTypeKey, number> = {
   warmup: StepTypeId.WARMUP,
   cooldown: StepTypeId.COOLDOWN,
   interval: StepTypeId.INTERVAL,
@@ -72,7 +84,7 @@ const STEP_TYPE_IDS: Record<string, number> = {
   rest: StepTypeId.REST,
 };
 
-const STEP_TYPE_ORDER: Record<string, number> = {
+const STEP_TYPE_ORDER: Record<StepTypeKey, number> = {
   warmup: 1,
   cooldown: 2,
   interval: 3,
@@ -83,14 +95,9 @@ const STEP_TYPE_ORDER: Record<string, number> = {
 const getStepTypeInfo = (intensity: string) => {
   const key = mapIntensityToStepType(intensity);
   return {
-    stepTypeId: STEP_TYPE_IDS[key] ?? StepTypeId.INTERVAL,
-    stepTypeKey: key as
-      | "warmup"
-      | "cooldown"
-      | "interval"
-      | "recovery"
-      | "rest",
-    displayOrder: STEP_TYPE_ORDER[key] ?? 3,
+    stepTypeId: STEP_TYPE_IDS[key],
+    stepTypeKey: key,
+    displayOrder: STEP_TYPE_ORDER[key],
   };
 };
 

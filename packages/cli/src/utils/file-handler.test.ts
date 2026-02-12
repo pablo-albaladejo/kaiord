@@ -98,7 +98,7 @@ describe("readFile", () => {
 
     // Act & Assert
     await expect(readFile(filePath, "krd")).rejects.toThrow(
-      "Invalid path: null byte detected"
+      "Invalid path: dangerous characters detected"
     );
   });
 });
@@ -209,7 +209,7 @@ describe("writeFile", () => {
 
     // Act & Assert
     await expect(writeFile(filePath, "data", "krd")).rejects.toThrow(
-      "Invalid path: shell metacharacters detected"
+      "Invalid path: dangerous characters detected"
     );
   });
 });
@@ -237,7 +237,7 @@ describe("validatePathSecurity", () => {
 
     // Act & Assert
     expect(() => validatePathSecurity(invalidPath)).toThrow(
-      "Invalid path: null byte detected"
+      "Invalid path: dangerous characters detected"
     );
   });
 
@@ -247,7 +247,7 @@ describe("validatePathSecurity", () => {
 
     // Act & Assert
     expect(() => validatePathSecurity(invalidPath)).toThrow(
-      "Invalid path: shell metacharacters detected"
+      "Invalid path: dangerous characters detected"
     );
   });
 });
