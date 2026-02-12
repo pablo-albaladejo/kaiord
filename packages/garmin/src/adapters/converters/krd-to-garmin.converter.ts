@@ -6,17 +6,11 @@ import type {
   WorkoutStep,
 } from "@kaiord/core";
 import { createGarminParsingError, workoutSchema } from "@kaiord/core";
-import { ConditionTypeId, StepTypeId } from "../schemas/common";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
-import { mapDurationToCondition } from "../mappers/condition.mapper";
-import { mapKrdEquipmentToGarmin } from "../mappers/equipment.mapper";
-import {
-  mapIntensityToStepType,
-  type StepTypeKey,
-} from "../mappers/intensity.mapper";
 import { mapKrdSportToGarmin } from "../mappers/sport.mapper";
-import { mapKrdStrokeToGarmin } from "../mappers/stroke.mapper";
-import { mapKrdTargetToGarmin } from "../mappers/target.mapper";
+import { mapWorkoutStep } from "./garmin-workout-step.converter";
+import { mapRepetitionBlock } from "./garmin-repetition.converter";
+import { addPoolInfo, type PoolInput } from "./garmin-pool-info.mapper";
 
 export const convertKRDToGarmin = (krd: KRD, logger: Logger): string => {
   logger.info("Converting KRD to Garmin Connect JSON");
@@ -35,7 +29,7 @@ export const convertKRDToGarmin = (krd: KRD, logger: Logger): string => {
       : mapWorkoutStep(step, counter)
   );
 
-  const input = {
+  const input: PoolInput & Record<string, unknown> = {
     sportType,
     workoutName: (workout.name ?? "Kaiord Workout").substring(0, 255),
     workoutSegments: [
@@ -45,10 +39,6 @@ export const convertKRDToGarmin = (krd: KRD, logger: Logger): string => {
         workoutSteps,
       },
     ],
-    poolLength: undefined as number | undefined,
-    poolLengthUnit: undefined as
-      | { unitId: number; unitKey: string; factor: number }
-      | undefined,
   };
 
   addPoolInfo(workout, input);
@@ -75,128 +65,3 @@ const extractWorkout = (krd: KRD): Workout | undefined => {
 const isRepetitionBlock = (
   step: WorkoutStep | RepetitionBlock
 ): step is RepetitionBlock => "repeatCount" in step;
-
-const STEP_TYPE_IDS: Record<StepTypeKey, number> = {
-  warmup: StepTypeId.WARMUP,
-  cooldown: StepTypeId.COOLDOWN,
-  interval: StepTypeId.INTERVAL,
-  recovery: StepTypeId.RECOVERY,
-  rest: StepTypeId.REST,
-};
-
-const STEP_TYPE_ORDER: Record<StepTypeKey, number> = {
-  warmup: 1,
-  cooldown: 2,
-  interval: 3,
-  recovery: 4,
-  rest: 5,
-};
-
-const getStepTypeInfo = (intensity: string) => {
-  const key = mapIntensityToStepType(intensity);
-  return {
-    stepTypeId: STEP_TYPE_IDS[key],
-    stepTypeKey: key,
-    displayOrder: STEP_TYPE_ORDER[key],
-  };
-};
-
-const mapWorkoutStep = (
-  step: WorkoutStep,
-  counter: { value: number }
-): GarminWorkoutStepInput => {
-  const stepOrder = counter.value++;
-  const stepType = getStepTypeInfo(step.intensity ?? "active");
-  const { endCondition, endConditionValue } = mapDurationToCondition(
-    step.durationType,
-    step.duration
-  );
-  const { targetType, targetValueOne, targetValueTwo, zoneNumber } =
-    mapKrdTargetToGarmin(step.target);
-
-  const strokeType =
-    step.target.type === "stroke_type"
-      ? mapKrdStrokeToGarmin(fitValueToStroke(extractStrokeValue(step.target)))
-      : mapKrdStrokeToGarmin(undefined);
-
-  const equipmentType = mapKrdEquipmentToGarmin(step.equipment);
-
-  return {
-    type: "ExecutableStepDTO",
-    stepOrder,
-    stepType,
-    endCondition,
-    endConditionValue,
-    targetType,
-    targetValueOne,
-    targetValueTwo,
-    zoneNumber,
-    secondaryTargetType: null,
-    secondaryTargetValueOne: null,
-    secondaryTargetValueTwo: null,
-    secondaryZoneNumber: null,
-    strokeType,
-    equipmentType,
-  };
-};
-
-const mapRepetitionBlock = (
-  block: RepetitionBlock,
-  counter: { value: number }
-): GarminWorkoutStepInput => {
-  const stepOrder = counter.value++;
-  const innerSteps: GarminWorkoutStepInput[] = block.steps.map((step) =>
-    mapWorkoutStep(step, counter)
-  );
-
-  return {
-    type: "RepeatGroupDTO",
-    stepOrder,
-    stepType: {
-      stepTypeId: StepTypeId.REPEAT,
-      stepTypeKey: "repeat",
-      displayOrder: 6,
-    },
-    numberOfIterations: block.repeatCount,
-    endCondition: {
-      conditionTypeId: ConditionTypeId.ITERATIONS,
-      conditionTypeKey: "iterations",
-      displayOrder: 7,
-      displayable: false,
-    },
-    endConditionValue: block.repeatCount,
-    workoutSteps: innerSteps,
-  };
-};
-
-type PoolInput = {
-  poolLength?: number;
-  poolLengthUnit?: { unitId: number; unitKey: string; factor: number };
-};
-
-const addPoolInfo = (workout: Workout, input: PoolInput): void => {
-  if (workout.poolLength && workout.poolLength > 0) {
-    input.poolLength = workout.poolLength;
-    input.poolLengthUnit = {
-      unitId: 1,
-      unitKey: "meter",
-      factor: 100,
-    };
-  }
-};
-
-const FIT_TO_STROKE: Record<number, string> = {
-  0: "freestyle",
-  1: "backstroke",
-  2: "breaststroke",
-  3: "butterfly",
-  4: "drill",
-  5: "mixed",
-};
-
-const extractStrokeValue = (target: { value?: { value: number } }): number => {
-  return target.value?.value ?? 0;
-};
-
-const fitValueToStroke = (value: number): string | undefined =>
-  FIT_TO_STROKE[value];

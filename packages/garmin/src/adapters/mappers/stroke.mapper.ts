@@ -52,3 +52,32 @@ export const mapKrdStrokeToGarmin = (
     displayOrder: mapped.order,
   };
 };
+
+const STROKE_TO_FIT: Record<string, number> = {
+  freestyle: 0,
+  backstroke: 1,
+  breaststroke: 2,
+  butterfly: 3,
+  drill: 4,
+  mixed: 5,
+  im: 5,
+};
+
+export const strokeToFitValue = (stroke: string): number =>
+  STROKE_TO_FIT[stroke] ?? 0;
+
+const FIT_TO_STROKE: Record<number, string> = {
+  0: "freestyle",
+  1: "backstroke",
+  2: "breaststroke",
+  3: "butterfly",
+  4: "drill",
+  5: "mixed",
+};
+
+export const fitValueToStroke = (value: number): string | undefined =>
+  FIT_TO_STROKE[value];
+
+export const extractStrokeValue = (target: {
+  value?: { value: number };
+}): number => target.value?.value ?? 0;
