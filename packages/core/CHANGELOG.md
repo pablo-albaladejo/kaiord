@@ -1,5 +1,13 @@
 # @kaiord/core
 
+## 4.2.1
+
+### Patch Changes
+
+- 529c891: perf(core): reduce published dist from 1.8M to 268K
+  - Split tsup config to disable sourcemaps for test-utils entry
+  - Externalize devDependencies (@faker-js/faker, rosie) from test-utils build
+
 ## 4.2.0
 
 ### Minor Changes
