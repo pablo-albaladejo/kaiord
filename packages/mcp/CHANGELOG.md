@@ -1,5 +1,11 @@
 # @kaiord/mcp
 
+## 4.3.3
+
+### Patch Changes
+
+- 4e11d43: test(mcp): add build artifact test to detect shebang and ESM issues
+
 ## 4.3.2
 
 ### Patch Changes
