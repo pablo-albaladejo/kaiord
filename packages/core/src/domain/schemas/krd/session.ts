@@ -24,6 +24,7 @@ export const krdSessionSchema = z.object({
   totalElapsedTime: z.number().min(0),
   totalTimerTime: z.number().min(0).optional(),
   totalDistance: z.number().min(0).optional(),
+  /** @see sportSchema for known sport values. Accepts custom strings for forward compatibility. */
   sport: z.string(),
   subSport: z.string().optional(),
   avgHeartRate: z.number().int().min(0).max(300).optional(),

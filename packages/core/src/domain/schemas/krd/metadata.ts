@@ -28,6 +28,7 @@ export const krdMetadataSchema = z.object({
   manufacturer: z.string().optional(),
   product: z.string().optional(),
   serialNumber: z.string().optional(),
+  /** @see sportSchema for known sport values. Accepts custom strings for forward compatibility. */
   sport: z.string(),
   subSport: z.string().optional(),
 });
