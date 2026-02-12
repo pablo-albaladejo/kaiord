@@ -18,9 +18,7 @@ export const handleValidationError = (
     const errorObj = formatError(error, { json: true });
     const errorData =
       typeof errorObj === "string" ? JSON.parse(errorObj) : errorObj;
-    console.log(
-      JSON.stringify({ success: false, error: errorData }, null, 2)
-    );
+    console.log(JSON.stringify({ success: false, error: errorData }, null, 2));
   } else {
     console.error(formatError(error, { json: false }));
   }
