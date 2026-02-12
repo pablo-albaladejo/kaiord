@@ -36,9 +36,7 @@ const PAGE_TITLE_RE = /<title>([^<]*)<\/title>/;
 
 type FetchFn = typeof globalThis.fetch;
 
-const fetchOAuthConsumer = async (
-  fetchFn: FetchFn
-): Promise<OAuthConsumer> => {
+const fetchOAuthConsumer = async (fetchFn: FetchFn): Promise<OAuthConsumer> => {
   const res = await fetchFn(OAUTH_CONSUMER_URL);
   const data = (await res.json()) as {
     consumer_key: string;
@@ -127,9 +125,7 @@ const checkAccountLocked = (html: string): void => {
 const checkPageTitle = (html: string, logger: Logger): void => {
   const match = PAGE_TITLE_RE.exec(html);
   if (match?.includes("Update Phone Number")) {
-    throw createServiceAuthError(
-      "Login failed: phone number update required."
-    );
+    throw createServiceAuthError("Login failed: phone number update required.");
   }
   if (match) {
     logger.debug("Login page title", { title: match[1] });
@@ -173,10 +169,7 @@ export const exchangeOAuth2 = async (
   const signer = createOAuthSigner(consumer);
   const baseUrl = `${OAUTH_URL}/exchange/user/2.0`;
   const token = { key: oauth1.oauth_token, secret: oauth1.oauth_token_secret };
-  const authHeader = signer.toHeader(
-    { url: baseUrl, method: "POST" },
-    token
-  );
+  const authHeader = signer.toHeader({ url: baseUrl, method: "POST" }, token);
 
   const res = await fetchFn(baseUrl, {
     method: "POST",

@@ -82,9 +82,7 @@ describe("createGarminWorkoutService", () => {
 
     expect(krd.version).toBe("1.0");
     expect(krd.type).toBe("structured_workout");
-    expect(httpClient.get).toHaveBeenCalledWith(
-      `${WORKOUT_URL}/workout/123`
-    );
+    expect(httpClient.get).toHaveBeenCalledWith(`${WORKOUT_URL}/workout/123`);
   });
 
   it("should remove a workout", async () => {
@@ -93,8 +91,6 @@ describe("createGarminWorkoutService", () => {
     const service = createGarminWorkoutService(httpClient, mockLogger);
     await service.remove("456");
 
-    expect(httpClient.del).toHaveBeenCalledWith(
-      `${WORKOUT_URL}/workout/456`
-    );
+    expect(httpClient.del).toHaveBeenCalledWith(`${WORKOUT_URL}/workout/456`);
   });
 });

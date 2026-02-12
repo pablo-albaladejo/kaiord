@@ -25,7 +25,9 @@ const OAUTH2_RESPONSE = JSON.stringify({
   refresh_token_expires_in: 86400,
 });
 
-const createMockFetch = (responses: Array<{ text?: string; json?: unknown }>) => {
+const createMockFetch = (
+  responses: Array<{ text?: string; json?: unknown }>
+) => {
   let callIndex = 0;
   return vi.fn(async () => {
     const resp = responses[callIndex++] ?? { text: "" };
