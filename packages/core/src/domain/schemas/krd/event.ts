@@ -17,7 +17,7 @@ import { z } from "zod";
  * ```
  */
 export const krdEventSchema = z.object({
-  timestamp: z.string().datetime(),
+  timestamp: z.iso.datetime(),
   eventType: z.enum([
     "event_start",
     "event_stop",
