@@ -9,7 +9,14 @@ const STEP_TYPE_TO_INTENSITY: Record<string, Intensity> = {
   main: "active",
 };
 
-const INTENSITY_TO_STEP_TYPE: Record<string, string> = {
+export type StepTypeKey =
+  | "warmup"
+  | "cooldown"
+  | "interval"
+  | "recovery"
+  | "rest";
+
+const INTENSITY_TO_STEP_TYPE: Record<string, StepTypeKey> = {
   warmup: "warmup",
   cooldown: "cooldown",
   active: "interval",
@@ -22,5 +29,5 @@ const INTENSITY_TO_STEP_TYPE: Record<string, string> = {
 export const mapStepTypeToIntensity = (stepTypeKey: string): Intensity =>
   STEP_TYPE_TO_INTENSITY[stepTypeKey] ?? "active";
 
-export const mapIntensityToStepType = (intensity: string): string =>
+export const mapIntensityToStepType = (intensity: string): StepTypeKey =>
   INTENSITY_TO_STEP_TYPE[intensity] ?? "interval";
