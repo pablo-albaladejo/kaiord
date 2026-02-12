@@ -1,5 +1,13 @@
 # @kaiord/mcp
 
+## 4.5.1
+
+### Patch Changes
+
+- 9dfe279: Replace non-null assertion with explicit guard in resolve-input.ts
+- Updated dependencies [9dfe279]
+  - @kaiord/garmin@4.5.1
+
 ## 4.4.0
 
 ### Minor Changes
