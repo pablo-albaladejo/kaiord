@@ -3,6 +3,7 @@ import type { BinaryReader, KRD, Logger, TextReader } from "@kaiord/core";
 
 import type { FileFormat } from "../types/tool-schemas";
 import { isBinaryFormat } from "../types/tool-schemas";
+import { decodeBase64 } from "../utils/base64";
 import { readFileAsBuffer, readFileAsText } from "../utils/file-io";
 import {
   FORMAT_REGISTRY,
@@ -49,7 +50,7 @@ const readBinaryInput = async (
   }
   const buffer = inputFile
     ? await readFileAsBuffer(inputFile)
-    : Buffer.from(inputContent as string, "base64");
+    : decodeBase64(inputContent as string);
   return fromBinary(buffer, reader, logger);
 };
 

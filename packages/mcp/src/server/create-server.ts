@@ -1,3 +1,6 @@
+import { readFileSync } from "fs";
+import { dirname, join } from "path";
+import { fileURLToPath } from "url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 import { createStderrLogger } from "../adapters/stderr-logger";
@@ -14,12 +17,15 @@ import { registerListFormatsTool } from "../tools/kaiord-list-formats";
 import { registerValidateTool } from "../tools/kaiord-validate";
 
 const SERVER_NAME = "kaiord-mcp";
-const SERVER_VERSION = "1.0.0";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const pkg = JSON.parse(
+  readFileSync(join(__dirname, "../../package.json"), "utf-8")
+) as { version: string };
 
 export const createServer = (): McpServer => {
   const server = new McpServer({
     name: SERVER_NAME,
-    version: SERVER_VERSION,
+    version: pkg.version,
   });
   const logger = createStderrLogger();
 

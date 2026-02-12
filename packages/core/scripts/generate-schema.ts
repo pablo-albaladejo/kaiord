@@ -12,6 +12,16 @@ const schemaDir = resolve(__dirname, "../schema");
 const writeSchema = (path: string, data: object) =>
   writeFileSync(path, JSON.stringify(data, null, 2));
 
+const extractProperties = (
+  schema: object
+): Record<string, unknown> | undefined => {
+  if (!("properties" in schema)) return undefined;
+  const s = schema as { properties: Record<string, unknown> };
+  if (typeof s.properties !== "object" || s.properties === null)
+    return undefined;
+  return s.properties;
+};
+
 // Generate Workout schema (for extensions.structured_workout)
 const workoutJsonSchema = z.toJSONSchema(workoutSchema);
 
@@ -25,12 +35,11 @@ writeSchema(workoutOutputPath, {
 console.log(`✓ Workout Schema generated at ${workoutOutputPath}`);
 
 // Generate KRD schema with reference to workout schema
-const krdJsonSchema = z.toJSONSchema(krdSchema) as Record<string, unknown> & {
-  properties?: Record<string, unknown>;
-};
+const krdJsonSchema = z.toJSONSchema(krdSchema);
+const krdProperties = extractProperties(krdJsonSchema);
 
-if (krdJsonSchema.properties?.extensions) {
-  krdJsonSchema.properties.extensions = {
+if (krdProperties?.extensions) {
+  krdProperties.extensions = {
     type: "object",
     properties: {
       structured_workout: { $ref: "workout.json" },
