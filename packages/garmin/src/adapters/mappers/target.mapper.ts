@@ -1,4 +1,4 @@
-import type { Target } from "@kaiord/core";
+import type { Target, TargetType } from "@kaiord/core";
 import type { GarminTargetType } from "../schemas/common";
 import { TargetTypeId } from "../schemas/common";
 
@@ -14,7 +14,7 @@ export const mapGarminTargetToKrd = (
   valueOne: number | null,
   valueTwo: number | null,
   zoneNumber: number | null
-): { targetType: string; target: Target } => {
+): { targetType: TargetType; target: Target } => {
   switch (targetTypeKey) {
     case "power.zone":
       return mapPowerTarget(valueOne, valueTwo, zoneNumber);
@@ -36,7 +36,7 @@ const mapPowerTarget = (
   v1: number | null,
   v2: number | null,
   zone: number | null
-): { targetType: string; target: Target } => {
+): { targetType: TargetType; target: Target } => {
   if (zone !== null) {
     return {
       targetType: "power",
@@ -56,7 +56,7 @@ const mapHeartRateTarget = (
   v1: number | null,
   v2: number | null,
   zone: number | null
-): { targetType: string; target: Target } => {
+): { targetType: TargetType; target: Target } => {
   if (zone !== null) {
     return {
       targetType: "heart_rate",
@@ -82,7 +82,7 @@ const mapPaceTarget = (
   v1: number | null,
   v2: number | null,
   zone: number | null
-): { targetType: string; target: Target } => {
+): { targetType: TargetType; target: Target } => {
   if (zone !== null) {
     return {
       targetType: "pace",
@@ -103,7 +103,7 @@ const mapSpeedTarget = (
   v2: number | null,
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   _zone: number | null
-): { targetType: string; target: Target } => {
+): { targetType: TargetType; target: Target } => {
   if (v1 !== null && v2 !== null) {
     return {
       targetType: "pace",
@@ -116,7 +116,7 @@ const mapSpeedTarget = (
 const mapCadenceTarget = (
   v1: number | null,
   v2: number | null
-): { targetType: string; target: Target } => {
+): { targetType: TargetType; target: Target } => {
   if (v1 !== null && v2 !== null) {
     return {
       targetType: "cadence",

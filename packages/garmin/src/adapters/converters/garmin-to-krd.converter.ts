@@ -1,3 +1,4 @@
+import { z } from "zod";
 import type {
   KRD,
   Logger,
@@ -8,14 +9,91 @@ import type {
   WorkoutStep,
 } from "@kaiord/core";
 import { createGarminParsingError } from "@kaiord/core";
-import type { ExecutableStepDTO } from "../schemas/output";
-import type { GarminWorkoutStep } from "../schemas/output/types";
 import { mapConditionToDuration } from "../mappers/condition.mapper";
 import { mapGarminEquipmentToKrd } from "../mappers/equipment.mapper";
 import { mapStepTypeToIntensity } from "../mappers/intensity.mapper";
 import { mapGarminSportToKrd } from "../mappers/sport.mapper";
 import { mapGarminStrokeToKrd } from "../mappers/stroke.mapper";
 import { mapGarminTargetToKrd } from "../mappers/target.mapper";
+
+const executableStepParseSchema = z
+  .object({
+    type: z.literal("ExecutableStepDTO"),
+    stepType: z.object({ stepTypeKey: z.string() }).passthrough(),
+    endCondition: z.object({ conditionTypeKey: z.string() }).passthrough(),
+    endConditionValue: z.number(),
+    targetType: z.object({ workoutTargetTypeKey: z.string() }).passthrough(),
+    targetValueOne: z.number().nullable().optional(),
+    targetValueTwo: z.number().nullable().optional(),
+    zoneNumber: z.number().nullable().optional(),
+    secondaryTargetType: z
+      .object({ workoutTargetTypeKey: z.string() })
+      .passthrough()
+      .nullable()
+      .optional(),
+    secondaryTargetValueOne: z.number().nullable().optional(),
+    secondaryTargetValueTwo: z.number().nullable().optional(),
+    secondaryZoneNumber: z.number().nullable().optional(),
+    strokeType: z
+      .object({
+        strokeTypeKey: z.string().nullable().optional(),
+        strokeTypeId: z.number().nullable().optional(),
+      })
+      .passthrough()
+      .nullable()
+      .optional(),
+    equipmentType: z
+      .object({ equipmentTypeKey: z.string().nullable().optional() })
+      .passthrough()
+      .nullable()
+      .optional(),
+  })
+  .passthrough();
+
+type ParsedExecutableStep = z.infer<typeof executableStepParseSchema>;
+
+type ParsedRepeatGroup = {
+  type: "RepeatGroupDTO";
+  numberOfIterations: number;
+  workoutSteps: ParsedWorkoutStep[];
+};
+
+type ParsedWorkoutStep = ParsedExecutableStep | ParsedRepeatGroup;
+
+const repeatGroupParseSchema: z.ZodType<ParsedRepeatGroup> = z.lazy(() =>
+  z
+    .object({
+      type: z.literal("RepeatGroupDTO"),
+      numberOfIterations: z.number(),
+      workoutSteps: z.array(workoutStepParseSchema),
+    })
+    .passthrough()
+);
+
+const workoutStepParseSchema: z.ZodType<ParsedWorkoutStep> = z.lazy(() =>
+  z.union([executableStepParseSchema, repeatGroupParseSchema])
+);
+
+const garminWorkoutParseSchema = z.object({
+  sportType: z
+    .object({ sportTypeKey: z.string() })
+    .passthrough()
+    .nullable()
+    .optional(),
+  workoutName: z.string().optional(),
+  workoutSegments: z
+    .array(
+      z
+        .object({
+          workoutSteps: z.array(workoutStepParseSchema).optional(),
+        })
+        .passthrough()
+    )
+    .optional(),
+  poolLength: z.number().nullable().optional(),
+});
+
+type GarminWorkoutParsed = z.infer<typeof garminWorkoutParseSchema>;
 
 export const convertGarminToKRD = (gcnString: string, logger: Logger): KRD => {
   logger.info("Parsing Garmin Connect JSON");
@@ -27,19 +105,18 @@ export const convertGarminToKRD = (gcnString: string, logger: Logger): KRD => {
     throw createGarminParsingError("Invalid JSON in GCN file", error);
   }
 
-  if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
-    throw createGarminParsingError("GCN data is not an object");
+  const result = garminWorkoutParseSchema.safeParse(parsed);
+  if (!result.success) {
+    const issues = result.error.issues
+      .map((i) => `${i.path.join(".")}: ${i.message}`)
+      .join("; ");
+    throw createGarminParsingError(`Invalid GCN data: ${issues}`);
   }
-  const gcn = parsed as Record<string, unknown>;
 
-  const sportType = gcn.sportType as {
-    sportTypeKey: string;
-  } | null;
-  const sport = mapGarminSportToKrd(sportType?.sportTypeKey ?? "");
-  const workoutName = (gcn.workoutName as string) ?? "";
-  const segments =
-    (gcn.workoutSegments as Array<Record<string, unknown>>) ?? [];
-
+  const gcn = result.data;
+  const sport = mapGarminSportToKrd(gcn.sportType?.sportTypeKey ?? "");
+  const workoutName = gcn.workoutName ?? "";
+  const segments = gcn.workoutSegments ?? [];
   const steps = flattenSegmentsToSteps(segments, logger);
 
   const workout: Workout = {
@@ -51,32 +128,27 @@ export const convertGarminToKRD = (gcnString: string, logger: Logger): KRD => {
   addPoolLength(gcn, workout);
 
   const now = new Date().toISOString();
-
   return {
     version: "1.0",
     type: "structured_workout",
-    metadata: {
-      created: now,
-      sport,
-      manufacturer: "garmin-connect",
-    },
-    extensions: {
-      structured_workout: workout,
-    },
+    metadata: { created: now, sport, manufacturer: "garmin-connect" },
+    extensions: { structured_workout: workout },
   };
 };
 
+type ParsedSegment = NonNullable<
+  GarminWorkoutParsed["workoutSegments"]
+>[number];
+
 const flattenSegmentsToSteps = (
-  segments: Array<Record<string, unknown>>,
+  segments: ParsedSegment[],
   logger: Logger
 ): Array<WorkoutStep | RepetitionBlock> => {
   const allSteps: Array<WorkoutStep | RepetitionBlock> = [];
   let stepIndex = 0;
 
   for (const segment of segments) {
-    const workoutSteps = (segment.workoutSteps as GarminWorkoutStep[]) ?? [];
-
-    for (const step of workoutSteps) {
+    for (const step of segment.workoutSteps ?? []) {
       if (step.type === "RepeatGroupDTO") {
         const block = mapRepeatGroup(step, stepIndex, logger);
         stepIndex += block.steps.length;
@@ -92,30 +164,29 @@ const flattenSegmentsToSteps = (
 };
 
 const mapExecutableStep = (
-  step: ExecutableStepDTO,
+  step: ParsedExecutableStep,
   stepIndex: number
 ): WorkoutStep => {
-  const conditionKey = step.endCondition.conditionTypeKey;
   const { durationType, duration } = mapConditionToDuration(
-    conditionKey,
+    step.endCondition.conditionTypeKey,
     step.endConditionValue
   );
 
   const { targetType, target } = resolveTarget(step);
   const intensity = mapStepTypeToIntensity(step.stepType.stepTypeKey);
   const equipment = mapGarminEquipmentToKrd(
-    step.equipmentType?.equipmentTypeKey
+    step.equipmentType?.equipmentTypeKey ?? null
   );
   const stroke = mapGarminStrokeToKrd(
-    step.strokeType?.strokeTypeKey,
-    step.strokeType?.strokeTypeId
+    step.strokeType?.strokeTypeKey ?? null,
+    step.strokeType?.strokeTypeId ?? 0
   );
 
   const result: WorkoutStep = {
     stepIndex,
     durationType,
     duration,
-    targetType: targetType as TargetType,
+    targetType,
     target,
     intensity,
   };
@@ -134,34 +205,29 @@ const mapExecutableStep = (
 };
 
 const resolveTarget = (
-  step: ExecutableStepDTO
-): { targetType: string; target: Target } => {
+  step: ParsedExecutableStep
+): { targetType: TargetType; target: Target } => {
   const primary = mapGarminTargetToKrd(
     step.targetType.workoutTargetTypeKey,
-    step.targetValueOne,
-    step.targetValueTwo,
-    step.zoneNumber
+    step.targetValueOne ?? null,
+    step.targetValueTwo ?? null,
+    step.zoneNumber ?? null
   );
 
   if (step.secondaryTargetType && primary.targetType === "open") {
     return mapGarminTargetToKrd(
       step.secondaryTargetType.workoutTargetTypeKey,
-      step.secondaryTargetValueOne,
-      step.secondaryTargetValueTwo,
-      step.secondaryZoneNumber
+      step.secondaryTargetValueOne ?? null,
+      step.secondaryTargetValueTwo ?? null,
+      step.secondaryZoneNumber ?? null
     );
   }
 
   return primary;
 };
 
-type RepeatGroupLike = {
-  numberOfIterations: number;
-  workoutSteps: GarminWorkoutStep[];
-};
-
 const mapRepeatGroup = (
-  group: RepeatGroupLike,
+  group: ParsedRepeatGroup,
   startIndex: number,
   logger: Logger
 ): RepetitionBlock => {
@@ -184,17 +250,11 @@ const mapRepeatGroup = (
     }
   }
 
-  return {
-    repeatCount: group.numberOfIterations,
-    steps,
-  };
+  return { repeatCount: group.numberOfIterations, steps };
 };
 
-const addPoolLength = (
-  gcn: Record<string, unknown>,
-  workout: Workout
-): void => {
-  const poolLength = gcn.poolLength as number | null;
+const addPoolLength = (gcn: GarminWorkoutParsed, workout: Workout): void => {
+  const poolLength = gcn.poolLength;
   if (poolLength && poolLength > 0) {
     workout.poolLength = poolLength;
     workout.poolLengthUnit = "meters";

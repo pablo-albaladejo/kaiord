@@ -13,7 +13,9 @@
       "WebSearch",
       "WebFetch",
       "mcp__ide__getDiagnostics",
-      "Skill(test)"
+      "Skill(test)",
+      "Skill(coverage)",
+      "Skill(deep-review-fix)"
     ],
     "deny": [
       "Bash(rm -rf /)",

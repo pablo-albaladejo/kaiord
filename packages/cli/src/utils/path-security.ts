@@ -2,6 +2,8 @@
  * Path security validation utilities
  */
 
+const DANGEROUS_CHARS = /[\0|;&`$(){}!\n\r<>]/;
+
 /**
  * Validate that a path does not contain dangerous path components.
  * CLIs legitimately need to access files anywhere on the filesystem,
@@ -11,15 +13,9 @@
  * @throws Error if dangerous path pattern is detected
  */
 export const validatePathSecurity = (inputPath: string): void => {
-  // Block null bytes which could be used for injection attacks
-  if (inputPath.includes("\0")) {
-    throw new Error(`Invalid path: null byte detected in ${inputPath}`);
-  }
-
-  // Block paths that attempt command injection
-  if (inputPath.includes("|") || inputPath.includes(";")) {
+  if (DANGEROUS_CHARS.test(inputPath)) {
     throw new Error(
-      `Invalid path: shell metacharacters detected in ${inputPath}`
+      `Invalid path: dangerous characters detected in ${inputPath}`
     );
   }
 };
