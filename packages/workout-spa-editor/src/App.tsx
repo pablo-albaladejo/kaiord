@@ -1,4 +1,4 @@
-import { lazy, Suspense, useState } from "react";
+import { lazy, Suspense, useEffect, useState } from "react";
 import "./App.css";
 import { AppKeyboardShortcuts } from "./components/AppKeyboardShortcuts";
 import { WelcomeSection } from "./components/pages/WelcomeSection";
@@ -23,6 +23,9 @@ function App() {
   const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
   const { showTutorial, setShowTutorial } = useOnboardingTutorial();
   const [tutorialMounted, setTutorialMounted] = useState(showTutorial);
+  useEffect(() => {
+    if (showTutorial) setTutorialMounted(true);
+  }, [showTutorial]);
   const reorderStep = useWorkoutStore((s) => s.reorderStep);
   const reorderStepsInBlock = useWorkoutStore((s) => s.reorderStepsInBlock);
 
@@ -42,12 +45,7 @@ function App() {
   return (
     <AppToastProvider>
       <AppKeyboardShortcuts />
-      <MainLayout
-        onReplayTutorial={() => {
-          setTutorialMounted(true);
-          setShowTutorial(true);
-        }}
-      >
+      <MainLayout onReplayTutorial={() => setShowTutorial(true)}>
         <div className="space-y-6">
           {!workout && (
             <WelcomeSection
