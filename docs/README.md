@@ -21,6 +21,7 @@ Welcome to the Kaiord documentation. This directory contains comprehensive guide
 
 - **[Core Library](../packages/core/README.md)** - @kaiord/core package documentation
 - **[CLI Tool](../packages/cli/README.md)** - @kaiord/cli package documentation
+- **[MCP Server](../packages/mcp/README.md)** - @kaiord/mcp MCP server for AI/LLM integration
 - **[Workout SPA Editor](../packages/workout-spa-editor/README.md)** - Web application documentation
 
 ## Quick Links

@@ -27,7 +27,7 @@ export type DifficultyLevel = z.infer<typeof difficultyLevelSchema>;
  * Represents a saved workout in the library with metadata for organization.
  */
 export const workoutTemplateSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   name: z.string().min(1).max(200),
   sport: z.string().min(1).max(50),
   krd: krdSchema,
@@ -36,8 +36,8 @@ export const workoutTemplateSchema = z.object({
   duration: z.number().int().positive().optional(),
   notes: z.string().max(1000).optional(),
   thumbnailData: z.string().optional(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime(),
+  createdAt: z.iso.datetime(),
+  updatedAt: z.iso.datetime(),
 });
 
 export type WorkoutTemplate = z.infer<typeof workoutTemplateSchema>;

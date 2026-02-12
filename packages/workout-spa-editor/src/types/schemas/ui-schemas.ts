@@ -11,7 +11,7 @@ import { z } from "zod";
  * Step with ID schema (for UI rendering)
  */
 export const workoutStepWithIdSchema = z.object({
-  id: z.string().uuid(),
+  id: z.uuid(),
   stepIndex: z.number().int().nonnegative(),
   name: z.string().optional(),
   durationType: z.enum([

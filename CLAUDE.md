@@ -14,6 +14,7 @@ Kaiord is an open-source health & fitness data framework. A TypeScript monorepo 
 - `@kaiord/zwo` - ZWO format adapter (fast-xml-parser, XSD validation)
 - `@kaiord/garmin` - Garmin Connect API (GCN) format adapter
 - `@kaiord/cli` - Command-line interface
+- `@kaiord/mcp` - Model Context Protocol (MCP) server for AI/LLM integration
 - `@kaiord/workout-spa-editor` - React web application (private)
 
 ## Commands
@@ -76,7 +77,8 @@ packages/
 ├── tcx/src/adapters/     # TCX reader/writer/validator implementations
 ├── zwo/src/adapters/     # ZWO reader/writer/validator implementations
 ├── all/src/              # Meta-package wiring all adapters
-└── cli/src/              # CLI commands
+├── cli/src/              # CLI commands
+└── mcp/src/              # MCP server for AI/LLM integration
 ```
 
 **Critical rules:**

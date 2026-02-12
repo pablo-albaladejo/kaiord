@@ -10,7 +10,8 @@
       "@kaiord/tcx",
       "@kaiord/zwo",
       "@kaiord/garmin",
-      "@kaiord/cli"
+      "@kaiord/cli",
+      "@kaiord/mcp"
     ]
   ],
   "access": "public",
