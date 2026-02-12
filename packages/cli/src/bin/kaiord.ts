@@ -10,6 +10,7 @@ import { hideBin } from "yargs/helpers";
 import { convertYargsConfig } from "../commands/convert/yargs-config.js";
 import { diffYargsConfig } from "../commands/diff/yargs-config.js";
 import { validateYargsConfig } from "../commands/validate/yargs-config.js";
+import { getExitCodeForError } from "../utils/error-exit-code.js";
 import { formatError } from "../utils/error-formatter.js";
 import { ExitCode } from "../utils/exit-codes.js";
 
@@ -75,23 +76,7 @@ const main = async (): Promise<void> => {
     const formattedError = formatError(error, { json: false });
     console.error(formattedError);
 
-    if (error && typeof error === "object" && "name" in error) {
-      const errorName = (error as { name: string }).name;
-      if (
-        errorName === "FitParsingError" ||
-        errorName === "GarminParsingError"
-      ) {
-        process.exit(ExitCode.PARSING_ERROR);
-      } else if (errorName === "KrdValidationError") {
-        process.exit(ExitCode.VALIDATION_ERROR);
-      } else if (errorName === "ToleranceExceededError") {
-        process.exit(ExitCode.TOLERANCE_EXCEEDED);
-      } else if (errorName === "InvalidArgumentError") {
-        process.exit(ExitCode.INVALID_ARGUMENT);
-      }
-    }
-
-    process.exit(ExitCode.UNKNOWN_ERROR);
+    process.exit(getExitCodeForError(error));
   }
 };
 

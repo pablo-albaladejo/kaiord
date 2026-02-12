@@ -45,13 +45,7 @@ export const diffYargsConfig = {
   },
   handler: async (argv: Record<string, unknown>) => {
     const exitCode = await diffCommand(argv as unknown as DiffOptions);
-    if (
-      exitCode !== ExitCode.SUCCESS &&
-      exitCode !== ExitCode.DIFFERENCES_FOUND
-    ) {
-      process.exit(exitCode);
-    }
-    if (exitCode === ExitCode.DIFFERENCES_FOUND) {
+    if (exitCode !== ExitCode.SUCCESS) {
       process.exit(exitCode);
     }
   },

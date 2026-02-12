@@ -3,16 +3,16 @@ import {
   loadConfigWithMetadata,
   mergeWithConfig,
 } from "../../utils/config-loader.js";
-import { formatError } from "../../utils/error-formatter.js";
 import { ExitCode } from "../../utils/exit-codes.js";
 import { detectFormat } from "../../utils/format-detector.js";
 import { createLogger } from "../../utils/logger-factory.js";
-import { executeValidation } from "./execute-validation";
+import { executeValidation } from "./execute-validation.js";
 import {
   formatValidationFailure,
   formatValidationSuccess,
-} from "./format-results";
-import { validateOptionsSchema } from "./types";
+} from "./format-results.js";
+import { handleValidationError } from "./handle-error.js";
+import { validateOptionsSchema } from "./types.js";
 
 export const validateCommand = async (options: unknown): Promise<number> => {
   let logger: Awaited<ReturnType<typeof createLogger>> | undefined;
@@ -82,39 +82,7 @@ export const validateCommand = async (options: unknown): Promise<number> => {
     return ExitCode.TOLERANCE_EXCEEDED;
   } catch (error) {
     logger?.error("Validation failed", { error });
-
-    let jsonOutput = false;
-    try {
-      const opts = validateOptionsSchema.parse(options);
-      jsonOutput = opts.json || false;
-    } catch {
-      // If options parsing failed, use default formatting
-    }
-
-    if (jsonOutput) {
-      const errorObj = formatError(error, { json: true });
-      const errorData =
-        typeof errorObj === "string" ? JSON.parse(errorObj) : errorObj;
-      console.log(
-        JSON.stringify({ success: false, error: errorData }, null, 2)
-      );
-    } else {
-      console.error(formatError(error, { json: false }));
-    }
-
-    if (error instanceof Error) {
-      if (error.message.includes("File not found")) {
-        return ExitCode.FILE_NOT_FOUND;
-      }
-      if (
-        error.message.includes("only supports") ||
-        error.message.includes("Unable to detect")
-      ) {
-        return ExitCode.INVALID_ARGUMENT;
-      }
-    }
-
-    return ExitCode.UNKNOWN_ERROR;
+    return handleValidationError(error, options);
   } finally {
     spinner?.stop();
   }
