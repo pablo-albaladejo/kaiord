@@ -5,10 +5,6 @@
  */
 
 import { toBinary, toText } from "@kaiord/core";
-import { fitWriter } from "@kaiord/fit";
-import { garminWriter } from "@kaiord/garmin";
-import { tcxWriter } from "@kaiord/tcx";
-import { zwiftWriter } from "@kaiord/zwo";
 import { ExportError } from "./export-workout";
 import type { ExportProgressCallback } from "./export-workout";
 import type { KRD } from "@kaiord/core";
@@ -37,6 +33,7 @@ export const exportFitFile = async (
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
   onProgress?.(50);
+  const { fitWriter } = await import("@kaiord/fit");
   const buffer = await toBinary(krd, fitWriter);
   onProgress?.(100);
   return buffer;
@@ -47,6 +44,7 @@ export const exportTcxFile = async (
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
   onProgress?.(50);
+  const { tcxWriter } = await import("@kaiord/tcx");
   const tcxString = await toText(krd, tcxWriter);
   const buffer = new TextEncoder().encode(tcxString);
   onProgress?.(100);
@@ -58,6 +56,7 @@ export const exportZwoFile = async (
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
   onProgress?.(50);
+  const { zwiftWriter } = await import("@kaiord/zwo");
   const zwoString = await toText(krd, zwiftWriter);
   const buffer = new TextEncoder().encode(zwoString);
   onProgress?.(100);
@@ -69,6 +68,7 @@ export const exportGcnFile = async (
   onProgress?: ExportProgressCallback
 ): Promise<Uint8Array> => {
   onProgress?.(50);
+  const { garminWriter } = await import("@kaiord/garmin");
   const gcnString = await toText(krd, garminWriter);
   const buffer = new TextEncoder().encode(gcnString);
   onProgress?.(100);

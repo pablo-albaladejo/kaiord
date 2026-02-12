@@ -1,21 +1,33 @@
-import { useState } from "react";
+import { lazy, Suspense } from "react";
 import { HeaderLogo } from "./components/HeaderLogo";
 import { HeaderNav } from "./components/HeaderNav";
-import { HelpDialog } from "./components/HelpDialog";
+import { useLazyDialog } from "../../../hooks/use-lazy-dialog";
 import { useLibraryStore } from "../../../store/library-store";
 import { useProfileStore } from "../../../store/profile-store";
 import { useWorkoutStore } from "../../../store/workout-store";
-import { ProfileManager } from "../../organisms/ProfileManager/ProfileManager";
-import { WorkoutLibrary } from "../../organisms/WorkoutLibrary/WorkoutLibrary";
+
+const ProfileManager = lazy(() =>
+  import("../../organisms/ProfileManager/ProfileManager").then((m) => ({
+    default: m.ProfileManager,
+  }))
+);
+const WorkoutLibrary = lazy(() =>
+  import("../../organisms/WorkoutLibrary/WorkoutLibrary").then((m) => ({
+    default: m.WorkoutLibrary,
+  }))
+);
+const HelpDialog = lazy(() =>
+  import("./components/HelpDialog").then((m) => ({ default: m.HelpDialog }))
+);
 
 type LayoutHeaderProps = {
   onReplayTutorial?: () => void;
 };
 
 export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
-  const [profileManagerOpen, setProfileManagerOpen] = useState(false);
-  const [libraryOpen, setLibraryOpen] = useState(false);
-  const [helpDialogOpen, setHelpDialogOpen] = useState(false);
+  const profile = useLazyDialog();
+  const library = useLazyDialog();
+  const help = useLazyDialog();
   const { getActiveProfile } = useProfileStore();
   const activeProfile = getActiveProfile();
   const { templates } = useLibraryStore();
@@ -28,31 +40,40 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
         <HeaderNav
           activeProfileName={activeProfile?.name || null}
           libraryCount={templates.length}
-          onProfileClick={() => setProfileManagerOpen(true)}
-          onLibraryClick={() => setLibraryOpen(true)}
-          onHelpClick={() => setHelpDialogOpen(true)}
+          onProfileClick={profile.show}
+          onLibraryClick={library.show}
+          onHelpClick={help.show}
         />
       </div>
 
-      <ProfileManager
-        open={profileManagerOpen}
-        onOpenChange={setProfileManagerOpen}
-      />
+      <Suspense fallback={null}>
+        {profile.mounted && (
+          <ProfileManager open={profile.open} onOpenChange={profile.setOpen} />
+        )}
+      </Suspense>
 
-      <WorkoutLibrary
-        open={libraryOpen}
-        onOpenChange={setLibraryOpen}
-        onLoadWorkout={(template) => {
-          loadWorkout(template.krd);
-        }}
-        hasCurrentWorkout={currentWorkout !== null}
-      />
+      <Suspense fallback={null}>
+        {library.mounted && (
+          <WorkoutLibrary
+            open={library.open}
+            onOpenChange={library.setOpen}
+            onLoadWorkout={(template) => {
+              loadWorkout(template.krd);
+            }}
+            hasCurrentWorkout={currentWorkout !== null}
+          />
+        )}
+      </Suspense>
 
-      <HelpDialog
-        open={helpDialogOpen}
-        onOpenChange={setHelpDialogOpen}
-        onReplayTutorial={onReplayTutorial}
-      />
+      <Suspense fallback={null}>
+        {help.mounted && (
+          <HelpDialog
+            open={help.open}
+            onOpenChange={help.setOpen}
+            onReplayTutorial={onReplayTutorial}
+          />
+        )}
+      </Suspense>
     </header>
   );
 };

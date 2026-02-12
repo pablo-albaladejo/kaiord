@@ -1,41 +1,31 @@
+import { lazy, Suspense, useEffect, useState } from "react";
 import "./App.css";
-import { OnboardingTutorial } from "./components/organisms/OnboardingTutorial/OnboardingTutorial";
+import { AppKeyboardShortcuts } from "./components/AppKeyboardShortcuts";
 import { WelcomeSection } from "./components/pages/WelcomeSection";
 import { WorkoutSection } from "./components/pages/WorkoutSection/WorkoutSection";
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { TUTORIAL_STEPS } from "./constants/tutorial-steps";
-import { useAppKeyboardHandlers } from "./hooks/use-app-keyboard-handlers";
 import { useOnboardingTutorial } from "./hooks/use-onboarding-tutorial";
 import { useAppHandlers } from "./hooks/useAppHandlers";
 import { useDeleteCleanup } from "./hooks/useDeleteCleanup";
 import { useWorkoutStore } from "./store/workout-store";
-import {
-  useCurrentWorkout,
-  useSelectedStepId,
-} from "./store/workout-store-selectors";
 import type { Workout } from "./types/krd";
 
-/** Renders keyboard shortcut bindings inside the toast context */
-function AppKeyboardShortcuts() {
-  useAppKeyboardHandlers();
-  return null;
-}
+const OnboardingTutorial = lazy(() =>
+  import("./components/organisms/OnboardingTutorial/OnboardingTutorial").then(
+    (m) => ({ default: m.OnboardingTutorial })
+  )
+);
 
-/**
- * Main App Component
- *
- * Integrates file upload, workout state management, and workout display.
- * Implements Requirements 1, 7, 37.1, and 37.5:
- * - Requirement 1: Display workout structure in clear visual format
- * - Requirement 7: Load existing KRD files
- * - Requirement 37.1: Display onboarding tutorial on first visit
- * - Requirement 37.5: Allow skipping or replaying tutorial
- */
 function App() {
-  const currentWorkout = useCurrentWorkout();
-  const selectedStepId = useSelectedStepId();
+  const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
+  const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
   const { showTutorial, setShowTutorial } = useOnboardingTutorial();
+  const [tutorialMounted, setTutorialMounted] = useState(showTutorial);
+  useEffect(() => {
+    if (showTutorial) setTutorialMounted(true);
+  }, [showTutorial]);
   const reorderStep = useWorkoutStore((s) => s.reorderStep);
   const reorderStepsInBlock = useWorkoutStore((s) => s.reorderStepsInBlock);
 
@@ -77,11 +67,15 @@ function App() {
         </div>
       </MainLayout>
 
-      <OnboardingTutorial
-        steps={TUTORIAL_STEPS}
-        open={showTutorial}
-        onOpenChange={setShowTutorial}
-      />
+      <Suspense fallback={null}>
+        {(showTutorial || tutorialMounted) && (
+          <OnboardingTutorial
+            steps={TUTORIAL_STEPS}
+            open={showTutorial}
+            onOpenChange={setShowTutorial}
+          />
+        )}
+      </Suspense>
     </AppToastProvider>
   );
 }

@@ -5,10 +5,6 @@
  */
 
 import { fromBinary, fromText } from "@kaiord/core";
-import { fitReader } from "@kaiord/fit";
-import { garminReader } from "@kaiord/garmin";
-import { tcxReader } from "@kaiord/tcx";
-import { zwiftReader } from "@kaiord/zwo";
 import { parseJSON } from "./json-parser";
 import { validateKRD } from "./krd-validator";
 import type { ImportProgressCallback } from "./import-workout";
@@ -42,6 +38,7 @@ export const importFitFile = async (
   signal?.throwIfAborted();
   onProgress?.(50);
   signal?.throwIfAborted();
+  const { fitReader } = await import("@kaiord/fit");
   const krd = await fromBinary(buffer, fitReader);
   onProgress?.(100);
   return krd;
@@ -56,6 +53,7 @@ export const importTcxFile = async (
   const text = new TextDecoder().decode(buffer);
   onProgress?.(50);
   signal?.throwIfAborted();
+  const { tcxReader } = await import("@kaiord/tcx");
   const krd = await fromText(text, tcxReader);
   onProgress?.(100);
   return krd;
@@ -70,6 +68,7 @@ export const importZwoFile = async (
   const text = new TextDecoder().decode(buffer);
   onProgress?.(50);
   signal?.throwIfAborted();
+  const { zwiftReader } = await import("@kaiord/zwo");
   const krd = await fromText(text, zwiftReader);
   onProgress?.(100);
   return krd;
@@ -84,6 +83,7 @@ export const importGcnFile = async (
   const text = new TextDecoder().decode(buffer);
   onProgress?.(50);
   signal?.throwIfAborted();
+  const { garminReader } = await import("@kaiord/garmin");
   const krd = await fromText(text, garminReader);
   onProgress?.(100);
   return krd;
