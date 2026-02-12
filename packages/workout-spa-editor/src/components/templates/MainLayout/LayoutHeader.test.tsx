@@ -149,7 +149,7 @@ describe("LayoutHeader", () => {
 
       // Assert
       expect(
-        screen.getByRole("heading", { name: /profile manager/i })
+        await screen.findByRole("heading", { name: /profile manager/i })
       ).toBeInTheDocument();
     });
   });
@@ -175,7 +175,7 @@ describe("LayoutHeader", () => {
         screen.getByRole("button", { name: /open profile manager/i })
       );
       expect(
-        screen.getByRole("heading", { name: /profile manager/i })
+        await screen.findByRole("heading", { name: /profile manager/i })
       ).toBeInTheDocument();
 
       // Act - Close dialog
@@ -198,7 +198,7 @@ describe("LayoutHeader", () => {
       await user.click(screen.getByRole("button", { name: /open help/i }));
 
       // Assert
-      const headings = screen.getAllByRole("heading", {
+      const headings = await screen.findAllByRole("heading", {
         name: /help & documentation/i,
       });
       expect(headings.length).toBeGreaterThan(0);
@@ -224,7 +224,7 @@ describe("LayoutHeader", () => {
 
       // Act - Open dialog
       await user.click(screen.getByRole("button", { name: /open help/i }));
-      const headings = screen.getAllByRole("heading", {
+      const headings = await screen.findAllByRole("heading", {
         name: /help & documentation/i,
       });
       expect(headings.length).toBeGreaterThan(0);
@@ -248,7 +248,7 @@ describe("LayoutHeader", () => {
       await user.click(screen.getByRole("button", { name: /open help/i }));
 
       // Assert
-      expect(screen.getByText(/getting started/i)).toBeInTheDocument();
+      expect(await screen.findByText(/getting started/i)).toBeInTheDocument();
       expect(screen.getByText(/keyboard shortcuts/i)).toBeInTheDocument();
       expect(
         screen.getByText(/frequently asked questions/i)
@@ -296,7 +296,7 @@ describe("LayoutHeader", () => {
 
       // Assert
       expect(
-        screen.getByRole("heading", { name: /workout library/i })
+        await screen.findByRole("heading", { name: /workout library/i })
       ).toBeInTheDocument();
     });
   });
@@ -322,7 +322,7 @@ describe("LayoutHeader", () => {
         screen.getByRole("button", { name: /open workout library/i })
       );
       expect(
-        screen.getByRole("heading", { name: /workout library/i })
+        await screen.findByRole("heading", { name: /workout library/i })
       ).toBeInTheDocument();
 
       // Act - Close dialog
@@ -350,7 +350,7 @@ describe("LayoutHeader", () => {
       );
 
       // Act - Load workout
-      const loadButton = screen.getByRole("button", { name: /^load$/i });
+      const loadButton = await screen.findByRole("button", { name: /^load$/i });
       await user.click(loadButton);
 
       // Assert - Workout should be loaded

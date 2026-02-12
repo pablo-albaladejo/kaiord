@@ -211,6 +211,34 @@ export default tseslint.config(
           },
         },
       ],
+      // Prevent static imports of heavy adapter packages (use dynamic import())
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          paths: [
+            {
+              name: "@kaiord/fit",
+              message: "Use dynamic import() for code splitting.",
+              allowTypeImports: true,
+            },
+            {
+              name: "@kaiord/tcx",
+              message: "Use dynamic import() for code splitting.",
+              allowTypeImports: true,
+            },
+            {
+              name: "@kaiord/zwo",
+              message: "Use dynamic import() for code splitting.",
+              allowTypeImports: true,
+            },
+            {
+              name: "@kaiord/garmin",
+              message: "Use dynamic import() for code splitting.",
+              allowTypeImports: true,
+            },
+          ],
+        },
+      ],
     },
   },
   {
