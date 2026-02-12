@@ -1,5 +1,11 @@
 # @kaiord/mcp
 
+## 4.4.0
+
+### Minor Changes
+
+- 61e2a85: feat(mcp): add kaiord_get_format_spec tool and server instructions for KRD discoverability
+
 ## 4.3.3
 
 ### Patch Changes
