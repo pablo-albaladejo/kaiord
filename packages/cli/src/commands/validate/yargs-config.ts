@@ -17,10 +17,7 @@ export const validateYargsConfig = {
         type: "string" as const,
         description: "Path to custom tolerance configuration JSON",
       })
-      .example(
-        "$0 validate -i workout.fit",
-        "Validate round-trip conversion"
-      )
+      .example("$0 validate -i workout.fit", "Validate round-trip conversion")
       .example(
         "$0 validate -i workout.fit --tolerance-config custom.json",
         "Validate with custom tolerances"

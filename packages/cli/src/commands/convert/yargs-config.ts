@@ -32,14 +32,8 @@ export const convertYargsConfig = {
         choices: ["fit", "gcn", "krd", "tcx", "zwo"] as const,
         description: "Override output format detection",
       })
-      .example(
-        "$0 convert -i workout.fit -o workout.krd",
-        "Convert FIT to KRD"
-      )
-      .example(
-        "$0 convert -i workout.krd -o workout.fit",
-        "Convert KRD to FIT"
-      )
+      .example("$0 convert -i workout.fit -o workout.krd", "Convert FIT to KRD")
+      .example("$0 convert -i workout.krd -o workout.fit", "Convert KRD to FIT")
       .example(
         '$0 convert -i "workouts/*.fit" --output-dir converted/',
         "Batch convert all FIT files"
