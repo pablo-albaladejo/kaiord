@@ -25,6 +25,67 @@ jobs:
         uses: anthropics/claude-code-action@v1
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
-          use_sticky_comment: true
           prompt: |
             Review this pull request. Focus on code quality, potential bugs, security issues, and compliance with project standards (see CLAUDE.md).
+            Write your review as a structured markdown report with sections: Summary, Key Findings, and Recommendations.
+
+      - name: Post review comment
+        if: always() && steps.claude-review.outputs.execution_file
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const execFile = '${{ steps.claude-review.outputs.execution_file }}';
+            if (!fs.existsSync(execFile)) {
+              console.log('No execution file found, skipping comment');
+              return;
+            }
+            const raw = fs.readFileSync(execFile, 'utf8');
+            const lines = raw.trim().split('\n');
+            // Find the last "result" message which contains Claude's final response
+            let review = '';
+            for (const line of lines) {
+              try {
+                const entry = JSON.parse(line);
+                if (entry.type === 'result' && entry.result) {
+                  review = entry.result;
+                } else if (entry.type === 'assistant' && entry.message?.content) {
+                  // Collect text blocks from assistant messages
+                  const texts = entry.message.content
+                    .filter(b => b.type === 'text')
+                    .map(b => b.text);
+                  if (texts.length > 0) review = texts.join('\n');
+                }
+              } catch {}
+            }
+            if (!review) {
+              console.log('No review content found in execution output');
+              return;
+            }
+            const marker = '<!-- claude-code-review -->';
+            const body = `${marker}\n## Claude Code Review\n\n${review}\n\n---\n*Automated review by Claude Code*`;
+            // Find existing sticky comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              per_page: 100,
+            });
+            const existing = comments.find(c => c.body?.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+              console.log(`Updated existing comment ${existing.id}`);
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+              console.log('Created new review comment');
+            }
