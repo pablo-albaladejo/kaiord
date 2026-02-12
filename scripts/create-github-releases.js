@@ -53,6 +53,18 @@ async function createGitHubReleases() {
     });
   }
 
+  // Check @kaiord/mcp
+  if (fs.existsSync("packages/mcp/package.json")) {
+    const pkg = JSON.parse(
+      fs.readFileSync("packages/mcp/package.json", "utf8")
+    );
+    packages.push({
+      name: pkg.name,
+      version: pkg.version,
+      dir: "packages/mcp",
+    });
+  }
+
   console.log(
     `\n📦 Creating GitHub releases for ${packages.length} package(s)...\n`
   );
