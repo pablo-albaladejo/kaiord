@@ -12,6 +12,7 @@ on:
       - "packages/zwo/**"
       - "packages/garmin/**"
       - "packages/cli/**"
+      - "packages/mcp/**"
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
@@ -80,6 +81,7 @@ jobs:
           # Store current versions
           CORE_VERSION_BEFORE=$(node -p "require('./packages/core/package.json').version")
           GARMIN_VERSION_BEFORE=$(node -p "require('./packages/garmin/package.json').version")
+          MCP_VERSION_BEFORE=$(node -p "require('./packages/mcp/package.json').version")
           CLI_VERSION_BEFORE=$(node -p "require('./packages/cli/package.json').version")
 
           # Run changeset version
@@ -94,11 +96,13 @@ jobs:
           pnpm --filter @kaiord/tcx build
           pnpm --filter @kaiord/zwo build
           pnpm --filter @kaiord/garmin build
+          pnpm --filter @kaiord/mcp build
           pnpm --filter @kaiord/cli build
 
           # Get new versions
           CORE_VERSION_AFTER=$(node -p "require('./packages/core/package.json').version")
           GARMIN_VERSION_AFTER=$(node -p "require('./packages/garmin/package.json').version")
+          MCP_VERSION_AFTER=$(node -p "require('./packages/mcp/package.json').version")
           CLI_VERSION_AFTER=$(node -p "require('./packages/cli/package.json').version")
 
           # Determine what changed
@@ -114,6 +118,13 @@ jobs:
             echo "garmin-version=$GARMIN_VERSION_AFTER" >> $GITHUB_OUTPUT
           else
             echo "garmin-changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$MCP_VERSION_BEFORE" != "$MCP_VERSION_AFTER" ]; then
+            echo "mcp-changed=true" >> $GITHUB_OUTPUT
+            echo "mcp-version=$MCP_VERSION_AFTER" >> $GITHUB_OUTPUT
+          else
+            echo "mcp-changed=false" >> $GITHUB_OUTPUT
           fi
 
           if [ "$CLI_VERSION_BEFORE" != "$CLI_VERSION_AFTER" ]; then
@@ -140,6 +151,7 @@ jobs:
         if: steps.changesets.outputs.has-changesets == 'true' && steps.version.outputs.has-version-changes == 'true'
         env:
           NPM_CONFIG_PROVENANCE: true
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm exec changeset publish
 
       - name: Create GitHub Releases
@@ -161,6 +173,10 @@ jobs:
 
           if [ "${{ steps.version.outputs.garmin-changed }}" = "true" ]; then
             echo "- @kaiord/garmin@${{ steps.version.outputs.garmin-version }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.version.outputs.mcp-changed }}" = "true" ]; then
+            echo "- @kaiord/mcp@${{ steps.version.outputs.mcp-version }}" >> $GITHUB_STEP_SUMMARY
           fi
 
           if [ "${{ steps.version.outputs.cli-changed }}" = "true" ]; then
