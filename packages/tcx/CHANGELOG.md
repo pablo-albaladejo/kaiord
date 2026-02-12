@@ -1,5 +1,19 @@
 # @kaiord/tcx
 
+## 4.3.0
+
+### Minor Changes
+
+- 3cea716: feat(mcp): add MCP server package exposing Kaiord tools to AI agents
+  - New `@kaiord/mcp` package with 6 tools, 3 resources, and 2 prompts for Claude Desktop/Code integration
+  - Upgrade Zod from v3 to v4 across all packages (`z.uuid()`, `z.iso.datetime()`, native `z.toJSONSchema()`)
+  - Remove `zod-to-json-schema` dependency in favor of native Zod v4 JSON schema generation
+
+### Patch Changes
+
+- Updated dependencies [3cea716]
+  - @kaiord/core@4.3.0
+
 ## 4.1.3
 
 ### Patch Changes
