@@ -151,7 +151,6 @@ jobs:
         if: steps.changesets.outputs.has-changesets == 'true' && steps.version.outputs.has-version-changes == 'true'
         env:
           NPM_CONFIG_PROVENANCE: true
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: pnpm exec changeset publish
 
       - name: Create GitHub Releases
