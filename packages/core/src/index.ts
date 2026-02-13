@@ -90,6 +90,9 @@ export type { LengthUnit } from "./domain/schemas/length-unit";
 export { krdLapTriggerSchema } from "./domain/schemas/krd/lap";
 export type { KRDLapTrigger } from "./domain/schemas/krd/lap";
 
+// Domain Type Guards
+export { isRepetitionBlock } from "./domain/type-guards";
+
 // Domain Converters
 export { convertLengthToMeters } from "./domain/converters/length-unit.converter";
 export { createWorkoutKRD } from "./domain/converters/workout-to-krd.converter";
