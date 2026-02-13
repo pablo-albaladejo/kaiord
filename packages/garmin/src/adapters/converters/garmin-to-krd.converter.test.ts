@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { KRD, Workout } from "@kaiord/core";
+import type { KRD, RepetitionBlock, Workout, WorkoutStep } from "@kaiord/core";
 import { createGarminParsingError, isRepetitionBlock } from "@kaiord/core";
 import { convertGarminToKRD } from "./garmin-to-krd.converter";
 
