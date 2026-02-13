@@ -1,5 +1,11 @@
 # @kaiord/garmin
 
+## 4.5.3
+
+### Patch Changes
+
+- 6cc9ccb: Add comprehensive unit tests for target converters, duration converters, workout converters, and CLI utilities to close coverage gaps
+
 ## 4.5.1
 
 ### Patch Changes
