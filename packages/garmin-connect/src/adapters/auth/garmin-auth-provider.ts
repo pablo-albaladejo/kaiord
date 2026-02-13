@@ -23,10 +23,14 @@ export const createGarminAuthProvider = (
   const tokenStore = options?.tokenStore;
   const fetchFn = options?.fetchFn ?? globalThis.fetch;
   const httpClient = createGarminHttpClient(logger, fetchFn);
+  let currentOAuth1:
+    | { oauth_token: string; oauth_token_secret: string }
+    | undefined;
 
   const auth: AuthProvider = {
     login: async (username, password) => {
       const result = await garminSso(username, password, logger, fetchFn);
+      currentOAuth1 = result.oauth1;
       httpClient.setTokens(result.oauth1, result.oauth2);
       if (tokenStore) {
         await tokenStore.save({
@@ -44,30 +48,22 @@ export const createGarminAuthProvider = (
 
     export_tokens: async () => {
       const token = httpClient.getOAuth2Token();
-      if (!token) {
+      if (!token || !currentOAuth1) {
         throw createServiceAuthError("No tokens to export");
       }
-      return { oauth1: {}, oauth2: token };
+      return { oauth1: currentOAuth1, oauth2: token };
     },
 
     restore_tokens: async (data) => {
       const parsed = garminTokensSchema.parse(data);
+      currentOAuth1 = parsed.oauth1;
       httpClient.setTokens(parsed.oauth1, parsed.oauth2);
       logger.info("Tokens restored from stored session");
     },
 
     logout: async () => {
-      httpClient.setTokens(
-        { oauth_token: "", oauth_token_secret: "" },
-        {
-          access_token: "",
-          refresh_token: "",
-          token_type: "",
-          expires_in: 0,
-          refresh_token_expires_in: 0,
-          expires_at: 0,
-        }
-      );
+      currentOAuth1 = undefined;
+      httpClient.clearTokens();
       if (tokenStore) {
         await tokenStore.clear();
       }

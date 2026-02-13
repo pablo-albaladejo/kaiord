@@ -38,6 +38,11 @@ type FetchFn = typeof globalThis.fetch;
 
 const fetchOAuthConsumer = async (fetchFn: FetchFn): Promise<OAuthConsumer> => {
   const res = await fetchFn(OAUTH_CONSUMER_URL);
+  if (!res.ok) {
+    throw createServiceAuthError(
+      `Failed to fetch OAuth consumer: ${res.status} ${res.statusText}`
+    );
+  }
   const data = (await res.json()) as {
     consumer_key: string;
     consumer_secret: string;
@@ -115,7 +120,7 @@ const getLoginTicket = async (
 
 const checkAccountLocked = (html: string): void => {
   const match = ACCOUNT_LOCKED_RE.exec(html);
-  if (match) {
+  if (match && match[1] === "ACCOUNT_LOCKED") {
     throw createServiceAuthError(
       `Account locked: ${match[1]}. Unlock via Garmin Connect web.`
     );
@@ -124,7 +129,7 @@ const checkAccountLocked = (html: string): void => {
 
 const checkPageTitle = (html: string, logger: Logger): void => {
   const match = PAGE_TITLE_RE.exec(html);
-  if (match?.includes("Update Phone Number")) {
+  if (match?.[1]?.includes("Update Phone Number")) {
     throw createServiceAuthError("Login failed: phone number update required.");
   }
   if (match) {
@@ -149,6 +154,11 @@ const getOAuth1Token = async (
   const res = await fetchFn(url, {
     headers: { ...headers, "User-Agent": USER_AGENT_MOBILE },
   });
+  if (!res.ok) {
+    throw createServiceAuthError(
+      `OAuth1 token request failed: ${res.status} ${res.statusText}`
+    );
+  }
   const text = await res.text();
   const parsed = new URLSearchParams(text);
 
@@ -179,6 +189,11 @@ export const exchangeOAuth2 = async (
       "Content-Type": "application/x-www-form-urlencoded",
     },
   });
+  if (!res.ok) {
+    throw createServiceAuthError(
+      `OAuth2 exchange failed: ${res.status} ${res.statusText}`
+    );
+  }
   const data = (await res.json()) as OAuth2Token;
 
   return {

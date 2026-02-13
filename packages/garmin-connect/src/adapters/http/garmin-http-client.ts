@@ -12,6 +12,7 @@ export type GarminHttpClient = {
   post: <T>(url: string, body: unknown) => Promise<T>;
   del: <T>(url: string) => Promise<T>;
   setTokens: (oauth1: OAuth1Token, oauth2: OAuth2Token) => void;
+  clearTokens: () => void;
   getOAuth2Token: () => OAuth2Token | undefined;
 };
 
@@ -23,7 +24,11 @@ export const createGarminHttpClient = (
   let oauth2Token: OAuth2Token | undefined;
   let consumer: OAuthConsumer | undefined;
   let isRefreshing = false;
-  let refreshSubscribers: ((token: string) => void)[] = [];
+  type RefreshSubscriber = {
+    resolve: (token: string) => void;
+    reject: (error: unknown) => void;
+  };
+  let refreshSubscribers: RefreshSubscriber[] = [];
 
   const fetchConsumer = async (): Promise<OAuthConsumer> => {
     if (consumer) return consumer;
@@ -46,12 +51,17 @@ export const createGarminHttpClient = (
   };
 
   const waitForRefresh = (): Promise<string> =>
-    new Promise((resolve) => {
-      refreshSubscribers.push(resolve);
+    new Promise((resolve, reject) => {
+      refreshSubscribers.push({ resolve, reject });
     });
 
   const notifySubscribers = (): void => {
-    refreshSubscribers.forEach((cb) => cb(oauth2Token!.access_token));
+    refreshSubscribers.forEach((s) => s.resolve(oauth2Token!.access_token));
+    refreshSubscribers = [];
+  };
+
+  const rejectSubscribers = (error: unknown): void => {
+    refreshSubscribers.forEach((s) => s.reject(error));
     refreshSubscribers = [];
   };
 
@@ -72,9 +82,15 @@ export const createGarminHttpClient = (
         });
       }
       isRefreshing = true;
-      await refreshToken();
-      isRefreshing = false;
-      notifySubscribers();
+      try {
+        await refreshToken();
+        notifySubscribers();
+      } catch (error) {
+        rejectSubscribers(error);
+        throw error;
+      } finally {
+        isRefreshing = false;
+      }
     }
 
     const res = await fetchFn(url, {
@@ -94,9 +110,15 @@ export const createGarminHttpClient = (
         });
       }
       isRefreshing = true;
-      await refreshToken();
-      isRefreshing = false;
-      notifySubscribers();
+      try {
+        await refreshToken();
+        notifySubscribers();
+      } catch (error) {
+        rejectSubscribers(error);
+        throw error;
+      } finally {
+        isRefreshing = false;
+      }
       return fetchFn(url, {
         ...init,
         headers: {
@@ -142,6 +164,12 @@ export const createGarminHttpClient = (
     setTokens: (o1: OAuth1Token, o2: OAuth2Token): void => {
       oauth1Token = o1;
       oauth2Token = o2;
+    },
+
+    clearTokens: (): void => {
+      oauth1Token = undefined;
+      oauth2Token = undefined;
+      consumer = undefined;
     },
 
     getOAuth2Token: () => oauth2Token,

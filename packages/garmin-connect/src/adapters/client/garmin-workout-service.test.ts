@@ -45,6 +45,7 @@ const createMockHttpClient = (): GarminHttpClient => ({
   post: vi.fn(async () => ({ workoutId: 999, workoutName: "Pushed" })),
   del: vi.fn(async () => ({})),
   setTokens: vi.fn(),
+  clearTokens: vi.fn(),
   getOAuth2Token: vi.fn(() => undefined),
 });
 
