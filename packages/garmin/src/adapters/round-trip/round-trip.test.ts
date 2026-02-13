@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { RepetitionBlock, Workout, WorkoutStep } from "@kaiord/core";
-import { createToleranceChecker } from "@kaiord/core";
+import type { Workout } from "@kaiord/core";
+import { createToleranceChecker, isRepetitionBlock } from "@kaiord/core";
 import { convertGarminToKRD } from "../converters/garmin-to-krd.converter";
 import { convertKRDToGarmin } from "../converters/krd-to-garmin.converter";
 
@@ -17,10 +17,6 @@ const mockLogger = {
   warn: () => {},
   error: () => {},
 };
-
-const isRepetitionBlock = (
-  step: WorkoutStep | RepetitionBlock
-): step is RepetitionBlock => "repeatCount" in step;
 
 describe("Garmin GCN Round-Trip", () => {
   const toleranceChecker = createToleranceChecker();

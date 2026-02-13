@@ -3,7 +3,7 @@ import type { Logger } from "@kaiord/core";
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import { fitTargetTypeSchema } from "../schemas/fit-target";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
-import { isRepetitionBlock } from "../shared/type-guards";
+import { isRepetitionBlock } from "@kaiord/core";
 import {
   convertWorkoutStep,
   type ConvertWorkoutStepOptions,

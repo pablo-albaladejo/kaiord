@@ -3,7 +3,7 @@ import type { KRD } from "@kaiord/core";
 import type { RepetitionBlock, Workout, WorkoutStep } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
 import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
-import { isRepetitionBlock } from "../shared/type-guards";
+import { isRepetitionBlock } from "@kaiord/core";
 import { mapSubSportToFit } from "../sub-sport/sub-sport.mapper";
 
 const DEFAULT_MANUFACTURER = "garmin";

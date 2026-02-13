@@ -1,11 +1,9 @@
-import type {
-  KRD,
-  Logger,
-  RepetitionBlock,
-  Workout,
-  WorkoutStep,
+import type { KRD, Logger, Workout } from "@kaiord/core";
+import {
+  createGarminParsingError,
+  isRepetitionBlock,
+  workoutSchema,
 } from "@kaiord/core";
-import { createGarminParsingError, workoutSchema } from "@kaiord/core";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
 import { mapKrdSportToGarmin } from "../mappers/sport.mapper";
 import { mapWorkoutStep } from "./garmin-workout-step.converter";
@@ -61,7 +59,3 @@ const extractWorkout = (krd: KRD): Workout | undefined => {
 
   return result.data;
 };
-
-const isRepetitionBlock = (
-  step: WorkoutStep | RepetitionBlock
-): step is RepetitionBlock => "repeatCount" in step;

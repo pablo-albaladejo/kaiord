@@ -1,14 +1,5 @@
-import type { RepetitionBlock, Sport, WorkoutStep } from "@kaiord/core";
+import type { Sport } from "@kaiord/core";
 import { sportSchema } from "@kaiord/core";
-
-/**
- * Type guard to check if a step is a RepetitionBlock
- */
-export const isRepetitionBlock = (
-  step: WorkoutStep | RepetitionBlock
-): step is RepetitionBlock => {
-  return "repeatCount" in step;
-};
 
 /**
  * Default values for FIT file generation and mapping

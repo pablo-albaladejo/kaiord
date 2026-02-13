@@ -27,7 +27,7 @@ export const convertToKrd = async (
 
 const resolveInputFormat = (
   inputFile: string | undefined,
-  inputContent: string | undefined,
+  _inputContent: string | undefined,
   inputFormat: FileFormat | undefined
 ): FileFormat => {
   if (inputFormat) return inputFormat;
