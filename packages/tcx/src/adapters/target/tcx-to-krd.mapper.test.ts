@@ -103,7 +103,7 @@ describe("convertTcxTarget (mapper)", () => {
       });
     });
 
-    it("should return null for HeartRate_t without valid zone data", () => {
+    it("should return open for HeartRate_t without valid zone data", () => {
       const logger = createMockLogger();
       const tcxTarget = {
         "@_xsi:type": "HeartRate_t",
@@ -118,7 +118,7 @@ describe("convertTcxTarget (mapper)", () => {
       expect(logger.warn).toHaveBeenCalled();
     });
 
-    it("should return null for HeartRate_t without HeartRateZone", () => {
+    it("should return open for HeartRate_t without HeartRateZone", () => {
       const logger = createMockLogger();
       const tcxTarget = {
         "@_xsi:type": "HeartRate_t",
@@ -130,7 +130,7 @@ describe("convertTcxTarget (mapper)", () => {
       expect(logger.warn).toHaveBeenCalled();
     });
 
-    it("should return null for PredefinedHeartRateZone_t with non-number value", () => {
+    it("should return open for PredefinedHeartRateZone_t with non-number value", () => {
       const logger = createMockLogger();
       const tcxTarget = {
         "@_xsi:type": "HeartRate_t",

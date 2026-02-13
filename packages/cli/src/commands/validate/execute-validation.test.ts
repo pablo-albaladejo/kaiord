@@ -39,7 +39,7 @@ import { executeValidation } from "./execute-validation";
 import { readFile } from "../../utils/file-handler.js";
 import { detectFormat } from "../../utils/format-detector.js";
 import { readFile as fsReadFile } from "fs/promises";
-import { validateRoundTrip, toleranceConfigSchema } from "@kaiord/core";
+import { validateRoundTrip } from "@kaiord/core";
 
 const createMockLogger = (): Logger => ({
   debug: vi.fn(),

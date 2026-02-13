@@ -93,7 +93,7 @@ describe("convertHeartRateTarget", () => {
       });
     });
 
-    it("should treat invalid zone > 5 as BPM value (via convertHeartRateValue)", () => {
+    it("should treat invalid zone > 5 as percent_max (via convertHeartRateValue)", () => {
       // Zone 6 is invalid, so it falls through to convertHeartRateValue
       // 6 is 0 < 6 <= 100, so it's treated as percent_max
       const data: FitTargetData = {

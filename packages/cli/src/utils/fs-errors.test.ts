@@ -45,6 +45,7 @@ describe("isNodeSystemError", () => {
   it("should allow access to code property when type guard passes", () => {
     const error = Object.assign(new Error("test"), { code: "EACCES" });
 
+    expect(isNodeSystemError(error)).toBe(true);
     if (isNodeSystemError(error)) {
       expect(error.code).toBe("EACCES");
     }
