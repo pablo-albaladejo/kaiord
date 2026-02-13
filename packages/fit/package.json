@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/fit",
-  "version": "4.3.0",
+  "version": "4.5.3",
   "description": "FIT format adapter for the Kaiord health & fitness data framework",
   "type": "module",
   "main": "./dist/index.js",

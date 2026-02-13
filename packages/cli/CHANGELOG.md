@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.5.3
+
+### Patch Changes
+
+- 6cc9ccb: Add comprehensive unit tests for target converters, duration converters, workout converters, and CLI utilities to close coverage gaps
+- Updated dependencies [6cc9ccb]
+  - @kaiord/fit@4.5.3
+  - @kaiord/tcx@4.5.3
+  - @kaiord/zwo@4.5.3
+  - @kaiord/garmin@4.5.3
+
 ## 4.5.1
 
 ### Patch Changes
