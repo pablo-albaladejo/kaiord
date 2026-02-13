@@ -1,5 +1,11 @@
 # @kaiord/core
 
+## 4.5.2
+
+### Patch Changes
+
+- f5a5f58: Export `isRepetitionBlock` type guard from core, consolidating duplicate implementations in fit and garmin packages
+
 ## 4.5.0
 
 ### Minor Changes
