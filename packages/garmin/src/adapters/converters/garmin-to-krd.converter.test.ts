@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import type { KRD, RepetitionBlock, Workout, WorkoutStep } from "@kaiord/core";
-import { createGarminParsingError } from "@kaiord/core";
+import type { KRD, Workout } from "@kaiord/core";
+import { createGarminParsingError, isRepetitionBlock } from "@kaiord/core";
 import { convertGarminToKRD } from "./garmin-to-krd.converter";
 
 const fixturesDir = join(__dirname, "../../../../../test-fixtures/gcn");
@@ -19,10 +19,6 @@ const mockLogger = {
 
 const getWorkout = (krd: KRD): Workout =>
   krd.extensions?.structured_workout as Workout;
-
-const isRepetitionBlock = (
-  step: WorkoutStep | RepetitionBlock
-): step is RepetitionBlock => "repeatCount" in step;
 
 describe("convertGarminToKRD", () => {
   describe("running workout with nested repeats", () => {

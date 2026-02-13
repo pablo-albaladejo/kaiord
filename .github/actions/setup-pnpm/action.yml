@@ -15,12 +15,12 @@ runs:
   using: "composite"
   steps:
     - name: Setup Node.js
-      uses: actions/setup-node@v4
+      uses: actions/setup-node@v6
       with:
         node-version: ${{ inputs.node-version }}
 
     - name: Setup pnpm
-      uses: pnpm/action-setup@v2
+      uses: pnpm/action-setup@v4
       with:
         version: ${{ inputs.pnpm-version }}
 
@@ -32,7 +32,7 @@ runs:
 
     - name: Setup pnpm store cache
       id: cache-pnpm-store
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
         key: ${{ runner.os }}-pnpm-store-${{ inputs.pnpm-version }}-${{ hashFiles('**/pnpm-lock.yaml') }}
@@ -42,7 +42,7 @@ runs:
 
     - name: Setup node_modules cache
       id: cache-node-modules
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: |
           node_modules
@@ -54,7 +54,7 @@ runs:
 
     - name: Setup TypeScript build cache
       id: cache-typescript
-      uses: actions/cache@v3
+      uses: actions/cache@v5
       with:
         path: |
           packages/*/dist
