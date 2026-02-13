@@ -68,9 +68,7 @@ describe("executeValidation", () => {
 
     await expect(
       executeValidation({ input: "workout.tcx" }, logger)
-    ).rejects.toThrow(
-      "Validation currently only supports FIT files. Got: tcx"
-    );
+    ).rejects.toThrow("Validation currently only supports FIT files. Got: tcx");
   });
 
   it("should throw when FIT file returns string data", async () => {
@@ -102,17 +100,13 @@ describe("executeValidation", () => {
     };
     vi.mocked(validateRoundTrip).mockReturnValue(mockValidator);
 
-    const result = await executeValidation(
-      { input: "workout.fit" },
-      logger
-    );
+    const result = await executeValidation({ input: "workout.fit" }, logger);
 
     expect(result).toStrictEqual(mockValidateResult);
     expect(readFile).toHaveBeenCalledWith("workout.fit", "fit");
-    expect(logger.info).toHaveBeenCalledWith(
-      "Starting round-trip validation",
-      { file: "workout.fit" }
-    );
+    expect(logger.info).toHaveBeenCalledWith("Starting round-trip validation", {
+      file: "workout.fit",
+    });
   });
 
   it("should load custom tolerance config when provided", async () => {
