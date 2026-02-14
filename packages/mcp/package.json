@@ -35,6 +35,7 @@
     "@kaiord/tcx": "workspace:^",
     "@kaiord/zwo": "workspace:^",
     "@kaiord/garmin": "workspace:^",
+    "@kaiord/garmin-connect": "workspace:^",
     "@modelcontextprotocol/sdk": "^1.26.0",
     "zod": "^4.0.0"
   },

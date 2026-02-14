@@ -9,6 +9,7 @@ import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
 import { convertYargsConfig } from "../commands/convert/yargs-config.js";
 import { diffYargsConfig } from "../commands/diff/yargs-config.js";
+import { garminYargsConfig } from "../commands/garmin/yargs-config.js";
 import { validateYargsConfig } from "../commands/validate/yargs-config.js";
 import { getExitCodeForError } from "../utils/error-exit-code.js";
 import { formatError } from "../utils/error-formatter.js";
@@ -43,6 +44,12 @@ const main = async (): Promise<void> => {
         diffYargsConfig.describe,
         diffYargsConfig.builder,
         diffYargsConfig.handler
+      )
+      .command(
+        garminYargsConfig.command,
+        garminYargsConfig.describe,
+        garminYargsConfig.builder,
+        garminYargsConfig.handler
       )
       .option("verbose", {
         type: "boolean",
