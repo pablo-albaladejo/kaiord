@@ -58,6 +58,7 @@
     "zod": "^4.0.0",
     "@kaiord/fit": "workspace:^",
     "@kaiord/garmin": "workspace:^",
+    "@kaiord/garmin-connect": "workspace:^",
     "@kaiord/tcx": "workspace:^",
     "@kaiord/zwo": "workspace:^"
   },

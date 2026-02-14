@@ -15,6 +15,10 @@ import { registerExtractWorkoutTool } from "../tools/kaiord-extract-workout";
 import { registerGetFormatSpecTool } from "../tools/kaiord-get-format-spec";
 import { registerInspectTool } from "../tools/kaiord-inspect";
 import { registerListFormatsTool } from "../tools/kaiord-list-formats";
+import { registerGarminListTool } from "../tools/kaiord-garmin-list";
+import { registerGarminLoginTool } from "../tools/kaiord-garmin-login";
+import { registerGarminLogoutTool } from "../tools/kaiord-garmin-logout";
+import { registerGarminPushTool } from "../tools/kaiord-garmin-push";
 import { registerValidateTool } from "../tools/kaiord-validate";
 
 const SERVER_NAME = "kaiord-mcp";
@@ -27,6 +31,7 @@ const SERVER_INSTRUCTIONS = [
   "Kaiord is a fitness data framework. KRD is the canonical JSON format — all conversions go through KRD.",
   "BEFORE creating or editing KRD documents, call the kaiord_get_format_spec tool to get the full specification.",
   "Use kaiord_list_formats to discover all supported formats (FIT, TCX, ZWO, GCN, KRD).",
+  "Use kaiord_garmin_login to authenticate, then kaiord_garmin_list/kaiord_garmin_push to interact with Garmin Connect.",
 ].join("\n");
 
 export const createServer = (): McpServer => {
@@ -43,6 +48,10 @@ export const createServer = (): McpServer => {
   registerInspectTool(server, logger);
   registerExtractWorkoutTool(server, logger);
   registerDiffTool(server, logger);
+  registerGarminLoginTool(server, logger);
+  registerGarminLogoutTool(server, logger);
+  registerGarminListTool(server, logger);
+  registerGarminPushTool(server, logger);
 
   registerKrdSchemaResource(server);
   registerSupportedFormatsResource(server);

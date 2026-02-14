@@ -7,6 +7,8 @@ const ERROR_NAME_TO_EXIT_CODE: Record<string, ExitCodeValue> = {
   KrdValidationError: ExitCode.VALIDATION_ERROR,
   ToleranceExceededError: ExitCode.TOLERANCE_EXCEEDED,
   InvalidArgumentError: ExitCode.INVALID_ARGUMENT,
+  ServiceAuthError: ExitCode.AUTH_ERROR,
+  ServiceApiError: ExitCode.UNKNOWN_ERROR,
 };
 
 export const getExitCodeForError = (error: unknown): ExitCodeValue => {
