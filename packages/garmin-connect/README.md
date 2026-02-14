@@ -69,6 +69,7 @@ const { auth, service } = createGarminConnectClient({ fetchFn: cookieFetch });
 Creates a Garmin Connect client with authentication and workout service.
 
 **Options:**
+
 - `fetchFn` - Custom fetch function (defaults to cookie-aware fetch)
 - `tokenStore` - Token persistence store (defaults to in-memory)
 
