@@ -31,3 +31,10 @@ export {
   createToleranceExceededError,
   ToleranceExceededError,
 } from "./tolerance-errors";
+
+export {
+  createServiceApiError,
+  createServiceAuthError,
+  ServiceApiError,
+  ServiceAuthError,
+} from "./service-errors";

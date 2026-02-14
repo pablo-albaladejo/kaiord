@@ -105,6 +105,8 @@ export {
   FitParsingError,
   GarminParsingError,
   KrdValidationError,
+  ServiceApiError,
+  ServiceAuthError,
   TcxParsingError,
   TcxValidationError,
   ToleranceExceededError,
@@ -113,6 +115,8 @@ export {
   createFitParsingError,
   createGarminParsingError,
   createKrdValidationError,
+  createServiceApiError,
+  createServiceAuthError,
   createTcxParsingError,
   createTcxValidationError,
   createToleranceExceededError,
@@ -160,6 +164,19 @@ export type {
 
 export type { LogLevel, Logger } from "./ports/logger";
 export { createConsoleLogger } from "./adapters/logger/console-logger";
+
+// ============================================
+// Ports (Remote Service)
+// ============================================
+
+export type { AuthProvider, TokenData } from "./ports/auth-provider";
+export type { TokenStore } from "./ports/token-store";
+export type {
+  ListOptions,
+  PushResult,
+  WorkoutService,
+  WorkoutSummary,
+} from "./ports/workout-service";
 
 // ============================================
 // Conversion Functions

@@ -53,6 +53,18 @@ async function createGitHubReleases() {
     });
   }
 
+  // Check @kaiord/garmin-connect
+  if (fs.existsSync("packages/garmin-connect/package.json")) {
+    const pkg = JSON.parse(
+      fs.readFileSync("packages/garmin-connect/package.json", "utf8")
+    );
+    packages.push({
+      name: pkg.name,
+      version: pkg.version,
+      dir: "packages/garmin-connect",
+    });
+  }
+
   // Check @kaiord/mcp
   if (fs.existsSync("packages/mcp/package.json")) {
     const pkg = JSON.parse(

@@ -11,6 +11,7 @@ on:
       - "packages/tcx/**"
       - "packages/zwo/**"
       - "packages/garmin/**"
+      - "packages/garmin-connect/**"
       - "packages/cli/**"
       - "packages/mcp/**"
   workflow_dispatch:
@@ -81,6 +82,7 @@ jobs:
           # Store current versions
           CORE_VERSION_BEFORE=$(node -p "require('./packages/core/package.json').version")
           GARMIN_VERSION_BEFORE=$(node -p "require('./packages/garmin/package.json').version")
+          GARMIN_CONNECT_VERSION_BEFORE=$(node -p "require('./packages/garmin-connect/package.json').version")
           MCP_VERSION_BEFORE=$(node -p "require('./packages/mcp/package.json').version")
           CLI_VERSION_BEFORE=$(node -p "require('./packages/cli/package.json').version")
 
@@ -96,12 +98,14 @@ jobs:
           pnpm --filter @kaiord/tcx build
           pnpm --filter @kaiord/zwo build
           pnpm --filter @kaiord/garmin build
+          pnpm --filter @kaiord/garmin-connect build
           pnpm --filter @kaiord/mcp build
           pnpm --filter @kaiord/cli build
 
           # Get new versions
           CORE_VERSION_AFTER=$(node -p "require('./packages/core/package.json').version")
           GARMIN_VERSION_AFTER=$(node -p "require('./packages/garmin/package.json').version")
+          GARMIN_CONNECT_VERSION_AFTER=$(node -p "require('./packages/garmin-connect/package.json').version")
           MCP_VERSION_AFTER=$(node -p "require('./packages/mcp/package.json').version")
           CLI_VERSION_AFTER=$(node -p "require('./packages/cli/package.json').version")
 
@@ -118,6 +122,13 @@ jobs:
             echo "garmin-version=$GARMIN_VERSION_AFTER" >> $GITHUB_OUTPUT
           else
             echo "garmin-changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$GARMIN_CONNECT_VERSION_BEFORE" != "$GARMIN_CONNECT_VERSION_AFTER" ]; then
+            echo "garmin-connect-changed=true" >> $GITHUB_OUTPUT
+            echo "garmin-connect-version=$GARMIN_CONNECT_VERSION_AFTER" >> $GITHUB_OUTPUT
+          else
+            echo "garmin-connect-changed=false" >> $GITHUB_OUTPUT
           fi
 
           if [ "$MCP_VERSION_BEFORE" != "$MCP_VERSION_AFTER" ]; then
@@ -172,6 +183,10 @@ jobs:
 
           if [ "${{ steps.version.outputs.garmin-changed }}" = "true" ]; then
             echo "- @kaiord/garmin@${{ steps.version.outputs.garmin-version }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.version.outputs.garmin-connect-changed }}" = "true" ]; then
+            echo "- @kaiord/garmin-connect@${{ steps.version.outputs.garmin-connect-version }}" >> $GITHUB_STEP_SUMMARY
           fi
 
           if [ "${{ steps.version.outputs.mcp-changed }}" = "true" ]; then

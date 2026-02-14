@@ -10,6 +10,7 @@
       "@kaiord/tcx",
       "@kaiord/zwo",
       "@kaiord/garmin",
+      "@kaiord/garmin-connect",
       "@kaiord/cli",
       "@kaiord/mcp"
     ]
