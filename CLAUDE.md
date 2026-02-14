@@ -13,6 +13,7 @@ Kaiord is an open-source health & fitness data framework. A TypeScript monorepo 
 - `@kaiord/tcx` - TCX format adapter (fast-xml-parser)
 - `@kaiord/zwo` - ZWO format adapter (fast-xml-parser, XSD validation)
 - `@kaiord/garmin` - Garmin Connect API (GCN) format adapter
+- `@kaiord/garmin-connect` - Garmin Connect API client (SSO auth, push/list workouts)
 - `@kaiord/cli` - Command-line interface
 - `@kaiord/mcp` - Model Context Protocol (MCP) server for AI/LLM integration
 - `@kaiord/workout-spa-editor` - React web application (private)
@@ -156,6 +157,16 @@ import { createFitReader } from '@kaiord/fit';   // factory(logger?)
 4. Run: `pnpm -r test && pnpm -r build && pnpm lint:fix`
 5. Add changeset: `pnpm exec changeset` (for features/fixes)
 6. Commit: `feat(scope): description` (conventional commits)
+
+## Adding a New Package
+
+When adding a new publishable package to the monorepo, update these CI/CD files:
+
+1. **`.changeset/config.json`** - Add to `linked` array
+2. **`.github/workflows/changeset-bot.yml`** - Add to `PUBLISHABLE` list
+3. **`.github/workflows/release.yml`** - Add to `paths` trigger, version tracking, and build step
+4. **`.github/workflows/ci.yml`** - Add to `test` matrix, `build` verification, and `detect-changes`
+5. **`scripts/create-github-releases.js`** - Add package entry for GitHub releases
 
 ## Key References
 

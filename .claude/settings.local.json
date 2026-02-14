@@ -15,7 +15,8 @@
       "mcp__ide__getDiagnostics",
       "Skill(test)",
       "Skill(coverage)",
-      "Skill(deep-review-fix)"
+      "Skill(deep-review-fix)",
+      "mcp__kaiord__*"
     ],
     "deny": [
       "Bash(rm -rf /)",
