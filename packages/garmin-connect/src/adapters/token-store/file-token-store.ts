@@ -10,7 +10,10 @@ export const createFileTokenStore = (
 ): TokenStore => ({
   save: async (tokens: TokenData) => {
     await mkdir(dirname(filePath), { recursive: true });
-    await writeFile(filePath, JSON.stringify(tokens, null, 2), "utf-8");
+    await writeFile(filePath, JSON.stringify(tokens, null, 2), {
+      encoding: "utf-8",
+      mode: 0o600,
+    });
   },
 
   load: async (): Promise<TokenData | null> => {

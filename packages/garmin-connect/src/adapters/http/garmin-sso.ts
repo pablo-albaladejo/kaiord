@@ -202,6 +202,11 @@ export const exchangeOAuth2 = async (
   };
 };
 
+/**
+ * Garmin Connect SSO login flow.
+ * The fetchFn must be cookie-aware (persist cookies across requests).
+ * Use fetch-cookie or similar wrapper for Node.js environments.
+ */
 export const garminSso = async (
   username: string,
   password: string,

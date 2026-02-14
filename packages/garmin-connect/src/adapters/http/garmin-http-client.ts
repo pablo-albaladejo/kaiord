@@ -33,6 +33,12 @@ export const createGarminHttpClient = (
   const fetchConsumer = async (): Promise<OAuthConsumer> => {
     if (consumer) return consumer;
     const res = await fetchFn(OAUTH_CONSUMER_URL);
+    if (!res.ok) {
+      throw createServiceApiError(
+        `Failed to fetch OAuth consumer: ${res.status}`,
+        res.status
+      );
+    }
     const data = (await res.json()) as {
       consumer_key: string;
       consumer_secret: string;
@@ -56,12 +62,16 @@ export const createGarminHttpClient = (
     });
 
   const notifySubscribers = (): void => {
-    refreshSubscribers.forEach((s) => s.resolve(oauth2Token!.access_token));
+    refreshSubscribers.forEach((s) => {
+      s.resolve(oauth2Token!.access_token);
+    });
     refreshSubscribers = [];
   };
 
   const rejectSubscribers = (error: unknown): void => {
-    refreshSubscribers.forEach((s) => s.reject(error));
+    refreshSubscribers.forEach((s) => {
+      s.reject(error);
+    });
     refreshSubscribers = [];
   };
 
