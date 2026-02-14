@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.7.0
+
+### Minor Changes
+
+- 35c927e: Add Garmin Connect integration to CLI and MCP with login, logout, list, and push commands/tools
+
 ## 4.5.3
 
 ### Patch Changes
