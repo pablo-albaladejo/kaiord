@@ -16,7 +16,7 @@ export const garminSso = async (
   username: string,
   password: string,
   logger: Logger,
-  fetchFn: FetchFn = globalThis.fetch
+  fetchFn: FetchFn
 ): Promise<SsoResult> => {
   logger.info("Starting Garmin Connect SSO login");
 

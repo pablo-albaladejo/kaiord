@@ -44,7 +44,14 @@ export const createGarminHttpClient = (
 
     if (res.status === 401) {
       await refresh.ensureFreshToken();
-      return makeRequest(url, init);
+      const retry = await makeRequest(url, init);
+      if (!retry.ok) {
+        throw createServiceApiError(
+          `API request failed after token refresh: ${retry.statusText}`,
+          retry.status
+        );
+      }
+      return retry;
     }
     if (!res.ok) {
       throw createServiceApiError(
@@ -73,7 +80,8 @@ export const createGarminHttpClient = (
         method: "POST",
         headers: { "X-Http-Method-Override": "DELETE" },
       });
-      return (await res.json()) as T;
+      const text = await res.text();
+      return (text ? JSON.parse(text) : undefined) as T;
     },
     setTokens: (o1: OAuth1Token, o2: OAuth2Token): void => {
       refresh.state.oauth1Token = o1;

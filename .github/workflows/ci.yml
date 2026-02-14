@@ -345,7 +345,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [detect-changes, build]
     if: |
-      always() &&
+      needs.build.result == 'success' &&
       needs.detect-changes.outputs.should-test == 'true' &&
       (needs.detect-changes.outputs.garmin-connect-changed == 'true' || github.ref == 'refs/heads/main')
     steps:

@@ -5,6 +5,7 @@ export const GC_MODERN = "https://connect.garmin.com/modern";
 export const API_BASE = "https://connectapi.garmin.com";
 export const OAUTH_URL = `${API_BASE}/oauth-service/oauth`;
 export const WORKOUT_URL = `${API_BASE}/workout-service`;
+/** OAuth consumer credentials hosted by the garth project (third-party). */
 export const OAUTH_CONSUMER_URL =
   "https://thegarth.s3.amazonaws.com/oauth_consumer.json";
 

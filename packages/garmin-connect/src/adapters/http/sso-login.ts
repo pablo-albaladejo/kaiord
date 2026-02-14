@@ -21,6 +21,11 @@ const fetchCsrfToken = async (fetchFn: FetchFn): Promise<string> => {
     gauthHost: GARMIN_SSO_EMBED,
   });
   const csrfRes = await fetchFn(`${SIGNIN_URL}?${signinParams}`);
+  if (!csrfRes.ok) {
+    throw createServiceAuthError(
+      `SSO login page returned ${csrfRes.status}: ${csrfRes.statusText}`
+    );
+  }
   const csrfHtml = await csrfRes.text();
   const csrfMatch = CSRF_RE.exec(csrfHtml);
   if (!csrfMatch) {

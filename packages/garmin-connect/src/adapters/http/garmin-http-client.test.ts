@@ -45,6 +45,7 @@ const createOkFetch = (data: unknown = { data: "test" }) =>
     ok: true,
     status: 200,
     json: async () => data,
+    text: async () => JSON.stringify(data),
   })) as unknown as typeof globalThis.fetch;
 
 describe("createGarminHttpClient", () => {

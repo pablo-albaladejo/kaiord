@@ -19,7 +19,7 @@
     "build": "tsup",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
-    "test:integration": "vitest --run --testPathPattern integration",
+    "test:integration": "vitest --run --config vitest.integration.config.ts",
     "test:watch": "vitest",
     "lint": "tsc --noEmit && eslint . && prettier --check src",
     "lint:fix": "eslint . --fix && prettier --write src",
