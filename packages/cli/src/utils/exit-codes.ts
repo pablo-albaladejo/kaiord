@@ -17,6 +17,8 @@ export const ExitCode = {
   VALIDATION_ERROR: 5,
   /** Tolerance exceeded (round-trip validation failed) */
   TOLERANCE_EXCEEDED: 6,
+  /** Authentication error (login failed or session expired) */
+  AUTH_ERROR: 7,
   /** Differences found (diff command - files are different, not an error) */
   DIFFERENCES_FOUND: 10,
   /** Partial success (batch operations with some failures) */
