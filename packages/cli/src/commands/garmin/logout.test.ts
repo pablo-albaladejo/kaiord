@@ -56,14 +56,18 @@ describe("logoutCommand", () => {
   it("should return AUTH_ERROR on ServiceAuthError", async () => {
     const logger = createMockLogger();
     vi.mocked(createCliGarminClient).mockResolvedValue({
-      auth: { logout: vi.fn().mockRejectedValue(new ServiceAuthError("expired")) },
+      auth: {
+        logout: vi.fn().mockRejectedValue(new ServiceAuthError("expired")),
+      },
       service: {} as never,
     } as never);
 
     const result = await logoutCommand(logger);
 
     expect(result).toBe(ExitCode.AUTH_ERROR);
-    expect(logger.error).toHaveBeenCalledWith("Logout failed", { error: "expired" });
+    expect(logger.error).toHaveBeenCalledWith("Logout failed", {
+      error: "expired",
+    });
   });
 
   it("should rethrow unknown errors", async () => {
