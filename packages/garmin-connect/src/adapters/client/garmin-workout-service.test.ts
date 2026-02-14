@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { createGarminWorkoutService } from "./garmin-workout-service";
 import type { GarminHttpClient } from "../http/garmin-http-client";
-import type { Logger } from "@kaiord/core";
+import type { KRD, Logger } from "@kaiord/core";
 import { WORKOUT_URL } from "../http/urls";
 
 const mockLogger: Logger = {
@@ -9,35 +9,6 @@ const mockLogger: Logger = {
   info: vi.fn(),
   warn: vi.fn(),
   error: vi.fn(),
-};
-
-const GCN_WORKOUT_DETAIL = {
-  workoutId: 123,
-  workoutName: "Test Ride",
-  sportType: { sportTypeId: 2, sportTypeKey: "cycling" },
-  workoutSegments: [
-    {
-      segmentOrder: 1,
-      sportType: { sportTypeId: 2, sportTypeKey: "cycling" },
-      workoutSteps: [
-        {
-          type: "ExecutableStepDTO",
-          stepOrder: 1,
-          stepType: { stepTypeId: 1, stepTypeKey: "warmup" },
-          endCondition: {
-            conditionTypeId: 2,
-            conditionTypeKey: "time",
-            displayable: true,
-          },
-          endConditionValue: 600,
-          targetType: {
-            workoutTargetTypeId: 1,
-            workoutTargetTypeKey: "no.target",
-          },
-        },
-      ],
-    },
-  ],
 };
 
 const createMockHttpClient = (): GarminHttpClient => ({
@@ -74,24 +45,48 @@ describe("createGarminWorkoutService", () => {
     );
   });
 
-  it("should pull a workout by id", async () => {
+  it("should push a workout", async () => {
     const httpClient = createMockHttpClient();
-    vi.mocked(httpClient.get).mockResolvedValue(GCN_WORKOUT_DETAIL);
+    vi.mocked(httpClient.post).mockResolvedValue({
+      workoutId: 999,
+      workoutName: "Pushed",
+    });
 
     const service = createGarminWorkoutService(httpClient, mockLogger);
-    const krd = await service.pull("123");
 
-    expect(krd.version).toBe("1.0");
-    expect(krd.type).toBe("structured_workout");
-    expect(httpClient.get).toHaveBeenCalledWith(`${WORKOUT_URL}/workout/123`);
-  });
+    const krd: KRD = {
+      version: "1.0",
+      type: "structured_workout",
+      metadata: {
+        created: "2025-01-15T10:00:00Z",
+        sport: "cycling",
+      },
+      extensions: {
+        structured_workout: {
+          sport: "cycling",
+          name: "Test Workout",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 300 },
+              targetType: "open",
+              target: { type: "open" },
+              intensity: "warmup",
+            },
+          ],
+        },
+      },
+    };
 
-  it("should remove a workout", async () => {
-    const httpClient = createMockHttpClient();
+    const result = await service.push(krd);
 
-    const service = createGarminWorkoutService(httpClient, mockLogger);
-    await service.remove("456");
-
-    expect(httpClient.del).toHaveBeenCalledWith(`${WORKOUT_URL}/workout/456`);
+    expect(result.id).toBe("999");
+    expect(result.name).toBe("Pushed");
+    expect(result.url).toContain("999");
+    expect(httpClient.post).toHaveBeenCalledWith(
+      `${WORKOUT_URL}/workout`,
+      expect.any(Object)
+    );
   });
 });

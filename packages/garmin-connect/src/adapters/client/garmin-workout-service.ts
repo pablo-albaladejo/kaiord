@@ -1,25 +1,26 @@
 import type {
   KRD,
+  ListOptions,
   Logger,
+  PushResult,
   WorkoutService,
   WorkoutSummary,
-  PushResult,
-  ListOptions,
 } from "@kaiord/core";
-import { createConsoleLogger, toText, fromText } from "@kaiord/core";
-import { createGarminReader, createGarminWriter } from "@kaiord/garmin";
-import { createServiceApiError } from "@kaiord/core";
-import type { GarminHttpClient } from "../http/garmin-http-client";
 import {
-  createGarminAuthProvider,
-  type GarminAuthProviderOptions,
-} from "../auth/garmin-auth-provider";
+  createConsoleLogger,
+  toText,
+  createServiceApiError,
+} from "@kaiord/core";
+import { createGarminWriter } from "@kaiord/garmin";
+import type { GarminHttpClient } from "../http/garmin-http-client";
 import { mapToWorkoutSummary } from "../mappers/workout-summary.mapper";
 import {
   garminPushResponseSchema,
   garminWorkoutSummarySchema,
 } from "../schemas/workout-response.schema";
 import { WORKOUT_URL } from "../http/urls";
+
+export type GarminWorkoutClient = Pick<WorkoutService, "push" | "list">;
 
 const pushWorkout = async (
   krd: KRD,
@@ -48,28 +49,6 @@ const pushWorkout = async (
   }
 };
 
-const pullWorkout = async (
-  workoutId: string,
-  httpClient: GarminHttpClient,
-  garminReader: ReturnType<typeof createGarminReader>,
-  log: Logger
-): Promise<KRD> => {
-  try {
-    log.info("Pulling workout from Garmin Connect", { workoutId });
-    const detail = await httpClient.get<Record<string, unknown>>(
-      `${WORKOUT_URL}/workout/${workoutId}`
-    );
-    const gcnString = JSON.stringify(detail);
-    return fromText(gcnString, garminReader, log);
-  } catch (error) {
-    throw createServiceApiError(
-      `Failed to pull workout ${workoutId}`,
-      undefined,
-      error
-    );
-  }
-};
-
 const listWorkouts = async (
   httpClient: GarminHttpClient,
   log: Logger,
@@ -94,45 +73,15 @@ const listWorkouts = async (
   }
 };
 
-const removeWorkout = async (
-  workoutId: string,
-  httpClient: GarminHttpClient,
-  log: Logger
-): Promise<void> => {
-  try {
-    log.info("Deleting workout from Garmin Connect", { workoutId });
-    await httpClient.del(`${WORKOUT_URL}/workout/${workoutId}`);
-  } catch (error) {
-    throw createServiceApiError(
-      `Failed to delete workout ${workoutId}`,
-      undefined,
-      error
-    );
-  }
-};
-
 export const createGarminWorkoutService = (
   httpClient: GarminHttpClient,
   logger?: Logger
-): WorkoutService => {
+): GarminWorkoutClient => {
   const log = logger ?? createConsoleLogger();
   const garminWriter = createGarminWriter(log);
-  const garminReader = createGarminReader(log);
 
   return {
     push: (krd) => pushWorkout(krd, httpClient, garminWriter, log),
-    pull: (id) => pullWorkout(id, httpClient, garminReader, log),
     list: (opts) => listWorkouts(httpClient, log, opts),
-    remove: (id) => removeWorkout(id, httpClient, log),
   };
-};
-
-export type GarminConnectClientOptions = GarminAuthProviderOptions;
-
-export const createGarminConnectClient = (
-  options?: GarminConnectClientOptions
-) => {
-  const { auth, httpClient } = createGarminAuthProvider(options);
-  const service = createGarminWorkoutService(httpClient, options?.logger);
-  return { auth, service };
 };

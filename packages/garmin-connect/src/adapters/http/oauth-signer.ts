@@ -1,7 +1,8 @@
 import { createHmac } from "node:crypto";
 import OAuth from "oauth-1.0a";
+import type { OAuthConsumer } from "./types";
 
-export type OAuthConsumer = { key: string; secret: string };
+export type { OAuthConsumer } from "./types";
 export type OAuthToken = { key: string; secret: string };
 
 export type OAuthSigner = {

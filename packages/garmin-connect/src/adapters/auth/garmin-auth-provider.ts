@@ -2,6 +2,7 @@ import type { AuthProvider, Logger, TokenStore } from "@kaiord/core";
 import { createConsoleLogger, createServiceAuthError } from "@kaiord/core";
 import type { GarminHttpClient } from "../http/garmin-http-client";
 import { createGarminHttpClient } from "../http/garmin-http-client";
+import { createCookieFetch } from "../http/cookie-fetch";
 import { garminSso } from "../http/garmin-sso";
 import { garminTokensSchema } from "../schemas/garmin-token.schema";
 
@@ -21,7 +22,7 @@ export const createGarminAuthProvider = (
 ): GarminAuthProviderResult => {
   const logger = options?.logger ?? createConsoleLogger();
   const tokenStore = options?.tokenStore;
-  const fetchFn = options?.fetchFn ?? globalThis.fetch;
+  const fetchFn = options?.fetchFn ?? createCookieFetch();
   const httpClient = createGarminHttpClient(logger, fetchFn);
   let currentOAuth1:
     | { oauth_token: string; oauth_token_secret: string }

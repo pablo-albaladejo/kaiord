@@ -2,25 +2,24 @@
  * @kaiord/garmin-connect - Garmin Connect API client for Kaiord
  */
 
-// Port type re-exports
+// Types
+export type { GarminWorkoutClient } from "./adapters/client/garmin-workout-service";
 export type {
-  AuthProvider,
   ListOptions,
   PushResult,
   TokenData,
   TokenStore,
-  WorkoutService,
   WorkoutSummary,
 } from "@kaiord/core";
 
 // Auth
 export { createGarminAuthProvider } from "./adapters/auth/garmin-auth-provider";
 
-// Workout service
-export {
-  createGarminConnectClient,
-  createGarminWorkoutService,
-} from "./adapters/client/garmin-workout-service";
+// Client (high-level)
+export { createGarminConnectClient } from "./adapters/client/garmin-connect-client";
+
+// Cookie fetch
+export { createCookieFetch } from "./adapters/http/cookie-fetch";
 
 // Token stores
 export { createFileTokenStore } from "./adapters/token-store/file-token-store";

@@ -19,6 +19,7 @@
     "build": "tsup",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
+    "test:integration": "vitest --run --testPathPattern integration",
     "test:watch": "vitest",
     "lint": "tsc --noEmit && eslint . && prettier --check src",
     "lint:fix": "eslint . --fix && prettier --write src",
@@ -27,6 +28,7 @@
   "dependencies": {
     "@kaiord/core": "workspace:^",
     "@kaiord/garmin": "workspace:^",
+    "fetch-cookie": "^3.2.0",
     "oauth-1.0a": "^2.2.6",
     "zod": "^4.0.0"
   },
