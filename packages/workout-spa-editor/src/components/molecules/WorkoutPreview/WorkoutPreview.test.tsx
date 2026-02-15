@@ -217,7 +217,9 @@ describe("flattenWorkoutSteps", () => {
     const bars = flattenWorkoutSteps(workout);
 
     expect(bars).toHaveLength(6);
-    bars.forEach((bar) => expect(bar.stepId).toBe("block-0"));
+    bars.forEach((bar) => {
+      expect(bar.stepId).toBe("block-0");
+    });
   });
 
   it("should handle mixed steps and blocks", () => {
