@@ -39,9 +39,12 @@ test.describe("Error Handling", () => {
     await expect(
       page.getByText(/invalid json|failed to parse json/i)
     ).toBeVisible({ timeout: 5000 });
-    await expect(page.getByText(/position|line/i)).toBeVisible({
-      timeout: 5000,
-    });
+    // Browser JSON parse error details vary:
+    // - Chromium: "position N" or "Unexpected token"
+    // - Firefox: "line N" or "expected property name"
+    // - WebKit: "Expected '}'" or similar
+    const errorDetail = page.getByText(/position|line|unexpected|expected/i);
+    await expect(errorDetail).toBeVisible({ timeout: 5000 });
   });
 
   test("should display specific error for missing required fields", async ({
