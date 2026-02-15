@@ -22,7 +22,10 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 export const writeClipboard = async (text: string): Promise<void> => {
   memory = text;
   try {
-    await withTimeout(navigator.clipboard.writeText(text), CLIPBOARD_TIMEOUT_MS);
+    await withTimeout(
+      navigator.clipboard.writeText(text),
+      CLIPBOARD_TIMEOUT_MS
+    );
   } catch {
     // Fallback already stored in memory
   }
