@@ -4,6 +4,7 @@ import { WorkoutSectionEditor } from "./WorkoutSectionEditor";
 import { WorkoutStepsList } from "./WorkoutStepsList";
 import { StoreConfirmationModal } from "../../molecules/ConfirmationModal";
 import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
+import { WorkoutPreview } from "../../molecules/WorkoutPreview/WorkoutPreview";
 import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
 import type { KRD, Workout } from "../../../types/krd";
 
@@ -29,11 +30,15 @@ export function WorkoutSection(props: WorkoutSectionProps) {
     props.onStepReorder,
     props.onReorderStepsInBlock
   );
-
   return (
     <div className="space-y-6" data-testid="workout-section">
       <WorkoutHeader workout={props.workout} krd={props.krd} />
       <WorkoutStats workout={props.workout} />
+      <WorkoutPreview
+        workout={props.workout}
+        selectedStepId={props.selectedStepId}
+        onStepSelect={props.onStepSelect}
+      />
       <WorkoutSectionEditor
         isEditing={state.isEditing}
         selectedStep={state.selectedStep}
@@ -65,11 +70,7 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         }
       />
       <CreateRepetitionBlockDialog
-        stepCount={
-          state.selectedStepIds.length >= 2
-            ? state.selectedStepIds.length
-            : undefined
-        }
+        stepCount={state.blockStepCount}
         onConfirm={state.handleConfirmCreateBlock}
         onCancel={state.handleCancelCreateBlock}
         isOpen={state.showCreateBlockDialog}

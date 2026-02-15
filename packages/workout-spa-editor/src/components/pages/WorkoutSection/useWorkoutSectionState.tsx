@@ -40,13 +40,12 @@ export function useWorkoutSectionState(
   const toggleStepSelection = useToggleStepSelection();
   const selectStep = useSelectStep();
   const repetitionBlockHandlers = useRepetitionBlockHandlers();
-
-  const handleToggleStepSelection = (stepId: string) => {
-    toggleStepSelection(stepId);
-  };
+  const { selectedStepIds } = repetitionBlockHandlers;
 
   return {
     isEditing,
+    blockStepCount:
+      selectedStepIds.length >= 2 ? selectedStepIds.length : undefined,
     createStep,
     deleteStep,
     duplicateStep,
@@ -55,10 +54,10 @@ export function useWorkoutSectionState(
     reorderStep,
     reorderStepsInBlock: onReorderStepsInBlock,
     selectedStep,
-    selectedStepIds: repetitionBlockHandlers.selectedStepIds,
+    selectedStepIds,
     showCreateBlockDialog: repetitionBlockHandlers.showCreateBlockDialog,
     handleBlockSelect: selectStep,
-    handleToggleStepSelection,
+    handleToggleStepSelection: toggleStepSelection,
     handleCreateRepetitionBlock:
       repetitionBlockHandlers.handleCreateRepetitionBlock,
     handleCreateEmptyRepetitionBlock:
