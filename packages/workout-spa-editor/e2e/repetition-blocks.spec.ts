@@ -647,11 +647,13 @@ test.describe("Repetition Blocks - Ungroup", () => {
     await expect(page.getByText("Repeat Block")).toBeVisible();
     await expect(page.getByText("3x")).toBeVisible();
 
-    // Wait for block card to stabilize before interaction
-    await page.waitForTimeout(500);
+    // Wait for block actions trigger to be visible and stable
+    const trigger = page.getByTestId("block-actions-trigger");
+    await expect(trigger).toBeVisible({ timeout: 5000 });
+    await trigger.scrollIntoViewIfNeeded();
 
     // Open context menu
-    await page.getByTestId("block-actions-trigger").click();
+    await trigger.click();
 
     // Click "Ungroup" option
     await page.getByRole("menuitem", { name: /ungroup/i }).click();
