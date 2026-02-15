@@ -31,7 +31,10 @@ export const WorkoutPreviewBar: React.FC<WorkoutPreviewBarProps> = ({
     aria-label={ariaLabel}
     onClick={onClick}
     onKeyDown={(e) => {
-      if (e.key === "Enter" || e.key === " ") onClick();
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        onClick();
+      }
     }}
     className="cursor-pointer transition-opacity hover:opacity-100 focus-visible:outline focus-visible:outline-2 focus-visible:outline-blue-500"
   />

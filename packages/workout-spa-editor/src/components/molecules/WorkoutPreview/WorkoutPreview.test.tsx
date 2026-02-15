@@ -140,6 +140,60 @@ describe("calculateNormalizedHeight", () => {
 
     expect(h).toBeCloseTo(80 / 100);
   });
+
+  it("should map HR range to height using midpoint", () => {
+    const h = calculateNormalizedHeight(
+      { type: "heart_rate", value: { unit: "range", min: 120, max: 160 } },
+      "active"
+    );
+
+    expect(h).toBeCloseTo(140 / 200);
+  });
+
+  it("should map cadence rpm to height", () => {
+    const h = calculateNormalizedHeight(
+      { type: "cadence", value: { unit: "rpm", value: 90 } },
+      "active"
+    );
+
+    expect(h).toBeCloseTo(90 / 120);
+  });
+
+  it("should map cadence range to height using midpoint", () => {
+    const h = calculateNormalizedHeight(
+      { type: "cadence", value: { unit: "range", min: 60, max: 100 } },
+      "active"
+    );
+
+    expect(h).toBeCloseTo(80 / 120);
+  });
+
+  it("should map pace mps to height", () => {
+    const h = calculateNormalizedHeight(
+      { type: "pace", value: { unit: "mps", value: 4 } },
+      "active"
+    );
+
+    expect(h).toBeCloseTo(4 / 6);
+  });
+
+  it("should map pace range to height using midpoint", () => {
+    const h = calculateNormalizedHeight(
+      { type: "pace", value: { unit: "range", min: 3, max: 5 } },
+      "active"
+    );
+
+    expect(h).toBeCloseTo(4 / 6);
+  });
+
+  it("should fall back to intensity for stroke_type target", () => {
+    const h = calculateNormalizedHeight(
+      { type: "stroke_type", value: { stroke: "freestyle" } } as never,
+      "active"
+    );
+
+    expect(h).toBe(0.6);
+  });
 });
 
 describe("flattenWorkoutSteps", () => {

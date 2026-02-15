@@ -8,8 +8,7 @@
 import React, { useMemo } from "react";
 import { flattenWorkoutSteps } from "./flatten-steps";
 import { WorkoutPreviewBar } from "./WorkoutPreviewBar";
-import type { PreviewBar } from "./workout-preview-types";
-import type { WorkoutPreviewProps } from "./workout-preview-types";
+import type { PreviewBar, WorkoutPreviewProps } from "./workout-preview-types";
 
 const VIEWBOX_WIDTH = 1000;
 const MIN_BAR_WIDTH = 3;
@@ -31,15 +30,17 @@ function computeLayout(bars: PreviewBar[], totalDuration: number): BarLayout[] {
     return Math.max(raw, MIN_BAR_WIDTH);
   });
 
-  // Scale down if total exceeds available space
+  // Scale down if total exceeds available space; drop gaps when scaled
   const totalWidth = widths.reduce((s, w) => s + w, 0);
-  const scale = totalWidth > available ? available / totalWidth : 1;
+  const overflow = totalWidth > available;
+  const scale = overflow ? available / totalWidth : 1;
+  const gap = overflow ? 0 : BAR_GAP;
 
   let x = 0;
   return bars.map((bar, i) => {
     const width = widths[i] * scale;
     const layout = { ...bar, x, width };
-    x += width + BAR_GAP;
+    x += width + gap;
     return layout;
   });
 }
