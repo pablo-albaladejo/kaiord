@@ -652,8 +652,9 @@ test.describe("Repetition Blocks - Ungroup", () => {
     await expect(trigger).toBeVisible({ timeout: 5000 });
     await trigger.scrollIntoViewIfNeeded();
 
-    // Open context menu
-    await trigger.click();
+    // Open context menu (force: true to bypass root div pointer interception
+    // on Mobile Chrome CI where single-worker execution is slower)
+    await trigger.click({ force: true });
 
     // Click "Ungroup" option
     await page.getByRole("menuitem", { name: /ungroup/i }).click();
