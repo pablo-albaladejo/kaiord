@@ -41,7 +41,7 @@ describe("WorkoutActions", () => {
       expect(container).toHaveClass("gap-3"); // gap-3 = 12px in Tailwind
     });
 
-    it("should have consistent spacing in button row", () => {
+    it("should use flex layout for button container", () => {
       // Arrange & Act
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
@@ -49,7 +49,7 @@ describe("WorkoutActions", () => {
       const container = screen.getByTestId(
         "discard-workout-button"
       ).parentElement;
-      expect(container).toHaveClass("gap-3"); // gap-3 = 12px
+      expect(container).toHaveClass("flex");
     });
   });
 

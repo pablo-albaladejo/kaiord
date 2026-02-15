@@ -11,6 +11,7 @@
  */
 
 import { Download } from "lucide-react";
+import { ProgressBar } from "./ProgressBar";
 import { SaveButtonToasts } from "./SaveButtonToasts";
 import { useSaveWorkout } from "./use-save-workout";
 import { Button } from "../../atoms/Button/Button";
@@ -24,9 +25,6 @@ export type SaveButtonProps = {
   className?: string;
 };
 
-/**
- * Button that saves workout with format selection and error handling
- */
 export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
   const {
     saveErrors,
@@ -48,7 +46,11 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
   );
 
   return (
-    <div className={`flex w-full flex-col gap-2 sm:w-auto ${className || ""}`}>
+    <div
+      className={["flex w-full flex-col gap-2 sm:w-auto", className]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center">
         <ExportFormatSelector
           currentFormat={selectedFormat}
@@ -78,22 +80,6 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
         />
       )}
       <SaveButtonToasts toasts={toasts} onDismiss={dismiss} />
-    </div>
-  );
-}
-
-function ProgressBar({ progress }: { progress: number }) {
-  return (
-    <div className="w-full bg-gray-200 rounded-full h-2 dark:bg-gray-700">
-      <div
-        className="bg-primary-600 h-2 rounded-full transition-all duration-300"
-        style={{ width: `${progress}%` }}
-        role="progressbar"
-        aria-valuenow={progress}
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-label={`Export progress: ${progress}%`}
-      />
     </div>
   );
 }

@@ -54,7 +54,7 @@ describe("FormatDropdown - Property Tests", () => {
         />
       );
 
-      const dropdown = screen.getByRole("menu");
+      expect(screen.getByRole("menu")).toBeInTheDocument();
 
       // Act - Navigate to last option
       await user.keyboard("{ArrowDown}");
@@ -90,7 +90,7 @@ describe("FormatDropdown - Property Tests", () => {
         />
       );
 
-      const dropdown = screen.getByRole("menu");
+      expect(screen.getByRole("menu")).toBeInTheDocument();
 
       // Act - Try to go before first option
       await user.keyboard("{ArrowUp}");

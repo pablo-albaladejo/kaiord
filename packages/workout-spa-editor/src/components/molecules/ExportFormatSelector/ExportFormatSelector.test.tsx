@@ -557,7 +557,7 @@ describe("ExportFormatSelector", () => {
       });
     });
 
-    it("should mark selected option with aria-selected", async () => {
+    it("should mark selected option with aria-current", async () => {
       // Arrange
       const user = userEvent.setup();
       render(
