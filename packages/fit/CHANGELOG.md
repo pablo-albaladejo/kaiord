@@ -1,5 +1,11 @@
 # @kaiord/fit
 
+## 4.7.1
+
+### Patch Changes
+
+- a4cb756: Fix zone validation for power and pace targets during FIT import
+
 ## 4.5.3
 
 ### Patch Changes
