@@ -325,11 +325,13 @@ test.describe("Error Recovery", () => {
     const retryButton = page.getByRole("button", { name: /try again/i });
     await expect(retryButton).toBeVisible();
 
-    // Act - Click retry
+    // Act - Click retry (triggers file picker which resets the error state)
     await retryButton.click();
 
-    // Assert - File input exists and is ready for new file (it's hidden but accessible)
-    await expect(fileInput).toHaveCount(1);
+    // Assert - Error message is dismissed after retry
+    await expect(page.getByText(/import failed/i)).not.toBeVisible({
+      timeout: 5000,
+    });
   });
 
   test("should provide clear instructions for unrecoverable errors", async ({
