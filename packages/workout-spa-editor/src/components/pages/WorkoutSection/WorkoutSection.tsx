@@ -4,7 +4,7 @@ import { WorkoutSectionEditor } from "./WorkoutSectionEditor";
 import { WorkoutStepsList } from "./WorkoutStepsList";
 import { StoreConfirmationModal } from "../../molecules/ConfirmationModal";
 import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
-import { WorkoutPreview } from "../../molecules/WorkoutPreview/WorkoutPreview";
+import { WorkoutPreview } from "../../molecules/WorkoutPreview";
 import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
 import type { KRD, Workout } from "../../../types/krd";
 

@@ -18,10 +18,10 @@ export function getStepColor(step: unknown): string {
   const intensity = (step as { intensity?: string }).intensity;
   if (intensity === "warmup") return "#10b981"; // Green
   if (intensity === "cooldown") return "#06b6d4"; // Cyan
-  if (intensity === "rest") return "#6b7280"; // Gray
+  if (intensity === "rest" || intensity === "recovery") return "#6b7280"; // Gray
 
-  // Color based on target type for active intervals
-  if (intensity === "active") {
+  // Color based on target type for active/interval steps
+  if (intensity === "active" || intensity === "interval") {
     const targetType = (step as { targetType?: string }).targetType;
     if (targetType === "power") return "#ef4444"; // Red
     if (targetType === "heart_rate") return "#f59e0b"; // Orange
