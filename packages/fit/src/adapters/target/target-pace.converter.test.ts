@@ -66,6 +66,48 @@ describe("convertPaceTarget", () => {
         value: { unit: "zone", value: 3 },
       });
     });
+
+    it("should accept zone 1 (lower boundary)", () => {
+      const result = convertPaceTarget({ targetSpeedZone: 1 });
+
+      expect(result).toStrictEqual({
+        type: "pace",
+        value: { unit: "zone", value: 1 },
+      });
+    });
+
+    it("should accept zone 5 (upper boundary)", () => {
+      const result = convertPaceTarget({ targetSpeedZone: 5 });
+
+      expect(result).toStrictEqual({
+        type: "pace",
+        value: { unit: "zone", value: 5 },
+      });
+    });
+
+    it("should treat zone 0 as open (invalid zone, falls through)", () => {
+      const result = convertPaceTarget({ targetSpeedZone: 0 });
+
+      expect(result).toStrictEqual({ type: "open" });
+    });
+
+    it("should treat zone 6 as mps (invalid zone, fallback)", () => {
+      const result = convertPaceTarget({ targetSpeedZone: 6 });
+
+      expect(result).toStrictEqual({
+        type: "pace",
+        value: { unit: "mps", value: 6 },
+      });
+    });
+
+    it("should treat zone 1299 as mps (invalid zone, fallback)", () => {
+      const result = convertPaceTarget({ targetSpeedZone: 1299 });
+
+      expect(result).toStrictEqual({
+        type: "pace",
+        value: { unit: "mps", value: 1299 },
+      });
+    });
   });
 
   describe("value target", () => {
