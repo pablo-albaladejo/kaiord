@@ -46,10 +46,10 @@ describe("WorkoutActions", () => {
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
-      const discardButton = screen.getByTestId("discard-workout-button");
-      const outerContainer = discardButton.parentElement;
-      const buttonRow = outerContainer?.firstElementChild;
-      expect(buttonRow).toHaveClass("gap-3"); // gap-3 = 12px
+      const container = screen.getByTestId(
+        "discard-workout-button"
+      ).parentElement;
+      expect(container).toHaveClass("gap-3"); // gap-3 = 12px
     });
   });
 
@@ -59,10 +59,10 @@ describe("WorkoutActions", () => {
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
-      const discardButton = screen.getByTestId("discard-workout-button");
-      const outerContainer = discardButton.parentElement;
-      const buttonRow = outerContainer?.firstElementChild;
-      expect(buttonRow).toHaveClass("sm:flex-row");
+      const container = screen.getByTestId(
+        "discard-workout-button"
+      ).parentElement;
+      expect(container).toHaveClass("sm:flex-row");
     });
 
     it("should stack buttons vertically on mobile", () => {
@@ -70,10 +70,10 @@ describe("WorkoutActions", () => {
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
-      const discardButton = screen.getByTestId("discard-workout-button");
-      const outerContainer = discardButton.parentElement;
-      const buttonRow = outerContainer?.firstElementChild;
-      expect(buttonRow).toHaveClass("flex-col");
+      const container = screen.getByTestId(
+        "discard-workout-button"
+      ).parentElement;
+      expect(container).toHaveClass("flex-col");
     });
   });
 
@@ -88,13 +88,13 @@ describe("WorkoutActions", () => {
       expect(saveButton).toBeInTheDocument();
     });
 
-    it("should use secondary variant for discard button", () => {
+    it("should use ghost variant for discard button", () => {
       // Arrange & Act
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
       const discardButton = screen.getByRole("button", { name: /discard/i });
-      expect(discardButton).toHaveClass("border"); // Secondary variant has border
+      expect(discardButton).toHaveClass("text-red-600");
     });
   });
 

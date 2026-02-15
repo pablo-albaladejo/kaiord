@@ -54,7 +54,7 @@ describe("FormatDropdown - Property Tests", () => {
         />
       );
 
-      const dropdown = screen.getByRole("listbox");
+      const dropdown = screen.getByRole("menu");
 
       // Act - Navigate to last option
       await user.keyboard("{ArrowDown}");
@@ -66,7 +66,7 @@ describe("FormatDropdown - Property Tests", () => {
       await user.keyboard("{ArrowDown}");
 
       // Assert - Focus should stay at last option (index 3)
-      const options = screen.getAllByRole("option");
+      const options = screen.getAllByRole("menuitem");
       expect(options[3]).toHaveAttribute("tabIndex", "0");
       expect(options[0]).toHaveAttribute("tabIndex", "-1");
       expect(options[1]).toHaveAttribute("tabIndex", "-1");
@@ -90,14 +90,14 @@ describe("FormatDropdown - Property Tests", () => {
         />
       );
 
-      const dropdown = screen.getByRole("listbox");
+      const dropdown = screen.getByRole("menu");
 
       // Act - Try to go before first option
       await user.keyboard("{ArrowUp}");
       await user.keyboard("{ArrowUp}");
 
       // Assert - Focus should stay at first option (index 0)
-      const options = screen.getAllByRole("option");
+      const options = screen.getAllByRole("menuitem");
       expect(options[0]).toHaveAttribute("tabIndex", "0");
       expect(options[1]).toHaveAttribute("tabIndex", "-1");
       expect(options[2]).toHaveAttribute("tabIndex", "-1");
@@ -121,7 +121,7 @@ describe("FormatDropdown - Property Tests", () => {
         />
       );
 
-      const options = screen.getAllByRole("option");
+      const options = screen.getAllByRole("menuitem");
 
       // Act & Assert - Navigate through all options
       for (let i = 0; i < mockFormatOptions.length; i++) {
@@ -159,7 +159,7 @@ describe("FormatDropdown - Property Tests", () => {
         />
       );
 
-      const options = screen.getAllByRole("option");
+      const options = screen.getAllByRole("menuitem");
 
       // Act & Assert - Navigate backwards through all options
       for (let i = mockFormatOptions.length - 1; i >= 0; i--) {
@@ -333,7 +333,7 @@ describe("FormatDropdown - Unit Tests", () => {
         />
       );
 
-      const options = screen.getAllByRole("option");
+      const options = screen.getAllByRole("menuitem");
 
       // Act
       await user.keyboard("{ArrowDown}");
@@ -360,7 +360,7 @@ describe("FormatDropdown - Unit Tests", () => {
         />
       );
 
-      const options = screen.getAllByRole("option");
+      const options = screen.getAllByRole("menuitem");
 
       // Act
       await user.keyboard("{ArrowUp}");
@@ -466,7 +466,7 @@ describe("FormatDropdown - Unit Tests", () => {
       );
 
       // Assert - TCX option (index 2) should be focused
-      const options = screen.getAllByRole("option");
+      const options = screen.getAllByRole("menuitem");
       expect(options[2]).toHaveAttribute("tabIndex", "0");
       expect(options[0]).toHaveAttribute("tabIndex", "-1");
       expect(options[1]).toHaveAttribute("tabIndex", "-1");
@@ -492,7 +492,7 @@ describe("FormatDropdown - Unit Tests", () => {
       );
 
       // Assert - First option should be focused
-      const options = screen.getAllByRole("option");
+      const options = screen.getAllByRole("menuitem");
       expect(options[0]).toHaveAttribute("tabIndex", "0");
       expect(options[1]).toHaveAttribute("tabIndex", "-1");
       expect(options[2]).toHaveAttribute("tabIndex", "-1");
@@ -546,7 +546,7 @@ describe("FormatDropdown - Unit Tests", () => {
       );
 
       // Assert - All options should be disabled
-      const options = screen.getAllByRole("option");
+      const options = screen.getAllByRole("menuitem");
       options.forEach((option) => {
         expect(option).toBeDisabled();
       });

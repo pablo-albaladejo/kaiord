@@ -65,10 +65,10 @@ describe("ExportFormatSelector", () => {
 
       // Assert
       await waitFor(() => {
-        expect(screen.getByRole("listbox")).toBeInTheDocument();
+        expect(screen.getByRole("menu")).toBeInTheDocument();
       });
 
-      const options = screen.getAllByRole("option");
+      const options = screen.getAllByRole("menuitem");
       expect(options).toHaveLength(5);
 
       expect(screen.getAllByText("FIT")).toHaveLength(1);
@@ -164,9 +164,9 @@ describe("ExportFormatSelector", () => {
       // Assert
       await waitFor(() => {
         const tcxOption = screen
-          .getAllByRole("option")
+          .getAllByRole("menuitem")
           .find((opt) => opt.textContent?.includes("TCX"));
-        expect(tcxOption).toHaveAttribute("aria-selected", "true");
+        expect(tcxOption).toHaveAttribute("aria-current", "true");
       });
     });
   });
@@ -190,11 +190,11 @@ describe("ExportFormatSelector", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByRole("listbox")).toBeInTheDocument();
+        expect(screen.getByRole("menu")).toBeInTheDocument();
       });
 
       const fitOption = screen
-        .getAllByRole("option")
+        .getAllByRole("menuitem")
         .find((opt) => opt.textContent?.includes("FIT"));
       await user.click(fitOption!);
 
@@ -219,17 +219,17 @@ describe("ExportFormatSelector", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByRole("listbox")).toBeInTheDocument();
+        expect(screen.getByRole("menu")).toBeInTheDocument();
       });
 
       const tcxOption = screen
-        .getAllByRole("option")
+        .getAllByRole("menuitem")
         .find((opt) => opt.textContent?.includes("TCX"));
       await user.click(tcxOption!);
 
       // Assert
       await waitFor(() => {
-        expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+        expect(screen.queryByRole("menu")).not.toBeInTheDocument();
       });
     });
 
@@ -253,7 +253,7 @@ describe("ExportFormatSelector", () => {
 
       // Assert - Open
       await waitFor(() => {
-        expect(screen.getByRole("listbox")).toBeInTheDocument();
+        expect(screen.getByRole("menu")).toBeInTheDocument();
       });
 
       // Act - Close
@@ -261,7 +261,7 @@ describe("ExportFormatSelector", () => {
 
       // Assert - Closed
       await waitFor(() => {
-        expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+        expect(screen.queryByRole("menu")).not.toBeInTheDocument();
       });
     });
 
@@ -283,7 +283,7 @@ describe("ExportFormatSelector", () => {
       );
 
       // Assert
-      expect(screen.queryByRole("listbox")).not.toBeInTheDocument();
+      expect(screen.queryByRole("menu")).not.toBeInTheDocument();
     });
   });
 
@@ -306,11 +306,11 @@ describe("ExportFormatSelector", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByRole("listbox")).toBeInTheDocument();
+        expect(screen.getByRole("menu")).toBeInTheDocument();
       });
 
       const fitOption = screen
-        .getAllByRole("option")
+        .getAllByRole("menuitem")
         .find((opt) => opt.textContent?.includes("FIT"));
       await user.click(fitOption!);
 
@@ -344,11 +344,11 @@ describe("ExportFormatSelector", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByRole("listbox")).toBeInTheDocument();
+        expect(screen.getByRole("menu")).toBeInTheDocument();
       });
 
       const fitOption = screen
-        .getAllByRole("option")
+        .getAllByRole("menuitem")
         .find((opt) => opt.textContent?.includes("FIT"));
       await user.click(fitOption!);
 
@@ -380,11 +380,11 @@ describe("ExportFormatSelector", () => {
       );
 
       await waitFor(() => {
-        expect(screen.getByRole("listbox")).toBeInTheDocument();
+        expect(screen.getByRole("menu")).toBeInTheDocument();
       });
 
       const fitOption = screen
-        .getAllByRole("option")
+        .getAllByRole("menuitem")
         .find((opt) => opt.textContent?.includes("FIT"));
       await user.click(fitOption!);
 
@@ -530,7 +530,7 @@ describe("ExportFormatSelector", () => {
         name: /select export format/i,
       });
       expect(button).toHaveAttribute("aria-expanded", "false");
-      expect(button).toHaveAttribute("aria-haspopup", "listbox");
+      expect(button).toHaveAttribute("aria-haspopup", "menu");
     });
 
     it("should update aria-expanded when opened", async () => {
@@ -576,9 +576,9 @@ describe("ExportFormatSelector", () => {
       // Assert
       await waitFor(() => {
         const fitOption = screen
-          .getAllByRole("option")
+          .getAllByRole("menuitem")
           .find((opt) => opt.textContent?.includes("FIT"));
-        expect(fitOption).toHaveAttribute("aria-selected", "true");
+        expect(fitOption).toHaveAttribute("aria-current", "true");
       });
     });
   });

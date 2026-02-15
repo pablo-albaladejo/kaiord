@@ -125,7 +125,7 @@ describe("SaveButton", () => {
       expect(icon).toBeInTheDocument();
     });
 
-    it("should apply custom className", () => {
+    it("should apply custom className to container", () => {
       // Arrange & Act
       renderWithToast(
         <SaveButton workout={mockKRD} className="custom-class" />
@@ -133,7 +133,8 @@ describe("SaveButton", () => {
 
       // Assert
       const button = screen.getByRole("button", { name: /save workout/i });
-      expect(button).toHaveClass("custom-class");
+      const container = button.closest(".custom-class");
+      expect(container).toBeInTheDocument();
     });
   });
 

@@ -46,8 +46,8 @@ export function FormatDropdown({
 
       {isOpen && (
         <div
-          className="absolute z-10 mt-2 w-full bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg"
-          role="listbox"
+          className="absolute z-10 mt-2 w-full min-w-[240px] bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg"
+          role="menu"
         >
           {formatOptions.map((option, index) => {
             const isSelected = option.value === currentFormat;
