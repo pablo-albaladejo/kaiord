@@ -49,13 +49,26 @@ const buildPaceRangeTarget = (data: FitTargetData): Target | null => {
 
 const buildPaceZoneTarget = (data: FitTargetData): Target | null => {
   if (data.targetSpeedZone !== undefined) {
-    return {
-      type: targetTypeSchema.enum.pace,
-      value: {
-        unit: targetUnitSchema.enum.zone,
-        value: data.targetSpeedZone,
-      },
-    };
+    // Validate zone is in valid range (1-5)
+    // If not, treat as mps value instead
+    if (data.targetSpeedZone >= 1 && data.targetSpeedZone <= 5) {
+      return {
+        type: targetTypeSchema.enum.pace,
+        value: {
+          unit: targetUnitSchema.enum.zone,
+          value: data.targetSpeedZone,
+        },
+      };
+    }
+    if (data.targetSpeedZone > 0) {
+      return {
+        type: targetTypeSchema.enum.pace,
+        value: {
+          unit: targetUnitSchema.enum.mps,
+          value: data.targetSpeedZone,
+        },
+      };
+    }
   }
   return null;
 };

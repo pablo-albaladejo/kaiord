@@ -82,6 +82,48 @@ describe("convertPowerTarget", () => {
         value: { unit: "zone", value: 4 },
       });
     });
+
+    it("should accept zone 1 (lower boundary)", () => {
+      const result = convertPowerTarget({ targetPowerZone: 1 });
+
+      expect(result).toStrictEqual({
+        type: "power",
+        value: { unit: "zone", value: 1 },
+      });
+    });
+
+    it("should accept zone 7 (upper boundary)", () => {
+      const result = convertPowerTarget({ targetPowerZone: 7 });
+
+      expect(result).toStrictEqual({
+        type: "power",
+        value: { unit: "zone", value: 7 },
+      });
+    });
+
+    it("should treat zone 0 as open (invalid zone, convertPowerValue returns null)", () => {
+      const result = convertPowerTarget({ targetPowerZone: 0 });
+
+      expect(result).toStrictEqual({ type: "open" });
+    });
+
+    it("should treat zone 8 as percent_ftp (invalid zone, fallback)", () => {
+      const result = convertPowerTarget({ targetPowerZone: 8 });
+
+      expect(result).toStrictEqual({
+        type: "power",
+        value: { unit: "percent_ftp", value: 8 },
+      });
+    });
+
+    it("should treat zone 1299 as watts (invalid zone, value > 1000)", () => {
+      const result = convertPowerTarget({ targetPowerZone: 1299 });
+
+      expect(result).toStrictEqual({
+        type: "power",
+        value: { unit: "watts", value: 299 },
+      });
+    });
   });
 
   describe("value target", () => {

@@ -63,13 +63,21 @@ const buildPowerRangeTarget = (data: FitTargetData): Target | null => {
 
 const buildPowerZoneTarget = (data: FitTargetData): Target | null => {
   if (data.targetPowerZone !== undefined) {
-    return {
-      type: targetTypeSchema.enum.power,
-      value: {
-        unit: targetUnitSchema.enum.zone,
-        value: data.targetPowerZone,
-      },
-    };
+    // Validate zone is in valid range (1-7)
+    // If not, treat as power value instead
+    if (data.targetPowerZone >= 1 && data.targetPowerZone <= 7) {
+      return {
+        type: targetTypeSchema.enum.power,
+        value: {
+          unit: targetUnitSchema.enum.zone,
+          value: data.targetPowerZone,
+        },
+      };
+    }
+    const powerValue = convertPowerValue(data.targetPowerZone);
+    if (powerValue) {
+      return { type: targetTypeSchema.enum.power, value: powerValue };
+    }
   }
   return null;
 };
