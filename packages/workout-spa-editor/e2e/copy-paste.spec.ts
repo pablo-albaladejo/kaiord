@@ -94,14 +94,20 @@ test.describe("Copy/Paste Functionality", () => {
     test("should show error when pasting with empty clipboard", async ({
       page,
     }) => {
+      // Ensure clipboard and in-memory store are cleared
+      await page.evaluate(() => navigator.clipboard.writeText(""));
+
       // Act - Click paste button without copying first
       await page.locator('[data-testid="paste-step-button"]').click();
 
       // Assert - Error notification appears
+      // In Firefox/WebKit, the clipboard API may read system clipboard content
+      // (non-JSON text from other apps), producing "Invalid clipboard content"
+      // instead of "No content in clipboard"
       await expect(
         page
           .getByText(
-            /no content in clipboard|no valid step|clipboard does not contain/i
+            /no content in clipboard|no valid step|clipboard does not contain|invalid clipboard content/i
           )
           .first()
       ).toBeVisible();
@@ -365,14 +371,18 @@ test.describe("Copy/Paste Functionality", () => {
     test("should show error notification when clipboard is empty", async ({
       page,
     }) => {
+      // Ensure clipboard and in-memory store are cleared
+      await page.evaluate(() => navigator.clipboard.writeText(""));
+
       // Act - Try to paste without copying first (clipboard is empty)
       await page.locator('[data-testid="paste-step-button"]').click();
 
       // Assert - Error notification appears on all browsers
-      // In-memory fallback ensures consistent behavior
+      // In Firefox/WebKit, the clipboard API may read system clipboard content
+      // (non-JSON text from other apps), producing "Invalid clipboard content"
       const notification = page
         .getByText(
-          /no content in clipboard|no valid step|clipboard does not contain/i
+          /no content in clipboard|no valid step|clipboard does not contain|invalid clipboard content/i
         )
         .first();
       await expect(notification).toBeVisible();
