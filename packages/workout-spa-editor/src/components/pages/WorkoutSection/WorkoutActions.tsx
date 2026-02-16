@@ -33,7 +33,7 @@ export function WorkoutActions({
       <SaveButton workout={krd} />
       <SaveToLibraryButton workout={krd} className="w-full sm:w-auto" />
       <Button
-        variant="ghost"
+        variant="tertiary"
         onClick={onDiscard}
         aria-label="Discard workout and return to welcome screen"
         data-testid="discard-workout-button"

@@ -88,7 +88,7 @@ describe("WorkoutActions", () => {
       expect(saveButton).toBeInTheDocument();
     });
 
-    it("should use ghost variant for discard button", () => {
+    it("should use tertiary variant for discard button", () => {
       // Arrange & Act
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 

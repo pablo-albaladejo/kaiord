@@ -12,7 +12,7 @@ const meta = {
     variant: {
       description: "Button visual style variant",
       control: { type: "select" },
-      options: ["primary", "secondary", "ghost", "danger"],
+      options: ["primary", "secondary", "tertiary", "danger"],
     },
     size: {
       description: "Button size",
@@ -75,12 +75,12 @@ export const Secondary: Story = {
 };
 
 /**
- * Ghost variant (transparent background)
+ * Tertiary variant (transparent background)
  */
-export const Ghost: Story = {
+export const Tertiary: Story = {
   args: {
-    variant: "ghost",
-    children: "Ghost Button",
+    variant: "tertiary",
+    children: "Tertiary Button",
   },
 };
 
@@ -152,7 +152,7 @@ export const AllVariants: Story = {
     <div className="flex flex-wrap gap-4">
       <Button variant="primary">Primary</Button>
       <Button variant="secondary">Secondary</Button>
-      <Button variant="ghost">Ghost</Button>
+      <Button variant="tertiary">Tertiary</Button>
       <Button variant="danger">Danger</Button>
     </div>
   ),
@@ -195,13 +195,13 @@ export const RealWorldExamples: Story = {
         <Button variant="secondary">Cancel</Button>
       </div>
       <div className="flex gap-2">
-        <Button variant="ghost" size="sm">
+        <Button variant="tertiary" size="sm">
           Copy
         </Button>
-        <Button variant="ghost" size="sm">
+        <Button variant="tertiary" size="sm">
           Paste
         </Button>
-        <Button variant="ghost" size="sm">
+        <Button variant="tertiary" size="sm">
           Duplicate
         </Button>
       </div>
