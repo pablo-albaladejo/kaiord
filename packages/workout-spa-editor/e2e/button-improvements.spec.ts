@@ -105,7 +105,7 @@ test.describe("Button Improvements - Desktop Layout", () => {
     // Assert - Buttons should be in horizontal layout on desktop
     // The layout has two rows:
     // Row 1: Save Workout and Save to Library (horizontal on desktop)
-    // Row 2: Discard Workout (below row 1)
+    // All buttons should be in a single horizontal row on desktop
 
     if (saveBox && libraryBox) {
       const yDifference = Math.abs(saveBox.y - libraryBox.y);
@@ -119,9 +119,10 @@ test.describe("Button Improvements - Desktop Layout", () => {
       }
     }
 
-    // Discard button should be below the first row
-    if (saveBox && discardBox) {
-      expect(discardBox.y).toBeGreaterThan(saveBox.y);
+    // Discard button should be on the same row as other buttons on desktop
+    if (libraryBox && discardBox) {
+      const yDifference = Math.abs(discardBox.y - libraryBox.y);
+      expect(yDifference).toBeLessThan(60);
     }
   });
 
@@ -609,7 +610,7 @@ test.describe("Button Improvements - Capitalization", () => {
     });
     await expect(discardButton).toBeVisible();
     const discardText = await discardButton.textContent();
-    expect(discardText).toContain("Discard Workout"); // Title case
+    expect(discardText).toContain("Discard"); // Single word label
   });
 
   test("should use lowercase for minor words in button labels", async ({
