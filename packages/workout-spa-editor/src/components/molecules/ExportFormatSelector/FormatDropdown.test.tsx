@@ -481,9 +481,7 @@ describe("FormatDropdown - Unit Tests", () => {
       render(
         <FormatDropdown
           isOpen={true}
-          currentFormat="unknown"
-          as
-          any
+          currentFormat={"unknown" as any}
           formatOptions={mockFormatOptions}
           onToggle={onToggle}
           onFormatSelect={onFormatSelect}
