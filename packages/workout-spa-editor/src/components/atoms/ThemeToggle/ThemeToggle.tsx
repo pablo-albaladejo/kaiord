@@ -34,7 +34,7 @@ export const ThemeToggle = () => {
 
   return (
     <Button
-      variant="ghost"
+      variant="tertiary"
       size="sm"
       onClick={handleToggle}
       aria-label={ariaLabel}

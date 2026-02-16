@@ -4,7 +4,7 @@ A flexible, accessible button component with multiple variants, sizes, and state
 
 ## Features
 
-- **4 Variants**: primary, secondary, ghost, danger
+- **4 Variants**: primary, secondary, tertiary, danger
 - **3 Sizes**: sm, md, lg
 - **Loading State**: Shows spinner and disables interaction
 - **Disabled State**: Prevents interaction with visual feedback
@@ -22,7 +22,7 @@ import { Button } from "@/components/atoms/Button";
 // With variant
 <Button variant="primary">Primary</Button>
 <Button variant="secondary">Secondary</Button>
-<Button variant="ghost">Ghost</Button>
+<Button variant="tertiary">Tertiary</Button>
 <Button variant="danger">Delete</Button>
 
 // With size
@@ -49,15 +49,15 @@ import { Button } from "@/components/atoms/Button";
 
 ## Props
 
-| Prop        | Type                                              | Default     | Description                               |
-| ----------- | ------------------------------------------------- | ----------- | ----------------------------------------- |
-| `variant`   | `"primary" \| "secondary" \| "ghost" \| "danger"` | `"primary"` | Visual style variant                      |
-| `size`      | `"sm" \| "md" \| "lg"`                            | `"md"`      | Button size                               |
-| `loading`   | `boolean`                                         | `false`     | Shows loading spinner and disables button |
-| `disabled`  | `boolean`                                         | `false`     | Disables button interaction               |
-| `className` | `string`                                          | `""`        | Additional CSS classes                    |
-| `children`  | `ReactNode`                                       | -           | Button content                            |
-| ...rest     | `ButtonHTMLAttributes`                            | -           | All standard button HTML attributes       |
+| Prop        | Type                                                 | Default     | Description                               |
+| ----------- | ---------------------------------------------------- | ----------- | ----------------------------------------- |
+| `variant`   | `"primary" \| "secondary" \| "tertiary" \| "danger"` | `"primary"` | Visual style variant                      |
+| `size`      | `"sm" \| "md" \| "lg"`                               | `"md"`      | Button size                               |
+| `loading`   | `boolean`                                            | `false`     | Shows loading spinner and disables button |
+| `disabled`  | `boolean`                                            | `false`     | Disables button interaction               |
+| `className` | `string`                                             | `""`        | Additional CSS classes                    |
+| `children`  | `ReactNode`                                          | -           | Button content                            |
+| ...rest     | `ButtonHTMLAttributes`                               | -           | All standard button HTML attributes       |
 
 ## Variants
 
@@ -69,9 +69,9 @@ Default variant with primary brand color. Use for main actions.
 
 Outlined variant with subtle background. Use for secondary actions.
 
-### Ghost
+### Tertiary
 
-Transparent background with hover effect. Use for tertiary actions or in toolbars.
+Transparent background with hover effect. Use for low-emphasis actions or in toolbars.
 
 ### Danger
 
@@ -118,11 +118,11 @@ const [saving, setSaving] = useState(false);
 
 ```tsx
 <div className="flex gap-2">
-  <Button variant="ghost" size="sm">
+  <Button variant="tertiary" size="sm">
     <Icon name="copy" />
     Copy
   </Button>
-  <Button variant="ghost" size="sm">
+  <Button variant="tertiary" size="sm">
     <Icon name="paste" />
     Paste
   </Button>
