@@ -31,8 +31,8 @@ export const FormatOptionItem = forwardRef<
           ${isFocused ? "ring-2 ring-primary-500 ring-inset" : ""}
           ${disabled ? "cursor-not-allowed opacity-50" : ""}
         `}
-      role="option"
-      aria-selected={isSelected}
+      role="menuitem"
+      aria-current={isSelected || undefined}
       aria-label={option.label}
       tabIndex={isFocused ? 0 : -1}
       data-testid={`export-format-option-${option.value}`}

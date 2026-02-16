@@ -172,7 +172,7 @@ export const RepetitionBlockSteps = ({
 
       {onAddStep && (
         <Button
-          variant="ghost"
+          variant="tertiary"
           size="sm"
           onClick={onAddStep}
           className="w-full"

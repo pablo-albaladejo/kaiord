@@ -15,7 +15,7 @@ export function WorkoutTitle({ workout, onEdit }: WorkoutTitleProps) {
           {workout.name || "Untitled Workout"}
         </h2>
         <Button
-          variant="ghost"
+          variant="tertiary"
           size="sm"
           onClick={onEdit}
           aria-label="Edit workout metadata"

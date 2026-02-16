@@ -45,7 +45,7 @@ export const RepetitionCountEditor = ({
         </Button>
         <Button
           size="sm"
-          variant="ghost"
+          variant="tertiary"
           onClick={onCancelEdit}
           data-testid="cancel-count-button"
         >

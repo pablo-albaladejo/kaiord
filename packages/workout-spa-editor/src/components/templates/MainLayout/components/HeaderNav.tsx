@@ -26,7 +26,7 @@ export function HeaderNav({
   return (
     <nav className="flex items-center gap-2" aria-label="Main navigation">
       <Button
-        variant="ghost"
+        variant="tertiary"
         size="sm"
         onClick={onProfileClick}
         aria-label="Open profile manager"
@@ -37,7 +37,7 @@ export function HeaderNav({
         </span>
       </Button>
       <Button
-        variant="ghost"
+        variant="tertiary"
         size="sm"
         onClick={onLibraryClick}
         aria-label="Open workout library"
@@ -55,7 +55,7 @@ export function HeaderNav({
         )}
       </Button>
       <Button
-        variant="ghost"
+        variant="tertiary"
         size="sm"
         onClick={onHelpClick}
         aria-label="Open help (Press ?)"

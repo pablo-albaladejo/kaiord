@@ -18,7 +18,7 @@ export function CardHeader({ workoutName, onDelete }: CardHeaderProps) {
       <div className="flex items-start justify-between">
         <h3 className="line-clamp-2 text-base font-semibold">{workoutName}</h3>
         <Button
-          variant="ghost"
+          variant="tertiary"
           size="sm"
           onClick={onDelete}
           className="opacity-0 transition-opacity group-hover:opacity-100"

@@ -46,11 +46,7 @@ describe("WorkoutActions - Property Tests", () => {
     const buttons = screen.getAllByRole("button");
 
     // Define expected button labels in title case
-    const expectedLabels = [
-      "Save Workout",
-      "Save to Library",
-      "Discard Workout",
-    ];
+    const expectedLabels = ["Save Workout", "Save to Library", "Discard"];
 
     // Minor words that should be lowercase in title case (except when first word)
     const minorWords = [
@@ -128,15 +124,15 @@ describe("WorkoutActions - Property Tests", () => {
     expect(libraryButton.textContent).toContain("Save to Library");
   });
 
-  it("should have 'Discard Workout' button in title case", () => {
+  it("should have 'Discard' button in title case", () => {
     // Arrange & Act
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
     const discardButton = screen.getByRole("button", {
-      name: /discard workout/i,
+      name: /discard/i,
     });
-    expect(discardButton.textContent).toContain("Discard Workout");
+    expect(discardButton.textContent).toContain("Discard");
   });
 
   /**
@@ -149,23 +145,23 @@ describe("WorkoutActions - Property Tests", () => {
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
-    const discardButton = screen.getByTestId("discard-workout-button");
-    const outerContainer = discardButton.parentElement;
-    const buttonRow = outerContainer?.firstElementChild;
+    const container = screen.getByTestId(
+      "discard-workout-button"
+    ).parentElement;
 
     // Verify responsive classes are present
     // Mobile: flex-col (stack vertically)
-    expect(buttonRow).toHaveClass("flex-col");
+    expect(container).toHaveClass("flex-col");
 
     // Desktop: sm:flex-row (horizontal layout)
-    expect(buttonRow).toHaveClass("sm:flex-row");
+    expect(container).toHaveClass("sm:flex-row");
 
     // Proper spacing
-    expect(buttonRow).toHaveClass("gap-3");
+    expect(container).toHaveClass("gap-3");
 
     // Full width on mobile, auto width on desktop
-    expect(buttonRow).toHaveClass("w-full");
-    expect(buttonRow).toHaveClass("sm:w-auto");
+    expect(container).toHaveClass("w-full");
+    expect(container).toHaveClass("sm:w-auto");
   });
 
   it("should have full width buttons on mobile", () => {

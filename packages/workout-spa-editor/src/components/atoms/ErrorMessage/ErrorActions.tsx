@@ -23,7 +23,7 @@ export const ErrorActions = ({ onRetry, onDismiss }: ErrorActionsProps) => {
       {onDismiss && (
         <Button
           onClick={onDismiss}
-          variant="ghost"
+          variant="tertiary"
           size="sm"
           className="text-red-700 hover:bg-red-100 dark:text-red-300 dark:hover:bg-red-900"
         >

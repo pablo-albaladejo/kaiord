@@ -54,6 +54,7 @@ When working on this codebase, ALL problems must be fixed, regardless of whether
 - ✅ **Zero TypeScript errors** - Strict type checking with no `any` escapes
 - ✅ **Zero test warnings** - Clean test output (React act(), accessibility, etc.)
 - ✅ **Zero build warnings** - Vite, ESBuild, etc. must produce clean output
+- ✅ **Zero IDE warnings** - SonarQube, accessibility, and static analysis warnings must be resolved (treat as lint errors)
 - ✅ **Coverage thresholds met** - 80% for core packages, 70% for frontend
 - ✅ **All tests passing** - 100% pass rate across all packages
 

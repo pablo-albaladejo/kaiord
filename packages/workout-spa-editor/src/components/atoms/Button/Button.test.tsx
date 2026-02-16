@@ -38,8 +38,8 @@ describe("Button", () => {
       expect(button).toHaveClass("bg-white");
     });
 
-    it("should render ghost variant", () => {
-      render(<Button variant="ghost">Ghost</Button>);
+    it("should render tertiary variant", () => {
+      render(<Button variant="tertiary">Tertiary</Button>);
 
       const button = screen.getByRole("button");
       expect(button).toHaveClass("bg-transparent");

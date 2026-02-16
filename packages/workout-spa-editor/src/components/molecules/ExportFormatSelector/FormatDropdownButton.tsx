@@ -23,17 +23,17 @@ export function FormatDropdownButton({
       onClick={onToggle}
       disabled={disabled}
       className={`
-        w-full flex items-center justify-between gap-2 px-4 py-2.5
+        w-full sm:w-auto flex items-center justify-between gap-2 px-4 py-2.5
         bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600
         rounded-lg text-sm font-medium text-gray-900 dark:text-gray-100
         hover:bg-gray-50 dark:hover:bg-gray-700
         focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2
         disabled:opacity-60 disabled:cursor-not-allowed
-        transition-colors
+        transition-colors whitespace-nowrap
       `}
       aria-label="Select export format"
       aria-expanded={isOpen}
-      aria-haspopup="listbox"
+      aria-haspopup="menu"
       data-testid="export-format-selector-button"
     >
       <span className="flex items-center gap-2">
