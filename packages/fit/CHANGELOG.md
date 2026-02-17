@@ -1,5 +1,11 @@
 # @kaiord/fit
 
+## 4.7.2
+
+### Patch Changes
+
+- 2377eaa: Update production dependencies: @garmin/fitsdk 21.194.0, fast-xml-parser 5.3.6
+
 ## 4.7.1
 
 ### Patch Changes
