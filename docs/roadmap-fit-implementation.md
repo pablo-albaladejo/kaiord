@@ -52,7 +52,7 @@
 | ------------------- | --------- | ---------------- |
 | Duration conversion | 861       | ✅ Comprehensive |
 | Target conversion   | 1,027     | ✅ Comprehensive |
-| KRD↔FIT roundtrip  | 2,028     | ✅ Comprehensive |
+| KRD↔FIT roundtrip   | 2,028     | ✅ Comprehensive |
 | Swimming            | 428       | ✅ Good          |
 | Notes handling      | 340       | ✅ Good          |
 | Metadata            | 185       | ✅ Good          |

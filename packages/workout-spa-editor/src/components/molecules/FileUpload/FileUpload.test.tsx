@@ -97,9 +97,8 @@ describe("FileUpload", () => {
 
   it("should call onError with invalid file", async () => {
     // Arrange
-    const { importWorkout, ImportError } = await import(
-      "../../../utils/import-workout"
-    );
+    const { importWorkout, ImportError } =
+      await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValue(
       new ImportError("Failed to parse file", "krd")
     );
@@ -124,9 +123,8 @@ describe("FileUpload", () => {
 
   it("should display error message with retry button for invalid file", async () => {
     // Arrange
-    const { importWorkout, ImportError } = await import(
-      "../../../utils/import-workout"
-    );
+    const { importWorkout, ImportError } =
+      await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValue(
       new ImportError("Failed to parse file", "krd")
     );
@@ -156,9 +154,8 @@ describe("FileUpload", () => {
 
   it("should call onError with invalid KRD schema", async () => {
     // Arrange
-    const { importWorkout, ImportError } = await import(
-      "../../../utils/import-workout"
-    );
+    const { importWorkout, ImportError } =
+      await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValue(
       new ImportError("Validation failed", "krd")
     );
@@ -185,9 +182,8 @@ describe("FileUpload", () => {
 
   it("should display error for invalid file", async () => {
     // Arrange
-    const { importWorkout, ImportError } = await import(
-      "../../../utils/import-workout"
-    );
+    const { importWorkout, ImportError } =
+      await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValue(
       new ImportError("Validation failed", "krd")
     );
@@ -295,9 +291,8 @@ describe("FileUpload", () => {
 
   it("should retry file upload when Try Again button is clicked", async () => {
     // Arrange
-    const { importWorkout, ImportError } = await import(
-      "../../../utils/import-workout"
-    );
+    const { importWorkout, ImportError } =
+      await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValueOnce(
       new ImportError("Failed to parse file", "krd")
     );
@@ -340,9 +335,8 @@ describe("FileUpload", () => {
 
   it("should dismiss error when Dismiss button is clicked", async () => {
     // Arrange
-    const { importWorkout, ImportError } = await import(
-      "../../../utils/import-workout"
-    );
+    const { importWorkout, ImportError } =
+      await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValue(
       new ImportError("Failed to parse file", "krd")
     );
@@ -373,9 +367,8 @@ describe("FileUpload", () => {
 
   it("should clear error when new file is selected", async () => {
     // Arrange
-    const { importWorkout, ImportError } = await import(
-      "../../../utils/import-workout"
-    );
+    const { importWorkout, ImportError } =
+      await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValueOnce(
       new ImportError("Failed to parse file", "krd")
     );

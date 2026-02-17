@@ -30,7 +30,7 @@
   },
   "dependencies": {
     "@kaiord/core": "workspace:^",
-    "fast-xml-parser": "^5.3.4",
+    "fast-xml-parser": "^5.3.6",
     "xsd-schema-validator": "^0.11.0",
     "zod": "^4.0.0"
   },

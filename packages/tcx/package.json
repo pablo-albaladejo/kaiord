@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@kaiord/core": "workspace:^",
-    "fast-xml-parser": "^5.3.4",
+    "fast-xml-parser": "^5.3.6",
     "zod": "^4.0.0"
   },
   "devDependencies": {
