@@ -60,9 +60,8 @@ vi.mock("../ExportFormatSelector/ExportFormatSelector", () => ({
 }));
 
 // Import after mocking
-const { exportWorkout, downloadWorkout } = await import(
-  "../../../utils/export-workout"
-);
+const { exportWorkout, downloadWorkout } =
+  await import("../../../utils/export-workout");
 
 // Helper to render with ToastProvider
 const renderWithToast = (ui: ReactElement) => {

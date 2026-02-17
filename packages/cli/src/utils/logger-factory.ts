@@ -33,14 +33,12 @@ export const createLogger = async (
 
   // Import appropriate logger dynamically
   if (loggerType === "structured") {
-    const { createStructuredLogger } = await import(
-      "../adapters/logger/structured-logger"
-    );
+    const { createStructuredLogger } =
+      await import("../adapters/logger/structured-logger");
     return createStructuredLogger(options);
   } else {
-    const { createPrettyLogger } = await import(
-      "../adapters/logger/pretty-logger"
-    );
+    const { createPrettyLogger } =
+      await import("../adapters/logger/pretty-logger");
     return createPrettyLogger(options);
   }
 };

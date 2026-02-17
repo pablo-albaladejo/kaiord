@@ -175,9 +175,8 @@ describe("createZwiftValidator", () => {
           // @ts-expect-error - Simulating browser environment
           global.window = {};
           vi.resetModules();
-          const { createZwiftValidator: createBrowserValidator } = await import(
-            "./xsd-validator"
-          );
+          const { createZwiftValidator: createBrowserValidator } =
+            await import("./xsd-validator");
           const browserValidator = createBrowserValidator(logger);
 
           // Then, change to Node.js environment WITHOUT module reload
@@ -186,9 +185,8 @@ describe("createZwiftValidator", () => {
           // Note: NOT calling vi.resetModules() here
 
           // Act - Import again without reset (should get cached module)
-          const { createZwiftValidator: createCachedValidator } = await import(
-            "./xsd-validator"
-          );
+          const { createZwiftValidator: createCachedValidator } =
+            await import("./xsd-validator");
           const cachedValidator = createCachedValidator(logger);
 
           // Assert - Both validators should behave the same (browser mode)
@@ -201,9 +199,8 @@ describe("createZwiftValidator", () => {
 
           // Now reset modules and verify Node.js behavior
           vi.resetModules();
-          const { createZwiftValidator: createNodeValidator } = await import(
-            "./xsd-validator"
-          );
+          const { createZwiftValidator: createNodeValidator } =
+            await import("./xsd-validator");
           const nodeValidator = createNodeValidator(logger);
           const nodeResult = await nodeValidator(validXml);
 
@@ -238,9 +235,8 @@ describe("createZwiftValidator", () => {
             // @ts-expect-error - Simulating Node.js environment
             global.window = undefined;
             vi.resetModules();
-            const { createZwiftValidator: createNodeValidator } = await import(
-              "./xsd-validator"
-            );
+            const { createZwiftValidator: createNodeValidator } =
+              await import("./xsd-validator");
             const nodeValidator = createNodeValidator(logger);
             const nodeResult = await nodeValidator(validXml);
             expect(nodeResult.valid).toBe(true);

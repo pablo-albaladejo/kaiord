@@ -24,12 +24,12 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@garmin/fitsdk": "^21.141.0",
+    "@garmin/fitsdk": "^21.194.0",
     "@kaiord/core": "workspace:^",
     "zod": "^4.0.0"
   },
   "devDependencies": {
-    "@faker-js/faker": "^10.1.0",
+    "@faker-js/faker": "^10.3.0",
     "@types/node": "^24.0.0",
     "@types/rosie": "^0.0.45",
     "@vitest/coverage-v8": "^4.0.18",
