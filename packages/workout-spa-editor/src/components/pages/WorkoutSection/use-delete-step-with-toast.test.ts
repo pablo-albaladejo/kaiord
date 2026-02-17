@@ -50,9 +50,8 @@ describe("useDeleteStepWithToast", () => {
     const mockDeleteStep = vi.fn();
     const mockToast = vi.fn();
 
-    const { useDeleteStep } = await import(
-      "../../../store/workout-store-selectors"
-    );
+    const { useDeleteStep } =
+      await import("../../../store/workout-store-selectors");
     const { useToastContext } = await import("../../../contexts/ToastContext");
     const { useWorkoutStore } = await import("../../../store/workout-store");
 

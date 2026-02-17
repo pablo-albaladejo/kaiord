@@ -116,9 +116,8 @@ describe("useWorkoutSectionState", () => {
     it("should delegate to useDeleteStepWithToast", async () => {
       // Arrange
       const mockDeleteStep = vi.fn();
-      const { useDeleteStepWithToast } = await import(
-        "./use-delete-step-with-toast"
-      );
+      const { useDeleteStepWithToast } =
+        await import("./use-delete-step-with-toast");
       vi.mocked(useDeleteStepWithToast).mockReturnValue(mockDeleteStep);
 
       const { result } = renderHook(() =>
