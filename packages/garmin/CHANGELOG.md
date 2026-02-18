@@ -1,5 +1,11 @@
 # @kaiord/garmin
 
+## 4.7.3
+
+### Patch Changes
+
+- c925282: Fix step description/notes round-trip in Garmin workout conversion pipeline
+
 ## 4.5.3
 
 ### Patch Changes
