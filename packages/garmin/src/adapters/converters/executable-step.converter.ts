@@ -37,6 +37,7 @@ export const mapExecutableStep = (
     intensity,
   };
 
+  if (step.description) result.notes = step.description.slice(0, 256);
   if (equipment) result.equipment = equipment;
 
   if (stroke) {

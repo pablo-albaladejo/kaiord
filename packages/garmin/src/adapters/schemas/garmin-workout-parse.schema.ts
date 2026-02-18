@@ -31,6 +31,7 @@ export const executableStepParseSchema = z
       .passthrough()
       .nullable()
       .optional(),
+    description: z.string().nullable().optional(),
   })
   .passthrough();
 

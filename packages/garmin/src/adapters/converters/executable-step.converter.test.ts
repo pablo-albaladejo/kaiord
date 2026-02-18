@@ -301,6 +301,42 @@ describe("mapExecutableStep", () => {
     });
   });
 
+  describe("notes mapping", () => {
+    it("should map description to notes when present", () => {
+      const step = buildStep({ description: "RPE 8: 250W" });
+
+      const result = mapExecutableStep(step, 0);
+
+      expect(result.notes).toBe("RPE 8: 250W");
+    });
+
+    it("should omit notes when description is absent", () => {
+      const step = buildStep();
+
+      const result = mapExecutableStep(step, 0);
+
+      expect(result.notes).toBeUndefined();
+    });
+
+    it("should omit notes when description is null", () => {
+      const step = buildStep({ description: null });
+
+      const result = mapExecutableStep(step, 0);
+
+      expect(result.notes).toBeUndefined();
+    });
+
+    it("should truncate description to 256 characters", () => {
+      const longDescription = "A".repeat(300);
+      const step = buildStep({ description: longDescription });
+
+      const result = mapExecutableStep(step, 0);
+
+      expect(result.notes).toHaveLength(256);
+      expect(result.notes).toBe("A".repeat(256));
+    });
+  });
+
   describe("stepIndex", () => {
     it("should assign the provided stepIndex", () => {
       const step = buildStep();

@@ -75,5 +75,6 @@ export const mapWorkoutStep = (
     secondaryZoneNumber: null,
     strokeType,
     equipmentType,
+    ...(step.notes ? { description: step.notes } : {}),
   };
 };

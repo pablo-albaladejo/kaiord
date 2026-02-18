@@ -113,6 +113,100 @@ describe("convertKRDToGarmin", () => {
     });
   });
 
+  describe("step description round-trip", () => {
+    it("should preserve step descriptions through GCN → KRD → GCN", () => {
+      const gcnInput = JSON.stringify({
+        sportType: { sportTypeId: 2, sportTypeKey: "cycling" },
+        workoutName: "Notes Test",
+        workoutSegments: [
+          {
+            segmentOrder: 1,
+            sportType: { sportTypeId: 2, sportTypeKey: "cycling" },
+            workoutSteps: [
+              {
+                type: "ExecutableStepDTO",
+                stepOrder: 1,
+                stepType: { stepTypeId: 1, stepTypeKey: "warmup" },
+                endCondition: {
+                  conditionTypeId: 2,
+                  conditionTypeKey: "time",
+                  displayable: true,
+                },
+                endConditionValue: 300,
+                targetType: {
+                  workoutTargetTypeId: 1,
+                  workoutTargetTypeKey: "no.target",
+                },
+                description: "5 min easy Z1",
+              },
+              {
+                type: "ExecutableStepDTO",
+                stepOrder: 2,
+                stepType: { stepTypeId: 2, stepTypeKey: "cooldown" },
+                endCondition: {
+                  conditionTypeId: 2,
+                  conditionTypeKey: "time",
+                  displayable: true,
+                },
+                endConditionValue: 300,
+                targetType: {
+                  workoutTargetTypeId: 1,
+                  workoutTargetTypeKey: "no.target",
+                },
+                description: "RPE 3 cool-down",
+              },
+            ],
+          },
+        ],
+      });
+
+      const krd = convertGarminToKRD(gcnInput, mockLogger);
+      const result = convertKRDToGarmin(krd, mockLogger);
+      const parsed = JSON.parse(result);
+      const steps = parsed.workoutSegments[0].workoutSteps;
+
+      expect(steps[0].description).toBe("5 min easy Z1");
+      expect(steps[1].description).toBe("RPE 3 cool-down");
+    });
+
+    it("should omit description when step has no notes", () => {
+      const gcnInput = JSON.stringify({
+        sportType: { sportTypeId: 1, sportTypeKey: "running" },
+        workoutName: "No Notes",
+        workoutSegments: [
+          {
+            segmentOrder: 1,
+            sportType: { sportTypeId: 1, sportTypeKey: "running" },
+            workoutSteps: [
+              {
+                type: "ExecutableStepDTO",
+                stepOrder: 1,
+                stepType: { stepTypeId: 1, stepTypeKey: "warmup" },
+                endCondition: {
+                  conditionTypeId: 2,
+                  conditionTypeKey: "time",
+                  displayable: true,
+                },
+                endConditionValue: 600,
+                targetType: {
+                  workoutTargetTypeId: 1,
+                  workoutTargetTypeKey: "no.target",
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      const krd = convertGarminToKRD(gcnInput, mockLogger);
+      const result = convertKRDToGarmin(krd, mockLogger);
+      const parsed = JSON.parse(result);
+      const step = parsed.workoutSegments[0].workoutSteps[0];
+
+      expect(step.description).toBeUndefined();
+    });
+  });
+
   describe("error handling", () => {
     it("should throw when KRD has no workout extension", () => {
       const krd = {
