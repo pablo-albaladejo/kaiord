@@ -33,7 +33,7 @@
     "zod": "^4.0.0"
   },
   "devDependencies": {
-    "@types/node": "^24.10.13",
+    "@types/node": "^25.0.0",
     "@vitest/coverage-v8": "^4.0.18",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
