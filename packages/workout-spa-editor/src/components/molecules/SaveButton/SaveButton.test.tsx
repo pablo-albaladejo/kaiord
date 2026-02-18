@@ -90,6 +90,12 @@ describe("SaveButton", () => {
   });
 
   afterEach(() => {
+    // Clear pending Radix Toast timers to prevent "document is not defined"
+    // errors when toast auto-dismiss fires after jsdom teardown (Node 24.x)
+    const id = setTimeout(() => {}, 0);
+    for (let i = 1; i <= Number(id); i++) {
+      clearTimeout(i);
+    }
     cleanup();
   });
 
