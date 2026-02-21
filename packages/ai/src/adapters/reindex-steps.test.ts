@@ -68,6 +68,54 @@ describe("reindexSteps", () => {
     }
   });
 
+  it("handles empty steps array", () => {
+    const workout: Workout = { sport: "running", steps: [] };
+
+    const result = reindexSteps(workout);
+
+    expect(result.steps).toHaveLength(0);
+    expect(result).not.toBe(workout);
+  });
+
+  it("skips RepetitionBlocks in top-level index sequence", () => {
+    const workout: Workout = {
+      sport: "running",
+      steps: [
+        {
+          stepIndex: 99,
+          durationType: "time",
+          duration: { type: "time", seconds: 600 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+        {
+          repeatCount: 3,
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 300 },
+              targetType: "open",
+              target: { type: "open" },
+            },
+          ],
+        },
+        {
+          stepIndex: 99,
+          durationType: "time",
+          duration: { type: "time", seconds: 300 },
+          targetType: "open",
+          target: { type: "open" },
+        },
+      ],
+    };
+
+    const result = reindexSteps(workout);
+
+    expect(result.steps[0]).toMatchObject({ stepIndex: 0 });
+    expect(result.steps[2]).toMatchObject({ stepIndex: 1 });
+  });
+
   it("does not mutate the original workout", () => {
     const workout: Workout = {
       sport: "running",

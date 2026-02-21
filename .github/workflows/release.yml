@@ -85,6 +85,7 @@ jobs:
           GARMIN_CONNECT_VERSION_BEFORE=$(node -p "require('./packages/garmin-connect/package.json').version")
           MCP_VERSION_BEFORE=$(node -p "require('./packages/mcp/package.json').version")
           CLI_VERSION_BEFORE=$(node -p "require('./packages/cli/package.json').version")
+          AI_VERSION_BEFORE=$(node -p "require('./packages/ai/package.json').version")
 
           # Run changeset version
           pnpm exec changeset version
@@ -101,6 +102,7 @@ jobs:
           pnpm --filter @kaiord/garmin-connect build
           pnpm --filter @kaiord/mcp build
           pnpm --filter @kaiord/cli build
+          pnpm --filter @kaiord/ai build
 
           # Get new versions
           CORE_VERSION_AFTER=$(node -p "require('./packages/core/package.json').version")
@@ -108,6 +110,7 @@ jobs:
           GARMIN_CONNECT_VERSION_AFTER=$(node -p "require('./packages/garmin-connect/package.json').version")
           MCP_VERSION_AFTER=$(node -p "require('./packages/mcp/package.json').version")
           CLI_VERSION_AFTER=$(node -p "require('./packages/cli/package.json').version")
+          AI_VERSION_AFTER=$(node -p "require('./packages/ai/package.json').version")
 
           # Determine what changed
           if [ "$CORE_VERSION_BEFORE" != "$CORE_VERSION_AFTER" ]; then
@@ -143,6 +146,13 @@ jobs:
             echo "cli-version=$CLI_VERSION_AFTER" >> $GITHUB_OUTPUT
           else
             echo "cli-changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          if [ "$AI_VERSION_BEFORE" != "$AI_VERSION_AFTER" ]; then
+            echo "ai-changed=true" >> $GITHUB_OUTPUT
+            echo "ai-version=$AI_VERSION_AFTER" >> $GITHUB_OUTPUT
+          else
+            echo "ai-changed=false" >> $GITHUB_OUTPUT
           fi
 
           # Commit version changes (if any packages were actually bumped)
@@ -195,6 +205,10 @@ jobs:
 
           if [ "${{ steps.version.outputs.cli-changed }}" = "true" ]; then
             echo "- @kaiord/cli@${{ steps.version.outputs.cli-version }}" >> $GITHUB_STEP_SUMMARY
+          fi
+
+          if [ "${{ steps.version.outputs.ai-changed }}" = "true" ]; then
+            echo "- @kaiord/ai@${{ steps.version.outputs.ai-version }}" >> $GITHUB_STEP_SUMMARY
           fi
 
       - name: No changes

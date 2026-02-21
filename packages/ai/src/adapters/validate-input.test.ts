@@ -34,4 +34,22 @@ describe("validateInput", () => {
 
     expect(validateInput(input)).toBe(input);
   });
+
+  it("throws when input is only control characters", () => {
+    const input = "\x00\x01\x02";
+
+    expect(() => validateInput(input)).toThrow(AiParsingError);
+  });
+
+  it("truncates inputText in error for long inputs", () => {
+    const longInput = "a".repeat(2001);
+
+    try {
+      validateInput(longInput);
+    } catch (error) {
+      expect((error as AiParsingError).inputText.length).toBeLessThanOrEqual(
+        203
+      );
+    }
+  });
 });
