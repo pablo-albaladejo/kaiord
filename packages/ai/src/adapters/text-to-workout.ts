@@ -66,7 +66,7 @@ export const createTextToWorkout = (config: TextToWorkoutConfig) => {
 
         logger?.debug?.("LLM raw output", { output: result.output });
 
-        const workout = reindexSteps(result.output as Workout);
+        const workout = reindexSteps(result.output);
         if (options?.name) workout.name = options.name;
 
         logger?.info?.("Workout parsed", { steps: workout.steps.length });

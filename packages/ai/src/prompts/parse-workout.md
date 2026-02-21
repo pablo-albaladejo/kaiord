@@ -34,7 +34,7 @@ Each element in `steps` is EITHER a **WorkoutStep** OR a **RepetitionBlock**:
 ```
 
 Required fields: `stepIndex`, `durationType`, `duration`, `targetType`, `target`.
-Optional: `intensity`, `notes`, `equipment`.
+Optional: `intensity`, `notes`.
 
 ### RepetitionBlock
 

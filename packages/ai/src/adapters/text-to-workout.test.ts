@@ -88,6 +88,7 @@ describe("createTextToWorkout", () => {
     const callArgs = mockGenerateText.mock.calls[0]?.[0] as {
       system?: string;
     };
+
     expect(callArgs.system).toContain("running");
   });
 
@@ -130,7 +131,6 @@ describe("createTextToWorkout", () => {
 
   it("throws AiParsingError after max retries exhausted", async () => {
     mockGenerateText.mockRejectedValue(new Error("Always fails"));
-
     const parse = createTextToWorkout({ model: mockModel, maxRetries: 1 });
 
     await expect(parse("bad input")).rejects.toThrow(AiParsingError);
@@ -141,8 +141,8 @@ describe("createTextToWorkout", () => {
 
   it("throws AiParsingError when output is null", async () => {
     mockGenerateText.mockResolvedValue({ output: null } as never);
-
     const parse = createTextToWorkout({ model: mockModel, maxRetries: 0 });
+
     await expect(parse("test")).rejects.toThrow(AiParsingError);
   });
 
@@ -166,7 +166,6 @@ describe("createTextToWorkout", () => {
         },
       ],
     };
-
     mockGenerateText.mockResolvedValueOnce({
       output: badIndices,
     } as never);
@@ -185,7 +184,6 @@ describe("createTextToWorkout", () => {
       warn: vi.fn(),
       error: vi.fn(),
     };
-
     mockGenerateText
       .mockRejectedValueOnce(new Error("fail"))
       .mockResolvedValueOnce({ output: RUNNING_WORKOUT } as never);

@@ -18,11 +18,13 @@ describe("loadPrompt", () => {
 
   it("replaces multiple variables", () => {
     const result = loadPrompt("{{a}} and {{b}}", { a: "X", b: "Y" });
+
     expect(result).toBe("X and Y");
   });
 
   it("replaces all occurrences of the same variable", () => {
     const result = loadPrompt("{{x}} + {{x}}", { x: "1" });
+
     expect(result).toBe("1 + 1");
   });
 

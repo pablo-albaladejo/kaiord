@@ -19,7 +19,7 @@ export const validateInput = (text: string): string => {
   if (sanitized.length > MAX_INPUT_LENGTH) {
     throw createAiParsingError(
       `Input text exceeds ${MAX_INPUT_LENGTH} characters (got ${sanitized.length})`,
-      text.slice(0, 100),
+      text,
       0
     );
   }

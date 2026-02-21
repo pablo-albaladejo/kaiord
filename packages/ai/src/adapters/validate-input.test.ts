@@ -14,12 +14,14 @@ describe("validateInput", () => {
 
   it("throws on input exceeding 2000 characters", () => {
     const longInput = "a".repeat(2001);
+
     expect(() => validateInput(longInput)).toThrow(AiParsingError);
     expect(() => validateInput(longInput)).toThrow("exceeds");
   });
 
   it("strips control characters but keeps newlines", () => {
     const input = "step 1\nstep 2\x00\x01\x02";
+
     expect(validateInput(input)).toBe("step 1\nstep 2");
   });
 
@@ -29,6 +31,7 @@ describe("validateInput", () => {
 
   it("accepts exactly 2000 characters", () => {
     const input = "a".repeat(2000);
+
     expect(validateInput(input)).toBe(input);
   });
 });
