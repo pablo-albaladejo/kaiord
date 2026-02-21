@@ -77,6 +77,18 @@ async function createGitHubReleases() {
     });
   }
 
+  // Check @kaiord/ai
+  if (fs.existsSync("packages/ai/package.json")) {
+    const pkg = JSON.parse(
+      fs.readFileSync("packages/ai/package.json", "utf8")
+    );
+    packages.push({
+      name: pkg.name,
+      version: pkg.version,
+      dir: "packages/ai",
+    });
+  }
+
   console.log(
     `\n📦 Creating GitHub releases for ${packages.length} package(s)...\n`
   );

@@ -36,7 +36,7 @@ jobs:
           # All packages except workout-spa-editor (private) are published to npm
           CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
 
-          PUBLISHABLE="packages/core packages/cli packages/fit packages/tcx packages/zwo packages/garmin packages/garmin-connect packages/mcp"
+          PUBLISHABLE="packages/core packages/cli packages/fit packages/tcx packages/zwo packages/garmin packages/garmin-connect packages/mcp packages/ai"
           NEEDS_CHANGESET=false
 
           for pkg in $PUBLISHABLE; do

@@ -14,6 +14,7 @@ on:
       - "packages/garmin-connect/**"
       - "packages/cli/**"
       - "packages/mcp/**"
+      - "packages/ai/**"
   workflow_dispatch:
 
 concurrency: ${{ github.workflow }}-${{ github.ref }}
