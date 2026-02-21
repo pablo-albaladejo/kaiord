@@ -79,9 +79,7 @@ async function createGitHubReleases() {
 
   // Check @kaiord/ai
   if (fs.existsSync("packages/ai/package.json")) {
-    const pkg = JSON.parse(
-      fs.readFileSync("packages/ai/package.json", "utf8")
-    );
+    const pkg = JSON.parse(fs.readFileSync("packages/ai/package.json", "utf8"));
     packages.push({
       name: pkg.name,
       version: pkg.version,
