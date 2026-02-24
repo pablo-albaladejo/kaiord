@@ -22,45 +22,45 @@ If the user doesn't specify an output filename, derive one from the workout name
 
 Infer from context. Default to cycling if ambiguous.
 
-| Sport | sportTypeId | sportTypeKey |
-|-------|-------------|--------------|
-| Running | 1 | "running" |
-| Cycling | 2 | "cycling" |
-| Swimming | 4 | "swimming" |
+| Sport    | sportTypeId | sportTypeKey |
+| -------- | ----------- | ------------ |
+| Running  | 1           | "running"    |
+| Cycling  | 2           | "cycling"    |
+| Swimming | 4           | "swimming"   |
 
 ## Step Types (Intensity)
 
-| Intensity | stepTypeId | stepTypeKey |
-|-----------|------------|-------------|
-| Warmup | 1 | "warmup" |
-| Cooldown | 2 | "cooldown" |
-| Interval/Work | 3 | "interval" |
-| Recovery | 4 | "recovery" |
-| Rest | 5 | "rest" |
-| Repeat (internal) | 6 | "repeat" |
+| Intensity         | stepTypeId | stepTypeKey |
+| ----------------- | ---------- | ----------- |
+| Warmup            | 1          | "warmup"    |
+| Cooldown          | 2          | "cooldown"  |
+| Interval/Work     | 3          | "interval"  |
+| Recovery          | 4          | "recovery"  |
+| Rest              | 5          | "rest"      |
+| Repeat (internal) | 6          | "repeat"    |
 
 ## End Conditions (Duration)
 
-| Duration | conditionTypeId | conditionTypeKey | displayable |
-|----------|----------------|------------------|-------------|
-| Lap button (open) | 1 | "lap.button" | true |
-| Time (seconds) | 2 | "time" | true |
-| Distance (meters) | 3 | "distance" | true |
-| Calories | 4 | "calories" | true |
-| Iterations (repeats only) | 7 | "iterations" | false |
+| Duration                  | conditionTypeId | conditionTypeKey | displayable |
+| ------------------------- | --------------- | ---------------- | ----------- |
+| Lap button (open)         | 1               | "lap.button"     | true        |
+| Time (seconds)            | 2               | "time"           | true        |
+| Distance (meters)         | 3               | "distance"       | true        |
+| Calories                  | 4               | "calories"       | true        |
+| Iterations (repeats only) | 7               | "iterations"     | false       |
 
 Convert user input: "5 min" = 300, "1km" = 1000, "400m" = 400, "20s" = 20.
 
 ## Targets
 
-| Target | workoutTargetTypeId | workoutTargetTypeKey |
-|--------|---------------------|----------------------|
-| No target | 1 | "no.target" |
-| Power zone | 2 | "power.zone" |
-| Cadence | 3 | "cadence" |
-| Heart rate zone | 4 | "heart.rate.zone" |
-| Speed zone | 5 | "speed.zone" |
-| Pace zone | 6 | "pace.zone" |
+| Target          | workoutTargetTypeId | workoutTargetTypeKey |
+| --------------- | ------------------- | -------------------- |
+| No target       | 1                   | "no.target"          |
+| Power zone      | 2                   | "power.zone"         |
+| Cadence         | 3                   | "cadence"            |
+| Heart rate zone | 4                   | "heart.rate.zone"    |
+| Speed zone      | 5                   | "speed.zone"         |
+| Pace zone       | 6                   | "pace.zone"          |
 
 **Zone-based** (e.g., "Z2", "zone 3"): set `zoneNumber` only.
 **Range-based** (e.g., "200-250W", "85-95rpm"): set `targetValueOne`/`targetValueTwo` only.
@@ -81,24 +81,28 @@ Pace values use **m/s** (4:00/km = 4.17 m/s, 5:00/km = 3.33 m/s, 6:00/km = 2.78 
 ### Calculating Targets from Zone References
 
 When the workout says "Z3", look up the zone min/max from zones.md and use those as `targetValueOne`/`targetValueTwo`:
+
 - **Running Z3**: zones.md says 5:24-4:45/km → use `targetValueOne: 3.08, targetValueTwo: 3.51`
 - **Cycling Z3**: zones.md says 199-229W → use `targetValueOne: 199, targetValueTwo: 229`
 
 ### "Progresivo" / Progressive Steps
 
 Calculate a pace or power RANGE spanning from the current zone to the next:
+
 - **Running**: E.g., "1K progresivo" after Z1 → from Z1 min to Z2 max → `targetValueOne: 2.54, targetValueTwo: 3.08`
 - **Cycling**: E.g., "progresivo" after Z1 → from Z1 min to Z2 max → `targetValueOne: 111, targetValueTwo: 198`
 
 ### "Suave" / "Muy comodo" / Easy Steps
 
 Use Z1 values from zones.md:
+
 - **Running**: Z1 pace range
 - **Cycling**: Z1 power range
 
 ### "A tope" / "Mejor ritmo posible" / Max Effort
 
 Use Z5 values from zones.md:
+
 - **Running**: Z5 pace range
 - **Cycling**: Z5 power range
 
@@ -123,11 +127,19 @@ For complete schema and real examples, see [reference.md](reference.md).
 ```json
 {
   "type": "ExecutableStepDTO",
-  "stepId": 1, "stepOrder": 1,
-  "stepType": {"stepTypeId": 1, "stepTypeKey": "warmup"},
-  "endCondition": {"conditionTypeId": 2, "conditionTypeKey": "time", "displayable": true},
+  "stepId": 1,
+  "stepOrder": 1,
+  "stepType": { "stepTypeId": 1, "stepTypeKey": "warmup" },
+  "endCondition": {
+    "conditionTypeId": 2,
+    "conditionTypeKey": "time",
+    "displayable": true
+  },
   "endConditionValue": 600,
-  "targetType": {"workoutTargetTypeId": 2, "workoutTargetTypeKey": "power.zone"},
+  "targetType": {
+    "workoutTargetTypeId": 2,
+    "workoutTargetTypeKey": "power.zone"
+  },
   "zoneNumber": 2
 }
 ```
@@ -137,13 +149,20 @@ For complete schema and real examples, see [reference.md](reference.md).
 ```json
 {
   "type": "RepeatGroupDTO",
-  "stepId": 4, "stepOrder": 3,
-  "stepType": {"stepTypeId": 6, "stepTypeKey": "repeat"},
+  "stepId": 4,
+  "stepOrder": 3,
+  "stepType": { "stepTypeId": 6, "stepTypeKey": "repeat" },
   "numberOfIterations": 5,
   "smartRepeat": false,
-  "endCondition": {"conditionTypeId": 7, "conditionTypeKey": "iterations", "displayable": false},
+  "endCondition": {
+    "conditionTypeId": 7,
+    "conditionTypeKey": "iterations",
+    "displayable": false
+  },
   "endConditionValue": 5,
-  "workoutSteps": [ /* nested steps with stepOrder resetting to 1 */ ]
+  "workoutSteps": [
+    /* nested steps with stepOrder resetting to 1 */
+  ]
 }
 ```
 
