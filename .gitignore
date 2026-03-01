@@ -37,6 +37,9 @@ metrics/DASHBOARD.md
 !metrics/.gitkeep
 !metrics/latest/.gitkeep
 
+# Claude Code worktrees
+.claude/worktrees/
+
 # GitHub Actions local testing (act)
 .secrets
 .actrc.local
