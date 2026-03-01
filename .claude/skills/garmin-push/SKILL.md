@@ -36,11 +36,11 @@ pnpm --filter @kaiord/cli dev -- garmin push -i <FILE> --json
 
 Parse the JSON output from the push command and show a summary:
 
-| Field   | Value                |
-| ------- | -------------------- |
-| Name    | workout name         |
-| ID      | workout id           |
-| URL     | Garmin Connect link  |
+| Field | Value               |
+| ----- | ------------------- |
+| Name  | workout name        |
+| ID    | workout id          |
+| URL   | Garmin Connect link |
 
 ## Notes
 

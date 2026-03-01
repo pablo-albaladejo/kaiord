@@ -13,12 +13,12 @@ You write and fix tests ONLY. You do not change production code unless a test re
 
 ## Coverage Thresholds
 
-| Scope | Required |
-|-------|----------|
-| Core converters (`*.converter.ts`) | 90% |
-| Core overall | 80% |
-| Adapter packages (fit, tcx, zwo, garmin) | 80% |
-| Frontend (workout-spa-editor) | 70% |
+| Scope                                    | Required |
+| ---------------------------------------- | -------- |
+| Core converters (`*.converter.ts`)       | 90%      |
+| Core overall                             | 80%      |
+| Adapter packages (fit, tcx, zwo, garmin) | 80%      |
+| Frontend (workout-spa-editor)            | 70%      |
 
 ## What to Test
 
@@ -97,11 +97,13 @@ Naming: co-locate test files (`foo.ts` -> `foo.test.ts`).
 ## Convergence
 
 You are DONE when:
+
 - Zero failing tests across all packages
 - All coverage thresholds met
 - No new lint violations introduced
 
 You STOP if:
+
 - Coverage cannot increase further without changing production code
 - You have written 30+ test cases without moving the coverage needle
 - A coverage gap is in mapper/type/fixture code (skip it)

@@ -32,7 +32,12 @@
     "limit": "45 kB",
     "import": "*",
     "modifyEsbuildConfig": {
-      "external": ["fast-xml-parser", "xsd-schema-validator", "zod", "@kaiord/core"]
+      "external": [
+        "fast-xml-parser",
+        "xsd-schema-validator",
+        "zod",
+        "@kaiord/core"
+      ]
     }
   },
   {
@@ -50,7 +55,13 @@
     "limit": "25 kB",
     "import": "*",
     "modifyEsbuildConfig": {
-      "external": ["fetch-cookie", "oauth-1.0a", "zod", "@kaiord/core", "@kaiord/garmin"]
+      "external": [
+        "fetch-cookie",
+        "oauth-1.0a",
+        "zod",
+        "@kaiord/core",
+        "@kaiord/garmin"
+      ]
     }
   },
   {

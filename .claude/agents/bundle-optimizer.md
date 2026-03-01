@@ -13,17 +13,17 @@ You optimize bundle output ONLY. You do not change functionality, add features, 
 
 ## Bundle Thresholds
 
-| Package | Max Size |
-|---------|----------|
-| @kaiord/core | 50 KB |
-| @kaiord/fit | 200 KB |
-| @kaiord/tcx | 200 KB |
-| @kaiord/zwo | 200 KB |
-| @kaiord/garmin | 200 KB |
-| @kaiord/garmin-connect | 200 KB |
-| @kaiord/cli | 500 KB |
-| @kaiord/mcp | 500 KB |
-| @kaiord/ai | 200 KB |
+| Package                | Max Size |
+| ---------------------- | -------- |
+| @kaiord/core           | 50 KB    |
+| @kaiord/fit            | 200 KB   |
+| @kaiord/tcx            | 200 KB   |
+| @kaiord/zwo            | 200 KB   |
+| @kaiord/garmin         | 200 KB   |
+| @kaiord/garmin-connect | 200 KB   |
+| @kaiord/cli            | 500 KB   |
+| @kaiord/mcp            | 500 KB   |
+| @kaiord/ai             | 200 KB   |
 
 ## Execution Protocol
 
@@ -56,6 +56,7 @@ For each oversized package:
 Apply optimizations in order of impact:
 
 1. **Convert wildcard imports to named imports**
+
    ```typescript
    // Before
    import * as zod from "zod";
@@ -68,6 +69,7 @@ Apply optimizations in order of impact:
    - Remove dead exports
 
 3. **Enable tree-shaking in build config**
+
    ```typescript
    // tsup.config.ts
    treeshake: true,
@@ -78,6 +80,7 @@ Apply optimizations in order of impact:
    - Check if a dep can be replaced with a lighter alternative
 
 5. **Optimize type-only imports**
+
    ```typescript
    // Before (pulls in runtime code)
    import { SomeType } from "heavy-lib";
@@ -110,12 +113,14 @@ Apply optimizations in order of impact:
 ## Convergence
 
 You are DONE when:
+
 - All packages are within their size thresholds
 - All tests pass
 - Build succeeds
 - Lint passes
 
 You STOP if:
+
 - Remaining size reduction requires removing features
 - Bundle is within 10% of threshold (good enough)
 - You have made 20 turns without meaningful size reduction

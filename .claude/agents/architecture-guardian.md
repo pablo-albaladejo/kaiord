@@ -23,31 +23,32 @@ adapters/         -> Implements ports, may use external libraries
 
 ### Forbidden Import Patterns
 
-| From | Cannot Import | Reason |
-|------|--------------|--------|
-| `domain/` | `../adapters/`, `../application/`, external libs | Domain is pure |
-| `application/` | `../adapters/`, external libs | Application uses ports only |
-| `ports/` | `../adapters/`, external libs | Ports are contracts |
-| Any core layer | `@garmin`, `fast-xml-parser`, `@fitparser` | External libs in adapters only |
+| From           | Cannot Import                                    | Reason                         |
+| -------------- | ------------------------------------------------ | ------------------------------ |
+| `domain/`      | `../adapters/`, `../application/`, external libs | Domain is pure                 |
+| `application/` | `../adapters/`, external libs                    | Application uses ports only    |
+| `ports/`       | `../adapters/`, external libs                    | Ports are contracts            |
+| Any core layer | `@garmin`, `fast-xml-parser`, `@fitparser`       | External libs in adapters only |
 
 ### Cross-Package Dependencies
 
-| Package | May Depend On |
-|---------|--------------|
-| `@kaiord/core` | Nothing external (only zod for schemas) |
-| `@kaiord/fit` | `@kaiord/core` only |
-| `@kaiord/tcx` | `@kaiord/core` only |
-| `@kaiord/zwo` | `@kaiord/core` only |
-| `@kaiord/garmin` | `@kaiord/core` only |
-| `@kaiord/cli` | `@kaiord/core` + adapter packages |
-| `@kaiord/mcp` | `@kaiord/core` + adapter packages |
-| `@kaiord/ai` | `@kaiord/core` + `ai` peer dependency |
+| Package          | May Depend On                           |
+| ---------------- | --------------------------------------- |
+| `@kaiord/core`   | Nothing external (only zod for schemas) |
+| `@kaiord/fit`    | `@kaiord/core` only                     |
+| `@kaiord/tcx`    | `@kaiord/core` only                     |
+| `@kaiord/zwo`    | `@kaiord/core` only                     |
+| `@kaiord/garmin` | `@kaiord/core` only                     |
+| `@kaiord/cli`    | `@kaiord/core` + adapter packages       |
+| `@kaiord/mcp`    | `@kaiord/core` + adapter packages       |
+| `@kaiord/ai`     | `@kaiord/core` + `ai` peer dependency   |
 
 ## Execution Protocol
 
 ### Phase 1: Scan for Violations (5 turns)
 
 1. **Domain layer violations**:
+
    ```bash
    grep -rn "from ['\"]\.\.\/adapters" packages/core/src/domain/
    grep -rn "from ['\"]\.\.\/application" packages/core/src/domain/
@@ -56,12 +57,14 @@ adapters/         -> Implements ports, may use external libraries
    ```
 
 2. **Application layer violations**:
+
    ```bash
    grep -rn "from ['\"]\.\.\/adapters" packages/core/src/application/
    grep -rn "from ['\"]@garmin" packages/core/src/application/
    ```
 
 3. **Cross-package violations**:
+
    ```bash
    # Check each adapter package does not import other adapters
    grep -rn "from ['\"]@kaiord/fit" packages/tcx/src/
@@ -83,6 +86,7 @@ adapters/         -> Implements ports, may use external libraries
 For each violation found:
 
 1. **Misplaced imports**: Move the dependency behind a port
+
    ```typescript
    // Before (in application/)
    import { parseFit } from "@garmin/fit-sdk";
@@ -93,6 +97,7 @@ For each violation found:
    ```
 
 2. **Leaky abstractions**: Extract interface to ports
+
    ```typescript
    // Before (in domain/)
    import { XMLParser } from "fast-xml-parser";
@@ -104,6 +109,7 @@ For each violation found:
    ```
 
 3. **Schema naming**: Rename to match convention
+
    ```typescript
    // Domain: snake_case
    export const sportSchema = z.enum(["indoor_cycling", "lap_swimming"]);
@@ -112,6 +118,7 @@ For each violation found:
    ```
 
 4. **Cross-package coupling**: Invert the dependency
+
    ```typescript
    // Before: fit imports tcx
    import { TcxWriter } from "@kaiord/tcx";
@@ -140,12 +147,14 @@ For each violation found:
 ## Convergence
 
 You are DONE when:
+
 - Zero architecture violations detected by Phase 1 scans
 - All tests pass without modification
 - Build and lint clean
 - No cross-package violations
 
 You STOP if:
+
 - Fixing a violation would require a breaking API change (document it)
 - The violation is in generated code or third-party code
 - You have made 15 turns without eliminating violations

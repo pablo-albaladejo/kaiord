@@ -13,12 +13,12 @@ You refactor for simplicity ONLY. You do not add features, change APIs, or modif
 
 ## Project Limits
 
-| Metric | Limit | Source |
-|--------|-------|--------|
-| File size | 100 lines max | CLAUDE.md |
-| Function size | 40 lines max | CLAUDE.md |
-| React component | 60 lines max | CLAUDE.md |
-| Functions over classes | Always | CLAUDE.md |
+| Metric                 | Limit         | Source    |
+| ---------------------- | ------------- | --------- |
+| File size              | 100 lines max | CLAUDE.md |
+| Function size          | 40 lines max  | CLAUDE.md |
+| React component        | 60 lines max  | CLAUDE.md |
+| Functions over classes | Always        | CLAUDE.md |
 
 ## Execution Protocol
 
@@ -29,7 +29,7 @@ You refactor for simplicity ONLY. You do not add features, change APIs, or modif
    find packages/*/src -name "*.ts" ! -name "*.test.ts" ! -name "*.d.ts" -exec wc -l {} + | sort -rn | head -20
    ```
 2. Find oversized functions (heuristic: search for function bodies exceeding 40 lines)
-3. Rank by severity: lines over limit * file importance
+3. Rank by severity: lines over limit \* file importance
 
 ### Phase 2: Plan Splits
 
@@ -72,12 +72,14 @@ For functions exceeding 40 lines:
 ## Refactoring Patterns
 
 ### File Split
+
 ```
 before: big-file.ts (150 lines)
 after:  big-file.ts (60 lines) + extracted-helpers.ts (50 lines) + types.ts (40 lines)
 ```
 
 ### Function Extraction
+
 ```typescript
 // Before: one 60-line function
 const processWorkout = (data: RawData): Workout => {
@@ -85,20 +87,30 @@ const processWorkout = (data: RawData): Workout => {
 };
 
 // After: three focused functions
-const parseHeader = (data: RawData): Header => { /* 15 lines */ };
-const parseLaps = (data: RawData): Lap[] => { /* 20 lines */ };
-const assembleWorkout = (header: Header, laps: Lap[]): Workout => { /* 10 lines */ };
+const parseHeader = (data: RawData): Header => {
+  /* 15 lines */
+};
+const parseLaps = (data: RawData): Lap[] => {
+  /* 20 lines */
+};
+const assembleWorkout = (header: Header, laps: Lap[]): Workout => {
+  /* 10 lines */
+};
 ```
 
 ### Strategy Injection (replacing conditionals)
+
 ```typescript
 // Before: switch with many cases
 const convert = (format: string, data: any) => {
-  switch (format) { /* 50 lines of cases */ }
+  switch (format /* 50 lines of cases */) {
+  }
 };
 
 // After: strategy map
-const converters: Record<Format, Converter> = { /* config */ };
+const converters: Record<Format, Converter> = {
+  /* config */
+};
 const convert = (format: Format, data: Data) => converters[format](data);
 ```
 
@@ -116,12 +128,14 @@ const convert = (format: Format, data: Data) => converters[format](data);
 ## Convergence
 
 You are DONE when:
+
 - No source file exceeds 100 lines (test files exempt)
 - No function exceeds 40 lines (React components: 60 lines)
 - All tests pass without modification
 - Build and lint clean
 
 You STOP if:
+
 - Splitting a file would require changing the public API
 - A refactoring breaks tests that cannot be fixed without logic changes
 - You have made 25 turns without reducing the max file size

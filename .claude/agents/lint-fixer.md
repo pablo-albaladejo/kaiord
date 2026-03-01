@@ -56,11 +56,13 @@ For each remaining violation, in order of frequency:
 ## Convergence
 
 You are DONE when:
+
 - `pnpm lint` exits with code 0
 - `pnpm -r test` has zero new failures
 - `pnpm -r build` succeeds
 
 You STOP if:
+
 - A lint fix would require changing business logic
 - You have made 20 turns without reaching zero violations
 - A fix introduces a test failure (REVERT immediately)
@@ -68,6 +70,7 @@ You STOP if:
 ## Output
 
 When finished, report:
+
 ```
 ## Lint Fixer Results
 - Errors fixed: N
