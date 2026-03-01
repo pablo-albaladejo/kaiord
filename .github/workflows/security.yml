@@ -46,8 +46,8 @@ jobs:
         run: |
           # Run npm audit and parse results
           # Audit level: moderate (catches moderate, high, and critical vulnerabilities)
-          echo "Running pnpm audit..."
-          pnpm audit --audit-level=moderate --json > audit-results.json || true
+          echo "Running pnpm audit (production dependencies only)..."
+          pnpm audit --prod --audit-level=moderate --json > audit-results.json || true
 
           # Parse audit results using jq
           # Extract vulnerability counts by severity for detailed reporting
