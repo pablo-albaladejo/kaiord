@@ -1,0 +1,69 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    "packages/core": {
+      "entry": ["src/index.ts", "src/test-utils/index.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": [
+        "src/**/*.test.ts",
+        "src/tests/**",
+        "src/test-utils/**"
+      ],
+      "ignoreDependencies": ["@faker-js/faker", "rosie", "@types/rosie"]
+    },
+    "packages/fit": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/**/*.test.ts"],
+      "ignoreDependencies": ["@faker-js/faker", "rosie", "@types/rosie"]
+    },
+    "packages/tcx": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/**/*.test.ts"]
+    },
+    "packages/zwo": {
+      "entry": ["src/index.ts", "src/browser.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/**/*.test.ts"]
+    },
+    "packages/garmin": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/**/*.test.ts"]
+    },
+    "packages/garmin-connect": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/**/*.test.ts"]
+    },
+    "packages/ai": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/**/*.test.ts"],
+      "ignoreDependencies": ["@ai-sdk/anthropic", "ai"]
+    },
+    "packages/mcp": {
+      "entry": ["src/index.ts", "src/bin/kaiord-mcp.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/**/*.test.ts"]
+    },
+    "packages/cli": {
+      "entry": ["src/bin/kaiord.ts"],
+      "project": ["src/**/*.ts"],
+      "ignore": ["src/**/*.test.ts"],
+      "ignoreDependencies": ["license-checker", "execa", "tmp-promise", "strip-ansi"]
+    }
+  },
+  "ignore": [
+    "packages/workout-spa-editor/**",
+    "scripts/**",
+    "metrics/**",
+    "docs/**"
+  ],
+  "ignoreDependencies": [
+    "@changesets/cli",
+    "husky",
+    "prettier"
+  ]
+}
