@@ -31,6 +31,15 @@ pnpm-debug.log*
 .env
 .env.local
 
+# Quality metrics (generated, keep history only)
+metrics/latest/
+metrics/DASHBOARD.md
+!metrics/.gitkeep
+!metrics/latest/.gitkeep
+
+# Claude Code worktrees
+.claude/worktrees/
+
 # GitHub Actions local testing (act)
 .secrets
 .actrc.local

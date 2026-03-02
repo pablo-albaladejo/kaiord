@@ -36,7 +36,7 @@ jobs:
           # All packages except workout-spa-editor (private) are published to npm
           CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
 
-          PUBLISHABLE="packages/core packages/cli packages/fit packages/tcx packages/zwo packages/garmin packages/garmin-connect packages/mcp"
+          PUBLISHABLE="packages/core packages/cli packages/fit packages/tcx packages/zwo packages/garmin packages/garmin-connect packages/mcp packages/ai"
           NEEDS_CHANGESET=false
 
           for pkg in $PUBLISHABLE; do
@@ -64,7 +64,7 @@ jobs:
             \`\`\`
 
             This will prompt you to:
-            1. Select affected packages (@kaiord/core, @kaiord/cli, @kaiord/fit, @kaiord/tcx, @kaiord/zwo, @kaiord/garmin, @kaiord/garmin-connect, @kaiord/mcp)
+            1. Select affected packages (@kaiord/core, @kaiord/cli, @kaiord/fit, @kaiord/tcx, @kaiord/zwo, @kaiord/garmin, @kaiord/garmin-connect, @kaiord/mcp, @kaiord/ai)
             2. Choose bump type (patch/minor/major)
             3. Write a summary of your changes
 

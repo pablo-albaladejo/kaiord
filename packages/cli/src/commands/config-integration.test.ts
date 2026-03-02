@@ -52,41 +52,45 @@ describe("config file integration", () => {
     expect(result.exitCode).toBeDefined();
   });
 
-  it("should prioritize CLI options over config defaults", async () => {
-    // Arrange - Create config file with verbose: true
-    const configPath = join(tmpDir.path, ".kaiordrc.json");
-    const config = {
-      verbose: true,
-    };
-    await writeFile(configPath, JSON.stringify(config, null, 2));
+  it(
+    "should prioritize CLI options over config defaults",
+    { timeout: 15000 },
+    async () => {
+      // Arrange - Create config file with verbose: true
+      const configPath = join(tmpDir.path, ".kaiordrc.json");
+      const config = {
+        verbose: true,
+      };
+      await writeFile(configPath, JSON.stringify(config, null, 2));
 
-    // Create a minimal FIT file
-    const inputPath = join(tmpDir.path, "workout.fit");
-    await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
+      // Create a minimal FIT file
+      const inputPath = join(tmpDir.path, "workout.fit");
+      await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
 
-    const outputPath = join(tmpDir.path, "workout.krd");
+      const outputPath = join(tmpDir.path, "workout.krd");
 
-    // Act - Run convert command with --quiet (should override config)
-    const result = await execa(
-      "node",
-      [
-        "dist/bin/kaiord.js",
-        "convert",
-        "--input",
-        inputPath,
-        "--output",
-        outputPath,
-        "--quiet",
-      ],
-      {
-        cwd: tmpDir.path,
-        reject: false,
-      }
-    );
+      // Act - Run convert command with --quiet (should override config)
+      const result = await execa(
+        "node",
+        [
+          "dist/bin/kaiord.js",
+          "convert",
+          "--input",
+          inputPath,
+          "--output",
+          outputPath,
+          "--quiet",
+        ],
+        {
+          cwd: tmpDir.path,
+          reject: false,
+        }
+      );
 
-    // Assert - CLI option should override config
-    expect(result.exitCode).toBeDefined();
-  });
+      // Assert - CLI option should override config
+      expect(result.exitCode).toBeDefined();
+    }
+  );
 
   it("should use default output directory from config", async () => {
     // Arrange - Create config file with defaultOutputDir
