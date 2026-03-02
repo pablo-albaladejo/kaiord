@@ -12,7 +12,8 @@
       "@kaiord/garmin",
       "@kaiord/garmin-connect",
       "@kaiord/cli",
-      "@kaiord/mcp"
+      "@kaiord/mcp",
+      "@kaiord/ai"
     ]
   ],
   "access": "public",

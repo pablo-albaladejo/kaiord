@@ -33,6 +33,7 @@ jobs:
       core-changed: ${{ steps.changes.outputs.core-changed }}
       garmin-changed: ${{ steps.changes.outputs.garmin-changed }}
       garmin-connect-changed: ${{ steps.changes.outputs.garmin-connect-changed }}
+      ai-changed: ${{ steps.changes.outputs.ai-changed }}
       frontend-changed: ${{ steps.changes.outputs.frontend-changed }}
       should-test: ${{ steps.changes.outputs.should-test }}
     steps:
@@ -52,6 +53,8 @@ jobs:
               - 'packages/garmin/**'
             garmin_connect:
               - 'packages/garmin-connect/**'
+            ai:
+              - 'packages/ai/**'
             frontend:
               - 'packages/workout-spa-editor/**'
             root_deps:
@@ -92,6 +95,14 @@ jobs:
             echo "garmin-connect-changed=false" >> $GITHUB_OUTPUT
           fi
 
+          # AI package changes
+          if [[ "${{ steps.changed-files.outputs.ai_any_changed }}" == "true" ]] || \
+             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
+            echo "ai-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "ai-changed=false" >> $GITHUB_OUTPUT
+          fi
+
           # Frontend package changes
           if [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "true" ]] || \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
@@ -106,6 +117,7 @@ jobs:
              [[ "${{ steps.changed-files.outputs.core_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.garmin_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.garmin_connect_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.ai_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "false" ]]; then
             echo "should-test=false" >> $GITHUB_OUTPUT
@@ -118,6 +130,7 @@ jobs:
           echo "Core changed: ${{ steps.changes.outputs.core-changed }}"
           echo "Garmin changed: ${{ steps.changes.outputs.garmin-changed }}"
           echo "Garmin Connect changed: ${{ steps.changes.outputs.garmin-connect-changed }}"
+          echo "AI changed: ${{ steps.changes.outputs.ai-changed }}"
           echo "Frontend changed: ${{ steps.changes.outputs.frontend-changed }}"
           echo "Should test: ${{ steps.changes.outputs.should-test }}"
 
@@ -169,7 +182,7 @@ jobs:
       fail-fast: false
       matrix:
         node-version: ["20.x", "22.x", "24.x"]
-        package: ["core", "garmin", "garmin-connect"]
+        package: ["core", "garmin", "garmin-connect", "ai"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -224,7 +237,7 @@ jobs:
 
       - name: Verify build outputs
         run: |
-          for pkg in core garmin garmin-connect; do
+          for pkg in core garmin garmin-connect ai; do
             if [ ! -d "packages/$pkg/dist" ]; then
               echo "::error::@kaiord/$pkg build output not found"
               exit 1

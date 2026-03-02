@@ -1,0 +1,94 @@
+[
+  {
+    "name": "@kaiord/core",
+    "path": "packages/core/dist/index.js",
+    "limit": "35 kB",
+    "import": "*",
+    "modifyEsbuildConfig": {
+      "external": ["zod"]
+    }
+  },
+  {
+    "name": "@kaiord/fit",
+    "path": "packages/fit/dist/index.js",
+    "limit": "70 kB",
+    "import": "*",
+    "modifyEsbuildConfig": {
+      "external": ["@garmin/fitsdk", "zod", "@kaiord/core"]
+    }
+  },
+  {
+    "name": "@kaiord/tcx",
+    "path": "packages/tcx/dist/index.js",
+    "limit": "30 kB",
+    "import": "*",
+    "modifyEsbuildConfig": {
+      "external": ["fast-xml-parser", "zod", "@kaiord/core"]
+    }
+  },
+  {
+    "name": "@kaiord/zwo",
+    "path": "packages/zwo/dist/index.js",
+    "limit": "45 kB",
+    "import": "*",
+    "modifyEsbuildConfig": {
+      "external": [
+        "fast-xml-parser",
+        "xsd-schema-validator",
+        "zod",
+        "@kaiord/core"
+      ]
+    }
+  },
+  {
+    "name": "@kaiord/garmin",
+    "path": "packages/garmin/dist/index.js",
+    "limit": "30 kB",
+    "import": "*",
+    "modifyEsbuildConfig": {
+      "external": ["zod", "@kaiord/core"]
+    }
+  },
+  {
+    "name": "@kaiord/garmin-connect",
+    "path": "packages/garmin-connect/dist/index.js",
+    "limit": "25 kB",
+    "import": "*",
+    "modifyEsbuildConfig": {
+      "external": [
+        "fetch-cookie",
+        "oauth-1.0a",
+        "zod",
+        "@kaiord/core",
+        "@kaiord/garmin"
+      ]
+    }
+  },
+  {
+    "name": "@kaiord/ai",
+    "path": "packages/ai/dist/index.js",
+    "limit": "20 kB",
+    "import": "*",
+    "modifyEsbuildConfig": {
+      "external": ["zod", "@kaiord/core"]
+    }
+  },
+  {
+    "name": "@kaiord/mcp",
+    "path": "packages/mcp/dist/index.js",
+    "limit": "35 kB",
+    "import": "*",
+    "modifyEsbuildConfig": {
+      "external": [
+        "@modelcontextprotocol/sdk",
+        "zod",
+        "@kaiord/core",
+        "@kaiord/fit",
+        "@kaiord/tcx",
+        "@kaiord/zwo",
+        "@kaiord/garmin",
+        "@kaiord/garmin-connect"
+      ]
+    }
+  }
+]
