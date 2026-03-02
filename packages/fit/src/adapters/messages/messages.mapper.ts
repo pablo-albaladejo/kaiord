@@ -1,14 +1,14 @@
 import { fileTypeSchema, type FileType } from "@kaiord/core";
-import type { KRD } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
 import { createCourseMessages } from "../course";
+import { createActivityMessages } from "./activity-messages.creator";
+import { mapActivityFileToKRD } from "./activity.mapper";
+import { mapWorkoutFileToKRD } from "./workout.mapper";
 import { convertKRDToMessages } from "../krd-to-fit/krd-to-fit.converter";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import type { FitMessages } from "../shared/types";
-import { createActivityMessages } from "./activity-messages.creator";
-import { mapActivityFileToKRD } from "./activity.mapper";
-import { mapWorkoutFileToKRD } from "./workout.mapper";
+import type { Logger } from "@kaiord/core";
+import type { KRD } from "@kaiord/core";
 
 /**
  * Detects file type from FIT messages.

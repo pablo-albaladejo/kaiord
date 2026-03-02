@@ -9,6 +9,7 @@
 - **KRD** as canonical format; MIME `application/vnd.kaiord+json`
 - **Round‑trip safety** with Zod validation (JSON Schema via AJV for external consumers)
 - **Typed API**: no implicit `any`
+- **Never relax rules**: If code violates a lint rule, coverage threshold, or quality standard — fix the code, never downgrade the rule. This applies to ALL code, including pre-existing violations not introduced by the current change. Use `pnpm lint:fix` for auto-fixable issues, manual refactoring for the rest.
 
 ## Ports & adapters (example: FIT)
 

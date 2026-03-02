@@ -1,9 +1,9 @@
-import type { Equipment } from "@kaiord/core";
-import type { z } from "zod";
 import type {
   equipmentTypeKeySchema,
   GarminEquipmentType,
 } from "../schemas/common";
+import type { Equipment } from "@kaiord/core";
+import type { z } from "zod";
 
 type EquipmentTypeKey = NonNullable<z.infer<typeof equipmentTypeKeySchema>>;
 

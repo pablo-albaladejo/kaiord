@@ -1,6 +1,6 @@
-import type { KRDSession } from "@kaiord/core";
-import type { FitSession } from "../schemas/fit-session";
 import { mapSubSportToFit, mapSubSportToKrd } from "../sub-sport/sub-sport";
+import type { FitSession } from "../schemas/fit-session";
+import type { KRDSession } from "@kaiord/core";
 
 /**
  * Maps FIT SESSION fields to KRD session fields.

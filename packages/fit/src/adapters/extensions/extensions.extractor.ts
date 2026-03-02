@@ -1,6 +1,6 @@
-import type { Logger } from "@kaiord/core";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import type { FitMessages } from "../shared/types";
+import type { Logger } from "@kaiord/core";
 
 export const extractFitExtensions = (
   messages: FitMessages,

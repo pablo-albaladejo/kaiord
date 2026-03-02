@@ -1,6 +1,6 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { existsSync, readFileSync } from "fs";
 import { resolve } from "path";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const SCHEMA_URI = "kaiord://schema/krd";
 const FALLBACK_URL = "https://github.com/pablo-albaladejo/kaiord";

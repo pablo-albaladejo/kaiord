@@ -1,10 +1,11 @@
 import { z } from "zod";
-import type { GarminWorkoutStep } from "./types";
 import {
   garminConditionTypeSchema,
   garminStepTypeSchema,
   garminUnitSchema,
 } from "../common";
+import { executableStepDTOSchema } from "./step.schema";
+import type { GarminWorkoutStep } from "./types";
 
 export const repeatGroupDTOSchema: z.ZodType<{
   type: "RepeatGroupDTO";
@@ -41,9 +42,6 @@ export const repeatGroupDTOSchema: z.ZodType<{
 );
 
 export type RepeatGroupDTO = z.infer<typeof repeatGroupDTOSchema>;
-
-// Must be defined after repeatGroupDTOSchema to avoid circular issues
-import { executableStepDTOSchema } from "./step.schema";
 
 export const garminWorkoutStepSchema: z.ZodType<GarminWorkoutStep> = z.lazy(
   () => z.union([executableStepDTOSchema, repeatGroupDTOSchema])

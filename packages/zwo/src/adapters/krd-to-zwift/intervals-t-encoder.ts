@@ -1,5 +1,5 @@
-import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
 import { encodeTextEvents } from "./text-events-encoder";
+import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
 
 const encodeDurations = (
   onStep: WorkoutStep,

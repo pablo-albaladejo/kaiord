@@ -1,9 +1,8 @@
-import type { WorkoutStep } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
 import { encodeDuration } from "./duration-encoder";
 import { encodeHeartRateTarget, encodeMetadata } from "./metadata-encoder";
 import { encodeCadence, encodeTargets } from "./target-encoder";
 import { encodeTextEvents } from "./text-events-encoder";
+import type { Logger, WorkoutStep } from "@kaiord/core";
 
 export const convertStepToInterval = (
   step: WorkoutStep,

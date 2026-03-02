@@ -47,7 +47,13 @@
     "clean": "pnpm -r clean",
     "setup:npm": "./scripts/quick-setup-npm.sh",
     "setup:npm:full": "./scripts/setup-npm-publishing.sh",
-    "prepare": "husky"
+    "prepare": "husky",
+    "arch:check": "depcruise packages/*/src --config .dependency-cruiser.cjs",
+    "dead-code": "knip",
+    "size": "size-limit",
+    "duplication": "jscpd packages/*/src",
+    "metrics": "node .github/scripts/collect-metrics.js",
+    "metrics:compare": "node .github/scripts/compare-metrics.js"
   },
   "devDependencies": {
     "@changesets/cli": "^2.29.8",
@@ -58,6 +64,11 @@
     "husky": "^9.1.7",
     "prettier": "^3.8.1",
     "typescript": "^5.3.3",
+    "dependency-cruiser": "^16.0.0",
+    "jscpd": "^4.0.0",
+    "knip": "^5.0.0",
+    "size-limit": "^11.0.0",
+    "@size-limit/file": "^11.0.0",
     "typescript-eslint": "^8.56.0"
   }
 }

@@ -1,8 +1,8 @@
-import type { Logger } from "@kaiord/core";
-import type { FetchFn, OAuth1Token, OAuth2Token } from "./types";
 import { fetchOAuthConsumer } from "./oauth-consumer";
 import { getLoginTicket } from "./sso-login";
 import { getOAuth1Token, exchangeOAuth2 as exchange } from "./sso-oauth";
+import type { FetchFn, OAuth1Token, OAuth2Token } from "./types";
+import type { Logger } from "@kaiord/core";
 
 export type { OAuth1Token, OAuth2Token } from "./types";
 export type SsoResult = { oauth1: OAuth1Token; oauth2: OAuth2Token };

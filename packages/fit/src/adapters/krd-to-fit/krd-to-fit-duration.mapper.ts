@@ -1,9 +1,9 @@
-import type { WorkoutStep } from "@kaiord/core";
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import { convertConditionalDuration } from "./duration-converters/conditional";
 import { convertRepeatDuration } from "./duration-converters/repeat";
 import { convertRepeatHrPowerDuration } from "./duration-converters/repeat-hr-power";
 import { convertSimpleDuration } from "./duration-converters/simple";
+import type { WorkoutStep } from "@kaiord/core";
 
 export const convertDuration = (
   step: WorkoutStep,

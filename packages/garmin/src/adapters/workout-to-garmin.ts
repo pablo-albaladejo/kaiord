@@ -1,6 +1,6 @@
-import type { Logger } from "@kaiord/core";
 import { createConsoleLogger, createWorkoutKRD, toText } from "@kaiord/core";
 import { createGarminWriter } from "./garmin-writer";
+import type { Logger } from "@kaiord/core";
 
 /**
  * Creates a function that converts a Workout directly to Garmin Connect JSON.

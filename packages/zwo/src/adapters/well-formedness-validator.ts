@@ -1,6 +1,6 @@
-import type { Logger } from "@kaiord/core";
-import type { ZwiftValidationResult, ZwiftValidator } from "../types";
 import { validateXmlWellFormedness } from "./xml-well-formedness-validator";
+import type { ZwiftValidationResult, ZwiftValidator } from "../types";
+import type { Logger } from "@kaiord/core";
 
 /**
  * Creates a Zwift validator that only validates XML well-formedness.

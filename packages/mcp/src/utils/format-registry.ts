@@ -1,3 +1,10 @@
+import { extname } from "path";
+import { validateKrd } from "@kaiord/core";
+import { createFitReader, createFitWriter } from "@kaiord/fit";
+import { createGarminReader, createGarminWriter } from "@kaiord/garmin";
+import { createTcxReader, createTcxWriter } from "@kaiord/tcx";
+import { createZwiftReader, createZwiftWriter } from "@kaiord/zwo";
+import type { FileFormat } from "../types/tool-schemas";
 import type {
   BinaryReader,
   BinaryWriter,
@@ -5,14 +12,6 @@ import type {
   TextReader,
   TextWriter,
 } from "@kaiord/core";
-import { validateKrd } from "@kaiord/core";
-import { createFitReader, createFitWriter } from "@kaiord/fit";
-import { createGarminReader, createGarminWriter } from "@kaiord/garmin";
-import { createTcxReader, createTcxWriter } from "@kaiord/tcx";
-import { createZwiftReader, createZwiftWriter } from "@kaiord/zwo";
-import { extname } from "path";
-
-import type { FileFormat } from "../types/tool-schemas";
 
 type ReaderFactory = (logger: Logger) => BinaryReader | TextReader;
 type WriterFactory = (logger: Logger) => BinaryWriter | TextWriter;

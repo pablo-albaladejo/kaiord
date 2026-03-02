@@ -44,3 +44,8 @@ metrics/DASHBOARD.md
 .secrets
 .actrc.local
 .playwright-mcp/
+
+# Metrics (generated)
+.metrics/
+.jscpd-report/
+metrics-*.json

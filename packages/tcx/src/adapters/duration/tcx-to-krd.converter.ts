@@ -1,10 +1,10 @@
 import { durationTypeSchema } from "@kaiord/core";
-import { tcxDurationTypeSchema } from "../schemas/tcx-duration";
 import { convertExtendedDuration } from "./extended-duration.converter";
-import {
-  convertStandardDuration,
-  type TcxDurationConversionResult,
-  type TcxDurationData,
+import { convertStandardDuration } from "./standard-duration.converter";
+import { tcxDurationTypeSchema } from "../schemas/tcx-duration";
+import type {
+  TcxDurationConversionResult,
+  TcxDurationData,
 } from "./standard-duration.converter";
 
 export type {

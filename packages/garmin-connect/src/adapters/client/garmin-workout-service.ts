@@ -1,3 +1,16 @@
+import {
+  createConsoleLogger,
+  toText,
+  createServiceApiError,
+} from "@kaiord/core";
+import { createGarminWriter } from "@kaiord/garmin";
+import { WORKOUT_URL } from "../http/urls";
+import { mapToWorkoutSummary } from "../mappers/workout-summary.mapper";
+import {
+  garminPushResponseSchema,
+  garminWorkoutSummarySchema,
+} from "../schemas/workout-response.schema";
+import type { GarminHttpClient } from "../http/garmin-http-client";
 import type {
   KRD,
   ListOptions,
@@ -6,19 +19,6 @@ import type {
   WorkoutService,
   WorkoutSummary,
 } from "@kaiord/core";
-import {
-  createConsoleLogger,
-  toText,
-  createServiceApiError,
-} from "@kaiord/core";
-import { createGarminWriter } from "@kaiord/garmin";
-import type { GarminHttpClient } from "../http/garmin-http-client";
-import { mapToWorkoutSummary } from "../mappers/workout-summary.mapper";
-import {
-  garminPushResponseSchema,
-  garminWorkoutSummarySchema,
-} from "../schemas/workout-response.schema";
-import { WORKOUT_URL } from "../http/urls";
 
 export type GarminWorkoutClient = Pick<WorkoutService, "push" | "list">;
 

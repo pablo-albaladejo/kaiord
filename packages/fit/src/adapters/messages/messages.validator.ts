@@ -1,7 +1,7 @@
 import { createFitParsingError } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import type { FitMessages } from "../shared/types";
+import type { Logger } from "@kaiord/core";
 
 export type ValidateMessagesOptions = {
   /** If true, throw on missing critical messages. Default: true */
