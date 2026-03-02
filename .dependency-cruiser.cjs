@@ -1,3 +1,4 @@
+/* eslint-env node */
 /** @type {import('dependency-cruiser').IConfiguration} */
 module.exports = {
   forbidden: [
@@ -58,7 +59,7 @@ module.exports = {
         path: "packages/(fit|tcx|zwo|garmin)/src",
       },
       to: {
-        path: "packages/(cli|mcp|garmin-connect|ai|workout-spa-editor)/src",
+        path: "packages/(fit|tcx|zwo|garmin|cli|mcp|garmin-connect|ai|workout-spa-editor)/src",
       },
     },
 

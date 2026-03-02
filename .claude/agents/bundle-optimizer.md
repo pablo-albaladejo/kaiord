@@ -128,7 +128,7 @@ You STOP if:
 
 ## Output
 
-```
+```text
 ## Bundle Optimizer Results
 | Package | Before | After | Threshold | Status |
 |---------|--------|-------|-----------|--------|

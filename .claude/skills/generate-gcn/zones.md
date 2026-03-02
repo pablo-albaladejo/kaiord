@@ -2,7 +2,7 @@
 
 Override this file with your personal zones. These are used by the generate-gcn skill to calculate pace/power targets.
 
-## Running Pace Zones (13-01-2025)
+## Running Pace Zones (2025-01-13)
 
 | Zone | Min (min/km) | Max (min/km) | Min (m/s) | Max (m/s) | %VAM   |
 | ---- | ------------ | ------------ | --------- | --------- | ------ |
@@ -12,7 +12,7 @@ Override this file with your personal zones. These are used by the generate-gcn 
 | Z4   | 4:44         | 4:10         | 3.51      | 4.00      | 80-89  |
 | Z5   | 4:09         | 3:30         | 4.02      | 4.76      | 90-100 |
 
-## Swimming Pace Zones (23-08-2025)
+## Swimming Pace Zones (2025-08-23)
 
 | Zone | Min (min/100m) | Max (min/100m) | Min (m/s) | Max (m/s) | %VAM   |
 | ---- | -------------- | -------------- | --------- | --------- | ------ |
@@ -22,7 +22,7 @@ Override this file with your personal zones. These are used by the generate-gcn 
 | Z4   | 1:39           | 1:32           | 1.01      | 1.09      | 80-89  |
 | Z5   | 1:31           | 1:26           | 1.10      | 1.16      | 90-100 |
 
-## Cycling Power Zones (10-11-2025)
+## Cycling Power Zones (2025-11-10)
 
 | Zone | Min (W) | Max (W) | %FTP   |
 | ---- | ------- | ------- | ------ |

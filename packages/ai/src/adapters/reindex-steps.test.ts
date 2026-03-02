@@ -60,6 +60,7 @@ describe("reindexSteps", () => {
     };
 
     const result = reindexSteps(workout);
+
     const block = result.steps[0];
     expect("repeatCount" in block).toBe(true);
     if ("repeatCount" in block) {

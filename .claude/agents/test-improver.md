@@ -110,7 +110,7 @@ You STOP if:
 
 ## Output
 
-```
+```text
 ## Test Improver Results
 - Tests fixed: N (were failing)
 - Tests written: N (new)

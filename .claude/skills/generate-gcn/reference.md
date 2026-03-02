@@ -46,7 +46,7 @@
 
 ## Complete Cycling Example
 
-Input: "10min warmup Z2, 5x(5min at 280-320W + 3min recovery at 100-150W), 10min cooldown"
+Input: "10 min warmup Z2, 5x(5 min at 280-320W + 3 min recovery at 100-150W), 10 min cooldown"
 
 ```json
 {
@@ -150,7 +150,7 @@ Input: "10min warmup Z2, 5x(5min at 280-320W + 3min recovery at 100-150W), 10min
 
 ## Complete Running Example
 
-Input: "10min warmup easy, 6x(400m at 4:00-4:15/km pace + 200m jog recovery), 10min cooldown"
+Input: "10 min warmup easy, 6x(400m at 4:00-4:15/km pace + 200m jog recovery), 10 min cooldown"
 
 ```json
 {
@@ -173,9 +173,10 @@ Input: "10min warmup easy, 6x(400m at 4:00-4:15/km pace + 200m jog recovery), 10
           },
           "endConditionValue": 600,
           "targetType": {
-            "workoutTargetTypeId": 1,
-            "workoutTargetTypeKey": "no.target"
-          }
+            "workoutTargetTypeId": 6,
+            "workoutTargetTypeKey": "pace.zone"
+          },
+          "zoneNumber": 1
         },
         {
           "type": "RepeatGroupDTO",
@@ -221,9 +222,10 @@ Input: "10min warmup easy, 6x(400m at 4:00-4:15/km pace + 200m jog recovery), 10
               },
               "endConditionValue": 200,
               "targetType": {
-                "workoutTargetTypeId": 1,
-                "workoutTargetTypeKey": "no.target"
-              }
+                "workoutTargetTypeId": 6,
+                "workoutTargetTypeKey": "pace.zone"
+              },
+              "zoneNumber": 1
             }
           ]
         },
@@ -239,9 +241,10 @@ Input: "10min warmup easy, 6x(400m at 4:00-4:15/km pace + 200m jog recovery), 10
           },
           "endConditionValue": 600,
           "targetType": {
-            "workoutTargetTypeId": 1,
-            "workoutTargetTypeKey": "no.target"
-          }
+            "workoutTargetTypeId": 6,
+            "workoutTargetTypeKey": "pace.zone"
+          },
+          "zoneNumber": 1
         }
       ]
     }
