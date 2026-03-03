@@ -215,7 +215,7 @@ jobs:
 
       - name: Upload coverage artifact
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-${{ matrix.package }}-${{ matrix.node-version }}
           path: ./packages/${{ matrix.package }}/coverage/
@@ -247,7 +247,7 @@ jobs:
           echo "All package builds verified"
 
       - name: Upload build artifacts
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: build-artifacts
           path: |
@@ -297,7 +297,7 @@ jobs:
 
       - name: Upload coverage artifact
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: coverage-frontend-${{ matrix.node-version }}
           path: ./packages/workout-spa-editor/coverage/
@@ -348,7 +348,7 @@ jobs:
 
       - name: Upload round-trip test results
         if: always()
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: round-trip-results-${{ matrix.package }}
           path: round-trip-output.txt
