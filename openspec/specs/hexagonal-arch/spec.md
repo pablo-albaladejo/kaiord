@@ -11,6 +11,7 @@ The dependency graph SHALL be: `domain` ← `ports` ← `application` ← `adapt
 ### Requirement: Domain Purity
 
 Code in `packages/core/src/domain/` SHALL NOT import from:
+
 - `adapters/`
 - `application/`
 - Any external library (e.g., `@garmin/fitsdk`, `fast-xml-parser`)
@@ -20,6 +21,7 @@ Domain contains only pure TypeScript types and Zod schemas.
 ### Requirement: Application Isolation
 
 Code in `packages/core/src/application/` SHALL NOT import from:
+
 - `adapters/`
 - Any external library
 

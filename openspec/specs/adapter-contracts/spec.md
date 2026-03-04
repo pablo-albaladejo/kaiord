@@ -7,6 +7,7 @@ Adapters implement port interfaces to convert between external formats and KRD.
 ### Requirement: Port Types
 
 All adapters SHALL implement one or more of these port types from `packages/core/src/ports/format-strategy.ts`:
+
 - `BinaryReader`: `(buffer: Uint8Array) => Promise<KRD>`
 - `TextReader`: `(text: string) => Promise<KRD>`
 - `BinaryWriter`: `(krd: KRD) => Promise<Uint8Array>`
@@ -15,6 +16,7 @@ All adapters SHALL implement one or more of these port types from `packages/core
 ### Requirement: Dual Exports
 
 Each adapter package SHALL provide two export styles:
+
 - **Pre-built instance**: `import { fitReader } from '@kaiord/fit'`
 - **Factory function**: `import { createFitReader } from '@kaiord/fit'`
 

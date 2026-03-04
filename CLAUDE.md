@@ -167,14 +167,14 @@ import { createFitReader } from '@kaiord/fit';   // factory(logger?)
 
 ## OpenSpec Commands
 
-| Command | Purpose |
-|---|---|
-| `/opsx:explore` | Investigate a feature area before proposing |
-| `/opsx:propose` | Create proposal + specs + design + tasks |
-| `/opsx:apply` | Implement guided by active spec |
-| `/opsx:verify` | Verify implementation against spec scenarios |
-| `/opsx:archive` | Archive completed change after merge |
-| `/opsx:sync` | Update domain specs after refactors |
+| Command         | Purpose                                      |
+| --------------- | -------------------------------------------- |
+| `/opsx:explore` | Investigate a feature area before proposing  |
+| `/opsx:propose` | Create proposal + specs + design + tasks     |
+| `/opsx:apply`   | Implement guided by active spec              |
+| `/opsx:verify`  | Verify implementation against spec scenarios |
+| `/opsx:archive` | Archive completed change after merge         |
+| `/opsx:sync`    | Update domain specs after refactors          |
 
 ## Adding a New Package
 

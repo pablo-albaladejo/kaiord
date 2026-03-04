@@ -24,18 +24,23 @@ Once aligned, create `openspec/changes/<slug>/` with these files in order:
 # Proposal: <title>
 
 ## Problem
+
 Why this change is needed. What pain point it solves.
 
 ## Solution
+
 What will be built. High-level approach.
 
 ## Affected Packages
-Which @kaiord/* packages are touched and why.
+
+Which @kaiord/\* packages are touched and why.
 
 ## Breaking Changes
+
 Any public API changes (mark with **BREAKING** if applicable).
 
 ## Constraints
+
 - Architecture layer(s): domain / ports / application / adapters
 - Referenced specs: openspec/specs/<domain>/spec.md
 ```
@@ -51,6 +56,7 @@ Technical decisions with rationale and alternatives considered. Reference which 
 ### 4. tasks.md
 
 Implementation checklist ordered by hexagonal layer:
+
 1. Domain types/schemas
 2. Port interfaces
 3. Application use cases

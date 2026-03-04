@@ -19,6 +19,7 @@ All KRD instances MUST validate against the Zod schemas in `packages/core/src/do
 ### Requirement: Round-Trip Safety
 
 Converting data from any supported format to KRD and back MUST preserve values within defined tolerances:
+
 - Time: ±1 second
 - Power: ±1W or ±1% FTP
 - Heart rate: ±1 bpm
@@ -27,6 +28,7 @@ Converting data from any supported format to KRD and back MUST preserve values w
 ### Requirement: Top-Level Structure
 
 A KRD document SHALL contain:
+
 - `version` (string, required): Schema version (e.g., "1.0")
 - `type` (string, required): One of "workout", "activity", "course"
 - `metadata` (object, required): File-level metadata
