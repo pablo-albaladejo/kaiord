@@ -1,5 +1,17 @@
 # @kaiord/mcp
 
+## 4.8.1
+
+### Patch Changes
+
+- 2bb0ffd: Internal: lint fixes, vitest config, and type import cleanup across adapter packages
+- Updated dependencies [2bb0ffd]
+  - @kaiord/fit@4.8.1
+  - @kaiord/tcx@4.8.1
+  - @kaiord/zwo@4.8.1
+  - @kaiord/garmin@4.8.1
+  - @kaiord/garmin-connect@4.8.1
+
 ## 4.7.0
 
 ### Minor Changes
