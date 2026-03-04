@@ -1,8 +1,8 @@
-import type { Logger } from "@kaiord/core";
 import {
   createGarminConnectClient,
   createMemoryTokenStore,
 } from "@kaiord/garmin-connect";
+import type { Logger } from "@kaiord/core";
 
 type GarminClient = ReturnType<typeof createGarminConnectClient>;
 

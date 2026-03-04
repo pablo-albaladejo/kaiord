@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { garminSportTypeSchema } from "../common";
-import { garminUnitInputSchema } from "../common/unit.schema";
 import { garminWorkoutStepInputSchema } from "./repeat-input.schema";
+import { garminUnitInputSchema } from "../common/unit.schema";
 
 export const garminWorkoutSegmentInputSchema = z.object({
   segmentOrder: z.number().int().positive(),

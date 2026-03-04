@@ -3,13 +3,13 @@
  * Uses well-formedness validation only (no Node.js XSD validation)
  */
 
-import type { Logger, TextReader, TextWriter } from "@kaiord/core";
 import { createConsoleLogger } from "@kaiord/core";
 import {
   createFastXmlZwiftReader,
   createFastXmlZwiftWriter,
 } from "./adapters/fast-xml-parser";
 import { createZwiftValidator } from "./adapters/xsd-validator-browser";
+import type { Logger, TextReader, TextWriter } from "@kaiord/core";
 
 export const createZwiftReader = (logger?: Logger): TextReader => {
   const log = logger || createConsoleLogger();

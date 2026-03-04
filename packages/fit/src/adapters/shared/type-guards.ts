@@ -1,5 +1,5 @@
-import type { Sport } from "@kaiord/core";
 import { sportSchema } from "@kaiord/core";
+import type { Sport } from "@kaiord/core";
 
 /**
  * Default values for FIT file generation and mapping

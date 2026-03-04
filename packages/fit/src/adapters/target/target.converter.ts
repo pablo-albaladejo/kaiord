@@ -1,10 +1,10 @@
 import { targetTypeSchema, type Target } from "@kaiord/core";
-import { fitTargetTypeSchema } from "../schemas/fit-target";
 import { convertCadenceTarget } from "./target-cadence.converter";
 import { convertHeartRateTarget } from "./target-heart-rate.converter";
 import { convertPaceTarget } from "./target-pace.converter";
 import { convertPowerTarget } from "./target-power.converter";
 import { convertStrokeTypeTarget } from "./target-stroke.converter";
+import { fitTargetTypeSchema } from "../schemas/fit-target";
 import type { FitTargetData } from "./target.types";
 
 export type { FitTargetData };

@@ -1,11 +1,11 @@
-import type { KRDLap } from "@kaiord/core";
 import { FIT_TO_SWIM_STROKE, SWIM_STROKE_TO_FIT } from "@kaiord/core";
-import type { FitLap } from "../schemas/fit-lap";
-import { mapSubSportToFit, mapSubSportToKrd } from "../sub-sport/sub-sport";
 import {
   mapFitLapTriggerToKrd,
   mapKrdLapTriggerToFit,
 } from "./lap-trigger.mapper";
+import { mapSubSportToFit, mapSubSportToKrd } from "../sub-sport/sub-sport";
+import type { FitLap } from "../schemas/fit-lap";
+import type { KRDLap } from "@kaiord/core";
 
 /**
  * Maps FIT LAP fields to KRD lap fields.

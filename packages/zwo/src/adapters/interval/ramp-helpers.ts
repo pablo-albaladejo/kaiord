@@ -1,13 +1,11 @@
-import type { Intensity } from "@kaiord/core";
-import type { Target } from "@kaiord/core";
 import { targetTypeSchema } from "@kaiord/core";
-import type { WorkoutStep } from "@kaiord/core";
-import type { ZwiftDurationData } from "../duration/duration.mapper";
-import { convertZwiftPowerRange } from "../target/target.converter";
 import {
   restoreHeartRateTarget,
   restorePowerTarget,
 } from "./target-restoration";
+import { convertZwiftPowerRange } from "../target/target.converter";
+import type { ZwiftDurationData } from "../duration/duration.mapper";
+import type { Intensity, Target, WorkoutStep } from "@kaiord/core";
 
 export type ZwiftRampData = {
   Duration?: number;

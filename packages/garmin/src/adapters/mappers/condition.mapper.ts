@@ -1,6 +1,10 @@
-import type { Duration, DurationType } from "@kaiord/core";
-import type { GarminConditionType } from "../schemas/common";
 import { ConditionTypeId } from "../schemas/common";
+import type {
+  GarminConditionType,
+  conditionTypeKeySchema,
+} from "../schemas/common";
+import type { Duration, DurationType } from "@kaiord/core";
+import type { z } from "zod";
 
 export const mapConditionToDuration = (
   conditionTypeKey: string,
@@ -39,9 +43,6 @@ export const mapConditionToDuration = (
       };
   }
 };
-
-import type { z } from "zod";
-import type { conditionTypeKeySchema } from "../schemas/common";
 
 type ConditionTypeKey = z.infer<typeof conditionTypeKeySchema>;
 

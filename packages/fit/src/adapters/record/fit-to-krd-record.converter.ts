@@ -1,7 +1,7 @@
-import type { KRDRecord } from "@kaiord/core";
+import { mapFitRecordToKrd } from "./record.mapper";
 import { fitRecordSchema, type FitRecord } from "../schemas/fit-record";
 import { validateCoordinates } from "../shared/coordinate.converter";
-import { mapFitRecordToKrd } from "./record.mapper";
+import type { KRDRecord } from "@kaiord/core";
 
 /**
  * Converts a FIT RECORD message to KRD record format.

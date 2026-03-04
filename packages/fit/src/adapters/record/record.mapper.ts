@@ -1,9 +1,9 @@
-import type { KRDRecord } from "@kaiord/core";
-import type { FitRecord } from "../schemas/fit-record";
 import {
   degreesToSemicircles,
   semicirclesToDegrees,
 } from "../shared/coordinate.converter";
+import type { FitRecord } from "../schemas/fit-record";
+import type { KRDRecord } from "@kaiord/core";
 
 /**
  * Maps FIT RECORD fields to KRD record fields.

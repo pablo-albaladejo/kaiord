@@ -2,13 +2,13 @@
  * @kaiord/tcx - TCX format adapter for Kaiord
  */
 
-import type { Logger, TextReader, TextWriter } from "@kaiord/core";
 import { createConsoleLogger } from "@kaiord/core";
 import {
   createFastXmlTcxReader,
   createFastXmlTcxWriter,
 } from "./adapters/fast-xml-parser";
 import { createXsdTcxValidator } from "./adapters/xsd-validator";
+import type { Logger, TextReader, TextWriter } from "@kaiord/core";
 
 export const createTcxReader = (logger?: Logger): TextReader => {
   const log = logger || createConsoleLogger();

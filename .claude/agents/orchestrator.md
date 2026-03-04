@@ -29,9 +29,15 @@ Review roles: [list of roles or "all"]
 │           EXECUTION CYCLE               │
 ├─────────────────────────────────────────┤
 │                                         │
+│  0. SPEC CHECK                          │
+│     └── Look for matching spec in       │
+│         openspec/changes/*/tasks.md     │
+│     └── If found: use as checklist      │
+│     └── If not found: use plan as-is    │
+│                                         │
 │  1. EXECUTE                             │
 │     └── Implement next step             │
-│         of the plan                     │
+│         of the plan (or tasks.md)       │
 │                                         │
 │  2. VERIFY                              │
 │     └── Tests pass?                     │

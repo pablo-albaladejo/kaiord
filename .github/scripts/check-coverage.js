@@ -28,7 +28,7 @@ for (const file in coverage) {
   coveredStatements += fileCov.s
     ? Object.values(fileCov.s).filter((v) => v > 0).length
     : 0;
-  totalBranches += fileCov.b ? Object.keys(fileCov.b).length : 0;
+  totalBranches += fileCov.b ? Object.values(fileCov.b).flat().length : 0;
   coveredBranches += fileCov.b
     ? Object.values(fileCov.b)
         .flat()

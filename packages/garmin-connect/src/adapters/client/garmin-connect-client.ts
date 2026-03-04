@@ -1,6 +1,6 @@
-import type { GarminAuthProviderOptions } from "../auth/garmin-auth-provider";
-import { createGarminAuthProvider } from "../auth/garmin-auth-provider";
 import { createGarminWorkoutService } from "./garmin-workout-service";
+import { createGarminAuthProvider } from "../auth/garmin-auth-provider";
+import type { GarminAuthProviderOptions } from "../auth/garmin-auth-provider";
 
 export type GarminConnectClientOptions = GarminAuthProviderOptions;
 

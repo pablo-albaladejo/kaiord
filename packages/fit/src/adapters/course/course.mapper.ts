@@ -1,8 +1,8 @@
-import type { FitCoursePoint } from "../schemas/fit-course-point";
 import {
   degreesToSemicircles,
   semicirclesToDegrees,
 } from "../shared/coordinate.converter";
+import type { FitCoursePoint } from "../schemas/fit-course-point";
 
 /**
  * Course point type for KRD extensions

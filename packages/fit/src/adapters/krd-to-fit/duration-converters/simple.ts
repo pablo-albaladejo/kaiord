@@ -1,6 +1,6 @@
-import type { Duration } from "@kaiord/core";
 import { durationTypeSchema } from "@kaiord/core";
 import { fitDurationTypeSchema } from "../../schemas/fit-duration";
+import type { Duration } from "@kaiord/core";
 
 export const convertSimpleDuration = (
   duration: Duration,

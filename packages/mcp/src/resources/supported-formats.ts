@@ -1,6 +1,5 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-
 import { FORMAT_REGISTRY } from "../utils/format-registry";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const FORMATS_URI = "kaiord://formats";
 

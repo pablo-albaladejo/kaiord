@@ -1,13 +1,11 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { Logger } from "@kaiord/core";
-import { z } from "zod";
-
 import { extractWorkout } from "@kaiord/core";
-
+import { z } from "zod";
+import { convertToKrd } from "./convert-to-krd";
 import { formatSchema } from "../types/tool-schemas";
 import { formatError, formatSuccess } from "../utils/error-formatter";
 import { validateExclusiveInput } from "../utils/resolve-input";
-import { convertToKrd } from "./convert-to-krd";
+import type { Logger } from "@kaiord/core";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const extractWorkoutSchema = {
   input_file: z.string().optional().describe("Path to the fitness data file"),

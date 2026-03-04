@@ -1,0 +1,186 @@
+name: Auto Merge
+
+# ============================================================================
+# Auto-merge handler for PRs labeled 'automerge'.
+# Verifies all CI checks have passed, metrics haven't regressed,
+# and merges with squash strategy.
+#
+# SAFETY:
+# - Only triggers on label events (not on push/commit)
+# - Requires ALL required status checks to pass
+# - Verifies the 'automerge' label is present
+# - Uses squash merge to keep main history clean
+# - Cleans up branch after merge
+# - Cannot create infinite loops (label-triggered only)
+# ============================================================================
+
+on:
+  # Trigger when the 'automerge' label is added
+  pull_request:
+    types: [labeled]
+  # Retry after CI workflow completes (scoped to CI only, not all check suites)
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+
+permissions:
+  contents: write
+  pull-requests: write
+  checks: read
+
+jobs:
+  auto-merge:
+    name: Auto-merge Labeled PR
+    runs-on: ubuntu-latest
+    # Only run for 'automerge' label events
+    if: |
+      (github.event_name == 'pull_request' && github.event.label.name == 'automerge') ||
+      github.event_name == 'workflow_run'
+    steps:
+      - name: Find automerge PRs
+        id: find-prs
+        uses: actions/github-script@v8
+        with:
+          script: |
+            let prNumbers = [];
+
+            if (context.eventName === 'pull_request') {
+              // Direct label event - we know the PR number
+              prNumbers = [context.payload.pull_request.number];
+            } else if (context.eventName === 'workflow_run') {
+              // Check suite completed - find PRs with automerge label
+              const { data: prs } = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: 'open',
+                sort: 'updated',
+                direction: 'desc',
+                per_page: 10
+              });
+
+              prNumbers = prs
+                .filter(pr => pr.labels.some(l => l.name === 'automerge'))
+                .map(pr => pr.number);
+            }
+
+            core.setOutput('pr-numbers', JSON.stringify(prNumbers));
+            console.log(`Found ${prNumbers.length} PR(s) to check: ${prNumbers.join(', ')}`);
+
+      - name: Process auto-merge candidates
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const prNumbers = JSON.parse('${{ steps.find-prs.outputs.pr-numbers }}');
+
+            for (const prNumber of prNumbers) {
+              console.log(`\nProcessing PR #${prNumber}...`);
+
+              // Get PR details
+              const { data: pr } = await github.rest.pulls.get({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+
+              // Verify automerge label is still present
+              if (!pr.labels.some(l => l.name === 'automerge')) {
+                console.log(`PR #${prNumber}: 'automerge' label removed, skipping`);
+                continue;
+              }
+
+              // Check if PR is mergeable
+              if (pr.mergeable_state === 'blocked' || pr.mergeable_state === 'dirty') {
+                console.log(`PR #${prNumber}: Not mergeable (state: ${pr.mergeable_state})`);
+                continue;
+              }
+
+              // Get combined status checks
+              const { data: status } = await github.rest.repos.getCombinedStatusForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: pr.head.sha
+              });
+
+              // Get check runs
+              const { data: checks } = await github.rest.checks.listForRef({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                ref: pr.head.sha
+              });
+
+              // Required checks that must pass
+              const requiredChecks = ['lint', 'test', 'test-frontend', 'round-trip', 'typecheck', 'build'];
+
+              const checkResults = checks.check_runs.reduce((acc, run) => {
+                acc[run.name] = run.conclusion;
+                return acc;
+              }, {});
+
+              const failedRequired = requiredChecks.filter(name => {
+                const result = checkResults[name];
+                return result !== 'success' && result !== 'skipped';
+              });
+
+              if (failedRequired.length > 0) {
+                console.log(`PR #${prNumber}: Required checks not passed: ${failedRequired.join(', ')}`);
+                continue;
+              }
+
+              // Check for reviews - must have at least one approval
+              const { data: reviews } = await github.rest.pulls.listReviews({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber
+              });
+
+              const hasApproval = reviews.some(r => r.state === 'APPROVED');
+              if (!hasApproval) {
+                console.log(`PR #${prNumber}: No approval found, skipping`);
+                continue;
+              }
+
+              // All checks passed - merge with squash
+              console.log(`PR #${prNumber}: All checks passed, merging...`);
+
+              try {
+                await github.rest.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                  merge_method: 'squash',
+                  commit_title: `${pr.title} (#${prNumber})`,
+                  commit_message: `Auto-merged by the auto-merge workflow.\n\nPR: #${prNumber}`
+                });
+
+                console.log(`PR #${prNumber}: Merged successfully`);
+
+                // Clean up: delete the branch
+                try {
+                  await github.rest.git.deleteRef({
+                    owner: context.repo.owner,
+                    repo: context.repo.repo,
+                    ref: `heads/${pr.head.ref}`
+                  });
+                  console.log(`PR #${prNumber}: Branch ${pr.head.ref} deleted`);
+                } catch (e) {
+                  console.log(`PR #${prNumber}: Could not delete branch (may be from fork)`);
+                }
+
+                // Post merge confirmation
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: `Auto-merged via squash. All CI checks passed.\n\nWorkflow run: ${context.payload.repository.html_url}/actions/runs/${context.runId}`
+                });
+
+              } catch (mergeError) {
+                console.error(`PR #${prNumber}: Merge failed:`, mergeError.message);
+                await github.rest.issues.createComment({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  issue_number: prNumber,
+                  body: `Auto-merge failed: ${mergeError.message}\n\nPlease review and merge manually.`
+                });
+              }
+            }

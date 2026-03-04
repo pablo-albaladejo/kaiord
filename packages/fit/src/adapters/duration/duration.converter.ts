@@ -1,5 +1,4 @@
 import { durationTypeSchema, type Duration } from "@kaiord/core";
-import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import {
   convertCaloriesDuration,
   convertDistanceDuration,
@@ -17,6 +16,7 @@ import {
   convertRepeatUntilPowerLessThan,
   convertRepeatUntilTime,
 } from "./repeat-duration-converters";
+import { fitDurationTypeSchema } from "../schemas/fit-duration";
 
 export type FitDurationData = {
   durationType?: string;

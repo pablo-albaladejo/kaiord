@@ -1,8 +1,7 @@
-import type { KRD } from "@kaiord/core";
 import { createTcxParsingError } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
 import { extractKaiordMetadata } from "./metadata-extractor";
 import { convertTcxWorkout } from "./workout.converter";
+import type { KRD, Logger } from "@kaiord/core";
 
 const extractTcxExtensions = (
   trainingCenterDatabase: Record<string, unknown>,

@@ -1,7 +1,7 @@
-import type { RepetitionBlock } from "@kaiord/core";
-import type { GarminWorkoutStepInput } from "../schemas/input/types";
-import { ConditionTypeId, StepTypeId } from "../schemas/common";
 import { mapWorkoutStep } from "./garmin-workout-step.converter";
+import { ConditionTypeId, StepTypeId } from "../schemas/common";
+import type { GarminWorkoutStepInput } from "../schemas/input/types";
+import type { RepetitionBlock } from "@kaiord/core";
 
 export const mapRepetitionBlock = (
   block: RepetitionBlock,

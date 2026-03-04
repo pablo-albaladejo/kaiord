@@ -1,11 +1,9 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { Logger } from "@kaiord/core";
-import { z } from "zod";
-
 import { validateKrd } from "@kaiord/core";
-
+import { z } from "zod";
 import { formatError, formatSuccess } from "../utils/error-formatter";
 import { resolveTextInput } from "../utils/resolve-input";
+import type { Logger } from "@kaiord/core";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const validateSchema = {
   input_file: z.string().optional().describe("Path to KRD JSON file"),

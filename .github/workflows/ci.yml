@@ -31,8 +31,13 @@ jobs:
     if: github.actor != 'github-actions[bot]'
     outputs:
       core-changed: ${{ steps.changes.outputs.core-changed }}
+      fit-changed: ${{ steps.changes.outputs.fit-changed }}
+      tcx-changed: ${{ steps.changes.outputs.tcx-changed }}
+      zwo-changed: ${{ steps.changes.outputs.zwo-changed }}
       garmin-changed: ${{ steps.changes.outputs.garmin-changed }}
       garmin-connect-changed: ${{ steps.changes.outputs.garmin-connect-changed }}
+      cli-changed: ${{ steps.changes.outputs.cli-changed }}
+      mcp-changed: ${{ steps.changes.outputs.mcp-changed }}
       ai-changed: ${{ steps.changes.outputs.ai-changed }}
       frontend-changed: ${{ steps.changes.outputs.frontend-changed }}
       should-test: ${{ steps.changes.outputs.should-test }}
@@ -51,8 +56,18 @@ jobs:
               - 'packages/core/**'
             garmin:
               - 'packages/garmin/**'
+            fit:
+              - 'packages/fit/**'
+            tcx:
+              - 'packages/tcx/**'
+            zwo:
+              - 'packages/zwo/**'
             garmin_connect:
               - 'packages/garmin-connect/**'
+            cli:
+              - 'packages/cli/**'
+            mcp:
+              - 'packages/mcp/**'
             ai:
               - 'packages/ai/**'
             frontend:
@@ -95,6 +110,46 @@ jobs:
             echo "garmin-connect-changed=false" >> $GITHUB_OUTPUT
           fi
 
+          # FIT package changes
+          if [[ "${{ steps.changed-files.outputs.fit_any_changed }}" == "true" ]] || \
+             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
+            echo "fit-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "fit-changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          # TCX package changes
+          if [[ "${{ steps.changed-files.outputs.tcx_any_changed }}" == "true" ]] || \
+             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
+            echo "tcx-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "tcx-changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          # ZWO package changes
+          if [[ "${{ steps.changed-files.outputs.zwo_any_changed }}" == "true" ]] || \
+             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
+            echo "zwo-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "zwo-changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          # CLI package changes
+          if [[ "${{ steps.changed-files.outputs.cli_any_changed }}" == "true" ]] || \
+             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
+            echo "cli-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "cli-changed=false" >> $GITHUB_OUTPUT
+          fi
+
+          # MCP package changes
+          if [[ "${{ steps.changed-files.outputs.mcp_any_changed }}" == "true" ]] || \
+             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
+            echo "mcp-changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "mcp-changed=false" >> $GITHUB_OUTPUT
+          fi
+
           # AI package changes
           if [[ "${{ steps.changed-files.outputs.ai_any_changed }}" == "true" ]] || \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
@@ -115,8 +170,13 @@ jobs:
           # This reduces CI time from ~5 minutes to ~30 seconds for docs-only PRs
           if [[ "${{ steps.changed-files.outputs.docs_any_changed }}" == "true" ]] && \
              [[ "${{ steps.changed-files.outputs.core_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.fit_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.tcx_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.zwo_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.garmin_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.garmin_connect_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.cli_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.mcp_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.ai_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "false" ]]; then
@@ -128,8 +188,13 @@ jobs:
       - name: Display change detection results
         run: |
           echo "Core changed: ${{ steps.changes.outputs.core-changed }}"
+          echo "FIT changed: ${{ steps.changes.outputs.fit-changed }}"
+          echo "TCX changed: ${{ steps.changes.outputs.tcx-changed }}"
+          echo "ZWO changed: ${{ steps.changes.outputs.zwo-changed }}"
           echo "Garmin changed: ${{ steps.changes.outputs.garmin-changed }}"
           echo "Garmin Connect changed: ${{ steps.changes.outputs.garmin-connect-changed }}"
+          echo "CLI changed: ${{ steps.changes.outputs.cli-changed }}"
+          echo "MCP changed: ${{ steps.changes.outputs.mcp-changed }}"
           echo "AI changed: ${{ steps.changes.outputs.ai-changed }}"
           echo "Frontend changed: ${{ steps.changes.outputs.frontend-changed }}"
           echo "Should test: ${{ steps.changes.outputs.should-test }}"
@@ -182,7 +247,8 @@ jobs:
       fail-fast: false
       matrix:
         node-version: ["20.x", "22.x", "24.x"]
-        package: ["core", "garmin", "garmin-connect", "ai"]
+        package:
+          ["core", "fit", "tcx", "zwo", "garmin", "garmin-connect", "mcp", "ai"]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -211,7 +277,12 @@ jobs:
           fail_ci_if_error: false
 
       - name: Check coverage threshold
-        run: node .github/scripts/check-coverage.js ./packages/${{ matrix.package }}/coverage/coverage-final.json
+        run: |
+          THRESHOLD=80
+          if [ "${{ matrix.package }}" = "mcp" ]; then
+            THRESHOLD=70
+          fi
+          node .github/scripts/check-coverage.js ./packages/${{ matrix.package }}/coverage/coverage-final.json $THRESHOLD
 
       - name: Upload coverage artifact
         if: always()
@@ -237,7 +308,7 @@ jobs:
 
       - name: Verify build outputs
         run: |
-          for pkg in core garmin garmin-connect ai; do
+          for pkg in core fit tcx zwo garmin garmin-connect cli mcp ai; do
             if [ ! -d "packages/$pkg/dist" ]; then
               echo "::error::@kaiord/$pkg build output not found"
               exit 1
@@ -301,6 +372,51 @@ jobs:
         with:
           name: coverage-frontend-${{ matrix.node-version }}
           path: ./packages/workout-spa-editor/coverage/
+          retention-days: 30
+
+  test-cli:
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: always() && needs.detect-changes.outputs.should-test == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        node-version: ["20.x", "22.x", "24.x"]
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm with caching
+        uses: ./.github/actions/setup-pnpm
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Build all packages (CLI depends on all adapters)
+        run: pnpm -r build
+
+      - name: Run CLI tests with coverage
+        run: pnpm --filter @kaiord/cli test:coverage
+
+      - name: Check coverage threshold (70%)
+        run: node .github/scripts/check-coverage.js ./packages/cli/coverage/coverage-final.json 70
+
+      - name: Upload coverage to Codecov
+        if: matrix.node-version == '20.x'
+        uses: codecov/codecov-action@v5
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: pablo-albaladejo/kaiord
+          files: ./packages/cli/coverage/coverage-final.json
+          flags: cli
+          name: cli-${{ matrix.node-version }}
+          fail_ci_if_error: false
+
+      - name: Upload coverage artifact
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: coverage-cli-${{ matrix.node-version }}
+          path: ./packages/cli/coverage/
           retention-days: 30
 
   round-trip:
@@ -446,6 +562,7 @@ jobs:
         lint,
         typecheck,
         test,
+        test-cli,
         test-frontend,
         build,
         round-trip,
@@ -457,6 +574,7 @@ jobs:
       (needs.lint.result == 'failure' ||
        needs.typecheck.result == 'failure' ||
        needs.test.result == 'failure' ||
+       needs.test-cli.result == 'failure' ||
        needs.test-frontend.result == 'failure' ||
        needs.build.result == 'failure' ||
        needs.round-trip.result == 'failure' ||
@@ -477,7 +595,10 @@ jobs:
               failedJobs.push('Type Check');
             }
             if ('${{ needs.test.result }}' === 'failure') {
-              failedJobs.push('Tests (Core/Garmin)');
+              failedJobs.push('Tests (Core/Adapters)');
+            }
+            if ('${{ needs.test-cli.result }}' === 'failure') {
+              failedJobs.push('Tests (CLI)');
             }
             if ('${{ needs.test-frontend.result }}' === 'failure') {
               failedJobs.push('Tests (Frontend)');

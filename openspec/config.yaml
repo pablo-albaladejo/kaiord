@@ -1,0 +1,49 @@
+schema: spec-driven
+
+context: |
+  Kaiord is an open-source TypeScript monorepo for health & fitness data.
+  It converts between FIT, TCX, ZWO, GCN, and KRD formats.
+
+  Architecture: Hexagonal (ports-and-adapters)
+  - domain/ depends on nothing (pure types + Zod schemas)
+  - ports/ depends only on domain (pure interfaces)
+  - application/ depends on domain + ports (use cases, no external libs)
+  - adapters/ depend on ports + domain (implementations, can use external libs)
+
+  KRD is the canonical format. All conversions go through KRD.
+  MIME type: application/vnd.kaiord+json
+
+  Code style:
+  - TypeScript strict mode, no implicit any
+  - Files <= 100 lines (tests exempt), functions < 40 LOC
+  - Use type not interface, separate type imports
+  - Domain schemas: snake_case, adapter schemas: camelCase
+  - Mappers (*.mapper.ts) = simple transform, no tests
+  - Converters (*.converter.ts) = complex logic, requires tests
+  - Factory functions preferred over classes
+
+  Quality: zero ESLint warnings, zero TS errors, zero test warnings.
+  Coverage: 80% core, 70% frontend.
+  All code, comments, commits, and docs MUST be in English.
+
+rules:
+  proposal:
+    - Include affected @kaiord/* packages
+    - Identify which hexagonal layer(s) the change touches
+    - Flag any breaking changes to the public API
+    - Reference existing domain specs in openspec/specs/
+  specs:
+    - Use SHALL/MUST for requirements, SHOULD/MAY for optional
+    - Scenarios use Given/When/Then format
+    - Include round-trip safety scenarios when touching converters
+    - Reference KRD schema fields by exact name
+  design:
+    - Document which hexagonal layer each decision affects
+    - Justify any new external dependency
+    - Include migration plan if changing public API
+    - Reference ports/adapters pattern for new I/O
+  tasks:
+    - Order by hexagonal layer (domain -> ports -> application -> adapters)
+    - Include test tasks after each implementation task
+    - End with changeset and documentation tasks
+    - Use checkbox format for /opsx:apply tracking

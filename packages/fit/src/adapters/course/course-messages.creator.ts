@@ -1,8 +1,7 @@
-import type { KRD } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
+import { mapKrdCoursePointToFit } from "./course.mapper";
 import { convertMetadataToFileId } from "../krd-to-fit/krd-to-fit-metadata.mapper";
 import type { KRDCoursePoint } from "./course.mapper";
-import { mapKrdCoursePointToFit } from "./course.mapper";
+import type { KRD, Logger } from "@kaiord/core";
 
 /**
  * Creates FIT course messages from KRD format

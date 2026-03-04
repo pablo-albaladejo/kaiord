@@ -1,14 +1,14 @@
-import type { KRD, Logger, Workout } from "@kaiord/core";
 import {
   createGarminParsingError,
   isRepetitionBlock,
   workoutSchema,
 } from "@kaiord/core";
-import type { GarminWorkoutStepInput } from "../schemas/input/types";
-import { mapKrdSportToGarmin } from "../mappers/sport.mapper";
-import { mapWorkoutStep } from "./garmin-workout-step.converter";
-import { mapRepetitionBlock } from "./garmin-repetition.converter";
 import { addPoolInfo, type PoolInput } from "./garmin-pool-info.mapper";
+import { mapRepetitionBlock } from "./garmin-repetition.converter";
+import { mapWorkoutStep } from "./garmin-workout-step.converter";
+import { mapKrdSportToGarmin } from "../mappers/sport.mapper";
+import type { GarminWorkoutStepInput } from "../schemas/input/types";
+import type { KRD, Logger, Workout } from "@kaiord/core";
 
 export const convertKRDToGarmin = (krd: KRD, logger: Logger): string => {
   logger.info("Converting KRD to Garmin Connect JSON");

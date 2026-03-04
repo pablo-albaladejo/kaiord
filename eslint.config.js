@@ -96,6 +96,77 @@ export default tseslint.config(
     },
   },
   {
+    // Backend adapter packages: same rules as core
+    files: [
+      "packages/fit/**/*.ts",
+      "packages/tcx/**/*.ts",
+      "packages/zwo/**/*.ts",
+      "packages/garmin/**/*.ts",
+      "packages/garmin-connect/**/*.ts",
+      "packages/cli/**/*.ts",
+      "packages/mcp/**/*.ts",
+    ],
+    languageOptions: {
+      parser: tseslint.parser,
+      parserOptions: {
+        projectService: true,
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tseslint.plugin,
+      import: importPlugin,
+    },
+    rules: {
+      "max-lines": [
+        "warn",
+        {
+          max: 100,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+      "max-lines-per-function": [
+        "warn",
+        {
+          max: 40,
+          skipBlankLines: true,
+          skipComments: true,
+        },
+      ],
+      complexity: ["warn", 10],
+      "max-depth": ["warn", 4],
+      "max-params": ["warn", 4],
+      "@typescript-eslint/no-explicit-any": "error",
+      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+      "@typescript-eslint/consistent-type-imports": [
+        "error",
+        {
+          prefer: "type-imports",
+          fixStyle: "separate-type-imports",
+        },
+      ],
+      "import/order": [
+        "error",
+        {
+          groups: [
+            "builtin",
+            "external",
+            "internal",
+            ["parent", "sibling"],
+            "index",
+            "type",
+          ],
+          "newlines-between": "never",
+          alphabetize: {
+            order: "asc",
+            caseInsensitive: true,
+          },
+        },
+      ],
+    },
+  },
+  {
     // Test files: basic linting without type checking
     files: ["**/*.test.ts", "**/*.spec.ts", "**/tests/**/*.ts"],
     languageOptions: {
