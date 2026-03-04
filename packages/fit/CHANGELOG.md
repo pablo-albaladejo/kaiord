@@ -1,5 +1,11 @@
 # @kaiord/fit
 
+## 4.8.1
+
+### Patch Changes
+
+- 2bb0ffd: Internal: lint fixes, vitest config, and type import cleanup across adapter packages
+
 ## 4.7.2
 
 ### Patch Changes
