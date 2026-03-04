@@ -1,14 +1,11 @@
-import type { Duration } from "@kaiord/core";
-import type { Target } from "@kaiord/core";
-import type { WorkoutStep } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
-import { convertTcxDuration } from "../duration/duration.mapper";
-import { convertTcxTarget } from "../target/target.mapper";
 import {
   extractExtensions,
   extractIntensity,
   extractPowerFromExtensions,
 } from "./step-helpers";
+import { convertTcxDuration } from "../duration/duration.mapper";
+import { convertTcxTarget } from "../target/target.mapper";
+import type { Duration, Logger, Target, WorkoutStep } from "@kaiord/core";
 
 const convertTargetWithExtensions = (
   tcxStep: Record<string, unknown>,

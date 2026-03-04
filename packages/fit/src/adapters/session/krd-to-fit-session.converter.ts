@@ -1,6 +1,6 @@
 import { krdSessionSchema, type KRDSession } from "@kaiord/core";
-import type { FitSession } from "../schemas/fit-session";
 import { mapKrdSessionToFit } from "./session.mapper";
+import type { FitSession } from "../schemas/fit-session";
 
 /**
  * Converts a KRD session to FIT SESSION message format.

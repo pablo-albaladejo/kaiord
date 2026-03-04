@@ -1,4 +1,3 @@
-import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
 import { mapFreeRideToKrd } from "../interval/free-ride.mapper";
 import { mapIntervalsTToKrd } from "../interval/intervals-t.mapper";
 import {
@@ -7,6 +6,7 @@ import {
   mapWarmupToKrd,
 } from "../interval/ramp.mapper";
 import { mapSteadyStateToKrd } from "../interval/steady-state.mapper";
+import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
 
 type IntervalData = { type: string; data: Record<string, unknown> };
 type ProcessResult = {

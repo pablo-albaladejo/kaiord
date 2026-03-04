@@ -1,5 +1,5 @@
-import type { KRDLapTrigger } from "@kaiord/core";
 import type { FitLapTrigger } from "../schemas/fit-lap-trigger";
+import type { KRDLapTrigger } from "@kaiord/core";
 
 /**
  * Maps FIT lap trigger to KRD lap trigger.

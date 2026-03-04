@@ -1,8 +1,7 @@
-import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
-import { detectIntervalType } from "../interval/interval-type-detector";
 import { encodeIntervalsT } from "./intervals-t-encoder";
 import { convertStepToInterval } from "./step-encoder";
+import { detectIntervalType } from "../interval/interval-type-detector";
+import type { Logger, RepetitionBlock, WorkoutStep } from "@kaiord/core";
 
 export const convertStepsToZwiftIntervals = (
   steps: Array<WorkoutStep | RepetitionBlock>,

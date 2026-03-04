@@ -1,6 +1,7 @@
-import type { Target, TargetType } from "@kaiord/core";
-import type { GarminTargetType } from "../schemas/common";
 import { TargetTypeId } from "../schemas/common";
+import type { GarminTargetType, targetTypeKeySchema } from "../schemas/common";
+import type { Target, TargetType } from "@kaiord/core";
+import type { z } from "zod";
 
 type GarminTargetInfo = {
   targetType: GarminTargetType;
@@ -128,9 +129,6 @@ const mapCadenceTarget = (
   }
   return { targetType: "open", target: { type: "open" } };
 };
-
-import type { z } from "zod";
-import type { targetTypeKeySchema } from "../schemas/common";
 
 type TargetTypeKey = z.infer<typeof targetTypeKeySchema>;
 

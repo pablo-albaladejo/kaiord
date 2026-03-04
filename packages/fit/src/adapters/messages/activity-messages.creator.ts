@@ -1,6 +1,6 @@
+import { convertMetadataToFileId } from "../krd-to-fit/krd-to-fit-metadata.mapper";
 import type { KRD } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
-import { convertMetadataToFileId } from "../krd-to-fit/krd-to-fit-metadata.mapper";
 
 /**
  * Creates FIT activity messages from KRD format.

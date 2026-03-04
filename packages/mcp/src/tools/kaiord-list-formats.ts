@@ -1,7 +1,6 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-
 import { formatSuccess } from "../utils/error-formatter";
 import { FORMAT_REGISTRY } from "../utils/format-registry";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 export const registerListFormatsTool = (server: McpServer): void => {
   server.tool(

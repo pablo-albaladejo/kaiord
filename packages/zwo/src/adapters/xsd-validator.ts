@@ -1,8 +1,8 @@
-import type { Logger } from "@kaiord/core";
-import type { ZwiftValidationResult, ZwiftValidator } from "../types";
 import { createWellFormednessValidator } from "./well-formedness-validator";
 import { validateXmlWellFormedness } from "./xml-well-formedness-validator";
 import { validateAgainstXsdSchema } from "./xsd-schema-validator";
+import type { ZwiftValidationResult, ZwiftValidator } from "../types";
+import type { Logger } from "@kaiord/core";
 
 // Detect browser environment before attempting to load Node.js modules
 // Use a type-safe check that works in both Node.js and browser environments

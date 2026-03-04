@@ -2,7 +2,6 @@ import { readFileSync } from "fs";
 import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-
 import { createStderrLogger } from "../adapters/stderr-logger";
 import { registerAnalyzeWorkoutPrompt } from "../prompts/analyze-workout";
 import { registerConvertFilePrompt } from "../prompts/convert-file";
@@ -12,13 +11,13 @@ import { registerSupportedFormatsResource } from "../resources/supported-formats
 import { registerConvertTool } from "../tools/kaiord-convert";
 import { registerDiffTool } from "../tools/kaiord-diff";
 import { registerExtractWorkoutTool } from "../tools/kaiord-extract-workout";
-import { registerGetFormatSpecTool } from "../tools/kaiord-get-format-spec";
-import { registerInspectTool } from "../tools/kaiord-inspect";
-import { registerListFormatsTool } from "../tools/kaiord-list-formats";
 import { registerGarminListTool } from "../tools/kaiord-garmin-list";
 import { registerGarminLoginTool } from "../tools/kaiord-garmin-login";
 import { registerGarminLogoutTool } from "../tools/kaiord-garmin-logout";
 import { registerGarminPushTool } from "../tools/kaiord-garmin-push";
+import { registerGetFormatSpecTool } from "../tools/kaiord-get-format-spec";
+import { registerInspectTool } from "../tools/kaiord-inspect";
+import { registerListFormatsTool } from "../tools/kaiord-list-formats";
 import { registerValidateTool } from "../tools/kaiord-validate";
 
 const SERVER_NAME = "kaiord-mcp";

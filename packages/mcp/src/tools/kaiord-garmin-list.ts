@@ -1,9 +1,8 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-import type { Logger } from "@kaiord/core";
 import { z } from "zod";
-
 import { formatError, formatSuccess } from "../utils/error-formatter";
 import { getGarminClient } from "../utils/garmin-client-state";
+import type { Logger } from "@kaiord/core";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const listSchema = {
   limit: z

@@ -11,8 +11,14 @@ process.stdin.on("end", () => {
 
     if (!filePath) process.exit(0);
 
-    // Exempt test files
-    if (filePath.includes(".test.") || filePath.includes(".spec.")) {
+    // Exempt test files, docs, and config
+    if (
+      filePath.includes(".test.") ||
+      filePath.includes(".spec.") ||
+      filePath.endsWith(".md") ||
+      filePath.endsWith(".yaml") ||
+      filePath.endsWith(".yml")
+    ) {
       process.exit(0);
     }
 

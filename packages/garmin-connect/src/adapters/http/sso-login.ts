@@ -1,6 +1,5 @@
-import type { Logger } from "@kaiord/core";
 import { createServiceAuthError } from "@kaiord/core";
-import type { FetchFn } from "./types";
+import { checkAccountLocked, checkPageTitle } from "./sso-validators";
 import {
   GARMIN_SSO_EMBED,
   GC_MODERN,
@@ -8,7 +7,8 @@ import {
   SIGNIN_URL,
   USER_AGENT_BROWSER,
 } from "./urls";
-import { checkAccountLocked, checkPageTitle } from "./sso-validators";
+import type { FetchFn } from "./types";
+import type { Logger } from "@kaiord/core";
 
 const CSRF_RE = /name="_csrf"\s+value="(.+?)"/;
 const TICKET_RE = /ticket=([^"]+)"/;

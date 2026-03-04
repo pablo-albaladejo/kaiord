@@ -1,14 +1,14 @@
 import { convertLengthToMeters } from "@kaiord/core";
-import type { Workout } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
-import { mapLengthUnitToKrd } from "../length-unit/length-unit.mapper";
-import { mapSportType } from "../shared/type-guards";
-import type { FitWorkoutMessage, FitWorkoutStep } from "../shared/types";
-import { mapSubSportToKrd } from "../sub-sport/sub-sport.mapper";
 import {
   buildWorkoutSteps,
   findRepetitionStepIndices,
 } from "./repetition.builder";
+import { mapLengthUnitToKrd } from "../length-unit/length-unit.mapper";
+import { mapSportType } from "../shared/type-guards";
+import { mapSubSportToKrd } from "../sub-sport/sub-sport.mapper";
+import type { FitWorkoutMessage, FitWorkoutStep } from "../shared/types";
+import type { Workout } from "@kaiord/core";
+import type { Logger } from "@kaiord/core";
 
 export const mapWorkout = (
   workoutMsg: FitWorkoutMessage | undefined,

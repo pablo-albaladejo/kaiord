@@ -1,14 +1,14 @@
-import type { KRDEvent } from "@kaiord/core";
-import type {
-  FitEvent,
-  FitEventMessage,
-  FitEventType,
-} from "../schemas/fit-event";
 import {
   FIT_EVENT_TO_KRD_TYPE,
   KRD_TYPE_TO_FIT_EVENT,
   KRD_TYPE_TO_FIT_EVENT_TYPE,
 } from "./event-type-maps";
+import type {
+  FitEvent,
+  FitEventMessage,
+  FitEventType,
+} from "../schemas/fit-event";
+import type { KRDEvent } from "@kaiord/core";
 
 const mapEventTypeToKrd = (
   fitEvent: FitEvent,

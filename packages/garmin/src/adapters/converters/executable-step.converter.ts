@@ -1,4 +1,3 @@
-import type { Target, TargetType, WorkoutStep } from "@kaiord/core";
 import { mapConditionToDuration } from "../mappers/condition.mapper";
 import { mapGarminEquipmentToKrd } from "../mappers/equipment.mapper";
 import { mapStepTypeToIntensity } from "../mappers/intensity.mapper";
@@ -8,6 +7,7 @@ import {
 } from "../mappers/stroke.mapper";
 import { mapGarminTargetToKrd } from "../mappers/target.mapper";
 import type { ParsedExecutableStep } from "../schemas/garmin-workout-parse.schema";
+import type { Target, TargetType, WorkoutStep } from "@kaiord/core";
 
 export const mapExecutableStep = (
   step: ParsedExecutableStep,

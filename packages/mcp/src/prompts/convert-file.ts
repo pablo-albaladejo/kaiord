@@ -1,7 +1,6 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
-
 import { formatSchema } from "../types/tool-schemas";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const promptArgs = {
   file_path: z.string().describe("Path to the fitness file to convert"),

@@ -122,4 +122,50 @@ describe("createGarminAuthProvider", () => {
 
     expect(mockStore.clear).toHaveBeenCalled();
   });
+
+  it("should export tokens after login", async () => {
+    const { auth } = createGarminAuthProvider({
+      logger: mockLogger,
+      fetchFn: mockFetch,
+    });
+
+    await auth.login("user", "pass");
+    const tokens = await auth.export_tokens();
+
+    expect(tokens.oauth1).toStrictEqual({
+      oauth_token: "o1",
+      oauth_token_secret: "s1",
+    });
+    expect(tokens.oauth2.access_token).toBe("at");
+  });
+
+  it("should throw when exporting tokens without login", async () => {
+    const { auth } = createGarminAuthProvider({
+      logger: mockLogger,
+      fetchFn: mockFetch,
+    });
+
+    await expect(auth.export_tokens()).rejects.toThrow("No tokens to export");
+  });
+
+  it("should return false for is_authenticated when token is expired", async () => {
+    const { auth, httpClient } = createGarminAuthProvider({
+      logger: mockLogger,
+      fetchFn: mockFetch,
+    });
+
+    httpClient.setTokens(
+      { oauth_token: "t", oauth_token_secret: "s" },
+      {
+        access_token: "at",
+        refresh_token: "rt",
+        token_type: "Bearer",
+        expires_in: 3600,
+        refresh_token_expires_in: 86400,
+        expires_at: Math.floor(Date.now() / 1000) - 100,
+      }
+    );
+
+    expect(auth.is_authenticated()).toBe(false);
+  });
 });

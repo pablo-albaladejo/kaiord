@@ -1,7 +1,7 @@
 import { createServiceAuthError } from "@kaiord/core";
-import type { FetchFn, OAuthConsumer } from "./types";
 import { createOAuthSigner } from "./oauth-signer";
 import { GARMIN_SSO_EMBED, OAUTH_URL, USER_AGENT_MOBILE } from "./urls";
+import type { FetchFn, OAuthConsumer } from "./types";
 import type { OAuth1Token, OAuth2Token } from "./types";
 
 export const getOAuth1Token = async (

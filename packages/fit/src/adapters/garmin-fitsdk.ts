@@ -4,14 +4,14 @@
  */
 
 import { Decoder, Encoder, Stream } from "@garmin/fitsdk";
-import type { KRD } from "@kaiord/core";
 import { createFitParsingError } from "@kaiord/core";
-import type { BinaryReader } from "@kaiord/core";
-import type { BinaryWriter } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
 import { convertKRDToMessages } from "./krd-to-fit/krd-to-fit.converter";
 import { mapMessagesToKRD } from "./messages/messages.mapper";
 import type { FitMessages } from "./shared/types";
+import type { KRD } from "@kaiord/core";
+import type { BinaryReader } from "@kaiord/core";
+import type { BinaryWriter } from "@kaiord/core";
+import type { Logger } from "@kaiord/core";
 
 export const createGarminFitSdkReader =
   (logger: Logger): BinaryReader =>

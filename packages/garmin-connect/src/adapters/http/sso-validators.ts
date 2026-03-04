@@ -1,5 +1,5 @@
-import type { Logger } from "@kaiord/core";
 import { createServiceAuthError } from "@kaiord/core";
+import type { Logger } from "@kaiord/core";
 
 const ACCOUNT_LOCKED_RE = /var status\s*=\s*"([^"]*)"/;
 const PAGE_TITLE_RE = /<title>([^<]*)<\/title>/;

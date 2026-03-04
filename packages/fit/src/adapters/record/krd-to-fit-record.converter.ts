@@ -1,6 +1,6 @@
 import { krdRecordSchema, type KRDRecord } from "@kaiord/core";
-import type { FitRecord } from "../schemas/fit-record";
 import { mapKrdRecordToFit } from "./record.mapper";
+import type { FitRecord } from "../schemas/fit-record";
 
 /**
  * Converts a KRD record to FIT RECORD message format.

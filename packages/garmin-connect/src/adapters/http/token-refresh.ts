@@ -1,8 +1,8 @@
-import type { Logger } from "@kaiord/core";
 import { createServiceApiError } from "@kaiord/core";
-import type { FetchFn, OAuthConsumer, OAuth1Token, OAuth2Token } from "./types";
 import { exchangeOAuth2 } from "./garmin-sso";
 import { fetchOAuthConsumer } from "./oauth-consumer";
+import type { FetchFn, OAuthConsumer, OAuth1Token, OAuth2Token } from "./types";
+import type { Logger } from "@kaiord/core";
 
 type RefreshSubscriber = {
   resolve: (token: string) => void;

@@ -1,6 +1,6 @@
+import type { GarminStrokeType, strokeTypeKeySchema } from "../schemas/common";
 import type { SwimStroke } from "@kaiord/core";
 import type { z } from "zod";
-import type { GarminStrokeType, strokeTypeKeySchema } from "../schemas/common";
 
 type StrokeTypeKey = NonNullable<z.infer<typeof strokeTypeKeySchema>>;
 

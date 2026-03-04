@@ -1,9 +1,7 @@
-import { XMLBuilder } from "fast-xml-parser";
-import type { KRD } from "@kaiord/core";
-import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
 import { createZwiftParsingError } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
+import { XMLBuilder } from "fast-xml-parser";
 import { buildWorkoutFile } from "./krd-to-zwift/workout-file-builder";
+import type { KRD, Logger, RepetitionBlock, WorkoutStep } from "@kaiord/core";
 
 const extractWorkoutData = (krd: KRD) => {
   const workout = krd.extensions?.structured_workout;

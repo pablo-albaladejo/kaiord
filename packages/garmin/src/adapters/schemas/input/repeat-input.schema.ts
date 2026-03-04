@@ -1,6 +1,7 @@
 import { z } from "zod";
-import type { GarminWorkoutStepInput } from "./types";
 import { garminConditionTypeSchema, garminStepTypeSchema } from "../common";
+import { executableStepDTOInputSchema } from "./step-input.schema";
+import type { GarminWorkoutStepInput } from "./types";
 
 export const repeatGroupDTOInputSchema: z.ZodType<{
   type: "RepeatGroupDTO";
@@ -29,8 +30,6 @@ export const repeatGroupDTOInputSchema: z.ZodType<{
 );
 
 export type RepeatGroupDTOInput = z.infer<typeof repeatGroupDTOInputSchema>;
-
-import { executableStepDTOInputSchema } from "./step-input.schema";
 
 export const garminWorkoutStepInputSchema: z.ZodType<GarminWorkoutStepInput> =
   z.lazy(() =>

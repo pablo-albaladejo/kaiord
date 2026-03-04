@@ -1,7 +1,6 @@
-import type { WorkoutStep } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
 import { convertDurationToTcx } from "./duration-to-tcx-encoder";
 import { convertTargetToTcx } from "./target-to-tcx.converter";
+import type { Logger, WorkoutStep } from "@kaiord/core";
 
 const capitalizeFirst = (str: string): string => {
   return str.charAt(0).toUpperCase() + str.slice(1);

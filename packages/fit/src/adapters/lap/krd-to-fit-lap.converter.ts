@@ -1,6 +1,6 @@
 import { krdLapSchema, type KRDLap } from "@kaiord/core";
-import type { FitLap } from "../schemas/fit-lap";
 import { mapKrdLapToFit } from "./lap.mapper";
+import type { FitLap } from "../schemas/fit-lap";
 
 /**
  * Converts a KRD lap to FIT LAP message format.

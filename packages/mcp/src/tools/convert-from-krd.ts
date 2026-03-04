@@ -1,10 +1,9 @@
 import { toBinary, toText } from "@kaiord/core";
-import type { BinaryWriter, KRD, Logger, TextWriter } from "@kaiord/core";
-
-import type { FileFormat } from "../types/tool-schemas";
 import { isBinaryFormat } from "../types/tool-schemas";
 import { writeOutputFile } from "../utils/file-io";
 import { FORMAT_REGISTRY } from "../utils/format-registry";
+import type { FileFormat } from "../types/tool-schemas";
+import type { BinaryWriter, KRD, Logger, TextWriter } from "@kaiord/core";
 
 export type ConvertFromKrdResult = {
   readonly content: string;

@@ -197,6 +197,58 @@ describe("createGarminHttpClient", () => {
     expect(mockFetch).toHaveBeenCalledTimes(3);
   });
 
+  it("should throw when retry after 401 refresh also fails", async () => {
+    const consumerResponse = {
+      ok: true,
+      status: 200,
+      json: async () => ({
+        consumer_key: "ck",
+        consumer_secret: "cs",
+      }),
+    };
+    const unauthorizedResponse = {
+      ok: false,
+      status: 401,
+      statusText: "Unauthorized",
+    };
+    const retryFailResponse = {
+      ok: false,
+      status: 403,
+      statusText: "Forbidden",
+    };
+
+    let callCount = 0;
+    const mockFetch = vi.fn(async () => {
+      callCount++;
+      if (callCount === 1) return unauthorizedResponse;
+      if (callCount === 2) return consumerResponse;
+      return retryFailResponse;
+    }) as unknown as typeof globalThis.fetch;
+
+    const client = createGarminHttpClient(mockLogger, mockFetch);
+    client.setTokens(validOAuth1, createValidToken());
+
+    await expect(client.get("https://api.test/data")).rejects.toThrow(
+      "API request failed after token refresh"
+    );
+  });
+
+  it("should post with null body sending undefined", async () => {
+    const mockFetch = createOkFetch({ id: 1 });
+    const client = createGarminHttpClient(mockLogger, mockFetch);
+    client.setTokens(validOAuth1, createValidToken());
+
+    await client.post("https://api.test/create", null);
+
+    expect(mockFetch).toHaveBeenCalledWith(
+      "https://api.test/create",
+      expect.objectContaining({
+        method: "POST",
+        body: undefined,
+      })
+    );
+  });
+
   it("should coalesce concurrent requests into single refresh", async () => {
     const { exchangeOAuth2 } = await import("./garmin-sso");
     const mockedExchange = vi.mocked(exchangeOAuth2);

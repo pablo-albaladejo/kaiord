@@ -1,9 +1,8 @@
-import type { WorkoutStep } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
 import {
   encodeRampPowerTarget,
   encodeSteadyStatePowerTarget,
 } from "./power-encoder";
+import type { Logger, WorkoutStep } from "@kaiord/core";
 
 export const encodeSteadyStateTargets = (
   step: WorkoutStep,

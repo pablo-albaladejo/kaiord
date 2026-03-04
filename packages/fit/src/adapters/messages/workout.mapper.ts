@@ -1,12 +1,12 @@
 import { fileTypeSchema } from "@kaiord/core";
-import type { KRD } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
+import { validateMessages } from "./messages.validator";
 import { extractFitExtensions } from "../extensions/extensions.extractor";
 import { mapMetadata } from "../metadata/metadata.mapper";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
-import type { FitMessages } from "../shared/types";
 import { mapWorkout } from "../workout/workout.mapper";
-import { validateMessages } from "./messages.validator";
+import type { FitMessages } from "../shared/types";
+import type { Logger } from "@kaiord/core";
+import type { KRD } from "@kaiord/core";
 
 const KRD_VERSION = "1.0" as const;
 

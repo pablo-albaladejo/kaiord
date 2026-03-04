@@ -1,6 +1,5 @@
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
-
 import { findSpecFile } from "../utils/find-spec-file";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const SPEC_URI = "kaiord://docs/krd-format";
 

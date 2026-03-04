@@ -1,5 +1,5 @@
-import type { Logger, TextWriter } from "@kaiord/core";
 import { convertKRDToGarmin } from "./converters/krd-to-garmin.converter";
+import type { Logger, TextWriter } from "@kaiord/core";
 
 export const createGarminWriter =
   (logger: Logger): TextWriter =>

@@ -1,8 +1,8 @@
-import { durationTypeSchema, type Duration } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
-import { tcxDurationTypeSchema } from "../schemas/tcx-duration";
+import { durationTypeSchema } from "@kaiord/core";
 import { restoreKaiordDuration } from "./duration-kaiord-restorer";
 import { convertStandardTcxDuration } from "./duration-standard-converter";
+import { tcxDurationTypeSchema } from "../schemas/tcx-duration";
+import type { Duration, Logger } from "@kaiord/core";
 
 export type TcxDurationData = {
   durationType?: string;

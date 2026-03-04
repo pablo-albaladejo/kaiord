@@ -1,0 +1,149 @@
+name: Metrics Gate
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: metrics-gate-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
+jobs:
+  gate:
+    name: Quality Metrics Gate
+    runs-on: ubuntu-latest
+    if: github.actor != 'github-actions[bot]'
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm with caching
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Build all packages
+        run: pnpm -r build
+
+      - name: Collect current metrics
+        run: node .github/scripts/collect-metrics.js
+        env:
+          METRICS_OUTPUT: current
+
+      # On push to main: save metrics as cached baseline
+      - name: Cache main metrics
+        if: github.event_name == 'push'
+        uses: actions/cache/save@v4
+        with:
+          path: metrics-current.json
+          key: metrics-main-${{ github.sha }}
+
+      # On PR: restore cached main baseline
+      - name: Restore main baseline
+        if: github.event_name == 'pull_request'
+        id: cache
+        uses: actions/cache/restore@v4
+        with:
+          path: metrics-baseline.json
+          key: metrics-main-${{ github.event.pull_request.base.sha }}
+          restore-keys: metrics-main-
+
+      - name: Use current as baseline if no cache
+        if: github.event_name == 'pull_request' && steps.cache.outputs.cache-hit != 'true'
+        run: |
+          cp metrics-current.json metrics-baseline.json
+          echo "No cached baseline. Using current as baseline (first run)."
+
+      - name: Compare metrics
+        if: github.event_name == 'pull_request'
+        id: compare
+        run: node .github/scripts/compare-metrics.js metrics-baseline.json metrics-current.json
+
+      - name: Post metrics comment
+        if: github.event_name == 'pull_request'
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const fs = require('fs');
+            const current = JSON.parse(fs.readFileSync('metrics-current.json', 'utf8'));
+            const scoreBefore = '${{ steps.compare.outputs.score-before }}' || current.score;
+            const scoreAfter = '${{ steps.compare.outputs.score-after }}' || current.score;
+            const scoreDelta = '${{ steps.compare.outputs.score-delta }}' || '0';
+            const regressions = '${{ steps.compare.outputs.regressions }}' || '0';
+
+            const icon = regressions === '0' ? '✅' : '⚠️';
+
+            const body = `## ${icon} Quality Metrics Gate
+
+            | Metric | Value | Status |
+            |--------|-------|--------|
+            | **Score** | **${scoreAfter}/100** (${scoreDelta}) | ${parseFloat(scoreAfter) >= 80 ? '✅' : '⚠️'} |
+            | Lint | ${current.lint.warnings}w / ${current.lint.errors}e | ${current.lint.clean ? '✅' : '⚠️'} |
+            | TypeScript | ${current.typecheck.errors} errors | ${current.typecheck.clean ? '✅' : '❌'} |
+            | Tests | ${current.tests.passRate}% pass rate | ${current.tests.passRate === 100 ? '✅' : '❌'} |
+            | Coverage | ${current.coverage.average}% avg | ${current.coverage.average >= 80 ? '✅' : '⚠️'} |
+            | Build | ${current.build.success ? 'OK' : 'FAIL'} | ${current.build.success ? '✅' : '❌'} |
+
+            <details><summary>Per-package coverage</summary>
+
+            | Package | Coverage |
+            |---------|----------|
+            ${Object.entries(current.coverage.packages).map(([pkg, d]) =>
+              '| @kaiord/' + pkg + ' | ' + d.statements + '% |'
+            ).join('\n')}
+
+            </details>
+
+            _Metrics Gate • ${current.timestamp}_`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const botComment = comments.find(c =>
+              c.user.type === 'Bot' && c.body.includes('Quality Metrics Gate')
+            );
+
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body
+              });
+            }
+
+      - name: Check for regressions
+        if: github.event_name == 'pull_request'
+        run: |
+          REGRESSIONS="${{ steps.compare.outputs.regressions }}"
+          DELTA="${{ steps.compare.outputs.score-delta-numeric }}"
+          if [ "${REGRESSIONS:-0}" -gt 0 ]; then
+            echo "::warning::Per-metric regressions detected: ${{ steps.compare.outputs.regression-details }}"
+          fi
+          if [ -n "$DELTA" ] && [ "$(echo "$DELTA < -2" | bc -l 2>/dev/null || echo 0)" = "1" ]; then
+            echo "::error::Quality score regressed by ${DELTA} points"
+            exit 1
+          fi
+
+      - name: Upload metrics
+        if: always()
+        uses: actions/upload-artifact@v6
+        with:
+          name: metrics-${{ github.event_name }}-${{ github.sha }}
+          path: metrics-*.json
+          retention-days: 30

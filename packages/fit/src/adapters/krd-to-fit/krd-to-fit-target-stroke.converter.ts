@@ -1,6 +1,6 @@
 import { targetTypeSchema } from "@kaiord/core";
-import type { WorkoutStep } from "@kaiord/core";
 import { fitTargetTypeSchema } from "../schemas/fit-target";
+import type { WorkoutStep } from "@kaiord/core";
 
 /**
  * Converts KRD stroke_type target to FIT swimStroke target.

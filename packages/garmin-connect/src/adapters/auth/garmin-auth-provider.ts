@@ -1,10 +1,10 @@
-import type { AuthProvider, Logger, TokenStore } from "@kaiord/core";
 import { createConsoleLogger, createServiceAuthError } from "@kaiord/core";
-import type { GarminHttpClient } from "../http/garmin-http-client";
-import { createGarminHttpClient } from "../http/garmin-http-client";
 import { createCookieFetch } from "../http/cookie-fetch";
+import { createGarminHttpClient } from "../http/garmin-http-client";
 import { garminSso } from "../http/garmin-sso";
 import { garminTokensSchema } from "../schemas/garmin-token.schema";
+import type { GarminHttpClient } from "../http/garmin-http-client";
+import type { AuthProvider, Logger, TokenStore } from "@kaiord/core";
 
 export type GarminAuthProviderOptions = {
   logger?: Logger;

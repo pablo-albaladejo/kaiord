@@ -1,12 +1,12 @@
-import type { Logger } from "@kaiord/core";
 import { createServiceApiError } from "@kaiord/core";
+import { createTokenRefreshManager } from "./token-refresh";
 import type {
   FetchFn,
   GarminHttpClient,
   OAuth1Token,
   OAuth2Token,
 } from "./types";
-import { createTokenRefreshManager } from "./token-refresh";
+import type { Logger } from "@kaiord/core";
 
 export type { GarminHttpClient } from "./types";
 

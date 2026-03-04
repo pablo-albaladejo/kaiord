@@ -89,4 +89,47 @@ describe("createGarminWorkoutService", () => {
       expect.any(Object)
     );
   });
+
+  it("should throw a ServiceApiError when push fails", async () => {
+    const httpClient = createMockHttpClient();
+    vi.mocked(httpClient.post).mockRejectedValue(new Error("network error"));
+
+    const service = createGarminWorkoutService(httpClient, mockLogger);
+
+    const krd: KRD = {
+      version: "1.0",
+      type: "structured_workout",
+      metadata: {
+        created: "2025-01-15T10:00:00Z",
+        sport: "cycling",
+      },
+      extensions: {
+        structured_workout: {
+          sport: "cycling",
+          name: "Test Workout",
+          steps: [
+            {
+              stepIndex: 0,
+              durationType: "time",
+              duration: { type: "time", seconds: 300 },
+              targetType: "open",
+              target: { type: "open" },
+              intensity: "warmup",
+            },
+          ],
+        },
+      },
+    };
+
+    await expect(service.push(krd)).rejects.toThrow("Failed to push workout");
+  });
+
+  it("should throw a ServiceApiError when list fails", async () => {
+    const httpClient = createMockHttpClient();
+    vi.mocked(httpClient.get).mockRejectedValue(new Error("network error"));
+
+    const service = createGarminWorkoutService(httpClient, mockLogger);
+
+    await expect(service.list()).rejects.toThrow("Failed to list workouts");
+  });
 });

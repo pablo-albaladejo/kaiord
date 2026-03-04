@@ -1,7 +1,7 @@
 import { targetTypeSchema, type Target, type TargetType } from "@kaiord/core";
+import { convertFitTarget } from "./target.converter";
 import { fitTargetTypeSchema } from "../schemas/fit-target";
 import type { FitWorkoutStep } from "../shared/types";
-import { convertFitTarget } from "./target.converter";
 
 export const mapTarget = (step: FitWorkoutStep): Target => {
   return convertFitTarget(step);
