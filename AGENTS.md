@@ -11,6 +11,19 @@
 - **Typed API**: no implicit `any`
 - **Never relax rules**: If code violates a lint rule, coverage threshold, or quality standard — fix the code, never downgrade the rule. This applies to ALL code, including pre-existing violations not introduced by the current change. Use `pnpm lint:fix` for auto-fixable issues, manual refactoring for the rest.
 
+## Spec Awareness
+
+Before implementing any non-trivial feature or fix:
+
+1. **Check for active spec**: Look in `openspec/changes/` for a matching proposal
+2. **Read the spec**: If found, read `proposal.md`, `design.md`, and `tasks.md` before writing code
+3. **Read domain specs**: Reference `openspec/specs/` for architecture and format constraints
+4. **Implement in spec order**: Follow the hexagonal ordering in `tasks.md`
+5. **Update task checkboxes**: Mark `tasks.md` items `[x]` as work progresses
+6. **Do not diverge silently**: If the spec is wrong or incomplete, flag it — do not silently implement differently
+
+If no spec exists for a requested non-trivial change, create one with `/opsx:propose` before coding.
+
 ## Ports & adapters (example: FIT)
 
 - **Ports** (`ports/fit.ts`): `FitReader.readToKRD(buf)`, `FitWriter.writeFromKRD(krd)`
@@ -54,8 +67,10 @@ pnpm exec changeset                              # For version-worthy changes
 
 ## Contribution flow
 
-1. Implement domain/application/ports → adapters (hexagonal order)
-2. Add tests (unit + round‑trip)
+0. Check `openspec/changes/` for an active spec — if none, run `/opsx:propose`
+1. Implement domain/application/ports → adapters (hexagonal order, guided by `tasks.md`)
+2. Add tests (unit + round‑trip, verify against spec scenarios)
 3. Run: `pnpm -r build && pnpm -r test && pnpm lint:fix`
 4. Add changeset if version-worthy: `pnpm exec changeset`
 5. Update docs if public API changes
+6. After merge: `/opsx:archive` to preserve decisions

@@ -49,3 +49,6 @@ metrics/DASHBOARD.md
 .metrics/
 .jscpd-report/
 metrics-*.json
+
+# OpenSpec
+openspec/.cache/

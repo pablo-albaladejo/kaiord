@@ -152,12 +152,29 @@ import { createFitReader } from '@kaiord/fit';   // factory(logger?)
 
 ## Contribution Flow
 
-1. Create feature branch: `feature/my-feature`, `fix/my-fix`
-2. Implement following hexagonal architecture
-3. Add tests (follow AAA pattern)
-4. Run: `pnpm -r test && pnpm -r build && pnpm lint:fix`
-5. Add changeset: `pnpm exec changeset` (for features/fixes)
-6. Commit: `feat(scope): description` (conventional commits)
+1. **Spec phase** (for features and non-trivial fixes):
+   - `/opsx:explore` — investigate the area, understand constraints
+   - `/opsx:propose` — create proposal, specs, design, tasks in `openspec/changes/<slug>/`
+   - Review and iterate on the spec before writing any code
+2. Create feature branch: `feature/my-feature`, `fix/my-fix`
+3. Implement following spec tasks and hexagonal architecture (`/opsx:apply`)
+4. Add tests (follow AAA pattern, verify against spec scenarios)
+5. Verify spec compliance: `/opsx:verify`
+6. Run: `pnpm -r test && pnpm -r build && pnpm lint:fix`
+7. Add changeset: `pnpm exec changeset` (for features/fixes)
+8. Commit: `feat(scope): description` (conventional commits)
+9. After PR merge: `/opsx:archive` — move change to archive
+
+## OpenSpec Commands
+
+| Command | Purpose |
+|---|---|
+| `/opsx:explore` | Investigate a feature area before proposing |
+| `/opsx:propose` | Create proposal + specs + design + tasks |
+| `/opsx:apply` | Implement guided by active spec |
+| `/opsx:verify` | Verify implementation against spec scenarios |
+| `/opsx:archive` | Archive completed change after merge |
+| `/opsx:sync` | Update domain specs after refactors |
 
 ## Adding a New Package
 
@@ -172,5 +189,8 @@ When adding a new publishable package to the monorepo, update these CI/CD files:
 ## Key References
 
 - `AGENTS.md` - Strict AI guidance (non-negotiables)
+- `openspec/config.yaml` - Project constraints for AI planning
+- `openspec/specs/` - Domain specs (architecture, KRD format, adapter contracts)
+- `openspec/changes/` - Active feature specs and proposals
 - `docs/` - Architecture docs, code style, testing strategies
 - `docs/krd-format.md` - KRD format specification

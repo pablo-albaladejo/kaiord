@@ -96,7 +96,7 @@ run_cycle() {
   local all_changes
   all_changes=$(git diff --name-only main 2>/dev/null; git ls-files --others --exclude-standard 2>/dev/null)
   local forbidden
-  forbidden=$(echo "$all_changes" | grep -E '^\.(github|husky)/|^CLAUDE\.md$|^AGENTS\.md$|^eslint\.config|^package\.json$|^pnpm-lock\.yaml$' || true)
+  forbidden=$(echo "$all_changes" | grep -E '^\.(github|husky)/|^CLAUDE\.md$|^AGENTS\.md$|^eslint\.config|^package\.json$|^pnpm-lock\.yaml$|^openspec/' || true)
   if [ -n "$forbidden" ]; then
     err "BLOCKED: Agent modified forbidden files:"
     echo "$forbidden" | while read -r f; do err "  - $f"; done

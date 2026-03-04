@@ -1,10 +1,11 @@
 You are improving the Kaiord monorepo. Read CLAUDE.md and AGENTS.md for standards.
+Read `openspec/config.yaml` for project constraints and `openspec/specs/` for domain rules.
 
 Scope: deps - Audit dependencies for security issues and report findings.
 
 Rules:
 
-- You MUST NOT modify files in .github/, .husky/, .claude/, or scripts/
+- You MUST NOT modify files in .github/, .husky/, .claude/, scripts/, or openspec/
 - You MUST NOT modify CLAUDE.md, AGENTS.md, eslint.config.js, or root package.json
 - You MUST NOT add or remove dependencies (only report findings)
 - You MUST NOT delete test files
