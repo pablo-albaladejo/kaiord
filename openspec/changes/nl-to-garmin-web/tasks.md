@@ -43,17 +43,17 @@
 
 ## 5. SPA: AI Workout Generation UI
 
-- [ ] 5.1 Create `AiWorkoutInput` component — textarea + sport selector + model dropdown + "Generate" button
-- [ ] 5.2 Model dropdown: lists all configured providers with labels, defaults to user's default provider
-- [ ] 5.3 Add custom prompt field (optional, collapsible) — "Additional instructions for the AI"
-- [ ] 5.4 Inject training zones from `profile-store` into LLM prompt context
-- [ ] 5.5 Create provider factory: given a provider config, return a `LanguageModel` instance (Anthropic/OpenAI/Google)
-- [ ] 5.6 Wire up `createTextToWorkout()` from `@kaiord/ai` with the selected browser model
-- [ ] 5.7 Display loading state during generation (streaming if possible)
-- [ ] 5.8 On success: load generated workout into existing workout editor via `workout-store.loadWorkout()`
-- [ ] 5.9 On error: show error message with retry option
-- [ ] 5.10 Handle no providers configured: redirect to settings
-- [ ] 5.11 Test AI input component: renders, model dropdown, validates, handles loading/error states
+- [x] 5.1 Create `AiWorkoutInput` component — textarea + sport selector + model dropdown + "Generate" button
+- [x] 5.2 Model dropdown: lists all configured providers with labels, defaults to user's default provider
+- [x] 5.3 Add custom prompt field (optional, collapsible) — "Additional instructions for the AI"
+- [x] 5.4 Inject training zones from `profile-store` into LLM prompt context
+- [x] 5.5 Create provider factory: given a provider config, return a `LanguageModel` instance (Anthropic/OpenAI/Google)
+- [x] 5.6 Wire up `createTextToWorkout()` from `@kaiord/ai` with the selected browser model
+- [x] 5.7 Display loading state during generation (streaming if possible)
+- [x] 5.8 On success: load generated workout into existing workout editor via `workout-store.loadWorkout()`
+- [x] 5.9 On error: show error message with retry option
+- [x] 5.10 Handle no providers configured: redirect to settings
+- [x] 5.11 Test AI input component: renders, model dropdown, validates, handles loading/error states
 - [ ] 5.12 Test provider factory: creates correct LanguageModel for each provider type
 
 ## 6. SPA: Garmin Push UI
@@ -69,10 +69,10 @@
 
 ## 7. SPA: New Dependencies
 
-- [ ] 7.1 Add `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/google` to SPA dependencies
-- [ ] 7.2 Add `@kaiord/ai` to SPA dependencies
-- [ ] 7.3 Verify bundle size impact — lazy-load AI provider modules per-provider
-- [ ] 7.4 Verify browser compatibility of all three providers (Vercel AI SDK in browser)
+- [x] 7.1 Add `@ai-sdk/anthropic`, `@ai-sdk/openai`, `@ai-sdk/google` to SPA dependencies
+- [x] 7.2 Add `@kaiord/ai` to SPA dependencies
+- [x] 7.3 Verify bundle size impact — lazy-load AI provider modules per-provider
+- [x] 7.4 Verify browser compatibility of all three providers (Vercel AI SDK in browser)
 
 ## 8. SPA: E2E Tests (Playwright)
 
