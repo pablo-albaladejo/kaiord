@@ -48,9 +48,6 @@ const RUNNING_WORKOUT: Workout = {
 
 vi.mock("ai", () => ({
   generateText: vi.fn(),
-  Output: {
-    object: vi.fn(({ schema }: { schema: unknown }) => ({ schema })),
-  },
 }));
 
 const mockGenerateText = vi.mocked((await import("ai")).generateText);
@@ -66,7 +63,7 @@ describe("createTextToWorkout", () => {
 
   it("parses running workout from natural language", async () => {
     mockGenerateText.mockResolvedValueOnce({
-      output: RUNNING_WORKOUT,
+      text: JSON.stringify(RUNNING_WORKOUT),
     } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
@@ -79,7 +76,7 @@ describe("createTextToWorkout", () => {
 
   it("passes sport hint to system prompt", async () => {
     mockGenerateText.mockResolvedValueOnce({
-      output: RUNNING_WORKOUT,
+      text: JSON.stringify(RUNNING_WORKOUT),
     } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
@@ -94,7 +91,7 @@ describe("createTextToWorkout", () => {
 
   it("applies name override as post-processing", async () => {
     mockGenerateText.mockResolvedValueOnce({
-      output: { ...RUNNING_WORKOUT, name: "LLM Name" },
+      text: JSON.stringify({ ...RUNNING_WORKOUT, name: "LLM Name" }),
     } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
@@ -106,7 +103,7 @@ describe("createTextToWorkout", () => {
   it("retries on first failure and succeeds on second attempt", async () => {
     mockGenerateText
       .mockRejectedValueOnce(new Error("Schema validation failed"))
-      .mockResolvedValueOnce({ output: RUNNING_WORKOUT } as never);
+      .mockResolvedValueOnce({ text: JSON.stringify(RUNNING_WORKOUT) } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
     const result = await parse("4x(8' a 5'15\")");
@@ -118,7 +115,7 @@ describe("createTextToWorkout", () => {
   it("includes error feedback in retry prompt", async () => {
     mockGenerateText
       .mockRejectedValueOnce(new Error("Invalid duration"))
-      .mockResolvedValueOnce({ output: RUNNING_WORKOUT } as never);
+      .mockResolvedValueOnce({ text: JSON.stringify(RUNNING_WORKOUT) } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
     await parse("test workout");
@@ -140,7 +137,7 @@ describe("createTextToWorkout", () => {
   });
 
   it("throws AiParsingError when output is null", async () => {
-    mockGenerateText.mockResolvedValue({ output: null } as never);
+    mockGenerateText.mockResolvedValue({ text: "" } as never);
     const parse = createTextToWorkout({ model: mockModel, maxRetries: 0 });
 
     await expect(parse("test")).rejects.toThrow(AiParsingError);
@@ -167,7 +164,7 @@ describe("createTextToWorkout", () => {
       ],
     };
     mockGenerateText.mockResolvedValueOnce({
-      output: badIndices,
+      text: JSON.stringify(badIndices),
     } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
@@ -186,7 +183,7 @@ describe("createTextToWorkout", () => {
     };
     mockGenerateText
       .mockRejectedValueOnce(new Error("fail"))
-      .mockResolvedValueOnce({ output: RUNNING_WORKOUT } as never);
+      .mockResolvedValueOnce({ text: JSON.stringify(RUNNING_WORKOUT) } as never);
 
     const parse = createTextToWorkout({ model: mockModel, logger });
     await parse("test");
@@ -208,7 +205,7 @@ describe("createTextToWorkout", () => {
 
   it("preserves LLM name when options has no name override", async () => {
     mockGenerateText.mockResolvedValueOnce({
-      output: { ...RUNNING_WORKOUT, name: "LLM Name" },
+      text: JSON.stringify({ ...RUNNING_WORKOUT, name: "LLM Name" }),
     } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
@@ -236,7 +233,7 @@ describe("createTextToWorkout", () => {
 
   it("passes default config values to generateText", async () => {
     mockGenerateText.mockResolvedValueOnce({
-      output: RUNNING_WORKOUT,
+      text: JSON.stringify(RUNNING_WORKOUT),
     } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
@@ -254,7 +251,7 @@ describe("createTextToWorkout", () => {
   it("handles non-Error thrown values in catch", async () => {
     mockGenerateText
       .mockRejectedValueOnce("plain string error")
-      .mockResolvedValueOnce({ output: RUNNING_WORKOUT } as never);
+      .mockResolvedValueOnce({ text: JSON.stringify(RUNNING_WORKOUT) } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
     const result = await parse("test");

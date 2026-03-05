@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
-import { AiWorkoutInputEmpty } from "./AiWorkoutInputEmpty";
 import { AiWorkoutForm } from "./AiWorkoutForm";
+import { AiWorkoutInputEmpty } from "./AiWorkoutInputEmpty";
 import { useAiStore } from "../../../store/ai-store";
 
 type AiWorkoutInputProps = {

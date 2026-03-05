@@ -1,4 +1,4 @@
-import { generateText, Output } from "ai";
+import { generateText } from "ai";
 import type { Workout } from "@kaiord/core";
 import { workoutSchema, sportSchema } from "@kaiord/core";
 import type { TextToWorkoutConfig, TextToWorkoutOptions } from "../types";
@@ -9,6 +9,14 @@ import { loadPrompt } from "../prompts/load-prompt";
 import systemPromptRaw from "../prompts/parse-workout.md";
 
 const MAX_ERROR_LENGTH = 200;
+
+const extractJson = (text: string): string => {
+  const fenced = text.match(/```(?:json)?\s*\n?([\s\S]*?)```/);
+  if (fenced) return fenced[1].trim();
+  const braceMatch = text.match(/\{[\s\S]*\}/);
+  if (braceMatch) return braceMatch[0];
+  return text.trim();
+};
 
 const truncate = (text: string, max: number): string =>
   text.length > max ? `${text.slice(0, max)}...` : text;
@@ -42,17 +50,19 @@ const executeWithRetry = async (
 
       const result = await generateText({
         model,
-        output: Output.object({ schema: workoutSchema }),
-        system,
+        system: `${system}\n\nRespond ONLY with valid JSON matching the Workout schema. No markdown, no explanation.`,
         prompt,
         maxOutputTokens,
         temperature,
       });
 
-      if (!result.output) throw new Error("No structured output generated");
+      if (!result.text) throw new Error("No output generated");
 
-      logger?.debug("LLM raw output", { output: result.output });
-      return reindexSteps(result.output);
+      const json = extractJson(result.text);
+      const parsed = workoutSchema.parse(JSON.parse(json));
+
+      logger?.debug("LLM raw output", { output: parsed });
+      return reindexSteps(parsed);
     } catch (error) {
       lastError = error instanceof Error ? error.message : String(error);
       logger?.warn("Parse attempt failed", { attempt, error: lastError });
