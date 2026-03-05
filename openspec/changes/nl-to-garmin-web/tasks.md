@@ -18,10 +18,10 @@
 
 ## 2. SPA: Encrypted Credential Storage
 
-- [ ] 2.1 Create `packages/workout-spa-editor/src/lib/crypto.ts` — AES-GCM encrypt/decrypt with Web Crypto API
-- [ ] 2.2 Create `packages/workout-spa-editor/src/lib/secure-storage.ts` — encrypted localStorage wrapper
-- [ ] 2.3 Test crypto module: encrypt/decrypt round-trip, wrong passphrase fails
-- [ ] 2.4 Test secure-storage: store/retrieve/delete, encryption at rest
+- [x] 2.1 Create `packages/workout-spa-editor/src/lib/crypto.ts` — AES-GCM encrypt/decrypt with Web Crypto API
+- [x] 2.2 Create `packages/workout-spa-editor/src/lib/secure-storage.ts` — encrypted localStorage wrapper
+- [x] 2.3 Test crypto module: encrypt/decrypt round-trip, wrong passphrase fails
+- [x] 2.4 Test secure-storage: store/retrieve/delete, encryption at rest
 
 ## 3. SPA: Zustand Stores
 
