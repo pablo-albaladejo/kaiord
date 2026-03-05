@@ -1,9 +1,9 @@
-import { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
-import { TabButton } from "./TabButton";
+import { useState } from "react";
 import { AiTab } from "./AiTab";
 import { GarminTab } from "./GarminTab";
 import { PrivacyTab } from "./PrivacyTab";
+import { TabButton } from "./TabButton";
 import type { SettingsPanelProps, SettingsTab } from "./types";
 
 const TABS: Array<{ id: SettingsTab; label: string }> = [

@@ -1,7 +1,7 @@
-import { Button } from "../../atoms/Button";
 import { createSecureStorage } from "../../../lib/secure-storage";
 import { useAiStore } from "../../../store/ai-store";
 import { useGarminStore } from "../../../store/garmin-store";
+import { Button } from "../../atoms/Button";
 
 export const PrivacyTab: React.FC = () => {
   const clearAi = () => useAiStore.setState({ providers: [] });
@@ -20,9 +20,7 @@ export const PrivacyTab: React.FC = () => {
           Privacy Information
         </h3>
         <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-          <li>
-            We do not store your credentials on any server.
-          </li>
+          <li>We do not store your credentials on any server.</li>
           <li>
             Garmin credentials are sent to the Lambda proxy only for the
             duration of the push request.

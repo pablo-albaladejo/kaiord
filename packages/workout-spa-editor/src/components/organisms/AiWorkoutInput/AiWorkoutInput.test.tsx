@@ -16,9 +16,7 @@ describe("AiWorkoutInput", () => {
   it("should show settings prompt when no providers configured", () => {
     render(<AiWorkoutInput onSettingsClick={vi.fn()} />);
 
-    expect(
-      screen.getByText(/Configure an AI provider/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Configure an AI provider/)).toBeInTheDocument();
     expect(screen.getByText("Open Settings")).toBeInTheDocument();
   });
 

@@ -1,30 +1,11 @@
-import { lazy, Suspense } from "react";
 import { HeaderLogo } from "./components/HeaderLogo";
 import { HeaderNav } from "./components/HeaderNav";
+import { LayoutHeaderDialogs } from "./components/LayoutHeaderDialogs";
 import { useLazyDialog } from "../../../hooks/use-lazy-dialog";
 import { useLibraryStore } from "../../../store/library-store";
 import { useProfileStore } from "../../../store/profile-store";
 import { useSettingsDialogStore } from "../../../store/settings-dialog-store";
 import { useWorkoutStore } from "../../../store/workout-store";
-
-const ProfileManager = lazy(() =>
-  import("../../organisms/ProfileManager/ProfileManager").then((m) => ({
-    default: m.ProfileManager,
-  }))
-);
-const WorkoutLibrary = lazy(() =>
-  import("../../organisms/WorkoutLibrary/WorkoutLibrary").then((m) => ({
-    default: m.WorkoutLibrary,
-  }))
-);
-const HelpDialog = lazy(() =>
-  import("./components/HelpDialog").then((m) => ({ default: m.HelpDialog }))
-);
-const SettingsPanel = lazy(() =>
-  import("../../organisms/SettingsPanel/SettingsPanel").then((m) => ({
-    default: m.SettingsPanel,
-  }))
-);
 
 type LayoutHeaderProps = {
   onReplayTutorial?: () => void;
@@ -55,44 +36,16 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
           onSettingsClick={settingsShow}
         />
       </div>
-
-      <Suspense fallback={null}>
-        {profile.mounted && (
-          <ProfileManager open={profile.open} onOpenChange={profile.setOpen} />
-        )}
-      </Suspense>
-
-      <Suspense fallback={null}>
-        {library.mounted && (
-          <WorkoutLibrary
-            open={library.open}
-            onOpenChange={library.setOpen}
-            onLoadWorkout={(template) => {
-              loadWorkout(template.krd);
-            }}
-            hasCurrentWorkout={currentWorkout !== null}
-          />
-        )}
-      </Suspense>
-
-      <Suspense fallback={null}>
-        {help.mounted && (
-          <HelpDialog
-            open={help.open}
-            onOpenChange={help.setOpen}
-            onReplayTutorial={onReplayTutorial}
-          />
-        )}
-      </Suspense>
-
-      <Suspense fallback={null}>
-        {settingsOpen && (
-          <SettingsPanel
-            open={settingsOpen}
-            onOpenChange={(open) => { if (!open) settingsHide(); }}
-          />
-        )}
-      </Suspense>
+      <LayoutHeaderDialogs
+        profile={profile}
+        library={library}
+        help={help}
+        settingsOpen={settingsOpen}
+        settingsHide={settingsHide}
+        onReplayTutorial={onReplayTutorial}
+        onLoadWorkout={(template) => loadWorkout(template.krd)}
+        hasCurrentWorkout={currentWorkout !== null}
+      />
     </header>
   );
 };

@@ -27,8 +27,7 @@ export const useGarminStore = create<GarminStore>((set, get) => ({
   lambdaUrl: DEFAULT_LAMBDA_URL,
   push: { status: "idle" },
 
-  setCredentials: (username, password) =>
-    set({ username, password }),
+  setCredentials: (username, password) => set({ username, password }),
 
   setLambdaUrl: (url) => set({ lambdaUrl: url }),
 

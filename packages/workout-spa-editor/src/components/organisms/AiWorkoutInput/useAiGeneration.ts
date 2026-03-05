@@ -1,14 +1,13 @@
 import { useCallback } from "react";
-import type { Sport } from "@kaiord/core";
+import { formatZonesContext } from "./zones-formatter";
+import { generateWorkoutKrd } from "../../../lib/generate-workout";
 import { useAiStore } from "../../../store/ai-store";
 import { useProfileStore } from "../../../store/profile-store";
 import { useWorkoutStore } from "../../../store/workout-store";
-import { generateWorkoutKrd } from "../../../lib/generate-workout";
-import { formatZonesContext } from "./zones-formatter";
+import type { Sport } from "@kaiord/core";
 
 export const useAiGeneration = () => {
-  const { getSelectedProvider, customPrompt, setGeneration } =
-    useAiStore();
+  const { getSelectedProvider, customPrompt, setGeneration } = useAiStore();
   const { getActiveProfile } = useProfileStore();
   const { loadWorkout } = useWorkoutStore();
 
@@ -21,9 +20,7 @@ export const useAiGeneration = () => {
 
       try {
         const profile = getActiveProfile();
-        const zonesContext = profile
-          ? formatZonesContext(profile)
-          : undefined;
+        const zonesContext = profile ? formatZonesContext(profile) : undefined;
 
         const krd = await generateWorkoutKrd({
           text,
@@ -41,7 +38,13 @@ export const useAiGeneration = () => {
         setGeneration({ status: "error", message });
       }
     },
-    [getSelectedProvider, customPrompt, setGeneration, getActiveProfile, loadWorkout]
+    [
+      getSelectedProvider,
+      customPrompt,
+      setGeneration,
+      getActiveProfile,
+      loadWorkout,
+    ]
   );
 
   return { generate };

@@ -1,10 +1,16 @@
-import { Input } from "../../atoms/Input";
-import { Button } from "../../atoms/Button";
 import { useGarminStore } from "../../../store/garmin-store";
+import { Button } from "../../atoms/Button";
+import { Input } from "../../atoms/Input";
 
 export const GarminTab: React.FC = () => {
-  const { username, password, lambdaUrl, setCredentials, setLambdaUrl, resetLambdaUrl } =
-    useGarminStore();
+  const {
+    username,
+    password,
+    lambdaUrl,
+    setCredentials,
+    setLambdaUrl,
+    resetLambdaUrl,
+  } = useGarminStore();
 
   return (
     <div className="space-y-6">

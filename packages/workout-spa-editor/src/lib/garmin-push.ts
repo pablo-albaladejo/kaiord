@@ -21,9 +21,7 @@ export const pushToGarminLambda = async (
     body: JSON.stringify(request),
   });
 
-  const data = (await res.json()) as
-    | GarminPushResponse
-    | { error: string };
+  const data = (await res.json()) as GarminPushResponse | { error: string };
 
   if (!res.ok) {
     const error = "error" in data ? data.error : `HTTP ${res.status}`;

@@ -1,8 +1,7 @@
 import { useAiStore } from "../../../store/ai-store";
 
 export const ModelSelector: React.FC = () => {
-  const { providers, selectedProviderId, selectForGeneration } =
-    useAiStore();
+  const { providers, selectedProviderId, selectForGeneration } = useAiStore();
 
   if (providers.length === 0) return null;
 

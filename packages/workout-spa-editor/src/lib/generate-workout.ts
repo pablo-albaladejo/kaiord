@@ -1,8 +1,8 @@
 import { createTextToWorkout } from "@kaiord/ai";
 import { createWorkoutKRD } from "@kaiord/core";
-import type { KRD, Sport } from "@kaiord/core";
-import type { LlmProviderConfig } from "../store/ai-store";
 import { createLanguageModel } from "./provider-factory";
+import type { LlmProviderConfig } from "../store/ai-store";
+import type { KRD, Sport } from "@kaiord/core";
 
 export type GenerateWorkoutOptions = {
   text: string;
@@ -33,9 +33,7 @@ const buildPrompt = (options: GenerateWorkoutOptions): string => {
     parts.push(`\nTraining zones:\n${options.zonesContext}`);
   }
   if (options.customPrompt) {
-    parts.push(
-      `\nAdditional instructions:\n${options.customPrompt}`
-    );
+    parts.push(`\nAdditional instructions:\n${options.customPrompt}`);
   }
 
   return parts.join("");

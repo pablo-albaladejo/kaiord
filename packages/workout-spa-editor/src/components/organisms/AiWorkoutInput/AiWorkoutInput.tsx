@@ -1,17 +1,11 @@
 import { useState } from "react";
-import type { Sport } from "@kaiord/core";
-import { Button } from "../../atoms/Button";
-import { useAiStore } from "../../../store/ai-store";
+import { AiWorkoutInputEmpty } from "./AiWorkoutInputEmpty";
 import { ModelSelector } from "./ModelSelector";
+import { SportSelect } from "./SportSelect";
 import { useAiGeneration } from "./useAiGeneration";
-
-const SPORT_OPTIONS = [
-  { value: "", label: "Auto-detect" },
-  { value: "cycling", label: "Cycling" },
-  { value: "running", label: "Running" },
-  { value: "swimming", label: "Swimming" },
-  { value: "generic", label: "Generic" },
-];
+import { useAiStore } from "../../../store/ai-store";
+import { Button } from "../../atoms/Button";
+import type { Sport } from "@kaiord/core";
 
 type AiWorkoutInputProps = {
   onSettingsClick: () => void;
@@ -33,16 +27,7 @@ export const AiWorkoutInput: React.FC<AiWorkoutInputProps> = ({
   };
 
   if (!hasProviders) {
-    return (
-      <div className="rounded-lg border border-dashed border-gray-300 p-6 text-center dark:border-gray-600">
-        <p className="mb-3 text-sm text-gray-500 dark:text-gray-400">
-          Configure an AI provider to generate workouts from text.
-        </p>
-        <Button size="sm" onClick={onSettingsClick}>
-          Open Settings
-        </Button>
-      </div>
-    );
+    return <AiWorkoutInputEmpty onSettingsClick={onSettingsClick} />;
   }
 
   return (
@@ -57,22 +42,7 @@ export const AiWorkoutInput: React.FC<AiWorkoutInputProps> = ({
         disabled={isLoading}
       />
       <div className="flex items-end gap-3">
-        <div className="w-full">
-          <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-            Sport
-          </label>
-          <select
-            className="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-            value={sport}
-            onChange={(e) => setSport(e.target.value)}
-          >
-            {SPORT_OPTIONS.map((o) => (
-              <option key={o.value} value={o.value}>
-                {o.label}
-              </option>
-            ))}
-          </select>
-        </div>
+        <SportSelect value={sport} onChange={setSport} />
         <ModelSelector />
         <Button
           onClick={handleGenerate}

@@ -1,42 +1,11 @@
 import { create } from "zustand";
+import type { AiStore } from "./ai-store-types";
 
-export type LlmProviderType = "anthropic" | "openai" | "google";
-
-export type LlmProviderConfig = {
-  id: string;
-  type: LlmProviderType;
-  apiKey: string;
-  model: string;
-  label: string;
-  isDefault: boolean;
-};
-
-type GenerationState =
-  | { status: "idle" }
-  | { status: "loading" }
-  | { status: "error"; message: string }
-  | { status: "success" };
-
-export type AiStore = {
-  providers: Array<LlmProviderConfig>;
-  customPrompt: string;
-  selectedProviderId: string | null;
-  generation: GenerationState;
-  addProvider: (
-    config: Omit<LlmProviderConfig, "id" | "isDefault">
-  ) => string;
-  removeProvider: (id: string) => void;
-  updateProvider: (
-    id: string,
-    updates: Partial<Omit<LlmProviderConfig, "id">>
-  ) => void;
-  setDefault: (id: string) => void;
-  selectForGeneration: (id: string | null) => void;
-  setCustomPrompt: (prompt: string) => void;
-  setGeneration: (state: GenerationState) => void;
-  getSelectedProvider: () => LlmProviderConfig | null;
-  getDefaultProvider: () => LlmProviderConfig | null;
-};
+export type {
+  LlmProviderType,
+  LlmProviderConfig,
+  AiStore,
+} from "./ai-store-types";
 
 const generateId = (): string =>
   `llm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
@@ -51,10 +20,7 @@ export const useAiStore = create<AiStore>((set, get) => ({
     const id = generateId();
     const isFirst = get().providers.length === 0;
     set((s) => ({
-      providers: [
-        ...s.providers,
-        { ...config, id, isDefault: isFirst },
-      ],
+      providers: [...s.providers, { ...config, id, isDefault: isFirst }],
       selectedProviderId: isFirst ? id : s.selectedProviderId,
     }));
     return id;
@@ -64,8 +30,7 @@ export const useAiStore = create<AiStore>((set, get) => ({
     set((s) => {
       const remaining = s.providers.filter((p) => p.id !== id);
       const needsNewDefault =
-        s.providers.find((p) => p.id === id)?.isDefault &&
-        remaining.length > 0;
+        s.providers.find((p) => p.id === id)?.isDefault && remaining.length > 0;
       if (needsNewDefault) remaining[0].isDefault = true;
       return {
         providers: remaining,
@@ -106,6 +71,5 @@ export const useAiStore = create<AiStore>((set, get) => ({
     );
   },
 
-  getDefaultProvider: () =>
-    get().providers.find((p) => p.isDefault) ?? null,
+  getDefaultProvider: () => get().providers.find((p) => p.isDefault) ?? null,
 }));

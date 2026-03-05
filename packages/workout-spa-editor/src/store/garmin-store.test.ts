@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useGarminStore } from "./garmin-store";
 
-const resetStore = () => useGarminStore.setState({
-  username: "",
-  password: "",
-  lambdaUrl: "https://api.kaiord.com/push",
-  push: { status: "idle" },
-});
+const resetStore = () =>
+  useGarminStore.setState({
+    username: "",
+    password: "",
+    lambdaUrl: "https://api.kaiord.com/push",
+    push: { status: "idle" },
+  });
 
 describe("garmin-store", () => {
   beforeEach(() => resetStore());

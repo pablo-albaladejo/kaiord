@@ -1,12 +1,13 @@
 import { describe, it, expect, beforeEach } from "vitest";
 import { useAiStore } from "./ai-store";
 
-const resetStore = () => useAiStore.setState({
-  providers: [],
-  customPrompt: "",
-  selectedProviderId: null,
-  generation: { status: "idle" },
-});
+const resetStore = () =>
+  useAiStore.setState({
+    providers: [],
+    customPrompt: "",
+    selectedProviderId: null,
+    generation: { status: "idle" },
+  });
 
 describe("ai-store", () => {
   beforeEach(() => resetStore());
@@ -33,10 +34,16 @@ describe("ai-store", () => {
   it("should not set second provider as default", () => {
     const store = useAiStore.getState();
     store.addProvider({
-      type: "anthropic", apiKey: "k1", model: "m1", label: "L1",
+      type: "anthropic",
+      apiKey: "k1",
+      model: "m1",
+      label: "L1",
     });
     store.addProvider({
-      type: "openai", apiKey: "k2", model: "m2", label: "L2",
+      type: "openai",
+      apiKey: "k2",
+      model: "m2",
+      label: "L2",
     });
 
     const { providers } = useAiStore.getState();
@@ -47,10 +54,16 @@ describe("ai-store", () => {
   it("should remove a provider and reassign default", () => {
     const store = useAiStore.getState();
     const id1 = store.addProvider({
-      type: "anthropic", apiKey: "k1", model: "m1", label: "L1",
+      type: "anthropic",
+      apiKey: "k1",
+      model: "m1",
+      label: "L1",
     });
     store.addProvider({
-      type: "openai", apiKey: "k2", model: "m2", label: "L2",
+      type: "openai",
+      apiKey: "k2",
+      model: "m2",
+      label: "L2",
     });
 
     useAiStore.getState().removeProvider(id1);
@@ -62,7 +75,10 @@ describe("ai-store", () => {
 
   it("should update a provider", () => {
     const id = useAiStore.getState().addProvider({
-      type: "anthropic", apiKey: "k1", model: "old", label: "L1",
+      type: "anthropic",
+      apiKey: "k1",
+      model: "old",
+      label: "L1",
     });
 
     useAiStore.getState().updateProvider(id, { model: "new-model" });
@@ -73,10 +89,16 @@ describe("ai-store", () => {
   it("should change default provider", () => {
     const store = useAiStore.getState();
     store.addProvider({
-      type: "anthropic", apiKey: "k1", model: "m1", label: "L1",
+      type: "anthropic",
+      apiKey: "k1",
+      model: "m1",
+      label: "L1",
     });
     const id2 = store.addProvider({
-      type: "openai", apiKey: "k2", model: "m2", label: "L2",
+      type: "openai",
+      apiKey: "k2",
+      model: "m2",
+      label: "L2",
     });
 
     useAiStore.getState().setDefault(id2);
@@ -88,7 +110,10 @@ describe("ai-store", () => {
 
   it("should select provider for generation", () => {
     const id = useAiStore.getState().addProvider({
-      type: "google", apiKey: "k1", model: "m1", label: "L1",
+      type: "google",
+      apiKey: "k1",
+      model: "m1",
+      label: "L1",
     });
 
     useAiStore.getState().selectForGeneration(id);
@@ -99,7 +124,10 @@ describe("ai-store", () => {
   it("should get selected provider (falls back to default)", () => {
     const store = useAiStore.getState();
     store.addProvider({
-      type: "anthropic", apiKey: "k1", model: "m1", label: "Claude",
+      type: "anthropic",
+      apiKey: "k1",
+      model: "m1",
+      label: "Claude",
     });
 
     const selected = useAiStore.getState().getSelectedProvider();

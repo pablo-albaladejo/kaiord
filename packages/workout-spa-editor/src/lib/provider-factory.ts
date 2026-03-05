@@ -1,8 +1,8 @@
 import { createAnthropic } from "@ai-sdk/anthropic";
-import { createOpenAI } from "@ai-sdk/openai";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
-import type { LanguageModel } from "ai";
+import { createOpenAI } from "@ai-sdk/openai";
 import type { LlmProviderConfig } from "../store/ai-store";
+import type { LanguageModel } from "ai";
 
 export const createLanguageModel = (
   config: LlmProviderConfig

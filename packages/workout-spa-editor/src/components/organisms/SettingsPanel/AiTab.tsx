@@ -1,10 +1,16 @@
-import { useAiStore } from "../../../store/ai-store";
-import { ProviderList } from "./ProviderList";
 import { ProviderForm } from "./ProviderForm";
+import { ProviderList } from "./ProviderList";
+import { useAiStore } from "../../../store/ai-store";
 
 export const AiTab: React.FC = () => {
-  const { providers, customPrompt, addProvider, removeProvider, setDefault, setCustomPrompt } =
-    useAiStore();
+  const {
+    providers,
+    customPrompt,
+    addProvider,
+    removeProvider,
+    setDefault,
+    setCustomPrompt,
+  } = useAiStore();
 
   return (
     <div className="space-y-6">

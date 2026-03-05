@@ -40,9 +40,7 @@ describe("GarminPushButton", () => {
 
     render(<GarminPushButton />);
 
-    expect(
-      screen.getByText("Open in Garmin Connect")
-    ).toBeInTheDocument();
+    expect(screen.getByText("Open in Garmin Connect")).toBeInTheDocument();
   });
 
   it("should show error message on push failure", () => {

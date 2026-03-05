@@ -1,8 +1,8 @@
 import { Upload } from "lucide-react";
-import { Button } from "../../atoms/Button";
+import { useGarminPush } from "./useGarminPush";
 import { useGarminStore } from "../../../store/garmin-store";
 import { useSettingsDialogStore } from "../../../store/settings-dialog-store";
-import { useGarminPush } from "./useGarminPush";
+import { Button } from "../../atoms/Button";
 
 export const GarminPushButton: React.FC = () => {
   const onSettingsClick = useSettingsDialogStore((s) => s.show);

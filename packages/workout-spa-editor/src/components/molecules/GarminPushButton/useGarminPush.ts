@@ -1,7 +1,7 @@
 import { useCallback } from "react";
+import { pushToGarminLambda } from "../../../lib/garmin-push";
 import { useGarminStore } from "../../../store/garmin-store";
 import { useWorkoutStore } from "../../../store/workout-store";
-import { pushToGarminLambda } from "../../../lib/garmin-push";
 
 export const useGarminPush = () => {
   const { username, password, lambdaUrl, setPush, hasCredentials } =
@@ -25,8 +25,7 @@ export const useGarminPush = () => {
         url: result.url,
       });
     } catch (error: unknown) {
-      const message =
-        error instanceof Error ? error.message : "Push failed";
+      const message = error instanceof Error ? error.message : "Push failed";
       setPush({ status: "error", message });
     }
   }, [currentWorkout, username, password, lambdaUrl, setPush, hasCredentials]);

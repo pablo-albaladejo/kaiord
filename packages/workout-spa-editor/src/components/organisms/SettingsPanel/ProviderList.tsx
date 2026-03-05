@@ -54,11 +54,7 @@ export const ProviderList: React.FC<ProviderListProps> = ({
                 Set Default
               </Button>
             )}
-            <Button
-              size="sm"
-              variant="danger"
-              onClick={() => onRemove(p.id)}
-            >
+            <Button size="sm" variant="danger" onClick={() => onRemove(p.id)}>
               Remove
             </Button>
           </div>
