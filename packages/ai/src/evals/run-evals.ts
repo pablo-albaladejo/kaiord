@@ -56,7 +56,9 @@ const runEvals = async () => {
   console.log("\n" + formatReport(report));
 
   const fs = await import("fs");
-  const outPath = `eval-report-${Date.now()}.json`;
+  const path = await import("path");
+  const packageDir = path.join(import.meta.dirname, "..", "..");
+  const outPath = path.join(packageDir, `eval-report-${Date.now()}.json`);
   fs.writeFileSync(outPath, JSON.stringify(report, null, 2));
   console.log(`\nReport saved to ${outPath}`);
 

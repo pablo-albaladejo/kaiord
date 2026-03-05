@@ -1,7 +1,14 @@
-import { createSecureStorage } from "../../../lib/secure-storage";
 import { useAiStore } from "../../../store/ai-store";
 import { useGarminStore } from "../../../store/garmin-store";
 import { Button } from "../../atoms/Button";
+
+const SECURE_STORAGE_PREFIX = "kaiord_secure_";
+
+const clearSecureStorage = (): void => {
+  Object.keys(localStorage)
+    .filter((k) => k.startsWith(SECURE_STORAGE_PREFIX))
+    .forEach((k) => localStorage.removeItem(k));
+};
 
 export const PrivacyTab: React.FC = () => {
   const clearAi = () => useAiStore.setState({ providers: [] });
@@ -10,7 +17,7 @@ export const PrivacyTab: React.FC = () => {
   const handleClearAll = () => {
     clearAi();
     clearGarmin();
-    createSecureStorage("").clearAll();
+    clearSecureStorage();
   };
 
   return (

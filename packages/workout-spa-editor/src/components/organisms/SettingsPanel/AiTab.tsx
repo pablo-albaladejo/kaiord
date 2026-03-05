@@ -46,6 +46,7 @@ export const AiTab: React.FC = () => {
           id="ai-custom-system-prompt"
           className="w-full rounded-lg border border-gray-300 p-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           rows={3}
+          maxLength={500}
           placeholder="Additional instructions for all AI generations (e.g., 'I'm recovering from a knee injury')"
           value={customPrompt}
           onChange={(e) => setCustomPrompt(e.target.value)}

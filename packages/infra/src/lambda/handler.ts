@@ -35,7 +35,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     if (isAuthError) {
       return errorResponse(401, "Garmin authentication failed");
     }
-    console.error("Garmin API error:", message);
+    console.error("Garmin push failed");
     return errorResponse(500, "Garmin API error");
   }
 };

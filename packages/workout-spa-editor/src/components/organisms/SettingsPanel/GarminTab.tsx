@@ -1,5 +1,5 @@
+import { GarminLambdaInput } from "./GarminLambdaInput";
 import { useGarminStore } from "../../../store/garmin-store";
-import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
 
 export const GarminTab: React.FC = () => {
@@ -40,18 +40,11 @@ export const GarminTab: React.FC = () => {
         <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
           Lambda Endpoint
         </h3>
-        <div className="space-y-2">
-          <Input
-            label="URL"
-            placeholder="https://api.kaiord.com/push"
-            value={lambdaUrl}
-            onChange={(e) => setLambdaUrl(e.target.value)}
-            helperText="Self-hosted? Enter your Lambda URL here."
-          />
-          <Button size="sm" variant="secondary" onClick={resetLambdaUrl}>
-            Reset to Default
-          </Button>
-        </div>
+        <GarminLambdaInput
+          lambdaUrl={lambdaUrl}
+          onUrlChange={setLambdaUrl}
+          onReset={resetLambdaUrl}
+        />
       </section>
     </div>
   );

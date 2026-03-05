@@ -2,16 +2,15 @@ import { create } from "zustand";
 
 const DEFAULT_LAMBDA_URL = "https://api.kaiord.com/push";
 
-const normalizeLambdaUrl = (url: string): string => {
-  const parsed = new URL(url);
-  const isLocalhost =
-    parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
-
-  if (parsed.protocol !== "https:" && !isLocalhost) {
-    throw new Error("Lambda URL must use HTTPS (except localhost)");
+export const isValidLambdaUrl = (url: string): boolean => {
+  try {
+    const parsed = new URL(url);
+    const isLocalhost =
+      parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
+    return parsed.protocol === "https:" || isLocalhost;
+  } catch {
+    return false;
   }
-
-  return parsed.toString();
 };
 
 type PushState =
@@ -41,7 +40,7 @@ export const useGarminStore = create<GarminStore>((set, get) => ({
 
   setCredentials: (username, password) => set({ username, password }),
 
-  setLambdaUrl: (url) => set({ lambdaUrl: normalizeLambdaUrl(url) }),
+  setLambdaUrl: (url) => set({ lambdaUrl: url }),
 
   resetLambdaUrl: () => set({ lambdaUrl: DEFAULT_LAMBDA_URL }),
 

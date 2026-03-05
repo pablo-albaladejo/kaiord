@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { pushToGarminLambda } from "../../../lib/garmin-push";
-import { useGarminStore } from "../../../store/garmin-store";
+import { useGarminStore, isValidLambdaUrl } from "../../../store/garmin-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 
 export const useGarminPush = () => {
@@ -10,6 +10,14 @@ export const useGarminPush = () => {
 
   const push = useCallback(async () => {
     if (!currentWorkout || !hasCredentials()) return;
+
+    if (!isValidLambdaUrl(lambdaUrl)) {
+      setPush({
+        status: "error",
+        message: "Invalid Lambda URL: must use HTTPS (except localhost)",
+      });
+      return;
+    }
 
     setPush({ status: "loading" });
 

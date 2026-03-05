@@ -27,7 +27,7 @@ export const ProviderList: React.FC<ProviderListProps> = ({
   }
 
   return (
-    <ul className="space-y-2">
+    <ul role="list" aria-label="Configured LLM providers" className="space-y-2">
       {providers.map((p) => (
         <li
           key={p.id}

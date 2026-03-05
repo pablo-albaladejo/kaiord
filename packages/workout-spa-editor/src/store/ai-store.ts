@@ -31,7 +31,7 @@ export const useAiStore = create<AiStore>((set, get) => ({
       const remaining = s.providers.filter((p) => p.id !== id);
       const needsNewDefault =
         s.providers.find((p) => p.id === id)?.isDefault && remaining.length > 0;
-      if (needsNewDefault) remaining[0].isDefault = true;
+      if (needsNewDefault) remaining[0] = { ...remaining[0], isDefault: true };
       return {
         providers: remaining,
         selectedProviderId:

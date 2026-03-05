@@ -16,7 +16,7 @@ A stateless Lambda function that pushes workouts to Garmin Connect. It receives 
 ## Prerequisites
 
 - AWS account with CLI configured (`aws configure`)
-- Node.js 20+
+- Node.js 24+
 - pnpm
 
 ## Deploy
@@ -29,9 +29,35 @@ pnpm --filter @kaiord/infra deploy
 
 This creates:
 
-- Lambda function (Node.js 20)
+- Lambda function (Node.js 24)
 - API Gateway HTTP API with CORS enabled
 - CloudWatch log group (1 week retention)
+- Default stage with rate limiting (10 req/s, burst 5)
+
+## CORS Origins
+
+By default, the API allows all origins (`*`). For production deployments, restrict CORS to your specific domain:
+
+```bash
+pnpm --filter @kaiord/infra cdk deploy \
+  --context allowedOrigins='["https://editor.kaiord.com"]'
+```
+
+Multiple origins are supported:
+
+```bash
+pnpm --filter @kaiord/infra cdk deploy \
+  --context allowedOrigins='["https://editor.kaiord.com","https://staging.kaiord.com"]'
+```
+
+## Rate Limiting
+
+The API includes default throttle settings on the `$default` stage:
+
+- **Rate limit:** 10 requests per second (steady-state)
+- **Burst limit:** 5 requests (maximum concurrent)
+
+These settings protect against abuse while allowing normal usage patterns. To adjust, modify the `throttle` configuration in `garmin-proxy-stack.ts`.
 
 ## API
 

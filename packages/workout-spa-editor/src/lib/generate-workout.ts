@@ -15,7 +15,7 @@ export type GenerateWorkoutOptions = {
 export const generateWorkoutKrd = async (
   options: GenerateWorkoutOptions
 ): Promise<KRD> => {
-  const model = createLanguageModel(options.provider);
+  const model = await createLanguageModel(options.provider);
   const textToWorkout = createTextToWorkout({ model });
 
   const prompt = buildPrompt(options);
@@ -26,6 +26,8 @@ export const generateWorkoutKrd = async (
   return createWorkoutKRD(workout);
 };
 
+const MAX_CUSTOM_PROMPT = 500;
+
 const buildPrompt = (options: GenerateWorkoutOptions): string => {
   const parts = [options.text];
 
@@ -33,7 +35,8 @@ const buildPrompt = (options: GenerateWorkoutOptions): string => {
     parts.push(`\nTraining zones:\n${options.zonesContext}`);
   }
   if (options.customPrompt) {
-    parts.push(`\nAdditional instructions:\n${options.customPrompt}`);
+    const truncated = options.customPrompt.slice(0, MAX_CUSTOM_PROMPT);
+    parts.push(`\nAdditional instructions:\n${truncated}`);
   }
 
   return parts.join("");

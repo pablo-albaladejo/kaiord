@@ -36,7 +36,10 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
           <Dialog.Title className="mb-4 text-lg font-semibold dark:text-white">
             Settings
           </Dialog.Title>
-          <div className="mb-4 flex gap-1 border-b border-gray-200 dark:border-gray-700">
+          <div
+            role="tablist"
+            className="mb-4 flex gap-1 border-b border-gray-200 dark:border-gray-700"
+          >
             {TABS.map((tab) => (
               <TabButton
                 key={tab.id}
@@ -47,7 +50,9 @@ export const SettingsPanel: React.FC<SettingsPanelProps> = ({
               />
             ))}
           </div>
-          <ActiveContent />
+          <div role="tabpanel">
+            <ActiveContent />
+          </div>
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

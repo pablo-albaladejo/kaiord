@@ -29,6 +29,9 @@ test.describe("AI Generate Workout Flow", () => {
     }
   });
 
+  // fixme: The AiWorkoutInput component is not yet mounted in the main page
+  // flow, so the textarea and generate button are not reachable from "/".
+  // Enable this test once the component is integrated into the app layout.
   test.fixme("8.4: generate workout flow - type text, select model, generate", async ({
     page,
   }) => {

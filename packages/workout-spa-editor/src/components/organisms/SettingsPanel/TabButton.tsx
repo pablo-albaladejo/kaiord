@@ -15,6 +15,8 @@ export const TabButton: React.FC<TabButtonProps> = ({
 }) => (
   <button
     type="button"
+    role="tab"
+    aria-selected={active}
     onClick={() => onClick(tab)}
     className={`px-4 py-2 text-sm font-medium rounded-t-lg transition-colors ${
       active
