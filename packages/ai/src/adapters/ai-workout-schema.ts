@@ -15,7 +15,7 @@
 import { z } from "zod";
 
 const stepSchema = z.object({
-  stepIndex: z.number().int(),
+  stepIndex: z.number(),
   name: z.string().optional(),
   durationType: z.string(),
   duration: z.object({
@@ -43,7 +43,7 @@ const stepSchema = z.object({
 });
 
 const blockSchema = z.object({
-  repeatCount: z.number().int(),
+  repeatCount: z.number(),
   steps: z.array(stepSchema),
 });
 
