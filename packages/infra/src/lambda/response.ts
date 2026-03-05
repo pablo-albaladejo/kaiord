@@ -12,5 +12,4 @@ export const jsonResponse = (
 export const errorResponse = (
   statusCode: number,
   message: string
-): APIGatewayProxyResultV2 =>
-  jsonResponse(statusCode, { error: message });
+): APIGatewayProxyResultV2 => jsonResponse(statusCode, { error: message });

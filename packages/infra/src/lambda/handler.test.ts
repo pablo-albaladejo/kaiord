@@ -10,7 +10,7 @@ const { pushToGarmin } = await import("./garmin-push");
 const mockPush = vi.mocked(pushToGarmin);
 
 const createEvent = (body?: string): APIGatewayProxyEventV2 =>
-  ({ body } as APIGatewayProxyEventV2);
+  ({ body }) as APIGatewayProxyEventV2;
 
 const validBody = JSON.stringify({
   krd: { version: "1.0", type: "structured_workout", metadata: {} },
@@ -42,7 +42,9 @@ describe("Lambda handler", () => {
     );
 
     expect(result.statusCode).toBe(400);
-    expect(JSON.parse(result.body as string).error).toContain("Invalid request");
+    expect(JSON.parse(result.body as string).error).toContain(
+      "Invalid request"
+    );
   });
 
   it("should return 200 with push result on success", async () => {

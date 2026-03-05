@@ -19,6 +19,7 @@ The SPA SHALL inject the user's training zones (from the existing profile store)
 ### Requirement: Multi-Provider LLM Support
 
 The SPA SHALL support multiple LLM providers for workout generation. Supported providers SHALL include at minimum:
+
 - **Anthropic** (Claude) via `@ai-sdk/anthropic`
 - **OpenAI** (GPT) via `@ai-sdk/openai`
 - **Google** (Gemini) via `@ai-sdk/google`
@@ -28,6 +29,7 @@ All LLM calls SHALL be made directly from the browser (all three providers allow
 ### Requirement: Provider Configuration
 
 The SPA SHALL allow users to configure multiple LLM providers in settings. Each provider configuration SHALL include:
+
 - Provider type (Anthropic / OpenAI / Google)
 - API key (encrypted in localStorage)
 - Model name (e.g., `claude-sonnet-4-5-20241022`, `gpt-4o`, `gemini-2.0-flash`)
@@ -46,6 +48,7 @@ After LLM generation, the SPA SHALL display the generated workout in the existin
 ### Requirement: Garmin Push via Lambda
 
 The system SHALL provide a stateless Lambda function that:
+
 1. Receives a KRD document and Garmin credentials (username + password)
 2. Performs Garmin SSO login
 3. Converts KRD to GCN format
@@ -64,6 +67,7 @@ The SPA SHALL encrypt all stored credentials (LLM API keys for all configured pr
 ### Requirement: Privacy Disclaimers
 
 The SPA SHALL display clear disclaimers:
+
 1. "We do not store your credentials on any server"
 2. "Garmin credentials are sent to the Lambda proxy only for the duration of the push request"
 3. "You can self-host the Lambda — see documentation"
@@ -72,6 +76,7 @@ The SPA SHALL display clear disclaimers:
 ### Requirement: Self-Hostable Infrastructure
 
 The `@kaiord/infra` package SHALL contain a complete AWS CDK stack that any user can deploy with `cdk deploy`. The stack SHALL include:
+
 - Lambda function (Node.js runtime)
 - API Gateway (HTTPS endpoint with CORS)
 - No persistent storage resources
@@ -80,6 +85,7 @@ The `@kaiord/infra` package SHALL contain a complete AWS CDK stack that any user
 ### Requirement: Lambda API Contract
 
 The Lambda endpoint SHALL accept:
+
 ```
 POST /push
 Content-Type: application/json
@@ -94,6 +100,7 @@ Content-Type: application/json
 ```
 
 And return:
+
 ```
 200 OK
 {
@@ -104,6 +111,7 @@ And return:
 ```
 
 Or error:
+
 ```
 401 { "error": "Garmin authentication failed" }
 400 { "error": "Invalid KRD document" }
@@ -117,11 +125,12 @@ The SPA SHALL allow users to configure the Lambda endpoint URL. This enables use
 ### Requirement: E2E Test Coverage
 
 The new SPA features SHALL have Playwright E2E tests covering:
+
 - AI workout generation flow (input → loading → preview in editor)
 - Garmin push flow (push button → loading → success/error)
 - Settings management (add/remove providers, save/load credentials)
 - Model selector dropdown behavior
-LLM and Lambda calls SHALL be mocked in E2E tests (no real API calls).
+  LLM and Lambda calls SHALL be mocked in E2E tests (no real API calls).
 
 ### Requirement: E2E in CI/CD
 
@@ -130,6 +139,7 @@ E2E tests SHALL run in the CI/CD pipeline on every PR that modifies `packages/wo
 ### Requirement: LLM Eval Suite
 
 The `@kaiord/ai` package SHALL include an eval suite that tests workout generation quality against a benchmark dataset. Evals SHALL:
+
 - Use real LLM calls (not mocked) against at least one provider
 - Validate output schema (Zod `workoutSchema`)
 - Check sport type correctness
@@ -142,6 +152,7 @@ The `@kaiord/ai` package SHALL include an eval suite that tests workout generati
 ### Requirement: Eval Benchmark Dataset
 
 The eval suite SHALL use a curated set of at least 20 benchmark workout descriptions spanning:
+
 - Different sports (cycling, running, swimming, generic)
 - Different complexities (simple steady-state, intervals, repetition blocks, mixed)
 - Different languages (English, Spanish)
@@ -151,6 +162,7 @@ The eval suite SHALL use a curated set of at least 20 benchmark workout descript
 ### Requirement: Eval Reporting
 
 Eval results SHALL produce a structured report with:
+
 - Pass/fail per benchmark case
 - Overall pass rate (target: ≥90% valid workouts)
 - Breakdown by sport, complexity, and language

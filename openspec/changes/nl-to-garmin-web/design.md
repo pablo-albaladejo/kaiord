@@ -25,6 +25,7 @@ The SPA (`@kaiord/workout-spa-editor`) is a React 19 + Zustand + Tailwind app. I
 **Layer:** Adapters (SPA)
 
 **Decision:** Call LLM APIs directly from the browser for all supported providers. All three major providers allow CORS:
+
 - **Anthropic:** `anthropic-dangerous-direct-browser-access` header, `Access-Control-Allow-Origin: *`
 - **OpenAI:** `dangerouslyAllowBrowser: true`, CORS allowed
 - **Google Gemini:** API key in URL, CORS allowed
@@ -42,6 +43,7 @@ The user's API keys go straight to the provider, never touch our infra.
 **Layer:** Adapters (SPA)
 
 **Decision:** Use Vercel AI SDK provider packages in the browser:
+
 - `@ai-sdk/anthropic` → `createAnthropic({ apiKey, dangerouslyAllowBrowser: true })`
 - `@ai-sdk/openai` → `createOpenAI({ apiKey, dangerouslyAllowBrowser: true })`
 - `@ai-sdk/google` → `createGoogleGenerativeAI({ apiKey })`
@@ -61,6 +63,7 @@ The existing `@kaiord/ai` `createTextToWorkout()` function works as-is — it ac
 **Rationale:** Garmin blocks CORS on all endpoints (SSO, OAuth, workout API). A popup-based flow only solves login but not the OAuth exchange or push. A Lambda is the simplest stateless proxy. Using Lambda + API Gateway keeps infra minimal and pay-per-use.
 
 **Alternatives considered:**
+
 - Browser popup for SSO → only solves login, not push (OAuth + workout API also CORS-blocked)
 - Browser extension → poor UX, distribution complexity
 - Electron/Tauri app → different product, not web
@@ -75,6 +78,7 @@ The existing `@kaiord/ai` `createTextToWorkout()` function works as-is — it ac
 **Rationale:** Maximum transparency. Users who don't trust our hosted Lambda can deploy their own. The CDK stack is auditable — same code as in the repo.
 
 **Stack resources:**
+
 - Lambda function (Node.js 20, bundled with `@kaiord/garmin-connect` + `@kaiord/garmin` + `@kaiord/core`)
 - API Gateway HTTP API (CORS configured for `*`)
 - CloudWatch log group (with credential-scrubbing log filter)
@@ -95,6 +99,7 @@ The existing `@kaiord/ai` `createTextToWorkout()` function works as-is — it ac
 **Layer:** Adapters (SPA)
 
 **Decision:** Two new Zustand stores:
+
 - `ai-store`: List of configured providers (each with: id, provider type, API key encrypted, model name, label, isDefault), custom system prompt, generation state (loading/error/result), selected provider id for current generation
 - `garmin-store`: Garmin credentials (encrypted), Lambda URL (configurable), push state (loading/error/result), connection status
 
@@ -143,6 +148,7 @@ The existing `@kaiord/ai` `createTextToWorkout()` function works as-is — it ac
 **Decision:** Evals assert on structural properties (valid schema, correct sport, plausible step count, zone values within range), NOT on exact output (specific step names, exact durations). LLMs are non-deterministic — asserting exact output would make evals flaky.
 
 **Thresholds:**
+
 - Schema validity: 100% (every output must parse)
 - Sport correctness: ≥95%
 - Zone accuracy (when provided): ≥90%
@@ -150,15 +156,15 @@ The existing `@kaiord/ai` `createTextToWorkout()` function works as-is — it ac
 
 ## Risks and Mitigations
 
-| Risk | Mitigation |
-|---|---|
-| Garmin changes SSO flow, breaking Lambda | `@kaiord/garmin-connect` is versioned; pin Lambda dependency. Monitor with integration tests. |
-| User's API key exposed in browser devtools | Clear disclaimer. Anthropic's own naming (`dangerous-direct-browser-access`) communicates this. |
-| Lambda cold start adds latency to push | Garmin SSO is already ~2-3s. Cold start (~1s) is negligible in comparison. |
-| Garmin rate-limits or blocks Lambda IP | Use user-provided credentials (not a single service account). Each push is independent. |
-| User forgets passphrase for encrypted storage | Provide "reset credentials" option that clears and re-enters. |
+| Risk                                                    | Mitigation                                                                                                   |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Garmin changes SSO flow, breaking Lambda                | `@kaiord/garmin-connect` is versioned; pin Lambda dependency. Monitor with integration tests.                |
+| User's API key exposed in browser devtools              | Clear disclaimer. Anthropic's own naming (`dangerous-direct-browser-access`) communicates this.              |
+| Lambda cold start adds latency to push                  | Garmin SSO is already ~2-3s. Cold start (~1s) is negligible in comparison.                                   |
+| Garmin rate-limits or blocks Lambda IP                  | Use user-provided credentials (not a single service account). Each push is independent.                      |
+| User forgets passphrase for encrypted storage           | Provide "reset credentials" option that clears and re-enters.                                                |
 | LLM output quality degrades after provider model update | Eval suite catches regressions. Run evals after bumping AI SDK or when providers release new model versions. |
-| Eval costs accumulate | Manual trigger only — developer decides when to spend. Use cheapest model that passes thresholds. |
+| Eval costs accumulate                                   | Manual trigger only — developer decides when to spend. Use cheapest model that passes thresholds.            |
 
 ## Open Questions
 

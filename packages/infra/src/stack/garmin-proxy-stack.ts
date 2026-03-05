@@ -41,10 +41,7 @@ export class GarminProxyStack extends Stack {
       },
     });
 
-    const integration = new HttpLambdaIntegration(
-      "PushIntegration",
-      handler
-    );
+    const integration = new HttpLambdaIntegration("PushIntegration", handler);
 
     api.addRoutes({
       path: "/push",

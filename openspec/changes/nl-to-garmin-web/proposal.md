@@ -22,14 +22,14 @@ A self-hostable `@kaiord/infra` CDK package allows any user to deploy their own 
 
 ## Affected Packages
 
-| Package | Change |
-|---|---|
-| `@kaiord/workout-spa-editor` | New AI input UI, Garmin push UI, settings panel (API key, Garmin creds, zones), encrypted storage |
-| `@kaiord/infra` (NEW) | AWS CDK stack: Lambda function + API Gateway for Garmin proxy |
-| `@kaiord/ai` | No code changes — used as-is from the browser via `createTextToWorkout()`. Provider-agnostic design supports all three LLM providers. |
-| `@kaiord/garmin-connect` | No code changes — used inside the Lambda |
-| `@kaiord/garmin` | No code changes — used inside the Lambda for KRD → GCN conversion |
-| `@kaiord/core` | No code changes — used in both browser and Lambda |
+| Package                      | Change                                                                                                                                |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `@kaiord/workout-spa-editor` | New AI input UI, Garmin push UI, settings panel (API key, Garmin creds, zones), encrypted storage                                     |
+| `@kaiord/infra` (NEW)        | AWS CDK stack: Lambda function + API Gateway for Garmin proxy                                                                         |
+| `@kaiord/ai`                 | No code changes — used as-is from the browser via `createTextToWorkout()`. Provider-agnostic design supports all three LLM providers. |
+| `@kaiord/garmin-connect`     | No code changes — used inside the Lambda                                                                                              |
+| `@kaiord/garmin`             | No code changes — used inside the Lambda for KRD → GCN conversion                                                                     |
+| `@kaiord/core`               | No code changes — used in both browser and Lambda                                                                                     |
 
 ## Breaking Changes
 

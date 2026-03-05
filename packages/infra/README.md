@@ -28,6 +28,7 @@ pnpm --filter @kaiord/infra deploy
 ```
 
 This creates:
+
 - Lambda function (Node.js 20)
 - API Gateway HTTP API with CORS enabled
 - CloudWatch log group (1 week retention)
@@ -50,6 +51,7 @@ Content-Type: application/json
 Success: `200 { "id": "123", "name": "Workout", "url": "https://connect.garmin.com/modern/workout/123" }`
 
 Errors:
+
 - `400` — Invalid request body or KRD document
 - `401` — Garmin authentication failed
 - `500` — Garmin API error
