@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
+import {
+  PROVIDER_MODELS,
+  getDefaultModel,
+} from "../../../lib/provider-models";
 import type { LlmProviderType } from "../../../store/ai-store";
 
 type ProviderFormProps = {
@@ -12,21 +16,15 @@ type ProviderFormProps = {
   }) => void;
 };
 
-const PROVIDER_MODELS: Record<LlmProviderType, string> = {
-  anthropic: "claude-sonnet-4-5-20241022",
-  openai: "gpt-4o",
-  google: "gemini-2.0-flash",
-};
-
 export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
   const [type, setType] = useState<LlmProviderType>("anthropic");
   const [apiKey, setApiKey] = useState("");
-  const [model, setModel] = useState(PROVIDER_MODELS.anthropic);
+  const [model, setModel] = useState(getDefaultModel("anthropic"));
   const [label, setLabel] = useState("");
 
   const handleTypeChange = (newType: LlmProviderType) => {
     setType(newType);
-    setModel(PROVIDER_MODELS[newType]);
+    setModel(getDefaultModel(newType));
   };
 
   const handleSubmit = () => {
@@ -36,13 +34,20 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
     setLabel("");
   };
 
+  const modelOptions = PROVIDER_MODELS[type].map((m) => ({
+    value: m.id,
+    label: m.label,
+  }));
+
   return (
     <div className="space-y-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
       <Input
         label="Provider"
         variant="select"
         value={type}
-        onChange={(e) => handleTypeChange(e.target.value as LlmProviderType)}
+        onChange={(e) =>
+          handleTypeChange(e.target.value as LlmProviderType)
+        }
         options={[
           { value: "anthropic", label: "Anthropic (Claude)" },
           { value: "openai", label: "OpenAI (GPT)" },
@@ -62,12 +67,20 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
         value={apiKey}
         onChange={(e) => setApiKey(e.target.value)}
       />
-      <Input
-        label="Model"
-        placeholder={PROVIDER_MODELS[type]}
-        value={model}
-        onChange={(e) => setModel(e.target.value)}
-      />
+      <div className="w-full">
+        <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
+          Model
+        </label>
+        <select
+          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
+          value={model}
+          onChange={(e) => setModel(e.target.value)}
+        >
+          {modelOptions.map((m) => (
+            <option key={m.value} value={m.value}>{m.label}</option>
+          ))}
+        </select>
+      </div>
       <Button
         size="sm"
         onClick={handleSubmit}

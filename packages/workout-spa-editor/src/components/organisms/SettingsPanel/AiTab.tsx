@@ -8,6 +8,7 @@ export const AiTab: React.FC = () => {
     customPrompt,
     addProvider,
     removeProvider,
+    updateProvider,
     setDefault,
     setCustomPrompt,
   } = useAiStore();
@@ -22,6 +23,7 @@ export const AiTab: React.FC = () => {
           providers={providers}
           onRemove={removeProvider}
           onSetDefault={setDefault}
+          onUpdate={updateProvider}
         />
       </section>
 

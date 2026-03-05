@@ -14,32 +14,32 @@
 
 import { z } from "zod";
 
+const durationSchema = z.object({
+  type: z.string(),
+  seconds: z.number().optional(),
+  meters: z.number().optional(),
+  calories: z.number().optional(),
+});
+
+const targetValueSchema = z.object({
+  unit: z.string(),
+  value: z.number().optional(),
+  min: z.number().optional(),
+  max: z.number().optional(),
+});
+
+const targetSchema = z.object({
+  type: z.string(),
+  value: targetValueSchema.optional(),
+});
+
 const stepSchema = z.object({
   stepIndex: z.number(),
-  name: z.string().optional(),
   durationType: z.string(),
-  duration: z.object({
-    type: z.string(),
-    seconds: z.number().optional(),
-    meters: z.number().optional(),
-    calories: z.number().optional(),
-    bpm: z.number().optional(),
-    watts: z.number().optional(),
-  }),
+  duration: durationSchema,
   targetType: z.string(),
-  target: z.object({
-    type: z.string(),
-    value: z
-      .object({
-        unit: z.string().optional(),
-        value: z.number().optional(),
-        min: z.number().optional(),
-        max: z.number().optional(),
-      })
-      .optional(),
-  }),
-  intensity: z.string().optional(),
-  notes: z.string().optional(),
+  target: targetSchema,
+  intensity: z.string(),
 });
 
 const blockSchema = z.object({
@@ -48,8 +48,6 @@ const blockSchema = z.object({
 });
 
 export const aiWorkoutSchema = z.object({
-  name: z.string().optional(),
   sport: z.enum(["cycling", "running", "swimming", "generic"]),
-  subSport: z.string().optional(),
   steps: z.array(z.union([stepSchema, blockSchema])),
 });
