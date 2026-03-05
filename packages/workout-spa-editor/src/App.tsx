@@ -15,9 +15,9 @@ import { useWorkoutStore } from "./store/workout-store";
 import type { Workout } from "./types/krd";
 
 const AiWorkoutInput = lazy(() =>
-  import("./components/organisms/AiWorkoutInput/AiWorkoutInput").then(
-    (m) => ({ default: m.AiWorkoutInput })
-  )
+  import("./components/organisms/AiWorkoutInput/AiWorkoutInput").then((m) => ({
+    default: m.AiWorkoutInput,
+  }))
 );
 
 function App() {
@@ -29,8 +29,12 @@ function App() {
   const reorderStepsInBlock = useWorkoutStore((s) => s.reorderStepsInBlock);
   const { showTutorial, setShowTutorial } = useOnboardingTutorial();
   const settingsShow = useSettingsDialogStore((s) => s.show);
-  const { handleFileLoad, handleFileError, handleStepSelect, handleCreateWorkout } =
-    useAppHandlers();
+  const {
+    handleFileLoad,
+    handleFileError,
+    handleStepSelect,
+    handleCreateWorkout,
+  } = useAppHandlers();
 
   const workout = currentWorkout?.extensions?.structured_workout as
     | Workout

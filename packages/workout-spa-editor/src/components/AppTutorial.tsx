@@ -2,9 +2,9 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { TUTORIAL_STEPS } from "../constants/tutorial-steps";
 
 const OnboardingTutorial = lazy(() =>
-  import("./organisms/OnboardingTutorial/OnboardingTutorial").then(
-    (m) => ({ default: m.OnboardingTutorial })
-  )
+  import("./organisms/OnboardingTutorial/OnboardingTutorial").then((m) => ({
+    default: m.OnboardingTutorial,
+  }))
 );
 
 type AppTutorialProps = {
