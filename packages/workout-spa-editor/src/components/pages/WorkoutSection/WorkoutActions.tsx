@@ -1,5 +1,6 @@
 import { Trash2 } from "lucide-react";
 import { Button } from "../../atoms/Button/Button";
+import { GarminPushButton } from "../../molecules/GarminPushButton";
 import { SaveButton } from "../../molecules/SaveButton/SaveButton";
 import { SaveToLibraryButton } from "../../molecules/SaveToLibraryButton/SaveToLibraryButton";
 import { UndoRedoButtons } from "../../molecules/UndoRedoButtons";
@@ -32,6 +33,7 @@ export function WorkoutActions({
       />
       <SaveButton workout={krd} />
       <SaveToLibraryButton workout={krd} className="w-full sm:w-auto" />
+      <GarminPushButton />
       <Button
         variant="tertiary"
         onClick={onDiscard}

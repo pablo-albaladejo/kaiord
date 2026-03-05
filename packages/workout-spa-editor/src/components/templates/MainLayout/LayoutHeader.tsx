@@ -4,6 +4,7 @@ import { HeaderNav } from "./components/HeaderNav";
 import { useLazyDialog } from "../../../hooks/use-lazy-dialog";
 import { useLibraryStore } from "../../../store/library-store";
 import { useProfileStore } from "../../../store/profile-store";
+import { useSettingsDialogStore } from "../../../store/settings-dialog-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 
 const ProfileManager = lazy(() =>
@@ -33,7 +34,9 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
   const profile = useLazyDialog();
   const library = useLazyDialog();
   const help = useLazyDialog();
-  const settings = useLazyDialog();
+  const settingsOpen = useSettingsDialogStore((s) => s.open);
+  const settingsShow = useSettingsDialogStore((s) => s.show);
+  const settingsHide = useSettingsDialogStore((s) => s.hide);
   const { getActiveProfile } = useProfileStore();
   const activeProfile = getActiveProfile();
   const { templates } = useLibraryStore();
@@ -49,7 +52,7 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
           onProfileClick={profile.show}
           onLibraryClick={library.show}
           onHelpClick={help.show}
-          onSettingsClick={settings.show}
+          onSettingsClick={settingsShow}
         />
       </div>
 
@@ -83,10 +86,10 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
       </Suspense>
 
       <Suspense fallback={null}>
-        {settings.mounted && (
+        {settingsOpen && (
           <SettingsPanel
-            open={settings.open}
-            onOpenChange={settings.setOpen}
+            open={settingsOpen}
+            onOpenChange={(open) => { if (!open) settingsHide(); }}
           />
         )}
       </Suspense>

@@ -58,14 +58,14 @@
 
 ## 6. SPA: Garmin Push UI
 
-- [ ] 6.1 Add "Push to Garmin" button in `WorkoutActions` toolbar
-- [ ] 6.2 On click: send KRD + encrypted creds to Lambda endpoint
-- [ ] 6.3 Display loading state during push
-- [ ] 6.4 On success: show Garmin Connect URL with link
-- [ ] 6.5 On 401 error: show "Check your Garmin credentials" with link to settings
-- [ ] 6.6 On other errors: show error message
-- [ ] 6.7 Handle missing credentials: redirect to settings
-- [ ] 6.8 Test push flow: success, auth error, network error, missing creds
+- [x] 6.1 Add "Push to Garmin" button in `WorkoutActions` toolbar
+- [x] 6.2 On click: send KRD + encrypted creds to Lambda endpoint
+- [x] 6.3 Display loading state during push
+- [x] 6.4 On success: show Garmin Connect URL with link
+- [x] 6.5 On 401 error: show "Check your Garmin credentials" with link to settings
+- [x] 6.6 On other errors: show error message
+- [x] 6.7 Handle missing credentials: redirect to settings
+- [x] 6.8 Test push flow: success, auth error, network error, missing creds
 
 ## 7. SPA: New Dependencies
 
