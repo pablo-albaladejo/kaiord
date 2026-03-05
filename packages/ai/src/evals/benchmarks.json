@@ -1,0 +1,209 @@
+[
+  {
+    "id": "cycling-simple",
+    "text": "30 minutes easy cycling",
+    "expectedSport": "cycling",
+    "minSteps": 1,
+    "maxSteps": 5,
+    "category": "simple",
+    "language": "en"
+  },
+  {
+    "id": "cycling-sweetspot",
+    "text": "45min sweet spot cycling: 10min warmup, 3x10min at 88-93% FTP with 2min recovery, 5min cooldown",
+    "expectedSport": "cycling",
+    "minSteps": 3,
+    "maxSteps": 15,
+    "category": "intervals",
+    "language": "en"
+  },
+  {
+    "id": "cycling-vo2max",
+    "text": "4x4min VO2max intervals at 106-120% FTP with 4min recovery between, 15min warmup and 10min cooldown",
+    "expectedSport": "cycling",
+    "minSteps": 5,
+    "maxSteps": 20,
+    "category": "intervals",
+    "language": "en"
+  },
+  {
+    "id": "cycling-endurance",
+    "text": "2 hour endurance ride in zone 2",
+    "expectedSport": "cycling",
+    "minSteps": 1,
+    "maxSteps": 5,
+    "category": "simple",
+    "language": "en"
+  },
+  {
+    "id": "cycling-mixed",
+    "text": "1h cycling: warmup 15min, then alternate 5min tempo and 3min recovery x4, cooldown 10min",
+    "expectedSport": "cycling",
+    "minSteps": 5,
+    "maxSteps": 20,
+    "category": "mixed",
+    "language": "en"
+  },
+  {
+    "id": "running-easy",
+    "text": "30 minute easy run",
+    "expectedSport": "running",
+    "minSteps": 1,
+    "maxSteps": 5,
+    "category": "simple",
+    "language": "en"
+  },
+  {
+    "id": "running-intervals",
+    "text": "Running intervals: 10min warmup, 8x400m fast with 200m jog recovery, 10min cooldown",
+    "expectedSport": "running",
+    "minSteps": 3,
+    "maxSteps": 25,
+    "category": "intervals",
+    "language": "en"
+  },
+  {
+    "id": "running-tempo",
+    "text": "Tempo run: 15min warmup, 20min at threshold pace, 10min cooldown",
+    "expectedSport": "running",
+    "minSteps": 3,
+    "maxSteps": 10,
+    "category": "intervals",
+    "language": "en"
+  },
+  {
+    "id": "running-long",
+    "text": "Long run 90 minutes with the last 20 minutes at marathon pace",
+    "expectedSport": "running",
+    "minSteps": 2,
+    "maxSteps": 10,
+    "category": "mixed",
+    "language": "en"
+  },
+  {
+    "id": "swimming-drill",
+    "text": "1500m swim workout: 200m warmup, 10x100m at threshold with 15s rest, 200m cooldown",
+    "expectedSport": "swimming",
+    "minSteps": 3,
+    "maxSteps": 25,
+    "category": "intervals",
+    "language": "en"
+  },
+  {
+    "id": "swimming-simple",
+    "text": "30 minutes easy swimming",
+    "expectedSport": "swimming",
+    "minSteps": 1,
+    "maxSteps": 5,
+    "category": "simple",
+    "language": "en"
+  },
+  {
+    "id": "generic-strength",
+    "text": "45 minute strength training session",
+    "expectedSport": "generic",
+    "minSteps": 1,
+    "maxSteps": 10,
+    "category": "simple",
+    "language": "en"
+  },
+  {
+    "id": "es-cycling",
+    "text": "Entreno de ciclismo de 1 hora: 15 minutos de calentamiento, 3x10 minutos en zona 4 con 5 minutos de recuperacion, 10 minutos de vuelta a la calma",
+    "expectedSport": "cycling",
+    "minSteps": 3,
+    "maxSteps": 20,
+    "category": "intervals",
+    "language": "es"
+  },
+  {
+    "id": "es-running",
+    "text": "Carrera continua de 40 minutos a ritmo suave",
+    "expectedSport": "running",
+    "minSteps": 1,
+    "maxSteps": 5,
+    "category": "simple",
+    "language": "es"
+  },
+  {
+    "id": "es-swimming",
+    "text": "Natacion: 400m calentamiento, 8x50m sprint con 20s descanso, 200m vuelta a la calma",
+    "expectedSport": "swimming",
+    "minSteps": 3,
+    "maxSteps": 25,
+    "category": "intervals",
+    "language": "es"
+  },
+  {
+    "id": "mixed-lang",
+    "text": "Cycling workout con 10 min warmup, luego 5x3min at 95% FTP con 2min recovery, y 10min cooldown",
+    "expectedSport": "cycling",
+    "minSteps": 3,
+    "maxSteps": 20,
+    "category": "intervals",
+    "language": "mixed"
+  },
+  {
+    "id": "zones-ftp",
+    "text": "Sweet spot intervals: 3x15min at 88-93% FTP with 5min easy between",
+    "expectedSport": "cycling",
+    "minSteps": 3,
+    "maxSteps": 15,
+    "category": "zones",
+    "language": "en",
+    "zoneCheck": {
+      "targetType": "power",
+      "minPercent": 83,
+      "maxPercent": 98
+    }
+  },
+  {
+    "id": "zones-hr",
+    "text": "Run 30 minutes in heart rate zone 2 (130-150 bpm)",
+    "expectedSport": "running",
+    "minSteps": 1,
+    "maxSteps": 5,
+    "category": "zones",
+    "language": "en",
+    "zoneCheck": {
+      "targetType": "heart_rate",
+      "minValue": 120,
+      "maxValue": 160
+    }
+  },
+  {
+    "id": "edge-short",
+    "text": "5 minute sprint",
+    "expectedSport": "cycling",
+    "minSteps": 1,
+    "maxSteps": 3,
+    "category": "edge",
+    "language": "en"
+  },
+  {
+    "id": "edge-long",
+    "text": "3 hour endurance cycling ride with fueling every 45 minutes",
+    "expectedSport": "cycling",
+    "minSteps": 1,
+    "maxSteps": 15,
+    "category": "edge",
+    "language": "en"
+  },
+  {
+    "id": "edge-ambiguous",
+    "text": "workout for tomorrow morning, something moderate",
+    "minSteps": 1,
+    "maxSteps": 10,
+    "category": "edge",
+    "language": "en"
+  },
+  {
+    "id": "repetition-block",
+    "text": "Cycling: warmup 10min, then repeat 3 times: 5min hard, 2min easy, 1min sprint. Cooldown 10min.",
+    "expectedSport": "cycling",
+    "minSteps": 3,
+    "maxSteps": 15,
+    "category": "repetition",
+    "language": "en"
+  }
+]

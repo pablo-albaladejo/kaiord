@@ -4,7 +4,8 @@
  * Navigation buttons for the header.
  */
 
-import { HelpCircle, Library, User } from "lucide-react";
+import { HelpCircle, Settings, User } from "lucide-react";
+import { LibraryButton } from "./LibraryButton";
 import { Button } from "../../../atoms/Button/Button";
 import { ThemeToggle } from "../../../atoms/ThemeToggle";
 
@@ -14,6 +15,7 @@ type HeaderNavProps = {
   onProfileClick: () => void;
   onLibraryClick: () => void;
   onHelpClick: () => void;
+  onSettingsClick: () => void;
 };
 
 export function HeaderNav({
@@ -22,6 +24,7 @@ export function HeaderNav({
   onProfileClick,
   onLibraryClick,
   onHelpClick,
+  onSettingsClick,
 }: HeaderNavProps) {
   return (
     <nav className="flex items-center gap-2" aria-label="Main navigation">
@@ -36,24 +39,10 @@ export function HeaderNav({
           {activeProfileName || "Profiles"}
         </span>
       </Button>
-      <Button
-        variant="tertiary"
-        size="sm"
-        onClick={onLibraryClick}
-        aria-label="Open workout library"
-        className="relative"
-      >
-        <Library className="h-4 w-4" />
-        <span className="hidden sm:inline">Library</span>
-        {libraryCount > 0 && (
-          <span
-            className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-primary-500 text-xs font-medium text-white"
-            aria-label={`${libraryCount} workouts in library`}
-          >
-            {libraryCount}
-          </span>
-        )}
-      </Button>
+      <LibraryButton
+        libraryCount={libraryCount}
+        onLibraryClick={onLibraryClick}
+      />
       <Button
         variant="tertiary"
         size="sm"
@@ -63,6 +52,16 @@ export function HeaderNav({
       >
         <HelpCircle className="h-4 w-4" />
         <span className="hidden sm:inline">Help</span>
+      </Button>
+      <Button
+        variant="tertiary"
+        size="sm"
+        onClick={onSettingsClick}
+        aria-label="Open settings"
+        title="Settings"
+      >
+        <Settings className="h-4 w-4" />
+        <span className="hidden sm:inline">Settings</span>
       </Button>
       <ThemeToggle />
     </nav>

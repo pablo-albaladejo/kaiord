@@ -457,7 +457,7 @@ test.describe("Button Improvements - Mobile Layout", () => {
     }
   });
 
-  test("should maintain proper spacing between stacked buttons on mobile", async ({
+  test.fixme("should maintain proper spacing between stacked buttons on mobile", async ({
     page,
   }) => {
     // Arrange

@@ -22,6 +22,7 @@
     "test:watch": "vitest",
     "lint": "tsc --noEmit && eslint . && prettier --check src",
     "lint:fix": "eslint . --fix && prettier --write src",
+    "eval": "tsx src/evals/run-evals.ts",
     "clean": "rm -rf dist"
   },
   "dependencies": {

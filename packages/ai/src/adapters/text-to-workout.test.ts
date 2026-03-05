@@ -48,9 +48,7 @@ const RUNNING_WORKOUT: Workout = {
 
 vi.mock("ai", () => ({
   generateText: vi.fn(),
-  Output: {
-    object: vi.fn(({ schema }: { schema: unknown }) => ({ schema })),
-  },
+  Output: { object: vi.fn(({ schema }: { schema: unknown }) => ({ schema })) },
 }));
 
 const mockGenerateText = vi.mocked((await import("ai")).generateText);
@@ -106,7 +104,9 @@ describe("createTextToWorkout", () => {
   it("retries on first failure and succeeds on second attempt", async () => {
     mockGenerateText
       .mockRejectedValueOnce(new Error("Schema validation failed"))
-      .mockResolvedValueOnce({ output: RUNNING_WORKOUT } as never);
+      .mockResolvedValueOnce({
+        output: RUNNING_WORKOUT,
+      } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
     const result = await parse("4x(8' a 5'15\")");
@@ -118,7 +118,9 @@ describe("createTextToWorkout", () => {
   it("includes error feedback in retry prompt", async () => {
     mockGenerateText
       .mockRejectedValueOnce(new Error("Invalid duration"))
-      .mockResolvedValueOnce({ output: RUNNING_WORKOUT } as never);
+      .mockResolvedValueOnce({
+        output: RUNNING_WORKOUT,
+      } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
     await parse("test workout");
@@ -186,7 +188,9 @@ describe("createTextToWorkout", () => {
     };
     mockGenerateText
       .mockRejectedValueOnce(new Error("fail"))
-      .mockResolvedValueOnce({ output: RUNNING_WORKOUT } as never);
+      .mockResolvedValueOnce({
+        output: RUNNING_WORKOUT,
+      } as never);
 
     const parse = createTextToWorkout({ model: mockModel, logger });
     await parse("test");
@@ -254,7 +258,9 @@ describe("createTextToWorkout", () => {
   it("handles non-Error thrown values in catch", async () => {
     mockGenerateText
       .mockRejectedValueOnce("plain string error")
-      .mockResolvedValueOnce({ output: RUNNING_WORKOUT } as never);
+      .mockResolvedValueOnce({
+        output: RUNNING_WORKOUT,
+      } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
     const result = await parse("test");

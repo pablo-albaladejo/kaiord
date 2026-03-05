@@ -1,8 +1,7 @@
-import { Plus } from "lucide-react";
 import { useState } from "react";
-import { Button } from "../atoms/Button/Button";
+import { GettingStartedTips } from "./GettingStartedTips";
+import { ManualCreateSection } from "./ManualCreateSection";
 import { CreateWorkoutDialog } from "../molecules/CreateWorkoutDialog/CreateWorkoutDialog";
-import { FileUpload } from "../molecules/FileUpload/FileUpload";
 import type { KRD, Sport, ValidationError } from "../../types/krd";
 
 export type WelcomeSectionProps = {
@@ -23,49 +22,13 @@ export function WelcomeSection({
 
   return (
     <>
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <h2 className="mb-4 text-2xl font-bold text-gray-900 dark:text-white">
-          Welcome to Workout Editor
-        </h2>
-        <p className="mb-6 text-gray-600 dark:text-gray-400">
-          Create, edit, and manage your structured workout files in KRD format.
-        </p>
+      <ManualCreateSection
+        onCreateClick={() => setShowCreateDialog(true)}
+        onFileLoad={onFileLoad}
+        onFileError={onFileError}
+      />
 
-        <div className="space-y-4">
-          <Button
-            onClick={() => setShowCreateDialog(true)}
-            className="w-full"
-            size="lg"
-          >
-            <Plus className="mr-2 h-5 w-5" />
-            Create New Workout
-          </Button>
-
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-300 dark:border-gray-600" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                Or
-              </span>
-            </div>
-          </div>
-
-          <FileUpload onFileLoad={onFileLoad} onError={onFileError} />
-        </div>
-      </div>
-
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-          Getting Started
-        </h3>
-        <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-          <li>• Create a new workout from scratch</li>
-          <li>• Load an existing workout file</li>
-          <li>• Add, edit, and organize workout steps</li>
-        </ul>
-      </div>
+      <GettingStartedTips />
 
       <CreateWorkoutDialog
         open={showCreateDialog}
