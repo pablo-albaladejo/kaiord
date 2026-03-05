@@ -1,10 +1,10 @@
 import { useState } from "react";
-import { Button } from "../../atoms/Button";
-import { Input } from "../../atoms/Input";
 import {
   PROVIDER_MODELS,
   getDefaultModel,
 } from "../../../lib/provider-models";
+import { Button } from "../../atoms/Button";
+import { Input } from "../../atoms/Input";
 import type { LlmProviderType } from "../../../store/ai-store";
 
 type ProviderFormProps = {

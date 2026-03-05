@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { Button } from "../../atoms/Button";
 import { ProviderEditRow } from "./ProviderEditRow";
+import { Button } from "../../atoms/Button";
 import type { LlmProviderConfig } from "../../../store/ai-store";
 
 type ProviderListProps = {

@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { Button } from "../../atoms/Button";
-import { Input } from "../../atoms/Input";
 import {
   PROVIDER_MODELS,
 } from "../../../lib/provider-models";
+import { Button } from "../../atoms/Button";
+import { Input } from "../../atoms/Input";
 import type { LlmProviderConfig } from "../../../store/ai-store";
 
 type ProviderEditRowProps = {
