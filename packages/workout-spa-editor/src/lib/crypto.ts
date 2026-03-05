@@ -2,11 +2,10 @@ const SALT_LENGTH = 16;
 const IV_LENGTH = 12;
 const PBKDF2_ITERATIONS = 100_000;
 
-const toBuffer = (data: Uint8Array): ArrayBuffer => {
-  const copy = new ArrayBuffer(data.byteLength);
-  new Uint8Array(copy).set(data);
-  return copy;
-};
+const copyBytes = (data: Uint8Array): Uint8Array =>
+  new Uint8Array(
+    data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength)
+  );
 
 const deriveKey = async (
   passphrase: string,
@@ -15,7 +14,7 @@ const deriveKey = async (
   const encoder = new TextEncoder();
   const keyMaterial = await crypto.subtle.importKey(
     "raw",
-    toBuffer(encoder.encode(passphrase)),
+    copyBytes(encoder.encode(passphrase)) as BufferSource,
     "PBKDF2",
     false,
     ["deriveKey"]
@@ -23,7 +22,7 @@ const deriveKey = async (
   return crypto.subtle.deriveKey(
     {
       name: "PBKDF2",
-      salt: toBuffer(salt),
+      salt: copyBytes(salt) as BufferSource,
       iterations: PBKDF2_ITERATIONS,
       hash: "SHA-256",
     },
@@ -44,9 +43,9 @@ export const encrypt = async (
   const key = await deriveKey(passphrase, salt);
 
   const ciphertext = await crypto.subtle.encrypt(
-    { name: "AES-GCM", iv: toBuffer(iv) },
+    { name: "AES-GCM", iv: copyBytes(iv) as BufferSource },
     key,
-    toBuffer(encoder.encode(plaintext))
+    copyBytes(encoder.encode(plaintext)) as BufferSource
   );
 
   const combined = new Uint8Array(
@@ -70,9 +69,9 @@ export const decrypt = async (
 
   const key = await deriveKey(passphrase, salt);
   const decrypted = await crypto.subtle.decrypt(
-    { name: "AES-GCM", iv: toBuffer(iv) },
+    { name: "AES-GCM", iv: copyBytes(iv) as BufferSource },
     key,
-    toBuffer(ciphertext)
+    copyBytes(ciphertext) as BufferSource
   );
 
   return new TextDecoder().decode(decrypted);

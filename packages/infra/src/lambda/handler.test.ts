@@ -13,7 +13,11 @@ const createEvent = (body?: string): APIGatewayProxyEventV2 =>
   ({ body }) as APIGatewayProxyEventV2;
 
 const validBody = JSON.stringify({
-  krd: { version: "1.0", type: "structured_workout", metadata: {} },
+  krd: {
+    version: "1.0",
+    type: "structured_workout",
+    metadata: { created: "2025-01-15T10:30:00Z", sport: "cycling" },
+  },
   garmin: { username: "user@test.com", password: "pass123" },
 });
 
@@ -88,9 +92,7 @@ describe("Lambda handler", () => {
     const result = await handler(createEvent(validBody));
 
     expect(result.statusCode).toBe(500);
-    expect(JSON.parse(result.body as string).error).toContain(
-      "Connection timeout"
-    );
+    expect(JSON.parse(result.body as string).error).toBe("Garmin API error");
   });
 
   it("should not leak credentials in error responses", async () => {
@@ -100,5 +102,6 @@ describe("Lambda handler", () => {
     const body = result.body as string;
 
     expect(body).not.toContain("user@test.com");
+    expect(body).not.toContain("pass123");
   });
 });

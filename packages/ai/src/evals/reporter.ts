@@ -7,7 +7,7 @@ export const createReport = (
 ): EvalReport => {
   const passed = results.filter((r) => r.pass).length;
   const byCategory = groupBy(results, (r) => r.id.split("-")[0] ?? "other");
-  const byLanguage = groupBy(results, (r) => r.id.split("-")[0] ?? "other");
+  const byLanguage = groupBy(results, (r) => r.id.split("-")[1] ?? "other");
 
   return {
     provider,

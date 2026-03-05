@@ -23,14 +23,13 @@ test.describe("Garmin Push Flow", () => {
     const pushButton = page.getByRole("button", {
       name: /push to garmin/i,
     });
-    if (await pushButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await pushButton.click();
+    await expect(pushButton).toBeVisible({ timeout: 5000 });
+    await pushButton.click();
 
-      // Should show success with Garmin Connect link
-      await expect(page.getByText(/open in garmin connect/i)).toBeVisible({
-        timeout: 10000,
-      });
-    }
+    // Should show success with Garmin Connect link
+    await expect(page.getByText(/open in garmin connect/i)).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test("8.6: push error flow - 401 shows error message", async ({ page }) => {
@@ -47,17 +46,16 @@ test.describe("Garmin Push Flow", () => {
     const pushButton = page.getByRole("button", {
       name: /push to garmin/i,
     });
-    if (await pushButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await pushButton.click();
+    await expect(pushButton).toBeVisible({ timeout: 5000 });
+    await pushButton.click();
 
-      // Should show auth error message
-      await expect(
-        page.getByText(/authentication|credentials/i).first()
-      ).toBeVisible({ timeout: 10000 });
+    // Should show auth error message
+    await expect(
+      page.getByText(/authentication|credentials/i).first()
+    ).toBeVisible({ timeout: 10000 });
 
-      // Should offer link to check credentials
-      await expect(page.getByText(/check credentials/i)).toBeVisible();
-    }
+    // Should offer link to check credentials
+    await expect(page.getByText(/check credentials/i)).toBeVisible();
   });
 
   test("8.7a: no Garmin credentials shows configure button", async ({
@@ -70,9 +68,7 @@ test.describe("Garmin Push Flow", () => {
     const configButton = page.getByRole("button", {
       name: /configure garmin/i,
     });
-    if (await configButton.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await expect(configButton).toBeVisible();
-    }
+    await expect(configButton).toBeVisible({ timeout: 5000 });
   });
 });
 
@@ -124,11 +120,18 @@ async function configureGarminCredentials(
   // Open settings
   await page.getByRole("button", { name: /open settings/i }).click();
 
-  // Switch to Garmin tab
-  await page
-    .getByRole("button", { name: /garmin/i })
-    .first()
-    .click();
+  // Wait for dialog to be visible
+  await expect(page.getByText("Settings")).toBeVisible({ timeout: 5000 });
+
+  // Switch to Garmin tab (use exact match to avoid matching "Push to Garmin")
+  const garminTab = page.getByRole("button", { name: /^garmin$/i });
+  await expect(garminTab).toBeVisible({ timeout: 3000 });
+  await garminTab.click();
+
+  // Wait for Garmin tab content to render
+  await expect(page.getByText("Garmin Connect Credentials")).toBeVisible({
+    timeout: 5000,
+  });
 
   // Fill credentials
   await page.getByPlaceholder("your@email.com").fill("test@garmin.com");

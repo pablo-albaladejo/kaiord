@@ -36,7 +36,14 @@ export const AiTab: React.FC = () => {
         <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
           Custom System Prompt
         </h3>
+        <label
+          htmlFor="ai-custom-system-prompt"
+          className="mb-2 block text-sm text-gray-600 dark:text-gray-300"
+        >
+          Additional instructions applied to all generations
+        </label>
         <textarea
+          id="ai-custom-system-prompt"
           className="w-full rounded-lg border border-gray-300 p-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
           rows={3}
           placeholder="Additional instructions for all AI generations (e.g., 'I'm recovering from a knee injury')"

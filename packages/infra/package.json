@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/infra",
-  "version": "0.1.0",
+  "version": "4.8.0",
   "private": true,
   "description": "Self-hostable AWS CDK stack for Kaiord Garmin proxy Lambda",
   "type": "module",

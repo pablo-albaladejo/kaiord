@@ -29,21 +29,20 @@ export async function seedAiProvider(
   provider: ProviderSeed = DEFAULT_PROVIDER
 ): Promise<void> {
   await page.evaluate((p) => {
-    // Access Zustand store via its internal API exposed on window
-    // Zustand stores created with `create` have getState/setState
     const w = window as unknown as Record<string, unknown>;
     const stores = w.__ZUSTAND_STORES__;
-    if (stores) {
-      const aiStore = (
-        stores as Record<string, { getState: () => unknown }>
-      ).ai?.getState();
-      if (aiStore) {
-        (
-          aiStore as Record<string, (...args: unknown[]) => unknown>
-        ).addProvider(p);
-        return;
-      }
+    if (!stores) throw new Error("Missing window.__ZUSTAND_STORES__");
+
+    const aiStore = (
+      stores as Record<string, { getState: () => unknown }>
+    ).ai?.getState();
+    if (!aiStore) throw new Error("Missing ai store on __ZUSTAND_STORES__");
+
+    const addProvider = (aiStore as Record<string, unknown>).addProvider;
+    if (typeof addProvider !== "function") {
+      throw new Error("Missing ai.addProvider");
     }
+    (addProvider as (provider: ProviderSeed) => unknown)(p);
   }, provider);
 }
 
@@ -60,17 +59,21 @@ export async function seedGarminCredentials(
     ({ u, p }) => {
       const w = window as unknown as Record<string, unknown>;
       const stores = w.__ZUSTAND_STORES__;
-      if (stores) {
-        const garminStore = (
-          stores as Record<string, { getState: () => unknown }>
-        ).garmin?.getState();
-        if (garminStore) {
-          (
-            garminStore as Record<string, (...args: unknown[]) => unknown>
-          ).setCredentials(u, p);
-          return;
-        }
+      if (!stores) throw new Error("Missing window.__ZUSTAND_STORES__");
+
+      const garminStore = (
+        stores as Record<string, { getState: () => unknown }>
+      ).garmin?.getState();
+      if (!garminStore) {
+        throw new Error("Missing garmin store on __ZUSTAND_STORES__");
       }
+
+      const setCredentials = (garminStore as Record<string, unknown>)
+        .setCredentials;
+      if (typeof setCredentials !== "function") {
+        throw new Error("Missing garmin.setCredentials");
+      }
+      (setCredentials as (u: string, p: string) => unknown)(u, p);
     },
     { u: username, p: password }
   );

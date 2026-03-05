@@ -39,19 +39,18 @@ test.describe("AI Generate Workout Flow", () => {
 
     // Now look for the AI workout input area
     const textarea = page.getByPlaceholder(/describe your workout/i);
-    if (await textarea.isVisible({ timeout: 3000 }).catch(() => false)) {
-      await textarea.fill(
-        "45 minutes sweet spot cycling with 10 min warmup and cooldown"
-      );
+    await expect(textarea).toBeVisible({ timeout: 5000 });
+    await textarea.fill(
+      "45 minutes sweet spot cycling with 10 min warmup and cooldown"
+    );
 
-      // Click generate
-      await page.getByRole("button", { name: /generate/i }).click();
+    // Click generate
+    await page.getByRole("button", { name: /generate/i }).click();
 
-      // Wait for the workout to appear (mock API responds instantly)
-      await expect(page.getByText(/sweet spot cycling/i).first()).toBeVisible({
-        timeout: 10000,
-      });
-    }
+    // Wait for the workout to appear (mock API responds instantly)
+    await expect(page.getByText(/sweet spot cycling/i).first()).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test("8.10: model selector lists all configured providers", async ({

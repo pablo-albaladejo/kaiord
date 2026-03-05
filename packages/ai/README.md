@@ -5,7 +5,7 @@ AI/LLM integration for the Kaiord health & fitness data framework. Converts natu
 ## Installation
 
 ```bash
-pnpm add @kaiord/ai ai
+pnpm add @kaiord/ai ai @ai-sdk/anthropic
 ```
 
 ## Usage

@@ -23,7 +23,9 @@ export const createSecureStorage = (passphrase: string) => ({
 
   clearAll: (): void => {
     const keys = Object.keys(localStorage).filter((k) => k.startsWith(PREFIX));
-    keys.forEach((k) => localStorage.removeItem(k));
+    keys.forEach((k) => {
+      localStorage.removeItem(k);
+    });
   },
 });
 

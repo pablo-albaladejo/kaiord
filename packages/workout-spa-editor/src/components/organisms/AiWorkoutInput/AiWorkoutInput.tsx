@@ -32,7 +32,12 @@ export const AiWorkoutInput: React.FC<AiWorkoutInputProps> = ({
 
   return (
     <div className="space-y-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
+      <label htmlFor="ai-workout-description" className="sr-only">
+        Workout description
+      </label>
       <textarea
+        id="ai-workout-description"
+        aria-label="Workout description"
         className="w-full rounded-lg border border-gray-300 p-3 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
         rows={3}
         maxLength={2000}

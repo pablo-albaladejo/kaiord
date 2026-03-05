@@ -23,7 +23,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   const { krd, garmin } = validation.data;
 
   try {
-    const result = await pushToGarmin(krd as never, garmin);
+    const result = await pushToGarmin(krd, garmin);
     return jsonResponse(200, result);
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Unknown error";
@@ -35,6 +35,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     if (isAuthError) {
       return errorResponse(401, "Garmin authentication failed");
     }
-    return errorResponse(500, `Garmin API error: ${message}`);
+    console.error("Garmin API error:", message);
+    return errorResponse(500, "Garmin API error");
   }
 };
