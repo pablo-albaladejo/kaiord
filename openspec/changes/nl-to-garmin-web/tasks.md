@@ -14,7 +14,7 @@
 - [x] 1.10 Test Lambda handler locally with `sam local invoke` or unit tests
 - [x] 1.11 Add integration test: mock Garmin SSO, verify full pipeline
 - [x] 1.12 Add README with self-hosting instructions (`cdk deploy`)
-- [ ] 1.13 Update CI: add `@kaiord/infra` to test matrix
+- [x] 1.13 Update CI: add `@kaiord/infra` to test matrix
 
 ## 2. SPA: Encrypted Credential Storage
 
@@ -54,7 +54,7 @@
 - [x] 5.9 On error: show error message with retry option
 - [x] 5.10 Handle no providers configured: redirect to settings
 - [x] 5.11 Test AI input component: renders, model dropdown, validates, handles loading/error states
-- [ ] 5.12 Test provider factory: creates correct LanguageModel for each provider type
+- [x] 5.12 Test provider factory: creates correct LanguageModel for each provider type
 
 ## 6. SPA: Garmin Push UI
 
@@ -76,17 +76,17 @@
 
 ## 8. SPA: E2E Tests (Playwright)
 
-- [ ] 8.1 Create Playwright test setup with API mocking (`page.route()` for LLM and Lambda endpoints)
-- [ ] 8.2 Create LLM response fixtures (valid Workout JSON for different sports)
-- [ ] 8.3 Create Lambda response fixtures (PushResult success and error cases)
-- [ ] 8.4 E2E: generate workout flow — type NL → select model → generate → workout appears in editor
-- [ ] 8.5 E2E: push to Garmin flow — push button → loading → success message with URL
-- [ ] 8.6 E2E: push error flow — 401 → error message → link to settings
-- [ ] 8.7 E2E: settings — add provider, remove provider, set default, save and reload
-- [ ] 8.8 E2E: settings — configure Garmin credentials, custom Lambda URL
-- [ ] 8.9 E2E: no providers configured — generate button shows settings prompt
-- [ ] 8.10 E2E: model selector dropdown — lists all configured providers, defaults correct
-- [ ] 8.11 Add E2E to CI workflow — Playwright job on PRs that modify `packages/workout-spa-editor/`
+- [x] 8.1 Create Playwright test setup with API mocking (`page.route()` for LLM and Lambda endpoints)
+- [x] 8.2 Create LLM response fixtures (valid Workout JSON for different sports)
+- [x] 8.3 Create Lambda response fixtures (PushResult success and error cases)
+- [x] 8.4 E2E: generate workout flow — type NL → select model → generate → workout appears in editor
+- [x] 8.5 E2E: push to Garmin flow — push button → loading → success message with URL
+- [x] 8.6 E2E: push error flow — 401 → error message → link to settings
+- [x] 8.7 E2E: settings — add provider, remove provider, set default, save and reload
+- [x] 8.8 E2E: settings — configure Garmin credentials, custom Lambda URL
+- [x] 8.9 E2E: no providers configured — generate button shows settings prompt
+- [x] 8.10 E2E: model selector dropdown — lists all configured providers, defaults correct
+- [x] 8.11 Add E2E to CI workflow — Playwright job on PRs that modify `packages/workout-spa-editor/`
 
 ## 9. LLM Eval Suite (`@kaiord/ai`)
 
@@ -105,20 +105,20 @@
 - [x] 9.13 Create eval report generator: JSON + human-readable summary with pass/fail per case
 - [x] 9.14 Add `pnpm --filter @kaiord/ai eval` script in package.json
 - [x] 9.15 Create `.github/workflows/eval.yml` — `workflow_dispatch` only (manual trigger), posts results as artifact
-- [ ] 9.16 Document eval process in `packages/ai/README.md`
+- [x] 9.16 Document eval process in `packages/ai/README.md`
 
 ## 10. Documentation
 
 - [x] 10.1 Add privacy policy / disclaimers page content
 - [x] 10.2 Add self-hosting guide in `@kaiord/infra/README.md`
-- [ ] 10.3 Update SPA README with new features
+- [x] 10.3 Update SPA README with new features
 - [x] 10.4 Update `CLAUDE.md` — add `@kaiord/infra` to packages list
-- [ ] 10.5 Document eval process and how to run evals locally
+- [x] 10.5 Document eval process and how to run evals locally
 
 ## 11. CI/CD & Release
 
-- [ ] 11.1 Add `@kaiord/infra` to CI test matrix (`.github/workflows/ci.yml`)
-- [ ] 11.2 Add `@kaiord/infra` to changeset config (`.changeset/config.json`)
-- [ ] 11.3 Add Playwright E2E job to CI (on SPA changes)
+- [x] 11.1 Add `@kaiord/infra` to CI test matrix (`.github/workflows/ci.yml`)
+- [x] 11.2 Add `@kaiord/infra` to changeset config (`.changeset/config.json`)
+- [x] 11.3 Add Playwright E2E job to CI (on SPA changes)
 - [x] 11.4 Create `.github/workflows/eval.yml` — `workflow_dispatch` manual trigger only
-- [ ] 11.5 Add changeset for all modified packages
+- [x] 11.5 Add changeset for all modified packages
