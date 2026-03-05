@@ -7,6 +7,7 @@ import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { TUTORIAL_STEPS } from "./constants/tutorial-steps";
 import { useOnboardingTutorial } from "./hooks/use-onboarding-tutorial";
+import { useStoreHydration } from "./hooks/use-store-hydration";
 import { useAppHandlers } from "./hooks/useAppHandlers";
 import { useDeleteCleanup } from "./hooks/useDeleteCleanup";
 import { useWorkoutStore } from "./store/workout-store";
@@ -19,6 +20,7 @@ const OnboardingTutorial = lazy(() =>
 );
 
 function App() {
+  useStoreHydration();
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
   const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
   const { showTutorial, setShowTutorial } = useOnboardingTutorial();

@@ -20,6 +20,7 @@ export type AiStore = {
   customPrompt: string;
   selectedProviderId: string | null;
   generation: GenerationState;
+  hydrated: boolean;
   addProvider: (config: Omit<LlmProviderConfig, "id" | "isDefault">) => string;
   removeProvider: (id: string) => void;
   updateProvider: (
@@ -32,4 +33,5 @@ export type AiStore = {
   setGeneration: (state: GenerationState) => void;
   getSelectedProvider: () => LlmProviderConfig | null;
   getDefaultProvider: () => LlmProviderConfig | null;
+  hydrate: () => Promise<void>;
 };

@@ -1,5 +1,14 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useGarminStore, isValidLambdaUrl } from "./garmin-store";
+
+vi.mock("./garmin-store-persistence", () => ({
+  persistGarminData: vi.fn(),
+  loadGarminData: vi.fn().mockResolvedValue({
+    username: "saved@user.com",
+    password: "saved-pass",
+    lambdaUrl: "https://custom.server.com/push",
+  }),
+}));
 
 const resetStore = () =>
   useGarminStore.setState({
@@ -7,6 +16,7 @@ const resetStore = () =>
     password: "",
     lambdaUrl: "https://api.kaiord.com/push",
     push: { status: "idle" },
+    hydrated: false,
   });
 
 describe("garmin-store", () => {
@@ -101,6 +111,18 @@ describe("garmin-store", () => {
     if (push.status === "error") {
       expect(push.message).toBe("Auth failed");
     }
+  });
+
+  it("should hydrate credentials from persistence", async () => {
+    expect(useGarminStore.getState().hydrated).toBe(false);
+
+    await useGarminStore.getState().hydrate();
+
+    const state = useGarminStore.getState();
+    expect(state.hydrated).toBe(true);
+    expect(state.username).toBe("saved@user.com");
+    expect(state.password).toBe("saved-pass");
+    expect(state.lambdaUrl).toBe("https://custom.server.com/push");
   });
 });
 

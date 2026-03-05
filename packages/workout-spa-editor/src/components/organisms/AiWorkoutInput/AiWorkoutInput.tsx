@@ -16,10 +16,12 @@ export const AiWorkoutInput: React.FC<AiWorkoutInputProps> = ({
 }) => {
   const [text, setText] = useState("");
   const [sport, setSport] = useState("");
-  const { providers, generation } = useAiStore();
+  const { providers, generation, hydrated } = useAiStore();
   const { generate } = useAiGeneration();
   const isLoading = generation.status === "loading";
   const hasProviders = providers.length > 0;
+
+  if (!hydrated) return null;
 
   const handleGenerate = () => {
     if (!text.trim() || isLoading) return;

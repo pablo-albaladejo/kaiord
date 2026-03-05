@@ -1,9 +1,18 @@
 import { Plus } from "lucide-react";
-import { useState } from "react";
+import { lazy, Suspense, useState } from "react";
+import { GettingStartedTips } from "./GettingStartedTips";
+import { OrDivider } from "./OrDivider";
+import { useSettingsDialogStore } from "../../store/settings-dialog-store";
 import { Button } from "../atoms/Button/Button";
 import { CreateWorkoutDialog } from "../molecules/CreateWorkoutDialog/CreateWorkoutDialog";
 import { FileUpload } from "../molecules/FileUpload/FileUpload";
 import type { KRD, Sport, ValidationError } from "../../types/krd";
+
+const AiWorkoutInput = lazy(() =>
+  import("../organisms/AiWorkoutInput/AiWorkoutInput").then((m) => ({
+    default: m.AiWorkoutInput,
+  }))
+);
 
 export type WelcomeSectionProps = {
   onFileLoad: (krd: KRD) => void;
@@ -20,6 +29,7 @@ export function WelcomeSection({
   onCreateWorkout,
 }: WelcomeSectionProps) {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const settingsShow = useSettingsDialogStore((s) => s.show);
 
   return (
     <>
@@ -41,31 +51,17 @@ export function WelcomeSection({
             Create New Workout
           </Button>
 
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-gray-300 dark:border-gray-600" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-white px-2 text-gray-500 dark:bg-gray-800 dark:text-gray-400">
-                Or
-              </span>
-            </div>
-          </div>
+          <OrDivider />
 
           <FileUpload onFileLoad={onFileLoad} onError={onFileError} />
         </div>
       </div>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <h3 className="mb-3 text-lg font-semibold text-gray-900 dark:text-white">
-          Getting Started
-        </h3>
-        <ul className="space-y-2 text-gray-600 dark:text-gray-400">
-          <li>• Create a new workout from scratch</li>
-          <li>• Load an existing workout file</li>
-          <li>• Add, edit, and organize workout steps</li>
-        </ul>
-      </div>
+      <Suspense fallback={null}>
+        <AiWorkoutInput onSettingsClick={settingsShow} />
+      </Suspense>
+
+      <GettingStartedTips />
 
       <CreateWorkoutDialog
         open={showCreateDialog}

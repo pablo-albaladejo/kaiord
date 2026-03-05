@@ -1,0 +1,54 @@
+import { loadGarminData, persistGarminData } from "./garmin-store-persistence";
+
+type GarminState = {
+  username: string;
+  password: string;
+  lambdaUrl: string;
+  hydrated: boolean;
+};
+
+type Set = (
+  fn: Partial<GarminState> | ((s: GarminState) => Partial<GarminState>)
+) => void;
+type Get = () => GarminState;
+
+const persist = (get: Get): void => {
+  const { username, password, lambdaUrl } = get();
+  persistGarminData({ username, password, lambdaUrl });
+};
+
+export const createGarminActions = (
+  set: Set,
+  get: Get,
+  defaultUrl: string
+) => ({
+  hydrate: async () => {
+    const data = await loadGarminData();
+    set({
+      username: data.username,
+      password: data.password,
+      lambdaUrl: data.lambdaUrl || defaultUrl,
+      hydrated: true,
+    });
+  },
+
+  setCredentials: (username: string, password: string) => {
+    set({ username, password });
+    persist(get);
+  },
+
+  setLambdaUrl: (url: string) => {
+    set({ lambdaUrl: url });
+    persist(get);
+  },
+
+  resetLambdaUrl: () => {
+    set({ lambdaUrl: defaultUrl });
+    persist(get);
+  },
+
+  clearCredentials: () => {
+    set({ username: "", password: "" });
+    persist(get);
+  },
+});

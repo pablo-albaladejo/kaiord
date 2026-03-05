@@ -1,13 +1,14 @@
 import { create } from "zustand";
+import { createGarminActions } from "./garmin-store-actions";
 
 const DEFAULT_LAMBDA_URL = "https://api.kaiord.com/push";
 
 export const isValidLambdaUrl = (url: string): boolean => {
   try {
     const parsed = new URL(url);
-    const isLocalhost =
+    const isLocal =
       parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
-    return parsed.protocol === "https:" || isLocalhost;
+    return parsed.protocol === "https:" || isLocal;
   } catch {
     return false;
   }
@@ -24,12 +25,14 @@ export type GarminStore = {
   password: string;
   lambdaUrl: string;
   push: PushState;
+  hydrated: boolean;
   setCredentials: (username: string, password: string) => void;
   setLambdaUrl: (url: string) => void;
   resetLambdaUrl: () => void;
   setPush: (state: PushState) => void;
   clearCredentials: () => void;
   hasCredentials: () => boolean;
+  hydrate: () => Promise<void>;
 };
 
 export const useGarminStore = create<GarminStore>((set, get) => ({
@@ -37,16 +40,11 @@ export const useGarminStore = create<GarminStore>((set, get) => ({
   password: "",
   lambdaUrl: DEFAULT_LAMBDA_URL,
   push: { status: "idle" },
+  hydrated: false,
 
-  setCredentials: (username, password) => set({ username, password }),
-
-  setLambdaUrl: (url) => set({ lambdaUrl: url }),
-
-  resetLambdaUrl: () => set({ lambdaUrl: DEFAULT_LAMBDA_URL }),
+  ...createGarminActions(set, get, DEFAULT_LAMBDA_URL),
 
   setPush: (push) => set({ push }),
-
-  clearCredentials: () => set({ username: "", password: "" }),
 
   hasCredentials: () => {
     const { username, password } = get();

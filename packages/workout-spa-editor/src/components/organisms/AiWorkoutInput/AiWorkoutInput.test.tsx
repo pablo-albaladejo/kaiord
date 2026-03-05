@@ -10,6 +10,7 @@ describe("AiWorkoutInput", () => {
       customPrompt: "",
       selectedProviderId: null,
       generation: { status: "idle" },
+      hydrated: true,
     });
   });
 

@@ -1,5 +1,22 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useAiStore } from "./ai-store";
+
+vi.mock("./ai-store-persistence", () => ({
+  persistAiData: vi.fn(),
+  loadAiData: vi.fn().mockResolvedValue({
+    providers: [
+      {
+        id: "llm_saved",
+        type: "openai",
+        apiKey: "sk-saved",
+        model: "gpt-4",
+        label: "Saved GPT",
+        isDefault: true,
+      },
+    ],
+    customPrompt: "saved prompt",
+  }),
+}));
 
 const resetStore = () =>
   useAiStore.setState({
@@ -7,6 +24,7 @@ const resetStore = () =>
     customPrompt: "",
     selectedProviderId: null,
     generation: { status: "idle" },
+    hydrated: false,
   });
 
 describe("ai-store", () => {
@@ -152,5 +170,17 @@ describe("ai-store", () => {
 
     store.setGeneration({ status: "success" });
     expect(useAiStore.getState().generation.status).toBe("success");
+  });
+
+  it("should hydrate providers from persistence", async () => {
+    expect(useAiStore.getState().hydrated).toBe(false);
+
+    await useAiStore.getState().hydrate();
+
+    const state = useAiStore.getState();
+    expect(state.hydrated).toBe(true);
+    expect(state.providers).toHaveLength(1);
+    expect(state.providers[0].label).toBe("Saved GPT");
+    expect(state.customPrompt).toBe("saved prompt");
   });
 });
