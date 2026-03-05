@@ -16,6 +16,7 @@ Kaiord is an open-source health & fitness data framework. A TypeScript monorepo 
 - `@kaiord/garmin-connect` - Garmin Connect API client (SSO auth, push/list workouts)
 - `@kaiord/cli` - Command-line interface
 - `@kaiord/mcp` - Model Context Protocol (MCP) server for AI/LLM integration
+- `@kaiord/infra` - Self-hostable AWS CDK stack (Garmin proxy Lambda)
 - `@kaiord/workout-spa-editor` - React web application (private)
 
 ## Commands

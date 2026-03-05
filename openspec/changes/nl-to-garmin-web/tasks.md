@@ -109,10 +109,10 @@
 
 ## 10. Documentation
 
-- [ ] 10.1 Add privacy policy / disclaimers page content
-- [ ] 10.2 Add self-hosting guide in `@kaiord/infra/README.md`
+- [x] 10.1 Add privacy policy / disclaimers page content
+- [x] 10.2 Add self-hosting guide in `@kaiord/infra/README.md`
 - [ ] 10.3 Update SPA README with new features
-- [ ] 10.4 Update `CLAUDE.md` — add `@kaiord/infra` to packages list
+- [x] 10.4 Update `CLAUDE.md` — add `@kaiord/infra` to packages list
 - [ ] 10.5 Document eval process and how to run evals locally
 
 ## 11. CI/CD & Release
@@ -120,5 +120,5 @@
 - [ ] 11.1 Add `@kaiord/infra` to CI test matrix (`.github/workflows/ci.yml`)
 - [ ] 11.2 Add `@kaiord/infra` to changeset config (`.changeset/config.json`)
 - [ ] 11.3 Add Playwright E2E job to CI (on SPA changes)
-- [ ] 11.4 Create `.github/workflows/eval.yml` — `workflow_dispatch` manual trigger only
+- [x] 11.4 Create `.github/workflows/eval.yml` — `workflow_dispatch` manual trigger only
 - [ ] 11.5 Add changeset for all modified packages
