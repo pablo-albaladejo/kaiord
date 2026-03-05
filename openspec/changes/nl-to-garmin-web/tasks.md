@@ -90,21 +90,21 @@
 
 ## 9. LLM Eval Suite (`@kaiord/ai`)
 
-- [ ] 9.1 Create `packages/ai/src/evals/` directory structure
-- [ ] 9.2 Create `benchmarks.json` — 20+ curated workout descriptions with expected assertions
-- [ ] 9.3 Include benchmarks for: cycling, running, swimming, generic sports
-- [ ] 9.4 Include benchmarks for: simple, intervals, repetition blocks, mixed complexity
-- [ ] 9.5 Include benchmarks for: English, Spanish, mixed language
-- [ ] 9.6 Include benchmarks for: zone references (FTP %, HR zones, pace zones) with expected ranges
-- [ ] 9.7 Include edge case benchmarks: very short, very long, ambiguous descriptions
-- [ ] 9.8 Create eval runner script: iterate benchmarks, call `createTextToWorkout()`, validate output
-- [ ] 9.9 Eval assertions: Zod schema validation (100% required)
-- [ ] 9.10 Eval assertions: sport type correctness (≥95%)
-- [ ] 9.11 Eval assertions: plausible step count (not empty, not >50)
-- [ ] 9.12 Eval assertions: zone accuracy when zones provided (±5% tolerance, ≥90%)
-- [ ] 9.13 Create eval report generator: JSON + human-readable summary with pass/fail per case
-- [ ] 9.14 Add `pnpm --filter @kaiord/ai eval` script in package.json
-- [ ] 9.15 Create `.github/workflows/eval.yml` — `workflow_dispatch` only (manual trigger), posts results as artifact
+- [x] 9.1 Create `packages/ai/src/evals/` directory structure
+- [x] 9.2 Create `benchmarks.json` — 20+ curated workout descriptions with expected assertions
+- [x] 9.3 Include benchmarks for: cycling, running, swimming, generic sports
+- [x] 9.4 Include benchmarks for: simple, intervals, repetition blocks, mixed complexity
+- [x] 9.5 Include benchmarks for: English, Spanish, mixed language
+- [x] 9.6 Include benchmarks for: zone references (FTP %, HR zones, pace zones) with expected ranges
+- [x] 9.7 Include edge case benchmarks: very short, very long, ambiguous descriptions
+- [x] 9.8 Create eval runner script: iterate benchmarks, call `createTextToWorkout()`, validate output
+- [x] 9.9 Eval assertions: Zod schema validation (100% required)
+- [x] 9.10 Eval assertions: sport type correctness (≥95%)
+- [x] 9.11 Eval assertions: plausible step count (not empty, not >50)
+- [x] 9.12 Eval assertions: zone accuracy when zones provided (±5% tolerance, ≥90%)
+- [x] 9.13 Create eval report generator: JSON + human-readable summary with pass/fail per case
+- [x] 9.14 Add `pnpm --filter @kaiord/ai eval` script in package.json
+- [x] 9.15 Create `.github/workflows/eval.yml` — `workflow_dispatch` only (manual trigger), posts results as artifact
 - [ ] 9.16 Document eval process in `packages/ai/README.md`
 
 ## 10. Documentation
