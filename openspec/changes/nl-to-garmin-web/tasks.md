@@ -33,13 +33,13 @@
 
 ## 4. SPA: Settings UI
 
-- [ ] 4.1 Create `SettingsPanel` component — tabbed panel (AI, Garmin, Privacy)
-- [ ] 4.2 AI tab: provider list (add/remove/edit), each with: provider type dropdown (Anthropic/OpenAI/Google), API key input, model name input, label input, default toggle
-- [ ] 4.3 AI tab: custom system prompt textarea (global, applies to all providers)
-- [ ] 4.4 Garmin tab: username/password inputs, Lambda URL input (default + custom), connection test button
-- [ ] 4.5 Privacy tab: disclaimers text, link to self-hosting docs, "Clear all credentials" button
-- [ ] 4.6 Integrate settings into existing `HeaderNav` (gear/settings icon)
-- [ ] 4.7 Test settings panel: renders, add/remove providers, saves encrypted, loads decrypted
+- [x] 4.1 Create `SettingsPanel` component — tabbed panel (AI, Garmin, Privacy)
+- [x] 4.2 AI tab: provider list (add/remove/edit), each with: provider type dropdown (Anthropic/OpenAI/Google), API key input, model name input, label input, default toggle
+- [x] 4.3 AI tab: custom system prompt textarea (global, applies to all providers)
+- [x] 4.4 Garmin tab: username/password inputs, Lambda URL input (default + custom), connection test button
+- [x] 4.5 Privacy tab: disclaimers text, link to self-hosting docs, "Clear all credentials" button
+- [x] 4.6 Integrate settings into existing `HeaderNav` (gear/settings icon)
+- [x] 4.7 Test settings panel: renders, add/remove providers, saves encrypted, loads decrypted
 
 ## 5. SPA: AI Workout Generation UI
 

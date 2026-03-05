@@ -19,6 +19,11 @@ const WorkoutLibrary = lazy(() =>
 const HelpDialog = lazy(() =>
   import("./components/HelpDialog").then((m) => ({ default: m.HelpDialog }))
 );
+const SettingsPanel = lazy(() =>
+  import("../../organisms/SettingsPanel/SettingsPanel").then((m) => ({
+    default: m.SettingsPanel,
+  }))
+);
 
 type LayoutHeaderProps = {
   onReplayTutorial?: () => void;
@@ -28,6 +33,7 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
   const profile = useLazyDialog();
   const library = useLazyDialog();
   const help = useLazyDialog();
+  const settings = useLazyDialog();
   const { getActiveProfile } = useProfileStore();
   const activeProfile = getActiveProfile();
   const { templates } = useLibraryStore();
@@ -43,6 +49,7 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
           onProfileClick={profile.show}
           onLibraryClick={library.show}
           onHelpClick={help.show}
+          onSettingsClick={settings.show}
         />
       </div>
 
@@ -71,6 +78,15 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
             open={help.open}
             onOpenChange={help.setOpen}
             onReplayTutorial={onReplayTutorial}
+          />
+        )}
+      </Suspense>
+
+      <Suspense fallback={null}>
+        {settings.mounted && (
+          <SettingsPanel
+            open={settings.open}
+            onOpenChange={settings.setOpen}
           />
         )}
       </Suspense>
