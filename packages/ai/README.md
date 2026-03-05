@@ -15,7 +15,9 @@ import { createTextToWorkout } from "@kaiord/ai";
 import { createAnthropic } from "@ai-sdk/anthropic";
 
 const provider = createAnthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-const textToWorkout = createTextToWorkout({ model: provider("claude-sonnet-4-5-20241022") });
+const textToWorkout = createTextToWorkout({
+  model: provider("claude-sonnet-4-5-20241022"),
+});
 
 const workout = await textToWorkout("30 minutes easy cycling", {
   sport: "cycling",
@@ -55,12 +57,12 @@ The benchmark suite (`src/evals/benchmarks.json`) contains 22 curated workout de
 
 Each benchmark is evaluated against these criteria:
 
-| Assertion | Threshold | Description |
-|---|---|---|
-| Schema validation | 100% | Output must pass Zod `workoutSchema` |
-| Sport correctness | >= 95% | Detected sport matches expected sport |
-| Step count | per-benchmark | Between `minSteps` and `maxSteps` |
-| Zone accuracy | +/- 5% | Target values within tolerance when zone checks are defined |
+| Assertion         | Threshold     | Description                                                 |
+| ----------------- | ------------- | ----------------------------------------------------------- |
+| Schema validation | 100%          | Output must pass Zod `workoutSchema`                        |
+| Sport correctness | >= 95%        | Detected sport matches expected sport                       |
+| Step count        | per-benchmark | Between `minSteps` and `maxSteps`                           |
+| Zone accuracy     | +/- 5%        | Target values within tolerance when zone checks are defined |
 
 The overall pass rate must be >= 90% for the eval to succeed (exit code 0).
 

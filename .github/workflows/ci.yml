@@ -261,7 +261,17 @@ jobs:
       matrix:
         node-version: ["20.x", "22.x", "24.x"]
         package:
-          ["core", "fit", "tcx", "zwo", "garmin", "garmin-connect", "mcp", "ai", "infra"]
+          [
+            "core",
+            "fit",
+            "tcx",
+            "zwo",
+            "garmin",
+            "garmin-connect",
+            "mcp",
+            "ai",
+            "infra",
+          ]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
