@@ -10,8 +10,15 @@ import { useOnboardingTutorial } from "./hooks/use-onboarding-tutorial";
 import { useStoreHydration } from "./hooks/use-store-hydration";
 import { useAppHandlers } from "./hooks/useAppHandlers";
 import { useDeleteCleanup } from "./hooks/useDeleteCleanup";
+import { useSettingsDialogStore } from "./store/settings-dialog-store";
 import { useWorkoutStore } from "./store/workout-store";
 import type { Workout } from "./types/krd";
+
+const AiWorkoutInput = lazy(() =>
+  import("./components/organisms/AiWorkoutInput/AiWorkoutInput").then(
+    (m) => ({ default: m.AiWorkoutInput })
+  )
+);
 
 const OnboardingTutorial = lazy(() =>
   import("./components/organisms/OnboardingTutorial/OnboardingTutorial").then(
@@ -44,11 +51,16 @@ function App() {
 
   useDeleteCleanup();
 
+  const settingsShow = useSettingsDialogStore((s) => s.show);
+
   return (
     <AppToastProvider>
       <AppKeyboardShortcuts />
       <MainLayout onReplayTutorial={() => setShowTutorial(true)}>
         <div className="space-y-6">
+          <Suspense fallback={null}>
+            <AiWorkoutInput onSettingsClick={settingsShow} />
+          </Suspense>
           {!workout && (
             <WelcomeSection
               onFileLoad={handleFileLoad}
