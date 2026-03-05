@@ -103,7 +103,9 @@ describe("createTextToWorkout", () => {
   it("retries on first failure and succeeds on second attempt", async () => {
     mockGenerateText
       .mockRejectedValueOnce(new Error("Schema validation failed"))
-      .mockResolvedValueOnce({ text: JSON.stringify(RUNNING_WORKOUT) } as never);
+      .mockResolvedValueOnce({
+        text: JSON.stringify(RUNNING_WORKOUT),
+      } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
     const result = await parse("4x(8' a 5'15\")");
@@ -115,7 +117,9 @@ describe("createTextToWorkout", () => {
   it("includes error feedback in retry prompt", async () => {
     mockGenerateText
       .mockRejectedValueOnce(new Error("Invalid duration"))
-      .mockResolvedValueOnce({ text: JSON.stringify(RUNNING_WORKOUT) } as never);
+      .mockResolvedValueOnce({
+        text: JSON.stringify(RUNNING_WORKOUT),
+      } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
     await parse("test workout");
@@ -183,7 +187,9 @@ describe("createTextToWorkout", () => {
     };
     mockGenerateText
       .mockRejectedValueOnce(new Error("fail"))
-      .mockResolvedValueOnce({ text: JSON.stringify(RUNNING_WORKOUT) } as never);
+      .mockResolvedValueOnce({
+        text: JSON.stringify(RUNNING_WORKOUT),
+      } as never);
 
     const parse = createTextToWorkout({ model: mockModel, logger });
     await parse("test");
@@ -251,7 +257,9 @@ describe("createTextToWorkout", () => {
   it("handles non-Error thrown values in catch", async () => {
     mockGenerateText
       .mockRejectedValueOnce("plain string error")
-      .mockResolvedValueOnce({ text: JSON.stringify(RUNNING_WORKOUT) } as never);
+      .mockResolvedValueOnce({
+        text: JSON.stringify(RUNNING_WORKOUT),
+      } as never);
 
     const parse = createTextToWorkout({ model: mockModel });
     const result = await parse("test");
