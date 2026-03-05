@@ -41,9 +41,9 @@ describe("AiWorkoutInput", () => {
     render(<AiWorkoutInput onSettingsClick={vi.fn()} />);
 
     expect(
-      screen.getByPlaceholderText(/Describe your workout/)
+      screen.getByPlaceholderText(/sweet spot cycling/)
     ).toBeInTheDocument();
-    expect(screen.getByText("Generate")).toBeInTheDocument();
+    expect(screen.getByText("Generate Workout")).toBeInTheDocument();
   });
 
   it("should show error message when generation fails", () => {
@@ -72,6 +72,6 @@ describe("AiWorkoutInput", () => {
 
     render(<AiWorkoutInput onSettingsClick={vi.fn()} />);
 
-    expect(screen.getByText("Generate")).toBeDisabled();
+    expect(screen.getByText("Generate Workout")).toBeDisabled();
   });
 });
