@@ -1,8 +1,6 @@
 import { useState } from "react";
-import {
-  PROVIDER_MODELS,
-  getDefaultModel,
-} from "../../../lib/provider-models";
+import { ModelSelect } from "./ModelSelect";
+import { getDefaultModel } from "../../../lib/provider-models";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
 import type { LlmProviderType } from "../../../store/ai-store";
@@ -34,20 +32,13 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
     setLabel("");
   };
 
-  const modelOptions = PROVIDER_MODELS[type].map((m) => ({
-    value: m.id,
-    label: m.label,
-  }));
-
   return (
     <div className="space-y-3 rounded-lg border border-gray-200 p-4 dark:border-gray-700">
       <Input
         label="Provider"
         variant="select"
         value={type}
-        onChange={(e) =>
-          handleTypeChange(e.target.value as LlmProviderType)
-        }
+        onChange={(e) => handleTypeChange(e.target.value as LlmProviderType)}
         options={[
           { value: "anthropic", label: "Anthropic (Claude)" },
           { value: "openai", label: "OpenAI (GPT)" },
@@ -67,20 +58,7 @@ export const ProviderForm: React.FC<ProviderFormProps> = ({ onAdd }) => {
         value={apiKey}
         onChange={(e) => setApiKey(e.target.value)}
       />
-      <div className="w-full">
-        <label className="mb-1 block text-xs font-medium text-gray-700 dark:text-gray-300">
-          Model
-        </label>
-        <select
-          className="w-full rounded-lg border border-gray-300 bg-white px-3 py-1.5 text-sm dark:border-gray-600 dark:bg-gray-700 dark:text-white"
-          value={model}
-          onChange={(e) => setModel(e.target.value)}
-        >
-          {modelOptions.map((m) => (
-            <option key={m.value} value={m.value}>{m.label}</option>
-          ))}
-        </select>
-      </div>
+      <ModelSelect type={type} value={model} onChange={setModel} />
       <Button
         size="sm"
         onClick={handleSubmit}
