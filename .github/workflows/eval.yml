@@ -1,0 +1,37 @@
+name: LLM Eval Suite
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Model to evaluate"
+        default: "claude-sonnet-4-5-20241022"
+        type: string
+
+jobs:
+  eval:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm -r build
+
+      - name: Run evals
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          EVAL_MODEL: ${{ inputs.model }}
+        run: pnpm --filter @kaiord/ai eval
+
+      - name: Upload eval report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eval-report
+          path: packages/ai/eval-report-*.json
+          retention-days: 30

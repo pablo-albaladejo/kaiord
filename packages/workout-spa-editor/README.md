@@ -23,15 +23,29 @@ The application has a fully functional MVP with all core features:
 - ✅ **Comprehensive Testing** - Unit tests (86.5% coverage) + E2E tests (Playwright)
 - ✅ **CI/CD Pipeline** - Automated testing and deployment to GitHub Pages
 
+### AI Workout Generation
+
+- **Natural language input** - Describe a workout in plain text and generate a structured KRD workout
+- **Multi-provider support** - Anthropic (Claude), OpenAI (GPT), Google (Gemini) via Vercel AI SDK
+- **Training zone context** - Automatically injects your profile zones into the LLM prompt
+- **Custom system prompts** - Add global instructions for all AI generations
+
+### Garmin Connect Integration
+
+- **Push to Garmin** - Send workouts directly to your Garmin Connect account
+- **Self-hostable proxy** - Uses a Lambda endpoint (configurable, self-host with `@kaiord/infra`)
+- **Credential management** - Encrypted storage for Garmin credentials
+
+### Settings Panel
+
+- **AI tab** - Manage LLM providers (add/remove/edit), set default, custom prompt
+- **Garmin tab** - Configure Garmin credentials and Lambda endpoint URL
+- **Privacy tab** - Disclaimers, self-hosting guide, clear all credentials
+
 ### Coming Soon (P2+)
 
-- 🔄 Drag-and-drop step reordering
-- 👤 User profiles with training zones
-- 📚 Workout library with local storage
-- 📤 Export to FIT/TCX/ZWO formats
-- 🎨 Theme system (light/dark modes)
-- 🌍 Internationalization (i18n)
-- 📱 PWA support for offline usage
+- PWA support for offline usage
+- Internationalization (i18n)
 
 ## Tech Stack
 

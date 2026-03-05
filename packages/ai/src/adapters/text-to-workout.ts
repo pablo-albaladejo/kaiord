@@ -6,6 +6,7 @@ import { createAiParsingError } from "../errors";
 import { validateInput } from "./validate-input";
 import { reindexSteps } from "./reindex-steps";
 import { loadPrompt } from "../prompts/load-prompt";
+import { aiWorkoutSchema } from "./ai-workout-schema";
 import systemPromptRaw from "../prompts/parse-workout.md";
 
 const MAX_ERROR_LENGTH = 200;
@@ -42,7 +43,7 @@ const executeWithRetry = async (
 
       const result = await generateText({
         model,
-        output: Output.object({ schema: workoutSchema }),
+        output: Output.object({ schema: aiWorkoutSchema }),
         system,
         prompt,
         maxOutputTokens,
@@ -51,8 +52,9 @@ const executeWithRetry = async (
 
       if (!result.output) throw new Error("No structured output generated");
 
-      logger?.debug("LLM raw output", { output: result.output });
-      return reindexSteps(result.output);
+      const validated = workoutSchema.parse(result.output);
+      logger?.debug("LLM raw output", { output: validated });
+      return reindexSteps(validated);
     } catch (error) {
       lastError = error instanceof Error ? error.message : String(error);
       logger?.warn("Parse attempt failed", { attempt, error: lastError });
