@@ -37,7 +37,9 @@ const createTestStore = () => {
     hydrated: false,
   };
 
-  const set = (fn: Partial<StoreState> | ((s: StoreState) => Partial<StoreState>)) => {
+  const set = (
+    fn: Partial<StoreState> | ((s: StoreState) => Partial<StoreState>)
+  ) => {
     if (typeof fn === "function") {
       state = { ...state, ...fn(state) };
     } else {
@@ -46,7 +48,10 @@ const createTestStore = () => {
   };
 
   const get = () => state as AiStore;
-  const actions = createAiActions(set as Parameters<typeof createAiActions>[0], get);
+  const actions = createAiActions(
+    set as Parameters<typeof createAiActions>[0],
+    get
+  );
 
   return { get: () => state, actions };
 };

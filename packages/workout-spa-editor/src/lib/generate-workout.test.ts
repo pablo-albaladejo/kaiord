@@ -58,10 +58,9 @@ describe("generateWorkoutKrd", () => {
   it("should pass user text as prompt", async () => {
     await generateWorkoutKrd(baseOptions);
 
-    expect(mockTextToWorkout).toHaveBeenCalledWith(
-      "30 minute endurance ride",
-      { sport: undefined }
-    );
+    expect(mockTextToWorkout).toHaveBeenCalledWith("30 minute endurance ride", {
+      sport: undefined,
+    });
   });
 
   it("should pass sport option when provided", async () => {
@@ -71,10 +70,9 @@ describe("generateWorkoutKrd", () => {
       sport: "running",
     });
 
-    expect(mockTextToWorkout).toHaveBeenCalledWith(
-      "easy run",
-      { sport: "running" }
-    );
+    expect(mockTextToWorkout).toHaveBeenCalledWith("easy run", {
+      sport: "running",
+    });
   });
 
   it("should append zones context to prompt when provided", async () => {

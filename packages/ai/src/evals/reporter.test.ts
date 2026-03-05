@@ -83,7 +83,11 @@ describe("createReport", () => {
 
 describe("formatReport", () => {
   it("should format report as markdown-like text", () => {
-    const report = createReport([passingResult, failingResult], "openai", "gpt-4");
+    const report = createReport(
+      [passingResult, failingResult],
+      "openai",
+      "gpt-4"
+    );
 
     const output = formatReport(report);
 
@@ -91,9 +95,7 @@ describe("formatReport", () => {
     expect(output).toContain("Pass rate: 50% (1/2)");
     expect(output).toContain("[PASS] cycling-en-001");
     expect(output).toContain("[FAIL] running-es-002");
-    expect(output).toContain(
-      "Sport mismatch: expected running, got cycling"
-    );
+    expect(output).toContain("Sport mismatch: expected running, got cycling");
     expect(output).toContain("## By Category");
     expect(output).toContain("cycling: 1/1");
     expect(output).toContain("running: 0/1");

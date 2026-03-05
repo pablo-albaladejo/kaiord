@@ -8,7 +8,9 @@ describe("jsonResponse", () => {
     const result = jsonResponse(200, body);
 
     expect(result.statusCode).toBe(200);
-    expect(result.headers).toStrictEqual({ "Content-Type": "application/json" });
+    expect(result.headers).toStrictEqual({
+      "Content-Type": "application/json",
+    });
     expect(JSON.parse(result.body as string)).toStrictEqual(body);
   });
 
@@ -55,6 +57,8 @@ describe("errorResponse", () => {
   it("should include Content-Type header", () => {
     const result = errorResponse(401, "Unauthorized");
 
-    expect(result.headers).toStrictEqual({ "Content-Type": "application/json" });
+    expect(result.headers).toStrictEqual({
+      "Content-Type": "application/json",
+    });
   });
 });

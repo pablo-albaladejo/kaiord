@@ -3,9 +3,7 @@ import { evaluateBenchmark } from "./assertions";
 import type { Benchmark } from "./types";
 import type { Workout } from "@kaiord/core";
 
-const createWorkout = (
-  overrides: Partial<Workout> = {}
-): Workout => ({
+const createWorkout = (overrides: Partial<Workout> = {}): Workout => ({
   name: "Test Workout",
   sport: "cycling",
   steps: [

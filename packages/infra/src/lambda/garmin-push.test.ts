@@ -21,8 +21,10 @@ import { pushToGarmin } from "./garmin-push";
 import type { KRD } from "@kaiord/core";
 
 const mocks = await import("@kaiord/garmin-connect");
-const mockLogin = (mocks as Record<string, ReturnType<typeof vi.fn>>)._mockLogin;
-const mockLogout = (mocks as Record<string, ReturnType<typeof vi.fn>>)._mockLogout;
+const mockLogin = (mocks as Record<string, ReturnType<typeof vi.fn>>)
+  ._mockLogin;
+const mockLogout = (mocks as Record<string, ReturnType<typeof vi.fn>>)
+  ._mockLogout;
 const mockPush = (mocks as Record<string, ReturnType<typeof vi.fn>>)._mockPush;
 
 const fakeKrd = {
@@ -62,9 +64,7 @@ describe("pushToGarmin", () => {
 
     const result = await pushToGarmin(fakeKrd, credentials);
 
-    expect(result.url).toBe(
-      "https://connect.garmin.com/modern/workout/456"
-    );
+    expect(result.url).toBe("https://connect.garmin.com/modern/workout/456");
   });
 
   it("should convert numeric id to string", async () => {
@@ -81,7 +81,9 @@ describe("pushToGarmin", () => {
   });
 
   it("should propagate login errors", async () => {
-    mockLogin.mockRejectedValueOnce(new Error("Login failed: ticket not found"));
+    mockLogin.mockRejectedValueOnce(
+      new Error("Login failed: ticket not found")
+    );
 
     await expect(pushToGarmin(fakeKrd, credentials)).rejects.toThrow(
       "Login failed: ticket not found"
