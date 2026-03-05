@@ -1,0 +1,43 @@
+{
+  "name": "@kaiord/infra",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Self-hostable AWS CDK stack for Kaiord Garmin proxy Lambda",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest --run",
+    "test:coverage": "vitest --run --coverage",
+    "test:watch": "vitest",
+    "lint": "tsc --noEmit && eslint . && prettier --check src",
+    "lint:fix": "eslint . --fix && prettier --write src",
+    "cdk": "cdk",
+    "deploy": "cdk deploy",
+    "synth": "cdk synth",
+    "clean": "rm -rf dist cdk.out"
+  },
+  "dependencies": {
+    "@kaiord/core": "workspace:^",
+    "@kaiord/garmin": "workspace:^",
+    "@kaiord/garmin-connect": "workspace:^",
+    "aws-cdk-lib": "^2.180.0",
+    "constructs": "^10.4.2",
+    "zod": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.147",
+    "@types/node": "^25.0.0",
+    "@vitest/coverage-v8": "^4.0.18",
+    "aws-cdk": "^2.180.0",
+    "esbuild": "^0.25.0",
+    "typescript": "^5.3.3",
+    "vitest": "^4.0.18"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/pablo-albaladejo/kaiord.git",
+    "directory": "packages/infra"
+  },
+  "author": "Kaiord Contributors",
+  "license": "MIT"
+}
