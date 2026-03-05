@@ -1,3 +1,5 @@
+> Completed: 2026-03-05
+
 # Proposal: Natural Language Workout to Garmin Connect (Web)
 
 ## Problem
