@@ -25,11 +25,11 @@
 
 ## 3. SPA: Zustand Stores
 
-- [ ] 3.1 Create `ai-store.ts` — providers list (id, type, encrypted key, model, label, isDefault), custom prompt, generation state, selected provider
-- [ ] 3.2 Add ai-store actions: addProvider, removeProvider, updateProvider, setDefault, selectForGeneration
-- [ ] 3.3 Create `garmin-store.ts` — Garmin creds (encrypted), Lambda URL (configurable), push state, connection status
-- [ ] 3.4 Test ai-store: add/remove/update providers, default selection, state transitions
-- [ ] 3.5 Test garmin-store: credential management, URL config, state transitions
+- [x] 3.1 Create `ai-store.ts` — providers list (id, type, encrypted key, model, label, isDefault), custom prompt, generation state, selected provider
+- [x] 3.2 Add ai-store actions: addProvider, removeProvider, updateProvider, setDefault, selectForGeneration
+- [x] 3.3 Create `garmin-store.ts` — Garmin creds (encrypted), Lambda URL (configurable), push state, connection status
+- [x] 3.4 Test ai-store: add/remove/update providers, default selection, state transitions
+- [x] 3.5 Test garmin-store: credential management, URL config, state transitions
 
 ## 4. SPA: Settings UI
 
