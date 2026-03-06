@@ -1,13 +1,14 @@
+> Synced: 2026-03-06
+
 # Adapter Contracts
 
-Adapters implement port interfaces to convert between external formats and KRD.
+Adapters implement port interfaces to convert between external formats and KRD, or provide API/protocol integration.
 
 ## Requirements
 
-### Requirement: Port Types
+### Requirement: Format Adapter Port Types
 
-All adapters SHALL implement one or more of these port types from `packages/core/src/ports/format-strategy.ts`:
-
+Format adapters SHALL implement one or more of these port types from `packages/core/src/ports/format-strategy.ts`:
 - `BinaryReader`: `(buffer: Uint8Array) => Promise<KRD>`
 - `TextReader`: `(text: string) => Promise<KRD>`
 - `BinaryWriter`: `(krd: KRD) => Promise<Uint8Array>`
@@ -15,8 +16,7 @@ All adapters SHALL implement one or more of these port types from `packages/core
 
 ### Requirement: Dual Exports
 
-Each adapter package SHALL provide two export styles:
-
+Each format adapter package SHALL provide two export styles:
 - **Pre-built instance**: `import { fitReader } from '@kaiord/fit'`
 - **Factory function**: `import { createFitReader } from '@kaiord/fit'`
 
@@ -29,12 +29,21 @@ The factory accepts an optional `Logger` parameter.
 
 ### Requirement: Schema Conventions
 
-- Adapter-internal schemas SHALL use **camelCase** (e.g., `indoorCycling`)
-- When mapping to/from KRD, adapters MUST convert to/from **snake_case** (e.g., `indoor_cycling`)
+- KRD field names use **camelCase** (e.g., `serialNumber`, `heartRate`)
+- Domain enum values use **snake_case** (e.g., `indoor_cycling`, `lap_swimming`)
+- Adapter-internal schemas MAY use any convention but MUST map correctly to KRD
 
 ### Requirement: No Cross-Adapter Dependencies
 
-Adapter packages SHALL NOT import from other adapter packages. All inter-format communication goes through KRD via core use cases.
+Format adapter packages SHALL NOT import from other adapter packages. All inter-format communication goes through KRD via core use cases.
+
+### Requirement: API Adapter Pattern
+
+API adapters (e.g., `@kaiord/garmin-connect`) SHALL export factory functions for clients, auth providers, and token stores. They SHALL depend on `@kaiord/core` only and SHALL NOT import format adapters.
+
+### Requirement: LLM Adapter Pattern
+
+The AI adapter (`@kaiord/ai`) SHALL export factory functions that accept a `LanguageModel` parameter (provider-agnostic via Vercel AI SDK). It SHALL depend on `@kaiord/core` only with `ai` as a peer dependency.
 
 ## Scenarios
 
@@ -61,3 +70,15 @@ Adapter packages SHALL NOT import from other adapter packages. All inter-format 
 - **GIVEN** a new file that converts FIT workout steps to KRD steps
 - **WHEN** the conversion involves conditional logic or data transformation
 - **THEN** the file is named `step.converter.ts` and has a corresponding `step.converter.test.ts`
+
+#### Scenario: AI adapter text-to-workout
+
+- **GIVEN** a consumer calls `createTextToWorkout({ model })` from `@kaiord/ai`
+- **WHEN** they pass a natural language description
+- **THEN** the AI adapter returns a validated `Workout` object using the injected LLM model
+
+#### Scenario: Garmin Connect API client
+
+- **GIVEN** a consumer calls `createGarminConnectClient()` from `@kaiord/garmin-connect`
+- **WHEN** they authenticate and push a KRD workout
+- **THEN** the client handles SSO login and returns a `PushResult` with Garmin Connect URL
