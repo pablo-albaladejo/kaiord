@@ -6,6 +6,10 @@
 
 import { z } from "zod";
 import { sportZonesRecordSchema } from "./sport-zones-schemas";
+import { heartRateZoneSchema, powerZoneSchema } from "./zone-schemas";
+
+export { heartRateZoneSchema, powerZoneSchema } from "./zone-schemas";
+export type { HeartRateZone, PowerZone } from "./zone-schemas";
 
 export type {
   PaceZone,
@@ -24,37 +28,7 @@ export {
 } from "./profile-defaults";
 
 /**
- * Power Zone Schema
- *
- * Represents a single power training zone with percentage ranges based on FTP.
- */
-export const powerZoneSchema = z.object({
-  zone: z.number().int().min(1).max(7),
-  name: z.string().min(1).max(50),
-  minPercent: z.number().min(0).max(200),
-  maxPercent: z.number().min(0).max(200),
-});
-
-export type PowerZone = z.infer<typeof powerZoneSchema>;
-
-/**
- * Heart Rate Zone Schema
- *
- * Represents a single heart rate training zone with BPM ranges based on max HR.
- */
-export const heartRateZoneSchema = z.object({
-  zone: z.number().int().min(1).max(5),
-  name: z.string().min(1).max(50),
-  minBpm: z.number().int().min(0).max(250),
-  maxBpm: z.number().int().min(0).max(250),
-});
-
-export type HeartRateZone = z.infer<typeof heartRateZoneSchema>;
-
-/**
  * Profile Schema
- *
- * Represents a complete user profile with personal data and training zones.
  */
 export const profileSchema = z.object({
   id: z.uuid(),
