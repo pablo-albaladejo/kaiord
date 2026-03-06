@@ -1,3 +1,5 @@
+> Synced: 2026-03-06
+
 # Hexagonal Architecture
 
 The project follows hexagonal (ports-and-adapters) architecture with strict layer dependency rules.
@@ -11,7 +13,6 @@ The dependency graph SHALL be: `domain` ← `ports` ← `application` ← `adapt
 ### Requirement: Domain Purity
 
 Code in `packages/core/src/domain/` SHALL NOT import from:
-
 - `adapters/`
 - `application/`
 - Any external library (e.g., `@garmin/fitsdk`, `fast-xml-parser`)
@@ -21,7 +22,6 @@ Domain contains only pure TypeScript types and Zod schemas.
 ### Requirement: Application Isolation
 
 Code in `packages/core/src/application/` SHALL NOT import from:
-
 - `adapters/`
 - Any external library
 
@@ -39,6 +39,20 @@ Adapter packages (`@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin`)
 
 Format conversion SHALL use the strategy pattern. Core use cases (`fromBinary`, `fromText`, `toBinary`, `toText`) accept reader/writer functions as parameters. They MUST NOT hard-code any specific adapter.
 
+### Requirement: Package Dependencies
+
+Each package SHALL respect the following dependency rules:
+
+| Package | Allowed Dependencies |
+|---|---|
+| `@kaiord/core` | No workspace deps (root of the graph) |
+| `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin` | `@kaiord/core` only |
+| `@kaiord/garmin-connect` | `@kaiord/core` only |
+| `@kaiord/ai` | `@kaiord/core` only (+ `ai` as peer dependency) |
+| `@kaiord/infra` | `@kaiord/core`, `@kaiord/garmin`, `@kaiord/garmin-connect` |
+| `@kaiord/mcp` | `@kaiord/core` + all format adapters |
+| `@kaiord/cli` | `@kaiord/core` + all adapters + `@kaiord/garmin-connect` |
+
 ## Scenarios
 
 #### Scenario: Domain import violation blocked
@@ -53,14 +67,14 @@ Format conversion SHALL use the strategy pattern. Core use cases (`fromBinary`, 
 - **WHEN** the file contains `import { X } from '@garmin/fitsdk'`
 - **THEN** the `check-architecture.js` hook blocks the edit
 
-#### Scenario: Adapter cross-dependency prevented
-
-- **GIVEN** a file in `packages/fit/src/`
-- **WHEN** it tries to import from `@kaiord/tcx`
-- **THEN** the dependency cruiser (`pnpm arch:check`) reports a violation
-
 #### Scenario: Strategy injection in use case
 
 - **GIVEN** a call to `fromBinary(buffer, fitReader)`
 - **WHEN** the reader is swapped to a different adapter
 - **THEN** the core use case works identically without code changes
+
+#### Scenario: Infra Lambda uses garmin adapters
+
+- **GIVEN** the `@kaiord/infra` Lambda handler
+- **WHEN** it receives a KRD push request
+- **THEN** it uses `@kaiord/garmin-connect` for SSO login and `@kaiord/garmin` for KRD→GCN conversion

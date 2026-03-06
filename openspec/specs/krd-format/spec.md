@@ -1,3 +1,5 @@
+> Synced: 2026-03-06
+
 # KRD Format
 
 KRD (Kaiord Representation Definition) is the canonical intermediate format. All conversions between FIT, TCX, ZWO, and GCN pass through KRD.
@@ -30,17 +32,17 @@ Converting data from any supported format to KRD and back MUST preserve values w
 A KRD document SHALL contain:
 
 - `version` (string, required): Schema version (e.g., "1.0")
-- `type` (string, required): One of "workout", "activity", "course"
+- `type` (string, required): One of `"structured_workout"`, `"recorded_activity"`, `"course"`
 - `metadata` (object, required): File-level metadata
 - `sessions` (array, optional): Training sessions
 - `laps` (array, optional): Lap/interval data
 - `records` (array, optional): Time-series data points
 - `events` (array, optional): Workout events
-- `extensions` (object, optional): Format-specific extensions
+- `extensions` (object, optional): Structured data (e.g., `extensions.structured_workout` holds the Workout object)
 
-### Requirement: Domain Naming
+### Requirement: Naming Conventions
 
-KRD schema fields SHALL use **snake_case** naming (e.g., `indoor_cycling`, `lap_swimming`). Adapter schemas MAY use camelCase internally but MUST map to snake_case when producing KRD.
+KRD field names SHALL use **camelCase** (e.g., `serialNumber`, `heartRate`, `subSport`). Domain enum values SHALL use **snake_case** (e.g., `indoor_cycling`, `lap_swimming`). Adapter schemas MAY use camelCase internally and MUST map enum values to snake_case when producing KRD.
 
 ## Scenarios
 
@@ -61,3 +63,9 @@ KRD schema fields SHALL use **snake_case** naming (e.g., `indoor_cycling`, `lap_
 - **GIVEN** a FIT file with Garmin-specific extension fields
 - **WHEN** converted to KRD
 - **THEN** extension data is preserved in the `extensions` object
+
+#### Scenario: Structured workout in extensions
+
+- **GIVEN** a workout created via `createWorkoutKRD(workout)`
+- **WHEN** the KRD document is inspected
+- **THEN** `extensions.structured_workout` contains the full Workout object
