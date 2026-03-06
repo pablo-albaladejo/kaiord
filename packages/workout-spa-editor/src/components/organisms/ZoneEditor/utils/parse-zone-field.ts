@@ -53,7 +53,7 @@ function parsePowerField(
   const cleaned = raw.replace(/[W%]/g, "");
   const val = parseInt(cleaned, 10);
   if (isNaN(val)) return null;
-  if (threshold && raw.includes("W")) {
+  if (threshold) {
     const pct = Math.round((val / threshold) * 100);
     return field === "min" ? { minPercent: pct } : { maxPercent: pct };
   }

@@ -64,3 +64,15 @@ describe("applyValueChange", () => {
     expect(result).toBeNull();
   });
 });
+
+  it("should convert bare number to percent when threshold exists", () => {
+    const result = applyValueChange(powerZones, 0, "max", "200", "power", 250);
+
+    expect((result![0] as PowerZone).maxPercent).toBe(80);
+  });
+
+  it("should treat bare number as percent when no threshold", () => {
+    const result = applyValueChange(powerZones, 0, "max", "80", "power");
+
+    expect((result![0] as PowerZone).maxPercent).toBe(80);
+  });
