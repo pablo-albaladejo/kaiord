@@ -2,9 +2,11 @@
  * Zone field parsing utilities
  *
  * Parses raw string input into zone field patches.
+ * Cascades changes to adjacent zones for contiguity.
  */
 
 import { mmSsToSeconds } from "./pace-format";
+import { cascadeToNeighbors } from "./cascade-zones";
 import type { HeartRateZone, PowerZone } from "../../../../types/profile";
 import type { PaceZone } from "../../../../types/sport-zones";
 
@@ -18,14 +20,15 @@ export function applyValueChange(
   type: string,
   threshold?: number
 ): Array<ZoneRowData> | null {
-  const zone = zones[index];
-  const patch = parseField(zone, field, raw, type, threshold);
+  const patch = parseField(field, raw, type, threshold);
   if (!patch) return null;
-  return zones.map((z, i) => (i === index ? { ...z, ...patch } : z));
+  const updated = zones.map((z, i) =>
+    i === index ? { ...z, ...patch } : z
+  );
+  return cascadeToNeighbors(updated, index, field, type, threshold);
 }
 
 function parseField(
-  _zone: ZoneRowData,
   field: "min" | "max",
   raw: string,
   type: string,
@@ -50,7 +53,7 @@ function parsePowerField(
   raw: string,
   threshold?: number
 ): Record<string, number> | null {
-  const cleaned = raw.replace(/[W%]/g, "");
+  const cleaned = raw.replace(/[W%]/g, "").trim();
   const val = parseInt(cleaned, 10);
   if (isNaN(val)) return null;
   if (threshold) {
