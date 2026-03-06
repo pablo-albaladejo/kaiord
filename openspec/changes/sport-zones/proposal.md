@@ -18,11 +18,11 @@ Refactor the profile zone system to be sport-specific:
 
 ## Affected Packages
 
-| Package | Change |
-|---|---|
+| Package                      | Change                                                                                                                                                      |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `@kaiord/workout-spa-editor` | Profile types, zone schemas, Profile Manager UI (tabs per sport, auto/manual toggle, zone editors), AI Generator zones indicator, zones-formatter per sport |
-| `@kaiord/core` | No changes — Profile types live in the SPA |
-| `@kaiord/ai` | No changes — receives zones as text context |
+| `@kaiord/core`               | No changes — Profile types live in the SPA                                                                                                                  |
+| `@kaiord/ai`                 | No changes — receives zones as text context                                                                                                                 |
 
 ## Breaking Changes
 

@@ -8,12 +8,12 @@ Per-sport zone configuration with auto-calculated and manual modes.
 
 Each sport SHALL support specific zone types:
 
-| Sport | HR Zones | Power Zones (watts) | Pace Zones |
-|---|---|---|---|
-| Cycling | YES | YES | NO |
-| Running | YES | YES | YES (min/km) |
-| Swimming | YES | NO | YES (min/100m) |
-| Generic | YES | NO | NO |
+| Sport    | HR Zones | Power Zones (watts) | Pace Zones     |
+| -------- | -------- | ------------------- | -------------- |
+| Cycling  | YES      | YES                 | NO             |
+| Running  | YES      | YES                 | YES (min/km)   |
+| Swimming | YES      | NO                  | YES (min/100m) |
+| Generic  | YES      | NO                  | NO             |
 
 HR zones SHALL be available for ALL sports.
 
@@ -21,12 +21,12 @@ HR zones SHALL be available for ALL sports.
 
 Each sport SHALL define its available thresholds:
 
-| Sport | Thresholds |
-|---|---|
-| Cycling | LTHR (bpm), FTP (watts) |
-| Running | LTHR (bpm), FTP run (watts), Threshold pace (min/km) |
-| Swimming | LTHR (bpm), Threshold pace (min/100m) |
-| Generic | LTHR (bpm) |
+| Sport    | Thresholds                                           |
+| -------- | ---------------------------------------------------- |
+| Cycling  | LTHR (bpm), FTP (watts)                              |
+| Running  | LTHR (bpm), FTP run (watts), Threshold pace (min/km) |
+| Swimming | LTHR (bpm), Threshold pace (min/100m)                |
+| Generic  | LTHR (bpm)                                           |
 
 ### Requirement: Auto-Calculated Zones
 
@@ -43,6 +43,7 @@ Users SHALL be able to define each zone's min/max values manually for any zone t
 ### Requirement: Profile Schema Migration
 
 Existing profiles with top-level `powerZones` and `heartRateZones` SHALL be migrated automatically:
+
 - `powerZones` → `sportZones.cycling.powerZones`
 - `heartRateZones` → `sportZones.cycling.heartRateZones` AND `sportZones.generic.heartRateZones`
 - `ftp` → `sportZones.cycling.thresholds.ftp`
@@ -53,6 +54,7 @@ Migration SHALL happen transparently on profile load.
 ### Requirement: Zone Editor UI
 
 The Profile Manager SHALL include a zone editor with:
+
 - Tab per sport (Cycling, Running, Swimming, Generic)
 - Per zone type: toggle between Auto and Manual modes
 - Auto mode: threshold input field → zones table (read-only, calculated)
@@ -62,6 +64,7 @@ The Profile Manager SHALL include a zone editor with:
 ### Requirement: Pace Zone Schema
 
 A new `PaceZone` type SHALL be added:
+
 ```
 PaceZone = {
   zone: number (1-6),
@@ -75,6 +78,7 @@ PaceZone = {
 ### Requirement: AI Generator Zone Indicator
 
 The AI Generator component SHALL display:
+
 - The active profile name
 - Which sport's zones will be injected (based on the selected sport dropdown)
 - A summary of the active thresholds (e.g., "FTP: 250W, LTHR: 170bpm")
@@ -83,6 +87,7 @@ The AI Generator component SHALL display:
 ### Requirement: Sport-Specific Zone Injection
 
 The `zones-formatter` SHALL only inject zones matching the selected sport:
+
 - Cycling → power zones + HR zones
 - Running → pace zones + power zones + HR zones
 - Swimming → pace zones + HR zones
