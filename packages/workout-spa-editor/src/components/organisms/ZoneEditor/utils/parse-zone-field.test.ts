@@ -101,3 +101,19 @@ describe("applyValueChange", () => {
     expect((result![1] as PaceZone).minPace).toBe(451);
   });
 });
+
+  it("should cascade recursively when max pushes through next zone", () => {
+    // Z1: 100-130, Z2: 131-160, Z3: 161-190
+    // Set Z1 max to 180 → Z2 min=181, Z2 max must be >= 181 → push Z2 max to 182
+    // → Z3 min=183
+    const result = applyValueChange(hrZones, 0, "max", "180", "heartRate");
+
+    const z1 = result![0] as HeartRateZone;
+    const z2 = result![1] as HeartRateZone;
+    const z3 = result![2] as HeartRateZone;
+
+    expect(z1.maxBpm).toBe(180);
+    expect(z2.minBpm).toBe(181);
+    expect(z2.maxBpm).toBeGreaterThanOrEqual(z2.minBpm);
+    expect(z3.minBpm).toBe(z2.maxBpm + 1);
+  });
