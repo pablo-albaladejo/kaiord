@@ -5,6 +5,7 @@
 ### Requirement: Profile Manager Layout
 
 The Profile Manager dialog SHALL have this structure:
+
 - Profile name: inline-editable in the dialog header
 - Two top-level tabs: "Training Zones" (default) and "Personal Data"
 - Training Zones tab: sub-tabs per sport (Cycling/Running/Swimming/Generic)
@@ -16,17 +17,20 @@ The Profile Manager dialog SHALL have this structure:
 Each zone type SHALL offer a dropdown of predefined zone methods:
 
 **Power zones:**
+
 - Coggan 7-zone (default)
 - Friel 7-zone
 - British Cycling 6-zone
 - Custom
 
 **Heart rate zones:**
+
 - Karvonen 5-zone (default)
 - Friel 5-zone
 - Custom
 
 **Pace zones:**
+
 - Daniels 5-zone (default)
 - Custom
 
@@ -35,6 +39,7 @@ Selecting a method SHALL set the number of zones, default percentages, and zone 
 ### Requirement: Zone Values in Real Units
 
 Zone tables SHALL display values in real units:
+
 - Power zones: watts (e.g., "Z3: 190-225W")
 - HR zones: bpm (e.g., "Z2: 139-151 bpm")
 - Pace zones: min/km or min/100m (e.g., "Z3: 4:30-5:00/km")
@@ -54,6 +59,7 @@ Zone names SHALL be editable inline. Each zone row SHALL allow the user to click
 ### Requirement: Custom Zone Count
 
 When "Custom" method is selected, the user SHALL be able to:
+
 - Add zones (button below the table, up to 10)
 - Remove zones (delete button per row, minimum 1)
 
@@ -62,6 +68,7 @@ Predefined methods have a fixed zone count that cannot be changed.
 ### Requirement: Zone Method Schema
 
 The `ZoneConfig` type SHALL include a `method` field:
+
 ```
 ZoneConfig<T> = {
   method: string;    // e.g., "coggan-7", "friel-7", "custom"
@@ -73,6 +80,7 @@ ZoneConfig<T> = {
 ### Requirement: LLM Prompt Zone Format
 
 The zones-formatter SHALL output zone values in real units for the LLM prompt:
+
 ```
 Power zones (Coggan 7-zone, FTP: 250W):
   Z1 Active Recovery: 0-137W

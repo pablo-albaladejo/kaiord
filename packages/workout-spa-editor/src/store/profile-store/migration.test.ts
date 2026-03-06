@@ -38,11 +38,11 @@ describe("migrateProfile", () => {
     expect(cycling?.thresholds.lthr).toBe(170);
   });
 
-  it("should map power zones to cycling", () => {
+  it("should map power zones to cycling with custom method", () => {
     const migrated = migrateProfile(legacyProfile);
     const cycling = migrated.sportZones?.cycling;
 
-    expect(cycling?.powerZones?.mode).toBe("manual");
+    expect(cycling?.powerZones?.method).toBe("custom");
     expect(cycling?.powerZones?.zones).toEqual(legacyProfile.powerZones);
   });
 
@@ -50,7 +50,7 @@ describe("migrateProfile", () => {
     const migrated = migrateProfile(legacyProfile);
     const cycling = migrated.sportZones?.cycling;
 
-    expect(cycling?.heartRateZones.mode).toBe("auto");
+    expect(cycling?.heartRateZones.method).toBe("karvonen-5");
     // LTHR=170 -> Z1: 0-139bpm
     expect(cycling?.heartRateZones.zones[0]?.maxBpm).toBe(139);
   });
@@ -67,19 +67,19 @@ describe("migrateProfile", () => {
     const migrated = migrateProfile(legacyProfile);
     const reMigrated = migrateProfile(migrated);
 
-    expect(reMigrated).toBe(migrated);
+    expect(reMigrated.sportZones).toEqual(migrated.sportZones);
   });
 
-  it("should use manual mode with existing HR zones when no maxHeartRate", () => {
+  it("should use custom method with existing HR zones when no maxHeartRate", () => {
     const noHr = { ...legacyProfile, maxHeartRate: undefined };
     const migrated = migrateProfile(noHr);
     const cycling = migrated.sportZones?.cycling;
 
-    expect(cycling?.heartRateZones.mode).toBe("manual");
+    expect(cycling?.heartRateZones.method).toBe("custom");
     expect(cycling?.heartRateZones.zones).toEqual(legacyProfile.heartRateZones);
   });
 
-  it("should fall back to manual defaults when no HR data exists", () => {
+  it("should fall back to custom defaults when no HR data exists", () => {
     const noHrData = {
       ...legacyProfile,
       maxHeartRate: undefined,
@@ -88,7 +88,7 @@ describe("migrateProfile", () => {
     const migrated = migrateProfile(noHrData);
     const cycling = migrated.sportZones?.cycling;
 
-    expect(cycling?.heartRateZones.mode).toBe("manual");
+    expect(cycling?.heartRateZones.method).toBe("custom");
     expect(cycling?.heartRateZones.zones).toEqual(DEFAULT_HEART_RATE_ZONES);
   });
 
@@ -99,5 +99,24 @@ describe("migrateProfile", () => {
     expect(migrated.sportZones?.swimming?.powerZones).toBeUndefined();
     expect(migrated.sportZones?.running?.paceZones).toBeUndefined();
     expect(migrated.sportZones?.swimming?.paceZones).toBeUndefined();
+  });
+
+  it("should migrate old mode field to method", () => {
+    const oldProfile = {
+      ...legacyProfile,
+      sportZones: {
+        cycling: {
+          thresholds: { lthr: 170, ftp: 250 },
+          heartRateZones: { mode: "auto", zones: [] },
+          powerZones: { mode: "manual", zones: [] },
+        },
+      },
+    };
+
+    const migrated = migrateProfile(oldProfile);
+    const cycling = migrated.sportZones?.cycling;
+
+    expect(cycling?.heartRateZones.method).toBe("karvonen-5");
+    expect(cycling?.powerZones?.method).toBe("custom");
   });
 });

@@ -24,6 +24,7 @@ The current Profile Manager has a two-step flow: edit profile fields (card) → 
 **Layer:** Adapters (SPA UI)
 
 **Decision:** Replace the current layout:
+
 ```
 Before: [Edit Profile card] + [Training Zones]
 After:  [Profile name inline] → Tab: Training Zones | Tab: Personal Data
@@ -38,6 +39,7 @@ Training Zones is the default tab. Personal Data holds body weight and future fi
 **Layer:** Adapters (SPA types + utils)
 
 **Decision:** A registry of zone methods:
+
 ```ts
 type ZoneMethod = {
   id: string;                    // e.g., "coggan-7"
@@ -67,6 +69,7 @@ Each method defines default percentages. "Custom" has a mutable zone count.
 **Layer:** Adapters (SPA types)
 
 **Decision:** Update ZoneConfig:
+
 ```ts
 type ZoneConfig<T> = {
   method: string;
@@ -83,6 +86,7 @@ When a user overrides a value, the zone itself stores the overridden value. The 
 **Layer:** Adapters (SPA UI + utils)
 
 **Decision:** Zone tables always show real units. Calculation: `watts = threshold * percent / 100`. For display:
+
 - Primary: "190-225W"
 - Secondary (optional, muted text): "(76-90%)"
 
@@ -108,8 +112,8 @@ The zones-formatter for LLM output also uses real values.
 
 ## Risks and Mitigations
 
-| Risk | Mitigation |
-|---|---|
-| Method switch loses overrides | Confirmation dialog before reset |
-| Too many zone methods overwhelms UI | Start with 3-4 per type, extensible later |
-| Custom zone count edge cases (0 zones) | Minimum 1, disable remove on last zone |
+| Risk                                   | Mitigation                                |
+| -------------------------------------- | ----------------------------------------- |
+| Method switch loses overrides          | Confirmation dialog before reset          |
+| Too many zone methods overwhelms UI    | Start with 3-4 per type, extensible later |
+| Custom zone count edge cases (0 zones) | Minimum 1, disable remove on last zone    |

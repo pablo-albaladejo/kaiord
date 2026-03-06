@@ -19,8 +19,8 @@
 
 ## Affected Packages
 
-| Package | Change |
-|---|---|
+| Package                      | Change                                                                            |
+| ---------------------------- | --------------------------------------------------------------------------------- |
 | `@kaiord/workout-spa-editor` | Profile Manager UI redesign, zone method system, editable zones, formatter update |
 
 ## Breaking Changes

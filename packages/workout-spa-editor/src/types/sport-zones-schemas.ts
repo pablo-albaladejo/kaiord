@@ -5,15 +5,11 @@
  */
 
 import { z } from "zod";
-import {
-  paceZoneSchema,
-  sportThresholdsSchema,
-  zoneModeSchema,
-} from "./sport-zones";
+import { paceZoneSchema, sportThresholdsSchema } from "./sport-zones";
 import { heartRateZoneSchema, powerZoneSchema } from "./zone-schemas";
 
 const zoneConfigSchema = <T extends z.ZodType>(itemSchema: T) =>
-  z.object({ mode: zoneModeSchema, zones: z.array(itemSchema) });
+  z.object({ method: z.string(), zones: z.array(itemSchema) });
 
 export const sportZoneConfigSchema = z.object({
   thresholds: sportThresholdsSchema,

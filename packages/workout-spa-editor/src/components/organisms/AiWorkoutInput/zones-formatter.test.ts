@@ -31,7 +31,7 @@ const baseProfile: Profile = {
 const cyclingConfig: SportZoneConfig = {
   thresholds: { lthr: 170, ftp: 250 },
   heartRateZones: {
-    mode: "auto",
+    method: "karvonen-5",
     zones: [
       { zone: 1, name: "Recovery", minBpm: 0, maxBpm: 139 },
       { zone: 2, name: "Aerobic", minBpm: 139, maxBpm: 151 },
@@ -41,10 +41,10 @@ const cyclingConfig: SportZoneConfig = {
     ],
   },
   powerZones: {
-    mode: "auto",
+    method: "coggan-7",
     zones: [
-      { zone: 1, name: "Z1", minPercent: 0, maxPercent: 55 },
-      { zone: 2, name: "Z2", minPercent: 56, maxPercent: 75 },
+      { zone: 1, name: "Active Recovery", minPercent: 0, maxPercent: 55 },
+      { zone: 2, name: "Endurance", minPercent: 56, maxPercent: 75 },
     ],
   },
 };
@@ -52,15 +52,15 @@ const cyclingConfig: SportZoneConfig = {
 const runningConfig: SportZoneConfig = {
   thresholds: { lthr: 170, thresholdPace: 300, paceUnit: "min_per_km" },
   heartRateZones: {
-    mode: "auto",
+    method: "karvonen-5",
     zones: [{ zone: 1, name: "Recovery", minBpm: 0, maxBpm: 139 }],
   },
   powerZones: {
-    mode: "manual",
+    method: "custom",
     zones: [{ zone: 1, name: "Z1", minPercent: 0, maxPercent: 55 }],
   },
   paceZones: {
-    mode: "auto",
+    method: "daniels-5",
     zones: [
       { zone: 1, name: "Easy", minPace: 345, maxPace: 600, unit: "min_per_km" },
       {
@@ -77,11 +77,11 @@ const runningConfig: SportZoneConfig = {
 const swimmingConfig: SportZoneConfig = {
   thresholds: { lthr: 160, thresholdPace: 100, paceUnit: "min_per_100m" },
   heartRateZones: {
-    mode: "auto",
+    method: "karvonen-5",
     zones: [{ zone: 1, name: "Recovery", minBpm: 0, maxBpm: 131 }],
   },
   paceZones: {
-    mode: "auto",
+    method: "daniels-5",
     zones: [
       {
         zone: 1,
@@ -130,7 +130,7 @@ describe("formatZonesContext", () => {
   });
 
   describe("cycling sport", () => {
-    it("should format power + HR zones only", () => {
+    it("should format power + HR zones with method names", () => {
       const profile: Profile = {
         ...baseProfile,
         sportZones: { cycling: cyclingConfig },
@@ -140,14 +140,15 @@ describe("formatZonesContext", () => {
 
       expect(result).toContain("LTHR: 170bpm");
       expect(result).toContain("FTP: 250W");
-      expect(result).toContain("HR zones:");
-      expect(result).toContain("Power zones:");
-      expect(result).not.toContain("Pace zones:");
+      expect(result).toContain("HR zones (Karvonen 5-zone):");
+      expect(result).toContain("Power zones (Coggan 7-zone, FTP: 250W):");
+      expect(result).toContain("Z1 Active Recovery: 0-138W");
+      expect(result).not.toContain("Pace zones");
     });
   });
 
   describe("running sport", () => {
-    it("should format pace + HR zones", () => {
+    it("should format pace + HR zones with method names", () => {
       const profile: Profile = {
         ...baseProfile,
         sportZones: { running: runningConfig },
@@ -157,8 +158,8 @@ describe("formatZonesContext", () => {
 
       expect(result).toContain("LTHR: 170bpm");
       expect(result).toContain("Threshold Pace: 5:00/km");
-      expect(result).toContain("Pace zones:");
-      expect(result).toContain("Easy: 5:45-10:00/km");
+      expect(result).toContain("Pace zones (Daniels 5-zone):");
+      expect(result).toContain("Z1 Easy: 5:45-10:00/km");
     });
   });
 
@@ -172,7 +173,7 @@ describe("formatZonesContext", () => {
       const result = formatZonesContext(profile, "swimming");
 
       expect(result).toContain("LTHR: 160bpm");
-      expect(result).toContain("Pace zones:");
+      expect(result).toContain("Pace zones (Daniels 5-zone):");
       expect(result).toContain("/100m");
     });
   });
@@ -186,10 +187,8 @@ describe("formatZonesContext", () => {
 
       const result = formatZonesContext(profile, "running");
 
-      // 345s = 5:45, 600s = 10:00
-      expect(result).toContain("Easy: 5:45-10:00/km");
-      // 324s = 5:24, 345s = 5:45
-      expect(result).toContain("Aerobic: 5:24-5:45/km");
+      expect(result).toContain("Z1 Easy: 5:45-10:00/km");
+      expect(result).toContain("Z2 Aerobic: 5:24-5:45/km");
     });
 
     it("should format min/100m pace zones as mm:ss/100m", () => {
@@ -200,8 +199,7 @@ describe("formatZonesContext", () => {
 
       const result = formatZonesContext(profile, "swimming");
 
-      // 115s = 1:55, 200s = 3:20
-      expect(result).toContain("Easy: 1:55-3:20/100m");
+      expect(result).toContain("Z1 Easy: 1:55-3:20/100m");
     });
   });
 
@@ -219,6 +217,28 @@ describe("formatZonesContext", () => {
 
       expect(result).toContain("[cycling]");
       expect(result).toContain("[running]");
+    });
+  });
+
+  describe("custom zone names in formatter", () => {
+    it("should output custom zone names", () => {
+      const config: SportZoneConfig = {
+        ...cyclingConfig,
+        powerZones: {
+          method: "custom",
+          zones: [
+            { zone: 1, name: "My Easy Zone", minPercent: 0, maxPercent: 60 },
+          ],
+        },
+      };
+      const profile: Profile = {
+        ...baseProfile,
+        sportZones: { cycling: config },
+      };
+
+      const result = formatZonesContext(profile, "cycling");
+
+      expect(result).toContain("Z1 My Easy Zone: 0-150W");
     });
   });
 });

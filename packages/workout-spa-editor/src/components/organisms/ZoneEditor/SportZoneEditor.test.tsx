@@ -43,7 +43,7 @@ describe("SportZoneEditor", () => {
       );
     });
 
-    it("should show HR zones in auto mode with auto labels", () => {
+    it("should show HR zones section", () => {
       const profile = createTestProfile();
 
       render(<SportZoneEditor profileId={profile.id} />);
@@ -58,6 +58,15 @@ describe("SportZoneEditor", () => {
 
       expect(screen.getByLabelText("LTHR threshold")).toBeInTheDocument();
       expect(screen.getByLabelText("FTP threshold")).toBeInTheDocument();
+    });
+
+    it("should show zone method dropdown", () => {
+      const profile = createTestProfile();
+
+      render(<SportZoneEditor profileId={profile.id} />);
+
+      expect(screen.getByLabelText("hr zone method")).toBeInTheDocument();
+      expect(screen.getByLabelText("power zone method")).toBeInTheDocument();
     });
   });
 
@@ -93,26 +102,20 @@ describe("SportZoneEditor", () => {
     });
   });
 
-  describe("mode toggle", () => {
-    it("should show confirmation when switching from manual to auto", async () => {
+  describe("zone method selection", () => {
+    it("should change power zone method", async () => {
       const profile = createTestProfile();
       const user = userEvent.setup();
 
       render(<SportZoneEditor profileId={profile.id} />);
 
-      // First switch to manual
-      const toggleBtn = screen.getByLabelText(
-        /switch heart rate zones to manual mode/i
-      );
-      await user.click(toggleBtn);
+      const methodSelect = screen.getByLabelText("power zone method");
+      await user.selectOptions(methodSelect, "british-cycling-6");
 
-      // Now try to switch back to auto
-      const toggleBtn2 = screen.getByLabelText(
-        /switch heart rate zones to auto mode/i
+      const updated = useProfileStore.getState().getProfile(profile.id);
+      expect(updated?.sportZones?.cycling?.powerZones?.method).toBe(
+        "british-cycling-6"
       );
-      await user.click(toggleBtn2);
-
-      expect(screen.getByText("Switch to Auto Mode")).toBeInTheDocument();
     });
   });
 });

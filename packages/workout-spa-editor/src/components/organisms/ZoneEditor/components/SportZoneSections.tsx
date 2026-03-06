@@ -7,46 +7,50 @@
 import { ZoneTypeSection } from "./ZoneTypeSection";
 import type { ZoneType } from "../../../../store/profile-store/types";
 import type { SportZoneConfig } from "../../../../types/sport-zones";
-import type { ZoneMode } from "../../../../types/sport-zones";
 
 type SportZoneSectionsProps = {
   config: SportZoneConfig;
   capabilities: { hr: boolean; power: boolean; pace: boolean };
-  onToggleMode: (zoneType: ZoneType, mode: ZoneMode) => void;
+  onMethodChange: (zoneType: ZoneType, method: string) => void;
+  ftp?: number;
 };
 
 export function SportZoneSections({
   config,
   capabilities,
-  onToggleMode,
+  onMethodChange,
+  ftp,
 }: SportZoneSectionsProps) {
   return (
     <div className="space-y-4">
       {capabilities.hr && (
         <ZoneTypeSection
           title="Heart Rate Zones"
-          mode={config.heartRateZones.mode}
+          method={config.heartRateZones.method}
           zones={config.heartRateZones.zones}
           zoneDisplayType="heartRate"
-          onToggleMode={(m) => onToggleMode("heartRateZones", m)}
+          onMethodChange={(m) => onMethodChange("heartRateZones", m)}
+          threshold={config.thresholds.lthr}
         />
       )}
       {capabilities.power && config.powerZones && (
         <ZoneTypeSection
           title="Power Zones"
-          mode={config.powerZones.mode}
+          method={config.powerZones.method}
           zones={config.powerZones.zones}
           zoneDisplayType="power"
-          onToggleMode={(m) => onToggleMode("powerZones", m)}
+          onMethodChange={(m) => onMethodChange("powerZones", m)}
+          threshold={ftp}
         />
       )}
       {capabilities.pace && config.paceZones && (
         <ZoneTypeSection
           title="Pace Zones"
-          mode={config.paceZones.mode}
+          method={config.paceZones.method}
           zones={config.paceZones.zones}
           zoneDisplayType="pace"
-          onToggleMode={(m) => onToggleMode("paceZones", m)}
+          onMethodChange={(m) => onMethodChange("paceZones", m)}
+          threshold={config.thresholds.thresholdPace}
         />
       )}
     </div>

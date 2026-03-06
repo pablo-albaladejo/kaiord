@@ -1,7 +1,7 @@
 /**
  * ZoneTable Component
  *
- * Renders zone rows. Read-only in auto mode, editable in manual mode.
+ * Renders zone rows with real unit values as primary display.
  */
 
 import { getZoneColor } from "../utils/zone-colors";
@@ -13,16 +13,21 @@ type ZoneRow = HeartRateZone | PowerZone | PaceZone;
 type ZoneTableProps = {
   zones: Array<ZoneRow>;
   type: "heartRate" | "power" | "pace";
-  readOnly: boolean;
+  threshold?: number;
 };
 
-function formatValue(zone: ZoneRow, type: string): string {
+function formatPrimary(zone: ZoneRow, type: string, threshold?: number) {
   if (type === "heartRate") {
     const hr = zone as HeartRateZone;
     return `${hr.minBpm} - ${hr.maxBpm} bpm`;
   }
   if (type === "power") {
     const pw = zone as PowerZone;
+    if (threshold) {
+      const minW = Math.round((threshold * pw.minPercent) / 100);
+      const maxW = Math.round((threshold * pw.maxPercent) / 100);
+      return `${minW} - ${maxW}W`;
+    }
     return `${pw.minPercent} - ${pw.maxPercent}%`;
   }
   const pace = zone as PaceZone;
@@ -33,7 +38,15 @@ function formatValue(zone: ZoneRow, type: string): string {
   return `${toMmSs(pace.minPace)} - ${toMmSs(pace.maxPace)}`;
 }
 
-export function ZoneTable({ zones, type, readOnly }: ZoneTableProps) {
+function formatSecondary(zone: ZoneRow, type: string, threshold?: number) {
+  if (type === "power" && threshold) {
+    const pw = zone as PowerZone;
+    return `(${pw.minPercent}-${pw.maxPercent}%)`;
+  }
+  return null;
+}
+
+export function ZoneTable({ zones, type, threshold }: ZoneTableProps) {
   if (zones.length === 0) {
     return (
       <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -56,9 +69,13 @@ export function ZoneTable({ zones, type, readOnly }: ZoneTableProps) {
             {zone.name}
           </span>
           <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
-            {formatValue(zone, type)}
+            {formatPrimary(zone, type, threshold)}
           </span>
-          {readOnly && <span className="text-xs text-gray-400">(auto)</span>}
+          {formatSecondary(zone, type, threshold) && (
+            <span className="text-xs text-gray-400">
+              {formatSecondary(zone, type, threshold)}
+            </span>
+          )}
         </div>
       ))}
     </div>

@@ -1,61 +1,71 @@
-import { SportZoneEditor } from "../../ZoneEditor/SportZoneEditor";
+/**
+ * ProfileManagerDialog Component
+ *
+ * Redesigned layout with inline name, tabs, and zones as primary view.
+ */
+
+import { CreateProfileSection } from "./CreateProfileSection";
 import { DeleteConfirmDialog } from "../DeleteConfirmDialog";
-import { ImportExportActions } from "../ImportExportActions";
-import { ProfileForm } from "../ProfileForm";
 import { DialogHeader } from "./DialogHeader";
+import { ImportExportActions } from "../ImportExportActions";
+import { ProfileEditView } from "./ProfileEditView";
 import { ProfileListSection } from "./ProfileListSection";
 import { ProfileNotifications } from "./ProfileNotifications";
 import type { ProfileManagerDialogProps } from "./profile-manager-dialog-types";
 
-export function ProfileManagerDialog({
-  profiles,
-  activeProfileId,
-  editingProfile,
-  formData,
-  deleteConfirmId,
-  importError,
-  switchNotification,
-  setFormData,
-  handleCreate,
-  handleEdit,
-  handleSave,
-  handleCancel,
-  handleSwitchProfile,
-  handleDelete,
-  confirmDelete,
-  handleExport,
-  handleImport,
-  setDeleteConfirmId,
-}: ProfileManagerDialogProps) {
+export function ProfileManagerDialog(props: ProfileManagerDialogProps) {
+  const { editingProfile, formData, setFormData, handleSave } = props;
+
+  const handleNameChange = (name: string) => {
+    setFormData({ ...formData, name });
+    if (editingProfile) handleSave();
+  };
+
   return (
     <>
-      <DialogHeader />
+      <DialogHeader
+        profileName={editingProfile ? formData.name : undefined}
+        onNameChange={editingProfile ? handleNameChange : undefined}
+      />
       <ProfileNotifications
-        importError={importError}
-        switchNotification={switchNotification}
+        importError={props.importError}
+        switchNotification={props.switchNotification}
       />
-      <ProfileForm
-        formData={formData}
-        editingProfile={editingProfile}
-        onFormDataChange={setFormData}
-        onCreate={handleCreate}
-        onSave={handleSave}
-        onCancel={handleCancel}
-      />
-      {editingProfile && <SportZoneEditor profileId={editingProfile.id} />}
-      <ImportExportActions onImport={handleImport} />
-      <ProfileListSection
-        profiles={profiles}
-        activeProfileId={activeProfileId}
-        onSwitch={handleSwitchProfile}
-        onEdit={handleEdit}
-        onExport={handleExport}
-        onDelete={handleDelete}
-      />
+      {editingProfile ? (
+        <ProfileEditView
+          profileId={editingProfile.id}
+          formData={formData}
+          setFormData={setFormData}
+          onCancel={props.handleCancel}
+        />
+      ) : (
+        <ProfileListView {...props} />
+      )}
       <DeleteConfirmDialog
-        open={!!deleteConfirmId}
-        onConfirm={confirmDelete}
-        onCancel={() => setDeleteConfirmId(null)}
+        open={!!props.deleteConfirmId}
+        onConfirm={props.confirmDelete}
+        onCancel={() => props.setDeleteConfirmId(null)}
+      />
+    </>
+  );
+}
+
+function ProfileListView(props: ProfileManagerDialogProps) {
+  return (
+    <>
+      <CreateProfileSection
+        formData={props.formData}
+        setFormData={props.setFormData}
+        onCreate={props.handleCreate}
+      />
+      <ImportExportActions onImport={props.handleImport} />
+      <ProfileListSection
+        profiles={props.profiles}
+        activeProfileId={props.activeProfileId}
+        onSwitch={props.handleSwitchProfile}
+        onEdit={props.handleEdit}
+        onExport={props.handleExport}
+        onDelete={props.handleDelete}
       />
     </>
   );
