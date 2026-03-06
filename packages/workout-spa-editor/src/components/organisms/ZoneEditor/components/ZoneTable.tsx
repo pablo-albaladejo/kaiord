@@ -1,52 +1,29 @@
 /**
  * ZoneTable Component
  *
- * Renders zone rows with real unit values as primary display.
+ * Renders editable zone rows with inline editing for names and values.
  */
 
-import { getZoneColor } from "../utils/zone-colors";
-import type { HeartRateZone, PowerZone } from "../../../../types/profile";
-import type { PaceZone } from "../../../../types/sport-zones";
-
-type ZoneRow = HeartRateZone | PowerZone | PaceZone;
+import { ZoneRow } from "./ZoneRow";
+import type { ZoneRowData, ZoneTableCallbacks } from "../types/zone-table";
 
 type ZoneTableProps = {
-  zones: Array<ZoneRow>;
+  zones: Array<ZoneRowData>;
   type: "heartRate" | "power" | "pace";
   threshold?: number;
+  isCustom: boolean;
+  callbacks: ZoneTableCallbacks;
+  onAddZone?: () => void;
 };
 
-function formatPrimary(zone: ZoneRow, type: string, threshold?: number) {
-  if (type === "heartRate") {
-    const hr = zone as HeartRateZone;
-    return `${hr.minBpm} - ${hr.maxBpm} bpm`;
-  }
-  if (type === "power") {
-    const pw = zone as PowerZone;
-    if (threshold) {
-      const minW = Math.round((threshold * pw.minPercent) / 100);
-      const maxW = Math.round((threshold * pw.maxPercent) / 100);
-      return `${minW} - ${maxW}W`;
-    }
-    return `${pw.minPercent} - ${pw.maxPercent}%`;
-  }
-  const pace = zone as PaceZone;
-  const toMmSs = (s: number) => {
-    const m = Math.floor(s / 60);
-    return `${m}:${String(s % 60).padStart(2, "0")}`;
-  };
-  return `${toMmSs(pace.minPace)} - ${toMmSs(pace.maxPace)}`;
-}
-
-function formatSecondary(zone: ZoneRow, type: string, threshold?: number) {
-  if (type === "power" && threshold) {
-    const pw = zone as PowerZone;
-    return `(${pw.minPercent}-${pw.maxPercent}%)`;
-  }
-  return null;
-}
-
-export function ZoneTable({ zones, type, threshold }: ZoneTableProps) {
+export function ZoneTable({
+  zones,
+  type,
+  threshold,
+  isCustom,
+  callbacks,
+  onAddZone,
+}: ZoneTableProps) {
   if (zones.length === 0) {
     return (
       <p className="text-sm text-gray-500 dark:text-gray-400">
@@ -57,27 +34,28 @@ export function ZoneTable({ zones, type, threshold }: ZoneTableProps) {
 
   return (
     <div className="space-y-1">
-      {zones.map((zone) => (
-        <div
+      {zones.map((zone, i) => (
+        <ZoneRow
           key={zone.zone}
-          className={`flex items-center gap-3 rounded px-3 py-1.5 ${getZoneColor(zone.zone)}`}
-        >
-          <span className="w-6 text-center text-xs font-bold text-gray-700 dark:text-gray-300">
-            Z{zone.zone}
-          </span>
-          <span className="flex-1 text-sm text-gray-800 dark:text-gray-200">
-            {zone.name}
-          </span>
-          <span className="text-sm font-mono text-gray-600 dark:text-gray-400">
-            {formatPrimary(zone, type, threshold)}
-          </span>
-          {formatSecondary(zone, type, threshold) && (
-            <span className="text-xs text-gray-400">
-              {formatSecondary(zone, type, threshold)}
-            </span>
-          )}
-        </div>
+          zone={zone}
+          index={i}
+          type={type}
+          threshold={threshold}
+          isCustom={isCustom}
+          callbacks={callbacks}
+        />
       ))}
+      {isCustom && onAddZone && (
+        <button
+          type="button"
+          onClick={onAddZone}
+          className="mt-2 rounded border border-dashed border-gray-300 px-3
+            py-1 text-xs text-gray-500 hover:border-blue-400 hover:text-blue-500
+            dark:border-gray-600 dark:text-gray-400"
+        >
+          + Add Zone
+        </button>
+      )}
     </div>
   );
 }

@@ -25,6 +25,8 @@ export function SportZoneEditor({ profileId }: SportZoneEditorProps) {
     confirmMethodSwitch,
     cancelMethodSwitch,
     updateSportThresholds,
+    handleZonesChange,
+    handleAddZone,
   } = useSportZoneEditor(profileId);
 
   if (!sportConfig) {
@@ -47,6 +49,8 @@ export function SportZoneEditor({ profileId }: SportZoneEditorProps) {
         config={sportConfig}
         capabilities={capabilities}
         onMethodChange={handleMethodChange}
+        onZonesChange={handleZonesChange}
+        onAddZone={handleAddZone}
         ftp={sportConfig.thresholds.ftp}
       />
       <ConfirmationModal

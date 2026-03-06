@@ -7,11 +7,14 @@
 import { ZoneTypeSection } from "./ZoneTypeSection";
 import type { ZoneType } from "../../../../store/profile-store/types";
 import type { SportZoneConfig } from "../../../../types/sport-zones";
+import type { ZoneRowData } from "../types/zone-table";
 
 type SportZoneSectionsProps = {
   config: SportZoneConfig;
   capabilities: { hr: boolean; power: boolean; pace: boolean };
   onMethodChange: (zoneType: ZoneType, method: string) => void;
+  onZonesChange: (zoneType: ZoneType, zones: Array<ZoneRowData>) => void;
+  onAddZone: (zoneType: ZoneType) => void;
   ftp?: number;
 };
 
@@ -19,6 +22,8 @@ export function SportZoneSections({
   config,
   capabilities,
   onMethodChange,
+  onZonesChange,
+  onAddZone,
   ftp,
 }: SportZoneSectionsProps) {
   return (
@@ -30,6 +35,8 @@ export function SportZoneSections({
           zones={config.heartRateZones.zones}
           zoneDisplayType="heartRate"
           onMethodChange={(m) => onMethodChange("heartRateZones", m)}
+          onZonesChange={(z) => onZonesChange("heartRateZones", z)}
+          onAddZone={() => onAddZone("heartRateZones")}
           threshold={config.thresholds.lthr}
         />
       )}
@@ -40,6 +47,8 @@ export function SportZoneSections({
           zones={config.powerZones.zones}
           zoneDisplayType="power"
           onMethodChange={(m) => onMethodChange("powerZones", m)}
+          onZonesChange={(z) => onZonesChange("powerZones", z)}
+          onAddZone={() => onAddZone("powerZones")}
           threshold={ftp}
         />
       )}
@@ -50,6 +59,8 @@ export function SportZoneSections({
           zones={config.paceZones.zones}
           zoneDisplayType="pace"
           onMethodChange={(m) => onMethodChange("paceZones", m)}
+          onZonesChange={(z) => onZonesChange("paceZones", z)}
+          onAddZone={() => onAddZone("paceZones")}
           threshold={config.thresholds.thresholdPace}
         />
       )}

@@ -2,18 +2,22 @@
  * ZoneTypeSection Component
  *
  * Wrapper for each zone type within a sport tab.
- * Shows method dropdown and zone content.
+ * Shows method dropdown and editable zone content.
  */
 
 import { ZoneMethodSelect } from "./ZoneMethodSelect";
 import { ZoneTable } from "./ZoneTable";
+import { useZoneCallbacks } from "../hooks/useZoneCallbacks";
+import type { ZoneRowData } from "../types/zone-table";
 
 type ZoneTypeSectionProps = {
   title: string;
   method: string;
-  zones: Array<Record<string, unknown>>;
+  zones: Array<ZoneRowData>;
   zoneDisplayType: "heartRate" | "power" | "pace";
   onMethodChange: (method: string) => void;
+  onZonesChange: (zones: Array<ZoneRowData>) => void;
+  onAddZone?: () => void;
   threshold?: number;
 };
 
@@ -23,8 +27,19 @@ export function ZoneTypeSection({
   zones,
   zoneDisplayType,
   onMethodChange,
+  onZonesChange,
+  onAddZone,
   threshold,
 }: ZoneTypeSectionProps) {
+  const isCustom = method === "custom";
+
+  const callbacks = useZoneCallbacks({
+    zones,
+    type: zoneDisplayType,
+    threshold,
+    onZonesChange,
+  });
+
   return (
     <div className="rounded-lg border border-gray-200 p-4 dark:border-gray-700">
       <div className="mb-3 flex items-center justify-between">
@@ -38,9 +53,12 @@ export function ZoneTypeSection({
         />
       </div>
       <ZoneTable
-        zones={zones as never}
+        zones={zones}
         type={zoneDisplayType}
         threshold={threshold}
+        isCustom={isCustom}
+        callbacks={callbacks}
+        onAddZone={onAddZone}
       />
     </div>
   );

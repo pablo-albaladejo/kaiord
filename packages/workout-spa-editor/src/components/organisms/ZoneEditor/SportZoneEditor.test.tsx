@@ -118,4 +118,62 @@ describe("SportZoneEditor", () => {
       );
     });
   });
+
+  describe("inline editing", () => {
+    it("should edit zone name inline", async () => {
+      const profile = createTestProfile();
+      const user = userEvent.setup();
+
+      render(<SportZoneEditor profileId={profile.id} />);
+
+      const nameButtons = screen.getAllByLabelText("Zone 1 name");
+      await user.click(nameButtons[0]);
+
+      const input = screen.getByRole("textbox", { name: "Zone 1 name" });
+      await user.clear(input);
+      await user.type(input, "Easy");
+      await user.keyboard("{Enter}");
+
+      const updated = useProfileStore.getState().getProfile(profile.id);
+      const hrZones = updated?.sportZones?.cycling?.heartRateZones?.zones;
+      expect(hrZones?.[0].name).toBe("Easy");
+    });
+
+    it("should render zone value buttons for editing", () => {
+      const profile = createTestProfile();
+
+      render(<SportZoneEditor profileId={profile.id} />);
+
+      const minButtons = screen.getAllByLabelText("Zone 1 min");
+      expect(minButtons.length).toBeGreaterThan(0);
+
+      const maxButtons = screen.getAllByLabelText("Zone 1 max");
+      expect(maxButtons.length).toBeGreaterThan(0);
+    });
+
+    it("should show add zone button when method is custom", async () => {
+      const profile = createTestProfile();
+      const user = userEvent.setup();
+
+      render(<SportZoneEditor profileId={profile.id} />);
+
+      const methodSelect = screen.getByLabelText("power zone method");
+      await user.selectOptions(methodSelect, "custom");
+
+      expect(screen.getAllByText("+ Add Zone").length).toBeGreaterThan(0);
+    });
+
+    it("should show remove buttons when method is custom", async () => {
+      const profile = createTestProfile();
+      const user = userEvent.setup();
+
+      render(<SportZoneEditor profileId={profile.id} />);
+
+      const methodSelect = screen.getByLabelText("power zone method");
+      await user.selectOptions(methodSelect, "custom");
+
+      const removeButtons = screen.getAllByLabelText(/Remove zone \d/);
+      expect(removeButtons.length).toBeGreaterThan(0);
+    });
+  });
 });

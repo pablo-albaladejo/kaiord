@@ -5,59 +5,39 @@
  */
 
 import { useState } from "react";
+import { useMethodSwitch } from "./useMethodSwitch";
 import { useProfileStore } from "../../../../store/profile-store";
 import { SPORT_ZONE_CAPABILITIES } from "../../../../types/sport-zones";
-import { calculateHrZones } from "../../../../utils/calculate-hr-zones";
-import { calculatePaceZones } from "../../../../utils/calculate-pace-zones";
-import { calculatePowerZones } from "../../../../utils/calculate-power-zones";
+import { buildDefaultZone } from "../utils/default-zone";
 import type { ZoneType } from "../../../../store/profile-store/types";
 import type { SportKey } from "../../../../types/sport-zones";
 
 export function useSportZoneEditor(profileId: string) {
   const [activeSport, setActiveSport] = useState<SportKey>("cycling");
-  const [confirmMethod, setConfirmMethod] = useState<{
-    zoneType: ZoneType;
-    method: string;
-  } | null>(null);
-
-  const { updateSportThresholds, setZoneMethod, getProfile } =
-    useProfileStore();
-  const profile = getProfile(profileId);
-
+  const store = useProfileStore();
+  const profile = store.getProfile(profileId);
   const sportConfig = profile?.sportZones?.[activeSport];
   const capabilities = SPORT_ZONE_CAPABILITIES[activeSport];
 
-  const handleMethodChange = (zoneType: ZoneType, method: string) => {
+  const {
+    confirmMethod,
+    handleMethodChange,
+    confirmMethodSwitch,
+    cancelMethodSwitch,
+  } = useMethodSwitch(sportConfig, (zoneType, method, zones) => {
+    store.setZoneMethod(profileId, activeSport, zoneType, method, zones);
+  });
+
+  const handleZonesChange = (zoneType: ZoneType, zones: Array<unknown>) => {
+    store.updateSportZones(profileId, activeSport, zoneType, zones);
+  };
+
+  const handleAddZone = (zoneType: ZoneType) => {
     const current = sportConfig?.[zoneType];
-    if (current?.method === "custom" && current.zones.length > 0) {
-      setConfirmMethod({ zoneType, method });
-      return;
-    }
-    applyMethodChange(zoneType, method);
+    const nextNum = (current?.zones.length ?? 0) + 1;
+    const zone = buildDefaultZone(zoneType, nextNum);
+    store.addCustomZone(profileId, activeSport, zoneType, zone);
   };
-
-  const applyMethodChange = (zoneType: ZoneType, method: string) => {
-    const t = sportConfig?.thresholds;
-    let zones: Array<unknown> = [];
-
-    if (zoneType === "heartRateZones" && t?.lthr) {
-      zones = calculateHrZones(t.lthr, method);
-    } else if (zoneType === "powerZones") {
-      zones = calculatePowerZones(t?.ftp, method);
-    } else if (zoneType === "paceZones" && t?.thresholdPace && t?.paceUnit) {
-      zones = calculatePaceZones(t.thresholdPace, t.paceUnit, method);
-    }
-
-    setZoneMethod(profileId, activeSport, zoneType, method, zones);
-  };
-
-  const confirmMethodSwitch = () => {
-    if (!confirmMethod) return;
-    applyMethodChange(confirmMethod.zoneType, confirmMethod.method);
-    setConfirmMethod(null);
-  };
-
-  const cancelMethodSwitch = () => setConfirmMethod(null);
 
   return {
     activeSport,
@@ -68,6 +48,8 @@ export function useSportZoneEditor(profileId: string) {
     handleMethodChange,
     confirmMethodSwitch,
     cancelMethodSwitch,
-    updateSportThresholds,
+    updateSportThresholds: store.updateSportThresholds,
+    handleZonesChange,
+    handleAddZone,
   };
 }
