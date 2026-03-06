@@ -1,3 +1,4 @@
+import { expandFileUpload } from "./helpers/expand-file-upload";
 import { expect, test } from "./fixtures/base";
 import type { Page } from "@playwright/test";
 
@@ -39,6 +40,7 @@ test.describe("Button Improvements - Desktop Layout", () => {
     await dismissTutorialIfPresent(page);
 
     // Load a workout to display the action buttons
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -133,6 +135,7 @@ test.describe("Button Improvements - Desktop Layout", () => {
     await page.goto("/");
     await dismissTutorialIfPresent(page);
 
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -203,6 +206,7 @@ test.describe("Button Improvements - Desktop Layout", () => {
     await page.goto("/");
     await dismissTutorialIfPresent(page);
 
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -288,6 +292,7 @@ test.describe("Button Improvements - Mobile Layout", () => {
     await dismissTutorialIfPresent(page);
 
     // Load a workout
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -374,6 +379,7 @@ test.describe("Button Improvements - Mobile Layout", () => {
     await page.goto("/");
     await dismissTutorialIfPresent(page);
 
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -464,6 +470,7 @@ test.describe("Button Improvements - Mobile Layout", () => {
     await page.goto("/");
     await dismissTutorialIfPresent(page);
 
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -550,6 +557,7 @@ test.describe("Button Improvements - Capitalization", () => {
     await dismissTutorialIfPresent(page);
 
     // Load a workout
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -620,6 +628,7 @@ test.describe("Button Improvements - Capitalization", () => {
     await page.goto("/");
     await dismissTutorialIfPresent(page);
 
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -685,6 +694,7 @@ test.describe("Button Improvements - Capitalization", () => {
     await page.goto("/");
     await dismissTutorialIfPresent(page);
 
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",

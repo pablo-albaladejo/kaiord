@@ -1,3 +1,4 @@
+import { expandFileUpload } from "./helpers/expand-file-upload";
 import { expect, test } from "./fixtures/base";
 
 /**
@@ -32,6 +33,7 @@ test.describe("Mobile Responsive Design", () => {
     await page.goto("/");
 
     // Load a workout
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -86,6 +88,7 @@ test.describe("Mobile Responsive Design", () => {
     await page.goto("/");
 
     // Load a workout with multiple steps instead of creating one
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -202,6 +205,7 @@ test.describe("Tablet Responsive Design", () => {
     expect(mainPadding.paddingRight).toBe("24px");
 
     // Load a workout to test tablet layout with content
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",

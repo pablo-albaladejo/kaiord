@@ -1,3 +1,4 @@
+import { expandFileUpload } from "./helpers/expand-file-upload";
 import { expect, test } from "./fixtures/base";
 
 /**
@@ -20,6 +21,7 @@ test.describe("Step Selection - Unique IDs", () => {
     await page.goto("/");
 
     // Load a workout with steps that have duplicate stepIndex values
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -129,6 +131,7 @@ test.describe("Step Selection - Unique IDs", () => {
     await page.goto("/");
 
     // Load a workout with repetition blocks
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -227,6 +230,7 @@ test.describe("Step Selection - Unique IDs", () => {
     await page.goto("/");
 
     // Load a workout with multiple repetition blocks
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -391,6 +395,7 @@ test.describe("Step Selection - Unique IDs", () => {
     await page.goto("/");
 
     // Load a workout where multiple contexts have steps with stepIndex: 1
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",
@@ -528,6 +533,7 @@ test.describe("Step Selection - Unique IDs", () => {
     await page.goto("/");
 
     // Load a workout with multiple blocks and duplicate stepIndex values
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     const testWorkout = {
       version: "1.0",

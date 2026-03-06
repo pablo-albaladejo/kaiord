@@ -1,4 +1,5 @@
 import { expect } from "@playwright/test";
+import { expandFileUpload } from "./expand-file-upload";
 import type { Page } from "@playwright/test";
 
 /**
@@ -11,6 +12,7 @@ export async function loadTestWorkout(
   page: Page,
   workoutName = "Test Workout"
 ) {
+  await expandFileUpload(page);
   const fileInput = page.locator('input[type="file"]');
   const testWorkout = {
     version: "1.0",

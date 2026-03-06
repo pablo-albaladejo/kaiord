@@ -1,3 +1,4 @@
+import { expandFileUpload } from "./helpers/expand-file-upload";
 import { expect, test } from "./fixtures/base";
 
 /**
@@ -25,6 +26,7 @@ test.describe("Advanced Workout Features", () => {
       await page.goto("/");
 
       // Load a swimming workout
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       const swimmingWorkout = {
         version: "1.0",
@@ -129,6 +131,7 @@ test.describe("Advanced Workout Features", () => {
         },
       };
 
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles({
         name: "pool-swim.krd",
@@ -185,6 +188,7 @@ test.describe("Advanced Workout Features", () => {
         },
       };
 
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles({
         name: "calorie-workout.krd",
@@ -237,6 +241,7 @@ test.describe("Advanced Workout Features", () => {
         },
       };
 
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles({
         name: "power-threshold.krd",
@@ -286,6 +291,7 @@ test.describe("Advanced Workout Features", () => {
         },
       };
 
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles({
         name: "hr-threshold.krd",
@@ -335,6 +341,7 @@ test.describe("Advanced Workout Features", () => {
         },
       };
 
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles({
         name: "repeat-workout.krd",
@@ -405,6 +412,7 @@ test.describe("Advanced Workout Features", () => {
         },
       };
 
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles({
         name: "coached-workout.krd",
@@ -462,6 +470,7 @@ test.describe("Advanced Workout Features", () => {
         },
       };
 
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles({
         name: "simple-workout.krd",
@@ -513,6 +522,7 @@ test.describe("Advanced Workout Features", () => {
         },
       };
 
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles({
         name: "test-workout.krd",
@@ -586,6 +596,7 @@ test.describe("Advanced Workout Features", () => {
         },
       };
 
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles({
         name: "sport-test.krd",
@@ -658,6 +669,7 @@ test.describe("Advanced Workout Features", () => {
         },
       };
 
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles({
         name: "cancel-test.krd",
@@ -734,6 +746,7 @@ test.describe("Advanced Workout Features", () => {
         },
       };
 
+      await expandFileUpload(page);
       const fileInput = page.locator('input[type="file"]');
       await fileInput.setInputFiles({
         name: "large-workout.krd",

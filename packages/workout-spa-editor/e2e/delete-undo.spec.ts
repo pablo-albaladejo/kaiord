@@ -1,3 +1,4 @@
+import { expandFileUpload } from "./helpers/expand-file-upload";
 import { expect, test } from "./fixtures/base";
 
 /**
@@ -23,6 +24,7 @@ test.describe("Delete with Undo Flow", () => {
     }
 
     // Load a test workout with multiple steps
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",

@@ -38,7 +38,7 @@ test.describe("AI Generate Workout Flow", () => {
     await addTestProvider(page);
 
     // The AiWorkoutInput is now mounted in WelcomeSection
-    const textarea = page.getByPlaceholder(/describe your workout/i);
+    const textarea = page.getByLabel("Workout description");
     await expect(textarea).toBeVisible({ timeout: 5000 });
     await textarea.fill(
       "45 minutes sweet spot cycling with 10 min warmup and cooldown"
@@ -81,25 +81,29 @@ async function addTestProvider(
   label = "Test Claude",
   type = "anthropic"
 ): Promise<void> {
-  // Open settings
-  await page.getByRole("button", { name: /open settings/i }).click();
+  // Open settings (use exact match to avoid matching "Open Settings" button)
+  await page
+    .getByRole("button", { name: "Open settings", exact: true })
+    .click();
 
-  // Should be on AI tab by default
-  await expect(page.getByText("LLM Providers")).toBeVisible({ timeout: 5000 });
+  const dialog = page.getByRole("dialog", { name: "Settings" });
+  await expect(dialog).toBeVisible({ timeout: 5000 });
 
   // Select provider type
-  const providerSelect = page.locator("select").first();
+  const providerSelect = dialog.locator("select").first();
   await providerSelect.selectOption(type);
 
   // Fill in the form
-  await page.getByPlaceholder("e.g., My Claude").fill(label);
-  await page.getByPlaceholder("sk-...").fill("sk-test-key-for-e2e");
+  await dialog.getByPlaceholder("e.g., My Claude").fill(label);
+  await dialog.getByPlaceholder("sk-...").fill("sk-test-key-for-e2e");
 
   // Click add
-  await page.getByRole("button", { name: /add provider/i }).click();
+  await dialog.getByRole("button", { name: /add provider/i }).click();
 
   // Verify provider appears in list
-  await expect(page.getByText(label)).toBeVisible({ timeout: 3000 });
+  await expect(dialog.getByText(label, { exact: true })).toBeVisible({
+    timeout: 3000,
+  });
 
   // Close settings dialog
   await page.keyboard.press("Escape");

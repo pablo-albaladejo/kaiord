@@ -1,3 +1,4 @@
+import { expandFileUpload } from "./helpers/expand-file-upload";
 /**
  * E2E Tests: Import/Export Multiple Formats
  *
@@ -56,6 +57,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should import KRD file and display workout", async ({ page }) => {
     // Arrange
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Upload KRD file
@@ -76,6 +78,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should export workout to FIT format", async ({ page }) => {
     // Arrange - Load workout first
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -110,6 +113,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should export workout to TCX format", async ({ page }) => {
     // Arrange - Load workout first
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -152,6 +156,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should export workout to ZWO format", async ({ page }) => {
     // Arrange - Load workout first
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -199,6 +204,7 @@ test.describe("Import/Export Multiple Formats", () => {
     // For now, we'll test the KRD round-trip as a proxy
 
     // Arrange - Load workout
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -244,6 +250,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should handle conversion errors gracefully", async ({ page }) => {
     // Arrange - Upload invalid file
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "invalid.fit",
@@ -265,6 +272,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should show loading state during import", async ({ page }) => {
     // Arrange
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Act - Upload file
@@ -286,6 +294,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should show loading state during export", async ({ page }) => {
     // Arrange - Load workout first
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -311,6 +320,7 @@ test.describe("Import/Export Multiple Formats", () => {
     page,
   }) => {
     // Arrange - Load workout
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -359,6 +369,7 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test("should display format-specific warnings", async ({ page }) => {
     // Arrange - Load workout
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -392,6 +403,7 @@ test.describe("Import/Export Multiple Formats", () => {
     page,
   }) => {
     // Arrange - Load workout
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "test-workout.krd",
@@ -448,6 +460,7 @@ test.describe("Import/Export Mobile Flow", () => {
     };
 
     // Act - Upload file on mobile
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "mobile-workout.krd",
@@ -481,6 +494,7 @@ test.describe("Import/Export Mobile Flow", () => {
       },
     };
 
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "mobile-workout.krd",

@@ -1,3 +1,4 @@
+import { expandFileUpload } from "./helpers/expand-file-upload";
 import { expect, test } from "./fixtures/base";
 import { readFileSync } from "fs";
 
@@ -23,6 +24,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     ).toBeVisible();
 
     // Load a workout file
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
 
     // Create a minimal valid KRD workout
@@ -140,6 +142,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
   }) => {
     await page.goto("/");
 
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
 
     // Upload an invalid KRD file (missing required fields)
@@ -166,6 +169,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
   test("should handle file parsing errors gracefully", async ({ page }) => {
     await page.goto("/");
 
+    await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
 
     // Upload a file with invalid JSON

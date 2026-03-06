@@ -1,3 +1,4 @@
+import { expandFileUpload } from "./helpers/expand-file-upload";
 import { expect, test } from "./fixtures/base";
 import { mockLambdaAuthError, mockLambdaSuccess } from "./fixtures/api-mocks";
 
@@ -101,6 +102,7 @@ async function loadTestWorkout(
     },
   };
 
+  await expandFileUpload(page);
   const fileInput = page.locator('input[type="file"]');
   await fileInput.setInputFiles({
     name: "push-test.krd",
@@ -117,25 +119,25 @@ async function loadTestWorkout(
 async function configureGarminCredentials(
   page: import("@playwright/test").Page
 ): Promise<void> {
-  // Open settings
-  await page.getByRole("button", { name: /open settings/i }).click();
+  // Open settings (use exact match to avoid matching "Open Settings" button)
+  await page
+    .getByRole("button", { name: "Open settings", exact: true })
+    .click();
 
-  // Wait for dialog to be visible
-  await expect(page.getByText("Settings")).toBeVisible({ timeout: 5000 });
+  const dialog = page.getByRole("dialog", { name: "Settings" });
+  await expect(dialog).toBeVisible({ timeout: 5000 });
 
-  // Switch to Garmin tab (use exact match to avoid matching "Push to Garmin")
-  const garminTab = page.getByRole("button", { name: /^garmin$/i });
-  await expect(garminTab).toBeVisible({ timeout: 3000 });
-  await garminTab.click();
+  // Switch to Garmin tab
+  await dialog.getByRole("tab", { name: /^garmin$/i }).click();
 
   // Wait for Garmin tab content to render
-  await expect(page.getByText("Garmin Connect Credentials")).toBeVisible({
+  await expect(dialog.getByText("Garmin Connect Credentials")).toBeVisible({
     timeout: 5000,
   });
 
   // Fill credentials
-  await page.getByPlaceholder("your@email.com").fill("test@garmin.com");
-  await page.getByPlaceholder("Your Garmin password").fill("test-password");
+  await dialog.getByPlaceholder("your@email.com").fill("test@garmin.com");
+  await dialog.getByPlaceholder("Your Garmin password").fill("test-password");
 
   // Close settings
   await page.keyboard.press("Escape");
