@@ -1,5 +1,6 @@
 import { expect } from "@playwright/test";
 import { buildRepetitionSteps } from "./build-repetition-steps";
+import { expandFileUpload } from "./expand-file-upload";
 import type { Page } from "@playwright/test";
 
 export type RepetitionBlock = {
@@ -20,6 +21,7 @@ export async function loadTestWorkoutWithBlocks(
   workoutName: string,
   blocks: RepetitionBlock[]
 ) {
+  await expandFileUpload(page);
   const fileInput = page.locator('input[type="file"]');
   const sport = blocks[0]?.sport ?? "cycling";
   const steps = blocks.map(buildRepetitionSteps);

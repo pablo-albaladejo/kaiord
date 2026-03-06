@@ -1,3 +1,4 @@
+import { expandFileUpload } from "./helpers/expand-file-upload";
 import { expect, test } from "./fixtures/base";
 
 /**
@@ -17,6 +18,7 @@ test.describe("Step Management Flow", () => {
     await page.goto("/");
 
     // Load a minimal workout file
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -99,6 +101,7 @@ test.describe("Step Management Flow", () => {
     await page.goto("/");
 
     // Load a workout
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
@@ -159,6 +162,7 @@ test.describe("Step Management Flow", () => {
     await page.goto("/");
 
     // Load a workout
+    await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     const testWorkout = {
       version: "1.0",
