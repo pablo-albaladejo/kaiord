@@ -5,12 +5,12 @@
  */
 
 import { z } from "zod";
-import { heartRateZoneSchema, powerZoneSchema } from "./zone-schemas";
 import {
   paceZoneSchema,
   sportThresholdsSchema,
   zoneModeSchema,
 } from "./sport-zones";
+import { heartRateZoneSchema, powerZoneSchema } from "./zone-schemas";
 
 const zoneConfigSchema = <T extends z.ZodType>(itemSchema: T) =>
   z.object({ mode: zoneModeSchema, zones: z.array(itemSchema) });
