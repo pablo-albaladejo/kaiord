@@ -5,55 +5,51 @@
  */
 
 import { useState } from "react";
+import { useMethodSwitch } from "./useMethodSwitch";
 import { useProfileStore } from "../../../../store/profile-store";
 import { SPORT_ZONE_CAPABILITIES } from "../../../../types/sport-zones";
+import { buildDefaultZone } from "../utils/default-zone";
 import type { ZoneType } from "../../../../store/profile-store/types";
-import type { SportKey, ZoneMode } from "../../../../types/sport-zones";
+import type { SportKey } from "../../../../types/sport-zones";
 
 export function useSportZoneEditor(profileId: string) {
   const [activeSport, setActiveSport] = useState<SportKey>("cycling");
-  const [confirmToggle, setConfirmToggle] = useState<{
-    zoneType: ZoneType;
-    targetMode: ZoneMode;
-  } | null>(null);
-
-  const { updateSportThresholds, toggleZoneMode, getProfile } =
-    useProfileStore();
-  const profile = getProfile(profileId);
-
+  const store = useProfileStore();
+  const profile = store.getProfile(profileId);
   const sportConfig = profile?.sportZones?.[activeSport];
   const capabilities = SPORT_ZONE_CAPABILITIES[activeSport];
 
-  const handleToggleMode = (zoneType: ZoneType, mode: ZoneMode) => {
-    if (mode === "auto" && sportConfig?.[zoneType]?.mode === "manual") {
-      setConfirmToggle({ zoneType, targetMode: mode });
-      return;
-    }
-    toggleZoneMode(profileId, activeSport, zoneType, mode);
+  const {
+    confirmMethod,
+    handleMethodChange,
+    confirmMethodSwitch,
+    cancelMethodSwitch,
+  } = useMethodSwitch(sportConfig, (zoneType, method, zones) => {
+    store.setZoneMethod(profileId, activeSport, zoneType, method, zones);
+  });
+
+  const handleZonesChange = (zoneType: ZoneType, zones: Array<unknown>) => {
+    store.updateSportZones(profileId, activeSport, zoneType, zones);
   };
 
-  const confirmModeSwitch = () => {
-    if (!confirmToggle) return;
-    toggleZoneMode(
-      profileId,
-      activeSport,
-      confirmToggle.zoneType,
-      confirmToggle.targetMode
-    );
-    setConfirmToggle(null);
+  const handleAddZone = (zoneType: ZoneType) => {
+    const current = sportConfig?.[zoneType];
+    const nextNum = (current?.zones.length ?? 0) + 1;
+    const zone = buildDefaultZone(zoneType, nextNum);
+    store.addCustomZone(profileId, activeSport, zoneType, zone);
   };
-
-  const cancelModeSwitch = () => setConfirmToggle(null);
 
   return {
     activeSport,
     setActiveSport,
     sportConfig,
     capabilities,
-    confirmToggle,
-    handleToggleMode,
-    confirmModeSwitch,
-    cancelModeSwitch,
-    updateSportThresholds,
+    confirmMethod,
+    handleMethodChange,
+    confirmMethodSwitch,
+    cancelMethodSwitch,
+    updateSportThresholds: store.updateSportThresholds,
+    handleZonesChange,
+    handleAddZone,
   };
 }

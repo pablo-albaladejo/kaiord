@@ -23,27 +23,38 @@ export function recalculateZones(
   const caps = SPORT_ZONE_CAPABILITIES[sport];
   const updated = { ...config, thresholds };
 
-  if (caps.hr && thresholds.lthr && updated.heartRateZones.mode === "auto") {
-    updated.heartRateZones = {
-      mode: "auto",
-      zones: calculateHrZones(thresholds.lthr),
-    };
+  if (caps.hr && thresholds.lthr) {
+    const method = updated.heartRateZones.method;
+    if (method !== "custom") {
+      updated.heartRateZones = {
+        method,
+        zones: calculateHrZones(thresholds.lthr, method),
+      };
+    }
   }
 
-  if (caps.power && updated.powerZones?.mode === "auto") {
-    updated.powerZones = { mode: "auto", zones: calculatePowerZones() };
+  if (caps.power && updated.powerZones) {
+    const method = updated.powerZones.method;
+    if (method !== "custom") {
+      updated.powerZones = {
+        method,
+        zones: calculatePowerZones(thresholds.ftp, method),
+      };
+    }
   }
 
-  if (
-    caps.pace &&
-    thresholds.thresholdPace &&
-    thresholds.paceUnit &&
-    updated.paceZones?.mode === "auto"
-  ) {
-    updated.paceZones = {
-      mode: "auto",
-      zones: calculatePaceZones(thresholds.thresholdPace, thresholds.paceUnit),
-    };
+  if (caps.pace && thresholds.thresholdPace && thresholds.paceUnit) {
+    const method = updated.paceZones?.method ?? "daniels-5";
+    if (method !== "custom") {
+      updated.paceZones = {
+        method,
+        zones: calculatePaceZones(
+          thresholds.thresholdPace,
+          thresholds.paceUnit,
+          method
+        ),
+      };
+    }
   }
 
   return updated;
