@@ -24,7 +24,10 @@ export function cascadeToNeighbors(
 }
 
 function cascadeForward(
-  zones: Array<ZoneRowData>, from: number, type: string, threshold?: number
+  zones: Array<ZoneRowData>,
+  from: number,
+  type: string,
+  threshold?: number
 ): void {
   for (let i = from; i < zones.length - 1; i++) {
     const curMax = getRealValue(zones[i], "max", type, threshold);
@@ -38,7 +41,10 @@ function cascadeForward(
 }
 
 function cascadeBackward(
-  zones: Array<ZoneRowData>, from: number, type: string, threshold?: number
+  zones: Array<ZoneRowData>,
+  from: number,
+  type: string,
+  threshold?: number
 ): void {
   for (let i = from; i > 0; i--) {
     const curMin = getRealValue(zones[i], "min", type, threshold);
@@ -52,7 +58,10 @@ function cascadeBackward(
 }
 
 function getRealValue(
-  zone: ZoneRowData, field: "min" | "max", type: string, threshold?: number
+  zone: ZoneRowData,
+  field: "min" | "max",
+  type: string,
+  threshold?: number
 ): number {
   if (type === "heartRate") {
     const hr = zone as HeartRateZone;
@@ -68,16 +77,24 @@ function getRealValue(
 }
 
 function setRealValue(
-  zones: Array<ZoneRowData>, idx: number, field: "min" | "max",
-  value: number, type: string, threshold?: number
+  zones: Array<ZoneRowData>,
+  idx: number,
+  field: "min" | "max",
+  value: number,
+  type: string,
+  threshold?: number
 ): void {
   const z = zones[idx];
   if (type === "heartRate") {
-    (z as Record<string, unknown>)[field === "min" ? "minBpm" : "maxBpm"] = value;
+    (z as Record<string, unknown>)[field === "min" ? "minBpm" : "maxBpm"] =
+      value;
   } else if (type === "power") {
     const pct = threshold ? Math.round((value / threshold) * 100) : value;
-    (z as Record<string, unknown>)[field === "min" ? "minPercent" : "maxPercent"] = pct;
+    (z as Record<string, unknown>)[
+      field === "min" ? "minPercent" : "maxPercent"
+    ] = pct;
   } else {
-    (z as Record<string, unknown>)[field === "min" ? "minPace" : "maxPace"] = value;
+    (z as Record<string, unknown>)[field === "min" ? "minPace" : "maxPace"] =
+      value;
   }
 }
