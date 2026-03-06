@@ -47,7 +47,7 @@ test.describe("Profile Management", () => {
     // Act - Fill all fields
     await page.getByLabel(/^name$/i).fill("Pro Cyclist");
     await page.getByLabel(/body weight/i).fill("70");
-    await page.getByLabel(/ftp/i).fill("300");
+    await page.getByRole("dialog").getByLabel(/ftp/i).first().fill("300");
     await page.getByLabel(/max hr/i).fill("190");
     await page.getByRole("button", { name: /create profile/i }).click();
 
@@ -68,7 +68,7 @@ test.describe("Profile Management", () => {
     await page.getByRole("button", { name: /^edit$/i }).click();
     await page.getByLabel(/^name$/i).clear();
     await page.getByLabel(/^name$/i).fill("Updated Name");
-    await page.getByLabel(/ftp/i).fill("280");
+    await dialog.getByLabel(/ftp/i).first().fill("280");
     await page.getByRole("button", { name: /save changes/i }).click();
 
     // Assert - Profile shows updated data in dialog
@@ -127,7 +127,7 @@ test.describe("Profile Management", () => {
     // Arrange - Create a profile
     await page.getByRole("button", { name: /profile/i }).click();
     await page.getByLabel(/^name$/i).fill("Export Test");
-    await page.getByLabel(/ftp/i).fill("300");
+    await page.getByRole("dialog").getByLabel(/ftp/i).first().fill("300");
     await page.getByRole("button", { name: /create profile/i }).click();
 
     // Act - Set up download listener and click export
@@ -283,8 +283,8 @@ test.describe("Zone Configuration", () => {
   test("should recalculate zones when FTP changes", async ({ page }) => {
     // Arrange - Edit profile to change FTP
     await page.getByRole("button", { name: /^edit$/i }).click();
-    await page.getByLabel(/ftp/i).clear();
-    await page.getByLabel(/ftp/i).fill("300");
+    await page.getByRole("dialog").getByLabel(/ftp/i).first().clear();
+    await page.getByRole("dialog").getByLabel(/ftp/i).first().fill("300");
     await page.getByRole("button", { name: /save changes/i }).click();
 
     // Assert - Profile shows updated FTP

@@ -9,6 +9,7 @@ import {
   DEFAULT_HEART_RATE_ZONES,
   DEFAULT_POWER_ZONES,
 } from "../../../types/profile";
+import { migrateProfile } from "../migration";
 import type { Profile } from "../../../types/profile";
 
 export function createNewProfile(
@@ -26,7 +27,7 @@ export function createNewProfile(
     ? calculateHeartRateZones(options.maxHeartRate)
     : DEFAULT_HEART_RATE_ZONES;
 
-  return {
+  const base = {
     id,
     name,
     bodyWeight: options.bodyWeight,
@@ -37,4 +38,6 @@ export function createNewProfile(
     createdAt: now,
     updatedAt: now,
   };
+
+  return migrateProfile(base) as Profile;
 }
