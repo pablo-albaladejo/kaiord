@@ -1,32 +1,11 @@
+import { SportZoneEditor } from "../../ZoneEditor/SportZoneEditor";
 import { DeleteConfirmDialog } from "../DeleteConfirmDialog";
 import { ImportExportActions } from "../ImportExportActions";
 import { ProfileForm } from "../ProfileForm";
 import { DialogHeader } from "./DialogHeader";
 import { ProfileListSection } from "./ProfileListSection";
 import { ProfileNotifications } from "./ProfileNotifications";
-import type { Profile } from "../../../../types/profile";
-import type { ProfileFormData } from "../types";
-
-type ProfileManagerDialogProps = {
-  profiles: Profile[];
-  activeProfileId: string | null;
-  editingProfile: Profile | null;
-  formData: ProfileFormData;
-  deleteConfirmId: string | null;
-  importError: string | null;
-  switchNotification: string | null;
-  setFormData: (data: ProfileFormData) => void;
-  setDeleteConfirmId: (id: string | null) => void;
-  handleCreate: () => void;
-  handleEdit: (profile: Profile) => void;
-  handleSave: () => void;
-  handleCancel: () => void;
-  handleSwitchProfile: (profileId: string) => void;
-  handleDelete: (profileId: string) => void;
-  confirmDelete: () => void;
-  handleExport: (profile: Profile) => void;
-  handleImport: (event: React.ChangeEvent<HTMLInputElement>) => void;
-};
+import type { ProfileManagerDialogProps } from "./profile-manager-dialog-types";
 
 export function ProfileManagerDialog({
   profiles,
@@ -51,12 +30,10 @@ export function ProfileManagerDialog({
   return (
     <>
       <DialogHeader />
-
       <ProfileNotifications
         importError={importError}
         switchNotification={switchNotification}
       />
-
       <ProfileForm
         formData={formData}
         editingProfile={editingProfile}
@@ -65,9 +42,8 @@ export function ProfileManagerDialog({
         onSave={handleSave}
         onCancel={handleCancel}
       />
-
+      {editingProfile && <SportZoneEditor profileId={editingProfile.id} />}
       <ImportExportActions onImport={handleImport} />
-
       <ProfileListSection
         profiles={profiles}
         activeProfileId={activeProfileId}
@@ -76,7 +52,6 @@ export function ProfileManagerDialog({
         onExport={handleExport}
         onDelete={handleDelete}
       />
-
       <DeleteConfirmDialog
         open={!!deleteConfirmId}
         onConfirm={confirmDelete}

@@ -3,6 +3,7 @@ import { useState } from "react";
 import { ModelSelector } from "./ModelSelector";
 import { SportSelect } from "./SportSelect";
 import { useAiGeneration } from "./useAiGeneration";
+import { ZoneIndicator } from "./ZoneIndicator";
 import { useAiStore } from "../../../store/ai-store";
 import { Button } from "../../atoms/Button";
 import type { Sport } from "@kaiord/core";
@@ -35,6 +36,7 @@ export const AiWorkoutForm: React.FC = () => {
         onChange={(e) => setText(e.target.value)}
         disabled={isLoading}
       />
+      <ZoneIndicator sport={sport} />
       <div className="flex flex-wrap items-end gap-3">
         <SportSelect value={sport} onChange={setSport} />
         <ModelSelector />
