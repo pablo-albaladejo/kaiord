@@ -5,8 +5,8 @@
  * Cascades changes to adjacent zones for contiguity.
  */
 
-import { mmSsToSeconds } from "./pace-format";
 import { cascadeToNeighbors } from "./cascade-zones";
+import { mmSsToSeconds } from "./pace-format";
 import type { HeartRateZone, PowerZone } from "../../../../types/profile";
 import type { PaceZone } from "../../../../types/sport-zones";
 
@@ -22,9 +22,7 @@ export function applyValueChange(
 ): Array<ZoneRowData> | null {
   const patch = parseField(field, raw, type, threshold);
   if (!patch) return null;
-  const updated = zones.map((z, i) =>
-    i === index ? { ...z, ...patch } : z
-  );
+  const updated = zones.map((z, i) => (i === index ? { ...z, ...patch } : z));
   return cascadeToNeighbors(updated, index, field, type, threshold);
 }
 

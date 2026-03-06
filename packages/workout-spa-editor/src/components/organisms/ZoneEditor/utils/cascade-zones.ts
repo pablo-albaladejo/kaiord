@@ -20,11 +20,23 @@ export function cascadeToNeighbors(
   const result = [...zones];
   if (field === "max" && index < zones.length - 1) {
     const next = adjacentValue(result[index], "max", type, threshold, 1);
-    result[index + 1] = applyAdjacent(result[index + 1], "min", next, type, threshold);
+    result[index + 1] = applyAdjacent(
+      result[index + 1],
+      "min",
+      next,
+      type,
+      threshold
+    );
   }
   if (field === "min" && index > 0) {
     const prev = adjacentValue(result[index], "min", type, threshold, -1);
-    result[index - 1] = applyAdjacent(result[index - 1], "max", prev, type, threshold);
+    result[index - 1] = applyAdjacent(
+      result[index - 1],
+      "max",
+      prev,
+      type,
+      threshold
+    );
   }
   return result;
 }
