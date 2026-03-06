@@ -2,33 +2,33 @@
 
 ## 1. Domain Types (SPA)
 
-- [ ] 1.1 Create `PaceZone` type: zone, name, minPace, maxPace, unit (min_per_km | min_per_100m)
-- [ ] 1.2 Create `SportThresholds` type: lthr?, ftp?, thresholdPace?, paceUnit?
-- [ ] 1.3 Create `ZoneConfig<T>` type: mode (auto | manual), zones Array<T>
-- [ ] 1.4 Create `SportZoneConfig` type combining HR/power/pace zone configs per sport
-- [ ] 1.5 Create `SPORT_ZONE_CAPABILITIES` constant mapping sport → available zone types
-- [ ] 1.6 Update `Profile` type: replace top-level ftp/maxHeartRate/powerZones/heartRateZones with sportZones record
-- [ ] 1.7 Test type definitions compile correctly
+- [x] 1.1 Create `PaceZone` type: zone, name, minPace, maxPace, unit (min_per_km | min_per_100m)
+- [x] 1.2 Create `SportThresholds` type: lthr?, ftp?, thresholdPace?, paceUnit?
+- [x] 1.3 Create `ZoneConfig<T>` type: mode (auto | manual), zones Array<T>
+- [x] 1.4 Create `SportZoneConfig` type combining HR/power/pace zone configs per sport
+- [x] 1.5 Create `SPORT_ZONE_CAPABILITIES` constant mapping sport → available zone types
+- [x] 1.6 Update `Profile` type: replace top-level ftp/maxHeartRate/powerZones/heartRateZones with sportZones record
+- [x] 1.7 Test type definitions compile correctly
 
 ## 2. Zone Calculation
 
-- [ ] 2.1 Create `calculate-hr-zones.ts`: 5 zones from LTHR using percentage model
-- [ ] 2.2 Create `calculate-power-zones.ts`: 7 zones from FTP using Coggan's model
-- [ ] 2.3 Create `calculate-pace-zones.ts`: 5 zones from threshold pace (supports both min/km and min/100m)
-- [ ] 2.4 Test HR zone calculation: known LTHR → expected zone boundaries
-- [ ] 2.5 Test power zone calculation: known FTP → expected zone boundaries
-- [ ] 2.6 Test pace zone calculation: known threshold → expected zone boundaries (both units)
+- [x] 2.1 Create `calculate-hr-zones.ts`: 5 zones from LTHR using percentage model
+- [x] 2.2 Create `calculate-power-zones.ts`: 7 zones from FTP using Coggan's model
+- [x] 2.3 Create `calculate-pace-zones.ts`: 5 zones from threshold pace (supports both min/km and min/100m)
+- [x] 2.4 Test HR zone calculation: known LTHR → expected zone boundaries
+- [x] 2.5 Test power zone calculation: known FTP → expected zone boundaries
+- [x] 2.6 Test pace zone calculation: known threshold → expected zone boundaries (both units)
 
 ## 3. Profile Migration
 
-- [ ] 3.1 Create `profile-migration.ts`: detect legacy profiles, migrate to sportZones structure
-- [ ] 3.2 Migration: powerZones + ftp → sportZones.cycling
-- [ ] 3.3 Migration: heartRateZones + maxHeartRate → sportZones.cycling.heartRateZones + sportZones.generic.heartRateZones
-- [ ] 3.4 Migration: copy LTHR to all sports
-- [ ] 3.5 Migration: default empty configs for running, swimming (no legacy data)
-- [ ] 3.6 Test migration: legacy profile → migrated profile with correct structure
-- [ ] 3.7 Test migration: already-migrated profile is not re-migrated
-- [ ] 3.8 Integrate migration into profile load path (profile-store initial-state or persistence)
+- [x] 3.1 Create `profile-migration.ts`: detect legacy profiles, migrate to sportZones structure
+- [x] 3.2 Migration: powerZones + ftp → sportZones.cycling
+- [x] 3.3 Migration: heartRateZones + maxHeartRate → sportZones.cycling.heartRateZones + sportZones.generic.heartRateZones
+- [x] 3.4 Migration: copy LTHR to all sports
+- [x] 3.5 Migration: default empty configs for running, swimming (no legacy data)
+- [x] 3.6 Test migration: legacy profile → migrated profile with correct structure
+- [x] 3.7 Test migration: already-migrated profile is not re-migrated
+- [x] 3.8 Integrate migration into profile load path (profile-store initial-state or persistence)
 
 ## 4. Profile Store Updates
 
