@@ -4,6 +4,7 @@ import { generateWorkoutKrd } from "../../../lib/generate-workout";
 import { useAiStore } from "../../../store/ai-store";
 import { useProfileStore } from "../../../store/profile-store";
 import { useWorkoutStore } from "../../../store/workout-store";
+import type { SportKey } from "../../../types/sport-zones";
 import type { Sport } from "@kaiord/core";
 
 export const useAiGeneration = () => {
@@ -20,7 +21,10 @@ export const useAiGeneration = () => {
 
       try {
         const profile = getActiveProfile();
-        const zonesContext = profile ? formatZonesContext(profile) : undefined;
+        const sportKey = (sport || undefined) as SportKey | undefined;
+        const zonesContext = profile
+          ? formatZonesContext(profile, sportKey)
+          : undefined;
 
         const krd = await generateWorkoutKrd({
           text,

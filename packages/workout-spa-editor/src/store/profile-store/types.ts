@@ -3,6 +3,13 @@
  */
 
 import type { HeartRateZone, PowerZone, Profile } from "../../types/profile";
+import type {
+  SportKey,
+  SportThresholds,
+  ZoneMode,
+} from "../../types/sport-zones";
+
+export type ZoneType = "heartRateZones" | "powerZones" | "paceZones";
 
 export type ProfileStore = {
   profiles: Array<Profile>;
@@ -27,6 +34,23 @@ export type ProfileStore = {
   updateHeartRateZones: (
     profileId: string,
     zones: Array<HeartRateZone>
+  ) => void;
+  updateSportThresholds: (
+    profileId: string,
+    sport: SportKey,
+    thresholds: SportThresholds
+  ) => void;
+  updateSportZones: (
+    profileId: string,
+    sport: SportKey,
+    zoneType: ZoneType,
+    zones: Array<unknown>
+  ) => void;
+  toggleZoneMode: (
+    profileId: string,
+    sport: SportKey,
+    zoneType: ZoneType,
+    mode: ZoneMode
   ) => void;
   getActiveProfile: () => Profile | null;
   getProfile: (profileId: string) => Profile | null;

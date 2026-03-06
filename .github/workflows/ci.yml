@@ -525,6 +525,10 @@ jobs:
       needs.build.result == 'success' &&
       needs.detect-changes.outputs.should-test == 'true' &&
       needs.detect-changes.outputs.frontend-changed == 'true'
+    strategy:
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -540,14 +544,14 @@ jobs:
       - name: Install Playwright browsers
         run: pnpm --filter @kaiord/workout-spa-editor exec playwright install --with-deps chromium
 
-      - name: Run Playwright E2E tests (Chromium only)
-        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium
+      - name: Run Playwright E2E tests (shard ${{ matrix.shard }}/4)
+        run: pnpm --filter @kaiord/workout-spa-editor test:e2e --project=chromium --shard=${{ matrix.shard }}/4
 
       - name: Upload Playwright report
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: playwright-report
+          name: playwright-report-shard-${{ matrix.shard }}
           path: packages/workout-spa-editor/playwright-report/
           retention-days: 30
 

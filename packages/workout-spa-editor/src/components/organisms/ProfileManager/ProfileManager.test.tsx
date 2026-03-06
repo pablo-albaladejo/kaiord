@@ -148,8 +148,8 @@ describe("ProfileManager", () => {
 
       // Assert
       expect(screen.getByLabelText(/^name$/i)).toHaveValue("Original");
-      expect(screen.getByLabelText(/ftp/i)).toHaveValue(200);
-      expect(screen.getByLabelText(/max hr/i)).toHaveValue(180);
+      expect(screen.getByLabelText(/^ftp \(watts\)$/i)).toHaveValue(200);
+      expect(screen.getByLabelText(/^max hr \(bpm\)$/i)).toHaveValue(180);
     });
 
     it("should save edited profile", async () => {

@@ -5,8 +5,12 @@ import type { Page } from "@playwright/test";
  * so the file input becomes visible in the DOM.
  */
 export async function expandFileUpload(page: Page) {
-  const accordion = page.getByText("Or create manually / import a file");
-  if (await accordion.isVisible({ timeout: 2000 }).catch(() => false)) {
-    await accordion.click();
-  }
+  // The file input might already be in the DOM if accordion was expanded
+  const fileInput = page.locator('input[type="file"]');
+  if ((await fileInput.count()) > 0) return;
+
+  // Click the accordion to reveal file upload
+  const accordion = page.getByText(/create manually.*import/i);
+  await accordion.click();
+  await fileInput.waitFor({ state: "attached", timeout: 5000 });
 }
