@@ -78,7 +78,8 @@ describe("applyValueChange", () => {
     const z1 = result![0] as PowerZone;
     const z2 = result![1] as PowerZone;
     expect(Math.round(z1.maxPercent)).toBe(80);
-    const z2MinW = Math.round((250 * z2.minPercent) / 100); expect(z2MinW).toBe(201);
+    const z2MinW = Math.round((250 * z2.minPercent) / 100);
+    expect(z2MinW).toBe(201);
   });
 
   it("should not cascade beyond first zone", () => {
