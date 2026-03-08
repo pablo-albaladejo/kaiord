@@ -76,10 +76,13 @@ function buildSportZones(
     running: {
       thresholds: { lthr },
       heartRateZones: lthr ? { ...baseHr } : { ...emptyHr },
+      powerZones: { method: "custom", zones: [] },
+      paceZones: { method: "custom", zones: [] },
     },
     swimming: {
       thresholds: { lthr },
       heartRateZones: lthr ? { ...baseHr } : { ...emptyHr },
+      paceZones: { method: "custom", zones: [] },
     },
     generic: {
       thresholds: { lthr },

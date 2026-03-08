@@ -95,10 +95,10 @@ describe("migrateProfile", () => {
   it("should create empty running and swimming configs", () => {
     const migrated = migrateProfile(legacyProfile);
 
-    expect(migrated.sportZones?.running?.powerZones).toBeUndefined();
+    expect(migrated.sportZones?.running?.powerZones).toBeDefined();
     expect(migrated.sportZones?.swimming?.powerZones).toBeUndefined();
-    expect(migrated.sportZones?.running?.paceZones).toBeUndefined();
-    expect(migrated.sportZones?.swimming?.paceZones).toBeUndefined();
+    expect(migrated.sportZones?.running?.paceZones).toBeDefined();
+    expect(migrated.sportZones?.swimming?.paceZones).toBeDefined();
   });
 
   it("should migrate old mode field to method", () => {

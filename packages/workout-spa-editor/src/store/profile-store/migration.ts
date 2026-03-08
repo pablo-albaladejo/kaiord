@@ -52,8 +52,15 @@ function migrateToSportZones<T extends Record<string, unknown>>(profile: T): T {
   const sportZones: Partial<Record<SportKey, SportZoneConfig>> = {
     cycling,
     generic,
-    running: buildEmptySportConfig(legacy.maxHeartRate),
-    swimming: buildEmptySportConfig(legacy.maxHeartRate),
+    running: {
+      ...buildEmptySportConfig(legacy.maxHeartRate),
+      powerZones: { method: "custom", zones: [] },
+      paceZones: { method: "custom", zones: [] },
+    },
+    swimming: {
+      ...buildEmptySportConfig(legacy.maxHeartRate),
+      paceZones: { method: "custom", zones: [] },
+    },
   };
 
   return { ...profile, sportZones };
