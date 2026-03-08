@@ -33,12 +33,12 @@ export function recalculateZones(
     }
   }
 
-  if (caps.power && updated.powerZones) {
+  if (caps.power && updated.powerZones && thresholds.ftp) {
     const method = updated.powerZones.method;
     if (method !== "custom") {
       updated.powerZones = {
         method,
-        zones: calculatePowerZones(thresholds.ftp, method),
+        zones: calculatePowerZones(method),
       };
     }
   }

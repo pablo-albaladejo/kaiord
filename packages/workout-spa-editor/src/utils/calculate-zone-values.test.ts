@@ -24,10 +24,10 @@ describe("calculateZoneValues", () => {
     expect(zones[1]).toEqual({
       zone: 2,
       name: "Endurance",
-      min: 140,
+      min: 139,
       max: 188,
     });
-    expect(zones[2]).toEqual({ zone: 3, name: "Tempo", min: 190, max: 225 });
+    expect(zones[2]).toEqual({ zone: 3, name: "Tempo", min: 189, max: 225 });
   });
 
   it("should calculate Karvonen HR zones with LTHR=170", () => {
@@ -36,6 +36,7 @@ describe("calculateZoneValues", () => {
 
     expect(zones).toHaveLength(5);
     expect(zones[0]).toEqual({ zone: 1, name: "Recovery", min: 0, max: 139 });
+    expect(zones[1].min).toBe(140);
   });
 });
 
@@ -46,8 +47,9 @@ describe("calculatePowerZoneValues", () => {
     expect(zones).toHaveLength(7);
     expect(zones[0].minWatts).toBe(0);
     expect(zones[0].maxWatts).toBe(138);
+    expect(zones[1].minWatts).toBe(139);
     expect(zones[2].name).toBe("Tempo");
-    expect(zones[2].minWatts).toBe(190);
+    expect(zones[2].minWatts).toBe(189);
     expect(zones[2].maxWatts).toBe(225);
   });
 
@@ -73,7 +75,7 @@ describe("calculateHrZones", () => {
 
     expect(zones).toHaveLength(5);
     expect(zones[0].maxBpm).toBe(139);
-    expect(zones[1].minBpm).toBe(139);
+    expect(zones[1].minBpm).toBe(140);
   });
 
   it("should calculate Friel HR zones", () => {

@@ -21,7 +21,8 @@ export const calculatePaceZones = (
   unit: PaceUnit,
   methodId = "daniels-5"
 ): Array<PaceZone> => {
-  const method = findMethod(PACE_METHODS, methodId) ?? PACE_METHODS[0];
+  const method = findMethod(PACE_METHODS, methodId);
+  if (!method) return [];
 
   return method.defaults.map((def, i) => ({
     zone: i + 1,

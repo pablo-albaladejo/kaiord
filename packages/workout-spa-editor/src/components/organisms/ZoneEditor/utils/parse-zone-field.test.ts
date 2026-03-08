@@ -85,27 +85,39 @@ describe("applyValueChange", () => {
   it("should not cascade beyond first zone", () => {
     const result = applyValueChange(hrZones, 0, "min", "90", "heartRate");
     expect((result![0] as HeartRateZone).minBpm).toBe(90);
-    // No zone before index 0, so no cascade
+    // Untouched zones remain the same
+    expect((result![1] as HeartRateZone).minBpm).toBe(131);
+    expect((result![1] as HeartRateZone).maxBpm).toBe(160);
+    expect((result![2] as HeartRateZone).minBpm).toBe(161);
+    expect((result![2] as HeartRateZone).maxBpm).toBe(190);
     expect(result!.length).toBe(3);
   });
 
   it("should not cascade beyond last zone", () => {
     const result = applyValueChange(hrZones, 2, "max", "200", "heartRate");
     expect((result![2] as HeartRateZone).maxBpm).toBe(200);
-    // No zone after last, so no cascade
+    // Untouched zones remain the same
+    expect((result![0] as HeartRateZone).minBpm).toBe(100);
+    expect((result![0] as HeartRateZone).maxBpm).toBe(130);
+    expect((result![1] as HeartRateZone).minBpm).toBe(131);
+    expect((result![1] as HeartRateZone).maxBpm).toBe(160);
     expect(result!.length).toBe(3);
   });
 
   it("should cascade pace max to next zone min", () => {
+    // Cascade treats pace like ascending zones (minPace->maxPace).
+    // Increasing Z1 maxPace pushes Z2 minPace forward.
     const result = applyValueChange(paceZones, 0, "max", "7:30", "pace");
     expect((result![0] as PaceZone).maxPace).toBe(450);
     expect((result![1] as PaceZone).minPace).toBe(451);
+    // Z2 max pushed since 451 > 359
+    expect((result![1] as PaceZone).maxPace).toBeGreaterThanOrEqual(451);
   });
 });
 
 it("should cascade recursively when max pushes through next zone", () => {
   // Z1: 100-130, Z2: 131-160, Z3: 161-190
-  // Set Z1 max to 180 → Z2 min=181, Z2 max must be >= 181 → push Z2 max to 182
+  // Set Z1 max to 180 → Z2 min=181, Z2 max (160) < 181 → push Z2 max to 182
   // → Z3 min=183
   const result = applyValueChange(hrZones, 0, "max", "180", "heartRate");
 
@@ -115,8 +127,9 @@ it("should cascade recursively when max pushes through next zone", () => {
 
   expect(z1.maxBpm).toBe(180);
   expect(z2.minBpm).toBe(181);
-  expect(z2.maxBpm).toBeGreaterThanOrEqual(z2.minBpm);
-  expect(z3.minBpm).toBe(z2.maxBpm + 1);
+  expect(z2.maxBpm).toBe(182);
+  expect(z3.minBpm).toBe(183);
+  expect(z3.maxBpm).toBe(190);
 });
 
 it("should fix same zone when min exceeds max and cascade forward", () => {

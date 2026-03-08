@@ -35,11 +35,12 @@ export function useProfileEdit(params: UseProfileEditParams) {
     });
   };
 
-  const handleSave = () => {
-    if (editingProfile && formData.name.trim()) {
+  const handleSave = (overrideData?: ProfileFormData) => {
+    const data = overrideData ?? formData;
+    if (editingProfile && data.name.trim()) {
       updateProfile(editingProfile.id, {
-        name: formData.name.trim(),
-        bodyWeight: formData.bodyWeight,
+        name: data.name.trim(),
+        bodyWeight: data.bodyWeight,
       });
       setEditingProfile(null);
       setFormData({ name: "" });

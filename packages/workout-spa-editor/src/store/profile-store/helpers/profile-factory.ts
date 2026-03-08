@@ -35,7 +35,7 @@ function buildSportZones(): Record<string, SportZoneConfig> {
       heartRateZones: { ...emptyHr },
       powerZones: {
         method: "coggan-7",
-        zones: calculatePowerZones(undefined, "coggan-7"),
+        zones: calculatePowerZones("coggan-7"),
       },
     },
     running: {

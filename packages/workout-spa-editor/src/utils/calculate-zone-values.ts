@@ -23,10 +23,16 @@ export type ZoneValue = {
 export const calculateZoneValues = (
   method: ZoneMethod,
   threshold: number
-): Array<ZoneValue> =>
-  method.defaults.map((def, i) => ({
-    zone: i + 1,
-    name: def.name,
-    min: Math.round((threshold * def.minPercent) / 100),
-    max: Math.round((threshold * def.maxPercent) / 100),
-  }));
+): Array<ZoneValue> => {
+  const zones: Array<ZoneValue> = [];
+  for (let i = 0; i < method.defaults.length; i++) {
+    const def = method.defaults[i];
+    const max = Math.round((threshold * def.maxPercent) / 100);
+    const min =
+      i === 0
+        ? Math.round((threshold * def.minPercent) / 100)
+        : zones[i - 1].max + 1;
+    zones.push({ zone: i + 1, name: def.name, min, max });
+  }
+  return zones;
+};

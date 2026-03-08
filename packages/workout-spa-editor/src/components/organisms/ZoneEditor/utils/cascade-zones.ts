@@ -73,10 +73,10 @@ function cascadeBackward(
 ): void {
   for (let i = from; i > 0; i--) {
     const curMin = getRealValue(zones[i], "min", type, threshold);
-    setRealValue(zones, i - 1, "max", curMin - 1, type, threshold);
+    setRealValue(zones, i - 1, "max", Math.max(0, curMin - 1), type, threshold);
     const pMax = getRealValue(zones[i - 1], "max", type, threshold);
     const pMin = getRealValue(zones[i - 1], "min", type, threshold);
     if (pMin <= pMax) break;
-    setRealValue(zones, i - 1, "min", pMax - 1, type, threshold);
+    setRealValue(zones, i - 1, "min", Math.max(0, pMax - 1), type, threshold);
   }
 }

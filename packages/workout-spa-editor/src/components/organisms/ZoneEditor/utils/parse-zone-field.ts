@@ -51,9 +51,11 @@ function parsePowerField(
   raw: string,
   threshold?: number
 ): Record<string, number> | null {
+  const hasWattSuffix = /W\s*$/i.test(raw);
   const cleaned = raw.replace(/[W%]/g, "").trim();
   const val = parseInt(cleaned, 10);
   if (isNaN(val)) return null;
+  if (hasWattSuffix && !threshold) return null;
   if (threshold) {
     const pct = (val / threshold) * 100;
     return field === "min" ? { minPercent: pct } : { maxPercent: pct };

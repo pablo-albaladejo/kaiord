@@ -128,10 +128,10 @@ describe("SportZoneEditor", () => {
 
       render(<SportZoneEditor profileId={profile.id} />);
 
-      const nameButtons = screen.getAllByLabelText("Zone 1 name");
+      const nameButtons = screen.getAllByLabelText("HR Zone 1 name");
       await user.click(nameButtons[0]);
 
-      const input = screen.getByRole("textbox", { name: "Zone 1 name" });
+      const input = screen.getByRole("textbox", { name: "HR Zone 1 name" });
       await user.clear(input);
       await user.type(input, "Easy");
       await user.keyboard("{Enter}");
@@ -146,10 +146,10 @@ describe("SportZoneEditor", () => {
 
       render(<SportZoneEditor profileId={profile.id} />);
 
-      const minButtons = screen.getAllByLabelText("Zone 1 min");
+      const minButtons = screen.getAllByLabelText("HR Zone 1 min");
       expect(minButtons.length).toBeGreaterThan(0);
 
-      const maxButtons = screen.getAllByLabelText("Zone 1 max");
+      const maxButtons = screen.getAllByLabelText("HR Zone 1 max");
       expect(maxButtons.length).toBeGreaterThan(0);
     });
 
@@ -174,7 +174,7 @@ describe("SportZoneEditor", () => {
       const methodSelect = screen.getByLabelText("power zone method");
       await user.selectOptions(methodSelect, "custom");
 
-      const removeButtons = screen.getAllByLabelText(/Remove zone \d/);
+      const removeButtons = screen.getAllByLabelText(/Remove \w+ zone \d/);
       expect(removeButtons.length).toBeGreaterThan(0);
     });
   });

@@ -16,7 +16,13 @@ export function CreateProfileSection({
   onCreate,
 }: CreateProfileSectionProps) {
   return (
-    <div className="mb-4 flex gap-2">
+    <form
+      className="mb-4 flex gap-2"
+      onSubmit={(e) => {
+        e.preventDefault();
+        if (formData.name.trim()) onCreate();
+      }}
+    >
       <input
         type="text"
         value={formData.name}
@@ -26,13 +32,12 @@ export function CreateProfileSection({
         className="flex-1 rounded border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 dark:border-gray-600 dark:bg-gray-800 dark:text-white"
       />
       <button
-        type="button"
+        type="submit"
         disabled={!formData.name.trim()}
-        onClick={onCreate}
         className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
       >
         Create Profile
       </button>
-    </div>
+    </form>
   );
 }

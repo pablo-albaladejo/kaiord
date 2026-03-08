@@ -51,6 +51,7 @@ export function useZoneCallbacks({
 
   const onRemove = useCallback(
     (i: number) => {
+      if (zones.length <= 1) return;
       onZonesChange(zones.filter((_, idx) => idx !== i));
     },
     [zones, onZonesChange]

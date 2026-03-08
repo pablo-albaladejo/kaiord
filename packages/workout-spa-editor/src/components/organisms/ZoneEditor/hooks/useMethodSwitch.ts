@@ -29,14 +29,21 @@ export function useMethodSwitch(
   };
 
   const applyChange = (zoneType: ZoneType, method: string) => {
+    if (method === "custom") {
+      onApply(zoneType, method, sportConfig?.[zoneType]?.zones ?? []);
+      return;
+    }
+
     const t = sportConfig?.thresholds;
     let zones: Array<unknown> = [];
 
-    if (zoneType === "heartRateZones" && t?.lthr) {
+    if (zoneType === "heartRateZones") {
+      if (!t?.lthr) return;
       zones = calculateHrZones(t.lthr, method);
     } else if (zoneType === "powerZones") {
-      zones = calculatePowerZones(t?.ftp, method);
-    } else if (zoneType === "paceZones" && t?.thresholdPace && t?.paceUnit) {
+      zones = calculatePowerZones(method);
+    } else if (zoneType === "paceZones") {
+      if (!t?.thresholdPace || !t?.paceUnit) return;
       zones = calculatePaceZones(t.thresholdPace, t.paceUnit, method);
     }
 

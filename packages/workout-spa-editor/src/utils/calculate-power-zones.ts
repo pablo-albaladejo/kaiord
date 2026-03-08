@@ -10,15 +10,14 @@ import type { PowerZone } from "../types/profile";
 /**
  * Calculate power zones using specified method
  *
- * @param ftp - Functional Threshold Power in watts (optional)
  * @param methodId - Zone method ID (defaults to "coggan-7")
  * @returns Array of power zones with FTP percentage ranges
  */
 export const calculatePowerZones = (
-  _ftp?: number,
   methodId = "coggan-7"
 ): Array<PowerZone> => {
-  const method = findMethod(POWER_METHODS, methodId) ?? POWER_METHODS[0];
+  const method = findMethod(POWER_METHODS, methodId);
+  if (!method) return [];
 
   return method.defaults.map((def, i) => ({
     zone: i + 1,
@@ -40,11 +39,21 @@ export const calculatePowerZoneValues = (
   minWatts: number;
   maxWatts: number;
 }> => {
-  const zones = calculatePowerZones(ftp, methodId);
-  return zones.map((z) => ({
-    zone: z.zone,
-    name: z.name,
-    minWatts: Math.round((ftp * z.minPercent) / 100),
-    maxWatts: Math.round((ftp * z.maxPercent) / 100),
-  }));
+  const zones = calculatePowerZones(methodId);
+  const result: Array<{
+    zone: number;
+    name: string;
+    minWatts: number;
+    maxWatts: number;
+  }> = [];
+  for (let i = 0; i < zones.length; i++) {
+    const z = zones[i];
+    const maxWatts = Math.round((ftp * z.maxPercent) / 100);
+    const minWatts =
+      i === 0
+        ? Math.round((ftp * z.minPercent) / 100)
+        : result[i - 1].maxWatts + 1;
+    result.push({ zone: z.zone, name: z.name, minWatts, maxWatts });
+  }
+  return result;
 };

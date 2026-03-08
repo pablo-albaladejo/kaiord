@@ -268,9 +268,9 @@ describe("TargetPicker", () => {
       // Act
       render(<TargetPicker value={value} onChange={onChange} />);
 
-      // Assert - Karvonen zone 2: 82-89% of LTHR 180 = 148-160 BPM
+      // Assert - Karvonen zone 2: contiguous from Z1.max+1 to round(89%*180)
       expect(screen.getByText(/Aerobic/)).toBeInTheDocument();
-      expect(screen.getByText(/148-160 BPM/)).toBeInTheDocument();
+      expect(screen.getByText(/149-160 BPM/)).toBeInTheDocument();
     });
 
     it("should not show zone info when no profile is active", () => {

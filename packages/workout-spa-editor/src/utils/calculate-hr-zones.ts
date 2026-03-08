@@ -18,12 +18,18 @@ export const calculateHrZones = (
   lthr: number,
   methodId = "karvonen-5"
 ): Array<HeartRateZone> => {
-  const method = findMethod(HR_METHODS, methodId) ?? HR_METHODS[0];
+  const method = findMethod(HR_METHODS, methodId);
+  if (!method) return [];
 
-  return method.defaults.map((def, i) => ({
-    zone: i + 1,
-    name: def.name,
-    minBpm: Math.round((lthr * def.minPercent) / 100),
-    maxBpm: Math.round((lthr * def.maxPercent) / 100),
-  }));
+  const zones: Array<HeartRateZone> = [];
+  for (let i = 0; i < method.defaults.length; i++) {
+    const def = method.defaults[i];
+    const maxBpm = Math.round((lthr * def.maxPercent) / 100);
+    const minBpm =
+      i === 0
+        ? Math.round((lthr * def.minPercent) / 100)
+        : zones[i - 1].maxBpm + 1;
+    zones.push({ zone: i + 1, name: def.name, minBpm, maxBpm });
+  }
+  return zones;
 };

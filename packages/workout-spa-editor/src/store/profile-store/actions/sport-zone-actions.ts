@@ -61,7 +61,8 @@ export const createSportZoneActions: StateCreator<
       const idx = state.profiles.findIndex((p) => p.id === profileId);
       if (idx === -1) return state;
       const updated = updateSportConfig(state.profiles[idx], sport, (cfg) => {
-        return { ...cfg, [zoneType]: { method, zones } };
+        const existing = cfg[zoneType];
+        return { ...cfg, [zoneType]: { ...existing, method, zones } };
       });
       const profiles = [...state.profiles];
       profiles[idx] = updated;

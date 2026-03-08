@@ -17,8 +17,9 @@ export function ProfileManagerDialog(props: ProfileManagerDialogProps) {
   const { editingProfile, formData, setFormData, handleSave } = props;
 
   const handleNameChange = (name: string) => {
-    setFormData({ ...formData, name });
-    if (editingProfile) handleSave();
+    const nextFormData = { ...formData, name };
+    setFormData(nextFormData);
+    if (editingProfile) handleSave(nextFormData);
   };
 
   return (
