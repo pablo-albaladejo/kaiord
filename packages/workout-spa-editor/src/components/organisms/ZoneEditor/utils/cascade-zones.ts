@@ -32,8 +32,11 @@ export function cascadeToNeighbors(
 }
 
 function fixSameZone(
-  zones: Array<ZoneRowData>, idx: number,
-  changed: "min" | "max", type: string, threshold?: number
+  zones: Array<ZoneRowData>,
+  idx: number,
+  changed: "min" | "max",
+  type: string,
+  threshold?: number
 ): void {
   const min = getRealValue(zones[idx], "min", type, threshold);
   const max = getRealValue(zones[idx], "max", type, threshold);
@@ -47,8 +50,10 @@ function fixSameZone(
 }
 
 function cascadeForward(
-  zones: Array<ZoneRowData>, from: number,
-  type: string, threshold?: number
+  zones: Array<ZoneRowData>,
+  from: number,
+  type: string,
+  threshold?: number
 ): void {
   for (let i = from; i < zones.length - 1; i++) {
     const curMax = getRealValue(zones[i], "max", type, threshold);
@@ -61,8 +66,10 @@ function cascadeForward(
 }
 
 function cascadeBackward(
-  zones: Array<ZoneRowData>, from: number,
-  type: string, threshold?: number
+  zones: Array<ZoneRowData>,
+  from: number,
+  type: string,
+  threshold?: number
 ): void {
   for (let i = from; i > 0; i--) {
     const curMin = getRealValue(zones[i], "min", type, threshold);

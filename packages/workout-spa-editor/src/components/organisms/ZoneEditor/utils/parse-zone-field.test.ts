@@ -118,27 +118,27 @@ it("should cascade recursively when max pushes through next zone", () => {
   expect(z3.minBpm).toBe(z2.maxBpm + 1);
 });
 
-  it("should fix same zone when min exceeds max and cascade forward", () => {
-    // Power: Z1: 0-55%, Z2: 56-75%, Z3: 76-90%  (FTP=250)
-    // Z1=0-137W, Z2=140-187W, Z3=190-225W
-    // Set Z3 min to 285W (114%) → Z3 max (225W) < 285W
-    // → Z3 max pushed to 286W, Z4+ would cascade
-    const zones: Array<PowerZone> = [
-      { zone: 1, name: "Z1", minPercent: 0, maxPercent: 55 },
-      { zone: 2, name: "Z2", minPercent: 56, maxPercent: 75 },
-      { zone: 3, name: "Z3", minPercent: 76, maxPercent: 90 },
-    ];
-    const result = applyValueChange(zones, 2, "min", "285", "power", 250);
+it("should fix same zone when min exceeds max and cascade forward", () => {
+  // Power: Z1: 0-55%, Z2: 56-75%, Z3: 76-90%  (FTP=250)
+  // Z1=0-137W, Z2=140-187W, Z3=190-225W
+  // Set Z3 min to 285W (114%) → Z3 max (225W) < 285W
+  // → Z3 max pushed to 286W, Z4+ would cascade
+  const zones: Array<PowerZone> = [
+    { zone: 1, name: "Z1", minPercent: 0, maxPercent: 55 },
+    { zone: 2, name: "Z2", minPercent: 56, maxPercent: 75 },
+    { zone: 3, name: "Z3", minPercent: 76, maxPercent: 90 },
+  ];
+  const result = applyValueChange(zones, 2, "min", "285", "power", 250);
 
-    const z2 = result![1] as PowerZone;
-    const z3 = result![2] as PowerZone;
-    // Z3 min = 285W → 114%
-    expect(z3.minPercent).toBe(114);
-    // Z3 max must be >= Z3 min
-    const z3MaxW = Math.round((250 * z3.maxPercent) / 100);
-    const z3MinW = Math.round((250 * z3.minPercent) / 100);
-    expect(z3MaxW).toBeGreaterThanOrEqual(z3MinW);
-    // Z2 max should be 284W (Z3 min - 1)
-    const z2MaxW = Math.round((250 * z2.maxPercent) / 100);
-    expect(z2MaxW).toBeLessThanOrEqual(z3MinW);
-  });
+  const z2 = result![1] as PowerZone;
+  const z3 = result![2] as PowerZone;
+  // Z3 min = 285W → 114%
+  expect(z3.minPercent).toBe(114);
+  // Z3 max must be >= Z3 min
+  const z3MaxW = Math.round((250 * z3.maxPercent) / 100);
+  const z3MinW = Math.round((250 * z3.minPercent) / 100);
+  expect(z3MaxW).toBeGreaterThanOrEqual(z3MinW);
+  // Z2 max should be 284W (Z3 min - 1)
+  const z2MaxW = Math.round((250 * z2.maxPercent) / 100);
+  expect(z2MaxW).toBeLessThanOrEqual(z3MinW);
+});
