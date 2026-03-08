@@ -14,8 +14,8 @@ import {
 
 describe("zone method registries", () => {
   describe("POWER_METHODS", () => {
-    it("should have 4 methods", () => {
-      expect(POWER_METHODS).toHaveLength(4);
+    it("should have 6 methods", () => {
+      expect(POWER_METHODS).toHaveLength(6);
     });
 
     it("Coggan 7-zone should have 7 zones", () => {
@@ -53,8 +53,8 @@ describe("zone method registries", () => {
   });
 
   describe("HR_METHODS", () => {
-    it("should have 3 methods", () => {
-      expect(HR_METHODS).toHaveLength(3);
+    it("should have 4 methods", () => {
+      expect(HR_METHODS).toHaveLength(4);
     });
 
     it("Karvonen 5-zone should have 5 zones", () => {

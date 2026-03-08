@@ -32,6 +32,17 @@ const FRIEL_HR_5: ZoneMethod = {
   ],
 };
 
+const POLARIZED_HR_3: ZoneMethod = {
+  id: "polarized-hr-3",
+  name: "Polarized 3-zone",
+  zoneCount: 3,
+  defaults: [
+    { name: "Low Intensity", minPercent: 0, maxPercent: 80 },
+    { name: "Threshold", minPercent: 80, maxPercent: 100 },
+    { name: "High Intensity", minPercent: 100, maxPercent: 106 },
+  ],
+};
+
 const CUSTOM_HR: ZoneMethod = {
   id: "custom",
   name: "Custom",
@@ -46,6 +57,7 @@ const CUSTOM_HR: ZoneMethod = {
 };
 
 export const HR_METHODS: Array<ZoneMethod> = [
+  POLARIZED_HR_3,
   KARVONEN_5,
   FRIEL_HR_5,
   CUSTOM_HR,
