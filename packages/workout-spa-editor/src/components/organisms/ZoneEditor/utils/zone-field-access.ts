@@ -1,5 +1,8 @@
 /**
  * Zone field getters/setters for cascade logic.
+ *
+ * For power zones, uses ceil/floor rounding to ensure that
+ * converting watts→percent→watts preserves at least 1W gaps.
  */
 
 import type { HeartRateZone, PowerZone } from "../../../../types/profile";
@@ -39,7 +42,7 @@ export function setRealValue(
     (z as Record<string, unknown>)[field === "min" ? "minBpm" : "maxBpm"] =
       value;
   } else if (type === "power") {
-    const pct = threshold ? Math.round((value / threshold) * 100) : value;
+    const pct = threshold ? wattsToPercent(value, threshold, field) : value;
     (z as Record<string, unknown>)[
       field === "min" ? "minPercent" : "maxPercent"
     ] = pct;
@@ -47,4 +50,13 @@ export function setRealValue(
     (z as Record<string, unknown>)[field === "min" ? "minPace" : "maxPace"] =
       value;
   }
+}
+
+function wattsToPercent(
+  watts: number,
+  threshold: number,
+  field: "min" | "max"
+): number {
+  const exact = (watts / threshold) * 100;
+  return field === "min" ? Math.ceil(exact) : Math.floor(exact);
 }
