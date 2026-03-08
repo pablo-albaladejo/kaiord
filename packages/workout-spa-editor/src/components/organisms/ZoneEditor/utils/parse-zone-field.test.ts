@@ -42,12 +42,12 @@ describe("applyValueChange", () => {
 
   it("should convert bare number to percent when threshold exists", () => {
     const result = applyValueChange(powerZones, 0, "max", "200", "power", 250);
-    expect((result![0] as PowerZone).maxPercent).toBe(80);
+    expect(Math.round((result![0] as PowerZone).maxPercent)).toBe(80);
   });
 
   it("should treat bare number as percent when no threshold", () => {
     const result = applyValueChange(powerZones, 0, "max", "80", "power");
-    expect((result![0] as PowerZone).maxPercent).toBe(80);
+    expect(Math.round((result![0] as PowerZone).maxPercent)).toBe(80);
   });
 
   it("should update pace from mm:ss format", () => {
@@ -77,8 +77,8 @@ describe("applyValueChange", () => {
     // 200W → 80%, next zone min should be 201W → 80% (rounded)
     const z1 = result![0] as PowerZone;
     const z2 = result![1] as PowerZone;
-    expect(z1.maxPercent).toBe(80);
-    expect(z2.minPercent).toBe(Math.ceil((201 / 250) * 100));
+    expect(Math.round(z1.maxPercent)).toBe(80);
+    const z2MinW = Math.round((250 * z2.minPercent) / 100); expect(z2MinW).toBe(201);
   });
 
   it("should not cascade beyond first zone", () => {
@@ -133,7 +133,7 @@ it("should fix same zone when min exceeds max and cascade forward", () => {
   const z2 = result![1] as PowerZone;
   const z3 = result![2] as PowerZone;
   // Z3 min = 285W → 114%
-  expect(z3.minPercent).toBe(114);
+  expect(Math.round(z3.minPercent)).toBe(114);
   // Z3 max must be >= Z3 min
   const z3MaxW = Math.round((250 * z3.maxPercent) / 100);
   const z3MinW = Math.round((250 * z3.minPercent) / 100);
