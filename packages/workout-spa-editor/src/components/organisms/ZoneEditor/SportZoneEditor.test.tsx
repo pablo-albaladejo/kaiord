@@ -15,9 +15,11 @@ describe("SportZoneEditor", () => {
   });
 
   function createTestProfile() {
-    return useProfileStore
+    const profile = useProfileStore.getState().createProfile("Test Athlete");
+    useProfileStore
       .getState()
-      .createProfile("Test Athlete", { maxHeartRate: 180, ftp: 250 });
+      .updateSportThresholds(profile.id, "cycling", { lthr: 180, ftp: 250 });
+    return useProfileStore.getState().getProfile(profile.id)!;
   }
 
   describe("rendering", () => {

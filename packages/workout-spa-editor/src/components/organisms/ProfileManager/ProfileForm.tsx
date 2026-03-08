@@ -6,14 +6,8 @@
 
 import { ProfileFormActions } from "./components/ProfileFormActions";
 import { ProfileFormFields } from "./components/ProfileFormFields";
+import type { ProfileFormData } from "./types";
 import type { Profile } from "../../../types/profile";
-
-type ProfileFormData = {
-  name: string;
-  bodyWeight?: number;
-  ftp?: number;
-  maxHeartRate?: number;
-};
 
 type ProfileFormProps = {
   formData: ProfileFormData;

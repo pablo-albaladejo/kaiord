@@ -65,9 +65,7 @@ export function updateSportConfig(
   sport: SportKey,
   updater: (config: SportZoneConfig) => SportZoneConfig
 ): Profile {
-  const sportZones = { ...profile.sportZones } as NonNullable<
-    Profile["sportZones"]
-  >;
+  const sportZones = { ...profile.sportZones };
   const config = sportZones[sport];
   if (!config) return profile;
 

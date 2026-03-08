@@ -100,7 +100,7 @@ describe("ProfileManager", () => {
     it("should show tabs when editing a profile", async () => {
       const user = userEvent.setup();
       const { createProfile } = useProfileStore.getState();
-      createProfile("Original", { ftp: 200, maxHeartRate: 180 });
+      createProfile("Original");
       renderWithProviders(
         <ProfileManager open={true} onOpenChange={vi.fn()} />
       );
@@ -118,7 +118,7 @@ describe("ProfileManager", () => {
     it("should show sport zone editor by default when editing", async () => {
       const user = userEvent.setup();
       const { createProfile } = useProfileStore.getState();
-      createProfile("Athlete", { ftp: 250, maxHeartRate: 180 });
+      createProfile("Athlete");
       renderWithProviders(
         <ProfileManager open={true} onOpenChange={vi.fn()} />
       );

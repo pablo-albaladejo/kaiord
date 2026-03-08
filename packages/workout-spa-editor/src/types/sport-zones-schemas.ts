@@ -18,8 +18,9 @@ export const sportZoneConfigSchema = z.object({
   paceZones: zoneConfigSchema(paceZoneSchema).optional(),
 });
 
-const sportKeySchema = z.enum(["cycling", "running", "swimming", "generic"]);
-
-export const sportZonesRecordSchema = z
-  .record(sportKeySchema, sportZoneConfigSchema)
-  .optional();
+export const sportZonesRecordSchema = z.object({
+  cycling: sportZoneConfigSchema.optional(),
+  running: sportZoneConfigSchema.optional(),
+  swimming: sportZoneConfigSchema.optional(),
+  generic: sportZoneConfigSchema.optional(),
+});

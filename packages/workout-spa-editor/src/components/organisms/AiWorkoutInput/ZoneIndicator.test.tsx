@@ -20,7 +20,7 @@ describe("ZoneIndicator", () => {
   });
 
   it("should show profile name when no sport is selected", () => {
-    useProfileStore.getState().createProfile("My Athlete", { ftp: 250 });
+    useProfileStore.getState().createProfile("My Athlete");
 
     render(<ZoneIndicator sport="" />);
 
@@ -28,9 +28,7 @@ describe("ZoneIndicator", () => {
   });
 
   it("should show thresholds for selected sport", () => {
-    const profile = useProfileStore
-      .getState()
-      .createProfile("Cyclist", { ftp: 280, maxHeartRate: 185 });
+    const profile = useProfileStore.getState().createProfile("Cyclist");
 
     useProfileStore
       .getState()
@@ -46,9 +44,7 @@ describe("ZoneIndicator", () => {
   it("should show no-zones message for unconfigured sport", () => {
     const profile = useProfileStore.getState().createProfile("Runner");
 
-    // Swimming has no zones configured by default (empty thresholds)
-    // But sportZones exists from migration, so it won't show "no zones"
-    // unless the config itself is missing
+    // All sports have sportZones by default, so the profile name shows
     render(<ZoneIndicator sport="cycling" />);
 
     expect(screen.getByText(/runner/i)).toBeInTheDocument();

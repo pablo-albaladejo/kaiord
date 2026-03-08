@@ -3,27 +3,28 @@ import { formatZonesContext } from "./zones-formatter";
 import type { Profile } from "../../../types/profile";
 import type { SportZoneConfig } from "../../../types/sport-zones";
 
-const baseProfile: Profile = {
-  id: "00000000-0000-0000-0000-000000000001",
-  name: "Test Athlete",
-  ftp: undefined,
-  maxHeartRate: undefined,
-  powerZones: [
-    { zone: 1, name: "Z1", minPercent: 0, maxPercent: 55 },
-    { zone: 2, name: "Z2", minPercent: 56, maxPercent: 75 },
-    { zone: 3, name: "Z3", minPercent: 76, maxPercent: 90 },
-    { zone: 4, name: "Z4", minPercent: 91, maxPercent: 105 },
-    { zone: 5, name: "Z5", minPercent: 106, maxPercent: 120 },
-    { zone: 6, name: "Z6", minPercent: 121, maxPercent: 150 },
-    { zone: 7, name: "Z7", minPercent: 151, maxPercent: 200 },
-  ],
-  heartRateZones: [
+const emptyHrZones = {
+  method: "custom",
+  zones: [
     { zone: 1, name: "Recovery", minBpm: 0, maxBpm: 0 },
     { zone: 2, name: "Aerobic", minBpm: 0, maxBpm: 0 },
     { zone: 3, name: "Tempo", minBpm: 0, maxBpm: 0 },
     { zone: 4, name: "Threshold", minBpm: 0, maxBpm: 0 },
     { zone: 5, name: "VO2 Max", minBpm: 0, maxBpm: 0 },
   ],
+};
+
+const baseProfile: Profile = {
+  id: "00000000-0000-0000-0000-000000000001",
+  name: "Test Athlete",
+  sportZones: {
+    cycling: {
+      thresholds: {},
+      heartRateZones: emptyHrZones,
+      powerZones: { method: "custom", zones: [] },
+    },
+    generic: { thresholds: {}, heartRateZones: emptyHrZones },
+  },
   createdAt: "2025-01-01T00:00:00Z",
   updatedAt: "2025-01-01T00:00:00Z",
 };
@@ -95,37 +96,11 @@ const swimmingConfig: SportZoneConfig = {
 };
 
 describe("formatZonesContext", () => {
-  describe("legacy (no sport)", () => {
-    it("should return empty string when profile has no FTP or HR data", () => {
+  describe("empty profile", () => {
+    it("should return empty string when profile has no threshold data", () => {
       const result = formatZonesContext(baseProfile);
 
       expect(result).toBe("");
-    });
-
-    it("should include FTP value when set", () => {
-      const profile: Profile = { ...baseProfile, ftp: 250 };
-
-      const result = formatZonesContext(profile);
-
-      expect(result).toContain("FTP: 250W");
-    });
-
-    it("should include max heart rate when set", () => {
-      const profile: Profile = { ...baseProfile, maxHeartRate: 185 };
-
-      const result = formatZonesContext(profile);
-
-      expect(result).toContain("Max HR: 185bpm");
-    });
-
-    it("should include power zones with calculated watt values when FTP is set", () => {
-      const profile: Profile = { ...baseProfile, ftp: 200 };
-
-      const result = formatZonesContext(profile);
-
-      expect(result).toContain("FTP: 200W");
-      expect(result).toContain("Power zones:");
-      expect(result).toContain("Z1: 0-110W");
     });
   });
 

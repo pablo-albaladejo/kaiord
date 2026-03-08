@@ -15,9 +15,7 @@ describe("sport zone actions", () => {
 
   describe("updateSportThresholds", () => {
     it("should update thresholds for a sport", () => {
-      const profile = useProfileStore
-        .getState()
-        .createProfile("Athlete", { maxHeartRate: 180 });
+      const profile = useProfileStore.getState().createProfile("Athlete");
       const id = profile.id;
 
       useProfileStore
@@ -30,10 +28,13 @@ describe("sport zone actions", () => {
     });
 
     it("should recalculate HR zones when LTHR changes", () => {
-      const profile = useProfileStore
-        .getState()
-        .createProfile("Athlete", { maxHeartRate: 180 });
+      const profile = useProfileStore.getState().createProfile("Athlete");
       const id = profile.id;
+
+      // Set method to karvonen-5 first so recalculation triggers
+      useProfileStore
+        .getState()
+        .setZoneMethod(id, "cycling", "heartRateZones", "karvonen-5", []);
 
       useProfileStore
         .getState()
@@ -125,9 +126,7 @@ describe("sport zone actions", () => {
 
   describe("setZoneMethod", () => {
     it("should change zone method and zones", () => {
-      const profile = useProfileStore
-        .getState()
-        .createProfile("Athlete", { maxHeartRate: 180 });
+      const profile = useProfileStore.getState().createProfile("Athlete");
       const id = profile.id;
 
       const newZones = [
