@@ -30,50 +30,18 @@ function formatSportZones(config: SportZoneConfig): string {
   return parts.join("\n");
 }
 
-function formatLegacy(profile: Profile): string {
-  const parts: Array<string> = [];
-  if (profile.ftp) parts.push(`FTP: ${profile.ftp}W`);
-  if (profile.maxHeartRate) {
-    parts.push(`Max HR: ${profile.maxHeartRate}bpm`);
-  }
-
-  if (profile.powerZones?.length && profile.ftp) {
-    const ftp = profile.ftp;
-    const z = profile.powerZones
-      .map(
-        (p) =>
-          `${p.name}: ${Math.round((ftp * p.minPercent) / 100)}-${Math.round((ftp * p.maxPercent) / 100)}W`
-      )
-      .join(", ");
-    parts.push(`Power zones: ${z}`);
-  }
-
-  if (profile.heartRateZones?.length) {
-    const z = profile.heartRateZones
-      .filter((h) => h.maxBpm > 0)
-      .map((h) => `${h.name}: ${h.minBpm}-${h.maxBpm}bpm`)
-      .join(", ");
-    if (z) parts.push(`HR zones: ${z}`);
-  }
-  return parts.join("\n");
-}
-
 export const formatZonesContext = (
   profile: Profile,
   sport?: SportKey
 ): string => {
-  if (sport && profile.sportZones?.[sport]) {
+  if (sport && profile.sportZones[sport]) {
     return formatSportZones(profile.sportZones[sport]);
   }
 
-  if (profile.sportZones) {
-    const allParts: Array<string> = [];
-    for (const [key, config] of Object.entries(profile.sportZones)) {
-      const formatted = formatSportZones(config);
-      if (formatted) allParts.push(`[${key}] ${formatted}`);
-    }
-    if (allParts.length) return allParts.join("\n\n");
+  const allParts: Array<string> = [];
+  for (const [key, config] of Object.entries(profile.sportZones)) {
+    const formatted = formatSportZones(config);
+    if (formatted) allParts.push(`[${key}] ${formatted}`);
   }
-
-  return formatLegacy(profile);
+  return allParts.length ? allParts.join("\n\n") : "";
 };

@@ -8,31 +8,13 @@ import { useProfileCreate } from "./useProfileCreate";
 import { useProfileDelete } from "./useProfileDelete";
 import { useProfileEdit } from "./useProfileEdit";
 import type { Profile } from "../../../../types/profile";
-
-type ProfileFormData = {
-  name: string;
-  bodyWeight?: number;
-  ftp?: number;
-  maxHeartRate?: number;
-};
+import type { ProfileFormData } from "../types";
 
 type UseProfileCRUDParams = {
-  createProfile: (
-    name: string,
-    data: {
-      bodyWeight?: number;
-      ftp?: number;
-      maxHeartRate?: number;
-    }
-  ) => void;
+  createProfile: (name: string, data: { bodyWeight?: number }) => void;
   updateProfile: (
     id: string,
-    data: {
-      name?: string;
-      bodyWeight?: number;
-      ftp?: number;
-      maxHeartRate?: number;
-    }
+    data: { name?: string; bodyWeight?: number }
   ) => void;
   deleteProfile: (id: string) => void;
   formData: ProfileFormData;

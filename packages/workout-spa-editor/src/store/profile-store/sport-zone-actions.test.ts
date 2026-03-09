@@ -15,9 +15,7 @@ describe("sport zone actions", () => {
 
   describe("updateSportThresholds", () => {
     it("should update thresholds for a sport", () => {
-      const profile = useProfileStore
-        .getState()
-        .createProfile("Athlete", { maxHeartRate: 180 });
+      const profile = useProfileStore.getState().createProfile("Athlete");
       const id = profile.id;
 
       useProfileStore
@@ -29,11 +27,14 @@ describe("sport zone actions", () => {
       expect(updated?.sportZones?.cycling?.thresholds.ftp).toBe(280);
     });
 
-    it("should recalculate HR zones in auto mode when LTHR changes", () => {
-      const profile = useProfileStore
-        .getState()
-        .createProfile("Athlete", { maxHeartRate: 180 });
+    it("should recalculate HR zones when LTHR changes", () => {
+      const profile = useProfileStore.getState().createProfile("Athlete");
       const id = profile.id;
+
+      // Set method to karvonen-5 first so recalculation triggers
+      useProfileStore
+        .getState()
+        .setZoneMethod(id, "cycling", "heartRateZones", "karvonen-5", []);
 
       useProfileStore
         .getState()
@@ -41,19 +42,19 @@ describe("sport zone actions", () => {
 
       const updated = useProfileStore.getState().getProfile(id);
       const hrZones = updated?.sportZones?.cycling?.heartRateZones;
-      expect(hrZones?.mode).toBe("auto");
+      expect(hrZones?.method).toBe("karvonen-5");
       // Z1 max: round(170 * 82 / 100) = 139
       expect(hrZones?.zones[0]?.maxBpm).toBe(139);
     });
 
-    it("should recalculate pace zones in auto mode when threshold changes", () => {
+    it("should recalculate pace zones when threshold changes", () => {
       const profile = useProfileStore.getState().createProfile("Runner");
       const id = profile.id;
 
-      // First set up running with auto pace zones
+      // Set pace zone method and thresholds
       useProfileStore
         .getState()
-        .toggleZoneMode(id, "running", "paceZones", "auto");
+        .setZoneMethod(id, "running", "paceZones", "daniels-5", []);
       useProfileStore.getState().updateSportThresholds(id, "running", {
         thresholdPace: 300,
         paceUnit: "min_per_km",
@@ -61,7 +62,7 @@ describe("sport zone actions", () => {
 
       const updated = useProfileStore.getState().getProfile(id);
       const paceZones = updated?.sportZones?.running?.paceZones;
-      expect(paceZones?.mode).toBe("auto");
+      expect(paceZones?.method).toBe("daniels-5");
       expect(paceZones?.zones.length).toBe(5);
     });
 
@@ -78,7 +79,7 @@ describe("sport zone actions", () => {
   });
 
   describe("updateSportZones", () => {
-    it("should update manual zones for a sport", () => {
+    it("should update zones for a sport", () => {
       const profile = useProfileStore.getState().createProfile("Athlete");
       const id = profile.id;
 
@@ -100,13 +101,9 @@ describe("sport zone actions", () => {
       );
     });
 
-    it("should persist custom zones in manual mode", () => {
+    it("should persist custom zones", () => {
       const profile = useProfileStore.getState().createProfile("Athlete");
       const id = profile.id;
-
-      useProfileStore
-        .getState()
-        .toggleZoneMode(id, "generic", "heartRateZones", "manual");
 
       const customZones = [
         { zone: 1, name: "Z1", minBpm: 90, maxBpm: 120 },
@@ -121,50 +118,136 @@ describe("sport zone actions", () => {
         .updateSportZones(id, "generic", "heartRateZones", customZones);
 
       const updated = useProfileStore.getState().getProfile(id);
-      expect(updated?.sportZones?.generic?.heartRateZones.mode).toBe("manual");
       expect(updated?.sportZones?.generic?.heartRateZones.zones).toEqual(
         customZones
       );
     });
   });
 
-  describe("toggleZoneMode", () => {
-    it("should toggle from manual to auto and recalculate zones", () => {
-      const profile = useProfileStore
-        .getState()
-        .createProfile("Athlete", { maxHeartRate: 180 });
+  describe("setZoneMethod", () => {
+    it("should change zone method and zones", () => {
+      const profile = useProfileStore.getState().createProfile("Athlete");
       const id = profile.id;
 
-      // Set to manual first
-      useProfileStore
-        .getState()
-        .toggleZoneMode(id, "cycling", "heartRateZones", "manual");
+      const newZones = [
+        { zone: 1, name: "Recovery", minBpm: 0, maxBpm: 146 },
+        { zone: 2, name: "EE", minBpm: 146, maxBpm: 160 },
+        { zone: 3, name: "IE", minBpm: 162, maxBpm: 167 },
+        { zone: 4, name: "Threshold", minBpm: 169, maxBpm: 178 },
+        { zone: 5, name: "AC", minBpm: 180, maxBpm: 191 },
+      ];
 
-      // Toggle back to auto
       useProfileStore
         .getState()
-        .toggleZoneMode(id, "cycling", "heartRateZones", "auto");
+        .setZoneMethod(id, "cycling", "heartRateZones", "friel-hr-5", newZones);
 
       const updated = useProfileStore.getState().getProfile(id);
-      expect(updated?.sportZones?.cycling?.heartRateZones.mode).toBe("auto");
+      expect(updated?.sportZones?.cycling?.heartRateZones.method).toBe(
+        "friel-hr-5"
+      );
+      expect(updated?.sportZones?.cycling?.heartRateZones.zones).toEqual(
+        newZones
+      );
+    });
+  });
+
+  describe("addCustomZone", () => {
+    it("should add a zone to custom config", () => {
+      const profile = useProfileStore.getState().createProfile("Athlete");
+      const id = profile.id;
+
+      useProfileStore
+        .getState()
+        .setZoneMethod(id, "cycling", "heartRateZones", "custom", [
+          { zone: 1, name: "Z1", minBpm: 0, maxBpm: 150 },
+        ]);
+
+      useProfileStore
+        .getState()
+        .addCustomZone(id, "cycling", "heartRateZones", {
+          zone: 2,
+          name: "Z2",
+          minBpm: 151,
+          maxBpm: 180,
+        });
+
+      const updated = useProfileStore.getState().getProfile(id);
+      expect(updated?.sportZones?.cycling?.heartRateZones.zones).toHaveLength(
+        2
+      );
     });
 
-    it("should switch to manual mode without recalculating", () => {
-      const profile = useProfileStore
-        .getState()
-        .createProfile("Athlete", { maxHeartRate: 180 });
+    it("should not exceed 10 zones", () => {
+      const profile = useProfileStore.getState().createProfile("Athlete");
       const id = profile.id;
 
-      const autoZones = profile.sportZones?.cycling?.heartRateZones.zones ?? [];
+      const tenZones = Array.from({ length: 10 }, (_, i) => ({
+        zone: i + 1,
+        name: `Z${i + 1}`,
+        minBpm: i * 20,
+        maxBpm: (i + 1) * 20,
+      }));
 
       useProfileStore
         .getState()
-        .toggleZoneMode(id, "cycling", "heartRateZones", "manual");
+        .setZoneMethod(id, "cycling", "heartRateZones", "custom", tenZones);
+
+      useProfileStore
+        .getState()
+        .addCustomZone(id, "cycling", "heartRateZones", {
+          zone: 11,
+          name: "Z11",
+          minBpm: 200,
+          maxBpm: 220,
+        });
 
       const updated = useProfileStore.getState().getProfile(id);
-      const hrZones = updated?.sportZones?.cycling?.heartRateZones;
-      expect(hrZones?.mode).toBe("manual");
-      expect(hrZones?.zones).toEqual(autoZones);
+      expect(updated?.sportZones?.cycling?.heartRateZones.zones).toHaveLength(
+        10
+      );
+    });
+  });
+
+  describe("removeCustomZone", () => {
+    it("should remove a zone by index", () => {
+      const profile = useProfileStore.getState().createProfile("Athlete");
+      const id = profile.id;
+
+      useProfileStore
+        .getState()
+        .setZoneMethod(id, "cycling", "heartRateZones", "custom", [
+          { zone: 1, name: "Z1", minBpm: 0, maxBpm: 130 },
+          { zone: 2, name: "Z2", minBpm: 131, maxBpm: 170 },
+        ]);
+
+      useProfileStore
+        .getState()
+        .removeCustomZone(id, "cycling", "heartRateZones", 0);
+
+      const updated = useProfileStore.getState().getProfile(id);
+      expect(updated?.sportZones?.cycling?.heartRateZones.zones).toHaveLength(
+        1
+      );
+    });
+
+    it("should not remove the last zone", () => {
+      const profile = useProfileStore.getState().createProfile("Athlete");
+      const id = profile.id;
+
+      useProfileStore
+        .getState()
+        .setZoneMethod(id, "cycling", "heartRateZones", "custom", [
+          { zone: 1, name: "Z1", minBpm: 0, maxBpm: 150 },
+        ]);
+
+      useProfileStore
+        .getState()
+        .removeCustomZone(id, "cycling", "heartRateZones", 0);
+
+      const updated = useProfileStore.getState().getProfile(id);
+      expect(updated?.sportZones?.cycling?.heartRateZones.zones).toHaveLength(
+        1
+      );
     });
   });
 });

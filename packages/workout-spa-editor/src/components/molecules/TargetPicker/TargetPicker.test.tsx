@@ -222,10 +222,10 @@ describe("TargetPicker", () => {
   describe("Profile Integration", () => {
     it("should show zone name when profile is active and zone is selected", () => {
       // Arrange
-      const profile = useProfileStore.getState().createProfile("Test Profile", {
-        ftp: 250,
-        maxHeartRate: 180,
-      });
+      const profile = useProfileStore.getState().createProfile("Test Profile");
+      useProfileStore
+        .getState()
+        .updateSportThresholds(profile.id, "cycling", { ftp: 250, lthr: 180 });
       useProfileStore.getState().setActiveProfile(profile.id);
 
       const onChange = vi.fn();
@@ -244,9 +244,19 @@ describe("TargetPicker", () => {
 
     it("should show heart rate zone name when profile is active", () => {
       // Arrange
-      const profile = useProfileStore.getState().createProfile("Test Profile", {
-        maxHeartRate: 180,
-      });
+      const profile = useProfileStore.getState().createProfile("Test Profile");
+      useProfileStore
+        .getState()
+        .setZoneMethod(
+          profile.id,
+          "cycling",
+          "heartRateZones",
+          "karvonen-5",
+          []
+        );
+      useProfileStore
+        .getState()
+        .updateSportThresholds(profile.id, "cycling", { lthr: 180 });
       useProfileStore.getState().setActiveProfile(profile.id);
 
       const onChange = vi.fn();
@@ -258,9 +268,9 @@ describe("TargetPicker", () => {
       // Act
       render(<TargetPicker value={value} onChange={onChange} />);
 
-      // Assert
+      // Assert - Karvonen zone 2: contiguous from Z1.max+1 to round(89%*180)
       expect(screen.getByText(/Aerobic/)).toBeInTheDocument();
-      expect(screen.getByText(/108-126 BPM/)).toBeInTheDocument();
+      expect(screen.getByText(/149-160 BPM/)).toBeInTheDocument();
     });
 
     it("should not show zone info when no profile is active", () => {
@@ -280,9 +290,10 @@ describe("TargetPicker", () => {
 
     it("should update zone info when profile changes", () => {
       // Arrange
-      const profile1 = useProfileStore.getState().createProfile("Profile 1", {
-        ftp: 250,
-      });
+      const profile1 = useProfileStore.getState().createProfile("Profile 1");
+      useProfileStore
+        .getState()
+        .updateSportThresholds(profile1.id, "cycling", { ftp: 250 });
       useProfileStore.getState().setActiveProfile(profile1.id);
 
       const onChange = vi.fn();
@@ -299,9 +310,10 @@ describe("TargetPicker", () => {
       expect(screen.getByText(/190-225W/)).toBeInTheDocument();
 
       // Act - Change profile
-      const profile2 = useProfileStore.getState().createProfile("Profile 2", {
-        ftp: 300,
-      });
+      const profile2 = useProfileStore.getState().createProfile("Profile 2");
+      useProfileStore
+        .getState()
+        .updateSportThresholds(profile2.id, "cycling", { ftp: 300 });
       useProfileStore.getState().setActiveProfile(profile2.id);
 
       rerender(<TargetPicker value={value} onChange={onChange} />);
@@ -331,9 +343,10 @@ describe("TargetPicker", () => {
 
     it("should calculate absolute power values from zone and FTP", () => {
       // Arrange
-      const profile = useProfileStore.getState().createProfile("Test Profile", {
-        ftp: 200,
-      });
+      const profile = useProfileStore.getState().createProfile("Test Profile");
+      useProfileStore
+        .getState()
+        .updateSportThresholds(profile.id, "cycling", { ftp: 200 });
       useProfileStore.getState().setActiveProfile(profile.id);
 
       const onChange = vi.fn();

@@ -44,17 +44,26 @@ test.describe("Profile Management", () => {
     await page.getByRole("button", { name: /profile/i }).click();
     const dialog = page.getByRole("dialog");
 
-    // Act - Fill all fields
+    // Act - Create profile with name (the only field in the create form)
     await page.getByLabel(/^name$/i).fill("Pro Cyclist");
-    await page.getByLabel(/body weight/i).fill("70");
-    await page.getByRole("dialog").getByLabel(/ftp/i).first().fill("300");
-    await page.getByLabel(/max hr/i).fill("190");
     await page.getByRole("button", { name: /create profile/i }).click();
 
-    // Assert - Profile shows all data in dialog
+    // Assert - Profile appears in the list
     await expect(dialog.getByText("Pro Cyclist")).toBeVisible();
+
+    // Act - Edit profile to set cycling thresholds (FTP, LTHR)
+    await page.getByRole("button", { name: /^edit$/i }).click();
+
+    // The edit view opens on Training Zones tab with Cycling sport by default
+    await dialog.getByLabel(/FTP threshold/i).fill("300");
+    await dialog.getByLabel(/LTHR threshold/i).fill("170");
+
+    // Go back to list to verify
+    await dialog.getByRole("button", { name: /back to list/i }).click();
+
+    // Assert - Profile shows FTP and LTHR in the list
     await expect(dialog.getByText(/FTP: 300W/i)).toBeVisible();
-    await expect(dialog.getByText(/Max HR: 190 bpm/i)).toBeVisible();
+    await expect(dialog.getByText(/LTHR: 170 bpm/i)).toBeVisible();
   });
 
   test("should edit an existing profile", async ({ page }) => {
@@ -64,15 +73,16 @@ test.describe("Profile Management", () => {
     await page.getByLabel(/^name$/i).fill("Original Name");
     await page.getByRole("button", { name: /create profile/i }).click();
 
-    // Act - Edit the profile
+    // Act - Edit the profile name (name is edited inline in the header)
     await page.getByRole("button", { name: /^edit$/i }).click();
-    await page.getByLabel(/^name$/i).clear();
-    await page.getByLabel(/^name$/i).fill("Updated Name");
-    await dialog.getByLabel(/ftp/i).first().fill("280");
-    await page.getByRole("button", { name: /save changes/i }).click();
 
-    // Assert - Profile shows updated data in dialog
-    await expect(dialog.getByText("Updated Name")).toBeVisible();
+    // Set FTP in the cycling thresholds (Training Zones tab, Cycling sport)
+    await dialog.getByLabel(/FTP threshold/i).fill("280");
+
+    // Go back to list
+    await dialog.getByRole("button", { name: /back to list/i }).click();
+
+    // Assert - Profile shows updated FTP in dialog
     await expect(dialog.getByText(/FTP: 280W/i)).toBeVisible();
   });
 
@@ -127,7 +137,6 @@ test.describe("Profile Management", () => {
     // Arrange - Create a profile
     await page.getByRole("button", { name: /profile/i }).click();
     await page.getByLabel(/^name$/i).fill("Export Test");
-    await page.getByRole("dialog").getByLabel(/ftp/i).first().fill("300");
     await page.getByRole("button", { name: /create profile/i }).click();
 
     // Act - Set up download listener and click export
@@ -140,29 +149,38 @@ test.describe("Profile Management", () => {
   });
 
   test("should import a valid profile", async ({ page }) => {
-    // Arrange - Create a profile JSON file
+    // Arrange - Create a profile JSON matching the new schema (sportZones)
     const profileData = {
       id: crypto.randomUUID(),
       name: "Imported Profile",
-      ftp: 320,
-      maxHeartRate: 195,
       bodyWeight: 72,
-      powerZones: [
-        { zone: 1, name: "Z1", minPercent: 0, maxPercent: 55 },
-        { zone: 2, name: "Z2", minPercent: 56, maxPercent: 75 },
-        { zone: 3, name: "Z3", minPercent: 76, maxPercent: 90 },
-        { zone: 4, name: "Z4", minPercent: 91, maxPercent: 105 },
-        { zone: 5, name: "Z5", minPercent: 106, maxPercent: 120 },
-        { zone: 6, name: "Z6", minPercent: 121, maxPercent: 150 },
-        { zone: 7, name: "Z7", minPercent: 151, maxPercent: 200 },
-      ],
-      heartRateZones: [
-        { zone: 1, name: "HR1", minBpm: 0, maxBpm: 117 },
-        { zone: 2, name: "HR2", minBpm: 117, maxBpm: 137 },
-        { zone: 3, name: "HR3", minBpm: 137, maxBpm: 156 },
-        { zone: 4, name: "HR4", minBpm: 156, maxBpm: 176 },
-        { zone: 5, name: "HR5", minBpm: 176, maxBpm: 195 },
-      ],
+      sportZones: {
+        cycling: {
+          thresholds: { ftp: 320, lthr: 170 },
+          heartRateZones: {
+            method: "custom",
+            zones: [
+              { zone: 1, name: "Recovery", minBpm: 0, maxBpm: 117 },
+              { zone: 2, name: "Aerobic", minBpm: 117, maxBpm: 137 },
+              { zone: 3, name: "Tempo", minBpm: 137, maxBpm: 156 },
+              { zone: 4, name: "Threshold", minBpm: 156, maxBpm: 176 },
+              { zone: 5, name: "VO2 Max", minBpm: 176, maxBpm: 195 },
+            ],
+          },
+          powerZones: {
+            method: "coggan-7",
+            zones: [
+              { zone: 1, name: "Z1", minPercent: 0, maxPercent: 55 },
+              { zone: 2, name: "Z2", minPercent: 56, maxPercent: 75 },
+              { zone: 3, name: "Z3", minPercent: 76, maxPercent: 90 },
+              { zone: 4, name: "Z4", minPercent: 91, maxPercent: 105 },
+              { zone: 5, name: "Z5", minPercent: 106, maxPercent: 120 },
+              { zone: 6, name: "Z6", minPercent: 121, maxPercent: 150 },
+              { zone: 7, name: "Z7", minPercent: 151, maxPercent: 200 },
+            ],
+          },
+        },
+      },
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
@@ -177,10 +195,8 @@ test.describe("Profile Management", () => {
       buffer: Buffer.from(JSON.stringify(profileData)),
     });
 
-    // Assert - Profile appears in dialog list
+    // Assert - Profile appears in dialog list with cycling thresholds
     await expect(dialog.getByText("Imported Profile")).toBeVisible();
-    await expect(dialog.getByText(/FTP: 320W/i)).toBeVisible();
-    await expect(dialog.getByText(/Max HR: 195 bpm/i)).toBeVisible();
   });
 
   test("should show error for invalid profile import", async ({ page }) => {
@@ -220,7 +236,6 @@ test.describe("Profile Management", () => {
     await page.getByRole("button", { name: /profile/i }).click();
     const dialog = page.getByRole("dialog");
     await page.getByLabel(/^name$/i).fill("Persistent Profile");
-    await page.getByLabel(/ftp/i).fill("275");
     await page.getByRole("button", { name: /create profile/i }).click();
 
     // Verify profile was created in dialog before reload
@@ -233,9 +248,6 @@ test.describe("Profile Management", () => {
     await page.getByRole("button", { name: /profile/i }).click();
     await expect(
       page.getByRole("dialog").getByText("Persistent Profile")
-    ).toBeVisible();
-    await expect(
-      page.getByRole("dialog").getByText(/FTP: 275W/i)
     ).toBeVisible();
 
     await context.close();
@@ -251,11 +263,17 @@ test.describe("Zone Configuration", () => {
     });
     await page.goto("/");
 
+    // Create a profile and set cycling thresholds
     await page.getByRole("button", { name: /profile/i }).click();
     await page.getByLabel(/^name$/i).fill("Zone Test");
-    await page.getByLabel(/ftp/i).fill("250");
-    await page.getByLabel(/max hr/i).fill("190");
     await page.getByRole("button", { name: /create profile/i }).click();
+
+    // Edit the profile to set FTP and LTHR in cycling thresholds
+    await page.getByRole("button", { name: /^edit$/i }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel(/FTP threshold/i).fill("250");
+    await dialog.getByLabel(/LTHR threshold/i).fill("170");
+    await dialog.getByRole("button", { name: /back to list/i }).click();
   });
 
   test("should edit power zones", async () => {
@@ -281,25 +299,37 @@ test.describe("Zone Configuration", () => {
   });
 
   test("should recalculate zones when FTP changes", async ({ page }) => {
-    // Arrange - Edit profile to change FTP
+    const dialog = page.getByRole("dialog");
+
+    // Arrange - Edit profile to change FTP in cycling thresholds
     await page.getByRole("button", { name: /^edit$/i }).click();
-    await page.getByRole("dialog").getByLabel(/ftp/i).first().clear();
-    await page.getByRole("dialog").getByLabel(/ftp/i).first().fill("300");
-    await page.getByRole("button", { name: /save changes/i }).click();
+
+    // FTP is in Training Zones > Cycling tab thresholds
+    await dialog.getByLabel(/FTP threshold/i).clear();
+    await dialog.getByLabel(/FTP threshold/i).fill("300");
+
+    // Go back to list to verify
+    await dialog.getByRole("button", { name: /back to list/i }).click();
 
     // Assert - Profile shows updated FTP
-    await expect(page.getByText(/FTP: 300W/i)).toBeVisible();
+    await expect(dialog.getByText(/FTP: 300W/i)).toBeVisible();
   });
 
-  test("should recalculate zones when max HR changes", async ({ page }) => {
-    // Arrange - Edit profile to change max HR
-    await page.getByRole("button", { name: /^edit$/i }).click();
-    await page.getByLabel(/max hr/i).clear();
-    await page.getByLabel(/max hr/i).fill("195");
-    await page.getByRole("button", { name: /save changes/i }).click();
+  test("should recalculate zones when LTHR changes", async ({ page }) => {
+    const dialog = page.getByRole("dialog");
 
-    // Assert - Profile shows updated max HR
-    await expect(page.getByText(/Max HR: 195 bpm/i)).toBeVisible();
+    // Arrange - Edit profile to change LTHR in cycling thresholds
+    await page.getByRole("button", { name: /^edit$/i }).click();
+
+    // LTHR is in Training Zones > Cycling tab thresholds
+    await dialog.getByLabel(/LTHR threshold/i).clear();
+    await dialog.getByLabel(/LTHR threshold/i).fill("175");
+
+    // Go back to list to verify
+    await dialog.getByRole("button", { name: /back to list/i }).click();
+
+    // Assert - Profile shows updated LTHR
+    await expect(dialog.getByText(/LTHR: 175 bpm/i)).toBeVisible();
   });
 });
 
