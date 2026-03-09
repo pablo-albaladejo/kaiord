@@ -5,23 +5,12 @@
  */
 
 import type { Profile } from "../../../../types/profile";
-
-type ProfileFormData = {
-  name: string;
-  bodyWeight?: number;
-  ftp?: number;
-  maxHeartRate?: number;
-};
+import type { ProfileFormData } from "../types";
 
 type UseProfileEditParams = {
   updateProfile: (
     id: string,
-    data: {
-      name?: string;
-      bodyWeight?: number;
-      ftp?: number;
-      maxHeartRate?: number;
-    }
+    data: { name?: string; bodyWeight?: number }
   ) => void;
   formData: ProfileFormData;
   editingProfile: Profile | null;
@@ -43,18 +32,15 @@ export function useProfileEdit(params: UseProfileEditParams) {
     setFormData({
       name: profile.name,
       bodyWeight: profile.bodyWeight,
-      ftp: profile.ftp,
-      maxHeartRate: profile.maxHeartRate,
     });
   };
 
-  const handleSave = () => {
-    if (editingProfile && formData.name.trim()) {
+  const handleSave = (overrideData?: ProfileFormData) => {
+    const data = overrideData ?? formData;
+    if (editingProfile && data.name.trim()) {
       updateProfile(editingProfile.id, {
-        name: formData.name.trim(),
-        bodyWeight: formData.bodyWeight,
-        ftp: formData.ftp,
-        maxHeartRate: formData.maxHeartRate,
+        name: data.name.trim(),
+        bodyWeight: data.bodyWeight,
       });
       setEditingProfile(null);
       setFormData({ name: "" });

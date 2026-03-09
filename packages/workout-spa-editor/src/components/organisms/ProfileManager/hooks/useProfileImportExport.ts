@@ -8,14 +8,7 @@ import { profileSchema } from "../../../../types/profile";
 import type { Profile } from "../../../../types/profile";
 
 type UseProfileImportExportParams = {
-  createProfile: (
-    name: string,
-    data: {
-      bodyWeight?: number;
-      ftp?: number;
-      maxHeartRate?: number;
-    }
-  ) => void;
+  createProfile: (name: string, data: { bodyWeight?: number }) => void;
   setImportError: (error: string | null) => void;
 };
 
@@ -46,8 +39,6 @@ export function useProfileImportExport(params: UseProfileImportExportParams) {
 
       createProfile(validatedProfile.name, {
         bodyWeight: validatedProfile.bodyWeight,
-        ftp: validatedProfile.ftp,
-        maxHeartRate: validatedProfile.maxHeartRate,
       });
 
       setImportError(null);

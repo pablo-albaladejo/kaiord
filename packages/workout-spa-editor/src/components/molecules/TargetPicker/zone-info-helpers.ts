@@ -18,18 +18,19 @@ export const getZoneInfo = (
   value: string,
   activeProfile?: Profile | null
 ): string | null => {
-  if (unit !== "zone" || !value || !activeProfile) {
-    return null;
-  }
+  if (unit !== "zone" || !value || !activeProfile) return null;
 
   const zoneNumber = Number.parseInt(value, 10);
+  const cycling = activeProfile.sportZones.cycling;
+  if (!cycling) return null;
 
   if (targetType === "power") {
-    const zoneName = getPowerZoneName(zoneNumber, activeProfile.powerZones);
+    const zones = cycling.powerZones?.zones ?? [];
+    const zoneName = getPowerZoneName(zoneNumber, zones);
     const zoneRange = calculatePowerFromZone(
       zoneNumber,
-      activeProfile.powerZones,
-      activeProfile.ftp
+      zones,
+      cycling.thresholds.ftp
     );
 
     if (zoneName && zoneRange) {
@@ -39,14 +40,9 @@ export const getZoneInfo = (
   }
 
   if (targetType === "heart_rate") {
-    const zoneName = getHeartRateZoneName(
-      zoneNumber,
-      activeProfile.heartRateZones
-    );
-    const zoneRange = calculateHeartRateFromZone(
-      zoneNumber,
-      activeProfile.heartRateZones
-    );
+    const zones = cycling.heartRateZones.zones;
+    const zoneName = getHeartRateZoneName(zoneNumber, zones);
+    const zoneRange = calculateHeartRateFromZone(zoneNumber, zones);
 
     if (zoneName && zoneRange) {
       return `${zoneName} (${zoneRange.min}-${zoneRange.max} BPM)`;

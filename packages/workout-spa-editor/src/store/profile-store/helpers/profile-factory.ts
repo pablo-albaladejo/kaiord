@@ -1,43 +1,57 @@
 /**
  * Profile Factory
  *
- * Functions for creating new profiles.
+ * Functions for creating new profiles with sport-specific zones.
  */
 
-import {
-  calculateHeartRateZones,
-  DEFAULT_HEART_RATE_ZONES,
-  DEFAULT_POWER_ZONES,
-} from "../../../types/profile";
-import { migrateProfile } from "../migration";
+import { DEFAULT_HEART_RATE_ZONES } from "../../../types/profile";
+import { calculatePowerZones } from "../../../utils/calculate-power-zones";
 import type { Profile } from "../../../types/profile";
+import type { SportKey, SportZoneConfig } from "../../../types/sport-zones";
 
 export function createNewProfile(
   name: string,
-  options: {
-    bodyWeight?: number;
-    ftp?: number;
-    maxHeartRate?: number;
-  }
+  options: { bodyWeight?: number } = {}
 ): Profile {
   const now = new Date().toISOString();
   const id = crypto.randomUUID();
 
-  const heartRateZones = options.maxHeartRate
-    ? calculateHeartRateZones(options.maxHeartRate)
-    : DEFAULT_HEART_RATE_ZONES;
-
-  const base = {
+  return {
     id,
     name,
     bodyWeight: options.bodyWeight,
-    ftp: options.ftp,
-    maxHeartRate: options.maxHeartRate,
-    powerZones: DEFAULT_POWER_ZONES,
-    heartRateZones,
+    sportZones: buildSportZones(),
     createdAt: now,
     updatedAt: now,
   };
+}
 
-  return migrateProfile(base) as Profile;
+function buildSportZones(): Record<string, SportZoneConfig> {
+  const emptyHr = { method: "custom", zones: DEFAULT_HEART_RATE_ZONES };
+
+  return {
+    cycling: {
+      thresholds: {},
+      heartRateZones: { ...emptyHr },
+      powerZones: {
+        method: "coggan-7",
+        zones: calculatePowerZones("coggan-7"),
+      },
+    },
+    running: {
+      thresholds: {},
+      heartRateZones: { ...emptyHr },
+      powerZones: { method: "custom", zones: [] },
+      paceZones: { method: "custom", zones: [] },
+    },
+    swimming: {
+      thresholds: {},
+      heartRateZones: { ...emptyHr },
+      paceZones: { method: "custom", zones: [] },
+    },
+    generic: {
+      thresholds: {},
+      heartRateZones: { ...emptyHr },
+    },
+  } satisfies Record<SportKey, SportZoneConfig>;
 }

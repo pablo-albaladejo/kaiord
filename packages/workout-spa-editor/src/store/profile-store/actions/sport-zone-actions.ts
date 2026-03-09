@@ -9,12 +9,12 @@ import {
   updateSportConfig,
 } from "../helpers/sport-zone-updater";
 import { persistState } from "../persistence";
-import type { ProfileStore, ZoneType } from "../types";
+import type { ProfileStore } from "../types";
 import type { StateCreator } from "zustand";
 
 type SportZoneActions = Pick<
   ProfileStore,
-  "updateSportThresholds" | "updateSportZones" | "toggleZoneMode"
+  "updateSportThresholds" | "updateSportZones" | "setZoneMethod"
 >;
 
 function applyUpdate(state: ProfileStore, profiles: typeof state.profiles) {
@@ -56,17 +56,13 @@ export const createSportZoneActions: StateCreator<
     });
   },
 
-  toggleZoneMode: (profileId, sport, zoneType, mode) => {
+  setZoneMethod: (profileId, sport, zoneType, method, zones) => {
     set((state) => {
       const idx = state.profiles.findIndex((p) => p.id === profileId);
       if (idx === -1) return state;
       const updated = updateSportConfig(state.profiles[idx], sport, (cfg) => {
-        const existing = cfg[zoneType as ZoneType];
-        const zc = existing ?? { mode: "manual", zones: [] };
-        const newCfg = { ...cfg, [zoneType]: { ...zc, mode } };
-        return mode === "auto"
-          ? recalculateZones(newCfg, cfg.thresholds, sport)
-          : newCfg;
+        const existing = cfg[zoneType];
+        return { ...cfg, [zoneType]: { ...existing, method, zones } };
       });
       const profiles = [...state.profiles];
       profiles[idx] = updated;

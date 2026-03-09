@@ -1,11 +1,21 @@
 /**
  * Zones Format Helpers
  *
- * Helper functions for formatting zone data into text.
+ * Helper functions for formatting zone data into text with real units.
  */
 
+import {
+  HR_METHODS,
+  PACE_METHODS,
+  POWER_METHODS,
+} from "../../../lib/zone-methods";
 import { secondsToMmSs } from "../ZoneEditor/utils/pace-format";
+import type { ZoneMethod } from "../../../lib/zone-method-types";
 import type { SportZoneConfig } from "../../../types/sport-zones";
+
+function methodLabel(methods: Array<ZoneMethod>, id: string) {
+  return methods.find((m) => m.id === id)?.name ?? id;
+}
 
 export function formatHrZones(
   config: SportZoneConfig,
@@ -13,9 +23,11 @@ export function formatHrZones(
 ): void {
   const hrZones = config.heartRateZones.zones
     .filter((z) => z.maxBpm > 0)
-    .map((z) => `${z.name}: ${z.minBpm}-${z.maxBpm}bpm`)
+    .map((z) => `Z${z.zone} ${z.name}: ${z.minBpm}-${z.maxBpm}bpm`)
     .join(", ");
-  if (hrZones) parts.push(`HR zones: ${hrZones}`);
+  if (!hrZones) return;
+  const label = methodLabel(HR_METHODS, config.heartRateZones.method);
+  parts.push(`HR zones (${label}): ${hrZones}`);
 }
 
 export function formatPowerZones(
@@ -24,13 +36,15 @@ export function formatPowerZones(
   parts: Array<string>
 ): void {
   if (!config.powerZones?.zones.length || !ftp) return;
+  const label = methodLabel(POWER_METHODS, config.powerZones.method);
   const zones = config.powerZones.zones
-    .map(
-      (z) =>
-        `${z.name}: ${Math.round((ftp * z.minPercent) / 100)}-${Math.round((ftp * z.maxPercent) / 100)}W`
-    )
+    .map((z) => {
+      const min = Math.round((ftp * z.minPercent) / 100);
+      const max = Math.round((ftp * z.maxPercent) / 100);
+      return `Z${z.zone} ${z.name}: ${min}-${max}W`;
+    })
     .join(", ");
-  parts.push(`Power zones: ${zones}`);
+  parts.push(`Power zones (${label}, FTP: ${ftp}W): ${zones}`);
 }
 
 export function formatPaceZones(
@@ -38,11 +52,12 @@ export function formatPaceZones(
   parts: Array<string>
 ): void {
   if (!config.paceZones?.zones.length) return;
+  const label = methodLabel(PACE_METHODS, config.paceZones.method);
   const zones = config.paceZones.zones
-    .map(
-      (z) =>
-        `${z.name}: ${secondsToMmSs(z.minPace)}-${secondsToMmSs(z.maxPace)}${z.unit === "min_per_100m" ? "/100m" : "/km"}`
-    )
+    .map((z) => {
+      const unit = z.unit === "min_per_100m" ? "/100m" : "/km";
+      return `Z${z.zone} ${z.name}: ${secondsToMmSs(z.minPace)}-${secondsToMmSs(z.maxPace)}${unit}`;
+    })
     .join(", ");
-  parts.push(`Pace zones: ${zones}`);
+  parts.push(`Pace zones (${label}): ${zones}`);
 }

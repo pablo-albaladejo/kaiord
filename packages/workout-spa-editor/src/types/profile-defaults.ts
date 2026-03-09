@@ -1,7 +1,7 @@
 /**
  * Profile Default Values
  *
- * Default zone configurations and legacy heart rate calculation.
+ * Default zone configurations for profiles.
  */
 
 import type { HeartRateZone, PowerZone } from "./profile";
@@ -23,28 +23,3 @@ export const DEFAULT_HEART_RATE_ZONES: Array<HeartRateZone> = [
   { zone: 4, name: "Threshold", minBpm: 0, maxBpm: 0 },
   { zone: 5, name: "VO2 Max", minBpm: 0, maxBpm: 0 },
 ];
-
-/**
- * Calculate Heart Rate Zones (legacy, max HR based)
- *
- * @param maxHeartRate - Maximum heart rate in BPM
- * @returns Array of 5 heart rate zones with calculated BPM ranges
- */
-export const calculateHeartRateZones = (
-  maxHeartRate: number
-): Array<HeartRateZone> => {
-  const percentages = [
-    { zone: 1, name: "Recovery", min: 0, max: 60 },
-    { zone: 2, name: "Aerobic", min: 60, max: 70 },
-    { zone: 3, name: "Tempo", min: 70, max: 80 },
-    { zone: 4, name: "Threshold", min: 80, max: 90 },
-    { zone: 5, name: "VO2 Max", min: 90, max: 100 },
-  ];
-
-  return percentages.map(({ zone, name, min, max }) => ({
-    zone,
-    name,
-    minBpm: Math.round((maxHeartRate * min) / 100),
-    maxBpm: Math.round((maxHeartRate * max) / 100),
-  }));
-};

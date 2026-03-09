@@ -20,11 +20,13 @@ export function SportZoneEditor({ profileId }: SportZoneEditorProps) {
     setActiveSport,
     sportConfig,
     capabilities,
-    confirmToggle,
-    handleToggleMode,
-    confirmModeSwitch,
-    cancelModeSwitch,
+    confirmMethod,
+    handleMethodChange,
+    confirmMethodSwitch,
+    cancelMethodSwitch,
     updateSportThresholds,
+    handleZonesChange,
+    handleAddZone,
   } = useSportZoneEditor(profileId);
 
   if (!sportConfig) {
@@ -37,9 +39,6 @@ export function SportZoneEditor({ profileId }: SportZoneEditorProps) {
 
   return (
     <div className="space-y-4">
-      <h3 className="text-sm font-semibold text-gray-900 dark:text-white">
-        Training Zones
-      </h3>
       <SportZoneTabs activeSport={activeSport} onSportChange={setActiveSport} />
       <SportZoneThresholds
         thresholds={sportConfig.thresholds}
@@ -49,16 +48,19 @@ export function SportZoneEditor({ profileId }: SportZoneEditorProps) {
       <SportZoneSections
         config={sportConfig}
         capabilities={capabilities}
-        onToggleMode={handleToggleMode}
+        onMethodChange={handleMethodChange}
+        onZonesChange={handleZonesChange}
+        onAddZone={handleAddZone}
+        ftp={sportConfig.thresholds.ftp}
       />
       <ConfirmationModal
-        isOpen={!!confirmToggle}
-        title="Switch to Auto Mode"
-        message="Switching to auto mode will replace your custom zones with calculated values. Continue?"
-        confirmLabel="Switch to Auto"
-        cancelLabel="Keep Manual"
-        onConfirm={confirmModeSwitch}
-        onCancel={cancelModeSwitch}
+        isOpen={!!confirmMethod}
+        title="Change Zone Method"
+        message="This will replace your current zones with calculated values. Continue?"
+        confirmLabel="Change Method"
+        cancelLabel="Keep Current"
+        onConfirm={confirmMethodSwitch}
+        onCancel={cancelMethodSwitch}
         variant="default"
       />
     </div>

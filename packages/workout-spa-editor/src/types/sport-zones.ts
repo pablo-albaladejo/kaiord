@@ -35,7 +35,7 @@ export const zoneModeSchema = z.enum(["auto", "manual"]);
 export type ZoneMode = z.infer<typeof zoneModeSchema>;
 
 export type ZoneConfig<T> = {
-  mode: ZoneMode;
+  method: string;
   zones: Array<T>;
 };
 

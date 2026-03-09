@@ -4,51 +4,15 @@
  * Functions for updating profile data.
  */
 
-import { calculateHeartRateZones } from "../../../types/profile";
-import type { HeartRateZone, PowerZone, Profile } from "../../../types/profile";
+import type { Profile } from "../../../types/profile";
 
 export function updateProfileData(
   profile: Profile,
-  updates: Partial<Profile>
+  updates: Partial<Pick<Profile, "name" | "bodyWeight">>
 ): Profile {
-  const now = new Date().toISOString();
-
-  const updatedProfile: Profile = {
+  return {
     ...profile,
     ...updates,
-    updatedAt: now,
+    updatedAt: new Date().toISOString(),
   };
-
-  if (
-    updates.maxHeartRate !== undefined &&
-    updates.maxHeartRate !== profile.maxHeartRate
-  ) {
-    updatedProfile.heartRateZones = calculateHeartRateZones(
-      updates.maxHeartRate
-    );
-  }
-
-  return updatedProfile;
-}
-
-export function updateProfileZones(
-  profile: Profile,
-  zones: PowerZone[] | HeartRateZone[],
-  zoneType: "power" | "heartRate"
-): Profile {
-  const now = new Date().toISOString();
-
-  if (zoneType === "power") {
-    return {
-      ...profile,
-      powerZones: zones as PowerZone[],
-      updatedAt: now,
-    };
-  } else {
-    return {
-      ...profile,
-      heartRateZones: zones as HeartRateZone[],
-      updatedAt: now,
-    };
-  }
 }

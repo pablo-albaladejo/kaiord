@@ -1,7 +1,8 @@
 /**
  * useZoneEditor Hook
  *
- * Manages state and logic for the zone editor component.
+ * Manages state and logic for the legacy zone editor component.
+ * Reads zones from sportZones.cycling config.
  */
 
 import { useState } from "react";
@@ -23,9 +24,10 @@ export function useZoneEditor(
   onSave: (zones: Array<PowerZone> | Array<HeartRateZone>) => void
 ) {
   const isPowerZones = zoneType === "power";
+  const cycling = profile.sportZones.cycling;
   const initialZones = isPowerZones
-    ? profile.powerZones
-    : profile.heartRateZones;
+    ? (cycling?.powerZones?.zones ?? [])
+    : (cycling?.heartRateZones.zones ?? []);
 
   const [zones, setZones] = useState<Array<PowerZone> | Array<HeartRateZone>>(
     initialZones

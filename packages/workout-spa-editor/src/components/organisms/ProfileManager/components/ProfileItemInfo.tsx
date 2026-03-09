@@ -12,6 +12,10 @@ type ProfileItemInfoProps = {
 };
 
 export function ProfileItemInfo({ profile }: ProfileItemInfoProps) {
+  const cycling = profile.sportZones.cycling;
+  const ftp = cycling?.thresholds.ftp;
+  const lthr = cycling?.thresholds.lthr;
+
   return (
     <div className="flex items-center gap-3">
       <User className="h-5 w-5 text-gray-400" />
@@ -20,9 +24,9 @@ export function ProfileItemInfo({ profile }: ProfileItemInfoProps) {
           {profile.name}
         </p>
         <p className="text-xs text-gray-500 dark:text-gray-400">
-          {profile.ftp && `FTP: ${profile.ftp}W`}
-          {profile.ftp && profile.maxHeartRate && " • "}
-          {profile.maxHeartRate && `Max HR: ${profile.maxHeartRate} bpm`}
+          {ftp && `FTP: ${ftp}W`}
+          {ftp && lthr && " - "}
+          {lthr && `LTHR: ${lthr} bpm`}
         </p>
       </div>
     </div>
