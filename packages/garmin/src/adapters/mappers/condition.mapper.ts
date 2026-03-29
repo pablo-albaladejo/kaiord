@@ -26,16 +26,6 @@ export const mapConditionToDuration = (
         durationType: "calories",
         duration: { type: "calories", calories: value },
       };
-    case "lap.button":
-      return {
-        durationType: "open",
-        duration: { type: "open" },
-      };
-    case "reps":
-      return {
-        durationType: "open",
-        duration: { type: "open" },
-      };
     default:
       return {
         durationType: "open",
@@ -58,46 +48,43 @@ const buildCondition = (
   displayable,
 });
 
+const buildTimeCondition = (duration: Duration) => ({
+  endCondition: buildCondition(ConditionTypeId.TIME, "time", 2, true),
+  endConditionValue: "seconds" in duration ? duration.seconds : 0,
+});
+
+const buildDistanceCondition = (duration: Duration) => ({
+  endCondition: buildCondition(ConditionTypeId.DISTANCE, "distance", 3, true),
+  endConditionValue: "meters" in duration ? duration.meters : 0,
+});
+
+const buildCaloriesCondition = (duration: Duration) => ({
+  endCondition: buildCondition(ConditionTypeId.CALORIES, "calories", 4, true),
+  endConditionValue: "calories" in duration ? duration.calories : 0,
+});
+
+const buildOpenCondition = () => ({
+  endCondition: buildCondition(
+    ConditionTypeId.LAP_BUTTON,
+    "lap.button",
+    1,
+    true
+  ),
+  endConditionValue: 0,
+});
+
 export const mapDurationToCondition = (
   durationType: string,
   duration: Duration
 ): { endCondition: GarminConditionType; endConditionValue: number } => {
   switch (durationType) {
     case "time":
-      return {
-        endCondition: buildCondition(ConditionTypeId.TIME, "time", 2, true),
-        endConditionValue: "seconds" in duration ? duration.seconds : 0,
-      };
+      return buildTimeCondition(duration);
     case "distance":
-      return {
-        endCondition: buildCondition(
-          ConditionTypeId.DISTANCE,
-          "distance",
-          3,
-          true
-        ),
-        endConditionValue: "meters" in duration ? duration.meters : 0,
-      };
+      return buildDistanceCondition(duration);
     case "calories":
-      return {
-        endCondition: buildCondition(
-          ConditionTypeId.CALORIES,
-          "calories",
-          4,
-          true
-        ),
-        endConditionValue: "calories" in duration ? duration.calories : 0,
-      };
-    case "open":
+      return buildCaloriesCondition(duration);
     default:
-      return {
-        endCondition: buildCondition(
-          ConditionTypeId.LAP_BUTTON,
-          "lap.button",
-          1,
-          true
-        ),
-        endConditionValue: 0,
-      };
+      return buildOpenCondition();
   }
 };

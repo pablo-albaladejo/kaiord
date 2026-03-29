@@ -1,4 +1,4 @@
-import { createServiceApiError } from "@kaiord/core";
+import { authFetch } from "./garmin-auth-fetch";
 import { createTokenRefreshManager } from "./token-refresh";
 import type {
   FetchFn,
@@ -15,60 +15,16 @@ export const createGarminHttpClient = (
   fetchFn: FetchFn = globalThis.fetch
 ): GarminHttpClient => {
   const refresh = createTokenRefreshManager(fetchFn, logger);
-
-  const makeRequest = (url: string, init?: RequestInit): Promise<Response> => {
-    if (!refresh.state.oauth2Token) {
-      throw createServiceApiError("Token unavailable after refresh", 401);
-    }
-    return fetchFn(url, {
-      ...init,
-      headers: {
-        ...init?.headers,
-        Authorization: `Bearer ${refresh.state.oauth2Token.access_token}`,
-      },
-    });
-  };
-
-  const authFetch = async (
-    url: string,
-    init?: RequestInit
-  ): Promise<Response> => {
-    if (!refresh.state.oauth2Token) {
-      throw createServiceApiError("Not authenticated", 401);
-    }
-    if (refresh.state.oauth2Token.expires_at < Math.floor(Date.now() / 1000)) {
-      await refresh.ensureFreshToken();
-    }
-
-    const res = await makeRequest(url, init);
-
-    if (res.status === 401) {
-      await refresh.ensureFreshToken();
-      const retry = await makeRequest(url, init);
-      if (!retry.ok) {
-        throw createServiceApiError(
-          `API request failed after token refresh: ${retry.statusText}`,
-          retry.status
-        );
-      }
-      return retry;
-    }
-    if (!res.ok) {
-      throw createServiceApiError(
-        `API request failed: ${res.statusText}`,
-        res.status
-      );
-    }
-    return res;
-  };
+  const fetch = (url: string, init?: RequestInit) =>
+    authFetch(url, init, refresh, fetchFn);
 
   return {
     get: async <T>(url: string): Promise<T> => {
-      const res = await authFetch(url);
+      const res = await fetch(url);
       return (await res.json()) as T;
     },
     post: async <T>(url: string, body: unknown): Promise<T> => {
-      const res = await authFetch(url, {
+      const res = await fetch(url, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: body !== null ? JSON.stringify(body) : undefined,
@@ -76,7 +32,7 @@ export const createGarminHttpClient = (
       return (await res.json()) as T;
     },
     del: async <T>(url: string): Promise<T> => {
-      const res = await authFetch(url, {
+      const res = await fetch(url, {
         method: "POST",
         headers: { "X-Http-Method-Override": "DELETE" },
       });

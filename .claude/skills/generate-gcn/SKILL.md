@@ -62,10 +62,10 @@ Convert user input: "5 min" = 300, "1km" = 1000, "400m" = 400, "20s" = 20.
 | Speed zone      | 5                   | "speed.zone"         |
 | Pace zone       | 6                   | "pace.zone"          |
 
-**Zone-based** (e.g., "Z2", "zone 3"): set `zoneNumber` only.
+**Zone-based** (e.g., "Z2", "zone 3"): set `zoneNumber` only. **EXCEPTION: `pace.zone` does NOT support `zoneNumber` — always use `targetValueOne`/`targetValueTwo` in m/s for pace targets.**
 **Range-based** (e.g., "200-250W", "85-95rpm"): set `targetValueOne`/`targetValueTwo` only.
 
-Power zones: 1-7. HR zones: 1-5. Pace zones: 1-5.
+Power zones: 1-7 (supports `zoneNumber`). HR zones: 1-5 (supports `zoneNumber`). **Pace zones: NEVER use `zoneNumber` — always use explicit m/s values.**
 Pace values use **m/s** (4:00/km = 4.17 m/s, 5:00/km = 3.33 m/s, 6:00/km = 2.78 m/s).
 
 ## Sport-Specific Target Rules (MANDATORY)

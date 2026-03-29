@@ -10,30 +10,35 @@ export type ZwiftDurationData = {
   "kaiord:originalDurationWatts"?: number;
 };
 
-export const mapZwiftDuration = (data: ZwiftDurationData): Duration => {
-  // Restore original duration type if available
-  if (data["kaiord:originalDurationType"] === "distance") {
+const mapOriginalDurationType = (
+  data: ZwiftDurationData
+): Duration | undefined => {
+  const orig = data["kaiord:originalDurationType"];
+  if (orig === "distance") {
     return {
       type: durationTypeSchema.enum.distance,
       meters: data["kaiord:originalDurationMeters"] || data.Duration || 0,
     };
   }
-
-  if (data["kaiord:originalDurationType"] === "heart_rate_less_than") {
+  if (orig === "heart_rate_less_than") {
     return {
       type: durationTypeSchema.enum.heart_rate_less_than,
       bpm: data["kaiord:originalDurationBpm"] || 0,
     };
   }
-
-  if (data["kaiord:originalDurationType"] === "power_less_than") {
+  if (orig === "power_less_than") {
     return {
       type: durationTypeSchema.enum.power_less_than,
       watts: data["kaiord:originalDurationWatts"] || 0,
     };
   }
+  return undefined;
+};
 
-  // Standard Zwift duration handling
+export const mapZwiftDuration = (data: ZwiftDurationData): Duration => {
+  const original = mapOriginalDurationType(data);
+  if (original) return original;
+
   if (data.Duration === undefined || data.Duration <= 0) {
     return { type: durationTypeSchema.enum.open };
   }

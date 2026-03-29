@@ -25,7 +25,7 @@ describe("Garmin GCN Round-Trip", () => {
     const original = loadFixture("WorkoutRunningNestedRepeatsOutput.gcn");
 
     const krd1 = convertGarminToKRD(original, mockLogger);
-    const gcnOutput = convertKRDToGarmin(krd1, mockLogger);
+    const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
 
     const w1 = krd1.extensions?.structured_workout as Workout;
@@ -42,7 +42,7 @@ describe("Garmin GCN Round-Trip", () => {
     const original = loadFixture("WorkoutCyclingPowerCadenceOutput.gcn");
 
     const krd1 = convertGarminToKRD(original, mockLogger);
-    const gcnOutput = convertKRDToGarmin(krd1, mockLogger);
+    const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
 
     const w1 = krd1.extensions?.structured_workout as Workout;
@@ -58,7 +58,7 @@ describe("Garmin GCN Round-Trip", () => {
     const original = loadFixture("WorkoutSwimmingAllStrokesOutput.gcn");
 
     const krd1 = convertGarminToKRD(original, mockLogger);
-    const gcnOutput = convertKRDToGarmin(krd1, mockLogger);
+    const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
 
     const w1 = krd1.extensions?.structured_workout as Workout;
@@ -73,7 +73,7 @@ describe("Garmin GCN Round-Trip", () => {
     const original = loadFixture("WorkoutStrengthRepsOutput.gcn");
 
     const krd1 = convertGarminToKRD(original, mockLogger);
-    const gcnOutput = convertKRDToGarmin(krd1, mockLogger);
+    const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
 
     const w1 = krd1.extensions?.structured_workout as Workout;
@@ -87,7 +87,7 @@ describe("Garmin GCN Round-Trip", () => {
     const original = loadFixture("WorkoutEdgeCasesOutput.gcn");
 
     const krd1 = convertGarminToKRD(original, mockLogger);
-    const gcnOutput = convertKRDToGarmin(krd1, mockLogger);
+    const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
 
     const w1 = krd1.extensions?.structured_workout as Workout;
@@ -100,7 +100,7 @@ describe("Garmin GCN Round-Trip", () => {
     const original = loadFixture("WorkoutMultisportTriathlonOutput.gcn");
 
     const krd1 = convertGarminToKRD(original, mockLogger);
-    const gcnOutput = convertKRDToGarmin(krd1, mockLogger);
+    const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
 
     const w1 = krd1.extensions?.structured_workout as Workout;

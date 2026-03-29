@@ -50,13 +50,13 @@ export const convertKRDToZwift = (krd: KRD, logger: Logger): string => {
     unknown
   >;
 
-  const workoutFile = buildWorkoutFile(
+  const workoutFile = buildWorkoutFile({
     workoutData,
     zwiftExtensions,
-    krd.metadata,
-    krd.extensions?.fit as Record<string, unknown> | undefined,
-    logger
-  );
+    metadata: krd.metadata,
+    fitExtensions: krd.extensions?.fit as Record<string, unknown> | undefined,
+    logger,
+  });
   const xmlString = buildXmlString(workoutFile);
 
   logger.debug("Zwift XML structure built successfully");

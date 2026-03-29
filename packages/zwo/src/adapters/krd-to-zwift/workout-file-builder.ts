@@ -17,13 +17,21 @@ type WorkoutData = {
 type ZwiftExtensions = Record<string, unknown>;
 type FitExtensions = Record<string, unknown>;
 
-export const buildWorkoutFile = (
-  workoutData: WorkoutData,
-  zwiftExtensions: ZwiftExtensions,
-  metadata: KRDMetadata,
-  fitExtensions?: FitExtensions,
-  logger?: Logger
-): Record<string, unknown> => {
+type BuildWorkoutFileOptions = {
+  workoutData: WorkoutData;
+  zwiftExtensions: ZwiftExtensions;
+  metadata: KRDMetadata;
+  fitExtensions?: FitExtensions;
+  logger?: Logger;
+};
+
+export const buildWorkoutFile = ({
+  workoutData,
+  zwiftExtensions,
+  metadata,
+  fitExtensions,
+  logger,
+}: BuildWorkoutFileOptions): Record<string, unknown> => {
   const workoutFile: Record<string, unknown> = {};
 
   // Add author and name first (XSD requires this order)

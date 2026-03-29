@@ -2,6 +2,40 @@ import { convertMetadataToFileId } from "../krd-to-fit/krd-to-fit-metadata.mappe
 import type { KRD } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
 
+const addActivityData = (
+  messages: Record<string, unknown[]>,
+  krd: KRD
+): void => {
+  if (krd.sessions && krd.sessions.length > 0) {
+    messages.sessionMesgs = krd.sessions;
+  }
+  if (krd.records && krd.records.length > 0) {
+    messages.recordMesgs = krd.records;
+  }
+  if (krd.laps && krd.laps.length > 0) {
+    messages.lapMesgs = krd.laps;
+  }
+  if (krd.events && krd.events.length > 0) {
+    messages.eventMesgs = krd.events;
+  }
+};
+
+const logActivityMessages = (
+  messages: Record<string, unknown[]>,
+  logger: Logger
+): void => {
+  const sessions = messages.sessionMesgs ? messages.sessionMesgs.length : 0;
+  const records = messages.recordMesgs ? messages.recordMesgs.length : 0;
+  const laps = messages.lapMesgs ? messages.lapMesgs.length : 0;
+  const events = messages.eventMesgs ? messages.eventMesgs.length : 0;
+  logger.debug("Created activity messages", {
+    sessions,
+    records,
+    laps,
+    events,
+  });
+};
+
 /**
  * Creates FIT activity messages from KRD format.
  *
@@ -18,32 +52,8 @@ export const createActivityMessages = (
     fileIdMesgs: [convertMetadataToFileId(krd, logger)],
   };
 
-  // Add session messages from top-level KRD fields
-  if (krd.sessions && krd.sessions.length > 0) {
-    messages.sessionMesgs = krd.sessions;
-  }
-
-  // Add record messages if present (GPS/sensor data)
-  if (krd.records && krd.records.length > 0) {
-    messages.recordMesgs = krd.records;
-  }
-
-  // Add lap messages if present
-  if (krd.laps && krd.laps.length > 0) {
-    messages.lapMesgs = krd.laps;
-  }
-
-  // Add event messages if present
-  if (krd.events && krd.events.length > 0) {
-    messages.eventMesgs = krd.events;
-  }
-
-  logger.debug("Created activity messages", {
-    sessions: messages.sessionMesgs?.length ?? 0,
-    records: messages.recordMesgs?.length ?? 0,
-    laps: messages.lapMesgs?.length ?? 0,
-    events: messages.eventMesgs?.length ?? 0,
-  });
+  addActivityData(messages, krd);
+  logActivityMessages(messages, logger);
 
   return messages;
 };

@@ -21,6 +21,21 @@ const convertTimeCreated = (timeCreated: unknown): string => {
   return new Date().toISOString();
 };
 
+const buildKrdMetadata = (
+  fileId: Record<string, unknown> | undefined,
+  session: ReturnType<typeof convertFitToKrdSession> | undefined
+) => ({
+  created: convertTimeCreated(fileId ? fileId.timeCreated : undefined),
+  sport: (session ? session.sport : undefined) ?? "other",
+  subSport: session ? session.subSport : undefined,
+});
+
+const toOptionalArray = <T>(items: T[]): T[] | undefined =>
+  items.length > 0 ? items : undefined;
+
+const toOptionalSingle = <T>(item: T | undefined): T[] | undefined =>
+  item !== undefined ? [item] : undefined;
+
 /**
  * Maps activity file to KRD format.
  */
@@ -48,22 +63,17 @@ export const mapActivityFileToKRD = (
   const laps = convertFitToKrdLaps(lapMsgs);
   const fitExtensions = extractFitExtensions(messages, logger);
 
-  const created = convertTimeCreated(fileId?.timeCreated);
-
   return {
     version: KRD_VERSION,
     type: fileTypeSchema.enum.recorded_activity,
-    metadata: {
-      created,
-      sport: session?.sport ?? "other",
-      subSport: session?.subSport,
-    },
-    sessions: session ? [session] : undefined,
-    laps: laps.length > 0 ? laps : undefined,
-    records: records.length > 0 ? records : undefined,
-    events: events.length > 0 ? events : undefined,
-    extensions: {
-      fit: fitExtensions,
-    },
+    metadata: buildKrdMetadata(
+      fileId as Record<string, unknown> | undefined,
+      session
+    ),
+    sessions: toOptionalSingle(session),
+    laps: toOptionalArray(laps),
+    records: toOptionalArray(records),
+    events: toOptionalArray(events),
+    extensions: { fit: fitExtensions },
   };
 };

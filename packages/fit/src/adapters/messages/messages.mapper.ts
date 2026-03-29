@@ -50,6 +50,27 @@ export const mapMessagesToKRD = (
   }
 };
 
+const groupWorkoutMessages = (
+  rawMessages: unknown[]
+): Record<string, unknown[]> => {
+  const result: Record<string, unknown[]> = {};
+  for (const msg of rawMessages) {
+    const message = msg as { mesgNum?: number };
+    const key =
+      message.mesgNum === FIT_MESSAGE_NUMBERS.FILE_ID
+        ? fitMessageKeySchema.enum.fileIdMesgs
+        : message.mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
+          ? fitMessageKeySchema.enum.workoutMesgs
+          : message.mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT_STEP
+            ? fitMessageKeySchema.enum.workoutStepMesgs
+            : null;
+    if (key) {
+      result[key] = [...(result[key] || []), message];
+    }
+  }
+  return result;
+};
+
 /**
  * Creates FIT messages from KRD format with file type routing.
  *
@@ -65,34 +86,8 @@ export const createFitMessages = (
   logger.debug("Creating FIT messages from KRD", { fileType });
 
   switch (fileType) {
-    case "structured_workout": {
-      // Workout files use array-based format from convertKRDToMessages
-      // Group messages by type for compatibility with record-based format
-      const messages = convertKRDToMessages(krd, logger);
-      const result: Record<string, unknown[]> = {};
-
-      for (const msg of messages) {
-        const message = msg as { mesgNum?: number };
-        if (message.mesgNum === FIT_MESSAGE_NUMBERS.FILE_ID) {
-          result[fitMessageKeySchema.enum.fileIdMesgs] = [
-            ...(result[fitMessageKeySchema.enum.fileIdMesgs] || []),
-            message,
-          ];
-        } else if (message.mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT) {
-          result[fitMessageKeySchema.enum.workoutMesgs] = [
-            ...(result[fitMessageKeySchema.enum.workoutMesgs] || []),
-            message,
-          ];
-        } else if (message.mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT_STEP) {
-          result[fitMessageKeySchema.enum.workoutStepMesgs] = [
-            ...(result[fitMessageKeySchema.enum.workoutStepMesgs] || []),
-            message,
-          ];
-        }
-      }
-
-      return result;
-    }
+    case "structured_workout":
+      return groupWorkoutMessages(convertKRDToMessages(krd, logger));
     case "recorded_activity":
       return createActivityMessages(krd, logger);
     case "course":
