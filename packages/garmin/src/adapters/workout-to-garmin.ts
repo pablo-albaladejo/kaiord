@@ -1,30 +1,31 @@
 import { createConsoleLogger, createWorkoutKRD, toText } from "@kaiord/core";
 import { createGarminWriter } from "./garmin-writer";
+import { isLogger } from "./utils/is-logger";
+import type { GarminWriterConfig } from "./garmin-writer";
 import type { Logger } from "@kaiord/core";
 
-/**
- * Creates a function that converts a Workout directly to Garmin Connect JSON.
- *
- * Composition facade: wraps application-layer orchestration (toText) with
- * the garmin writer. This is a convenience for consumers who don't need
- * the intermediate KRD step.
- *
- * Input is validated against workoutSchema.
- * Throws KrdValidationError if the workout structure is invalid.
- *
- * @param logger - Optional logger (defaults to console logger)
- * @returns Function that converts unknown workout data to Garmin JSON string
- */
+export type WorkoutToGarminOptions = {
+  logger?: Logger;
+  paceZones?: GarminWriterConfig["paceZones"];
+};
+
 export const createWorkoutToGarmin =
-  (logger?: Logger) =>
+  (options?: Logger | WorkoutToGarminOptions) =>
   async (workout: unknown): Promise<string> => {
-    const log = logger ?? createConsoleLogger();
+    const resolved = resolveOptions(options);
     const krd = createWorkoutKRD(workout);
-    return toText(krd, createGarminWriter(log), log);
+    return toText(krd, createGarminWriter(resolved), resolved.logger);
   };
 
-/**
- * Converts a Workout directly to Garmin Connect JSON format.
- * Pre-built instance using the default console logger.
- */
 export const workoutToGarmin = createWorkoutToGarmin();
+
+const resolveOptions = (
+  options?: Logger | WorkoutToGarminOptions
+): GarminWriterConfig => {
+  if (!options) return { logger: createConsoleLogger() };
+  if (isLogger(options)) return { logger: options };
+  return {
+    logger: options.logger ?? createConsoleLogger(),
+    paceZones: options.paceZones,
+  };
+};

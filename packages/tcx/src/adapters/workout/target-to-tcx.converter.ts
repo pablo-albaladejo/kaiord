@@ -76,33 +76,23 @@ export const convertCadenceToTcx = (value: {
   return { "@_xsi:type": "None_t" };
 };
 
+const NONE_TCX = { "@_xsi:type": "None_t" };
+
+const convertTargetValueToTcx = (
+  type: string,
+  value: { unit: string; value?: number; min?: number; max?: number }
+): Record<string, unknown> => {
+  if (type === "heart_rate") return convertHeartRateToTcx(value);
+  if (type === "pace") return convertPaceToTcx(value);
+  if (type === "cadence") return convertCadenceToTcx(value);
+  return NONE_TCX;
+};
+
 export const convertTargetToTcx = (
   step: WorkoutStep
 ): Record<string, unknown> => {
-  if (step.target.type === "open") {
-    return { "@_xsi:type": "None_t" };
-  }
-
-  if (step.target.type === "heart_rate") {
-    const value = step.target.value;
-    if (value && "unit" in value) {
-      return convertHeartRateToTcx(value);
-    }
-  }
-
-  if (step.target.type === "pace") {
-    const value = step.target.value;
-    if (value && "unit" in value) {
-      return convertPaceToTcx(value);
-    }
-  }
-
-  if (step.target.type === "cadence") {
-    const value = step.target.value;
-    if (value && "unit" in value) {
-      return convertCadenceToTcx(value);
-    }
-  }
-
-  return { "@_xsi:type": "None_t" };
+  const { target } = step;
+  if (target.type === "open" || target.type === "stroke_type") return NONE_TCX;
+  if (!("value" in target) || !target.value) return NONE_TCX;
+  return convertTargetValueToTcx(target.type, target.value);
 };

@@ -1,3 +1,4 @@
+import { extractFieldsFromMessageArray } from "./developer-fields.extractor";
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import type { FitMessages } from "../shared/types";
 import type { Logger } from "@kaiord/core";
@@ -43,35 +44,11 @@ const extractAllDeveloperFields = (
 
   for (const value of Object.values(messages)) {
     if (value && Array.isArray(value)) {
-      for (const message of value) {
-        if (message && typeof message === "object") {
-          const devFields = extractDeveloperFields(message);
-          if (devFields.length > 0) {
-            developerFields.push(...devFields);
-          }
-        }
-      }
+      developerFields.push(...extractFieldsFromMessageArray(value));
     }
   }
 
   return developerFields;
-};
-
-const extractDeveloperFields = (
-  message: Record<string, unknown>
-): Array<Record<string, unknown>> => {
-  const devFields: Array<Record<string, unknown>> = [];
-
-  for (const [key, value] of Object.entries(message)) {
-    if (key.startsWith("developer_") || key.includes("DeveloperField")) {
-      devFields.push({
-        fieldName: key,
-        value,
-      });
-    }
-  }
-
-  return devFields;
 };
 
 const buildExtensions = (

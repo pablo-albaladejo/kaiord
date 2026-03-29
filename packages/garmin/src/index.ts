@@ -5,17 +5,41 @@
 import { createConsoleLogger } from "@kaiord/core";
 import { createGarminReader as createGarminReaderImpl } from "./adapters/garmin-reader";
 import { createGarminWriter as createGarminWriterImpl } from "./adapters/garmin-writer";
+import { isLogger } from "./adapters/utils/is-logger";
+import type { PaceZoneTable } from "./adapters/mappers/target.mapper";
 import type { Logger, TextReader, TextWriter } from "@kaiord/core";
+
+export type {
+  PaceZoneTable,
+  PaceZoneEntry,
+} from "./adapters/mappers/target.mapper";
+
+export type GarminWriterOptions = {
+  logger?: Logger;
+  paceZones?: PaceZoneTable;
+};
 
 export const createGarminReader = (logger?: Logger): TextReader =>
   createGarminReaderImpl(logger || createConsoleLogger());
 
-export const createGarminWriter = (logger?: Logger): TextWriter =>
-  createGarminWriterImpl(logger || createConsoleLogger());
+export const createGarminWriter = (
+  options?: Logger | GarminWriterOptions
+): TextWriter => {
+  if (!options || isLogger(options)) {
+    return createGarminWriterImpl({
+      logger: options || createConsoleLogger(),
+    });
+  }
+  return createGarminWriterImpl({
+    logger: options.logger || createConsoleLogger(),
+    paceZones: options.paceZones,
+  });
+};
 
 export const garminReader: TextReader = createGarminReader();
 export const garminWriter: TextWriter = createGarminWriter();
 
+export type { WorkoutToGarminOptions } from "./adapters/workout-to-garmin";
 export {
   createWorkoutToGarmin,
   workoutToGarmin,

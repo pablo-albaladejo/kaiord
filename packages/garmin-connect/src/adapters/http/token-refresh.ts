@@ -20,6 +20,36 @@ export type TokenRefreshManager = {
   state: TokenState;
 };
 
+const notifyAll = (subs: RefreshSubscriber[], token: string): void => {
+  subs.forEach((s) => s.resolve(token));
+};
+
+const rejectAll = (subs: RefreshSubscriber[], error: unknown): void => {
+  subs.forEach((s) => s.reject(error));
+};
+
+const getOrFetchConsumer = async (
+  state: TokenState,
+  fetchFn: FetchFn
+): Promise<OAuthConsumer> => {
+  if (state.consumer) return state.consumer;
+  state.consumer = await fetchOAuthConsumer(fetchFn);
+  return state.consumer;
+};
+
+const doRefreshToken = async (
+  state: TokenState,
+  fetchFn: FetchFn,
+  logger: Logger
+): Promise<void> => {
+  if (!state.oauth1Token || !state.oauth2Token) {
+    throw createServiceApiError("No tokens available for refresh", 401);
+  }
+  const cons = await getOrFetchConsumer(state, fetchFn);
+  state.oauth2Token = await exchangeOAuth2(state.oauth1Token, cons, fetchFn);
+  logger.info("OAuth2 token refreshed");
+};
+
 export const createTokenRefreshManager = (
   fetchFn: FetchFn,
   logger: Logger
@@ -32,55 +62,24 @@ export const createTokenRefreshManager = (
   let isRefreshing = false;
   let subscribers: RefreshSubscriber[] = [];
 
-  const getConsumer = async (): Promise<OAuthConsumer> => {
-    if (state.consumer) return state.consumer;
-    state.consumer = await fetchOAuthConsumer(fetchFn);
-    return state.consumer;
-  };
-
-  const refreshToken = async (): Promise<void> => {
-    if (!state.oauth1Token || !state.oauth2Token) {
-      throw createServiceApiError("No tokens available for refresh", 401);
-    }
-    const cons = await getConsumer();
-    state.oauth2Token = await exchangeOAuth2(state.oauth1Token, cons, fetchFn);
-    logger.info("OAuth2 token refreshed");
-  };
-
-  const waitForRefresh = (): Promise<string> =>
-    new Promise((resolve, reject) => {
-      subscribers.push({ resolve, reject });
-    });
-
-  const notifySubscribers = (): void => {
-    if (!state.oauth2Token) return;
-    const token = state.oauth2Token.access_token;
-    subscribers.forEach((s) => {
-      s.resolve(token);
-    });
-    subscribers = [];
-  };
-
-  const rejectSubscribers = (error: unknown): void => {
-    subscribers.forEach((s) => {
-      s.reject(error);
-    });
-    subscribers = [];
-  };
-
   return {
     state,
     ensureFreshToken: async (): Promise<void> => {
       if (isRefreshing) {
-        await waitForRefresh();
+        await new Promise<string>((resolve, reject) => {
+          subscribers.push({ resolve, reject });
+        });
         return;
       }
       isRefreshing = true;
       try {
-        await refreshToken();
-        notifySubscribers();
+        await doRefreshToken(state, fetchFn, logger);
+        if (state.oauth2Token)
+          notifyAll(subscribers, state.oauth2Token.access_token);
+        subscribers = [];
       } catch (error) {
-        rejectSubscribers(error);
+        rejectAll(subscribers, error);
+        subscribers = [];
         throw error;
       } finally {
         isRefreshing = false;

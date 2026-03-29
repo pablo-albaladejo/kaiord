@@ -176,7 +176,8 @@ Input: "10 min warmup easy, 6x(400m at 4:00-4:15/km pace + 200m jog recovery), 1
             "workoutTargetTypeId": 6,
             "workoutTargetTypeKey": "pace.zone"
           },
-          "zoneNumber": 1
+          "targetValueOne": 2.54,
+          "targetValueTwo": 2.86
         },
         {
           "type": "RepeatGroupDTO",
@@ -225,7 +226,8 @@ Input: "10 min warmup easy, 6x(400m at 4:00-4:15/km pace + 200m jog recovery), 1
                 "workoutTargetTypeId": 6,
                 "workoutTargetTypeKey": "pace.zone"
               },
-              "zoneNumber": 1
+              "targetValueOne": 2.54,
+              "targetValueTwo": 2.86
             }
           ]
         },
@@ -244,7 +246,8 @@ Input: "10 min warmup easy, 6x(400m at 4:00-4:15/km pace + 200m jog recovery), 1
             "workoutTargetTypeId": 6,
             "workoutTargetTypeKey": "pace.zone"
           },
-          "zoneNumber": 1
+          "targetValueOne": 2.54,
+          "targetValueTwo": 2.86
         }
       ]
     }

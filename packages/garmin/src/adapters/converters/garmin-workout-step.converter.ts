@@ -11,6 +11,7 @@ import {
 } from "../mappers/stroke.mapper";
 import { mapKrdTargetToGarmin } from "../mappers/target.mapper";
 import { StepTypeId } from "../schemas/common";
+import type { TargetMapperOptions } from "../mappers/target.mapper";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
 import type { WorkoutStep } from "@kaiord/core";
 
@@ -41,7 +42,8 @@ const getStepTypeInfo = (intensity: string) => {
 
 export const mapWorkoutStep = (
   step: WorkoutStep,
-  counter: { value: number }
+  counter: { value: number },
+  options?: TargetMapperOptions
 ): GarminWorkoutStepInput => {
   const stepOrder = counter.value++;
   const stepType = getStepTypeInfo(step.intensity ?? "active");
@@ -50,7 +52,7 @@ export const mapWorkoutStep = (
     step.duration
   );
   const { targetType, targetValueOne, targetValueTwo, zoneNumber } =
-    mapKrdTargetToGarmin(step.target);
+    mapKrdTargetToGarmin(step.target, options);
 
   const strokeType =
     step.target.type === "stroke_type"

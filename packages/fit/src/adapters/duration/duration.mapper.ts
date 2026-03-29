@@ -11,36 +11,37 @@ export const mapDuration = (step: FitWorkoutStep): Duration => {
   return convertFitDuration(step);
 };
 
+const FIT_TO_KRD_DURATION_TYPE: Record<string, DurationType> = {
+  [fitDurationTypeSchema.enum.time]: durationTypeSchema.enum.time,
+  [fitDurationTypeSchema.enum.distance]: durationTypeSchema.enum.distance,
+  [fitDurationTypeSchema.enum.hrLessThan]:
+    durationTypeSchema.enum.heart_rate_less_than,
+  [fitDurationTypeSchema.enum.repeatUntilHrGreaterThan]:
+    durationTypeSchema.enum.repeat_until_heart_rate_greater_than,
+  [fitDurationTypeSchema.enum.calories]: durationTypeSchema.enum.calories,
+  [fitDurationTypeSchema.enum.powerLessThan]:
+    durationTypeSchema.enum.power_less_than,
+  [fitDurationTypeSchema.enum.powerGreaterThan]:
+    durationTypeSchema.enum.power_greater_than,
+  [fitDurationTypeSchema.enum.repeatUntilTime]:
+    durationTypeSchema.enum.repeat_until_time,
+  [fitDurationTypeSchema.enum.repeatUntilDistance]:
+    durationTypeSchema.enum.repeat_until_distance,
+  [fitDurationTypeSchema.enum.repeatUntilCalories]:
+    durationTypeSchema.enum.repeat_until_calories,
+  [fitDurationTypeSchema.enum.repeatUntilHrLessThan]:
+    durationTypeSchema.enum.repeat_until_heart_rate_less_than,
+  [fitDurationTypeSchema.enum.repeatUntilPowerLessThan]:
+    durationTypeSchema.enum.repeat_until_power_less_than,
+  [fitDurationTypeSchema.enum.repeatUntilPowerGreaterThan]:
+    durationTypeSchema.enum.repeat_until_power_greater_than,
+};
+
 export const mapDurationType = (
   fitDurationType: string | undefined
 ): DurationType => {
-  if (fitDurationType === fitDurationTypeSchema.enum.time)
-    return durationTypeSchema.enum.time;
-  if (fitDurationType === fitDurationTypeSchema.enum.distance)
-    return durationTypeSchema.enum.distance;
-  if (fitDurationType === fitDurationTypeSchema.enum.hrLessThan)
-    return durationTypeSchema.enum.heart_rate_less_than;
-  if (fitDurationType === fitDurationTypeSchema.enum.repeatUntilHrGreaterThan)
-    return durationTypeSchema.enum.repeat_until_heart_rate_greater_than;
-  if (fitDurationType === fitDurationTypeSchema.enum.calories)
-    return durationTypeSchema.enum.calories;
-  if (fitDurationType === fitDurationTypeSchema.enum.powerLessThan)
-    return durationTypeSchema.enum.power_less_than;
-  if (fitDurationType === fitDurationTypeSchema.enum.powerGreaterThan)
-    return durationTypeSchema.enum.power_greater_than;
-  if (fitDurationType === fitDurationTypeSchema.enum.repeatUntilTime)
-    return durationTypeSchema.enum.repeat_until_time;
-  if (fitDurationType === fitDurationTypeSchema.enum.repeatUntilDistance)
-    return durationTypeSchema.enum.repeat_until_distance;
-  if (fitDurationType === fitDurationTypeSchema.enum.repeatUntilCalories)
-    return durationTypeSchema.enum.repeat_until_calories;
-  if (fitDurationType === fitDurationTypeSchema.enum.repeatUntilHrLessThan)
-    return durationTypeSchema.enum.repeat_until_heart_rate_less_than;
-  if (fitDurationType === fitDurationTypeSchema.enum.repeatUntilPowerLessThan)
-    return durationTypeSchema.enum.repeat_until_power_less_than;
-  if (
-    fitDurationType === fitDurationTypeSchema.enum.repeatUntilPowerGreaterThan
-  )
-    return durationTypeSchema.enum.repeat_until_power_greater_than;
-  return durationTypeSchema.enum.open;
+  if (!fitDurationType) return durationTypeSchema.enum.open;
+  return (
+    FIT_TO_KRD_DURATION_TYPE[fitDurationType] ?? durationTypeSchema.enum.open
+  );
 };
