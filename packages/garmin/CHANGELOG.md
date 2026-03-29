@@ -1,5 +1,15 @@
 # @kaiord/garmin
 
+## 4.9.1
+
+### Patch Changes
+
+- aa78a2e: Resolve pace zone references to m/s ranges for Garmin Connect
+
+  Garmin Connect does not support native pace zone numbers. Pace zone targets
+  are now resolved to min/max m/s values via a configurable PaceZoneTable,
+  passed through createGarminWriter and createWorkoutToGarmin options.
+
 ## 4.8.1
 
 ### Patch Changes
