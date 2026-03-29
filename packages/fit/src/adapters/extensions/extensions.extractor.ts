@@ -36,6 +36,23 @@ const extractUnknownMessages = (
   return unknownMessages;
 };
 
+const extractFieldsFromMessageArray = (
+  messages: unknown[]
+): Array<Record<string, unknown>> => {
+  const developerFields: Array<Record<string, unknown>> = [];
+  for (const message of messages) {
+    if (message && typeof message === "object") {
+      const devFields = extractDeveloperFields(
+        message as Record<string, unknown>
+      );
+      if (devFields.length > 0) {
+        developerFields.push(...devFields);
+      }
+    }
+  }
+  return developerFields;
+};
+
 const extractAllDeveloperFields = (
   messages: FitMessages
 ): Array<Record<string, unknown>> => {
@@ -43,14 +60,7 @@ const extractAllDeveloperFields = (
 
   for (const value of Object.values(messages)) {
     if (value && Array.isArray(value)) {
-      for (const message of value) {
-        if (message && typeof message === "object") {
-          const devFields = extractDeveloperFields(message);
-          if (devFields.length > 0) {
-            developerFields.push(...devFields);
-          }
-        }
-      }
+      developerFields.push(...extractFieldsFromMessageArray(value));
     }
   }
 

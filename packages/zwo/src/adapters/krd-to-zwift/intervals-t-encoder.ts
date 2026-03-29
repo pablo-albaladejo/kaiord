@@ -38,36 +38,27 @@ const encodePowerTargets = (
   }
 };
 
+const resolveStepCadence = (step: WorkoutStep): number | undefined => {
+  if (step.target.type === "cadence" && step.target.value.unit === "rpm") {
+    return step.target.value.value as number;
+  }
+  const zwift = step.extensions ? step.extensions.zwift : undefined;
+  const ext = zwift as Record<string, unknown> | undefined;
+  return ext ? (ext.cadence as number | undefined) : undefined;
+};
+
 const encodeCadenceTargets = (
   onStep: WorkoutStep,
   offStep: WorkoutStep,
   intervalsT: Record<string, unknown>
 ): void => {
-  if (onStep.target.type === "cadence" && onStep.target.value.unit === "rpm") {
-    intervalsT["@_Cadence"] = onStep.target.value.value;
-  } else {
-    const onStepExtensions = onStep.extensions?.zwift as
-      | Record<string, unknown>
-      | undefined;
-    const cadence = onStepExtensions?.cadence as number | undefined;
-    if (cadence !== undefined) {
-      intervalsT["@_Cadence"] = cadence;
-    }
+  const cadence = resolveStepCadence(onStep);
+  if (cadence !== undefined) {
+    intervalsT["@_Cadence"] = cadence;
   }
-
-  if (
-    offStep.target.type === "cadence" &&
-    offStep.target.value.unit === "rpm"
-  ) {
-    intervalsT["@_CadenceResting"] = offStep.target.value.value;
-  } else {
-    const offStepExtensions = offStep.extensions?.zwift as
-      | Record<string, unknown>
-      | undefined;
-    const cadenceResting = offStepExtensions?.cadence as number | undefined;
-    if (cadenceResting !== undefined) {
-      intervalsT["@_CadenceResting"] = cadenceResting;
-    }
+  const cadenceResting = resolveStepCadence(offStep);
+  if (cadenceResting !== undefined) {
+    intervalsT["@_CadenceResting"] = cadenceResting;
   }
 };
 

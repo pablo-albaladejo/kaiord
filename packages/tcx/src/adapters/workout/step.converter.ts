@@ -37,14 +37,23 @@ const convertTargetWithExtensions = (
   return target;
 };
 
-const buildWorkoutStep = (
-  stepIndex: number,
-  name: string | undefined,
-  duration: Duration,
-  target: Target,
-  tcxStep: Record<string, unknown>,
-  extensions: Record<string, unknown> | undefined
-): WorkoutStep => {
+type BuildStepInput = {
+  stepIndex: number;
+  name: string | undefined;
+  duration: Duration;
+  target: Target;
+  tcxStep: Record<string, unknown>;
+  extensions: Record<string, unknown> | undefined;
+};
+
+const buildWorkoutStep = ({
+  stepIndex,
+  name,
+  duration,
+  target,
+  tcxStep,
+  extensions,
+}: BuildStepInput): WorkoutStep => {
   const step: WorkoutStep = {
     stepIndex,
     name,
@@ -87,12 +96,12 @@ export const convertTcxStep = (
     return null;
   }
 
-  return buildWorkoutStep(
+  return buildWorkoutStep({
     stepIndex,
-    tcxStep.Name as string | undefined,
+    name: tcxStep.Name as string | undefined,
     duration,
     target,
     tcxStep,
-    extensions
-  );
+    extensions,
+  });
 };
