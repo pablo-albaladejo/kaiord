@@ -7,11 +7,19 @@ import { addPoolInfo, type PoolInput } from "./garmin-pool-info.mapper";
 import { mapRepetitionBlock } from "./garmin-repetition.converter";
 import { mapWorkoutStep } from "./garmin-workout-step.converter";
 import { mapKrdSportToGarmin } from "../mappers/sport.mapper";
+import type { TargetMapperOptions } from "../mappers/target.mapper";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
 import type { KRD, Logger, Workout } from "@kaiord/core";
 
-export const convertKRDToGarmin = (krd: KRD, logger: Logger): string => {
-  logger.info("Converting KRD to Garmin Connect JSON");
+export type GarminWriterOptions = TargetMapperOptions & {
+  logger: Logger;
+};
+
+export const convertKRDToGarmin = (
+  krd: KRD,
+  options: GarminWriterOptions
+): string => {
+  options.logger.info("Converting KRD to Garmin Connect JSON");
 
   const workout = extractWorkout(krd);
   if (!workout) {
@@ -20,11 +28,14 @@ export const convertKRDToGarmin = (krd: KRD, logger: Logger): string => {
 
   const sportType = mapKrdSportToGarmin(workout.sport);
   const counter = { value: 1 };
+  const targetOpts: TargetMapperOptions = {
+    paceZones: options.paceZones,
+  };
 
   const workoutSteps: GarminWorkoutStepInput[] = workout.steps.map((step) =>
     isRepetitionBlock(step)
-      ? mapRepetitionBlock(step, counter)
-      : mapWorkoutStep(step, counter)
+      ? mapRepetitionBlock(step, counter, targetOpts)
+      : mapWorkoutStep(step, counter, targetOpts)
   );
 
   const input: PoolInput & Record<string, unknown> = {
@@ -41,7 +52,7 @@ export const convertKRDToGarmin = (krd: KRD, logger: Logger): string => {
 
   addPoolInfo(workout, input);
 
-  logger.info("KRD to Garmin GCN conversion complete");
+  options.logger.info("KRD to Garmin GCN conversion complete");
   return JSON.stringify(input, null, 2);
 };
 

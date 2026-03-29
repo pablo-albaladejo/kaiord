@@ -22,7 +22,7 @@ describe("convertKRDToGarmin", () => {
       const gcn = loadFixture("WorkoutRunningNestedRepeatsOutput.gcn");
       const krd = convertGarminToKRD(gcn, mockLogger);
 
-      const result = convertKRDToGarmin(krd, mockLogger);
+      const result = convertKRDToGarmin(krd, { logger: mockLogger });
       const parsed = JSON.parse(result);
 
       expect(parsed.sportType.sportTypeKey).toBe("running");
@@ -35,7 +35,7 @@ describe("convertKRDToGarmin", () => {
       const gcn = loadFixture("WorkoutRunningNestedRepeatsOutput.gcn");
       const krd = convertGarminToKRD(gcn, mockLogger);
 
-      const result = convertKRDToGarmin(krd, mockLogger);
+      const result = convertKRDToGarmin(krd, { logger: mockLogger });
       const parsed = JSON.parse(result);
 
       const flatSteps = getAllStepOrders(
@@ -52,7 +52,7 @@ describe("convertKRDToGarmin", () => {
       const gcn = loadFixture("WorkoutCyclingPowerCadenceOutput.gcn");
       const krd = convertGarminToKRD(gcn, mockLogger);
 
-      const result = convertKRDToGarmin(krd, mockLogger);
+      const result = convertKRDToGarmin(krd, { logger: mockLogger });
       const parsed = JSON.parse(result);
       const steps = parsed.workoutSegments[0].workoutSteps;
 
@@ -66,7 +66,7 @@ describe("convertKRDToGarmin", () => {
       const gcn = loadFixture("WorkoutCyclingPowerCadenceOutput.gcn");
       const krd = convertGarminToKRD(gcn, mockLogger);
 
-      const result = convertKRDToGarmin(krd, mockLogger);
+      const result = convertKRDToGarmin(krd, { logger: mockLogger });
       const parsed = JSON.parse(result);
       const steps = parsed.workoutSegments[0].workoutSteps;
 
@@ -88,7 +88,7 @@ describe("convertKRDToGarmin", () => {
       const gcn = loadFixture("WorkoutSwimmingAllStrokesOutput.gcn");
       const krd = convertGarminToKRD(gcn, mockLogger);
 
-      const result = convertKRDToGarmin(krd, mockLogger);
+      const result = convertKRDToGarmin(krd, { logger: mockLogger });
       const parsed = JSON.parse(result);
 
       expect(parsed.poolLength).toBe(25);
@@ -101,7 +101,7 @@ describe("convertKRDToGarmin", () => {
       const gcn = loadFixture("WorkoutStrengthRepsOutput.gcn");
       const krd = convertGarminToKRD(gcn, mockLogger);
 
-      const result = convertKRDToGarmin(krd, mockLogger);
+      const result = convertKRDToGarmin(krd, { logger: mockLogger });
       const parsed = JSON.parse(result);
       const steps = parsed.workoutSegments[0].workoutSteps;
 
@@ -161,7 +161,7 @@ describe("convertKRDToGarmin", () => {
       });
 
       const krd = convertGarminToKRD(gcnInput, mockLogger);
-      const result = convertKRDToGarmin(krd, mockLogger);
+      const result = convertKRDToGarmin(krd, { logger: mockLogger });
       const parsed = JSON.parse(result);
       const steps = parsed.workoutSegments[0].workoutSteps;
 
@@ -199,7 +199,7 @@ describe("convertKRDToGarmin", () => {
       });
 
       const krd = convertGarminToKRD(gcnInput, mockLogger);
-      const result = convertKRDToGarmin(krd, mockLogger);
+      const result = convertKRDToGarmin(krd, { logger: mockLogger });
       const parsed = JSON.parse(result);
       const step = parsed.workoutSegments[0].workoutSteps[0];
 
@@ -218,7 +218,7 @@ describe("convertKRDToGarmin", () => {
         },
       };
 
-      expect(() => convertKRDToGarmin(krd, mockLogger)).toThrow();
+      expect(() => convertKRDToGarmin(krd, { logger: mockLogger })).toThrow();
     });
   });
 });
