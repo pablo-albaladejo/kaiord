@@ -1,3 +1,5 @@
+> Completed: 2026-03-29
+
 # Proposal: Sport-Specific Training Zones
 
 ## Problem

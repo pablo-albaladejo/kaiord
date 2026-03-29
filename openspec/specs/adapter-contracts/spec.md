@@ -1,4 +1,4 @@
-> Synced: 2026-03-06
+> Synced: 2026-03-29
 
 # Adapter Contracts
 
@@ -22,7 +22,25 @@ Each format adapter package SHALL provide two export styles:
 - **Pre-built instance**: `import { fitReader } from '@kaiord/fit'`
 - **Factory function**: `import { createFitReader } from '@kaiord/fit'`
 
-The factory accepts an optional `Logger` parameter.
+The factory accepts an optional `Logger` parameter. Adapters that require additional configuration (e.g., `@kaiord/garmin`) MAY accept an options object as an alternative to a plain `Logger`. When an options object is accepted, the `Logger` form SHALL remain supported for backward compatibility.
+
+### Requirement: Garmin Writer Options
+
+The `createGarminWriter` factory SHALL accept either a `Logger` or a `GarminWriterOptions` object:
+
+- `GarminWriterOptions.logger` (Logger, optional): Custom logger
+- `GarminWriterOptions.paceZones` (PaceZoneTable, optional): Pace zone lookup table for resolving pace zone references to m/s ranges
+
+The `PaceZoneTable` type is an array of `PaceZoneEntry` objects, each with `zone` (number), `minMps` (number), and `maxMps` (number) fields.
+
+### Requirement: Convenience Workout Conversion
+
+The `@kaiord/garmin` package SHALL export convenience functions for direct Workout-to-GCN conversion:
+
+- `workoutToGarmin`: Pre-built function that converts a Workout object to GCN JSON string
+- `createWorkoutToGarmin(options?)`: Factory that accepts `Logger` or `WorkoutToGarminOptions` (with optional `logger` and `paceZones`)
+
+These functions wrap `createWorkoutKRD` and `toText` with a Garmin writer internally.
 
 ### Requirement: File Naming
 
@@ -45,7 +63,7 @@ API adapters (e.g., `@kaiord/garmin-connect`) SHALL export factory functions for
 
 ### Requirement: LLM Adapter Pattern
 
-The AI adapter (`@kaiord/ai`) SHALL export factory functions that accept a `LanguageModel` parameter (provider-agnostic via Vercel AI SDK). It SHALL depend on `@kaiord/core` only with `ai` as a peer dependency.
+The AI adapter (`@kaiord/ai`) SHALL export a `createTextToWorkout` factory that accepts a `TextToWorkoutConfig` object containing a required `model` (LanguageModel, provider-agnostic via Vercel AI SDK) and optional `logger`, `maxRetries`, `maxOutputTokens`, and `temperature` fields. No pre-built singleton is exported because `model` has no sensible default. The factory returns a function `(text: string, options?: TextToWorkoutOptions) => Promise<Workout>`. It SHALL depend on `@kaiord/core` only with `ai` as a peer dependency.
 
 ## Scenarios
 
@@ -76,8 +94,20 @@ The AI adapter (`@kaiord/ai`) SHALL export factory functions that accept a `Lang
 #### Scenario: AI adapter text-to-workout
 
 - **GIVEN** a consumer calls `createTextToWorkout({ model })` from `@kaiord/ai`
-- **WHEN** they pass a natural language description
-- **THEN** the AI adapter returns a validated `Workout` object using the injected LLM model
+- **WHEN** they invoke the returned function with a natural language description and optional `TextToWorkoutOptions` (sport, name)
+- **THEN** the AI adapter returns a validated `Workout` object using the injected LLM model, with automatic retry on parse failure
+
+#### Scenario: Garmin writer with pace zones
+
+- **GIVEN** a consumer calls `createGarminWriter({ paceZones })` with a `PaceZoneTable`
+- **WHEN** a KRD workout containing pace zone references is written
+- **THEN** the writer resolves zone numbers to m/s ranges in the GCN output
+
+#### Scenario: Workout-to-Garmin convenience
+
+- **GIVEN** a consumer calls `workoutToGarmin(workoutObject)` from `@kaiord/garmin`
+- **WHEN** the workout object is valid
+- **THEN** the function returns a GCN JSON string by wrapping `createWorkoutKRD` and `toText` with the default Garmin writer
 
 #### Scenario: Garmin Connect API client
 
