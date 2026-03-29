@@ -16,7 +16,10 @@ const addOptionalMessages = (
   if (extensions?.course) {
     messages.courseMesgs = [extensions.course];
   }
-  if (extensions?.course_points) {
+  if (
+    Array.isArray(extensions?.course_points) &&
+    extensions.course_points.length > 0
+  ) {
     messages.coursePointMesgs = extensions.course_points.map(
       mapKrdCoursePointToFit
     );

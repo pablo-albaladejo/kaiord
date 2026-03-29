@@ -91,10 +91,8 @@ const convertTargetValueToTcx = (
 export const convertTargetToTcx = (
   step: WorkoutStep
 ): Record<string, unknown> => {
-  const { type, value } = step.target as {
-    type: string;
-    value?: { unit: string; value?: number; min?: number; max?: number };
-  };
-  if (type === "open" || !value || !("unit" in value)) return NONE_TCX;
-  return convertTargetValueToTcx(type, value);
+  const { target } = step;
+  if (target.type === "open" || target.type === "stroke_type") return NONE_TCX;
+  if (!("value" in target) || !target.value) return NONE_TCX;
+  return convertTargetValueToTcx(target.type, target.value);
 };

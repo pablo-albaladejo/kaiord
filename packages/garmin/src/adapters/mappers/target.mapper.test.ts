@@ -10,7 +10,7 @@ describe("mapKrdTargetToGarmin", () => {
       { zone: 2, minMps: 2.86, maxMps: 3.08 },
       { zone: 3, minMps: 3.08, maxMps: 3.51 },
       { zone: 4, minMps: 3.51, maxMps: 4.0 },
-      { zone: 5, minMps: 4.02, maxMps: 4.76 },
+      { zone: 5, minMps: 4.0, maxMps: 4.76 },
     ];
 
     it("should resolve pace zone to m/s range when table provided", () => {

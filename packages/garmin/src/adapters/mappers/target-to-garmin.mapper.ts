@@ -8,7 +8,7 @@ import type {
 } from "./target-types";
 import type { Target } from "@kaiord/core";
 
-type ValueShape = { unit: string; value?: number; min?: number; max?: number };
+type Val = { unit: string; value?: number; min?: number; max?: number };
 type TT = GarminTargetInfo["targetType"];
 
 export const mapKrdTargetToGarmin = (
@@ -44,10 +44,7 @@ export const mapKrdTargetToGarmin = (
   }
 };
 
-const mapPace = (
-  value: ValueShape,
-  paceZones?: PaceZoneTable
-): GarminTargetInfo => {
+const mapPace = (value: Val, paceZones?: PaceZoneTable): GarminTargetInfo => {
   const tt = buildTargetType(TargetTypeId.PACE_ZONE, "pace.zone", 6);
   if (value.unit === "zone") {
     if (!paceZones) {
@@ -72,7 +69,7 @@ const mapPace = (
   return mapRangeOrValue(tt, value);
 };
 
-const mapZoneOrRange = (tt: TT, value: ValueShape): GarminTargetInfo => {
+const mapZoneOrRange = (tt: TT, value: Val): GarminTargetInfo => {
   if (value.unit === "zone") {
     return {
       targetType: tt,
@@ -84,7 +81,7 @@ const mapZoneOrRange = (tt: TT, value: ValueShape): GarminTargetInfo => {
   return mapRangeOrValue(tt, value);
 };
 
-const mapRangeOrValue = (tt: TT, value: ValueShape): GarminTargetInfo => {
+const mapRangeOrValue = (tt: TT, value: Val): GarminTargetInfo => {
   if (value.unit === "range") {
     return {
       targetType: tt,

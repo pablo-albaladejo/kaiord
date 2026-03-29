@@ -39,8 +39,16 @@ const encodePowerTargets = (
 };
 
 const resolveStepCadence = (step: WorkoutStep): number | undefined => {
-  if (step.target.type === "cadence" && step.target.value.unit === "rpm") {
-    return step.target.value.value as number;
+  if (step.target.type === "cadence") {
+    const val = step.target.value;
+    if (val.unit === "rpm") return val.value as number;
+    if (
+      val.unit === "range" &&
+      val.min !== undefined &&
+      val.max !== undefined
+    ) {
+      return Math.round((val.min + val.max) / 2);
+    }
   }
   const zwift = step.extensions ? step.extensions.zwift : undefined;
   const ext = zwift as Record<string, unknown> | undefined;

@@ -2,7 +2,7 @@ import { createServiceApiError } from "@kaiord/core";
 import type { TokenRefreshManager } from "./token-refresh";
 import type { FetchFn } from "./types";
 
-export const makeRequest = (
+const makeRequest = (
   url: string,
   init: RequestInit | undefined,
   refresh: TokenRefreshManager,

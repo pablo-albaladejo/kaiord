@@ -1,5 +1,6 @@
 import { createConsoleLogger, createWorkoutKRD, toText } from "@kaiord/core";
 import { createGarminWriter } from "./garmin-writer";
+import { isLogger } from "./utils/is-logger";
 import type { GarminWriterConfig } from "./garmin-writer";
 import type { Logger } from "@kaiord/core";
 
@@ -22,7 +23,7 @@ const resolveOptions = (
   options?: Logger | WorkoutToGarminOptions
 ): GarminWriterConfig => {
   if (!options) return { logger: createConsoleLogger() };
-  if ("info" in options) return { logger: options };
+  if (isLogger(options)) return { logger: options };
   return {
     logger: options.logger ?? createConsoleLogger(),
     paceZones: options.paceZones,

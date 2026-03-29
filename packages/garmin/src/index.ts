@@ -5,6 +5,7 @@
 import { createConsoleLogger } from "@kaiord/core";
 import { createGarminReader as createGarminReaderImpl } from "./adapters/garmin-reader";
 import { createGarminWriter as createGarminWriterImpl } from "./adapters/garmin-writer";
+import { isLogger } from "./adapters/utils/is-logger";
 import type { PaceZoneTable } from "./adapters/mappers/target.mapper";
 import type { Logger, TextReader, TextWriter } from "@kaiord/core";
 
@@ -24,9 +25,6 @@ export const createGarminReader = (logger?: Logger): TextReader =>
 export const createGarminWriter = (
   options?: Logger | GarminWriterOptions
 ): TextWriter => {
-  const isLogger = (v: unknown): v is Logger =>
-    v !== null && typeof v === "object" && "info" in v;
-
   if (!options || isLogger(options)) {
     return createGarminWriterImpl({
       logger: options || createConsoleLogger(),
