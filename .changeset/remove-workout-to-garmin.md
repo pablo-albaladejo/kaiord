@@ -10,17 +10,17 @@ Migration:
 
 ```typescript
 // Before
-import { workoutToGarmin } from '@kaiord/garmin';
+import { workoutToGarmin } from "@kaiord/garmin";
 const json = await workoutToGarmin(workout);
 
 // After
-import { createWorkoutKRD, toText } from '@kaiord/core';
-import { garminWriter } from '@kaiord/garmin';
+import { createWorkoutKRD, toText } from "@kaiord/core";
+import { garminWriter } from "@kaiord/garmin";
 const krd = createWorkoutKRD(workout);
 const json = await toText(krd, garminWriter);
 
 // With paceZones
-import { createGarminWriter } from '@kaiord/garmin';
+import { createGarminWriter } from "@kaiord/garmin";
 const writer = createGarminWriter({ paceZones });
 const json = await toText(krd, writer);
 ```
