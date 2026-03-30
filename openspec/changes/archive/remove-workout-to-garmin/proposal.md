@@ -1,3 +1,5 @@
+> Completed: 2026-03-30
+
 # Proposal: Remove workoutToGarmin convenience API
 
 ## Problem
