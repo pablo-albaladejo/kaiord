@@ -33,14 +33,9 @@ The `createGarminWriter` factory SHALL accept either a `Logger` or a `GarminWrit
 
 The `PaceZoneTable` type is an array of `PaceZoneEntry` objects, each with `zone` (number), `minMps` (number), and `maxMps` (number) fields.
 
-### Requirement: Convenience Workout Conversion
+### Requirement: No Use-Case Orchestration in Adapters
 
-The `@kaiord/garmin` package SHALL export convenience functions for direct Workout-to-GCN conversion:
-
-- `workoutToGarmin`: Pre-built function that converts a Workout object to GCN JSON string
-- `createWorkoutToGarmin(options?)`: Factory that accepts `Logger` or `WorkoutToGarminOptions` (with optional `logger` and `paceZones`)
-
-These functions wrap `createWorkoutKRD` and `toText` with a Garmin writer internally.
+Format adapter packages SHALL NOT import or invoke core use-case functions (`toText`, `fromText`, `toBinary`, `fromBinary`) or domain converters (e.g., `createWorkoutKRD`). Adapters implement port interfaces only. Composing KRD creation with format conversion is the consumer's responsibility.
 
 ### Requirement: File Naming
 
@@ -102,12 +97,6 @@ The AI adapter (`@kaiord/ai`) SHALL export a `createTextToWorkout` factory that 
 - **GIVEN** a consumer calls `createGarminWriter({ paceZones })` with a `PaceZoneTable`
 - **WHEN** a KRD workout containing pace zone references is written
 - **THEN** the writer resolves zone numbers to m/s ranges in the GCN output
-
-#### Scenario: Workout-to-Garmin convenience
-
-- **GIVEN** a consumer calls `workoutToGarmin(workoutObject)` from `@kaiord/garmin`
-- **WHEN** the workout object is valid
-- **THEN** the function returns a GCN JSON string by wrapping `createWorkoutKRD` and `toText` with the default Garmin writer
 
 #### Scenario: Garmin Connect API client
 

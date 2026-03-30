@@ -38,9 +38,3 @@ export const createGarminWriter = (
 
 export const garminReader: TextReader = createGarminReader();
 export const garminWriter: TextWriter = createGarminWriter();
-
-export type { WorkoutToGarminOptions } from "./adapters/workout-to-garmin";
-export {
-  createWorkoutToGarmin,
-  workoutToGarmin,
-} from "./adapters/workout-to-garmin";
