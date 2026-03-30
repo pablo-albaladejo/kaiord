@@ -1,4 +1,5 @@
 > Synced: 2026-03-30
+> Updated: 2026-03-30 — synced garmin-connect dependency on @kaiord/garmin
 
 # Adapter Contracts
 
@@ -54,7 +55,7 @@ Format adapter packages SHALL NOT import from other adapter packages. All inter-
 
 ### Requirement: API Adapter Pattern
 
-API adapters (e.g., `@kaiord/garmin-connect`) SHALL export factory functions for clients, auth providers, and token stores. They SHALL depend on `@kaiord/core` only and SHALL NOT import format adapters.
+API adapters (e.g., `@kaiord/garmin-connect`) SHALL export factory functions for clients, auth providers, and token stores. They SHALL depend on `@kaiord/core` and MAY depend on a corresponding format adapter when the API requires format conversion (e.g., `@kaiord/garmin-connect` depends on `@kaiord/garmin` to convert KRD→GCN before pushing to the Garmin Connect API).
 
 ### Requirement: LLM Adapter Pattern
 

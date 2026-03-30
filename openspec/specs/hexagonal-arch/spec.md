@@ -1,4 +1,4 @@
-> Synced: 2026-03-29
+> Synced: 2026-03-30
 
 # Hexagonal Architecture
 
@@ -49,7 +49,7 @@ Each package SHALL respect the following dependency rules:
 | ------------------------------------------------------------- | --------------------------------------------------------------- |
 | `@kaiord/core`                                                | No workspace deps (root of the graph)                           |
 | `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin` | `@kaiord/core` only                                             |
-| `@kaiord/garmin-connect`                                      | `@kaiord/core` only                                             |
+| `@kaiord/garmin-connect`                                      | `@kaiord/core`, `@kaiord/garmin`                                |
 | `@kaiord/ai`                                                  | `@kaiord/core` only (+ `ai` as peer dependency)                 |
 | `@kaiord/infra`                                               | `@kaiord/core`, `@kaiord/garmin`, `@kaiord/garmin-connect`      |
 | `@kaiord/mcp`                                                 | `@kaiord/core` + all format adapters + `@kaiord/garmin-connect` |
