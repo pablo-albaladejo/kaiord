@@ -1,5 +1,12 @@
 # @kaiord/garmin-connect
 
+## 5.0.0
+
+### Patch Changes
+
+- Updated dependencies [22f13a0]
+  - @kaiord/garmin@5.0.0
+
 ## 4.9.0
 
 ### Patch Changes
