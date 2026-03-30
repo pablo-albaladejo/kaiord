@@ -1,4 +1,4 @@
-> Synced: 2026-03-29
+> Synced: 2026-03-30
 
 # KRD Format
 
@@ -43,6 +43,19 @@ A KRD document SHALL contain:
 ### Requirement: Naming Conventions
 
 KRD field names SHALL use **camelCase** (e.g., `serialNumber`, `heartRate`, `subSport`). Domain enum values SHALL use **snake_case** (e.g., `indoor_cycling`, `lap_swimming`). Adapter schemas MAY use camelCase internally and MUST map enum values to snake_case when producing KRD.
+
+### Requirement: Extension Namespaces
+
+The `extensions` object MAY contain the following namespaces:
+
+- `extensions.structured_workout` (Workout): Full Workout object for structured workout KRDs, set by `createWorkoutKRD()`
+- `extensions.fit` (object): Preserves FIT-specific data not mappable to KRD fields, containing:
+  - `developerFields` (array): Developer-defined fields from FIT SDK
+  - `unknownMessages` (array): Unrecognized FIT message types
+- `extensions.course` (object): Course metadata for course-type KRDs
+- `extensions.course_points` (array of KRDCoursePoint): Course waypoints, each containing `index`, `latitude`, `longitude`, `distance`, `type`, `name`, `favorite`, and optional `timestamp`
+
+Adapters MAY define additional extension namespaces. Unknown extension namespaces SHALL be preserved during round-trip conversions when the target format supports them.
 
 ## Scenarios
 
