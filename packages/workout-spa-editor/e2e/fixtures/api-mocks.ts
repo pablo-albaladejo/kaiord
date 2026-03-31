@@ -31,7 +31,7 @@ export async function mockLlmApis(
 
 /** Intercept Lambda push endpoint with a success response. */
 export async function mockLambdaSuccess(page: Page): Promise<void> {
-  await page.route("**/api.kaiord.com/**", (route) =>
+  await page.route("**execute-api**", (route) =>
     route.fulfill({
       status: 200,
       contentType: "application/json",
@@ -42,7 +42,7 @@ export async function mockLambdaSuccess(page: Page): Promise<void> {
 
 /** Intercept Lambda push endpoint with a 401 auth error. */
 export async function mockLambdaAuthError(page: Page): Promise<void> {
-  await page.route("**/api.kaiord.com/**", (route) =>
+  await page.route("**execute-api**", (route) =>
     route.fulfill({
       status: 401,
       contentType: "application/json",

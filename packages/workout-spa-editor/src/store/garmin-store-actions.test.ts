@@ -22,7 +22,7 @@ type GarminState = {
   hydrated: boolean;
 };
 
-const DEFAULT_URL = "https://api.kaiord.com/push";
+const DEFAULT_URL = "";
 
 const createTestStore = () => {
   let state: GarminState = {
@@ -71,6 +71,19 @@ describe("createGarminActions", () => {
         username: "u",
         password: "p",
         lambdaUrl: "",
+      });
+      const { get, actions } = createTestStore();
+
+      await actions.hydrate();
+
+      expect(get().lambdaUrl).toBe(DEFAULT_URL);
+    });
+
+    it("should migrate stale api.kaiord.com URL to default", async () => {
+      mockLoad.mockResolvedValueOnce({
+        username: "u",
+        password: "p",
+        lambdaUrl: "https://api.kaiord.com/push",
       });
       const { get, actions } = createTestStore();
 

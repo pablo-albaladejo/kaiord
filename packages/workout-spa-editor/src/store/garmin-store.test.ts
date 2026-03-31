@@ -14,7 +14,7 @@ const resetStore = () =>
   useGarminStore.setState({
     username: "",
     password: "",
-    lambdaUrl: "https://api.kaiord.com/push",
+    lambdaUrl: "",
     push: { status: "idle" },
     hydrated: false,
   });
@@ -52,10 +52,8 @@ describe("garmin-store", () => {
     expect(useGarminStore.getState().hasCredentials()).toBe(false);
   });
 
-  it("should have default Lambda URL", () => {
-    expect(useGarminStore.getState().lambdaUrl).toBe(
-      "https://api.kaiord.com/push"
-    );
+  it("should have empty default Lambda URL when env var is not set", () => {
+    expect(useGarminStore.getState().lambdaUrl).toBe("");
   });
 
   it("should set custom Lambda URL without validation", () => {
@@ -76,9 +74,7 @@ describe("garmin-store", () => {
     useGarminStore.getState().setLambdaUrl("https://custom.com");
     useGarminStore.getState().resetLambdaUrl();
 
-    expect(useGarminStore.getState().lambdaUrl).toBe(
-      "https://api.kaiord.com/push"
-    );
+    expect(useGarminStore.getState().lambdaUrl).toBe("");
   });
 
   it("should track push state", () => {
@@ -128,7 +124,11 @@ describe("garmin-store", () => {
 
 describe("isValidLambdaUrl", () => {
   it("should accept valid HTTPS URL", () => {
-    expect(isValidLambdaUrl("https://api.kaiord.com/push")).toBe(true);
+    expect(
+      isValidLambdaUrl(
+        "https://test123.execute-api.eu-west-1.amazonaws.com/push"
+      )
+    ).toBe(true);
   });
 
   it("should reject invalid URL", () => {
@@ -136,7 +136,11 @@ describe("isValidLambdaUrl", () => {
   });
 
   it("should reject HTTP URL for non-localhost", () => {
-    expect(isValidLambdaUrl("http://api.kaiord.com/push")).toBe(false);
+    expect(
+      isValidLambdaUrl(
+        "http://test123.execute-api.eu-west-1.amazonaws.com/push"
+      )
+    ).toBe(false);
   });
 
   it("should accept HTTP for localhost", () => {

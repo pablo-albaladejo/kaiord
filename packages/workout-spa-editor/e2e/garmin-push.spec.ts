@@ -139,6 +139,12 @@ async function configureGarminCredentials(
   await dialog.getByPlaceholder("your@email.com").fill("test@garmin.com");
   await dialog.getByPlaceholder("Your Garmin password").fill("test-password");
 
+  // Set Lambda URL (empty by default when VITE_GARMIN_LAMBDA_URL is not set)
+  const lambdaInput = dialog.getByPlaceholder(/execute-api.*amazonaws.com/);
+  await lambdaInput.fill(
+    "https://test.execute-api.eu-west-1.amazonaws.com/push"
+  );
+
   // Close settings
   await page.keyboard.press("Escape");
 }

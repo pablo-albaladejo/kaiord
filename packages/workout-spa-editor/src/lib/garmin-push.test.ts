@@ -5,7 +5,7 @@ import { pushToGarminLambda } from "./garmin-push";
 const mockFetch = vi.fn();
 vi.stubGlobal("fetch", mockFetch);
 
-const lambdaUrl = "https://api.kaiord.com/push";
+const lambdaUrl = "https://test123.execute-api.eu-west-1.amazonaws.com/push";
 const request: GarminPushRequest = {
   krd: { version: "1.0" } as GarminPushRequest["krd"],
   garmin: { username: "user@test.com", password: "pass123" },
