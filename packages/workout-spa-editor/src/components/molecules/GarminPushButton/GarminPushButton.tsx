@@ -1,4 +1,5 @@
 import { Upload } from "lucide-react";
+import { PushFeedback } from "./PushFeedback";
 import { useGarminPush } from "./useGarminPush";
 import { useGarminStore } from "../../../store/garmin-store";
 import { useSettingsDialogStore } from "../../../store/settings-dialog-store";
@@ -6,11 +7,16 @@ import { Button } from "../../atoms/Button";
 
 export const GarminPushButton: React.FC = () => {
   const onSettingsClick = useSettingsDialogStore((s) => s.show);
-  const { push: pushState, hasCredentials, setPush } = useGarminStore();
+  const {
+    push: pushState,
+    hasCredentials,
+    lambdaUrl,
+    setPush,
+  } = useGarminStore();
   const { push } = useGarminPush();
   const isLoading = pushState.status === "loading";
 
-  if (!hasCredentials()) {
+  if (!hasCredentials() || !lambdaUrl) {
     return (
       <Button size="sm" variant="secondary" onClick={onSettingsClick}>
         <Upload className="h-4 w-4" />
@@ -31,34 +37,11 @@ export const GarminPushButton: React.FC = () => {
         <Upload className="h-4 w-4" />
         Push to Garmin
       </Button>
-      {pushState.status === "success" && (
-        <a
-          href={pushState.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="text-xs text-blue-600 underline dark:text-blue-400"
-          onClick={() => setPush({ status: "idle" })}
-        >
-          Open in Garmin Connect
-        </a>
-      )}
-      {pushState.status === "error" && (
-        <span className="text-xs text-red-600 dark:text-red-400">
-          {pushState.message}
-          {pushState.message.includes("authentication") && (
-            <>
-              {" — "}
-              <button
-                type="button"
-                className="underline"
-                onClick={onSettingsClick}
-              >
-                check credentials
-              </button>
-            </>
-          )}
-        </span>
-      )}
+      <PushFeedback
+        push={pushState}
+        onReset={() => setPush({ status: "idle" })}
+        onSettingsClick={onSettingsClick}
+      />
     </div>
   );
 };

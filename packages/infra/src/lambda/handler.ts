@@ -3,9 +3,19 @@ import { pushRequestSchema } from "./request-schema";
 import { pushToGarmin } from "./garmin-push";
 import { errorResponse, jsonResponse } from "./response";
 
+const MAX_BODY_BYTES = 512_000;
+
+// SECURITY: Never log event.body, credentials, or raw error messages.
+// They may contain Garmin username/password from the request payload.
 export const handler = async (event: APIGatewayProxyEventV2) => {
+  const requestId = event.requestContext?.requestId;
+
   if (!event.body) {
     return errorResponse(400, "Request body is required");
+  }
+
+  if (event.body.length > MAX_BODY_BYTES) {
+    return errorResponse(413, "Payload too large");
   }
 
   let parsed: unknown;
@@ -35,7 +45,10 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     if (isAuthError) {
       return errorResponse(401, "Garmin authentication failed");
     }
-    console.error("Garmin push failed");
+    console.error("Garmin push failed", {
+      requestId,
+      errorType: error instanceof Error ? error.constructor.name : "unknown",
+    });
     return errorResponse(500, "Garmin API error");
   }
 };

@@ -10,7 +10,10 @@ const { pushToGarmin } = await import("./garmin-push");
 const mockPush = vi.mocked(pushToGarmin);
 
 const createEvent = (body?: string): APIGatewayProxyEventV2 =>
-  ({ body }) as APIGatewayProxyEventV2;
+  ({
+    body,
+    requestContext: { requestId: "test-req-id" },
+  }) as unknown as APIGatewayProxyEventV2;
 
 const validBody = JSON.stringify({
   krd: {
@@ -93,6 +96,28 @@ describe("Lambda handler", () => {
 
     expect(result.statusCode).toBe(500);
     expect(JSON.parse(result.body as string).error).toBe("Garmin API error");
+  });
+
+  it("should return 413 when payload exceeds 512 KB", async () => {
+    const largeBody = "x".repeat(512_001);
+
+    const result = await handler(createEvent(largeBody));
+
+    expect(result.statusCode).toBe(413);
+    expect(JSON.parse(result.body as string).error).toBe("Payload too large");
+  });
+
+  it("should log requestId and errorType without sensitive data", async () => {
+    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    mockPush.mockRejectedValueOnce(new TypeError("Connection timeout"));
+
+    await handler(createEvent(validBody));
+
+    expect(consoleSpy).toHaveBeenCalledWith("Garmin push failed", {
+      requestId: "test-req-id",
+      errorType: "TypeError",
+    });
+    consoleSpy.mockRestore();
   });
 
   it("should not leak credentials in error responses", async () => {
