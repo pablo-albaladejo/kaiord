@@ -29,7 +29,7 @@ export const PushFeedback: React.FC<PushFeedbackProps> = ({
     return (
       <span className="text-xs text-red-600 dark:text-red-400">
         {push.message}
-        {push.message.includes("authentication") && (
+        {push.message.toLowerCase().includes("authentication") && (
           <>
             {" — "}
             <button
