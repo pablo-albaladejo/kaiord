@@ -17,24 +17,27 @@
    - Audience: `sts.amazonaws.com`
 
 2. Create IAM role `github-actions-kaiord-deploy` with trust policy:
+
    ```json
    {
      "Version": "2012-10-17",
-     "Statement": [{
-       "Effect": "Allow",
-       "Principal": {
-         "Federated": "arn:aws:iam::ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
-       },
-       "Action": "sts:AssumeRoleWithWebIdentity",
-       "Condition": {
-         "StringEquals": {
-           "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+     "Statement": [
+       {
+         "Effect": "Allow",
+         "Principal": {
+           "Federated": "arn:aws:iam::ACCOUNT_ID:oidc-provider/token.actions.githubusercontent.com"
          },
-         "StringLike": {
-           "token.actions.githubusercontent.com:sub": "repo:OWNER/kaiord:ref:refs/heads/main"
+         "Action": "sts:AssumeRoleWithWebIdentity",
+         "Condition": {
+           "StringEquals": {
+             "token.actions.githubusercontent.com:aud": "sts.amazonaws.com"
+           },
+           "StringLike": {
+             "token.actions.githubusercontent.com:sub": "repo:OWNER/kaiord:ref:refs/heads/main"
+           }
          }
        }
-     }]
+     ]
    }
    ```
 
@@ -53,14 +56,16 @@
 **Trade-off:** The URL is long and not branded, but it's only used as a backend endpoint — users never see it unless they check SPA settings. If the stack is ever destroyed and recreated, the URL changes and the SPA must be rebuilt with the new value.
 
 **CDK addition:** A `CfnOutput` that exports the API URL. Since the stack uses `createDefaultStage: false` with a custom `HttpStage`, the URL must be constructed from the API ID and region (not from `api.url` which may be undefined):
+
 ```typescript
-new CfnOutput(this, 'ApiUrl', {
+new CfnOutput(this, "ApiUrl", {
   value: `https://${api.apiId}.execute-api.${this.region}.amazonaws.com`,
-  description: 'Garmin proxy API Gateway URL',
+  description: "Garmin proxy API Gateway URL",
 });
 ```
 
 **Cross-pipeline coupling:** After first infra deploy, the operator must:
+
 1. Retrieve the API URL from the CDK/CloudFormation output
 2. Set `VITE_GARMIN_LAMBDA_URL` as a GitHub repository variable (with `/push` appended)
 3. Manually trigger the `deploy-spa-editor.yml` workflow to rebuild the SPA with the new URL
@@ -78,6 +83,7 @@ This coupling is documented in the infra README.
 **Migration:** Users who previously had the broken `https://api.kaiord.com/push` persisted in localStorage will have it treated as empty on hydrate, falling back to the env var default.
 
 **Changes:**
+
 - `garmin-store.ts`: `const DEFAULT_LAMBDA_URL = import.meta.env.VITE_GARMIN_LAMBDA_URL || ""`
 - `garmin-store-actions.ts`: On hydrate, treat `"https://api.kaiord.com/push"` as empty string
 - `deploy-spa-editor.yml`: Add `VITE_GARMIN_LAMBDA_URL` env var to SPA build step (value stored as GitHub variable)
@@ -102,6 +108,7 @@ This coupling is documented in the infra README.
 **Rationale:** A public Lambda handling credentials needs minimum observability. Alarms provide early warning of broken deploys, Garmin API outages, or abuse.
 
 **Implementation:**
+
 - Alarm on API Gateway `5xx` metric (threshold: 5 errors in 5 minutes)
 - Alarm on Lambda `Errors` metric (threshold: 5 errors in 5 minutes)
 - No SNS topic initially — alarms visible in CloudWatch console. SNS can be added later.
@@ -115,6 +122,7 @@ This coupling is documented in the infra README.
 **Concurrency:** `concurrency: { group: "infra-deploy", cancel-in-progress: false }` prevents parallel CDK deploys.
 
 **Steps:**
+
 1. Checkout
 2. Setup pnpm + Node.js 24
 3. Install dependencies
@@ -140,6 +148,7 @@ This coupling is documented in the infra README.
 **Credential safety:** Add a comment in `handler.ts` warning against logging request bodies or error messages (which could contain credentials from Garmin SSO errors). The existing `console.error("Garmin push failed")` is safe (logs a static string only). Enhance it with `requestId` for traceability without logging sensitive data.
 
 **Structured logging:**
+
 ```typescript
 console.error("Garmin push failed", {
   requestId: event.requestContext?.requestId,

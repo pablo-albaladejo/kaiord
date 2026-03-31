@@ -20,11 +20,11 @@ Without a working Lambda proxy, the "Push to Garmin" button in the SPA is non-fu
 
 ## Affected Packages
 
-| Package | Changes |
-|---------|---------|
-| `@kaiord/infra` | Add `cdk.out` to gitignore, `CfnOutput` for API URL, CloudWatch alarms, CORS lockdown in deploy |
+| Package                      | Changes                                                                                                        |
+| ---------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `@kaiord/infra`              | Add `cdk.out` to gitignore, `CfnOutput` for API URL, CloudWatch alarms, CORS lockdown in deploy                |
 | `@kaiord/workout-spa-editor` | Replace hardcoded URL with env var `VITE_GARMIN_LAMBDA_URL`, migrate stale localStorage URL, fallback to empty |
-| `.github/workflows/` | New `deploy-infra.yml` workflow with OIDC + CDK deploy + smoke test |
+| `.github/workflows/`         | New `deploy-infra.yml` workflow with OIDC + CDK deploy + smoke test                                            |
 
 ## Breaking Changes
 
