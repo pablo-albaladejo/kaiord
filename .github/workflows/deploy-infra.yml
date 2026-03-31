@@ -1,0 +1,70 @@
+name: Deploy Garmin Proxy Lambda
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/infra/**"
+      - ".github/workflows/deploy-infra.yml"
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+concurrency:
+  group: "infra-deploy"
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          cache: "pnpm"
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION || 'eu-west-1' }}
+          role-session-name: kaiord-infra-deploy
+
+      - name: Build dependencies
+        run: pnpm -r build --filter @kaiord/infra...
+
+      - name: Deploy CDK stack
+        working-directory: packages/infra
+        run: |
+          npx cdk deploy --require-approval never \
+            --context allowedOrigins='["${{ vars.SPA_ORIGIN }}"]' \
+            --outputs-file cdk-outputs.json
+
+      - name: Smoke test
+        working-directory: packages/infra
+        run: |
+          API_URL=$(jq -r '.[].ApiUrl' cdk-outputs.json)
+          echo "API URL: $API_URL"
+          STATUS=$(curl -sf -o /dev/null -w '%{http_code}' \
+            -X POST \
+            -H 'Content-Type: application/json' \
+            -d '{}' \
+            "$API_URL/push" || true)
+          echo "Response status: $STATUS"
+          if [ "$STATUS" = "000" ] || [ "$STATUS" -ge 500 ]; then
+            echo "Smoke test failed: got HTTP $STATUS"
+            exit 1
+          fi
+          echo "Smoke test passed (HTTP $STATUS)"

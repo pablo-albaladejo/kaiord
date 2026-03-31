@@ -74,7 +74,7 @@ test.describe("Settings Panel", () => {
     await passwordInput.fill("my-password");
 
     // Change Lambda URL
-    const lambdaInput = dialog.getByPlaceholder("https://api.kaiord.com/push");
+    const lambdaInput = dialog.getByPlaceholder(/execute-api.*amazonaws.com/);
     await lambdaInput.clear();
     await lambdaInput.fill("https://my-lambda.amazonaws.com/push");
 
@@ -88,7 +88,7 @@ test.describe("Settings Panel", () => {
     // Reset Lambda URL
     await dialog.getByRole("button", { name: /reset to default/i }).click();
 
-    // Lambda URL should be reset
-    await expect(lambdaInput).toHaveValue("https://api.kaiord.com/push");
+    // Lambda URL should be reset to empty (env var default)
+    await expect(lambdaInput).toHaveValue("");
   });
 });

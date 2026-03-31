@@ -1,12 +1,16 @@
-import { Stack, Duration, RemovalPolicy } from "aws-cdk-lib";
+import { CfnOutput, Duration, RemovalPolicy, Stack } from "aws-cdk-lib";
 import type { StackProps } from "aws-cdk-lib";
+import {
+  CorsHttpMethod,
+  HttpApi,
+  HttpMethod,
+  HttpStage,
+} from "aws-cdk-lib/aws-apigatewayv2";
+import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
+import { Alarm, Metric, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction, OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
-import { HttpApi, CorsHttpMethod } from "aws-cdk-lib/aws-apigatewayv2";
-import { HttpLambdaIntegration } from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
-import { HttpMethod } from "aws-cdk-lib/aws-apigatewayv2";
-import { HttpStage } from "aws-cdk-lib/aws-apigatewayv2";
 import type { Construct } from "constructs";
 
 export class GarminProxyStack extends Stack {
@@ -63,6 +67,33 @@ export class GarminProxyStack extends Stack {
       path: "/push",
       methods: [HttpMethod.POST],
       integration,
+    });
+
+    new CfnOutput(this, "ApiUrl", {
+      value: `https://${api.apiId}.execute-api.${this.region}.amazonaws.com`,
+      description: "Garmin proxy API Gateway URL",
+    });
+
+    new Alarm(this, "ApiGateway5xxAlarm", {
+      metric: new Metric({
+        namespace: "AWS/ApiGateway",
+        metricName: "5xx",
+        dimensionsMap: { ApiId: api.apiId },
+        period: Duration.minutes(5),
+        statistic: "Sum",
+      }),
+      threshold: 5,
+      evaluationPeriods: 1,
+      treatMissingData: TreatMissingData.NOT_BREACHING,
+      alarmDescription: "API Gateway 5xx errors > 5 in 5 minutes",
+    });
+
+    new Alarm(this, "LambdaErrorsAlarm", {
+      metric: handler.metricErrors({ period: Duration.minutes(5) }),
+      threshold: 5,
+      evaluationPeriods: 1,
+      treatMissingData: TreatMissingData.NOT_BREACHING,
+      alarmDescription: "Lambda invocation errors > 5 in 5 minutes",
     });
   }
 }

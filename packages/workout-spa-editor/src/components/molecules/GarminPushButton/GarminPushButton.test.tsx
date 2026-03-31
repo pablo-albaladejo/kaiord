@@ -8,12 +8,21 @@ describe("GarminPushButton", () => {
     useGarminStore.setState({
       username: "",
       password: "",
-      lambdaUrl: "https://api.kaiord.com/push",
+      lambdaUrl: "https://test123.execute-api.eu-west-1.amazonaws.com/push",
       push: { status: "idle" },
     });
   });
 
   it("should show configure button when no credentials", () => {
+    render(<GarminPushButton />);
+
+    expect(screen.getByText("Configure Garmin")).toBeInTheDocument();
+  });
+
+  it("should show configure button when Lambda URL is empty", () => {
+    useGarminStore.setState({ lambdaUrl: "" });
+    useGarminStore.getState().setCredentials("user@test.com", "pass");
+
     render(<GarminPushButton />);
 
     expect(screen.getByText("Configure Garmin")).toBeInTheDocument();

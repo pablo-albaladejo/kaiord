@@ -28,7 +28,7 @@ export const GarminLambdaInput: React.FC<GarminLambdaInputProps> = ({
     <div className="space-y-2">
       <Input
         label="URL"
-        placeholder="https://api.kaiord.com/push"
+        placeholder="https://xxxxxxxxxx.execute-api.eu-west-1.amazonaws.com/push"
         value={lambdaUrl}
         onChange={(e) => {
           onUrlChange(e.target.value);

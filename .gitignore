@@ -50,5 +50,8 @@ metrics/DASHBOARD.md
 .jscpd-report/
 metrics-*.json
 
+# CDK
+cdk.out/
+
 # OpenSpec
 openspec/.cache/
