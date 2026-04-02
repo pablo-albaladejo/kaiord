@@ -1,5 +1,12 @@
 # Changelog
 
+## 6.0.0
+
+### Patch Changes
+
+- Updated dependencies [89896ab]
+  - @kaiord/garmin-connect@6.0.0
+
 ## 5.0.0
 
 ### Patch Changes
