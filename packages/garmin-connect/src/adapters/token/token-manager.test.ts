@@ -108,7 +108,7 @@ describe("createTokenManager", () => {
       await expect(tm.setTokens(OAUTH1, OAUTH2)).resolves.toBeUndefined();
       expect(logger.warn).toHaveBeenCalledWith(
         "Failed to persist tokens",
-        expect.objectContaining({ error: expect.any(Error) })
+        expect.objectContaining({ errorName: "Error" })
       );
     });
   });
@@ -250,9 +250,9 @@ describe("createTokenManager", () => {
 
       const results = await Promise.all([tm.init(), tm.init()]);
 
-      const restoredCount = results.filter((r) => r.restored).length;
-      expect(restoredCount).toBeLessThanOrEqual(1);
-      expect(tm.getGeneration()).toBeLessThanOrEqual(1);
+      expect(results.some((r) => r.restored)).toBe(true);
+      expect(tm.getGeneration()).toBe(1);
+      expect(tm.getAccessToken()).toBe("acc_valid");
     });
 
     it("returns restored false for invalid store data", async () => {
@@ -277,6 +277,29 @@ describe("createTokenManager", () => {
       expect(tm.getOAuth1Token()).toBeUndefined();
       expect(tm.isAuthenticated()).toBe(false);
       expect(store.clear).toHaveBeenCalled();
+    });
+  });
+
+  describe("stale refresh guard", () => {
+    it("should discard stale refresh result after clearTokens", async () => {
+      let resolveRefresh!: (v: OAuth2Token) => void;
+      const slowRefresh: RefreshFn = vi.fn(
+        () =>
+          new Promise<OAuth2Token>((r) => {
+            resolveRefresh = r;
+          })
+      );
+      const tm = createTokenManager({ refreshFn: slowRefresh, logger });
+      await tm.setTokens(OAUTH1, OAUTH2);
+
+      const refreshPromise = tm.refresh();
+      await tm.clearTokens();
+
+      resolveRefresh(refreshedOAuth2());
+      await refreshPromise;
+
+      expect(tm.getAccessToken()).toBeUndefined();
+      expect(tm.isAuthenticated()).toBe(false);
     });
   });
 

@@ -28,7 +28,7 @@ const buildAuthProvider = (
     if (!oauth1 || !oauth2) {
       throw createServiceAuthError("No tokens to export");
     }
-    return { oauth1, oauth2 };
+    return { oauth1: { ...oauth1 }, oauth2: { ...oauth2 } };
   },
   restore_tokens: async (data) => {
     const parsed = garminTokensSchema.parse(data);

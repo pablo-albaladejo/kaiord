@@ -21,7 +21,9 @@ export const persistBestEffort = async (
   try {
     await store.save({ oauth1, oauth2 });
   } catch (error) {
-    logger.warn("Failed to persist tokens", { error });
+    logger.warn("Failed to persist tokens", {
+      errorName: error instanceof Error ? error.name : typeof error,
+    });
   }
 };
 
@@ -38,8 +40,10 @@ export const doRefresh = (
     throw createServiceApiError("No OAuth1 token for refresh", 401);
   }
   const currentOAuth1 = s.oauth1;
+  const generationAtStart = s.generation;
   s.refreshPromise = refreshFn(currentOAuth1)
     .then(async (newOAuth2) => {
+      if (s.generation !== generationAtStart) return;
       s.oauth2 = newOAuth2;
       s.generation++;
       logger.info("Token refreshed", { generation: s.generation });

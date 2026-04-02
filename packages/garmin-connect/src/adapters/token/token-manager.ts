@@ -25,8 +25,8 @@ export const createTokenManager = (options: Options): TokenManager => {
 
   return {
     getAccessToken: () => s.oauth2?.access_token,
-    getOAuth1Token: () => s.oauth1,
-    getOAuth2Token: () => s.oauth2,
+    getOAuth1Token: () => (s.oauth1 ? { ...s.oauth1 } : undefined),
+    getOAuth2Token: () => (s.oauth2 ? { ...s.oauth2 } : undefined),
     getGeneration: () => s.generation,
     isAuthenticated: () => !!s.oauth2 && !isExpired(s.oauth2),
     setTokens: async (o1, o2) => {
@@ -39,6 +39,8 @@ export const createTokenManager = (options: Options): TokenManager => {
     clearTokens: async () => {
       s.oauth1 = undefined;
       s.oauth2 = undefined;
+      s.refreshPromise = undefined;
+      s.generation++;
       logger.info("Tokens cleared");
       if (tokenStore) await tokenStore.clear();
     },

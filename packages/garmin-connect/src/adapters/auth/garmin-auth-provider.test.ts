@@ -150,7 +150,7 @@ describe("createGarminAuthProvider", () => {
       oauth_token: "o1",
       oauth_token_secret: "s1",
     });
-    expect((tokens as Record<string, unknown>).oauth2).toBe(oauth2);
+    expect((tokens as Record<string, unknown>).oauth2).toStrictEqual(oauth2);
   });
 
   it("should throw when exporting tokens without login", async () => {

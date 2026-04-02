@@ -7,8 +7,8 @@ export const buildRefreshFn = (fetchFn: FetchFn): RefreshFn => {
   let consumer: OAuthConsumer | undefined;
 
   return async (oauth1) => {
+    consumer ??= await fetchOAuthConsumer(fetchFn);
     try {
-      consumer ??= await fetchOAuthConsumer(fetchFn);
       return await exchangeOAuth2(oauth1, consumer, fetchFn);
     } catch {
       consumer = undefined;

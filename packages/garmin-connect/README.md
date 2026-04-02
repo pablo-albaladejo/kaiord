@@ -118,7 +118,7 @@ Lists workouts from Garmin Connect.
 
 ### `client.service.push(krd): Promise<PushResult>`
 
-Pushes a KRD structured workout to Garmin Connect.
+Pushes a KRD-structured workout to Garmin Connect.
 
 ### `createFileTokenStore(path?): TokenStore`
 

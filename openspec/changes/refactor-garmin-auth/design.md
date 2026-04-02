@@ -4,7 +4,7 @@
 
 All changes are in the **adapter layer** (`@kaiord/garmin-connect`). Core ports remain unchanged.
 
-```
+```text
 @kaiord/core (ports — unchanged)
 ├── AuthProvider
 ├── TokenStore
@@ -37,6 +37,7 @@ All changes are in the **adapter layer** (`@kaiord/garmin-connect`). Core ports 
 type TokenManager = {
   getAccessToken: () => string | undefined;
   getOAuth1Token: () => OAuth1Token | undefined;
+  getOAuth2Token: () => OAuth2Token | undefined;
   getGeneration: () => number;
   isAuthenticated: () => boolean;
   setTokens: (oauth1: OAuth1Token, oauth2: OAuth2Token) => Promise<void>;
@@ -108,7 +109,7 @@ This keeps OAuthConsumer caching inside the closure with retry-on-failure invali
 
 **Decision**: The client factory creates two fetch paths from the base `fetchFn`:
 
-```
+```text
 rawFetchFn = fetchFn ?? createCookieFetch()
 retryFetchFn = options.retry ? withRetry(rawFetchFn, options.retry) : rawFetchFn
 
