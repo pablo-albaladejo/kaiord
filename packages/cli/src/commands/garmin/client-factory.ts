@@ -8,10 +8,7 @@ export const createCliGarminClient = async (logger: Logger) => {
   const tokenStore = createFileTokenStore();
   const client = createGarminConnectClient({ logger, tokenStore });
 
-  const stored = await tokenStore.load();
-  if (stored) {
-    await client.auth.restore_tokens(stored);
-  }
+  await client.init();
 
   return client;
 };

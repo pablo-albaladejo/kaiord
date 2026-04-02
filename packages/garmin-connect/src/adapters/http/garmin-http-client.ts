@@ -1,22 +1,19 @@
 import { authFetch } from "./garmin-auth-fetch";
-import { createTokenRefreshManager } from "./token-refresh";
-import type {
-  FetchFn,
-  GarminHttpClient,
-  OAuth1Token,
-  OAuth2Token,
-} from "./types";
+import type { FetchFn, GarminHttpClient } from "./types";
+import type { TokenReader } from "../token/token-manager.types";
 import type { Logger } from "@kaiord/core";
 
 export type { GarminHttpClient } from "./types";
 
 export const createGarminHttpClient = (
-  logger: Logger,
-  fetchFn: FetchFn = globalThis.fetch
+  tokenReader: TokenReader,
+  fetchFn: FetchFn,
+  logger: Logger
 ): GarminHttpClient => {
-  const refresh = createTokenRefreshManager(fetchFn, logger);
   const fetch = (url: string, init?: RequestInit) =>
-    authFetch(url, init, refresh, fetchFn);
+    authFetch(url, init, tokenReader, fetchFn);
+
+  logger.debug("HTTP client created");
 
   return {
     get: async <T>(url: string): Promise<T> => {
@@ -39,15 +36,5 @@ export const createGarminHttpClient = (
       const text = await res.text();
       return (text ? JSON.parse(text) : undefined) as T;
     },
-    setTokens: (o1: OAuth1Token, o2: OAuth2Token): void => {
-      refresh.state.oauth1Token = o1;
-      refresh.state.oauth2Token = o2;
-    },
-    clearTokens: (): void => {
-      refresh.state.oauth1Token = undefined;
-      refresh.state.oauth2Token = undefined;
-      refresh.state.consumer = undefined;
-    },
-    getOAuth2Token: () => refresh.state.oauth2Token,
   };
 };

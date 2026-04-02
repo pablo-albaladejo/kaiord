@@ -1,6 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { createGarminAuthProvider } from "./garmin-auth-provider";
-import type { Logger, TokenStore } from "@kaiord/core";
+import type { TokenManager } from "../token/token-manager.types";
+import type { Logger } from "@kaiord/core";
 
 vi.mock("../http/garmin-sso", () => ({
   garminSso: vi.fn(async () => ({
@@ -14,7 +15,6 @@ vi.mock("../http/garmin-sso", () => ({
       expires_at: Math.floor(Date.now() / 1000) + 3600,
     },
   })),
-  exchangeOAuth2: vi.fn(),
 }));
 
 const mockLogger: Logger = {
@@ -26,9 +26,26 @@ const mockLogger: Logger = {
 
 const mockFetch = vi.fn() as unknown as typeof globalThis.fetch;
 
+const createMockTokenManager = (
+  overrides?: Partial<TokenManager>
+): TokenManager => ({
+  getAccessToken: vi.fn(() => undefined),
+  getOAuth1Token: vi.fn(() => undefined),
+  getOAuth2Token: vi.fn(() => undefined),
+  getGeneration: vi.fn(() => 0),
+  isAuthenticated: vi.fn(() => false),
+  setTokens: vi.fn(async () => {}),
+  clearTokens: vi.fn(async () => {}),
+  refresh: vi.fn(async () => {}),
+  init: vi.fn(async () => ({ restored: false })),
+  ...overrides,
+});
+
 describe("createGarminAuthProvider", () => {
   it("should not be authenticated initially", () => {
-    const { auth } = createGarminAuthProvider({
+    const tm = createMockTokenManager();
+    const auth = createGarminAuthProvider({
+      tokenManager: tm,
       logger: mockLogger,
       fetchFn: mockFetch,
     });
@@ -36,42 +53,40 @@ describe("createGarminAuthProvider", () => {
     expect(auth.is_authenticated()).toBe(false);
   });
 
-  it("should be authenticated after login", async () => {
-    const { auth } = createGarminAuthProvider({
+  it("should call setTokens after login", async () => {
+    const tm = createMockTokenManager();
+    const auth = createGarminAuthProvider({
+      tokenManager: tm,
       logger: mockLogger,
       fetchFn: mockFetch,
     });
 
     await auth.login("user", "pass");
 
-    expect(auth.is_authenticated()).toBe(true);
-  });
-
-  it("should save tokens to store after login", async () => {
-    const mockStore: TokenStore = {
-      save: vi.fn(async () => {}),
-      load: vi.fn(async () => null),
-      clear: vi.fn(async () => {}),
-    };
-
-    const { auth } = createGarminAuthProvider({
-      logger: mockLogger,
-      tokenStore: mockStore,
-      fetchFn: mockFetch,
-    });
-
-    await auth.login("user", "pass");
-
-    expect(mockStore.save).toHaveBeenCalledWith(
-      expect.objectContaining({
-        oauth1: expect.objectContaining({ oauth_token: "o1" }),
-        oauth2: expect.objectContaining({ access_token: "at" }),
-      })
+    expect(tm.setTokens).toHaveBeenCalledWith(
+      expect.objectContaining({ oauth_token: "o1" }),
+      expect.objectContaining({ access_token: "at" })
     );
   });
 
-  it("should restore tokens from stored data", async () => {
-    const { auth } = createGarminAuthProvider({
+  it("should delegate is_authenticated to TokenManager", () => {
+    const tm = createMockTokenManager({
+      isAuthenticated: vi.fn(() => true),
+    });
+    const auth = createGarminAuthProvider({
+      tokenManager: tm,
+      logger: mockLogger,
+      fetchFn: mockFetch,
+    });
+
+    expect(auth.is_authenticated()).toBe(true);
+    expect(tm.isAuthenticated).toHaveBeenCalled();
+  });
+
+  it("should restore tokens via setTokens", async () => {
+    const tm = createMockTokenManager();
+    const auth = createGarminAuthProvider({
+      tokenManager: tm,
       logger: mockLogger,
       fetchFn: mockFetch,
     });
@@ -88,84 +103,64 @@ describe("createGarminAuthProvider", () => {
       },
     });
 
-    expect(auth.is_authenticated()).toBe(true);
+    expect(tm.setTokens).toHaveBeenCalledWith(
+      expect.objectContaining({ oauth_token: "t1" }),
+      expect.objectContaining({ access_token: "at" })
+    );
   });
 
-  it("should not be authenticated after logout", async () => {
-    const { auth } = createGarminAuthProvider({
+  it("should call clearTokens on logout", async () => {
+    const tm = createMockTokenManager();
+    const auth = createGarminAuthProvider({
+      tokenManager: tm,
       logger: mockLogger,
       fetchFn: mockFetch,
     });
 
-    await auth.login("user", "pass");
-    expect(auth.is_authenticated()).toBe(true);
-
     await auth.logout();
-    expect(auth.is_authenticated()).toBe(false);
+
+    expect(tm.clearTokens).toHaveBeenCalled();
   });
 
-  it("should clear token store on logout", async () => {
-    const mockStore: TokenStore = {
-      save: vi.fn(async () => {}),
-      load: vi.fn(async () => null),
-      clear: vi.fn(async () => {}),
+  it("should export tokens from TokenManager", async () => {
+    const oauth2 = {
+      access_token: "at",
+      refresh_token: "rt",
+      token_type: "Bearer",
+      expires_in: 3600,
+      refresh_token_expires_in: 86400,
+      expires_at: Math.floor(Date.now() / 1000) + 3600,
     };
-
-    const { auth } = createGarminAuthProvider({
-      logger: mockLogger,
-      tokenStore: mockStore,
-      fetchFn: mockFetch,
+    const tm = createMockTokenManager({
+      getOAuth1Token: vi.fn(() => ({
+        oauth_token: "o1",
+        oauth_token_secret: "s1",
+      })),
+      getOAuth2Token: vi.fn(() => oauth2),
     });
-
-    await auth.login("user", "pass");
-    await auth.logout();
-
-    expect(mockStore.clear).toHaveBeenCalled();
-  });
-
-  it("should export tokens after login", async () => {
-    const { auth } = createGarminAuthProvider({
+    const auth = createGarminAuthProvider({
+      tokenManager: tm,
       logger: mockLogger,
       fetchFn: mockFetch,
     });
 
-    await auth.login("user", "pass");
     const tokens = await auth.export_tokens();
 
     expect(tokens.oauth1).toStrictEqual({
       oauth_token: "o1",
       oauth_token_secret: "s1",
     });
-    expect(tokens.oauth2.access_token).toBe("at");
+    expect((tokens as Record<string, unknown>).oauth2).toStrictEqual(oauth2);
   });
 
   it("should throw when exporting tokens without login", async () => {
-    const { auth } = createGarminAuthProvider({
+    const tm = createMockTokenManager();
+    const auth = createGarminAuthProvider({
+      tokenManager: tm,
       logger: mockLogger,
       fetchFn: mockFetch,
     });
 
     await expect(auth.export_tokens()).rejects.toThrow("No tokens to export");
-  });
-
-  it("should return false for is_authenticated when token is expired", async () => {
-    const { auth, httpClient } = createGarminAuthProvider({
-      logger: mockLogger,
-      fetchFn: mockFetch,
-    });
-
-    httpClient.setTokens(
-      { oauth_token: "t", oauth_token_secret: "s" },
-      {
-        access_token: "at",
-        refresh_token: "rt",
-        token_type: "Bearer",
-        expires_in: 3600,
-        refresh_token_expires_in: 86400,
-        expires_at: Math.floor(Date.now() / 1000) - 100,
-      }
-    );
-
-    expect(auth.is_authenticated()).toBe(false);
   });
 });
