@@ -6,7 +6,9 @@ const email = process.env.GARMIN_TEST_EMAIL;
 const password = process.env.GARMIN_TEST_PASSWORD;
 
 type Tokens = Awaited<
-  ReturnType<ReturnType<typeof createGarminConnectClient>["auth"]["export_tokens"]>
+  ReturnType<
+    ReturnType<typeof createGarminConnectClient>["auth"]["export_tokens"]
+  >
 >;
 let sharedTokens: Tokens;
 
