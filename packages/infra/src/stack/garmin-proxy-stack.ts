@@ -17,9 +17,15 @@ export class GarminProxyStack extends Stack {
   constructor(scope: Construct, id: string, props?: StackProps) {
     super(scope, id, props);
 
-    const allowedOrigins = (this.node.tryGetContext("allowedOrigins") as
+    const rawOrigins = this.node.tryGetContext("allowedOrigins") as
+      | string
       | string[]
-      | undefined) ?? ["*"];
+      | undefined;
+    const allowedOrigins: string[] = Array.isArray(rawOrigins)
+      ? rawOrigins
+      : typeof rawOrigins === "string"
+        ? (JSON.parse(rawOrigins) as string[])
+        : ["*"];
 
     const logGroup = new LogGroup(this, "LambdaLogs", {
       retention: RetentionDays.ONE_WEEK,
