@@ -19,7 +19,4 @@ export type GarminHttpClient = {
   get: <T>(url: string) => Promise<T>;
   post: <T>(url: string, body: unknown) => Promise<T>;
   del: <T>(url: string) => Promise<T>;
-  setTokens: (oauth1: OAuth1Token, oauth2: OAuth2Token) => void;
-  clearTokens: () => void;
-  getOAuth2Token: () => OAuth2Token | undefined;
 };

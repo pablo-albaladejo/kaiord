@@ -10,7 +10,7 @@ import {
   garminPushResponseSchema,
   garminWorkoutSummarySchema,
 } from "../schemas/workout-response.schema";
-import type { GarminHttpClient } from "../http/garmin-http-client";
+import type { GarminHttpClient } from "../http/types";
 import type {
   KRD,
   ListOptions,
