@@ -24,7 +24,7 @@ describe.skipIf(!email || !password)("Garmin Connect Integration", () => {
     expect(sharedTokens.oauth1).toBeDefined();
     expect(sharedTokens.oauth2).toBeDefined();
     expect(sharedTokens.oauth2.expires_at).toBeGreaterThan(
-      Math.floor(Date.now() / 1000),
+      Math.floor(Date.now() / 1000)
     );
   });
 
