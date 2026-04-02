@@ -43,7 +43,7 @@ jobs:
           role-session-name: kaiord-infra-deploy
 
       - name: Build dependencies
-        run: pnpm -r build --filter @kaiord/infra...
+        run: pnpm --filter @kaiord/infra... build
 
       - name: Deploy CDK stack
         working-directory: packages/infra

@@ -1,33 +1,43 @@
-import { describe, it, expect } from "vitest";
+import { beforeAll, describe, it, expect } from "vitest";
 import type { KRD } from "@kaiord/core";
 import { createGarminConnectClient } from "./index";
 
 const email = process.env.GARMIN_TEST_EMAIL;
 const password = process.env.GARMIN_TEST_PASSWORD;
 
+type Tokens = Awaited<
+  ReturnType<
+    ReturnType<typeof createGarminConnectClient>["auth"]["export_tokens"]
+  >
+>;
+let sharedTokens: Tokens;
+
 describe.skipIf(!email || !password)("Garmin Connect Integration", () => {
-  it("should login and obtain valid tokens", async () => {
+  beforeAll(async () => {
     const { auth } = createGarminConnectClient();
-
     await auth.login(email!, password!);
-
-    expect(auth.is_authenticated()).toBe(true);
+    sharedTokens = await auth.export_tokens();
   }, 30_000);
+
+  it("should login and obtain valid tokens", () => {
+    expect(sharedTokens).toBeDefined();
+    expect(sharedTokens.oauth1).toBeDefined();
+    expect(sharedTokens.oauth2).toBeDefined();
+    expect(sharedTokens.oauth2.expires_at).toBeGreaterThan(
+      Math.floor(Date.now() / 1000)
+    );
+  });
 
   it("should export and restore tokens across clients", async () => {
-    const client1 = createGarminConnectClient();
-    await client1.auth.login(email!, password!);
-    const tokens = await client1.auth.export_tokens();
+    const client = createGarminConnectClient();
+    await client.auth.restore_tokens(sharedTokens);
 
-    const client2 = createGarminConnectClient();
-    await client2.auth.restore_tokens(tokens);
-
-    expect(client2.auth.is_authenticated()).toBe(true);
-  }, 30_000);
+    expect(client.auth.is_authenticated()).toBe(true);
+  });
 
   it("should list workouts", async () => {
     const { auth, service } = createGarminConnectClient();
-    await auth.login(email!, password!);
+    await auth.restore_tokens(sharedTokens);
 
     const workouts = await service.list({ limit: 5 });
 
@@ -41,7 +51,7 @@ describe.skipIf(!email || !password)("Garmin Connect Integration", () => {
 
   it("should push a workout", async () => {
     const { auth, service } = createGarminConnectClient();
-    await auth.login(email!, password!);
+    await auth.restore_tokens(sharedTokens);
 
     const krd: KRD = {
       version: "1.0",
