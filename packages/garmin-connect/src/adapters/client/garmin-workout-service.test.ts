@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { createGarminWorkoutService } from "./garmin-workout-service";
-import type { GarminHttpClient } from "../http/garmin-http-client";
+import type { GarminHttpClient } from "../http/types";
 import type { KRD, Logger } from "@kaiord/core";
 import { WORKOUT_URL } from "../http/urls";
 
@@ -15,9 +15,6 @@ const createMockHttpClient = (): GarminHttpClient => ({
   get: vi.fn(async () => ({})),
   post: vi.fn(async () => ({ workoutId: 999, workoutName: "Pushed" })),
   del: vi.fn(async () => ({})),
-  setTokens: vi.fn(),
-  clearTokens: vi.fn(),
-  getOAuth2Token: vi.fn(() => undefined),
 });
 
 describe("createGarminWorkoutService", () => {

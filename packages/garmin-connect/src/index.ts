@@ -5,6 +5,13 @@
 // Types
 export type { GarminWorkoutClient } from "./adapters/client/garmin-workout-service";
 export type {
+  GarminConnectClient,
+  GarminConnectClientOptions,
+  InitResult,
+} from "./adapters/client/garmin-connect-client.types";
+export type { RetryOptions } from "./adapters/http/retry";
+export type { TokenReader } from "./adapters/token/token-manager.types";
+export type {
   ListOptions,
   PushResult,
   TokenData,
@@ -14,6 +21,9 @@ export type {
 
 // Auth
 export { createGarminAuthProvider } from "./adapters/auth/garmin-auth-provider";
+
+// Token manager (advanced usage)
+export { createTokenManager } from "./adapters/token/token-manager";
 
 // Client (high-level)
 export { createGarminConnectClient } from "./adapters/client/garmin-connect-client";

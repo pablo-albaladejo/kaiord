@@ -17,22 +17,21 @@ pnpm add @kaiord/garmin-connect
 
 ```typescript
 import { createGarminConnectClient } from "@kaiord/garmin-connect";
-import type { KRD } from "@kaiord/core";
 
-const { auth, service } = createGarminConnectClient();
+const client = createGarminConnectClient();
 
 // Login
-await auth.login("email@example.com", "password");
+await client.auth.login("email@example.com", "password");
 
 // List workouts
-const workouts = await service.list({ limit: 10 });
+const workouts = await client.service.list({ limit: 10 });
 
 // Push a KRD workout to Garmin Connect
-const result = await service.push(krd);
+const result = await client.service.push(krd);
 console.log(`Pushed workout: ${result.name} (id: ${result.id})`);
 ```
 
-### Token Persistence
+### Token Persistence with Auto-Restore
 
 ```typescript
 import {
@@ -40,17 +39,28 @@ import {
   createFileTokenStore,
 } from "@kaiord/garmin-connect";
 
-const tokenStore = createFileTokenStore("./tokens.json");
-const { auth, service } = createGarminConnectClient({ tokenStore });
+const client = createGarminConnectClient({
+  tokenStore: createFileTokenStore("./tokens.json"),
+});
 
-// Login (tokens are saved automatically)
-await auth.login("email@example.com", "password");
-
-// On next run, tokens are restored automatically
-// No need to login again if tokens are still valid
+// Auto-restore tokens from store (login not needed if tokens are valid)
+const { restored } = await client.init();
+if (!restored) {
+  await client.auth.login("email@example.com", "password");
+}
 ```
 
-### Custom Cookie-Aware Fetch
+### With Retry for Transient Failures
+
+```typescript
+import { createGarminConnectClient } from "@kaiord/garmin-connect";
+
+const client = createGarminConnectClient({
+  retry: { maxRetries: 3, baseDelay: 1000, maxDelay: 10000 },
+});
+```
+
+### Custom Fetch Function
 
 ```typescript
 import {
@@ -58,56 +68,84 @@ import {
   createCookieFetch,
 } from "@kaiord/garmin-connect";
 
-const cookieFetch = createCookieFetch();
-const { auth, service } = createGarminConnectClient({ fetchFn: cookieFetch });
+const client = createGarminConnectClient({
+  fetchFn: createCookieFetch(),
+});
 ```
 
 ## API
 
-### `createGarminConnectClient(options?): { auth, service }`
+### `createGarminConnectClient(options?): GarminConnectClient`
 
 Creates a Garmin Connect client with authentication and workout service.
 
 **Options:**
 
 - `fetchFn` - Custom fetch function (defaults to cookie-aware fetch)
-- `tokenStore` - Token persistence store (defaults to in-memory)
+- `tokenStore` - Token persistence store
+- `logger` - Custom logger
+- `retry` - Retry options: `{ maxRetries?, baseDelay?, maxDelay? }`
 
-### `auth.login(email, password): Promise<void>`
+**Returns:** `{ auth, service, init }`
+
+### `client.init(): Promise<{ restored: boolean }>`
+
+Auto-restores tokens from the token store. Returns `{ restored: true }` if valid tokens were found. Idempotent: no-op if tokens are already in memory.
+
+### `client.auth.login(email, password): Promise<void>`
 
 Authenticates with Garmin Connect via SSO.
 
-### `auth.is_authenticated(): boolean`
+### `client.auth.is_authenticated(): boolean`
 
-Checks if the client has valid authentication tokens.
+Checks if the client has valid (non-expired) authentication tokens.
 
-### `auth.export_tokens(): Promise<TokenData>`
+### `client.auth.export_tokens(): Promise<TokenData>`
 
 Exports current tokens for external storage.
 
-### `auth.restore_tokens(tokens): Promise<void>`
+### `client.auth.restore_tokens(tokens): Promise<void>`
 
 Restores previously exported tokens.
 
-### `service.list(options?): Promise<WorkoutSummary[]>`
+### `client.auth.logout(): Promise<void>`
+
+Clears all tokens from memory and token store.
+
+### `client.service.list(options?): Promise<WorkoutSummary[]>`
 
 Lists workouts from Garmin Connect.
 
-### `service.push(krd): Promise<PushResult>`
+### `client.service.push(krd): Promise<PushResult>`
 
 Pushes a KRD structured workout to Garmin Connect.
+
+### `createFileTokenStore(path?): TokenStore`
+
+Creates a file-based token store. Defaults to `~/.kaiord/garmin-tokens.json`.
+
+### `createMemoryTokenStore(): TokenStore`
+
+Creates an in-memory token store (tokens lost on process exit).
 
 ### `createCookieFetch(): typeof fetch`
 
 Creates a cookie-aware fetch wrapper for SSO authentication flows.
 
-### `createFileTokenStore(path): TokenStore`
+## Migration from v5.x
 
-Creates a file-based token store for persistent authentication.
+```typescript
+// Before (v5.x)
+const { auth, service } = createGarminConnectClient();
+await auth.login(email, password);
 
-### `createMemoryTokenStore(): TokenStore`
+// After (v6.x)
+const client = createGarminConnectClient({ tokenStore });
+const { restored } = await client.init();
+if (!restored) await client.auth.login(email, password);
+```
 
-Creates an in-memory token store (tokens lost on process exit).
+See the [design document](../../openspec/changes/refactor-garmin-auth/design.md) for the full migration guide.
 
 ## License
 
