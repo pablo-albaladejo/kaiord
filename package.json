@@ -67,7 +67,7 @@
     "@fission-ai/openspec": "^1.2.0",
     "@size-limit/file": "^11.0.0",
     "@types/node": "^25.0.0",
-    "dependency-cruiser": "^16.0.0",
+    "dependency-cruiser": "^17.3.10",
     "eslint": "^9.15.0",
     "eslint-plugin-import": "^2.32.0",
     "husky": "^9.1.7",
