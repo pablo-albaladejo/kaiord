@@ -235,6 +235,9 @@ jobs:
       - name: Run linting (ESLint + Prettier)
         run: pnpm lint
 
+      - name: Check architecture boundaries
+        run: pnpm arch:check
+
   typecheck:
     runs-on: ubuntu-latest
     needs: detect-changes
@@ -302,7 +305,7 @@ jobs:
       - name: Check coverage threshold
         run: |
           THRESHOLD=80
-          if [ "${{ matrix.package }}" = "mcp" ] || [ "${{ matrix.package }}" = "infra" ]; then
+          if [ "${{ matrix.package }}" = "infra" ]; then
             THRESHOLD=70
           fi
           node .github/scripts/check-coverage.js ./packages/${{ matrix.package }}/coverage/coverage-final.json $THRESHOLD

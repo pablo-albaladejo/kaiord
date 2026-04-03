@@ -18,6 +18,7 @@ import { registerGarminPushTool } from "../tools/kaiord-garmin-push";
 import { registerGetFormatSpecTool } from "../tools/kaiord-get-format-spec";
 import { registerInspectTool } from "../tools/kaiord-inspect";
 import { registerListFormatsTool } from "../tools/kaiord-list-formats";
+import { registerRoundTripValidateTool } from "../tools/kaiord-round-trip-validate";
 import { registerValidateTool } from "../tools/kaiord-validate";
 
 const SERVER_NAME = "kaiord-mcp";
@@ -44,6 +45,7 @@ export const createServer = (): McpServer => {
   registerListFormatsTool(server);
   registerConvertTool(server, logger);
   registerValidateTool(server, logger);
+  registerRoundTripValidateTool(server, logger);
   registerInspectTool(server, logger);
   registerExtractWorkoutTool(server, logger);
   registerDiffTool(server, logger);
