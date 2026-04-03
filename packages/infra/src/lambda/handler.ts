@@ -1,9 +1,11 @@
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import { pushRequestSchema } from "./request-schema";
 import { pushToGarmin } from "./garmin-push";
+import { checkTunnelHealth } from "./proxy-fetch";
 import { errorResponse, jsonResponse } from "./response";
 
 const MAX_BODY_BYTES = 512_000;
+const useTailscale = (): boolean => Boolean(process.env.TS_SECRET_API_KEY);
 
 const getBodyBytes = (event: APIGatewayProxyEventV2): number =>
   event.isBase64Encoded
@@ -19,10 +21,20 @@ const isAuthError = (error: unknown): boolean => {
   );
 };
 
+const isRateLimited = (error: unknown): boolean => {
+  const msg = error instanceof Error ? error.message : "";
+  return msg.includes("429") || msg.includes("Too Many Requests");
+};
+
 // SECURITY: Never log event.body, credentials, or raw error messages.
 // They may contain Garmin username/password from the request payload.
 export const handler = async (event: APIGatewayProxyEventV2) => {
   const requestId = event.requestContext?.requestId;
+
+  if (useTailscale() && !(await checkTunnelHealth())) {
+    console.error("Tailscale tunnel unavailable", { requestId });
+    return errorResponse(503, "Proxy tunnel unavailable");
+  }
 
   if (!event.body) {
     return errorResponse(400, "Request body is required");
@@ -58,9 +70,13 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     if (isAuthError(error)) {
       return errorResponse(401, "Garmin authentication failed");
     }
+    if (isRateLimited(error)) {
+      return errorResponse(429, "Garmin rate limited, try again later");
+    }
     console.error("Garmin push failed", {
       requestId,
       errorType: error instanceof Error ? error.constructor.name : "unknown",
+      errorMessage: error instanceof Error ? error.message : String(error),
     });
     return errorResponse(500, "Garmin API error");
   }

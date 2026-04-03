@@ -6,8 +6,15 @@ vi.mock("./garmin-push", () => ({
   pushToGarmin: vi.fn(),
 }));
 
+vi.mock("./proxy-fetch", () => ({
+  proxyFetch: vi.fn(),
+  checkTunnelHealth: vi.fn().mockResolvedValue(true),
+}));
+
 const { pushToGarmin } = await import("./garmin-push");
 const mockPush = vi.mocked(pushToGarmin);
+const { checkTunnelHealth } = await import("./proxy-fetch");
+const mockTunnelHealth = vi.mocked(checkTunnelHealth);
 
 const createEvent = (body?: string): APIGatewayProxyEventV2 =>
   ({
@@ -116,8 +123,35 @@ describe("Lambda handler", () => {
     expect(consoleSpy).toHaveBeenCalledWith("Garmin push failed", {
       requestId: "test-req-id",
       errorType: "TypeError",
+      errorMessage: "Connection timeout",
     });
     consoleSpy.mockRestore();
+  });
+
+  it("should return 429 on Garmin rate limit error", async () => {
+    mockPush.mockRejectedValueOnce(
+      new Error("OAuth1 token request failed: 429 Too Many Requests")
+    );
+
+    const result = await handler(createEvent(validBody));
+
+    expect(result.statusCode).toBe(429);
+    expect(JSON.parse(result.body as string).error).toBe(
+      "Garmin rate limited, try again later"
+    );
+  });
+
+  it("should return 503 when tunnel health check fails", async () => {
+    process.env.TS_SECRET_API_KEY = "test-secret";
+    mockTunnelHealth.mockResolvedValueOnce(false);
+
+    const result = await handler(createEvent(validBody));
+
+    expect(result.statusCode).toBe(503);
+    expect(JSON.parse(result.body as string).error).toBe(
+      "Proxy tunnel unavailable"
+    );
+    delete process.env.TS_SECRET_API_KEY;
   });
 
   it("should not leak credentials in error responses", async () => {
