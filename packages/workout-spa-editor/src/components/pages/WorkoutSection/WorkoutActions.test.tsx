@@ -62,7 +62,7 @@ describe("WorkoutActions", () => {
       const container = screen.getByTestId(
         "discard-workout-button"
       ).parentElement;
-      expect(container).toHaveClass("sm:flex-row");
+      expect(container).toHaveClass("lg:flex-row");
     });
 
     it("should stack buttons vertically on mobile", () => {
