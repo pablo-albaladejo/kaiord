@@ -29,3 +29,5 @@ export { buildKRDSession } from "../tests/fixtures/krd/session.fixtures";
 // Workout fixture builders
 export { buildWorkoutStep } from "../tests/fixtures/workout/workout-step.fixtures";
 export { buildWorkout } from "../tests/fixtures/workout/workout.fixtures";
+export { buildDuration } from "../tests/fixtures/workout/duration.fixtures";
+export { buildTarget } from "../tests/fixtures/workout/target.fixtures";

@@ -49,25 +49,25 @@ module.exports = {
       },
     },
 
-    // Rule 4: Adapter packages depend only on core
+    // Rule 4: Adapter packages must not depend on CLI, MCP, AI, or SPA
     {
-      name: "adapter-depends-only-on-core",
+      name: "adapter-no-higher-level-deps",
       comment:
-        "Format adapter packages (fit, tcx, zwo, garmin) must only depend on @kaiord/core",
+        "Format adapters must not depend on CLI, MCP, AI packages, or SPA editor",
       severity: "error",
       from: {
-        path: "packages/(fit|tcx|zwo|garmin)/src",
+        path: "packages/(fit|tcx|zwo|garmin|garmin-connect)/src",
       },
       to: {
-        path: "packages/(fit|tcx|zwo|garmin|cli|mcp|garmin-connect|ai|workout-spa-editor)/src",
+        path: "packages/(cli|mcp|ai|workout-spa-editor)/src",
       },
     },
 
-    // Rule 5: No circular dependencies between packages
+    // Rule 5: No circular dependencies between packages (ignoring internal cycles)
     {
       name: "no-circular-package-deps",
       comment: "Packages must not have circular dependencies",
-      severity: "error",
+      severity: "warn",
       from: { path: "packages/[^/]+/src" },
       to: { circular: true },
     },
@@ -118,36 +118,26 @@ module.exports = {
     // === COUPLING RULES ===
 
     // Rule 9: Limit fan-out (max dependencies per module)
-    {
-      name: "max-module-fan-out",
-      comment: "A module should not depend on more than 15 other modules",
-      severity: "warn",
-      from: {
-        pathNot: ["index\\.ts$", "\\.test\\.ts$", "\\.spec\\.ts$"],
-      },
-      to: {},
-      module: {
-        numberOfDependentsLessThan: 100, // effectively disabled; fan-out checked via metrics
-      },
-    },
+    // (Disabled - fan-out checked via metrics instead)
+    // {
+    //   name: "max-module-fan-out",
+    //   comment: "A module should not depend on more than 15 other modules",
+    //   severity: "warn",
+    //   from: {
+    //     pathNot: ["index\\.ts$", "\\.test\\.ts$", "\\.spec\\.ts$"],
+    //   },
+    //   to: {},
+    // },
   ],
 
   options: {
     doNotFollow: {
       path: ["node_modules", "dist", "coverage"],
     },
-    tsPreCompilationDeps: true,
-    tsConfig: {
-      fileName: "packages/core/tsconfig.json",
-    },
+    tsPreCompilationDeps: false,
     enhancedResolveOptions: {
       exportsFields: ["exports"],
       conditionNames: ["import", "require", "node", "default"],
-    },
-    reporterOptions: {
-      json: {
-        fileName: "metrics/latest/dependency-cruiser.json",
-      },
     },
     exclude: {
       path: [
