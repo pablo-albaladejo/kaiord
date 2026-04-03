@@ -1,3 +1,5 @@
+> Completed: 2026-04-02
+
 # Proposal: Refactor Garmin Auth Provider
 
 ## Problem
