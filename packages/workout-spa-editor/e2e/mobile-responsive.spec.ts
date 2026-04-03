@@ -272,3 +272,109 @@ test.describe("Tablet Responsive Design", () => {
     expect(workoutSectionWidth).toBeLessThanOrEqual(768);
   });
 });
+
+test.describe("Workout Actions Overflow", () => {
+  const testWorkout = {
+    version: "1.0",
+    type: "structured_workout",
+    metadata: {
+      created: new Date().toISOString(),
+      sport: "cycling",
+    },
+    extensions: {
+      structured_workout: {
+        name: "Overflow Test",
+        sport: "cycling",
+        steps: [
+          {
+            stepIndex: 0,
+            durationType: "time",
+            duration: { type: "time", seconds: 600 },
+            targetType: "power",
+            target: {
+              type: "power",
+              value: { unit: "watts", value: 200 },
+            },
+            intensity: "active",
+          },
+        ],
+      },
+    },
+  };
+
+  async function loadWorkout(page: import("@playwright/test").Page) {
+    await page.goto("/");
+    await expandFileUpload(page);
+    const fileInput = page.locator('input[type="file"]');
+    await fileInput.setInputFiles({
+      name: "overflow-test.krd",
+      mimeType: "application/json",
+      buffer: Buffer.from(JSON.stringify(testWorkout)),
+    });
+    await expect(page.getByText("Overflow Test")).toBeVisible({
+      timeout: 10000,
+    });
+  }
+
+  test("should not overflow action buttons at 712px width", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 712, height: 800 });
+    await loadWorkout(page);
+
+    // The workout header card should contain all action buttons
+    const discardButton = page.getByTestId("discard-workout-button");
+    await expect(discardButton).toBeVisible();
+
+    const headerCard = discardButton.locator("xpath=ancestor::div[contains(@class, 'rounded-lg')]").first();
+    const headerBox = await headerCard.boundingBox();
+    const discardBox = await discardButton.boundingBox();
+
+    expect(headerBox).not.toBeNull();
+    expect(discardBox).not.toBeNull();
+
+    // Discard button must be fully inside the header card
+    expect(discardBox!.x).toBeGreaterThanOrEqual(headerBox!.x);
+    expect(discardBox!.x + discardBox!.width).toBeLessThanOrEqual(
+      headerBox!.x + headerBox!.width + 1
+    );
+  });
+
+  test("should stack action buttons vertically below lg breakpoint", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 900, height: 800 });
+    await loadWorkout(page);
+
+    const saveButton = page.getByRole("button", { name: "Save Workout" });
+    const discardButton = page.getByTestId("discard-workout-button");
+
+    await expect(saveButton).toBeVisible();
+    await expect(discardButton).toBeVisible();
+
+    const saveBox = await saveButton.boundingBox();
+    const discardBox = await discardButton.boundingBox();
+
+    // Below lg (1024px), buttons should stack: discard below save
+    expect(discardBox!.y).toBeGreaterThan(saveBox!.y);
+  });
+
+  test("should display action buttons in a row at lg breakpoint", async ({
+    page,
+  }) => {
+    await page.setViewportSize({ width: 1200, height: 800 });
+    await loadWorkout(page);
+
+    const saveButton = page.getByRole("button", { name: "Save Workout" });
+    const discardButton = page.getByTestId("discard-workout-button");
+
+    await expect(saveButton).toBeVisible();
+    await expect(discardButton).toBeVisible();
+
+    const saveBox = await saveButton.boundingBox();
+    const discardBox = await discardButton.boundingBox();
+
+    // At lg+ (1024px), buttons should be on the same row
+    expect(Math.abs(discardBox!.y - saveBox!.y)).toBeLessThan(10);
+  });
+});

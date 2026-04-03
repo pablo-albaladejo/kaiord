@@ -153,15 +153,15 @@ describe("WorkoutActions - Property Tests", () => {
     // Mobile: flex-col (stack vertically)
     expect(container).toHaveClass("flex-col");
 
-    // Desktop: sm:flex-row (horizontal layout)
-    expect(container).toHaveClass("sm:flex-row");
+    // Desktop: lg:flex-row (horizontal layout)
+    expect(container).toHaveClass("lg:flex-row");
 
     // Proper spacing
     expect(container).toHaveClass("gap-3");
 
     // Full width on mobile, auto width on desktop
     expect(container).toHaveClass("w-full");
-    expect(container).toHaveClass("sm:w-auto");
+    expect(container).toHaveClass("lg:w-auto");
   });
 
   it("should have full width buttons on mobile", () => {
@@ -175,6 +175,6 @@ describe("WorkoutActions - Property Tests", () => {
     expect(discardButton).toHaveClass("w-full");
 
     // But auto width on desktop
-    expect(discardButton).toHaveClass("sm:w-auto");
+    expect(discardButton).toHaveClass("lg:w-auto");
   });
 });
