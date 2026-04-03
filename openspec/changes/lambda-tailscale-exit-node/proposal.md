@@ -21,21 +21,21 @@ The Lambda handler passes a SOCKS5-aware `fetchFn` to `createGarminConnectClient
 
 ## Alternatives evaluated
 
-| Alternative | Why rejected |
-|-------------|-------------|
-| VPC + EC2 t4g.nano ($3/mo) with Tailscale | User prefers serverless, no EC2 |
-| HTTP proxy (Squid) on exit node | Lambda can't reach the proxy without Tailscale anyway |
-| Tailscale Funnel on Raspberry Pi | Exposes Raspberry to public internet |
-| Frontend-only (no Lambda) | Garmin blocks CORS on all endpoints |
-| CLI-only push (remove Lambda) | Push from SPA is a requirement |
-| Custom Lambda Layer (build own) | `tailscale-lambda-extension` already solves this |
+| Alternative                               | Why rejected                                          |
+| ----------------------------------------- | ----------------------------------------------------- |
+| VPC + EC2 t4g.nano ($3/mo) with Tailscale | User prefers serverless, no EC2                       |
+| HTTP proxy (Squid) on exit node           | Lambda can't reach the proxy without Tailscale anyway |
+| Tailscale Funnel on Raspberry Pi          | Exposes Raspberry to public internet                  |
+| Frontend-only (no Lambda)                 | Garmin blocks CORS on all endpoints                   |
+| CLI-only push (remove Lambda)             | Push from SPA is a requirement                        |
+| Custom Lambda Layer (build own)           | `tailscale-lambda-extension` already solves this      |
 
 ## Affected Packages
 
-| Package | Change |
-|---------|--------|
-| `@kaiord/infra` | CDK construct, handler proxy setup, Secrets Manager |
-| `@kaiord/garmin-connect` | No changes — already accepts custom `fetchFn` |
+| Package                  | Change                                              |
+| ------------------------ | --------------------------------------------------- |
+| `@kaiord/infra`          | CDK construct, handler proxy setup, Secrets Manager |
+| `@kaiord/garmin-connect` | No changes — already accepts custom `fetchFn`       |
 
 ## Breaking Changes
 

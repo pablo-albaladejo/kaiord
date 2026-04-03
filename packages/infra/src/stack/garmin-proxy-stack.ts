@@ -46,7 +46,8 @@ export class GarminProxyStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
-    const tsSecretName = (this.node.tryGetContext("tsSecretName") as string) ??
+    const tsSecretName =
+      (this.node.tryGetContext("tsSecretName") as string) ??
       "tailscale-api-key";
     const tsExitNode = this.node.tryGetContext("tsExitNode") as
       | string
@@ -78,7 +79,9 @@ export class GarminProxyStack extends Stack {
     });
 
     const tsSecret = secretsmanager.Secret.fromSecretNameV2(
-      this, "TailscaleApiKey", tsSecretName,
+      this,
+      "TailscaleApiKey",
+      tsSecretName
     );
     tsSecret.grantRead(handler);
 

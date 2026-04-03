@@ -13,6 +13,7 @@
 **New dependency:** `tailscale-lambda-extension` (CDK construct, MIT)
 
 **Alternatives considered:**
+
 - **Custom Lambda Layer**: More control but duplicates solved problems (lifecycle, binary management)
 - **VPC + EC2 exit node**: $3-5/month, EC2 maintenance, user rejected
 - **Docker custom runtime**: Exceeds Lambda size limits, slower cold starts
@@ -35,7 +36,7 @@
 
 **Choice:** Store the Tailscale API key in AWS Secrets Manager. The CDK construct reads it at runtime, not from environment variables.
 
-**Rationale (from security review):** Lambda env vars are visible in the AWS Console, `GetFunctionConfiguration` API, and CloudFormation templates. Secrets Manager provides encryption at rest, rotation support, and IAM-scoped access. The `tailscale-lambda-extension` construct has built-in Secrets Manager integration via `TS_SECRET_API_KEY` env var (which contains the secret *name*, not the value).
+**Rationale (from security review):** Lambda env vars are visible in the AWS Console, `GetFunctionConfiguration` API, and CloudFormation templates. Secrets Manager provides encryption at rest, rotation support, and IAM-scoped access. The `tailscale-lambda-extension` construct has built-in Secrets Manager integration via `TS_SECRET_API_KEY` env var (which contains the secret _name_, not the value).
 
 **Exit node hostname** (`TS_EXIT_NODE`) is non-sensitive and stays as an env var.
 
@@ -74,7 +75,11 @@
 ```json
 {
   "acls": [
-    {"action": "accept", "src": ["tag:lambda"], "dst": ["autogroup:internet:*"]}
+    {
+      "action": "accept",
+      "src": ["tag:lambda"],
+      "dst": ["autogroup:internet:*"]
+    }
   ]
 }
 ```
@@ -96,6 +101,7 @@ Browser → API Gateway → Lambda Handler
 ## Deploy workflow changes
 
 `deploy-infra.yml` needs:
+
 1. Tailscale API key stored in Secrets Manager (manual, one-time setup)
 2. Exit node hostname passed as CDK context (non-sensitive)
 3. No binary download step needed — construct handles it
