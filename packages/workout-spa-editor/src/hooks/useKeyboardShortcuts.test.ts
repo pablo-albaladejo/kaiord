@@ -693,6 +693,101 @@ describe("useKeyboardShortcuts", () => {
     });
   });
 
+  describe("form input passthrough", () => {
+    const createEventFromElement = (
+      tag: "input" | "textarea" | "select",
+      key: string,
+      modifiers: Partial<KeyboardEventInit> = {}
+    ) => {
+      const el = document.createElement(tag);
+      document.body.appendChild(el);
+      el.focus();
+      const event = new KeyboardEvent("keydown", {
+        key,
+        bubbles: true,
+        ...modifiers,
+      });
+      Object.defineProperty(event, "target", { value: el });
+      return { event, cleanup: () => el.remove() };
+    };
+
+    it("should not intercept Ctrl+V when target is an input", () => {
+      const onPaste = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onPaste }));
+
+      const { event, cleanup } = createEventFromElement("input", "v", {
+        ctrlKey: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onPaste).not.toHaveBeenCalled();
+      cleanup();
+    });
+
+    it("should not intercept Ctrl+C when target is a textarea", () => {
+      const onCopy = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      const { event, cleanup } = createEventFromElement("textarea", "c", {
+        ctrlKey: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onCopy).not.toHaveBeenCalled();
+      cleanup();
+    });
+
+    it("should not intercept Ctrl+A when target is a select", () => {
+      const onSelectAll = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onSelectAll }));
+
+      const { event, cleanup } = createEventFromElement("select", "a", {
+        ctrlKey: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onSelectAll).not.toHaveBeenCalled();
+      cleanup();
+    });
+
+    it("should not intercept Ctrl+Z when target is an input", () => {
+      const onUndo = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onUndo }));
+
+      const { event, cleanup } = createEventFromElement("input", "z", {
+        ctrlKey: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onUndo).not.toHaveBeenCalled();
+      cleanup();
+    });
+
+    it("should not intercept Alt+ArrowUp when target is an input", () => {
+      const onMoveStepUp = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onMoveStepUp }));
+
+      const { event, cleanup } = createEventFromElement("input", "ArrowUp", {
+        altKey: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onMoveStepUp).not.toHaveBeenCalled();
+      cleanup();
+    });
+
+    it("should not intercept Escape when target is an input", () => {
+      const onClearSelection = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onClearSelection }));
+
+      const { event, cleanup } = createEventFromElement("input", "Escape");
+      window.dispatchEvent(event);
+
+      expect(onClearSelection).not.toHaveBeenCalled();
+      cleanup();
+    });
+  });
+
   describe("optional handlers", () => {
     it("should not throw when handlers are undefined", () => {
       // Arrange & Act

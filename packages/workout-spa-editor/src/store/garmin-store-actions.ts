@@ -17,10 +17,6 @@ const persist = (get: Get): void => {
   persistGarminData({ username, password, lambdaUrl });
 };
 
-const STALE_URL = "https://api.kaiord.com/push";
-
-const migrateStaleUrl = (url: string): string => (url === STALE_URL ? "" : url);
-
 export const createGarminActions = (
   set: Set,
   get: Get,
@@ -28,11 +24,10 @@ export const createGarminActions = (
 ) => ({
   hydrate: async () => {
     const data = await loadGarminData();
-    const migrated = migrateStaleUrl(data.lambdaUrl);
     set({
       username: data.username,
       password: data.password,
-      lambdaUrl: migrated || defaultUrl,
+      lambdaUrl: data.lambdaUrl || defaultUrl,
       hydrated: true,
     });
   },
