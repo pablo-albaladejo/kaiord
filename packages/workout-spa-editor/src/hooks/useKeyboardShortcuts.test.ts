@@ -775,6 +775,17 @@ describe("useKeyboardShortcuts", () => {
       expect(onMoveStepUp).not.toHaveBeenCalled();
       cleanup();
     });
+
+    it("should not intercept Escape when target is an input", () => {
+      const onClearSelection = vi.fn();
+      renderHook(() => useKeyboardShortcuts({ onClearSelection }));
+
+      const { event, cleanup } = createEventFromElement("input", "Escape");
+      window.dispatchEvent(event);
+
+      expect(onClearSelection).not.toHaveBeenCalled();
+      cleanup();
+    });
   });
 
   describe("optional handlers", () => {

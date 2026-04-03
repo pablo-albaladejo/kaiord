@@ -124,6 +124,14 @@ export function useKeyboardShortcuts({
 
     // Handle Escape key separately (no modifier needed)
     const handleEscape = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
       if (event.key === "Escape") {
         event.preventDefault();
         onClearSelection?.();
