@@ -1,5 +1,5 @@
-> Synced: 2026-03-30
-> Updated: 2026-03-30 — synced garmin-connect dependency on @kaiord/garmin
+> Synced: 2026-04-03
+> Updated: 2026-04-03 — synced garmin-connect auth refactor (TokenManager, retry, two fetch paths)
 
 # Adapter Contracts
 
@@ -55,7 +55,18 @@ Format adapter packages SHALL NOT import from other adapter packages. All inter-
 
 ### Requirement: API Adapter Pattern
 
-API adapters (e.g., `@kaiord/garmin-connect`) SHALL export factory functions for clients, auth providers, and token stores. They SHALL depend on `@kaiord/core` and MAY depend on a corresponding format adapter when the API requires format conversion (e.g., `@kaiord/garmin-connect` depends on `@kaiord/garmin` to convert KRD→GCN before pushing to the Garmin Connect API).
+API adapters (e.g., `@kaiord/garmin-connect`) SHALL export a client factory that returns `{ auth, service, init }`. The factory SHALL remain synchronous; async initialization (e.g., token auto-restore) SHALL be performed via an explicit `init()` method.
+
+API adapters SHALL separate concerns into:
+
+- **TokenManager**: encapsulated token state with generation counter, best-effort persistence, and subscriber-pattern concurrent refresh. Refresh I/O is injected via a `refreshFn` closure.
+- **AuthProvider**: implements the `AuthProvider` port from `@kaiord/core`. Delegates token state to TokenManager. Accepts injectable `fetchFn`.
+- **HttpClient**: receives a narrowed `TokenReader` type for read-only token access. Uses token generation to handle concurrent 401s without redundant refreshes.
+- **Retry wrapper**: optional `withRetry(fetchFn)` with exponential backoff and full jitter for transient failures (429, 5xx, network errors). Applied to API calls only, NOT to SSO login.
+
+API adapters SHALL depend on `@kaiord/core` and MAY depend on a corresponding format adapter when the API requires format conversion (e.g., `@kaiord/garmin-connect` depends on `@kaiord/garmin` to convert KRD→GCN before pushing to the Garmin Connect API).
+
+Token values (`access_token`, `oauth_token_secret`, `refresh_token`) SHALL NOT appear in log messages at any level.
 
 ### Requirement: LLM Adapter Pattern
 
@@ -101,6 +112,18 @@ The AI adapter (`@kaiord/ai`) SHALL export a `createTextToWorkout` factory that 
 
 #### Scenario: Garmin Connect API client
 
-- **GIVEN** a consumer calls `createGarminConnectClient()` from `@kaiord/garmin-connect`
-- **WHEN** they authenticate and push a KRD workout
-- **THEN** the client handles SSO login and returns a `PushResult` with Garmin Connect URL
+- **GIVEN** a consumer calls `createGarminConnectClient({ tokenStore, retry })` from `@kaiord/garmin-connect`
+- **WHEN** they call `await client.init()` and then authenticate and push a KRD workout
+- **THEN** the client auto-restores tokens from the store, handles SSO login if needed, retries transient API failures, and returns a `PushResult` with Garmin Connect URL
+
+#### Scenario: Garmin Connect token auto-restore
+
+- **GIVEN** a consumer creates a client with a `tokenStore` containing valid tokens
+- **WHEN** they call `await client.init()`
+- **THEN** `init()` returns `{ restored: true }` and the client is authenticated without calling `login()`
+
+#### Scenario: Garmin Connect retry on transient failure
+
+- **GIVEN** a consumer creates a client with `retry: { maxRetries: 3 }`
+- **WHEN** an API call receives HTTP 429
+- **THEN** the call is retried with exponential backoff and full jitter, up to 3 times
