@@ -51,7 +51,7 @@ jobs:
           npx cdk deploy --require-approval never \
             --context allowedOrigins='["${{ vars.SPA_ORIGIN }}"]' \
             --context tsSecretName='${{ vars.TS_SECRET_NAME }}' \
-            --context tsExitNode='${{ vars.TS_EXIT_NODE }}' \
+            --context tsExitNode='${{ secrets.TS_EXIT_NODE }}' \
             --outputs-file cdk-outputs.json
 
       - name: Smoke test
