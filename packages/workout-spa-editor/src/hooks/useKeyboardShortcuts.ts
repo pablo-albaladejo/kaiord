@@ -31,6 +31,15 @@ export function useKeyboardShortcuts({
 }: KeyboardShortcutHandlers) {
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
+      const target = event.target;
+      if (
+        target instanceof HTMLInputElement ||
+        target instanceof HTMLTextAreaElement ||
+        target instanceof HTMLSelectElement
+      ) {
+        return;
+      }
+
       // Check for Ctrl (Windows/Linux) or Cmd (Mac)
       const isModifier = event.ctrlKey || event.metaKey;
 
