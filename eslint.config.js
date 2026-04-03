@@ -1,6 +1,35 @@
 import js from "@eslint/js";
-import tseslint from "typescript-eslint";
+import boundaries from "eslint-plugin-boundaries";
 import importPlugin from "eslint-plugin-import";
+import tseslint from "typescript-eslint";
+
+const adapterPackages = ["fit", "tcx", "zwo", "garmin", "garmin-connect"];
+
+// garmin-connect legitimately depends on garmin (GCN format)
+const adapterAllowedDeps = {
+  "garmin-connect": ["garmin"],
+};
+
+function adapterBoundaryRules() {
+  return adapterPackages.map((pkg) => ({
+    files: [`packages/${pkg}/src/**/*.ts`],
+    rules: {
+      "no-restricted-imports": [
+        "error",
+        {
+          paths: adapterPackages
+            .filter((other) => other !== pkg)
+            .filter((other) => !(adapterAllowedDeps[pkg] ?? []).includes(other))
+            .map((other) => ({
+              name: `@kaiord/${other}`,
+              message:
+                "Adapter packages must not depend on other adapters. Depend on @kaiord/core only.",
+            })),
+        },
+      ],
+    },
+  }));
+}
 
 export default tseslint.config(
   js.configs.recommended,
@@ -333,5 +362,62 @@ export default tseslint.config(
     rules: {
       "max-lines": "off",
     },
-  }
+  },
+  {
+    // Hexagonal architecture boundaries for core package
+    files: ["packages/core/src/**/*.ts"],
+    plugins: { boundaries },
+    settings: {
+      "boundaries/elements": [
+        {
+          type: "domain",
+          pattern: "packages/core/src/domain/**",
+        },
+        {
+          type: "application",
+          pattern: "packages/core/src/application/**",
+        },
+        {
+          type: "ports",
+          pattern: "packages/core/src/ports/**",
+        },
+        {
+          type: "adapters",
+          pattern: "packages/core/src/adapters/**",
+        },
+      ],
+    },
+    rules: {
+      "boundaries/element-types": [
+        "error",
+        {
+          default: "allow",
+          rules: [
+            {
+              // domain must not import from application, ports, or adapters
+              from: "domain",
+              disallow: ["application", "ports", "adapters"],
+              message:
+                "Domain layer must not depend on {{target}}. Domain is pure and self-contained.",
+            },
+            {
+              // application must not import from adapters
+              from: "application",
+              disallow: ["adapters"],
+              message:
+                "Application layer must not depend on adapters. Use ports instead.",
+            },
+            {
+              // ports must not import from application or adapters
+              from: "ports",
+              disallow: ["application", "adapters"],
+              message:
+                "Ports must not depend on {{target}}. Ports define interfaces only.",
+            },
+          ],
+        },
+      ],
+    },
+  },
+  ...adapterBoundaryRules()
 );
