@@ -499,6 +499,9 @@ jobs:
   integration-garmin:
     runs-on: ubuntu-latest
     needs: [detect-changes, build]
+    concurrency:
+      group: garmin-integration
+      cancel-in-progress: false
     if: |
       needs.build.result == 'success' &&
       needs.detect-changes.outputs.should-test == 'true' &&
