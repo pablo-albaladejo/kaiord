@@ -1,5 +1,7 @@
 import { extractWorkout } from "@kaiord/core";
 import ora from "ora";
+import { handleExtractWorkoutError } from "./handle-error.js";
+import { extractWorkoutOptionsSchema } from "./types.js";
 import {
   loadConfigWithMetadata,
   mergeWithConfig,
@@ -7,8 +9,25 @@ import {
 import { ExitCode } from "../../utils/exit-codes.js";
 import { loadFileAsKrd } from "../../utils/krd-converter.js";
 import { createLogger } from "../../utils/logger-factory.js";
-import { handleExtractWorkoutError } from "./handle-error.js";
-import { extractWorkoutOptionsSchema } from "./types.js";
+import type { ExtractWorkoutOptions } from "./types.js";
+
+const resolveOptions = async (
+  options: unknown
+): Promise<ExtractWorkoutOptions> => {
+  const configResult = await loadConfigWithMetadata();
+  const { config } = configResult;
+  const mergedOptions = mergeWithConfig(
+    options as Record<string, unknown>,
+    config
+  );
+
+  return extractWorkoutOptionsSchema.parse({
+    ...mergedOptions,
+    verbose: mergedOptions.verbose ?? config.verbose,
+    quiet: mergedOptions.quiet ?? config.quiet,
+    logFormat: mergedOptions.logFormat || config.logFormat,
+  });
+};
 
 export const extractWorkoutCommand = async (
   options: unknown
@@ -17,21 +36,7 @@ export const extractWorkoutCommand = async (
   let spinner: ReturnType<typeof ora> | null = null;
 
   try {
-    const configResult = await loadConfigWithMetadata();
-    const { config } = configResult;
-    const mergedOptions = mergeWithConfig(
-      options as Record<string, unknown>,
-      config
-    );
-
-    const optionsWithDefaults = {
-      ...mergedOptions,
-      verbose: mergedOptions.verbose ?? config.verbose,
-      quiet: mergedOptions.quiet ?? config.quiet,
-      logFormat: mergedOptions.logFormat || config.logFormat,
-    };
-
-    const opts = extractWorkoutOptionsSchema.parse(optionsWithDefaults);
+    const opts = await resolveOptions(options);
     logger = await createLogger({
       type: opts.logFormat,
       level: opts.verbose ? "debug" : opts.quiet ? "error" : "info",

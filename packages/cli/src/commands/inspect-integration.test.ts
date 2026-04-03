@@ -106,6 +106,8 @@ describe("inspect command integration tests", () => {
       expect(result.exitCode).toBe(0);
       const output = stripAnsi(result.stdout);
       expect(output).toContain("Type:");
+      const stderr = stripAnsi(result.stderr);
+      expect(stderr).not.toContain("Inspecting file");
     }
   );
 });

@@ -7,10 +7,10 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
+import { registerCommands } from "./register-commands.js";
 import { getExitCodeForError } from "../utils/error-exit-code.js";
 import { formatError } from "../utils/error-formatter.js";
 import { ExitCode } from "../utils/exit-codes.js";
-import { registerCommands } from "./register-commands.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

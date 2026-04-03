@@ -89,6 +89,8 @@ describe("extract-workout command integration tests", () => {
       expect(result.exitCode).toBe(0);
       const workout = JSON.parse(result.stdout);
       expect(workout.sport).toBeDefined();
+      const stderr = stripAnsi(result.stderr);
+      expect(stderr).not.toContain("Extracting workout");
     }
   );
 });
