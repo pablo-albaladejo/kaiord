@@ -305,7 +305,7 @@ jobs:
       - name: Check coverage threshold
         run: |
           THRESHOLD=80
-          if [ "${{ matrix.package }}" = "mcp" ] || [ "${{ matrix.package }}" = "infra" ]; then
+          if [ "${{ matrix.package }}" = "infra" ]; then
             THRESHOLD=70
           fi
           node .github/scripts/check-coverage.js ./packages/${{ matrix.package }}/coverage/coverage-final.json $THRESHOLD
