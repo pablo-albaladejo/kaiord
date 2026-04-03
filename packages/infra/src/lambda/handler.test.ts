@@ -123,7 +123,7 @@ describe("Lambda handler", () => {
     expect(consoleSpy).toHaveBeenCalledWith("Garmin push failed", {
       requestId: "test-req-id",
       errorType: "TypeError",
-      errorMessage: "Connection timeout",
+      errorMessage: "Connection timeout".slice(0, 100),
     });
     consoleSpy.mockRestore();
   });
@@ -143,15 +143,18 @@ describe("Lambda handler", () => {
 
   it("should return 503 when tunnel health check fails", async () => {
     process.env.TS_SECRET_API_KEY = "test-secret";
-    mockTunnelHealth.mockResolvedValueOnce(false);
+    try {
+      mockTunnelHealth.mockResolvedValueOnce(false);
 
-    const result = await handler(createEvent(validBody));
+      const result = await handler(createEvent(validBody));
 
-    expect(result.statusCode).toBe(503);
-    expect(JSON.parse(result.body as string).error).toBe(
-      "Proxy tunnel unavailable"
-    );
-    delete process.env.TS_SECRET_API_KEY;
+      expect(result.statusCode).toBe(503);
+      expect(JSON.parse(result.body as string).error).toBe(
+        "Proxy tunnel unavailable"
+      );
+    } finally {
+      delete process.env.TS_SECRET_API_KEY;
+    }
   });
 
   it("should not leak credentials in error responses", async () => {

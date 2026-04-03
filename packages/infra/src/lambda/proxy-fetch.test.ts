@@ -1,4 +1,5 @@
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
+import type { MockedFunction } from "vitest";
 
 class MockSocksProxyAgent {
   url: string;
@@ -11,11 +12,11 @@ vi.mock("socks-proxy-agent", () => ({
   SocksProxyAgent: MockSocksProxyAgent,
 }));
 
-let mockFetch: ReturnType<typeof vi.fn>;
+let mockFetch: MockedFunction<typeof fetch>;
 const originalFetch = globalThis.fetch;
 
 beforeEach(() => {
-  mockFetch = vi.fn();
+  mockFetch = vi.fn<typeof fetch>();
   globalThis.fetch = mockFetch;
 });
 

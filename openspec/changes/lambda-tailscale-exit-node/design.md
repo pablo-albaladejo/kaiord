@@ -88,7 +88,7 @@
 
 ## Architecture diagram
 
-```
+```text
 Browser → API Gateway → Lambda Handler
                           ├─ tailscale-lambda-extension [cold start + health check]
                           │   ├─ tailscaled --tun=userspace-networking --socks5-server=:1055

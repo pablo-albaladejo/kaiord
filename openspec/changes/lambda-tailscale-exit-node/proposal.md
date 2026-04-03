@@ -48,7 +48,7 @@ None. The Lambda API (request/response) is unchanged.
 - Cold start impact: +5-10s for Tailscale tunnel initialization (real-world benchmarks)
 - Memory: 256 → 512 MB (Tailscale needs headroom)
 - Timeout: 30 → 60s (tunnel init + Garmin SSO + push)
-- Reserved concurrency: 3-5 (prevent ephemeral node flood on Tailscale coordination server)
+- Reserved concurrency: 5 (prevent ephemeral node flood on Tailscale coordination server)
 - Cost: ~$0 incremental (reuses existing exit node)
 - Secrets: Tailscale API key in Secrets Manager, exit node hostname in env var
 

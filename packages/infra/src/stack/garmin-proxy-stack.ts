@@ -47,7 +47,7 @@ export class GarminProxyStack extends Stack {
     });
 
     const tsSecretName =
-      (this.node.tryGetContext("tsSecretName") as string) ??
+      (this.node.tryGetContext("tsSecretName") as string) ||
       "tailscale-api-key";
     const tsExitNode = this.node.tryGetContext("tsExitNode") as
       | string
