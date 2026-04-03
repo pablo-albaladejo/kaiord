@@ -156,9 +156,7 @@ describe("createGarminWorkoutService", () => {
 
     expect(krd).toBeDefined();
     expect(krd.type).toBe("structured_workout");
-    expect(httpClient.get).toHaveBeenCalledWith(
-      `${WORKOUT_URL}/workout/42`
-    );
+    expect(httpClient.get).toHaveBeenCalledWith(`${WORKOUT_URL}/workout/42`);
   });
 
   it("should throw a ServiceApiError when pull fails", async () => {
@@ -177,9 +175,7 @@ describe("createGarminWorkoutService", () => {
     const service = createGarminWorkoutService(httpClient, mockLogger);
     await service.remove("42");
 
-    expect(httpClient.del).toHaveBeenCalledWith(
-      `${WORKOUT_URL}/workout/42`
-    );
+    expect(httpClient.del).toHaveBeenCalledWith(`${WORKOUT_URL}/workout/42`);
   });
 
   it("should throw a ServiceApiError when remove fails", async () => {

@@ -1,4 +1,8 @@
-import { createConsoleLogger, toText, createServiceApiError } from "@kaiord/core";
+import {
+  createConsoleLogger,
+  toText,
+  createServiceApiError,
+} from "@kaiord/core";
 import { createGarminReader, createGarminWriter } from "@kaiord/garmin";
 import { pullWorkout } from "./pull-workout";
 import { removeWorkout } from "./remove-workout";
@@ -9,7 +13,14 @@ import {
   garminWorkoutSummarySchema,
 } from "../schemas/workout-response.schema";
 import type { GarminHttpClient } from "../http/types";
-import type { KRD, ListOptions, Logger, PushResult, WorkoutService, WorkoutSummary } from "@kaiord/core";
+import type {
+  KRD,
+  ListOptions,
+  Logger,
+  PushResult,
+  WorkoutService,
+  WorkoutSummary,
+} from "@kaiord/core";
 
 export type GarminWorkoutClient = WorkoutService;
 
@@ -23,7 +34,10 @@ const pushWorkout = async (
     log.info("Pushing workout to Garmin Connect");
     const gcnJson = await toText(krd, garminWriter, log);
     const payload = JSON.parse(gcnJson) as Record<string, unknown>;
-    const raw = await httpClient.post<unknown>(`${WORKOUT_URL}/workout`, payload);
+    const raw = await httpClient.post<unknown>(
+      `${WORKOUT_URL}/workout`,
+      payload
+    );
     const result = garminPushResponseSchema.parse(raw);
     return {
       id: String(result.workoutId),
@@ -44,8 +58,13 @@ const listWorkouts = async (
     log.info("Listing workouts from Garmin Connect");
     const start = options?.offset ?? 0;
     const limit = options?.limit ?? 20;
-    const params = new URLSearchParams({ start: String(start), limit: String(limit) });
-    const raw = await httpClient.get<unknown>(`${WORKOUT_URL}/workouts?${params}`);
+    const params = new URLSearchParams({
+      start: String(start),
+      limit: String(limit),
+    });
+    const raw = await httpClient.get<unknown>(
+      `${WORKOUT_URL}/workouts?${params}`
+    );
     const workouts = garminWorkoutSummarySchema.array().parse(raw);
     return workouts.map(mapToWorkoutSummary);
   } catch (error) {
