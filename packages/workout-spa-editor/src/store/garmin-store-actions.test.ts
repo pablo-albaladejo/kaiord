@@ -78,7 +78,6 @@ describe("createGarminActions", () => {
 
       expect(get().lambdaUrl).toBe(DEFAULT_URL);
     });
-
   });
 
   describe("setCredentials", () => {
