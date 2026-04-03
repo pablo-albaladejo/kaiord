@@ -1,10 +1,10 @@
 import type { Argv } from "yargs";
 import { ExitCode } from "../../utils/exit-codes";
-import { inspectCommand } from "./index";
+import { extractWorkoutCommand } from "./index";
 
-export const inspectYargsConfig = {
-  command: "inspect",
-  describe: "Inspect a fitness file and display a summary or full KRD JSON",
+export const extractWorkoutYargsConfig = {
+  command: "extract-workout",
+  describe: "Extract structured workout from a fitness file as JSON",
   builder: (yargs: Argv) => {
     return yargs
       .option("input", {
@@ -18,11 +18,17 @@ export const inspectYargsConfig = {
         description:
           "Override input format detection (fit, tcx, zwo, gcn, krd)",
       })
-      .example("$0 inspect -i workout.fit", "Display a summary of the file")
-      .example("$0 inspect -i workout.fit --json", "Output full KRD JSON");
+      .example(
+        "$0 extract-workout -i workout.fit",
+        "Extract workout JSON from FIT file"
+      )
+      .example(
+        "$0 extract-workout -i workout.krd",
+        "Extract workout JSON from KRD file"
+      );
   },
   handler: async (argv: Record<string, unknown>) => {
-    const exitCode = await inspectCommand(argv);
+    const exitCode = await extractWorkoutCommand(argv);
     if (exitCode !== ExitCode.SUCCESS) {
       process.exit(exitCode);
     }

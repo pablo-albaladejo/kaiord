@@ -1,6 +1,7 @@
 import type { Argv } from "yargs";
 import { convertYargsConfig } from "../commands/convert/yargs-config.js";
 import { diffYargsConfig } from "../commands/diff/yargs-config.js";
+import { extractWorkoutYargsConfig } from "../commands/extract-workout/yargs-config.js";
 import { garminYargsConfig } from "../commands/garmin/yargs-config.js";
 import { inspectYargsConfig } from "../commands/inspect/yargs-config.js";
 import { validateYargsConfig } from "../commands/validate/yargs-config.js";
@@ -17,6 +18,7 @@ const commands: YargsConfig[] = [
   validateYargsConfig,
   diffYargsConfig,
   inspectYargsConfig,
+  extractWorkoutYargsConfig,
   garminYargsConfig,
 ];
 

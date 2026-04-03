@@ -7,53 +7,45 @@ import { getFixturePath } from "../tests/helpers/fixture-paths";
 const cliPath = resolve(__dirname, "../bin/kaiord.ts");
 
 describe("inspect command integration tests", () => {
-  it(
-    "should display summary for a KRD file",
-    { timeout: 30_000 },
-    async () => {
-      // Arrange
-      const inputPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
+  it("should display summary for a KRD file", { timeout: 30_000 }, async () => {
+    // Arrange
+    const inputPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
 
-      // Act
-      const result = await execa(
-        "tsx",
-        [cliPath, "inspect", "--input", inputPath],
-        { reject: false }
-      );
+    // Act
+    const result = await execa(
+      "tsx",
+      [cliPath, "inspect", "--input", inputPath],
+      { reject: false }
+    );
 
-      // Assert
-      expect(result.exitCode).toBe(0);
-      const output = stripAnsi(result.stdout);
-      expect(output).toContain("Type:");
-      expect(output).toContain("Sport:");
-      expect(output).toContain("--- Metadata ---");
-      expect(output).toContain("--- Data ---");
-      expect(output).toContain("--- Workout ---");
-    }
-  );
+    // Assert
+    expect(result.exitCode).toBe(0);
+    const output = stripAnsi(result.stdout);
+    expect(output).toContain("Type:");
+    expect(output).toContain("Sport:");
+    expect(output).toContain("--- Metadata ---");
+    expect(output).toContain("--- Data ---");
+    expect(output).toContain("--- Workout ---");
+  });
 
-  it(
-    "should display summary for a FIT file",
-    { timeout: 30_000 },
-    async () => {
-      // Arrange
-      const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
+  it("should display summary for a FIT file", { timeout: 30_000 }, async () => {
+    // Arrange
+    const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
 
-      // Act
-      const result = await execa(
-        "tsx",
-        [cliPath, "inspect", "--input", inputPath],
-        { reject: false }
-      );
+    // Act
+    const result = await execa(
+      "tsx",
+      [cliPath, "inspect", "--input", inputPath],
+      { reject: false }
+    );
 
-      // Assert
-      expect(result.exitCode).toBe(0);
-      const output = stripAnsi(result.stdout);
-      expect(output).toContain("Type:");
-      expect(output).toContain("Sport:");
-      expect(output).toContain("--- Workout ---");
-    }
-  );
+    // Assert
+    expect(result.exitCode).toBe(0);
+    const output = stripAnsi(result.stdout);
+    expect(output).toContain("Type:");
+    expect(output).toContain("Sport:");
+    expect(output).toContain("--- Workout ---");
+  });
 
   it(
     "should output full KRD JSON with --json flag",
