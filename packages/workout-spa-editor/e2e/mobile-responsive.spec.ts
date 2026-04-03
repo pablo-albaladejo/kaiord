@@ -326,7 +326,9 @@ test.describe("Workout Actions Overflow", () => {
     const discardButton = page.getByTestId("discard-workout-button");
     await expect(discardButton).toBeVisible();
 
-    const headerCard = discardButton.locator("xpath=ancestor::div[contains(@class, 'rounded-lg')]").first();
+    const headerCard = discardButton
+      .locator("xpath=ancestor::div[contains(@class, 'rounded-lg')]")
+      .first();
     const headerBox = await headerCard.boundingBox();
     const discardBox = await discardButton.boundingBox();
 
