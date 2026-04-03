@@ -7,13 +7,10 @@ import { dirname, join } from "path";
 import { fileURLToPath } from "url";
 import yargs from "yargs";
 import { hideBin } from "yargs/helpers";
-import { convertYargsConfig } from "../commands/convert/yargs-config.js";
-import { diffYargsConfig } from "../commands/diff/yargs-config.js";
-import { garminYargsConfig } from "../commands/garmin/yargs-config.js";
-import { validateYargsConfig } from "../commands/validate/yargs-config.js";
 import { getExitCodeForError } from "../utils/error-exit-code.js";
 import { formatError } from "../utils/error-formatter.js";
 import { ExitCode } from "../utils/exit-codes.js";
+import { registerCommands } from "./register-commands.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -24,33 +21,11 @@ const version = packageJson.version;
 
 const main = async (): Promise<void> => {
   try {
-    await yargs(hideBin(process.argv))
+    const cli = yargs(hideBin(process.argv))
       .scriptName("kaiord")
-      .usage("$0 <command> [options]")
-      .command(
-        convertYargsConfig.command,
-        convertYargsConfig.describe,
-        convertYargsConfig.builder,
-        convertYargsConfig.handler
-      )
-      .command(
-        validateYargsConfig.command,
-        validateYargsConfig.describe,
-        validateYargsConfig.builder,
-        validateYargsConfig.handler
-      )
-      .command(
-        diffYargsConfig.command,
-        diffYargsConfig.describe,
-        diffYargsConfig.builder,
-        diffYargsConfig.handler
-      )
-      .command(
-        garminYargsConfig.command,
-        garminYargsConfig.describe,
-        garminYargsConfig.builder,
-        garminYargsConfig.handler
-      )
+      .usage("$0 <command> [options]");
+
+    await registerCommands(cli)
       .option("verbose", {
         type: "boolean",
         description: "Enable verbose logging",
