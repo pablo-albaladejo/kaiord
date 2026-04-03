@@ -510,7 +510,11 @@ jobs:
           oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
           oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
           tags: tag:ci
-          args: --exit-node=${{ secrets.TS_EXIT_NODE }} --exit-node-allow-lan-access
+
+      - name: Route traffic through exit node
+        run: sudo tailscale set --exit-node=$TS_EXIT_NODE --exit-node-allow-lan-access
+        env:
+          TS_EXIT_NODE: ${{ secrets.TS_EXIT_NODE }}
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
