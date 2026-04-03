@@ -504,6 +504,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Setup Tailscale
+        uses: tailscale/github-action@v4
+        with:
+          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
+          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
+          tags: tag:ci
+          args: --exit-node=${{ secrets.TS_EXIT_NODE }} --exit-node-allow-lan-access
+
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
         with:

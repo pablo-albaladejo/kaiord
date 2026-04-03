@@ -1,4 +1,4 @@
-import { beforeAll, describe, it, expect } from "vitest";
+import { beforeAll, describe, expect, it } from "vitest";
 import type { KRD } from "@kaiord/core";
 import { createGarminConnectClient } from "./index";
 
