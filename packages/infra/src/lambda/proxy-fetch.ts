@@ -2,11 +2,16 @@ import { SocksProxyAgent } from "socks-proxy-agent";
 
 const SOCKS5_URL = "socks://localhost:1055";
 
-const agent = new SocksProxyAgent(SOCKS5_URL);
+let agent: SocksProxyAgent | undefined;
+
+const getAgent = (): SocksProxyAgent => {
+  agent ??= new SocksProxyAgent(SOCKS5_URL);
+  return agent;
+};
 
 export const proxyFetch: typeof globalThis.fetch = (input, init) =>
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  globalThis.fetch(input, { ...init, dispatcher: agent } as any);
+  globalThis.fetch(input, { ...init, dispatcher: getAgent() } as any);
 
 export const checkTunnelHealth = async (): Promise<boolean> => {
   try {
