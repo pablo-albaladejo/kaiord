@@ -13,11 +13,11 @@ then closes the individual Dependabot PRs.
 
 ### CI Actions (workflow YAML)
 
-| Action                | From | To  | PR   |
-| --------------------- | ---- | --- | ---- |
+| Action                  | From  | To  | PR   |
+| ----------------------- | ----- | --- | ---- |
 | actions/upload-artifact | v4/v6 | v7  | #169 |
-| actions/checkout       | v4   | v6  | #170 |
-| actions/setup-node     | v4   | v6  | #171 |
+| actions/checkout        | v4    | v6  | #170 |
+| actions/setup-node      | v4    | v6  | #171 |
 
 Most workflows are already migrated. Only stragglers remain:
 
@@ -27,13 +27,13 @@ Most workflows are already migrated. Only stragglers remain:
 
 ### Dev Dependencies (package.json)
 
-| Package             | From     | To      | PR   | Location               |
-| ------------------- | -------- | ------- | ---- | ---------------------- |
-| storybook           | 10.2.13  | 10.2.17 | #172 | workout-spa-editor     |
-| autoprefixer        | 10.4.24  | 10.4.27 | #173 | workout-spa-editor     |
-| esbuild             | 0.25.12  | 0.27.3  | #174 | infra                  |
-| @changesets/cli     | 2.29.8   | 2.30.0  | #175 | root                   |
-| dependency-cruiser  | 16.10.4  | 17.3.8  | #176 | root                   |
+| Package            | From    | To      | PR   | Location           |
+| ------------------ | ------- | ------- | ---- | ------------------ |
+| storybook          | 10.2.13 | 10.2.17 | #172 | workout-spa-editor |
+| autoprefixer       | 10.4.24 | 10.4.27 | #173 | workout-spa-editor |
+| esbuild            | 0.25.12 | 0.27.3  | #174 | infra              |
+| @changesets/cli    | 2.29.8  | 2.30.0  | #175 | root               |
+| dependency-cruiser | 16.10.4 | 17.3.8  | #176 | root               |
 
 ## Affected Packages
 
