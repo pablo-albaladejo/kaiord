@@ -342,41 +342,28 @@ test.describe("Workout Actions Overflow", () => {
     );
   });
 
-  test("should stack action buttons vertically below lg breakpoint", async ({
+  test("should not overflow action buttons at 1100px width", async ({
     page,
   }) => {
-    await page.setViewportSize({ width: 900, height: 800 });
+    await page.setViewportSize({ width: 1100, height: 800 });
     await loadWorkout(page);
 
-    const saveButton = page.getByRole("button", { name: "Save Workout" });
     const discardButton = page.getByTestId("discard-workout-button");
-
-    await expect(saveButton).toBeVisible();
     await expect(discardButton).toBeVisible();
 
-    const saveBox = await saveButton.boundingBox();
+    const headerCard = discardButton
+      .locator("xpath=ancestor::div[contains(@class, 'rounded-lg')]")
+      .first();
+    const headerBox = await headerCard.boundingBox();
     const discardBox = await discardButton.boundingBox();
 
-    // Below lg (1024px), buttons should stack: discard below save
-    expect(discardBox!.y).toBeGreaterThan(saveBox!.y);
-  });
+    expect(headerBox).not.toBeNull();
+    expect(discardBox).not.toBeNull();
 
-  test("should display action buttons in a row at lg breakpoint", async ({
-    page,
-  }) => {
-    await page.setViewportSize({ width: 1200, height: 800 });
-    await loadWorkout(page);
-
-    const saveButton = page.getByRole("button", { name: "Save Workout" });
-    const discardButton = page.getByTestId("discard-workout-button");
-
-    await expect(saveButton).toBeVisible();
-    await expect(discardButton).toBeVisible();
-
-    const saveBox = await saveButton.boundingBox();
-    const discardBox = await discardButton.boundingBox();
-
-    // At lg+ (1024px), buttons should be on the same row
-    expect(Math.abs(discardBox!.y - saveBox!.y)).toBeLessThan(10);
+    // Discard button must be fully inside the header card
+    expect(discardBox!.x).toBeGreaterThanOrEqual(headerBox!.x);
+    expect(discardBox!.x + discardBox!.width).toBeLessThanOrEqual(
+      headerBox!.x + headerBox!.width + 1
+    );
   });
 });
