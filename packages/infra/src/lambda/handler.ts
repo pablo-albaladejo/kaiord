@@ -76,7 +76,8 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     console.error("Garmin push failed", {
       requestId,
       errorType: error instanceof Error ? error.constructor.name : "unknown",
-      errorMessage: error instanceof Error ? error.message.slice(0, 100) : "unknown",
+      errorMessage:
+        error instanceof Error ? error.message.slice(0, 100) : "unknown",
     });
     return errorResponse(500, "Garmin API error");
   }
