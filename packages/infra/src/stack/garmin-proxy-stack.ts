@@ -74,7 +74,7 @@ export class GarminProxyStack extends Stack {
         target: "node24",
         format: OutputFormat.ESM,
         mainFields: ["module", "main"],
-        nodeModules: ["undici"],
+        nodeModules: ["undici", "fetch-socks", "socks"],
       },
     });
 

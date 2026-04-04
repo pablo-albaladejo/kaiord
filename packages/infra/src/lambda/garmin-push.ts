@@ -3,7 +3,6 @@ import {
   createGarminConnectClient,
   createMemoryTokenStore,
 } from "@kaiord/garmin-connect";
-import { proxyFetch } from "./proxy-fetch";
 
 export type GarminCredentials = {
   username: string;
@@ -21,11 +20,7 @@ export const pushToGarmin = async (
   credentials: GarminCredentials
 ): Promise<PushResultResponse> => {
   const tokenStore = createMemoryTokenStore();
-  const fetchFn = process.env.TS_SECRET_API_KEY ? proxyFetch : undefined;
-  const { auth, service } = createGarminConnectClient({
-    tokenStore,
-    ...(fetchFn ? { fetchFn } : {}),
-  });
+  const { auth, service } = createGarminConnectClient({ tokenStore });
 
   await auth.login(credentials.username, credentials.password);
 

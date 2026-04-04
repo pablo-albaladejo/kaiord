@@ -22,8 +22,9 @@
     "@kaiord/garmin-connect": "workspace:^",
     "aws-cdk-lib": "^2.180.0",
     "constructs": "^10.4.2",
+    "fetch-socks": "^1.3.3",
     "tailscale-lambda-extension": "^0.0.8",
-    "undici": "^8.0.1",
+    "undici": "^8.0.2",
     "zod": "^4.0.0"
   },
   "devDependencies": {
