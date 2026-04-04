@@ -61,7 +61,6 @@ export class GarminProxyStack extends Stack {
       runtime: Runtime.NODEJS_24_X,
       timeout: Duration.seconds(60),
       memorySize: 512,
-      reservedConcurrentExecutions: 5,
       logGroup,
       layers: [tailscale.layer],
       environment: {
