@@ -70,7 +70,45 @@ fi
 
 This would allow using OAuth client keys (no expiry) with `TS_ADVERTISE_TAGS=tag:lambda` as an environment variable. Consider contributing this upstream to `rehanvdm/tailscale-lambda-extension`.
 
-## Decision 4: Tunnel health check on every invocation
+The forked script should also support `TS_EXIT_NODE` natively:
+
+```bash
+# Forked (with exit-node + advertise-tags support):
+EXTRA_ARGS=""
+if [ -n "${TS_ADVERTISE_TAGS}" ]; then
+  EXTRA_ARGS="--advertise-tags=${TS_ADVERTISE_TAGS}"
+fi
+/opt/extensions/bin/tailscale --socket=/tmp/tailscale.sock up \
+  --authkey="${TS_KEY}" \
+  --hostname="${TS_HOSTNAME}" \
+  ${EXTRA_ARGS}
+
+if [ -n "${TS_EXIT_NODE}" ]; then
+  /opt/extensions/bin/tailscale --socket=/tmp/tailscale.sock set \
+    --exit-node="${TS_EXIT_NODE}"
+fi
+```
+
+**Benefits of fork over current workaround:**
+
+- OAuth client keys (no 90-day expiry, no rotation needed)
+- Exit node configured in extension lifecycle (before handler runs)
+- Cleaner separation of concerns (handler doesn't manage Tailscale)
+- Could contribute upstream to `rehanvdm/tailscale-lambda-extension`
+
+## Decision 4: Exit node configuration from handler
+
+**Layer:** adapters (`@kaiord/infra`)
+
+**Choice:** Call `tailscale set --exit-node` from the Lambda handler on first invocation (cold start only). The construct's extension starts Tailscale but does not support `--exit-node`.
+
+**Rationale:** The extension runs `tailscale up` before the handler starts, but only with `--authkey` and `--hostname`. The `tailscale set` command can modify the running configuration after the fact. This avoids forking the construct.
+
+**Implementation:** `tailscale-exit-node.ts` calls `/opt/extensions/bin/tailscale --socket=/tmp/tailscale.sock set --exit-node=X` once per container. Cached via module-level flag.
+
+**Trade-off:** When the construct is forked (see above), this workaround can be removed and exit node will be configured natively in the extension lifecycle.
+
+## Decision 5: Tunnel health check on every invocation
 
 **Layer:** adapters (`@kaiord/infra`)
 
@@ -80,15 +118,13 @@ This would allow using OAuth client keys (no expiry) with `TS_ADVERTISE_TAGS=tag
 
 **Implementation:** Attempt a TCP connection through SOCKS5 before proxying to Garmin. If it fails, kill `tailscaled` and reinitialize.
 
-## Decision 5: Reserved concurrency limit
+## Decision 6: Reserved concurrency (deferred)
 
 **Layer:** adapters (`@kaiord/infra`)
 
-**Choice:** Set Lambda reserved concurrency to 5.
+**Status:** Removed — AWS account quota too low (10). Increase to 1000 requested. API Gateway throttle (10 rps, burst 5) provides protection in the meantime. Re-add `reservedConcurrentExecutions: 5` once quota is approved.
 
-**Rationale (from Lambda engineer review):** Each concurrent invocation creates a separate ephemeral Tailscale node. Burst traffic can overwhelm the coordination server ([GitHub issue #14956](https://github.com/tailscale/tailscale/issues/14956)). The API Gateway throttle (10 rps, burst 5) provides some protection, but explicit concurrency limits prevent node flood.
-
-## Decision 6: Disable minification, enable source maps
+## Decision 7: Disable minification, enable source maps
 
 **Layer:** adapters (`@kaiord/infra`)
 
@@ -96,7 +132,7 @@ This would allow using OAuth client keys (no expiry) with `TS_ADVERTISE_TAGS=tag
 
 **Rationale:** Minification obscured error types (`ServiceAuthError` → `Op`), making debugging impossible. Bundle size increase (~100KB) is negligible for server-side. Already deployed during debug session.
 
-## Decision 7: Tailscale ACLs for `tag:lambda`
+## Decision 8: Tailscale ACLs for `tag:lambda`
 
 **Layer:** external (Tailscale admin console)
 
