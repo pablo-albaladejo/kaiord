@@ -74,6 +74,7 @@ export class GarminProxyStack extends Stack {
         target: "node24",
         format: OutputFormat.ESM,
         mainFields: ["module", "main"],
+        nodeModules: ["socks-proxy-agent", "socks", "smart-buffer"],
       },
     });
 
