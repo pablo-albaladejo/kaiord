@@ -157,6 +157,22 @@ describe("Lambda handler", () => {
     }
   });
 
+  it("should return 400 for invalid body even when tunnel is down", async () => {
+    process.env.TS_SECRET_API_KEY = "test-secret";
+    try {
+      mockTunnelHealth.mockResolvedValueOnce(false);
+
+      const result = await handler(createEvent("not json"));
+
+      expect(result.statusCode).toBe(400);
+      expect(JSON.parse(result.body as string).error).toBe(
+        "Invalid JSON in request body"
+      );
+    } finally {
+      delete process.env.TS_SECRET_API_KEY;
+    }
+  });
+
   it("should not leak credentials in error responses", async () => {
     mockPush.mockRejectedValueOnce(new Error("Some error with pass123"));
 

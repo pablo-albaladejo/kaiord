@@ -31,11 +31,6 @@ const isRateLimited = (error: unknown): boolean => {
 export const handler = async (event: APIGatewayProxyEventV2) => {
   const requestId = event.requestContext?.requestId;
 
-  if (useTailscale() && !(await checkTunnelHealth())) {
-    console.error("Tailscale tunnel unavailable", { requestId });
-    return errorResponse(503, "Proxy tunnel unavailable");
-  }
-
   if (!event.body) {
     return errorResponse(400, "Request body is required");
   }
@@ -58,6 +53,11 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   const validation = pushRequestSchema.safeParse(parsed);
   if (!validation.success) {
     return errorResponse(400, "Invalid request: check KRD and credentials");
+  }
+
+  if (useTailscale() && !(await checkTunnelHealth())) {
+    console.error("Tailscale tunnel unavailable", { requestId });
+    return errorResponse(503, "Proxy tunnel unavailable");
   }
 
   try {
