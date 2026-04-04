@@ -40,6 +40,36 @@
 
 **Exit node hostname** (`TS_EXIT_NODE`) is non-sensitive and stays as an env var.
 
+### Auth key types
+
+The construct's `tailscale up` is hardcoded with only `--authkey` and `--hostname` flags — no `--advertise-tags` support. This means:
+
+- **Auth keys** (`tskey-auth-*`): Work directly. Tags are embedded in the key at creation time. Max expiry: 90 days. Must be rotated.
+- **OAuth client keys** (`tskey-client-*`): Do NOT work with the current construct. They require `--advertise-tags` which the extension shell script does not pass.
+
+**Current choice:** Auth key with tags pre-configured (ephemeral, reusable, `tag:lambda`, 90-day expiry).
+
+**Future alternative if auth key rotation becomes burdensome:** Fork the `tailscale-lambda-extension` construct to add `--advertise-tags` support. The change would be in the embedded shell script (`extensions/tailscale-extension`) inside `tailscale-extension.zip`:
+
+```bash
+# Current (hardcoded):
+/opt/extensions/bin/tailscale --socket=/tmp/tailscale.sock up \
+  --authkey="${TS_KEY}" \
+  --hostname="${TS_HOSTNAME}"
+
+# Forked (with advertise-tags support):
+EXTRA_ARGS=""
+if [ -n "${TS_ADVERTISE_TAGS}" ]; then
+  EXTRA_ARGS="--advertise-tags=${TS_ADVERTISE_TAGS}"
+fi
+/opt/extensions/bin/tailscale --socket=/tmp/tailscale.sock up \
+  --authkey="${TS_KEY}" \
+  --hostname="${TS_HOSTNAME}" \
+  ${EXTRA_ARGS}
+```
+
+This would allow using OAuth client keys (no expiry) with `TS_ADVERTISE_TAGS=tag:lambda` as an environment variable. Consider contributing this upstream to `rehanvdm/tailscale-lambda-extension`.
+
 ## Decision 4: Tunnel health check on every invocation
 
 **Layer:** adapters (`@kaiord/infra`)
