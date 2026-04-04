@@ -13,7 +13,10 @@ export const enableSocksProxy = (): void => {
     host: SOCKS5_HOST,
     port: SOCKS5_PORT,
   });
-  setGlobalDispatcher(dispatcher);
+  // Cast needed: fetch-socks uses undici 7.x types, but the project may resolve
+  // undici 8.x where Dispatcher signatures differ. Safe at runtime.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  setGlobalDispatcher(dispatcher as any);
   enabled = true;
 };
 
