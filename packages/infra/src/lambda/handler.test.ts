@@ -7,8 +7,12 @@ vi.mock("./garmin-push", () => ({
 }));
 
 vi.mock("./proxy-fetch", () => ({
-  proxyFetch: vi.fn(),
+  enableSocksProxy: vi.fn(),
   checkTunnelHealth: vi.fn().mockResolvedValue(true),
+}));
+
+vi.mock("./tailscale-exit-node", () => ({
+  ensureExitNode: vi.fn().mockResolvedValue(undefined),
 }));
 
 const { pushToGarmin } = await import("./garmin-push");

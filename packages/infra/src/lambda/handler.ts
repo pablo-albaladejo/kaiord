@@ -1,7 +1,7 @@
 import type { APIGatewayProxyEventV2 } from "aws-lambda";
 import { pushRequestSchema } from "./request-schema";
 import { pushToGarmin } from "./garmin-push";
-import { checkTunnelHealth } from "./proxy-fetch";
+import { checkTunnelHealth, enableSocksProxy } from "./proxy-fetch";
 import { errorResponse, jsonResponse } from "./response";
 import { ensureExitNode } from "./tailscale-exit-node";
 
@@ -56,13 +56,15 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     return errorResponse(400, "Invalid request: check KRD and credentials");
   }
 
-  if (useTailscale()) await ensureExitNode();
+  if (useTailscale()) {
+    await ensureExitNode();
+    enableSocksProxy();
+  }
 
-  // TODO: re-enable health check once SOCKS5 proxy routing is verified
-  // if (useTailscale() && !(await checkTunnelHealth())) {
-  //   console.error("Tailscale tunnel unavailable", { requestId });
-  //   return errorResponse(503, "Proxy tunnel unavailable");
-  // }
+  if (useTailscale() && !(await checkTunnelHealth())) {
+    console.error("Tailscale tunnel unavailable", { requestId });
+    return errorResponse(503, "Proxy tunnel unavailable");
+  }
 
   try {
     const result = await pushToGarmin(
