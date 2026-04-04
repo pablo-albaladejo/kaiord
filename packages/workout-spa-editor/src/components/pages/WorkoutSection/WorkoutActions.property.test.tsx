@@ -140,7 +140,7 @@ describe("WorkoutActions - Property Tests", () => {
    * For any viewport width, buttons in the metadata section should either display horizontally
    * with proper spacing (desktop) or stack vertically (mobile) without overflow
    */
-  it("should have responsive layout classes for mobile and desktop", () => {
+  it("should have responsive layout classes with flex-wrap", () => {
     // Arrange & Act
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
@@ -149,32 +149,10 @@ describe("WorkoutActions - Property Tests", () => {
       "discard-workout-button"
     ).parentElement;
 
-    // Verify responsive classes are present
-    // Mobile: flex-col (stack vertically)
-    expect(container).toHaveClass("flex-col");
-
-    // Desktop: lg:flex-row (horizontal layout)
-    expect(container).toHaveClass("lg:flex-row");
+    // Flex-wrap allows buttons to flow and wrap naturally
+    expect(container).toHaveClass("flex-wrap");
 
     // Proper spacing
     expect(container).toHaveClass("gap-3");
-
-    // Full width on mobile, auto width on desktop
-    expect(container).toHaveClass("w-full");
-    expect(container).toHaveClass("lg:w-auto");
-  });
-
-  it("should have full width buttons on mobile", () => {
-    // Arrange & Act
-    renderWithProviders(<WorkoutActions {...defaultProps} />);
-
-    // Assert
-    const discardButton = screen.getByTestId("discard-workout-button");
-
-    // Buttons should be full width on mobile
-    expect(discardButton).toHaveClass("w-full");
-
-    // But auto width on desktop
-    expect(discardButton).toHaveClass("lg:w-auto");
   });
 });

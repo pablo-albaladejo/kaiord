@@ -54,7 +54,7 @@ describe("WorkoutActions", () => {
   });
 
   describe("button alignment", () => {
-    it("should align buttons in a row on desktop", () => {
+    it("should use flex-wrap for responsive layout", () => {
       // Arrange & Act
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
@@ -62,18 +62,7 @@ describe("WorkoutActions", () => {
       const container = screen.getByTestId(
         "discard-workout-button"
       ).parentElement;
-      expect(container).toHaveClass("lg:flex-row");
-    });
-
-    it("should stack buttons vertically on mobile", () => {
-      // Arrange & Act
-      renderWithProviders(<WorkoutActions {...defaultProps} />);
-
-      // Assert
-      const container = screen.getByTestId(
-        "discard-workout-button"
-      ).parentElement;
-      expect(container).toHaveClass("flex-col");
+      expect(container).toHaveClass("flex-wrap");
     });
   });
 
