@@ -1,21 +1,23 @@
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MockedFunction } from "vitest";
 
-class MockSocks5ProxyAgent {
-  uri: string;
-  constructor(uri: string) {
-    this.uri = uri;
-  }
-}
+const mockSetGlobalDispatcher = vi.fn();
+const mockSocksDispatcher = vi.fn().mockReturnValue({ mock: true });
 
 vi.mock("undici", () => ({
-  Socks5ProxyAgent: MockSocks5ProxyAgent,
+  setGlobalDispatcher: mockSetGlobalDispatcher,
+}));
+
+vi.mock("fetch-socks", () => ({
+  socksDispatcher: mockSocksDispatcher,
 }));
 
 let mockFetch: MockedFunction<typeof fetch>;
 const originalFetch = globalThis.fetch;
 
 beforeEach(() => {
+  vi.resetModules();
+  vi.clearAllMocks();
   mockFetch = vi.fn<typeof fetch>();
   globalThis.fetch = mockFetch;
 });
@@ -24,20 +26,27 @@ afterAll(() => {
   globalThis.fetch = originalFetch;
 });
 
-describe("proxyFetch", () => {
-  it("should pass dispatcher with SOCKS5 proxy agent to fetch", async () => {
-    mockFetch.mockResolvedValueOnce(new Response("ok"));
-    const { proxyFetch } = await import("./proxy-fetch");
+describe("enableSocksProxy", () => {
+  it("should set global dispatcher with SOCKS5 config", async () => {
+    const { enableSocksProxy } = await import("./proxy-fetch");
 
-    await proxyFetch("https://example.com", { method: "GET" });
+    enableSocksProxy();
 
-    expect(mockFetch).toHaveBeenCalledWith(
-      "https://example.com",
-      expect.objectContaining({
-        method: "GET",
-        dispatcher: expect.any(MockSocks5ProxyAgent),
-      })
-    );
+    expect(mockSocksDispatcher).toHaveBeenCalledWith({
+      type: 5,
+      host: "localhost",
+      port: 1055,
+    });
+    expect(mockSetGlobalDispatcher).toHaveBeenCalledWith({ mock: true });
+  });
+
+  it("should only configure once", async () => {
+    const { enableSocksProxy } = await import("./proxy-fetch");
+
+    enableSocksProxy();
+    enableSocksProxy();
+
+    expect(mockSetGlobalDispatcher).toHaveBeenCalledTimes(1);
   });
 });
 
