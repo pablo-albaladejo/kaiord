@@ -46,7 +46,7 @@ describe("checkTunnelHealth", () => {
     mockFetch.mockResolvedValueOnce(new Response("", { status: 200 }));
     const { checkTunnelHealth } = await import("./proxy-fetch");
 
-    const result = await checkTunnelHealth();
+    const result = await checkTunnelHealth(1);
 
     expect(result).toBe(true);
   });
@@ -55,7 +55,7 @@ describe("checkTunnelHealth", () => {
     mockFetch.mockResolvedValueOnce(new Response("", { status: 403 }));
     const { checkTunnelHealth } = await import("./proxy-fetch");
 
-    const result = await checkTunnelHealth();
+    const result = await checkTunnelHealth(1);
 
     expect(result).toBe(true);
   });
@@ -64,7 +64,7 @@ describe("checkTunnelHealth", () => {
     mockFetch.mockRejectedValueOnce(new Error("ECONNREFUSED"));
     const { checkTunnelHealth } = await import("./proxy-fetch");
 
-    const result = await checkTunnelHealth();
+    const result = await checkTunnelHealth(1);
 
     expect(result).toBe(false);
   });
