@@ -5,6 +5,8 @@ vi.mock("node:child_process", () => ({
   execFileSync: mockExecFileSync,
 }));
 
+const STATUS_ONLINE = JSON.stringify({ ExitNodeStatus: { Online: true } });
+
 describe("ensureExitNode", () => {
   beforeEach(() => {
     vi.resetModules();
@@ -12,11 +14,14 @@ describe("ensureExitNode", () => {
     delete process.env.TS_EXIT_NODE;
   });
 
-  it("should call tailscale set with exit node from env", async () => {
+  it("should call tailscale set and wait for exit node", async () => {
     process.env.TS_EXIT_NODE = "100.116.150.51";
+    mockExecFileSync
+      .mockReturnValueOnce("") // set command
+      .mockReturnValue(Buffer.from(STATUS_ONLINE)); // status command
 
     const { ensureExitNode } = await import("./tailscale-exit-node");
-    ensureExitNode();
+    await ensureExitNode();
 
     expect(mockExecFileSync).toHaveBeenCalledWith(
       "/opt/extensions/bin/tailscale",
@@ -27,19 +32,27 @@ describe("ensureExitNode", () => {
 
   it("should skip when TS_EXIT_NODE is not set", async () => {
     const { ensureExitNode } = await import("./tailscale-exit-node");
-    ensureExitNode();
+    await ensureExitNode();
 
     expect(mockExecFileSync).not.toHaveBeenCalled();
   });
 
   it("should only configure once per container", async () => {
     process.env.TS_EXIT_NODE = "100.116.150.51";
+    mockExecFileSync
+      .mockReturnValueOnce("")
+      .mockReturnValue(Buffer.from(STATUS_ONLINE));
 
     const { ensureExitNode } = await import("./tailscale-exit-node");
-    ensureExitNode();
-    ensureExitNode();
+    await ensureExitNode();
+    await ensureExitNode();
 
-    expect(mockExecFileSync).toHaveBeenCalledTimes(1);
+    // set called once, status called once (second ensureExitNode skips)
+    expect(
+      mockExecFileSync.mock.calls.filter((c: string[][]) =>
+        c[1]?.includes("set")
+      )
+    ).toHaveLength(1);
   });
 
   it("should log error and continue if tailscale set fails", async () => {
@@ -50,7 +63,7 @@ describe("ensureExitNode", () => {
     const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
 
     const { ensureExitNode } = await import("./tailscale-exit-node");
-    ensureExitNode();
+    await ensureExitNode();
 
     expect(consoleSpy).toHaveBeenCalledWith(
       "Failed to set Tailscale exit node",

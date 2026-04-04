@@ -56,7 +56,7 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
     return errorResponse(400, "Invalid request: check KRD and credentials");
   }
 
-  if (useTailscale()) ensureExitNode();
+  if (useTailscale()) await ensureExitNode();
 
   if (useTailscale() && !(await checkTunnelHealth())) {
     console.error("Tailscale tunnel unavailable", { requestId });
