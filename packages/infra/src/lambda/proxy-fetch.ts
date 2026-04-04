@@ -37,7 +37,8 @@ export const checkTunnelHealth = async (
   maxRetries = 3,
   delayMs = 2000
 ): Promise<boolean> => {
-  for (let i = 0; i < maxRetries; i++) {
+  const retries = Math.max(1, maxRetries);
+  for (let i = 0; i < retries; i++) {
     if (await probe()) return true;
     if (i < maxRetries - 1) await sleep(delayMs);
   }
