@@ -11,6 +11,8 @@ import { Alarm, Metric, TreatMissingData } from "aws-cdk-lib/aws-cloudwatch";
 import { Runtime } from "aws-cdk-lib/aws-lambda";
 import { NodejsFunction, OutputFormat } from "aws-cdk-lib/aws-lambda-nodejs";
 import { LogGroup, RetentionDays } from "aws-cdk-lib/aws-logs";
+import * as secretsmanager from "aws-cdk-lib/aws-secretsmanager";
+import { TailscaleLambdaExtension } from "tailscale-lambda-extension";
 import type { Construct } from "constructs";
 
 export class GarminProxyStack extends Stack {
@@ -44,21 +46,44 @@ export class GarminProxyStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY,
     });
 
+    const tsSecretName =
+      (this.node.tryGetContext("tsSecretName") as string) ||
+      "tailscale-api-key";
+    const tsExitNode = this.node.tryGetContext("tsExitNode") as
+      | string
+      | undefined;
+
+    const tailscale = new TailscaleLambdaExtension(this, "TailscaleExt");
+
     const handler = new NodejsFunction(this, "PushHandler", {
       entry: "src/lambda/handler.ts",
       handler: "handler",
       runtime: Runtime.NODEJS_24_X,
-      timeout: Duration.seconds(30),
-      memorySize: 256,
+      timeout: Duration.seconds(60),
+      memorySize: 512,
+      reservedConcurrentExecutions: 5,
       logGroup,
+      layers: [tailscale.layer],
+      environment: {
+        TS_SECRET_API_KEY: tsSecretName,
+        TS_HOSTNAME: "garmin-proxy-lambda",
+        ...(tsExitNode ? { TS_EXIT_NODE: tsExitNode } : {}),
+      },
       bundling: {
-        minify: true,
-        sourceMap: false,
+        minify: false,
+        sourceMap: true,
         target: "node24",
         format: OutputFormat.ESM,
         mainFields: ["module", "main"],
       },
     });
+
+    const tsSecret = secretsmanager.Secret.fromSecretNameV2(
+      this,
+      "TailscaleApiKey",
+      tsSecretName
+    );
+    tsSecret.grantRead(handler);
 
     const api = new HttpApi(this, "GarminProxyApi", {
       createDefaultStage: false,
