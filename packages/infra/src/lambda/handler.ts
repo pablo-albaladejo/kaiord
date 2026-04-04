@@ -3,6 +3,7 @@ import { pushRequestSchema } from "./request-schema";
 import { pushToGarmin } from "./garmin-push";
 import { checkTunnelHealth } from "./proxy-fetch";
 import { errorResponse, jsonResponse } from "./response";
+import { ensureExitNode } from "./tailscale-exit-node";
 
 const MAX_BODY_BYTES = 512_000;
 const useTailscale = (): boolean => Boolean(process.env.TS_SECRET_API_KEY);
@@ -54,6 +55,8 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   if (!validation.success) {
     return errorResponse(400, "Invalid request: check KRD and credentials");
   }
+
+  if (useTailscale()) ensureExitNode();
 
   if (useTailscale() && !(await checkTunnelHealth())) {
     console.error("Tailscale tunnel unavailable", { requestId });
