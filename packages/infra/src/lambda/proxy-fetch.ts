@@ -18,7 +18,10 @@ export const proxyFetch: typeof globalThis.fetch = (input, init) =>
     dispatcher: getProxy(),
   } as unknown as RequestInit);
 
-export const checkTunnelHealth = async (): Promise<boolean> => {
+const sleep = (ms: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, ms));
+
+const probe = async (): Promise<boolean> => {
   try {
     const res = await proxyFetch("https://sso.garmin.com", {
       method: "HEAD",
@@ -28,4 +31,15 @@ export const checkTunnelHealth = async (): Promise<boolean> => {
   } catch {
     return false;
   }
+};
+
+export const checkTunnelHealth = async (
+  maxRetries = 3,
+  delayMs = 2000
+): Promise<boolean> => {
+  for (let i = 0; i < maxRetries; i++) {
+    if (await probe()) return true;
+    if (i < maxRetries - 1) await sleep(delayMs);
+  }
+  return false;
 };
