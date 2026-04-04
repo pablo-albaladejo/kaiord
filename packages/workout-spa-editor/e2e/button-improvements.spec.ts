@@ -450,11 +450,15 @@ test.describe("Button Improvements - Mobile Layout", () => {
     }
 
     if (libraryBox) {
-      expect(libraryBox.x + libraryBox.width).toBeLessThanOrEqual(viewportWidth);
+      expect(libraryBox.x + libraryBox.width).toBeLessThanOrEqual(
+        viewportWidth
+      );
     }
 
     if (discardBox) {
-      expect(discardBox.x + discardBox.width).toBeLessThanOrEqual(viewportWidth);
+      expect(discardBox.x + discardBox.width).toBeLessThanOrEqual(
+        viewportWidth
+      );
     }
   });
 
