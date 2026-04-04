@@ -1,15 +1,15 @@
 import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MockedFunction } from "vitest";
 
-class MockSocksProxyAgent {
-  url: string;
-  constructor(url: string) {
-    this.url = url;
+class MockSocks5ProxyAgent {
+  uri: string;
+  constructor(uri: string) {
+    this.uri = uri;
   }
 }
 
-vi.mock("socks-proxy-agent", () => ({
-  SocksProxyAgent: MockSocksProxyAgent,
+vi.mock("undici", () => ({
+  Socks5ProxyAgent: MockSocks5ProxyAgent,
 }));
 
 let mockFetch: MockedFunction<typeof fetch>;
@@ -25,7 +25,7 @@ afterAll(() => {
 });
 
 describe("proxyFetch", () => {
-  it("should pass dispatcher with SOCKS5 agent to fetch", async () => {
+  it("should pass dispatcher with SOCKS5 proxy agent to fetch", async () => {
     mockFetch.mockResolvedValueOnce(new Response("ok"));
     const { proxyFetch } = await import("./proxy-fetch");
 
@@ -35,7 +35,7 @@ describe("proxyFetch", () => {
       "https://example.com",
       expect.objectContaining({
         method: "GET",
-        dispatcher: expect.any(MockSocksProxyAgent),
+        dispatcher: expect.any(MockSocks5ProxyAgent),
       })
     );
   });
