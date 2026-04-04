@@ -9,10 +9,14 @@ const getProxy = (): Socks5ProxyAgent => {
   return proxy;
 };
 
+// Node.js 24 globalThis.fetch supports `dispatcher` via undici but
+// the types are experimental (Socks5ProxyAgent doesn't match Dispatcher).
+// Cast is safe: Socks5ProxyAgent IS an undici Dispatcher at runtime.
 export const proxyFetch: typeof globalThis.fetch = (input, init) =>
-  // Socks5ProxyAgent is a valid undici Dispatcher but types are experimental
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  globalThis.fetch(input, { ...init, dispatcher: getProxy() as any });
+  globalThis.fetch(input, {
+    ...init,
+    dispatcher: getProxy(),
+  } as unknown as RequestInit);
 
 export const checkTunnelHealth = async (): Promise<boolean> => {
   try {
