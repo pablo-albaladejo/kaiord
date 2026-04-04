@@ -68,4 +68,16 @@ describe("checkTunnelHealth", () => {
 
     expect(result).toBe(false);
   });
+
+  it("should retry and succeed on second attempt", async () => {
+    mockFetch
+      .mockRejectedValueOnce(new Error("ECONNREFUSED"))
+      .mockResolvedValueOnce(new Response("", { status: 200 }));
+    const { checkTunnelHealth } = await import("./proxy-fetch");
+
+    const result = await checkTunnelHealth(2, 10);
+
+    expect(result).toBe(true);
+    expect(mockFetch).toHaveBeenCalledTimes(2);
+  });
 });
