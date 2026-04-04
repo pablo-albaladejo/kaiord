@@ -51,7 +51,7 @@ export function WorkoutHeader({ workout, krd }: WorkoutHeaderProps) {
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+      <div className="flex flex-col gap-4">
         <WorkoutTitle workout={workout} onEdit={handleEditMetadata} />
         <WorkoutActions
           krd={krd}

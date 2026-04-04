@@ -47,7 +47,7 @@ export function SaveButton({ workout, disabled, className }: SaveButtonProps) {
 
   return (
     <div
-      className={["flex w-full flex-col gap-2 lg:w-auto", className]
+      className={["flex flex-col gap-2", className]
         .filter(Boolean)
         .join(" ")}
     >
