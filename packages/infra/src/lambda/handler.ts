@@ -58,10 +58,11 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
 
   if (useTailscale()) await ensureExitNode();
 
-  if (useTailscale() && !(await checkTunnelHealth())) {
-    console.error("Tailscale tunnel unavailable", { requestId });
-    return errorResponse(503, "Proxy tunnel unavailable");
-  }
+  // TODO: re-enable health check once SOCKS5 proxy routing is verified
+  // if (useTailscale() && !(await checkTunnelHealth())) {
+  //   console.error("Tailscale tunnel unavailable", { requestId });
+  //   return errorResponse(503, "Proxy tunnel unavailable");
+  // }
 
   try {
     const result = await pushToGarmin(
