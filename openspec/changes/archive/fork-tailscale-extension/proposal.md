@@ -1,3 +1,5 @@
+> Completed: 2026-04-06
+
 # Proposal: Fork tailscale-lambda-extension with exit-node and advertise-tags support
 
 ## Problem
