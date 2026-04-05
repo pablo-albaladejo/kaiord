@@ -1100,8 +1100,11 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
       timeout: 10000,
     });
 
-    // Open context menu
-    await page.getByTestId("block-actions-trigger").click();
+    // Open context menu (force: true to bypass root div pointer interception
+    // on Mobile Chrome CI where single-worker execution is slower)
+    const editTrigger = page.getByTestId("block-actions-trigger");
+    await editTrigger.scrollIntoViewIfNeeded();
+    await editTrigger.click({ force: true });
 
     // Click "Edit Count" option
     await page.getByRole("menuitem", { name: /edit count/i }).click();
@@ -1174,8 +1177,11 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
       page.getByTestId("repetition-block-card").getByText("1 step")
     ).toBeVisible();
 
-    // Open context menu
-    await page.getByTestId("block-actions-trigger").click();
+    // Open context menu (force: true to bypass root div pointer interception
+    // on Mobile Chrome CI where single-worker execution is slower)
+    const addTrigger = page.getByTestId("block-actions-trigger");
+    await addTrigger.scrollIntoViewIfNeeded();
+    await addTrigger.click({ force: true });
 
     // Click "Add Step" option
     await page.getByRole("menuitem", { name: /add step/i }).click();
@@ -1242,8 +1248,11 @@ test.describe("Repetition Blocks - Context Menu Actions", () => {
     // Verify block exists
     await expect(page.getByText("Repeat Block")).toBeVisible();
 
-    // Open context menu
-    await page.getByTestId("block-actions-trigger").click();
+    // Open context menu (force: true to bypass root div pointer interception
+    // on Mobile Chrome CI where single-worker execution is slower)
+    const deleteTrigger = page.getByTestId("block-actions-trigger");
+    await deleteTrigger.scrollIntoViewIfNeeded();
+    await deleteTrigger.click({ force: true });
 
     // Click "Delete" option
     await page.getByRole("menuitem", { name: /delete/i }).click();

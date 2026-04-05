@@ -227,7 +227,8 @@ test.describe("Tooltips", () => {
     }
   });
 
-  test("should hide tooltips when mouse leaves", async ({ page }) => {
+  test("should hide tooltips when mouse leaves", async ({ page, isMobile }) => {
+    test.skip(isMobile, "Mouse hover not available on mobile touch devices");
     // Arrange
     await page.goto("/");
     await page.waitForLoadState("networkidle");

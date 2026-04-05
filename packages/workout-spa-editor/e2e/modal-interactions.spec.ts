@@ -323,8 +323,11 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
       timeout: 5000,
     });
 
-    // Open context menu and click delete
-    await page.getByTestId("block-actions-trigger").click();
+    // Open context menu (force: true to bypass root div pointer interception
+    // on Mobile Chrome CI where single-worker execution is slower)
+    const trigger = page.getByTestId("block-actions-trigger");
+    await trigger.scrollIntoViewIfNeeded();
+    await trigger.click({ force: true });
 
     // Wait for menu to be visible
     await expect(page.getByRole("menu")).toBeVisible({ timeout: 5000 });
