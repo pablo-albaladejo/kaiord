@@ -45,7 +45,7 @@ describe("diff command integration", () => {
       const file2 = join(FIXTURES_PATH, "fit/WorkoutRepeatSteps.fit");
 
       // Act - use reject: false to capture non-zero exit codes
-      const { stdout, exitCode } = await execa(
+      const { stdout, stderr, exitCode } = await execa(
         "node",
         [CLI_PATH, "diff", "--file1", file1, "--file2", file2],
         { reject: false }
@@ -53,6 +53,9 @@ describe("diff command integration", () => {
 
       // Assert
       // Exit code 0 = identical, 10 = differences found (not an error)
+      if (![ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND].includes(exitCode)) {
+        console.error("Unexpected exit code", { exitCode, stderr, stdout });
+      }
       expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(
         exitCode
       );
@@ -148,7 +151,7 @@ describe("diff command integration", () => {
       const krdFile = join(FIXTURES_PATH, "krd/WorkoutIndividualSteps.krd");
 
       // Act - use reject: false to capture non-zero exit codes
-      const { stdout, exitCode } = await execa(
+      const { stdout, stderr, exitCode } = await execa(
         "node",
         [CLI_PATH, "diff", "--file1", fitFile, "--file2", krdFile],
         { reject: false }
@@ -156,6 +159,10 @@ describe("diff command integration", () => {
 
       // Assert
       // Exit code 0 = identical, 10 = differences found (not an error)
+      // Log stderr for debugging flaky CI failures (exit code 1 under load)
+      if (![ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND].includes(exitCode)) {
+        console.error("Unexpected exit code", { exitCode, stderr, stdout });
+      }
       expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(
         exitCode
       );
