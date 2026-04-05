@@ -50,11 +50,12 @@ The extension SHALL support passing `--advertise-tags` to `tailscale up` via the
 
 The construct SHALL expose new optional props for configuring the extension.
 
-### Scenario: Props passed to environment
+### Scenario: Environment variables documented
 
-- **GIVEN** a CDK stack creates `TailscaleLambdaExtension` with `advertiseTags: "tag:lambda"` and `exitNode: "100.116.150.51"`
-- **WHEN** the construct is synthesized
-- **THEN** the Lambda environment SHALL include `TS_ADVERTISE_TAGS=tag:lambda` and `TS_EXIT_NODE=100.116.150.51`
+- **GIVEN** a user configures `TS_ADVERTISE_TAGS` and `TS_EXIT_NODE` on their Lambda function
+- **WHEN** the extension initializes
+- **THEN** the extension SHALL use these env vars as documented in the README
+- **AND** the CDK construct SHALL NOT set these env vars (it only provides the Lambda Layer)
 
 ## Requirement: Backward compatibility
 

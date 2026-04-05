@@ -52,6 +52,9 @@ export class GarminProxyStack extends Stack {
     const tsExitNode = this.node.tryGetContext("tsExitNode") as
       | string
       | undefined;
+    const tsAdvertiseTags = this.node.tryGetContext("tsAdvertiseTags") as
+      | string
+      | undefined;
 
     const tailscale = new TailscaleLambdaExtension(this, "TailscaleExt");
 
@@ -67,6 +70,7 @@ export class GarminProxyStack extends Stack {
         TS_SECRET_API_KEY: tsSecretName,
         TS_HOSTNAME: "garmin-proxy-lambda",
         ...(tsExitNode ? { TS_EXIT_NODE: tsExitNode } : {}),
+        ...(tsAdvertiseTags ? { TS_ADVERTISE_TAGS: tsAdvertiseTags } : {}),
       },
       bundling: {
         minify: false,
