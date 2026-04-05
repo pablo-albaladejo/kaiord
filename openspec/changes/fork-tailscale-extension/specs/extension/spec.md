@@ -63,6 +63,7 @@ All new features MUST be optional. Existing usage without new props MUST behave 
 ## Requirement: Documentation
 
 The README MUST document:
+
 - New environment variables (`TS_EXIT_NODE`, `TS_ADVERTISE_TAGS`)
 - Usage with OAuth client keys (when using `--advertise-tags`)
 - Usage with exit nodes

@@ -1,5 +1,7 @@
+import { useEffect, useState } from "react";
 import { GarminLambdaInput } from "./GarminLambdaInput";
 import { useGarminStore } from "../../../store/garmin-store";
+import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
 
 export const GarminTab: React.FC = () => {
@@ -12,6 +14,20 @@ export const GarminTab: React.FC = () => {
     resetLambdaUrl,
   } = useGarminStore();
 
+  const [email, setEmail] = useState(username);
+  const [pass, setPass] = useState(password);
+
+  useEffect(() => {
+    setEmail(username);
+    setPass(password);
+  }, [username, password]);
+
+  const isDirty = email !== username || pass !== password;
+
+  const handleSave = () => {
+    setCredentials(email, pass);
+  };
+
   return (
     <div className="space-y-6">
       <section>
@@ -23,16 +39,19 @@ export const GarminTab: React.FC = () => {
             label="Email"
             type="email"
             placeholder="your@email.com"
-            value={username}
-            onChange={(e) => setCredentials(e.target.value, password)}
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
           />
           <Input
             label="Password"
             type="password"
             placeholder="Your Garmin password"
-            value={password}
-            onChange={(e) => setCredentials(username, e.target.value)}
+            value={pass}
+            onChange={(e) => setPass(e.target.value)}
           />
+          <Button size="sm" onClick={handleSave} disabled={!isDirty}>
+            Save Credentials
+          </Button>
         </div>
       </section>
 
