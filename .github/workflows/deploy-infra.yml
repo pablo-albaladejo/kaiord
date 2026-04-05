@@ -52,6 +52,7 @@ jobs:
             --context allowedOrigins='["${{ vars.SPA_ORIGIN }}"]' \
             --context tsSecretName='${{ vars.TS_SECRET_NAME }}' \
             --context tsExitNode='${{ secrets.TS_EXIT_NODE }}' \
+            --context tsAdvertiseTags='${{ vars.TS_ADVERTISE_TAGS }}' \
             --outputs-file cdk-outputs.json
 
       - name: Smoke test
