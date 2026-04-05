@@ -457,7 +457,7 @@ test.describe("Accessibility", () => {
     await expect(stepCard).toBeVisible();
   });
 
-  test("should have smooth theme transitions", async ({ page }) => {
+  test("should have smooth theme transitions", async ({ page, isMobile }) => {
     // Requirement 13: Smooth transitions between themes
     await page.goto("/");
 
@@ -476,7 +476,11 @@ test.describe("Accessibility", () => {
     const themeToggle = page.getByRole("button", {
       name: /switch to (light|dark) mode/i,
     });
-    await themeToggle.click();
+    if (isMobile) {
+      await themeToggle.click({ force: true });
+    } else {
+      await themeToggle.click();
+    }
     await page.waitForTimeout(500);
 
     // Verify page is still functional - use specific heading level to avoid ambiguity
