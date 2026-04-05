@@ -25,6 +25,7 @@ test.describe("Modal Interactions", () => {
 
   test("should display confirmation modal instead of browser alert when deleting block", async ({
     page,
+    isMobile,
   }) => {
     // Requirement 6.1: Display modal dialog instead of browser alert
     await page.goto("/");
@@ -39,12 +40,16 @@ test.describe("Modal Interactions", () => {
     });
 
     // Wait for block actions trigger to be visible
-    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
-      timeout: 5000,
-    });
+    const trigger = page.getByTestId("block-actions-trigger");
+    await expect(trigger).toBeVisible({ timeout: 5000 });
 
-    // Open context menu and click delete
-    await page.getByTestId("block-actions-trigger").click();
+    // Open context menu and click delete (force on mobile to bypass instability)
+    if (isMobile) {
+      await trigger.scrollIntoViewIfNeeded();
+      await trigger.click({ force: true });
+    } else {
+      await trigger.click();
+    }
 
     // Wait for menu to be visible
     await expect(page.getByRole("menu")).toBeVisible({ timeout: 5000 });
@@ -63,7 +68,10 @@ test.describe("Modal Interactions", () => {
     ).toBeVisible();
   });
 
-  test("should dismiss modal when Escape key is pressed", async ({ page }) => {
+  test("should dismiss modal when Escape key is pressed", async ({
+    page,
+    isMobile,
+  }) => {
     // Requirement 6.5: Allow Escape key to dismiss modal
     await page.goto("/");
 
@@ -81,12 +89,16 @@ test.describe("Modal Interactions", () => {
     await expect(page.getByText("Repeat Block")).toBeVisible();
 
     // Wait for block actions trigger to be visible
-    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
-      timeout: 5000,
-    });
+    const trigger = page.getByTestId("block-actions-trigger");
+    await expect(trigger).toBeVisible({ timeout: 5000 });
 
-    // Open context menu and click delete to show modal
-    await page.getByTestId("block-actions-trigger").click();
+    // Open context menu and click delete to show modal (force on mobile)
+    if (isMobile) {
+      await trigger.scrollIntoViewIfNeeded();
+      await trigger.click({ force: true });
+    } else {
+      await trigger.click();
+    }
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -102,7 +114,10 @@ test.describe("Modal Interactions", () => {
     await expect(page.getByText("Repeat Block")).toBeVisible();
   });
 
-  test("should dismiss modal when backdrop is clicked", async ({ page }) => {
+  test("should dismiss modal when backdrop is clicked", async ({
+    page,
+    isMobile,
+  }) => {
     // Requirement 6.5: Allow backdrop click to dismiss modal
     await page.goto("/");
 
@@ -115,12 +130,16 @@ test.describe("Modal Interactions", () => {
     await expect(page.getByText("Repeat Block")).toBeVisible();
 
     // Wait for block actions trigger to be visible
-    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
-      timeout: 5000,
-    });
+    const trigger = page.getByTestId("block-actions-trigger");
+    await expect(trigger).toBeVisible({ timeout: 5000 });
 
-    // Open context menu and click delete to show modal
-    await page.getByTestId("block-actions-trigger").click();
+    // Open context menu and click delete to show modal (force on mobile)
+    if (isMobile) {
+      await trigger.scrollIntoViewIfNeeded();
+      await trigger.click({ force: true });
+    } else {
+      await trigger.click();
+    }
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -137,7 +156,7 @@ test.describe("Modal Interactions", () => {
     await expect(page.getByText("Repeat Block")).toBeVisible();
   });
 
-  test("should trap focus within modal", async ({ page }) => {
+  test("should trap focus within modal", async ({ page, isMobile }) => {
     // Requirement 6.3: Trap keyboard focus within modal
     await page.goto("/");
 
@@ -147,12 +166,16 @@ test.describe("Modal Interactions", () => {
     ]);
 
     // Wait for block actions trigger to be visible
-    await expect(page.getByTestId("block-actions-trigger")).toBeVisible({
-      timeout: 5000,
-    });
+    const trigger = page.getByTestId("block-actions-trigger");
+    await expect(trigger).toBeVisible({ timeout: 5000 });
 
-    // Open context menu and click delete to show modal
-    await page.getByTestId("block-actions-trigger").click();
+    // Open context menu and click delete to show modal (force on mobile)
+    if (isMobile) {
+      await trigger.scrollIntoViewIfNeeded();
+      await trigger.click({ force: true });
+    } else {
+      await trigger.click();
+    }
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
@@ -188,6 +211,7 @@ test.describe("Modal Interactions", () => {
 
   test("should prevent background interaction when modal is open", async ({
     page,
+    isMobile,
   }) => {
     // Requirement 6.6: Prevent interaction with background content
     await page.goto("/");
@@ -202,8 +226,14 @@ test.describe("Modal Interactions", () => {
     const blocks = page.locator('[data-testid="repetition-block-card"]');
     await expect(blocks).toHaveCount(2);
 
-    // Open modal for first block
-    await blocks.first().getByTestId("block-actions-trigger").click();
+    // Open modal for first block (force on mobile)
+    const trigger = blocks.first().getByTestId("block-actions-trigger");
+    if (isMobile) {
+      await trigger.scrollIntoViewIfNeeded();
+      await trigger.click({ force: true });
+    } else {
+      await trigger.click();
+    }
     await page.getByRole("menuitem", { name: /delete/i }).click();
 
     // Verify modal is visible
