@@ -45,7 +45,7 @@ After the upgrade, CI MUST NOT produce Node.js deprecation warnings related to
 
 ### Scenario 1: Firefox E2E accordion click
 
-```
+```text
 Given the workout SPA editor is loaded in Firefox
 When expandFileUpload() is called
 Then the accordion button is clicked (not the inner span)
@@ -54,7 +54,7 @@ And the file input becomes visible within 5 seconds
 
 ### Scenario 2: Mobile E2E accordion click
 
-```
+```text
 Given the workout SPA editor is loaded in Mobile Chrome
 When expandFileUpload() is called
 Then the accordion button is clicked reliably
@@ -63,7 +63,7 @@ And the file input becomes visible within 5 seconds
 
 ### Scenario 3: Chromium E2E remains unaffected
 
-```
+```text
 Given the workout SPA editor is loaded in Chromium
 When expandFileUpload() is called
 Then behavior is identical to before (no regression)
@@ -71,7 +71,7 @@ Then behavior is identical to before (no regression)
 
 ### Scenario 4: CI runs without Node.js deprecation warnings
 
-```
+```text
 Given all workflow files use pnpm/action-setup@v5 and actions/github-script@v8
 When any CI workflow runs
 Then no "Node.js 20 actions are deprecated" annotations appear
@@ -79,7 +79,7 @@ Then no "Node.js 20 actions are deprecated" annotations appear
 
 ### Scenario 5: No stale action versions remain
 
-```
+```text
 Given all upgrades are applied
 When running grep -r "action-setup@v4" .github/
 And running grep -r "github-script@v7" .github/
