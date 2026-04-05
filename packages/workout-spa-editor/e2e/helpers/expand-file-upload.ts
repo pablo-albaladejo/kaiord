@@ -13,6 +13,7 @@ export async function expandFileUpload(page: Page) {
   const accordion = page.getByRole("button", {
     name: /create manually.*import/i,
   });
+  await accordion.waitFor({ state: "visible", timeout: 10000 });
   await accordion.click();
   await fileInput.waitFor({ state: "attached", timeout: 5000 });
 }
