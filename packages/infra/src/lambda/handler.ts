@@ -3,7 +3,6 @@ import { pushRequestSchema } from "./request-schema";
 import { pushToGarmin } from "./garmin-push";
 import { checkTunnelHealth, enableSocksProxy } from "./proxy-fetch";
 import { errorResponse, jsonResponse } from "./response";
-import { ensureExitNode } from "./tailscale-exit-node";
 
 const MAX_BODY_BYTES = 512_000;
 const useTailscale = (): boolean => Boolean(process.env.TS_SECRET_API_KEY);
@@ -57,7 +56,6 @@ export const handler = async (event: APIGatewayProxyEventV2) => {
   }
 
   if (useTailscale()) {
-    await ensureExitNode();
     enableSocksProxy();
   }
 
