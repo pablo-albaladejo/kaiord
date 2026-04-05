@@ -9,8 +9,10 @@ export async function expandFileUpload(page: Page) {
   const fileInput = page.locator('input[type="file"]');
   if ((await fileInput.count()) > 0) return;
 
-  // Click the accordion to reveal file upload
-  const accordion = page.getByText(/create manually.*import/i);
+  // Click the accordion button to reveal file upload
+  const accordion = page.getByRole("button", {
+    name: /create manually.*import/i,
+  });
   await accordion.click();
   await fileInput.waitFor({ state: "attached", timeout: 5000 });
 }
