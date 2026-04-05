@@ -35,7 +35,7 @@ test.describe("Settings Panel", () => {
 
     // Add second provider (OpenAI)
     const providerSelect = dialog.locator("select").first();
-    await providerSelect.selectOption("openai");
+    await providerSelect.selectOption({ value: "openai" });
     await dialog.getByPlaceholder("e.g., My Claude").fill("My GPT");
     await dialog.getByPlaceholder("sk-...").fill("sk-openai-key-1");
     await dialog.getByRole("button", { name: /add provider/i }).click();
@@ -72,6 +72,9 @@ test.describe("Settings Panel", () => {
 
     const passwordInput = dialog.getByPlaceholder("Your Garmin password");
     await passwordInput.fill("my-password");
+
+    // Save credentials (required after commit 10caf517)
+    await dialog.getByRole("button", { name: /save credentials/i }).click();
 
     // Change Lambda URL
     const lambdaInput = dialog.getByPlaceholder(/execute-api.*amazonaws.com/);
