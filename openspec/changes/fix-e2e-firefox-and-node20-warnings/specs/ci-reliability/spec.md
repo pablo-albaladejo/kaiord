@@ -21,6 +21,7 @@ All GitHub Actions workflow files SHALL use `pnpm/action-setup@v5` (or later)
 which supports Node.js 24 natively.
 
 This MUST apply to every file containing `pnpm/action-setup` references:
+
 - `.github/actions/setup-pnpm/action.yml` (also used transitively by `ci.yml`)
 - `.github/workflows/workout-spa-editor-e2e.yml`
 - `.github/workflows/eval.yml`
@@ -30,6 +31,7 @@ This MUST apply to every file containing `pnpm/action-setup` references:
 - `.github/workflows/release.yml`
 
 Additionally, `actions/github-script@v7` SHALL be upgraded to `@v8` in:
+
 - `.github/workflows/changeset-bot.yml` (2 occurrences)
 
 After the upgrade, CI MUST NOT produce Node.js deprecation warnings related to

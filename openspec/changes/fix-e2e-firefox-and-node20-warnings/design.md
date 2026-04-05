@@ -8,6 +8,7 @@
 `page.getByRole("button", { name: /create manually.*import/i })`.
 
 **Rationale:**
+
 - `getByText` matches any DOM element containing the text, which in this case
   resolves to the inner `<span>` rather than the parent `<button>`.
 - In Firefox and mobile browsers, clicking a `<span>` inside a `<button>` does
@@ -19,6 +20,7 @@
   side effects since the locator is more specific (not less).
 
 **Alternatives considered:**
+
 - `page.locator("button").filter({ hasText: /.../ })` — works but less
   idiomatic than `getByRole`.
 - Adding `data-testid` to the button — unnecessary when `getByRole` works and
@@ -33,6 +35,7 @@
 workflow files.
 
 **Rationale:**
+
 - `pnpm/action-setup@v4` runs on Node.js 20, which GitHub will force-upgrade
   to Node.js 24 on June 2, 2026.
 - `pnpm/action-setup@v5` (released as v5.0.0) natively supports Node.js 24.
@@ -40,6 +43,7 @@ workflow files.
 - The `version` input parameter is still supported in v5.
 
 **Alternatives considered:**
+
 - Pinning to a specific commit SHA — more secure against supply-chain attacks
   but harder to maintain without Dependabot/Renovate. Consider as a follow-up.
 - Waiting until June 2026 — risks sudden breakage when GitHub forces the
@@ -53,6 +57,7 @@ workflow files.
 `changeset-bot.yml` (2 occurrences).
 
 **Rationale:**
+
 - `actions/github-script@v7` also runs on Node.js 20 and produces the same
   deprecation warning.
 - All other workflows already use `@v8`; `changeset-bot.yml` was missed.
@@ -60,17 +65,17 @@ workflow files.
 
 ## Files to modify
 
-| File | Change |
-|------|--------|
+| File                                                            | Change                                    |
+| --------------------------------------------------------------- | ----------------------------------------- |
 | `packages/workout-spa-editor/e2e/helpers/expand-file-upload.ts` | `getByText` -> `getByRole("button", ...)` |
-| `.github/actions/setup-pnpm/action.yml` | `pnpm/action-setup@v4` -> `@v5` |
-| `.github/workflows/workout-spa-editor-e2e.yml` (2x) | `pnpm/action-setup@v4` -> `@v5` |
-| `.github/workflows/eval.yml` | `pnpm/action-setup@v4` -> `@v5` |
-| `.github/workflows/security.yml` | `pnpm/action-setup@v4` -> `@v5` |
-| `.github/workflows/deploy-spa-editor.yml` | `pnpm/action-setup@v4` -> `@v5` |
-| `.github/workflows/deploy-infra.yml` | `pnpm/action-setup@v4` -> `@v5` |
-| `.github/workflows/release.yml` | `pnpm/action-setup@v4` -> `@v5` |
-| `.github/workflows/changeset-bot.yml` (2x) | `actions/github-script@v7` -> `@v8` |
+| `.github/actions/setup-pnpm/action.yml`                         | `pnpm/action-setup@v4` -> `@v5`           |
+| `.github/workflows/workout-spa-editor-e2e.yml` (2x)             | `pnpm/action-setup@v4` -> `@v5`           |
+| `.github/workflows/eval.yml`                                    | `pnpm/action-setup@v4` -> `@v5`           |
+| `.github/workflows/security.yml`                                | `pnpm/action-setup@v4` -> `@v5`           |
+| `.github/workflows/deploy-spa-editor.yml`                       | `pnpm/action-setup@v4` -> `@v5`           |
+| `.github/workflows/deploy-infra.yml`                            | `pnpm/action-setup@v4` -> `@v5`           |
+| `.github/workflows/release.yml`                                 | `pnpm/action-setup@v4` -> `@v5`           |
+| `.github/workflows/changeset-bot.yml` (2x)                      | `actions/github-script@v7` -> `@v8`       |
 
 ## Dependencies
 
