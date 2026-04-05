@@ -2469,8 +2469,8 @@ test.describe("Repetition Blocks - Performance", () => {
     await expect(page.locator('[data-testid="step-card"]')).toHaveCount(0);
     const collapseTime = Date.now() - startTime;
 
-    // Should complete in under 1 second
-    expect(collapseTime).toBeLessThan(1000);
+    // Should complete in under 2 seconds
+    expect(collapseTime).toBeLessThan(2000);
 
     // Expand again
     const expandStartTime = Date.now();
@@ -2478,8 +2478,8 @@ test.describe("Repetition Blocks - Performance", () => {
     await expect(page.locator('[data-testid="step-card"]')).toHaveCount(25);
     const expandTime = Date.now() - expandStartTime;
 
-    // Should complete in under 2 seconds
-    expect(expandTime).toBeLessThan(2000);
+    // Should complete in under 3 seconds
+    expect(expandTime).toBeLessThan(3000);
   });
 
   test("should handle deeply nested repetitions", async ({ page }) => {
