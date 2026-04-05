@@ -44,45 +44,58 @@ AWS Lambda (Node.js 24, 512MB, 60s timeout)
 **This was the hardest problem to solve.** Three approaches were tried and failed:
 
 #### Attempt 1: `socks-proxy-agent` with `dispatcher` option
+
 ```typescript
 // FAILED: socks-proxy-agent creates an http.Agent, not an undici Dispatcher.
 // globalThis.fetch uses undici internally and ignores http.Agent.
 import { SocksProxyAgent } from "socks-proxy-agent";
-globalThis.fetch(url, { dispatcher: new SocksProxyAgent("socks://localhost:1055") });
+globalThis.fetch(url, {
+  dispatcher: new SocksProxyAgent("socks://localhost:1055"),
+});
 // Error: TypeError: fetch failed
 ```
 
 #### Attempt 2: `undici.Socks5ProxyAgent` (experimental)
+
 ```typescript
 // FAILED: Socks5ProxyAgent is experimental (v7.23.0+) and has bugs.
 // Returned 404 for URLs that work normally (S3, connectapi.garmin.com).
 import { Socks5ProxyAgent } from "undici";
-globalThis.fetch(url, { dispatcher: new Socks5ProxyAgent("socks5://localhost:1055") });
+globalThis.fetch(url, {
+  dispatcher: new Socks5ProxyAgent("socks5://localhost:1055"),
+});
 // Error: OAuth consumer 404, OAuth1 token 404
 ```
 
 #### Attempt 3: `undici.fetch` directly (bypassing globalThis.fetch)
+
 ```typescript
 // PARTIALLY WORKED: undici.fetch with Socks5ProxyAgent routed some requests.
 // BUT: fetch-cookie wraps globalThis.fetch, not undici.fetch.
 // Cookies from SSO login were lost when OAuth1 used undici.fetch directly.
 import { fetch as undiciFetch, Socks5ProxyAgent } from "undici";
-undiciFetch(url, { dispatcher: new Socks5ProxyAgent("socks5://localhost:1055") });
+undiciFetch(url, {
+  dispatcher: new Socks5ProxyAgent("socks5://localhost:1055"),
+});
 // Error: OAuth1 token 404 (cookies not forwarded)
 ```
 
 #### Final solution: `fetch-socks` + `setGlobalDispatcher`
+
 ```typescript
 // WORKS: fetch-socks creates a proper undici Dispatcher from SOCKS5 config.
 // setGlobalDispatcher makes ALL globalThis.fetch calls use it.
 // fetch-cookie wraps globalThis.fetch → automatically gets SOCKS5 routing.
 import { setGlobalDispatcher } from "undici";
 import { socksDispatcher } from "fetch-socks";
-setGlobalDispatcher(socksDispatcher({ type: 5, host: "localhost", port: 1055 }));
+setGlobalDispatcher(
+  socksDispatcher({ type: 5, host: "localhost", port: 1055 })
+);
 // All fetch calls now route through Tailscale SOCKS5 → exit node → internet
 ```
 
 **Why `fetch-socks` works and `undici.Socks5ProxyAgent` doesn't:**
+
 - `fetch-socks` implements SOCKS5 at the socket level using the `socks` package (battle-tested)
 - `undici.Socks5ProxyAgent` is experimental (added in undici 7.23.0, March 2026) and has known issues
 - `fetch-socks` returns a standard undici `Dispatcher` that `setGlobalDispatcher` accepts
@@ -114,35 +127,35 @@ The SOCKS5 tunnel takes 1-3 seconds to become functional after exit node configu
 
 ## Files
 
-| File | Purpose |
-|------|---------|
-| `proxy-fetch.ts` | `enableSocksProxy()` + `checkTunnelHealth()` |
-| `tailscale-exit-node.ts` | `ensureExitNode()` — configures exit node + waits |
-| `handler.ts` | Orchestrates: validate → exit node → proxy → health → push |
-| `garmin-push.ts` | Creates Garmin client (unchanged — uses default `createCookieFetch`) |
-| `garmin-proxy-stack.ts` | CDK: Tailscale Layer, Secrets Manager, env vars, bundling |
-| `deploy-infra.yml` | Passes `tsSecretName` and `tsExitNode` context to CDK |
+| File                     | Purpose                                                              |
+| ------------------------ | -------------------------------------------------------------------- |
+| `proxy-fetch.ts`         | `enableSocksProxy()` + `checkTunnelHealth()`                         |
+| `tailscale-exit-node.ts` | `ensureExitNode()` — configures exit node + waits                    |
+| `handler.ts`             | Orchestrates: validate → exit node → proxy → health → push           |
+| `garmin-push.ts`         | Creates Garmin client (unchanged — uses default `createCookieFetch`) |
+| `garmin-proxy-stack.ts`  | CDK: Tailscale Layer, Secrets Manager, env vars, bundling            |
+| `deploy-infra.yml`       | Passes `tsSecretName` and `tsExitNode` context to CDK                |
 
 ## Dependencies
 
-| Package | Purpose | Why this one |
-|---------|---------|-------------|
-| `tailscale-lambda-extension` | CDK construct for Tailscale Lambda Layer | Only maintained CDK construct, referenced by AWS blog |
-| `fetch-socks` | SOCKS5 dispatcher for undici | Works with `setGlobalDispatcher`, unlike `socks-proxy-agent` (http.Agent) or `undici.Socks5ProxyAgent` (experimental/buggy) |
-| `undici` | `setGlobalDispatcher` API | Needed to redirect globalThis.fetch through SOCKS5 |
-| `socks` | SOCKS5 protocol (fetch-socks dep) | Externalized in nodeModules for Lambda ESM compatibility |
+| Package                      | Purpose                                  | Why this one                                                                                                                |
+| ---------------------------- | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+| `tailscale-lambda-extension` | CDK construct for Tailscale Lambda Layer | Only maintained CDK construct, referenced by AWS blog                                                                       |
+| `fetch-socks`                | SOCKS5 dispatcher for undici             | Works with `setGlobalDispatcher`, unlike `socks-proxy-agent` (http.Agent) or `undici.Socks5ProxyAgent` (experimental/buggy) |
+| `undici`                     | `setGlobalDispatcher` API                | Needed to redirect globalThis.fetch through SOCKS5                                                                          |
+| `socks`                      | SOCKS5 protocol (fetch-socks dep)        | Externalized in nodeModules for Lambda ESM compatibility                                                                    |
 
 ## Infrastructure
 
-| Resource | Value |
-|----------|-------|
-| Memory | 512 MB (was 256) |
-| Timeout | 60s (was 30) |
-| Bundling | minify: false, sourceMap: true |
-| nodeModules | undici, fetch-socks, socks |
-| Secrets Manager | `tailscale-api-key` (auth key, 90-day expiry) |
-| Exit node | Raspberry Pi (Home Assistant) with residential IP |
-| Tailscale tag | `tag:lambda` (ephemeral, internet-only ACL) |
+| Resource        | Value                                             |
+| --------------- | ------------------------------------------------- |
+| Memory          | 512 MB (was 256)                                  |
+| Timeout         | 60s (was 30)                                      |
+| Bundling        | minify: false, sourceMap: true                    |
+| nodeModules     | undici, fetch-socks, socks                        |
+| Secrets Manager | `tailscale-api-key` (auth key, 90-day expiry)     |
+| Exit node       | Raspberry Pi (Home Assistant) with residential IP |
+| Tailscale tag   | `tag:lambda` (ephemeral, internet-only ACL)       |
 
 ## Debugging Timeline
 

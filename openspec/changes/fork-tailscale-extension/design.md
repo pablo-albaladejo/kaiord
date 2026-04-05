@@ -7,6 +7,7 @@
 **Rationale:** Public fork enables contributing back. While waiting for upstream merge, kaiord uses the fork via npm. If upstream merges, switch back to the official package.
 
 **Alternatives considered:**
+
 - **Monorepo package:** Harder to contribute upstream, duplicates build infrastructure
 - **Patch-package:** Fragile, breaks on updates, can't test independently
 
@@ -99,6 +100,7 @@ export interface TailscaleLambdaExtensionProps {
 **Choice:** Publish fork as `@pablo-albaladejo/tailscale-lambda-extension` on npm during the upstream PR review period.
 
 **Kaiord uses:**
+
 ```json
 "tailscale-lambda-extension": "npm:@pablo-albaladejo/tailscale-lambda-extension@^0.1.0"
 ```

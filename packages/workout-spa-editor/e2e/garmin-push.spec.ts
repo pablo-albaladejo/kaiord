@@ -135,9 +135,10 @@ async function configureGarminCredentials(
     timeout: 5000,
   });
 
-  // Fill credentials
+  // Fill credentials and save
   await dialog.getByPlaceholder("your@email.com").fill("test@garmin.com");
   await dialog.getByPlaceholder("Your Garmin password").fill("test-password");
+  await dialog.getByRole("button", { name: /save credentials/i }).click();
 
   // Set Lambda URL (empty by default when VITE_GARMIN_LAMBDA_URL is not set)
   const lambdaInput = dialog.getByPlaceholder(/execute-api.*amazonaws.com/);

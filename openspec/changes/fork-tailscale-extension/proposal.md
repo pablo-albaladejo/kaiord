@@ -15,16 +15,17 @@ Fork `rehanvdm/tailscale-lambda-extension` to add:
 2. **`TS_ADVERTISE_TAGS` support** — pass `--advertise-tags` to `tailscale up`, enabling OAuth client keys
 
 Then:
+
 - Use the fork in `@kaiord/infra`, removing workaround code
 - Submit PR upstream to `rehanvdm/tailscale-lambda-extension`
 - Switch from auth key to OAuth client key (no expiry)
 
 ## Affected Packages
 
-| Package | Change |
-|---------|--------|
-| `tailscale-lambda-extension` (fork) | Shell script + CDK props + README |
-| `@kaiord/infra` | Switch to fork, remove workarounds, OAuth client key |
+| Package                             | Change                                               |
+| ----------------------------------- | ---------------------------------------------------- |
+| `tailscale-lambda-extension` (fork) | Shell script + CDK props + README                    |
+| `@kaiord/infra`                     | Switch to fork, remove workarounds, OAuth client key |
 
 ## Breaking Changes
 
