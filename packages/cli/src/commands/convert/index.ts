@@ -1,4 +1,7 @@
-import type { Config } from "../../utils/config-loader.js";
+import { executeBatchConversion } from "./batch";
+import { mapErrorToExitCode } from "./error-exit-code";
+import { executeSingleFileConversion } from "./single-file";
+import { convertOptionsSchema } from "./types";
 import {
   loadConfigWithMetadata,
   mergeWithConfig,
@@ -6,22 +9,14 @@ import {
 import { formatError } from "../../utils/error-formatter";
 import { ExitCode } from "../../utils/exit-codes";
 import { createLogger } from "../../utils/logger-factory";
-import { executeBatchConversion } from "./batch";
-import { mapErrorToExitCode } from "./error-exit-code";
-import { executeSingleFileConversion } from "./single-file";
-import { convertOptionsSchema, type ConvertOptions } from "./types";
+import type { ConvertOptions } from "./types";
+import type { Config } from "../../utils/config-loader.js";
 
 export type { ConvertOptions } from "./types";
 
-/**
- * Detect if input contains glob patterns
- */
 const isBatchMode = (input: string): boolean =>
   input.includes("*") || input.includes("?");
 
-/**
- * Merge CLI options with config file defaults
- */
 const resolveOptions = (options: ConvertOptions, config: Config) => {
   const merged = mergeWithConfig(options, config);
   const batch = typeof merged.input === "string" && isBatchMode(merged.input);
@@ -38,16 +33,8 @@ const resolveOptions = (options: ConvertOptions, config: Config) => {
   });
 };
 
-/**
- * Main convert command handler
- */
-export const convertCommand = async (
-  options: ConvertOptions
-): Promise<number> => {
-  const configResult = await loadConfigWithMetadata();
-  const validatedOptions = resolveOptions(options, configResult.config);
-
-  if (validatedOptions.output && validatedOptions.outputDir) {
+const validateExclusiveOutput = (opts: { output?: string; outputDir?: string }) => {
+  if (opts.output && opts.outputDir) {
     const error = new Error(
       "Cannot use both --output and --output-dir. " +
         "Use --output for single file, --output-dir for batch conversion."
@@ -55,38 +42,39 @@ export const convertCommand = async (
     error.name = "InvalidArgumentError";
     throw error;
   }
+};
+
+export const convertCommand = async (
+  options: ConvertOptions
+): Promise<number> => {
+  const configResult = await loadConfigWithMetadata();
+  const validated = resolveOptions(options, configResult.config);
+  validateExclusiveOutput(validated);
 
   const logger = await createLogger({
-    type: validatedOptions.logFormat,
-    level: validatedOptions.verbose
-      ? "debug"
-      : validatedOptions.quiet
-        ? "error"
-        : "info",
-    quiet: validatedOptions.quiet,
+    type: validated.logFormat,
+    level: validated.verbose ? "debug" : validated.quiet ? "error" : "info",
+    quiet: validated.quiet,
   });
 
-  if (configResult.loadedFrom) {
+  if (configResult.loadedFrom)
     logger.debug("Configuration loaded", { path: configResult.loadedFrom });
-  } else {
+  else
     logger.debug("No configuration file found", {
       searchedPaths: configResult.searchedPaths,
     });
-  }
 
   try {
-    if (isBatchMode(validatedOptions.input)) {
-      return await executeBatchConversion(validatedOptions, logger);
+    if (isBatchMode(validated.input)) {
+      return await executeBatchConversion(validated, logger);
     }
-    await executeSingleFileConversion(validatedOptions, logger);
+    await executeSingleFileConversion(validated, logger);
     return ExitCode.SUCCESS;
   } catch (error) {
     logger.error("Conversion failed", { error });
-    const formatted = formatError(error, { json: validatedOptions.json });
-
-    if (validatedOptions.json) console.log(formatted);
+    const formatted = formatError(error, { json: validated.json });
+    if (validated.json) console.log(formatted);
     else console.error(formatted);
-
     return mapErrorToExitCode(error);
   }
 };
