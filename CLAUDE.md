@@ -36,6 +36,12 @@ pnpm lint                       # Lint + type check + format check
 pnpm lint:fix                   # Auto-fix all
 pnpm format                     # Format with Prettier
 
+# Local Garmin push dev server
+pnpm --filter @kaiord/infra dev:local  # http://127.0.0.1:3001
+# SPA auto-connects if you create packages/workout-spa-editor/.env.development.local:
+#   VITE_GARMIN_LAMBDA_URL=http://localhost:3001
+# Optional: CORS_ORIGIN=http://localhost:5174 PORT=3002
+
 # Changesets (for version-worthy changes)
 pnpm exec changeset             # Create changeset before PR
 
