@@ -2,19 +2,12 @@ import { execa } from "execa";
 import { dirname, join } from "path";
 import stripAnsi from "strip-ansi";
 import { fileURLToPath } from "url";
-import { beforeAll, describe, expect, it } from "vitest";
+import { describe, expect, it } from "vitest";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 describe("CLI smoke tests", () => {
-  beforeAll(async () => {
-    // Build the CLI before running tests
-    await execa("pnpm", ["build"], {
-      cwd: join(__dirname, "../.."),
-    });
-  });
-
   it("should display help with --help flag", async () => {
     // Arrange & Act
     const { stdout } = await execa("./dist/bin/kaiord.js", ["--help"], {
