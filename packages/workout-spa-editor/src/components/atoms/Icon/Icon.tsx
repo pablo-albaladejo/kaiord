@@ -1,5 +1,5 @@
-import { forwardRef, type HTMLAttributes } from "react";
 import type { LucideIcon } from "lucide-react";
+import { forwardRef, type HTMLAttributes } from "react";
 
 export type IconSize = "xs" | "sm" | "md" | "lg" | "xl";
 export type IconColor =

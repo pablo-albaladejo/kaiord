@@ -4,7 +4,7 @@
  * Calculates power zones from FTP using a specified method.
  */
 
-import { POWER_METHODS, findMethod } from "../lib/zone-methods";
+import { findMethod, POWER_METHODS } from "../lib/zone-methods";
 import type { PowerZone } from "../types/profile";
 
 /**

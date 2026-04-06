@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { executeDeleteWithToast } from "./delete-block-with-toast";
+
 import { useToastContext } from "../../../contexts/ToastContext";
 import {
   useAddStepToRepetitionBlock,
@@ -17,6 +17,7 @@ import {
   useUndoDelete,
   useUngroupRepetitionBlock,
 } from "../../../store/workout-store-selectors";
+import { executeDeleteWithToast } from "./delete-block-with-toast";
 
 function extractStepIndices(ids: readonly string[]): Array<number> {
   return ids

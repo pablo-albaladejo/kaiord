@@ -5,11 +5,12 @@
  */
 
 import { useState } from "react";
+
+import type { ZoneType } from "../../../../store/profile-store/types";
+import type { SportZoneConfig } from "../../../../types/sport-zones";
 import { calculateHrZones } from "../../../../utils/calculate-hr-zones";
 import { calculatePaceZones } from "../../../../utils/calculate-pace-zones";
 import { calculatePowerZones } from "../../../../utils/calculate-power-zones";
-import type { ZoneType } from "../../../../store/profile-store/types";
-import type { SportZoneConfig } from "../../../../types/sport-zones";
 
 type MethodSwitch = { zoneType: ZoneType; method: string } | null;
 

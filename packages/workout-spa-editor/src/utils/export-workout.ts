@@ -5,6 +5,8 @@
  * from the canonical KRD format.
  */
 
+import type { KRD } from "@kaiord/core";
+
 import {
   exportFitFile,
   exportGcnFile,
@@ -12,9 +14,8 @@ import {
   exportTcxFile,
   exportZwoFile,
 } from "./export-workout-formats";
-import { getMimeType } from "./file-format-detector";
 import type { WorkoutFileFormat } from "./file-format-detector";
-import type { KRD } from "@kaiord/core";
+import { getMimeType } from "./file-format-detector";
 
 export class ExportError extends Error {
   public readonly format: WorkoutFileFormat;

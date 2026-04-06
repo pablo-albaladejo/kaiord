@@ -5,6 +5,8 @@
  */
 
 import { useState } from "react";
+
+import type { Duration } from "../../../../types/krd";
 import { buildDuration, validateRepeatFrom } from "./duration-builder";
 import {
   getDurationTypeFromValue,
@@ -12,9 +14,8 @@ import {
   getValueFromDuration,
   isRepeatType,
 } from "./duration-helpers";
-import { validateValue } from "./duration-validation";
 import type { AdvancedDurationType } from "./duration-type-options";
-import type { Duration } from "../../../../types/krd";
+import { validateValue } from "./duration-validation";
 
 export function useAdvancedDuration(
   value: Duration | null,

@@ -5,6 +5,7 @@
  */
 
 import React from "react";
+
 import type { WorkoutPreviewBarProps } from "./workout-preview-types";
 
 export const WorkoutPreviewBar: React.FC<WorkoutPreviewBarProps> = ({

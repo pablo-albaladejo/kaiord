@@ -1,22 +1,18 @@
 export {
-  garminWorkoutInputSchema,
-  type GarminWorkoutInput,
-} from "./workout-input.schema";
-
-export {
-  garminWorkoutSegmentInputSchema,
-  type GarminWorkoutSegmentInput,
-} from "./segment-input.schema";
-
-export {
-  executableStepDTOInputSchema,
-  type ExecutableStepDTOInput,
-} from "./step-input.schema";
-
-export {
   garminWorkoutStepInputSchema,
-  repeatGroupDTOInputSchema,
   type RepeatGroupDTOInput,
+  repeatGroupDTOInputSchema,
 } from "./repeat-input.schema";
-
+export {
+  type GarminWorkoutSegmentInput,
+  garminWorkoutSegmentInputSchema,
+} from "./segment-input.schema";
+export {
+  type ExecutableStepDTOInput,
+  executableStepDTOInputSchema,
+} from "./step-input.schema";
 export type { GarminWorkoutStepInput } from "./types";
+export {
+  type GarminWorkoutInput,
+  garminWorkoutInputSchema,
+} from "./workout-input.schema";

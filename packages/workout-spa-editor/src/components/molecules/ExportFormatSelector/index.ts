@@ -1,2 +1,2 @@
-export { ExportFormatSelector } from "./ExportFormatSelector";
 export type { ExportFormatSelectorProps } from "./ExportFormatSelector";
+export { ExportFormatSelector } from "./ExportFormatSelector";

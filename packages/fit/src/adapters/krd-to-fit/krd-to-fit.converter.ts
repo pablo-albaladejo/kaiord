@@ -1,13 +1,14 @@
-import { workoutSchema, type Workout } from "@kaiord/core";
+import type { Logger } from "@kaiord/core";
+import type { KRD } from "@kaiord/core";
+import { type Workout, workoutSchema } from "@kaiord/core";
 import { createFitParsingError } from "@kaiord/core";
+
+import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import {
   convertMetadataToFileId,
   convertWorkoutMetadata,
 } from "./krd-to-fit-metadata.mapper";
 import { convertWorkoutSteps } from "./krd-to-fit-workout.mapper";
-import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
-import type { Logger } from "@kaiord/core";
-import type { KRD } from "@kaiord/core";
 
 /**
  * Safely converts unknown to Record<string, unknown>.

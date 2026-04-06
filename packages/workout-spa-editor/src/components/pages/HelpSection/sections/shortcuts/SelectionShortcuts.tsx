@@ -5,6 +5,7 @@
  */
 
 import { Zap } from "lucide-react";
+
 import { ShortcutRow } from "../../components/ShortcutRow";
 
 export function SelectionShortcuts() {

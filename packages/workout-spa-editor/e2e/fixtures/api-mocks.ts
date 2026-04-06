@@ -3,9 +3,10 @@
  * Intercepts LLM provider and Lambda endpoints via page.route().
  */
 
-import { LAMBDA_SUCCESS, LAMBDA_AUTH_ERROR } from "./lambda-responses";
-import { LLM_CYCLING_RESPONSE } from "./llm-responses";
 import type { Page } from "@playwright/test";
+
+import { LAMBDA_AUTH_ERROR, LAMBDA_SUCCESS } from "./lambda-responses";
+import { LLM_CYCLING_RESPONSE } from "./llm-responses";
 
 /** Intercept all LLM provider API calls and return a mock structured output. */
 export async function mockLlmApis(

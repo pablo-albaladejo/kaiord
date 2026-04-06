@@ -1,7 +1,7 @@
+import type { WorkoutStep } from "@kaiord/core";
 import { intensitySchema } from "@kaiord/core";
 import { targetTypeSchema } from "@kaiord/core";
 import { targetUnitSchema } from "@kaiord/core";
-import type { WorkoutStep } from "@kaiord/core";
 
 export type ZwiftIntervalType =
   | "SteadyState"

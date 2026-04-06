@@ -4,10 +4,10 @@
  * Central registry for all zone calculation methods.
  */
 
-export type { ZoneMethod, ZoneMethodDefault } from "./zone-method-types";
-export { POWER_METHODS } from "./power-methods";
 export { HR_METHODS } from "./hr-methods";
 export { PACE_METHODS } from "./pace-methods";
+export { POWER_METHODS } from "./power-methods";
+export type { ZoneMethod, ZoneMethodDefault } from "./zone-method-types";
 
 import { HR_METHODS } from "./hr-methods";
 import { PACE_METHODS } from "./pace-methods";

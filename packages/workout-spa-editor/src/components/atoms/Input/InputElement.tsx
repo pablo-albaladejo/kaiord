@@ -4,6 +4,7 @@ import {
   type Ref,
   type SelectHTMLAttributes,
 } from "react";
+
 import type { InputVariant, SelectInputProps } from "./Input.types";
 
 type InputElementProps = {

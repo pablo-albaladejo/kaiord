@@ -2,9 +2,9 @@
  * Target Values - Re-exports from modular structure
  */
 
-export { cadenceValueSchema, type CadenceValue } from "./cadence";
-export { heartRateValueSchema, type HeartRateValue } from "./heart-rate";
-export { paceValueSchema, type PaceValue } from "./pace";
-export { powerValueSchema, type PowerValue } from "./power";
-export { strokeTypeValueSchema, type StrokeTypeValue } from "./stroke-type";
-export { targetUnitSchema, type TargetUnit } from "./unit";
+export { type CadenceValue, cadenceValueSchema } from "./cadence";
+export { type HeartRateValue, heartRateValueSchema } from "./heart-rate";
+export { type PaceValue, paceValueSchema } from "./pace";
+export { type PowerValue, powerValueSchema } from "./power";
+export { type StrokeTypeValue, strokeTypeValueSchema } from "./stroke-type";
+export { type TargetUnit, targetUnitSchema } from "./unit";

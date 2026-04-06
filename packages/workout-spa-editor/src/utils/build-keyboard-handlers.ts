@@ -5,8 +5,8 @@
  * Pure function that maps store actions to keyboard shortcut callbacks.
  */
 
-import { saveWorkout } from "./save-workout";
 import type { KRD, Workout } from "../types/krd";
+import { saveWorkout } from "./save-workout";
 
 type KeyboardHandlerDeps = {
   currentWorkout: KRD | null;

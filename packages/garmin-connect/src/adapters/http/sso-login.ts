@@ -1,14 +1,15 @@
+import type { Logger } from "@kaiord/core";
 import { createServiceAuthError } from "@kaiord/core";
+
 import { checkAccountLocked, checkPageTitle } from "./sso-validators";
+import type { FetchFn } from "./types";
 import {
   GARMIN_SSO_EMBED,
-  GC_MODERN,
   GARMIN_SSO_ORIGIN,
+  GC_MODERN,
   SIGNIN_URL,
   USER_AGENT_BROWSER,
 } from "./urls";
-import type { FetchFn } from "./types";
-import type { Logger } from "@kaiord/core";
 
 const CSRF_RE = /name="_csrf"\s+value="(.+?)"/;
 const TICKET_RE = /ticket=([^"]+)"/;

@@ -1,4 +1,5 @@
 import { Settings } from "lucide-react";
+
 import { Button } from "../../atoms/Button";
 
 type AiWorkoutInputEmptyProps = {

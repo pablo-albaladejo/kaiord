@@ -6,8 +6,9 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
-import { PreviewDialogContent } from "./PreviewDialogContent";
+
 import type { WorkoutTemplate } from "../../../../types/workout-library";
+import { PreviewDialogContent } from "./PreviewDialogContent";
 
 type PreviewDialogProps = {
   template: WorkoutTemplate | null;

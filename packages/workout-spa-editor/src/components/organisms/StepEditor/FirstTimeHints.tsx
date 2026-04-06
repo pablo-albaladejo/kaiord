@@ -9,6 +9,7 @@
 
 import { Info, X } from "lucide-react";
 import { useEffect, useState } from "react";
+
 import { DEFAULT_STORAGE_KEY } from "./hints/constants";
 import { HintProgressDots } from "./hints/HintProgressDots";
 import {

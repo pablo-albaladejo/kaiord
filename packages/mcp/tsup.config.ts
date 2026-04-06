@@ -9,6 +9,7 @@ export default defineConfig([
     clean: true,
     shims: true,
     splitting: false,
+    treeshake: true,
     onSuccess: async () => {
       writeFileSync(
         "dist/package.json",
@@ -21,6 +22,7 @@ export default defineConfig([
     format: ["esm"],
     shims: true,
     splitting: false,
+    treeshake: true,
     banner: { js: "#!/usr/bin/env node" },
   },
 ]);

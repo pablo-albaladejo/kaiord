@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { garminConditionTypeSchema, garminStepTypeSchema } from "../common";
 import { executableStepDTOInputSchema } from "./step-input.schema";
 import type { GarminWorkoutStepInput } from "./types";

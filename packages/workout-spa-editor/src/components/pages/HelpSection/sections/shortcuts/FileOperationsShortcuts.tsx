@@ -5,6 +5,7 @@
  */
 
 import { Save } from "lucide-react";
+
 import { ShortcutRow } from "../../components/ShortcutRow";
 
 export function FileOperationsShortcuts() {

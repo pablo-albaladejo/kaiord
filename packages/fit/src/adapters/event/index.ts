@@ -1,3 +1,4 @@
+export { mapFitEventToKrd, mapKrdEventToFit } from "./event.mapper";
 export {
   convertFitToKrdEvent,
   convertFitToKrdEvents,
@@ -6,4 +7,3 @@ export {
   convertKrdToFitEvent,
   convertKrdToFitEvents,
 } from "./krd-to-fit-event.converter";
-export { mapFitEventToKrd, mapKrdEventToFit } from "./event.mapper";

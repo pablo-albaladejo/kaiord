@@ -1,9 +1,3 @@
-import { useDeleteStepWithToast } from "./use-delete-step-with-toast";
-import { useRepetitionBlockHandlers } from "./use-repetition-block-handlers";
-import { useCopyStep } from "./useCopyStep";
-import { usePasteStep } from "./usePasteStep";
-import { useSelectedStep } from "./useSelectedStep";
-import { useWorkoutSectionHandlers } from "./useWorkoutSectionHandlers";
 import {
   useCreateStep,
   useDuplicateStep,
@@ -13,6 +7,12 @@ import {
   useToggleStepSelection,
 } from "../../../store/workout-store-selectors";
 import type { KRD, Workout } from "../../../types/krd";
+import { useDeleteStepWithToast } from "./use-delete-step-with-toast";
+import { useRepetitionBlockHandlers } from "./use-repetition-block-handlers";
+import { useCopyStep } from "./useCopyStep";
+import { usePasteStep } from "./usePasteStep";
+import { useSelectedStep } from "./useSelectedStep";
+import { useWorkoutSectionHandlers } from "./useWorkoutSectionHandlers";
 
 export function useWorkoutSectionState(
   workout: Workout,

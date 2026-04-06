@@ -4,14 +4,14 @@
  * Formats training zone context for AI prompt injection.
  */
 
+import type { Profile } from "../../../types/profile";
+import type { SportKey, SportZoneConfig } from "../../../types/sport-zones";
+import { secondsToMmSs } from "../ZoneEditor/utils/pace-format";
 import {
   formatHrZones,
   formatPaceZones,
   formatPowerZones,
 } from "./zones-format-helpers";
-import { secondsToMmSs } from "../ZoneEditor/utils/pace-format";
-import type { Profile } from "../../../types/profile";
-import type { SportKey, SportZoneConfig } from "../../../types/sport-zones";
 
 function formatSportZones(config: SportZoneConfig): string {
   const parts: Array<string> = [];

@@ -1,9 +1,10 @@
-import { intensitySchema, type Intensity } from "@kaiord/core";
+import type { WorkoutStep } from "@kaiord/core";
+import { type Intensity, intensitySchema } from "@kaiord/core";
+
 import { mapDuration, mapDurationType } from "../duration/duration.mapper";
 import { mapEquipmentToKrd } from "../equipment/equipment.mapper";
-import { mapTarget, mapTargetType } from "../target/target.mapper";
 import type { FitWorkoutStep } from "../shared/types";
-import type { WorkoutStep } from "@kaiord/core";
+import { mapTarget, mapTargetType } from "../target/target.mapper";
 
 export const mapStep = (step: FitWorkoutStep, index: number): WorkoutStep => {
   const duration = mapDuration(step);

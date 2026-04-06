@@ -5,6 +5,7 @@
  */
 
 import { Copy, RotateCcw, Scissors } from "lucide-react";
+
 import { ShortcutRow } from "../../components/ShortcutRow";
 
 export function EditOperationsShortcuts() {

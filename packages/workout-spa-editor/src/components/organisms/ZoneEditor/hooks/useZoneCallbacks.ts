@@ -5,10 +5,11 @@
  */
 
 import { useCallback } from "react";
-import { applyValueChange } from "../utils/parse-zone-field";
+
 import type { HeartRateZone, PowerZone } from "../../../../types/profile";
 import type { PaceZone } from "../../../../types/sport-zones";
 import type { ZoneTableCallbacks } from "../types/zone-table";
+import { applyValueChange } from "../utils/parse-zone-field";
 
 type ZoneRowData = HeartRateZone | PowerZone | PaceZone;
 

@@ -4,8 +4,8 @@
  * Displays list of saved profiles with actions.
  */
 
-import { ProfileListItem } from "./components/ProfileListItem";
 import type { Profile } from "../../../types/profile";
+import { ProfileListItem } from "./components/ProfileListItem";
 
 type ProfileListProps = {
   profiles: Array<Profile>;

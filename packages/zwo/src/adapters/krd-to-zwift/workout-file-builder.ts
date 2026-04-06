@@ -1,12 +1,13 @@
-import { convertStepsToZwiftIntervals } from "./intervals-encoder";
-import { addKrdMetadata } from "./metadata-builder";
-import { addWorkoutProperties, mapSportType } from "./workout-properties";
 import type {
   KRDMetadata,
   Logger,
   RepetitionBlock,
   WorkoutStep,
 } from "@kaiord/core";
+
+import { convertStepsToZwiftIntervals } from "./intervals-encoder";
+import { addKrdMetadata } from "./metadata-builder";
+import { addWorkoutProperties, mapSportType } from "./workout-properties";
 
 type WorkoutData = {
   name?: string;

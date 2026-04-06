@@ -4,10 +4,10 @@
  * Extracts display strings from zone objects by type.
  */
 
-import { secondsToMmSs } from "./pace-format";
 import type { HeartRateZone, PowerZone } from "../../../../types/profile";
 import type { PaceZone } from "../../../../types/sport-zones";
 import type { ZoneRowData } from "../types/zone-table";
+import { secondsToMmSs } from "./pace-format";
 
 export function extractValues(
   zone: ZoneRowData,

@@ -1,5 +1,6 @@
-import { subSportSchema, type SubSport } from "@kaiord/core";
-import { fitSubSportSchema, type FitSubSport } from "../schemas/fit-sub-sport";
+import { type SubSport, subSportSchema } from "@kaiord/core";
+
+import { type FitSubSport, fitSubSportSchema } from "../schemas/fit-sub-sport";
 
 const FIT_TO_KRD_SUB_SPORT_MAP: Record<FitSubSport, SubSport> = {
   generic: "generic",

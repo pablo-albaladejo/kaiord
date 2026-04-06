@@ -1,6 +1,7 @@
-import { durationTypeSchema } from "@kaiord/core";
-import { fitDurationTypeSchema } from "../../schemas/fit-duration";
 import type { Duration } from "@kaiord/core";
+import { durationTypeSchema } from "@kaiord/core";
+
+import { fitDurationTypeSchema } from "../../schemas/fit-duration";
 
 export const convertRepeatHrPowerDuration = (
   duration: Duration,

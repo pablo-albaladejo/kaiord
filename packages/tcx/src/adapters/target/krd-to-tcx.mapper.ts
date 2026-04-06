@@ -1,6 +1,7 @@
-import { targetTypeSchema } from "@kaiord/core";
-import { tcxTargetTypeSchema } from "../schemas/tcx-target";
 import type { Target, TargetType } from "@kaiord/core";
+import { targetTypeSchema } from "@kaiord/core";
+
+import { tcxTargetTypeSchema } from "../schemas/tcx-target";
 
 export const mapTargetTypeToTcx = (targetType: TargetType): string => {
   if (targetType === targetTypeSchema.enum.heart_rate)

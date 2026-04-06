@@ -5,8 +5,9 @@
  */
 
 import { Plus } from "lucide-react";
-import { Button } from "../../../atoms/Button/Button";
+
 import type { Profile } from "../../../../types/profile";
+import { Button } from "../../../atoms/Button/Button";
 
 type ProfileFormActionsProps = {
   editingProfile: Profile | null;

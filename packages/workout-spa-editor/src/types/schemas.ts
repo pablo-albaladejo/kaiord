@@ -7,6 +7,27 @@
  */
 
 // Re-export core schemas and types from @kaiord/core
+export type {
+  Duration,
+  DurationType,
+  Equipment,
+  Intensity,
+  KRD,
+  KRDEvent,
+  KRDLap,
+  KRDMetadata,
+  KRDRecord,
+  KRDSession,
+  RepetitionBlock,
+  Sport,
+  SubSport,
+  SwimStroke,
+  Target,
+  TargetType,
+  TargetUnit,
+  Workout,
+  WorkoutStep,
+} from "./schemas/core-exports";
 export {
   durationSchema,
   durationTypeSchema,
@@ -29,35 +50,12 @@ export {
   workoutStepSchema,
 } from "./schemas/core-exports";
 
-export type {
-  Duration,
-  DurationType,
-  Equipment,
-  Intensity,
-  KRD,
-  KRDEvent,
-  KRDLap,
-  KRDMetadata,
-  KRDRecord,
-  KRDSession,
-  RepetitionBlock,
-  Sport,
-  SubSport,
-  SwimStroke,
-  Target,
-  TargetType,
-  TargetUnit,
-  Workout,
-  WorkoutStep,
-} from "./schemas/core-exports";
-
 // Re-export form validation schemas
 export type {
   PartialRepetitionBlock,
   PartialWorkoutStep,
   WorkoutMetadataForm,
 } from "./schemas/form-schemas";
-
 export {
   partialRepetitionBlockSchema,
   partialWorkoutStepSchema,
@@ -69,7 +67,6 @@ export type {
   ValidationErrorType,
   WorkoutStepWithId,
 } from "./schemas/ui-schemas";
-
 export {
   validationErrorSchema,
   workoutStepWithIdSchema,

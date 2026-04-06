@@ -1,4 +1,4 @@
-import { durationTypeSchema, type Duration } from "@kaiord/core";
+import { type Duration, durationTypeSchema } from "@kaiord/core";
 
 export type ZwiftIntervalData = {
   "@_Duration"?: number;

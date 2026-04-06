@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { fitLapTriggerSchema } from "./fit-lap-trigger";
 import { fitSportSchema } from "./fit-sport";
 import { fitSubSportSchema } from "./fit-sub-sport";

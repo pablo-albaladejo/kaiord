@@ -1,5 +1,6 @@
-import type { Workout } from "../../../types/krd";
 import type { HTMLAttributes } from "react";
+
+import type { Workout } from "../../../types/krd";
 
 export type WorkoutListProps = HTMLAttributes<HTMLDivElement> & {
   workout: Workout;

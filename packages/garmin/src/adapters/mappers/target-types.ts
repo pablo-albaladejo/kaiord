@@ -1,5 +1,6 @@
-import type { GarminTargetType, targetTypeKeySchema } from "../schemas/common";
 import type { z } from "zod";
+
+import type { GarminTargetType, targetTypeKeySchema } from "../schemas/common";
 
 export type GarminTargetInfo = {
   targetType: GarminTargetType;

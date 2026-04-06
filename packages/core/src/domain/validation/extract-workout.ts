@@ -1,8 +1,8 @@
-import { mapZodErrors } from "./map-zod-errors";
-import { workoutSchema } from "../schemas/workout";
-import { createKrdValidationError } from "../types/errors";
 import type { KRD } from "../schemas/krd";
 import type { Workout } from "../schemas/workout";
+import { workoutSchema } from "../schemas/workout";
+import { createKrdValidationError } from "../types/errors";
+import { mapZodErrors } from "./map-zod-errors";
 
 /**
  * Extracts and validates the structured workout from a KRD object.

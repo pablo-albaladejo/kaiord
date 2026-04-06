@@ -1,6 +1,7 @@
-import { expect } from "@playwright/test";
-import { expandFileUpload } from "./expand-file-upload";
 import type { Page } from "@playwright/test";
+import { expect } from "@playwright/test";
+
+import { expandFileUpload } from "./expand-file-upload";
 
 /**
  * Helper function to load a test workout in E2E tests

@@ -5,6 +5,7 @@
  */
 
 import { User } from "lucide-react";
+
 import type { Profile } from "../../../../types/profile";
 
 type ProfileItemInfoProps = {

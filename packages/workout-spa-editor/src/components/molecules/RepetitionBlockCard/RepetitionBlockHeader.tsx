@@ -1,7 +1,7 @@
-import { RepetitionBlockHeaderLeft } from "./RepetitionBlockHeaderLeft";
-import { RepetitionBlockHeaderRight } from "./RepetitionBlockHeaderRight";
 import type { RepetitionBlock } from "../../../types/krd";
 import type { DragHandleProps } from "../StepCard/StepCard";
+import { RepetitionBlockHeaderLeft } from "./RepetitionBlockHeaderLeft";
+import { RepetitionBlockHeaderRight } from "./RepetitionBlockHeaderRight";
 
 type RepetitionBlockHeaderProps = {
   block: RepetitionBlock;

@@ -1,7 +1,7 @@
 export {
-  OnboardingTutorial,
   hasCompletedOnboarding,
-  resetOnboarding,
+  OnboardingTutorial,
   type OnboardingTutorialProps,
+  resetOnboarding,
   type TutorialStep,
 } from "./OnboardingTutorial";

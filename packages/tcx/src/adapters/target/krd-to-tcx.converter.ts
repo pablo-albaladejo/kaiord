@@ -1,4 +1,5 @@
-import { targetTypeSchema, type Target } from "@kaiord/core";
+import { type Target, targetTypeSchema } from "@kaiord/core";
+
 import { convertCadenceTargetToTcx } from "./cadence.converter";
 import { convertHeartRateZone } from "./heart-rate.converter";
 import { convertPaceTargetToTcx } from "./pace.converter";

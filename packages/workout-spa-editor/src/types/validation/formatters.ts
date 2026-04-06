@@ -4,8 +4,9 @@
  * Format validation errors for display.
  */
 
-import type { ValidationError } from "../krd";
 import type { ZodError } from "zod";
+
+import type { ValidationError } from "../krd";
 
 /**
  * Format Zod errors into a user-friendly structure

@@ -1,5 +1,8 @@
+import type { KRD, Logger, TextReader, TextWriter } from "@kaiord/core";
 import { createZwiftParsingError } from "@kaiord/core";
 import { XMLParser } from "fast-xml-parser";
+
+import type { ZwiftValidator } from "../types";
 import { convertKRDToZwift } from "./krd-to-zwift.converter";
 import {
   validateGeneratedZwiftXml,
@@ -7,8 +10,6 @@ import {
   validateZwiftStructure,
 } from "./xml-validator-helpers";
 import { convertZwiftToKRD } from "./zwift-to-krd.converter";
-import type { ZwiftValidator } from "../types";
-import type { KRD, Logger, TextReader, TextWriter } from "@kaiord/core";
 
 const parseZwiftXml = (xmlString: string, logger: Logger): unknown => {
   logger.debug("Parsing Zwift file");

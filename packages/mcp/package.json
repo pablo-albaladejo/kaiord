@@ -3,6 +3,7 @@
   "version": "6.0.0",
   "description": "MCP server for Kaiord fitness data conversion (FIT, TCX, ZWO, GCN, KRD)",
   "type": "module",
+  "sideEffects": false,
   "bin": {
     "kaiord-mcp": "./dist/bin/kaiord-mcp.js"
   },
@@ -75,5 +76,8 @@
     "ai"
   ],
   "author": "Kaiord Contributors",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  }
 }

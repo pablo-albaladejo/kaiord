@@ -1,10 +1,11 @@
+import type { Logger } from "@kaiord/core";
 import { validateKrd } from "@kaiord/core";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+
 import { formatError, formatSuccess } from "../utils/error-formatter";
 import { getGarminClient } from "../utils/garmin-client-state";
 import { resolveTextInput } from "../utils/resolve-input";
-import type { Logger } from "@kaiord/core";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const pushSchema = {
   input_file: z.string().optional().describe("Path to KRD JSON file"),

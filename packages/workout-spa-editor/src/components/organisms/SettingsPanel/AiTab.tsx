@@ -1,6 +1,6 @@
+import { useAiStore } from "../../../store/ai-store";
 import { ProviderForm } from "./ProviderForm";
 import { ProviderList } from "./ProviderList";
-import { useAiStore } from "../../../store/ai-store";
 
 export const AiTab: React.FC = () => {
   const {

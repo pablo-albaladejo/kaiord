@@ -9,12 +9,13 @@
  */
 
 import * as Dialog from "@radix-ui/react-dialog";
+
 import { TutorialDialog } from "./components/TutorialDialog";
 import { TutorialOverlay } from "./components/TutorialOverlay";
 import { useElementHighlight } from "./hooks/useElementHighlight";
 import { useTutorialNavigation } from "./hooks/useTutorialNavigation";
-import { DEFAULT_STORAGE_KEY } from "./utils/storage-utils";
 import type { OnboardingTutorialProps } from "./types";
+import { DEFAULT_STORAGE_KEY } from "./utils/storage-utils";
 
 export const OnboardingTutorial: React.FC<OnboardingTutorialProps> = ({
   steps,

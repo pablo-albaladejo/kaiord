@@ -1,10 +1,11 @@
-import { z } from "zod";
-import { convertToKrd } from "./convert-to-krd";
-import { compareKrdFiles } from "./diff-compare";
-import { formatSchema } from "../types/tool-schemas";
-import { formatError, formatSuccess } from "../utils/error-formatter";
 import type { Logger } from "@kaiord/core";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+
+import { formatSchema } from "../types/tool-schemas";
+import { formatError, formatSuccess } from "../utils/error-formatter";
+import { convertToKrd } from "./convert-to-krd";
+import { compareKrdFiles } from "./diff-compare";
 
 const diffSchema = {
   file1: z.string().describe("Path to the first fitness data file"),

@@ -1,6 +1,7 @@
-import { degreesToSemicircles } from "../shared/coordinate.converter";
-import type { FitRecord } from "../schemas/fit-record";
 import type { KRDRecord } from "@kaiord/core";
+
+import type { FitRecord } from "../schemas/fit-record";
+import { degreesToSemicircles } from "../shared/coordinate.converter";
 
 const mapKrdCadenceToFit = (krd: KRDRecord, fit: Partial<FitRecord>): void => {
   if (krd.cadence !== undefined) {

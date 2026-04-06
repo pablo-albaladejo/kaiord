@@ -1,6 +1,7 @@
 import { Edit2 } from "lucide-react";
-import { Button } from "../../atoms/Button/Button";
+
 import type { Workout } from "../../../types/krd";
+import { Button } from "../../atoms/Button/Button";
 
 type WorkoutTitleProps = {
   workout: Workout;

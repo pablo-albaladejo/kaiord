@@ -1,4 +1,4 @@
-import { targetTypeSchema, type Target } from "@kaiord/core";
+import { type Target, targetTypeSchema } from "@kaiord/core";
 
 /**
  * Convert Zwift pace target (seconds per kilometer) to KRD pace target (meters per second)

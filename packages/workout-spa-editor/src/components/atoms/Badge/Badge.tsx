@@ -1,4 +1,5 @@
 import { forwardRef, type HTMLAttributes, type ReactNode } from "react";
+
 import { sizeClasses, variantClasses } from "./badge-styles";
 
 export type BadgeVariant =

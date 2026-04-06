@@ -2,16 +2,17 @@
  * @kaiord/garmin - Garmin Connect API (GCN) format adapter for Kaiord
  */
 
+import type { Logger, TextReader, TextWriter } from "@kaiord/core";
 import { createConsoleLogger } from "@kaiord/core";
+
 import { createGarminReader as createGarminReaderImpl } from "./adapters/garmin-reader";
 import { createGarminWriter as createGarminWriterImpl } from "./adapters/garmin-writer";
-import { isLogger } from "./adapters/utils/is-logger";
 import type { PaceZoneTable } from "./adapters/mappers/target.mapper";
-import type { Logger, TextReader, TextWriter } from "@kaiord/core";
+import { isLogger } from "./adapters/utils/is-logger";
 
 export type {
-  PaceZoneTable,
   PaceZoneEntry,
+  PaceZoneTable,
 } from "./adapters/mappers/target.mapper";
 
 export type GarminWriterOptions = {

@@ -1,6 +1,7 @@
+import type { ZodType } from "zod";
+
 import { formatZodError } from "./formatters";
 import type { ValidationResult } from "./validation-types";
-import type { ZodType } from "zod";
 
 export const validate = <T>(
   schema: ZodType<T>,

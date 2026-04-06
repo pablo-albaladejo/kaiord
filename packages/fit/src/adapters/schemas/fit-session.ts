@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { fitSportSchema } from "./fit-sport";
 import { fitSubSportSchema } from "./fit-sub-sport";
 

@@ -4,11 +4,11 @@
  * Combines create, update, delete operations.
  */
 
+import type { Profile } from "../../../../types/profile";
+import type { ProfileFormData } from "../types";
 import { useProfileCreate } from "./useProfileCreate";
 import { useProfileDelete } from "./useProfileDelete";
 import { useProfileEdit } from "./useProfileEdit";
-import type { Profile } from "../../../../types/profile";
-import type { ProfileFormData } from "../types";
 
 type UseProfileCRUDParams = {
   createProfile: (name: string, data: { bodyWeight?: number }) => void;

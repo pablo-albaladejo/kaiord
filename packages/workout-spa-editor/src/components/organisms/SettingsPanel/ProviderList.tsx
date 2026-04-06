@@ -1,7 +1,8 @@
 import { useState } from "react";
+
+import type { LlmProviderConfig } from "../../../store/ai-store";
 import { ProviderEditRow } from "./ProviderEditRow";
 import { ProviderRow } from "./ProviderRow";
-import type { LlmProviderConfig } from "../../../store/ai-store";
 
 type ProviderListProps = {
   providers: Array<LlmProviderConfig>;

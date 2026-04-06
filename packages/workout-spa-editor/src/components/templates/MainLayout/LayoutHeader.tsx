@@ -1,11 +1,11 @@
-import { HeaderLogo } from "./components/HeaderLogo";
-import { HeaderNav } from "./components/HeaderNav";
-import { LayoutHeaderDialogs } from "./components/LayoutHeaderDialogs";
 import { useLazyDialog } from "../../../hooks/use-lazy-dialog";
 import { useLibraryStore } from "../../../store/library-store";
 import { useProfileStore } from "../../../store/profile-store";
 import { useSettingsDialogStore } from "../../../store/settings-dialog-store";
 import { useWorkoutStore } from "../../../store/workout-store";
+import { HeaderLogo } from "./components/HeaderLogo";
+import { HeaderNav } from "./components/HeaderNav";
+import { LayoutHeaderDialogs } from "./components/LayoutHeaderDialogs";
 
 type LayoutHeaderProps = {
   onReplayTutorial?: () => void;

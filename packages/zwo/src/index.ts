@@ -2,16 +2,17 @@
  * @kaiord/zwo - ZWO format adapter for Kaiord
  */
 
+import type { Logger, TextReader, TextWriter } from "@kaiord/core";
 import { createConsoleLogger } from "@kaiord/core";
+
 import {
   createFastXmlZwiftReader,
   createFastXmlZwiftWriter,
 } from "./adapters/fast-xml-parser";
 import {
-  createZwiftValidator,
   createXsdZwiftValidator,
+  createZwiftValidator,
 } from "./adapters/xsd-validator";
-import type { Logger, TextReader, TextWriter } from "@kaiord/core";
 
 export const createZwiftReader = (logger?: Logger): TextReader => {
   const log = logger || createConsoleLogger();
@@ -29,9 +30,9 @@ export const zwiftReader: TextReader = createZwiftReader();
 export const zwiftWriter: TextWriter = createZwiftWriter();
 
 export { createFastXmlZwiftReader, createFastXmlZwiftWriter };
-export { createZwiftValidator, createXsdZwiftValidator };
+export { createXsdZwiftValidator, createZwiftValidator };
 export type {
-  ZwiftValidator,
-  ZwiftValidationResult,
   ZwiftValidationError,
+  ZwiftValidationResult,
+  ZwiftValidator,
 } from "./types";

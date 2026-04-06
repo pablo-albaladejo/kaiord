@@ -1,6 +1,7 @@
-import { targetTypeSchema } from "@kaiord/core";
-import { tcxTargetTypeSchema } from "../schemas/tcx-target";
 import type { Logger, Target, TargetType } from "@kaiord/core";
+import { targetTypeSchema } from "@kaiord/core";
+
+import { tcxTargetTypeSchema } from "../schemas/tcx-target";
 
 export const mapTargetType = (
   tcxTargetType: string | undefined

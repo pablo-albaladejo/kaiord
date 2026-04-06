@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { krdEventSchema } from "./event";
 import { krdLapSchema } from "./lap";
 import { krdMetadataSchema } from "./metadata";
@@ -53,13 +54,13 @@ export const krdSchema = z.object({
  */
 export type KRD = z.infer<typeof krdSchema>;
 
-export { krdEventSchema, type KRDEvent } from "./event";
+export { type KRDEvent, krdEventSchema } from "./event";
 export {
-  krdLapSchema,
-  krdLapTriggerSchema,
   type KRDLap,
+  krdLapSchema,
   type KRDLapTrigger,
+  krdLapTriggerSchema,
 } from "./lap";
-export { krdMetadataSchema, type KRDMetadata } from "./metadata";
-export { krdRecordSchema, type KRDRecord } from "./record";
-export { krdSessionSchema, type KRDSession } from "./session";
+export { type KRDMetadata, krdMetadataSchema } from "./metadata";
+export { type KRDRecord, krdRecordSchema } from "./record";
+export { type KRDSession, krdSessionSchema } from "./session";

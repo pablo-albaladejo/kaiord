@@ -1,5 +1,6 @@
-import type { FitEvent, FitEventType } from "../schemas/fit-event";
 import type { KRDEvent } from "@kaiord/core";
+
+import type { FitEvent, FitEventType } from "../schemas/fit-event";
 
 export const FIT_EVENT_TO_KRD_TYPE: Record<FitEvent, KRDEvent["eventType"]> = {
   timer: "event_timer",

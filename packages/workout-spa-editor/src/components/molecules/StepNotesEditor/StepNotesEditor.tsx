@@ -1,4 +1,5 @@
 import { useState } from "react";
+
 import { getCharacterCountClasses, getTextareaClasses } from "./styles";
 
 export type StepNotesEditorProps = {

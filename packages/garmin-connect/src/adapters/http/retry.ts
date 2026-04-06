@@ -1,5 +1,6 @@
-import type { FetchFn } from "./types";
 import type { Logger } from "@kaiord/core";
+
+import type { FetchFn } from "./types";
 
 export type RetryOptions = {
   maxRetries?: number;

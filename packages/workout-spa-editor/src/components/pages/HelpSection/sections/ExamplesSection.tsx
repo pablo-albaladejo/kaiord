@@ -5,6 +5,7 @@
  */
 
 import { FileText } from "lucide-react";
+
 import { ExampleWorkout } from "../components/ExampleWorkout";
 
 export function ExamplesSection() {

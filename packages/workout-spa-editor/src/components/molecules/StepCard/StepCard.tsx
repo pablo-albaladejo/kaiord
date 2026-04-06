@@ -1,8 +1,9 @@
 import { forwardRef, type HTMLAttributes } from "react";
+
 import { SelectionIndicator } from "../SelectionIndicator";
+import type { DragHandleProps, StepCardProps } from "./StepCard.types";
 import { useStepCardData } from "./use-step-card-data";
 import { useStepCardHandlers } from "./use-step-card-handlers";
-import type { DragHandleProps, StepCardProps } from "./StepCard.types";
 
 export type { DragHandleProps, StepCardProps };
 

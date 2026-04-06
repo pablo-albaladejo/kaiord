@@ -4,7 +4,7 @@
  * Calculates heart rate zones from LTHR using a specified method.
  */
 
-import { HR_METHODS, findMethod } from "../lib/zone-methods";
+import { findMethod, HR_METHODS } from "../lib/zone-methods";
 import type { HeartRateZone } from "../types/profile";
 
 /**

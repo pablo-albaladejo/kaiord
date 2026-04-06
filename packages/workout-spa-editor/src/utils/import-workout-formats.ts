@@ -4,11 +4,12 @@
  * Internal utilities for importing different workout file formats.
  */
 
+import type { KRD } from "@kaiord/core";
 import { fromBinary, fromText } from "@kaiord/core";
+
+import type { ImportProgressCallback } from "./import-workout";
 import { parseJSON } from "./json-parser";
 import { validateKRD } from "./krd-validator";
-import type { ImportProgressCallback } from "./import-workout";
-import type { KRD } from "@kaiord/core";
 
 export const importKrdFile = async (
   buffer: Uint8Array,

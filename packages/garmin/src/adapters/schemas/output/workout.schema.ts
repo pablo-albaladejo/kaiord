@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { garminSportTypeSchema, garminUnitSchema } from "../common";
 import { garminAuthorSchema } from "./author.schema";
 import { garminWorkoutSegmentSchema } from "./segment.schema";

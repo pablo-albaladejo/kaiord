@@ -1,3 +1,5 @@
+import type { ZodType } from "zod";
+
 import {
   partialRepetitionBlockSchema,
   partialWorkoutStepSchema,
@@ -9,7 +11,6 @@ import {
 import { formatZodError } from "./formatters";
 import { validate } from "./validate-helper";
 import type { ValidationResult } from "./validation-types";
-import type { ZodType } from "zod";
 
 export type { ValidationResult } from "./validation-types";
 

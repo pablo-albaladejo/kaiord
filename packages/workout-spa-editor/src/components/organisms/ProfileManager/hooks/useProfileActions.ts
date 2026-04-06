@@ -4,10 +4,10 @@
  * Combines all profile actions.
  */
 
-import { useProfileCRUD } from "./useProfileCRUD";
-import { useProfileSwitch } from "./useProfileSwitch";
 import type { Profile } from "../../../../types/profile";
 import type { ProfileFormData } from "../types";
+import { useProfileCRUD } from "./useProfileCRUD";
+import { useProfileSwitch } from "./useProfileSwitch";
 
 type UseProfileActionsParams = {
   createProfile: (name: string, data: { bodyWeight?: number }) => void;

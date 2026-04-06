@@ -1,12 +1,13 @@
+import type { Sport } from "@kaiord/core";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
+
+import { useAiStore } from "../../../store/ai-store";
+import { Button } from "../../atoms/Button";
 import { ModelSelector } from "./ModelSelector";
 import { SportSelect } from "./SportSelect";
 import { useAiGeneration } from "./useAiGeneration";
 import { ZoneIndicator } from "./ZoneIndicator";
-import { useAiStore } from "../../../store/ai-store";
-import { Button } from "../../atoms/Button";
-import type { Sport } from "@kaiord/core";
 
 export const AiWorkoutForm: React.FC = () => {
   const [text, setText] = useState("");

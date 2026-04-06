@@ -5,6 +5,7 @@
  */
 
 import { HelpCircle } from "lucide-react";
+
 import { FAQItem } from "../components/FAQItem";
 
 export function FAQSection() {

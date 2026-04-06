@@ -5,12 +5,13 @@
  */
 
 import { useState } from "react";
-import { useMethodSwitch } from "./useMethodSwitch";
+
 import { useProfileStore } from "../../../../store/profile-store";
-import { SPORT_ZONE_CAPABILITIES } from "../../../../types/sport-zones";
-import { buildDefaultZone } from "../utils/default-zone";
 import type { ZoneType } from "../../../../store/profile-store/types";
 import type { SportKey } from "../../../../types/sport-zones";
+import { SPORT_ZONE_CAPABILITIES } from "../../../../types/sport-zones";
+import { buildDefaultZone } from "../utils/default-zone";
+import { useMethodSwitch } from "./useMethodSwitch";
 
 export function useSportZoneEditor(profileId: string) {
   const [activeSport, setActiveSport] = useState<SportKey>("cycling");

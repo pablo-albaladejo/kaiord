@@ -1,5 +1,6 @@
-import { targetTypeSchema, type Target } from "@kaiord/core";
+import { type Target, targetTypeSchema } from "@kaiord/core";
 import { targetUnitSchema } from "@kaiord/core";
+
 import { convertPowerValue, interpretWorkoutPower } from "./power-helpers";
 import type { FitTargetData } from "./target.types";
 

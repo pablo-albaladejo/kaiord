@@ -1,9 +1,10 @@
-import { mapExecutableStep } from "./executable-step.converter";
+import type { Logger, RepetitionBlock, WorkoutStep } from "@kaiord/core";
+
 import type {
   GarminWorkoutParsed,
   ParsedRepeatGroup,
 } from "../schemas/garmin-workout-parse.schema";
-import type { Logger, RepetitionBlock, WorkoutStep } from "@kaiord/core";
+import { mapExecutableStep } from "./executable-step.converter";
 
 export type ParsedSegment = NonNullable<
   GarminWorkoutParsed["workoutSegments"]

@@ -1,5 +1,5 @@
-import { Button } from "../../atoms/Button";
 import type { LlmProviderConfig } from "../../../store/ai-store";
+import { Button } from "../../atoms/Button";
 
 const PROVIDER_LABELS: Record<string, string> = {
   anthropic: "Anthropic",

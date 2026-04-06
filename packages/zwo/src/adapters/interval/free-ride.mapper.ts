@@ -1,9 +1,10 @@
-import { intensitySchema, targetTypeSchema } from "@kaiord/core";
-import { mapZwiftDuration } from "../duration/duration.mapper";
-import { extractTextEvents } from "./index";
-import type { ZwiftTextEvent } from "./index";
-import type { ZwiftDurationData } from "../duration/duration.mapper";
 import type { WorkoutStep } from "@kaiord/core";
+import { intensitySchema, targetTypeSchema } from "@kaiord/core";
+
+import type { ZwiftDurationData } from "../duration/duration.mapper";
+import { mapZwiftDuration } from "../duration/duration.mapper";
+import type { ZwiftTextEvent } from "./index";
+import { extractTextEvents } from "./index";
 
 export type ZwiftFreeRideData = {
   Duration?: number;

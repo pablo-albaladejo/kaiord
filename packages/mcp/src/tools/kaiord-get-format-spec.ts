@@ -1,6 +1,7 @@
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+
 import { formatSuccess } from "../utils/error-formatter";
 import { findSpecFile } from "../utils/find-spec-file";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 export const registerGetFormatSpecTool = (server: McpServer): void => {
   const spec = findSpecFile();

@@ -1,9 +1,10 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 import { useState } from "react";
-import { CreateWorkoutForm } from "./CreateWorkoutForm";
-import { Button } from "../../atoms/Button/Button";
+
 import type { Sport } from "../../../types/krd-core";
+import { Button } from "../../atoms/Button/Button";
+import { CreateWorkoutForm } from "./CreateWorkoutForm";
 
 export type CreateWorkoutDialogProps = {
   open: boolean;

@@ -1,7 +1,8 @@
-import type { GarminWorkoutClient } from "./garmin-workout-service";
+import type { AuthProvider, Logger, TokenStore } from "@kaiord/core";
+
 import type { RetryOptions } from "../http/retry";
 import type { FetchFn } from "../http/types";
-import type { AuthProvider, Logger, TokenStore } from "@kaiord/core";
+import type { GarminWorkoutClient } from "./garmin-workout-service";
 
 export type InitResult = { restored: boolean };
 

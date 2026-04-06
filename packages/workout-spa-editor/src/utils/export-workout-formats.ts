@@ -4,10 +4,11 @@
  * Internal utilities for exporting workout files to different formats.
  */
 
-import { toBinary, toText } from "@kaiord/core";
-import { ExportError } from "./export-workout";
-import type { ExportProgressCallback } from "./export-workout";
 import type { KRD } from "@kaiord/core";
+import { toBinary, toText } from "@kaiord/core";
+
+import type { ExportProgressCallback } from "./export-workout";
+import { ExportError } from "./export-workout";
 
 export const exportKrdFile = async (
   krd: KRD,

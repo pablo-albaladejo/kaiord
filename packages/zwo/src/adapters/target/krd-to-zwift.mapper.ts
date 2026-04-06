@@ -1,4 +1,4 @@
-import { targetTypeSchema, type Target } from "@kaiord/core";
+import { type Target, targetTypeSchema } from "@kaiord/core";
 
 /**
  * Map KRD power target to Zwift Power attribute

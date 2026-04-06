@@ -2,8 +2,8 @@
  * Profile Store Initial State
  */
 
-import { loadProfiles } from "../../utils/profile-storage";
 import type { Profile } from "../../types/profile";
+import { loadProfiles } from "../../utils/profile-storage";
 
 export function loadInitialState(): {
   profiles: Array<Profile>;

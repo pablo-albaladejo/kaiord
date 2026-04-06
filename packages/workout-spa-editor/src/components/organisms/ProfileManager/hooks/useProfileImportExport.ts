@@ -4,8 +4,8 @@
  * Profile import/export functionality.
  */
 
-import { profileSchema } from "../../../../types/profile";
 import type { Profile } from "../../../../types/profile";
+import { profileSchema } from "../../../../types/profile";
 
 type UseProfileImportExportParams = {
   createProfile: (name: string, data: { bodyWeight?: number }) => void;

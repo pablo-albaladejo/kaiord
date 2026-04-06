@@ -9,6 +9,7 @@
  */
 
 import * as Dialog from "@radix-ui/react-dialog";
+
 import { ProfileManagerDialog } from "./components/ProfileManagerDialog";
 import { useProfileManager } from "./useProfileManager";
 

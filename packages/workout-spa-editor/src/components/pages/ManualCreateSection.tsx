@@ -1,8 +1,9 @@
 import { ChevronDown, Plus, Upload } from "lucide-react";
 import { useState } from "react";
+
+import type { KRD, ValidationError } from "../../types/krd";
 import { Button } from "../atoms/Button/Button";
 import { FileUpload } from "../molecules/FileUpload/FileUpload";
-import type { KRD, ValidationError } from "../../types/krd";
 
 type ManualCreateSectionProps = {
   onCreateClick: () => void;

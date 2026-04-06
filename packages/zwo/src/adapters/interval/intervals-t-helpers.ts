@@ -1,13 +1,14 @@
+import type { Target, WorkoutStep } from "@kaiord/core";
 import { intensitySchema, targetTypeSchema } from "@kaiord/core";
+
+import type { ZwiftDurationData } from "../duration/duration.mapper";
 import { mapZwiftDuration } from "../duration/duration.mapper";
 import {
   convertZwiftCadenceTarget,
   convertZwiftPowerTarget,
 } from "../target/target.converter";
-import { extractTextEvents } from "./index";
 import type { ZwiftTextEvent } from "./index";
-import type { ZwiftDurationData } from "../duration/duration.mapper";
-import type { Target, WorkoutStep } from "@kaiord/core";
+import { extractTextEvents } from "./index";
 
 export type ZwiftIntervalsTData = {
   Repeat: number;

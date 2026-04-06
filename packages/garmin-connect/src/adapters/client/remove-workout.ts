@@ -1,7 +1,8 @@
-import { createServiceApiError } from "@kaiord/core";
-import { WORKOUT_URL } from "../http/urls";
-import type { GarminHttpClient } from "../http/types";
 import type { Logger } from "@kaiord/core";
+import { createServiceApiError } from "@kaiord/core";
+
+import type { GarminHttpClient } from "../http/types";
+import { WORKOUT_URL } from "../http/urls";
 
 export const removeWorkout = async (
   workoutId: string,

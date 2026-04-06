@@ -1,6 +1,7 @@
 import { Check } from "lucide-react";
 import { forwardRef } from "react";
-import { getFileExtensionForFormat, type FormatOption } from "./format-options";
+
+import { type FormatOption, getFileExtensionForFormat } from "./format-options";
 
 type FormatOptionProps = {
   readonly option: FormatOption;

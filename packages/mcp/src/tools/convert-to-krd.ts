@@ -1,13 +1,14 @@
+import type { BinaryReader, KRD, Logger, TextReader } from "@kaiord/core";
 import { fromBinary, fromText } from "@kaiord/core";
+
+import type { FileFormat } from "../types/tool-schemas";
 import { isBinaryFormat } from "../types/tool-schemas";
 import { decodeBase64 } from "../utils/base64";
 import { readFileAsBuffer, readFileAsText } from "../utils/file-io";
 import {
-  FORMAT_REGISTRY,
   detectFormatFromPath,
+  FORMAT_REGISTRY,
 } from "../utils/format-registry";
-import type { FileFormat } from "../types/tool-schemas";
-import type { BinaryReader, KRD, Logger, TextReader } from "@kaiord/core";
 
 export const convertToKrd = async (
   inputFile: string | undefined,

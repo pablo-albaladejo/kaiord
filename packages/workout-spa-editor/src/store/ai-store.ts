@@ -1,11 +1,12 @@
 import { create } from "zustand";
+
 import { createAiActions } from "./ai-store-actions";
 import type { AiStore } from "./ai-store-types";
 
 export type {
-  LlmProviderType,
-  LlmProviderConfig,
   AiStore,
+  LlmProviderConfig,
+  LlmProviderType,
 } from "./ai-store-types";
 
 export const useAiStore = create<AiStore>((set, get) => ({

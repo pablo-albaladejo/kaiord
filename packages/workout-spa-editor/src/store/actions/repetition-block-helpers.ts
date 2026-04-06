@@ -1,5 +1,5 @@
-import { isWorkoutStep } from "../../types/krd";
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../types/krd";
+import { isWorkoutStep } from "../../types/krd";
 
 export type ExtractedSteps = {
   stepsToWrap: Array<WorkoutStep>;

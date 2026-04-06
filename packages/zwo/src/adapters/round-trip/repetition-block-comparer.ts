@@ -1,5 +1,5 @@
-import { expect } from "vitest";
 import type { ToleranceChecker } from "@kaiord/core";
+import { expect } from "vitest";
 
 type NestedStep = {
   stepIndex: number;

@@ -4,14 +4,14 @@
  * Redesigned layout with inline name, tabs, and zones as primary view.
  */
 
-import { CreateProfileSection } from "./CreateProfileSection";
 import { DeleteConfirmDialog } from "../DeleteConfirmDialog";
-import { DialogHeader } from "./DialogHeader";
 import { ImportExportActions } from "../ImportExportActions";
+import { CreateProfileSection } from "./CreateProfileSection";
+import { DialogHeader } from "./DialogHeader";
+import type { ProfileManagerDialogProps } from "./profile-manager-dialog-types";
 import { ProfileEditView } from "./ProfileEditView";
 import { ProfileListSection } from "./ProfileListSection";
 import { ProfileNotifications } from "./ProfileNotifications";
-import type { ProfileManagerDialogProps } from "./profile-manager-dialog-types";
 
 export function ProfileManagerDialog(props: ProfileManagerDialogProps) {
   const { editingProfile, formData, setFormData, handleSave } = props;

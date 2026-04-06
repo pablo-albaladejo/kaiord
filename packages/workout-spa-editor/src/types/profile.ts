@@ -5,25 +5,25 @@
  */
 
 import { z } from "zod";
+
 import { sportZonesRecordSchema } from "./sport-zones-schemas";
 
-export { heartRateZoneSchema, powerZoneSchema } from "./zone-schemas";
-export type { HeartRateZone, PowerZone } from "./zone-schemas";
-
+export {
+  DEFAULT_HEART_RATE_ZONES,
+  DEFAULT_POWER_ZONES,
+} from "./profile-defaults";
 export type {
-  PaceZone,
   PaceUnit,
-  SportThresholds,
-  ZoneMode,
-  ZoneConfig,
-  SportZoneConfig,
+  PaceZone,
   SportKey,
+  SportThresholds,
+  SportZoneConfig,
+  ZoneConfig,
+  ZoneMode,
 } from "./sport-zones";
 export { SPORT_ZONE_CAPABILITIES } from "./sport-zones";
-export {
-  DEFAULT_POWER_ZONES,
-  DEFAULT_HEART_RATE_ZONES,
-} from "./profile-defaults";
+export type { HeartRateZone, PowerZone } from "./zone-schemas";
+export { heartRateZoneSchema, powerZoneSchema } from "./zone-schemas";
 
 /**
  * Profile Schema

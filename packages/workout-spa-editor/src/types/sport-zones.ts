@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+
 import type { HeartRateZone, PowerZone } from "./profile";
 
 export const paceUnitSchema = z.enum(["min_per_km", "min_per_100m"]);

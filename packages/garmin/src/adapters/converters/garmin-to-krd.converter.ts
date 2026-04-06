@@ -1,9 +1,10 @@
+import type { KRD, Logger, Workout } from "@kaiord/core";
 import { createGarminParsingError } from "@kaiord/core";
-import { flattenSegmentsToSteps } from "./flatten-segments.converter";
-import { addPoolLength } from "./pool-length.mapper";
+
 import { mapGarminSportToKrd } from "../mappers/sport.mapper";
 import { garminWorkoutParseSchema } from "../schemas/garmin-workout-parse.schema";
-import type { KRD, Logger, Workout } from "@kaiord/core";
+import { flattenSegmentsToSteps } from "./flatten-segments.converter";
+import { addPoolLength } from "./pool-length.mapper";
 
 export const convertGarminToKRD = (gcnString: string, logger: Logger): KRD => {
   logger.info("Parsing Garmin Connect JSON");

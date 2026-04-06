@@ -2,12 +2,13 @@
  * @kaiord/fit - FIT format adapter for Kaiord
  */
 
+import type { BinaryReader, BinaryWriter, Logger } from "@kaiord/core";
 import { createConsoleLogger } from "@kaiord/core";
+
 import {
   createGarminFitSdkReader,
   createGarminFitSdkWriter,
 } from "./adapters/garmin-fitsdk";
-import type { BinaryReader, BinaryWriter, Logger } from "@kaiord/core";
 
 export const createFitReader = (logger?: Logger): BinaryReader =>
   createGarminFitSdkReader(logger || createConsoleLogger());

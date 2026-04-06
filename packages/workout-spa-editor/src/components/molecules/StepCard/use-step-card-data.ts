@@ -1,7 +1,7 @@
 import { getStepLabel } from "./get-step-label";
 import { renderStepCardContent } from "./render-step-card-content";
-import { getStepCardClasses } from "./use-step-card-classes";
 import type { StepCardProps } from "./StepCard.types";
+import { getStepCardClasses } from "./use-step-card-classes";
 
 /** Compute derived data and content for StepCard rendering. */
 export function useStepCardData(props: StepCardProps) {

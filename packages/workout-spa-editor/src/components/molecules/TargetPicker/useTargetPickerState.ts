@@ -1,4 +1,6 @@
 import { useState } from "react";
+
+import type { Target } from "../../../types/krd";
 import {
   getCurrentUnit,
   getRangeMaxString,
@@ -6,7 +8,6 @@ import {
   getTargetTypeFromValue,
   getValueString,
 } from "./helpers";
-import type { Target } from "../../../types/krd";
 
 export type TargetPickerState = {
   targetType: "power" | "heart_rate" | "pace" | "cadence" | "open";

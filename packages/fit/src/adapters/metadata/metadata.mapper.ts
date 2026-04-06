@@ -1,7 +1,8 @@
-import { mapSportType } from "../shared/type-guards";
-import type { FitFileId, FitWorkoutMessage } from "../shared/types";
 import type { KRDMetadata } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
+
+import { mapSportType } from "../shared/type-guards";
+import type { FitFileId, FitWorkoutMessage } from "../shared/types";
 export const mapMetadata = (
   fileId: FitFileId | undefined,
   workoutMsg: FitWorkoutMessage | undefined,

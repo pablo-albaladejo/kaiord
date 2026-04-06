@@ -1,7 +1,7 @@
+import type { KRD } from "../schemas/krd";
 import { workoutSchema } from "../schemas/workout";
 import { createKrdValidationError } from "../types/errors";
 import { mapZodErrors } from "../validation/map-zod-errors";
-import type { KRD } from "../schemas/krd";
 
 type CreateWorkoutKRDOptions = {
   created?: string;

@@ -1,6 +1,7 @@
 import { createServiceAuthError } from "@kaiord/core";
-import { OAUTH_CONSUMER_URL } from "./urls";
+
 import type { FetchFn, OAuthConsumer } from "./types";
+import { OAUTH_CONSUMER_URL } from "./urls";
 
 export const fetchOAuthConsumer = async (
   fetchFn: FetchFn

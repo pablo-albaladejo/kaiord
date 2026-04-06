@@ -1,12 +1,13 @@
+import type { Target } from "@kaiord/core";
 import { createGarminParsingError } from "@kaiord/core";
-import { buildTargetType } from "./target-types";
+
 import { TargetTypeId } from "../schemas/common";
 import type {
   GarminTargetInfo,
   PaceZoneTable,
   TargetMapperOptions,
 } from "./target-types";
-import type { Target } from "@kaiord/core";
+import { buildTargetType } from "./target-types";
 
 type Val = { unit: string; value?: number; min?: number; max?: number };
 type TT = GarminTargetInfo["targetType"];

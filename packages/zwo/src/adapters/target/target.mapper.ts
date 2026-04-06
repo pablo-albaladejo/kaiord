@@ -10,7 +10,6 @@ export {
   mapPowerRangeToZwift,
   mapPowerTargetToZwift,
 } from "./krd-to-zwift.mapper";
-
 export {
   mapFreeRideToKrd,
   mapZwiftCadenceToKrd,

@@ -4,11 +4,11 @@
  * Sport-specific zone editor with tabs, thresholds, and zone sections.
  */
 
+import { ConfirmationModal } from "../../molecules/ConfirmationModal/ConfirmationModal";
 import { SportZoneSections } from "./components/SportZoneSections";
 import { SportZoneTabs } from "./components/SportZoneTabs";
 import { SportZoneThresholds } from "./components/SportZoneThresholds";
 import { useSportZoneEditor } from "./hooks/useSportZoneEditor";
-import { ConfirmationModal } from "../../molecules/ConfirmationModal/ConfirmationModal";
 
 type SportZoneEditorProps = {
   profileId: string;

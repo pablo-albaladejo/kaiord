@@ -5,8 +5,8 @@
  * Handles step ID parsing and position lookup in the workout steps array.
  */
 
-import { parseStepId } from "./step-id-parser";
 import type { Workout } from "../types/krd";
+import { parseStepId } from "./step-id-parser";
 
 export const getSelectedStepIndex = (
   selectedStepId: string | null,

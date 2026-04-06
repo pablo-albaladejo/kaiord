@@ -5,8 +5,8 @@
  * from the store and displays a toast with an undo button.
  */
 
-import { useWorkoutStore } from "../../../store/workout-store";
 import type { useToastContext } from "../../../contexts/ToastContext";
+import { useWorkoutStore } from "../../../store/workout-store";
 
 export function executeDeleteWithToast(
   blockId: string,

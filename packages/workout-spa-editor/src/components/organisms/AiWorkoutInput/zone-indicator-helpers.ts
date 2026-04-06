@@ -4,8 +4,8 @@
  * Formats threshold summaries for display.
  */
 
-import { secondsToMmSs } from "../ZoneEditor/utils/pace-format";
 import type { SportThresholds } from "../../../types/sport-zones";
+import { secondsToMmSs } from "../ZoneEditor/utils/pace-format";
 
 export function formatThresholdSummary(thresholds: SportThresholds): string {
   const parts: Array<string> = [];
