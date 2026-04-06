@@ -57,7 +57,7 @@ describe("Lambda handler (via Hono adapter)", () => {
       url: "https://connect.garmin.com/modern/workout/123",
     });
 
-    const result = await handler(createEvent("POST", "/", validBody));
+    const result = await handler(createEvent("POST", "/push", validBody));
 
     expect(result.statusCode).toBe(200);
   });
@@ -66,7 +66,7 @@ describe("Lambda handler (via Hono adapter)", () => {
     process.env.TS_SECRET_API_KEY = "test-secret";
     mockPush.mockResolvedValueOnce({ id: "1", name: "W", url: "u" });
 
-    await handler(createEvent("POST", "/", validBody));
+    await handler(createEvent("POST", "/push", validBody));
 
     expect(mockEnableSocks).toHaveBeenCalled();
     expect(mockTunnelHealth).toHaveBeenCalled();
@@ -76,7 +76,7 @@ describe("Lambda handler (via Hono adapter)", () => {
     process.env.TS_SECRET_API_KEY = "test-secret";
     mockTunnelHealth.mockResolvedValueOnce(false);
 
-    const result = await handler(createEvent("POST", "/", validBody));
+    const result = await handler(createEvent("POST", "/push", validBody));
 
     expect(result.statusCode).toBe(503);
   });
@@ -84,7 +84,7 @@ describe("Lambda handler (via Hono adapter)", () => {
   it("should not invoke Tailscale without env var", async () => {
     mockPush.mockResolvedValueOnce({ id: "1", name: "W", url: "u" });
 
-    await handler(createEvent("POST", "/", validBody));
+    await handler(createEvent("POST", "/push", validBody));
 
     expect(mockEnableSocks).not.toHaveBeenCalled();
   });

@@ -20,7 +20,7 @@ const validBody = {
 };
 
 const post = (app: ReturnType<typeof createApp>, body: unknown) =>
-  app.request("/", {
+  app.request("/push", {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(body),
@@ -49,11 +49,11 @@ describe("GET /health", () => {
   });
 });
 
-describe("POST / — validation", () => {
+describe("POST /push — validation", () => {
   it("should return 400 when body is malformed JSON", async () => {
     const app = createApp();
 
-    const res = await app.request("/", {
+    const res = await app.request("/push", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: "not json",
@@ -76,7 +76,7 @@ describe("POST / — validation", () => {
     const app = createApp();
     const largeBody = JSON.stringify({ data: "x".repeat(512_001) });
 
-    const res = await app.request("/", {
+    const res = await app.request("/push", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -90,7 +90,7 @@ describe("POST / — validation", () => {
   });
 });
 
-describe("POST / — push success", () => {
+describe("POST /push — push success", () => {
   it("should return 200 with push result", async () => {
     mockPush.mockResolvedValueOnce({
       id: "123",
@@ -108,7 +108,7 @@ describe("POST / — push success", () => {
   });
 });
 
-describe("POST / — error classification", () => {
+describe("POST /push — error classification", () => {
   it("should return 401 on auth error", async () => {
     mockPush.mockRejectedValueOnce(new Error("Login failed: ticket not found"));
     const app = createApp();
@@ -181,7 +181,7 @@ describe("POST / — error classification", () => {
   });
 });
 
-describe("POST / — onBeforePush middleware", () => {
+describe("POST /push — onBeforePush middleware", () => {
   it("should execute before push handler", async () => {
     const order: string[] = [];
     const mw: MiddlewareHandler = async (_c, next) => {
