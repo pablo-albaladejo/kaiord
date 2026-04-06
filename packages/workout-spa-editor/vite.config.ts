@@ -23,31 +23,33 @@ export default defineConfig({
   build: {
     outDir: "dist",
     sourcemap: true,
-    // Optimize for production
-    minify: "terser",
+    // Optimize for production (Vite 8 default: oxc, 30-90x faster than terser)
+    minify: "oxc",
     target: "es2020",
-    rollupOptions: {
+    rolldownOptions: {
       output: {
-        manualChunks: {
-          "vendor-ui": [
-            "@radix-ui/react-dialog",
-            "@radix-ui/react-dropdown-menu",
-            "@radix-ui/react-toast",
-            "@radix-ui/react-tooltip",
+        codeSplitting: {
+          groups: [
+            { name: "vendor-ui", test: /[\\/]node_modules[\\/]@radix-ui[\\/]/ },
+            {
+              name: "vendor-state",
+              test: /[\\/]node_modules[\\/]zustand[\\/]/,
+            },
+            { name: "vendor-zod", test: /[\\/]node_modules[\\/]zod[\\/]/ },
+            {
+              name: "vendor-dnd",
+              test: /[\\/]node_modules[\\/]@dnd-kit[\\/]/,
+            },
+            {
+              name: "vendor-icons",
+              test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
+            },
+            { name: "kaiord-core", test: /[\\/]packages[\\/]core[\\/]/ },
+            { name: "kaiord-fit", test: /[\\/]packages[\\/]fit[\\/]/ },
+            { name: "kaiord-tcx", test: /[\\/]packages[\\/]tcx[\\/]/ },
+            { name: "kaiord-zwo", test: /[\\/]packages[\\/]zwo[\\/]/ },
+            { name: "kaiord-garmin", test: /[\\/]packages[\\/]garmin[\\/]/ },
           ],
-          "vendor-state": ["zustand"],
-          "vendor-zod": ["zod"],
-          "vendor-dnd": [
-            "@dnd-kit/core",
-            "@dnd-kit/sortable",
-            "@dnd-kit/utilities",
-          ],
-          "vendor-icons": ["lucide-react"],
-          "kaiord-core": ["@kaiord/core"],
-          "kaiord-fit": ["@kaiord/fit"],
-          "kaiord-tcx": ["@kaiord/tcx"],
-          "kaiord-zwo": ["@kaiord/zwo"],
-          "kaiord-garmin": ["@kaiord/garmin"],
         },
       },
     },
