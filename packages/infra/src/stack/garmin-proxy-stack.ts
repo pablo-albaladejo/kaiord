@@ -36,8 +36,8 @@ export class GarminProxyStack extends Stack {
     const api = this.createApi(allowedOrigins, handler);
 
     new CfnOutput(this, "ApiUrl", {
-      value: `https://${api.apiId}.execute-api.${this.region}.amazonaws.com/push`,
-      description: "Garmin proxy API Gateway URL (POST endpoint)",
+      value: `https://${api.apiId}.execute-api.${this.region}.amazonaws.com`,
+      description: "Garmin proxy API Gateway URL",
     });
 
     if (alarmEmail) {
