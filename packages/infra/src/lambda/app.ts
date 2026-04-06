@@ -70,6 +70,13 @@ export const createApp = (options?: AppOptions) => {
         return c.json(result, 200);
       } catch (error: unknown) {
         if (isAuthError(error)) {
+          console.error("Garmin auth failed", {
+            requestId: reqId,
+            errorType:
+              error instanceof Error ? error.constructor.name : "unknown",
+            errorMessage:
+              error instanceof Error ? error.message.slice(0, 200) : "unknown",
+          });
           return c.json({ error: "Garmin authentication failed" }, 401);
         }
         if (isRateLimited(error)) {

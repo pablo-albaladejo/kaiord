@@ -1,3 +1,4 @@
+import type { Logger } from "@kaiord/core";
 import { createServiceAuthError } from "@kaiord/core";
 
 import { createOAuthSigner } from "./oauth-signer";
@@ -8,7 +9,8 @@ import { GARMIN_SSO_EMBED, OAUTH_URL, USER_AGENT_MOBILE } from "./urls";
 export const getOAuth1Token = async (
   ticket: string,
   consumer: OAuthConsumer,
-  fetchFn: FetchFn
+  fetchFn: FetchFn,
+  logger: Logger
 ): Promise<OAuth1Token> => {
   const signer = createOAuthSigner(consumer);
   const params = new URLSearchParams({
@@ -22,6 +24,7 @@ export const getOAuth1Token = async (
   const res = await fetchFn(url, {
     headers: { ...headers, "User-Agent": USER_AGENT_MOBILE },
   });
+  logger.debug("[SSO] Requesting OAuth1 token", { status: res.status });
   if (!res.ok) {
     throw createServiceAuthError(
       `OAuth1 token request failed: ${res.status} ${res.statusText}`
@@ -42,7 +45,8 @@ export const getOAuth1Token = async (
 export const exchangeOAuth2 = async (
   oauth1: OAuth1Token,
   consumer: OAuthConsumer,
-  fetchFn: FetchFn
+  fetchFn: FetchFn,
+  logger: Logger
 ): Promise<OAuth2Token> => {
   const signer = createOAuthSigner(consumer);
   const baseUrl = `${OAUTH_URL}/exchange/user/2.0`;
@@ -60,6 +64,7 @@ export const exchangeOAuth2 = async (
       "Content-Type": "application/x-www-form-urlencoded",
     },
   });
+  logger.debug("[SSO] Exchanging OAuth2 token", { status: res.status });
   if (!res.ok) {
     throw createServiceAuthError(
       `OAuth2 exchange failed: ${res.status} ${res.statusText}`

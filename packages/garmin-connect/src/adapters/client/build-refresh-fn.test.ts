@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { Logger } from "@kaiord/core";
 import type { OAuth1Token, OAuth2Token, OAuthConsumer } from "../http/types";
 
 vi.mock("../http/oauth-consumer", () => ({
@@ -31,6 +32,13 @@ const OAUTH2: OAuth2Token = {
 
 const mockFetch: typeof globalThis.fetch = vi.fn();
 
+const mockLogger: Logger = {
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+};
+
 describe("buildRefreshFn", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -40,14 +48,19 @@ describe("buildRefreshFn", () => {
     vi.mocked(fetchOAuthConsumer).mockResolvedValue(CONSUMER);
     vi.mocked(exchangeOAuth2).mockResolvedValue(OAUTH2);
 
-    const refreshFn = buildRefreshFn(mockFetch);
+    const refreshFn = buildRefreshFn(mockFetch, mockLogger);
 
     await refreshFn(OAUTH1);
     await refreshFn(OAUTH1);
 
     expect(fetchOAuthConsumer).toHaveBeenCalledTimes(1);
     expect(exchangeOAuth2).toHaveBeenCalledTimes(2);
-    expect(exchangeOAuth2).toHaveBeenCalledWith(OAUTH1, CONSUMER, mockFetch);
+    expect(exchangeOAuth2).toHaveBeenCalledWith(
+      OAUTH1,
+      CONSUMER,
+      mockFetch,
+      mockLogger
+    );
   });
 
   it("clears consumer cache on failure and re-fetches on retry", async () => {
@@ -64,7 +77,7 @@ describe("buildRefreshFn", () => {
       .mockResolvedValueOnce(CONSUMER)
       .mockResolvedValueOnce(freshConsumer);
 
-    const refreshFn = buildRefreshFn(mockFetch);
+    const refreshFn = buildRefreshFn(mockFetch, mockLogger);
 
     const result = await refreshFn(OAUTH1);
 
@@ -73,7 +86,8 @@ describe("buildRefreshFn", () => {
     expect(exchangeOAuth2).toHaveBeenLastCalledWith(
       OAUTH1,
       freshConsumer,
-      mockFetch
+      mockFetch,
+      mockLogger
     );
     expect(result).toEqual(OAUTH2);
   });
