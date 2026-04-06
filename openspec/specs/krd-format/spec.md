@@ -1,4 +1,4 @@
-> Synced: 2026-03-30
+> Synced: 2026-04-06
 
 # KRD Format
 
@@ -17,6 +17,13 @@ KRD files SHALL use the MIME type `application/vnd.kaiord+json`.
 ### Requirement: Schema Validation
 
 All KRD instances MUST validate against the Zod schemas in `packages/core/src/domain/schemas/`. Invalid KRD data MUST be rejected before reaching adapters.
+
+`WorkoutStep` MUST satisfy two cross-field invariants enforced via Zod `.refine()` on `workoutStepSchema`:
+
+- `durationType` MUST equal `duration.type`
+- `targetType` MUST equal `target.type`
+
+Validation fails at parse time if either invariant is violated.
 
 ### Requirement: Round-Trip Safety
 
@@ -76,6 +83,12 @@ Adapters MAY define additional extension namespaces. Unknown extension namespace
 - **GIVEN** a FIT file with Garmin-specific extension fields
 - **WHEN** converted to KRD
 - **THEN** extension data is preserved in the `extensions` object
+
+#### Scenario: WorkoutStep cross-field invariant rejected
+
+- **GIVEN** a WorkoutStep where `durationType` is `"time"` but `duration.type` is `"distance"`
+- **WHEN** parsed via `workoutStepSchema`
+- **THEN** Zod throws a validation error: "durationType must match duration.type"
 
 #### Scenario: Structured workout in extensions
 
