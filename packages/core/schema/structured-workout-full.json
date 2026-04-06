@@ -120,8 +120,7 @@
                   "repeat_until_power_less_than",
                   "repeat_until_power_greater_than",
                   "open"
-                ],
-                "description": "Must match duration.type"
+                ]
               },
               "duration": {
                 "oneOf": [
@@ -430,8 +429,7 @@
                   "pace",
                   "stroke_type",
                   "open"
-                ],
-                "description": "Must match target.type"
+                ]
               },
               "target": {
                 "oneOf": [
@@ -883,8 +881,7 @@
                         "repeat_until_power_less_than",
                         "repeat_until_power_greater_than",
                         "open"
-                      ],
-                      "description": "Must match duration.type"
+                      ]
                     },
                     "duration": {
                       "oneOf": [
@@ -1193,8 +1190,7 @@
                         "pace",
                         "stroke_type",
                         "open"
-                      ],
-                      "description": "Must match target.type"
+                      ]
                     },
                     "target": {
                       "oneOf": [
