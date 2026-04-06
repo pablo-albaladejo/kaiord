@@ -41,7 +41,7 @@
     },
     "peerDependencyRules": {
       "allowedVersions": {
-        "@codecov/vite-plugin>vite": "7"
+        "@codecov/vite-plugin>vite": "8"
       }
     }
   },
