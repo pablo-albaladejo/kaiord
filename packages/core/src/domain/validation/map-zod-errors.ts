@@ -1,5 +1,6 @@
-import type { ValidationError } from "../types/error-types";
 import type { ZodIssue } from "zod";
+
+import type { ValidationError } from "../types/error-types";
 
 /**
  * Maps Zod validation issues to the domain ValidationError format.

@@ -1,4 +1,5 @@
 import { lazy, Suspense } from "react";
+
 import type { useLazyDialog } from "../../../../hooks/use-lazy-dialog";
 import type { WorkoutTemplate } from "../../../../types/workout-library";
 

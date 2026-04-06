@@ -1,7 +1,7 @@
-import { mapZodErrors } from "./map-zod-errors";
+import type { KRD } from "../schemas/krd";
 import { krdSchema } from "../schemas/krd";
 import { createKrdValidationError } from "../types/errors";
-import type { KRD } from "../schemas/krd";
+import { mapZodErrors } from "./map-zod-errors";
 
 /**
  * Validates unknown data against the KRD schema.

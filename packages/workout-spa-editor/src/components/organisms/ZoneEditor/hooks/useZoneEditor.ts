@@ -6,12 +6,13 @@
  */
 
 import { useState } from "react";
-import { useZoneValidation } from "./useZoneValidation";
+
 import type {
   HeartRateZone,
   PowerZone,
   Profile,
 } from "../../../../types/profile";
+import { useZoneValidation } from "./useZoneValidation";
 
 type ZoneValidationError = {
   zone: number;

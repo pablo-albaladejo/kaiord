@@ -1,6 +1,6 @@
-export { createCourseMessages } from "./course-messages.creator";
 export {
+  type KRDCoursePoint,
   mapFitCoursePointToKrd,
   mapKrdCoursePointToFit,
-  type KRDCoursePoint,
 } from "./course.mapper";
+export { createCourseMessages } from "./course-messages.creator";

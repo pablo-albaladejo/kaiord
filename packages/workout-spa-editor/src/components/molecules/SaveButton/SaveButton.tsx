@@ -11,13 +11,14 @@
  */
 
 import { Download } from "lucide-react";
-import { ProgressBar } from "./ProgressBar";
-import { SaveButtonToasts } from "./SaveButtonToasts";
-import { useSaveWorkout } from "./use-save-workout";
+
+import type { KRD } from "../../../types/krd";
 import { Button } from "../../atoms/Button/Button";
 import { ExportFormatSelector } from "../ExportFormatSelector/ExportFormatSelector";
 import { SaveErrorDialog } from "../SaveErrorDialog/SaveErrorDialog";
-import type { KRD } from "../../../types/krd";
+import { ProgressBar } from "./ProgressBar";
+import { SaveButtonToasts } from "./SaveButtonToasts";
+import { useSaveWorkout } from "./use-save-workout";
 
 export type SaveButtonProps = {
   workout: KRD;

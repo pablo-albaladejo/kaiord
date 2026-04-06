@@ -1,11 +1,11 @@
 import {
   closestCenter,
   DndContext,
+  type DragEndEvent,
   KeyboardSensor,
   PointerSensor,
   useSensor,
   useSensors,
-  type DragEndEvent,
 } from "@dnd-kit/core";
 import {
   SortableContext,
@@ -13,11 +13,12 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import { Plus } from "lucide-react";
-import { buildSortableIds } from "./repetition-block-steps.types";
-import { StepList } from "./StepList";
+
 import { Button } from "../../atoms/Button/Button";
 import { Icon } from "../../atoms/Icon/Icon";
 import type { RepetitionBlockStepsProps } from "./repetition-block-steps.types";
+import { buildSortableIds } from "./repetition-block-steps.types";
+import { StepList } from "./StepList";
 
 export const RepetitionBlockSteps = (props: RepetitionBlockStepsProps) => {
   const { steps, onReorderSteps, onAddStep, blockIndex } = props;

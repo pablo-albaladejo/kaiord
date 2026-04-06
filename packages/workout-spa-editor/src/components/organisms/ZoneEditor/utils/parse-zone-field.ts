@@ -5,10 +5,10 @@
  * Cascades changes to adjacent zones for contiguity.
  */
 
-import { cascadeToNeighbors } from "./cascade-zones";
-import { mmSsToSeconds } from "./pace-format";
 import type { HeartRateZone, PowerZone } from "../../../../types/profile";
 import type { PaceZone } from "../../../../types/sport-zones";
+import { cascadeToNeighbors } from "./cascade-zones";
+import { mmSsToSeconds } from "./pace-format";
 
 type ZoneRowData = HeartRateZone | PowerZone | PaceZone;
 

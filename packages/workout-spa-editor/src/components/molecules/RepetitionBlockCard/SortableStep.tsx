@@ -1,7 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import { StepCard } from "../StepCard/StepCard";
+
 import type { WorkoutStep } from "../../../types/krd";
+import { StepCard } from "../StepCard/StepCard";
 
 export type SortableStepProps = {
   step: WorkoutStep;

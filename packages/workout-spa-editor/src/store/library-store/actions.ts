@@ -2,6 +2,8 @@
  * Library Store Actions
  */
 
+import type { StateCreator } from "zustand";
+
 import {
   createNewTemplate,
   extractAllTags,
@@ -12,7 +14,6 @@ import {
 } from "./helpers";
 import { persistState } from "./persistence";
 import type { LibraryStore } from "./types";
-import type { StateCreator } from "zustand";
 
 export const createActions: StateCreator<LibraryStore> = (set, get) => ({
   templates: [],

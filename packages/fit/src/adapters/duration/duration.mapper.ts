@@ -1,8 +1,9 @@
 import {
-  durationTypeSchema,
   type Duration,
   type DurationType,
+  durationTypeSchema,
 } from "@kaiord/core";
+
 import { convertFitDuration } from "../duration/duration.converter";
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import type { FitWorkoutStep } from "../shared/types";

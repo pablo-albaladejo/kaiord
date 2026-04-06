@@ -5,6 +5,7 @@
  */
 
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
 import { Button } from "../../../atoms/Button/Button";
 
 type TutorialActionsProps = {

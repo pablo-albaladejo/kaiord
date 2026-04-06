@@ -4,10 +4,10 @@
  * Functions for creating new profiles with sport-specific zones.
  */
 
-import { DEFAULT_HEART_RATE_ZONES } from "../../../types/profile";
-import { calculatePowerZones } from "../../../utils/calculate-power-zones";
 import type { Profile } from "../../../types/profile";
+import { DEFAULT_HEART_RATE_ZONES } from "../../../types/profile";
 import type { SportKey, SportZoneConfig } from "../../../types/sport-zones";
+import { calculatePowerZones } from "../../../utils/calculate-power-zones";
 
 export function createNewProfile(
   name: string,

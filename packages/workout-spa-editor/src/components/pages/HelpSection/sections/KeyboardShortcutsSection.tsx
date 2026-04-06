@@ -5,6 +5,7 @@
  */
 
 import { Keyboard } from "lucide-react";
+
 import { EditOperationsShortcuts } from "./shortcuts/EditOperationsShortcuts";
 import { FileOperationsShortcuts } from "./shortcuts/FileOperationsShortcuts";
 import { SelectionShortcuts } from "./shortcuts/SelectionShortcuts";

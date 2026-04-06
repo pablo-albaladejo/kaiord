@@ -4,11 +4,11 @@
  * Single zone row with editable name, min/max values, and optional delete.
  */
 
-import { EditableZoneName } from "./EditableZoneName";
-import { EditableZoneValue } from "./EditableZoneValue";
+import type { ZoneRowData, ZoneTableCallbacks } from "../types/zone-table";
 import { getZoneColor } from "../utils/zone-colors";
 import { extractValues, formatSecondary } from "../utils/zone-values";
-import type { ZoneRowData, ZoneTableCallbacks } from "../types/zone-table";
+import { EditableZoneName } from "./EditableZoneName";
+import { EditableZoneValue } from "./EditableZoneValue";
 
 const TYPE_LABELS = {
   heartRate: "HR",

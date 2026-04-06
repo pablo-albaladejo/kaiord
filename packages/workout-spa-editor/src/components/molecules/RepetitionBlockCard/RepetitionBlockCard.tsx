@@ -1,13 +1,14 @@
 import { forwardRef } from "react";
+
 import {
   buildBlockClasses,
   createBlockClickHandler,
   createBlockKeyDownHandler,
 } from "./repetition-block-card.helpers";
+import type { RepetitionBlockCardProps } from "./repetition-block-card.types";
 import { RepetitionBlockHeader } from "./RepetitionBlockHeader";
 import { RepetitionBlockSteps } from "./RepetitionBlockSteps";
 import { useRepetitionBlockState } from "./use-repetition-block-state";
-import type { RepetitionBlockCardProps } from "./repetition-block-card.types";
 
 export type { RepetitionBlockCardProps } from "./repetition-block-card.types";
 

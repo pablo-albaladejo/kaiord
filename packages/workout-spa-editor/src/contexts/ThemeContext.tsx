@@ -1,6 +1,7 @@
-import { createContext, useContext, type ReactNode } from "react";
-import { useThemeProvider } from "./useThemeProvider";
+import { createContext, type ReactNode, useContext } from "react";
+
 import type { ResolvedTheme, Theme } from "./theme-utils";
+import { useThemeProvider } from "./useThemeProvider";
 
 export type { ResolvedTheme, Theme };
 

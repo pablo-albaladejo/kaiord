@@ -1,5 +1,5 @@
-import { WorkoutMetadataEditor } from "../../molecules/WorkoutMetadataEditor/WorkoutMetadataEditor";
 import type { KRD } from "../../../types/krd";
+import { WorkoutMetadataEditor } from "../../molecules/WorkoutMetadataEditor/WorkoutMetadataEditor";
 
 type MetadataEditModeProps = {
   krd: KRD;

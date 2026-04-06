@@ -1,15 +1,16 @@
+import type { KRD, Logger, Workout } from "@kaiord/core";
 import {
   createGarminParsingError,
   isRepetitionBlock,
   workoutSchema,
 } from "@kaiord/core";
-import { addPoolInfo, type PoolInput } from "./garmin-pool-info.mapper";
-import { mapRepetitionBlock } from "./garmin-repetition.converter";
-import { mapWorkoutStep } from "./garmin-workout-step.converter";
+
 import { mapKrdSportToGarmin } from "../mappers/sport.mapper";
 import type { TargetMapperOptions } from "../mappers/target.mapper";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
-import type { KRD, Logger, Workout } from "@kaiord/core";
+import { addPoolInfo, type PoolInput } from "./garmin-pool-info.mapper";
+import { mapRepetitionBlock } from "./garmin-repetition.converter";
+import { mapWorkoutStep } from "./garmin-workout-step.converter";
 
 export type GarminWriterOptions = TargetMapperOptions & {
   logger: Logger;

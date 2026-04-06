@@ -6,35 +6,28 @@
  */
 
 export type { ToleranceViolation, ValidationError } from "./error-types";
-
 export { createFitParsingError, FitParsingError } from "./fit-errors";
-
-export { createKrdValidationError, KrdValidationError } from "./krd-errors";
-
-export {
-  createTcxParsingError,
-  createTcxValidationError,
-  TcxParsingError,
-  TcxValidationError,
-} from "./tcx-errors";
-
-export {
-  createZwiftParsingError,
-  createZwiftValidationError,
-  ZwiftParsingError,
-  ZwiftValidationError,
-} from "./zwift-errors";
-
 export { createGarminParsingError, GarminParsingError } from "./garmin-errors";
-
-export {
-  createToleranceExceededError,
-  ToleranceExceededError,
-} from "./tolerance-errors";
-
+export { createKrdValidationError, KrdValidationError } from "./krd-errors";
 export {
   createServiceApiError,
   createServiceAuthError,
   ServiceApiError,
   ServiceAuthError,
 } from "./service-errors";
+export {
+  createTcxParsingError,
+  createTcxValidationError,
+  TcxParsingError,
+  TcxValidationError,
+} from "./tcx-errors";
+export {
+  createToleranceExceededError,
+  ToleranceExceededError,
+} from "./tolerance-errors";
+export {
+  createZwiftParsingError,
+  createZwiftValidationError,
+  ZwiftParsingError,
+  ZwiftValidationError,
+} from "./zwift-errors";

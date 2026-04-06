@@ -1,5 +1,5 @@
-import { z } from "zod";
 import type { Sport } from "@kaiord/core";
+import { z } from "zod";
 
 export const tcxSportSchema = z.enum(["Running", "Biking", "Other"]);
 

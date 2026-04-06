@@ -3,12 +3,12 @@
  */
 
 // Types
-export type { GarminWorkoutClient } from "./adapters/client/garmin-workout-service";
 export type {
   GarminConnectClient,
   GarminConnectClientOptions,
   InitResult,
 } from "./adapters/client/garmin-connect-client.types";
+export type { GarminWorkoutClient } from "./adapters/client/garmin-workout-service";
 export type { RetryOptions } from "./adapters/http/retry";
 export type { TokenReader } from "./adapters/token/token-manager.types";
 export type {

@@ -1,16 +1,17 @@
+import type { Target } from "@kaiord/core";
 import { targetTypeSchema } from "@kaiord/core";
+
+import {
+  zwiftCadenceTargetSchema,
+  zwiftPaceTargetSchema,
+  zwiftPowerTargetSchema,
+} from "../schemas/zwift-target";
 import {
   convertZwiftCadenceTarget,
   convertZwiftPaceTarget,
   convertZwiftPowerRange,
   convertZwiftPowerTarget,
 } from "./target.converter";
-import {
-  zwiftCadenceTargetSchema,
-  zwiftPaceTargetSchema,
-  zwiftPowerTargetSchema,
-} from "../schemas/zwift-target";
-import type { Target } from "@kaiord/core";
 
 /**
  * Map Zwift Power attribute to KRD power target

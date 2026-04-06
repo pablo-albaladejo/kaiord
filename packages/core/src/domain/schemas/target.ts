@@ -1,4 +1,5 @@
 import { z } from "zod";
+
 import { targetTypeSchema } from "./target-type";
 import {
   cadenceValueSchema,
@@ -8,8 +9,8 @@ import {
   strokeTypeValueSchema,
 } from "./target-values";
 
-export { targetTypeSchema } from "./target-type";
 export type { TargetType } from "./target-type";
+export { targetTypeSchema } from "./target-type";
 
 /**
  * Zod schema for workout step target.
@@ -48,7 +49,6 @@ export const targetSchema = z.discriminatedUnion("type", [
  */
 export type Target = z.infer<typeof targetSchema>;
 
-export { targetUnitSchema } from "./target-values";
 export type {
   CadenceValue,
   HeartRateValue,
@@ -57,3 +57,4 @@ export type {
   StrokeTypeValue,
   TargetUnit,
 } from "./target-values";
+export { targetUnitSchema } from "./target-values";

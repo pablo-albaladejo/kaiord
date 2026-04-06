@@ -1,5 +1,5 @@
-import { isModifierKeyPressed } from "./use-modifier-detection";
 import type { WorkoutStep } from "../../../types/krd";
+import { isModifierKeyPressed } from "./use-modifier-detection";
 
 type StepCardHandlersProps = {
   step: WorkoutStep;

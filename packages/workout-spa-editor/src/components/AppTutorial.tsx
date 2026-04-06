@@ -1,4 +1,5 @@
 import { lazy, Suspense, useEffect, useState } from "react";
+
 import { TUTORIAL_STEPS } from "../constants/tutorial-steps";
 
 const OnboardingTutorial = lazy(() =>

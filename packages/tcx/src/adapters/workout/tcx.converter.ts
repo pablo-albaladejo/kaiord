@@ -1,8 +1,9 @@
+import type { KRD, Logger, Workout, WorkoutStep } from "@kaiord/core";
 import { createTcxParsingError } from "@kaiord/core";
+
+import { KRD_TO_TCX_SPORT } from "../schemas/tcx-sport";
 import { addKaiordMetadata } from "./metadata-builder";
 import { convertStepToTcx } from "./step-to-tcx.converter";
-import { KRD_TO_TCX_SPORT } from "../schemas/tcx-sport";
-import type { KRD, Logger, Workout, WorkoutStep } from "@kaiord/core";
 
 const buildTcxWorkout = (
   workout: Workout,

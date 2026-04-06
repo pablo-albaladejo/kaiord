@@ -1,7 +1,8 @@
 import { durationTypeSchema } from "@kaiord/core";
+
 import {
-  tcxDurationTypeSchema,
   type TcxDurationType,
+  tcxDurationTypeSchema,
 } from "../schemas/tcx-duration";
 import type {
   TcxDurationConversionResult,

@@ -1,10 +1,11 @@
-import { z } from "zod";
-import { buildInspectSummary } from "./build-inspect-summary";
-import { convertToKrd } from "./convert-to-krd";
-import { formatSchema } from "../types/tool-schemas";
-import { formatError, formatSuccess } from "../utils/error-formatter";
 import type { Logger } from "@kaiord/core";
 import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { z } from "zod";
+
+import { formatSchema } from "../types/tool-schemas";
+import { formatError, formatSuccess } from "../utils/error-formatter";
+import { buildInspectSummary } from "./build-inspect-summary";
+import { convertToKrd } from "./convert-to-krd";
 
 const inspectSchema = {
   input_file: z.string().describe("Path to the fitness data file"),

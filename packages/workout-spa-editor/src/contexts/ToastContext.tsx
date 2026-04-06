@@ -1,4 +1,5 @@
-import { createContext, useContext, type ReactNode } from "react";
+import { createContext, type ReactNode, useContext } from "react";
+
 import { useToast } from "../hooks/useToast";
 import type { ToastOptions } from "../hooks/useToast.types";
 

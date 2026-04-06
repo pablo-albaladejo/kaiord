@@ -1,7 +1,8 @@
-import { mapStep } from "./step.mapper";
+import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
+
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import type { FitWorkoutStep } from "../shared/types";
-import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
+import { mapStep } from "./step.mapper";
 
 export const findRepetitionStepIndices = (
   workoutSteps: Array<FitWorkoutStep>

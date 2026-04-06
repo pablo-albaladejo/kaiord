@@ -1,10 +1,11 @@
 import { z } from "zod";
+
 import { sportSchema } from "./sport";
 import { subSportSchema } from "./sub-sport";
 import { workoutStepSchema } from "./workout-step";
 
-export { workoutStepSchema } from "./workout-step";
 export type { WorkoutStep } from "./workout-step";
+export { workoutStepSchema } from "./workout-step";
 
 /**
  * Zod schema for a repetition block.

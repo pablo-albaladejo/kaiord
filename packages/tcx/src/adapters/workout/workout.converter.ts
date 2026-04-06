@@ -1,6 +1,7 @@
-import { convertTcxStep } from "./step.converter";
-import { TCX_TO_KRD_SPORT, tcxSportSchema } from "../schemas/tcx-sport";
 import type { Logger, Workout, WorkoutStep } from "@kaiord/core";
+
+import { TCX_TO_KRD_SPORT, tcxSportSchema } from "../schemas/tcx-sport";
+import { convertTcxStep } from "./step.converter";
 
 const extractWorkoutExtensions = (
   tcxWorkout: Record<string, unknown>,

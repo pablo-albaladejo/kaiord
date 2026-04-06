@@ -1,6 +1,7 @@
 import { Fragment } from "react";
-import { renderWorkoutItem } from "./render-workout-item";
+
 import { EmptyWorkoutState } from "../../molecules/EmptyWorkoutState";
+import { renderWorkoutItem } from "./render-workout-item";
 import type { WorkoutListContentProps } from "./WorkoutListContent.types";
 
 export const WorkoutListContent = ({

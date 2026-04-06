@@ -1,8 +1,9 @@
 import { useState } from "react";
+
+import type { KRD, Sport, ValidationError } from "../../types/krd";
+import { CreateWorkoutDialog } from "../molecules/CreateWorkoutDialog/CreateWorkoutDialog";
 import { GettingStartedTips } from "./GettingStartedTips";
 import { ManualCreateSection } from "./ManualCreateSection";
-import { CreateWorkoutDialog } from "../molecules/CreateWorkoutDialog/CreateWorkoutDialog";
-import type { KRD, Sport, ValidationError } from "../../types/krd";
 
 export type WelcomeSectionProps = {
   onFileLoad: (krd: KRD) => void;

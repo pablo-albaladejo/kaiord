@@ -1,6 +1,7 @@
-import { semicirclesToDegrees } from "../shared/coordinate.converter";
-import type { FitRecord } from "../schemas/fit-record";
 import type { KRDRecord } from "@kaiord/core";
+
+import type { FitRecord } from "../schemas/fit-record";
+import { semicirclesToDegrees } from "../shared/coordinate.converter";
 
 const mapFitPosition = (
   fit: FitRecord

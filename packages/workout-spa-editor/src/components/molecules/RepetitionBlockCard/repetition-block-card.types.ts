@@ -1,6 +1,7 @@
+import type { HTMLAttributes } from "react";
+
 import type { RepetitionBlock } from "../../../types/krd";
 import type { DragHandleProps } from "../StepCard/StepCard";
-import type { HTMLAttributes } from "react";
 
 /**
  * Props for the RepetitionBlockCard component.

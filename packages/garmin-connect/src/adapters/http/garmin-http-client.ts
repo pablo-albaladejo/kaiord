@@ -1,7 +1,8 @@
+import type { Logger } from "@kaiord/core";
+
+import type { TokenReader } from "../token/token-manager.types";
 import { authFetch } from "./garmin-auth-fetch";
 import type { FetchFn, GarminHttpClient } from "./types";
-import type { TokenReader } from "../token/token-manager.types";
-import type { Logger } from "@kaiord/core";
 
 export type { GarminHttpClient } from "./types";
 

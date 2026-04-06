@@ -1,5 +1,5 @@
-import { SortableStepCard } from "./SortableStepCard";
 import type { WorkoutStep } from "../../../types/krd";
+import { SortableStepCard } from "./SortableStepCard";
 
 type RenderStepProps = {
   readonly id: string;

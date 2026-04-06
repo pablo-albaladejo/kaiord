@@ -38,13 +38,18 @@ export type {
   WorkoutStep,
   WorkoutStepWithId,
 } from "./krd";
-
 export { isRepetitionBlock, isWorkoutStep } from "./krd";
 
 // ============================================
 // Schemas
 // ============================================
 
+export type {
+  PartialRepetitionBlock,
+  PartialWorkoutStep,
+  ValidationErrorType,
+  WorkoutMetadataForm,
+} from "./schemas";
 export {
   durationSchema,
   durationTypeSchema,
@@ -72,17 +77,11 @@ export {
   workoutStepWithIdSchema,
 } from "./schemas";
 
-export type {
-  PartialRepetitionBlock,
-  PartialWorkoutStep,
-  ValidationErrorType,
-  WorkoutMetadataForm,
-} from "./schemas";
-
 // ============================================
 // Validation Helpers
 // ============================================
 
+export type { ValidationResult } from "./validation";
 export {
   createDebouncedValidator,
   formatValidationErrors,
@@ -99,5 +98,3 @@ export {
   validateWorkoutMetadata,
   validateWorkoutStep,
 } from "./validation";
-
-export type { ValidationResult } from "./validation";

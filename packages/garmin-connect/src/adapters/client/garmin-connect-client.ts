@@ -1,15 +1,16 @@
 import { createConsoleLogger } from "@kaiord/core";
-import { buildRefreshFn } from "./build-refresh-fn";
-import { createGarminWorkoutService } from "./garmin-workout-service";
+
 import { createGarminAuthProvider } from "../auth/garmin-auth-provider";
 import { createCookieFetch } from "../http/cookie-fetch";
 import { createGarminHttpClient } from "../http/garmin-http-client";
 import { withRetry } from "../http/retry";
 import { createTokenManager } from "../token/token-manager";
+import { buildRefreshFn } from "./build-refresh-fn";
 import type {
   GarminConnectClient,
   GarminConnectClientOptions,
 } from "./garmin-connect-client.types";
+import { createGarminWorkoutService } from "./garmin-workout-service";
 
 export type {
   GarminConnectClient,

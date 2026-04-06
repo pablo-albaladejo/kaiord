@@ -1,10 +1,11 @@
+import type { Logger, ToleranceViolation } from "@kaiord/core";
 import { createToleranceChecker, validateRoundTrip } from "@kaiord/core";
 import { createFitReader, createFitWriter } from "@kaiord/fit";
+import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { z } from "zod";
+
 import { formatError, formatSuccess } from "../utils/error-formatter";
 import { readFileAsBuffer } from "../utils/file-io";
-import type { Logger, ToleranceViolation } from "@kaiord/core";
-import type { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 
 const TOOL_NAME = "kaiord_round_trip_validate";
 const TOOL_DESC =

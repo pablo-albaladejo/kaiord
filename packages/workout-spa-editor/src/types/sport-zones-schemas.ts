@@ -5,6 +5,7 @@
  */
 
 import { z } from "zod";
+
 import { paceZoneSchema, sportThresholdsSchema } from "./sport-zones";
 import { heartRateZoneSchema, powerZoneSchema } from "./zone-schemas";
 

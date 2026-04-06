@@ -1,4 +1,5 @@
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
+
 import { createServer } from "../server/create-server";
 
 const main = async (): Promise<void> => {

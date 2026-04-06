@@ -1,6 +1,7 @@
 import { createServiceApiError } from "@kaiord/core";
-import type { FetchFn } from "./types";
+
 import type { TokenReader } from "../token/token-manager.types";
+import type { FetchFn } from "./types";
 
 const sendRequest = (
   url: string,

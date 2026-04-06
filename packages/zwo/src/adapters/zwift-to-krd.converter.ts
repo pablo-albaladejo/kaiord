@@ -1,3 +1,5 @@
+import type { KRD, Logger } from "@kaiord/core";
+
 import {
   extractIntervals,
   extractTags,
@@ -7,7 +9,6 @@ import {
   extractFitExtensions,
   extractMetadata,
 } from "./zwift-to-krd/metadata-extractor";
-import type { KRD, Logger } from "@kaiord/core";
 
 type ZwiftWorkoutFile = {
   author?: string;

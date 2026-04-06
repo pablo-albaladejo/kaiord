@@ -5,6 +5,7 @@
  */
 
 import { ArrowDown, ArrowUp, Layers } from "lucide-react";
+
 import { ShortcutRow } from "../../components/ShortcutRow";
 
 export function StepManagementShortcuts() {

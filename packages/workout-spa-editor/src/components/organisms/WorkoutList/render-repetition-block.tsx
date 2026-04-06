@@ -1,5 +1,5 @@
-import { SortableRepetitionBlockCard } from "./SortableRepetitionBlockCard";
 import type { RenderRepetitionBlockProps } from "./render-repetition-block.types";
+import { SortableRepetitionBlockCard } from "./SortableRepetitionBlockCard";
 
 const createHandlers = (
   blockId: string | undefined,

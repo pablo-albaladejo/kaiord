@@ -5,6 +5,7 @@
  */
 
 import { BookOpen } from "lucide-react";
+
 import { Button } from "../../../atoms/Button";
 
 type EmptyLibraryProps = {

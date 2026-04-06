@@ -1,2 +1,2 @@
-export { SelectionIndicator } from "./SelectionIndicator";
 export type { SelectionIndicatorProps } from "./SelectionIndicator";
+export { SelectionIndicator } from "./SelectionIndicator";

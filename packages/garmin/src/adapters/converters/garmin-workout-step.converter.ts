@@ -1,3 +1,5 @@
+import type { WorkoutStep } from "@kaiord/core";
+
 import { mapDurationToCondition } from "../mappers/condition.mapper";
 import { mapKrdEquipmentToGarmin } from "../mappers/equipment.mapper";
 import {
@@ -9,11 +11,10 @@ import {
   fitValueToStroke,
   mapKrdStrokeToGarmin,
 } from "../mappers/stroke.mapper";
+import type { TargetMapperOptions } from "../mappers/target.mapper";
 import { mapKrdTargetToGarmin } from "../mappers/target.mapper";
 import { StepTypeId } from "../schemas/common";
-import type { TargetMapperOptions } from "../mappers/target.mapper";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
-import type { WorkoutStep } from "@kaiord/core";
 
 const STEP_TYPE_IDS: Record<StepTypeKey, number> = {
   warmup: StepTypeId.WARMUP,

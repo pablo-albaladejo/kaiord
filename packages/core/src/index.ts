@@ -4,6 +4,40 @@
  */
 
 // Domain: Schemas, Types, Converters, Validation, Errors
+export type {
+  CadenceValue,
+  Duration,
+  DurationType,
+  Equipment,
+  FileType,
+  HeartRateValue,
+  Intensity,
+  KRD,
+  KRDEvent,
+  KRDLap,
+  KRDLapTrigger,
+  KRDMetadata,
+  KRDRecord,
+  KRDSession,
+  LengthUnit,
+  PaceValue,
+  PowerValue,
+  RepetitionBlock,
+  SchemaValidator,
+  Sport,
+  StrokeTypeValue,
+  SubSport,
+  SwimStroke,
+  Target,
+  TargetType,
+  TargetUnit,
+  ToleranceChecker,
+  ToleranceConfig,
+  ToleranceViolation,
+  ValidationError,
+  Workout,
+  WorkoutStep,
+} from "./domain";
 export {
   convertLengthToMeters,
   createFitParsingError,
@@ -51,8 +85,8 @@ export {
   TcxParsingError,
   TcxValidationError,
   toleranceConfigSchema,
-  toleranceViolationSchema,
   ToleranceExceededError,
+  toleranceViolationSchema,
   validateKrd,
   workoutSchema,
   workoutStepSchema,
@@ -60,49 +94,15 @@ export {
   ZwiftValidationError,
 } from "./domain";
 
-export type {
-  CadenceValue,
-  Duration,
-  DurationType,
-  Equipment,
-  FileType,
-  HeartRateValue,
-  Intensity,
-  KRD,
-  KRDEvent,
-  KRDLap,
-  KRDLapTrigger,
-  KRDMetadata,
-  KRDRecord,
-  KRDSession,
-  LengthUnit,
-  PaceValue,
-  PowerValue,
-  RepetitionBlock,
-  SchemaValidator,
-  Sport,
-  StrokeTypeValue,
-  SubSport,
-  SwimStroke,
-  Target,
-  TargetType,
-  TargetUnit,
-  ToleranceChecker,
-  ToleranceConfig,
-  ToleranceViolation,
-  ValidationError,
-  Workout,
-  WorkoutStep,
-} from "./domain";
-
 // Ports
+export { createConsoleLogger } from "./adapters/logger/console-logger";
 export type {
   AuthProvider,
   BinaryReader,
   BinaryWriter,
   ListOptions,
-  LogLevel,
   Logger,
+  LogLevel,
   PushResult,
   TextReader,
   TextWriter,
@@ -111,12 +111,11 @@ export type {
   WorkoutService,
   WorkoutSummary,
 } from "./ports";
-export { createConsoleLogger } from "./adapters/logger/console-logger";
 
 // Application: Conversion Functions
 export { fromBinary, fromText } from "./application";
 export { toBinary, toText } from "./application";
 
 // Round-Trip Validation
-export { validateRoundTrip } from "./tests/round-trip/validate-round-trip";
 export type { ValidateRoundTrip } from "./tests/round-trip/validate-round-trip";
+export { validateRoundTrip } from "./tests/round-trip/validate-round-trip";

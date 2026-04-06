@@ -1,7 +1,7 @@
-import { generateWorkoutFilename } from "./workout-filename";
-import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { KRD, ValidationError } from "../../../types/krd";
+import { downloadWorkout, exportWorkout } from "../../../utils/export-workout";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
+import { generateWorkoutFilename } from "./workout-filename";
 
 export function createSaveHandler(
   workout: KRD,

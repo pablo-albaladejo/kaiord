@@ -1,4 +1,5 @@
 import { create } from "zustand";
+
 import { createGarminActions } from "./garmin-store-actions";
 
 const DEFAULT_LAMBDA_URL: string = import.meta.env.VITE_GARMIN_LAMBDA_URL || "";

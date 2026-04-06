@@ -5,13 +5,14 @@
  */
 
 import { useState } from "react";
+
+import type { WorkoutTemplate } from "../../../../types/workout-library";
 import { CardActions } from "./CardActions";
 import { CardBadges } from "./CardBadges";
 import { CardHeader } from "./CardHeader";
 import { CardTags } from "./CardTags";
 import { CardThumbnail } from "./CardThumbnail";
 import { DeleteWorkoutDialog } from "./DeleteWorkoutDialog";
-import type { WorkoutTemplate } from "../../../../types/workout-library";
 
 type WorkoutCardProps = {
   template: WorkoutTemplate;

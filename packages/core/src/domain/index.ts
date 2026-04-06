@@ -1,29 +1,5 @@
-export {
-  durationSchema,
-  durationTypeSchema,
-  equipmentSchema,
-  FIT_TO_SWIM_STROKE,
-  fileTypeSchema,
-  intensitySchema,
-  krdEventSchema,
-  krdLapSchema,
-  krdLapTriggerSchema,
-  krdMetadataSchema,
-  krdRecordSchema,
-  krdSchema,
-  krdSessionSchema,
-  lengthUnitSchema,
-  repetitionBlockSchema,
-  sportSchema,
-  subSportSchema,
-  SWIM_STROKE_TO_FIT,
-  swimStrokeSchema,
-  targetSchema,
-  targetTypeSchema,
-  targetUnitSchema,
-  workoutSchema,
-  workoutStepSchema,
-} from "./schemas";
+export { convertLengthToMeters } from "./converters/length-unit.converter";
+export { createWorkoutKRD } from "./converters/workout-to-krd.converter";
 export type {
   CadenceValue,
   Duration,
@@ -53,20 +29,35 @@ export type {
   Workout,
   WorkoutStep,
 } from "./schemas";
-export { isRepetitionBlock } from "./type-guards";
-export { convertLengthToMeters } from "./converters/length-unit.converter";
-export { createWorkoutKRD } from "./converters/workout-to-krd.converter";
 export {
-  FitParsingError,
-  GarminParsingError,
-  KrdValidationError,
-  ServiceApiError,
-  ServiceAuthError,
-  TcxParsingError,
-  TcxValidationError,
-  ToleranceExceededError,
-  ZwiftParsingError,
-  ZwiftValidationError,
+  durationSchema,
+  durationTypeSchema,
+  equipmentSchema,
+  fileTypeSchema,
+  FIT_TO_SWIM_STROKE,
+  intensitySchema,
+  krdEventSchema,
+  krdLapSchema,
+  krdLapTriggerSchema,
+  krdMetadataSchema,
+  krdRecordSchema,
+  krdSchema,
+  krdSessionSchema,
+  lengthUnitSchema,
+  repetitionBlockSchema,
+  sportSchema,
+  subSportSchema,
+  SWIM_STROKE_TO_FIT,
+  swimStrokeSchema,
+  targetSchema,
+  targetTypeSchema,
+  targetUnitSchema,
+  workoutSchema,
+  workoutStepSchema,
+} from "./schemas";
+export { isRepetitionBlock } from "./type-guards";
+export type { ToleranceViolation, ValidationError } from "./types/errors";
+export {
   createFitParsingError,
   createGarminParsingError,
   createKrdValidationError,
@@ -77,19 +68,28 @@ export {
   createToleranceExceededError,
   createZwiftParsingError,
   createZwiftValidationError,
+  FitParsingError,
+  GarminParsingError,
+  KrdValidationError,
+  ServiceApiError,
+  ServiceAuthError,
+  TcxParsingError,
+  TcxValidationError,
+  ToleranceExceededError,
+  ZwiftParsingError,
+  ZwiftValidationError,
 } from "./types/errors";
-export type { ToleranceViolation, ValidationError } from "./types/errors";
-export {
-  DEFAULT_TOLERANCES,
-  createSchemaValidator,
-  createToleranceChecker,
-  extractWorkout,
-  toleranceConfigSchema,
-  toleranceViolationSchema,
-  validateKrd,
-} from "./validation";
 export type {
   SchemaValidator,
   ToleranceChecker,
   ToleranceConfig,
+} from "./validation";
+export {
+  createSchemaValidator,
+  createToleranceChecker,
+  DEFAULT_TOLERANCES,
+  extractWorkout,
+  toleranceConfigSchema,
+  toleranceViolationSchema,
+  validateKrd,
 } from "./validation";

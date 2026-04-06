@@ -6,9 +6,10 @@
  */
 
 import React, { useMemo } from "react";
+
 import { flattenWorkoutSteps } from "./flatten-steps";
-import { WorkoutPreviewBar } from "./WorkoutPreviewBar";
 import type { PreviewBar, WorkoutPreviewProps } from "./workout-preview-types";
+import { WorkoutPreviewBar } from "./WorkoutPreviewBar";
 
 const VIEWBOX_WIDTH = 1000;
 const MIN_BAR_WIDTH = 3;

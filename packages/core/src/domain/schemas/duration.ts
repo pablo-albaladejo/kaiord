@@ -1,8 +1,9 @@
 import { z } from "zod";
+
 import { durationTypeSchema } from "./duration-type";
 
-export { durationTypeSchema } from "./duration-type";
 export type { DurationType } from "./duration-type";
+export { durationTypeSchema } from "./duration-type";
 
 /**
  * Zod schema for workout step duration.

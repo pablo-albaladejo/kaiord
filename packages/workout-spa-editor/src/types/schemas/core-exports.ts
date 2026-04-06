@@ -4,28 +4,6 @@
  * Re-exports Zod schemas and types from @kaiord/core for use in the UI.
  */
 
-export {
-  durationSchema,
-  durationTypeSchema,
-  equipmentSchema,
-  intensitySchema,
-  krdEventSchema,
-  krdLapSchema,
-  krdMetadataSchema,
-  krdRecordSchema,
-  krdSchema,
-  krdSessionSchema,
-  repetitionBlockSchema,
-  sportSchema,
-  subSportSchema,
-  swimStrokeSchema,
-  targetSchema,
-  targetTypeSchema,
-  targetUnitSchema,
-  workoutSchema,
-  workoutStepSchema,
-} from "@kaiord/core";
-
 export type {
   Duration,
   DurationType,
@@ -46,4 +24,25 @@ export type {
   TargetUnit,
   Workout,
   WorkoutStep,
+} from "@kaiord/core";
+export {
+  durationSchema,
+  durationTypeSchema,
+  equipmentSchema,
+  intensitySchema,
+  krdEventSchema,
+  krdLapSchema,
+  krdMetadataSchema,
+  krdRecordSchema,
+  krdSchema,
+  krdSessionSchema,
+  repetitionBlockSchema,
+  sportSchema,
+  subSportSchema,
+  swimStrokeSchema,
+  targetSchema,
+  targetTypeSchema,
+  targetUnitSchema,
+  workoutSchema,
+  workoutStepSchema,
 } from "@kaiord/core";

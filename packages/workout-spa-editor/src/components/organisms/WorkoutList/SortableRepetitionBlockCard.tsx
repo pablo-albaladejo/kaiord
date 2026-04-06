@@ -1,10 +1,11 @@
 import { useSortable } from "@dnd-kit/sortable";
+
+import { RepetitionBlockCard } from "../../molecules/RepetitionBlockCard/RepetitionBlockCard";
 import { parseSelectedStepIndex } from "./parse-selected-step-index";
 import {
   buildBlockHandlers,
   buildSortableStyle,
 } from "./sortable-repetition-block-card.helpers";
-import { RepetitionBlockCard } from "../../molecules/RepetitionBlockCard/RepetitionBlockCard";
 import type { SortableRepetitionBlockCardProps } from "./sortable-repetition-block-card.types";
 
 /** Wraps RepetitionBlockCard with drag-and-drop sorting. */

@@ -1,6 +1,7 @@
-import { createOffStep, createOnStep } from "./intervals-t-helpers";
-import type { ZwiftIntervalsTData } from "./intervals-t-helpers";
 import type { RepetitionBlock } from "@kaiord/core";
+
+import type { ZwiftIntervalsTData } from "./intervals-t-helpers";
+import { createOffStep, createOnStep } from "./intervals-t-helpers";
 
 export type { ZwiftIntervalsTData };
 

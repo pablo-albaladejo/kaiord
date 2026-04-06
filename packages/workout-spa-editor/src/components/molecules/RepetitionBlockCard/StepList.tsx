@@ -1,5 +1,5 @@
-import { SortableStep } from "./SortableStep";
 import type { WorkoutStep } from "../../../types/krd";
+import { SortableStep } from "./SortableStep";
 
 type StepListProps = {
   steps: WorkoutStep[];

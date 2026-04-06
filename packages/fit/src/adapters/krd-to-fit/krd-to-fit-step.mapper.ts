@@ -1,9 +1,10 @@
-import { createFitParsingError } from "@kaiord/core";
-import { convertDuration } from "./krd-to-fit-duration.mapper";
-import { convertTarget } from "./krd-to-fit-target.mapper";
-import { mapEquipmentToFit } from "../equipment/equipment.mapper";
 import type { WorkoutStep } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
+import { createFitParsingError } from "@kaiord/core";
+
+import { mapEquipmentToFit } from "../equipment/equipment.mapper";
+import { convertDuration } from "./krd-to-fit-duration.mapper";
+import { convertTarget } from "./krd-to-fit-target.mapper";
 
 /** FIT protocol maximum length for notes field */
 const FIT_NOTES_MAX_LENGTH = 256;

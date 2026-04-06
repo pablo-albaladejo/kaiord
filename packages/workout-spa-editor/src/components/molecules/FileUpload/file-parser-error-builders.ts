@@ -5,9 +5,10 @@
  */
 
 import { KrdValidationError } from "@kaiord/core";
+
 import { ValidationError as CustomValidationError } from "../../../types/errors";
-import { getFormatName } from "../../../utils/file-format-metadata";
 import type { ValidationError } from "../../../types/krd";
+import { getFormatName } from "../../../utils/file-format-metadata";
 import type { ImportError } from "../../../utils/import-workout";
 
 type ErrorState = {

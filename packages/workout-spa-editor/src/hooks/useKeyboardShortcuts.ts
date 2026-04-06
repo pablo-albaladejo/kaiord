@@ -1,9 +1,10 @@
 import { useEffect } from "react";
-import {
-  createKeyDownHandler,
-  createEscapeHandler,
-} from "./keyboard-shortcut-handlers";
+
 import type { KeyboardShortcutHandlers } from "./keyboard-shortcut-handlers";
+import {
+  createEscapeHandler,
+  createKeyDownHandler,
+} from "./keyboard-shortcut-handlers";
 
 export type { KeyboardShortcutHandlers } from "./keyboard-shortcut-handlers";
 

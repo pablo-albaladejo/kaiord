@@ -5,6 +5,7 @@
  */
 
 import { useState } from "react";
+
 import type { WorkoutTemplate } from "../../../../types/workout-library";
 
 export function useWorkoutLoader(

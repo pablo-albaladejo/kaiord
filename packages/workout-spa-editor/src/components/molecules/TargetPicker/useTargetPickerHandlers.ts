@@ -1,7 +1,7 @@
 import { useRangeChange } from "./hooks";
 import { useTargetPickerBasicHandlers } from "./useTargetPickerBasicHandlers";
-import { useTargetPickerRangeHandlers } from "./useTargetPickerRangeHandlers";
 import type { UseTargetPickerHandlersParams } from "./useTargetPickerHandlers.types";
+import { useTargetPickerRangeHandlers } from "./useTargetPickerRangeHandlers";
 
 export const useTargetPickerHandlers = (
   params: UseTargetPickerHandlersParams

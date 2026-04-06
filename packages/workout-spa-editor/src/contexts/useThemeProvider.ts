@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
+
 import {
   applyTheme,
   getStoredTheme,
+  type ResolvedTheme,
   resolveTheme,
   storeTheme,
-  type ResolvedTheme,
   type Theme,
 } from "./theme-utils";
 

@@ -5,10 +5,10 @@
  * Shows method dropdown and editable zone content.
  */
 
-import { ZoneMethodSelect } from "./ZoneMethodSelect";
-import { ZoneTable } from "./ZoneTable";
 import { useZoneCallbacks } from "../hooks/useZoneCallbacks";
 import type { ZoneRowData } from "../types/zone-table";
+import { ZoneMethodSelect } from "./ZoneMethodSelect";
+import { ZoneTable } from "./ZoneTable";
 
 type ZoneTypeSectionProps = {
   title: string;

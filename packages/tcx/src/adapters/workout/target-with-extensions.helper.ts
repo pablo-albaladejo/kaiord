@@ -1,6 +1,7 @@
-import { extractPowerFromExtensions } from "./step-helpers";
-import { convertTcxTarget } from "../target/target.mapper";
 import type { Logger, Target } from "@kaiord/core";
+
+import { convertTcxTarget } from "../target/target.mapper";
+import { extractPowerFromExtensions } from "./step-helpers";
 
 export const convertTargetWithExtensions = (
   tcxStep: Record<string, unknown>,

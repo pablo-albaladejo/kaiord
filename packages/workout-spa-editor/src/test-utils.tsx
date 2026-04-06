@@ -1,7 +1,8 @@
 import { render, type RenderOptions } from "@testing-library/react";
 import React, { type ReactElement } from "react";
+
 import { ToastProvider } from "./components/atoms/Toast";
-import { ThemeProvider, type Theme } from "./contexts/ThemeContext";
+import { type Theme, ThemeProvider } from "./contexts/ThemeContext";
 import { ToastContextProvider } from "./contexts/ToastContext";
 
 /**

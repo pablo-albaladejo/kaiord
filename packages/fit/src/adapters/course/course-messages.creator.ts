@@ -1,7 +1,8 @@
-import { mapKrdCoursePointToFit } from "./course.mapper";
+import type { KRD, Logger } from "@kaiord/core";
+
 import { convertMetadataToFileId } from "../krd-to-fit/krd-to-fit-metadata.mapper";
 import type { KRDCoursePoint } from "./course.mapper";
-import type { KRD, Logger } from "@kaiord/core";
+import { mapKrdCoursePointToFit } from "./course.mapper";
 
 type CourseExtensions = {
   course?: unknown;

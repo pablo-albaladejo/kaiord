@@ -3,11 +3,12 @@ import {
   SortableContext,
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
+
 import { dndAnnouncements } from "./dnd-announcements";
 import { useWorkoutListDnd } from "./use-workout-list-dnd";
+import type { WorkoutListProps } from "./WorkoutList.types";
 import { WorkoutListContent } from "./WorkoutListContent";
 import { WorkoutListDragOverlay } from "./WorkoutListDragOverlay";
-import type { WorkoutListProps } from "./WorkoutList.types";
 
 export type { WorkoutListProps };
 
