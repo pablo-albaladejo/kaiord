@@ -84,7 +84,7 @@ export default tseslint.config(
       ],
       // Enforce maximum function length
       "max-lines-per-function": [
-        "warn",
+        "error",
         {
           max: 40,
           skipBlankLines: true,
@@ -148,7 +148,7 @@ export default tseslint.config(
     },
     rules: {
       "max-lines": [
-        "warn",
+        "error",
         {
           max: 100,
           skipBlankLines: true,
@@ -156,16 +156,16 @@ export default tseslint.config(
         },
       ],
       "max-lines-per-function": [
-        "warn",
+        "error",
         {
           max: 40,
           skipBlankLines: true,
           skipComments: true,
         },
       ],
-      complexity: ["warn", 10],
-      "max-depth": ["warn", 4],
-      "max-params": ["warn", 4],
+      complexity: ["error", 10],
+      "max-depth": ["error", 4],
+      "max-params": ["error", 4],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "@typescript-eslint/consistent-type-imports": [
@@ -273,7 +273,7 @@ export default tseslint.config(
       ],
       // Enforce maximum function length (60 for frontend components)
       "max-lines-per-function": [
-        "warn",
+        "error",
         {
           max: 60,
           skipBlankLines: true,
