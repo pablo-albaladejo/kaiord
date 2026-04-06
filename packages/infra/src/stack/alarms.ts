@@ -59,7 +59,7 @@ export const createAlarms = (
     threshold: 20,
     evaluationPeriods: 1,
     treatMissingData: TreatMissingData.NOT_BREACHING,
-    alarmDescription: "API Gateway 4xx errors > 20 in 5 minutes (throttling)",
+    alarmDescription: "API Gateway 4xx client errors > 20 in 5 minutes",
   });
   apiGateway4xx.addAlarmAction(snsAction);
 };

@@ -1,6 +1,7 @@
 import { CSS } from "@dnd-kit/utilities";
-import type { SortableRepetitionBlockCardProps } from "./sortable-repetition-block-card.types";
 import type { Transform } from "@dnd-kit/utilities";
+import type { CSSProperties } from "react";
+import type { SortableRepetitionBlockCardProps } from "./sortable-repetition-block-card.types";
 
 type BlockHandlers = {
   handleDuplicate?: (stepIndex: number) => void;
@@ -12,7 +13,7 @@ export function buildSortableStyle(
   transform: Transform | null,
   transition: string | undefined,
   isDragging: boolean
-): React.CSSProperties {
+): CSSProperties {
   return {
     transform: CSS.Transform.toString(transform),
     transition,
