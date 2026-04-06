@@ -15,11 +15,14 @@ export const createLambda = (scope: Stack, logGroup: LogGroup) => {
   const tsAdvertiseTags = scope.node.tryGetContext("tsAdvertiseTags") as
     | string
     | undefined;
-  const tsExitNodePingTimeout = scope.node.tryGetContext(
-    "tsExitNodePingTimeout"
+  const tsExitNodeProbeTimeout = scope.node.tryGetContext(
+    "tsExitNodeProbeTimeout"
   ) as string | undefined;
-  const tsExitNodePingRetries = scope.node.tryGetContext(
-    "tsExitNodePingRetries"
+  const tsExitNodeProbeRetries = scope.node.tryGetContext(
+    "tsExitNodeProbeRetries"
+  ) as string | undefined;
+  const tsExitNodeProbeHost = scope.node.tryGetContext(
+    "tsExitNodeProbeHost"
   ) as string | undefined;
 
   const tailscale = new TailscaleLambdaExtension(scope, "TailscaleExt");
@@ -37,11 +40,14 @@ export const createLambda = (scope: Stack, logGroup: LogGroup) => {
       TS_HOSTNAME: "garmin-proxy-lambda",
       ...(tsExitNode ? { TS_EXIT_NODE: tsExitNode } : {}),
       ...(tsAdvertiseTags ? { TS_ADVERTISE_TAGS: tsAdvertiseTags } : {}),
-      ...(tsExitNodePingTimeout
-        ? { TS_EXIT_NODE_PING_TIMEOUT: tsExitNodePingTimeout }
+      ...(tsExitNodeProbeTimeout
+        ? { TS_EXIT_NODE_PROBE_TIMEOUT: tsExitNodeProbeTimeout }
         : {}),
-      ...(tsExitNodePingRetries
-        ? { TS_EXIT_NODE_PING_RETRIES: tsExitNodePingRetries }
+      ...(tsExitNodeProbeRetries
+        ? { TS_EXIT_NODE_PROBE_RETRIES: tsExitNodeProbeRetries }
+        : {}),
+      ...(tsExitNodeProbeHost
+        ? { TS_EXIT_NODE_PROBE_HOST: tsExitNodeProbeHost }
         : {}),
     },
     bundling: {
