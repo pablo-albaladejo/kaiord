@@ -15,6 +15,12 @@ export const createLambda = (scope: Stack, logGroup: LogGroup) => {
   const tsAdvertiseTags = scope.node.tryGetContext("tsAdvertiseTags") as
     | string
     | undefined;
+  const tsExitNodePingTimeout = scope.node.tryGetContext(
+    "tsExitNodePingTimeout"
+  ) as string | undefined;
+  const tsExitNodePingRetries = scope.node.tryGetContext(
+    "tsExitNodePingRetries"
+  ) as string | undefined;
 
   const tailscale = new TailscaleLambdaExtension(scope, "TailscaleExt");
 
@@ -31,6 +37,12 @@ export const createLambda = (scope: Stack, logGroup: LogGroup) => {
       TS_HOSTNAME: "garmin-proxy-lambda",
       ...(tsExitNode ? { TS_EXIT_NODE: tsExitNode } : {}),
       ...(tsAdvertiseTags ? { TS_ADVERTISE_TAGS: tsAdvertiseTags } : {}),
+      ...(tsExitNodePingTimeout
+        ? { TS_EXIT_NODE_PING_TIMEOUT: tsExitNodePingTimeout }
+        : {}),
+      ...(tsExitNodePingRetries
+        ? { TS_EXIT_NODE_PING_RETRIES: tsExitNodePingRetries }
+        : {}),
     },
     bundling: {
       minify: false,
