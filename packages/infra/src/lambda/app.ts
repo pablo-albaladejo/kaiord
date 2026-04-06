@@ -8,7 +8,9 @@ import { pushToGarmin } from "./garmin-push";
 const MAX_BODY_BYTES = 512_000;
 
 export const isAuthError = (error: unknown): boolean => {
-  const msg = error instanceof Error ? error.message : "";
+  if (!(error instanceof Error)) return false;
+  if (error.name === "ServiceAuthError") return true;
+  const msg = error.message;
   return (
     msg.includes("authentication") ||
     msg.includes("Login failed") ||
