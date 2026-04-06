@@ -101,6 +101,6 @@ The local dev server SHALL bind to `127.0.0.1` only (NOT `0.0.0.0`) to prevent e
 
 #### Scenario: Middleware execution order
 
-- **GIVEN** a Hono app created with an `onBeforeRoute` middleware
+- **GIVEN** a Hono app created with an `onBeforePush` middleware
 - **WHEN** a POST `/` request arrives
 - **THEN** the middleware executes before the route handler

@@ -50,6 +50,19 @@ describe("GET /health", () => {
 });
 
 describe("POST / — validation", () => {
+  it("should return 400 when body is malformed JSON", async () => {
+    const app = createApp();
+
+    const res = await app.request("/", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "not json",
+    });
+
+    expect(res.status).toBe(400);
+    expect((await res.json()).error).toContain("Invalid request");
+  });
+
   it("should return 400 when schema validation fails", async () => {
     const app = createApp();
 
@@ -61,11 +74,14 @@ describe("POST / — validation", () => {
 
   it("should return 413 when payload exceeds 512KB", async () => {
     const app = createApp();
-    const largeBody = "x".repeat(512_001);
+    const largeBody = JSON.stringify({ data: "x".repeat(512_001) });
 
     const res = await app.request("/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Content-Length": String(Buffer.byteLength(largeBody)),
+      },
       body: largeBody,
     });
 

@@ -23,11 +23,15 @@ export const isRateLimited = (error: unknown): boolean => {
 
 const passthrough: MiddlewareHandler = async (_c, next) => next();
 
-type AppOptions = { onBeforePush?: MiddlewareHandler };
+type AppOptions = {
+  onBeforePush?: MiddlewareHandler;
+  middleware?: MiddlewareHandler[];
+};
 
 export const createApp = (options?: AppOptions) => {
   const app = new Hono();
 
+  for (const mw of options?.middleware ?? []) app.use("*", mw);
   app.use("*", requestId());
 
   app.get("/health", (c) => c.json({ status: "ok" }));
@@ -40,7 +44,15 @@ export const createApp = (options?: AppOptions) => {
     }),
     options?.onBeforePush ?? passthrough,
     async (c) => {
-      const body = await c.req.json();
+      let body: unknown;
+      try {
+        body = await c.req.json();
+      } catch {
+        return c.json(
+          { error: "Invalid request: check KRD and credentials" },
+          400
+        );
+      }
       const validation = pushRequestSchema.safeParse(body);
       if (!validation.success) {
         return c.json(
