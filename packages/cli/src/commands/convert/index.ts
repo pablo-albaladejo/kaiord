@@ -33,7 +33,10 @@ const resolveOptions = (options: ConvertOptions, config: Config) => {
   });
 };
 
-const validateExclusiveOutput = (opts: { output?: string; outputDir?: string }) => {
+const validateExclusiveOutput = (opts: {
+  output?: string;
+  outputDir?: string;
+}) => {
   if (opts.output && opts.outputDir) {
     const error = new Error(
       "Cannot use both --output and --output-dir. " +
