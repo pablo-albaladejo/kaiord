@@ -5,7 +5,7 @@ on:
     workflows: ["CI"]
     types:
       - completed
-    branches: [main, develop]
+    branches: [main]
 
 jobs:
   check-ci-status:
@@ -16,9 +16,31 @@ jobs:
     steps:
       - name: Check if frontend changed
         id: check
-        run: |
-          echo "CI workflow succeeded, checking if E2E tests should run"
-          echo "should-run=true" >> $GITHUB_OUTPUT
+        uses: actions/github-script@v8
+        with:
+          script: |
+            const run = await github.rest.actions.listWorkflowRunArtifacts({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.payload.workflow_run.id,
+            });
+            // Check the head commit's changed files
+            const commits = await github.rest.repos.getCommit({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.payload.workflow_run.head_sha,
+            });
+            const files = commits.data.files?.map(f => f.filename) || [];
+            const frontendChanged = files.some(f =>
+              f.startsWith('packages/workout-spa-editor/') ||
+              f.startsWith('packages/core/') ||
+              f.startsWith('packages/fit/') ||
+              f.startsWith('packages/tcx/') ||
+              f.startsWith('packages/zwo/') ||
+              f.startsWith('packages/garmin/')
+            );
+            core.setOutput('should-run', frontendChanged ? 'true' : 'false');
+            console.log(`Frontend changed: ${frontendChanged}, files: ${files.length}`);
 
   e2e-tests:
     name: E2E Tests
@@ -36,29 +58,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v5
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        uses: ./.github/actions/setup-pnpm
 
       - name: Install Playwright browsers
         run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install
@@ -103,29 +104,8 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: "20"
-
       - name: Setup pnpm
-        uses: pnpm/action-setup@v5
-
-      - name: Get pnpm store directory
-        shell: bash
-        run: |
-          echo "STORE_PATH=$(pnpm store path --silent)" >> $GITHUB_ENV
-
-      - name: Setup pnpm cache
-        uses: actions/cache@v5
-        with:
-          path: ${{ env.STORE_PATH }}
-          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
-          restore-keys: |
-            ${{ runner.os }}-pnpm-store-
-
-      - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        uses: ./.github/actions/setup-pnpm
 
       - name: Install Playwright browsers
         run: pnpm --filter @kaiord/workout-spa-editor test:e2e:install

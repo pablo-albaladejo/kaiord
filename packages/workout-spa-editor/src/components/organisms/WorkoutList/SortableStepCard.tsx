@@ -53,7 +53,6 @@ export const SortableStepCard = ({
   };
 
   // Remove role attribute to prevent conflicts with StepCard's role
-  // Merge dnd-kit attributes with component HTML props
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { role, ...dndAttributes } = attributes;
 

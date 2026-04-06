@@ -14,6 +14,8 @@ export const diffOptionsSchema = z.object({
 
 export type DiffOptions = z.infer<typeof diffOptionsSchema>;
 
+export type ValidatedDiffOptions = z.infer<typeof diffOptionsSchema>;
+
 export type DiffResult = {
   identical: boolean;
   metadataDiff?: Array<{

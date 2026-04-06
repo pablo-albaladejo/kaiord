@@ -1,5 +1,5 @@
 import { krdLapSchema, type KRDLap } from "@kaiord/core";
-import { mapKrdLapToFit } from "./lap.mapper";
+import { mapKrdLapToFit } from "./krd-to-fit-lap.mapper";
 import type { FitLap } from "../schemas/fit-lap";
 
 /**

@@ -21,13 +21,14 @@
     "schema"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && pnpm run postbuild",
+    "postbuild": "cp -r src/schema schema",
     "test": "vitest --run",
     "test:coverage": "vitest --run --coverage",
     "test:watch": "vitest",
     "lint": "tsc --noEmit && eslint . && prettier --check src",
     "lint:fix": "eslint . --fix && prettier --write src",
-    "clean": "rm -rf dist"
+    "clean": "rm -rf dist schema"
   },
   "dependencies": {
     "@kaiord/core": "workspace:^",
@@ -64,5 +65,8 @@
     "fitness"
   ],
   "author": "Kaiord Contributors",
-  "license": "MIT"
+  "license": "MIT",
+  "engines": {
+    "node": ">=20.0.0"
+  }
 }

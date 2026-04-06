@@ -39,15 +39,17 @@ export const useRepetitionBlockState = (
     }
   };
 
-  return {
+  const headerStateProps = {
     isExpanded,
     isEditingCount,
     editValue,
-    setEditValue,
-    handleToggleExpand,
-    handleEditClick,
-    handleSaveCount,
-    handleCancelEdit,
-    handleKeyDown,
+    onToggleExpand: handleToggleExpand,
+    onEditClick: handleEditClick,
+    onSaveCount: handleSaveCount,
+    onCancelEdit: handleCancelEdit,
+    onEditValueChange: setEditValue,
+    onKeyDown: handleKeyDown,
   };
+
+  return { isExpanded, isEditingCount, headerStateProps };
 };

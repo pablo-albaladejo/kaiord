@@ -5,8 +5,11 @@ on:
     inputs:
       model:
         description: "Model to evaluate"
-        default: "claude-sonnet-4-5-20241022"
+        default: "claude-sonnet-4-6-20250514"
         type: string
+
+permissions:
+  contents: read
 
 jobs:
   eval:

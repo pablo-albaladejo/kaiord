@@ -6,7 +6,8 @@ export {
   convertKrdToFitLap,
   convertKrdToFitLaps,
 } from "./krd-to-fit-lap.converter";
-export { mapFitLapToKrd, mapKrdLapToFit } from "./lap.mapper";
+export { mapFitLapToKrd } from "./fit-to-krd-lap.mapper";
+export { mapKrdLapToFit } from "./krd-to-fit-lap.mapper";
 export {
   mapFitLapTriggerToKrd,
   mapKrdLapTriggerToFit,
