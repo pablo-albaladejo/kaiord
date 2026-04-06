@@ -1,8 +1,10 @@
 import { z } from "zod";
 import { durationSchema } from "./duration";
+import { durationTypeSchema } from "./duration-type";
 import { equipmentSchema } from "./equipment";
 import { intensitySchema } from "./intensity";
 import { targetSchema } from "./target";
+import { targetTypeSchema } from "./target-type";
 
 /**
  * Zod schema for a workout step.
@@ -10,37 +12,27 @@ import { targetSchema } from "./target";
  * Validates an individual interval or segment within a workout,
  * including duration, target, and intensity.
  */
-export const workoutStepSchema = z.object({
-  stepIndex: z.number().int().nonnegative(),
-  name: z.string().optional(),
-  durationType: z
-    .enum([
-      "time",
-      "distance",
-      "heart_rate_less_than",
-      "repeat_until_heart_rate_greater_than",
-      "calories",
-      "power_less_than",
-      "power_greater_than",
-      "repeat_until_time",
-      "repeat_until_distance",
-      "repeat_until_calories",
-      "repeat_until_heart_rate_less_than",
-      "repeat_until_power_less_than",
-      "repeat_until_power_greater_than",
-      "open",
-    ])
-    .describe("Must match duration.type"),
-  duration: durationSchema,
-  targetType: z
-    .enum(["power", "heart_rate", "cadence", "pace", "stroke_type", "open"])
-    .describe("Must match target.type"),
-  target: targetSchema,
-  intensity: intensitySchema.optional(),
-  notes: z.string().max(256).optional(),
-  equipment: equipmentSchema.optional(),
-  extensions: z.record(z.string(), z.unknown()).optional(),
-});
+export const workoutStepSchema = z
+  .object({
+    stepIndex: z.number().int().nonnegative(),
+    name: z.string().optional(),
+    durationType: durationTypeSchema,
+    duration: durationSchema,
+    targetType: targetTypeSchema,
+    target: targetSchema,
+    intensity: intensitySchema.optional(),
+    notes: z.string().max(256).optional(),
+    equipment: equipmentSchema.optional(),
+    extensions: z.record(z.string(), z.unknown()).optional(),
+  })
+  .refine((s) => s.durationType === s.duration.type, {
+    message: "durationType must match duration.type",
+    path: ["durationType"],
+  })
+  .refine((s) => s.targetType === s.target.type, {
+    message: "targetType must match target.type",
+    path: ["targetType"],
+  });
 
 /**
  * TypeScript type for a workout step, inferred from {@link workoutStepSchema}.

@@ -24,11 +24,13 @@ const isBatchMode = (input: string): boolean =>
  */
 const resolveOptions = (options: ConvertOptions, config: Config) => {
   const merged = mergeWithConfig(options, config);
+  const batch = typeof merged.input === "string" && isBatchMode(merged.input);
   return convertOptionsSchema.parse({
     ...merged,
     inputFormat: merged.inputFormat || config.defaultInputFormat,
     outputFormat: merged.outputFormat || config.defaultOutputFormat,
-    outputDir: merged.outputDir || config.defaultOutputDir,
+    outputDir:
+      merged.outputDir || (batch ? config.defaultOutputDir : undefined),
     verbose: merged.verbose ?? config.verbose,
     quiet: merged.quiet ?? config.quiet,
     json: merged.json ?? config.json,
