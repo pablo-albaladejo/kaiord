@@ -24,7 +24,7 @@
 
 **Layer:** Adapters (infra)
 
-```
+```text
 packages/infra/src/lambda/
 ├── app.ts            ← NEW: Hono app with GET /health + POST / routes
 ├── handler.ts        ← MODIFIED: thin Lambda wrapper importing app
