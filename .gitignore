@@ -30,6 +30,7 @@ pnpm-debug.log*
 # Environment
 .env
 .env.local
+.env.*.local
 
 # Quality metrics (generated, keep history only)
 metrics/latest/

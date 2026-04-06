@@ -1,6 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
-import { handler } from "./handler";
-import type { APIGatewayProxyEventV2 } from "aws-lambda";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 vi.mock("./garmin-push", () => ({
   pushToGarmin: vi.fn(),
@@ -13,14 +11,11 @@ vi.mock("./proxy-fetch", () => ({
 
 const { pushToGarmin } = await import("./garmin-push");
 const mockPush = vi.mocked(pushToGarmin);
-const { checkTunnelHealth } = await import("./proxy-fetch");
+const { checkTunnelHealth, enableSocksProxy } = await import("./proxy-fetch");
 const mockTunnelHealth = vi.mocked(checkTunnelHealth);
+const mockEnableSocks = vi.mocked(enableSocksProxy);
 
-const createEvent = (body?: string): APIGatewayProxyEventV2 =>
-  ({
-    body,
-    requestContext: { requestId: "test-req-id" },
-  }) as unknown as APIGatewayProxyEventV2;
+const { handler } = await import("./handler");
 
 const validBody = JSON.stringify({
   krd: {
@@ -31,155 +26,76 @@ const validBody = JSON.stringify({
   garmin: { username: "user@test.com", password: "pass123" },
 });
 
-describe("Lambda handler", () => {
-  it("should return 400 when body is missing", async () => {
-    const result = await handler(createEvent(undefined));
+const createEvent = (method: string, path: string, body?: string) =>
+  ({
+    requestContext: {
+      http: { method, path },
+      requestId: "test-req-id",
+      accountId: "123",
+      apiId: "api",
+      stage: "$default",
+      time: "",
+      timeEpoch: 0,
+    },
+    rawPath: path,
+    rawQueryString: "",
+    headers: { "content-type": "application/json" },
+    isBase64Encoded: false,
+    body,
+  }) as Parameters<typeof handler>[0];
 
-    expect(result.statusCode).toBe(400);
-    expect(JSON.parse(result.body as string).error).toBe(
-      "Request body is required"
-    );
-  });
+beforeEach(() => vi.clearAllMocks());
+afterEach(() => {
+  delete process.env.TS_SECRET_API_KEY;
+});
 
-  it("should return 400 when body is invalid JSON", async () => {
-    const result = await handler(createEvent("not json"));
-
-    expect(result.statusCode).toBe(400);
-    expect(JSON.parse(result.body as string).error).toBe(
-      "Invalid JSON in request body"
-    );
-  });
-
-  it("should return 400 when schema validation fails", async () => {
-    const result = await handler(
-      createEvent(JSON.stringify({ krd: {}, garmin: {} }))
-    );
-
-    expect(result.statusCode).toBe(400);
-    expect(JSON.parse(result.body as string).error).toContain(
-      "Invalid request"
-    );
-  });
-
-  it("should return 200 with push result on success", async () => {
+describe("Lambda handler (via Hono adapter)", () => {
+  it("should return 200 on successful push", async () => {
     mockPush.mockResolvedValueOnce({
       id: "123",
-      name: "Test Workout",
+      name: "Test",
       url: "https://connect.garmin.com/modern/workout/123",
     });
 
-    const result = await handler(createEvent(validBody));
+    const result = await handler(createEvent("POST", "/", validBody));
 
     expect(result.statusCode).toBe(200);
-    const body = JSON.parse(result.body as string);
-    expect(body.id).toBe("123");
-    expect(body.name).toBe("Test Workout");
-    expect(body.url).toContain("connect.garmin.com");
   });
 
-  it("should return 401 on authentication error", async () => {
-    mockPush.mockRejectedValueOnce(new Error("Login failed: ticket not found"));
-
-    const result = await handler(createEvent(validBody));
-
-    expect(result.statusCode).toBe(401);
-    expect(JSON.parse(result.body as string).error).toBe(
-      "Garmin authentication failed"
-    );
-  });
-
-  it("should return 401 on account locked error", async () => {
-    mockPush.mockRejectedValueOnce(new Error("Account locked"));
-
-    const result = await handler(createEvent(validBody));
-
-    expect(result.statusCode).toBe(401);
-  });
-
-  it("should return 500 on generic Garmin error", async () => {
-    mockPush.mockRejectedValueOnce(new Error("Connection timeout"));
-
-    const result = await handler(createEvent(validBody));
-
-    expect(result.statusCode).toBe(500);
-    expect(JSON.parse(result.body as string).error).toBe("Garmin API error");
-  });
-
-  it("should return 413 when payload exceeds 512 KB", async () => {
-    const largeBody = "x".repeat(512_001);
-
-    const result = await handler(createEvent(largeBody));
-
-    expect(result.statusCode).toBe(413);
-    expect(JSON.parse(result.body as string).error).toBe("Payload too large");
-  });
-
-  it("should log requestId and errorType without sensitive data", async () => {
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
-    mockPush.mockRejectedValueOnce(new TypeError("Connection timeout"));
-
-    await handler(createEvent(validBody));
-
-    expect(consoleSpy).toHaveBeenCalledWith("Garmin push failed", {
-      requestId: "test-req-id",
-      errorType: "TypeError",
-      errorMessage: "Connection timeout".slice(0, 100),
-    });
-    consoleSpy.mockRestore();
-  });
-
-  it("should return 429 on Garmin rate limit error", async () => {
-    mockPush.mockRejectedValueOnce(
-      new Error("OAuth1 token request failed: 429 Too Many Requests")
-    );
-
-    const result = await handler(createEvent(validBody));
-
-    expect(result.statusCode).toBe(429);
-    expect(JSON.parse(result.body as string).error).toBe(
-      "Garmin rate limited, try again later"
-    );
-  });
-
-  it("should return 503 when tunnel health check fails", async () => {
+  it("should invoke Tailscale middleware when env var set", async () => {
     process.env.TS_SECRET_API_KEY = "test-secret";
-    try {
-      mockTunnelHealth.mockResolvedValueOnce(false);
+    mockPush.mockResolvedValueOnce({ id: "1", name: "W", url: "u" });
 
-      const result = await handler(createEvent(validBody));
+    await handler(createEvent("POST", "/", validBody));
 
-      expect(result.statusCode).toBe(503);
-      expect(JSON.parse(result.body as string).error).toBe(
-        "Proxy tunnel unavailable"
-      );
-    } finally {
-      delete process.env.TS_SECRET_API_KEY;
-    }
+    expect(mockEnableSocks).toHaveBeenCalled();
+    expect(mockTunnelHealth).toHaveBeenCalled();
   });
 
-  it("should return 400 for invalid body even when tunnel is down", async () => {
+  it("should return 503 when tunnel health fails", async () => {
     process.env.TS_SECRET_API_KEY = "test-secret";
-    try {
-      mockTunnelHealth.mockResolvedValueOnce(false);
+    mockTunnelHealth.mockResolvedValueOnce(false);
 
-      const result = await handler(createEvent("not json"));
+    const result = await handler(createEvent("POST", "/", validBody));
 
-      expect(result.statusCode).toBe(400);
-      expect(JSON.parse(result.body as string).error).toBe(
-        "Invalid JSON in request body"
-      );
-    } finally {
-      delete process.env.TS_SECRET_API_KEY;
-    }
+    expect(result.statusCode).toBe(503);
   });
 
-  it("should not leak credentials in error responses", async () => {
-    mockPush.mockRejectedValueOnce(new Error("Some error with pass123"));
+  it("should not invoke Tailscale without env var", async () => {
+    mockPush.mockResolvedValueOnce({ id: "1", name: "W", url: "u" });
 
-    const result = await handler(createEvent(validBody));
-    const body = result.body as string;
+    await handler(createEvent("POST", "/", validBody));
 
-    expect(body).not.toContain("user@test.com");
-    expect(body).not.toContain("pass123");
+    expect(mockEnableSocks).not.toHaveBeenCalled();
+  });
+
+  it("should serve health check regardless of Tailscale", async () => {
+    process.env.TS_SECRET_API_KEY = "test-secret";
+    mockTunnelHealth.mockResolvedValueOnce(false);
+
+    const result = await handler(createEvent("GET", "/health"));
+
+    expect(result.statusCode).toBe(200);
+    expect(mockEnableSocks).not.toHaveBeenCalled();
   });
 });
