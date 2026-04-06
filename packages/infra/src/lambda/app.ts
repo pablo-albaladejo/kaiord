@@ -37,7 +37,7 @@ export const createApp = (options?: AppOptions) => {
   app.get("/health", (c) => c.json({ status: "ok" }));
 
   app.post(
-    "/",
+    "/push",
     bodyLimit({
       maxSize: MAX_BODY_BYTES,
       onError: (c) => c.json({ error: "Payload too large" }, 413),
