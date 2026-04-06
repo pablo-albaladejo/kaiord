@@ -15,8 +15,8 @@ The core push logic (`garmin-push.ts`) remains unchanged. Local developers run `
 
 ## Affected Packages
 
-| Package | Impact |
-|---|---|
+| Package         | Impact                                                                   |
+| --------------- | ------------------------------------------------------------------------ |
 | `@kaiord/infra` | Refactor handler into Hono app + two entry points; add `hono` dependency |
 
 No other packages are touched. The SPA already supports `localhost` URLs in the Garmin settings panel.

@@ -7,6 +7,7 @@
 **Choice:** Hono
 
 **Rationale:**
+
 - ~14KB, zero transitive dependencies
 - First-class adapters for AWS Lambda (`hono/aws-lambda`) and Node.js (`@hono/node-server`)
 - Built-in CORS middleware, body size limiting, request ID, and JSON parsing
@@ -14,6 +15,7 @@
 - Native `app.request()` test pattern — no running server needed for unit tests
 
 **Alternatives considered:**
+
 - Raw `node:http` — would require manual JSON parsing, CORS headers, error formatting. More code, same result.
 - Express — heavier, no Lambda adapter, would need `serverless-http` wrapper.
 - Fastify — good but heavier, Lambda support via separate plugin.
