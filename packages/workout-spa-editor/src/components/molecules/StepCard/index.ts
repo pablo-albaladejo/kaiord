@@ -1,2 +1,2 @@
-export { StepCard } from "./StepCard";
 export type { StepCardProps } from "./StepCard";
+export { StepCard } from "./StepCard";

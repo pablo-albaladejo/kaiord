@@ -1,6 +1,7 @@
 import * as ToastPrimitive from "@radix-ui/react-toast";
 import { X } from "lucide-react";
 import { forwardRef } from "react";
+
 import { baseToastStyles, variantStyles } from "./Toast.styles";
 import type { ToastProps } from "./Toast.types";
 

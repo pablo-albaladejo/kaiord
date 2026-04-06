@@ -4,9 +4,9 @@
  * Shows profile name and thresholds for the selected sport in AI form.
  */
 
-import { formatThresholdSummary } from "./zone-indicator-helpers";
 import { useProfileStore } from "../../../store/profile-store";
 import type { SportKey } from "../../../types/sport-zones";
+import { formatThresholdSummary } from "./zone-indicator-helpers";
 
 type ZoneIndicatorProps = {
   sport: string;

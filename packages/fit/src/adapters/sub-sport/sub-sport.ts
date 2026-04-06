@@ -1,6 +1,6 @@
 // Export schemas and types
-export { subSportSchema, type SubSport } from "@kaiord/core";
-export { fitSubSportSchema, type FitSubSport } from "../schemas/fit-sub-sport";
+export { type FitSubSport, fitSubSportSchema } from "../schemas/fit-sub-sport";
+export { type SubSport, subSportSchema } from "@kaiord/core";
 
 // Export mapper functions
 export { mapSubSportToFit, mapSubSportToKrd } from "./sub-sport.mapper";

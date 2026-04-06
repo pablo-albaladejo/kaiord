@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
-import { GarminLambdaInput } from "./GarminLambdaInput";
+
 import { useGarminStore } from "../../../store/garmin-store";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
+import { GarminLambdaInput } from "./GarminLambdaInput";
 
 export const GarminTab: React.FC = () => {
   const {

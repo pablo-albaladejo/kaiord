@@ -5,8 +5,9 @@
  */
 
 import { z } from "zod";
-import { profileSchema } from "../types/profile";
+
 import type { Profile } from "../types/profile";
+import { profileSchema } from "../types/profile";
 
 const STORAGE_KEY = "workout-spa-profiles";
 const ACTIVE_PROFILE_KEY = "workout-spa-active-profile";

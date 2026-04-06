@@ -1,46 +1,40 @@
 export {
-  conditionTypeKeySchema,
   ConditionTypeId,
-  garminConditionTypeSchema,
+  conditionTypeKeySchema,
   type GarminConditionType,
+  garminConditionTypeSchema,
 } from "./condition-type.schema";
-
 export {
   equipmentTypeKeySchema,
-  garminEquipmentTypeSchema,
   type GarminEquipmentType,
+  garminEquipmentTypeSchema,
 } from "./equipment-type.schema";
-
 export {
+  type GarminSportType,
   garminSportTypeSchema,
   SportTypeId,
   sportTypeKeySchema,
-  type GarminSportType,
 } from "./sport-type.schema";
-
 export {
+  type GarminStepType,
   garminStepTypeSchema,
   StepTypeId,
   stepTypeKeySchema,
-  type GarminStepType,
 } from "./step-type.schema";
-
 export {
+  type GarminStrokeType,
   garminStrokeTypeSchema,
   strokeTypeKeySchema,
-  type GarminStrokeType,
 } from "./stroke-type.schema";
-
 export {
+  type GarminTargetType,
   garminTargetTypeSchema,
   TargetTypeId,
   targetTypeKeySchema,
-  type GarminTargetType,
 } from "./target-type.schema";
-
 export {
+  type GarminUnit,
   garminUnitInputSchema,
   garminUnitSchema,
   unitKeySchema,
-  type GarminUnit,
 } from "./unit.schema";

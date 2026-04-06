@@ -1,6 +1,7 @@
-import { SportTypeId } from "../schemas/common";
-import type { GarminSportType } from "../schemas/common";
 import type { Sport } from "@kaiord/core";
+
+import type { GarminSportType } from "../schemas/common";
+import { SportTypeId } from "../schemas/common";
 
 const GARMIN_TO_KRD_SPORT: Record<string, Sport> = {
   running: "running",

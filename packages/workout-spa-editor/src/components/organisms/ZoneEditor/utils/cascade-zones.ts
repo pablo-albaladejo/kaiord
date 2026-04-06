@@ -5,9 +5,9 @@
  * and the min <= max invariant within each zone.
  */
 
-import { getRealValue, setRealValue } from "./zone-field-access";
 import type { HeartRateZone, PowerZone } from "../../../../types/profile";
 import type { PaceZone } from "../../../../types/sport-zones";
+import { getRealValue, setRealValue } from "./zone-field-access";
 
 type ZoneRowData = HeartRateZone | PowerZone | PaceZone;
 

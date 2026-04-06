@@ -1,4 +1,5 @@
 import { useCallback, useState } from "react";
+
 import { createToastItem, createVariantToast } from "./useToast.helpers";
 import type { ToastItem, ToastOptions } from "./useToast.types";
 

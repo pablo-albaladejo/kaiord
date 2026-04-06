@@ -1,12 +1,13 @@
+import type { Logger, TokenStore } from "@kaiord/core";
+
+import type { TokenState } from "./token-manager.helpers";
 import {
   doRefresh,
   isExpired,
   persistBestEffort,
   restoreFromStore,
 } from "./token-manager.helpers";
-import type { TokenState } from "./token-manager.helpers";
 import type { RefreshFn, TokenManager } from "./token-manager.types";
-import type { Logger, TokenStore } from "@kaiord/core";
 
 type Options = {
   refreshFn: RefreshFn;

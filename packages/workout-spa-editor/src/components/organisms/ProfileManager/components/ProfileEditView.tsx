@@ -5,11 +5,12 @@
  */
 
 import { useState } from "react";
-import { PersonalDataTab } from "./PersonalDataTab";
-import { ProfileTabs } from "./ProfileTabs";
+
 import { SportZoneEditor } from "../../ZoneEditor/SportZoneEditor";
-import type { ProfileTab } from "./ProfileTabs";
 import type { ProfileFormData } from "../types";
+import { PersonalDataTab } from "./PersonalDataTab";
+import type { ProfileTab } from "./ProfileTabs";
+import { ProfileTabs } from "./ProfileTabs";
 
 type ProfileEditViewProps = {
   profileId: string;

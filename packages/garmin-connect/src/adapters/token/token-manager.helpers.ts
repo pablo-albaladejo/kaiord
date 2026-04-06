@@ -1,8 +1,9 @@
+import type { Logger, TokenStore } from "@kaiord/core";
 import { createServiceApiError } from "@kaiord/core";
+
+import type { OAuth1Token, OAuth2Token } from "../http/types";
 import { garminTokensSchema } from "../schemas/garmin-token.schema";
 import type { RefreshFn } from "./token-manager.types";
-import type { OAuth1Token, OAuth2Token } from "../http/types";
-import type { Logger, TokenStore } from "@kaiord/core";
 
 export type TokenState = {
   oauth1: OAuth1Token | undefined;

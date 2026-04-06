@@ -1,8 +1,9 @@
-import { fromText, createServiceApiError } from "@kaiord/core";
-import { WORKOUT_URL } from "../http/urls";
-import type { GarminHttpClient } from "../http/types";
 import type { KRD, Logger } from "@kaiord/core";
+import { createServiceApiError, fromText } from "@kaiord/core";
 import type { createGarminReader } from "@kaiord/garmin";
+
+import type { GarminHttpClient } from "../http/types";
+import { WORKOUT_URL } from "../http/urls";
 
 export const pullWorkout = async (
   workoutId: string,

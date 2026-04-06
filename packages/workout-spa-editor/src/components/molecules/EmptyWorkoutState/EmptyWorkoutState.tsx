@@ -1,4 +1,5 @@
 import { ListPlus } from "lucide-react";
+
 import { Button } from "../../atoms/Button/Button";
 
 export type EmptyWorkoutStateProps = {

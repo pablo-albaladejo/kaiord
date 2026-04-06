@@ -5,6 +5,7 @@
  */
 
 import { useEffect, useState } from "react";
+
 import { HINT_ROTATION_INTERVAL, HINTS } from "./constants";
 
 export function useHintRotation(visible: boolean) {

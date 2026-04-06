@@ -1,9 +1,10 @@
-import { mapFitEventToKrd } from "./event.mapper";
-import {
-  fitEventMessageSchema,
-  type FitEventMessage,
-} from "../schemas/fit-event";
 import type { KRDEvent } from "@kaiord/core";
+
+import {
+  type FitEventMessage,
+  fitEventMessageSchema,
+} from "../schemas/fit-event";
+import { mapFitEventToKrd } from "./event.mapper";
 
 /**
  * Converts a FIT EVENT message to KRD event format.

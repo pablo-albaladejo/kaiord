@@ -1,8 +1,5 @@
 import { useState } from "react";
-import { MetadataEditMode } from "./MetadataEditMode";
-import { useDiscardConfirmation } from "./use-discard-confirmation";
-import { WorkoutActions } from "./WorkoutActions";
-import { WorkoutTitle } from "./WorkoutTitle";
+
 import {
   useCanRedo,
   useCanUndo,
@@ -11,6 +8,10 @@ import {
   useUpdateWorkout,
 } from "../../../store";
 import type { KRD, Workout } from "../../../types/krd";
+import { MetadataEditMode } from "./MetadataEditMode";
+import { useDiscardConfirmation } from "./use-discard-confirmation";
+import { WorkoutActions } from "./WorkoutActions";
+import { WorkoutTitle } from "./WorkoutTitle";
 
 type WorkoutHeaderProps = {
   readonly workout: Workout;

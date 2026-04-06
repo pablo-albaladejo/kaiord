@@ -1,6 +1,7 @@
-import { readFile, writeFile, mkdir, unlink } from "node:fs/promises";
+import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
+
 import type { TokenData, TokenStore } from "@kaiord/core";
 
 const DEFAULT_PATH = join(homedir(), ".kaiord", "garmin-tokens.json");

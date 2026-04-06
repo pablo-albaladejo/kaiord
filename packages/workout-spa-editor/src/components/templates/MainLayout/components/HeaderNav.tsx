@@ -5,9 +5,10 @@
  */
 
 import { HelpCircle, Settings, User } from "lucide-react";
-import { LibraryButton } from "./LibraryButton";
+
 import { Button } from "../../../atoms/Button/Button";
 import { ThemeToggle } from "../../../atoms/ThemeToggle";
+import { LibraryButton } from "./LibraryButton";
 
 type HeaderNavProps = {
   activeProfileName: string | null;

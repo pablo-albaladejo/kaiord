@@ -1,5 +1,6 @@
-import { convertPowerZoneToPercentFtp } from "../target/target.converter";
 import type { Logger, WorkoutStep } from "@kaiord/core";
+
+import { convertPowerZoneToPercentFtp } from "../target/target.converter";
 
 export const encodeSteadyStatePowerTarget = (
   step: WorkoutStep,

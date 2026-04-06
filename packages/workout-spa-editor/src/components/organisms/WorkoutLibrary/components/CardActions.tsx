@@ -5,6 +5,7 @@
  */
 
 import { Eye, Play } from "lucide-react";
+
 import { Button } from "../../../atoms/Button/Button";
 
 type CardActionsProps = {

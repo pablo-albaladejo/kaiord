@@ -4,10 +4,11 @@
  * Actions for adding/removing custom zones.
  */
 
+import type { StateCreator } from "zustand";
+
 import { updateSportConfig } from "../helpers/sport-zone-updater";
 import { persistState } from "../persistence";
 import type { ProfileStore } from "../types";
-import type { StateCreator } from "zustand";
 
 type CustomZoneActions = Pick<
   ProfileStore,

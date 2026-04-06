@@ -16,13 +16,14 @@
  */
 
 import { useCallback, useMemo } from "react";
-import { useKeyboardStoreSelectors } from "./use-keyboard-store-selectors";
-import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
+
 import { useCopyStep } from "../components/pages/WorkoutSection/useCopyStep";
 import { usePasteStep } from "../components/pages/WorkoutSection/usePasteStep";
+import type { Workout } from "../types/krd";
 import { buildKeyboardHandlers } from "../utils/build-keyboard-handlers";
 import { getSelectedStepIndex } from "../utils/get-selected-step-index";
-import type { Workout } from "../types/krd";
+import { useKeyboardStoreSelectors } from "./use-keyboard-store-selectors";
+import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 
 export const useAppKeyboardHandlers = () => {
   const store = useKeyboardStoreSelectors();

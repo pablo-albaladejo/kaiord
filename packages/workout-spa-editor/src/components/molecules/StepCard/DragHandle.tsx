@@ -1,6 +1,7 @@
 import { GripVertical } from "lucide-react";
-import { Tooltip } from "../../atoms/Tooltip/Tooltip";
 import type { HTMLAttributes } from "react";
+
+import { Tooltip } from "../../atoms/Tooltip/Tooltip";
 
 export type DragHandleProps = HTMLAttributes<HTMLDivElement> & {
   isDragging?: boolean;

@@ -6,16 +6,16 @@
  */
 
 export {
-  cadenceValueSchema,
-  heartRateValueSchema,
-  paceValueSchema,
-  powerValueSchema,
-  strokeTypeValueSchema,
-  targetUnitSchema,
   type CadenceValue,
+  cadenceValueSchema,
   type HeartRateValue,
+  heartRateValueSchema,
   type PaceValue,
+  paceValueSchema,
   type PowerValue,
+  powerValueSchema,
   type StrokeTypeValue,
+  strokeTypeValueSchema,
   type TargetUnit,
+  targetUnitSchema,
 } from "./target-values/index";

@@ -4,9 +4,9 @@
  * Threshold inputs for a sport based on its capabilities.
  */
 
+import type { SportThresholds } from "../../../../types/sport-zones";
 import { PaceInput } from "./PaceInput";
 import { ThresholdInput } from "./ThresholdInput";
-import type { SportThresholds } from "../../../../types/sport-zones";
 
 type SportZoneThresholdsProps = {
   thresholds: SportThresholds;

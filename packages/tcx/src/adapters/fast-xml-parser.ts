@@ -1,9 +1,10 @@
+import type { KRD, Logger, TextReader, TextWriter } from "@kaiord/core";
 import { createTcxParsingError, createTcxValidationError } from "@kaiord/core";
 import { XMLBuilder, XMLParser } from "fast-xml-parser";
+
+import type { TcxValidator } from "../types";
 import { convertTcxToKRD } from "./workout/krd.converter";
 import { convertKRDToTcx as convertKRDToTcxStructure } from "./workout/tcx.converter";
-import type { TcxValidator } from "../types";
-import type { KRD, Logger, TextReader, TextWriter } from "@kaiord/core";
 
 export const createFastXmlTcxReader =
   (logger: Logger): TextReader =>

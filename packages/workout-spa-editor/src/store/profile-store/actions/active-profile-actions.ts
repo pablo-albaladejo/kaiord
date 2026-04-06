@@ -4,9 +4,10 @@
  * Actions for managing the active profile.
  */
 
+import type { StateCreator } from "zustand";
+
 import { persistState } from "../persistence";
 import type { ProfileStore } from "../types";
-import type { StateCreator } from "zustand";
 
 type ActiveProfileActions = Pick<
   ProfileStore,

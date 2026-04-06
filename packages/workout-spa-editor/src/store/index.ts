@@ -3,7 +3,6 @@
  */
 
 export { useWorkoutStore, type WorkoutStore } from "./workout-store";
-
 export {
   useCanRedo,
   useCanUndo,
@@ -11,14 +10,14 @@ export {
   useClearWorkout,
   useCreateStep,
   useCurrentWorkout,
-  useDeleteStep,
   useDeletedSteps,
+  useDeleteStep,
   useDuplicateStep,
   useIsEditing,
   useLoadWorkout,
   useRedo,
-  useSelectStep,
   useSelectedStepId,
+  useSelectStep,
   useSetEditing,
   useUndo,
   useUndoDelete,

@@ -1,3 +1,5 @@
+import type { StoreApi } from "zustand";
+
 import {
   createBasicMethods,
   createClipboardMethods,
@@ -5,7 +7,6 @@ import {
 } from "./create-workout-method-helpers-basic";
 import type { createWorkoutStoreActions } from "./workout-store-actions";
 import type { WorkoutStore } from "./workout-store-types";
-import type { StoreApi } from "zustand";
 
 export const createBlockMethods = (
   actions: ReturnType<typeof createWorkoutStoreActions>,

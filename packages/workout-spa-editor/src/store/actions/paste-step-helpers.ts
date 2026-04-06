@@ -2,15 +2,15 @@
  * Helper functions for paste step action
  */
 
-import { readClipboard as readClipboardText } from "../clipboard-store";
-import { recalculateStepIndices } from "./recalculate-step-indices";
-import { isRepetitionBlock } from "../../types/krd";
 import type {
   KRD,
   RepetitionBlock,
   Workout,
   WorkoutStep,
 } from "../../types/krd";
+import { isRepetitionBlock } from "../../types/krd";
+import { readClipboard as readClipboardText } from "../clipboard-store";
+import { recalculateStepIndices } from "./recalculate-step-indices";
 
 /**
  * Read and parse clipboard content

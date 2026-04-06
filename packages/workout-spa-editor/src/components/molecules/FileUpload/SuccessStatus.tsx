@@ -1,5 +1,5 @@
-import { FormatBadge } from "./FormatBadge";
 import { detectFormat } from "../../../utils/file-format-detector";
+import { FormatBadge } from "./FormatBadge";
 
 type SuccessStatusProps = {
   fileName: string;

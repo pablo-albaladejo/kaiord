@@ -1,5 +1,7 @@
-import { lazy, Suspense } from "react";
 import "./App.css";
+
+import { lazy, Suspense } from "react";
+
 import { AppKeyboardShortcuts } from "./components/AppKeyboardShortcuts";
 import { AppTutorial } from "./components/AppTutorial";
 import { WelcomeSection } from "./components/pages/WelcomeSection";

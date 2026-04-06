@@ -1,11 +1,12 @@
+import type { Sport } from "@kaiord/core";
 import { useCallback } from "react";
-import { formatZonesContext } from "./zones-formatter";
+
 import { generateWorkoutKrd } from "../../../lib/generate-workout";
 import { useAiStore } from "../../../store/ai-store";
 import { useProfileStore } from "../../../store/profile-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 import type { SportKey } from "../../../types/sport-zones";
-import type { Sport } from "@kaiord/core";
+import { formatZonesContext } from "./zones-formatter";
 
 export const useAiGeneration = () => {
   const { getSelectedProvider, customPrompt, setGeneration } = useAiStore();

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
+
 import { pushToGarminLambda } from "../../../lib/garmin-push";
-import { useGarminStore, isValidLambdaUrl } from "../../../store/garmin-store";
+import { isValidLambdaUrl, useGarminStore } from "../../../store/garmin-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 
 export const useGarminPush = () => {

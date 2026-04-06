@@ -1,8 +1,9 @@
 import { createTextToWorkout } from "@kaiord/ai";
-import { createWorkoutKRD } from "@kaiord/core";
-import { createLanguageModel } from "./provider-factory";
-import type { LlmProviderConfig } from "../store/ai-store";
 import type { KRD, Sport } from "@kaiord/core";
+import { createWorkoutKRD } from "@kaiord/core";
+
+import type { LlmProviderConfig } from "../store/ai-store";
+import { createLanguageModel } from "./provider-factory";
 
 export type GenerateWorkoutOptions = {
   text: string;

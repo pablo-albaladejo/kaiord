@@ -1,8 +1,8 @@
-import { StepEditorActions } from "./StepEditorActions";
+import type { Duration, Target } from "../../../types/krd";
 import { DurationPicker } from "../../molecules/DurationPicker/DurationPicker";
 import { StepNotesEditor } from "../../molecules/StepNotesEditor";
 import { TargetPicker } from "../../molecules/TargetPicker/TargetPicker";
-import type { Duration, Target } from "../../../types/krd";
+import { StepEditorActions } from "./StepEditorActions";
 
 type StepEditorContentProps = {
   stepIndex: number;

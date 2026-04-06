@@ -1,5 +1,6 @@
-import type { GarminWorkoutParsed } from "../schemas/garmin-workout-parse.schema";
 import type { Workout } from "@kaiord/core";
+
+import type { GarminWorkoutParsed } from "../schemas/garmin-workout-parse.schema";
 
 export const addPoolLength = (
   gcn: GarminWorkoutParsed,

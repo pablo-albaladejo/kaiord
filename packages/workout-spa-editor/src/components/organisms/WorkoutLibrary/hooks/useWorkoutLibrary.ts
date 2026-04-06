@@ -5,10 +5,11 @@
  */
 
 import { useState } from "react";
-import { useLibraryFilters } from "./useLibraryFilters";
-import { useWorkoutLoader } from "./useWorkoutLoader";
+
 import { useLibraryStore } from "../../../../store/library-store";
 import type { WorkoutTemplate } from "../../../../types/workout-library";
+import { useLibraryFilters } from "./useLibraryFilters";
+import { useWorkoutLoader } from "./useWorkoutLoader";
 
 export function useWorkoutLibrary(
   hasCurrentWorkout: boolean,

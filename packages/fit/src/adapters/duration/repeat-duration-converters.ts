@@ -1,4 +1,5 @@
-import { durationTypeSchema, type Duration } from "@kaiord/core";
+import { type Duration, durationTypeSchema } from "@kaiord/core";
+
 import type { FitDurationData } from "./duration.converter";
 
 export const convertRepeatUntilTime = (

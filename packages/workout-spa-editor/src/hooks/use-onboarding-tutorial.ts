@@ -10,6 +10,7 @@
  */
 
 import { useEffect, useState } from "react";
+
 import { hasCompletedOnboarding } from "../components/organisms/OnboardingTutorial/OnboardingTutorial";
 
 const isE2ETestingEnvironment = (): boolean => {

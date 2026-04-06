@@ -1,5 +1,5 @@
-import { TargetUnitSelect } from "./TargetUnitSelect";
 import type { TargetPickerFieldsProps } from "./TargetPickerFields.types";
+import { TargetUnitSelect } from "./TargetUnitSelect";
 
 type TargetPickerFieldsUnitProps = Pick<
   TargetPickerFieldsProps,

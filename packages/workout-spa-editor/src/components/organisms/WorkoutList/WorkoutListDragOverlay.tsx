@@ -1,7 +1,7 @@
+import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
 import { isRepetitionBlock } from "../../../types/krd";
 import { RepetitionBlockCard } from "../../molecules/RepetitionBlockCard/RepetitionBlockCard";
 import { StepCard } from "../../molecules/StepCard/StepCard";
-import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
 
 type WorkoutListDragOverlayProps = {
   activeItem: WorkoutStep | RepetitionBlock | null;

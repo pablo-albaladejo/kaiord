@@ -4,14 +4,14 @@
  * Helper functions for formatting zone data into text with real units.
  */
 
+import type { ZoneMethod } from "../../../lib/zone-method-types";
 import {
   HR_METHODS,
   PACE_METHODS,
   POWER_METHODS,
 } from "../../../lib/zone-methods";
-import { secondsToMmSs } from "../ZoneEditor/utils/pace-format";
-import type { ZoneMethod } from "../../../lib/zone-method-types";
 import type { SportZoneConfig } from "../../../types/sport-zones";
+import { secondsToMmSs } from "../ZoneEditor/utils/pace-format";
 
 function methodLabel(methods: Array<ZoneMethod>, id: string) {
   return methods.find((m) => m.id === id)?.name ?? id;

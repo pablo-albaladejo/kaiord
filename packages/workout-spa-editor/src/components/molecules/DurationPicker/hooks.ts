@@ -1,6 +1,7 @@
 import { useCallback } from "react";
-import { validateDurationValue } from "./validation";
+
 import type { Duration } from "../../../types/krd";
+import { validateDurationValue } from "./validation";
 
 export const useTypeChange = (
   onChange: (duration: Duration | null) => void,

@@ -1,10 +1,11 @@
-import { ConditionTypeId } from "../schemas/common";
-import type {
-  GarminConditionType,
-  conditionTypeKeySchema,
-} from "../schemas/common";
 import type { Duration, DurationType } from "@kaiord/core";
 import type { z } from "zod";
+
+import type {
+  conditionTypeKeySchema,
+  GarminConditionType,
+} from "../schemas/common";
+import { ConditionTypeId } from "../schemas/common";
 
 export const mapConditionToDuration = (
   conditionTypeKey: string,

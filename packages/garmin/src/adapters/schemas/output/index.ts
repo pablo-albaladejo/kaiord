@@ -1,18 +1,13 @@
-export { garminWorkoutSchema, type GarminWorkout } from "./workout.schema";
-
-export {
-  garminWorkoutSegmentSchema,
-  type GarminWorkoutSegment,
-} from "./segment.schema";
-
-export { executableStepDTOSchema, type ExecutableStepDTO } from "./step.schema";
-
+export { type GarminAuthor, garminAuthorSchema } from "./author.schema";
 export {
   garminWorkoutStepSchema,
-  repeatGroupDTOSchema,
   type RepeatGroupDTO,
+  repeatGroupDTOSchema,
 } from "./repeat.schema";
-
-export { garminAuthorSchema, type GarminAuthor } from "./author.schema";
-
+export {
+  type GarminWorkoutSegment,
+  garminWorkoutSegmentSchema,
+} from "./segment.schema";
+export { type ExecutableStepDTO, executableStepDTOSchema } from "./step.schema";
 export type { GarminWorkoutStep } from "./types";
+export { type GarminWorkout, garminWorkoutSchema } from "./workout.schema";

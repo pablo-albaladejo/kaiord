@@ -4,8 +4,8 @@
  * Input fields for zone ranges.
  */
 
-import { Input } from "../../../atoms/Input/Input";
 import type { HeartRateZone, PowerZone } from "../../../../types/profile";
+import { Input } from "../../../atoms/Input/Input";
 
 type ZoneInputsProps = {
   zone: PowerZone | HeartRateZone;

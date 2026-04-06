@@ -7,8 +7,18 @@
  */
 
 // Re-export all validation utilities
+export {
+  formatValidationErrors,
+  formatZodError,
+} from "./validation/formatters";
+export {
+  createDebouncedValidator,
+  getFieldError,
+  getNestedErrors,
+  hasFieldError,
+  mergeValidationErrors,
+} from "./validation/helpers";
 export type { ValidationResult } from "./validation/validators";
-
 export {
   validateField,
   validatePartialRepetitionBlock,
@@ -18,16 +28,3 @@ export {
   validateWorkoutMetadata,
   validateWorkoutStep,
 } from "./validation/validators";
-
-export {
-  formatValidationErrors,
-  formatZodError,
-} from "./validation/formatters";
-
-export {
-  createDebouncedValidator,
-  getFieldError,
-  getNestedErrors,
-  hasFieldError,
-  mergeValidationErrors,
-} from "./validation/helpers";

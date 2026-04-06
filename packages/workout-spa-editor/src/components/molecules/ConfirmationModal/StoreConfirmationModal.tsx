@@ -5,12 +5,12 @@
  * the ConfirmationModal when the store's isModalOpen is true.
  */
 
-import { ConfirmationModal } from "./ConfirmationModal";
 import {
   useHideConfirmationModal,
   useIsModalOpen,
   useModalConfig,
 } from "../../../store/workout-store-selectors";
+import { ConfirmationModal } from "./ConfirmationModal";
 
 export function StoreConfirmationModal() {
   const isModalOpen = useIsModalOpen();

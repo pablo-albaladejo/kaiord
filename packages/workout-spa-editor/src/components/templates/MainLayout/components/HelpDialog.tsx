@@ -6,6 +6,7 @@
 
 import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
+
 import { HelpSection } from "../../../pages/HelpSection/HelpSection";
 
 type HelpDialogProps = {

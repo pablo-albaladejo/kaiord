@@ -1,9 +1,10 @@
 import { useState } from "react";
-import { ModelSelect } from "./ModelSelect";
+
 import { getDefaultModel } from "../../../lib/provider-models";
+import type { LlmProviderType } from "../../../store/ai-store";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
-import type { LlmProviderType } from "../../../store/ai-store";
+import { ModelSelect } from "./ModelSelect";
 
 type ProviderFormProps = {
   onAdd: (config: {

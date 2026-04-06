@@ -2,8 +2,8 @@
  * Profile Store Persistence
  */
 
-import { saveProfiles } from "../../utils/profile-storage";
 import type { Profile } from "../../types/profile";
+import { saveProfiles } from "../../utils/profile-storage";
 
 export function persistState(
   profiles: Array<Profile>,

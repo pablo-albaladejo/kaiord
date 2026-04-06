@@ -9,6 +9,7 @@
 
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
 import { MoreVertical } from "lucide-react";
+
 import { RepetitionBlockMenuContent } from "./RepetitionBlockMenuContent";
 
 export type RepetitionBlockContextMenuProps = {

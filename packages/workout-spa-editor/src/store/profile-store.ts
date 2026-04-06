@@ -6,6 +6,7 @@
  */
 
 import { create } from "zustand";
+
 import { createActions } from "./profile-store/actions";
 import { loadInitialState } from "./profile-store/initial-state";
 import type { ProfileStore } from "./profile-store/types";

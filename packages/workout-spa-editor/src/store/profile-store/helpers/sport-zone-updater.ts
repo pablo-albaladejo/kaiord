@@ -4,16 +4,16 @@
  * Helpers for updating sport zone configs in profiles.
  */
 
-import { SPORT_ZONE_CAPABILITIES } from "../../../types/sport-zones";
-import { calculateHrZones } from "../../../utils/calculate-hr-zones";
-import { calculatePaceZones } from "../../../utils/calculate-pace-zones";
-import { calculatePowerZones } from "../../../utils/calculate-power-zones";
 import type { Profile } from "../../../types/profile";
 import type {
   SportKey,
   SportThresholds,
   SportZoneConfig,
 } from "../../../types/sport-zones";
+import { SPORT_ZONE_CAPABILITIES } from "../../../types/sport-zones";
+import { calculateHrZones } from "../../../utils/calculate-hr-zones";
+import { calculatePaceZones } from "../../../utils/calculate-pace-zones";
+import { calculatePowerZones } from "../../../utils/calculate-power-zones";
 
 export function recalculateZones(
   config: SportZoneConfig,

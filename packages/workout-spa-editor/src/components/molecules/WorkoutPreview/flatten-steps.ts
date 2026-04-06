@@ -5,11 +5,11 @@
  * into a flat array of PreviewBar objects for rendering.
  */
 
-import { calculateNormalizedHeight } from "./bar-height";
+import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { isRepetitionBlock } from "../../../types/krd";
 import { getStepColor } from "../../../utils/step-colors";
+import { calculateNormalizedHeight } from "./bar-height";
 import type { PreviewBar } from "./workout-preview-types";
-import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 
 const DEFAULT_DURATION_SECONDS = 300;
 

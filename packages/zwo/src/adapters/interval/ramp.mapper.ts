@@ -1,15 +1,16 @@
+import type { Intensity, WorkoutStep } from "@kaiord/core";
 import { intensitySchema } from "@kaiord/core";
+
+import { mapZwiftDuration } from "../duration/duration.mapper";
+import type { ZwiftTextEvent } from "./index";
+import { extractTextEvents } from "./index";
+import type { ZwiftRampData } from "./ramp-helpers";
 import {
   addRampMetadata,
   buildRampDurationData,
   resolveIntensity,
   resolveRampTarget,
 } from "./ramp-helpers";
-import { mapZwiftDuration } from "../duration/duration.mapper";
-import { extractTextEvents } from "./index";
-import type { ZwiftTextEvent } from "./index";
-import type { ZwiftRampData } from "./ramp-helpers";
-import type { Intensity, WorkoutStep } from "@kaiord/core";
 
 export type { ZwiftRampData };
 

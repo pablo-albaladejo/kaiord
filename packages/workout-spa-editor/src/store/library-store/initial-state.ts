@@ -2,8 +2,8 @@
  * Library Store Initial State
  */
 
-import { loadLibrary } from "../../utils/library-storage";
 import type { WorkoutTemplate } from "../../types/workout-library";
+import { loadLibrary } from "../../utils/library-storage";
 
 export function loadInitialState(): {
   templates: Array<WorkoutTemplate>;

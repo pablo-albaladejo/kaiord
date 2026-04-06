@@ -1,4 +1,4 @@
-import { lengthUnitSchema, type LengthUnit } from "@kaiord/core";
+import { type LengthUnit, lengthUnitSchema } from "@kaiord/core";
 
 const FIT_LENGTH_UNIT_MAP: Record<number, LengthUnit> = {
   0: "meters",

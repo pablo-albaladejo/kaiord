@@ -5,7 +5,7 @@
  * Note: slower pace = higher number, so Z1 (easy) has the highest values.
  */
 
-import { PACE_METHODS, findMethod } from "../lib/zone-methods";
+import { findMethod, PACE_METHODS } from "../lib/zone-methods";
 import type { PaceUnit, PaceZone } from "../types/profile";
 
 /**

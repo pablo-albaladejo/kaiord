@@ -4,8 +4,8 @@
  * Renders editable zone rows with inline editing for names and values.
  */
 
-import { ZoneRow } from "./ZoneRow";
 import type { ZoneRowData, ZoneTableCallbacks } from "../types/zone-table";
+import { ZoneRow } from "./ZoneRow";
 
 type ZoneTableProps = {
   zones: Array<ZoneRowData>;

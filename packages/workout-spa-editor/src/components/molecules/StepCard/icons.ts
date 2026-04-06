@@ -3,10 +3,10 @@ import {
   Clock,
   Gauge,
   Heart,
+  type LucideIcon,
   Repeat,
   Ruler,
   Zap,
-  type LucideIcon,
 } from "lucide-react";
 
 /**

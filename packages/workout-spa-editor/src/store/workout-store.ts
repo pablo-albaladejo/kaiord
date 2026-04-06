@@ -1,4 +1,5 @@
 import { create } from "zustand";
+
 import { createHistoryMethods } from "./create-history-methods";
 import { createRecoveryMethods } from "./create-recovery-methods";
 import { createWorkoutMethods } from "./create-workout-methods";
