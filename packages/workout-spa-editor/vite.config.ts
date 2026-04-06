@@ -31,7 +31,10 @@ export default defineConfig({
         codeSplitting: {
           groups: [
             { name: "vendor-ui", test: /[\\/]node_modules[\\/]@radix-ui[\\/]/ },
-            { name: "vendor-state", test: /[\\/]node_modules[\\/]zustand[\\/]/ },
+            {
+              name: "vendor-state",
+              test: /[\\/]node_modules[\\/]zustand[\\/]/,
+            },
             { name: "vendor-zod", test: /[\\/]node_modules[\\/]zod[\\/]/ },
             {
               name: "vendor-dnd",
