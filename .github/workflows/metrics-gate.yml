@@ -38,7 +38,7 @@ jobs:
       # On push to main: save metrics as cached baseline
       - name: Cache main metrics
         if: github.event_name == 'push'
-        uses: actions/cache/save@v4
+        uses: actions/cache/save@v5
         with:
           path: metrics-current.json
           key: metrics-main-${{ github.sha }}
@@ -47,7 +47,7 @@ jobs:
       - name: Restore main baseline
         if: github.event_name == 'pull_request'
         id: cache
-        uses: actions/cache/restore@v4
+        uses: actions/cache/restore@v5
         with:
           path: metrics-baseline.json
           key: metrics-main-${{ github.event.pull_request.base.sha }}
