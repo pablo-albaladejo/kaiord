@@ -11,7 +11,6 @@ export default defineConfig({
   shims: true,
   splitting: false,
   bundle: true,
-  treeshake: true,
   banner: {
     js: "#!/usr/bin/env node",
   },
