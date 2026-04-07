@@ -26,37 +26,25 @@ export const isRateLimited = (error: unknown): boolean => {
 
 type ErrorTuple = [message: string, status: 401 | 429 | 500];
 
-const parsePushBody = async (
-  c: Context
-): Promise<PushRequest | Response> => {
+const parsePushBody = async (c: Context): Promise<PushRequest | Response> => {
   let body: unknown;
   try {
     body = await c.req.json();
   } catch {
-    return c.json(
-      { error: "Invalid request: check KRD and credentials" },
-      400
-    );
+    return c.json({ error: "Invalid request: check KRD and credentials" }, 400);
   }
   const validation = pushRequestSchema.safeParse(body);
   if (!validation.success) {
-    return c.json(
-      { error: "Invalid request: check KRD and credentials" },
-      400
-    );
+    return c.json({ error: "Invalid request: check KRD and credentials" }, 400);
   }
   return validation.data;
 };
 
-const mapPushError = (
-  error: unknown,
-  requestId: string
-): ErrorTuple => {
+const mapPushError = (error: unknown, requestId: string): ErrorTuple => {
   if (isAuthError(error)) {
     console.error("Garmin auth failed", {
       requestId,
-      errorType:
-        error instanceof Error ? error.constructor.name : "unknown",
+      errorType: error instanceof Error ? error.constructor.name : "unknown",
       errorMessage:
         error instanceof Error ? error.message.slice(0, 200) : "unknown",
     });
@@ -67,8 +55,7 @@ const mapPushError = (
   }
   console.error("Garmin push failed", {
     requestId,
-    errorType:
-      error instanceof Error ? error.constructor.name : "unknown",
+    errorType: error instanceof Error ? error.constructor.name : "unknown",
     errorMessage:
       error instanceof Error ? error.message.slice(0, 100) : "unknown",
   });
