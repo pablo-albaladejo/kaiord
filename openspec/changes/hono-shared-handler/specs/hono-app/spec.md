@@ -1,3 +1,5 @@
+> Synced: 2026-04-07
+
 # Shared Hono App Spec
 
 ## Requirements
@@ -8,7 +10,7 @@ The Hono app (`app.ts`) SHALL define all HTTP behavior (request parsing, validat
 
 ### Requirement: POST route contract
 
-The app SHALL expose a `POST /` route that:
+The app SHALL expose a `POST /push` route that:
 
 1. Parses the JSON body as `{ krd, garmin: { username, password } }`
 2. Validates against `pushRequestSchema` (Zod)
@@ -102,5 +104,5 @@ The local dev server SHALL bind to `127.0.0.1` only (NOT `0.0.0.0`) to prevent e
 #### Scenario: Middleware execution order
 
 - **GIVEN** a Hono app created with an `onBeforePush` middleware
-- **WHEN** a POST `/` request arrives
+- **WHEN** a POST `/push` request arrives
 - **THEN** the middleware executes before the route handler

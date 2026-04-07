@@ -9,9 +9,9 @@
 
 - [x] Create `packages/infra/src/lambda/app.ts` — Hono app factory with `createApp(options?)`
   - `GET /health` route → `{ status: "ok" }` (HTTP 200) — no middleware, always available
-  - `POST /` route with:
+  - `POST /push` route with:
     - Hono `bodyLimit` middleware (512KB, custom handler returning `{ error: "Payload too large" }`)
-    - Optional `onBeforePush` middleware (applied only to `POST /`, NOT globally)
+    - Optional `onBeforePush` middleware (applied only to `POST /push`, NOT globally)
     - JSON body parsing + Zod validation via `pushRequestSchema`
     - Calls `pushToGarmin(krd, credentials)`
     - Returns `{ id, name, url }` on success
