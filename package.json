@@ -68,7 +68,7 @@
     "@changesets/cli": "^2.30.0",
     "@eslint/js": "^9.39.4",
     "@fission-ai/openspec": "^1.2.0",
-    "@size-limit/file": "^11.0.0",
+    "@size-limit/file": "^12.0.1",
     "@types/node": "^25.5.2",
     "dependency-cruiser": "^17.0.0",
     "eslint": "^9.15.0",
@@ -78,7 +78,7 @@
     "jscpd": "^4.0.0",
     "knip": "^5.0.0",
     "prettier": "^3.8.1",
-    "size-limit": "^11.0.0",
+    "size-limit": "^12.0.1",
     "typescript": "^5.3.3",
     "typescript-eslint": "^8.58.0"
   }
