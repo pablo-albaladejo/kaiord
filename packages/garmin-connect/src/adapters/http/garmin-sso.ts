@@ -21,16 +21,19 @@ export const garminSso = async (
 ): Promise<SsoResult> => {
   logger.info("Starting Garmin Connect SSO login");
 
-  const consumer = await fetchOAuthConsumer(fetchFn);
+  logger.info("[SSO] Step 1/4: OAuth consumer");
+  const consumer = await fetchOAuthConsumer(fetchFn, logger);
+
+  logger.info("[SSO] Step 2/4: Login ticket");
   const ticket = await getLoginTicket(username, password, fetchFn, logger);
-  logger.debug("SSO ticket obtained");
 
-  const oauth1 = await getOAuth1Token(ticket, consumer, fetchFn);
-  logger.debug("OAuth1 token obtained");
+  logger.info("[SSO] Step 3/4: OAuth1 token");
+  const oauth1 = await getOAuth1Token(ticket, consumer, fetchFn, logger);
 
-  const oauth2 = await exchange(oauth1, consumer, fetchFn);
+  logger.info("[SSO] Step 4/4: OAuth2 exchange");
+  const oauth2 = await exchange(oauth1, consumer, fetchFn, logger);
+
   logger.info("Garmin Connect SSO login successful");
-
   return { oauth1, oauth2 };
 };
 

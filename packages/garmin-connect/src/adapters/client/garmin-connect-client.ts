@@ -40,7 +40,7 @@ export const createGarminConnectClient = (
     ? withRetry(rawFetchFn, { ...options.retry, logger })
     : rawFetchFn;
 
-  const refreshFn = buildRefreshFn(rawFetchFn);
+  const refreshFn = buildRefreshFn(rawFetchFn, logger);
   const tokenManager = createTokenManager({
     refreshFn,
     logger,
