@@ -17,7 +17,12 @@ describe("getLoginTicket", () => {
       if (callCount === 1) {
         return { ok: true, text: async () => "" };
       }
-      return { ok: false, status: 503, statusText: "Service Unavailable" };
+      return {
+        ok: false,
+        status: 503,
+        statusText: "Service Unavailable",
+        text: async () => "",
+      };
     }) as unknown as typeof globalThis.fetch;
 
     await expect(

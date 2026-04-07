@@ -1,17 +1,30 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import type { Logger } from "@kaiord/core";
 import { fetchOAuthConsumer } from "./oauth-consumer";
 
+const mockLogger: Logger = {
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+};
+
 describe("fetchOAuthConsumer", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("should return consumer key and secret on success", async () => {
     const mockFetch = vi.fn(async () => ({
       ok: true,
+      status: 200,
       json: async () => ({
         consumer_key: "my-key",
         consumer_secret: "my-secret",
       }),
     })) as unknown as typeof globalThis.fetch;
 
-    const result = await fetchOAuthConsumer(mockFetch);
+    const result = await fetchOAuthConsumer(mockFetch, mockLogger);
 
     expect(result).toStrictEqual({ key: "my-key", secret: "my-secret" });
   });
@@ -23,8 +36,13 @@ describe("fetchOAuthConsumer", () => {
       statusText: "Service Unavailable",
     })) as unknown as typeof globalThis.fetch;
 
-    await expect(fetchOAuthConsumer(mockFetch)).rejects.toThrow(
+    await expect(fetchOAuthConsumer(mockFetch, mockLogger)).rejects.toThrow(
       "Failed to fetch OAuth consumer"
+    );
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      "[SSO] OAuth consumer fetch failed",
+      { status: 503 }
     );
   });
 });

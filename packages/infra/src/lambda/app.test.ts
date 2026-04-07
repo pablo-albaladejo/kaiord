@@ -128,6 +128,17 @@ describe("POST /push — error classification", () => {
     expect(res.status).toBe(401);
   });
 
+  it("should return 401 for ServiceAuthError regardless of message", async () => {
+    const err = new Error("Failed to fetch OAuth consumer: 404 Not Found");
+    err.name = "ServiceAuthError";
+    mockPush.mockRejectedValueOnce(err);
+    const app = createApp();
+
+    const res = await post(app, validBody);
+
+    expect(res.status).toBe(401);
+  });
+
   it("should return 429 on rate limit", async () => {
     mockPush.mockRejectedValueOnce(
       new Error("OAuth1 token request failed: 429 Too Many Requests")

@@ -2,7 +2,10 @@ import { afterAll, beforeEach, describe, expect, it, vi } from "vitest";
 import type { MockedFunction } from "vitest";
 
 const mockSetGlobalDispatcher = vi.fn();
-const mockSocksDispatcher = vi.fn().mockReturnValue({ mock: true });
+const mockDestroy = vi.fn();
+const mockSocksDispatcher = vi
+  .fn()
+  .mockReturnValue({ mock: true, destroy: mockDestroy });
 
 vi.mock("undici", () => ({
   setGlobalDispatcher: mockSetGlobalDispatcher,
@@ -37,16 +40,28 @@ describe("enableSocksProxy", () => {
       host: "localhost",
       port: 1055,
     });
-    expect(mockSetGlobalDispatcher).toHaveBeenCalledWith({ mock: true });
+    expect(mockSetGlobalDispatcher).toHaveBeenCalledWith(
+      expect.objectContaining({ mock: true })
+    );
   });
 
-  it("should only configure once", async () => {
+  it("should recreate dispatcher on every call to avoid stale connections", async () => {
     const { enableSocksProxy } = await import("./proxy-fetch");
 
     enableSocksProxy();
     enableSocksProxy();
 
-    expect(mockSetGlobalDispatcher).toHaveBeenCalledTimes(1);
+    expect(mockSetGlobalDispatcher).toHaveBeenCalledTimes(2);
+  });
+
+  it("should destroy previous dispatcher before creating a new one", async () => {
+    const { enableSocksProxy } = await import("./proxy-fetch");
+
+    enableSocksProxy();
+    expect(mockDestroy).not.toHaveBeenCalled();
+
+    enableSocksProxy();
+    expect(mockDestroy).toHaveBeenCalledTimes(1);
   });
 });
 

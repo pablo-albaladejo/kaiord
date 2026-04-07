@@ -1,4 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
+import type { Logger } from "@kaiord/core";
 import { getOAuth1Token, exchangeOAuth2 } from "./sso-oauth";
 import type { OAuthConsumer } from "./types";
 
@@ -10,14 +11,27 @@ vi.mock("./oauth-signer", () => ({
 
 const consumer: OAuthConsumer = { key: "ck", secret: "cs" };
 
+const mockLogger: Logger = {
+  debug: vi.fn(),
+  info: vi.fn(),
+  warn: vi.fn(),
+  error: vi.fn(),
+};
+
 describe("getOAuth1Token", () => {
   it("should return OAuth1 tokens on success", async () => {
     const mockFetch = vi.fn(async () => ({
       ok: true,
+      status: 200,
       text: async () => "oauth_token=tok1&oauth_token_secret=sec1",
     })) as unknown as typeof globalThis.fetch;
 
-    const result = await getOAuth1Token("ticket-123", consumer, mockFetch);
+    const result = await getOAuth1Token(
+      "ticket-123",
+      consumer,
+      mockFetch,
+      mockLogger
+    );
 
     expect(result).toStrictEqual({
       oauth_token: "tok1",
@@ -33,18 +47,19 @@ describe("getOAuth1Token", () => {
     })) as unknown as typeof globalThis.fetch;
 
     await expect(
-      getOAuth1Token("ticket-123", consumer, mockFetch)
+      getOAuth1Token("ticket-123", consumer, mockFetch, mockLogger)
     ).rejects.toThrow("OAuth1 token request failed");
   });
 
   it("should throw when oauth_token is missing from response", async () => {
     const mockFetch = vi.fn(async () => ({
       ok: true,
+      status: 200,
       text: async () => "some_other_param=value",
     })) as unknown as typeof globalThis.fetch;
 
     await expect(
-      getOAuth1Token("ticket-123", consumer, mockFetch)
+      getOAuth1Token("ticket-123", consumer, mockFetch, mockLogger)
     ).rejects.toThrow("OAuth1 token exchange failed");
   });
 });
@@ -55,6 +70,7 @@ describe("exchangeOAuth2", () => {
   it("should return OAuth2 token with computed expires_at", async () => {
     const mockFetch = vi.fn(async () => ({
       ok: true,
+      status: 200,
       json: async () => ({
         access_token: "bearer",
         refresh_token: "rt",
@@ -64,7 +80,12 @@ describe("exchangeOAuth2", () => {
       }),
     })) as unknown as typeof globalThis.fetch;
 
-    const result = await exchangeOAuth2(oauth1, consumer, mockFetch);
+    const result = await exchangeOAuth2(
+      oauth1,
+      consumer,
+      mockFetch,
+      mockLogger
+    );
 
     expect(result.access_token).toBe("bearer");
     expect(result.expires_at).toBeGreaterThan(Math.floor(Date.now() / 1000));
@@ -77,8 +98,8 @@ describe("exchangeOAuth2", () => {
       statusText: "Internal Server Error",
     })) as unknown as typeof globalThis.fetch;
 
-    await expect(exchangeOAuth2(oauth1, consumer, mockFetch)).rejects.toThrow(
-      "OAuth2 exchange failed"
-    );
+    await expect(
+      exchangeOAuth2(oauth1, consumer, mockFetch, mockLogger)
+    ).rejects.toThrow("OAuth2 exchange failed");
   });
 });
