@@ -33,8 +33,8 @@ export const logLoginHtmlDiagnostics = (
   const title = extractTitle(html);
   const size = new TextEncoder().encode(html).byteLength;
   logger.debug("[SSO] Page title", { title });
-  if (/mfa/i.test(html)) logger.warn("[SSO] MFA detected");
-  if (/error/i.test(html)) logger.warn("[SSO] Error indicators found");
+  if (/\bmfa\b/i.test(html)) logger.warn("[SSO] MFA detected");
+  if (/\berror\b/i.test(html)) logger.warn("[SSO] Error indicators found");
   if (ticketFound) {
     logger.debug("[SSO] Ticket found in HTML");
   } else {

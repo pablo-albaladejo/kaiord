@@ -1,7 +1,8 @@
+import type { Context, MiddlewareHandler } from "hono";
 import { Hono } from "hono";
 import { bodyLimit } from "hono/body-limit";
 import { requestId } from "hono/request-id";
-import type { MiddlewareHandler } from "hono";
+import type { PushRequest } from "./request-schema";
 import { pushRequestSchema } from "./request-schema";
 import { pushToGarmin } from "./garmin-push";
 
@@ -21,6 +22,57 @@ export const isAuthError = (error: unknown): boolean => {
 export const isRateLimited = (error: unknown): boolean => {
   const msg = error instanceof Error ? error.message : "";
   return msg.includes("429") || msg.includes("Too Many Requests");
+};
+
+type ErrorTuple = [message: string, status: 401 | 429 | 500];
+
+const parsePushBody = async (
+  c: Context
+): Promise<PushRequest | Response> => {
+  let body: unknown;
+  try {
+    body = await c.req.json();
+  } catch {
+    return c.json(
+      { error: "Invalid request: check KRD and credentials" },
+      400
+    );
+  }
+  const validation = pushRequestSchema.safeParse(body);
+  if (!validation.success) {
+    return c.json(
+      { error: "Invalid request: check KRD and credentials" },
+      400
+    );
+  }
+  return validation.data;
+};
+
+const mapPushError = (
+  error: unknown,
+  requestId: string
+): ErrorTuple => {
+  if (isAuthError(error)) {
+    console.error("Garmin auth failed", {
+      requestId,
+      errorType:
+        error instanceof Error ? error.constructor.name : "unknown",
+      errorMessage:
+        error instanceof Error ? error.message.slice(0, 200) : "unknown",
+    });
+    return ["Garmin authentication failed", 401];
+  }
+  if (isRateLimited(error)) {
+    return ["Garmin rate limited, try again later", 429];
+  }
+  console.error("Garmin push failed", {
+    requestId,
+    errorType:
+      error instanceof Error ? error.constructor.name : "unknown",
+    errorMessage:
+      error instanceof Error ? error.message.slice(0, 100) : "unknown",
+  });
+  return ["Garmin API error", 500];
 };
 
 const passthrough: MiddlewareHandler = async (_c, next) => next();
@@ -46,52 +98,16 @@ export const createApp = (options?: AppOptions) => {
     }),
     options?.onBeforePush ?? passthrough,
     async (c) => {
-      let body: unknown;
-      try {
-        body = await c.req.json();
-      } catch {
-        return c.json(
-          { error: "Invalid request: check KRD and credentials" },
-          400
-        );
-      }
-      const validation = pushRequestSchema.safeParse(body);
-      if (!validation.success) {
-        return c.json(
-          { error: "Invalid request: check KRD and credentials" },
-          400
-        );
-      }
+      const parsed = await parsePushBody(c);
+      if (parsed instanceof Response) return parsed;
 
       const reqId = c.get("requestId");
       try {
-        const result = await pushToGarmin(
-          validation.data.krd,
-          validation.data.garmin
-        );
+        const result = await pushToGarmin(parsed.krd, parsed.garmin);
         return c.json(result, 200);
       } catch (error: unknown) {
-        if (isAuthError(error)) {
-          console.error("Garmin auth failed", {
-            requestId: reqId,
-            errorType:
-              error instanceof Error ? error.constructor.name : "unknown",
-            errorMessage:
-              error instanceof Error ? error.message.slice(0, 200) : "unknown",
-          });
-          return c.json({ error: "Garmin authentication failed" }, 401);
-        }
-        if (isRateLimited(error)) {
-          return c.json({ error: "Garmin rate limited, try again later" }, 429);
-        }
-        console.error("Garmin push failed", {
-          requestId: reqId,
-          errorType:
-            error instanceof Error ? error.constructor.name : "unknown",
-          errorMessage:
-            error instanceof Error ? error.message.slice(0, 100) : "unknown",
-        });
-        return c.json({ error: "Garmin API error" }, 500);
+        const [msg, status] = mapPushError(error, reqId);
+        return c.json({ error: msg }, status);
       }
     }
   );

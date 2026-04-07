@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Logger } from "@kaiord/core";
 import { fetchOAuthConsumer } from "./oauth-consumer";
 
@@ -10,6 +10,10 @@ const mockLogger: Logger = {
 };
 
 describe("fetchOAuthConsumer", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
   it("should return consumer key and secret on success", async () => {
     const mockFetch = vi.fn(async () => ({
       ok: true,
@@ -34,6 +38,11 @@ describe("fetchOAuthConsumer", () => {
 
     await expect(fetchOAuthConsumer(mockFetch, mockLogger)).rejects.toThrow(
       "Failed to fetch OAuth consumer"
+    );
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      "[SSO] OAuth consumer fetch failed",
+      { status: 503 }
     );
   });
 });

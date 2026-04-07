@@ -24,7 +24,7 @@ export const getOAuth1Token = async (
   const res = await fetchFn(url, {
     headers: { ...headers, "User-Agent": USER_AGENT_MOBILE },
   });
-  logger.debug("[SSO] Requesting OAuth1 token", { status: res.status });
+  logger.debug("[SSO] OAuth1 token response", { status: res.status });
   if (!res.ok) {
     throw createServiceAuthError(
       `OAuth1 token request failed: ${res.status} ${res.statusText}`
@@ -64,7 +64,7 @@ export const exchangeOAuth2 = async (
       "Content-Type": "application/x-www-form-urlencoded",
     },
   });
-  logger.debug("[SSO] Exchanging OAuth2 token", { status: res.status });
+  logger.debug("[SSO] OAuth2 exchange response", { status: res.status });
   if (!res.ok) {
     throw createServiceAuthError(
       `OAuth2 exchange failed: ${res.status} ${res.statusText}`

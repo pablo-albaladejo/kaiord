@@ -22,15 +22,15 @@ const fetchCsrfToken = async (
     gauthHost: GARMIN_SSO_EMBED,
   });
   const csrfRes = await fetchFn(`${SIGNIN_URL}?${signinParams}`);
+  const csrfHtml = await csrfRes.text();
+  const csrfMatch = CSRF_RE.exec(csrfHtml);
+  const size = new TextEncoder().encode(csrfHtml).byteLength;
+  logCsrfResult(logger, csrfRes.status, size, !!csrfMatch);
   if (!csrfRes.ok) {
     throw createServiceAuthError(
       `SSO login page returned ${csrfRes.status}: ${csrfRes.statusText}`
     );
   }
-  const csrfHtml = await csrfRes.text();
-  const csrfMatch = CSRF_RE.exec(csrfHtml);
-  const size = new TextEncoder().encode(csrfHtml).byteLength;
-  logCsrfResult(logger, csrfRes.status, size, !!csrfMatch);
   if (!csrfMatch) {
     throw createServiceAuthError("CSRF token not found on login page");
   }
@@ -48,7 +48,13 @@ export const getLoginTicket = async (
     locale: "en",
     service: GC_MODERN,
   });
-  await fetchFn(`${GARMIN_SSO_EMBED}?${embedParams}`);
+  const embedRes = await fetchFn(`${GARMIN_SSO_EMBED}?${embedParams}`);
+  logger.debug("[SSO] Embed bootstrap", { status: embedRes.status });
+  if (!embedRes.ok) {
+    throw createServiceAuthError(
+      `SSO embed bootstrap failed: ${embedRes.status} ${embedRes.statusText}`
+    );
+  }
 
   const csrf = await fetchCsrfToken(fetchFn, logger);
   const { html: loginHtml } = await submitLogin({
