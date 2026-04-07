@@ -5,23 +5,35 @@ import { logCsrfResult, logLoginHtmlDiagnostics } from "./sso-html-diagnostics";
 import { submitLogin } from "./sso-submit";
 import { checkAccountLocked, checkPageTitle } from "./sso-validators";
 import type { FetchFn } from "./types";
-import { GARMIN_SSO_EMBED, GC_MODERN, SIGNIN_URL } from "./urls";
+import { GARMIN_SSO_EMBED, SIGNIN_URL, USER_AGENT_SSO } from "./urls";
 
 const CSRF_RE = /name="_csrf"\s+value="(.+?)"/;
 const TICKET_RE = /ticket=([^"]+)"/;
 
+const buildSigninParams = (): URLSearchParams =>
+  new URLSearchParams({
+    id: "gauth-widget",
+    embedWidget: "true",
+    gauthHost: GARMIN_SSO_EMBED,
+    service: GARMIN_SSO_EMBED,
+    source: GARMIN_SSO_EMBED,
+    redirectAfterAccountLoginUrl: GARMIN_SSO_EMBED,
+    redirectAfterAccountCreationUrl: GARMIN_SSO_EMBED,
+  });
+
 const fetchCsrfToken = async (
   fetchFn: FetchFn,
+  embedUrl: string,
   logger: Logger
 ): Promise<string> => {
   logger.debug("[SSO] Fetching CSRF token");
-  const signinParams = new URLSearchParams({
-    id: "gauth-widget",
-    embedWidget: "true",
-    locale: "en",
-    gauthHost: GARMIN_SSO_EMBED,
+  const signinParams = buildSigninParams();
+  const csrfRes = await fetchFn(`${SIGNIN_URL}?${signinParams}`, {
+    headers: {
+      "User-Agent": USER_AGENT_SSO,
+      Referer: embedUrl,
+    },
   });
-  const csrfRes = await fetchFn(`${SIGNIN_URL}?${signinParams}`);
   const csrfHtml = await csrfRes.text();
   const csrfMatch = CSRF_RE.exec(csrfHtml);
   const size = new TextEncoder().encode(csrfHtml).byteLength;
@@ -44,11 +56,14 @@ export const getLoginTicket = async (
   logger: Logger
 ): Promise<string> => {
   const embedParams = new URLSearchParams({
-    clientId: "GarminConnect",
-    locale: "en",
-    service: GC_MODERN,
+    id: "gauth-widget",
+    embedWidget: "true",
+    gauthHost: "https://sso.garmin.com/sso",
   });
-  const embedRes = await fetchFn(`${GARMIN_SSO_EMBED}?${embedParams}`);
+  const embedUrl = `${GARMIN_SSO_EMBED}?${embedParams}`;
+  const embedRes = await fetchFn(embedUrl, {
+    headers: { "User-Agent": USER_AGENT_SSO },
+  });
   logger.debug("[SSO] Embed bootstrap", { status: embedRes.status });
   if (!embedRes.ok) {
     throw createServiceAuthError(
@@ -56,7 +71,7 @@ export const getLoginTicket = async (
     );
   }
 
-  const csrf = await fetchCsrfToken(fetchFn, logger);
+  const csrf = await fetchCsrfToken(fetchFn, embedUrl, logger);
   const { html: loginHtml } = await submitLogin({
     username,
     password,

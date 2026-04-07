@@ -6,7 +6,7 @@ import {
   GARMIN_SSO_EMBED,
   GARMIN_SSO_ORIGIN,
   SIGNIN_URL,
-  USER_AGENT_BROWSER,
+  USER_AGENT_SSO,
 } from "./urls";
 
 export type LoginResult = { html: string; status: number };
@@ -23,8 +23,6 @@ const buildLoginParams = (): URLSearchParams =>
   new URLSearchParams({
     id: "gauth-widget",
     embedWidget: "true",
-    clientId: "GarminConnect",
-    locale: "en",
     gauthHost: GARMIN_SSO_EMBED,
     service: GARMIN_SSO_EMBED,
     source: GARMIN_SSO_EMBED,
@@ -45,10 +43,9 @@ export const submitLogin = async (input: LoginInput): Promise<LoginResult> => {
     method: "POST",
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Dnt: "1",
       Origin: GARMIN_SSO_ORIGIN,
-      Referer: SIGNIN_URL,
-      "User-Agent": USER_AGENT_BROWSER,
+      Referer: `${SIGNIN_URL}?${buildLoginParams()}`,
+      "User-Agent": USER_AGENT_SSO,
     },
     body: body.toString(),
   });
