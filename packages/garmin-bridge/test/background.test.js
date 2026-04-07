@@ -1,0 +1,125 @@
+import { describe, it, expect, beforeEach } from "vitest";
+
+const {
+  PROTOCOL_VERSION,
+  handleAction,
+  getCsrfToken,
+  checkSession,
+} = require("../background.js");
+
+describe("background.js", () => {
+  beforeEach(() => {
+    __resetChromeMock();
+  });
+
+  describe("PROTOCOL_VERSION", () => {
+    it("should be 1", () => {
+      expect(PROTOCOL_VERSION).toBe(1);
+    });
+  });
+
+  describe("getCsrfToken", () => {
+    it("returns null when no token stored", async () => {
+      const token = await getCsrfToken();
+
+      expect(token).toBeNull();
+    });
+
+    it("returns stored token", async () => {
+      await chrome.storage.session.set({ csrfToken: "test-token" });
+
+      const token = await getCsrfToken();
+
+      expect(token).toBe("test-token");
+    });
+  });
+
+  describe("handleAction", () => {
+    it("rejects unknown action", async () => {
+      await expect(handleAction({ action: "unknown" })).rejects.toThrow(
+        "Unknown action: unknown",
+      );
+    });
+
+    it("rejects push without gcn payload", async () => {
+      await expect(handleAction({ action: "push" })).rejects.toThrow(
+        "Missing gcn payload",
+      );
+    });
+
+    it("handles ping with no Garmin tab", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([]));
+
+      const result = await checkSession();
+
+      expect(result.csrfCaptured).toBe(false);
+      expect(result.gcApi.ok).toBe(false);
+    });
+
+    it("handles ping with CSRF token captured", async () => {
+      await chrome.storage.session.set({ csrfToken: "abc" });
+      chrome.tabs.query.mockImplementation((q, cb) => cb([]));
+
+      const result = await checkSession();
+
+      expect(result.csrfCaptured).toBe(true);
+    });
+
+    it("handles open-garmin action", async () => {
+      chrome.tabs.create.mockResolvedValue({ id: 42 });
+
+      const result = await handleAction({ action: "open-garmin" });
+
+      expect(chrome.tabs.create).toHaveBeenCalledWith({
+        url: "https://connect.garmin.com/modern/",
+      });
+      expect(result).toBeNull();
+    });
+
+    it("handles list with Garmin tab and successful response", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) =>
+        cb([{ id: 1 }]),
+      );
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({
+          ok: true,
+          status: 200,
+          data: [{ workoutId: 1, workoutName: "Test" }],
+        }),
+      );
+
+      const result = await handleAction({ action: "list" });
+
+      expect(result).toEqual([{ workoutId: 1, workoutName: "Test" }]);
+    });
+
+    it("handles list failure", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) =>
+        cb([{ id: 1 }]),
+      );
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: false, status: 403 }),
+      );
+
+      await expect(handleAction({ action: "list" })).rejects.toThrow(
+        "List failed: 403",
+      );
+    });
+
+    it("handles push with gcn payload", async () => {
+      const gcn = { workoutName: "My Workout" };
+      chrome.tabs.query.mockImplementation((q, cb) =>
+        cb([{ id: 1 }]),
+      );
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) => {
+        expect(msg.body).toEqual(gcn);
+        expect(msg.method).toBe("POST");
+        cb({ ok: true, status: 200, data: { workoutId: 123 } });
+      });
+
+      const result = await handleAction({ action: "push", gcn });
+
+      expect(result).toEqual({ workoutId: 123 });
+    });
+  });
+});

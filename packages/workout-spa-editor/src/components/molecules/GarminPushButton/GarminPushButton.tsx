@@ -1,27 +1,25 @@
 import { Upload } from "lucide-react";
 
 import { useGarminStore } from "../../../store/garmin-store";
-import { useSettingsDialogStore } from "../../../store/settings-dialog-store";
 import { Button } from "../../atoms/Button";
 import { PushFeedback } from "./PushFeedback";
 import { useGarminPush } from "./useGarminPush";
 
 export const GarminPushButton: React.FC = () => {
-  const onSettingsClick = useSettingsDialogStore((s) => s.show);
-  const {
-    push: pushState,
-    hasCredentials,
-    lambdaUrl,
-    setPush,
-  } = useGarminStore();
+  const { extensionInstalled, sessionActive, pushing, setPushing } =
+    useGarminStore();
   const { push } = useGarminPush();
-  const isLoading = pushState.status === "loading";
+  const isLoading = pushing.status === "loading";
 
-  if (!hasCredentials() || !lambdaUrl) {
+  if (!extensionInstalled) {
+    return null;
+  }
+
+  if (!sessionActive) {
     return (
-      <Button size="sm" variant="secondary" onClick={onSettingsClick}>
+      <Button size="sm" variant="secondary" disabled>
         <Upload className="h-4 w-4" />
-        Configure Garmin
+        Garmin (no session)
       </Button>
     );
   }
@@ -36,12 +34,11 @@ export const GarminPushButton: React.FC = () => {
         disabled={isLoading}
       >
         <Upload className="h-4 w-4" />
-        Push to Garmin
+        Send to Garmin
       </Button>
       <PushFeedback
-        push={pushState}
-        onReset={() => setPush({ status: "idle" })}
-        onSettingsClick={onSettingsClick}
+        push={pushing}
+        onReset={() => setPushing({ status: "idle" })}
       />
     </div>
   );
