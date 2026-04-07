@@ -19,8 +19,7 @@ const ALLOWED = [
 
 const isAllowed = (method, path) =>
   ALLOWED.some(
-    (rule) =>
-      rule.method === (method || "GET") && rule.pattern.test(path),
+    (rule) => rule.method === (method || "GET") && rule.pattern.test(path)
   );
 
 const handleGarminFetch = async (msg) => {

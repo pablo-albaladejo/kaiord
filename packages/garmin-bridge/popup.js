@@ -43,7 +43,7 @@ $("list-btn").addEventListener("click", () => {
     }
     el.innerHTML = workouts
       .map(
-        (w) => `<div class="workout"><b>${w.workoutName || w.name}</b></div>`,
+        (w) => `<div class="workout"><b>${w.workoutName || w.name}</b></div>`
       )
       .join("");
   });

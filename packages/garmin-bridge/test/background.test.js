@@ -37,13 +37,13 @@ describe("background.js", () => {
   describe("handleAction", () => {
     it("rejects unknown action", async () => {
       await expect(handleAction({ action: "unknown" })).rejects.toThrow(
-        "Unknown action: unknown",
+        "Unknown action: unknown"
       );
     });
 
     it("rejects push without gcn payload", async () => {
       await expect(handleAction({ action: "push" })).rejects.toThrow(
-        "Missing gcn payload",
+        "Missing gcn payload"
       );
     });
 
@@ -77,15 +77,13 @@ describe("background.js", () => {
     });
 
     it("handles list with Garmin tab and successful response", async () => {
-      chrome.tabs.query.mockImplementation((q, cb) =>
-        cb([{ id: 1 }]),
-      );
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
       chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
         cb({
           ok: true,
           status: 200,
           data: [{ workoutId: 1, workoutName: "Test" }],
-        }),
+        })
       );
 
       const result = await handleAction({ action: "list" });
@@ -94,23 +92,19 @@ describe("background.js", () => {
     });
 
     it("handles list failure", async () => {
-      chrome.tabs.query.mockImplementation((q, cb) =>
-        cb([{ id: 1 }]),
-      );
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
       chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
-        cb({ ok: false, status: 403 }),
+        cb({ ok: false, status: 403 })
       );
 
       await expect(handleAction({ action: "list" })).rejects.toThrow(
-        "List failed: 403",
+        "List failed: 403"
       );
     });
 
     it("handles push with gcn payload", async () => {
       const gcn = { workoutName: "My Workout" };
-      chrome.tabs.query.mockImplementation((q, cb) =>
-        cb([{ id: 1 }]),
-      );
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
       chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) => {
         expect(msg.body).toEqual(gcn);
         expect(msg.method).toBe("POST");

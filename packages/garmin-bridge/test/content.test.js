@@ -14,7 +14,7 @@ describe("content.js", () => {
 
     it("allows GET /workout-service/workouts with query params", () => {
       expect(
-        isAllowed("GET", "/workout-service/workouts?start=0&limit=20"),
+        isAllowed("GET", "/workout-service/workouts?start=0&limit=20")
       ).toBe(true);
     });
 
@@ -95,7 +95,7 @@ describe("content.js", () => {
             nk: "NT",
             "connect-csrf-token": "csrf-123",
           }),
-        }),
+        })
       );
     });
 
@@ -128,7 +128,7 @@ describe("content.js", () => {
           headers: expect.objectContaining({
             "Content-Type": "application/json",
           }),
-        }),
+        })
       );
     });
 

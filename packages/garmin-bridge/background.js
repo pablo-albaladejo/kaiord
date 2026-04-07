@@ -14,14 +14,14 @@ const GARMIN_DASHBOARD = "https://connect.garmin.com/modern/";
 chrome.webRequest.onBeforeSendHeaders.addListener(
   (details) => {
     const header = details.requestHeaders?.find(
-      (h) => h.name.toLowerCase() === "connect-csrf-token",
+      (h) => h.name.toLowerCase() === "connect-csrf-token"
     );
     if (header?.value) {
       chrome.storage.session.set({ csrfToken: header.value });
     }
   },
   { urls: [GARMIN_URL_PATTERN] },
-  ["requestHeaders"],
+  ["requestHeaders"]
 );
 
 const getCsrfToken = () =>
@@ -42,7 +42,7 @@ const garminFetch = async (path, method, body) => {
   const tab = await findGarminTab();
   if (!tab) {
     throw new Error(
-      "No Garmin Connect tab open. Open connect.garmin.com first.",
+      "No Garmin Connect tab open. Open connect.garmin.com first."
     );
   }
 
@@ -58,7 +58,7 @@ const garminFetch = async (path, method, body) => {
         } else {
           resolve(res);
         }
-      },
+      }
     );
   });
 };
@@ -72,7 +72,7 @@ const checkSession = async () => {
   try {
     const res = await garminFetch(
       "/workout-service/workouts?start=0&limit=1",
-      "GET",
+      "GET"
     );
     results.gcApi = res;
   } catch (e) {
@@ -85,7 +85,7 @@ const checkSession = async () => {
 const listWorkouts = async () => {
   const res = await garminFetch(
     "/workout-service/workouts?start=0&limit=20",
-    "GET",
+    "GET"
   );
   if (!res.ok) throw new Error(`List failed: ${res.status}`);
   return res.data;
@@ -142,7 +142,7 @@ chrome.runtime.onMessageExternal.addListener(
       .then((data) => sendResult(data, sendResponse))
       .catch((err) => sendError(err, sendResponse));
     return true;
-  },
+  }
 );
 
 // ── Internal messages (popup) ──
