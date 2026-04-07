@@ -40,13 +40,13 @@ describe("enableSocksProxy", () => {
     expect(mockSetGlobalDispatcher).toHaveBeenCalledWith({ mock: true });
   });
 
-  it("should only configure once", async () => {
+  it("should recreate dispatcher on every call to avoid stale connections", async () => {
     const { enableSocksProxy } = await import("./proxy-fetch");
 
     enableSocksProxy();
     enableSocksProxy();
 
-    expect(mockSetGlobalDispatcher).toHaveBeenCalledTimes(1);
+    expect(mockSetGlobalDispatcher).toHaveBeenCalledTimes(2);
   });
 });
 

@@ -4,17 +4,13 @@ import { socksDispatcher } from "fetch-socks";
 const SOCKS5_HOST = "localhost";
 const SOCKS5_PORT = 1055;
 
-let enabled = false;
-
 export const enableSocksProxy = (): void => {
-  if (enabled) return;
   const dispatcher = socksDispatcher({
     type: 5,
     host: SOCKS5_HOST,
     port: SOCKS5_PORT,
   });
   setGlobalDispatcher(dispatcher as unknown as Dispatcher);
-  enabled = true;
 };
 
 const sleep = (ms: number): Promise<void> =>
