@@ -71,7 +71,7 @@
     "@size-limit/file": "^12.0.1",
     "@types/node": "^25.5.2",
     "dependency-cruiser": "^17.0.0",
-    "eslint": "^9.15.0",
+    "eslint": "^10.2.0",
     "eslint-plugin-boundaries": "^6.0.2",
     "eslint-plugin-simple-import-sort": "^12.1.1",
     "husky": "^9.1.7",
