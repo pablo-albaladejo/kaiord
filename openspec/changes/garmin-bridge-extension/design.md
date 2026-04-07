@@ -31,6 +31,7 @@ A PoC browser extension (`poc-extension/`) proved that a Chrome extension can ma
 **Why**: Service worker `fetch()` cannot send browser cookies (forbidden header). Content scripts share the page origin, so the browser attaches all cookies automatically — including HttpOnly `JWT_WEB`.
 
 **Alternatives considered**:
+
 - Background script with manual Cookie header → `Cookie` is a forbidden header in `fetch()`
 - `declarativeNetRequest` to modify headers → overly complex, MV3 limitations
 - Page script injection → blocked by Garmin's CSP
@@ -46,6 +47,7 @@ A PoC browser extension (`poc-extension/`) proved that a Chrome extension can ma
 **Limitation**: `externally_connectable` is Chrome-only. Firefox does not support this API. V1 is scoped to Chrome; a `window.postMessage` fallback for Firefox is deferred to a follow-up change.
 
 **Alternatives considered**:
+
 - `window.postMessage` → requires content script on SPA origin, less secure, but needed for Firefox (future)
 - Native messaging → requires native host binary, defeats simplicity goal
 - Shared `localStorage` → not cross-origin
@@ -109,6 +111,7 @@ A PoC browser extension (`poc-extension/`) proved that a Chrome extension can ma
 **Why**: Principle of least privilege. Without an allowlist, any origin in `externally_connectable` could use the extension as a generic Garmin API proxy — deleting workouts, modifying profiles, accessing health data. The allowlist restricts to workout read/write operations only.
 
 **Allowed paths**:
+
 - `GET /workout-service/workouts` (with query params)
 - `POST /workout-service/workout`
 

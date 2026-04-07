@@ -1,7 +1,7 @@
 ## 1. Create @kaiord/garmin-bridge package
 
 - [ ] 1.1 Scaffold `packages/garmin-bridge/` with `package.json` (name, version, description, vitest as devDependency)
-- [ ] 1.2 Create `manifest.json` with MV3 permissions (`storage`, `tabs`, `webRequest`), `host_permissions` (`connect.garmin.com` only), `externally_connectable` (localhost:5173, localhost:5174, *.kaiord.com), content script at `document_start`, background service worker
+- [ ] 1.2 Create `manifest.json` with MV3 permissions (`storage`, `tabs`, `webRequest`), `host_permissions` (`connect.garmin.com` only), `externally_connectable` (localhost:5173, localhost:5174, \*.kaiord.com), content script at `document_start`, background service worker
 - [ ] 1.3 Implement `background.js` — CSRF capture via `webRequest.onBeforeSendHeaders` stored in `chrome.storage.session`, Garmin tab lookup, message routing to content script, external message API (`ping` with `protocolVersion: 1`, `list`, `push`, `open-garmin`). No console.log of token values.
 - [ ] 1.4 Implement `content.js` — capture pristine `fetch` reference at load, validate path/method against allowlist (`GET /workout-service/workouts`, `POST /workout-service/workout`), execute `fetch()` to `/gc-api/*` with required headers, 30s `AbortController` timeout, handle 204 No Content, return response shape `{ ok, status, data/body/error }`
 - [ ] 1.5 Create `popup.html` + `popup.js` — diagnostic UI showing CSRF status (boolean only), session check, workout list
