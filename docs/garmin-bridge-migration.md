@@ -16,6 +16,7 @@ npx cdk destroy --all
 ```
 
 Confirm the destruction when prompted. This removes:
+
 - API Gateway
 - Lambda function
 - CloudWatch alarms
