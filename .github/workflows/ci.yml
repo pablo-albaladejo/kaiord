@@ -530,8 +530,11 @@ jobs:
         run: |
           echo "--- tailscale status ---"
           tailscale status
-          echo "--- public IP ---"
+          echo "--- public IP (curl) ---"
           curl -s --max-time 10 https://ifconfig.me || echo "FAILED to reach ifconfig.me"
+          echo ""
+          echo "--- public IP (Node.js fetch) ---"
+          node -e "fetch('https://ifconfig.me',{headers:{'Accept':'text/plain'}}).then(r=>r.text()).then(console.log).catch(e=>console.error('FAILED:',e.message))"
 
       - name: Run Garmin Connect integration tests
         env:
