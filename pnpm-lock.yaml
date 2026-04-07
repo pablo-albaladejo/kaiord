@@ -37,8 +37,8 @@ importers:
         specifier: ^2.30.0
         version: 2.30.0(@types/node@25.5.2)
       '@eslint/js':
-        specifier: ^9.15.0
-        version: 9.39.1
+        specifier: ^9.39.4
+        version: 9.39.4
       '@fission-ai/openspec':
         specifier: ^1.2.0
         version: 1.2.0(@types/node@25.5.2)
@@ -536,8 +536,8 @@ importers:
         specifier: ^1.9.1
         version: 1.9.1(vite@8.0.5(@types/node@25.5.2)(esbuild@0.28.0)(jiti@2.6.1)(terser@5.46.1)(tsx@4.21.0)(yaml@2.8.3))
       '@eslint/js':
-        specifier: ^9.39.1
-        version: 9.39.1
+        specifier: ^9.39.4
+        version: 9.39.4
       '@fast-check/vitest':
         specifier: ^0.4.0
         version: 0.4.0(vitest@4.1.2)
@@ -1527,6 +1527,10 @@ packages:
 
   '@eslint/js@9.39.1':
     resolution: {integrity: sha512-S26Stp4zCy88tH94QbBv3XCuzRQiZ9yXofEILmglYTh/Ug/a9/umqvgFtYBAo3Lp0nsI/5/qH1CCrbdK3AP1Tw==}
+    engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@eslint/js@9.39.4':
+    resolution: {integrity: sha512-nE7DEIchvtiFTwBw4Lfbu59PG+kCofhjsKaCWzxTpt4lfRjRMqG6uMBzKXuEcyXhOHoUp9riAm7/aWYGhXZ9cw==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
 
   '@eslint/object-schema@2.1.7':
@@ -6549,6 +6553,8 @@ snapshots:
       - supports-color
 
   '@eslint/js@9.39.1': {}
+
+  '@eslint/js@9.39.4': {}
 
   '@eslint/object-schema@2.1.7': {}
 
