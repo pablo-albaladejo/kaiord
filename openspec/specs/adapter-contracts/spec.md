@@ -1,5 +1,5 @@
-> Synced: 2026-04-03
-> Updated: 2026-04-03 — synced garmin-connect auth refactor (TokenManager, retry, two fetch paths)
+> Synced: 2026-04-07
+> Updated: 2026-04-07 — synced SSO flow alignment (GCM-iOS UA, no clientId, embed params)
 
 # Adapter Contracts
 
@@ -67,6 +67,17 @@ API adapters SHALL separate concerns into:
 API adapters SHALL depend on `@kaiord/core` and MAY depend on a corresponding format adapter when the API requires format conversion (e.g., `@kaiord/garmin-connect` depends on `@kaiord/garmin` to convert KRD→GCN before pushing to the Garmin Connect API).
 
 Token values (`access_token`, `oauth_token_secret`, `refresh_token`) SHALL NOT appear in log messages at any level.
+
+### Requirement: Garmin SSO Widget Flow
+
+The SSO login SHALL use the legacy widget flow (`/sso/embed` + `/sso/signin`) with the following constraints:
+
+- User-Agent SHALL be `GCM-iOS-5.7.2.1` (`USER_AGENT_SSO`) for all SSO steps (embed GET, signin GET, signin POST). Browser User-Agents trigger aggressive rate limiting.
+- The embed GET SHALL use params `id`, `embedWidget`, `gauthHost` only. It SHALL NOT include `clientId` or `locale` — these are rate-limit bucket keys.
+- The signin GET and POST SHALL include `service`, `source`, `redirectAfterAccountLoginUrl`, `redirectAfterAccountCreationUrl` params pointing to the embed URL.
+- The signin GET SHALL include `Referer` header pointing to the embed URL.
+- The signin POST SHALL NOT include `clientId` or `locale` in query params.
+- CSRF token SHALL be extracted from the signin HTML via regex and included in the POST body.
 
 ### Requirement: LLM Adapter Pattern
 
