@@ -510,6 +510,14 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v6
 
+      - name: Setup pnpm with caching
+        uses: ./.github/actions/setup-pnpm
+        with:
+          node-version: "20.x"
+
+      - name: Build dependencies
+        run: pnpm -r build
+
       - name: Setup Tailscale
         uses: tailscale/github-action@v4
         with:
@@ -522,21 +530,8 @@ jobs:
         run: |
           echo "--- tailscale status ---"
           tailscale status
-          echo "--- exit node check ---"
-          tailscale exit-node status 2>&1 || true
           echo "--- public IP ---"
           curl -s --max-time 10 https://ifconfig.me || echo "FAILED to reach ifconfig.me"
-          echo ""
-          echo "--- DNS resolution ---"
-          nslookup sso.garmin.com || true
-
-      - name: Setup pnpm with caching
-        uses: ./.github/actions/setup-pnpm
-        with:
-          node-version: "20.x"
-
-      - name: Build dependencies
-        run: pnpm -r build
 
       - name: Run Garmin Connect integration tests
         env:
