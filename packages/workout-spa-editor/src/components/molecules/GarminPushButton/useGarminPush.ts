@@ -5,15 +5,21 @@ import { useWorkoutStore } from "../../../store/workout-store";
 import { exportGcnWorkout } from "../../../utils/export-workout-formats";
 
 export const useGarminPush = () => {
-  const { pushWorkout, sessionActive } = useGarminStore();
+  const { pushWorkout, setPushing, sessionActive } = useGarminStore();
   const { currentWorkout } = useWorkoutStore();
 
   const push = useCallback(async () => {
     if (!currentWorkout || !sessionActive) return;
 
-    const gcn = await exportGcnWorkout(currentWorkout);
-    await pushWorkout(gcn);
-  }, [currentWorkout, sessionActive, pushWorkout]);
+    try {
+      const gcn = await exportGcnWorkout(currentWorkout);
+      await pushWorkout(gcn);
+    } catch (error: unknown) {
+      const message =
+        error instanceof Error ? error.message : "Conversion failed";
+      setPushing({ status: "error", message });
+    }
+  }, [currentWorkout, sessionActive, pushWorkout, setPushing]);
 
   return { push };
 };

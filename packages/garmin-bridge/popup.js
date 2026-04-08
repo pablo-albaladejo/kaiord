@@ -41,11 +41,15 @@ $("list-btn").addEventListener("click", () => {
       el.textContent = "No workouts found";
       return;
     }
-    el.innerHTML = workouts
-      .map(
-        (w) => `<div class="workout"><b>${w.workoutName || w.name}</b></div>`
-      )
-      .join("");
+    el.textContent = "";
+    for (const w of workouts) {
+      const div = document.createElement("div");
+      div.className = "workout";
+      const b = document.createElement("b");
+      b.textContent = w.workoutName || w.name;
+      div.appendChild(b);
+      el.appendChild(div);
+    }
   });
 });
 

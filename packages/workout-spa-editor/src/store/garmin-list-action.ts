@@ -29,5 +29,5 @@ export const createListAction =
       throw new Error(res.error ?? "List failed");
     }
 
-    return res.data as unknown[];
+    return Array.isArray(res.data) ? res.data : [];
   };

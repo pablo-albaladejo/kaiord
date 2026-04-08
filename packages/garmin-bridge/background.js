@@ -87,13 +87,13 @@ const listWorkouts = async () => {
     "/workout-service/workouts?start=0&limit=20",
     "GET"
   );
-  if (!res.ok) throw new Error(`List failed: ${res.status}`);
+  if (!res.ok) throw new Error(res.error || `List failed: ${res.status}`);
   return res.data;
 };
 
 const pushWorkout = async (gcn) => {
   const res = await garminFetch("/workout-service/workout", "POST", gcn);
-  if (!res.ok) throw new Error(`Push failed: ${res.status}`);
+  if (!res.ok) throw new Error(res.error || `Push failed: ${res.status}`);
   return res.data;
 };
 

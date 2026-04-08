@@ -41,6 +41,8 @@ export const GarminStatus: React.FC<GarminStatusProps> = ({
         Connected to Garmin Connect via extension.
       </p>
     )}
-    {lastError && <p className="text-red-600 dark:text-red-400">{lastError}</p>}
+    {lastError && !sessionActive && (
+      <p className="text-red-600 dark:text-red-400">{lastError}</p>
+    )}
   </div>
 );
