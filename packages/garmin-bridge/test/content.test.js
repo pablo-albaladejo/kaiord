@@ -2,9 +2,69 @@ import { describe, it, expect, beforeEach } from "vitest";
 
 const { isAllowed, handleGarminFetch } = require("../content.js");
 
+const onMessageCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
+
 describe("content.js", () => {
   beforeEach(() => {
     __resetChromeMock();
+  });
+
+  describe("onMessage listener", () => {
+    it("returns true for garmin-fetch action (async response)", () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve([]),
+      });
+      const sendResponse = vi.fn();
+
+      const result = onMessageCb(
+        {
+          action: "garmin-fetch",
+          path: "/workout-service/workouts",
+          method: "GET",
+        },
+        {},
+        sendResponse,
+      );
+
+      expect(result).toBe(true);
+    });
+
+    it("calls sendResponse with fetch result", async () => {
+      fetch.mockResolvedValue({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve([{ workoutId: 1 }]),
+      });
+      const sendResponse = vi.fn();
+
+      onMessageCb(
+        {
+          action: "garmin-fetch",
+          path: "/workout-service/workouts",
+          method: "GET",
+        },
+        {},
+        sendResponse,
+      );
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      expect(sendResponse).toHaveBeenCalledWith({
+        ok: true,
+        status: 200,
+        data: [{ workoutId: 1 }],
+      });
+    });
+
+    it("ignores non-garmin-fetch messages", () => {
+      const sendResponse = vi.fn();
+
+      const result = onMessageCb({ action: "other" }, {}, sendResponse);
+
+      expect(result).toBeUndefined();
+      expect(sendResponse).not.toHaveBeenCalled();
+    });
   });
 
   describe("isAllowed", () => {

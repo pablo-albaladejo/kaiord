@@ -1,11 +1,18 @@
 import { describe, it, expect, beforeEach } from "vitest";
 
+// Capture listener callbacks registered at import time (before any reset)
 const {
   PROTOCOL_VERSION,
   handleAction,
   getCsrfToken,
   checkSession,
 } = require("../background.js");
+
+const externalCb =
+  chrome.runtime.onMessageExternal.addListener.mock.calls[0][0];
+const internalCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
+const webRequestCb =
+  chrome.webRequest.onBeforeSendHeaders.addListener.mock.calls[0][0];
 
 describe("background.js", () => {
   beforeEach(() => {
@@ -34,16 +41,105 @@ describe("background.js", () => {
     });
   });
 
+  describe("webRequest listener", () => {
+    it("captures CSRF token from request headers", () => {
+      webRequestCb({
+        requestHeaders: [
+          { name: "connect-csrf-token", value: "csrf-abc" },
+        ],
+      });
+
+      expect(chrome.storage.session.set).toHaveBeenCalledWith({
+        csrfToken: "csrf-abc",
+      });
+    });
+
+    it("ignores requests without CSRF header", () => {
+      webRequestCb({
+        requestHeaders: [{ name: "content-type", value: "text/html" }],
+      });
+
+      expect(chrome.storage.session.set).not.toHaveBeenCalled();
+    });
+
+    it("ignores requests with no headers", () => {
+      webRequestCb({});
+
+      expect(chrome.storage.session.set).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("onMessageExternal listener", () => {
+    it("returns true for async response", () => {
+      const sendResponse = vi.fn();
+
+      const result = externalCb({ action: "ping" }, {}, sendResponse);
+
+      expect(result).toBe(true);
+    });
+
+    it("sends success result on resolved action", async () => {
+      chrome.tabs.create.mockResolvedValue({ id: 1 });
+      const sendResponse = vi.fn();
+
+      externalCb({ action: "open-garmin" }, {}, sendResponse);
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      expect(sendResponse).toHaveBeenCalledWith({
+        ok: true,
+        protocolVersion: 1,
+        data: null,
+      });
+    });
+
+    it("sends error result on rejected action", async () => {
+      const sendResponse = vi.fn();
+
+      externalCb({ action: "unknown" }, {}, sendResponse);
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      expect(sendResponse).toHaveBeenCalledWith({
+        ok: false,
+        protocolVersion: 1,
+        error: "Unknown action: unknown",
+      });
+    });
+  });
+
+  describe("onMessage listener", () => {
+    it("returns true for async response", () => {
+      const sendResponse = vi.fn();
+
+      const result = internalCb({ action: "ping" }, {}, sendResponse);
+
+      expect(result).toBe(true);
+    });
+
+    it("sends result to popup", async () => {
+      chrome.tabs.create.mockResolvedValue({ id: 1 });
+      const sendResponse = vi.fn();
+
+      internalCb({ action: "open-garmin" }, {}, sendResponse);
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      expect(sendResponse).toHaveBeenCalledWith({
+        ok: true,
+        protocolVersion: 1,
+        data: null,
+      });
+    });
+  });
+
   describe("handleAction", () => {
     it("rejects unknown action", async () => {
       await expect(handleAction({ action: "unknown" })).rejects.toThrow(
-        "Unknown action: unknown"
+        "Unknown action: unknown",
       );
     });
 
     it("rejects push without gcn payload", async () => {
       await expect(handleAction({ action: "push" })).rejects.toThrow(
-        "Missing gcn payload"
+        "Missing gcn payload",
       );
     });
 
@@ -83,7 +179,7 @@ describe("background.js", () => {
           ok: true,
           status: 200,
           data: [{ workoutId: 1, workoutName: "Test" }],
-        })
+        }),
       );
 
       const result = await handleAction({ action: "list" });
@@ -91,14 +187,25 @@ describe("background.js", () => {
       expect(result).toEqual([{ workoutId: 1, workoutName: "Test" }]);
     });
 
-    it("handles list failure", async () => {
+    it("handles list failure with error message", async () => {
       chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
       chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
-        cb({ ok: false, status: 403 })
+        cb({ ok: false, error: "Blocked: disallowed path or method" }),
       );
 
       await expect(handleAction({ action: "list" })).rejects.toThrow(
-        "List failed: 403"
+        "Blocked: disallowed path or method",
+      );
+    });
+
+    it("handles list failure with status code", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: false, status: 403 }),
+      );
+
+      await expect(handleAction({ action: "list" })).rejects.toThrow(
+        "List failed: 403",
       );
     });
 
