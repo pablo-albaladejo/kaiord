@@ -39,7 +39,6 @@ jobs:
       cli-changed: ${{ steps.changes.outputs.cli-changed }}
       mcp-changed: ${{ steps.changes.outputs.mcp-changed }}
       ai-changed: ${{ steps.changes.outputs.ai-changed }}
-      infra-changed: ${{ steps.changes.outputs.infra-changed }}
       frontend-changed: ${{ steps.changes.outputs.frontend-changed }}
       should-test: ${{ steps.changes.outputs.should-test }}
     steps:
@@ -71,8 +70,8 @@ jobs:
               - 'packages/mcp/**'
             ai:
               - 'packages/ai/**'
-            infra:
-              - 'packages/infra/**'
+            garmin_bridge:
+              - 'packages/garmin-bridge/**'
             frontend:
               - 'packages/workout-spa-editor/**'
             root_deps:
@@ -161,14 +160,6 @@ jobs:
             echo "ai-changed=false" >> $GITHUB_OUTPUT
           fi
 
-          # Infra package changes
-          if [[ "${{ steps.changed-files.outputs.infra_any_changed }}" == "true" ]] || \
-             [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
-            echo "infra-changed=true" >> $GITHUB_OUTPUT
-          else
-            echo "infra-changed=false" >> $GITHUB_OUTPUT
-          fi
-
           # Frontend package changes
           if [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "true" ]] || \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "true" ]]; then
@@ -189,7 +180,7 @@ jobs:
              [[ "${{ steps.changed-files.outputs.cli_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.mcp_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.ai_any_changed }}" == "false" ]] && \
-             [[ "${{ steps.changed-files.outputs.infra_any_changed }}" == "false" ]] && \
+             [[ "${{ steps.changed-files.outputs.garmin_bridge_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.frontend_any_changed }}" == "false" ]] && \
              [[ "${{ steps.changed-files.outputs.root_deps_any_changed }}" == "false" ]]; then
             echo "should-test=false" >> $GITHUB_OUTPUT
@@ -208,7 +199,6 @@ jobs:
           echo "CLI changed: ${{ steps.changes.outputs.cli-changed }}"
           echo "MCP changed: ${{ steps.changes.outputs.mcp-changed }}"
           echo "AI changed: ${{ steps.changes.outputs.ai-changed }}"
-          echo "Infra changed: ${{ steps.changes.outputs.infra-changed }}"
           echo "Frontend changed: ${{ steps.changes.outputs.frontend-changed }}"
           echo "Should test: ${{ steps.changes.outputs.should-test }}"
 
@@ -273,7 +263,7 @@ jobs:
             "garmin-connect",
             "mcp",
             "ai",
-            "infra",
+            "garmin-bridge",
           ]
     steps:
       - name: Checkout code
@@ -305,9 +295,6 @@ jobs:
       - name: Check coverage threshold
         run: |
           THRESHOLD=80
-          if [ "${{ matrix.package }}" = "infra" ]; then
-            THRESHOLD=70
-          fi
           node .github/scripts/check-coverage.js ./packages/${{ matrix.package }}/coverage/coverage-final.json $THRESHOLD
 
       - name: Upload coverage artifact
@@ -496,52 +483,6 @@ jobs:
           path: round-trip-output.txt
           retention-days: 30
 
-  integration-garmin:
-    runs-on: ubuntu-latest
-    needs: [detect-changes, build]
-    concurrency:
-      group: garmin-integration
-      cancel-in-progress: false
-    if: |
-      needs.build.result == 'success' &&
-      needs.detect-changes.outputs.should-test == 'true' &&
-      (needs.detect-changes.outputs.garmin-connect-changed == 'true' || github.ref == 'refs/heads/main')
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
-
-      - name: Setup pnpm with caching
-        uses: ./.github/actions/setup-pnpm
-        with:
-          node-version: "20.x"
-
-      - name: Build dependencies
-        run: pnpm -r build
-
-      - name: Setup Tailscale
-        uses: tailscale/github-action@v4
-        with:
-          oauth-client-id: ${{ secrets.TS_OAUTH_CLIENT_ID }}
-          oauth-secret: ${{ secrets.TS_OAUTH_SECRET }}
-          tags: tag:ci
-          args: --exit-node=${{ secrets.TS_EXIT_NODE }} --exit-node-allow-lan-access
-
-      - name: Verify Tailscale exit node
-        run: |
-          echo "--- tailscale status ---"
-          tailscale status
-          echo "--- public IP (curl) ---"
-          curl -s --max-time 10 https://ifconfig.me || echo "FAILED to reach ifconfig.me"
-          echo ""
-          echo "--- public IP (Node.js fetch) ---"
-          node -e "fetch('https://ifconfig.me',{headers:{'Accept':'text/plain'}}).then(r=>r.text()).then(console.log).catch(e=>console.error('FAILED:',e.message))"
-
-      - name: Run Garmin Connect integration tests
-        env:
-          GARMIN_TEST_EMAIL: ${{ secrets.GARMIN_TEST_EMAIL }}
-          GARMIN_TEST_PASSWORD: ${{ secrets.GARMIN_TEST_PASSWORD }}
-        run: pnpm --filter @kaiord/garmin-connect test:integration
-
   e2e-frontend:
     runs-on: ubuntu-latest
     needs: [detect-changes, build]
@@ -651,7 +592,6 @@ jobs:
         e2e-frontend,
         build,
         round-trip,
-        integration-garmin,
       ]
     if: |
       always() &&
@@ -663,8 +603,7 @@ jobs:
        needs.test-frontend.result == 'failure' ||
        needs.e2e-frontend.result == 'failure' ||
        needs.build.result == 'failure' ||
-       needs.round-trip.result == 'failure' ||
-       needs.integration-garmin.result == 'failure')
+       needs.round-trip.result == 'failure')
     permissions:
       issues: write
     steps:
@@ -698,10 +637,6 @@ jobs:
             if ('${{ needs.round-trip.result }}' === 'failure') {
               failedJobs.push('Round-trip Tests');
             }
-            if ('${{ needs.integration-garmin.result }}' === 'failure') {
-              failedJobs.push('Integration (Garmin Connect)');
-            }
-
             const title = `🚨 CI Failure on main branch`;
 
             const body = `## CI Workflow Failed on Main Branch

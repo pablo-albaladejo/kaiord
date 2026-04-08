@@ -1,0 +1,14 @@
+{
+  "name": "@kaiord/garmin-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome extension that bridges the Kaiord SPA to Garmin Connect via the user's web session",
+  "scripts": {
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.2"
+  }
+}

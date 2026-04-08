@@ -19,6 +19,6 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@kaiord/workout-spa-editor", "@kaiord/infra"],
+  "ignore": ["@kaiord/workout-spa-editor", "@kaiord/garmin-bridge"],
   "tagFormat": "${packageName}@${version}"
 }

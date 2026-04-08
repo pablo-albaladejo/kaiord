@@ -1,5 +1,4 @@
 import { useAiStore } from "../../../store/ai-store";
-import { useGarminStore } from "../../../store/garmin-store";
 import { Button } from "../../atoms/Button";
 
 const SECURE_STORAGE_PREFIX = "kaiord_secure_";
@@ -12,11 +11,9 @@ const clearSecureStorage = (): void => {
 
 export const PrivacyTab: React.FC = () => {
   const clearAi = () => useAiStore.setState({ providers: [] });
-  const clearGarmin = useGarminStore.getState().clearCredentials;
 
   const handleClearAll = () => {
     clearAi();
-    clearGarmin();
     clearSecureStorage();
   };
 
@@ -29,24 +26,12 @@ export const PrivacyTab: React.FC = () => {
         <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
           <li>We do not store your credentials on any server.</li>
           <li>
-            Garmin credentials are sent to the Lambda proxy only for the
-            duration of the push request.
+            Garmin integration uses a browser extension that piggybacks on your
+            existing Garmin Connect session. No credentials leave your browser.
           </li>
           <li>
             LLM API keys are sent directly to the provider (Anthropic, OpenAI,
             or Google) — they never pass through our infrastructure.
-          </li>
-          <li>
-            You can self-host the Lambda —{" "}
-            <a
-              href="https://github.com/pablo-albaladejo/kaiord/tree/main/packages/infra"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-blue-600 underline dark:text-blue-400"
-            >
-              see documentation
-            </a>
-            .
           </li>
           <li>
             We are not responsible for credential security on your device.
@@ -59,11 +44,10 @@ export const PrivacyTab: React.FC = () => {
           Data Management
         </h3>
         <Button variant="danger" size="sm" onClick={handleClearAll}>
-          Clear All Credentials
+          Clear All API Keys
         </Button>
         <p className="mt-2 text-xs text-gray-500 dark:text-gray-400">
-          This removes all stored API keys and Garmin credentials from your
-          browser.
+          This removes all stored API keys from your browser.
         </p>
       </section>
     </div>
