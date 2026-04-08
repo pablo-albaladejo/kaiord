@@ -6,7 +6,10 @@ import type { GarminStore } from "../../../store/garmin-store";
 const mockPushWorkout = vi.fn();
 const mockSetPushing = vi.fn();
 
-const garminState: Pick<GarminStore, "pushWorkout" | "setPushing" | "sessionActive"> = {
+const garminState: Pick<
+  GarminStore,
+  "pushWorkout" | "setPushing" | "sessionActive"
+> = {
   pushWorkout: mockPushWorkout,
   setPushing: mockSetPushing,
   sessionActive: true,
