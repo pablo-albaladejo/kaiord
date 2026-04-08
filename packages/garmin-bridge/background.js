@@ -82,18 +82,25 @@ const checkSession = async () => {
   return results;
 };
 
+const toBridgeError = (fallback, res) => {
+  const msg = res?.error ?? `${fallback}${res?.status ? `: ${res.status}` : ""}`;
+  const err = new Error(msg);
+  if (typeof res?.status === "number") err.status = res.status;
+  return err;
+};
+
 const listWorkouts = async () => {
   const res = await garminFetch(
     "/workout-service/workouts?start=0&limit=20",
     "GET"
   );
-  if (!res.ok) throw new Error(res.error || `List failed: ${res.status}`);
+  if (!res?.ok) throw toBridgeError("List failed", res);
   return res.data;
 };
 
 const pushWorkout = async (gcn) => {
   const res = await garminFetch("/workout-service/workout", "POST", gcn);
-  if (!res.ok) throw new Error(res.error || `Push failed: ${res.status}`);
+  if (!res?.ok) throw toBridgeError("Push failed", res);
   return res.data;
 };
 
@@ -130,7 +137,8 @@ const sendError = (err, sendResponse) => {
   sendResponse({
     ok: false,
     protocolVersion: PROTOCOL_VERSION,
-    error: err.message,
+    error: String(err?.message ?? err),
+    ...(typeof err?.status === "number" ? { status: err.status } : {}),
   });
 };
 

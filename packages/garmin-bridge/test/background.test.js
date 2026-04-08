@@ -207,6 +207,25 @@ describe("background.js", () => {
       );
     });
 
+    it("preserves status on error through sendError", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: false, status: 403, error: "Forbidden" })
+      );
+      const sendResponse = vi.fn();
+
+      externalCb({ action: "list" }, {}, sendResponse);
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      expect(sendResponse).toHaveBeenCalledWith(
+        expect.objectContaining({
+          ok: false,
+          error: "Forbidden",
+          status: 403,
+        })
+      );
+    });
+
     it("handles push with gcn payload", async () => {
       const gcn = { workoutName: "My Workout" };
       chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
