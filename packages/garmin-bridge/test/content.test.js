@@ -25,7 +25,7 @@ describe("content.js", () => {
           method: "GET",
         },
         {},
-        sendResponse,
+        sendResponse
       );
 
       expect(result).toBe(true);
@@ -46,7 +46,7 @@ describe("content.js", () => {
           method: "GET",
         },
         {},
-        sendResponse,
+        sendResponse
       );
       await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
 

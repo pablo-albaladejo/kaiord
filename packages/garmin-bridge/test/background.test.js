@@ -44,9 +44,7 @@ describe("background.js", () => {
   describe("webRequest listener", () => {
     it("captures CSRF token from request headers", () => {
       webRequestCb({
-        requestHeaders: [
-          { name: "connect-csrf-token", value: "csrf-abc" },
-        ],
+        requestHeaders: [{ name: "connect-csrf-token", value: "csrf-abc" }],
       });
 
       expect(chrome.storage.session.set).toHaveBeenCalledWith({
@@ -133,13 +131,13 @@ describe("background.js", () => {
   describe("handleAction", () => {
     it("rejects unknown action", async () => {
       await expect(handleAction({ action: "unknown" })).rejects.toThrow(
-        "Unknown action: unknown",
+        "Unknown action: unknown"
       );
     });
 
     it("rejects push without gcn payload", async () => {
       await expect(handleAction({ action: "push" })).rejects.toThrow(
-        "Missing gcn payload",
+        "Missing gcn payload"
       );
     });
 
@@ -179,7 +177,7 @@ describe("background.js", () => {
           ok: true,
           status: 200,
           data: [{ workoutId: 1, workoutName: "Test" }],
-        }),
+        })
       );
 
       const result = await handleAction({ action: "list" });
@@ -190,22 +188,22 @@ describe("background.js", () => {
     it("handles list failure with error message", async () => {
       chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
       chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
-        cb({ ok: false, error: "Blocked: disallowed path or method" }),
+        cb({ ok: false, error: "Blocked: disallowed path or method" })
       );
 
       await expect(handleAction({ action: "list" })).rejects.toThrow(
-        "Blocked: disallowed path or method",
+        "Blocked: disallowed path or method"
       );
     });
 
     it("handles list failure with status code", async () => {
       chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
       chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
-        cb({ ok: false, status: 403 }),
+        cb({ ok: false, status: 403 })
       );
 
       await expect(handleAction({ action: "list" })).rejects.toThrow(
-        "List failed: 403",
+        "List failed: 403"
       );
     });
 
