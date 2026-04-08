@@ -58,7 +58,7 @@ jobs:
 
       - name: Build SPA Editor
         env:
-          # Custom domain serves from root '/'; fallback to '/repo-name/' for project pages without custom domain
+          # Custom domain serves from root '/'
           VITE_BASE_PATH: /
         run: pnpm --filter @kaiord/workout-spa-editor build
 
