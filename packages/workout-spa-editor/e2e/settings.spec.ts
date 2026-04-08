@@ -68,16 +68,14 @@ test.describe("Settings Panel", () => {
     await dialog.getByRole("tab", { name: /garmin/i }).click();
 
     // Should show extension status (not installed in e2e context)
+    await expect(dialog.getByText(/Garmin Bridge Extension/i)).toBeVisible();
     await expect(
-      dialog.getByText(/Garmin Bridge Extension/i),
-    ).toBeVisible();
-    await expect(
-      dialog.getByText(/not detected|installed AND enabled/i),
+      dialog.getByText(/not detected|installed AND enabled/i)
     ).toBeVisible();
 
     // Should have a refresh button
     await expect(
-      dialog.getByRole("button", { name: /refresh status/i }),
+      dialog.getByRole("button", { name: /refresh status/i })
     ).toBeVisible();
   });
 });
