@@ -64,6 +64,12 @@ export const exportZwoFile = async (
   return buffer;
 };
 
+export const exportGcnWorkout = async (krd: KRD): Promise<unknown> => {
+  const { garminWriter } = await import("@kaiord/garmin");
+  const gcnString = await toText(krd, garminWriter);
+  return JSON.parse(gcnString) as unknown;
+};
+
 export const exportGcnFile = async (
   krd: KRD,
   onProgress?: ExportProgressCallback

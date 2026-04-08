@@ -54,5 +54,8 @@ metrics-*.json
 # CDK
 cdk.out/
 
+# PoC directories (local experiments, not committed)
+poc-*/
+
 # OpenSpec
 openspec/.cache/

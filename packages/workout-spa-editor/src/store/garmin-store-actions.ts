@@ -1,54 +1,17 @@
-import { loadGarminData, persistGarminData } from "./garmin-store-persistence";
+import { createDetectAction } from "./garmin-detect";
+import { createListAction } from "./garmin-list-action";
+import { createPushAction } from "./garmin-push-action";
+import type { GarminStore } from "./garmin-store";
 
-type GarminState = {
-  username: string;
-  password: string;
-  lambdaUrl: string;
-  hydrated: boolean;
-};
-
-type Set = (
-  fn: Partial<GarminState> | ((s: GarminState) => Partial<GarminState>)
-) => void;
-type Get = () => GarminState;
-
-const persist = (get: Get): void => {
-  const { username, password, lambdaUrl } = get();
-  persistGarminData({ username, password, lambdaUrl });
-};
+type Set = (fn: Partial<GarminStore>) => void;
+type Get = () => GarminStore;
 
 export const createGarminActions = (
   set: Set,
   get: Get,
-  defaultUrl: string
+  extensionId: string
 ) => ({
-  hydrate: async () => {
-    const data = await loadGarminData();
-    set({
-      username: data.username,
-      password: data.password,
-      lambdaUrl: data.lambdaUrl || defaultUrl,
-      hydrated: true,
-    });
-  },
-
-  setCredentials: (username: string, password: string) => {
-    set({ username, password });
-    persist(get);
-  },
-
-  setLambdaUrl: (url: string) => {
-    set({ lambdaUrl: url });
-    persist(get);
-  },
-
-  resetLambdaUrl: () => {
-    set({ lambdaUrl: defaultUrl });
-    persist(get);
-  },
-
-  clearCredentials: () => {
-    set({ username: "", password: "" });
-    persist(get);
-  },
+  detectExtension: createDetectAction(set, get, extensionId),
+  pushWorkout: createPushAction(set, get, extensionId),
+  listWorkouts: createListAction(set, get, extensionId),
 });

@@ -1,43 +1,25 @@
 import { useCallback } from "react";
 
-import { pushToGarminLambda } from "../../../lib/garmin-push";
-import { isValidLambdaUrl, useGarminStore } from "../../../store/garmin-store";
+import { useGarminStore } from "../../../store/garmin-store";
 import { useWorkoutStore } from "../../../store/workout-store";
+import { exportGcnWorkout } from "../../../utils/export-workout-formats";
 
 export const useGarminPush = () => {
-  const { username, password, lambdaUrl, setPush, hasCredentials } =
-    useGarminStore();
+  const { pushWorkout, setPushing, sessionActive } = useGarminStore();
   const { currentWorkout } = useWorkoutStore();
 
   const push = useCallback(async () => {
-    if (!currentWorkout || !hasCredentials()) return;
-
-    if (!isValidLambdaUrl(lambdaUrl)) {
-      setPush({
-        status: "error",
-        message: "Invalid Lambda URL: must use HTTPS (except localhost)",
-      });
-      return;
-    }
-
-    setPush({ status: "loading" });
+    if (!currentWorkout || !sessionActive) return;
 
     try {
-      const result = await pushToGarminLambda(lambdaUrl, {
-        krd: currentWorkout,
-        garmin: { username, password },
-      });
-      setPush({
-        status: "success",
-        id: result.id,
-        name: result.name,
-        url: result.url,
-      });
+      const gcn = await exportGcnWorkout(currentWorkout);
+      await pushWorkout(gcn);
     } catch (error: unknown) {
-      const message = error instanceof Error ? error.message : "Push failed";
-      setPush({ status: "error", message });
+      const message =
+        error instanceof Error ? error.message : "Conversion failed";
+      setPushing({ status: "error", message });
     }
-  }, [currentWorkout, username, password, lambdaUrl, setPush, hasCredentials]);
+  }, [currentWorkout, sessionActive, pushWorkout, setPushing]);
 
   return { push };
 };

@@ -1,70 +1,39 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { useGarminStore } from "../../../store/garmin-store";
 import { Button } from "../../atoms/Button";
-import { Input } from "../../atoms/Input";
-import { GarminLambdaInput } from "./GarminLambdaInput";
+import { GarminStatus } from "./GarminStatus";
 
 export const GarminTab: React.FC = () => {
-  const {
-    username,
-    password,
-    lambdaUrl,
-    setCredentials,
-    setLambdaUrl,
-    resetLambdaUrl,
-  } = useGarminStore();
-
-  const [email, setEmail] = useState(username);
-  const [pass, setPass] = useState(password);
+  const { extensionInstalled, sessionActive, lastError, detectExtension } =
+    useGarminStore();
 
   useEffect(() => {
-    setEmail(username);
-    setPass(password);
-  }, [username, password]);
-
-  const isDirty = email !== username || pass !== password;
-
-  const handleSave = () => {
-    setCredentials(email, pass);
-  };
+    detectExtension();
+  }, [detectExtension]);
 
   return (
     <div className="space-y-6">
       <section>
         <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-          Garmin Connect Credentials
+          Garmin Bridge Extension
         </h3>
-        <div className="space-y-3">
-          <Input
-            label="Email"
-            type="email"
-            placeholder="your@email.com"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          <Input
-            label="Password"
-            type="password"
-            placeholder="Your Garmin password"
-            value={pass}
-            onChange={(e) => setPass(e.target.value)}
-          />
-          <Button size="sm" onClick={handleSave} disabled={!isDirty}>
-            Save Credentials
-          </Button>
-        </div>
-      </section>
-
-      <section>
-        <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-          Lambda Endpoint
-        </h3>
-        <GarminLambdaInput
-          lambdaUrl={lambdaUrl}
-          onUrlChange={setLambdaUrl}
-          onReset={resetLambdaUrl}
+        <GarminStatus
+          extensionInstalled={extensionInstalled}
+          sessionActive={sessionActive}
+          lastError={lastError}
         />
+        <Button
+          size="sm"
+          variant="secondary"
+          className="mt-3"
+          onClick={() => {
+            useGarminStore.setState({ lastDetectionTimestamp: null });
+            detectExtension();
+          }}
+        >
+          Refresh Status
+        </Button>
       </section>
     </div>
   );

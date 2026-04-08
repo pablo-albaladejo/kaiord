@@ -2,53 +2,34 @@ import { create } from "zustand";
 
 import { createGarminActions } from "./garmin-store-actions";
 
-const DEFAULT_LAMBDA_URL: string = import.meta.env.VITE_GARMIN_LAMBDA_URL || "";
-
-export const isValidLambdaUrl = (url: string): boolean => {
-  try {
-    const parsed = new URL(url);
-    const isLocal =
-      parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1";
-    return parsed.protocol === "https:" || isLocal;
-  } catch {
-    return false;
-  }
-};
+const EXTENSION_ID: string = import.meta.env.VITE_GARMIN_EXTENSION_ID || "";
 
 type PushState =
   | { status: "idle" }
   | { status: "loading" }
   | { status: "error"; message: string }
-  | { status: "success"; id: string; name: string; url: string };
+  | { status: "success" };
 
 export type GarminStore = {
-  username: string;
-  password: string;
-  lambdaUrl: string;
-  push: PushState;
-  hydrated: boolean;
-  setCredentials: (username: string, password: string) => void;
-  setLambdaUrl: (url: string) => void;
-  resetLambdaUrl: () => void;
-  setPush: (state: PushState) => void;
-  clearCredentials: () => void;
-  hasCredentials: () => boolean;
-  hydrate: () => Promise<void>;
+  extensionInstalled: boolean;
+  sessionActive: boolean;
+  pushing: PushState;
+  lastError: string | null;
+  lastDetectionTimestamp: number | null;
+  detectExtension: () => Promise<void>;
+  pushWorkout: (gcn: unknown) => Promise<void>;
+  listWorkouts: () => Promise<unknown[]>;
+  setPushing: (state: PushState) => void;
 };
 
 export const useGarminStore = create<GarminStore>((set, get) => ({
-  username: "",
-  password: "",
-  lambdaUrl: DEFAULT_LAMBDA_URL,
-  push: { status: "idle" },
-  hydrated: false,
+  extensionInstalled: false,
+  sessionActive: false,
+  pushing: { status: "idle" },
+  lastError: null,
+  lastDetectionTimestamp: null,
 
-  ...createGarminActions(set, get, DEFAULT_LAMBDA_URL),
+  ...createGarminActions(set, get, EXTENSION_ID),
 
-  setPush: (push) => set({ push }),
-
-  hasCredentials: () => {
-    const { username, password } = get();
-    return username.length > 0 && password.length > 0;
-  },
+  setPushing: (pushing) => set({ pushing }),
 }));

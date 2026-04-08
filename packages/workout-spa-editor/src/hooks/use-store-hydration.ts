@@ -5,10 +5,10 @@ import { useGarminStore } from "../store/garmin-store";
 
 export const useStoreHydration = () => {
   const hydrateAi = useAiStore((s) => s.hydrate);
-  const hydrateGarmin = useGarminStore((s) => s.hydrate);
+  const detectExtension = useGarminStore((s) => s.detectExtension);
 
   useEffect(() => {
     hydrateAi();
-    hydrateGarmin();
-  }, [hydrateAi, hydrateGarmin]);
+    detectExtension();
+  }, [hydrateAi, detectExtension]);
 };

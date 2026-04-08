@@ -2,7 +2,7 @@
  * EditableZoneName Component Tests
  */
 
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { EditableZoneName } from "./EditableZoneName";
@@ -72,9 +72,8 @@ describe("EditableZoneName", () => {
     await user.click(screen.getByRole("button", { name: "test" }));
 
     const input = screen.getByRole("textbox", { name: "test" });
-    await user.clear(input);
-    await user.type(input, "Recovery");
-    await user.keyboard("{Enter}");
+    fireEvent.change(input, { target: { value: "Recovery" } });
+    fireEvent.blur(input);
 
     expect(onSave).toHaveBeenCalledWith("Recovery");
   });

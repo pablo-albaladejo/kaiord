@@ -16,7 +16,7 @@ Kaiord is an open-source health & fitness data framework. A TypeScript monorepo 
 - `@kaiord/garmin-connect` - Garmin Connect API client (SSO auth, push/list workouts)
 - `@kaiord/cli` - Command-line interface
 - `@kaiord/mcp` - Model Context Protocol (MCP) server for AI/LLM integration
-- `@kaiord/infra` - Self-hostable AWS CDK stack (Garmin proxy Lambda)
+- `@kaiord/garmin-bridge` - Chrome extension for SPA-to-Garmin Connect integration (private)
 - `@kaiord/workout-spa-editor` - React web application (private)
 
 ## Commands
@@ -35,12 +35,6 @@ cd packages/core && pnpm test   # Single package
 pnpm lint                       # Lint + type check + format check
 pnpm lint:fix                   # Auto-fix all
 pnpm format                     # Format with Prettier
-
-# Local Garmin push dev server
-pnpm --filter @kaiord/infra dev:local  # http://127.0.0.1:3001
-# SPA auto-connects if you create packages/workout-spa-editor/.env.development.local:
-#   VITE_GARMIN_LAMBDA_URL=http://localhost:3001
-# Optional: CORS_ORIGIN=http://localhost:5174 PORT=3002
 
 # Changesets (for version-worthy changes)
 pnpm exec changeset             # Create changeset before PR

@@ -1,0 +1,38 @@
+{
+  "manifest_version": 3,
+  "name": "Kaiord Garmin Bridge",
+  "version": "0.1.0",
+  "description": "Connects Kaiord SPA to Garmin Connect via your browser session",
+
+  "permissions": ["storage", "tabs", "webRequest"],
+
+  "host_permissions": ["https://connect.garmin.com/*"],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "48": "icon48.png",
+      "128": "icon128.png"
+    }
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://connect.garmin.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+
+  "externally_connectable": {
+    "matches": [
+      "http://localhost:5173/*",
+      "http://localhost:5174/*",
+      "https://*.kaiord.com/*"
+    ]
+  }
+}

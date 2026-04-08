@@ -30,7 +30,7 @@ describe("SettingsPanel", () => {
 
     fireEvent.click(screen.getByText("Garmin"));
 
-    expect(screen.getByText("Garmin Connect Credentials")).toBeInTheDocument();
+    expect(screen.getByText("Garmin Bridge Extension")).toBeInTheDocument();
   });
 
   it("should switch to Privacy tab", () => {
@@ -57,6 +57,6 @@ describe("SettingsPanel", () => {
     expect(
       screen.getByText(/We do not store your credentials/)
     ).toBeInTheDocument();
-    expect(screen.getByText("Clear All Credentials")).toBeInTheDocument();
+    expect(screen.getByText("Clear All API Keys")).toBeInTheDocument();
   });
 });
