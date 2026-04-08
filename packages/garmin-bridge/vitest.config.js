@@ -4,5 +4,9 @@ export default defineConfig({
   test: {
     globals: true,
     setupFiles: ["./test/chrome-mock.js"],
+    coverage: {
+      include: ["background.js", "content.js"],
+      exclude: ["popup.js"],
+    },
   },
 });
