@@ -3,8 +3,8 @@ import { expect, test } from "./fixtures/base";
 /**
  * E2E: Settings Panel
  *
- * Tests for the Settings panel including AI providers,
- * Garmin credentials, and Lambda URL configuration.
+ * Tests for the Settings panel including AI providers
+ * and Garmin extension status.
  */
 
 test.describe("Settings Panel", () => {
@@ -58,7 +58,7 @@ test.describe("Settings Panel", () => {
     ).not.toBeVisible();
   });
 
-  test("8.8: configure Garmin credentials and Lambda URL", async ({ page }) => {
+  test("8.8: Garmin tab shows extension status", async ({ page }) => {
     // Open settings
     await page.getByRole("button", { name: /open settings/i }).click();
     const dialog = page.getByRole("dialog", { name: "Settings" });
@@ -67,32 +67,17 @@ test.describe("Settings Panel", () => {
     // Switch to Garmin tab
     await dialog.getByRole("tab", { name: /garmin/i }).click();
 
-    // Fill email and password
-    const emailInput = dialog.getByPlaceholder("your@email.com");
-    await emailInput.fill("user@garmin.com");
+    // Should show extension status (not installed in e2e context)
+    await expect(
+      dialog.getByText(/Garmin Bridge Extension/i),
+    ).toBeVisible();
+    await expect(
+      dialog.getByText(/not detected|installed AND enabled/i),
+    ).toBeVisible();
 
-    const passwordInput = dialog.getByPlaceholder("Your Garmin password");
-    await passwordInput.fill("my-password");
-
-    // Save credentials (required after commit 10caf517)
-    await dialog.getByRole("button", { name: /save credentials/i }).click();
-
-    // Change Lambda URL
-    const lambdaInput = dialog.getByPlaceholder(/execute-api.*amazonaws.com/);
-    await lambdaInput.clear();
-    await lambdaInput.fill("https://my-lambda.amazonaws.com/push");
-
-    // Verify values are set
-    await expect(emailInput).toHaveValue("user@garmin.com");
-    await expect(passwordInput).toHaveValue("my-password");
-    await expect(lambdaInput).toHaveValue(
-      "https://my-lambda.amazonaws.com/push"
-    );
-
-    // Reset Lambda URL
-    await dialog.getByRole("button", { name: /reset to default/i }).click();
-
-    // Lambda URL should be reset to empty (env var default)
-    await expect(lambdaInput).toHaveValue("");
+    // Should have a refresh button
+    await expect(
+      dialog.getByRole("button", { name: /refresh status/i }),
+    ).toBeVisible();
   });
 });
