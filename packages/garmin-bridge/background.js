@@ -83,7 +83,8 @@ const checkSession = async () => {
 };
 
 const toBridgeError = (fallback, res) => {
-  const msg = res?.error ?? `${fallback}${res?.status ? `: ${res.status}` : ""}`;
+  const msg =
+    res?.error ?? `${fallback}${res?.status ? `: ${res.status}` : ""}`;
   const err = new Error(msg);
   if (typeof res?.status === "number") err.status = res.status;
   return err;
