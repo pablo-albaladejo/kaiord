@@ -1,0 +1,40 @@
+/* Kaiord Brand Tokens — imported from shared styles */
+@import "../../../../styles/brand-tokens.css";
+
+/* System font stack (no web fonts) */
+:root {
+  --vp-font-family-base:
+    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji",
+    "Segoe UI Emoji";
+  --vp-font-family-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, "Liberation Mono",
+    monospace;
+}
+
+/* Map brand tokens to VitePress theme variables */
+:root {
+  --vp-c-brand-1: var(--brand-accent-blue);
+  --vp-c-brand-2: var(--brand-accent-blue);
+  --vp-c-brand-3: var(--brand-accent-blue);
+}
+
+.dark {
+  --vp-c-bg: var(--brand-bg-primary);
+  --vp-c-bg-soft: var(--brand-bg-surface);
+  --vp-c-bg-mute: var(--brand-bg-surface);
+  --vp-c-text-1: var(--brand-text-primary);
+  --vp-c-text-2: var(--brand-text-secondary);
+  --vp-c-text-3: var(--brand-text-muted);
+  --vp-c-divider: var(--brand-border);
+}
+
+/* Footer link styling */
+.VPFooter a {
+  color: var(--vp-c-brand-1);
+  text-decoration: none;
+}
+
+.VPFooter a:hover {
+  text-decoration: underline;
+}

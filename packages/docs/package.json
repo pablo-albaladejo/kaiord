@@ -1,0 +1,29 @@
+{
+  "name": "@kaiord/docs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "VitePress documentation site for Kaiord",
+  "type": "module",
+  "scripts": {
+    "dev": "vitepress dev",
+    "build": "node scripts/generate-api-docs.mjs && vitepress build",
+    "preview": "vitepress preview",
+    "lint:fix": "prettier --write ."
+  },
+  "devDependencies": {
+    "@kaiord/cli": "workspace:*",
+    "@kaiord/core": "workspace:*",
+    "@kaiord/fit": "workspace:*",
+    "@kaiord/garmin": "workspace:*",
+    "@kaiord/garmin-connect": "workspace:*",
+    "@kaiord/mcp": "workspace:*",
+    "@kaiord/tcx": "workspace:*",
+    "@kaiord/zwo": "workspace:*",
+    "@shikijs/vitepress-twoslash": "^3.23.0",
+    "typedoc": "^0.28.18",
+    "typedoc-plugin-markdown": "^4.11.0",
+    "vitepress": "2.0.0-alpha.17",
+    "vitepress-plugin-llms": "^1.12.0",
+    "vue": "^3.5.16"
+  }
+}
