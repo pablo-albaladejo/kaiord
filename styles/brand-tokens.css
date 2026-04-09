@@ -1,0 +1,19 @@
+/* Kaiord Brand Tokens — shared across landing and editor */
+
+:root {
+  /* Backgrounds */
+  --brand-bg-primary: #0f172a;
+  --brand-bg-surface: #1e293b;
+
+  /* Text */
+  --brand-text-primary: #f8fafc;
+  --brand-text-secondary: #cbd5e1;
+  --brand-text-muted: #64748b;
+
+  /* Accents */
+  --brand-accent-blue: #0284c7;
+  --brand-accent-purple: #9333ea;
+
+  /* Borders */
+  --brand-border: #334155;
+}
