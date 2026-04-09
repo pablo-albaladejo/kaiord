@@ -27,7 +27,7 @@ describe("MainLayout", () => {
     );
 
     // Assert
-    expect(screen.getByText("Workout Editor")).toBeInTheDocument();
+    expect(screen.getByText("Kaiord Editor")).toBeInTheDocument();
   });
 
   it("should render header with logo", () => {

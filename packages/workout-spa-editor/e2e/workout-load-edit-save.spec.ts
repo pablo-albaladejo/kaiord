@@ -20,7 +20,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
 
     // Wait for the welcome section to load (use heading with level to avoid strict mode)
     await expect(
-      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
 
     // Load a workout file

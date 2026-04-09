@@ -21,7 +21,7 @@ export function HelpHeader({ onReplayTutorial }: HelpHeaderProps) {
             Help & Documentation
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Learn how to use the Workout Editor to create and manage structured
+            Learn how to use the Kaiord Editor to create and manage structured
             workout files
           </p>
         </div>

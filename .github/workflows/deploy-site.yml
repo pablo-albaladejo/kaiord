@@ -1,0 +1,94 @@
+name: Deploy Kaiord Site to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "packages/landing/**"
+      - "packages/workout-spa-editor/**"
+      - "packages/core/**"
+      - "packages/fit/**"
+      - "packages/tcx/**"
+      - "packages/zwo/**"
+      - "packages/garmin/**"
+      - "styles/**"
+      - ".github/workflows/deploy-site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Allow only one concurrent deployment
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm
+        uses: ./.github/actions/setup-pnpm
+
+      # Always build both packages — the merged artifact must be complete.
+      # Targeted filters build only required transitive dependencies.
+      - name: Build Landing Page
+        run: pnpm --filter @kaiord/landing... build
+
+      - name: Build SPA Editor
+        env:
+          VITE_BASE_PATH: /editor/
+        run: pnpm --filter @kaiord/workout-spa-editor... build
+
+      - name: Merge dist outputs
+        run: |
+          mkdir -p merged-dist
+
+          # Landing page at root
+          cp -r packages/landing/dist/* merged-dist/
+          cp -r packages/landing/dist/.nojekyll merged-dist/ 2>/dev/null || true
+
+          # Editor at /editor/
+          mkdir -p merged-dist/editor
+          cp -r packages/workout-spa-editor/dist/* merged-dist/editor/
+
+          echo "✅ Merged dist structure:"
+          ls -la merged-dist/
+
+      - name: Verify merged artifact
+        run: |
+          set -e
+          test -f merged-dist/index.html          || { echo "❌ Missing landing index.html"; exit 1; }
+          test -f merged-dist/editor/index.html    || { echo "❌ Missing editor index.html"; exit 1; }
+          test -f merged-dist/CNAME                || { echo "❌ Missing CNAME"; exit 1; }
+          test -f merged-dist/.nojekyll            || { echo "❌ Missing .nojekyll"; exit 1; }
+          test -f merged-dist/404.html             || { echo "❌ Missing 404.html"; exit 1; }
+          test -f merged-dist/robots.txt           || { echo "❌ Missing robots.txt"; exit 1; }
+          test -f merged-dist/sitemap.xml          || { echo "❌ Missing sitemap.xml"; exit 1; }
+          echo "✅ All required files present in merged artifact"
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v6
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: merged-dist
+
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+      # Rollback: use workflow_dispatch on last known-good main commit SHA,
+      # or revert the breaking commit on main.

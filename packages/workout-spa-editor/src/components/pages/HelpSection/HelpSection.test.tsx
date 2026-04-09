@@ -315,7 +315,7 @@ describe("HelpSection", () => {
       // Assert
       expect(
         screen.getByText(
-          /learn how to use the workout editor to create and manage/i
+          /learn how to use the kaiord editor to create and manage/i
         )
       ).toBeInTheDocument();
     });
