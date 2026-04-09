@@ -61,6 +61,11 @@ The `create-github-releases.js` script SHALL create GitHub releases for all publ
 - **WHEN** `PUBLISHED_PACKAGES` env var is not set
 - **THEN** the script SHALL scan package.json files for all 9 publishable packages and create releases for any with new versions
 
+#### Scenario: Malformed PUBLISHED_PACKAGES fallback
+
+- **WHEN** `PUBLISHED_PACKAGES` env var contains invalid JSON (including empty string)
+- **THEN** the script SHALL log a warning and fall back to scanning package.json files for all 9 publishable packages
+
 #### Scenario: Garmin package released
 
 - **WHEN** `@kaiord/garmin` has a version bump and is in `publishedPackages`
