@@ -198,6 +198,18 @@ export default defineConfig({
 
   markdown: {
     codeTransformers: [transformerTwoslash()],
+    languages: [
+      "ts",
+      "tsx",
+      "js",
+      "json",
+      "bash",
+      "sh",
+      "yaml",
+      "md",
+      "css",
+      "html",
+    ],
   },
 
   vite: {
