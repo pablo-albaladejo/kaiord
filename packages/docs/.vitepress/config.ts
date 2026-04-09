@@ -125,14 +125,14 @@ export default defineConfig({
         text: "Getting Started",
         items: [
           { text: "Quick Start", link: "/guide/quick-start" },
-          { text: "Why Kaiord", link: "/guide/why-kaiord" },
+          { text: "Why Kaiord?", link: "/guide/why-kaiord" },
+          { text: "Installation", link: "/guide/getting-started" },
         ],
       },
       {
         text: "Guides",
         collapsed: false,
         items: [
-          { text: "Getting Started", link: "/guide/getting-started" },
           { text: "Architecture", link: "/guide/architecture" },
           { text: "Testing", link: "/guide/testing" },
           { text: "Contributing", link: "/guide/contributing" },
