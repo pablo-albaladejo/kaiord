@@ -485,7 +485,7 @@ test.describe("Accessibility", () => {
 
     // Verify page is still functional - use specific heading level to avoid ambiguity
     await expect(
-      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
   });
 });

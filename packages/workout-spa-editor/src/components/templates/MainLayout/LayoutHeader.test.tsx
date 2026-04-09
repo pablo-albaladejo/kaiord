@@ -58,7 +58,7 @@ describe("LayoutHeader", () => {
 
       // Assert
       expect(
-        screen.getByRole("heading", { name: /workout editor/i })
+        screen.getByRole("heading", { name: /kaiord editor/i })
       ).toBeInTheDocument();
     });
 
@@ -384,7 +384,7 @@ describe("LayoutHeader", () => {
       renderWithProviders(<LayoutHeader />);
 
       // Assert
-      const heading = screen.getByRole("heading", { name: /workout editor/i });
+      const heading = screen.getByRole("heading", { name: /kaiord editor/i });
       expect(heading.tagName).toBe("H1");
     });
 
