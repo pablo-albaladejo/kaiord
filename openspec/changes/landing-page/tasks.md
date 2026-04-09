@@ -25,25 +25,25 @@
 
 ## 4. Landing Page Sections
 
-- [ ] 4.1 Build sticky nav: logo wordmark + "Try the Editor" + "GitHub" links, smooth-scroll anchors, mobile-collapsed minimal bar
-- [ ] 4.2 Build hero section: tagline ("One framework. Every fitness format."), subtitle explaining what Kaiord does, primary CTA ("Try the Editor" → /editor/), install command with npm/yarn/pnpm/bun tabs (native `<select>` dropdown on mobile, default npm) and copy-to-clipboard with "Copied!" feedback (`aria-live="polite"`), highlight badges below CTAs: "100% AI-coded" + "Zero infrastructure"
-- [ ] 4.3 Build user-facing features section: three cards (Visual Editor, AI Workouts, Garmin Connect) with CTA to editor
-- [ ] 4.4 Build format hub visual: animated CSS diagram (transform/opacity only) showing FIT/TCX/ZWO/GCN ↔ KRD convergence, with `prefers-reduced-motion` fallback to static and `aria-label` for screen readers
-- [ ] 4.5 Build developer-facing section: build-time pre-highlighted code example (4-line FIT→KRD→TCX, no runtime JS highlighter), feature grid (TypeScript, Hexagonal, Plugin, CLI, MCP)
-- [ ] 4.6 Build differentiators section: two cards — "100% AI-coded" (every line by AI agents, link to commit history as proof) and "Zero infrastructure" (CLI, SPA, MCP all run locally, no servers/accounts needed)
-- [ ] 4.7 Build open source section: capability metrics ("5 format adapters", "100% round-trip safe", "80%+ test coverage"), README badges (CI, coverage, TS), "Star on GitHub" button (no count), MIT license
-- [ ] 4.8 Build footer: logo, GitHub link, npm link, MIT license, "Built by Pablo Albaladejo" with link to LinkedIn profile and GitHub profile
-- [ ] 4.9 Ensure responsive layout: mobile (360px), tablet (768px), desktop (1280px+) — install tabs become dropdown on mobile, code example has horizontal scroll with gradient fade hint
-- [ ] 4.10 Add skip-to-content link (visually hidden, visible on Tab focus, jumps to `<main>`)
-- [ ] 4.11 Verify WCAG AA: keyboard navigation with visible focus indicators, 44x44px touch targets on mobile, semantic landmarks (`<header>`, `<main>`, `<section>`, `<nav>`, `<footer>`), contrast ratios (4.5:1 body, 3:1 large text), external links with `target="_blank" rel="noopener"`
+- [x] 4.1 Build sticky nav: logo wordmark + "Try the Editor" + "GitHub" links, smooth-scroll anchors, mobile-collapsed minimal bar
+- [x] 4.2 Build hero section: tagline ("One framework. Every fitness format."), subtitle explaining what Kaiord does, primary CTA ("Try the Editor" → /editor/), install command with npm/yarn/pnpm/bun tabs (native `<select>` dropdown on mobile, default npm) and copy-to-clipboard with "Copied!" feedback (`aria-live="polite"`), highlight badges below CTAs: "100% AI-coded" + "Zero infrastructure"
+- [x] 4.3 Build user-facing features section: three cards (Visual Editor, AI Workouts, Garmin Connect) with CTA to editor
+- [x] 4.4 Build format hub visual: animated CSS diagram (transform/opacity only) showing FIT/TCX/ZWO/GCN ↔ KRD convergence, with `prefers-reduced-motion` fallback to static and `aria-label` for screen readers
+- [x] 4.5 Build developer-facing section: build-time pre-highlighted code example (4-line FIT→KRD→TCX, no runtime JS highlighter), feature grid (TypeScript, Hexagonal, Plugin, CLI, MCP)
+- [x] 4.6 Build differentiators section: two cards — "100% AI-coded" (every line by AI agents, link to commit history as proof) and "Zero infrastructure" (CLI, SPA, MCP all run locally, no servers/accounts needed)
+- [x] 4.7 Build open source section: capability metrics ("5 format adapters", "100% round-trip safe", "80%+ test coverage"), README badges (CI, coverage, TS), "Star on GitHub" button (no count), MIT license
+- [x] 4.8 Build footer: logo, GitHub link, npm link, MIT license, "Built by Pablo Albaladejo" with link to LinkedIn profile and GitHub profile
+- [x] 4.9 Ensure responsive layout: mobile (360px), tablet (768px), desktop (1280px+) — install tabs become dropdown on mobile, code example has horizontal scroll with gradient fade hint
+- [x] 4.10 Add skip-to-content link (visually hidden, visible on Tab focus, jumps to `<main>`)
+- [x] 4.11 Verify WCAG AA: keyboard navigation with visible focus indicators, 44x44px touch targets on mobile, semantic landmarks (`<header>`, `<main>`, `<section>`, `<nav>`, `<footer>`), contrast ratios (4.5:1 body, 3:1 large text), external links with `target="_blank" rel="noopener"`
 
 ## 5. Editor Branding Update
 
-- [ ] 5.1 Update SPA editor favicon to Kaiord favicon (replace vite.svg)
-- [ ] 5.2 Update SPA editor page title from "workout-spa-editor" to "Kaiord Editor"
-- [ ] 5.3 Add OG, Twitter Card, and meta description tags to SPA editor index.html
-- [ ] 5.4 Update editor header logo to use Kaiord logo SVG (replace current lightning bolt)
-- [ ] 5.5 Import shared brand color tokens (`styles/brand-tokens.css`) in editor CSS via relative path (no workspace dependency on landing)
+- [x] 5.1 Update SPA editor favicon to Kaiord favicon (replace vite.svg)
+- [x] 5.2 Update SPA editor page title from "workout-spa-editor" to "Kaiord Editor"
+- [x] 5.3 Add OG, Twitter Card, and meta description tags to SPA editor index.html
+- [x] 5.4 Update editor header logo to use Kaiord logo SVG (replace current lightning bolt)
+- [x] 5.5 Import shared brand color tokens (`styles/brand-tokens.css`) in editor CSS via relative path (no workspace dependency on landing)
 
 ## 6. Verification
 

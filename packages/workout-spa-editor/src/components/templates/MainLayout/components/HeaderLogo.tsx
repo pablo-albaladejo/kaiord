@@ -1,7 +1,7 @@
 /**
  * HeaderLogo Component
  *
- * Logo and title for the header.
+ * Kaiord logo and title for the header.
  */
 
 export function HeaderLogo() {
@@ -10,21 +10,23 @@ export function HeaderLogo() {
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600 text-white">
         <svg
           className="h-6 w-6"
+          viewBox="0 0 40 40"
           fill="none"
-          stroke="currentColor"
-          viewBox="0 0 24 24"
           aria-hidden="true"
         >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M13 10V3L4 14h7v7l9-11h-7z"
-          />
+          <g transform="translate(2,2) scale(0.9)">
+            <path
+              d="M20 0L37.32 10L37.32 30L20 40L2.68 30L2.68 10Z"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              fill="none"
+            />
+            <circle cx="20" cy="20" r="5" fill="currentColor" />
+          </g>
         </svg>
       </div>
       <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
-        Workout Editor
+        Kaiord Editor
       </h1>
     </div>
   );
