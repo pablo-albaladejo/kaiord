@@ -1,22 +1,23 @@
 {
   "permissions": {
     "allow": [
-      "Read",
+      "Bash",
       "Edit",
-      "Write",
       "Glob",
       "Grep",
-      "Bash",
+      "Read",
+      "Write",
+
+      "WebFetch",
+      "WebSearch",
+
+      "mcp__context7__*",
+      "mcp__ide__getDiagnostics",
+      "mcp__kaiord__*",
       "mcp__playwright__*",
       "mcp__vitest__*",
-      "mcp__context7__*",
-      "WebSearch",
-      "WebFetch",
-      "mcp__ide__getDiagnostics",
-      "Skill(test)",
-      "Skill(coverage)",
-      "Skill(deep-review-fix)",
-      "mcp__kaiord__*"
+
+      "Skill(*)"
     ],
     "deny": [
       "Bash(rm -rf /)",
