@@ -1,52 +1,41 @@
 #!/usr/bin/env node
 const fs = require("fs");
+const { execSync } = require("child_process");
 
-// Read JSON input from stdin
-let input = "";
-process.stdin.setEncoding("utf8");
-process.stdin.on("data", (chunk) => (input += chunk));
-process.stdin.on("end", () => {
-  try {
-    const data = JSON.parse(input);
-    const filePath = data.tool_input?.file_path;
+const files = execSync("git diff --name-only HEAD", { encoding: "utf8" })
+  .trim()
+  .split("\n")
+  .filter((f) => f.includes("/packages/core/src/") && f.endsWith(".ts"));
 
-    if (!filePath || !filePath.includes("/packages/core/src/")) {
-      process.exit(0);
-    }
+const violations = [];
 
-    const content = fs.existsSync(filePath)
-      ? fs.readFileSync(filePath, "utf8")
-      : "";
-    const isInDomain = filePath.includes("/domain/");
-    const isInApplication = filePath.includes("/application/");
-    const violations = [];
+for (const file of files) {
+  if (!fs.existsSync(file)) continue;
+  const content = fs.readFileSync(file, "utf8");
+  const isInDomain = file.includes("/domain/");
+  const isInApplication = file.includes("/application/");
 
-    if (isInDomain) {
-      if (/from\s+['"]\.\.\/adapters/.test(content))
-        violations.push("Domain cannot import from adapters");
-      if (/from\s+['"]\.\.\/application/.test(content))
-        violations.push("Domain cannot import from application");
-      if (/from\s+['"]@garmin/.test(content))
-        violations.push("Domain cannot import @garmin");
-      if (/from\s+['"]fast-xml-parser/.test(content))
-        violations.push("Domain cannot import fast-xml-parser");
-    }
-
-    if (isInApplication) {
-      if (/from\s+['"]\.\.\/adapters/.test(content))
-        violations.push("Application cannot import from adapters");
-      if (/from\s+['"]@garmin/.test(content))
-        violations.push("Application cannot import @garmin");
-    }
-
-    if (violations.length > 0) {
-      console.error(`HEXAGONAL VIOLATION in ${filePath}:`);
-      violations.forEach((v) => console.error(`  - ${v}`));
-      process.exit(2);
-    }
-
-    process.exit(0);
-  } catch (e) {
-    process.exit(0);
+  if (isInDomain) {
+    if (/from\s+['"]\.\.\/adapters/.test(content))
+      violations.push(`${file}: Domain cannot import from adapters`);
+    if (/from\s+['"]\.\.\/application/.test(content))
+      violations.push(`${file}: Domain cannot import from application`);
+    if (/from\s+['"]@garmin/.test(content))
+      violations.push(`${file}: Domain cannot import @garmin`);
+    if (/from\s+['"]fast-xml-parser/.test(content))
+      violations.push(`${file}: Domain cannot import fast-xml-parser`);
   }
-});
+
+  if (isInApplication) {
+    if (/from\s+['"]\.\.\/adapters/.test(content))
+      violations.push(`${file}: Application cannot import from adapters`);
+    if (/from\s+['"]@garmin/.test(content))
+      violations.push(`${file}: Application cannot import @garmin`);
+  }
+}
+
+if (violations.length > 0) {
+  console.error("HEXAGONAL VIOLATIONS:");
+  violations.forEach((v) => console.error(`  - ${v}`));
+  process.exit(2);
+}

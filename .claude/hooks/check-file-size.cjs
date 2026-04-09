@@ -1,43 +1,34 @@
 #!/usr/bin/env node
 const fs = require("fs");
+const { execSync } = require("child_process");
 
-let input = "";
-process.stdin.setEncoding("utf8");
-process.stdin.on("data", (chunk) => (input += chunk));
-process.stdin.on("end", () => {
-  try {
-    const data = JSON.parse(input);
-    const filePath = data.tool_input?.file_path;
+const files = execSync("git diff --name-only HEAD", { encoding: "utf8" })
+  .trim()
+  .split("\n")
+  .filter(
+    (f) =>
+      f.endsWith(".ts") &&
+      !f.includes(".test.") &&
+      !f.includes(".spec.") &&
+      !f.endsWith(".md") &&
+      !f.endsWith(".yaml") &&
+      !f.endsWith(".yml")
+  );
 
-    if (!filePath) process.exit(0);
+const MAX_LINES = 100;
+const warnings = [];
 
-    // Exempt test files, docs, and config
-    if (
-      filePath.includes(".test.") ||
-      filePath.includes(".spec.") ||
-      filePath.endsWith(".md") ||
-      filePath.endsWith(".yaml") ||
-      filePath.endsWith(".yml")
-    ) {
-      process.exit(0);
-    }
+for (const file of files) {
+  if (!fs.existsSync(file)) continue;
+  const lines = fs.readFileSync(file, "utf8").split("\n").length;
+  if (lines > MAX_LINES)
+    warnings.push(`${file}: ${lines} lines (max: ${MAX_LINES})`);
+}
 
-    const content =
-      data.tool_input?.content ||
-      (fs.existsSync(filePath) ? fs.readFileSync(filePath, "utf8") : "");
-    const lines = content.split("\n").length;
-    const MAX_LINES = 100;
-
-    if (lines > MAX_LINES) {
-      console.log(
-        JSON.stringify({
-          systemMessage: `WARNING: File has ${lines} lines (max: ${MAX_LINES}). Consider splitting into smaller modules.`,
-        })
-      );
-    }
-
-    process.exit(0);
-  } catch (e) {
-    process.exit(0);
-  }
-});
+if (warnings.length > 0) {
+  console.log(
+    JSON.stringify({
+      systemMessage: `File size warnings:\n${warnings.join("\n")}\nConsider splitting into smaller modules.`,
+    })
+  );
+}

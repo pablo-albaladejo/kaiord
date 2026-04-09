@@ -1,24 +1,24 @@
 #!/usr/bin/env node
+const fs = require("fs");
+const { execSync } = require("child_process");
 
-let input = "";
-process.stdin.setEncoding("utf8");
-process.stdin.on("data", (chunk) => (input += chunk));
-process.stdin.on("end", () => {
-  try {
-    const data = JSON.parse(input);
-    const filePath = data.tool_input?.file_path;
+const files = execSync("git diff --name-only HEAD", { encoding: "utf8" })
+  .trim()
+  .split("\n")
+  .filter((f) => f.endsWith(".converter.ts") && !f.includes(".test."));
 
-    if (filePath?.includes(".converter.ts") && !filePath.includes(".test.")) {
-      const testPath = filePath.replace(".converter.ts", ".converter.test.ts");
-      console.log(
-        JSON.stringify({
-          systemMessage: `REMINDER: Converters require tests!\nExpected test file: ${testPath}\nFollow AAA pattern. Coverage target: 90%`,
-        })
-      );
-    }
+const reminders = [];
 
-    process.exit(0);
-  } catch (e) {
-    process.exit(0);
-  }
-});
+for (const file of files) {
+  const testPath = file.replace(".converter.ts", ".converter.test.ts");
+  if (!fs.existsSync(testPath))
+    reminders.push(`${file} -> missing test: ${testPath}`);
+}
+
+if (reminders.length > 0) {
+  console.log(
+    JSON.stringify({
+      systemMessage: `Converters require tests!\n${reminders.join("\n")}\nFollow AAA pattern. Coverage target: 90%`,
+    })
+  );
+}
