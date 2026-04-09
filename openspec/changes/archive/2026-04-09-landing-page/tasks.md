@@ -21,7 +21,7 @@
 - [x] 3.3 Rename workflow `deploy-spa-editor.yml` → `deploy-site.yml` in a **single atomic commit**: delete old file, create new file with updated self-reference path trigger, add `packages/landing/**` and `styles/**` to path triggers (retain all existing paths: core, fit, tcx, zwo, garmin, workout-spa-editor), use targeted builds (`pnpm --filter @kaiord/landing... build && pnpm --filter @kaiord/workout-spa-editor... build`)
 - [x] 3.4 Audit `packages/workout-spa-editor/public/` for files that would conflict with landing root (CNAME, robots.txt, .nojekyll) and remove/relocate if present
 - [x] 3.5 Add merge step: copy editor dist into `dist/editor/`, verify artifact (`index.html`, `editor/index.html`, `CNAME`, `.nojekyll`, `404.html`, `robots.txt`, `sitemap.xml`)
-- [ ] 3.6 Deploy minimal placeholder landing page and verify: kaiord.com/ loads, kaiord.com/editor/ works, kaiord.com/nonexistent shows 404
+- [x] 3.6 Deploy minimal placeholder landing page and verify: kaiord.com/ loads, kaiord.com/editor/ works, kaiord.com/nonexistent shows 404
 
 ## 4. Landing Page Sections
 
@@ -47,21 +47,21 @@
 
 ## 6. Verification
 
-- [ ] 6.1 Verify landing page loads at `kaiord.com/` with all sections rendered and sticky nav working
-- [ ] 6.2 Verify editor loads at `kaiord.com/editor/` with full functionality
-- [ ] 6.3 Verify `kaiord.com/nonexistent` shows branded 404 page
-- [ ] 6.4 Verify OG and Twitter Card tags render correctly (Facebook Sharing Debugger, Twitter Card Validator)
-- [ ] 6.5 Verify responsive layout on 360px, 768px, and 1280px viewports
-- [ ] 6.6 Verify favicon displays correctly on both landing and editor
+- [x] 6.1 Verify landing page loads at `kaiord.com/` with all sections rendered and sticky nav working
+- [x] 6.2 Verify editor loads at `kaiord.com/editor/` with full functionality
+- [x] 6.3 Verify `kaiord.com/nonexistent` shows branded 404 page
+- [x] 6.4 Verify OG and Twitter Card tags render correctly (Facebook Sharing Debugger, Twitter Card Validator)
+- [x] 6.5 Verify responsive layout on 360px, 768px, and 1280px viewports
+- [x] 6.6 Verify favicon displays correctly on both landing and editor
 - [ ] 6.7 Run Lighthouse: Performance >= 95, Accessibility >= 95, SEO = 100
-- [ ] 6.8 Verify `robots.txt`, `sitemap.xml`, and JSON-LD structured data are accessible and valid
-- [ ] 6.9 Verify copy-to-clipboard works for install command
-- [ ] 6.10 Verify `prefers-reduced-motion: reduce` disables animations
-- [ ] 6.11 Verify local dev: `pnpm --filter @kaiord/workout-spa-editor dev` serves at localhost:5173/
+- [x] 6.8 Verify `robots.txt`, `sitemap.xml`, and JSON-LD structured data are accessible and valid
+- [x] 6.9 Verify copy-to-clipboard works for install command
+- [x] 6.10 Verify `prefers-reduced-motion: reduce` disables animations
+- [x] 6.11 Verify local dev: `pnpm --filter @kaiord/workout-spa-editor dev` serves at localhost:5173/
 
 ## 7. Finalize
 
-- [ ] 7.1 Run `pnpm lint:fix` and ensure zero warnings/errors
+- [x] 7.1 Run `pnpm lint:fix` and ensure zero warnings/errors
 - [ ] 7.2 Update npm package READMEs and GitHub repo description/website to link to kaiord.com
-- [ ] 7.3 Create changeset for the change
-- [ ] 7.4 Create PR with all changes
+- [x] 7.3 Create changeset for the change
+- [x] 7.4 Create PR with all changes
