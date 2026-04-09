@@ -108,20 +108,16 @@ No dependency injection framework needed. Functions are composed at entry points
 
 ### Curried use cases
 
-For more complex use cases, Kaiord uses currying for dependency injection:
+For more complex use cases, Kaiord uses currying for dependency injection. The use case receives adapters (ports) as dependencies and delegates work to them -- validation stays at adapter boundaries, not inside use cases:
 
 ```typescript
-// First function receives dependencies
+// First function receives dependencies (adapters)
 // Second function receives operation parameters
 export const convertFitToKrd =
-  (fitReader: FitReader, validator: SchemaValidator) =>
+  (fitReader: FitReader) =>
   async (params: { fitBuffer: Uint8Array }): Promise<KRD> => {
-    const krd = await fitReader(params.fitBuffer);
-    const errors = validator.validate(krd);
-    if (errors.length > 0) {
-      throw new KrdValidationError("Validation failed", errors);
-    }
-    return krd;
+    // The adapter validates internally at the boundary
+    return fitReader(params.fitBuffer);
   };
 ```
 
@@ -129,8 +125,7 @@ Composition happens at entry points:
 
 ```typescript
 const fitReader = createFitReader(logger);
-const validator = createSchemaValidator();
-const convertFitToKrdUseCase = convertFitToKrd(fitReader, validator);
+const convertFitToKrdUseCase = convertFitToKrd(fitReader);
 const krd = await convertFitToKrdUseCase({ fitBuffer });
 ```
 

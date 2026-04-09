@@ -77,5 +77,5 @@
 ## 9. Finalize
 
 - [x] 9.1 Run `pnpm lint:fix` and ensure zero warnings/errors
-- [ ] 9.2 Create changeset
+- [x] 9.2 Create changeset
 - [x] 9.3 Create PR (draft: #265)
