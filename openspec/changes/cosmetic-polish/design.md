@@ -13,46 +13,47 @@
      Changes here affect all three surfaces. */
 
   /* Backgrounds — 3 elevation levels */
-  --brand-bg-primary: #0f172a;     /* Page background (slate-900) */
-  --brand-bg-surface: #1e293b;     /* Cards, sidebars (slate-800) */
-  --brand-bg-elevated: #334155;    /* Code blocks, tooltips (slate-700) */
+  --brand-bg-primary: #0f172a; /* Page background (slate-900) */
+  --brand-bg-surface: #1e293b; /* Cards, sidebars (slate-800) */
+  --brand-bg-elevated: #334155; /* Code blocks, tooltips (slate-700) */
 
   /* Text — 3 hierarchy levels */
-  --brand-text-primary: #f8fafc;   /* Headings, body (slate-50) */
+  --brand-text-primary: #f8fafc; /* Headings, body (slate-50) */
   --brand-text-secondary: #cbd5e1; /* Descriptions (slate-300) */
-  --brand-text-muted: #94a3b8;     /* Captions, metadata (slate-400) */
+  --brand-text-muted: #94a3b8; /* Captions, metadata (slate-400) */
 
   /* Accent — blue with 3 distinct interactive states */
-  --brand-accent-blue: #0284c7;       /* Default (sky-600) */
+  --brand-accent-blue: #0284c7; /* Default (sky-600) */
   --brand-accent-blue-hover: #0369a1; /* Hover (sky-700) */
   --brand-accent-blue-active: #075985; /* Active/pressed (sky-800) */
-  --brand-accent-blue-soft: #0c4a6e;  /* Soft bg for badges/pills (sky-900) */
-  --brand-accent-purple: #9333ea;     /* Secondary accent — DECORATIVE ONLY.
+  --brand-accent-blue-soft: #0c4a6e; /* Soft bg for badges/pills (sky-900) */
+  --brand-accent-purple: #9333ea; /* Secondary accent — DECORATIVE ONLY.
                                          3.9:1 on slate-900: fails AA for normal text.
                                          Use only for large decorative elements, gradients, or icons. */
 
   /* Semantic — for callouts/alerts (all -400 variants, WCAG AA verified) */
-  --brand-semantic-tip: #34d399;          /* emerald-400 */
-  --brand-semantic-tip-soft: #0d3b2e;     /* Pre-computed: emerald-400 12% over slate-900 */
-  --brand-semantic-warning: #fbbf24;      /* amber-400 */
+  --brand-semantic-tip: #34d399; /* emerald-400 */
+  --brand-semantic-tip-soft: #0d3b2e; /* Pre-computed: emerald-400 12% over slate-900 */
+  --brand-semantic-warning: #fbbf24; /* amber-400 */
   --brand-semantic-warning-soft: #2d2305; /* Pre-computed: amber-400 12% over slate-900 */
-  --brand-semantic-danger: #f87171;       /* red-400 */
-  --brand-semantic-danger-soft: #2d1216;  /* Pre-computed: red-400 12% over slate-900 */
+  --brand-semantic-danger: #f87171; /* red-400 */
+  --brand-semantic-danger-soft: #2d1216; /* Pre-computed: red-400 12% over slate-900 */
 
   /* Borders */
-  --brand-border: #334155;         /* Default (slate-700) */
-  --brand-border-soft: #1e293b;    /* Subtle (slate-800) */
+  --brand-border: #334155; /* Default (slate-700) */
+  --brand-border-soft: #1e293b; /* Subtle (slate-800) */
 
   /* Code */
-  --brand-code-bg: #1e293b;        /* Inline code background (surface) */
-  --brand-code-block-bg: #131c2e;  /* Fenced code — custom blend halfway between slate-900 and
+  --brand-code-bg: #1e293b; /* Inline code background (surface) */
+  --brand-code-block-bg: #131c2e; /* Fenced code — custom blend halfway between slate-900 and
                                       slate-800. No Tailwind equivalent class. */
 
   /* Font stacks */
-  --brand-font-sans: "Inter", system-ui, -apple-system, BlinkMacSystemFont,
-    "Segoe UI", Roboto, sans-serif;
-  --brand-font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
-    monospace;
+  --brand-font-sans:
+    "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
+  --brand-font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
 }
 ```
 
@@ -60,20 +61,20 @@
 
 Verified with WebAIM contrast checker.
 
-| Token | Hex | Background | Bg Hex | Ratio | WCAG AA |
-|-------|-----|------------|--------|-------|---------|
-| `text-primary` | `#f8fafc` | page | `#0f172a` | 17.1:1 | Pass |
-| `text-secondary` | `#cbd5e1` | page | `#0f172a` | 9.8:1 | Pass |
-| `text-muted` | `#94a3b8` | page | `#0f172a` | 5.4:1 | Pass |
-| `semantic-tip` | `#34d399` | page | `#0f172a` | 7.4:1 | Pass |
-| `semantic-tip` | `#34d399` | tip-soft | `#0d3b2e` | 5.2:1 | Pass |
-| `semantic-warning` | `#fbbf24` | page | `#0f172a` | 10.5:1 | Pass |
-| `semantic-warning` | `#fbbf24` | warning-soft | `#2d2305` | 8.1:1 | Pass |
-| `semantic-danger` | `#f87171` | page | `#0f172a` | 5.8:1 | Pass |
-| `semantic-danger` | `#f87171` | danger-soft | `#2d1216` | 4.7:1 | Pass |
-| `accent-blue` | `#0284c7` | page | `#0f172a` | 3.8:1 | Pass (UI/large text, 3:1) |
-| `accent-blue` | `#0284c7` | surface | `#1e293b` | ~2.8:1 | **Fail** — mitigated below |
-| `accent-purple` | `#9333ea` | page | `#0f172a` | 3.9:1 | Fail — decorative only |
+| Token              | Hex       | Background   | Bg Hex    | Ratio  | WCAG AA                    |
+| ------------------ | --------- | ------------ | --------- | ------ | -------------------------- |
+| `text-primary`     | `#f8fafc` | page         | `#0f172a` | 17.1:1 | Pass                       |
+| `text-secondary`   | `#cbd5e1` | page         | `#0f172a` | 9.8:1  | Pass                       |
+| `text-muted`       | `#94a3b8` | page         | `#0f172a` | 5.4:1  | Pass                       |
+| `semantic-tip`     | `#34d399` | page         | `#0f172a` | 7.4:1  | Pass                       |
+| `semantic-tip`     | `#34d399` | tip-soft     | `#0d3b2e` | 5.2:1  | Pass                       |
+| `semantic-warning` | `#fbbf24` | page         | `#0f172a` | 10.5:1 | Pass                       |
+| `semantic-warning` | `#fbbf24` | warning-soft | `#2d2305` | 8.1:1  | Pass                       |
+| `semantic-danger`  | `#f87171` | page         | `#0f172a` | 5.8:1  | Pass                       |
+| `semantic-danger`  | `#f87171` | danger-soft  | `#2d1216` | 4.7:1  | Pass                       |
+| `accent-blue`      | `#0284c7` | page         | `#0f172a` | 3.8:1  | Pass (UI/large text, 3:1)  |
+| `accent-blue`      | `#0284c7` | surface      | `#1e293b` | ~2.8:1 | **Fail** — mitigated below |
+| `accent-purple`    | `#9333ea` | page         | `#0f172a` | 3.9:1  | Fail — decorative only     |
 
 **Accent-blue on surface (2.8:1):** Fails 3:1 UI threshold. Mitigation: VitePress sidebar links use `--vp-c-text-1` (white), not brand color. For body links that may appear on elevated surfaces, underline is enforced as additional affordance (scoped to links on surfaces, not all `.vp-doc a` — see Decision 7).
 
@@ -105,9 +106,11 @@ Verified with WebAIM contrast checker.
   --vp-c-border: var(--brand-border);
 
   /* Brand — 3 distinct interactive states */
-  --vp-c-brand-1: var(--brand-accent-blue);          /* default (sky-600) */
-  --vp-c-brand-2: var(--brand-accent-blue-hover);     /* hover (sky-700) */
-  --vp-c-brand-3: var(--brand-accent-blue-active);    /* active/pressed (sky-800) */
+  --vp-c-brand-1: var(--brand-accent-blue); /* default (sky-600) */
+  --vp-c-brand-2: var(--brand-accent-blue-hover); /* hover (sky-700) */
+  --vp-c-brand-3: var(
+    --brand-accent-blue-active
+  ); /* active/pressed (sky-800) */
   --vp-c-brand-soft: var(--brand-accent-blue-soft);
 
   /* Semantic containers — all via tokens */
@@ -146,6 +149,7 @@ Implementation step: do a full dump of VP dark vars and verify no unmapped varia
 **Luminance:** 76 → 66 → 55 → 45 — ~10-point steps.
 **Focus ring:** `ring-primary-500` (L=55) lighter than `bg-primary-600` (L=45). Correct.
 **Accent drift:** TW4 `@theme` requires static values. Sync comment:
+
 ```css
 @theme {
   --color-primary-500: #0284c7; /* Must match --brand-accent-blue in styles/brand-tokens.css */
@@ -157,6 +161,7 @@ Implementation step: do a full dump of VP dark vars and verify no unmapped varia
 **Font copies committed to git** (~25KB × 4 = 100KB total). Fresh clone works without scripts.
 
 **@font-face in brand-tokens.css** (absolute root path):
+
 ```css
 @font-face {
   font-family: "Inter";
@@ -164,15 +169,17 @@ Implementation step: do a full dump of VP dark vars and verify no unmapped varia
   font-weight: 100 900;
   font-display: swap;
   src: url("/fonts/inter-var-latin.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-    U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF,
+    U+FFFD;
 }
 ```
 
 **Surfaces with non-root base paths MUST override `@font-face` AFTER importing brand-tokens.css.** Vite does NOT rewrite absolute CSS `url()` paths. The override ensures `@font-face src` matches the preload href, preventing double-downloads.
 
 **Docs (`custom.css`):**
+
 ```css
 @import "../../../../styles/brand-tokens.css";
 
@@ -183,13 +190,15 @@ Implementation step: do a full dump of VP dark vars and verify no unmapped varia
   font-weight: 100 900;
   font-display: swap;
   src: url("/docs/fonts/inter-var-latin.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-    U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF,
+    U+FFFD;
 }
 ```
 
 **Editor (`index.css`):**
+
 ```css
 @import "../../../styles/brand-tokens.css";
 
@@ -203,20 +212,29 @@ Implementation step: do a full dump of VP dark vars and verify no unmapped varia
   font-weight: 100 900;
   font-display: swap;
   src: url("/editor/fonts/inter-var-latin.woff2") format("woff2");
-  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6,
-    U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193,
-    U+2212, U+2215, U+FEFF, U+FFFD;
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF,
+    U+FFFD;
 }
 ```
 
 **Preload tags — MUST include `crossorigin`:**
+
 ```html
-<link rel="preload" href="/fonts/inter-var-latin.woff2" as="font"
-      type="font/woff2" crossorigin />
+<link
+  rel="preload"
+  href="/fonts/inter-var-latin.woff2"
+  as="font"
+  type="font/woff2"
+  crossorigin
+/>
 ```
+
 Without `crossorigin`, the browser downloads the font twice (preload without CORS, then @font-face with CORS).
 
 **Font sync script** (`scripts/sync-fonts.sh`):
+
 ```bash
 #!/usr/bin/env bash
 # Sync canonical font files to all surface public directories.
@@ -283,6 +301,7 @@ VitePress uses the **same** `.VPSidebar` class for desktop and mobile drawer. Mo
 Accent-blue (3.8:1 on page, 2.8:1 on surface) needs underline as additional affordance. Two aspects:
 
 **Hover state:** Verify VitePress applies `--vp-c-brand-2` to `.vp-doc a:hover`. If not, add:
+
 ```css
 .vp-doc a:hover {
   color: var(--vp-c-brand-2);
@@ -313,6 +332,7 @@ Before committing, visually review a link-dense docs page (e.g., API reference).
 The editor body uses `dark:bg-gray-950` (#030712, warm) while brand tokens use slate-900 (#0f172a, cool). `LayoutHeader` also uses `dark:bg-gray-950`. These are always-visible structural elements.
 
 **Fix in this change (all files in `components/templates/`):**
+
 - `body` in `index.css`: `dark:bg-gray-950` → `dark:bg-slate-900`
 - `LayoutHeader.tsx`: `dark:bg-gray-950` → `dark:bg-slate-900`, `dark:border-gray-800` → `dark:border-slate-800`
 - `MainLayout.tsx`: `dark:bg-gray-900` → `dark:bg-slate-900`

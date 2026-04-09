@@ -1,12 +1,14 @@
 # Tasks: Cosmetic Polish
 
 ## Task 1: Delete App.css and fix editor mobile
+
 - [ ] Delete `packages/workout-spa-editor/src/App.css`
 - [ ] Remove `import "./App.css"` from `packages/workout-spa-editor/src/App.tsx`
 - [ ] Visual screenshot of WelcomeSection at 1440px — confirm no text alignment regression
 - [ ] Verify editor renders full-width at 320px and 375px
 
 ## Task 2: Self-hosted Inter variable font
+
 - [ ] Download Inter variable font woff2 (latin subset, ~25KB) from rsms.me/inter
 - [ ] Place canonical source at `styles/fonts/inter-var-latin.woff2`
 - [ ] Copy to `packages/landing/public/fonts/inter-var-latin.woff2`
@@ -29,6 +31,7 @@
 - [ ] Verify: `git clone && pnpm install && pnpm -r build` works without running sync script
 
 ## Task 3: Expand brand-tokens.css
+
 - [ ] Add consumer documentation comment (landing, docs, editor) and light-mode note
 - [ ] Add elevation: `--brand-bg-elevated` (#334155)
 - [ ] Add 3 interactive accent states: hover (sky-700), active (sky-800), soft (sky-900)
@@ -40,6 +43,7 @@
 - [ ] Document accent-blue on surface (2.8:1) mitigation in code comment
 
 ## Task 4: Complete VitePress dark theme overrides
+
 - [ ] Verify actual VitePress version from `packages/docs/package.json` — use that in pinned comment
 - [ ] Add version-pinned comment block with exact vars.css path
 - [ ] Document intentionally skipped variables in comment
@@ -57,6 +61,7 @@
 - [ ] Verify mobile sidebar drawer has correct 16px padding
 
 ## Task 5: Align editor accent, fix structural gray→slate
+
 - [ ] Regenerate `--color-primary-300` (#67c9f5) and `--color-primary-400` (#2aabea)
 - [ ] Set `--color-primary-500: #0284c7` with comment `/* Must match --brand-accent-blue */`
 - [ ] Shift 600-950 accordingly
@@ -70,10 +75,12 @@
 - [ ] Verify focus rings lighter than buttons, all interactive states correct
 
 ## Task 6: Update landing font
+
 - [ ] Update `--font-sans` in `packages/landing/src/main.css` → `var(--brand-font-sans)`
 - [ ] Verify landing renders with Inter font
 
 ## Task 7: Visual verification & build
+
 - [ ] Editor at 320px, 375px, 667px, 768px, 1440px — full-width, correct accent, Inter, slate-900 body/header
 - [ ] Docs at 320px, 375px, 667px, 768px, 1440px — code blocks, callouts, sidebar, tips, warnings
 - [ ] Landing at 320px, 375px, 667px, 768px, 1440px — no regressions, Inter renders

@@ -65,11 +65,11 @@ styles/fonts/inter-var-latin.woff2              ← canonical source
 
 **Path strategy per surface:**
 
-| Surface | Base | @font-face src | Preload href | Notes |
-|---------|------|----------------|--------------|-------|
-| Landing | `/` | `/fonts/inter-var-latin.woff2` (brand-tokens) | `/fonts/inter-var-latin.woff2` | Paths match |
-| Docs | `/docs/` | `/docs/fonts/inter-var-latin.woff2` (custom.css override) | `/docs/fonts/inter-var-latin.woff2` | Override AFTER import |
-| Editor (dev) | `/` | `/fonts/inter-var-latin.woff2` (brand-tokens) | `/fonts/inter-var-latin.woff2` | Works in dev |
+| Surface       | Base       | @font-face src                                             | Preload href                          | Notes                 |
+| ------------- | ---------- | ---------------------------------------------------------- | ------------------------------------- | --------------------- |
+| Landing       | `/`        | `/fonts/inter-var-latin.woff2` (brand-tokens)              | `/fonts/inter-var-latin.woff2`        | Paths match           |
+| Docs          | `/docs/`   | `/docs/fonts/inter-var-latin.woff2` (custom.css override)  | `/docs/fonts/inter-var-latin.woff2`   | Override AFTER import |
+| Editor (dev)  | `/`        | `/fonts/inter-var-latin.woff2` (brand-tokens)              | `/fonts/inter-var-latin.woff2`        | Works in dev          |
 | Editor (prod) | `/editor/` | `/editor/fonts/inter-var-latin.woff2` (index.css override) | `/editor/fonts/inter-var-latin.woff2` | Override AFTER import |
 
 **Critical:** All `<link rel="preload">` tags MUST include `crossorigin` attribute (required for fonts even same-origin, because `@font-face` fetches use CORS mode). Without it, browser downloads font twice.
@@ -80,15 +80,15 @@ styles/fonts/inter-var-latin.woff2              ← canonical source
 
 ## Risks
 
-| Risk | Mitigation |
-|------|------------|
-| VitePress upgrade breaks variables | Version-pinned comment with exact file path (verify actual version from package.json) |
-| Inter FOUT | `font-display: swap` + preload. Dark bg. `size-adjust` deferred. |
-| App.css deletion cascade | Visual screenshot at 1440px. Trivially reversible. |
-| Primary ramp jump | Smooth gradient, luminance-verified |
-| Font drift (4 copies) | `scripts/sync-fonts.sh` + script comments listing all touchpoints |
-| Accent drift (TW4 limitation) | Sync comment in editor @theme |
-| Editor gray/slate mix at component level | Structural components (body, header) fixed. Full migration scoped separately. |
+| Risk                                     | Mitigation                                                                            |
+| ---------------------------------------- | ------------------------------------------------------------------------------------- |
+| VitePress upgrade breaks variables       | Version-pinned comment with exact file path (verify actual version from package.json) |
+| Inter FOUT                               | `font-display: swap` + preload. Dark bg. `size-adjust` deferred.                      |
+| App.css deletion cascade                 | Visual screenshot at 1440px. Trivially reversible.                                    |
+| Primary ramp jump                        | Smooth gradient, luminance-verified                                                   |
+| Font drift (4 copies)                    | `scripts/sync-fonts.sh` + script comments listing all touchpoints                     |
+| Accent drift (TW4 limitation)            | Sync comment in editor @theme                                                         |
+| Editor gray/slate mix at component level | Structural components (body, header) fixed. Full migration scoped separately.         |
 
 ## Success Criteria
 
