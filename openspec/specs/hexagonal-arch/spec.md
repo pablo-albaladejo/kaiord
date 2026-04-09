@@ -1,4 +1,4 @@
-> Synced: 2026-03-30
+> Synced: 2026-04-09
 
 # Hexagonal Architecture
 
@@ -51,7 +51,6 @@ Each package SHALL respect the following dependency rules:
 | `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin` | `@kaiord/core` only                                             |
 | `@kaiord/garmin-connect`                                      | `@kaiord/core`, `@kaiord/garmin`                                |
 | `@kaiord/ai`                                                  | `@kaiord/core` only (+ `ai` as peer dependency)                 |
-| `@kaiord/infra`                                               | `@kaiord/core`, `@kaiord/garmin`, `@kaiord/garmin-connect`      |
 | `@kaiord/mcp`                                                 | `@kaiord/core` + all format adapters + `@kaiord/garmin-connect` |
 | `@kaiord/cli`                                                 | `@kaiord/core` + all adapters + `@kaiord/garmin-connect`        |
 
@@ -75,8 +74,3 @@ Each package SHALL respect the following dependency rules:
 - **WHEN** the reader is swapped to a different adapter
 - **THEN** the core use case works identically without code changes
 
-#### Scenario: Infra Lambda uses garmin adapters
-
-- **GIVEN** the `@kaiord/infra` Lambda handler
-- **WHEN** it receives a KRD push request
-- **THEN** it uses `@kaiord/garmin-connect` for SSO login and `@kaiord/garmin` for KRD→GCN conversion
