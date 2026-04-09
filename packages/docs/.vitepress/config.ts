@@ -9,7 +9,8 @@ const OG_IMAGE = `${SITE_URL}${DOCS_BASE}og-image-docs.png`;
 
 const AUTHOR = {
   name: "Pablo Albaladejo",
-  linkedin: "https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/",
+  linkedin:
+    "https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/",
   github: "https://github.com/pablo-albaladejo",
 };
 
