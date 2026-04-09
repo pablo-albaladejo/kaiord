@@ -73,4 +73,3 @@ Each package SHALL respect the following dependency rules:
 - **GIVEN** a call to `fromBinary(buffer, fitReader)`
 - **WHEN** the reader is swapped to a different adapter
 - **THEN** the core use case works identically without code changes
-
