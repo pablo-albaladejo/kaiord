@@ -45,7 +45,7 @@ for (const pkg of packages) {
         "",
         `See the [CLI Commands Reference](/cli/commands) for documentation.`,
         "",
-      ].join("\n"),
+      ].join("\n")
     );
     console.warn(`  Placeholder: api/${pkg.name}/ (no index.ts entry point)`);
     continue;
