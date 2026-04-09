@@ -83,7 +83,7 @@ Verified with WebAIM contrast checker.
 ```css
 /*
  * VitePress Dark Theme Overrides
- * Verified against: vitepress@[ACTUAL_VERSION from package.json]
+ * Verified against: vitepress@2.0.0-alpha.17
  * Variable source: node_modules/vitepress/dist/client/theme-default/styles/vars.css
  * On VitePress upgrade, grep the above file for these variable names.
  * Intentionally skipped: --vp-c-brand-dimm-* (unused in current layout),
@@ -132,7 +132,7 @@ Implementation step: do a full dump of VP dark vars and verify no unmapped varia
 
 ## Decision 3: Editor Primary Color Ramp — Smooth Regeneration
 
-```
+```text
 50:  #f0f9ff   (unchanged)
 100: #e0f2fe   (unchanged)
 200: #bae6fd   (unchanged)
