@@ -134,6 +134,87 @@ Rules:
 
 **Do not test**: types, mappers, fixtures, type definitions, third-party libraries.
 
+## Test assertions
+
+- Use `toStrictEqual()` for objects -- validates complete structure
+- Use fixtures with `.build()` -- generate realistic data
+- Include all fields in assertions
+- One `expect` per object, not per property
+
+```typescript
+// Good -- complete object validation
+expect(metadata).toStrictEqual({
+  created: "2025-01-15T10:30:00Z",
+  manufacturer: metadata.manufacturer,
+  sport: "running",
+  subSport: metadata.subSport,
+});
+
+// Avoid -- multiple expects for same object
+expect(metadata.created).toBe("2025-01-15T10:30:00Z");
+expect(metadata.sport).toBe("running");
+```
+
+## Coverage strategy
+
+Mappers get coverage indirectly through:
+
+1. **Integration tests** -- testing adapters that use mappers
+2. **Round-trip tests** -- FIT to KRD to FIT conversions
+3. **Converter tests** -- converters that call mappers
+4. **Use case tests** -- end-to-end flows
+
+If a mapper has low coverage, it means the mapper is unused, has logic that should be in a converter, or is missing integration test scenarios.
+
+## Frontend testing
+
+### Component tests (React Testing Library)
+
+```typescript
+describe("Button", () => {
+  it("should call onClick when clicked", async () => {
+    // Arrange
+    const handleClick = vi.fn();
+    const user = userEvent.setup();
+    renderWithProviders(<Button onClick={handleClick}>Click me</Button>);
+
+    // Act
+    await user.click(screen.getByRole("button"));
+
+    // Assert
+    expect(handleClick).toHaveBeenCalledOnce();
+  });
+});
+```
+
+Use semantic queries in this order: `getByRole` > `getByLabelText` > `getByPlaceholderText` > `getByText` > `getByTestId` (last resort).
+
+### Store tests (Zustand)
+
+Reset state before each test:
+
+```typescript
+beforeEach(() => {
+  useWorkoutStore.setState({
+    currentWorkout: null,
+    workoutHistory: [],
+    historyIndex: -1,
+  });
+});
+```
+
+### E2E tests (Playwright)
+
+```typescript
+test("should load and edit workout", async ({ page }) => {
+  await page.goto("/");
+  await page.getByRole("button", { name: /load workout/i }).click();
+  await page.getByRole("textbox", { name: /workout name/i }).fill("New Name");
+  await page.getByRole("button", { name: /save/i }).click();
+  await expect(page.getByText("Workout saved")).toBeVisible();
+});
+```
+
 ## Running tests
 
 ```bash
@@ -148,7 +229,16 @@ pnpm -r test:watch
 
 # With coverage
 pnpm test -- --coverage
+
+# E2E tests (frontend)
+cd packages/workout-spa-editor && pnpm test:e2e
 ```
+
+## Best practices
+
+**Do**: test user behavior, use semantic queries, test accessibility, test error states, follow AAA pattern, use fixtures.
+
+**Don't**: test implementation details, test types (TypeScript handles this), test mappers directly, test third-party libraries, use `getByTestId` as first choice.
 
 ## Next steps
 

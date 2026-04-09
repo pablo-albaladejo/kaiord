@@ -106,6 +106,29 @@ const tcx = await toText(krd, tcxWriter);
 
 No dependency injection framework needed. Functions are composed at entry points (CLI, MCP).
 
+### Curried use cases
+
+For more complex use cases, Kaiord uses currying for dependency injection. The use case receives adapters (ports) as dependencies and delegates work to them -- validation stays at adapter boundaries, not inside use cases:
+
+```typescript
+// First function receives dependencies (adapters)
+// Second function receives operation parameters
+export const convertFitToKrd =
+  (fitReader: FitReader) =>
+  async (params: { fitBuffer: Uint8Array }): Promise<KRD> => {
+    // The adapter validates internally at the boundary
+    return fitReader(params.fitBuffer);
+  };
+```
+
+Composition happens at entry points:
+
+```typescript
+const fitReader = createFitReader(logger);
+const convertFitToKrdUseCase = convertFitToKrd(fitReader);
+const krd = await convertFitToKrdUseCase({ fitBuffer });
+```
+
 ## Schema-first development
 
 Kaiord uses **Zod as the single source of truth**:
@@ -131,6 +154,37 @@ export type Sport = z.infer<typeof sportSchema>;
 - **Adapter schemas** use `camelCase`: `indoorCycling`, `lapSwimming`
 - Access enum values via `.enum`: `sportSchema.enum.cycling`
 
+### Enum schemas
+
+Use `z.enum()` for enumeration types, never TypeScript `enum` or constant objects:
+
+```typescript
+export const subSportSchema = z.enum([
+  "generic",
+  "indoor_cycling", // snake_case in domain
+  "lap_swimming",
+]);
+export type SubSport = z.infer<typeof subSportSchema>;
+
+// Access values at runtime
+subSportSchema.enum.indoor_cycling; // "indoor_cycling"
+```
+
+### Validation at boundaries
+
+Validate at entry points (CLI, adapters), not in use cases:
+
+```typescript
+// Adapter validates its output before returning
+export const createFitReader =
+  (logger: Logger): FitReader =>
+  async (buffer: Uint8Array): Promise<KRD> => {
+    const rawData = decoder.read(buffer);
+    const krd = convertFitMessagesToKRD(rawData.messages);
+    return krdSchema.parse(krd); // Validate at boundary
+  };
+```
+
 ## Error handling
 
 Errors follow Clean Architecture principles:
@@ -145,6 +199,31 @@ Domain Layer      → Define custom Error classes
 Application Layer → Propagate errors (add context if needed)
 Adapters Layer    → Catch external errors, transform to domain errors
 Entry Points      → Catch all errors, log, format response
+```
+
+### Domain error classes
+
+All domain errors extend `Error` with descriptive names:
+
+- **FitParsingError** -- FIT file parsing failures
+- **KrdValidationError** -- KRD schema validation failures (includes field-level errors)
+- **ToleranceExceededError** -- round-trip tolerance violations (includes per-field deviations)
+
+### Error transformation in adapters
+
+Adapters catch external library errors and wrap them:
+
+```typescript
+export const createFitReader =
+  (logger: Logger): FitReader =>
+  async (buffer: Uint8Array): Promise<KRD> => {
+    try {
+      const { messages } = decoder.read(buffer);
+      return convertMessagesToKRD(messages);
+    } catch (error) {
+      throw new FitParsingError("Failed to parse FIT file", error);
+    }
+  };
 ```
 
 ## Next steps

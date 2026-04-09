@@ -30,6 +30,17 @@
   },
   "enableAllProjectMcpServers": true,
   "hooks": {
+    "PreToolUse": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"$CLAUDE_PROJECT_DIR\"/scripts/check-docs-sync.sh",
+            "if": "Bash(git commit*)"
+          }
+        ]
+      }
+    ],
     "Stop": [
       {
         "hooks": [
