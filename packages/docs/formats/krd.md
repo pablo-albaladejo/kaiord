@@ -101,13 +101,73 @@ Additional repeat types: `repeat_until_time`, `repeat_until_distance`, `repeat_u
 | `cadence`    | `rpm`, `zone`, `range`                  |
 | `open`       | No target                               |
 
-## Sessions, laps, and records
+## Sessions
 
-**Sessions** capture training session summaries (start time, elapsed time, distance, sport, averages).
+Sessions capture training session summaries:
 
-**Laps** represent intervals within sessions (per-lap averages and maximums).
+```json
+{
+  "sessions": [
+    {
+      "startTime": "2025-01-15T10:30:00Z",
+      "totalElapsedTime": 3600,
+      "totalTimerTime": 3540,
+      "totalDistance": 10000,
+      "sport": "running",
+      "avgHeartRate": 145,
+      "maxHeartRate": 178,
+      "avgCadence": 85,
+      "avgPower": 250,
+      "totalCalories": 650
+    }
+  ]
+}
+```
 
-**Records** are time-series data points (timestamp, position, altitude, heart rate, cadence, power, speed, distance).
+Key fields: `startTime` (ISO 8601), `totalElapsedTime` (seconds), `totalTimerTime` (active time, excludes pauses), `totalDistance` (meters), `sport`.
+
+## Laps
+
+Laps represent intervals within a session:
+
+```json
+{
+  "laps": [
+    {
+      "startTime": "2025-01-15T10:30:00Z",
+      "totalElapsedTime": 600,
+      "totalDistance": 1000,
+      "avgHeartRate": 142,
+      "maxHeartRate": 155,
+      "avgCadence": 84,
+      "avgPower": 245
+    }
+  ]
+}
+```
+
+## Records
+
+Time-series data points (typically 1 Hz):
+
+```json
+{
+  "records": [
+    {
+      "timestamp": "2025-01-15T10:30:00Z",
+      "position": { "lat": 41.3851, "lon": 2.1734 },
+      "altitude": 12.5,
+      "heartRate": 145,
+      "cadence": 85,
+      "power": 250,
+      "speed": 2.78,
+      "distance": 100
+    }
+  ]
+}
+```
+
+Fields: `timestamp` (ISO 8601), `position` (lat/lon in degrees), `altitude` (meters), `heartRate` (bpm), `cadence` (rpm), `power` (watts), `speed` (m/s), `distance` (cumulative meters). All fields except `timestamp` are optional.
 
 ## Units and conventions
 
@@ -138,6 +198,28 @@ Format-specific data lives in `extensions`:
 }
 ```
 
+FIT developer fields and unknown messages are preserved during round-trip conversions:
+
+```json
+{
+  "extensions": {
+    "fit": {
+      "developerFields": [
+        { "fieldDefinitionNumber": 0, "fieldName": "custom_field", "value": 42 }
+      ]
+    }
+  }
+}
+```
+
+## Validation rules
+
+1. All KRD files MUST validate against the Zod schema
+2. Timestamps MUST be in ISO 8601 format with UTC timezone
+3. Numeric values MUST be finite (no NaN or Infinity)
+4. Arrays MUST be sorted by timestamp where applicable
+5. Required fields MUST be present; optional fields may be omitted (not null)
+
 ## Round-trip tolerances
 
 - Time: +/- 1 second
@@ -155,6 +237,78 @@ Format-specific data lives in `extensions`:
   "metadata": {
     "created": "2025-01-15T10:30:00Z",
     "sport": "running"
+  }
+}
+```
+
+## Example: complete workout
+
+```json
+{
+  "version": "1.0",
+  "type": "workout",
+  "metadata": {
+    "created": "2025-01-15T10:30:00Z",
+    "manufacturer": "garmin",
+    "product": "fenix7",
+    "sport": "cycling",
+    "subSport": "indoor_cycling"
+  },
+  "extensions": {
+    "workout": {
+      "name": "FTP Intervals",
+      "sport": "cycling",
+      "steps": [
+        {
+          "stepIndex": 0,
+          "durationType": "time",
+          "duration": { "type": "time", "seconds": 600 },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": { "unit": "percent_ftp", "value": 60 }
+          },
+          "intensity": "warmup",
+          "notes": "Easy warmup"
+        },
+        {
+          "stepIndex": 1,
+          "durationType": "time",
+          "duration": { "type": "time", "seconds": 300 },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": { "unit": "percent_ftp", "value": 105 }
+          },
+          "intensity": "active",
+          "notes": "Hard effort"
+        },
+        {
+          "stepIndex": 2,
+          "durationType": "time",
+          "duration": { "type": "time", "seconds": 180 },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": { "unit": "percent_ftp", "value": 50 }
+          },
+          "intensity": "rest",
+          "notes": "Recovery"
+        },
+        {
+          "stepIndex": 3,
+          "durationType": "time",
+          "duration": { "type": "time", "seconds": 300 },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": { "unit": "percent_ftp", "value": 50 }
+          },
+          "intensity": "cooldown",
+          "notes": "Easy cooldown"
+        }
+      ]
+    }
   }
 }
 ```
