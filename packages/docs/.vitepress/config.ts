@@ -9,7 +9,8 @@ const OG_IMAGE = `${SITE_URL}${DOCS_BASE}og-image-docs.png`;
 
 const AUTHOR = {
   name: "Pablo Albaladejo",
-  linkedin: "https://www.linkedin.com/in/pabloalbaladejo/",
+  linkedin:
+    "https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/",
   github: "https://github.com/pablo-albaladejo",
 };
 
@@ -125,14 +126,14 @@ export default defineConfig({
         text: "Getting Started",
         items: [
           { text: "Quick Start", link: "/guide/quick-start" },
-          { text: "Why Kaiord", link: "/guide/why-kaiord" },
+          { text: "Why Kaiord?", link: "/guide/why-kaiord" },
+          { text: "Installation", link: "/guide/getting-started" },
         ],
       },
       {
         text: "Guides",
         collapsed: false,
         items: [
-          { text: "Getting Started", link: "/guide/getting-started" },
           { text: "Architecture", link: "/guide/architecture" },
           { text: "Testing", link: "/guide/testing" },
           { text: "Contributing", link: "/guide/contributing" },
@@ -175,7 +176,7 @@ export default defineConfig({
 
     footer: {
       message:
-        'Built by <a href="https://www.linkedin.com/in/pabloalbaladejo/" target="_blank" rel="noopener">Pablo Albaladejo</a>',
+        'Built by <a href="https://www.linkedin.com/in/pablo-albaladejo-aws-software-engineer-ai/" target="_blank" rel="noopener">Pablo Albaladejo</a>',
       copyright:
         '<a href="https://github.com/pablo-albaladejo/kaiord/releases" target="_blank" rel="noopener">GitHub Releases</a>',
     },
