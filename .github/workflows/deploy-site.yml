@@ -6,6 +6,7 @@ on:
     paths:
       - "packages/landing/**"
       - "packages/workout-spa-editor/**"
+      - "packages/docs/**"
       - "packages/core/**"
       - "packages/fit/**"
       - "packages/tcx/**"
@@ -35,7 +36,15 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
-      # Always build both packages — the merged artifact must be complete.
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/pnpm/store/v3
+          key: pnpm-store-${{ hashFiles('pnpm-lock.yaml') }}
+          restore-keys: |
+            pnpm-store-
+
+      # Always build all packages — the merged artifact must be complete.
       # Targeted filters build only required transitive dependencies.
       - name: Build Landing Page
         run: pnpm --filter @kaiord/landing... build
@@ -44,6 +53,9 @@ jobs:
         env:
           VITE_BASE_PATH: /editor/
         run: pnpm --filter @kaiord/workout-spa-editor... build
+
+      - name: Build Docs
+        run: pnpm --filter @kaiord/docs... build
 
       - name: Merge dist outputs
         run: |
@@ -57,6 +69,15 @@ jobs:
           mkdir -p merged-dist/editor
           cp -r packages/workout-spa-editor/dist/* merged-dist/editor/
 
+          # Docs at /docs/
+          mkdir -p merged-dist/docs
+          cp -r packages/docs/.vitepress/dist/* merged-dist/docs/
+
+          # Merge sitemaps: use VitePress sitemap as the single sitemap
+          if [ -f merged-dist/docs/sitemap.xml ]; then
+            mv merged-dist/docs/sitemap.xml merged-dist/sitemap.xml
+          fi
+
           echo "✅ Merged dist structure:"
           ls -la merged-dist/
 
@@ -65,6 +86,7 @@ jobs:
           set -e
           test -f merged-dist/index.html          || { echo "❌ Missing landing index.html"; exit 1; }
           test -f merged-dist/editor/index.html    || { echo "❌ Missing editor index.html"; exit 1; }
+          test -f merged-dist/docs/index.html      || { echo "❌ Missing docs index.html"; exit 1; }
           test -f merged-dist/CNAME                || { echo "❌ Missing CNAME"; exit 1; }
           test -f merged-dist/.nojekyll            || { echo "❌ Missing .nojekyll"; exit 1; }
           test -f merged-dist/404.html             || { echo "❌ Missing 404.html"; exit 1; }

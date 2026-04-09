@@ -1,24 +1,24 @@
 ## 1. Package Setup
 
-- [ ] 1.1 Scaffold `packages/docs/` with package.json (private: true), VitePress 2.x, @shikijs/vitepress-twoslash, vitepress-plugin-llms. Declare all `@kaiord/*` packages as devDependencies for Twoslash resolution.
-- [ ] 1.2 Create `.vitepress/config.ts` with: `base: '/docs/'`, dark mode default, Kaiord logo, sidebar (Quick Start > Why Kaiord > Guides > Formats > CLI > MCP > API Reference), MiniSearch with Cmd+K, Twoslash, llms plugin, `sitemap: { hostname: 'https://kaiord.com' }`, `outline` for "On this page" sidebar, code copy button enabled
-- [ ] 1.3 Apply Kaiord branding: brand color tokens, system font stack (no web fonts), "Built by Pablo Albaladejo" footer with LinkedIn + GitHub Releases links, logo in sidebar
-- [ ] 1.4 Create `index.md` docs home: hero with one-liner + "Quick Start" CTA, 3-step visual (Install → Convert → Done), feature cards linking to Formats, CLI, MCP, API Reference
-- [ ] 1.5 Add typedoc + typedoc-plugin-markdown as devDependency, create prebuild script (`scripts/generate-api-docs.mjs`) to generate API reference into `packages/docs/api/`, add `api/` to `.gitignore`
-- [ ] 1.6 Add VitePress frontmatter template with `title` and `description` fields for per-page SEO
-- [ ] 1.7 Create docs OG image (1200x630, < 100KB, dark background + Kaiord logo + "Documentation" subtitle)
-- [ ] 1.8 Add JSON-LD structured data via VitePress `transformHead` hook: `BreadcrumbList` + `TechArticle` per page, `WebSite` + `SearchAction` on docs home
-- [ ] 1.9 Configure VitePress custom 404 page with search box and links to Quick Start + docs home
+- [x] 1.1 Scaffold `packages/docs/` with package.json (private: true), VitePress 1.x, @shikijs/vitepress-twoslash, vitepress-plugin-llms. Declare all `@kaiord/*` packages as devDependencies for Twoslash resolution.
+- [x] 1.2 Create `.vitepress/config.ts` with: `base: '/docs/'`, dark mode default, Kaiord logo, sidebar (Quick Start > Why Kaiord > Guides > Formats > CLI > MCP > API Reference), MiniSearch with Cmd+K, Twoslash, llms plugin, `sitemap: { hostname: 'https://kaiord.com' }`, `outline` for "On this page" sidebar, code copy button enabled
+- [x] 1.3 Apply Kaiord branding: brand color tokens, system font stack (no web fonts), "Built by Pablo Albaladejo" footer with LinkedIn + GitHub Releases links, logo in sidebar
+- [x] 1.4 Create `index.md` docs home: hero with one-liner + "Quick Start" CTA, 3-step visual (Install > Convert > Done), feature cards linking to Formats, CLI, MCP, API Reference
+- [x] 1.5 Add typedoc + typedoc-plugin-markdown as devDependency, create prebuild script (`scripts/generate-api-docs.mjs`) to generate API reference into `packages/docs/api/`, add `api/` to `.gitignore`
+- [x] 1.6 Add VitePress frontmatter template with `title` and `description` fields for per-page SEO
+- [x] 1.7 Create docs OG image (1200x630, < 100KB, dark background + Kaiord logo + "Documentation" subtitle)
+- [x] 1.8 Add JSON-LD structured data via VitePress `transformHead` hook: `BreadcrumbList` + `TechArticle` per page, `WebSite` + `SearchAction` on docs home
+- [x] 1.9 Configure VitePress custom 404 page with search box and links to Quick Start + docs home
 
 ## 2. Content Migration
 
-- [ ] 2.1 Create `guide/quick-start.md`: <=10 steps from `pnpm add` to working FIT→TCX conversion, self-contained, Twoslash type-checked. Opens with "By the end of this guide, you'll convert a Garmin FIT file to TCX in 4 lines of TypeScript."
+- [ ] 2.1 Create `guide/quick-start.md`: <=10 steps from `pnpm add` to working FIT->TCX conversion, self-contained, Twoslash type-checked. Opens with "By the end of this guide, you'll convert a Garmin FIT file to TCX in 4 lines of TypeScript."
 - [ ] 2.2 Create `guide/why-kaiord.md`: problem framing (fragmented formats, no unified TS SDK), search-friendly terms, comparison table vs parsing libraries individually (fitparse, gpx-parser, etc.)
 - [ ] 2.3 Migrate Getting Started guide from `docs/getting-started.md` to `packages/docs/guide/getting-started.md`
 - [ ] 2.4 Migrate Architecture guide from `docs/architecture.md` to `packages/docs/guide/architecture.md`
 - [ ] 2.5 Migrate KRD Format spec from `docs/krd-format.md` to `packages/docs/formats/krd.md`
 - [ ] 2.6 Migrate Testing guide from `docs/testing.md` to `packages/docs/guide/testing.md`
-- [ ] 2.7 Create format adapter pages: `formats/fit.md`, `formats/tcx.md`, `formats/zwo.md`, `formats/gcn.md` from package READMEs. Each page SHALL end with a CTA linking to Quick Start for conversion funnel ("Ready to convert? Follow the Quick Start →").
+- [ ] 2.7 Create format adapter pages: `formats/fit.md`, `formats/tcx.md`, `formats/zwo.md`, `formats/gcn.md` from package READMEs. Each page SHALL end with a CTA linking to Quick Start for conversion funnel ("Ready to convert? Follow the Quick Start ->").
 - [ ] 2.8 Create CLI command reference at `cli/commands.md`
 - [ ] 2.9 Create MCP tool reference at `mcp/tools.md`
 - [ ] 2.10 Add Twoslash type-checked code examples to key pages (quick-start, format pages, API overview)
@@ -60,7 +60,7 @@
 
 - [ ] 8.1 Verify docs load at `kaiord.com/docs/` with all pages rendered
 - [ ] 8.2 Verify search works: Cmd+K opens modal, type query, results appear, zero-results shows fallback links
-- [ ] 8.3 Verify `llms.txt` is accessible at `kaiord.com/docs/llms.txt` — feed to LLM and test 5 questions about Kaiord's API
+- [ ] 8.3 Verify `llms.txt` is accessible at `kaiord.com/docs/llms.txt` -- feed to LLM and test 5 questions about Kaiord's API
 - [ ] 8.4 Verify Twoslash code examples render with type information tooltips
 - [ ] 8.5 Verify auto-generated API reference pages are present and accurate
 - [ ] 8.6 Verify responsive: mobile sidebar hamburger, collapsible sections, 44px touch targets
