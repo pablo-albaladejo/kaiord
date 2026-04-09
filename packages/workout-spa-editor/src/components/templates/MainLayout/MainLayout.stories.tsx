@@ -50,7 +50,7 @@ export const WithWorkoutList: Story = {
           {[1, 2, 3, 4, 5].map((step) => (
             <div
               key={step}
-              className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+              className="rounded-lg border border-gray-200 bg-white p-4 shadow-sm dark:border-slate-700 dark:bg-slate-800"
             >
               <div className="flex items-center justify-between">
                 <div>
@@ -82,7 +82,7 @@ export const EmptyState: Story = {
   args: {
     children: (
       <div className="flex min-h-[400px] flex-col items-center justify-center space-y-4 text-center">
-        <div className="rounded-full bg-gray-100 p-6 dark:bg-gray-800">
+        <div className="rounded-full bg-gray-100 p-6 dark:bg-slate-800">
           <svg
             className="h-12 w-12 text-gray-400"
             fill="none"
@@ -127,7 +127,7 @@ export const MobileView: Story = {
           {[1, 2, 3].map((step) => (
             <div
               key={step}
-              className="rounded-lg border border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800"
+              className="rounded-lg border border-gray-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-800"
             >
               <div className="text-sm font-medium text-gray-900 dark:text-white">
                 Step {step}

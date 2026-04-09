@@ -103,6 +103,16 @@ export default defineConfig({
         href: `${DOCS_BASE}logo.svg`,
       },
     ],
+    [
+      "link",
+      {
+        rel: "preload",
+        href: `${DOCS_BASE}fonts/inter-var-latin.woff2`,
+        as: "font",
+        type: "font/woff2",
+        crossorigin: "",
+      },
+    ],
   ],
 
   sitemap: {

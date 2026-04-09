@@ -1,20 +1,38 @@
 @import "tailwindcss";
 @import "../../../styles/brand-tokens.css";
 
+/* Override @font-face for /editor/ production base path — MUST be after brand-tokens import.
+   In local dev (base=/), Vite serves public/ at root, so /fonts/... works.
+   In production (base=/editor/), Vite does NOT rewrite absolute CSS urls,
+   so this override is required. */
+@font-face {
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url("/editor/fonts/inter-var-latin.woff2") format("woff2");
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF,
+    U+FFFD;
+}
+
 @variant dark (&:where(.dark, .dark *));
 
 @theme {
+  /* Primary scale — smoothed ramp centered on brand accent #0284c7.
+     Must match --brand-accent-blue in styles/brand-tokens.css */
   --color-primary-50: #f0f9ff;
   --color-primary-100: #e0f2fe;
   --color-primary-200: #bae6fd;
-  --color-primary-300: #7dd3fc;
-  --color-primary-400: #38bdf8;
-  --color-primary-500: #0ea5e9;
-  --color-primary-600: #0284c7;
-  --color-primary-700: #0369a1;
-  --color-primary-800: #075985;
-  --color-primary-900: #0c4a6e;
-  --color-primary-950: #082f49;
+  --color-primary-300: #67c9f5;
+  --color-primary-400: #2aabea;
+  --color-primary-500: #0284c7;
+  --color-primary-600: #0369a1;
+  --color-primary-700: #075985;
+  --color-primary-800: #0c4a6e;
+  --color-primary-900: #082f49;
+  --color-primary-950: #041e36;
 
   --color-secondary-50: #faf5ff;
   --color-secondary-100: #f3e8ff;
@@ -28,9 +46,7 @@
   --color-secondary-900: #581c87;
   --color-secondary-950: #3b0764;
 
-  --font-family-sans:
-    Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    sans-serif;
+  --font-sans: var(--brand-font-sans);
 }
 
 @layer base {
@@ -51,7 +67,7 @@
   }
 
   body {
-    @apply m-0 min-h-screen bg-white text-gray-900 transition-colors duration-300 dark:bg-gray-950 dark:text-gray-100;
+    @apply m-0 min-h-screen bg-white text-gray-900 transition-colors duration-300 dark:bg-slate-900 dark:text-gray-100;
   }
 
   /* Webkit-specific focus styles for better Safari/iOS support - Requirement 35 */
