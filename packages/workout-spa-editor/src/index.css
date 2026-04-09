@@ -46,7 +46,7 @@
   --color-secondary-900: #581c87;
   --color-secondary-950: #3b0764;
 
-  --font-family-sans: var(--brand-font-sans);
+  --font-sans: var(--brand-font-sans);
 }
 
 @layer base {
