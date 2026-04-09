@@ -176,6 +176,11 @@
             >Features</a
           >
           <a
+            href="/docs/"
+            class="text-[var(--brand-text-secondary)] transition-colors hover:text-[var(--brand-text-primary)]"
+            >Docs</a
+          >
+          <a
             href="#developers"
             class="text-[var(--brand-text-secondary)] transition-colors hover:text-[var(--brand-text-primary)]"
             >Developers</a
@@ -199,12 +204,19 @@
           >
         </div>
 
-        <!-- Mobile CTA -->
-        <a
-          href="/editor/"
-          class="inline-flex min-h-[44px] items-center rounded-lg bg-[var(--brand-accent-blue)] px-4 py-2 text-sm font-semibold text-white sm:hidden"
-          >Try the Editor</a
-        >
+        <!-- Mobile CTAs -->
+        <div class="flex items-center gap-3 sm:hidden">
+          <a
+            href="/docs/"
+            class="text-sm text-[var(--brand-text-secondary)] transition-colors hover:text-[var(--brand-text-primary)]"
+            >Docs</a
+          >
+          <a
+            href="/editor/"
+            class="inline-flex min-h-[44px] items-center rounded-lg bg-[var(--brand-accent-blue)] px-4 py-2 text-sm font-semibold text-white"
+            >Try the Editor</a
+          >
+        </div>
       </nav>
     </header>
 
@@ -602,6 +614,13 @@
           >
             Convert fitness data in 4 lines of TypeScript. Strategy pattern —
             bring your own adapters.
+          </p>
+          <p class="mx-auto mt-3 max-w-2xl text-center">
+            <a
+              href="/docs/"
+              class="inline-flex items-center gap-1 text-[var(--brand-accent-blue)] transition-colors hover:text-[var(--brand-accent-blue)]/80"
+              >Read the Docs &#8594;</a
+            >
           </p>
 
           <!-- Code example -->

@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 240 48" fill="none">
+  <!-- Symbol: hub/convergence — hexagon with inner connections representing format hub -->
+  <g transform="translate(4, 4)">
+    <!-- Outer hexagon -->
+    <path d="M20 0L37.32 10L37.32 30L20 40L2.68 30L2.68 10Z" stroke="currentColor" stroke-width="2" fill="none"/>
+    <!-- Inner node (KRD hub) -->
+    <circle cx="20" cy="20" r="5" fill="currentColor"/>
+    <!-- Connection lines to vertices -->
+    <line x1="20" y1="20" x2="20" y2="2" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+    <line x1="20" y1="20" x2="35.6" y2="11" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+    <line x1="20" y1="20" x2="35.6" y2="29" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+    <line x1="20" y1="20" x2="20" y2="38" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+    <line x1="20" y1="20" x2="4.4" y2="29" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+    <line x1="20" y1="20" x2="4.4" y2="11" stroke="currentColor" stroke-width="1.5" opacity="0.5"/>
+    <!-- Format dots on vertices -->
+    <circle cx="20" cy="2" r="2.5" fill="currentColor" opacity="0.7"/>
+    <circle cx="35.6" cy="11" r="2.5" fill="currentColor" opacity="0.7"/>
+    <circle cx="35.6" cy="29" r="2.5" fill="currentColor" opacity="0.7"/>
+    <circle cx="20" cy="38" r="2.5" fill="currentColor" opacity="0.7"/>
+    <circle cx="4.4" cy="29" r="2.5" fill="currentColor" opacity="0.7"/>
+    <circle cx="4.4" cy="11" r="2.5" fill="currentColor" opacity="0.7"/>
+  </g>
+  <!-- Wordmark -->
+  <text x="56" y="34" font-family="system-ui, -apple-system, sans-serif" font-size="28" font-weight="700" letter-spacing="-0.5" fill="currentColor">kaiord</text>
+</svg>
