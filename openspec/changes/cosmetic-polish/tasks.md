@@ -14,7 +14,7 @@
 - [x] Copy to `packages/landing/public/fonts/inter-var-latin.woff2`
 - [x] Copy to `packages/docs/.vitepress/public/fonts/inter-var-latin.woff2`
 - [x] Copy to `packages/workout-spa-editor/public/fonts/inter-var-latin.woff2`
-- [ ] Commit all 4 copies to git
+- [x] Commit all 4 copies to git
 - [x] Create `scripts/sync-fonts.sh` with touchpoint list in comments (10 edits on font update)
 - [x] Add `@font-face` in `styles/brand-tokens.css` with absolute `src: url("/fonts/inter-var-latin.woff2")` and `font-display: swap`
 - [x] Add `--brand-font-sans` and `--brand-font-mono` tokens
@@ -47,7 +47,7 @@
 - [x] Verify actual VitePress version from `packages/docs/package.json` — use that in pinned comment
 - [x] Add version-pinned comment block with exact vars.css path
 - [x] Document intentionally skipped variables in comment
-- [ ] Full dump of VP dark vars — verify no unmapped variable produces visible warm grays
+- [x] Full dump of VP dark vars — verify no unmapped variable produces visible warm grays
 - [x] Map backgrounds: bg, bg-soft, bg-mute (all distinct), gutter
 - [x] Map borders: divider, border
 - [x] Map brand: brand-1 (sky-600), brand-2 (sky-700), brand-3 (sky-800) — all distinct
@@ -92,8 +92,8 @@
 - [ ] VitePress sidebar at 320px: no horizontal text overflow on longest item
 - [x] `pnpm -r build` passes
 - [x] `pnpm lint` passes
-- [ ] Create backlog issue: editor component-level `dark:bg-gray-*` → slate migration (~90 files outside templates/)
-- [ ] Create backlog issue: `viewport-fit=cover` + safe-area-inset
-- [ ] Create backlog issue: focus-visible styling consistency across surfaces
-- [ ] Create backlog issue: Inter `size-adjust` for CLS optimization (if FOUT is noticeable)
-- [ ] Create backlog issue: extract shared `@font-face` into single importable CSS file to reduce 3-file duplication
+- [x] Create backlog issue: editor component-level `dark:bg-gray-*` → slate migration (~90 files outside templates/) — #266
+- [x] Create backlog issue: `viewport-fit=cover` + safe-area-inset — #267
+- [x] Create backlog issue: focus-visible styling consistency across surfaces — #268
+- [x] Create backlog issue: Inter `size-adjust` for CLS optimization (if FOUT is noticeable) — #269
+- [x] Create backlog issue: extract shared `@font-face` into single importable CSS file to reduce 3-file duplication — #270
