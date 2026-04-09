@@ -30,9 +30,24 @@ console.log("Generating API reference docs with TypeDoc...");
 for (const pkg of packages) {
   const entryPath = join(monorepoRoot, pkg.entryPoint);
   if (!existsSync(entryPath)) {
-    console.warn(
-      `  Skipping ${pkg.name}: entry point not found at ${pkg.entryPoint}`
+    // Create placeholder for packages without index.ts (e.g., CLI)
+    const placeholderDir = join(apiDir, pkg.name);
+    mkdirSync(placeholderDir, { recursive: true });
+    writeFileSync(
+      join(placeholderDir, "index.md"),
+      [
+        "---",
+        `title: "@kaiord/${pkg.name} API"`,
+        `description: "API reference for @kaiord/${pkg.name}"`,
+        "---",
+        "",
+        `# @kaiord/${pkg.name}`,
+        "",
+        `See the [CLI Commands Reference](/cli/commands) for documentation.`,
+        "",
+      ].join("\n"),
     );
+    console.warn(`  Placeholder: api/${pkg.name}/ (no index.ts entry point)`);
     continue;
   }
 
