@@ -1,5 +1,7 @@
 # Kaiord — Open-Source Health & Fitness Data Framework
 
+**[kaiord.com](https://kaiord.com)** | [Editor](https://kaiord.com/editor/) | [npm](https://www.npmjs.com/org/kaiord)
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-blue?logo=typescript)](https://www.typescriptlang.org/)
 
