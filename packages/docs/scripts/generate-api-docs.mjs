@@ -13,7 +13,10 @@ const packages = [
   { name: "tcx", entryPoint: "packages/tcx/src/index.ts" },
   { name: "zwo", entryPoint: "packages/zwo/src/index.ts" },
   { name: "garmin", entryPoint: "packages/garmin/src/index.ts" },
-  { name: "garmin-connect", entryPoint: "packages/garmin-connect/src/index.ts" },
+  {
+    name: "garmin-connect",
+    entryPoint: "packages/garmin-connect/src/index.ts",
+  },
   { name: "cli", entryPoint: "packages/cli/src/index.ts" },
   { name: "mcp", entryPoint: "packages/mcp/src/index.ts" },
 ];
@@ -27,7 +30,9 @@ console.log("Generating API reference docs with TypeDoc...");
 for (const pkg of packages) {
   const entryPath = join(monorepoRoot, pkg.entryPoint);
   if (!existsSync(entryPath)) {
-    console.warn(`  Skipping ${pkg.name}: entry point not found at ${pkg.entryPoint}`);
+    console.warn(
+      `  Skipping ${pkg.name}: entry point not found at ${pkg.entryPoint}`
+    );
     continue;
   }
 
@@ -54,7 +59,7 @@ for (const pkg of packages) {
         cwd: monorepoRoot,
         stdio: "pipe",
         timeout: 60_000,
-      },
+      }
     );
     console.log(`  Generated: api/${pkg.name}/`);
   } catch (error) {
@@ -75,9 +80,11 @@ for (const pkg of packages) {
         `pnpm add @kaiord/${pkg.name}`,
         "```",
         "",
-      ].join("\n"),
+      ].join("\n")
     );
-    console.warn(`  Placeholder: api/${pkg.name}/ (TypeDoc needs tsconfig fix)`);
+    console.warn(
+      `  Placeholder: api/${pkg.name}/ (TypeDoc needs tsconfig fix)`
+    );
   }
 }
 
@@ -107,7 +114,7 @@ if (!existsSync(apiIndex)) {
       "| [@kaiord/cli](./cli/index.md) | Command-line interface |",
       "| [@kaiord/mcp](./mcp/README.md) | Model Context Protocol server |",
       "",
-    ].join("\n"),
+    ].join("\n")
   );
   console.log("  Generated: api/index.md");
 }

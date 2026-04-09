@@ -44,10 +44,10 @@ const writer = createFitWriter(logger);
 
 ## API
 
-| Function | Description |
-| --- | --- |
-| `fitReader` | Pre-built FIT binary reader |
-| `fitWriter` | Pre-built FIT binary writer |
+| Function                   | Description                                 |
+| -------------------------- | ------------------------------------------- |
+| `fitReader`                | Pre-built FIT binary reader                 |
+| `fitWriter`                | Pre-built FIT binary writer                 |
 | `createFitReader(logger?)` | Factory for FIT reader with optional logger |
 | `createFitWriter(logger?)` | Factory for FIT writer with optional logger |
 

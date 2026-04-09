@@ -22,10 +22,10 @@ description: "KRD (Kaiord Representation Definition) is a JSON-based canonical f
 {
   "version": "1.0",
   "type": "workout",
-  "metadata": { },
-  "sessions": [ ],
-  "laps": [ ],
-  "records": [ ]
+  "metadata": {},
+  "sessions": [],
+  "laps": [],
+  "records": []
 }
 ```
 
@@ -78,28 +78,28 @@ Workouts are stored in `extensions.workout.steps`:
 
 ## Duration types
 
-| Type | Example |
-| --- | --- |
-| `time` | `{ "type": "time", "seconds": 600 }` |
-| `distance` | `{ "type": "distance", "meters": 5000 }` |
-| `open` | `{ "type": "open" }` |
-| `calories` | `{ "type": "calories", "calories": 200 }` |
-| `power_less_than` | `{ "type": "power_less_than", "watts": 150 }` |
-| `power_greater_than` | `{ "type": "power_greater_than", "watts": 300 }` |
-| `heart_rate_less_than` | `{ "type": "heart_rate_less_than", "bpm": 120 }` |
+| Type                          | Example                                                                        |
+| ----------------------------- | ------------------------------------------------------------------------------ |
+| `time`                        | `{ "type": "time", "seconds": 600 }`                                           |
+| `distance`                    | `{ "type": "distance", "meters": 5000 }`                                       |
+| `open`                        | `{ "type": "open" }`                                                           |
+| `calories`                    | `{ "type": "calories", "calories": 200 }`                                      |
+| `power_less_than`             | `{ "type": "power_less_than", "watts": 150 }`                                  |
+| `power_greater_than`          | `{ "type": "power_greater_than", "watts": 300 }`                               |
+| `heart_rate_less_than`        | `{ "type": "heart_rate_less_than", "bpm": 120 }`                               |
 | `repeat_until_steps_complete` | `{ "type": "repeat_until_steps_complete", "repeatCount": 5, "repeatFrom": 0 }` |
 
 Additional repeat types: `repeat_until_time`, `repeat_until_distance`, `repeat_until_calories`, `repeat_until_power_less_than`, `repeat_until_power_greater_than`, `repeat_until_heart_rate_less_than`, `repeat_until_heart_rate_greater_than`.
 
 ## Target types
 
-| Type | Units |
-| --- | --- |
-| `power` | `watts`, `percent_ftp`, `zone`, `range` |
-| `heart_rate` | `bpm`, `percent_max`, `zone`, `range` |
-| `pace` | `meters_per_second`, `zone`, `range` |
-| `cadence` | `rpm`, `zone`, `range` |
-| `open` | No target |
+| Type         | Units                                   |
+| ------------ | --------------------------------------- |
+| `power`      | `watts`, `percent_ftp`, `zone`, `range` |
+| `heart_rate` | `bpm`, `percent_max`, `zone`, `range`   |
+| `pace`       | `meters_per_second`, `zone`, `range`    |
+| `cadence`    | `rpm`, `zone`, `range`                  |
+| `open`       | No target                               |
 
 ## Sessions, laps, and records
 
@@ -111,16 +111,16 @@ Additional repeat types: `repeat_until_time`, `repeat_until_distance`, `repeat_u
 
 ## Units and conventions
 
-| Measurement | Unit |
-| --- | --- |
-| Time | seconds |
-| Distance | meters |
-| Speed | meters per second |
-| Altitude | meters |
-| Heart rate | bpm |
-| Cadence | rpm (running: spm/2) |
-| Power | watts |
-| Timestamps | ISO 8601 UTC |
+| Measurement | Unit                 |
+| ----------- | -------------------- |
+| Time        | seconds              |
+| Distance    | meters               |
+| Speed       | meters per second    |
+| Altitude    | meters               |
+| Heart rate  | bpm                  |
+| Cadence     | rpm (running: spm/2) |
+| Power       | watts                |
+| Timestamps  | ISO 8601 UTC         |
 
 Field naming uses **camelCase** with prefixes: `total*`, `avg*`, `max*`, `min*`.
 

@@ -15,7 +15,7 @@ const AUTHOR = {
 
 function buildJsonLd(
   pageData: { relativePath: string; title: string; description: string },
-  isHome: boolean,
+  isHome: boolean
 ): string[] {
   const pageUrl = `${SITE_URL}${DOCS_BASE}${pageData.relativePath.replace(/\.md$/, ".html").replace(/index\.html$/, "")}`;
   const segments = pageData.relativePath
@@ -231,15 +231,11 @@ export default defineConfig({
         title: pageData.frontmatter.title || pageData.title,
         description: pageData.frontmatter.description || pageData.description,
       },
-      isHome,
+      isHome
     );
 
     for (const block of jsonLdBlocks) {
-      head.push([
-        "script",
-        { type: "application/ld+json" },
-        block,
-      ]);
+      head.push(["script", { type: "application/ld+json" }, block]);
     }
 
     return head;

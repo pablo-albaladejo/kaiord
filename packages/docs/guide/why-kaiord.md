@@ -35,17 +35,17 @@ This means:
 
 ## How Kaiord compares
 
-| Capability | Individual parsers | Kaiord |
-| --- | --- | --- |
-| Read FIT files | `@garmin/fitsdk` | `@kaiord/fit` |
-| Read TCX files | `fast-xml-parser` + custom code | `@kaiord/tcx` |
-| Read ZWO files | Manual XML parsing | `@kaiord/zwo` |
-| Garmin Connect API format | Custom JSON mapping | `@kaiord/garmin` |
-| Convert between formats | DIY glue code | `fromBinary` / `toText` |
-| Round-trip validation | Not available | Built-in `validate` command |
-| TypeScript types | Partial or none | Full Zod schemas |
-| CLI tool | Build your own | `@kaiord/cli` |
-| AI/LLM integration | Not available | `@kaiord/mcp` |
+| Capability                | Individual parsers              | Kaiord                      |
+| ------------------------- | ------------------------------- | --------------------------- |
+| Read FIT files            | `@garmin/fitsdk`                | `@kaiord/fit`               |
+| Read TCX files            | `fast-xml-parser` + custom code | `@kaiord/tcx`               |
+| Read ZWO files            | Manual XML parsing              | `@kaiord/zwo`               |
+| Garmin Connect API format | Custom JSON mapping             | `@kaiord/garmin`            |
+| Convert between formats   | DIY glue code                   | `fromBinary` / `toText`     |
+| Round-trip validation     | Not available                   | Built-in `validate` command |
+| TypeScript types          | Partial or none                 | Full Zod schemas            |
+| CLI tool                  | Build your own                  | `@kaiord/cli`               |
+| AI/LLM integration        | Not available                   | `@kaiord/mcp`               |
 
 ## Who is Kaiord for?
 

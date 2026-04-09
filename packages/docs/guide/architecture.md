@@ -117,7 +117,10 @@ Kaiord uses **Zod as the single source of truth**:
 ```typescript
 // domain/schemas/sport.ts
 export const sportSchema = z.enum([
-  "cycling", "running", "swimming", "generic"
+  "cycling",
+  "running",
+  "swimming",
+  "generic",
 ]);
 export type Sport = z.infer<typeof sportSchema>;
 ```

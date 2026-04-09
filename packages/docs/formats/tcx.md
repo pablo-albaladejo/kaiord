@@ -54,13 +54,13 @@ const validator = createXsdTcxValidator(logger);
 
 ## API
 
-| Function | Description |
-| --- | --- |
-| `tcxReader` | Pre-built TCX text reader |
-| `tcxWriter` | Pre-built TCX text writer |
-| `createTcxReader(logger?)` | Factory for TCX reader with optional logger |
-| `createTcxWriter(logger?)` | Factory for TCX writer with optional logger |
-| `createXsdTcxValidator(logger)` | XSD schema validator for TCX files |
+| Function                        | Description                                 |
+| ------------------------------- | ------------------------------------------- |
+| `tcxReader`                     | Pre-built TCX text reader                   |
+| `tcxWriter`                     | Pre-built TCX text writer                   |
+| `createTcxReader(logger?)`      | Factory for TCX reader with optional logger |
+| `createTcxWriter(logger?)`      | Factory for TCX writer with optional logger |
+| `createXsdTcxValidator(logger)` | XSD schema validator for TCX files          |
 
 ## Supported features
 

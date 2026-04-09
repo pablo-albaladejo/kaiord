@@ -87,28 +87,28 @@ List all supported formats and their capabilities.
 
 ## Resources
 
-| URI | Description |
-| --- | --- |
-| `kaiord://schema/krd` | KRD JSON Schema |
-| `kaiord://formats` | Supported formats with capabilities |
-| `kaiord://docs/krd-format` | KRD format specification |
+| URI                        | Description                         |
+| -------------------------- | ----------------------------------- |
+| `kaiord://schema/krd`      | KRD JSON Schema                     |
+| `kaiord://formats`         | Supported formats with capabilities |
+| `kaiord://docs/krd-format` | KRD format specification            |
 
 ## Prompts
 
-| Name | Description |
-| --- | --- |
-| `convert_file` | Guided file conversion workflow |
+| Name              | Description                               |
+| ----------------- | ----------------------------------------- |
+| `convert_file`    | Guided file conversion workflow           |
 | `analyze_workout` | Inspect, extract, and summarize a workout |
 
 ## Supported formats
 
-| Format | Extension | Type | Description |
-| --- | --- | --- | --- |
-| FIT | `.fit` | Binary | Garmin FIT protocol |
-| TCX | `.tcx` | Text | Training Center XML |
-| ZWO | `.zwo` | Text | Zwift workout XML |
-| GCN | `.gcn` | Text | Garmin Connect workout JSON |
-| KRD | `.krd` | Text | Kaiord canonical JSON format |
+| Format | Extension | Type   | Description                  |
+| ------ | --------- | ------ | ---------------------------- |
+| FIT    | `.fit`    | Binary | Garmin FIT protocol          |
+| TCX    | `.tcx`    | Text   | Training Center XML          |
+| ZWO    | `.zwo`    | Text   | Zwift workout XML            |
+| GCN    | `.gcn`    | Text   | Garmin Connect workout JSON  |
+| KRD    | `.krd`    | Text   | Kaiord canonical JSON format |
 
 ## Next steps
 

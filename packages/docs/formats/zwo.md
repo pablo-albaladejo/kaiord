@@ -44,12 +44,12 @@ const writer = createZwiftWriter(logger);
 
 ## API
 
-| Function | Description |
-| --- | --- |
-| `zwiftReader` | Pre-built ZWO text reader |
-| `zwiftWriter` | Pre-built ZWO text writer |
-| `createZwiftReader(logger?)` | Factory for ZWO reader with optional logger |
-| `createZwiftWriter(logger?)` | Factory for ZWO writer with optional logger |
+| Function                       | Description                                                  |
+| ------------------------------ | ------------------------------------------------------------ |
+| `zwiftReader`                  | Pre-built ZWO text reader                                    |
+| `zwiftWriter`                  | Pre-built ZWO text writer                                    |
+| `createZwiftReader(logger?)`   | Factory for ZWO reader with optional logger                  |
+| `createZwiftWriter(logger?)`   | Factory for ZWO writer with optional logger                  |
 | `createZwiftValidator(logger)` | XSD validator (Node.js) or well-formedness checker (browser) |
 
 ## Supported features

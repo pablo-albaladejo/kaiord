@@ -30,13 +30,13 @@ kaiord convert -i "workouts/*.fit" --output-dir converted/
 kaiord convert -i data.bin --input-format fit -o workout.krd
 ```
 
-| Option | Alias | Description |
-| --- | --- | --- |
-| `--input` | `-i` | Input file path or glob pattern (required) |
-| `--output` | `-o` | Output file path |
-| `--output-dir` | | Output directory for batch conversion |
-| `--input-format` | | Override input format: `fit`, `gcn`, `krd`, `tcx`, `zwo` |
-| `--output-format` | | Override output format: `fit`, `gcn`, `krd`, `tcx`, `zwo` |
+| Option            | Alias | Description                                               |
+| ----------------- | ----- | --------------------------------------------------------- |
+| `--input`         | `-i`  | Input file path or glob pattern (required)                |
+| `--output`        | `-o`  | Output file path                                          |
+| `--output-dir`    |       | Output directory for batch conversion                     |
+| `--input-format`  |       | Override input format: `fit`, `gcn`, `krd`, `tcx`, `zwo`  |
+| `--output-format` |       | Override output format: `fit`, `gcn`, `krd`, `tcx`, `zwo` |
 
 ## validate
 
@@ -47,10 +47,10 @@ kaiord validate -i workout.fit
 kaiord validate -i workout.fit --tolerance-config custom.json
 ```
 
-| Option | Alias | Description |
-| --- | --- | --- |
-| `--input` | `-i` | Input file path (required) |
-| `--tolerance-config` | | Path to custom tolerance configuration JSON |
+| Option               | Alias | Description                                 |
+| -------------------- | ----- | ------------------------------------------- |
+| `--input`            | `-i`  | Input file path (required)                  |
+| `--tolerance-config` |       | Path to custom tolerance configuration JSON |
 
 Tolerance config example:
 
@@ -73,10 +73,10 @@ kaiord inspect -i workout.fit --json
 kaiord inspect -i workout.fit --input-format fit
 ```
 
-| Option | Alias | Description |
-| --- | --- | --- |
-| `--input` | `-i` | Input file path (required) |
-| `--input-format` | | Override format detection: `fit`, `tcx`, `zwo`, `gcn`, `krd` |
+| Option           | Alias | Description                                                  |
+| ---------------- | ----- | ------------------------------------------------------------ |
+| `--input`        | `-i`  | Input file path (required)                                   |
+| `--input-format` |       | Override format detection: `fit`, `tcx`, `zwo`, `gcn`, `krd` |
 
 ## diff
 
@@ -88,12 +88,12 @@ kaiord diff --file1 workout.fit --file2 workout.krd
 kaiord diff --file1 a.krd --file2 b.krd --json
 ```
 
-| Option | Alias | Description |
-| --- | --- | --- |
-| `--file1` | `-1` | First file to compare (required) |
-| `--file2` | `-2` | Second file to compare (required) |
-| `--format1` | | Override format detection for first file |
-| `--format2` | | Override format detection for second file |
+| Option      | Alias | Description                               |
+| ----------- | ----- | ----------------------------------------- |
+| `--file1`   | `-1`  | First file to compare (required)          |
+| `--file2`   | `-2`  | Second file to compare (required)         |
+| `--format1` |       | Override format detection for first file  |
+| `--format2` |       | Override format detection for second file |
 
 ## extract-workout
 
@@ -104,10 +104,10 @@ kaiord extract-workout -i workout.fit
 kaiord extract-workout -i workout.krd
 ```
 
-| Option | Alias | Description |
-| --- | --- | --- |
-| `--input` | `-i` | Input file path (required) |
-| `--input-format` | | Override format detection |
+| Option           | Alias | Description                |
+| ---------------- | ----- | -------------------------- |
+| `--input`        | `-i`  | Input file path (required) |
+| `--input-format` |       | Override format detection  |
 
 ## garmin
 
@@ -119,10 +119,10 @@ Garmin Connect operations. Requires authentication via `garmin login`.
 kaiord garmin login -e user@example.com -p password
 ```
 
-| Option | Alias | Description |
-| --- | --- | --- |
-| `--email` | `-e` | Garmin Connect email (required) |
-| `--password` | `-p` | Garmin Connect password (required) |
+| Option       | Alias | Description                        |
+| ------------ | ----- | ---------------------------------- |
+| `--email`    | `-e`  | Garmin Connect email (required)    |
+| `--password` | `-p`  | Garmin Connect password (required) |
 
 ### garmin logout
 
@@ -137,10 +137,10 @@ kaiord garmin list
 kaiord garmin list --limit 50 --offset 20
 ```
 
-| Option | Alias | Description |
-| --- | --- | --- |
-| `--limit` | `-l` | Maximum workouts to list (default: 20) |
-| `--offset` | | Number of workouts to skip (default: 0) |
+| Option     | Alias | Description                             |
+| ---------- | ----- | --------------------------------------- |
+| `--limit`  | `-l`  | Maximum workouts to list (default: 20)  |
+| `--offset` |       | Number of workouts to skip (default: 0) |
 
 ### garmin push
 
@@ -149,21 +149,21 @@ kaiord garmin push -i workout.krd
 kaiord garmin push -i workout.fit --input-format fit
 ```
 
-| Option | Alias | Description |
-| --- | --- | --- |
-| `--input` | `-i` | Input workout file path (required) |
-| `--input-format` | | Override format detection |
+| Option           | Alias | Description                        |
+| ---------------- | ----- | ---------------------------------- |
+| `--input`        | `-i`  | Input workout file path (required) |
+| `--input-format` |       | Override format detection          |
 
 ## Global options
 
-| Option | Description |
-| --- | --- |
-| `--verbose` | Enable verbose logging |
-| `--quiet` | Quiet mode (errors only) |
-| `--json` | JSON output (machine-readable) |
+| Option         | Description                    |
+| -------------- | ------------------------------ |
+| `--verbose`    | Enable verbose logging         |
+| `--quiet`      | Quiet mode (errors only)       |
+| `--json`       | JSON output (machine-readable) |
 | `--log-format` | Log format: `pretty` or `json` |
-| `--help` | Show help |
-| `--version` | Show version |
+| `--help`       | Show help                      |
+| `--version`    | Show version                   |
 
 ## Configuration file
 
@@ -185,13 +185,13 @@ CLI options always override config file defaults.
 
 ## Supported formats
 
-| Format | Extension | Type | Description |
-| --- | --- | --- | --- |
-| FIT | `.fit` | Binary | Garmin FIT protocol |
-| KRD | `.krd` | Text | Kaiord canonical JSON |
-| TCX | `.tcx` | Text | Training Center XML |
-| ZWO | `.zwo` | Text | Zwift workout XML |
-| GCN | `.gcn` | Text | Garmin Connect JSON |
+| Format | Extension | Type   | Description           |
+| ------ | --------- | ------ | --------------------- |
+| FIT    | `.fit`    | Binary | Garmin FIT protocol   |
+| KRD    | `.krd`    | Text   | Kaiord canonical JSON |
+| TCX    | `.tcx`    | Text   | Training Center XML   |
+| ZWO    | `.zwo`    | Text   | Zwift workout XML     |
+| GCN    | `.gcn`    | Text   | Garmin Connect JSON   |
 
 ## Exit codes
 

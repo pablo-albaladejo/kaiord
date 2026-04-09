@@ -44,10 +44,10 @@ const writer = createGarminWriter(logger);
 
 ## API
 
-| Function | Description |
-| --- | --- |
-| `garminReader` | Pre-built GCN text reader |
-| `garminWriter` | Pre-built GCN text writer |
+| Function                      | Description                                 |
+| ----------------------------- | ------------------------------------------- |
+| `garminReader`                | Pre-built GCN text reader                   |
+| `garminWriter`                | Pre-built GCN text writer                   |
 | `createGarminReader(logger?)` | Factory for GCN reader with optional logger |
 | `createGarminWriter(logger?)` | Factory for GCN writer with optional logger |
 

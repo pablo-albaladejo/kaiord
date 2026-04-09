@@ -17,13 +17,13 @@ Kaiord uses a comprehensive testing strategy with multiple test types.
 
 ## Test stack
 
-| Package | Runner | Coverage target |
-| --- | --- | --- |
-| `@kaiord/core` | Vitest | 80% overall, 90% converters |
-| `@kaiord/fit` | Vitest | 80% |
-| `@kaiord/tcx` | Vitest | 80% |
-| `@kaiord/zwo` | Vitest | 80% |
-| Frontend SPA | Vitest + jsdom | 70% |
+| Package        | Runner         | Coverage target             |
+| -------------- | -------------- | --------------------------- |
+| `@kaiord/core` | Vitest         | 80% overall, 90% converters |
+| `@kaiord/fit`  | Vitest         | 80%                         |
+| `@kaiord/tcx`  | Vitest         | 80%                         |
+| `@kaiord/zwo`  | Vitest         | 80%                         |
+| Frontend SPA   | Vitest + jsdom | 70%                         |
 
 ## TDD workflow
 
@@ -84,6 +84,7 @@ src/
 Validate data integrity through conversions (FIT to KRD to FIT):
 
 **Tolerances**:
+
 - Time: +/- 1 second
 - Power: +/- 1 watt or +/- 1% FTP
 - Heart rate: +/- 1 bpm
@@ -100,7 +101,10 @@ it("should preserve data in FIT round-trip", async () => {
 
   // Assert
   expect(roundTripKrd).toMatchKrdWithTolerance(originalKrd, {
-    time: 1, power: 1, heartRate: 1, cadence: 1,
+    time: 1,
+    power: 1,
+    heartRate: 1,
+    cadence: 1,
   });
 });
 ```
@@ -119,6 +123,7 @@ export const buildEntity = new Factory<EntityType>()
 ```
 
 Rules:
+
 - Fixtures generate data, tests validate
 - Do not call `.parse()` in fixtures
 - Keep fixtures simple
