@@ -16,12 +16,17 @@ The landing page SHALL be served at `kaiord.com/` as a static HTML page built fr
 
 ### Requirement: Sticky navigation
 
-The landing page SHALL have a sticky header containing the Kaiord logo wordmark and primary CTAs ("Try the Editor", "GitHub"). The nav SHALL include smooth-scroll anchor links to each section. On mobile, the nav SHALL collapse to a minimal bar with logo and one CTA.
+The landing page SHALL have a sticky header containing the Kaiord logo wordmark, a "Docs" link pointing to `/docs/`, and primary CTAs ("Try the Editor", "GitHub"). The nav SHALL include smooth-scroll anchor links to each section. On mobile, the nav SHALL collapse to a minimal bar with logo and one CTA.
 
 #### Scenario: Nav persists on scroll
 
 - **WHEN** a user scrolls past the hero section
 - **THEN** the sticky nav SHALL remain visible at the top of the viewport with the primary CTAs accessible
+
+#### Scenario: Docs link in nav
+
+- **WHEN** the landing page renders
+- **THEN** the sticky nav SHALL include a "Docs" link that navigates to `kaiord.com/docs/`
 
 #### Scenario: Anchor links work
 
@@ -167,12 +172,22 @@ The landing page SHALL achieve a Lighthouse Performance score of 95+ on mobile. 
 
 ### Requirement: SEO fundamentals
 
-The landing page SHALL include: `robots.txt` (allow `/`, disallow `/editor/`), `sitemap.xml` with `<lastmod>`, `<link rel="canonical">` pointing to `https://kaiord.com/`, and JSON-LD structured data (`@type: SoftwareSourceCode` with name, description, url, programmingLanguage, license, codeRepository, and `author` with `@type: Person`, name "Pablo Albaladejo", and sameAs linking to LinkedIn and GitHub profiles).
+The landing page SHALL include: `robots.txt` (allow `/`, disallow `/editor/`, allow `/docs/`), `sitemap.xml` with `<lastmod>` and documentation page URLs, `<link rel="canonical">` pointing to `https://kaiord.com/`, and JSON-LD structured data (`@type: SoftwareSourceCode` with name, description, url, programmingLanguage, license, codeRepository, and `author` with `@type: Person`, name "Pablo Albaladejo", and sameAs linking to LinkedIn and GitHub profiles).
 
 #### Scenario: Search engine crawl
 
 - **WHEN** a search engine crawls `kaiord.com`
 - **THEN** `robots.txt` SHALL be accessible at `/robots.txt`, `sitemap.xml` at `/sitemap.xml`, and structured data SHALL be valid per Google Rich Results Test
+
+#### Scenario: Docs crawlable
+
+- **WHEN** a search engine crawls `kaiord.com/robots.txt`
+- **THEN** `/docs/` SHALL be allowed (not disallowed)
+
+#### Scenario: Docs in sitemap
+
+- **WHEN** a search engine reads `kaiord.com/sitemap.xml`
+- **THEN** documentation URLs SHALL be included
 
 ### Requirement: SPA editor served at /editor/ path
 
