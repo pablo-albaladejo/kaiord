@@ -2,10 +2,8 @@
 @import "../../../styles/brand-tokens.css";
 
 @theme {
-  --font-sans:
-    system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  --font-mono:
-    ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+  --font-sans: var(--brand-font-sans);
+  --font-mono: var(--brand-font-mono);
 }
 
 /* Scroll behavior */
