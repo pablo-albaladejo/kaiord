@@ -40,13 +40,18 @@ Separately, `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, and `@kaiord/garmin` ar
 ```yaml
 - uses: changesets/action@v1
   with:
-    publish: pnpm exec changeset publish
+    version: pnpm exec changeset version && pnpm install --no-frozen-lockfile
+    publish: pnpm -r build && pnpm exec changeset publish
   env:
     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     NPM_CONFIG_PROVENANCE: true
 ```
 
-**Rationale**: The `publish` input is required for two reasons:
+The `version` input is a custom script that runs `changeset version` followed by `pnpm install --no-frozen-lockfile` to update `pnpm-lock.yaml`. Without this, the Version Packages PR would have a stale lockfile since `changeset version` modifies `package.json` files but does not run `pnpm install`.
+
+**Rationale**: The `publish` input includes `pnpm -r build` before `changeset publish` because most packages lack `prepublishOnly`/`prepack` lifecycle scripts (only `@kaiord/cli` has one). Without building first, published packages would ship without compiled `dist/` output.
+
+The `publish` input is required for two additional reasons:
 
 1. The action only populates the `publishedPackages` output when `publish` is provided
 2. It handles both modes automatically:

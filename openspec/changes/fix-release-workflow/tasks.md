@@ -6,13 +6,13 @@
 
 ## 2. Changesets Action Integration
 
-- [ ] 2.1 Replace the entire `Version packages` step with `changesets/action@v1`. This removes: `changeset version`, the 9 per-package `pnpm --filter` build commands (only needed for the pre-push git hook, not applicable here), the before/after version diffing, and the `git commit` + `git push`. Assign `id: changesets` to the step. Pass `publish: pnpm exec changeset publish` as input. Set `GITHUB_TOKEN` and `NPM_CONFIG_PROVENANCE: true` in env
+- [ ] 2.1 Replace the entire `Version packages` step with `changesets/action@v1`. This removes: `changeset version`, `pnpm install --no-frozen-lockfile`, the 9 individual `pnpm --filter` build commands, the before/after version diffing, and the `git commit` + `git push`. Assign `id: changesets` to the step. Pass `version: pnpm exec changeset version && pnpm install --no-frozen-lockfile` (to keep `pnpm-lock.yaml` in sync in the Version Packages PR) and `publish: pnpm -r build && pnpm exec changeset publish` (build is needed because most packages lack `prepublishOnly` scripts — without it, `dist/` would be missing from published tarballs). Set `GITHUB_TOKEN` and `NPM_CONFIG_PROVENANCE: true` in env
 - [ ] 2.2 Remove the `Check for pending changesets` step — the action handles detection internally
 - [ ] 2.3 Remove the `Publish to npm with provenance` step — publish is now handled by the action's `publish` input
 
 ## 3. GitHub Releases Script
 
-- [ ] 3.1 Refactor `create-github-releases.js` to accept `PUBLISHED_PACKAGES` env var: parse JSON array of `{ name, version }` when set, fall back to hardcoded list of all 9 publishable packages (core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, ai) reading each `package.json` for versions when not set
+- [ ] 3.1 Refactor `create-github-releases.js` to accept `PUBLISHED_PACKAGES` env var: parse JSON array of `{ name, version }` when set (deriving package directory from name by stripping `@kaiord/` prefix, e.g., `@kaiord/core` → `packages/core` for changelog extraction; validate derived path with `fs.existsSync` before attempting changelog extraction, log a warning if directory is missing), fall back to hardcoded list of all 9 publishable packages (core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, ai) reading each `package.json` for versions when not set. Wrap `JSON.parse` in try/catch, falling back to `getPackagesFromDisk()` on parse failure
 - [ ] 3.2 Update the `Create GitHub Releases` workflow step: pass `PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}` as env var, set `if: steps.changesets.outputs.published == 'true'`
 
 ## 4. Summary & Cleanup

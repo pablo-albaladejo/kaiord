@@ -9,10 +9,15 @@ The release workflow SHALL use `changesets/action@v1` to create a "Version Packa
 - **WHEN** a push to `main` includes pending changeset files
 - **THEN** the workflow SHALL create or update a PR titled "Version Packages" with bumped versions and updated changelogs
 
+#### Scenario: Version Packages PR updated with new changesets
+
+- **WHEN** a Version Packages PR already exists AND a new push to `main` includes additional changeset files
+- **THEN** the workflow SHALL update the existing PR with the combined version bumps from all pending changesets
+
 #### Scenario: Version Packages PR merged
 
 - **WHEN** the "Version Packages" PR is merged to `main` (no remaining changesets)
-- **THEN** the workflow SHALL run `changeset publish` via the action's `publish` input, publishing updated packages to npm with OIDC provenance
+- **THEN** the workflow SHALL build all packages (`pnpm -r build`) and run `changeset publish` via the action's `publish` input, publishing updated packages to npm with OIDC provenance
 
 #### Scenario: Manual workflow dispatch
 
@@ -82,5 +87,5 @@ The workflow SHALL produce a step summary listing all published packages with ve
 
 #### Scenario: No packages published
 
-- **WHEN** no packages are published (`published != 'true'`)
+- **WHEN** the workflow completes and `published` output is not `true` (either because a Version Packages PR was created instead of publishing, or no packages needed publishing)
 - **THEN** the summary SHALL indicate no release was performed
