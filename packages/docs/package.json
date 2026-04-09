@@ -8,7 +8,9 @@
     "dev": "vitepress dev",
     "build": "node scripts/generate-api-docs.mjs && vitepress build",
     "preview": "vitepress preview",
-    "lint:fix": "prettier --write ."
+    "lint": "prettier --check . && cspell --no-progress \"**/*.md\" --exclude api/",
+    "lint:fix": "prettier --write .",
+    "spellcheck": "cspell --no-progress \"**/*.md\" --exclude api/"
   },
   "devDependencies": {
     "@kaiord/cli": "workspace:*",
@@ -20,6 +22,7 @@
     "@kaiord/tcx": "workspace:*",
     "@kaiord/zwo": "workspace:*",
     "@shikijs/vitepress-twoslash": "^3.23.0",
+    "cspell": "^10.0.0",
     "typedoc": "^0.28.18",
     "typedoc-plugin-markdown": "^4.11.0",
     "vitepress": "2.0.0-alpha.17",

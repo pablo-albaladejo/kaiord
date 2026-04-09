@@ -12,48 +12,48 @@
 
 ## 2. Content Migration
 
-- [ ] 2.1 Create `guide/quick-start.md`: <=10 steps from `pnpm add` to working FIT->TCX conversion, self-contained, Twoslash type-checked. Opens with "By the end of this guide, you'll convert a Garmin FIT file to TCX in 4 lines of TypeScript."
-- [ ] 2.2 Create `guide/why-kaiord.md`: problem framing (fragmented formats, no unified TS SDK), search-friendly terms, comparison table vs parsing libraries individually (fitparse, gpx-parser, etc.)
-- [ ] 2.3 Migrate Getting Started guide from `docs/getting-started.md` to `packages/docs/guide/getting-started.md`
-- [ ] 2.4 Migrate Architecture guide from `docs/architecture.md` to `packages/docs/guide/architecture.md`
-- [ ] 2.5 Migrate KRD Format spec from `docs/krd-format.md` to `packages/docs/formats/krd.md`
-- [ ] 2.6 Migrate Testing guide from `docs/testing.md` to `packages/docs/guide/testing.md`
-- [ ] 2.7 Create format adapter pages: `formats/fit.md`, `formats/tcx.md`, `formats/zwo.md`, `formats/gcn.md` from package READMEs. Each page SHALL end with a CTA linking to Quick Start for conversion funnel ("Ready to convert? Follow the Quick Start ->").
-- [ ] 2.8 Create CLI command reference at `cli/commands.md`
-- [ ] 2.9 Create MCP tool reference at `mcp/tools.md`
-- [ ] 2.10 Add Twoslash type-checked code examples to key pages (quick-start, format pages, API overview)
-- [ ] 2.11 Add VitePress frontmatter (`title`, `description`) to every page for per-page SEO
+- [x] 2.1 Create `guide/quick-start.md`: <=10 steps from `pnpm add` to working FIT->TCX conversion, self-contained, Twoslash type-checked. Opens with "By the end of this guide, you'll convert a Garmin FIT file to TCX in 4 lines of TypeScript."
+- [x] 2.2 Create `guide/why-kaiord.md`: problem framing (fragmented formats, no unified TS SDK), search-friendly terms, comparison table vs parsing libraries individually (fitparse, gpx-parser, etc.)
+- [x] 2.3 Migrate Getting Started guide from `docs/getting-started.md` to `packages/docs/guide/getting-started.md`
+- [x] 2.4 Migrate Architecture guide from `docs/architecture.md` to `packages/docs/guide/architecture.md`
+- [x] 2.5 Migrate KRD Format spec from `docs/krd-format.md` to `packages/docs/formats/krd.md`
+- [x] 2.6 Migrate Testing guide from `docs/testing.md` to `packages/docs/guide/testing.md`
+- [x] 2.7 Create format adapter pages: `formats/fit.md`, `formats/tcx.md`, `formats/zwo.md`, `formats/gcn.md` from package READMEs. Each page SHALL end with a CTA linking to Quick Start for conversion funnel ("Ready to convert? Follow the Quick Start ->").
+- [x] 2.8 Create CLI command reference at `cli/commands.md`
+- [x] 2.9 Create MCP tool reference at `mcp/tools.md`
+- [x] 2.10 Add Twoslash type-checked code examples to key pages (quick-start, format pages, API overview)
+- [x] 2.11 Add VitePress frontmatter (`title`, `description`) to every page for per-page SEO
 
 ## 3. Auto-Generation Pipeline
 
-- [ ] 3.1 Create TypeDoc config (`typedoc.json`) covering all public packages with typedoc-plugin-markdown output, configure first-sentence extraction for descriptions
-- [ ] 3.2 Wire prebuild script into `packages/docs/package.json` prebuild step
-- [ ] 3.3 Verify auto-generated API reference builds correctly with VitePress and is indexed by MiniSearch
+- [x] 3.1 Create TypeDoc config (`typedoc.json`) covering all public packages with typedoc-plugin-markdown output, configure first-sentence extraction for descriptions
+- [x] 3.2 Wire prebuild script into `packages/docs/package.json` prebuild step
+- [x] 3.3 Verify auto-generated API reference builds correctly with VitePress and is indexed by MiniSearch
 
 ## 4. Deploy Pipeline
 
-- [ ] 4.1 Update `deploy-site.yml`: add `packages/docs/**` to path triggers, add docs build step (`pnpm --filter @kaiord/docs... build`), add `docs/index.html` to artifact verification, add pnpm store cache (`actions/cache`) to speed up repeat builds when only .md files change
-- [ ] 4.2 Update merge step to copy VitePress output (`.vitepress/dist`) into `dist/docs/`
-- [ ] 4.3 Add sitemap merge script in workflow: copy VitePress sitemap to `dist/sitemap.xml`, prepend landing root URL entry (`https://kaiord.com/`)
-- [ ] 4.4 Update landing `robots.txt` to allow `/docs/`
-- [ ] 4.5 Add `lang="en"` to VitePress HTML config
+- [x] 4.1 Update `deploy-site.yml`: add `packages/docs/**` to path triggers, add docs build step (`pnpm --filter @kaiord/docs... build`), add `docs/index.html` to artifact verification, add pnpm store cache (`actions/cache`) to speed up repeat builds when only .md files change
+- [x] 4.2 Update merge step to copy VitePress output (`.vitepress/dist`) into `dist/docs/`
+- [x] 4.3 Add sitemap merge script in workflow: copy VitePress sitemap to `dist/sitemap.xml`, prepend landing root URL entry (`https://kaiord.com/`)
+- [x] 4.4 Update landing `robots.txt` to allow `/docs/`
+- [x] 4.5 Add `lang="en"` to VitePress HTML config
 
 ## 5. Landing Page Update
 
-- [ ] 5.1 Add "Docs" link to landing page sticky nav (desktop nav links + mobile)
-- [ ] 5.2 Add docs link to developer section or hero
+- [x] 5.1 Add "Docs" link to landing page sticky nav (desktop nav links + mobile)
+- [x] 5.2 Add docs link to developer section or hero
 
 ## 6. Anti-Drift CI
 
-- [ ] 6.1 Add cspell config (`.cspell.json`) with project dictionary for Kaiord-specific terms
+- [x] 6.1 Add cspell config (`.cspell.json`) with project dictionary for Kaiord-specific terms
 - [ ] 6.2 Add link checker script or VitePress plugin for internal link validation
-- [ ] 6.3 Verify Twoslash type-checking: create an intentionally broken example, confirm build fails, fix it
-- [ ] 6.4 Add docs-specific lint/check scripts to `packages/docs/package.json`
+- [x] 6.3 Verify Twoslash type-checking: create an intentionally broken example, confirm build fails, fix it
+- [x] 6.4 Add docs-specific lint/check scripts to `packages/docs/package.json`
 
 ## 7. Claude Code Hook
 
-- [ ] 7.1 Create shell script (`scripts/check-docs-sync.sh`) that checks `git diff --cached --name-only` for src changes without docs changes
-- [ ] 7.2 Add pre-commit hook to `.claude/settings.local.json` referencing the script
+- [x] 7.1 Create shell script (`scripts/check-docs-sync.sh`) that checks `git diff --cached --name-only` for src changes without docs changes
+- [x] 7.2 Add pre-commit hook to `.claude/settings.json` referencing the script (PreToolUse with git commit filter)
 - [ ] 7.3 Test hook: commit only src changes (reminder appears), commit src+docs (silent pass)
 
 ## 8. Verification
