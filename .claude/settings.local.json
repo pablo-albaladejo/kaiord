@@ -35,11 +35,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-architecture.js"
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-architecture.cjs"
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-schema-naming.js"
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-schema-naming.cjs"
           }
         ]
       }
@@ -50,11 +50,11 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-file-size.js"
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-file-size.cjs"
           },
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-test-needed.js"
+            "command": "node \"$CLAUDE_PROJECT_DIR\"/.claude/hooks/check-test-needed.cjs"
           }
         ]
       }
