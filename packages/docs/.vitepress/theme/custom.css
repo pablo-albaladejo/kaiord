@@ -29,6 +29,17 @@
   --vp-c-divider: var(--brand-border);
 }
 
+/* Reduce sidebar left padding */
+.VPSidebar {
+  padding-left: 16px !important;
+}
+
+@media (min-width: 960px) {
+  .VPSidebar {
+    padding-left: 24px !important;
+  }
+}
+
 /* Footer link styling */
 .VPFooter a {
   color: var(--vp-c-brand-1);
