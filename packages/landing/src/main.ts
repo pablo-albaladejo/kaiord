@@ -57,13 +57,17 @@ function setup() {
 
   // Copy to clipboard
   copyBtn?.addEventListener("click", async () => {
-    const text = cmdEl?.textContent ?? "";
-    await navigator.clipboard.writeText(text);
-    if (feedback) {
-      feedback.textContent = "Copied!";
-      setTimeout(() => {
-        feedback.textContent = "";
-      }, 2000);
+    try {
+      const text = cmdEl?.textContent ?? "";
+      await navigator.clipboard.writeText(text);
+      if (feedback) {
+        feedback.textContent = "Copied!";
+        setTimeout(() => {
+          feedback.textContent = "";
+        }, 2000);
+      }
+    } catch {
+      /* clipboard not available in insecure contexts */
     }
   });
 

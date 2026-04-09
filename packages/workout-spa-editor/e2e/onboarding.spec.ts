@@ -29,7 +29,7 @@ test.describe("Onboarding", () => {
     // Assert - Tutorial should appear for first-time user
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText("Welcome to Workout Editor")).toBeVisible();
+    await expect(dialog.getByText("Welcome to Kaiord Editor")).toBeVisible();
   });
 
   test("should allow skipping tutorial", async ({ page }) => {
@@ -83,7 +83,7 @@ test.describe("Onboarding", () => {
 
     // Assert - First step
     const dialog = page.getByRole("dialog");
-    await expect(dialog.getByText("Welcome to Workout Editor")).toBeVisible();
+    await expect(dialog.getByText("Welcome to Kaiord Editor")).toBeVisible();
     await expect(page.getByText("Step 1 of")).toBeVisible();
 
     // Act - Navigate to next step
@@ -153,7 +153,7 @@ test.describe("Onboarding", () => {
     // Assert - Tutorial should appear again
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible();
-    await expect(dialog.getByText("Welcome to Workout Editor")).toBeVisible();
+    await expect(dialog.getByText("Welcome to Kaiord Editor")).toBeVisible();
   });
 
   test("should display progress indicator", async ({ page }) => {

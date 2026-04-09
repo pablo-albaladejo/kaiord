@@ -251,6 +251,7 @@
               <button
                 role="tab"
                 aria-selected="true"
+                aria-controls="install-cmd"
                 data-pm="npm"
                 class="pm-tab rounded-l-lg border-r border-[var(--brand-border)] px-3 py-3 text-xs font-medium text-[var(--brand-text-primary)] bg-[var(--brand-bg-primary)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
               >
@@ -259,6 +260,7 @@
               <button
                 role="tab"
                 aria-selected="false"
+                aria-controls="install-cmd"
                 data-pm="yarn"
                 class="pm-tab border-r border-[var(--brand-border)] px-3 py-3 text-xs font-medium text-[var(--brand-text-muted)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
               >
@@ -267,6 +269,7 @@
               <button
                 role="tab"
                 aria-selected="false"
+                aria-controls="install-cmd"
                 data-pm="pnpm"
                 class="pm-tab border-r border-[var(--brand-border)] px-3 py-3 text-xs font-medium text-[var(--brand-text-muted)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
               >
@@ -275,6 +278,7 @@
               <button
                 role="tab"
                 aria-selected="false"
+                aria-controls="install-cmd"
                 data-pm="bun"
                 class="pm-tab border-r border-[var(--brand-border)] px-3 py-3 text-xs font-medium text-[var(--brand-text-muted)] focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-[var(--brand-accent-blue)]"
               >
@@ -294,6 +298,7 @@
             </select>
             <code
               id="install-cmd"
+              role="tabpanel"
               class="px-3 py-3 font-mono text-sm text-[var(--brand-text-secondary)]"
               >npm i @kaiord/core</code
             >

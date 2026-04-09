@@ -11,9 +11,9 @@ import type { TutorialStep } from "../components/organisms/OnboardingTutorial/On
 
 export const TUTORIAL_STEPS: Array<TutorialStep> = [
   {
-    title: "Welcome to Workout Editor",
+    title: "Welcome to Kaiord Editor",
     description:
-      "This tutorial will guide you through the key features of the Workout Editor. You can skip at any time or replay this tutorial from the Help section.",
+      "This tutorial will guide you through the key features of the Kaiord Editor. You can skip at any time or replay this tutorial from the Help section.",
     position: "center",
   },
   {

@@ -15,7 +15,7 @@ test.describe("Error Handling", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
   });
 
@@ -207,7 +207,7 @@ test.describe("Error Recovery", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
   });
 
@@ -378,7 +378,7 @@ test.describe("Error Handling - Mobile", () => {
     // Arrange
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
 
     // Act - Upload invalid file
@@ -447,7 +447,7 @@ test.describe("Error Handling - Performance", () => {
     // Arrange
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
 
     await expandFileUpload(page);
@@ -479,7 +479,7 @@ test.describe("Error Handling - Performance", () => {
     // Arrange
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
 
     await expandFileUpload(page);
@@ -508,7 +508,7 @@ test.describe("Error Handling - Performance", () => {
 
     // Assert - Page still responsive
     await expect(
-      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
   });
 });

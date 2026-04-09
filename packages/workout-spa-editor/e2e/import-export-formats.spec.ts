@@ -51,7 +51,7 @@ test.describe("Import/Export Multiple Formats", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
   });
 
@@ -440,7 +440,7 @@ test.describe("Import/Export Mobile Flow", () => {
     // Arrange
     await page.goto("/");
     await expect(
-      page.getByRole("heading", { name: "Workout Editor", level: 1 })
+      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
 
     const testWorkout = {

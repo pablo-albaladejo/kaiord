@@ -81,9 +81,8 @@ async function main() {
     console.log(`  favicon-${size}.png`);
   }
 
-  console.log("Generating favicon.ico...");
-  // ICO format: simple concatenation approach using 32px PNG as .ico
-  // Modern browsers prefer SVG favicon, ICO is fallback
+  console.log("Generating favicon.png (32px fallback)...");
+  // Modern browsers prefer SVG favicon, PNG is fallback
   await sharp(createFaviconSvg(32))
     .resize(32, 32)
     .png()
