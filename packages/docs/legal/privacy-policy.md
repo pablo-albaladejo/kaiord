@@ -3,6 +3,8 @@ title: Privacy Policy
 description: Kaiord privacy policy covering the website, documentation, and Chrome extension.
 ---
 
+<!-- cSpell:words CCPA -->
+
 # Privacy Policy
 
 **Last updated:** 2026-04-10
