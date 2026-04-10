@@ -108,6 +108,7 @@
   .VPNavBar.has-sidebar.VPNavBar.has-sidebar .title {
     padding-left: 32px;
     width: var(--vp-sidebar-width);
+    overflow: hidden;
   }
 
   .VPNavBar.has-sidebar.VPNavBar.has-sidebar .content {
