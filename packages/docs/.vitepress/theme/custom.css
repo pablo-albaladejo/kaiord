@@ -86,6 +86,23 @@
   }
 }
 
+/* Wide screen layout fix.
+   Default VP: at >1440px, sidebar and content padding grow with calc() to
+   center a 1440px layout, wasting space on large monitors.
+   We override the centering calc with fixed values so content stays left-aligned
+   and uses available space. */
+@media (min-width: 1440px) {
+  .VPSidebar.VPSidebar {
+    padding-left: 32px;
+    width: var(--vp-sidebar-width);
+  }
+
+  .VPContent.has-sidebar {
+    padding-left: var(--vp-sidebar-width);
+    padding-right: 0;
+  }
+}
+
 /* Content link accessibility — underline for accent-blue contrast */
 .vp-doc a {
   text-decoration: underline;
