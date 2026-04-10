@@ -175,6 +175,11 @@ export default defineConfig({
         collapsed: false,
         items: [{ text: "Overview", link: "/api/" }],
       },
+      {
+        text: "Legal",
+        collapsed: true,
+        items: [{ text: "Privacy Policy", link: "/legal/privacy-policy" }],
+      },
     ],
 
     socialLinks: [
