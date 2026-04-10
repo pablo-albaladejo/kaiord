@@ -122,7 +122,7 @@ export default defineConfig({
   appearance: "dark",
 
   themeConfig: {
-    logo: "/logo.svg",
+    logo: { light: "/logo-light.svg", dark: "/logo-dark.svg" },
     siteTitle: "Kaiord",
 
     nav: [
