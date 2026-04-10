@@ -21,15 +21,14 @@ concurrency: ${{ github.workflow }}-${{ github.ref }}
 
 permissions:
   contents: write
-  issues: write
+  pull-requests: write
+  issues: read
   id-token: write
 
 jobs:
   release:
     name: Version & Publish
     runs-on: ubuntu-latest
-    # Skip version commits to prevent infinite loops
-    if: "!contains(github.event.head_commit.message, 'chore: version packages')"
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -41,160 +40,41 @@ jobs:
       - name: Setup pnpm
         uses: ./.github/actions/setup-pnpm
 
-      - name: Check for pending changesets
+      - name: Create Release PR or Publish
         id: changesets
-        run: |
-          CHANGESET_COUNT=$(find .changeset -name "*.md" ! -name "README.md" 2>/dev/null | wc -l | tr -d ' ')
-          echo "count=$CHANGESET_COUNT" >> $GITHUB_OUTPUT
-          if [ "$CHANGESET_COUNT" -gt 0 ]; then
-            echo "has-changesets=true" >> $GITHUB_OUTPUT
-          else
-            echo "has-changesets=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Version packages
-        if: steps.changesets.outputs.has-changesets == 'true'
-        id: version
+        uses: changesets/action@v1
+        with:
+          version: pnpm exec changeset version && pnpm install --no-frozen-lockfile
+          publish: pnpm -r build && pnpm exec changeset publish
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          # Store current versions
-          CORE_VERSION_BEFORE=$(node -p "require('./packages/core/package.json').version")
-          GARMIN_VERSION_BEFORE=$(node -p "require('./packages/garmin/package.json').version")
-          GARMIN_CONNECT_VERSION_BEFORE=$(node -p "require('./packages/garmin-connect/package.json').version")
-          MCP_VERSION_BEFORE=$(node -p "require('./packages/mcp/package.json').version")
-          CLI_VERSION_BEFORE=$(node -p "require('./packages/cli/package.json').version")
-          AI_VERSION_BEFORE=$(node -p "require('./packages/ai/package.json').version")
-
-          # Run changeset version
-          pnpm exec changeset version
-
-          # Update lock file after version bump
-          pnpm install --no-frozen-lockfile
-
-          # Build packages so TypeScript can resolve workspace dependencies in pre-push hook
-          pnpm --filter @kaiord/core build
-          pnpm --filter @kaiord/fit build
-          pnpm --filter @kaiord/tcx build
-          pnpm --filter @kaiord/zwo build
-          pnpm --filter @kaiord/garmin build
-          pnpm --filter @kaiord/garmin-connect build
-          pnpm --filter @kaiord/mcp build
-          pnpm --filter @kaiord/cli build
-          pnpm --filter @kaiord/ai build
-
-          # Get new versions
-          CORE_VERSION_AFTER=$(node -p "require('./packages/core/package.json').version")
-          GARMIN_VERSION_AFTER=$(node -p "require('./packages/garmin/package.json').version")
-          GARMIN_CONNECT_VERSION_AFTER=$(node -p "require('./packages/garmin-connect/package.json').version")
-          MCP_VERSION_AFTER=$(node -p "require('./packages/mcp/package.json').version")
-          CLI_VERSION_AFTER=$(node -p "require('./packages/cli/package.json').version")
-          AI_VERSION_AFTER=$(node -p "require('./packages/ai/package.json').version")
-
-          # Determine what changed
-          if [ "$CORE_VERSION_BEFORE" != "$CORE_VERSION_AFTER" ]; then
-            echo "core-changed=true" >> $GITHUB_OUTPUT
-            echo "core-version=$CORE_VERSION_AFTER" >> $GITHUB_OUTPUT
-          else
-            echo "core-changed=false" >> $GITHUB_OUTPUT
-          fi
-
-          if [ "$GARMIN_VERSION_BEFORE" != "$GARMIN_VERSION_AFTER" ]; then
-            echo "garmin-changed=true" >> $GITHUB_OUTPUT
-            echo "garmin-version=$GARMIN_VERSION_AFTER" >> $GITHUB_OUTPUT
-          else
-            echo "garmin-changed=false" >> $GITHUB_OUTPUT
-          fi
-
-          if [ "$GARMIN_CONNECT_VERSION_BEFORE" != "$GARMIN_CONNECT_VERSION_AFTER" ]; then
-            echo "garmin-connect-changed=true" >> $GITHUB_OUTPUT
-            echo "garmin-connect-version=$GARMIN_CONNECT_VERSION_AFTER" >> $GITHUB_OUTPUT
-          else
-            echo "garmin-connect-changed=false" >> $GITHUB_OUTPUT
-          fi
-
-          if [ "$MCP_VERSION_BEFORE" != "$MCP_VERSION_AFTER" ]; then
-            echo "mcp-changed=true" >> $GITHUB_OUTPUT
-            echo "mcp-version=$MCP_VERSION_AFTER" >> $GITHUB_OUTPUT
-          else
-            echo "mcp-changed=false" >> $GITHUB_OUTPUT
-          fi
-
-          if [ "$CLI_VERSION_BEFORE" != "$CLI_VERSION_AFTER" ]; then
-            echo "cli-changed=true" >> $GITHUB_OUTPUT
-            echo "cli-version=$CLI_VERSION_AFTER" >> $GITHUB_OUTPUT
-          else
-            echo "cli-changed=false" >> $GITHUB_OUTPUT
-          fi
-
-          if [ "$AI_VERSION_BEFORE" != "$AI_VERSION_AFTER" ]; then
-            echo "ai-changed=true" >> $GITHUB_OUTPUT
-            echo "ai-version=$AI_VERSION_AFTER" >> $GITHUB_OUTPUT
-          else
-            echo "ai-changed=false" >> $GITHUB_OUTPUT
-          fi
-
-          # Commit version changes (if any packages were actually bumped)
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add .
-          if git diff --cached --quiet; then
-            echo "No version changes to commit (changesets may only affect ignored packages)"
-            echo "has-version-changes=false" >> $GITHUB_OUTPUT
-          else
-            git commit -m "chore: version packages [skip ci]"
-            git push https://x-access-token:${GITHUB_TOKEN}@github.com/${{ github.repository }}.git HEAD:main
-            echo "has-version-changes=true" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Publish to npm with provenance
-        if: steps.changesets.outputs.has-changesets == 'true' && steps.version.outputs.has-version-changes == 'true'
-        env:
           NPM_CONFIG_PROVENANCE: true
-        run: pnpm exec changeset publish
 
       - name: Create GitHub Releases
-        if: steps.changesets.outputs.has-changesets == 'true' && steps.version.outputs.has-version-changes == 'true'
+        if: steps.changesets.outputs.published == 'true'
         run: node scripts/create-github-releases.js
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
+          PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
 
       - name: Summary
-        if: steps.changesets.outputs.has-changesets == 'true' && steps.version.outputs.has-version-changes == 'true'
+        if: steps.changesets.outputs.published == 'true'
         run: |
           echo "## 📦 Release Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo '${{ steps.changesets.outputs.publishedPackages }}' | node -e "
+            const pkgs = JSON.parse(require('fs').readFileSync('/dev/stdin', 'utf8'));
+            for (const p of pkgs) {
+              console.log('- ✅ [' + p.name + '@' + p.version + '](https://www.npmjs.com/package/' + p.name + '/v/' + p.version + ')');
+            }
+          " >> $GITHUB_STEP_SUMMARY
 
-          if [ "${{ steps.version.outputs.core-changed }}" = "true" ]; then
-            echo "- ✅ [@kaiord/core@${{ steps.version.outputs.core-version }}](https://www.npmjs.com/package/@kaiord/core/v/${{ steps.version.outputs.core-version }})" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ steps.version.outputs.garmin-changed }}" = "true" ]; then
-            echo "- @kaiord/garmin@${{ steps.version.outputs.garmin-version }}" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ steps.version.outputs.garmin-connect-changed }}" = "true" ]; then
-            echo "- @kaiord/garmin-connect@${{ steps.version.outputs.garmin-connect-version }}" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ steps.version.outputs.mcp-changed }}" = "true" ]; then
-            echo "- @kaiord/mcp@${{ steps.version.outputs.mcp-version }}" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ steps.version.outputs.cli-changed }}" = "true" ]; then
-            echo "- @kaiord/cli@${{ steps.version.outputs.cli-version }}" >> $GITHUB_STEP_SUMMARY
-          fi
-
-          if [ "${{ steps.version.outputs.ai-changed }}" = "true" ]; then
-            echo "- @kaiord/ai@${{ steps.version.outputs.ai-version }}" >> $GITHUB_STEP_SUMMARY
-          fi
-
-      - name: No changes
-        if: steps.changesets.outputs.has-changesets == 'false'
+      - name: No packages published
+        if: steps.changesets.outputs.published != 'true'
         run: |
           echo "## ℹ️ No Release" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "No pending changesets found. To release:" >> $GITHUB_STEP_SUMMARY
-          echo "1. Run \`pnpm exec changeset\` locally" >> $GITHUB_STEP_SUMMARY
-          echo "2. Commit and push the generated changeset file" >> $GITHUB_STEP_SUMMARY
+          echo "No packages were published. Either:" >> $GITHUB_STEP_SUMMARY
+          echo "- A **Version Packages** PR was created/updated (check open PRs)" >> $GITHUB_STEP_SUMMARY
+          echo "- No pending changesets were found" >> $GITHUB_STEP_SUMMARY

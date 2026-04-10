@@ -1,19 +1,62 @@
 #!/usr/bin/env node
 
 /**
- * Create GitHub releases for published packages
- * Usage: node scripts/create-github-releases.js
+ * Create GitHub releases for published packages.
  *
  * Environment variables:
  * - GITHUB_TOKEN: GitHub API token
  * - GITHUB_REPOSITORY: Repository in format "owner/repo"
+ * - PUBLISHED_PACKAGES: (optional) JSON array of { name, version } from changesets/action.
+ *   When not set, falls back to scanning package.json for all publishable packages.
  */
 
 import fs from "fs";
 import { execSync } from "child_process";
 
+const PUBLISHABLE_DIRS = [
+  "core",
+  "fit",
+  "tcx",
+  "zwo",
+  "garmin",
+  "garmin-connect",
+  "cli",
+  "mcp",
+  "ai",
+];
+
+function getPackagesFromEnv() {
+  const raw = process.env.PUBLISHED_PACKAGES;
+  if (!raw) return null;
+
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) return null;
+    return parsed.map((pkg) => ({
+      name: pkg.name,
+      version: pkg.version,
+      dir: `packages/${pkg.name.replace("@kaiord/", "")}`,
+    }));
+  } catch {
+    console.warn(
+      "⚠️  Could not parse PUBLISHED_PACKAGES, falling back to disk scan"
+    );
+    return null;
+  }
+}
+
+function getPackagesFromDisk() {
+  return PUBLISHABLE_DIRS.filter((d) =>
+    fs.existsSync(`packages/${d}/package.json`)
+  ).map((d) => {
+    const pkg = JSON.parse(
+      fs.readFileSync(`packages/${d}/package.json`, "utf8")
+    );
+    return { name: pkg.name, version: pkg.version, dir: `packages/${d}` };
+  });
+}
+
 async function createGitHubReleases() {
-  // Get GitHub context from environment
   const token = process.env.GITHUB_TOKEN;
   const repository = process.env.GITHUB_REPOSITORY;
 
@@ -25,67 +68,7 @@ async function createGitHubReleases() {
   }
 
   const [owner, repo] = repository.split("/");
-
-  // Read package.json files to get versions
-  const packages = [];
-
-  // Check @kaiord/core
-  if (fs.existsSync("packages/core/package.json")) {
-    const pkg = JSON.parse(
-      fs.readFileSync("packages/core/package.json", "utf8")
-    );
-    packages.push({
-      name: pkg.name,
-      version: pkg.version,
-      dir: "packages/core",
-    });
-  }
-
-  // Check @kaiord/cli
-  if (fs.existsSync("packages/cli/package.json")) {
-    const pkg = JSON.parse(
-      fs.readFileSync("packages/cli/package.json", "utf8")
-    );
-    packages.push({
-      name: pkg.name,
-      version: pkg.version,
-      dir: "packages/cli",
-    });
-  }
-
-  // Check @kaiord/garmin-connect
-  if (fs.existsSync("packages/garmin-connect/package.json")) {
-    const pkg = JSON.parse(
-      fs.readFileSync("packages/garmin-connect/package.json", "utf8")
-    );
-    packages.push({
-      name: pkg.name,
-      version: pkg.version,
-      dir: "packages/garmin-connect",
-    });
-  }
-
-  // Check @kaiord/mcp
-  if (fs.existsSync("packages/mcp/package.json")) {
-    const pkg = JSON.parse(
-      fs.readFileSync("packages/mcp/package.json", "utf8")
-    );
-    packages.push({
-      name: pkg.name,
-      version: pkg.version,
-      dir: "packages/mcp",
-    });
-  }
-
-  // Check @kaiord/ai
-  if (fs.existsSync("packages/ai/package.json")) {
-    const pkg = JSON.parse(fs.readFileSync("packages/ai/package.json", "utf8"));
-    packages.push({
-      name: pkg.name,
-      version: pkg.version,
-      dir: "packages/ai",
-    });
-  }
+  const packages = getPackagesFromEnv() ?? getPackagesFromDisk();
 
   console.log(
     `\n📦 Creating GitHub releases for ${packages.length} package(s)...\n`
@@ -172,7 +155,6 @@ async function createGitHubReleases() {
   console.log("\n✅ GitHub releases creation completed\n");
 }
 
-// Run the script
 createGitHubReleases().catch((error) => {
   console.error("❌ Script failed:", error);
   process.exit(1);
