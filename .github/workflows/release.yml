@@ -44,8 +44,8 @@ jobs:
         id: changesets
         uses: changesets/action@v1
         with:
-          version: pnpm exec changeset version && pnpm install --no-frozen-lockfile
-          publish: pnpm -r build && pnpm exec changeset publish
+          version: bash -c "pnpm exec changeset version && pnpm install --no-frozen-lockfile"
+          publish: bash -c "pnpm -r build && pnpm exec changeset publish"
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NPM_CONFIG_PROVENANCE: true
