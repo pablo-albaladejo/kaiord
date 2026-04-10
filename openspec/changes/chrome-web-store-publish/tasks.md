@@ -33,4 +33,4 @@
 
 - [x] 6.1 Run `pnpm -r test && pnpm -r build && pnpm lint:fix` — ensure zero errors/warnings
 - [x] 6.2 Add changeset via `pnpm exec changeset`
-- [ ] 6.3 Commit with conventional commit: `feat(garmin-bridge): prepare Chrome Web Store publishing`
+- [x] 6.3 Commit with conventional commit: `feat(garmin-bridge): prepare Chrome Web Store publishing`
