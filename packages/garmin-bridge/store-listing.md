@@ -18,6 +18,7 @@ Features:
 • Session status indicator in the popup
 
 How it works:
+
 1. Log into Garmin Connect in your browser
 2. Open the Kaiord workout editor
 3. Push workouts to Garmin Connect with one click
@@ -59,6 +60,7 @@ Capture popup screenshots at 640x400 or 1280x800:
 3. **Workout list**: In connected state, click "List Workouts", capture popup showing workout names
 
 Steps to capture:
+
 1. Load the extension from the extracted zip (`chrome://extensions` → Load unpacked)
 2. Open Garmin Connect and log in
 3. Use Chrome DevTools "Capture screenshot" or a screenshot tool

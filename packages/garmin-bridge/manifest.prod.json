@@ -35,8 +35,6 @@
   ],
 
   "externally_connectable": {
-    "matches": [
-      "https://*.kaiord.com/*"
-    ]
+    "matches": ["https://*.kaiord.com/*"]
   }
 }
