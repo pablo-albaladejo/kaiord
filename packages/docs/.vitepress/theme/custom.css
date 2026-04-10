@@ -92,14 +92,31 @@
    We override the centering calc with fixed values so content stays left-aligned
    and uses available space. */
 @media (min-width: 1440px) {
+  /* Sidebar: fixed width, no centering padding */
   .VPSidebar.VPSidebar {
     padding-left: 32px;
     width: var(--vp-sidebar-width);
   }
 
+  /* Content area: left-aligned after sidebar */
   .VPContent.has-sidebar {
     padding-left: var(--vp-sidebar-width);
     padding-right: 0;
+  }
+
+  /* Navbar: doubled selectors to beat VP's scoped styles */
+  .VPNavBar.has-sidebar.VPNavBar.has-sidebar .title {
+    padding-left: 32px;
+    width: var(--vp-sidebar-width);
+  }
+
+  .VPNavBar.has-sidebar.VPNavBar.has-sidebar .content {
+    padding-left: var(--vp-sidebar-width);
+    padding-right: 32px;
+  }
+
+  .VPNavBar.has-sidebar.VPNavBar.has-sidebar .divider {
+    padding-left: var(--vp-sidebar-width);
   }
 }
 
