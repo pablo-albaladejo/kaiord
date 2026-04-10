@@ -10,7 +10,7 @@ Connects the Kaiord workout editor to Garmin Connect via your browser session
 
 ## Detailed Description
 
-Kaiord Garmin Bridge connects the Kaiord workout editor (kaiord.com/editor) to your Garmin Connect account through your existing browser session. No passwords or API keys needed — the extension uses your active Garmin Connect login.
+Kaiord Garmin Bridge connects the Kaiord workout editor (https://kaiord.com/editor) to your Garmin Connect account through your existing browser session. No passwords or API keys needed — the extension uses your active Garmin Connect login.
 
 Features:
 • Push structured workouts from the Kaiord editor directly to Garmin Connect
@@ -26,7 +26,7 @@ How it works:
 Privacy:
 • No data collection, no analytics, no telemetry
 • No passwords or tokens stored — uses your existing browser session
-• Open source: github.com/pablo-albaladejo/kaiord
+• Open source: https://github.com/pablo-albaladejo/kaiord
 
 ## Metadata
 

@@ -3,7 +3,7 @@
 - [x] 1.1 Add `@resvg/resvg-js` as devDependency in root `package.json` (build tooling)
 - [x] 1.2 Create `scripts/generate-extension-icons.mjs` that rasterizes `assets/favicon.svg` to 16x16, 48x48, 128x128 PNG in `packages/garmin-bridge/icons/`
 - [x] 1.3 Run the script and verify generated icons are valid PNGs at correct dimensions
-- [x] 1.4 Commit the generated PNGs to the repository (they change rarely, avoids build-step dependency)
+- [x] 1.4 Commit the generated PNGs to the repository (they rarely change, avoids build-step dependency)
 
 ## 2. Production Manifest
 

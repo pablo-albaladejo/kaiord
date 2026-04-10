@@ -15,7 +15,7 @@ The extension code itself does not change — this is purely a packaging and dis
 **Goals:**
 
 - Produce a CWS-ready `.zip` with production manifest and real icons
-- Add a privacy policy page to `docs.kaiord.com`
+- Add a privacy policy page to `kaiord.com/docs`
 - Document the submission process so it's repeatable
 - Keep dev workflow unchanged (Load unpacked still works)
 

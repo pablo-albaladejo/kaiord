@@ -6,7 +6,7 @@ The `@kaiord/garmin-bridge` extension is fully functional but only usable via "L
 
 - Generate production-ready extension icons (16x16, 48x48, 128x128 PNG) from the existing `favicon.svg` brand asset
 - Create a production manifest that removes localhost origins from `externally_connectable`
-- Add a privacy policy page to the docs site (`docs.kaiord.com/legal/privacy-policy`)
+- Add a privacy policy page to the docs site (`kaiord.com/docs/legal/privacy-policy`)
 - Create a packaging script that produces a clean `.zip` for CWS upload
 - Prepare Chrome Web Store listing assets (description, screenshots, category)
 - Document the CWS submission and review process
@@ -28,5 +28,5 @@ The `@kaiord/garmin-bridge` extension is fully functional but only usable via "L
 - **Hexagonal layers**: Infrastructure only (adapter packaging, no domain/application changes)
 - **APIs**: No breaking changes — the extension message API is unchanged
 - **Dependencies**: No new runtime dependencies; `@resvg/resvg-js` added as root devDependency for SVG→PNG icon rasterization
-- **External systems**: Chrome Web Store (new listing), `docs.kaiord.com` (new page)
+- **External systems**: Chrome Web Store (new listing), `kaiord.com/docs` (new page)
 - **Manual steps required**: Developer account creation ($5), CWS dashboard submission, review wait

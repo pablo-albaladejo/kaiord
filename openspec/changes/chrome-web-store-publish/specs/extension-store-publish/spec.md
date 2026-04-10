@@ -2,7 +2,7 @@
 
 ### Requirement: Production extension icons
 
-The extension SHALL include PNG icons at 16x16, 48x48, and 128x128 pixels, generated from the project's `assets/favicon.svg`. Icons SHALL use the brand colors: `#0284c7` (sky-600) on `#0f172a` (slate-900) background with rounded corners. Icons SHALL be stored in `packages/garmin-bridge/icons/` and committed to the repository (they change rarely and avoid build-step dependencies).
+The extension SHALL include PNG icons at 16x16, 48x48, and 128x128 pixels, generated from the project's `assets/favicon.svg`. Icons SHALL use the brand colors: `#0284c7` (sky-600) on `#0f172a` (slate-900) background with rounded corners. Icons SHALL be stored in `packages/garmin-bridge/icons/` and committed to the repository (they rarely change and avoid build-step dependencies).
 
 #### Scenario: Icons are valid PNG at correct dimensions
 

@@ -23,6 +23,12 @@ if [ -z "$VERSION" ]; then
   exit 1
 fi
 
+MANIFEST_VERSION=$(node -e "const m=JSON.parse(require('fs').readFileSync('$PKG_DIR/manifest.prod.json','utf8')); if(!m.version){process.exit(1)}; console.log(m.version)" 2>/dev/null)
+if [ -z "$MANIFEST_VERSION" ] || [ "$MANIFEST_VERSION" != "$VERSION" ]; then
+  echo "ERROR: version mismatch (package.json=$VERSION, manifest.prod.json=$MANIFEST_VERSION)" >&2
+  exit 1
+fi
+
 echo "Packaging Kaiord Garmin Bridge v$VERSION..."
 
 # ── Assemble files (whitelist approach) ──
