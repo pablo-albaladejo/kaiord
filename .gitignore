@@ -60,3 +60,4 @@ poc-*/
 # OpenSpec
 openspec/.cache/
 packages/docs/.vitepress/cache/
+*.gcn
