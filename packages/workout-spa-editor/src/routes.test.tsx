@@ -63,7 +63,7 @@ describe("Routing", () => {
     renderAtPath("/library");
 
     await waitFor(() => {
-      expect(screen.getByText("Library (coming soon)")).toBeInTheDocument();
+      expect(screen.getByText("Workout Library")).toBeInTheDocument();
     });
   });
 
