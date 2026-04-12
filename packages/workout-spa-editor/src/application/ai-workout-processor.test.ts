@@ -95,7 +95,7 @@ describe("processWorkoutWithAi", () => {
     await processWorkoutWithAi(makeParams({ generateFn }));
 
     const retryPrompt = generateFn.mock.calls[1][0];
-    expect(retryPrompt).toContain("Previous attempt failed");
+    expect(retryPrompt).toContain("<previous_error>");
     expect(retryPrompt).toContain("Invalid JSON");
   });
 
