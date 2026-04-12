@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { createContext, useContext } from "react";
+import { createContext, useContext, useMemo } from "react";
 
 import { useGarminBridgeActions } from "../hooks/use-garmin-bridge-actions";
 import type { GarminBridgeState } from "./garmin-bridge-types";
@@ -9,8 +9,14 @@ const GarminBridgeContext = createContext<GarminBridgeState | null>(null);
 export const GarminBridgeProvider = ({ children }: { children: ReactNode }) => {
   const state = useGarminBridgeActions();
 
+  const value = useMemo(
+    () => state,
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable callbacks from useCallback
+    [state.extensionInstalled, state.sessionActive, state.pushing, state.lastError]
+  );
+
   return (
-    <GarminBridgeContext.Provider value={state}>
+    <GarminBridgeContext.Provider value={value}>
       {children}
     </GarminBridgeContext.Provider>
   );
