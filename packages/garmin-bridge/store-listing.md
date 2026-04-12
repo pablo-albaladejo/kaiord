@@ -37,19 +37,26 @@ Privacy:
 - **Website**: https://kaiord.com
 - **Support URL**: https://github.com/pablo-albaladejo/kaiord/issues
 
-## Submission Checklist
+## Submission Checklist (Initial Setup)
 
-- [ ] Create Chrome Web Store developer account ($5 one-time fee)
-- [ ] Register as "Pablo Albaladejo"
-- [ ] Run `bash scripts/package-extension.sh` to generate the zip
-- [ ] Upload `packages/garmin-bridge/dist/kaiord-garmin-bridge-{version}.zip`
-- [ ] Fill in listing fields from this document
-- [ ] Upload icon (128x128 from `packages/garmin-bridge/icons/icon128.png`)
-- [ ] Upload at least one screenshot (1280x800 or 640x400)
-- [ ] Paste permission justifications from `privacy-justification.md` into the CWS dashboard
-- [ ] Set privacy policy URL to `https://kaiord.com/docs/legal/privacy-policy`
-- [ ] Submit for review
-- [ ] Wait for approval (may take days due to `webRequest` permission)
+- [x] Create Chrome Web Store developer account ($5 one-time fee)
+- [x] Register as "Pablo Albaladejo"
+- [x] Fill in listing fields from this document
+- [x] Upload icon (128x128 from `packages/garmin-bridge/icons/icon128.png`)
+- [x] Upload at least one screenshot (1280x800 or 640x400)
+- [x] Paste permission justifications from `privacy-justification.md` into the CWS dashboard
+- [x] Set privacy policy URL to `https://kaiord.com/docs/legal/privacy-policy`
+- [x] Submit for review
+
+## Automated Publishing
+
+After initial setup, updates are published automatically via GitHub Actions:
+
+1. Create a changeset: `pnpm exec changeset` (select `@kaiord/garmin-bridge`)
+2. Merge to main — changesets creates a "Version Packages" PR
+3. Merge the Version Packages PR — `cws-publish.yml` detects the version bump and uploads to CWS
+
+See `docs/cws-credentials-setup.md` for the one-time CWS API credentials setup.
 
 ## Screenshots
 

@@ -1,0 +1,92 @@
+name: CWS Publish
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "packages/garmin-bridge/**"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    name: Publish to Chrome Web Store
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Detect version change
+        id: version
+        run: |
+          CURRENT=$(node -e "console.log(JSON.parse(require('fs').readFileSync('packages/garmin-bridge/package.json','utf8')).version)")
+          LATEST_TAG=$(git tag -l '@kaiord/garmin-bridge@*' --sort=-v:refname | head -n1 || echo "")
+          if [ -n "$LATEST_TAG" ]; then
+            TAG_VERSION="${LATEST_TAG#@kaiord/garmin-bridge@}"
+          else
+            TAG_VERSION=""
+          fi
+          echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "tag_version=$TAG_VERSION" >> "$GITHUB_OUTPUT"
+          if [ "$CURRENT" = "$TAG_VERSION" ]; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "Version $CURRENT already published (tag exists)"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+            echo "New version detected: $CURRENT (tag: ${TAG_VERSION:-none})"
+          fi
+
+      - name: Setup pnpm
+        if: steps.version.outputs.changed == 'true'
+        uses: ./.github/actions/setup-pnpm
+
+      - name: Sync manifest versions
+        if: steps.version.outputs.changed == 'true'
+        run: node scripts/sync-extension-version.mjs
+
+      - name: Package extension
+        if: steps.version.outputs.changed == 'true'
+        run: bash scripts/package-extension.sh
+
+      - name: Upload to Chrome Web Store
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          npx chrome-webstore-upload-cli upload \
+            --source packages/garmin-bridge/dist/kaiord-garmin-bridge-${{ steps.version.outputs.current }}.zip \
+            --extension-id ${{ secrets.CWS_EXTENSION_ID }} \
+            --client-id ${{ secrets.CWS_CLIENT_ID }} \
+            --client-secret ${{ secrets.CWS_CLIENT_SECRET }} \
+            --refresh-token ${{ secrets.CWS_REFRESH_TOKEN }} \
+            --auto-publish
+
+      - name: Create git tag
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          TAG="@kaiord/garmin-bridge@${{ steps.version.outputs.current }}"
+          git tag "$TAG"
+          git push origin "$TAG"
+
+      - name: Summary
+        if: steps.version.outputs.changed == 'true'
+        run: |
+          echo "## 🚀 CWS Publish" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Version**: ${{ steps.version.outputs.current }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tag**: @kaiord/garmin-bridge@${{ steps.version.outputs.current }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Status**: Uploaded and auto-publish requested" >> $GITHUB_STEP_SUMMARY
+
+      - name: Skip summary
+        if: steps.version.outputs.changed != 'true'
+        run: |
+          echo "## ℹ️ CWS Publish Skipped" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Version ${{ steps.version.outputs.current }} already published." >> $GITHUB_STEP_SUMMARY
