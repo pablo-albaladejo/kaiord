@@ -15,6 +15,7 @@ export type RawWorkoutContentProps = {
   onProcess: (workoutId: string, commentIndices: number[]) => void;
   onSkip: (workoutId: string) => void;
   onUnskip: (workoutId: string) => void;
+  isSubmitting?: boolean;
 };
 
 export function RawWorkoutContent({
@@ -22,6 +23,7 @@ export function RawWorkoutContent({
   onProcess,
   onSkip,
   onUnskip,
+  isSubmitting = false,
 }: RawWorkoutContentProps) {
   const raw = workout.raw;
   const comments = raw?.comments ?? [];
@@ -48,6 +50,7 @@ export function RawWorkoutContent({
         onSkip={onSkip}
         onUnskip={onUnskip}
         onManual={() => navigate(`/workout/new?date=${workout.date}`)}
+        disabled={isSubmitting}
       />
     </div>
   );

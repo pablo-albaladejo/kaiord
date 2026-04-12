@@ -7,6 +7,12 @@
 import { Download, PenLine, Plug } from "lucide-react";
 import { useLocation } from "wouter";
 
+import { useSettingsDialog } from "../../../contexts";
+
+export type FirstVisitStateProps = {
+  onSettingsClick?: () => void;
+};
+
 function EntryPath({
   icon: IconCmp,
   title,
@@ -33,8 +39,9 @@ function EntryPath({
   );
 }
 
-export function FirstVisitState() {
+export function FirstVisitState({ onSettingsClick }: FirstVisitStateProps) {
   const [, navigate] = useLocation();
+  const { show } = useSettingsDialog();
 
   return (
     <div
@@ -57,13 +64,13 @@ export function FirstVisitState() {
           icon={Download}
           title="Import"
           description="Import FIT, TCX, or ZWO files"
-          onClick={() => navigate("/workout/new")}
+          onClick={() => navigate("/workout/new?action=import")}
         />
         <EntryPath
           icon={Plug}
           title="Connect"
           description="Link a platform like Garmin Connect"
-          onClick={() => navigate("/workout/new")}
+          onClick={onSettingsClick ?? show}
         />
       </div>
     </div>

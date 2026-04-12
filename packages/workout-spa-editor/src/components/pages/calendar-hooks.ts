@@ -25,6 +25,8 @@ export type HydrationStatus = "pending" | "complete" | "failed";
 
 export type CalendarData = {
   weekId: string;
+  weekStart: string;
+  weekEnd: string;
   isValidWeek: boolean;
   days: string[];
   workoutsByDay: Record<string, WorkoutRecord[]>;
@@ -75,6 +77,8 @@ export function useCalendarData(): CalendarData {
 
   return {
     weekId,
+    weekStart: range?.start ?? "",
+    weekEnd: range?.end ?? "",
     isValidWeek,
     days,
     workoutsByDay,

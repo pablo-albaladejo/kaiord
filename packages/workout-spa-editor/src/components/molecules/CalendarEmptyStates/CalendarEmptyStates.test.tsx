@@ -75,6 +75,16 @@ describe("NoBridgesState", () => {
       screen.getByText(/No bridge extensions detected/)
     ).toBeInTheDocument();
   });
+
+  it("renders learn more link to bridge docs", () => {
+    render(<NoBridgesState />);
+
+    const link = screen.getByText("Learn more");
+
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute("href", "https://kaiord.com/docs/bridges");
+    expect(link).toHaveAttribute("target", "_blank");
+  });
 });
 
 describe("NoAiProviderState", () => {

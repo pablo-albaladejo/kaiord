@@ -9,6 +9,7 @@ export type ActionBtnProps = {
   label: string;
   onClick: () => void;
   primary?: boolean;
+  disabled?: boolean;
 };
 
 export function ActionBtn({
@@ -16,6 +17,7 @@ export function ActionBtn({
   label,
   onClick,
   primary,
+  disabled = false,
 }: ActionBtnProps) {
   const cls = primary
     ? "bg-primary-600 text-white hover:bg-primary-700"
@@ -24,7 +26,8 @@ export function ActionBtn({
     <button
       type="button"
       onClick={onClick}
-      className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm ${cls}`}
+      disabled={disabled}
+      className={`flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm ${cls} disabled:cursor-not-allowed disabled:opacity-50`}
     >
       <I className="h-4 w-4" /> {label}
     </button>
