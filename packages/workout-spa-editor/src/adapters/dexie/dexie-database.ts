@@ -24,3 +24,8 @@ export class KaiordDatabase extends Dexie {
 }
 
 export const db = new KaiordDatabase();
+
+// Expose for e2e test seeding (dev mode only)
+if (import.meta.env.DEV) {
+  (window as unknown as Record<string, unknown>).__KAIORD_DB__ = db;
+}
