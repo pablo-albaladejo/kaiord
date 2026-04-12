@@ -78,6 +78,55 @@ export {
 } from "./schemas";
 
 // ============================================
+// Calendar Schemas
+// ============================================
+
+export type {
+  AiMeta,
+  Condition,
+  ValueWithUnit,
+  WorkoutComment,
+  WorkoutFeedback,
+  WorkoutRaw,
+  WorkoutRecord,
+  WorkoutState,
+} from "./calendar-schemas";
+export {
+  aiMetaSchema,
+  conditionSchema,
+  valueWithUnitSchema,
+  workoutCommentSchema,
+  workoutFeedbackSchema,
+  workoutRawSchema,
+  workoutRecordSchema,
+  workoutStateSchema,
+} from "./calendar-schemas";
+
+// ============================================
+// Bridge Schemas
+// ============================================
+
+export type {
+  BridgeCapability,
+  BridgeErrorResponse,
+  BridgeManifest,
+  SyncState,
+} from "./bridge-schemas";
+export {
+  bridgeCapabilitySchema,
+  bridgeErrorResponseSchema,
+  bridgeManifestSchema,
+  syncStateSchema,
+} from "./bridge-schemas";
+
+// ============================================
+// Usage Schemas
+// ============================================
+
+export type { UsageEntry, UsageRecord } from "./usage-schemas";
+export { usageEntrySchema, usageRecordSchema } from "./usage-schemas";
+
+// ============================================
 // Validation Helpers
 // ============================================
 
