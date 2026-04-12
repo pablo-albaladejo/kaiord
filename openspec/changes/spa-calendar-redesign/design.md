@@ -76,7 +76,7 @@ Dexie.js (~50KB) wraps IndexedDB with typed schemas, compound indexes, and `useL
 
 **Port interface (hexagonal boundary):**
 
-```
+```text
 PersistencePort
 ├── WorkoutRepository     (calendar instances)
 ├── TemplateRepository    (library templates)
@@ -91,7 +91,7 @@ PersistencePort
 - `DexiePersistenceAdapter` — production, writes to IndexedDB
 - `InMemoryPersistenceAdapter` — tests, shared in `src/test-utils/`
 
-**Write flow:** Zustand-first (synchronous UI update) → 100ms debounced Dexie persist (async). Data loss window on abrupt tab closure: <100ms. Same risk profile as Google Docs, Notion.
+**Write flow:** Zustand-first for editor runtime only (workout-store). Persist to Dexie exclusively on explicit user actions (e.g., "Save to Library", push to Garmin) via PersistencePort repositories. No automatic workout-store write-through. Non-editor stores (library, profiles, AI providers) write through to Dexie on mutation.
 
 **Read flow:** Dexie hydrates app on boot. `useLiveQuery` at page level (one query per page, not per card). Cross-tab reactivity via `liveQuery` scoped to current view.
 
@@ -109,7 +109,7 @@ PersistencePort
 
 **Layer:** Domain (Zod schemas) + Adapter (Dexie table)
 
-```
+```text
 Workout {
   id: string (uuid)
   date: string                         // ISO 8601 date (YYYY-MM-DD), no time component
@@ -168,7 +168,7 @@ Workout {
 
 **Capability manifest:**
 
-```
+```text
 BridgeManifest {
   id: string
   name: string
