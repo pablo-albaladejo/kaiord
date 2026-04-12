@@ -2,6 +2,8 @@ import { render, type RenderOptions } from "@testing-library/react";
 import React, { type ReactElement } from "react";
 
 import { ToastProvider } from "./components/atoms/Toast";
+import { GarminBridgeProvider } from "./contexts/garmin-bridge-context";
+import { SettingsDialogProvider } from "./contexts/settings-dialog-context";
 import { type Theme, ThemeProvider } from "./contexts/ThemeContext";
 import { ToastContextProvider } from "./contexts/ToastContext";
 
@@ -25,9 +27,13 @@ export function renderWithProviders(
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
     return (
       <ThemeProvider defaultTheme={defaultTheme}>
-        <ToastProvider>
-          <ToastContextProvider>{children}</ToastContextProvider>
-        </ToastProvider>
+        <SettingsDialogProvider>
+          <GarminBridgeProvider>
+            <ToastProvider>
+              <ToastContextProvider>{children}</ToastContextProvider>
+            </ToastProvider>
+          </GarminBridgeProvider>
+        </SettingsDialogProvider>
       </ThemeProvider>
     );
   };

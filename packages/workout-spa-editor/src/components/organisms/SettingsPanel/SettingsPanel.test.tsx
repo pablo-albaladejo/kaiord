@@ -3,6 +3,23 @@ import { render, screen, fireEvent } from "@testing-library/react";
 import { SettingsPanel } from "./SettingsPanel";
 import { useAiStore } from "../../../store/ai-store";
 
+vi.mock("../../../contexts", async (importOriginal) => {
+  const actual = await importOriginal<Record<string, unknown>>();
+  return {
+    ...actual,
+    useGarminBridge: () => ({
+      extensionInstalled: false,
+      sessionActive: false,
+      pushing: { status: "idle" },
+      lastError: null,
+      detectExtension: vi.fn(),
+      pushWorkout: vi.fn(),
+      listWorkouts: vi.fn(),
+      setPushing: vi.fn(),
+    }),
+  };
+});
+
 describe("SettingsPanel", () => {
   beforeEach(() => {
     useAiStore.setState({
