@@ -93,5 +93,5 @@ function toSuccess(
 }
 
 function appendRetryContext(prompt: string, error: string): string {
-  return `${prompt}\n\nPrevious attempt failed: ${error}\nPlease fix and try again.`;
+  return `${prompt}\n\n<previous_error>\n${error}\n</previous_error>\nPlease fix the above error and try again.`;
 }

@@ -35,6 +35,7 @@ export const detectStale = async (
     state: "stale",
     previousState: existing.state,
     raw: updatedRaw,
+    lastProcessingError: null,
     updatedAt,
   };
 };
