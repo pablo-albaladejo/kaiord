@@ -9,6 +9,33 @@ Each bridge extension SHALL respond to a `ping` action with a capability manifes
 - **WHEN** the SPA sends `{ action: "ping" }` to a bridge extension via `chrome.runtime.sendMessage`
 - **THEN** the bridge SHALL respond with `{ ok: true, protocolVersion: N, data: { id, name, version, capabilities } }`
 
+### Requirement: Bridge response validation
+
+All bridge responses SHALL be validated against the BridgeManifest Zod schema before registration. Responses that fail validation SHALL be rejected.
+
+#### Scenario: Malformed manifest response
+
+- **WHEN** a bridge responds to a ping with a response that does not match the BridgeManifest schema (e.g., missing `capabilities` field)
+- **THEN** the SPA SHALL reject the response, NOT register the bridge, and log a warning
+
+### Requirement: Bridge error response schema
+
+Bridge error responses SHALL follow a consistent schema: `{ ok: false, error: string, code?: string, retryable?: boolean }`.
+
+#### Scenario: Bridge operation fails
+
+- **WHEN** a bridge operation (push, list) fails
+- **THEN** the bridge SHALL respond with `{ ok: false, error: "<description>", retryable: true|false }` and the SPA SHALL display the error message to the user
+
+### Requirement: Hourly rate limit per bridge
+
+The SPA SHALL NOT send more than 60 operations per hour per bridge. If the limit is reached, queued operations SHALL be paused with user notification.
+
+#### Scenario: Rate limit reached
+
+- **WHEN** the SPA has sent 60 operations to a bridge within the last hour
+- **THEN** queued operations SHALL be paused and the user SHALL see "Rate limit reached for [bridge name]. Try again in X minutes."
+
 ### Requirement: Typed bridge capabilities
 
 The system SHALL define these capability types: `read:workouts`, `write:workouts`, `read:body`, `read:sleep`. The SPA SHALL adapt its UI based on detected capabilities (e.g., "Push to Garmin" only shown if a bridge with `write:workouts` is registered).
