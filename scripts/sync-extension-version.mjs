@@ -30,7 +30,9 @@ const validCws =
   parts.every((p) => /^(0|[1-9]\d*)$/.test(p) && Number(p) <= 65535);
 
 if (!validCws) {
-  console.error(`ERROR: invalid Chrome extension version "${version}" in ${pkgPath}`);
+  console.error(
+    `ERROR: invalid Chrome extension version "${version}" in ${pkgPath}`
+  );
   process.exit(1);
 }
 
