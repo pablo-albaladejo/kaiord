@@ -1,8 +1,16 @@
-import { createSecureStorage } from "../lib/secure-storage";
+/**
+ * AI Store Persistence
+ *
+ * Persists AI providers to IndexedDB via Dexie with encryption.
+ * Custom prompt stored in the meta table.
+ */
+
+import { createDexieAiProviderRepository } from "../adapters/dexie/dexie-ai-provider-repository";
+import { db } from "../adapters/dexie/dexie-database";
 import type { LlmProviderConfig } from "./ai-store-types";
 
-const STORAGE_KEY = "ai_providers";
-const storage = createSecureStorage("kaiord-spa-v1");
+const repo = createDexieAiProviderRepository(db);
+const metaTable = () => db.table("meta");
 
 type PersistedAiData = {
   providers: Array<LlmProviderConfig>;
@@ -11,17 +19,28 @@ type PersistedAiData = {
 
 export const persistAiData = async (data: PersistedAiData): Promise<void> => {
   try {
-    await storage.set(STORAGE_KEY, JSON.stringify(data));
-  } catch {
-    /* silent — best-effort persistence */
+    await Promise.all([
+      ...data.providers.map((p) => repo.put(p)),
+      metaTable().put({ key: "ai_custom_prompt", value: data.customPrompt }),
+    ]);
+  } catch (error: unknown) {
+    console.error(
+      "Failed to persist AI data:",
+      error instanceof Error ? error.message : "Unknown error"
+    );
   }
 };
 
 export const loadAiData = async (): Promise<PersistedAiData> => {
   try {
-    const raw = await storage.get(STORAGE_KEY);
-    if (!raw) return { providers: [], customPrompt: "" };
-    return JSON.parse(raw) as PersistedAiData;
+    const [providers, meta] = await Promise.all([
+      repo.getAll(),
+      metaTable().get("ai_custom_prompt"),
+    ]);
+    return {
+      providers,
+      customPrompt: (meta?.value as string) ?? "",
+    };
   } catch {
     return { providers: [], customPrompt: "" };
   }

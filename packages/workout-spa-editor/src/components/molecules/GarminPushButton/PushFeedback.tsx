@@ -1,7 +1,7 @@
-import type { GarminStore } from "../../../store/garmin-store";
+import type { PushState } from "../../../contexts";
 
 type PushFeedbackProps = {
-  push: GarminStore["pushing"];
+  push: PushState;
   onReset: () => void;
 };
 

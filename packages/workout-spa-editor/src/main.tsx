@@ -4,23 +4,28 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import App from "./App.tsx";
-import { ThemeProvider } from "./contexts";
+import {
+  GarminBridgeProvider,
+  SettingsDialogProvider,
+  ThemeProvider,
+} from "./contexts";
 
 if (import.meta.env.DEV) {
   import("./store/ai-store").then(({ useAiStore }) => {
-    import("./store/garmin-store").then(({ useGarminStore }) => {
-      (window as unknown as Record<string, unknown>).__ZUSTAND_STORES__ = {
-        ai: useAiStore,
-        garmin: useGarminStore,
-      };
-    });
+    (window as unknown as Record<string, unknown>).__ZUSTAND_STORES__ = {
+      ai: useAiStore,
+    };
   });
 }
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <ThemeProvider>
-      <App />
+      <SettingsDialogProvider>
+        <GarminBridgeProvider>
+          <App />
+        </GarminBridgeProvider>
+      </SettingsDialogProvider>
     </ThemeProvider>
   </StrictMode>
 );

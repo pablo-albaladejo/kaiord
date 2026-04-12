@@ -2,11 +2,14 @@
  * HeaderLogo Component
  *
  * Kaiord logo and title for the header.
+ * Uses wouter Link for SPA navigation (no full page reload).
  */
+
+import { Link } from "wouter";
 
 export function HeaderLogo() {
   return (
-    <div className="flex items-center gap-3">
+    <Link href="/calendar" className="flex items-center gap-3 no-underline">
       <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary-600 text-white">
         <svg
           className="h-6 w-6"
@@ -28,6 +31,6 @@ export function HeaderLogo() {
       <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
         Kaiord Editor
       </h1>
-    </div>
+    </Link>
   );
 }

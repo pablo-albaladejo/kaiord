@@ -2,7 +2,7 @@
  * Library Store
  *
  * Zustand store for managing workout library.
- * Automatically persists to localStorage on changes.
+ * Persists to IndexedDB via Dexie (migrated from localStorage).
  */
 
 import { create } from "zustand";
