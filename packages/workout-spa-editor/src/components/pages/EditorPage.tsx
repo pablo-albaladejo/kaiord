@@ -6,6 +6,8 @@
  * standard editor with file upload / AI input.
  */
 
+import { useSearch } from "wouter";
+
 import { useAppHandlers } from "../../hooks/useAppHandlers";
 import { useDeleteCleanup } from "../../hooks/useDeleteCleanup";
 import { useWorkoutStore } from "../../store/workout-store";
@@ -21,6 +23,10 @@ export type EditorPageProps = { id?: string };
 
 export default function EditorPage({ id }: EditorPageProps) {
   useDeleteCleanup();
+  const search = useSearch();
+  const params = new URLSearchParams(search);
+  const dateParam = params.get("date");
+
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
   const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
   const reorderStep = useWorkoutStore((s) => s.reorderStep);
@@ -39,6 +45,7 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   return (
     <div className="space-y-6">
+      {!id && dateParam && <DateBanner date={dateParam} />}
       {record && (
         <EditorWorkflowBar
           state={record.state}
@@ -59,5 +66,23 @@ export default function EditorPage({ id }: EditorPageProps) {
         />
       )}
     </div>
+  );
+}
+
+function DateBanner({ date }: { date: string }) {
+  const parsed = new Date(date + "T12:00:00Z");
+  if (isNaN(parsed.getTime())) return null;
+
+  const formatted = parsed.toLocaleDateString("en-US", {
+    weekday: "long",
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
+
+  return (
+    <p data-testid="date-banner" className="text-sm text-muted-foreground">
+      Creating workout for {formatted}
+    </p>
   );
 }

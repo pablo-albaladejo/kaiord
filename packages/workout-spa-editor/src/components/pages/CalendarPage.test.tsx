@@ -5,7 +5,7 @@ import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../adapters/dexie/dexie-database";
-import { SettingsDialogProvider } from "../../contexts";
+import { GarminBridgeProvider, SettingsDialogProvider } from "../../contexts";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import CalendarPage from "./CalendarPage";
 
@@ -45,9 +45,11 @@ function renderCalendar(path = "/calendar/2026-W15") {
   const { hook } = memoryLocation({ path, record: true });
   return render(
     <SettingsDialogProvider>
-      <Router hook={hook}>
-        <CalendarPage />
-      </Router>
+      <GarminBridgeProvider>
+        <Router hook={hook}>
+          <CalendarPage />
+        </Router>
+      </GarminBridgeProvider>
     </SettingsDialogProvider>
   );
 }

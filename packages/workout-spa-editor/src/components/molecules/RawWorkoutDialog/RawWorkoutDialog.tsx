@@ -15,6 +15,7 @@ export type RawWorkoutDialogProps = {
   onProcess: (workoutId: string, commentIndices: number[]) => void;
   onSkip: (workoutId: string) => void;
   onUnskip: (workoutId: string) => void;
+  isSubmitting?: boolean;
 };
 
 export function RawWorkoutDialog({
@@ -23,6 +24,7 @@ export function RawWorkoutDialog({
   onProcess,
   onSkip,
   onUnskip,
+  isSubmitting = false,
 }: RawWorkoutDialogProps) {
   return (
     <Dialog.Root
@@ -38,6 +40,7 @@ export function RawWorkoutDialog({
               onProcess={onProcess}
               onSkip={onSkip}
               onUnskip={onUnskip}
+              isSubmitting={isSubmitting}
             />
           )}
         </Dialog.Content>

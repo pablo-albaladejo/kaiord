@@ -14,6 +14,7 @@ export type RawWorkoutActionsProps = {
   onSkip: (id: string) => void;
   onUnskip: (id: string) => void;
   onManual: () => void;
+  disabled?: boolean;
 };
 
 export function RawWorkoutActions({
@@ -23,6 +24,7 @@ export function RawWorkoutActions({
   onSkip,
   onUnskip,
   onManual,
+  disabled = false,
 }: RawWorkoutActionsProps) {
   return (
     <div className="flex flex-wrap gap-2 pt-2">
@@ -33,11 +35,13 @@ export function RawWorkoutActions({
             label="Process with AI"
             onClick={() => onProcess(workout.id, Array.from(selected))}
             primary
+            disabled={disabled}
           />
           <ActionBtn
             icon={SkipForward}
             label="Skip"
             onClick={() => onSkip(workout.id)}
+            disabled={disabled}
           />
         </>
       )}
@@ -46,9 +50,15 @@ export function RawWorkoutActions({
           icon={Undo2}
           label="Un-skip"
           onClick={() => onUnskip(workout.id)}
+          disabled={disabled}
         />
       )}
-      <ActionBtn icon={PenLine} label="Create manually" onClick={onManual} />
+      <ActionBtn
+        icon={PenLine}
+        label="Create manually"
+        onClick={onManual}
+        disabled={disabled}
+      />
     </div>
   );
 }

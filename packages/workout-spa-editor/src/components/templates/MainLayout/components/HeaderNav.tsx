@@ -4,7 +4,8 @@
  * Navigation buttons for the header.
  */
 
-import { HelpCircle, Settings, User } from "lucide-react";
+import { Calendar, HelpCircle, Settings, User } from "lucide-react";
+import { useLocation } from "wouter";
 
 import { Button } from "../../../atoms/Button/Button";
 import { ThemeToggle } from "../../../atoms/ThemeToggle";
@@ -27,8 +28,19 @@ export function HeaderNav({
   onHelpClick,
   onSettingsClick,
 }: HeaderNavProps) {
+  const [, navigate] = useLocation();
+
   return (
     <nav className="flex items-center gap-2" aria-label="Main navigation">
+      <Button
+        variant="tertiary"
+        size="sm"
+        onClick={() => navigate("/calendar")}
+        aria-label="Go to calendar"
+      >
+        <Calendar className="h-4 w-4" />
+        <span className="hidden sm:inline">Calendar</span>
+      </Button>
       <Button
         variant="tertiary"
         size="sm"
