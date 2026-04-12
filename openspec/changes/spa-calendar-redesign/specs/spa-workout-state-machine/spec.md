@@ -26,7 +26,7 @@ A RAW workout SHALL transition to STRUCTURED when the AI processing pipeline gen
 #### Scenario: AI processing failure
 
 - **WHEN** AI processing fails (invalid JSON, Zod validation error, or API error)
-- **THEN** the workout SHALL remain in `raw` state with an error annotation available for display
+- **THEN** the workout SHALL remain in `raw` state and `lastProcessingError` SHALL contain the error message for display
 
 ### Requirement: STRUCTURED to READY transition via user acceptance
 
@@ -62,12 +62,37 @@ A PUSHED workout that is edited SHALL transition to MODIFIED, indicating it need
 
 ### Requirement: STALE detection via rawHash
 
-When a bridge re-imports a workout whose `raw` content has changed (detected via rawHash comparison), the workout SHALL transition to STALE regardless of its current state (except `skipped`).
+When a bridge re-imports a workout whose `raw` content has changed (detected via rawHash comparison), the workout SHALL transition to STALE for states with user work (structured, ready, pushed, modified). For `raw` state (no user work yet), the raw payload SHALL be updated in-place without transitioning to STALE. For `skipped` state, no transition occurs. On STALE transition, `previousState` SHALL record the state before transition. The `modifiedAt` field SHALL be updated on any user edit to the KRD, not only on PUSHED→MODIFIED transitions.
 
-#### Scenario: Coach updates workout description
+#### Scenario: Coach updates a RAW workout
 
-- **WHEN** a bridge syncs a workout and the newly computed rawHash differs from the stored rawHash
-- **THEN** the workout state SHALL transition to `stale`
+- **WHEN** a bridge syncs a workout in `raw` state and the newly computed rawHash differs from the stored rawHash
+- **THEN** the `raw` payload (description, comments) SHALL be updated in-place, `rawHash` SHALL be recomputed, and the workout SHALL remain in `raw` state (no STALE transition since no user work exists)
+
+#### Scenario: Coach updates a STRUCTURED workout
+
+- **WHEN** a bridge syncs a workout in `structured` state and the newly computed rawHash differs from the stored rawHash
+- **THEN** the workout state SHALL transition to `stale`, `previousState` SHALL be set to `structured`, the `raw` payload SHALL be updated, the existing `krd` SHALL be preserved, and `lastProcessingError` SHALL be cleared
+
+#### Scenario: Coach updates a READY workout
+
+- **WHEN** a bridge syncs a workout in `ready` state and the rawHash has changed
+- **THEN** the workout state SHALL transition to `stale`, `previousState` SHALL be set to `ready`, the `raw` payload SHALL be updated, and the existing `krd` SHALL be preserved
+
+#### Scenario: Coach updates a PUSHED workout
+
+- **WHEN** a bridge syncs a workout in `pushed` state and the rawHash has changed
+- **THEN** the workout state SHALL transition to `stale`, `previousState` SHALL be set to `pushed`, the `raw` payload SHALL be updated, the existing `krd` SHALL be preserved, and `garminPushId` SHALL be preserved
+
+#### Scenario: Coach updates a MODIFIED workout
+
+- **WHEN** a bridge syncs a workout in `modified` state and the rawHash has changed
+- **THEN** the workout state SHALL transition to `stale`, `previousState` SHALL be set to `modified`, the `raw` payload SHALL be updated, the user's edited `krd` SHALL be preserved, and `garminPushId` SHALL be preserved
+
+#### Scenario: Coach updates a SKIPPED workout
+
+- **WHEN** a bridge syncs a workout in `skipped` state and the rawHash has changed
+- **THEN** the workout SHALL remain in `skipped` state (STALE does NOT apply to skipped workouts)
 
 #### Scenario: rawHash computation
 
@@ -76,23 +101,38 @@ When a bridge re-imports a workout whose `raw` content has changed (detected via
 
 ### Requirement: STALE conflict resolution
 
-When a STALE workout has user edits (`modifiedAt > aiMeta.processedAt`), re-processing SHALL require explicit user confirmation.
+When a STALE workout has user edits (`modifiedAt > aiMeta.processedAt`), re-processing SHALL require explicit user confirmation. When there are no user edits, re-processing SHALL proceed immediately.
+
+#### Scenario: Re-process stale workout without user edits
+
+- **WHEN** the user clicks "Re-process" on a STALE workout where `modifiedAt` is null or `modifiedAt <= aiMeta.processedAt`
+- **THEN** the system SHALL re-process immediately without a confirmation dialog and transition to `structured`
 
 #### Scenario: Re-process stale workout with user edits
 
-- **WHEN** the user clicks "Re-process" on a STALE workout that has been locally modified
+- **WHEN** the user clicks "Re-process" on a STALE workout that has been locally modified (`modifiedAt > aiMeta.processedAt`)
 - **THEN** the system SHALL display a confirmation dialog with options: "View diff", "Re-process anyway", "Keep my version"
+
+#### Scenario: Re-process stale workout with null aiMeta (manually created)
+
+- **WHEN** the user clicks "Re-process" on a STALE workout where `aiMeta` is null (manually structured, never AI-processed)
+- **THEN** the system SHALL show the conflict dialog since user work exists (`modifiedAt !== null` is treated as having user edits when aiMeta is absent)
 
 #### Scenario: Keep user version
 
 - **WHEN** the user selects "Keep my version" on the STALE conflict dialog
-- **THEN** the STALE flag SHALL be cleared, the raw.rawHash SHALL be updated to the new hash, and the user's KRD SHALL be preserved
+- **THEN** the state SHALL transition to `previousState` (the state before STALE), the `raw` payload and `rawHash` SHALL reflect the latest coach content, and the user's KRD SHALL be preserved
 
 ### Requirement: SKIPPED state
 
-A RAW workout SHALL be skippable. SKIPPED workouts SHALL not appear in batch processing counts.
+A RAW workout SHALL be skippable. SKIPPED workouts SHALL not appear in batch processing counts. A SKIPPED workout SHALL be recoverable via un-skip.
 
 #### Scenario: Skip a workout
 
 - **WHEN** the user marks a RAW workout as skipped
 - **THEN** the state SHALL transition to `skipped`
+
+#### Scenario: Un-skip a workout
+
+- **WHEN** the user marks a SKIPPED workout as "Reconsider"
+- **THEN** the state SHALL transition back to `raw` and the workout SHALL appear in batch processing counts

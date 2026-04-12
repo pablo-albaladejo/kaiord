@@ -2,7 +2,7 @@
 
 ### Requirement: PersistencePort interface
 
-The system SHALL define a PersistencePort interface with repository types for workouts, templates, profiles, AI providers, and sync state. Stores and use cases SHALL depend on the port interface, never on Dexie directly.
+The system SHALL define a PersistencePort interface with repository types for workouts, templates, profiles, AI providers, sync state, and usage tracking. Stores and use cases SHALL depend on the port interface, never on Dexie directly.
 
 #### Scenario: Store uses PersistencePort
 

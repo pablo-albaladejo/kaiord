@@ -19,6 +19,24 @@ The SPA SHALL display a calendar week view as the default home page at `/calenda
 - **WHEN** the user clicks the "next week" or "previous week" control
 - **THEN** the URL SHALL update to the new week ID and the calendar SHALL display that week's workouts
 
+### Requirement: Invalid weekId handling
+
+The calendar SHALL handle invalid or malformed weekId URL parameters gracefully.
+
+#### Scenario: Malformed weekId
+
+- **WHEN** the user navigates to `/calendar/not-a-week` or `/calendar/2026-W99`
+- **THEN** the system SHALL redirect to `/calendar` (current week)
+
+### Requirement: Multiple workouts per day
+
+The calendar SHALL support displaying multiple workouts on the same day, ordered by `createdAt` timestamp (ascending).
+
+#### Scenario: Day with multiple workouts
+
+- **WHEN** a calendar day has 3 workouts (e.g., AM swim, PM run, strength)
+- **THEN** the cards SHALL be displayed stacked in `createdAt` ascending order within the day column
+
 ### Requirement: Workout cards with state indicators
 
 Each workout on the calendar SHALL be displayed as a card showing sport type, duration/distance, source, and a state indicator. State indicators SHALL follow this visual priority order: STALE (orange) > MODIFIED > RAW (warning) > STRUCTURED > READY (star) > PUSHED (check) > SKIPPED.
