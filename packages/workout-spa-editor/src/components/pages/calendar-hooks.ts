@@ -2,6 +2,10 @@
  * Calendar Hooks
  *
  * useLiveQuery for workouts + hydration status + week resolution.
+ *
+ * Note: reads use Dexie's useLiveQuery directly (not PersistencePort)
+ * because useLiveQuery is a Dexie-specific reactive hook that cannot
+ * be abstracted behind the port interface. Writes go through the port.
  */
 
 import { useLiveQuery } from "dexie-react-hooks";
