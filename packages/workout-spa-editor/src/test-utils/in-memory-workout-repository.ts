@@ -14,16 +14,14 @@ export function createInMemoryWorkoutRepository(): WorkoutRepository {
     getById: async (id) => store.get(id),
 
     getByDateRange: async (start, end) =>
-      [...store.values()].filter(
-        (w) => w.date >= start && w.date <= end,
-      ),
+      [...store.values()].filter((w) => w.date >= start && w.date <= end),
 
     getByState: async (state) =>
       [...store.values()].filter((w) => w.state === state),
 
     getBySourceId: async (source, sourceId) =>
       [...store.values()].find(
-        (w) => w.source === source && w.sourceId === sourceId,
+        (w) => w.source === source && w.sourceId === sourceId
       ),
 
     put: async (workout) => {

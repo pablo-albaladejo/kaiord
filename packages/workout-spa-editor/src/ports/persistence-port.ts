@@ -15,14 +15,11 @@ import type { WorkoutTemplate } from "../types/workout-library";
 
 export type WorkoutRepository = {
   getById: (id: string) => Promise<WorkoutRecord | undefined>;
-  getByDateRange: (
-    start: string,
-    end: string,
-  ) => Promise<WorkoutRecord[]>;
+  getByDateRange: (start: string, end: string) => Promise<WorkoutRecord[]>;
   getByState: (state: WorkoutState) => Promise<WorkoutRecord[]>;
   getBySourceId: (
     source: string,
-    sourceId: string,
+    sourceId: string
   ) => Promise<WorkoutRecord | undefined>;
   put: (workout: WorkoutRecord) => Promise<void>;
   delete: (id: string) => Promise<void>;
