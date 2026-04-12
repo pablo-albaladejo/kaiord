@@ -1,7 +1,7 @@
+import { useSettingsDialog } from "../../../contexts";
 import { useLazyDialog } from "../../../hooks/use-lazy-dialog";
-import { useLibraryStore } from "../../../store/library-store";
+import { useLibrary } from "../../../hooks/use-library";
 import { useProfileStore } from "../../../store/profile-store";
-import { useSettingsDialogStore } from "../../../store/settings-dialog-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 import { HeaderLogo } from "./components/HeaderLogo";
 import { HeaderNav } from "./components/HeaderNav";
@@ -15,12 +15,14 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
   const profile = useLazyDialog();
   const library = useLazyDialog();
   const help = useLazyDialog();
-  const settingsOpen = useSettingsDialogStore((s) => s.open);
-  const settingsShow = useSettingsDialogStore((s) => s.show);
-  const settingsHide = useSettingsDialogStore((s) => s.hide);
+  const {
+    open: settingsOpen,
+    show: settingsShow,
+    hide: settingsHide,
+  } = useSettingsDialog();
   const { getActiveProfile } = useProfileStore();
   const activeProfile = getActiveProfile();
-  const { templates } = useLibraryStore();
+  const { templates } = useLibrary();
   const { currentWorkout, loadWorkout } = useWorkoutStore();
 
   return (

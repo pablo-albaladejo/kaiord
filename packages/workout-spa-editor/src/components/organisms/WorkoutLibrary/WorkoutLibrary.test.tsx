@@ -13,12 +13,12 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useLibraryStore } from "../../../store/library-store";
+import { useLibrary } from "../../../hooks/use-library";
 import type { WorkoutTemplate } from "../../../types/workout-library";
 import { WorkoutLibrary } from "./WorkoutLibrary";
 
-// Mock the library store
-vi.mock("../../../store/library-store");
+// Mock the library hook
+vi.mock("../../../hooks/use-library");
 
 describe("WorkoutLibrary", () => {
   const mockOnOpenChange = vi.fn();
@@ -104,7 +104,7 @@ describe("WorkoutLibrary", () => {
       "intervals",
       "technique",
     ]);
-    vi.mocked(useLibraryStore).mockReturnValue({
+    vi.mocked(useLibrary).mockReturnValue({
       templates: mockTemplates,
       deleteTemplate: mockDeleteTemplate,
       getAllTags: mockGetAllTags,
@@ -138,7 +138,7 @@ describe("WorkoutLibrary", () => {
 
     it("should render empty state when no workouts", () => {
       // Arrange
-      vi.mocked(useLibraryStore).mockReturnValue({
+      vi.mocked(useLibrary).mockReturnValue({
         templates: [],
         deleteTemplate: mockDeleteTemplate,
         getAllTags: vi.fn().mockReturnValue([]),
