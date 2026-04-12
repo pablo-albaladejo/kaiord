@@ -17,7 +17,11 @@ function makeRaw(overrides?: Partial<WorkoutRaw>): WorkoutRaw {
     title: "Long Run",
     description: "2K z1 + 3K z3 + 2K z1",
     comments: [
-      { author: "coach", text: "lleva geles", timestamp: "2026-04-10T08:00:00Z" },
+      {
+        author: "coach",
+        text: "lleva geles",
+        timestamp: "2026-04-10T08:00:00Z",
+      },
     ],
     distance: { value: 15, unit: "km" },
     duration: null,
