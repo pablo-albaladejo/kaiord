@@ -56,7 +56,7 @@ describe("App", () => {
     renderWithProviders(<App />);
     // Default route redirects to /calendar
     await waitFor(() => {
-      expect(screen.getByText("Calendar (coming soon)")).toBeInTheDocument();
+      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
     });
   });
 

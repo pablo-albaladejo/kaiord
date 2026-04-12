@@ -1,5 +1,5 @@
 import { waitFor } from "@testing-library/react";
-import { render } from "@testing-library/react";
+import { render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
@@ -13,7 +13,6 @@ import {
 } from "./contexts";
 import { ToastContextProvider } from "./contexts/ToastContext";
 import { useWorkoutStore } from "./store/workout-store";
-import { screen } from "./test-utils";
 
 function renderAtPath(path: string) {
   const { hook } = memoryLocation({ path, record: true });
@@ -56,7 +55,7 @@ describe("Routing", () => {
     renderAtPath("/calendar");
 
     await waitFor(() => {
-      expect(screen.getByText("Calendar (coming soon)")).toBeInTheDocument();
+      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
     });
   });
 
@@ -71,7 +70,6 @@ describe("Routing", () => {
   it("renders EditorPage at /workout/new", async () => {
     renderAtPath("/workout/new");
 
-    // EditorPage lazy-loads; first we may see the spinner, then content
     await waitFor(
       () => {
         const container = document.querySelector(".space-y-6");
@@ -85,7 +83,7 @@ describe("Routing", () => {
     renderAtPath("/");
 
     await waitFor(() => {
-      expect(screen.getByText("Calendar (coming soon)")).toBeInTheDocument();
+      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
     });
   });
 
@@ -93,7 +91,7 @@ describe("Routing", () => {
     renderAtPath("/nonexistent");
 
     await waitFor(() => {
-      expect(screen.getByText("Calendar (coming soon)")).toBeInTheDocument();
+      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
     });
   });
 
@@ -101,7 +99,7 @@ describe("Routing", () => {
     renderAtPath("/calendar/2026-W15");
 
     await waitFor(() => {
-      expect(screen.getByText("Calendar (coming soon)")).toBeInTheDocument();
+      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
     });
   });
 });
