@@ -11,7 +11,7 @@ Each bridge extension SHALL respond to a `ping` action with a capability manifes
 
 ### Requirement: Bridge response validation
 
-All bridge responses SHALL be validated against the BridgeManifest Zod schema before registration. Responses that fail validation SHALL be rejected.
+Ping responses used for bridge registration SHALL be validated against the BridgeManifest Zod schema before registration. Responses that fail validation SHALL be rejected.
 
 #### Scenario: Malformed manifest response
 

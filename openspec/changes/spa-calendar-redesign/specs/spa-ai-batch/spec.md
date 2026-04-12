@@ -11,7 +11,7 @@ The system SHALL process RAW workouts into structured KRD on user demand, not au
 
 ### Requirement: Comment selection for AI input
 
-The system SHALL allow the user to select which comments to include in the AI prompt. Comments with timestamps before the workout date (noon) SHALL be pre-selected by default.
+The system SHALL allow the user to select which comments to include in the AI prompt. Comments with timestamps before the workout date at noon in the athlete's browser timezone SHALL be pre-selected by default.
 
 #### Scenario: Pre-workout comments pre-selected
 
