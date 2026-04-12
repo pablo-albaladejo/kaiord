@@ -1,0 +1,159 @@
+import { render, screen, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { beforeEach, describe, expect, it } from "vitest";
+import { Router } from "wouter";
+import { memoryLocation } from "wouter/memory-location";
+
+import { db } from "../../adapters/dexie/dexie-database";
+import { SettingsDialogProvider } from "../../contexts";
+import type { WorkoutRecord } from "../../types/calendar-record";
+import CalendarPage from "./CalendarPage";
+
+function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
+  return {
+    id: crypto.randomUUID(),
+    date: "2026-04-06",
+    sport: "running",
+    source: "kaiord",
+    sourceId: null,
+    planId: null,
+    state: "raw",
+    raw: {
+      title: "Easy run",
+      description: "30 min easy",
+      comments: [],
+      distance: null,
+      duration: { value: 1800, unit: "s" },
+      prescribedRpe: null,
+      rawHash: "abc123",
+    },
+    krd: null,
+    lastProcessingError: null,
+    feedback: null,
+    aiMeta: null,
+    garminPushId: null,
+    tags: [],
+    previousState: null,
+    createdAt: "2026-04-06T08:00:00.000Z",
+    modifiedAt: null,
+    updatedAt: "2026-04-06T08:00:00.000Z",
+    ...overrides,
+  };
+}
+
+function renderCalendar(path = "/calendar/2026-W15") {
+  const { hook } = memoryLocation({ path, record: true });
+  return render(
+    <SettingsDialogProvider>
+      <Router hook={hook}>
+        <CalendarPage />
+      </Router>
+    </SettingsDialogProvider>
+  );
+}
+
+describe("CalendarPage", () => {
+  beforeEach(async () => {
+    await db.table("workouts").clear();
+  });
+
+  it("shows first-visit state when no workouts exist", async () => {
+    renderCalendar();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("first-visit-state")).toBeInTheDocument();
+    });
+  });
+
+  it("shows empty-week state when workouts exist in other weeks", async () => {
+    await db.table("workouts").add(makeWorkout({ date: "2026-03-30" }));
+
+    renderCalendar();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("empty-week-state")).toBeInTheDocument();
+    });
+  });
+
+  it("renders workout cards in the correct day column", async () => {
+    const workout = makeWorkout({ id: "w-mon", date: "2026-04-06" });
+    await db.table("workouts").add(workout);
+
+    renderCalendar();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("calendar-week-grid")).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("workout-card-w-mon")).toBeInTheDocument();
+  });
+
+  it("shows batch processing banner when raw workouts exist", async () => {
+    await db.table("workouts").add(makeWorkout({ date: "2026-04-07" }));
+    await db
+      .table("workouts")
+      .add(makeWorkout({ date: "2026-04-08", id: "w2" }));
+
+    renderCalendar();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("batch-processing-banner")).toBeInTheDocument();
+    });
+    expect(screen.getByText(/2 raw workouts/)).toBeInTheDocument();
+  });
+
+  it("stacks multiple workouts per day by createdAt", async () => {
+    const w1 = makeWorkout({
+      id: "w-early",
+      date: "2026-04-06",
+      createdAt: "2026-04-06T06:00:00.000Z",
+      raw: {
+        title: "Morning swim",
+        description: "",
+        comments: [],
+        distance: null,
+        duration: null,
+        prescribedRpe: null,
+        rawHash: "h1",
+      },
+    });
+    const w2 = makeWorkout({
+      id: "w-late",
+      date: "2026-04-06",
+      createdAt: "2026-04-06T18:00:00.000Z",
+      raw: {
+        title: "Evening run",
+        description: "",
+        comments: [],
+        distance: null,
+        duration: null,
+        prescribedRpe: null,
+        rawHash: "h2",
+      },
+    });
+    await db.table("workouts").bulkAdd([w2, w1]);
+
+    renderCalendar();
+
+    await waitFor(() => {
+      expect(screen.getByText("Morning swim")).toBeInTheDocument();
+      expect(screen.getByText("Evening run")).toBeInTheDocument();
+    });
+
+    const cards = screen.getAllByTestId(/^workout-card-/);
+    expect(cards[0]).toHaveTextContent("Morning swim");
+    expect(cards[1]).toHaveTextContent("Evening run");
+  });
+
+  it("shows week navigation controls", async () => {
+    await db.table("workouts").add(makeWorkout({ date: "2026-04-06" }));
+
+    renderCalendar();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("week-navigation")).toBeInTheDocument();
+    });
+    expect(screen.getByLabelText("Previous week")).toBeInTheDocument();
+    expect(screen.getByLabelText("Next week")).toBeInTheDocument();
+    expect(screen.getByText("Today")).toBeInTheDocument();
+  });
+});

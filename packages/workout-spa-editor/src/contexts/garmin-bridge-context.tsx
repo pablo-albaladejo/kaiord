@@ -11,8 +11,12 @@ export const GarminBridgeProvider = ({ children }: { children: ReactNode }) => {
 
   const value = useMemo(
     () => state,
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable callbacks from useCallback
-    [state.extensionInstalled, state.sessionActive, state.pushing, state.lastError]
+    [
+      state.extensionInstalled,
+      state.sessionActive,
+      state.pushing,
+      state.lastError,
+    ]
   );
 
   return (
