@@ -23,7 +23,7 @@ The Garmin Bridge extension is published manually to the Chrome Web Store via da
 
 **Key constraint:** `@kaiord/garmin-bridge` is `private: true`. The `changesets/action` does NOT include private packages in its `publishedPackages` output, even when they are versioned. This means we cannot piggyback on the release workflow's publish step.
 
-**Approach:** Create a separate `cws-publish.yml` workflow triggered on push to main when `packages/garmin-bridge/**` changes. The workflow detects version changes by comparing the `package.json` version against the latest git tag (`garmin-bridge@*`). If the version is newer, it packages and publishes.
+**Approach:** Create a separate `cws-publish.yml` workflow triggered on push to main when `packages/garmin-bridge/**` changes. The workflow detects version changes by comparing the `package.json` version against the latest git tag (`@kaiord/garmin-bridge@*`). If the version is newer, it packages and publishes.
 
 **Pre-requisite:** Remove `@kaiord/garmin-bridge` from `.changeset/config.json` `ignore` list. This allows changesets to version the package (bump package.json) when changesets are consumed. Since the package is `private: true`, `changeset publish` automatically skips npm publish and does NOT create git tags for it — no risk of accidental npm release.
 

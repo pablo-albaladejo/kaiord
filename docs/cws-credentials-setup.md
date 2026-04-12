@@ -20,9 +20,8 @@ One-time setup for automated CWS publishing via GitHub Actions.
 
 1. Go to **APIs & Services > Credentials**
 2. Click **Create Credentials > OAuth 2.0 Client IDs**
-3. Application type: **Web application**
-4. Authorized redirect URIs: `urn:ietf:wg:oauth:2.0:oob` (for manual token generation)
-5. Note the **Client ID** and **Client Secret**
+3. Application type: **Desktop application**
+4. Note the **Client ID** and **Client Secret**
 
 ## 4. Enable Chrome Web Store API
 
@@ -40,22 +39,9 @@ npx chrome-webstore-upload-cli init \
   --client-secret YOUR_CLIENT_SECRET
 ```
 
-This opens a browser window for OAuth consent. After authorizing, you receive a **refresh token**.
+This starts a local server on `http://127.0.0.1` and opens a browser window for OAuth consent. After authorizing, you receive a **refresh token**.
 
-Alternatively, use the manual OAuth2 flow:
-
-1. Visit: `https://accounts.google.com/o/oauth2/auth?response_type=code&scope=https://www.googleapis.com/auth/chromewebstore&client_id=YOUR_CLIENT_ID&redirect_uri=urn:ietf:wg:oauth:2.0:oob`
-2. Authorize and copy the authorization code
-3. Exchange for tokens:
-   ```bash
-   curl -X POST https://oauth2.googleapis.com/token \
-     -d "client_id=YOUR_CLIENT_ID" \
-     -d "client_secret=YOUR_CLIENT_SECRET" \
-     -d "code=AUTH_CODE" \
-     -d "grant_type=authorization_code" \
-     -d "redirect_uri=urn:ietf:wg:oauth:2.0:oob"
-   ```
-4. Note the `refresh_token` from the response
+> **Note:** Google deprecated `urn:ietf:wg:oauth:2.0:oob` in 2023. The CLI tool uses loopback redirect (`http://127.0.0.1`) automatically when using the "Desktop application" client type.
 
 ## 6. Get Extension ID
 

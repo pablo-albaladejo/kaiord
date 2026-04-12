@@ -23,6 +23,17 @@ if (!pkg.version) {
 }
 
 const version = pkg.version;
+const parts = version.split(".");
+const validCws =
+  parts.length >= 1 &&
+  parts.length <= 4 &&
+  parts.every((p) => /^(0|[1-9]\d*)$/.test(p) && Number(p) <= 65535);
+
+if (!validCws) {
+  console.error(`ERROR: invalid Chrome extension version "${version}" in ${pkgPath}`);
+  process.exit(1);
+}
+
 let changed = false;
 
 for (const path of [manifestPath, manifestProdPath]) {
