@@ -9,12 +9,12 @@ import { Component } from "react";
 import { RouteErrorFallback } from "./RouteErrorFallback";
 
 type Props = { children: ReactNode };
-type State = { error: Error | null };
+type State = { error: Error | null; retryCount: number };
 
 export class RouteErrorBoundary extends Component<Props, State> {
-  state: State = { error: null };
+  state: State = { error: null, retryCount: 0 };
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): Partial<State> {
     return { error };
   }
 
@@ -23,7 +23,7 @@ export class RouteErrorBoundary extends Component<Props, State> {
   }
 
   handleRetry = () => {
-    this.setState({ error: null });
+    this.setState((s) => ({ error: null, retryCount: s.retryCount + 1 }));
   };
 
   render() {
@@ -35,6 +35,6 @@ export class RouteErrorBoundary extends Component<Props, State> {
         />
       );
     }
-    return this.props.children;
+    return <div key={this.state.retryCount}>{this.props.children}</div>;
   }
 }

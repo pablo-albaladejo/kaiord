@@ -24,8 +24,7 @@ export type EditorPageProps = {
   id?: string;
 };
 
-export default function EditorPage(_: EditorPageProps) {
-  void _; // id param will be wired to Dexie loading in Wave 12
+export default function EditorPage({ id }: EditorPageProps) {
   useDeleteCleanup();
   const currentWorkout = useWorkoutStore((s) => s.currentWorkout);
   const selectedStepId = useWorkoutStore((s) => s.selectedStepId);
@@ -42,6 +41,19 @@ export default function EditorPage(_: EditorPageProps) {
   const workout = currentWorkout?.extensions?.structured_workout as
     | Workout
     | undefined;
+
+  if (id) {
+    return (
+      <div className="flex flex-col items-center justify-center py-16 text-center">
+        <p className="text-muted-foreground">
+          Direct workout loading coming soon.
+        </p>
+        <a href="/calendar" className="text-primary underline mt-2">
+          Go to Calendar
+        </a>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

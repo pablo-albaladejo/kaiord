@@ -23,8 +23,11 @@ export const persistAiData = async (data: PersistedAiData): Promise<void> => {
       ...data.providers.map((p) => repo.put(p)),
       metaTable().put({ key: "ai_custom_prompt", value: data.customPrompt }),
     ]);
-  } catch {
-    /* silent - best-effort persistence */
+  } catch (error: unknown) {
+    console.error(
+      "Failed to persist AI data:",
+      error instanceof Error ? error.message : "Unknown error"
+    );
   }
 };
 
