@@ -15,7 +15,7 @@ export const usageEntrySchema = z.object({
 export type UsageEntry = z.infer<typeof usageEntrySchema>;
 
 export const usageRecordSchema = z.object({
-  yearMonth: z.string().regex(/^\d{4}-\d{2}$/),
+  yearMonth: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/),
   totalTokens: z.number().int().nonnegative(),
   totalCost: z.number().nonnegative(),
   entries: z.array(usageEntrySchema),

@@ -5,10 +5,27 @@ import type { SyncState } from "../types/bridge-schemas";
 import type { WorkoutRecord } from "../types/calendar-schemas";
 import type { Profile } from "../types/profile";
 import type { UsageRecord } from "../types/usage-schemas";
+import type { KRD } from "../types/schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
 import { createInMemoryPersistence } from "./in-memory-persistence";
 
 // --- Fixture factories ---
+
+const TEMPLATE_UUID_1 = "00000000-0000-4000-8000-000000000001";
+const TEMPLATE_UUID_2 = "00000000-0000-4000-8000-000000000002";
+const PROFILE_UUID_1 = "00000000-0000-4000-8000-000000000003";
+const PROFILE_UUID_2 = "00000000-0000-4000-8000-000000000004";
+
+function makeKrd(): KRD {
+  return {
+    version: "1.0",
+    type: "structured_workout",
+    metadata: {
+      created: "2026-04-07T08:00:00Z",
+      sport: "cycling",
+    },
+  };
+}
 
 function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
   return {
@@ -35,35 +52,35 @@ function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
 }
 
 function makeTemplate(
-  overrides: Partial<Pick<WorkoutTemplate, "id" | "name" | "sport">> = {},
+  overrides: Partial<Pick<WorkoutTemplate, "id" | "name" | "sport">> = {}
 ): WorkoutTemplate {
   const now = new Date().toISOString();
   return {
-    id: overrides.id ?? "t-1",
+    id: overrides.id ?? TEMPLATE_UUID_1,
     name: overrides.name ?? "Tempo Ride",
     sport: overrides.sport ?? "cycling",
-    krd: { metadata: {}, workout: { steps: [] } },
+    krd: makeKrd(),
     tags: [],
     createdAt: now,
     updatedAt: now,
-  } as WorkoutTemplate;
+  };
 }
 
 function makeProfile(
-  overrides: Partial<Pick<Profile, "id" | "name">> = {},
+  overrides: Partial<Pick<Profile, "id" | "name">> = {}
 ): Profile {
   const now = new Date().toISOString();
   return {
-    id: overrides.id ?? "p-1",
+    id: overrides.id ?? PROFILE_UUID_1,
     name: overrides.name ?? "Default",
     sportZones: {},
     createdAt: now,
     updatedAt: now,
-  } as Profile;
+  };
 }
 
 function makeProvider(
-  overrides: Partial<LlmProviderConfig> = {},
+  overrides: Partial<LlmProviderConfig> = {}
 ): LlmProviderConfig {
   return {
     id: "ai-1",
@@ -76,9 +93,7 @@ function makeProvider(
   };
 }
 
-function makeSyncState(
-  overrides: Partial<SyncState> = {},
-): SyncState {
+function makeSyncState(overrides: Partial<SyncState> = {}): SyncState {
   return {
     source: "garmin",
     extensionId: "ext-123",
@@ -160,10 +175,10 @@ describe("WorkoutRepository", () => {
   it("should find by source and sourceId", async () => {
     const { workouts } = createInMemoryPersistence();
     await workouts.put(
-      makeWorkout({ id: "w-1", source: "train2go", sourceId: "ext-42" }),
+      makeWorkout({ id: "w-1", source: "train2go", sourceId: "ext-42" })
     );
     await workouts.put(
-      makeWorkout({ id: "w-2", source: "kaiord", sourceId: null }),
+      makeWorkout({ id: "w-2", source: "kaiord", sourceId: null })
     );
 
     const result = await workouts.getBySourceId("train2go", "ext-42");
@@ -198,7 +213,7 @@ describe("TemplateRepository", () => {
     const template = makeTemplate();
 
     await templates.put(template);
-    const result = await templates.getById("t-1");
+    const result = await templates.getById(TEMPLATE_UUID_1);
 
     expect(result).toEqual(template);
   });
@@ -213,8 +228,8 @@ describe("TemplateRepository", () => {
 
   it("should getAll", async () => {
     const { templates } = createInMemoryPersistence();
-    await templates.put(makeTemplate({ id: "t-1" }));
-    await templates.put(makeTemplate({ id: "t-2" }));
+    await templates.put(makeTemplate({ id: TEMPLATE_UUID_1 }));
+    await templates.put(makeTemplate({ id: TEMPLATE_UUID_2 }));
 
     const result = await templates.getAll();
 
@@ -223,22 +238,26 @@ describe("TemplateRepository", () => {
 
   it("should filter getBySport", async () => {
     const { templates } = createInMemoryPersistence();
-    await templates.put(makeTemplate({ id: "t-1", sport: "cycling" }));
-    await templates.put(makeTemplate({ id: "t-2", sport: "running" }));
+    await templates.put(
+      makeTemplate({ id: TEMPLATE_UUID_1, sport: "cycling" })
+    );
+    await templates.put(
+      makeTemplate({ id: TEMPLATE_UUID_2, sport: "running" })
+    );
 
     const result = await templates.getBySport("cycling");
 
     expect(result).toHaveLength(1);
-    expect(result[0].id).toBe("t-1");
+    expect(result[0].id).toBe(TEMPLATE_UUID_1);
   });
 
   it("should delete a template", async () => {
     const { templates } = createInMemoryPersistence();
     await templates.put(makeTemplate());
 
-    await templates.delete("t-1");
+    await templates.delete(TEMPLATE_UUID_1);
 
-    expect(await templates.getById("t-1")).toBeUndefined();
+    expect(await templates.getById(TEMPLATE_UUID_1)).toBeUndefined();
     expect(await templates.getAll()).toHaveLength(0);
   });
 });
@@ -251,7 +270,7 @@ describe("ProfileRepository", () => {
     const profile = makeProfile();
 
     await profiles.put(profile);
-    const result = await profiles.getById("p-1");
+    const result = await profiles.getById(PROFILE_UUID_1);
 
     expect(result).toEqual(profile);
   });
@@ -261,14 +280,14 @@ describe("ProfileRepository", () => {
 
     expect(await profiles.getActiveId()).toBeNull();
 
-    await profiles.setActiveId("p-1");
+    await profiles.setActiveId(PROFILE_UUID_1);
 
-    expect(await profiles.getActiveId()).toBe("p-1");
+    expect(await profiles.getActiveId()).toBe(PROFILE_UUID_1);
   });
 
   it("should clear active id on null", async () => {
     const { profiles } = createInMemoryPersistence();
-    await profiles.setActiveId("p-1");
+    await profiles.setActiveId(PROFILE_UUID_1);
 
     await profiles.setActiveId(null);
 
@@ -277,19 +296,19 @@ describe("ProfileRepository", () => {
 
   it("should clear active id when deleting active profile", async () => {
     const { profiles } = createInMemoryPersistence();
-    await profiles.put(makeProfile({ id: "p-1" }));
-    await profiles.setActiveId("p-1");
+    await profiles.put(makeProfile({ id: PROFILE_UUID_1 }));
+    await profiles.setActiveId(PROFILE_UUID_1);
 
-    await profiles.delete("p-1");
+    await profiles.delete(PROFILE_UUID_1);
 
     expect(await profiles.getActiveId()).toBeNull();
-    expect(await profiles.getById("p-1")).toBeUndefined();
+    expect(await profiles.getById(PROFILE_UUID_1)).toBeUndefined();
   });
 
   it("should getAll profiles", async () => {
     const { profiles } = createInMemoryPersistence();
-    await profiles.put(makeProfile({ id: "p-1" }));
-    await profiles.put(makeProfile({ id: "p-2" }));
+    await profiles.put(makeProfile({ id: PROFILE_UUID_1 }));
+    await profiles.put(makeProfile({ id: PROFILE_UUID_2 }));
 
     const result = await profiles.getAll();
 

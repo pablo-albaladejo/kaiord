@@ -7,5 +7,3 @@ export type {
   UsageRepository,
   WorkoutRepository,
 } from "./persistence-port";
-
-export type { UsageRecord } from "../types/usage-schemas";
