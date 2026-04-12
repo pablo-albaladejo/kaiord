@@ -34,21 +34,25 @@ A calendar-centric redesign makes Kaiord the bridge between coaching platforms a
 ## Impact
 
 **Packages affected:**
+
 - `@kaiord/workout-spa-editor` — primary target: routing, calendar page, library page refactor, state management migration, Dexie integration, AI batch UI
 - `@kaiord/garmin-bridge` — minor: add capability manifest to ping response, align with bridge protocol
 - `@kaiord/core` — none (domain layer untouched)
 
 **Hexagonal layers:**
+
 - **Application**: New use cases for workout state transitions, calendar queries, batch AI orchestration
 - **Ports**: New PersistencePort interface (WorkoutRepository, TemplateRepository, ProfileRepository, AiProviderRepository, SyncStateRepository)
 - **Adapters**: DexiePersistenceAdapter, InMemoryPersistenceAdapter
 - **Domain**: No changes (KRD format unchanged)
 
 **Dependencies added:**
+
 - `dexie` + `dexie-react-hooks` (~50KB) — IndexedDB persistence
 - `wouter` (~1.5KB) — client-side routing
 
 **Dependencies removed:**
+
 - None (Zustand kept for workout-store)
 
 **Breaking changes:** None. This is a UX redesign of a private package.

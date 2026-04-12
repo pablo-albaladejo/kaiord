@@ -5,6 +5,7 @@ The workout SPA editor (`@kaiord/workout-spa-editor`) is a React + Tailwind + Zu
 Users receive workouts from coaches on Train2Go as natural language descriptions in Spanish, manually recreate them using the AI generator, then push to Garmin. The redesign introduces a calendar-centric hub that automates this flow.
 
 **Constraints:**
+
 - All data lives in the browser (no backend infrastructure)
 - Hexagonal architecture (domain/ports/application/adapters)
 - One Chrome extension per external platform (plugin model)
@@ -13,6 +14,7 @@ Users receive workouts from coaches on Train2Go as natural language descriptions
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Calendar week view as home page with workout lifecycle visibility
 - Structured persistence via Dexie.js with hexagonal PersistencePort
 - Formalized bridge protocol for Chrome extension plugins
@@ -20,6 +22,7 @@ Users receive workouts from coaches on Train2Go as natural language descriptions
 - Clean state management split: Zustand (editor) / Dexie (data) / React (UI)
 
 **Non-Goals:**
+
 - Training plans / periodization (v2, `planId` reserved on schema)
 - Multi-sport brick workouts (v2, use `generic` sport type in v1)
 - Recurrence / repeat scheduling (v1.x)
@@ -37,6 +40,7 @@ Users receive workouts from coaches on Train2Go as natural language descriptions
 wouter provides hash-free client-side routing at 1.5KB gzipped. React Router v7 (~30KB) is overkill for 6 routes. TanStack Router (~12KB) is a good middle ground but unnecessary complexity for this use case.
 
 **Routes:**
+
 - `/` → redirect to `/calendar`
 - `/calendar` → current week
 - `/calendar/:weekId` → specific week (e.g., `2026-W15`)
@@ -55,6 +59,7 @@ Route-based lazy loading with `React.lazy` + `Suspense`. Route-level `ErrorBound
 Expert panel review (9.0/10, unanimous 5/5) determined that the workout-store is a domain-specific state machine (undo/redo, selection, clipboard, 22 action types), not a data store. The other 5 stores are thin CRUD/config layers.
 
 **Split:**
+
 - **Zustand** — workout-store only (editor runtime, transient, never auto-persisted)
 - **Dexie.js + useLiveQuery** — all persisted data (workouts, templates, profiles, AI providers, sync state)
 - **React native state** — ephemeral UI (useState for modals/spinners, useContext for shared runtime like bridge status)
@@ -70,6 +75,7 @@ Expert panel review (9.0/10, unanimous 5/5) determined that the workout-store is
 Dexie.js (~50KB) wraps IndexedDB with typed schemas, compound indexes, and `useLiveQuery` for reactive reads. Replaces the current fragmented persistence (localStorage for library/profiles, encrypted localStorage for AI providers).
 
 **Port interface (hexagonal boundary):**
+
 ```
 PersistencePort
 ├── WorkoutRepository     (calendar instances)
@@ -81,6 +87,7 @@ PersistencePort
 ```
 
 **Adapters:**
+
 - `DexiePersistenceAdapter` — production, writes to IndexedDB
 - `InMemoryPersistenceAdapter` — tests, shared in `src/test-utils/`
 
@@ -160,6 +167,7 @@ Workout {
 **V2 (future, not in scope):** When 4+ bridges exist, introduce `window.postMessage` announcement (untrusted) + `chrome.runtime.sendMessage` verification (trusted via `externally_connectable`). Gradual migration, no breaking change.
 
 **Capability manifest:**
+
 ```
 BridgeManifest {
   id: string
