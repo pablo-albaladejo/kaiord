@@ -25,10 +25,7 @@ const makeWorkout = (id: string, date: string): WorkoutRecord =>
     raw: { title: "Easy run", duration: { value: 1800, unit: "s" } },
   }) as unknown as WorkoutRecord;
 
-const makeCoaching = (
-  id: string,
-  date: string
-): CoachingActivity => ({
+const makeCoaching = (id: string, date: string): CoachingActivity => ({
   id,
   source: "test-platform",
   sourceBadge: "TST",
@@ -121,7 +118,9 @@ describe("CalendarWeekGrid", () => {
       />
     );
 
-    expect(screen.queryByTestId("empty-day-2026-04-06")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("empty-day-2026-04-06")
+    ).not.toBeInTheDocument();
     expect(screen.getByTestId("empty-day-2026-04-07")).toBeInTheDocument();
   });
 

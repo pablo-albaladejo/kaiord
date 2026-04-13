@@ -95,7 +95,8 @@ describe("background service worker", () => {
           data: {
             data: {
               replace: {
-                "#workplan": '<div class="workplan-table-block workplan-table-day workplan-table-date-2026-04-13 remote-sidebar"><div class="activity" data-status="0" data-id="123"><figure class="icon icon-sportscycling"></figure><span class="measured">1 h</span><div class="workload workload-default" data-value="2"></div><a href="#" title="Test Ride"></a></div></div>',
+                "#workplan":
+                  '<div class="workplan-table-block workplan-table-day workplan-table-date-2026-04-13 remote-sidebar"><div class="activity" data-status="0" data-id="123"><figure class="icon icon-sportscycling"></figure><span class="measured">1 h</span><div class="workload workload-default" data-value="2"></div><a href="#" title="Test Ride"></a></div></div>',
               },
             },
           },
@@ -137,9 +138,9 @@ describe("background service worker", () => {
     });
 
     it("rejects unknown actions", async () => {
-      await expect(
-        handleAction({ action: "unknown" })
-      ).rejects.toThrow("Unknown action: unknown");
+      await expect(handleAction({ action: "unknown" })).rejects.toThrow(
+        "Unknown action: unknown"
+      );
     });
 
     it("read-week fails when no tab is open", async () => {

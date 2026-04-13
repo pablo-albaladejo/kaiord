@@ -42,9 +42,7 @@ const findTrain2GoTab = () =>
 const train2goFetch = async (path) => {
   const tab = await findTrain2GoTab();
   if (!tab) {
-    throw new Error(
-      "No Train2Go tab open. Open app.train2go.com first."
-    );
+    throw new Error("No Train2Go tab open. Open app.train2go.com first.");
   }
 
   return new Promise((resolve, reject) => {

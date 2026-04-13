@@ -110,7 +110,7 @@ describe("parser", () => {
 
       expect(desc).toContain("**Calentamiento:**");
       expect(desc).toContain("**Parte Principal (intervalos cortos):**");
-      expect(desc).toContain("6x(30\" Z5 a 315w + 30\" Z1).");
+      expect(desc).toContain('6x(30" Z5 a 315w + 30" Z1).');
       expect(desc).toContain("Resto soltando en Z1");
     });
 

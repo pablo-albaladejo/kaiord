@@ -13,10 +13,12 @@ Pablo's coach programs training plans on Train2Go (app.train2go.com), but there 
 ## Capabilities
 
 ### New Capabilities
+
 - `train2go-bridge`: Chrome extension manifest, content script API proxy, HTML parsing, background service worker actions, popup UI, and allowlist security
 - `spa-train2go-extension`: SPA-side detection, state management, data fetching, and calendar rendering for Train2Go planned workouts
 
 ### Modified Capabilities
+
 - (none — existing bridge infrastructure is already generic enough)
 
 ## Impact

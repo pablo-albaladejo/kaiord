@@ -80,11 +80,7 @@ describe("createDetectAction", () => {
   });
 
   it("skips detection when extension ID is empty", async () => {
-    const detectEmpty = createDetectAction(
-      set as never,
-      get as never,
-      ""
-    );
+    const detectEmpty = createDetectAction(set as never, get as never, "");
 
     await detectEmpty();
 

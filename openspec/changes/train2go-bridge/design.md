@@ -9,12 +9,14 @@ The Train2Go bridge follows the same Chrome extension architecture as the Garmin
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Read training plan activities from Train2Go and display them in the SPA calendar
 - Follow the same extension architecture and bridge protocol as Garmin bridge
 - Design data shape to support future KRD conversion (via LLM or manual editing)
 - Keep the extension minimal — `tabs` permission only, no storage, no webRequest
 
 **Non-Goals:**
+
 - Writing data back to Train2Go (marking activities as done, etc.)
 - Converting Train2Go descriptions to KRD format (Phase 2 — future work)
 - Merging Garmin and Train2Go into a single extension
@@ -69,6 +71,7 @@ The 3-week response includes the previous week, current week, and next week. The
 **Decision**: Content script enforces an allowlist of permitted API paths, matching the Garmin bridge pattern.
 
 Allowed paths:
+
 - `GET /api/v2/profile/ping`
 - `GET /api/v2/workplan/weekly/*`
 - `GET /api/v2/workplan/daily/*`
@@ -112,9 +115,9 @@ Each platform implements the `CoachingSource` port interface:
 
 ```typescript
 type CoachingSource = {
-  id: string;              // "train2go"
-  label: string;           // "Train2Go"
-  badge: string;           // "T2G"
+  id: string; // "train2go"
+  label: string; // "Train2Go"
+  badge: string; // "T2G"
   available: boolean;
   connected: boolean;
   loading: boolean;

@@ -17,11 +17,13 @@ const ALLOWED = [
   { method: "GET", pattern: /^\/api\/v2\/profile\/ping$/ },
   {
     method: "GET",
-    pattern: /^\/api\/v2\/workplan\/weekly\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/,
+    pattern:
+      /^\/api\/v2\/workplan\/weekly\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/,
   },
   {
     method: "GET",
-    pattern: /^\/api\/v2\/workplan\/daily\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/,
+    pattern:
+      /^\/api\/v2\/workplan\/daily\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/,
   },
   { method: "GET", pattern: /^\/api\/v2\/workplan\/tooltip\/activity\/\d+$/ },
 ];
