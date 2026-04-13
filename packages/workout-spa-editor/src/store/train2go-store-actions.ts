@@ -46,7 +46,10 @@ const createReadDayAction =
 
     const res = await readDay(extensionId, date, userId);
 
-    if (!res.ok) return;
+    if (!res.ok) {
+      set({ lastError: res.error ?? "Read day failed" });
+      return;
+    }
 
     const dayActivities = res.data?.activities ?? [];
     const { activities } = get();

@@ -6,7 +6,6 @@
  */
 
 import type { ReactNode } from "react";
-import { useMemo } from "react";
 
 import { useTrain2GoSource } from "../adapters/train2go/use-train2go-source";
 import { CoachingRegistryProvider } from "./coaching-registry-context";
@@ -19,15 +18,7 @@ export function CoachingRegistryBootstrap({
   const train2go = useTrain2GoSource();
   // Future: const trainingPeaks = useTrainingPeaksSource();
 
-  const sources = useMemo(
-    () => [train2go],
-    [
-      train2go.available,
-      train2go.connected,
-      train2go.loading,
-      train2go.activities,
-    ]
-  );
+  const sources = [train2go];
 
   return (
     <CoachingRegistryProvider sources={sources}>

@@ -126,7 +126,7 @@ describe("train2go-extension-transport", () => {
       };
 
       const promise = readWeek("ext-id", "2026-04-13", 42);
-      vi.advanceTimersByTime(15_000);
+      vi.advanceTimersByTime(35_000);
       const result = await promise;
 
       expect(result).toEqual({ ok: false, error: "Extension did not respond" });

@@ -209,7 +209,7 @@ describe("train2go-store-actions", () => {
       expect(mockReadDay).not.toHaveBeenCalled();
     });
 
-    it("does nothing when readDay fails", async () => {
+    it("sets lastError when readDay fails", async () => {
       state.activities = [{ id: 1 }];
       mockReadDay.mockResolvedValue({ ok: false, error: "fail" });
       const actions = createTrain2GoActions(
@@ -221,6 +221,7 @@ describe("train2go-store-actions", () => {
       await actions.fetchDay("2026-04-13");
 
       expect(state.activities).toEqual([{ id: 1 }]);
+      expect(state.lastError).toBe("fail");
     });
 
     it("defaults to empty array when data.activities is missing", async () => {

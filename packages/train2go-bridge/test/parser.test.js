@@ -137,8 +137,8 @@ describe("parser", () => {
       const result = parsePingJson(json);
 
       expect(result).toEqual({
-        userId: 28035,
-        userName: "Pablo",
+        userId: 99999,
+        userName: "Test",
         sessionActive: true,
       });
     });

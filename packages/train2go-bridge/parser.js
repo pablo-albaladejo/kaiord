@@ -42,7 +42,7 @@ const parseWeeklyHtml = (html) => {
 
     const idMatches = [...cell.matchAll(/data-id="(\d+)"/g)];
     const sportMatches = [...cell.matchAll(/icon-sports(\w+)/g)];
-    const titleMatches = [...cell.matchAll(/title="([^"]{6,})"/g)];
+    const titleMatches = [...cell.matchAll(/title="([^"]{2,})"/g)];
     const measuredMatches = [...cell.matchAll(/class="measured">([^<]+)</g)];
     const loadMatches = [
       ...cell.matchAll(/workload-default[^"]*"\s*data-value="(\d+)"/g),

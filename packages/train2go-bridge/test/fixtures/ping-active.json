@@ -1,21 +1,21 @@
 {
   "data": {
     "user": {
-      "id": 28035,
+      "id": 99999,
       "role": 2,
-      "name": "Pablo",
-      "surname": "Albaladejo",
+      "name": "Test",
+      "surname": "User",
       "status": "validated",
       "bpm_max": "187",
       "bpm_rest": "51",
       "weight": 83,
       "height": 1.74,
       "gender": "male",
-      "trainer_id": 16128,
+      "trainer_id": 88888,
       "trainer": {
-        "id": 16128,
-        "name": "Daniel",
-        "surname": "Blanco Galindo"
+        "id": 88888,
+        "name": "Coach",
+        "surname": "Trainer"
       }
     }
   },

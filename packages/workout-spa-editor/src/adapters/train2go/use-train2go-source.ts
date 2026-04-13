@@ -31,13 +31,11 @@ export function useTrain2GoSource(): CoachingSource {
 
   const connect = useCallback(async () => {
     await store.openTrain2Go();
-    let attempts = 0;
-    const poll = setInterval(async () => {
-      attempts++;
+    for (let i = 0; i < 5; i++) {
+      await new Promise((r) => setTimeout(r, 2000));
       await store.detectExtension();
-      const { sessionActive } = useTrain2GoStore.getState();
-      if (sessionActive || attempts >= 5) clearInterval(poll);
-    }, 2000);
+      if (useTrain2GoStore.getState().sessionActive) break;
+    }
   }, [store.openTrain2Go, store.detectExtension]);
 
   return {

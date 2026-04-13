@@ -36,7 +36,12 @@ $("check-btn").addEventListener("click", check);
 $("read-btn").addEventListener("click", () => {
   if (!storedUserId) return;
 
-  const today = new Date().toISOString().split("T")[0];
+  const d = new Date();
+  const today = [
+    d.getFullYear(),
+    String(d.getMonth() + 1).padStart(2, "0"),
+    String(d.getDate()).padStart(2, "0"),
+  ].join("-");
   $("activities").textContent = "Loading...";
   $("read-btn").disabled = true;
 

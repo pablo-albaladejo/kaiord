@@ -81,12 +81,13 @@ describe("useTrain2GoSource", () => {
     );
 
     const { result } = renderHook(() => useTrain2GoSource());
-    await result.current.connect();
+    const connectPromise = result.current.connect();
 
     expect(mockStoreState.openTrain2Go).toHaveBeenCalled();
 
-    // Advance past one poll interval
+    // Advance past one poll interval so the awaited setTimeout resolves
     await vi.advanceTimersByTimeAsync(2000);
+    await connectPromise;
     expect(mockStoreState.detectExtension).toHaveBeenCalled();
 
     vi.useRealTimers();

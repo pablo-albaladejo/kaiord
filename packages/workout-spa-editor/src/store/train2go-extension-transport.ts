@@ -50,7 +50,7 @@ type ReadData = { activities: Train2GoActivity[] };
 
 const PING_T1 = 2_000;
 const PING_T2 = 4_000;
-const ACTION_T = 15_000;
+const ACTION_T = 35_000;
 
 export const ping = async (
   extensionId: string

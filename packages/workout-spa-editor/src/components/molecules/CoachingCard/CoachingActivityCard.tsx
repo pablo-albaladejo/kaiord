@@ -25,6 +25,7 @@ export function CoachingActivityCard({
   onExpand,
 }: CoachingActivityCardProps) {
   const [expanded, setExpanded] = useState(false);
+  const effort = Math.min(activity.effort ?? 0, 5);
 
   const handleClick = () => {
     if (!expanded && onExpand) onExpand(activity);
@@ -48,10 +49,10 @@ export function CoachingActivityCard({
       <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
         <span>{activity.sport.label}</span>
         {activity.duration && <span>{activity.duration}</span>}
-        {activity.effort != null && activity.effort > 0 && (
-          <span title={`Effort: ${activity.effort}/5`}>
-            {"\u25CF".repeat(activity.effort)}
-            {"\u25CB".repeat(5 - activity.effort)}
+        {effort > 0 && (
+          <span title={`Effort: ${effort}/5`}>
+            {"\u25CF".repeat(effort)}
+            {"\u25CB".repeat(5 - effort)}
           </span>
         )}
         <span
