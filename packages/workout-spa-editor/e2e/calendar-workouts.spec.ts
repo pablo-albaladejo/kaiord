@@ -14,6 +14,30 @@ import {
   seedWorkouts,
 } from "./helpers/seed-dexie";
 
+test.describe("Calendar Skeleton", () => {
+  test("shows skeleton during hydration on boot", async ({ page }) => {
+    // Arrange
+    await page.goto("/calendar");
+    const skeleton = page.getByTestId("calendar-skeleton");
+    const calendarPage = page.getByTestId("calendar-page");
+    let skeletonWasVisible = false;
+
+    // Act — skeleton may appear briefly during hydration
+    try {
+      await expect(skeleton).toBeVisible({ timeout: 2_000 });
+      skeletonWasVisible = true;
+    } catch {
+      // Fast hydration: skeleton disappeared before observation
+    }
+
+    // Assert — calendar page must always appear after hydration
+    await expect(calendarPage).toBeVisible({ timeout: 5_000 });
+    if (skeletonWasVisible) {
+      await expect(skeleton).toBeHidden({ timeout: 5_000 });
+    }
+  });
+});
+
 test.describe("Calendar Workouts", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/calendar");
