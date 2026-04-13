@@ -142,5 +142,49 @@ describe("createBridgeRegistry", () => {
 
       registry.destroy();
     });
+
+    it("prunes bridge after 24h of unavailable status", async () => {
+      vi.mocked(transport.sendBridgeMessage)
+        .mockResolvedValueOnce(VALID_PING_RESPONSE) // detect
+        .mockResolvedValue({ ok: false, error: "gone" }); // all heartbeats fail
+
+      const registry = createBridgeRegistry();
+      await registry.detectBridge("ext-123");
+      registry.startHeartbeat(100);
+
+      // Fail 3 heartbeats to mark as unavailable
+      await vi.advanceTimersByTimeAsync(100);
+      await vi.advanceTimersByTimeAsync(100);
+      await vi.advanceTimersByTimeAsync(100);
+      expect(registry.getBridge("ext-123")?.status).toBe("unavailable");
+
+      // Stop heartbeat to avoid 864k tick iterations
+      registry.stopHeartbeat();
+
+      // Backdate lastSeen to 25 hours ago so prune condition is met
+      const bridge = registry.getBridge("ext-123")!;
+      bridge.lastSeen = new Date(
+        Date.now() - 25 * 60 * 60 * 1_000
+      ).toISOString();
+
+      // Restart heartbeat — pruneStale runs on PRUNE_AFTER_MS interval
+      // but we can advance just enough to trigger one prune cycle
+      registry.startHeartbeat(100);
+
+      // The prune timer fires at PRUNE_AFTER_MS (24h) intervals.
+      // Advance 24h worth of time. To avoid excessive heartbeat ticks,
+      // stop heartbeat, advance, then check.
+      registry.stopHeartbeat();
+
+      // Manually trigger the prune by calling startHeartbeat then
+      // advancing exactly the prune interval
+      registry.startHeartbeat(24 * 60 * 60 * 1_000); // heartbeat = 24h
+      await vi.advanceTimersByTimeAsync(24 * 60 * 60 * 1_000);
+
+      expect(registry.getBridge("ext-123")).toBeUndefined();
+      expect(registry.getAllBridges()).toHaveLength(0);
+
+      registry.destroy();
+    });
   });
 });

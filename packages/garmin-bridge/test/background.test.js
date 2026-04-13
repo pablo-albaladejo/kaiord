@@ -128,6 +128,27 @@ describe("background.js", () => {
     });
   });
 
+  describe("ping response backward compatibility", () => {
+    it("includes protocolVersion at top level alongside session data", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([]));
+      const sendResponse = vi.fn();
+
+      externalCb({ action: "ping" }, {}, sendResponse);
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      const response = sendResponse.mock.calls[0][0];
+
+      // New structure fields
+      expect(response).toHaveProperty("ok", true);
+      expect(response).toHaveProperty("protocolVersion", 1);
+      expect(response).toHaveProperty("data");
+
+      // Session data nested in data
+      expect(response.data).toHaveProperty("csrfCaptured");
+      expect(response.data).toHaveProperty("gcApi");
+    });
+  });
+
   describe("handleAction", () => {
     it("rejects unknown action", async () => {
       await expect(handleAction({ action: "unknown" })).rejects.toThrow(

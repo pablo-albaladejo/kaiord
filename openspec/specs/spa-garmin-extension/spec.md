@@ -1,10 +1,10 @@
+> Synced: 2026-04-13
+
 ## ADDED Requirements
 
 ### Requirement: Extension detection
 
-The SPA SHALL detect whether the Kaiord Garmin Bridge extension is installed by sending a `ping` message to the configured extension ID via `chrome.runtime.sendMessage`. Detection SHALL use a two-stage timeout: first attempt with 2s timeout, and if it times out without `chrome.runtime.lastError` (suggesting service worker cold start), retry once with 4s timeout. Only on the second timeout or an explicit `lastError` does the SPA conclude the extension is not installed.
-
-Detection results SHALL be cached for 30 seconds via `lastDetectionTimestamp`. If less than 30s have elapsed since the last detection and `extensionInstalled` is `true`, skip the ping. The cache is invalidated on any push/list failure with a connection error.
+The SPA SHALL detect whether the Kaiord Garmin Bridge extension is installed by sending a `ping` message to the configured extension ID via `chrome.runtime.sendMessage`. Detection SHALL use the bridge protocol lifecycle: 60-second heartbeat interval, 3 consecutive failures mark the bridge as UNAVAILABLE, and 24 hours of UNAVAILABLE status triggers REMOVED with user notification.
 
 The extension ID SHALL be configurable via environment variable (`VITE_GARMIN_EXTENSION_ID`) to support development (unpacked) and production (Web Store) IDs.
 
@@ -134,7 +134,21 @@ The store SHALL NOT persist any data to localStorage (no credentials, no tokens)
 - **WHEN** the extension ping completes
 - **THEN** the store reflects the detected state and updates `lastDetectionTimestamp`
 
-#### Scenario: Detection cache hit
+#### Scenario: Bridge lifecycle heartbeat
 
-- **WHEN** less than 30 seconds have elapsed since last detection and `extensionInstalled` is `true`
-- **THEN** the store skips the ping and uses cached values
+- **WHEN** the bridge heartbeat runs every 60 seconds
+- **THEN** the store reflects the detected state via the bridge protocol lifecycle (VERIFIED / UNAVAILABLE / REMOVED)
+
+### Requirement: Extension ping response includes capability manifest
+
+The garmin-bridge extension SHALL include a capability manifest in its ping response, declaring its bridge ID, name, version, protocol version, and supported capabilities.
+
+#### Scenario: SPA pings garmin-bridge
+
+- **WHEN** the SPA sends `{ action: "ping" }` to the garmin-bridge extension
+- **THEN** the extension SHALL respond with `{ ok: true, protocolVersion: 1, data: { id: "garmin-bridge", name: "Garmin Connect", version: "<current>", capabilities: ["write:workouts"] } }` in addition to the existing session status fields
+
+#### Scenario: Backward compatibility
+
+- **WHEN** an older SPA version pings the updated garmin-bridge
+- **THEN** the extension SHALL still include the existing session status fields alongside the new manifest fields, maintaining backward compatibility
