@@ -53,8 +53,12 @@ for (const path of [manifestPath, manifestProdPath]) {
   }
 
   const old = manifest.version;
-  manifest.version = version;
-  writeFileSync(path, JSON.stringify(manifest, null, 2) + "\n");
+  const text = readFileSync(path, "utf8");
+  const updated = text.replace(
+    /"version":\s*"[^"]*"/,
+    `"version": "${version}"`
+  );
+  writeFileSync(path, updated);
   console.log(`  ${path}: ${old} → ${version}`);
   changed = true;
 }
