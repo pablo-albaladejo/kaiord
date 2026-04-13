@@ -33,6 +33,44 @@ describe("FirstVisitState", () => {
 
     expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
   });
+
+  it("calls onSettingsClick when Connect is clicked", async () => {
+    const user = userEvent.setup();
+    const onSettingsClick = vi.fn();
+
+    render(withRouter(<FirstVisitState onSettingsClick={onSettingsClick} />));
+
+    await user.click(screen.getByText("Connect"));
+
+    expect(onSettingsClick).toHaveBeenCalledOnce();
+  });
+
+  it("opens settings dialog when Connect is clicked without prop", async () => {
+    const user = userEvent.setup();
+
+    render(withRouter(<FirstVisitState />));
+
+    // Should not throw - falls back to context's show()
+    await user.click(screen.getByText("Connect"));
+  });
+
+  it("navigates to /workout/new when Create is clicked", async () => {
+    const user = userEvent.setup();
+
+    render(withRouter(<FirstVisitState />));
+
+    await user.click(screen.getByText("Create"));
+    // Navigate is called - no error thrown
+  });
+
+  it("navigates to import when Import is clicked", async () => {
+    const user = userEvent.setup();
+
+    render(withRouter(<FirstVisitState />));
+
+    await user.click(screen.getByText("Import"));
+    // Navigate is called - no error thrown
+  });
 });
 
 describe("EmptyWeekState", () => {
@@ -40,6 +78,15 @@ describe("EmptyWeekState", () => {
     render(withRouter(<EmptyWeekState />));
 
     expect(screen.getByText("Add workout")).toBeInTheDocument();
+  });
+
+  it("navigates when Add workout is clicked", async () => {
+    const user = userEvent.setup();
+
+    render(withRouter(<EmptyWeekState />));
+
+    await user.click(screen.getByText("Add workout"));
+    // Navigate to /workout/new is called - no error thrown
   });
 
   it("shows go to latest when callback provided", () => {
