@@ -57,8 +57,11 @@ The script SHALL exit with a non-zero code and a descriptive error message if:
 - `manifest.prod.json` does not exist
 - The `icons/` directory does not exist or is empty
 - The version cannot be read from `package.json`
+- The version in `manifest.prod.json` does not match `package.json`
 
 After creating the zip, the script SHALL verify that the packaged `manifest.json` does not contain localhost origins.
+
+The packaging script MAY be invoked by CI without user interaction. It SHALL produce deterministic output given the same input files and SHALL NOT require a TTY.
 
 #### Scenario: Packaging produces valid zip
 
@@ -91,6 +94,12 @@ After creating the zip, the script SHALL verify that the packaged `manifest.json
 - **GIVEN** `packages/garmin-bridge/package.json` does not exist or has no `version` field
 - **WHEN** `scripts/package-extension.sh` is executed
 - **THEN** the script SHALL exit with a non-zero code and print an error message about the missing version
+
+#### Scenario: Packaging is CI-compatible
+
+- **GIVEN** the script is executed in a headless CI environment
+- **WHEN** no TTY is attached
+- **THEN** the script SHALL complete without prompts or interactive input
 
 #### Scenario: Packaging script is idempotent
 
