@@ -2,6 +2,8 @@
  * CalendarPage - Week-view calendar with workout cards.
  *
  * Single useLiveQuery at page level, passes data down as props.
+ * Coaching data flows through the generic CoachingSource registry —
+ * this file has zero platform-specific imports.
  */
 
 import { Redirect } from "wouter";
@@ -14,6 +16,7 @@ import {
   NoAiProviderState,
   NoBridgesState,
 } from "../molecules/CalendarEmptyStates";
+import { CoachingSyncButton } from "../molecules/CoachingCard/CoachingSyncButton";
 import { CalendarSkeleton } from "../molecules/WorkoutCard/CalendarSkeleton";
 import { WeekNavigation } from "../molecules/WorkoutCard/WeekNavigation";
 import { CalendarDialogs } from "./CalendarDialogs";
@@ -22,9 +25,7 @@ import { useCalendarState } from "./use-calendar-state";
 
 export default function CalendarPage() {
   const s = useCalendarState();
-  const { byDay: coachingByDay, expandActivity } = useCoachingActivities(
-    s.data.days
-  );
+  const coaching = useCoachingActivities(s.data.days);
 
   if (!s.data.isValidWeek) return <Redirect to="/calendar" />;
   if (s.data.hydration === "pending") return <CalendarSkeleton />;
@@ -39,10 +40,25 @@ export default function CalendarPage() {
       )}
       {s.data.rawCount > 0 && !s.hasAiProvider && <NoAiProviderState />}
       {s.hasReadyWorkouts && !s.extensionInstalled && <NoBridgesState />}
-      <WeekNavigation
-        weekId={s.data.weekId}
-        weekLabel={s.data.weekId.replace("-W", " W")}
-      />
+      <div className="flex items-center justify-between">
+        <WeekNavigation
+          weekId={s.data.weekId}
+          weekLabel={s.data.weekId.replace("-W", " W")}
+        />
+        <div className="flex gap-2">
+          {coaching.syncSources.map((src) => (
+            <CoachingSyncButton
+              key={src.id}
+              connected={src.connected}
+              loading={src.loading}
+              error={src.error}
+              onSync={() => src.sync(s.data.days[0])}
+              onConnect={src.connect}
+              label={src.label}
+            />
+          ))}
+        </div>
+      </div>
       {s.batch.message && (
         <BatchMessage
           message={s.batch.message}
@@ -59,11 +75,11 @@ export default function CalendarPage() {
       <CalendarWeekGrid
         days={s.data.days}
         workoutsByDay={s.data.workoutsByDay}
-        coachingByDay={coachingByDay}
+        coachingByDay={coaching.byDay}
         todayDate={new Date().toISOString().slice(0, 10)}
         onWorkoutClick={s.handleWorkoutClick}
         onEmptyDayClick={s.setEmptyDayDate}
-        onActivityExpand={expandActivity}
+        onActivityExpand={coaching.expandActivity}
       />
       <CalendarDialogs
         selectedWorkout={s.selectedWorkout}

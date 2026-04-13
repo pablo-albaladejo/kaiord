@@ -104,13 +104,37 @@ The `workload` field (1-5) is a coach-assigned effort scale (1=easy/recovery, 5=
 
 **Layer**: Infrastructure (data contract between content script and SPA).
 
-### D7: SPA calendar shows Train2Go cards as read-only overlays
+### D7: SPA calendar shows coaching activities as read-only overlays via CoachingSource port
 
-**Decision**: Train2Go activities appear in the existing `CalendarWeekGrid` as visually distinct read-only cards. They are NOT stored in Dexie — they are transient data fetched on demand and held in React state or a lightweight Zustand slice.
+**Decision**: Coaching activities from external platforms appear in the `CalendarWeekGrid` as visually distinct read-only cards. The calendar components are fully decoupled from any platform — they consume only the generic `CoachingActivity` type and never import platform-specific stores, mappers, or types.
 
-**Why**: Train2Go data is the coach's plan, not the user's data. It should not persist in the local database. The calendar renders both sources: Dexie workouts (editable) and Train2Go activities (read-only). This follows the state management rule: "Persisted data → Dexie. Editor runtime → Zustand. Local UI → React state."
+Each platform implements the `CoachingSource` port interface:
 
-**Layer**: Infrastructure (SPA adapter + UI component).
+```typescript
+type CoachingSource = {
+  id: string;              // "train2go"
+  label: string;           // "Train2Go"
+  badge: string;           // "T2G"
+  available: boolean;
+  connected: boolean;
+  loading: boolean;
+  error: string | null;
+  activities: CoachingActivity[];
+  sync: (weekStart: string) => void;
+  expand: (date: string) => void;
+  connect: () => void;
+};
+```
+
+A `CoachingRegistry` React context aggregates all registered sources. Hooks and components consume the registry — never platform stores directly.
+
+Registration happens at boot in a single composition point (the registry provider). Adding a new platform (TrainingPeaks, Final Surge) means implementing one adapter and one `register()` call — zero changes to hooks, components, or calendar code.
+
+Coaching data is NOT stored in Dexie — it is transient state in each platform's Zustand store. The registry reads from all stores and returns unified `CoachingActivity[]`.
+
+**Why**: Hexagonal architecture. The port (`CoachingSource`) defines what the SPA needs. The adapter (`createTrain2GoSource`) bridges the platform-specific store to the port. Components and hooks only depend on the port. This makes the system open for extension (new platforms) without modification of existing code.
+
+**Layer**: Application (port) + Infrastructure (adapter per platform).
 
 ### D8: No storage permission — session state is ephemeral
 

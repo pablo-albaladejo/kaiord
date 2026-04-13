@@ -30,7 +30,7 @@
 
 ## 5. SPA Bridge Schema Extension
 
-- [ ] 5.1 Add `"read:training-plan"` to `bridgeCapabilitySchema` enum — DEFERRED: `bridge-schemas.ts` only exists on `feature/spa-calendar-redesign`
+- [x] 5.1 Add `"read:training-plan"` to `bridgeCapabilitySchema` enum in `bridge-schemas.ts`
 - [x] 5.2 Add `VITE_TRAIN2GO_EXTENSION_ID` to `.env.example` and SPA env type declarations. Ensure the SPA gracefully skips Train2Go detection when the env var is unset (no error, no crash)
 
 ## 6. SPA Train2Go State & Data Fetching
@@ -38,18 +38,18 @@
 - [x] 6.1 Create Train2Go state (Zustand store) with `extensionInstalled`, `sessionActive`, `userId`, `userName`, `loading`, `lastError`, `lastDetectionTimestamp`, `activities` (transient, not Dexie)
 - [x] 6.2 Create Train2Go store actions — detect extension (2-stage ping, 30s cache), fetchWeek, fetchDay, openTrain2Go, transport layer
 - [x] 6.3 Wire Train2Go extension detection in `use-store-hydration.ts` alongside Garmin detection on boot
-- [ ] 6.4 Create tests for Train2Go state (initial state, ping update, session expiry, detection cache hit/miss, userId stored from ping) — DEFERRED to calendar integration phase
+- [ ] 6.4 Create tests for Train2Go state (initial state, ping update, session expiry, detection cache hit/miss, userId stored from ping)
 
 ## 7. SPA Calendar Integration
 
-- [ ] 7.0 Create `train2go-sport-map.ts` — mapping from Train2Go sport identifiers (28 known) to SPA icon keys, with fallback to generic activity icon. Include test.
-- [ ] 7.1 Create `Train2GoActivityCard` component — sport icon, title, duration, workload dots, status badge, "T2G" label, read-only (not draggable/editable)
-- [ ] 7.2 Integrate Train2Go activities into `CalendarWeekGrid` — render `Train2GoActivityCard` alongside Kaiord workout cards per day column
-- [ ] 7.3 Add expand-on-click for Train2Go cards — lazy-load description via `read-day` on first expand, display cleaned description text
+- [x] 7.0 Create `adapters/train2go/train2go-sport-map.ts` — mapping from 24 Train2Go sport identifiers to {label, icon} with fallback. Test: 5 tests.
+- [x] 7.1 Create `CoachingActivityCard` component (generic, platform-agnostic) — sport icon, title, duration, effort dots, status, source badge, read-only, expand-on-click. Test: 8 tests.
+- [x] 7.2 Integrate coaching activities into `CalendarWeekGrid`/`DayColumn` — generic `coachingActivities` prop, zero platform imports. `useCoachingActivities` hook aggregates all sources.
+- [x] 7.3 Expand-on-click calls `onActivityExpand` on first click, toggles description locally after. Lazy-load via `useCoachingActivities.expandActivity()`.
 - [ ] 7.4 Add "Sync Train2Go" button in calendar header — visible when extension is detected, triggers `read-week` for current displayed week
 - [ ] 7.5 Add "Connect to Train2Go" prompt — shown when extension is installed but session is expired, triggers `open-train2go` + polling
-- [ ] 7.6 Create tests for `Train2GoActivityCard` (render sport icon, display title/duration, workload dots, read-only behavior)
-- [ ] 7.7 Create tests for CalendarWeekGrid integration (both Kaiord + Train2Go sources rendered, empty Train2Go state, Train2Go-only week)
+- [x] 7.6 Tests: CoachingActivityCard (8), train2go-mapper (8), train2go-sport-map (5) — 21 tests total
+- [ ] 7.7 Create tests for CalendarWeekGrid integration (both Kaiord + coaching sources rendered, empty coaching state)
 
 ## 8. Testing & Quality
 
