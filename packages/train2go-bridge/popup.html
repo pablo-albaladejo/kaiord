@@ -1,0 +1,70 @@
+<!doctype html>
+<html>
+  <head>
+    <style>
+      body {
+        width: 340px;
+        padding: 16px;
+        font-family: system-ui, sans-serif;
+        font-size: 13px;
+      }
+      h3 {
+        margin: 0 0 12px;
+      }
+      .status {
+        padding: 8px;
+        border-radius: 4px;
+        margin-bottom: 12px;
+      }
+      .ok {
+        background: #d4edda;
+        color: #155724;
+      }
+      .no {
+        background: #f8d7da;
+        color: #721c24;
+      }
+      .checking {
+        background: #fff3cd;
+        color: #856404;
+      }
+      button {
+        width: 100%;
+        padding: 8px;
+        margin-top: 8px;
+        background: #f74464;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      button:hover {
+        background: #d63855;
+      }
+      button:disabled {
+        opacity: 0.6;
+        cursor: not-allowed;
+      }
+      #activities {
+        margin-top: 12px;
+        font-size: 12px;
+      }
+      .hint {
+        font-size: 11px;
+        color: #666;
+        margin-top: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h3>Kaiord Train2Go Bridge</h3>
+    <div id="status" class="status checking">Checking...</div>
+    <p class="hint" id="hint" style="display: none">
+      Open Train2Go in another tab and log in to activate the session.
+    </p>
+    <button id="check-btn">Check Session</button>
+    <button id="read-btn" style="display: none">Read This Week</button>
+    <div id="activities"></div>
+    <script src="popup.js"></script>
+  </body>
+</html>

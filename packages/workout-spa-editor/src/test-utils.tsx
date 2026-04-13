@@ -2,6 +2,7 @@ import { render, type RenderOptions } from "@testing-library/react";
 import React, { type ReactElement } from "react";
 
 import { ToastProvider } from "./components/atoms/Toast";
+import { CoachingRegistryProvider } from "./contexts/coaching-registry-context";
 import { GarminBridgeProvider } from "./contexts/garmin-bridge-context";
 import { SettingsDialogProvider } from "./contexts/settings-dialog-context";
 import { type Theme, ThemeProvider } from "./contexts/ThemeContext";
@@ -29,9 +30,11 @@ export function renderWithProviders(
       <ThemeProvider defaultTheme={defaultTheme}>
         <SettingsDialogProvider>
           <GarminBridgeProvider>
-            <ToastProvider>
-              <ToastContextProvider>{children}</ToastContextProvider>
-            </ToastProvider>
+            <CoachingRegistryProvider sources={[]}>
+              <ToastProvider>
+                <ToastContextProvider>{children}</ToastContextProvider>
+              </ToastProvider>
+            </CoachingRegistryProvider>
           </GarminBridgeProvider>
         </SettingsDialogProvider>
       </ThemeProvider>

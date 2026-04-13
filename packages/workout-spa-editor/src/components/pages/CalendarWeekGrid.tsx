@@ -3,22 +3,27 @@
  */
 
 import type { WorkoutRecord } from "../../types/calendar-record";
+import type { CoachingActivity } from "../../types/coaching-activity";
 import { DayColumn } from "../molecules/WorkoutCard/DayColumn";
 
 export type CalendarWeekGridProps = {
   days: string[];
   workoutsByDay: Record<string, WorkoutRecord[]>;
+  coachingByDay?: Record<string, CoachingActivity[]>;
   todayDate: string;
   onWorkoutClick: (workout: WorkoutRecord) => void;
   onEmptyDayClick: (date: string) => void;
+  onActivityExpand?: (activity: CoachingActivity) => void;
 };
 
 export function CalendarWeekGrid({
   days,
   workoutsByDay,
+  coachingByDay = {},
   todayDate,
   onWorkoutClick,
   onEmptyDayClick,
+  onActivityExpand,
 }: CalendarWeekGridProps) {
   return (
     <div
@@ -31,8 +36,10 @@ export function CalendarWeekGrid({
           date={date}
           isToday={date === todayDate}
           workouts={workoutsByDay[date] ?? []}
+          coachingActivities={coachingByDay[date]}
           onWorkoutClick={onWorkoutClick}
           onEmptyDayClick={onEmptyDayClick}
+          onActivityExpand={onActivityExpand}
         />
       ))}
     </div>

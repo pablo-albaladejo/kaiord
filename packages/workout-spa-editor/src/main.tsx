@@ -9,6 +9,7 @@ import {
   SettingsDialogProvider,
   ThemeProvider,
 } from "./contexts";
+import { CoachingRegistryBootstrap } from "./contexts/coaching-registry-bootstrap";
 
 if (import.meta.env.DEV) {
   import("./store/ai-store").then(({ useAiStore }) => {
@@ -23,7 +24,9 @@ createRoot(document.getElementById("root")!).render(
     <ThemeProvider>
       <SettingsDialogProvider>
         <GarminBridgeProvider>
-          <App />
+          <CoachingRegistryBootstrap>
+            <App />
+          </CoachingRegistryBootstrap>
         </GarminBridgeProvider>
       </SettingsDialogProvider>
     </ThemeProvider>

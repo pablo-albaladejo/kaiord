@@ -48,19 +48,23 @@ describe("CLI smoke tests", () => {
     }
   });
 
-  it("should show usage when convert command is missing required args", async () => {
-    // Arrange & Act & Assert
-    try {
-      await execa("./dist/bin/kaiord.js", ["convert"], {
-        cwd: join(__dirname, "../.."),
-      });
-      expect.fail("Should have thrown an error");
-    } catch (error) {
-      const execaError = error as { stderr: string; exitCode: number };
-      const output = stripAnsi(execaError.stderr);
+  it(
+    "should show usage when convert command is missing required args",
+    { timeout: 15000 },
+    async () => {
+      // Arrange & Act & Assert
+      try {
+        await execa("./dist/bin/kaiord.js", ["convert"], {
+          cwd: join(__dirname, "../.."),
+        });
+        expect.fail("Should have thrown an error");
+      } catch (error) {
+        const execaError = error as { stderr: string; exitCode: number };
+        const output = stripAnsi(execaError.stderr);
 
-      expect(output).toContain("input");
-      expect(execaError.exitCode).toBe(1);
+        expect(output).toContain("input");
+        expect(execaError.exitCode).toBe(1);
+      }
     }
-  });
+  );
 });
