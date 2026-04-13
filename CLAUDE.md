@@ -17,6 +17,7 @@ Kaiord is an open-source health & fitness data framework. A TypeScript monorepo 
 - `@kaiord/cli` - Command-line interface
 - `@kaiord/mcp` - Model Context Protocol (MCP) server for AI/LLM integration
 - `@kaiord/garmin-bridge` - Chrome extension for SPA-to-Garmin Connect integration (private)
+- `@kaiord/train2go-bridge` - Chrome extension for reading Train2Go coaching plans (private)
 - `@kaiord/workout-spa-editor` - React web application (private)
 
 ## Commands

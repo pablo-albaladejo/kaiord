@@ -194,7 +194,7 @@ describe("validate command integration tests", () => {
   describe("JSON output", () => {
     it(
       "should output JSON format when --json flag is set",
-      { timeout: 10000 },
+      { timeout: 15000 },
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");

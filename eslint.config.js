@@ -57,6 +57,7 @@ export default tseslint.config(
       "**/scripts/**",
       "**/*.test.ts",
       "**/*.test.tsx",
+      "**/*.test.js",
       "**/*.spec.ts",
       "**/*.stories.ts",
       "**/*.stories.tsx",
