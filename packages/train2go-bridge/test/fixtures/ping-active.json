@@ -1,0 +1,27 @@
+{
+  "data": {
+    "user": {
+      "id": 28035,
+      "role": 2,
+      "name": "Pablo",
+      "surname": "Albaladejo",
+      "status": "validated",
+      "bpm_max": "187",
+      "bpm_rest": "51",
+      "weight": 83,
+      "height": 1.74,
+      "gender": "male",
+      "trainer_id": 16128,
+      "trainer": {
+        "id": 16128,
+        "name": "Daniel",
+        "surname": "Blanco Galindo"
+      }
+    }
+  },
+  "errors": [],
+  "exception": null,
+  "message": null,
+  "redirect": null,
+  "success": true
+}

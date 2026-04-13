@@ -1,0 +1,14 @@
+{
+  "name": "@kaiord/train2go-bridge",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Chrome extension that reads training plans from Train2Go and bridges them to the Kaiord SPA",
+  "scripts": {
+    "test": "vitest --run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest --run --coverage"
+  },
+  "devDependencies": {
+    "vitest": "^4.1.2"
+  }
+}
