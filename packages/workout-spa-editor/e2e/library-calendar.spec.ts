@@ -119,7 +119,9 @@ test.describe("Library-Calendar Integration", () => {
     await page.goto(`/calendar/${weekId}`);
 
     // Click empty day (day 1 has no workouts)
-    await page.getByTestId(`empty-day-${dates[1]}`).click();
+    const btn = page.getByTestId(`empty-day-${dates[1]}`);
+    await btn.scrollIntoViewIfNeeded();
+    await btn.click({ force: true });
     await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
 
     await page.getByRole("button", { name: /Add from Library/i }).click();

@@ -21,7 +21,10 @@ export function CalendarWeekGrid({
   onEmptyDayClick,
 }: CalendarWeekGridProps) {
   return (
-    <div data-testid="calendar-week-grid" className="grid grid-cols-7 gap-2">
+    <div
+      data-testid="calendar-week-grid"
+      className="flex gap-2 overflow-x-auto pb-2 sm:grid sm:grid-cols-7 sm:overflow-x-visible sm:pb-0"
+    >
       {days.map((date) => (
         <DayColumn
           key={date}

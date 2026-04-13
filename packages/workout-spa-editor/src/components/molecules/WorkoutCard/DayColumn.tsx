@@ -38,7 +38,7 @@ export function DayColumn({
   return (
     <div
       data-testid={`day-column-${date}`}
-      className={`flex min-h-[120px] flex-col rounded-lg border p-2 ${todayClass}`}
+      className={`flex min-h-[120px] min-w-[120px] flex-1 flex-col rounded-lg border p-2 sm:min-w-0 ${todayClass}`}
     >
       <span className="mb-2 text-xs font-semibold text-muted-foreground">
         {label}

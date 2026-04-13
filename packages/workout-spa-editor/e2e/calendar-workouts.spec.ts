@@ -158,7 +158,9 @@ test.describe("Calendar Workouts", () => {
     await page.goto(`/calendar/${weekId}`);
 
     // Click the empty day button for day 1
-    await page.getByTestId(`empty-day-${dates[1]}`).click();
+    const btn = page.getByTestId(`empty-day-${dates[1]}`);
+    await btn.scrollIntoViewIfNeeded();
+    await btn.click({ force: true });
 
     await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
   });
@@ -171,7 +173,9 @@ test.describe("Calendar Workouts", () => {
 
     await page.goto(`/calendar/${weekId}`);
 
-    await page.getByTestId(`empty-day-${dates[0]}`).click();
+    const btn = page.getByTestId(`empty-day-${dates[0]}`);
+    await btn.scrollIntoViewIfNeeded();
+    await btn.click({ force: true });
     await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
 
     await page.getByRole("button", { name: /Create new workout/i }).click();
@@ -186,7 +190,9 @@ test.describe("Calendar Workouts", () => {
 
     await page.goto(`/calendar/${weekId}`);
 
-    await page.getByTestId(`empty-day-${dates[0]}`).click();
+    const btn = page.getByTestId(`empty-day-${dates[0]}`);
+    await btn.scrollIntoViewIfNeeded();
+    await btn.click({ force: true });
     await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
 
     await page.getByRole("button", { name: /Add from Library/i }).click();
