@@ -27,11 +27,30 @@ describe("getT2GSportDisplay", () => {
 
   it("maps all 24 known sports without throwing", () => {
     const sports = [
-      "cycling", "running", "swimming", "gym", "stretching",
-      "yoga", "pilates", "rest", "walk", "mountainwalk",
-      "trail", "mountainbike", "stationarybike", "rowing",
-      "indoorrowing", "climbing", "ski", "mountainski",
-      "sprint", "tennis", "cardio", "canicross", "canibike", "dog",
+      "cycling",
+      "running",
+      "swimming",
+      "gym",
+      "stretching",
+      "yoga",
+      "pilates",
+      "rest",
+      "walk",
+      "mountainwalk",
+      "trail",
+      "mountainbike",
+      "stationarybike",
+      "rowing",
+      "indoorrowing",
+      "climbing",
+      "ski",
+      "mountainski",
+      "sprint",
+      "tennis",
+      "cardio",
+      "canicross",
+      "canibike",
+      "dog",
     ];
 
     for (const sport of sports) {

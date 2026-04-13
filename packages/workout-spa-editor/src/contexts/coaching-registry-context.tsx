@@ -6,8 +6,8 @@
  * useCoachingSources() to access the aggregated data.
  */
 
-import { createContext, useContext } from "react";
 import type { ReactNode } from "react";
+import { createContext, useContext } from "react";
 
 import type { CoachingSource } from "../types/coaching-source";
 

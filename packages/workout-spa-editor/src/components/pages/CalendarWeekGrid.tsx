@@ -2,8 +2,8 @@
  * CalendarWeekGrid - 7-column grid of day columns.
  */
 
-import type { CoachingActivity } from "../../types/coaching-activity";
 import type { WorkoutRecord } from "../../types/calendar-record";
+import type { CoachingActivity } from "../../types/coaching-activity";
 import { DayColumn } from "../molecules/WorkoutCard/DayColumn";
 
 export type CalendarWeekGridProps = {

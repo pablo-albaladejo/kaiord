@@ -5,8 +5,8 @@
  * Adding a new platform = one import + one useMemo entry here.
  */
 
-import { useMemo } from "react";
 import type { ReactNode } from "react";
+import { useMemo } from "react";
 
 import { useTrain2GoSource } from "../adapters/train2go/use-train2go-source";
 import { CoachingRegistryProvider } from "./coaching-registry-context";
@@ -21,8 +21,12 @@ export function CoachingRegistryBootstrap({
 
   const sources = useMemo(
     () => [train2go],
-    // eslint-disable-next-line react-hooks/exhaustive-deps -- stable source references
-    [train2go.available, train2go.connected, train2go.loading, train2go.activities]
+    [
+      train2go.available,
+      train2go.connected,
+      train2go.loading,
+      train2go.activities,
+    ]
   );
 
   return (

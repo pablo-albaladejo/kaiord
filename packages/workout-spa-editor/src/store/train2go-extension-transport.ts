@@ -5,6 +5,8 @@
  * via chrome.runtime.sendMessage. Mirrors garmin-extension-transport.
  */
 
+import type { Train2GoActivity } from "./train2go-store";
+
 type ExtensionResponse = {
   ok: boolean;
   protocolVersion?: number;
@@ -23,11 +25,9 @@ const sendMessage = (
       resolve({ ok: false, error: "Chrome runtime not available" });
       return;
     }
-
     const timer = setTimeout(() => {
       resolve({ ok: false, error: "Extension did not respond" });
     }, timeoutMs);
-
     try {
       chrome.runtime.sendMessage(extensionId, message, (raw) => {
         clearTimeout(timer);
@@ -45,71 +45,49 @@ const sendMessage = (
     }
   });
 
-type PingData = {
-  sessionActive: boolean;
-  userId?: number;
-  userName?: string;
-};
+type PingData = { sessionActive: boolean; userId?: number; userName?: string };
+type ReadData = { activities: Train2GoActivity[] };
 
-const PING_TIMEOUT_1 = 2_000;
-const PING_TIMEOUT_2 = 4_000;
-const ACTION_TIMEOUT = 15_000;
+const PING_T1 = 2_000;
+const PING_T2 = 4_000;
+const ACTION_T = 15_000;
 
 export const ping = async (
   extensionId: string
 ): Promise<ExtensionResponse & { data?: PingData }> => {
-  const res = await sendMessage(
-    extensionId,
-    { action: "ping" },
-    PING_TIMEOUT_1
-  );
+  const res = await sendMessage(extensionId, { action: "ping" }, PING_T1);
   if (res.ok) return res as ExtensionResponse & { data?: PingData };
   if (res.error === "Extension did not respond") {
     return (await sendMessage(
       extensionId,
       { action: "ping" },
-      PING_TIMEOUT_2
+      PING_T2
     )) as ExtensionResponse & { data?: PingData };
   }
   return res as ExtensionResponse & { data?: PingData };
 };
 
-type Train2GoActivity = {
-  id: number;
-  date: string;
-  sport: string;
-  title: string;
-  duration: string;
-  workload: number;
-  status: number;
-  description?: string;
-  completion?: number;
-};
-
-type ReadWeekData = { activities: Train2GoActivity[] };
-type ReadDayData = { activities: Train2GoActivity[] };
-
-export const readWeek = async (
+export const readWeek = (
   extensionId: string,
   date: string,
   userId: number
-): Promise<ExtensionResponse & { data?: ReadWeekData }> =>
+): Promise<ExtensionResponse & { data?: ReadData }> =>
   sendMessage(
     extensionId,
     { action: "read-week", date, userId },
-    ACTION_TIMEOUT
-  ) as Promise<ExtensionResponse & { data?: ReadWeekData }>;
+    ACTION_T
+  ) as Promise<ExtensionResponse & { data?: ReadData }>;
 
-export const readDay = async (
+export const readDay = (
   extensionId: string,
   date: string,
   userId: number
-): Promise<ExtensionResponse & { data?: ReadDayData }> =>
+): Promise<ExtensionResponse & { data?: ReadData }> =>
   sendMessage(
     extensionId,
     { action: "read-day", date, userId },
-    ACTION_TIMEOUT
-  ) as Promise<ExtensionResponse & { data?: ReadDayData }>;
+    ACTION_T
+  ) as Promise<ExtensionResponse & { data?: ReadData }>;
 
 export const openTrain2Go = (extensionId: string): Promise<ExtensionResponse> =>
-  sendMessage(extensionId, { action: "open-train2go" }, PING_TIMEOUT_1);
+  sendMessage(extensionId, { action: "open-train2go" }, PING_T1);

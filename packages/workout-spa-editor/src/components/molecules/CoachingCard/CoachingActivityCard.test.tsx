@@ -66,9 +66,7 @@ describe("CoachingActivityCard", () => {
   it("does not call onExpand on collapse click", async () => {
     const onExpand = vi.fn();
     const activity = { ...baseActivity, description: "Some text" };
-    render(
-      <CoachingActivityCard activity={activity} onExpand={onExpand} />
-    );
+    render(<CoachingActivityCard activity={activity} onExpand={onExpand} />);
 
     const card = screen.getByTestId("coaching-card-train2go:123");
     await userEvent.click(card); // expand

@@ -5,8 +5,8 @@
  * Clickable empty area triggers add-workout flow.
  */
 
-import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import type { CoachingActivity } from "../../../types/coaching-activity";
 import { CoachingActivityCard } from "../CoachingCard/CoachingActivityCard";
 import { WorkoutCard } from "./WorkoutCard";
 

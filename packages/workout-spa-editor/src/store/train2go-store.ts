@@ -9,8 +9,7 @@ import { create } from "zustand";
 
 import { createTrain2GoActions } from "./train2go-store-actions";
 
-const EXTENSION_ID: string =
-  import.meta.env.VITE_TRAIN2GO_EXTENSION_ID || "";
+const EXTENSION_ID: string = import.meta.env.VITE_TRAIN2GO_EXTENSION_ID || "";
 
 export type Train2GoActivity = {
   id: number;

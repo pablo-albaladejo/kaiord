@@ -1,7 +1,6 @@
 /**
  * CalendarPage - Week-view calendar with workout cards.
  *
- * Single useLiveQuery at page level, passes data down as props.
  * Coaching data flows through the generic CoachingSource registry —
  * this file has zero platform-specific imports.
  */
@@ -9,17 +8,11 @@
 import { Redirect } from "wouter";
 
 import { useCoachingActivities } from "../../hooks/use-coaching-activities";
-import { BatchProcessingBanner } from "../molecules/BatchProcessingBanner/BatchProcessingBanner";
-import {
-  EmptyWeekState,
-  FirstVisitState,
-  NoAiProviderState,
-  NoBridgesState,
-} from "../molecules/CalendarEmptyStates";
 import { CoachingSyncButton } from "../molecules/CoachingCard/CoachingSyncButton";
 import { CalendarSkeleton } from "../molecules/WorkoutCard/CalendarSkeleton";
 import { WeekNavigation } from "../molecules/WorkoutCard/WeekNavigation";
 import { CalendarDialogs } from "./CalendarDialogs";
+import { CalendarEmptyBanners } from "./CalendarEmptyBanners";
 import { CalendarWeekGrid } from "./CalendarWeekGrid";
 import { useCalendarState } from "./use-calendar-state";
 
@@ -32,14 +25,21 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4" data-testid="calendar-page">
-      {!s.hasAnyWorkouts && <FirstVisitState />}
-      {s.hasAnyWorkouts && !s.hasWeekWorkouts && (
-        <EmptyWeekState
-          onGoToLatest={s.latestWorkout ? s.handleGoToLatest : undefined}
-        />
-      )}
-      {s.data.rawCount > 0 && !s.hasAiProvider && <NoAiProviderState />}
-      {s.hasReadyWorkouts && !s.extensionInstalled && <NoBridgesState />}
+      <CalendarEmptyBanners
+        hasAnyWorkouts={s.hasAnyWorkouts}
+        hasWeekWorkouts={s.hasWeekWorkouts}
+        hasReadyWorkouts={s.hasReadyWorkouts}
+        hasAiProvider={s.hasAiProvider}
+        extensionInstalled={s.extensionInstalled}
+        rawCount={s.data.rawCount}
+        onGoToLatest={s.latestWorkout ? s.handleGoToLatest : undefined}
+        batchMessage={s.batch.message}
+        onDismissBatch={s.batch.dismissMessage}
+        batchIsProcessing={s.batch.isProcessing}
+        batchProgress={s.batch.progress}
+        onBatchProcess={s.batch.start}
+        onBatchCancel={s.batch.cancel}
+      />
       <div className="flex items-center justify-between">
         <WeekNavigation
           weekId={s.data.weekId}
@@ -59,19 +59,6 @@ export default function CalendarPage() {
           ))}
         </div>
       </div>
-      {s.batch.message && (
-        <BatchMessage
-          message={s.batch.message}
-          onDismiss={s.batch.dismissMessage}
-        />
-      )}
-      <BatchProcessingBanner
-        rawCount={s.data.rawCount}
-        isProcessing={s.batch.isProcessing}
-        progress={s.batch.progress}
-        onProcess={s.batch.start}
-        onCancel={s.batch.cancel}
-      />
       <CalendarWeekGrid
         days={s.data.days}
         workoutsByDay={s.data.workoutsByDay}
@@ -87,23 +74,6 @@ export default function CalendarPage() {
         onCloseWorkout={() => s.setSelectedWorkout(null)}
         onCloseDay={() => s.setEmptyDayDate(null)}
       />
-    </div>
-  );
-}
-
-function BatchMessage({
-  message,
-  onDismiss,
-}: {
-  message: string;
-  onDismiss: () => void;
-}) {
-  return (
-    <div className="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm dark:border-amber-900 dark:bg-amber-950">
-      <span className="flex-1">{message}</span>
-      <button type="button" onClick={onDismiss} className="text-xs underline">
-        Dismiss
-      </button>
     </div>
   );
 }

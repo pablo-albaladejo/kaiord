@@ -4,20 +4,19 @@
  * Read-week and read-day actions for fetching training plans.
  */
 
-import {
-  readWeek,
-  readDay,
-  openTrain2Go,
-} from "./train2go-extension-transport";
 import { createDetectAction } from "./train2go-detect";
+import {
+  openTrain2Go,
+  readDay,
+  readWeek,
+} from "./train2go-extension-transport";
 import type { Train2GoStore } from "./train2go-store";
 
 type Set = (fn: Partial<Train2GoStore>) => void;
 type Get = () => Train2GoStore;
 
 const createReadWeekAction =
-  (set: Set, get: Get, extensionId: string) =>
-  async (date: string) => {
+  (set: Set, get: Get, extensionId: string) => async (date: string) => {
     const { userId } = get();
     if (!userId) {
       set({ lastError: "Not connected to Train2Go" });
@@ -41,8 +40,7 @@ const createReadWeekAction =
   };
 
 const createReadDayAction =
-  (set: Set, get: Get, extensionId: string) =>
-  async (date: string) => {
+  (set: Set, get: Get, extensionId: string) => async (date: string) => {
     const { userId } = get();
     if (!userId) return;
 
@@ -55,7 +53,13 @@ const createReadDayAction =
 
     const merged = activities.map((a) => {
       const detail = dayActivities.find((d) => d.id === a.id);
-      return detail ? { ...a, description: detail.description, completion: detail.completion } : a;
+      return detail
+        ? {
+            ...a,
+            description: detail.description,
+            completion: detail.completion,
+          }
+        : a;
     });
 
     set({ activities: merged });

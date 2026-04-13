@@ -38,7 +38,7 @@
 - [x] 6.1 Create Train2Go state (Zustand store) with `extensionInstalled`, `sessionActive`, `userId`, `userName`, `loading`, `lastError`, `lastDetectionTimestamp`, `activities` (transient, not Dexie)
 - [x] 6.2 Create Train2Go store actions — detect extension (2-stage ping, 30s cache), fetchWeek, fetchDay, openTrain2Go, transport layer
 - [x] 6.3 Wire Train2Go extension detection in `use-store-hydration.ts` alongside Garmin detection on boot
-- [ ] 6.4 Create tests for Train2Go state (initial state, ping update, session expiry, detection cache hit/miss, userId stored from ping)
+- [ ] 6.4 Create tests for Train2Go adapter: `use-train2go-source` (maps store to CoachingSource port), `train2go-detect` (cache, protocol)
 
 ## 7. SPA Calendar Integration
 
@@ -46,19 +46,19 @@
 - [x] 7.1 Create `CoachingActivityCard` component (generic, platform-agnostic) — sport icon, title, duration, effort dots, status, source badge, read-only, expand-on-click. Test: 8 tests.
 - [x] 7.2 Integrate coaching activities into `CalendarWeekGrid`/`DayColumn` — generic `coachingActivities` prop, zero platform imports. `useCoachingActivities` hook aggregates all sources.
 - [x] 7.3 Expand-on-click calls `onActivityExpand` on first click, toggles description locally after. Lazy-load via `useCoachingActivities.expandActivity()`.
-- [ ] 7.4 Add "Sync Train2Go" button in calendar header — visible when extension is detected, triggers `read-week` for current displayed week
-- [ ] 7.5 Add "Connect to Train2Go" prompt — shown when extension is installed but session is expired, triggers `open-train2go` + polling
+- [x] 7.4 Generic `CoachingSyncButton` renders per-source sync/connect via `syncSources` from registry hook. CalendarPage iterates `coaching.syncSources` — zero platform knowledge.
+- [x] 7.5 Connect prompt handled by `CoachingSyncButton` (connected=false state) + `CoachingSource.connect()` with polling in adapter.
 - [x] 7.6 Tests: CoachingActivityCard (8), train2go-mapper (8), train2go-sport-map (5) — 21 tests total
-- [ ] 7.7 Create tests for CalendarWeekGrid integration (both Kaiord + coaching sources rendered, empty coaching state)
+- [ ] 7.7 Create tests for CalendarWeekGrid integration (both Kaiord + coaching sources rendered, empty coaching state via CoachingRegistryProvider)
 
 ## 8. Testing & Quality
 
 - [x] 8.1 Verify all extension tests pass: `cd packages/train2go-bridge && pnpm test`
 - [x] 8.2 Verify SPA builds cleanly: `cd packages/workout-spa-editor && pnpm build`
-- [ ] 8.3 Run full lint: `pnpm lint`
+- [x] 8.3 Run full lint: `pnpm lint` — zero errors, zero warnings
 - [x] 8.4 Create `TESTING.md` in `packages/train2go-bridge/` with manual testing guide (load unpacked, open Train2Go tab, test popup, test SPA integration)
 
 ## 9. Finalization
 
-- [ ] 9.1 Add changeset for `@kaiord/workout-spa-editor` (minor — new Train2Go calendar integration)
-- [ ] 9.2 Update root `CLAUDE.md` packages list to include `@kaiord/train2go-bridge`
+- [x] 9.1 Add changeset for `@kaiord/workout-spa-editor` (minor — coaching platform integration)
+- [x] 9.2 Update root `CLAUDE.md` packages list to include `@kaiord/train2go-bridge`
