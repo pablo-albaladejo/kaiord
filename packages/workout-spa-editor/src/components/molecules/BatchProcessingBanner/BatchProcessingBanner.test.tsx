@@ -100,6 +100,28 @@ describe("BatchProcessingBanner", () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
+  it("shows progress counter as X of N", () => {
+    render(
+      <BatchProcessingBanner
+        rawCount={5}
+        isProcessing={true}
+        progress={{
+          total: 5,
+          processed: 2,
+          succeeded: 2,
+          failed: 0,
+          current: null,
+        }}
+        onProcess={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("batch-progress")).toHaveTextContent(
+      "Processing 2 of 5"
+    );
+  });
+
   it("uses singular form for 1 raw workout", () => {
     render(
       <BatchProcessingBanner

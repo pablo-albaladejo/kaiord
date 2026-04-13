@@ -129,6 +129,27 @@ describe("createOperationQueue", () => {
       expect(execute).toHaveBeenCalledTimes(2);
     });
 
+    it("gives up after MAX_RETRIES (5) on repeated 429", async () => {
+      const queue = createOperationQueue(0);
+      const error429 = Object.assign(new Error("Too Many"), {
+        status: 429,
+      });
+
+      const execute = vi.fn().mockRejectedValue(error429);
+      const op = { bridgeId: "b1", execute };
+      const promise = queue.enqueue(op);
+
+      // Prevent unhandled rejection warning during timer advancement
+      promise.catch(() => {});
+
+      // Advance enough time for all retries: 2s + 4s + 8s + 16s + 30s = ~60s
+      await vi.advanceTimersByTimeAsync(70_000);
+
+      await expect(promise).rejects.toThrow("Too Many");
+      // 1 initial + 4 retries = 5 total, gives up when attempt reaches 5
+      expect(execute).toHaveBeenCalledTimes(5);
+    });
+
     it("propagates non-429 errors immediately", async () => {
       vi.useRealTimers();
       const queue = createOperationQueue(0);
