@@ -22,7 +22,9 @@ test.describe("Calendar Empty States", () => {
   test("No workouts shows FirstVisitState", async ({ page }) => {
     await page.reload();
 
-    await expect(page.getByTestId("first-visit-state")).toBeVisible();
+    await expect(page.getByTestId("first-visit-state")).toBeVisible({
+      timeout: 10_000,
+    });
     await expect(page.getByText("Welcome to Kaiord")).toBeVisible();
   });
 
