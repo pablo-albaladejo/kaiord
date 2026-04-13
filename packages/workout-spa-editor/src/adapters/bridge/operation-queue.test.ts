@@ -142,7 +142,8 @@ describe("createOperationQueue", () => {
       // Prevent unhandled rejection warning during timer advancement
       promise.catch(() => {});
 
-      // Advance enough time for all retries: 2s + 4s + 8s + 16s + 30s = ~60s
+      // Advance enough time for all retries: 2s + 4s + 8s + 16s = 30s
+      // (5th failure throws immediately without scheduling another delay)
       await vi.advanceTimersByTimeAsync(70_000);
 
       await expect(promise).rejects.toThrow("Too Many");

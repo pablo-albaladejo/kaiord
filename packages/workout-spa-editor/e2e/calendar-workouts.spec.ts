@@ -16,25 +16,25 @@ import {
 
 test.describe("Calendar Skeleton", () => {
   test("shows skeleton during hydration on boot", async ({ page }) => {
-    // Navigate to calendar and immediately check for skeleton
-    // The skeleton appears while hydration is "pending" and disappears after
+    // Arrange
     await page.goto("/calendar");
-
-    // The skeleton element should exist in the DOM during initial render
     const skeleton = page.getByTestId("calendar-skeleton");
-    // Use a short timeout since skeleton disappears quickly after hydration
-    await expect(skeleton)
-      .toBeVisible({ timeout: 2_000 })
-      .catch(() => {
-        // Skeleton may have already disappeared if hydration was fast.
-        // Verify the calendar page loaded successfully instead.
-      });
+    const calendarPage = page.getByTestId("calendar-page");
+    let skeletonWasVisible = false;
 
-    // After hydration, the calendar page should be visible
-    await page.waitForSelector(
-      '[data-testid="calendar-page"], [data-testid="calendar-skeleton"]',
-      { timeout: 5_000 }
-    );
+    // Act — skeleton may appear briefly during hydration
+    try {
+      await expect(skeleton).toBeVisible({ timeout: 2_000 });
+      skeletonWasVisible = true;
+    } catch {
+      // Fast hydration: skeleton disappeared before observation
+    }
+
+    // Assert — calendar page must always appear after hydration
+    await expect(calendarPage).toBeVisible({ timeout: 5_000 });
+    if (skeletonWasVisible) {
+      await expect(skeleton).toBeHidden({ timeout: 5_000 });
+    }
   });
 });
 
