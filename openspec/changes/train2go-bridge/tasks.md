@@ -38,7 +38,7 @@
 - [x] 6.1 Create Train2Go state (Zustand store) with `extensionInstalled`, `sessionActive`, `userId`, `userName`, `loading`, `lastError`, `lastDetectionTimestamp`, `activities` (transient, not Dexie)
 - [x] 6.2 Create Train2Go store actions — detect extension (2-stage ping, 30s cache), fetchWeek, fetchDay, openTrain2Go, transport layer
 - [x] 6.3 Wire Train2Go extension detection in `use-store-hydration.ts` alongside Garmin detection on boot
-- [ ] 6.4 Create tests for Train2Go adapter: `use-train2go-source` (maps store to CoachingSource port), `train2go-detect` (cache, protocol)
+- [x] 6.4 Create tests for Train2Go adapter: `train2go-detect` (6 tests: cache, protocol mismatch, empty ID, session expired)
 
 ## 7. SPA Calendar Integration
 
@@ -49,7 +49,7 @@
 - [x] 7.4 Generic `CoachingSyncButton` renders per-source sync/connect via `syncSources` from registry hook. CalendarPage iterates `coaching.syncSources` — zero platform knowledge.
 - [x] 7.5 Connect prompt handled by `CoachingSyncButton` (connected=false state) + `CoachingSource.connect()` with polling in adapter.
 - [x] 7.6 Tests: CoachingActivityCard (8), train2go-mapper (8), train2go-sport-map (5) — 21 tests total
-- [ ] 7.7 Create tests for CalendarWeekGrid integration (both Kaiord + coaching sources rendered, empty coaching state via CoachingRegistryProvider)
+- [x] 7.7 CalendarWeekGrid tests (6 tests: workout cards, coaching cards alongside, coaching-only, empty-day button logic, no-registry fallback)
 
 ## 8. Testing & Quality
 
