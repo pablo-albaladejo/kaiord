@@ -17,7 +17,7 @@ import { loadTestWorkoutWithBlocks } from "./helpers/load-test-workout-with-bloc
 test.describe("Modal Interactions", () => {
   test.beforeEach(async ({ page }) => {
     // Skip onboarding tutorial for all tests
-    await page.goto("/");
+    await page.goto("/workout/new");
     await page.evaluate(() => {
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
@@ -28,7 +28,7 @@ test.describe("Modal Interactions", () => {
     isMobile,
   }) => {
     // Requirement 6.1: Display modal dialog instead of browser alert
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Load a workout with a repetition block
     await loadTestWorkoutWithBlocks(page, "Modal Test", [{ repeatCount: 3 }]);
@@ -73,7 +73,7 @@ test.describe("Modal Interactions", () => {
     isMobile,
   }) => {
     // Requirement 6.5: Allow Escape key to dismiss modal
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Load a workout with a repetition block
     await loadTestWorkoutWithBlocks(page, "Escape Test", [
@@ -119,7 +119,7 @@ test.describe("Modal Interactions", () => {
     isMobile,
   }) => {
     // Requirement 6.5: Allow backdrop click to dismiss modal
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Load a workout with a repetition block
     await loadTestWorkoutWithBlocks(page, "Backdrop Test", [
@@ -158,7 +158,7 @@ test.describe("Modal Interactions", () => {
 
   test("should trap focus within modal", async ({ page, isMobile }) => {
     // Requirement 6.3: Trap keyboard focus within modal
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Load a workout with a repetition block
     await loadTestWorkoutWithBlocks(page, "Focus Trap Test", [
@@ -214,7 +214,7 @@ test.describe("Modal Interactions", () => {
     isMobile,
   }) => {
     // Requirement 6.6: Prevent interaction with background content
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Load a workout with multiple blocks
     await loadTestWorkoutWithBlocks(page, "Background Block Test", [
@@ -269,7 +269,7 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     page,
   }) => {
     // Requirement 6.9: Adapt to mobile screens
-    await page.goto("/");
+    await page.goto("/workout/new");
     await page.evaluate(() => {
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
@@ -339,7 +339,7 @@ test.describe("Modal Interactions - Mobile Viewport", () => {
     // Test on tablet size (iPad Mini)
     await page.setViewportSize({ width: 768, height: 1024 });
 
-    await page.goto("/");
+    await page.goto("/workout/new");
     await page.evaluate(() => {
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });

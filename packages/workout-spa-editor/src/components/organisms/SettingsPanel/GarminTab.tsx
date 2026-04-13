@@ -1,12 +1,12 @@
 import { useEffect } from "react";
 
-import { useGarminStore } from "../../../store/garmin-store";
+import { useGarminBridge } from "../../../contexts";
 import { Button } from "../../atoms/Button";
 import { GarminStatus } from "./GarminStatus";
 
 export const GarminTab: React.FC = () => {
   const { extensionInstalled, sessionActive, lastError, detectExtension } =
-    useGarminStore();
+    useGarminBridge();
 
   useEffect(() => {
     detectExtension();
@@ -27,10 +27,7 @@ export const GarminTab: React.FC = () => {
           size="sm"
           variant="secondary"
           className="mt-3"
-          onClick={() => {
-            useGarminStore.setState({ lastDetectionTimestamp: null });
-            detectExtension();
-          }}
+          onClick={() => detectExtension()}
         >
           Refresh Status
         </Button>

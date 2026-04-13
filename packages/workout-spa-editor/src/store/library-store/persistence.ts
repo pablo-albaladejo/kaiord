@@ -1,13 +1,29 @@
 /**
  * Library Store Persistence
+ *
+ * Persists templates to IndexedDB via Dexie.
  */
 
+import { db } from "../../adapters/dexie/dexie-database";
 import type { WorkoutTemplate } from "../../types/workout-library";
-import { saveLibrary } from "../../utils/library-storage";
+
+const table = () => db.table<WorkoutTemplate>("templates");
 
 export function persistState(templates: Array<WorkoutTemplate>): void {
-  const error = saveLibrary(templates);
-  if (error) {
-    console.error("Failed to save library:", error.message);
-  }
+  table()
+    .toArray()
+    .then((existing) => {
+      const currentIds = new Set(templates.map((t) => t.id));
+      const toDelete = existing.filter((t) => !currentIds.has(t.id));
+      return Promise.all([
+        ...toDelete.map((t) => table().delete(t.id)),
+        table().bulkPut(templates),
+      ]);
+    })
+    .catch((error: unknown) => {
+      console.error(
+        "Failed to save library:",
+        error instanceof Error ? error.message : "Unknown error"
+      );
+    });
 }

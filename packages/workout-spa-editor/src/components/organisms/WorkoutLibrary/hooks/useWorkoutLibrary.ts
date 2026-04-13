@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 
-import { useLibraryStore } from "../../../../store/library-store";
+import { useLibrary } from "../../../../hooks/use-library";
 import type { WorkoutTemplate } from "../../../../types/workout-library";
 import { useLibraryFilters } from "./useLibraryFilters";
 import { useWorkoutLoader } from "./useWorkoutLoader";
@@ -16,7 +16,7 @@ export function useWorkoutLibrary(
   onLoadWorkout: (template: WorkoutTemplate) => void,
   onOpenChange: (open: boolean) => void
 ) {
-  const { templates, deleteTemplate } = useLibraryStore();
+  const { templates, deleteTemplate } = useLibrary();
   const [previewTemplate, setPreviewTemplate] =
     useState<WorkoutTemplate | null>(null);
 

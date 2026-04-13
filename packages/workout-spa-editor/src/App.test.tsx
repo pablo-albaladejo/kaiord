@@ -52,9 +52,12 @@ describe("App", () => {
     expect(container).toBeInTheDocument();
   });
 
-  it("should render the welcome section when no workout is loaded", () => {
-    const { container } = renderWithProviders(<App />);
-    expect(container.querySelector(".space-y-6")).toBeInTheDocument();
+  it("should render the calendar page by default when no workout is loaded", async () => {
+    renderWithProviders(<App />);
+    // Default route redirects to /calendar
+    await waitFor(() => {
+      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
+    });
   });
 
   describe("onboarding tutorial integration (Requirements 37.1, 37.5)", () => {

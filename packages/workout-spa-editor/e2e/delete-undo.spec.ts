@@ -12,7 +12,7 @@ import { expect, test } from "./fixtures/base";
  */
 test.describe("Delete with Undo Flow", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Wait for the page to be fully loaded
     await page.waitForLoadState("networkidle");

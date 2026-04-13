@@ -13,7 +13,7 @@ import { expect, test } from "./fixtures/base";
 
 test.describe("Error Handling", () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
     await expect(
       page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
@@ -205,7 +205,7 @@ test.describe("Error Recovery", () => {
   };
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
     await expect(
       page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
@@ -376,7 +376,7 @@ test.describe("Error Handling - Mobile", () => {
 
   test("should display error messages on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/");
+    await page.goto("/workout/new");
     await expect(
       page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
@@ -399,7 +399,7 @@ test.describe("Error Handling - Mobile", () => {
 
   test("should handle error recovery on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     const validWorkout = {
       version: "1.0",
@@ -445,7 +445,7 @@ test.describe("Error Handling - Performance", () => {
     page,
   }) => {
     // Arrange
-    await page.goto("/");
+    await page.goto("/workout/new");
     await expect(
       page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
@@ -477,7 +477,7 @@ test.describe("Error Handling - Performance", () => {
     page,
   }) => {
     // Arrange
-    await page.goto("/");
+    await page.goto("/workout/new");
     await expect(
       page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();

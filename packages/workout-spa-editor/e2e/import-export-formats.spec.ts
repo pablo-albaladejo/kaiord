@@ -49,7 +49,7 @@ test.describe("Import/Export Multiple Formats", () => {
   };
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
     await expect(
       page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
@@ -438,7 +438,7 @@ test.describe("Import/Export Mobile Flow", () => {
 
   test("should handle file upload on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/");
+    await page.goto("/workout/new");
     await expect(
       page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
     ).toBeVisible();
@@ -476,7 +476,7 @@ test.describe("Import/Export Mobile Flow", () => {
 
   test("should handle format selection on mobile", async ({ page }) => {
     // Arrange
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     const testWorkout = {
       version: "1.0",
