@@ -5,15 +5,19 @@
  * Clickable empty area triggers add-workout flow.
  */
 
+import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import { CoachingActivityCard } from "../CoachingCard/CoachingActivityCard";
 import { WorkoutCard } from "./WorkoutCard";
 
 export type DayColumnProps = {
   date: string;
   isToday: boolean;
   workouts: WorkoutRecord[];
+  coachingActivities?: CoachingActivity[];
   onWorkoutClick: (workout: WorkoutRecord) => void;
   onEmptyDayClick: (date: string) => void;
+  onActivityExpand?: (activity: CoachingActivity) => void;
 };
 
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -29,8 +33,10 @@ export function DayColumn({
   date,
   isToday,
   workouts,
+  coachingActivities = [],
   onWorkoutClick,
   onEmptyDayClick,
+  onActivityExpand,
 }: DayColumnProps) {
   const label = getDayLabel(date);
   const todayClass = isToday ? "bg-primary-50 dark:bg-primary-950" : "";
@@ -44,11 +50,18 @@ export function DayColumn({
         {label}
       </span>
       <div className="flex flex-1 flex-col gap-1.5">
+        {coachingActivities.map((a) => (
+          <CoachingActivityCard
+            key={a.id}
+            activity={a}
+            onExpand={onActivityExpand}
+          />
+        ))}
         {workouts.map((w) => (
           <WorkoutCard key={w.id} workout={w} onClick={onWorkoutClick} />
         ))}
       </div>
-      {workouts.length === 0 && (
+      {workouts.length === 0 && coachingActivities.length === 0 && (
         <button
           type="button"
           data-testid={`empty-day-${date}`}

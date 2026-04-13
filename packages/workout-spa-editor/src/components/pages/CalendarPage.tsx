@@ -6,6 +6,7 @@
 
 import { Redirect } from "wouter";
 
+import { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import { BatchProcessingBanner } from "../molecules/BatchProcessingBanner/BatchProcessingBanner";
 import {
   EmptyWeekState,
@@ -21,6 +22,9 @@ import { useCalendarState } from "./use-calendar-state";
 
 export default function CalendarPage() {
   const s = useCalendarState();
+  const { byDay: coachingByDay, expandActivity } = useCoachingActivities(
+    s.data.days
+  );
 
   if (!s.data.isValidWeek) return <Redirect to="/calendar" />;
   if (s.data.hydration === "pending") return <CalendarSkeleton />;
@@ -55,9 +59,11 @@ export default function CalendarPage() {
       <CalendarWeekGrid
         days={s.data.days}
         workoutsByDay={s.data.workoutsByDay}
+        coachingByDay={coachingByDay}
         todayDate={new Date().toISOString().slice(0, 10)}
         onWorkoutClick={s.handleWorkoutClick}
         onEmptyDayClick={s.setEmptyDayDate}
+        onActivityExpand={expandActivity}
       />
       <CalendarDialogs
         selectedWorkout={s.selectedWorkout}
