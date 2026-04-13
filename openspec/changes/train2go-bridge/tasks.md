@@ -30,15 +30,15 @@
 
 ## 5. SPA Bridge Schema Extension
 
-- [ ] 5.1 Add `"read:training-plan"` to `bridgeCapabilitySchema` enum in `packages/workout-spa-editor/src/types/bridge-schemas.ts`
-- [ ] 5.2 Add `VITE_TRAIN2GO_EXTENSION_ID` to `.env.example` and SPA env type declarations. Ensure the SPA gracefully skips Train2Go detection when the env var is unset (no error, no crash)
+- [ ] 5.1 Add `"read:training-plan"` to `bridgeCapabilitySchema` enum — DEFERRED: `bridge-schemas.ts` only exists on `feature/spa-calendar-redesign`
+- [x] 5.2 Add `VITE_TRAIN2GO_EXTENSION_ID` to `.env.example` and SPA env type declarations. Ensure the SPA gracefully skips Train2Go detection when the env var is unset (no error, no crash)
 
 ## 6. SPA Train2Go State & Data Fetching
 
-- [ ] 6.1 Create Train2Go state (Zustand slice or React context) with `extensionInstalled`, `sessionActive`, `userId`, `userName`, `loading`, `lastError`, `lastDetectionTimestamp`, `activities` (transient, not Dexie)
-- [ ] 6.2 Create `useTrain2GoBridgeActions` hook — detect extension, ping, read-week, read-day, open-train2go, connection polling (2s x 5 attempts), 30s detection cache
-- [ ] 6.3 Wire Train2Go extension detection in existing bridge registry (`adapters/bridge/bridge-registry.ts`) — call `detectBridge(VITE_TRAIN2GO_EXTENSION_ID)` alongside Garmin detection on boot
-- [ ] 6.4 Create tests for Train2Go state (initial state, ping update, session expiry, detection cache hit/miss, userId stored from ping)
+- [x] 6.1 Create Train2Go state (Zustand store) with `extensionInstalled`, `sessionActive`, `userId`, `userName`, `loading`, `lastError`, `lastDetectionTimestamp`, `activities` (transient, not Dexie)
+- [x] 6.2 Create Train2Go store actions — detect extension (2-stage ping, 30s cache), fetchWeek, fetchDay, openTrain2Go, transport layer
+- [x] 6.3 Wire Train2Go extension detection in `use-store-hydration.ts` alongside Garmin detection on boot
+- [ ] 6.4 Create tests for Train2Go state (initial state, ping update, session expiry, detection cache hit/miss, userId stored from ping) — DEFERRED to calendar integration phase
 
 ## 7. SPA Calendar Integration
 
@@ -53,10 +53,10 @@
 
 ## 8. Testing & Quality
 
-- [ ] 8.1 Verify all extension tests pass: `cd packages/train2go-bridge && pnpm test`
-- [ ] 8.2 Verify SPA builds cleanly: `cd packages/workout-spa-editor && pnpm build`
+- [x] 8.1 Verify all extension tests pass: `cd packages/train2go-bridge && pnpm test`
+- [x] 8.2 Verify SPA builds cleanly: `cd packages/workout-spa-editor && pnpm build`
 - [ ] 8.3 Run full lint: `pnpm lint`
-- [ ] 8.4 Create `TESTING.md` in `packages/train2go-bridge/` with manual testing guide (load unpacked, open Train2Go tab, test popup, test SPA integration)
+- [x] 8.4 Create `TESTING.md` in `packages/train2go-bridge/` with manual testing guide (load unpacked, open Train2Go tab, test popup, test SPA integration)
 
 ## 9. Finalization
 

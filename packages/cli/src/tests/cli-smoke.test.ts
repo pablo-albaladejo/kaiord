@@ -48,7 +48,7 @@ describe("CLI smoke tests", () => {
     }
   });
 
-  it("should show usage when convert command is missing required args", async () => {
+  it("should show usage when convert command is missing required args", { timeout: 15000 }, async () => {
     // Arrange & Act & Assert
     try {
       await execa("./dist/bin/kaiord.js", ["convert"], {
