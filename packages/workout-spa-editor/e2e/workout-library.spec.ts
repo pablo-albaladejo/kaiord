@@ -12,11 +12,12 @@
 
 import { expect, test } from "./fixtures/base";
 import { loadTestWorkout } from "./helpers/load-test-workout";
+import { openHeaderAction } from "./helpers/mobile-menu";
 
 test.describe("Workout Library", () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the app
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Clear localStorage to start fresh
     await page.evaluate(() => {
@@ -123,7 +124,7 @@ test.describe("Workout Library", () => {
       await page.reload();
 
       // Act - Open library and load workout
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
 
       // Wait for library dialog to be visible
       await page.getByRole("dialog").waitFor({ state: "visible" });
@@ -157,7 +158,7 @@ test.describe("Workout Library", () => {
       await page.getByTestId("add-step-button").click();
 
       // Act - Try to load from library
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
       await page
         .getByRole("button", { name: /^load$/i })
         .first()
@@ -182,7 +183,7 @@ test.describe("Workout Library", () => {
       await page.getByTestId("add-step-button").click();
 
       // Act - Load with confirmation
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
       await page
         .getByRole("button", { name: /^load$/i })
         .first()
@@ -215,7 +216,7 @@ test.describe("Workout Library", () => {
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
       // Act - Search for "morning"
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
       await page.getByPlaceholder(/search workouts/i).fill("morning");
 
       // Assert - Should show only Morning Run
@@ -249,7 +250,7 @@ test.describe("Workout Library", () => {
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
       // Act - Filter by "easy" tag
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
       await page.getByRole("button", { name: "easy" }).first().click();
 
       // Assert - Should show only Easy Workout
@@ -275,7 +276,7 @@ test.describe("Workout Library", () => {
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
       // Act - Search for non-existent workout
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
       await page.getByPlaceholder(/search workouts/i).fill("nonexistent");
 
       // Assert - Should show no results message
@@ -298,7 +299,7 @@ test.describe("Workout Library", () => {
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
       // Act - Delete the workout
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
       await page.getByLabel(/^Delete Delete Me$/i).click();
       await page.getByRole("button", { name: /^delete$/i }).click();
 
@@ -321,7 +322,7 @@ test.describe("Workout Library", () => {
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
       // Act - Click delete
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
       await page.getByLabel(/^Delete Confirm Delete$/i).click();
 
       // Assert - Should show confirmation dialog
@@ -343,7 +344,7 @@ test.describe("Workout Library", () => {
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
       // Act - Cancel delete
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
       await page.getByLabel(/^Delete Keep Me$/i).click();
       await page.getByRole("button", { name: /cancel/i }).click();
 
@@ -357,7 +358,7 @@ test.describe("Workout Library", () => {
   test.describe("empty state", () => {
     test("should show empty state when no workouts saved", async ({ page }) => {
       // Act - Open library
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
 
       // Assert - Should show empty state
       await expect(page.getByText(/your library is empty/i)).toBeVisible();
@@ -383,7 +384,7 @@ test.describe("Workout Library", () => {
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
       // Act - Open preview
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
       await page.getByRole("button", { name: "Preview", exact: true }).click();
 
       // Assert - Should show workout details in the preview dialog
@@ -419,7 +420,7 @@ test.describe("Workout Library", () => {
       await page.reload();
 
       // Act - Load from preview
-      await page.getByRole("button", { name: /open workout library/i }).click();
+      await openHeaderAction(page, /open workout library/i);
       await page.getByRole("button", { name: "Preview", exact: true }).click();
       await page.getByRole("button", { name: /load workout/i }).click();
 

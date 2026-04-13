@@ -5,6 +5,7 @@
  */
 
 import { expect, test } from "./fixtures/base";
+import { openHeaderAction } from "./helpers/mobile-menu";
 import {
   clearDexie,
   getWeekDates,
@@ -99,7 +100,7 @@ test.describe("Library-Calendar Integration", () => {
     await page.goto("/calendar");
 
     // The header Library button opens the dialog overlay, not the route
-    await page.getByRole("button", { name: "Open workout library" }).click();
+    await openHeaderAction(page, /open workout library/i);
 
     await expect(page.getByRole("dialog")).toBeVisible();
     // We should still be on /calendar, not /library
