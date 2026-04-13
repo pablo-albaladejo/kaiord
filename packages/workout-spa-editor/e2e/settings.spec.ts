@@ -1,4 +1,5 @@
 import { expect, test } from "./fixtures/base";
+import { openHeaderAction } from "./helpers/mobile-menu";
 
 /**
  * E2E: Settings Panel
@@ -13,12 +14,12 @@ test.describe("Settings Panel", () => {
       localStorage.clear();
       localStorage.setItem("workout-spa-onboarding-completed", "true");
     });
-    await page.goto("/");
+    await page.goto("/workout/new");
   });
 
   test("8.7: add provider, remove provider, set default", async ({ page }) => {
     // Open settings
-    await page.getByRole("button", { name: /open settings/i }).click();
+    await openHeaderAction(page, /open settings/i);
     const dialog = page.getByRole("dialog", { name: "Settings" });
     await expect(dialog).toBeVisible({ timeout: 5000 });
 
@@ -60,7 +61,7 @@ test.describe("Settings Panel", () => {
 
   test("8.8: Garmin tab shows extension status", async ({ page }) => {
     // Open settings
-    await page.getByRole("button", { name: /open settings/i }).click();
+    await openHeaderAction(page, /open settings/i);
     const dialog = page.getByRole("dialog", { name: "Settings" });
     await expect(dialog).toBeVisible({ timeout: 5000 });
 

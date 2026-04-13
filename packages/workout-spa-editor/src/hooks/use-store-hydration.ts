@@ -1,14 +1,7 @@
-import { useEffect } from "react";
-
-import { useAiStore } from "../store/ai-store";
-import { useGarminStore } from "../store/garmin-store";
+import { useAiHydration } from "./use-ai-hydration";
+import { useGarminDetection } from "./use-garmin-detection";
 
 export const useStoreHydration = () => {
-  const hydrateAi = useAiStore((s) => s.hydrate);
-  const detectExtension = useGarminStore((s) => s.detectExtension);
-
-  useEffect(() => {
-    hydrateAi();
-    detectExtension();
-  }, [hydrateAi, detectExtension]);
+  useAiHydration();
+  useGarminDetection();
 };

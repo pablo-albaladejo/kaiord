@@ -1,5 +1,6 @@
 import { expect, test } from "./fixtures/base";
 import { mockLlmApis } from "./fixtures/api-mocks";
+import { openHeaderAction } from "./helpers/mobile-menu";
 
 /**
  * E2E: AI Workout Generation Flow
@@ -16,7 +17,7 @@ test.describe("AI Generate Workout Flow", () => {
   test("8.9: no providers configured shows settings prompt", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // The AiWorkoutInput should show "Configure an AI provider" message
     // when no providers are configured
@@ -32,7 +33,7 @@ test.describe("AI Generate Workout Flow", () => {
   test("8.4: generate workout flow - type text, select model, generate", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // First add a provider via settings
     await addTestProvider(page);
@@ -56,7 +57,7 @@ test.describe("AI Generate Workout Flow", () => {
   test("8.10: model selector lists all configured providers", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Add two providers via settings
     await addTestProvider(page, "Test Claude", "anthropic");
@@ -81,10 +82,8 @@ async function addTestProvider(
   label = "Test Claude",
   type = "anthropic"
 ): Promise<void> {
-  // Open settings (use exact match to avoid matching "Open Settings" button)
-  await page
-    .getByRole("button", { name: "Open settings", exact: true })
-    .click();
+  // Open settings via header action (handles mobile hamburger menu)
+  await openHeaderAction(page, /open settings/i);
 
   const dialog = page.getByRole("dialog", { name: "Settings" });
   await expect(dialog).toBeVisible({ timeout: 5000 });

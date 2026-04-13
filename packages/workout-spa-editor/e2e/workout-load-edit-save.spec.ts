@@ -16,7 +16,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     page,
   }) => {
     // Navigate to the application
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Wait for the welcome section to load (use heading with level to avoid strict mode)
     await expect(
@@ -140,7 +140,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
   test("should validate KRD file and show errors for invalid format", async ({
     page,
   }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
@@ -167,7 +167,7 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
   });
 
   test("should handle file parsing errors gracefully", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");

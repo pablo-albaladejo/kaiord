@@ -1,13 +1,13 @@
 import { Upload } from "lucide-react";
 
-import { useGarminStore } from "../../../store/garmin-store";
+import { useGarminBridge } from "../../../contexts";
 import { Button } from "../../atoms/Button";
 import { PushFeedback } from "./PushFeedback";
 import { useGarminPush } from "./useGarminPush";
 
 export const GarminPushButton: React.FC = () => {
   const { extensionInstalled, sessionActive, pushing, setPushing } =
-    useGarminStore();
+    useGarminBridge();
   const { push } = useGarminPush();
   const isLoading = pushing.status === "loading";
 

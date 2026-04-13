@@ -42,7 +42,7 @@ test.describe("Drag-and-Drop Step Reordering", () => {
   });
 
   test.beforeEach(async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
   });
 
   test("should reorder steps using mouse drag-and-drop", async ({ page }) => {
@@ -616,7 +616,7 @@ test.describe("Drag-and-Drop Mobile Touch", () => {
   });
 
   test("should support touch drag on mobile", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Load workout
     await expandFileUpload(page);

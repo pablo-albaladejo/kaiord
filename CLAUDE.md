@@ -137,6 +137,14 @@ import { createFitReader } from '@kaiord/fit';   // factory(logger?)
 - Mappers: `*.mapper.ts` (simple transformation, no logic, no tests)
 - Converters: `*.converter.ts` (complex logic, requires tests)
 
+## State Management
+
+- **Zustand**: ONLY for `workout-store` (editor runtime: undo/redo, selection, clipboard). Never auto-persisted.
+- **Dexie.js + `useLiveQuery`**: All persisted data (workouts, templates, profiles, AI providers, sync state). One query per page.
+- **React state**: Ephemeral UI (useState for modals/spinners, useContext for shared runtime like bridge status).
+
+Rule: "Editor runtime -> Zustand. Persisted data -> Dexie. Local UI -> React state."
+
 ## Testing
 
 - **AAA pattern**: Arrange, Act, Assert (with blank lines between)

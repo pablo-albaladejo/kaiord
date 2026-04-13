@@ -12,7 +12,7 @@ test.describe("Mobile Responsive Design", () => {
   test.use({ viewport: { width: 375, height: 667 } }); // iPhone SE size
 
   test("should display mobile-optimized layout", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Verify mobile layout is applied
     const container = page.locator("main");
@@ -30,7 +30,7 @@ test.describe("Mobile Responsive Design", () => {
   });
 
   test("should support touch gestures for navigation", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Load a workout
     await expandFileUpload(page);
@@ -85,7 +85,7 @@ test.describe("Mobile Responsive Design", () => {
   });
 
   test("should scroll smoothly on mobile", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Load a workout with multiple steps instead of creating one
     await expandFileUpload(page);
@@ -185,7 +185,7 @@ test.describe("Tablet Responsive Design", () => {
   test.use({ viewport: { width: 768, height: 1024 } }); // iPad size
 
   test("should adapt layout for tablet screens", async ({ page }) => {
-    await page.goto("/");
+    await page.goto("/workout/new");
 
     // Verify tablet layout is applied
     const container = page.locator("main");
@@ -303,7 +303,7 @@ test.describe("Workout Actions Overflow", () => {
   };
 
   async function loadWorkout(page: import("@playwright/test").Page) {
-    await page.goto("/");
+    await page.goto("/workout/new");
     await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');
     await fileInput.setInputFiles({

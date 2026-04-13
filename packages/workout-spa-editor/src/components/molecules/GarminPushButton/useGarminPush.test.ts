@@ -1,13 +1,13 @@
 import { renderHook, act } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { GarminStore } from "../../../store/garmin-store";
+import type { GarminBridgeState } from "../../../contexts";
 
 const mockPushWorkout = vi.fn();
 const mockSetPushing = vi.fn();
 
 const garminState: Pick<
-  GarminStore,
+  GarminBridgeState,
   "pushWorkout" | "setPushing" | "sessionActive"
 > = {
   pushWorkout: mockPushWorkout,
@@ -15,8 +15,8 @@ const garminState: Pick<
   sessionActive: true,
 };
 
-vi.mock("../../../store/garmin-store", () => ({
-  useGarminStore: vi.fn(() => ({ ...garminState })),
+vi.mock("../../../contexts", () => ({
+  useGarminBridge: vi.fn(() => ({ ...garminState })),
 }));
 
 const workoutState: { currentWorkout: unknown } = {

@@ -1,0 +1,116 @@
+import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
+
+import { BatchProcessingBanner } from "./BatchProcessingBanner";
+
+describe("BatchProcessingBanner", () => {
+  it("renders nothing when no raw workouts and not processing", () => {
+    const { container } = render(
+      <BatchProcessingBanner
+        rawCount={0}
+        isProcessing={false}
+        progress={null}
+        onProcess={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    expect(container.firstChild).toBeNull();
+  });
+
+  it("shows raw count and process button when idle", () => {
+    render(
+      <BatchProcessingBanner
+        rawCount={3}
+        isProcessing={false}
+        progress={null}
+        onProcess={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText(/3 raw workouts/)).toBeInTheDocument();
+    expect(screen.getByText("Process all with AI")).toBeInTheDocument();
+  });
+
+  it("calls onProcess when button clicked", async () => {
+    const user = userEvent.setup();
+    const onProcess = vi.fn();
+
+    render(
+      <BatchProcessingBanner
+        rawCount={2}
+        isProcessing={false}
+        progress={null}
+        onProcess={onProcess}
+        onCancel={vi.fn()}
+      />
+    );
+
+    await user.click(screen.getByText("Process all with AI"));
+
+    expect(onProcess).toHaveBeenCalled();
+  });
+
+  it("shows progress during processing", () => {
+    render(
+      <BatchProcessingBanner
+        rawCount={3}
+        isProcessing={true}
+        progress={{
+          total: 3,
+          processed: 1,
+          succeeded: 1,
+          failed: 0,
+          current: null,
+        }}
+        onProcess={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("batch-progress")).toHaveTextContent(
+      "Processing 1 of 3"
+    );
+  });
+
+  it("shows cancel button during processing", async () => {
+    const user = userEvent.setup();
+    const onCancel = vi.fn();
+
+    render(
+      <BatchProcessingBanner
+        rawCount={3}
+        isProcessing={true}
+        progress={{
+          total: 3,
+          processed: 0,
+          succeeded: 0,
+          failed: 0,
+          current: null,
+        }}
+        onProcess={vi.fn()}
+        onCancel={onCancel}
+      />
+    );
+
+    await user.click(screen.getByLabelText("Cancel batch processing"));
+
+    expect(onCancel).toHaveBeenCalled();
+  });
+
+  it("uses singular form for 1 raw workout", () => {
+    render(
+      <BatchProcessingBanner
+        rawCount={1}
+        isProcessing={false}
+        progress={null}
+        onProcess={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    expect(screen.getByText(/1 raw workout this/)).toBeInTheDocument();
+  });
+});

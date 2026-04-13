@@ -23,7 +23,7 @@ test.describe("Advanced Workout Features", () => {
       page,
     }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       // Load a swimming workout
       await expandFileUpload(page);
@@ -100,7 +100,7 @@ test.describe("Advanced Workout Features", () => {
       page,
     }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       const swimmingWorkout = {
         version: "1.0",
@@ -158,7 +158,7 @@ test.describe("Advanced Workout Features", () => {
   test.describe("Advanced Duration Types", () => {
     test("should handle calorie-based duration", async ({ page }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       const calorieWorkout = {
         version: "1.0",
@@ -211,7 +211,7 @@ test.describe("Advanced Workout Features", () => {
 
     test("should handle power threshold duration", async ({ page }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       const powerThresholdWorkout = {
         version: "1.0",
@@ -261,7 +261,7 @@ test.describe("Advanced Workout Features", () => {
 
     test("should handle heart rate threshold duration", async ({ page }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       const hrThresholdWorkout = {
         version: "1.0",
@@ -311,7 +311,7 @@ test.describe("Advanced Workout Features", () => {
 
     test("should handle repeat until conditions", async ({ page }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       const repeatWorkout = {
         version: "1.0",
@@ -369,7 +369,7 @@ test.describe("Advanced Workout Features", () => {
   test.describe("Workout Notes", () => {
     test("should display step notes when present", async ({ page }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       const workoutWithNotes = {
         version: "1.0",
@@ -440,7 +440,7 @@ test.describe("Advanced Workout Features", () => {
 
     test("should handle steps without notes", async ({ page }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       const workoutWithoutNotes = {
         version: "1.0",
@@ -492,7 +492,7 @@ test.describe("Advanced Workout Features", () => {
   test.describe("Workout Metadata Editing", () => {
     test("should edit workout name via metadata editor", async ({ page }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       const testWorkout = {
         version: "1.0",
@@ -566,7 +566,7 @@ test.describe("Advanced Workout Features", () => {
 
     test("should edit workout sport via metadata editor", async ({ page }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       const testWorkout = {
         version: "1.0",
@@ -639,7 +639,7 @@ test.describe("Advanced Workout Features", () => {
 
     test("should cancel metadata editing without saving", async ({ page }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       const testWorkout = {
         version: "1.0",
@@ -715,7 +715,7 @@ test.describe("Advanced Workout Features", () => {
       page,
     }) => {
       // Arrange
-      await page.goto("/");
+      await page.goto("/workout/new");
 
       // Create a workout with 50 steps
       const steps = Array.from({ length: 50 }, (_, i) => ({

@@ -1,18 +1,29 @@
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 
 import { GarminPushButton } from "./GarminPushButton";
-import { useGarminStore } from "../../../store/garmin-store";
+
+const mockState = {
+  extensionInstalled: false,
+  sessionActive: false,
+  pushing: { status: "idle" as const },
+  lastError: null as string | null,
+  detectExtension: vi.fn(),
+  pushWorkout: vi.fn(),
+  listWorkouts: vi.fn(),
+  setPushing: vi.fn(),
+};
+
+vi.mock("../../../contexts", () => ({
+  useGarminBridge: () => ({ ...mockState }),
+}));
 
 describe("GarminPushButton", () => {
   beforeEach(() => {
-    useGarminStore.setState({
-      extensionInstalled: false,
-      sessionActive: false,
-      pushing: { status: "idle" },
-      lastError: null,
-      lastDetectionTimestamp: null,
-    });
+    mockState.extensionInstalled = false;
+    mockState.sessionActive = false;
+    mockState.pushing = { status: "idle" };
+    mockState.lastError = null;
   });
 
   it("renders nothing when extension is not installed", () => {
@@ -22,10 +33,8 @@ describe("GarminPushButton", () => {
   });
 
   it("shows disabled button when no session", () => {
-    useGarminStore.setState({
-      extensionInstalled: true,
-      sessionActive: false,
-    });
+    mockState.extensionInstalled = true;
+    mockState.sessionActive = false;
 
     render(<GarminPushButton />);
 
@@ -35,10 +44,8 @@ describe("GarminPushButton", () => {
   });
 
   it("shows send button when session active", () => {
-    useGarminStore.setState({
-      extensionInstalled: true,
-      sessionActive: true,
-    });
+    mockState.extensionInstalled = true;
+    mockState.sessionActive = true;
 
     render(<GarminPushButton />);
 
@@ -48,11 +55,9 @@ describe("GarminPushButton", () => {
   });
 
   it("shows success feedback", () => {
-    useGarminStore.setState({
-      extensionInstalled: true,
-      sessionActive: true,
-      pushing: { status: "success" },
-    });
+    mockState.extensionInstalled = true;
+    mockState.sessionActive = true;
+    mockState.pushing = { status: "success" };
 
     render(<GarminPushButton />);
 
@@ -60,11 +65,9 @@ describe("GarminPushButton", () => {
   });
 
   it("shows error feedback", () => {
-    useGarminStore.setState({
-      extensionInstalled: true,
-      sessionActive: true,
-      pushing: { status: "error", message: "Push failed" },
-    });
+    mockState.extensionInstalled = true;
+    mockState.sessionActive = true;
+    mockState.pushing = { status: "error", message: "Push failed" };
 
     render(<GarminPushButton />);
 

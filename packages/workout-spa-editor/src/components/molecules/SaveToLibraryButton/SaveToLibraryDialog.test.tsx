@@ -8,13 +8,13 @@ import { KRD } from "@kaiord/core";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useLibraryStore } from "../../../store/library-store";
+import { useLibrary } from "../../../hooks/use-library";
 import { AppToastProvider } from "../../providers/AppToastProvider";
 import { SaveToLibraryDialog } from "./SaveToLibraryDialog";
 
-// Mock the library store
-vi.mock("../../../store/library-store", () => ({
-  useLibraryStore: vi.fn(),
+// Mock the library hook
+vi.mock("../../../hooks/use-library", () => ({
+  useLibrary: vi.fn(),
 }));
 
 // Mock thumbnail generation
@@ -43,7 +43,7 @@ describe("SaveToLibraryDialog", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useLibraryStore).mockReturnValue({
+    vi.mocked(useLibrary).mockReturnValue({
       addTemplate: mockAddTemplate,
       templates: [],
       updateTemplate: vi.fn(),

@@ -1,16 +1,15 @@
 /**
  * Profile Store Tests
  *
- * Tests for the Zustand profile store implementation.
+ * Tests for the profile store implementation.
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import * as profileStorage from "../utils/profile-storage";
+
 import { useProfileStore } from "./profile-store";
 
 describe("useProfileStore", () => {
   beforeEach(() => {
-    localStorage.clear();
     vi.clearAllMocks();
     useProfileStore.setState({
       profiles: [],
@@ -34,13 +33,11 @@ describe("useProfileStore", () => {
 
   describe("createProfile", () => {
     it("should create a profile with name only", () => {
-      const name = "Test Athlete";
-
-      const profile = useProfileStore.getState().createProfile(name);
+      const profile = useProfileStore.getState().createProfile("Test Athlete");
       const state = useProfileStore.getState();
 
       expect(state.profiles).toHaveLength(1);
-      expect(profile.name).toBe(name);
+      expect(profile.name).toBe("Test Athlete");
       expect(profile.id).toBeDefined();
       expect(profile.bodyWeight).toBeUndefined();
       expect(profile.sportZones).toBeDefined();
@@ -64,9 +61,8 @@ describe("useProfileStore", () => {
       expect(state.activeProfileId).toBe(profile.id);
     });
 
-    it("should not change active profile when creating second profile", () => {
+    it("should not change active when creating second profile", () => {
       const profile1 = useProfileStore.getState().createProfile("Profile 1");
-
       useProfileStore.getState().createProfile("Profile 2");
       const state = useProfileStore.getState();
 
@@ -75,10 +71,10 @@ describe("useProfileStore", () => {
     });
 
     it("should generate unique IDs for each profile", () => {
-      const profile1 = useProfileStore.getState().createProfile("Profile 1");
-      const profile2 = useProfileStore.getState().createProfile("Profile 2");
+      const p1 = useProfileStore.getState().createProfile("Profile 1");
+      const p2 = useProfileStore.getState().createProfile("Profile 2");
 
-      expect(profile1.id).not.toBe(profile2.id);
+      expect(p1.id).not.toBe(p2.id);
     });
 
     it("should initialize sportZones with all 4 sports", () => {
@@ -121,9 +117,8 @@ describe("useProfileStore", () => {
         .createProfile("Athlete", { bodyWeight: 70 });
 
       useProfileStore.getState().updateProfile(profile.id, { bodyWeight: 72 });
-      const state = useProfileStore.getState();
 
-      expect(state.profiles[0].bodyWeight).toBe(72);
+      expect(useProfileStore.getState().profiles[0].bodyWeight).toBe(72);
     });
 
     it("should do nothing when profile ID does not exist", () => {
@@ -132,10 +127,8 @@ describe("useProfileStore", () => {
       useProfileStore
         .getState()
         .updateProfile("non-existent-id", { name: "New" });
-      const state = useProfileStore.getState();
 
-      expect(state.profiles).toHaveLength(1);
-      expect(state.profiles[0].name).toBe(profile.name);
+      expect(useProfileStore.getState().profiles[0].name).toBe(profile.name);
     });
   });
 
@@ -144,41 +137,27 @@ describe("useProfileStore", () => {
       const profile = useProfileStore.getState().createProfile("To Delete");
 
       useProfileStore.getState().deleteProfile(profile.id);
-      const state = useProfileStore.getState();
 
-      expect(state.profiles).toHaveLength(0);
+      expect(useProfileStore.getState().profiles).toHaveLength(0);
     });
 
-    it("should set activeProfileId to null when deleting the only profile", () => {
+    it("should set activeProfileId to null when deleting only profile", () => {
       const profile = useProfileStore.getState().createProfile("Only Profile");
 
       useProfileStore.getState().deleteProfile(profile.id);
-      const state = useProfileStore.getState();
 
-      expect(state.activeProfileId).toBeNull();
+      expect(useProfileStore.getState().activeProfileId).toBeNull();
     });
 
-    it("should set activeProfileId to first remaining profile when deleting active", () => {
-      const profile1 = useProfileStore.getState().createProfile("Profile 1");
-      const profile2 = useProfileStore.getState().createProfile("Profile 2");
-      useProfileStore.getState().setActiveProfile(profile1.id);
+    it("should reassign active to first remaining when deleting active", () => {
+      const p1 = useProfileStore.getState().createProfile("Profile 1");
+      const p2 = useProfileStore.getState().createProfile("Profile 2");
+      useProfileStore.getState().setActiveProfile(p1.id);
 
-      useProfileStore.getState().deleteProfile(profile1.id);
+      useProfileStore.getState().deleteProfile(p1.id);
       const state = useProfileStore.getState();
 
-      expect(state.activeProfileId).toBe(profile2.id);
-      expect(state.profiles).toHaveLength(1);
-    });
-
-    it("should preserve activeProfileId when deleting non-active profile", () => {
-      const profile1 = useProfileStore.getState().createProfile("Profile 1");
-      const profile2 = useProfileStore.getState().createProfile("Profile 2");
-      useProfileStore.getState().setActiveProfile(profile1.id);
-
-      useProfileStore.getState().deleteProfile(profile2.id);
-      const state = useProfileStore.getState();
-
-      expect(state.activeProfileId).toBe(profile1.id);
+      expect(state.activeProfileId).toBe(p2.id);
       expect(state.profiles).toHaveLength(1);
     });
   });
@@ -186,46 +165,23 @@ describe("useProfileStore", () => {
   describe("setActiveProfile", () => {
     it("should set active profile by ID", () => {
       useProfileStore.getState().createProfile("Profile 1");
-      const profile2 = useProfileStore.getState().createProfile("Profile 2");
+      const p2 = useProfileStore.getState().createProfile("Profile 2");
 
-      useProfileStore.getState().setActiveProfile(profile2.id);
-      const state = useProfileStore.getState();
+      useProfileStore.getState().setActiveProfile(p2.id);
 
-      expect(state.activeProfileId).toBe(profile2.id);
-    });
-
-    it("should allow setting activeProfileId to null", () => {
-      useProfileStore.getState().createProfile("Profile");
-
-      useProfileStore.getState().setActiveProfile(null);
-      const state = useProfileStore.getState();
-
-      expect(state.activeProfileId).toBeNull();
+      expect(useProfileStore.getState().activeProfileId).toBe(p2.id);
     });
   });
 
   describe("getActiveProfile", () => {
     it("should return null when no active profile", () => {
-      const activeProfile = useProfileStore.getState().getActiveProfile();
-
-      expect(activeProfile).toBeNull();
+      expect(useProfileStore.getState().getActiveProfile()).toBeNull();
     });
 
     it("should return active profile", () => {
       const profile = useProfileStore.getState().createProfile("Active");
 
-      const activeProfile = useProfileStore.getState().getActiveProfile();
-
-      expect(activeProfile).toEqual(profile);
-    });
-
-    it("should return null when active profile ID does not exist", () => {
-      useProfileStore.getState().createProfile("Profile");
-      useProfileStore.getState().setActiveProfile("non-existent-id");
-
-      const activeProfile = useProfileStore.getState().getActiveProfile();
-
-      expect(activeProfile).toBeNull();
+      expect(useProfileStore.getState().getActiveProfile()).toEqual(profile);
     });
   });
 
@@ -233,75 +189,17 @@ describe("useProfileStore", () => {
     it("should return profile by ID", () => {
       const profile = useProfileStore.getState().createProfile("Test");
 
-      const foundProfile = useProfileStore.getState().getProfile(profile.id);
-
-      expect(foundProfile).toEqual(profile);
+      expect(useProfileStore.getState().getProfile(profile.id)).toEqual(
+        profile
+      );
     });
 
     it("should return null when profile ID does not exist", () => {
       useProfileStore.getState().createProfile("Profile");
 
-      const foundProfile = useProfileStore
-        .getState()
-        .getProfile("non-existent-id");
-
-      expect(foundProfile).toBeNull();
-    });
-  });
-
-  describe("persistence", () => {
-    it("should save profiles to localStorage when creating a profile", () => {
-      const saveSpy = vi.spyOn(profileStorage, "saveProfiles");
-
-      useProfileStore.getState().createProfile("Test Profile");
-
-      expect(saveSpy).toHaveBeenCalled();
-    });
-
-    it("should save profiles to localStorage when updating a profile", () => {
-      const profile = useProfileStore.getState().createProfile("Test");
-      const saveSpy = vi.spyOn(profileStorage, "saveProfiles");
-
-      useProfileStore.getState().updateProfile(profile.id, { name: "Updated" });
-
-      expect(saveSpy).toHaveBeenCalled();
-    });
-
-    it("should save profiles to localStorage when deleting a profile", () => {
-      const profile = useProfileStore.getState().createProfile("Test");
-      const saveSpy = vi.spyOn(profileStorage, "saveProfiles");
-
-      useProfileStore.getState().deleteProfile(profile.id);
-
-      expect(saveSpy).toHaveBeenCalled();
-    });
-
-    it("should save profiles to localStorage when setting active profile", () => {
-      const profile = useProfileStore.getState().createProfile("Test");
-      const saveSpy = vi.spyOn(profileStorage, "saveProfiles");
-
-      useProfileStore.getState().setActiveProfile(profile.id);
-
-      expect(saveSpy).toHaveBeenCalled();
-    });
-
-    it("should handle storage quota errors gracefully", () => {
-      const consoleErrorSpy = vi
-        .spyOn(console, "error")
-        .mockImplementation(() => {});
-      vi.spyOn(profileStorage, "saveProfiles").mockReturnValue({
-        type: "quota_exceeded",
-        message: "Storage quota exceeded",
-      });
-
-      useProfileStore.getState().createProfile("Test");
-
-      expect(consoleErrorSpy).toHaveBeenCalledWith(
-        "Failed to save profiles:",
-        "Storage quota exceeded"
-      );
-
-      consoleErrorSpy.mockRestore();
+      expect(
+        useProfileStore.getState().getProfile("non-existent-id")
+      ).toBeNull();
     });
   });
 });

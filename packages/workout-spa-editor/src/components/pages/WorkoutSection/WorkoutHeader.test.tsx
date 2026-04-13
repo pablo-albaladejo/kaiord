@@ -6,6 +6,10 @@ import type { KRD, Workout } from "../../../types/krd";
 import { WorkoutHeader } from "./WorkoutHeader";
 
 // Mock the child components
+vi.mock("../../molecules/GarminPushButton", () => ({
+  GarminPushButton: () => null,
+}));
+
 vi.mock("../../molecules/SaveButton/SaveButton", () => ({
   SaveButton: () => <div data-testid="save-button">Save Button</div>,
 }));

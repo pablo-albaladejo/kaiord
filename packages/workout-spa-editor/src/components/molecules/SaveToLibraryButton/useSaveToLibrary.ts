@@ -7,7 +7,7 @@
 import { useState } from "react";
 
 import { useToastContext } from "../../../contexts/ToastContext";
-import { useLibraryStore } from "../../../store/library-store";
+import { useLibrary } from "../../../hooks/use-library";
 import type { KRD } from "../../../types/krd";
 import type { DifficultyLevel } from "../../../types/workout-library";
 import { calculateWorkoutDuration } from "./calculate-duration";
@@ -31,7 +31,7 @@ function parseTags(tagsString: string): string[] {
 }
 
 export function useSaveToLibrary(workout: KRD, onClose: () => void) {
-  const { addTemplate } = useLibraryStore();
+  const { addTemplate } = useLibrary();
   const { success, error: showError } = useToastContext();
 
   const [name, setName] = useState("");
