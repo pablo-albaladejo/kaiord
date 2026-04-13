@@ -18,7 +18,7 @@ const check = () => {
     if (sessionActive) {
       $("status").className = "status ok";
       $("status").textContent = userName
-        ? `Connected — ${userName}`
+        ? `Connected \u2014 ${userName}`
         : "Connected to Train2Go";
       $("read-btn").style.display = "block";
     } else {

@@ -168,7 +168,17 @@ const parsePingJson = (json) => {
   };
 };
 
-// Exported for testing and background.js
+// Export to service worker global scope (importScripts doesn't add const to globalThis)
+if (typeof self !== "undefined" && typeof module === "undefined") {
+  self.parseWeeklyHtml = parseWeeklyHtml;
+  self.parseDailyHtml = parseDailyHtml;
+  self.parsePingJson = parsePingJson;
+  self.decodeEntities = decodeEntities;
+  self.extractDescription = extractDescription;
+  self.extractCompletion = extractCompletion;
+}
+
+// Exported for testing (Node.js / vitest)
 if (typeof module !== "undefined") {
   module.exports = {
     parseWeeklyHtml,
