@@ -1,0 +1,36 @@
+Single Purpose Description
+--------------------------
+Kaiord Train2Go Bridge reads training plans from the Train2Go coaching platform
+and bridges them to the Kaiord workout editor for editing, conversion, and
+push to fitness devices.
+
+Host Permission Justification
+-----------------------------
+Host permission: https://app.train2go.com/*
+
+The extension injects a content script into Train2Go pages to read the coaching
+plan DOM (training sessions, workout structures, dates). This data is sent via
+chrome.runtime messaging to the extension popup, which forwards it to the Kaiord
+SPA. No data is modified on the Train2Go page. No network requests are made to
+Train2Go servers — all reading is done from the already-loaded page DOM.
+
+Tabs Permission Justification
+-----------------------------
+Permission: tabs
+
+Used for two purposes:
+1. chrome.tabs.query({ url: "https://app.train2go.com/*" }) — detect whether the
+   user has an active Train2Go session open, to show connection status in the popup.
+2. chrome.tabs.create() — open a new Train2Go tab when the user clicks "Open
+   Train2Go" in the popup and no active tab exists.
+
+No tab URLs, titles, or browsing history are read beyond the Train2Go domain match.
+
+Data Handling
+-------------
+- No user data is collected, stored, or transmitted to any server
+- No analytics, telemetry, or tracking of any kind
+- No cookies, tokens, or credentials are accessed
+- Training plan data is read on-demand from the page DOM and discarded after use
+- The extension communicates only with app.train2go.com (content script) and
+  kaiord.com (externally_connectable messaging)
