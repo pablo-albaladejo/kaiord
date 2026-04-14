@@ -1,4 +1,4 @@
-export type SettingsTab = "ai" | "garmin" | "privacy";
+export type SettingsTab = "ai" | "extensions" | "privacy";
 
 export type SettingsPanelProps = {
   open: boolean;

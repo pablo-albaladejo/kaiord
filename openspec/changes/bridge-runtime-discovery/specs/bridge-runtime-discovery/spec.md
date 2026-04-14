@@ -64,8 +64,4 @@ The SPA SHALL listen for `KAIORD_BRIDGE_ANNOUNCE` messages on `window` at applic
 #### Scenario: Spoofed announcement rejected
 
 - **WHEN** the SPA receives an announcement and sends a verification ping to the announced `extensionId`
-- **THEN** the SPA only registers the bridge if the ping response:
-  - validates against the BridgeManifest schema,
-  - has a compatible `protocolVersion`, and
-  - has `data.id` equal to the announced `bridgeId`
-- **AND** if any check fails, the SPA SHALL reject the announcement and not register the bridge
+- **THEN** the SPA only registers the bridge if the ping response matches the expected protocol

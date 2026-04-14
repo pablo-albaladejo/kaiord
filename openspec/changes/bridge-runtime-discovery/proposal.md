@@ -1,7 +1,6 @@
 ## Why
 
 Bridge extension IDs are currently configured via `VITE_*` env vars, baked into the JS bundle at build time (Factor III / Factor V violation). This means:
-
 - Each build is coupled to specific extension IDs — the artifact is not portable across environments
 - Local development requires `.env.local` with the developer's unique unpacked extension ID
 - Production requires the Chrome Web Store ID at build time

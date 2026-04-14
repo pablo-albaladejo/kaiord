@@ -20,6 +20,15 @@ vi.mock("../../../contexts", async (importOriginal) => {
   };
 });
 
+vi.mock("../../../store/train2go-store", () => ({
+  useTrain2GoStore: () => ({
+    extensionInstalled: false,
+    sessionActive: false,
+    lastError: null,
+    detectExtension: vi.fn(),
+  }),
+}));
+
 describe("SettingsPanel", () => {
   beforeEach(() => {
     useAiStore.setState({
@@ -42,12 +51,14 @@ describe("SettingsPanel", () => {
     expect(screen.getByText("LLM Providers")).toBeInTheDocument();
   });
 
-  it("should switch to Garmin tab", () => {
+  it("should switch to Extensions tab", () => {
     render(<SettingsPanel open={true} onOpenChange={vi.fn()} />);
 
-    fireEvent.click(screen.getByText("Garmin"));
+    fireEvent.click(screen.getByText("Extensions"));
 
-    expect(screen.getByText("Garmin Bridge Extension")).toBeInTheDocument();
+    expect(screen.getByText("Garmin Connect")).toBeInTheDocument();
+    expect(screen.getByText("Train2Go")).toBeInTheDocument();
+    expect(screen.getByText("Refresh Status")).toBeInTheDocument();
   });
 
   it("should switch to Privacy tab", () => {

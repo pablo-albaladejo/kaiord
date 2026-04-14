@@ -69,7 +69,7 @@ export function FirstVisitState({ onSettingsClick }: FirstVisitStateProps) {
         <EntryPath
           icon={Plug}
           title="Connect"
-          description="Link a platform like Garmin Connect"
+          description="Link Garmin Connect, Train2Go, or other platforms"
           onClick={onSettingsClick ?? show}
         />
       </div>

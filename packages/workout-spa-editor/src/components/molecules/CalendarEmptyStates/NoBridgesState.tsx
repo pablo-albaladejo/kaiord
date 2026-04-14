@@ -16,7 +16,8 @@ export function NoBridgesState() {
       <div className="flex-1">
         <p className="text-sm font-medium">No bridge extensions detected</p>
         <p className="text-xs text-muted-foreground">
-          Install a bridge extension (e.g., Garmin Connect) to push workouts.
+          Install a bridge extension (e.g., Garmin Connect, Train2Go) to sync
+          workouts.
         </p>
       </div>
       <a
