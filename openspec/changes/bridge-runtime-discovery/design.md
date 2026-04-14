@@ -30,7 +30,15 @@ Both extensions already have `externally_connectable` configured for `*.kaiord.c
 Each extension adds a lightweight content script (~20 LOC) that runs on `*.kaiord.com` and `localhost:*`. On injection, it posts a message to `window`:
 
 ```json
-{ "type": "KAIORD_BRIDGE_ANNOUNCE", "bridgeId": "…", "extensionId": "…", "name": "…", "version": "…", "protocolVersion": 1, "capabilities": ["…"] }
+{
+  "type": "KAIORD_BRIDGE_ANNOUNCE",
+  "bridgeId": "…",
+  "extensionId": "…",
+  "name": "…",
+  "version": "…",
+  "protocolVersion": 1,
+  "capabilities": ["…"]
+}
 ```
 
 The `extensionId` is `chrome.runtime.id` — always correct, even for unpacked extensions.
