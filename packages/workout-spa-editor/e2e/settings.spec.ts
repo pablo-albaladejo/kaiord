@@ -59,22 +59,18 @@ test.describe("Settings Panel", () => {
     ).not.toBeVisible();
   });
 
-  test("8.8: Garmin tab shows extension status", async ({ page }) => {
+  test("8.8: Extensions tab shows bridge status", async ({ page }) => {
     // Open settings
     await openHeaderAction(page, /open settings/i);
     const dialog = page.getByRole("dialog", { name: "Settings" });
     await expect(dialog).toBeVisible({ timeout: 5000 });
 
-    // Switch to Garmin tab
-    await dialog.getByRole("tab", { name: /garmin/i }).click();
+    // Switch to Extensions tab
+    await dialog.getByRole("tab", { name: /extensions/i }).click();
 
-    // Should show extension status (not installed in e2e context)
-    await expect(
-      dialog.getByRole("heading", { name: /Garmin Bridge Extension/i })
-    ).toBeVisible();
-    await expect(
-      dialog.getByText(/not detected|installed AND enabled/i)
-    ).toBeVisible();
+    // Should show both bridges in the status table
+    await expect(dialog.getByText("Garmin Connect")).toBeVisible();
+    await expect(dialog.getByText("Train2Go")).toBeVisible();
 
     // Should have a refresh button
     await expect(
