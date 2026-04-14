@@ -2,20 +2,20 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { useState } from "react";
 
 import { AiTab } from "./AiTab";
-import { GarminTab } from "./GarminTab";
+import { ExtensionsTab } from "./ExtensionsTab";
 import { PrivacyTab } from "./PrivacyTab";
 import { TabButton } from "./TabButton";
 import type { SettingsPanelProps, SettingsTab } from "./types";
 
 const TABS: Array<{ id: SettingsTab; label: string }> = [
   { id: "ai", label: "AI" },
-  { id: "garmin", label: "Garmin" },
+  { id: "extensions", label: "Extensions" },
   { id: "privacy", label: "Privacy" },
 ];
 
 const TAB_CONTENT: Record<SettingsTab, React.FC> = {
   ai: AiTab,
-  garmin: GarminTab,
+  extensions: ExtensionsTab,
   privacy: PrivacyTab,
 };
 

@@ -121,6 +121,7 @@ describe("NoBridgesState", () => {
     expect(
       screen.getByText(/No bridge extensions detected/)
     ).toBeInTheDocument();
+    expect(screen.getByText(/Garmin Connect, Train2Go/)).toBeInTheDocument();
   });
 
   it("renders learn more link to bridge docs", () => {
