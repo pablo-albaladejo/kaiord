@@ -44,6 +44,7 @@ The `extensionId` is `chrome.runtime.id` — always correct, even for unpacked e
 **Layer**: UI adapter (`adapters/bridge/`)
 
 New `bridge-discovery.ts` module:
+
 - Adds a `window.addEventListener("message", ...)` listener on app boot
 - Filters for `type === "KAIORD_BRIDGE_ANNOUNCE"` and validates origin
 - Extracts `extensionId` from the announcement
@@ -71,6 +72,7 @@ Keep `externally_connectable` as-is. The difference is the SPA now discovers the
 **Layer**: Extension content script
 
 The SPA may load before the content script injects (race condition). To handle this:
+
 - Content script announces on injection (`run_at: "document_start"`)
 - Content script also listens for `KAIORD_BRIDGE_DISCOVER` messages from the SPA
 - SPA sends `window.postMessage({ type: "KAIORD_BRIDGE_DISCOVER" })` if no bridges discovered after 2s
