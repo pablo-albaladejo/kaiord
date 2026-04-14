@@ -1,3 +1,5 @@
+> Synced: 2026-04-14
+
 # CWS Train2Go Listing
 
 Chrome Web Store listing assets and CI/CD publishing for the train2go-bridge extension.
@@ -22,11 +24,11 @@ The train2go-bridge package SHALL include a `privacy-justification.md` file expl
 
 ### Requirement: Train2Go Bridge CWS privacy practices
 
-The train2go-bridge package SHALL include a `dist/cws-privacy-practices.txt` file in CWS submission format covering single purpose description, host permission justification, and tabs permission justification.
+The train2go-bridge package SHALL include a `cws-privacy-practices.txt` file in CWS submission format covering single purpose description, host permission justification, and tabs permission justification.
 
 #### Scenario: CWS privacy practices file exists
 
-- **WHEN** the `packages/train2go-bridge/dist/cws-privacy-practices.txt` file is read
+- **WHEN** the `packages/train2go-bridge/cws-privacy-practices.txt` file is read
 - **THEN** it SHALL contain: Single Purpose Description, Host Permission Justification, and Tabs Permission Justification sections
 
 ### Requirement: Multi-extension packaging script

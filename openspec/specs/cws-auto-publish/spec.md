@@ -1,35 +1,46 @@
-## ADDED Requirements
+> Synced: 2026-04-14
+
+## Requirements
 
 ### Requirement: Automated CWS publishing workflow
 
-The project SHALL include a `cws-publish.yml` GitHub Actions workflow that publishes the Garmin Bridge extension to the Chrome Web Store when a new version is detected on the `main` branch.
+The project SHALL include a `cws-publish.yml` GitHub Actions workflow that publishes Chrome extensions to the Chrome Web Store when a new version is detected on the `main` branch.
 
-The workflow SHALL be triggered on push to `main` when `packages/garmin-bridge/**` changes.
+The workflow SHALL be triggered on push to `main` when `packages/garmin-bridge/**` or `packages/train2go-bridge/**` changes.
 
-The workflow SHALL:
+The workflow SHALL use a matrix strategy to publish each extension independently:
 
-- Detect version changes by comparing `packages/garmin-bridge/package.json` version against the latest `@kaiord/garmin-bridge@*` git tag
-- Run `scripts/sync-extension-version.mjs` to sync manifest versions
-- Run `scripts/package-extension.sh` to produce the zip
-- Upload and publish the zip to CWS via `chrome-webstore-upload-cli` using GitHub Secrets (`CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN`, `CWS_EXTENSION_ID`)
-- Create a `@kaiord/garmin-bridge@{version}` git tag on success (matching the changesets `tagFormat` convention)
+- `garmin-bridge` using secret `CWS_EXTENSION_ID`
+- `train2go-bridge` using secret `CWS_TRAIN2GO_EXTENSION_ID`
+
+Shared OAuth credentials (`CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN`) SHALL be reused across both matrix entries.
+
+For each extension, the workflow SHALL:
+
+- Detect version changes by comparing `packages/<extension>/package.json` version against the latest `@kaiord/<extension>@*` git tag
+- Run `scripts/sync-extension-version.mjs <extension>` to sync manifest versions
+- Run `scripts/package-extension.sh <extension>` to produce the zip
+- Upload and publish the zip to CWS via `chrome-webstore-upload-cli`
+- Create a `@kaiord/<extension>@{version}` git tag on success
+
+The workflow SHALL use `fail-fast: false` so that a failure in one extension does not block the other.
 
 The workflow SHALL use a concurrency guard (`concurrency: ${{ github.workflow }}-${{ github.ref }}`) to prevent duplicate runs from racing on rapid successive merges.
 
 The workflow SHALL run without verbose flags to minimize risk of credential fragments in logs.
 
-Version detection SHALL use string equality comparison between the `package.json` version and the version extracted from the latest `@kaiord/garmin-bridge@*` git tag. If no tag exists or the versions differ, the workflow SHALL proceed with publishing.
+Version detection SHALL use string equality comparison between the `package.json` version and the version extracted from the latest git tag. If no tag exists or the versions differ, the workflow SHALL proceed with publishing.
 
 #### Scenario: Extension published after version bump
 
-- **GIVEN** changesets bumps `@kaiord/garmin-bridge` to a new version on main
+- **GIVEN** changesets bumps an extension to a new version on main
 - **WHEN** the `cws-publish.yml` workflow detects the version is newer than the latest git tag
 - **THEN** the workflow SHALL upload and publish the new zip to the Chrome Web Store
-- **AND** create a `@kaiord/garmin-bridge@{version}` git tag
+- **AND** create a `@kaiord/<extension>@{version}` git tag
 
 #### Scenario: Extension not published when version unchanged
 
-- **GIVEN** a push to main changes files in `packages/garmin-bridge/` but the version in `package.json` is unchanged
+- **GIVEN** a push to main changes files in an extension package but the version in `package.json` is unchanged
 - **WHEN** the `cws-publish.yml` workflow runs
 - **THEN** the workflow SHALL skip the upload step and exit successfully
 
@@ -48,42 +59,51 @@ Version detection SHALL use string equality comparison between the `package.json
 
 #### Scenario: Workflow re-run after partial failure
 
-- **GIVEN** the workflow previously uploaded version X to CWS but failed to create the git tag
+- **GIVEN** the workflow previously uploaded a version to CWS but failed to create the git tag
 - **WHEN** the workflow is re-run
-- **THEN** it SHALL re-upload version X (CWS accepts re-uploads of the same version) and create the tag
+- **THEN** it SHALL re-upload (CWS accepts re-uploads of the same version) and create the tag
 
 #### Scenario: First-ever run with no existing tag
 
-- **GIVEN** no `@kaiord/garmin-bridge@*` git tag exists
+- **GIVEN** no git tag exists for the extension
 - **WHEN** the `cws-publish.yml` workflow runs
 - **THEN** it SHALL treat the current version as new and proceed with publishing
 
-### Requirement: Changesets configuration for garmin-bridge
+#### Scenario: One extension fails without blocking the other
 
-`@kaiord/garmin-bridge` SHALL be removed from the `ignore` array in `.changeset/config.json` so that changesets versions the package when changesets are consumed. Since the package is `private: true`, `changeset publish` SHALL automatically skip npm publish and SHALL NOT create git tags for it. The `cws-publish.yml` workflow is the sole creator of `@kaiord/garmin-bridge@*` tags.
+- **GIVEN** garmin-bridge publishes successfully but train2go-bridge fails
+- **WHEN** the workflow completes
+- **THEN** garmin-bridge SHALL have its tag created
+- **AND** train2go-bridge SHALL show as failed independently
 
-#### Scenario: Garmin-bridge participates in changesets versioning
+### Requirement: Changesets configuration for extensions
 
-- **GIVEN** a changeset includes `@kaiord/garmin-bridge`
+`@kaiord/garmin-bridge` and `@kaiord/train2go-bridge` SHALL participate in changesets versioning. Since both packages are `private: true`, `changeset publish` SHALL automatically skip npm publish. The `cws-publish.yml` workflow is the sole creator of extension git tags.
+
+#### Scenario: Extension participates in changesets versioning
+
+- **GIVEN** a changeset includes an extension package
 - **WHEN** `pnpm exec changeset version` is run
-- **THEN** `packages/garmin-bridge/package.json` version SHALL be bumped
+- **THEN** the extension's `package.json` version SHALL be bumped
 
-#### Scenario: Garmin-bridge is not published to npm
+#### Scenario: Extension is not published to npm
 
-- **GIVEN** `@kaiord/garmin-bridge` has `private: true` in `package.json`
+- **GIVEN** an extension has `private: true` in `package.json`
 - **WHEN** `pnpm exec changeset publish` is run
 - **THEN** the package SHALL NOT be published to npm
 
 ### Requirement: Version sync script
 
-The project SHALL include a `scripts/sync-extension-version.mjs` script that reads the version from `packages/garmin-bridge/package.json` and writes it to the `version` field in both `packages/garmin-bridge/manifest.json` and `packages/garmin-bridge/manifest.prod.json`.
+The project SHALL include a `scripts/sync-extension-version.mjs` script that accepts an optional extension name argument. When called with an argument (e.g., `train2go-bridge`), it SHALL sync only that extension. When called without arguments, it SHALL sync all extensions (`garmin-bridge`, `train2go-bridge`).
+
+For each extension, the script SHALL read the version from `packages/<extension>/package.json` and write it to the `version` field in both `packages/<extension>/manifest.json` and `packages/<extension>/manifest.prod.json`.
 
 The script SHALL only modify the `version` field and leave all other manifest content unchanged. The script SHALL be idempotent — if versions already match, it SHALL exit with code 0 without modifying files.
 
 #### Scenario: Version synced to manifests
 
 - **GIVEN** `package.json` has version `0.2.0` and manifests have version `0.1.0`
-- **WHEN** `scripts/sync-extension-version.mjs` is executed
+- **WHEN** `scripts/sync-extension-version.mjs <extension>` is executed
 - **THEN** both `manifest.json` and `manifest.prod.json` SHALL have version `0.2.0`
 - **AND** all other fields SHALL remain unchanged
 
@@ -108,7 +128,7 @@ The project SHALL include a `docs/cws-credentials-setup.md` guide documenting th
 - Creating OAuth2 credentials (client ID and secret)
 - Generating a refresh token
 - Minimum required OAuth scope (`https://www.googleapis.com/auth/chromewebstore`)
-- Adding secrets to GitHub (`CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN`, `CWS_EXTENSION_ID`)
+- Adding secrets to GitHub (`CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN`, `CWS_EXTENSION_ID`, `CWS_TRAIN2GO_EXTENSION_ID`)
 - Periodic token rotation guidance
 
 #### Scenario: Setup guide is complete

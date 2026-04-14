@@ -1,4 +1,6 @@
-## ADDED Requirements
+> Synced: 2026-04-14
+
+## Requirements
 
 ### Requirement: Production extension icons
 
@@ -44,13 +46,15 @@ The development `manifest.json` SHALL remain unchanged for local development.
 
 ### Requirement: Extension packaging script
 
-The project SHALL include a `scripts/package-extension.sh` script that produces a `.zip` file ready for Chrome Web Store upload. The script SHALL use a whitelist approach, copying only explicitly named production files:
+The project SHALL include a `scripts/package-extension.sh` script that accepts an extension name argument and produces a `.zip` file ready for Chrome Web Store upload. The script SHALL copy:
 
-- `background.js`, `content.js`, `popup.html`, `popup.js` (popup.html uses inline styles with no external CSS/asset references)
+- All `*.js` and `*.html` files from the package root (excluding `vitest.config*`)
 - `icons/` directory (all PNG icons)
 - `manifest.prod.json` copied as `manifest.json`
 
-The script SHALL read the version from `packages/garmin-bridge/package.json` and output to `packages/garmin-bridge/dist/kaiord-garmin-bridge-{version}.zip`.
+The script SHALL read the version from `packages/<extension>/package.json` and output to `packages/<extension>/dist/kaiord-<extension>-{version}.zip`.
+
+The script SHALL exit with a non-zero code and a usage message when called without arguments.
 
 The script SHALL exit with a non-zero code and a descriptive error message if:
 
@@ -66,9 +70,9 @@ The packaging script MAY be invoked by CI without user interaction. It SHALL pro
 #### Scenario: Packaging produces valid zip
 
 - **GIVEN** the icons exist in `icons/` and `manifest.prod.json` exists
-- **WHEN** `scripts/package-extension.sh` is executed
+- **WHEN** `scripts/package-extension.sh garmin-bridge` is executed
 - **THEN** a zip file SHALL be created at `packages/garmin-bridge/dist/kaiord-garmin-bridge-{version}.zip`
-- **AND** the zip SHALL contain 5 root files (`manifest.json`, `background.js`, `content.js`, `popup.html`, `popup.js`) and 3 icon files under `icons/` (`icon16.png`, `icon48.png`, `icon128.png`)
+- **AND** the zip SHALL contain the extension's JS/HTML files, manifest.json, and icon files
 
 #### Scenario: Packaging uses production manifest
 
@@ -91,8 +95,8 @@ The packaging script MAY be invoked by CI without user interaction. It SHALL pro
 
 #### Scenario: Packaging fails when version cannot be read
 
-- **GIVEN** `packages/garmin-bridge/package.json` does not exist or has no `version` field
-- **WHEN** `scripts/package-extension.sh` is executed
+- **GIVEN** `packages/<extension>/package.json` does not exist or has no `version` field
+- **WHEN** `scripts/package-extension.sh <extension>` is executed
 - **THEN** the script SHALL exit with a non-zero code and print an error message about the missing version
 
 #### Scenario: Packaging is CI-compatible
@@ -103,8 +107,8 @@ The packaging script MAY be invoked by CI without user interaction. It SHALL pro
 
 #### Scenario: Packaging script is idempotent
 
-- **GIVEN** a zip file already exists at `packages/garmin-bridge/dist/kaiord-garmin-bridge-{version}.zip`
-- **WHEN** `scripts/package-extension.sh` is executed again
+- **GIVEN** a zip file already exists at `packages/<extension>/dist/kaiord-<extension>-{version}.zip`
+- **WHEN** `scripts/package-extension.sh <extension>` is executed again
 - **THEN** the script SHALL overwrite the existing zip without error
 
 ### Requirement: Chrome Web Store listing metadata
