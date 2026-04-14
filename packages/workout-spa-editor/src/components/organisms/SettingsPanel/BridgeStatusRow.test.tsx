@@ -34,7 +34,11 @@ describe("BridgeStatusRow", () => {
   });
 
   it("shows not-detected state with gray dot and hint", () => {
-    renderRow({ name: "Garmin Connect", state: "not-detected", hint: "Install" });
+    renderRow({
+      name: "Garmin Connect",
+      state: "not-detected",
+      hint: "Install",
+    });
 
     expect(screen.getByText("Not detected")).toBeInTheDocument();
     expect(screen.getByText(/Install/)).toBeInTheDocument();
