@@ -1,3 +1,5 @@
+> Synced: 2026-04-13 (settings-train2go-bridge)
+
 ## ADDED Requirements
 
 ### Requirement: Bridge capability schema extension
@@ -155,3 +157,41 @@ When the Train2Go extension is installed but the session is not active, the SPA 
 
 - **WHEN** the SPA polls 5 times without `sessionActive: true`
 - **THEN** the SPA shows guidance: "Open Train2Go, log in, and try again"
+
+### Requirement: Train2Go status in Settings panel
+
+The Extensions tab in the Settings panel SHALL display the Train2Go bridge status alongside the Garmin bridge. The status row SHALL show a colored dot indicator (green = connected, yellow = session inactive, gray = not detected) and a hint message when not connected. A "Refresh Status" button SHALL trigger re-detection of all bridges.
+
+#### Scenario: Train2Go not installed
+
+- **WHEN** the user opens the Extensions tab and the Train2Go extension is not installed
+- **THEN** the Train2Go row shows a gray dot with "Not detected" status
+
+#### Scenario: Train2Go installed but no session
+
+- **WHEN** the user opens the Extensions tab and the Train2Go extension is installed but session is not active
+- **THEN** the Train2Go row shows a yellow dot with "Session inactive" status and hint "Open Train2Go and log in"
+
+#### Scenario: Train2Go connected
+
+- **WHEN** the user opens the Extensions tab and the Train2Go extension is installed with an active session
+- **THEN** the Train2Go row shows a green dot with "Connected" status
+
+#### Scenario: Refresh button re-detects all bridges
+
+- **WHEN** the user clicks the "Refresh Status" button
+- **THEN** the SPA re-runs detection for both Garmin and Train2Go bridges and updates the status table
+
+### Requirement: Platform-inclusive copy in empty states
+
+The calendar empty states SHALL use platform-inclusive copy that references multiple bridge platforms, not just Garmin. This ensures users are aware of all integration options.
+
+#### Scenario: FirstVisitState mentions multiple platforms
+
+- **WHEN** the calendar shows the first-visit onboarding state
+- **THEN** the "Connect" entry path description SHALL say "Link Garmin Connect, Train2Go, or other platforms"
+
+#### Scenario: NoBridgesState mentions multiple platforms
+
+- **WHEN** the calendar shows the no-bridges-detected banner
+- **THEN** the banner SHALL say "Install a bridge extension (e.g., Garmin Connect, Train2Go) to sync workouts."
