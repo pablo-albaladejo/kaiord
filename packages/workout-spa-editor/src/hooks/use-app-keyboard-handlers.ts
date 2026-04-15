@@ -47,6 +47,7 @@ export const useAppKeyboardHandlers = () => {
         stepIndex,
         copyStep,
         pasteStep,
+        deleteStep: store.deleteStep,
       }),
     [store, workout, stepIndex, copyStep, pasteStep]
   );

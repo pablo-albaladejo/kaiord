@@ -2,87 +2,41 @@
  * Build Keyboard Handlers
  *
  * Creates the keyboard shortcut handler configuration for the app.
- * Pure function that maps store actions to keyboard shortcut callbacks.
+ * Each handler returns true when the action was performed, false
+ * when a guard prevents it (enabling context-aware preventDefault).
  */
 
-import type { KRD, Workout } from "../types/krd";
+import type { KeyboardShortcutHandlers } from "../hooks/keyboard-shortcut-handlers";
+import { hasClipboardContent } from "../store/clipboard-store";
+import { buildStepHandlers } from "./build-step-handlers";
 import { saveWorkout } from "./save-workout";
 
-type KeyboardHandlerDeps = {
-  currentWorkout: KRD | null;
-  workout: Workout | undefined;
-  stepIndex: () => number | null;
-  canUndo: boolean;
-  canRedo: boolean;
-  undo: () => void;
-  redo: () => void;
-  reorderStep: (from: number, to: number) => void;
-  copyStep: (stepIndex: number) => Promise<void>;
-  pasteStep: (position: number) => Promise<void>;
-  selectedStepId: string | null;
-  selectedStepIds: Array<string>;
-  openCreateBlockDialog: () => void;
-  ungroupRepetitionBlock: (blockId: string) => void;
-  selectAllSteps: (ids: Array<string>) => void;
-  selectStep: (id: string | null) => void;
-  clearStepSelection: () => void;
-};
+export type { KeyboardHandlerDeps } from "./keyboard-handler-deps";
 
-export const buildKeyboardHandlers = (deps: KeyboardHandlerDeps) => ({
+import type { KeyboardHandlerDeps } from "./keyboard-handler-deps";
+
+export const buildKeyboardHandlers = (
+  deps: KeyboardHandlerDeps
+): KeyboardShortcutHandlers => ({
   onSave: () => {
     if (deps.currentWorkout) saveWorkout(deps.currentWorkout);
+    return true;
   },
   onUndo: () => {
     if (deps.canUndo) deps.undo();
+    return true;
   },
   onRedo: () => {
     if (deps.canRedo) deps.redo();
+    return true;
   },
-  onMoveStepUp: () => {
-    const idx = deps.stepIndex();
-    if (idx !== null && idx > 0) deps.reorderStep(idx, idx - 1);
-  },
-  onMoveStepDown: () => {
-    const idx = deps.stepIndex();
-    if (idx !== null && deps.workout && idx < deps.workout.steps.length - 1) {
-      deps.reorderStep(idx, idx + 1);
-    }
-  },
-  onCopy: () => {
-    const idx = deps.stepIndex();
-    if (idx !== null && deps.workout) {
-      const step = deps.workout.steps[idx];
-      if (step && "stepIndex" in step) void deps.copyStep(step.stepIndex);
-    }
-  },
-  onPaste: () => {
-    const idx = deps.stepIndex();
-    if (idx !== null) {
-      void deps.pasteStep(idx + 1);
-    } else if (deps.workout) {
-      void deps.pasteStep(deps.workout.steps.length);
-    }
-  },
-  onCreateBlock: () => {
-    if (deps.selectedStepIds.length >= 2) {
-      deps.openCreateBlockDialog();
-    }
-  },
-  onUngroupBlock: () => {
-    if (!deps.selectedStepId) return;
-    if (deps.selectedStepId.startsWith("block-")) {
-      deps.ungroupRepetitionBlock(deps.selectedStepId);
-    }
-  },
-  onSelectAll: () => {
-    if (!deps.workout) return;
-    const ids = deps.workout.steps
-      .filter((step) => "stepIndex" in step)
-      .map((step) => `step-${(step as { stepIndex: number }).stepIndex}`);
-    deps.selectAllSteps(ids);
-  },
+  ...buildStepHandlers(deps, hasClipboardContent),
   onClearSelection: () => {
+    if (!deps.selectedStepId && deps.selectedStepIds.length === 0) {
+      return false;
+    }
     deps.clearStepSelection();
     deps.selectStep(null);
+    return true;
   },
 });

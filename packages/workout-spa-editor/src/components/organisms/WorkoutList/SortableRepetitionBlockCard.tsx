@@ -44,9 +44,10 @@ export const SortableRepetitionBlockCard = ({
     onReorderSteps,
     blockIndex,
   });
+  const wrapperProps = { ...htmlAttributes, "data-step-id": id };
 
   return (
-    <div ref={sortable.setNodeRef} style={style} {...htmlAttributes}>
+    <div ref={sortable.setNodeRef} style={style} {...wrapperProps}>
       <RepetitionBlockCard
         block={block}
         selectedStepIndex={selectedStepIndex}

@@ -5,14 +5,14 @@ export function handleAltShortcuts(
   handlers: KeyboardShortcutHandlers
 ): boolean {
   if (event.key === "ArrowUp") {
-    event.preventDefault();
-    handlers.onMoveStepUp?.();
-    return true;
+    const handled = handlers.onMoveStepUp?.() ?? false;
+    if (handled) event.preventDefault();
+    return handled;
   }
   if (event.key === "ArrowDown") {
-    event.preventDefault();
-    handlers.onMoveStepDown?.();
-    return true;
+    const handled = handlers.onMoveStepDown?.() ?? false;
+    if (handled) event.preventDefault();
+    return handled;
   }
   return false;
 }
@@ -20,33 +20,31 @@ export function handleAltShortcuts(
 export function handleModifierShortcuts(
   event: KeyboardEvent,
   handlers: KeyboardShortcutHandlers
-): void {
+): boolean {
   const key = event.key.toLowerCase();
   const shift = event.shiftKey;
+  let handled = false;
 
-  if (key === "s") {
-    event.preventDefault();
-    handlers.onSave?.();
+  if (key === "s" && !shift) {
+    handled = handlers.onSave?.() ?? false;
   } else if (key === "z" && !shift) {
-    event.preventDefault();
-    handlers.onUndo?.();
+    handled = handlers.onUndo?.() ?? false;
   } else if (key === "y" || (shift && key === "z")) {
-    event.preventDefault();
-    handlers.onRedo?.();
-  } else if (key === "c") {
-    event.preventDefault();
-    handlers.onCopy?.();
-  } else if (key === "v") {
-    event.preventDefault();
-    handlers.onPaste?.();
+    handled = handlers.onRedo?.() ?? false;
+  } else if (key === "c" && !shift) {
+    handled = handlers.onCopy?.() ?? false;
+  } else if (key === "x" && !shift) {
+    handled = handlers.onCut?.() ?? false;
+  } else if (key === "v" && !shift) {
+    handled = handlers.onPaste?.() ?? false;
   } else if (key === "g" && !shift) {
-    event.preventDefault();
-    handlers.onCreateBlock?.();
+    handled = handlers.onCreateBlock?.() ?? false;
   } else if (key === "g" && shift) {
-    event.preventDefault();
-    handlers.onUngroupBlock?.();
-  } else if (key === "a") {
-    event.preventDefault();
-    handlers.onSelectAll?.();
+    handled = handlers.onUngroupBlock?.() ?? false;
+  } else if (key === "a" && !shift) {
+    handled = handlers.onSelectAll?.() ?? false;
   }
+
+  if (handled) event.preventDefault();
+  return handled;
 }

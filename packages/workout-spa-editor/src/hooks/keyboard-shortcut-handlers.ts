@@ -4,24 +4,28 @@ import {
 } from "./modifier-shortcut-handlers";
 
 export type KeyboardShortcutHandlers = {
-  onSave?: () => void;
-  onUndo?: () => void;
-  onRedo?: () => void;
-  onMoveStepUp?: () => void;
-  onMoveStepDown?: () => void;
-  onCopy?: () => void;
-  onPaste?: () => void;
-  onCreateBlock?: () => void;
-  onUngroupBlock?: () => void;
-  onSelectAll?: () => void;
-  onClearSelection?: () => void;
+  onSave?: () => boolean;
+  onUndo?: () => boolean;
+  onRedo?: () => boolean;
+  onMoveStepUp?: () => boolean;
+  onMoveStepDown?: () => boolean;
+  onCopy?: () => boolean;
+  onPaste?: () => boolean;
+  onCut?: () => boolean;
+  onDelete?: () => boolean;
+  onCreateBlock?: () => boolean;
+  onUngroupBlock?: () => boolean;
+  onSelectAll?: () => boolean;
+  onClearSelection?: () => boolean;
 };
 
 function isFormElement(target: EventTarget | null): boolean {
   return (
     target instanceof HTMLInputElement ||
     target instanceof HTMLTextAreaElement ||
-    target instanceof HTMLSelectElement
+    target instanceof HTMLSelectElement ||
+    (target instanceof HTMLElement &&
+      (target.isContentEditable || target.contentEditable === "true"))
   );
 }
 
@@ -36,19 +40,20 @@ export function createKeyDownHandler(
       if (handleAltShortcuts(event, handlers)) return;
     }
     if (!isModifier) return;
-    handleModifierShortcuts(event, handlers);
+    const handled = handleModifierShortcuts(event, handlers);
+    if (handled) return;
   };
 }
 
 /** Create a keydown handler for the Escape key. */
 export function createEscapeHandler(
-  onClearSelection?: () => void
+  onClearSelection?: () => boolean
 ): (event: KeyboardEvent) => void {
   return (event: KeyboardEvent) => {
     if (isFormElement(event.target)) return;
     if (event.key === "Escape") {
-      event.preventDefault();
-      onClearSelection?.();
+      const handled = onClearSelection?.() ?? false;
+      if (handled) event.preventDefault();
     }
   };
 }
