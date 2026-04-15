@@ -69,8 +69,10 @@ test.describe("Settings Panel", () => {
     await dialog.getByRole("tab", { name: /extensions/i }).click();
 
     // Should show both bridges in the status table
-    await expect(dialog.getByText("Garmin Connect")).toBeVisible();
-    await expect(dialog.getByText("Train2Go")).toBeVisible();
+    await expect(
+      dialog.getByText("Garmin Connect", { exact: true })
+    ).toBeVisible();
+    await expect(dialog.getByText("Train2Go", { exact: true })).toBeVisible();
 
     // Should have a refresh button
     await expect(
