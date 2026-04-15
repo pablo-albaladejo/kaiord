@@ -25,8 +25,8 @@ export async function openHeaderAction(
   page: Page,
   actionName: string | RegExp
 ): Promise<void> {
-  // Filter by visible to avoid strict mode violations when both
-  // DesktopNav and MobileMenuPanel have buttons with the same aria-label
+  // Both DesktopNav and MobileMenuPanel render buttons with the same
+  // aria-label. Filter to visible ones to avoid strict mode violations.
   const visible = page
     .getByRole("button", { name: actionName })
     .filter({ visible: true });
@@ -40,12 +40,12 @@ export async function openHeaderAction(
   const menuButton = page.getByLabel("Menu");
   if (await menuButton.isVisible().catch(() => false)) {
     await menuButton.click();
-    await page.waitForTimeout(200);
-    // After menu opens, the item becomes visible
-    await page
+    // Wait for dropdown item to become visible instead of fixed delay
+    const menuItem = page
       .getByRole("button", { name: actionName })
       .filter({ visible: true })
-      .first()
-      .click();
+      .first();
+    await menuItem.waitFor({ state: "visible" });
+    await menuItem.click();
   }
 }

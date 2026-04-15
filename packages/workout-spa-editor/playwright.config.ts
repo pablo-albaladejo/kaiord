@@ -21,6 +21,10 @@ export default defineConfig({
     actionTimeout: 10000, // 10 seconds for actions (click, fill, etc.)
   },
 
+  expect: {
+    timeout: 10_000, // 10s for assertions (Dexie clear + reload is slow on Mobile Safari)
+  },
+
   // Global timeout for tests
   timeout: 60000, // 60 seconds per test
 
