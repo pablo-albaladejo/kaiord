@@ -1,6 +1,12 @@
-const platform =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (navigator as any).userAgentData?.platform ?? navigator.platform ?? "";
+type NavigatorWithUserAgentData = Navigator & {
+  userAgentData?: { platform?: string };
+};
+
+const platform = (() => {
+  if (typeof navigator === "undefined") return "";
+  const nav = navigator as NavigatorWithUserAgentData;
+  return nav.userAgentData?.platform ?? navigator.platform ?? "";
+})();
 
 export const isMac = /mac/i.test(platform);
 

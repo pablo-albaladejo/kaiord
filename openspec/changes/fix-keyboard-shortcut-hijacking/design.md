@@ -53,7 +53,7 @@ Both routing functions return `boolean` to indicate whether the event was handle
 
 **Native fallback mechanism**: Radix `ContextMenu.Root` intercepts the `contextmenu` event via `preventDefault()`. To achieve native fallback when no actions apply, **conditionally render the entire `ContextMenu.Root`**. When `hasAnyAction` is false, render a plain wrapper (`<div>`) instead of `ContextMenu.Root` + `ContextMenu.Trigger`, so the browser's native context menu fires normally. Compute `hasAnyAction` synchronously from store state before render.
 
-```
+```typescript
 hasAnyAction = hasSelectedStep || hasClipboardContent() || hasSteps
 ```
 

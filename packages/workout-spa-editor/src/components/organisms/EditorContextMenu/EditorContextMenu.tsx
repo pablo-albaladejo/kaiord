@@ -1,5 +1,6 @@
 import * as ContextMenu from "@radix-ui/react-context-menu";
 import type { ReactNode } from "react";
+import { useRef } from "react";
 
 import { useEditorContextMenu } from "../../../hooks/use-editor-context-menu";
 import { EditorContextMenuContent } from "./EditorContextMenuContent";
@@ -10,12 +11,20 @@ type EditorContextMenuProps = {
 
 export const EditorContextMenu = ({ children }: EditorContextMenuProps) => {
   const ctx = useEditorContextMenu();
+  const targetStepId = useRef<string | null>(null);
 
   if (!ctx.hasAnyAction) {
     return <>{children}</>;
   }
 
-  const handleContextMenu = (stepId: string | null) => {
+  const handleContextMenu = (e: React.MouseEvent) => {
+    const el = (e.target as HTMLElement).closest("[data-step-id]");
+    targetStepId.current = el?.getAttribute("data-step-id") ?? null;
+  };
+
+  const handleOpen = (open: boolean) => {
+    if (!open) return;
+    const stepId = targetStepId.current;
     if (!stepId) {
       ctx.clearStepSelection();
       return;
@@ -28,16 +37,12 @@ export const EditorContextMenu = ({ children }: EditorContextMenuProps) => {
   };
 
   return (
-    <ContextMenu.Root
-      onOpenChange={(open) => {
-        if (open) {
-          const target = document.querySelector(":hover[data-step-id]");
-          const stepId = target?.getAttribute("data-step-id") ?? null;
-          handleContextMenu(stepId);
-        }
-      }}
-    >
-      <ContextMenu.Trigger asChild aria-label="Workout editor actions">
+    <ContextMenu.Root onOpenChange={handleOpen}>
+      <ContextMenu.Trigger
+        asChild
+        aria-label="Workout editor actions"
+        onContextMenu={handleContextMenu}
+      >
         {children}
       </ContextMenu.Trigger>
       <ContextMenu.Portal>
