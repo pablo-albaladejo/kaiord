@@ -58,7 +58,13 @@ export const SortableStepCard = ({
   const { role, ...dndAttributes } = attributes;
 
   return (
-    <div ref={setNodeRef} style={style} {...dndAttributes} {...htmlProps}>
+    <div
+      ref={setNodeRef}
+      style={style}
+      {...dndAttributes}
+      {...htmlProps}
+      data-step-id={id}
+    >
       <StepCard
         step={step}
         visualIndex={visualIndex}

@@ -1,4 +1,5 @@
 import type { Workout } from "../../../types/krd";
+import { EditorContextMenu } from "../../organisms/EditorContextMenu";
 import { WorkoutList } from "../../organisms/WorkoutList/WorkoutList";
 import { WorkoutStepsListActions } from "./WorkoutStepsListActions";
 
@@ -60,35 +61,37 @@ export function WorkoutStepsList({
   const hasMultipleSelection = selectedStepIds.length >= 2;
 
   return (
-    <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-      <WorkoutList
-        workout={workout}
-        selectedStepId={selectedStepId}
-        selectedStepIds={selectedStepIds}
-        onStepSelect={onStepSelect}
-        onBlockSelect={onBlockSelect}
-        onToggleStepSelection={onToggleStepSelection}
-        onStepDelete={onStepDelete}
-        onStepDuplicate={onStepDuplicate}
-        onStepCopy={onStepCopy}
-        onStepReorder={onStepReorder}
-        onReorderStepsInBlock={onReorderStepsInBlock}
-        onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
-        onEditRepetitionBlock={onEditRepetitionBlock}
-        onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
-        onUngroupRepetitionBlock={onUngroupRepetitionBlock}
-        onDeleteRepetitionBlock={onDeleteRepetitionBlock}
-        onAddStep={onAddStep}
-      />
+    <EditorContextMenu>
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
+        <WorkoutList
+          workout={workout}
+          selectedStepId={selectedStepId}
+          selectedStepIds={selectedStepIds}
+          onStepSelect={onStepSelect}
+          onBlockSelect={onBlockSelect}
+          onToggleStepSelection={onToggleStepSelection}
+          onStepDelete={onStepDelete}
+          onStepDuplicate={onStepDuplicate}
+          onStepCopy={onStepCopy}
+          onStepReorder={onStepReorder}
+          onReorderStepsInBlock={onReorderStepsInBlock}
+          onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
+          onEditRepetitionBlock={onEditRepetitionBlock}
+          onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
+          onUngroupRepetitionBlock={onUngroupRepetitionBlock}
+          onDeleteRepetitionBlock={onDeleteRepetitionBlock}
+          onAddStep={onAddStep}
+        />
 
-      <WorkoutStepsListActions
-        hasMultipleSelection={hasMultipleSelection}
-        selectedStepCount={selectedStepIds.length}
-        onCreateRepetitionBlock={onCreateRepetitionBlock}
-        onCreateEmptyRepetitionBlock={onCreateEmptyRepetitionBlock}
-        onAddStep={onAddStep}
-        onPasteStep={onStepPaste}
-      />
-    </div>
+        <WorkoutStepsListActions
+          hasMultipleSelection={hasMultipleSelection}
+          selectedStepCount={selectedStepIds.length}
+          onCreateRepetitionBlock={onCreateRepetitionBlock}
+          onCreateEmptyRepetitionBlock={onCreateEmptyRepetitionBlock}
+          onAddStep={onAddStep}
+          onPasteStep={onStepPaste}
+        />
+      </div>
+    </EditorContextMenu>
   );
 }

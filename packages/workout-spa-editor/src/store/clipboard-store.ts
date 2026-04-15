@@ -31,6 +31,8 @@ export const writeClipboard = async (text: string): Promise<void> => {
   }
 };
 
+export const hasClipboardContent = (): boolean => memory !== null;
+
 export const readClipboard = async (): Promise<string> => {
   try {
     return await withTimeout(
