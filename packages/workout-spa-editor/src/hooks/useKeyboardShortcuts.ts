@@ -27,6 +27,7 @@ export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers) {
     handlers.onMoveStepUp,
     handlers.onMoveStepDown,
     handlers.onCopy,
+    handlers.onCut,
     handlers.onPaste,
     handlers.onCreateBlock,
     handlers.onUngroupBlock,

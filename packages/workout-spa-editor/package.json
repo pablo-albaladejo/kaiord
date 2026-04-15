@@ -41,6 +41,7 @@
     "@kaiord/garmin": "workspace:^",
     "@kaiord/tcx": "workspace:^",
     "@kaiord/zwo": "workspace:^",
+    "@radix-ui/react-context-menu": "^2.2.16",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-dropdown-menu": "^2.1.16",
     "@radix-ui/react-toast": "^1.2.15",

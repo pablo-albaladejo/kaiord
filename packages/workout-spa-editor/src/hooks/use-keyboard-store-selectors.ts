@@ -28,6 +28,7 @@ export function useKeyboardStoreSelectors() {
   const selectAllSteps = useWorkoutStore((s) => s.selectAllSteps);
   const selectStep = useWorkoutStore((s) => s.selectStep);
   const clearStepSelection = useWorkoutStore((s) => s.clearStepSelection);
+  const deleteStep = useWorkoutStore((s) => s.deleteStep);
 
   return {
     currentWorkout,
@@ -43,5 +44,6 @@ export function useKeyboardStoreSelectors() {
     selectAllSteps,
     selectStep,
     clearStepSelection,
+    deleteStep,
   };
 }

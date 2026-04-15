@@ -822,6 +822,13 @@ describe("useKeyboardShortcuts", () => {
       });
       expect(() => window.dispatchEvent(pasteEvent)).not.toThrow();
 
+      const cutEvent = new KeyboardEvent("keydown", {
+        key: "x",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      expect(() => window.dispatchEvent(cutEvent)).not.toThrow();
+
       const createBlockEvent = new KeyboardEvent("keydown", {
         key: "g",
         ctrlKey: true,
@@ -849,6 +856,248 @@ describe("useKeyboardShortcuts", () => {
         bubbles: true,
       });
       expect(() => window.dispatchEvent(escapeEvent)).not.toThrow();
+    });
+  });
+
+  describe("cut shortcut (Cmd+X)", () => {
+    it("should call onCut when Ctrl+X is pressed", () => {
+      const onCut = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onCut }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "x",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onCut).toHaveBeenCalledOnce();
+    });
+
+    it("should not call onCut when Ctrl+Shift+X is pressed", () => {
+      const onCut = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onCut }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "x",
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onCut).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("exact modifier matching (Cmd+Shift passthrough)", () => {
+    it("should not call onCopy when Ctrl+Shift+C is pressed", () => {
+      const onCopy = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "c",
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onCopy).not.toHaveBeenCalled();
+    });
+
+    it("should not call onSave when Cmd+Shift+S is pressed", () => {
+      const onSave = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onSave }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "s",
+        metaKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onSave).not.toHaveBeenCalled();
+    });
+
+    it("should not call onPaste when Ctrl+Shift+V is pressed", () => {
+      const onPaste = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onPaste }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "v",
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onPaste).not.toHaveBeenCalled();
+    });
+
+    it("should not call onSelectAll when Ctrl+Shift+A is pressed", () => {
+      const onSelectAll = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onSelectAll }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "a",
+        ctrlKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onSelectAll).not.toHaveBeenCalled();
+    });
+
+    it("should still call onUngroupBlock when Cmd+Shift+G is pressed", () => {
+      const onUngroupBlock = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onUngroupBlock }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "g",
+        metaKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onUngroupBlock).toHaveBeenCalledOnce();
+    });
+
+    it("should still call onRedo when Cmd+Shift+Z is pressed", () => {
+      const onRedo = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onRedo }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "z",
+        metaKey: true,
+        shiftKey: true,
+        bubbles: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onRedo).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("context-aware preventDefault", () => {
+    it("should not preventDefault when handler returns false", () => {
+      const onCopy = vi.fn().mockReturnValue(false);
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "c",
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onCopy).toHaveBeenCalledOnce();
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it("should preventDefault when handler returns true", () => {
+      const onCopy = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "c",
+        ctrlKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onCopy).toHaveBeenCalledOnce();
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it("should not preventDefault for escape when handler returns false", () => {
+      const onClearSelection = vi.fn().mockReturnValue(false);
+      renderHook(() => useKeyboardShortcuts({ onClearSelection }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onClearSelection).toHaveBeenCalledOnce();
+      expect(event.defaultPrevented).toBe(false);
+    });
+
+    it("should preventDefault for escape when handler returns true", () => {
+      const onClearSelection = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onClearSelection }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+        cancelable: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onClearSelection).toHaveBeenCalledOnce();
+      expect(event.defaultPrevented).toBe(true);
+    });
+
+    it("should not preventDefault for Alt+ArrowUp when handler returns false", () => {
+      const onMoveStepUp = vi.fn().mockReturnValue(false);
+      renderHook(() => useKeyboardShortcuts({ onMoveStepUp }));
+
+      const event = new KeyboardEvent("keydown", {
+        key: "ArrowUp",
+        altKey: true,
+        bubbles: true,
+        cancelable: true,
+      });
+      window.dispatchEvent(event);
+
+      expect(onMoveStepUp).toHaveBeenCalledOnce();
+      expect(event.defaultPrevented).toBe(false);
+    });
+  });
+
+  describe("contentEditable passthrough", () => {
+    it("should not intercept Ctrl+C when target is contentEditable", () => {
+      const onCopy = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onCopy }));
+
+      const el = document.createElement("div");
+      el.contentEditable = "true";
+      document.body.appendChild(el);
+
+      const event = new KeyboardEvent("keydown", {
+        key: "c",
+        ctrlKey: true,
+        bubbles: true,
+      });
+      el.dispatchEvent(event);
+
+      expect(onCopy).not.toHaveBeenCalled();
+      el.remove();
+    });
+
+    it("should not intercept Escape when target is contentEditable", () => {
+      const onClearSelection = vi.fn().mockReturnValue(true);
+      renderHook(() => useKeyboardShortcuts({ onClearSelection }));
+
+      const el = document.createElement("div");
+      el.contentEditable = "true";
+      document.body.appendChild(el);
+
+      const event = new KeyboardEvent("keydown", {
+        key: "Escape",
+        bubbles: true,
+      });
+      el.dispatchEvent(event);
+
+      expect(onClearSelection).not.toHaveBeenCalled();
+      el.remove();
     });
   });
 });
