@@ -23,10 +23,10 @@
     "@kaiord/zwo": "workspace:*",
     "@shikijs/vitepress-twoslash": "^3.23.0",
     "cspell": "^9.5.0",
-    "typedoc": "^0.28.18",
+    "typedoc": "^0.28.19",
     "typedoc-plugin-markdown": "^4.11.0",
     "vitepress": "2.0.0-alpha.17",
-    "vitepress-plugin-llms": "^1.12.0",
+    "vitepress-plugin-llms": "^1.12.1",
     "vue": "^3.5.16"
   }
 }
