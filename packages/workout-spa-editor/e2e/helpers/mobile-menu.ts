@@ -25,10 +25,14 @@ export async function openHeaderAction(
   page: Page,
   actionName: string | RegExp
 ): Promise<void> {
-  const directButton = page.getByRole("button", { name: actionName });
+  // Both DesktopNav and MobileMenuPanel render buttons with the same
+  // aria-label. Filter to visible ones to avoid strict mode violations.
+  const visible = page
+    .getByRole("button", { name: actionName })
+    .filter({ visible: true });
 
-  if (await directButton.isVisible().catch(() => false)) {
-    await directButton.click();
+  if ((await visible.count()) > 0) {
+    await visible.first().click();
     return;
   }
 
@@ -36,10 +40,12 @@ export async function openHeaderAction(
   const menuButton = page.getByLabel("Menu");
   if (await menuButton.isVisible().catch(() => false)) {
     await menuButton.click();
-    // Wait for the dropdown to appear
-    await page.waitForTimeout(200);
-    // Now find and click the action in the dropdown
-    const menuItem = page.getByRole("button", { name: actionName });
+    // Wait for dropdown item to become visible instead of fixed delay
+    const menuItem = page
+      .getByRole("button", { name: actionName })
+      .filter({ visible: true })
+      .first();
+    await menuItem.waitFor({ state: "visible" });
     await menuItem.click();
   }
 }
