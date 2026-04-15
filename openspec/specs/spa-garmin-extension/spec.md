@@ -1,4 +1,4 @@
-> Synced: 2026-04-13
+> Synced: 2026-04-13 (settings-train2go-bridge)
 
 ## ADDED Requirements
 
@@ -39,6 +39,20 @@ If the browser is not Chrome-based (no `chrome.runtime.sendMessage` available), 
 
 - **WHEN** the SPA sends a message and receives "Extension context invalidated" error
 - **THEN** the SPA automatically re-runs detection and shows "Extension was updated. Reconnecting..."
+
+### Requirement: Settings tab labeled "Extensions"
+
+The Settings panel SHALL have a tab labeled "Extensions" (not "Garmin") to accommodate multiple bridge extensions (Garmin Connect, Train2Go, and future bridges). The tab SHALL display all registered bridges in a status table.
+
+#### Scenario: Settings tab label
+
+- **WHEN** the user opens the Settings panel
+- **THEN** the tab is labeled "Extensions" (not "Garmin")
+
+#### Scenario: Extensions tab shows all bridges
+
+- **WHEN** the user opens the Extensions tab
+- **THEN** the tab displays a table with rows for each registered bridge (Garmin Connect, Train2Go) showing name and status
 
 ### Requirement: Extension install prompt
 
