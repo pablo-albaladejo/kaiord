@@ -15,7 +15,7 @@ The handler callbacks in `build-keyboard-handlers.ts` already contain guard logi
 - Right-click on editor area provides Cut/Copy/Paste/Delete/Group actions via a custom context menu
 - Custom context menu falls back to native context menu when no app actions are applicable
 - `contentEditable` elements are treated as form elements (shortcuts pass through)
-- Context menu items display keyboard shortcut hints (e.g., "Copy  ⌘C")
+- Context menu items display keyboard shortcut hints (e.g., "Copy ⌘C")
 
 **Non-Goals:**
 
@@ -63,22 +63,23 @@ hasAnyAction = hasSelectedStep || hasClipboardContent() || hasSteps
 
 **Decision**: Each menu item is conditionally rendered based on current state:
 
-| Menu item | Shortcut hint | Shown when |
-|-----------|--------------|-----------|
-| Cut | ⌘X | A single step is selected |
-| Copy | ⌘C | A single step is selected |
-| Paste | ⌘V | Clipboard store has content |
-| Delete | ⌫ | One or more steps are selected |
-| Separator | — | Between edit actions and structural actions |
-| Select All | ⌘A | Workout has steps |
-| Group | ⌘G | 2+ steps are selected |
-| Ungroup | ⇧⌘G | Selected item is a block |
+| Menu item  | Shortcut hint | Shown when                                  |
+| ---------- | ------------- | ------------------------------------------- |
+| Cut        | ⌘X            | A single step is selected                   |
+| Copy       | ⌘C            | A single step is selected                   |
+| Paste      | ⌘V            | Clipboard store has content                 |
+| Delete     | ⌫             | One or more steps are selected              |
+| Separator  | —             | Between edit actions and structural actions |
+| Select All | ⌘A            | Workout has steps                           |
+| Group      | ⌘G            | 2+ steps are selected                       |
+| Ungroup    | ⇧⌘G           | Selected item is a block                    |
 
 **Render strategy**: Items are hidden (not rendered) rather than shown as disabled. Rationale: the context menu is state-aware and only appears when at least one action applies. Showing grayed-out items adds visual noise without aiding discovery — the keyboard shortcut hints already inform users of available actions.
 
 **Focus management**: After a context menu action completes or the menu is dismissed, focus SHALL return to the step list container. After a Delete action, focus SHALL move to the next step (or the previous one if the last step was deleted). Radix ContextMenu handles focus return on dismiss automatically; delete focus management is handled by the existing step list logic.
 
 **Accessibility**: Two separate attributes per menu item:
+
 - **`aria-keyshortcuts`** (machine-readable, ARIA format): uses ARIA modifier key names — `Control+C` on Windows/Linux, `Meta+C` on macOS. Set via platform detection (`navigator.userAgentData?.platform ?? navigator.platform`).
 - **Visible shortcut hint** (human-readable, display text): uses platform-native symbols — `⌘C` on macOS, `Ctrl+C` on Windows/Linux. Rendered as right-aligned text in the menu item via Radix `ContextMenu.Shortcut`.
 
