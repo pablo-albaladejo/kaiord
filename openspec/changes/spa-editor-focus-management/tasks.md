@@ -176,7 +176,7 @@
 - [ ] 11.1 Run `pnpm -r test` — all tests pass, zero test warnings
 - [ ] 11.2 Run `pnpm lint` — zero errors, zero warnings (includes no-warnings policy)
 - [ ] 11.3 Run `pnpm -r build` — zero build warnings
-- [ ] 11.4 Run `find packages/workout-spa-editor/src -type f \( -name '*.ts' -o -name '*.tsx' \) ! -name '*.test.ts' ! -name '*.test.tsx' -exec wc -l {} + | awk '$1 > 100'` — zero rows; verify all new functions <40 LOC by inspection
+- [ ] 11.4 Run `find packages/workout-spa-editor/src -type f \( -name '*.ts' -o -name '*.tsx' \) ! -name '*.test.ts' ! -name '*.test.tsx' -exec wc -l {} \; | awk '$1 > 100 && $2 != "total"'` — zero rows; verify all new functions <40 LOC by inspection. The `-exec ... \;` form (one-file-per-invocation) avoids `wc`'s aggregate `total` row that `-exec ... {} +` produces, which would otherwise false-positive as a >100 LOC file
 - [ ] 11.5 Manual verification in the dev server: delete (single + multi-select contiguous + non-contiguous), paste, duplicate, add, undo, redo, reorder, group, ungroup via keyboard, context menu, toolbar, and DnD; confirm focus lands on the correct element in each case
 - [ ] 11.6 Manual verification with VoiceOver (macOS) and NVDA (Windows) that the toast `role="status"` announcement is not truncated by the focus move; record the evidence (transcript or screenshot of Accessibility Inspector) and attach to the PR
 - [ ] 11.7 Manual verification in Safari that programmatic focus produces a visible `:focus-visible` ring on step cards, block cards, and the empty-state button
