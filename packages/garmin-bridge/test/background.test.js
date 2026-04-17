@@ -44,9 +44,12 @@ describe("background.js", () => {
     });
 
     it("validates against bridgeManifestSchema (replica of the SPA contract)", () => {
-      // Replica of packages/workout-spa-editor/src/types/bridge-schemas.ts so
-      // the bridge test fails if the response shape drifts from what the
-      // SPA registry will accept. If you change one, change the other.
+      // Mirrors the Zod rules at
+      // packages/workout-spa-editor/src/types/bridge-schemas.ts:20-26
+      // exactly: id/name/version are bare z.string() (no min length),
+      // protocolVersion is positive int, capabilities is z.array(...) (no
+      // .nonempty()) of values from bridgeCapabilitySchema. If you change
+      // the SPA schema, change this replica.
       const ALLOWED_CAPABILITIES = new Set([
         "read:workouts",
         "write:workouts",
@@ -56,20 +59,18 @@ describe("background.js", () => {
       ]);
       const validate = (m) => {
         const errors = [];
-        if (typeof m?.id !== "string" || m.id.length === 0)
-          errors.push("id must be non-empty string");
-        if (typeof m?.name !== "string" || m.name.length === 0)
-          errors.push("name must be non-empty string");
-        if (typeof m?.version !== "string" || m.version.length === 0)
-          errors.push("version must be non-empty string");
+        if (typeof m?.id !== "string") errors.push("id must be string");
+        if (typeof m?.name !== "string") errors.push("name must be string");
+        if (typeof m?.version !== "string")
+          errors.push("version must be string");
         if (
           typeof m?.protocolVersion !== "number" ||
           !Number.isInteger(m.protocolVersion) ||
           m.protocolVersion < 1
         )
           errors.push("protocolVersion must be a positive integer");
-        if (!Array.isArray(m?.capabilities) || m.capabilities.length === 0)
-          errors.push("capabilities must be a non-empty array");
+        if (!Array.isArray(m?.capabilities))
+          errors.push("capabilities must be an array");
         for (const c of m?.capabilities ?? []) {
           if (!ALLOWED_CAPABILITIES.has(c))
             errors.push(`capabilities[] contains "${c}" not in allowed enum`);
@@ -270,6 +271,37 @@ describe("background.js", () => {
         name: "Garmin Connect",
         protocolVersion: 1,
         capabilities: ["write:workouts"],
+      });
+    });
+
+    it("ping via externalCb wraps checkSession in the full SPA envelope", async () => {
+      await chrome.storage.session.set({ csrfToken: "abc" });
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 7 }]));
+      chrome.tabs.sendMessage.mockImplementation((_tabId, _msg, cb) => {
+        cb({ ok: true, data: [{ workoutId: 1 }] });
+      });
+      const sendResponse = vi.fn();
+
+      externalCb({ action: "ping" }, {}, sendResponse);
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      const response = sendResponse.mock.calls[0][0];
+
+      // The SPA's parseManifestFromPing reads response.data — it MUST
+      // contain every BridgeManifest field plus the session-status
+      // fields the popup/UI consume.
+      expect(response).toMatchObject({
+        ok: true,
+        protocolVersion: 1,
+        data: {
+          id: "garmin-bridge",
+          name: "Garmin Connect",
+          version: "0.1.0",
+          protocolVersion: 1,
+          capabilities: ["write:workouts"],
+          csrfCaptured: true,
+          gcApi: { ok: true, data: [{ workoutId: 1 }] },
+        },
       });
     });
 

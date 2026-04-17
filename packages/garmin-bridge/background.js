@@ -77,11 +77,16 @@ const garminFetch = async (path, method, body) => {
  * Ping handler. Response data shape:
  *   BridgeManifest ∪ { csrfCaptured: boolean, gcApi: object }
  *
- * Manifest keys (id, name, version, protocolVersion, capabilities) take
- * precedence on collision. The SPA's bridge-registry parses only the
- * BridgeManifest fields via `bridgeManifestSchema.safeParse(data)`;
- * extra fields are stripped by Zod so the session-status fields remain
- * available to popup/UI consumers without affecting registration.
+ * The outer envelope sent to the SPA via `sendResult` is
+ *   { ok: true, protocolVersion: 1, data: <this object> }
+ *
+ * The SPA reads `response.data` and passes it to
+ * `bridgeManifestSchema.safeParse` at
+ * `packages/workout-spa-editor/src/adapters/bridge/bridge-registry-helpers.ts:21`.
+ * Zod strips the session-status fields (csrfCaptured, gcApi); they
+ * stay available to popup/UI consumers that read `response.data`
+ * directly. Manifest keys (id, name, version, protocolVersion,
+ * capabilities) take precedence on collision.
  */
 const checkSession = async () => {
   const csrfToken = await getCsrfToken();

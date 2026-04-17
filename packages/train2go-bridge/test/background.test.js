@@ -26,6 +26,50 @@ describe("background service worker", () => {
     it("has protocolVersion 1", () => {
       expect(PROTOCOL_VERSION).toBe(1);
     });
+
+    it("version matches package.json (no drift between background.js and the published version)", () => {
+      const pkg = require("../package.json");
+
+      expect(BRIDGE_MANIFEST.version).toBe(pkg.version);
+    });
+
+    it("validates against bridgeManifestSchema (replica of the SPA contract)", () => {
+      // Mirrors the Zod rules at
+      // packages/workout-spa-editor/src/types/bridge-schemas.ts:20-26
+      // exactly: id/name/version are bare z.string() (no min length),
+      // protocolVersion is positive int, capabilities is z.array(...) (no
+      // .nonempty()) of values from bridgeCapabilitySchema. If you
+      // change the SPA schema, change this replica.
+      const ALLOWED_CAPABILITIES = new Set([
+        "read:workouts",
+        "write:workouts",
+        "read:body",
+        "read:sleep",
+        "read:training-plan",
+      ]);
+      const validate = (m) => {
+        const errors = [];
+        if (typeof m?.id !== "string") errors.push("id must be string");
+        if (typeof m?.name !== "string") errors.push("name must be string");
+        if (typeof m?.version !== "string")
+          errors.push("version must be string");
+        if (
+          typeof m?.protocolVersion !== "number" ||
+          !Number.isInteger(m.protocolVersion) ||
+          m.protocolVersion < 1
+        )
+          errors.push("protocolVersion must be a positive integer");
+        if (!Array.isArray(m?.capabilities))
+          errors.push("capabilities must be an array");
+        for (const c of m?.capabilities ?? []) {
+          if (!ALLOWED_CAPABILITIES.has(c))
+            errors.push(`capabilities[] contains "${c}" not in allowed enum`);
+        }
+        return errors;
+      };
+
+      expect(validate(BRIDGE_MANIFEST)).toEqual([]);
+    });
   });
 
   describe("findTrain2GoTab", () => {

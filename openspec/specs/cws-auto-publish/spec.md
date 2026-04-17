@@ -96,16 +96,24 @@ Version detection SHALL use string equality comparison between the `package.json
 
 The project SHALL include a `scripts/sync-extension-version.mjs` script that accepts an optional extension name argument. When called with an argument (e.g., `train2go-bridge`), it SHALL sync only that extension. When called without arguments, it SHALL sync all extensions (`garmin-bridge`, `train2go-bridge`).
 
-For each extension, the script SHALL read the version from `packages/<extension>/package.json` and write it to the `version` field in both `packages/<extension>/manifest.json` and `packages/<extension>/manifest.prod.json`.
+For each extension, the script SHALL read the version from `packages/<extension>/package.json` and write it to the `version` field in `packages/<extension>/manifest.json`, `packages/<extension>/manifest.prod.json`, AND the `BRIDGE_MANIFEST.version` literal inside `packages/<extension>/background.js`. The latter is the value the extension reports to the SPA via the `ping` action — keeping it in lockstep with the published manifest version is required for the SPA's "Update your extension" detection to work correctly.
 
-The script SHALL only modify the `version` field and leave all other manifest content unchanged. The script SHALL be idempotent — if versions already match, it SHALL exit with code 0 without modifying files.
+The script SHALL only modify the `version` fields and leave all other content unchanged. The script SHALL be idempotent — if all three files already match, it SHALL exit with code 0 without modifying files.
 
-#### Scenario: Version synced to manifests
+The script SHALL fail loudly (exit code 1) if `background.js` exists for an extension but no `BRIDGE_MANIFEST … version: "…"` literal can be located, since that means a refactor moved or renamed the constant and the sync is silently broken.
 
-- **GIVEN** `package.json` has version `0.2.0` and manifests have version `0.1.0`
+#### Scenario: Version synced to manifests and background.js
+
+- **GIVEN** `package.json` has version `0.2.0`, the manifests have version `0.1.0`, and `background.js` declares `BRIDGE_MANIFEST = { …, version: "0.1.0", … }`
 - **WHEN** `scripts/sync-extension-version.mjs <extension>` is executed
-- **THEN** both `manifest.json` and `manifest.prod.json` SHALL have version `0.2.0`
+- **THEN** `manifest.json`, `manifest.prod.json`, AND the `BRIDGE_MANIFEST.version` literal in `background.js` SHALL all be updated to `0.2.0`
 - **AND** all other fields SHALL remain unchanged
+
+#### Scenario: Missing BRIDGE_MANIFEST literal fails loudly
+
+- **GIVEN** `background.js` exists for an extension but does not contain a `BRIDGE_MANIFEST … version: "…"` literal
+- **WHEN** `scripts/sync-extension-version.mjs <extension>` is executed
+- **THEN** the script SHALL exit with a non-zero code and an error pointing at `background.js`
 
 #### Scenario: Version already in sync
 
