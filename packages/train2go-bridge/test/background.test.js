@@ -8,9 +8,14 @@ const {
   readDay,
   openTrain2Go,
 } = require("../background.js");
+const parser = require("../parser.js");
 
 describe("background service worker", () => {
   beforeEach(() => __resetChromeMock());
+  // Restore any vi.spyOn() patches from individual tests (e.g. the
+  // parsePingJson stub used by the precedence test) so a failing
+  // assertion never leaks a stub into a sibling test.
+  afterEach(() => vi.restoreAllMocks());
 
   describe("BRIDGE_MANIFEST", () => {
     it("has correct shape", () => {
@@ -154,7 +159,6 @@ describe("background service worker", () => {
       // We therefore mock the parser here. Reverting the spread order
       // in ping() to `{ ...BRIDGE_MANIFEST, ...session }` makes this
       // test fail on result.id/name/version/protocolVersion/capabilities.
-      const parser = require("../parser.js");
       const ATTACKER_SESSION = {
         id: "ATTACKER",
         name: "Fake Bridge",
@@ -165,9 +169,7 @@ describe("background service worker", () => {
         userName: "Pablo",
         sessionActive: true,
       };
-      const spy = vi
-        .spyOn(parser, "parsePingJson")
-        .mockReturnValue(ATTACKER_SESSION);
+      vi.spyOn(parser, "parsePingJson").mockReturnValue(ATTACKER_SESSION);
       chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
       chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
         cb({ ok: true, status: 200, data: { success: true } })
@@ -176,7 +178,9 @@ describe("background service worker", () => {
       const result = await handleAction({ action: "ping" });
 
       // Manifest keys win on collision (5 fields), session-only fields
-      // still flow through (3 fields).
+      // still flow through (3 fields). The describe-level
+      // `afterEach(vi.restoreAllMocks)` cleans up the spy even if this
+      // assertion throws.
       expect(result).toMatchObject({
         id: "train2go-bridge",
         name: "Kaiord Train2Go Bridge",
@@ -187,8 +191,6 @@ describe("background service worker", () => {
         userId: 28035,
         userName: "Pablo",
       });
-
-      spy.mockRestore();
     });
 
     it("handles read-week action", async () => {
