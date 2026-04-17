@@ -2,6 +2,10 @@
 
 # SPA Workout State Machine
 
+## Purpose
+
+Workout lifecycle — raw, structured, ready, pushed, modified, stale, skipped — and the transitions (AI generation, explicit finalize, Garmin push, user edits, raw-content change detection) that move workouts between those states.
+
 ## Requirements
 
 ### Requirement: Workout lifecycle states

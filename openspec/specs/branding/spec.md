@@ -2,6 +2,10 @@
 
 # Branding
 
+## Purpose
+
+Visual identity — colors, typography, logos, favicons, and OG/Twitter metadata — shared across the landing page, docs site, and workout editor so every Kaiord surface looks like the same product.
+
 ## Requirements
 
 ### Requirement: Kaiord logo SVG

@@ -2,6 +2,10 @@
 
 # CWS Auto Publish
 
+## Purpose
+
+Automated Chrome Web Store publishing for every extension in the monorepo, triggered by a version bump in the extension's `package.json`.
+
 ## Requirements
 
 ### Requirement: Automated CWS publishing workflow

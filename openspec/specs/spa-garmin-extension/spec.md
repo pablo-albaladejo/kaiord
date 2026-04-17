@@ -1,6 +1,10 @@
-> Synced: 2026-04-17
+> Synced: 2026-04-17 (settings-train2go-bridge)
 
 # SPA Garmin Extension
+
+## Purpose
+
+SPA-side integration with the garmin-bridge extension — discovery via `VITE_GARMIN_EXTENSION_ID`, heartbeat, and push-to-Garmin operations routed through the bridge-protocol port.
 
 ## Requirements
 

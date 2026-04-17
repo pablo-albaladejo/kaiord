@@ -2,6 +2,10 @@
 
 # Privacy Policy
 
+## Purpose
+
+Public privacy-policy content and coverage requirements across every Kaiord surface that handles user data (website, docs, workout editor, garmin-bridge, train2go-bridge).
+
 ## Requirements
 
 ### Requirement: Privacy policy page

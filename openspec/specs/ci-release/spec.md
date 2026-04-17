@@ -2,6 +2,10 @@
 
 # CI Release
 
+## Purpose
+
+Changeset-driven versioning and release workflow that publishes the npm packages from `packages/` and creates GitHub releases on every merge to `main`.
+
 ## Requirements
 
 ### Requirement: Release workflow uses PR-based versioning

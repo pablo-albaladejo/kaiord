@@ -2,6 +2,10 @@
 
 # SPA Editor Context Menu
 
+## Purpose
+
+Context-aware keyboard shortcuts and a custom right-click menu in the workout editor that only intercept events when the app can act, passing them through to the browser otherwise.
+
 ## Requirements
 
 ### Requirement: Context-aware keyboard shortcut interception

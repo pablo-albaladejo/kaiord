@@ -2,6 +2,10 @@
 
 # Landing Page
 
+## Purpose
+
+Public landing page at `/` — content, layout, accessibility, performance, and SEO requirements that present Kaiord to first-time visitors and lead into the docs and editor.
+
 ## Requirements
 
 ### Requirement: Landing page serves at root path

@@ -2,6 +2,10 @@
 
 # Docs Site
 
+## Purpose
+
+Structure, routing, navigation, and content requirements for the Kaiord documentation site served from `/docs`.
+
 ## Requirements
 
 ### Requirement: Documentation site serves at /docs/ path

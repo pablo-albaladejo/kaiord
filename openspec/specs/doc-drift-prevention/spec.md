@@ -2,6 +2,10 @@
 
 # Doc Drift Prevention
 
+## Purpose
+
+Safeguards — type-checked code examples, TypeDoc generation, link checking, spellcheck, and a doc-sync hook — that keep the documentation faithful to the code it describes.
+
 ## Requirements
 
 ### Requirement: Twoslash type-checked code examples

@@ -2,7 +2,9 @@
 
 # KRD Format
 
-KRD (Kaiord Representation Definition) is the canonical intermediate format. All conversions between FIT, TCX, ZWO, and GCN pass through KRD.
+## Purpose
+
+KRD (Kaiord Representation Definition) — the canonical intermediate format through which every conversion (FIT ↔ TCX ↔ ZWO ↔ GCN) must flow. Defines schema, MIME type, and round-trip invariants.
 
 ## Requirements
 
@@ -10,9 +12,21 @@ KRD (Kaiord Representation Definition) is the canonical intermediate format. All
 
 All format conversions SHALL use KRD as the intermediate representation. Direct format-to-format conversion (e.g., FIT → TCX) without passing through KRD is forbidden.
 
+#### Scenario: Conversion pipeline passes through KRD
+
+- **GIVEN** a request to convert a FIT file to TCX
+- **WHEN** the converter executes
+- **THEN** it reads FIT into a KRD instance and writes the KRD instance out as TCX — never FIT → TCX directly
+
 ### Requirement: MIME Type
 
 KRD files SHALL use the MIME type `application/vnd.kaiord+json`.
+
+#### Scenario: Writer sets MIME type
+
+- **GIVEN** a KRD payload served via HTTP
+- **WHEN** the response headers are inspected
+- **THEN** `Content-Type` is `application/vnd.kaiord+json`
 
 ### Requirement: Schema Validation
 
@@ -25,6 +39,18 @@ All KRD instances MUST validate against the Zod schemas in `packages/core/src/do
 
 Validation fails at parse time if either invariant is violated.
 
+#### Scenario: Invalid KRD rejected
+
+- **GIVEN** a JSON object missing the required `version` field
+- **WHEN** parsed as KRD
+- **THEN** Zod validation throws a schema error before any adapter processes it
+
+#### Scenario: WorkoutStep cross-field invariant rejected
+
+- **GIVEN** a WorkoutStep where `durationType` is `"time"` but `duration.type` is `"distance"`
+- **WHEN** parsed via `workoutStepSchema`
+- **THEN** Zod throws a validation error: "durationType must match duration.type"
+
 ### Requirement: Round-Trip Safety
 
 Converting data from any supported format to KRD and back MUST preserve values within defined tolerances:
@@ -33,6 +59,12 @@ Converting data from any supported format to KRD and back MUST preserve values w
 - Power: ±1W or ±1% FTP
 - Heart rate: ±1 bpm
 - Cadence: ±1 rpm
+
+#### Scenario: FIT to KRD round-trip
+
+- **GIVEN** a valid FIT file with a running workout
+- **WHEN** converted to KRD and back to FIT
+- **THEN** all field values are within round-trip tolerances
 
 ### Requirement: Top-Level Structure
 
@@ -47,13 +79,25 @@ A KRD document SHALL contain:
 - `events` (array, optional): Workout events
 - `extensions` (object, optional): Structured data (e.g., `extensions.structured_workout` holds the Workout object)
 
+#### Scenario: Missing required top-level field rejected
+
+- **GIVEN** a KRD candidate without the `metadata` object
+- **WHEN** parsed by `krdSchema`
+- **THEN** validation fails with a Zod error naming the missing field
+
 ### Requirement: Naming Conventions
 
 KRD field names SHALL use **camelCase** (e.g., `serialNumber`, `heartRate`, `subSport`). Domain enum values SHALL use **snake_case** (e.g., `indoor_cycling`, `lap_swimming`). Adapter schemas MAY use camelCase internally and MUST map enum values to snake_case when producing KRD.
 
+#### Scenario: Adapter maps enum to snake_case
+
+- **GIVEN** an adapter that internally represents a sub-sport as `"indoorCycling"` (camelCase)
+- **WHEN** the adapter writes the KRD payload
+- **THEN** the emitted KRD contains `"sub_sport": "indoor_cycling"`
+
 ### Requirement: Extension Namespaces
 
-The `extensions` object MAY contain the following namespaces:
+The `extensions` object SHALL reserve the following namespace keys for known extension payloads, and SHALL preserve any additional (adapter-defined or unknown) namespaces during round-trip conversions when the target format supports them:
 
 - `extensions.structured_workout` (Workout): Full Workout object for structured workout KRDs, set by `createWorkoutKRD()`
 - `extensions.fit` (object): Preserves FIT-specific data not mappable to KRD fields, containing:
@@ -62,33 +106,13 @@ The `extensions` object MAY contain the following namespaces:
 - `extensions.course` (object): Course metadata for course-type KRDs
 - `extensions.course_points` (array of KRDCoursePoint): Course waypoints, each containing `index`, `latitude`, `longitude`, `distance`, `type`, `name`, `favorite`, and optional `timestamp`
 
-Adapters MAY define additional extension namespaces. Unknown extension namespaces SHALL be preserved during round-trip conversions when the target format supports them.
-
-## Scenarios
-
-#### Scenario: FIT to KRD round-trip
-
-- **GIVEN** a valid FIT file with a running workout
-- **WHEN** converted to KRD and back to FIT
-- **THEN** all field values are within round-trip tolerances
-
-#### Scenario: Invalid KRD rejected
-
-- **GIVEN** a JSON object missing the required `version` field
-- **WHEN** parsed as KRD
-- **THEN** Zod validation throws a schema error before any adapter processes it
+Adapters MUST NOT drop unknown extension namespaces silently; they MUST either round-trip them unchanged or fail the conversion with a descriptive error.
 
 #### Scenario: Extension preservation
 
 - **GIVEN** a FIT file with Garmin-specific extension fields
 - **WHEN** converted to KRD
 - **THEN** extension data is preserved in the `extensions` object
-
-#### Scenario: WorkoutStep cross-field invariant rejected
-
-- **GIVEN** a WorkoutStep where `durationType` is `"time"` but `duration.type` is `"distance"`
-- **WHEN** parsed via `workoutStepSchema`
-- **THEN** Zod throws a validation error: "durationType must match duration.type"
 
 #### Scenario: Structured workout in extensions
 

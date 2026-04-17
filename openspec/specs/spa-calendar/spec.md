@@ -2,6 +2,10 @@
 
 # SPA Calendar
 
+## Purpose
+
+Week-view calendar as the editor's home page — URL-addressable weeks, per-day workout grouping, state indicators, and integration with batch processing.
+
 ## Requirements
 
 ### Requirement: Calendar week view as home page

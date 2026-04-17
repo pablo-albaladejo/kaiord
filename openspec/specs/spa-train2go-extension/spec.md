@@ -1,6 +1,10 @@
-> Synced: 2026-04-17
+> Synced: 2026-04-17 (settings-train2go-bridge)
 
 # SPA Train2Go Extension
+
+## Purpose
+
+SPA-side integration with the train2go-bridge extension — discovery via `VITE_TRAIN2GO_EXTENSION_ID` and read-only import of coaching plans rendered on Train2Go pages.
 
 ## Requirements
 

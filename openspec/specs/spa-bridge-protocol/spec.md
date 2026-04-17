@@ -2,6 +2,10 @@
 
 # SPA Bridge Protocol
 
+## Purpose
+
+Transport and lifecycle contract between the workout editor and any bridge Chrome extension: ping manifest, response envelope, rate limits, per-bridge operation queue, and heartbeat-based VERIFIED/UNAVAILABLE/REMOVED state machine.
+
 ## Requirements
 
 ### Requirement: Bridge capability manifest

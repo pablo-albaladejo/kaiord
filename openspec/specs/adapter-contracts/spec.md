@@ -2,6 +2,10 @@
 
 # Adapter Contracts
 
+## Purpose
+
+Generic contract that every format-adapter and browser-extension-adapter in the monorepo MUST satisfy, so adapters stay interchangeable behind ports and cannot leak implementation concerns into the domain layer.
+
 ## Requirements
 
 ### Requirement: Browser Extension Adapter Pattern

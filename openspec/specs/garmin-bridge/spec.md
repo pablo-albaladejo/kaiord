@@ -2,6 +2,10 @@
 
 # Garmin Bridge
 
+## Purpose
+
+Chrome extension that proxies Kaiord's workout-editor to Garmin Connect by piggybacking on the user's authenticated session — no credentials stored, CSRF token captured in memory-only session storage.
+
 ## Requirements
 
 ### Requirement: Extension manifest
