@@ -98,9 +98,8 @@ for (const extName of extensions) {
     if (oldVersion === version) {
       console.log(`  ${backgroundPath}: BRIDGE_MANIFEST already ${version}`);
     } else {
-      const updated = backgroundText.replace(
-        probeRe,
-        (match, _v) => match.replace(/version:\s*"[^"]*"/, `version: "${version}"`)
+      const updated = backgroundText.replace(probeRe, (match, _v) =>
+        match.replace(/version:\s*"[^"]*"/, `version: "${version}"`)
       );
       writeFileSync(backgroundPath, updated);
       console.log(`  ${backgroundPath}: ${oldVersion} → ${version}`);
