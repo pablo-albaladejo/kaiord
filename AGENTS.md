@@ -24,6 +24,16 @@ Before implementing any non-trivial feature or fix:
 
 If no spec exists for a requested non-trivial change, create one with `/opsx:propose` before coding.
 
+Domain specs under `openspec/specs/` follow the canonical shape in
+`openspec/SPEC_TEMPLATE.md`. When you add or edit one, run `pnpm lint:specs`
+locally — CI enforces the same check as part of `pnpm lint`.
+
+Archives under `openspec/changes/archive/` MUST be named `YYYY-MM-DD-<slug>`
+where `YYYY-MM-DD` equals the `> Completed:` marker inside the archived
+`proposal.md`. The invariant is enforced by `pnpm lint:archive`. After
+archiving, run `pnpm archive:index` to refresh
+`openspec/changes/archive/README.md`.
+
 ## Ports & adapters (example: FIT)
 
 - **Ports** (`ports/fit.ts`): `FitReader.readToKRD(buf)`, `FitWriter.writeFromKRD(krd)`

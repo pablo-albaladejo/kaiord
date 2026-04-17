@@ -1,6 +1,12 @@
-> Synced: 2026-04-13
+> Synced: 2026-04-17
 
-## ADDED Requirements
+# SPA AI Batch
+
+## Purpose
+
+Batch processing flow that lets the editor run an AI provider over many raw workouts with rate limiting, continue-on-failure, prompt-injection defense, and monthly usage tracking.
+
+## Requirements
 
 ### Requirement: On-demand AI processing for RAW workouts
 

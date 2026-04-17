@@ -1,6 +1,12 @@
-> Synced: 2026-04-13
+> Synced: 2026-04-17
 
-## ADDED Requirements
+# SPA Persistence Port
+
+## Purpose
+
+PersistencePort contract (workouts, templates, profiles, AI providers, sync state, monthly usage) and the Dexie adapter that backs editor-local state in IndexedDB.
+
+## Requirements
 
 ### Requirement: PersistencePort interface
 

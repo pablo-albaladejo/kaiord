@@ -40,6 +40,12 @@ pnpm format                     # Format with Prettier
 # Changesets (for version-worthy changes)
 pnpm exec changeset             # Create changeset before PR
 
+# Archive maintenance
+pnpm lint:archive               # Enforce archive folder-vs-Completed invariant
+pnpm lint:archive-index         # Verify archive/README.md is up to date
+pnpm archive:index              # Regenerate archive/README.md
+pnpm test:scripts               # Run node:test for scripts/*.test.mjs
+
 # NPM optimization (Claude Code skills)
 /check-deps                     # Analyze dependencies (unused, duplicates, security)
 /analyze-bundle                 # Check bundle sizes and optimization opportunities
@@ -201,6 +207,39 @@ When adding a new publishable package to the monorepo, update these CI/CD files:
 - `AGENTS.md` - Strict AI guidance (non-negotiables)
 - `openspec/config.yaml` - Project constraints for AI planning
 - `openspec/specs/` - Domain specs (architecture, KRD format, adapter contracts)
+- `openspec/SPEC_TEMPLATE.md` - Canonical shape for new domain specs
 - `openspec/changes/` - Active feature specs and proposals
+- `openspec/changes/archive/README.md` - Auto-generated index of archived changes. Do NOT hand-edit; run `pnpm archive:index` to refresh. CI verifies it is in sync via `pnpm lint:archive-index`.
+- `scripts/check-spec-format.mjs` - Spec-format lint; run via `pnpm lint:specs`
 - `docs/` - Architecture docs, code style, testing strategies
 - `docs/krd-format.md` - KRD format specification
+
+## Authoring a new capability spec
+
+1. Copy `openspec/SPEC_TEMPLATE.md` to `openspec/specs/<capability-slug>/spec.md`.
+2. Replace every `<...>` placeholder; leaving one will fail `pnpm lint:specs`.
+3. Run `pnpm lint:specs` before committing. It runs the structural lint
+   (tests + static checks) and `npx openspec validate --specs`. CI enforces
+   the same check via `pnpm lint`.
+
+## Archive conventions
+
+Archived OpenSpec changes live under `openspec/changes/archive/YYYY-MM-DD-<slug>/`.
+The date prefix is assigned once when the change is archived and MUST equal the
+`> Completed:` marker at the top of its `proposal.md`. This invariant is enforced
+by `scripts/check-archive-dates.mjs` via `pnpm lint:archive` (runs in CI as part
+of `pnpm lint`).
+
+The auto-generated `openspec/changes/archive/README.md` index MUST stay in sync
+with its source folders — run `pnpm archive:index` after adding or renaming an
+archive. CI verifies freshness via `pnpm lint:archive-index`
+(`scripts/check-archive-index.mjs`), which prints the first differing lines on
+failure so the fix is obvious from the log.
+
+## Repo scripts
+
+`scripts/` holds repo-wide tooling (archive invariants, extension packaging,
+setup helpers). See `scripts/README.md` for the full inventory. Every
+non-trivial script there MUST have a co-located `*.test.mjs` using `node:test`;
+CI runs `pnpm test:scripts` in the lint job, and the husky `pre-commit` hook
+runs the same suite locally.

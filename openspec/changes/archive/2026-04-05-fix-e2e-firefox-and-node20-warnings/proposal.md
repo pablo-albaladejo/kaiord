@@ -1,3 +1,5 @@
+> Completed: 2026-04-05
+
 # Proposal: Fix E2E Firefox/mobile test failures and Node.js 20 deprecation warnings
 
 ## Problem

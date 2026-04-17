@@ -1,3 +1,5 @@
+> Completed: 2026-04-10
+
 ## Why
 
 The Release workflow (`release.yml`) pushes version bump commits directly to `main`, which is blocked by branch protection rules (requires PR + 7 status checks). This means npm publish and GitHub releases never execute. Additionally, `@kaiord/garmin`, `@kaiord/fit`, `@kaiord/tcx`, and `@kaiord/zwo` are missing from the GitHub releases script.

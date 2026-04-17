@@ -55,3 +55,22 @@ if [ $? -ne 0 ]; then
 fi
 
 echo "✅ All tests passed!"
+echo ""
+echo "🧪 Running scripts/ unit tests..."
+
+# Run node:test for scripts/*.test.mjs (archive invariants, etc.)
+pnpm test:scripts
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ scripts/ tests failed! Commit blocked."
+  echo ""
+  echo "Fix the failing tests:"
+  echo "  pnpm test:scripts"
+  echo ""
+  echo "To skip this check (NOT RECOMMENDED):"
+  echo "  git commit --no-verify"
+  exit 1
+fi
+
+echo "✅ scripts/ tests passed!"

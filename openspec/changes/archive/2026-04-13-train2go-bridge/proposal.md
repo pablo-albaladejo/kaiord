@@ -1,3 +1,5 @@
+> Completed: 2026-04-13
+
 ## Why
 
 Pablo's coach programs training plans on Train2Go (app.train2go.com), but there is no way to view those planned workouts alongside user-created workouts in the Kaiord SPA calendar. This forces constant context-switching between apps. A Train2Go bridge extension — following the same architecture as the Garmin bridge — would read the coach's planned workouts and surface them in the unified calendar, enabling the future pipeline: Train2Go → KRD → Garmin Connect.
