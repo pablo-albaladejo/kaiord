@@ -30,6 +30,11 @@ export const PrivacyTab: React.FC = () => {
             existing Garmin Connect session. No credentials leave your browser.
           </li>
           <li>
+            Train2Go import uses a browser extension that reads coaching plans
+            from your existing Train2Go session. No credentials leave your
+            browser.
+          </li>
+          <li>
             LLM API keys are sent directly to the provider (Anthropic, OpenAI,
             or Google) — they never pass through our infrastructure.
           </li>

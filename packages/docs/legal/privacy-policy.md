@@ -40,9 +40,9 @@ The extensions only communicate with the following domains:
 
 - `https://connect.garmin.com/*` — Garmin Bridge content script proxies API requests using your existing session
 - `https://app.train2go.com/*` — Train2Go Bridge content script reads the coaching plan from the page
-- `https://*.kaiord.com/*` — both extensions receive workout requests from, and deliver workouts to, the Kaiord workout editor
+- `https://*.kaiord.com/*` — both extensions receive workout requests from, and deliver workouts to, the Kaiord workout editor (via Chrome's `externally_connectable` messaging)
 
-No other domains are contacted.
+No other domains are contacted in production builds. During local development, both extensions additionally accept messages from `http://localhost:5173` and `http://localhost:5174` (Vite dev server). These origins are stripped from the production manifests (`manifest.prod.json`) before publishing to the Chrome Web Store.
 
 ## Open Source
 
