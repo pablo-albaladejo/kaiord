@@ -17,9 +17,9 @@ Archive a completed OpenSpec change.
    ```
    > Completed: YYYY-MM-DD
    ```
-3. Move `openspec/changes/<slug>/` to `openspec/changes/archive/<slug>/`
+3. Move `openspec/changes/<slug>/` to `openspec/changes/archive/YYYY-MM-DD-<slug>/` where `YYYY-MM-DD` is today's archive date (matching the `> Completed:` marker). The date prefix is assigned once and MUST NOT change afterwards — this preserves `git log --follow` history.
 4. If the change introduced new domain capabilities, sync the relevant specs:
-   - Merge delta specs from `openspec/changes/archive/<slug>/specs/` into `openspec/specs/`
+   - Merge delta specs from `openspec/changes/archive/YYYY-MM-DD-<slug>/specs/` into `openspec/specs/`
    - Or suggest running `/opsx:sync` for a thorough update
 
 ## After Archiving
