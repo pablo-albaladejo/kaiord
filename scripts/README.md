@@ -2,6 +2,36 @@
 
 This directory contains utility scripts for the Kaiord project.
 
+## Archive invariants (gated by CI)
+
+Every non-trivial script here ships with a co-located `*.test.mjs`
+exercised by `pnpm test:scripts` (CI-enforced in the `lint` job and
+in the husky `pre-commit` hook).
+
+| Script                       | Purpose                                                                                                                                                                                                                                                 | Invoked by                                | Test file                                   |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------- | ------------------------------------------- |
+| `check-archive-dates.mjs`    | Fail if any `openspec/changes/archive/YYYY-MM-DD-<slug>/` folder prefix disagrees with the `> Completed:` marker in its `proposal.md`. Also rejects invalid calendar dates (e.g. `2026-02-31`).                                                         | `pnpm lint:archive` (→ `pnpm lint`)       | `check-archive-dates.test.mjs` (5 cases)    |
+| `check-archive-index.mjs`    | Drift guard: regenerate `openspec/changes/archive/README.md` in memory and fail on any diff (including a missing README.md), so a contributor who forgets `pnpm archive:index` cannot merge a stale index. Prints the first differing lines on failure. | `pnpm lint:archive-index` (→ `pnpm lint`) | `check-archive-index.test.mjs` (3 cases)    |
+| `generate-archive-index.mjs` | Render the auto-generated archive README as a reverse-chronological table with per-change summaries extracted from `proposal.md`. Exports `buildIndex()` so the drift guard reuses the same generator — no parallel reimplementation.                   | `pnpm archive:index`                      | `generate-archive-index.test.mjs` (6 cases) |
+
+## Authoring guide for new scripts
+
+1. Every new script in `scripts/` SHOULD have a co-located
+   `*.test.mjs` using `node:test`. It will be picked up automatically
+   by `pnpm test:scripts` via the `scripts/*.test.mjs` glob.
+2. Entry-point guard: use
+   `if (import.meta.url === pathToFileURL(process.argv[1]).href)`
+   from `node:url` — string concatenation is Windows-hostile.
+3. Path resolution: resolve repo paths via `import.meta.url` +
+   `fileURLToPath` so the script works from any cwd. Never rely on
+   `process.cwd()`.
+4. Side-effect-free exports: expose the core logic as a pure function
+   (e.g. `checkArchives()`, `buildIndex()`) so tests can exercise it
+   without spawning a subprocess when possible.
+5. CI enforcement: any script gating `pnpm lint` MUST be documented
+   in the table above, referenced in `CLAUDE.md` Commands, and
+   covered by `pnpm test:scripts`.
+
 ## test-ci-workflows.sh
 
 Simulates GitHub Actions CI workflows locally to catch deployment issues before pushing to GitHub.

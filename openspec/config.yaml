@@ -47,3 +47,9 @@ rules:
     - Include test tasks after each implementation task
     - End with changeset and documentation tasks
     - Use checkbox format for /opsx:apply tracking
+  archive:
+    - "Archived changes MUST live under openspec/changes/archive/YYYY-MM-DD-<slug>/"
+    - "The folder date prefix MUST equal the `> Completed: YYYY-MM-DD` marker inside proposal.md"
+    - "The folder date prefix MUST be assigned once at archive time and MUST NOT change afterwards (preserves `git log --follow` history)"
+    - "`openspec/changes/archive/README.md` MUST be treated as auto-generated — contributors MUST run `pnpm archive:index` to refresh it and MUST NOT hand-edit it"
+    - "CI MUST enforce both invariants via `pnpm lint:archive` (folder-date equivalence) and `pnpm lint:archive-index` (index freshness)"
