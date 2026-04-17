@@ -1,4 +1,6 @@
-## ADDED Requirements
+> Synced: 2026-04-17
+
+## Requirements
 
 ### Requirement: Extension manifest
 

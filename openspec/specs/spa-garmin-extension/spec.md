@@ -1,6 +1,6 @@
-> Synced: 2026-04-13 (settings-train2go-bridge)
+> Synced: 2026-04-17
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Extension detection
 

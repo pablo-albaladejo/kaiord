@@ -1,6 +1,6 @@
-> Synced: 2026-04-13
+> Synced: 2026-04-17
 
-## ADDED Requirements
+## Requirements
 
 ### Requirement: Workout lifecycle states
 
