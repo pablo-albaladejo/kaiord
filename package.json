@@ -47,7 +47,8 @@
   },
   "scripts": {
     "build": "pnpm -r build",
-    "test": "pnpm -r test",
+    "test": "pnpm -r test && pnpm test:scripts",
+    "test:scripts": "node --test scripts/*.test.mjs",
     "lint": "pnpm -r lint",
     "lint:fix": "pnpm -r lint:fix && prettier --write .",
     "lint:packages": "pnpm -r lint",

@@ -46,13 +46,13 @@ describe("background service worker", () => {
       const validate = makeManifestValidator();
 
       expect(validate({ ...BRIDGE_MANIFEST, capabilities: ["bogus"] })).toEqual(
-        expect.arrayContaining([expect.stringMatching(/not in allowed enum/)]),
+        expect.arrayContaining([expect.stringMatching(/not in allowed enum/)])
       );
       expect(validate({ ...BRIDGE_MANIFEST, protocolVersion: 0 })).toEqual(
-        expect.arrayContaining([expect.stringMatching(/protocolVersion/)]),
+        expect.arrayContaining([expect.stringMatching(/protocolVersion/)])
       );
       expect(validate({ ...BRIDGE_MANIFEST, id: 42 })).toEqual(
-        expect.arrayContaining([expect.stringMatching(/id must be string/)]),
+        expect.arrayContaining([expect.stringMatching(/id must be string/)])
       );
     });
   });
@@ -69,8 +69,7 @@ describe("background service worker", () => {
       const errors = [];
       if (typeof m?.id !== "string") errors.push("id must be string");
       if (typeof m?.name !== "string") errors.push("name must be string");
-      if (typeof m?.version !== "string")
-        errors.push("version must be string");
+      if (typeof m?.version !== "string") errors.push("version must be string");
       if (
         typeof m?.protocolVersion !== "number" ||
         !Number.isInteger(m.protocolVersion) ||

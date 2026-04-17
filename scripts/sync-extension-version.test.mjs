@@ -21,15 +21,16 @@ import { test } from "node:test";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCRIPT_SRC = readFileSync(
   resolve(__dirname, "sync-extension-version.mjs"),
-  "utf8",
+  "utf8"
 );
 
 function mkHarness(extName, prep) {
-  const root = realpathSync(
-    mkdtempSync(join(tmpdir(), "kaiord-sync-test-")),
-  );
+  const root = realpathSync(mkdtempSync(join(tmpdir(), "kaiord-sync-test-")));
   mkdirSync(join(root, "scripts"), { recursive: true });
-  writeFileSync(join(root, "scripts", "sync-extension-version.mjs"), SCRIPT_SRC);
+  writeFileSync(
+    join(root, "scripts", "sync-extension-version.mjs"),
+    SCRIPT_SRC
+  );
   const pkgDir = join(root, "packages", extName);
   mkdirSync(pkgDir, { recursive: true });
   prep(pkgDir);
@@ -39,7 +40,7 @@ function mkHarness(extName, prep) {
       return spawnSync(
         process.execPath,
         [join(root, "scripts", "sync-extension-version.mjs"), extName],
-        { cwd: root, encoding: "utf8" },
+        { cwd: root, encoding: "utf8" }
       );
     },
     cleanup() {
@@ -63,7 +64,10 @@ const BG_010 = `const BRIDGE_MANIFEST = {
 
 test("happy path: package bumped → manifests + background.js all updated", () => {
   const h = mkHarness("garmin-bridge", (pkgDir) => {
-    writeFileSync(join(pkgDir, "package.json"), JSON.stringify({ version: "0.2.0" }));
+    writeFileSync(
+      join(pkgDir, "package.json"),
+      JSON.stringify({ version: "0.2.0" })
+    );
     writeFileSync(join(pkgDir, "manifest.json"), MANIFEST_010);
     writeFileSync(join(pkgDir, "manifest.prod.json"), MANIFEST_010);
     writeFileSync(join(pkgDir, "background.js"), BG_010);
@@ -100,13 +104,16 @@ test("idempotent: re-running with all versions matching produces no edits", () =
 
 test("fail-loud: background.js exists but BRIDGE_MANIFEST literal missing", () => {
   const h = mkHarness("garmin-bridge", (pkgDir) => {
-    writeFileSync(join(pkgDir, "package.json"), JSON.stringify({ version: "0.2.0" }));
+    writeFileSync(
+      join(pkgDir, "package.json"),
+      JSON.stringify({ version: "0.2.0" })
+    );
     writeFileSync(join(pkgDir, "manifest.json"), MANIFEST_010);
     writeFileSync(join(pkgDir, "manifest.prod.json"), MANIFEST_010);
     // Renamed constant — sync cannot find it; must error, not no-op.
     writeFileSync(
       join(pkgDir, "background.js"),
-      "const RENAMED_MANIFEST = { id: 'x', version: '0.1.0' };\n",
+      "const RENAMED_MANIFEST = { id: 'x', version: '0.1.0' };\n"
     );
   });
   try {
@@ -120,7 +127,10 @@ test("fail-loud: background.js exists but BRIDGE_MANIFEST literal missing", () =
 
 test("missing background.js is OK (script proceeds with manifests only)", () => {
   const h = mkHarness("garmin-bridge", (pkgDir) => {
-    writeFileSync(join(pkgDir, "package.json"), JSON.stringify({ version: "0.2.0" }));
+    writeFileSync(
+      join(pkgDir, "package.json"),
+      JSON.stringify({ version: "0.2.0" })
+    );
     writeFileSync(join(pkgDir, "manifest.json"), MANIFEST_010);
     writeFileSync(join(pkgDir, "manifest.prod.json"), MANIFEST_010);
     // No background.js at all.
