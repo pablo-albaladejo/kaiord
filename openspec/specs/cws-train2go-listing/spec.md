@@ -1,8 +1,12 @@
-> Synced: 2026-04-14
+> Synced: 2026-04-17
 
 # CWS Train2Go Listing
 
-Chrome Web Store listing assets and CI/CD publishing for the train2go-bridge extension.
+## Purpose
+
+Chrome Web Store listing assets (store description, privacy justification, submission metadata) and CI/CD integration for the train2go-bridge extension.
+
+## Requirements
 
 ### Requirement: Train2Go Bridge store listing documentation
 

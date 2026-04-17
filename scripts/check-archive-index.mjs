@@ -15,13 +15,7 @@ import { buildIndex } from "./generate-archive-index.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
-const README = join(
-  REPO_ROOT,
-  "openspec",
-  "changes",
-  "archive",
-  "README.md"
-);
+const README = join(REPO_ROOT, "openspec", "changes", "archive", "README.md");
 
 export function checkIndex() {
   const expected = buildIndex();

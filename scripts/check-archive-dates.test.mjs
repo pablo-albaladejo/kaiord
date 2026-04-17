@@ -1,12 +1,7 @@
 // Tests for scripts/check-archive-dates.mjs using node:test.
 
 import { strict as assert } from "node:assert";
-import {
-  mkdirSync,
-  mkdtempSync,
-  rmSync,
-  writeFileSync,
-} from "node:fs";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -28,14 +23,14 @@ import { readFileSync, realpathSync } from "node:fs";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const SCRIPT_SRC = readFileSync(
   resolve(__dirname, "check-archive-dates.mjs"),
-  "utf8",
+  "utf8"
 );
 
 function mkHarness(prep) {
   // realpath the tmp dir so `process.argv[1]` and `import.meta.url` agree
   // under macOS's /var -> /private/var symlink.
   const root = realpathSync(
-    mkdtempSync(join(tmpdir(), "kaiord-archive-test-")),
+    mkdtempSync(join(tmpdir(), "kaiord-archive-test-"))
   );
   mkdirSync(join(root, "openspec", "changes", "archive"), { recursive: true });
   mkdirSync(join(root, "scripts"), { recursive: true });
@@ -47,7 +42,7 @@ function mkHarness(prep) {
       const result = spawnSync(
         process.execPath,
         [join(root, "scripts", "check-archive-dates.mjs")],
-        { cwd: root, encoding: "utf8" },
+        { cwd: root, encoding: "utf8" }
       );
       return result;
     },
@@ -67,7 +62,7 @@ test("matching folder date and Completed marker passes", () => {
     writeProposal(
       archive,
       "2026-04-17-sample-change",
-      "> Completed: 2026-04-17\n\n# Sample\n",
+      "> Completed: 2026-04-17\n\n# Sample\n"
     );
   });
   try {
@@ -84,7 +79,7 @@ test("mismatched folder date and Completed marker fails", () => {
     writeProposal(
       archive,
       "2026-04-17-sample-change",
-      "> Completed: 2026-04-15\n\n# Sample\n",
+      "> Completed: 2026-04-15\n\n# Sample\n"
     );
   });
   try {
@@ -105,7 +100,7 @@ test("missing Completed marker is now an error (no more soft warnings)", () => {
     assert.equal(result.status, 1);
     assert.match(
       result.stderr,
-      /proposal\.md is missing the "> Completed: YYYY-MM-DD" marker/,
+      /proposal\.md is missing the "> Completed: YYYY-MM-DD" marker/
     );
   } finally {
     h.cleanup();
@@ -118,7 +113,7 @@ test("folder prefix with invalid calendar date is rejected", () => {
     writeProposal(
       archive,
       "2026-02-31-bad-date",
-      "> Completed: 2026-02-31\n\n# Sample\n",
+      "> Completed: 2026-02-31\n\n# Sample\n"
     );
   });
   try {

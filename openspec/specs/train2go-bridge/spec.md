@@ -1,4 +1,12 @@
-## ADDED Requirements
+> Synced: 2026-04-17
+
+# Train2Go Bridge
+
+## Purpose
+
+Chrome extension that imports coaching plans from Train2Go into the workout editor by read-only DOM access on `app.train2go.com` — no credentials stored, no persistence, content-script-only communication.
+
+## Requirements
 
 ### Requirement: Extension manifest
 

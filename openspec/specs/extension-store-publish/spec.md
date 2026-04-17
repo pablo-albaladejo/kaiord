@@ -1,4 +1,10 @@
-> Synced: 2026-04-14
+> Synced: 2026-04-17
+
+# Extension Store Publish
+
+## Purpose
+
+Generic requirements that any Chrome extension in the monorepo MUST meet before CWS submission: icons, production manifest, store listing, and privacy documentation.
 
 ## Requirements
 

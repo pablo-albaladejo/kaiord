@@ -18,18 +18,16 @@ import { test } from "node:test";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const GENERATOR_SRC = readFileSync(
   resolve(__dirname, "generate-archive-index.mjs"),
-  "utf8",
+  "utf8"
 );
 
 function mkHarness(prep) {
-  const root = realpathSync(
-    mkdtempSync(join(tmpdir(), "kaiord-index-test-")),
-  );
+  const root = realpathSync(mkdtempSync(join(tmpdir(), "kaiord-index-test-")));
   mkdirSync(join(root, "openspec", "changes", "archive"), { recursive: true });
   mkdirSync(join(root, "scripts"), { recursive: true });
   writeFileSync(
     join(root, "scripts", "generate-archive-index.mjs"),
-    GENERATOR_SRC,
+    GENERATOR_SRC
   );
   prep(join(root, "openspec", "changes", "archive"));
   return {
@@ -38,13 +36,13 @@ function mkHarness(prep) {
       return spawnSync(
         process.execPath,
         [join(root, "scripts", "generate-archive-index.mjs")],
-        { cwd: root, encoding: "utf8" },
+        { cwd: root, encoding: "utf8" }
       );
     },
     readReadme() {
       return readFileSync(
         join(root, "openspec", "changes", "archive", "README.md"),
-        "utf8",
+        "utf8"
       );
     },
     cleanup() {
@@ -63,7 +61,7 @@ test("heading with Proposal: prefix is stripped", () => {
     writeProposal(
       archive,
       "2026-04-10-sample-change",
-      "# Proposal: Sample Change\n\nIrrelevant body.\n",
+      "# Proposal: Sample Change\n\nIrrelevant body.\n"
     );
   });
   try {
@@ -83,7 +81,7 @@ test("falls back to first prose line when no heading", () => {
     writeProposal(
       archive,
       "2026-04-11-prose-only",
-      "> Completed: 2026-04-11\n\nThis change does the thing.\n",
+      "> Completed: 2026-04-11\n\nThis change does the thing.\n"
     );
   });
   try {
@@ -106,11 +104,13 @@ test("reverse-chronological sort with same-date tiebreak", () => {
     const result = h.run();
     assert.equal(result.status, 0);
     const readme = h.readReadme();
-    const rows = readme
-      .split("\n")
-      .filter((l) => l.startsWith("| 2026-"));
+    const rows = readme.split("\n").filter((l) => l.startsWith("| 2026-"));
     assert.equal(rows[0].includes("newest"), true, "newest first");
-    assert.equal(rows[1].includes("alpha"), true, "alpha before beta (same date, slug order)");
+    assert.equal(
+      rows[1].includes("alpha"),
+      true,
+      "alpha before beta (same date, slug order)"
+    );
     assert.equal(rows[2].includes("beta"), true);
   } finally {
     h.cleanup();
@@ -119,11 +119,7 @@ test("reverse-chronological sort with same-date tiebreak", () => {
 
 test("pipe characters in summary are escaped", () => {
   const h = mkHarness((archive) => {
-    writeProposal(
-      archive,
-      "2026-04-12-pipe",
-      "# Title with a | pipe inside\n",
-    );
+    writeProposal(archive, "2026-04-12-pipe", "# Title with a | pipe inside\n");
   });
   try {
     const result = h.run();

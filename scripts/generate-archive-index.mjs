@@ -10,7 +10,13 @@
 //
 // Idempotent — running twice produces a byte-identical file.
 
-import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  readdirSync,
+  readFileSync,
+  statSync,
+  writeFileSync,
+} from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -65,7 +71,9 @@ export function buildIndex() {
     rows.push({ date, slug, entry, summary });
   }
 
-  rows.sort((a, b) => (a.date > b.date ? -1 : a.date < b.date ? 1 : a.slug.localeCompare(b.slug)));
+  rows.sort((a, b) =>
+    a.date > b.date ? -1 : a.date < b.date ? 1 : a.slug.localeCompare(b.slug)
+  );
 
   const header = [
     "# Archived Changes",
@@ -80,7 +88,7 @@ export function buildIndex() {
   ];
   const lines = rows.map(
     ({ date, slug, entry, summary }) =>
-      `| ${date} | [\`${slug}\`](./${entry}/) | ${summary.replace(/\|/g, "\\|")} |`,
+      `| ${date} | [\`${slug}\`](./${entry}/) | ${summary.replace(/\|/g, "\\|")} |`
   );
 
   return [...header, ...lines, ""].join("\n");
