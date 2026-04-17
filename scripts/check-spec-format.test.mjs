@@ -37,16 +37,19 @@ test("missing Synced header is rejected", () => {
   const violations = checkSpec(FILE, src);
   assert.ok(
     violations.some((v) => v.includes("> Synced: YYYY-MM-DD")),
-    "expected Synced violation",
+    "expected Synced violation"
   );
 });
 
 test("missing Purpose is rejected", () => {
-  const src = happy.replace(/## Purpose\n\nA sample capability used only for tests.\n\n/, "");
+  const src = happy.replace(
+    /## Purpose\n\nA sample capability used only for tests.\n\n/,
+    ""
+  );
   const violations = checkSpec(FILE, src);
   assert.ok(
     violations.some((v) => v.includes('"## Purpose"')),
-    "expected Purpose violation",
+    "expected Purpose violation"
   );
 });
 
@@ -55,16 +58,19 @@ test("missing Requirements is rejected", () => {
   const violations = checkSpec(FILE, src);
   assert.ok(
     violations.some((v) => v.includes('"## Requirements"')),
-    "expected Requirements violation",
+    "expected Requirements violation"
   );
 });
 
 test("two H1 headers are rejected", () => {
-  const src = happy.replace("# Sample Capability", "# Sample Capability\n\n# Extra H1");
+  const src = happy.replace(
+    "# Sample Capability",
+    "# Sample Capability\n\n# Extra H1"
+  );
   const violations = checkSpec(FILE, src);
   assert.ok(
     violations.some((v) => v.includes("H1 title")),
-    "expected H1 violation",
+    "expected H1 violation"
   );
 });
 
@@ -73,7 +79,7 @@ test("ADDED Requirements delta header is rejected", () => {
   const violations = checkSpec(FILE, src);
   assert.ok(
     violations.some((v) => v.includes("change-delta header")),
-    "expected delta-header violation",
+    "expected delta-header violation"
   );
 });
 
@@ -82,7 +88,7 @@ test("placeholder in heading is rejected", () => {
   const violations = checkSpec(FILE, src);
   assert.ok(
     violations.some((v) => v.includes("<Placeholder>")),
-    "expected placeholder violation",
+    "expected placeholder violation"
   );
 });
 
@@ -109,7 +115,7 @@ Should be above Requirements.
   const violations = checkSpec(FILE, src);
   assert.ok(
     violations.some((v) => v.includes("Purpose") && v.includes("before")),
-    "expected ordering violation",
+    "expected ordering violation"
   );
 });
 
@@ -132,18 +138,18 @@ Sample.
   const violations = checkSpec(FILE, src);
   assert.ok(
     violations.some((v) => v.includes("orphan scenario")),
-    "expected orphan-scenario violation",
+    "expected orphan-scenario violation"
   );
 });
 
 test("Synced annotation with unknown change slug is rejected", () => {
   const src = happy.replace(
     "> Synced: 2026-04-17",
-    "> Synced: 2026-04-17 (this-slug-does-not-exist-12345)",
+    "> Synced: 2026-04-17 (this-slug-does-not-exist-12345)"
   );
   const violations = checkSpec(FILE, src);
   assert.ok(
     violations.some((v) => v.includes("unknown change slug")),
-    "expected unknown-slug violation",
+    "expected unknown-slug violation"
   );
 });

@@ -27,9 +27,9 @@ const TEMPLATE_FILE = join(REPO_ROOT, "openspec", "SPEC_TEMPLATE.md");
 const CHANGES_DIR = join(REPO_ROOT, "openspec", "changes");
 const ARCHIVE_DIR = join(CHANGES_DIR, "archive");
 
-const syncedRe = /^> Synced: \d{4}-\d{2}-\d{2}(?: \(([a-z0-9][a-z0-9-]*)\))?\s*$/;
-const deltaHeaderRe =
-  /^## (ADDED|MODIFIED|REMOVED|RENAMED) Requirements\b/m;
+const syncedRe =
+  /^> Synced: \d{4}-\d{2}-\d{2}(?: \(([a-z0-9][a-z0-9-]*)\))?\s*$/;
+const deltaHeaderRe = /^## (ADDED|MODIFIED|REMOVED|RENAMED) Requirements\b/m;
 const placeholderInHeadingRe = /^#{1,6} .*<[A-Z][^>]*>/m;
 
 function changeSlugExists(slug) {
@@ -37,8 +37,8 @@ function changeSlugExists(slug) {
   const activeDir = join(CHANGES_DIR, slug);
   if (existsSync(activeDir) && statSync(activeDir).isDirectory()) return true;
   if (!existsSync(ARCHIVE_DIR)) return false;
-  const archived = readdirSync(ARCHIVE_DIR).filter((name) =>
-    name === slug || name.endsWith(`-${slug}`),
+  const archived = readdirSync(ARCHIVE_DIR).filter(
+    (name) => name === slug || name.endsWith(`-${slug}`)
   );
   return archived.length > 0;
 }
@@ -51,18 +51,18 @@ export function checkSpec(file, src) {
 
   if (!syncedMatch) {
     violations.push(
-      `${file}: first non-empty line must match "> Synced: YYYY-MM-DD" or "> Synced: YYYY-MM-DD (<change-slug>)"`,
+      `${file}: first non-empty line must match "> Synced: YYYY-MM-DD" or "> Synced: YYYY-MM-DD (<change-slug>)"`
     );
   } else if (syncedMatch[1] && !changeSlugExists(syncedMatch[1])) {
     violations.push(
-      `${file}: Synced annotation references unknown change slug "${syncedMatch[1]}" — no matching folder under openspec/changes/ or openspec/changes/archive/`,
+      `${file}: Synced annotation references unknown change slug "${syncedMatch[1]}" — no matching folder under openspec/changes/ or openspec/changes/archive/`
     );
   }
 
   const h1Lines = lines.filter((l) => /^# [^#]/.test(l));
   if (h1Lines.length !== 1) {
     violations.push(
-      `${file}: expected exactly one H1 title, found ${h1Lines.length}`,
+      `${file}: expected exactly one H1 title, found ${h1Lines.length}`
     );
   }
 
@@ -73,26 +73,24 @@ export function checkSpec(file, src) {
   }
   if (reqIdx === -1) {
     violations.push(`${file}: missing "## Requirements" section`);
-  } else if (
-    lines.filter((l) => /^## Requirements\b/.test(l)).length !== 1
-  ) {
+  } else if (lines.filter((l) => /^## Requirements\b/.test(l)).length !== 1) {
     violations.push(`${file}: expected exactly one "## Requirements" section`);
   }
   if (purposeIdx !== -1 && reqIdx !== -1 && purposeIdx > reqIdx) {
     violations.push(
-      `${file}: "## Purpose" must appear before "## Requirements"`,
+      `${file}: "## Purpose" must appear before "## Requirements"`
     );
   }
 
   if (deltaHeaderRe.test(src)) {
     violations.push(
-      `${file}: uses change-delta header (## ADDED|MODIFIED|REMOVED|RENAMED Requirements) — those belong in openspec/changes/<slug>/specs/`,
+      `${file}: uses change-delta header (## ADDED|MODIFIED|REMOVED|RENAMED Requirements) — those belong in openspec/changes/<slug>/specs/`
     );
   }
 
   if (placeholderInHeadingRe.test(src)) {
     violations.push(
-      `${file}: leaves a "<Placeholder>" inside a heading — looks like an unfilled template`,
+      `${file}: leaves a "<Placeholder>" inside a heading — looks like an unfilled template`
     );
   }
 
@@ -110,9 +108,12 @@ export function checkSpec(file, src) {
       continue;
     }
     if (/^#### Scenario:/.test(line)) {
-      if (!/^## Requirements\b/.test(lastH2) || !/^### Requirement:/.test(lastH3)) {
+      if (
+        !/^## Requirements\b/.test(lastH2) ||
+        !/^### Requirement:/.test(lastH3)
+      ) {
         violations.push(
-          `${file}: orphan scenario "${line.trim()}" — must nest under a "### Requirement:" inside "## Requirements"`,
+          `${file}: orphan scenario "${line.trim()}" — must nest under a "### Requirement:" inside "## Requirements"`
         );
       }
     }
@@ -161,7 +162,9 @@ function walk() {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const violations = walk();
   if (violations.length > 0) {
-    console.error(`\nopenspec/specs format violations (${violations.length}):\n`);
+    console.error(
+      `\nopenspec/specs format violations (${violations.length}):\n`
+    );
     for (const v of violations) console.error(`  ${v}`);
     console.error("\nSee openspec/SPEC_TEMPLATE.md for the canonical shape.");
     process.exit(1);
