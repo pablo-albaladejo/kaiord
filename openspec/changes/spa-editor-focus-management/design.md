@@ -173,7 +173,7 @@ The `workoutHistory.push` + `selectionHistory.push` pair is centralized in a sin
 ### Decision 4: Per-action focus rules implemented as pure helpers, one per file
 
 **Purity constraint:** Focus-rule helpers are pure with respect to `UIWorkout` only. They MUST NOT import from `react`, `react-dom`, `@testing-library/*`, or any DOM API (`document`, `window`, `HTMLElement`). A CI grep asserts this:
-```
+```bash
 grep -R -E "from ['\"]react|document\\.|window\\.|HTMLElement" packages/workout-spa-editor/src/store/focus-rules/
 ```
 MUST return zero matches. This keeps the helpers trivially unit-testable and prevents accidental DOM coupling.
