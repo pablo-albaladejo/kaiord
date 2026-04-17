@@ -34,43 +34,58 @@ describe("background service worker", () => {
     });
 
     it("validates against bridgeManifestSchema (replica of the SPA contract)", () => {
-      // Mirrors the Zod rules at
-      // packages/workout-spa-editor/src/types/bridge-schemas.ts:20-26
-      // exactly: id/name/version are bare z.string() (no min length),
-      // protocolVersion is positive int, capabilities is z.array(...) (no
-      // .nonempty()) of values from bridgeCapabilitySchema. If you
-      // change the SPA schema, change this replica.
-      const ALLOWED_CAPABILITIES = new Set([
-        "read:workouts",
-        "write:workouts",
-        "read:body",
-        "read:sleep",
-        "read:training-plan",
-      ]);
-      const validate = (m) => {
-        const errors = [];
-        if (typeof m?.id !== "string") errors.push("id must be string");
-        if (typeof m?.name !== "string") errors.push("name must be string");
-        if (typeof m?.version !== "string")
-          errors.push("version must be string");
-        if (
-          typeof m?.protocolVersion !== "number" ||
-          !Number.isInteger(m.protocolVersion) ||
-          m.protocolVersion < 1
-        )
-          errors.push("protocolVersion must be a positive integer");
-        if (!Array.isArray(m?.capabilities))
-          errors.push("capabilities must be an array");
-        for (const c of m?.capabilities ?? []) {
-          if (!ALLOWED_CAPABILITIES.has(c))
-            errors.push(`capabilities[] contains "${c}" not in allowed enum`);
-        }
-        return errors;
-      };
+      // Mirrors the Zod rules in `bridgeManifestSchema` from
+      // packages/workout-spa-editor/src/types/bridge-schemas.ts.
+      // If you change the SPA schema, change this replica.
+      const validate = makeManifestValidator();
 
       expect(validate(BRIDGE_MANIFEST)).toEqual([]);
     });
+
+    it("replica rejects malformed manifests (not a pass-everything stub)", () => {
+      const validate = makeManifestValidator();
+
+      expect(validate({ ...BRIDGE_MANIFEST, capabilities: ["bogus"] })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/not in allowed enum/)]),
+      );
+      expect(validate({ ...BRIDGE_MANIFEST, protocolVersion: 0 })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/protocolVersion/)]),
+      );
+      expect(validate({ ...BRIDGE_MANIFEST, id: 42 })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/id must be string/)]),
+      );
+    });
   });
+
+  function makeManifestValidator() {
+    const ALLOWED_CAPABILITIES = new Set([
+      "read:workouts",
+      "write:workouts",
+      "read:body",
+      "read:sleep",
+      "read:training-plan",
+    ]);
+    return (m) => {
+      const errors = [];
+      if (typeof m?.id !== "string") errors.push("id must be string");
+      if (typeof m?.name !== "string") errors.push("name must be string");
+      if (typeof m?.version !== "string")
+        errors.push("version must be string");
+      if (
+        typeof m?.protocolVersion !== "number" ||
+        !Number.isInteger(m.protocolVersion) ||
+        m.protocolVersion < 1
+      )
+        errors.push("protocolVersion must be a positive integer");
+      if (!Array.isArray(m?.capabilities))
+        errors.push("capabilities must be an array");
+      for (const c of m?.capabilities ?? []) {
+        if (!ALLOWED_CAPABILITIES.has(c))
+          errors.push(`capabilities[] contains "${c}" not in allowed enum`);
+      }
+      return errors;
+    };
+  }
 
   describe("findTrain2GoTab", () => {
     it("returns null when no tab is open", async () => {

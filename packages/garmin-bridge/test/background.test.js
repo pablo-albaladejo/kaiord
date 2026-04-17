@@ -44,43 +44,63 @@ describe("background.js", () => {
     });
 
     it("validates against bridgeManifestSchema (replica of the SPA contract)", () => {
-      // Mirrors the Zod rules at
-      // packages/workout-spa-editor/src/types/bridge-schemas.ts:20-26
-      // exactly: id/name/version are bare z.string() (no min length),
+      // Mirrors the Zod rules in `bridgeManifestSchema` from
+      // packages/workout-spa-editor/src/types/bridge-schemas.ts exactly:
+      // id/name/version are bare z.string() (no min length),
       // protocolVersion is positive int, capabilities is z.array(...) (no
       // .nonempty()) of values from bridgeCapabilitySchema. If you change
       // the SPA schema, change this replica.
-      const ALLOWED_CAPABILITIES = new Set([
-        "read:workouts",
-        "write:workouts",
-        "read:body",
-        "read:sleep",
-        "read:training-plan",
-      ]);
-      const validate = (m) => {
-        const errors = [];
-        if (typeof m?.id !== "string") errors.push("id must be string");
-        if (typeof m?.name !== "string") errors.push("name must be string");
-        if (typeof m?.version !== "string")
-          errors.push("version must be string");
-        if (
-          typeof m?.protocolVersion !== "number" ||
-          !Number.isInteger(m.protocolVersion) ||
-          m.protocolVersion < 1
-        )
-          errors.push("protocolVersion must be a positive integer");
-        if (!Array.isArray(m?.capabilities))
-          errors.push("capabilities must be an array");
-        for (const c of m?.capabilities ?? []) {
-          if (!ALLOWED_CAPABILITIES.has(c))
-            errors.push(`capabilities[] contains "${c}" not in allowed enum`);
-        }
-        return errors;
-      };
+      const validate = makeManifestValidator();
 
       expect(validate(BRIDGE_MANIFEST)).toEqual([]);
     });
+
+    it("replica rejects malformed manifests (not a pass-everything stub)", () => {
+      const validate = makeManifestValidator();
+
+      expect(validate({ ...BRIDGE_MANIFEST, capabilities: ["bogus"] })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/not in allowed enum/)]),
+      );
+      expect(validate({ ...BRIDGE_MANIFEST, protocolVersion: 0 })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/protocolVersion/)]),
+      );
+      expect(validate({ ...BRIDGE_MANIFEST, id: 42 })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/id must be string/)]),
+      );
+    });
   });
+
+  // Inline replica of `bridgeManifestSchema` — see the test above for the
+  // canonical comment. Extracted so the negative-path test can re-use it.
+  function makeManifestValidator() {
+    const ALLOWED_CAPABILITIES = new Set([
+      "read:workouts",
+      "write:workouts",
+      "read:body",
+      "read:sleep",
+      "read:training-plan",
+    ]);
+    return (m) => {
+      const errors = [];
+      if (typeof m?.id !== "string") errors.push("id must be string");
+      if (typeof m?.name !== "string") errors.push("name must be string");
+      if (typeof m?.version !== "string")
+        errors.push("version must be string");
+      if (
+        typeof m?.protocolVersion !== "number" ||
+        !Number.isInteger(m.protocolVersion) ||
+        m.protocolVersion < 1
+      )
+        errors.push("protocolVersion must be a positive integer");
+      if (!Array.isArray(m?.capabilities))
+        errors.push("capabilities must be an array");
+      for (const c of m?.capabilities ?? []) {
+        if (!ALLOWED_CAPABILITIES.has(c))
+          errors.push(`capabilities[] contains "${c}" not in allowed enum`);
+      }
+      return errors;
+    };
+  }
 
   describe("getCsrfToken", () => {
     it("returns null when no token stored", async () => {
@@ -303,6 +323,27 @@ describe("background.js", () => {
           gcApi: { ok: true, data: [{ workoutId: 1 }] },
         },
       });
+    });
+
+    it("manifest fields take precedence if upstream API leaks an id/version", async () => {
+      // Defends against a future Garmin API change that returns its own
+      // `id`/`version` keys at the top level of the response. The spread
+      // order in checkSession (`{ ...BRIDGE_MANIFEST, csrfCaptured, gcApi }`)
+      // ensures the manifest-only fields cannot be overwritten by the
+      // upstream payload (gcApi keeps the rogue keys nested but they
+      // never bubble up to response.data).
+      await chrome.storage.session.set({ csrfToken: "abc" });
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 7 }]));
+      chrome.tabs.sendMessage.mockImplementation((_tabId, _msg, cb) => {
+        cb({ ok: true, id: "ATTACKER", version: "99.9.9", data: [] });
+      });
+
+      const result = await checkSession();
+
+      expect(result.id).toBe("garmin-bridge");
+      expect(result.version).toBe("0.1.0");
+      // The rogue keys are inside gcApi, which Zod will strip.
+      expect(result.gcApi.id).toBe("ATTACKER");
     });
 
     it("checkSession returns manifest fields alongside session status", async () => {

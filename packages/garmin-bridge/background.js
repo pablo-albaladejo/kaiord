@@ -81,12 +81,17 @@ const garminFetch = async (path, method, body) => {
  *   { ok: true, protocolVersion: 1, data: <this object> }
  *
  * The SPA reads `response.data` and passes it to
- * `bridgeManifestSchema.safeParse` at
- * `packages/workout-spa-editor/src/adapters/bridge/bridge-registry-helpers.ts:21`.
+ * `bridgeManifestSchema.safeParse` (defined in
+ * `packages/workout-spa-editor/src/types/bridge-schemas.ts`, called
+ * from `parseManifestFromPing` in
+ * `packages/workout-spa-editor/src/adapters/bridge/bridge-registry-helpers.ts`).
  * Zod strips the session-status fields (csrfCaptured, gcApi); they
  * stay available to popup/UI consumers that read `response.data`
  * directly. Manifest keys (id, name, version, protocolVersion,
- * capabilities) take precedence on collision.
+ * capabilities) take precedence on collision (the spread
+ * `{ ...BRIDGE_MANIFEST, csrfCaptured, gcApi }` writes them last so
+ * any rogue id/version coming back from the upstream API cannot
+ * spoof the manifest).
  */
 const checkSession = async () => {
   const csrfToken = await getCsrfToken();
