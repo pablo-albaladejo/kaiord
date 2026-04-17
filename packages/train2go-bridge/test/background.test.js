@@ -143,37 +143,47 @@ describe("background service worker", () => {
       });
     });
 
-    it("manifest fields take precedence if upstream API leaks an id/version", async () => {
+    it("manifest fields take precedence if parsePingJson ever returns colliding keys", async () => {
       // Symmetric defense to the garmin-bridge "manifest fields take
-      // precedence" test. parsePingJson() shapes session data; if it
-      // ever started returning `id`/`version` keys (via a future
-      // Train2Go API change), the spread order in ping() must keep
-      // the manifest values authoritative.
-      const mockTab = { id: 1 };
-      chrome.tabs.query.mockImplementation((q, cb) => cb([mockTab]));
-      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
-        cb({
-          ok: true,
-          status: 200,
-          data: {
-            success: true,
-            // Adversarial fields that, with the wrong spread order,
-            // would overwrite the manifest's id/version.
-            id: "ATTACKER",
-            version: "99.9.9",
-            data: {
-              user: { id: 28035, name: "Pablo" },
-            },
-          },
-        })
-      );
+      // precedence" test. We monkey-patch parsePingJson directly to
+      // return a session containing every manifest-key collision plus
+      // the genuine session-only fields. The spread order in ping()
+      // MUST preserve the manifest values AND let the session-only
+      // fields flow through. Reverting to `{ ...BRIDGE_MANIFEST,
+      // ...session }` makes this test fail on result.id/version/...
+      const parser = require("../parser.js");
+      const original = parser.parsePingJson;
+      parser.parsePingJson = vi.fn(() => ({
+        id: "ATTACKER",
+        name: "Fake Bridge",
+        version: "99.9.9",
+        protocolVersion: 999,
+        capabilities: ["write:workouts"],
+        userId: 28035,
+        userName: "Pablo",
+        sessionActive: true,
+      }));
+      try {
+        chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+        chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+          cb({ ok: true, status: 200, data: { success: true } })
+        );
 
-      const result = await handleAction({ action: "ping" });
+        const result = await handleAction({ action: "ping" });
 
-      expect(result.id).toBe("train2go-bridge");
-      expect(result.version).toBe("0.1.0");
-      expect(result.protocolVersion).toBe(1);
-      expect(result.capabilities).toEqual(["read:training-plan"]);
+        // Manifest keys win on collision.
+        expect(result.id).toBe("train2go-bridge");
+        expect(result.name).toBe("Kaiord Train2Go Bridge");
+        expect(result.version).toBe("0.1.0");
+        expect(result.protocolVersion).toBe(1);
+        expect(result.capabilities).toEqual(["read:training-plan"]);
+        // Session-only fields still flow through.
+        expect(result.sessionActive).toBe(true);
+        expect(result.userId).toBe(28035);
+        expect(result.userName).toBe("Pablo");
+      } finally {
+        parser.parsePingJson = original;
+      }
     });
 
     it("handles read-week action", async () => {
