@@ -39,3 +39,6 @@ future reader is lied to. After archiving, also run
    otherwise.
 3. If you see `pnpm lint:archive` fail, check that the folder date prefix
    matches the `> Completed:` marker inside `proposal.md` exactly.
+4. If you see `pnpm lint:archive-index` fail, re-run `pnpm archive:index`
+   and commit the diff — the committed README has drifted from the
+   generator output.

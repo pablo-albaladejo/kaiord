@@ -11,7 +11,7 @@ in the husky `pre-commit` hook).
 | Script | Purpose | Invoked by | Test file |
 | ------ | ------- | ---------- | --------- |
 | `check-archive-dates.mjs` | Fail if any `openspec/changes/archive/YYYY-MM-DD-<slug>/` folder prefix disagrees with the `> Completed:` marker in its `proposal.md`. Also rejects invalid calendar dates (e.g. `2026-02-31`). | `pnpm lint:archive` (→ `pnpm lint`) | `check-archive-dates.test.mjs` (5 cases) |
-| `check-archive-index.mjs` | Drift guard: regenerate `openspec/changes/archive/README.md` in memory and fail on any diff, so a contributor who forgets `pnpm archive:index` cannot merge a stale index. Prints the first differing lines on failure. | `pnpm lint:archive-index` (→ `pnpm lint`) | `check-archive-index.test.mjs` (3 cases) |
+| `check-archive-index.mjs` | Drift guard: regenerate `openspec/changes/archive/README.md` in memory and fail on any diff (including a missing README.md), so a contributor who forgets `pnpm archive:index` cannot merge a stale index. Prints the first differing lines on failure. | `pnpm lint:archive-index` (→ `pnpm lint`) | `check-archive-index.test.mjs` (3 cases) |
 | `generate-archive-index.mjs` | Render the auto-generated archive README as a reverse-chronological table with per-change summaries extracted from `proposal.md`. Exports `buildIndex()` so the drift guard reuses the same generator — no parallel reimplementation. | `pnpm archive:index` | `generate-archive-index.test.mjs` (6 cases) |
 
 ## Authoring guide for new scripts
