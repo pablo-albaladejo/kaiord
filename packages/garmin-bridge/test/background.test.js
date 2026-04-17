@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 // Capture listener callbacks registered at import time (before any reset)
 const {
   PROTOCOL_VERSION,
+  BRIDGE_MANIFEST,
   handleAction,
   getCsrfToken,
   checkSession,
@@ -22,6 +23,18 @@ describe("background.js", () => {
   describe("PROTOCOL_VERSION", () => {
     it("should be 1", () => {
       expect(PROTOCOL_VERSION).toBe(1);
+    });
+  });
+
+  describe("BRIDGE_MANIFEST", () => {
+    it("has correct shape matching bridgeManifestSchema", () => {
+      expect(BRIDGE_MANIFEST).toEqual({
+        id: "garmin-bridge",
+        name: "Garmin Connect",
+        version: "0.1.0",
+        protocolVersion: 1,
+        capabilities: ["write:workouts"],
+      });
     });
   });
 
@@ -147,6 +160,24 @@ describe("background.js", () => {
       expect(response.data).toHaveProperty("csrfCaptured");
       expect(response.data).toHaveProperty("gcApi");
     });
+
+    it("includes bridge manifest fields in data envelope", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([]));
+      const sendResponse = vi.fn();
+
+      externalCb({ action: "ping" }, {}, sendResponse);
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      const response = sendResponse.mock.calls[0][0];
+
+      expect(response.data).toMatchObject({
+        id: "garmin-bridge",
+        name: "Garmin Connect",
+        version: "0.1.0",
+        protocolVersion: 1,
+        capabilities: ["write:workouts"],
+      });
+    });
   });
 
   describe("handleAction", () => {
@@ -178,6 +209,20 @@ describe("background.js", () => {
       const result = await checkSession();
 
       expect(result.csrfCaptured).toBe(true);
+    });
+
+    it("checkSession returns manifest fields alongside session status", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([]));
+
+      const result = await checkSession();
+
+      expect(result).toMatchObject({
+        id: "garmin-bridge",
+        name: "Garmin Connect",
+        version: "0.1.0",
+        protocolVersion: 1,
+        capabilities: ["write:workouts"],
+      });
     });
 
     it("handles open-garmin action", async () => {
