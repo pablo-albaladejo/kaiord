@@ -219,3 +219,17 @@ The date prefix is assigned once when the change is archived and MUST equal the
 `> Completed:` marker at the top of its `proposal.md`. This invariant is enforced
 by `scripts/check-archive-dates.mjs` via `pnpm lint:archive` (runs in CI as part
 of `pnpm lint`).
+
+The auto-generated `openspec/changes/archive/README.md` index MUST stay in sync
+with its source folders — run `pnpm archive:index` after adding or renaming an
+archive. CI verifies freshness via `pnpm lint:archive-index`
+(`scripts/check-archive-index.mjs`), which prints the first differing lines on
+failure so the fix is obvious from the log.
+
+## Repo scripts
+
+`scripts/` holds repo-wide tooling (archive invariants, extension packaging,
+setup helpers). See `scripts/README.md` for the full inventory. Every
+non-trivial script there MUST have a co-located `*.test.mjs` using `node:test`;
+CI runs `pnpm test:scripts` in the lint job, and the husky `pre-commit` hook
+runs the same suite locally.

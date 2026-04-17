@@ -33,4 +33,9 @@ future reader is lied to. After archiving, also run
 
 ## After Archiving
 
-Confirm the archive with `npx openspec status`.
+1. Confirm the archive with `npx openspec status`.
+2. Run `pnpm archive:index` to regenerate `openspec/changes/archive/README.md`.
+   Stage and commit the diff — CI will fail via `pnpm lint:archive-index`
+   otherwise.
+3. If you see `pnpm lint:archive` fail, check that the folder date prefix
+   matches the `> Completed:` marker inside `proposal.md` exactly.

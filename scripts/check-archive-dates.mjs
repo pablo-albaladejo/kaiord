@@ -5,9 +5,10 @@
 //   MUST contain `> Completed: YYYY-MM-DD` matching the folder prefix.
 //
 // Exits non-zero on any violation. There is no warning path — every
-// archived change MUST carry the marker; the 17 legacy archives were
-// backfilled in PR #302 so the invariant holds across the full
-// history.
+// archived change MUST carry the marker. Legacy archives were
+// backfilled from their folder-date prefix (which equals the
+// archive-commit date) before this guard landed, so the invariant
+// holds across the full archive history.
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
