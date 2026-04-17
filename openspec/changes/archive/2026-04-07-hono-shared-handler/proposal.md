@@ -1,3 +1,5 @@
+> Completed: 2026-04-07
+
 # Proposal: Extract shared Hono app from Lambda handler
 
 ## Problem

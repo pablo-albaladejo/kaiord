@@ -1,3 +1,5 @@
+> Completed: 2026-04-09
+
 ## Why
 
 Kaiord has comprehensive internal documentation (20+ files in `docs/`, READMEs per package, OpenSpec specs) but no public-facing documentation site. Developers discovering Kaiord via kaiord.com have no way to learn the API, understand the architecture, or see code examples beyond the landing page's 4-line snippet. Additionally, existing docs have ~30% JSDoc coverage and no mechanism to prevent drift — docs go stale silently when code changes.

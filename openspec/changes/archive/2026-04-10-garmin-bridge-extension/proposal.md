@@ -1,3 +1,5 @@
+> Completed: 2026-04-10
+
 ## Why
 
 The current Garmin Connect integration requires a self-hosted AWS infrastructure (CDK stack with API Gateway, Lambda, Tailscale tunnel) to proxy API calls from the SPA. This creates three problems: credentials (username/password) travel over the network, infrastructure is complex to deploy and maintain, and rate limits are not mitigated by the proxy. A browser extension that piggybacks on the user's existing Garmin web session eliminates all three issues — zero servers, zero credentials in transit, zero infrastructure.

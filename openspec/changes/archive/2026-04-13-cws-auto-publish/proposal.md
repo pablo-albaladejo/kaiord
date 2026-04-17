@@ -1,3 +1,5 @@
+> Completed: 2026-04-13
+
 ## Why
 
 Publishing the Garmin Bridge extension to the Chrome Web Store currently requires manual zip generation and dashboard upload. As the extension evolves, this manual process is error-prone (wrong manifest, forgotten version bump) and slow. Automating the CWS publish via GitHub Actions ensures every release is consistent, traceable, and hands-free — matching the existing npm release automation via changesets.

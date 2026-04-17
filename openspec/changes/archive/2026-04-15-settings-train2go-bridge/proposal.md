@@ -1,3 +1,5 @@
+> Completed: 2026-04-15
+
 ## Why
 
 The Settings panel only shows Garmin Bridge status in its "Garmin" tab. With Train2Go Bridge now integrated, there is no UI for users to see its connection status or troubleshoot detection issues. Additionally, several user-facing strings still reference only "Garmin Connect" when both platforms are now supported.

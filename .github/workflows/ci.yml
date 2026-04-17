@@ -225,6 +225,9 @@ jobs:
       - name: Run linting (ESLint + Prettier)
         run: pnpm lint
 
+      - name: Run scripts unit tests
+        run: pnpm test:scripts
+
       - name: Check architecture boundaries
         run: pnpm arch:check
 

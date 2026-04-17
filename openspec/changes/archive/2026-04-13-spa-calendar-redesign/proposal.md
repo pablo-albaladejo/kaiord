@@ -1,3 +1,5 @@
+> Completed: 2026-04-13
+
 ## Why
 
 The current workout SPA editor is a standalone single-page editor with no concept of time, scheduling, or external data sources. Users receive workouts from coaches on platforms like Train2Go as natural language descriptions, manually recreate them in Kaiord, then push to Garmin Connect. This friction-heavy flow limits Kaiord's usefulness as a training data hub.

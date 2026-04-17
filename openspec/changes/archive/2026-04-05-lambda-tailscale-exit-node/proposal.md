@@ -1,3 +1,5 @@
+> Completed: 2026-04-05
+
 # Proposal: Route Lambda traffic through Tailscale exit node
 
 ## Problem

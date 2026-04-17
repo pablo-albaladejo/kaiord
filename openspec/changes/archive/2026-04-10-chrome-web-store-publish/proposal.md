@@ -1,3 +1,5 @@
+> Completed: 2026-04-10
+
 ## Why
 
 The `@kaiord/garmin-bridge` extension is fully functional but only usable via "Load unpacked" in developer mode. Publishing to the Chrome Web Store makes it installable by any user, which is required for the SPA workout editor to offer Garmin Connect integration to end users. Additionally, the Chrome Web Store requires a privacy policy URL, which Kaiord currently lacks entirely.
