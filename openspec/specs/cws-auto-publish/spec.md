@@ -1,4 +1,10 @@
-> Synced: 2026-04-14
+> Synced: 2026-04-17
+
+# CWS Auto Publish
+
+## Purpose
+
+Automated Chrome Web Store publishing for every extension in the monorepo, triggered by a version bump in the extension's `package.json`.
 
 ## Requirements
 
