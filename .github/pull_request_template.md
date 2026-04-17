@@ -44,7 +44,6 @@
 - [ ] Code follows project style guidelines
 - [ ] Coverage maintained or improved
 - [ ] Round-trip tests passing (if applicable)
-- [ ] Spec updated (if implementing from `docs/specs/`)
 - [ ] If spec under `openspec/specs/` changed: `pnpm lint:specs` passes and the spec matches `openspec/SPEC_TEMPLATE.md`
 
 ## Testing

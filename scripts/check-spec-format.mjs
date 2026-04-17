@@ -18,7 +18,7 @@
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
@@ -32,13 +32,26 @@ const syncedRe =
 const deltaHeaderRe = /^## (ADDED|MODIFIED|REMOVED|RENAMED) Requirements\b/m;
 const placeholderInHeadingRe = /^#{1,6} .*<[A-Z][^>]*>/m;
 
+function escapeRe(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 function changeSlugExists(slug) {
-  if (!existsSync(CHANGES_DIR)) return true; // can't verify; don't fail
+  if (!existsSync(CHANGES_DIR)) {
+    console.warn(
+      `[check-spec-format] ${CHANGES_DIR} does not exist; cannot verify slug "${slug}"`
+    );
+    return true;
+  }
   const activeDir = join(CHANGES_DIR, slug);
   if (existsSync(activeDir) && statSync(activeDir).isDirectory()) return true;
   if (!existsSync(ARCHIVE_DIR)) return false;
+  // Anchor the match strictly to "YYYY-MM-DD-<slug>" so a shorter slug
+  // (e.g. "bridge") does not accidentally resolve to a longer archived
+  // folder ("2026-04-10-garmin-bridge").
+  const exactRe = new RegExp(`^\\d{4}-\\d{2}-\\d{2}-${escapeRe(slug)}$`);
   const archived = readdirSync(ARCHIVE_DIR).filter(
-    (name) => name === slug || name.endsWith(`-${slug}`)
+    (name) => name === slug || exactRe.test(name)
   );
   return archived.length > 0;
 }
@@ -159,7 +172,7 @@ function walk() {
   return all;
 }
 
-if (import.meta.url === `file://${process.argv[1]}`) {
+if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const violations = walk();
   if (violations.length > 0) {
     console.error(

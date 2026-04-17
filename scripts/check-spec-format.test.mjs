@@ -153,3 +153,31 @@ test("Synced annotation with unknown change slug is rejected", () => {
     "expected unknown-slug violation"
   );
 });
+
+test("Synced annotation with known archived slug is accepted", () => {
+  // settings-train2go-bridge is archived as 2026-04-15-settings-train2go-bridge.
+  // The resolver MUST recognize the plain slug via the anchored regex.
+  const src = happy.replace(
+    "> Synced: 2026-04-17",
+    "> Synced: 2026-04-17 (settings-train2go-bridge)"
+  );
+  const violations = checkSpec(FILE, src);
+  assert.ok(
+    !violations.some((v) => v.includes("unknown change slug")),
+    `valid slug rejected: ${violations.join(" | ")}`
+  );
+});
+
+test("Synced slug that only suffix-matches does NOT resolve (no collision)", () => {
+  // "bridge" is a suffix of "2026-04-10-garmin-bridge" but is NOT a valid
+  // standalone slug. The anchored regex must reject this collision.
+  const src = happy.replace(
+    "> Synced: 2026-04-17",
+    "> Synced: 2026-04-17 (bridge)"
+  );
+  const violations = checkSpec(FILE, src);
+  assert.ok(
+    violations.some((v) => v.includes("unknown change slug")),
+    "expected suffix collision to be rejected"
+  );
+});
