@@ -64,6 +64,11 @@ const train2goFetch = async (path) => {
 
 let lastPingedUserId = null;
 
+// Spread session FIRST, then BRIDGE_MANIFEST, so manifest fields
+// (id/name/version/protocolVersion/capabilities) cannot be spoofed by
+// a future Train2Go API change that returns its own keys with the same
+// names. This matches the garmin-bridge precedence and is enforced by
+// the "manifest fields take precedence" test.
 const ping = async () => {
   try {
     const res = await train2goFetch("/api/v2/profile/ping");
@@ -72,7 +77,7 @@ const ping = async () => {
     }
     const session = parser.parsePingJson(res.data);
     if (session.userId) lastPingedUserId = session.userId;
-    return { ...BRIDGE_MANIFEST, ...session };
+    return { ...session, ...BRIDGE_MANIFEST, sessionActive: session.sessionActive, userId: session.userId, userName: session.userName };
   } catch {
     return { ...BRIDGE_MANIFEST, sessionActive: false };
   }

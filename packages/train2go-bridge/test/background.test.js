@@ -143,6 +143,39 @@ describe("background service worker", () => {
       });
     });
 
+    it("manifest fields take precedence if upstream API leaks an id/version", async () => {
+      // Symmetric defense to the garmin-bridge "manifest fields take
+      // precedence" test. parsePingJson() shapes session data; if it
+      // ever started returning `id`/`version` keys (via a future
+      // Train2Go API change), the spread order in ping() must keep
+      // the manifest values authoritative.
+      const mockTab = { id: 1 };
+      chrome.tabs.query.mockImplementation((q, cb) => cb([mockTab]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({
+          ok: true,
+          status: 200,
+          data: {
+            success: true,
+            // Adversarial fields that, with the wrong spread order,
+            // would overwrite the manifest's id/version.
+            id: "ATTACKER",
+            version: "99.9.9",
+            data: {
+              user: { id: 28035, name: "Pablo" },
+            },
+          },
+        })
+      );
+
+      const result = await handleAction({ action: "ping" });
+
+      expect(result.id).toBe("train2go-bridge");
+      expect(result.version).toBe("0.1.0");
+      expect(result.protocolVersion).toBe(1);
+      expect(result.capabilities).toEqual(["read:training-plan"]);
+    });
+
     it("handles read-week action", async () => {
       const mockTab = { id: 1 };
       chrome.tabs.query.mockImplementation((q, cb) => cb([mockTab]));
