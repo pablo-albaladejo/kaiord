@@ -19,7 +19,7 @@ Kaiord operates no backend that receives, stores, or processes your data. All pr
 
 Kaiord does **not** collect any personal data, analytics, or telemetry. We do not use cookies for tracking. We do not use any third-party analytics services.
 
-All workout-editor state (workouts, templates, sport-zone profiles, AI provider keys, sync state) is stored locally in your browser via IndexedDB (Dexie). Nothing is sent to a Kaiord-operated server, ever. This local data remains on your device until you delete it from the editor (Settings → Privacy → Clear All, or the per-workout delete action) or clear site data in your browser.
+All workout-editor state (workouts, templates, sport-zone profiles, AI provider keys, sync state) is stored locally in your browser via IndexedDB (Dexie). Nothing is sent to a Kaiord-operated server, ever. This local data remains on your device until you remove it: clear AI provider keys via Settings → Privacy → Clear All API Keys, delete individual workouts via the per-workout delete action, or clear site data in your browser to remove everything at once.
 
 If you configure the optional AI features inside the workout editor, your prompts and workout content are sent directly from your browser to the LLM provider you chose (Anthropic, OpenAI, or Google) and are subject to that provider's privacy policy and terms of service. Kaiord does not receive or relay this data; your API key is stored locally and transmitted only to the provider you configured.
 
@@ -57,7 +57,7 @@ No other domains are contacted in production builds. During local development, b
 
 ## Regulatory Compliance
 
-Because Kaiord operates no backend and collects no personal data server-side, there is no personal data held by us to protect, share, or delete. This applies under all applicable data protection regulations, including the EU General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA).
+Because Kaiord operates no backend and collects no personal data server-side, there is no personal data held by us to protect, share, or delete. This applies as long as Kaiord operates no backend and collects no personal data server-side (the state of the system today and at every release), under all applicable data protection regulations, including the EU General Data Protection Regulation (GDPR) and the California Consumer Privacy Act (CCPA).
 
 You retain all data-subject rights under GDPR and CCPA (access, rectification, erasure, portability). Because Kaiord holds no records about you, a request would return nothing to act upon; if you believe data has been collected or processed in error, please contact us and we will investigate immediately.
 

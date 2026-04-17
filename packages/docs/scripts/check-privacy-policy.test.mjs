@@ -23,11 +23,12 @@ title: Privacy Policy
 
 ## Data Controller
 
-Client-side only.
+For GDPR purposes there is no Kaiord-operated data controller.
 
 ## Data Collection
 
-All state is stored in your browser via IndexedDB.
+All state is stored in your browser via IndexedDB. You can clear site data
+in your browser to remove everything at once.
 
 If you configure AI features, prompts are sent directly to the
 provider (Anthropic, OpenAI, or Google).
@@ -46,10 +47,20 @@ provider (Anthropic, OpenAI, or Google).
 
 \`externally_connectable\` is a one-way inbound channel.
 Local dev origins: http://localhost:5173 and http://localhost:5174.
+Each extension declares \`host_permissions\` limited to the single
+host listed above — no wildcard or \`<all_urls>\` access.
 
 ## Regulatory Compliance
 
 Under GDPR and CCPA you retain access, rectification, erasure, portability.
+
+## Children's Privacy
+
+Not directed at children under 13.
+
+## Changes to this Policy
+
+Material changes are announced through the project's GitHub release notes.
 
 ## Open Source
 
@@ -77,7 +88,7 @@ test("missing Train2Go Bridge coverage is flagged", () => {
 });
 
 test("missing GDPR/CCPA reference is flagged", () => {
-  const src = FULL.replace(/GDPR and CCPA/g, "regulations");
+  const src = FULL.replace(/GDPR/g, "rights").replace(/CCPA/g, "rights");
   const v = checkPolicy(src);
   assert.ok(v.some((r) => r.includes("GDPR")));
   assert.ok(v.some((r) => r.includes("CCPA")));

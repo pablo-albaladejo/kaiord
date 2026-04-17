@@ -41,16 +41,37 @@ const GARMIN_MANIFEST = join(
 // Hosts the policy claims each production extension may contact.
 const TRAIN2GO_ALLOWED_HOSTS = new Set(["https://app.train2go.com/*"]);
 const GARMIN_ALLOWED_HOSTS = new Set(["https://connect.garmin.com/*"]);
-// Train2Go must not declare `cookies`; Garmin uses `webRequest` +
-// `storage` but must not add `cookies` either (policy claims no
-// credential access).
-const FORBIDDEN_PERMISSIONS = new Set(["cookies"]);
+// externally_connectable.matches entries allowed in each extension.
+// kaiord.com covers the production editor; localhost entries are the
+// dev-server match patterns the policy discloses explicitly.
+const ALLOWED_EXTERNALLY_CONNECTABLE = new Set([
+  "https://*.kaiord.com/*",
+  "http://localhost:5173/*",
+  "http://localhost:5174/*",
+]);
+// No extension may declare these: cookies (credential access),
+// webRequestBlocking / declarativeNetRequest* (request mutation).
+const FORBIDDEN_PERMISSIONS = new Set([
+  "cookies",
+  "webRequestBlocking",
+  "declarativeNetRequest",
+  "declarativeNetRequestWithHostAccess",
+  "declarativeNetRequestFeedback",
+]);
 
 // Each rule = human-readable label + regex that MUST match the file.
 const REQUIRED_RULES = [
   {
     label: "Last updated date in YYYY-MM-DD format",
     re: /\*\*Last updated:\*\*\s+\d{4}-\d{2}-\d{2}/,
+  },
+  {
+    label: "Data controller scope clarified (no Kaiord-operated controller)",
+    re: /no Kaiord-operated data controller/i,
+  },
+  {
+    label: "Retention / deletion guidance present",
+    re: /(clear site data|delete it from the editor)/i,
   },
   {
     label: "Garmin Bridge extension covered",
@@ -75,6 +96,10 @@ const REQUIRED_RULES = [
   {
     label: "CSRF-token session-storage disclosure",
     re: /CSRF token.*chrome\.storage\.session/is,
+  },
+  {
+    label: "Host-permission narrowing stated (no <all_urls>)",
+    re: /no wildcard or `<all_urls>` access/i,
   },
   {
     label: "GDPR referenced",
@@ -103,6 +128,14 @@ const REQUIRED_RULES = [
   {
     label: "Localhost dev origins disclosed",
     re: /localhost:5173/,
+  },
+  {
+    label: "Children's Privacy section present",
+    re: /##\s+Children's Privacy/i,
+  },
+  {
+    label: "Changes-to-policy section present",
+    re: /##\s+Changes to this Policy/i,
   },
   {
     label: "Open-source link present",
@@ -135,14 +168,22 @@ export function checkManifestPermissions(
     return violations;
   }
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-  const perms = manifest.permissions ?? [];
-  for (const p of perms) {
+
+  // permissions + optional_permissions (both paths can grant credential
+  // or request-mutation access at runtime).
+  const allPerms = [
+    ...(manifest.permissions ?? []),
+    ...(manifest.optional_permissions ?? []),
+  ];
+  for (const p of allPerms) {
     if (FORBIDDEN_PERMISSIONS.has(p)) {
       violations.push(
-        `${extensionName}: forbidden permission "${p}" declared (policy claims no credential access)`
+        `${extensionName}: forbidden permission "${p}" declared (policy claims no credential access and no request mutation)`
       );
     }
   }
+
+  // host_permissions narrowed to the disclosed host.
   const hosts = manifest.host_permissions ?? [];
   for (const h of hosts) {
     if (!allowedHosts.has(h)) {
@@ -151,6 +192,29 @@ export function checkManifestPermissions(
       );
     }
   }
+
+  // content_scripts matches must be inside the disclosed host.
+  for (const cs of manifest.content_scripts ?? []) {
+    for (const m of cs.matches ?? []) {
+      if (!allowedHosts.has(m)) {
+        violations.push(
+          `${extensionName}: undisclosed content_scripts match "${m}" — policy restricts DOM access to ${[...allowedHosts].join(", ")}`
+        );
+      }
+    }
+  }
+
+  // externally_connectable matches must be inside the disclosed set
+  // (prod + dev localhost origins the policy names explicitly).
+  const ec = manifest.externally_connectable?.matches ?? [];
+  for (const m of ec) {
+    if (!ALLOWED_EXTERNALLY_CONNECTABLE.has(m)) {
+      violations.push(
+        `${extensionName}: undisclosed externally_connectable match "${m}" — policy restricts the one-way inbound channel to ${[...ALLOWED_EXTERNALLY_CONNECTABLE].join(", ")}`
+      );
+    }
+  }
+
   return violations;
 }
 

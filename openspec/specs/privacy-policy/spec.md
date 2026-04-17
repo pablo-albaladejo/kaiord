@@ -24,8 +24,8 @@ The privacy policy SHALL cover the following topics:
 - **Data controller identity**: The policy SHALL state that Kaiord operates no backend and that processing is entirely client-side, so there is no Kaiord-operated data controller beyond the user
 - **Data collection**: The project does NOT collect personal data, analytics, or telemetry
 - **Client-side storage disclosure**: The policy SHALL state that workout-editor state (workouts, templates, profiles, AI provider keys, sync state) is stored locally in the user's browser via IndexedDB / Dexie, and that nothing is sent to a Kaiord-operated server
-- **LLM provider data flow**: The policy SHALL disclose that, when the user configures AI features, prompts and workout content are sent directly from the browser to the chosen LLM provider (Anthropic, OpenAI, or Google) under that provider's terms, and that Kaiord does not receive or relay this data
-- **Garmin Bridge extension data handling**: The Garmin Bridge extension stores only a CSRF token in `chrome.storage.session` (encrypted, memory-only, cleared on browser close)
+- **LLM provider data flow**: The policy SHALL disclose that, when the user configures AI features, prompts and workout content are sent directly from the browser to the chosen LLM provider (Anthropic, OpenAI, or Google) and are subject to that provider's privacy policy and terms of service, and that Kaiord does not receive or relay this data
+- **Garmin Bridge extension data handling**: The Garmin Bridge extension stores only a CSRF token in `chrome.storage.session` (memory-only, isolated from page scripts, cleared when the browser closes; Chrome additionally encrypts the area when OS-level key material is available)
 - **Train2Go Bridge extension data handling**: The Train2Go Bridge extension stores no data locally; training plans are read on-demand from the Train2Go page DOM and delivered directly to the Kaiord workout editor
 - **Multi-extension coverage**: The policy SHALL cover every Chrome extension currently shipping in the monorepo (at minimum `@kaiord/garmin-bridge` and `@kaiord/train2go-bridge`) with symmetric data-handling disclosures
 - **No credentials storage**: No extension reads, stores, or transmits user passwords or OAuth tokens
@@ -34,6 +34,10 @@ The privacy policy SHALL cover the following topics:
 - **Localhost dev disclosure**: The policy SHALL disclose that local-development manifests additionally accept messages from `http://localhost:5173` / `http://localhost:5174`, and SHALL state that these origins are stripped from the production manifest before CWS submission
 - **Regulatory compliance**: Statement of compliance with applicable data protection regulations (GDPR, CCPA) — specifically that because no personal data is collected server-side, there is no personal data held by Kaiord to protect, share, or delete
 - **Data-subject rights**: The policy SHALL explicitly enumerate GDPR/CCPA rights (access, rectification, erasure, portability) and state that, because Kaiord holds no records, such requests have no data to act upon
+- **Retention guidance**: The policy SHALL describe how the user can remove local data — at minimum the editor's API-key clear action, per-workout delete, and the browser-level "clear site data" path
+- **Host-permission narrowing**: The policy SHALL state that each extension declares `host_permissions` limited to its single disclosed host (no wildcard, no `<all_urls>`)
+- **Children's Privacy**: The policy SHALL include a Children's Privacy section stating the products are not directed at children under 13 (or 16 in jurisdictions where that age applies)
+- **Changes to this Policy**: The policy SHALL include a Changes-to-this-Policy section explaining how material changes are announced (project release notes / git log / "Last updated" date)
 - **Open source**: Link to the GitHub repository for full transparency
 - **Contact**: Contact information for privacy inquiries
 - **Last updated date**: The policy SHALL include a "Last updated" date in YYYY-MM-DD format
