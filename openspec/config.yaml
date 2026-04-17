@@ -47,3 +47,9 @@ rules:
     - Include test tasks after each implementation task
     - End with changeset and documentation tasks
     - Use checkbox format for /opsx:apply tracking
+  archive:
+    - Archived changes live under openspec/changes/archive/YYYY-MM-DD-<slug>/
+    - The date prefix MUST equal the `> Completed: YYYY-MM-DD` marker inside proposal.md
+    - The date prefix is assigned once at archive time and MUST NOT change afterwards (preserves `git log --follow` history)
+    - `openspec/changes/archive/README.md` is auto-generated — do NOT hand-edit; run `pnpm archive:index` to refresh
+    - Enforced in CI via `pnpm lint:archive` (invariant) and `pnpm lint:archive-index` (drift guard)
