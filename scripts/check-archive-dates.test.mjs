@@ -96,14 +96,35 @@ test("mismatched folder date and Completed marker fails", () => {
   }
 });
 
-test("missing Completed marker produces a warning, not a failure", () => {
+test("missing Completed marker is now an error (no more soft warnings)", () => {
   const h = mkHarness((archive) => {
     writeProposal(archive, "2026-04-17-sample-change", "# Sample\n");
   });
   try {
     const result = h.run();
-    assert.equal(result.status, 0);
-    assert.match(result.stderr, /no "> Completed: YYYY-MM-DD" marker/);
+    assert.equal(result.status, 1);
+    assert.match(
+      result.stderr,
+      /proposal\.md is missing the "> Completed: YYYY-MM-DD" marker/,
+    );
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("folder prefix with invalid calendar date is rejected", () => {
+  const h = mkHarness((archive) => {
+    // February 31 doesn't exist.
+    writeProposal(
+      archive,
+      "2026-02-31-bad-date",
+      "> Completed: 2026-02-31\n\n# Sample\n",
+    );
+  });
+  try {
+    const result = h.run();
+    assert.equal(result.status, 1);
+    assert.match(result.stderr, /not a valid calendar date/);
   } finally {
     h.cleanup();
   }

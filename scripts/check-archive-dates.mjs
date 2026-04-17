@@ -4,8 +4,9 @@
 //   openspec/changes/archive/YYYY-MM-DD-<slug>/proposal.md
 //   MUST contain `> Completed: YYYY-MM-DD` matching the folder prefix.
 //
-// Also warns on (but does not fail for) archive folders missing a
-// `> Completed:` marker — legacy archives may predate the convention.
+// Exits non-zero on any violation. There is no warning path — every
+// archived change MUST carry the marker (the backfill in commit
+// <this-commit> covered the historical archives).
 
 import { existsSync, readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
@@ -14,16 +15,26 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
 const ARCHIVE_DIR = join(REPO_ROOT, "openspec", "changes", "archive");
-const folderDateRe = /^(\d{4}-\d{2}-\d{2})-[a-z0-9][a-z0-9-]*$/;
-const completedRe = /^> Completed: (\d{4}-\d{2}-\d{2})\s*$/m;
+const folderDateRe = /^(\d{4})-(\d{2})-(\d{2})-[a-z0-9][a-z0-9-]*$/;
+const completedRe = /^> Completed: (\d{4})-(\d{2})-(\d{2})\s*$/m;
 
-function checkArchives() {
+function isValidCalendarDate(y, m, d) {
+  const dt = new Date(Date.UTC(Number(y), Number(m) - 1, Number(d)));
+  return (
+    dt.getUTCFullYear() === Number(y) &&
+    dt.getUTCMonth() === Number(m) - 1 &&
+    dt.getUTCDate() === Number(d)
+  );
+}
+
+export function checkArchives() {
   const violations = [];
-  const warnings = [];
 
   if (!existsSync(ARCHIVE_DIR)) {
-    console.warn(`[check-archive-dates] ${ARCHIVE_DIR} missing; nothing to check`);
-    return { violations, warnings };
+    console.warn(
+      `[check-archive-dates] ${ARCHIVE_DIR} missing; nothing to check`
+    );
+    return { violations };
   }
 
   for (const entry of readdirSync(ARCHIVE_DIR)) {
@@ -37,37 +48,49 @@ function checkArchives() {
       );
       continue;
     }
-    const folderDate = match[1];
+    const [, fy, fm, fd] = match;
+    if (!isValidCalendarDate(fy, fm, fd)) {
+      violations.push(
+        `${folder}: folder prefix "${fy}-${fm}-${fd}" is not a valid calendar date`
+      );
+      continue;
+    }
+    const folderDate = `${fy}-${fm}-${fd}`;
 
     const proposalPath = join(folder, "proposal.md");
     if (!existsSync(proposalPath)) {
-      warnings.push(`${folder}: no proposal.md found`);
+      violations.push(`${folder}: no proposal.md found`);
       continue;
     }
 
     const src = readFileSync(proposalPath, "utf8");
     const completed = completedRe.exec(src);
     if (!completed) {
-      warnings.push(
-        `${folder}: proposal.md has no "> Completed: YYYY-MM-DD" marker`
+      violations.push(
+        `${folder}: proposal.md is missing the "> Completed: YYYY-MM-DD" marker`
       );
       continue;
     }
-
-    if (completed[1] !== folderDate) {
+    const [, cy, cm, cd] = completed;
+    if (!isValidCalendarDate(cy, cm, cd)) {
       violations.push(
-        `${folder}: folder date ${folderDate} does NOT match "> Completed: ${completed[1]}" in proposal.md`
+        `${folder}: proposal.md Completed marker "${cy}-${cm}-${cd}" is not a valid calendar date`
+      );
+      continue;
+    }
+    const markerDate = `${cy}-${cm}-${cd}`;
+    if (markerDate !== folderDate) {
+      violations.push(
+        `${folder}: folder date ${folderDate} does NOT match "> Completed: ${markerDate}" in proposal.md`
       );
     }
   }
 
-  return { violations, warnings };
+  return { violations };
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const { violations, warnings } = checkArchives();
-
-  for (const w of warnings) console.warn(`⚠  ${w}`);
+  const { violations } = checkArchives();
 
   if (violations.length > 0) {
     console.error(
@@ -80,9 +103,5 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     process.exit(1);
   }
 
-  console.log(
-    `openspec/changes/archive: date-prefix invariant holds${warnings.length ? ` (${warnings.length} warnings)` : ""}.`
-  );
+  console.log("openspec/changes/archive: date-prefix invariant holds.");
 }
-
-export { checkArchives };

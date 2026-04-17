@@ -8,9 +8,11 @@ Archive a completed OpenSpec change.
 ## Invariant
 
 The archive folder's date prefix MUST equal the `> Completed:` marker
-inside its `proposal.md`. Enforced by the pre-commit guard at
-`scripts/check-archive-dates.mjs`; break once and every future reader
-is lied to.
+inside its `proposal.md`. Enforced in CI by `pnpm lint:archive`
+(backed by `scripts/check-archive-dates.mjs`); break once and every
+future reader is lied to. After archiving, also run
+`pnpm archive:index` to refresh the auto-generated
+`openspec/changes/archive/README.md`.
 
 ## Prerequisites
 

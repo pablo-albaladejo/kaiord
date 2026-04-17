@@ -1,3 +1,5 @@
+> Completed: 2026-04-17
+
 ## Why
 
 The workout editor's keyboard shortcut handlers unconditionally call `preventDefault()` on every Cmd/Ctrl modifier combination they recognize, regardless of whether the app action is meaningful in the current context. This breaks native browser behavior: users cannot copy text from the page, paste via right-click, use browser shortcuts like Cmd+Shift+C (DevTools), or interact normally when no workout steps are selected. The golden rule — **never `preventDefault()` unless the app actually handles the event** — is violated throughout.

@@ -40,6 +40,12 @@ pnpm format                     # Format with Prettier
 # Changesets (for version-worthy changes)
 pnpm exec changeset             # Create changeset before PR
 
+# Archive maintenance
+pnpm lint:archive               # Enforce archive folder-vs-Completed invariant
+pnpm lint:archive-index         # Verify archive/README.md is up to date
+pnpm archive:index              # Regenerate archive/README.md
+pnpm test:scripts               # Run node:test for scripts/*.test.mjs
+
 # NPM optimization (Claude Code skills)
 /check-deps                     # Analyze dependencies (unused, duplicates, security)
 /analyze-bundle                 # Check bundle sizes and optimization opportunities
@@ -202,7 +208,7 @@ When adding a new publishable package to the monorepo, update these CI/CD files:
 - `openspec/config.yaml` - Project constraints for AI planning
 - `openspec/specs/` - Domain specs (architecture, KRD format, adapter contracts)
 - `openspec/changes/` - Active feature specs and proposals
-- `openspec/changes/archive/README.md` - Auto-generated index of archived changes (run `pnpm archive:index` to refresh)
+- `openspec/changes/archive/README.md` - Auto-generated index of archived changes. Do NOT hand-edit; run `pnpm archive:index` to refresh. CI verifies it is in sync via `pnpm lint:archive-index`.
 - `docs/` - Architecture docs, code style, testing strategies
 - `docs/krd-format.md` - KRD format specification
 
