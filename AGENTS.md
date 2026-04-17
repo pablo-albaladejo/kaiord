@@ -24,6 +24,10 @@ Before implementing any non-trivial feature or fix:
 
 If no spec exists for a requested non-trivial change, create one with `/opsx:propose` before coding.
 
+Domain specs under `openspec/specs/` follow the canonical shape in
+`openspec/SPEC_TEMPLATE.md`. When you add or edit one, run `pnpm lint:specs`
+locally — CI enforces the same check as part of `pnpm lint`.
+
 ## Ports & adapters (example: FIT)
 
 - **Ports** (`ports/fit.ts`): `FitReader.readToKRD(buf)`, `FitWriter.writeFromKRD(krd)`

@@ -51,7 +51,7 @@
     "lint": "pnpm -r lint && pnpm lint:specs",
     "lint:fix": "pnpm -r lint:fix && prettier --write .",
     "lint:packages": "pnpm -r lint",
-    "lint:specs": "node scripts/check-spec-format.mjs && npx --yes openspec validate --specs",
+    "lint:specs": "node --test scripts/check-spec-format.test.mjs && node scripts/check-spec-format.mjs && pnpm exec openspec validate --specs",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "clean": "pnpm -r clean",

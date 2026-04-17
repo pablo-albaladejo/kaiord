@@ -1,4 +1,4 @@
-> Synced: 2026-04-17 (focus management updated to match implementation)
+> Synced: 2026-04-17 (fix-keyboard-shortcut-hijacking)
 
 # SPA Editor Context Menu
 

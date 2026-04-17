@@ -201,6 +201,16 @@ When adding a new publishable package to the monorepo, update these CI/CD files:
 - `AGENTS.md` - Strict AI guidance (non-negotiables)
 - `openspec/config.yaml` - Project constraints for AI planning
 - `openspec/specs/` - Domain specs (architecture, KRD format, adapter contracts)
+- `openspec/SPEC_TEMPLATE.md` - Canonical shape for new domain specs
 - `openspec/changes/` - Active feature specs and proposals
+- `scripts/check-spec-format.mjs` - Spec-format lint; run via `pnpm lint:specs`
 - `docs/` - Architecture docs, code style, testing strategies
 - `docs/krd-format.md` - KRD format specification
+
+## Authoring a new capability spec
+
+1. Copy `openspec/SPEC_TEMPLATE.md` to `openspec/specs/<capability-slug>/spec.md`.
+2. Replace every `<...>` placeholder; leaving one will fail `pnpm lint:specs`.
+3. Run `pnpm lint:specs` before committing. It runs the structural lint
+   (tests + static checks) and `npx openspec validate --specs`. CI enforces
+   the same check via `pnpm lint`.
