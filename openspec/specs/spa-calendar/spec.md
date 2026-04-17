@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# SPA Calendar
+
 ## Requirements
 
 ### Requirement: Calendar week view as home page

@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# Landing Page
+
 ## Requirements
 
 ### Requirement: Landing page serves at root path

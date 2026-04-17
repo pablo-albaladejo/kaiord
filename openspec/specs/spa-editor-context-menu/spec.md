@@ -1,4 +1,8 @@
-> Synced: 2026-04-17
+> Synced: 2026-04-17 (focus management updated to match implementation)
+
+# SPA Editor Context Menu
+
+## Requirements
 
 ### Requirement: Context-aware keyboard shortcut interception
 

@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# SPA Bridge Protocol
+
 ## Requirements
 
 ### Requirement: Bridge capability manifest

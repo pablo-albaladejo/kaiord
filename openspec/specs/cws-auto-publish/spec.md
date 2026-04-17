@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# CWS Auto Publish
+
 ## Requirements
 
 ### Requirement: Automated CWS publishing workflow

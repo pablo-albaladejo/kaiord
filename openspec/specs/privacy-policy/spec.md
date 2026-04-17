@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# Privacy Policy
+
 ## Requirements
 
 ### Requirement: Privacy policy page

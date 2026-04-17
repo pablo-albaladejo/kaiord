@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# Doc Drift Prevention
+
 ## Requirements
 
 ### Requirement: Twoslash type-checked code examples

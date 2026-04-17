@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# SPA Workout State Machine
+
 ## Requirements
 
 ### Requirement: Workout lifecycle states

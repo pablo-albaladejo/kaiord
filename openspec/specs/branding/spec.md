@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# Branding
+
 ## Requirements
 
 ### Requirement: Kaiord logo SVG

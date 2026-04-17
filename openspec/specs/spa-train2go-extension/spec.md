@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# SPA Train2Go Extension
+
 ## Requirements
 
 ### Requirement: Bridge capability schema extension

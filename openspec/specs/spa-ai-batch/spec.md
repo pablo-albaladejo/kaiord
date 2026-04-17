@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# SPA AI Batch
+
 ## Requirements
 
 ### Requirement: On-demand AI processing for RAW workouts

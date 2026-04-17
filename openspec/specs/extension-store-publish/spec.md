@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# Extension Store Publish
+
 ## Requirements
 
 ### Requirement: Production extension icons

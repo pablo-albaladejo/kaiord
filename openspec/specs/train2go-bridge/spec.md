@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# Train2Go Bridge
+
 ## Requirements
 
 ### Requirement: Extension manifest

@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# CI Release
+
 ## Requirements
 
 ### Requirement: Release workflow uses PR-based versioning

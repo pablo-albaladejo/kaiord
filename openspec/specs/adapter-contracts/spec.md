@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# Adapter Contracts
+
 ## Requirements
 
 ### Requirement: Browser Extension Adapter Pattern

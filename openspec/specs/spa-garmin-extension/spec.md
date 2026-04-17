@@ -1,5 +1,7 @@
 > Synced: 2026-04-17
 
+# SPA Garmin Extension
+
 ## Requirements
 
 ### Requirement: Extension detection
