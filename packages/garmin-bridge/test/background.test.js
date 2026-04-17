@@ -36,6 +36,49 @@ describe("background.js", () => {
         capabilities: ["write:workouts"],
       });
     });
+
+    it("version matches package.json (no drift between background.js and the published version)", () => {
+      const pkg = require("../package.json");
+
+      expect(BRIDGE_MANIFEST.version).toBe(pkg.version);
+    });
+
+    it("validates against bridgeManifestSchema (replica of the SPA contract)", () => {
+      // Replica of packages/workout-spa-editor/src/types/bridge-schemas.ts so
+      // the bridge test fails if the response shape drifts from what the
+      // SPA registry will accept. If you change one, change the other.
+      const ALLOWED_CAPABILITIES = new Set([
+        "read:workouts",
+        "write:workouts",
+        "read:body",
+        "read:sleep",
+        "read:training-plan",
+      ]);
+      const validate = (m) => {
+        const errors = [];
+        if (typeof m?.id !== "string" || m.id.length === 0)
+          errors.push("id must be non-empty string");
+        if (typeof m?.name !== "string" || m.name.length === 0)
+          errors.push("name must be non-empty string");
+        if (typeof m?.version !== "string" || m.version.length === 0)
+          errors.push("version must be non-empty string");
+        if (
+          typeof m?.protocolVersion !== "number" ||
+          !Number.isInteger(m.protocolVersion) ||
+          m.protocolVersion < 1
+        )
+          errors.push("protocolVersion must be a positive integer");
+        if (!Array.isArray(m?.capabilities) || m.capabilities.length === 0)
+          errors.push("capabilities must be a non-empty array");
+        for (const c of m?.capabilities ?? []) {
+          if (!ALLOWED_CAPABILITIES.has(c))
+            errors.push(`capabilities[] contains "${c}" not in allowed enum`);
+        }
+        return errors;
+      };
+
+      expect(validate(BRIDGE_MANIFEST)).toEqual([]);
+    });
   });
 
   describe("getCsrfToken", () => {
@@ -209,6 +252,25 @@ describe("background.js", () => {
       const result = await checkSession();
 
       expect(result.csrfCaptured).toBe(true);
+    });
+
+    it("handles ping happy path (Garmin tab open, API responds OK)", async () => {
+      await chrome.storage.session.set({ csrfToken: "abc" });
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 7 }]));
+      chrome.tabs.sendMessage.mockImplementation((_tabId, _msg, cb) => {
+        cb({ ok: true, data: [{ workoutId: 1 }] });
+      });
+
+      const result = await checkSession();
+
+      expect(result.csrfCaptured).toBe(true);
+      expect(result.gcApi).toEqual({ ok: true, data: [{ workoutId: 1 }] });
+      expect(result).toMatchObject({
+        id: "garmin-bridge",
+        name: "Garmin Connect",
+        protocolVersion: 1,
+        capabilities: ["write:workouts"],
+      });
     });
 
     it("checkSession returns manifest fields alongside session status", async () => {

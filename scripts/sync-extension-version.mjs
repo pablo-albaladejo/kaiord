@@ -69,6 +69,36 @@ for (const extName of extensions) {
     changed = true;
   }
 
+  // Sync the BRIDGE_MANIFEST.version literal inside background.js so the
+  // value the extension reports to the SPA via the `ping` action stays in
+  // lockstep with the published manifest version. Without this, the SPA's
+  // "Update your extension" detection runs against a stale version.
+  const backgroundPath = join(pkgDir, "background.js");
+  let backgroundText;
+  try {
+    backgroundText = readFileSync(backgroundPath, "utf8");
+  } catch {
+    backgroundText = null;
+  }
+  if (backgroundText !== null) {
+    const updated = backgroundText.replace(
+      /(BRIDGE_MANIFEST[\s\S]{0,200}?version:\s*")([^"]*)(")/,
+      (_match, head, oldVersion, tail) => {
+        if (oldVersion === version) return _match;
+        console.log(`  ${backgroundPath}: ${oldVersion} → ${version}`);
+        changed = true;
+        return `${head}${version}${tail}`;
+      }
+    );
+    if (updated !== backgroundText) {
+      writeFileSync(backgroundPath, updated);
+    } else if (
+      /BRIDGE_MANIFEST[\s\S]{0,200}?version:\s*"/.test(backgroundText)
+    ) {
+      console.log(`  ${backgroundPath}: BRIDGE_MANIFEST already ${version}`);
+    }
+  }
+
   if (changed) {
     console.log(`Synced ${extName} manifest versions to ${version}`);
   } else {
