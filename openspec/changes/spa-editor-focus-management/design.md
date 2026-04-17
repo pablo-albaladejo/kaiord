@@ -101,7 +101,7 @@ export const asItemId = (s: string): ItemId => s as ItemId;
 
 ### Decision 2: Focus intent lives in a dedicated slice of the workout store
 
-**Choice:** Add a focus slice `FocusSlice` with `pendingFocusTarget: FocusTarget | null`, `selectionHistory: Array<string | null>`, `setPendingFocusTarget(target)`, and `recordSelectionSnapshot(selection)`. The slice is composed into `WorkoutStore` via slice-pattern to keep individual type files ≤100 lines.
+**Choice:** Add a focus slice `FocusSlice` with `pendingFocusTarget: FocusTarget | null`, `selectionHistory: Array<ItemId | null>`, `setPendingFocusTarget(target)`, and `recordSelectionSnapshot(selection: ItemId | null)`. The slice is composed into `WorkoutStore` via slice-pattern to keep individual type files ≤100 lines. All selection-history values use the branded `ItemId` type (not raw `string`) to preserve type safety against positional-ID contamination.
 
 `FocusTarget` is `{ kind: 'item'; id: ItemId } | { kind: 'empty-state' }`.
 
@@ -256,7 +256,7 @@ The hook subscribes to Zustand via `useWorkoutStore((s) => s.pendingFocusTarget)
 ## Migration Plan
 
 1. **Introduce branded `ItemId` and `IdProvider` port** (task 1.0). Zero behavioral change; preserves zero-warning invariant for later steps.
-2. **Add stable IDs to store state** (task 1.2 onwards) — `loadWorkout`, `createStep`, etc., assign `id: idProvider()`. Positional-ID generators stay in place as render-time fallbacks.
+2. **Add stable IDs to store state** (§2 "In-memory state rename: KRD → UIWorkout with id fields" in `tasks.md`, atomic PR) — `loadWorkout`, `createStep`, etc., assign `id: idProvider()`. Positional-ID generators stay in place as render-time fallbacks.
 3. **Add `pendingFocusTarget` + `selectionHistory` + setters** (task §2). No consumers yet; unit-test round-trip.
 4. **Add focus-rule helpers** (task §3). No consumers yet; unit-test each.
 5. **Wire focus rules into actions** (task §4). One action at a time, each with a test. Store-only; no DOM yet.
