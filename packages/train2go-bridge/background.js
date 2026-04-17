@@ -77,7 +77,13 @@ const ping = async () => {
     }
     const session = parser.parsePingJson(res.data);
     if (session.userId) lastPingedUserId = session.userId;
-    return { ...session, ...BRIDGE_MANIFEST, sessionActive: session.sessionActive, userId: session.userId, userName: session.userName };
+    return {
+      ...session,
+      ...BRIDGE_MANIFEST,
+      sessionActive: session.sessionActive,
+      userId: session.userId,
+      userName: session.userName,
+    };
   } catch {
     return { ...BRIDGE_MANIFEST, sessionActive: false };
   }
