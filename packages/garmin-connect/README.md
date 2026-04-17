@@ -145,7 +145,7 @@ const { restored } = await client.init();
 if (!restored) await client.auth.login(email, password);
 ```
 
-See the [design document](../../openspec/changes/archive/2026-04-03-refactor-garmin-auth/design.md) for the full migration guide.
+See the [design document](https://github.com/pablo-albaladejo/kaiord/blob/main/openspec/changes/archive/2026-04-03-refactor-garmin-auth/design.md) for the full migration guide.
 
 ## License
 

@@ -5,6 +5,13 @@ description: Archive a completed change after its PR is merged. Moves artifacts 
 
 Archive a completed OpenSpec change.
 
+## Invariant
+
+The archive folder's date prefix MUST equal the `> Completed:` marker
+inside its `proposal.md`. Enforced by the pre-commit guard at
+`scripts/check-archive-dates.mjs`; break once and every future reader
+is lied to.
+
 ## Prerequisites
 
 - All tasks in `tasks.md` are checked `[x]`

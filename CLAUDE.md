@@ -202,5 +202,14 @@ When adding a new publishable package to the monorepo, update these CI/CD files:
 - `openspec/config.yaml` - Project constraints for AI planning
 - `openspec/specs/` - Domain specs (architecture, KRD format, adapter contracts)
 - `openspec/changes/` - Active feature specs and proposals
+- `openspec/changes/archive/README.md` - Auto-generated index of archived changes (run `pnpm archive:index` to refresh)
 - `docs/` - Architecture docs, code style, testing strategies
 - `docs/krd-format.md` - KRD format specification
+
+## Archive conventions
+
+Archived OpenSpec changes live under `openspec/changes/archive/YYYY-MM-DD-<slug>/`.
+The date prefix is assigned once when the change is archived and MUST equal the
+`> Completed:` marker at the top of its `proposal.md`. This invariant is enforced
+by `scripts/check-archive-dates.mjs` via `pnpm lint:archive` (runs in CI as part
+of `pnpm lint`).
