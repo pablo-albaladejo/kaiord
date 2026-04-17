@@ -18,6 +18,33 @@ const POLICY = join(
   "legal",
   "privacy-policy.md"
 );
+const VITEPRESS_CONFIG = join(
+  REPO_ROOT,
+  "packages",
+  "docs",
+  ".vitepress",
+  "config.ts"
+);
+const TRAIN2GO_MANIFEST = join(
+  REPO_ROOT,
+  "packages",
+  "train2go-bridge",
+  "manifest.json"
+);
+const GARMIN_MANIFEST = join(
+  REPO_ROOT,
+  "packages",
+  "garmin-bridge",
+  "manifest.json"
+);
+
+// Hosts the policy claims each production extension may contact.
+const TRAIN2GO_ALLOWED_HOSTS = new Set(["https://app.train2go.com/*"]);
+const GARMIN_ALLOWED_HOSTS = new Set(["https://connect.garmin.com/*"]);
+// Train2Go must not declare `cookies`; Garmin uses `webRequest` +
+// `storage` but must not add `cookies` either (policy claims no
+// credential access).
+const FORBIDDEN_PERMISSIONS = new Set(["cookies"]);
 
 // Each rule = human-readable label + regex that MUST match the file.
 const REQUIRED_RULES = [
@@ -97,19 +124,76 @@ export function checkPolicy(src) {
   return violations;
 }
 
+export function checkManifestPermissions(
+  manifestPath,
+  extensionName,
+  allowedHosts
+) {
+  const violations = [];
+  if (!existsSync(manifestPath)) {
+    violations.push(`${extensionName}: manifest not found at ${manifestPath}`);
+    return violations;
+  }
+  const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+  const perms = manifest.permissions ?? [];
+  for (const p of perms) {
+    if (FORBIDDEN_PERMISSIONS.has(p)) {
+      violations.push(
+        `${extensionName}: forbidden permission "${p}" declared (policy claims no credential access)`
+      );
+    }
+  }
+  const hosts = manifest.host_permissions ?? [];
+  for (const h of hosts) {
+    if (!allowedHosts.has(h)) {
+      violations.push(
+        `${extensionName}: undisclosed host_permission "${h}" — policy lists only ${[...allowedHosts].join(", ")}`
+      );
+    }
+  }
+  return violations;
+}
+
+export function checkSidebar(configSrc) {
+  if (!/legal\/privacy-policy/.test(configSrc)) {
+    return [
+      `packages/docs/.vitepress/config.ts: no sidebar link to /legal/privacy-policy — spec Requirement "Privacy policy navigation" violated`,
+    ];
+  }
+  return [];
+}
+
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   if (!existsSync(POLICY)) {
     console.error(`[check-privacy-policy] ${POLICY} not found`);
     process.exit(2);
   }
-  const src = readFileSync(POLICY, "utf8");
-  const violations = checkPolicy(src);
+  const policySrc = readFileSync(POLICY, "utf8");
+  const all = [];
+  all.push(...checkPolicy(policySrc));
+  all.push(
+    ...checkManifestPermissions(
+      TRAIN2GO_MANIFEST,
+      "train2go-bridge",
+      TRAIN2GO_ALLOWED_HOSTS
+    )
+  );
+  all.push(
+    ...checkManifestPermissions(
+      GARMIN_MANIFEST,
+      "garmin-bridge",
+      GARMIN_ALLOWED_HOSTS
+    )
+  );
+  if (existsSync(VITEPRESS_CONFIG)) {
+    all.push(...checkSidebar(readFileSync(VITEPRESS_CONFIG, "utf8")));
+  }
 
-  if (violations.length > 0) {
+  if (all.length > 0) {
     console.error(
-      `\npackages/docs/legal/privacy-policy.md is missing required disclosures (${violations.length}):\n`
+      `\npackages/docs/legal/privacy-policy.md drift detected (${all.length}):\n`
     );
-    for (const v of violations) console.error(`  - ${v}`);
+    for (const v of all) console.error(`  - ${v}`);
     console.error(
       "\nEvery rule corresponds to a requirement in openspec/specs/privacy-policy/spec.md."
     );
@@ -117,6 +201,6 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   }
 
   console.log(
-    "packages/docs/legal/privacy-policy.md: all required disclosures present."
+    "packages/docs/legal/privacy-policy.md: policy text, extension manifests, and sidebar are in sync with the spec."
   );
 }

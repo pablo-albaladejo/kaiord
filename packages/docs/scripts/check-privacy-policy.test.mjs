@@ -3,7 +3,14 @@
 import { strict as assert } from "node:assert";
 import { test } from "node:test";
 
-import { checkPolicy } from "./check-privacy-policy.mjs";
+import {
+  checkManifestPermissions,
+  checkPolicy,
+  checkSidebar,
+} from "./check-privacy-policy.mjs";
+import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 
 const FULL = `
 ---
@@ -92,4 +99,82 @@ test("missing localhost dev disclosure is flagged", () => {
   const src = FULL.replace(/localhost:5173/g, "");
   const v = checkPolicy(src);
   assert.ok(v.some((r) => r.includes("Localhost")));
+});
+
+// ---------- checkManifestPermissions ----------
+
+function writeManifest(dir, permissions, host_permissions) {
+  const path = join(dir, "manifest.json");
+  writeFileSync(
+    path,
+    JSON.stringify({ permissions, host_permissions }, null, 2)
+  );
+  return path;
+}
+
+test("manifest without cookies and with allowed host passes", () => {
+  const dir = mkdtempSync(join(tmpdir(), "kaiord-priv-ok-"));
+  try {
+    const m = writeManifest(dir, ["tabs"], ["https://app.train2go.com/*"]);
+    const v = checkManifestPermissions(
+      m,
+      "train2go-bridge",
+      new Set(["https://app.train2go.com/*"])
+    );
+    assert.deepEqual(v, []);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("manifest declaring `cookies` permission is rejected", () => {
+  const dir = mkdtempSync(join(tmpdir(), "kaiord-priv-cookies-"));
+  try {
+    const m = writeManifest(
+      dir,
+      ["tabs", "cookies"],
+      ["https://app.train2go.com/*"]
+    );
+    const v = checkManifestPermissions(
+      m,
+      "train2go-bridge",
+      new Set(["https://app.train2go.com/*"])
+    );
+    assert.ok(v.some((r) => r.includes('forbidden permission "cookies"')));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("manifest with undisclosed host_permission is rejected", () => {
+  const dir = mkdtempSync(join(tmpdir(), "kaiord-priv-host-"));
+  try {
+    const m = writeManifest(
+      dir,
+      ["tabs"],
+      ["https://app.train2go.com/*", "https://evil.example.com/*"]
+    );
+    const v = checkManifestPermissions(
+      m,
+      "train2go-bridge",
+      new Set(["https://app.train2go.com/*"])
+    );
+    assert.ok(v.some((r) => r.includes("undisclosed host_permission")));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+// ---------- checkSidebar ----------
+
+test("sidebar config referencing privacy-policy passes", () => {
+  const config = `sidebar: [{ text: 'Legal', items: [{ link: '/legal/privacy-policy' }] }]`;
+  assert.deepEqual(checkSidebar(config), []);
+});
+
+test("sidebar config missing privacy-policy is flagged", () => {
+  const config = `sidebar: [{ text: 'Guide', items: [] }]`;
+  const v = checkSidebar(config);
+  assert.equal(v.length, 1);
+  assert.match(v[0], /no sidebar link/);
 });

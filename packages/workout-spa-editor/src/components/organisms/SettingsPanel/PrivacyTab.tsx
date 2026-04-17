@@ -36,12 +36,22 @@ export const PrivacyTab: React.FC = () => {
           </li>
           <li>
             LLM API keys are sent directly to the provider (Anthropic, OpenAI,
-            or Google) — they never pass through our infrastructure.
+            or Google) — Kaiord does not receive or relay this data.
           </li>
           <li>
             We are not responsible for credential security on your device.
           </li>
         </ul>
+        <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+          <a
+            href="https://kaiord.com/docs/legal/privacy-policy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="underline underline-offset-2 hover:text-gray-700 dark:hover:text-gray-300"
+          >
+            Read the full privacy policy
+          </a>
+        </p>
       </section>
 
       <section>
