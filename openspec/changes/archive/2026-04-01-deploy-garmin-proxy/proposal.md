@@ -1,3 +1,5 @@
+> Completed: 2026-04-01
+
 # Proposal: Deploy Garmin Proxy Lambda and Fix SPA Default URL
 
 ## Problem

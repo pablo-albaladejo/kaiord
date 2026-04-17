@@ -1,3 +1,5 @@
+> Completed: 2026-04-10
+
 # Cosmetic Polish: Unified Dark Mode & Mobile Fix
 
 **Status:** proposed

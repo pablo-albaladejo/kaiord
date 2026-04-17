@@ -1,3 +1,5 @@
+> Completed: 2026-04-14
+
 ## Why
 
 The train2go-bridge Chrome extension is feature-complete and tested but not yet published to the Chrome Web Store. The garmin-bridge extension is already published and serves as the template. Publishing train2go-bridge enables users to install it directly from the CWS instead of loading it as an unpacked extension.

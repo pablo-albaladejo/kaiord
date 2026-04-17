@@ -1,3 +1,5 @@
+> Completed: 2026-04-09
+
 ## Why
 
 Kaiord now owns the `kaiord.com` domain (Route 53 → GitHub Pages), but the site opens directly to the workout SPA editor with no branding, no value proposition, and default Vite favicon/title. There is no landing page explaining what Kaiord is, who it's for, or why it matters. Open-source projects live or die by their first impression — a compelling landing page is the single highest-leverage marketing asset for driving adoption by both end-users and developers.
