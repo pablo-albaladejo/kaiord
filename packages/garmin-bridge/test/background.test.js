@@ -8,6 +8,7 @@ const {
   getCsrfToken,
   checkSession,
 } = require("../background.js");
+const pkg = require("../package.json");
 
 const externalCb =
   chrome.runtime.onMessageExternal.addListener.mock.calls[0][0];
@@ -31,15 +32,13 @@ describe("background.js", () => {
       expect(BRIDGE_MANIFEST).toEqual({
         id: "garmin-bridge",
         name: "Garmin Connect",
-        version: "0.1.0",
+        version: pkg.version,
         protocolVersion: 1,
         capabilities: ["write:workouts"],
       });
     });
 
     it("version matches package.json (no drift between background.js and the published version)", () => {
-      const pkg = require("../package.json");
-
       expect(BRIDGE_MANIFEST.version).toBe(pkg.version);
     });
 
@@ -236,7 +235,7 @@ describe("background.js", () => {
       expect(response.data).toMatchObject({
         id: "garmin-bridge",
         name: "Garmin Connect",
-        version: "0.1.0",
+        version: pkg.version,
         protocolVersion: 1,
         capabilities: ["write:workouts"],
       });
@@ -315,7 +314,7 @@ describe("background.js", () => {
         data: {
           id: "garmin-bridge",
           name: "Garmin Connect",
-          version: "0.1.0",
+          version: pkg.version,
           protocolVersion: 1,
           capabilities: ["write:workouts"],
           csrfCaptured: true,
@@ -340,7 +339,7 @@ describe("background.js", () => {
       const result = await checkSession();
 
       expect(result.id).toBe("garmin-bridge");
-      expect(result.version).toBe("0.1.0");
+      expect(result.version).toBe(pkg.version);
       // The rogue keys are inside gcApi, which Zod will strip.
       expect(result.gcApi.id).toBe("ATTACKER");
     });
@@ -353,7 +352,7 @@ describe("background.js", () => {
       expect(result).toMatchObject({
         id: "garmin-bridge",
         name: "Garmin Connect",
-        version: "0.1.0",
+        version: pkg.version,
         protocolVersion: 1,
         capabilities: ["write:workouts"],
       });

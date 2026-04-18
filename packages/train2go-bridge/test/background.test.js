@@ -9,6 +9,7 @@ const {
   openTrain2Go,
 } = require("../background.js");
 const parser = require("../parser.js");
+const pkg = require("../package.json");
 
 describe("background service worker", () => {
   beforeEach(() => __resetChromeMock());
@@ -22,7 +23,7 @@ describe("background service worker", () => {
       expect(BRIDGE_MANIFEST).toEqual({
         id: "train2go-bridge",
         name: "Kaiord Train2Go Bridge",
-        version: "0.1.0",
+        version: pkg.version,
         protocolVersion: 1,
         capabilities: ["read:training-plan"],
       });
@@ -33,8 +34,6 @@ describe("background service worker", () => {
     });
 
     it("version matches package.json (no drift between background.js and the published version)", () => {
-      const pkg = require("../package.json");
-
       expect(BRIDGE_MANIFEST.version).toBe(pkg.version);
     });
 
@@ -184,7 +183,7 @@ describe("background service worker", () => {
       expect(result).toMatchObject({
         id: "train2go-bridge",
         name: "Kaiord Train2Go Bridge",
-        version: "0.1.0",
+        version: pkg.version,
         protocolVersion: 1,
         capabilities: ["read:training-plan"],
         sessionActive: true,
