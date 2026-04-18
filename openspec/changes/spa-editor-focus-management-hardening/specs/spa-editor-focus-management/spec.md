@@ -10,12 +10,12 @@
 
 The workout editor SHALL expose a kill-switch that short-circuits programmatic focus moves without requiring a redeploy. `useFocusKillSwitch()` SHALL return `true` (disabled) or `false` (enabled) per the following truth table, where `LS` is `localStorage.kaiordFocusManagement` and `ENV` is `import.meta.env.VITE_KAIORD_FOCUS_MANAGEMENT`:
 
-| LS | ENV | Result |
-|---|---|---|
-| `'off'` | any | `true` (disabled) |
-| `'on'` | any | `false` (enabled — runtime force-enable overrides build-time default) |
-| unset or other | `'off'` | `true` (disabled at build time) |
-| unset or other | `'on'` or unset | `false` (enabled — default) |
+| LS             | ENV             | Result                                                                |
+| -------------- | --------------- | --------------------------------------------------------------------- |
+| `'off'`        | any             | `true` (disabled)                                                     |
+| `'on'`         | any             | `false` (enabled — runtime force-enable overrides build-time default) |
+| unset or other | `'off'`         | `true` (disabled at build time)                                       |
+| unset or other | `'on'` or unset | `false` (enabled — default)                                           |
 
 When the switch resolves to `true`, the hook SHALL read and clear `pendingFocusTarget` without calling `focus()` or `scrollIntoView()`, and SHALL leave `selectedStepId`, `undoHistory`, and all undo/redo behavior untouched. The switch value SHALL be read live so a DevTools mutation takes effect on the next render without a page reload.
 
@@ -119,14 +119,14 @@ Every short-circuit and fallback path in `useFocusAfterAction` SHALL emit a corr
 
 > **Event-to-requirement map:** the telemetry capability defines six event types. Their emission points are spread across requirements in this focus-management capability:
 >
-> | Event | Emission requirement in focus-management |
-> |---|---|
-> | `kill-switch-active` | "Runtime kill-switch for focus management" (on each false→true transition) |
-> | `wiring-canary` | Type declared in `spa-editor-focus-telemetry`; emission site is `useFocusAfterAction`'s initial mount within THIS capability — see Scenario "Wiring-canary emitted on initial editor mount with wired telemetry" below |
-> | `unresolved-target-fallback` | This requirement (short-circuit on unresolved id) |
-> | `form-field-short-circuit` | This requirement (short-circuit on active form field) |
-> | `overlay-deferred-apply` | This requirement (deferred apply after overlay close) |
-> | `focus-error` | This requirement (`finally` recovery from throw) |
+> | Event                        | Emission requirement in focus-management                                                                                                                                                                               |
+> | ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+> | `kill-switch-active`         | "Runtime kill-switch for focus management" (on each false→true transition)                                                                                                                                             |
+> | `wiring-canary`              | Type declared in `spa-editor-focus-telemetry`; emission site is `useFocusAfterAction`'s initial mount within THIS capability — see Scenario "Wiring-canary emitted on initial editor mount with wired telemetry" below |
+> | `unresolved-target-fallback` | This requirement (short-circuit on unresolved id)                                                                                                                                                                      |
+> | `form-field-short-circuit`   | This requirement (short-circuit on active form field)                                                                                                                                                                  |
+> | `overlay-deferred-apply`     | This requirement (deferred apply after overlay close)                                                                                                                                                                  |
+> | `focus-error`                | This requirement (`finally` recovery from throw)                                                                                                                                                                       |
 
 #### Scenario: Unresolved-target fallback emits telemetry
 
@@ -173,9 +173,9 @@ The workout store SHALL expose `undoHistory: Array<{ workout: UIWorkout; selecti
 
 - **WHEN** `undo` decrements `historyIndex` to `i`
 - **THEN** the restored workout SHALL be `undoHistory[i].workout`
-- **AND** the selection available for focus-target fallback SHALL be `undoHistory[i + 1].selection` (the selection captured *at the time the undone mutation ran*, which was pushed alongside the mutation's post-state snapshot at index `i + 1`)
+- **AND** the selection available for focus-target fallback SHALL be `undoHistory[i + 1].selection` (the selection captured _at the time the undone mutation ran_, which was pushed alongside the mutation's post-state snapshot at index `i + 1`)
 
-> **Off-by-one note:** the two fields come from different indices because `pushHistorySnapshot` captures `selection` as "the selection that was active *before* the mutation" and pairs it with the mutation's *post-state* workout at the same index. On undo, the restored workout is the pre-mutation state (`undoHistory[i].workout`) and the relevant pre-mutation selection is at `undoHistory[i + 1].selection`.
+> **Off-by-one note:** the two fields come from different indices because `pushHistorySnapshot` captures `selection` as "the selection that was active _before_ the mutation" and pairs it with the mutation's _post-state_ workout at the same index. On undo, the restored workout is the pre-mutation state (`undoHistory[i].workout`) and the relevant pre-mutation selection is at `undoHistory[i + 1].selection`.
 
 #### Scenario: Clear workout resets the single history array
 
