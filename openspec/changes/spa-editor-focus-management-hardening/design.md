@@ -62,9 +62,9 @@ Update `WorkoutStore.workoutHistory` → `undoHistory: UndoHistory`. The name `u
 
 **Alternatives considered:**
 
-- *Keep parallel arrays and improve assertions*: rejected — doesn't address the "silent wrong-target in production" failure mode; only delays it.
-- *Use a tuple `[UIWorkout, ItemId | null]`*: equivalent but less readable at call sites.
-- *Defer to a future change*: rejected — the base change's history semantics are load-bearing for every undo scenario; hardening while it is fresh in contributors' minds is cheaper than a separate refactor cycle.
+- _Keep parallel arrays and improve assertions_: rejected — doesn't address the "silent wrong-target in production" failure mode; only delays it.
+- _Use a tuple `[UIWorkout, ItemId | null]`_: equivalent but less readable at call sites.
+- _Defer to a future change_: rejected — the base change's history semantics are load-bearing for every undo scenario; hardening while it is fresh in contributors' minds is cheaper than a separate refactor cycle.
 
 **Atomic-PR note:** Like base §2, the rename from `workoutHistory` to `undoHistory` breaks every consumer in a single type-propagation step. This change is a single atomic PR; intermediate commits are not zero-warning.
 
@@ -77,7 +77,11 @@ Update `WorkoutStore.workoutHistory` → `undoHistory: UndoHistory`. The name `u
 ```ts
 export type FocusTelemetryEvent =
   | { type: "wiring-canary" }
-  | { type: "unresolved-target-fallback"; targetKind: "item" | "empty-state"; fallback: "empty-state" | "first-item" | "heading" }
+  | {
+      type: "unresolved-target-fallback";
+      targetKind: "item" | "empty-state";
+      fallback: "empty-state" | "first-item" | "heading";
+    }
   | { type: "form-field-short-circuit" }
   | { type: "overlay-deferred-apply"; deferredForMs: number }
   | { type: "focus-error"; phase: "focus" | "scrollIntoView" };
@@ -86,7 +90,7 @@ export type FocusTelemetry = (event: FocusTelemetryEvent) => void;
 export const defaultFocusTelemetry: FocusTelemetry = () => {};
 ```
 
-The event payload carries *structural* metadata only — never `ItemId` values, never step/block content, never workout names. This preserves the existing no-PII rule from base Decision 3.
+The event payload carries _structural_ metadata only — never `ItemId` values, never step/block content, never workout names. This preserves the existing no-PII rule from base Decision 3.
 
 The store accepts an optional `telemetry: FocusTelemetry` at construction time (same pattern as `IdProvider`). `useFocusAfterAction` reads the telemetry fn from context (`FocusTelemetryContext`, provided at editor root) and invokes it at each observation point via a single centralized `safeEmit(telemetry, event)` wrapper that try/catches the call and dev-warns on failure. Tests inject a spy that asserts the expected event sequence.
 
@@ -101,9 +105,9 @@ Production deployments that want Sentry/Datadog/etc. integration import and prov
 
 **Alternatives considered:**
 
-- *Direct `console.warn`/`console.error` calls*: rejected — captured by nothing; "turn on devtools and reproduce" is not a production diagnostic strategy.
-- *EventTarget-style bus*: rejected — more machinery than a function pointer; no observed benefit for single-listener scenarios.
-- *Sentry-as-default*: rejected — forces a dependency on every consumer.
+- _Direct `console.warn`/`console.error` calls_: rejected — captured by nothing; "turn on devtools and reproduce" is not a production diagnostic strategy.
+- _EventTarget-style bus_: rejected — more machinery than a function pointer; no observed benefit for single-listener scenarios.
+- _Sentry-as-default_: rejected — forces a dependency on every consumer.
 
 **Privacy mitigations:**
 
@@ -119,17 +123,17 @@ Production deployments that want Sentry/Datadog/etc. integration import and prov
 
 The spec performs each mutation across each input path:
 
-| Mutation | Keyboard | Context menu | Toolbar |
-|---|---|---|---|
-| Delete (single) | ✓ | ✓ | ✓ |
-| Delete (multi-select) | ✓ | ✓ | — |
-| Paste | ✓ | ✓ | ✓ |
-| Duplicate | ✓ | ✓ | ✓ |
-| Reorder (Alt+Arrow / DnD) | ✓ | — | — |
-| Group | ✓ | ✓ | — |
-| Ungroup | ✓ | ✓ | — |
-| Undo | ✓ | — | ✓ |
-| Redo | ✓ | — | ✓ |
+| Mutation                  | Keyboard | Context menu | Toolbar |
+| ------------------------- | -------- | ------------ | ------- |
+| Delete (single)           | ✓        | ✓            | ✓       |
+| Delete (multi-select)     | ✓        | ✓            | —       |
+| Paste                     | ✓        | ✓            | ✓       |
+| Duplicate                 | ✓        | ✓            | ✓       |
+| Reorder (Alt+Arrow / DnD) | ✓        | —            | —       |
+| Group                     | ✓        | ✓            | —       |
+| Ungroup                   | ✓        | ✓            | —       |
+| Undo                      | ✓        | —            | ✓       |
+| Redo                      | ✓        | —            | ✓       |
 
 **Legend:** `✓` = input path exists in the current UI and is exercised by the E2E spec. `—` = input path does not exist in the current UI for this action. If a future UI change adds a path (e.g., a toolbar Reorder button), the matrix SHALL gain the cell and the E2E spec SHALL add the corresponding assertion. A PR-template checklist item enforces this for new UI affordances.
 
@@ -141,21 +145,23 @@ The Vitest integration tests from base task §8 gain a sibling describe block wr
 describe.each([
   { mode: "standard", Wrapper: Fragment },
   { mode: "strict", Wrapper: StrictMode },
-])("focus integration [$mode]", ({ Wrapper }) => { /* ... */ });
+])("focus integration [$mode]", ({ Wrapper }) => {
+  /* ... */
+});
 ```
 
 Each assertion runs twice. Discrepancies fail the test.
 
 **Rationale:**
 
-- The base change's manual-verification gate (task 11.5) protects *that PR* but not subsequent PRs that touch the focus path. An E2E spec is the recurring regression gate.
+- The base change's manual-verification gate (task 11.5) protects _that PR_ but not subsequent PRs that touch the focus path. An E2E spec is the recurring regression gate.
 - Strict Mode double-invocation is a known footgun; a `describe.each` two-mode run is low-effort, high-coverage.
 - Matrix coverage mirrors the spec's "input-method agnostic" requirement — the spec asserts keyboard and context menu produce identical outcomes, so the E2E should too.
 
 **Alternatives considered:**
 
-- *Only re-run a subset in Strict Mode*: rejected — every new focus scenario is a Strict Mode risk area; blanket re-run is cheap.
-- *Separate E2E workflow*: rejected — the existing `workout-spa-editor-e2e.yml` is the right home.
+- _Only re-run a subset in Strict Mode_: rejected — every new focus scenario is a Strict Mode risk area; blanket re-run is cheap.
+- _Separate E2E workflow_: rejected — the existing `workout-spa-editor-e2e.yml` is the right home.
 
 **Layer impact:** Infrastructure (E2E + test harness).
 
@@ -178,8 +184,8 @@ The base change's changeset body includes the directory path. Subsequent changes
 
 **Alternatives considered:**
 
-- *Git LFS for screenshots*: rejected — screenshots are small (<500 KB each); LFS adds setup complexity.
-- *External storage (S3, Drive)*: rejected — defeats the "durable in the repo" goal.
+- _Git LFS for screenshots_: rejected — screenshots are small (<500 KB each); LFS adds setup complexity.
+- _External storage (S3, Drive)_: rejected — defeats the "durable in the repo" goal.
 
 **Layer impact:** Documentation / repository organization.
 
@@ -203,14 +209,15 @@ Phases in order (each is its own PR):
 
 **Rollback order** (reverse-dependency):
 
-- To roll back *Phase D*: revert Phase D's PR. Phase C, B, A remain.
-- To roll back *Phase C* (telemetry events in the hook): revert Phase C's PR. Phase B, A remain. Hook reverts to pre-telemetry behavior; seams stay available for re-wiring.
-- To roll back *Phase B* (atomic history rewrite): must first revert Phase C AND Phase D (both reference `undoHistory`). Attempting to revert Phase B alone while later phases still use `undoHistory` will produce a broken build. A pre-revert smoke test is `pnpm -F @kaiord/workout-spa-editor build`.
-- To roll back *Phase A* (seams): revert its PR. Requires Phases B, C, D to be already reverted since they depend on the seams' types.
+- To roll back _Phase D_: revert Phase D's PR. Phase C, B, A remain.
+- To roll back _Phase C_ (telemetry events in the hook): revert Phase C's PR. Phase B, A remain. Hook reverts to pre-telemetry behavior; seams stay available for re-wiring.
+- To roll back _Phase B_ (atomic history rewrite): must first revert Phase C AND Phase D (both reference `undoHistory`). Attempting to revert Phase B alone while later phases still use `undoHistory` will produce a broken build. A pre-revert smoke test is `pnpm -F @kaiord/workout-spa-editor build`.
+- To roll back _Phase A_ (seams): revert its PR. Requires Phases B, C, D to be already reverted since they depend on the seams' types.
 
-For *runtime* focus-management regressions, rollback is a full redeploy of the prior build; no in-app kill-switch exists (see Non-Goals).
+For _runtime_ focus-management regressions, rollback is a full redeploy of the prior build; no in-app kill-switch exists (see Non-Goals).
 
 **Smoke tests per revert:**
+
 - After any revert: `pnpm -r test && pnpm -r build && pnpm -F @kaiord/workout-spa-editor test:e2e` must all pass.
 - After Phase B revert specifically: verify `rg 'undoHistory\[' packages/workout-spa-editor/src/store` returns zero matches and `rg 'workoutHistory|selectionHistory' packages/workout-spa-editor/src/store` shows the restored pair.
 
