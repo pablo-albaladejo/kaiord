@@ -1,3 +1,5 @@
+> Completed: 2026-04-18
+
 ## Why
 
 The 2026-04-18 opsx-sync audit (commit `305284d2`) fixed one spec-drift finding in `garmin-bridge` and surfaced five more that were out of scope for a pure spec-to-code sync. Those five drifts are now an explicit backlog mixing missing implementation (CI link checker, AI cost estimation / usage UI), stale documentation (`CWS_TRAIN2GO_EXTENSION_ID`), and spec-level clarifications (context-menu right-click, branding token importability). Left open, each becomes a broken promise in a capability spec — which is exactly what we invested in `pnpm lint:specs` to prevent.
