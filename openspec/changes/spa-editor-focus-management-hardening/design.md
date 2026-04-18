@@ -126,6 +126,7 @@ Update `WorkoutStore.workoutHistory` → `undoHistory: UndoHistory`. Update `pus
 ```ts
 export type FocusTelemetryEvent =
   | { type: "kill-switch-active" }
+  | { type: "wiring-canary" }
   | { type: "unresolved-target-fallback"; targetKind: "item" | "empty-state"; fallback: "empty-state" | "first-item" | "heading" }
   | { type: "form-field-short-circuit" }
   | { type: "overlay-deferred-apply"; deferredForMs: number }
@@ -272,7 +273,7 @@ Until retirement, the kill-switch documentation SHALL include an expiry check no
 - **[Risk] Kill-switch ships but is never used in production** → Acceptable: its existence is cheap (one context + one env-var read), and the first regression where it saves a deploy justifies the overhead. Document the usage pattern in `src/store/README.md` and a troubleshooting section.
 - **[Risk] History rewrite breaks a call site not covered by tests** → Mitigation: the atomic-PR approach forces TypeScript to surface every consumer; `pnpm lint && pnpm -r build && pnpm -r test` at the PR head is the acceptance gate. The base change already identifies every call site; this hardening only renames the field and composes existing fields into one object.
 - **[Risk] `FocusTelemetry` default no-op silently swallows events in unwired deployments** → Acceptable and intentional. The no-op IS the "unwired" behavior. Deployments that care wire the port.
-- **[Risk] E2E flakiness (focus assertions are browser-timing-dependent)** → Mitigation: the base change's `useLayoutEffect` + `setTimeout(0)` scheduling is designed for deterministic ordering; E2E waits on an `await page.waitForFunction(() => document.activeElement?.dataset.testid === ...)` pattern rather than fixed delays.
+- **[Risk] E2E flakiness (focus assertions are browser-timing-dependent)** → Mitigation: the base change's `useLayoutEffect` + `setTimeout(0)` scheduling is designed for deterministic ordering; E2E waits on `page.waitForFunction(() => document.activeElement?.getAttribute('aria-label') === '<name>' || document.activeElement?.textContent?.trim() === '<name>')` — an accessible-name assertion consistent with the `getByRole('listitem', { name: ... })` strategy committed in Decision 4. Never `dataset.testid` (testids are not part of the production bundle strategy).
 - **[Risk] AT evidence goes stale without refresh** → Mitigation: the runbook + CODEOWNERS rule + an annual refresh task keep it fresh. Stale evidence is still better than no evidence.
 - **[Risk] Kill-switch + telemetry are two new indirection seams** → Trade-off accepted. Observability and operational control are not free, but they are cheaper than production debugging through user bug reports.
 - **[Trade-off] Strict Mode re-run doubles test duration for focus integration** → Acceptable; base task §8 has ~20 integration tests; a 2× run is ~40 tests, well within the CI budget. If a hot-spot emerges we can split the describe in half.
