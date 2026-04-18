@@ -3,6 +3,7 @@ import { describe, it, expect, beforeEach } from "vitest";
 // Capture listener callbacks registered at import time (before any reset)
 const {
   PROTOCOL_VERSION,
+  BRIDGE_MANIFEST,
   handleAction,
   getCsrfToken,
   checkSession,
@@ -24,6 +25,81 @@ describe("background.js", () => {
       expect(PROTOCOL_VERSION).toBe(1);
     });
   });
+
+  describe("BRIDGE_MANIFEST", () => {
+    it("has correct shape matching bridgeManifestSchema", () => {
+      expect(BRIDGE_MANIFEST).toEqual({
+        id: "garmin-bridge",
+        name: "Garmin Connect",
+        version: "0.1.0",
+        protocolVersion: 1,
+        capabilities: ["write:workouts"],
+      });
+    });
+
+    it("version matches package.json (no drift between background.js and the published version)", () => {
+      const pkg = require("../package.json");
+
+      expect(BRIDGE_MANIFEST.version).toBe(pkg.version);
+    });
+
+    it("validates against bridgeManifestSchema (replica of the SPA contract)", () => {
+      // Mirrors the Zod rules in `bridgeManifestSchema` from
+      // packages/workout-spa-editor/src/types/bridge-schemas.ts exactly:
+      // id/name/version are bare z.string() (no min length),
+      // protocolVersion is positive int, capabilities is z.array(...) (no
+      // .nonempty()) of values from bridgeCapabilitySchema. If you change
+      // the SPA schema, change this replica.
+      const validate = makeManifestValidator();
+
+      expect(validate(BRIDGE_MANIFEST)).toEqual([]);
+    });
+
+    it("replica rejects malformed manifests (not a pass-everything stub)", () => {
+      const validate = makeManifestValidator();
+
+      expect(validate({ ...BRIDGE_MANIFEST, capabilities: ["bogus"] })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/not in allowed enum/)])
+      );
+      expect(validate({ ...BRIDGE_MANIFEST, protocolVersion: 0 })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/protocolVersion/)])
+      );
+      expect(validate({ ...BRIDGE_MANIFEST, id: 42 })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/id must be string/)])
+      );
+    });
+  });
+
+  // Inline replica of `bridgeManifestSchema` — see the test above for the
+  // canonical comment. Extracted so the negative-path test can re-use it.
+  function makeManifestValidator() {
+    const ALLOWED_CAPABILITIES = new Set([
+      "read:workouts",
+      "write:workouts",
+      "read:body",
+      "read:sleep",
+      "read:training-plan",
+    ]);
+    return (m) => {
+      const errors = [];
+      if (typeof m?.id !== "string") errors.push("id must be string");
+      if (typeof m?.name !== "string") errors.push("name must be string");
+      if (typeof m?.version !== "string") errors.push("version must be string");
+      if (
+        typeof m?.protocolVersion !== "number" ||
+        !Number.isInteger(m.protocolVersion) ||
+        m.protocolVersion < 1
+      )
+        errors.push("protocolVersion must be a positive integer");
+      if (!Array.isArray(m?.capabilities))
+        errors.push("capabilities must be an array");
+      for (const c of m?.capabilities ?? []) {
+        if (!ALLOWED_CAPABILITIES.has(c))
+          errors.push(`capabilities[] contains "${c}" not in allowed enum`);
+      }
+      return errors;
+    };
+  }
 
   describe("getCsrfToken", () => {
     it("returns null when no token stored", async () => {
@@ -147,6 +223,24 @@ describe("background.js", () => {
       expect(response.data).toHaveProperty("csrfCaptured");
       expect(response.data).toHaveProperty("gcApi");
     });
+
+    it("includes bridge manifest fields in data envelope", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([]));
+      const sendResponse = vi.fn();
+
+      externalCb({ action: "ping" }, {}, sendResponse);
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      const response = sendResponse.mock.calls[0][0];
+
+      expect(response.data).toMatchObject({
+        id: "garmin-bridge",
+        name: "Garmin Connect",
+        version: "0.1.0",
+        protocolVersion: 1,
+        capabilities: ["write:workouts"],
+      });
+    });
   });
 
   describe("handleAction", () => {
@@ -178,6 +272,91 @@ describe("background.js", () => {
       const result = await checkSession();
 
       expect(result.csrfCaptured).toBe(true);
+    });
+
+    it("handles ping happy path (Garmin tab open, API responds OK)", async () => {
+      await chrome.storage.session.set({ csrfToken: "abc" });
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 7 }]));
+      chrome.tabs.sendMessage.mockImplementation((_tabId, _msg, cb) => {
+        cb({ ok: true, data: [{ workoutId: 1 }] });
+      });
+
+      const result = await checkSession();
+
+      expect(result.csrfCaptured).toBe(true);
+      expect(result.gcApi).toEqual({ ok: true, data: [{ workoutId: 1 }] });
+      expect(result).toMatchObject({
+        id: "garmin-bridge",
+        name: "Garmin Connect",
+        protocolVersion: 1,
+        capabilities: ["write:workouts"],
+      });
+    });
+
+    it("ping via externalCb wraps checkSession in the full SPA envelope", async () => {
+      await chrome.storage.session.set({ csrfToken: "abc" });
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 7 }]));
+      chrome.tabs.sendMessage.mockImplementation((_tabId, _msg, cb) => {
+        cb({ ok: true, data: [{ workoutId: 1 }] });
+      });
+      const sendResponse = vi.fn();
+
+      externalCb({ action: "ping" }, {}, sendResponse);
+      await vi.waitFor(() => expect(sendResponse).toHaveBeenCalled());
+
+      const response = sendResponse.mock.calls[0][0];
+
+      // The SPA's parseManifestFromPing reads response.data — it MUST
+      // contain every BridgeManifest field plus the session-status
+      // fields the popup/UI consume.
+      expect(response).toMatchObject({
+        ok: true,
+        protocolVersion: 1,
+        data: {
+          id: "garmin-bridge",
+          name: "Garmin Connect",
+          version: "0.1.0",
+          protocolVersion: 1,
+          capabilities: ["write:workouts"],
+          csrfCaptured: true,
+          gcApi: { ok: true, data: [{ workoutId: 1 }] },
+        },
+      });
+    });
+
+    it("manifest fields take precedence if upstream API leaks an id/version", async () => {
+      // Defends against a future Garmin API change that returns its own
+      // `id`/`version` keys at the top level of the response. The spread
+      // order in checkSession (`{ ...BRIDGE_MANIFEST, csrfCaptured, gcApi }`)
+      // ensures the manifest-only fields cannot be overwritten by the
+      // upstream payload (gcApi keeps the rogue keys nested but they
+      // never bubble up to response.data).
+      await chrome.storage.session.set({ csrfToken: "abc" });
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 7 }]));
+      chrome.tabs.sendMessage.mockImplementation((_tabId, _msg, cb) => {
+        cb({ ok: true, id: "ATTACKER", version: "99.9.9", data: [] });
+      });
+
+      const result = await checkSession();
+
+      expect(result.id).toBe("garmin-bridge");
+      expect(result.version).toBe("0.1.0");
+      // The rogue keys are inside gcApi, which Zod will strip.
+      expect(result.gcApi.id).toBe("ATTACKER");
+    });
+
+    it("checkSession returns manifest fields alongside session status", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([]));
+
+      const result = await checkSession();
+
+      expect(result).toMatchObject({
+        id: "garmin-bridge",
+        name: "Garmin Connect",
+        version: "0.1.0",
+        protocolVersion: 1,
+        capabilities: ["write:workouts"],
+      });
     });
 
     it("handles open-garmin action", async () => {

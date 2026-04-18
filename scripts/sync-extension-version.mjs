@@ -69,6 +69,44 @@ for (const extName of extensions) {
     changed = true;
   }
 
+  // Sync the BRIDGE_MANIFEST.version literal inside background.js so the
+  // value the extension reports to the SPA via the `ping` action stays in
+  // lockstep with the published manifest version. Without this, the SPA's
+  // "Update your extension" detection runs against a stale version.
+  //
+  // Fail loudly if background.js exists but its BRIDGE_MANIFEST literal
+  // cannot be located — that means a future refactor moved/renamed the
+  // constant and the sync is silently broken. Catching it here is much
+  // cheaper than discovering it post-publish via SPA bridge-registry.
+  const backgroundPath = join(pkgDir, "background.js");
+  let backgroundText;
+  try {
+    backgroundText = readFileSync(backgroundPath, "utf8");
+  } catch {
+    backgroundText = null;
+  }
+  if (backgroundText !== null) {
+    const probeRe = /BRIDGE_MANIFEST[\s\S]*?version:\s*"([^"]*)"/;
+    const probe = probeRe.exec(backgroundText);
+    if (!probe) {
+      console.error(
+        `ERROR: ${backgroundPath} exists but does not contain a "BRIDGE_MANIFEST … version: \"…\"" literal — sync cannot proceed. Either restore the constant or remove this guard from sync-extension-version.mjs.`
+      );
+      process.exit(1);
+    }
+    const oldVersion = probe[1];
+    if (oldVersion === version) {
+      console.log(`  ${backgroundPath}: BRIDGE_MANIFEST already ${version}`);
+    } else {
+      const updated = backgroundText.replace(probeRe, (match, _v) =>
+        match.replace(/version:\s*"[^"]*"/, `version: "${version}"`)
+      );
+      writeFileSync(backgroundPath, updated);
+      console.log(`  ${backgroundPath}: ${oldVersion} → ${version}`);
+      changed = true;
+    }
+  }
+
   if (changed) {
     console.log(`Synced ${extName} manifest versions to ${version}`);
   } else {
