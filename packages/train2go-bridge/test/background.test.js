@@ -8,9 +8,14 @@ const {
   readDay,
   openTrain2Go,
 } = require("../background.js");
+const parser = require("../parser.js");
 
 describe("background service worker", () => {
   beforeEach(() => __resetChromeMock());
+  // Restore any vi.spyOn() patches from individual tests (e.g. the
+  // parsePingJson stub used by the precedence test) so a failing
+  // assertion never leaks a stub into a sibling test.
+  afterEach(() => vi.restoreAllMocks());
 
   describe("BRIDGE_MANIFEST", () => {
     it("has correct shape", () => {
@@ -26,7 +31,65 @@ describe("background service worker", () => {
     it("has protocolVersion 1", () => {
       expect(PROTOCOL_VERSION).toBe(1);
     });
+
+    it("version matches package.json (no drift between background.js and the published version)", () => {
+      const pkg = require("../package.json");
+
+      expect(BRIDGE_MANIFEST.version).toBe(pkg.version);
+    });
+
+    it("validates against bridgeManifestSchema (replica of the SPA contract)", () => {
+      // Mirrors the Zod rules in `bridgeManifestSchema` from
+      // packages/workout-spa-editor/src/types/bridge-schemas.ts.
+      // If you change the SPA schema, change this replica.
+      const validate = makeManifestValidator();
+
+      expect(validate(BRIDGE_MANIFEST)).toEqual([]);
+    });
+
+    it("replica rejects malformed manifests (not a pass-everything stub)", () => {
+      const validate = makeManifestValidator();
+
+      expect(validate({ ...BRIDGE_MANIFEST, capabilities: ["bogus"] })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/not in allowed enum/)])
+      );
+      expect(validate({ ...BRIDGE_MANIFEST, protocolVersion: 0 })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/protocolVersion/)])
+      );
+      expect(validate({ ...BRIDGE_MANIFEST, id: 42 })).toEqual(
+        expect.arrayContaining([expect.stringMatching(/id must be string/)])
+      );
+    });
   });
+
+  function makeManifestValidator() {
+    const ALLOWED_CAPABILITIES = new Set([
+      "read:workouts",
+      "write:workouts",
+      "read:body",
+      "read:sleep",
+      "read:training-plan",
+    ]);
+    return (m) => {
+      const errors = [];
+      if (typeof m?.id !== "string") errors.push("id must be string");
+      if (typeof m?.name !== "string") errors.push("name must be string");
+      if (typeof m?.version !== "string") errors.push("version must be string");
+      if (
+        typeof m?.protocolVersion !== "number" ||
+        !Number.isInteger(m.protocolVersion) ||
+        m.protocolVersion < 1
+      )
+        errors.push("protocolVersion must be a positive integer");
+      if (!Array.isArray(m?.capabilities))
+        errors.push("capabilities must be an array");
+      for (const c of m?.capabilities ?? []) {
+        if (!ALLOWED_CAPABILITIES.has(c))
+          errors.push(`capabilities[] contains "${c}" not in allowed enum`);
+      }
+      return errors;
+    };
+  }
 
   describe("findTrain2GoTab", () => {
     it("returns null when no tab is open", async () => {
@@ -82,6 +145,51 @@ describe("background service worker", () => {
         protocolVersion: 1,
         capabilities: ["read:training-plan"],
         sessionActive: false,
+      });
+    });
+
+    it("manifest fields take precedence if parsePingJson ever returns colliding keys", async () => {
+      // Symmetric defense to the garmin-bridge "manifest fields take
+      // precedence" test. The threat vectors differ: garmin-bridge's
+      // is an upstream HTTP response leak (so its test injects at the
+      // response layer, since `checkSession` spreads the raw response
+      // object); train2go-bridge's vector would be a `parsePingJson`
+      // regression that started passing arbitrary keys through (since
+      // the parser is the layer between the response and the spread).
+      // We therefore mock the parser here. Reverting the spread order
+      // in ping() to `{ ...BRIDGE_MANIFEST, ...session }` makes this
+      // test fail on result.id/name/version/protocolVersion/capabilities.
+      const ATTACKER_SESSION = {
+        id: "ATTACKER",
+        name: "Fake Bridge",
+        version: "99.9.9",
+        protocolVersion: 999,
+        capabilities: ["write:workouts"],
+        userId: 28035,
+        userName: "Pablo",
+        sessionActive: true,
+      };
+      vi.spyOn(parser, "parsePingJson").mockReturnValue(ATTACKER_SESSION);
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: true, status: 200, data: { success: true } })
+      );
+
+      const result = await handleAction({ action: "ping" });
+
+      // Manifest keys win on collision (5 fields), session-only fields
+      // still flow through (3 fields). The describe-level
+      // `afterEach(vi.restoreAllMocks)` cleans up the spy even if this
+      // assertion throws.
+      expect(result).toMatchObject({
+        id: "train2go-bridge",
+        name: "Kaiord Train2Go Bridge",
+        version: "0.1.0",
+        protocolVersion: 1,
+        capabilities: ["read:training-plan"],
+        sessionActive: true,
+        userId: 28035,
+        userName: "Pablo",
       });
     });
 
