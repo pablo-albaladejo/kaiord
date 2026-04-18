@@ -39,7 +39,7 @@ jobs:
     steps:
       - name: Find automerge PRs
         id: find-prs
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             let prNumbers = [];
@@ -67,7 +67,7 @@ jobs:
             console.log(`Found ${prNumbers.length} PR(s) to check: ${prNumbers.join(', ')}`);
 
       - name: Process auto-merge candidates
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const prNumbers = JSON.parse('${{ steps.find-prs.outputs.pr-numbers }}');
