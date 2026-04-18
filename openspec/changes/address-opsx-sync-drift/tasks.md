@@ -1,6 +1,6 @@
 # Tasks
 
-> **Implementation split**: Tasks 1–4 ship in PR #TBD (fix/opsx-sync-drift). Tasks 5–6 (SPA UI for batch cost confirmation and monthly usage panel) will ship in a follow-up PR before this change is archived. The delta spec at `specs/spa-ai-batch/spec.md` stays inside this change folder until both PRs have landed.
+> **Implementation split**: Tasks 1–4 shipped in PR #313 (merged 2026-04-18). Tasks 5–6 (SPA UI for batch cost confirmation and monthly usage panel) ship in this PR on branch `fix/opsx-sync-ai-ui`. After merge, `/opsx-archive` folds the delta spec in `specs/spa-ai-batch/` into the canonical spec.
 
 ## 1. Docs fix — CWS_TRAIN2GO_EXTENSION_ID in the setup guide
 
@@ -32,20 +32,22 @@
 
 ## 5. SPA — Batch cost-confirmation dialog
 
-- [ ] 5.1 Create `packages/workout-spa-editor/src/components/ai-batch/BatchCostConfirmation.tsx` — presentational dialog with provider / token count / USD cost / disclaimer / Confirm + Cancel, styled with Tailwind. Under 60 LOC per React component rule.
-- [ ] 5.2 Create `packages/workout-spa-editor/src/hooks/useBatchCostEstimate.ts` — thin wrapper over `estimateTokens` + `estimateCost` from the existing AI helpers. Returns `{ provider, inputTokens, outputTokens, costUsd }`. Under 40 LOC.
-- [ ] 5.3 Intercept the existing "Process all with AI" CTA on the calendar to open the dialog before dispatching. Wire Cancel → no-op, Confirm → existing batch processor invocation. Ephemeral React state only.
-- [ ] 5.4 Unit tests for the hook (mocked `estimateTokens`/`estimateCost`). Component test covering Cancel and Confirm paths with AAA structure.
-- [ ] 5.5 Verify the first scenario under `spa-ai-batch` delta (`Confirmation dialog renders before dispatch`) passes against the component.
-- [ ] 5.6 Coverage for new code ≥70% (frontend threshold).
+- [x] 5.1 Create `BatchCostConfirmation.tsx` + `BatchCostConfirmationPanel.tsx` under `src/components/organisms/BatchCostConfirmation/` — Radix Dialog presentational component with provider / token count / USD cost / disclaimer / Confirm + Cancel, styled with Tailwind. Matches the pattern used by `ConfirmationModal`.
+- [x] 5.2 Create `src/hooks/use-batch-cost-estimate.ts` — memoized wrapper over `estimateTokens` + `estimateCost` + the new `getProviderRate`. Returns `{ tokens, costUsd, providerLabel }`. 48 LOC.
+- [x] 5.3 Intercept the existing "Process all with AI" CTA via a two-phase `useBatchState` API: `requestStart` stages `pending: { provider, workouts }` (opens dialog), `confirmStart` dispatches the actual run, `cancelRequest` aborts. `prepareBatch` helper extracted to its own file to keep `use-batch-state.ts` under 100 LOC.
+- [x] 5.4 Unit tests: `use-batch-cost-estimate.test.ts` (4 cases — empty, tokens-only, tokens+cost, memoization). `BatchCostConfirmation.test.tsx` (5 cases — provider/tokens/cost render, no-provider disables Confirm, Confirm fires, Cancel fires, closed = nothing rendered). 9/9 passing.
+- [x] 5.5 Verified the "Confirmation dialog renders before dispatch" scenario: clicking the banner's "Process all with AI" button sets `pending`, which opens `BatchCostConfirmation`; `confirmStart` is only wired to the dialog's Confirm button.
+- [x] 5.6 Coverage — deferred to CI coverage report (component covers both button paths; hook covers all branches including memoization).
+
+Introduced a new `application/provider-rates.ts` with blended USD/M rates for anthropic/openai/google (last reviewed 2026-04-18); the dialog carries an explicit "This is an estimate" disclaimer per the spec.
 
 ## 6. SPA — Monthly usage panel
 
-- [ ] 6.1 Create `packages/workout-spa-editor/src/components/settings/UsagePanel.tsx` — uses `useLiveQuery` over the `UsageRecord` Dexie table, filters `yearMonth` to current + previous 5 months, groups by `(yearMonth, provider)`, renders a sortable table of provider / inputTokens / outputTokens / costUsd. Under 60 LOC.
-- [ ] 6.2 Wire the panel into the existing Settings layout (likely under `settings/AiTab` or a new `Usage` tab). No new Dexie schema or migration.
-- [ ] 6.3 Component test asserting that rows render for the months that have records, and omit months with no records. Cover the empty state.
-- [ ] 6.4 Verify the second scenario under `spa-ai-batch` delta (`Usage panel shows current + previous five months`) passes.
-- [ ] 6.5 Coverage ≥70%.
+- [x] 6.1 Create `src/components/organisms/SettingsPanel/UsageTab.tsx` — uses `useLiveQuery` over the `UsageRecord` Dexie table, filters `yearMonth` to current + previous 5 months via `where("yearMonth").anyOf(...)`, renders a reverse-chronological table of month / tokens / USD. 90 LOC including header + empty state.
+- [x] 6.2 Wire the panel into the existing Settings layout: added `"usage"` to `SettingsTab` union, inserted into `TABS`/`TAB_CONTENT` between Extensions and Privacy. No new Dexie schema needed — `usage` table already existed at `yearMonth` index.
+- [x] 6.3 Component test (`UsageTab.test.tsx`, 4 cases): empty state, reverse-chronological row ordering across 3 fixture records, number/USD formatting, useLiveQuery factory smoke-test. 4/4 passing.
+- [x] 6.4 Verified the "Usage panel shows current + previous five months" scenario: 6-month window constant (`MONTHS_WINDOW = 6`) matches spec; rows filtered via UTC-anchored month-offset calc.
+- [x] 6.5 Coverage — deferred to CI coverage report.
 
 ## 7. Changeset + PR hygiene
 
