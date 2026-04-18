@@ -1,4 +1,4 @@
-> Synced: 2026-04-17
+> Synced: 2026-04-18
 
 # Branding
 
@@ -98,7 +98,7 @@ Both the landing page and the editor SHALL include `<meta name="theme-color">` w
 
 ### Requirement: Shared brand color tokens
 
-Brand colors SHALL be defined as semantic CSS custom properties in a shared file at the repo root (`styles/brand-tokens.css`), outside any package, importable by both landing and editor via relative path without creating workspace dependencies. Tokens: `--brand-bg-primary`, `--brand-bg-surface`, `--brand-text-primary`, `--brand-text-secondary`, `--brand-text-muted`, `--brand-accent-blue` (`#0284c7`), `--brand-accent-purple` (`#9333ea`), `--brand-border`. No arbitrary hex values SHALL be used in component styles.
+Brand colors SHALL be defined as semantic CSS custom properties in a shared file at the repo root (`styles/brand-tokens.css`), outside any package, importable by both landing and editor via relative path without creating workspace dependencies. Consumers SHALL import the file with a CSS `@import url('<relative path>/styles/brand-tokens.css');` statement (or the bundler's equivalent) — not via a `workspace:*` dependency — so the tokens can be consumed by plain-HTML landing pages and bundled apps alike. Tokens: `--brand-bg-primary`, `--brand-bg-surface`, `--brand-text-primary`, `--brand-text-secondary`, `--brand-text-muted`, `--brand-accent-blue` (`#0284c7`), `--brand-accent-purple` (`#9333ea`), `--brand-border`. No arbitrary hex values SHALL be used in component styles.
 
 #### Scenario: Color consistency
 
