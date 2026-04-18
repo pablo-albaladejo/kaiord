@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Check if frontend changed
         id: check
-        uses: actions/github-script@v8
+        uses: actions/github-script@v9
         with:
           script: |
             const commits = await github.rest.repos.getCommit({
