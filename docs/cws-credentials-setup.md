@@ -58,13 +58,13 @@ The OAuth client (steps 1-5) is shared across every extension, but the `*_EXTENS
 
 Go to **GitHub repo > Settings > Secrets and variables > Actions** and add:
 
-| Secret Name                  | Value                                                 |
-| ---------------------------- | ----------------------------------------------------- |
-| `CWS_CLIENT_ID`              | Google Cloud OAuth client ID                          |
-| `CWS_CLIENT_SECRET`          | Google Cloud OAuth client secret                      |
-| `CWS_REFRESH_TOKEN`          | Refresh token from step 5                             |
-| `CWS_EXTENSION_ID`           | Garmin Bridge extension ID from step 6                |
-| `CWS_TRAIN2GO_EXTENSION_ID`  | Train2Go Bridge extension ID from step 6              |
+| Secret Name                 | Value                                    |
+| --------------------------- | ---------------------------------------- |
+| `CWS_CLIENT_ID`             | Google Cloud OAuth client ID             |
+| `CWS_CLIENT_SECRET`         | Google Cloud OAuth client secret         |
+| `CWS_REFRESH_TOKEN`         | Refresh token from step 5                |
+| `CWS_EXTENSION_ID`          | Garmin Bridge extension ID from step 6   |
+| `CWS_TRAIN2GO_EXTENSION_ID` | Train2Go Bridge extension ID from step 6 |
 
 The OAuth secrets (`CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN`) are shared across every extension; only the `*_EXTENSION_ID` values differ. Add one `*_EXTENSION_ID` secret per extension the project publishes.
 

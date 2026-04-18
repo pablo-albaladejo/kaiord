@@ -10,6 +10,7 @@ All five items live in different layers but share two constraints:
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Implement a CI internal-link checker that fails PRs when Markdown links break, satisfying the existing `doc-drift-prevention` SHALL.
 - Document `CWS_TRAIN2GO_EXTENSION_ID` in `docs/cws-credentials-setup.md` so the page matches `cws-publish.yml` and the `cws-auto-publish` spec scenarios.
 - Ship a batch-confirmation dialog (provider, estimated tokens, estimated cost, disclaimer) and a Settings → Usage panel (current + previous 5 months) using existing helpers and schema — no new domain types.
@@ -17,6 +18,7 @@ All five items live in different layers but share two constraints:
 - Clarify the brand-token import pattern in `branding` spec.
 
 **Non-Goals:**
+
 - Expanding LLM token-accounting beyond the existing `estimateTokens`/`estimateCost` helpers.
 - Adding external link checking (only internal links across the repo).
 - Enforcing brand tokens via ESLint / bundler rules.
