@@ -6,16 +6,19 @@ import { ExtensionsTab } from "./ExtensionsTab";
 import { PrivacyTab } from "./PrivacyTab";
 import { TabButton } from "./TabButton";
 import type { SettingsPanelProps, SettingsTab } from "./types";
+import { UsageTab } from "./UsageTab";
 
 const TABS: Array<{ id: SettingsTab; label: string }> = [
   { id: "ai", label: "AI" },
   { id: "extensions", label: "Extensions" },
+  { id: "usage", label: "Usage" },
   { id: "privacy", label: "Privacy" },
 ];
 
 const TAB_CONTENT: Record<SettingsTab, React.FC> = {
   ai: AiTab,
   extensions: ExtensionsTab,
+  usage: UsageTab,
   privacy: PrivacyTab,
 };
 
