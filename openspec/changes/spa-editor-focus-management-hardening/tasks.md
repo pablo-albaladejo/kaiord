@@ -115,17 +115,19 @@
   - A post-deploy smoke-test procedure: "Open the editor, perform a delete, verify at least one `wiring-canary` or mutation-driven event arrived in the telemetry dashboard within 60 seconds; absence indicates wiring failure"
   - **Event-to-severity alert guidance table** for ops (thresholds below are starting points — tune to actual DAU):
 
-    | Event | Expected rate | Suggested alert (P) | Response playbook |
-    |---|---|---|---|
-    | `wiring-canary` | One per editor mount with wired telemetry | Info; **absence >30 min during editor-active hours = P3** (missing-canary) | Verify the deployment includes the telemetry provider; if absent, re-deploy with the correct env wiring |
-    | `focus-error` | Near zero (should never fire in correct implementation) | **Any occurrence = P2 error** | Inspect stack-trace field in event; identify the throwing element; file a regression bug |
-    | `unresolved-target-fallback` | Low, occasional (race conditions acceptable) | Info; **sustained elevation ≥5× baseline for 6h = P3** | Check for recent changes to component unmount ordering or ref-registration |
-    | `form-field-short-circuit` | Per-user, moderate (debounced) | Debug; not pageable | Statistical monitoring only |
-    | `overlay-deferred-apply` | Per-user, moderate | Debug; outlier `deferredForMs` ≥5000 may indicate UI stall | Investigate dialog-close handlers for long-running work |
+    | Event                        | Expected rate                                           | Suggested alert (P)                                                        | Response playbook                                                                                       |
+    | ---------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+    | `wiring-canary`              | One per editor mount with wired telemetry               | Info; **absence >30 min during editor-active hours = P3** (missing-canary) | Verify the deployment includes the telemetry provider; if absent, re-deploy with the correct env wiring |
+    | `focus-error`                | Near zero (should never fire in correct implementation) | **Any occurrence = P2 error**                                              | Inspect stack-trace field in event; identify the throwing element; file a regression bug                |
+    | `unresolved-target-fallback` | Low, occasional (race conditions acceptable)            | Info; **sustained elevation ≥5× baseline for 6h = P3**                     | Check for recent changes to component unmount ordering or ref-registration                              |
+    | `form-field-short-circuit`   | Per-user, moderate (debounced)                          | Debug; not pageable                                                        | Statistical monitoring only                                                                             |
+    | `overlay-deferred-apply`     | Per-user, moderate                                      | Debug; outlier `deferredForMs` ≥5000 may indicate UI stall                 | Investigate dialog-close handlers for long-running work                                                 |
 
     **Post-deploy missing-canary auto-alert pattern:** configure a continuous check on your telemetry dashboard — if `wiring-canary` event count over a 30-minute rolling window is zero during editor-active hours (09:00–22:00 in the deployment's configured `TELEMETRY_TIMEZONE`; defaults to UTC if unset), fire a P3 alert. Document `TELEMETRY_TIMEZONE` as an ops configuration variable alongside the telemetry-backend credentials. For single-user local installations where editor-active hours are effectively 24/7 within the user's timezone, the rolling window can be widened to 2 hours.
+
   - **Incident ownership guidance:** "For deployed installations, alerts should be paged per the deployment's internal on-call runbook. For the open-source reference deployment, `focus-error` SHOULD result in a GitHub issue filed against the repo with the `incident` label and assigned to the workout-spa-editor CODEOWNERS."
   - **Desktop-AT version-drift policy:** "AT evidence is considered valid for AT + OS + browser versions within one major release of the pinned version in the evidence directory's README. Outside that window, the quarterly refresh cron (or a dependency-bump-triggered manual refresh) re-captures evidence against then-current versions."
+
 - [ ] 9.3 Update `WorkoutList/README.md` to reference the AT evidence directory as the regression-comparison baseline
 - [ ] 9.4 Run `/opsx-verify spa-editor-focus-management-hardening` and resolve any mismatches
 - [ ] 9.5 Run `/opsx-verify spa-editor-focus-telemetry` and resolve any mismatches
