@@ -50,18 +50,18 @@ Constraints:
 
 **Choice:** Add `src/hooks/use-focus-kill-switch.ts` (a hook, NOT a React context — no provider is needed because the reader talks to `window` events and `localStorage` directly) exposing `useFocusKillSwitch(): boolean` which returns `true` when focus management should be disabled. The reader is a three-state decision: runtime localStorage override beats build-time env var beats default. Truth table:
 
-| `localStorage.kaiordFocusManagement` | `import.meta.env.VITE_KAIORD_FOCUS_MANAGEMENT` | `useFocusKillSwitch()` |
-|---|---|---|
-| `'off'` | any | `true` (disabled) |
-| `'on'` | any | `false` (enabled — runtime force-enable) |
-| unset or other | `'off'` | `true` (disabled — build-time disabled) |
-| unset or other | `'on'` or unset | `false` (enabled — default) |
+| `localStorage.kaiordFocusManagement` | `import.meta.env.VITE_KAIORD_FOCUS_MANAGEMENT` | `useFocusKillSwitch()`                   |
+| ------------------------------------ | ---------------------------------------------- | ---------------------------------------- |
+| `'off'`                              | any                                            | `true` (disabled)                        |
+| `'on'`                               | any                                            | `false` (enabled — runtime force-enable) |
+| unset or other                       | `'off'`                                        | `true` (disabled — build-time disabled)  |
+| unset or other                       | `'on'` or unset                                | `false` (enabled — default)              |
 
 Supporting `'on'` on the runtime axis matters because `VITE_KAIORD_FOCUS_MANAGEMENT` is a **compile-time constant** (Vite inlines it at build); without a runtime override for `'on'`, a build-time "off" would be a one-way door per deployment and an internal tester could not selectively re-enable the feature. The build-time axis is therefore covered by unit tests only (using `vi.stubEnv`); the E2E suite exercises exclusively the localStorage path because E2E runs against a built bundle where the env var cannot change mid-run.
 
 The hook reads the kill-switch via `useSyncExternalStore` with a subscriber that listens to two events:
 
-1. A **cross-tab** `storage` event (fired by browsers in *other* tabs of the same origin when localStorage mutates — NOT in the writing tab itself).
+1. A **cross-tab** `storage` event (fired by browsers in _other_ tabs of the same origin when localStorage mutates — NOT in the writing tab itself).
 2. A **same-tab** custom event `kaiord:focus-kill-switch-change` that our own code dispatches (`window.dispatchEvent(new CustomEvent('kaiord:focus-kill-switch-change'))`) whenever the `/settings/focus-diagnostics` UI mutates localStorage, or whenever any programmatic code flips the switch.
 
 This dual subscription is necessary because the Web Storage API explicitly does not fire `storage` in the tab that performed the write. Without the custom event, a DevTools-driven `localStorage.setItem(...)` in the editor tab would leave the hook's cached value stale until page reload.
@@ -76,7 +76,7 @@ When the effective value is `true`, the hook:
 - Emits a `kill-switch-active` telemetry event on each `false → true` transition (not merely once per hook-instance lifetime) so a DevTools toggle mid-session produces an observable signal. Support staff can use event arrival as a confirmation that the intervention succeeded.
 - Leaves `history` / `selectedStepId` / all undo-redo semantics untouched.
 
-**Rollback honesty note:** The kill-switch restores *pre-base-change* behavior, i.e., focus falls to `document.body` after unmount. That is the accessibility bug that motivated the base change. Kill-switch-active is therefore a **revert-to-broken-but-stable** state, not a supported mode. The `kill-switch-active` rate is an error-budget signal, not a steady-state posture — deployments SHOULD alarm if the rolling-window rate exceeds baseline.
+**Rollback honesty note:** The kill-switch restores _pre-base-change_ behavior, i.e., focus falls to `document.body` after unmount. That is the accessibility bug that motivated the base change. Kill-switch-active is therefore a **revert-to-broken-but-stable** state, not a supported mode. The `kill-switch-active` rate is an error-budget signal, not a steady-state posture — deployments SHOULD alarm if the rolling-window rate exceeds baseline.
 
 **Rationale:**
 
@@ -86,9 +86,9 @@ When the effective value is `true`, the hook:
 
 **Alternatives considered:**
 
-- *Feature-flag service (LaunchDarkly, GrowthBook)*: rejected for this scope. No existing infrastructure; would add a dependency for a single binary flag.
-- *Direct env-var check in hook*: rejected for test friction.
-- *Gate at store level (don't set `pendingFocusTarget` at all)*: rejected because the target is also consumed by tests and future features; gating at the DOM layer is the narrowest cut.
+- _Feature-flag service (LaunchDarkly, GrowthBook)_: rejected for this scope. No existing infrastructure; would add a dependency for a single binary flag.
+- _Direct env-var check in hook_: rejected for test friction.
+- _Gate at store level (don't set `pendingFocusTarget` at all)_: rejected because the target is also consumed by tests and future features; gating at the DOM layer is the narrowest cut.
 
 **Layer impact:** Infrastructure (React-hook + context).
 
@@ -111,9 +111,9 @@ Update `WorkoutStore.workoutHistory` → `undoHistory: UndoHistory`. Update `pus
 
 **Alternatives considered:**
 
-- *Keep parallel arrays and improve assertions*: rejected — doesn't address the "silent wrong-target in production" failure mode; only delays it.
-- *Use a tuple `[UIWorkout, ItemId | null]`*: equivalent but less readable at call sites.
-- *Defer to a future change*: rejected — the base change's history semantics are load-bearing for every undo scenario; hardening while it is fresh in contributors' minds is cheaper than a separate refactor cycle.
+- _Keep parallel arrays and improve assertions_: rejected — doesn't address the "silent wrong-target in production" failure mode; only delays it.
+- _Use a tuple `[UIWorkout, ItemId | null]`_: equivalent but less readable at call sites.
+- _Defer to a future change_: rejected — the base change's history semantics are load-bearing for every undo scenario; hardening while it is fresh in contributors' minds is cheaper than a separate refactor cycle.
 
 **Atomic-PR note:** Like base §2, the rename from `workoutHistory` to `history` breaks every consumer in a single type-propagation step. This change is a single atomic PR; intermediate commits are not zero-warning.
 
@@ -127,7 +127,11 @@ Update `WorkoutStore.workoutHistory` → `undoHistory: UndoHistory`. Update `pus
 export type FocusTelemetryEvent =
   | { type: "kill-switch-active" }
   | { type: "wiring-canary" }
-  | { type: "unresolved-target-fallback"; targetKind: "item" | "empty-state"; fallback: "empty-state" | "first-item" | "heading" }
+  | {
+      type: "unresolved-target-fallback";
+      targetKind: "item" | "empty-state";
+      fallback: "empty-state" | "first-item" | "heading";
+    }
   | { type: "form-field-short-circuit" }
   | { type: "overlay-deferred-apply"; deferredForMs: number }
   | { type: "focus-error"; phase: "focus" | "scrollIntoView" };
@@ -136,7 +140,7 @@ export type FocusTelemetry = (event: FocusTelemetryEvent) => void;
 export const defaultFocusTelemetry: FocusTelemetry = () => {};
 ```
 
-The event payload carries *structural* metadata only — never `ItemId` values, never step/block content, never workout names. This preserves the existing no-PII rule from base Decision 3.
+The event payload carries _structural_ metadata only — never `ItemId` values, never step/block content, never workout names. This preserves the existing no-PII rule from base Decision 3.
 
 The store accepts an optional `telemetry: FocusTelemetry` at construction time (same pattern as `IdProvider`). `useFocusAfterAction` reads the telemetry fn from context (`FocusTelemetryContext`, provided at editor root) and invokes it at each observation point. Tests inject a spy that asserts the expected event sequence.
 
@@ -151,9 +155,9 @@ Production deployments that want Sentry/Datadog/etc. integration import and prov
 
 **Alternatives considered:**
 
-- *Direct `console.warn`/`console.error` calls*: rejected — captured by nothing; "turn on devtools and reproduce" is not a production diagnostic strategy.
-- *EventTarget-style bus*: rejected — more machinery than a function pointer; no observed benefit for single-listener scenarios.
-- *Sentry-as-default*: rejected — forces a dependency on every consumer.
+- _Direct `console.warn`/`console.error` calls_: rejected — captured by nothing; "turn on devtools and reproduce" is not a production diagnostic strategy.
+- _EventTarget-style bus_: rejected — more machinery than a function pointer; no observed benefit for single-listener scenarios.
+- _Sentry-as-default_: rejected — forces a dependency on every consumer.
 
 **Layer impact:** Infrastructure (new port + adapter).
 
@@ -163,17 +167,17 @@ Production deployments that want Sentry/Datadog/etc. integration import and prov
 
 The spec performs each mutation across each input path:
 
-| Mutation | Keyboard | Context menu | Toolbar |
-|---|---|---|---|
-| Delete (single) | ✓ | ✓ | ✓ |
-| Delete (multi-select) | ✓ | ✓ | — |
-| Paste | ✓ | ✓ | ✓ |
-| Duplicate | ✓ | ✓ | ✓ |
-| Reorder (Alt+Arrow / DnD) | ✓ | — | — |
-| Group | ✓ | ✓ | — |
-| Ungroup | ✓ | ✓ | — |
-| Undo | ✓ | — | ✓ |
-| Redo | ✓ | — | ✓ |
+| Mutation                  | Keyboard | Context menu | Toolbar |
+| ------------------------- | -------- | ------------ | ------- |
+| Delete (single)           | ✓        | ✓            | ✓       |
+| Delete (multi-select)     | ✓        | ✓            | —       |
+| Paste                     | ✓        | ✓            | ✓       |
+| Duplicate                 | ✓        | ✓            | ✓       |
+| Reorder (Alt+Arrow / DnD) | ✓        | —            | —       |
+| Group                     | ✓        | ✓            | —       |
+| Ungroup                   | ✓        | ✓            | —       |
+| Undo                      | ✓        | —            | ✓       |
+| Redo                      | ✓        | —            | ✓       |
 
 **Legend:** `✓` = input path exists in the current UI and is exercised by the E2E spec. `—` = input path does not exist in the current UI for this action (e.g., there is no context-menu "Undo" item). If a future UI change adds a path (e.g., a toolbar Reorder button), the matrix SHALL gain the cell and the E2E spec SHALL add the corresponding assertion. A PR-template checklist item (task 6.4) enforces this for new UI affordances.
 
@@ -185,21 +189,23 @@ The Vitest integration tests from base task §8 gain a sibling describe block wr
 describe.each([
   { mode: "standard", Wrapper: Fragment },
   { mode: "strict", Wrapper: StrictMode },
-])("focus integration [$mode]", ({ Wrapper }) => { /* ... */ });
+])("focus integration [$mode]", ({ Wrapper }) => {
+  /* ... */
+});
 ```
 
 Each assertion runs twice. Discrepancies fail the test.
 
 **Rationale:**
 
-- The base change's manual-verification gate (task 11.5) protects *that PR* but not subsequent PRs that touch the focus path. An E2E spec is the recurring regression gate.
+- The base change's manual-verification gate (task 11.5) protects _that PR_ but not subsequent PRs that touch the focus path. An E2E spec is the recurring regression gate.
 - Strict Mode double-invocation is a known footgun; a `describe.each` two-mode run is low-effort, high-coverage.
 - Matrix coverage mirrors the spec's "input-method agnostic" requirement — the spec asserts keyboard and context menu produce identical outcomes, so the E2E should too.
 
 **Alternatives considered:**
 
-- *Only re-run a subset in Strict Mode*: rejected — every new focus scenario is a Strict Mode risk area; blanket re-run is cheap.
-- *Separate E2E workflow*: rejected — the existing `workout-spa-editor-e2e.yml` is the right home.
+- _Only re-run a subset in Strict Mode_: rejected — every new focus scenario is a Strict Mode risk area; blanket re-run is cheap.
+- _Separate E2E workflow_: rejected — the existing `workout-spa-editor-e2e.yml` is the right home.
 
 **Layer impact:** Infrastructure (E2E + test harness).
 
@@ -210,6 +216,7 @@ Each assertion runs twice. Discrepancies fail the test.
 **Alternatives considered:** admin-role unlock (no admin role exists in single-user product), `?debug=focus` query-param gate (obscures the troubleshooting path from non-technical users). Both rejected in favor of the always-on route.
 
 **Rationale:**
+
 - Documentation-only paths ("paste this snippet in DevTools") are unrealistic for non-technical support.
 - A visible UI doubles as self-serve for advanced users without needing a support channel.
 - Having a single route makes the retirement migration trivial: replace the UI with a "focus management is always enabled" notice.
@@ -235,8 +242,8 @@ The base change's changeset body includes the directory path. Subsequent changes
 
 **Alternatives considered:**
 
-- *Git LFS for screenshots*: rejected — screenshots are small (<500 KB each); LFS adds setup complexity.
-- *External storage (S3, Drive)*: rejected — defeats the "durable in the repo" goal.
+- _Git LFS for screenshots_: rejected — screenshots are small (<500 KB each); LFS adds setup complexity.
+- _External storage (S3, Drive)_: rejected — defeats the "durable in the repo" goal.
 
 **Layer impact:** Documentation / repository organization.
 
@@ -262,6 +269,7 @@ Retirement is performed via a follow-up proposal (`spa-editor-focus-management-k
 Until retirement, the kill-switch documentation SHALL include an expiry check note: "If both conditions above have held for the current release cycle, propose retirement in the next release planning window."
 
 **Rationale:**
+
 - Feature flags without expiry criteria become permanent technical debt; every project has cautionary tales.
 - Two conditions (one telemetry-based, one release-based) prevent retirement if telemetry wiring is broken (no events = could mean "healthy" or could mean "wiring broken") — the release-count condition forces real release-cycle validation.
 - Naming the retirement proposal up-front makes retirement a scheduled event, not a "someday maybe".
@@ -289,13 +297,14 @@ Phases in order (each is its own PR):
 
 **Rollback order** (reverse-dependency):
 
-- To roll back a *runtime* focus-behavior regression: flip `localStorage.kaiordFocusManagement = 'off'`. No code revert needed. This is the kill-switch's purpose.
-- To roll back *Phase D*: revert Phase D's PR. Phase C, B, A remain.
-- To roll back *Phase C* (telemetry events in the hook): revert Phase C's PR. Phase B, A remain. Hook reverts to pre-telemetry behavior; seams stay available for re-wiring.
-- To roll back *Phase B* (atomic history rewrite): must first revert Phase C AND Phase D (both reference `history`). Attempting to revert Phase B alone while later phases still use `history` will produce a broken build. A pre-revert smoke test is `pnpm -F @kaiord/workout-spa-editor build`.
-- To roll back *Phase A* (seams): revert its PR. Requires Phases B, C, D to be already reverted since they depend on the seams' types.
+- To roll back a _runtime_ focus-behavior regression: flip `localStorage.kaiordFocusManagement = 'off'`. No code revert needed. This is the kill-switch's purpose.
+- To roll back _Phase D_: revert Phase D's PR. Phase C, B, A remain.
+- To roll back _Phase C_ (telemetry events in the hook): revert Phase C's PR. Phase B, A remain. Hook reverts to pre-telemetry behavior; seams stay available for re-wiring.
+- To roll back _Phase B_ (atomic history rewrite): must first revert Phase C AND Phase D (both reference `history`). Attempting to revert Phase B alone while later phases still use `history` will produce a broken build. A pre-revert smoke test is `pnpm -F @kaiord/workout-spa-editor build`.
+- To roll back _Phase A_ (seams): revert its PR. Requires Phases B, C, D to be already reverted since they depend on the seams' types.
 
 **Smoke tests per revert:**
+
 - After any revert: `pnpm -r test && pnpm -r build && pnpm -F @kaiord/workout-spa-editor e2e` must all pass.
 - After Phase B revert specifically: verify `rg 'history\[' packages/workout-spa-editor/src/store` returns zero matches and `rg 'workoutHistory|selectionHistory' packages/workout-spa-editor/src/store` shows the restored pair.
 

@@ -63,6 +63,6 @@
   "author": "Kaiord Contributors",
   "license": "MIT",
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=22.12.0"
   }
 }

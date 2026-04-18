@@ -29,13 +29,13 @@
   - "Default (follow deployment setting)" — value: unset (clears localStorage key)
   - "Always enable focus management" — value: `'on'` (overrides deployment default)
   - "Disable focus management (use if you're experiencing focus issues)" — value: `'off'`
-  The toggle handler MUST: `localStorage.setItem(key, value)` (or `removeItem` for unset) AND `window.dispatchEvent(new Event('kaiord:focus-kill-switch-change'))`. Display the effective `useFocusKillSwitch()` result and the resolved `VITE_KAIORD_FOCUS_MANAGEMENT` value as read-only informational rows. The page has no server side effects, no auth bypass — safe to expose in production.
+    The toggle handler MUST: `localStorage.setItem(key, value)` (or `removeItem` for unset) AND `window.dispatchEvent(new Event('kaiord:focus-kill-switch-change'))`. Display the effective `useFocusKillSwitch()` result and the resolved `VITE_KAIORD_FOCUS_MANAGEMENT` value as read-only informational rows. The page has no server side effects, no auth bypass — safe to expose in production.
 - [ ] 3.5.b Register the route at `/settings/focus-diagnostics` in the SPA router
 - [ ] 3.5.c Write an E2E smoke test that navigates to the route, selects "Disable", returns to the editor, and verifies mutations no longer move focus — confirming the support path works without DevTools
 - [ ] 3.6.a Implement `src/components/molecules/FocusKillSwitchBanner.tsx`. The banner uses TWO separate DOM elements to avoid nested-live-region double-announcement (`role="status"` implies `aria-live="polite"`; nesting them produces double-announcement in NVDA/JAWS):
   1. A **visible banner** `<div>` (no ARIA role, just visual chrome) containing the static text "Focus management disabled — Change in Focus Diagnostics" with a link to `/settings/focus-diagnostics`. The link text matches the target page's `<h1>` so the user understands where they land.
   2. A **sibling hidden live region** `<div aria-live="polite" aria-atomic="true" className="sr-only">` whose text content is driven by transition effects (see 3.6.c). The live region is visually hidden but screen-reader accessible. `aria-atomic="true"` ensures the entire content is announced when it changes, preventing partial announcements if future maintainers add structured content; also allows the region to contain only a single text node as the canonical format.
-  The banner is intentionally non-dismissible — its presence IS the operational signal that the editor is in a revert-to-broken-but-stable posture. CSS MUST NOT apply `transition` or `animation` on entry/exit when `@media (prefers-reduced-motion: reduce)`; use CSS-only handling, no JS involvement
+     The banner is intentionally non-dismissible — its presence IS the operational signal that the editor is in a revert-to-broken-but-stable posture. CSS MUST NOT apply `transition` or `animation` on entry/exit when `@media (prefers-reduced-motion: reduce)`; use CSS-only handling, no JS involvement
 - [ ] 3.6.b Mount the banner as the first child of the editor's `role="main"` landmark, before the toolbar. Since the visible banner has NO ARIA role (per 3.6.a, `role="status"` lives only on the sr-only sibling live region to avoid nested-live-region double-announcement), E2E tests MUST select the visible banner by its content, NOT by role. Use: `page.getByRole('main').getByText('Focus management disabled — Change in Focus Diagnostics').first()` or assign the banner a unique `data-slot="focus-kill-switch-banner"` attribute and use `page.getByRole('main').locator('[data-slot="focus-kill-switch-banner"]').first()`. Write E2E test asserting the banner appears as the first child of `<main>` AND the link navigates to `/settings/focus-diagnostics`
 - [ ] 3.6.c Write failing tests asserting the aria-live region's text content cycles exactly as `"" → "Focus management disabled" → ""` on `false → true` and `"" → "Focus management enabled" → ""` on `true → false`. The canonical React pattern is: on transition, set text to the message via `setState`; schedule a `setTimeout(() => setText(''), 100)` to arm the next announcement (100 ms is the browser's coalesce window floor). Static renders (value unchanged) emit no text change. First-mount with already-active kill-switch SHALL NOT emit a live-region announcement — the visible banner alone is the signal; programmatic screen-reader discovery of the banner happens on Tab traversal via the `<main>` landmark. This is intentionally documented as a behavioral choice.
 - [ ] 3.4.a Write failing test asserting kill-switch activity does NOT alter `currentWorkout`, `selectedStepId`, `selectedStepIds`, `undoHistory`, or undo/redo behavior
@@ -150,30 +150,32 @@
   - A post-deploy smoke-test procedure: "Open the editor, perform a delete, verify at least one `wiring-canary` or mutation-driven event arrived in the telemetry dashboard within 60 seconds; absence indicates wiring failure"
   - **Event-to-severity alert guidance table** for ops (thresholds below are starting points — tune to actual DAU):
 
-    | Event | Expected rate | Suggested alert (P) | Response playbook |
-    |---|---|---|---|
-    | `wiring-canary` | One per editor mount with wired telemetry | Info; **absence >30 min during editor-active hours = P3** (missing-canary) | Verify the deployment includes the telemetry provider; if absent, re-deploy with the correct env wiring |
-    | `kill-switch-active` | Near zero in production | Warning at ≥1/day; **≥10 events/day sustained for 24h = P2** | Investigate recent focus-touching changes; consider emergency revert; check recent `/settings/focus-diagnostics` UX reports |
-    | `focus-error` | Near zero (should never fire in correct implementation) | **Any occurrence = P2 error** | Inspect stack-trace field in event; identify the throwing element; file a regression bug |
-    | `unresolved-target-fallback` | Low, occasional (race conditions acceptable) | Info; **sustained elevation ≥5× baseline for 6h = P3** | Check for recent changes to component unmount ordering or ref-registration |
-    | `form-field-short-circuit` | Per-user, moderate (debounced) | Debug; not pageable | Statistical monitoring only |
-    | `overlay-deferred-apply` | Per-user, moderate | Debug; outlier `deferredForMs` ≥5000 may indicate UI stall | Investigate dialog-close handlers for long-running work |
+    | Event                        | Expected rate                                           | Suggested alert (P)                                                        | Response playbook                                                                                                           |
+    | ---------------------------- | ------------------------------------------------------- | -------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------- |
+    | `wiring-canary`              | One per editor mount with wired telemetry               | Info; **absence >30 min during editor-active hours = P3** (missing-canary) | Verify the deployment includes the telemetry provider; if absent, re-deploy with the correct env wiring                     |
+    | `kill-switch-active`         | Near zero in production                                 | Warning at ≥1/day; **≥10 events/day sustained for 24h = P2**               | Investigate recent focus-touching changes; consider emergency revert; check recent `/settings/focus-diagnostics` UX reports |
+    | `focus-error`                | Near zero (should never fire in correct implementation) | **Any occurrence = P2 error**                                              | Inspect stack-trace field in event; identify the throwing element; file a regression bug                                    |
+    | `unresolved-target-fallback` | Low, occasional (race conditions acceptable)            | Info; **sustained elevation ≥5× baseline for 6h = P3**                     | Check for recent changes to component unmount ordering or ref-registration                                                  |
+    | `form-field-short-circuit`   | Per-user, moderate (debounced)                          | Debug; not pageable                                                        | Statistical monitoring only                                                                                                 |
+    | `overlay-deferred-apply`     | Per-user, moderate                                      | Debug; outlier `deferredForMs` ≥5000 may indicate UI stall                 | Investigate dialog-close handlers for long-running work                                                                     |
 
     **Post-deploy missing-canary auto-alert pattern:** configure a continuous check on your telemetry dashboard — if `wiring-canary` event count over a 30-minute rolling window is zero during editor-active hours (09:00–22:00 in the deployment's configured `TELEMETRY_TIMEZONE`; defaults to UTC if unset), fire a P3 alert. Document `TELEMETRY_TIMEZONE` as an ops configuration variable alongside the telemetry-backend credentials. For single-user local installations where editor-active hours are effectively 24/7 within the user's timezone, the rolling window can be widened to 2 hours.
 
     **Deployment-size guidance for kill-switch-active threshold:**
 
-    | Deployment shape | Suggested `kill-switch-active` threshold |
-    |---|---|
-    | Multi-tenant (≥100 concurrent users) | ≥1/day warning, ≥10/day sustained 24h = P2 (from table above) |
-    | Small multi-tenant (<100 users) | ≥1 event sustained across 2 days = investigate |
+    | Deployment shape                                                       | Suggested `kill-switch-active` threshold                                    |
+    | ---------------------------------------------------------------------- | --------------------------------------------------------------------------- |
+    | Multi-tenant (≥100 concurrent users)                                   | ≥1/day warning, ≥10/day sustained 24h = P2 (from table above)               |
+    | Small multi-tenant (<100 users)                                        | ≥1 event sustained across 2 days = investigate                              |
     | Single-install (1 user per deployment; e.g., Kaiord's default posture) | ≥1 event = investigate; ≥1 event sustained across 2 days = emergency revert |
 
     Choose the row matching your deployment. Kaiord's reference deployment is single-install; the severity table's default row assumes multi-tenant and SHOULD be re-tuned for single-install before wiring the alert.
+
   - The new `history: Array<HistoryEntry>` shape and the removal of the parallel-array invariant + its CI grep
   - The kill-switch retirement criterion (Decision 6) with a reminder to check it each release cycle
   - **Incident ownership guidance:** "For deployed installations, alerts should be paged per the deployment's internal on-call runbook. For the open-source reference deployment, `focus-error` and sustained `kill-switch-active` events SHOULD result in a GitHub issue filed against the repo with the `incident` label and assigned to the workout-spa-editor CODEOWNERS."
   - **Desktop-AT version-drift policy:** "AT evidence is considered valid for AT + OS + browser versions within one major release of the pinned version in the evidence directory's README. Outside that window, the quarterly refresh cron (or a dependency-bump-triggered manual refresh) re-captures evidence against then-current versions."
+
 - [ ] 10.3 Update `WorkoutList/README.md` to reference the AT evidence directory as the regression-comparison baseline
 - [ ] 10.4 Run `/opsx-verify spa-editor-focus-management-hardening` and resolve any mismatches
 - [ ] 10.5 Run `/opsx-verify spa-editor-focus-telemetry` and resolve any mismatches
