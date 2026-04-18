@@ -220,7 +220,6 @@ pnpm test:e2e:flakiness:ios
 For complete documentation, see:
 
 - [E2E README - Mobile Touch Drag Testing](./README.md#mobile-touch-drag-testing)
-- [Flakiness Testing Guide](./FLAKINESS-TESTING.md)
 
 ## CI/CD Integration
 

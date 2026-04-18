@@ -43,23 +43,30 @@ This starts a local server on `http://127.0.0.1` and opens a browser window for 
 
 > **Note:** Google deprecated `urn:ietf:wg:oauth:2.0:oob` in 2023. The CLI tool uses loopback redirect (`http://127.0.0.1`) automatically when using the "Desktop application" client type.
 
-## 6. Get Extension ID
+## 6. Get Extension IDs
+
+Repeat these steps for every extension published under this project — each has its own ID:
 
 1. Go to the [Chrome Web Store Developer Dashboard](https://chrome.google.com/webstore/devconsole)
-2. Click on the "Kaiord Garmin Bridge" extension
-3. The extension ID is in the URL: `chrome.google.com/webstore/devconsole/.../innelncjhkdoalikinkchoppgekennoee/edit`
-4. Copy the ID (e.g., `innelncjhkdoalikinkchoppgekennoee`)
+2. Click on the extension (e.g. "Kaiord Garmin Bridge", "Kaiord Train2Go Bridge")
+3. The extension ID is in the URL: `chrome.google.com/webstore/devconsole/.../<extension-id>/edit`
+4. Copy each ID (e.g., `innelncjhkdoalikinkchoppgekennoee`)
+
+The OAuth client (steps 1-5) is shared across every extension, but the `*_EXTENSION_ID` secret is per-extension — the `cws-publish.yml` matrix maps each entry to its secret.
 
 ## 7. Add GitHub Secrets
 
 Go to **GitHub repo > Settings > Secrets and variables > Actions** and add:
 
-| Secret Name         | Value                            |
-| ------------------- | -------------------------------- |
-| `CWS_CLIENT_ID`     | Google Cloud OAuth client ID     |
-| `CWS_CLIENT_SECRET` | Google Cloud OAuth client secret |
-| `CWS_REFRESH_TOKEN` | Refresh token from step 5        |
-| `CWS_EXTENSION_ID`  | Extension ID from step 6         |
+| Secret Name                  | Value                                                 |
+| ---------------------------- | ----------------------------------------------------- |
+| `CWS_CLIENT_ID`              | Google Cloud OAuth client ID                          |
+| `CWS_CLIENT_SECRET`          | Google Cloud OAuth client secret                      |
+| `CWS_REFRESH_TOKEN`          | Refresh token from step 5                             |
+| `CWS_EXTENSION_ID`           | Garmin Bridge extension ID from step 6                |
+| `CWS_TRAIN2GO_EXTENSION_ID`  | Train2Go Bridge extension ID from step 6              |
+
+The OAuth secrets (`CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN`) are shared across every extension; only the `*_EXTENSION_ID` values differ. Add one `*_EXTENSION_ID` secret per extension the project publishes.
 
 ## Token Rotation
 

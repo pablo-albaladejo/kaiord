@@ -201,7 +201,7 @@ const xml = await zwiftWriter(krd, { ftp: 250 });
 - [Zwift Workout Format](https://zwift.com)
 - [Garmin FIT SDK](https://developer.garmin.com/fit/)
 - [TCX Schema](https://www8.garmin.com/xmlschemas/TrainingCenterDatabasev2.xsd)
-- [Kaiord KRD Format](./KRD_FORMAT.md)
+- [Kaiord KRD Format](../../../docs/krd-format.md)
 
 ## Version History
 

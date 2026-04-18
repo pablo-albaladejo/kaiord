@@ -930,10 +930,8 @@ const fitBuffer = await providers.convertKrdToFit({ krd });
 ## Additional Resources
 
 - [Main README](../README.md) - Package overview and quick start
-- [Architecture Documentation](../../docs/architecture.md) - System design and patterns
-- [Error Handling Guide](../../docs/error-handling.md) - Comprehensive error handling patterns
-- [TypeScript Guide](../../docs/typescript-guide.md) - TypeScript usage and best practices
-- [Contributing Guidelines](../../CONTRIBUTING.md) - How to contribute to the project
+- [Architecture Documentation](../../../docs/architecture.md) - System design and patterns
+- [Contributing Guidelines](../../../CONTRIBUTING.md) - How to contribute to the project
 
 ## Support
 

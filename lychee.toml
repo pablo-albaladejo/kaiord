@@ -1,0 +1,65 @@
+# Configuration for `lychee` — CI internal-link checker.
+#
+# Enforces the `doc-drift-prevention` spec requirement:
+# "The CI pipeline SHALL check all internal links in documentation
+#  pages. Broken links SHALL fail the build."
+#
+# Scope: Markdown files whose hyperlinks use filesystem-resolvable
+# relative paths — repo-root docs, per-package READMEs, OpenSpec
+# specs, and the contribution / scripts documentation. The VitePress
+# docs under `packages/docs/` use server-relative URLs (e.g.
+# `/guide/quick-start`) that only resolve against the live site; they
+# are validated by VitePress's own `pnpm -C packages/docs build`
+# step at build time and are excluded here to avoid false positives.
+#
+# External URLs are excluded — external-link rot is noisy
+# (network flakes, rate-limits) and orthogonal to the doc-drift
+# problem we're solving today.
+
+offline = true
+include_fragments = false
+max_retries = 1
+timeout = 10
+format = "compact"
+no_progress = true
+
+exclude_path = [
+  "node_modules",
+  "dist",
+  "build",
+  "coverage",
+  ".changeset",
+  ".claude/worktrees",
+  "generated-diagrams",
+  # Playwright HTML reports are test artifacts with their own
+  # internal cross-references that are not part of the doc surface.
+  "packages/workout-spa-editor/playwright-report",
+  # Legacy draft proposals under packages/garmin/docs/ — retained
+  # for history but not a live docs surface.
+  "packages/workout-spa-editor/docs",
+  "openspec/changes/archive/README.md",
+  "THIRD-PARTY-LICENSES.md",
+  "packages/*/node_modules",
+  "packages/*/dist",
+  "packages/*/coverage",
+  # VitePress-rendered docs use server-relative URLs that only
+  # resolve in the live site. VitePress build catches link drift
+  # in-tree; lychee would produce false positives here.
+  "packages/docs/api",
+  "packages/docs/guide",
+  "packages/docs/formats",
+  "packages/docs/cli",
+  "packages/docs/mcp",
+  "packages/docs/legal",
+  "packages/docs/index.md",
+  # Per-package garmin docs use root-relative links for
+  # cross-referencing project docs from a draft proposal directory.
+  "packages/garmin/docs",
+]
+
+exclude = [
+  # External origins — out of scope.
+  "^https?://",
+  # mailto: — not a link to check.
+  "^mailto:",
+]

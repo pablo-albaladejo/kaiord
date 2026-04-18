@@ -65,7 +65,7 @@ Run this script before:
 - Making changes to:
   - `packages/workout-spa-editor/**`
   - `packages/core/**`
-  - `.github/workflows/deploy-spa-editor.yml`
+  - `.github/workflows/deploy-site.yml`
   - `pnpm-lock.yaml`
 
 ### What It Tests
@@ -296,7 +296,7 @@ VITE_BASE_PATH="/kaiord/" pnpm --filter @kaiord/workout-spa-editor build
 
 ### Integration with CI/CD
 
-This script mirrors the GitHub Actions workflow (`.github/workflows/deploy-spa-editor.yml`):
+This script mirrors the GitHub Actions workflow (`.github/workflows/deploy-site.yml`):
 
 | Script Test                   | Workflow Step                |
 | ----------------------------- | ---------------------------- |
@@ -310,7 +310,7 @@ This script mirrors the GitHub Actions workflow (`.github/workflows/deploy-spa-e
 
 - [DEPLOYMENT.md](../DEPLOYMENT.md) - Complete deployment guide
 - [CONTRIBUTING.md](../CONTRIBUTING.md) - Contribution guidelines
-- [.github/workflows/deploy-spa-editor.yml](../.github/workflows/deploy-spa-editor.yml) - Deployment workflow
+- [.github/workflows/deploy-site.yml](../.github/workflows/deploy-site.yml) - Deployment workflow
 
 ## Other Scripts
 
@@ -318,7 +318,7 @@ This script mirrors the GitHub Actions workflow (`.github/workflows/deploy-spa-e
 
 Configures npm publishing with token-based authentication (legacy method).
 
-**Recommended**: Use [Trusted Publishing](../.github/NPM_TRUSTED_PUBLISHING.md) instead.
+**Recommended**: Use Trusted Publishing via `.github/workflows/release.yml` instead.
 
 ### quick-setup-npm.sh
 
@@ -438,13 +438,11 @@ npm view @kaiord/cli --json | jq '.dist.attestations'
 
 **Documentation:**
 
-See [NPM_TRUSTED_PUBLISHING.md](../.github/NPM_TRUSTED_PUBLISHING.md) for detailed information.
+See the [npm Trusted Publishing docs](https://docs.npmjs.com/trusted-publishers) and `.github/workflows/release.yml` for the current configuration.
 
 ### test-workflow.sh
 
-Tests individual GitHub Actions workflows locally using `act`.
-
-See [TESTING_WORKFLOWS.md](../.github/TESTING_WORKFLOWS.md) for details.
+Tests individual GitHub Actions workflows locally using `act`. Workflow definitions live under `.github/workflows/`.
 
 ## Release Tag Scripts
 
@@ -569,7 +567,7 @@ The script expects CHANGELOG.md files to follow the standard format:
 
 **Integration:**
 
-This script is used by the Changesets workflow (`.github/workflows/changesets.yml`) to automatically extract version-specific changelog content for GitHub releases.
+This script is used by the Changesets workflow (`.github/workflows/release.yml`) to automatically extract version-specific changelog content for GitHub releases.
 
 **Tests:**
 
@@ -616,7 +614,7 @@ Usage: ./extract-changelog.sh <changelog-file> <version>
 
 **Related Documentation:**
 
-- [Changesets Workflow](../.github/workflows/changesets.yml)
+- [Changesets Workflow](../.github/workflows/release.yml)
 - [Release Workflow](../.github/workflows/release.yml)
 
 ### create-release.sh
