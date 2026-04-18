@@ -120,7 +120,25 @@ Only the two scenarios below change in this delta; all other scenarios under thi
 
 `pendingFocusTarget` and `undoHistory` SHALL NOT span a Dexie reload. Upon reloading a workout from Dexie, the workout store SHALL initialize `pendingFocusTarget` to `null`, `undoHistory` to an empty array, `historyIndex` to its initial value, and regenerate all `ItemId` values via the configured `IdProvider`. Every Dexie write SHALL strip `id` fields via a single `stripIds` helper so that no `ItemId` values are persisted.
 
-Only the "history reset" concern changes here; the "Dexie reload clears pendingFocusTarget", "Dexie reload regenerates ItemId values", and "Dexie persisted payload contains no ItemId values" scenarios in the base spec are preserved unchanged.
+Scenarios below are re-published verbatim from the base spec (unchanged semantically; required by OpenSpec's MODIFIED delta format, which replaces the entire requirement including its scenario block).
+
+#### Scenario: Dexie reload clears pendingFocusTarget
+
+- **GIVEN** the user set `pendingFocusTarget` to a non-null value before reloading the workout from Dexie
+- **WHEN** the workout is reloaded
+- **THEN** `pendingFocusTarget` SHALL be `null`
+
+#### Scenario: Dexie reload regenerates ItemId values
+
+- **GIVEN** a workout with known `ItemId` values is persisted to Dexie (after stripping)
+- **WHEN** the workout is reloaded
+- **THEN** every step and block SHALL receive a freshly generated `ItemId`
+- **AND** none of the newly assigned ids SHALL equal any id from before the reload
+
+#### Scenario: Dexie persisted payload contains no ItemId values
+
+- **WHEN** the store writes a workout to Dexie
+- **THEN** the persisted JSON SHALL contain no `id` property on any step or block
 
 ## REMOVED Requirements
 
