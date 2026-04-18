@@ -2,7 +2,7 @@
 
 ### Requirement: Focus telemetry service-locator seam
 
-The workout editor SHALL expose a `FocusTelemetry` injectable seam for observing focus-management runtime events. The seam is a single function type `FocusTelemetry = (event: FocusTelemetryEvent) => void`. `FocusTelemetryEvent` SHALL be a discriminated union covering: kill-switch activation, unresolved-target fallback, form-field short-circuit, overlay-deferred apply, and focus-error recovery. A default no-op implementation SHALL be provided. Events SHALL carry only structural metadata; `ItemId` values, step content, block content, and workout names SHALL NOT appear in event payloads.
+The workout editor SHALL expose a `FocusTelemetry` injectable seam for observing focus-management runtime events. The seam is a single function type `FocusTelemetry = (event: FocusTelemetryEvent) => void`. `FocusTelemetryEvent` SHALL be a discriminated union covering: wiring canary, unresolved-target fallback, form-field short-circuit, overlay-deferred apply, and focus-error recovery. A default no-op implementation SHALL be provided. Events SHALL carry only structural metadata; `ItemId` values, step content, block content, and workout names SHALL NOT appear in event payloads.
 
 #### Scenario: Default telemetry is a no-op
 
@@ -35,21 +35,11 @@ The workout editor SHALL expose a `FocusTelemetry` injectable seam for observing
 
 The `FocusTelemetryEvent` discriminated union SHALL include at minimum the following event types with the specified structural fields:
 
-- `{ type: 'kill-switch-active' }` — emitted on each `false → true` transition of the effective kill-switch value within a hook instance. Consecutive renders with the value staying `true` SHALL NOT re-emit. A `true → false → true` cycle (e.g., a mid-session DevTools toggle) SHALL emit a fresh event on each re-entry into the active state.
 - `{ type: 'unresolved-target-fallback'; targetKind: 'item' | 'empty-state'; fallback: 'empty-state' | 'first-item' | 'heading' }` — emitted when the hook exercises the fallback chain.
 - `{ type: 'form-field-short-circuit' }` — emitted when `pendingFocusTarget` was cleared without moving focus because an input/textarea/select/contentEditable was active. Emission SHALL be debounced: at most one `form-field-short-circuit` event per hook instance per 1000 ms wall-clock window. This breaks correlation with keystroke timing (user typing in a notes field triggers short-circuits on every autosave-driven mutation; unlimited emission would be a keystroke-timing side channel for privacy-relevant workout data).
 - `{ type: 'overlay-deferred-apply'; deferredForMs: number }` — emitted when an overlay open caused a focus-target application to be deferred. `deferredForMs` is `Math.round(elapsedMs / 100) * 100` (quantized to 100 ms buckets) so the value cannot reveal fine-grained dialog dwell time (a privacy-relevant indirect indicator of user reading speed or indecision). `deferredForMs` is a non-negative integer. Precision is implementation-defined: in same-origin contexts `performance.now()` typically yields ≥1 ms; in cross-origin iframes it may be reduced to ≥1 ms by the browser. The 100 ms quantization is always the final rounding.
 - `{ type: 'focus-error'; phase: 'focus' | 'scrollIntoView' }` — emitted when `focus()` or `scrollIntoView()` threw and the `finally` block recovered the pending-target clear.
 - `{ type: 'wiring-canary' }` — emitted exactly once on editor mount if a non-default `FocusTelemetry` is wired. Serves as a deployment smoke-test signal: ops can confirm in the telemetry dashboard that the canary arrived within N seconds of a deploy to verify wiring is live. The default no-op implementation does NOT emit this event (because there is nothing to verify).
-
-#### Scenario: Kill-switch event is emitted on each false→true transition
-
-- **GIVEN** the hook is mounted with the kill-switch inactive
-- **WHEN** the effective kill-switch value transitions `false → true`
-- **THEN** exactly one `kill-switch-active` event SHALL be emitted
-- **AND** subsequent renders with the value remaining `true` SHALL NOT emit additional events
-- **AND** a subsequent `true → false → true` cycle within the same hook instance SHALL emit a fresh event on re-entry to the `true` state
-- **AND** unmount + remount SHALL emit a fresh event if the switch is already `true` on the new mount
 
 #### Scenario: Unresolved-target fallback event carries the exact fallback path taken
 
