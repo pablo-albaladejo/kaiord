@@ -11,8 +11,9 @@ Several input methods converge on the same mutations: keyboard shortcuts (`src/h
 This change is scoped to a single package (`@kaiord/workout-spa-editor`), which sits above the hexagonal boundary (it is a UI adapter). Domain and application code in `@kaiord/core` are unaffected.
 
 **Constraints:**
+
 - Existing selection state uses string IDs (`selectedStepId: string | null`, `selectedStepIds: Array<string>`). The focus target system MUST continue to reference items via IDs that match selection IDs, so focus and selection stay consistent.
-- `WorkoutStepWithId` and `RepetitionBlockWithId` already carry an `id` field (`src/types/krd-ui.ts`), but current code generates those IDs from positions at render time. Stable IDs need to be *persisted* on the in-memory items so they survive reorders and undo/redo snapshots.
+- `WorkoutStepWithId` and `RepetitionBlockWithId` already carry an `id` field (`src/types/krd-ui.ts`), but current code generates those IDs from positions at render time. Stable IDs need to be _persisted_ on the in-memory items so they survive reorders and undo/redo snapshots.
 - The store is Zustand-based with an undo/redo history (`workoutHistory`, `historyIndex`, currently typed `Array<KRD>`). This design renames the in-memory shape to `UIWorkout` to disambiguate from the portable `KRD`.
 - React 18 concurrent mode, Strict Mode double-invocation, and Radix focus-trap components (ContextMenu, Dialog) are in scope for correctness.
 - Dexie is used for persisted workouts/templates (see `@kaiord/workout-spa-editor` CLAUDE section "State Management"). Stable IDs are an in-memory/UI concern and are regenerated on every load.
@@ -23,6 +24,7 @@ This change is scoped to a single package (`@kaiord/workout-spa-editor`), which 
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Programmatic focus after every step-list mutation, for all input methods (keyboard, context menu, toolbar, drag-and-drop).
 - Stable per-step IDs that survive reordering, delete+undo, duplicate, paste, and multi-select delete so that focus targets remain valid once React re-renders.
 - A single source of truth for "what should receive focus next" (`pendingFocusTarget` in the workout store).
@@ -41,9 +43,10 @@ This change is scoped to a single package (`@kaiord/workout-spa-editor`), which 
   - **Reorder (Alt+Arrow or DnD)** → the moved item.
 
 **Non-Goals:**
+
 - Changing the KRD domain schema (`@kaiord/core`). Stable IDs live on `WorkoutStepWithId`/`RepetitionBlockWithId` in-memory, not on serialized KRD.
-- Changing context-menu open/close focus behavior provided by Radix. Radix's focus return already works; only the *target* changes when the dismissing action mutated the list.
-- Implementing roving-tabindex or arrow-key list navigation for idle traversal. This change only handles focus *after* a mutation.
+- Changing context-menu open/close focus behavior provided by Radix. Radix's focus return already works; only the _target_ changes when the dismissing action mutated the list.
+- Implementing roving-tabindex or arrow-key list navigation for idle traversal. This change only handles focus _after_ a mutation.
 - Persisting stable IDs to disk or round-tripping them through KRD export/import. IDs are regenerated on every load (including Dexie reload).
 - List virtualization. The list is assumed to render every item into the DOM.
 - Changing `@dnd-kit` configuration beyond routing `activeId` through stable IDs.
@@ -68,8 +71,10 @@ export type IdProvider = () => ItemId;
 // Never fall through to Math.random — collision resistance is required for
 // history snapshot integrity.
 export const defaultIdProvider: IdProvider = () => {
-  if (typeof crypto?.randomUUID === "function") return asItemId(crypto.randomUUID());
-  if (typeof crypto?.getRandomValues === "function") return asItemId(uuidV4FromCrypto());
+  if (typeof crypto?.randomUUID === "function")
+    return asItemId(crypto.randomUUID());
+  if (typeof crypto?.getRandomValues === "function")
+    return asItemId(uuidV4FromCrypto());
   throw new Error("No secure random source available");
 };
 ```
@@ -79,21 +84,23 @@ Store actions that introduce new items (load, create, paste, duplicate, undo-res
 A branded type is introduced to keep type safety during the staged migration:
 
 ```ts
-export type ItemId = string & { readonly __brand: 'ItemId' };
+export type ItemId = string & { readonly __brand: "ItemId" };
 export const asItemId = (s: string): ItemId => s as ItemId;
 ```
 
 **Rationale:**
+
 - Positional IDs conflate identity with position; any reorder/delete/undo invalidates references.
 - UUIDs are opaque, collision-free, available in all supported browsers and jsdom ≥20.
 - Injection via a provider makes store actions deterministically testable without mocking `crypto`.
 - Branded type prevents mixing positional IDs and stable IDs in intermediate migration states — catches errors at `pnpm lint` / `pnpm -r build` time and preserves the zero-warning invariant.
 
 **Alternatives considered:**
-- *Monotonic integer counter in store*: counter must itself be snapshotted in undo history to avoid collisions. More moving parts than UUIDs for no user-visible benefit. Rejected.
-- *Content-hash ID*: identical steps (common in warm-ups) would collide. Rejected.
-- *Positional IDs + `{ blockIndex, stepIndex }` coordinates*: every action would need to reason about "what index will this be *after* the mutation", which is exactly the coupling we are removing. Rejected.
-- *Call `crypto.randomUUID()` directly in actions (no port)*: harder to test deterministically; forces `vi.mock('crypto')` which is fragile under Vitest. Rejected.
+
+- _Monotonic integer counter in store_: counter must itself be snapshotted in undo history to avoid collisions. More moving parts than UUIDs for no user-visible benefit. Rejected.
+- _Content-hash ID_: identical steps (common in warm-ups) would collide. Rejected.
+- _Positional IDs + `{ blockIndex, stepIndex }` coordinates_: every action would need to reason about "what index will this be _after_ the mutation", which is exactly the coupling we are removing. Rejected.
+- _Call `crypto.randomUUID()` directly in actions (no port)_: harder to test deterministically; forces `vi.mock('crypto')` which is fragile under Vitest. Rejected.
 
 **Layer impact:** Infrastructure only (`@kaiord/workout-spa-editor`). No changes to domain types in `@kaiord/core`.
 
@@ -110,15 +117,17 @@ export const asItemId = (s: string): ItemId => s as ItemId;
 Every built-in store action that mutates the step list SHALL set `pendingFocusTarget` as part of the same state update, using the rules enumerated in Goals.
 
 **Rationale:**
+
 - Colocates focus decisions with the action that mutated the list.
 - Slice pattern keeps each types file ≤100 lines (CLAUDE.md constraint).
 - `selectionHistory` removes the silent dependency called out in review: undo rules were referencing "the previously selected item" without the store actually tracking it.
 - The DOM layer stays dumb: a hook reads the intent and applies it.
 
 **Alternatives considered:**
-- *Event emitter pattern*: store emits `"delete"` events, a subscriber computes focus from event + current state. Two-step reasoning; easy to miss edge cases. Rejected.
-- *Return focus target from mutation methods*: couples every caller to focus handling; a new caller can forget. Rejected.
-- *Separate `useFocusStore`*: focus decisions are computed from mutations — keeping them in the same store avoids cross-store coordination and `subscribe` hand-offs. Rejected.
+
+- _Event emitter pattern_: store emits `"delete"` events, a subscriber computes focus from event + current state. Two-step reasoning; easy to miss edge cases. Rejected.
+- _Return focus target from mutation methods_: couples every caller to focus handling; a new caller can forget. Rejected.
+- _Separate `useFocusStore`_: focus decisions are computed from mutations — keeping them in the same store avoids cross-store coordination and `subscribe` hand-offs. Rejected.
 
 **History interaction:** `pendingFocusTarget` itself is not snapshotted. `workoutHistory` stores `UIWorkout` snapshots (renamed from `KRD` to disambiguate from the portable format), so stable IDs in the restored snapshot are exactly the strings captured earlier. Undo/redo actions compute the target at dispatch time from the restored snapshot and `selectionHistory`.
 
@@ -130,7 +139,7 @@ Every built-in store action that mutates the step list SHALL set `pendingFocusTa
 
 1. Guards with a `useRef` holding the previously applied target — the effect body is a no-op unless the current target differs.
 2. Short-circuits if `document.activeElement` is a form field (`input`, `textarea`, `select`, `[contenteditable="true"]`) inside the editor — the pending target is cleared without moving focus to avoid interrupting the user's typing.
-3. Short-circuits if a Radix `Dialog` or `ContextMenu` is open, detected by an overlay-count ref maintained through a `MutationObserver` **scoped to the editor root element** (not `document.body`), watching for `data-state` attribute changes on descendants whose callback additionally filters to `target.matches('[role="dialog"],[role="menu"]')` plus a `data-radix-*` attribute — combined with Radix's `onOpenChange` callbacks where available. Scoping to the editor root prevents (a) a rogue extension injecting `<div role="dialog" data-state="open">` elsewhere in the page from silently disabling focus management, and (b) tooltip/toast hover churn on unrelated Radix primitives from firing the callback. The observer is a ref-counted singleton: lazily created on the first `subscribe()` call, `disconnect()`ed when the last subscriber unsubscribes. If `typeof MutationObserver === "undefined"` (legacy test environment), the observer assumes zero open overlays and emits a one-time dev warning. The singleton reference lives in a module-scoped `let` in production; under `NODE_ENV === "test"` it is additionally pinned to `globalThis.__kaiord_overlayObserver__` so Vitest module-reset cycles share a single reference and the test-only `__resetOverlayObserverForTests()` helper can reset it. The `globalThis` handle is NOT present in production bundles (verified by `vite build` output grep in CI). The target is *retained* until the observer reports zero open overlays; at that point the observer triggers a store action that re-reads `pendingFocusTarget` and re-fires the effect within the next animation frame.
+3. Short-circuits if a Radix `Dialog` or `ContextMenu` is open, detected by an overlay-count ref maintained through a `MutationObserver` **scoped to the editor root element** (not `document.body`), watching for `data-state` attribute changes on descendants whose callback additionally filters to `target.matches('[role="dialog"],[role="menu"]')` plus a `data-radix-*` attribute — combined with Radix's `onOpenChange` callbacks where available. Scoping to the editor root prevents (a) a rogue extension injecting `<div role="dialog" data-state="open">` elsewhere in the page from silently disabling focus management, and (b) tooltip/toast hover churn on unrelated Radix primitives from firing the callback. The observer is a ref-counted singleton: lazily created on the first `subscribe()` call, `disconnect()`ed when the last subscriber unsubscribes. If `typeof MutationObserver === "undefined"` (legacy test environment), the observer assumes zero open overlays and emits a one-time dev warning. The singleton reference lives in a module-scoped `let` in production; under `NODE_ENV === "test"` it is additionally pinned to `globalThis.__kaiord_overlayObserver__` so Vitest module-reset cycles share a single reference and the test-only `__resetOverlayObserverForTests()` helper can reset it. The `globalThis` handle is NOT present in production bundles (verified by `vite build` output grep in CI). The target is _retained_ until the observer reports zero open overlays; at that point the observer triggers a store action that re-reads `pendingFocusTarget` and re-fires the effect within the next animation frame.
 4. Resolves the target via a ref registry (`FocusRegistryContext`) that maps `ItemId -> HTMLElement`.
 5. Calls `element.focus({ preventScroll: true })` followed by `element.scrollIntoView({ block: 'nearest', behavior: shouldReduceMotion() ? 'instant' : 'auto' })`, where `shouldReduceMotion()` honours `window.matchMedia('(prefers-reduced-motion: reduce)')`.
 6. Schedules the focus + scroll calls so any polite `role="status"` announcement triggered in the same commit (e.g., "Step deleted" toast) enters the AT speech queue before the focus change arrives. The concrete mechanism is `setTimeout(fn, 0)` — chosen because it yields a macrotask boundary after current microtasks drain, which empirically lets browser-to-AT aria-live plumbing flush. The spec itself states only the behavioral guarantee ("announcement queued first"); `setTimeout(0)` is an implementation choice documented here so future refactors (e.g., `queueMicrotask`, `requestAnimationFrame`) that preserve the ordering invariant are free to replace it. Unit tests assert ordering via fake timers.
@@ -156,6 +165,7 @@ type FocusRegistry = {
 The `workoutHistory.push` + `selectionHistory.push` pair is centralized in a single helper `pushHistorySnapshot(uiWorkout, selection)` in `src/store/workout-store-history.ts`. Every mutating action calls this helper instead of pushing to the arrays directly. A dev-mode assertion verifies `workoutHistory.length === selectionHistory.length` after each push.
 
 **Rationale:**
+
 - `useLayoutEffect` runs after commit, before paint — eliminating the single-frame window where focus is on `document.body` between the old DOM being removed and the effect firing.
 - `preventScroll: true` + explicit `scrollIntoView({ block: 'nearest' })` avoids the double-scroll artifact of default browser focus scrolling plus manual scroll.
 - The `prevTarget` ref prevents repeated `focus()` calls on every unrelated re-render where the target is non-null but unchanged.
@@ -163,21 +173,23 @@ The `workoutHistory.push` + `selectionHistory.push` pair is centralized in a sin
 - The dialog/input short-circuit is WCAG-required: focus must not be stolen from user-controlled widgets.
 
 **Alternatives considered:**
-- *`useEffect`*: ran after paint; visible focus glitch under concurrent rendering. Rejected.
-- *`requestAnimationFrame` inside `useEffect`*: doubles the latency; provides no guarantees `useLayoutEffect` doesn't. Rejected.
-- *`getElementById` lookup*: requires DOM IDs == item IDs exactly; pollutes DOM namespace. Rejected.
-- *Imperative `forwardRef` to every card*: forces every caller to manage refs; registry scales better. Rejected.
+
+- _`useEffect`_: ran after paint; visible focus glitch under concurrent rendering. Rejected.
+- _`requestAnimationFrame` inside `useEffect`_: doubles the latency; provides no guarantees `useLayoutEffect` doesn't. Rejected.
+- _`getElementById` lookup_: requires DOM IDs == item IDs exactly; pollutes DOM namespace. Rejected.
+- _Imperative `forwardRef` to every card_: forces every caller to manage refs; registry scales better. Rejected.
 
 **Layer impact:** Infrastructure. Lives in `src/hooks/` and `src/contexts/`.
 
 ### Decision 4: Per-action focus rules implemented as pure helpers, one per file
 
 **Purity constraint:** Focus-rule helpers are pure with respect to `UIWorkout` only. They MUST NOT import from `react`, `react-dom`, `@testing-library/*`, or any DOM API (`document`, `window`, `HTMLElement`). A CI grep asserts this:
+
 ```bash
 grep -R -E "from ['\"]react|document\\.|window\\.|HTMLElement" packages/workout-spa-editor/src/store/focus-rules/
 ```
-MUST return zero matches. This keeps the helpers trivially unit-testable and prevents accidental DOM coupling.
 
+MUST return zero matches. This keeps the helpers trivially unit-testable and prevents accidental DOM coupling.
 
 **Choice:** Each rule is a pure function in `src/store/focus-rules/`, one function per file (≤100 lines, <40 LOC each):
 
@@ -191,6 +203,7 @@ MUST return zero matches. This keeps the helpers trivially unit-testable and pre
 Each helper is unit-tested in isolation (no store, no DOM). Store action handlers import from the barrel and set `pendingFocusTarget` alongside their other state updates.
 
 **Rationale:**
+
 - Pure functions are trivial to unit-test.
 - File-per-function respects CLAUDE.md's 100-line and 40-LOC limits.
 - Keeps action handlers readable: the focus rule is one call, not inlined branching.
@@ -227,12 +240,14 @@ The hook subscribes to Zustand via `useWorkoutStore((s) => s.pendingFocusTarget)
 **Atomic migration note:** Renaming `currentWorkout: KRD` → `currentWorkout: UIWorkout` in `WorkoutStore` is a type-breaking change across every action creator that constructs a workout. To preserve the zero-warning invariant at every commit, task group §2 is executed as a single atomic PR (tasks 2.0.a through 2.2.b merge together). A transitional union type (`KRD | UIWorkout`) is not used — TypeScript narrowing at hundreds of call sites would be more disruptive than an atomic migration.
 
 **Rationale:**
+
 - Review flagged a tension: the design said history stored `KRD`, but stable IDs had to be on items in history snapshots. Renaming resolves the tension without forcing IDs into serialized/persisted forms.
 - Regenerating IDs on Dexie reload is acceptable because `pendingFocusTarget` never spans a reload — after reload, no focus target should carry over from a prior session.
 
 **Alternatives considered:**
-- *Persist IDs in Dexie schema*: forces a Dexie migration and makes the ID contract durable across sessions. No user-visible benefit; rejected.
-- *Keep history as `Array<KRD>` and re-attach IDs on every undo*: loses the IDs the user just saw; breaks undo-focus scenarios. Rejected.
+
+- _Persist IDs in Dexie schema_: forces a Dexie migration and makes the ID contract durable across sessions. No user-visible benefit; rejected.
+- _Keep history as `Array<KRD>` and re-attach IDs on every undo_: loses the IDs the user just saw; breaks undo-focus scenarios. Rejected.
 
 **Layer impact:** Infrastructure. Affects `src/store/workout-state.types.ts`, `src/store/workout-store-history.ts`, and exporters.
 
@@ -269,5 +284,5 @@ The hook subscribes to Zustand via `useWorkoutStore((s) => s.pendingFocusTarget)
 
 ## Open Questions
 
-- **VoiceOver truncation contingency:** Task 11.6 gathers AT evidence with the `setTimeout(0)` mechanism. If VoiceOver or NVDA truncates the toast on some versions, the contingency is to duplicate the toast message into the focus target's `aria-describedby` for one render tick so the AT re-announces it on focus arrival. This is deferred to a follow-up change (tentative id `spa-editor-focus-at-describedby-fallback`) rather than pre-emptively adding scope here. If the evidence shows the contingency is needed, the PR is held and the follow-up is proposed *before* merging this change.
+- **VoiceOver truncation contingency:** Task 11.6 gathers AT evidence with the `setTimeout(0)` mechanism. If VoiceOver or NVDA truncates the toast on some versions, the contingency is to duplicate the toast message into the focus target's `aria-describedby` for one render tick so the AT re-announces it on focus arrival. This is deferred to a follow-up change (tentative id `spa-editor-focus-at-describedby-fallback`) rather than pre-emptively adding scope here. If the evidence shows the contingency is needed, the PR is held and the follow-up is proposed _before_ merging this change.
 - **Radix focus-scope return override:** Is Radix's `FocusScope` automatic focus-return to the trigger element correctly overridden by our programmatic focus, or does Radix reclaim focus on menu close after our call? Validate empirically in task 11.5 via context-menu Delete/Paste/Group scenarios. If Radix reclaims, wrap the hook's `focus()` in a `queueMicrotask` after Radix's `onOpenChange(false)` callback fires.
