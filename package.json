@@ -54,6 +54,7 @@
     "lint:archive": "node scripts/check-archive-dates.mjs",
     "lint:archive-index": "node scripts/check-archive-index.mjs",
     "lint:specs": "node --test scripts/check-spec-format.test.mjs && node scripts/check-spec-format.mjs && pnpm exec openspec validate --specs",
+    "lint:links": "bash scripts/lint-links.sh",
     "test:scripts": "node --test scripts/*.test.mjs",
     "archive:index": "node scripts/generate-archive-index.mjs",
     "format": "prettier --write .",

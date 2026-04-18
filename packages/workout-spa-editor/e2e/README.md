@@ -578,12 +578,6 @@ Both test the same underlying reordering logic, ensuring comprehensive coverage.
 
 ### Documentation
 
-For complete documentation on flakiness measurement:
-
-- [FLAKINESS-TESTING.md](./FLAKINESS-TESTING.md) - Complete usage guide
-- [FLAKINESS-RESULTS.md](./FLAKINESS-RESULTS.md) - Analysis and recommendations
-- [FLAKINESS-SUMMARY.md](./FLAKINESS-SUMMARY.md) - Implementation summary
-
 ### Custom Runs
 
 ```bash
