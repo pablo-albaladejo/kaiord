@@ -25,20 +25,20 @@
     "clean": "rm -rf dist"
   },
   "dependencies": {
-    "@garmin/fitsdk": "^21.195.0",
+    "@garmin/fitsdk": "^21.200.0",
     "@kaiord/core": "workspace:^",
     "zod": "^4.0.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.4.0",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "@types/rosie": "^0.0.45",
-    "@vitest/coverage-v8": "^4.1.2",
+    "@vitest/coverage-v8": "^4.1.4",
     "rosie": "^2.1.1",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.3.3",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.4"
   },
   "repository": {
     "type": "git",
