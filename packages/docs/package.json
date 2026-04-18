@@ -24,7 +24,7 @@
     "@kaiord/tcx": "workspace:*",
     "@kaiord/zwo": "workspace:*",
     "@shikijs/vitepress-twoslash": "^4.0.2",
-    "cspell": "^9.5.0",
+    "cspell": "^10.0.0",
     "typedoc": "^0.28.18",
     "typedoc-plugin-markdown": "^4.11.0",
     "vitepress": "2.0.0-alpha.17",
