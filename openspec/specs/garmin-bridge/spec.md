@@ -1,4 +1,4 @@
-> Synced: 2026-04-17
+> Synced: 2026-04-18
 
 # Garmin Bridge
 
@@ -142,7 +142,7 @@ All API operations SHALL require an open Garmin Connect tab (`https://connect.ga
 
 The extension SHALL handle messages from allowed SPA origins via `chrome.runtime.onMessageExternal` with the following actions:
 
-- `ping` — Returns session check results (CSRF boolean, API reachability, protocol version)
+- `ping` — Returns the bridge manifest (id, name, version, protocolVersion, capabilities) along with session check results (CSRF boolean, API reachability)
 - `list` — Returns workout list from Garmin Connect (timeout: 10s)
 - `push` — Pushes a GCN workout payload to Garmin Connect (requires `message.gcn`, timeout: 15s)
 - `open-garmin` — Opens `https://connect.garmin.com/modern/` in a new tab
@@ -151,10 +151,12 @@ All responses SHALL use the shape `{ ok: boolean, protocolVersion?: number, data
 
 The `ping` response SHALL include `protocolVersion: 1` (integer, bumped only when the message contract changes).
 
+The `ping` response `data` envelope SHALL contain the full `BridgeManifest` fields (`id: "garmin-bridge"`, `name: "Garmin Connect"`, `version: <package.json version>`, `protocolVersion: 1`, `capabilities: ["write:workouts"]`) alongside session-status fields (`csrfCaptured`, `gcApi`). Manifest keys SHALL take precedence on collision — the extension MUST NOT allow upstream Garmin Connect API responses to overwrite the manifest identity. The SPA reads `response.data` and validates it against `bridgeManifestSchema` via `parseManifestFromPing`; Zod strips the session-status fields so both consumers coexist.
+
 #### Scenario: SPA pings extension
 
 - **WHEN** the SPA sends `{ action: "ping" }` to the extension
-- **THEN** the extension returns `{ ok: true, protocolVersion: 1, data: { csrfCaptured: true, gcApi: { ok: true, status: 200 } } }`
+- **THEN** the extension returns `{ ok: true, protocolVersion: 1, data: { id: "garmin-bridge", name: "Garmin Connect", version: "<pkg version>", protocolVersion: 1, capabilities: ["write:workouts"], csrfCaptured: true, gcApi: { ok: true, status: 200 } } }`
 
 #### Scenario: SPA lists workouts
 
