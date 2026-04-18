@@ -1,4 +1,4 @@
-export type SettingsTab = "ai" | "extensions" | "privacy";
+export type SettingsTab = "ai" | "extensions" | "usage" | "privacy";
 
 export type SettingsPanelProps = {
   open: boolean;
