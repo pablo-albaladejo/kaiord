@@ -24,7 +24,7 @@ These are not correctness issues — the base change is shippable without them �
 
 - `spa-editor-focus-telemetry`: observability seam and default no-op adapter for focus-management runtime events. The seam is a `FocusTelemetry = (event: FocusTelemetryEvent) => void` function plus a discriminated-union event type. Wired call sites in `useFocusAfterAction` emit structured events that a telemetry adapter (customer-wired in production) forwards to an error-reporting surface.
 
-  **Why separable from `spa-editor-focus-management`:** (a) the event type and default implementation have no import dependency on any focus-management type beyond `ItemId` never appearing in payloads; (b) the default no-op ships and tests independently; (c) the seam is deliberately reusable — future capabilities in the SPA (autosave, library sync) can emit telemetry events through the same port without re-inventing the contract; (d) production deployments that wire Sentry/Datadog will configure one provider for all telemetry, not per-capability. The focus-management capability *consumes* the port (hook emits events) but does not *own* it; the port's contract can evolve without touching focus-management scenarios, and vice versa.
+  **Why separable from `spa-editor-focus-management`:** (a) the event type and default implementation have no import dependency on any focus-management type beyond `ItemId` never appearing in payloads; (b) the default no-op ships and tests independently; (c) the seam is deliberately reusable — future capabilities in the SPA (autosave, library sync) can emit telemetry events through the same port without re-inventing the contract; (d) production deployments that wire Sentry/Datadog will configure one provider for all telemetry, not per-capability. The focus-management capability _consumes_ the port (hook emits events) but does not _own_ it; the port's contract can evolve without touching focus-management scenarios, and vice versa.
 
 ### Modified Capabilities
 
@@ -44,6 +44,6 @@ These are not correctness issues — the base change is shippable without them �
   - `packages/workout-spa-editor/e2e/focus-management.spec.ts` — new Playwright spec
   - `packages/workout-spa-editor/docs/accessibility-evidence/<date>-focus-management/` — committed transcripts and screenshots
   - `.github/workflows/workout-spa-editor-e2e.yml` — add the new spec to the matrix
-- **Rollback**: kill-switch itself *is* the rollback mechanism. The history rewrite is behind a single atomic PR; rollback = revert that PR.
+- **Rollback**: kill-switch itself _is_ the rollback mechanism. The history rewrite is behind a single atomic PR; rollback = revert that PR.
 - **No new npm dependencies**. Playwright is already used for E2E; Vitest already supports `<StrictMode>`.
 - **No breaking changes to consumer code**. The kill-switch is opt-in off. The history-structure change is internal to the store (external API — `undo`, `redo`, `canUndo` — unchanged).

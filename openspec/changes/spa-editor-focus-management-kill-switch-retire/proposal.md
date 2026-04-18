@@ -12,6 +12,7 @@ When both conditions hold, this proposal is filled in to remove the kill-switch 
 **TBD — to be filled in when the retirement criteria are met.**
 
 Scope enumerated in hardening Decision 6 (copy here when activating this proposal):
+
 - Remove `src/hooks/use-focus-kill-switch.ts` and its tests
 - Remove `/settings/focus-diagnostics` route and `FocusDiagnosticsPage.tsx`
 - Remove `FocusKillSwitchBanner.tsx` and its tests
