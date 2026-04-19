@@ -31,11 +31,23 @@ jobs:
     name: Version & Publish
     runs-on: ubuntu-latest
     steps:
+      # Mint a short-lived (1h) token from the kaiord-release-bot GitHub App.
+      # Required so the "Version Packages" PR pushed by changesets/action
+      # triggers branch-protection-required workflows on the new commit
+      # (GITHUB_TOKEN-authored pushes are intentionally excluded by GitHub
+      # Actions, which would leave the PR unmergeable).
+      - name: Mint release-bot token
+        id: app-token
+        uses: actions/create-github-app-token@v2
+        with:
+          app-id: ${{ vars.RELEASE_APP_ID }}
+          private-key: ${{ secrets.RELEASE_APP_PRIVATE_KEY }}
+
       - name: Checkout repository
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           persist-credentials: true
 
       - name: Setup pnpm
@@ -48,14 +60,14 @@ jobs:
           version: ./scripts/changeset-version.sh
           publish: ./scripts/changeset-publish.sh
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           NPM_CONFIG_PROVENANCE: true
 
       - name: Create GitHub Releases
         if: steps.changesets.outputs.published == 'true'
         run: node scripts/create-github-releases.js
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.app-token.outputs.token }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           PUBLISHED_PACKAGES: ${{ steps.changesets.outputs.publishedPackages }}
 
