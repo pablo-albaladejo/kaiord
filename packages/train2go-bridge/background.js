@@ -12,7 +12,7 @@ const TRAIN2GO_DASHBOARD = "https://app.train2go.com/user/index";
 const BRIDGE_MANIFEST = {
   id: "train2go-bridge",
   name: "Kaiord Train2Go Bridge",
-  version: "0.1.0",
+  version: "0.1.1",
   protocolVersion: PROTOCOL_VERSION,
   capabilities: ["read:training-plan"],
 };

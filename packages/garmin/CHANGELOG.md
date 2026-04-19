@@ -1,5 +1,18 @@
 # @kaiord/garmin
 
+## 7.0.0
+
+### Major Changes
+
+- 99271a8: Drop Node.js 20 support. Minimum required runtime is now Node.js 22.12.0.
+
+  Node.js 20 reaches end-of-life on 30 April 2026. Upstream dependencies (cspell v10, jsdom 29.0.2, @eslint/js v10) have already dropped support. Bump your Node.js toolchain to 22.x (Maintenance LTS) or 24.x (Active LTS).
+
+### Patch Changes
+
+- Updated dependencies [99271a8]
+  - @kaiord/core@7.0.0
+
 ## 5.0.0
 
 ### Major Changes
