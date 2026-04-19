@@ -19,6 +19,6 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": ["@kaiord/workout-spa-editor"],
+  "ignore": [],
   "tagFormat": "${packageName}@${version}"
 }
