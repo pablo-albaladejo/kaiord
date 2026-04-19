@@ -43,7 +43,7 @@ This will prompt you to:
 
 ## Configuration
 
-- **Linked packages**: `@kaiord/core`, `@kaiord/cli`, and `@kaiord/mcp` are linked (same major/minor versions)
-- **Ignored packages**: `@kaiord/workout-spa-editor` (private, not published)
+- **Linked packages**: `@kaiord/core`, `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin`, `@kaiord/garmin-connect`, `@kaiord/cli`, `@kaiord/mcp`, and `@kaiord/ai` are linked (same major/minor versions)
+- **Private packages** (`@kaiord/workout-spa-editor`, `@kaiord/garmin-bridge`, `@kaiord/train2go-bridge`) participate in the changesets flow — they get versioned and changelogged, but `"private": true` in their `package.json` keeps `npm publish` from uploading them
 
 See `config.json` for full configuration.
