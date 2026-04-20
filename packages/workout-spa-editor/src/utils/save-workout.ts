@@ -8,6 +8,7 @@
  * - Requirement 36: Clear error feedback with retry options
  */
 
+import { stripIds } from "../store/strip-ids";
 import type { KRD, ValidationError } from "../types/krd";
 import { krdSchema } from "../types/schemas";
 import { formatZodError } from "../types/validation";
@@ -47,8 +48,11 @@ const triggerDownload = (content: string, filename: string): void => {
 };
 
 export const saveWorkout = (krd: KRD, filename?: string): SaveResult => {
+  // stripIds chokepoint: UIWorkout ids never leak into exported .krd files.
+  const portable = stripIds(krd);
+
   // Validate workout against KRD schema (Requirement 6.1)
-  const validationResult = krdSchema.safeParse(krd);
+  const validationResult = krdSchema.safeParse(portable);
 
   if (!validationResult.success) {
     return {

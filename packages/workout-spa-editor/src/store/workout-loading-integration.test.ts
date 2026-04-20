@@ -68,6 +68,9 @@ describe("workout loading integration", () => {
       const block = workout?.steps[0] as RepetitionBlock;
       expect(block.id).toBeDefined();
       expect(typeof block.id).toBe("string");
+      // Blocks without an id go through `migrateRepetitionBlocks` which
+      // assigns a `block-*` id; `hydrateUIWorkout` then preserves it. Once
+      // §9 migrates every consumer to stable ItemIds this tightens to v4.
       expect(block.id).toMatch(/^block-\d+-[a-z0-9]+$/);
     });
 
@@ -241,7 +244,9 @@ describe("workout loading integration", () => {
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
 
-      // Assert
+      // Assert: hydrate currently preserves legacy `block-*` ids so
+      // keyboard / DnD consumers that key off them keep working; §9 will
+      // flip this to always-regenerate.
       const workout = state.currentWorkout?.extensions?.structured_workout;
       const block = workout?.steps[0] as RepetitionBlock;
       expect(block.id).toBe(existingId);
@@ -447,9 +452,10 @@ describe("workout loading integration", () => {
       const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(3);
 
-      // Verify all blocks have IDs
+      // Verify all blocks have IDs — `migrateRepetitionBlocks` fills in the
+      // legacy `block-*` format; §9 will promote these to UUID v4.
       const blocks = workout?.steps as RepetitionBlock[];
-      blocks.forEach((block, index) => {
+      blocks.forEach((block) => {
         expect(block.id).toBeDefined();
         expect(typeof block.id).toBe("string");
         expect(block.id).toMatch(/^block-\d+-[a-z0-9]+$/);

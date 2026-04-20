@@ -525,7 +525,11 @@ describe("createRepetitionBlock", () => {
     expect(isRepetitionBlock(block)).toBe(true);
 
     if (isRepetitionBlock(block)) {
+      // Block id stays in the legacy `block-*` format until §9 migrates
+      // every consumer (keyboard, DnD, context menu) to stable ItemIds.
+      expect(block.id).toMatch(/^block-\d+-[a-z0-9]+$/);
       expect(block.steps[0]).toEqual({
+        id: expect.any(String),
         stepIndex: 0,
         durationType: "time",
         duration: { type: "time", seconds: 1200 },

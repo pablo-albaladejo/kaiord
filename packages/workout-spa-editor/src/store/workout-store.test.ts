@@ -836,6 +836,7 @@ describe("useWorkoutStore", () => {
 
       const newStep = workout?.steps[1];
       expect(newStep).toEqual({
+        id: expect.any(String),
         stepIndex: 1,
         name: "Step 2",
         durationType: "open",

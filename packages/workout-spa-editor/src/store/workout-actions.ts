@@ -1,6 +1,8 @@
 import type { KRD, Workout } from "../types/krd";
 import type { Sport } from "../types/krd-core";
+import type { UIWorkout } from "../types/krd-ui";
 import { migrateRepetitionBlocks } from "../utils/workout-migration";
+import { hydrateUIWorkout } from "./hydrate-ui-workout";
 import type { WorkoutState } from "./workout-state.types";
 
 export type { WorkoutState };
@@ -18,9 +20,10 @@ export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => {
         },
       }
     : krd;
+  const uiWorkout = hydrateUIWorkout(migratedKrd);
   return {
-    currentWorkout: migratedKrd,
-    workoutHistory: [migratedKrd],
+    currentWorkout: uiWorkout,
+    workoutHistory: [uiWorkout],
     historyIndex: 0,
     selectedStepId: null,
     selectedStepIds: [],
@@ -29,19 +32,19 @@ export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => {
 };
 
 export const createUpdateWorkoutAction = (
-  krd: KRD,
+  uiWorkout: UIWorkout,
   state: WorkoutState
 ): Partial<WorkoutState> => {
   const newHistory = [
     ...state.workoutHistory.slice(0, state.historyIndex + 1),
-    krd,
+    uiWorkout,
   ];
   const trimmedHistory =
     newHistory.length > MAX_HISTORY_SIZE
       ? newHistory.slice(newHistory.length - MAX_HISTORY_SIZE)
       : newHistory;
   return {
-    currentWorkout: krd,
+    currentWorkout: uiWorkout,
     workoutHistory: trimmedHistory,
     historyIndex: trimmedHistory.length - 1,
   };
@@ -60,7 +63,7 @@ export const createEmptyWorkoutAction = (
   name: string,
   sport: Sport
 ): Partial<WorkoutState> => {
-  const emptyWorkout: KRD = {
+  const emptyWorkout: UIWorkout = {
     version: "1.0",
     type: "structured_workout",
     metadata: { created: new Date().toISOString(), sport },
@@ -71,6 +74,7 @@ export const createEmptyWorkoutAction = (
     workoutHistory: [emptyWorkout],
     historyIndex: 0,
     selectedStepId: null,
+    selectedStepIds: [],
     isEditing: false,
   };
 };

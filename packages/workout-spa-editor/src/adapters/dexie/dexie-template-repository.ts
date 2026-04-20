@@ -5,7 +5,14 @@
  */
 
 import type { TemplateRepository } from "../../ports/persistence-port";
+import { stripIds } from "../../store/strip-ids";
+import type { WorkoutTemplate } from "../../types/workout-library";
 import type { KaiordDatabase } from "./dexie-database";
+
+const stripTemplateIds = (template: WorkoutTemplate): WorkoutTemplate => ({
+  ...template,
+  krd: stripIds(template.krd),
+});
 
 export function createDexieTemplateRepository(
   db: KaiordDatabase
@@ -22,8 +29,9 @@ export function createDexieTemplateRepository(
 
     getBySport: async (sport) => table().where("sport").equals(sport).toArray(),
 
+    // stripIds chokepoint: UIWorkout ids never leak into persisted templates.
     put: async (template) => {
-      await table().put(template);
+      await table().put(stripTemplateIds(template));
     },
 
     delete: async (id) => {

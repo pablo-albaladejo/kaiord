@@ -252,6 +252,47 @@ describe("exportWorkout", () => {
         /Unsupported format/
       );
     });
+
+    it("exports a GCN buffer for the gcn format", async () => {
+      const buffer = await exportWorkout(mockKrd, "gcn");
+      expect(buffer.byteLength).toBeGreaterThan(0);
+    });
+
+    it("strips UI ids before handing off to any exporter", async () => {
+      const uiKrd = {
+        ...mockKrd,
+        extensions: {
+          structured_workout: {
+            ...mockKrd.extensions!.structured_workout!,
+            steps: [
+              {
+                id: "leaked-ui-id",
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 60 },
+                targetType: "open",
+                target: { type: "open" },
+              },
+            ],
+          },
+        },
+      } as KRD;
+
+      // GCN: the exporter may silently drop unknown keys, so this check
+      // alone is a weak proxy.
+      const gcnBuffer = await exportWorkout(uiKrd, "gcn");
+      expect(new TextDecoder().decode(gcnBuffer)).not.toContain("leaked-ui-id");
+
+      // KRD: the canonical format round-trips unknown keys, so the only
+      // way the exported bytes can lack `id` is if `stripIds` ran before
+      // the handoff. This is the load-bearing assertion.
+      const krdBuffer = await exportWorkout(uiKrd, "krd");
+      const exportedKrd = JSON.parse(new TextDecoder().decode(krdBuffer));
+      const exportedStep = exportedKrd.extensions.structured_workout.steps[0];
+      expect(Object.prototype.hasOwnProperty.call(exportedStep, "id")).toBe(
+        false
+      );
+    });
   });
 });
 

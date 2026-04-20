@@ -9,6 +9,7 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import { defaultIdProvider } from "../providers/id-provider";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -44,6 +45,7 @@ export const addStepToRepetitionBlockAction = (
   // Create a new default step
   const newStepIndex = block.steps.length;
   const newStep = {
+    id: defaultIdProvider(),
     stepIndex: newStepIndex,
     name: `Step ${newStepIndex + 1}`,
     durationType: "time" as const,

@@ -5,6 +5,7 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import { defaultIdProvider } from "../providers/id-provider";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -41,9 +42,13 @@ export const duplicateStepInRepetitionBlockAction = (
     return {};
   }
 
-  // Create a deep clone of the step
+  // Create a deep clone of the step and assign a fresh ItemId so focus /
+  // selection can reference the duplicate distinctly from the original.
   const stepToDuplicate = block.steps[stepIndex];
-  const duplicatedStep = structuredClone(stepToDuplicate);
+  const duplicatedStep = {
+    ...structuredClone(stepToDuplicate),
+    id: defaultIdProvider(),
+  };
 
   // Insert the duplicated step after the original (at stepIndex + 1)
   const updatedBlockSteps = [

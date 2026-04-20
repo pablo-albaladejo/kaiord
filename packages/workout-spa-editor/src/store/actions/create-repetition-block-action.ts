@@ -46,6 +46,8 @@ export const createRepetitionBlockAction = (
     return {};
   }
 
+  // Legacy `block-` id format preserved until §9 (consumer migration) —
+  // keyboard shortcut and DnD handlers still gate on `id.startsWith("block-")`.
   const repetitionBlock: RepetitionBlock = {
     id: generateBlockId(),
     repeatCount,

@@ -9,6 +9,7 @@ import {
   getSuccessMessage,
   insertStep,
   readClipboard,
+  regeneratePasteIds,
 } from "./paste-step-helpers";
 import {
   isValidRepetitionBlock,
@@ -49,16 +50,14 @@ export const pasteStepAction = async (
       };
     }
 
-    const updatedWorkout = insertStep(
-      workout,
-      parsedData as WorkoutStep | RepetitionBlock,
-      insertIndex
-    );
-
-    const updatedKrd = createUpdatedKrd(krd, updatedWorkout);
-    const message = getSuccessMessage(
+    const freshPayload = regeneratePasteIds(
       parsedData as WorkoutStep | RepetitionBlock
     );
+
+    const updatedWorkout = insertStep(workout, freshPayload, insertIndex);
+
+    const updatedKrd = createUpdatedKrd(krd, updatedWorkout);
+    const message = getSuccessMessage(freshPayload);
 
     return { success: true, message, updatedKrd };
   } catch {

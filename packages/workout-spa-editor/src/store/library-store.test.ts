@@ -109,6 +109,53 @@ describe("useLibraryStore", () => {
 
       expect(useLibraryStore.getState().templates).toHaveLength(1);
     });
+
+    it("strips UI ids from the updated krd payload (stripIds chokepoint)", () => {
+      const template = useLibraryStore
+        .getState()
+        .addTemplate("W", "cycling", mockKRD);
+
+      const krdWithIds: KRD = {
+        ...mockKRD,
+        extensions: {
+          structured_workout: {
+            name: "updated",
+            sport: "cycling",
+            steps: [
+              {
+                id: "leaked-id",
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 60 },
+                targetType: "open",
+                target: { type: "open" },
+              },
+            ],
+          },
+        },
+      };
+
+      useLibraryStore
+        .getState()
+        .updateTemplate(template.id, { krd: krdWithIds });
+
+      const persistedStep = (
+        useLibraryStore.getState().templates[0].krd.extensions
+          ?.structured_workout as { steps: Array<Record<string, unknown>> }
+      ).steps[0];
+      // Own-property absence: asserts the key is removed, not just
+      // left as `{ id: undefined }`.
+      expect(Object.prototype.hasOwnProperty.call(persistedStep, "id")).toBe(
+        false
+      );
+      expect(persistedStep).toStrictEqual({
+        stepIndex: 0,
+        durationType: "time",
+        duration: { type: "time", seconds: 60 },
+        targetType: "open",
+        target: { type: "open" },
+      });
+    });
   });
 
   describe("deleteTemplate", () => {
