@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-04-20 | [`fix-spec-code-drift`](./2026-04-20-fix-spec-code-drift/) | An /opsx-sync audit against the 22 live specs and 24 archived changes surfaced eight cases where the code diverged from specs — in every case the spec describe… |
 | 2026-04-18 | [`address-opsx-sync-drift`](./2026-04-18-address-opsx-sync-drift/) | The 2026-04-18 opsx-sync audit (commit 305284d2) fixed one spec-drift finding in garmin-bridge and surfaced five more that were out of scope for a pure spec-to… |
 | 2026-04-17 | [`fix-keyboard-shortcut-hijacking`](./2026-04-17-fix-keyboard-shortcut-hijacking/) | The workout editor's keyboard shortcut handlers unconditionally call preventDefault() on every Cmd/Ctrl modifier combination they recognize, regardless of whet… |
 | 2026-04-15 | [`settings-train2go-bridge`](./2026-04-15-settings-train2go-bridge/) | The Settings panel only shows Garmin Bridge status in its "Garmin" tab. With Train2Go Bridge now integrated, there is no UI for users to see its connection sta… |

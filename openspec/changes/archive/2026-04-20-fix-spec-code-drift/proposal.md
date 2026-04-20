@@ -1,3 +1,5 @@
+> Completed: 2026-04-20
+
 ## Why
 
 An `/opsx-sync` audit against the 22 live specs and 24 archived changes surfaced eight cases where the code diverged from specs — in every case the spec describes intended behavior and the code is incomplete. Because the specs are the source of truth, we bring the code up to spec rather than weakening the specs. Fixing all drift in one proposal keeps the follow-up edits to group B (spec wording aligned to stable code reality) uncontested.
