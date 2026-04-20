@@ -12,5 +12,5 @@ The "Storage unavailable — changes in this session won't be saved" banner mand
 
 #### Scenario: Banner is absent when storage is healthy
 
-- **WHEN** `probeStorage()` resolves to `"ok"`
+- **WHEN** `probeStorage()` resolves to `"complete"`
 - **THEN** `StorageAvailabilityBanner` SHALL render nothing (no DOM node)

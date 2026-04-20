@@ -32,7 +32,7 @@ Current state per gap:
 
 ### 1. Storage-unavailable banner mounts in the editor root
 
-Add a `StorageAvailabilityBanner` component mounted once in `WorkoutEditorLayout` (or equivalent top-level layout). It subscribes to a new `storage-store` that runs `probeStorage()` on app mount and exposes `status: "ok" | "failed" | "checking"`.
+Add a `StorageAvailabilityBanner` component mounted once in `WorkoutEditorLayout` (or equivalent top-level layout). It subscribes to a new `storage-store` that runs `probeStorage()` on app mount and exposes the underlying `HydrationStatus` (`"pending" | "complete" | "failed"`) from `adapters/dexie/storage-probe.ts`.
 
 - **Why a store and not a hook**: Other surfaces (sync indicator, "Push to Garmin") need to react to the same probe result. Centralizing avoids duplicate probes and ensures a single banner.
 - **Alternative considered**: Running `probeStorage()` from each persistence adapter at first write. Rejected because the UI needs an eager signal before the first write is attempted.
@@ -80,7 +80,7 @@ Append `@kaiord/garmin-bridge` and `@kaiord/train2go-bridge` to the existing `li
 
 ### 6. Promote `modifiedAt` update into a central `onWorkoutMutation(draft, state)` helper
 
-Rather than sprinkling `Date.now()` assignments across every action creator, introduce `onWorkoutMutation` in `application/workout-transitions.ts` that all mutators call before persisting. The helper updates `modifiedAt` unconditionally and is idempotent.
+Rather than sprinkling `Date.now()` assignments across every action creator, introduce `onWorkoutMutation` in `application/workout-transitions.ts` that all mutators call before persisting. The helper unconditionally advances `modifiedAt` to a single `Date.now()` captured at the top of the current mutation batch — calling the helper twice within the same synchronous mutation is safe (both calls see the same captured timestamp); each fresh mutation writes a new timestamp, which is the intended behavior.
 
 - **Why a helper**: The state machine has many mutators (edit-step, reorder, paste, delete, group, ungroup, etc.). A single chokepoint makes the invariant mechanical.
 - **Alternative considered**: Zustand middleware. Rejected because mutations happen through different slice shapes and a middleware would couple unrelated state.
@@ -113,9 +113,10 @@ type UsageRecord = {
   outputTokens: number;
   totalTokens: number; // derived: inputTokens + outputTokens, kept for legacy readers
   costUsd: number;
+  legacy?: boolean; // true only on rows backfilled by the v1 → v2 migration; the renderer shows `—` for `outputTokens` when true
 };
 ```
-Dexie version bump (`this.version(2).stores({...}).upgrade(tx => tx.table('usage').toCollection().modify(record => { ... }))`). For legacy rows with only `totalTokens`, set `inputTokens = totalTokens` and `outputTokens = 0` (conservative: we know total usage happened but can't know the split; downstream renderers show "—" when `outputTokens === 0 && inputTokens > 0 && legacy === true`, marked via a transient `legacy: true` field we strip before display).
+Dexie version bump (`this.version(2).stores({...}).upgrade(tx => tx.table('usage').toCollection().modify(record => { ... }))`). For legacy rows with only `totalTokens`, set `inputTokens = totalTokens`, `outputTokens = 0`, and `legacy: true` — conservative: we know total usage happened but can't know the split. The `legacy: boolean` field is a persisted `UsageRecord` field (part of the v2 schema) and SHALL be passed through to the renderer so it can show `—` for `outputTokens` on legacy rows. New-version writes omit `legacy` (or set it to `false`); the renderer treats missing/`false` identically.
 
 - **Alternative considered**: Drop `totalTokens` and compute everywhere. Rejected because external readers (tests, possible tooling) index on `totalTokens`.
 - **Layer**: Adapter (Dexie).
@@ -126,7 +127,7 @@ Dexie version bump (`this.version(2).stores({...}).upgrade(tx => tx.table('usage
 - **[Dexie migration double-bump risk] → Mitigation**: If `UsageRecord` changes land alongside an unrelated Dexie bump on `main`, renumbering is fragile. Verify no other pending migration exists on merge; if conflict, resolve by renumbering during rebase, not during write.
 - **[`modifiedAt` on every edit loosens debounce windows] → Mitigation**: The spec already requires this behavior; any downstream consumer assuming "changes only on push" was already wrong. Add a test covering `STRUCTURED` edit → `modifiedAt` advanced.
 - **[Group-B spec edits delayed] → Mitigation**: Called out as non-goal; the follow-up change is already agreed with the user and will be a minimal doc-only PR.
-- **[`inputTokens`/`outputTokens` for legacy rows is a guess] → Mitigation**: The renderer strategy ("—" when `legacy === true`) keeps us honest. Alternatively, expose the legacy rows to a one-off telemetry re-ingestion if the user ever wires real provider receipts.
+- **[`inputTokens`/`outputTokens` for legacy rows is a guess] → Mitigation**: The persisted `legacy: true` field plus the renderer's `—` fallback keeps us honest — readers never see a fabricated `outputTokens: 0` without the caveat. Alternatively, expose the legacy rows to a one-off telemetry re-ingestion if the user ever wires real provider receipts.
 
 ## Migration Plan
 

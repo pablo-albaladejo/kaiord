@@ -16,4 +16,5 @@ To satisfy `Monthly AI usage tracking`'s "one row per `(yearMonth, provider)` ..
 - **WHEN** the Dexie database upgrades to the new schema version
 - **THEN** the row SHALL have `inputTokens` set to its previous `totalTokens` value
 - **AND** `outputTokens` SHALL be set to `0`
-- **AND** the row SHALL be flagged as legacy so the usage panel renderer can show `—` for `outputTokens` instead of a misleading zero
+- **AND** the row SHALL have a persisted `legacy: true` field (added by the v2 schema)
+- **AND** the usage panel renderer SHALL show `—` (not `0`) for `outputTokens` on rows where `legacy === true`, so the backfilled zero is never rendered as a truthful value
