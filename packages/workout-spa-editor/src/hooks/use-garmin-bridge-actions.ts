@@ -1,15 +1,12 @@
 import { useCallback, useState } from "react";
 
 import type { PushState } from "../contexts/garmin-bridge-types";
-import { ping } from "../store/garmin-extension-transport";
+import { executeList, INITIAL_PUSH_STATE } from "./garmin-bridge-operations";
 import {
-  evaluatePingResult,
-  executeList,
-  executePush,
-  INITIAL_PUSH_STATE,
-} from "./garmin-bridge-operations";
-
-const EXTENSION_ID: string = import.meta.env.VITE_GARMIN_EXTENSION_ID || "";
+  getGarminExtensionId,
+  runDetect,
+  runPush,
+} from "./use-garmin-bridge-action-helpers";
 
 export const useGarminBridgeActions = () => {
   const [extensionInstalled, setExtensionInstalled] = useState(false);
@@ -17,41 +14,21 @@ export const useGarminBridgeActions = () => {
   const [pushing, setPushing] = useState<PushState>(INITIAL_PUSH_STATE);
   const [lastError, setLastError] = useState<string | null>(null);
 
-  const detectExtension = useCallback(async () => {
-    const res = await ping(EXTENSION_ID);
-    const result = evaluatePingResult(res);
-    setExtensionInstalled(result.installed);
-    setSessionActive(result.installed && result.session);
-    setLastError(result.installed ? result.error : null);
-  }, []);
+  const detectExtension = useCallback(
+    () => runDetect({ setExtensionInstalled, setSessionActive, setLastError }),
+    []
+  );
 
-  const redetect = useCallback(async () => {
-    await detectExtension();
-  }, [detectExtension]);
+  const redetect = useCallback(() => detectExtension(), [detectExtension]);
 
   const pushWorkout = useCallback(
-    async (gcn: unknown) => {
-      setPushing({ status: "loading" });
-      const result = await executePush(EXTENSION_ID, gcn);
-      if (result.status === "invalidated") {
-        await redetect();
-        setPushing({
-          status: "error",
-          message: "Extension was updated. Please try again.",
-        });
-      } else if (result.status === "error") {
-        if (result.redetect) await redetect();
-        setPushing({ status: "error", message: result.message });
-      } else {
-        setPushing({ status: "success" });
-      }
-    },
+    (gcn: unknown) => runPush(gcn, setPushing, redetect),
     [redetect]
   );
 
   const listWorkouts = useCallback(async (): Promise<unknown[]> => {
     try {
-      const { data } = await executeList(EXTENSION_ID);
+      const { data } = await executeList(getGarminExtensionId());
       return data;
     } catch (err: unknown) {
       if (err instanceof Error && "redetect" in err) await redetect();

@@ -7,7 +7,7 @@ description: Kaiord privacy policy covering the website, documentation, Chrome e
 
 # Privacy Policy
 
-**Last updated:** 2026-04-17
+**Last updated:** 2026-04-20
 
 This privacy policy describes how the Kaiord project ("we", "us") handles data across all its products: the website (kaiord.com), documentation (kaiord.com/docs), the Kaiord workout editor, the Kaiord Garmin Bridge Chrome extension, and the Kaiord Train2Go Bridge Chrome extension.
 
@@ -51,9 +51,11 @@ The extensions only communicate with the following domains:
 - `https://app.train2go.com/*` — Train2Go Bridge content script (runs on that domain) reads the coaching plan from the page
 - `https://*.kaiord.com/*` — the Kaiord editor (running on kaiord.com) sends messages **to** each extension via Chrome's `externally_connectable` channel. This is a one-way inbound channel: the extensions do not read the editor's DOM or cookies.
 
+Each extension also injects a minimal **announce-only** content script (`kaiord-announce.js`) into `https://*.kaiord.com/*` so the editor can discover which extension IDs are installed at runtime. This content script only calls `window.postMessage` to publish a fixed announcement object (bridge id, extension id, version, declared capabilities) and re-announces on request. It does **not** read the editor's DOM, cookies, storage, or network traffic, does **not** modify the page, and does **not** enable any inbound data path from kaiord.com into the extension beyond what `externally_connectable` already allows.
+
 Each extension declares `host_permissions` limited to the single host listed above — no wildcard or `<all_urls>` access.
 
-No other domains are contacted in production builds. During local development, both extensions additionally accept messages from `http://localhost:5173` and `http://localhost:5174` (Vite dev server). These origins are stripped from the production manifests (`manifest.prod.json`) before publishing to the Chrome Web Store.
+No other domains are contacted in production builds. During local development, both extensions additionally accept messages from `http://localhost:5173` and `http://localhost:5174` (Vite dev server), and the announce-only content script is also injected on `http://localhost/*` so locally-served editor builds can discover the extensions. These development-only matches are stripped from the production manifests (`manifest.prod.json`) before publishing to the Chrome Web Store.
 
 ## Regulatory Compliance
 

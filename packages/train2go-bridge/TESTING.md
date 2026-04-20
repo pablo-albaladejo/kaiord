@@ -27,13 +27,10 @@
 
 ## Test with SPA
 
-1. Copy the extension ID from `chrome://extensions/`
-2. Create `.env` in `packages/workout-spa-editor/`:
-   ```
-   VITE_TRAIN2GO_EXTENSION_ID=your-extension-id-here
-   ```
-3. Start the SPA: `cd packages/workout-spa-editor && pnpm dev`
-4. The SPA detects the extension on boot via `useTrain2GoStore`
+1. Start the SPA: `cd packages/workout-spa-editor && pnpm dev`
+2. Open the SPA — the extension's content script auto-announces to
+   the page and the SPA discovers the extension ID at runtime.
+3. No `.env` entry is required.
 
 ## Troubleshooting
 
