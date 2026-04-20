@@ -3,6 +3,8 @@ import { transformerTwoslash } from "@shikijs/vitepress-twoslash";
 import llmstxt from "vitepress-plugin-llms";
 import type { HeadConfig } from "vitepress";
 
+import { buildStaticHead } from "./head-config.mjs";
+
 const SITE_URL = "https://kaiord.com";
 const DOCS_BASE = "/docs/";
 const OG_IMAGE = `${SITE_URL}${DOCS_BASE}og-image-docs.png`;
@@ -88,32 +90,7 @@ export default defineConfig({
     "Open-source health & fitness data framework for TypeScript. Convert FIT, TCX, ZWO, and GCN formats.",
   base: DOCS_BASE,
 
-  head: [
-    ["meta", { property: "og:type", content: "website" }],
-    ["meta", { property: "og:image", content: OG_IMAGE }],
-    ["meta", { property: "og:image:width", content: "1200" }],
-    ["meta", { property: "og:image:height", content: "630" }],
-    ["meta", { name: "twitter:card", content: "summary_large_image" }],
-    ["meta", { name: "twitter:image", content: OG_IMAGE }],
-    [
-      "link",
-      {
-        rel: "icon",
-        type: "image/svg+xml",
-        href: `${DOCS_BASE}logo.svg`,
-      },
-    ],
-    [
-      "link",
-      {
-        rel: "preload",
-        href: `${DOCS_BASE}fonts/inter-var-latin.woff2`,
-        as: "font",
-        type: "font/woff2",
-        crossorigin: "",
-      },
-    ],
-  ],
+  head: buildStaticHead({ docsBase: DOCS_BASE, ogImage: OG_IMAGE }),
 
   sitemap: {
     hostname: SITE_URL,

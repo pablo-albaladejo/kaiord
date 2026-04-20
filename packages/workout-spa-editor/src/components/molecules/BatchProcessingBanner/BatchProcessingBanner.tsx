@@ -1,12 +1,15 @@
 /**
  * BatchProcessingBanner - Shows raw workout count and batch action.
  *
- * During processing, shows progress with cancel button.
+ * During processing, shows progress with cancel button + the
+ * spec-required per-workout status breakdown
+ * (queued / processing / succeeded / failed).
  */
 
-import { Bot, X } from "lucide-react";
+import { Bot } from "lucide-react";
 
 import type { BatchProgress } from "../../../application/batch-processor";
+import { ProcessingStatus } from "./ProcessingStatus";
 
 export type BatchProcessingBannerProps = {
   rawCount: number;
@@ -58,30 +61,6 @@ function IdleStatus({
         className="rounded-md bg-primary-600 px-3 py-1 text-sm text-white hover:bg-primary-700"
       >
         Process all with AI
-      </button>
-    </>
-  );
-}
-
-function ProcessingStatus({
-  progress,
-  onCancel,
-}: {
-  progress: BatchProgress;
-  onCancel: () => void;
-}) {
-  return (
-    <>
-      <span className="flex-1 text-sm" data-testid="batch-progress">
-        Processing {progress.processed} of {progress.total}
-      </span>
-      <button
-        type="button"
-        onClick={onCancel}
-        aria-label="Cancel batch processing"
-        className="rounded p-1 hover:bg-yellow-100 dark:hover:bg-yellow-900"
-      >
-        <X className="h-4 w-4" />
       </button>
     </>
   );

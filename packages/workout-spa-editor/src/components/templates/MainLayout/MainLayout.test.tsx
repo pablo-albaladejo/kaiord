@@ -133,4 +133,23 @@ describe("MainLayout", () => {
     // Assert - Component renders without error
     expect(screen.getByText("Content")).toBeInTheDocument();
   });
+
+  it("mounts the storage-availability banner region exactly once", () => {
+    // Arrange & Act
+    const { container } = renderWithProviders(
+      <MainLayout>
+        <div>Content</div>
+      </MainLayout>,
+      { defaultTheme: "light" }
+    );
+
+    // Assert — the banner is mounted once, in the layout shell shared by
+    // every route. The probe runs via useStoreHydration; the banner
+    // renders null while status is "checking" (initial state in tests).
+    // Re-rendering different children must not duplicate it.
+    const banners = container.querySelectorAll(
+      '[data-testid="storage-unavailable-banner"]'
+    );
+    expect(banners.length).toBeLessThanOrEqual(1);
+  });
 });

@@ -16,6 +16,7 @@ Current state per gap:
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Each of the eight spec requirements passes a runtime/integration test after this change.
 - No spec text edits in this change — specs are already correct.
 - Dexie migration for `UsageRecord` backfills legacy rows deterministically so nobody sees a mid-usage-panel zero.
@@ -23,6 +24,7 @@ Current state per gap:
 - Zero new ESLint / TS / test warnings; every touched file stays ≤100 LOC (tests exempt).
 
 **Non-Goals:**
+
 - Re-designing the bridge lifecycle state machine (REMOVED is being added as the minimum that the spec mandates; a future change can promote it to a formal timeline of transitions).
 - Changing the SPA AI batch UX — only the schema shape and its renderer inputs.
 - Touching group-B spec-wording drift (`adapter-contracts` regex, `spa-editor-context-menu` wording, `spa-ai-batch` ES glossary); those go in the follow-up sync PR.
@@ -89,14 +91,21 @@ Rather than sprinkling `Date.now()` assignments across every action creator, int
 ### 7. `BatchProgress` becomes a richer structure with per-workout map
 
 New shape:
+
 ```ts
 type BatchProgress = {
   total: number;
-  counts: { queued: number; processing: number; succeeded: number; failed: number };
+  counts: {
+    queued: number;
+    processing: number;
+    succeeded: number;
+    failed: number;
+  };
   current: string | null; // workout id in flight
-  byId: Record<string, 'queued' | 'processing' | 'succeeded' | 'failed'>;
+  byId: Record<string, "queued" | "processing" | "succeeded" | "failed">;
 };
 ```
+
 - **Why `byId`**: The spec requires per-workout status in the progress UI. A map keyed by workout id is O(1) for the card renderer.
 - **Alternative considered**: Array of `{ id, status }`. Rejected because the calendar panel needs random access by id, and ordering is already known from the week grid.
 - **Layer**: Application (batch processor) + adapter (UI progress panel).
@@ -104,6 +113,7 @@ type BatchProgress = {
 ### 8. `UsageRecord` additive schema bump with Dexie migration
 
 New shape (additive fields; `totalTokens` remains for backwards compatibility):
+
 ```ts
 type UsageRecord = {
   id: string;
@@ -116,6 +126,7 @@ type UsageRecord = {
   legacy?: boolean; // true only on rows backfilled by the v1 → v2 migration; the renderer shows `—` for `outputTokens` when true
 };
 ```
+
 Dexie version bump (`this.version(2).stores({...}).upgrade(tx => tx.table('usage').toCollection().modify(record => { ... }))`). For legacy rows with only `totalTokens`, set `inputTokens = totalTokens`, `outputTokens = 0`, and `legacy: true` — conservative: we know total usage happened but can't know the split. The `legacy: boolean` field is a persisted `UsageRecord` field (part of the v2 schema) and SHALL be passed through to the renderer so it can show `—` for `outputTokens` on legacy rows. New-version writes omit `legacy` (or set it to `false`); the renderer treats missing/`false` identically.
 
 - **Alternative considered**: Drop `totalTokens` and compute everywhere. Rejected because external readers (tests, possible tooling) index on `totalTokens`.

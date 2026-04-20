@@ -45,18 +45,24 @@ describe("UsageTab", () => {
     mockRows = [
       {
         yearMonth: "2026-02",
+        inputTokens: 800,
+        outputTokens: 200,
         totalTokens: 1000,
         totalCost: 0.003,
         entries: [],
       },
       {
         yearMonth: "2026-04",
+        inputTokens: 4000,
+        outputTokens: 1000,
         totalTokens: 5000,
         totalCost: 0.015,
         entries: [],
       },
       {
         yearMonth: "2026-03",
+        inputTokens: 1600,
+        outputTokens: 400,
         totalTokens: 2000,
         totalCost: 0.006,
         entries: [],
@@ -76,6 +82,8 @@ describe("UsageTab", () => {
     mockRows = [
       {
         yearMonth: "2026-04",
+        inputTokens: 10000,
+        outputTokens: 2345,
         totalTokens: 12345,
         totalCost: 0.01234567,
         entries: [],
