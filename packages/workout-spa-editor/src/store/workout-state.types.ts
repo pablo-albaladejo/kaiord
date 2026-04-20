@@ -1,8 +1,17 @@
-import type { KRD, RepetitionBlock, WorkoutStep } from "../types/krd";
+import type { RepetitionBlock, WorkoutStep } from "../types/krd";
+import type { UIWorkout } from "../types/krd-ui";
+
+export type {
+  UIRepetitionBlock,
+  UIWorkout,
+  UIWorkoutInner,
+  UIWorkoutItem,
+  UIWorkoutStep,
+} from "../types/krd-ui";
 
 export type WorkoutState = {
-  currentWorkout: KRD | null;
-  workoutHistory: Array<KRD>;
+  currentWorkout: UIWorkout | null;
+  workoutHistory: Array<UIWorkout>;
   historyIndex: number;
   selectedStepId: string | null;
   selectedStepIds: Array<string>;

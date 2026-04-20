@@ -6,6 +6,7 @@
 
 import type { KRD, RepetitionBlock, WorkoutStep } from "../types/krd";
 import type { Sport } from "../types/krd-core";
+import type { UIWorkout } from "../types/krd-ui";
 
 export type DeletedStep = {
   step: WorkoutStep | RepetitionBlock;
@@ -25,14 +26,14 @@ export type ModalConfig = {
 
 export type WorkoutStore = {
   // State
-  currentWorkout: KRD | null;
-  workoutHistory: Array<KRD>;
+  currentWorkout: UIWorkout | null;
+  workoutHistory: Array<UIWorkout>;
   historyIndex: number;
   selectedStepId: string | null;
   selectedStepIds: Array<string>;
   isEditing: boolean;
   safeMode: boolean;
-  lastBackup: KRD | null;
+  lastBackup: UIWorkout | null;
   deletedSteps: Array<DeletedStep>;
   isModalOpen: boolean;
   modalConfig: ModalConfig | null;

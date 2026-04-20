@@ -68,7 +68,10 @@ describe("workout loading integration", () => {
       const block = workout?.steps[0] as RepetitionBlock;
       expect(block.id).toBeDefined();
       expect(typeof block.id).toBe("string");
-      expect(block.id).toMatch(/^block-\d+-[a-z0-9]+$/);
+      // loadWorkout now assigns fresh ItemIds (UUID v4) via IdProvider.
+      expect(block.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$|^block-\d+-[a-z0-9]+$/
+      );
     });
 
     it("should add unique IDs to multiple blocks without IDs", () => {

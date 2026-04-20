@@ -16,6 +16,7 @@ import type {
 } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
 import { generateBlockId } from "../../utils/id-generation";
+import { defaultIdProvider } from "../providers/id-provider";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -60,13 +61,17 @@ export const createEmptyRepetitionBlockAction = (
 
   const workout = krd.extensions.structured_workout as Workout;
 
-  // Create default step with stepIndex 0 (within the block context)
-  const defaultStep: WorkoutStep = {
+  // Create default step with stepIndex 0 (within the block context) and a
+  // stable ItemId so focus / selection can reference it.
+  const defaultStep: WorkoutStep & { id: string } = {
     ...DEFAULT_STEP,
     stepIndex: 0,
+    id: defaultIdProvider(),
   };
 
-  // Create a repetition block with the default step
+  // Create a repetition block with the default step. `generateBlockId()` is
+  // retained to preserve wire-stable ids for existing DnD / lookup paths;
+  // the stable-focus id is the same string promoted to `ItemId`.
   const repetitionBlock: RepetitionBlock = {
     id: generateBlockId(),
     repeatCount,

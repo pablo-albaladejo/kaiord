@@ -5,6 +5,7 @@
  */
 
 import type { KRD, Workout } from "../../types/krd";
+import { defaultIdProvider } from "../providers/id-provider";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -20,6 +21,7 @@ export const createStepAction = (
   const newStepIndex = workout.steps.length;
 
   const newStep = {
+    id: defaultIdProvider(),
     stepIndex: newStepIndex,
     name: `Step ${newStepIndex + 1}`,
     durationType: "open" as const,

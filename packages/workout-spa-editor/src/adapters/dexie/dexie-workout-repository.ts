@@ -5,7 +5,12 @@
  */
 
 import type { WorkoutRepository } from "../../ports/persistence-port";
+import { stripIds } from "../../store/strip-ids";
+import type { WorkoutRecord } from "../../types/calendar-record";
 import type { KaiordDatabase } from "./dexie-database";
+
+const stripRecordIds = (record: WorkoutRecord): WorkoutRecord =>
+  record.krd ? { ...record, krd: stripIds(record.krd) } : record;
 
 export function createDexieWorkoutRepository(
   db: KaiordDatabase
@@ -34,8 +39,9 @@ export function createDexieWorkoutRepository(
       return result ?? undefined;
     },
 
+    // stripIds chokepoint: UIWorkout ids never leak into persisted records.
     put: async (workout) => {
-      await table().put(workout);
+      await table().put(stripRecordIds(workout));
     },
 
     delete: async (id) => {

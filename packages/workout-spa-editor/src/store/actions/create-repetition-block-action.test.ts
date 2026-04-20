@@ -526,6 +526,7 @@ describe("createRepetitionBlock", () => {
 
     if (isRepetitionBlock(block)) {
       expect(block.steps[0]).toEqual({
+        id: expect.any(String),
         stepIndex: 0,
         durationType: "time",
         duration: { type: "time", seconds: 1200 },
