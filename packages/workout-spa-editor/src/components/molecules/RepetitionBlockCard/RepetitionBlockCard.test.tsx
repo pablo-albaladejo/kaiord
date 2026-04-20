@@ -3,7 +3,6 @@ import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 import { expectNoReactWarnings } from "../../../test-utils/console-spy";
 import type { RepetitionBlock, WorkoutStep } from "../../../types/krd";
-import { parseStepId } from "../../../utils/step-id-parser";
 import { RepetitionBlockCard } from "./RepetitionBlockCard";
 
 describe("RepetitionBlockCard", () => {
@@ -565,25 +564,14 @@ describe("RepetitionBlockCard", () => {
         <RepetitionBlockCard block={multiStepBlock} blockIndex={blockIndex} />
       );
 
-      // Assert - Get all step cards and verify their IDs contain block context
+      // Assert - all three inner steps are rendered with their own card.
+      // The legacy `block-N-step-M` ID format is gone; each inner step
+      // carries a stable ItemId directly on the item, and the component
+      // no longer constructs positional strings.
       const stepCards = screen.getAllByTestId("step-card");
       expect(stepCards).toHaveLength(3);
-
-      // Verify each step card has a parent div with the correct hierarchical ID
-      stepCards.forEach((stepCard, index) => {
-        const parentDiv = stepCard.parentElement;
-        expect(parentDiv).toBeDefined();
-
-        // The parent div should have a data-id or similar attribute
-        // Since we're using dnd-kit, the ID is used internally
-        // We can verify by checking the step's position matches the expected ID format
-        const expectedId = `block-${blockIndex}-step-${index}`;
-
-        // Parse the expected ID to verify it has the correct structure
-        const parsed = parseStepId(expectedId);
-        expect(parsed.type).toBe("step");
-        expect(parsed.blockIndex).toBe(blockIndex);
-        expect(parsed.stepIndex).toBe(index);
+      stepCards.forEach((stepCard) => {
+        expect(stepCard.parentElement).toBeDefined();
       });
     });
 
@@ -631,29 +619,17 @@ describe("RepetitionBlockCard", () => {
         <RepetitionBlockCard block={block1} blockIndex={block1Index} />
       );
 
-      // Assert block 1
+      // Assert block 1: one step card rendered.
       let stepCards = screen.getAllByTestId("step-card");
       expect(stepCards).toHaveLength(1);
-
-      const expectedId1 = `block-${block1Index}-step-0`;
-      const parsed1 = parseStepId(expectedId1);
-      expect(parsed1.blockIndex).toBe(block1Index);
-      expect(parsed1.stepIndex).toBe(0);
 
       // Act - Render block 2
       rerender(<RepetitionBlockCard block={block2} blockIndex={block2Index} />);
 
-      // Assert block 2
+      // Assert block 2: one step card rendered. Inner items carry
+      // stable ItemIds; no positional `block-N-step-M` string to verify.
       stepCards = screen.getAllByTestId("step-card");
       expect(stepCards).toHaveLength(1);
-
-      const expectedId2 = `block-${block2Index}-step-0`;
-      const parsed2 = parseStepId(expectedId2);
-      expect(parsed2.blockIndex).toBe(block2Index);
-      expect(parsed2.stepIndex).toBe(0);
-
-      // Verify IDs are different even though stepIndex is the same
-      expect(expectedId1).not.toBe(expectedId2);
     });
 
     it("should handle block without blockIndex gracefully", () => {
@@ -689,13 +665,13 @@ describe("RepetitionBlockCard", () => {
       expect(stepCards[0]).toBeInTheDocument();
     });
 
-    it("should generate unique IDs for steps with same stepIndex in different blocks", () => {
-      // Arrange
-      const block1Index = 0;
-      const block2Index = 1;
-
+    it("renders steps with the same stepIndex in different blocks independently", () => {
+      // Step identity is now a stable ItemId — two blocks containing
+      // steps with identical `stepIndex` are rendered independently
+      // because each step card binds to its own id, not the positional
+      // `block-N-step-M` string.
       const step: WorkoutStep = {
-        stepIndex: 5, // Same stepIndex in both blocks
+        stepIndex: 5,
         durationType: "time",
         duration: { type: "time", seconds: 300 },
         targetType: "power",
@@ -706,32 +682,18 @@ describe("RepetitionBlockCard", () => {
         intensity: "active",
       };
 
-      const block1: RepetitionBlock = {
+      const block: RepetitionBlock = {
         repeatCount: 2,
         steps: [step],
       };
 
-      const block2: RepetitionBlock = {
-        repeatCount: 2,
-        steps: [step],
-      };
+      const { rerender } = render(
+        <RepetitionBlockCard block={block} blockIndex={0} />
+      );
+      expect(screen.getAllByTestId("step-card")).toHaveLength(1);
 
-      // Act & Assert - Generate IDs for both blocks
-      const id1 = `block-${block1Index}-step-${step.stepIndex}`;
-      const id2 = `block-${block2Index}-step-${step.stepIndex}`;
-
-      // Parse both IDs
-      const parsed1 = parseStepId(id1);
-      const parsed2 = parseStepId(id2);
-
-      // Verify both have the same stepIndex but different blockIndex
-      expect(parsed1.stepIndex).toBe(parsed2.stepIndex);
-      expect(parsed1.blockIndex).not.toBe(parsed2.blockIndex);
-
-      // Verify the full IDs are different
-      expect(id1).not.toBe(id2);
-      expect(id1).toBe("block-0-step-5");
-      expect(id2).toBe("block-1-step-5");
+      rerender(<RepetitionBlockCard block={block} blockIndex={1} />);
+      expect(screen.getAllByTestId("step-card")).toHaveLength(1);
     });
   });
 

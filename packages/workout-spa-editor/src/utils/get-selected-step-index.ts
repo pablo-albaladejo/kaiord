@@ -1,12 +1,13 @@
 /**
  * Get Selected Step Index Utility
  *
- * Resolves the current array position of a selected step by its ID.
- * Handles step ID parsing and position lookup in the workout steps array.
+ * Resolves the current array position of a selected top-level step by
+ * its stable ItemId. Only returns a position for main-list steps —
+ * selections on a block or on a nested-inside-block step return null.
  */
 
+import { findById } from "../store/find-by-id";
 import type { Workout } from "../types/krd";
-import { parseStepId } from "./step-id-parser";
 
 export const getSelectedStepIndex = (
   selectedStepId: string | null,
@@ -14,24 +15,7 @@ export const getSelectedStepIndex = (
 ): number | null => {
   if (!selectedStepId || !workout) return null;
 
-  try {
-    const parsed = parseStepId(selectedStepId);
-
-    if (parsed.type !== "step" || parsed.stepIndex === undefined) {
-      return null;
-    }
-
-    // Only handle main workout steps (not block steps)
-    if (parsed.blockIndex !== undefined) {
-      return null;
-    }
-
-    const currentPosition = workout.steps.findIndex(
-      (step) => "stepIndex" in step && step.stepIndex === parsed.stepIndex
-    );
-
-    return currentPosition === -1 ? null : currentPosition;
-  } catch {
-    return null;
-  }
+  const found = findById(workout, selectedStepId);
+  if (!found || found.kind !== "step") return null;
+  return found.index;
 };

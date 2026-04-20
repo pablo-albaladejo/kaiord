@@ -1,7 +1,6 @@
-import type { KRD, Workout } from "../types/krd";
+import type { KRD } from "../types/krd";
 import type { Sport } from "../types/krd-core";
 import type { UIWorkout } from "../types/krd-ui";
-import { migrateRepetitionBlocks } from "../utils/workout-migration";
 import { hydrateUIWorkout } from "./hydrate-ui-workout";
 import type { WorkoutState } from "./workout-state.types";
 
@@ -10,17 +9,10 @@ export type { WorkoutState };
 const MAX_HISTORY_SIZE = 50;
 
 export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => {
-  const workout = krd.extensions?.structured_workout as Workout | undefined;
-  const migratedKrd = workout
-    ? {
-        ...krd,
-        extensions: {
-          ...krd.extensions,
-          structured_workout: migrateRepetitionBlocks(workout),
-        },
-      }
-    : krd;
-  const uiWorkout = hydrateUIWorkout(migratedKrd);
+  // `hydrateUIWorkout` now assigns fresh UUID v4 ids to every step and
+  // block; the legacy `migrateRepetitionBlocks` pre-pass that seeded the
+  // `block-{timestamp}-{random}` format is no longer needed.
+  const uiWorkout = hydrateUIWorkout(krd);
   return {
     currentWorkout: uiWorkout,
     workoutHistory: [uiWorkout],

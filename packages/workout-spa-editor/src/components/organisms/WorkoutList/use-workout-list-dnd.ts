@@ -14,46 +14,34 @@ import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { isWorkoutStep } from "../../../types/krd";
 
 /**
- * Generates a globally unique ID for a workout item
+ * Returns the item's stable `ItemId`.
  *
- * ID Format:
- * - Main workout step: `step-{stepIndex}`
- * - Step inside block: `block-{blockIndex}-step-{stepIndex}`
- * - Repetition block: `block-{index}`
+ * In production every `UIWorkout` item already carries an `id` (assigned
+ * by `hydrateUIWorkout` on load, preserved through every mutation), so
+ * the returned string is the same stable id the focus / selection
+ * subsystem uses.
  *
- * @param item - The workout step or repetition block
- * @param index - The item's position in the parent container
- * @param parentBlockIndex - Optional parent block index for nested steps
- * @returns A unique identifier string
- *
- * @example
- * // Main workout step
- * generateStepId(step, 0) // "step-1"
- *
- * @example
- * // Step inside repetition block at index 2
- * generateStepId(step, 0, 2) // "block-2-step-1"
- *
- * @example
- * // Repetition block
- * generateStepId(block, 2) // "block-2"
+ * The positional-ID fallback (`step-${stepIndex}` / `block-${index}` /
+ * `block-${parentBlockIndex}-step-${stepIndex}`) is retained exclusively
+ * for isolated component unit tests that construct raw `Workout` shapes
+ * without going through `loadWorkout`. A CI grep invariant ensures no
+ * production module relies on the positional path.
  */
 const generateStepId = (
   item: WorkoutStep | RepetitionBlock,
-  index: number,
+  index?: number,
   parentBlockIndex?: number
 ): string => {
+  const id = (item as { id?: string }).id;
+  if (id) return id;
+
   if (isWorkoutStep(item)) {
-    // Steps in main structured_workout: "step-{stepIndex}"
-    // Steps in blocks: "block-{blockIndex}-step-{stepIndex}"
     if (parentBlockIndex !== undefined) {
       return `block-${parentBlockIndex}-step-${item.stepIndex}`;
     }
     return `step-${item.stepIndex}`;
   }
-
-  // Repetition blocks: "block-{index}"
-  return `block-${index}`;
+  return `block-${index ?? 0}`;
 };
 
 /**
@@ -80,8 +68,8 @@ export const useWorkoutListDnd = (
     })
   );
 
-  // Generate sortable IDs for all items using position-based IDs
-  // This ensures React can correctly track element identity during reordering
+  // Sortable IDs prefer the items' own stable ItemIds and fall back to
+  // position-based ids only in test harnesses that skip `loadWorkout`.
   const sortableIds = workout.steps.map((item, index) =>
     generateStepId(item, index)
   );

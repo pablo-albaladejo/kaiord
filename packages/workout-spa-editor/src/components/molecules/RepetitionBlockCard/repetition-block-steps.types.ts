@@ -13,13 +13,21 @@ export type RepetitionBlockStepsProps = {
   blockIndex?: number;
 };
 
+/**
+ * Build sortable ids for a block's inner steps. Prefers the step's own
+ * stable `ItemId`; falls back to position-based strings when a test
+ * harness passes raw `WorkoutStep`s without ids (production flows go
+ * through `hydrateUIWorkout`, which guarantees every step has one).
+ */
 export function buildSortableIds(
   steps: WorkoutStep[],
   blockIndex?: number
 ): string[] {
-  return steps.map((step) =>
-    blockIndex !== undefined
+  return steps.map((step) => {
+    const id = (step as { id?: string }).id;
+    if (id) return id;
+    return blockIndex !== undefined
       ? `block-${blockIndex}-step-${step.stepIndex}`
-      : `block-step-${step.stepIndex}`
-  );
+      : `block-step-${step.stepIndex}`;
+  });
 }

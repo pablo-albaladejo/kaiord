@@ -525,9 +525,11 @@ describe("createRepetitionBlock", () => {
     expect(isRepetitionBlock(block)).toBe(true);
 
     if (isRepetitionBlock(block)) {
-      // Block id stays in the legacy `block-*` format until §9 migrates
-      // every consumer (keyboard, DnD, context menu) to stable ItemIds.
-      expect(block.id).toMatch(/^block-\d+-[a-z0-9]+$/);
+      // Block id comes from `defaultIdProvider()` — uniform UUID v4
+      // ItemId contract shared with step ids (design decision 1).
+      expect(block.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+      );
       expect(block.steps[0]).toEqual({
         id: expect.any(String),
         stepIndex: 0,

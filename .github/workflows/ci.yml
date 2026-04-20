@@ -231,6 +231,28 @@ jobs:
       - name: Check architecture boundaries
         run: pnpm arch:check
 
+      - name: Focus-invariants — no positional-ID generators
+        # Positional step/block ids (`step-N`, `block-N`, `block-N-step-M`)
+        # were replaced by stable ItemIds in §9. Any reintroduction must
+        # fail CI — the `parseStepId` / `reconstructStepId` / `step-id-parser`
+        # module deleted in §9.5 must stay deleted.
+        run: |
+          ! grep -R -E "parseStepId|reconstructStepId|step-id-parser" \
+            packages/workout-spa-editor/src
+
+      - name: Focus-invariants — no Zustand persist() middleware in the workout store
+        # Per design decision 6, UIWorkout must never flow through Zustand's
+        # `persist` middleware — `stripIds` is the only outbound chokepoint.
+        # This check grep-fails only on imports of `persist` from
+        # `zustand/middleware`; the local helper named `persist` in
+        # `ai-store-actions.ts` (which wraps `persistAiData`) is not flagged.
+        run: |
+          ! grep -RnE "from ['\"]zustand/middleware['\"]" \
+            packages/workout-spa-editor/src/store \
+            --include="*.ts" --include="*.tsx" \
+            | grep -v "\.test\." \
+            | grep "persist"
+
   check-links:
     name: Link checker
     runs-on: ubuntu-latest

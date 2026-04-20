@@ -1,32 +1,23 @@
-import { parseStepId } from "../../../utils/step-id-parser";
+import type { RepetitionBlock } from "../../../types/krd";
 
 /**
- * Extract selected step index from a step ID string.
- * Handles hierarchical ID format: "step-{index}" or "block-{blockIndex}-step-{stepIndex}".
- * Returns undefined if the step does not belong to the given block.
+ * Return the inner index of the selected step within a given block, or
+ * `undefined` if the selection is elsewhere.
+ *
+ * Walks the block's own `steps` array looking for the stable `ItemId` —
+ * the legacy `step-N` / `block-N-step-M` string parsing is gone. Callers
+ * no longer need to know their own `blockIndex` (array position); they
+ * pass their block directly.
  */
 export function parseSelectedStepIndex(
   selectedStepId: string | null | undefined,
-  parentBlockIndex: number
+  block: RepetitionBlock | undefined
 ): number | undefined {
-  if (!selectedStepId) return undefined;
+  if (!selectedStepId || !block) return undefined;
 
-  try {
-    const parsed = parseStepId(selectedStepId);
-
-    if (parsed.type !== "step") return undefined;
-
-    // Only select steps that belong to this specific block
-    if (
-      parsed.blockIndex !== undefined &&
-      parsed.blockIndex === parentBlockIndex
-    ) {
-      return parsed.stepIndex;
-    }
-
-    return undefined;
-  } catch (error) {
-    console.warn("Failed to parse step ID:", selectedStepId, error);
-    return undefined;
+  for (let i = 0; i < block.steps.length; i++) {
+    const inner = block.steps[i] as { id?: string };
+    if (inner.id && inner.id === selectedStepId) return i;
   }
+  return undefined;
 }

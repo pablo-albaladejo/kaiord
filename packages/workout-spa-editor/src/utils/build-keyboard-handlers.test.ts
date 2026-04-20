@@ -228,13 +228,48 @@ describe("buildKeyboardHandlers return values", () => {
       expect(h.onUngroupBlock!()).toBe(false);
     });
 
-    it("returns false when selected item is not a block", () => {
-      const h = buildKeyboardHandlers(mockDeps({ selectedStepId: "step-0" }));
+    it("returns false when the selected id points at a step, not a block", () => {
+      // A workout with a top-level step `id-step-1` and no matching block.
+      const workout = {
+        steps: [
+          {
+            id: "id-step-1",
+            stepIndex: 0,
+            type: "active" as const,
+          },
+        ],
+      } as unknown as KeyboardHandlerDeps["workout"];
+
+      const h = buildKeyboardHandlers(
+        mockDeps({ selectedStepId: "id-step-1", workout })
+      );
       expect(h.onUngroupBlock!()).toBe(false);
     });
 
-    it("returns true when selected item is a block", () => {
-      const h = buildKeyboardHandlers(mockDeps({ selectedStepId: "block-1" }));
+    it("returns true when the selected id points at a repetition block", () => {
+      // A workout with a block whose `id` matches the selection.
+      const workout = {
+        steps: [
+          {
+            id: "id-block-1",
+            repeatCount: 2,
+            steps: [
+              {
+                id: "id-inner-0",
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 60 },
+                targetType: "open",
+                target: { type: "open" },
+              },
+            ],
+          },
+        ],
+      } as unknown as KeyboardHandlerDeps["workout"];
+
+      const h = buildKeyboardHandlers(
+        mockDeps({ selectedStepId: "id-block-1", workout })
+      );
       expect(h.onUngroupBlock!()).toBe(true);
     });
   });
