@@ -49,6 +49,14 @@ const ALLOWED_EXTERNALLY_CONNECTABLE = new Set([
   "http://localhost:5173/*",
   "http://localhost:5174/*",
 ]);
+// content_scripts.matches entries allowed for the announce-only script
+// that injects into SPA origins so the editor can discover installed
+// extensions at runtime. Chrome match patterns do not accept a port in
+// the host, so localhost is expressed as `http://localhost/*`.
+const ALLOWED_ANNOUNCE_CONTENT_SCRIPT_MATCHES = new Set([
+  "https://*.kaiord.com/*",
+  "http://localhost/*",
+]);
 // No extension may declare these: cookies (credential access),
 // webRequestBlocking / declarativeNetRequest* (request mutation).
 const FORBIDDEN_PERMISSIONS = new Set([
@@ -126,6 +134,10 @@ const REQUIRED_RULES = [
     re: /externally_connectable/,
   },
   {
+    label: "Announce-only content-script disclosure present",
+    re: /announce-only/i,
+  },
+  {
     label: "Localhost dev origins disclosed",
     re: /localhost:5173/,
   },
@@ -193,14 +205,21 @@ export function checkManifestPermissions(
     }
   }
 
-  // content_scripts matches must be inside the disclosed host.
+  // content_scripts matches must be inside the disclosed host, OR
+  // must be the announce-only injection set disclosed alongside
+  // externally_connectable (the SPA-origin match used for runtime
+  // extension discovery).
   for (const cs of manifest.content_scripts ?? []) {
     for (const m of cs.matches ?? []) {
-      if (!allowedHosts.has(m)) {
-        violations.push(
-          `${extensionName}: undisclosed content_scripts match "${m}" — policy restricts DOM access to ${[...allowedHosts].join(", ")}`
-        );
+      if (
+        allowedHosts.has(m) ||
+        ALLOWED_ANNOUNCE_CONTENT_SCRIPT_MATCHES.has(m)
+      ) {
+        continue;
       }
+      violations.push(
+        `${extensionName}: undisclosed content_scripts match "${m}" — policy restricts DOM access to ${[...allowedHosts].join(", ")} or the announce-only matches ${[...ALLOWED_ANNOUNCE_CONTENT_SCRIPT_MATCHES].join(", ")}`
+      );
     }
   }
 

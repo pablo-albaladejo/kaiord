@@ -1,4 +1,4 @@
-> Synced: 2026-04-20
+> Synced: 2026-04-20 (bridge-runtime-discovery)
 
 # Privacy Policy
 
@@ -31,7 +31,8 @@ The privacy policy SHALL cover the following topics:
 - **No credentials storage**: No extension reads, stores, or transmits user passwords or OAuth tokens
 - **No third-party sharing**: No data is shared with third parties beyond the user-configured LLM provider disclosed above
 - **Communication scope**: Each extension only communicates with its declared host (`connect.garmin.com` / `app.train2go.com`) and allowed Kaiord origins. The Kaiord-origin channel (`externally_connectable`) SHALL be described as one-way inbound (editor → extension)
-- **Localhost dev disclosure**: The policy SHALL disclose that local-development manifests additionally accept messages from `http://localhost:5173` / `http://localhost:5174`, and SHALL state that these origins are stripped from the production manifest before CWS submission
+- **Runtime discovery disclosure**: The policy SHALL disclose the announce-only content script injected into SPA origins (`https://*.kaiord.com/*` in production, additionally `http://localhost/*` in development) and SHALL state that the script only posts a fixed announcement object via `window.postMessage`, does not read SPA DOM / cookies / storage / network, and does not modify the page
+- **Localhost dev disclosure**: The policy SHALL disclose that local-development manifests additionally accept messages from `http://localhost:5173` / `http://localhost:5174` via `externally_connectable`, that the announce content script injects on `http://localhost/*`, and SHALL state that these development-only matches are stripped from the production manifest before CWS submission
 - **Regulatory compliance**: Statement of compliance with applicable data protection regulations (GDPR, CCPA) — specifically that because no personal data is collected server-side, there is no personal data held by Kaiord to protect, share, or delete
 - **Data-subject rights**: The policy SHALL explicitly enumerate GDPR/CCPA rights (access, rectification, erasure, portability) and state that, because Kaiord holds no records, such requests have no data to act upon
 - **Retention guidance**: The policy SHALL describe how the user can remove local data — at minimum the editor's API-key clear action, per-workout delete, and the browser-level "clear site data" path

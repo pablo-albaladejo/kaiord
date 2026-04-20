@@ -62,7 +62,7 @@ describe("train2go-store-actions", () => {
       const actions = createTrain2GoActions(
         set as never,
         get as never,
-        "ext-id"
+        () => "ext-id"
       );
 
       await actions.fetchWeek("2026-04-13");
@@ -77,7 +77,7 @@ describe("train2go-store-actions", () => {
       const actions = createTrain2GoActions(
         set as never,
         get as never,
-        "ext-id"
+        () => "ext-id"
       );
 
       await actions.fetchWeek("2026-04-13");
@@ -91,7 +91,7 @@ describe("train2go-store-actions", () => {
       const actions = createTrain2GoActions(
         set as never,
         get as never,
-        "ext-id"
+        () => "ext-id"
       );
 
       await actions.fetchWeek("2026-04-13");
@@ -106,7 +106,7 @@ describe("train2go-store-actions", () => {
       const actions = createTrain2GoActions(
         set as never,
         get as never,
-        "ext-id"
+        () => "ext-id"
       );
 
       await actions.fetchWeek("2026-04-13");
@@ -120,7 +120,7 @@ describe("train2go-store-actions", () => {
       const actions = createTrain2GoActions(
         set as never,
         get as never,
-        "ext-id"
+        () => "ext-id"
       );
 
       await actions.fetchWeek("2026-04-13");
@@ -133,7 +133,7 @@ describe("train2go-store-actions", () => {
       const actions = createTrain2GoActions(
         set as never,
         get as never,
-        "ext-id"
+        () => "ext-id"
       );
 
       await actions.fetchWeek("2026-04-13");
@@ -185,7 +185,7 @@ describe("train2go-store-actions", () => {
       const actions = createTrain2GoActions(
         set as never,
         get as never,
-        "ext-id"
+        () => "ext-id"
       );
 
       await actions.fetchDay("2026-04-13");
@@ -201,7 +201,7 @@ describe("train2go-store-actions", () => {
       const actions = createTrain2GoActions(
         set as never,
         get as never,
-        "ext-id"
+        () => "ext-id"
       );
 
       await actions.fetchDay("2026-04-13");
@@ -215,7 +215,7 @@ describe("train2go-store-actions", () => {
       const actions = createTrain2GoActions(
         set as never,
         get as never,
-        "ext-id"
+        () => "ext-id"
       );
 
       await actions.fetchDay("2026-04-13");
@@ -230,7 +230,7 @@ describe("train2go-store-actions", () => {
       const actions = createTrain2GoActions(
         set as never,
         get as never,
-        "ext-id"
+        () => "ext-id"
       );
 
       await actions.fetchDay("2026-04-13");
@@ -246,7 +246,7 @@ describe("train2go-store-actions", () => {
       const actions = createTrain2GoActions(
         set as never,
         get as never,
-        "ext-id"
+        () => "ext-id"
       );
 
       await actions.openTrain2Go();

@@ -43,7 +43,11 @@ describe("Train2Go detection cache — integration", () => {
     };
     const set = (p: Partial<State>) => Object.assign(state, p);
     const get = () => state;
-    detect = createDetectAction(set as never, get as never, "train2go-ext-id");
+    detect = createDetectAction(
+      set as never,
+      get as never,
+      () => "train2go-ext-id"
+    );
     vi.mocked(ping).mockResolvedValue({
       ok: true,
       protocolVersion: 1,

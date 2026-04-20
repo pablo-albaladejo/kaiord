@@ -14,7 +14,8 @@ const DETECTION_CACHE_MS = 30_000;
 const SUPPORTED_PROTOCOLS = [1];
 
 export const createDetectAction =
-  (set: Set, get: Get, extensionId: string) => async () => {
+  (set: Set, get: Get, getExtensionId: () => string) => async () => {
+    const extensionId = getExtensionId();
     if (!extensionId) return;
 
     const { lastDetectionTimestamp, extensionInstalled } = get();

@@ -27,7 +27,11 @@ describe("createDetectAction", () => {
     };
     set = (partial) => Object.assign(state, partial);
     get = () => state;
-    detect = createDetectAction(set as never, get as never, "test-ext-id");
+    detect = createDetectAction(
+      set as never,
+      get as never,
+      () => "test-ext-id"
+    );
     vi.clearAllMocks();
   });
 
@@ -80,7 +84,11 @@ describe("createDetectAction", () => {
   });
 
   it("skips detection when extension ID is empty", async () => {
-    const detectEmpty = createDetectAction(set as never, get as never, "");
+    const detectEmpty = createDetectAction(
+      set as never,
+      get as never,
+      () => ""
+    );
 
     await detectEmpty();
 

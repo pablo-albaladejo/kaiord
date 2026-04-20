@@ -46,6 +46,8 @@ provider (Anthropic, OpenAI, or Google).
 ## Communication Scope
 
 \`externally_connectable\` is a one-way inbound channel.
+An announce-only content script injects into SPA origins so the
+editor can discover installed extensions at runtime.
 Local dev origins: http://localhost:5173 and http://localhost:5174.
 Each extension declares \`host_permissions\` limited to the single
 host listed above — no wildcard or \`<all_urls>\` access.
@@ -110,6 +112,77 @@ test("missing localhost dev disclosure is flagged", () => {
   const src = FULL.replace(/localhost:5173/g, "");
   const v = checkPolicy(src);
   assert.ok(v.some((r) => r.includes("Localhost")));
+});
+
+test("missing announce-only content-script disclosure is flagged", () => {
+  const src = FULL.replace(/announce-only/gi, "different-wording");
+  const v = checkPolicy(src);
+  assert.ok(v.some((r) => r.includes("Announce-only")));
+});
+
+test("manifest with announce-only content script match on kaiord.com passes", () => {
+  const dir = mkdtempSync(join(tmpdir(), "kaiord-priv-announce-"));
+  try {
+    const path = join(dir, "manifest.json");
+    writeFileSync(
+      path,
+      JSON.stringify(
+        {
+          permissions: ["tabs"],
+          host_permissions: ["https://app.train2go.com/*"],
+          content_scripts: [
+            {
+              matches: ["https://app.train2go.com/*"],
+              js: ["content.js"],
+            },
+            {
+              matches: ["https://*.kaiord.com/*", "http://localhost/*"],
+              js: ["kaiord-announce.js"],
+            },
+          ],
+        },
+        null,
+        2
+      )
+    );
+    const v = checkManifestPermissions(
+      path,
+      "train2go-bridge",
+      new Set(["https://app.train2go.com/*"])
+    );
+    assert.deepEqual(v, []);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("manifest with undisclosed content_scripts match is still rejected", () => {
+  const dir = mkdtempSync(join(tmpdir(), "kaiord-priv-undisclosed-"));
+  try {
+    const path = join(dir, "manifest.json");
+    writeFileSync(
+      path,
+      JSON.stringify(
+        {
+          permissions: ["tabs"],
+          host_permissions: ["https://app.train2go.com/*"],
+          content_scripts: [
+            { matches: ["https://evil.example.com/*"], js: ["x.js"] },
+          ],
+        },
+        null,
+        2
+      )
+    );
+    const v = checkManifestPermissions(
+      path,
+      "train2go-bridge",
+      new Set(["https://app.train2go.com/*"])
+    );
+    assert.ok(v.some((r) => r.includes("undisclosed content_scripts match")));
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 // ---------- checkManifestPermissions ----------

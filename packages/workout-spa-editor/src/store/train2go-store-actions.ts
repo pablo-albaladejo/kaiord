@@ -15,8 +15,11 @@ import type { Train2GoStore } from "./train2go-store";
 type Set = (fn: Partial<Train2GoStore>) => void;
 type Get = () => Train2GoStore;
 
+type GetExtensionId = () => string;
+
 const createReadWeekAction =
-  (set: Set, get: Get, extensionId: string) => async (date: string) => {
+  (set: Set, get: Get, getExtensionId: GetExtensionId) =>
+  async (date: string) => {
     const { userId } = get();
     if (!userId) {
       set({ lastError: "Not connected to Train2Go" });
@@ -25,7 +28,7 @@ const createReadWeekAction =
 
     set({ loading: true, lastError: null });
 
-    const res = await readWeek(extensionId, date, userId);
+    const res = await readWeek(getExtensionId(), date, userId);
 
     if (!res.ok) {
       if (res.error === "Session expired") {
@@ -40,11 +43,12 @@ const createReadWeekAction =
   };
 
 const createReadDayAction =
-  (set: Set, get: Get, extensionId: string) => async (date: string) => {
+  (set: Set, get: Get, getExtensionId: GetExtensionId) =>
+  async (date: string) => {
     const { userId } = get();
     if (!userId) return;
 
-    const res = await readDay(extensionId, date, userId);
+    const res = await readDay(getExtensionId(), date, userId);
 
     if (!res.ok) {
       set({ lastError: res.error ?? "Read day failed" });
@@ -69,17 +73,17 @@ const createReadDayAction =
   };
 
 const createOpenAction =
-  (_set: Set, _get: Get, extensionId: string) => async () => {
-    await openTrain2Go(extensionId);
+  (_set: Set, _get: Get, getExtensionId: GetExtensionId) => async () => {
+    await openTrain2Go(getExtensionId());
   };
 
 export const createTrain2GoActions = (
   set: Set,
   get: Get,
-  extensionId: string
+  getExtensionId: GetExtensionId
 ) => ({
-  detectExtension: createDetectAction(set, get, extensionId),
-  fetchWeek: createReadWeekAction(set, get, extensionId),
-  fetchDay: createReadDayAction(set, get, extensionId),
-  openTrain2Go: createOpenAction(set, get, extensionId),
+  detectExtension: createDetectAction(set, get, getExtensionId),
+  fetchWeek: createReadWeekAction(set, get, getExtensionId),
+  fetchDay: createReadDayAction(set, get, getExtensionId),
+  openTrain2Go: createOpenAction(set, get, getExtensionId),
 });

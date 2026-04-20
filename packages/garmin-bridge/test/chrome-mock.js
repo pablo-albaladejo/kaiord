@@ -6,7 +6,9 @@ const sessionStore = {};
 
 const chromeMock = {
   runtime: {
+    id: "garmin-test-extension-id",
     lastError: null,
+    getManifest: vi.fn(() => ({ version: "0.2.0" })),
     onMessage: {
       addListener: vi.fn(),
     },
@@ -41,6 +43,14 @@ const chromeMock = {
 
 globalThis.chrome = chromeMock;
 globalThis.fetch = vi.fn();
+
+const windowMock = {
+  addEventListener: vi.fn(),
+  removeEventListener: vi.fn(),
+  postMessage: vi.fn(),
+  location: { origin: "https://kaiord.com" },
+};
+globalThis.window = windowMock;
 
 // Helper to reset state between tests
 globalThis.__resetChromeMock = () => {

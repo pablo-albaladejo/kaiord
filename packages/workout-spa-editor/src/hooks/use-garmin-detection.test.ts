@@ -9,10 +9,14 @@ vi.mock("../contexts", () => ({
   })),
 }));
 
+vi.mock("./use-discovered-extension-id", () => ({
+  useDiscoveredExtensionId: vi.fn(() => null),
+}));
+
 import { useGarminDetection } from "./use-garmin-detection";
 
 describe("useGarminDetection", () => {
-  it("should call detectExtension on garmin bridge context", () => {
+  it("calls detectExtension on mount even without a discovered id", () => {
     renderHook(() => useGarminDetection());
 
     expect(mockDetectExtension).toHaveBeenCalledTimes(1);
