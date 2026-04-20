@@ -135,4 +135,43 @@ describe("BatchProcessingBanner", () => {
 
     expect(screen.getByText(/1 raw workout this/)).toBeInTheDocument();
   });
+
+  it("renders the per-bucket breakdown from progress.counts", () => {
+    render(
+      <BatchProcessingBanner
+        rawCount={5}
+        isProcessing={true}
+        progress={{
+          total: 5,
+          processed: 2,
+          succeeded: 1,
+          failed: 1,
+          current: "w3",
+          counts: { queued: 2, processing: 1, succeeded: 1, failed: 1 },
+          byId: {
+            w1: "succeeded",
+            w2: "failed",
+            w3: "processing",
+            w4: "queued",
+            w5: "queued",
+          },
+        }}
+        onProcess={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    expect(screen.getByTestId("batch-count-queued")).toHaveTextContent(
+      "Queued 2"
+    );
+    expect(screen.getByTestId("batch-count-processing")).toHaveTextContent(
+      "Processing 1"
+    );
+    expect(screen.getByTestId("batch-count-succeeded")).toHaveTextContent(
+      "Succeeded 1"
+    );
+    expect(screen.getByTestId("batch-count-failed")).toHaveTextContent(
+      "Failed 1"
+    );
+  });
 });
