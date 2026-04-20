@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it } from "vitest";
 
-const { buildAnnouncement, onDiscoverRequest, announce } =
-  require("../kaiord-announce.js");
+const {
+  buildAnnouncement,
+  onDiscoverRequest,
+  announce,
+} = require("../kaiord-announce.js");
 
 describe("kaiord-announce.js (garmin-bridge)", () => {
   beforeEach(() => {
