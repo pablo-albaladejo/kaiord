@@ -1,4 +1,5 @@
-import { asItemId, type ItemId } from "./item-id";
+import type { ItemId } from "./item-id";
+import { asItemId } from "./item-id";
 
 export type IdProvider = () => ItemId;
 

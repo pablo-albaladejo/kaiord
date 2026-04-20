@@ -12,6 +12,7 @@ import type {
 } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
 import { defaultIdProvider } from "../providers/id-provider";
+import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -42,7 +43,7 @@ export const duplicateStepAction = (
 
   // Create a deep clone of the step and assign a fresh ItemId so focus /
   // selection can reference the duplicate distinctly from the original.
-  const duplicatedStep: WorkoutStep & { id: string } = {
+  const duplicatedStep: WorkoutStep & { id: ItemId } = {
     ...(JSON.parse(JSON.stringify(stepToDuplicate)) as WorkoutStep),
     id: defaultIdProvider(),
   };

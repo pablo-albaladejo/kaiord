@@ -46,6 +46,9 @@ const innerSteps = (): Array<WorkoutStep | RepetitionBlock> => {
 
 describe("store mutations assign fresh ItemIds", () => {
   afterEach(() => {
+    // Always unstub — a failing assertion inside a test must not leak a
+    // stubbed `navigator` (clipboard) into the next test.
+    vi.unstubAllGlobals();
     useWorkoutStore.setState({
       currentWorkout: null,
       workoutHistory: [],
@@ -163,8 +166,6 @@ describe("store mutations assign fresh ItemIds", () => {
     const ids = innerSteps().map((s) => (s as { id?: string }).id);
     expect(ids).toHaveLength(2);
     expect(ids).not.toContain("attacker-supplied-id");
-
-    vi.unstubAllGlobals();
   });
 });
 
@@ -190,10 +191,12 @@ describe("undoDelete + undo/redo preserve item ids", () => {
     );
 
     useWorkoutStore.getState().deleteStep(1);
-    const deleted = useWorkoutStore.getState().deletedSteps;
+    const deleted = useWorkoutStore.getState().deletedSteps ?? [];
     expect(deleted).toHaveLength(1);
+    const [deletedEntry] = deleted;
+    if (!deletedEntry) throw new Error("Expected one deleted step");
 
-    useWorkoutStore.getState().undoDelete(deleted[0].timestamp);
+    useWorkoutStore.getState().undoDelete(deletedEntry.timestamp);
     const restoredIds = innerSteps().map((s) => (s as { id: string }).id);
 
     expect(restoredIds).toEqual([firstId, secondId]);

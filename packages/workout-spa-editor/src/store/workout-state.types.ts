@@ -1,5 +1,4 @@
-import type { RepetitionBlock, WorkoutStep } from "../types/krd";
-import type { UIWorkout } from "../types/krd-ui";
+import type { UIWorkout, UIWorkoutItem } from "../types/krd-ui";
 
 export type {
   UIRepetitionBlock,
@@ -17,7 +16,9 @@ export type WorkoutState = {
   selectedStepIds: Array<string>;
   isEditing: boolean;
   deletedSteps?: Array<{
-    step: WorkoutStep | RepetitionBlock;
+    // Keep the stable-ItemId contract on the undo trail: the restored item
+    // must carry the same `ItemId` the user saw before deletion.
+    step: UIWorkoutItem;
     index: number;
     timestamp: number;
   }>;

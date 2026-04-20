@@ -13,6 +13,7 @@
 
 import type { KRD, Workout } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
+import type { UIWorkoutItem } from "../../types/krd-ui";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -106,11 +107,17 @@ export const deleteRepetitionBlockAction = (
     },
   };
 
-  // Track deleted block for undo
+  // Track deleted block for undo. The block came from the in-memory
+  // UIWorkout, so it carries a stable ItemId at runtime; re-assert the
+  // type after the Workout cast erased it.
   const deletedBlocks = state.deletedSteps || [];
   const newDeletedBlocks = [
     ...deletedBlocks,
-    { step: block, index: position, timestamp: Date.now() },
+    {
+      step: block as UIWorkoutItem,
+      index: position,
+      timestamp: Date.now(),
+    },
   ];
 
   return {

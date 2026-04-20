@@ -109,6 +109,42 @@ describe("useLibraryStore", () => {
 
       expect(useLibraryStore.getState().templates).toHaveLength(1);
     });
+
+    it("strips UI ids from the updated krd payload (stripIds chokepoint)", () => {
+      const template = useLibraryStore
+        .getState()
+        .addTemplate("W", "cycling", mockKRD);
+
+      const krdWithIds: KRD = {
+        ...mockKRD,
+        extensions: {
+          structured_workout: {
+            name: "updated",
+            sport: "cycling",
+            steps: [
+              {
+                id: "leaked-id",
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 60 },
+                targetType: "open",
+                target: { type: "open" },
+              },
+            ],
+          },
+        },
+      };
+
+      useLibraryStore
+        .getState()
+        .updateTemplate(template.id, { krd: krdWithIds });
+
+      const persistedStep = (
+        useLibraryStore.getState().templates[0].krd.extensions
+          ?.structured_workout as { steps: Array<{ id?: string }> }
+      ).steps[0];
+      expect(persistedStep.id).toBeUndefined();
+    });
   });
 
   describe("deleteTemplate", () => {

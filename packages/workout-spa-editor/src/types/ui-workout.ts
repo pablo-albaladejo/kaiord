@@ -31,9 +31,16 @@ export type UIWorkoutInner = Omit<Workout, "steps"> & {
 /**
  * In-memory workout shape.
  *
- * Structurally a `KRD`. Its `extensions.structured_workout` (typed `unknown`
- * on the portable `KRD`) is guaranteed to conform to `UIWorkoutInner` while
- * inside the editor's store. The `stripIds` chokepoint enforces the KRD
- * shape before serialisation.
+ * Structurally a `KRD` with the guarantee — enforced at the type level —
+ * that `extensions.structured_workout` (if present) conforms to
+ * `UIWorkoutInner` and therefore carries stable `ItemId`s on every step
+ * and block. A plain `KRD` coming from a port is not assignable here;
+ * `hydrateUIWorkout` is the only supported way to obtain one, and the
+ * `stripIds` chokepoint enforces the portable `KRD` shape before
+ * serialisation.
  */
-export type UIWorkout = KRD;
+export type UIWorkout = Omit<KRD, "extensions"> & {
+  extensions?: {
+    structured_workout?: UIWorkoutInner;
+  };
+};

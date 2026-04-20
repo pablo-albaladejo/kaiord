@@ -15,7 +15,6 @@ import type {
   WorkoutStep,
 } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
-import { generateBlockId } from "../../utils/id-generation";
 import { defaultIdProvider } from "../providers/id-provider";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -69,11 +68,10 @@ export const createEmptyRepetitionBlockAction = (
     id: defaultIdProvider(),
   };
 
-  // Create a repetition block with the default step. `generateBlockId()` is
-  // retained to preserve wire-stable ids for existing DnD / lookup paths;
-  // the stable-focus id is the same string promoted to `ItemId`.
+  // Block and nested step both come from `defaultIdProvider()` so the
+  // in-memory ItemId contract is uniform across steps and blocks.
   const repetitionBlock: RepetitionBlock = {
-    id: generateBlockId(),
+    id: defaultIdProvider(),
     repeatCount,
     steps: [defaultStep],
   };

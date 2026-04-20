@@ -74,6 +74,7 @@ export const createEmptyWorkoutAction = (
     workoutHistory: [emptyWorkout],
     historyIndex: 0,
     selectedStepId: null,
+    selectedStepIds: [],
     isEditing: false,
   };
 };

@@ -525,6 +525,10 @@ describe("createRepetitionBlock", () => {
     expect(isRepetitionBlock(block)).toBe(true);
 
     if (isRepetitionBlock(block)) {
+      // Block id also comes from defaultIdProvider() — uniform ItemId contract.
+      expect(block.id).toMatch(
+        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
+      );
       expect(block.steps[0]).toEqual({
         id: expect.any(String),
         stepIndex: 0,

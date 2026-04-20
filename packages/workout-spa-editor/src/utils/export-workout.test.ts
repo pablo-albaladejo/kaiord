@@ -252,6 +252,36 @@ describe("exportWorkout", () => {
         /Unsupported format/
       );
     });
+
+    it("exports a GCN buffer for the gcn format", async () => {
+      const buffer = await exportWorkout(mockKrd, "gcn");
+      expect(buffer.byteLength).toBeGreaterThan(0);
+    });
+
+    it("strips UI ids before handing off to the gcn export", async () => {
+      const uiKrd = {
+        ...mockKrd,
+        extensions: {
+          structured_workout: {
+            ...mockKrd.extensions!.structured_workout!,
+            steps: [
+              {
+                id: "leaked-ui-id",
+                stepIndex: 0,
+                durationType: "time",
+                duration: { type: "time", seconds: 60 },
+                targetType: "open",
+                target: { type: "open" },
+              },
+            ],
+          },
+        },
+      } as KRD;
+
+      const buffer = await exportWorkout(uiKrd, "gcn");
+      const text = new TextDecoder().decode(buffer);
+      expect(text).not.toContain("leaked-ui-id");
+    });
   });
 });
 
