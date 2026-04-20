@@ -12,7 +12,9 @@ import type {
   WorkoutStep,
 } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
-import type { UIWorkoutItem } from "../../types/krd-ui";
+import type { UIWorkout, UIWorkoutItem } from "../../types/krd-ui";
+import { nextAfterDelete } from "../focus-rules";
+import { asItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -75,20 +77,22 @@ export const deleteStepAction = (
   // Runtime invariant: `state.currentWorkout` is a UIWorkout, so the
   // deleted item already carries its stable ItemId. The `as Workout` cast
   // above erased that at the type level — re-assert it here so the undo
-  // trail stays on the UIWorkoutItem contract (CodeRabbit feedback).
-  const newDeletedSteps = deletedStep
+  // trail stays on the UIWorkoutItem contract.
+  const deletedUiItem = deletedStep as UIWorkoutItem | null;
+  const newDeletedSteps = deletedUiItem
     ? [
         ...deletedSteps,
-        {
-          step: deletedStep as UIWorkoutItem,
-          index: stepIndex,
-          timestamp: Date.now(),
-        },
+        { step: deletedUiItem, index: stepIndex, timestamp: Date.now() },
       ]
     : deletedSteps;
+
+  const focusTarget = deletedUiItem
+    ? nextAfterDelete(krd as UIWorkout, asItemId(deletedUiItem.id))
+    : null;
 
   return {
     ...createUpdateWorkoutAction(updatedKrd, state),
     deletedSteps: newDeletedSteps,
+    pendingFocusTarget: focusTarget,
   };
 };

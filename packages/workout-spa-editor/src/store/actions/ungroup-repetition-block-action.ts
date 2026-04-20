@@ -9,6 +9,8 @@
  */
 
 import type { KRD, Workout } from "../../types/krd";
+import type { FocusTarget } from "../focus/focus-target.types";
+import { asItemId } from "../providers/item-id";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -68,5 +70,13 @@ export const ungroupRepetitionBlockAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  const firstChild = extractedSteps[0] as { id?: string } | undefined;
+  const focusTarget: FocusTarget | null = firstChild?.id
+    ? { kind: "item", id: asItemId(firstChild.id) }
+    : null;
+
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    pendingFocusTarget: focusTarget,
+  };
 };

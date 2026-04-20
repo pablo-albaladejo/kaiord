@@ -3,11 +3,12 @@ import type { Sport } from "../types/krd-core";
 import type { UIWorkout } from "../types/krd-ui";
 import { migrateRepetitionBlocks } from "../utils/workout-migration";
 import { hydrateUIWorkout } from "./hydrate-ui-workout";
+import type { ItemId } from "./providers/item-id";
+import { asItemId } from "./providers/item-id";
 import type { WorkoutState } from "./workout-state.types";
+import { pushHistorySnapshot } from "./workout-store-history";
 
 export type { WorkoutState };
-
-const MAX_HISTORY_SIZE = 50;
 
 export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => {
   const workout = krd.extensions?.structured_workout as Workout | undefined;
@@ -25,38 +26,34 @@ export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => {
     currentWorkout: uiWorkout,
     workoutHistory: [uiWorkout],
     historyIndex: 0,
+    selectionHistory: [null],
     selectedStepId: null,
     selectedStepIds: [],
     isEditing: false,
+    pendingFocusTarget: null,
   };
 };
+
+const selectionAsItemId = (state: WorkoutState): ItemId | null =>
+  state.selectedStepId ? asItemId(state.selectedStepId) : null;
 
 export const createUpdateWorkoutAction = (
   uiWorkout: UIWorkout,
   state: WorkoutState
-): Partial<WorkoutState> => {
-  const newHistory = [
-    ...state.workoutHistory.slice(0, state.historyIndex + 1),
-    uiWorkout,
-  ];
-  const trimmedHistory =
-    newHistory.length > MAX_HISTORY_SIZE
-      ? newHistory.slice(newHistory.length - MAX_HISTORY_SIZE)
-      : newHistory;
-  return {
-    currentWorkout: uiWorkout,
-    workoutHistory: trimmedHistory,
-    historyIndex: trimmedHistory.length - 1,
-  };
-};
+): Partial<WorkoutState> => ({
+  currentWorkout: uiWorkout,
+  ...pushHistorySnapshot(uiWorkout, selectionAsItemId(state), state),
+});
 
 export const createClearWorkoutAction = (): Partial<WorkoutState> => ({
   currentWorkout: null,
   workoutHistory: [],
   historyIndex: -1,
+  selectionHistory: [],
   selectedStepId: null,
   selectedStepIds: [],
   isEditing: false,
+  pendingFocusTarget: null,
 });
 
 export const createEmptyWorkoutAction = (
@@ -73,9 +70,11 @@ export const createEmptyWorkoutAction = (
     currentWorkout: emptyWorkout,
     workoutHistory: [emptyWorkout],
     historyIndex: 0,
+    selectionHistory: [null],
     selectedStepId: null,
     selectedStepIds: [],
     isEditing: false,
+    pendingFocusTarget: null,
   };
 };
 

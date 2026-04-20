@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { createHistoryMethods } from "./create-history-methods";
 import { createRecoveryMethods } from "./create-recovery-methods";
 import { createWorkoutMethods } from "./create-workout-methods";
+import { createFocusSlice } from "./focus/focus-slice";
 import { createWorkoutStoreActions } from "./workout-store-actions";
 import { createModalActions } from "./workout-store-modal-actions";
 import { createSelectionActions } from "./workout-store-selection-actions";
@@ -24,6 +25,7 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => {
     isModalOpen: false,
     modalConfig: null,
     createBlockDialogOpen: false,
+    ...createFocusSlice<WorkoutStore>(set),
     ...createWorkoutMethods(actions, set, get),
     ...createSelectionActions(set),
     setEditing: (editing) => set({ isEditing: editing }),

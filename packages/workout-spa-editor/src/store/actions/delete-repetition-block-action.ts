@@ -13,7 +13,9 @@
 
 import type { KRD, Workout } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
-import type { UIWorkoutItem } from "../../types/krd-ui";
+import type { UIWorkout, UIWorkoutItem } from "../../types/krd-ui";
+import { nextAfterDelete } from "../focus-rules";
+import { asItemId } from "../providers/item-id";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -125,5 +127,8 @@ export const deleteRepetitionBlockAction = (
     selectedStepId: null,
     selectedStepIds: [],
     deletedSteps: newDeletedBlocks,
+    pendingFocusTarget: block.id
+      ? nextAfterDelete(krd as UIWorkout, asItemId(block.id))
+      : null,
   };
 };

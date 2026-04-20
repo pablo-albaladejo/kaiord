@@ -2,6 +2,7 @@ import type { StoreApi } from "zustand";
 
 import { copyStepAction } from "./actions/copy-step-action";
 import { pasteStepAction } from "./actions/paste-step-action";
+import { createdItemTarget } from "./focus-rules";
 import type { createWorkoutStoreActions } from "./workout-store-actions";
 import type { WorkoutStore } from "./workout-store-types";
 
@@ -46,7 +47,13 @@ export const createClipboardMethods = (
     }
     const result = await pasteStepAction(state.currentWorkout, insertIndex);
     if (result.success && result.updatedKrd) {
-      set((state) => actions.updateWorkout(result.updatedKrd!, state));
+      const focusTarget = result.newItemId
+        ? createdItemTarget(result.newItemId)
+        : null;
+      set((s) => ({
+        ...actions.updateWorkout(result.updatedKrd!, s),
+        pendingFocusTarget: focusTarget,
+      }));
     }
     return { success: result.success, message: result.message };
   },

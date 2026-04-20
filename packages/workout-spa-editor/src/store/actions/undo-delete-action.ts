@@ -11,6 +11,8 @@ import type {
   WorkoutStep,
 } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
+import type { FocusTarget } from "../focus/focus-target.types";
+import { asItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -66,8 +68,14 @@ export const undoDeleteAction = (
   // Remove the deleted step from tracking
   const newDeletedSteps = deletedSteps.filter((d) => d.timestamp !== timestamp);
 
+  const restoredId = (step as { id?: string }).id;
+  const focusTarget: FocusTarget | null = restoredId
+    ? { kind: "item", id: asItemId(restoredId) }
+    : null;
+
   return {
     ...createUpdateWorkoutAction(updatedKrd, state),
     deletedSteps: newDeletedSteps,
+    pendingFocusTarget: focusTarget,
   };
 };

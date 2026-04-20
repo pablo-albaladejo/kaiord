@@ -11,6 +11,8 @@ import type {
   Workout,
   WorkoutStep,
 } from "../../types/krd";
+import type { FocusTarget } from "../focus/focus-target.types";
+import { asItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -84,5 +86,13 @@ export const reorderStepAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  const movedId = (movedStep as { id?: string } | undefined)?.id;
+  const focusTarget: FocusTarget | null = movedId
+    ? { kind: "item", id: asItemId(movedId) }
+    : null;
+
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    pendingFocusTarget: focusTarget,
+  };
 };

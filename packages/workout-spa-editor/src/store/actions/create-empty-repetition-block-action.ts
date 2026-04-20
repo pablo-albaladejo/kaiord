@@ -16,7 +16,9 @@ import type {
 } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
 import { generateBlockId } from "../../utils/id-generation";
+import { createdItemTarget } from "../focus-rules";
 import { defaultIdProvider } from "../providers/id-provider";
+import { asItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -109,5 +111,10 @@ export const createEmptyRepetitionBlockAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    pendingFocusTarget: repetitionBlock.id
+      ? createdItemTarget(asItemId(repetitionBlock.id))
+      : null,
+  };
 };

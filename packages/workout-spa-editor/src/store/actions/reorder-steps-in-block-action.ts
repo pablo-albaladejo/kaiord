@@ -6,6 +6,8 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type { FocusTarget } from "../focus/focus-target.types";
+import { asItemId } from "../providers/item-id";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -86,5 +88,13 @@ export const reorderStepsInBlockAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  const movedId = (movedStep as { id?: string } | undefined)?.id;
+  const focusTarget: FocusTarget | null = movedId
+    ? { kind: "item", id: asItemId(movedId) }
+    : null;
+
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    pendingFocusTarget: focusTarget,
+  };
 };

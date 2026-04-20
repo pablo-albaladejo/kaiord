@@ -1,4 +1,6 @@
 import type { UIWorkout, UIWorkoutItem } from "../types/krd-ui";
+import type { FocusTarget } from "./focus/focus-target.types";
+import type { ItemId } from "./providers/item-id";
 
 export type {
   UIRepetitionBlock,
@@ -22,4 +24,6 @@ export type WorkoutState = {
     index: number;
     timestamp: number;
   }>;
+  selectionHistory?: Array<ItemId | null>;
+  pendingFocusTarget?: FocusTarget | null;
 };

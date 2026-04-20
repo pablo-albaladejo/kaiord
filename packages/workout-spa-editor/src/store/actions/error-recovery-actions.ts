@@ -41,6 +41,8 @@ export const restoreFromBackupAction = (
     currentWorkout: restoredWorkout,
     workoutHistory: [restoredWorkout],
     historyIndex: 0,
+    selectionHistory: [null],
+    pendingFocusTarget: null,
     success: true,
   };
 };
