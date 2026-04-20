@@ -1,4 +1,4 @@
-> Synced: 2026-04-17 (fix-keyboard-shortcut-hijacking)
+> Synced: 2026-04-20
 
 # SPA Editor Context Menu
 
@@ -129,7 +129,7 @@ Keyboard shortcuts SHALL only call `preventDefault()` when the app handler perfo
 
 ### Requirement: Exact modifier matching
 
-Keyboard shortcuts SHALL only intercept the exact modifier combination they own. Shortcuts with additional modifiers (e.g., Shift) that are not part of the defined shortcut SHALL pass through to the browser.
+Keyboard shortcuts SHALL only intercept the exact modifier combination they own. A modifier that is part of a defined shortcut (e.g., Shift in the owned shortcuts Cmd+Shift+G for ungroup and Cmd+Shift+Z for redo) is owned and SHALL trigger interception. A modifier that is NOT part of any defined shortcut on the same base key (e.g., Shift in Cmd+Shift+C) is unowned and SHALL pass through to the browser.
 
 #### Scenario: Cmd+Shift+C passes through
 
