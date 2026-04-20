@@ -1,3 +1,5 @@
+> Completed: 2026-04-20
+
 ## Why
 
 Bridge extension IDs are currently configured via `VITE_*` env vars, baked into the JS bundle at build time (Factor III / Factor V violation). This means:

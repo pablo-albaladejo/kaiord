@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-04-20 | [`bridge-runtime-discovery`](./2026-04-20-bridge-runtime-discovery/) | Bridge extension IDs are currently configured via VITE_* env vars, baked into the JS bundle at build time (Factor III / Factor V violation). This means: |
 | 2026-04-20 | [`fix-spec-code-drift`](./2026-04-20-fix-spec-code-drift/) | An /opsx-sync audit against the 22 live specs and 24 archived changes surfaced eight cases where the code diverged from specs — in every case the spec describe… |
 | 2026-04-18 | [`address-opsx-sync-drift`](./2026-04-18-address-opsx-sync-drift/) | The 2026-04-18 opsx-sync audit (commit 305284d2) fixed one spec-drift finding in garmin-bridge and surfaced five more that were out of scope for a pure spec-to… |
 | 2026-04-17 | [`fix-keyboard-shortcut-hijacking`](./2026-04-17-fix-keyboard-shortcut-hijacking/) | The workout editor's keyboard shortcut handlers unconditionally call preventDefault() on every Cmd/Ctrl modifier combination they recognize, regardless of whet… |

@@ -1,4 +1,4 @@
-> Synced: 2026-04-17
+> Synced: 2026-04-20 (bridge-runtime-discovery)
 
 # SPA Bridge Protocol
 
@@ -91,18 +91,18 @@ The SPA SHALL maintain a separate operation queue per bridge with a concurrency 
 - **WHEN** a bridge operation receives an HTTP 429 response
 - **THEN** the SPA SHALL apply exponential backoff before retrying the operation
 
-### Requirement: V1 bridge discovery via env vars
+### Requirement: Bridge discovery via runtime announcement
 
-In V1, bridge extension IDs SHALL be configured via Vite environment variables (e.g., `VITE_GARMIN_EXTENSION_ID`). The SPA SHALL attempt to detect each configured bridge on boot and periodically thereafter.
+Bridge extensions SHALL announce their presence at runtime via `window.postMessage` from injected content scripts (see the `bridge-runtime-discovery` capability). The SPA SHALL discover bridges by listening for `KAIORD_BRIDGE_ANNOUNCE` messages and verifying each announcement with a ping before registering the bridge as VERIFIED. No build-time Vite environment variables (e.g., `VITE_GARMIN_EXTENSION_ID`, `VITE_TRAIN2GO_EXTENSION_ID`) are required or consulted.
 
-#### Scenario: Garmin bridge configured and installed
+#### Scenario: Garmin bridge discovered at runtime
 
-- **WHEN** `VITE_GARMIN_EXTENSION_ID` is set and the extension is installed
-- **THEN** the SPA SHALL detect the bridge via `chrome.runtime.sendMessage` ping and register it as VERIFIED
+- **WHEN** the Garmin Bridge extension is installed and announces via content script
+- **THEN** the SPA SHALL detect the bridge via the announcement, verify with a ping, and register it as VERIFIED
 
 #### Scenario: Bridge extension not installed
 
-- **WHEN** a configured extension ID does not respond to ping
+- **WHEN** no bridge extension announces and the discovery timeout expires
 - **THEN** the SPA SHALL not show bridge-related UI for that platform
 
 ### Requirement: Protocol version compatibility
