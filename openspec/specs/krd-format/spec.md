@@ -1,4 +1,4 @@
-> Synced: 2026-04-17
+> Synced: 2026-04-20
 
 # KRD Format
 
