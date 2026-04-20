@@ -29,6 +29,7 @@
 - [ ] 4.6 Write failing Dexie integration test: bridge registry persists across browser sessions — seed a bridge entry with `status: "unavailable"` and `lastSeen: Date.now() - 22h`, reload the SPA, confirm the pruning timer resumes from the persisted `lastSeen` (not restarts from zero)
 - [ ] 4.7 Add a `bridges` store to the SPA Dexie database (new schema version bump if needed); migrate reads/writes in `bridge-registry-helpers.ts` to go through it
 - [ ] 4.8 Document the wall-clock-based timer caveat in `packages/workout-spa-editor/src/adapters/bridge/README.md` (per design Decision 2a)
+- [ ] 4.9 Non-regression: add a test (or CI grep invariant) asserting that only the new `bridges` store is persisted in Dexie — `garmin-store` and `train2go-store` MUST remain in-memory Zustand with no `persist(` middleware and no Dexie writes. Reference the Dexie-vs-Zustand boundary clause in `proposal.md` and the `CLAUDE.md` state-management rule
 
 ## 5. SPA — Train2Go 30s detection cache (spa-train2go-extension)
 

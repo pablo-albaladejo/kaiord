@@ -15,6 +15,8 @@ An `/opsx-sync` audit against the 22 live specs and 24 archived changes surfaced
 
 No breaking changes to public library APIs; the SPA changes are internal to `@kaiord/workout-spa-editor`. The `UsageRecord` schema change is a non-breaking Dexie schema bump (additive fields) with a migration that fills `inputTokens`/`outputTokens` from `totalTokens` when absent.
 
+**Dexie-vs-Zustand boundary (per `CLAUDE.md` state-management rule "Editor runtime → Zustand. Persisted data → Dexie. Local UI → React state.")**: the new `bridges` Dexie store in this proposal persists only the registry record for each bridge (extensionId, status, lastSeen, timer anchors). The transient bridge runtime stores (`garmin-store`, `train2go-store`) and the `workout-store` remain non-persistent Zustand state — they are NOT to be piped through the Dexie persistence boundary by this change.
+
 ## Capabilities
 
 ### New Capabilities

@@ -7,7 +7,7 @@ The `linked` array in `.changeset/config.json` SHALL include `@kaiord/garmin-bri
 #### Scenario: Both bridge packages appear in linked
 
 - **WHEN** `.changeset/config.json` is parsed
-- **THEN** the first entry of its `linked` array SHALL contain both `@kaiord/garmin-bridge` and `@kaiord/train2go-bridge`
+- **THEN** at least one entry of its `linked` array SHALL contain both `@kaiord/garmin-bridge` and `@kaiord/train2go-bridge` (regardless of its position in the array)
 - **AND** the parse SHALL succeed with no duplicate names across linked groups
 
 #### Scenario: Version bump for one extension bumps the other
