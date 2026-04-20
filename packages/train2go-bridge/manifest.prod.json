@@ -31,6 +31,11 @@
       "matches": ["https://app.train2go.com/*"],
       "js": ["content.js"],
       "run_at": "document_start"
+    },
+    {
+      "matches": ["https://*.kaiord.com/*"],
+      "js": ["kaiord-announce.js"],
+      "run_at": "document_start"
     }
   ],
 

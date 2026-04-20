@@ -7,9 +7,11 @@
 
 import { create } from "zustand";
 
+import { bridgeDiscovery } from "../adapters/bridge/bridge-discovery";
 import { createTrain2GoActions } from "./train2go-store-actions";
 
-const EXTENSION_ID: string = import.meta.env.VITE_TRAIN2GO_EXTENSION_ID || "";
+const getTrain2GoExtensionId = (): string =>
+  bridgeDiscovery.getExtensionId("train2go-bridge") ?? "";
 
 export type Train2GoActivity = {
   id: number;
@@ -48,5 +50,5 @@ export const useTrain2GoStore = create<Train2GoStore>((set, get) => ({
   lastDetectionTimestamp: null,
   activities: [],
 
-  ...createTrain2GoActions(set, get, EXTENSION_ID),
+  ...createTrain2GoActions(set, get, getTrain2GoExtensionId),
 }));

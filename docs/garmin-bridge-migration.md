@@ -50,4 +50,5 @@ Confirm the destruction when prompted. This removes:
 - The `VITE_GARMIN_LAMBDA_URL` environment variable has been removed
 - Garmin credentials (username/password) are no longer stored
 - The Settings panel now shows extension status instead of Lambda URL and credentials
-- Set `VITE_GARMIN_EXTENSION_ID` if you need a specific extension ID
+- Extension IDs are discovered at runtime via a content script announcement; no
+  `VITE_GARMIN_EXTENSION_ID` env var is required
