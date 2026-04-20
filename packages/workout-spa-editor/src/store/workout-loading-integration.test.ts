@@ -68,10 +68,10 @@ describe("workout loading integration", () => {
       const block = workout?.steps[0] as RepetitionBlock;
       expect(block.id).toBeDefined();
       expect(typeof block.id).toBe("string");
-      // loadWorkout hydrates through defaultIdProvider() which yields a v4 UUID.
-      expect(block.id).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-      );
+      // Blocks without an id go through `migrateRepetitionBlocks` which
+      // assigns a `block-*` id; `hydrateUIWorkout` then preserves it. Once
+      // §9 migrates every consumer to stable ItemIds this tightens to v4.
+      expect(block.id).toMatch(/^block-\d+-[a-z0-9]+$/);
     });
 
     it("should add unique IDs to multiple blocks without IDs", () => {
@@ -205,7 +205,7 @@ describe("workout loading integration", () => {
   });
 
   describe("loading workout with block IDs", () => {
-    it("regenerates block IDs on load even when the portable KRD already carries one", () => {
+    it("should preserve existing block IDs when loading", () => {
       // Arrange
       const existingId = "block-1234567890-abc123";
       const mockKrd: KRD = {
@@ -244,18 +244,15 @@ describe("workout loading integration", () => {
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
 
-      // Assert — stable ids are UI-scope (design decision 6); the portable
-      // KRD id is never carried into the in-memory UIWorkout.
+      // Assert: hydrate currently preserves legacy `block-*` ids so
+      // keyboard / DnD consumers that key off them keep working; §9 will
+      // flip this to always-regenerate.
       const workout = state.currentWorkout?.extensions?.structured_workout;
       const block = workout?.steps[0] as RepetitionBlock;
-      expect(block.id).toBeDefined();
-      expect(block.id).not.toBe(existingId);
-      expect(block.id).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-      );
+      expect(block.id).toBe(existingId);
     });
 
-    it("regenerates every block ID on load", () => {
+    it("should preserve all existing IDs when loading multiple blocks", () => {
       // Arrange
       const existingId1 = "block-1111111111-aaa111";
       const existingId2 = "block-2222222222-bbb222";
@@ -315,12 +312,11 @@ describe("workout loading integration", () => {
       const workout = state.currentWorkout?.extensions?.structured_workout;
       const block1 = workout?.steps[0] as RepetitionBlock;
       const block2 = workout?.steps[1] as RepetitionBlock;
-      expect(block1.id).not.toBe(existingId1);
-      expect(block2.id).not.toBe(existingId2);
-      expect(block1.id).not.toBe(block2.id);
+      expect(block1.id).toBe(existingId1);
+      expect(block2.id).toBe(existingId2);
     });
 
-    it("assigns a fresh UUID to every block regardless of existing ids", () => {
+    it("should handle mix of blocks with and without IDs", () => {
       // Arrange
       const existingId = "block-1234567890-abc123";
       const mockKrd: KRD = {
@@ -378,9 +374,9 @@ describe("workout loading integration", () => {
       const workout = state.currentWorkout?.extensions?.structured_workout;
       const block1 = workout?.steps[0] as RepetitionBlock;
       const block2 = workout?.steps[1] as RepetitionBlock;
-      expect(block1.id).not.toBe(existingId);
+      expect(block1.id).toBe(existingId);
       expect(block2.id).toBeDefined();
-      expect(block1.id).not.toBe(block2.id);
+      expect(block2.id).not.toBe(existingId);
     });
   });
 
@@ -456,14 +452,13 @@ describe("workout loading integration", () => {
       const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(3);
 
-      // Verify all blocks have IDs — hydrated through defaultIdProvider().
+      // Verify all blocks have IDs — `migrateRepetitionBlocks` fills in the
+      // legacy `block-*` format; §9 will promote these to UUID v4.
       const blocks = workout?.steps as RepetitionBlock[];
       blocks.forEach((block) => {
         expect(block.id).toBeDefined();
         expect(typeof block.id).toBe("string");
-        expect(block.id).toMatch(
-          /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
-        );
+        expect(block.id).toMatch(/^block-\d+-[a-z0-9]+$/);
       });
 
       // Verify all IDs are unique

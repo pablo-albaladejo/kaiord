@@ -8,7 +8,7 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
-import { defaultIdProvider } from "../providers/id-provider";
+import { generateBlockId } from "../../utils/id-generation";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 import {
@@ -46,8 +46,10 @@ export const createRepetitionBlockAction = (
     return {};
   }
 
+  // Legacy `block-` id format preserved until §9 (consumer migration) —
+  // keyboard shortcut and DnD handlers still gate on `id.startsWith("block-")`.
   const repetitionBlock: RepetitionBlock = {
-    id: defaultIdProvider(),
+    id: generateBlockId(),
     repeatCount,
     steps: stepsToWrap,
   };
