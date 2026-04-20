@@ -46,6 +46,15 @@ Expand `BridgeStatus = "verified" | "unavailable" | "removed"`. Pruning in `brid
 - **Alternative considered**: Boolean `removed: true` on the existing type. Rejected because `BridgeStatus` is already a discriminated union elsewhere and adding a flag side-steps exhaustiveness checks.
 - **Layer**: Adapter (bridge registry) + application (notification store).
 
+### 2a. Bridge registry persistence across browser sessions
+
+The bridge registry — including `status`, `lastSeen`, and the 24h-unavailable retention timer — SHALL be persisted to Dexie (one row per bridge keyed by extensionId). Without persistence, the "24h of UNAVAILABLE before REMOVED" timer and the "24h retention after REMOVED" timer both reset to zero on every browser session, which defeats the user-visible semantics of the lifecycle states.
+
+- **Why Dexie**: It's already the SPA's persistence port for every other durable state (library, templates, usage, ai-provider). Adding a `bridges` store follows the existing pattern and keeps the persistence boundary centralized.
+- **Alternative considered**: `localStorage` / `sessionStorage`. Rejected because the rest of the SPA's durable state lives in Dexie; splitting persistence strategies creates dev-prod parity and backup headaches.
+- **Wall-clock caveat**: The 24h timer is wall-clock-based. A user whose system clock jumps (daylight-savings, NTP correction) could see earlier/later pruning. This is acceptable — the spec allows approximate lifecycle — but **SHALL NOT** be replaced by `performance.now()` (monotonic clock resets per session).
+- **Layer**: Adapter (new Dexie table) + application (registry helpers read/write through it).
+
 ### 3. 30s detection cache in the Train2Go store action, not the hook
 
 `detectAction` reads `lastDetectionTimestamp` + `extensionInstalled` from the store state: if both are true and the delta is <30s, return early with the cached result. This matches the base `spa-garmin-extension` pattern (which already caches) and keeps cache policy in one place.
@@ -53,9 +62,17 @@ Expand `BridgeStatus = "verified" | "unavailable" | "removed"`. Pruning in `brid
 - **Alternative considered**: Cache in the React hook via `useMemo`. Rejected because detection also runs from non-hook contexts (e.g., after push).
 - **Layer**: Application (store action).
 
-### 4. Theme-color meta via VitePress head config
+### 4. Theme-color meta derived from the shared brand token
 
-Add a single entry to `.vitepress/config.ts`: `['meta', { name: 'theme-color', content: '#0f172a' }]`. No CSS token work, no favicon rework — this proposal scopes to the missing tag only.
+Add a single entry to `.vitepress/config.ts` with the `theme-color` meta. The `content` value SHALL be sourced from the shared CSS token `--brand-bg-primary` (defined in the repo-root `styles/brand-tokens.css`) — not a duplicated hex literal — so the brand invariant from the `branding` spec holds mechanically. Options, in preference order:
+
+1. Parse `styles/brand-tokens.css` at VitePress config load and extract the `--brand-bg-primary` value into the `head` array entry.
+2. Export a tiny `theme-color.ts` module in the docs package that `require`s/imports the token string; the CSS file and TS module are both generated from a single source of truth in `styles/brand-tokens.css`.
+
+Additionally, a CI/test invariant SHALL assert that the rendered docs `<meta name="theme-color">` value equals `--brand-bg-primary` from the shared token file; divergence fails the check. No CSS token rework, no favicon rework — this proposal scopes to the missing tag + the parity guard only.
+
+- **Why not hardcode `#0f172a`**: Factor V (build/release/run) plus the `branding` spec's "No arbitrary hex values SHALL be used in component styles" rule. The docs site is a component of the brand system; the same token discipline applies.
+- **Alternative considered**: Accept the hex duplication and rely on a reviewer to catch drift. Rejected because the audit that kicked off this proposal would not have flagged a silent divergence; the point of this change is mechanical enforcement.
 
 ### 5. Add bridge extensions to `.changeset/config.json#linked`
 
@@ -114,13 +131,13 @@ Dexie version bump (`this.version(2).stores({...}).upgrade(tx => tx.table('usage
 ## Migration Plan
 
 1. Land `BridgeStatus` type change behind a feature-complete PR (atomic — no intermediate commits compile).
-2. Dexie `usage` bump to version 2 with the backfill upgrade step.
-3. Release via changesets (`pnpm exec changeset`): one changeset entry tagging `@kaiord/workout-spa-editor` as `minor` (new UI affordances, additive schema), `@kaiord/docs` as `patch` (head meta tag only), and a repo-root note for the `.changeset/config.json` edit.
+2. Dexie schema bump in a single coordinated version step: `usage` store gains input/output token fields AND a new `bridges` store is introduced. Both migrations run in the same `this.version(N).stores({...}).upgrade(...)` hook so users see one upgrade, not two.
+3. Release via changesets (`pnpm exec changeset`): one changeset entry tagging `@kaiord/workout-spa-editor` as `minor` (new UI affordances, additive schema, new Dexie store), `@kaiord/docs` as `patch` (head meta tag + token-parsing helper), and a repo-root note for the `.changeset/config.json` edit.
 4. Post-merge: run `/opsx-verify` on every modified spec; the 8 gaps should close without any spec rewrite.
-5. No rollback needed beyond a normal revert — no irreversible data transforms (Dexie migration is additive and idempotent on re-run).
+5. No rollback needed beyond a normal revert — no irreversible data transforms (both Dexie migrations are additive and idempotent on re-run).
 
 ## Open Questions
 
 - **`modifiedAt` on pure selection/navigation events**: Should selecting a step count as a mutation? The spec says "user edit", which clearly excludes selection; the helper wires into mutators only. Confirmed non-issue.
-- **Bridge REMOVED retention window**: 24h is picked from analogy with the Garmin extension's session timeout — if the user prefers 7 days (to match "weeks-of-use" stories) update the design before implementing. Default stands at 24h unless challenged.
+- **Bridge REMOVED retention window**: 24h is picked from analogy with the Garmin extension's session timeout — if the user prefers 7 days (to match "weeks-of-use" stories) update the design before implementing. Default stands at 24h unless challenged. Decision 2a (persist the registry to Dexie) resolves the across-session concern; the value itself is still a product question.
 - **Legacy `totalTokens` split display policy**: "—" for `outputTokens` is proposed; an alternative is showing `totalTokens` under a combined "Tokens" column when `legacy`. Will defer until the usage panel renderer is touched.

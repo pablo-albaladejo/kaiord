@@ -5,8 +5,11 @@
 
 ## 2. Documentation site — theme-color meta tag
 
-- [ ] 2.1 Add `['meta', { name: 'theme-color', content: '#0f172a' }]` to the `head` array in `packages/docs/.vitepress/config.ts`
-- [ ] 2.2 Add a build-output assertion test (or a VitePress integration snapshot) confirming the rendered `/docs/index.html` contains the `theme-color` meta tag
+- [ ] 2.1 Write failing test asserting the docs `theme-color` meta tag equals `--brand-bg-primary` parsed from `styles/brand-tokens.css` (not a duplicated hex literal)
+- [ ] 2.2 Add a helper `readBrandTokenColor('--brand-bg-primary')` in the docs package (or shared location) that parses `styles/brand-tokens.css` synchronously at VitePress config load
+- [ ] 2.3 Wire the helper output into `packages/docs/.vitepress/config.ts` `head` array as `['meta', { name: 'theme-color', content: <parsed value> }]`
+- [ ] 2.4 Add a build-output assertion test confirming the rendered `/docs/index.html` contains the `theme-color` meta tag with the exact parsed token value
+- [ ] 2.5 Add a CI invariant (grep-based or unit) asserting no file under `packages/docs/` hardcodes the hex `#0f172a` — the value must come from the token
 
 ## 3. SPA — storage-unavailable banner (spa-persistence-port)
 
@@ -23,6 +26,9 @@
 - [ ] 4.3 Update every exhaustive consumer (grep `BridgeStatus`) to handle `"removed"`; compile error-driven
 - [ ] 4.4 Write failing test for `bridge-registry-helpers.ts` pruning: 24h-unavailable entry transitions to `status: "removed"` and fires toast; second trigger after another 24h deletes the entry
 - [ ] 4.5 Refactor `bridge-registry-helpers.ts` pruning path to transition → notify → deferred delete
+- [ ] 4.6 Write failing Dexie integration test: bridge registry persists across browser sessions — seed a bridge entry with `status: "unavailable"` and `lastSeen: Date.now() - 22h`, reload the SPA, confirm the pruning timer resumes from the persisted `lastSeen` (not restarts from zero)
+- [ ] 4.7 Add a `bridges` store to the SPA Dexie database (new schema version bump if needed); migrate reads/writes in `bridge-registry-helpers.ts` to go through it
+- [ ] 4.8 Document the wall-clock-based timer caveat in `packages/workout-spa-editor/src/adapters/bridge/README.md` (per design Decision 2a)
 
 ## 5. SPA — Train2Go 30s detection cache (spa-train2go-extension)
 
