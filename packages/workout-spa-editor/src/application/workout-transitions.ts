@@ -3,11 +3,18 @@
  *
  * Pure functions that validate and apply state transitions.
  * Each returns a new WorkoutRecord (immutable).
+ *
+ * Mutation-without-transition goes through `onWorkoutMutation`
+ * (see ./on-workout-mutation.ts) — re-exported here as the
+ * canonical entry point for consumers.
  */
 
 import type { AiMeta } from "../types/calendar-fragments";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { KRD } from "../types/schemas";
+
+export type { OnWorkoutMutationOptions } from "./on-workout-mutation";
+export { onWorkoutMutation } from "./on-workout-mutation";
 
 const now = (): string => new Date().toISOString();
 
