@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { assert, describe, expect, it } from "vitest";
 
 import { isRepetitionBlock, isWorkoutStep } from "../types/krd";
 import type { KRD, Workout } from "../types/krd";
@@ -64,10 +64,12 @@ describe("hydrateUIWorkout", () => {
     const [step, block] = steps ?? [];
     expect(isWorkoutStep(step!)).toBe(true);
     expect((step as { id: string }).id).toBe("keep-step");
-    if (isRepetitionBlock(block!)) {
-      expect(block.id).toBe("block-123-abc");
-      expect((block.steps[0] as { id: string }).id).toBe("keep-nested");
-    }
+    assert(
+      block && isRepetitionBlock(block),
+      "Expected second item to be a repetition block"
+    );
+    expect(block.id).toBe("block-123-abc");
+    expect((block.steps[0] as { id: string }).id).toBe("keep-nested");
   });
 
   it("generates ids for steps/blocks lacking one in the default (preserve) mode", () => {
@@ -86,10 +88,12 @@ describe("hydrateUIWorkout", () => {
       ?.steps;
     const [step, block] = steps ?? [];
     expect((step as { id: string }).id).toBe("id-0");
-    if (isRepetitionBlock(block!)) {
-      expect(block.id).toBe("id-1");
-      expect((block.steps[0] as { id: string }).id).toBe("id-2");
-    }
+    assert(
+      block && isRepetitionBlock(block),
+      "Expected second item to be a repetition block"
+    );
+    expect(block.id).toBe("id-1");
+    expect((block.steps[0] as { id: string }).id).toBe("id-2");
   });
 
   it("regenerates every id when preserveExistingIds: false (paste-path trust boundary)", () => {
@@ -109,12 +113,12 @@ describe("hydrateUIWorkout", () => {
       ?.steps;
     const [step, block] = steps ?? [];
     expect((step as { id: string }).id).not.toBe("clipboard-step");
-    if (isRepetitionBlock(block!)) {
-      expect(block.id).not.toBe("clipboard-block");
-      expect((block.steps[0] as { id: string }).id).not.toBe(
-        "clipboard-nested"
-      );
-    }
+    assert(
+      block && isRepetitionBlock(block),
+      "Expected second item to be a repetition block"
+    );
+    expect(block.id).not.toBe("clipboard-block");
+    expect((block.steps[0] as { id: string }).id).not.toBe("clipboard-nested");
   });
 
   it("accepts a custom IdProvider for deterministic regeneration", () => {

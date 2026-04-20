@@ -141,9 +141,20 @@ describe("useLibraryStore", () => {
 
       const persistedStep = (
         useLibraryStore.getState().templates[0].krd.extensions
-          ?.structured_workout as { steps: Array<{ id?: string }> }
+          ?.structured_workout as { steps: Array<Record<string, unknown>> }
       ).steps[0];
-      expect(persistedStep.id).toBeUndefined();
+      // Own-property absence: asserts the key is removed, not just
+      // left as `{ id: undefined }`.
+      expect(Object.prototype.hasOwnProperty.call(persistedStep, "id")).toBe(
+        false
+      );
+      expect(persistedStep).toStrictEqual({
+        stepIndex: 0,
+        durationType: "time",
+        duration: { type: "time", seconds: 60 },
+        targetType: "open",
+        target: { type: "open" },
+      });
     });
   });
 
