@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 
+import { StorageAvailabilityBanner } from "../../molecules/StorageAvailabilityBanner";
 import { LayoutHeader } from "./LayoutHeader";
 
 type MainLayoutProps = {
@@ -11,6 +12,9 @@ export const MainLayout = ({ children, onReplayTutorial }: MainLayoutProps) => {
   return (
     <div className="flex min-h-screen flex-col bg-gray-50 dark:bg-slate-900">
       <LayoutHeader onReplayTutorial={onReplayTutorial} />
+      <div className="mx-auto w-full max-w-7xl px-4 pt-3 sm:px-6 lg:px-8">
+        <StorageAvailabilityBanner />
+      </div>
       <main className="mx-auto w-full max-w-7xl flex-1 overflow-x-hidden px-4 py-6 sm:px-6 lg:px-8">
         {children}
       </main>
