@@ -1,4 +1,4 @@
-> Synced: 2026-04-17 (settings-train2go-bridge)
+> Synced: 2026-04-20
 
 # SPA Garmin Extension
 

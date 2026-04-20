@@ -1,4 +1,4 @@
-> Synced: 2026-04-18
+> Synced: 2026-04-20
 
 # Garmin Bridge
 
