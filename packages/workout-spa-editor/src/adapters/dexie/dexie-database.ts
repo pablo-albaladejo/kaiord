@@ -20,6 +20,19 @@ export class KaiordDatabase extends Dexie {
       usage: "yearMonth",
       meta: "key",
     });
+
+    // v2 — bridge registry persistence so the 24h-unavailable and
+    // 24h-removed lifecycle timers survive browser restarts.
+    this.version(2).stores({
+      workouts: "id, date, [date+state], [source+sourceId], sport, *tags",
+      templates: "id, sport, *tags",
+      profiles: "id",
+      aiProviders: "id",
+      syncState: "source",
+      usage: "yearMonth",
+      meta: "key",
+      bridges: "extensionId, status, lastSeen",
+    });
   }
 }
 
