@@ -33,6 +33,41 @@ export class KaiordDatabase extends Dexie {
       meta: "key",
       bridges: "extensionId, status, lastSeen",
     });
+
+    // v3 — UsageRecord gains `inputTokens`/`outputTokens` (split of
+    // the legacy `totalTokens`). Schema keys unchanged; only the
+    // row shape grows, hence no store redefinition — just an
+    // `.upgrade()` backfill marking pre-v3 rows as `legacy`.
+    this.version(3)
+      .stores({
+        workouts: "id, date, [date+state], [source+sourceId], sport, *tags",
+        templates: "id, sport, *tags",
+        profiles: "id",
+        aiProviders: "id",
+        syncState: "source",
+        usage: "yearMonth",
+        meta: "key",
+        bridges: "extensionId, status, lastSeen",
+      })
+      .upgrade(async (tx) => {
+        await tx.table("usage").toCollection().modify(backfillUsageRow);
+      });
+  }
+}
+
+export function backfillUsageRow(row: Record<string, unknown>): void {
+  if (typeof row.inputTokens === "number") return;
+  const total = typeof row.totalTokens === "number" ? row.totalTokens : 0;
+  row.inputTokens = total;
+  row.outputTokens = 0;
+  row.legacy = true;
+
+  if (Array.isArray(row.entries)) {
+    row.entries = row.entries.map((entry: Record<string, unknown>) => {
+      if (typeof entry.inputTokens === "number") return entry;
+      const tokens = typeof entry.tokens === "number" ? entry.tokens : 0;
+      return { ...entry, inputTokens: tokens, outputTokens: 0 };
+    });
   }
 }
 
