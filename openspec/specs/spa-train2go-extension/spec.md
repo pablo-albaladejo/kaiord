@@ -1,10 +1,10 @@
-> Synced: 2026-04-17 (settings-train2go-bridge)
+> Synced: 2026-04-20 (bridge-runtime-discovery)
 
 # SPA Train2Go Extension
 
 ## Purpose
 
-SPA-side integration with the train2go-bridge extension — discovery via `VITE_TRAIN2GO_EXTENSION_ID` and read-only import of coaching plans rendered on Train2Go pages.
+SPA-side integration with the train2go-bridge extension — runtime discovery via content script announcement and read-only import of coaching plans rendered on Train2Go pages.
 
 ## Requirements
 
@@ -24,32 +24,32 @@ The `BridgeCapability` Zod enum in `bridge-schemas.ts` SHALL include `"read:trai
 
 ### Requirement: Train2Go extension detection
 
-The SPA SHALL detect whether the Kaiord Train2Go Bridge extension is installed by sending a `ping` message to the configured extension ID via `chrome.runtime.sendMessage`. Detection SHALL follow the same two-stage timeout pattern as the Garmin bridge: first attempt with 2s timeout, retry once with 4s timeout on service worker cold start.
+The SPA SHALL detect whether the Kaiord Train2Go Bridge extension is installed by listening for `KAIORD_BRIDGE_ANNOUNCE` messages on `window` with `bridgeId: "train2go-bridge"`. Upon receiving an announcement, the SPA SHALL verify the bridge by sending a `ping` message to the announced `extensionId` via `chrome.runtime.sendMessage`. Detection SHALL follow the same two-stage timeout pattern as the Garmin bridge: first attempt with 2s timeout, retry once with 4s timeout on service worker cold start.
 
-The extension ID SHALL be configurable via environment variable `VITE_TRAIN2GO_EXTENSION_ID`.
+The extension ID SHALL be discovered at runtime from the content script announcement. No build-time environment variable is required.
 
-The existing bridge registry (`adapters/bridge/bridge-registry.ts`) SHALL detect both Garmin and Train2Go extensions independently on boot. The `detectBridge` function SHALL be called for each configured extension ID. Both bridges can be active simultaneously.
+The existing bridge registry (`adapters/bridge/bridge-registry.ts`) SHALL register bridges from content script announcements. Both bridges can be active simultaneously.
 
 Detection results SHALL be cached for 30 seconds via `lastDetectionTimestamp`. If less than 30s have elapsed since the last detection and `extensionInstalled` is `true`, skip the ping. The cache is invalidated on any fetch failure with a connection error.
 
 #### Scenario: Train2Go extension is installed and session active
 
-- **WHEN** the SPA sends a ping and receives `{ ok: true, protocolVersion: 1, data: { sessionActive: true, userId: 28035 } }`
+- **WHEN** the SPA receives a bridge announcement with `bridgeId: "train2go-bridge"` and the verification ping returns `{ ok: true, protocolVersion: 1, data: { sessionActive: true, userId: 28035 } }`
 - **THEN** the bridge registry registers the Train2Go bridge with capability `"read:training-plan"` and status `"verified"`
 
 #### Scenario: Train2Go extension is installed but session expired
 
-- **WHEN** the SPA sends a ping and receives `{ ok: true, protocolVersion: 1, data: { sessionActive: false } }`
+- **WHEN** the SPA receives a bridge announcement and the verification ping returns `{ ok: true, protocolVersion: 1, data: { sessionActive: false } }`
 - **THEN** the bridge registry registers the bridge but the SPA shows a "Connect to Train2Go" prompt
 
 #### Scenario: Train2Go extension is not installed
 
-- **WHEN** the SPA sends a ping and `chrome.runtime.lastError` is set or both timeout attempts are exhausted
+- **WHEN** no `KAIORD_BRIDGE_ANNOUNCE` with `bridgeId: "train2go-bridge"` is received within the discovery timeout
 - **THEN** the Train2Go integration is silently hidden (no error shown — it is optional)
 
 #### Scenario: Both Garmin and Train2Go bridges detected
 
-- **WHEN** the bridge registry detects both extensions via their respective extension IDs
+- **WHEN** the SPA receives announcements from both bridges
 - **THEN** `hasCapability("write:workouts")` returns true (Garmin) and `hasCapability("read:training-plan")` returns true (Train2Go)
 
 #### Scenario: Detection cache hit
