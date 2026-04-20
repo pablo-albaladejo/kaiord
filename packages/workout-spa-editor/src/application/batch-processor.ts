@@ -4,18 +4,22 @@
  * Processes multiple workouts sequentially with continue-on-failure
  * semantics, 500ms cadence, and cancellation support.
  * Enforces a batch-level retry budget of 3.
+ *
+ * Emits per-workout status via `byId` + summary `counts` so the
+ * calendar progress panel can render the spec-required
+ * "per-workout status (success/fail/queued)" detail.
  */
 
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { ProcessResult } from "./ai-workout-processor";
+import type { WorkoutBatchStatus } from "./batch-progress";
+import { type BatchProgress, buildBatchProgress } from "./batch-progress";
 
-export type BatchProgress = {
-  total: number;
-  processed: number;
-  succeeded: number;
-  failed: number;
-  current: string | null;
-};
+export type {
+  BatchProgress,
+  BatchProgressCounts,
+  WorkoutBatchStatus,
+} from "./batch-progress";
 
 export type BatchResult = {
   succeeded: string[];
@@ -37,11 +41,10 @@ export async function processBatch(
   onProgress: (progress: BatchProgress) => void,
   signal: AbortSignal
 ): Promise<BatchResult> {
-  const result: BatchResult = {
-    succeeded: [],
-    failed: [],
-    cancelled: false,
-  };
+  const result: BatchResult = { succeeded: [], failed: [], cancelled: false };
+  const byId: Record<string, WorkoutBatchStatus> = Object.fromEntries(
+    workouts.map((w) => [w.id, "queued"])
+  );
   let retriesUsed = 0;
 
   for (let i = 0; i < workouts.length; i++) {
@@ -51,41 +54,27 @@ export async function processBatch(
     }
 
     const workout = workouts[i];
-    onProgress(buildProgress(workouts.length, result, workout.id));
+    byId[workout.id] = "processing";
+    onProgress(buildBatchProgress(workouts.length, workout.id, byId));
 
     const canRetry = retriesUsed < MAX_BATCH_RETRIES;
     const outcome = await processOne(workout, canRetry);
-
     if (outcome.retried) retriesUsed++;
 
     if (outcome.ok) {
       result.succeeded.push(workout.id);
+      byId[workout.id] = "succeeded";
     } else {
       result.failed.push({ id: workout.id, error: outcome.error });
+      byId[workout.id] = "failed";
     }
 
-    onProgress(buildProgress(workouts.length, result, null));
+    onProgress(buildBatchProgress(workouts.length, null, byId));
 
-    if (i < workouts.length - 1 && !signal.aborted) {
-      await delay(CADENCE_MS);
-    }
+    if (i < workouts.length - 1 && !signal.aborted) await delay(CADENCE_MS);
   }
 
   return result;
-}
-
-function buildProgress(
-  total: number,
-  r: BatchResult,
-  current: string | null
-): BatchProgress {
-  return {
-    total,
-    processed: r.succeeded.length + r.failed.length,
-    succeeded: r.succeeded.length,
-    failed: r.failed.length,
-    current,
-  };
 }
 
 function delay(ms: number): Promise<void> {

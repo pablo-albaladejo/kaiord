@@ -3,12 +3,14 @@ import { statSync, mkdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { readBrandTokenColor } from "../.vitepress/brand-tokens.mjs";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const docsRoot = join(__dirname, "..");
 const publicDir = join(docsRoot, "public");
 
-const BRAND_BG = "#0f172a";
-const BRAND_ACCENT = "#0284c7";
+const BRAND_BG = readBrandTokenColor("--brand-bg-primary");
+const BRAND_ACCENT = readBrandTokenColor("--brand-accent-blue");
 
 function createDocsOgSvg() {
   return Buffer.from(`<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630">

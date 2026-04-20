@@ -100,4 +100,76 @@ describe("createDetectAction", () => {
     expect(state.sessionActive).toBe(false);
     expect(state.userId).toBeNull();
   });
+
+  describe("30s detection cache (spa-train2go-extension spec)", () => {
+    it("re-pings when the cached timestamp is older than 30s", async () => {
+      mockPing.mockResolvedValue({
+        ok: true,
+        protocolVersion: 1,
+        data: { sessionActive: true, userId: 1, userName: "A" },
+      });
+
+      await detect();
+      expect(mockPing).toHaveBeenCalledTimes(1);
+
+      // Age the cache entry past the 30s window.
+      state.lastDetectionTimestamp =
+        (state.lastDetectionTimestamp as number) - 31_000;
+      await detect();
+
+      expect(mockPing).toHaveBeenCalledTimes(2);
+    });
+
+    it("always pings when no detection has ever run (timestamp = null)", async () => {
+      mockPing.mockResolvedValue({
+        ok: true,
+        protocolVersion: 1,
+        data: { sessionActive: true, userId: 1, userName: "A" },
+      });
+
+      expect(state.lastDetectionTimestamp).toBeNull();
+
+      await detect();
+
+      expect(mockPing).toHaveBeenCalledTimes(1);
+    });
+
+    it("re-pings even within 30s when the cached result was 'not installed'", async () => {
+      mockPing.mockResolvedValue({ ok: false, error: "nope" });
+
+      await detect();
+      expect(state.extensionInstalled).toBe(false);
+      expect(mockPing).toHaveBeenCalledTimes(1);
+
+      // A subsequent detect() within 30s must retry because the cache
+      // short-circuit only applies when extensionInstalled === true.
+      mockPing.mockResolvedValueOnce({
+        ok: true,
+        protocolVersion: 1,
+        data: { sessionActive: true },
+      });
+
+      await detect();
+
+      expect(mockPing).toHaveBeenCalledTimes(2);
+    });
+
+    it("short-circuits without updating lastDetectionTimestamp", async () => {
+      mockPing.mockResolvedValue({
+        ok: true,
+        protocolVersion: 1,
+        data: { sessionActive: true },
+      });
+
+      await detect();
+      const firstStamp = state.lastDetectionTimestamp;
+
+      await detect();
+
+      // The cache short-circuit returns before `set(...)` runs, so the
+      // stamp stays pinned to the first detection. Verifies the
+      // "rolling window" anti-pattern is NOT present.
+      expect(state.lastDetectionTimestamp).toBe(firstStamp);
+    });
+  });
 });

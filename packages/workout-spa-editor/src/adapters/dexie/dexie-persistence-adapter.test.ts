@@ -440,9 +440,19 @@ describe("DexieUsageRepository", () => {
     const { usage } = createDexiePersistence(testDb);
     const record: UsageRecord = {
       yearMonth: "2026-04",
+      inputTokens: 1200,
+      outputTokens: 300,
       totalTokens: 1500,
       totalCost: 0.03,
-      entries: [{ date: "2026-04-07", tokens: 1500, cost: 0.03 }],
+      entries: [
+        {
+          date: "2026-04-07",
+          inputTokens: 1200,
+          outputTokens: 300,
+          tokens: 1500,
+          cost: 0.03,
+        },
+      ],
     };
 
     await usage.put(record);
@@ -461,6 +471,8 @@ describe("DexieUsageRepository", () => {
     const { usage } = createDexiePersistence(testDb);
     await usage.put({
       yearMonth: "2026-04",
+      inputTokens: 80,
+      outputTokens: 20,
       totalTokens: 100,
       totalCost: 0.01,
       entries: [],
@@ -468,9 +480,19 @@ describe("DexieUsageRepository", () => {
 
     await usage.put({
       yearMonth: "2026-04",
+      inputTokens: 160,
+      outputTokens: 40,
       totalTokens: 200,
       totalCost: 0.02,
-      entries: [{ date: "2026-04-11", tokens: 200, cost: 0.02 }],
+      entries: [
+        {
+          date: "2026-04-11",
+          inputTokens: 160,
+          outputTokens: 40,
+          tokens: 200,
+          cost: 0.02,
+        },
+      ],
     });
     const result = await usage.getByMonth("2026-04");
 
