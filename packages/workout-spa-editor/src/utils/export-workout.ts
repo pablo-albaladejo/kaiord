@@ -7,6 +7,7 @@
 
 import type { KRD } from "@kaiord/core";
 
+import { stripIds } from "../store/strip-ids";
 import {
   exportFitFile,
   exportGcnFile,
@@ -39,18 +40,22 @@ export const exportWorkout = async (
   try {
     onProgress?.(10);
 
+    // stripIds chokepoint: UIWorkout ids never reach a @kaiord/core
+    // conversion port.
+    const portable = stripIds(krd);
+
     let buffer: Uint8Array;
 
     if (format === "krd") {
-      buffer = await exportKrdFile(krd, onProgress);
+      buffer = await exportKrdFile(portable, onProgress);
     } else if (format === "fit") {
-      buffer = await exportFitFile(krd, onProgress);
+      buffer = await exportFitFile(portable, onProgress);
     } else if (format === "tcx") {
-      buffer = await exportTcxFile(krd, onProgress);
+      buffer = await exportTcxFile(portable, onProgress);
     } else if (format === "zwo") {
-      buffer = await exportZwoFile(krd, onProgress);
+      buffer = await exportZwoFile(portable, onProgress);
     } else if (format === "gcn") {
-      buffer = await exportGcnFile(krd, onProgress);
+      buffer = await exportGcnFile(portable, onProgress);
     } else {
       throw new ExportError(`Unsupported format: ${format}`, format);
     }

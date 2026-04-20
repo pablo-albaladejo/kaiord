@@ -9,6 +9,7 @@ import type {
   DifficultyLevel,
   WorkoutTemplate,
 } from "../../types/workout-library";
+import { stripIds } from "../strip-ids";
 
 export function createNewTemplate(
   name: string,
@@ -29,7 +30,8 @@ export function createNewTemplate(
     id,
     name,
     sport,
-    krd,
+    // stripIds chokepoint: UIWorkout ids never leak into persisted KRDs.
+    krd: stripIds(krd),
     tags: options.tags ?? [],
     difficulty: options.difficulty,
     duration: options.duration,
@@ -45,9 +47,12 @@ export function updateTemplateData(
   updates: Partial<WorkoutTemplate>
 ): WorkoutTemplate {
   const now = new Date().toISOString();
+  const normalized = updates.krd
+    ? { ...updates, krd: stripIds(updates.krd) }
+    : updates;
   return {
     ...template,
-    ...updates,
+    ...normalized,
     updatedAt: now,
   };
 }

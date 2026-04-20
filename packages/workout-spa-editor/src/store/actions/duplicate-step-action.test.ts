@@ -128,8 +128,9 @@ describe("duplicateStep", () => {
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
 
-    // Verify the duplicated step is a deep clone
+    // Verify the duplicated step is a deep clone (with a fresh ItemId)
     expect(workout?.steps[1]).toEqual({
+      id: expect.any(String),
       stepIndex: 1,
       durationType: "time",
       duration: { type: "time", seconds: 600 },
@@ -140,6 +141,9 @@ describe("duplicateStep", () => {
       },
       notes: "Test notes",
     });
+    expect((workout?.steps[1] as { id: string }).id).not.toBe(
+      (workout?.steps[0] as { id: string }).id
+    );
 
     // Verify they are not the same object reference
     expect(workout?.steps[0]).not.toBe(workout?.steps[1]);
@@ -413,8 +417,9 @@ describe("duplicateStep", () => {
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
 
-    // Verify complex structure is preserved
+    // Verify complex structure is preserved (with a fresh ItemId)
     expect(workout?.steps[1]).toEqual({
+      id: expect.any(String),
       stepIndex: 1,
       durationType: "time",
       duration: { type: "time", seconds: 1200 },

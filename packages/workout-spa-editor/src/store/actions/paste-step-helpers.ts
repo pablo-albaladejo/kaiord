@@ -10,7 +10,28 @@ import type {
 } from "../../types/krd";
 import { isRepetitionBlock } from "../../types/krd";
 import { readClipboard as readClipboardText } from "../clipboard-store";
+import { defaultIdProvider } from "../providers/id-provider";
 import { recalculateStepIndices } from "./recalculate-step-indices";
+
+/**
+ * Regenerate every `id` field on a pasted step / block so:
+ *  - A clipboard-supplied id cannot redirect focus to an attacker-chosen
+ *    DOM node (paste-path trust boundary, design decision 1).
+ *  - The pasted item is distinguishable from any existing item with the
+ *    same id — focus / selection can reference it independently.
+ */
+export const regeneratePasteIds = (
+  payload: WorkoutStep | RepetitionBlock
+): WorkoutStep | RepetitionBlock => {
+  if (isRepetitionBlock(payload)) {
+    return {
+      ...payload,
+      id: defaultIdProvider(),
+      steps: payload.steps.map((s) => ({ ...s, id: defaultIdProvider() })),
+    };
+  }
+  return { ...payload, id: defaultIdProvider() };
+};
 
 /**
  * Read and parse clipboard content

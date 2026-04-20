@@ -1,0 +1,85 @@
+import type { KRD, RepetitionBlock, Workout, WorkoutStep } from "../types/krd";
+import { isWorkoutStep } from "../types/krd";
+import type { UIWorkout } from "../types/krd-ui";
+import type { IdProvider } from "./providers/id-provider";
+import { defaultIdProvider } from "./providers/id-provider";
+import type { ItemId } from "./providers/item-id";
+import { asItemId } from "./providers/item-id";
+
+const hydrateStep = (
+  step: WorkoutStep & { id?: string },
+  idProvider: IdProvider
+): WorkoutStep & { id: ItemId } => ({
+  ...step,
+  id: step.id ? asItemId(step.id) : idProvider(),
+});
+
+const hydrateBlock = (
+  block: RepetitionBlock,
+  idProvider: IdProvider
+): RepetitionBlock & { id: ItemId } => ({
+  ...block,
+  id: block.id ? asItemId(block.id) : idProvider(),
+  steps: block.steps.map((s) => hydrateStep(s, idProvider)),
+});
+
+const regenerateStep = (
+  step: WorkoutStep,
+  idProvider: IdProvider
+): WorkoutStep & { id: ItemId } => ({ ...step, id: idProvider() });
+
+const regenerateBlock = (
+  block: RepetitionBlock,
+  idProvider: IdProvider
+): RepetitionBlock & { id: ItemId } => ({
+  ...block,
+  id: idProvider(),
+  steps: block.steps.map((s) => regenerateStep(s, idProvider)),
+});
+
+/**
+ * Hydrate a portable KRD into an in-memory UIWorkout by ensuring every
+ * step and block carries an `ItemId`.
+ *
+ * Default (`preserveExistingIds: true`) keeps any id-like strings already
+ * on the payload — legacy block ids produced by `generateBlockId()` ride
+ * through unchanged so current keyboard / DnD / context-menu consumers
+ * (which still gate on `id.startsWith("block-")`) keep functioning.
+ * Once §9 lands and every consumer reads a stable `ItemId`, flip this
+ * default to `false` so design decision 6 ("Stable IDs are regenerated
+ * on every load") applies uniformly.
+ *
+ * `preserveExistingIds: false` is already used by the paste-path trust
+ * boundary (design decision 1) so a clipboard-supplied id cannot
+ * redirect focus onto an existing item.
+ */
+export const hydrateUIWorkout = (
+  krd: KRD,
+  options: { idProvider?: IdProvider; preserveExistingIds?: boolean } = {}
+): UIWorkout => {
+  const idProvider = options.idProvider ?? defaultIdProvider;
+  const preserve = options.preserveExistingIds ?? true;
+  const workout = krd.extensions?.structured_workout as Workout | undefined;
+
+  if (!workout) return krd as UIWorkout;
+
+  const hydrated = workout.steps.map((item) =>
+    preserve
+      ? isWorkoutStep(item)
+        ? hydrateStep(item, idProvider)
+        : hydrateBlock(item, idProvider)
+      : isWorkoutStep(item)
+        ? regenerateStep(item, idProvider)
+        : regenerateBlock(item, idProvider)
+  );
+
+  return {
+    ...krd,
+    extensions: {
+      ...krd.extensions,
+      structured_workout: { ...workout, steps: hydrated },
+    },
+  } as UIWorkout;
+};
+
+export type { ItemId };
