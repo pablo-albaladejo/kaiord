@@ -323,13 +323,17 @@ describe("WorkoutSection", () => {
     });
 
     it("should create repetition block and clear selection on confirm", async () => {
-      // Arrange
-      const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
+      // Arrange — steps carry stable ItemIds so `findById` in
+      // `extractStepIndices` can resolve the selection to array positions.
+      const workout = createMockWorkout([
+        createMockStep(0, "id-rep-step-0"),
+        createMockStep(1, "id-rep-step-1"),
+      ]);
       const krd = createMockKRD(workout);
 
       useWorkoutStore.setState({
         currentWorkout: krd,
-        selectedStepIds: ["step-0", "step-1"],
+        selectedStepIds: ["id-rep-step-0", "id-rep-step-1"],
       });
 
       renderWithProviders(

@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 
 import { useToastContext } from "../../../contexts/ToastContext";
+import { findById } from "../../../store/find-by-id";
 import {
   useAddStepToRepetitionBlock,
   useClearStepSelection,
@@ -8,6 +9,7 @@ import {
   useCreateBlockDialogOpen,
   useCreateEmptyRepetitionBlock,
   useCreateRepetitionBlock,
+  useCurrentWorkout,
   useDeleteRepetitionBlock,
   useDuplicateStepInRepetitionBlock,
   useEditRepetitionBlock,
@@ -17,13 +19,23 @@ import {
   useUndoDelete,
   useUngroupRepetitionBlock,
 } from "../../../store/workout-store-selectors";
+import type { Workout } from "../../../types/krd";
 import { executeDeleteWithToast } from "./delete-block-with-toast";
 
-function extractStepIndices(ids: readonly string[]): Array<number> {
+/**
+ * Resolve the selected ids — now stable ItemIds — to their main-list
+ * array positions. Only top-level steps are candidates for wrapping into
+ * a repetition block (nested-step / block selections are ignored).
+ */
+function extractStepIndices(
+  ids: readonly string[],
+  workout: Workout | undefined
+): Array<number> {
+  if (!workout) return [];
   return ids
     .map((id) => {
-      const m = id.match(/^step-(\d+)$/);
-      return m ? Number.parseInt(m[1], 10) : null;
+      const found = findById(workout, id);
+      return found?.kind === "step" ? found.index : null;
     })
     .filter((i): i is number => i !== null);
 }
@@ -54,6 +66,7 @@ function useDeleteWithConfirmation() {
 
 export function useRepetitionBlockHandlers() {
   const selectedStepIds = useSelectedStepIds();
+  const currentWorkout = useCurrentWorkout();
   const createRepetitionBlock = useCreateRepetitionBlock();
   const createEmptyBlock = useCreateEmptyRepetitionBlock();
   const editRepetitionBlock = useEditRepetitionBlock();
@@ -67,7 +80,10 @@ export function useRepetitionBlockHandlers() {
   const handleDelete = useDeleteWithConfirmation();
 
   const handleConfirmCreateBlock = (repeatCount: number) => {
-    const indices = extractStepIndices(selectedStepIds);
+    const workout = currentWorkout?.extensions?.structured_workout as
+      | Workout
+      | undefined;
+    const indices = extractStepIndices(selectedStepIds, workout);
     if (indices.length >= 2) {
       createRepetitionBlock(indices, repeatCount);
       clearSelection();
