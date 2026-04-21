@@ -2,23 +2,26 @@ import type { KRD } from "../types/krd";
 import type { Sport } from "../types/krd-core";
 import type { UIWorkout } from "../types/krd-ui";
 import { hydrateUIWorkout } from "./hydrate-ui-workout";
+import type { ItemId } from "./providers/item-id";
 import type { WorkoutState } from "./workout-state.types";
+import { pushHistorySnapshot } from "./workout-store-history";
 
 export type { WorkoutState };
-
-const MAX_HISTORY_SIZE = 50;
 
 export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => {
   // `hydrateUIWorkout` now assigns fresh UUID v4 ids to every step and
   // block; the legacy `migrateRepetitionBlocks` pre-pass that seeded the
   // `block-{timestamp}-{random}` format is no longer needed.
   const uiWorkout = hydrateUIWorkout(krd);
+  // Fresh session: a single snapshot, no prior selection. `selectionHistory`
+  // is kept parallel to `workoutHistory` so undo/redo never drift.
   return {
     currentWorkout: uiWorkout,
     workoutHistory: [uiWorkout],
     historyIndex: 0,
     selectedStepId: null,
     selectedStepIds: [],
+    selectionHistory: [null as ItemId | null],
     isEditing: false,
   };
 };
@@ -27,19 +30,18 @@ export const createUpdateWorkoutAction = (
   uiWorkout: UIWorkout,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  const newHistory = [
-    ...state.workoutHistory.slice(0, state.historyIndex + 1),
+  // Route every mid-session push through the helper so the
+  // `selectionHistory` array stays parallel to `workoutHistory`. CI grep
+  // enforces the single-call-site rule.
+  return pushHistorySnapshot(
+    {
+      workoutHistory: state.workoutHistory,
+      historyIndex: state.historyIndex,
+      selectionHistory: state.selectionHistory,
+    },
     uiWorkout,
-  ];
-  const trimmedHistory =
-    newHistory.length > MAX_HISTORY_SIZE
-      ? newHistory.slice(newHistory.length - MAX_HISTORY_SIZE)
-      : newHistory;
-  return {
-    currentWorkout: uiWorkout,
-    workoutHistory: trimmedHistory,
-    historyIndex: trimmedHistory.length - 1,
-  };
+    state.selectedStepId as ItemId | null
+  );
 };
 
 export const createClearWorkoutAction = (): Partial<WorkoutState> => ({
@@ -48,6 +50,7 @@ export const createClearWorkoutAction = (): Partial<WorkoutState> => ({
   historyIndex: -1,
   selectedStepId: null,
   selectedStepIds: [],
+  selectionHistory: [],
   isEditing: false,
 });
 
@@ -67,6 +70,7 @@ export const createEmptyWorkoutAction = (
     historyIndex: 0,
     selectedStepId: null,
     selectedStepIds: [],
+    selectionHistory: [null as ItemId | null],
     isEditing: false,
   };
 };
