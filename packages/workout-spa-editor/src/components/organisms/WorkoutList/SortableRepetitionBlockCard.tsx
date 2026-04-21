@@ -35,10 +35,7 @@ export const SortableRepetitionBlockCard = ({
   );
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const { role, ...htmlAttributes } = sortable.attributes;
-  const selectedStepIndex = parseSelectedStepIndex(
-    selectedStepId,
-    parentBlockIndex
-  );
+  const selectedStepIndex = parseSelectedStepIndex(selectedStepId, block);
   const { handleDuplicate, handleReorder } = buildBlockHandlers({
     onStepDuplicate,
     onReorderSteps,

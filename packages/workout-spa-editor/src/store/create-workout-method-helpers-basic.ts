@@ -46,7 +46,18 @@ export const createClipboardMethods = (
     }
     const result = await pasteStepAction(state.currentWorkout, insertIndex);
     if (result.success && result.updatedKrd) {
-      set((state) => actions.updateWorkout(result.updatedKrd!, state));
+      // `pasteStepAction` already regenerated the clipboard payload's ids
+      // via `regeneratePasteIds`; `updateWorkout` now preserves those ids
+      // (see `create-base-workout-actions`). Still clear the selection
+      // after the mutation so no stale selectedStepIds point at items
+      // that no longer exist (the selection before paste may have come
+      // from a step that was reordered or whose id got regenerated in
+      // a prior mutation).
+      set((state) => ({
+        ...actions.updateWorkout(result.updatedKrd!, state),
+        selectedStepId: null,
+        selectedStepIds: [],
+      }));
     }
     return { success: result.success, message: result.message };
   },

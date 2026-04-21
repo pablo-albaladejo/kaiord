@@ -228,7 +228,15 @@ describe("App", () => {
       const krd = createMockKRD(workout);
 
       useWorkoutStore.getState().loadWorkout(krd);
-      useWorkoutStore.getState().selectStep("step-1"); // Select step at index 1
+      // loadWorkout hydrates every step with a stable ItemId; read the
+      // freshly-assigned id of step[1] and select by that.
+      const hydratedSteps = (
+        useWorkoutStore.getState().currentWorkout?.extensions
+          ?.structured_workout as Workout
+      ).steps;
+      useWorkoutStore
+        .getState()
+        .selectStep((hydratedSteps[1] as { id: string }).id);
 
       renderWithProviders(<App />);
 
@@ -276,7 +284,13 @@ describe("App", () => {
       const krd = createMockKRD(workout);
 
       useWorkoutStore.getState().loadWorkout(krd);
-      useWorkoutStore.getState().selectStep("step-1"); // Select step at index 1
+      const hydratedSteps = (
+        useWorkoutStore.getState().currentWorkout?.extensions
+          ?.structured_workout as Workout
+      ).steps;
+      useWorkoutStore
+        .getState()
+        .selectStep((hydratedSteps[1] as { id: string }).id);
 
       renderWithProviders(<App />);
 
@@ -323,7 +337,11 @@ describe("App", () => {
       const krd = createMockKRD(workout);
 
       useWorkoutStore.getState().loadWorkout(krd);
-      useWorkoutStore.getState().selectStep("step-0"); // Select first step
+      const hydrated = (
+        useWorkoutStore.getState().currentWorkout?.extensions
+          ?.structured_workout as Workout
+      ).steps;
+      useWorkoutStore.getState().selectStep((hydrated[0] as { id: string }).id);
 
       renderWithProviders(<App />);
 
@@ -352,7 +370,11 @@ describe("App", () => {
       const krd = createMockKRD(workout);
 
       useWorkoutStore.getState().loadWorkout(krd);
-      useWorkoutStore.getState().selectStep("step-1"); // Select last step
+      const hydrated = (
+        useWorkoutStore.getState().currentWorkout?.extensions
+          ?.structured_workout as Workout
+      ).steps;
+      useWorkoutStore.getState().selectStep((hydrated[1] as { id: string }).id);
 
       renderWithProviders(<App />);
 

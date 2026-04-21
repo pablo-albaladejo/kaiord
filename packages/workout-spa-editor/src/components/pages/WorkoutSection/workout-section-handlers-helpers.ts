@@ -1,6 +1,6 @@
+import { findById } from "../../../store/find-by-id";
 import type { KRD, Workout, WorkoutStep } from "../../../types/krd";
 import { isRepetitionBlock } from "../../../types/krd";
-import { parseStepId } from "../../../utils/step-id-parser";
 
 export function createUpdatedWorkout(
   workout: Workout,
@@ -12,47 +12,45 @@ export function createUpdatedWorkout(
     return workout;
   }
 
-  try {
-    const parsed = parseStepId(selectedStepId);
+  const found = findById(workout, selectedStepId);
+  if (!found) return workout;
 
-    // Only handle step IDs, not block IDs
-    if (parsed.type !== "step" || parsed.stepIndex === undefined) {
-      return workout;
-    }
-
-    // If blockIndex is present, update step in that specific block
-    if (parsed.blockIndex !== undefined) {
-      return {
-        ...workout,
-        steps: workout.steps.map((item, itemIndex) => {
-          if (isRepetitionBlock(item) && itemIndex === parsed.blockIndex) {
-            // This is the target block - update the step
-            return {
-              ...item,
-              steps: item.steps.map((s) =>
-                s.stepIndex === parsed.stepIndex ? updatedStep : s
-              ),
-            };
-          }
-          return item;
-        }),
-      };
-    }
-
-    // No blockIndex: update step in main workout only
+  if (found.kind === "nested-step") {
+    const { blockIndex, stepIndex } = found;
     return {
       ...workout,
-      steps: workout.steps.map((item) => {
-        if (!isRepetitionBlock(item) && item.stepIndex === parsed.stepIndex) {
-          return updatedStep;
+      steps: workout.steps.map((item, itemIndex) => {
+        if (isRepetitionBlock(item) && itemIndex === blockIndex) {
+          return {
+            ...item,
+            steps: item.steps.map((s, j) => {
+              if (j !== stepIndex) return s;
+              const nestedId = (s as { id?: string }).id;
+              return { ...updatedStep, ...(nestedId ? { id: nestedId } : {}) };
+            }),
+          };
         }
         return item;
       }),
     };
-  } catch {
-    // Invalid ID format - return unchanged workout
-    return workout;
   }
+
+  if (found.kind === "step") {
+    const { index } = found;
+    return {
+      ...workout,
+      steps: workout.steps.map((item, itemIndex) => {
+        if (itemIndex === index && !isRepetitionBlock(item)) {
+          const topId = (item as { id?: string }).id;
+          return { ...updatedStep, ...(topId ? { id: topId } : {}) };
+        }
+        return item;
+      }),
+    };
+  }
+
+  // Blocks are not editable through this path.
+  return workout;
 }
 
 export function createUpdatedKrd(krd: KRD, updatedWorkout: Workout): KRD {

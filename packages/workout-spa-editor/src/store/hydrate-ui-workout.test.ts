@@ -47,32 +47,36 @@ describe("hydrateUIWorkout", () => {
     expect(hydrateUIWorkout(krd)).toBe(krd);
   });
 
-  it("preserves existing ids by default (legacy block-* consumers)", () => {
+  it("regenerates every id by default (design decision 6)", () => {
+    let counter = 0;
+    const deterministic = () => asItemId(`regen-${counter++}`);
+
     const ui = hydrateUIWorkout(
       buildKrd([
-        { ...bareStep, id: "keep-step" } as never,
+        { ...bareStep, id: "would-have-kept-step" } as never,
         {
-          id: "block-123-abc",
+          id: "would-have-kept-block",
           repeatCount: 2,
-          steps: [{ ...bareStep, id: "keep-nested" } as never],
+          steps: [{ ...bareStep, id: "would-have-kept-nested" } as never],
         } as never,
-      ])
+      ]),
+      { idProvider: deterministic }
     );
 
     const steps = (ui.extensions?.structured_workout as Workout | undefined)
       ?.steps;
     const [step, block] = steps ?? [];
     expect(isWorkoutStep(step!)).toBe(true);
-    expect((step as { id: string }).id).toBe("keep-step");
+    expect((step as { id: string }).id).toBe("regen-0");
     assert(
       block && isRepetitionBlock(block),
       "Expected second item to be a repetition block"
     );
-    expect(block.id).toBe("block-123-abc");
-    expect((block.steps[0] as { id: string }).id).toBe("keep-nested");
+    expect(block.id).toBe("regen-1");
+    expect((block.steps[0] as { id: string }).id).toBe("regen-2");
   });
 
-  it("generates ids for steps/blocks lacking one in the default (preserve) mode", () => {
+  it("generates ids for steps/blocks lacking one (covers items without an id)", () => {
     let counter = 0;
     const deterministic = () => asItemId(`id-${counter++}`);
 
@@ -96,29 +100,29 @@ describe("hydrateUIWorkout", () => {
     expect((block.steps[0] as { id: string }).id).toBe("id-2");
   });
 
-  it("regenerates every id when preserveExistingIds: false (paste-path trust boundary)", () => {
+  it("keeps existing ids when preserveExistingIds: true (opt-in migration mode)", () => {
     const ui = hydrateUIWorkout(
       buildKrd([
-        { ...bareStep, id: "clipboard-step" } as never,
+        { ...bareStep, id: "keep-step" } as never,
         {
-          id: "clipboard-block",
+          id: "keep-block",
           repeatCount: 2,
-          steps: [{ ...bareStep, id: "clipboard-nested" } as never],
+          steps: [{ ...bareStep, id: "keep-nested" } as never],
         } as never,
       ]),
-      { preserveExistingIds: false }
+      { preserveExistingIds: true }
     );
 
     const steps = (ui.extensions?.structured_workout as Workout | undefined)
       ?.steps;
     const [step, block] = steps ?? [];
-    expect((step as { id: string }).id).not.toBe("clipboard-step");
+    expect((step as { id: string }).id).toBe("keep-step");
     assert(
       block && isRepetitionBlock(block),
       "Expected second item to be a repetition block"
     );
-    expect(block.id).not.toBe("clipboard-block");
-    expect((block.steps[0] as { id: string }).id).not.toBe("clipboard-nested");
+    expect(block.id).toBe("keep-block");
+    expect((block.steps[0] as { id: string }).id).toBe("keep-nested");
   });
 
   it("accepts a custom IdProvider for deterministic regeneration", () => {
@@ -127,7 +131,6 @@ describe("hydrateUIWorkout", () => {
 
     const ui = hydrateUIWorkout(buildKrd([bareStep as never]), {
       idProvider: deterministic,
-      preserveExistingIds: false,
     });
 
     const steps = (ui.extensions?.structured_workout as Workout | undefined)

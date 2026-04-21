@@ -30,17 +30,19 @@ describe("WorkoutSection", () => {
     });
   });
 
-  const createMockStep = (stepIndex: number): WorkoutStep => ({
-    stepIndex,
-    durationType: "time",
-    duration: { type: "time", seconds: 300 },
-    targetType: "power",
-    target: {
-      type: "power",
-      value: { unit: "watts", value: 200 },
-    },
-    intensity: "active",
-  });
+  const createMockStep = (stepIndex: number, id?: string): WorkoutStep =>
+    ({
+      ...(id ? { id } : {}),
+      stepIndex,
+      durationType: "time",
+      duration: { type: "time", seconds: 300 },
+      targetType: "power",
+      target: {
+        type: "power",
+        value: { unit: "watts", value: 200 },
+      },
+      intensity: "active",
+    }) as WorkoutStep;
 
   const createMockWorkout = (steps: Array<WorkoutStep>): Workout => ({
     name: "Test Workout",
@@ -105,9 +107,9 @@ describe("WorkoutSection", () => {
 
   it("should open StepEditor when step is selected and editing is enabled", () => {
     // Arrange
-    const workout = createMockWorkout([createMockStep(0)]);
+    const workout = createMockWorkout([createMockStep(0, "id-step-0")]);
     const krd = createMockKRD(workout);
-    const selectedStepId = `step-${workout.steps[0].stepIndex}`;
+    const selectedStepId = "id-step-0";
 
     // Set editing state to true
     useWorkoutStore.setState({ isEditing: true });
@@ -153,13 +155,13 @@ describe("WorkoutSection", () => {
 
   it("should show editor when step is selected and editing is true", () => {
     // Arrange
-    const workout = createMockWorkout([createMockStep(0)]);
+    const workout = createMockWorkout([createMockStep(0, "id-show-editor")]);
     const krd = createMockKRD(workout);
 
     // Set up state with a selected step and editing enabled
     useWorkoutStore.setState({
       isEditing: true,
-      selectedStepId: "step-0",
+      selectedStepId: "id-show-editor",
     });
 
     // Act
@@ -167,7 +169,7 @@ describe("WorkoutSection", () => {
       <WorkoutSection
         workout={workout}
         krd={krd}
-        selectedStepId="step-0"
+        selectedStepId="id-show-editor"
         onStepSelect={vi.fn()}
       />
     );
@@ -178,9 +180,9 @@ describe("WorkoutSection", () => {
 
   it("should close editor and clear selection on cancel", async () => {
     // Arrange
-    const workout = createMockWorkout([createMockStep(0)]);
+    const workout = createMockWorkout([createMockStep(0, "id-step-0")]);
     const krd = createMockKRD(workout);
-    const selectedStepId = `step-${workout.steps[0].stepIndex}`;
+    const selectedStepId = "id-step-0";
 
     useWorkoutStore.setState({
       isEditing: true,
@@ -321,13 +323,17 @@ describe("WorkoutSection", () => {
     });
 
     it("should create repetition block and clear selection on confirm", async () => {
-      // Arrange
-      const workout = createMockWorkout([createMockStep(0), createMockStep(1)]);
+      // Arrange — steps carry stable ItemIds so `findById` in
+      // `extractStepIndices` can resolve the selection to array positions.
+      const workout = createMockWorkout([
+        createMockStep(0, "id-rep-step-0"),
+        createMockStep(1, "id-rep-step-1"),
+      ]);
       const krd = createMockKRD(workout);
 
       useWorkoutStore.setState({
         currentWorkout: krd,
-        selectedStepIds: ["step-0", "step-1"],
+        selectedStepIds: ["id-rep-step-0", "id-rep-step-1"],
       });
 
       renderWithProviders(
