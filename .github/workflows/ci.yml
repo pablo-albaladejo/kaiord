@@ -235,9 +235,14 @@ jobs:
         # Positional step/block ids (`step-N`, `block-N`, `block-N-step-M`)
         # were replaced by stable ItemIds in §9. Any reintroduction must
         # fail CI — the `parseStepId` / `reconstructStepId` / `step-id-parser`
-        # module deleted in §9.5 must stay deleted.
+        # module deleted in §9.5 must stay deleted. Test files are excluded
+        # so regression-test fixtures mentioning the old names (comments
+        # or strings) don't trip the guard; production code is the only
+        # surface that matters.
         run: |
           ! grep -R -E "parseStepId|reconstructStepId|step-id-parser" \
+            --include="*.ts" --include="*.tsx" \
+            --exclude="*.test.ts" --exclude="*.test.tsx" \
             packages/workout-spa-editor/src
 
       - name: Focus-invariants — no Zustand persist() middleware in the workout store
