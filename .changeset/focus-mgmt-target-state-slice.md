@@ -20,8 +20,8 @@ Internal refactor: focus target state + selection history (§4 of the
   routes every mid-session push through it. Dev-mode length-drift
   assert + CI invariant enforce the single-call-site rule.
 - `workout-store-types.ts` split into `workout-store-state.types.ts`
-  + `workout-store-actions.types.ts` to respect the repo's
-  ≤80-line-per-file ESLint rule.
+  - `workout-store-actions.types.ts` to respect the repo's
+    ≤80-line-per-file ESLint rule.
 
 No consumer wiring yet — that's §6 (focus-rule helpers into mutating
 actions) and §7 (`useFocusAfterAction` hook). This PR only lays the
