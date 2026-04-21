@@ -231,6 +231,59 @@ jobs:
       - name: Check architecture boundaries
         run: pnpm arch:check
 
+      - name: Focus-invariants — no positional-ID generators
+        # Positional step/block ids (`step-N`, `block-N`, `block-N-step-M`)
+        # were replaced by stable ItemIds in §9. Any reintroduction must
+        # fail CI — the `parseStepId` / `reconstructStepId` / `step-id-parser`
+        # module deleted in §9.5 must stay deleted. Test files are excluded
+        # so regression-test fixtures mentioning the old names (comments
+        # or strings) don't trip the guard; production code is the only
+        # surface that matters.
+        run: |
+          ! grep -R -E "parseStepId|reconstructStepId|step-id-parser" \
+            --include="*.ts" --include="*.tsx" \
+            --exclude="*.test.ts" --exclude="*.test.tsx" \
+            packages/workout-spa-editor/src
+
+      - name: Focus-invariants — no Zustand persist() middleware in the workout store
+        # Per design decision 6, UIWorkout must never flow through Zustand's
+        # `persist` middleware — `stripIds` is the only outbound chokepoint.
+        # The check is semantic (not line-based): a Python scan matches
+        # `import { ... persist ... } from "zustand/middleware"` even when
+        # the import is split across multiple lines (common after prettier
+        # formatting). The local helper named `persist` in
+        # `ai-store-actions.ts` (wrapping `persistAiData`) is not flagged
+        # because it is not imported from `zustand/middleware`.
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          root = Path("packages/workout-spa-editor/src/store")
+          # Match any `import { ... persist ... } from "zustand/middleware"`
+          # regardless of line breaks inside the braces.
+          pattern = re.compile(
+              r'import\s*(?:[^{]*,\s*)?\{[^}]*\bpersist\b[^}]*\}\s*'
+              r'from\s*[\'"]zustand/middleware[\'"]',
+              re.S,
+          )
+          violations = []
+          for path in root.rglob("*"):
+              if path.suffix not in {".ts", ".tsx"}:
+                  continue
+              if ".test." in path.name:
+                  continue
+              if pattern.search(path.read_text()):
+                  violations.append(str(path))
+
+          if violations:
+              print("Forbidden Zustand persist middleware imports:")
+              for v in violations:
+                  print(f"  {v}")
+              sys.exit(1)
+          PY
+
   check-links:
     name: Link checker
     runs-on: ubuntu-latest

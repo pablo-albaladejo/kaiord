@@ -8,7 +8,7 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
-import { generateBlockId } from "../../utils/id-generation";
+import { defaultIdProvider } from "../providers/id-provider";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 import {
@@ -46,10 +46,12 @@ export const createRepetitionBlockAction = (
     return {};
   }
 
-  // Legacy `block-` id format preserved until §9 (consumer migration) —
-  // keyboard shortcut and DnD handlers still gate on `id.startsWith("block-")`.
+  // Block and nested step ids all come from `defaultIdProvider()` so the
+  // in-memory ItemId contract is uniform: every step and every block is
+  // referenced by the same UUID v4 shape the focus / selection system
+  // uses (no Math.random — design decision 1).
   const repetitionBlock: RepetitionBlock = {
-    id: generateBlockId(),
+    id: defaultIdProvider(),
     repeatCount,
     steps: stepsToWrap,
   };

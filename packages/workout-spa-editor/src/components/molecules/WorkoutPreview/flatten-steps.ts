@@ -29,17 +29,31 @@ function stepToBar(step: WorkoutStep, id: string, stepId: string): PreviewBar {
   };
 }
 
+/**
+ * Resolve the selection id for a workout item. Prefers the stable
+ * `ItemId` (assigned by `hydrateUIWorkout`), falls back to position-based
+ * ids only when a test harness passes a raw `Workout` without hydration.
+ */
+function selectionIdFor(
+  item: WorkoutStep | RepetitionBlock,
+  positionalFallback: string
+): string {
+  return (item as { id?: string }).id ?? positionalFallback;
+}
+
 function flattenBlock(
   block: RepetitionBlock,
   blockIndex: number
 ): PreviewBar[] {
   const bars: PreviewBar[] = [];
-  const blockId = `block-${blockIndex}`;
+  const blockId = selectionIdFor(block, `block-${blockIndex}`);
 
   for (let rep = 0; rep < block.repeatCount; rep++) {
     for (let j = 0; j < block.steps.length; j++) {
       const inner = block.steps[j];
-      const barId = `block-${blockIndex}-rep-${rep}-step-${j}`;
+      // `barId` is unique per rendered bar; `stepId` points at the block so
+      // clicking any bar inside the block selects the block itself.
+      const barId = `${blockId}-rep-${rep}-step-${j}`;
       bars.push(stepToBar(inner, barId, blockId));
     }
   }
@@ -56,7 +70,7 @@ export function flattenWorkoutSteps(workout: Workout): PreviewBar[] {
     if (isRepetitionBlock(item)) {
       bars.push(...flattenBlock(item, i));
     } else {
-      const stepId = `step-${item.stepIndex}`;
+      const stepId = selectionIdFor(item, `step-${item.stepIndex}`);
       bars.push(stepToBar(item, stepId, stepId));
     }
   }

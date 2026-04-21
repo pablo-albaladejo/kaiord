@@ -41,24 +41,21 @@ const regenerateBlock = (
  * Hydrate a portable KRD into an in-memory UIWorkout by ensuring every
  * step and block carries an `ItemId`.
  *
- * Default (`preserveExistingIds: true`) keeps any id-like strings already
- * on the payload — legacy block ids produced by `generateBlockId()` ride
- * through unchanged so current keyboard / DnD / context-menu consumers
- * (which still gate on `id.startsWith("block-")`) keep functioning.
- * Once §9 lands and every consumer reads a stable `ItemId`, flip this
- * default to `false` so design decision 6 ("Stable IDs are regenerated
- * on every load") applies uniformly.
+ * Default (`preserveExistingIds: false`) regenerates every id on load —
+ * design decision 6: "Stable IDs are an in-memory/UI concern and are
+ * regenerated on every load." This also closes the paste-path trust
+ * boundary (design decision 1): a clipboard-supplied id cannot redirect
+ * focus onto an existing item.
  *
- * `preserveExistingIds: false` is already used by the paste-path trust
- * boundary (design decision 1) so a clipboard-supplied id cannot
- * redirect focus onto an existing item.
+ * `preserveExistingIds: true` is retained as an opt-in for migration
+ * fixtures and deterministic tests.
  */
 export const hydrateUIWorkout = (
   krd: KRD,
   options: { idProvider?: IdProvider; preserveExistingIds?: boolean } = {}
 ): UIWorkout => {
   const idProvider = options.idProvider ?? defaultIdProvider;
-  const preserve = options.preserveExistingIds ?? true;
+  const preserve = options.preserveExistingIds ?? false;
   const workout = krd.extensions?.structured_workout as Workout | undefined;
 
   if (!workout) return krd as UIWorkout;

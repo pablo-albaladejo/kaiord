@@ -15,7 +15,6 @@ import type {
   WorkoutStep,
 } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
-import { generateBlockId } from "../../utils/id-generation";
 import { defaultIdProvider } from "../providers/id-provider";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -69,12 +68,10 @@ export const createEmptyRepetitionBlockAction = (
     id: defaultIdProvider(),
   };
 
-  // Block id keeps the legacy `block-` prefix until §9 (consumer migration
-  // to stable IDs) lands — keyboard/DnD handlers still key off
-  // `id.startsWith("block-")`. The block still gets a stable `ItemId`
-  // branded string; only the format differs from step ids.
+  // Block and nested step ids all come from `defaultIdProvider()` so the
+  // in-memory ItemId contract is uniform across steps and blocks.
   const repetitionBlock: RepetitionBlock = {
-    id: generateBlockId(),
+    id: defaultIdProvider(),
     repeatCount,
     steps: [defaultStep],
   };

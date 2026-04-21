@@ -40,9 +40,14 @@ export type WorkoutStore = {
   createBlockDialogOpen: boolean;
 
   // Actions
+  // `loadWorkout` accepts a portable KRD from any external source (file
+  // import, Dexie, etc.) and hydrates it into a UIWorkout.
   loadWorkout: (krd: KRD) => void;
   createEmptyWorkout: (name: string, sport: Sport) => void;
-  updateWorkout: (krd: KRD) => void;
+  // `updateWorkout` is a mid-session mutation: every caller builds from
+  // `currentWorkout` which is already a UIWorkout, so narrow the param
+  // type to make the "ids must be present" contract explicit.
+  updateWorkout: (workout: UIWorkout) => void;
   createStep: () => void;
   deleteStep: (stepIndex: number) => void;
   undoDelete: (timestamp: number) => void;
