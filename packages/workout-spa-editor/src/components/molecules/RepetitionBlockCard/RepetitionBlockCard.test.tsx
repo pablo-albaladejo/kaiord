@@ -509,15 +509,16 @@ describe("RepetitionBlockCard", () => {
     });
   });
 
-  describe("block context preservation", () => {
+  describe("multi-step block rendering", () => {
     /**
-     * Property 5: Block Context Preservation
-     * Validates: Requirements 2.2, 3.1, 3.2
-     *
-     * For any step inside a repetition block, the generated ID must include
-     * the parent block's index.
+     * Validates that `RepetitionBlockCard` renders one card per inner
+     * step, independently of stepIndex collisions between blocks. The
+     * legacy "block context must be encoded in the ID" contract is gone
+     * — each inner step now carries its own stable `ItemId` and the
+     * component keys React children by that id rather than a positional
+     * `block-N-step-M` string.
      */
-    it("should generate IDs with block context for all steps in block", () => {
+    it("renders one step card per inner step of a multi-step block", () => {
       // Arrange
       const blockIndex = 2;
       const multiStepBlock: RepetitionBlock = {
@@ -564,18 +565,12 @@ describe("RepetitionBlockCard", () => {
         <RepetitionBlockCard block={multiStepBlock} blockIndex={blockIndex} />
       );
 
-      // Assert - all three inner steps are rendered with their own card.
-      // The legacy `block-N-step-M` ID format is gone; each inner step
-      // carries a stable ItemId directly on the item, and the component
-      // no longer constructs positional strings.
+      // Three inner steps → three step-card elements.
       const stepCards = screen.getAllByTestId("step-card");
       expect(stepCards).toHaveLength(3);
-      stepCards.forEach((stepCard) => {
-        expect(stepCard.parentElement).toBeDefined();
-      });
     });
 
-    it("should preserve block index in IDs across multiple blocks", () => {
+    it("renders one step card per block regardless of blockIndex", () => {
       // Arrange
       const block1Index = 1;
       const block2Index = 3;
@@ -654,14 +649,11 @@ describe("RepetitionBlockCard", () => {
       // Act - Render without blockIndex
       render(<RepetitionBlockCard block={block} />);
 
-      // Assert - Should still render without errors
+      // Assert - component renders and produces the inner step card even
+      // when `blockIndex` is omitted; stable `ItemId`s on the inner items
+      // carry the identity that used to be encoded in the positional id.
       const stepCards = screen.getAllByTestId("step-card");
       expect(stepCards).toHaveLength(1);
-
-      // When blockIndex is undefined, the ID format should be "block-step-{stepIndex}"
-      // This is a fallback format
-      const fallbackId = "block-step-0";
-      // We can't directly access the ID, but we can verify the component renders
       expect(stepCards[0]).toBeInTheDocument();
     });
 

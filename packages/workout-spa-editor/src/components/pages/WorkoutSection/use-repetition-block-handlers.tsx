@@ -83,6 +83,15 @@ export function useRepetitionBlockHandlers() {
     const workout = currentWorkout?.extensions?.structured_workout as
       | Workout
       | undefined;
+    // No workout → no selection can be resolved. Fall through to the
+    // empty-block path only when the user explicitly has no selection
+    // (consistent with the legacy behavior). If a selection exists but
+    // no workout, the invariant is broken — no-op and close the dialog
+    // rather than silently swallowing the user's selection.
+    if (!workout && selectedStepIds.length > 0) {
+      closeDialog();
+      return;
+    }
     const indices = extractStepIndices(selectedStepIds, workout);
     if (indices.length >= 2) {
       createRepetitionBlock(indices, repeatCount);
