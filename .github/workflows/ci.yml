@@ -231,6 +231,35 @@ jobs:
       - name: Check architecture boundaries
         run: pnpm arch:check
 
+      - name: Focus-invariants — focus-rules stay pure (no React/DOM imports)
+        # §5 rule helpers are pure: they take a Workout + ids and return a
+        # FocusTarget. If any file under `src/store/focus-rules/` ever
+        # imports from `react` / `react-dom` / `@testing-library/*` or
+        # touches `document` / `window` / `HTMLElement`, focus dispatch
+        # (§7) would end up testing DOM behaviour inside what should be
+        # pure reducer logic. Test files are exempt.
+        #
+        # Fail closed on any grep error (missing dir, permissions, etc.)
+        # rather than silently passing via `! grep …` which treats exit
+        # code 2 (error) the same as 1 (no match).
+        run: |
+          set +e
+          grep -RnE "from ['\"]react|from ['\"]react-dom|from ['\"]@testing-library|document\\.|window\\.|HTMLElement" \
+            --include="*.ts" --include="*.tsx" \
+            --exclude="*.test.ts" --exclude="*.test.tsx" \
+            packages/workout-spa-editor/src/store/focus-rules/
+          status=$?
+          set -e
+          if [ "$status" = "0" ]; then
+            echo "focus-rules purity violation: grep found forbidden imports above"
+            exit 1
+          elif [ "$status" = "1" ]; then
+            exit 0
+          else
+            echo "focus-rules purity check: grep exited with status $status (error)"
+            exit 2
+          fi
+
       - name: Focus-invariants — workoutHistory push only inside pushHistorySnapshot
         # `selectionHistory` must stay exactly parallel to `workoutHistory`
         # for the undo / redo fallback rules to work (§4). The single
