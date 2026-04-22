@@ -231,6 +231,19 @@ jobs:
       - name: Check architecture boundaries
         run: pnpm arch:check
 
+      - name: Focus-invariants — focus-rules stay pure (no React/DOM imports)
+        # §5 rule helpers are pure: they take a Workout + ids and return a
+        # FocusTarget. If any file under `src/store/focus-rules/` ever
+        # imports from `react` / `react-dom` / `@testing-library/*` or
+        # touches `document` / `window` / `HTMLElement`, focus dispatch
+        # (§7) would end up testing DOM behaviour inside what should be
+        # pure reducer logic. Test files are exempt.
+        run: |
+          ! grep -RnE "from ['\"]react|from ['\"]react-dom|from ['\"]@testing-library|document\\.|window\\.|HTMLElement" \
+            --include="*.ts" --include="*.tsx" \
+            --exclude="*.test.ts" --exclude="*.test.tsx" \
+            packages/workout-spa-editor/src/store/focus-rules/
+
       - name: Focus-invariants — workoutHistory push only inside pushHistorySnapshot
         # `selectionHistory` must stay exactly parallel to `workoutHistory`
         # for the undo / redo fallback rules to work (§4). The single
