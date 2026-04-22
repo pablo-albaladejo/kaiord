@@ -51,7 +51,9 @@ export const pushHistorySnapshot = (
   const newHistory = [...historyPrefix, uiWorkout];
   const newSelection = [...selectionPrefix, selection];
 
-  // Trim to MAX_HISTORY_SIZE from the tail, keeping both arrays aligned.
+  // Cap both arrays at MAX_HISTORY_SIZE by dropping the oldest entries
+  // from the head; the most-recent tail (the one the user just produced)
+  // is what we keep, and both arrays stay aligned at the same length.
   const overflow = Math.max(0, newHistory.length - MAX_HISTORY_SIZE);
   const trimmedHistory = overflow ? newHistory.slice(overflow) : newHistory;
   const trimmedSelection = overflow

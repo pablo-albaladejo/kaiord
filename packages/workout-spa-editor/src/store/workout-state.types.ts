@@ -16,9 +16,12 @@ export type WorkoutState = {
   // is the `selectedStepId` that was active the moment the matching
   // workout snapshot was pushed. Undo of add/paste/duplicate restores
   // focus to that item when still present (§6 focus-rule wiring).
-  // Typed as `string | null` to match `selectedStepId`; values stored
-  // here come from the same UUID v4 provider as every other UIWorkout
-  // id, so the brand is applied at the point of use downstream.
+  // Typed as `string | null` to match `selectedStepId` and avoid an
+  // unsafe brand cast at the single `pushHistorySnapshot` call site.
+  // Values stored here are the same id strings as every `UIWorkoutStep`
+  // / `UIRepetitionBlock`, produced by `defaultIdProvider()` (UUID v4);
+  // the `ItemId` brand is applied at the point of use downstream
+  // (focus-rule helpers in §6 that look items up via `findById`).
   selectionHistory: Array<string | null>;
   selectedStepId: string | null;
   selectedStepIds: Array<string>;
