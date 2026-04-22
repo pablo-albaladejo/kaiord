@@ -1,5 +1,4 @@
 import type { UIWorkout, UIWorkoutItem } from "../types/krd-ui";
-import type { ItemId } from "./providers/item-id";
 
 export type {
   UIRepetitionBlock,
@@ -17,7 +16,10 @@ export type WorkoutState = {
   // is the `selectedStepId` that was active the moment the matching
   // workout snapshot was pushed. Undo of add/paste/duplicate restores
   // focus to that item when still present (§6 focus-rule wiring).
-  selectionHistory: Array<ItemId | null>;
+  // Typed as `string | null` to match `selectedStepId`; values stored
+  // here come from the same UUID v4 provider as every other UIWorkout
+  // id, so the brand is applied at the point of use downstream.
+  selectionHistory: Array<string | null>;
   selectedStepId: string | null;
   selectedStepIds: Array<string>;
   isEditing: boolean;

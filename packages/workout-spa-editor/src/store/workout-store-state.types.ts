@@ -7,7 +7,6 @@
 
 import type { UIWorkout, UIWorkoutItem } from "../types/krd-ui";
 import type { FocusTarget } from "./focus/focus-target.types";
-import type { ItemId } from "./providers/item-id";
 
 export type DeletedStep = {
   step: UIWorkoutItem;
@@ -45,5 +44,10 @@ export type WorkoutStoreState = {
   // `workoutHistory` so undo/redo can restore focus to the item the
   // user saw selected before the undone mutation.
   pendingFocusTarget: FocusTarget | null;
-  selectionHistory: Array<ItemId | null>;
+  // Matches `selectedStepId: string | null`. The brand (`ItemId`) is
+  // applied at the point of use (the selection ids stored here come
+  // from the same provider as every other UIWorkout id), so the
+  // relaxed type here avoids an unsafe `as ItemId` cast at the single
+  // `pushHistorySnapshot` call site.
+  selectionHistory: Array<string | null>;
 };

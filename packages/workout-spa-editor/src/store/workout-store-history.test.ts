@@ -76,7 +76,7 @@ describe("pushHistorySnapshot", () => {
     expect(afterC.selectionHistory).toEqual([null, "sel-c"]);
   });
 
-  it("defaults selectionHistory to [] when the caller omits it (legacy fixture)", () => {
+  it("treats missing selectionHistory as empty and seeds [null] on first push", () => {
     const result = pushHistorySnapshot(
       // @ts-expect-error — deliberately omit selectionHistory to mirror pre-§4 test fixtures.
       { workoutHistory: [], historyIndex: -1 },
@@ -86,14 +86,28 @@ describe("pushHistorySnapshot", () => {
     expect(result.selectionHistory).toEqual([null]);
   });
 
+  it("backfills selectionHistory with nulls when only history has a prefix", () => {
+    // Legacy fixture: workoutHistory has entries but no selectionHistory.
+    // The helper must return parallel arrays, not a short selection array.
+    const result = pushHistorySnapshot(
+      {
+        workoutHistory: [makeUI("old-0"), makeUI("old-1")],
+        historyIndex: 1,
+        // selectionHistory omitted → backfill to [null, null] prefix.
+      },
+      makeUI("new"),
+      null
+    );
+    expect(result.workoutHistory).toHaveLength(3);
+    expect(result.selectionHistory).toEqual([null, null, null]);
+  });
+
   it("trims both arrays together at MAX_HISTORY_SIZE (50)", () => {
     // Seed 50 entries, then push a 51st to trip the trim path.
     let state = {
       workoutHistory: [] as Array<UIWorkout>,
       historyIndex: -1,
-      selectionHistory: [] as Array<
-        import("./providers/item-id").ItemId | null
-      >,
+      selectionHistory: [] as Array<string | null>,
     };
     for (let i = 0; i < 50; i++) {
       const next = pushHistorySnapshot(state, makeUI(`u${i}`), null);
@@ -147,14 +161,13 @@ describe("loadWorkout seeds selectionHistory parallel to workoutHistory", () => 
   });
 });
 
-describe("dev-mode length-drift guard", () => {
-  it("logs an error when workoutHistory and selectionHistory drift", () => {
-    const spy = vi.spyOn(console, "error").mockImplementation(() => {});
-
-    pushHistorySnapshot(
+describe("structural drift prevention", () => {
+  it("returns parallel arrays even when the input state omits selectionHistory entries", () => {
+    // Legacy fixture: workoutHistory has 2 entries, historyIndex=1, but
+    // selectionHistory is shorter (only 1 entry). The helper backfills
+    // the missing slot with `null` so the returned arrays match length.
+    const result = pushHistorySnapshot(
       {
-        // Seed a drift: workout has 2 entries, selection only 1, so after
-        // appending one to each the totals are 3 vs 2.
         workoutHistory: [makeUI("x"), makeUI("y")],
         historyIndex: 1,
         selectionHistory: [null],
@@ -163,9 +176,7 @@ describe("dev-mode length-drift guard", () => {
       null
     );
 
-    expect(spy).toHaveBeenCalledWith(
-      expect.stringContaining("[pushHistorySnapshot] history length drift")
-    );
-    spy.mockRestore();
+    expect(result.workoutHistory.length).toBe(result.selectionHistory.length);
+    expect(result.selectionHistory).toEqual([null, null, null]);
   });
 });

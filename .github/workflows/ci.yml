@@ -250,8 +250,10 @@ jobs:
               r"\bworkoutHistory\s*\.\s*(push|unshift|splice)\s*\("
           )
           # Slice-and-append pattern: `...state.workoutHistory.slice(...), X`
+          # or, after destructuring, `...workoutHistory.slice(...), X`.
           spread_re = re.compile(
-              r"\.\.\.\s*[a-zA-Z_][\w.]*\.workoutHistory\s*\.\s*slice\s*\([^)]*\)\s*,",
+              r"\.\.\.\s*(?:[a-zA-Z_][\w.]*\.)?"
+              r"workoutHistory\s*\.\s*slice\s*\([^)]*\)\s*,",
               re.S,
           )
           violations = []

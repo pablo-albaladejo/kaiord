@@ -1,5 +1,4 @@
 import type { UIWorkout } from "../types/krd-ui";
-import type { ItemId } from "./providers/item-id";
 
 const MAX_HISTORY_SIZE = 50;
 
@@ -7,17 +6,18 @@ type HistorySnapshotInput = {
   workoutHistory: Array<UIWorkout>;
   historyIndex: number;
   // Optional to keep legacy test fixtures working. Production flows always
-  // seed this via `createLoadWorkoutAction` / `createEmptyWorkoutAction`;
-  // the dev-mode length-drift assert below flags any leakage of a fixture
-  // that forgets to seed it.
-  selectionHistory?: Array<ItemId | null>;
+  // seed this via `createLoadWorkoutAction` / `createEmptyWorkoutAction`.
+  // When missing, the push backfills the prefix with `null`s so the two
+  // arrays never return drifted (the dev-mode drift-guard would still
+  // flag the upstream offender for inspection).
+  selectionHistory?: Array<string | null>;
 };
 
 type HistorySnapshotResult = {
   currentWorkout: UIWorkout;
   workoutHistory: Array<UIWorkout>;
   historyIndex: number;
-  selectionHistory: Array<ItemId | null>;
+  selectionHistory: Array<string | null>;
 };
 
 /**
@@ -38,17 +38,18 @@ type HistorySnapshotResult = {
 export const pushHistorySnapshot = (
   state: HistorySnapshotInput,
   uiWorkout: UIWorkout,
-  selection: ItemId | null
+  selection: string | null
 ): HistorySnapshotResult => {
-  const newHistory = [
-    ...state.workoutHistory.slice(0, state.historyIndex + 1),
-    uiWorkout,
-  ];
-  const currentSelection = state.selectionHistory ?? [];
-  const newSelection = [
-    ...currentSelection.slice(0, state.historyIndex + 1),
-    selection,
-  ];
+  // Backfill the selection prefix to match the history prefix length so
+  // the two arrays never drift — even when a legacy caller omits
+  // `selectionHistory` on the input shape. Missing entries become `null`,
+  // which is a safe sentinel ("no selection was active at that snapshot").
+  const historyPrefix = state.workoutHistory.slice(0, state.historyIndex + 1);
+  const selectionPrefix = historyPrefix.map(
+    (_, index) => state.selectionHistory?.[index] ?? null
+  );
+  const newHistory = [...historyPrefix, uiWorkout];
+  const newSelection = [...selectionPrefix, selection];
 
   // Trim to MAX_HISTORY_SIZE from the tail, keeping both arrays aligned.
   const overflow = Math.max(0, newHistory.length - MAX_HISTORY_SIZE);

@@ -13,39 +13,62 @@ describe("FocusSlice", () => {
   });
 
   it("defaults to pendingFocusTarget: null on a fresh store", () => {
+    // Arrange + Act: the default store state is the system under test.
+
+    // Assert
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
   });
 
   it("setPendingFocusTarget writes an item target", () => {
+    // Arrange
     const target = focusItem(asItemId("step-x"));
+
+    // Act
     useWorkoutStore.getState().setPendingFocusTarget(target);
+
+    // Assert
     expect(useWorkoutStore.getState().pendingFocusTarget).toEqual(target);
   });
 
   it("setPendingFocusTarget writes the empty-state sentinel", () => {
+    // Arrange + Act
     useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
+
+    // Assert
     expect(useWorkoutStore.getState().pendingFocusTarget).toEqual(
       focusEmptyState
     );
   });
 
   it("setPendingFocusTarget clears via null", () => {
+    // Arrange: put the slice into a non-null state first.
     useWorkoutStore.getState().setPendingFocusTarget(focusItem(asItemId("a")));
+
+    // Act
     useWorkoutStore.getState().setPendingFocusTarget(null);
+
+    // Assert
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
   });
 
   it("overwrites a prior target without throwing", () => {
+    // Arrange
     useWorkoutStore.getState().setPendingFocusTarget(focusItem(asItemId("a")));
+
+    // Act
     useWorkoutStore.getState().setPendingFocusTarget(focusItem(asItemId("b")));
+
+    // Assert
     expect(useWorkoutStore.getState().pendingFocusTarget).toEqual(
       focusItem(asItemId("b"))
     );
   });
 
   it("accepts an id that does not exist in the current workout", () => {
-    // The slice is dumb — it only stores the value. Resolving the id to
-    // a DOM node is the hook's job (§7), not the slice's.
+    // Arrange: resolving the id to a DOM node is the hook's job (§7), not
+    // the slice's — the slice only stores whatever it's given.
+
+    // Act + Assert
     expect(() =>
       useWorkoutStore
         .getState()
@@ -57,6 +80,9 @@ describe("FocusSlice", () => {
   });
 
   it("selectionHistory starts empty on a fresh store", () => {
+    // Arrange + Act: the default store state is the system under test.
+
+    // Assert
     expect(useWorkoutStore.getState().selectionHistory).toEqual([]);
   });
 });

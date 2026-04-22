@@ -2,7 +2,6 @@ import type { KRD } from "../types/krd";
 import type { Sport } from "../types/krd-core";
 import type { UIWorkout } from "../types/krd-ui";
 import { hydrateUIWorkout } from "./hydrate-ui-workout";
-import type { ItemId } from "./providers/item-id";
 import type { WorkoutState } from "./workout-state.types";
 import { pushHistorySnapshot } from "./workout-store-history";
 
@@ -21,7 +20,7 @@ export const createLoadWorkoutAction = (krd: KRD): Partial<WorkoutState> => {
     historyIndex: 0,
     selectedStepId: null,
     selectedStepIds: [],
-    selectionHistory: [null as ItemId | null],
+    selectionHistory: [null],
     isEditing: false,
   };
 };
@@ -40,7 +39,7 @@ export const createUpdateWorkoutAction = (
       selectionHistory: state.selectionHistory,
     },
     uiWorkout,
-    state.selectedStepId as ItemId | null
+    state.selectedStepId
   );
 };
 
@@ -70,7 +69,7 @@ export const createEmptyWorkoutAction = (
     historyIndex: 0,
     selectedStepId: null,
     selectedStepIds: [],
-    selectionHistory: [null as ItemId | null],
+    selectionHistory: [null],
     isEditing: false,
   };
 };
