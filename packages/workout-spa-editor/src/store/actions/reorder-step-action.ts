@@ -11,6 +11,8 @@ import type {
   Workout,
   WorkoutStep,
 } from "../../types/krd";
+import { createdItemTarget } from "../focus-rules";
+import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -84,5 +86,16 @@ export const reorderStepAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  // Focus follows the moved item to its new position. Its id is stable
+  // across the reorder (ItemId doesn't change on array moves), so the
+  // hook re-resolves the same item and scrolls to its new DOM node.
+  const movedId = (movedStep as { id?: string }).id;
+  const pendingFocusTarget = movedId
+    ? createdItemTarget(movedId as ItemId)
+    : state.pendingFocusTarget;
+
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    pendingFocusTarget,
+  };
 };

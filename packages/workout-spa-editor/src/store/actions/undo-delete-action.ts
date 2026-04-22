@@ -11,6 +11,8 @@ import type {
   WorkoutStep,
 } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
+import { restoredAfterUndoTarget } from "../focus-rules";
+import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -66,8 +68,16 @@ export const undoDeleteAction = (
   // Remove the deleted step from tracking
   const newDeletedSteps = deletedSteps.filter((d) => d.timestamp !== timestamp);
 
+  // Focus lands on the restored item so the user can immediately
+  // continue editing what they just undid.
+  const restoredId = (step as { id?: string }).id;
+  const pendingFocusTarget = restoredId
+    ? restoredAfterUndoTarget(updatedWorkout, restoredId as ItemId)
+    : state.pendingFocusTarget;
+
   return {
     ...createUpdateWorkoutAction(updatedKrd, state),
     deletedSteps: newDeletedSteps,
+    pendingFocusTarget,
   };
 };

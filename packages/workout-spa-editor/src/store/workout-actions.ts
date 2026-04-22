@@ -51,6 +51,10 @@ export const createClearWorkoutAction = (): Partial<WorkoutState> => ({
   selectedStepIds: [],
   selectionHistory: [],
   isEditing: false,
+  // No workout means there is nothing to focus — explicit null so the
+  // hook (§7) sees a fresh state rather than leftover intent from the
+  // previous session.
+  pendingFocusTarget: null,
 });
 
 export const createEmptyWorkoutAction = (

@@ -1,68 +1,114 @@
 # Store
 
-This directory contains Zustand stores for global state management.
+Zustand stores for global state management.
 
 ## Workout Store
 
-The workout store (`workout-store.ts`) manages the current workout state, selection, and editing mode.
+`workout-store.ts` is the central store. It owns the current workout,
+selection, history (undo/redo), and the focus-intent slice.
 
 ### State
 
-- `currentWorkout: KRD | null` - The currently loaded workout
-- `selectedStepId: string | null` - ID of the currently selected step
-- `isEditing: boolean` - Whether the user is in editing mode
+- `currentWorkout: UIWorkout | null` — the in-memory workout. A
+  `UIWorkout` is structurally a `KRD` plus a stable `ItemId` on every
+  step and block. See `../types/ui-workout.ts`.
+- `workoutHistory: Array<UIWorkout>` — undo/redo snapshots.
+- `historyIndex: number` — current position in `workoutHistory`.
+- `selectionHistory: Array<string | null>` — parallel to
+  `workoutHistory`; each entry is the `selectedStepId` at the moment
+  the matching snapshot was pushed. Used by undo-of-add/paste/duplicate
+  to restore focus to the item that was selected just before the undone
+  mutation.
+- `selectedStepId: string | null`, `selectedStepIds: Array<string>` —
+  single- and multi-selection.
+- `pendingFocusTarget: FocusTarget | null` — focus intent written by
+  mutating actions. A hook (`useFocusAfterAction`, §7) reads it after
+  each React commit and moves DOM focus accordingly.
+- `isEditing`, `safeMode`, `lastBackup`, `deletedSteps`, `isModalOpen`,
+  `modalConfig`, `createBlockDialogOpen` — misc UI slots.
 
 ### Actions
 
-- `loadWorkout(krd: KRD)` - Load a workout into the store (resets selection and editing state)
-- `updateWorkout(krd: KRD)` - Update the current workout (preserves selection and editing state)
-- `selectStep(id: string | null)` - Select a step by ID or deselect with null
-- `setEditing(editing: boolean)` - Toggle editing mode
-- `clearWorkout()` - Clear the current workout and reset all state
+- `loadWorkout(krd)` / `createEmptyWorkout(name, sport)` / `clearWorkout()`
+  — reset the store. Hydrate assigns fresh `ItemId`s on every load.
+- `updateWorkout(uiWorkout)` — mid-session mutation push (preserves ids).
+- `setPendingFocusTarget(target)` — dumb setter for the focus slice.
+- `createStep` / `duplicateStep` / `pasteStep` / `addStepToRepetitionBlock`
+  / `duplicateStepInRepetitionBlock` / `createRepetitionBlock`
+  / `createEmptyRepetitionBlock` — produce new items with fresh
+  `ItemId`s, set `pendingFocusTarget = createdItemTarget(newId)`.
+- `deleteStep` / `deleteRepetitionBlock` — set `pendingFocusTarget` via
+  `nextAfterDelete` (next sibling, previous sibling, empty-state, or
+  block-cascade anchor).
+- `undoDelete` — set `pendingFocusTarget` via `restoredAfterUndoTarget`.
+- `undo` / `redo` — set `pendingFocusTarget` via
+  `preservedSelectionTarget`, reading the parallel `selectionHistory`.
+- `reorderStep` / `reorderStepsInBlock` — set `pendingFocusTarget` to
+  the moved item's own id (stable across the reorder).
+- `editRepetitionBlock` — leaves `pendingFocusTarget` untouched.
+- `toggleStepSelection` / `selectAllSteps` — enforce the single-parent
+  invariant: a multi-selection cannot span the main list and the
+  inside of a block (cross-parent toggles replace rather than extend).
 
-### Selector Hooks
+### History chokepoint
 
-Convenience hooks for accessing specific parts of the store:
+Every append to `workoutHistory` goes through
+`pushHistorySnapshot(state, uiWorkout, selection)` in
+`workout-store-history.ts`. The helper keeps `workoutHistory` and
+`selectionHistory` parallel by construction (drift is structurally
+impossible). A CI focus-invariant grep rejects any
+`workoutHistory.push` / `.unshift` / `.splice` / `...slice, x` outside
+that helper.
 
-- `useCurrentWorkout()` - Get the current workout
-- `useSelectedStepId()` - Get the selected step ID
-- `useIsEditing()` - Get the editing state
-- `useWorkoutActions()` - Get all action functions
+### Outbound ID chokepoint
 
-### Usage Example
+`stripIds(uiWorkout): KRD` in `strip-ids.ts` removes `id` fields from
+every step and block before the workout crosses a boundary. Every
+Dexie write path, `saveWorkout`, and `exportWorkout` pass through it.
+Direct calls to `@kaiord/core` conversion ports do the same.
 
-```typescript
-import { useWorkoutStore, useCurrentWorkout, useWorkoutActions } from "@/store";
+### Focus-rule helpers
 
-function WorkoutEditor() {
-  // Access state
-  const workout = useCurrentWorkout();
+`focus-rules/` holds five pure functions (one per file) that compute
+what `pendingFocusTarget` should be after each mutation:
 
-  // Access actions
-  const { loadWorkout, selectStep } = useWorkoutActions();
+- `createdItemTarget(id)` — newly-created items.
+- `nextAfterDelete({ workout, deletedIndex, parentBlockId? })` —
+  single-delete rules (main-list + block-child, cascade anchor).
+- `nextAfterMultiDelete({ workout, deletedIndices })` — multi-select.
+- `restoredAfterUndoTarget(workout, id)` — undo of delete.
+- `preservedSelectionTarget(workout, priorSelection, fallbackIndex)` —
+  undo of add/paste/duplicate and redo traversal.
 
-  // Or use the store directly
-  const isEditing = useWorkoutStore((state) => state.isEditing);
+Purity is CI-enforced: no `react`, `react-dom`, `@testing-library`,
+`document.`, `window.`, or `HTMLElement` references allowed under
+`focus-rules/`.
 
-  return (
-    <div>
-      {workout && <WorkoutDisplay workout={workout} />}
-    </div>
-  );
-}
+### Narrow-selector discipline
+
+Every `setPendingFocusTarget({ kind: 'item', id })` produces a fresh
+object reference, so any consumer subscribed with a wide selector
+(`useWorkoutStore()` / `useWorkoutStore(s => s)`) would re-render on
+every focus-intent write. Subscribe narrowly:
+
+```ts
+const target = useWorkoutStore((s) => s.pendingFocusTarget);
 ```
 
-## Requirements Mapping
+A CI grep check in §10.3.a will pin this discipline once the hook
+consumer (§7) lands.
 
-- **Requirement 1**: Display workout structure
-  - `loadWorkout` loads KRD files for visualization
-  - `currentWorkout` provides the workout data to display
+## AI Store
 
-- **Requirement 2**: Create new workouts
-  - `updateWorkout` updates workout metadata and steps
-  - `loadWorkout` initializes new workout structures
+`ai-store.ts` holds AI-provider config. It's independent from the
+workout store and is persisted to Dexie via `ai-store-persistence`.
 
-- **Requirement 3**: Edit existing steps
-  - `selectStep` selects steps for editing
-  - `isEditing` tracks editing mode
-  - `updateWorkout` saves step modifications
+## Library Store
+
+`library-store/` holds the saved-workouts library with Dexie
+persistence. `stripIds` runs on every write path.
+
+## Profile Store
+
+`profile-store/` holds the active sport profile and its sport-zone
+overrides.
