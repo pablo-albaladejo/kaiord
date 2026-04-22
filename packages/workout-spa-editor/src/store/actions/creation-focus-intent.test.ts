@@ -183,10 +183,12 @@ describe("creation-action focus intent (§6.3–6.6)", () => {
     // Assert — focus lands on the regenerated id, never the attacker id.
     const inner = readInner();
     const target = useWorkoutStore.getState().pendingFocusTarget;
-    expect(target).not.toBeNull();
-    if (target && target.kind === "item") {
-      expect(target.id).not.toBe("attacker-supplied-id");
-      expect(inner.steps.some((s) => s.id === target.id)).toBe(true);
+    // Must be an item target (empty-state would skip the id assertions).
+    expect(target?.kind).toBe("item");
+    if (!target || target.kind !== "item") {
+      throw new Error("Expected pasteStep to focus the regenerated item");
     }
+    expect(target.id).not.toBe("attacker-supplied-id");
+    expect(inner.steps.some((s) => s.id === target.id)).toBe(true);
   });
 });

@@ -223,10 +223,15 @@ test.describe("Step Selection - Unique IDs", () => {
     await expect(selectedIndicators).toHaveCount(1);
   });
 
-  test("should support multi-selection across different blocks", async ({
+  test("enforces the single-parent invariant when toggling across different blocks", async ({
     page,
   }) => {
-    // Requirement 4.3: Test multi-selection across blocks
+    // spa-editor-focus-management §8.8: a multi-selection cannot span
+    // the main list and the inside of a repetition block, nor two
+    // different blocks. Cross-parent toggles REPLACE the selection
+    // (rather than extend it) so `selectedStepIds` always shares one
+    // parent. This test previously asserted the old (extend) behavior;
+    // it now asserts the new (replace) behavior.
     await page.goto("/workout/new");
 
     // Load a workout with multiple repetition blocks
@@ -368,24 +373,26 @@ test.describe("Step Selection - Unique IDs", () => {
     });
     await page.waitForTimeout(300);
 
-    // Verify all three clicked steps are selected
-    await expect(mainStep).toHaveAttribute("data-selected", "true", {
+    // The three toggles crossed parents twice (main→block1, block1→block2),
+    // so the selection was replaced each time. Only the last-toggled step
+    // (block2Step) remains selected.
+    await expect(block2Step).toHaveAttribute("data-selected", "true", {
       timeout: 2000,
     });
-    await expect(block1Step).toHaveAttribute("data-selected", "true");
-    await expect(block2Step).toHaveAttribute("data-selected", "true");
+    await expect(mainStep).toHaveAttribute("data-selected", "false");
+    await expect(block1Step).toHaveAttribute("data-selected", "false");
 
-    // Verify other steps are NOT selected
+    // And no other steps are selected either.
     const block1Step2 = allStepCards.nth(2);
     const block2Step2 = allStepCards.nth(4);
     await expect(block1Step2).toHaveAttribute("data-selected", "false");
     await expect(block2Step2).toHaveAttribute("data-selected", "false");
 
-    // Verify exactly 3 steps are selected
+    // Exactly 1 step selected (the last-toggled block2 child).
     const selectedIndicators = page.locator(
       '[data-testid="step-card"][data-selected="true"]'
     );
-    await expect(selectedIndicators).toHaveCount(3);
+    await expect(selectedIndicators).toHaveCount(1);
   });
 
   test("should independently select steps with same stepIndex in different contexts", async ({

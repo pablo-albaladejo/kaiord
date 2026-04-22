@@ -13,9 +13,24 @@ import type { WorkoutState } from "../workout-actions";
  * Compute the focus target for an undo/redo traversal.
  *
  * Reads the `selectionHistory` entry aligned with the new `historyIndex`
- * and delegates to `preservedSelectionTarget`, which falls back to the
- * same-index item or empty-state when the prior selection is gone.
+ * and delegates to `preservedSelectionTarget`. When the prior selection
+ * is gone from the destination snapshot, the rule uses the *current*
+ * selection's position in the workout we're leaving as the fallback
+ * index, so focus lands near the same logical position rather than
+ * jumping to slot 0.
  */
+const currentSelectionMainListIndex = (state: WorkoutState): number => {
+  const currentWorkout = state.currentWorkout?.extensions
+    ?.structured_workout as Workout | undefined;
+  const steps = currentWorkout?.steps ?? [];
+  const currentId = state.selectedStepId;
+  if (!currentId) return 0;
+  const idx = steps.findIndex(
+    (item) => (item as { id?: string }).id === currentId
+  );
+  return idx >= 0 ? idx : 0;
+};
+
 const focusForHistoryIndex = (
   state: WorkoutState,
   newIndex: number
@@ -29,10 +44,8 @@ const focusForHistoryIndex = (
   // entirely. Fall back to `null` for a missing slot.
   const priorSelection =
     (state.selectionHistory?.[newIndex] as ItemId | null | undefined) ?? null;
-  // Fallback index: try the prior selection's index in the destination
-  // snapshot. Starting at 0 is the simplest safe choice — the rule
-  // walks the list to find something focusable anyway.
-  return preservedSelectionTarget(workout, priorSelection, 0);
+  const fallbackIndex = currentSelectionMainListIndex(state);
+  return preservedSelectionTarget(workout, priorSelection, fallbackIndex);
 };
 
 export const createUndoAction = (
