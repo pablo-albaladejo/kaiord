@@ -57,7 +57,9 @@ describe("restoredAfterUndoTarget", () => {
       steps: [
         makeStep("top-0", 0),
         {
-          id: asItemId("block-1"),
+          // RepetitionBlock ids are plain strings (not branded `ItemId`);
+          // the selection/focus brand applies to WorkoutStep ids only.
+          id: "block-1",
           repeatCount: 2,
           steps: [makeStep("nested-0", 0), makeStep("nested-1", 1)],
         },

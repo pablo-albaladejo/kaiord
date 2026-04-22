@@ -60,5 +60,16 @@ export const nextAfterMultiDelete = (
     if (prev?.id) return focusItem(prev.id as ItemId);
   }
 
+  // Items still remain somewhere in the list (e.g. a non-contiguous
+  // delete that took [0, 2] out of [a, b, c] leaves [b] at index 0,
+  // where both "after last" and "before first" checks miss). Anchor
+  // focus on whatever survives nearest the original first-deleted
+  // position rather than collapsing to empty-state when the list is
+  // not actually empty.
+  const candidate = steps[Math.min(firstDeleted, steps.length - 1)] as
+    | { id?: string }
+    | undefined;
+  if (candidate?.id) return focusItem(candidate.id as ItemId);
+
   return focusEmptyState;
 };

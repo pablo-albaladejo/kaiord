@@ -68,6 +68,24 @@ describe("nextAfterMultiDelete", () => {
     expect(target).toEqual({ kind: "item", id: "a" });
   });
 
+  it("anchors on a surviving item when both after-last and before-first checks miss", () => {
+    // Arrange — original [a, b, c]; deleted [0, 2]; post-delete [b].
+    // `afterLast` position = 2 - 1 = 1 → undefined (only 1 item now).
+    // `firstDeleted` = 0, so no previous-sibling check applies. Without
+    // the "anchor to surviving" fallback this would collapse to
+    // empty-state even though "b" is still in the list.
+    const workout = workoutWith(["b"]);
+
+    // Act
+    const target = nextAfterMultiDelete({
+      workout,
+      deletedIndices: [0, 2],
+    });
+
+    // Assert
+    expect(target).toEqual({ kind: "item", id: "b" });
+  });
+
   it("returns empty-state when every item was deleted", () => {
     // Arrange — list is empty post-delete.
     const workout = workoutWith([]);

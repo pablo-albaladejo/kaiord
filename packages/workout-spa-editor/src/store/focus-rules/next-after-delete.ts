@@ -71,8 +71,11 @@ const nextInsideBlock = (
   const found = findById(workout, parentBlockId);
   if (!found || found.kind !== "block") {
     // Block was cascaded away (or the caller passed a bad id). The
-    // parent-block handle is gone — fall back to main-list rules.
-    return nextInMainList(workout, 0);
+    // parent-block handle is gone — fall back to main-list rules at
+    // the position the item originally occupied so focus lands as
+    // close as possible to where the user was acting, rather than
+    // resetting to the top of the list.
+    return nextInMainList(workout, deletedIndex);
   }
 
   const blockSteps = found.block.steps;
