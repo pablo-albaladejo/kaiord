@@ -14,7 +14,7 @@
 
 import { render } from "@testing-library/react";
 import { useContext, useEffect, useRef, useState } from "react";
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it } from "vitest";
 
 import {
   FocusRegistryContext,
@@ -179,17 +179,10 @@ describe("FocusRegistryContext", () => {
       return <div ref={ref} data-testid={id} />;
     };
 
-    const registryFn = vi.fn();
-
     const App = ({ show }: { show: boolean }) => (
       <FocusRegistryProvider>
         {captureValue(sink)}
         {show ? <ItemCard id="card-1" /> : null}
-        <button
-          onClick={() => registryFn(sink.current!.getItem(asItemId("card-1")))}
-        >
-          probe
-        </button>
       </FocusRegistryProvider>
     );
 
