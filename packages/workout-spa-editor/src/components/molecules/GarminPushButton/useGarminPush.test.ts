@@ -23,8 +23,8 @@ const workoutState: { currentWorkout: unknown } = {
   currentWorkout: { name: "test workout" },
 };
 
-vi.mock("../../../store/workout-store", () => ({
-  useWorkoutStore: vi.fn(() => ({ ...workoutState })),
+vi.mock("../../../store/workout-store-selectors", () => ({
+  useCurrentWorkout: vi.fn(() => workoutState.currentWorkout),
 }));
 
 const mockExportGcnWorkout = vi.fn();
