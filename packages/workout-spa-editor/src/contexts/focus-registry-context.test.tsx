@@ -13,7 +13,7 @@
  */
 
 import { render } from "@testing-library/react";
-import { useContext, useEffect, useRef } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -116,21 +116,14 @@ describe("FocusRegistryContext", () => {
       return null;
     };
 
-    const ParentWithToggle = () => {
-      const rerenderRef = useRef(0);
-      rerenderRef.current += 1;
-      return (
-        <FocusRegistryProvider>
-          <Inner />
-        </FocusRegistryProvider>
-      );
-    };
+    const ParentWithToggle = () => (
+      <FocusRegistryProvider>
+        <Inner />
+      </FocusRegistryProvider>
+    );
 
     const Wrapper = () => {
-      const [, setN] = require("react").useState(0) as [
-        number,
-        (u: (n: number) => number) => void,
-      ];
+      const [, setN] = useState(0);
       triggerRerender = () => setN((n) => n + 1);
       return <ParentWithToggle />;
     };

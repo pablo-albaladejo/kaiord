@@ -23,7 +23,13 @@
  */
 
 import type { RefObject } from "react";
-import { useContext, useEffect, useLayoutEffect, useRef } from "react";
+import {
+  useCallback,
+  useContext,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+} from "react";
 
 import { FocusRegistryContext } from "../../contexts/focus-registry-context";
 import { subscribeToOverlayCount } from "../../lib/focus/overlay-observer";
@@ -51,16 +57,23 @@ export const useFocusAfterAction = ({
   const overlaysOpenRef = useRef(0);
   const stashedTargetRef = useRef<FocusTarget | null>(null);
 
-  const apply = (target: FocusTarget) =>
-    applyFocusTarget(target, {
-      getItem,
-      emptyStateButton: emptyStateButtonRef.current,
-      editorHeading: editorHeadingRef.current,
-      setPendingFocusTarget,
-      onApplied: (t) => {
-        prevTargetRef.current = t;
-      },
-    });
+  // Stable identity: all captured values are refs or Zustand actions
+  // (stable) + the context's `getItem` (reference-stable per
+  // FocusRegistryContext invariants). An empty dep list is safe and
+  // prevents the overlay effect below from tearing down on every render.
+  const apply = useCallback(
+    (target: FocusTarget) =>
+      applyFocusTarget(target, {
+        getItem,
+        emptyStateButton: emptyStateButtonRef.current,
+        editorHeading: editorHeadingRef.current,
+        setPendingFocusTarget,
+        onApplied: (t) => {
+          prevTargetRef.current = t;
+        },
+      }),
+    [getItem, emptyStateButtonRef, editorHeadingRef, setPendingFocusTarget]
+  );
 
   useEffect(() => {
     const root = editorRootRef.current;
@@ -71,7 +84,17 @@ export const useFocusAfterAction = ({
       if (wasOpen && count === 0 && stashedTargetRef.current) {
         const target = stashedTargetRef.current;
         stashedTargetRef.current = null;
-        requestAnimationFrame(() => apply(target));
+        requestAnimationFrame(() => {
+          // Re-check the overlay count at the rAF boundary: a new
+          // dialog could have opened in the gap between scheduling
+          // and firing. If so, re-stash and bail out — the next
+          // open-to-zero transition will schedule a fresh rAF.
+          if (overlaysOpenRef.current > 0) {
+            stashedTargetRef.current = target;
+            return;
+          }
+          apply(target);
+        });
       }
     });
   }, [editorRootRef, apply]);

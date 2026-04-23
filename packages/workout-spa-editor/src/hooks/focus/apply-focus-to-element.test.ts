@@ -92,21 +92,8 @@ describe("prefersReducedMotion", () => {
   });
 
   it("reflects matchMedia('(prefers-reduced-motion: reduce)')", () => {
-    // Arrange — spin up a matchMedia stub that reports reduce.
-    vi.stubGlobal(
-      "matchMedia",
-      vi.fn(() => ({
-        matches: true,
-        media: "(prefers-reduced-motion: reduce)",
-        onchange: null,
-        addEventListener: vi.fn(),
-        removeEventListener: vi.fn(),
-        addListener: vi.fn(),
-        removeListener: vi.fn(),
-        dispatchEvent: vi.fn(),
-      }))
-    );
-    // Patch onto window (jsdom) since matchMedia is read from window.
+    // Arrange — patch `window.matchMedia` directly; `prefersReducedMotion`
+    // reads it off `window`.
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       configurable: true,

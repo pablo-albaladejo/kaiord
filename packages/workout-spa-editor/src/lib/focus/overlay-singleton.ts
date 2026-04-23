@@ -19,7 +19,13 @@ export type OverlaySingleton = {
 
 const TEST_GLOBAL_KEY = "__kaiord_overlayObserver__";
 
-export const isTestEnv = (): boolean => import.meta.env.MODE === "test";
+export const isTestEnv = (): boolean =>
+  import.meta.env.MODE === "test" ||
+  // Vitest sets `import.meta.vitest` on the ImportMeta object; detect it
+  // without reading Node's `process.env` (which isn't typed in the
+  // browser build).
+  typeof (import.meta as unknown as { vitest?: unknown }).vitest !==
+    "undefined";
 
 let moduleSingleton: OverlaySingleton | null = null;
 
@@ -54,5 +60,13 @@ export const clearSingleton = (): void => {
   writeGlobalSingleton(null);
 };
 
+/**
+ * Read-only view of the live singleton. In production the test-only
+ * global mirror is never consulted (`readGlobalSingleton` returns
+ * `null`), so this effectively reads the module-local `moduleSingleton`
+ * — which is exactly what `unsubscribeFrom` / `__resetOverlayObserverForTests`
+ * need. Callers that want "test-only" semantics should gate on
+ * `isTestEnv()` themselves.
+ */
 export const peekSingleton = (): OverlaySingleton | null =>
   readGlobalSingleton() ?? moduleSingleton;

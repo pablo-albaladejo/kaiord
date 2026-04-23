@@ -301,6 +301,88 @@ describe("useFocusAfterAction", () => {
     warnSpy.mockRestore();
   });
 
+  it("stashes the target while a Radix dialog is open and re-applies it on close via rAF", () => {
+    // Arrange — a Radix-flagged dialog that renders INSIDE the editor
+    // root through a prop toggle. Starting the test with the dialog
+    // present guarantees the observer's initial synchronous count is
+    // 1, so we do not have to rely on the MutationObserver microtask
+    // firing under fake timers.
+    const HarnessWithDialog = ({
+      harnessRef,
+      dialogOpen,
+    }: {
+      harnessRef: { current: HarnessRefs | null };
+      dialogOpen: boolean;
+    }) => {
+      const rootRef = useRef<HTMLDivElement | null>(null);
+      const emptyStateRef = useRef<HTMLButtonElement | null>(null);
+      const headingRef = useRef<HTMLHeadingElement | null>(null);
+      useFocusAfterAction({
+        editorRootRef: rootRef,
+        emptyStateButtonRef: emptyStateRef,
+        editorHeadingRef: headingRef,
+      });
+      return (
+        <div
+          ref={(n) => {
+            rootRef.current = n;
+            if (n && harnessRef.current === null) {
+              harnessRef.current = {
+                root: n,
+                emptyState: emptyStateRef.current!,
+                heading: headingRef.current!,
+                registerSpy: vi.fn(),
+                getItemSpy: vi.fn(),
+              };
+            }
+          }}
+        >
+          <h2 ref={headingRef} tabIndex={-1}>
+            Editor
+          </h2>
+          <button ref={emptyStateRef}>Add step</button>
+          {dialogOpen ? (
+            <div
+              role="dialog"
+              data-state="open"
+              data-radix-popper-content-wrapper=""
+              data-testid="radix-dialog"
+            />
+          ) : null}
+        </div>
+      );
+    };
+    const ref = { current: null as HarnessRefs | null };
+    const view = render(
+      <FocusRegistryProvider>
+        <HarnessWithDialog harnessRef={ref} dialogOpen />
+      </FocusRegistryProvider>
+    );
+
+    const rafSpy = vi
+      .spyOn(globalThis, "requestAnimationFrame")
+      .mockImplementation((cb) => {
+        cb(0);
+        return 0;
+      });
+
+    // Act — set pendingFocusTarget while the dialog is open.
+    act(() => {
+      useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
+    });
+    act(() => {
+      vi.runAllTimers();
+    });
+
+    // Assert — store cleared (stash path) and focus did NOT move to
+    // the empty-state button while the overlay was open.
+    expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
+    expect(document.activeElement).not.toBe(ref.current!.emptyState);
+
+    rafSpy.mockRestore();
+    view.unmount();
+  });
+
   it("focuses an item registered via the context", () => {
     // Arrange — render a child that registers itself in the registry.
     const ref = { current: null as HarnessRefs | null };
