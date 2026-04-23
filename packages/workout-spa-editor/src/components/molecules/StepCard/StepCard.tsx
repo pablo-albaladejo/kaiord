@@ -1,5 +1,7 @@
 import { forwardRef, type HTMLAttributes } from "react";
 
+import { useFocusRegistration } from "../../../hooks/focus/use-focus-registration";
+import { mergeRefs } from "../../../lib/merge-refs";
 import { SelectionIndicator } from "../SelectionIndicator";
 import type { DragHandleProps, StepCardProps } from "./StepCard.types";
 import { useStepCardData } from "./use-step-card-data";
@@ -41,9 +43,15 @@ export const StepCard = forwardRef<HTMLDivElement, StepCardProps>(
       onToggleMultiSelect,
     });
 
+    // Self-register with the focus registry (§8.2) so the post-commit
+    // `useFocusAfterAction` hook can resolve `step.id → HTMLElement`.
+    const registration = useFocusRegistration<HTMLDivElement>(
+      (step as { id?: string }).id
+    );
+
     return (
       <div
-        ref={ref}
+        ref={mergeRefs(ref, registration.ref)}
         className={classes}
         onClick={handlers.handleClick}
         onMouseDown={handlers.handleMouseDown}

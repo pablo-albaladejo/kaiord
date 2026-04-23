@@ -1,4 +1,5 @@
 import { Plus, Repeat } from "lucide-react";
+import type { RefObject } from "react";
 
 import { Button } from "../../atoms/Button/Button";
 import { PasteButton } from "../../molecules/PasteButton";
@@ -11,6 +12,13 @@ type WorkoutStepsListActionsProps = {
   readonly onCreateEmptyRepetitionBlock: () => void;
   readonly onAddStep: () => void;
   readonly onPasteStep?: () => void;
+  /**
+   * Ref to the Add Step button — this is the empty-state focus
+   * target for `useFocusAfterAction` (§7.5). The button is always
+   * mounted, so the hook can land focus on it whether or not the
+   * workout currently has steps.
+   */
+  readonly addStepButtonRef?: RefObject<HTMLButtonElement | null>;
 };
 
 export function WorkoutStepsListActions({
@@ -20,6 +28,7 @@ export function WorkoutStepsListActions({
   onCreateEmptyRepetitionBlock,
   onAddStep,
   onPasteStep,
+  addStepButtonRef,
 }: WorkoutStepsListActionsProps) {
   const hasSingleSelection = selectedStepCount === 1;
 
@@ -44,6 +53,7 @@ export function WorkoutStepsListActions({
           Add Repetition
         </Button>
         <Button
+          ref={addStepButtonRef}
           variant="secondary"
           onClick={onAddStep}
           aria-label="Add new step to workout"
