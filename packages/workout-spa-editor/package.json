@@ -57,7 +57,7 @@
     "zustand": "^5.0.12"
   },
   "devDependencies": {
-    "@codecov/vite-plugin": "^1.9.1",
+    "@codecov/vite-plugin": "^2.0.1",
     "@eslint/js": "^10.0.1",
     "@fast-check/vitest": "^0.4.0",
     "@playwright/test": "^1.59.1",
