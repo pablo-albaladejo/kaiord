@@ -9,6 +9,7 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import { createdItemTarget } from "../focus-rules";
 import { defaultIdProvider } from "../providers/id-provider";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
@@ -79,5 +80,8 @@ export const addStepToRepetitionBlockAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    pendingFocusTarget: createdItemTarget(newStep.id),
+  };
 };

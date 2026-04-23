@@ -2,6 +2,8 @@ import type { StoreApi } from "zustand";
 
 import { copyStepAction } from "./actions/copy-step-action";
 import { pasteStepAction } from "./actions/paste-step-action";
+import { createdItemTarget } from "./focus-rules";
+import type { ItemId } from "./providers/item-id";
 import type { createWorkoutStoreActions } from "./workout-store-actions";
 import type { WorkoutStore } from "./workout-store-types";
 
@@ -53,10 +55,18 @@ export const createClipboardMethods = (
       // that no longer exist (the selection before paste may have come
       // from a step that was reordered or whose id got regenerated in
       // a prior mutation).
+      //
+      // Focus lands on the freshly-pasted item — `pastedItemId` is the
+      // regenerated UUID, never the clipboard-supplied id (paste-path
+      // trust boundary, design decision 1).
+      const pendingFocusTarget = result.pastedItemId
+        ? createdItemTarget(result.pastedItemId as ItemId)
+        : null;
       set((state) => ({
         ...actions.updateWorkout(result.updatedKrd!, state),
         selectedStepId: null,
         selectedStepIds: [],
+        pendingFocusTarget,
       }));
     }
     return { success: result.success, message: result.message };

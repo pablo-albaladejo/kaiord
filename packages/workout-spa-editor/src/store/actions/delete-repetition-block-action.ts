@@ -14,6 +14,7 @@
 import type { KRD, Workout } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
 import type { UIWorkoutItem } from "../../types/krd-ui";
+import { nextAfterDelete } from "../focus-rules";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -120,10 +121,19 @@ export const deleteRepetitionBlockAction = (
     },
   ];
 
+  // Focus intent: the block took a main-list slot, so the same
+  // nextAfterDelete rule applies — next sibling in the main list,
+  // previous sibling, or empty-state.
+  const pendingFocusTarget = nextAfterDelete({
+    workout: { ...workout, steps: reindexedSteps },
+    deletedIndex: position,
+  });
+
   return {
     ...createUpdateWorkoutAction(updatedKrd, state),
     selectedStepId: null,
     selectedStepIds: [],
     deletedSteps: newDeletedBlocks,
+    pendingFocusTarget,
   };
 };

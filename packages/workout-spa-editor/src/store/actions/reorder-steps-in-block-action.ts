@@ -6,6 +6,8 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import { createdItemTarget } from "../focus-rules";
+import type { ItemId } from "../providers/item-id";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -86,5 +88,16 @@ export const reorderStepsInBlockAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  // Focus follows the moved nested step — its id is stable across the
+  // intra-block reorder, so the hook re-resolves the same item at its
+  // new DOM position.
+  const movedId = (movedStep as { id?: string }).id;
+  const pendingFocusTarget = movedId
+    ? createdItemTarget(movedId as ItemId)
+    : state.pendingFocusTarget;
+
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    pendingFocusTarget,
+  };
 };

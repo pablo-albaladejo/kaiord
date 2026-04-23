@@ -9,6 +9,8 @@
  */
 
 import type { KRD, Workout } from "../../types/krd";
+import { createdItemTarget } from "../focus-rules";
+import type { ItemId } from "../providers/item-id";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -68,5 +70,17 @@ export const ungroupRepetitionBlockAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  // Focus lands on the first formerly-child step at its new top-level
+  // position (the same `position` the block occupied). Falls back to
+  // the existing focus target if the block had no steps (shouldn't
+  // happen — empty blocks cascade-delete before they can be ungrouped).
+  const firstChildId = (extractedSteps[0] as { id?: string } | undefined)?.id;
+  const pendingFocusTarget = firstChildId
+    ? createdItemTarget(firstChildId as ItemId)
+    : state.pendingFocusTarget;
+
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    pendingFocusTarget,
+  };
 };

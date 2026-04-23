@@ -20,6 +20,14 @@ export type PasteStepResult = {
   success: boolean;
   message: string;
   updatedKrd?: KRD;
+  /**
+   * Stable id of the just-pasted item (step or block). Exposed so the
+   * store caller can set `pendingFocusTarget` to `createdItemTarget(id)`
+   * after the `updateWorkout` commit. Always a fresh UUID produced by
+   * `regeneratePasteIds` — never the clipboard-supplied id (paste-path
+   * trust boundary, design decision 1).
+   */
+  pastedItemId?: string;
 };
 
 export const pasteStepAction = async (
@@ -58,8 +66,9 @@ export const pasteStepAction = async (
 
     const updatedKrd = createUpdatedKrd(krd, updatedWorkout);
     const message = getSuccessMessage(freshPayload);
+    const pastedItemId = (freshPayload as { id?: string }).id;
 
-    return { success: true, message, updatedKrd };
+    return { success: true, message, updatedKrd, pastedItemId };
   } catch {
     return { success: false, message: "Failed to paste from clipboard" };
   }

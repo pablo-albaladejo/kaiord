@@ -15,7 +15,9 @@ import type {
   WorkoutStep,
 } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
+import { createdItemTarget } from "../focus-rules";
 import { defaultIdProvider } from "../providers/id-provider";
+import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 
@@ -106,5 +108,10 @@ export const createEmptyRepetitionBlockAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    // Focus lands on the newly-created block card so the user can
+    // immediately edit its repeat count or add more steps.
+    pendingFocusTarget: createdItemTarget(repetitionBlock.id as ItemId),
+  };
 };
