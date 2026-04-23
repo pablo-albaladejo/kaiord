@@ -5,7 +5,9 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import { createdItemTarget } from "../focus-rules";
 import { defaultIdProvider } from "../providers/id-provider";
+import type { ItemId } from "../providers/item-id";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
@@ -84,5 +86,8 @@ export const duplicateStepInRepetitionBlockAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    pendingFocusTarget: createdItemTarget(duplicatedStep.id as ItemId),
+  };
 };

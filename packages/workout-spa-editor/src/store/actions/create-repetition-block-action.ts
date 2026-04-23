@@ -8,7 +8,9 @@
  */
 
 import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import { createdItemTarget } from "../focus-rules";
 import { defaultIdProvider } from "../providers/id-provider";
+import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
 import {
@@ -73,5 +75,8 @@ export const createRepetitionBlockAction = (
     extensions: { ...krd.extensions, structured_workout: updatedWorkout },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    pendingFocusTarget: createdItemTarget(repetitionBlock.id as ItemId),
+  };
 };

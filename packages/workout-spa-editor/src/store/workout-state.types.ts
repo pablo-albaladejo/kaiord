@@ -1,4 +1,5 @@
 import type { UIWorkout, UIWorkoutItem } from "../types/krd-ui";
+import type { FocusTarget } from "./focus/focus-target.types";
 
 export type {
   UIRepetitionBlock,
@@ -12,6 +13,11 @@ export type WorkoutState = {
   currentWorkout: UIWorkout | null;
   workoutHistory: Array<UIWorkout>;
   historyIndex: number;
+  /**
+   * Focus intent written by mutating actions (§6). `useFocusAfterAction`
+   * (§7) reads it after each commit and moves DOM focus.
+   */
+  pendingFocusTarget: FocusTarget | null;
   // `selectionHistory` is kept parallel to `workoutHistory`: each entry
   // is the `selectedStepId` that was active the moment the matching
   // workout snapshot was pushed. Undo of add/paste/duplicate restores

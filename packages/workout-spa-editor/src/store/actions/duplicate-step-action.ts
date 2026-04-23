@@ -11,6 +11,7 @@ import type {
   WorkoutStep,
 } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
+import { createdItemTarget } from "../focus-rules";
 import { defaultIdProvider } from "../providers/id-provider";
 import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
@@ -74,5 +75,8 @@ export const duplicateStepAction = (
     },
   };
 
-  return createUpdateWorkoutAction(updatedKrd, state);
+  return {
+    ...createUpdateWorkoutAction(updatedKrd, state),
+    pendingFocusTarget: createdItemTarget(duplicatedStep.id),
+  };
 };
