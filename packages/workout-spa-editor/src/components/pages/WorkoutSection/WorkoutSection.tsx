@@ -1,12 +1,14 @@
+import { FocusRegistryProvider } from "../../../contexts/focus-registry-context";
 import type { KRD, Workout } from "../../../types/krd";
 import { StoreConfirmationModal } from "../../molecules/ConfirmationModal";
 import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
 import { WorkoutPreview } from "../../molecules/WorkoutPreview";
 import { WorkoutStats } from "../../organisms/WorkoutStats/WorkoutStats";
+import { useWorkoutSectionFocus } from "./use-workout-section-focus";
 import { useWorkoutSectionState } from "./useWorkoutSectionState";
 import { WorkoutHeader } from "./WorkoutHeader";
 import { WorkoutSectionEditor } from "./WorkoutSectionEditor";
-import { WorkoutStepsList } from "./WorkoutStepsList";
+import { WorkoutStepsListBinding } from "./WorkoutStepsListBinding";
 
 export type WorkoutSectionProps = {
   workout: Workout;
@@ -21,7 +23,7 @@ export type WorkoutSectionProps = {
   ) => void;
 };
 
-export function WorkoutSection(props: WorkoutSectionProps) {
+function WorkoutSectionInner(props: WorkoutSectionProps) {
   const state = useWorkoutSectionState(
     props.workout,
     props.krd,
@@ -30,9 +32,17 @@ export function WorkoutSection(props: WorkoutSectionProps) {
     props.onStepReorder,
     props.onReorderStepsInBlock
   );
+
+  const { editorRootRef, addStepButtonRef, titleRef } =
+    useWorkoutSectionFocus();
+
   return (
     <div className="space-y-6" data-testid="workout-section">
-      <WorkoutHeader workout={props.workout} krd={props.krd} />
+      <WorkoutHeader
+        workout={props.workout}
+        krd={props.krd}
+        titleRef={titleRef}
+      />
       <WorkoutStats workout={props.workout} />
       <WorkoutPreview
         workout={props.workout}
@@ -45,29 +55,12 @@ export function WorkoutSection(props: WorkoutSectionProps) {
         onSave={state.handleSave}
         onCancel={state.handleCancel}
       />
-      <WorkoutStepsList
+      <WorkoutStepsListBinding
         workout={props.workout}
         selectedStepId={props.selectedStepId}
-        selectedStepIds={state.selectedStepIds}
-        onStepSelect={state.handleStepSelect}
-        onBlockSelect={state.handleBlockSelect}
-        onToggleStepSelection={state.handleToggleStepSelection}
-        onStepDelete={state.deleteStep}
-        onStepDuplicate={state.duplicateStep}
-        onStepCopy={state.copyStep}
-        onStepPaste={state.pasteStep}
-        onStepReorder={state.reorderStep}
-        onReorderStepsInBlock={state.reorderStepsInBlock}
-        onAddStep={state.createStep}
-        onCreateRepetitionBlock={state.handleCreateRepetitionBlock}
-        onCreateEmptyRepetitionBlock={state.handleCreateEmptyRepetitionBlock}
-        onEditRepetitionBlock={state.handleEditRepetitionBlock}
-        onAddStepToRepetitionBlock={state.handleAddStepToRepetitionBlock}
-        onUngroupRepetitionBlock={state.handleUngroupRepetitionBlock}
-        onDeleteRepetitionBlock={state.handleDeleteRepetitionBlock}
-        onDuplicateStepInRepetitionBlock={
-          state.handleDuplicateStepInRepetitionBlock
-        }
+        state={state}
+        editorRootRef={editorRootRef}
+        addStepButtonRef={addStepButtonRef}
       />
       <CreateRepetitionBlockDialog
         stepCount={state.blockStepCount}
@@ -77,5 +70,16 @@ export function WorkoutSection(props: WorkoutSectionProps) {
       />
       <StoreConfirmationModal />
     </div>
+  );
+}
+
+export function WorkoutSection(props: WorkoutSectionProps) {
+  // `FocusRegistryProvider` must wrap every consumer of
+  // `FocusRegistryContext` (StepCard, RepetitionBlockCard, and the
+  // hook itself), so it sits at the WorkoutSection boundary.
+  return (
+    <FocusRegistryProvider>
+      <WorkoutSectionInner {...props} />
+    </FocusRegistryProvider>
   );
 }

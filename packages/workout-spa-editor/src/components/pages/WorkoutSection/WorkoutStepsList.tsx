@@ -1,3 +1,5 @@
+import type { RefObject } from "react";
+
 import type { Workout } from "../../../types/krd";
 import { EditorContextMenu } from "../../organisms/EditorContextMenu";
 import { WorkoutList } from "../../organisms/WorkoutList/WorkoutList";
@@ -34,62 +36,45 @@ type WorkoutStepsListProps = {
     blockId: string,
     stepIndex: number
   ) => void;
+  /**
+   * Ref to the outer editor root. `useFocusAfterAction` (§7.4) scopes
+   * its overlay MutationObserver to this element, and `isFormFieldFocused`
+   * (§7.3) uses it to decide whether `document.activeElement` is
+   * "inside the editor" for the form-field guard.
+   */
+  readonly editorRootRef?: RefObject<HTMLDivElement | null>;
+  /** Ref to the Add Step button — §7.5 empty-state focus target. */
+  readonly addStepButtonRef?: RefObject<HTMLButtonElement | null>;
 };
 
-export function WorkoutStepsList({
-  workout,
-  selectedStepId,
-  selectedStepIds,
-  onStepSelect,
-  onBlockSelect,
-  onToggleStepSelection,
-  onStepDelete,
-  onStepDuplicate,
-  onStepCopy,
-  onStepPaste,
-  onStepReorder,
-  onReorderStepsInBlock,
-  onAddStep,
-  onCreateRepetitionBlock,
-  onCreateEmptyRepetitionBlock,
-  onEditRepetitionBlock,
-  onAddStepToRepetitionBlock,
-  onUngroupRepetitionBlock,
-  onDeleteRepetitionBlock,
-  onDuplicateStepInRepetitionBlock,
-}: WorkoutStepsListProps) {
+export function WorkoutStepsList(props: WorkoutStepsListProps) {
+  const {
+    selectedStepIds,
+    onStepPaste,
+    editorRootRef,
+    addStepButtonRef,
+    onCreateRepetitionBlock,
+    onCreateEmptyRepetitionBlock,
+    ...workoutListProps
+  } = props;
   const hasMultipleSelection = selectedStepIds.length >= 2;
 
   return (
     <EditorContextMenu>
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
-        <WorkoutList
-          workout={workout}
-          selectedStepId={selectedStepId}
-          selectedStepIds={selectedStepIds}
-          onStepSelect={onStepSelect}
-          onBlockSelect={onBlockSelect}
-          onToggleStepSelection={onToggleStepSelection}
-          onStepDelete={onStepDelete}
-          onStepDuplicate={onStepDuplicate}
-          onStepCopy={onStepCopy}
-          onStepReorder={onStepReorder}
-          onReorderStepsInBlock={onReorderStepsInBlock}
-          onDuplicateStepInRepetitionBlock={onDuplicateStepInRepetitionBlock}
-          onEditRepetitionBlock={onEditRepetitionBlock}
-          onAddStepToRepetitionBlock={onAddStepToRepetitionBlock}
-          onUngroupRepetitionBlock={onUngroupRepetitionBlock}
-          onDeleteRepetitionBlock={onDeleteRepetitionBlock}
-          onAddStep={onAddStep}
-        />
-
+      <div
+        ref={editorRootRef}
+        data-testid="editor-root"
+        className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800"
+      >
+        <WorkoutList {...workoutListProps} selectedStepIds={selectedStepIds} />
         <WorkoutStepsListActions
           hasMultipleSelection={hasMultipleSelection}
           selectedStepCount={selectedStepIds.length}
           onCreateRepetitionBlock={onCreateRepetitionBlock}
           onCreateEmptyRepetitionBlock={onCreateEmptyRepetitionBlock}
-          onAddStep={onAddStep}
+          onAddStep={props.onAddStep}
           onPasteStep={onStepPaste}
+          addStepButtonRef={addStepButtonRef}
         />
       </div>
     </EditorContextMenu>
