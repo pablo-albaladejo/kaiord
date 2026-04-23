@@ -1,3 +1,4 @@
+import type { RefObject } from "react";
 import { useState } from "react";
 
 import {
@@ -16,9 +17,11 @@ import { WorkoutTitle } from "./WorkoutTitle";
 type WorkoutHeaderProps = {
   readonly workout: Workout;
   readonly krd: KRD;
+  /** Ref to the `<h2>` title for §7.5 heading-fallback focus. */
+  readonly titleRef?: RefObject<HTMLHeadingElement | null>;
 };
 
-export function WorkoutHeader({ workout, krd }: WorkoutHeaderProps) {
+export function WorkoutHeader({ workout, krd, titleRef }: WorkoutHeaderProps) {
   const updateWorkout = useUpdateWorkout();
   const canUndo = useCanUndo();
   const canRedo = useCanRedo();
@@ -53,7 +56,11 @@ export function WorkoutHeader({ workout, krd }: WorkoutHeaderProps) {
   return (
     <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm dark:border-gray-700 dark:bg-gray-800">
       <div className="flex flex-col gap-4">
-        <WorkoutTitle workout={workout} onEdit={handleEditMetadata} />
+        <WorkoutTitle
+          workout={workout}
+          onEdit={handleEditMetadata}
+          titleRef={titleRef}
+        />
         <WorkoutActions
           krd={krd}
           canUndo={canUndo}
