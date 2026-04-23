@@ -98,6 +98,61 @@ const target = useWorkoutStore((s) => s.pendingFocusTarget);
 A CI grep check in §10.3.a will pin this discipline once the hook
 consumer (§7) lands.
 
+### flushSync patterns for focus continuations
+
+`useFocusAfterAction` runs inside `useLayoutEffect`, so any mutation
+that _also_ needs to read committed workout state on the same task
+must first push React through a paint. Three canonical patterns
+cover the call sites this repo uses:
+
+**1. Paste-then-continuation.** The pasted item exists only after
+commit; a continuation that needs its id (e.g. opening an inline
+editor) must wait for commit:
+
+```ts
+import { flushSync } from "react-dom";
+
+flushSync(() => {
+  // Writes `pendingFocusTarget = createdItemTarget(newId)` and
+  // updates `currentWorkout` in one setState.
+  pasteStep();
+});
+// `currentWorkout` has the new step; `useFocusAfterAction` has
+// already focused it. Safe to read ids and open an editor.
+const newId = readLastStepId();
+openInlineEditorFor(newId);
+```
+
+**2. Delete-then-continuation.** After a delete, the caller may need
+to know the next-focused item (for example, to drag it into view
+without waiting for the focus hook's own scroll). Wrap the mutation:
+
+```ts
+flushSync(() => {
+  deleteStep(arrayIndex);
+});
+// `pendingFocusTarget` has been cleared by the hook. Read the new
+// active element synchronously.
+const fallback = document.activeElement;
+```
+
+**3. Paste-inside-dialog continuation.** When a dialog is open the
+hook _stashes_ the target and re-applies it one animation frame
+after the dialog closes. If a button inside the dialog wants to
+close the dialog AND then commit a paste, the paste must be
+committed first so the stashed target is the paste's item:
+
+```ts
+flushSync(() => {
+  pasteStep(); // writes pendingFocusTarget (will be stashed)
+});
+setDialogOpen(false); // overlay close re-applies the stashed target
+```
+
+Every production `flushSync` call site in this store carries a
+comment like `// §7.9 pattern #1` so readers can jump straight to
+the relevant pattern.
+
 ## AI Store
 
 `ai-store.ts` holds AI-provider config. It's independent from the
