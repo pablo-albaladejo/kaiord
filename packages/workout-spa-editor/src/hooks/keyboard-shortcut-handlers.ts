@@ -39,7 +39,13 @@ export function createKeyDownHandler(
     if (event.altKey && !isModifier) {
       if (handleAltShortcuts(event, handlers)) return;
     }
-    if (!isModifier) return;
+    if (!isModifier) {
+      if (event.key === "Delete" || event.key === "Backspace") {
+        const handled = handlers.onDelete?.() ?? false;
+        if (handled) event.preventDefault();
+      }
+      return;
+    }
     const handled = handleModifierShortcuts(event, handlers);
     if (handled) return;
   };

@@ -32,6 +32,7 @@ export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers) {
     handlers.onCreateBlock,
     handlers.onUngroupBlock,
     handlers.onSelectAll,
+    handlers.onDelete,
     handlers.onClearSelection,
   ]);
 }
