@@ -405,11 +405,12 @@ jobs:
               sys.exit(1)
           PY
 
+  # Always runs (no `if:` gate) and lychee is pinned to a MAJOR.MINOR —
+  # both are spec-locked under `doc-drift-prevention`. See
+  # `openspec/specs/doc-drift-prevention/spec.md`.
   check-links:
     name: Link checker
     runs-on: ubuntu-latest
-    needs: detect-changes
-    if: always() && needs.detect-changes.outputs.should-test == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -417,7 +418,7 @@ jobs:
       - name: Install lychee
         uses: taiki-e/install-action@v2
         with:
-          tool: lychee
+          tool: lychee@0.24
 
       - name: Run link checker
         run: bash scripts/lint-links.sh
