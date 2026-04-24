@@ -46,9 +46,9 @@ All three issues are solvable without adding new dependencies — the Chrome Web
 
 **Alternatives considered:**
 
-- *Inline `gh api` calls in YAML*: rejected — `gh` doesn't authenticate against Google OAuth out of the box.
-- *Inline `curl + jq`*: rejected — verbose, harder to test, secret redaction is easier to get wrong than in a structured script.
-- *Pull in the underlying `chrome-webstore-upload` library directly*: acceptable but adds a devDep usage pattern (currently only used transitively by the CLI). Writing ~80 lines of fetch against the documented REST API is simpler and version-independent.
+- _Inline `gh api` calls in YAML_: rejected — `gh` doesn't authenticate against Google OAuth out of the box.
+- _Inline `curl + jq`_: rejected — verbose, harder to test, secret redaction is easier to get wrong than in a structured script.
+- _Pull in the underlying `chrome-webstore-upload` library directly_: acceptable but adds a devDep usage pattern (currently only used transitively by the CLI). Writing ~80 lines of fetch against the documented REST API is simpler and version-independent.
 
 **Layer impact:** Infrastructure (CI scripts).
 
@@ -68,8 +68,8 @@ All three issues are solvable without adding new dependencies — the Chrome Web
 
 **Alternatives considered:**
 
-- *Do nothing; let the upload fail*: rejected — current behavior, observed to be poor.
-- *Validate the token ONLY in the weekly health check*: rejected — a reactive fail-fast during release is still faster than "scroll up to see why upload failed".
+- _Do nothing; let the upload fail_: rejected — current behavior, observed to be poor.
+- _Validate the token ONLY in the weekly health check_: rejected — a reactive fail-fast during release is still faster than "scroll up to see why upload failed".
 
 **Layer impact:** Infrastructure (CI workflow step).
 
@@ -102,9 +102,9 @@ All three issues are solvable without adding new dependencies — the Chrome Web
 
 **Alternatives considered:**
 
-- *Keep `--auto-publish` and just add post-publish polling*: rejected — doesn't solve duplicate upload. The split is what unlocks resumability.
-- *Fail the workflow on step-5 timeout*: rejected for the reason above.
-- *Retry publish on transient failure*: the CLI already retries. Not adding a second retry layer.
+- _Keep `--auto-publish` and just add post-publish polling_: rejected — doesn't solve duplicate upload. The split is what unlocks resumability.
+- _Fail the workflow on step-5 timeout_: rejected for the reason above.
+- _Retry publish on transient failure_: the CLI already retries. Not adding a second retry layer.
 
 **Layer impact:** Infrastructure (CI workflow step rewrite).
 
@@ -120,9 +120,9 @@ All three issues are solvable without adding new dependencies — the Chrome Web
 
 **Alternatives considered:**
 
-- *Daily cadence*: rejected — probably overkill; weekly is the coarsest interval that still beats the release cadence.
-- *Cron during business hours in a specific timezone*: rejected — issue creation is async; UTC keeps the schedule simple.
-- *Use `googleapis` SDK for a richer health check*: rejected — adds a heavyweight dep for a single call; the same REST fetch as the helper suffices.
+- _Daily cadence_: rejected — probably overkill; weekly is the coarsest interval that still beats the release cadence.
+- _Cron during business hours in a specific timezone_: rejected — issue creation is async; UTC keeps the schedule simple.
+- _Use `googleapis` SDK for a richer health check_: rejected — adds a heavyweight dep for a single call; the same REST fetch as the helper suffices.
 
 **Layer impact:** Infrastructure (new scheduled workflow).
 
@@ -146,7 +146,7 @@ The mitigation is a **shared concurrency group** across BOTH workflows:
 # In cws-publish.yml AND cws-token-health.yml
 concurrency:
   group: cws-issue-writer
-  cancel-in-progress: false   # do not cancel an in-flight run
+  cancel-in-progress: false # do not cancel an in-flight run
 ```
 
 With `cancel-in-progress: false`, the second workflow's job queues behind the first; when the first finishes, the second sees the real (just-updated) issue state before doing its own check. Race eliminated.
@@ -161,10 +161,10 @@ Defense-in-depth: the open-or-bump script also queries by **exact issue title** 
 
 **Alternatives considered:**
 
-- *Separate templates for reactive vs proactive*: rejected — same problem, same fix, same runbook; splitting creates duplicates.
-- *Slack / email alerting*: out of scope (no existing alerting infra in this repo; issue-as-queue is sufficient for a solo-maintainer project).
-- *Accept the TOCTOU race and de-dupe manually*: rejected — violates Factor XII (admin processes should be idempotent).
-- *Retry-loop with exponential backoff around create*: rejected — serializing via concurrency group is simpler AND deterministic.
+- _Separate templates for reactive vs proactive_: rejected — same problem, same fix, same runbook; splitting creates duplicates.
+- _Slack / email alerting_: out of scope (no existing alerting infra in this repo; issue-as-queue is sufficient for a solo-maintainer project).
+- _Accept the TOCTOU race and de-dupe manually_: rejected — violates Factor XII (admin processes should be idempotent).
+- _Retry-loop with exponential backoff around create_: rejected — serializing via concurrency group is simpler AND deterministic.
 
 **Layer impact:** Documentation / repo ops.
 
