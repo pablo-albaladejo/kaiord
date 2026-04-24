@@ -57,7 +57,10 @@
     "fenix",
     "formedness",
     "fitsdk",
-    "minmax"
+    "minmax",
+    "opsx",
+    "Dexie",
+    "affordances"
   ],
-  "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**"]
+  "ignorePaths": ["api/**", "node_modules/**", ".vitepress/**", "CHANGELOG.md"]
 }
