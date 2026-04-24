@@ -1,3 +1,7 @@
+> Completed: 2026-04-24
+
+# Proposal: Harden Link Checker (always-run, pin lychee, required + enforce_admins)
+
 ## Why
 
 The CI "Link checker" job broke silently on 2026-04-24 when the `taiki-e/install-action@v2` action started installing `lychee@0.24.0`, which changed `include_fragments` from a boolean to a string enum. Because the check is NOT in the required-status-check set and the repo's `enforce_admins` is `false`, the regression (a) did not block any PR merge and (b) hid in the "other checks" section of the GitHub UI where it is easy to miss. PR #342 was admin-bypassed past it.

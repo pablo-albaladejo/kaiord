@@ -40,6 +40,7 @@ metrics/DASHBOARD.md
 
 # Claude Code worktrees
 .claude/worktrees/
+.claude/settings.local.json
 
 # GitHub Actions local testing (act)
 .secrets
