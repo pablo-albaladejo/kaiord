@@ -1,11 +1,13 @@
 import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 
 import type { Page } from "@playwright/test";
 
 import { expandFileUpload } from "./expand-file-upload";
 
-const FIXTURE_PATH = join(__dirname, "../fixtures/focus-workout.krd.json");
+const FIXTURE_PATH = fileURLToPath(
+  new URL("../fixtures/focus-workout.krd.json", import.meta.url)
+);
 
 export async function loadFocusFixture(page: Page): Promise<void> {
   await expandFileUpload(page);
