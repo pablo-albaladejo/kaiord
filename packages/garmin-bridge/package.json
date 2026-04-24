@@ -1,6 +1,6 @@
 {
   "name": "@kaiord/garmin-bridge",
-  "version": "0.2.0",
+  "version": "7.1.0",
   "private": true,
   "description": "Chrome extension that bridges the Kaiord SPA to Garmin Connect via the user's web session",
   "scripts": {
