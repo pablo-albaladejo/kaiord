@@ -1,48 +1,48 @@
 ## 1. Focus telemetry port + default
 
-- [ ] 1.1.a Write failing test for `FocusTelemetryEvent` discriminated union — asserting exhaustive switch coverage via `never` assertion
-- [ ] 1.1.b Define `FocusTelemetry` type and `FocusTelemetryEvent` union (five variants: `wiring-canary`, `unresolved-target-fallback`, `form-field-short-circuit`, `overlay-deferred-apply`, `focus-error`) in `src/store/providers/focus-telemetry.ts`
-- [ ] 1.1.c Implement and export `defaultFocusTelemetry: FocusTelemetry = () => {}`
-- [ ] 1.2.a Write failing test asserting a custom `FocusTelemetry` throwing an exception does not interrupt focus behavior; a dev-only `console.warn` is emitted at the call site
-- [ ] 1.2.b Implement a small `safeEmit(telemetry, event)` wrapper that try/catches the call and dev-warns on failure
-- [ ] 1.3.a Write failing test asserting event payloads contain no `ItemId`, no step/block names, no workout titles — assert via exhaustive property check that only enumerated fields appear
-- [ ] 1.3.b Implement event constructors as pure factory functions (`unresolvedTargetFallbackEvent`, `formFieldShortCircuitEvent`, etc.) to centralize payload shape
+- [x] 1.1.a Write failing test for `FocusTelemetryEvent` discriminated union — asserting exhaustive switch coverage via `never` assertion
+- [x] 1.1.b Define `FocusTelemetry` type and `FocusTelemetryEvent` union (five variants: `wiring-canary`, `unresolved-target-fallback`, `form-field-short-circuit`, `overlay-deferred-apply`, `focus-error`) in `src/store/providers/focus-telemetry.ts`
+- [x] 1.1.c Implement and export `defaultFocusTelemetry: FocusTelemetry = () => {}`
+- [x] 1.2.a Write failing test asserting a custom `FocusTelemetry` throwing an exception does not interrupt focus behavior; a dev-only `console.warn` is emitted at the call site
+- [x] 1.2.b Implement a small `safeEmit(telemetry, event)` wrapper that try/catches the call and dev-warns on failure
+- [x] 1.3.a Write failing test asserting event payloads contain no `ItemId`, no step/block names, no workout titles — assert via exhaustive property check that only enumerated fields appear
+- [x] 1.3.b Implement event constructors as pure factory functions (`unresolvedTargetFallbackEvent`, `formFieldShortCircuitEvent`, etc.) to centralize payload shape
 
 ## 2. FocusTelemetryContext
 
-- [ ] 2.1.a Write failing test asserting a `FocusTelemetryContext.Provider` wraps the editor and exposes the current `FocusTelemetry` via `useFocusTelemetry()`
-- [ ] 2.1.b Implement `src/contexts/focus-telemetry-context.tsx` with memoized context value and `defaultFocusTelemetry` fallback when no provider is mounted
-- [ ] 2.1.c Wire the provider into `WorkoutList` (or its immediate ancestor) so the hook has a consumer; document in the SPA bootstrap README
-- [ ] 2.1.d Add a dev-build-only ref-stability guard in `FocusTelemetryContext.Provider`: store the incoming `value` in a `useRef`; if the ref identity changes between renders AND `import.meta.env.DEV`, emit `console.warn` once per mount: "FocusTelemetry provider value changed reference — wrap in useCallback to preserve context memoization". Gated behind DEV so production builds are warning-free
+- [x] 2.1.a Write failing test asserting a `FocusTelemetryContext.Provider` wraps the editor and exposes the current `FocusTelemetry` via `useFocusTelemetry()`
+- [x] 2.1.b Implement `src/contexts/focus-telemetry-context.tsx` with memoized context value and `defaultFocusTelemetry` fallback when no provider is mounted
+- [x] 2.1.c Wire the provider into `WorkoutList` (or its immediate ancestor) so the hook has a consumer; document in the SPA bootstrap README
+- [x] 2.1.d Add a dev-build-only ref-stability guard in `FocusTelemetryContext.Provider`: store the incoming `value` in a `useRef`; if the ref identity changes between renders AND `import.meta.env.DEV`, emit `console.warn` once per mount: "FocusTelemetry provider value changed reference — wrap in useCallback to preserve context memoization". Gated behind DEV so production builds are warning-free
 
 ## 3. Wire telemetry into existing short-circuit paths
 
-- [ ] 3.1.a Write failing test asserting the unresolved-target fallback emits `{ type: 'unresolved-target-fallback', targetKind, fallback }` with the correct `fallback` for each of the three branches (empty-state, first-item, heading)
-- [ ] 3.1.b Emit the event immediately before the fallback focus call
-- [ ] 3.2.a Write failing test asserting the form-field short-circuit emits `{ type: 'form-field-short-circuit' }` and is debounced to at most one event per 1000 ms per hook instance (five short-circuits within 500 ms produce exactly one event)
-- [ ] 3.2.b Emit the event in the short-circuit branch with a `useRef<number>(0)` timestamp guard implementing the 1000 ms debounce
-- [ ] 3.3.a Write failing test asserting the overlay-deferred-apply emits `{ type: 'overlay-deferred-apply', deferredForMs }` with `deferredForMs === Math.round(measuredMs / 100) * 100` (quantized to 100 ms buckets) and always a non-negative integer
-- [ ] 3.3.b Implement `performance.now()` capture at both ends; apply the quantization and integer conversion before emission
-- [ ] 3.4.a Write failing test asserting a `{ type: 'wiring-canary' }` event fires exactly once on editor mount when a non-default `FocusTelemetry` is provided; no event fires when the default no-op is used (since the no-op swallows it)
-- [ ] 3.4.b Implement canary emission in `useFocusAfterAction`'s initial mount `useLayoutEffect` via a **module-level** `let hasFiredCanaryThisSession = false` boolean (NOT a per-instance `useRef` — Strict Mode double-mount creates two refs). On first mount of the editor session, check + set the module-level flag; subsequent mounts in the same page-load session do not re-emit. On page reload the module re-initializes and the flag resets — correct semantics (a reload IS a new deployment session from the canary's perspective). Add a dev-only HMR reset so editing adjacent files during local dev doesn't suppress the canary in subsequent test mounts: `if (import.meta.hot) import.meta.hot.accept(() => { hasFiredCanaryThisSession = false; });`
-- [ ] 3.5.a Write failing test asserting the `finally`-block recovery from a `focus()` or `scrollIntoView()` throw emits `{ type: 'focus-error', phase }`
-- [ ] 3.5.b Emit the event inside the catch clause (not in `finally` — we only emit when an error actually occurred)
+- [x] 3.1.a Write failing test asserting the unresolved-target fallback emits `{ type: 'unresolved-target-fallback', targetKind, fallback }` with the correct `fallback` for each of the three branches (empty-state, first-item, heading)
+- [x] 3.1.b Emit the event immediately before the fallback focus call
+- [x] 3.2.a Write failing test asserting the form-field short-circuit emits `{ type: 'form-field-short-circuit' }` and is debounced to at most one event per 1000 ms per hook instance (five short-circuits within 500 ms produce exactly one event)
+- [x] 3.2.b Emit the event in the short-circuit branch with a `useRef<number>(0)` timestamp guard implementing the 1000 ms debounce
+- [x] 3.3.a Write failing test asserting the overlay-deferred-apply emits `{ type: 'overlay-deferred-apply', deferredForMs }` with `deferredForMs === Math.round(measuredMs / 100) * 100` (quantized to 100 ms buckets) and always a non-negative integer
+- [x] 3.3.b Implement `performance.now()` capture at both ends; apply the quantization and integer conversion before emission
+- [x] 3.4.a Write failing test asserting a `{ type: 'wiring-canary' }` event fires exactly once on editor mount when a non-default `FocusTelemetry` is provided; no event fires when the default no-op is used (since the no-op swallows it)
+- [x] 3.4.b Implement canary emission in `useFocusAfterAction`'s initial mount `useLayoutEffect` via a **module-level** `let hasFiredCanaryThisSession = false` boolean (NOT a per-instance `useRef` — Strict Mode double-mount creates two refs). On first mount of the editor session, check + set the module-level flag; subsequent mounts in the same page-load session do not re-emit. On page reload the module re-initializes and the flag resets — correct semantics (a reload IS a new deployment session from the canary's perspective). Add a dev-only HMR reset so editing adjacent files during local dev doesn't suppress the canary in subsequent test mounts: `if (import.meta.hot) import.meta.hot.accept(() => { hasFiredCanaryThisSession = false; });`
+- [x] 3.5.a Write failing test asserting the `finally`-block recovery from a `focus()` or `scrollIntoView()` throw emits `{ type: 'focus-error', phase }`
+- [x] 3.5.b Emit the event inside the catch clause (not in `finally` — we only emit when an error actually occurred)
 
 ## 4. Structural history refactor (ATOMIC PR)
 
 > This task group is a single atomic PR. The rename `workoutHistory` + `selectionHistory` → `undoHistory` breaks every consumer in a single type-propagation step; intermediate commits would fail `pnpm -r build`. All 4.x tasks land together.
 
-- [ ] 4.0 Before opening the refactor PR, post a complete consumer inventory as a PR comment: run `rg 'workoutHistory|selectionHistory' packages/workout-spa-editor` and list every file, grouped by category (reducers, selectors, Zustand devtools labels, Dexie persistence code, tests). Reviewers use this list to confirm the rename surface is complete. Acceptance criterion: after merge, the same rg returns zero matches.
-- [ ] 4.1.a Write failing test asserting the new `HistoryEntry` shape (`{ workout: UIWorkout; selection: ItemId | null }`) and `undoHistory: UndoHistory` typing on `WorkoutStore`
-- [ ] 4.1.b Introduce `HistoryEntry` and `UndoHistory` types in `src/store/workout-state.types.ts` (alongside `UIWorkout`); update `WorkoutStore.undoHistory: UndoHistory` typing and remove `workoutHistory`/`selectionHistory` fields. Name is `undoHistory` to avoid lexical collision with `window.history` in destructured store consumers
-- [ ] 4.2.a Write failing test asserting `pushHistorySnapshot(entry: HistoryEntry)` pushes a single tuple atomically; signature is 1-arg (tuple), NOT the base's 2-arg form
-- [ ] 4.2.b Refactor `pushHistorySnapshot` to the 1-arg signature; update every call site to pass `{ workout, selection }` literals; remove the dev-mode length assertion (it is now structurally enforced)
-- [ ] 4.3.a Write failing test asserting `undo` reads the paired `{ workout, selection }` snapshot and passes `selection` to the focus-rule helpers as the pre-mutation selection for fallback
-- [ ] 4.3.b Refactor every `undo`/`redo`/`undoDelete` reducer to read `undoHistory[i].workout` and `undoHistory[i].selection`
-- [ ] 4.4.a Write failing test asserting `clearWorkout` resets `undoHistory` to an empty array and `historyIndex` to its initial value
-- [ ] 4.4.b Update `clearWorkout` implementation
-- [ ] 4.5 Delete the dev-mode length assertion in `pushHistorySnapshot` AND the `workoutHistory.push`-only-in-helper CI grep step (both introduced by the base change) — no longer needed since the parallel arrays don't exist; remove the step from `.github/workflows/ci.yml`
-- [ ] 4.6 Verify `pnpm lint && pnpm -r build && pnpm -r test` at the PR head
+- [x] 4.0 Before opening the refactor PR, post a complete consumer inventory as a PR comment: run `rg 'workoutHistory|selectionHistory' packages/workout-spa-editor` and list every file, grouped by category (reducers, selectors, Zustand devtools labels, Dexie persistence code, tests). Reviewers use this list to confirm the rename surface is complete. Acceptance criterion: after merge, the same rg returns zero matches.
+- [x] 4.1.a Write failing test asserting the new `HistoryEntry` shape (`{ workout: UIWorkout; selection: ItemId | null }`) and `undoHistory: UndoHistory` typing on `WorkoutStore`
+- [x] 4.1.b Introduce `HistoryEntry` and `UndoHistory` types in `src/store/workout-state.types.ts` (alongside `UIWorkout`); update `WorkoutStore.undoHistory: UndoHistory` typing and remove `workoutHistory`/`selectionHistory` fields. Name is `undoHistory` to avoid lexical collision with `window.history` in destructured store consumers
+- [x] 4.2.a Write failing test asserting `pushHistorySnapshot(entry: HistoryEntry)` pushes a single tuple atomically; signature is 1-arg (tuple), NOT the base's 2-arg form
+- [x] 4.2.b Refactor `pushHistorySnapshot` to the 1-arg signature; update every call site to pass `{ workout, selection }` literals; remove the dev-mode length assertion (it is now structurally enforced)
+- [x] 4.3.a Write failing test asserting `undo` reads the paired `{ workout, selection }` snapshot and passes `selection` to the focus-rule helpers as the pre-mutation selection for fallback
+- [x] 4.3.b Refactor every `undo`/`redo`/`undoDelete` reducer to read `undoHistory[i].workout` and `undoHistory[i].selection`
+- [x] 4.4.a Write failing test asserting `clearWorkout` resets `undoHistory` to an empty array and `historyIndex` to its initial value
+- [x] 4.4.b Update `clearWorkout` implementation
+- [x] 4.5 Delete the dev-mode length assertion in `pushHistorySnapshot` AND the `workoutHistory.push`-only-in-helper CI grep step (both introduced by the base change) — no longer needed since the parallel arrays don't exist; remove the step from `.github/workflows/ci.yml`
+- [x] 4.6 Verify `pnpm lint && pnpm -r build && pnpm -r test` at the PR head
 
 ## 5. E2E automation
 
