@@ -1,7 +1,13 @@
 import { describe, it } from "node:test";
 import { strictEqual } from "node:assert";
 import { execFileSync } from "node:child_process";
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync, readFileSync } from "node:fs";
+import {
+  mkdtempSync,
+  writeFileSync,
+  mkdirSync,
+  rmSync,
+  readFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -26,14 +32,17 @@ function runWithFakeTsup({ installs, rollupSrc }) {
     mkdirSync(join(tsupDir, "dist"), { recursive: true });
     writeFileSync(
       join(tsupDir, "package.json"),
-      JSON.stringify({ name: "tsup", version }),
+      JSON.stringify({ name: "tsup", version })
     );
     writeFileSync(join(tsupDir, "dist", "rollup.js"), rollupSrc);
   }
 
   const fakeScriptsDir = join(fakeRoot, "scripts");
   mkdirSync(fakeScriptsDir, { recursive: true });
-  const fakeScriptPath = join(fakeScriptsDir, "check-tsup-ignoredeprecations.mjs");
+  const fakeScriptPath = join(
+    fakeScriptsDir,
+    "check-tsup-ignoredeprecations.mjs"
+  );
   writeFileSync(fakeScriptPath, scriptSource);
 
   let status = 0;
@@ -93,7 +102,10 @@ describe("scripts/check-tsup-ignoredeprecations.mjs", () => {
 
     const fakeScriptsDir = join(fakeRoot, "scripts");
     mkdirSync(fakeScriptsDir, { recursive: true });
-    const fakeScriptPath = join(fakeScriptsDir, "check-tsup-ignoredeprecations.mjs");
+    const fakeScriptPath = join(
+      fakeScriptsDir,
+      "check-tsup-ignoredeprecations.mjs"
+    );
     writeFileSync(fakeScriptPath, scriptSource);
 
     let status = 0;

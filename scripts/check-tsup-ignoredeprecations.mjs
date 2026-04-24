@@ -30,12 +30,16 @@ function resolveTsupInstallDir() {
   try {
     entries = readdirSync(pnpmDir);
   } catch (err) {
-    return { error: `could not read ${pnpmDir} — run \`pnpm install\` first.\n${err.message}` };
+    return {
+      error: `could not read ${pnpmDir} — run \`pnpm install\` first.\n${err.message}`,
+    };
   }
 
   const tsupDirs = entries.filter((d) => /^tsup@\d/.test(d));
   if (tsupDirs.length === 0) {
-    return { error: `no tsup installation found under ${pnpmDir}. Run \`pnpm install\`.` };
+    return {
+      error: `no tsup installation found under ${pnpmDir}. Run \`pnpm install\`.`,
+    };
   }
 
   const versions = new Set(tsupDirs.map((d) => d.match(/^tsup@([^_]+)/)[1]));
@@ -67,7 +71,7 @@ try {
   tsupVersion = pkg.version;
 } catch (err) {
   console.error(
-    `[tsup-watchdog] could not read ${tsupPkgPath} — run \`pnpm install\` first.\n${err.message}`,
+    `[tsup-watchdog] could not read ${tsupPkgPath} — run \`pnpm install\` first.\n${err.message}`
   );
   process.exit(2);
 }
@@ -78,7 +82,7 @@ try {
 } catch (err) {
   console.error(
     `[tsup-watchdog] could not read tsup's installed rollup.js at ${tsupRollupPath}.\n` +
-      `tsup's internal structure may have changed. Review and update this watchdog.\n${err.message}`,
+      `tsup's internal structure may have changed. Review and update this watchdog.\n${err.message}`
   );
   process.exit(1);
 }
@@ -101,6 +105,6 @@ console.error(
     `  1. Delete the "ignoreDeprecations": "6.0" line from tsconfig.base.json\n` +
     `  2. Delete this watchdog script and its test\n` +
     `  3. Drop the "tsup-watchdog" step from package.json's lint script\n\n` +
-    `Tracking: https://github.com/egoist/tsup/issues/1388\n`,
+    `Tracking: https://github.com/egoist/tsup/issues/1388\n`
 );
 process.exit(1);
