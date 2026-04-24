@@ -16,10 +16,12 @@
     "noEmit": true,
     "jsx": "react-jsx",
 
-    /* Path aliases */
-    "baseUrl": ".",
+    /* Path aliases — since TS 6.0 `paths` resolves relative to the
+       tsconfig file's directory when `baseUrl` is absent, so dropping
+       baseUrl keeps @/* pointing at ./src/* without the deprecation
+       warning. */
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
 
     /* Linting */
@@ -28,8 +30,7 @@
     "noUnusedParameters": true,
     "erasableSyntaxOnly": true,
     "noFallthroughCasesInSwitch": true,
-    "noUncheckedSideEffectImports": true,
-    "ignoreDeprecations": "6.0"
+    "noUncheckedSideEffectImports": true
   },
   "include": ["src"],
   "exclude": [
