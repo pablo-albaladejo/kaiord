@@ -58,11 +58,11 @@ if (resolved.error) {
 let tsupVersion;
 try {
   tsupVersion = JSON.parse(
-    readFileSync(join(resolved.dir, "package.json"), "utf8"),
+    readFileSync(join(resolved.dir, "package.json"), "utf8")
   ).version;
 } catch (err) {
   console.error(
-    `[tsup-watchdog] could not read tsup's package.json — run \`pnpm install\`.\n${err.message}`,
+    `[tsup-watchdog] could not read tsup's package.json — run \`pnpm install\`.\n${err.message}`
   );
   process.exit(2);
 }
@@ -72,7 +72,7 @@ try {
   rollupSrc = readFileSync(join(resolved.dir, "dist", "rollup.js"), "utf8");
 } catch (err) {
   console.error(
-    `[tsup-watchdog] could not read tsup's dist/rollup.js — internal structure may have changed.\n${err.message}`,
+    `[tsup-watchdog] could not read tsup's dist/rollup.js — internal structure may have changed.\n${err.message}`
   );
   process.exit(1);
 }

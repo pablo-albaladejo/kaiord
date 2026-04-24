@@ -34,7 +34,7 @@ function runWithFakeTsup({ installs, rollupSrc }) {
       mkdirSync(join(tsupDir, "dist"), { recursive: true });
       writeFileSync(
         join(tsupDir, "package.json"),
-        JSON.stringify({ name: "tsup", version }),
+        JSON.stringify({ name: "tsup", version })
       );
       writeFileSync(join(tsupDir, "dist", "rollup.js"), rollupSrc);
     }
@@ -43,7 +43,7 @@ function runWithFakeTsup({ installs, rollupSrc }) {
     mkdirSync(fakeScriptsDir, { recursive: true });
     const fakeScriptPath = join(
       fakeScriptsDir,
-      "check-tsup-ignoredeprecations.mjs",
+      "check-tsup-ignoredeprecations.mjs"
     );
     writeFileSync(fakeScriptPath, scriptSource);
 
