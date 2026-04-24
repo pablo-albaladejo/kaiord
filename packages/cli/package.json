@@ -59,14 +59,14 @@
     "@kaiord/zwo": "workspace:^",
     "chalk": "^5.3.0",
     "glob": "^13.0.6",
-    "ora": "^9.3.0",
+    "ora": "^9.4.0",
     "winston": "^3.19.0",
     "yargs": "^18.0.0",
     "zod": "^4.0.0"
   },
   "devDependencies": {
     "@types/yargs": "^17.0.32",
-    "@vitest/coverage-v8": "^4.1.4",
+    "@vitest/coverage-v8": "^4.1.5",
     "execa": "^9.6.1",
     "license-checker": "^25.0.1",
     "strip-ansi": "^7.2.0",
@@ -74,7 +74,7 @@
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
-    "vitest": "^4.1.4"
+    "vitest": "^4.1.5"
   },
   "engines": {
     "node": ">=22.12.0"
