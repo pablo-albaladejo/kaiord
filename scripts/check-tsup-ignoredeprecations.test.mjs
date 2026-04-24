@@ -19,46 +19,49 @@ const scriptSource = readFileSync(scriptPath, "utf8");
 /**
  * Spawn the watchdog from a synthetic repo root with a pnpm-style tsup
  * install tree (`node_modules/.pnpm/tsup@<version>_<hash>/node_modules/tsup`).
- * Returns {status, stderr}.
+ * If `installs` is empty, the pnpm dir is created but left empty to
+ * exercise the "no tsup installed" branch. Returns {status, stderr}.
  */
 function runWithFakeTsup({ installs, rollupSrc }) {
   const fakeRoot = mkdtempSync(join(tmpdir(), "tsup-watchdog-"));
-  const pnpmDir = join(fakeRoot, "node_modules", ".pnpm");
-  mkdirSync(pnpmDir, { recursive: true });
-
-  for (const { version, peerHash = "abc" } of installs) {
-    const entryName = `tsup@${version}_${peerHash}`;
-    const tsupDir = join(pnpmDir, entryName, "node_modules", "tsup");
-    mkdirSync(join(tsupDir, "dist"), { recursive: true });
-    writeFileSync(
-      join(tsupDir, "package.json"),
-      JSON.stringify({ name: "tsup", version })
-    );
-    writeFileSync(join(tsupDir, "dist", "rollup.js"), rollupSrc);
-  }
-
-  const fakeScriptsDir = join(fakeRoot, "scripts");
-  mkdirSync(fakeScriptsDir, { recursive: true });
-  const fakeScriptPath = join(
-    fakeScriptsDir,
-    "check-tsup-ignoredeprecations.mjs"
-  );
-  writeFileSync(fakeScriptPath, scriptSource);
-
-  let status = 0;
-  let stderr = "";
   try {
-    execFileSync(process.execPath, [fakeScriptPath], {
-      encoding: "utf8",
-      stdio: ["ignore", "ignore", "pipe"],
-    });
-  } catch (err) {
-    status = err.status ?? 1;
-    stderr = err.stderr?.toString() ?? "";
-  }
+    const pnpmDir = join(fakeRoot, "node_modules", ".pnpm");
+    mkdirSync(pnpmDir, { recursive: true });
 
-  rmSync(fakeRoot, { recursive: true, force: true });
-  return { status, stderr };
+    for (const { version, peerHash = "abc" } of installs) {
+      const entryName = `tsup@${version}_${peerHash}`;
+      const tsupDir = join(pnpmDir, entryName, "node_modules", "tsup");
+      mkdirSync(join(tsupDir, "dist"), { recursive: true });
+      writeFileSync(
+        join(tsupDir, "package.json"),
+        JSON.stringify({ name: "tsup", version }),
+      );
+      writeFileSync(join(tsupDir, "dist", "rollup.js"), rollupSrc);
+    }
+
+    const fakeScriptsDir = join(fakeRoot, "scripts");
+    mkdirSync(fakeScriptsDir, { recursive: true });
+    const fakeScriptPath = join(
+      fakeScriptsDir,
+      "check-tsup-ignoredeprecations.mjs",
+    );
+    writeFileSync(fakeScriptPath, scriptSource);
+
+    let status = 0;
+    let stderr = "";
+    try {
+      execFileSync(process.execPath, [fakeScriptPath], {
+        encoding: "utf8",
+        stdio: ["ignore", "ignore", "pipe"],
+      });
+    } catch (err) {
+      status = err.status ?? 1;
+      stderr = err.stderr?.toString() ?? "";
+    }
+    return { status, stderr };
+  } finally {
+    rmSync(fakeRoot, { recursive: true, force: true });
+  }
 }
 
 const FORCED_ROLLUP_SRC = `
@@ -83,6 +86,7 @@ describe("scripts/check-tsup-ignoredeprecations.mjs", () => {
       installs: [{ version: "8.5.1" }],
       rollupSrc: FORCED_ROLLUP_SRC,
     });
+
     strictEqual(status, 0);
   });
 
@@ -91,36 +95,17 @@ describe("scripts/check-tsup-ignoredeprecations.mjs", () => {
       installs: [{ version: "9.0.0" }],
       rollupSrc: FIXED_ROLLUP_SRC,
     });
+
     strictEqual(status, 1);
     strictEqual(stderr.includes("tsconfig.base.json"), true);
     strictEqual(stderr.includes("ignoreDeprecations"), true);
   });
 
   it("exits 2 when no tsup is installed under node_modules/.pnpm", () => {
-    const fakeRoot = mkdtempSync(join(tmpdir(), "tsup-watchdog-empty-"));
-    mkdirSync(join(fakeRoot, "node_modules", ".pnpm"), { recursive: true });
-
-    const fakeScriptsDir = join(fakeRoot, "scripts");
-    mkdirSync(fakeScriptsDir, { recursive: true });
-    const fakeScriptPath = join(
-      fakeScriptsDir,
-      "check-tsup-ignoredeprecations.mjs"
-    );
-    writeFileSync(fakeScriptPath, scriptSource);
-
-    let status = 0;
-    let stderr = "";
-    try {
-      execFileSync(process.execPath, [fakeScriptPath], {
-        encoding: "utf8",
-        stdio: ["ignore", "ignore", "pipe"],
-      });
-    } catch (err) {
-      status = err.status ?? 1;
-      stderr = err.stderr?.toString() ?? "";
-    }
-
-    rmSync(fakeRoot, { recursive: true, force: true });
+    const { status, stderr } = runWithFakeTsup({
+      installs: [],
+      rollupSrc: "",
+    });
 
     strictEqual(status, 2);
     strictEqual(stderr.includes("no tsup installation found"), true);
@@ -134,6 +119,7 @@ describe("scripts/check-tsup-ignoredeprecations.mjs", () => {
       ],
       rollupSrc: FORCED_ROLLUP_SRC,
     });
+
     strictEqual(status, 2);
     strictEqual(stderr.includes("multiple tsup versions"), true);
   });
