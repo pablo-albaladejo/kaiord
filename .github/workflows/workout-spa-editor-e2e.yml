@@ -1,3 +1,7 @@
+# Baseline wall-clock (2026-04-24, ubuntu-latest): not yet measured — run once
+# on main after this PR merges to record actual duration.
+# focus-management spec budget: baseline + 30% max.
+# Advisory-only: record the measured time here and review on PRs that touch e2e/.
 name: Workout SPA Editor E2E Tests
 
 on:
