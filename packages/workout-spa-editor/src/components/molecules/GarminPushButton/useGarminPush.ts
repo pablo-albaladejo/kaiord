@@ -1,12 +1,12 @@
 import { useCallback } from "react";
 
 import { useGarminBridge } from "../../../contexts";
-import { useWorkoutStore } from "../../../store/workout-store";
+import { useCurrentWorkout } from "../../../store/workout-store-selectors";
 import { exportGcnWorkout } from "../../../utils/export-workout-formats";
 
 export const useGarminPush = () => {
   const { pushWorkout, setPushing, sessionActive } = useGarminBridge();
-  const { currentWorkout } = useWorkoutStore();
+  const currentWorkout = useCurrentWorkout();
 
   const push = useCallback(async () => {
     if (!currentWorkout || !sessionActive) return;

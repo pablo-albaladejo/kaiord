@@ -203,4 +203,47 @@ describe("WorkoutSection focus integration (§8.1–§8.5)", () => {
     expect(document.activeElement).toBe(input);
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
   });
+
+  // §8.6 — focus-visible styling contract. jsdom does not apply CSS
+  // pseudo-classes, so we assert the marker classes are present in the
+  // className string — verifying the ring is wired even if we cannot
+  // measure the pixel outline.
+  it("applies focus-visible ring classes to every focusable item target", () => {
+    // Arrange
+    renderSection(buildKrd([step(0), { repeatCount: 2, steps: [step(0)] }]));
+
+    // Assert — both a step card and the block card carry the ring class.
+    const stepCard = document.querySelector(
+      '[data-testid="step-card"]'
+    ) as HTMLElement;
+    const blockCard = document.querySelector(
+      '[data-testid="repetition-block-card"]'
+    ) as HTMLElement;
+    expect(stepCard.className).toContain("focus-visible:ring-2");
+    expect(blockCard.className).toContain("focus-visible:ring-2");
+
+    // And the classes respect prefers-reduced-motion via motion-reduce:.
+    expect(stepCard.className).toContain("motion-reduce:transition-none");
+    expect(blockCard.className).toContain("motion-reduce:transition-none");
+  });
+
+  // §8.7 — tab-order: Tab from a programmatically focused step card
+  // should move focus forward; Shift+Tab should move it back. jsdom
+  // does not implement the sequential focus navigation algorithm, so
+  // we cannot dispatch a literal Tab keypress and observe focus
+  // moving. Instead we assert the preconditions: the step card has
+  // `tabIndex={0}` (not -1), i.e. it participates in the normal
+  // sequential order.
+  it("step cards participate in normal sequential focus order (tabIndex=0)", () => {
+    // Arrange
+    renderSection(buildKrd([step(0)]));
+    const stepCard = document.querySelector(
+      '[data-testid="step-card"]'
+    ) as HTMLElement;
+
+    // Assert — tabIndex 0 means the user can Tab onto it; a focus move
+    // by the hook lands on a normally-tabbable target, not a roving
+    // -1 trap.
+    expect(stepCard.tabIndex).toBe(0);
+  });
 });
