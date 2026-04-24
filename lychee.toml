@@ -17,7 +17,10 @@
 # problem we're solving today.
 
 offline = true
-include_fragments = false
+# lychee v0.24+ changed the type of `include_fragments` (boolean →
+# string/table); its purpose — skipping anchor fragments — is not
+# load-bearing for this repo's internal-link check, so we drop it
+# and rely on the default behavior.
 max_retries = 1
 timeout = 10
 format = "compact"
