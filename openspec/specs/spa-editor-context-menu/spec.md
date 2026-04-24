@@ -1,4 +1,4 @@
-> Synced: 2026-04-20
+> Synced: 2026-04-24 (spa-editor-focus-management)
 
 # SPA Editor Context Menu
 
@@ -234,12 +234,15 @@ The workout editor area SHALL provide a custom right-click context menu with act
 - **WHEN** the user selects "Ungroup" from the context menu and a repetition block is selected
 - **THEN** the system SHALL ungroup the block into individual steps, same as Cmd+Shift+G
 
-#### Scenario: Focus return after context menu dismissal
+#### Scenario: Focus return when context menu is dismissed without action
 
-- **WHEN** a context menu action completes or the context menu is dismissed without action
+- **WHEN** the context menu is dismissed without taking an action (Escape, outside click, blur)
 - **THEN** focus SHALL return to the step list container (Radix ContextMenu default behavior)
 
-> **Future enhancement**: Smart focus management (focus next step after Delete, focus pasted step after Paste) is tracked as a separate cross-cutting change (`spa-editor-focus-management`) that will apply holistically across all input methods (keyboard, context menu, toolbar, drag-and-drop).
+#### Scenario: Focus after context menu action mutation
+
+- **WHEN** a context menu action mutates the workout (Delete, Paste, Duplicate, Copy-then-mutate, Group, Ungroup)
+- **THEN** resulting focus SHALL be resolved by the shared `pendingFocusTarget` focus-management rules defined in the `spa-editor-focus-management` capability — converging with the keyboard-shortcut and toolbar paths
 
 #### Scenario: Screen reader announcement of context menu actions
 

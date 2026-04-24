@@ -1,3 +1,5 @@
+> Completed: 2026-04-24
+
 ## Why
 
 The workout editor has zero programmatic focus management. When a step is deleted, pasted, added, duplicated, reordered, or undo/redone, focus either stays on the removed DOM element (falling to `document.body`) or doesn't move to the affected item. This creates a poor experience for keyboard-only and screen reader users who lose their place in the step list after every action.
