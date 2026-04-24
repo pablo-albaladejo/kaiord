@@ -1,89 +1,109 @@
-## 1. CWS API helper script
+## 1. Google Cloud service-account setup (one-time, maintainer)
 
-- [ ] 1.1.a Write failing `node --test` covering `getAccessToken` success path: POST to Google OAuth with refresh token returns a 200 with `access_token`; helper caches the token for the run duration.
-- [ ] 1.1.b Implement `scripts/cws-api.mjs` exporting `getAccessToken(env)` — uses `node:fetch`, no third-party deps.
-- [ ] 1.1.c Header comment on `scripts/cws-api.mjs`: `// Requires Node >= 18 (fetch global). Repo root pins >= 22.12 via engines.node;` — belt-and-braces for standalone invocations outside the monorepo CI.
-- [ ] 1.1.d CWS API base URL (`https://www.googleapis.com/chromewebstore/v1.1`) is a module-level constant, NOT an env var (Factor III pragmatic: only one CWS endpoint exists; see design Decision 1's pragmatic-deviation note).
-- [ ] 1.2.a Write failing test for `getItem(id, projection)` success (200 returns normalized `{ id, draft, published, reviewState }`) AND 401/403 failure paths (throws a typed `CwsAuthError` with a stable message string the workflow can grep for).
-- [ ] 1.2.b Implement `getItem` using the token from 1.1.b; map 2xx / 4xx / 5xx to `{ ok, body }` or typed throws.
-- [ ] 1.3.a Write failing test for `pollUntil(predicate, { timeoutMs, intervalMs })` returning on first truthy predicate or throwing `CwsTimeoutError` after `timeoutMs`.
-- [ ] 1.3.b Implement the polling helper; used by post-upload verify AND post-publish verify.
-- [ ] 1.4.a Write failing test for CLI entry point `node scripts/cws-api.mjs <subcommand> <extensionId>`: subcommands `check` (pre-flight), `get-draft`, `get-published`, `wait-uploaded`, `wait-published`. Each prints JSON to stdout and exits 0 on success, non-zero on typed errors, with the error TYPE in stderr (not the secret).
-- [ ] 1.4.b Implement the subcommand dispatcher.
-- [ ] 1.5 Add `scripts/cws-api.test.mjs` to the `test:scripts` glob; verify `pnpm test:scripts` runs it and it covers success, 401, 403, 429, 5xx, malformed JSON, network error, timeout. All fetches mocked via `globalThis.fetch = vi.fn()` or `undici.MockAgent`.
-- [ ] 1.5.a Write failing test asserting NO secret value (`client_secret`, `refresh_token`, `access_token`, or any substring ≥12 chars of them) appears in stdout OR stderr across ALL exit paths (success, 401, 403, 429, 5xx, timeout, malformed JSON). Factor XI complement: GitHub Actions secret-masking only catches exact matches of registered secrets, so a JWT payload split or partial-decode leak would escape the runner's redaction — test it at the source.
-- [ ] 1.6 Manual verification: from a checkout with valid secrets exported to the shell, run each subcommand against the real CWS API; confirm responses parse and exit codes are correct.
+> This section is the prerequisite human step. Implementation tasks (2+) depend on the service account and JSON key existing. The maintainer performs these manually; the runbook (task 8.x) will ultimately document them in reusable form.
 
-## 2. Pre-flight integration in `cws-publish.yml`
+- [ ] 1.1 In Google Cloud Console, create (or identify) a project dedicated to CWS automation. Note the project ID for the runbook.
+- [ ] 1.2 In the project, create a service account (e.g., `kaiord-cws-publisher@<project>.iam.gserviceaccount.com`). Grant it NO project-level IAM roles — the only authority it needs is the CWS Developer Dashboard link.
+- [ ] 1.3 Generate a JSON key for the service account. Download once; the file will be pasted into a GitHub Secret and never stored on disk after.
+- [ ] 1.4 In the Chrome Web Store Developer Dashboard (https://chrome.google.com/webstore/devconsole), go to Settings → Service accounts → Add account. Paste the service-account email. This is Google's "one service account per publisher" linkage.
+- [ ] 1.5 Add the JSON key content to the repo as secret `CWS_SERVICE_ACCOUNT_KEY` (Settings → Secrets and variables → Actions).
+- [ ] 1.6 Keep the existing `CWS_EXTENSION_ID` and `CWS_TRAIN2GO_EXTENSION_ID` secrets. They are reused.
+- [ ] 1.7 **Defer** removing `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN` until task 9.x (after end-to-end verification of the new flow).
 
-- [ ] 2.1.a Write an E2E-style failing test via `act` (or equivalent local runner) with a stubbed CWS endpoint returning 401; confirm the workflow fails at the pre-flight step, does NOT reach `Setup pnpm`, and creates the issue. If `act` coverage is impractical, document the manual verification alternative in the PR description.
-- [ ] 2.1.b Add a `pre-flight` job that runs BEFORE the main `publish` matrix; calls `node scripts/cws-api.mjs check $CWS_EXTENSION_ID`. `publish` gains `needs: pre-flight`.
-- [ ] 2.2.a Write failing test asserting that on a 4xx auth error, `gh issue list --label cws-token-refresh-needed` is consulted and if a matching open issue exists, that issue is updated with a new timestamp comment rather than a duplicate being created.
-- [ ] 2.2.b Implement the issue-open-or-bump logic in a small `scripts/cws-notify-token.mjs` (called from pre-flight on failure).
-- [ ] 2.2.c TOCTOU mitigation: the open-or-bump script searches for an existing issue by EXACT title match (`CWS token refresh needed`), NOT just by label, so label-only queries that race against two concurrent writers don't deduplicate incorrectly. Write a failing test simulating two concurrent invocations that both see "no issue" at CHECK time; assert the second invocation detects the issue created by the first via title match and bumps instead of creating a duplicate.
-- [ ] 2.2.d Add `concurrency: { group: cws-issue-writer, cancel-in-progress: false }` to BOTH `cws-publish.yml` and `cws-token-health.yml` (task 5.1) so overlapping workflow runs serialize on the issue-writer — eliminates the TOCTOU race at the workflow layer. The `cancel-in-progress: false` is critical: a mid-flight issue creation MUST complete, not get cancelled.
-- [ ] 2.3 Verify the pre-flight step does NOT check out code (`actions/checkout` is not required for the API call; checkouts add ~2 s and are unnecessary).
+## 2. CWS API helper: auth + state
 
-## 3. Upload / publish split in `cws-publish.yml`
+- [ ] 2.1.a Write failing `node --test` for `signJwt(serviceAccountJson)` — produces an RS256 JWT with `iss == client_email`, `scope == https://www.googleapis.com/auth/chromewebstore`, `aud == https://oauth2.googleapis.com/token`, `iat == now - 60`, `exp == now + 3600`. Verify signature with the public key from the JSON.
+- [ ] 2.1.b Implement `signJwt` using `node:crypto.createSign('RSA-SHA256')` — no third-party deps.
+- [ ] 2.2.a Write failing test for `mintAccessToken(serviceAccountJson)`: POSTs to `https://oauth2.googleapis.com/token` with `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer` and the JWT; returns the 1-hour access token.
+- [ ] 2.2.b Implement `mintAccessToken` using `globalThis.fetch`. Cache the token per-process for its lifetime (up to ~55 min, leaving 5 min safety margin).
+- [ ] 2.3.a Write failing test for `getItem(id, projection)` — uses the cached access token; returns normalized `{ id, draft, published, reviewState, rawResponse }` on 2xx; throws typed `CwsAuthError` on 401/403, `CwsStateError` on other 4xx/5xx.
+- [ ] 2.3.b Implement `getItem(id, projection)` against `https://www.googleapis.com/chromewebstore/v1.1/items/<id>?projection=<projection>`.
+- [ ] 2.4.a Write failing test asserting typed errors surface stable message prefixes (`[CwsAuthError]`, `[CwsStateError]`, `[CwsTimeoutError]`) — the workflow greps these to decide whether to open the auth-broken issue vs the verification-timeout issue.
+- [ ] 2.4.b Implement the typed error classes.
+- [ ] 2.5 Header comment on `scripts/cws-api.mjs`: `// Requires Node >= 18 (fetch global, crypto.createSign); repo root pins >= 22.12`.
+- [ ] 2.6 `CWS_API_BASE_URL = "https://www.googleapis.com/chromewebstore/v1.1"` as module-level constant. Documented in the helper header as a pragmatic Factor III deviation (single-endpoint service).
 
-- [ ] 3.1.a Write failing test for the "skip upload if CWS already has this version" branch: given `getItem()` returns `draft.version == package.json.version && draft.uploadState == UPLOADED`, the upload step is skipped and the workflow proceeds to publish.
-- [ ] 3.1.b Add a "query CWS state" step BEFORE the upload step that sets outputs: `cws_current_version`, `cws_upload_state`, `cws_published_version`. Upload step gains `if:` that compares these outputs to `steps.version.outputs.current`.
-- [ ] 3.1.c Add `force_upload: boolean (default false)` as a `workflow_dispatch` input. When `true`, the "query CWS state" step is bypassed and the upload step runs unconditionally regardless of `draft.uploadState`. This enables emergency re-publishes of the same version (silent build regression, credential leak in a published bundle, post-publish malware-scan rejection). Document the input in `docs/runbooks/cws-token-rotation.md` (task 6.2) under a new "Emergency re-publish" section so the escape hatch is discoverable.
-- [ ] 3.2 Remove `--auto-publish` from the upload step; it becomes `chrome-webstore-upload-cli upload ...` only.
-- [ ] 3.3.a Write failing test: after upload, a new "wait for uploaded state" step polls `getItem()` until `draft.uploadState == UPLOADED` (timeout 60 s). On timeout, the workflow fails with a clear message.
-- [ ] 3.3.b Implement the wait step via `node scripts/cws-api.mjs wait-uploaded <id> --timeout-ms 60000`.
-- [ ] 3.4 Add a new "publish" step: `chrome-webstore-upload-cli publish --extension-id ... --client-id ... --client-secret ... --refresh-token ...`.
-- [ ] 3.5 Move the "create @kaiord/<ext>@<version> git tag" step to run AFTER post-publish verification (task 4.x), not after upload — the tag now represents "verified live or accepted in review", not "uploaded".
+## 3. CWS API helper: upload + publish + polling
 
-## 4. Post-publish verification
+- [ ] 3.1.a Write failing test for `uploadCrx(id, zipPath)` — PUTs the zip body to `https://www.googleapis.com/upload/chromewebstore/v1.1/items/<id>` with `Content-Type: application/octet-stream`, `x-goog-api-version: 2`. Returns the CWS response `{ id, uploadState, itemError?, crxVersion? }`.
+- [ ] 3.1.b Implement `uploadCrx` via `fetch` with `body: createReadStream(zipPath)` and `duplex: "half"` (Node fetch streaming body requirement).
+- [ ] 3.2.a Write failing test for `publishItem(id, { deployPercentage=100, trustedTesters=false })` — POSTs to `https://www.googleapis.com/chromewebstore/v1.1/items/<id>/publish?publishTarget=<default|trustedTesters>`. Returns `{ status: [string] }`.
+- [ ] 3.2.b Implement `publishItem`.
+- [ ] 3.3.a Write failing test for `pollUntil(predicate, { timeoutMs, intervalMs=2000 })` — returns on first truthy predicate; throws `CwsTimeoutError` after `timeoutMs`.
+- [ ] 3.3.b Implement `pollUntil` as a general helper used by both wait-uploaded and wait-published.
+- [ ] 3.4.a Write failing test for CLI entry `node scripts/cws-api.mjs <sub> ...` — subcommands: `check`, `state`, `upload`, `publish`, `wait-uploaded`, `wait-published`. Each prints JSON to stdout on success, exits 0; typed errors go to stderr with the stable prefix; exit code 1 for recoverable, 2 for usage errors.
+- [ ] 3.4.b Implement the subcommand dispatcher.
 
-- [ ] 4.1.a Write failing test for the happy path: after publish, polling `getItem(id, 'PUBLISHED')` sees `published.version == package.json.version` within 2 min; the workflow proceeds to git-tag creation and exits success.
-- [ ] 4.1.b Implement via `node scripts/cws-api.mjs wait-published <id> --version $CURRENT --timeout-ms 120000`.
-- [ ] 4.2.a Write failing test for the "review queue" path: within 2 min, CWS reports `reviewState: IN_REVIEW` (not yet published). The workflow SHALL open an issue labelled `cws-publish-verification-timeout` with the last state payload AND succeed (not fail).
-- [ ] 4.2.b Implement the in-review detection and non-blocking issue opening.
-- [ ] 4.3.a Write failing test for the "silent stall" path: after 2 min, CWS reports neither `PUBLISHED` nor `IN_REVIEW`. Same issue-open-non-blocking behavior as 4.2.
-- [ ] 4.3.b Implement (shared code path with 4.2.b).
-- [ ] 4.4 Ensure per-extension, per-version issue idempotency: the issue title includes `@kaiord/<ext>@<version>` so two stuck versions produce two distinct issues (tracked independently).
+## 4. Test coverage + secret redaction
 
-## 5. Weekly `cws-token-health.yml` workflow
+- [ ] 4.1 Add `scripts/cws-api.test.mjs` to the `test:scripts` glob. Cover success, 401, 403, 429, 5xx, malformed JSON, network error, timeout, clock skew (JWT `iat` 60s in the past), two sequential calls re-using the cached token. All fetches mocked via `globalThis.fetch = vi.fn()` or `undici.MockAgent`.
+- [ ] 4.2 Write failing test asserting NO secret value (`private_key`, `access_token`, or any substring ≥32 chars of them) appears in stdout OR stderr across ALL exit paths (success, 401, 403, 429, 5xx, timeout, malformed JSON, JWT sign error). Factor XI complement: GitHub Actions secret-masking only catches exact matches of registered secrets — a JWT payload-segment leak (base64 fragment) would escape the runner's redaction.
+- [ ] 4.3 Manual verification from a local checkout with `CWS_SERVICE_ACCOUNT_KEY` in the shell env: run each subcommand against the real CWS API; confirm output formats and exit codes.
 
-- [ ] 5.1 Create `.github/workflows/cws-token-health.yml` with `on: { schedule: [{ cron: '0 9 * * 1' }], workflow_dispatch: {} }` AND `concurrency: { group: cws-issue-writer, cancel-in-progress: false }` (shared with `cws-publish.yml` per task 2.2.d — prevents TOCTOU races on the `cws-token-refresh-needed` issue when the weekly cron coincides with a reactive publish).
-- [ ] 5.2 Single job: `node scripts/cws-api.mjs check $CWS_EXTENSION_ID`. On non-zero exit, call `scripts/cws-notify-token.mjs` (same logic as pre-flight failure; opens or bumps the `cws-token-refresh-needed` issue).
-- [ ] 5.3 On success, the workflow SHALL exit silently — no artefacts, no comments, no success notification.
-- [ ] 5.4 Verify permissions: `contents: read, issues: write` (needed to bump the issue); no write to code.
-- [ ] 5.5 Manually trigger the workflow via `workflow_dispatch` once on a healthy token to confirm exit-silent behavior.
-- [ ] 5.6 Manually trigger with a deliberately-broken secret (or simulate via local `act`) to confirm the issue opens.
+## 5. Rewrite `cws-publish.yml`
 
-## 6. Issue template + runbook
+- [ ] 5.1 Remove `chrome-webstore-upload-cli` from `packages/garmin-bridge/package.json` and `packages/train2go-bridge/package.json` devDeps. Run `pnpm install` to prune.
+- [ ] 5.2 Rewrite `.github/workflows/cws-publish.yml`:
+  - New `pre-flight` job: single step `node scripts/cws-api.mjs check $CWS_EXTENSION_ID`. Environment: `CWS_SERVICE_ACCOUNT_KEY`. On failure, run `scripts/cws-notify-issue.mjs cws-auth-broken` and fail.
+  - Add `publish` matrix `needs: pre-flight`.
+  - Add `workflow_dispatch` input `force_upload: boolean (default false)`.
+  - Publish job steps per extension:
+    1. Checkout + setup-pnpm + pnpm install
+    2. Sync + package (`scripts/sync-extension-version.mjs` + `scripts/package-extension.sh`)
+    3. **Query CWS state** (unless `inputs.force_upload == true`): `node scripts/cws-api.mjs state <id>`. Set outputs: `cws_draft_version`, `cws_draft_upload_state`, `cws_published_version`.
+    4. **Upload** (skip if `force_upload == false` AND draft already `UPLOADED` at current version, OR published already at current version): `node scripts/cws-api.mjs upload <id> --source <zip>`.
+    5. **Wait-uploaded** (skip same conditions as 4): `node scripts/cws-api.mjs wait-uploaded <id> --timeout-ms 60000`.
+    6. **Publish** (skip only if published already at current version): `node scripts/cws-api.mjs publish <id>`.
+    7. **Wait-published**: `node scripts/cws-api.mjs wait-published <id> --version <current> --timeout-ms 120000`. On success: tag. On IN_REVIEW or timeout: open `cws-publish-verification-timeout` issue scoped per-extension per-version and exit 0.
+    8. **Git tag** (only on true PUBLISHED): `git tag @kaiord/<ext>@<version> && git push origin @kaiord/<ext>@<version>`.
+- [ ] 5.3 Keep `fail-fast: false`, `concurrency: ${{ github.workflow }}-${{ github.ref }}`.
+- [ ] 5.4 Remove all references to `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN` in the workflow.
+- [ ] 5.5 `actionlint` passes on the rewritten workflow.
 
-- [ ] 6.1 Create `.github/ISSUE_TEMPLATE/cws-token-refresh.md` with YAML frontmatter (labels: `cws-token-refresh-needed`, assignees: `pablo-albaladejo`) and a body containing:
-  - Observed error (templated via `workflow-dispatch` inputs or workflow-computed string)
-  - Link to `docs/runbooks/cws-token-rotation.md`
-  - Checklist: revoke old token in Google Cloud; run `chrome-webstore-upload-cli init`; paste into `CWS_REFRESH_TOKEN` secret; trigger `cws-token-health` dispatch to verify; close this issue.
-- [ ] 6.2 Create `docs/runbooks/cws-token-rotation.md` covering:
-  - Google Cloud project name (`kaiord-cws-publisher` or whatever the current one is)
-  - OAuth client name + scopes (`https://www.googleapis.com/auth/chromewebstore`)
-  - Exact CLI: `npx chrome-webstore-upload-cli init` (or the `refresh-token` subcommand, whichever is current)
-  - How to retrieve the new `refresh_token` from the CLI output
-  - Exact GitHub repo Settings path to paste it at: Settings → Secrets and variables → Actions → `CWS_REFRESH_TOKEN` → Update secret
-  - Verification: Actions → "CWS Token Health" → Run workflow (workflow_dispatch), expect success within 30 s
-  - **Section "Emergency re-publish"**: when a published CRX is known-bad (silent build bug, credential leak, malware-scan rejection), trigger `cws-publish.yml` via `workflow_dispatch` with `force_upload: true` to bypass the CWS-state idempotency check and re-upload the same version. Document the exact Actions UI path and note that this is a break-glass procedure — normal releases never need it.
-- [ ] 6.3 Add a reference to the runbook from `AGENTS.md` (under "Critical runbooks") and from the existing CWS section of `CLAUDE.md` if there is one.
-- [ ] 6.4 Proofread the runbook against a real token rotation performed by the author (self-dogfood) — any step that required off-runbook knowledge is a missing step.
+## 6. Issue notification helper
 
-## 7. Quality gates
+- [ ] 6.1.a Write failing test for `scripts/cws-notify-issue.mjs <label> [<title-suffix>]`: searches existing open issues by EXACT title match (built from label + optional suffix), bumps via comment if present, creates if absent. Returns the issue number.
+- [ ] 6.1.b Implement the helper using `gh api repos/:owner/:repo/issues` — single call to search by title, single call to create or comment.
+- [ ] 6.2 Title conventions: `cws-auth-broken` → title `"CWS authentication broken"`. `cws-publish-verification-timeout` → title `"CWS publish stalled: @kaiord/<ext>@<version>"` (scoped so each stuck release is a separate issue).
+- [ ] 6.3 Add `scripts/cws-notify-issue.test.mjs` to `test:scripts`. Cover: no existing issue → creates; existing open issue → bumps (comment added, no duplicate); existing closed issue with same title → creates new; two concurrent invocations → second sees first's issue via exact-title match (TOCTOU protection — see task 6.4).
+- [ ] 6.4 **TOCTOU mitigation at workflow level**: add `concurrency: { group: cws-issue-writer, cancel-in-progress: false }` to `cws-publish.yml`. (The dedicated weekly token-health workflow is **not** created in this change — service accounts do not expire, so the proactive scheduled-check premise no longer applies. The concurrency group still prevents parallel matrix entries from racing on issue writes.)
 
-- [ ] 7.1 `pnpm test:scripts` — `cws-api.test.mjs` and `cws-notify-token.test.mjs` pass; full scripts suite green.
-- [ ] 7.2 `pnpm lint:specs` — 25/25 (new spec + sync).
-- [ ] 7.3 `npx openspec validate harden-cws-publish` — change is valid.
-- [ ] 7.4 `actionlint .github/workflows/cws-publish.yml .github/workflows/cws-token-health.yml` — zero warnings.
-- [ ] 7.5 On a test branch, trigger `cws-publish.yml` via `workflow_dispatch` against the current production secrets (once the maintainer rotates the token to close the existing outage); confirm the new flow publishes `garmin-bridge` and `train2go-bridge` end-to-end.
-- [ ] 7.6 Capture a successful run's log as evidence in the PR description (redacted).
+## 7. Issue templates
 
-## 8. Documentation + rollout
+- [ ] 7.1 `.github/ISSUE_TEMPLATE/cws-auth-broken.md`: title prefill `CWS authentication broken`, labels `cws-auth-broken`, assignees `pablo-albaladejo`. Body: observed error, link to runbook, checklist (rotate key via Google Cloud → update `CWS_SERVICE_ACCOUNT_KEY` → re-run pre-flight via `workflow_dispatch` → close issue).
+- [ ] 7.2 `.github/ISSUE_TEMPLATE/cws-publish-verification-timeout.md`: title template `CWS publish stalled: @kaiord/<ext>@<version>`, labels `cws-publish-verification-timeout`. Body: last CWS state payload, link to CWS Developer Dashboard, note that `IN_REVIEW` is usually fine and self-resolves.
 
-- [ ] 8.1 Update `AGENTS.md` / `CLAUDE.md` if they document the CWS publish pipeline — note the pre-flight + verification changes briefly.
-- [ ] 8.2 Post a pre-merge PR-description paragraph summarizing the observed failure history (with run IDs) so the context is captured in git archaeology, not lost in a Slack thread.
-- [ ] 8.3 After the first successful end-to-end publish with the new flow, open a quick-win PR to update the runbook's "Verification" section with any friction the author hit.
-- [ ] 8.4 Run `/opsx-verify harden-cws-publish` and resolve any spec-vs-implementation mismatches.
-- [ ] 8.5 After PR merge, run `/opsx-archive harden-cws-publish` and sync the delta into `openspec/specs/cws-auto-publish/spec.md`.
+## 8. Runbook
+
+- [ ] 8.1 Create `docs/runbooks/cws-service-account.md` with sections:
+  - **One-time setup** (mirrors task 1.x with screenshots or step-by-step clickpaths where Chrome Web Store UI is involved).
+  - **Key rotation** (optional, security best practice): generate new key → update secret → trigger `workflow_dispatch` pre-flight to verify → revoke old key. Timeline suggestion: annual or on any security event.
+  - **Emergency re-publish**: Actions → "CWS Publish" → Run workflow → `force_upload: true` → Run. Note: `force_upload` BYPASSES the idempotency guard; only use when the shipped CRX is known-bad.
+  - **Compromised-key response**: revoke the JSON key in Google Cloud Console IMMEDIATELY (does not require waiting to generate replacement); this will cause pre-flight to fail and open `cws-auth-broken`; then generate new key, update secret, audit CWS Developer Dashboard for unauthorized item submissions in the last N days.
+  - **What this replaces**: a brief note that the repo used to use OAuth user-delegated refresh tokens (`CWS_CLIENT_ID` / `CWS_CLIENT_SECRET` / `CWS_REFRESH_TOKEN`). These secrets are no longer consulted; remove them from the repo Secrets screen after confirming the new flow works end-to-end.
+- [ ] 8.2 Reference the runbook from `AGENTS.md` under a "Runbooks" index section (create section if absent).
+- [ ] 8.3 Self-dogfood: the maintainer does tasks 1.x while following the runbook and updates any step that required off-runbook knowledge.
+
+## 9. Decommission OAuth auth
+
+- [ ] 9.1 After the first `cws-publish.yml` run with the new flow succeeds end-to-end (both extensions published or confirmed-already-at-current-version), remove `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN` from repo Secrets.
+- [ ] 9.2 Grep the repo for any remaining references to those env var names. Expected result: zero hits. Remove if any found.
+- [ ] 9.3 Post a PR comment on the merged PR linking the first successful run in the new flow (public evidence for audit).
+
+## 10. Quality gates
+
+- [ ] 10.1 `pnpm test:scripts` — `cws-api.test.mjs` + `cws-notify-issue.test.mjs` pass; full scripts suite green.
+- [ ] 10.2 `pnpm lint` — zero errors (including the existing Link checker gate).
+- [ ] 10.3 `pnpm lint:specs` — all specs validate.
+- [ ] 10.4 `npx openspec validate harden-cws-publish` — change is valid.
+- [ ] 10.5 `actionlint .github/workflows/cws-publish.yml` — zero warnings.
+- [ ] 10.6 End-to-end: `workflow_dispatch` against a test branch that bumps the extension version; confirm the new flow publishes both extensions, verify `cws-auth-broken` does NOT open, verify the correct git tag is written.
+- [ ] 10.7 End-to-end with `force_upload: true`: confirm the idempotency guard is bypassed and upload runs even though CWS has the version.
+- [ ] 10.8 Destructive test: temporarily set a bogus `CWS_SERVICE_ACCOUNT_KEY` in a test branch; confirm pre-flight fails in <10 s, the publish matrix is skipped, and a `cws-auth-broken` issue opens.
+
+## 11. Documentation + archive
+
+- [ ] 11.1 Update `AGENTS.md` section on CWS publish pipeline if present — note the service-account migration at a high level.
+- [ ] 11.2 Update `openspec/specs/cws-auto-publish/spec.md` via `opsx-archive` after PR merge — the delta in this change modifies the existing capability.
+- [ ] 11.3 Run `/opsx-verify harden-cws-publish` and resolve any spec-vs-implementation mismatches.
+- [ ] 11.4 After PR merge, run `/opsx-archive harden-cws-publish`.

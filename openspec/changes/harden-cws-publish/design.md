@@ -1,192 +1,230 @@
 ## Context
 
-The existing `.github/workflows/cws-publish.yml` publishes Chrome extensions via a single `chrome-webstore-upload-cli upload ... --auto-publish` call per extension in a 2-entry matrix. The "did we already publish this?" check compares `packages/<ext>/package.json` version against the latest `@kaiord/<ext>@*` git tag; if they match, the workflow skips.
+The existing `.github/workflows/cws-publish.yml` publishes Chrome extensions via a single `chrome-webstore-upload-cli upload ... --auto-publish` call per extension in a 2-entry matrix. It authenticates with Google via OAuth 2.0 **user-delegated refresh tokens** (`CWS_CLIENT_ID` + `CWS_CLIENT_SECRET` + `CWS_REFRESH_TOKEN`). The "did we already publish this?" check compares `packages/<ext>/package.json` version against the latest `@kaiord/<ext>@*` git tag; if they match, the workflow skips.
 
-That model has three structural weaknesses surfaced by the observed Apr 12–24 failure pattern:
+That model has **three structural weaknesses** surfaced by the observed Apr 12–24 failure pattern:
 
-1. **Tag is NOT the source of truth for CWS state.** A git tag is only written on successful publish. If upload succeeds and publish fails (partial write to CWS), the tag never gets created but CWS already has the new version. The next run sees `tag != package.json version`, retries the upload, and hits `PKG_INVALID_VERSION_NUMBER`. Observed 5+ times between Apr 12 and Apr 19.
-2. **Token validity is only tested during upload.** A revoked refresh token fails the entire upload step after ~1 min of CI time. No pre-flight check; no proactive monitoring; the token's existence is only verified at the worst possible moment (mid-release).
-3. **No post-publish verification.** Auto-publish is fire-and-forget. If Chrome's review queue holds the submission, the workflow reports success but the extension never reaches users. There is no way for the repo to distinguish "published" from "uploaded but awaiting review" from "rejected".
+1. **OAuth refresh-token auth is inherently fragile for server-to-server use.** Google's user-delegated OAuth treats the CI as a web application — refresh tokens expire after ~6 months of inactivity (per Google's published policy for unverified or low-traffic apps), they can be revoked by password changes, OAuth consent-screen reconfigurations, or Google-side security actions. Renewal requires a human at a browser doing the full OAuth consent flow. There is no automated path. Observed: `invalid_grant` on 2026-04-24.
 
-All three issues are solvable without adding new dependencies — the Chrome Web Store API is REST + OAuth2, and the existing secrets already grant the necessary scopes. A small helper script + workflow restructure closes the loop.
+2. **Git tag is NOT the source of truth for CWS state.** A git tag is only written on successful publish. If upload succeeds and publish fails (partial write to CWS), the tag never gets created but CWS already has the new version. The next run sees `tag != package.json.version`, retries the upload, and CWS returns `PKG_INVALID_VERSION_NUMBER`. Observed 5+ times between Apr 12 and Apr 19.
+
+3. **No post-publish verification.** Auto-publish is fire-and-forget. If Chrome's review queue holds the submission, the workflow reports success but the extension never reaches users. The repo cannot distinguish "published" from "uploaded but awaiting review" from "rejected".
+
+The Chrome Web Store API **also supports Google Cloud service-account authentication** (https://developer.chrome.com/docs/webstore/service-accounts) — the same auth model fastlane-supply uses for the Google Play Store: a JSON private key signs a short-lived JWT which is exchanged for a 1-hour access token. The service-account JSON key **does not expire** (keys persist until the maintainer rotates or revokes them, which is optional and entirely under repo control). A single service account can be linked per CWS publisher — no Chrome Web Store Group ownership is required per the docs.
+
+This change replaces the fragile OAuth user-flow auth with service-account auth AND addresses the two orthogonal structural issues (git-tag-as-idempotency-proxy, missing post-publish verification) in the same pass.
 
 ## Goals / Non-Goals
 
 **Goals:**
 
-- Detect token expiry before it causes a mid-release failure (fail-fast ≤10 s, auto-open a tracking issue).
+- Eliminate OAuth refresh-token fragility by migrating to service-account JWT auth — no more periodic token expiry.
 - Make the publish flow resumable: upload and publish are separate steps; a failed publish does not trigger a duplicate upload on retry.
-- Use the CWS API's `uploadState` / `draft.version` as the authoritative "has this version been uploaded?" check, subsuming the git tag comparison.
-- Verify post-publish transition to `PUBLISHED` (or a review queue) within 2 minutes; auto-open an issue if it doesn't.
-- Monitor token health proactively (weekly dry call) so expiry is surfaced as a low-priority issue days-to-weeks before the next release rather than as a release-blocker.
-- Document the token-rotation procedure in-repo so the fix is ≤5 minutes when the issue fires.
+- Use CWS API state (`draft.uploadState`, `draft.version`, `published.version`) as the authoritative idempotency check; the git tag becomes an *output* of a successful publish, not an *input* to the next run.
+- Verify post-publish transition within 2 minutes; auto-open a tracking issue if the extension enters manual review rather than going live.
+- Provide an emergency `force_upload` override for cases where the CWS-state idempotency would incorrectly skip a needed re-upload (known-bad CRX, credential leak in a shipped bundle, malware-scan rejection).
+- Document the one-time service-account setup and the rare key-rotation procedure in a single runbook.
 
 **Non-Goals:**
 
-- Switching away from `chrome-webstore-upload-cli` to a bespoke CWS client.
-- Changing the changesets `linked` group configuration (extensions continue to bump alongside npm packages).
-- Altering the matrix strategy (2 extensions remain separate entries with shared credentials).
-- Adding retry-with-backoff for transient CWS API failures beyond what the upload CLI already does.
-- Handling CRX-signing errors or manifest-validation errors (out of scope; those are extension-content issues, not publish-pipeline issues).
-- Automating the token re-authentication itself (requires a human interacting with a browser OAuth flow; out of scope).
-- Building a dashboard or centralized telemetry; the signal surface is GitHub Issues + workflow runs, which are already queryable.
+- Keeping `chrome-webstore-upload-cli` as a dependency — it does not support service accounts; we absorb its functionality into the helper.
+- Contributing service-account support upstream to `chrome-webstore-upload-cli` — larger scope, blocks on external release cadence.
+- Retaining the OAuth refresh-token auth path as a fallback — dual auth paths double the test surface and defer the real fix. Rollback, if needed, is via git-revert.
+- Automating the Google Cloud service-account creation itself — Terraforming it is possible (gcloud, Google Cloud IaC) but over-engineered for a one-time ≤15-minute setup. Documented in the runbook.
+- Automating key rotation — service-account keys do not expire; rotation is a maintainer-initiated security action, not a required scheduled task. If a scheduled rotation policy is ever adopted (e.g., quarterly), that becomes a separate future change.
+- Adding Chrome-sync / publish-metrics telemetry — orthogonal.
+- Adding Firefox / Edge add-on stores — orthogonal; each has its own auth model.
 
 ## Decisions
 
-### Decision 1: Add a `scripts/cws-api.mjs` helper as the single call site
+### Decision 1: Migrate auth to Google Cloud service account (JWT flow)
 
-**Choice:** Create a small ESM module that exposes the CWS API calls the workflows need: `getItem(id)`, `uploadItem(id, zipPath)`, `publishItem(id)`, `getDraft(id)`, `getPublished(id)`. Implemented via `node:fetch`, using `CWS_CLIENT_ID` / `CWS_CLIENT_SECRET` / `CWS_REFRESH_TOKEN` to mint an access token on each invocation.
+**Choice:** The maintainer performs a one-time Google Cloud setup:
 
-**Rationale:**
+1. In Google Cloud Console, create (or reuse) a project dedicated to CWS automation.
+2. In that project, create a service account (e.g., `kaiord-cws-publisher@<project>.iam.gserviceaccount.com`).
+3. Generate a JSON key for the service account and store it as the `CWS_SERVICE_ACCOUNT_KEY` GitHub Secret (repo-level).
+4. In the Chrome Web Store Developer Dashboard, link the service account to the publisher account (Settings → Service accounts → Add account). This grants the service account permission to manage items owned by the publisher. Limit documented by Google: **one service account per publisher**.
+5. Remove the prior secrets `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN` after the new flow is verified end-to-end.
 
-- The workflows will call the CWS API in 4 places (pre-flight, post-upload verify, post-publish poll, weekly health). Inlining `curl` in YAML multiplies maintenance cost; a single script with `node --test` coverage is cheaper.
-- Keeps the YAML readable — each step becomes `node scripts/cws-api.mjs <subcommand>`.
-- Lets us unit-test the error mapping (401 → exit code X, 429 → retry, etc.) via `node --test`; the project already runs `pnpm test:scripts` in CI.
-- Matches the existing pattern of repo-wide scripts under `scripts/` (archive, spec-format, tsup-watchdog, etc.).
+At runtime, the helper:
 
-**Alternatives considered:**
+1. Reads `CWS_SERVICE_ACCOUNT_KEY` (JSON content), parses the private key.
+2. Signs a JWT (`alg: RS256`) with the token-request claims (`iss`, `scope: https://www.googleapis.com/auth/chromewebstore`, `aud`, `exp`, `iat`).
+3. POSTs to Google's token endpoint (`https://oauth2.googleapis.com/token`) with `grant_type=urn:ietf:params:oauth:grant-type:jwt-bearer` and the signed JWT.
+4. Receives a 1-hour access token.
+5. Uses that token in `Authorization: Bearer ...` headers for all CWS API calls.
 
-- _Inline `gh api` calls in YAML_: rejected — `gh` doesn't authenticate against Google OAuth out of the box.
-- _Inline `curl + jq`_: rejected — verbose, harder to test, secret redaction is easier to get wrong than in a structured script.
-- _Pull in the underlying `chrome-webstore-upload` library directly_: acceptable but adds a devDep usage pattern (currently only used transitively by the CLI). Writing ~80 lines of fetch against the documented REST API is simpler and version-independent.
-
-**Layer impact:** Infrastructure (CI scripts).
-
-**Node version requirement:** the helper uses `globalThis.fetch` (Node ≥18) and no third-party deps. Repo root `package.json` already pins `engines.node >= 22.12`, so CI is safe. The helper SHALL carry a header comment stating `// Requires Node >= 18 (fetch global); repo root pins >= 22.12` so that standalone script invocations (e.g., a future standalone bin) don't silently regress.
-
-**CWS API base URL:** the helper hardcodes `https://www.googleapis.com/chromewebstore/v1.1` as a module-level constant, not an env var. A strict Factor III reading would require externalization, but there is only one Chrome Web Store endpoint and no alternate deploy target exists (no staging CWS). If Google ever ships a staging tier, extract to `CWS_API_BASE_URL` env var with the current value as default — at that point the refactor is ~5 lines. Recorded here as a deliberate pragmatic deviation from Factor III purism.
-
-### Decision 2: Pre-flight token validation as the workflow's first real step
-
-**Choice:** Add a `pre-flight` step (runs before `version` detection) that calls `getItem(extensionId)` and verifies a 200 response. On 401/403 (`invalid_grant` or equivalent), the step calls `gh issue create --label cws-token-refresh-needed --template cws-token-refresh.md` to open (or bump) a tracking issue, then fails the job with exit code 1. The step runs for every extension in the matrix independently — the same token backs both, but a single successful call per run is enough to validate.
+No refresh tokens. No 6-month expiry. No browser flow. If a human invalidates the key (revokes from Google Cloud Console) or unlinks the service account from the CWS Developer Dashboard, API calls fail with 401/403 — the pre-flight (Decision 3) catches this in ≤5 s.
 
 **Rationale:**
 
-- Moves the failure point from "minute of upload burned" to "5 seconds of API call". Faster signal, lower CI minute cost.
-- Auto-issue creation removes the "who notices the failure?" tribal knowledge; anyone watching the issue tracker sees the problem.
-- The issue template (see Decision 5) links to the runbook, turning a 20-minute scramble into a walkthrough.
+- Matches the standard Google Cloud auth pattern used by BigQuery, Firestore, Pub/Sub, and every Cloud product designed for server-to-server access. Tooling (gcloud, `google-auth-library-nodejs`) exists but we don't need it — JWT signing with Node's `crypto` module is ~10 LOC.
+- Eliminates the class of failure (`invalid_grant`) that caused Apr 24's outage.
+- fastlane-supply (Android) uses exactly this pattern for Play Store; proven at immense scale. There is no structural reason CWS automation can't meet the same bar.
 
 **Alternatives considered:**
 
-- _Do nothing; let the upload fail_: rejected — current behavior, observed to be poor.
-- _Validate the token ONLY in the weekly health check_: rejected — a reactive fail-fast during release is still faster than "scroll up to see why upload failed".
+- *Keep OAuth refresh tokens + add monitoring/runbook*: rejected — treats the symptom (tokens expire) instead of the cause (wrong auth model for CI).
+- *Short-lived OAuth with `workload_identity_federation`*: considered — would work, but adds a layer (WIF provider config) for no incremental benefit over plain service-account JSON key when the runner is GitHub Actions-hosted. Worth revisiting if the repo ever moves to a self-hosted or fork-reviewable CI model where secret exposure is a real concern.
+- *Impersonation via `gcloud auth print-access-token` on every run*: considered — requires `gcloud` installed on the runner and an OIDC configured between GitHub Actions and Google Cloud; more moving parts than JSON-key + JWT.
 
-**Layer impact:** Infrastructure (CI workflow step).
+**Layer impact:** Infrastructure (workflow + helper); ops (one-time Google Cloud setup).
 
-### Decision 3: Split upload from publish; use CWS state as the skip check
+### Decision 2: Absorb `chrome-webstore-upload-cli` into `scripts/cws-api.mjs`
 
-**Choice:** Replace the single `chrome-webstore-upload-cli upload --auto-publish` invocation with:
+**Choice:** The CLI does not support service-account auth. Rather than fork upstream and wait on a release, implement the upload and publish flows directly against the Chrome Web Store REST API inside a new `scripts/cws-api.mjs` helper. The helper is a single ESM module with `node:fetch`, `node:crypto`, `node:fs`, `node:path` — no third-party deps.
+
+Helper public surface:
 
 ```
-1. query CWS draft state:
-   - if draft.version === package.json.version AND draft.uploadState === UPLOADED:
-     → skip upload, proceed to publish
-   - if published.version === package.json.version:
-     → skip everything (already live)
-   - else: continue to upload
-2. upload (no --auto-publish):
-   chrome-webstore-upload-cli upload --source <zip> --extension-id ... --client-id ... --client-secret ... --refresh-token ...
-3. poll CWS draft state until uploadState === UPLOADED (timeout 60 s; usually <10 s)
+node scripts/cws-api.mjs <subcommand> [flags]
+
+subcommands:
+  check   <extension-id>                             # pre-flight auth + access
+  state   <extension-id>                             # print current CWS state JSON
+  upload  <extension-id> --source <zip-path>         # upload a CRX (no publish)
+  publish <extension-id> [--deploy-percentage=100]   # publish the uploaded draft
+  wait-uploaded <extension-id> --timeout-ms N
+  wait-published <extension-id> --version V --timeout-ms N
+```
+
+All subcommands print structured JSON to stdout on success (parseable by workflow steps via `jq` or `node -e`), diagnostic strings to stderr on errors (typed — `CwsAuthError`, `CwsStateError`, `CwsTimeoutError` — with stable message prefixes). Exit codes: `0` success, `1` recoverable error (open tracking issue), `2` usage error (invalid args, unreachable config).
+
+**Rationale:**
+
+- Keeps the workflow YAML readable: each step is one subcommand invocation.
+- Testable: `scripts/cws-api.test.mjs` under `pnpm test:scripts` mocks `fetch` to cover success / 401 / 403 / 429 / 5xx / timeout / malformed-JSON paths, including secret-redaction assertions.
+- Version-independent: no upstream package to bump and re-test on every minor release.
+- ~120–150 LOC total: the CWS API surface we need (4 endpoints) plus JWT signing is genuinely small.
+
+**Alternatives considered:**
+
+- *Use `googleapis` npm SDK*: adds 30+ MB of transitive deps for one API; rejected.
+- *Use `@fregante/chrome-webstore-upload` library directly*: same OAuth limitation as the CLI; would still need to bolt on JWT auth.
+- *Fork `chrome-webstore-upload-cli`*: rejected — upstream release cadence is not our call; absorbing the ~80 lines of upload/publish logic is cheaper and more maintainable in-repo.
+
+**Node version requirement:** the helper uses `globalThis.fetch` (Node ≥18) and `crypto.createSign` for JWT signing. Repo root `package.json` already pins `engines.node >= 22.12`. The helper SHALL carry a header comment `// Requires Node >= 18 (fetch global, crypto.createSign); repo root pins >= 22.12`.
+
+**CWS API base URL:** `https://www.googleapis.com/chromewebstore/v1.1` is a module-level constant, not an env var. There is only one CWS endpoint globally; no staging tier exists (Factor X inherent gap, see Risks). If Google ever ships an alternative, extract to `CWS_API_BASE_URL` with the current value as default — a ~5-line refactor.
+
+**Layer impact:** Infrastructure (new helper + tests; removes a devDep).
+
+### Decision 3: Pre-flight auth check as the workflow's first real step
+
+**Choice:** Add a `pre-flight` job that runs BEFORE the main `publish` matrix. Calls `node scripts/cws-api.mjs check $CWS_EXTENSION_ID` — performs JWT sign, token exchange, and a `getItem` call against CWS. On any 2xx, exits 0 and the `publish` matrix runs. On 4xx (service-account key invalid, account not linked in CWS Dashboard, quota exceeded, etc.), exits non-zero, calls `scripts/cws-notify-issue.mjs` to open-or-bump a tracking issue labelled `cws-auth-broken` with the last-seen error and a link to the runbook. The `publish` matrix has `needs: pre-flight`.
+
+**Rationale:**
+
+- Moves the failure point from "minute of upload burned" to "5 seconds of API call".
+- Surfaces the problem in a persistent queue (GitHub Issues) rather than a workflow log scroll.
+- Covers both "forgot to rotate a compromised key" and "CWS Developer Dashboard revoked the service-account linkage" in a single check — both manifest as 401/403 on `getItem`.
+
+**Alternatives considered:**
+
+- *No pre-flight, rely on upload failure*: rejected — current behavior, observed poor.
+- *Split pre-flight per extension in the matrix*: rejected — same service-account credentials for both extensions; one check per workflow run is sufficient.
+
+**Layer impact:** Infrastructure (workflow step).
+
+### Decision 4: Split upload from publish; CWS state is the idempotency source of truth
+
+**Choice:** Replace the single `chrome-webstore-upload-cli --auto-publish` call with:
+
+```
+1. query CWS draft + published state:
+     if published.version >= package.json.version  → skip all (already live)
+     if draft.version == package.json.version
+        AND draft.uploadState == UPLOADED          → skip upload, go to publish
+     else                                          → proceed to upload
+
+   BYPASS: if workflow_dispatch input force_upload=true, skip this query.
+
+2. upload:
+     node scripts/cws-api.mjs upload  <id> --source <zip>
+
+3. wait-uploaded:
+     node scripts/cws-api.mjs wait-uploaded <id> --timeout-ms 60000
+     (polls CWS draft.uploadState until UPLOADED or timeout)
+
 4. publish:
-   chrome-webstore-upload-cli publish --extension-id ... --client-id ... --client-secret ... --refresh-token ...
-5. poll CWS published state until version === package.json.version OR reviewState === IN_REVIEW (timeout 120 s)
-6. on step-5 timeout, open a GitHub issue tagged cws-publish-verification-timeout with the last-seen state payload; do NOT fail the workflow (extension may be legitimately in manual review; failing would block the next release for a non-actionable reason)
+     node scripts/cws-api.mjs publish <id>
+
+5. wait-published:
+     node scripts/cws-api.mjs wait-published <id> \
+       --version $PKG_VERSION --timeout-ms 120000
+     Success criteria (either):
+       published.version == package.json.version   → live
+       reviewState == IN_REVIEW                    → manual review queue
+     Neither within timeout → open cws-publish-verification-timeout
+                                 issue (scoped per-extension per-version),
+                                 exit 0 (non-blocking).
+
+6. git tag:
+     only on (published.version == package.json.version)
+     — IN_REVIEW does NOT tag (not yet live).
 ```
 
 **Rationale:**
 
-- Step 1 eliminates the `PKG_INVALID_VERSION_NUMBER` class of failures at its source.
-- Steps 2–3 make the upload fully verifiable: we know the CRX reached CWS before attempting to publish.
-- Step 5 closes the "silent review queue" gap; the workflow reports truthful state instead of green-on-unknown.
-- Step 6 is a deliberate non-failure: manual review is the single observed reason for the 2-min poll to time out; treating it as a workflow failure would block subsequent releases (including hotfixes to other packages) unnecessarily.
+- Step 1 eliminates `PKG_INVALID_VERSION_NUMBER` — we never attempt to upload a version CWS already has.
+- Step 1-BYPASS covers emergency force-republish of the same version (known-bad CRX, credential leak).
+- Steps 2–3 make the upload fully verifiable before publish.
+- Step 5 closes the silent-review-queue gap.
+- Step 6 keeps the git tag as an honest record of "this version is live for users" — not a noisy record of "we tried to publish".
 
 **Alternatives considered:**
 
-- _Keep `--auto-publish` and just add post-publish polling_: rejected — doesn't solve duplicate upload. The split is what unlocks resumability.
-- _Fail the workflow on step-5 timeout_: rejected for the reason above.
-- _Retry publish on transient failure_: the CLI already retries. Not adding a second retry layer.
+- *Retain `--auto-publish` and add post-publish polling only*: rejected — doesn't fix duplicate-upload. The split IS what unlocks resumability.
+- *Fail the workflow on step-5 timeout*: rejected — `IN_REVIEW` is a legitimate outcome; treating it as CI failure would block unrelated future releases.
+- *Write the git tag on `IN_REVIEW`*: rejected — tag semantics say "shipped to users"; review queue hasn't shipped yet.
 
-**Layer impact:** Infrastructure (CI workflow step rewrite).
+**Layer impact:** Infrastructure (workflow rewrite).
 
-### Decision 4: Weekly token-health monitor via `workflow: schedule`
+### Decision 5: Single runbook at `docs/runbooks/cws-service-account.md`
 
-**Choice:** New workflow `.github/workflows/cws-token-health.yml`, cron `0 9 * * 1` (Monday 09:00 UTC). Calls `node scripts/cws-api.mjs check` which hits `getItem(extensionId)` for a stable extension (`CWS_EXTENSION_ID`). On non-2xx, opens (or bumps) a `cws-token-refresh-needed` issue — the same label the reactive fail-fast (Decision 2) uses, so the two signals converge. On success, the workflow exits silently; no no-op comments.
+**Choice:** One markdown file covers:
+
+- **One-time setup**: Google Cloud project / service-account creation, JSON key download, CWS Developer Dashboard linkage, `CWS_SERVICE_ACCOUNT_KEY` secret upload, decommissioning of the three OAuth secrets.
+- **Key rotation** (when): service-account keys don't expire automatically; rotate if compromised or on a policy cadence the maintainer chooses (annual, quarterly — not prescribed). Procedure: generate a new key, update secret, revoke the old key.
+- **Emergency re-publish**: use `workflow_dispatch` with `force_upload: true` when the published CRX is known-bad.
+- **Revoking a compromised key**: what to do if the JSON key leaked (rotate immediately, audit CWS item submissions via the CWS Developer Dashboard, rotate extension-owned secrets if those were accessible).
+
+Tracked via the `cws-auth-broken` issue template — the pre-flight's auto-created issue links here.
 
 **Rationale:**
 
-- Converts a 6-monthly surprise into a ≤7-day lead time for the maintainer to act.
-- Zero-cost when the token is healthy (one successful API call per week).
-- Sharing the issue label / template with the reactive path means there's one queue to monitor, not two.
+- One procedure, one markdown, searchable via repo grep.
+- Service-account rotation is rare (yearly-to-never for unexposed keys); a dedicated workflow / runbook for each action would be overengineering.
+- Combining "setup" and "rotate" in one file means a maintainer who last set it up 18 months ago can re-orient quickly.
 
 **Alternatives considered:**
 
-- _Daily cadence_: rejected — probably overkill; weekly is the coarsest interval that still beats the release cadence.
-- _Cron during business hours in a specific timezone_: rejected — issue creation is async; UTC keeps the schedule simple.
-- _Use `googleapis` SDK for a richer health check_: rejected — adds a heavyweight dep for a single call; the same REST fetch as the helper suffices.
+- *Separate runbooks per procedure*: rejected — separate files fragment context; procedures share 80% of their steps.
+- *Document in CLAUDE.md / AGENTS.md*: rejected — those are AI-agent instructions, not ops runbooks.
 
-**Layer impact:** Infrastructure (new scheduled workflow).
+**Layer impact:** Documentation.
 
-### Decision 5: One GitHub issue template covers both failure paths
+### Decision 6: Preserve the existing workflow posture (matrix, shared credentials, `fail-fast: false`)
 
-**Choice:** New `.github/ISSUE_TEMPLATE/cws-token-refresh.md` with sections for:
-
-- Observed error (templatable via workflow-dispatch input)
-- Link to `docs/runbooks/cws-token-rotation.md`
-- Check-off list: (a) revoke old token at console.cloud.google.com; (b) run `chrome-webstore-upload-cli init`; (c) paste new `refresh_token` into `CWS_REFRESH_TOKEN` secret; (d) trigger `cws-token-health` via `workflow_dispatch` to verify; (e) close this issue.
-
-The issue opens with the `cws-token-refresh-needed` label and auto-assigns to the `@pablo-albaladejo` CODEOWNER for the CI workflows path. Subsequent detections update the existing issue body with a new timestamp rather than opening duplicates.
-
-**TOCTOU mitigation (open-or-bump race):**
-
-The naive "open-or-bump" pattern is `gh issue list` (CHECK) → conditional `gh issue create` or `gh issue comment` (USE). If the reactive path (`cws-publish.yml` pre-flight) and the proactive path (`cws-token-health.yml` weekly cron) fire within seconds of each other (plausible if a Monday-morning merge coincides with the 09:00 UTC cron), both can see "no open issue" at check time and both create one at use time. Result: duplicate issues.
-
-The mitigation is a **shared concurrency group** across BOTH workflows:
-
-```yaml
-# In cws-publish.yml AND cws-token-health.yml
-concurrency:
-  group: cws-issue-writer
-  cancel-in-progress: false # do not cancel an in-flight run
-```
-
-With `cancel-in-progress: false`, the second workflow's job queues behind the first; when the first finishes, the second sees the real (just-updated) issue state before doing its own check. Race eliminated.
-
-Defense-in-depth: the open-or-bump script also queries by **exact issue title** (not just label) — `CWS token refresh needed` — so even if a label-only approach would have produced a duplicate, the title check catches it.
+**Choice:** Keep the 2-extension matrix. Both extensions use the same service-account credentials (constrained by Google's "one service account per CWS publisher" rule — see Decision 1). Keep `fail-fast: false`. Keep `concurrency: ${{ github.workflow }}-${{ github.ref }}`.
 
 **Rationale:**
 
-- One procedure, one template, one issue — less context switching.
-- The checklist format makes mid-rotation interruption safe (you can see exactly where you left off).
-- Anchoring the runbook from the issue shortens the path-to-fix.
-
-**Alternatives considered:**
-
-- _Separate templates for reactive vs proactive_: rejected — same problem, same fix, same runbook; splitting creates duplicates.
-- _Slack / email alerting_: out of scope (no existing alerting infra in this repo; issue-as-queue is sufficient for a solo-maintainer project).
-- _Accept the TOCTOU race and de-dupe manually_: rejected — violates Factor XII (admin processes should be idempotent).
-- _Retry-loop with exponential backoff around create_: rejected — serializing via concurrency group is simpler AND deterministic.
-
-**Layer impact:** Documentation / repo ops.
-
-### Decision 6: Keep the matrix; the secrets; the `fail-fast: false`
-
-**Choice:** Do NOT refactor the matrix, the shared-credentials approach, or the `fail-fast: false` strategy. Those are spec-locked in `cws-auto-publish` and working as intended — one extension's failure should not block the other's publish.
-
-**Rationale:**
-
-- Preserves the existing capability contract; reviewers don't have to re-learn the workflow layout.
-- Minimizes the blast radius of this change.
+- Capability contract (existing `cws-auto-publish` spec) stays stable on the parts that work.
+- Minimizes blast radius of this change.
 
 **Layer impact:** None (explicitly not changing).
 
 ## Risks / Trade-offs
 
-- **[Risk] Adding pre-flight + post-publish polling adds ~30 s to each successful run** → Acceptable. CI minutes on publish are cheap (the workflow runs at most a few times per week on merge) and the polls short-circuit on success. The wall-clock tradeoff vs a minute of burned upload + a human-hour of triage is favorable.
-- **[Risk] The CWS API's `uploadState` / `draft.version` semantics are under-documented** → Mitigation: the helper script normalizes the three states we care about (`UPLOADED`, `PUBLISHED`, `IN_REVIEW`) and treats anything else as "state unclear → open an issue with the raw payload". Running against the real API in the token-health check (Decision 4) surfaces any surprise quickly.
-- **[Risk] Auto-issue creation could spam the tracker (TOCTOU race)** → Two-part mitigation: (a) both `cws-publish.yml` and `cws-token-health.yml` share a `concurrency: { group: cws-issue-writer, cancel-in-progress: false }` declaration so overlapping runs serialize instead of racing check-then-create; (b) the open-or-bump script queries by exact issue title (not just label) so even accidental duplicates get caught at the next detection and merged. The post-publish-timeout case (Decision 3, step 6) uses a different label (`cws-publish-verification-timeout`) per-extension per-version so each stuck release gets its own actionable record.
-- **[Risk] The helper script's own bugs could brick publishes** → Mitigation: `scripts/cws-api.test.mjs` under `pnpm test:scripts` covers success / 401 / 403 / 429 / 5xx / malformed-JSON paths via fetch mocking. The script is small (<100 lines) and lives next to the workflow it serves.
-- **[Trade-off] Token-rotation remains manual** → Google's OAuth flow requires browser interaction; no automated path exists. The documented runbook is the cheapest mitigation.
-- **[Trade-off] Adding a weekly scheduled workflow consumes a tiny amount of CI quota** → ~1 minute / week. Negligible.
-- **[Trade-off] `chrome-webstore-upload-cli publish` vs direct CWS API call** → Keeping the CLI for the publish step (not only upload) preserves the existing mental model and avoids re-implementing another documented-but-quirky API call. The helper handles state-inspection only; writes still go through the CLI.
-- **[Trade-off] Factor X gap: no staging Chrome Web Store tier exists** → Acknowledged limitation. Google does not offer a staging CWS; every end-to-end verification (task 7.5) touches production. Mitigations: (a) extensive fetch-mocked unit tests of the helper cover the full state machine (`UPLOADED` / `PUBLISHED` / `IN_REVIEW` / errors); (b) end-to-end verification is scheduled alongside a real intended release rather than speculatively; (c) `workflow_dispatch` in `cws-token-health` allows non-destructive token validation at any time without uploading anything. If Google ever ships a staging CWS tier, the `CWS_API_BASE_URL` extraction (see Decision 1's Node/URL note) unlocks dual-environment testing in ~5 LOC.
-- **[Trade-off] Emergency force-republish of the same version** → The CWS-state-as-source-of-truth idempotency (Decision 3) skips re-upload when CWS already has the current `package.json` version. If the uploaded CRX is later known-bad (silent build regression, post-publish malware-scan rejection, credential leak in the bundle) the dev needs to force the same version back through the pipeline. Mitigation: `cws-publish.yml`'s `workflow_dispatch` gains a `force_upload: boolean` input; when `true`, the state-check step is bypassed and upload runs unconditionally. Default `false` preserves the normal guard. Documented in the runbook.
+- **[Risk] One-time manual setup is a blocker for any automation gain** → Acceptable. ≤15 minutes of Google Cloud Console + CWS Developer Dashboard work. The runbook guides it step-by-step. Without this one-time setup, the auth migration cannot proceed; but once done, the system is durable for years.
+- **[Risk] Google's "one service account per publisher" limit** → Fits our use case (single publisher owning 2 extensions). Would constrain a future multi-publisher split, but that's a much larger re-org.
+- **[Risk] Service-account JSON key in GitHub Secrets is exposed to any workflow that can access it** → Mitigation: the key is repo-scoped (not org-wide); only `cws-publish.yml` references it (enforced by code review + secret-scanning); GitHub masks it in logs automatically; the helper's tests include a "no secret in stdout/stderr" assertion (Factor XI defense-in-depth); if compromised, the runbook's "revoke compromised key" procedure is the response.
+- **[Risk] The helper's JWT signing has a subtle clock-skew edge case** → Mitigation: the JWT `iat` and `exp` claims use `Date.now()` with a 60-second safety window on `iat` (backdating slightly to survive GitHub Actions runner clock drift vs Google's auth endpoint). Tested explicitly.
+- **[Risk] CWS API semantics for `uploadState` / `reviewState` are under-documented** → Mitigation: the helper normalizes the known states (`UPLOADED`, `PUBLISHED`, `IN_REVIEW`) and any other response is treated as "state unclear → open an issue with the raw payload for manual triage". This also catches future CWS API additions gracefully.
+- **[Risk] Adding pre-flight + post-publish polling adds ~30 s to each successful run** → Acceptable; CI minutes on publish are cheap (few runs/week).
+- **[Risk] Removing `chrome-webstore-upload-cli` means we own the upload multipart-request implementation** → Mitigation: the CWS upload endpoint is a documented PUT with a zip body and `Content-Type: application/octet-stream` (NOT multipart); simpler than expected. The helper implementation is ~15 LOC for upload, covered by tests with mocked fetch.
+- **[Trade-off] Factor X: no staging Chrome Web Store tier exists** → Chrome Web Store has no staging; every end-to-end test touches prod. Mitigations: (a) exhaustive fetch-mocked unit tests on the helper; (b) end-to-end verification scheduled with a real intended release, not speculatively; (c) pre-flight `check` is non-destructive and runs on any `workflow_dispatch` — so we can validate auth and connectivity without uploading.
+- **[Trade-off] No fallback OAuth path** → Explicit. If the service-account path breaks mid-release due to a Google outage, rollback is `git revert` + restore the three OAuth secrets. The old path still works against the same CWS API.
+- **[Trade-off] Emergency force-republish requires `workflow_dispatch`, not auto** → Intentional: `force_upload` bypasses a correctness guardrail; requiring a human to flip it ensures re-uploads of the same version are deliberate.
