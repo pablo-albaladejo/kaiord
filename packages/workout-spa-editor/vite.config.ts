@@ -2,11 +2,32 @@ import { codecovVitePlugin } from "@codecov/vite-plugin";
 import react from "@vitejs/plugin-react";
 import path from "path";
 import { defineConfig } from "vite";
+import type { Plugin } from "vite";
+
+function conditionalBeacon(): Plugin {
+  return {
+    name: "conditional-beacon",
+    transformIndexHtml(html) {
+      const token = process.env.VITE_CF_ANALYTICS_TOKEN;
+      if (!token) {
+        return html.replace(
+          /<!--\s*CF_BEACON_START\s*-->[\s\S]*?<!--\s*CF_BEACON_END\s*-->/g,
+          ""
+        );
+      }
+      return html
+        .replace(/<!--\s*CF_BEACON_START\s*-->/g, "")
+        .replace(/<!--\s*CF_BEACON_END\s*-->/g, "")
+        .replace(/%VITE_CF_ANALYTICS_TOKEN%/g, token);
+    },
+  };
+}
 
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [
     react(),
+    conditionalBeacon(),
     codecovVitePlugin({
       enableBundleAnalysis: !!process.env.CODECOV_TOKEN,
       bundleName: "workout-spa-editor",

@@ -7,6 +7,7 @@ The chosen provider is **Cloudflare Web Analytics**: free tier, cookieless, GDPR
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Define `Analytics` port in `@kaiord/core` mirroring the `Logger` type
 - Provide `createNoopAnalytics()` as the default adapter (no tracking unless injected)
 - Wire Cloudflare Web Analytics in `@kaiord/landing` (vanilla TS) and `@kaiord/workout-spa-editor` (React)
@@ -14,6 +15,7 @@ The chosen provider is **Cloudflare Web Analytics**: free tier, cookieless, GDPR
 - Export port and noop adapter from `@kaiord/core` public API for OSS consumers
 
 **Non-Goals:**
+
 - A new published `@kaiord/analytics-cloudflare` package (YAGNI — adapters stay private)
 - Session recording, heatmaps, or product analytics (Cloudflare free tier: page views + custom events only)
 - Any consent banner or cookie management (Cloudflare Analytics is cookieless)
@@ -25,12 +27,12 @@ The chosen provider is **Cloudflare Web Analytics**: free tier, cookieless, GDPR
 
 ```typescript
 // packages/core/src/ports/analytics.ts
-type AnalyticsEvent = Record<string, string | number | boolean>
+type AnalyticsEvent = Record<string, string | number | boolean>;
 
 type Analytics = {
-  pageView: (path: string) => void
-  event: (name: string, props?: AnalyticsEvent) => void
-}
+  pageView: (path: string) => void;
+  event: (name: string, props?: AnalyticsEvent) => void;
+};
 ```
 
 **Why**: Mirrors the Cloudflare Web Analytics JS API surface (`window.cfBeacon.pushEvent`). Keeping it minimal avoids over-engineering for a single provider. Properties are typed strictly (`string | number | boolean`, not `unknown`) so adapters can safely serialize them without runtime guards.
@@ -76,8 +78,10 @@ const analytics = createCloudflareAnalytics(import.meta.env.VITE_CF_ANALYTICS_TO
 
 ```typescript
 // landing/src/analytics.ts
-import { createCloudflareAnalytics } from './adapters/analytics/cloudflare-analytics'
-export const analytics = createCloudflareAnalytics(import.meta.env.VITE_CF_ANALYTICS_TOKEN)
+import { createCloudflareAnalytics } from "./adapters/analytics/cloudflare-analytics";
+export const analytics = createCloudflareAnalytics(
+  import.meta.env.VITE_CF_ANALYTICS_TOKEN
+);
 ```
 
 **Why**: The landing is vanilla TS with no framework. A singleton module is idiomatic and simple. The token is injected at build time via Vite env vars.
@@ -90,14 +94,14 @@ The adapter guards against the beacon not being available (e.g., blocked by ad b
 
 ```typescript
 const push = (name: string, props?: AnalyticsEvent) => {
-  if (typeof window !== 'undefined' && window.cfBeacon) {
+  if (typeof window !== "undefined" && window.cfBeacon) {
     try {
-      window.cfBeacon.pushEvent(name, props)
+      window.cfBeacon.pushEvent(name, props);
     } catch {
       // beacon errors must not surface to the application
     }
   }
-}
+};
 ```
 
 A `window.cfBeacon` TypeScript ambient declaration is required in each consumer package for strict-mode compilation (`src/types/cf-beacon.d.ts`).
@@ -114,32 +118,34 @@ The beacon `<script>` tag is conditionally emitted only when `VITE_CF_ANALYTICS_
 Concretely, the adapter factory treats an empty/undefined token as a signal to return a noop:
 
 ```typescript
-export const createCloudflareAnalytics = (token: string | undefined): Analytics => {
-  if (!token) return createNoopAnalytics()
+export const createCloudflareAnalytics = (
+  token: string | undefined
+): Analytics => {
+  if (!token) return createNoopAnalytics();
   // ... wire up beacon
-}
+};
 ```
 
 **Local dev behavior (explicit)**:
 
-| Environment              | Token set? | Behavior                              |
-|--------------------------|------------|---------------------------------------|
-| Local dev (`pnpm dev`)   | No         | Noop — no beacon, no console errors   |
-| CI/CD build              | Yes        | Cloudflare adapter active             |
-| Production               | Yes        | Same artifact as CI/CD build          |
+| Environment            | Token set? | Behavior                            |
+| ---------------------- | ---------- | ----------------------------------- |
+| Local dev (`pnpm dev`) | No         | Noop — no beacon, no console errors |
+| CI/CD build            | Yes        | Cloudflare adapter active           |
+| Production             | Yes        | Same artifact as CI/CD build        |
 
 ### 6. Events to track
 
-| Surface  | Event name          | Props                              | Trigger                          |
-|----------|---------------------|------------------------------------|----------------------------------|
-| Landing  | (page view)         | —                                  | automatic via beacon             |
-| Landing  | `editor-opened`     | —                                  | click on "Try the Editor" CTA    |
-| Landing  | `github-opened`     | —                                  | click on "Star on GitHub" link   |
-| Landing  | `docs-opened`       | —                                  | click on "Read the Docs" link    |
-| Editor   | `editor-loaded`     | —                                  | app mount in main.tsx            |
-| Editor   | `workout-generated` | `{ provider, sport }`              | AI generation completes          |
-| Editor   | `workout-exported`  | `{ format }`                       | export to FIT/TCX/ZWO/GCN        |
-| Editor   | `garmin-synced`     | `{ result: 'success' \| 'failure' }`| Garmin Connect push completes   |
+| Surface | Event name          | Props                                | Trigger                        |
+| ------- | ------------------- | ------------------------------------ | ------------------------------ |
+| Landing | (page view)         | —                                    | automatic via beacon           |
+| Landing | `editor-opened`     | —                                    | click on "Try the Editor" CTA  |
+| Landing | `github-opened`     | —                                    | click on "Star on GitHub" link |
+| Landing | `docs-opened`       | —                                    | click on "Read the Docs" link  |
+| Editor  | `editor-loaded`     | —                                    | app mount in main.tsx          |
+| Editor  | `workout-generated` | `{ provider, sport }`                | AI generation completes        |
+| Editor  | `workout-exported`  | `{ format }`                         | export to FIT/TCX/ZWO/GCN      |
+| Editor  | `garmin-synced`     | `{ result: 'success' \| 'failure' }` | Garmin Connect push completes  |
 
 `garmin-synced` is fired on both success and failure — the `result` dimension allows computing the sync conversion rate. `workout-generated` includes `provider` (e.g., `claude`, `gpt`, `gemini`) and `sport` for segmentation. No props carry PII.
 

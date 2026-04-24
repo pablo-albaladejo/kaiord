@@ -1,4 +1,5 @@
 import "./main.css";
+import { analytics } from "./analytics";
 
 const commands: Record<string, string> = {
   npm: "npm i @kaiord/core",
@@ -83,4 +84,31 @@ function setup() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", setup);
+function setupAnalytics() {
+  analytics.pageView(window.location.pathname);
+
+  document
+    .querySelectorAll<HTMLAnchorElement>('a[href="/editor/"]')
+    .forEach((a) => {
+      a.addEventListener("click", () => analytics.event("editor-opened"));
+    });
+
+  document
+    .querySelectorAll<HTMLAnchorElement>(
+      'a[href^="https://github.com/pablo-albaladejo/kaiord"]'
+    )
+    .forEach((a) => {
+      a.addEventListener("click", () => analytics.event("github-opened"));
+    });
+
+  document
+    .querySelectorAll<HTMLAnchorElement>('a[href="/docs/"]')
+    .forEach((a) => {
+      a.addEventListener("click", () => analytics.event("docs-opened"));
+    });
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  setup();
+  setupAnalytics();
+});

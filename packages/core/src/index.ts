@@ -95,6 +95,7 @@ export {
 } from "./domain";
 
 // Ports
+export { createNoopAnalytics } from "./adapters/analytics/noop-analytics";
 export { createConsoleLogger } from "./adapters/logger/console-logger";
 export type {
   AuthProvider,
@@ -111,6 +112,7 @@ export type {
   WorkoutService,
   WorkoutSummary,
 } from "./ports";
+export type { Analytics, AnalyticsEvent } from "./ports/analytics";
 
 // Application: Conversion Functions
 export { fromBinary, fromText } from "./application";

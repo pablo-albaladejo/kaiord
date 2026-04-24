@@ -1,4 +1,4 @@
-import { lazy, Suspense } from "react";
+import { lazy, Suspense, useEffect } from "react";
 import { Redirect, Route, Switch } from "wouter";
 
 import { AppKeyboardShortcuts } from "./components/AppKeyboardShortcuts";
@@ -7,6 +7,7 @@ import { RouteSpinner } from "./components/atoms/RouteSpinner";
 import { RouteErrorBoundary } from "./components/molecules/RouteErrorBoundary";
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
+import { useAnalytics } from "./contexts";
 import { useOnboardingTutorial } from "./hooks/use-onboarding-tutorial";
 import { useStoreHydration } from "./hooks/use-store-hydration";
 
@@ -54,6 +55,11 @@ function AppRoutes() {
 function App() {
   useStoreHydration();
   const { showTutorial, setShowTutorial } = useOnboardingTutorial();
+  const analytics = useAnalytics();
+
+  useEffect(() => {
+    analytics.event("editor-loaded");
+  }, [analytics]);
 
   return (
     <AppToastProvider>
