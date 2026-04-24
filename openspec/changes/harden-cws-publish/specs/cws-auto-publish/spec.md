@@ -111,7 +111,8 @@ The workflow SHALL NOT use a single auto-publishing call (`--auto-publish` or eq
 - **AND** the published version is strictly older
 - **WHEN** the workflow runs
 - **THEN** upload runs
-- **AND** `wait-uploaded` polls CWS until `draft.uploadState == UPLOADED` (timeout 60 s)
+- **AND** `wait-uploaded` polls CWS until `draft.uploadState == UPLOADED` within 60 seconds. Rationale: CRX bundles in this repo are <2 MB; CWS typically reports `UPLOADED` within 3–10 s of a successful PUT. 60 s provides ~6× headroom.
+- **AND** on `CwsTimeoutError` from `wait-uploaded`, the workflow SHALL retry `wait-uploaded` ONCE with a fresh 60 s window before failing the step. A single transient slow-poll is recoverable; two consecutive timeouts reliably indicate a CWS-side or network issue that another retry will not fix. The helper's retry count is NOT configurable from the workflow (deliberate: a workflow-side retry loop would mask this boundary).
 - **AND** publish runs
 
 ### Requirement: Chrome Web Store API is the idempotency source of truth
@@ -129,7 +130,7 @@ If the CWS API is unreachable (5xx, network error) during the state query, the w
 
 ### Requirement: Post-publish verification
 
-After `publish`, the workflow SHALL poll the CWS API (`GET /items/<id>?projection=PUBLISHED`) for up to 2 minutes (rationale: this timeout confirms publish **dispatch** reached a terminal state, NOT end-user-review completion which can take days). The poll SHALL terminate on any of four terminal states: `PUBLISHED`, `IN_REVIEW`, `REJECTED`, or `TIMEOUT` (no terminal state reached within the window).
+After `publish`, the workflow SHALL poll the CWS API (`GET /items/<id>?projection=PUBLISHED`) for up to 2 minutes. Rationale: this timeout confirms publish **dispatch** reached a terminal state, NOT end-user-review completion (which can take hours-to-days). 120 s is chosen as 2× the observed p95 publish-dispatch latency (30–60 s in prior successful runs logged on this repo); a tighter value would flap, a much larger value would delay `cws-publish-rejected` surfacing without making correct outcomes more reliable. On the first end-to-end run of the new flow (task 10.6), measured dispatch latency SHALL be recorded in the PR description; if it exceeds 90 s systematically, the constant is re-tuned in a follow-up PR. The poll SHALL terminate on any of four terminal states: `PUBLISHED`, `IN_REVIEW`, `REJECTED`, or `TIMEOUT` (no terminal state reached within the window).
 
 The `wait-published` subcommand SHALL print a structured JSON contract to stdout on exit:
 
