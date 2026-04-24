@@ -37,11 +37,15 @@
       "express-rate-limit@<8.2.2": ">=8.2.2",
       "smol-toml@<1.6.1": ">=1.6.1",
       "brace-expansion@>=4.0.0 <5.0.5": ">=5.0.5",
-      "yaml@>=2.0.0 <2.8.3": ">=2.8.3"
+      "yaml@>=2.0.0 <2.8.3": ">=2.8.3",
+      "vite": "^8.0.5"
     },
     "peerDependencyRules": {
       "allowedVersions": {
-        "@codecov/vite-plugin>vite": "8"
+        "@codecov/vite-plugin>vite": "8",
+        "vitepress>vite": "8",
+        "vitepress>@vitejs/plugin-vue>vite": "8",
+        "@vitejs/plugin-vue>vite": "8"
       }
     }
   },

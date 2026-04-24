@@ -216,7 +216,7 @@ export default defineConfig({
 
   vite: {
     build: { target: "esnext" },
-    plugins: [llmstxt() as never],
+    plugins: [llmstxt()],
   },
 
   transformHead({ pageData }) {
