@@ -1,3 +1,10 @@
+import type { RepetitionBlock } from "../../../types/krd";
+
+/** Build an accessible label for a block card. */
+export function buildBlockLabel(block: RepetitionBlock): string {
+  return `Repeat block ${block.repeatCount}×`;
+}
+
 /**
  * Build CSS class string for the RepetitionBlockCard.
  */

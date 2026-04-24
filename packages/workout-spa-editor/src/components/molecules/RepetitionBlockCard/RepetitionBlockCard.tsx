@@ -4,6 +4,7 @@ import { useFocusRegistration } from "../../../hooks/focus/use-focus-registratio
 import { mergeRefs } from "../../../lib/merge-refs";
 import {
   buildBlockClasses,
+  buildBlockLabel,
   createBlockClickHandler,
   createBlockKeyDownHandler,
 } from "./repetition-block-card.helpers";
@@ -41,23 +42,19 @@ export const RepetitionBlockCard = forwardRef<
   const s = useRepetitionBlockState(block, onEditRepeatCount);
   const handleBlockClick = createBlockClickHandler(block.id, onBlockSelect);
   const handleKeyDown = createBlockKeyDownHandler(onDelete, s.isEditingCount);
-
-  // Self-register with the focus registry (§8.3). Nested steps
-  // register under their own ids separately via StepCard.
   const registration = useFocusRegistration<HTMLDivElement>(block.id);
-
   return (
     <div
       ref={mergeRefs(ref, registration.ref)}
       className={buildBlockClasses(isDragging, className)}
       data-testid="repetition-block-card"
       tabIndex={0}
+      aria-label={buildBlockLabel(block)}
       onClick={handleBlockClick}
       onKeyDown={handleKeyDown}
       {...htmlProps}
     >
       <RepetitionBlockHeader
-        block={block}
         {...s.headerStateProps}
         onAddStep={onAddStep}
         onUngroup={onUngroup}

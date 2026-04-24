@@ -5,6 +5,9 @@
  */
 
 import type { Workout } from "../../types/krd";
+import { findById } from "../find-by-id";
+import type { FocusTarget } from "../focus/focus-target.types";
+import { focusItem } from "../focus/focus-target.types";
 import { preservedSelectionTarget } from "../focus-rules";
 import type { WorkoutState } from "../workout-actions";
 
@@ -33,6 +36,22 @@ const focusForHistoryIndex = (
   return preservedSelectionTarget(workout, priorSelection, fallbackIndex);
 };
 
+const focusForUndo = (state: WorkoutState, newIndex: number): FocusTarget => {
+  // When undoing a delete, the deleted item comes back in the restored snapshot.
+  // Check whether the selection recorded at mutation time exists there — if it
+  // does, restore focus directly to it (instead of falling back to position 0).
+  const currentEntry = state.undoHistory[state.historyIndex];
+  const restoredWorkout = state.undoHistory[newIndex]?.workout?.extensions
+    ?.structured_workout as Workout | undefined;
+  if (
+    currentEntry?.selection &&
+    findById(restoredWorkout, currentEntry.selection)
+  ) {
+    return focusItem(currentEntry.selection);
+  }
+  return focusForHistoryIndex(state, newIndex);
+};
+
 export const createUndoAction = (
   state: WorkoutState
 ): Partial<WorkoutState> => {
@@ -41,7 +60,7 @@ export const createUndoAction = (
     return {
       currentWorkout: state.undoHistory[newIndex].workout,
       historyIndex: newIndex,
-      pendingFocusTarget: focusForHistoryIndex(state, newIndex),
+      pendingFocusTarget: focusForUndo(state, newIndex),
     };
   }
   return {};

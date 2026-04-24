@@ -67,5 +67,8 @@ export async function triggerViaToolbar(
 ): Promise<void> {
   await focusStep(page, stepName);
   const label = action === "delete" ? /delete.*step/i : /duplicate.*step/i;
-  await page.getByRole("button", { name: label }).first().click();
+  const selectedCard = page.locator(
+    '[data-testid="step-card"][aria-selected="true"]'
+  );
+  await selectedCard.getByRole("button", { name: label }).click();
 }

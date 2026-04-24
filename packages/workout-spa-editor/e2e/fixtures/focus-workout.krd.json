@@ -11,71 +11,11 @@
       "sport": "cycling",
       "steps": [
         {
-          "stepIndex": 0,
-          "name": "Warm-up 10 min",
-          "durationType": "time",
-          "duration": { "type": "time", "seconds": 600 },
-          "targetType": "power",
-          "target": {
-            "type": "power",
-            "value": { "unit": "watts", "value": 100 }
-          },
-          "intensity": "warmup"
-        },
-        {
-          "stepIndex": 1,
-          "name": "Interval 1 — Z4 push",
-          "durationType": "time",
-          "duration": { "type": "time", "seconds": 300 },
-          "targetType": "power",
-          "target": {
-            "type": "power",
-            "value": { "unit": "watts", "value": 280 }
-          },
-          "intensity": "active"
-        },
-        {
-          "stepIndex": 2,
-          "name": "Recovery 1 min",
-          "durationType": "time",
-          "duration": { "type": "time", "seconds": 60 },
-          "targetType": "power",
-          "target": {
-            "type": "power",
-            "value": { "unit": "watts", "value": 120 }
-          },
-          "intensity": "recovery"
-        },
-        {
-          "stepIndex": 3,
-          "name": "Interval 2 — Z4 hold",
-          "durationType": "time",
-          "duration": { "type": "time", "seconds": 300 },
-          "targetType": "power",
-          "target": {
-            "type": "power",
-            "value": { "unit": "watts", "value": 275 }
-          },
-          "intensity": "active"
-        },
-        {
-          "stepIndex": 4,
-          "name": "Cooldown 5 min",
-          "durationType": "time",
-          "duration": { "type": "time", "seconds": 300 },
-          "targetType": "power",
-          "target": {
-            "type": "power",
-            "value": { "unit": "watts", "value": 90 }
-          },
-          "intensity": "cooldown"
-        },
-        {
           "repeatCount": 2,
           "name": "2x Interval Set",
           "steps": [
             {
-              "stepIndex": 5,
+              "stepIndex": 0,
               "name": "Block step A — Z3 tempo",
               "durationType": "time",
               "duration": { "type": "time", "seconds": 240 },
@@ -87,7 +27,7 @@
               "intensity": "active"
             },
             {
-              "stepIndex": 6,
+              "stepIndex": 1,
               "name": "Block step B — Z3 recover",
               "durationType": "time",
               "duration": { "type": "time", "seconds": 120 },
@@ -99,6 +39,66 @@
               "intensity": "recovery"
             }
           ]
+        },
+        {
+          "stepIndex": 2,
+          "name": "Warm-up 10 min",
+          "durationType": "time",
+          "duration": { "type": "time", "seconds": 600 },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": { "unit": "watts", "value": 100 }
+          },
+          "intensity": "warmup"
+        },
+        {
+          "stepIndex": 3,
+          "name": "Interval 1 — Z4 push",
+          "durationType": "time",
+          "duration": { "type": "time", "seconds": 300 },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": { "unit": "watts", "value": 280 }
+          },
+          "intensity": "active"
+        },
+        {
+          "stepIndex": 4,
+          "name": "Recovery 1 min",
+          "durationType": "time",
+          "duration": { "type": "time", "seconds": 60 },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": { "unit": "watts", "value": 120 }
+          },
+          "intensity": "recovery"
+        },
+        {
+          "stepIndex": 5,
+          "name": "Interval 2 — Z4 hold",
+          "durationType": "time",
+          "duration": { "type": "time", "seconds": 300 },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": { "unit": "watts", "value": 275 }
+          },
+          "intensity": "active"
+        },
+        {
+          "stepIndex": 6,
+          "name": "Cooldown 5 min",
+          "durationType": "time",
+          "duration": { "type": "time", "seconds": 300 },
+          "targetType": "power",
+          "target": {
+            "type": "power",
+            "value": { "unit": "watts", "value": 90 }
+          },
+          "intensity": "cooldown"
         }
       ]
     }
