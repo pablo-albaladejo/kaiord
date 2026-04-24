@@ -34,7 +34,7 @@ This change replaces the fragile OAuth user-flow auth with service-account auth 
 - Automating key rotation — service-account keys do not expire; rotation is a maintainer-initiated security action, not a required scheduled task. If a scheduled rotation policy is ever adopted (e.g., quarterly), that becomes a separate future change.
 - Adding Chrome-sync / publish-metrics telemetry — orthogonal.
 - Adding Firefox / Edge add-on stores — orthogonal; each has its own auth model.
-- Detecting post-publish demotion, publisher-account suspension, or Google-initiated policy-update re-submission demands — all Google-initiated reactive events not preventable from CI; out of scope. The `cws-auth-broken` surface catches the 401/403 *symptom* but the response lives outside this pipeline.
+- Detecting post-publish demotion, publisher-account suspension, or Google-initiated policy-update re-submission demands — all Google-initiated reactive events not preventable from CI; out of scope. The `cws-auth-broken` surface catches the 401/403 _symptom_ but the response lives outside this pipeline.
 
 ## Decisions
 
@@ -249,12 +249,12 @@ The helper searches existing issues by EXACT title match (not just label) before
 
 **Layer B — `concurrency: { group: cws-issue-writer, cancel-in-progress: false }` (narrow defense-in-depth)**
 
-GitHub Actions concurrency groups serialize across *workflow runs*, NOT across matrix jobs within a single run. Two matrix entries (`garmin-bridge` + `train2go-bridge`) inside one `cws-publish.yml` run share the concurrency token and execute in parallel. Layer B's contribution is narrow: it prevents a `workflow_dispatch`-triggered run from racing against a push-triggered run targeting the same extension's issue. Under the service-account model (Decision 1), there is no weekly cron workflow, so this cross-run race is rare — Layer B is still worth keeping for the manual-dispatch-during-push case (close to zero probability, zero runtime cost).
+GitHub Actions concurrency groups serialize across _workflow runs_, NOT across matrix jobs within a single run. Two matrix entries (`garmin-bridge` + `train2go-bridge`) inside one `cws-publish.yml` run share the concurrency token and execute in parallel. Layer B's contribution is narrow: it prevents a `workflow_dispatch`-triggered run from racing against a push-triggered run targeting the same extension's issue. Under the service-account model (Decision 1), there is no weekly cron workflow, so this cross-run race is rare — Layer B is still worth keeping for the manual-dispatch-during-push case (close to zero probability, zero runtime cost).
 
 **What the Choice explicitly REJECTS:**
 
-- *Claim that the concurrency group serializes matrix jobs*: WRONG. Matrix jobs in one run share the token; they race.
-- *Layer B alone as TOCTOU protection*: INSUFFICIENT. Relies on Layer A for the within-run matrix case, which is the common case.
+- _Claim that the concurrency group serializes matrix jobs_: WRONG. Matrix jobs in one run share the token; they race.
+- _Layer B alone as TOCTOU protection_: INSUFFICIENT. Relies on Layer A for the within-run matrix case, which is the common case.
 
 **Rationale:**
 
@@ -263,8 +263,8 @@ GitHub Actions concurrency groups serialize across *workflow runs*, NOT across m
 
 **Alternatives considered:**
 
-- *Per-issue GitHub GraphQL mutation with a deterministic idempotency key*: GitHub does not offer one for issue creation. Rejected.
-- *Serialize matrix jobs via `needs: [prev-job]`*: would remove parallelism and more than double wall-clock time of a publish. Rejected.
+- _Per-issue GitHub GraphQL mutation with a deterministic idempotency key_: GitHub does not offer one for issue creation. Rejected.
+- _Serialize matrix jobs via `needs: [prev-job]`_: would remove parallelism and more than double wall-clock time of a publish. Rejected.
 
 **Layer impact:** Infrastructure (honest documentation of the TOCTOU story).
 
