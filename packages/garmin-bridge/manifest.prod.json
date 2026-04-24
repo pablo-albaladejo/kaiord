@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Kaiord Garmin Bridge",
-  "version": "0.2.0",
+  "version": "7.1.0",
   "description": "Connects the Kaiord workout editor to Garmin Connect via your browser session",
 
   "permissions": ["storage", "tabs", "webRequest"],
