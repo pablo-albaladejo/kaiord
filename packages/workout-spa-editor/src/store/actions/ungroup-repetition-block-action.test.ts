@@ -15,7 +15,7 @@ import { ungroupRepetitionBlockAction } from "./ungroup-repetition-block-action"
 describe("ungroupRepetitionBlockAction", () => {
   const createMockState = (): WorkoutState => ({
     currentWorkout: null,
-    workoutHistory: [],
+    undoHistory: [],
     historyIndex: -1,
     selectedStepId: null,
     selectedStepIds: [],
@@ -285,7 +285,7 @@ describe("ungroupRepetitionBlockAction", () => {
       const state: WorkoutState = {
         ...createMockState(),
         currentWorkout: krd,
-        workoutHistory: [krd],
+        undoHistory: [{ workout: krd, selection: null }],
         historyIndex: 0,
       };
 
@@ -293,8 +293,8 @@ describe("ungroupRepetitionBlockAction", () => {
       const result = ungroupRepetitionBlockAction(krd, blockId, state);
 
       // Assert
-      expect(result.workoutHistory).toBeDefined();
-      expect(result.workoutHistory?.length).toBe(2);
+      expect(result.undoHistory).toBeDefined();
+      expect(result.undoHistory?.length).toBe(2);
       expect(result.historyIndex).toBe(1);
     });
   });

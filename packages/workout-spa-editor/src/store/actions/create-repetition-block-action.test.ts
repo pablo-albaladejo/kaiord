@@ -14,7 +14,7 @@ describe("createRepetitionBlock", () => {
   beforeEach(() => {
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       isEditing: false,
@@ -310,7 +310,7 @@ describe("createRepetitionBlock", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    expect(state.workoutHistory).toHaveLength(2);
+    expect(state.undoHistory).toHaveLength(2);
     expect(state.historyIndex).toBe(1);
   });
 
@@ -318,7 +318,7 @@ describe("createRepetitionBlock", () => {
     // Arrange
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
     });
 
@@ -328,7 +328,7 @@ describe("createRepetitionBlock", () => {
 
     // Assert
     expect(state.currentWorkout).toBeNull();
-    expect(state.workoutHistory).toHaveLength(0);
+    expect(state.undoHistory).toHaveLength(0);
   });
 
   it("should do nothing when step indices array is empty", () => {
@@ -368,7 +368,7 @@ describe("createRepetitionBlock", () => {
     // Assert
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(1);
-    expect(state.workoutHistory).toHaveLength(1); // Only the initial load
+    expect(state.undoHistory).toHaveLength(1); // Only the initial load
   });
 
   it("should do nothing when repeat count is less than 2", () => {
@@ -412,7 +412,7 @@ describe("createRepetitionBlock", () => {
     // Assert
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
-    expect(state.workoutHistory).toHaveLength(1); // Only the initial load
+    expect(state.undoHistory).toHaveLength(1); // Only the initial load
   });
 
   it("should wrap a single step in a repetition block", () => {
@@ -557,7 +557,7 @@ describe("createRepetitionBlock - Property Tests", () => {
   beforeEach(() => {
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       isEditing: false,
@@ -593,7 +593,7 @@ describe("createRepetitionBlock - Property Tests", () => {
     // Assert
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(0);
-    expect(state.workoutHistory).toHaveLength(1); // Only the initial load
+    expect(state.undoHistory).toHaveLength(1); // Only the initial load
   });
 
   it("should handle workout with existing repetition blocks", () => {
@@ -871,7 +871,7 @@ describe("createRepetitionBlock - Property Tests", () => {
       // Reset for next iteration
       useWorkoutStore.setState({
         currentWorkout: null,
-        workoutHistory: [],
+        undoHistory: [],
         historyIndex: -1,
       });
     }

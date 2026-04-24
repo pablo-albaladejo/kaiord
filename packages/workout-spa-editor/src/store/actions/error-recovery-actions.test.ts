@@ -35,7 +35,7 @@ describe("createBackupAction", () => {
 
     const state: WorkoutStore = {
       currentWorkout: mockWorkout,
-      workoutHistory: [mockWorkout],
+      undoHistory: [{ workout: mockWorkout, selection: null }],
       historyIndex: 0,
       selectedStepId: null,
       isEditing: false,
@@ -56,7 +56,7 @@ describe("createBackupAction", () => {
     // Arrange
     const state: WorkoutStore = {
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       isEditing: false,
@@ -93,7 +93,7 @@ describe("restoreFromBackupAction", () => {
 
     const state: WorkoutStore = {
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       isEditing: false,
@@ -108,7 +108,7 @@ describe("restoreFromBackupAction", () => {
     expect(result.success).toBe(true);
     expect(result.currentWorkout).toEqual(mockBackup);
     expect(result.currentWorkout).not.toBe(mockBackup); // Should be a clone
-    expect(result.workoutHistory).toEqual([mockBackup]);
+    expect(result.undoHistory).toEqual([{ workout: mockBackup, selection: null }]);
     expect(result.historyIndex).toBe(0);
   });
 
@@ -116,7 +116,7 @@ describe("restoreFromBackupAction", () => {
     // Arrange
     const state: WorkoutStore = {
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       isEditing: false,

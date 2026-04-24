@@ -54,9 +54,8 @@ const buildKrd = (steps: Array<unknown>): KRD =>
 const resetStore = () => {
   useWorkoutStore.setState({
     currentWorkout: null,
-    workoutHistory: [],
+    undoHistory: [],
     historyIndex: -1,
-    selectionHistory: [],
     selectedStepId: null,
     selectedStepIds: [],
     isEditing: false,

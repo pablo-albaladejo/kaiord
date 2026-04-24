@@ -68,7 +68,7 @@ const createKRDWithWorkout = (
  */
 const createInitialState = (krd: KRD): WorkoutState => ({
   currentWorkout: krd,
-  workoutHistory: [krd],
+  undoHistory: [{ workout: krd, selection: null }],
   historyIndex: 0,
   selectedStepId: null,
   selectedStepIds: [],

@@ -49,7 +49,7 @@ describe("clearExpiredDeletesAction", () => {
 
     const state: WorkoutState = {
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       selectedStepIds: [],
@@ -105,7 +105,7 @@ describe("clearExpiredDeletesAction", () => {
 
     const state: WorkoutState = {
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       selectedStepIds: [],
@@ -160,7 +160,7 @@ describe("clearExpiredDeletesAction", () => {
 
     const state: WorkoutState = {
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       selectedStepIds: [],

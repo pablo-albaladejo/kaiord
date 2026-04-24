@@ -33,9 +33,8 @@ import { useFocusAfterAction } from "./use-focus-after-action";
 const resetStore = () => {
   useWorkoutStore.setState({
     currentWorkout: null,
-    workoutHistory: [],
+    undoHistory: [],
     historyIndex: -1,
-    selectionHistory: [],
     selectedStepId: null,
     selectedStepIds: [],
     isEditing: false,

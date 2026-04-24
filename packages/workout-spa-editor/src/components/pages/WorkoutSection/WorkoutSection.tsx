@@ -1,4 +1,11 @@
 import { FocusRegistryProvider } from "../../../contexts/focus-registry-context";
+import {
+  FocusTelemetryProvider,
+} from "../../../contexts/focus-telemetry-context";
+import {
+  defaultFocusTelemetry,
+  type FocusTelemetry,
+} from "../../../store/providers/focus-telemetry";
 import type { KRD, Workout } from "../../../types/krd";
 import { StoreConfirmationModal } from "../../molecules/ConfirmationModal";
 import { CreateRepetitionBlockDialog } from "../../molecules/CreateRepetitionBlockDialog/CreateRepetitionBlockDialog";
@@ -21,6 +28,9 @@ export type WorkoutSectionProps = {
     activeIndex: number,
     overIndex: number
   ) => void;
+  /** Optional telemetry provider. Defaults to a no-op. Production deployments
+   *  pass a Sentry/Datadog adapter here without touching focus-rule call sites. */
+  focusTelemetry?: FocusTelemetry;
 };
 
 function WorkoutSectionInner(props: WorkoutSectionProps) {
@@ -74,12 +84,15 @@ function WorkoutSectionInner(props: WorkoutSectionProps) {
 }
 
 export function WorkoutSection(props: WorkoutSectionProps) {
-  // `FocusRegistryProvider` must wrap every consumer of
-  // `FocusRegistryContext` (StepCard, RepetitionBlockCard, and the
-  // hook itself), so it sits at the WorkoutSection boundary.
+  const { focusTelemetry = defaultFocusTelemetry, ...innerProps } = props;
+  // Both registry and telemetry providers sit at the WorkoutSection boundary:
+  // `FocusRegistryProvider` for DOM-element lookups by ItemId;
+  // `FocusTelemetryProvider` for the observability seam.
   return (
-    <FocusRegistryProvider>
-      <WorkoutSectionInner {...props} />
-    </FocusRegistryProvider>
+    <FocusTelemetryProvider value={focusTelemetry}>
+      <FocusRegistryProvider>
+        <WorkoutSectionInner {...innerProps} />
+      </FocusRegistryProvider>
+    </FocusTelemetryProvider>
   );
 }

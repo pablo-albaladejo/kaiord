@@ -11,7 +11,7 @@ describe("App", () => {
     // Reset store state before each test
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       selectedStepIds: [],

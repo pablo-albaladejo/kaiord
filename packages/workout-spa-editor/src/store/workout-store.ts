@@ -14,7 +14,7 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => {
   const actions = createWorkoutStoreActions();
   return {
     currentWorkout: null,
-    workoutHistory: [],
+    undoHistory: [],
     historyIndex: -1,
     selectedStepId: null,
     selectedStepIds: [],
@@ -25,10 +25,6 @@ export const useWorkoutStore = create<WorkoutStore>((set, get) => {
     isModalOpen: false,
     modalConfig: null,
     createBlockDialogOpen: false,
-    // Focus slice (§4): `pendingFocusTarget` + `selectionHistory` +
-    // `setPendingFocusTarget`. Nobody consumes `pendingFocusTarget` yet —
-    // the hook (§7) and action wiring (§6) land in separate PRs.
-    selectionHistory: [],
     ...createFocusSlice(set),
     ...createWorkoutMethods(actions, set, get),
     ...createSelectionActions(set),

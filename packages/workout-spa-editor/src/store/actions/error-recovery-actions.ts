@@ -39,7 +39,7 @@ export const restoreFromBackupAction = (
 
   return {
     currentWorkout: restoredWorkout,
-    workoutHistory: [restoredWorkout],
+    undoHistory: [{ workout: restoredWorkout, selection: null }],
     historyIndex: 0,
     success: true,
   };

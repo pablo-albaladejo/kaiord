@@ -39,9 +39,8 @@ const readInner = () =>
 const resetStore = () => {
   useWorkoutStore.setState({
     currentWorkout: null,
-    workoutHistory: [],
+    undoHistory: [],
     historyIndex: -1,
-    selectionHistory: [],
     selectedStepId: null,
     selectedStepIds: [],
     isEditing: false,
