@@ -20,7 +20,7 @@ This change replaces the fragile OAuth user-flow auth with service-account auth 
 
 - Eliminate OAuth refresh-token fragility by migrating to service-account JWT auth — no more periodic token expiry.
 - Make the publish flow resumable: upload and publish are separate steps; a failed publish does not trigger a duplicate upload on retry.
-- Use CWS API state (`draft.uploadState`, `draft.version`, `published.version`) as the authoritative idempotency check; the git tag becomes an *output* of a successful publish, not an *input* to the next run.
+- Use CWS API state (`draft.uploadState`, `draft.version`, `published.version`) as the authoritative idempotency check; the git tag becomes an _output_ of a successful publish, not an _input_ to the next run.
 - Verify post-publish transition within 2 minutes; auto-open a tracking issue if the extension enters manual review rather than going live.
 - Provide an emergency `force_upload` override for cases where the CWS-state idempotency would incorrectly skip a needed re-upload (known-bad CRX, credential leak in a shipped bundle, malware-scan rejection).
 - Document the one-time service-account setup and the rare key-rotation procedure in a single runbook.
@@ -65,9 +65,9 @@ No refresh tokens. No 6-month expiry. No browser flow. If a human invalidates th
 
 **Alternatives considered:**
 
-- *Keep OAuth refresh tokens + add monitoring/runbook*: rejected — treats the symptom (tokens expire) instead of the cause (wrong auth model for CI).
-- *Short-lived OAuth with `workload_identity_federation`*: considered — would work, but adds a layer (WIF provider config) for no incremental benefit over plain service-account JSON key when the runner is GitHub Actions-hosted. Worth revisiting if the repo ever moves to a self-hosted or fork-reviewable CI model where secret exposure is a real concern.
-- *Impersonation via `gcloud auth print-access-token` on every run*: considered — requires `gcloud` installed on the runner and an OIDC configured between GitHub Actions and Google Cloud; more moving parts than JSON-key + JWT.
+- _Keep OAuth refresh tokens + add monitoring/runbook_: rejected — treats the symptom (tokens expire) instead of the cause (wrong auth model for CI).
+- _Short-lived OAuth with `workload_identity_federation`_: considered — would work, but adds a layer (WIF provider config) for no incremental benefit over plain service-account JSON key when the runner is GitHub Actions-hosted. Worth revisiting if the repo ever moves to a self-hosted or fork-reviewable CI model where secret exposure is a real concern.
+- _Impersonation via `gcloud auth print-access-token` on every run_: considered — requires `gcloud` installed on the runner and an OIDC configured between GitHub Actions and Google Cloud; more moving parts than JSON-key + JWT.
 
 **Layer impact:** Infrastructure (workflow + helper); ops (one-time Google Cloud setup).
 
@@ -100,9 +100,9 @@ All subcommands print structured JSON to stdout on success (parseable by workflo
 
 **Alternatives considered:**
 
-- *Use `googleapis` npm SDK*: adds 30+ MB of transitive deps for one API; rejected.
-- *Use `@fregante/chrome-webstore-upload` library directly*: same OAuth limitation as the CLI; would still need to bolt on JWT auth.
-- *Fork `chrome-webstore-upload-cli`*: rejected — upstream release cadence is not our call; absorbing the ~80 lines of upload/publish logic is cheaper and more maintainable in-repo.
+- _Use `googleapis` npm SDK_: adds 30+ MB of transitive deps for one API; rejected.
+- _Use `@fregante/chrome-webstore-upload` library directly_: same OAuth limitation as the CLI; would still need to bolt on JWT auth.
+- _Fork `chrome-webstore-upload-cli`_: rejected — upstream release cadence is not our call; absorbing the ~80 lines of upload/publish logic is cheaper and more maintainable in-repo.
 
 **Node version requirement:** the helper uses `globalThis.fetch` (Node ≥18) and `crypto.createSign` for JWT signing. Repo root `package.json` already pins `engines.node >= 22.12`. The helper SHALL carry a header comment `// Requires Node >= 18 (fetch global, crypto.createSign); repo root pins >= 22.12`.
 
@@ -122,8 +122,8 @@ All subcommands print structured JSON to stdout on success (parseable by workflo
 
 **Alternatives considered:**
 
-- *No pre-flight, rely on upload failure*: rejected — current behavior, observed poor.
-- *Split pre-flight per extension in the matrix*: rejected — same service-account credentials for both extensions; one check per workflow run is sufficient.
+- _No pre-flight, rely on upload failure_: rejected — current behavior, observed poor.
+- _Split pre-flight per extension in the matrix_: rejected — same service-account credentials for both extensions; one check per workflow run is sufficient.
 
 **Layer impact:** Infrastructure (workflow step).
 
@@ -175,9 +175,9 @@ All subcommands print structured JSON to stdout on success (parseable by workflo
 
 **Alternatives considered:**
 
-- *Retain `--auto-publish` and add post-publish polling only*: rejected — doesn't fix duplicate-upload. The split IS what unlocks resumability.
-- *Fail the workflow on step-5 timeout*: rejected — `IN_REVIEW` is a legitimate outcome; treating it as CI failure would block unrelated future releases.
-- *Write the git tag on `IN_REVIEW`*: rejected — tag semantics say "shipped to users"; review queue hasn't shipped yet.
+- _Retain `--auto-publish` and add post-publish polling only_: rejected — doesn't fix duplicate-upload. The split IS what unlocks resumability.
+- _Fail the workflow on step-5 timeout_: rejected — `IN_REVIEW` is a legitimate outcome; treating it as CI failure would block unrelated future releases.
+- _Write the git tag on `IN_REVIEW`_: rejected — tag semantics say "shipped to users"; review queue hasn't shipped yet.
 
 **Layer impact:** Infrastructure (workflow rewrite).
 
@@ -200,8 +200,8 @@ Tracked via the `cws-auth-broken` issue template — the pre-flight's auto-creat
 
 **Alternatives considered:**
 
-- *Separate runbooks per procedure*: rejected — separate files fragment context; procedures share 80% of their steps.
-- *Document in CLAUDE.md / AGENTS.md*: rejected — those are AI-agent instructions, not ops runbooks.
+- _Separate runbooks per procedure_: rejected — separate files fragment context; procedures share 80% of their steps.
+- _Document in CLAUDE.md / AGENTS.md_: rejected — those are AI-agent instructions, not ops runbooks.
 
 **Layer impact:** Documentation.
 
