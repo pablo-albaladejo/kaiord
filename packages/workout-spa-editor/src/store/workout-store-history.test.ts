@@ -63,12 +63,20 @@ describe("pushHistorySnapshot", () => {
   it("trims at MAX_HISTORY_SIZE (50), keeping the most recent tail", () => {
     let state = { undoHistory: [] as UndoHistory, historyIndex: -1 };
     for (let i = 0; i < 50; i++) {
-      state = pushHistorySnapshot(state, { workout: makeUI(`u${i}`), selection: null });
+      state = pushHistorySnapshot(state, {
+        workout: makeUI(`u${i}`),
+        selection: null,
+      });
     }
-    const trimmed = pushHistorySnapshot(state, { workout: makeUI("overflow"), selection: null });
+    const trimmed = pushHistorySnapshot(state, {
+      workout: makeUI("overflow"),
+      selection: null,
+    });
     expect(trimmed.undoHistory.length).toBe(50);
     const tail = trimmed.undoHistory.at(-1)!.workout as KRD;
-    const inner = tail.extensions?.structured_workout as Workout & { __marker?: string };
+    const inner = tail.extensions?.structured_workout as Workout & {
+      __marker?: string;
+    };
     expect(inner.__marker).toBe("overflow");
   });
 });
@@ -90,7 +98,9 @@ describe("loadWorkout seeds undoHistory with a single null-selection entry", () 
       version: "1.0",
       type: "structured_workout",
       metadata: { created: "2025-01-01T00:00:00Z", sport: "cycling" },
-      extensions: { structured_workout: { sport: "cycling", steps: [] } as Workout },
+      extensions: {
+        structured_workout: { sport: "cycling", steps: [] } as Workout,
+      },
     };
     useWorkoutStore.getState().loadWorkout(krd);
     const state = useWorkoutStore.getState();

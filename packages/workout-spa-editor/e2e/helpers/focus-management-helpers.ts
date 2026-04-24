@@ -1,19 +1,16 @@
-import type { Page } from "@playwright/test";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 
+import type { Page } from "@playwright/test";
+
 import { expandFileUpload } from "./expand-file-upload";
 
-const FIXTURE_PATH = join(
-  __dirname,
-  "../fixtures/focus-workout.krd.json"
-);
+const FIXTURE_PATH = join(__dirname, "../fixtures/focus-workout.krd.json");
 
 export async function loadFocusFixture(page: Page): Promise<void> {
   await expandFileUpload(page);
-  const fileInput = page.locator('input[type="file"]');
   const content = readFileSync(FIXTURE_PATH);
-  await fileInput.setInputFiles({
+  await page.locator('input[type="file"]').setInputFiles({
     name: "focus-workout.krd",
     mimeType: "application/json",
     buffer: content,
@@ -32,24 +29,18 @@ export async function focusStep(page: Page, name: string): Promise<void> {
   await page.getByRole("button", { name: new RegExp(name, "i") }).click();
 }
 
+const KEYBOARD_KEYS = {
+  delete: "Delete",
+  undo: "Meta+z",
+  redo: "Meta+Shift+z",
+  duplicate: "Meta+d",
+} as const;
+
 export async function triggerViaKeyboard(
   page: Page,
-  action: "delete" | "undo" | "redo" | "duplicate"
+  action: keyof typeof KEYBOARD_KEYS
 ): Promise<void> {
-  switch (action) {
-    case "delete":
-      await page.keyboard.press("Delete");
-      break;
-    case "undo":
-      await page.keyboard.press("Meta+z");
-      break;
-    case "redo":
-      await page.keyboard.press("Meta+Shift+z");
-      break;
-    case "duplicate":
-      await page.keyboard.press("Meta+d");
-      break;
-  }
+  await page.keyboard.press(KEYBOARD_KEYS[action]);
 }
 
 export async function triggerViaContextMenu(
@@ -73,20 +64,6 @@ export async function triggerViaToolbar(
   stepName: string
 ): Promise<void> {
   await focusStep(page, stepName);
-  switch (action) {
-    case "delete": {
-      const btn = page
-        .getByRole("button", { name: new RegExp(`delete.*step`, "i") })
-        .first();
-      await btn.click();
-      break;
-    }
-    case "duplicate": {
-      const btn = page
-        .getByRole("button", { name: new RegExp(`duplicate.*step`, "i") })
-        .first();
-      await btn.click();
-      break;
-    }
-  }
+  const label = action === "delete" ? /delete.*step/i : /duplicate.*step/i;
+  await page.getByRole("button", { name: label }).first().click();
 }

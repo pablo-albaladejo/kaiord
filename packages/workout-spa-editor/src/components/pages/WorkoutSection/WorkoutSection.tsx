@@ -1,7 +1,5 @@
 import { FocusRegistryProvider } from "../../../contexts/focus-registry-context";
-import {
-  FocusTelemetryProvider,
-} from "../../../contexts/focus-telemetry-context";
+import { FocusTelemetryProvider } from "../../../contexts/focus-telemetry-context";
 import {
   defaultFocusTelemetry,
   type FocusTelemetry,

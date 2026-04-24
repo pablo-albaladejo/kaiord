@@ -184,7 +184,11 @@ describe("Performance Tests", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd3,
-        undoHistory: [{ workout: krd1, selection: null }, { workout: krd2, selection: null }, { workout: krd3, selection: null }],
+        undoHistory: [
+          { workout: krd1, selection: null },
+          { workout: krd2, selection: null },
+          { workout: krd3, selection: null },
+        ],
         historyIndex: 2,
         selectedStepId: null,
         selectedStepIds: [],
@@ -215,7 +219,11 @@ describe("Performance Tests", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd3,
-        undoHistory: [{ workout: krd1, selection: null }, { workout: krd2, selection: null }, { workout: krd3, selection: null }],
+        undoHistory: [
+          { workout: krd1, selection: null },
+          { workout: krd2, selection: null },
+          { workout: krd3, selection: null },
+        ],
         historyIndex: 2,
         selectedStepId: null,
         selectedStepIds: [],
@@ -445,7 +453,10 @@ describe("Performance Tests", () => {
       const updatedState: WorkoutState = {
         ...state,
         currentWorkout: deleteResult.currentWorkout!,
-        undoHistory: [{ workout: krd, selection: null }, { workout: deleteResult.currentWorkout!, selection: null }],
+        undoHistory: [
+          { workout: krd, selection: null },
+          { workout: deleteResult.currentWorkout!, selection: null },
+        ],
         historyIndex: 1,
       };
       const undoResult = createUndoAction(updatedState);

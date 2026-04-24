@@ -751,7 +751,8 @@ describe("deleteRepetitionBlockAction", () => {
             // Simulate undo by going back in history
             const previousIndex = stateAfterDelete.historyIndex! - 1;
             const afterUndo: Partial<WorkoutState> = {
-              currentWorkout: stateAfterDelete.undoHistory![previousIndex].workout,
+              currentWorkout:
+                stateAfterDelete.undoHistory![previousIndex].workout,
               historyIndex: previousIndex,
             };
 

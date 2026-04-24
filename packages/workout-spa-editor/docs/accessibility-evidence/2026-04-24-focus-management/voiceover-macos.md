@@ -5,14 +5,14 @@
 
 ## Capture metadata
 
-| Field | Value |
-|-------|-------|
-| Captured by | _(to be filled)_ |
-| Capture date | _(to be filled)_ |
-| macOS version | _(to be filled)_ |
-| VoiceOver version | _(matches macOS)_ |
-| Browser + version | _(to be filled)_ |
-| Fixture | `focus-workout.krd.json` |
+| Field             | Value                    |
+| ----------------- | ------------------------ |
+| Captured by       | _(to be filled)_         |
+| Capture date      | _(to be filled)_         |
+| macOS version     | _(to be filled)_         |
+| VoiceOver version | _(matches macOS)_        |
+| Browser + version | _(to be filled)_         |
+| Fixture           | `focus-workout.krd.json` |
 
 ## Transcript
 

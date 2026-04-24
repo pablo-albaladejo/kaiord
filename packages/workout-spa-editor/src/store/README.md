@@ -138,13 +138,13 @@ within 60 seconds. Absence indicates wiring failure.
 
 #### Event-to-severity alert guidance
 
-| Event | Expected rate | Suggested alert | Response |
-|-------|--------------|-----------------|----------|
-| `wiring-canary` | One per editor mount with wired telemetry | **Absence > 30 min during editor-active hours = P3** | Verify deployment includes telemetry provider |
-| `focus-error` | Near zero | **Any occurrence = P2 error** | Inspect phase field; file regression bug |
-| `unresolved-target-fallback` | Low, occasional | Info; **sustained ≥ 5× baseline for 6 h = P3** | Check component unmount ordering / ref-registration |
-| `form-field-short-circuit` | Per-user, moderate (debounced) | Debug; not pageable | Statistical monitoring only |
-| `overlay-deferred-apply` | Per-user, moderate | Debug; outlier `deferredForMs ≥ 5000` may indicate UI stall | Investigate dialog-close handlers |
+| Event                        | Expected rate                             | Suggested alert                                             | Response                                            |
+| ---------------------------- | ----------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------- |
+| `wiring-canary`              | One per editor mount with wired telemetry | **Absence > 30 min during editor-active hours = P3**        | Verify deployment includes telemetry provider       |
+| `focus-error`                | Near zero                                 | **Any occurrence = P2 error**                               | Inspect phase field; file regression bug            |
+| `unresolved-target-fallback` | Low, occasional                           | Info; **sustained ≥ 5× baseline for 6 h = P3**              | Check component unmount ordering / ref-registration |
+| `form-field-short-circuit`   | Per-user, moderate (debounced)            | Debug; not pageable                                         | Statistical monitoring only                         |
+| `overlay-deferred-apply`     | Per-user, moderate                        | Debug; outlier `deferredForMs ≥ 5000` may indicate UI stall | Investigate dialog-close handlers                   |
 
 **Post-deploy missing-canary auto-alert pattern:** configure a rolling
 30-minute window check — if `wiring-canary` count is zero during editor-active

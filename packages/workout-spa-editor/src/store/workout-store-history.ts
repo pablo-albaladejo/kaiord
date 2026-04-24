@@ -33,7 +33,9 @@ export const pushHistorySnapshot = (
   const newHistory: UndoHistory = [...historyPrefix, entry];
 
   const overflow = Math.max(0, newHistory.length - MAX_HISTORY_SIZE);
-  const trimmed: UndoHistory = overflow ? newHistory.slice(overflow) : newHistory;
+  const trimmed: UndoHistory = overflow
+    ? newHistory.slice(overflow)
+    : newHistory;
 
   return {
     currentWorkout: entry.workout,

@@ -303,7 +303,10 @@ describe("reorderStepAction", () => {
       // Arrange
       const stateWithHistory: WorkoutState = {
         ...mockState,
-        undoHistory: [{ workout: mockKrd, selection: null }, { workout: mockKrd, selection: null }],
+        undoHistory: [
+          { workout: mockKrd, selection: null },
+          { workout: mockKrd, selection: null },
+        ],
         historyIndex: 1,
       };
 

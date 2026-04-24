@@ -48,9 +48,9 @@ This issue is opened automatically on the first day of each quarter by the
 ### 4. Acceptance criteria
 
 - [ ] New transcripts diff against the previous baseline at ≤ 10% changed lines
-  (timestamp drift only — no structural announcement changes).
+      (timestamp drift only — no structural announcement changes).
 - [ ] If > 10% changed, investigate and document whether the change is a
-  regression or an expected improvement.
+      regression or an expected improvement.
 
 ### 5. PR
 

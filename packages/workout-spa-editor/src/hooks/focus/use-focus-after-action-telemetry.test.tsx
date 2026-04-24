@@ -54,7 +54,9 @@ const HookConsumer = () => {
   });
   return (
     <div ref={rootRef} data-testid="editor-root">
-      <h2 ref={headingRef} tabIndex={-1}>Editor</h2>
+      <h2 ref={headingRef} tabIndex={-1}>
+        Editor
+      </h2>
       <button ref={emptyStateRef}>Add step</button>
     </div>
   );
@@ -71,7 +73,9 @@ const HookConsumerDialog = ({ dialogOpen }: { dialogOpen: boolean }) => {
   });
   return (
     <div ref={rootRef} data-testid="editor-root">
-      <h2 ref={headingRef} tabIndex={-1}>Editor</h2>
+      <h2 ref={headingRef} tabIndex={-1}>
+        Editor
+      </h2>
       <button ref={emptyStateRef}>Add step</button>
       {dialogOpen && (
         <div
@@ -204,7 +208,9 @@ describe("useFocusAfterAction — telemetry", () => {
         });
         return (
           <div ref={rootRef}>
-            <h2 ref={headingRef} tabIndex={-1}>Editor</h2>
+            <h2 ref={headingRef} tabIndex={-1}>
+              Editor
+            </h2>
           </div>
         );
       };

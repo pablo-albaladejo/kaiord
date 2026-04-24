@@ -113,9 +113,7 @@ describe("FocusTelemetryContext", () => {
 
     const Consumer = () => {
       const telemetry = useFocusTelemetry();
-      return (
-        <button onClick={() => telemetry(event)}>emit</button>
-      );
+      return <button onClick={() => telemetry(event)}>emit</button>;
     };
 
     render(

@@ -5,15 +5,15 @@
 
 ## Capture metadata
 
-| Field | Value |
-|-------|-------|
-| Captured by | _(to be filled)_ |
-| Capture date | _(to be filled)_ |
-| Windows version | _(to be filled)_ |
-| NVDA version | _(to be filled)_ |
-| Browser + version | _(to be filled)_ |
-| Capture method | _(Option A: NVDA debug log / Option B: SpeechLogger — fill in)_ |
-| Fixture | `focus-workout.krd.json` |
+| Field             | Value                                                           |
+| ----------------- | --------------------------------------------------------------- |
+| Captured by       | _(to be filled)_                                                |
+| Capture date      | _(to be filled)_                                                |
+| Windows version   | _(to be filled)_                                                |
+| NVDA version      | _(to be filled)_                                                |
+| Browser + version | _(to be filled)_                                                |
+| Capture method    | _(Option A: NVDA debug log / Option B: SpeechLogger — fill in)_ |
+| Fixture           | `focus-workout.krd.json`                                        |
 
 ## Transcript
 

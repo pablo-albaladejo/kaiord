@@ -108,7 +108,9 @@ describe("restoreFromBackupAction", () => {
     expect(result.success).toBe(true);
     expect(result.currentWorkout).toEqual(mockBackup);
     expect(result.currentWorkout).not.toBe(mockBackup); // Should be a clone
-    expect(result.undoHistory).toEqual([{ workout: mockBackup, selection: null }]);
+    expect(result.undoHistory).toEqual([
+      { workout: mockBackup, selection: null },
+    ]);
     expect(result.historyIndex).toBe(0);
   });
 

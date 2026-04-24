@@ -49,7 +49,10 @@ describe("HistoryEntry type shape", () => {
 // Task 4.2.a — pushHistorySnapshot 1-arg signature
 describe("pushHistorySnapshot (1-arg HistoryEntry form)", () => {
   it("accepts a single HistoryEntry and pushes atomically", () => {
-    const entry: HistoryEntry = { workout: makeUI("a"), selection: asItemId("sel-1") };
+    const entry: HistoryEntry = {
+      workout: makeUI("a"),
+      selection: asItemId("sel-1"),
+    };
     const result = pushHistorySnapshot(
       { undoHistory: [], historyIndex: -1 },
       entry
@@ -62,7 +65,10 @@ describe("pushHistorySnapshot (1-arg HistoryEntry form)", () => {
 
   it("keeps undoHistory entries parallel (no length drift possible)", () => {
     const state0 = { undoHistory: [] as UndoHistory, historyIndex: -1 };
-    const r1 = pushHistorySnapshot(state0, { workout: makeUI("a"), selection: null });
+    const r1 = pushHistorySnapshot(state0, {
+      workout: makeUI("a"),
+      selection: null,
+    });
     const r2 = pushHistorySnapshot(
       { undoHistory: r1.undoHistory, historyIndex: r1.historyIndex },
       { workout: makeUI("b"), selection: asItemId("sel-2") }
@@ -75,7 +81,10 @@ describe("pushHistorySnapshot (1-arg HistoryEntry form)", () => {
   it("truncates to 50 entries, keeping the most recent tail", () => {
     let state = { undoHistory: [] as UndoHistory, historyIndex: -1 };
     for (let i = 0; i < 52; i++) {
-      state = pushHistorySnapshot(state, { workout: makeUI(`w-${i}`), selection: null });
+      state = pushHistorySnapshot(state, {
+        workout: makeUI(`w-${i}`),
+        selection: null,
+      });
     }
     expect(state.undoHistory.length).toBe(50);
     const tail = state.undoHistory.at(-1)!.workout as unknown as {

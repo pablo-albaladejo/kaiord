@@ -11,11 +11,11 @@ group, and ungroup actions on the fixture workout.
 
 ## Captured evidence
 
-| File | Description |
-|------|-------------|
-| `voiceover-macos.md` | VoiceOver (macOS) transcript with timestamps |
-| `nvda-windows.md` | NVDA (Windows) transcript with timestamps |
-| `screenshots/` | Accessibility Inspector (macOS) + NVDA speech-viewer screenshots |
+| File                 | Description                                                      |
+| -------------------- | ---------------------------------------------------------------- |
+| `voiceover-macos.md` | VoiceOver (macOS) transcript with timestamps                     |
+| `nvda-windows.md`    | NVDA (Windows) transcript with timestamps                        |
+| `screenshots/`       | Accessibility Inspector (macOS) + NVDA speech-viewer screenshots |
 
 ## Pinned versions at capture time
 
@@ -23,14 +23,14 @@ group, and ungroup actions on the fixture workout.
 > See the **Regeneration runbook** below for exact procedures.
 > When captures are recorded, update this table with the actual versions.
 
-| Aspect | Version |
-|--------|---------|
-| macOS | _(to be filled at capture time)_ |
-| VoiceOver | _(matches macOS)_ |
-| Safari | _(to be filled at capture time)_ |
-| NVDA | _(to be filled at capture time)_ |
-| Windows | _(to be filled at capture time)_ |
-| Firefox | _(to be filled at capture time)_ |
+| Aspect    | Version                          |
+| --------- | -------------------------------- |
+| macOS     | _(to be filled at capture time)_ |
+| VoiceOver | _(matches macOS)_                |
+| Safari    | _(to be filled at capture time)_ |
+| NVDA      | _(to be filled at capture time)_ |
+| Windows   | _(to be filled at capture time)_ |
+| Firefox   | _(to be filled at capture time)_ |
 
 ## Regeneration runbook
 
