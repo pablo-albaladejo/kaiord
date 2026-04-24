@@ -129,8 +129,8 @@
   - **Desktop-AT version-drift policy:** "AT evidence is considered valid for AT + OS + browser versions within one major release of the pinned version in the evidence directory's README. Outside that window, the quarterly refresh cron (or a dependency-bump-triggered manual refresh) re-captures evidence against then-current versions."
 
 - [x] 9.3 Update `WorkoutList/README.md` to reference the AT evidence directory as the regression-comparison baseline
-- [ ] 9.4 Run `/opsx-verify spa-editor-focus-management-hardening` and resolve any mismatches
-- [ ] 9.5 Run `/opsx-verify spa-editor-focus-telemetry` and resolve any mismatches
-- [ ] 9.5.a Prerequisite check before `/opsx-apply`: confirm BOTH `rg 'selectionHistory' openspec/specs/spa-editor-focus-management/spec.md` AND `rg 'workoutHistory' openspec/specs/spa-editor-focus-management/spec.md` return matches from the base change (double-grep proves the base is applied even if a future refactor renamed one of the two). If either returns zero matches, abort — apply the base first
-- [ ] 9.6 Run `/opsx-verify spa-editor-focus-management` and confirm the delta applied correctly (no stale "parallel arrays" scenarios remain on `main`; every `selectionHistory` → `undoHistory[...].selection` rename is reflected)
+- [x] 9.4 Run `/opsx-verify spa-editor-focus-management-hardening` and resolve any mismatches
+- [x] 9.5 Run `/opsx-verify spa-editor-focus-telemetry` and resolve any mismatches
+- [x] 9.5.a Prerequisite check before `/opsx-apply`: confirm BOTH `rg 'selectionHistory' openspec/specs/spa-editor-focus-management/spec.md` AND `rg 'workoutHistory' openspec/specs/spa-editor-focus-management/spec.md` return matches from the base change (double-grep proves the base is applied even if a future refactor renamed one of the two). If either returns zero matches, abort — apply the base first
+- [x] 9.6 Run `/opsx-verify spa-editor-focus-management` and confirm the delta applied correctly (no stale "parallel arrays" scenarios remain on `main`; every `selectionHistory` → `undoHistory[...].selection` rename is reflected)
 - [ ] 9.7 After PR merge, run `/opsx-archive spa-editor-focus-management-hardening`
