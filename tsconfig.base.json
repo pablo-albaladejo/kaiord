@@ -17,6 +17,9 @@
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
+    // Silences TS5101 caused by tsup's forced baseUrl in its dts pipeline
+    // (egoist/tsup#1388). The `tsup-watchdog` lint step in scripts/
+    // fails once tsup stops forcing it, reminding us to delete this line.
     "ignoreDeprecations": "6.0",
     "types": ["node"]
   }
