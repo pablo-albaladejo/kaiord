@@ -1,10 +1,5 @@
 import type { RefObject } from "react";
-import {
-  useCallback,
-  useContext,
-  useLayoutEffect,
-  useRef,
-} from "react";
+import { useCallback, useContext, useLayoutEffect, useRef } from "react";
 
 import { FocusRegistryContext } from "../../contexts/focus-registry-context";
 import { useFocusTelemetry } from "../../contexts/focus-telemetry-context";
@@ -50,12 +45,16 @@ export const useFocusAfterAction = ({
         editorHeading: editorHeadingRef.current,
         setPendingFocusTarget,
         telemetry: telemetryRef.current,
-        onApplied: (t) => { prevTargetRef.current = t; },
+        onApplied: (t) => {
+          prevTargetRef.current = t;
+        },
       }),
     [getItem, emptyStateButtonRef, editorHeadingRef, setPendingFocusTarget]
   );
 
-  useLayoutEffect(() => { emitCanaryIfFirst(telemetryRef.current); }, []);
+  useLayoutEffect(() => {
+    emitCanaryIfFirst(telemetryRef.current);
+  }, []);
 
   useOverlayFocusStash({
     editorRootRef,

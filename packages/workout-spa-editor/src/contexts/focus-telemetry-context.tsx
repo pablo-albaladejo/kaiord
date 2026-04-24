@@ -1,13 +1,14 @@
-import { createContext, useContext, useRef } from "react";
 import type { ReactNode } from "react";
+import { createContext, useContext, useRef } from "react";
 
 import {
   defaultFocusTelemetry,
   type FocusTelemetry,
 } from "../store/providers/focus-telemetry";
 
-export const FocusTelemetryContext =
-  createContext<FocusTelemetry>(defaultFocusTelemetry);
+export const FocusTelemetryContext = createContext<FocusTelemetry>(
+  defaultFocusTelemetry
+);
 
 export const useFocusTelemetry = (): FocusTelemetry =>
   useContext(FocusTelemetryContext);

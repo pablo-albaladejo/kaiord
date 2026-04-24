@@ -1,6 +1,6 @@
-import type { ItemId } from "./providers/item-id";
 import type { UIWorkout, UIWorkoutItem } from "../types/krd-ui";
 import type { FocusTarget } from "./focus/focus-target.types";
+import type { ItemId } from "./providers/item-id";
 
 export type {
   UIRepetitionBlock,

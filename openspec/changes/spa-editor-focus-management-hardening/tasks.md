@@ -99,17 +99,17 @@
 
 ## 8. Quality gates
 
-- [ ] 8.1 `pnpm -r test` — all tests pass (existing + new + Strict Mode re-run), zero warnings
-- [ ] 8.2 `pnpm lint` — zero errors, zero warnings
-- [ ] 8.3 `pnpm -r build` — zero build warnings
+- [x] 8.1 `pnpm -r test` — all tests pass (existing + new + Strict Mode re-run), zero warnings
+- [x] 8.2 `pnpm lint` — zero errors, zero warnings (workout-spa-editor; docs package excluded — pre-existing Node 22 requirement)
+- [x] 8.3 `pnpm -r build` — zero build warnings
 - [ ] 8.4 `pnpm -F @kaiord/workout-spa-editor test:e2e` — Playwright `focus-management.spec.ts` passes in Chromium, Firefox, WebKit (script name `test:e2e` verified against current `package.json`)
-- [ ] 8.5 `find packages/workout-spa-editor/src -type f \( -name '*.ts' -o -name '*.tsx' \) ! -name '*.test.ts' ! -name '*.test.tsx' -exec wc -l {} \; | awk '$1 > 100 && $2 != "total"'` — zero rows (new files respect the ≤100 line limit)
+- [x] 8.5 `find packages/workout-spa-editor/src -type f \( -name '*.ts' -o -name '*.tsx' \) ! -name '*.test.ts' ! -name '*.test.tsx' -exec wc -l {} \; | awk '$1 > 100 && $2 != "total"'` — zero rows for new files (pre-existing violations untouched)
 - [ ] 8.6 Manual verification: wire a spy telemetry function; exercise each of the five event types (wiring-canary, unresolved-target-fallback, form-field-short-circuit, overlay-deferred-apply, focus-error); confirm spy receives the expected payloads with structural fields only; verify `deferredForMs` is always a multiple of 100 and `form-field-short-circuit` is debounced
 
 ## 9. Documentation and changeset
 
-- [ ] 9.1 Add a changeset (`pnpm exec changeset`) describing the hardening improvements; reference the AT evidence directory path
-- [ ] 9.2 Update `src/store/README.md` to document:
+- [x] 9.1 Add a changeset (`pnpm exec changeset`) describing the hardening improvements; reference the AT evidence directory path
+- [x] 9.2 Update `src/store/README.md` to document:
   - The new `undoHistory: Array<HistoryEntry>` shape and the removal of the parallel-array invariant + its CI grep
   - The `FocusTelemetry` port with example wiring for Sentry AND Datadog RUM (two minimal code snippets); note that the wired function MUST be a stable reference (defined outside the render tree or wrapped with `useCallback`) — inline arrows invalidate the context value every render
   - A post-deploy smoke-test procedure: "Open the editor, perform a delete, verify at least one `wiring-canary` or mutation-driven event arrived in the telemetry dashboard within 60 seconds; absence indicates wiring failure"
@@ -128,7 +128,7 @@
   - **Incident ownership guidance:** "For deployed installations, alerts should be paged per the deployment's internal on-call runbook. For the open-source reference deployment, `focus-error` SHOULD result in a GitHub issue filed against the repo with the `incident` label and assigned to the workout-spa-editor CODEOWNERS."
   - **Desktop-AT version-drift policy:** "AT evidence is considered valid for AT + OS + browser versions within one major release of the pinned version in the evidence directory's README. Outside that window, the quarterly refresh cron (or a dependency-bump-triggered manual refresh) re-captures evidence against then-current versions."
 
-- [ ] 9.3 Update `WorkoutList/README.md` to reference the AT evidence directory as the regression-comparison baseline
+- [x] 9.3 Update `WorkoutList/README.md` to reference the AT evidence directory as the regression-comparison baseline
 - [ ] 9.4 Run `/opsx-verify spa-editor-focus-management-hardening` and resolve any mismatches
 - [ ] 9.5 Run `/opsx-verify spa-editor-focus-telemetry` and resolve any mismatches
 - [ ] 9.5.a Prerequisite check before `/opsx-apply`: confirm BOTH `rg 'selectionHistory' openspec/specs/spa-editor-focus-management/spec.md` AND `rg 'workoutHistory' openspec/specs/spa-editor-focus-management/spec.md` return matches from the base change (double-grep proves the base is applied even if a future refactor renamed one of the two). If either returns zero matches, abort — apply the base first
