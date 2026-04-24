@@ -190,7 +190,16 @@ export default defineConfig({
   },
 
   markdown: {
-    codeTransformers: [transformerTwoslash()],
+    codeTransformers: [
+      transformerTwoslash({
+        twoslashOptions: {
+          compilerOptions: {
+            types: ["node"],
+            lib: ["ES2022", "DOM"],
+          },
+        },
+      }),
+    ],
     languages: [
       "ts",
       "tsx",
@@ -207,7 +216,7 @@ export default defineConfig({
 
   vite: {
     build: { target: "esnext" },
-    plugins: [llmstxt()],
+    plugins: [llmstxt() as never],
   },
 
   transformHead({ pageData }) {
