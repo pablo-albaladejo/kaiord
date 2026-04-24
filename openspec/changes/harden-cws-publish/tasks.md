@@ -22,6 +22,7 @@
 - [ ] 2.4.b Implement the typed error classes.
 - [ ] 2.5 Header comment on `scripts/cws-api.mjs`: `// Requires Node >= 18 (fetch global, crypto.createSign); repo root pins >= 22.12`.
 - [ ] 2.6 `CWS_API_BASE_URL = "https://www.googleapis.com/chromewebstore/v1.1"` as module-level constant. Documented in the helper header as a pragmatic Factor III deviation (single-endpoint service).
+- [ ] 2.7 PEM normalization: the `private_key` field in the service-account JSON contains literal `\n` escape sequences when pasted as a single-line secret. The helper SHALL normalize with `privateKey.replace(/\\n/g, '\n')` before passing to `crypto.createSign`. Document the normalization in the helper header comment; test path in task 4.5.
 
 ## 3. CWS API helper: upload + publish + polling
 
@@ -37,8 +38,17 @@
 ## 4. Test coverage + secret redaction
 
 - [ ] 4.1 Add `scripts/cws-api.test.mjs` to the `test:scripts` glob. Cover success, 401, 403, 429, 5xx, malformed JSON, network error, timeout, clock skew (JWT `iat` 60s in the past), two sequential calls re-using the cached token. All fetches mocked via `globalThis.fetch = vi.fn()` or `undici.MockAgent`.
+- [ ] 4.1.a Token-cache EXPIRY path: two sequential calls separated by >55 minutes of mocked clock advance; second call mints a new token (cache not re-used). Asserts the cache-with-safety-margin TTL is respected.
+- [ ] 4.1.b 409 Conflict on `publishItem`: CWS returns 409 when the item is locked by a concurrent publish attempt. Helper surfaces `CwsStateError` with a stable prefix; test asserts.
+- [ ] 4.1.c HTTP 3xx redirect handling: Google's token endpoint occasionally 302s; `fetch` follows redirects by default but assert the helper does NOT swallow a 307/308 that preserves the POST body.
+- [ ] 4.1.d Response truncation: mock a 200 with a partial JSON body (e.g., body ends mid-key); helper throws `CwsStateError` with a dedicated message prefix, not `JSON.parse` leaking the raw partial content.
+- [ ] 4.1.e 429 with retry: helper retries once after a 5s backoff on 429; a second 429 surfaces `CwsStateError`. Test asserts exactly two `fetch` calls and a ≥5s wait between them (via mocked timer).
 - [ ] 4.2 Write failing test asserting NO secret value (`private_key`, `access_token`, or any substring ≥32 chars of them) appears in stdout OR stderr across ALL exit paths (success, 401, 403, 429, 5xx, timeout, malformed JSON, JWT sign error). Factor XI complement: GitHub Actions secret-masking only catches exact matches of registered secrets — a JWT payload-segment leak (base64 fragment) would escape the runner's redaction.
-- [ ] 4.3 Manual verification from a local checkout with `CWS_SERVICE_ACCOUNT_KEY` in the shell env: run each subcommand against the real CWS API; confirm output formats and exit codes.
+- [ ] 4.2.a Rationale doc-comment: the 32-char threshold is a heuristic chosen so a base64 fragment of the private-key PEM (≥64 chars per line typically) or a JWT header/payload segment (≥80 chars typical) would be caught. A lower threshold over-reports benign prefixes; documented in the test file header.
+- [ ] 4.3 Malformed-input redaction: corrupt `CWS_SERVICE_ACCOUNT_KEY` (invalid JSON), corrupt PEM (valid JSON but unparseable private_key), missing `client_email` field. Helper throws typed errors; test asserts NO key fragment / secret content appears in the error stderr (captured via spawned-process stderr capture).
+- [ ] 4.4 `wait-published` stdout schema: write a failing test for each of the four terminal states (`PUBLISHED`, `IN_REVIEW`, `REJECTED`, `TIMEOUT`); assert stdout parses as `{ status, version, raw }` with the exact `status` string; assert exit code matches spec (0 for PUBLISHED / IN_REVIEW / TIMEOUT; non-zero for REJECTED). The workflow's tag-vs-issue branching reads this schema; any drift here breaks the whole publish logic.
+- [ ] 4.5 PEM normalization: helper accepts both raw-PEM (`-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----`) and escaped-PEM (`-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----`, as pasted into a single-line secret). Test both variants sign an identical JWT; test a triple-escaped variant (`\\\\n`) throws `CwsAuthError` without leaking the PEM.
+- [ ] 4.6 Manual verification from a local checkout with `CWS_SERVICE_ACCOUNT_KEY` in the shell env: run each subcommand against the real CWS API; confirm output formats and exit codes.
 
 ## 5. Rewrite `cws-publish.yml`
 
@@ -57,6 +67,7 @@
     7. **Wait-published**: `node scripts/cws-api.mjs wait-published <id> --version <current> --timeout-ms 120000`. On success: tag. On IN_REVIEW or timeout: open `cws-publish-verification-timeout` issue scoped per-extension per-version and exit 0.
     8. **Git tag** (only on true PUBLISHED): `git tag @kaiord/<ext>@<version> && git push origin @kaiord/<ext>@<version>`.
 - [ ] 5.3 Keep `fail-fast: false`, `concurrency: ${{ github.workflow }}-${{ github.ref }}`.
+- [ ] 5.3.a Add a YAML comment in `cws-publish.yml` above the `workflow_dispatch` input block: `# inputs.force_upload is false on push events; always check explicitly rather than relying on undefined.` — saves future maintainers 10 min of wondering why the first expression didn't short-circuit.
 - [ ] 5.4 Remove all references to `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN` in the workflow.
 - [ ] 5.5 `actionlint` passes on the rewritten workflow.
 
@@ -64,21 +75,29 @@
 
 - [ ] 6.1.a Write failing test for `scripts/cws-notify-issue.mjs <label> [<title-suffix>]`: searches existing open issues by EXACT title match (built from label + optional suffix), bumps via comment if present, creates if absent. Returns the issue number.
 - [ ] 6.1.b Implement the helper using `gh api repos/:owner/:repo/issues` — single call to search by title, single call to create or comment.
-- [ ] 6.2 Title conventions: `cws-auth-broken` → title `"CWS authentication broken"`. `cws-publish-verification-timeout` → title `"CWS publish stalled: @kaiord/<ext>@<version>"` (scoped so each stuck release is a separate issue).
-- [ ] 6.3 Add `scripts/cws-notify-issue.test.mjs` to `test:scripts`. Cover: no existing issue → creates; existing open issue → bumps (comment added, no duplicate); existing closed issue with same title → creates new; two concurrent invocations → second sees first's issue via exact-title match (TOCTOU protection — see task 6.4).
-- [ ] 6.4 **TOCTOU mitigation at workflow level**: add `concurrency: { group: cws-issue-writer, cancel-in-progress: false }` to `cws-publish.yml`. (The dedicated weekly token-health workflow is **not** created in this change — service accounts do not expire, so the proactive scheduled-check premise no longer applies. The concurrency group still prevents parallel matrix entries from racing on issue writes.)
+- [ ] 6.2 Title conventions — scoped so distinct logical states get distinct titles (enables exact-title idempotency):
+  - `cws-auth-broken` → `"CWS authentication broken"` (singleton; one open at a time, bumped on re-detection).
+  - `cws-publish-verification-timeout` → `"CWS publish stalled: @kaiord/<ext>@<version>"` (per-extension per-version; each stuck release is a distinct issue).
+  - `cws-publish-rejected` → `"CWS publish rejected: @kaiord/<ext>@<version>"` (per-extension per-version; each rejection is a distinct issue with the `itemError` payload).
+- [ ] 6.3 Add `scripts/cws-notify-issue.test.mjs` to `test:scripts`. Cover: no existing issue → creates; existing open issue → bumps (comment added, no duplicate); existing closed issue with same title → creates new; two concurrent invocations against the same title → the one that creates first wins, the second sees the existing issue on its read and bumps instead of duplicating.
+- [ ] 6.4 **Honest TOCTOU story** (see design.md Decision 7). Two layers:
+  - **Layer A — primary**: `cws-notify-issue.mjs` uses exact-title read-then-write with per-extension per-version scoping. Two matrix jobs in the same run writing to distinct titles (different versions) never collide. Two writers targeting the same title are bounded by read-then-write — not perfectly race-free, but self-healing within the next invocation.
+  - **Layer B — defense-in-depth for cross-run races**: add `concurrency: { group: cws-issue-writer, cancel-in-progress: false }` to `cws-publish.yml`. This serializes ACROSS workflow runs (e.g., a `workflow_dispatch` run vs a push-triggered run). It does NOT serialize matrix jobs within one run — document this explicitly in both the design rationale and a YAML comment in the workflow file.
+  - Note: the weekly `cws-token-health` workflow is not created in this change (service-account keys do not expire, so proactive scheduled auth checking has no premise). Layer B's cross-run benefit is narrow but free.
 
 ## 7. Issue templates
 
 - [ ] 7.1 `.github/ISSUE_TEMPLATE/cws-auth-broken.md`: title prefill `CWS authentication broken`, labels `cws-auth-broken`, assignees `pablo-albaladejo`. Body: observed error, link to runbook, checklist (rotate key via Google Cloud → update `CWS_SERVICE_ACCOUNT_KEY` → re-run pre-flight via `workflow_dispatch` → close issue).
 - [ ] 7.2 `.github/ISSUE_TEMPLATE/cws-publish-verification-timeout.md`: title template `CWS publish stalled: @kaiord/<ext>@<version>`, labels `cws-publish-verification-timeout`. Body: last CWS state payload, link to CWS Developer Dashboard, note that `IN_REVIEW` is usually fine and self-resolves.
+- [ ] 7.3 `.github/ISSUE_TEMPLATE/cws-publish-rejected.md`: title template `CWS publish rejected: @kaiord/<ext>@<version>`, labels `cws-publish-rejected`, assignees `pablo-albaladejo`. Body: full `itemError` payload from CWS, link to Chrome Web Store item-error reference docs, link to runbook's "Emergency re-publish" section (after fixing the underlying issue, a `force_upload: true` re-run is often the fix), checklist (review `itemError` → address root cause in extension code or manifest → bump version or force-upload → close issue).
 
 ## 8. Runbook
 
 - [ ] 8.1 Create `docs/runbooks/cws-service-account.md` with sections:
   - **One-time setup** (mirrors task 1.x with screenshots or step-by-step clickpaths where Chrome Web Store UI is involved).
   - **Key rotation** (optional, security best practice): generate new key → update secret → trigger `workflow_dispatch` pre-flight to verify → revoke old key. Timeline suggestion: annual or on any security event.
-  - **Emergency re-publish**: Actions → "CWS Publish" → Run workflow → `force_upload: true` → Run. Note: `force_upload` BYPASSES the idempotency guard; only use when the shipped CRX is known-bad.
+  - **Emergency re-publish**: Actions → "CWS Publish" → Run workflow → `force_upload: true` → Run. Note: `force_upload` BYPASSES the idempotency guard; only use when the shipped CRX is known-bad. **DO NOT wire `force_upload: true` into another workflow (`release.yml`, `retry.yml`, etc.) as a default input** — it is a human-gated emergency override, not a knob for automation. If an upstream workflow needs to call CWS Publish, do so without `force_upload` and let the idempotency guard work.
+  - **Setup time expectations**: ≤15 minutes in the happy path (existing GCP project, no org policy restrictions). Cold-start with first-time GCP project + OAuth consent-screen configuration + occasional IAM-propagation delays can reach ~45 minutes. Plan accordingly.
   - **Compromised-key response**: revoke the JSON key in Google Cloud Console IMMEDIATELY (does not require waiting to generate replacement); this will cause pre-flight to fail and open `cws-auth-broken`; then generate new key, update secret, audit CWS Developer Dashboard for unauthorized item submissions in the last N days.
   - **What this replaces**: a brief note that the repo used to use OAuth user-delegated refresh tokens (`CWS_CLIENT_ID` / `CWS_CLIENT_SECRET` / `CWS_REFRESH_TOKEN`). These secrets are no longer consulted; remove them from the repo Secrets screen after confirming the new flow works end-to-end.
 - [ ] 8.2 Reference the runbook from `AGENTS.md` under a "Runbooks" index section (create section if absent).

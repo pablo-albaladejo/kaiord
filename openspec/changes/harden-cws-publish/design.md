@@ -34,6 +34,7 @@ This change replaces the fragile OAuth user-flow auth with service-account auth 
 - Automating key rotation — service-account keys do not expire; rotation is a maintainer-initiated security action, not a required scheduled task. If a scheduled rotation policy is ever adopted (e.g., quarterly), that becomes a separate future change.
 - Adding Chrome-sync / publish-metrics telemetry — orthogonal.
 - Adding Firefox / Edge add-on stores — orthogonal; each has its own auth model.
+- Detecting post-publish demotion, publisher-account suspension, or Google-initiated policy-update re-submission demands — all Google-initiated reactive events not preventable from CI; out of scope. The `cws-auth-broken` surface catches the 401/403 *symptom* but the response lives outside this pipeline.
 
 ## Decisions
 
@@ -153,16 +154,38 @@ All subcommands print structured JSON to stdout on success (parseable by workflo
 5. wait-published:
      node scripts/cws-api.mjs wait-published <id> \
        --version $PKG_VERSION --timeout-ms 120000
-     Success criteria (either):
-       published.version == package.json.version   → live
-       reviewState == IN_REVIEW                    → manual review queue
-     Neither within timeout → open cws-publish-verification-timeout
-                                 issue (scoped per-extension per-version),
-                                 exit 0 (non-blocking).
+     Terminal states (stops polling immediately):
+       published.version == package.json.version   → "PUBLISHED" — live
+       reviewState == IN_REVIEW                    → "IN_REVIEW"
+       itemError contains REJECTED marker          → "REJECTED" (fail-fast,
+                                                     do NOT wait out the 2-min
+                                                     timeout on a terminal-bad
+                                                     state)
+     Timeout without terminal state                → "TIMEOUT"
+
+     Stdout contract on success (exit 0 for all 4 states):
+       { "status": "PUBLISHED" | "IN_REVIEW" | "REJECTED" | "TIMEOUT",
+         "version": "X.Y.Z",
+         "raw": <last CWS response body> }
+     The workflow branches tag-vs-issue on the "status" field; tests assert
+     this schema explicitly (task 3.3).
+
+     Post-step workflow behavior per status:
+       PUBLISHED  → write git tag, exit 0
+       IN_REVIEW  → open cws-publish-verification-timeout issue (scoped
+                    per-extension per-version), no tag, exit 0 (non-blocking)
+       REJECTED   → open cws-publish-rejected issue (distinct label,
+                    scoped per-extension per-version), no tag, FAIL the
+                    matrix job (a rejected CRX is a human-actionable policy
+                    issue, not a queue-stall; treating it as non-blocking
+                    would let subsequent releases ship over an unresolved
+                    rejection).
+       TIMEOUT    → same as IN_REVIEW (open verification-timeout issue,
+                    exit 0 non-blocking; CWS may simply be slow).
 
 6. git tag:
-     only on (published.version == package.json.version)
-     — IN_REVIEW does NOT tag (not yet live).
+     only on (status == "PUBLISHED")
+     — IN_REVIEW, REJECTED, TIMEOUT do NOT tag.
 ```
 
 **Rationale:**
@@ -216,15 +239,47 @@ Tracked via the `cws-auth-broken` issue template — the pre-flight's auto-creat
 
 **Layer impact:** None (explicitly not changing).
 
+### Decision 7: TOCTOU mitigation on issue writes — where the real guarantee lives
+
+**Choice:** Two layers, with explicit acknowledgement of what each one does and does NOT do.
+
+**Layer A — `cws-notify-issue.mjs` read-then-write with exact-title match (the real mitigation)**
+
+The helper searches existing issues by EXACT title match (not just label) before deciding create-vs-bump. Title conventions include scoping (e.g., `CWS publish stalled: @kaiord/<ext>@<version>` — per-extension, per-version) so each distinct logical state gets a distinct title. Two concurrent writers racing toward the same title will both see "no open issue" at check time; the second write wins the API call that creates the duplicate, and the NEXT invocation's read detects both and can bump+close-duplicate. Not perfectly race-free, but bounded: duplicates are self-healing within one subsequent run.
+
+**Layer B — `concurrency: { group: cws-issue-writer, cancel-in-progress: false }` (narrow defense-in-depth)**
+
+GitHub Actions concurrency groups serialize across *workflow runs*, NOT across matrix jobs within a single run. Two matrix entries (`garmin-bridge` + `train2go-bridge`) inside one `cws-publish.yml` run share the concurrency token and execute in parallel. Layer B's contribution is narrow: it prevents a `workflow_dispatch`-triggered run from racing against a push-triggered run targeting the same extension's issue. Under the service-account model (Decision 1), there is no weekly cron workflow, so this cross-run race is rare — Layer B is still worth keeping for the manual-dispatch-during-push case (close to zero probability, zero runtime cost).
+
+**What the Choice explicitly REJECTS:**
+
+- *Claim that the concurrency group serializes matrix jobs*: WRONG. Matrix jobs in one run share the token; they race.
+- *Layer B alone as TOCTOU protection*: INSUFFICIENT. Relies on Layer A for the within-run matrix case, which is the common case.
+
+**Rationale:**
+
+- Honest framing of what each layer does matters: future maintainers who try to add a third matrix extension or another writer workflow need to know the real contract.
+- Exact-title scoping (Layer A) is the primary; concurrency group (Layer B) is secondary defense.
+
+**Alternatives considered:**
+
+- *Per-issue GitHub GraphQL mutation with a deterministic idempotency key*: GitHub does not offer one for issue creation. Rejected.
+- *Serialize matrix jobs via `needs: [prev-job]`*: would remove parallelism and more than double wall-clock time of a publish. Rejected.
+
+**Layer impact:** Infrastructure (honest documentation of the TOCTOU story).
+
 ## Risks / Trade-offs
 
 - **[Risk] One-time manual setup is a blocker for any automation gain** → Acceptable. ≤15 minutes of Google Cloud Console + CWS Developer Dashboard work. The runbook guides it step-by-step. Without this one-time setup, the auth migration cannot proceed; but once done, the system is durable for years.
 - **[Risk] Google's "one service account per publisher" limit** → Fits our use case (single publisher owning 2 extensions). Would constrain a future multi-publisher split, but that's a much larger re-org.
 - **[Risk] Service-account JSON key in GitHub Secrets is exposed to any workflow that can access it** → Mitigation: the key is repo-scoped (not org-wide); only `cws-publish.yml` references it (enforced by code review + secret-scanning); GitHub masks it in logs automatically; the helper's tests include a "no secret in stdout/stderr" assertion (Factor XI defense-in-depth); if compromised, the runbook's "revoke compromised key" procedure is the response.
 - **[Risk] The helper's JWT signing has a subtle clock-skew edge case** → Mitigation: the JWT `iat` and `exp` claims use `Date.now()` with a 60-second safety window on `iat` (backdating slightly to survive GitHub Actions runner clock drift vs Google's auth endpoint). Tested explicitly.
-- **[Risk] CWS API semantics for `uploadState` / `reviewState` are under-documented** → Mitigation: the helper normalizes the known states (`UPLOADED`, `PUBLISHED`, `IN_REVIEW`) and any other response is treated as "state unclear → open an issue with the raw payload for manual triage". This also catches future CWS API additions gracefully.
+- **[Risk] CWS API semantics for `uploadState` / `reviewState` are under-documented** → Mitigation: the helper normalizes the four known terminal states (`UPLOADED`, `PUBLISHED`, `IN_REVIEW`, `REJECTED`) and any other response is treated as "state unclear → open an issue with the raw payload for manual triage". `REJECTED` is a first-class terminal state (distinct label `cws-publish-rejected`, fail-fast from the poll, fails the matrix job): a rejected CRX is a human-actionable policy/validation error and NOT treating it as blocking would let subsequent unrelated releases ship over an unresolved rejection. `IN_REVIEW` remains non-blocking (manual review is a routine queue state). This also catches future CWS API additions gracefully.
+- **[Risk] Credential revoked mid-flight** → pre-flight passing is a point-in-time guarantee, not a running guarantee. The CWS Developer Dashboard owner could unlink the service account between pre-flight (T+0) and upload (T+5s) — upload would then fail with 401/403 mid-run. Mitigation: the helper's typed `CwsAuthError` is thrown on ANY 401/403 from CWS (not just pre-flight), and the workflow's upload/publish/state steps ALL route 401/403 errors to `scripts/cws-notify-issue.mjs cws-auth-broken` — same label as pre-flight uses, same runbook, same fix path. Covered by a dedicated scenario in the spec delta ("Pre-flight authentication validation" → mid-flight 401/403).
 - **[Risk] Adding pre-flight + post-publish polling adds ~30 s to each successful run** → Acceptable; CI minutes on publish are cheap (few runs/week).
 - **[Risk] Removing `chrome-webstore-upload-cli` means we own the upload multipart-request implementation** → Mitigation: the CWS upload endpoint is a documented PUT with a zip body and `Content-Type: application/octet-stream` (NOT multipart); simpler than expected. The helper implementation is ~15 LOC for upload, covered by tests with mocked fetch.
 - **[Trade-off] Factor X: no staging Chrome Web Store tier exists** → Chrome Web Store has no staging; every end-to-end test touches prod. Mitigations: (a) exhaustive fetch-mocked unit tests on the helper; (b) end-to-end verification scheduled with a real intended release, not speculatively; (c) pre-flight `check` is non-destructive and runs on any `workflow_dispatch` — so we can validate auth and connectivity without uploading.
 - **[Trade-off] No fallback OAuth path** → Explicit. If the service-account path breaks mid-release due to a Google outage, rollback is `git revert` + restore the three OAuth secrets. The old path still works against the same CWS API.
-- **[Trade-off] Emergency force-republish requires `workflow_dispatch`, not auto** → Intentional: `force_upload` bypasses a correctness guardrail; requiring a human to flip it ensures re-uploads of the same version are deliberate.
+- **[Trade-off] Emergency force-republish requires `workflow_dispatch`, not auto** → Intentional: `force_upload` bypasses a correctness guardrail; requiring a human to flip it ensures re-uploads of the same version are deliberate. The runbook explicitly forbids wiring `force_upload: true` as a default input of any upstream workflow (e.g., `release.yml with: { force_upload: true }`) — it is a human-gated emergency override, NOT a knob for automated pipelines.
+- **[Trade-off] Out-of-scope CWS failure classes** → Not addressed by this change: post-publish demotion (extension auto-removed weeks later for policy violation), publisher-account suspension (whole developer account disabled by Google), CWS policy updates that require re-submission. These are all reactive-by-Google events; none are preventable from CI. If they occur, the `cws-auth-broken` issue surfaces the symptom (401/403) and the runbook's compromised-key section is a reasonable starting point, but genuine response lives outside this pipeline.
+- **[Risk] One-time setup may exceed 15 minutes** → Happy-path estimate is ≤15 min (existing GCP project, no org policies). Cold-start estimate with first-time GCP project creation, OAuth consent screen configuration, and IAM propagation delays can reach ~45 min. The runbook documents both cases.

@@ -83,6 +83,15 @@ On a 4xx response consistent with authentication failure (401 Unauthorized, 403 
 - **AND** a GitHub Issue labelled `cws-auth-broken` SHALL exist (opened fresh or bumped with a new timestamp)
 - **AND** the `publish` matrix SHALL be skipped
 
+#### Scenario: Credential revoked mid-flight (after pre-flight passes)
+
+- **GIVEN** pre-flight passed at run start (auth was valid at T+0)
+- **AND** the service-account linkage is unlinked from the Chrome Web Store Developer Dashboard during the run (e.g., manual action between T+5s and T+30s)
+- **WHEN** the upload, publish, or state-query step subsequently issues an API call and receives 401 / 403
+- **THEN** the helper SHALL throw a typed `CwsAuthError`
+- **AND** the workflow SHALL open (or bump) an issue labelled `cws-auth-broken` — the same label and runbook link as the pre-flight path uses, so both detection modes converge on a single queue
+- **AND** the matrix job for the affected extension SHALL fail
+
 ### Requirement: Upload and publish are separate, resumable steps
 
 The workflow SHALL NOT use a single auto-publishing call (`--auto-publish` or equivalent). Upload and publish SHALL be issued as distinct helper subcommands (`upload`, `publish`), with a CWS-API-backed state check between them (`wait-uploaded`). A partial failure at publish SHALL NOT trigger a duplicate upload on the next run.
@@ -120,33 +129,63 @@ If the CWS API is unreachable (5xx, network error) during the state query, the w
 
 ### Requirement: Post-publish verification
 
-After `publish`, the workflow SHALL poll the CWS API (`GET /items/<id>?projection=PUBLISHED`) for up to 2 minutes, terminating on either `published.version == package.json.version` OR `reviewState == IN_REVIEW`. If neither terminal state is reached, the workflow SHALL open a GitHub Issue labelled `cws-publish-verification-timeout` (scoped per-extension per-version so each stuck release has a distinct record) containing the last-seen CWS response, and SHALL exit 0 — the workflow SHALL NOT fail on verification timeout (manual review and background processing are legitimate states; failing would block unrelated future releases).
+After `publish`, the workflow SHALL poll the CWS API (`GET /items/<id>?projection=PUBLISHED`) for up to 2 minutes (rationale: this timeout confirms publish **dispatch** reached a terminal state, NOT end-user-review completion which can take days). The poll SHALL terminate on any of four terminal states: `PUBLISHED`, `IN_REVIEW`, `REJECTED`, or `TIMEOUT` (no terminal state reached within the window).
 
-The git tag `@kaiord/<ext>@<version>` SHALL be created ONLY when the polled state reaches `PUBLISHED` with the expected version. `IN_REVIEW` SHALL NOT trigger tag creation.
+The `wait-published` subcommand SHALL print a structured JSON contract to stdout on exit:
+
+```json
+{
+  "status": "PUBLISHED" | "IN_REVIEW" | "REJECTED" | "TIMEOUT",
+  "version": "<the semver polled>",
+  "raw": <last CWS response body as object>
+}
+```
+
+The workflow SHALL branch on `status`:
+
+- `PUBLISHED` → create the `@kaiord/<ext>@<version>` git tag; matrix job exits 0.
+- `IN_REVIEW` → open `cws-publish-verification-timeout` issue (scoped per-extension per-version); NO git tag; matrix job exits 0 (non-blocking; manual review is a legitimate queue state).
+- `REJECTED` → open `cws-publish-rejected` issue (distinct label, scoped per-extension per-version) with the `itemError` payload; NO git tag; matrix job **FAILS** (a rejected CRX is a human-actionable policy/validation error; leaving subsequent releases to ship over an unresolved rejection would silently compound the problem).
+- `TIMEOUT` → same behavior as `IN_REVIEW` (CWS may simply be slow; issue opens for visibility; exit 0).
 
 #### Scenario: Publish reaches live
 
 - **GIVEN** publish succeeds
-- **AND** within 2 minutes the published version equals `package.json.version`
-- **WHEN** the verification step runs
-- **THEN** the workflow SHALL succeed and SHALL create the git tag
+- **AND** within 2 minutes the CWS response shows `published.version == package.json.version`
+- **WHEN** `wait-published` terminates
+- **THEN** stdout SHALL contain `{"status":"PUBLISHED",...}`
+- **AND** the workflow SHALL create the git tag
+- **AND** the matrix job SHALL exit 0
 
 #### Scenario: Publish enters manual review
 
 - **GIVEN** publish succeeds
-- **AND** within 2 minutes CWS reports `reviewState: IN_REVIEW` but no live version yet
-- **WHEN** the verification step runs
-- **THEN** the workflow SHALL succeed (non-blocking)
-- **AND** SHALL open a `cws-publish-verification-timeout` issue for maintainer awareness
-- **AND** SHALL NOT create the git tag
+- **AND** within 2 minutes CWS reports `reviewState: IN_REVIEW` with no live version
+- **WHEN** `wait-published` terminates
+- **THEN** stdout SHALL contain `{"status":"IN_REVIEW",...}`
+- **AND** the workflow SHALL open a `cws-publish-verification-timeout` issue scoped to this extension + version
+- **AND** the matrix job SHALL exit 0
+- **AND** no git tag SHALL be created
+
+#### Scenario: Publish is rejected
+
+- **GIVEN** publish dispatched
+- **AND** within 2 minutes CWS returns a rejection marker (`itemError` containing REJECTED state or equivalent)
+- **WHEN** `wait-published` terminates
+- **THEN** stdout SHALL contain `{"status":"REJECTED",...}`
+- **AND** `wait-published` SHALL fail-fast (NOT wait out the full 2-min timeout)
+- **AND** the workflow SHALL open a `cws-publish-rejected` issue scoped to this extension + version with the full `itemError` payload
+- **AND** the matrix job SHALL FAIL (non-zero exit)
+- **AND** no git tag SHALL be created
 
 #### Scenario: Publish silently stalls
 
 - **GIVEN** publish succeeds
-- **AND** after 2 minutes CWS reports neither `PUBLISHED` nor `IN_REVIEW`
-- **WHEN** the verification step runs
-- **THEN** the workflow SHALL succeed (non-blocking)
-- **AND** SHALL open a `cws-publish-verification-timeout` issue with the last CWS payload
+- **AND** after 2 minutes CWS reports neither `PUBLISHED` nor `IN_REVIEW` nor `REJECTED`
+- **WHEN** `wait-published` terminates
+- **THEN** stdout SHALL contain `{"status":"TIMEOUT",...}`
+- **AND** the workflow SHALL open a `cws-publish-verification-timeout` issue with the last CWS payload
+- **AND** the matrix job SHALL exit 0 (non-blocking; a stall is recoverable, unlike a rejection)
 
 ### Requirement: Emergency force-republish override
 
