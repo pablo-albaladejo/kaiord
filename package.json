@@ -84,11 +84,11 @@
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "husky": "^9.1.7",
     "jscpd": "^4.0.9",
-    "knip": "^6.4.1",
+    "knip": "^6.5.0",
     "prettier": "^3.8.3",
     "sharp": "^0.34.5",
     "size-limit": "^12.1.0",
     "typescript": "^5.3.3",
-    "typescript-eslint": "^8.58.2"
+    "typescript-eslint": "^8.59.0"
   }
 }
