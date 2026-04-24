@@ -4,14 +4,14 @@ import { useCallback } from "react";
 import { generateWorkoutKrd } from "../../../lib/generate-workout";
 import { useAiStore } from "../../../store/ai-store";
 import { useProfileStore } from "../../../store/profile-store";
-import { useWorkoutStore } from "../../../store/workout-store";
+import { useLoadWorkout } from "../../../store/workout-store-selectors";
 import type { SportKey } from "../../../types/sport-zones";
 import { formatZonesContext } from "./zones-formatter";
 
 export const useAiGeneration = () => {
   const { getSelectedProvider, customPrompt, setGeneration } = useAiStore();
   const { getActiveProfile } = useProfileStore();
-  const { loadWorkout } = useWorkoutStore();
+  const loadWorkout = useLoadWorkout();
 
   const generate = useCallback(
     async (text: string, sport?: Sport) => {

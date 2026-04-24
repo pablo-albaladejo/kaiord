@@ -357,6 +357,54 @@ jobs:
               sys.exit(1)
           PY
 
+      - name: Focus-invariants — narrow-selector discipline for useWorkoutStore
+        # Every consumer of the workout store under src/components/** or
+        # src/hooks/** MUST subscribe via a narrow selector so that a
+        # `setPendingFocusTarget` write (which produces a fresh object
+        # reference) does not re-render every consumer. The forbidden
+        # patterns are: no-arg `useWorkoutStore()` (subscribes to the
+        # whole state), and `useWorkoutStore((s) => s)` (same effect).
+        # Pre-baked narrow hooks live in `workout-store-selectors.ts`;
+        # prefer those or pass an explicit `(s) => s.specificField`.
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          roots = [
+              Path("packages/workout-spa-editor/src/components"),
+              Path("packages/workout-spa-editor/src/hooks"),
+          ]
+          # `useWorkoutStore()` with no selector, or `useWorkoutStore((s) => s)`
+          # / `useWorkoutStore(s => s)` with the identity selector.
+          wide_call = re.compile(r"\buseWorkoutStore\s*\(\s*\)")
+          identity = re.compile(
+              r"\buseWorkoutStore\s*\(\s*\(?\s*(\w+)\s*\)?\s*=>\s*\1\s*\)"
+          )
+          violations = []
+          for root in roots:
+              for path in root.rglob("*"):
+                  if path.suffix not in {".ts", ".tsx"}:
+                      continue
+                  if ".test." in path.name:
+                      continue
+                  text = path.read_text()
+                  if wide_call.search(text) or identity.search(text):
+                      violations.append(str(path))
+
+          if violations:
+              print(
+                  "Wide useWorkoutStore() subscriptions under "
+                  "components/ or hooks/ are forbidden (§10.3). Use a "
+                  "narrow selector or a pre-baked hook from "
+                  "workout-store-selectors.ts:"
+              )
+              for v in violations:
+                  print(f"  {v}")
+              sys.exit(1)
+          PY
+
   check-links:
     name: Link checker
     runs-on: ubuntu-latest

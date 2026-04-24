@@ -2,7 +2,10 @@ import { useSettingsDialog } from "../../../contexts";
 import { useLazyDialog } from "../../../hooks/use-lazy-dialog";
 import { useLibrary } from "../../../hooks/use-library";
 import { useProfileStore } from "../../../store/profile-store";
-import { useWorkoutStore } from "../../../store/workout-store";
+import {
+  useCurrentWorkout,
+  useLoadWorkout,
+} from "../../../store/workout-store-selectors";
 import { HeaderLogo } from "./components/HeaderLogo";
 import { HeaderNav } from "./components/HeaderNav";
 import { LayoutHeaderDialogs } from "./components/LayoutHeaderDialogs";
@@ -23,7 +26,8 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
   const { getActiveProfile } = useProfileStore();
   const activeProfile = getActiveProfile();
   const { templates } = useLibrary();
-  const { currentWorkout, loadWorkout } = useWorkoutStore();
+  const currentWorkout = useCurrentWorkout();
+  const loadWorkout = useLoadWorkout();
 
   return (
     <header className="sticky top-0 z-50 border-b border-gray-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
