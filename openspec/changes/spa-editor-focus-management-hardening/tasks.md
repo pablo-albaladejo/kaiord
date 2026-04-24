@@ -57,7 +57,7 @@
 
 ## 6. StrictMode re-run of integration tests
 
-- [ ] 6.1.a Identify focus integration test files in `packages/workout-spa-editor/src/`. Wrap each `describe` block covering focus-hook behavior with the following pattern. `FocusRegistryContext` is imported from the base change's `src/contexts/focus-registry-context.tsx` (introduced in base Decision 3); `FocusTelemetryContext` is introduced in this change (task 2.1.b):
+- [x] 6.1.a Identify focus integration test files in `packages/workout-spa-editor/src/`. Wrap each `describe` block covering focus-hook behavior with the following pattern. `FocusRegistryContext` is imported from the base change's `src/contexts/focus-registry-context.tsx` (introduced in base Decision 3); `FocusTelemetryContext` is introduced in this change (task 2.1.b):
   ```ts
   describe.each([
     { mode: 'standard', Wrapper: Fragment },
@@ -76,9 +76,9 @@
   });
   ```
   so each assertion runs twice, once per mode
-- [ ] 6.1.b Write a failing test demonstrating a deliberately-broken Strict Mode interaction (e.g., double-registration missing the identity guard); confirm the `describe.each` re-run catches it
-- [ ] 6.1.c Remove the failing test; commit the Strict Mode wrapper infrastructure
-- [ ] 6.1.d Write failing test asserting the `wiring-canary` emission does NOT double-fire under Strict Mode: mount → Strict Mode double-invokes → exactly one canary
+- [x] 6.1.b Write a failing test demonstrating a deliberately-broken Strict Mode interaction (e.g., double-registration missing the identity guard); confirm the `describe.each` re-run catches it
+- [x] 6.1.c Remove the failing test; commit the Strict Mode wrapper infrastructure
+- [x] 6.1.d Write failing test asserting the `wiring-canary` emission does NOT double-fire under Strict Mode: mount → Strict Mode double-invokes → exactly one canary
 - [ ] 6.2 Verify the CI wall-clock duration for the focus integration suite remains within the project's CI budget (target: <2× previous duration); document the before/after timing in the PR description
 
 ## 7. Accessibility evidence directory

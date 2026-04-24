@@ -11,24 +11,31 @@
  * Tests install `vi.useFakeTimers()` and call `vi.runAllTimers()` to
  * advance past that boundary. `requestAnimationFrame` is similarly
  * stubbed via `vi.advanceTimersByTime` semantics.
+ *
+ * StrictMode re-run (§6.1): every test executes under both standard and
+ * strict rendering modes via `describe.each`. The strict suite proves that
+ * double-mount / double-effect semantics do not break focus behaviour.
  */
 
+import { Fragment, StrictMode, useContext, useEffect, useRef } from "react";
 import { act, render } from "@testing-library/react";
-import { useContext, useEffect, useRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {
   FocusRegistryContext,
   FocusRegistryProvider,
 } from "../../contexts/focus-registry-context";
+import { FocusTelemetryContext } from "../../contexts/focus-telemetry-context";
 import { __resetOverlayObserverForTests } from "../../lib/focus/overlay-observer";
 import {
   focusEmptyState,
   focusItem,
 } from "../../store/focus/focus-target.types";
+import type { FocusTelemetry } from "../../store/providers/focus-telemetry";
 import { asItemId } from "../../store/providers/item-id";
 import { useWorkoutStore } from "../../store/workout-store";
 import { useFocusAfterAction } from "./use-focus-after-action";
+import { __resetCanaryForTests } from "./use-focus-telemetry-emitter";
 
 const resetStore = () => {
   useWorkoutStore.setState({
@@ -93,24 +100,33 @@ const Harness = ({
   );
 };
 
-const renderHarness = () => {
-  const ref = { current: null as HarnessRefs | null };
-  const view = render(
-    <FocusRegistryProvider>
-      <Harness harnessRef={ref} />
-    </FocusRegistryProvider>
-  );
-  return { ref, view };
-};
+type WrapperComponent = typeof Fragment | typeof StrictMode;
 
-describe("useFocusAfterAction", () => {
+describe.each([
+  { mode: "standard", Wrapper: Fragment as WrapperComponent },
+  { mode: "strict", Wrapper: StrictMode as WrapperComponent },
+])("useFocusAfterAction [$mode]", ({ Wrapper }) => {
+  const renderHarness = () => {
+    const ref = { current: null as HarnessRefs | null };
+    const view = render(
+      <Wrapper>
+        <FocusRegistryProvider>
+          <Harness harnessRef={ref} />
+        </FocusRegistryProvider>
+      </Wrapper>
+    );
+    return { ref, view };
+  };
+
   beforeEach(() => {
     resetStore();
     vi.useFakeTimers();
+    __resetCanaryForTests();
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
     __resetOverlayObserverForTests();
     resetStore();
     document.body.innerHTML = "";
@@ -278,9 +294,11 @@ describe("useFocusAfterAction", () => {
     };
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
     render(
-      <FocusRegistryProvider>
-        <BareHarness />
-      </FocusRegistryProvider>
+      <Wrapper>
+        <FocusRegistryProvider>
+          <BareHarness />
+        </FocusRegistryProvider>
+      </Wrapper>
     );
 
     // Act
@@ -353,9 +371,11 @@ describe("useFocusAfterAction", () => {
     };
     const ref = { current: null as HarnessRefs | null };
     const view = render(
-      <FocusRegistryProvider>
-        <HarnessWithDialog harnessRef={ref} dialogOpen />
-      </FocusRegistryProvider>
+      <Wrapper>
+        <FocusRegistryProvider>
+          <HarnessWithDialog harnessRef={ref} dialogOpen />
+        </FocusRegistryProvider>
+      </Wrapper>
     );
 
     const rafSpy = vi
@@ -397,10 +417,12 @@ describe("useFocusAfterAction", () => {
       return <div ref={nodeRef} data-testid={id} tabIndex={-1} />;
     };
     render(
-      <FocusRegistryProvider>
-        <Harness harnessRef={ref} />
-        <Item id="step-a" />
-      </FocusRegistryProvider>
+      <Wrapper>
+        <FocusRegistryProvider>
+          <Harness harnessRef={ref} />
+          <Item id="step-a" />
+        </FocusRegistryProvider>
+      </Wrapper>
     );
 
     // Act
@@ -416,5 +438,29 @@ describe("useFocusAfterAction", () => {
     // Assert
     const target = document.querySelector('[data-testid="step-a"]');
     expect(document.activeElement).toBe(target);
+  });
+
+  // Task 6.1.d — wiring-canary must fire exactly once under both modes.
+  // Under StrictMode, React double-invokes effects; the module-level
+  // hasFiredCanaryThisSession flag prevents double-emission.
+  it("wiring-canary fires exactly once even under StrictMode double-mount", () => {
+    // Arrange
+    const spy = vi.fn<FocusTelemetry>();
+    const harnessRef = { current: null as HarnessRefs | null };
+
+    // Act
+    render(
+      <Wrapper>
+        <FocusTelemetryContext.Provider value={spy}>
+          <FocusRegistryProvider>
+            <Harness harnessRef={harnessRef} />
+          </FocusRegistryProvider>
+        </FocusTelemetryContext.Provider>
+      </Wrapper>
+    );
+
+    // Assert — exactly one canary regardless of mount count.
+    const canaries = spy.mock.calls.filter(([e]) => e.type === "wiring-canary");
+    expect(canaries).toHaveLength(1);
   });
 });

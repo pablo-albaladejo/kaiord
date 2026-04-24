@@ -10,8 +10,12 @@
  * Timing: focus moves happen inside `setTimeout(fn, 0)` per §7.6;
  * tests install `vi.useFakeTimers()` and call `vi.runAllTimers()`
  * to push past that boundary.
+ *
+ * StrictMode re-run (§6.1): every test executes under both standard and
+ * strict rendering modes via `describe.each`.
  */
 
+import { Fragment, StrictMode } from "react";
 import { act } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -19,6 +23,7 @@ import { __resetOverlayObserverForTests } from "../../../lib/focus/overlay-obser
 import { useWorkoutStore } from "../../../store/workout-store";
 import { renderWithProviders } from "../../../test-utils";
 import type { KRD } from "../../../types/krd";
+import { __resetCanaryForTests } from "../../../hooks/focus/use-focus-telemetry-emitter";
 import { WorkoutSection } from "./WorkoutSection";
 
 // Mock WorkoutStats and WorkoutPreview to skip heavy chart rendering
@@ -86,163 +91,177 @@ const ReactiveSection = () => {
   );
 };
 
-const renderSection = (krd: KRD) => {
-  useWorkoutStore.getState().loadWorkout(krd);
-  return renderWithProviders(<ReactiveSection />);
-};
+type WrapperComponent = typeof Fragment | typeof StrictMode;
 
-describe("WorkoutSection focus integration (§8.1–§8.5)", () => {
-  beforeEach(() => {
-    resetStore();
-    vi.useFakeTimers();
-  });
+describe.each([
+  { mode: "standard", Wrapper: Fragment as WrapperComponent },
+  { mode: "strict", Wrapper: StrictMode as WrapperComponent },
+])(
+  "WorkoutSection focus integration (§8.1–§8.5) [$mode]",
+  ({ Wrapper }) => {
+    const renderSection = (krd: KRD) => {
+      useWorkoutStore.getState().loadWorkout(krd);
+      return renderWithProviders(
+        <Wrapper>
+          <ReactiveSection />
+        </Wrapper>
+      );
+    };
 
-  afterEach(() => {
-    vi.useRealTimers();
-    __resetOverlayObserverForTests();
-    resetStore();
-    document.body.innerHTML = "";
-  });
-
-  it("focuses the next sibling after deleting a step", () => {
-    // Arrange — two steps; delete the first.
-    renderSection(buildKrd([step(0), step(1)]));
-    const initialSecondId = readInner().steps[1].id;
-
-    // Act
-    act(() => {
-      useWorkoutStore.getState().deleteStep(0);
-    });
-    act(() => {
-      vi.runAllTimers();
+    beforeEach(() => {
+      resetStore();
+      vi.useFakeTimers();
+      __resetCanaryForTests();
     });
 
-    // Assert — focus landed on what was the second step (now index 0).
-    const activeId = (
-      document.activeElement as HTMLElement | null
-    )?.getAttribute("data-testid");
-    expect(activeId).toBe("step-card");
-    // And it is the same DOM node as the original second step's card.
-    const stepCards = document.querySelectorAll(
-      '[data-testid="step-card"]'
-    ) as NodeListOf<HTMLElement>;
-    expect(stepCards.length).toBe(1);
-    // The surviving card carries the original second step's id in the
-    // registry; we cannot read the id directly off the card (no data
-    // attribute for it), but the fact that it was focused is the
-    // assertion we care about.
-    expect(initialSecondId).toBeDefined();
-  });
-
-  it("focuses the new step after createStep", () => {
-    // Arrange
-    renderSection(buildKrd([step(0)]));
-
-    // Act
-    act(() => {
-      useWorkoutStore.getState().createStep();
-    });
-    act(() => {
-      vi.runAllTimers();
+    afterEach(() => {
+      vi.useRealTimers();
+      vi.restoreAllMocks();
+      __resetOverlayObserverForTests();
+      resetStore();
+      document.body.innerHTML = "";
     });
 
-    // Assert — a second step exists and focus lives on a step card.
-    const stepCards = document.querySelectorAll('[data-testid="step-card"]');
-    expect(stepCards.length).toBe(2);
-    expect(
-      (document.activeElement as HTMLElement | null)?.getAttribute(
-        "data-testid"
-      )
-    ).toBe("step-card");
-  });
+    it("focuses the next sibling after deleting a step", () => {
+      // Arrange — two steps; delete the first.
+      renderSection(buildKrd([step(0), step(1)]));
+      const initialSecondId = readInner().steps[1].id;
 
-  it("focuses the Add Step button when the list becomes empty", () => {
-    // Arrange — one step; delete it.
-    renderSection(buildKrd([step(0)]));
+      // Act
+      act(() => {
+        useWorkoutStore.getState().deleteStep(0);
+      });
+      act(() => {
+        vi.runAllTimers();
+      });
 
-    // Act
-    act(() => {
-      useWorkoutStore.getState().deleteStep(0);
-    });
-    act(() => {
-      vi.runAllTimers();
-    });
-
-    // Assert — focus on the Add Step button (the empty-state target).
-    // Capture AFTER the mutation so we compare against the live
-    // post-re-render DOM node, not a stale pre-mutation reference.
-    const addStepButton = document.querySelector(
-      '[data-testid="add-step-button"]'
-    );
-    expect(document.activeElement).toBe(addStepButton);
-  });
-
-  it("does not move focus while an input inside the editor is focused", () => {
-    // Arrange
-    renderSection(buildKrd([step(0), step(1)]));
-    // Inject an input inside the editor root; focus it; then trigger
-    // a mutation that would normally move focus.
-    const editorRoot = document.querySelector(
-      '[data-testid="editor-root"]'
-    ) as HTMLElement;
-    const input = document.createElement("input");
-    input.type = "text";
-    editorRoot.appendChild(input);
-    input.focus();
-
-    // Act
-    act(() => {
-      useWorkoutStore.getState().deleteStep(0);
-    });
-    act(() => {
-      vi.runAllTimers();
+      // Assert — focus landed on what was the second step (now index 0).
+      const activeId = (
+        document.activeElement as HTMLElement | null
+      )?.getAttribute("data-testid");
+      expect(activeId).toBe("step-card");
+      // And it is the same DOM node as the original second step's card.
+      const stepCards = document.querySelectorAll(
+        '[data-testid="step-card"]'
+      ) as NodeListOf<HTMLElement>;
+      expect(stepCards.length).toBe(1);
+      // The surviving card carries the original second step's id in the
+      // registry; we cannot read the id directly off the card (no data
+      // attribute for it), but the fact that it was focused is the
+      // assertion we care about.
+      expect(initialSecondId).toBeDefined();
     });
 
-    // Assert — focus stayed on the input; pendingFocusTarget cleared.
-    expect(document.activeElement).toBe(input);
-    expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
-  });
+    it("focuses the new step after createStep", () => {
+      // Arrange
+      renderSection(buildKrd([step(0)]));
 
-  // §8.6 — focus-visible styling contract. jsdom does not apply CSS
-  // pseudo-classes, so we assert the marker classes are present in the
-  // className string — verifying the ring is wired even if we cannot
-  // measure the pixel outline.
-  it("applies focus-visible ring classes to every focusable item target", () => {
-    // Arrange
-    renderSection(buildKrd([step(0), { repeatCount: 2, steps: [step(0)] }]));
+      // Act
+      act(() => {
+        useWorkoutStore.getState().createStep();
+      });
+      act(() => {
+        vi.runAllTimers();
+      });
 
-    // Assert — both a step card and the block card carry the ring class.
-    const stepCard = document.querySelector(
-      '[data-testid="step-card"]'
-    ) as HTMLElement;
-    const blockCard = document.querySelector(
-      '[data-testid="repetition-block-card"]'
-    ) as HTMLElement;
-    expect(stepCard.className).toContain("focus-visible:ring-2");
-    expect(blockCard.className).toContain("focus-visible:ring-2");
+      // Assert — a second step exists and focus lives on a step card.
+      const stepCards = document.querySelectorAll('[data-testid="step-card"]');
+      expect(stepCards.length).toBe(2);
+      expect(
+        (document.activeElement as HTMLElement | null)?.getAttribute(
+          "data-testid"
+        )
+      ).toBe("step-card");
+    });
 
-    // And the classes respect prefers-reduced-motion via motion-reduce:.
-    expect(stepCard.className).toContain("motion-reduce:transition-none");
-    expect(blockCard.className).toContain("motion-reduce:transition-none");
-  });
+    it("focuses the Add Step button when the list becomes empty", () => {
+      // Arrange — one step; delete it.
+      renderSection(buildKrd([step(0)]));
 
-  // §8.7 — tab-order: Tab from a programmatically focused step card
-  // should move focus forward; Shift+Tab should move it back. jsdom
-  // does not implement the sequential focus navigation algorithm, so
-  // we cannot dispatch a literal Tab keypress and observe focus
-  // moving. Instead we assert the preconditions: the step card has
-  // `tabIndex={0}` (not -1), i.e. it participates in the normal
-  // sequential order.
-  it("step cards participate in normal sequential focus order (tabIndex=0)", () => {
-    // Arrange
-    renderSection(buildKrd([step(0)]));
-    const stepCard = document.querySelector(
-      '[data-testid="step-card"]'
-    ) as HTMLElement;
+      // Act
+      act(() => {
+        useWorkoutStore.getState().deleteStep(0);
+      });
+      act(() => {
+        vi.runAllTimers();
+      });
 
-    // Assert — tabIndex 0 means the user can Tab onto it; a focus move
-    // by the hook lands on a normally-tabbable target, not a roving
-    // -1 trap.
-    expect(stepCard.tabIndex).toBe(0);
-  });
-});
+      // Assert — focus on the Add Step button (the empty-state target).
+      // Capture AFTER the mutation so we compare against the live
+      // post-re-render DOM node, not a stale pre-mutation reference.
+      const addStepButton = document.querySelector(
+        '[data-testid="add-step-button"]'
+      );
+      expect(document.activeElement).toBe(addStepButton);
+    });
+
+    it("does not move focus while an input inside the editor is focused", () => {
+      // Arrange
+      renderSection(buildKrd([step(0), step(1)]));
+      // Inject an input inside the editor root; focus it; then trigger
+      // a mutation that would normally move focus.
+      const editorRoot = document.querySelector(
+        '[data-testid="editor-root"]'
+      ) as HTMLElement;
+      const input = document.createElement("input");
+      input.type = "text";
+      editorRoot.appendChild(input);
+      input.focus();
+
+      // Act
+      act(() => {
+        useWorkoutStore.getState().deleteStep(0);
+      });
+      act(() => {
+        vi.runAllTimers();
+      });
+
+      // Assert — focus stayed on the input; pendingFocusTarget cleared.
+      expect(document.activeElement).toBe(input);
+      expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
+    });
+
+    // §8.6 — focus-visible styling contract. jsdom does not apply CSS
+    // pseudo-classes, so we assert the marker classes are present in the
+    // className string — verifying the ring is wired even if we cannot
+    // measure the pixel outline.
+    it("applies focus-visible ring classes to every focusable item target", () => {
+      // Arrange
+      renderSection(buildKrd([step(0), { repeatCount: 2, steps: [step(0)] }]));
+
+      // Assert — both a step card and the block card carry the ring class.
+      const stepCard = document.querySelector(
+        '[data-testid="step-card"]'
+      ) as HTMLElement;
+      const blockCard = document.querySelector(
+        '[data-testid="repetition-block-card"]'
+      ) as HTMLElement;
+      expect(stepCard.className).toContain("focus-visible:ring-2");
+      expect(blockCard.className).toContain("focus-visible:ring-2");
+
+      // And the classes respect prefers-reduced-motion via motion-reduce:.
+      expect(stepCard.className).toContain("motion-reduce:transition-none");
+      expect(blockCard.className).toContain("motion-reduce:transition-none");
+    });
+
+    // §8.7 — tab-order: Tab from a programmatically focused step card
+    // should move focus forward; Shift+Tab should move it back. jsdom
+    // does not implement the sequential focus navigation algorithm, so
+    // we cannot dispatch a literal Tab keypress and observe focus
+    // moving. Instead we assert the preconditions: the step card has
+    // `tabIndex={0}` (not -1), i.e. it participates in the normal
+    // sequential order.
+    it("step cards participate in normal sequential focus order (tabIndex=0)", () => {
+      // Arrange
+      renderSection(buildKrd([step(0)]));
+      const stepCard = document.querySelector(
+        '[data-testid="step-card"]'
+      ) as HTMLElement;
+
+      // Assert — tabIndex 0 means the user can Tab onto it; a focus move
+      // by the hook lands on a normally-tabbable target, not a roving
+      // -1 trap.
+      expect(stepCard.tabIndex).toBe(0);
+    });
+  }
+);
