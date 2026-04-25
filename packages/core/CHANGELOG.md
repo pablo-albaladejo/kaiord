@@ -1,5 +1,13 @@
 # @kaiord/core
 
+## 7.1.2
+
+### Patch Changes
+
+- 1eb5fd0: Add Analytics port and noop adapter.
+
+  Introduces `Analytics` type and `AnalyticsEvent` alias as a new port in `@kaiord/core`, alongside `createNoopAnalytics()` as the default do-nothing adapter. OSS consumers receive a zero-dependency, zero-tracking default; private deployments can inject their own adapter (e.g. Cloudflare Web Analytics) without any code changes to the framework.
+
 ## 7.1.1
 
 ### Patch Changes
