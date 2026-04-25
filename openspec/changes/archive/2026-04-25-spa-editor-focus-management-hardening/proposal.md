@@ -1,3 +1,5 @@
+> Completed: 2026-04-25
+
 ## Why
 
 The base change `spa-editor-focus-management` delivers correct focus behavior per WCAG and the expert-panel spec (9.66/10). A subsequent AWS Well-Architected review (adapted for the client-side SPA) surfaced four operational/resilience gaps that the base change's spec-first lens does not catch:
