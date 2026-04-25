@@ -1,3 +1,5 @@
+> Completed: 2026-04-25
+
 ## Why
 
 Kaiord has no visibility into who visits kaiord.com or uses the editor. Adding analytics following the existing Logger port/adapter pattern makes tracking opt-in by design: OSS consumers inject nothing (or a noop), while Kaiord's own deployments inject a Cloudflare Web Analytics adapter — consistent with the "your data never leaves your device" privacy message.
