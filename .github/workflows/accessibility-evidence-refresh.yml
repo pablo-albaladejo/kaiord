@@ -92,7 +92,7 @@ jobs:
               '',
               '## Reference',
               '',
-              'Full runbook: `packages/workout-spa-editor/docs/accessibility-evidence/README.md`',
+              'Full runbook: `packages/workout-spa-editor/docs/accessibility-evidence/2026-04-24-focus-management/README.md`',
             ].join('\n');
 
             await github.rest.issues.create({

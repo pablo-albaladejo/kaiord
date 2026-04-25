@@ -77,14 +77,13 @@ export const applyFocusTarget = (
   // Emit telemetry when the primary target was not directly resolved.
   // The only non-fallback case for reason="empty-state" is when the
   // target itself asked for the empty-state button.
-  const isDirectHit =
-    reason === "target" ||
-    (target.kind === "empty-state" && reason === "empty-state");
-  if (FALLBACK_REASONS.has(reason) && !isDirectHit) {
+  const isEmptyStateDirectHit =
+    target.kind === "empty-state" && reason === "empty-state";
+  if (FALLBACK_REASONS.has(reason) && !isEmptyStateDirectHit) {
     safeEmit(
       deps.telemetry,
       unresolvedTargetFallbackEvent(
-        target.kind as "item" | "empty-state",
+        target.kind,
         reason as "empty-state" | "first-item" | "heading"
       )
     );
