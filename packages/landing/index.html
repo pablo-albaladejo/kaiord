@@ -79,6 +79,14 @@
     </script>
 
     <link rel="stylesheet" href="/src/main.css" />
+
+    <!-- CF_BEACON_START -->
+    <script
+      defer
+      src="https://static.cloudflareinsights.com/beacon.min.js"
+      data-cf-beacon='{"token": "%VITE_CF_ANALYTICS_TOKEN%"}'
+    ></script>
+    <!-- CF_BEACON_END -->
   </head>
   <body
     class="bg-[var(--brand-bg-primary)] text-[var(--brand-text-primary)] font-sans antialiased"
@@ -988,6 +996,19 @@
             >
           </div>
         </div>
+
+        <!-- Analytics disclosure -->
+        <p class="mt-6 text-center text-xs text-[var(--brand-text-muted)]">
+          This site uses
+          <a
+            href="https://www.cloudflare.com/web-analytics/"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="underline underline-offset-2 hover:text-[var(--brand-text-secondary)]"
+            >Cloudflare Web Analytics</a
+          >
+          — cookieless, no personal data collected.
+        </p>
       </div>
     </footer>
 
