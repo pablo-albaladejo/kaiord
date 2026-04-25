@@ -40,4 +40,4 @@
 - [x] 4.2 Run `pnpm -r build` — verify zero build errors/warnings; inspect built `index.html` to confirm beacon `<script>` is absent when token is unset; grep built `assets/*.js` to confirm no literal Cloudflare token value appears outside the beacon script tag
 - [x] 4.3 Run `pnpm -r test` — verify all tests pass and coverage thresholds hold
 - [x] 4.4 Run `pnpm lint` — verify zero ESLint errors/warnings and zero TypeScript errors
-- [x] 4.5 Create changeset: `pnpm exec changeset` — patch bump for `@kaiord/core` only (new port export); `@kaiord/landing` and `@kaiord/workout-spa-editor` are private packages and require no changeset entry
+- [x] 4.5 Create changeset: `pnpm exec changeset` — patch bump for `@kaiord/core` (new port export) and `@kaiord/workout-spa-editor` (participates in changesets flow — removed from `.changeset/config.json` `ignore` array); `@kaiord/landing` remains private/ignored and requires no changeset entry

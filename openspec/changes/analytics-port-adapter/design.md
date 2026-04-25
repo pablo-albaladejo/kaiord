@@ -2,7 +2,7 @@
 
 Kaiord currently has zero analytics on kaiord.com (landing) and `/editor/`. The project follows hexagonal architecture strictly — the existing `Logger` port (`packages/core/src/ports/logger.ts`) is the reference pattern for cross-cutting infrastructure. Analytics must follow the same pattern: a port in `core`, a noop adapter as default, and provider-specific adapters in consumer packages.
 
-The chosen provider is **Cloudflare Web Analytics**: free tier, cookieless, GDPR-compliant by default, no consent banner required — coherent with the project's "your data never leaves your device" messaging. DNS is on AWS Route53; Cloudflare is used only as an analytics beacon (no proxy required).
+The chosen provider is **Cloudflare Web Analytics**: free tier, cookieless, GDPR-compliant by default, no consent banner required — coherent with the project's "your data never leaves your device" messaging. DNS is on AWS Route 53; Cloudflare is used only as an analytics beacon (no proxy required).
 
 ## Goals / Non-Goals
 
@@ -45,7 +45,7 @@ type Analytics = {
 
 ### 2. Noop adapter in core, Cloudflare adapter in consumer packages (Option A)
 
-```
+```text
 core/adapters/analytics/noop-analytics.ts     ← published with @kaiord/core
 landing/src/adapters/analytics/               ← private
 workout-spa-editor/src/adapters/analytics/    ← private
@@ -57,7 +57,7 @@ workout-spa-editor/src/adapters/analytics/    ← private
 
 ### 3. Editor injection via React Context
 
-```
+```text
 AnalyticsContext (React.createContext)
   └── AnalyticsProvider (wraps app in main.tsx)
         └── useAnalytics() hook (consumed by components)

@@ -1,6 +1,7 @@
 import { createNoopAnalytics } from "@kaiord/core";
 import type { Analytics } from "@kaiord/core";
 import { renderHook } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
 import { AnalyticsProvider, useAnalytics } from "./analytics-context";
@@ -22,7 +23,7 @@ describe("useAnalytics", () => {
       event: vi.fn(),
     };
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
+    const wrapper = ({ children }: { children: ReactNode }) => (
       <AnalyticsProvider analytics={mockAnalytics}>
         {children}
       </AnalyticsProvider>
@@ -45,7 +46,7 @@ describe("useAnalytics", () => {
       event: vi.fn(),
     };
 
-    const wrapper = ({ children }: { children: React.ReactNode }) => (
+    const wrapper = ({ children }: { children: ReactNode }) => (
       <AnalyticsProvider analytics={mockAnalytics}>
         {children}
       </AnalyticsProvider>

@@ -1,14 +1,11 @@
-import { defineConfig } from "vite";
 import tailwindcss from "@tailwindcss/vite";
+import { defineConfig, loadEnv } from "vite";
 import type { Plugin } from "vite";
 
-function conditionalBeacon(): Plugin {
+function conditionalBeacon(token: string | undefined): Plugin {
   return {
     name: "conditional-beacon",
-    transformIndexHtml(html, ctx) {
-      const token = ctx.server
-        ? process.env.VITE_CF_ANALYTICS_TOKEN
-        : process.env.VITE_CF_ANALYTICS_TOKEN;
+    transformIndexHtml(html) {
       if (!token) {
         return html.replace(
           /<!--\s*CF_BEACON_START\s*-->[\s\S]*?<!--\s*CF_BEACON_END\s*-->/g,
@@ -23,10 +20,13 @@ function conditionalBeacon(): Plugin {
   };
 }
 
-export default defineConfig({
-  plugins: [tailwindcss(), conditionalBeacon()],
-  build: {
-    outDir: "dist",
-    emptyOutDir: true,
-  },
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), "");
+  return {
+    plugins: [tailwindcss(), conditionalBeacon(env.VITE_CF_ANALYTICS_TOKEN)],
+    build: {
+      outDir: "dist",
+      emptyOutDir: true,
+    },
+  };
 });
