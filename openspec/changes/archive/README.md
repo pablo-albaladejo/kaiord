@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-04-25 | [`spa-editor-focus-management-hardening`](./2026-04-25-spa-editor-focus-management-hardening/) | The base change spa-editor-focus-management delivers correct focus behavior per WCAG and the expert-panel spec (9.66/10). A subsequent AWS Well-Architected rev… |
 | 2026-04-24 | [`harden-link-checker`](./2026-04-24-harden-link-checker/) | Harden Link Checker (always-run, pin lychee, required + enforce_admins) |
 | 2026-04-24 | [`spa-editor-focus-management`](./2026-04-24-spa-editor-focus-management/) | The workout editor has zero programmatic focus management. When a step is deleted, pasted, added, duplicated, reordered, or undo/redone, focus either stays on … |
 | 2026-04-20 | [`bridge-runtime-discovery`](./2026-04-20-bridge-runtime-discovery/) | Bridge extension IDs are currently configured via VITE_* env vars, baked into the JS bundle at build time (Factor III / Factor V violation). This means: |

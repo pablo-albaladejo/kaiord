@@ -62,3 +62,4 @@ poc-*/
 openspec/.cache/
 packages/docs/.vitepress/cache/
 *.gcn
+.claude/scheduled_tasks.lock
