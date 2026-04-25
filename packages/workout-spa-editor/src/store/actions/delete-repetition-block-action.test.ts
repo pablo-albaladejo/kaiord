@@ -63,7 +63,7 @@ const createKRDWithWorkout = (
  */
 const createInitialState = (krd: KRD): WorkoutState => ({
   currentWorkout: krd,
-  workoutHistory: [krd],
+  undoHistory: [{ workout: krd, selection: null }],
   historyIndex: 0,
   selectedStepId: null,
   selectedStepIds: [],
@@ -745,13 +745,14 @@ describe("deleteRepetitionBlockAction", () => {
             };
 
             // Verify we have history to undo
-            expect(stateAfterDelete.workoutHistory).toBeDefined();
+            expect(stateAfterDelete.undoHistory).toBeDefined();
             expect(stateAfterDelete.historyIndex).toBeGreaterThan(0);
 
             // Simulate undo by going back in history
             const previousIndex = stateAfterDelete.historyIndex! - 1;
             const afterUndo: Partial<WorkoutState> = {
-              currentWorkout: stateAfterDelete.workoutHistory![previousIndex],
+              currentWorkout:
+                stateAfterDelete.undoHistory![previousIndex].workout,
               historyIndex: previousIndex,
             };
 
@@ -815,7 +816,7 @@ describe("deleteRepetitionBlockAction", () => {
 
             const state: WorkoutState = {
               currentWorkout: krd,
-              workoutHistory: [krd],
+              undoHistory: [{ workout: krd, selection: null }],
               historyIndex: 0,
               selectedStepId: hasSelectedId ? "some-step-id" : null,
               selectedStepIds: hasSelectedIds ? ["step-1", "step-2"] : [],

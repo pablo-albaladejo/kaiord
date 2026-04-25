@@ -38,7 +38,7 @@ describe("Routing", () => {
   beforeEach(() => {
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       selectedStepIds: [],

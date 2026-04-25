@@ -13,7 +13,7 @@ describe("duplicateStep", () => {
   beforeEach(() => {
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       isEditing: false,
@@ -256,7 +256,7 @@ describe("duplicateStep", () => {
     const state = useWorkoutStore.getState();
 
     // Assert
-    expect(state.workoutHistory).toHaveLength(2);
+    expect(state.undoHistory).toHaveLength(2);
     expect(state.historyIndex).toBe(1);
   });
 
@@ -264,7 +264,7 @@ describe("duplicateStep", () => {
     // Arrange
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
     });
 
@@ -274,7 +274,7 @@ describe("duplicateStep", () => {
 
     // Assert
     expect(state.currentWorkout).toBeNull();
-    expect(state.workoutHistory).toHaveLength(0);
+    expect(state.undoHistory).toHaveLength(0);
   });
 
   it("should do nothing when step index does not exist", () => {
@@ -314,7 +314,7 @@ describe("duplicateStep", () => {
     // Assert - Workout should remain unchanged
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(1);
-    expect(state.workoutHistory).toHaveLength(1); // Only the initial load
+    expect(state.undoHistory).toHaveLength(1); // Only the initial load
   });
 
   it("should duplicate the last step in workout", () => {

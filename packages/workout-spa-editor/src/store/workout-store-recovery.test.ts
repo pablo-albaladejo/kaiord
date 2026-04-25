@@ -13,7 +13,7 @@ describe("Workout Store - Error Recovery", () => {
     // Reset store state before each test
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       isEditing: false,
@@ -90,7 +90,7 @@ describe("Workout Store - Error Recovery", () => {
       // Assert
       expect(success).toBe(true);
       expect(state.currentWorkout).toEqual(mockBackup);
-      expect(state.workoutHistory).toHaveLength(1);
+      expect(state.undoHistory).toHaveLength(1);
       expect(state.historyIndex).toBe(0);
     });
 
@@ -138,7 +138,7 @@ describe("Workout Store - Error Recovery", () => {
 
       useWorkoutStore.setState({
         currentWorkout: mockCurrent,
-        workoutHistory: [mockCurrent],
+        undoHistory: [{ workout: mockCurrent, selection: null }],
         historyIndex: 0,
         lastBackup: mockBackup,
       });
@@ -148,8 +148,8 @@ describe("Workout Store - Error Recovery", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      expect(state.workoutHistory).toHaveLength(1);
-      expect(state.workoutHistory[0]).toEqual(mockBackup);
+      expect(state.undoHistory).toHaveLength(1);
+      expect(state.undoHistory[0].workout).toEqual(mockBackup);
       expect(state.historyIndex).toBe(0);
     });
   });

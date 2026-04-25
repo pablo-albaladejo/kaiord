@@ -260,50 +260,6 @@ jobs:
             exit 2
           fi
 
-      - name: Focus-invariants — workoutHistory push only inside pushHistorySnapshot
-        # `selectionHistory` must stay exactly parallel to `workoutHistory`
-        # for the undo / redo fallback rules to work (§4). The single
-        # call-site rule is enforced here: the only production file
-        # allowed to append to `workoutHistory` is
-        # `src/store/workout-store-history.ts`. Test files are exempt —
-        # they seed fixtures directly.
-        run: |
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-          import sys
-
-          root = Path("packages/workout-spa-editor/src/store")
-          allowed = {root / "workout-store-history.ts"}
-          push_re = re.compile(
-              r"\bworkoutHistory\s*\.\s*(push|unshift|splice)\s*\("
-          )
-          # Slice-and-append pattern: `...state.workoutHistory.slice(...), X`
-          # or, after destructuring, `...workoutHistory.slice(...), X`.
-          spread_re = re.compile(
-              r"\.\.\.\s*(?:[a-zA-Z_][\w.]*\.)?"
-              r"workoutHistory\s*\.\s*slice\s*\([^)]*\)\s*,",
-              re.S,
-          )
-          violations = []
-          for path in root.rglob("*"):
-              if path.suffix not in {".ts", ".tsx"}:
-                  continue
-              if ".test." in path.name:
-                  continue
-              if path in allowed:
-                  continue
-              text = path.read_text()
-              if push_re.search(text) or spread_re.search(text):
-                  violations.append(str(path))
-
-          if violations:
-              print("workoutHistory must only be mutated via pushHistorySnapshot:")
-              for v in violations:
-                  print(f"  {v}")
-              sys.exit(1)
-          PY
-
       - name: Focus-invariants — no positional-ID generators
         # Positional step/block ids (`step-N`, `block-N`, `block-N-step-M`)
         # were replaced by stable ItemIds in §9. Any reintroduction must

@@ -18,7 +18,7 @@ describe("reorderStepsInBlockAction", () => {
 
   const createMockState = (): Partial<WorkoutState> => ({
     currentWorkout: null,
-    workoutHistory: [],
+    undoHistory: [],
     historyIndex: -1,
     selectedStepId: null,
     selectedStepIds: [],

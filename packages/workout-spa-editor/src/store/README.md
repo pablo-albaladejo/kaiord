@@ -12,13 +12,13 @@ selection, history (undo/redo), and the focus-intent slice.
 - `currentWorkout: UIWorkout | null` — the in-memory workout. A
   `UIWorkout` is structurally a `KRD` plus a stable `ItemId` on every
   step and block. See `../types/ui-workout.ts`.
-- `workoutHistory: Array<UIWorkout>` — undo/redo snapshots.
-- `historyIndex: number` — current position in `workoutHistory`.
-- `selectionHistory: Array<string | null>` — parallel to
-  `workoutHistory`; each entry is the `selectedStepId` at the moment
-  the matching snapshot was pushed. Used by undo-of-add/paste/duplicate
-  to restore focus to the item that was selected just before the undone
-  mutation.
+- `undoHistory: Array<HistoryEntry>` — undo/redo snapshots. Each entry
+  is `{ workout: UIWorkout; selection: ItemId | null }`, atomically
+  coupling the workout state with the selection that was active at the
+  moment the snapshot was pushed. The paired shape structurally enforces
+  the invariant that was previously maintained by a CI grep over two
+  parallel arrays (`workoutHistory` + `selectionHistory`).
+- `historyIndex: number` — current position in `undoHistory`.
 - `selectedStepId: string | null`, `selectedStepIds: Array<string>` —
   single- and multi-selection.
 - `pendingFocusTarget: FocusTarget | null` — focus intent written by
@@ -52,13 +52,11 @@ selection, history (undo/redo), and the focus-intent slice.
 
 ### History chokepoint
 
-Every append to `workoutHistory` goes through
-`pushHistorySnapshot(state, uiWorkout, selection)` in
-`workout-store-history.ts`. The helper keeps `workoutHistory` and
-`selectionHistory` parallel by construction (drift is structurally
-impossible). A CI focus-invariant grep rejects any
-`workoutHistory.push` / `.unshift` / `.splice` / `...slice, x` outside
-that helper.
+Every append to `undoHistory` goes through
+`pushHistorySnapshot(entry: HistoryEntry)` in `workout-store-history.ts`.
+The 1-arg `HistoryEntry` signature enforces atomic coupling of workout +
+selection by construction — parallel-array drift is structurally
+impossible and requires no CI grep.
 
 ### Outbound ID chokepoint
 
@@ -97,6 +95,69 @@ const target = useWorkoutStore((s) => s.pendingFocusTarget);
 
 A CI grep check in §10.3.a will pin this discipline once the hook
 consumer (§7) lands.
+
+### FocusTelemetry observability port
+
+`providers/focus-telemetry.ts` exports the `FocusTelemetry` function type
+and `FocusTelemetryContext`. Wire a function at the `WorkoutSection`
+boundary to observe focus events without coupling the hook to a specific
+telemetry backend.
+
+```tsx
+// Sentry example
+const onFocusEvent = useCallback((e: FocusTelemetryEvent) => {
+  if (e.type === "focus-error") {
+    Sentry.captureMessage(`focus-error phase=${e.phase}`, "error");
+  } else {
+    Sentry.addBreadcrumb({ category: "focus", message: e.type, data: e });
+  }
+}, []);
+
+// Datadog RUM example
+const onFocusEvent = useCallback((e: FocusTelemetryEvent) => {
+  datadogRum.addAction(e.type, e);
+}, []);
+
+// Wire at WorkoutSection boundary
+<FocusTelemetryContext.Provider value={onFocusEvent}>
+  <WorkoutSection ... />
+</FocusTelemetryContext.Provider>
+```
+
+**Stability requirement:** the wired function MUST be a stable reference
+(defined outside the render tree or wrapped in `useCallback`). An inline
+arrow creates a new function every render, invalidates the context value,
+and causes the `FocusTelemetryContext.Provider`'s dev-mode ref-stability
+guard to emit a `console.warn`.
+
+#### Post-deploy smoke-test
+
+Open the editor, perform a delete, and verify at least one `wiring-canary`
+or mutation-driven telemetry event arrived in your monitoring dashboard
+within 60 seconds. Absence indicates wiring failure.
+
+#### Event-to-severity alert guidance
+
+| Event                        | Expected rate                             | Suggested alert                                             | Response                                            |
+| ---------------------------- | ----------------------------------------- | ----------------------------------------------------------- | --------------------------------------------------- |
+| `wiring-canary`              | One per editor mount with wired telemetry | **Absence > 30 min during editor-active hours = P3**        | Verify deployment includes telemetry provider       |
+| `focus-error`                | Near zero                                 | **Any occurrence = P2 error**                               | Inspect phase field; file regression bug            |
+| `unresolved-target-fallback` | Low, occasional                           | Info; **sustained ≥ 5× baseline for 6 h = P3**              | Check component unmount ordering / ref-registration |
+| `form-field-short-circuit`   | Per-user, moderate (debounced)            | Debug; not pageable                                         | Statistical monitoring only                         |
+| `overlay-deferred-apply`     | Per-user, moderate                        | Debug; outlier `deferredForMs ≥ 5000` may indicate UI stall | Investigate dialog-close handlers                   |
+
+**Post-deploy missing-canary auto-alert pattern:** configure a rolling
+30-minute window check — if `wiring-canary` count is zero during editor-active
+hours (09:00–22:00 in `TELEMETRY_TIMEZONE`, defaults to UTC), fire a P3 alert.
+
+**Incident ownership:** `focus-error` events in the open-source reference
+deployment SHOULD result in a GitHub issue with the `incident` label assigned
+to the `workout-spa-editor` CODEOWNERS.
+
+**Desktop-AT version-drift policy:** AT evidence in
+`docs/accessibility-evidence/` is valid for AT + OS + browser versions within
+one major release of the pinned version. Outside that window, the quarterly
+refresh cron or a dependency-bump-triggered manual refresh re-captures.
 
 ### flushSync patterns for focus continuations
 

@@ -43,7 +43,7 @@ describe("LayoutHeader", () => {
     });
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       selectedStepIds: [],

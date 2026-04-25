@@ -10,8 +10,12 @@
  * Timing: focus moves happen inside `setTimeout(fn, 0)` per §7.6;
  * tests install `vi.useFakeTimers()` and call `vi.runAllTimers()`
  * to push past that boundary.
+ *
+ * StrictMode re-run (§6.1): every test executes under both standard and
+ * strict rendering modes via `describe.each`.
  */
 
+import { Fragment, StrictMode } from "react";
 import { act } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -19,6 +23,7 @@ import { __resetOverlayObserverForTests } from "../../../lib/focus/overlay-obser
 import { useWorkoutStore } from "../../../store/workout-store";
 import { renderWithProviders } from "../../../test-utils";
 import type { KRD } from "../../../types/krd";
+import { __resetCanaryForTests } from "../../../hooks/focus/use-focus-telemetry-emitter";
 import { WorkoutSection } from "./WorkoutSection";
 
 // Mock WorkoutStats and WorkoutPreview to skip heavy chart rendering
@@ -54,9 +59,8 @@ const buildKrd = (steps: Array<unknown>): KRD =>
 const resetStore = () => {
   useWorkoutStore.setState({
     currentWorkout: null,
-    workoutHistory: [],
+    undoHistory: [],
     historyIndex: -1,
-    selectionHistory: [],
     selectedStepId: null,
     selectedStepIds: [],
     isEditing: false,
@@ -87,19 +91,30 @@ const ReactiveSection = () => {
   );
 };
 
-const renderSection = (krd: KRD) => {
-  useWorkoutStore.getState().loadWorkout(krd);
-  return renderWithProviders(<ReactiveSection />);
-};
+type WrapperComponent = typeof Fragment | typeof StrictMode;
 
-describe("WorkoutSection focus integration (§8.1–§8.5)", () => {
+describe.each([
+  { mode: "standard", Wrapper: Fragment as WrapperComponent },
+  { mode: "strict", Wrapper: StrictMode as WrapperComponent },
+])("WorkoutSection focus integration (§8.1–§8.5) [$mode]", ({ Wrapper }) => {
+  const renderSection = (krd: KRD) => {
+    useWorkoutStore.getState().loadWorkout(krd);
+    return renderWithProviders(
+      <Wrapper>
+        <ReactiveSection />
+      </Wrapper>
+    );
+  };
+
   beforeEach(() => {
     resetStore();
     vi.useFakeTimers();
+    __resetCanaryForTests();
   });
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
     __resetOverlayObserverForTests();
     resetStore();
     document.body.innerHTML = "";
