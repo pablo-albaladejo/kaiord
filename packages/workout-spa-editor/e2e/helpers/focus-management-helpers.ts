@@ -33,9 +33,9 @@ export async function focusStep(page: Page, name: string): Promise<void> {
 
 const KEYBOARD_KEYS = {
   delete: "Delete",
-  undo: "Meta+z",
-  redo: "Meta+Shift+z",
-  duplicate: "Meta+d",
+  undo: "ControlOrMeta+z",
+  redo: "ControlOrMeta+Shift+z",
+  duplicate: "ControlOrMeta+d",
 } as const;
 
 export async function triggerViaKeyboard(

@@ -27,12 +27,14 @@ describe("HistoryEntry type shape", () => {
       workout: makeUI("a"),
       selection: asItemId("sel-1"),
     };
+
     expect(entry.workout).toBeDefined();
     expect(entry.selection).toBe("sel-1");
   });
 
   it("HistoryEntry selection can be null", () => {
     const entry: HistoryEntry = { workout: makeUI("b"), selection: null };
+
     expect(entry.selection).toBeNull();
   });
 
@@ -41,6 +43,7 @@ describe("HistoryEntry type shape", () => {
       { workout: makeUI("a"), selection: null },
       { workout: makeUI("b"), selection: asItemId("sel-1") },
     ];
+
     expect(history).toHaveLength(2);
     expect(history[1].selection).toBe("sel-1");
   });
@@ -53,10 +56,12 @@ describe("pushHistorySnapshot (1-arg HistoryEntry form)", () => {
       workout: makeUI("a"),
       selection: asItemId("sel-1"),
     };
+
     const result = pushHistorySnapshot(
       { undoHistory: [], historyIndex: -1 },
       entry
     );
+
     expect(result.undoHistory).toHaveLength(1);
     expect(result.undoHistory[0].workout).toEqual(entry.workout);
     expect(result.undoHistory[0].selection).toBe("sel-1");
@@ -73,6 +78,7 @@ describe("pushHistorySnapshot (1-arg HistoryEntry form)", () => {
       { undoHistory: r1.undoHistory, historyIndex: r1.historyIndex },
       { workout: makeUI("b"), selection: asItemId("sel-2") }
     );
+
     expect(r2.undoHistory).toHaveLength(2);
     expect(r2.undoHistory[0].selection).toBeNull();
     expect(r2.undoHistory[1].selection).toBe("sel-2");
@@ -86,6 +92,7 @@ describe("pushHistorySnapshot (1-arg HistoryEntry form)", () => {
         selection: null,
       });
     }
+
     expect(state.undoHistory.length).toBe(50);
     const tail = state.undoHistory.at(-1)!.workout as unknown as {
       extensions: { structured_workout: { __marker: string } };
@@ -138,6 +145,7 @@ describe("clearWorkout resets undoHistory", () => {
     });
 
     useWorkoutStore.getState().clearWorkout();
+
     const s = useWorkoutStore.getState();
     expect(s.undoHistory).toEqual([]);
     expect(s.historyIndex).toBe(-1);

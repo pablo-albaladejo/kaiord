@@ -22,31 +22,31 @@ describing the expected announcement for the action.)_
 
 ### Action: Delete first step
 
-```
+```text
 [00:00:00.000] (expected: focus announced on the step that was selected)
 [00:00:00.000] (expected: deletion announced, focus moves to next step or Add Step button)
 ```
 
 ### Action: Paste
 
-```
+```text
 [00:00:00.000] (expected: paste announced, focus moves to the pasted step)
 ```
 
 ### Action: Undo
 
-```
+```text
 [00:00:00.000] (expected: undo announced, focus returns to expected target)
 ```
 
 ### Action: Group two steps into a repetition block
 
-```
+```text
 [00:00:00.000] (expected: block creation announced, focus moves to the new block)
 ```
 
 ### Action: Ungroup the repetition block
 
-```
+```text
 [00:00:00.000] (expected: ungroup announced, focus moves to first ungrouped step)
 ```

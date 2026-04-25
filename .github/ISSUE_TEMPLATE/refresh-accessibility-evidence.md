@@ -43,7 +43,7 @@ This issue is opened automatically on the first day of each quarter by the
 
 - [ ] Capture Accessibility Inspector screenshots (macOS) for each action.
 - [ ] Capture NVDA Speech Viewer screenshots (Windows) for each action.
-- [ ] Save screenshots under `docs/accessibility-evidence/<date>-focus-management/screenshots/`.
+- [ ] Save screenshots under `packages/workout-spa-editor/docs/accessibility-evidence/<date>-focus-management/screenshots/`.
 
 ### 4. Acceptance criteria
 
