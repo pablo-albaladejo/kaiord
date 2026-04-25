@@ -1,5 +1,6 @@
 import { useAiStore } from "../../../store/ai-store";
 import { Button } from "../../atoms/Button";
+import { PrivacyInformationSection } from "./PrivacyInformationSection";
 
 const SECURE_STORAGE_PREFIX = "kaiord_secure_";
 
@@ -19,38 +20,24 @@ export const PrivacyTab: React.FC = () => {
 
   return (
     <div className="space-y-6">
+      <PrivacyInformationSection />
+
       <section>
         <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
-          Privacy Information
+          Analytics
         </h3>
-        <ul className="space-y-2 text-sm text-gray-600 dark:text-gray-400">
-          <li>We do not store your credentials on any server.</li>
-          <li>
-            Garmin integration uses a browser extension that piggybacks on your
-            existing Garmin Connect session. No credentials leave your browser.
-          </li>
-          <li>
-            Train2Go import uses a browser extension that reads the coaching
-            plan displayed on Train2Go pages you are already viewing. It does
-            not read your password or authentication tokens.
-          </li>
-          <li>
-            LLM API keys are sent directly to the provider (Anthropic, OpenAI,
-            or Google) — Kaiord does not receive or relay this data.
-          </li>
-          <li>
-            We are not responsible for credential security on your device.
-          </li>
-        </ul>
-        <p className="mt-3 text-xs text-gray-500 dark:text-gray-400">
+        <p className="text-sm text-gray-600 dark:text-gray-400">
+          This editor uses{" "}
           <a
-            href="https://kaiord.com/docs/legal/privacy-policy"
+            href="https://www.cloudflare.com/web-analytics/"
             target="_blank"
             rel="noopener noreferrer"
-            className="underline underline-offset-2 hover:text-gray-700 dark:hover:text-gray-300"
+            className="underline underline-offset-2 hover:text-gray-800 dark:hover:text-gray-200"
           >
-            Read the full privacy policy
-          </a>
+            Cloudflare Web Analytics
+          </a>{" "}
+          to track aggregate usage (page views, workout generation, exports). No
+          cookies are set and no personal data is collected.
         </p>
       </section>
 

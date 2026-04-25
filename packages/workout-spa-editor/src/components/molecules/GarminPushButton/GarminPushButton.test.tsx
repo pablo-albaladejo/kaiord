@@ -16,6 +16,7 @@ const mockState = {
 
 vi.mock("../../../contexts", () => ({
   useGarminBridge: () => ({ ...mockState }),
+  useAnalytics: () => ({ event: vi.fn(), pageView: vi.fn() }),
 }));
 
 describe("GarminPushButton", () => {

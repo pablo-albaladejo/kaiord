@@ -10,7 +10,8 @@ export function createSaveHandler(
   setSaveErrors: (errors: Array<ValidationError> | null) => void,
   setExportProgress: (progress: number) => void,
   success: (title: string, description: string) => void,
-  showError: (title: string, description: string) => void
+  showError: (title: string, description: string) => void,
+  onExported?: (format: string) => void
 ) {
   return async () => {
     setIsSaving(true);
@@ -40,6 +41,7 @@ export function createSaveHandler(
         "Workout Saved",
         `"${workoutName}" has been saved as ${formatLabel}`
       );
+      onExported?.(selectedFormat);
     } catch (err) {
       const errorMessage =
         err instanceof Error ? err.message : "Failed to export workout";

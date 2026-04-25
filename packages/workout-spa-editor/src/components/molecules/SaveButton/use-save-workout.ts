@@ -1,5 +1,6 @@
 import { useState } from "react";
 
+import { useAnalytics } from "../../../contexts";
 import { useToast } from "../../../hooks/useToast";
 import type { KRD, ValidationError } from "../../../types/krd";
 import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
@@ -18,6 +19,7 @@ export function useSaveWorkout(workout: KRD) {
     useState<WorkoutFileFormat>("krd");
   const toast = useToast();
   const { success, error: showError } = toast;
+  const analytics = useAnalytics();
 
   const handleSave = createSaveHandler(
     workout,
@@ -26,7 +28,8 @@ export function useSaveWorkout(workout: KRD) {
     setSaveErrors,
     setExportProgress,
     success,
-    showError
+    showError,
+    (format) => analytics.event("workout-exported", { format })
   );
 
   const clearErrors = () => setSaveErrors(null);

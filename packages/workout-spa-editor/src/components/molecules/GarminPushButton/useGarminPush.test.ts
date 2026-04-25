@@ -5,6 +5,7 @@ import type { GarminBridgeState } from "../../../contexts";
 
 const mockPushWorkout = vi.fn();
 const mockSetPushing = vi.fn();
+const mockAnalyticsEvent = vi.fn();
 
 const garminState: Pick<
   GarminBridgeState,
@@ -17,6 +18,7 @@ const garminState: Pick<
 
 vi.mock("../../../contexts", () => ({
   useGarminBridge: vi.fn(() => ({ ...garminState })),
+  useAnalytics: vi.fn(() => ({ event: mockAnalyticsEvent, pageView: vi.fn() })),
 }));
 
 const workoutState: { currentWorkout: unknown } = {
@@ -132,6 +134,38 @@ describe("useGarminPush", () => {
     expect(mockSetPushing).toHaveBeenCalledWith({
       status: "error",
       message: "Push rejected",
+    });
+  });
+
+  it("should fire garmin-synced success event after successful push", async () => {
+    // Arrange
+    mockPushWorkout.mockResolvedValue(undefined);
+    const { result } = renderHook(() => useGarminPush());
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
+    expect(mockAnalyticsEvent).toHaveBeenCalledWith("garmin-synced", {
+      result: "success",
+    });
+  });
+
+  it("should fire garmin-synced failure event when push throws", async () => {
+    // Arrange
+    mockPushWorkout.mockRejectedValue(new Error("Push failed"));
+    const { result } = renderHook(() => useGarminPush());
+
+    // Act
+    await act(async () => {
+      await result.current.push();
+    });
+
+    // Assert
+    expect(mockAnalyticsEvent).toHaveBeenCalledWith("garmin-synced", {
+      result: "failure",
     });
   });
 });

@@ -1,6 +1,7 @@
 import type { Sport } from "@kaiord/core";
 import { useCallback } from "react";
 
+import { useAnalytics } from "../../../contexts";
 import { generateWorkoutKrd } from "../../../lib/generate-workout";
 import { useAiStore } from "../../../store/ai-store";
 import { useProfileStore } from "../../../store/profile-store";
@@ -12,6 +13,7 @@ export const useAiGeneration = () => {
   const { getSelectedProvider, customPrompt, setGeneration } = useAiStore();
   const { getActiveProfile } = useProfileStore();
   const loadWorkout = useLoadWorkout();
+  const analytics = useAnalytics();
 
   const generate = useCallback(
     async (text: string, sport?: Sport) => {
@@ -37,6 +39,10 @@ export const useAiGeneration = () => {
 
         loadWorkout(krd);
         setGeneration({ status: "success" });
+        analytics.event("workout-generated", {
+          provider: provider.id,
+          sport: sport ?? "",
+        });
       } catch (error: unknown) {
         const message =
           error instanceof Error ? error.message : "Generation failed";
@@ -49,6 +55,7 @@ export const useAiGeneration = () => {
       setGeneration,
       getActiveProfile,
       loadWorkout,
+      analytics,
     ]
   );
 

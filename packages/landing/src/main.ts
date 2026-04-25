@@ -1,4 +1,5 @@
 import "./main.css";
+import { setupAnalytics } from "./setup-analytics";
 
 const commands: Record<string, string> = {
   npm: "npm i @kaiord/core",
@@ -83,4 +84,7 @@ function setup() {
   });
 }
 
-document.addEventListener("DOMContentLoaded", setup);
+document.addEventListener("DOMContentLoaded", () => {
+  setup();
+  setupAnalytics();
+});
