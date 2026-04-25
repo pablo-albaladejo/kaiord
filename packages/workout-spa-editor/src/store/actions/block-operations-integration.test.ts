@@ -18,7 +18,7 @@ import { ungroupRepetitionBlockAction } from "./ungroup-repetition-block-action"
 describe("Block Operations Integration", () => {
   const createMockState = (): WorkoutState => ({
     currentWorkout: null,
-    workoutHistory: [],
+    undoHistory: [],
     historyIndex: -1,
     selectedStepId: null,
     selectedStepIds: [],

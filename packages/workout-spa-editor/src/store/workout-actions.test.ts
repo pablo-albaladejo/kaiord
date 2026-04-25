@@ -19,7 +19,7 @@ describe("createEmptyWorkoutAction", () => {
     expect(patch.currentWorkout).toBeDefined();
     const inner = patch.currentWorkout?.extensions?.structured_workout;
     expect(inner).toEqual({ name: "New ride", sport: "cycling", steps: [] });
-    expect(patch.workoutHistory).toHaveLength(1);
+    expect(patch.undoHistory).toHaveLength(1);
     expect(patch.historyIndex).toBe(0);
     expect(patch.isEditing).toBe(false);
   });

@@ -1,0 +1,105 @@
+name: Accessibility Evidence Refresh
+
+on:
+  schedule:
+    # First day of each quarter: Jan 1, Apr 1, Jul 1, Oct 1
+    - cron: "0 0 1 */3 *"
+  workflow_dispatch:
+
+permissions:
+  issues: write
+  contents: read
+
+jobs:
+  open-refresh-issue:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Compute due date
+        id: due
+        run: |
+          DUE=$(date -d "+14 days" +%Y-%m-%d)
+          echo "date=$DUE" >> "$GITHUB_OUTPUT"
+
+      - name: Determine assignees
+        id: assignees
+        env:
+          ASSIGNEES_VAR: ${{ vars.A11Y_EVIDENCE_ASSIGNEES }}
+        run: |
+          if [ -n "$ASSIGNEES_VAR" ]; then
+            echo "list=$ASSIGNEES_VAR" >> "$GITHUB_OUTPUT"
+          else
+            echo "list=pablo-albaladejo" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Open quarterly refresh issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const now = new Date();
+            const q = Math.floor(now.getMonth() / 3) + 1;
+            const quarter = `Q${q} ${now.getFullYear()}`;
+            const dueDate = '${{ steps.due.outputs.date }}';
+            const assignees = '${{ steps.assignees.outputs.list }}'
+              .split(',')
+              .map(s => s.trim())
+              .filter(Boolean);
+
+            const body = [
+              '## Accessibility evidence refresh — quarterly',
+              '',
+              `This issue was opened automatically by the \`accessibility-evidence-refresh.yml\` workflow.`,
+              '',
+              `**Due date:** ${dueDate}`,
+              '',
+              '---',
+              '',
+              '## Checklist',
+              '',
+              '### 1. VoiceOver (macOS)',
+              '',
+              '- [ ] Enable VoiceOver (⌘F5).',
+              '- [ ] Open Accessibility Inspector (Xcode → Open Developer Tool).',
+              '- [ ] Enable Speech panel with timestamps.',
+              '- [ ] Load the editor with `e2e/fixtures/focus-workout.krd.json`.',
+              '- [ ] Perform: Delete → Paste → Undo → Group → Ungroup.',
+              '- [ ] Export log; paste into `voiceover-macos.md` with annotations.',
+              '- [ ] Update pinned versions in `README.md`.',
+              '',
+              '### 2. NVDA (Windows)',
+              '',
+              '- [ ] Set NVDA log level to Debug; restart NVDA.',
+              '- [ ] Perform same action sequence.',
+              '- [ ] Filter `nvda.log` for `speakText`/`speakMessage` lines.',
+              '- [ ] Paste into `nvda-windows.md` with annotations.',
+              '- [ ] Update pinned versions in `README.md`.',
+              '',
+              '### 3. Screenshots',
+              '',
+              '- [ ] Accessibility Inspector screenshots (macOS).',
+              '- [ ] NVDA Speech Viewer screenshots (Windows).',
+              '- [ ] Save under `packages/workout-spa-editor/docs/accessibility-evidence/<date>-focus-management/screenshots/`.',
+              '',
+              '### 4. Acceptance criteria',
+              '',
+              '- [ ] Transcripts diff against previous baseline at ≤ 10% changed lines.',
+              '- [ ] If > 10%, document whether regression or expected improvement.',
+              '',
+              '### 5. PR',
+              '',
+              '- [ ] Open a PR with fresh evidence; reference this issue; close on merge.',
+              '',
+              '---',
+              '',
+              '## Reference',
+              '',
+              'Full runbook: `packages/workout-spa-editor/docs/accessibility-evidence/2026-04-24-focus-management/README.md`',
+            ].join('\n');
+
+            await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `chore(a11y): refresh focus-management AT evidence — ${quarter}`,
+              body,
+              labels: ['accessibility', 'maintenance'],
+              assignees,
+            });

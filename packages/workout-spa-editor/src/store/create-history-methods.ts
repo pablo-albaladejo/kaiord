@@ -15,5 +15,5 @@ export const createHistoryMethods = (
   undo: () => set((state) => createUndoAction(state)),
   redo: () => set((state) => createRedoAction(state)),
   canUndo: () => get().historyIndex > 0,
-  canRedo: () => get().historyIndex < get().workoutHistory.length - 1,
+  canRedo: () => get().historyIndex < get().undoHistory.length - 1,
 });

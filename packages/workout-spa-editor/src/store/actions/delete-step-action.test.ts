@@ -52,7 +52,7 @@ describe("deleteStepAction", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd,
-        workoutHistory: [krd],
+        undoHistory: [{ workout: krd, selection: null }],
         historyIndex: 0,
         selectedStepId: null,
         selectedStepIds: [],
@@ -133,7 +133,7 @@ describe("deleteStepAction", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd,
-        workoutHistory: [krd],
+        undoHistory: [{ workout: krd, selection: null }],
         historyIndex: 0,
         selectedStepId: null,
         selectedStepIds: [],
@@ -191,7 +191,7 @@ describe("deleteStepAction", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd,
-        workoutHistory: [krd],
+        undoHistory: [{ workout: krd, selection: null }],
         historyIndex: 0,
         selectedStepId: null,
         selectedStepIds: [],
@@ -240,7 +240,7 @@ describe("deleteStepAction", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd,
-        workoutHistory: [krd],
+        undoHistory: [{ workout: krd, selection: null }],
         historyIndex: 0,
         selectedStepId: null,
         selectedStepIds: [],
@@ -288,7 +288,7 @@ describe("deleteStepAction", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd,
-        workoutHistory: [krd],
+        undoHistory: [{ workout: krd, selection: null }],
         historyIndex: 0,
         selectedStepId: null,
         selectedStepIds: [],
@@ -341,7 +341,7 @@ describe("deleteStepAction", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd,
-        workoutHistory: [krd],
+        undoHistory: [{ workout: krd, selection: null }],
         historyIndex: 0,
         selectedStepId: null,
         selectedStepIds: [],
@@ -406,7 +406,7 @@ describe("deleteStepAction", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd,
-        workoutHistory: [krd],
+        undoHistory: [{ workout: krd, selection: null }],
         historyIndex: 0,
         selectedStepId: null,
         selectedStepIds: [],
@@ -479,7 +479,7 @@ describe("deleteStepAction", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd,
-        workoutHistory: [krd],
+        undoHistory: [{ workout: krd, selection: null }],
         historyIndex: 0,
         selectedStepId: null,
         selectedStepIds: [],
@@ -549,7 +549,7 @@ describe("deleteStepAction", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd,
-        workoutHistory: [krd],
+        undoHistory: [{ workout: krd, selection: null }],
         historyIndex: 0,
         selectedStepId: null,
         selectedStepIds: [],
@@ -582,7 +582,7 @@ describe("deleteStepAction", () => {
 
       const state: WorkoutState = {
         currentWorkout: krd,
-        workoutHistory: [krd],
+        undoHistory: [{ workout: krd, selection: null }],
         historyIndex: 0,
         selectedStepId: null,
         selectedStepIds: [],

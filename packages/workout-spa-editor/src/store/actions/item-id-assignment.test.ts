@@ -51,7 +51,7 @@ describe("store mutations assign fresh ItemIds", () => {
     vi.unstubAllGlobals();
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       selectedStepIds: [],
@@ -173,7 +173,7 @@ describe("undoDelete + undo/redo preserve item ids", () => {
   afterEach(() => {
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       selectedStepIds: [],

@@ -1,37 +1,35 @@
 /**
  * Low-level focus application (§7.6).
  *
- * Called from a `setTimeout(fn, 0)` so that any concurrent
- * `role="status"` toast update queues first in the AT speech
- * pipeline, giving the user a chance to hear the mutation outcome
- * before the caret relocates.
+ * Called from `setTimeout(fn, 0)` so concurrent `role="status"` toasts
+ * queue first in the AT speech pipeline.
  *
- * Safety:
- *   - `focus({ preventScroll: true })` wrapped in try/catch — if the
- *     node has been detached between the resolve and the timer, we
- *     swallow the throw rather than triggering a render loop.
- *   - `scrollIntoView` wrapped separately — legacy engines throw
- *     `TypeError` on the options-object form; we fall back to a no-op
- *     rather than aborting the focus move that already succeeded.
- *
- * The hook clears `pendingFocusTarget` and updates its `prevTarget`
- * ref *before* scheduling this call, so a throw here does not cause
- * a retry storm.
+ * Safety: `focus()` and `scrollIntoView()` are each caught separately.
+ * A throw on `focus()` aborts early (scroll skipped); a throw on
+ * `scrollIntoView()` is swallowed — the focus move already succeeded.
+ * Both catches emit a `focus-error` telemetry event when a handler is
+ * provided.
  */
+
+import {
+  focusErrorEvent,
+  type FocusTelemetry,
+  safeEmit,
+} from "../../store/providers/focus-telemetry";
 
 export type FocusApplyOptions = {
   reduceMotion: boolean;
+  telemetry?: FocusTelemetry;
 };
 
 export const applyFocusToElement = (
   el: HTMLElement,
-  { reduceMotion }: FocusApplyOptions
+  { reduceMotion, telemetry }: FocusApplyOptions
 ): void => {
   try {
     el.focus({ preventScroll: true });
   } catch {
-    // Element was detached or refused focus — the hook has already
-    // cleared pendingFocusTarget, so nothing else to do.
+    if (telemetry) safeEmit(telemetry, focusErrorEvent("focus"));
     return;
   }
   try {
@@ -40,8 +38,7 @@ export const applyFocusToElement = (
       behavior: reduceMotion ? ("instant" as ScrollBehavior) : "auto",
     });
   } catch {
-    // Legacy browsers reject the options-object form; the focus move
-    // itself already succeeded above.
+    if (telemetry) safeEmit(telemetry, focusErrorEvent("scrollIntoView"));
   }
 };
 

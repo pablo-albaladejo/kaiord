@@ -14,7 +14,7 @@ describe("workout loading integration", () => {
   beforeEach(() => {
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       selectedStepIds: [],
@@ -513,9 +513,9 @@ describe("workout loading integration", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      expect(state.workoutHistory).toHaveLength(1);
+      expect(state.undoHistory).toHaveLength(1);
       const historyWorkout =
-        state.workoutHistory[0].extensions?.structured_workout;
+        state.undoHistory[0].workout.extensions?.structured_workout;
       const historyBlock = historyWorkout?.steps[0] as RepetitionBlock;
       expect(historyBlock.id).toBeDefined();
       expect(typeof historyBlock.id).toBe("string");

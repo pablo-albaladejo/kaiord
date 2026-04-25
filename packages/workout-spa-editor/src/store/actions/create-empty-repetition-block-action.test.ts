@@ -32,7 +32,7 @@ const createTestKrd = (workout: Workout): KRD => ({
  */
 const createTestState = (krd: KRD): WorkoutState => ({
   currentWorkout: krd,
-  workoutHistory: [],
+  undoHistory: [],
   historyIndex: -1,
   selectedStepId: null,
   selectedStepIds: [],

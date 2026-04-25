@@ -8,7 +8,6 @@ describe("FocusSlice", () => {
   afterEach(() => {
     useWorkoutStore.setState({
       pendingFocusTarget: null,
-      selectionHistory: [],
     });
   });
 
@@ -83,6 +82,6 @@ describe("FocusSlice", () => {
     // Arrange + Act: the default store state is the system under test.
 
     // Assert
-    expect(useWorkoutStore.getState().selectionHistory).toEqual([]);
+    expect(useWorkoutStore.getState().undoHistory).toEqual([]);
   });
 });

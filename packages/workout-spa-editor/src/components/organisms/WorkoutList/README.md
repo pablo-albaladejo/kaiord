@@ -163,6 +163,21 @@ Run tests with:
 pnpm test WorkoutList
 ```
 
+## Accessibility Evidence
+
+AT transcripts and screenshots for focus-management scenarios
+(delete → paste → undo → group → ungroup) are committed in:
+
+```
+packages/workout-spa-editor/docs/accessibility-evidence/2026-04-24-focus-management/
+```
+
+This directory is the **regression-comparison baseline** for future AT
+reviews. If a PR changes focus behaviour, re-capture and diff against the
+baseline (≤ 10% line change gate). The `README.md` inside the directory
+contains the full regeneration runbook for VoiceOver (macOS) and NVDA (Windows).
+A quarterly GitHub Actions workflow opens a refresh issue automatically.
+
 ## Related Components
 
 - **StepCard**: Molecule component for individual workout steps

@@ -7,6 +7,7 @@
 
 import type { UIWorkout, UIWorkoutItem } from "../types/krd-ui";
 import type { FocusTarget } from "./focus/focus-target.types";
+import type { UndoHistory } from "./workout-state.types";
 
 export type DeletedStep = {
   step: UIWorkoutItem;
@@ -26,7 +27,7 @@ export type ModalConfig = {
 
 export type WorkoutStoreState = {
   currentWorkout: UIWorkout | null;
-  workoutHistory: Array<UIWorkout>;
+  undoHistory: UndoHistory;
   historyIndex: number;
   selectedStepId: string | null;
   selectedStepIds: Array<string>;
@@ -37,17 +38,5 @@ export type WorkoutStoreState = {
   isModalOpen: boolean;
   modalConfig: ModalConfig | null;
   createBlockDialogOpen: boolean;
-
-  // Focus slice (§4) — `pendingFocusTarget` is an "intent" written by
-  // mutating actions; `useFocusAfterAction` (§7) reads it after commit
-  // and moves DOM focus. `selectionHistory` is kept parallel to
-  // `workoutHistory` so undo/redo can restore focus to the item the
-  // user saw selected before the undone mutation.
   pendingFocusTarget: FocusTarget | null;
-  // Matches `selectedStepId: string | null`. The brand (`ItemId`) is
-  // applied at the point of use (the selection ids stored here come
-  // from the same provider as every other UIWorkout id), so the
-  // relaxed type here avoids an unsafe `as ItemId` cast at the single
-  // `pushHistorySnapshot` call site.
-  selectionHistory: Array<string | null>;
 };

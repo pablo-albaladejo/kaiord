@@ -41,6 +41,7 @@ export const useRepetitionBlockState = (
   };
 
   const headerStateProps = {
+    block,
     isExpanded,
     isEditingCount,
     editValue,

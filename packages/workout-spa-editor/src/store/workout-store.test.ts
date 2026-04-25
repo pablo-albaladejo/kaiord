@@ -13,7 +13,7 @@ describe("useWorkoutStore", () => {
   beforeEach(() => {
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       isEditing: false,
@@ -338,7 +338,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      expect(state.workoutHistory).toEqual([]);
+      expect(state.undoHistory).toEqual([]);
       expect(state.historyIndex).toBe(-1);
     });
 
@@ -365,8 +365,8 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      expect(state.workoutHistory).toHaveLength(1);
-      expect(state.workoutHistory[0]).toEqual(mockKrd);
+      expect(state.undoHistory).toHaveLength(1);
+      expect(state.undoHistory[0].workout).toEqual(mockKrd);
       expect(state.historyIndex).toBe(0);
     });
 
@@ -406,9 +406,9 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      expect(state.workoutHistory).toHaveLength(2);
-      expect(state.workoutHistory[0]).toEqual(initialKrd);
-      expect(state.workoutHistory[1]).toEqual(updatedKrd);
+      expect(state.undoHistory).toHaveLength(2);
+      expect(state.undoHistory[0].workout).toEqual(initialKrd);
+      expect(state.undoHistory[1].workout).toEqual(updatedKrd);
       expect(state.historyIndex).toBe(1);
     });
 
@@ -613,9 +613,9 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      expect(state.workoutHistory).toHaveLength(2);
-      expect(state.workoutHistory[0]).toEqual(krd1);
-      expect(state.workoutHistory[1]).toEqual(krd3);
+      expect(state.undoHistory).toHaveLength(2);
+      expect(state.undoHistory[0].workout).toEqual(krd1);
+      expect(state.undoHistory[1].workout).toEqual(krd3);
       expect(state.historyIndex).toBe(1);
     });
 
@@ -657,18 +657,18 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      expect(state.workoutHistory).toHaveLength(50);
+      expect(state.undoHistory).toHaveLength(50);
       expect(state.historyIndex).toBe(49);
       expect(
         (
-          state.workoutHistory[0].extensions?.structured_workout as {
+          state.undoHistory[0].workout.extensions?.structured_workout as {
             name?: string;
           }
         )?.name
       ).toBe("Version 11");
       expect(
         (
-          state.workoutHistory[49].extensions?.structured_workout as {
+          state.undoHistory[49].workout.extensions?.structured_workout as {
             name?: string;
           }
         )?.name
@@ -789,7 +789,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      expect(state.workoutHistory).toEqual([]);
+      expect(state.undoHistory).toEqual([]);
       expect(state.historyIndex).toBe(-1);
     });
   });
@@ -870,7 +870,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      expect(state.workoutHistory).toHaveLength(2);
+      expect(state.undoHistory).toHaveLength(2);
       expect(state.historyIndex).toBe(1);
     });
 
@@ -909,7 +909,7 @@ describe("useWorkoutStore", () => {
       // Arrange
       useWorkoutStore.setState({
         currentWorkout: null,
-        workoutHistory: [],
+        undoHistory: [],
         historyIndex: -1,
       });
 
@@ -919,7 +919,7 @@ describe("useWorkoutStore", () => {
 
       // Assert
       expect(state.currentWorkout).toBeNull();
-      expect(state.workoutHistory).toHaveLength(0);
+      expect(state.undoHistory).toHaveLength(0);
     });
 
     it("should create step with open duration and open target", () => {
@@ -1124,7 +1124,7 @@ describe("useWorkoutStore", () => {
       const state = useWorkoutStore.getState();
 
       // Assert
-      expect(state.workoutHistory).toHaveLength(2);
+      expect(state.undoHistory).toHaveLength(2);
       expect(state.historyIndex).toBe(1);
     });
 
@@ -1132,7 +1132,7 @@ describe("useWorkoutStore", () => {
       // Arrange
       useWorkoutStore.setState({
         currentWorkout: null,
-        workoutHistory: [],
+        undoHistory: [],
         historyIndex: -1,
       });
 
@@ -1142,7 +1142,7 @@ describe("useWorkoutStore", () => {
 
       // Assert
       expect(state.currentWorkout).toBeNull();
-      expect(state.workoutHistory).toHaveLength(0);
+      expect(state.undoHistory).toHaveLength(0);
     });
 
     it("should handle deleting the only step in workout", () => {
@@ -1290,7 +1290,7 @@ describe("useWorkoutStore", () => {
     beforeEach(() => {
       useWorkoutStore.setState({
         currentWorkout: null,
-        workoutHistory: [],
+        undoHistory: [],
         historyIndex: -1,
         selectedStepId: null,
         selectedStepIds: [],

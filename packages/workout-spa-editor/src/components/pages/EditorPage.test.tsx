@@ -83,7 +83,7 @@ describe("EditorPage", () => {
     await db.table("workouts").clear();
     useWorkoutStore.setState({
       currentWorkout: null,
-      workoutHistory: [],
+      undoHistory: [],
       historyIndex: -1,
       selectedStepId: null,
       selectedStepIds: [],

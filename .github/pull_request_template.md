@@ -45,6 +45,7 @@
 - [ ] Coverage maintained or improved
 - [ ] Round-trip tests passing (if applicable)
 - [ ] If spec under `openspec/specs/` changed: `pnpm lint:specs` passes and the spec matches `openspec/SPEC_TEMPLATE.md`
+- [ ] If this PR adds a new UI affordance for a step/block mutation (toolbar button, context-menu item, keyboard shortcut), I have updated the focus-management E2E matrix and added the corresponding test cell in `e2e/focus-management.spec.ts`
 
 ## Testing
 
@@ -92,3 +93,4 @@
 - [ ] No security concerns
 - [ ] Performance impact is acceptable
 - [ ] Breaking changes are justified and documented
+- [ ] If this PR bumps React, Radix, or Zustand to a new major version, AT evidence MUST be refreshed and committed before merge (see `packages/workout-spa-editor/docs/accessibility-evidence/`)

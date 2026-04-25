@@ -61,7 +61,7 @@ describe("reorderStepAction", () => {
 
     mockState = {
       currentWorkout: mockKrd,
-      workoutHistory: [mockKrd],
+      undoHistory: [{ workout: mockKrd, selection: null }],
       historyIndex: 0,
       selectedStepId: null,
       selectedStepIds: [],
@@ -295,7 +295,7 @@ describe("reorderStepAction", () => {
       );
 
       // Assert
-      expect(result.workoutHistory).toHaveLength(2);
+      expect(result.undoHistory).toHaveLength(2);
       expect(result.historyIndex).toBe(1);
     });
 
@@ -303,7 +303,10 @@ describe("reorderStepAction", () => {
       // Arrange
       const stateWithHistory: WorkoutState = {
         ...mockState,
-        workoutHistory: [mockKrd, mockKrd],
+        undoHistory: [
+          { workout: mockKrd, selection: null },
+          { workout: mockKrd, selection: null },
+        ],
         historyIndex: 1,
       };
 
@@ -311,7 +314,7 @@ describe("reorderStepAction", () => {
       const result = reorderStepAction(mockKrd, 0, 1, stateWithHistory);
 
       // Assert
-      expect(result.workoutHistory).toHaveLength(3);
+      expect(result.undoHistory).toHaveLength(3);
       expect(result.historyIndex).toBe(2);
     });
   });
