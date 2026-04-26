@@ -31,10 +31,23 @@ export async function waitUploaded(
   { timeoutMs = 60000, sleep, now } = {}
 ) {
   const predicate = async () => {
-    const item = await getItem(serviceAccount, id, "DRAFT");
-    return item.uploadState === "SUCCESS" || item.uploadState === "UPLOADED"
-      ? item
-      : null;
+    const draft = await getItem(serviceAccount, id, "DRAFT");
+    // Standard upload-complete states.
+    if (draft.uploadState === "SUCCESS" || draft.uploadState === "UPLOADED") {
+      return draft;
+    }
+    // Still in progress: keep polling.
+    if (draft.uploadState === "IN_PROGRESS") return null;
+    // Other states (FAILURE, null, unknown): check if the published
+    // version already matches what we just uploaded. CWS does not create
+    // a new draft when the upload's version equals the currently-live
+    // one — the upload PUT returns SUCCESS but the DRAFT projection
+    // never transitions. Treat that as a successful no-op.
+    const published = await getItem(serviceAccount, id, "PUBLISHED");
+    if (published.uploadState === "PUBLISHED" || published.crxVersion) {
+      return { ...published, alreadyLive: true };
+    }
+    return null;
   };
   const opts = { timeoutMs, sleep, now };
   try {
