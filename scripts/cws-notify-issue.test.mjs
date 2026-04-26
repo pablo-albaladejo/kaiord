@@ -3,11 +3,7 @@
 import { describe, it } from "node:test";
 import { strictEqual, ok, deepStrictEqual } from "node:assert";
 
-import {
-  buildTitle,
-  findOpenIssue,
-  openOrBump,
-} from "./cws-notify-issue.mjs";
+import { buildTitle, findOpenIssue, openOrBump } from "./cws-notify-issue.mjs";
 
 function fakeDeps(behaviors) {
   const calls = [];
@@ -39,15 +35,18 @@ describe("buildTitle", () => {
 
   it("scopes verification-timeout title with suffix", () => {
     strictEqual(
-      buildTitle("cws-publish-verification-timeout", "@kaiord/garmin-bridge@7.1.1"),
-      "CWS publish stalled: @kaiord/garmin-bridge@7.1.1",
+      buildTitle(
+        "cws-publish-verification-timeout",
+        "@kaiord/garmin-bridge@7.1.1"
+      ),
+      "CWS publish stalled: @kaiord/garmin-bridge@7.1.1"
     );
   });
 
   it("scopes rejected title with suffix", () => {
     strictEqual(
       buildTitle("cws-publish-rejected", "@kaiord/train2go-bridge@7.1.1"),
-      "CWS publish rejected: @kaiord/train2go-bridge@7.1.1",
+      "CWS publish rejected: @kaiord/train2go-bridge@7.1.1"
     );
   });
 
@@ -71,9 +70,7 @@ describe("findOpenIssue", () => {
   it("returns issue number on exact title match", () => {
     const deps = fakeDeps([
       () =>
-        JSON.stringify([
-          { number: 42, title: "CWS authentication broken" },
-        ]),
+        JSON.stringify([{ number: 42, title: "CWS authentication broken" }]),
     ]);
     strictEqual(findOpenIssue("CWS authentication broken", deps), 42);
   });
@@ -100,7 +97,7 @@ describe("openOrBump", () => {
       "cws-auth-broken",
       undefined,
       "Pre-flight returned 401",
-      deps,
+      deps
     );
 
     strictEqual(result.action, "created");
@@ -112,10 +109,7 @@ describe("openOrBump", () => {
 
   it("bumps existing issue with comment when title matches", () => {
     const deps = fakeDeps([
-      () =>
-        JSON.stringify([
-          { number: 7, title: "CWS authentication broken" },
-        ]),
+      () => JSON.stringify([{ number: 7, title: "CWS authentication broken" }]),
       () => "", // gh issue comment returns nothing meaningful
     ]);
 
@@ -123,7 +117,7 @@ describe("openOrBump", () => {
       "cws-auth-broken",
       undefined,
       "Re-detected at next pre-flight",
-      deps,
+      deps
     );
 
     strictEqual(result.action, "bumped");
@@ -141,14 +135,14 @@ describe("openOrBump", () => {
       "cws-publish-verification-timeout",
       "@kaiord/garmin-bridge@7.1.1",
       "stuck",
-      deps,
+      deps
     );
 
     const createArgs = deps.calls[1].args;
     const titleIdx = createArgs.indexOf("--title");
     strictEqual(
       createArgs[titleIdx + 1],
-      "CWS publish stalled: @kaiord/garmin-bridge@7.1.1",
+      "CWS publish stalled: @kaiord/garmin-bridge@7.1.1"
     );
   });
 
@@ -162,23 +156,21 @@ describe("openOrBump", () => {
       "cws-auth-broken",
       undefined,
       "first detection",
-      writerA,
+      writerA
     );
     strictEqual(a.action, "created");
 
     // Writer B (slightly later): list returns issue 50; bumps it instead of creating.
     const writerB = fakeDeps([
       () =>
-        JSON.stringify([
-          { number: 50, title: "CWS authentication broken" },
-        ]),
+        JSON.stringify([{ number: 50, title: "CWS authentication broken" }]),
       () => "",
     ]);
     const b = openOrBump(
       "cws-auth-broken",
       undefined,
       "second detection",
-      writerB,
+      writerB
     );
     strictEqual(b.action, "bumped");
     strictEqual(b.issue, 50);

@@ -29,7 +29,7 @@ export async function main(argv = process.argv.slice(2), env = process.env) {
   const keyJson = env.CWS_SERVICE_ACCOUNT_KEY;
   if (!keyJson) {
     process.stderr.write(
-      "[CwsAuthError] CWS_SERVICE_ACCOUNT_KEY environment variable not set\n",
+      "[CwsAuthError] CWS_SERVICE_ACCOUNT_KEY environment variable not set\n"
     );
     return 2;
   }
@@ -58,7 +58,7 @@ function printUsage() {
       "  wait-uploaded --timeout-ms <N>",
       "  wait-published --version <V> --timeout-ms <N>",
       "",
-    ].join("\n"),
+    ].join("\n")
   );
 }
 
@@ -72,6 +72,6 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
       const safe = msg.startsWith("[Cws") ? msg : `[CwsStateError] ${msg}`;
       process.stderr.write(safe + "\n");
       process.exit(1);
-    },
+    }
   );
 }

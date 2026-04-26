@@ -9,7 +9,7 @@ import { CWS_API_BASE_URL } from "./state.mjs";
 export async function publishItem(
   serviceAccount,
   id,
-  { trustedTesters = false } = {},
+  { trustedTesters = false } = {}
 ) {
   const token = await mintAccessToken(serviceAccount);
   const target = trustedTesters ? "trustedTesters" : "default";
@@ -50,7 +50,7 @@ async function parseJsonOrThrow(res) {
     return JSON.parse(text);
   } catch {
     throw new CwsStateError(
-      `publishItem body is not valid JSON (length=${text.length})`,
+      `publishItem body is not valid JSON (length=${text.length})`
     );
   }
 }

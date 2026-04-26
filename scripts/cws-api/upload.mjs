@@ -49,7 +49,7 @@ async function parseJsonOrThrow(res) {
     return JSON.parse(text);
   } catch {
     throw new CwsStateError(
-      `uploadCrx body is not valid JSON (length=${text.length})`,
+      `uploadCrx body is not valid JSON (length=${text.length})`
     );
   }
 }

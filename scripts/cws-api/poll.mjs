@@ -8,7 +8,7 @@ import { getItem } from "./state.mjs";
 
 export async function pollUntil(
   predicate,
-  { timeoutMs, intervalMs = 2000, sleep = defaultSleep, now = Date.now } = {},
+  { timeoutMs, intervalMs = 2000, sleep = defaultSleep, now = Date.now } = {}
 ) {
   const deadline = now() + timeoutMs;
   for (;;) {
@@ -28,7 +28,7 @@ function defaultSleep(ms) {
 export async function waitUploaded(
   serviceAccount,
   id,
-  { timeoutMs = 60000, sleep, now } = {},
+  { timeoutMs = 60000, sleep, now } = {}
 ) {
   const predicate = async () => {
     const item = await getItem(serviceAccount, id, "DRAFT");
@@ -49,7 +49,7 @@ export async function waitUploaded(
 export async function waitPublished(
   serviceAccount,
   id,
-  { version, timeoutMs = 120000, sleep, now = Date.now } = {},
+  { version, timeoutMs = 120000, sleep, now = Date.now } = {}
 ) {
   const start = now();
   const deadline = start + timeoutMs;
@@ -80,8 +80,7 @@ function isRejected(item) {
     item.itemError.some(
       (e) =>
         e?.error_code === "ITEM_REJECTED" ||
-        (typeof e?.error_detail === "string" &&
-          /reject/i.test(e.error_detail)),
+        (typeof e?.error_detail === "string" && /reject/i.test(e.error_detail))
     )
   ) {
     return true;

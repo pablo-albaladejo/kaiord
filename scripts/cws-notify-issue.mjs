@@ -85,7 +85,10 @@ function parseIssueNumberFromUrl(url) {
 function defaultDeps() {
   return {
     exec: (cmd, args) =>
-      execFileSync(cmd, args, { encoding: "utf8", stdio: ["ignore", "pipe", "pipe"] }),
+      execFileSync(cmd, args, {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+      }),
   };
 }
 

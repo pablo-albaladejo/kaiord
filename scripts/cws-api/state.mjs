@@ -5,7 +5,8 @@
 import { CwsAuthError, CwsStateError } from "./errors.mjs";
 import { mintAccessToken } from "./auth.mjs";
 
-export const CWS_API_BASE_URL = "https://www.googleapis.com/chromewebstore/v1.1";
+export const CWS_API_BASE_URL =
+  "https://www.googleapis.com/chromewebstore/v1.1";
 
 async function safeJson(res) {
   const text = await res.text();
@@ -13,7 +14,7 @@ async function safeJson(res) {
     return JSON.parse(text);
   } catch {
     throw new CwsStateError(
-      `response body is not valid JSON (status=${res.status}, length=${text.length})`,
+      `response body is not valid JSON (status=${res.status}, length=${text.length})`
     );
   }
 }

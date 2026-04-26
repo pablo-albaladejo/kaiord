@@ -55,7 +55,9 @@ export function signJwt(serviceAccount, now = Date.now()) {
     exp,
   };
   const signingInput =
-    base64url(JSON.stringify(header)) + "." + base64url(JSON.stringify(payload));
+    base64url(JSON.stringify(header)) +
+    "." +
+    base64url(JSON.stringify(payload));
   let signature;
   try {
     const signer = createSign("RSA-SHA256");

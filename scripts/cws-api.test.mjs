@@ -90,14 +90,19 @@ describe("signJwt", () => {
     const payload = JSON.parse(Buffer.from(payloadSeg, "base64url").toString());
     strictEqual(header.alg, "RS256");
     strictEqual(payload.iss, account.client_email);
-    strictEqual(payload.scope, "https://www.googleapis.com/auth/chromewebstore");
+    strictEqual(
+      payload.scope,
+      "https://www.googleapis.com/auth/chromewebstore"
+    );
     strictEqual(payload.aud, "https://oauth2.googleapis.com/token");
     strictEqual(payload.iat, Math.floor(now / 1000) - 60);
     ok(payload.exp > payload.iat);
   });
 
   it("throws CwsAuthError without leaking PEM on signing error", () => {
-    const account = makeAccount("-----BEGIN PRIVATE KEY-----\nNOTABASE64\n-----END PRIVATE KEY-----\n");
+    const account = makeAccount(
+      "-----BEGIN PRIVATE KEY-----\nNOTABASE64\n-----END PRIVATE KEY-----\n"
+    );
     let caught;
     try {
       signJwt(account);
@@ -164,13 +169,15 @@ describe("mintAccessToken", () => {
     await withMockFetch(
       async () => {
         calls++;
-        return makeResponse({ body: { access_token: "AT-1", expires_in: 3600 } });
+        return makeResponse({
+          body: { access_token: "AT-1", expires_in: 3600 },
+        });
       },
       async () => {
         const token = await mintAccessToken(account);
         strictEqual(token, "AT-1");
         strictEqual(calls, 1);
-      },
+      }
     );
   });
 
@@ -187,7 +194,7 @@ describe("mintAccessToken", () => {
         await mintAccessToken(account, 1_000_000);
         await mintAccessToken(account, 1_000_001);
         strictEqual(calls, 1);
-      },
+      }
     );
   });
 
@@ -204,7 +211,7 @@ describe("mintAccessToken", () => {
         await mintAccessToken(account, 0);
         await mintAccessToken(account, 56 * 60 * 1000);
         strictEqual(calls, 2);
-      },
+      }
     );
   });
 
@@ -213,14 +220,15 @@ describe("mintAccessToken", () => {
     const account = makeAccount(pem);
     let caught;
     await withMockFetch(
-      async () => makeResponse({ status: 401, body: { error: "invalid_grant" } }),
+      async () =>
+        makeResponse({ status: 401, body: { error: "invalid_grant" } }),
       async () => {
         try {
           await mintAccessToken(account);
         } catch (e) {
           caught = e;
         }
-      },
+      }
     );
     ok(caught instanceof CwsAuthError);
   });
@@ -245,7 +253,7 @@ describe("getItem", () => {
         const item = await getItem(account, "abc", "DRAFT");
         strictEqual(item.uploadState, "UPLOADED");
         strictEqual(item.crxVersion, "1.0.0");
-      },
+      }
     );
   });
 
@@ -266,7 +274,7 @@ describe("getItem", () => {
         } catch (e) {
           caught = e;
         }
-      },
+      }
     );
     ok(caught instanceof CwsAuthError);
   });
@@ -288,7 +296,7 @@ describe("getItem", () => {
         } catch (e) {
           caught = e;
         }
-      },
+      }
     );
     ok(caught instanceof CwsStateError);
   });
@@ -310,7 +318,7 @@ describe("getItem", () => {
         } catch (e) {
           caught = e;
         }
-      },
+      }
     );
     ok(caught instanceof CwsStateError);
   });
@@ -354,7 +362,7 @@ describe("uploadCrx", () => {
       async () => {
         const result = await uploadCrx(account, "abc", zipPath);
         strictEqual(result.uploadState, "SUCCESS");
-      },
+      }
     );
   });
 });
@@ -375,7 +383,7 @@ describe("publishItem", () => {
       async () => {
         const result = await publishItem(account, "abc");
         deepStrictEqual(result.status, ["OK"]);
-      },
+      }
     );
   });
 
@@ -396,7 +404,7 @@ describe("publishItem", () => {
         } catch (e) {
           caught = e;
         }
-      },
+      }
     );
     ok(caught instanceof CwsStateError);
   });
@@ -407,10 +415,11 @@ describe("publishItem", () => {
 describe("pollUntil", () => {
   it("returns on first truthy predicate", async () => {
     let n = 0;
-    const result = await pollUntil(
-      async () => (++n === 2 ? "got it" : null),
-      { timeoutMs: 1000, intervalMs: 1, sleep: async () => {} },
-    );
+    const result = await pollUntil(async () => (++n === 2 ? "got it" : null), {
+      timeoutMs: 1000,
+      intervalMs: 1,
+      sleep: async () => {},
+    });
     strictEqual(result, "got it");
   });
 
@@ -462,7 +471,7 @@ describe("waitUploaded", () => {
         });
         strictEqual(result.uploadState, "SUCCESS");
         ok(calls >= 2, `expected at least 2 calls (retry); got ${calls}`);
-      },
+      }
     );
   });
 });
@@ -490,7 +499,7 @@ describe("waitPublished", () => {
         });
         strictEqual(result.status, "PUBLISHED");
         strictEqual(result.version, "1.0.0");
-      },
+      }
     );
   });
 
@@ -511,7 +520,7 @@ describe("waitPublished", () => {
           sleep: async () => {},
         });
         strictEqual(result.status, "IN_REVIEW");
-      },
+      }
     );
   });
 
@@ -541,7 +550,7 @@ describe("waitPublished", () => {
         const elapsed = Date.now() - start;
         strictEqual(result.status, "REJECTED");
         ok(elapsed < 5000, `elapsed=${elapsed}ms; expected <5000`);
-      },
+      }
     );
   });
 
@@ -566,7 +575,7 @@ describe("waitPublished", () => {
           now: () => nowVal,
         });
         strictEqual(result.status, "TIMEOUT");
-      },
+      }
     );
   });
 });
@@ -612,7 +621,7 @@ describe("dispatch (CLI)", () => {
         },
         async () => {
           code = await dispatch(["check", "abc"], account);
-        },
+        }
       );
     } finally {
       process.stdout.write = origWrite;
@@ -648,7 +657,7 @@ describe("secret redaction", () => {
         },
         async () => {
           await dispatch(["check", "abc"], account);
-        },
+        }
       );
     } finally {
       process.stderr.write = origWrite;
@@ -656,7 +665,9 @@ describe("secret redaction", () => {
     const stderr = stderrChunks.join("");
     // No 32+ char substring of the access token or PEM body should appear.
     const tokenSlice = accessToken.slice(0, 32);
-    const pemBodyMatch = pem.match(/-----BEGIN PRIVATE KEY-----\n([\s\S]+?)\n-----END/);
+    const pemBodyMatch = pem.match(
+      /-----BEGIN PRIVATE KEY-----\n([\s\S]+?)\n-----END/
+    );
     const pemSlice = pemBodyMatch ? pemBodyMatch[1].slice(0, 32) : "";
     ok(!stderr.includes(tokenSlice));
     if (pemSlice.length === 32) {
