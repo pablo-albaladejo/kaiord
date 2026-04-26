@@ -171,10 +171,10 @@ The workflow SHALL branch on `status`:
 #### Scenario: Publish is rejected
 
 - **GIVEN** publish dispatched
-- **AND** within 2 minutes CWS returns a rejection marker (`itemError` containing REJECTED state or equivalent)
+- **AND** at the next poll cycle (≤2s after dispatch) CWS returns a rejection marker (`itemError` containing REJECTED state or equivalent)
 - **WHEN** `wait-published` terminates
 - **THEN** stdout SHALL contain `{"status":"REJECTED",...}`
-- **AND** `wait-published` SHALL fail-fast (NOT wait out the full 2-min timeout)
+- **AND** `wait-published` SHALL fail-fast: the elapsed wall-clock time from invocation to exit SHALL be `< 5 seconds`. NOT waiting the full 2-min timeout. Test 4.4 SHALL assert this timing bound (mock CWS returns REJECTED on the first poll; `Date.now()` delta from `wait-published` start to exit `< 5000` ms — generous to absorb fetch + JSON parse on slow runners). Without this assertion, an implementer could trivially "pass" the REJECTED scenario by polling out the full timeout and reporting status REJECTED at the end, defeating the fail-fast intent.
 - **AND** the workflow SHALL open a `cws-publish-rejected` issue scoped to this extension + version with the full `itemError` payload
 - **AND** the matrix job SHALL FAIL (non-zero exit)
 - **AND** no git tag SHALL be created

@@ -32,6 +32,8 @@
 - [ ] 3.2.b Implement `publishItem`.
 - [ ] 3.3.a Write failing test for `pollUntil(predicate, { timeoutMs, intervalMs=2000 })` — returns on first truthy predicate; throws `CwsTimeoutError` after `timeoutMs`.
 - [ ] 3.3.b Implement `pollUntil` as a general helper used by both wait-uploaded and wait-published.
+- [ ] 3.3.c Write failing test for `wait-uploaded` retry-once-on-timeout: first `pollUntil` invocation throws `CwsTimeoutError` (mocked); the `wait-uploaded` helper SHALL catch it and immediately invoke a SECOND `pollUntil` with a fresh 60s window before propagating any failure. Assert exactly two `pollUntil` calls; the second yielding `UPLOADED` exits `wait-uploaded` 0; the second also throwing exits 1 with `CwsTimeoutError`. This retry count is internal to `wait-uploaded` (not configurable from the workflow, not exposed via flags) — distinct from the generic `pollUntil` timeout in 3.3.b.
+- [ ] 3.3.d Implement the retry-once wrapping logic in `wait-uploaded` (NOT in `pollUntil` itself; `pollUntil` stays single-shot). The retry boundary lives in `wait-uploaded` so `wait-published` (no retry policy by spec) can share `pollUntil` without inheriting it.
 - [ ] 3.4.a Write failing test for CLI entry `node scripts/cws-api.mjs <sub> ...` — subcommands: `check`, `state`, `upload`, `publish`, `wait-uploaded`, `wait-published`. Each prints JSON to stdout on success, exits 0; typed errors go to stderr with the stable prefix; exit code 1 for recoverable, 2 for usage errors.
 - [ ] 3.4.b Implement the subcommand dispatcher.
 
@@ -47,12 +49,13 @@
 - [ ] 4.2.a Rationale doc-comment: the 32-char threshold is a heuristic chosen so a base64 fragment of the private-key PEM (≥64 chars per line typically) or a JWT header/payload segment (≥80 chars typical) would be caught. A lower threshold over-reports benign prefixes; documented in the test file header.
 - [ ] 4.3 Malformed-input redaction: corrupt `CWS_SERVICE_ACCOUNT_KEY` (invalid JSON), corrupt PEM (valid JSON but unparseable private_key), missing `client_email` field. Helper throws typed errors; test asserts NO key fragment / secret content appears in the error stderr (captured via spawned-process stderr capture).
 - [ ] 4.4 `wait-published` stdout schema: write a failing test for each of the four terminal states (`PUBLISHED`, `IN_REVIEW`, `REJECTED`, `TIMEOUT`); assert stdout parses as `{ status, version, raw }` with the exact `status` string; assert exit code matches spec (0 for PUBLISHED / IN_REVIEW / TIMEOUT; non-zero for REJECTED). The workflow's tag-vs-issue branching reads this schema; any drift here breaks the whole publish logic.
+- [ ] 4.4.a REJECTED fail-fast timing: mock CWS to return REJECTED on the first poll cycle; capture `Date.now()` at `wait-published` invocation and at exit; assert elapsed < 5000 ms. Without this timing bound, an implementation could "pass" the REJECTED scenario by polling out the full timeout and reporting REJECTED at the end — defeating the fail-fast intent in the spec.
 - [ ] 4.5 PEM normalization: helper accepts both raw-PEM (`-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----`) and escaped-PEM (`-----BEGIN PRIVATE KEY-----\\n...\\n-----END PRIVATE KEY-----`, as pasted into a single-line secret). Test both variants sign an identical JWT; test a triple-escaped variant (`\\\\n`) throws `CwsAuthError` without leaking the PEM. Idempotency: calling the normalizer twice on the same input produces the same output (guards against future regressions if a different secret format is introduced).
 - [ ] 4.6 Manual verification from a local checkout with `CWS_SERVICE_ACCOUNT_KEY` in the shell env: run each subcommand against the real CWS API; confirm output formats and exit codes.
 
 ## 5. Rewrite `cws-publish.yml`
 
-- [ ] 5.1 Remove `chrome-webstore-upload-cli` from `packages/garmin-bridge/package.json` and `packages/train2go-bridge/package.json` devDeps. Run `pnpm install` to prune.
+- [ ] 5.1 Remove `chrome-webstore-upload-cli` from root `package.json` `devDependencies` (verified location via grep — it's a single root-level entry, NOT per-extension). Run `pnpm install` to prune the lockfile and `node_modules` monorepo-wide.
 - [ ] 5.2 Rewrite `.github/workflows/cws-publish.yml`:
   - New `pre-flight` job: single step `node scripts/cws-api.mjs check $CWS_EXTENSION_ID`. Environment: `CWS_SERVICE_ACCOUNT_KEY`. On failure, run `scripts/cws-notify-issue.mjs cws-auth-broken` and fail.
   - Add `publish` matrix `needs: pre-flight`.
