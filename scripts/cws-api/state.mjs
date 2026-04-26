@@ -33,10 +33,22 @@ export async function getItem(serviceAccount, id, projection = "DRAFT") {
     throw new CwsAuthError(`getItem returned ${res.status}`);
   }
   if (!res.ok) {
-    throw new CwsStateError(`getItem returned ${res.status}`);
+    const detail = await readErrorDetail(res);
+    throw new CwsStateError(
+      `getItem(${projection}) returned ${res.status}: ${detail}`
+    );
   }
   const body = await safeJson(res);
   return normalizeItem(body);
+}
+
+async function readErrorDetail(res) {
+  try {
+    const text = await res.text();
+    return text.replace(/\s+/g, " ").slice(0, 400);
+  } catch {
+    return "(no body)";
+  }
 }
 
 function normalizeItem(body) {
