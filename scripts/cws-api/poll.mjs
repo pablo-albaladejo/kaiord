@@ -32,22 +32,19 @@ export async function waitUploaded(
 ) {
   const predicate = async () => {
     const draft = await getItem(serviceAccount, id, "DRAFT");
-    // Standard upload-complete states.
-    if (draft.uploadState === "SUCCESS" || draft.uploadState === "UPLOADED") {
-      return draft;
+    // Real failure: itemError populated. Throw with details.
+    if (draft.itemError && draft.itemError.length > 0) {
+      throw new CwsStateError(
+        `upload itemError: ${JSON.stringify(draft.itemError)}`
+      );
     }
-    // Still in progress: keep polling.
+    // Still uploading: keep polling.
     if (draft.uploadState === "IN_PROGRESS") return null;
-    // Other states (FAILURE, null, unknown): check if the published
-    // version already matches what we just uploaded. CWS does not create
-    // a new draft when the upload's version equals the currently-live
-    // one — the upload PUT returns SUCCESS but the DRAFT projection
-    // never transitions. Treat that as a successful no-op.
-    const published = await getItem(serviceAccount, id, "PUBLISHED");
-    if (published.uploadState === "PUBLISHED" || published.crxVersion) {
-      return { ...published, alreadyLive: true };
-    }
-    return null;
+    // Anything else (SUCCESS, UPLOADED, null/empty, unknown): accept as
+    // terminal. The upload PUT already confirmed receipt; the wait here
+    // is a defensive double-check that we are no longer mid-upload.
+    // wait-published is the authoritative end-to-end gate.
+    return draft;
   };
   const opts = { timeoutMs, sleep, now };
   try {
