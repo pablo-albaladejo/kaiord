@@ -52,9 +52,6 @@ importers:
       '@types/node':
         specifier: ^25.6.0
         version: 25.6.0
-      chrome-webstore-upload-cli:
-        specifier: ^3.5.0
-        version: 3.5.0
       dependency-cruiser:
         specifier: ^17.0.0
         version: 17.3.10
@@ -4087,9 +4084,6 @@ packages:
     engines: {node: ^6 || ^7 || ^8 || ^9 || ^10 || ^11 || ^12 || >=13.7}
     hasBin: true
 
-  buffer-crc32@0.2.13:
-    resolution: {integrity: sha512-VO9Ht/+p3SN7SKWqcrgEzjGbRSJYTx+Q1pTQC0wrWqHx0vpJraQ6GtHx8tvcg1rlK1byhU5gccxgOgj7B0TDkQ==}
-
   buffer-from@1.1.2:
     resolution: {integrity: sha512-E+XQCRwSbaaiChtv6k6Dwgc+bx+Bs6vuKJHHl5kox/BaKbhiXzqQOwK4cO22yElGp2OCmjwVhT3HmxgyPGnJfQ==}
 
@@ -4175,15 +4169,6 @@ packages:
   chokidar@4.0.3:
     resolution: {integrity: sha512-Qgzu8kfBvo+cA4962jnP1KkS6Dop5NS6g7R5LFYJr4b8Ub94PPQXUksCw9PvXoeXPRRddRNC5C1JQUR2SMGtnA==}
     engines: {node: '>= 14.16.0'}
-
-  chrome-webstore-upload-cli@3.5.0:
-    resolution: {integrity: sha512-cojgwXDLK+TbeUh8Ll+H33njdCtBPY3pmf2Y5++HWZwlsrmTaW9I8mQz7FS3N57qv/8Woz5TY+SwiUjFtKwsnA==}
-    engines: {node: '>=18'}
-    hasBin: true
-
-  chrome-webstore-upload@3.2.0:
-    resolution: {integrity: sha512-ghFzqGFpPzEvDfam7qzokj07KsPn39fOdoj9KwqgQdjcHpFCJ1/wnKi2IHP6zCcHKWEBv9vI7VVbllbDRnypXw==}
-    engines: {node: '>=18'}
 
   cli-cursor@5.0.0:
     resolution: {integrity: sha512-aCj4O5wKyszjMmDT4tZj93kxyydN/K5zPWSCe6/0AV/AA1pqe5ZBIw0a2ZfPQV7lL5/yb5HsUreJ6UFAF1tEQw==}
@@ -5332,10 +5317,6 @@ packages:
   jstransformer@1.0.0:
     resolution: {integrity: sha512-C9YK3Rf8q6VAPDCCU9fnqo3mAfOH6vUGnMcP4AQAYIEpWtfGLpwOTmZ+igtdK5y+VvI2n3CyYSzy4Qh34eq24A==}
 
-  junk@4.0.1:
-    resolution: {integrity: sha512-Qush0uP+G8ZScpGMZvHUiRfI0YBWuB3gVBYlI0v0vvOJt5FLicco+IkP0a50LqTTQhmts/m6tP5SWE+USyIvcQ==}
-    engines: {node: '>=12.20'}
-
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
@@ -5581,10 +5562,6 @@ packages:
   media-typer@1.1.0:
     resolution: {integrity: sha512-aisnrDP4GNe06UcKFnV5bfMNPBUw4jsLGaWwWfnH3v02GnBuXX2MCVn5RbrWo0j3pczUilYblq7fQ7Nw2t5XKw==}
     engines: {node: '>= 0.8'}
-
-  meow@12.1.1:
-    resolution: {integrity: sha512-BhXM0Au22RwUneMPwSCnyhTOizdWoIEPU9sp0Aqa1PnDMR5Wv2FGXYDjuzJEIX+Eo2Rb8xuYe5jrnm5QowQFkw==}
-    engines: {node: '>=16.10'}
 
   merge-descriptors@2.0.0:
     resolution: {integrity: sha512-Snk314V5ayFLhp3fkUREub6WtjBfPdCPY1Ln8/8munuLuiYhsABgBVWsozAG+MWMbVEvcdcpbi9R7ww22l9Q3g==}
@@ -6217,10 +6194,6 @@ packages:
   rechoir@0.8.0:
     resolution: {integrity: sha512-/vxpCXddiX8NGfGO/mTafwjq4aFa/71pvamip0++IQk3zG8cbCj0fifNPrjjF1XMXUne91jL9OoxmdykoEtifQ==}
     engines: {node: '>= 10.13.0'}
-
-  recursive-readdir@2.2.3:
-    resolution: {integrity: sha512-8HrF5ZsXk5FAH9dgsx3BlUer73nIhuj+9OrQwEbLTPOBzGkL1lsFCR01am+v+0m2Cmbs1nP12hLDl5FA7EszKA==}
-    engines: {node: '>=6.0.0'}
 
   redent@3.0.0:
     resolution: {integrity: sha512-6tDA8g98We0zd0GvVeMT9arEOnTw9qM03L9cJXaCjrip1OO764RDBLBfrB4cwzNGDj5OA5ioymC9GkizgWJDUg==}
@@ -7255,9 +7228,6 @@ packages:
   yargs@18.0.0:
     resolution: {integrity: sha512-4UEqdc2RYGHZc7Doyqkrqiln3p9X2DZVxaGbwhn2pi7MrRagKaOcIKe8L3OxYcbhXLgLFUS3zAYuQjKBQgmuNg==}
     engines: {node: ^20.19.0 || ^22.12.0 || >=23}
-
-  yazl@2.5.1:
-    resolution: {integrity: sha512-phENi2PLiHnHb6QBVot+dJnaAZ0xosj7p3fWl+znIjBDlnMI2PsZCJZ306BPTFOaHf5qdDEI8x5qFrSOBN5vrw==}
 
   yocto-queue@0.1.0:
     resolution: {integrity: sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==}
@@ -10407,8 +10377,6 @@ snapshots:
       node-releases: 2.0.37
       update-browserslist-db: 1.2.3(browserslist@4.28.2)
 
-  buffer-crc32@0.2.13: {}
-
   buffer-from@1.1.2:
     optional: true
 
@@ -10485,16 +10453,6 @@ snapshots:
   chokidar@4.0.3:
     dependencies:
       readdirp: 4.1.2
-
-  chrome-webstore-upload-cli@3.5.0:
-    dependencies:
-      chrome-webstore-upload: 3.2.0
-      junk: 4.0.1
-      meow: 12.1.1
-      recursive-readdir: 2.2.3
-      yazl: 2.5.1
-
-  chrome-webstore-upload@3.2.0: {}
 
   cli-cursor@5.0.0:
     dependencies:
@@ -11776,8 +11734,6 @@ snapshots:
       is-promise: 2.2.2
       promise: 7.3.1
 
-  junk@4.0.1: {}
-
   keyv@4.5.4:
     dependencies:
       json-buffer: 3.0.1
@@ -12103,8 +12059,6 @@ snapshots:
   mdurl@2.0.0: {}
 
   media-typer@1.1.0: {}
-
-  meow@12.1.1: {}
 
   merge-descriptors@2.0.0: {}
 
@@ -12871,10 +12825,6 @@ snapshots:
   rechoir@0.8.0:
     dependencies:
       resolve: 1.22.12
-
-  recursive-readdir@2.2.3:
-    dependencies:
-      minimatch: 10.2.5
 
   redent@3.0.0:
     dependencies:
@@ -14083,10 +14033,6 @@ snapshots:
       string-width: 7.2.0
       y18n: 5.0.8
       yargs-parser: 22.0.0
-
-  yazl@2.5.1:
-    dependencies:
-      buffer-crc32: 0.2.13
 
   yocto-queue@0.1.0: {}
 
