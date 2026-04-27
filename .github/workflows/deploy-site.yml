@@ -47,11 +47,14 @@ jobs:
       # Always build all packages — the merged artifact must be complete.
       # Targeted filters build only required transitive dependencies.
       - name: Build Landing Page
+        env:
+          VITE_CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
         run: pnpm --filter @kaiord/landing... build
 
       - name: Build SPA Editor
         env:
           VITE_BASE_PATH: /editor/
+          VITE_CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
         run: pnpm --filter @kaiord/workout-spa-editor... build
 
       - name: Build Docs
