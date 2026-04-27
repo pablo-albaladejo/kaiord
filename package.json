@@ -82,7 +82,6 @@
     "@resvg/resvg-js": "^2.6.2",
     "@size-limit/file": "^12.1.0",
     "@types/node": "^25.6.0",
-    "chrome-webstore-upload-cli": "^3.5.0",
     "dependency-cruiser": "^17.0.0",
     "eslint": "^10.2.1",
     "eslint-plugin-boundaries": "^6.0.2",

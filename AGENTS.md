@@ -84,3 +84,7 @@ pnpm exec changeset                              # For version-worthy changes
 4. Add changeset if version-worthy: `pnpm exec changeset`
 5. Update docs if public API changes
 6. After merge: `/opsx:archive` to preserve decisions
+
+## Runbooks
+
+- [`docs/runbooks/cws-service-account.md`](docs/runbooks/cws-service-account.md) — Chrome Web Store service-account setup, key rotation, emergency `force_upload` re-publish, compromised-key response. Required reading before touching `.github/workflows/cws-publish.yml`.
