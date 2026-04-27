@@ -93,6 +93,37 @@ describe("ManualCreateSection analytics", () => {
     });
   });
 
+  it("fires workout-imported with format=fit on successful FIT import", async () => {
+    // Arrange
+    const { importWorkout } = await import("../../utils/import-workout");
+    vi.mocked(importWorkout).mockResolvedValue(mockKRD);
+
+    const analytics: Analytics = {
+      pageView: vi.fn(),
+      event: vi.fn(),
+    };
+    const user = userEvent.setup();
+
+    const { getByText, getByLabelText } = renderSection(analytics);
+
+    // Act — expand the section
+    await user.click(getByText(/or create manually/i));
+
+    const fileInput = getByLabelText(/upload workout file/i);
+    const file = new File([new Uint8Array([14, 16])], "workout.fit", {
+      type: "application/octet-stream",
+    });
+
+    await user.upload(fileInput, file);
+
+    // Assert
+    await waitFor(() => {
+      expect(analytics.event).toHaveBeenCalledWith("workout-imported", {
+        format: "fit",
+      });
+    });
+  });
+
   it("does NOT fire workout-imported when the import fails", async () => {
     // Arrange
     const { importWorkout, ImportError } =
