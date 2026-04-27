@@ -1,3 +1,7 @@
+> Completed: 2026-04-27
+
+# Proposal: Harden CWS Publish (Service-Account Migration)
+
 ## Why
 
 The `CWS Publish` GitHub Actions workflow has failed **7 of 12 runs in the last 12 days** (Apr 12–24, 2026). Two distinct failure modes surfaced:
