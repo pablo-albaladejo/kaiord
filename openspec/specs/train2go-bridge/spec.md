@@ -189,7 +189,7 @@ All API operations SHALL require an open Train2Go tab (`https://app.train2go.com
 
 The extension SHALL inject a content script (`kaiord-announce.js`) at `document_start` on SPA origins (`https://*.kaiord.com/*` and, in dev, `http://localhost/*`). The script SHALL post a `KAIORD_BRIDGE_ANNOUNCE` message via `window.postMessage` to the page's own origin so the SPA can discover the extension's runtime ID without hardcoding it.
 
-The announcement payload SHALL include: `type: "KAIORD_BRIDGE_ANNOUNCE"`, `bridgeId: "train2go-bridge"`, `extensionId: chrome.runtime.id`, `name: "Kaiord Train2Go Bridge"`, `version` (from manifest), `protocolVersion: 1`, and `capabilities: ["read:training-plan"]`.
+The announcement payload SHALL include: `type: "KAIORD_BRIDGE_ANNOUNCE"`, `bridgeId: "train2go-bridge"`, `extensionId: chrome.runtime.id`, `name: "Train2Go"`, `version` (from manifest), `protocolVersion: 1`, and `capabilities: ["read:training-plan"]`.
 
 The script SHALL re-announce when it receives a `KAIORD_BRIDGE_DISCOVER` message from the page (`event.source === window`).
 

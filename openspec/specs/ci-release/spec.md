@@ -43,7 +43,7 @@ The App ID SHALL be read from `vars.RELEASE_APP_ID` and the private key from `se
 #### Scenario: Version Packages PR triggers required checks
 
 - **WHEN** `changesets/action` pushes a commit to the Version Packages PR using the release-bot token
-- **THEN** GitHub Actions SHALL re-run the branch-protection-required workflows (lint/typecheck/test/build/Link checker/Check for Changeset) on that commit, allowing the PR to become mergeable
+- **THEN** GitHub Actions SHALL re-run the branch-protection-required status checks on that commit, allowing the PR to become mergeable
 
 #### Scenario: Release bot token is short-lived
 
