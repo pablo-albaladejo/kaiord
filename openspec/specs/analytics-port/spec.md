@@ -6,6 +6,10 @@
 **Status:** Active
 **Packages:** `@kaiord/core`, `@kaiord/landing`, `@kaiord/workout-spa-editor`
 
+## Purpose
+
+Provide a hexagonal-architecture-conformant analytics seam: a single `Analytics` port in `@kaiord/core` consumed by client apps, with concrete adapters (Cloudflare Web Analytics today; alternatives in the future) injected at the application boundary. No adapter-specific imports leak into domain or application layers.
+
 ## Overview
 
 A lightweight, injectable analytics abstraction that follows the hexagonal architecture pattern. The `Analytics` port is defined in core (no external dependencies), with a noop default adapter and a Cloudflare Web Analytics adapter in each consumer package.
