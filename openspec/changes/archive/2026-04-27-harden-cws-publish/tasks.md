@@ -110,8 +110,8 @@
 
 ## 9. Decommission OAuth auth
 
-- [ ] 9.1 After the first `cws-publish.yml` run with the new flow succeeds end-to-end (both extensions published or confirmed-already-at-current-version), remove `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN` from repo Secrets.
-- [ ] 9.2 Grep the repo for any remaining references to those env var names. Expected result: zero hits. Remove if any found.
+- [x] 9.1 After the first `cws-publish.yml` run with the new flow succeeds end-to-end (both extensions published or confirmed-already-at-current-version), remove `CWS_CLIENT_ID`, `CWS_CLIENT_SECRET`, `CWS_REFRESH_TOKEN` from repo Secrets.
+- [x] 9.2 Grep the repo for any remaining references to those env var names. Expected result: zero hits. Remove if any found.
 - [ ] 9.3 Post a PR comment on the merged PR linking the first successful run in the new flow (public evidence for audit).
 
 ## 10. Quality gates
