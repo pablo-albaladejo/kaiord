@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-04-27 | [`harden-cws-publish`](./2026-04-27-harden-cws-publish/) | Harden CWS Publish (Service-Account Migration) |
 | 2026-04-25 | [`analytics-port-adapter`](./2026-04-25-analytics-port-adapter/) | Kaiord has no visibility into who visits kaiord.com or uses the editor. Adding analytics following the existing Logger port/adapter pattern makes tracking opt-… |
 | 2026-04-25 | [`spa-editor-focus-management-hardening`](./2026-04-25-spa-editor-focus-management-hardening/) | The base change spa-editor-focus-management delivers correct focus behavior per WCAG and the expert-panel spec (9.66/10). A subsequent AWS Well-Architected rev… |
 | 2026-04-24 | [`harden-link-checker`](./2026-04-24-harden-link-checker/) | Harden Link Checker (always-run, pin lychee, required + enforce_admins) |
