@@ -85,4 +85,3 @@ The CI pipeline SHALL run spellcheck (cspell) on documentation content. Unrecogn
 
 - **WHEN** documentation contains a misspelled word not in the project dictionary
 - **THEN** the CI spellcheck SHALL fail and report the typo
-
