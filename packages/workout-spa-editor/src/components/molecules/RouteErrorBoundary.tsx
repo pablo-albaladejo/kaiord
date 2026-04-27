@@ -28,9 +28,13 @@ export class RouteErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, info: ErrorInfo) {
-    this.props.analytics?.event("route-error", {
-      route: window.location.pathname,
-    });
+    try {
+      this.props.analytics?.event("route-error", {
+        route: window.location.pathname,
+      });
+    } catch {
+      // analytics must not cause a secondary failure inside the error boundary
+    }
     console.error("Route error:", error, info.componentStack);
   }
 

@@ -65,10 +65,12 @@ function App() {
     analytics.event("editor-loaded");
   }, [analytics]);
 
-  // Fire pageView on initial mount and on every wouter route change
-  // so that SPA navigations are recorded in Cloudflare Web Analytics.
+  // Fire pageView on real routes only — skip redirect-only paths (/ and
+  // catch-all) which never render content of their own.
   useEffect(() => {
-    analytics.pageView(path);
+    if (path !== "/") {
+      analytics.pageView(path);
+    }
   }, [analytics, path]);
 
   return (

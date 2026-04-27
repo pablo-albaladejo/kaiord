@@ -18,7 +18,7 @@ The `analytics-port-adapter` change wired up the Analytics port but only tracked
 
 ### Modified Capabilities
 
-- `analytics-port`: Extend accepted event names and props documented in the spec to include the four new events (`route-page-view`, `workout-imported`, `workout-created`, `route-error`).
+- `analytics-port`: Extend accepted event names and props documented in the spec to include the four new events (`pageView` for SPA routes, `workout-imported`, `workout-created`, `route-error`).
 
 ## Impact
 

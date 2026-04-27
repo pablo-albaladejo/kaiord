@@ -75,12 +75,15 @@ export function createFileChangeHandler(
       setError(null);
       setConversionProgress(100);
       onFileLoad(krd);
-      reportImported(file.name, onImported);
       setIsLoading(false);
     } catch (error) {
       // AbortError is an expected cancellation, not a real failure.
       if (error instanceof Error && error.name === "AbortError") return;
       handleError(createParseError(error));
+      return;
     }
+    // Fire analytics outside the parse try so a throwing callback cannot
+    // pollute the error-handling path.
+    reportImported(file.name, onImported);
   };
 }
