@@ -1,4 +1,4 @@
-> Synced: 2026-04-20 (bridge-runtime-discovery)
+> Synced: 2026-04-27
 
 # Privacy Policy
 

@@ -1,10 +1,10 @@
-> Synced: 2026-04-17
+> Synced: 2026-04-27
 
 # SPA Calendar
 
 ## Purpose
 
-Week-view calendar as the editor's home page — URL-addressable weeks, per-day workout grouping, state indicators, and integration with batch processing.
+Week-view calendar as the editor's home page — URL-addressable weeks, per-day workout grouping, state indicators, integration with batch processing, and overlay of planned activities from external coaching platforms (Train2Go, TrainingPeaks, etc.).
 
 ## Requirements
 
@@ -95,6 +95,27 @@ Clicking a workout card SHALL navigate to the editor. Clicking an empty day SHAL
 
 - **WHEN** the user clicks an empty calendar day
 - **THEN** the system SHALL offer "Add from Library" and "Create new workout" options, with the date pre-filled
+
+### Requirement: Coaching activities overlay
+
+The calendar SHALL render planned activities from registered coaching sources (e.g., Train2Go) as a separate row of cards above each day's workouts. Coaching activities are read-only and use a generic `CoachingActivity` shape — calendar components SHALL NOT consume platform-specific types directly. Each adapter (e.g., `adapters/train2go/`) maps its raw payload to `CoachingActivity` at the boundary.
+
+The `CoachingActivity` shape SHALL include: `id` (unique across platforms as `"{source}:{platformId}"`), `source` (platform identifier), `sourceBadge` (short UI label), `date` (`YYYY-MM-DD`), `sport` (`{ label, icon }`), `title`, optional `duration`, optional normalised `effort` (1-5), `status` (`pending` | `completed` | `skipped`), and optional `description`.
+
+#### Scenario: Day with coaching activities
+
+- **WHEN** the calendar week contains coaching activities for a given day
+- **THEN** the day column SHALL render a stack of `CoachingActivityCard`s above the workout cards, each tagged with the source badge
+
+#### Scenario: Coaching activity card click
+
+- **WHEN** the user clicks a coaching activity card
+- **THEN** the card SHALL expand to display the full coaching description (read-only) without navigating away from the calendar
+
+#### Scenario: Empty day with only coaching activities
+
+- **WHEN** a day has coaching activities but no workouts
+- **THEN** the calendar SHALL NOT render the empty-day "+" affordance for that day
 
 ### Requirement: Batch AI processing banner
 

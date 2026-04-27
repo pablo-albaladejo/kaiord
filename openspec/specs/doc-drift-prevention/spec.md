@@ -1,10 +1,10 @@
-> Synced: 2026-04-24 (harden-link-checker)
+> Synced: 2026-04-27
 
 # Doc Drift Prevention
 
 ## Purpose
 
-Safeguards — type-checked code examples, TypeDoc generation, link checking, spellcheck, and a doc-sync hook — that keep the documentation faithful to the code it describes.
+Safeguards — type-checked code examples, TypeDoc generation, link checking, and spellcheck — that keep the documentation faithful to the code it describes.
 
 ## Requirements
 
@@ -85,17 +85,3 @@ The CI pipeline SHALL run spellcheck (cspell) on documentation content. Unrecogn
 
 - **WHEN** documentation contains a misspelled word not in the project dictionary
 - **THEN** the CI spellcheck SHALL fail and report the typo
-
-### Requirement: Claude Code doc-sync hook
-
-A Claude Code pre-commit hook SHALL check `git diff --cached --name-only` — if source files in `packages/*/src/` are staged but no `packages/docs/` files are staged, it SHALL display a reminder. If docs files are also staged, it SHALL pass silently.
-
-#### Scenario: Source changed without docs
-
-- **WHEN** a developer commits changes to `packages/core/src/` without staging any `packages/docs/` files
-- **THEN** the pre-commit hook SHALL display a reminder to check if docs need updating
-
-#### Scenario: Source and docs changed together
-
-- **WHEN** a developer commits changes to both `packages/core/src/` and `packages/docs/`
-- **THEN** the pre-commit hook SHALL pass silently
