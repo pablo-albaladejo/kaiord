@@ -25,7 +25,7 @@ For each extension, the workflow SHALL:
 
 - Run a pre-flight authentication check (see Requirement "Pre-flight authentication validation").
 - Query the current Chrome Web Store state for the extension via the CWS API (see Requirement "Chrome Web Store API is the idempotency source of truth").
-- Upload the extension zip, unless the CWS API state already has the current version in an `UPLOADED` or `PUBLISHED` draft (see Requirement "Upload and publish are separate, resumable steps").
+- Upload the extension zip, unless either (a) `draft.uploadState == UPLOADED` with `draft.version == package.json.version` (a prior partial publish that can be resumed) OR (b) `published.version == package.json.version` (already live, nothing to do). Both checks consult the CWS API directly. See Requirement "Upload and publish are separate, resumable steps".
 - Poll for `UPLOADED` state before proceeding to publish.
 - Publish the uploaded draft.
 - Poll for `PUBLISHED` or `IN_REVIEW` terminal state (see Requirement "Post-publish verification").
