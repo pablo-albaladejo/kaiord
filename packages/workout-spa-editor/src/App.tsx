@@ -1,5 +1,6 @@
+import type { Analytics } from "@kaiord/core";
 import { lazy, Suspense, useEffect } from "react";
-import { Redirect, Route, Switch } from "wouter";
+import { Redirect, Route, Switch, useLocation } from "wouter";
 
 import { AppKeyboardShortcuts } from "./components/AppKeyboardShortcuts";
 import { AppTutorial } from "./components/AppTutorial";
@@ -15,7 +16,9 @@ const CalendarPage = lazy(() => import("./components/pages/CalendarPage"));
 const LibraryPage = lazy(() => import("./components/pages/LibraryPage"));
 const EditorPage = lazy(() => import("./components/pages/EditorPage"));
 
-function AppRoutes() {
+type AppRoutesProps = { analytics: Analytics };
+
+function AppRoutes({ analytics }: AppRoutesProps) {
   return (
     <Suspense fallback={<RouteSpinner />}>
       <Switch>
@@ -23,23 +26,23 @@ function AppRoutes() {
           <Redirect to="/calendar" />
         </Route>
         <Route path="/calendar/:weekId?">
-          <RouteErrorBoundary>
+          <RouteErrorBoundary analytics={analytics}>
             <CalendarPage />
           </RouteErrorBoundary>
         </Route>
         <Route path="/library">
-          <RouteErrorBoundary>
+          <RouteErrorBoundary analytics={analytics}>
             <LibraryPage />
           </RouteErrorBoundary>
         </Route>
         <Route path="/workout/new">
-          <RouteErrorBoundary>
+          <RouteErrorBoundary analytics={analytics}>
             <EditorPage />
           </RouteErrorBoundary>
         </Route>
         <Route path="/workout/:id">
           {(params) => (
-            <RouteErrorBoundary>
+            <RouteErrorBoundary analytics={analytics}>
               <EditorPage id={params.id} />
             </RouteErrorBoundary>
           )}
@@ -56,16 +59,25 @@ function App() {
   useStoreHydration();
   const { showTutorial, setShowTutorial } = useOnboardingTutorial();
   const analytics = useAnalytics();
+  const [path] = useLocation();
 
   useEffect(() => {
     analytics.event("editor-loaded");
   }, [analytics]);
 
+  // Fire pageView on real routes only — skip redirect-only paths (/ and
+  // catch-all) which never render content of their own.
+  useEffect(() => {
+    if (path !== "/") {
+      analytics.pageView(path);
+    }
+  }, [analytics, path]);
+
   return (
     <AppToastProvider>
       <AppKeyboardShortcuts />
       <MainLayout onReplayTutorial={() => setShowTutorial(true)}>
-        <AppRoutes />
+        <AppRoutes analytics={analytics} />
       </MainLayout>
       <AppTutorial show={showTutorial} onOpenChange={setShowTutorial} />
     </AppToastProvider>

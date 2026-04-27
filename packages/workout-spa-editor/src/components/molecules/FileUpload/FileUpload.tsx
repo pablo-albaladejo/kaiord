@@ -7,6 +7,12 @@ import { useFileUpload } from "./useFileUpload";
 export type FileUploadProps = {
   onFileLoad: (krd: KRD) => void;
   onError?: (error: string, validationErrors?: Array<ValidationError>) => void;
+  /**
+   * Optional callback fired after a successful import with the detected
+   * file format (e.g., `"fit"`, `"tcx"`). Use this to forward an
+   * analytics event without coupling the upload component to any port.
+   */
+  onImported?: (format: string) => void;
   accept?: string;
   className?: string;
   disabled?: boolean;
@@ -15,11 +21,12 @@ export type FileUploadProps = {
 export const FileUpload = ({
   onFileLoad,
   onError,
+  onImported,
   accept = ".fit,.tcx,.zwo,.krd,.json,.gcn",
   className = "",
   disabled = false,
 }: FileUploadProps) => {
-  const upload = useFileUpload({ onFileLoad, onError });
+  const upload = useFileUpload({ onFileLoad, onError, onImported });
 
   return (
     <div className={`flex flex-col gap-3 ${className}`}>

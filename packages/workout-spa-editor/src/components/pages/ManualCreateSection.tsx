@@ -1,6 +1,7 @@
 import { ChevronDown, Plus, Upload } from "lucide-react";
 import { useState } from "react";
 
+import { useAnalytics } from "../../contexts";
 import type { KRD, ValidationError } from "../../types/krd";
 import { Button } from "../atoms/Button/Button";
 import { FileUpload } from "../molecules/FileUpload/FileUpload";
@@ -20,6 +21,11 @@ export function ManualCreateSection({
   onFileError,
 }: ManualCreateSectionProps) {
   const [expanded, setExpanded] = useState(false);
+  const analytics = useAnalytics();
+
+  const handleImported = (format: string) => {
+    analytics.event("workout-imported", { format });
+  };
 
   return (
     <div className="rounded-lg border border-gray-200 bg-white shadow-sm dark:border-gray-700 dark:bg-gray-800">
@@ -49,7 +55,11 @@ export function ManualCreateSection({
             <Upload className="h-3 w-3" />
             <span>Or upload a FIT, TCX, ZWO, GCN, or KRD file:</span>
           </div>
-          <FileUpload onFileLoad={onFileLoad} onError={onFileError} />
+          <FileUpload
+            onFileLoad={onFileLoad}
+            onError={onFileError}
+            onImported={handleImported}
+          />
         </div>
       )}
     </div>
