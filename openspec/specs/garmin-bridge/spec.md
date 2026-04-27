@@ -1,4 +1,4 @@
-> Synced: 2026-04-20
+> Synced: 2026-04-27
 
 # Garmin Bridge
 
@@ -137,6 +137,26 @@ All API operations SHALL require an open Garmin Connect tab (`https://connect.ga
 
 - **WHEN** the SPA or popup requests an API operation and no `connect.garmin.com` tab exists
 - **THEN** the extension returns an error: "No Garmin Connect tab open. Open connect.garmin.com first."
+
+### Requirement: Runtime extension ID announcement on SPA origins
+
+The extension SHALL inject a content script (`kaiord-announce.js`) at `document_start` on SPA origins (`https://*.kaiord.com/*` and, in dev, `http://localhost/*`). The script SHALL post a `KAIORD_BRIDGE_ANNOUNCE` message via `window.postMessage` to the page's own origin so the SPA can discover the extension's runtime ID without hardcoding it.
+
+The announcement payload SHALL include: `type: "KAIORD_BRIDGE_ANNOUNCE"`, `bridgeId: "garmin-bridge"`, `extensionId: chrome.runtime.id`, `name: "Garmin Connect"`, `version` (from manifest), `protocolVersion: 1`, and `capabilities: ["write:workouts"]`.
+
+The script SHALL re-announce when it receives a `KAIORD_BRIDGE_DISCOVER` message from the page (`event.source === window`).
+
+The production manifest (`manifest.prod.json`) SHALL only declare `https://*.kaiord.com/*` as the announce-script match; localhost origins SHALL NOT be present in the production build.
+
+#### Scenario: SPA loads on kaiord.com
+
+- **WHEN** the SPA loads on `https://*.kaiord.com/*` and the extension is installed
+- **THEN** the announce content script posts `{ type: "KAIORD_BRIDGE_ANNOUNCE", bridgeId: "garmin-bridge", extensionId, ... }` to the page so the SPA can register the bridge
+
+#### Scenario: SPA requests rediscovery
+
+- **WHEN** the SPA dispatches `window.postMessage({ type: "KAIORD_BRIDGE_DISCOVER" }, window.location.origin)`
+- **THEN** the announce script re-announces with the same payload
 
 ### Requirement: External message API
 
