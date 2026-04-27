@@ -1,4 +1,4 @@
-> Synced: 2026-04-20
+> Synced: 2026-04-27
 
 # CI Release
 
@@ -31,6 +31,24 @@ The release workflow SHALL use `changesets/action@v1` to create a "Version Packa
 
 - **WHEN** the workflow is triggered via `workflow_dispatch`
 - **THEN** the workflow SHALL behave identically to a push trigger (create PR if changesets exist, publish if none)
+
+### Requirement: Release bot GitHub App authentication
+
+The release workflow SHALL authenticate via a short-lived (≤1 h) installation token minted from the `kaiord-release-bot` GitHub App rather than the default `GITHUB_TOKEN`. This is required so that pushes from `changesets/action` (notably the "Version Packages" PR) trigger branch-protection-required workflows on the new commit — `GITHUB_TOKEN`-authored pushes are intentionally excluded from re-triggering workflows by GitHub Actions, which would otherwise leave the PR unmergeable.
+
+The minted token SHALL be requested with least-privilege permissions: `contents: write` and `pull-requests: write`. The App's `workflows: write` permission SHALL NOT be requested at the workflow level even though the App grants it, so the release scripts cannot modify `.github/workflows/`.
+
+The App ID SHALL be read from `vars.RELEASE_APP_ID` and the private key from `secrets.RELEASE_APP_PRIVATE_KEY`. The token SHALL be used for both `actions/checkout` (with `persist-credentials: true`) and the `GITHUB_TOKEN` env var passed to `changesets/action` and `create-github-releases.js`.
+
+#### Scenario: Version Packages PR triggers required checks
+
+- **WHEN** `changesets/action` pushes a commit to the Version Packages PR using the release-bot token
+- **THEN** GitHub Actions SHALL re-run the branch-protection-required status checks on that commit, allowing the PR to become mergeable
+
+#### Scenario: Release bot token is short-lived
+
+- **WHEN** the release workflow completes
+- **THEN** the minted token SHALL expire within 1 hour and SHALL NOT be persisted as a long-lived secret
 
 ### Requirement: Workflow permissions are minimal and sufficient
 

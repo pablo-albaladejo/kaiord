@@ -1,4 +1,4 @@
-> Synced: 2026-04-24 (spa-editor-focus-management)
+> Synced: 2026-04-27
 
 # SPA Editor Context Menu
 

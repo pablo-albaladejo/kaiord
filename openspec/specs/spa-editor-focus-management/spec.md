@@ -1,4 +1,4 @@
-> Synced: 2026-04-25 (spa-editor-focus-management-hardening)
+> Synced: 2026-04-27
 
 # Focus Management
 
