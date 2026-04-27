@@ -1,4 +1,5 @@
 import type { KRD, ValidationError } from "../../../types/krd";
+import { detectFormat } from "../../../utils/file-format-detector";
 import { createParseError, parseFile } from "./file-parser";
 import { validateFileSize } from "./file-upload-constants";
 
@@ -31,6 +32,15 @@ export function createErrorHandler(
   };
 }
 
+function reportImported(
+  filename: string,
+  onImported?: (format: string) => void
+) {
+  if (!onImported) return;
+  const detection = detectFormat(filename);
+  if (detection.success) onImported(detection.format);
+}
+
 export function createFileChangeHandler(
   setFileName: (name: string | null) => void,
   setIsLoading: (loading: boolean) => void,
@@ -38,12 +48,12 @@ export function createFileChangeHandler(
   setError: (error: ErrorState) => void,
   onFileLoad: (krd: KRD) => void,
   handleError: (errorState: ErrorState) => void,
-  createAbortController: () => AbortController
+  createAbortController: () => AbortController,
+  onImported?: (format: string) => void
 ) {
   return async (file: File | undefined) => {
     if (!file) return;
 
-    // Validate file size first
     const sizeError = validateFileSize(file);
     if (sizeError) {
       handleError(sizeError);
@@ -59,20 +69,17 @@ export function createFileChangeHandler(
     try {
       const krd = await parseFile(
         file,
-        (progress) => {
-          setConversionProgress(progress);
-        },
+        (progress) => setConversionProgress(progress),
         controller.signal
       );
       setError(null);
       setConversionProgress(100);
       onFileLoad(krd);
+      reportImported(file.name, onImported);
       setIsLoading(false);
     } catch (error) {
-      // Ignore AbortError - this is an expected cancellation, not a real error
-      if (error instanceof Error && error.name === "AbortError") {
-        return;
-      }
+      // AbortError is an expected cancellation, not a real failure.
+      if (error instanceof Error && error.name === "AbortError") return;
       handleError(createParseError(error));
     }
   };
