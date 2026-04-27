@@ -1,14 +1,17 @@
 /**
  * Editor New Workout Section
  *
- * Shows AI input + welcome section for creating new workouts.
+ * Shows AI input + welcome section for creating new workouts. Wraps
+ * the manual save flow with analytics so that `workout-created` events
+ * with `source: "manual"` are emitted whenever the user saves a
+ * non-AI workout.
  */
 
 import { lazy, Suspense } from "react";
 
-import { useSettingsDialog } from "../../contexts";
+import { useAnalytics, useSettingsDialog } from "../../contexts";
 import { useAppHandlers } from "../../hooks/useAppHandlers";
-import type { Workout } from "../../types/krd";
+import type { Sport, Workout } from "../../types/krd";
 import { WelcomeSection } from "./WelcomeSection";
 
 const AiWorkoutInput = lazy(() =>
@@ -25,6 +28,12 @@ export function EditorNewWorkout({ workout }: EditorNewWorkoutProps) {
   const { show: settingsShow } = useSettingsDialog();
   const { handleFileLoad, handleFileError, handleCreateWorkout } =
     useAppHandlers();
+  const analytics = useAnalytics();
+
+  const handleManualCreate = (name: string, sport: Sport) => {
+    handleCreateWorkout(name, sport);
+    analytics.event("workout-created", { source: "manual" });
+  };
 
   return (
     <>
@@ -35,7 +44,7 @@ export function EditorNewWorkout({ workout }: EditorNewWorkoutProps) {
         <WelcomeSection
           onFileLoad={handleFileLoad}
           onFileError={handleFileError}
-          onCreateWorkout={handleCreateWorkout}
+          onCreateWorkout={handleManualCreate}
         />
       )}
     </>
