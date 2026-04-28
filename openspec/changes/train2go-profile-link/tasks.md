@@ -81,8 +81,8 @@
   - Disconnect-after-successful-link: poll resolves and `linkAccount` writes; the user then clicks Disconnect; the disconnect handler runs `unlinkAccount` (does NOT skip the unlink just because the poll already resolved)
   - Wire-abort on connect cancel — case (a): AbortSignal fires BEFORE the transport response arrives; assert no `linkAccount` is invoked and the in-flight `ping` is aborted (controller's `signal.aborted === true`)
   - Wire-abort on connect cancel — case (b): AbortSignal fires AFTER the transport response is in flight (response races in post-abort); assert no `linkAccount` is invoked and the late response is discarded
-- [ ] 6.7 PII redaction audit covering THREE surfaces: (a) `console.error` / structured-log paths in `train2go-store-actions.ts` and transport, (b) `lastError: string` values written by the store on failure paths (session expired, tab closed, transport reject) — assert no `externalUserName` or `externalUserId` appears, (c) toast strings emitted by `LinkedAccountsSection` and the dialog. Add a snapshot test exercising each failure path with known PII values and asserting they are absent from all three surfaces.
-- [ ] 6.8 Heartbeat vs connect-flow path separation: assert (via unit test) that `detectExtension` never returns `userId`/`userName` to callers. `attemptLink` calls its own `ping` (or a separate transport function) and is the sole code path that extracts those fields.
+- [x] 6.7 PII redaction audit covering THREE surfaces: (a) `console.error` / structured-log paths in `train2go-store-actions.ts` and transport, (b) `lastError: string` values written by the store on failure paths (session expired, tab closed, transport reject) — assert no `externalUserName` or `externalUserId` appears, (c) toast strings emitted by `LinkedAccountsSection` and the dialog. Add a snapshot test exercising each failure path with known PII values and asserting they are absent from all three surfaces.
+- [x] 6.8 Heartbeat vs connect-flow path separation: assert (via unit test) that `detectExtension` never returns `userId`/`userName` to callers. `attemptLink` calls its own `ping` (or a separate transport function) and is the sole code path that extracts those fields.
 
 ## 7. CoachingSource port and Train2Go adapter
 
@@ -155,8 +155,8 @@ These tasks address findings from the AWS Well-Architected Framework review (REL
 
 ## 13. Spec sync, lint, and changeset
 
-- [ ] 13.1 Run `pnpm -r test && pnpm -r build && pnpm lint:fix`
-- [ ] 13.2 Run `pnpm lint:specs` and `npx openspec validate train2go-profile-link --strict`
-- [ ] 13.3 `pnpm exec changeset` — `@kaiord/workout-spa-editor` minor (new feature: persistent coaching integration with profile linking)
+- [x] 13.1 Run `pnpm -r test && pnpm -r build && pnpm lint:fix`
+- [x] 13.2 Run `pnpm lint:specs` and `npx openspec validate train2go-profile-link --strict`
+- [x] 13.3 `pnpm exec changeset` — `@kaiord/workout-spa-editor` minor (new feature: persistent coaching integration with profile linking)
 - [ ] 13.4 `/opsx:verify` against this change to confirm all spec scenarios are covered by tests
 - [ ] 13.5 After PR merge: `/opsx:archive` and `/opsx:sync` to update domain specs
