@@ -54,9 +54,12 @@ describe("Routing", () => {
   it("renders CalendarPage at /calendar", async () => {
     renderAtPath("/calendar");
 
-    await waitFor(() => {
-      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
   });
 
   it("renders LibraryPage at /library", async () => {
