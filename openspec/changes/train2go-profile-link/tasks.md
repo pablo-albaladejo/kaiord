@@ -125,11 +125,11 @@
 
 ## 11. Profile delete cascade
 
-- [ ] 11.1 If `application/profile/delete-profile.ts` does not yet exist, create it as a thin orchestration use case wrapping `ProfileRepository.delete`. The cascade lives here, not in the Dexie adapter, so it cannot be bypassed by direct port use. (Existing `ProfileRepository.delete` is preserved; the use case calls it after the cascade.)
-- [ ] 11.2 In the use case, call `coaching.deleteByProfile(deletedProfileId)` AND `coachingSyncState.deleteByProfile(deletedProfileId)` BEFORE `profiles.delete(deletedProfileId)`. The id passed MUST be the function argument's `deletedProfileId`, NEVER `getActiveId()`. Add a code comment naming the constraint.
-- [ ] 11.3 Update any UI handler that previously called `ProfileRepository.delete` directly to call the new use case instead.
-- [ ] 11.4 Test: deleting profile B while profile A is active leaves A's `coachingActivities` and `coachingSyncState` intact and removes only B's
-- [ ] 11.5 Test: deleting a profile does NOT cascade to converted `WorkoutRecord` rows (workouts survive profile deletion)
+- [x] 11.1 If `application/profile/delete-profile.ts` does not yet exist, create it as a thin orchestration use case wrapping `ProfileRepository.delete`. The cascade lives here, not in the Dexie adapter, so it cannot be bypassed by direct port use. (Existing `ProfileRepository.delete` is preserved; the use case calls it after the cascade.)
+- [x] 11.2 In the use case, call `coaching.deleteByProfile(deletedProfileId)` AND `coachingSyncState.deleteByProfile(deletedProfileId)` BEFORE `profiles.delete(deletedProfileId)`. The id passed MUST be the function argument's `deletedProfileId`, NEVER `getActiveId()`. Add a code comment naming the constraint.
+- [x] 11.3 Update any UI handler that previously called `ProfileRepository.delete` directly to call the new use case instead.
+- [x] 11.4 Test: deleting profile B while profile A is active leaves A's `coachingActivities` and `coachingSyncState` intact and removes only B's
+- [x] 11.5 Test: deleting a profile does NOT cascade to converted `WorkoutRecord` rows (workouts survive profile deletion)
 
 ## 12. Observability and config hygiene (cross-cutting reviews)
 
