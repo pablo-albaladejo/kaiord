@@ -1,10 +1,12 @@
 /**
  * CalendarDialogs - Dialog layer for the calendar page.
  *
- * Renders RawWorkoutDialog and EmptyDayDialog.
+ * Renders RawWorkoutDialog, EmptyDayDialog, and CoachingActivityDialog.
  */
 
 import type { WorkoutRecord } from "../../types/calendar-record";
+import type { CoachingActivity } from "../../types/coaching-activity";
+import { CoachingActivityDialog } from "../molecules/CoachingCard/CoachingActivityDialog";
 import { EmptyDayDialog } from "../molecules/EmptyDayDialog/EmptyDayDialog";
 import { RawWorkoutDialog } from "../molecules/RawWorkoutDialog/RawWorkoutDialog";
 import { useDialogHandlers } from "./use-dialog-handlers";
@@ -12,15 +14,19 @@ import { useDialogHandlers } from "./use-dialog-handlers";
 export type CalendarDialogsProps = {
   selectedWorkout: WorkoutRecord | null;
   emptyDayDate: string | null;
+  selectedCoachingActivity?: CoachingActivity | null;
   onCloseWorkout: () => void;
   onCloseDay: () => void;
+  onCloseCoaching?: () => void;
 };
 
 export function CalendarDialogs({
   selectedWorkout,
   emptyDayDate,
+  selectedCoachingActivity = null,
   onCloseWorkout,
   onCloseDay,
+  onCloseCoaching = () => {},
 }: CalendarDialogsProps) {
   const { handleProcess, handleSkip, handleUnskip, isSubmitting } =
     useDialogHandlers(selectedWorkout, onCloseWorkout);
@@ -36,6 +42,10 @@ export function CalendarDialogs({
         isSubmitting={isSubmitting}
       />
       <EmptyDayDialog date={emptyDayDate} onClose={onCloseDay} />
+      <CoachingActivityDialog
+        activity={selectedCoachingActivity}
+        onClose={onCloseCoaching}
+      />
     </>
   );
 }

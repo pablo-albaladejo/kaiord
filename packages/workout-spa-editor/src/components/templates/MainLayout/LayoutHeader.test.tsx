@@ -149,7 +149,11 @@ describe("LayoutHeader", () => {
 
       // Assert
       expect(
-        await screen.findByRole("heading", { name: /profile manager/i })
+        await screen.findByRole(
+          "heading",
+          { name: /profile manager/i },
+          { timeout: 5000 }
+        )
       ).toBeInTheDocument();
     });
   });

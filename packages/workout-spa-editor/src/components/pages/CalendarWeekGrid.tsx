@@ -13,7 +13,7 @@ export type CalendarWeekGridProps = {
   todayDate: string;
   onWorkoutClick: (workout: WorkoutRecord) => void;
   onEmptyDayClick: (date: string) => void;
-  onActivityExpand?: (activity: CoachingActivity) => void;
+  onActivityClick?: (activity: CoachingActivity) => void;
 };
 
 export function CalendarWeekGrid({
@@ -23,7 +23,7 @@ export function CalendarWeekGrid({
   todayDate,
   onWorkoutClick,
   onEmptyDayClick,
-  onActivityExpand,
+  onActivityClick,
 }: CalendarWeekGridProps) {
   return (
     <div
@@ -39,7 +39,7 @@ export function CalendarWeekGrid({
           coachingActivities={coachingByDay[date]}
           onWorkoutClick={onWorkoutClick}
           onEmptyDayClick={onEmptyDayClick}
-          onActivityExpand={onActivityExpand}
+          onActivityClick={onActivityClick}
         />
       ))}
     </div>

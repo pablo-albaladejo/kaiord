@@ -1,7 +1,11 @@
 /**
  * Train2Go Extension Detection
  *
- * Detects Train2Go Bridge extension via ping. Mirrors garmin-detect.
+ * Heartbeat / boot / visibility-change ping that toggles transport
+ * flags ONLY. MUST NOT mutate any profile's linkedAccounts — capturing
+ * userId/userName from a ping response is restricted to the explicit
+ * connect flow (application/coaching/attempt-link). A heartbeat after
+ * disconnect must NOT silently re-link.
  */
 
 import { ping } from "./train2go-extension-transport";
@@ -34,8 +38,6 @@ export const createDetectAction =
       set({
         extensionInstalled: false,
         sessionActive: false,
-        userId: null,
-        userName: null,
         lastError: null,
         lastDetectionTimestamp: now,
       });
@@ -55,11 +57,12 @@ export const createDetectAction =
       return;
     }
 
+    // sessionActive is the ONLY data field we consume here.
+    // userId / userName from `res` are ignored — they belong to the
+    // explicit connect flow only (see attemptLink).
     set({
       extensionInstalled: true,
-      sessionActive: res.data?.sessionActive === true,
-      userId: res.data?.userId ?? null,
-      userName: res.data?.userName ?? null,
+      sessionActive: res.sessionActive,
       lastError: null,
       lastDetectionTimestamp: now,
     });

@@ -1,76 +1,19 @@
 /**
- * Train2Go Store Actions
+ * Train2Go Store Actions — TRANSPORT-only
  *
- * Read-week and read-day actions for fetching training plans.
+ * After train2go-profile-link, the store no longer owns activities or
+ * userId/userName. Fetch use cases (syncWeek, expandDay) live in
+ * application/coaching/* and run via useTrain2GoSource. Only detection
+ * and "open the Train2Go tab" remain on the store surface.
  */
 
 import { createDetectAction } from "./train2go-detect";
-import {
-  openTrain2Go,
-  readDay,
-  readWeek,
-} from "./train2go-extension-transport";
+import { openTrain2Go } from "./train2go-extension-transport";
 import type { Train2GoStore } from "./train2go-store";
 
 type Set = (fn: Partial<Train2GoStore>) => void;
 type Get = () => Train2GoStore;
-
 type GetExtensionId = () => string;
-
-const createReadWeekAction =
-  (set: Set, get: Get, getExtensionId: GetExtensionId) =>
-  async (date: string) => {
-    const { userId } = get();
-    if (!userId) {
-      set({ lastError: "Not connected to Train2Go" });
-      return;
-    }
-
-    set({ loading: true, lastError: null });
-
-    const res = await readWeek(getExtensionId(), date, userId);
-
-    if (!res.ok) {
-      if (res.error === "Session expired") {
-        set({ sessionActive: false, loading: false, lastError: res.error });
-      } else {
-        set({ loading: false, lastError: res.error ?? "Read week failed" });
-      }
-      return;
-    }
-
-    set({ activities: res.data?.activities ?? [], loading: false });
-  };
-
-const createReadDayAction =
-  (set: Set, get: Get, getExtensionId: GetExtensionId) =>
-  async (date: string) => {
-    const { userId } = get();
-    if (!userId) return;
-
-    const res = await readDay(getExtensionId(), date, userId);
-
-    if (!res.ok) {
-      set({ lastError: res.error ?? "Read day failed" });
-      return;
-    }
-
-    const dayActivities = res.data?.activities ?? [];
-    const { activities } = get();
-
-    const merged = activities.map((a) => {
-      const detail = dayActivities.find((d) => d.id === a.id);
-      return detail
-        ? {
-            ...a,
-            description: detail.description,
-            completion: detail.completion,
-          }
-        : a;
-    });
-
-    set({ activities: merged });
-  };
 
 const createOpenAction =
   (_set: Set, _get: Get, getExtensionId: GetExtensionId) => async () => {
@@ -83,7 +26,5 @@ export const createTrain2GoActions = (
   getExtensionId: GetExtensionId
 ) => ({
   detectExtension: createDetectAction(set, get, getExtensionId),
-  fetchWeek: createReadWeekAction(set, get, getExtensionId),
-  fetchDay: createReadDayAction(set, get, getExtensionId),
   openTrain2Go: createOpenAction(set, get, getExtensionId),
 });

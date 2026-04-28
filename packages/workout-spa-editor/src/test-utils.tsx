@@ -4,9 +4,11 @@ import React, { type ReactElement } from "react";
 import { ToastProvider } from "./components/atoms/Toast";
 import { CoachingRegistryProvider } from "./contexts/coaching-registry-context";
 import { GarminBridgeProvider } from "./contexts/garmin-bridge-context";
+import { PersistenceProvider } from "./contexts/persistence-context";
 import { SettingsDialogProvider } from "./contexts/settings-dialog-context";
 import { type Theme, ThemeProvider } from "./contexts/ThemeContext";
 import { ToastContextProvider } from "./contexts/ToastContext";
+import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
 
 /**
  * Options for renderWithProviders
@@ -28,15 +30,17 @@ export function renderWithProviders(
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
     return (
       <ThemeProvider defaultTheme={defaultTheme}>
-        <SettingsDialogProvider>
-          <GarminBridgeProvider>
-            <CoachingRegistryProvider sources={[]}>
-              <ToastProvider>
-                <ToastContextProvider>{children}</ToastContextProvider>
-              </ToastProvider>
-            </CoachingRegistryProvider>
-          </GarminBridgeProvider>
-        </SettingsDialogProvider>
+        <PersistenceProvider persistence={createInMemoryPersistence()}>
+          <SettingsDialogProvider>
+            <GarminBridgeProvider>
+              <CoachingRegistryProvider factories={[]}>
+                <ToastProvider>
+                  <ToastContextProvider>{children}</ToastContextProvider>
+                </ToastProvider>
+              </CoachingRegistryProvider>
+            </GarminBridgeProvider>
+          </SettingsDialogProvider>
+        </PersistenceProvider>
       </ThemeProvider>
     );
   };

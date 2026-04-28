@@ -6,8 +6,10 @@
 
 import { useState } from "react";
 
+import { useProfileStore } from "../../../../store/profile-store";
 import { SportZoneEditor } from "../../ZoneEditor/SportZoneEditor";
 import type { ProfileFormData } from "../types";
+import { LinkedAccountsSection } from "./LinkedAccountsSection";
 import { PersonalDataTab } from "./PersonalDataTab";
 import type { ProfileTab } from "./ProfileTabs";
 import { ProfileTabs } from "./ProfileTabs";
@@ -26,6 +28,9 @@ export function ProfileEditView({
   onCancel,
 }: ProfileEditViewProps) {
   const [activeTab, setActiveTab] = useState<ProfileTab>("zones");
+  const profile = useProfileStore((s) =>
+    s.profiles.find((p) => p.id === profileId)
+  );
 
   return (
     <>
@@ -38,6 +43,9 @@ export function ProfileEditView({
             setFormData({ ...formData, bodyWeight: bw })
           }
         />
+      )}
+      {activeTab === "linked-accounts" && profile && (
+        <LinkedAccountsSection profile={profile} />
       )}
       <div className="mt-4 flex justify-end">
         <button

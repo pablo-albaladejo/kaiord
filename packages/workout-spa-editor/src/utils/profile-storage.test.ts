@@ -46,6 +46,7 @@ const testProfile: Profile = {
     },
     generic: { thresholds: {}, heartRateZones: emptyHrZones },
   },
+  linkedAccounts: [],
   createdAt: "2025-01-15T10:00:00Z",
   updatedAt: "2025-01-15T10:00:00Z",
 };

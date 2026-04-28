@@ -6,6 +6,8 @@
 
 import type { PersistencePort } from "../../ports/persistence-port";
 import { createDexieAiProviderRepository } from "./dexie-ai-provider-repository";
+import { createDexieCoachingRepository } from "./dexie-coaching-repository";
+import { createDexieCoachingSyncStateRepository } from "./dexie-coaching-sync-state-repository";
 import { db as defaultDb, type KaiordDatabase } from "./dexie-database";
 import { createDexieProfileRepository } from "./dexie-profile-repository";
 import { createDexieSyncStateRepository } from "./dexie-sync-state-repository";
@@ -23,5 +25,7 @@ export function createDexiePersistence(
     aiProviders: createDexieAiProviderRepository(database),
     syncState: createDexieSyncStateRepository(database),
     usage: createDexieUsageRepository(database),
+    coaching: createDexieCoachingRepository(database),
+    coachingSyncState: createDexieCoachingSyncStateRepository(database),
   };
 }

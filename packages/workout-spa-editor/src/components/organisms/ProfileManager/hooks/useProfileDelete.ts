@@ -1,8 +1,15 @@
 /**
  * useProfileDelete Hook
  *
- * Profile deletion logic.
+ * Profile deletion with coaching cascade. The cascade runs BEFORE the
+ * Zustand store action removes the profile row, so a subsequent reload
+ * doesn't see orphan coaching rows. deletedProfileId is captured at
+ * confirm time — NEVER `getActiveId()` (would race when deleting a
+ * non-active profile or right after a switch).
  */
+
+import { deleteProfileWithCascade } from "../../../../application/profile/delete-profile-with-cascade";
+import { usePersistence } from "../../../../contexts/persistence-context";
 
 type UseProfileDeleteParams = {
   deleteProfile: (id: string) => void;
@@ -11,16 +18,32 @@ type UseProfileDeleteParams = {
 
 export function useProfileDelete(params: UseProfileDeleteParams) {
   const { deleteProfile, setDeleteConfirmId } = params;
+  const persistence = usePersistence();
 
   const handleDelete = (profileId: string) => {
     setDeleteConfirmId(profileId);
   };
 
   const confirmDelete = (deleteConfirmId: string | null) => {
-    if (deleteConfirmId) {
-      deleteProfile(deleteConfirmId);
-      setDeleteConfirmId(null);
-    }
+    if (!deleteConfirmId) return;
+    const id = deleteConfirmId; // capture; never use getActiveId
+    void (async () => {
+      try {
+        await deleteProfileWithCascade(
+          {
+            coaching: persistence.coaching,
+            coachingSyncState: persistence.coachingSyncState,
+          },
+          id
+        );
+        deleteProfile(id);
+        setDeleteConfirmId(null);
+      } catch {
+        // Cascade rejection: keep the confirm dialog open so the user
+        // can retry. Avoid unhandled-rejection crashes; the dialog
+        // state staying non-null is the signal that delete didn't complete.
+      }
+    })();
   };
 
   return {
