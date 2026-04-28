@@ -149,6 +149,7 @@ When a profile has no `train2go` linked account, the Linked Accounts panel SHALL
 If the active profile changes during the poll, the link still completes against `targetProfileId` (the user's intent at click time wins) and a small toast surfaces "Linked Train2Go to <targetProfileName>" so the user is not surprised.
 
 The poll SHALL be aborted (and no link written) when:
+
 - The Linked Accounts panel/section unmounts (user navigates away from Profile Settings).
 - The user clicks "Disconnect" on the same source while the poll is in flight (concurrent intent reversal).
 - The user explicitly cancels the connect flow.

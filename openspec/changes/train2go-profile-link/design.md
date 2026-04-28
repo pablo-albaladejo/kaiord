@@ -6,9 +6,10 @@ The SPA already has two well-formed concepts that this change ties together:
 
 2. **`PersistencePort`** (`ports/persistence-port.ts`) — repository interfaces consumed by stores. Already includes `workouts`, `templates`, `profiles`, `aiProviders`, `syncState`, `usage`. The `[source+sourceId]` index on `workouts` (Dexie v1) was provisioned for this kind of integration but is currently unused.
 
-**Glossary.** Throughout this change, `getActiveId()` refers to the existing `meta` table accessor `ProfileRepository.getActiveId(): Promise<string | null>` (see `dexie-profile-repository.ts:27-30`). It is correct to use `getActiveId()` for *reads* (e.g., the `useActiveProfile` hook) but it is an **anti-pattern inside the link / sync / cascade-delete use cases**, which must take `profileId` as an explicit argument captured at user-action time (see D3 / D5). The proposal calls this rule out repeatedly to defend the profile-switch-mid-poll race and the cascade-delete-wrong-profile race.
+**Glossary.** Throughout this change, `getActiveId()` refers to the existing `meta` table accessor `ProfileRepository.getActiveId(): Promise<string | null>` (see `dexie-profile-repository.ts:27-30`). It is correct to use `getActiveId()` for _reads_ (e.g., the `useActiveProfile` hook) but it is an **anti-pattern inside the link / sync / cascade-delete use cases**, which must take `profileId` as an explicit argument captured at user-action time (see D3 / D5). The proposal calls this rule out repeatedly to defend the profile-switch-mid-poll race and the cascade-delete-wrong-profile race.
 
 Today's coaching flow (Train2Go):
+
 - `Train2GoStore` (Zustand) holds activities in memory only.
 - `useTrain2GoSource` adapts the store to the generic `CoachingSource` port.
 - `useCoachingActivities` flattens all sources, groups by date, returns to `CalendarPage`.
@@ -16,6 +17,7 @@ Today's coaching flow (Train2Go):
 - Spec `spa-train2go-extension` explicitly forbids Dexie storage of activities.
 
 The transient model causes three concrete failures the user hit:
+
 - "Sync" output evaporates on reload.
 - Click on a card opens nothing.
 - No link between a Train2Go account and a Kaiord profile (multi-profile users have no separation; single-profile users still rediscover `userId` on every ping).
@@ -23,6 +25,7 @@ The transient model causes three concrete failures the user hit:
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Link a Train2Go account to a specific Kaiord `Profile` via a generic `LinkedCoachingAccount` shape — extensible to TrainingPeaks/others without schema reshaping.
 - Persist coaching activities in Dexie, scoped per profile, keyed for upsert.
 - Survive reload, week navigation, and tab switches without re-syncing.
@@ -31,6 +34,7 @@ The transient model causes three concrete failures the user hit:
 - Keep the `CoachingSource` port generic; future sources implement the same port without UI work.
 
 **Non-Goals:**
+
 - Bidirectional sync (Kaiord → Train2Go writes). Read-only this round.
 - Parsing structured intervals out of Train2Go descriptions. Convert-to-workout produces a `raw` workout; the existing AI batch flow handles structuring.
 - Building a second coaching adapter (TrainingPeaks). The capability is generic, but only Train2Go is wired.
@@ -45,16 +49,17 @@ The transient model causes three concrete failures the user hit:
 
 ```ts
 type LinkedCoachingAccount = {
-  source: string;            // "train2go", future: "trainingpeaks"
-  externalUserId: string;    // string for forward-compat (Train2Go is numeric today)
+  source: string; // "train2go", future: "trainingpeaks"
+  externalUserId: string; // string for forward-compat (Train2Go is numeric today)
   externalUserName: string;
-  linkedAt: string;          // ISO datetime
+  linkedAt: string; // ISO datetime
 };
 ```
 
 Uniqueness invariant: at most one entry per `source` per profile (enforced by domain helper `linkAccount`/`unlinkAccount`, not Dexie).
 
 **Why on Profile and not a separate `linkedAccounts` table?**
+
 - Profile already owns user-identity-shaped data (name, body weight, zones). Linked accounts are user-identity data.
 - Avoids a join on every calendar render — the active profile is in memory.
 - Profile delete cascades to linked accounts naturally (no orphan rows).
@@ -72,25 +77,26 @@ coachingActivities: "id, [profileId+date], [profileId+source+sourceId], [profile
 
 ```ts
 type CoachingActivityRecord = {
-  id: string;              // composite as above
-  profileId: string;       // owning profile
-  source: string;          // "train2go"
-  sourceId: string;        // platform's id, captured as string at the JSON parse boundary
-  date: string;            // YYYY-MM-DD
-  sport: string;           // raw sport key from source (mapper applies icon)
+  id: string; // composite as above
+  profileId: string; // owning profile
+  source: string; // "train2go"
+  sourceId: string; // platform's id, captured as string at the JSON parse boundary
+  date: string; // YYYY-MM-DD
+  sport: string; // raw sport key from source (mapper applies icon)
   title: string;
-  duration?: string;       // free-text from source ("01:30:00", "Z2 60'")
-  workload?: number;       // raw platform metric — NOT clamped, NOT lossy
-  intensity?: 1 | 2 | 3 | 4 | 5;  // mapper-normalized 1-5 (Train2Go: clamp(workload, 1, 5))
+  duration?: string; // free-text from source ("01:30:00", "Z2 60'")
+  workload?: number; // raw platform metric — NOT clamped, NOT lossy
+  intensity?: 1 | 2 | 3 | 4 | 5; // mapper-normalized 1-5 (Train2Go: clamp(workload, 1, 5))
   status: "pending" | "completed" | "skipped";
-  completionPercent?: number;     // 0-100, distinct from status (a "completed" activity can be 85% done)
-  description?: string;    // populated lazily on expand
-  fetchedAt: string;       // ISO — drives staleness; refreshed on sync
+  completionPercent?: number; // 0-100, distinct from status (a "completed" activity can be 85% done)
+  description?: string; // populated lazily on expand
+  fetchedAt: string; // ISO — drives staleness; refreshed on sync
   // No internal Kaiord state machine — these are coach-owned.
 };
 ```
 
 **Why three orthogonal effort/status fields?**
+
 - `workload` preserves the platform's native signal (Train2Go: 0-N, TrainingPeaks: TSS 0-1000+) without lossy reduction. Future analytics need this.
 - `intensity` is a UI-friendly 1-5 dot indicator. Each platform's mapper documents its normalization rule (Train2Go: `clamp(workload, 1, 5)`; TrainingPeaks: `tssToIntensity(tss)`).
 - `status` ∈ pending/completed/skipped is the coach's discrete workflow state.
@@ -100,6 +106,7 @@ type CoachingActivityRecord = {
 JavaScript's `JSON.parse` lossily reduces integers above `Number.MAX_SAFE_INTEGER` (2^53 − 1) before any later `String()` cast can recover them. The Train2Go transport adapter MUST stringify `userId` and any activity ids at the parse boundary using a JSON reviver (or by parsing into a string-typed shape) — never via `String(parsedNumber)` after the fact. This rule applies to BOTH `linkedAccounts[].externalUserId` and `coachingActivities.sourceId`.
 
 **Why not extend `WorkoutRecord` with a `kind: "coaching"` discriminator?**
+
 - `WorkoutRecord` has its own state machine (raw → structured → ready → pushed) that does not apply to coach activities (which have an external pending/completed/skipped status owned by the coach).
 - Conversion is an explicit user action, not an in-place flip. A user might convert a coaching activity, leave the original intact, and convert it again later (idempotent — second conversion returns the same workout id).
 - Keeps the `workouts` table semantics narrow ("things the user owns and can export").
@@ -110,25 +117,29 @@ JavaScript's `JSON.parse` lossily reduces integers above `Number.MAX_SAFE_INTEGE
 ### D3. Active-profile-scoped sync; userId comes from the profile, not the ping
 
 Currently `Train2GoStore.userId` is hydrated from each `ping` response. Going forward:
+
 - `userId` is read from the active profile's `linkedAccounts` entry where `source === "train2go"`.
 - `ping` is used **only during the connect flow** to discover `userId`/`userName`. The Zustand store no longer holds them, and **`detectExtension` (called on heartbeat / visibility change / boot) MUST NOT mutate `linkedAccounts`** — it only toggles `extensionInstalled`/`sessionActive`. Auto-link on heartbeat would silently re-link a profile the user just disconnected.
 - If no linked account exists, the calendar shows a "Connect Train2Go" prompt routing to **Profile Settings → Linked Accounts**, not to a calendar-local action. (Calendar's previous Connect button is removed; only Sync remains, gated on `linkedAccounts`.)
 
 **Why move connect into profile settings?**
+
 - Linking is a profile-management decision, not a calendar action.
 - A user with two profiles (e.g., one for triathlon, one for running) should be able to link different accounts — the profile dialog is the natural place.
 - Disconnect is now obvious (where you linked, you unlink).
 
 **Connect-flow profile race — capture target id at flow start.**
 The connect flow polls `ping` for up to ~10s. If the user switches the active profile mid-poll, naively calling `linkAccount` with `getActiveId()` writes credentials to the wrong profile. Mitigation: the connect flow captures `targetProfileId` synchronously when the user clicks "Connect Train2Go" in Profile Settings, and the `linkAccount(profileId, account)` use case takes `profileId` as an explicit argument (not `getActiveId()`). If the active profile changes during the poll:
+
 - The link still completes against `targetProfileId` (the user's intent at click time wins).
 - The UI surfaces a small toast: "Linked Train2Go to <targetProfileName>." so the user is not surprised when switching back.
 
 **Connect-flow abandon — `AbortSignal` cancels the poll.**
 `attemptLink(targetProfileId, signal: AbortSignal)` accepts an abort signal. The `LinkedAccountsSection` creates an `AbortController` on click, passes the signal, and aborts on:
+
 - The connect modal/section unmounting (user navigates away from Profile Settings).
 - The user clicking "Disconnect" on the same source while a poll is in flight (concurrent intent reversal).
-On abort, the use case stops polling, does NOT call `linkAccount`, and resolves silently. No toast, no `lastError`. This rule covers both the abandon case and the within-same-profile disconnect-mid-connect race.
+  On abort, the use case stops polling, does NOT call `linkAccount`, and resolves silently. No toast, no `lastError`. This rule covers both the abandon case and the within-same-profile disconnect-mid-connect race.
 
 **`linkAccount` and the deleted-profile race.**
 If `getById(profileId)` returns `undefined` inside `linkAccount` (the target profile was deleted between click and poll completion), the use case throws `ProfileNotFoundError`. The caller (`attemptLink`) surfaces a single toast: "Profile no longer exists; not linked." No partial state is written.
@@ -136,6 +147,7 @@ If `getById(profileId)` returns `undefined` inside `linkAccount` (the target pro
 **`unlinkAccount` is idempotent.** Unlike `linkAccount`, `unlinkAccount(profileId, source)` MUST be a no-op (silent success) when the profile no longer exists OR when the source is not linked. Disconnect is the user's intent to "be in the unlinked state"; if the state is already that or the row is gone, the intent is already satisfied. This avoids spurious error toasts during disconnect-during-deletion races.
 
 **Disconnect-after-successful-link ordering.** If a connect poll resolves successfully and the user then immediately clicks Disconnect, the sequence is:
+
 1. `attemptLink` resolves, calls `linkAccount(targetProfileId, ...)` — link is written.
 2. The disconnect handler observes the link is now present (or fires regardless) and calls `unlinkAccount(targetProfileId, source)` — link is removed.
 
@@ -157,9 +169,9 @@ Row shape (explanatory; see `spa-persistence-port` `CoachingSyncStateRepository`
 
 ```ts
 type CoachingSyncStateRecord = {
-  source: string;          // e.g., "train2go"
-  profileId: string;       // owning Kaiord profile
-  lastSyncedAt: string;    // ISO datetime — staleness signal
+  source: string; // e.g., "train2go"
+  profileId: string; // owning Kaiord profile
+  lastSyncedAt: string; // ISO datetime — staleness signal
 };
 ```
 
@@ -172,6 +184,7 @@ Rule: on calendar mount and on week navigation, if `now - lastSyncedAt > 10 minu
 ### D5. "Convert to workout" — explicit, idempotent, profile-scoped
 
 Mapper `coaching-to-workout.mapper.ts`:
+
 - Input: `CoachingActivityRecord`
 - Output: `WorkoutRecord` with:
   - `id` = `nanoid()` (new workout)
@@ -187,57 +200,65 @@ Mapper `coaching-to-workout.mapper.ts`:
 **Note on namespace asymmetry.** The coaching activity's primary key is `${profileId}:${source}:${sourceId}` (three components). The workout's namespaced sourceId is `${profileId}:${rawSourceId}` (two components — `source` is omitted because `WorkoutRecord.source` is already a separate column, so encoding it again would be redundant). The asymmetry is deliberate; `namespaceSourceId(profileId, rawSourceId)` is the only place the rule lives.
 
 **Why namespace `sourceId`?**
+
 - Two profiles linking the same Train2Go account → each profile may want its own editable workout from the same source activity. With raw `sourceId`, profile B's "Convert" would resolve to profile A's already-created workout — wrong.
 - Adding `profileId` to `WorkoutRecord` is the cleaner long-term fix but bigger blast radius (touches every workout call site). Defer.
 - Trade-off: any future code that wants to "find the workout for this Train2Go activity" must namespace the sourceId the same way. Document at the mapper boundary; expose a helper `namespaceSourceId(profileId, rawId)` so the rule is enforced in one place.
 
 **Why a use case (`convertCoachingActivity`) instead of inline in the dialog?**
+
 - Idempotency check + write + navigate is a multi-step orchestration — fits application layer.
 - Future: convert may also archive the coaching activity or mark it as "converted" in metadata.
 
 ### D6. Schema migration: Dexie v4 with profile backfill
 
 ```ts
-this.version(4).stores({
-  workouts: "...",
-  templates: "...",
-  profiles: "id",
-  aiProviders: "id",
-  syncState: "source",
-  usage: "yearMonth",
-  meta: "key",
-  bridges: "extensionId, status, lastSeen",
-  coachingActivities: "id, [profileId+date], [profileId+source+sourceId], [profileId+source]",
-}).upgrade(async (tx) => {
-  await tx.table("profiles").toCollection().modify((row) => {
-    if (!row.linkedAccounts) row.linkedAccounts = [];
+this.version(4)
+  .stores({
+    workouts: "...",
+    templates: "...",
+    profiles: "id",
+    aiProviders: "id",
+    syncState: "source",
+    usage: "yearMonth",
+    meta: "key",
+    bridges: "extensionId, status, lastSeen",
+    coachingActivities:
+      "id, [profileId+date], [profileId+source+sourceId], [profileId+source]",
+  })
+  .upgrade(async (tx) => {
+    await tx
+      .table("profiles")
+      .toCollection()
+      .modify((row) => {
+        if (!row.linkedAccounts) row.linkedAccounts = [];
+      });
   });
-});
 ```
 
 No migration needed for `workouts` — schema string unchanged, and the existing `[source+sourceId]` index becomes load-bearing only on convert (D5).
 
 ### D7. Hexagonal placement
 
-| Concern                            | Layer       | File(s)                                                                 |
-|------------------------------------|-------------|--------------------------------------------------------------------------|
-| `LinkedCoachingAccount` type+Zod   | domain      | `types/profile.ts` (extend), `types/coaching-account.ts` (new)           |
-| `CoachingActivityRecord` type+Zod  | domain      | `types/coaching-activity-record.ts` (new)                                |
-| `CoachingRepository` interface     | port        | `ports/persistence-port.ts` (extend `PersistencePort`)                   |
-| Active-profile coaching use cases  | application | `application/coaching/*` — `linkAccount(profileId, account)`, `unlinkAccount(profileId, source)`, `syncWeek(profileId, weekStart)`, `expandDay(profileId, date)`, `convertCoachingActivity(activityId)` |
-| Active profile use case (pure)     | application | `application/profile/get-active-profile.ts` — async `getActiveProfile(): Promise<Profile \| null>`. Port-only, framework-free. |
-| Active profile React hook          | UI hook     | `hooks/use-active-profile.ts` — `useActiveProfile()` returning `{ id, profile, isLoading }`. Wraps the use case via `useLiveQuery`. Framework-coupled, intentionally outside the application layer. Required by every coaching hook downstream. |
-| Wire → Record mapper (per-source)  | adapter     | `adapters/train2go/train2go-record.mapper.ts` (new) — `Train2GoActivity` → `CoachingActivityRecord`. Stringifies ids at the parse boundary. Documents the `clamp(workload, 1, 5)` normalization for `intensity`. |
-| Record → ViewModel mapper (generic)| adapter     | `adapters/train2go/coaching-record-to-activity.mapper.ts` (new) — `CoachingActivityRecord` → `CoachingActivity` view-model. Platform-agnostic. |
-| Dexie repository                   | adapter     | `adapters/dexie/dexie-coaching-repository.ts`                            |
-| In-memory repository (tests)       | adapter     | `test-utils/in-memory-coaching-repository.ts`                            |
-| Train2Go transport (unchanged)     | adapter     | `store/train2go-extension-transport.ts` — JSON parse boundary stringifies `userId` and activity ids before the rest of the codebase sees them |
-| Train2Go source adapter            | adapter     | `adapters/train2go/use-train2go-source.ts` — exposes `query(profileId, days)` (returns `useLiveQuery`-backed activities), `sync`, `expand`, `connect`. Does NOT bake activities at bootstrap (see "Live-query placement" below). |
-| CoachingActivityDialog UI          | UI          | `components/molecules/CoachingCard/CoachingActivityDialog.tsx`           |
-| Profile settings linked-accounts   | UI          | `components/organisms/ProfileManager/LinkedAccountsSection.tsx`          |
-| Auto-sync hook                     | UI          | `hooks/use-coaching-auto-sync.ts`                                        |
+| Concern                             | Layer       | File(s)                                                                                                                                                                                                                                         |
+| ----------------------------------- | ----------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `LinkedCoachingAccount` type+Zod    | domain      | `types/profile.ts` (extend), `types/coaching-account.ts` (new)                                                                                                                                                                                  |
+| `CoachingActivityRecord` type+Zod   | domain      | `types/coaching-activity-record.ts` (new)                                                                                                                                                                                                       |
+| `CoachingRepository` interface      | port        | `ports/persistence-port.ts` (extend `PersistencePort`)                                                                                                                                                                                          |
+| Active-profile coaching use cases   | application | `application/coaching/*` — `linkAccount(profileId, account)`, `unlinkAccount(profileId, source)`, `syncWeek(profileId, weekStart)`, `expandDay(profileId, date)`, `convertCoachingActivity(activityId)`                                         |
+| Active profile use case (pure)      | application | `application/profile/get-active-profile.ts` — async `getActiveProfile(): Promise<Profile \| null>`. Port-only, framework-free.                                                                                                                  |
+| Active profile React hook           | UI hook     | `hooks/use-active-profile.ts` — `useActiveProfile()` returning `{ id, profile, isLoading }`. Wraps the use case via `useLiveQuery`. Framework-coupled, intentionally outside the application layer. Required by every coaching hook downstream. |
+| Wire → Record mapper (per-source)   | adapter     | `adapters/train2go/train2go-record.mapper.ts` (new) — `Train2GoActivity` → `CoachingActivityRecord`. Stringifies ids at the parse boundary. Documents the `clamp(workload, 1, 5)` normalization for `intensity`.                                |
+| Record → ViewModel mapper (generic) | adapter     | `adapters/train2go/coaching-record-to-activity.mapper.ts` (new) — `CoachingActivityRecord` → `CoachingActivity` view-model. Platform-agnostic.                                                                                                  |
+| Dexie repository                    | adapter     | `adapters/dexie/dexie-coaching-repository.ts`                                                                                                                                                                                                   |
+| In-memory repository (tests)        | adapter     | `test-utils/in-memory-coaching-repository.ts`                                                                                                                                                                                                   |
+| Train2Go transport (unchanged)      | adapter     | `store/train2go-extension-transport.ts` — JSON parse boundary stringifies `userId` and activity ids before the rest of the codebase sees them                                                                                                   |
+| Train2Go source adapter             | adapter     | `adapters/train2go/use-train2go-source.ts` — exposes `query(profileId, days)` (returns `useLiveQuery`-backed activities), `sync`, `expand`, `connect`. Does NOT bake activities at bootstrap (see "Live-query placement" below).                |
+| CoachingActivityDialog UI           | UI          | `components/molecules/CoachingCard/CoachingActivityDialog.tsx`                                                                                                                                                                                  |
+| Profile settings linked-accounts    | UI          | `components/organisms/ProfileManager/LinkedAccountsSection.tsx`                                                                                                                                                                                 |
+| Auto-sync hook                      | UI          | `hooks/use-coaching-auto-sync.ts`                                                                                                                                                                                                               |
 
-The Train2Go store is *not* deleted — it still owns transport state (`extensionInstalled`, `sessionActive`, `loading`, `lastError`). It loses ownership of `userId`, `userName`, and `activities`.
+The Train2Go store is _not_ deleted — it still owns transport state (`extensionInstalled`, `sessionActive`, `loading`, `lastError`). It loses ownership of `userId`, `userName`, and `activities`.
 
 **Live-query placement (refines D2).** `CoachingRegistryBootstrap` mounts above the calendar route and does not know which week the user is viewing. So `useTrain2GoSource` cannot bake an `activities: CoachingActivity[]` array via `useLiveQuery(getByProfileAndDateRange(profileId, weekStart, weekEnd))` at bootstrap — `weekStart`/`weekEnd` don't exist there. The `CoachingSource` port is therefore extended:
 

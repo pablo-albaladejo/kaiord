@@ -32,25 +32,30 @@ Coaching activities are first-class data — they should survive reloads, be add
 ## Impact
 
 **Affected packages:**
+
 - `@kaiord/workout-spa-editor` — primary surface (profile types, Dexie schema bump, repositories, stores, calendar UI)
 
 **Affected layers (hexagonal):**
+
 - Domain (types): `Profile.linkedAccounts`, `LinkedCoachingAccount`, `CoachingActivityRecord`
 - Ports: new `CoachingRepository` interface in `PersistencePort`
 - Adapters: `DexieCoachingRepository`, `InMemoryCoachingRepository`, Train2Go adapter writes through the repo instead of Zustand
 - UI: new `CoachingActivityDialog`, profile-settings "Linked Accounts" panel, calendar auto-sync hook
 
 **Schema migration:**
+
 - Dexie `version(4)` adds `coachingActivities` table and migrates `profiles` rows to default `linkedAccounts: []`
 - No migration of existing data needed (today's coaching activities are not persisted)
 
 **Specs touched:**
+
 - New: `openspec/specs/spa-coaching-integration/spec.md`
 - Modified (deltas): `spa-train2go-extension`, `spa-persistence-port`, `spa-calendar`
 
 **Public API:** no changes — this is internal SPA wiring only. No `@kaiord/core` or adapter package changes.
 
 **Out of scope:**
+
 - TrainingPeaks or other coaching sources (the capability is generic, but no second adapter is built here)
 - Bidirectional sync (marking an activity completed/skipped from Kaiord). This stays read-only from coach.
 - Importing structured workout steps from Train2Go descriptions (description text remains a string; "Convert to workout" produces a `raw` workout the user processes via existing AI flow).
