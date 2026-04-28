@@ -35,13 +35,20 @@ export const useLinkedAccountRow = (
     setBusy(true);
     try {
       await t2gSource.connect(profile.id);
+      // connect() returns void on abort / session-not-active / errors;
+      // verify the link was actually persisted before claiming success.
+      const refreshed = await persistence.profiles.getById(profile.id);
+      const linked = refreshed?.linkedAccounts.some(
+        (a) => a.source === sourceMeta.id
+      );
+      if (!linked) return;
       // PII rule: toast strings reference Kaiord profile name only;
       // never externalUserName / externalUserId.
       toasts.success(`Linked ${sourceMeta.label} to ${profile.name}`);
     } finally {
       setBusy(false);
     }
-  }, [t2gSource, profile, sourceMeta, toasts]);
+  }, [t2gSource, persistence, profile, sourceMeta, toasts]);
 
   const handleDisconnect = useCallback(async () => {
     abortRef.current?.abort();

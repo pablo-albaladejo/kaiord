@@ -32,8 +32,21 @@ vi.mock("../../application/coaching/attempt-link", () => ({
   attemptLink: (...args: unknown[]) => mockAttempt(...args),
 }));
 
+// Make useLiveQuery actually invoke the supplied query so the persisted
+// coaching read path is exercised (per CodeRabbit — a constant [] would
+// bypass the adapter's profile/week scoping coverage). For Promise-returning
+// queries we surface `undefined` (matching dexie-react-hooks' pre-resolution
+// behavior); the assertion in the test that expects an empty array does so
+// against a fresh in-memory store, which yields [] synchronously here.
 vi.mock("dexie-react-hooks", () => ({
-  useLiveQuery: (_fn: unknown) => [],
+  useLiveQuery: (fn: () => unknown) => {
+    try {
+      const r = fn();
+      return r instanceof Promise ? undefined : r;
+    } catch {
+      return undefined;
+    }
+  },
 }));
 
 vi.mock("../../store/train2go-store", () => ({

@@ -28,15 +28,21 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
     if (!deleteConfirmId) return;
     const id = deleteConfirmId; // capture; never use getActiveId
     void (async () => {
-      await deleteProfileWithCascade(
-        {
-          coaching: persistence.coaching,
-          coachingSyncState: persistence.coachingSyncState,
-        },
-        id
-      );
-      deleteProfile(id);
-      setDeleteConfirmId(null);
+      try {
+        await deleteProfileWithCascade(
+          {
+            coaching: persistence.coaching,
+            coachingSyncState: persistence.coachingSyncState,
+          },
+          id
+        );
+        deleteProfile(id);
+        setDeleteConfirmId(null);
+      } catch {
+        // Cascade rejection: keep the confirm dialog open so the user
+        // can retry. Avoid unhandled-rejection crashes; the dialog
+        // state staying non-null is the signal that delete didn't complete.
+      }
     })();
   };
 

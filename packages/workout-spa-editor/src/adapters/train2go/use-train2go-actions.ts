@@ -23,14 +23,18 @@ export const useSyncCallback = (
 ) =>
   useCallback(
     async (profileId: string, weekStart: string) => {
-      a.event("coaching.sync.invoked", { source: t.source, trigger: "manual" });
+      a.event("coaching.sync.invoked", {
+        source: t.source,
+        profileId,
+        trigger: "manual",
+      });
       const startedAt = Date.now();
       const result = await syncWeek(
         { ...baseDeps(p, t), coachingSyncState: p.coachingSyncState },
         profileId,
         weekStart
       );
-      emitSyncResult(a, t.source, result, Date.now() - startedAt);
+      emitSyncResult(a, t.source, profileId, result, Date.now() - startedAt);
     },
     [p, t, a]
   );
@@ -42,7 +46,10 @@ export const useExpandCallback = (
 ) =>
   useCallback(
     async (profileId: string, date: string) => {
-      a.event("coaching.expand_day.invoked", { source: t.source });
+      a.event("coaching.expand_day.invoked", {
+        source: t.source,
+        profileId,
+      });
       await expandDay(baseDeps(p, t), profileId, date);
     },
     [p, t, a]
@@ -64,7 +71,7 @@ export const useConnectCallback = (
         profileId,
         ctrl.signal
       );
-      emitLinkResult(a, t.source, r);
+      emitLinkResult(a, t.source, profileId, r);
     },
     [p, t, a]
   );

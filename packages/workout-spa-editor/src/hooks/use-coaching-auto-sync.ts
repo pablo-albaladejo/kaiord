@@ -7,8 +7,10 @@
  *    no row exists yet.
  *  - Auto-sync failures are silent — the source's `error` field is
  *    populated by the use case; no toast is raised here.
- *  - `expandDay` does NOT update lastSyncedAt; only this hook advances
- *    the gate (see spec).
+ *  - `expandDay` does NOT update lastSyncedAt; only this hook advances.
+ *
+ * Telemetry: `trigger` differentiates initial mount from week navigation;
+ * `errorKind` is a low-cardinality enum and NEVER raw exception text.
  */
 
 import { useEffect, useRef } from "react";
@@ -17,15 +19,7 @@ import { useAnalytics } from "../contexts";
 import { usePersistence } from "../contexts/persistence-context";
 import { useActiveProfile } from "./use-active-profile";
 import type { CoachingSyncState } from "./use-coaching-activities";
-
-const STALENESS_MS = 10 * 60 * 1000;
-
-const isStale = (lastSyncedAt: string | undefined, now: number): boolean => {
-  if (!lastSyncedAt) return true;
-  const t = Date.parse(lastSyncedAt);
-  if (Number.isNaN(t)) return true;
-  return now - t > STALENESS_MS;
-};
+import { runSourceSync } from "./use-coaching-auto-sync-helpers";
 
 export const useCoachingAutoSync = (
   syncSources: CoachingSyncState[],
@@ -41,8 +35,8 @@ export const useCoachingAutoSync = (
     const now = Date.now();
     const key = `${activeProfileId}:${weekStart}`;
     if (lastFiredKey.current === key) return;
-    // Gate BEFORE the async work so concurrent rerenders for the same
-    // (profile, week) cannot launch two parallel sync loops.
+    const trigger =
+      lastFiredKey.current === null ? "auto-mount" : "auto-week-change";
     lastFiredKey.current = key;
 
     const linkedSourceIds = new Set(
@@ -53,32 +47,15 @@ export const useCoachingAutoSync = (
 
     void (async () => {
       for (const src of targets) {
-        try {
-          const row = await persistence.coachingSyncState.getBySourceAndProfile(
-            src.id,
-            activeProfileId
-          );
-          if (!isStale(row?.lastSyncedAt, now)) continue;
-          analytics.event("coaching.sync.invoked", {
-            source: src.id,
-            trigger: "auto-mount",
-          });
-          await src.sync(weekStart);
-          if (src.error) {
-            analytics.event("coaching.sync.failure", {
-              source: src.id,
-              errorKind: "transport-error",
-              isAutoSync: true,
-            });
-          }
-        } catch (err) {
-          // Auto-sync is silent; per-source rejections never bubble up.
-          analytics.event("coaching.sync.failure", {
-            source: src.id,
-            errorKind: err instanceof Error ? err.message : "unknown",
-            isAutoSync: true,
-          });
-        }
+        await runSourceSync(
+          src,
+          activeProfileId,
+          weekStart,
+          trigger,
+          now,
+          persistence,
+          analytics
+        );
       }
     })();
   }, [
