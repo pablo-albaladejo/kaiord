@@ -104,12 +104,12 @@
 
 ## 9. Coaching activity dialog and convert action
 
-- [ ] 9.1 Create `components/molecules/CoachingCard/CoachingActivityDialog.tsx` — title, sport, date, duration, intensity, status, completionPercent, description, "Convert to workout" button, "Close"
-- [ ] 9.2 Update `CoachingActivityCard.tsx` — remove in-place toggle; click handler opens the dialog via state in `CalendarDialogs`
-- [ ] 9.3 Wire `CalendarDialogs` to manage `selectedCoachingActivity` state and render `CoachingActivityDialog`
-- [ ] 9.4 Lazy-load description: when dialog opens with `description === undefined` (NOT `""` — a known-empty description does NOT re-fire), dispatch `expandDay(activeProfileId, activity.date)` use case (which upserts siblings too)
-- [ ] 9.5 Wire "Convert to workout" button to `convertCoachingActivity` use case, then `setLocation(`/workout/${id}`)`
-- [ ] 9.6 Tests: dialog opens with persisted description; dialog lazy-loads when `description === undefined`; dialog does NOT re-fire when `description === ""`; siblings get descriptions on lazy-load; convert is idempotent within a profile, distinct between profiles, and routes to editor; convert write-failure stays on dialog and surfaces error toast (no navigation); intensity-undefined activity renders without dots.
+- [x] 9.1 Create `components/molecules/CoachingCard/CoachingActivityDialog.tsx` — title, sport, date, duration, intensity, status, completionPercent, description, "Convert to workout" button, "Close"
+- [x] 9.2 Update `CoachingActivityCard.tsx` — remove in-place toggle; click handler opens the dialog via state in `CalendarDialogs`
+- [x] 9.3 Wire `CalendarDialogs` to manage `selectedCoachingActivity` state and render `CoachingActivityDialog`
+- [x] 9.4 Lazy-load description: when dialog opens with `description === undefined` (NOT `""` — a known-empty description does NOT re-fire), dispatch `expandDay(activeProfileId, activity.date)` use case (which upserts siblings too)
+- [x] 9.5 Wire "Convert to workout" button to `convertCoachingActivity` use case, then `setLocation(`/workout/${id}`)`
+- [x] 9.6 Tests: dialog opens with persisted description; dialog lazy-loads when `description === undefined`; dialog does NOT re-fire when `description === ""`; siblings get descriptions on lazy-load; convert is idempotent within a profile, distinct between profiles, and routes to editor; convert write-failure stays on dialog and surfaces error toast (no navigation); intensity-undefined activity renders without dots.
 
 ## 10. Profile settings — Linked Accounts panel
 

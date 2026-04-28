@@ -17,7 +17,7 @@ export type DayColumnProps = {
   coachingActivities?: CoachingActivity[];
   onWorkoutClick: (workout: WorkoutRecord) => void;
   onEmptyDayClick: (date: string) => void;
-  onActivityExpand?: (activity: CoachingActivity) => void;
+  onActivityClick?: (activity: CoachingActivity) => void;
 };
 
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
@@ -36,7 +36,7 @@ export function DayColumn({
   coachingActivities = [],
   onWorkoutClick,
   onEmptyDayClick,
-  onActivityExpand,
+  onActivityClick,
 }: DayColumnProps) {
   const label = getDayLabel(date);
   const todayClass = isToday ? "bg-primary-50 dark:bg-primary-950" : "";
@@ -54,7 +54,7 @@ export function DayColumn({
           <CoachingActivityCard
             key={a.id}
             activity={a}
-            onExpand={onActivityExpand}
+            onClick={onActivityClick}
           />
         ))}
         {workouts.map((w) => (
