@@ -31,11 +31,13 @@ describe("toCoachingActivity (record → view-model)", () => {
 
   it("uses T2G as badge for train2go source", () => {
     const result = toCoachingActivity(baseRecord);
+
     expect(result.sourceBadge).toBe("T2G");
   });
 
   it("falls back to upper-cased source label for unknown badges", () => {
     const result = toCoachingActivity({ ...baseRecord, source: "future-src" });
+
     expect(result.sourceBadge).toBe("FUTURE-SRC");
   });
 
@@ -49,6 +51,7 @@ describe("toCoachingActivity (record → view-model)", () => {
 
   it("omits empty duration", () => {
     const result = toCoachingActivity({ ...baseRecord, duration: "" });
+
     expect(result.duration).toBeUndefined();
   });
 });

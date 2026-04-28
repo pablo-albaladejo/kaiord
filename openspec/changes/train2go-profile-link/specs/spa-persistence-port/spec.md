@@ -63,7 +63,7 @@ The system SHALL persist coaching staleness signals in a **separate** Dexie tabl
 
 The `coachingSyncState` table SHALL be primary-keyed by the compound `[source+profileId]` and store rows of shape:
 
-```
+```json
 {
   source: string,           // e.g., "train2go"
   profileId: string,        // owning Kaiord profile

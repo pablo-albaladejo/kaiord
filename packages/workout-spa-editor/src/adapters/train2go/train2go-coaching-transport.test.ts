@@ -22,6 +22,7 @@ describe("createTrain2GoCoachingTransport", () => {
 
   it("source identifier is train2go", () => {
     const t = createTrain2GoCoachingTransport(() => "ext-id");
+
     expect(t.source).toBe("train2go");
   });
 

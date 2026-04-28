@@ -69,8 +69,8 @@ Uniqueness invariant: at most one entry per `source` per profile (enforced by do
 
 ### D2. New `coachingActivities` Dexie table; do NOT extend `workouts`
 
-```
-coachingActivities: "id, [profileId+date], [profileId+source+sourceId], [profileId+source]"
+```ts
+coachingActivities: "id, [profileId+date], [profileId+source+sourceId], [profileId+source]";
 ```
 
 `id` = `${profileId}:${source}:${sourceId}` (deterministic, supports upsert and equality dedupe).
@@ -161,8 +161,8 @@ The existing `syncState` table is **bridge-discovery-shaped** — its rows carry
 
 Decision: introduce a **separate `coachingSyncState` table** dedicated to coaching staleness. This keeps the bridge-discovery `syncState` table untouched.
 
-```
-coachingSyncState: "[source+profileId], source, profileId"
+```ts
+coachingSyncState: "[source+profileId], source, profileId";
 ```
 
 Row shape (explanatory; see `spa-persistence-port` `CoachingSyncStateRepository` for the normative definition):

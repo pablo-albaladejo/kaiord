@@ -67,7 +67,7 @@ The `read-day` response typically contains every activity for that day, not only
 
 #### Scenario: User expands an activity to see description
 
-- **WHEN** the user opens a `CoachingActivityDialog` for an activity whose description is empty
+- **WHEN** the user opens a `CoachingActivityDialog` for an activity whose `description` is `undefined` (not yet fetched)
 - **THEN** the SPA sends `{ action: "read-day", date: activity.date, userId: linked.externalUserId }`, upserts every activity returned (including siblings on the same day) via `CoachingRepository.upsertMany`, and the dialog re-renders with the description for the clicked activity
 
 #### Scenario: Expand fills sibling descriptions in the same transaction
