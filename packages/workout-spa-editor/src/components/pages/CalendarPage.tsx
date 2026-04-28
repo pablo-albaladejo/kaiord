@@ -8,6 +8,7 @@
 import { Redirect } from "wouter";
 
 import { useCoachingActivities } from "../../hooks/use-coaching-activities";
+import { useCoachingAutoSync } from "../../hooks/use-coaching-auto-sync";
 import { CalendarSkeleton } from "../molecules/WorkoutCard/CalendarSkeleton";
 import { CalendarDialogs } from "./CalendarDialogs";
 import { CalendarHeader } from "./CalendarHeader";
@@ -17,6 +18,7 @@ import { useCalendarState } from "./use-calendar-state";
 export default function CalendarPage() {
   const s = useCalendarState();
   const coaching = useCoachingActivities(s.data.days);
+  useCoachingAutoSync(coaching.syncSources, s.data.days[0]);
 
   if (!s.data.isValidWeek) return <Redirect to="/calendar" />;
   if (s.data.hydration === "pending") return <CalendarSkeleton />;

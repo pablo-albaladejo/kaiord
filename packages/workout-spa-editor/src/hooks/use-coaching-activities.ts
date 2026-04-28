@@ -18,6 +18,8 @@ import { useActiveProfile } from "./use-active-profile";
 export type CoachingSyncState = {
   id: string;
   label: string;
+  /** Source has a linkedAccount on the active profile. */
+  linked: boolean;
   connected: boolean;
   loading: boolean;
   error: string | null;
@@ -26,7 +28,7 @@ export type CoachingSyncState = {
 };
 
 export function useCoachingActivities(days: string[]) {
-  const { id: activeProfileId } = useActiveProfile();
+  const { id: activeProfileId, profile } = useActiveProfile();
   const factories = useCoachingSourceFactories();
 
   // Each factory is itself a hook; calling them in stable order from this
@@ -53,11 +55,17 @@ export function useCoachingActivities(days: string[]) {
     [sources, activeProfileId]
   );
 
+  const linkedSourceIds = useMemo(() => {
+    if (!profile) return new Set<string>();
+    return new Set(profile.linkedAccounts.map((a) => a.source));
+  }, [profile]);
+
   const syncSources: CoachingSyncState[] = sources
     .filter((s) => s.available)
     .map((s) => ({
       id: s.id,
       label: s.label,
+      linked: linkedSourceIds.has(s.id),
       connected: s.connected,
       loading: s.loading,
       error: s.error,

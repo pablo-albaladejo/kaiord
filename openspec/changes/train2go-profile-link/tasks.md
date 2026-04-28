@@ -96,11 +96,11 @@
 
 ## 8. Calendar integration
 
-- [ ] 8.1 Create `hooks/use-coaching-auto-sync.ts` — fires `syncWeek(activeProfileId, weekStart)` for each linked source on mount and week change, gated by reading `coachingSyncState.getBySourceAndProfile(source, activeProfileId)` and checking `now - lastSyncedAt < 10 minutes`. Failures are silent (set `lastError` on the source's store slice, no toast).
-- [ ] 8.2 Wire `useCoachingAutoSync` into `CalendarPage`
-- [ ] 8.3 Update `CalendarHeader` to render Sync button only when active profile has a linked account for that source. Replace any calendar-local "Connect" affordance with a hint pointing to Profile Settings → Linked Accounts.
-- [ ] 8.4 Update calendar empty-state components (`FirstVisitState`, `NoBridgesState`) so the Connect CTA navigates to Profile Settings, not to a calendar-local action or modal.
-- [ ] 8.5 Tests: auto-sync fires on stale state, skips on fresh; profile switch invalidates staleness; missing linked account hides Sync; FirstVisitState Connect button navigates to Profile Settings; auto-sync failure is silent (lastError set on the source's `error` field, NO toast, no error re-thrown to the caller).
+- [x] 8.1 Create `hooks/use-coaching-auto-sync.ts` — fires `syncWeek(activeProfileId, weekStart)` for each linked source on mount and week change, gated by reading `coachingSyncState.getBySourceAndProfile(source, activeProfileId)` and checking `now - lastSyncedAt < 10 minutes`. Failures are silent (set `lastError` on the source's store slice, no toast).
+- [x] 8.2 Wire `useCoachingAutoSync` into `CalendarPage`
+- [x] 8.3 Update `CalendarHeader` to render Sync button only when active profile has a linked account for that source. Replace any calendar-local "Connect" affordance with a hint pointing to Profile Settings → Linked Accounts.
+- [x] 8.4 Update calendar empty-state components (`FirstVisitState`, `NoBridgesState`) so the Connect CTA navigates to Profile Settings, not to a calendar-local action or modal.
+- [x] 8.5 Tests: auto-sync fires on stale state, skips on fresh; profile switch invalidates staleness; missing linked account hides Sync; FirstVisitState Connect button navigates to Profile Settings; auto-sync failure is silent (lastError set on the source's `error` field, NO toast, no error re-thrown to the caller).
 
 ## 9. Coaching activity dialog and convert action
 

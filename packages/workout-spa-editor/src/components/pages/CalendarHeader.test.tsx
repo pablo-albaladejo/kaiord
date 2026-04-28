@@ -70,11 +70,12 @@ describe("CalendarHeader", () => {
     expect(screen.getByTestId("mock-week-nav")).toHaveTextContent("2026-W16");
   });
 
-  it("renders a sync button per coaching source", () => {
+  it("renders a sync button per LINKED coaching source (gates on linked)", () => {
     const coaching = {
       syncSources: [
         {
           id: "s1",
+          linked: true,
           connected: true,
           loading: false,
           error: null,
@@ -84,12 +85,23 @@ describe("CalendarHeader", () => {
         },
         {
           id: "s2",
+          linked: true,
           connected: false,
           loading: false,
           error: null,
           sync: vi.fn(),
           connect: vi.fn(),
           label: "Train2Go",
+        },
+        {
+          id: "s3",
+          linked: false,
+          connected: false,
+          loading: false,
+          error: null,
+          sync: vi.fn(),
+          connect: vi.fn(),
+          label: "Unlinked",
         },
       ],
     } as unknown as Parameters<typeof CalendarHeader>[0]["coaching"];
@@ -98,6 +110,8 @@ describe("CalendarHeader", () => {
 
     expect(screen.getByTestId("mock-sync-Garmin")).toBeInTheDocument();
     expect(screen.getByTestId("mock-sync-Train2Go")).toBeInTheDocument();
+    // The unlinked source must NOT render a Sync button.
+    expect(screen.queryByTestId("mock-sync-Unlinked")).not.toBeInTheDocument();
   });
 
   it("passes batch.pending presence to the cost confirmation's open prop", () => {
