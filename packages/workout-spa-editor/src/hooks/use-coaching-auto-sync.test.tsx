@@ -131,4 +131,34 @@ describe("useCoachingAutoSync", () => {
     await new Promise((r) => setTimeout(r, 5));
     expect(src.sync).not.toHaveBeenCalled();
   });
+
+  it("profile switch invalidates staleness — A's fresh row does NOT suppress sync for B", async () => {
+    // Profile A has a fresh syncState row; the active profile is B which has
+    // no row at all. The hook MUST read B's own row, not A's.
+    const persistence = createInMemoryPersistence();
+    const recent = new Date(Date.now() - 60_000).toISOString();
+    await persistence.coachingSyncState.put({
+      source: "train2go",
+      profileId: "p1", // A's row — must NOT suppress B
+      lastSyncedAt: recent,
+    });
+    mockProfile = {
+      id: "p2",
+      profile: { ...linkedProfile, id: "p2" },
+    };
+    const src = makeSource();
+
+    renderHook(() => useCoachingAutoSync([src], "2026-04-13"), {
+      wrapper: ({ children }) => (
+        <PersistenceProvider persistence={persistence}>
+          {children}
+        </PersistenceProvider>
+      ),
+    });
+
+    // B has no syncState row → stale → sync fires
+    await waitFor(() => {
+      expect(src.sync).toHaveBeenCalledWith("2026-04-13");
+    });
+  });
 });
