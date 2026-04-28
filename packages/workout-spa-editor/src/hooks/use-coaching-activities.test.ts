@@ -1,45 +1,54 @@
 import { renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import type { CoachingSource } from "../types/coaching-source";
+import type {
+  CoachingSource,
+  CoachingSourceFactory,
+} from "../types/coaching-source";
 
-const mockSources: CoachingSource[] = [
-  {
-    id: "train2go",
-    label: "Train2Go",
-    badge: "T2G",
-    available: true,
-    connected: true,
-    loading: false,
-    error: null,
-    activities: [
-      {
-        id: "train2go:1",
-        source: "train2go",
-        sourceBadge: "T2G",
-        date: "2026-04-13",
-        sport: { label: "Running", icon: "running" },
-        title: "Easy Run",
-        status: "pending",
-      },
-      {
-        id: "train2go:2",
-        source: "train2go",
-        sourceBadge: "T2G",
-        date: "2026-04-14",
-        sport: { label: "Cycling", icon: "cycling" },
-        title: "Long Ride",
-        status: "completed",
-      },
-    ],
-    sync: vi.fn(),
-    expand: vi.fn(),
-    connect: vi.fn(),
-  },
-];
+const ACTIVE_PROFILE_ID = "p1";
+
+const fakeSource: CoachingSource = {
+  id: "train2go",
+  label: "Train2Go",
+  badge: "T2G",
+  available: true,
+  connected: true,
+  loading: false,
+  error: null,
+  activities: [
+    {
+      id: "train2go:1",
+      source: "train2go",
+      sourceBadge: "T2G",
+      date: "2026-04-13",
+      sport: { label: "Running", icon: "running" },
+      title: "Easy Run",
+      status: "pending",
+    },
+    {
+      id: "train2go:2",
+      source: "train2go",
+      sourceBadge: "T2G",
+      date: "2026-04-14",
+      sport: { label: "Cycling", icon: "cycling" },
+      title: "Long Ride",
+      status: "completed",
+    },
+  ],
+  sync: vi.fn(async () => undefined),
+  expand: vi.fn(async () => undefined),
+  connect: vi.fn(async () => undefined),
+};
+
+const factory: CoachingSourceFactory = vi.fn(() => fakeSource);
 
 vi.mock("../contexts/coaching-registry-context", () => ({
-  useCoachingSources: () => mockSources,
+  useCoachingSourceFactories: () => [factory],
+}));
+
+vi.mock("./use-active-profile", () => ({
+  useActiveProfile: () => ({ id: ACTIVE_PROFILE_ID, profile: null }),
 }));
 
 import { useCoachingActivities } from "./use-coaching-activities";
@@ -48,6 +57,14 @@ describe("useCoachingActivities", () => {
   beforeEach(() => {
     vi.clearAllMocks();
   });
+
+  it("invokes each factory with (activeProfileId, days)", () => {
+    const days = ["2026-04-13", "2026-04-14"];
+    renderHook(() => useCoachingActivities(days));
+
+    expect(factory).toHaveBeenCalledWith(ACTIVE_PROFILE_ID, days);
+  });
+
   it("groups activities by day", () => {
     const { result } = renderHook(() =>
       useCoachingActivities(["2026-04-13", "2026-04-14", "2026-04-15"])
@@ -62,11 +79,11 @@ describe("useCoachingActivities", () => {
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
 
     expect(result.current.syncSources).toHaveLength(1);
-    expect(result.current.syncSources[0].id).toBe("train2go");
-    expect(result.current.syncSources[0].connected).toBe(true);
+    expect(result.current.syncSources[0]?.id).toBe("train2go");
+    expect(result.current.syncSources[0]?.connected).toBe(true);
   });
 
-  it("expandActivity calls source.expand with activity date", () => {
+  it("expandActivity calls source.expand with (activeProfileId, date)", async () => {
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
 
     result.current.expandActivity({
@@ -79,7 +96,10 @@ describe("useCoachingActivities", () => {
       status: "pending",
     });
 
-    expect(mockSources[0].expand).toHaveBeenCalledWith("2026-04-13");
+    expect(fakeSource.expand).toHaveBeenCalledWith(
+      ACTIVE_PROFILE_ID,
+      "2026-04-13"
+    );
   });
 
   it("expandActivity does nothing for unknown source", () => {
@@ -95,17 +115,20 @@ describe("useCoachingActivities", () => {
       status: "pending",
     });
 
-    expect(mockSources[0].expand).not.toHaveBeenCalled();
+    expect(fakeSource.expand).not.toHaveBeenCalled();
   });
 
-  it("syncSources includes sync and connect callbacks", () => {
+  it("syncSources.sync injects activeProfileId before calling source.sync", async () => {
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
+    const source = result.current.syncSources[0]!;
 
-    const source = result.current.syncSources[0];
-    source.sync("2026-04-13");
-    source.connect();
+    await source.sync("2026-04-13");
+    await source.connect();
 
-    expect(mockSources[0].sync).toHaveBeenCalledWith("2026-04-13");
-    expect(mockSources[0].connect).toHaveBeenCalled();
+    expect(fakeSource.sync).toHaveBeenCalledWith(
+      ACTIVE_PROFILE_ID,
+      "2026-04-13"
+    );
+    expect(fakeSource.connect).toHaveBeenCalledWith(ACTIVE_PROFILE_ID);
   });
 });

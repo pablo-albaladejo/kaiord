@@ -47,7 +47,7 @@ function renderCalendar(path = "/calendar/2026-W15") {
   return render(
     <SettingsDialogProvider>
       <GarminBridgeProvider>
-        <CoachingRegistryProvider sources={[]}>
+        <CoachingRegistryProvider factories={[]}>
           <Router hook={hook}>
             <CalendarPage />
           </Router>

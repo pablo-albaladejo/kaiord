@@ -1,45 +1,67 @@
 /**
- * Train2Go CoachingSource adapter.
+ * Train2Go CoachingSource adapter — factory hook.
  *
- * Bridges the Train2Go Zustand store to the generic CoachingSource port.
- * This is the only file that imports both the store and the mapper.
+ * Materializes a CoachingSource for a given (activeProfileId, days).
+ * Activities come from a useLiveQuery over the persisted
+ * coachingActivities table; sync/expand/connect delegate to application
+ * use cases (extracted to use-train2go-actions.ts to stay under lint).
  */
 
-import { useCallback, useMemo } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
+import { useMemo } from "react";
 
+import { usePersistence } from "../../contexts/persistence-context";
 import { useTrain2GoStore } from "../../store/train2go-store";
+import type { CoachingActivity } from "../../types/coaching-activity";
 import type { CoachingSource } from "../../types/coaching-source";
-import { toCoachingActivity } from "./train2go-mapper";
+import { bridgeDiscovery } from "../bridge/bridge-discovery";
+import { toCoachingActivity } from "./coaching-record-to-activity.mapper";
+import { createTrain2GoCoachingTransport } from "./train2go-coaching-transport";
+import {
+  useConnectCallback,
+  useExpandCallback,
+  useSyncCallback,
+} from "./use-train2go-actions";
 
-export function useTrain2GoSource(): CoachingSource {
+const TRAIN2GO = "train2go";
+
+const getExtensionId = (): string =>
+  bridgeDiscovery.getExtensionId("train2go-bridge") ?? "";
+
+export function useTrain2GoSource(
+  activeProfileId: string | null,
+  days: string[]
+): CoachingSource {
   const store = useTrain2GoStore();
+  const persistence = usePersistence();
 
-  const activities = useMemo(
-    () => store.activities.map(toCoachingActivity),
-    [store.activities]
+  const transport = useMemo(
+    () => createTrain2GoCoachingTransport(getExtensionId),
+    []
   );
 
-  const sync = useCallback(
-    (weekStart: string) => store.fetchWeek(weekStart),
-    [store.fetchWeek]
+  const start = days[0] ?? "";
+  const end = days[days.length - 1] ?? "";
+  const records = useLiveQuery(() => {
+    if (!activeProfileId || !start || !end) return Promise.resolve([]);
+    return persistence.coaching.getByProfileAndDateRange(
+      activeProfileId,
+      start,
+      end
+    );
+  }, [activeProfileId, start, end]);
+
+  const activities: CoachingActivity[] = useMemo(
+    () => (records ?? []).map(toCoachingActivity),
+    [records]
   );
 
-  const expand = useCallback(
-    (date: string) => store.fetchDay(date),
-    [store.fetchDay]
-  );
-
-  const connect = useCallback(async () => {
-    await store.openTrain2Go();
-    for (let i = 0; i < 5; i++) {
-      await new Promise((r) => setTimeout(r, 2000));
-      await store.detectExtension();
-      if (useTrain2GoStore.getState().sessionActive) break;
-    }
-  }, [store.openTrain2Go, store.detectExtension]);
+  const sync = useSyncCallback(persistence, transport);
+  const expand = useExpandCallback(persistence, transport);
+  const connect = useConnectCallback(persistence, transport);
 
   return {
-    id: "train2go",
+    id: TRAIN2GO,
     label: "Train2Go",
     badge: "T2G",
     available: store.extensionInstalled,

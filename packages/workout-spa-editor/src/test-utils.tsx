@@ -30,7 +30,7 @@ export function renderWithProviders(
       <ThemeProvider defaultTheme={defaultTheme}>
         <SettingsDialogProvider>
           <GarminBridgeProvider>
-            <CoachingRegistryProvider sources={[]}>
+            <CoachingRegistryProvider factories={[]}>
               <ToastProvider>
                 <ToastContextProvider>{children}</ToastContextProvider>
               </ToastProvider>

@@ -1,35 +1,34 @@
 import { render, screen } from "@testing-library/react";
+import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { CoachingSource } from "../types/coaching-source";
-
-const mockSource: CoachingSource = {
-  id: "train2go",
-  label: "Train2Go",
-  badge: "T2G",
-  available: true,
-  connected: false,
-  loading: false,
-  error: null,
-  activities: [],
-  sync: vi.fn(),
-  expand: vi.fn(),
-  connect: vi.fn(),
-};
+import type { CoachingSourceFactory } from "../types/coaching-source";
 
 vi.mock("../adapters/train2go/use-train2go-source", () => ({
-  useTrain2GoSource: () => mockSource,
+  useTrain2GoSource: vi.fn(() => ({
+    id: "train2go",
+    label: "Train2Go",
+    badge: "T2G",
+    available: true,
+    connected: false,
+    loading: false,
+    error: null,
+    activities: [],
+    sync: vi.fn(async () => undefined),
+    expand: vi.fn(async () => undefined),
+    connect: vi.fn(async () => undefined),
+  })),
 }));
 
 vi.mock("./coaching-registry-context", () => ({
   CoachingRegistryProvider: ({
     children,
-    sources,
+    factories,
   }: {
-    children: React.ReactNode;
-    sources: CoachingSource[];
+    children: ReactNode;
+    factories: CoachingSourceFactory[];
   }) => (
-    <div data-testid="provider" data-sources={sources.length}>
+    <div data-testid="provider" data-factories={factories.length}>
       {children}
     </div>
   ),
@@ -48,7 +47,7 @@ describe("CoachingRegistryBootstrap", () => {
     expect(screen.getByText("Child content")).toBeInTheDocument();
   });
 
-  it("passes sources to the provider", () => {
+  it("passes the factory array to the provider", () => {
     render(
       <CoachingRegistryBootstrap>
         <span>Test</span>
@@ -56,6 +55,6 @@ describe("CoachingRegistryBootstrap", () => {
     );
 
     const provider = screen.getByTestId("provider");
-    expect(provider).toHaveAttribute("data-sources", "1");
+    expect(provider).toHaveAttribute("data-factories", "1");
   });
 });

@@ -69,12 +69,12 @@
 
 ## 6. Train2Go store + transport refactor
 
-- [ ] 6.1 Update `store/train2go-extension-transport.ts` (the JSON parse boundary): parse `userId` and activity ids as strings via JSON reviver (or equivalent) — never `String(parsedNumber)` after the fact. Document the rule at the top of the file.
-- [ ] 6.2 Remove `userId`, `userName`, `activities` from `store/train2go-store.ts` `Train2GoStore` type and initial state. Keep `extensionInstalled`, `sessionActive`, `loading`, `lastError`, `lastDetectionTimestamp`.
-- [ ] 6.3 Update `store/train2go-store-actions.ts` so `fetchWeek`/`fetchDay` delegate to `syncWeek`/`expandDay` use cases (no in-store activity array, no userId resolution in the store).
-- [ ] 6.4 Update `store/train2go-detect.ts` so `detectExtension` ONLY toggles `extensionInstalled`/`sessionActive`/`lastError`/`lastDetectionTimestamp`. It MUST NOT call `linkAccount` and MUST NOT mutate any profile. (Auto-link on heartbeat would silently re-link a disconnected profile.)
-- [ ] 6.5 (moved to task 5.8 — `attemptLink(targetProfileId, signal)` lives in the application layer, used by `LinkedAccountsSection`)
-- [ ] 6.6 Tests:
+- [x] 6.1 Update `store/train2go-extension-transport.ts` (the JSON parse boundary): parse `userId` and activity ids as strings via JSON reviver (or equivalent) — never `String(parsedNumber)` after the fact. Document the rule at the top of the file.
+- [x] 6.2 Remove `userId`, `userName`, `activities` from `store/train2go-store.ts` `Train2GoStore` type and initial state. Keep `extensionInstalled`, `sessionActive`, `loading`, `lastError`, `lastDetectionTimestamp`.
+- [x] 6.3 Update `store/train2go-store-actions.ts` so `fetchWeek`/`fetchDay` delegate to `syncWeek`/`expandDay` use cases (no in-store activity array, no userId resolution in the store).
+- [x] 6.4 Update `store/train2go-detect.ts` so `detectExtension` ONLY toggles `extensionInstalled`/`sessionActive`/`lastError`/`lastDetectionTimestamp`. It MUST NOT call `linkAccount` and MUST NOT mutate any profile. (Auto-link on heartbeat would silently re-link a disconnected profile.)
+- [x] 6.5 (moved to task 5.8 — `attemptLink(targetProfileId, signal)` lives in the application layer, used by `LinkedAccountsSection`)
+- [x] 6.6 Tests:
   - `detectExtension` does NOT call any link use case (heartbeat-after-disconnect test: link, disconnect, fire detect — `linkedAccounts` stays empty)
   - Lossless userId: synthetic transport response with userId `"9999999999999999"` round-trips byte-identically
   - Profile-switch-mid-poll: `attemptLink(A)` started, active profile flips to B during poll, link still resolves to A
@@ -86,13 +86,13 @@
 
 ## 7. CoachingSource port and Train2Go adapter
 
-- [ ] 7.1 Update `types/coaching-source.ts` — replace `activities: CoachingActivity[]` with `query: (profileId: string, days: string[]) => CoachingActivity[]`. Update `sync`, `expand`, `connect` signatures to take `profileId` explicitly.
-- [ ] 7.2 Audit existing `CoachingSource` consumers (`useCoachingActivities`, `useTrain2GoSource`, `CoachingRegistryBootstrap`, every test fixture under `src/test-utils/`) and update for the new port shape. After the refactor, `grep -r "CoachingSource" packages/workout-spa-editor/src` SHALL show zero remaining references to `.activities`.
-- [ ] 7.3 Update `useCoachingActivities(days)` to read `activeProfileId` from `useActiveProfile()` and call `source.query(activeProfileId, days)` per source. Group by date as today.
-- [ ] 7.4 Create `adapters/train2go/train2go-record.mapper.ts` (Wire → Record): `Train2GoActivity` → `CoachingActivityRecord`. Stringifies ids (or trusts the parse-boundary string), preserves raw `workload`, computes `intensity = clamp(workload, 1, 5)`, maps `completion → completionPercent`, and maps Train2Go status codes to the canonical enum: **`0 → "pending"`, `1 → "completed"`, `-1 → "skipped"`** (matches the existing `STATUS_MAP` in `adapters/train2go/train2go-mapper.ts`). Emits `source: "train2go"` (canonical lowercase ASCII). Unit-tests cover all three status codes, the workload→intensity boundary conditions (below-min, above-max, mid, missing), AND a parity test asserting the new mapper's status mapping equals the existing `STATUS_MAP` constant byte-identically (guards against silent drift if either side changes).
-- [ ] 7.5 Create `adapters/train2go/coaching-record-to-activity.mapper.ts` (Record → ViewModel): `CoachingActivityRecord` → `CoachingActivity`. Platform-agnostic; usable by any future source's UI.
-- [ ] 7.6 Refactor `adapters/train2go/use-train2go-source.ts`: implement `query(profileId, days)` via `useLiveQuery(() => coaching.getByProfileAndDateRange(profileId, days[0], days[days.length-1]))` then map each record via `coaching-record-to-activity.mapper.ts`. `sync(profileId, weekStart)` and `expand(profileId, date)` delegate to use cases.
-- [ ] 7.7 Tests: `query` reactivity (sync writes → next render reflects); profile isolation (P1 query never sees P2 rows); calendar zero-platform-imports preserved.
+- [x] 7.1 Update `types/coaching-source.ts` — replace `activities: CoachingActivity[]` with `query: (profileId: string, days: string[]) => CoachingActivity[]`. Update `sync`, `expand`, `connect` signatures to take `profileId` explicitly.
+- [x] 7.2 Audit existing `CoachingSource` consumers (`useCoachingActivities`, `useTrain2GoSource`, `CoachingRegistryBootstrap`, every test fixture under `src/test-utils/`) and update for the new port shape. After the refactor, `grep -r "CoachingSource" packages/workout-spa-editor/src` SHALL show zero remaining references to `.activities`.
+- [x] 7.3 Update `useCoachingActivities(days)` to read `activeProfileId` from `useActiveProfile()` and call `source.query(activeProfileId, days)` per source. Group by date as today.
+- [x] 7.4 Create `adapters/train2go/train2go-record.mapper.ts` (Wire → Record): `Train2GoActivity` → `CoachingActivityRecord`. Stringifies ids (or trusts the parse-boundary string), preserves raw `workload`, computes `intensity = clamp(workload, 1, 5)`, maps `completion → completionPercent`, and maps Train2Go status codes to the canonical enum: **`0 → "pending"`, `1 → "completed"`, `-1 → "skipped"`** (matches the existing `STATUS_MAP` in `adapters/train2go/train2go-mapper.ts`). Emits `source: "train2go"` (canonical lowercase ASCII). Unit-tests cover all three status codes, the workload→intensity boundary conditions (below-min, above-max, mid, missing), AND a parity test asserting the new mapper's status mapping equals the existing `STATUS_MAP` constant byte-identically (guards against silent drift if either side changes).
+- [x] 7.5 Create `adapters/train2go/coaching-record-to-activity.mapper.ts` (Record → ViewModel): `CoachingActivityRecord` → `CoachingActivity`. Platform-agnostic; usable by any future source's UI.
+- [x] 7.6 Refactor `adapters/train2go/use-train2go-source.ts`: implement `query(profileId, days)` via `useLiveQuery(() => coaching.getByProfileAndDateRange(profileId, days[0], days[days.length-1]))` then map each record via `coaching-record-to-activity.mapper.ts`. `sync(profileId, weekStart)` and `expand(profileId, date)` delegate to use cases.
+- [x] 7.7 Tests: `query` reactivity (sync writes → next render reflects); profile isolation (P1 query never sees P2 rows); calendar zero-platform-imports preserved.
 
 ## 8. Calendar integration
 
