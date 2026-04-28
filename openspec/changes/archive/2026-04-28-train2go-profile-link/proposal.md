@@ -1,3 +1,5 @@
+> Completed: 2026-04-28
+
 ## Why
 
 Today, when the user clicks "Sync Train2Go" on the calendar, the activities appear as dashed cards but the data lives only in Zustand. Reloading the page or navigating to another week loses everything, so the user has to re-sync every time. There is also no link between Train2Go's `userId` (currently re-fetched on every ping) and the Kaiord `Profile`, so multi-profile users have no way to keep accounts separated, and there is no durable place to store "this Kaiord profile is connected to that Train2Go account".
