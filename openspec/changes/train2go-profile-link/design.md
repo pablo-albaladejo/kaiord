@@ -225,6 +225,7 @@ this.version(4)
     bridges: "extensionId, status, lastSeen",
     coachingActivities:
       "id, [profileId+date], [profileId+source+sourceId], [profileId+source]",
+    coachingSyncState: "[source+profileId], source, profileId",
   })
   .upgrade(async (tx) => {
     await tx

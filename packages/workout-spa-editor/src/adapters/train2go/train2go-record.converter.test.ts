@@ -12,7 +12,7 @@ import type { Train2GoActivity } from "../../store/train2go-extension-transport"
 import {
   TRAIN2GO_STATUS_MAP,
   toCoachingActivityRecord,
-} from "./train2go-record.mapper";
+} from "./train2go-record.converter";
 
 const base: Train2GoActivity = {
   id: 12345,
@@ -46,7 +46,19 @@ describe("toCoachingActivityRecord", () => {
     expect(result.intensity).toBe(5);
   });
 
-  it("emits intensity undefined when workload is 0 or missing", () => {
+  it("rounds non-integer workloads to a literal intensity (no decimals)", () => {
+    const result = toCoachingActivityRecord(
+      "p1",
+      { ...base, workload: 4.7 },
+      NOW
+    );
+
+    expect(result.workload).toBe(4.7);
+    expect(result.intensity).toBe(5);
+    expect(Number.isInteger(result.intensity)).toBe(true);
+  });
+
+  it("emits intensity undefined when workload is 0", () => {
     const result = toCoachingActivityRecord(
       "p1",
       { ...base, workload: 0 },

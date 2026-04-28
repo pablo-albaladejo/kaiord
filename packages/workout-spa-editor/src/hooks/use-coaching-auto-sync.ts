@@ -41,6 +41,9 @@ export const useCoachingAutoSync = (
     const now = Date.now();
     const key = `${activeProfileId}:${weekStart}`;
     if (lastFiredKey.current === key) return;
+    // Gate BEFORE the async work so concurrent rerenders for the same
+    // (profile, week) cannot launch two parallel sync loops.
+    lastFiredKey.current = key;
 
     const linkedSourceIds = new Set(
       profile.linkedAccounts.map((a) => a.source)
@@ -50,36 +53,33 @@ export const useCoachingAutoSync = (
 
     void (async () => {
       for (const src of targets) {
-        const row = await persistence.coachingSyncState.getBySourceAndProfile(
-          src.id,
-          activeProfileId
-        );
-        if (isStale(row?.lastSyncedAt, now)) {
+        try {
+          const row = await persistence.coachingSyncState.getBySourceAndProfile(
+            src.id,
+            activeProfileId
+          );
+          if (!isStale(row?.lastSyncedAt, now)) continue;
           analytics.event("coaching.sync.invoked", {
             source: src.id,
             trigger: "auto-mount",
           });
-          try {
-            await src.sync(weekStart);
-            // Source may have surfaced an error in src.error after sync;
-            // silent failures are reflected here in telemetry.
-            if (src.error) {
-              analytics.event("coaching.sync.failure", {
-                source: src.id,
-                errorKind: "transport-error",
-                isAutoSync: true,
-              });
-            }
-          } catch (err) {
+          await src.sync(weekStart);
+          if (src.error) {
             analytics.event("coaching.sync.failure", {
               source: src.id,
-              errorKind: err instanceof Error ? err.message : "unknown",
+              errorKind: "transport-error",
               isAutoSync: true,
             });
           }
+        } catch (err) {
+          // Auto-sync is silent; per-source rejections never bubble up.
+          analytics.event("coaching.sync.failure", {
+            source: src.id,
+            errorKind: err instanceof Error ? err.message : "unknown",
+            isAutoSync: true,
+          });
         }
       }
-      lastFiredKey.current = key;
     })();
   }, [
     activeProfileId,

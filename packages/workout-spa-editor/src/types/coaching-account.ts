@@ -20,7 +20,7 @@ import type { Profile } from "./profile";
 export const linkedCoachingAccountSchema = z.object({
   source: z.string().min(1),
   externalUserId: z.string().min(1),
-  externalUserName: z.string(),
+  externalUserName: z.string().min(1),
   linkedAt: z.iso.datetime(),
 });
 

@@ -19,7 +19,7 @@ import {
   readWeek,
 } from "../../store/train2go-extension-transport";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
-import { toCoachingActivityRecord } from "./train2go-record.mapper";
+import { toCoachingActivityRecord } from "./train2go-record.converter";
 
 const TRAIN2GO = "train2go";
 

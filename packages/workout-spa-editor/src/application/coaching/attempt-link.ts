@@ -1,28 +1,20 @@
 /**
- * attemptLink — application use case for the connect flow.
+ * attemptLink — connect-flow use case.
  *
- * Polls the platform's ping until the session is active (or the abort
- * signal fires), then writes the link to the captured `targetProfileId`
- * via `linkAccount`. The profileId argument is the user's intent at click
- * time — `getActiveId()` is NEVER consulted internally (race with profile
- * switches mid-poll).
- *
- * Abort semantics:
- *  - Each poll iteration checks `signal.aborted` first.
- *  - On abort, returns silently with `{ ok: false, reason: "aborted" }`.
- *    No `linkAccount` is invoked. The late ping response (if any) is
- *    discarded after `signal.aborted` becomes true.
- *
- * Profile-deletion semantics:
- *  - If `linkAccount` throws `ProfileNotFoundError`, we surface
- *    `{ ok: false, reason: "profile-deleted" }` so the caller can show
- *    a "Profile no longer exists; not linked" toast.
+ * Captures `targetProfileId` from the caller (NEVER `getActiveId()`),
+ * opens the platform's tab, polls ping until session is active, then
+ * `linkAccount(targetProfileId, ...)`. Abort: silent, no link. Deleted
+ * profile: returns `{ ok: false, reason: "profile-deleted" }`.
  */
 
 import type { ProfileRepository } from "../../ports/persistence-port";
-import { ProfileNotFoundError } from "../profile/errors";
+import {
+  aborted,
+  persistLinkOrDeleted,
+  safeOpenExternal,
+  transportError,
+} from "./attempt-link-helpers";
 import type { CoachingTransport } from "./coaching-transport-port";
-import { linkAccount } from "./link-account";
 
 export type AttemptLinkDeps = {
   profiles: ProfileRepository;
@@ -54,9 +46,11 @@ export const attemptLink = async (
   targetProfileId: string,
   signal?: AbortSignal
 ): Promise<AttemptLinkResult> => {
-  if (signal?.aborted) return { ok: false, reason: "aborted" };
+  if (signal?.aborted) return aborted();
 
-  await deps.transport.openExternal();
+  const openErr = await safeOpenExternal(deps.transport, signal);
+  if (signal?.aborted) return aborted();
+  if (openErr) return openErr;
 
   const maxAttempts = deps.maxAttempts ?? 5;
   const intervalMs = deps.pollIntervalMs ?? 2_000;
@@ -64,43 +58,29 @@ export const attemptLink = async (
   const now = deps.now ?? (() => new Date().toISOString());
 
   for (let attempt = 0; attempt < maxAttempts; attempt++) {
-    if (signal?.aborted) return { ok: false, reason: "aborted" };
+    if (signal?.aborted) return aborted();
     await delay(intervalMs);
-    if (signal?.aborted) return { ok: false, reason: "aborted" };
+    if (signal?.aborted) return aborted();
 
-    let result;
     try {
-      result = await deps.transport.ping(signal);
-    } catch (err) {
-      if (signal?.aborted) return { ok: false, reason: "aborted" };
-      return {
-        ok: false,
-        reason: "transport-error",
-        error: err instanceof Error ? err.message : String(err),
-      };
-    }
-
-    if (signal?.aborted) return { ok: false, reason: "aborted" };
-
-    if (
-      result.sessionActive &&
-      result.externalUserId &&
-      result.externalUserName
-    ) {
-      try {
-        await linkAccount(deps.profiles, targetProfileId, {
-          source: deps.transport.source,
-          externalUserId: result.externalUserId,
-          externalUserName: result.externalUserName,
-          linkedAt: now(),
-        });
-        return { ok: true };
-      } catch (err) {
-        if (err instanceof ProfileNotFoundError) {
-          return { ok: false, reason: "profile-deleted" };
-        }
-        throw err;
+      const result = await deps.transport.ping(signal);
+      if (signal?.aborted) return aborted();
+      if (
+        result.sessionActive &&
+        result.externalUserId &&
+        result.externalUserName
+      ) {
+        return persistLinkOrDeleted(
+          deps.profiles,
+          deps.transport,
+          targetProfileId,
+          result,
+          now()
+        );
       }
+    } catch (err) {
+      if (signal?.aborted) return aborted();
+      return transportError(err);
     }
   }
 

@@ -23,7 +23,7 @@ Clicking a workout card SHALL navigate to the editor. Clicking a coaching activi
 
 ### Requirement: Auto-sync coaching sources on calendar mount and week change
 
-When the active profile has at least one entry in `linkedAccounts`, the calendar SHALL trigger an automatic sync for each linked source on `CalendarPage` mount and on every week navigation. Auto-sync SHALL be skipped when the `coachingSyncState` row for `(source, profileId)` (read via `getBySourceAndProfile`) shows `now - lastSyncedAt < 10 minutes`. Dialog open is non-blocking — the dialog renders immediately; description fetch (if needed) happens lazily without delaying the open. See `spa-coaching-integration` for `CoachingActivityDialog` content semantics.
+When the active profile has at least one entry in `linkedAccounts`, the calendar SHALL trigger an automatic sync for each linked source on `CalendarPage` mount and on every week navigation. Auto-sync SHALL be skipped when the `coachingSyncState` row for `(source, profileId)` (read via `getBySourceAndProfile`) shows `now - lastSyncedAt < 10 minutes`. If no `coachingSyncState` row exists yet for `(source, profileId)`, auto-sync SHALL NOT be skipped (treat as stale) and SHALL call `syncWeek(currentWeekStart)`. Dialog open is non-blocking — the dialog renders immediately; description fetch (if needed) happens lazily without delaying the open. See `spa-coaching-integration` for `CoachingActivityDialog` content semantics.
 
 The user-facing manual "Sync" button SHALL bypass the staleness gate. Auto-sync errors SHALL be silent (set `lastError` only — no toast), so an offline / closed-tab state does not produce repeated noise.
 

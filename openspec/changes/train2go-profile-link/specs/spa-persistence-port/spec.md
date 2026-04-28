@@ -31,7 +31,7 @@ The composite primary key SHALL be `${profileId}:${source}:${sourceId}` to make 
 #### Scenario: Upsert is idempotent
 
 - **WHEN** `upsertMany` is called twice with the same set of records
-- **THEN** the rowcount in `coachingActivities` does not grow on the second call
+- **THEN** the row count in `coachingActivities` does not grow on the second call
 
 #### Scenario: Cascade delete by profile
 

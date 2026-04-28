@@ -12,6 +12,15 @@
  * On `WorkoutRepository.put` rejection the use case re-throws so the
  * caller (the dialog) can surface an error toast and stay on the dialog
  * — no navigation to a non-existent workout id.
+ *
+ * Concurrency note: the (getBySourceId → put) pair is NOT atomic. Two
+ * concurrent clicks (e.g., two browser tabs) can both miss the lookup
+ * and create different workout `id`s for the same `(source, sourceId)`.
+ * Benign for a UI conversion — the user can delete the duplicate. A
+ * robust fix requires either a deterministic workout id derived from
+ * `(source, sourceId)` (a refactor that touches every workout call
+ * site) or a Dexie transaction with a unique constraint. Tracked as
+ * out-of-scope follow-up.
  */
 
 import type {

@@ -90,9 +90,9 @@ The `read-day` response typically contains every activity for that day, not only
 - **WHEN** the extension returns `{ ok: false, error: "Session expired" }`
 - **THEN** the SPA updates `sessionActive: false` and shows a "Reconnect to Train2Go" prompt routing to Profile Settings → Linked Accounts
 
-#### Scenario: Fetch fails due to no linked profile
+#### Scenario: Fetch fails due to no linked profile (defensive)
 
-- **WHEN** the user clicks Sync but the active profile has no `train2go` linked account
+- **WHEN** Sync is invoked but the active profile has no `train2go` linked account (e.g., a defensive/programmatic call or a UI desync — under normal use the Sync button is gated by the coaching integration spec and does not appear)
 - **THEN** the SPA does not send any extension message and instead surfaces a hint pointing to Profile Settings → Linked Accounts
 
 ### Requirement: Calendar integration

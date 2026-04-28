@@ -5,13 +5,17 @@
  * week-id convention: Monday-start ISO weeks).
  */
 
-const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-/** Adds N calendar days to a YYYY-MM-DD string, returning the same shape. */
+/**
+ * Adds N calendar days to a YYYY-MM-DD string, returning the same shape.
+ *
+ * Uses `Date#setDate(getDate() + days)` rather than fixed-millisecond
+ * arithmetic so DST transitions (25-hour and 23-hour days) don't shift
+ * the result onto the wrong calendar day.
+ */
 export const addDaysIso = (iso: string, days: number): string => {
   const [y, m, d] = iso.split("-").map(Number);
   const date = new Date(y!, (m ?? 1) - 1, d ?? 1);
-  date.setTime(date.getTime() + days * MS_PER_DAY);
+  date.setDate(date.getDate() + days);
   const yyyy = String(date.getFullYear()).padStart(4, "0");
   const mm = String(date.getMonth() + 1).padStart(2, "0");
   const dd = String(date.getDate()).padStart(2, "0");
