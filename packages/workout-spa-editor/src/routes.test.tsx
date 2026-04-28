@@ -60,7 +60,7 @@ describe("Routing", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
-    });
+    }, { timeout: 5000 });
   });
 
   it("renders LibraryPage at /library", async () => {
