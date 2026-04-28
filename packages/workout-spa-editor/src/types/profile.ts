@@ -6,8 +6,11 @@
 
 import { z } from "zod";
 
+import { linkedCoachingAccountSchema } from "./coaching-account";
 import { sportZonesRecordSchema } from "./sport-zones-schemas";
 
+export type { LinkedCoachingAccount } from "./coaching-account";
+export { linkedCoachingAccountSchema } from "./coaching-account";
 export {
   DEFAULT_HEART_RATE_ZONES,
   DEFAULT_POWER_ZONES,
@@ -33,6 +36,7 @@ export const profileSchema = z.object({
   name: z.string().min(1).max(100),
   bodyWeight: z.number().positive().optional(),
   sportZones: sportZonesRecordSchema,
+  linkedAccounts: z.array(linkedCoachingAccountSchema).default([]),
   createdAt: z.iso.datetime(),
   updatedAt: z.iso.datetime(),
 });

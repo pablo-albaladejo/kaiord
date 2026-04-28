@@ -1,43 +1,43 @@
 ## 1. Domain types and schemas
 
-- [ ] 1.1 Create `types/coaching-account.ts` with `LinkedCoachingAccount` type + Zod schema (`source`, `externalUserId: string`, `externalUserName`, `linkedAt: ISO datetime`)
-- [ ] 1.2 Extend `types/profile.ts` `profileSchema` with `linkedAccounts: linkedCoachingAccountSchema.array().default([])`. After this change, `Profile` is `{ ..., linkedAccounts: LinkedCoachingAccount[] }` (non-optional). Update existing test fixtures and any in-source `Profile` literals to include `linkedAccounts: []` (or rely on `parse()` to apply the default). Run a TypeScript compile after the schema change to surface every call site that needs updating.
-- [ ] 1.3 Add domain helpers `linkAccount(profile, account)` / `unlinkAccount(profile, source)` enforcing one entry per source per profile (replace-on-relink). These helpers operate on `Profile` values, not on the active-profile resolver — the `profileId` is always passed in by the caller.
-- [ ] 1.4 Unit tests for the helpers (replace, append, remove, missing-source no-op)
-- [ ] 1.5 Create `types/coaching-activity-record.ts` with `CoachingActivityRecord` type + Zod schema. Include `workload?: number` (raw, unclamped), `intensity?: 1|2|3|4|5`, `status` enum, `completionPercent?: number (0-100)`. The `date` field is `YYYY-MM-DD` interpreted in the user's local timezone, matching the `spa-calendar` week-id convention (Monday-start ISO weeks); document this in a JSDoc comment on the `date` field. Validate `profileId`, `source`, `sourceId` independently; add a Zod `.refine()` asserting `id === `${profileId}:${source}:${sourceId}``(NOT a regex on`id`— sourceIds may contain arbitrary characters including`:`or`-`).
-- [ ] 1.6 Add helper `namespaceSourceId(profileId, rawSourceId): string` returning `${profileId}:${rawSourceId}` (used by `convertCoachingActivity`). The helper deliberately omits `source` (already a separate column on `WorkoutRecord`); this asymmetry vs `coachingActivities.id` is intentional and lives only in this helper.
-- [ ] 1.6b Add `types/coaching-sync-state.ts` with `CoachingSyncStateRecord` type + Zod schema (`{ source: string, profileId: string, lastSyncedAt: ISO datetime }`). Distinct from existing `syncStateSchema` in `bridge-schemas.ts`, which remains untouched.
-- [ ] 1.7 Update `types/index.ts` exports
-- [ ] 1.8 Unit tests for schema validation (workload preserved unclamped; intensity clamped 1-5; status enum; composite-id format)
+- [x] 1.1 Create `types/coaching-account.ts` with `LinkedCoachingAccount` type + Zod schema (`source`, `externalUserId: string`, `externalUserName`, `linkedAt: ISO datetime`)
+- [x] 1.2 Extend `types/profile.ts` `profileSchema` with `linkedAccounts: linkedCoachingAccountSchema.array().default([])`. After this change, `Profile` is `{ ..., linkedAccounts: LinkedCoachingAccount[] }` (non-optional). Update existing test fixtures and any in-source `Profile` literals to include `linkedAccounts: []` (or rely on `parse()` to apply the default). Run a TypeScript compile after the schema change to surface every call site that needs updating.
+- [x] 1.3 Add domain helpers `linkAccount(profile, account)` / `unlinkAccount(profile, source)` enforcing one entry per source per profile (replace-on-relink). These helpers operate on `Profile` values, not on the active-profile resolver — the `profileId` is always passed in by the caller.
+- [x] 1.4 Unit tests for the helpers (replace, append, remove, missing-source no-op)
+- [x] 1.5 Create `types/coaching-activity-record.ts` with `CoachingActivityRecord` type + Zod schema. Include `workload?: number` (raw, unclamped), `intensity?: 1|2|3|4|5`, `status` enum, `completionPercent?: number (0-100)`. The `date` field is `YYYY-MM-DD` interpreted in the user's local timezone, matching the `spa-calendar` week-id convention (Monday-start ISO weeks); document this in a JSDoc comment on the `date` field. Validate `profileId`, `source`, `sourceId` independently; add a Zod `.refine()` asserting `id === `${profileId}:${source}:${sourceId}``(NOT a regex on`id`— sourceIds may contain arbitrary characters including`:`or`-`).
+- [x] 1.6 Add helper `namespaceSourceId(profileId, rawSourceId): string` returning `${profileId}:${rawSourceId}` (used by `convertCoachingActivity`). The helper deliberately omits `source` (already a separate column on `WorkoutRecord`); this asymmetry vs `coachingActivities.id` is intentional and lives only in this helper.
+- [x] 1.6b Add `types/coaching-sync-state.ts` with `CoachingSyncStateRecord` type + Zod schema (`{ source: string, profileId: string, lastSyncedAt: ISO datetime }`). Distinct from existing `syncStateSchema` in `bridge-schemas.ts`, which remains untouched.
+- [x] 1.7 Update `types/index.ts` exports
+- [x] 1.8 Unit tests for schema validation (workload preserved unclamped; intensity clamped 1-5; status enum; composite-id format)
 
 ## 2. Persistence port
 
-- [ ] 2.1 Add `CoachingRepository` interface to `ports/persistence-port.ts` per spec (`getById`, `getByProfileAndDateRange`, `getByProfileAndSourceId`, `upsertMany`, `put`, `delete` — no-op for missing id, `deleteByProfile`)
-- [ ] 2.2 Add `CoachingSyncStateRepository` interface to `ports/persistence-port.ts` (`getBySourceAndProfile(source, profileId)`, `put(record)`, `deleteByProfile(profileId)`). Distinct from the existing `SyncStateRepository` (which serves the bridge-discovery `syncState` table and is unchanged).
-- [ ] 2.3 Add `coaching: CoachingRepository` and `coachingSyncState: CoachingSyncStateRepository` to `PersistencePort`
-- [ ] 2.4 Update any composition root that builds `PersistencePort` to require the new fields (TypeScript will surface call sites)
+- [x] 2.1 Add `CoachingRepository` interface to `ports/persistence-port.ts` per spec (`getById`, `getByProfileAndDateRange`, `getByProfileAndSourceId`, `upsertMany`, `put`, `delete` — no-op for missing id, `deleteByProfile`)
+- [x] 2.2 Add `CoachingSyncStateRepository` interface to `ports/persistence-port.ts` (`getBySourceAndProfile(source, profileId)`, `put(record)`, `deleteByProfile(profileId)`). Distinct from the existing `SyncStateRepository` (which serves the bridge-discovery `syncState` table and is unchanged).
+- [x] 2.3 Add `coaching: CoachingRepository` and `coachingSyncState: CoachingSyncStateRepository` to `PersistencePort`
+- [x] 2.4 Update any composition root that builds `PersistencePort` to require the new fields (TypeScript will surface call sites)
 
 ## 3. Dexie adapter
 
-- [ ] 3.1 Bump Dexie schema to `version(4)` in `adapters/dexie/dexie-database.ts`:
+- [x] 3.1 Bump Dexie schema to `version(4)` in `adapters/dexie/dexie-database.ts`:
   - Add `coachingActivities: "id, [profileId+date], [profileId+source+sourceId], [profileId+source]"`
   - Add `coachingSyncState: "[source+profileId], source, profileId"` (compound primary key)
   - Existing `syncState` table schema string is UNCHANGED — bridge-discovery rows are untouched
   - `.upgrade()` step backfills `linkedAccounts: []` on profiles. No backfill on `syncState`.
-- [ ] 3.2 Create `adapters/dexie/dexie-coaching-repository.ts` implementing `CoachingRepository` (factory `createDexieCoachingRepository(db)`). Do NOT export raw table access — `getByProfileAndDateRange` is the only public read API. `delete(id)` MUST be a no-op when the row is absent (Dexie's `.delete()` already behaves this way; assert in test).
-- [ ] 3.3 Create `adapters/dexie/dexie-coaching-sync-state-repository.ts` implementing `CoachingSyncStateRepository`.
-- [ ] 3.4 Wire both new repos into the adapter composition (`adapters/dexie/dexie-persistence-adapter.ts` or equivalent)
-- [ ] 3.5 Integration tests for `dexie-coaching-repository`: upsert idempotency, multi-week persistence, cascade delete by profile, profile isolation (X never returns Y's rows), `delete(missingId)` is a no-op
-- [ ] 3.6 Integration tests for `dexie-coaching-sync-state-repository`: get/put round-trip with compound key, cascade delete by profile, isolation between profiles
-- [ ] 3.7 Migration test (forward): seed v3 DB with profiles missing `linkedAccounts`; open v4; assert backfill (`linkedAccounts: []`); assert `coachingSyncState` table exists and is empty; assert bridge `syncState` rows are unchanged byte-identically; assert v4's `syncState` store schema string equals `"source"` byte-identically (no compound index added) AND v4's `coachingSyncState` store schema string equals `"[source+profileId], source, profileId"` byte-identically — both guard against accidental future regressions.
-- [ ] 3.8 Migration test (forward-tolerance): seed v4 DB with `linkedAccounts: [...]`; open under v3 schema strings; assert Dexie preserves the unknown field without throwing
+- [x] 3.2 Create `adapters/dexie/dexie-coaching-repository.ts` implementing `CoachingRepository` (factory `createDexieCoachingRepository(db)`). Do NOT export raw table access — `getByProfileAndDateRange` is the only public read API. `delete(id)` MUST be a no-op when the row is absent (Dexie's `.delete()` already behaves this way; assert in test).
+- [x] 3.3 Create `adapters/dexie/dexie-coaching-sync-state-repository.ts` implementing `CoachingSyncStateRepository`.
+- [x] 3.4 Wire both new repos into the adapter composition (`adapters/dexie/dexie-persistence-adapter.ts` or equivalent)
+- [x] 3.5 Integration tests for `dexie-coaching-repository`: upsert idempotency, multi-week persistence, cascade delete by profile, profile isolation (X never returns Y's rows), `delete(missingId)` is a no-op
+- [x] 3.6 Integration tests for `dexie-coaching-sync-state-repository`: get/put round-trip with compound key, cascade delete by profile, isolation between profiles
+- [x] 3.7 Migration test (forward): seed v3 DB with profiles missing `linkedAccounts`; open v4; assert backfill (`linkedAccounts: []`); assert `coachingSyncState` table exists and is empty; assert bridge `syncState` rows are unchanged byte-identically; assert v4's `syncState` store schema string equals `"source"` byte-identically (no compound index added) AND v4's `coachingSyncState` store schema string equals `"[source+profileId], source, profileId"` byte-identically — both guard against accidental future regressions.
+- [x] 3.8 Migration test (forward-tolerance): seed v4 DB with `linkedAccounts: [...]`; open under v3 schema strings; assert Dexie preserves the unknown field without throwing
 
 ## 4. In-memory adapter (tests)
 
-- [ ] 4.1 Create `test-utils/in-memory-coaching-repository.ts` mirroring the port surface using a `Map<string, CoachingActivityRecord>`
-- [ ] 4.2 Create `test-utils/in-memory-coaching-sync-state-repository.ts` mirroring the new port using a `Map<string, CoachingSyncStateRecord>` keyed by `${source}:${profileId}`
-- [ ] 4.3 Add both to the in-memory persistence composition root
-- [ ] 4.4 Tests for the in-memory repos behavior parity (same scenarios as Dexie, sans IndexedDB)
+- [x] 4.1 Create `test-utils/in-memory-coaching-repository.ts` mirroring the port surface using a `Map<string, CoachingActivityRecord>`
+- [x] 4.2 Create `test-utils/in-memory-coaching-sync-state-repository.ts` mirroring the new port using a `Map<string, CoachingSyncStateRecord>` keyed by `${source}:${profileId}`
+- [x] 4.3 Add both to the in-memory persistence composition root
+- [x] 4.4 Tests for the in-memory repos behavior parity (same scenarios as Dexie, sans IndexedDB)
 
 ## 5. Application use cases
 

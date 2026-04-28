@@ -25,6 +25,7 @@ const baseProfile: Profile = {
     },
     generic: { thresholds: {}, heartRateZones: emptyHrZones },
   },
+  linkedAccounts: [],
   createdAt: "2025-01-01T00:00:00Z",
   updatedAt: "2025-01-01T00:00:00Z",
 };

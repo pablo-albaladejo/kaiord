@@ -21,6 +21,7 @@ export function createNewProfile(
     name,
     bodyWeight: options.bodyWeight,
     sportZones: buildSportZones(),
+    linkedAccounts: [],
     createdAt: now,
     updatedAt: now,
   };
