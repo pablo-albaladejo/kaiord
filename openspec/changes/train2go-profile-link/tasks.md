@@ -113,15 +113,15 @@
 
 ## 10. Profile settings — Linked Accounts panel
 
-- [ ] 10.1 Create `components/organisms/ProfileManager/LinkedAccountsSection.tsx` rendering one row per supported coaching source (currently `train2go`). Capture `targetProfileId = activeProfileId` synchronously on click — never resolve via `getActiveId()` later.
-- [ ] 10.2 If active profile has the source linked: show source label, `externalUserName`, `linkedAt`, and a "Disconnect" button (calls `unlinkAccount(profileId, source)` use case). On disconnect with a connect-poll-in-flight for the same source, abort the poll first.
-- [ ] 10.3 If not linked: show "Connect Train2Go" button that creates an `AbortController`, calls `attemptLink(targetProfileId, controller.signal)`, and stores the controller in component state so disconnect/unmount can cancel the poll.
-- [ ] 10.4 On `useEffect` cleanup (component unmount / panel close), call `controller.abort()` so abandoning Profile Settings cancels any in-flight connect poll cleanly (no toast, no link).
-- [ ] 10.5 If active profile changes during the poll, surface a toast "Linked Train2Go to <originalProfileName>." after success.
-- [ ] 10.6 If `attemptLink` rejects with `ProfileNotFoundError`, surface a toast "Profile no longer exists; not linked." and clear the in-flight state.
-- [ ] 10.7 Toast strings and error messages MUST NOT include `externalUserName` (use the Kaiord profile name instead). Add a unit test asserting no toast/error string contains the Train2Go username.
-- [ ] 10.8 Insert the section into the Profile Settings dialog/page next to Sport Zones.
-- [ ] 10.9 Tests: connect happy-path, polling timeout, disconnect, render when no extension installed, profile-switch-during-poll preserves intent, panel-unmount-during-poll aborts cleanly, concurrent-disconnect-during-connect aborts the poll, deleted-profile-during-poll surfaces ProfileNotFoundError toast.
+- [x] 10.1 Create `components/organisms/ProfileManager/LinkedAccountsSection.tsx` rendering one row per supported coaching source (currently `train2go`). Capture `targetProfileId = activeProfileId` synchronously on click — never resolve via `getActiveId()` later.
+- [x] 10.2 If active profile has the source linked: show source label, `externalUserName`, `linkedAt`, and a "Disconnect" button (calls `unlinkAccount(profileId, source)` use case). On disconnect with a connect-poll-in-flight for the same source, abort the poll first.
+- [x] 10.3 If not linked: show "Connect Train2Go" button that creates an `AbortController`, calls `attemptLink(targetProfileId, controller.signal)`, and stores the controller in component state so disconnect/unmount can cancel the poll.
+- [x] 10.4 On `useEffect` cleanup (component unmount / panel close), call `controller.abort()` so abandoning Profile Settings cancels any in-flight connect poll cleanly (no toast, no link).
+- [x] 10.5 If active profile changes during the poll, surface a toast "Linked Train2Go to <originalProfileName>." after success.
+- [x] 10.6 If `attemptLink` rejects with `ProfileNotFoundError`, surface a toast "Profile no longer exists; not linked." and clear the in-flight state.
+- [x] 10.7 Toast strings and error messages MUST NOT include `externalUserName` (use the Kaiord profile name instead). Add a unit test asserting no toast/error string contains the Train2Go username.
+- [x] 10.8 Insert the section into the Profile Settings dialog/page next to Sport Zones.
+- [x] 10.9 Tests: connect happy-path, polling timeout, disconnect, render when no extension installed, profile-switch-during-poll preserves intent, panel-unmount-during-poll aborts cleanly, concurrent-disconnect-during-connect aborts the poll, deleted-profile-during-poll surfaces ProfileNotFoundError toast.
 
 ## 11. Profile delete cascade
 
