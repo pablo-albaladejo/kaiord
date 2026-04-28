@@ -135,6 +135,29 @@ describe("unlinkAccount", () => {
     const a = await profiles.getById("A");
     expect(a?.linkedAccounts).toEqual([]);
   });
+
+  it("does NOT cascade to coachingActivities (disconnect retains historical activities)", async () => {
+    // Spec: "Persisted coachingActivities rows for that profile remain on disk;
+    // only profile deletion fully purges them."
+    const profiles = createInMemoryProfileRepository();
+    const coaching = createInMemoryCoachingRepository();
+    await profiles.put(makeProfile("A", [T2G_LINK]));
+    await coaching.upsertMany([makeRecord({ profileId: "A" })]);
+
+    await unlinkAccount(profiles, "A", "train2go");
+
+    // Profile no longer linked
+    const a = await profiles.getById("A");
+    expect(a?.linkedAccounts).toEqual([]);
+
+    // Coaching activities untouched — unlinkAccount has no coaching repo access
+    const activities = await coaching.getByProfileAndDateRange(
+      "A",
+      "2026-01-01",
+      "2026-12-31"
+    );
+    expect(activities).toHaveLength(1);
+  });
 });
 
 describe("syncWeek", () => {
