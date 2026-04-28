@@ -13,6 +13,7 @@
 
 import { useEffect, useRef } from "react";
 
+import { useAnalytics } from "../contexts";
 import { usePersistence } from "../contexts/persistence-context";
 import { useActiveProfile } from "./use-active-profile";
 import type { CoachingSyncState } from "./use-coaching-activities";
@@ -32,6 +33,7 @@ export const useCoachingAutoSync = (
 ): void => {
   const { id: activeProfileId, profile } = useActiveProfile();
   const persistence = usePersistence();
+  const analytics = useAnalytics();
   const lastFiredKey = useRef<string | null>(null);
 
   useEffect(() => {
@@ -53,10 +55,38 @@ export const useCoachingAutoSync = (
           activeProfileId
         );
         if (isStale(row?.lastSyncedAt, now)) {
-          await src.sync(weekStart);
+          analytics.event("coaching.sync.invoked", {
+            source: src.id,
+            trigger: "auto-mount",
+          });
+          try {
+            await src.sync(weekStart);
+            // Source may have surfaced an error in src.error after sync;
+            // silent failures are reflected here in telemetry.
+            if (src.error) {
+              analytics.event("coaching.sync.failure", {
+                source: src.id,
+                errorKind: "transport-error",
+                isAutoSync: true,
+              });
+            }
+          } catch (err) {
+            analytics.event("coaching.sync.failure", {
+              source: src.id,
+              errorKind: err instanceof Error ? err.message : "unknown",
+              isAutoSync: true,
+            });
+          }
         }
       }
       lastFiredKey.current = key;
     })();
-  }, [activeProfileId, profile, weekStart, syncSources, persistence]);
+  }, [
+    activeProfileId,
+    profile,
+    weekStart,
+    syncSources,
+    persistence,
+    analytics,
+  ]);
 };

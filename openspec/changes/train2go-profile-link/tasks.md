@@ -135,7 +135,7 @@
 
 These tasks address findings from the AWS Well-Architected Framework review (REL 6 — Workload monitoring; OPS 4 — Telemetry; OPS 8 — Utilize workload observability) and the 12-factor compliance review (Factor III — Config). The proposal is otherwise compliant; these are the only actionable cross-cutting follow-ups.
 
-- [ ] 12.1 Add coaching telemetry via the existing `analytics-port` (per the established pattern from `analytics-coverage-expansion`). Events to emit:
+- [x] 12.1 Add coaching telemetry via the existing `analytics-port` (per the established pattern from `analytics-coverage-expansion`). Events to emit:
   - `coaching.sync.invoked` — payload `{ source, profileId, trigger: "manual" | "auto-mount" | "auto-week-change" }`
   - `coaching.sync.success` — payload `{ source, profileId, activityCount, orphansDeleted, durationMs }`
   - `coaching.sync.failure` — payload `{ source, profileId, errorKind, isAutoSync }` (distinguishes silent auto-failures from user-triggered failures — closes the REL 6 visibility gap)
@@ -149,9 +149,9 @@ These tasks address findings from the AWS Well-Architected Framework review (REL
 
   Event payloads MUST NOT include `externalUserName`, `externalUserId`, `sourceId`, or `description` — only enums, counts, and durations (PII redaction rule from design D7 PII hygiene paragraph). The `profileId` is local-only opaque ID, safe to include.
 
-- [ ] 12.2 Tests for telemetry: assert `coaching.sync.failure` with `isAutoSync: true` is emitted when auto-sync fails silently (Train2Go tab closed, session expired, transport error). Assert NO event payload contains any of the PII fields above. Snapshot test the emitted events for the happy-path link → sync → expand → convert → unlink flow.
+- [x] 12.2 Tests for telemetry: assert `coaching.sync.failure` with `isAutoSync: true` is emitted when auto-sync fails silently (Train2Go tab closed, session expired, transport error). Assert NO event payload contains any of the PII fields above. Snapshot test the emitted events for the happy-path link → sync → expand → convert → unlink flow.
 
-- [ ] 12.3 12-factor verification: after implementation, run `grep -rE "import\.meta\.env|VITE_" packages/workout-spa-editor/src/adapters/train2go packages/workout-spa-editor/src/application/coaching packages/workout-spa-editor/src/hooks/use-coaching* packages/workout-spa-editor/src/components/molecules/CoachingCard packages/workout-spa-editor/src/components/organisms/ProfileManager/LinkedAccountsSection* packages/workout-spa-editor/src/store/train2go-*` and assert ZERO matches. Confirms no environment-specific values were baked into the SPA bundle by this change (Factor III — Config).
+- [x] 12.3 12-factor verification: after implementation, run `grep -rE "import\.meta\.env|VITE_" packages/workout-spa-editor/src/adapters/train2go packages/workout-spa-editor/src/application/coaching packages/workout-spa-editor/src/hooks/use-coaching* packages/workout-spa-editor/src/components/molecules/CoachingCard packages/workout-spa-editor/src/components/organisms/ProfileManager/LinkedAccountsSection* packages/workout-spa-editor/src/store/train2go-*` and assert ZERO matches. Confirms no environment-specific values were baked into the SPA bundle by this change (Factor III — Config).
 
 ## 13. Spec sync, lint, and changeset
 

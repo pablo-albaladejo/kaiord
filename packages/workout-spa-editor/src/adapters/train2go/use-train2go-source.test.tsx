@@ -14,9 +14,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 
-const mockSync = vi.fn(async () => undefined);
-const mockExpand = vi.fn(async () => undefined);
-const mockAttempt = vi.fn(async () => ({ ok: true }));
+const mockSync = vi.fn(async () => ({
+  ok: true as const,
+  activityCount: 0,
+  orphansDeleted: 0,
+}));
+const mockExpand = vi.fn(async () => ({ ok: true as const, activityCount: 0 }));
+const mockAttempt = vi.fn(async () => ({ ok: true as const }));
 
 vi.mock("../../application/coaching/sync-week", () => ({
   syncWeek: (...args: unknown[]) => mockSync(...args),

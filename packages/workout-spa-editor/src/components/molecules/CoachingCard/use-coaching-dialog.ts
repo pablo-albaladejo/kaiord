@@ -1,12 +1,15 @@
 /**
  * Hook backing CoachingActivityDialog: lazy description load + convert.
- * Extracted to keep the dialog component under the lint size limit.
+ * Emits coaching.convert.invoked / coaching.convert.idempotent_hit at
+ * the application boundary; payloads exclude PII (no sourceId, no
+ * description). Extracted to keep the dialog component under lint size.
  */
 
 import { useEffect, useState } from "react";
 import { useLocation } from "wouter";
 
 import { convertCoachingActivity } from "../../../application/coaching/convert-coaching-activity";
+import { useAnalytics } from "../../../contexts";
 import { useCoachingSourceFactories } from "../../../contexts/coaching-registry-context";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useActiveProfile } from "../../../hooks/use-active-profile";
@@ -23,6 +26,7 @@ export const useCoachingDialog = (
   onClose: () => void
 ): UseCoachingDialog => {
   const persistence = usePersistence();
+  const analytics = useAnalytics();
   const { id: activeProfileId } = useActiveProfile();
   const factories = useCoachingSourceFactories();
   const [, navigate] = useLocation();
@@ -39,6 +43,7 @@ export const useCoachingDialog = (
 
   const handleConvert = async () => {
     if (!activity || !activeProfileId) return;
+    analytics.event("coaching.convert.invoked", { source: activity.source });
     setError(null);
     setConverting(true);
     try {
@@ -52,12 +57,17 @@ export const useCoachingDialog = (
         setError("Activity not found");
         return;
       }
-      const { workoutId } = await convertCoachingActivity(
+      const result = await convertCoachingActivity(
         { coaching: persistence.coaching, workouts: persistence.workouts },
         record.id
       );
+      if (!result.created) {
+        analytics.event("coaching.convert.idempotent_hit", {
+          source: activity.source,
+        });
+      }
       onClose();
-      navigate(`/workout/${workoutId}`);
+      navigate(`/workout/${result.workoutId}`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Conversion failed");
     } finally {

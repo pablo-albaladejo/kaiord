@@ -10,6 +10,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 import { useMemo } from "react";
 
+import { useAnalytics } from "../../contexts";
 import { usePersistence } from "../../contexts/persistence-context";
 import { useTrain2GoStore } from "../../store/train2go-store";
 import type { CoachingActivity } from "../../types/coaching-activity";
@@ -56,9 +57,10 @@ export function useTrain2GoSource(
     [records]
   );
 
-  const sync = useSyncCallback(persistence, transport);
-  const expand = useExpandCallback(persistence, transport);
-  const connect = useConnectCallback(persistence, transport);
+  const analytics = useAnalytics();
+  const sync = useSyncCallback(persistence, transport, analytics);
+  const expand = useExpandCallback(persistence, transport, analytics);
+  const connect = useConnectCallback(persistence, transport, analytics);
 
   return {
     id: TRAIN2GO,
