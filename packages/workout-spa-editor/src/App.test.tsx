@@ -56,9 +56,12 @@ describe("App", () => {
     window.localStorage.setItem("workout-spa-onboarding-completed", "true");
     renderWithProviders(<App />);
     // Default route redirects to /calendar
-    await waitFor(() => {
-      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
   });
 
   describe("onboarding tutorial integration (Requirements 37.1, 37.5)", () => {
