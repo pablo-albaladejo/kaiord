@@ -1,3 +1,5 @@
+> Completed: 2026-04-28
+
 ## Why
 
 The `analytics-port-adapter` change wired up the Analytics port but only tracked four coarse events in the editor (`editor-loaded`, `workout-generated`, `workout-exported`, `garmin-synced`). SPA route changes, file imports, manual workout creation, and render errors are invisible to the dashboard, leaving the majority of user interactions untracked.

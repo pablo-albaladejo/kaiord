@@ -127,6 +127,29 @@ export type { UsageEntry, UsageRecord } from "./usage-schemas";
 export { usageEntrySchema, usageRecordSchema } from "./usage-schemas";
 
 // ============================================
+// Coaching (LinkedCoachingAccount, CoachingActivityRecord, CoachingSyncStateRecord)
+// ============================================
+
+export type { LinkedCoachingAccount } from "./coaching-account";
+export {
+  linkCoachingAccount,
+  linkedCoachingAccountSchema,
+  unlinkCoachingAccount,
+} from "./coaching-account";
+export type {
+  CoachingActivityRecord,
+  CoachingActivityStatus,
+} from "./coaching-activity-record";
+export {
+  buildCoachingActivityId,
+  coachingActivityRecordSchema,
+  coachingActivityStatusSchema,
+  namespaceSourceId,
+} from "./coaching-activity-record";
+export type { CoachingSyncStateRecord } from "./coaching-sync-state";
+export { coachingSyncStateRecordSchema } from "./coaching-sync-state";
+
+// ============================================
 // Validation Helpers
 // ============================================
 

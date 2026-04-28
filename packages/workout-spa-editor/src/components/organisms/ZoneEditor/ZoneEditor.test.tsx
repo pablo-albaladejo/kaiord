@@ -41,6 +41,7 @@ const mockProfile: Profile = {
       heartRateZones: { method: "custom", zones: DEFAULT_HEART_RATE_ZONES },
     },
   },
+  linkedAccounts: [],
   createdAt: "2025-01-15T10:00:00Z",
   updatedAt: "2025-01-15T10:00:00Z",
 };

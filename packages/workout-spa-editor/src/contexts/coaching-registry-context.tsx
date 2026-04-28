@@ -1,39 +1,39 @@
 /**
- * CoachingRegistry — React context that aggregates coaching sources.
+ * CoachingRegistry — React context that aggregates coaching source factories.
  *
- * Provides all registered CoachingSources to the component tree.
- * Platform adapters register via the provider. Consumers use
- * useCoachingSources() to access the aggregated data.
+ * Holds an array of CoachingSourceFactory (hooks). Consumers
+ * (useCoachingActivities) invoke each factory with the current
+ * (activeProfileId, days) to materialize a CoachingSource per render.
  */
 
 import type { ReactNode } from "react";
 import { createContext, useContext } from "react";
 
-import type { CoachingSource } from "../types/coaching-source";
+import type { CoachingSourceFactory } from "../types/coaching-source";
 
 type CoachingRegistryValue = {
-  sources: CoachingSource[];
+  factories: CoachingSourceFactory[];
 };
 
 const CoachingRegistryContext = createContext<CoachingRegistryValue>({
-  sources: [],
+  factories: [],
 });
 
 export type CoachingRegistryProviderProps = {
-  sources: CoachingSource[];
+  factories: CoachingSourceFactory[];
   children: ReactNode;
 };
 
 export function CoachingRegistryProvider({
-  sources,
+  factories,
   children,
 }: CoachingRegistryProviderProps) {
   return (
-    <CoachingRegistryContext.Provider value={{ sources }}>
+    <CoachingRegistryContext.Provider value={{ factories }}>
       {children}
     </CoachingRegistryContext.Provider>
   );
 }
 
-export const useCoachingSources = (): CoachingSource[] =>
-  useContext(CoachingRegistryContext).sources;
+export const useCoachingSourceFactories = (): CoachingSourceFactory[] =>
+  useContext(CoachingRegistryContext).factories;

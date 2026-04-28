@@ -1,17 +1,41 @@
 /**
  * useCoachingActivities — Consumes the CoachingSource registry.
  *
- * Zero platform imports. Zero platform knowledge.
- * Returns activities grouped by date + per-source sync state.
+ * Calls each registered factory hook with (activeProfileId, days) to
+ * materialize a CoachingSource per render. Returns activities grouped
+ * by date plus per-source sync state.
+ *
+ * Calendar code consumes only this hook + CoachingActivity / CoachingSource
+ * types — no platform-specific imports.
  */
 
 import { useCallback, useMemo } from "react";
 
-import { useCoachingSources } from "../contexts/coaching-registry-context";
+import { useCoachingSourceFactories } from "../contexts/coaching-registry-context";
 import type { CoachingActivity } from "../types/coaching-activity";
+import { useActiveProfile } from "./use-active-profile";
+
+export type CoachingSyncState = {
+  id: string;
+  label: string;
+  /** Source has a linkedAccount on the active profile. */
+  linked: boolean;
+  connected: boolean;
+  loading: boolean;
+  error: string | null;
+  sync: (weekStart: string) => Promise<void>;
+  connect: () => Promise<void>;
+};
 
 export function useCoachingActivities(days: string[]) {
-  const sources = useCoachingSources();
+  const { id: activeProfileId, profile } = useActiveProfile();
+  const factories = useCoachingSourceFactories();
+
+  // Each factory is itself a hook; calling them in stable order from this
+  // hook satisfies rules-of-hooks (factories never change at runtime).
+  const sources = factories.map((useFactory) =>
+    useFactory(activeProfileId, days)
+  );
 
   const byDay = useMemo(() => {
     const all = sources.flatMap((s) => s.activities);
@@ -24,33 +48,36 @@ export function useCoachingActivities(days: string[]) {
 
   const expandActivity = useCallback(
     (activity: CoachingActivity) => {
+      if (!activeProfileId) return;
       const source = sources.find((s) => s.id === activity.source);
-      source?.expand(activity.date);
+      void source?.expand(activeProfileId, activity.date);
     },
-    [sources]
+    [sources, activeProfileId]
   );
+
+  const linkedSourceIds = useMemo(() => {
+    if (!profile) return new Set<string>();
+    return new Set(profile.linkedAccounts.map((a) => a.source));
+  }, [profile]);
 
   const syncSources: CoachingSyncState[] = sources
     .filter((s) => s.available)
     .map((s) => ({
       id: s.id,
       label: s.label,
+      linked: linkedSourceIds.has(s.id),
       connected: s.connected,
       loading: s.loading,
       error: s.error,
-      sync: s.sync,
-      connect: s.connect,
+      sync: async (weekStart: string) => {
+        if (!activeProfileId) return;
+        await s.sync(activeProfileId, weekStart);
+      },
+      connect: async () => {
+        if (!activeProfileId) return;
+        await s.connect(activeProfileId);
+      },
     }));
 
   return { byDay, expandActivity, syncSources };
 }
-
-export type CoachingSyncState = {
-  id: string;
-  label: string;
-  connected: boolean;
-  loading: boolean;
-  error: string | null;
-  sync: (weekStart: string) => void;
-  connect: () => void;
-};

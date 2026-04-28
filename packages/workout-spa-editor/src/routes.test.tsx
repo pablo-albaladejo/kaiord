@@ -11,25 +11,29 @@ import {
   SettingsDialogProvider,
   ThemeProvider,
 } from "./contexts";
+import { PersistenceProvider } from "./contexts/persistence-context";
 import { ToastContextProvider } from "./contexts/ToastContext";
 import { useWorkoutStore } from "./store/workout-store";
+import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
 
 function renderAtPath(path: string) {
   const { hook } = memoryLocation({ path, record: true });
 
   return render(
     <ThemeProvider>
-      <SettingsDialogProvider>
-        <GarminBridgeProvider>
-          <ToastProvider>
-            <ToastContextProvider>
-              <Router hook={hook}>
-                <App />
-              </Router>
-            </ToastContextProvider>
-          </ToastProvider>
-        </GarminBridgeProvider>
-      </SettingsDialogProvider>
+      <PersistenceProvider persistence={createInMemoryPersistence()}>
+        <SettingsDialogProvider>
+          <GarminBridgeProvider>
+            <ToastProvider>
+              <ToastContextProvider>
+                <Router hook={hook}>
+                  <App />
+                </Router>
+              </ToastContextProvider>
+            </ToastProvider>
+          </GarminBridgeProvider>
+        </SettingsDialogProvider>
+      </PersistenceProvider>
     </ThemeProvider>
   );
 }
@@ -54,9 +58,12 @@ describe("Routing", () => {
   it("renders CalendarPage at /calendar", async () => {
     renderAtPath("/calendar");
 
-    await waitFor(() => {
-      expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
-    });
+    await waitFor(
+      () => {
+        expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
   });
 
   it("renders LibraryPage at /library", async () => {

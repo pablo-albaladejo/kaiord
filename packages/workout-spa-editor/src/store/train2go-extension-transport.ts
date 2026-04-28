@@ -1,52 +1,34 @@
 /**
- * Train2Go Extension Transport
+ * Train2Go Extension Transport — JSON parse boundary for the SPA.
  *
- * Sends messages to the Train2Go Bridge Chrome extension
- * via chrome.runtime.sendMessage. Mirrors garmin-extension-transport.
+ * Stringifies platform ids (userId, sourceId) HERE, never via
+ * String(parsedNumber) downstream (lossy above MAX_SAFE_INTEGER).
+ * Full wire-side losslessness needs a bridge-extension reviver — out
+ * of scope for this SPA work.
  */
 
-import type { Train2GoActivity } from "./train2go-store";
+import { toPingResult, type Train2GoPingResult } from "./train2go-ping-result";
+import {
+  type Train2GoExtensionResponse,
+  train2goSendMessage,
+} from "./train2go-send-message";
 
-type ExtensionResponse = {
-  ok: boolean;
-  protocolVersion?: number;
-  data?: unknown;
-  error?: string;
-  status?: number;
+export type { Train2GoPingResult } from "./train2go-ping-result";
+
+export type Train2GoActivity = {
+  id: number;
+  date: string;
+  sport: string;
+  title: string;
+  duration: string;
+  workload: number;
+  status: number;
+  description?: string;
+  completion?: number;
 };
 
-const sendMessage = (
-  extensionId: string,
-  message: unknown,
-  timeoutMs: number
-): Promise<ExtensionResponse> =>
-  new Promise((resolve) => {
-    if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) {
-      resolve({ ok: false, error: "Chrome runtime not available" });
-      return;
-    }
-    const timer = setTimeout(() => {
-      resolve({ ok: false, error: "Extension did not respond" });
-    }, timeoutMs);
-    try {
-      chrome.runtime.sendMessage(extensionId, message, (raw) => {
-        clearTimeout(timer);
-        if (chrome.runtime.lastError) {
-          resolve({ ok: false, error: chrome.runtime.lastError.message });
-        } else {
-          resolve(
-            (raw as ExtensionResponse) ?? { ok: false, error: "No response" }
-          );
-        }
-      });
-    } catch {
-      clearTimeout(timer);
-      resolve({ ok: false, error: "Extension not available" });
-    }
-  });
-
-type PingData = { sessionActive: boolean; userId?: number; userName?: string };
 type ReadData = { activities: Train2GoActivity[] };
+type ReadResponse = Train2GoExtensionResponse & { data?: ReadData };
 
 const PING_T1 = 2_000;
 const PING_T2 = 4_000;
@@ -54,40 +36,48 @@ const ACTION_T = 35_000;
 
 export const ping = async (
   extensionId: string
-): Promise<ExtensionResponse & { data?: PingData }> => {
-  const res = await sendMessage(extensionId, { action: "ping" }, PING_T1);
-  if (res.ok) return res as ExtensionResponse & { data?: PingData };
-  if (res.error === "Extension did not respond") {
-    return (await sendMessage(
-      extensionId,
-      { action: "ping" },
-      PING_T2
-    )) as ExtensionResponse & { data?: PingData };
+): Promise<Train2GoPingResult> => {
+  const first = await train2goSendMessage(
+    extensionId,
+    { action: "ping" },
+    PING_T1
+  );
+  if (first.ok) return toPingResult(first);
+  if (first.error === "Extension did not respond") {
+    return toPingResult(
+      await train2goSendMessage(extensionId, { action: "ping" }, PING_T2)
+    );
   }
-  return res as ExtensionResponse & { data?: PingData };
+  return toPingResult(first);
 };
+
+const readAction = (
+  extensionId: string,
+  action: "read-week" | "read-day",
+  date: string,
+  externalUserId: string
+): Promise<ReadResponse> =>
+  train2goSendMessage(
+    extensionId,
+    { action, date, userId: externalUserId },
+    ACTION_T
+  ) as Promise<ReadResponse>;
 
 export const readWeek = (
   extensionId: string,
   date: string,
-  userId: number
-): Promise<ExtensionResponse & { data?: ReadData }> =>
-  sendMessage(
-    extensionId,
-    { action: "read-week", date, userId },
-    ACTION_T
-  ) as Promise<ExtensionResponse & { data?: ReadData }>;
+  externalUserId: string
+): Promise<ReadResponse> =>
+  readAction(extensionId, "read-week", date, externalUserId);
 
 export const readDay = (
   extensionId: string,
   date: string,
-  userId: number
-): Promise<ExtensionResponse & { data?: ReadData }> =>
-  sendMessage(
-    extensionId,
-    { action: "read-day", date, userId },
-    ACTION_T
-  ) as Promise<ExtensionResponse & { data?: ReadData }>;
+  externalUserId: string
+): Promise<ReadResponse> =>
+  readAction(extensionId, "read-day", date, externalUserId);
 
-export const openTrain2Go = (extensionId: string): Promise<ExtensionResponse> =>
-  sendMessage(extensionId, { action: "open-train2go" }, PING_T1);
+export const openTrain2Go = (
+  extensionId: string
+): Promise<Train2GoExtensionResponse> =>
+  train2goSendMessage(extensionId, { action: "open-train2go" }, PING_T1);

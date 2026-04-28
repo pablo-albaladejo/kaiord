@@ -31,9 +31,9 @@ describe("CoachingActivityCard", () => {
     expect(screen.getByText("1:30 h")).toBeInTheDocument();
   });
 
-  it("renders effort dots", () => {
+  it("renders intensity dots", () => {
     render(<CoachingActivityCard activity={baseActivity} />);
-    expect(screen.getByTitle("Effort: 3/5")).toBeInTheDocument();
+    expect(screen.getByTitle("Intensity: 3/5")).toBeInTheDocument();
   });
 
   it("renders status", () => {
@@ -41,38 +41,22 @@ describe("CoachingActivityCard", () => {
     expect(screen.getByText("pending")).toBeInTheDocument();
   });
 
-  it("expands description on click", async () => {
+  it("calls onClick with the activity (no inline expand)", async () => {
+    const onClick = vi.fn();
+    render(<CoachingActivityCard activity={baseActivity} onClick={onClick} />);
+
+    await userEvent.click(screen.getByTestId("coaching-card-train2go:123"));
+
+    expect(onClick).toHaveBeenCalledWith(baseActivity);
+  });
+
+  it("does NOT inline-expand description (dialog handles it now)", async () => {
     const activity = { ...baseActivity, description: "Warmup: 10 min Z1" };
     render(<CoachingActivityCard activity={activity} />);
 
+    await userEvent.click(screen.getByTestId("coaching-card-train2go:123"));
+
     expect(screen.queryByText("Warmup: 10 min Z1")).not.toBeInTheDocument();
-
-    await userEvent.click(screen.getByTestId("coaching-card-train2go:123"));
-
-    expect(screen.getByText("Warmup: 10 min Z1")).toBeInTheDocument();
-  });
-
-  it("calls onExpand on first click", async () => {
-    const onExpand = vi.fn();
-    render(
-      <CoachingActivityCard activity={baseActivity} onExpand={onExpand} />
-    );
-
-    await userEvent.click(screen.getByTestId("coaching-card-train2go:123"));
-
-    expect(onExpand).toHaveBeenCalledWith(baseActivity);
-  });
-
-  it("does not call onExpand on collapse click", async () => {
-    const onExpand = vi.fn();
-    const activity = { ...baseActivity, description: "Some text" };
-    render(<CoachingActivityCard activity={activity} onExpand={onExpand} />);
-
-    const card = screen.getByTestId("coaching-card-train2go:123");
-    await userEvent.click(card); // expand
-    await userEvent.click(card); // collapse
-
-    expect(onExpand).toHaveBeenCalledTimes(1);
   });
 
   it("is not editable (no edit controls)", () => {

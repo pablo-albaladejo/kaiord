@@ -7,50 +7,47 @@
 
 import Dexie from "dexie";
 
+const CORE_V1 = {
+  workouts: "id, date, [date+state], [source+sourceId], sport, *tags",
+  templates: "id, sport, *tags",
+  profiles: "id",
+  aiProviders: "id",
+  syncState: "source",
+  usage: "yearMonth",
+  meta: "key",
+};
+const CORE_V2 = { ...CORE_V1, bridges: "extensionId, status, lastSeen" };
+const CORE_V4 = {
+  ...CORE_V2,
+  coachingActivities:
+    "id, [profileId+date], [profileId+source+sourceId], [profileId+source]",
+  coachingSyncState: "[source+profileId], source, profileId",
+};
+
+const backfillLinkedAccounts = (row: Record<string, unknown>): void => {
+  if (!Array.isArray(row.linkedAccounts)) row.linkedAccounts = [];
+};
+
 export class KaiordDatabase extends Dexie {
   constructor(name = "kaiord-spa") {
     super(name);
-
-    this.version(1).stores({
-      workouts: "id, date, [date+state], [source+sourceId], sport, *tags",
-      templates: "id, sport, *tags",
-      profiles: "id",
-      aiProviders: "id",
-      syncState: "source",
-      usage: "yearMonth",
-      meta: "key",
-    });
-
-    // v2 — bridge registry persistence so the 24h-unavailable and
-    // 24h-removed lifecycle timers survive browser restarts.
-    this.version(2).stores({
-      workouts: "id, date, [date+state], [source+sourceId], sport, *tags",
-      templates: "id, sport, *tags",
-      profiles: "id",
-      aiProviders: "id",
-      syncState: "source",
-      usage: "yearMonth",
-      meta: "key",
-      bridges: "extensionId, status, lastSeen",
-    });
-
-    // v3 — UsageRecord gains `inputTokens`/`outputTokens` (split of
-    // the legacy `totalTokens`). Schema keys unchanged; only the
-    // row shape grows, hence no store redefinition — just an
-    // `.upgrade()` backfill marking pre-v3 rows as `legacy`.
+    this.version(1).stores(CORE_V1);
+    this.version(2).stores(CORE_V2);
     this.version(3)
-      .stores({
-        workouts: "id, date, [date+state], [source+sourceId], sport, *tags",
-        templates: "id, sport, *tags",
-        profiles: "id",
-        aiProviders: "id",
-        syncState: "source",
-        usage: "yearMonth",
-        meta: "key",
-        bridges: "extensionId, status, lastSeen",
-      })
+      .stores(CORE_V2)
       .upgrade(async (tx) => {
         await tx.table("usage").toCollection().modify(backfillUsageRow);
+      });
+    // v4 — coaching integration. Bridge-discovery syncState is byte-
+    // identically unchanged; coachingActivities + coachingSyncState are
+    // new; existing profiles are backfilled with linkedAccounts: [].
+    this.version(4)
+      .stores(CORE_V4)
+      .upgrade(async (tx) => {
+        await tx
+          .table("profiles")
+          .toCollection()
+          .modify(backfillLinkedAccounts);
       });
   }
 }

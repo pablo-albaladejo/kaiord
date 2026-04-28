@@ -7,6 +7,8 @@ import { memoryLocation } from "wouter/memory-location";
 import { db } from "../../adapters/dexie/dexie-database";
 import { GarminBridgeProvider, SettingsDialogProvider } from "../../contexts";
 import { CoachingRegistryProvider } from "../../contexts/coaching-registry-context";
+import { PersistenceProvider } from "../../contexts/persistence-context";
+import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import CalendarPage from "./CalendarPage";
 
@@ -45,15 +47,17 @@ function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
 function renderCalendar(path = "/calendar/2026-W15") {
   const { hook } = memoryLocation({ path, record: true });
   return render(
-    <SettingsDialogProvider>
-      <GarminBridgeProvider>
-        <CoachingRegistryProvider sources={[]}>
-          <Router hook={hook}>
-            <CalendarPage />
-          </Router>
-        </CoachingRegistryProvider>
-      </GarminBridgeProvider>
-    </SettingsDialogProvider>
+    <PersistenceProvider persistence={createInMemoryPersistence()}>
+      <SettingsDialogProvider>
+        <GarminBridgeProvider>
+          <CoachingRegistryProvider factories={[]}>
+            <Router hook={hook}>
+              <CalendarPage />
+            </Router>
+          </CoachingRegistryProvider>
+        </GarminBridgeProvider>
+      </SettingsDialogProvider>
+    </PersistenceProvider>
   );
 }
 

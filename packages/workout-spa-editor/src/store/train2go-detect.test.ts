@@ -1,13 +1,18 @@
+/**
+ * train2go-detect — TRANSPORT detection only.
+ *
+ * After train2go-profile-link, detection MUST NOT mutate any profile's
+ * linkedAccounts. It only toggles extensionInstalled / sessionActive /
+ * lastError / lastDetectionTimestamp. userId / userName from a ping
+ * response are IGNORED here — they belong to the explicit connect flow.
+ */
+
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { createDetectAction } from "./train2go-detect";
-
-vi.mock("./train2go-extension-transport", () => ({
-  ping: vi.fn(),
-}));
-
 import { ping } from "./train2go-extension-transport";
 
+vi.mock("./train2go-extension-transport", () => ({ ping: vi.fn() }));
 const mockPing = vi.mocked(ping);
 
 describe("createDetectAction", () => {
@@ -20,8 +25,6 @@ describe("createDetectAction", () => {
     state = {
       extensionInstalled: false,
       sessionActive: false,
-      userId: null,
-      userName: null,
       lastError: null,
       lastDetectionTimestamp: null,
     };
@@ -35,23 +38,46 @@ describe("createDetectAction", () => {
     vi.clearAllMocks();
   });
 
-  it("sets extension installed on successful ping", async () => {
+  it("sets extensionInstalled + sessionActive on successful ping", async () => {
     mockPing.mockResolvedValue({
       ok: true,
       protocolVersion: 1,
-      data: { sessionActive: true, userId: 123, userName: "Test" },
+      sessionActive: true,
+      externalUserId: "28035",
+      externalUserName: "Pablo",
     });
 
     await detect();
 
     expect(state.extensionInstalled).toBe(true);
     expect(state.sessionActive).toBe(true);
-    expect(state.userId).toBe(123);
-    expect(state.userName).toBe("Test");
+  });
+
+  it("does NOT write any user identity field to the store (anti-auto-link)", async () => {
+    mockPing.mockResolvedValue({
+      ok: true,
+      protocolVersion: 1,
+      sessionActive: true,
+      externalUserId: "28035",
+      externalUserName: "Pablo",
+    });
+
+    await detect();
+
+    // The store no longer carries userId/userName — confirm we never
+    // accidentally added them via set().
+    expect("userId" in state).toBe(false);
+    expect("userName" in state).toBe(false);
   });
 
   it("sets not installed when ping fails", async () => {
-    mockPing.mockResolvedValue({ ok: false, error: "Not found" });
+    mockPing.mockResolvedValue({
+      ok: false,
+      sessionActive: false,
+      externalUserId: null,
+      externalUserName: null,
+      error: "Not found",
+    });
 
     await detect();
 
@@ -60,7 +86,13 @@ describe("createDetectAction", () => {
   });
 
   it("shows update message on protocol mismatch", async () => {
-    mockPing.mockResolvedValue({ ok: true, protocolVersion: 99 });
+    mockPing.mockResolvedValue({
+      ok: true,
+      protocolVersion: 99,
+      sessionActive: false,
+      externalUserId: null,
+      externalUserName: null,
+    });
 
     await detect();
 
@@ -73,7 +105,9 @@ describe("createDetectAction", () => {
     mockPing.mockResolvedValue({
       ok: true,
       protocolVersion: 1,
-      data: { sessionActive: true, userId: 1, userName: "A" },
+      sessionActive: true,
+      externalUserId: null,
+      externalUserName: null,
     });
 
     await detect();
@@ -99,28 +133,31 @@ describe("createDetectAction", () => {
     mockPing.mockResolvedValue({
       ok: true,
       protocolVersion: 1,
-      data: { sessionActive: false },
+      sessionActive: false,
+      externalUserId: null,
+      externalUserName: null,
     });
 
     await detect();
 
     expect(state.extensionInstalled).toBe(true);
     expect(state.sessionActive).toBe(false);
-    expect(state.userId).toBeNull();
   });
 
   describe("30s detection cache (spa-train2go-extension spec)", () => {
+    const okPing = {
+      ok: true,
+      protocolVersion: 1,
+      sessionActive: true,
+      externalUserId: null,
+      externalUserName: null,
+    };
+
     it("re-pings when the cached timestamp is older than 30s", async () => {
-      mockPing.mockResolvedValue({
-        ok: true,
-        protocolVersion: 1,
-        data: { sessionActive: true, userId: 1, userName: "A" },
-      });
+      mockPing.mockResolvedValue(okPing);
 
       await detect();
       expect(mockPing).toHaveBeenCalledTimes(1);
-
-      // Age the cache entry past the 30s window.
       state.lastDetectionTimestamp =
         (state.lastDetectionTimestamp as number) - 31_000;
       await detect();
@@ -129,12 +166,7 @@ describe("createDetectAction", () => {
     });
 
     it("always pings when no detection has ever run (timestamp = null)", async () => {
-      mockPing.mockResolvedValue({
-        ok: true,
-        protocolVersion: 1,
-        data: { sessionActive: true, userId: 1, userName: "A" },
-      });
-
+      mockPing.mockResolvedValue(okPing);
       expect(state.lastDetectionTimestamp).toBeNull();
 
       await detect();
@@ -143,19 +175,18 @@ describe("createDetectAction", () => {
     });
 
     it("re-pings even within 30s when the cached result was 'not installed'", async () => {
-      mockPing.mockResolvedValue({ ok: false, error: "nope" });
+      mockPing.mockResolvedValue({
+        ok: false,
+        sessionActive: false,
+        externalUserId: null,
+        externalUserName: null,
+        error: "nope",
+      });
 
       await detect();
       expect(state.extensionInstalled).toBe(false);
       expect(mockPing).toHaveBeenCalledTimes(1);
-
-      // A subsequent detect() within 30s must retry because the cache
-      // short-circuit only applies when extensionInstalled === true.
-      mockPing.mockResolvedValueOnce({
-        ok: true,
-        protocolVersion: 1,
-        data: { sessionActive: true },
-      });
+      mockPing.mockResolvedValueOnce(okPing);
 
       await detect();
 
@@ -163,20 +194,12 @@ describe("createDetectAction", () => {
     });
 
     it("short-circuits without updating lastDetectionTimestamp", async () => {
-      mockPing.mockResolvedValue({
-        ok: true,
-        protocolVersion: 1,
-        data: { sessionActive: true },
-      });
+      mockPing.mockResolvedValue(okPing);
 
       await detect();
       const firstStamp = state.lastDetectionTimestamp;
-
       await detect();
 
-      // The cache short-circuit returns before `set(...)` runs, so the
-      // stamp stays pinned to the first detection. Verifies the
-      // "rolling window" anti-pattern is NOT present.
       expect(state.lastDetectionTimestamp).toBe(firstStamp);
     });
   });

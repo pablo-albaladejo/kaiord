@@ -1,10 +1,10 @@
 /**
  * ProfileTabs Component
  *
- * Top-level tab selector: Training Zones | Personal Data.
+ * Top-level tab selector: Training Zones | Personal Data | Linked Accounts.
  */
 
-type ProfileTab = "zones" | "personal";
+type ProfileTab = "zones" | "personal" | "linked-accounts";
 
 type ProfileTabsProps = {
   activeTab: ProfileTab;
@@ -14,6 +14,7 @@ type ProfileTabsProps = {
 const TABS: Array<{ id: ProfileTab; label: string }> = [
   { id: "zones", label: "Training Zones" },
   { id: "personal", label: "Personal Data" },
+  { id: "linked-accounts", label: "Linked Accounts" },
 ];
 
 export function ProfileTabs({ activeTab, onTabChange }: ProfileTabsProps) {

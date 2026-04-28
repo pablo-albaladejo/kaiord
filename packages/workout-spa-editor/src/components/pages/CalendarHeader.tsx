@@ -47,17 +47,19 @@ export function CalendarHeader({ state: s, coaching }: CalendarHeaderProps) {
           weekLabel={s.data.weekId.replace("-W", " W")}
         />
         <div className="flex gap-2">
-          {coaching.syncSources.map((src) => (
-            <CoachingSyncButton
-              key={src.id}
-              connected={src.connected}
-              loading={src.loading}
-              error={src.error}
-              onSync={() => src.sync(s.data.days[0])}
-              onConnect={src.connect}
-              label={src.label}
-            />
-          ))}
+          {coaching.syncSources
+            .filter((src) => src.linked)
+            .map((src) => (
+              <CoachingSyncButton
+                key={src.id}
+                connected={src.connected}
+                loading={src.loading}
+                error={src.error}
+                onSync={() => src.sync(s.data.days[0])}
+                onConnect={src.connect}
+                label={src.label}
+              />
+            ))}
         </div>
       </div>
     </>

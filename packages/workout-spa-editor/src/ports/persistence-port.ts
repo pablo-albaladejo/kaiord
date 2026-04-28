@@ -12,6 +12,15 @@ import type { WorkoutRecord } from "../types/calendar-schemas";
 import type { Profile } from "../types/profile";
 import type { UsageRecord } from "../types/usage-schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
+import type {
+  CoachingRepository,
+  CoachingSyncStateRepository,
+} from "./coaching-repositories";
+
+export type {
+  CoachingRepository,
+  CoachingSyncStateRepository,
+} from "./coaching-repositories";
 
 export type WorkoutRepository = {
   getById: (id: string) => Promise<WorkoutRecord | undefined>;
@@ -68,4 +77,6 @@ export type PersistencePort = {
   aiProviders: AiProviderRepository;
   syncState: SyncStateRepository;
   usage: UsageRepository;
+  coaching: CoachingRepository;
+  coachingSyncState: CoachingSyncStateRepository;
 };

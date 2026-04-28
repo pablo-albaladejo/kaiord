@@ -1,0 +1,101 @@
+import "fake-indexeddb/auto";
+
+import { beforeEach, describe, expect, it } from "vitest";
+
+import { createDexieCoachingSyncStateRepository } from "./dexie-coaching-sync-state-repository";
+import { KaiordDatabase } from "./dexie-database";
+
+describe("DexieCoachingSyncStateRepository", () => {
+  let db: KaiordDatabase;
+  beforeEach(() => {
+    db = new KaiordDatabase(
+      `kaiord-coaching-sync-test-${Date.now()}-${Math.random()}`
+    );
+  });
+
+  it("get returns undefined for missing compound key", async () => {
+    const repo = createDexieCoachingSyncStateRepository(db);
+    const result = await repo.getBySourceAndProfile("train2go", "p1");
+    expect(result).toBeUndefined();
+  });
+
+  it("put round-trips by [source+profileId] compound key", async () => {
+    const repo = createDexieCoachingSyncStateRepository(db);
+    const record = {
+      source: "train2go",
+      profileId: "p1",
+      lastSyncedAt: "2026-04-28T10:00:00.000Z",
+    };
+
+    await repo.put(record);
+    const result = await repo.getBySourceAndProfile("train2go", "p1");
+
+    expect(result).toEqual(record);
+  });
+
+  it("put overwrites existing entry by compound key", async () => {
+    const repo = createDexieCoachingSyncStateRepository(db);
+    await repo.put({
+      source: "train2go",
+      profileId: "p1",
+      lastSyncedAt: "2026-04-28T10:00:00.000Z",
+    });
+    await repo.put({
+      source: "train2go",
+      profileId: "p1",
+      lastSyncedAt: "2026-04-28T11:00:00.000Z",
+    });
+
+    const result = await repo.getBySourceAndProfile("train2go", "p1");
+    expect(result?.lastSyncedAt).toBe("2026-04-28T11:00:00.000Z");
+  });
+
+  it("isolates entries by profile", async () => {
+    const repo = createDexieCoachingSyncStateRepository(db);
+    await repo.put({
+      source: "train2go",
+      profileId: "p1",
+      lastSyncedAt: "2026-04-28T10:00:00.000Z",
+    });
+    await repo.put({
+      source: "train2go",
+      profileId: "p2",
+      lastSyncedAt: "2026-04-28T11:00:00.000Z",
+    });
+
+    const p1 = await repo.getBySourceAndProfile("train2go", "p1");
+    const p2 = await repo.getBySourceAndProfile("train2go", "p2");
+
+    expect(p1?.lastSyncedAt).toBe("2026-04-28T10:00:00.000Z");
+    expect(p2?.lastSyncedAt).toBe("2026-04-28T11:00:00.000Z");
+  });
+
+  it("deleteByProfile removes only the targeted profile's rows", async () => {
+    const repo = createDexieCoachingSyncStateRepository(db);
+    await repo.put({
+      source: "train2go",
+      profileId: "p1",
+      lastSyncedAt: "2026-04-28T10:00:00.000Z",
+    });
+    await repo.put({
+      source: "trainingpeaks",
+      profileId: "p1",
+      lastSyncedAt: "2026-04-28T11:00:00.000Z",
+    });
+    await repo.put({
+      source: "train2go",
+      profileId: "p2",
+      lastSyncedAt: "2026-04-28T12:00:00.000Z",
+    });
+
+    await repo.deleteByProfile("p1");
+
+    expect(await repo.getBySourceAndProfile("train2go", "p1")).toBeUndefined();
+    expect(
+      await repo.getBySourceAndProfile("trainingpeaks", "p1")
+    ).toBeUndefined();
+    expect(
+      (await repo.getBySourceAndProfile("train2go", "p2"))?.lastSyncedAt
+    ).toBe("2026-04-28T12:00:00.000Z");
+  });
+});

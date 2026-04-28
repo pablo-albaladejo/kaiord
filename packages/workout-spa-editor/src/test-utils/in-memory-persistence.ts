@@ -7,6 +7,8 @@
 
 import type { PersistencePort } from "../ports/persistence-port";
 import { createInMemoryAiProviderRepository } from "./in-memory-ai-provider-repository";
+import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
+import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
 import { createInMemoryProfileRepository } from "./in-memory-profile-repository";
 import { createInMemorySyncStateRepository } from "./in-memory-sync-state-repository";
 import { createInMemoryTemplateRepository } from "./in-memory-template-repository";
@@ -21,5 +23,7 @@ export function createInMemoryPersistence(): PersistencePort {
     aiProviders: createInMemoryAiProviderRepository(),
     syncState: createInMemorySyncStateRepository(),
     usage: createInMemoryUsageRepository(),
+    coaching: createInMemoryCoachingRepository(),
+    coachingSyncState: createInMemoryCoachingSyncStateRepository(),
   };
 }
