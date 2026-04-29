@@ -1,3 +1,5 @@
+> Completed: 2026-04-29
+
 ## Why
 
 The `train2go-profile-link` change shipped (PR #372, archived 2026-04-28). The post-merge `/opsx:verify` report flagged 7 genuine test gaps; PR #374 fast-followed and closed 1. Six gaps remain — all are scenarios already documented in the synced specs (`spa-coaching-integration`, `spa-train2go-extension`) but not yet asserted by tests. They cover behaviors that work today but are silently regressible: lossless `userId` capture, manual sync gate bypass, idempotent conversion preserving the source row, navigation after convert, profile-switch reactivity on the calendar header, and connect-vs-disconnect race handling.
