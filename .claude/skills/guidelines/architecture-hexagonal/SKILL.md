@@ -14,14 +14,15 @@ domain ← ports ← application ← adapters
 No rightward imports. Enforced by `check-architecture.js` pre-commit hook.
 Canonical reference: `openspec/specs/hexagonal-arch/spec.md`.
 
-| Layer | Lives in | Depends on | Rules |
-|-------|----------|------------|-------|
-| `domain/` | `packages/core/src/domain/` | nothing | pure TypeScript types + Zod schemas only; no external libs |
-| `ports/` | `packages/core/src/ports/` | domain only | pure interfaces/type aliases; no runtime code |
-| `application/` | `packages/core/src/application/` | domain + ports | use cases; no external libs; no adapter imports |
-| adapters | `packages/<fit\|tcx\|zwo\|garmin>/src/adapters/` | `@kaiord/core` only | MAY use external libs; MUST NOT import other format adapters |
+| Layer          | Lives in                                         | Depends on          | Rules                                                        |
+| -------------- | ------------------------------------------------ | ------------------- | ------------------------------------------------------------ |
+| `domain/`      | `packages/core/src/domain/`                      | nothing             | pure TypeScript types + Zod schemas only; no external libs   |
+| `ports/`       | `packages/core/src/ports/`                       | domain only         | pure interfaces/type aliases; no runtime code                |
+| `application/` | `packages/core/src/application/`                 | domain + ports      | use cases; no external libs; no adapter imports              |
+| adapters       | `packages/<fit\|tcx\|zwo\|garmin>/src/adapters/` | `@kaiord/core` only | MAY use external libs; MUST NOT import other format adapters |
 
 **Decision rule for new code:**
+
 - Types/Zod schemas → `domain/`
 - Interfaces → `ports/`
 - Orchestration → `application/`
@@ -32,6 +33,7 @@ Canonical reference: `openspec/specs/hexagonal-arch/spec.md`.
 Full normative table: `openspec/specs/hexagonal-arch/spec.md`, Requirement: Package Dependencies.
 
 Summary:
+
 - `@kaiord/core` — no workspace deps (root of the graph)
 - `@kaiord/fit`, `tcx`, `zwo`, `garmin` — `@kaiord/core` only; never each other
 - `@kaiord/garmin-connect` — `@kaiord/core` + `@kaiord/garmin`
@@ -53,9 +55,10 @@ toText(krd: KRD,               writer: TextWriter,   logger?: Logger): Promise<s
 **Strategy injection is non-negotiable.** Use cases MUST accept reader/writer as parameters and MUST NOT hard-code any adapter. See hexagonal-arch spec, Requirement: Strategy Injection.
 
 Adapters export dual forms:
+
 ```typescript
-import { fitReader } from '@kaiord/fit';          // pre-built
-import { createFitReader } from '@kaiord/fit';    // factory(logger?)
+import { fitReader } from "@kaiord/fit"; // pre-built
+import { createFitReader } from "@kaiord/fit"; // factory(logger?)
 ```
 
 ## KRD as canonical format

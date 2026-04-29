@@ -29,10 +29,10 @@ description: Read this guideline when writing or reviewing TypeScript code, nami
 
 ## Mappers vs converters
 
-| File pattern | When to use | Tests |
-|-------------|-------------|-------|
-| `*.mapper.ts` | Simple transformation, no logic | MUST NOT have tests |
-| `*.converter.ts` | Complex logic, branching | MUST have tests |
+| File pattern     | When to use                     | Tests               |
+| ---------------- | ------------------------------- | ------------------- |
+| `*.mapper.ts`    | Simple transformation, no logic | MUST NOT have tests |
+| `*.converter.ts` | Complex logic, branching        | MUST have tests     |
 
 ## Comments
 

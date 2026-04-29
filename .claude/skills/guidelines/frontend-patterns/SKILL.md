@@ -7,11 +7,11 @@ description: Read this guideline when working on workout-spa-editor, React compo
 
 ## SPA state management routing
 
-| State type | Tool | Rule |
-|-----------|------|------|
-| Editor runtime (undo/redo, selection, clipboard) | Zustand (`workout-store`) | Never auto-persisted |
-| Persisted data (workouts, templates, profiles, AI providers, sync state) | Dexie + `useLiveQuery` | One query per page |
-| Ephemeral UI (modals, spinners) and shared runtime (bridge status) | React `useState` / `useContext` | — |
+| State type                                                               | Tool                            | Rule                 |
+| ------------------------------------------------------------------------ | ------------------------------- | -------------------- |
+| Editor runtime (undo/redo, selection, clipboard)                         | Zustand (`workout-store`)       | Never auto-persisted |
+| Persisted data (workouts, templates, profiles, AI providers, sync state) | Dexie + `useLiveQuery`          | One query per page   |
+| Ephemeral UI (modals, spinners) and shared runtime (bridge status)       | React `useState` / `useContext` | —                    |
 
 **Rule:** "Editor runtime → Zustand. Persisted data → Dexie. Local UI → React state."
 
