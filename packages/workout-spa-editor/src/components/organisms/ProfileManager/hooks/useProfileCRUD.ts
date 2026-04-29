@@ -1,7 +1,9 @@
 /**
  * useProfileCRUD Hook
  *
- * Combines create, update, delete operations.
+ * Combines create, update, delete operations. After Phase 1B each leaf
+ * hook pulls `usePersistence()` directly so this orchestrator no longer
+ * threads Zustand-store actions through its parameter list.
  */
 
 import type { Profile } from "../../../../types/profile";
@@ -11,12 +13,6 @@ import { useProfileDelete } from "./useProfileDelete";
 import { useProfileEdit } from "./useProfileEdit";
 
 type UseProfileCRUDParams = {
-  createProfile: (name: string, data: { bodyWeight?: number }) => void;
-  updateProfile: (
-    id: string,
-    data: { name?: string; bodyWeight?: number }
-  ) => void;
-  deleteProfile: (id: string) => void;
   formData: ProfileFormData;
   editingProfile: Profile | null;
   setFormData: (data: ProfileFormData) => void;
@@ -26,13 +22,11 @@ type UseProfileCRUDParams = {
 
 export function useProfileCRUD(params: UseProfileCRUDParams) {
   const create = useProfileCreate({
-    createProfile: params.createProfile,
     formData: params.formData,
     setFormData: params.setFormData,
   });
 
   const edit = useProfileEdit({
-    updateProfile: params.updateProfile,
     formData: params.formData,
     editingProfile: params.editingProfile,
     setFormData: params.setFormData,
@@ -40,13 +34,8 @@ export function useProfileCRUD(params: UseProfileCRUDParams) {
   });
 
   const deleteOps = useProfileDelete({
-    deleteProfile: params.deleteProfile,
     setDeleteConfirmId: params.setDeleteConfirmId,
   });
 
-  return {
-    ...create,
-    ...edit,
-    ...deleteOps,
-  };
+  return { ...create, ...edit, ...deleteOps };
 }

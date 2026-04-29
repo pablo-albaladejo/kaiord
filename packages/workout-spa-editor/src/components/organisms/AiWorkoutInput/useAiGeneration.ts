@@ -2,16 +2,21 @@ import type { Sport } from "@kaiord/core";
 import { useCallback } from "react";
 
 import { useAnalytics } from "../../../contexts";
+import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useLatestRef } from "../../../hooks/use-latest-ref";
 import { generateWorkoutKrd } from "../../../lib/generate-workout";
 import { useAiStore } from "../../../store/ai-store";
-import { useProfileStore } from "../../../store/profile-store";
 import { useLoadWorkout } from "../../../store/workout-store-selectors";
 import type { SportKey } from "../../../types/sport-zones";
 import { formatZonesContext } from "./zones-formatter";
 
 export const useAiGeneration = () => {
   const { getSelectedProvider, customPrompt, setGeneration } = useAiStore();
-  const { getActiveProfile } = useProfileStore();
+  // useLiveQuery returns `undefined` while loading; treat as no-profile.
+  // Latest-ref so the LLM-call closure reads the freshest profile at call
+  // time without rebuilding the closure on every profile mutation (which
+  // would cancel in-flight generation).
+  const profileRef = useLatestRef(useActiveProfileLive()?.profile ?? null);
   const loadWorkout = useLoadWorkout();
   const analytics = useAnalytics();
 
@@ -23,7 +28,7 @@ export const useAiGeneration = () => {
       setGeneration({ status: "loading" });
 
       try {
-        const profile = getActiveProfile();
+        const profile = profileRef.current;
         const sportKey = (sport || undefined) as SportKey | undefined;
         const zonesContext = profile
           ? formatZonesContext(profile, sportKey)
@@ -53,7 +58,7 @@ export const useAiGeneration = () => {
       getSelectedProvider,
       customPrompt,
       setGeneration,
-      getActiveProfile,
+      profileRef,
       loadWorkout,
       analytics,
     ]
