@@ -35,5 +35,5 @@
 - [x] 7.2 Run `pnpm -r build` — all packages build
 - [x] 7.3 Run `pnpm lint` — zero warnings (docs lint fails on local Node 20.19 due to cspell ≥22.18 requirement; unrelated to this change, runs clean in CI)
 - [x] 7.4 `pnpm exec changeset` — add a `patch` changeset for `@kaiord/workout-spa-editor` noting "test: close 6 coaching test gaps from train2go-profile-link verify report"
-- [ ] 7.5 `/opsx:verify` against this change to confirm all 6 scenarios are covered by tests
-- [ ] 7.6 After PR merge: `/opsx:archive` (no spec sync needed — the stub spec at archive time has zero impact since no main spec is referenced)
+- [x] 7.5 `/opsx:verify` against this change to confirm all 6 scenarios are covered by tests
+- [x] 7.6 After PR merge: `/opsx:archive` (no spec sync needed — the stub spec at archive time has zero impact since no main spec is referenced)
