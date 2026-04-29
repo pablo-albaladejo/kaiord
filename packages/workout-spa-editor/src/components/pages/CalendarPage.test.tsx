@@ -92,12 +92,7 @@ describe("CalendarPage", () => {
 
     renderCalendar();
 
-    await waitFor(
-      () => {
-        expect(screen.getByTestId("workout-card-w-mon")).toBeInTheDocument();
-      },
-      { timeout: 5000 }
-    );
+    expect(await screen.findByTestId("workout-card-w-mon")).toBeInTheDocument();
   });
 
   // Covered by e2e: calendar-batch.spec.ts "banner shows count"
@@ -109,12 +104,9 @@ describe("CalendarPage", () => {
 
     renderCalendar();
 
-    await waitFor(
-      () => {
-        expect(screen.getByText(/2 raw workouts/)).toBeInTheDocument();
-      },
-      { timeout: 5000 }
-    );
+    await waitFor(() => {
+      expect(screen.getByText(/2 raw workouts/)).toBeInTheDocument();
+    });
   });
 
   // Covered by e2e: calendar-workouts.spec.ts "Multiple workouts per day"
@@ -151,15 +143,12 @@ describe("CalendarPage", () => {
 
     renderCalendar();
 
-    await waitFor(
-      () => {
-        const cards = screen.getAllByTestId(/^workout-card-/);
-        expect(cards).toHaveLength(2);
-        expect(cards[0]).toHaveTextContent("Morning swim");
-        expect(cards[1]).toHaveTextContent("Evening run");
-      },
-      { timeout: 5000 }
-    );
+    await waitFor(() => {
+      const cards = screen.getAllByTestId(/^workout-card-/);
+      expect(cards).toHaveLength(2);
+      expect(cards[0]).toHaveTextContent("Morning swim");
+      expect(cards[1]).toHaveTextContent("Evening run");
+    });
   });
 
   it("shows week navigation controls", async () => {

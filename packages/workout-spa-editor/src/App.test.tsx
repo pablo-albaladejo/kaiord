@@ -55,13 +55,8 @@ describe("App", () => {
   it("should render the calendar page by default when no workout is loaded", async () => {
     window.localStorage.setItem("workout-spa-onboarding-completed", "true");
     renderWithProviders(<App />);
-    // Default route redirects to /calendar
-    await waitFor(
-      () => {
-        expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
-      },
-      { timeout: 5000 }
-    );
+
+    expect(await screen.findByText("Welcome to Kaiord")).toBeInTheDocument();
   });
 
   describe("onboarding tutorial integration (Requirements 37.1, 37.5)", () => {
