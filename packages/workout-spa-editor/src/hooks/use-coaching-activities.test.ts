@@ -47,8 +47,8 @@ vi.mock("../contexts/coaching-registry-context", () => ({
   useCoachingSourceFactories: () => [factory],
 }));
 
-vi.mock("./use-active-profile", () => ({
-  useActiveProfile: () => ({ id: ACTIVE_PROFILE_ID, profile: null }),
+vi.mock("./use-active-profile-live", () => ({
+  useActiveProfileLive: () => ({ id: ACTIVE_PROFILE_ID, profile: null }),
 }));
 
 import { useCoachingActivities } from "./use-coaching-activities";

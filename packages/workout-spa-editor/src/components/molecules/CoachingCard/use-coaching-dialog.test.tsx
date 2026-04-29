@@ -34,8 +34,8 @@ vi.mock("../../../contexts/coaching-registry-context", () => ({
   ],
 }));
 
-vi.mock("../../../hooks/use-active-profile", () => ({
-  useActiveProfile: () => ({
+vi.mock("../../../hooks/use-active-profile-live", () => ({
+  useActiveProfileLive: () => ({
     id: "p1",
     profile: {
       id: "p1",

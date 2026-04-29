@@ -4,7 +4,7 @@
  * Renders zone type sections based on sport capabilities.
  */
 
-import type { ZoneType } from "../../../../store/profile-store/types";
+import type { ZoneType } from "../../../../application/profile/zones/zone-types";
 import type { SportZoneConfig } from "../../../../types/sport-zones";
 import type { ZoneRowData } from "../types/zone-table";
 import { ZoneTypeSection } from "./ZoneTypeSection";

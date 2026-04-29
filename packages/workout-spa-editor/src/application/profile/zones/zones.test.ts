@@ -28,6 +28,26 @@ const HR_ZONE: HeartRateZone = {
 };
 
 describe("updateSportThresholds", () => {
+  it("recalculates pace zones when threshold pace is set with daniels-5 (running)", async () => {
+    const persistence = createInMemoryPersistence();
+    const profile = makeProfile();
+    profile.sportZones.running!.paceZones = {
+      method: "daniels-5",
+      zones: [],
+    };
+    await seedProfile(persistence, profile);
+
+    const updated = await updateSportThresholds(
+      persistence,
+      profile.id,
+      "running",
+      { thresholdPace: 300, paceUnit: "min_per_km" }
+    );
+
+    expect(updated.sportZones.running?.paceZones?.method).toBe("daniels-5");
+    expect(updated.sportZones.running?.paceZones?.zones).toHaveLength(5);
+  });
+
   it("recalculates HR zones when LTHR is set and method is non-custom", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();

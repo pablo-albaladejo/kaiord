@@ -12,7 +12,6 @@ import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
 import { createProfile } from "../../../application/profile/create-profile";
 import { useLibraryStore } from "../../../store/library-store";
-import { useProfileStore } from "../../../store/profile-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 import { renderWithProviders } from "../../../test-utils";
 import type { KRD } from "../../../types/krd";
@@ -36,15 +35,9 @@ const createTestKRD = (): KRD => ({
 });
 
 describe("LayoutHeader", () => {
-  // Reset state before each test. The active profile is now read via
-  // `useActiveProfileLive` against Dexie + fake-indexeddb (D5.1), so
-  // both the legacy Zustand mirror AND the Dexie tables must be cleared
-  // until Phase 1B retires the legacy store.
+  // Reset state before each test. The active profile is read via
+  // `useActiveProfileLive` against Dexie + fake-indexeddb (D5.1).
   beforeEach(async () => {
-    useProfileStore.setState({
-      profiles: [],
-      activeProfileId: null,
-    });
     useLibraryStore.setState({
       templates: [],
     });

@@ -10,7 +10,7 @@
 import { useEffect, useState } from "react";
 
 import { useCoachingSourceFactories } from "../../../contexts/coaching-registry-context";
-import { useActiveProfile } from "../../../hooks/use-active-profile";
+import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { useCoachingConvert } from "./use-coaching-convert";
 
@@ -24,7 +24,7 @@ export const useCoachingDialog = (
   activity: CoachingActivity | null,
   onClose: () => void
 ): UseCoachingDialog => {
-  const { id: activeProfileId } = useActiveProfile();
+  const activeProfileId = useActiveProfileLive()?.id ?? null;
   const factories = useCoachingSourceFactories();
   const [targetProfileId, setTargetProfileId] = useState<string | null>(null);
 

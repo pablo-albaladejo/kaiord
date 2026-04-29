@@ -1,66 +1,63 @@
 /**
  * ProfileManager Component Tests
  *
- * Tests for profile management with redesigned layout.
+ * Tests for profile management with redesigned layout. Phase 1B reads
+ * via the Dexie live hooks and writes via the application use cases —
+ * the test seeds the production Dexie singleton (fake-indexeddb-backed
+ * in jsdom, D5.1) and asserts via `findBy*` so live-query reactivity
+ * has time to settle.
  */
 
-import { screen, waitFor } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "../../../adapters/dexie/dexie-database";
-import { useProfileStore } from "../../../store/profile-store";
+import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { createProfile } from "../../../application/profile/create-profile";
 import { renderWithProviders } from "../../../test-utils";
 import { ProfileManager } from "./ProfileManager";
 
+const renderManager = () =>
+  renderWithProviders(<ProfileManager open={true} onOpenChange={vi.fn()} />, {
+    persistence: createDexiePersistence(db),
+  });
+
+const seedProfile = (name: string) =>
+  createProfile(createDexiePersistence(db), name);
+
 describe("ProfileManager", () => {
-  // Reset both the legacy Zustand mirror AND the Dexie tables. Phase 1A
-  // migrates ProfileEditView (subcomponent) to `useProfileByIdLive`
-  // against Dexie + fake-indexeddb (D5.1) while keeping ProfileManager
-  // itself on the legacy store; the dual reset prevents fake-indexeddb
-  // residue from a prior test from leaking into a new one.
   beforeEach(async () => {
-    useProfileStore.setState({
-      profiles: [],
-      activeProfileId: null,
-    });
     await Promise.all([db.table("profiles").clear(), db.table("meta").clear()]);
   });
 
   describe("rendering", () => {
     it("should render when open", () => {
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      renderManager();
 
       expect(
         screen.getByRole("heading", { name: /profile manager/i })
       ).toBeInTheDocument();
     });
 
-    it("should display empty state when no profiles exist", () => {
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+    it("should display empty state when no profiles exist", async () => {
+      renderManager();
 
-      expect(screen.getByText(/no profiles yet/i)).toBeInTheDocument();
+      expect(await screen.findByText(/no profiles yet/i)).toBeInTheDocument();
     });
 
-    it("should display profile count", () => {
-      const { createProfile } = useProfileStore.getState();
-      createProfile("Test Profile");
+    it("should display profile count", async () => {
+      await seedProfile("Test Profile");
 
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      renderManager();
 
-      expect(screen.getByText(/saved profiles \(1\)/i)).toBeInTheDocument();
+      expect(
+        await screen.findByText(/saved profiles \(1\)/i)
+      ).toBeInTheDocument();
     });
 
     it("should not show Edit Profile card", () => {
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      renderManager();
 
       expect(screen.queryByText("Edit Profile")).not.toBeInTheDocument();
     });
@@ -69,22 +66,19 @@ describe("ProfileManager", () => {
   describe("profile creation", () => {
     it("should create a new profile with name only", async () => {
       const user = userEvent.setup();
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      renderManager();
 
       await user.type(screen.getByLabelText(/^name$/i), "New Profile");
       await user.click(screen.getByRole("button", { name: /create profile/i }));
 
-      const state = useProfileStore.getState();
-      expect(state.profiles).toHaveLength(1);
-      expect(state.profiles[0].name).toBe("New Profile");
+      expect(
+        await screen.findByText(/saved profiles \(1\)/i)
+      ).toBeInTheDocument();
+      expect(await screen.findByText("New Profile")).toBeInTheDocument();
     });
 
     it("should disable create button when name is empty", () => {
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      renderManager();
 
       expect(
         screen.getByRole("button", { name: /create profile/i })
@@ -93,27 +87,26 @@ describe("ProfileManager", () => {
 
     it("should clear form after creating profile", async () => {
       const user = userEvent.setup();
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      renderManager();
 
       await user.type(screen.getByLabelText(/^name$/i), "Test");
       await user.click(screen.getByRole("button", { name: /create profile/i }));
 
-      expect(screen.getByLabelText(/^name$/i)).toHaveValue("");
+      // The input clears synchronously inside the use case continuation;
+      // poll once via findBy to allow the post-resolve setState to commit.
+      await vi.waitFor(() => {
+        expect(screen.getByLabelText(/^name$/i)).toHaveValue("");
+      });
     });
   });
 
   describe("profile editing", () => {
     it("should show tabs when editing a profile", async () => {
       const user = userEvent.setup();
-      const { createProfile } = useProfileStore.getState();
-      createProfile("Original");
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      await seedProfile("Original");
+      renderManager();
 
-      await user.click(screen.getByRole("button", { name: /^edit$/i }));
+      await user.click(await screen.findByRole("button", { name: /^edit$/i }));
 
       expect(
         screen.getByRole("tab", { name: /training zones/i })
@@ -125,51 +118,42 @@ describe("ProfileManager", () => {
 
     it("should show sport zone editor by default when editing", async () => {
       const user = userEvent.setup();
-      const { createProfile } = useProfileStore.getState();
-      createProfile("Athlete");
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      await seedProfile("Athlete");
+      renderManager();
 
-      await user.click(screen.getByRole("button", { name: /^edit$/i }));
+      await user.click(await screen.findByRole("button", { name: /^edit$/i }));
 
-      // Training zones tab is default, so sport tabs should be visible
-      expect(screen.getByRole("tab", { name: "Cycling" })).toBeInTheDocument();
+      expect(
+        await screen.findByRole("tab", { name: "Cycling" })
+      ).toBeInTheDocument();
     });
   });
 
   describe("profile deletion", () => {
     it("should show delete confirmation dialog", async () => {
       const user = userEvent.setup();
-      const { createProfile } = useProfileStore.getState();
-      createProfile("Profile 1");
-      createProfile("Profile 2");
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      await seedProfile("Profile 1");
+      await seedProfile("Profile 2");
+      renderManager();
 
-      const deleteButtons = screen.getAllByRole("button", {
+      const deleteButtons = await screen.findAllByRole("button", {
         name: /^delete profile$/i,
       });
       await user.click(deleteButtons[0]);
 
-      await waitFor(() => {
-        expect(
-          screen.getByRole("heading", { name: /delete profile/i })
-        ).toBeInTheDocument();
-      });
+      expect(
+        await screen.findByRole("heading", { name: /delete profile/i })
+      ).toBeInTheDocument();
     });
 
     it("should delete profile after confirmation", async () => {
       const user = userEvent.setup();
-      const { createProfile } = useProfileStore.getState();
-      createProfile("Profile 1");
-      createProfile("Profile 2");
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      const persistence = createDexiePersistence(db);
+      await seedProfile("Profile 1");
+      await seedProfile("Profile 2");
+      renderManager();
 
-      const deleteButtons = screen.getAllByRole("button", {
+      const deleteButtons = await screen.findAllByRole("button", {
         name: /^delete profile$/i,
       });
       await user.click(deleteButtons[0]);
@@ -179,56 +163,47 @@ describe("ProfileManager", () => {
       });
       await user.click(deleteButton);
 
-      await waitFor(() => {
-        const state = useProfileStore.getState();
-        expect(state.profiles).toHaveLength(1);
+      await vi.waitFor(async () => {
+        const remaining = await persistence.profiles.getAll();
+        expect(remaining).toHaveLength(1);
       });
     });
 
-    it("should disable delete button when only one profile exists", () => {
-      const { createProfile } = useProfileStore.getState();
-      createProfile("Only Profile");
+    it("should disable delete button when only one profile exists", async () => {
+      await seedProfile("Only Profile");
 
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      renderManager();
 
-      expect(
-        screen.getByRole("button", { name: /^delete profile$/i })
-      ).toBeDisabled();
+      const deleteButton = await screen.findByRole("button", {
+        name: /^delete profile$/i,
+      });
+      expect(deleteButton).toBeDisabled();
     });
   });
 
   describe("active profile", () => {
     it("should set active profile", async () => {
       const user = userEvent.setup();
-      const { createProfile } = useProfileStore.getState();
-      createProfile("Profile 1");
-      const profile2 = createProfile("Profile 2");
+      const persistence = createDexiePersistence(db);
+      await seedProfile("Profile 1"); // first → auto-active by I1
+      const profile2 = await seedProfile("Profile 2");
 
-      useProfileStore.setState({
-        activeProfileId: useProfileStore.getState().profiles[0].id,
-      });
+      renderManager();
 
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
-
-      const setActiveButtons = screen.getAllByRole("button", {
+      const setActiveButtons = await screen.findAllByRole("button", {
         name: /set active/i,
       });
       await user.click(setActiveButtons[0]);
 
-      const state = useProfileStore.getState();
-      expect(state.activeProfileId).toBe(profile2.id);
+      await vi.waitFor(async () => {
+        expect(await persistence.profiles.getActiveId()).toBe(profile2.id);
+      });
     });
   });
 
   describe("profile import", () => {
     it("should have import input element", () => {
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      renderManager();
 
       const input = document.getElementById(
         "import-profile"
@@ -239,11 +214,31 @@ describe("ProfileManager", () => {
     });
 
     it("should show import button", () => {
-      renderWithProviders(
-        <ProfileManager open={true} onOpenChange={vi.fn()} />
-      );
+      renderManager();
 
       expect(screen.getByText(/import profile/i)).toBeInTheDocument();
+    });
+  });
+
+  describe("error handling", () => {
+    it("surfaces a toast when createProfile rejects", async () => {
+      const user = userEvent.setup();
+      const persistence = createDexiePersistence(db);
+      persistence.profiles.put = vi.fn(() =>
+        Promise.reject(new Error("simulated"))
+      );
+
+      renderWithProviders(
+        <ProfileManager open={true} onOpenChange={vi.fn()} />,
+        { persistence }
+      );
+
+      await user.type(screen.getByLabelText(/^name$/i), "Will Fail");
+      await user.click(screen.getByRole("button", { name: /create profile/i }));
+
+      expect(
+        await screen.findByText(/failed to create profile/i)
+      ).toBeInTheDocument();
     });
   });
 });

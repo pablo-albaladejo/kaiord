@@ -4,7 +4,7 @@
  * Creates a default zone object for adding custom zones.
  */
 
-import type { ZoneType } from "../../../../store/profile-store/types";
+import type { ZoneType } from "../../../../application/profile/zones/zone-types";
 
 export function buildDefaultZone(
   zoneType: ZoneType,

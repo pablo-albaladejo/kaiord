@@ -1,26 +1,29 @@
 /**
  * useProfileManager Hook
  *
- * Business logic for profile management.
+ * Business logic for profile management. After Phase 1B reads come
+ * from Dexie via the live hooks (`useProfilesLive`,
+ * `useActiveProfileLive`) and writes go through the application use
+ * cases — every callsite returns a promise, errors surface via the
+ * toast context inside the leaf hooks.
+ *
+ * `useLiveQuery` returns `undefined` while loading on first mount;
+ * consumers receive an empty profiles array and a null active id
+ * during the loading window.
  */
 
 import { useState } from "react";
 
-import { useProfileStore } from "../../../store/profile-store";
+import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useProfilesLive } from "../../../hooks/use-profiles-live";
 import type { Profile } from "../../../types/profile";
 import { useProfileActions } from "./hooks/useProfileActions";
 import { useProfileImportExport } from "./hooks/useProfileImportExport";
 import type { ProfileFormData } from "./types";
 
 export function useProfileManager() {
-  const {
-    profiles,
-    activeProfileId,
-    createProfile,
-    updateProfile,
-    deleteProfile,
-    setActiveProfile,
-  } = useProfileStore();
+  const profiles = useProfilesLive() ?? [];
+  const activeProfileId = useActiveProfileLive()?.id ?? null;
 
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [formData, setFormData] = useState<ProfileFormData>({ name: "" });
@@ -31,10 +34,6 @@ export function useProfileManager() {
   );
 
   const actions = useProfileActions({
-    createProfile,
-    updateProfile,
-    deleteProfile,
-    setActiveProfile,
     profiles,
     formData,
     editingProfile,
@@ -44,10 +43,7 @@ export function useProfileManager() {
     setSwitchNotification,
   });
 
-  const importExport = useProfileImportExport({
-    createProfile,
-    setImportError,
-  });
+  const importExport = useProfileImportExport({ setImportError });
 
   return {
     profiles,

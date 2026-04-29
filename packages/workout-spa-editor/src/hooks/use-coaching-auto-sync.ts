@@ -17,7 +17,7 @@ import { useEffect, useRef } from "react";
 
 import { useAnalytics } from "../contexts";
 import { usePersistence } from "../contexts/persistence-context";
-import { useActiveProfile } from "./use-active-profile";
+import { useActiveProfileLive } from "./use-active-profile-live";
 import type { CoachingSyncState } from "./use-coaching-activities";
 import { runSourceSync } from "./use-coaching-auto-sync-helpers";
 
@@ -25,7 +25,9 @@ export const useCoachingAutoSync = (
   syncSources: CoachingSyncState[],
   weekStart: string | undefined
 ): void => {
-  const { id: activeProfileId, profile } = useActiveProfile();
+  const live = useActiveProfileLive();
+  const activeProfileId = live?.id ?? null;
+  const profile = live?.profile ?? null;
   const persistence = usePersistence();
   const analytics = useAnalytics();
   const lastFiredKey = useRef<string | null>(null);
