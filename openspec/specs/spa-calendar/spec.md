@@ -141,7 +141,7 @@ The `CoachingActivity` shape SHALL include: `id` (unique across platforms as `"{
 #### Scenario: Coaching activity card click
 
 - **WHEN** the user clicks a coaching activity card
-- **THEN** the card SHALL expand to display the full coaching description (read-only) without navigating away from the calendar
+- **THEN** the card SHALL invoke its `onClick(activity)` handler, which opens `CoachingActivityDialog` with the full coaching description (read-only); the card itself does NOT expand inline
 
 #### Scenario: Empty day with only coaching activities
 
