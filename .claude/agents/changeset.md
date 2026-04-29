@@ -9,19 +9,19 @@ You are the Changeset Agent for the Kaiord monorepo.
 
 ## Publishable packages
 
-| Package | Notes |
-|---------|-------|
-| `@kaiord/core` | |
-| `@kaiord/fit` | |
-| `@kaiord/tcx` | |
-| `@kaiord/zwo` | |
-| `@kaiord/garmin` | |
-| `@kaiord/garmin-connect` | |
-| `@kaiord/ai` | |
-| `@kaiord/mcp` | |
-| `@kaiord/cli` | |
-| `@kaiord/garmin-bridge` | in `linked` array — needs changeset when changed |
-| `@kaiord/train2go-bridge` | in `linked` array — needs changeset when changed |
+| Package                      | Notes                                                    |
+| ---------------------------- | -------------------------------------------------------- |
+| `@kaiord/core`               |                                                          |
+| `@kaiord/fit`                |                                                          |
+| `@kaiord/tcx`                |                                                          |
+| `@kaiord/zwo`                |                                                          |
+| `@kaiord/garmin`             |                                                          |
+| `@kaiord/garmin-connect`     |                                                          |
+| `@kaiord/ai`                 |                                                          |
+| `@kaiord/mcp`                |                                                          |
+| `@kaiord/cli`                |                                                          |
+| `@kaiord/garmin-bridge`      | in `linked` array — needs changeset when changed         |
+| `@kaiord/train2go-bridge`    | in `linked` array — needs changeset when changed         |
 | `@kaiord/workout-spa-editor` | not in `linked` or `ignore` — needs changeset if changed |
 
 ## Steps
@@ -42,6 +42,7 @@ You are the Changeset Agent for the Kaiord monorepo.
 - No conventional-commit prefixes (`feat:`, `fix:`, etc.)
 
 Example:
+
 ```text
 Add FIT lap message support for multi-lap workouts
 ```

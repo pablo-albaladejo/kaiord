@@ -10,9 +10,9 @@ description: Read this guideline when writing tests, reviewing test code, or dec
 Every test uses Arrange / Act / Assert with a blank line between each section:
 
 ```typescript
-it('converts power zone to explicit watts', () => {
+it("converts power zone to explicit watts", () => {
   // Arrange
-  const step = buildWorkoutStep({ target: { type: 'power', zone: 3 } });
+  const step = buildWorkoutStep({ target: { type: "power", zone: 3 } });
 
   // Act
   const result = toGcnStep(step);
@@ -25,20 +25,20 @@ it('converts power zone to explicit watts', () => {
 
 ## Per-layer test strategy
 
-| Layer | Test type | Dependencies | Notes |
-|-------|-----------|--------------|-------|
-| Domain (schemas, types, pure functions) | Unit | None | No mocks |
-| Application (use cases) | Unit | Port stubs/mocks | No real adapters |
-| Adapters | Integration | FIT SDK, parser, real fixtures | Use `@kaiord/core/test-utils` |
-| Round-trip (FIT ↔ KRD ↔ TCX) | Integration | Full pipeline | Within tolerances in `krd-format` guideline |
-| CLI | Integration | Spawns child process | Timeout ≥ 15 000 ms |
+| Layer                                   | Test type   | Dependencies                   | Notes                                       |
+| --------------------------------------- | ----------- | ------------------------------ | ------------------------------------------- |
+| Domain (schemas, types, pure functions) | Unit        | None                           | No mocks                                    |
+| Application (use cases)                 | Unit        | Port stubs/mocks               | No real adapters                            |
+| Adapters                                | Integration | FIT SDK, parser, real fixtures | Use `@kaiord/core/test-utils`               |
+| Round-trip (FIT ↔ KRD ↔ TCX)            | Integration | Full pipeline                  | Within tolerances in `krd-format` guideline |
+| CLI                                     | Integration | Spawns child process           | Timeout ≥ 15 000 ms                         |
 
 ## Coverage thresholds
 
-| Scope | Threshold |
-|-------|-----------|
-| `@kaiord/core` | 80% |
-| Frontend (`workout-spa-editor`) | 70% |
+| Scope                           | Threshold |
+| ------------------------------- | --------- |
+| `@kaiord/core`                  | 80%       |
+| Frontend (`workout-spa-editor`) | 70%       |
 
 ## Mappers vs converters
 
