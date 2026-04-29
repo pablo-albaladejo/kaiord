@@ -50,6 +50,36 @@ describe("createTrain2GoCoachingTransport", () => {
     });
   });
 
+  it("preserves a userId larger than Number.MAX_SAFE_INTEGER as a string at the JSON parse boundary", async () => {
+    // 9007199254740993 is one above Number.MAX_SAFE_INTEGER (2^53 - 1) and
+    // cannot be represented losslessly as a JS number. The bridge extension's
+    // JSON reviver delivers the raw digits as a string; the SPA-side
+    // stringifyUserId() in toPingResult() must preserve it byte-identical
+    // (string-equal), NOT call String(parsedNumber).
+    const mockSend = vi.fn(
+      (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+        cb({
+          ok: true,
+          protocolVersion: 1,
+          data: {
+            sessionActive: true,
+            userId: "9007199254740993",
+            userName: "Pablo",
+          },
+        });
+      }
+    );
+    (globalThis as Record<string, unknown>).chrome = {
+      runtime: { lastError: null, sendMessage: mockSend },
+    };
+    const t = createTrain2GoCoachingTransport(() => "ext-id");
+
+    const result = await t.ping();
+
+    expect(result.externalUserId).toBe("9007199254740993");
+    expect(typeof result.externalUserId).toBe("string");
+  });
+
   it("openExternal() resolves on success without throwing", async () => {
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {

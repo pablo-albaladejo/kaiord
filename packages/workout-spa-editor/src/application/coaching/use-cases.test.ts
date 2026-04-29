@@ -356,6 +356,24 @@ describe("convertCoachingActivity", () => {
     expect(w2?.sourceId).toBe("p2:12345");
   });
 
+  it("preserves the coachingActivities row after a successful conversion", async () => {
+    // The conversion creates a Workout (state: "raw"); the source coaching row
+    // MUST remain on disk so re-conversion is idempotent and the user can
+    // re-run the conversion or inspect history. This is locked in here so a
+    // future refactor that "cleans up" by deleting the row gets caught.
+    const activity = makeRecord({ profileId: "p1", sourceId: "12345" });
+    await deps.coaching.put(activity);
+
+    await convertCoachingActivity(deps, activity.id);
+
+    const stillThere = await deps.coaching.getByProfileAndSourceId(
+      "p1",
+      "train2go",
+      "12345"
+    );
+    expect(stillThere).toEqual(activity);
+  });
+
   it("re-throws when WorkoutRepository.put rejects (so caller does not navigate)", async () => {
     const activity = makeRecord();
     await deps.coaching.put(activity);
@@ -402,6 +420,41 @@ describe("attemptLink", () => {
 
     expect(result).toEqual({ ok: false, reason: "aborted" });
     const a = await profiles.getById("A");
+    expect(a?.linkedAccounts).toEqual([]);
+  });
+
+  it("returns aborted and writes nothing when the signal is aborted mid-poll", async () => {
+    // Distinct from "aborts cleanly mid-poll without writing the link" above:
+    // there, signal.aborted is already true on entry (early return). Here, the
+    // call begins on a non-aborted signal, parks at the in-loop delay() await,
+    // then the caller aborts (modeling a Disconnect click after Connect started).
+    const profiles = createInMemoryProfileRepository();
+    await profiles.put(makeProfile("p1"));
+    const controller = new AbortController();
+    let resolveDelay: (() => void) | null = null;
+    const delay = vi.fn(
+      () =>
+        new Promise<void>((resolve) => {
+          resolveDelay = resolve;
+        })
+    );
+    const ping = vi.fn();
+    const deps = makeDeps({
+      profiles,
+      transport: makeTransport({ ping }),
+      delay,
+    });
+
+    const linkPromise = attemptLink(deps, "p1", controller.signal);
+    // Flush microtasks until the function reaches the in-loop delay.
+    while (!resolveDelay) await new Promise((r) => setTimeout(r, 0));
+    controller.abort();
+    (resolveDelay as unknown as () => void)();
+    const result = await linkPromise;
+
+    expect(result).toEqual({ ok: false, reason: "aborted" });
+    expect(ping).not.toHaveBeenCalled();
+    const a = await profiles.getById("p1");
     expect(a?.linkedAccounts).toEqual([]);
   });
 
