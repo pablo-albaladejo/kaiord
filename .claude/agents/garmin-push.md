@@ -13,7 +13,7 @@ You are the Garmin Push Agent for the Kaiord monorepo.
 
 ## Auth decision tree
 
-```
+```text
 push file
   └─ success? → done
   └─ auth error?

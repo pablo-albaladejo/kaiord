@@ -32,13 +32,13 @@ pnpm --filter @kaiord/core test src/tests/round-trip/
 If a tolerance violation occurs:
 
 1. Identify the failing field from the error message.
-2. Read the corresponding converter in `packages/core/src/adapters/<format>/`.
+2. Read the corresponding converter in the adapter package.
 3. Check the mapper for that field (`*.mapper.ts`).
 4. Adjust the conversion logic to stay within tolerance.
 
 ## Key locations
 
 - `packages/core/src/tests/round-trip/` — round-trip test suite
-- `packages/core/src/adapters/fit/` — FIT converters
-- `packages/core/src/adapters/tcx/` — TCX converters
-- `packages/core/src/adapters/zwo/` — ZWO converters
+- `packages/fit/src/adapters/` — FIT converters
+- `packages/tcx/src/adapters/` — TCX converters
+- `packages/zwo/src/adapters/` — ZWO converters

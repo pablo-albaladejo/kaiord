@@ -18,8 +18,8 @@ When asked about the KRD format:
 ## Quick orientation (verify against live files before citing)
 
 - MIME type: `application/vnd.kaiord+json`
-- Top-level keys: `version`, `type`, `metadata`, `extensions`
+- Top-level keys (required): `version`, `type`, `metadata`; (optional): `sessions`, `laps`, `records`, `events`, `extensions`
 - Domain schemas: snake_case fields; adapter schemas: camelCase fields
 - Enum access pattern: `subSportSchema.enum.indoor_cycling`
-- Duration types: `time`, `distance`, `open`, `power_less_than`, `power_greater_than`, `hr_less_than`, `hr_greater_than`
-- Target types: `power`, `heart_rate`, `pace`, `cadence`, `open`
+- Duration types: `time`, `distance`, `open`, `calories`, `heart_rate_less_than`, `power_less_than`, `power_greater_than`, `repeat_until_time`, `repeat_until_distance`, `repeat_until_calories`, `repeat_until_heart_rate_less_than`, `repeat_until_heart_rate_greater_than`, `repeat_until_power_less_than`, `repeat_until_power_greater_than`
+- Target types: `power`, `heart_rate`, `cadence`, `pace`, `stroke_type`, `open`

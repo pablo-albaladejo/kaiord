@@ -31,7 +31,9 @@ openspec  ci  docs  scripts
 - One changeset per change (not per package) — packages in the linked array bump together
 - The changeset is the **last commit** on the feature branch before requesting review
 - Run `pnpm exec changeset` and follow the interactive prompt
-- Private packages (`garmin-bridge`, `train2go-bridge`, `workout-spa-editor`) do not need changesets
+- `garmin-bridge` and `train2go-bridge` are in the `linked` array — they need changesets when changed
+- `workout-spa-editor` is not in `linked` or `ignore` — needs a changeset if changed
+- The `private: true` flag prevents publishing but does not exempt a package from changesets
 
 ## OpenSpec archive naming
 
