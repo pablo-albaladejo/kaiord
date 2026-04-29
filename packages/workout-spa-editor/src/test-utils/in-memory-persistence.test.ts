@@ -404,6 +404,60 @@ describe("SyncStateRepository", () => {
   });
 });
 
+// --- Transaction (snapshot/revert) ---
+
+describe("InMemoryPersistence.transaction", () => {
+  it("commits writes on resolution", async () => {
+    const persistence = createInMemoryPersistence();
+    const profile = makeProfile({ id: PROFILE_UUID_1 });
+
+    const result = await persistence.transaction(async () => {
+      await persistence.profiles.put(profile);
+      await persistence.profiles.setActiveId(profile.id);
+      return "ok";
+    });
+
+    expect(result).toBe("ok");
+    expect(await persistence.profiles.getById(PROFILE_UUID_1)).toEqual(profile);
+    expect(await persistence.profiles.getActiveId()).toBe(PROFILE_UUID_1);
+  });
+
+  it("reverts writes to prior state on rejection", async () => {
+    const persistence = createInMemoryPersistence();
+    const seed = makeProfile({ id: PROFILE_UUID_1, name: "Seed" });
+    await persistence.profiles.put(seed);
+    await persistence.profiles.setActiveId(seed.id);
+
+    await expect(
+      persistence.transaction(async () => {
+        await persistence.profiles.put(
+          makeProfile({ id: PROFILE_UUID_2, name: "Inside" })
+        );
+        await persistence.profiles.setActiveId(PROFILE_UUID_2);
+        throw new Error("simulated");
+      })
+    ).rejects.toThrow("simulated");
+
+    expect(await persistence.profiles.getAll()).toEqual([seed]);
+    expect(await persistence.profiles.getActiveId()).toBe(PROFILE_UUID_1);
+  });
+
+  it("reverts writes across multiple repositories on rejection", async () => {
+    const persistence = createInMemoryPersistence();
+
+    await expect(
+      persistence.transaction(async () => {
+        await persistence.profiles.put(makeProfile({ id: PROFILE_UUID_1 }));
+        await persistence.templates.put(makeTemplate({ id: TEMPLATE_UUID_1 }));
+        throw new Error("multi-repo abort");
+      })
+    ).rejects.toThrow("multi-repo abort");
+
+    expect(await persistence.profiles.getAll()).toEqual([]);
+    expect(await persistence.templates.getAll()).toEqual([]);
+  });
+});
+
 // --- UsageRepository ---
 
 describe("UsageRepository", () => {

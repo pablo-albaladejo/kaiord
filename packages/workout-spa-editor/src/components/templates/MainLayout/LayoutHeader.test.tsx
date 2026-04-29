@@ -7,6 +7,10 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
+
+import { db } from "../../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { createProfile } from "../../../application/profile/create-profile";
 import { useLibraryStore } from "../../../store/library-store";
 import { useProfileStore } from "../../../store/profile-store";
 import { useWorkoutStore } from "../../../store/workout-store";
@@ -32,8 +36,11 @@ const createTestKRD = (): KRD => ({
 });
 
 describe("LayoutHeader", () => {
-  // Reset store state before each test
-  beforeEach(() => {
+  // Reset state before each test. The active profile is now read via
+  // `useActiveProfileLive` against Dexie + fake-indexeddb (D5.1), so
+  // both the legacy Zustand mirror AND the Dexie tables must be cleared
+  // until Phase 1B retires the legacy store.
+  beforeEach(async () => {
     useProfileStore.setState({
       profiles: [],
       activeProfileId: null,
@@ -49,6 +56,7 @@ describe("LayoutHeader", () => {
       selectedStepIds: [],
       isEditing: false,
     });
+    await Promise.all([db.table("profiles").clear(), db.table("meta").clear()]);
   });
 
   describe("rendering", () => {
@@ -123,17 +131,18 @@ describe("LayoutHeader", () => {
       expect(screen.getByText(/^profiles$/i)).toBeInTheDocument();
     });
 
-    it("should display active profile name when profile is active", () => {
-      // Arrange
-      const { createProfile, setActiveProfile } = useProfileStore.getState();
-      const profile = createProfile("My Training Profile");
-      setActiveProfile(profile.id);
+    it("should display active profile name when profile is active", async () => {
+      // Arrange — first profile auto-sets active id (createProfile I1).
+      const persistence = createDexiePersistence(db);
+      await createProfile(persistence, "My Training Profile");
 
       // Act
       renderWithProviders(<LayoutHeader />);
 
       // Assert
-      expect(screen.getByText(/my training profile/i)).toBeInTheDocument();
+      expect(
+        await screen.findByText(/my training profile/i)
+      ).toBeInTheDocument();
       expect(screen.queryByText(/^profiles$/i)).not.toBeInTheDocument();
     });
 

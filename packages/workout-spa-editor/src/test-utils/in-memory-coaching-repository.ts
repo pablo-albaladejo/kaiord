@@ -2,7 +2,9 @@
  * In-Memory Coaching Repository
  *
  * Test implementation using a plain Map keyed by composite id. Split into
- * read / write groups so the factory function stays under 40 LOC.
+ * read / write groups so the factory function stays under 40 LOC. Accepts
+ * an externally-owned store so `createInMemoryPersistence` can snapshot
+ * it for transaction rollback.
  */
 
 import type { CoachingRepository } from "../ports/persistence-port";
@@ -53,7 +55,8 @@ const buildWriters = (
   },
 });
 
-export function createInMemoryCoachingRepository(): CoachingRepository {
-  const store: Store = new Map();
+export function createInMemoryCoachingRepository(
+  store: Store = new Map()
+): CoachingRepository {
   return { ...buildReaders(store), ...buildWriters(store) };
 }

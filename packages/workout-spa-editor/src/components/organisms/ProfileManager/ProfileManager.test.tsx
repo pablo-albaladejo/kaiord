@@ -7,16 +7,24 @@
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { db } from "../../../adapters/dexie/dexie-database";
 import { useProfileStore } from "../../../store/profile-store";
 import { renderWithProviders } from "../../../test-utils";
 import { ProfileManager } from "./ProfileManager";
 
 describe("ProfileManager", () => {
-  beforeEach(() => {
+  // Reset both the legacy Zustand mirror AND the Dexie tables. Phase 1A
+  // migrates ProfileEditView (subcomponent) to `useProfileByIdLive`
+  // against Dexie + fake-indexeddb (D5.1) while keeping ProfileManager
+  // itself on the legacy store; the dual reset prevents fake-indexeddb
+  // residue from a prior test from leaking into a new one.
+  beforeEach(async () => {
     useProfileStore.setState({
       profiles: [],
       activeProfileId: null,
     });
+    await Promise.all([db.table("profiles").clear(), db.table("meta").clear()]);
   });
 
   describe("rendering", () => {

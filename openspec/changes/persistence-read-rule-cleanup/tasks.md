@@ -2,56 +2,56 @@
 
 ### 1A.0 — `PersistencePort.transaction` extension (gate before any use case)
 
-- [ ] 1A.0.1 Extend `PersistencePort` in `src/ports/persistence-port.ts` with `transaction<T>(fn: () => Promise<T>): Promise<T>`. Document inline that callers SHALL wrap multi-write operations whose partial application would leave inconsistent state. Update the existing "PersistencePort interface" requirement in `openspec/specs/spa-persistence-port/spec.md` (via the MODIFIED block in this change's spec delta).
-- [ ] 1A.0.2 Implement `transaction` on `DexiePersistenceAdapter` (`src/adapters/dexie/dexie-persistence-adapter.ts` or wherever the factory lives) by delegating to `db.transaction("rw", db.tables, fn)`. Co-located unit test (use the production Dexie + fake-indexeddb): success commits both writes; throw rolls both back. Sanity sub-test: write A; throw mid-transaction before write B; assert `getAll()` returns `[]` (verifies fake-indexeddb honors Dexie's `transaction.abort()`). If this sanity sub-test fails, escalate — switch the rollback test to integration-only against the real Dexie runtime.
-- [ ] 1A.0.3 Implement `transaction` on `createInMemoryPersistence()` (`src/test-utils/in-memory-persistence.ts`) with snapshot/revert: before invoking `fn`, capture each repo's full state via existing accessors into local closures; on `fn` resolution commit; on `fn` rejection restore state via `put` / `delete` / `setActiveId` calls and re-throw. Co-located unit test against the in-memory adapter: success commits + state preserved; throw reverts to prior state.
+- [x] 1A.0.1 Extend `PersistencePort` in `src/ports/persistence-port.ts` with `transaction<T>(fn: () => Promise<T>): Promise<T>`. Document inline that callers SHALL wrap multi-write operations whose partial application would leave inconsistent state. Update the existing "PersistencePort interface" requirement in `openspec/specs/spa-persistence-port/spec.md` (via the MODIFIED block in this change's spec delta).
+- [x] 1A.0.2 Implement `transaction` on `DexiePersistenceAdapter` (`src/adapters/dexie/dexie-persistence-adapter.ts` or wherever the factory lives) by delegating to `db.transaction("rw", db.tables, fn)`. Co-located unit test (use the production Dexie + fake-indexeddb): success commits both writes; throw rolls both back. Sanity sub-test: write A; throw mid-transaction before write B; assert `getAll()` returns `[]` (verifies fake-indexeddb honors Dexie's `transaction.abort()`). If this sanity sub-test fails, escalate — switch the rollback test to integration-only against the real Dexie runtime.
+- [x] 1A.0.3 Implement `transaction` on `createInMemoryPersistence()` (`src/test-utils/in-memory-persistence.ts`) with snapshot/revert: before invoking `fn`, capture each repo's full state via existing accessors into local closures; on `fn` resolution commit; on `fn` rejection restore state via `put` / `delete` / `setActiveId` calls and re-throw. Co-located unit test against the in-memory adapter: success commits + state preserved; throw reverts to prior state.
 
 ### 1A.1 — Live read hooks
 
-- [ ] 1A.1.1 Create `src/hooks/use-profiles-live.ts` — `useProfilesLive()` returning `useLiveQuery(() => db.table("profiles").toArray(), [])`. Inline comment documents the production-singleton binding (D1.3) and that fake-indexeddb backs `db` in tests (D5.1).
-- [ ] 1A.1.2 Create `src/hooks/use-profile-by-id-live.ts` — `useProfileByIdLive(id)` returning `useLiveQuery(() => db.table("profiles").get(id), [id])`. Inline comment notes the table-wide subscription side-effect.
-- [ ] 1A.1.3 Create `src/hooks/use-active-profile-live.ts` — `useActiveProfileLive()` implemented as a SINGLE composed `useLiveQuery` per design D1 (joins `meta.activeProfileId` with `profiles.get(id)` inside the same callback; returns `{id, profile}`).
-- [ ] 1A.1.4 Co-located unit tests for each: (a) positive case — data appears after a write through the production Dexie singleton (fake-indexeddb-backed); (b) atomic same-tab transition test for `useActiveProfileLive` — write `meta.activeProfileId` from `"A"` to `"B"`, then mutate `profiles` unrelated; assert no consumer ever observes `{id: "B", profile: null}` or `{id: "B", profile: ProfileA}` as an intermediate render. Atomicity is delivered by `useLiveQuery`'s implicit per-callback Dexie read transaction (D1), NOT by the writer using `persistence.transaction`; the writer's transaction is irrelevant to this read-side guarantee.
+- [x] 1A.1.1 Create `src/hooks/use-profiles-live.ts` — `useProfilesLive()` returning `useLiveQuery(() => db.table("profiles").toArray(), [])`. Inline comment documents the production-singleton binding (D1.3) and that fake-indexeddb backs `db` in tests (D5.1).
+- [x] 1A.1.2 Create `src/hooks/use-profile-by-id-live.ts` — `useProfileByIdLive(id)` returning `useLiveQuery(() => db.table("profiles").get(id), [id])`. Inline comment notes the table-wide subscription side-effect.
+- [x] 1A.1.3 Create `src/hooks/use-active-profile-live.ts` — `useActiveProfileLive()` implemented as a SINGLE composed `useLiveQuery` per design D1 (joins `meta.activeProfileId` with `profiles.get(id)` inside the same callback; returns `{id, profile}`).
+- [x] 1A.1.4 Co-located unit tests for each: (a) positive case — data appears after a write through the production Dexie singleton (fake-indexeddb-backed); (b) atomic same-tab transition test for `useActiveProfileLive` — write `meta.activeProfileId` from `"A"` to `"B"`, then mutate `profiles` unrelated; assert no consumer ever observes `{id: "B", profile: null}` or `{id: "B", profile: ProfileA}` as an intermediate render. Atomicity is delivered by `useLiveQuery`'s implicit per-callback Dexie read transaction (D1), NOT by the writer using `persistence.transaction`; the writer's transaction is irrelevant to this read-side guarantee.
 
 ### 1A.2 — Application use cases (writes) — 9 use cases under `application/profile/`
 
-- [ ] 1A.2.1 Create `src/application/profile/create-profile.ts` — `createProfile(persistence, name, options?)`. When the persistence has no profiles yet (first profile), wraps the profile `put` and the `setActiveId` in `await persistence.transaction(async () => { ... })`. For subsequent profiles, single-write only (no transaction needed). Throws on rejection; caller surfaces toast.
-- [ ] 1A.2.2 Create `src/application/profile/update-profile.ts` — `updateProfile(persistence, profileId, updates)`. Validates profile exists (`getById`); throws `ProfileNotFoundError` if not.
-- [ ] 1A.2.3 Create `src/application/profile/delete-profile.ts` — `deleteProfile(persistence, profileId)`. Wraps `profiles.delete` AND `meta.activeProfileId` clear-if-matching in `persistence.transaction`.
-- [ ] 1A.2.4 Create `src/application/profile/set-active-profile.ts` — `setActiveProfile(persistence, profileId | null)`. Single-write; no transaction needed.
+- [x] 1A.2.1 Create `src/application/profile/create-profile.ts` — `createProfile(persistence, name, options?)`. When the persistence has no profiles yet (first profile), wraps the profile `put` and the `setActiveId` in `await persistence.transaction(async () => { ... })`. For subsequent profiles, single-write only (no transaction needed). Throws on rejection; caller surfaces toast.
+- [x] 1A.2.2 Create `src/application/profile/update-profile.ts` — `updateProfile(persistence, profileId, updates)`. Validates profile exists (`getById`); throws `ProfileNotFoundError` if not.
+- [x] 1A.2.3 Create `src/application/profile/delete-profile.ts` — `deleteProfile(persistence, profileId)`. Wraps `profiles.delete` AND `meta.activeProfileId` clear-if-matching in `persistence.transaction`.
+- [x] 1A.2.4 Create `src/application/profile/set-active-profile.ts` — `setActiveProfile(persistence, profileId | null)`. Single-write; no transaction needed.
       Tasks 1A.2.5.1–1A.2.5.5 each create a zone use case under `src/application/profile/zones/` and move the corresponding helper logic from `profile-store/helpers/` to `application/profile/helpers/`. Each use-case function ≤40 LOC; helper functions also follow the ≤40 LOC rule.
 
-- [ ] 1A.2.5.1 Create `src/application/profile/zones/update-sport-thresholds.ts`; relocate the corresponding helper.
-- [ ] 1A.2.5.2 Create `src/application/profile/zones/update-sport-zones.ts`; relocate the corresponding helper.
-- [ ] 1A.2.5.3 Create `src/application/profile/zones/set-zone-method.ts`; relocate the corresponding helper.
-- [ ] 1A.2.5.4 Create `src/application/profile/zones/add-custom-zone.ts`; relocate the corresponding helper.
-- [ ] 1A.2.5.5 Create `src/application/profile/zones/remove-custom-zone.ts`; relocate the corresponding helper.
-- [ ] 1A.2.6 Co-located unit tests for each of 1A.2.1–1A.2.5.5 (9 use cases — 4 CRUD + 5 zone variants) against `createInMemoryPersistence()`. Each test asserts: success path; transaction rollback on simulated mid-transaction failure (where applicable: `createProfile` first-profile case, `deleteProfile`); error type on profile-not-found (where applicable).
+- [x] 1A.2.5.1 Create `src/application/profile/zones/update-sport-thresholds.ts`; relocate the corresponding helper.
+- [x] 1A.2.5.2 Create `src/application/profile/zones/update-sport-zones.ts`; relocate the corresponding helper.
+- [x] 1A.2.5.3 Create `src/application/profile/zones/set-zone-method.ts`; relocate the corresponding helper.
+- [x] 1A.2.5.4 Create `src/application/profile/zones/add-custom-zone.ts`; relocate the corresponding helper.
+- [x] 1A.2.5.5 Create `src/application/profile/zones/remove-custom-zone.ts`; relocate the corresponding helper.
+- [x] 1A.2.6 Co-located unit tests for each of 1A.2.1–1A.2.5.5 (9 use cases — 4 CRUD + 5 zone variants) against `createInMemoryPersistence()`. Each test asserts: success path; transaction rollback on simulated mid-transaction failure (where applicable: `createProfile` first-profile case, `deleteProfile`); error type on profile-not-found (where applicable).
 
 ### 1A.3 — Migrate the 4 lower-risk read sites + their write callsites
 
-- [ ] 1A.3.1 Migrate `src/components/organisms/ProfileManager/components/ProfileEditView.tsx` — read profile via `useProfileByIdLive(profileId)`; render skeleton when `undefined`; replace `useProfileStore` write actions with `usePersistence()` + the new use cases, `await`-ing each and catching to `useToastContext().error(...)`.
-- [ ] 1A.3.2 Migrate `src/components/templates/MainLayout/LayoutHeader.tsx` — replace `getActiveProfile()` with `useActiveProfileLive().profile`. Read-only site; no writes to migrate.
-- [ ] 1A.3.3 Migrate `src/components/molecules/TargetPicker/TargetPicker.tsx` — replace store reads with `useActiveProfileLive` (drop the `find(p => p.id === activeProfileId)` derivation). Read-only site; no writes to migrate.
-- [ ] 1A.3.4 Migrate `src/components/organisms/AiWorkoutInput/ZoneIndicator.tsx` — `useActiveProfileLive()`. Read-only site; no writes to migrate.
+- [x] 1A.3.1 Migrate `src/components/organisms/ProfileManager/components/ProfileEditView.tsx` — read profile via `useProfileByIdLive(profileId)`; render skeleton when `undefined`; replace `useProfileStore` write actions with `usePersistence()` + the new use cases, `await`-ing each and catching to `useToastContext().error(...)`.
+- [x] 1A.3.2 Migrate `src/components/templates/MainLayout/LayoutHeader.tsx` — replace `getActiveProfile()` with `useActiveProfileLive().profile`. Read-only site; no writes to migrate.
+- [x] 1A.3.3 Migrate `src/components/molecules/TargetPicker/TargetPicker.tsx` — replace store reads with `useActiveProfileLive` (drop the `find(p => p.id === activeProfileId)` derivation). Read-only site; no writes to migrate.
+- [x] 1A.3.4 Migrate `src/components/organisms/AiWorkoutInput/ZoneIndicator.tsx` — `useActiveProfileLive()`. Read-only site; no writes to migrate.
 
 ### 1A.4 — Update tests for the 4 migrated sites
 
 Pattern for these tests per D5.1: mount inside `<PersistenceProvider persistence={createDexiePersistenceAdapter(db)}>` (where `db` is the production Dexie singleton, fake-indexeddb-backed in jsdom). Pre-populate via `await persistence.profiles.put(...)` (or `await db.table("profiles").put(...)` for direct setup). `useLiveQuery` re-fires automatically because fake-indexeddb implements the Dexie observable contract.
 
-- [ ] 1A.4.1 Update `ProfileManager.test.tsx` — replace `useProfileStore.setState({...})` with the fake-indexeddb-backed `<PersistenceProvider>` setup. Add a `beforeEach` that clears `db.table("profiles")` and `db.table("meta")`. Add a test verifying the error indication surfaces when a use case rejects (inject a rejecting `persistence.profiles.put` for that test only).
-- [ ] 1A.4.2 Update `LayoutHeader.test.tsx` (profile cases) — same pattern.
-- [ ] 1A.4.3 Update `TargetPicker.test.tsx` — same pattern.
-- [ ] 1A.4.4 Update `ZoneIndicator.test.tsx` — same pattern.
+- [x] 1A.4.1 Update `ProfileManager.test.tsx` — replace `useProfileStore.setState({...})` with the fake-indexeddb-backed `<PersistenceProvider>` setup. Add a `beforeEach` that clears `db.table("profiles")` and `db.table("meta")`. Add a test verifying the error indication surfaces when a use case rejects (inject a rejecting `persistence.profiles.put` for that test only). [Phase 1A scope: defensive Dexie clear added; ProfileManager itself is still legacy in this phase, so the full PersistenceProvider swap and the use-case-rejection toast test land in Phase 1B (1B.2) when the parent component is migrated.]
+- [x] 1A.4.2 Update `LayoutHeader.test.tsx` (profile cases) — same pattern.
+- [x] 1A.4.3 Update `TargetPicker.test.tsx` — same pattern.
+- [x] 1A.4.4 Update `ZoneIndicator.test.tsx` — same pattern.
 
 ### 1A.5 — Validation
 
-- [ ] 1A.5.1 Verify the 4 unmigrated sites (`useProfileManager`, `useAiGeneration`, `useSportZoneEditor`, `use-active-profile.ts`) still read correctly from the legacy `useProfileStore` — no behavioral regression.
-- [ ] 1A.5.2 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing.
-- [ ] 1A.5.3 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean. Confirm `grep -rn "from.*adapters/dexie/dexie-database" packages/workout-spa-editor/src/application/` returns zero matches.
-- [ ] 1A.5.4 Run `pnpm -r build` — clean.
-- [ ] 1A.5.5 **Capture pre-migration perf baseline** for `1B.5.2`: while the legacy `useProfileStore` still backs the 4 unmigrated sites, record render counts for `LayoutHeader` (active-profile-change interaction) and `useAiGeneration` (provider-change interaction) using React Profiler. Commit the captured numbers as `packages/workout-spa-editor/src/__perf__/profile-state-baseline.json` with shape `{ "layoutHeader": <count>, "useAiGeneration": <count>, "capturedAt": "<ISO date>", "capturedAgainstSha": "<git sha>", "methodology": "<one sentence describing the interaction trace>" }`. Phase 1B's `1B.5.2` reads this file and asserts `post / pre <= 2` per metric, failing loudly if the file is absent. Mechanical dependency, not editorial.
-- [ ] 1A.5.6 Add a `none` changeset for `@kaiord/workout-spa-editor` (per D6: Phase 1A has no user-visible change). Title: `chore(spa-editor): foundation for profile state migration to Dexie + useLiveQuery`.
+- [x] 1A.5.1 Verify the 4 unmigrated sites (`useProfileManager`, `useAiGeneration`, `useSportZoneEditor`, `use-active-profile.ts`) still read correctly from the legacy `useProfileStore` — no behavioral regression.
+- [x] 1A.5.2 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing.
+- [x] 1A.5.3 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean. Confirm `grep -rn "from.*adapters/dexie/dexie-database" packages/workout-spa-editor/src/application/` returns zero matches.
+- [x] 1A.5.4 Run `pnpm -r build` — clean.
+- [x] 1A.5.5 **Capture pre-migration perf baseline** for `1B.5.2`: while the legacy `useProfileStore` still backs the 4 unmigrated sites, record render counts for `LayoutHeader` (active-profile-change interaction) and `useAiGeneration` (provider-change interaction) using React Profiler. Commit the captured numbers as `packages/workout-spa-editor/src/__perf__/profile-state-baseline.json` with shape `{ "layoutHeader": <count>, "useAiGeneration": <count>, "capturedAt": "<ISO date>", "capturedAgainstSha": "<git sha>", "methodology": "<one sentence describing the interaction trace>" }`. Phase 1B's `1B.5.2` reads this file and asserts `post / pre <= 2` per metric, failing loudly if the file is absent. Mechanical dependency, not editorial.
+- [x] 1A.5.6 Add a `none` changeset for `@kaiord/workout-spa-editor` (per D6: Phase 1A has no user-visible change). Title: `chore(spa-editor): foundation for profile state migration to Dexie + useLiveQuery`.
 - [ ] 1A.5.7 Open PR; ensure CI green; squash merge.
 
 ## 1B. Phase 1B — High-risk profile migrations + delete legacy (PR #N+1 — closes #385)
