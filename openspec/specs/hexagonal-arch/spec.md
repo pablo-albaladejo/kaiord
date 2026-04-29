@@ -1,4 +1,4 @@
-> Synced: 2026-04-27
+> Synced: 2026-04-29
 
 # Hexagonal Architecture
 
@@ -91,6 +91,11 @@ Each package SHALL respect the following dependency rules:
 | `@kaiord/ai`                                                  | `@kaiord/core` only (+ `ai` as peer dependency)                 |
 | `@kaiord/mcp`                                                 | `@kaiord/core` + all format adapters + `@kaiord/garmin-connect` |
 | `@kaiord/cli`                                                 | `@kaiord/core` + all adapters + `@kaiord/garmin-connect`        |
+| `@kaiord/workout-spa-editor`                                  | `@kaiord/core`, `@kaiord/ai`, `@kaiord/fit`, `@kaiord/garmin`, `@kaiord/tcx`, `@kaiord/zwo` |
+| `@kaiord/docs`                                                | `@kaiord/core` + all adapters + `@kaiord/garmin-connect` + `@kaiord/cli` + `@kaiord/mcp` |
+| `@kaiord/landing`                                             | `@kaiord/core`                                                  |
+| `@kaiord/garmin-bridge`                                       | No workspace deps (Chrome extension, communicates via `externally_connectable`) |
+| `@kaiord/train2go-bridge`                                     | No workspace deps (Chrome extension, communicates via `externally_connectable`) |
 
 #### Scenario: Core declares no workspace dependencies
 
