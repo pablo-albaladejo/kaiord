@@ -3,212 +3,50 @@ schema: spec-driven
 context: |
   Kaiord is an open-source TypeScript monorepo for health & fitness data.
   It converts between FIT, TCX, ZWO, GCN, and KRD formats.
+  All code, comments, commits, and docs MUST be in English.
 
-  Architecture: Hexagonal (ports-and-adapters)
-  Layer graph: domain ← ports ← application ← adapters (no rightward imports;
-  enforced by check-architecture.js pre-commit hook — see hexagonal-arch/spec.md scenarios)
-  - domain/ depends on nothing (pure types + Zod schemas)
-  - ports/ depends only on domain (pure interfaces)
-  - application/ depends on domain + ports (use cases, no external libs)
-  - Format adapters (fit, tcx, zwo, garmin) depend on @kaiord/core only, never on other
-    format adapters. They MAY use external libraries.
-  - Higher-level adapters (garmin-connect, cli, mcp) MAY compose multiple format adapters
-    per the dependency table in openspec/specs/hexagonal-arch/spec.md, Requirement: Package Dependencies.
-
-  Decision rule for new code: types/schemas → domain/; interfaces → ports/; orchestration
-  → application/; I/O → adapter package. See openspec/specs/hexagonal-arch/spec.md.
-
-  KRD is the canonical format. All conversions MUST pass through KRD.
-  Direct format-to-format conversion (e.g., FIT → TCX) is forbidden.
-  MIME type: application/vnd.kaiord+json
-  KRD top-level shape: version, type, metadata (required); sessions, laps, records,
-  events, extensions (optional). Normative in openspec/specs/krd-format/spec.md —
-  Requirement: Top-Level Structure.
-  KRD `type` is one of "structured_workout" | "recorded_activity" | "course";
-  adding a value is a breaking change requiring a migration plan.
-  Extensions: reserved namespaces are extensions.structured_workout, extensions.fit,
-  extensions.course, extensions.course_points. Adapters MUST NOT drop unknown namespaces
-  silently; they MUST round-trip them or fail with a descriptive error.
-  See krd-format spec, Requirement: Extension Namespaces, for per-namespace payload shapes.
-
-  Package/folder layout:
-    packages/
-    ├── core/src/
-    │   ├── domain/{types,schemas}/       # pure types + Zod (no external deps)
-    │   ├── ports/                         # interfaces only, depend on domain
-    │   ├── application/                   # use cases, depend on domain + ports
-    │   └── adapters/logger/               # only built-in adapter in core
-    ├── fit|tcx|zwo|garmin/src/adapters/   # format adapter packages
-    │   garmin = GCN payload adapter (KRD ↔ GCN JSON)
-    ├── garmin-connect/src/                # Garmin Connect HTTP client (SSO + push/list workouts)
-    ├── ai/src/                            # AI integration adapter (peer dep on the `ai` SDK)
-    ├── cli/src/                           # CLI commands
-    ├── mcp/src/                           # MCP server
-    ├── garmin-bridge/                     # Chrome extension, Garmin Connect (no workspace deps;
-    │   workout-spa-editor delegates Garmin Connect API access here so credentials
-    │   stay in the user's browser session — see adapter-contracts/spec.md)
-    ├── train2go-bridge/                   # Chrome extension, Train2Go (no workspace deps)
-    ├── workout-spa-editor/                # React SPA workout editor
-    ├── docs/                              # Documentation site
-    └── landing/                           # Landing page
-  Full dependency rules per package: openspec/specs/hexagonal-arch/spec.md, Requirement: Package Dependencies.
-  Zod domain schemas live in packages/core/src/domain/schemas/ and are exported via @kaiord/core.
-  Test fixtures: import from @kaiord/core/test-utils — do not re-implement fixture loading.
-
-  Browser-extension adapters follow the contract in openspec/specs/adapter-contracts/spec.md:
-  background SW + content script + externally_connectable, path/method allowlist enforcement,
-  response shape { ok: boolean, protocolVersion?: number, data?: unknown, error?: string },
-  no credential storage in extension.
-
-  Public API (core):
-    fromBinary / fromText / toBinary / toText — format-agnostic with strategy injection
-    Strategy injection is normative — see hexagonal-arch spec, Requirement: Strategy Injection.
-    Use cases MUST NOT hard-code adapters.
-    Adapters export pre-built (fitReader) and factory (createFitReader) forms.
-
-  Schema naming:
-    KRD field names are camelCase (e.g., subSport, durationType, heartRate).
-    KRD enum values are snake_case (e.g., subSport: "indoor_cycling").
-    Access enum values via .enum: subSportSchema.enum.indoor_cycling.
-    Adapters MAY use camelCase internally but MUST emit snake_case enum values in KRD output.
-    Mappers (*.mapper.ts) = simple transform, no tests required.
-    Converters (*.converter.ts) = complex logic, tests required.
-
-  SPA editor state management:
-    Zustand (workout-store) — editor runtime: undo/redo, selection, clipboard. Never auto-persisted.
-    Dexie + useLiveQuery — all persisted data (workouts, templates, profiles, AI providers, sync state).
-    React useState/useContext — ephemeral UI and shared runtime. One query per page.
-    Rule: "Editor runtime → Zustand. Persisted data → Dexie. Local UI → React state."
-
-  Round-trip tolerances: time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm
-
-  Code style:
-  - TypeScript strict mode, no implicit any
-  - Files <= 100 lines (tests exempt), functions < 40 LOC
-  - Use type not interface, separate type imports
-  - Factory functions preferred over classes
-
-  Quality: zero ESLint warnings, zero TS errors, zero test warnings.
-  Coverage: 80% core, 70% frontend.
-  When existing code violates a rule, fix the code — rules MUST NOT be relaxed
-  (no downgrades from error→warn or warn→off). Boy Scout Rule: leave it cleaner.
-  All code, comments, commits, and docs MUST be in English (regardless of user's language).
-
-  Quick reference:
-    Bootstrap: pnpm install && pnpm -r build
-    Test: pnpm -r test  |  Coverage: pnpm -r test:coverage
-    Pre-commit gate: pnpm lint && pnpm -r test
-    Spec/archive lints (included in pnpm lint): pnpm lint:specs && pnpm lint:archive && pnpm lint:archive-index
-    OpenSpec workflow: /opsx:explore → /opsx:propose → /opsx:apply → /opsx:verify → /opsx:archive
-                      (see CLAUDE.md › OpenSpec Commands for per-command behavior)
-  All workspace commands use -r for recursive (pnpm -r test, pnpm -r build, pnpm -r test:coverage);
-  root-only commands (pnpm lint, pnpm archive:index) drop -r.
-
-  Tooling gotchas:
-  - pnpm lint:specs MUST pass before committing (structural lint + openspec validate --specs).
-  - pnpm archive:index regenerates openspec/changes/archive/README.md — NEVER hand-edit it.
-  - pnpm test:scripts covers scripts/*.test.mjs — every non-trivial repo script needs a co-located test.
-  - Husky pre-commit hooks run pnpm test:scripts and pnpm lint:specs locally — they are mandatory.
-    NEVER use HUSKY=0 or --no-verify.
-  - All changes go through PRs; NEVER push directly to main. Even one-line fixes require a PR.
-  - Conventional commits: feat(scope)/fix(scope)/chore(scope)/test(scope)/docs(scope).
-    Valid scopes: core, fit, tcx, zwo, garmin, garmin-connect, ai, cli, mcp,
-    spa-editor, garmin-bridge, train2go-bridge, openspec, ci, docs, scripts.
-  - Test output capture: pnpm test 2>&1 | tee /tmp/out.txt — using | tail hides stderr warnings.
-  - CLI integration tests that spawn child processes MUST set timeout >=15000ms (resource contention).
-  - Archive folders use YYYY-MM-DD-<slug>/ and the date MUST equal "> Completed: YYYY-MM-DD" in
-    proposal.md. Once assigned, MUST NOT change (preserves git log --follow). Enforced by pnpm lint:archive.
-  - GCN targets: NEVER use zoneNumber (maps to Garmin default zones, not user's custom zones).
-    Always emit explicit targetValueOne/targetValueTwo with the zone's bpm/m-per-s/watt values.
+  Guidelines — read the relevant ones before acting:
+  - guidelines/architecture-hexagonal — layers, packages, ports and adapters, strategy injection
+  - guidelines/krd-format            — canonical format, schemas, extensions, round-trip tolerances
+  - guidelines/design-principles     — naming, TypeScript conventions, mapper vs converter
+  - guidelines/testing-standards     — AAA, per-layer strategy, coverage thresholds
+  - guidelines/xp-tdd-practices      — TDD red→green→refactor, task ordering, inside-out
+  - guidelines/frontend-patterns     — SPA state management, GCN targets, React conventions
+  - guidelines/git-strategy          — PRs, conventional commits, changesets, hook policy
 
 rules:
   proposal:
-    - Include affected @kaiord/* packages
-    - Identify which hexagonal layer(s) the change touches
+    - Read guidelines/architecture-hexagonal before designing
+    - Include affected @kaiord/* packages and identify which hexagonal layer(s) the change touches
     - If the change adds I/O, specify the new port interface BEFORE the adapter that implements it
     - Flag any breaking changes to the public API; if flagged, design.md MUST contain a migration plan
     - Reference existing domain specs in openspec/specs/
-    - Format adapter-to-format-adapter imports are forbidden; higher-level adapters (garmin-connect, cli, mcp)
-      may compose format adapters per the dependency table in hexagonal-arch/spec.md
-    - When touching extensions.*, reference reserved namespaces in openspec/specs/krd-format/spec.md
-      and ensure unknown namespaces are round-tripped, not dropped
-    - When adding a new publishable package, list required updates to .changeset/config.json (linked array),
+    - Format adapter-to-format-adapter imports are forbidden
+    - When touching extensions.*, read guidelines/krd-format and ensure unknown namespaces round-trip
+    - When adding a new publishable package, list required updates to .changeset/config.json,
       .github/workflows/{ci,release,changeset-bot}.yml, and scripts/create-github-releases.js
   specs:
-    - Specs MUST follow the structure in openspec/SPEC_TEMPLATE.md:
-      first non-empty line "> Synced: YYYY-MM-DD", then ## Purpose, ## Requirements,
-      ### Requirement: <Name>, #### Scenario: <Name> with WHEN/THEN bullets.
-      Run pnpm lint:specs before commit.
-    - Scenarios use WHEN/THEN; add GIVEN as a third clause when the precondition is non-trivial
-      (see openspec/SPEC_TEMPLATE.md note 3 for the rationale and examples).
-    - Scenarios MUST be self-contained — no implicit ordering or shared state between sibling scenarios.
-    - Update the "> Synced: YYYY-MM-DD" date whenever a spec is re-verified against the code.
-    - The optional "> Synced: YYYY-MM-DD (slug)" annotation MUST reference an existing folder under
-      openspec/changes/ or openspec/changes/archive/ — the lint validates at run time (moving or
-      archiving a change requires updating any spec that references its slug).
-    - Capability specs MUST NOT use ## ADDED Requirements, ## MODIFIED Requirements, or
-      ## REMOVED Requirements — those headers are reserved for change-delta specs under openspec/changes/<slug>/specs/.
-    - Markdown tables are allowed in requirement bodies for structured enumerations
-      (e.g., the package-dependency mapping in hexagonal-arch spec).
-    - Use RFC 2119 keywords: MUST, MUST NOT, SHALL, SHALL NOT, SHOULD, SHOULD NOT, MAY
-      (REQUIRED/RECOMMENDED/OPTIONAL also accepted).
-      SHALL and MUST are interchangeable; prefer SHALL for capability requirements
-      (matches existing specs) and MUST for ad-hoc constraints in proposals/tasks.
-    - Every Requirement MUST have at least one positive scenario. A rejection/violation scenario
-      is required for any requirement that defines a constraint (MUST NOT, SHALL NOT) or a
-      validation rule. Pure observable-outcome requirements need only a positive scenario.
-    - Reference exact artifacts: KRD field names (camelCase), enum values (snake_case via .enum),
-      Zod schema names (e.g., workoutStepSchema), function names, file paths
-    - When a change touches any Zod schema with .refine() cross-field invariants (e.g.,
-      workoutStepSchema durationType === duration.type, targetType === target.type),
-      scenarios MUST cover each invariant explicitly
+    - Read guidelines/krd-format for field names, enum values, and extension namespace rules
+    - Specs MUST follow openspec/SPEC_TEMPLATE.md structure; run pnpm lint:specs before commit
+    - Scenarios use WHEN/THEN; add GIVEN when the precondition is non-trivial
+    - Scenarios MUST be self-contained — no implicit ordering or shared state between siblings
+    - Use RFC 2119 keywords; prefer SHALL for capability requirements, MUST for ad-hoc constraints
+    - Every Requirement MUST have at least one positive scenario; rejection scenarios required for constraints
     - Include round-trip safety scenarios when touching converters
-      (tolerances per krd-format spec, Requirement: Round-Trip Safety)
     - GCN target scenarios MUST verify explicit targetValueOne/targetValueTwo, never zoneNumber
   design:
+    - Read guidelines/architecture-hexagonal before designing
     - Document which hexagonal layer each decision affects
-    - If adding I/O, specify the port interface BEFORE describing the adapter implementation
+    - Specify port interface BEFORE describing adapter implementation
     - Justify any new external dependency
     - Include migration plan if the proposal flagged a breaking API change
-    - Reference ports/adapters pattern for new I/O
   tasks:
-    - Use checkbox format "- [ ]" for all tasks so /opsx:apply can track progress
-    - Order strictly by layer: domain types/schemas → ports → application use cases → adapters → CLI/MCP wiring → docs/changeset.
-      Within each layer, apply TDD red→green ordering.
-    - Respect file/function size budgets when scoping tasks (100 LOC/file, 40 LOC/function; tests exempt)
-    - TDD: for every implementation task with behavior (entities, use cases, services, components, hooks),
-      the immediately-preceding sibling task MUST be its failing test (RED → GREEN → REFACTOR).
-      Use nested checkbox sub-items:
-        - [ ] parent feature
-          - [ ] write failing test for X
-          - [ ] implement X (minimal passing code)
-          - [ ] refactor X
-    - Bug fixes that change observable behavior MUST start with a failing regression test that
-      reproduces the bug, then the fix that makes it pass. Pure config/wiring fixes follow the
-      no-TDD carve-out at the next bullet.
-    - Tasks without behavior (types, interfaces, DTOs, config, wiring) are plain tasks — no TDD format.
-    - Tasks SHOULD be sized so a single checkbox can be implemented + tested in one focused commit
-      (~30-60 min). Split larger items into nested sub-checkboxes.
-    - Per-layer testing strategy:
-      Domain (schemas, types, pure functions) — unit tests, no mocks, co-located *.test.ts
-      Application (use cases) — unit tests with port stubs/mocks, no real adapters, co-located *.test.ts
-      Adapters — integration tests against real dependencies (FIT SDK, parser, fixtures from @kaiord/core/test-utils), co-located *.test.ts
-      Round-trip — FIT <-> KRD <-> TCX within tolerances per krd-format spec, Requirement: Round-Trip Safety
-      CLI integration — tests that spawn child processes MUST set timeout >=15000ms
-    - Mappers (*.mapper.ts) MUST NOT have tests; converters (*.converter.ts) MUST have tests
-    - One changeset per change (not per package) — packages in the linked array bump together.
-      The changeset is the last commit on the feature branch before requesting review.
-    - Final validation group (last task block, in this order):
-      - [ ] pnpm -r test:coverage  (all passing; thresholds: 80% core, 70% frontend;
-            if a package lacks the test:coverage script, copy from packages/core/package.json first)
-      - [ ] pnpm -r build  (zero warnings)
-      - [ ] pnpm lint  (zero errors/warnings; includes lint:specs, lint:archive, lint:archive-index)
-      - [ ] /opsx:verify against all spec scenarios
-      - [ ] pnpm exec changeset  (for any user-visible change)
-      - [ ] Update affected domain specs in openspec/specs/ and run pnpm lint:specs
+    - Read guidelines/xp-tdd-practices for TDD format and task ordering
+    - Read guidelines/testing-standards for per-layer test strategy
+    - Use checkbox format "- [ ]" for all tasks
   archive:
-    - "Archived changes MUST live under openspec/changes/archive/YYYY-MM-DD-<slug>/"
-    - "The folder date prefix MUST equal the `> Completed: YYYY-MM-DD` marker inside proposal.md"
-    - "The folder date prefix MUST be assigned once at archive time and MUST NOT change afterwards (preserves `git log --follow` history)"
-    - "`openspec/changes/archive/README.md` MUST be treated as auto-generated — contributors MUST run `pnpm archive:index` to refresh it and MUST NOT hand-edit it"
-    - "CI MUST enforce both invariants via `pnpm lint:archive` (folder-date equivalence) and `pnpm lint:archive-index` (index freshness)"
+    - Archived changes MUST live under openspec/changes/archive/YYYY-MM-DD-<slug>/
+    - The folder date prefix MUST equal the "> Completed: YYYY-MM-DD" marker inside proposal.md
+    - The folder date prefix is assigned once at archive time and MUST NOT change afterwards
+    - openspec/changes/archive/README.md is auto-generated — run pnpm archive:index, NEVER hand-edit
+    - CI enforces via pnpm lint:archive (folder-date) and pnpm lint:archive-index (index freshness)
