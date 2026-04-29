@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 
 import { CalendarHeader } from "./CalendarHeader";
 
@@ -20,8 +21,16 @@ vi.mock("../molecules/WorkoutCard/WeekNavigation", () => ({
 }));
 
 vi.mock("../molecules/CoachingCard/CoachingSyncButton", () => ({
-  CoachingSyncButton: ({ label }: { label: string }) => (
-    <button data-testid={`mock-sync-${label}`}>{label}</button>
+  CoachingSyncButton: ({
+    label,
+    onSync,
+  }: {
+    label: string;
+    onSync: () => void;
+  }) => (
+    <button data-testid={`mock-sync-${label}`} onClick={onSync}>
+      {label}
+    </button>
   ),
 }));
 
@@ -112,6 +121,86 @@ describe("CalendarHeader", () => {
     expect(screen.getByTestId("mock-sync-Train2Go")).toBeInTheDocument();
     // The unlinked source must NOT render a Sync button.
     expect(screen.queryByTestId("mock-sync-Unlinked")).not.toBeInTheDocument();
+  });
+
+  it("Manual Sync button bypasses staleness gate", async () => {
+    // The staleness gate (lastSyncedAt < 10 minutes blocks auto-sync) lives
+    // inside useCoachingActivities, NOT inside CalendarHeader. The CalendarHeader
+    // wires the Sync button directly to src.sync(weekStart) — clicking it always
+    // fires sync, regardless of when the last sync ran.
+    const sync = vi.fn();
+    const weekStart = "2026-04-13";
+    const stateAtWeek = {
+      ...baseState,
+      data: { ...baseState.data, days: [weekStart] },
+    } as unknown as Parameters<typeof CalendarHeader>[0]["state"];
+    const coaching = {
+      syncSources: [
+        {
+          id: "train2go",
+          linked: true,
+          connected: true,
+          loading: false,
+          error: null,
+          sync,
+          connect: vi.fn(),
+          label: "Train2Go",
+        },
+      ],
+    } as unknown as Parameters<typeof CalendarHeader>[0]["coaching"];
+    const user = userEvent.setup();
+    render(<CalendarHeader state={stateAtWeek} coaching={coaching} />);
+
+    await user.click(screen.getByTestId("mock-sync-Train2Go"));
+
+    expect(sync).toHaveBeenCalledTimes(1);
+    expect(sync).toHaveBeenCalledWith(weekStart);
+  });
+
+  it("hides the Sync button when active profile has no linked accounts", () => {
+    // Models switching from a Train2Go-linked profile to one with no linked
+    // accounts via two distinct mounts (D4 in design.md): avoids relying on
+    // useLiveQuery / useActiveProfile flush ordering on rerender.
+    const linkedCoaching = {
+      syncSources: [
+        {
+          id: "train2go",
+          linked: true,
+          connected: true,
+          loading: false,
+          error: null,
+          sync: vi.fn(),
+          connect: vi.fn(),
+          label: "Train2Go",
+        },
+      ],
+    } as unknown as Parameters<typeof CalendarHeader>[0]["coaching"];
+
+    const { unmount } = render(
+      <CalendarHeader state={baseState} coaching={linkedCoaching} />
+    );
+
+    expect(screen.getByTestId("mock-sync-Train2Go")).toBeInTheDocument();
+
+    unmount();
+
+    const unlinkedCoaching = {
+      syncSources: [
+        {
+          id: "train2go",
+          linked: false,
+          connected: false,
+          loading: false,
+          error: null,
+          sync: vi.fn(),
+          connect: vi.fn(),
+          label: "Train2Go",
+        },
+      ],
+    } as unknown as Parameters<typeof CalendarHeader>[0]["coaching"];
+    render(<CalendarHeader state={baseState} coaching={unlinkedCoaching} />);
+
+    expect(screen.queryByTestId("mock-sync-Train2Go")).not.toBeInTheDocument();
   });
 
   it("passes batch.pending presence to the cost confirmation's open prop", () => {
