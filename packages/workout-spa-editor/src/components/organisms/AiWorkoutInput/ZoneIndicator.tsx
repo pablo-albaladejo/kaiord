@@ -4,7 +4,7 @@
  * Shows profile name and thresholds for the selected sport in AI form.
  */
 
-import { useProfileStore } from "../../../store/profile-store";
+import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import type { SportKey } from "../../../types/sport-zones";
 import { formatThresholdSummary } from "./zone-indicator-helpers";
 
@@ -13,10 +13,11 @@ type ZoneIndicatorProps = {
 };
 
 export function ZoneIndicator({ sport }: ZoneIndicatorProps) {
-  const profile = useProfileStore((s) => {
-    const active = s.profiles.find((p) => p.id === s.activeProfileId);
-    return active ?? null;
-  });
+  // Live read of the active profile via the Dexie singleton (D1).
+  // `undefined` while loading collapses to `null` so the "No profile
+  // selected" branch renders during the initial paint, matching the
+  // pre-migration empty-store behavior.
+  const profile = useActiveProfileLive()?.profile ?? null;
 
   if (!profile) {
     return (

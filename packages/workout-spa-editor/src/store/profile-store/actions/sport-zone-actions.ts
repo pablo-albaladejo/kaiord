@@ -9,7 +9,7 @@ import type { StateCreator } from "zustand";
 import {
   recalculateZones,
   updateSportConfig,
-} from "../helpers/sport-zone-updater";
+} from "../../../application/profile/helpers/sport-zone-updater";
 import { persistState } from "../persistence";
 import type { ProfileStore } from "../types";
 
