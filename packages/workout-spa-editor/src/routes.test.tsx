@@ -58,12 +58,7 @@ describe("Routing", () => {
   it("renders CalendarPage at /calendar", async () => {
     renderAtPath("/calendar");
 
-    await waitFor(
-      () => {
-        expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
-      },
-      { timeout: 5000 }
-    );
+    expect(await screen.findByText("Welcome to Kaiord")).toBeInTheDocument();
   });
 
   it("renders LibraryPage at /library", async () => {
@@ -77,13 +72,10 @@ describe("Routing", () => {
   it("renders EditorPage at /workout/new", async () => {
     renderAtPath("/workout/new");
 
-    await waitFor(
-      () => {
-        const container = document.querySelector(".space-y-6");
-        expect(container).toBeInTheDocument();
-      },
-      { timeout: 5000 }
-    );
+    await waitFor(() => {
+      const container = document.querySelector(".space-y-6");
+      expect(container).toBeInTheDocument();
+    });
   });
 
   it("redirects / to /calendar", async () => {
