@@ -1,10 +1,16 @@
 import "fake-indexeddb/auto";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup } from "@testing-library/react";
+import { cleanup, configure } from "@testing-library/react";
 import { afterEach, beforeEach, expect, vi } from "vitest";
 
 // Extend Vitest's expect with jest-dom matchers
 expect.extend(matchers);
+
+// RTL default asyncUtilTimeout is 1s; route-level tests mounting React.lazy
+// chunks (CalendarPage, EditorPage) under post-build pre-commit load need more
+// headroom. Bumping globally is the deterministic alternative to per-call
+// `{ timeout: 5000 }` overrides scattered across tests.
+configure({ asyncUtilTimeout: 5000 });
 
 // Mock window.matchMedia for theme tests
 beforeEach(() => {
