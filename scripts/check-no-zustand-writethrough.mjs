@@ -33,12 +33,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
-const SPA_SRC = join(
-  REPO_ROOT,
-  "packages",
-  "workout-spa-editor",
-  "src"
-);
+const SPA_SRC = join(REPO_ROOT, "packages", "workout-spa-editor", "src");
 
 // Allowlisted files (relative to repo root, posix-style) that are
 // permitted to bypass R-DexieImport and R-PersistStateImport. Keep this
@@ -51,7 +46,12 @@ export const ALLOWLIST = new Set([
 ]);
 
 const TS_EXTENSIONS = [".ts", ".tsx"];
-const SKIP_EXTENSIONS = [".test.ts", ".test.tsx", ".stories.ts", ".stories.tsx"];
+const SKIP_EXTENSIONS = [
+  ".test.ts",
+  ".test.tsx",
+  ".stories.ts",
+  ".stories.tsx",
+];
 
 const STATIC_IMPORT_RE =
   /import(?:\s+type)?\s+(?:[\s\S]*?\s+from\s+)?["']([^"']+)["']/g;
@@ -166,8 +166,7 @@ function computeIsDexieBarrel(absResolved) {
   } catch {
     return false;
   }
-  const reExportFromRe =
-    /export\s+(?:\*|\{[^}]*\})\s+from\s+["']([^"']+)["']/g;
+  const reExportFromRe = /export\s+(?:\*|\{[^}]*\})\s+from\s+["']([^"']+)["']/g;
   for (const m of [
     ...source.matchAll(STATIC_IMPORT_RE),
     ...source.matchAll(reExportFromRe),

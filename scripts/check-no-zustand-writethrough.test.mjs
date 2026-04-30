@@ -8,7 +8,13 @@
 // allowlist exemption.
 
 import { strict as assert } from "node:assert";
-import { existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import {
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -39,10 +45,7 @@ beforeEach(() => {
   mkdirSync(storeDir, { recursive: true });
   mkdirSync(applicationDir, { recursive: true });
   mkdirSync(dexieDir, { recursive: true });
-  write(
-    "adapters/dexie/dexie-database.ts",
-    "export const db = {} as const;\n"
-  );
+  write("adapters/dexie/dexie-database.ts", "export const db = {} as const;\n");
 });
 
 afterEach(() => {
@@ -82,7 +85,9 @@ describe("check-no-zustand-writethrough", () => {
     );
     try {
       const violations = runCheck();
-      const hit = violations.find((v) => v.file.endsWith("__alias-fixture-leak.ts"));
+      const hit = violations.find((v) =>
+        v.file.endsWith("__alias-fixture-leak.ts")
+      );
       assert.ok(hit, "expected the alias fixture to be flagged");
       assert.equal(hit.rule, "R-DexieImport");
     } finally {
@@ -108,7 +113,7 @@ describe("check-no-zustand-writethrough", () => {
   test("R-DexieImport: dynamic import() flags the file", () => {
     write(
       "store/dynamic-leak-store.ts",
-      "export const load = async () => {\n  const m = await import(\"../adapters/dexie/dexie-database\");\n  return m.db;\n};\n"
+      'export const load = async () => {\n  const m = await import("../adapters/dexie/dexie-database");\n  return m.db;\n};\n'
     );
     const violations = sandboxRun();
     assert.equal(violations.length, 1);
