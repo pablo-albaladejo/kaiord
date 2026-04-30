@@ -81,7 +81,7 @@ For each issue, look up the failing commit in the issue body, confirm via `gh ru
   - **Destructured dispatch**: scan the file for `const\s*\{\s*([^}]+)\s*\}\s*=\s*useToastContext\(\)` and capture the bound names (e.g., `error`, `success`). Subsequent calls of the form `<bound-name>\(` within the same file are treated as in-scope; their first argument is checked.
   - **Re-bound dispatch**: scan the file for `const\s+([A-Za-z_$][\w$]*)\s*=\s*useToastContext\(\)` and capture the receiver name (e.g., `ctx`). Subsequent member-dispatch calls of the form `<ID>\.\s*(error|success|info|warning)\(` are treated as in-scope.
   - **Multi-binding ambiguity policy**: if a file contains conflicting bindings (e.g., a destructure and a re-bind, or two destructures from different sources), the script treats every potentially-toast `<name>(` or `<name>.<method>(` call as in-scope (false-positive bias is the safe default). The contributor either renames the conflict, refactors, or — last resort — allowlists the file under D9 criteria.
-  Extract the first argument's source text using a balanced-paren scanner that respects string literals (so `toast.error("oops, ).")` parses correctly).
+    Extract the first argument's source text using a balanced-paren scanner that respects string literals (so `toast.error("oops, ).")` parses correctly).
 - [x] 3.2.3 Validate the first argument shape per D3 in this exact order (bare-literal accept comes BEFORE rejection, so `toast.error("URL: example.com")` and `toast.error("a + b")` are accepted as bare literals despite their inner `:` and `+` characters):
   1. Trim leading/trailing whitespace.
   2. **Bare-literal accept first**: if the trimmed text matches `/^"[^"\\]*(?:\\.[^"\\]*)*"$/` or the equivalent single-quote regex, ACCEPT and continue to the next call site. Inner content is irrelevant — the bare-literal cannot interpolate.
@@ -100,11 +100,11 @@ For each issue, look up the failing commit in the issue body, confirm via `gh ru
 - [x] 3.3.1.4 Negative: identifier reference to a non-top-level binding is flagged. Fixture: `try { ... } catch (err) { const msg = err.message; toast.error(msg); }` — `msg` is a function-local const, not top-level, so the depth-1 lookup fails and the call is rejected.
 - [x] 3.3.1.5 Negative: helper-call indirection at definition time is flagged (`const SAVE_FAILED = formatError(err); toast.error(SAVE_FAILED);` — RHS is a `CallExpression`, not a literal).
 - [x] 3.3.1.6 Negative: computed-member dispatch is flagged (`toast["error"](\`Failed: ${err.message}\`)` — the dispatch regex catches the bracket form).
-- [x] 3.3.1.7 Negative: destructured dispatch is flagged (`const { error } = useToastContext(); error(\`Failed: ${err.message}\`);` — the destructure scan binds `error` to the toast context, and the subsequent call is treated as in-scope).
+- [x] 3.3.1.7 Negative: destructured dispatch is flagged (`const { error } = useToastContext(); error(\`Failed: ${err.message}\`);`— the destructure scan binds`error` to the toast context, and the subsequent call is treated as in-scope).
 - [x] 3.3.1.8 Positive: bare string literal containing colons / plus signs is accepted (`toast.error("URL: https://example.com")`, `toast.error("a + b")`) — verifies that bare-literal acceptance runs BEFORE the rejection char-class.
 - [x] 3.3.1.9 Positive: bare SCREAMING_SNAKE_CASE identifier resolving to a top-level string-literal const is accepted (`const SAVE_FAILED_TOAST = "Failed to save"; toast.error(SAVE_FAILED_TOAST);`).
 - [x] 3.3.1.10 Positive: allowlist exemption — an allowlisted file with a template literal passes; the production allowlist is empty, the fixture injects an entry into the exported `ALLOWLIST` Set.
-- [x] 3.3.1.11 Negative: re-bound dispatch is flagged (`const ctx = useToastContext(); ctx.error(\`Failed: ${err.message}\`);` — the re-binding scan binds `ctx` to the toast context, treats `ctx.error(...)` as member dispatch).
+- [x] 3.3.1.11 Negative: re-bound dispatch is flagged (`const ctx = useToastContext(); ctx.error(\`Failed: ${err.message}\`);`— the re-binding scan binds`ctx`to the toast context, treats`ctx.error(...)` as member dispatch).
 - [x] 3.3.1.12 Negative: identifier chain is flagged (`const A = B; const B = "x"; toast.error(A);` — depth-1 lookup of `A` finds the identifier `B` on the RHS, not a string literal).
 
 ### 3.4 — Wire into CI
@@ -194,20 +194,20 @@ For each issue, look up the failing commit in the issue body, confirm via `gh ru
 
 For each scenario in this change's `specs/spa-quality-gates/spec.md` ADDED block, identify the task that delivers the test. The order matches the spec's scenario order:
 
-| # | Scenario | Task that adds the test |
-| - | --- | --- |
-| 1 | Toast string with template-literal interpolation is rejected | 3.3.1.2 |
-| 2 | Concatenation with a closure-captured error is rejected | 3.3.1.3 |
-| 3 | Identifier reference to a `catch` / function-parameter binding is rejected | 3.3.1.4 |
-| 4 | Helper-call indirection at definition time is rejected | 3.3.1.5 |
-| 5 | Computed-member dispatch (`toast["error"]`) is rejected | 3.3.1.6 |
-| 6 | Destructured dispatch (`const { error } = useToastContext()`) is rejected | 3.3.1.7 |
-| 7 | Re-bound dispatch (`const ctx = useToastContext(); ctx.error(...)`) is rejected | 3.3.1.11 |
-| 8 | Identifier chain (`A → B → "x"`) is rejected (depth-1 only) | 3.3.1.12 |
-| 9 | Bare string literal (including inner `:` / `+`) is accepted | 3.3.1.8 |
-| 10 | Bare SCREAMING_SNAKE_CASE identifier with literal RHS is accepted | 3.3.1.9 |
-| 11 | Allowlisted file with a template literal passes (test-injected `ALLOWLIST` Set) | 3.3.1.10 |
-| 12 | Post-rollout codebase passes the static check | 3.3.1.1 |
+| #   | Scenario                                                                        | Task that adds the test |
+| --- | ------------------------------------------------------------------------------- | ----------------------- |
+| 1   | Toast string with template-literal interpolation is rejected                    | 3.3.1.2                 |
+| 2   | Concatenation with a closure-captured error is rejected                         | 3.3.1.3                 |
+| 3   | Identifier reference to a `catch` / function-parameter binding is rejected      | 3.3.1.4                 |
+| 4   | Helper-call indirection at definition time is rejected                          | 3.3.1.5                 |
+| 5   | Computed-member dispatch (`toast["error"]`) is rejected                         | 3.3.1.6                 |
+| 6   | Destructured dispatch (`const { error } = useToastContext()`) is rejected       | 3.3.1.7                 |
+| 7   | Re-bound dispatch (`const ctx = useToastContext(); ctx.error(...)`) is rejected | 3.3.1.11                |
+| 8   | Identifier chain (`A → B → "x"`) is rejected (depth-1 only)                     | 3.3.1.12                |
+| 9   | Bare string literal (including inner `:` / `+`) is accepted                     | 3.3.1.8                 |
+| 10  | Bare SCREAMING_SNAKE_CASE identifier with literal RHS is accepted               | 3.3.1.9                 |
+| 11  | Allowlisted file with a template literal passes (test-injected `ALLOWLIST` Set) | 3.3.1.10                |
+| 12  | Post-rollout codebase passes the static check                                   | 3.3.1.1                 |
 
 - [ ] 5.5.1 Confirm the table above is bidirectionally in sync with the final spec scenarios at archive time: every scenario maps to a task AND every fixture (3.3.1.X) maps to a scenario. Adjust either side if drift is detected during the rollout.
 
