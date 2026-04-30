@@ -1,37 +1,26 @@
 /**
  * useSaveToLibrary Hook
  *
- * Handles the logic for saving workouts to the library.
+ * Persists the current workout as a template via the `addTemplate`
+ * application use case. Rejections surface through the toast context
+ * so the user sees a clear error indication instead of a silent
+ * stale-success state.
  */
 
 import { useState } from "react";
 
+import { addTemplate } from "../../../application/library/add-template";
+import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
-import { useLibrary } from "../../../hooks/use-library";
 import type { KRD } from "../../../types/krd";
 import type { DifficultyLevel } from "../../../types/workout-library";
-import { calculateWorkoutDuration } from "./calculate-duration";
-import { generateThumbnail } from "./generate-thumbnail";
-
-function extractSportFromWorkout(workout: KRD): string {
-  const workoutData = workout.extensions?.structured_workout;
-  return workoutData &&
-    typeof workoutData === "object" &&
-    "sport" in workoutData &&
-    typeof workoutData.sport === "string"
-    ? workoutData.sport
-    : "cycling";
-}
-
-function parseTags(tagsString: string): string[] {
-  return tagsString
-    .split(",")
-    .map((t) => t.trim())
-    .filter((t) => t.length > 0);
-}
+import {
+  buildAddTemplateOptions,
+  extractSportFromWorkout,
+} from "./save-to-library-helpers";
 
 export function useSaveToLibrary(workout: KRD, onClose: () => void) {
-  const { addTemplate } = useLibrary();
+  const persistence = usePersistence();
   const { success, error: showError } = useToastContext();
 
   const [name, setName] = useState("");
@@ -40,35 +29,35 @@ export function useSaveToLibrary(workout: KRD, onClose: () => void) {
   const [notes, setNotes] = useState("");
   const [isSaving, setIsSaving] = useState(false);
 
+  const resetForm = () => {
+    setName("");
+    setTags("");
+    setDifficulty("");
+    setNotes("");
+  };
+
   const handleSave = async () => {
-    if (!name.trim()) return;
+    const trimmedName = name.trim();
+    if (!trimmedName) return;
 
     setIsSaving(true);
-
     try {
-      const thumbnailData = await generateThumbnail(workout);
-      const tagArray = parseTags(tags);
-      const duration = calculateWorkoutDuration(workout);
+      const options = await buildAddTemplateOptions(workout, {
+        tags,
+        difficulty,
+        notes,
+      });
       const sport = extractSportFromWorkout(workout);
 
-      addTemplate(name.trim(), sport, workout, {
-        tags: tagArray,
-        difficulty: difficulty || undefined,
-        duration,
-        notes: notes.trim() || undefined,
-        thumbnailData,
-      });
+      await addTemplate(persistence, trimmedName, sport, workout, options);
 
       success(
         "Workout Saved",
-        `"${name.trim()}" has been added to your library`,
+        `"${trimmedName}" has been added to your library`,
         { duration: 3000 }
       );
 
-      setName("");
-      setTags("");
-      setDifficulty("");
-      setNotes("");
+      resetForm();
       onClose();
     } catch (err) {
       showError(

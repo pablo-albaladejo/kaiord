@@ -12,6 +12,7 @@ import { TagFilterButtons } from "./TagFilterButtons";
 
 type LibraryDialogContentProps = {
   templates: WorkoutTemplate[];
+  isTemplatesLoading: boolean;
   previewTemplate: WorkoutTemplate | null;
   filters: LibraryFiltersType;
   loader: LibraryLoader;
@@ -23,6 +24,7 @@ type LibraryDialogContentProps = {
 
 export function LibraryDialogContent({
   templates,
+  isTemplatesLoading,
   previewTemplate,
   filters,
   loader,
@@ -57,6 +59,7 @@ export function LibraryDialogContent({
 
       <LibraryContent
         templates={templates}
+        isTemplatesLoading={isTemplatesLoading}
         filteredTemplates={filters.filteredAndSortedTemplates}
         hasActiveFilters={filters.hasActiveFilters}
         onLoadWorkout={loader.handleLoadWorkout}

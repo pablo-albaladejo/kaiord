@@ -9,13 +9,20 @@
  * - Delete action removes template
  */
 
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
+import { renderWithProviders } from "../../test-utils";
 import type { WorkoutTemplate } from "../../types/workout-library";
 import LibraryPage from "./LibraryPage";
+
+const renderPage = () =>
+  renderWithProviders(<LibraryPage />, {
+    persistence: createDexiePersistence(db),
+  });
 
 function makeTemplate(
   overrides: Partial<WorkoutTemplate> = {}
@@ -54,7 +61,7 @@ describe("LibraryPage", () => {
         makeTemplate({ id: "t2", name: "Bike Intervals", sport: "cycling" }),
       ]);
 
-    render(<LibraryPage />);
+    renderPage();
 
     await waitFor(() => {
       expect(screen.getByText("Morning Run")).toBeInTheDocument();
@@ -63,7 +70,7 @@ describe("LibraryPage", () => {
   });
 
   it("shows empty state when no templates", async () => {
-    render(<LibraryPage />);
+    renderPage();
 
     await waitFor(() => {
       expect(screen.getByText("Your library is empty")).toBeInTheDocument();
@@ -79,7 +86,7 @@ describe("LibraryPage", () => {
       ]);
 
     const user = userEvent.setup();
-    render(<LibraryPage />);
+    renderPage();
 
     await waitFor(() => {
       expect(screen.getByText("Morning Run")).toBeInTheDocument();
@@ -103,7 +110,7 @@ describe("LibraryPage", () => {
       ]);
 
     const user = userEvent.setup();
-    render(<LibraryPage />);
+    renderPage();
 
     await waitFor(() => {
       expect(screen.getByText("Morning Run")).toBeInTheDocument();
@@ -124,7 +131,7 @@ describe("LibraryPage", () => {
       .add(makeTemplate({ id: "t1", name: "Easy Ride", sport: "cycling" }));
 
     const user = userEvent.setup();
-    render(<LibraryPage />);
+    renderPage();
 
     await waitFor(() => {
       expect(screen.getByText("Easy Ride")).toBeInTheDocument();

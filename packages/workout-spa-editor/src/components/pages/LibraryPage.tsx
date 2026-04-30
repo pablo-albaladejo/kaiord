@@ -1,24 +1,37 @@
 /**
  * LibraryPage - Routed page for workout library.
  *
- * Uses useLiveQuery for Dexie-backed templates.
- * Supports search, filter, delete, and schedule actions.
+ * Reads templates via `useLibraryTemplatesLive` (Dexie + useLiveQuery)
+ * and dispatches deletes through the `deleteTemplate` application use
+ * case via `usePersistence()`. Errors surface through the toast context.
  */
 
-import { db } from "../../adapters/dexie/dexie-database";
+import { deleteTemplate } from "../../application/library/delete-template";
+import { usePersistence } from "../../contexts/persistence-context";
+import { useToastContext } from "../../contexts/ToastContext";
+import { useLibraryTemplatesLive } from "../../hooks/use-library-templates-live";
 import { ScheduleDateDialog } from "../molecules/ScheduleDateDialog";
-import { useLibraryTemplates } from "./library-hooks";
 import { LibraryPageContent } from "./LibraryPageContent";
 import { LibraryPageHeader } from "./LibraryPageHeader";
 import { useScheduleTemplate } from "./use-schedule-template";
 
 export default function LibraryPage() {
-  const templates = useLibraryTemplates();
+  const templates = useLibraryTemplatesLive();
+  const persistence = usePersistence();
+  const { error: showError } = useToastContext();
   const { scheduling, openScheduler, closeScheduler, confirmSchedule } =
     useScheduleTemplate();
 
   const handleDelete = async (id: string) => {
-    await db.table("templates").delete(id);
+    try {
+      await deleteTemplate(persistence, id);
+    } catch (err) {
+      showError(
+        "Delete Failed",
+        err instanceof Error ? err.message : "Failed to delete template",
+        { duration: 5000 }
+      );
+    }
   };
 
   if (templates === undefined) {
