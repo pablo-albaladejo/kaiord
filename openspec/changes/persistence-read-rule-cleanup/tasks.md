@@ -207,7 +207,7 @@ Pattern for these tests per D5.1: mount inside `<PersistenceProvider persistence
 - [x] 3.7.5 Run `pnpm -r build` — clean.
 - [x] 3.7.6 Update internal docs.
 - [x] 3.7.7 Add a `patch` changeset titled `refactor(spa-editor): split AI store into persisted slice (Dexie/useLiveQuery) and runtime slice (Zustand)`.
-- [x] 3.7.8 Open PR; ensure CI green; squash merge. Verify in production: AI providers reload after refresh; generation status still updates live; no encryption regression.
+- [ ] 3.7.8 Open PR; ensure CI green; squash merge. Verify in production: AI providers reload after refresh; generation status still updates live; no encryption regression.
 
 ## 4. Phase 4 — Mechanical guard + final consolidation (PR #N+4)
 

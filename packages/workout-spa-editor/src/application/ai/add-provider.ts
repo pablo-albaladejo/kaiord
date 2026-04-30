@@ -21,9 +21,6 @@ export type AddProviderInput = {
   label: string;
 };
 
-const generateId = (): string =>
-  `llm_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
 export const addProvider = async (
   persistence: PersistencePort,
   input: AddProviderInput
@@ -31,7 +28,7 @@ export const addProvider = async (
   const existing = await persistence.aiProviders.getAll();
   const provider: LlmProviderConfig = {
     ...input,
-    id: generateId(),
+    id: crypto.randomUUID(),
     isDefault: existing.length === 0,
   };
   await persistence.aiProviders.put(provider);

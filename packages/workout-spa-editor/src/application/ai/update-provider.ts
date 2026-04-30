@@ -16,6 +16,17 @@ export type UpdateProviderInput = Partial<
   Pick<LlmProviderConfig, "type" | "apiKey" | "model" | "label">
 >;
 
+// Drop `undefined` values so callers cannot blank required fields by
+// passing a half-built object (e.g. `{ apiKey: undefined }` would
+// otherwise erase the stored key).
+const stripUndefined = <T extends object>(o: T): Partial<T> => {
+  const out: Partial<T> = {};
+  for (const [k, v] of Object.entries(o) as Array<[keyof T, T[keyof T]]>) {
+    if (v !== undefined) out[k] = v;
+  }
+  return out;
+};
+
 export const updateProvider = async (
   persistence: PersistencePort,
   providerId: string,
@@ -24,7 +35,10 @@ export const updateProvider = async (
   const existing = await persistence.aiProviders.getById(providerId);
   if (!existing) throw new ProviderNotFoundError(providerId);
 
-  const updated: LlmProviderConfig = { ...existing, ...updates };
+  const updated: LlmProviderConfig = {
+    ...existing,
+    ...stripUndefined(updates),
+  };
   await persistence.aiProviders.put(updated);
   return updated;
 };
