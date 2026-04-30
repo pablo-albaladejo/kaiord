@@ -118,7 +118,11 @@ describe("WorkoutLibrary", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockDeleteTemplate.mockResolvedValue(undefined);
-    vi.mocked(useLibraryTemplatesLive).mockReturnValue(mockTemplates);
+    // Return a fresh array on every render so an in-place mutation in
+    // one test cannot leak into the next.
+    vi.mocked(useLibraryTemplatesLive).mockImplementation(() => [
+      ...mockTemplates,
+    ]);
   });
 
   describe("rendering", () => {
