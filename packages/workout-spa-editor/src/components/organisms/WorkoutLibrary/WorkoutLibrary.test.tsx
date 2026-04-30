@@ -13,18 +13,39 @@
 import { render, screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useLibrary } from "../../../hooks/use-library";
+
+import { deleteTemplate } from "../../../application/library/delete-template";
+import { PersistenceProvider } from "../../../contexts/persistence-context";
+import { useLibraryTemplatesLive } from "../../../hooks/use-library-templates-live";
+import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import type { WorkoutTemplate } from "../../../types/workout-library";
+import { AppToastProvider } from "../../providers/AppToastProvider";
 import { WorkoutLibrary } from "./WorkoutLibrary";
 
-// Mock the library hook
-vi.mock("../../../hooks/use-library");
+// Phase 2: useWorkoutLibrary reads via useLibraryTemplatesLive and
+// dispatches deletes through the deleteTemplate use case. Mock both
+// so we can drive the test fixtures without exercising Dexie.
+vi.mock("../../../hooks/use-library-templates-live", () => ({
+  useLibraryTemplatesLive: vi.fn(),
+}));
+
+vi.mock("../../../application/library/delete-template", () => ({
+  deleteTemplate: vi.fn().mockResolvedValue(undefined),
+}));
+
+const renderLibrary = (props: React.ComponentProps<typeof WorkoutLibrary>) =>
+  render(
+    <AppToastProvider>
+      <PersistenceProvider persistence={createInMemoryPersistence()}>
+        <WorkoutLibrary {...props} />
+      </PersistenceProvider>
+    </AppToastProvider>
+  );
 
 describe("WorkoutLibrary", () => {
   const mockOnOpenChange = vi.fn();
   const mockOnLoadWorkout = vi.fn();
-  const mockDeleteTemplate = vi.fn();
-  const mockGetAllTags = vi.fn();
+  const mockDeleteTemplate = vi.mocked(deleteTemplate);
 
   const mockTemplates: Array<WorkoutTemplate> = [
     {
@@ -97,36 +118,18 @@ describe("WorkoutLibrary", () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    mockGetAllTags.mockReturnValue([
-      "easy",
-      "recovery",
-      "hard",
-      "intervals",
-      "technique",
-    ]);
-    vi.mocked(useLibrary).mockReturnValue({
-      templates: mockTemplates,
-      deleteTemplate: mockDeleteTemplate,
-      getAllTags: mockGetAllTags,
-      addTemplate: vi.fn(),
-      updateTemplate: vi.fn(),
-      getTemplate: vi.fn(),
-      searchTemplates: vi.fn(),
-      filterByTags: vi.fn(),
-      filterBySport: vi.fn(),
-    });
+    mockDeleteTemplate.mockResolvedValue(undefined);
+    vi.mocked(useLibraryTemplatesLive).mockReturnValue(mockTemplates);
   });
 
   describe("rendering", () => {
     it("should render with workout grid", () => {
       // Arrange & Act
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Assert
       expect(screen.getByText("Workout Library")).toBeInTheDocument();
@@ -138,26 +141,14 @@ describe("WorkoutLibrary", () => {
 
     it("should render empty state when no workouts", () => {
       // Arrange
-      vi.mocked(useLibrary).mockReturnValue({
-        templates: [],
-        deleteTemplate: mockDeleteTemplate,
-        getAllTags: vi.fn().mockReturnValue([]),
-        addTemplate: vi.fn(),
-        updateTemplate: vi.fn(),
-        getTemplate: vi.fn(),
-        searchTemplates: vi.fn(),
-        filterByTags: vi.fn(),
-        filterBySport: vi.fn(),
-      });
+      vi.mocked(useLibraryTemplatesLive).mockReturnValue([]);
 
       // Act
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Assert
       expect(screen.getByText("Your library is empty")).toBeInTheDocument();
@@ -170,13 +161,11 @@ describe("WorkoutLibrary", () => {
 
     it("should render workout cards with correct information", () => {
       // Arrange & Act
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Assert
       expect(screen.getByText("Morning Run")).toBeInTheDocument();
@@ -189,13 +178,11 @@ describe("WorkoutLibrary", () => {
 
     it("should render difficulty badges", () => {
       // Arrange & Act
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Assert
       const cards = screen.getAllByTestId("workout-card");
@@ -208,13 +195,11 @@ describe("WorkoutLibrary", () => {
 
     it("should render tags for each workout", () => {
       // Arrange & Act
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Assert
       const cards = screen.getAllByTestId("workout-card");
@@ -229,13 +214,11 @@ describe("WorkoutLibrary", () => {
     it("should filter workouts by search query", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const searchInput = screen.getByPlaceholderText("Search workouts...");
@@ -252,13 +235,11 @@ describe("WorkoutLibrary", () => {
     it("should show no results message when search has no matches", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const searchInput = screen.getByPlaceholderText("Search workouts...");
@@ -276,13 +257,11 @@ describe("WorkoutLibrary", () => {
     it("should be case insensitive", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const searchInput = screen.getByPlaceholderText("Search workouts...");
@@ -299,13 +278,11 @@ describe("WorkoutLibrary", () => {
     it("should filter workouts by selected tags", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const easyTagButton = screen.getAllByRole("button", { name: "easy" })[0];
@@ -322,13 +299,11 @@ describe("WorkoutLibrary", () => {
     it("should filter by multiple tags (AND logic)", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const easyTagButton = screen.getAllByRole("button", { name: "easy" })[0];
@@ -349,13 +324,11 @@ describe("WorkoutLibrary", () => {
     it("should toggle tag selection", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const easyTagButton = screen.getAllByRole("button", { name: "easy" })[0];
@@ -372,13 +345,11 @@ describe("WorkoutLibrary", () => {
   describe("sorting", () => {
     it("should sort by date descending by default", () => {
       // Arrange & Act
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Assert
       const cards = screen.getAllByTestId("workout-card");
@@ -392,13 +363,11 @@ describe("WorkoutLibrary", () => {
     it("should sort by name descending by default", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const sortBySelect = screen.getByLabelText("Sort By");
@@ -419,13 +388,11 @@ describe("WorkoutLibrary", () => {
     it("should toggle sort direction", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const sortBySelect = screen.getByLabelText("Sort By");
@@ -448,13 +415,11 @@ describe("WorkoutLibrary", () => {
     it("should sort by difficulty", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Verify initial order (date descending)
       let cards = screen.getAllByTestId("workout-card");
@@ -483,14 +448,12 @@ describe("WorkoutLibrary", () => {
     it("should call onLoadWorkout immediately when no current workout", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-          hasCurrentWorkout={false}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+        hasCurrentWorkout: false,
+      });
 
       // Act
       const cards = screen.getAllByTestId("workout-card");
@@ -508,14 +471,12 @@ describe("WorkoutLibrary", () => {
     it("should show confirmation dialog when current workout exists", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-          hasCurrentWorkout={true}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+        hasCurrentWorkout: true,
+      });
 
       // Act
       const cards = screen.getAllByTestId("workout-card");
@@ -539,14 +500,12 @@ describe("WorkoutLibrary", () => {
     it("should load workout when confirmed", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-          hasCurrentWorkout={true}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+        hasCurrentWorkout: true,
+      });
 
       // Act
       const cards = screen.getAllByTestId("workout-card");
@@ -569,14 +528,12 @@ describe("WorkoutLibrary", () => {
     it("should cancel load when Cancel is clicked", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-          hasCurrentWorkout={true}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+        hasCurrentWorkout: true,
+      });
 
       // Act
       const cards = screen.getAllByTestId("workout-card");
@@ -596,14 +553,12 @@ describe("WorkoutLibrary", () => {
     it("should show confirmation when loading from preview dialog", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-          hasCurrentWorkout={true}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+        hasCurrentWorkout: true,
+      });
 
       // Act
       const cards = screen.getAllByTestId("workout-card");
@@ -630,13 +585,11 @@ describe("WorkoutLibrary", () => {
     it("should show confirmation dialog when delete is clicked", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const cards = screen.getAllByTestId("workout-card");
@@ -654,13 +607,11 @@ describe("WorkoutLibrary", () => {
     it("should delete workout when confirmed", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const cards = screen.getAllByTestId("workout-card");
@@ -673,19 +624,17 @@ describe("WorkoutLibrary", () => {
 
       // Assert
       // Cards are sorted by date desc, so first card is Easy Swim (id: "3")
-      expect(mockDeleteTemplate).toHaveBeenCalledWith("3");
+      expect(mockDeleteTemplate).toHaveBeenCalledWith(expect.anything(), "3");
     });
 
     it("should cancel delete when Cancel is clicked", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const cards = screen.getAllByTestId("workout-card");
@@ -705,13 +654,11 @@ describe("WorkoutLibrary", () => {
     it("should show preview dialog when Preview button is clicked", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const cards = screen.getAllByTestId("workout-card");
@@ -736,13 +683,11 @@ describe("WorkoutLibrary", () => {
     it("should load workout from preview dialog", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const cards = screen.getAllByTestId("workout-card");
@@ -766,13 +711,11 @@ describe("WorkoutLibrary", () => {
     it("should close preview dialog", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const cards = screen.getAllByTestId("workout-card");
@@ -794,13 +737,11 @@ describe("WorkoutLibrary", () => {
   describe("results count", () => {
     it("should display correct results count", () => {
       // Arrange & Act
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Assert
       expect(screen.getByText("Showing 3 of 3 workouts")).toBeInTheDocument();
@@ -809,13 +750,11 @@ describe("WorkoutLibrary", () => {
     it("should update results count when filtered", async () => {
       // Arrange
       const user = userEvent.setup();
-      render(
-        <WorkoutLibrary
-          open={true}
-          onOpenChange={mockOnOpenChange}
-          onLoadWorkout={mockOnLoadWorkout}
-        />
-      );
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
 
       // Act
       const searchInput = screen.getByPlaceholderText("Search workouts...");
