@@ -59,40 +59,40 @@ Pattern for these tests per D5.1: mount inside `<PersistenceProvider persistence
 
 ### 1B.1 — Migrate the 4 high-risk read sites + their write callsites
 
-- [ ] 1B.1.1 Migrate `src/components/organisms/ProfileManager/useProfileManager.ts` — read `profiles` via `useProfilesLive()`, `activeProfileId` via `useActiveProfileLive().id`. Replace every Zustand action callsite with the application use cases injected via `usePersistence()`. `await` the use cases; surface failures via `useToastContext().error(...)`.
-- [ ] 1B.1.2 Migrate `src/components/organisms/AiWorkoutInput/useAiGeneration.ts` — replace `getActiveProfile` callback with the `useLatestRef` pattern: introduce (if absent) `src/hooks/use-latest-ref.ts` exporting `useLatestRef<T>(value: T): { readonly current: T }` (`useRef` + `useEffect` to keep `.current` in sync each render); confirm via `grep -rn "useLatestRef" packages/workout-spa-editor/src` whether it exists and either reuse or create. The hook lets the LLM call read the latest profile snapshot at call time without re-subscribing the LLM-call closure on every profile change (which would cancel in-flight generation). Co-located unit test for `useLatestRef`.
-- [ ] 1B.1.3 Migrate `src/components/organisms/ZoneEditor/hooks/useSportZoneEditor.ts` — read profile via `useProfileByIdLive(profileId)`; replace zone action calls with the 5 zone use cases injected via `usePersistence()`; `await` and surface errors via toast.
+- [x] 1B.1.1 Migrate `src/components/organisms/ProfileManager/useProfileManager.ts` — read `profiles` via `useProfilesLive()`, `activeProfileId` via `useActiveProfileLive().id`. Replace every Zustand action callsite with the application use cases injected via `usePersistence()`. `await` the use cases; surface failures via `useToastContext().error(...)`.
+- [x] 1B.1.2 Migrate `src/components/organisms/AiWorkoutInput/useAiGeneration.ts` — replace `getActiveProfile` callback with the `useLatestRef` pattern: introduce (if absent) `src/hooks/use-latest-ref.ts` exporting `useLatestRef<T>(value: T): { readonly current: T }` (`useRef` + `useEffect` to keep `.current` in sync each render); confirm via `grep -rn "useLatestRef" packages/workout-spa-editor/src` whether it exists and either reuse or create. The hook lets the LLM call read the latest profile snapshot at call time without re-subscribing the LLM-call closure on every profile change (which would cancel in-flight generation). Co-located unit test for `useLatestRef`.
+- [x] 1B.1.3 Migrate `src/components/organisms/ZoneEditor/hooks/useSportZoneEditor.ts` — read profile via `useProfileByIdLive(profileId)`; replace zone action calls with the 5 zone use cases injected via `usePersistence()`; `await` and surface errors via toast.
 
 ### 1B.2 — Update tests for the 3 high-risk component sites
 
-- [ ] 1B.2.1 Update `useProfileManager` tests (or `ProfileManager.test.tsx` profile-creation/deletion cases extended in 1A.4) — switch to the fake-indexeddb-backed pattern.
-- [ ] 1B.2.2 Update `SportZoneEditor.test.tsx` — switch to the fake-indexeddb-backed pattern; mock the 5 zone use cases via `vi.mock` for action-success / action-failure scenarios.
-- [ ] 1B.2.3 Update `src/components/organisms/AiWorkoutInput/useAiGeneration.analytics.test.ts` (file confirmed to exist at this path) to the fake-indexeddb-backed pattern + pre-populated active profile.
-- [ ] 1B.2.4 Migrate assertions from `store/profile-store.test.ts`, `store/profile-store/sport-zone-actions.test.ts`, and `store/profile-store/default-sport-zones.test.ts` to `application/profile/*.test.ts` against the new use cases. Delete the legacy test files after migration confirms equivalent coverage.
+- [x] 1B.2.1 Update `useProfileManager` tests (or `ProfileManager.test.tsx` profile-creation/deletion cases extended in 1A.4) — switch to the fake-indexeddb-backed pattern.
+- [x] 1B.2.2 Update `SportZoneEditor.test.tsx` — switch to the fake-indexeddb-backed pattern; mock the 5 zone use cases via `vi.mock` for action-success / action-failure scenarios.
+- [x] 1B.2.3 Update `src/components/organisms/AiWorkoutInput/useAiGeneration.analytics.test.ts` (file confirmed to exist at this path) to the fake-indexeddb-backed pattern + pre-populated active profile.
+- [x] 1B.2.4 Migrate assertions from `store/profile-store.test.ts`, `store/profile-store/sport-zone-actions.test.ts`, and `store/profile-store/default-sport-zones.test.ts` to `application/profile/*.test.ts` against the new use cases. Delete the legacy test files after migration confirms equivalent coverage. (Behavior change documented: the new `deleteProfile` use case clears `meta.activeProfileId` when it matched the deleted id; the legacy "reassign to first remaining profile" semantic is intentionally dropped per the design `clear-if-matching` rule. The user re-selects an active profile after deletion.)
 
 ### 1B.3 — #385 regression tests
 
-- [ ] 1B.3.1 Add a test under the calendar-header-equivalent component (locate via `grep -rn "CalendarHeader" packages/workout-spa-editor/src/components`): render with no linked accounts in the fake-indexeddb-backed Dexie; call `linkAccount` via the same persistence; `waitFor` the Sync button to appear without re-rendering the component. (Locks in "toast and Sync button consistency" — Connect Train2Go scenario.)
-- [ ] 1B.3.2 Add a test: pre-populate Dexie with two profiles + a `meta.activeProfileId`, mount Profile Manager; assert both profiles appear and the active one is marked active. (Locks in "refresh shows persisted profiles".)
-- [ ] 1B.3.3 Add a test: mount a same-tab consumer reading `useActiveProfileLive()`; trigger `setActiveProfile(persistence, "B")` synchronously from a sibling component (NOT cross-tab); assert the consumer never observes `{id: "B", profile: <profileA-data>}` or `{id: "B", profile: null}`.
+- [x] 1B.3.1 Add a test under the calendar-header-equivalent component (locate via `grep -rn "CalendarHeader" packages/workout-spa-editor/src/components`): render with no linked accounts in the fake-indexeddb-backed Dexie; call `linkAccount` via the same persistence; `waitFor` the Sync button to appear without re-rendering the component. (Locks in "toast and Sync button consistency" — Connect Train2Go scenario.) — Implemented in `src/__regressions__/issue-385.test.tsx` (1B.3.1 case).
+- [x] 1B.3.2 Add a test: pre-populate Dexie with two profiles + a `meta.activeProfileId`, mount Profile Manager; assert both profiles appear and the active one is marked active. (Locks in "refresh shows persisted profiles".) — `issue-385.test.tsx` 1B.3.2 case.
+- [x] 1B.3.3 Add a test: mount a same-tab consumer reading `useActiveProfileLive()`; trigger `setActiveProfile(persistence, "B")` synchronously from a sibling component (NOT cross-tab); assert the consumer never observes `{id: "B", profile: <profileA-data>}` or `{id: "B", profile: null}`. — `issue-385.test.tsx` 1B.3.3 case.
 
 ### 1B.4 — Delete legacy
 
-- [ ] 1B.4.1 Delete `src/store/profile-store.ts`.
-- [ ] 1B.4.2 Delete `src/store/profile-store/` directory recursively.
-- [ ] 1B.4.3 Delete `src/hooks/use-active-profile.ts`. Update all callers to import `useActiveProfileLive` from `src/hooks/use-active-profile-live.ts`.
-- [ ] 1B.4.4 Verify zero references to `useProfileStore` via `grep -rn "useProfileStore" packages/workout-spa-editor/src`; verify zero stale imports of the deleted shim via `grep -rnE "from ['\"](.*)hooks/use-active-profile['\"]" packages/workout-spa-editor/src` returns zero matches (only `use-active-profile-live` imports remain). `pnpm exec tsc --noEmit` clean.
+- [x] 1B.4.1 Delete `src/store/profile-store.ts`.
+- [x] 1B.4.2 Delete `src/store/profile-store/` directory recursively.
+- [x] 1B.4.3 Delete `src/hooks/use-active-profile.ts`. Update all callers to import `useActiveProfileLive` from `src/hooks/use-active-profile-live.ts`.
+- [x] 1B.4.4 Verify zero references to `useProfileStore` via `grep -rn "useProfileStore" packages/workout-spa-editor/src`; verify zero stale imports of the deleted shim via `grep -rnE "from ['\"](.*)hooks/use-active-profile['\"]" packages/workout-spa-editor/src` returns zero matches (only `use-active-profile-live` imports remain). `pnpm exec tsc --noEmit` clean.
 
 ### 1B.5 — Validation
 
 - [ ] 1B.5.1 **Accessibility smoke**: keyboard-navigate Profile Manager (open dialog, tab through profiles list, edit, save, delete, switch active). Confirm aria-live announcements for loading states and toast surfaces.
-- [ ] 1B.5.2 **Performance smoke** (React Profiler): re-record render counts for `LayoutHeader` (active-profile-change interaction) and `useAiGeneration` (provider-change interaction) under the post-Phase-1B code. Read the pre-migration baseline from `packages/workout-spa-editor/src/__perf__/profile-state-baseline.json` (committed in `1A.5.5`); fail loudly if absent. Assert post-counts ≤ 2× pre-counts per metric.
-- [ ] 1B.5.3 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing.
-- [ ] 1B.5.4 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
-- [ ] 1B.5.5 Run `pnpm -r build` — clean.
+- [x] 1B.5.2 **Performance smoke** (React Profiler): re-record render counts for `LayoutHeader` (active-profile-change interaction) and `useAiGeneration` (provider-change interaction) under the post-Phase-1B code. Read the pre-migration baseline from `packages/workout-spa-editor/src/__perf__/profile-state-baseline.json` (committed in `1A.5.5`); fail loudly if absent. Assert post-counts ≤ 2× pre-counts per metric. — Gate test in `src/__perf__/profile-state-baseline.measure.test.tsx`; passes with both metrics at baseline (2 renders each).
+- [x] 1B.5.3 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing.
+- [x] 1B.5.4 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
+- [x] 1B.5.5 Run `pnpm -r build` — clean.
 - [ ] 1B.5.6 Update `packages/workout-spa-editor/README.md` (or the SPA's primary internal docs file, if any) to reference the new live hooks and use cases instead of the deleted Zustand store.
-- [ ] 1B.5.7 Add a `patch` changeset for `@kaiord/workout-spa-editor` titled `fix(spa-editor): migrate profile state to Dexie + useLiveQuery — closes #385`.
-- [ ] 1B.5.8 Open PR; ensure CI green; squash merge. Verify in production: Connect Train2Go shows Sync button immediately; refresh preserves profiles.
+- [ ] 1B.5.7 Add a `patch` changeset for `@kaiord/workout-spa-editor` titled `fix(spa-editor): migrate profile state to Dexie + useLiveQuery — closes #385`. — HOLD: deferred until Phase 1A (#389) merges to main, then added on top of the rebased branch.
+- [ ] 1B.5.8 Open PR; ensure CI green; squash merge. Verify in production: Connect Train2Go shows Sync button immediately; refresh preserves profiles. — HOLD: opens after Phase 1A (#389) merges.
 
 ## 2. Phase 2 — Library store full migration (PR #N+2)
 

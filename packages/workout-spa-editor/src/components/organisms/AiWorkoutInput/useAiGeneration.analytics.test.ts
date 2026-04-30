@@ -19,8 +19,11 @@ vi.mock("../../../store/ai-store", () => ({
   })),
 }));
 
-vi.mock("../../../store/profile-store", () => ({
-  useProfileStore: vi.fn(() => ({ getActiveProfile: mockGetActiveProfile })),
+vi.mock("../../../hooks/use-active-profile-live", () => ({
+  useActiveProfileLive: vi.fn(() => ({
+    id: null,
+    profile: mockGetActiveProfile(),
+  })),
 }));
 
 const mockLoadWorkout = vi.fn();

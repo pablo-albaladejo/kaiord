@@ -1,20 +1,26 @@
 import { render, type RenderOptions } from "@testing-library/react";
 import React, { type ReactElement } from "react";
 
-import { ToastProvider } from "./components/atoms/Toast";
+import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { CoachingRegistryProvider } from "./contexts/coaching-registry-context";
 import { GarminBridgeProvider } from "./contexts/garmin-bridge-context";
 import { PersistenceProvider } from "./contexts/persistence-context";
 import { SettingsDialogProvider } from "./contexts/settings-dialog-context";
 import { type Theme, ThemeProvider } from "./contexts/ThemeContext";
-import { ToastContextProvider } from "./contexts/ToastContext";
+import type { PersistencePort } from "./ports/persistence-port";
 import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
 
 /**
- * Options for renderWithProviders
+ * Options for renderWithProviders.
+ *
+ * `persistence` defaults to `createInMemoryPersistence()` for tests
+ * that don't depend on `useLiveQuery` reactivity. Tests that exercise
+ * Dexie-backed live hooks SHOULD pass `createDexiePersistence(db)`
+ * (the production singleton, fake-indexeddb-backed in jsdom).
  */
 export type RenderWithProvidersOptions = Omit<RenderOptions, "wrapper"> & {
   defaultTheme?: Theme;
+  persistence?: PersistencePort;
 };
 
 /**
@@ -26,17 +32,19 @@ export function renderWithProviders(
   ui: ReactElement,
   options?: RenderWithProvidersOptions
 ) {
-  const { defaultTheme, ...renderOptions } = options ?? {};
+  const {
+    defaultTheme,
+    persistence = createInMemoryPersistence(),
+    ...renderOptions
+  } = options ?? {};
   const Wrapper = ({ children }: { children: React.ReactNode }) => {
     return (
       <ThemeProvider defaultTheme={defaultTheme}>
-        <PersistenceProvider persistence={createInMemoryPersistence()}>
+        <PersistenceProvider persistence={persistence}>
           <SettingsDialogProvider>
             <GarminBridgeProvider>
               <CoachingRegistryProvider factories={[]}>
-                <ToastProvider>
-                  <ToastContextProvider>{children}</ToastContextProvider>
-                </ToastProvider>
+                <AppToastProvider>{children}</AppToastProvider>
               </CoachingRegistryProvider>
             </GarminBridgeProvider>
           </SettingsDialogProvider>

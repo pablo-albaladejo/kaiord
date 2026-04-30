@@ -1,7 +1,9 @@
 /**
  * useProfileActions Hook
  *
- * Combines all profile actions.
+ * Combines all profile actions. After Phase 1B the leaf hooks pull
+ * `usePersistence()` directly, so this orchestrator no longer threads
+ * Zustand-store actions through its parameter list.
  */
 
 import type { Profile } from "../../../../types/profile";
@@ -10,14 +12,7 @@ import { useProfileCRUD } from "./useProfileCRUD";
 import { useProfileSwitch } from "./useProfileSwitch";
 
 type UseProfileActionsParams = {
-  createProfile: (name: string, data: { bodyWeight?: number }) => void;
-  updateProfile: (
-    id: string,
-    data: { name?: string; bodyWeight?: number }
-  ) => void;
-  deleteProfile: (id: string) => void;
-  setActiveProfile: (id: string) => void;
-  profiles: Array<Profile>;
+  profiles: ReadonlyArray<Profile>;
   formData: ProfileFormData;
   editingProfile: Profile | null;
   setFormData: (data: ProfileFormData) => void;
@@ -28,9 +23,6 @@ type UseProfileActionsParams = {
 
 export function useProfileActions(params: UseProfileActionsParams) {
   const crud = useProfileCRUD({
-    createProfile: params.createProfile,
-    updateProfile: params.updateProfile,
-    deleteProfile: params.deleteProfile,
     formData: params.formData,
     editingProfile: params.editingProfile,
     setFormData: params.setFormData,
@@ -39,13 +31,9 @@ export function useProfileActions(params: UseProfileActionsParams) {
   });
 
   const switcher = useProfileSwitch({
-    setActiveProfile: params.setActiveProfile,
     profiles: params.profiles,
     setSwitchNotification: params.setSwitchNotification,
   });
 
-  return {
-    ...crud,
-    ...switcher,
-  };
+  return { ...crud, ...switcher };
 }

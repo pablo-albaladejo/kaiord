@@ -1,19 +1,23 @@
 /**
  * useProfileImportExport Hook
  *
- * Profile import/export functionality.
+ * Profile import/export. Import uses the `createProfile` application
+ * use case (so persistence rejection surfaces a user-visible error and
+ * the I1 invariant — first profile becomes active — is preserved).
  */
 
+import { createProfile } from "../../../../application/profile/create-profile";
+import { usePersistence } from "../../../../contexts/persistence-context";
 import type { Profile } from "../../../../types/profile";
 import { profileSchema } from "../../../../types/profile";
 
 type UseProfileImportExportParams = {
-  createProfile: (name: string, data: { bodyWeight?: number }) => void;
   setImportError: (error: string | null) => void;
 };
 
 export function useProfileImportExport(params: UseProfileImportExportParams) {
-  const { createProfile, setImportError } = params;
+  const { setImportError } = params;
+  const persistence = usePersistence();
 
   const handleExport = (profile: Profile) => {
     const dataStr = JSON.stringify(profile, null, 2);
@@ -37,24 +41,18 @@ export function useProfileImportExport(params: UseProfileImportExportParams) {
       const data = JSON.parse(text);
       const validatedProfile = profileSchema.parse(data);
 
-      createProfile(validatedProfile.name, {
+      await createProfile(persistence, validatedProfile.name, {
         bodyWeight: validatedProfile.bodyWeight,
       });
-
       setImportError(null);
     } catch (error) {
-      if (error instanceof Error) {
-        setImportError(`Import failed: ${error.message}`);
-      } else {
-        setImportError("Import failed: Invalid profile file");
-      }
+      setImportError(
+        `Import failed: ${error instanceof Error ? error.message : "Invalid profile file"}`
+      );
     }
 
     event.target.value = "";
   };
 
-  return {
-    handleExport,
-    handleImport,
-  };
+  return { handleExport, handleImport };
 }
