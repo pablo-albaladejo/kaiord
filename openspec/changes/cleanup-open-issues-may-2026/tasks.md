@@ -6,14 +6,14 @@ This phase ships as a comment on the proposal PR (or as standalone `gh issue clo
 
 For each issue, look up the failing commit in the issue body, confirm via `gh run list --branch main --workflow CI` that subsequent runs on later commits are green, then close with a comment naming the resolving commit SHA.
 
-- [ ] 1.1.1 Close `#393` (CI failure on `e59efe1`). Look up the latest green CI run on main at execution time via `gh run list --branch main --workflow CI --status success --limit 1 --json headSha,createdAt -q '.[0]'`. Substitute its SHA + date into the closure-comment template: "Resolved on commit `<SHA>`; main green as of `<date>`. Original failure was a Phase 3 e2e flake; the resolving commit is among the post-Phase-3 commits that landed before this lookup."
-- [ ] 1.1.2 Close `#355` (CI failure on `a1b6264`). Look up the resolving commit by `gh run list --branch main --workflow CI --created '>2026-04-24'` and citing the first green run on a commit newer than `a1b6264`. Closure comment template: `Resolved on commit <SHA>; CI green on main from <date> onward.`
-- [ ] 1.1.3 Close `#345` (Link Checker failure on `fec3a92`). Same lookup pattern as 1.1.2 against the Link Checker workflow.
+- [x] 1.1.1 Close `#393` (CI failure on `e59efe1`). Look up the latest green CI run on main at execution time via `gh run list --branch main --workflow CI --status success --limit 1 --json headSha,createdAt -q '.[0]'`. Substitute its SHA + date into the closure-comment template: "Resolved on commit `<SHA>`; main green as of `<date>`. Original failure was a Phase 3 e2e flake; the resolving commit is among the post-Phase-3 commits that landed before this lookup."
+- [x] 1.1.2 Close `#355` (CI failure on `a1b6264`). Look up the resolving commit by `gh run list --branch main --workflow CI --created '>2026-04-24'` and citing the first green run on a commit newer than `a1b6264`. Closure comment template: `Resolved on commit <SHA>; CI green on main from <date> onward.`
+- [x] 1.1.3 Close `#345` (Link Checker failure on `fec3a92`). Same lookup pattern as 1.1.2 against the Link Checker workflow.
 
 ### 1.2 — Stale security alerts
 
-- [ ] 1.2.1 Run `pnpm audit --json | jq '.metadata.vulnerabilities'` and capture the result. Confirm `critical: 0` and `high: 0`.
-- [ ] 1.2.2 For each of `#168, #177, #178, #182`, read the issue body to identify the specific CVE / GitHub Advisory ID(s) referenced. For each:
+- [x] 1.2.1 Run `pnpm audit --json | jq '.metadata.vulnerabilities'` and capture the result. Confirm `critical: 0` and `high: 0`.
+- [x] 1.2.2 For each of `#168, #177, #178, #182`, read the issue body to identify the specific CVE / GitHub Advisory ID(s) referenced. For each:
   - Run `pnpm why <package>` to confirm whether the package is still in the dep tree.
   - If absent: closure comment "Package `<name>` is no longer in the dependency tree as of `pnpm-lock.yaml` commit `<SHA>` (`pnpm why <name>` returns no results). Advisory `<GHSA-id>` is no longer applicable."
   - If present at a patched version: closure comment "Package `<name>` is at version `<X.Y.Z>` (locked in commit `<SHA>`); advisory `<GHSA-id>` patched in `<X.Y.W>`. Current `pnpm audit` reports 0 critical and 0 high; the bot's high-severity criterion is no longer met."
@@ -21,27 +21,27 @@ For each issue, look up the failing commit in the issue body, confirm via `gh ru
 
 ### 1.3 — Tracking meta-issue
 
-- [ ] 1.3.1 Close `#388`. Closure comment looks up the actual PR numbers at execution time via `gh pr list --state merged --search 'persistence-read-rule-cleanup' --limit 10 --json number,mergedAt,title` and lists them in chronological order. Template: "All `<N>` phase PRs (#<list>) merged; change archived as `openspec/changes/archive/2026-04-30-persistence-read-rule-cleanup/`. Tracking issue closed."
+- [x] 1.3.1 Close `#388`. Closure comment looks up the actual PR numbers at execution time via `gh pr list --state merged --search 'persistence-read-rule-cleanup' --limit 10 --json number,mergedAt,title` and lists them in chronological order. Template: "All `<N>` phase PRs (#<list>) merged; change archived as `openspec/changes/archive/2026-04-30-persistence-read-rule-cleanup/`. Tracking issue closed."
 
 ### 1.4 — Validation
 
-- [ ] 1.4.1 `gh issue list --state open --json number | jq 'length'` returns ≤7 (15 minus the 8 closed).
-- [ ] 1.4.2 Phase 1 ships with **no PR**. The closures are manual `gh issue close` invocations after the proposal merges (or as part of the proposal-PR's description if the user prefers to bundle).
+- [x] 1.4.1 `gh issue list --state open --json number | jq 'length'` returns ≤7 (15 minus the 8 closed).
+- [x] 1.4.2 Phase 1 ships with **no PR**. The closures are manual `gh issue close` invocations after the proposal merges (or as part of the proposal-PR's description if the user prefers to bundle).
 
 ## 2. Phase 2 — Fix #386 (SPA route 404 on refresh) via rafgraph SPA-fallback
 
-- [ ] 2.0 Worktree setup: `git worktree add -b feature/cleanup-issues-2-spa-fallback /Users/pablo/development/personal/kaiord-cleanup-2 main`. Run `pnpm install` and rebuild workspace deps.
+- [x] 2.0 Worktree setup: `git worktree add -b feature/cleanup-issues-2-spa-fallback /Users/pablo/development/personal/kaiord-cleanup-2 main`. Run `pnpm install` and rebuild workspace deps.
 
 ### 2.1 — Implement the rafgraph pattern in the deploy workflow
 
-- [ ] 2.1.1 Inspect `.github/workflows/deploy-site.yml` to identify the step that produces `merged-dist/404.html` (the landing's blue 404). Confirm the deploy structure matches the issue body's description.
-- [ ] 2.1.2 Replace the `merged-dist/404.html` build step with a rafgraph-shaped 404. The script captures `window.location.pathname + window.location.search`, encodes the path into a `?p=<encoded>` query, and `window.location.replace`s to `/editor/?p=<encoded>` ONLY IF the original path begins with `/editor/`. For non-`/editor/` 404s, the script no-ops and the existing landing 404 markup renders.
-- [ ] 2.1.3 Inject the decoder snippet into `merged-dist/editor/index.html` (post-SPA-build, pre-artifact-upload). The decoder runs synchronously before the React bundle; it reads `?p=<encoded>`, decodes via `decodeURIComponent`, and calls `window.history.replaceState(null, null, decoded)` to restore the original URL.
-- [ ] 2.1.4 Verify VitePress already produces `docs/404.html` (it does); no docs-side change.
+- [x] 2.1.1 Inspect `.github/workflows/deploy-site.yml` to identify the step that produces `merged-dist/404.html` (the landing's blue 404). Confirm the deploy structure matches the issue body's description.
+- [x] 2.1.2 Replace the `merged-dist/404.html` build step with a rafgraph-shaped 404. The script captures `window.location.pathname + window.location.search`, encodes the path into a `?p=<encoded>` query, and `window.location.replace`s to `/editor/?p=<encoded>` ONLY IF the original path begins with `/editor/`. For non-`/editor/` 404s, the script no-ops and the existing landing 404 markup renders.
+- [x] 2.1.3 Inject the decoder snippet into `merged-dist/editor/index.html` (post-SPA-build, pre-artifact-upload). The decoder runs synchronously before the React bundle; it reads `?p=<encoded>`, decodes via `decodeURIComponent`, and calls `window.history.replaceState(null, null, decoded)` to restore the original URL.
+- [x] 2.1.4 Verify VitePress already produces `docs/404.html` (it does); no docs-side change.
 
 ### 2.2 — CI smoke step (self-monitoring)
 
-- [ ] 2.2.1 Add a post-deploy smoke step in `.github/workflows/deploy-site.yml` that runs after the `actions/deploy-pages@v5` step completes. The step:
+- [x] 2.2.1 Add a post-deploy smoke step in `.github/workflows/deploy-site.yml` that runs after the `actions/deploy-pages@v5` step completes. The step:
   - Targets `${{ steps.deployment.outputs.page_url }}editor/calendar` (the GitHub Pages-issued `*.github.io` host, which propagates faster than the custom domain). Falls back to `https://kaiord.com/editor/calendar` only if the workflow is triggered on `main` AND the page-url output is unavailable.
   - **Build-derived marker**: read the SPA's emitted `index.html` post-build to extract a unique `<script src="...">` reference (e.g., `MARKER=$(grep -oE 'src="/editor/assets/index-[^"]+\.js"' merged-dist/editor/index.html | head -1)`). Hardcoded path prefixes break silently if `vite.config.ts` ever changes `base` or `build.assetsDir`; deriving the marker from the actual build output keeps the smoke step robust to those refactors.
   - **Retry-with-backoff**: Pages CDN propagation is eventually consistent (typical 30s–2min). The step runs `for i in $(seq 1 10); do curl -sL "$URL" > resp.html && grep -qF "$MARKER" resp.html && break || sleep 10; done` so an early-cache miss does not flake CI.
