@@ -8,19 +8,35 @@ import { KRD } from "@kaiord/core";
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useLibrary } from "../../../hooks/use-library";
+
+import { addTemplate } from "../../../application/library/add-template";
+import { PersistenceProvider } from "../../../contexts/persistence-context";
+import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import { AppToastProvider } from "../../providers/AppToastProvider";
 import { SaveToLibraryDialog } from "./SaveToLibraryDialog";
 
-// Mock the library hook
-vi.mock("../../../hooks/use-library", () => ({
-  useLibrary: vi.fn(),
+// Mock the addTemplate use case so we can spy on it without exercising
+// the in-memory persistence layer (Phase 2: useSaveToLibrary calls the
+// use case directly via usePersistence()).
+vi.mock("../../../application/library/add-template", () => ({
+  addTemplate: vi.fn(),
 }));
 
 // Mock thumbnail generation
 vi.mock("./generate-thumbnail", () => ({
   generateThumbnail: vi.fn().mockResolvedValue("data:image/png;base64,mock"),
 }));
+
+const renderDialog = (
+  props: React.ComponentProps<typeof SaveToLibraryDialog>
+) =>
+  render(
+    <AppToastProvider>
+      <PersistenceProvider persistence={createInMemoryPersistence()}>
+        <SaveToLibraryDialog {...props} />
+      </PersistenceProvider>
+    </AppToastProvider>
+  );
 
 describe("SaveToLibraryDialog", () => {
   const mockKRD: KRD = {
@@ -39,20 +55,19 @@ describe("SaveToLibraryDialog", () => {
     },
   };
 
-  const mockAddTemplate = vi.fn();
+  const mockAddTemplate = vi.mocked(addTemplate);
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi.mocked(useLibrary).mockReturnValue({
-      addTemplate: mockAddTemplate,
-      templates: [],
-      updateTemplate: vi.fn(),
-      deleteTemplate: vi.fn(),
-      getTemplate: vi.fn(),
-      searchTemplates: vi.fn(),
-      filterByTags: vi.fn(),
-      filterBySport: vi.fn(),
-      getAllTags: vi.fn(),
+    // Default: resolve with a stub template so the success path runs.
+    mockAddTemplate.mockResolvedValue({
+      id: "stub",
+      name: "stub",
+      sport: "cycling",
+      krd: mockKRD,
+      tags: [],
+      createdAt: "",
+      updatedAt: "",
     });
   });
 
@@ -62,15 +77,11 @@ describe("SaveToLibraryDialog", () => {
       const workout = mockKRD;
 
       // Act
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={vi.fn()}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({
+        workout,
+        open: true,
+        onOpenChange: vi.fn(),
+      });
 
       // Assert
       expect(screen.getByRole("dialog")).toBeInTheDocument();
@@ -82,15 +93,7 @@ describe("SaveToLibraryDialog", () => {
       const workout = mockKRD;
 
       // Act
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={false}
-            onOpenChange={vi.fn()}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({ workout, open: false, onOpenChange: vi.fn() });
 
       // Assert
       expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
@@ -101,15 +104,11 @@ describe("SaveToLibraryDialog", () => {
       const workout = mockKRD;
 
       // Act
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={vi.fn()}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({
+        workout,
+        open: true,
+        onOpenChange: vi.fn(),
+      });
 
       // Assert
       expect(screen.getByLabelText(/workout name/i)).toBeInTheDocument();
@@ -126,15 +125,7 @@ describe("SaveToLibraryDialog", () => {
       const workout = mockKRD;
       const onOpenChange = vi.fn();
 
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={onOpenChange}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({ workout, open: true, onOpenChange });
 
       // Act
       await user.type(screen.getByLabelText(/workout name/i), "Test Workout");
@@ -143,6 +134,7 @@ describe("SaveToLibraryDialog", () => {
       // Assert
       await waitFor(() => {
         expect(mockAddTemplate).toHaveBeenCalledWith(
+          expect.anything(),
           "Test Workout",
           "cycling",
           workout,
@@ -159,15 +151,7 @@ describe("SaveToLibraryDialog", () => {
       const workout = mockKRD;
       const onOpenChange = vi.fn();
 
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={onOpenChange}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({ workout, open: true, onOpenChange });
 
       // Act
       await user.type(screen.getByLabelText(/workout name/i), "Test Workout");
@@ -179,6 +163,7 @@ describe("SaveToLibraryDialog", () => {
       // Assert
       await waitFor(() => {
         expect(mockAddTemplate).toHaveBeenCalledWith(
+          expect.anything(),
           "Test Workout",
           "cycling",
           workout,
@@ -197,15 +182,7 @@ describe("SaveToLibraryDialog", () => {
       const workout = mockKRD;
       const onOpenChange = vi.fn();
 
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={onOpenChange}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({ workout, open: true, onOpenChange });
 
       // Act
       await user.type(screen.getByLabelText(/workout name/i), "Test Workout");
@@ -223,15 +200,7 @@ describe("SaveToLibraryDialog", () => {
       const workout = mockKRD;
       const onOpenChange = vi.fn();
 
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={onOpenChange}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({ workout, open: true, onOpenChange });
 
       // Act
       await user.click(screen.getByRole("button", { name: /cancel/i }));
@@ -247,15 +216,11 @@ describe("SaveToLibraryDialog", () => {
       const workout = mockKRD;
 
       // Act
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={vi.fn()}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({
+        workout,
+        open: true,
+        onOpenChange: vi.fn(),
+      });
 
       // Assert
       const saveButton = screen.getByRole("button", { name: /^save$/i });
@@ -267,15 +232,7 @@ describe("SaveToLibraryDialog", () => {
       const user = userEvent.setup();
       const workout = mockKRD;
 
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={vi.fn()}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({ workout, open: true, onOpenChange: vi.fn() });
 
       // Act
       await user.type(screen.getByLabelText(/workout name/i), "Test");
@@ -290,15 +247,7 @@ describe("SaveToLibraryDialog", () => {
       const user = userEvent.setup();
       const workout = mockKRD;
 
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={vi.fn()}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({ workout, open: true, onOpenChange: vi.fn() });
 
       // Act
       await user.type(screen.getByLabelText(/notes/i), "Test notes");
@@ -314,15 +263,7 @@ describe("SaveToLibraryDialog", () => {
       const user = userEvent.setup();
       const workout = mockKRD;
 
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={vi.fn()}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({ workout, open: true, onOpenChange: vi.fn() });
 
       // Act
       await user.type(screen.getByLabelText(/workout name/i), "Test");
@@ -332,6 +273,7 @@ describe("SaveToLibraryDialog", () => {
       // Assert
       await waitFor(() => {
         expect(mockAddTemplate).toHaveBeenCalledWith(
+          expect.anything(),
           "Test",
           expect.any(String),
           workout,
@@ -347,15 +289,7 @@ describe("SaveToLibraryDialog", () => {
       const user = userEvent.setup();
       const workout = mockKRD;
 
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={vi.fn()}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({ workout, open: true, onOpenChange: vi.fn() });
 
       // Act
       await user.type(screen.getByLabelText(/workout name/i), "Test");
@@ -365,6 +299,7 @@ describe("SaveToLibraryDialog", () => {
       // Assert
       await waitFor(() => {
         expect(mockAddTemplate).toHaveBeenCalledWith(
+          expect.anything(),
           "Test",
           expect.any(String),
           workout,
@@ -380,15 +315,7 @@ describe("SaveToLibraryDialog", () => {
       const user = userEvent.setup();
       const workout = mockKRD;
 
-      render(
-        <AppToastProvider>
-          <SaveToLibraryDialog
-            workout={workout}
-            open={true}
-            onOpenChange={vi.fn()}
-          />
-        </AppToastProvider>
-      );
+      renderDialog({ workout, open: true, onOpenChange: vi.fn() });
 
       // Act
       await user.type(screen.getByLabelText(/workout name/i), "Test");
@@ -398,6 +325,7 @@ describe("SaveToLibraryDialog", () => {
       // Assert
       await waitFor(() => {
         expect(mockAddTemplate).toHaveBeenCalledWith(
+          expect.anything(),
           "Test",
           expect.any(String),
           workout,

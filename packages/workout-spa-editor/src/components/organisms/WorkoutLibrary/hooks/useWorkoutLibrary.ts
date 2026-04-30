@@ -1,22 +1,32 @@
 /**
  * useWorkoutLibrary Hook
  *
- * Manages state and logic for the workout library component.
+ * Manages state and logic for the workout library component. After
+ * Phase 2: reads templates via `useLibraryTemplatesLive` and dispatches
+ * deletes through the application use case (errors surface via toast).
  */
 
 import { useState } from "react";
 
-import { useLibrary } from "../../../../hooks/use-library";
+import { deleteTemplate } from "../../../../application/library/delete-template";
+import { usePersistence } from "../../../../contexts/persistence-context";
+import { useToastContext } from "../../../../contexts/ToastContext";
+import { useLibraryTemplatesLive } from "../../../../hooks/use-library-templates-live";
 import type { WorkoutTemplate } from "../../../../types/workout-library";
 import { useLibraryFilters } from "./useLibraryFilters";
 import { useWorkoutLoader } from "./useWorkoutLoader";
+
+const TOAST_ERROR = "Failed to delete template — please retry.";
 
 export function useWorkoutLibrary(
   hasCurrentWorkout: boolean,
   onLoadWorkout: (template: WorkoutTemplate) => void,
   onOpenChange: (open: boolean) => void
 ) {
-  const { templates, deleteTemplate } = useLibrary();
+  const templates = useLibraryTemplatesLive() ?? [];
+  const persistence = usePersistence();
+  const toast = useToastContext();
+
   const [previewTemplate, setPreviewTemplate] =
     useState<WorkoutTemplate | null>(null);
 
@@ -26,6 +36,12 @@ export function useWorkoutLibrary(
     onLoadWorkout,
     onOpenChange
   );
+
+  const handleDelete = (templateId: string) => {
+    void deleteTemplate(persistence, templateId).catch(() =>
+      toast.error(TOAST_ERROR)
+    );
+  };
 
   const handlePreview = (template: WorkoutTemplate) => {
     setPreviewTemplate(template);
@@ -38,7 +54,7 @@ export function useWorkoutLibrary(
 
   return {
     templates,
-    deleteTemplate,
+    deleteTemplate: handleDelete,
     previewTemplate,
     setPreviewTemplate,
     handlePreview,

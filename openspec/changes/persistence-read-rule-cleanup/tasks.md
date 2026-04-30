@@ -98,45 +98,45 @@ Pattern for these tests per D5.1: mount inside `<PersistenceProvider persistence
 
 ### 2.1 — Live read hook
 
-- [ ] 2.1.1 Rename `useLibraryTemplates` (in `src/components/pages/library-hooks.ts`) to `useLibraryTemplatesLive`; relocate to `src/hooks/use-library-templates-live.ts`. Update call sites.
+- [x] 2.1.1 Rename `useLibraryTemplates` (in `src/components/pages/library-hooks.ts`) to `useLibraryTemplatesLive`; relocate to `src/hooks/use-library-templates-live.ts`. Update call sites.
 
 ### 2.2 — Application use cases (writes) — 3 use cases
 
-- [ ] 2.2.1 Create `src/application/library/add-template.ts` — `addTemplate(persistence, name, sport, krd)`. Generates id; writes via `persistence.templates.put`; returns the new template.
-- [ ] 2.2.2 Create `src/application/library/delete-template.ts` — `deleteTemplate(persistence, templateId)`.
-- [ ] 2.2.3 Create `src/application/library/update-template.ts` — `updateTemplate(persistence, templateId, updates)`.
-- [ ] 2.2.4 Co-located unit tests against `createInMemoryPersistence()`.
+- [x] 2.2.1 Create `src/application/library/add-template.ts` — `addTemplate(persistence, name, sport, krd)`. Generates id; writes via `persistence.templates.put`; returns the new template.
+- [x] 2.2.2 Create `src/application/library/delete-template.ts` — `deleteTemplate(persistence, templateId)`.
+- [x] 2.2.3 Create `src/application/library/update-template.ts` — `updateTemplate(persistence, templateId, updates)`. Wrapped in `persistence.transaction` (R-M-W atomicity) per the same pattern as Phase 1A's `updateProfile`. Throws `TemplateNotFoundError` (new `application/library/errors.ts`) when the id is unknown.
+- [x] 2.2.4 Co-located unit tests against `createInMemoryPersistence()`.
 
 ### 2.3 — Migrate 4 consumer files (read+write)
 
-- [ ] 2.3.1 Migrate `src/components/templates/MainLayout/LayoutHeader.tsx` (badge counter) — read templates via `useLibraryTemplatesLive`. Note: this file was previously touched in 1A.4.2 (profile cases); now extend to library cases.
-- [ ] 2.3.2 Migrate `src/components/organisms/WorkoutLibrary/hooks/useWorkoutLibrary.ts` — read via the live hook; replace `deleteTemplate` callsite with the use case.
-- [ ] 2.3.3 Migrate `src/components/molecules/SaveToLibraryButton/useSaveToLibrary.ts` — replace `addTemplate` (Zustand action) with the use case; `await`; surface errors via toast.
-- [ ] 2.3.4 Delete `src/hooks/use-library.ts`. Call sites read directly via `useLibraryTemplatesLive`.
+- [x] 2.3.1 Migrate `src/components/templates/MainLayout/LayoutHeader.tsx` (badge counter) — read templates via `useLibraryTemplatesLive`. Note: this file was previously touched in 1A.4.2 (profile cases); now extend to library cases.
+- [x] 2.3.2 Migrate `src/components/organisms/WorkoutLibrary/hooks/useWorkoutLibrary.ts` — read via the live hook; replace `deleteTemplate` callsite with the use case.
+- [x] 2.3.3 Migrate `src/components/molecules/SaveToLibraryButton/useSaveToLibrary.ts` — replace `addTemplate` (Zustand action) with the use case; `await`; surface errors via toast.
+- [x] 2.3.4 Delete `src/hooks/use-library.ts`. Call sites read directly via `useLibraryTemplatesLive`. Bonus: also migrated `LibraryPage.tsx` (was using direct `db.table().delete()`) to the `deleteTemplate` use case.
 
 ### 2.4 — Update tests
 
-- [ ] 2.4.1 Update `LayoutHeader.test.tsx` library-badge cases (overlapping touchpoint with 1A.4.2) — use the fake-indexeddb-backed pattern instead of `useLibraryStore.setState({...})`.
-- [ ] 2.4.2 Migrate assertions from `store/library-store.test.ts` to `application/library/*.test.ts` against the new use cases. Delete the legacy test file after migration confirms equivalent coverage.
-- [ ] 2.4.3 Update `save-as-template.test.ts` — switch to the fake-indexeddb-backed pattern.
+- [x] 2.4.1 Update `LayoutHeader.test.tsx` library-badge cases (overlapping touchpoint with 1A.4.2) — use the fake-indexeddb-backed pattern instead of `useLibraryStore.setState({...})`.
+- [x] 2.4.2 Migrate assertions from `store/library-store.test.ts` to `application/library/*.test.ts` against the new use cases. Delete the legacy test file after migration confirms equivalent coverage.
+- [x] 2.4.3 Update `save-as-template.test.ts` — switch to the fake-indexeddb-backed pattern. Also updated `SaveToLibraryDialog.test.tsx`, `WorkoutLibrary.test.tsx`, `LibraryPage.test.tsx`, and `EditorPage.test.tsx` (the latter needed a `PersistenceProvider` wrap because EditorPage transitively renders the SaveToLibrary use case via `useSaveToLibrary`).
 
 ### 2.5 — Regression test
 
-- [ ] 2.5.1 Pre-populate Dexie with two templates; mount `LayoutHeader`; assert badge shows "2" without any user interaction. (Locks in "library badge after refresh".)
+- [x] 2.5.1 Pre-populate Dexie with two templates; mount `LayoutHeader`; assert badge shows "2" without any user interaction. (Locks in "library badge after refresh".) — `src/__regressions__/library-badge.test.tsx`.
 
 ### 2.6 — Delete legacy
 
-- [ ] 2.6.1 Delete `src/store/library-store.ts`, `src/store/library-store/` (actions, persistence, initial-state, types).
-- [ ] 2.6.2 Verify zero references to `useLibraryStore` / `useLibrary` via grep.
+- [x] 2.6.1 Delete `src/store/library-store.ts`, `src/store/library-store/` (actions, persistence, initial-state, types). Also deleted `src/components/pages/library-hooks.ts` (renamed live hook) and `src/hooks/use-library.ts` (legacy shim).
+- [x] 2.6.2 Verify zero references to `useLibraryStore` / `useLibrary` via grep.
 
 ### 2.7 — Validation
 
 - [ ] 2.7.1 A11y smoke for WorkoutLibrary dialog: open, keyboard-navigate templates, delete, save-from-editor.
-- [ ] 2.7.2 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing.
-- [ ] 2.7.3 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
-- [ ] 2.7.4 Run `pnpm -r build` — clean.
+- [x] 2.7.2 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing (2834 tests).
+- [x] 2.7.3 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
+- [x] 2.7.4 Run `pnpm -r build` — clean.
 - [ ] 2.7.5 Update internal docs to reference the new hook + use cases.
-- [ ] 2.7.6 Add a `patch` changeset titled `fix(spa-editor): migrate library state to Dexie + useLiveQuery (latent bug from same root cause as #385)`.
+- [x] 2.7.6 Add a `patch` changeset titled `fix(spa-editor): migrate library state to Dexie + useLiveQuery (latent bug from same root cause as #385)`.
 - [ ] 2.7.7 Open PR; ensure CI green; squash merge. Verify in production: refresh after creating templates preserves the badge count.
 
 ## 3. Phase 3 — AI store split (PR #N+3)

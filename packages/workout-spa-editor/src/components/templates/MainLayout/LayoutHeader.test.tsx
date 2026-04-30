@@ -10,8 +10,8 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { addTemplate } from "../../../application/library/add-template";
 import { createProfile } from "../../../application/profile/create-profile";
-import { useLibraryStore } from "../../../store/library-store";
 import { useWorkoutStore } from "../../../store/workout-store";
 import { renderWithProviders } from "../../../test-utils";
 import type { KRD } from "../../../types/krd";
@@ -35,12 +35,11 @@ const createTestKRD = (): KRD => ({
 });
 
 describe("LayoutHeader", () => {
-  // Reset state before each test. The active profile is read via
-  // `useActiveProfileLive` against Dexie + fake-indexeddb (D5.1).
+  // Reset state before each test. Profiles + templates are read via
+  // useActiveProfileLive / useLibraryTemplatesLive against Dexie +
+  // fake-indexeddb (D5.1). useWorkoutStore is the editor runtime
+  // (legitimately Zustand-only).
   beforeEach(async () => {
-    useLibraryStore.setState({
-      templates: [],
-    });
     useWorkoutStore.setState({
       currentWorkout: null,
       undoHistory: [],
@@ -49,7 +48,11 @@ describe("LayoutHeader", () => {
       selectedStepIds: [],
       isEditing: false,
     });
-    await Promise.all([db.table("profiles").clear(), db.table("meta").clear()]);
+    await Promise.all([
+      db.table("profiles").clear(),
+      db.table("meta").clear(),
+      db.table("templates").clear(),
+    ]);
   });
 
   describe("rendering", () => {
@@ -269,19 +272,19 @@ describe("LayoutHeader", () => {
       ).not.toBeInTheDocument();
     });
 
-    it("should show badge with count when library has workouts", () => {
+    it("should show badge with count when library has workouts", async () => {
       // Arrange
-      const { addTemplate } = useLibraryStore.getState();
+      const persistence = createDexiePersistence(db);
       const krd = createTestKRD();
-      addTemplate("Workout 1", "running", krd);
-      addTemplate("Workout 2", "cycling", krd);
+      await addTemplate(persistence, "Workout 1", "running", krd);
+      await addTemplate(persistence, "Workout 2", "cycling", krd);
 
       // Act
-      renderWithProviders(<LayoutHeader />);
+      renderWithProviders(<LayoutHeader />, { persistence });
 
       // Assert
       expect(
-        screen.getByLabelText(/2 workouts in library/i)
+        await screen.findByLabelText(/2 workouts in library/i)
       ).toBeInTheDocument();
       expect(screen.getByText("2")).toBeInTheDocument();
     });
@@ -340,11 +343,11 @@ describe("LayoutHeader", () => {
     it("should load workout from library when selected", async () => {
       // Arrange
       const user = userEvent.setup();
-      const { addTemplate } = useLibraryStore.getState();
+      const persistence = createDexiePersistence(db);
       const krd = createTestKRD();
-      addTemplate("Test Workout", "running", krd);
+      await addTemplate(persistence, "Test Workout", "running", krd);
 
-      renderWithProviders(<LayoutHeader />);
+      renderWithProviders(<LayoutHeader />, { persistence });
 
       // Act - Open library
       await user.click(
@@ -390,18 +393,18 @@ describe("LayoutHeader", () => {
       expect(heading.tagName).toBe("H1");
     });
 
-    it("should have accessible badge label when library has workouts", () => {
+    it("should have accessible badge label when library has workouts", async () => {
       // Arrange
-      const { addTemplate } = useLibraryStore.getState();
+      const persistence = createDexiePersistence(db);
       const krd = createTestKRD();
-      addTemplate("Workout 1", "running", krd);
+      await addTemplate(persistence, "Workout 1", "running", krd);
 
       // Act
-      renderWithProviders(<LayoutHeader />);
+      renderWithProviders(<LayoutHeader />, { persistence });
 
       // Assert
       expect(
-        screen.getByLabelText(/1 workouts in library/i)
+        await screen.findByLabelText(/1 workouts in library/i)
       ).toBeInTheDocument();
     });
   });

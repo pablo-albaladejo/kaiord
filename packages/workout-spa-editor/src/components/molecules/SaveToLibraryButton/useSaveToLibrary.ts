@@ -1,13 +1,17 @@
 /**
  * useSaveToLibrary Hook
  *
- * Handles the logic for saving workouts to the library.
+ * Handles the logic for saving workouts to the library. After Phase 2:
+ * uses the `addTemplate` application use case (no more Zustand action),
+ * `await`s it, and surfaces persistence rejections through the existing
+ * toast context.
  */
 
 import { useState } from "react";
 
+import { addTemplate } from "../../../application/library/add-template";
+import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
-import { useLibrary } from "../../../hooks/use-library";
 import type { KRD } from "../../../types/krd";
 import type { DifficultyLevel } from "../../../types/workout-library";
 import { calculateWorkoutDuration } from "./calculate-duration";
@@ -31,7 +35,7 @@ function parseTags(tagsString: string): string[] {
 }
 
 export function useSaveToLibrary(workout: KRD, onClose: () => void) {
-  const { addTemplate } = useLibrary();
+  const persistence = usePersistence();
   const { success, error: showError } = useToastContext();
 
   const [name, setName] = useState("");
@@ -51,7 +55,7 @@ export function useSaveToLibrary(workout: KRD, onClose: () => void) {
       const duration = calculateWorkoutDuration(workout);
       const sport = extractSportFromWorkout(workout);
 
-      addTemplate(name.trim(), sport, workout, {
+      await addTemplate(persistence, name.trim(), sport, workout, {
         tags: tagArray,
         difficulty: difficulty || undefined,
         duration,
