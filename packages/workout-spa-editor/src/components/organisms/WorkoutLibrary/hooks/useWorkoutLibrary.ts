@@ -23,7 +23,12 @@ export function useWorkoutLibrary(
   onLoadWorkout: (template: WorkoutTemplate) => void,
   onOpenChange: (open: boolean) => void
 ) {
-  const templates = useLibraryTemplatesLive() ?? [];
+  // `undefined` from the live hook is the loading phase. Surface it
+  // separately from "no templates" so the UI can render a loading
+  // state instead of flashing the empty-library copy on first paint.
+  const liveTemplates = useLibraryTemplatesLive();
+  const isTemplatesLoading = liveTemplates === undefined;
+  const templates = liveTemplates ?? [];
   const persistence = usePersistence();
   const toast = useToastContext();
 
@@ -54,6 +59,7 @@ export function useWorkoutLibrary(
 
   return {
     templates,
+    isTemplatesLoading,
     deleteTemplate: handleDelete,
     previewTemplate,
     setPreviewTemplate,
