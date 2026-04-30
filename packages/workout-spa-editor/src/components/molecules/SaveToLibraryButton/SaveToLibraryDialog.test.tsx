@@ -11,8 +11,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { addTemplate } from "../../../application/library/add-template";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
+import { ToastContextProvider } from "../../../contexts/ToastContext";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
-import { AppToastProvider } from "../../providers/AppToastProvider";
 import { SaveToLibraryDialog } from "./SaveToLibraryDialog";
 
 // Mock the addTemplate use case so we can spy on it without exercising
@@ -27,15 +27,20 @@ vi.mock("./generate-thumbnail", () => ({
   generateThumbnail: vi.fn().mockResolvedValue("data:image/png;base64,mock"),
 }));
 
+// Use ToastContextProvider directly (without the Radix ToastProvider /
+// ToastRenderer wrappers from AppToastProvider). The dialog only needs
+// useToastContext() to resolve; mounting the Radix viewport leaks an
+// auto-dismiss setTimeout that fires after jsdom teardown and crashes
+// the suite ("ReferenceError: document is not defined").
 const renderDialog = (
   props: React.ComponentProps<typeof SaveToLibraryDialog>
 ) =>
   render(
-    <AppToastProvider>
+    <ToastContextProvider>
       <PersistenceProvider persistence={createInMemoryPersistence()}>
         <SaveToLibraryDialog {...props} />
       </PersistenceProvider>
-    </AppToastProvider>
+    </ToastContextProvider>
   );
 
 describe("SaveToLibraryDialog", () => {
