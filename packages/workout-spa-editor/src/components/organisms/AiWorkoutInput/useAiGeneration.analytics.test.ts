@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react";
+import { act, renderHook } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockAnalyticsEvent = vi.fn();
@@ -8,17 +8,35 @@ vi.mock("../../../contexts", () => ({
 }));
 
 const mockSetGeneration = vi.fn();
-const mockGetSelectedProvider = vi.fn();
-const mockGetActiveProfile = vi.fn();
+const mockSelectForGeneration = vi.fn();
 
-vi.mock("../../../store/ai-store", () => ({
-  useAiStore: vi.fn(() => ({
-    getSelectedProvider: mockGetSelectedProvider,
-    customPrompt: "",
-    setGeneration: mockSetGeneration,
-  })),
+vi.mock("../../../store/ai-runtime-store", () => ({
+  useAiRuntimeStore: Object.assign(
+    vi.fn((selector?: (s: unknown) => unknown) => {
+      const state = {
+        selectedProviderId: "claude",
+        generation: { status: "idle" },
+        selectForGeneration: mockSelectForGeneration,
+        setGeneration: mockSetGeneration,
+      };
+      return selector ? selector(state) : state;
+    }),
+    {}
+  ),
 }));
 
+import type { LlmProviderConfig } from "../../../store/ai-store-types";
+
+const mockProviders = vi.fn<() => LlmProviderConfig[]>();
+vi.mock("../../../hooks/use-ai-providers-live", () => ({
+  useAiProvidersLive: () => mockProviders(),
+}));
+
+vi.mock("../../../hooks/use-ai-custom-prompt-live", () => ({
+  useAiCustomPromptLive: () => null,
+}));
+
+const mockGetActiveProfile = vi.fn();
 vi.mock("../../../hooks/use-active-profile-live", () => ({
   useActiveProfileLive: vi.fn(() => ({
     id: null,
@@ -44,11 +62,18 @@ vi.mock("./zones-formatter", () => ({
 import { useAiGeneration } from "./useAiGeneration";
 
 describe("useAiGeneration — analytics call-site", () => {
-  const fakeProvider = { id: "claude", isDefault: true };
+  const fakeProvider = {
+    id: "claude",
+    type: "anthropic" as const,
+    apiKey: "k",
+    model: "claude-sonnet-4-5",
+    label: "Claude",
+    isDefault: true,
+  };
   const fakeKrd = { extensions: {} };
 
   beforeEach(() => {
-    mockGetSelectedProvider.mockReturnValue(fakeProvider);
+    mockProviders.mockReturnValue([fakeProvider]);
     mockGetActiveProfile.mockReturnValue(null);
     mockGenerateWorkoutKrd.mockResolvedValue(fakeKrd);
   });
@@ -57,49 +82,40 @@ describe("useAiGeneration — analytics call-site", () => {
     vi.clearAllMocks();
   });
 
-  it("should fire workout-generated with provider and sport after successful generation", async () => {
-    // Arrange
+  it("fires workout-generated with provider and sport after successful generation", async () => {
     const { result } = renderHook(() => useAiGeneration());
 
-    // Act
     await act(async () => {
       await result.current.generate("45min sweet spot", "cycling" as never);
     });
 
-    // Assert
     expect(mockAnalyticsEvent).toHaveBeenCalledWith("workout-generated", {
       provider: "claude",
       sport: "cycling",
     });
   });
 
-  it("should fire workout-generated with empty sport when no sport is passed", async () => {
-    // Arrange
+  it("fires workout-generated with empty sport when no sport is passed", async () => {
     const { result } = renderHook(() => useAiGeneration());
 
-    // Act
     await act(async () => {
       await result.current.generate("45min sweet spot");
     });
 
-    // Assert
     expect(mockAnalyticsEvent).toHaveBeenCalledWith("workout-generated", {
       provider: "claude",
       sport: "",
     });
   });
 
-  it("should not fire workout-generated when generation fails", async () => {
-    // Arrange
+  it("does not fire workout-generated when generation fails", async () => {
     mockGenerateWorkoutKrd.mockRejectedValue(new Error("API error"));
     const { result } = renderHook(() => useAiGeneration());
 
-    // Act
     await act(async () => {
       await result.current.generate("45min sweet spot");
     });
 
-    // Assert
     expect(mockAnalyticsEvent).not.toHaveBeenCalled();
   });
 });

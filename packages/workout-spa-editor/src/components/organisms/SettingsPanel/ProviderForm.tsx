@@ -1,7 +1,7 @@
 import { useState } from "react";
 
 import { getDefaultModel } from "../../../lib/provider-models";
-import type { LlmProviderType } from "../../../store/ai-store";
+import type { LlmProviderType } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
 import { ModelSelect } from "./ModelSelect";

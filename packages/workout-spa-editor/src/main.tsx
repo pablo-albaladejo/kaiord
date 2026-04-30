@@ -21,14 +21,6 @@ const analytics = createCloudflareAnalytics(
 
 const persistence = createDexiePersistence();
 
-if (import.meta.env.DEV) {
-  import("./store/ai-store").then(({ useAiStore }) => {
-    (window as unknown as Record<string, unknown>).__ZUSTAND_STORES__ = {
-      ai: useAiStore,
-    };
-  });
-}
-
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
     <AnalyticsProvider analytics={analytics}>

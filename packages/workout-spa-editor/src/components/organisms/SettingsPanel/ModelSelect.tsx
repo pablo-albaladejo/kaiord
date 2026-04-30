@@ -1,5 +1,5 @@
 import { PROVIDER_MODELS } from "../../../lib/provider-models";
-import type { LlmProviderType } from "../../../store/ai-store";
+import type { LlmProviderType } from "../../../store/ai-store-types";
 
 type ModelSelectProps = {
   type: LlmProviderType;

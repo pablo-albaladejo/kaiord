@@ -2,7 +2,7 @@ import type { Sport } from "@kaiord/core";
 import { Sparkles } from "lucide-react";
 import { useState } from "react";
 
-import { useAiStore } from "../../../store/ai-store";
+import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
 import { Button } from "../../atoms/Button";
 import { ModelSelector } from "./ModelSelector";
 import { SportSelect } from "./SportSelect";
@@ -12,7 +12,7 @@ import { ZoneIndicator } from "./ZoneIndicator";
 export const AiWorkoutForm: React.FC = () => {
   const [text, setText] = useState("");
   const [sport, setSport] = useState("");
-  const { generation } = useAiStore();
+  const generation = useAiRuntimeStore((s) => s.generation);
   const { generate } = useAiGeneration();
   const isLoading = generation.status === "loading";
 

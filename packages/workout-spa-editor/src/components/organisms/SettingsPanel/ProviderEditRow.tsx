@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import type { LlmProviderConfig } from "../../../store/ai-store";
+import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { Button } from "../../atoms/Button";
 import { Input } from "../../atoms/Input";
 import { ModelSelect } from "./ModelSelect";

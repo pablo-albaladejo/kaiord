@@ -58,6 +58,12 @@ export type AiProviderRepository = {
   getById: (id: string) => Promise<LlmProviderConfig | undefined>;
   put: (provider: LlmProviderConfig) => Promise<void>;
   delete: (id: string) => Promise<void>;
+  // Custom prompt belongs to the AI domain. Routing it through this
+  // repository keeps the meta-table read/write out of application
+  // code so the no-direct-port-call rule holds across the domain.
+  // `null` distinguishes "never set" from `""` (user cleared).
+  getCustomPrompt: () => Promise<string | null>;
+  setCustomPrompt: (prompt: string) => Promise<void>;
 };
 
 export type SyncStateRepository = {

@@ -48,15 +48,27 @@ test.describe("Settings Panel", () => {
     // Set second as default
     await dialog.getByRole("button", { name: /set default/i }).click();
 
-    // Remove the first provider
-    const removeButtons = dialog.getByRole("button", { name: /remove/i });
-    await removeButtons.first().click();
+    // Wait for the flip to fully settle. The two-step persistence
+    // (Claude flips off, then GPT flips on) is observable from the
+    // DOM as: Claude row now exposes its own Set Default button AND
+    // GPT no longer does. Gating here guarantees both puts have
+    // committed before the following remove fires.
+    const claudeRow = dialog
+      .locator("div.rounded-lg.border")
+      .filter({ hasText: "My Claude" });
+    await expect(
+      claudeRow.getByRole("button", { name: /set default/i })
+    ).toBeVisible();
+
+    // Remove Claude through its own row's Remove button — robust to
+    // row-order changes because we located by row content.
+    await claudeRow.getByRole("button", { name: /^remove$/i }).click();
 
     // Should only have GPT remaining
-    await expect(dialog.getByText("My GPT")).toBeVisible();
     await expect(
       dialog.getByText("My Claude", { exact: true })
     ).not.toBeVisible();
+    await expect(dialog.getByText("My GPT")).toBeVisible();
   });
 
   test("8.8: Extensions tab shows bridge status", async ({ page }) => {

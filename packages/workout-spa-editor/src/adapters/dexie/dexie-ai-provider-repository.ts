@@ -27,10 +27,13 @@ async function decryptProvider(
   return { ...p, apiKey: await decrypt(p.apiKey, PASSPHRASE) };
 }
 
+const CUSTOM_PROMPT_KEY = "ai_custom_prompt";
+
 export function createDexieAiProviderRepository(
   db: KaiordDatabase
 ): AiProviderRepository {
   const table = () => db.table("aiProviders");
+  const meta = () => db.table("meta");
 
   return {
     getAll: async () => {
@@ -49,6 +52,15 @@ export function createDexieAiProviderRepository(
 
     delete: async (id) => {
       await table().delete(id);
+    },
+
+    getCustomPrompt: async () => {
+      const row = await meta().get(CUSTOM_PROMPT_KEY);
+      return typeof row?.value === "string" ? row.value : null;
+    },
+
+    setCustomPrompt: async (prompt) => {
+      await meta().put({ key: CUSTOM_PROMPT_KEY, value: prompt });
     },
   };
 }
