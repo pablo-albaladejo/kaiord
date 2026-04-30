@@ -49,6 +49,8 @@ export type ProfileRepository = {
   setActiveId: (id: string | null) => Promise<void>;
   put: (profile: Profile) => Promise<void>;
   delete: (id: string) => Promise<void>;
+  // Lightweight existence check; uses the underlying store's count primitive.
+  count: () => Promise<number>;
 };
 
 export type AiProviderRepository = {
@@ -79,4 +81,9 @@ export type PersistencePort = {
   usage: UsageRepository;
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
+  // Atomic commit-or-rollback wrapper for multi-write or read-modify-write
+  // use cases. Dexie adapter delegates to db.transaction("rw", db.tables, fn);
+  // in-memory adapter implements snapshot/revert. Application code MUST NOT
+  // import `db` to obtain a transaction — go through this method.
+  transaction: <T>(fn: () => Promise<T>) => Promise<T>;
 };

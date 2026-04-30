@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 
-import { useProfileStore } from "../../../../store/profile-store";
+import { useProfileByIdLive } from "../../../../hooks/use-profile-by-id-live";
 import { SportZoneEditor } from "../../ZoneEditor/SportZoneEditor";
 import type { ProfileFormData } from "../types";
 import { LinkedAccountsSection } from "./LinkedAccountsSection";
@@ -28,9 +28,11 @@ export function ProfileEditView({
   onCancel,
 }: ProfileEditViewProps) {
   const [activeTab, setActiveTab] = useState<ProfileTab>("zones");
-  const profile = useProfileStore((s) =>
-    s.profiles.find((p) => p.id === profileId)
-  );
+  // Live read from Dexie via useLiveQuery — `undefined` covers both
+  // loading (first mount) and "no row for this id" (deleted between
+  // dialog open and now). Both cases hide the linked-accounts section,
+  // matching legacy behavior.
+  const profile = useProfileByIdLive(profileId);
 
   return (
     <>

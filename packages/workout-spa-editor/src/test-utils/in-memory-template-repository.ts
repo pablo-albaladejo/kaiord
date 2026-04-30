@@ -1,15 +1,17 @@
 /**
  * In-Memory Template Repository
  *
- * Test implementation using a plain Map.
+ * Test implementation using a plain Map. Accepts an externally-owned
+ * store so `createInMemoryPersistence` can snapshot it for transaction
+ * rollback.
  */
 
 import type { WorkoutTemplate } from "../types/workout-library";
 import type { TemplateRepository } from "../ports/persistence-port";
 
-export function createInMemoryTemplateRepository(): TemplateRepository {
-  const store = new Map<string, WorkoutTemplate>();
-
+export function createInMemoryTemplateRepository(
+  store: Map<string, WorkoutTemplate> = new Map()
+): TemplateRepository {
   return {
     getAll: async () => [...store.values()],
 

@@ -6,7 +6,7 @@
 
 import type { StateCreator } from "zustand";
 
-import { updateSportConfig } from "../helpers/sport-zone-updater";
+import { updateSportConfig } from "../../../application/profile/helpers/sport-zone-updater";
 import { persistState } from "../persistence";
 import type { ProfileStore } from "../types";
 

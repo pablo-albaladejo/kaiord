@@ -1,15 +1,17 @@
 /**
  * In-Memory Workout Repository
  *
- * Test implementation using a plain Map.
+ * Test implementation using a plain Map. Accepts an externally-owned
+ * store so `createInMemoryPersistence` can snapshot it for transaction
+ * rollback.
  */
 
 import type { WorkoutRecord } from "../types/calendar-schemas";
 import type { WorkoutRepository } from "../ports/persistence-port";
 
-export function createInMemoryWorkoutRepository(): WorkoutRepository {
-  const store = new Map<string, WorkoutRecord>();
-
+export function createInMemoryWorkoutRepository(
+  store: Map<string, WorkoutRecord> = new Map()
+): WorkoutRepository {
   return {
     getById: async (id) => store.get(id),
 

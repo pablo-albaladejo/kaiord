@@ -501,6 +501,67 @@ describe("DexieUsageRepository", () => {
   });
 });
 
+// --- Transaction (multi-write atomicity) ---
+
+describe("DexiePersistence.transaction", () => {
+  it("commits both writes on success", async () => {
+    const persistence = createDexiePersistence(testDb);
+    const profile = makeProfile({ id: PROFILE_UUID_1 });
+
+    await persistence.transaction(async () => {
+      await persistence.profiles.put(profile);
+      await persistence.profiles.setActiveId(profile.id);
+    });
+
+    expect(await persistence.profiles.getById(PROFILE_UUID_1)).toEqual(profile);
+    expect(await persistence.profiles.getActiveId()).toBe(PROFILE_UUID_1);
+  });
+
+  it("rolls back both writes when the callback rejects", async () => {
+    const persistence = createDexiePersistence(testDb);
+    const profile = makeProfile({ id: PROFILE_UUID_1 });
+
+    await expect(
+      persistence.transaction(async () => {
+        await persistence.profiles.put(profile);
+        await persistence.profiles.setActiveId(profile.id);
+        throw new Error("simulated mid-transaction failure");
+      })
+    ).rejects.toThrow("simulated mid-transaction failure");
+
+    expect(await persistence.profiles.getById(PROFILE_UUID_1)).toBeUndefined();
+    expect(await persistence.profiles.getActiveId()).toBeNull();
+  });
+
+  it("rolls back a write even when no second write follows (fake-indexeddb sanity)", async () => {
+    // Sanity sub-test from task 1A.0.2: verifies fake-indexeddb honors
+    // Dexie's transaction.abort() — write A then throw, expect getAll()
+    // to return [] after rollback.
+    const persistence = createDexiePersistence(testDb);
+    const profile = makeProfile({ id: PROFILE_UUID_1 });
+
+    await expect(
+      persistence.transaction(async () => {
+        await persistence.profiles.put(profile);
+        throw new Error("abort before second write");
+      })
+    ).rejects.toThrow("abort before second write");
+
+    expect(await persistence.profiles.getAll()).toEqual([]);
+  });
+
+  it("returns the callback's resolved value on success", async () => {
+    const persistence = createDexiePersistence(testDb);
+
+    const result = await persistence.transaction(async () => {
+      await persistence.profiles.put(makeProfile({ id: PROFILE_UUID_1 }));
+      return "committed";
+    });
+
+    expect(result).toBe("committed");
+  });
+});
+
 // --- Storage Probe ---
 
 describe("probeStorage", () => {

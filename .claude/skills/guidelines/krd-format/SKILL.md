@@ -32,10 +32,10 @@ Adding a new value is a **breaking change** and requires a migration plan.
 
 ## Naming conventions
 
-| Layer | Field names | Enum values |
-|-------|-------------|-------------|
-| KRD (domain) | camelCase — `subSport`, `durationType`, `heartRate` | snake_case — `"indoor_cycling"`, `"lap_swimming"` |
-| Adapters (internal) | camelCase allowed | MUST emit snake_case in KRD output |
+| Layer               | Field names                                         | Enum values                                       |
+| ------------------- | --------------------------------------------------- | ------------------------------------------------- |
+| KRD (domain)        | camelCase — `subSport`, `durationType`, `heartRate` | snake_case — `"indoor_cycling"`, `"lap_swimming"` |
+| Adapters (internal) | camelCase allowed                                   | MUST emit snake_case in KRD output                |
 
 Access enum values via `.enum`: `subSportSchema.enum.indoor_cycling`
 
@@ -47,13 +47,13 @@ Adapters **MUST NOT drop unknown namespaces** silently. They MUST either round-t
 
 ## Round-trip tolerances
 
-| Field | Tolerance |
-|-------|-----------|
-| Time | ±1 second |
-| Power | ±1 watt or ±1% FTP |
-| Heart Rate | ±1 bpm |
-| Cadence | ±1 rpm |
-| Distance | ±1 meter |
+| Field      | Tolerance          |
+| ---------- | ------------------ |
+| Time       | ±1 second          |
+| Power      | ±1 watt or ±1% FTP |
+| Heart Rate | ±1 bpm             |
+| Cadence    | ±1 rpm             |
+| Distance   | ±1 meter           |
 
 Every converter that touches a numeric field MUST have round-trip tests within these tolerances.
 

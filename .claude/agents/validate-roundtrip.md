@@ -10,7 +10,7 @@ You are the Round-Trip Validation Agent for the Kaiord monorepo.
 ## Allowed tolerances
 
 | Field      | Tolerance          |
-|------------|--------------------|
+| ---------- | ------------------ |
 | Time       | ±1 second          |
 | Power      | ±1 watt or ±1% FTP |
 | Heart Rate | ±1 bpm             |

@@ -1,0 +1,7 @@
+{
+  "layoutHeader": 2,
+  "useAiGeneration": 2,
+  "capturedAt": "2026-04-29",
+  "capturedAgainstSha": "17d5aff1532d1f47fafe176460b11a83192e4281",
+  "methodology": "React Profiler onRender count over (a) two setActiveProfile transitions on a 2-profile dataset for LayoutHeader's live-hook probe, (b) two useAiStore.selectedProviderId transitions for the AI provider-change proxy. Counts exclude the initial mount commit."
+}
