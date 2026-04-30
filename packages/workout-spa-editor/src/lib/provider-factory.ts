@@ -1,6 +1,6 @@
 import type { LanguageModel } from "ai";
 
-import type { LlmProviderConfig } from "../store/ai-store";
+import type { LlmProviderConfig } from "../store/ai-store-types";
 
 export const createLanguageModel = async (
   config: LlmProviderConfig

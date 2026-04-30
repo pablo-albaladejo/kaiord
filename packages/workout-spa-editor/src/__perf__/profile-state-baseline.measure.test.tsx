@@ -36,7 +36,7 @@ import { createDexiePersistence } from "../adapters/dexie/dexie-persistence-adap
 import { createProfile } from "../application/profile/create-profile";
 import { setActiveProfile } from "../application/profile/set-active-profile";
 import { useActiveProfileLive } from "../hooks/use-active-profile-live";
-import { useAiStore } from "../store/ai-store";
+import { useAiRuntimeStore } from "../store/ai-runtime-store";
 
 const baselinePath = resolve(__dirname, "profile-state-baseline.json");
 const shouldUpdate = process.env.UPDATE_BASELINE === "1";
@@ -56,12 +56,13 @@ const ProfileNameProbe = () => {
 };
 
 const ProviderNameProbe = () => {
-  // Minimal proxy for `useAiGeneration`'s provider-driven re-render path.
-  // Reads `useAiStore` selectedProviderId so a write to that store
-  // causes the same kind of subscriber re-render the real hook
-  // experiences. The hook itself depends on too many contexts to mount
-  // in a focused perf harness; this proxy isolates the observable cause.
-  const id = useAiStore((s) => s.selectedProviderId);
+  // Minimal proxy for `useAiGeneration`'s provider-driven re-render
+  // path. Subscribes to the runtime store's selectedProviderId so a
+  // write to that store causes the same kind of subscriber re-render
+  // the real hook experiences. The hook itself depends on too many
+  // contexts to mount in a focused perf harness; this proxy isolates
+  // the observable cause.
+  const id = useAiRuntimeStore((s) => s.selectedProviderId);
   return <span data-testid="ai-probe">{id ?? "none"}</span>;
 };
 
@@ -130,7 +131,7 @@ const measureUseAiGeneration = async (): Promise<number> => {
   const initialCount = count;
 
   act(() => {
-    useAiStore.setState({ selectedProviderId: "provider-a" });
+    useAiRuntimeStore.setState({ selectedProviderId: "provider-a" });
   });
   await waitFor(async () => {
     const probe = await findByTestId("ai-probe");
@@ -138,7 +139,7 @@ const measureUseAiGeneration = async (): Promise<number> => {
   });
 
   act(() => {
-    useAiStore.setState({ selectedProviderId: "provider-b" });
+    useAiRuntimeStore.setState({ selectedProviderId: "provider-b" });
   });
   await waitFor(async () => {
     const probe = await findByTestId("ai-probe");
@@ -158,7 +159,7 @@ const writeBaseline = (b: Baseline): void => {
     capturedAgainstSha:
       process.env.GIT_SHA ?? "unknown — run with GIT_SHA env var",
     methodology:
-      "React Profiler onRender count over (a) two setActiveProfile transitions on a 2-profile dataset for LayoutHeader's live-hook probe, (b) two useAiStore.selectedProviderId transitions for the AI provider-change proxy. Counts exclude the initial mount commit.",
+      "React Profiler onRender count over (a) two setActiveProfile transitions on a 2-profile dataset for LayoutHeader's live-hook probe, (b) two useAiRuntimeStore.selectedProviderId transitions for the AI provider-change proxy. Counts exclude the initial mount commit.",
   };
   writeFileSync(baselinePath, `${JSON.stringify(payload, null, 2)}\n`);
 };
@@ -166,7 +167,7 @@ const writeBaseline = (b: Baseline): void => {
 describe("profile-state perf gate", () => {
   beforeEach(async () => {
     await clearProfileTables();
-    useAiStore.setState({ selectedProviderId: null });
+    useAiRuntimeStore.setState({ selectedProviderId: null });
   });
   afterEach(async () => {
     await clearProfileTables();

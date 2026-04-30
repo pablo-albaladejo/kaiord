@@ -1,7 +1,11 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, screen } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
+import { db } from "../../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
+import { renderWithProviders } from "../../../test-utils";
 import { SettingsPanel } from "./SettingsPanel";
-import { useAiStore } from "../../../store/ai-store";
 
 vi.mock("../../../contexts", async (importOriginal) => {
   const actual = await importOriginal<Record<string, unknown>>();
@@ -29,59 +33,59 @@ vi.mock("../../../store/train2go-store", () => ({
   }),
 }));
 
+const renderPanel = () =>
+  renderWithProviders(<SettingsPanel open={true} onOpenChange={vi.fn()} />, {
+    persistence: createDexiePersistence(db),
+  });
+
 describe("SettingsPanel", () => {
-  beforeEach(() => {
-    useAiStore.setState({
-      providers: [],
-      customPrompt: "",
+  beforeEach(async () => {
+    await db.table("aiProviders").clear();
+    await db.table("meta").clear();
+    useAiRuntimeStore.setState({
       selectedProviderId: null,
       generation: { status: "idle" },
     });
   });
 
-  it("should render when open", () => {
-    render(<SettingsPanel open={true} onOpenChange={vi.fn()} />);
+  afterEach(async () => {
+    await db.table("aiProviders").clear();
+  });
 
+  it("renders when open", () => {
+    renderPanel();
     expect(screen.getByText("Settings")).toBeInTheDocument();
   });
 
-  it("should show AI tab by default", () => {
-    render(<SettingsPanel open={true} onOpenChange={vi.fn()} />);
-
+  it("shows the AI tab by default", () => {
+    renderPanel();
     expect(screen.getByText("LLM Providers")).toBeInTheDocument();
   });
 
-  it("should switch to Extensions tab", () => {
-    render(<SettingsPanel open={true} onOpenChange={vi.fn()} />);
-
+  it("switches to the Extensions tab", () => {
+    renderPanel();
     fireEvent.click(screen.getByText("Extensions"));
-
     expect(screen.getByText("Garmin Connect")).toBeInTheDocument();
     expect(screen.getByText("Train2Go")).toBeInTheDocument();
     expect(screen.getByText("Refresh Status")).toBeInTheDocument();
   });
 
-  it("should switch to Privacy tab", () => {
-    render(<SettingsPanel open={true} onOpenChange={vi.fn()} />);
-
+  it("switches to the Privacy tab", () => {
+    renderPanel();
     fireEvent.click(screen.getByText("Privacy"));
-
     expect(screen.getByText("Privacy Information")).toBeInTheDocument();
   });
 
-  it("should show provider list as empty initially", () => {
-    render(<SettingsPanel open={true} onOpenChange={vi.fn()} />);
-
+  it("shows the provider list as empty initially", () => {
+    renderPanel();
     expect(
       screen.getByText("No providers configured. Add one below.")
     ).toBeInTheDocument();
   });
 
-  it("should show privacy disclaimers", () => {
-    render(<SettingsPanel open={true} onOpenChange={vi.fn()} />);
-
+  it("shows privacy disclaimers", () => {
+    renderPanel();
     fireEvent.click(screen.getByText("Privacy"));
-
     expect(
       screen.getByText(/We do not store your credentials/)
     ).toBeInTheDocument();

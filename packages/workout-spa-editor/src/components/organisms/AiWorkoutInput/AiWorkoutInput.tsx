@@ -1,6 +1,6 @@
 import { Sparkles } from "lucide-react";
 
-import { useAiStore } from "../../../store/ai-store";
+import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { AiWorkoutForm } from "./AiWorkoutForm";
 import { AiWorkoutInputEmpty } from "./AiWorkoutInputEmpty";
 
@@ -11,9 +11,12 @@ type AiWorkoutInputProps = {
 export const AiWorkoutInput: React.FC<AiWorkoutInputProps> = ({
   onSettingsClick,
 }) => {
-  const { providers, hydrated } = useAiStore();
+  const providers = useAiProvidersLive();
 
-  if (!hydrated) return null;
+  // `undefined` is the loading phase. Render nothing so the gradient
+  // panel does not flash an empty CTA before the user's persisted
+  // providers resolve.
+  if (providers === undefined) return null;
 
   return (
     <div className="rounded-lg border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 shadow-md dark:border-blue-800 dark:from-blue-950/50 dark:to-indigo-950/50">

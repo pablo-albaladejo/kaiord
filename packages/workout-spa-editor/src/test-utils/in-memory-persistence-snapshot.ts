@@ -29,11 +29,17 @@ export type Stores = {
 
 export type Snapshot = {
   [K in keyof Stores]: Stores[K];
-} & { profileActiveId: string | null };
+} & {
+  profileActiveId: string | null;
+  aiCustomPrompt: string | null;
+};
+
+import type { CustomPromptRef } from "./in-memory-ai-provider-repository";
 
 export const captureSnapshot = (
   stores: Stores,
-  activeIdRef: ActiveIdRef
+  activeIdRef: ActiveIdRef,
+  customPromptRef: CustomPromptRef
 ): Snapshot => ({
   workouts: new Map(stores.workouts),
   templates: new Map(stores.templates),
@@ -44,11 +50,13 @@ export const captureSnapshot = (
   coaching: new Map(stores.coaching),
   coachingSyncState: new Map(stores.coachingSyncState),
   profileActiveId: activeIdRef.current,
+  aiCustomPrompt: customPromptRef.current,
 });
 
 export const restoreSnapshot = (
   stores: Stores,
   activeIdRef: ActiveIdRef,
+  customPromptRef: CustomPromptRef,
   snapshot: Snapshot
 ): void => {
   for (const key of Object.keys(stores) as Array<keyof Stores>) {
@@ -60,4 +68,5 @@ export const restoreSnapshot = (
     }
   }
   activeIdRef.current = snapshot.profileActiveId;
+  customPromptRef.current = snapshot.aiCustomPrompt;
 };

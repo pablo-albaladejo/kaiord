@@ -1,8 +1,11 @@
-import { useAiStore } from "../../../store/ai-store";
+import { clearAllProviders } from "../../../application/ai/clear-all-providers";
+import { usePersistence } from "../../../contexts/persistence-context";
+import { useToastContext } from "../../../contexts/ToastContext";
 import { Button } from "../../atoms/Button";
 import { PrivacyInformationSection } from "./PrivacyInformationSection";
 
 const SECURE_STORAGE_PREFIX = "kaiord_secure_";
+const CLEAR_FAILED_TOAST = "Failed to clear API keys — please retry.";
 
 const clearSecureStorage = (): void => {
   Object.keys(localStorage)
@@ -11,11 +14,16 @@ const clearSecureStorage = (): void => {
 };
 
 export const PrivacyTab: React.FC = () => {
-  const clearAi = () => useAiStore.setState({ providers: [] });
+  const persistence = usePersistence();
+  const toast = useToastContext();
 
-  const handleClearAll = () => {
-    clearAi();
-    clearSecureStorage();
+  const handleClearAll = async () => {
+    try {
+      await clearAllProviders(persistence);
+      clearSecureStorage();
+    } catch {
+      toast.error(CLEAR_FAILED_TOAST);
+    }
   };
 
   return (

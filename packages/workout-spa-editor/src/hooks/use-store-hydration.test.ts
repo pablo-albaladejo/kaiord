@@ -1,12 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
 import { renderHook } from "@testing-library/react";
+import { describe, expect, it, vi } from "vitest";
 
-const mockUseAiHydration = vi.fn();
 const mockUseGarminDetection = vi.fn();
-
-vi.mock("./use-ai-hydration", () => ({
-  useAiHydration: () => mockUseAiHydration(),
-}));
 
 vi.mock("./use-garmin-detection", () => ({
   useGarminDetection: () => mockUseGarminDetection(),
@@ -15,10 +10,9 @@ vi.mock("./use-garmin-detection", () => ({
 import { useStoreHydration } from "./use-store-hydration";
 
 describe("useStoreHydration", () => {
-  it("should delegate to useAiHydration and useGarminDetection", () => {
+  it("delegates to the persisted-state runtime detectors", () => {
     renderHook(() => useStoreHydration());
 
-    expect(mockUseAiHydration).toHaveBeenCalledTimes(1);
     expect(mockUseGarminDetection).toHaveBeenCalledTimes(1);
   });
 });
