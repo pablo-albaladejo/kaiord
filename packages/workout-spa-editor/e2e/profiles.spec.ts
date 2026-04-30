@@ -93,8 +93,12 @@ test.describe("Profile Management", () => {
     const dialog = page.getByRole("dialog");
     await page.getByLabel(/^name$/i).fill("Profile 1");
     await page.getByRole("button", { name: /create profile/i }).click();
+    // Wait for the form to clear (signals the async createProfile use
+    // case has resolved) before firing the next create.
+    await expect(page.getByLabel(/^name$/i)).toHaveValue("");
     await page.getByLabel(/^name$/i).fill("Profile 2");
     await page.getByRole("button", { name: /create profile/i }).click();
+    await expect(page.getByLabel(/^name$/i)).toHaveValue("");
 
     // Act - Delete first profile
     const deleteButtons = dialog.getByRole("button", {
@@ -117,8 +121,10 @@ test.describe("Profile Management", () => {
     const dialog = page.getByRole("dialog");
     await page.getByLabel(/^name$/i).fill("Profile A");
     await page.getByRole("button", { name: /create profile/i }).click();
+    await expect(page.getByLabel(/^name$/i)).toHaveValue("");
     await page.getByLabel(/^name$/i).fill("Profile B");
     await page.getByRole("button", { name: /create profile/i }).click();
+    await expect(page.getByLabel(/^name$/i)).toHaveValue("");
 
     // Act - Click "Set Active" on the non-active profile
     await dialog.getByRole("button", { name: /set active/i }).click();
@@ -352,6 +358,12 @@ test.describe("Profile Performance", () => {
     for (let i = 1; i <= 5; i++) {
       await page.getByLabel(/^name$/i).fill(`Profile ${i}`);
       await page.getByRole("button", { name: /create profile/i }).click();
+      // Phase 1B: createProfile is now async (wraps the count check, put,
+      // and conditional setActiveId in persistence.transaction). Wait for
+      // the form to clear — the canonical post-success signal — before
+      // firing the next iteration so we don't race with an in-flight use
+      // case clearing the name AFTER the next fill().
+      await expect(page.getByLabel(/^name$/i)).toHaveValue("");
     }
 
     // Act - Measure profile switch time
@@ -383,6 +395,10 @@ test.describe("Profile Performance", () => {
     for (let i = 1; i <= 20; i++) {
       await page.getByLabel(/^name$/i).fill(`Profile ${i}`);
       await page.getByRole("button", { name: /create profile/i }).click();
+      // Phase 1B: see comment in `should switch profiles quickly` —
+      // wait for the form to clear before the next iteration so the
+      // async use case has time to settle.
+      await expect(page.getByLabel(/^name$/i)).toHaveValue("");
     }
 
     // Assert - All profiles are visible and scrollable in dialog
