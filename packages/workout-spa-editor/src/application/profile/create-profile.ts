@@ -26,17 +26,17 @@ export const createProfile = async (
 ): Promise<Profile> => {
   const profile = createNewProfile(name, options);
 
-  // Use the lightweight `count()` primitive instead of pulling the full
-  // collection just to test emptiness — keeps boot-time work cheap as
-  // the profile count grows.
-  if ((await persistence.profiles.count()) === 0) {
-    await persistence.transaction(async () => {
-      await persistence.profiles.put(profile);
+  // Single transaction wraps the count check, the put, and the
+  // conditional setActiveId so a concurrent `createProfile` cannot
+  // observe `count === 0` from a stale read and overwrite the other
+  // call's active id (TOCTOU). The lightweight `count()` primitive
+  // avoids pulling the full collection just to test emptiness.
+  await persistence.transaction(async () => {
+    const isFirstProfile = (await persistence.profiles.count()) === 0;
+    await persistence.profiles.put(profile);
+    if (isFirstProfile) {
       await persistence.profiles.setActiveId(profile.id);
-    });
-    return profile;
-  }
-
-  await persistence.profiles.put(profile);
+    }
+  });
   return profile;
 };
