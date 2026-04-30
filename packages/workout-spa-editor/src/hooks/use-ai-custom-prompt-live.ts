@@ -10,14 +10,7 @@
 
 import { useLiveQuery } from "dexie-react-hooks";
 
-import { db } from "../adapters/dexie/dexie-database";
+import { aiProviderRepository } from "../adapters/dexie";
 
 export const useAiCustomPromptLive = (): string | null | undefined =>
-  useLiveQuery<string | null>(
-    () =>
-      db
-        .table("meta")
-        .get("ai_custom_prompt")
-        .then((row) => (row ? (row.value as string) : null)),
-    []
-  );
+  useLiveQuery<string | null>(() => aiProviderRepository.getCustomPrompt(), []);
