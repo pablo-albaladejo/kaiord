@@ -29,6 +29,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      spa_marker: ${{ steps.spa_marker.outputs.marker }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -97,6 +99,71 @@ jobs:
           test -f merged-dist/sitemap.xml          || { echo "❌ Missing sitemap.xml"; exit 1; }
           echo "✅ All required files present in merged artifact"
 
+      - name: Inject SPA route fallback
+        run: |
+          set -e
+          # Server-driven SPA fallback: GitHub Pages serves the root 404.html for any
+          # unresolved path. The redirect script captures /editor/* deep links into a
+          # ?p= query and bounces to the SPA's index.html, which decodes the query
+          # back into a real URL via history.replaceState before React Router boots.
+          # Non-/editor/* paths fall through to the landing's existing 404 markup.
+          cat >> merged-dist/404.html <<'EOF'
+          <script>
+            (function () {
+              var l = window.location;
+              if (l.pathname.indexOf('/editor/') === 0) {
+                l.replace(
+                  l.protocol + '//' + l.host +
+                    '/editor/?p=' +
+                    encodeURIComponent(l.pathname + l.search) +
+                    l.hash
+                );
+              }
+            })();
+          </script>
+          EOF
+
+          # Decoder runs synchronously before the React bundle so the URL settles
+          # to the user's intended deep link before any router subscribes.
+          python3 - <<'PY'
+          import re, pathlib
+          p = pathlib.Path('merged-dist/editor/index.html')
+          html = p.read_text()
+          decoder = (
+              '<script>'
+              '(function(){'
+              'var p=new URLSearchParams(window.location.search).get("p");'
+              'if(p){var d=decodeURIComponent(p);'
+              'window.history.replaceState(null,"",d+window.location.hash);}'
+              '})();'
+              '</script>'
+          )
+          new = re.sub(r'<head>', '<head>\n    ' + decoder, html, count=1)
+          if new == html:
+              raise SystemExit('Could not find <head> in editor/index.html')
+          p.write_text(new)
+          PY
+
+          # Verify both injections landed.
+          grep -q "indexOf('/editor/')" merged-dist/404.html \
+            || { echo "❌ 404.html redirect script missing after injection"; exit 1; }
+          grep -q "URLSearchParams" merged-dist/editor/index.html \
+            || { echo "❌ editor/index.html decoder missing after injection"; exit 1; }
+          echo "✅ SPA route fallback injected"
+
+      - name: Capture SPA build marker
+        id: spa_marker
+        run: |
+          set -e
+          # Build-derived marker so the smoke step survives vite base/assetsDir refactors.
+          MARKER=$(grep -oE 'src="/editor/assets/index-[^"]+\.js"' merged-dist/editor/index.html | head -1)
+          if [ -z "$MARKER" ]; then
+            echo "❌ Could not extract SPA entry-script marker from editor/index.html"
+            exit 1
+          fi
+          echo "Build marker: $MARKER"
+          echo "marker=$MARKER" >> "$GITHUB_OUTPUT"
+
       - name: Setup Pages
         uses: actions/configure-pages@v6
 
@@ -115,5 +182,34 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+
+      - name: Smoke-test SPA route fallback
+        env:
+          MARKER: ${{ needs.build.outputs.spa_marker }}
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          set -e
+          if [ -z "$MARKER" ] || [ -z "$PAGE_URL" ]; then
+            echo "❌ Missing build marker or page URL; cannot run smoke."
+            exit 1
+          fi
+          # Pages CDN propagation is eventually consistent; retry up to 10x at 10s.
+          # The deep route /editor/calendar must serve the SPA bundle (positive marker)
+          # and never the landing's 404 markup (negative marker).
+          URL="${PAGE_URL%/}/editor/calendar"
+          echo "Smoke target: $URL"
+          echo "Looking for marker: $MARKER"
+          for i in $(seq 1 10); do
+            BODY=$(curl -sL --max-time 15 "$URL" || true)
+            if echo "$BODY" | grep -qF "$MARKER"; then
+              echo "✅ Attempt $i: SPA bundle served at deep route"
+              exit 0
+            fi
+            echo "Attempt $i: marker not found yet; retrying in 10s"
+            sleep 10
+          done
+          echo "❌ Smoke failed after 10 retries — deep route did not serve the SPA bundle."
+          exit 1
+
       # Rollback: use workflow_dispatch on last known-good main commit SHA,
       # or revert the breaking commit on main.
