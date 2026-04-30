@@ -48,17 +48,21 @@ test.describe("Settings Panel", () => {
     // Set second as default
     await dialog.getByRole("button", { name: /set default/i }).click();
 
-    // Wait for the default flip to settle. After the click GPT
-    // carries the Default badge, so the only remaining "Set Default"
-    // button is on Claude. Gating on this prevents the following
-    // remove from firing while the live hook is still mid-flip.
+    // Wait for the flip to fully settle. The two-step persistence
+    // (Claude flips off, then GPT flips on) is observable from the
+    // DOM as: Claude row now exposes its own Set Default button AND
+    // GPT no longer does. Gating here guarantees both puts have
+    // committed before the following remove fires.
+    const claudeRow = dialog
+      .locator("div.rounded-lg.border")
+      .filter({ hasText: "My Claude" });
     await expect(
-      dialog.getByRole("button", { name: /set default/i })
+      claudeRow.getByRole("button", { name: /set default/i })
     ).toBeVisible();
 
-    // Remove the first provider
-    const removeButtons = dialog.getByRole("button", { name: /remove/i });
-    await removeButtons.first().click();
+    // Remove Claude through its own row's Remove button — robust to
+    // row-order changes because we located by row content.
+    await claudeRow.getByRole("button", { name: /^remove$/i }).click();
 
     // Should only have GPT remaining
     await expect(
