@@ -39,12 +39,11 @@ describe("AI tab toast PII / secret audit", () => {
         const trimmed = arg.trim();
         // Ban any backtick-templated argument outright.
         expect(trimmed).not.toContain("`");
-        // Allow either a literal string or an identifier (constant ref).
-        const isLiteral =
-          (trimmed.startsWith('"') && trimmed.endsWith('"')) ||
-          (trimmed.startsWith("'") && trimmed.endsWith("'"));
-        const isIdentifier = /^[A-Z_][A-Z0-9_]*$/.test(trimmed);
-        expect(isLiteral || isIdentifier).toBe(true);
+        // Require a SCREAMING_SNAKE_CASE identifier so the argument
+        // resolves to a top-level const at audit time. Inline string
+        // literals would still be safe today but lower the bar for
+        // future drift toward `\`...${error.message}\`` style.
+        expect(trimmed).toMatch(/^[A-Z_][A-Z0-9_]*$/);
       }
     }
   );

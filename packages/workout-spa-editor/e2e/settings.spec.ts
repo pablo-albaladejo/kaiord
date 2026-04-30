@@ -48,15 +48,23 @@ test.describe("Settings Panel", () => {
     // Set second as default
     await dialog.getByRole("button", { name: /set default/i }).click();
 
+    // Wait for the default flip to settle. After the click GPT
+    // carries the Default badge, so the only remaining "Set Default"
+    // button is on Claude. Gating on this prevents the following
+    // remove from firing while the live hook is still mid-flip.
+    await expect(
+      dialog.getByRole("button", { name: /set default/i })
+    ).toBeVisible();
+
     // Remove the first provider
     const removeButtons = dialog.getByRole("button", { name: /remove/i });
     await removeButtons.first().click();
 
     // Should only have GPT remaining
-    await expect(dialog.getByText("My GPT")).toBeVisible();
     await expect(
       dialog.getByText("My Claude", { exact: true })
     ).not.toBeVisible();
+    await expect(dialog.getByText("My GPT")).toBeVisible();
   });
 
   test("8.8: Extensions tab shows bridge status", async ({ page }) => {

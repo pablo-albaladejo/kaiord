@@ -56,7 +56,7 @@ export function createDexieAiProviderRepository(
 
     getCustomPrompt: async () => {
       const row = await meta().get(CUSTOM_PROMPT_KEY);
-      return row ? (row.value as string) : null;
+      return typeof row?.value === "string" ? row.value : null;
     },
 
     setCustomPrompt: async (prompt) => {
