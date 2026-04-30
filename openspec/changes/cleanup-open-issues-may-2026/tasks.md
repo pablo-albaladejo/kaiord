@@ -69,62 +69,62 @@ For each issue, look up the failing commit in the issue body, confirm via `gh ru
 
 ### 3.1 — Shared parser primitive (extracted from existing script)
 
-- [ ] 3.0 Worktree setup: `git worktree add -b feature/cleanup-issues-3-pii-guard /Users/pablo/development/personal/kaiord-cleanup-3 main`.
-- [ ] 3.1.1 Extract the string-aware JSONC stripper from `scripts/check-no-zustand-writethrough.mjs` into `scripts/lib/strip-jsonc.mjs`. Update `check-no-zustand-writethrough.mjs` to import from the shared module. Re-run `pnpm test:scripts` to confirm no behavioural regression in the existing 11 fixtures.
+- [x] 3.0 Worktree setup: `git worktree add -b feature/cleanup-issues-3-pii-guard /Users/pablo/development/personal/kaiord-cleanup-3 main`.
+- [x] 3.1.1 Extract the string-aware JSONC stripper from `scripts/check-no-zustand-writethrough.mjs` into `scripts/lib/strip-jsonc.mjs`. Update `check-no-zustand-writethrough.mjs` to import from the shared module. Re-run `pnpm test:scripts` to confirm no behavioural regression in the existing 11 fixtures.
 
 ### 3.2 — Guard script
 
-- [ ] 3.2.1 Create `scripts/check-no-pii-leakage.mjs` per design D2 / D3. Walk `packages/workout-spa-editor/src/{components,hooks,lib}/**/*.{ts,tsx}` excluding `*.test.{ts,tsx}` and `*.stories.{ts,tsx}`.
-- [ ] 3.2.2 Parse each file for four call-site dispatch shapes (canonical anchors):
+- [x] 3.2.1 Create `scripts/check-no-pii-leakage.mjs` per design D2 / D3. Walk `packages/workout-spa-editor/src/{components,hooks,lib}/**/*.{ts,tsx}` excluding `*.test.{ts,tsx}` and `*.stories.{ts,tsx}`.
+- [x] 3.2.2 Parse each file for four call-site dispatch shapes (canonical anchors):
   - **Member dispatch**: `(toast|useToastContext\(\))\s*\.\s*(error|success|info|warning)\(` and `console\.(log|warn|error|info|debug)\(`.
   - **Computed-member dispatch**: `(toast|useToastContext\(\))\s*\[\s*["'](error|success|info|warning)["']\s*\]\s*\(` — catches `toast["error"](...)` bypass.
   - **Destructured dispatch**: scan the file for `const\s*\{\s*([^}]+)\s*\}\s*=\s*useToastContext\(\)` and capture the bound names (e.g., `error`, `success`). Subsequent calls of the form `<bound-name>\(` within the same file are treated as in-scope; their first argument is checked.
   - **Re-bound dispatch**: scan the file for `const\s+([A-Za-z_$][\w$]*)\s*=\s*useToastContext\(\)` and capture the receiver name (e.g., `ctx`). Subsequent member-dispatch calls of the form `<ID>\.\s*(error|success|info|warning)\(` are treated as in-scope.
   - **Multi-binding ambiguity policy**: if a file contains conflicting bindings (e.g., a destructure and a re-bind, or two destructures from different sources), the script treats every potentially-toast `<name>(` or `<name>.<method>(` call as in-scope (false-positive bias is the safe default). The contributor either renames the conflict, refactors, or — last resort — allowlists the file under D9 criteria.
   Extract the first argument's source text using a balanced-paren scanner that respects string literals (so `toast.error("oops, ).")` parses correctly).
-- [ ] 3.2.3 Validate the first argument shape per D3 in this exact order (bare-literal accept comes BEFORE rejection, so `toast.error("URL: example.com")` and `toast.error("a + b")` are accepted as bare literals despite their inner `:` and `+` characters):
+- [x] 3.2.3 Validate the first argument shape per D3 in this exact order (bare-literal accept comes BEFORE rejection, so `toast.error("URL: example.com")` and `toast.error("a + b")` are accepted as bare literals despite their inner `:` and `+` characters):
   1. Trim leading/trailing whitespace.
   2. **Bare-literal accept first**: if the trimmed text matches `/^"[^"\\]*(?:\\.[^"\\]*)*"$/` or the equivalent single-quote regex, ACCEPT and continue to the next call site. Inner content is irrelevant — the bare-literal cannot interpolate.
   3. **Bare-identifier accept second**: if the trimmed text matches `/^[A-Z][A-Z0-9_]*$/`, scan the same file for a top-level `const <ID>\s*=\s*("[^"\\]*(?:\\.[^"\\]*)*"|'[^'\\]*(?:\\.[^'\\]*)*');` whose RHS is exactly a bare string literal. Depth-1 only per D8 — chains (`A → B → "x"`) are rejected at this step. If found, ACCEPT.
   4. **Reject everything else**: template literals, concatenation, parenthesized expressions (e.g., `("Failed")`), TS type assertions (`SAVE_FAILED as string`, `<string>SAVE_FAILED`, `SAVE_FAILED satisfies string`), TS post-fix operators (`SAVE_FAILED!`, `SAVE_FAILED as const`), unary operators (`void "Failed"`, `+SAVE_FAILED`), member access, function calls, lowercase / camelCase identifiers, identifier chains. The rejection message names the offending operator/shape verbatim so contributors can fix without consulting the spec: e.g., "rule R-PIIInterpolation: `SAVE_FAILED!` rejected — strip the non-null assertion; the constant is already statically known not-null".
-- [ ] 3.2.4 Hard-coded allowlist — empty initially. The allowlist mechanism mirrors `check-no-zustand-writethrough.mjs`'s exported `ALLOWLIST` Set so test fixtures can manipulate it. Each entry MUST carry a comment satisfying D9 criteria.
-- [ ] 3.2.5 CLI behaviour: print `✅ No PII / secret leakage detected.` on success; print one line per violation with file path, line number, call site, and the offending argument shape on failure. Exit 0 / 1.
-- [ ] 3.2.6 The script must be ESM (`.mjs`), use no external dependencies (`node --test`-compatible), and follow the existing `scripts/check-no-zustand-writethrough.mjs` style (export `runCheck` and `ALLOWLIST` for test injection).
+- [x] 3.2.4 Hard-coded allowlist — empty initially. The allowlist mechanism mirrors `check-no-zustand-writethrough.mjs`'s exported `ALLOWLIST` Set so test fixtures can manipulate it. Each entry MUST carry a comment satisfying D9 criteria.
+- [x] 3.2.5 CLI behaviour: print `✅ No PII / secret leakage detected.` on success; print one line per violation with file path, line number, call site, and the offending argument shape on failure. Exit 0 / 1.
+- [x] 3.2.6 The script must be ESM (`.mjs`), use no external dependencies (`node --test`-compatible), and follow the existing `scripts/check-no-zustand-writethrough.mjs` style (export `runCheck` and `ALLOWLIST` for test injection).
 
 ### 3.3 — Co-located test + fixtures
 
-- [ ] 3.3.1 Create `scripts/check-no-pii-leakage.test.mjs` (`node:test`) covering twelve fixtures under `scripts/__fixtures__/check-no-pii-leakage/`:
-- [ ] 3.3.1.1 Positive: post-rollout codebase passes — `runCheck()` against the real SPA editor source returns no violations.
-- [ ] 3.3.1.2 Negative: template literal interpolating `error.message` is flagged (`toast.error(\`Failed: ${error.message}\`)`).
-- [ ] 3.3.1.3 Negative: string concatenation with a closure-captured error is flagged (`console.error("Failed: " + err.message)`).
-- [ ] 3.3.1.4 Negative: identifier reference to a non-top-level binding is flagged. Fixture: `try { ... } catch (err) { const msg = err.message; toast.error(msg); }` — `msg` is a function-local const, not top-level, so the depth-1 lookup fails and the call is rejected.
-- [ ] 3.3.1.5 Negative: helper-call indirection at definition time is flagged (`const SAVE_FAILED = formatError(err); toast.error(SAVE_FAILED);` — RHS is a `CallExpression`, not a literal).
-- [ ] 3.3.1.6 Negative: computed-member dispatch is flagged (`toast["error"](\`Failed: ${err.message}\`)` — the dispatch regex catches the bracket form).
-- [ ] 3.3.1.7 Negative: destructured dispatch is flagged (`const { error } = useToastContext(); error(\`Failed: ${err.message}\`);` — the destructure scan binds `error` to the toast context, and the subsequent call is treated as in-scope).
-- [ ] 3.3.1.8 Positive: bare string literal containing colons / plus signs is accepted (`toast.error("URL: https://example.com")`, `toast.error("a + b")`) — verifies that bare-literal acceptance runs BEFORE the rejection char-class.
-- [ ] 3.3.1.9 Positive: bare SCREAMING_SNAKE_CASE identifier resolving to a top-level string-literal const is accepted (`const SAVE_FAILED_TOAST = "Failed to save"; toast.error(SAVE_FAILED_TOAST);`).
-- [ ] 3.3.1.10 Positive: allowlist exemption — an allowlisted file with a template literal passes; the production allowlist is empty, the fixture injects an entry into the exported `ALLOWLIST` Set.
-- [ ] 3.3.1.11 Negative: re-bound dispatch is flagged (`const ctx = useToastContext(); ctx.error(\`Failed: ${err.message}\`);` — the re-binding scan binds `ctx` to the toast context, treats `ctx.error(...)` as member dispatch).
-- [ ] 3.3.1.12 Negative: identifier chain is flagged (`const A = B; const B = "x"; toast.error(A);` — depth-1 lookup of `A` finds the identifier `B` on the RHS, not a string literal).
+- [x] 3.3.1 Create `scripts/check-no-pii-leakage.test.mjs` (`node:test`) covering twelve fixtures under `scripts/__fixtures__/check-no-pii-leakage/`:
+- [x] 3.3.1.1 Positive: post-rollout codebase passes — `runCheck()` against the real SPA editor source returns no violations.
+- [x] 3.3.1.2 Negative: template literal interpolating `error.message` is flagged (`toast.error(\`Failed: ${error.message}\`)`).
+- [x] 3.3.1.3 Negative: string concatenation with a closure-captured error is flagged (`console.error("Failed: " + err.message)`).
+- [x] 3.3.1.4 Negative: identifier reference to a non-top-level binding is flagged. Fixture: `try { ... } catch (err) { const msg = err.message; toast.error(msg); }` — `msg` is a function-local const, not top-level, so the depth-1 lookup fails and the call is rejected.
+- [x] 3.3.1.5 Negative: helper-call indirection at definition time is flagged (`const SAVE_FAILED = formatError(err); toast.error(SAVE_FAILED);` — RHS is a `CallExpression`, not a literal).
+- [x] 3.3.1.6 Negative: computed-member dispatch is flagged (`toast["error"](\`Failed: ${err.message}\`)` — the dispatch regex catches the bracket form).
+- [x] 3.3.1.7 Negative: destructured dispatch is flagged (`const { error } = useToastContext(); error(\`Failed: ${err.message}\`);` — the destructure scan binds `error` to the toast context, and the subsequent call is treated as in-scope).
+- [x] 3.3.1.8 Positive: bare string literal containing colons / plus signs is accepted (`toast.error("URL: https://example.com")`, `toast.error("a + b")`) — verifies that bare-literal acceptance runs BEFORE the rejection char-class.
+- [x] 3.3.1.9 Positive: bare SCREAMING_SNAKE_CASE identifier resolving to a top-level string-literal const is accepted (`const SAVE_FAILED_TOAST = "Failed to save"; toast.error(SAVE_FAILED_TOAST);`).
+- [x] 3.3.1.10 Positive: allowlist exemption — an allowlisted file with a template literal passes; the production allowlist is empty, the fixture injects an entry into the exported `ALLOWLIST` Set.
+- [x] 3.3.1.11 Negative: re-bound dispatch is flagged (`const ctx = useToastContext(); ctx.error(\`Failed: ${err.message}\`);` — the re-binding scan binds `ctx` to the toast context, treats `ctx.error(...)` as member dispatch).
+- [x] 3.3.1.12 Negative: identifier chain is flagged (`const A = B; const B = "x"; toast.error(A);` — depth-1 lookup of `A` finds the identifier `B` on the RHS, not a string literal).
 
 ### 3.4 — Wire into CI
 
-- [ ] 3.4.1 Confirm `pnpm test:scripts` glob (`node --test scripts/*.test.mjs`) picks up `scripts/check-no-pii-leakage.test.mjs` automatically.
-- [ ] 3.4.2 Run `pnpm test:scripts` locally — all green including the new file plus the existing 11 no-Zustand-writethrough fixtures (confirming D7 shared-primitive extraction did not regress).
+- [x] 3.4.1 Confirm `pnpm test:scripts` glob (`node --test scripts/*.test.mjs`) picks up `scripts/check-no-pii-leakage.test.mjs` automatically.
+- [x] 3.4.2 Run `pnpm test:scripts` locally — all green including the new file plus the existing 11 no-Zustand-writethrough fixtures (confirming D7 shared-primitive extraction did not regress).
 
 ### 3.5 — Existing audit reconciliation per D6
 
-- [ ] 3.5.1 **Keep** `packages/workout-spa-editor/src/components/organisms/SettingsPanel/use-ai-tab-handlers.audit.test.ts` per D6 (CLAUDE.md "Never delete a test"). Add a one-line header comment to the audit file: `// Defense-in-depth: scripts/check-no-pii-leakage.mjs provides repo-wide coverage of the same rule. This focused vitest variant catches regressions in the package's test surface.`
+- [x] 3.5.1 **Keep** `packages/workout-spa-editor/src/components/organisms/SettingsPanel/use-ai-tab-handlers.audit.test.ts` per D6 (CLAUDE.md "Never delete a test"). Add a one-line header comment to the audit file: `// Defense-in-depth: scripts/check-no-pii-leakage.mjs provides repo-wide coverage of the same rule. This focused vitest variant catches regressions in the package's test surface.`
 
 ### 3.6 — Validation
 
-- [ ] 3.6.1 Run the new guard against the current SPA editor source: `node scripts/check-no-pii-leakage.mjs`. Address every flagged call site (refactor to a SCREAMING_SNAKE_CASE constant; do NOT allowlist unless D9 criteria are met).
-- [ ] 3.6.2 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing, including the kept AiTab audit.
-- [ ] 3.6.3 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
-- [ ] 3.6.4 Run `pnpm test:scripts` — passing.
-- [ ] 3.6.5 Run `pnpm -r build` — clean.
-- [ ] 3.6.6 Update internal docs (`CLAUDE.md` "Quality Standards" section): add a bullet referencing the new guard alongside the existing no-Zustand-writethrough one.
-- [ ] 3.6.7 Add a `none` changeset unconditionally. The PR adds repo scripts (not packaged) and a comment-only edit to a `.test.ts` file inside the SPA editor; neither is a user-facing change. If the changeset bot complains, the right fix is to update `.changeset/config.json` `ignore` rules — never to misrepresent the change as `patch`.
+- [x] - [ ] 3.6.1 Run the new guard against the current SPA editor source: `node scripts/check-no-pii-leakage.mjs`. Address every flagged call site (refactor to a SCREAMING_SNAKE_CASE constant; do NOT allowlist unless D9 criteria are met).
+- [x] - [ ] 3.6.2 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing, including the kept AiTab audit.
+- [x] - [ ] 3.6.3 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
+- [x] - [ ] 3.6.4 Run `pnpm test:scripts` — passing.
+- [x] - [ ] 3.6.5 Run `pnpm -r build` — clean.
+- [x] - [ ] 3.6.6 Update internal docs (`CLAUDE.md` "Quality Standards" section): add a bullet referencing the new guard alongside the existing no-Zustand-writethrough one.
+- [x] - [ ] 3.6.7 Add a `none` changeset unconditionally. The PR adds repo scripts (not packaged) and a comment-only edit to a `.test.ts` file inside the SPA editor; neither is a user-facing change. If the changeset bot complains, the right fix is to update `.changeset/config.json` `ignore` rules — never to misrepresent the change as `patch`.
 - [ ] 3.6.8 Open PR; ensure CI green; squash merge.
 - [ ] 3.6.9 After merge: clean local worktree and delete local branch.
 

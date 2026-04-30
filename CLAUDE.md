@@ -65,6 +65,9 @@ When working on this codebase, ALL problems must be fixed, regardless of whether
 - ✅ **Zero IDE warnings** - SonarQube, accessibility, and static analysis warnings must be resolved (treat as lint errors)
 - ✅ **Coverage thresholds met** - 80% for core packages, 70% for frontend
 - ✅ **All tests passing** - 100% pass rate across all packages
+- ✅ **Mechanical guards passing** - `pnpm test:scripts` enforces:
+  - `check-no-zustand-writethrough.mjs` — no Zustand store writes Dexie directly (R-DexieImport / R-PersistStateImport / R-AppDexieImport)
+  - `check-no-pii-leakage.mjs` — toast and `console.*` first arguments under `packages/workout-spa-editor/src/{components,hooks,lib}/**` are static (bare string literal or top-level SCREAMING_SNAKE_CASE constant referencing a literal); rule R-PIIInterpolation
 
 If you encounter warnings or errors during your work:
 
