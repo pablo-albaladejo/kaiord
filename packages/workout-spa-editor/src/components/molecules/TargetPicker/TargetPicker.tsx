@@ -1,4 +1,4 @@
-import { useProfileStore } from "../../../store/profile-store";
+import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import type { TargetPickerProps } from "./TargetPicker.types";
 import { TargetPickerFields } from "./TargetPickerFields";
 import { useTargetPickerProps } from "./use-target-picker-props";
@@ -12,11 +12,10 @@ export const TargetPicker = ({
   disabled = false,
   className = "",
 }: TargetPickerProps) => {
-  const activeProfileId = useProfileStore((state) => state.activeProfileId);
-  const profiles = useProfileStore((state) => state.profiles);
-  const activeProfile = activeProfileId
-    ? (profiles.find((p) => p.id === activeProfileId) ?? null)
-    : null;
+  // Live join of `meta.activeProfileId` and `profiles.get(id)` (D1).
+  // `undefined` while loading collapses to `null` so downstream
+  // selection rendering matches legacy "no active profile" behavior.
+  const activeProfile = useActiveProfileLive()?.profile ?? null;
 
   const state = useTargetPickerState(value);
   const handlers = useTargetPickerHandlers({

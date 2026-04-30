@@ -1,7 +1,7 @@
 import { useSettingsDialog } from "../../../contexts";
+import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import { useLazyDialog } from "../../../hooks/use-lazy-dialog";
 import { useLibrary } from "../../../hooks/use-library";
-import { useProfileStore } from "../../../store/profile-store";
 import {
   useCurrentWorkout,
   useLoadWorkout,
@@ -23,8 +23,11 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
     show: settingsShow,
     hide: settingsHide,
   } = useSettingsDialog();
-  const { getActiveProfile } = useProfileStore();
-  const activeProfile = getActiveProfile();
+  // Reactive read of the active profile via the Dexie singleton.
+  // `undefined` while loading — render the header without a profile name
+  // until the live query resolves (matches the pre-migration behavior of
+  // an empty `useProfileStore`).
+  const activeProfile = useActiveProfileLive()?.profile ?? null;
   const { templates } = useLibrary();
   const currentWorkout = useCurrentWorkout();
   const loadWorkout = useLoadWorkout();

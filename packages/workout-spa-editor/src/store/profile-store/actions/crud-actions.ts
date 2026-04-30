@@ -6,9 +6,9 @@
 
 import type { StateCreator } from "zustand";
 
-import { createNewProfile } from "../helpers/profile-factory";
-import { updateProfileData } from "../helpers/profile-updater";
-import { getNewActiveProfileId } from "../helpers/profile-utils";
+import { createNewProfile } from "../../../application/profile/helpers/profile-factory";
+import { updateProfileData } from "../../../application/profile/helpers/profile-updater";
+import { getNewActiveProfileId } from "../../../application/profile/helpers/profile-utils";
 import { persistState } from "../persistence";
 import type { ProfileStore } from "../types";
 

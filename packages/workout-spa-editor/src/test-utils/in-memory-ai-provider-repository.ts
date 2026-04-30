@@ -1,15 +1,17 @@
 /**
  * In-Memory AI Provider Repository
  *
- * Test implementation using a plain Map.
+ * Test implementation using a plain Map. Accepts an externally-owned
+ * store so `createInMemoryPersistence` can snapshot it for transaction
+ * rollback.
  */
 
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import type { AiProviderRepository } from "../ports/persistence-port";
 
-export function createInMemoryAiProviderRepository(): AiProviderRepository {
-  const store = new Map<string, LlmProviderConfig>();
-
+export function createInMemoryAiProviderRepository(
+  store: Map<string, LlmProviderConfig> = new Map()
+): AiProviderRepository {
   return {
     getAll: async () => [...store.values()],
 

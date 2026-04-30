@@ -39,8 +39,8 @@ Tokens are persisted after login; subsequent pushes skip authentication automati
 
 Parse the JSON response and show:
 
-| Field | Value |
-|-------|-------|
-| Name  | workout name |
-| ID    | workout id |
+| Field | Value               |
+| ----- | ------------------- |
+| Name  | workout name        |
+| ID    | workout id          |
 | URL   | Garmin Connect link |

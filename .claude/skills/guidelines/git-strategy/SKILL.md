@@ -20,6 +20,7 @@ Format: `type(scope): description`
 Valid types: `feat`, `fix`, `chore`, `test`, `docs`, `refactor`, `perf`
 
 Valid scopes:
+
 ```
 core  fit  tcx  zwo  garmin  garmin-connect  ai  cli  mcp
 spa-editor  garmin-bridge  train2go-bridge

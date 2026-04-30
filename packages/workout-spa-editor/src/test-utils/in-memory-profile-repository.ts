@@ -2,24 +2,29 @@
  * In-Memory Profile Repository
  *
  * Test implementation using a plain Map with active ID tracking.
+ * Accepts externally-owned store and activeId ref so
+ * `createInMemoryPersistence` can snapshot both for transaction
+ * rollback.
  */
 
 import type { Profile } from "../types/profile";
 import type { ProfileRepository } from "../ports/persistence-port";
 
-export function createInMemoryProfileRepository(): ProfileRepository {
-  const store = new Map<string, Profile>();
-  let activeId: string | null = null;
+export type ActiveIdRef = { current: string | null };
 
+export function createInMemoryProfileRepository(
+  store: Map<string, Profile> = new Map(),
+  activeIdRef: ActiveIdRef = { current: null }
+): ProfileRepository {
   return {
     getAll: async () => [...store.values()],
 
     getById: async (id) => store.get(id),
 
-    getActiveId: async () => activeId,
+    getActiveId: async () => activeIdRef.current,
 
     setActiveId: async (id) => {
-      activeId = id;
+      activeIdRef.current = id;
     },
 
     put: async (profile) => {
@@ -28,9 +33,11 @@ export function createInMemoryProfileRepository(): ProfileRepository {
 
     delete: async (id) => {
       store.delete(id);
-      if (activeId === id) {
-        activeId = null;
+      if (activeIdRef.current === id) {
+        activeIdRef.current = null;
       }
     },
+
+    count: async () => store.size,
   };
 }

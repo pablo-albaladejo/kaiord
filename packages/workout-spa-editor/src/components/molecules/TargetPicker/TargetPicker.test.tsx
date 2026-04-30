@@ -1,16 +1,19 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { useProfileStore } from "../../../store/profile-store";
+
+import { db } from "../../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { createProfile } from "../../../application/profile/create-profile";
+import { setActiveProfile } from "../../../application/profile/set-active-profile";
+import { setZoneMethod } from "../../../application/profile/zones/set-zone-method";
+import { updateSportThresholds } from "../../../application/profile/zones/update-sport-thresholds";
 import type { Target } from "../../../types/krd";
 import { TargetPicker } from "./TargetPicker";
 
 describe("TargetPicker", () => {
-  beforeEach(() => {
-    useProfileStore.setState({
-      profiles: [],
-      activeProfileId: null,
-    });
+  beforeEach(async () => {
+    await Promise.all([db.table("profiles").clear(), db.table("meta").clear()]);
   });
 
   it("should render with open target by default", () => {
@@ -220,13 +223,14 @@ describe("TargetPicker", () => {
   });
 
   describe("Profile Integration", () => {
-    it("should show zone name when profile is active and zone is selected", () => {
+    it("should show zone name when profile is active and zone is selected", async () => {
       // Arrange
-      const profile = useProfileStore.getState().createProfile("Test Profile");
-      useProfileStore
-        .getState()
-        .updateSportThresholds(profile.id, "cycling", { ftp: 250, lthr: 180 });
-      useProfileStore.getState().setActiveProfile(profile.id);
+      const persistence = createDexiePersistence(db);
+      const profile = await createProfile(persistence, "Test Profile");
+      await updateSportThresholds(persistence, profile.id, "cycling", {
+        ftp: 250,
+        lthr: 180,
+      });
 
       const onChange = vi.fn();
       const value: Target = {
@@ -238,26 +242,25 @@ describe("TargetPicker", () => {
       render(<TargetPicker value={value} onChange={onChange} />);
 
       // Assert
-      expect(screen.getByText(/Tempo/)).toBeInTheDocument();
-      expect(screen.getByText(/190-225W/)).toBeInTheDocument();
+      expect(await screen.findByText(/Tempo/)).toBeInTheDocument();
+      expect(await screen.findByText(/190-225W/)).toBeInTheDocument();
     });
 
-    it("should show heart rate zone name when profile is active", () => {
+    it("should show heart rate zone name when profile is active", async () => {
       // Arrange
-      const profile = useProfileStore.getState().createProfile("Test Profile");
-      useProfileStore
-        .getState()
-        .setZoneMethod(
-          profile.id,
-          "cycling",
-          "heartRateZones",
-          "karvonen-5",
-          []
-        );
-      useProfileStore
-        .getState()
-        .updateSportThresholds(profile.id, "cycling", { lthr: 180 });
-      useProfileStore.getState().setActiveProfile(profile.id);
+      const persistence = createDexiePersistence(db);
+      const profile = await createProfile(persistence, "Test Profile");
+      await setZoneMethod(
+        persistence,
+        profile.id,
+        "cycling",
+        "heartRateZones",
+        "karvonen-5",
+        []
+      );
+      await updateSportThresholds(persistence, profile.id, "cycling", {
+        lthr: 180,
+      });
 
       const onChange = vi.fn();
       const value: Target = {
@@ -269,8 +272,8 @@ describe("TargetPicker", () => {
       render(<TargetPicker value={value} onChange={onChange} />);
 
       // Assert - Karvonen zone 2: contiguous from Z1.max+1 to round(89%*180)
-      expect(screen.getByText(/Aerobic/)).toBeInTheDocument();
-      expect(screen.getByText(/149-160 BPM/)).toBeInTheDocument();
+      expect(await screen.findByText(/Aerobic/)).toBeInTheDocument();
+      expect(await screen.findByText(/149-160 BPM/)).toBeInTheDocument();
     });
 
     it("should not show zone info when no profile is active", () => {
@@ -288,13 +291,13 @@ describe("TargetPicker", () => {
       expect(screen.queryByText(/Tempo/)).not.toBeInTheDocument();
     });
 
-    it("should update zone info when profile changes", () => {
-      // Arrange
-      const profile1 = useProfileStore.getState().createProfile("Profile 1");
-      useProfileStore
-        .getState()
-        .updateSportThresholds(profile1.id, "cycling", { ftp: 250 });
-      useProfileStore.getState().setActiveProfile(profile1.id);
+    it("should update zone info when profile changes", async () => {
+      // Arrange — first profile is auto-set active by createProfile (I1).
+      const persistence = createDexiePersistence(db);
+      const profile1 = await createProfile(persistence, "Profile 1");
+      await updateSportThresholds(persistence, profile1.id, "cycling", {
+        ftp: 250,
+      });
 
       const onChange = vi.fn();
       const value: Target = {
@@ -307,19 +310,19 @@ describe("TargetPicker", () => {
       );
 
       // Assert initial zone info
-      expect(screen.getByText(/190-225W/)).toBeInTheDocument();
+      expect(await screen.findByText(/190-225W/)).toBeInTheDocument();
 
-      // Act - Change profile
-      const profile2 = useProfileStore.getState().createProfile("Profile 2");
-      useProfileStore
-        .getState()
-        .updateSportThresholds(profile2.id, "cycling", { ftp: 300 });
-      useProfileStore.getState().setActiveProfile(profile2.id);
+      // Act — second profile does not auto-set active; switch explicitly.
+      const profile2 = await createProfile(persistence, "Profile 2");
+      await updateSportThresholds(persistence, profile2.id, "cycling", {
+        ftp: 300,
+      });
+      await setActiveProfile(persistence, profile2.id);
 
       rerender(<TargetPicker value={value} onChange={onChange} />);
 
       // Assert updated zone info
-      expect(screen.getByText(/228-270W/)).toBeInTheDocument();
+      expect(await screen.findByText(/228-270W/)).toBeInTheDocument();
     });
 
     it("should show zone label with no profile indicator when no profile", () => {
@@ -341,13 +344,13 @@ describe("TargetPicker", () => {
       expect(zoneOption?.textContent).toBe("Power Zone (no profile)");
     });
 
-    it("should calculate absolute power values from zone and FTP", () => {
+    it("should calculate absolute power values from zone and FTP", async () => {
       // Arrange
-      const profile = useProfileStore.getState().createProfile("Test Profile");
-      useProfileStore
-        .getState()
-        .updateSportThresholds(profile.id, "cycling", { ftp: 200 });
-      useProfileStore.getState().setActiveProfile(profile.id);
+      const persistence = createDexiePersistence(db);
+      const profile = await createProfile(persistence, "Test Profile");
+      await updateSportThresholds(persistence, profile.id, "cycling", {
+        ftp: 200,
+      });
 
       const onChange = vi.fn();
       const value: Target = {
@@ -359,13 +362,13 @@ describe("TargetPicker", () => {
       render(<TargetPicker value={value} onChange={onChange} />);
 
       // Assert - Zone 4 is 91-105% of FTP
-      expect(screen.getByText(/182-210W/)).toBeInTheDocument();
+      expect(await screen.findByText(/182-210W/)).toBeInTheDocument();
     });
 
-    it("should not show power range when FTP is not set", () => {
-      // Arrange
-      const profile = useProfileStore.getState().createProfile("Test Profile");
-      useProfileStore.getState().setActiveProfile(profile.id);
+    it("should not show power range when FTP is not set", async () => {
+      // Arrange — createProfile sets active automatically (I1).
+      const persistence = createDexiePersistence(db);
+      await createProfile(persistence, "Test Profile");
 
       const onChange = vi.fn();
       const value: Target = {
@@ -377,7 +380,7 @@ describe("TargetPicker", () => {
       render(<TargetPicker value={value} onChange={onChange} />);
 
       // Assert - Should show zone name but not power range
-      expect(screen.getByText(/Tempo/)).toBeInTheDocument();
+      expect(await screen.findByText(/Tempo/)).toBeInTheDocument();
       // Should not show power range in watts (e.g., "190-225W")
       expect(screen.queryByText(/\d+-\d+W/)).not.toBeInTheDocument();
     });
