@@ -58,6 +58,15 @@ const STATIC_IMPORT_RE =
 const DYNAMIC_IMPORT_RE = /\bimport\(\s*["']([^"']+)["']\s*\)/g;
 const PERSIST_STATE_NAMED_RE =
   /import(?:\s+type)?\s*\{([^}]*?)\}\s*from\s+["'][^"']+["']/g;
+// Catches `import persistState from "..."` and
+// `import persistState, { other } from "..."`. The leading clause
+// matches default imports only — namespace imports are handled by the
+// dedicated namespace regex below.
+const PERSIST_STATE_DEFAULT_RE =
+  /import(?:\s+type)?\s+([A-Za-z_$][\w$]*)(?:\s*,\s*[\s\S]*?)?\s+from\s+["'][^"']+["']/g;
+// Catches `import * as persistState from "..."`.
+const PERSIST_STATE_NAMESPACE_RE =
+  /import\s+\*\s+as\s+([A-Za-z_$][\w$]*)\s+from\s+["'][^"']+["']/g;
 
 const findRoots = (dir) => {
   const out = [];
@@ -104,16 +113,128 @@ function importsPersistState(source) {
       .map((s) => s.trim().replace(/\s+as\s+\w+$/, ""));
     if (names.includes("persistState")) return true;
   }
+  for (const m of source.matchAll(PERSIST_STATE_DEFAULT_RE)) {
+    if (m[1] === "persistState") return true;
+  }
+  for (const m of source.matchAll(PERSIST_STATE_NAMESPACE_RE)) {
+    if (m[1] === "persistState") return true;
+  }
   return false;
 }
 
-function resolveSpecifier(fromFile, spec) {
-  if (spec.startsWith("@/")) {
-    return resolveTsModule(join(SPA_SRC, spec.slice(2)));
+// Strip TypeScript's allowed JSON-with-comments noise so JSON.parse
+// succeeds. tsconfig.json allows // and /* */ comments and trailing
+// commas. The naive regex pass treats `/*` inside a string literal
+// (e.g. `"@/*"`) as a block-comment opener, so we walk the source
+// character-by-character and only treat comment markers seen outside
+// strings as comments.
+function stripJsonc(source) {
+  let out = "";
+  let i = 0;
+  let inString = false;
+  let stringChar = "";
+  while (i < source.length) {
+    const ch = source[i];
+    const next = source[i + 1];
+    if (inString) {
+      out += ch;
+      if (ch === "\\" && i + 1 < source.length) {
+        out += next;
+        i += 2;
+        continue;
+      }
+      if (ch === stringChar) inString = false;
+      i += 1;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      inString = true;
+      stringChar = ch;
+      out += ch;
+      i += 1;
+      continue;
+    }
+    if (ch === "/" && next === "/") {
+      while (i < source.length && source[i] !== "\n") i += 1;
+      continue;
+    }
+    if (ch === "/" && next === "*") {
+      i += 2;
+      while (
+        i < source.length &&
+        !(source[i] === "*" && source[i + 1] === "/")
+      ) {
+        i += 1;
+      }
+      i += 2; // skip closing */
+      continue;
+    }
+    out += ch;
+    i += 1;
   }
+  return out.replace(/,(\s*[}\]])/g, "$1");
+}
+
+let aliasCache;
+
+function loadTsconfigAliases() {
+  if (aliasCache) return aliasCache;
+  aliasCache = [];
+  const tsconfigPath = join(
+    REPO_ROOT,
+    "packages",
+    "workout-spa-editor",
+    "tsconfig.app.json"
+  );
+  let raw;
+  try {
+    raw = readFileSync(tsconfigPath, "utf8");
+  } catch {
+    return aliasCache;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(stripJsonc(raw));
+  } catch {
+    return aliasCache;
+  }
+  const paths = parsed?.compilerOptions?.paths ?? {};
+  for (const [pattern, targets] of Object.entries(paths)) {
+    if (!Array.isArray(targets) || targets.length === 0) continue;
+    // tsconfig path patterns end in /* — strip and treat the rest as a prefix.
+    const prefix = pattern.endsWith("/*") ? pattern.slice(0, -2) : pattern;
+    const target = targets[0].endsWith("/*")
+      ? targets[0].slice(0, -2)
+      : targets[0];
+    aliasCache.push({
+      prefix: prefix.endsWith("/") ? prefix.slice(0, -1) : prefix,
+      target: join(
+        REPO_ROOT,
+        "packages",
+        "workout-spa-editor",
+        target.startsWith("./") ? target.slice(2) : target
+      ),
+    });
+  }
+  return aliasCache;
+}
+
+function resolveAlias(spec) {
+  for (const { prefix, target } of loadTsconfigAliases()) {
+    if (spec === prefix) return target;
+    if (spec.startsWith(`${prefix}/`)) {
+      return join(target, spec.slice(prefix.length + 1));
+    }
+  }
+  return null;
+}
+
+function resolveSpecifier(fromFile, spec) {
   if (spec.startsWith(".")) {
     return resolveTsModule(resolve(dirname(fromFile), spec));
   }
+  const aliased = resolveAlias(spec);
+  if (aliased) return resolveTsModule(aliased);
   return null; // external package, irrelevant for these rules
 }
 
