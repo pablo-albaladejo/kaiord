@@ -48,5 +48,7 @@ export function createDexieProfileRepository(
         await meta().put({ key: ACTIVE_PROFILE_KEY, value: null });
       }
     },
+
+    count: async () => table().count(),
   };
 }

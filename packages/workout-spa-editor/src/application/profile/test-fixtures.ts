@@ -12,26 +12,31 @@ import { DEFAULT_HEART_RATE_ZONES } from "../../types/profile";
 
 export const NOW = "2026-04-29T00:00:00.000Z";
 
+// Each sport gets its own clone of DEFAULT_HEART_RATE_ZONES so a test
+// that mutates one profile's HR zones cannot leak into another sport
+// (or another fresh profile via `makeProfile()`).
+const cloneHrZones = () => DEFAULT_HEART_RATE_ZONES.map((z) => ({ ...z }));
+
 const baseSportZones = (): Record<SportKey, SportZoneConfig> => ({
   cycling: {
     thresholds: {},
-    heartRateZones: { method: "custom", zones: DEFAULT_HEART_RATE_ZONES },
+    heartRateZones: { method: "custom", zones: cloneHrZones() },
     powerZones: { method: "custom", zones: [] },
   },
   running: {
     thresholds: {},
-    heartRateZones: { method: "custom", zones: DEFAULT_HEART_RATE_ZONES },
+    heartRateZones: { method: "custom", zones: cloneHrZones() },
     powerZones: { method: "custom", zones: [] },
     paceZones: { method: "custom", zones: [] },
   },
   swimming: {
     thresholds: {},
-    heartRateZones: { method: "custom", zones: DEFAULT_HEART_RATE_ZONES },
+    heartRateZones: { method: "custom", zones: cloneHrZones() },
     paceZones: { method: "custom", zones: [] },
   },
   generic: {
     thresholds: {},
-    heartRateZones: { method: "custom", zones: DEFAULT_HEART_RATE_ZONES },
+    heartRateZones: { method: "custom", zones: cloneHrZones() },
   },
 });
 

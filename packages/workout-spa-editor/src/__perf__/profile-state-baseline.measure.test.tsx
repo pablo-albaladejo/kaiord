@@ -7,18 +7,21 @@
  *     interaction (Phase 1A migrated this site to `useActiveProfileLive`).
  *   - A minimal `useAiGeneration`-equivalent consumer re-renders during
  *     an AI-provider-change interaction (Phase 1A leaves this on the
- *     legacy `useAiStore` + `useProfileStore`).
+ *     legacy `useAiStore` until Phase 3 splits it).
  *
- * The first time this test runs (Phase 1A), the JSON sibling file is
- * written. Phase 1B's `1B.5.2` reads it, runs fresh measurements, and
- * fails loudly if `post / pre > 2` per metric. See `tasks.md`.
+ * The committed JSON sibling file is the source of truth. By default
+ * this test only measures and asserts the counts are positive (sanity)
+ * — it does NOT overwrite the baseline. Set `UPDATE_BASELINE=1` to
+ * regenerate the JSON (used during initial capture in `1A.5.5` and
+ * whenever the methodology intentionally changes). Phase 1B's
+ * `1B.5.2` reads this file and asserts `post / pre <= 2` per metric.
  *
  * The Profiler's `onRender` callback fires once per commit per profiler
  * boundary; a brief `await` after each Dexie write lets `useLiveQuery`'s
  * BroadcastChannel propagate before counting.
  */
 
-import { writeFileSync } from "node:fs";
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { resolve } from "node:path";
 
 import { act, render, waitFor } from "@testing-library/react";
@@ -33,6 +36,7 @@ import { useActiveProfileLive } from "../hooks/use-active-profile-live";
 import { useAiStore } from "../store/ai-store";
 
 const baselinePath = resolve(__dirname, "profile-state-baseline.json");
+const shouldUpdate = process.env.UPDATE_BASELINE === "1";
 
 const clearProfileTables = () =>
   Promise.all([db.table("profiles").clear(), db.table("meta").clear()]);
@@ -146,23 +150,41 @@ describe("profile-state perf baseline", () => {
     await clearProfileTables();
   });
 
-  it("captures LayoutHeader and useAiGeneration baseline counts", async () => {
+  it("measures LayoutHeader and useAiGeneration render counts (sanity)", async () => {
     const layoutHeader = await measureLayoutHeader();
     const useAiGeneration = await measureUseAiGeneration();
 
     expect(layoutHeader).toBeGreaterThan(0);
     expect(useAiGeneration).toBeGreaterThan(0);
 
-    const payload = {
-      layoutHeader,
-      useAiGeneration,
-      capturedAt: new Date().toISOString().slice(0, 10),
-      capturedAgainstSha:
-        process.env.GIT_SHA ?? "feature/persistence-rule-cleanup-1a",
-      methodology:
-        "React Profiler onRender count over (a) two setActiveProfile transitions on a 2-profile dataset for LayoutHeader's live-hook probe, (b) two useAiStore.selectedProviderId transitions for the AI provider-change proxy. Counts exclude the initial mount commit.",
-    };
+    if (shouldUpdate) {
+      // Explicit baseline regeneration. Use the GIT_SHA env var (set in
+      // CI) when available; locally `git rev-parse HEAD` can be passed
+      // through `GIT_SHA=$(git rev-parse HEAD) UPDATE_BASELINE=1 …`.
+      const payload = {
+        layoutHeader,
+        useAiGeneration,
+        capturedAt: new Date().toISOString().slice(0, 10),
+        capturedAgainstSha:
+          process.env.GIT_SHA ?? "unknown — run with GIT_SHA env var",
+        methodology:
+          "React Profiler onRender count over (a) two setActiveProfile transitions on a 2-profile dataset for LayoutHeader's live-hook probe, (b) two useAiStore.selectedProviderId transitions for the AI provider-change proxy. Counts exclude the initial mount commit.",
+      };
+      writeFileSync(baselinePath, `${JSON.stringify(payload, null, 2)}\n`);
+      return;
+    }
 
-    writeFileSync(baselinePath, `${JSON.stringify(payload, null, 2)}\n`);
+    // Sanity-check that the committed baseline file remains the source
+    // of truth. The 2x regression gate lives in Phase 1B (`1B.5.2`).
+    expect(
+      existsSync(baselinePath),
+      `profile-state baseline missing at ${baselinePath} — set UPDATE_BASELINE=1 to regenerate`
+    ).toBe(true);
+    const baseline = JSON.parse(readFileSync(baselinePath, "utf8")) as {
+      layoutHeader: number;
+      useAiGeneration: number;
+    };
+    expect(baseline.layoutHeader).toBeGreaterThan(0);
+    expect(baseline.useAiGeneration).toBeGreaterThan(0);
   });
 });

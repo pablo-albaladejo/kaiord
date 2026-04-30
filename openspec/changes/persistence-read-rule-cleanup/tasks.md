@@ -39,7 +39,8 @@
 
 Pattern for these tests per D5.1: mount inside `<PersistenceProvider persistence={createDexiePersistenceAdapter(db)}>` (where `db` is the production Dexie singleton, fake-indexeddb-backed in jsdom). Pre-populate via `await persistence.profiles.put(...)` (or `await db.table("profiles").put(...)` for direct setup). `useLiveQuery` re-fires automatically because fake-indexeddb implements the Dexie observable contract.
 
-- [x] 1A.4.1 Update `ProfileManager.test.tsx` — replace `useProfileStore.setState({...})` with the fake-indexeddb-backed `<PersistenceProvider>` setup. Add a `beforeEach` that clears `db.table("profiles")` and `db.table("meta")`. Add a test verifying the error indication surfaces when a use case rejects (inject a rejecting `persistence.profiles.put` for that test only). [Phase 1A scope: defensive Dexie clear added; ProfileManager itself is still legacy in this phase, so the full PersistenceProvider swap and the use-case-rejection toast test land in Phase 1B (1B.2) when the parent component is migrated.]
+- [x] 1A.4.1a Update `ProfileManager.test.tsx` — add a `beforeEach` that clears `db.table("profiles")` and `db.table("meta")`. Defensive: prevents fake-indexeddb residue from a prior test leaking into a new one now that `ProfileEditView` (subcomponent) reads via `useProfileByIdLive` against Dexie.
+- [ ] 1A.4.1b Update `ProfileManager.test.tsx` — replace `useProfileStore.setState({...})` with the fake-indexeddb-backed `<PersistenceProvider>` setup. Add a test verifying the error indication surfaces when a use case rejects (inject a rejecting `persistence.profiles.put` for that test only). Deferred to Phase 1B (`1B.2`) — the parent `ProfileManager` component is still legacy in Phase 1A; the full swap + toast test land when `useProfileManager` migrates in `1B.1.1`.
 - [x] 1A.4.2 Update `LayoutHeader.test.tsx` (profile cases) — same pattern.
 - [x] 1A.4.3 Update `TargetPicker.test.tsx` — same pattern.
 - [x] 1A.4.4 Update `ZoneIndicator.test.tsx` — same pattern.
@@ -52,7 +53,7 @@ Pattern for these tests per D5.1: mount inside `<PersistenceProvider persistence
 - [x] 1A.5.4 Run `pnpm -r build` — clean.
 - [x] 1A.5.5 **Capture pre-migration perf baseline** for `1B.5.2`: while the legacy `useProfileStore` still backs the 4 unmigrated sites, record render counts for `LayoutHeader` (active-profile-change interaction) and `useAiGeneration` (provider-change interaction) using React Profiler. Commit the captured numbers as `packages/workout-spa-editor/src/__perf__/profile-state-baseline.json` with shape `{ "layoutHeader": <count>, "useAiGeneration": <count>, "capturedAt": "<ISO date>", "capturedAgainstSha": "<git sha>", "methodology": "<one sentence describing the interaction trace>" }`. Phase 1B's `1B.5.2` reads this file and asserts `post / pre <= 2` per metric, failing loudly if the file is absent. Mechanical dependency, not editorial.
 - [x] 1A.5.6 Add a `none` changeset for `@kaiord/workout-spa-editor` (per D6: Phase 1A has no user-visible change). Title: `chore(spa-editor): foundation for profile state migration to Dexie + useLiveQuery`.
-- [ ] 1A.5.7 Open PR; ensure CI green; squash merge.
+- [x] 1A.5.7 Open PR; ensure CI green; squash merge. — PR #389
 
 ## 1B. Phase 1B — High-risk profile migrations + delete legacy (PR #N+1 — closes #385)
 

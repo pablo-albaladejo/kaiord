@@ -49,6 +49,12 @@ export type ProfileRepository = {
   setActiveId: (id: string | null) => Promise<void>;
   put: (profile: Profile) => Promise<void>;
   delete: (id: string) => Promise<void>;
+  /**
+   * Lightweight existence check. Implementations SHOULD avoid
+   * materialising the full collection — use the underlying store's
+   * count primitive (Dexie `count()`, in-memory `Map.size`).
+   */
+  count: () => Promise<number>;
 };
 
 export type AiProviderRepository = {

@@ -20,4 +20,14 @@ describe("setActiveProfile", () => {
 
     expect(await persistence.profiles.getActiveId()).toBeNull();
   });
+
+  it("propagates rejections from the persistence port", async () => {
+    const persistence = createInMemoryPersistence();
+    persistence.profiles.setActiveId = () =>
+      Promise.reject(new Error("simulated quota exceeded"));
+
+    await expect(setActiveProfile(persistence, "abc-123")).rejects.toThrow(
+      "simulated quota exceeded"
+    );
+  });
 });
