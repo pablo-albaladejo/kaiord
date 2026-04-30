@@ -17,10 +17,7 @@ import { describe, expect, it } from "vitest";
 
 import { AI_TAB_TOAST_MESSAGES } from "./use-ai-tab-handlers";
 
-const CONSUMER_FILES = [
-  "use-ai-tab-handlers.ts",
-  "PrivacyTab.tsx",
-];
+const CONSUMER_FILES = ["use-ai-tab-handlers.ts", "PrivacyTab.tsx"];
 
 const TOAST_CALL_REGEX = /toast\.error\(([^)]*)\)/g;
 
