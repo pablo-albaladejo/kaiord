@@ -1,10 +1,10 @@
 /**
  * useSaveToLibrary Hook
  *
- * Handles the logic for saving workouts to the library. After Phase 2:
- * uses the `addTemplate` application use case (no more Zustand action),
- * `await`s it, and surfaces persistence rejections through the existing
- * toast context.
+ * Persists the current workout as a template via the `addTemplate`
+ * application use case. Rejections surface through the toast context
+ * so the user sees a clear error indication instead of a silent
+ * stale-success state.
  */
 
 import { useState } from "react";

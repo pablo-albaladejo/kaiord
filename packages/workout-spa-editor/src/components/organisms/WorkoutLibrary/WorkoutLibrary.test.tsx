@@ -22,9 +22,8 @@ import type { WorkoutTemplate } from "../../../types/workout-library";
 import { AppToastProvider } from "../../providers/AppToastProvider";
 import { WorkoutLibrary } from "./WorkoutLibrary";
 
-// Phase 2: useWorkoutLibrary reads via useLibraryTemplatesLive and
-// dispatches deletes through the deleteTemplate use case. Mock both
-// so we can drive the test fixtures without exercising Dexie.
+// Mock the live hook + use case directly so the test drives the
+// component with fixed templates without standing up Dexie.
 vi.mock("../../../hooks/use-library-templates-live", () => ({
   useLibraryTemplatesLive: vi.fn(),
 }));

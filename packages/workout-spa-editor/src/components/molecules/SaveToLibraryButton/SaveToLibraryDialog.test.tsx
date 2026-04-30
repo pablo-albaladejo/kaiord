@@ -15,9 +15,8 @@ import { ToastContextProvider } from "../../../contexts/ToastContext";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import { SaveToLibraryDialog } from "./SaveToLibraryDialog";
 
-// Mock the addTemplate use case so we can spy on it without exercising
-// the in-memory persistence layer (Phase 2: useSaveToLibrary calls the
-// use case directly via usePersistence()).
+// Mock the addTemplate use case so we can spy on its arguments without
+// exercising the in-memory persistence layer.
 vi.mock("../../../application/library/add-template", () => ({
   addTemplate: vi.fn(),
 }));

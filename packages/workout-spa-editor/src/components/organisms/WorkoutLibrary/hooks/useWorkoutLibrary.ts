@@ -1,9 +1,9 @@
 /**
  * useWorkoutLibrary Hook
  *
- * Manages state and logic for the workout library component. After
- * Phase 2: reads templates via `useLibraryTemplatesLive` and dispatches
- * deletes through the application use case (errors surface via toast).
+ * Manages state and logic for the workout library component. Reads
+ * templates reactively from Dexie and dispatches deletes through the
+ * `deleteTemplate` use case; rejections surface via the toast context.
  */
 
 import { useState } from "react";
