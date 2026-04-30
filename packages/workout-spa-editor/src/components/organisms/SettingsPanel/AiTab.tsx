@@ -1,17 +1,14 @@
-import { useAiStore } from "../../../store/ai-store";
+import { useAiCustomPromptLive } from "../../../hooks/use-ai-custom-prompt-live";
+import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { ProviderForm } from "./ProviderForm";
 import { ProviderList } from "./ProviderList";
+import { useAiTabHandlers } from "./use-ai-tab-handlers";
 
 export const AiTab: React.FC = () => {
-  const {
-    providers,
-    customPrompt,
-    addProvider,
-    removeProvider,
-    updateProvider,
-    setDefault,
-    setCustomPrompt,
-  } = useAiStore();
+  const providers = useAiProvidersLive() ?? [];
+  const customPrompt = useAiCustomPromptLive() ?? "";
+  const { onAdd, onRemove, onUpdate, onSetDefault, onPromptChange } =
+    useAiTabHandlers();
 
   return (
     <div className="space-y-6">
@@ -21,9 +18,9 @@ export const AiTab: React.FC = () => {
         </h3>
         <ProviderList
           providers={providers}
-          onRemove={removeProvider}
-          onSetDefault={setDefault}
-          onUpdate={updateProvider}
+          onRemove={onRemove}
+          onSetDefault={onSetDefault}
+          onUpdate={onUpdate}
         />
       </section>
 
@@ -31,7 +28,7 @@ export const AiTab: React.FC = () => {
         <h3 className="mb-3 text-sm font-semibold text-gray-700 dark:text-gray-300">
           Add Provider
         </h3>
-        <ProviderForm onAdd={addProvider} />
+        <ProviderForm onAdd={onAdd} />
       </section>
 
       <section>
@@ -51,7 +48,7 @@ export const AiTab: React.FC = () => {
           maxLength={500}
           placeholder="Additional instructions for all AI generations (e.g., 'I'm recovering from a knee injury')"
           value={customPrompt}
-          onChange={(e) => setCustomPrompt(e.target.value)}
+          onChange={(e) => onPromptChange(e.target.value)}
         />
       </section>
     </div>

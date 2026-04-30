@@ -3,60 +3,67 @@ import { useCallback } from "react";
 
 import { useAnalytics } from "../../../contexts";
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
+import { useAiCustomPromptLive } from "../../../hooks/use-ai-custom-prompt-live";
+import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { useLatestRef } from "../../../hooks/use-latest-ref";
-import { generateWorkoutKrd } from "../../../lib/generate-workout";
-import { useAiStore } from "../../../store/ai-store";
+import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
+import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import { useLoadWorkout } from "../../../store/workout-store-selectors";
-import type { SportKey } from "../../../types/sport-zones";
-import { formatZonesContext } from "./zones-formatter";
+import { runAiGeneration } from "./run-ai-generation";
+import { useAiFallbackEffect } from "./use-ai-fallback-effect";
+
+const resolveProvider = (
+  providers: LlmProviderConfig[] | undefined,
+  selectedId: string | null
+): LlmProviderConfig | null => {
+  if (!providers) return null;
+  return (
+    providers.find((p) => p.id === selectedId) ??
+    providers.find((p) => p.isDefault) ??
+    null
+  );
+};
 
 export const useAiGeneration = () => {
-  const { getSelectedProvider, customPrompt, setGeneration } = useAiStore();
-  // useLiveQuery returns `undefined` while loading; treat as no-profile.
-  // Latest-ref so the LLM-call closure reads the freshest profile at call
-  // time without rebuilding the closure on every profile mutation (which
-  // would cancel in-flight generation).
+  const providers = useAiProvidersLive();
+  const customPrompt = useAiCustomPromptLive();
+  const selectedProviderId = useAiRuntimeStore((s) => s.selectedProviderId);
+  const selectForGeneration = useAiRuntimeStore((s) => s.selectForGeneration);
+  const setGeneration = useAiRuntimeStore((s) => s.setGeneration);
+
+  useAiFallbackEffect(providers, selectedProviderId, selectForGeneration);
+
+  // Latest-ref so the LLM-call closure reads the freshest provider /
+  // profile / prompt at call time without rebuilding the closure on
+  // every mutation (which would cancel in-flight generation).
   const profileRef = useLatestRef(useActiveProfileLive()?.profile ?? null);
+  const providersRef = useLatestRef(providers);
+  const customPromptRef = useLatestRef(customPrompt);
   const loadWorkout = useLoadWorkout();
   const analytics = useAnalytics();
 
   const generate = useCallback(
     async (text: string, sport?: Sport) => {
-      const provider = getSelectedProvider();
+      const provider = resolveProvider(
+        providersRef.current,
+        selectedProviderId
+      );
       if (!provider) return;
-
-      setGeneration({ status: "loading" });
-
-      try {
-        const profile = profileRef.current;
-        const sportKey = (sport || undefined) as SportKey | undefined;
-        const zonesContext = profile
-          ? formatZonesContext(profile, sportKey)
-          : undefined;
-
-        const krd = await generateWorkoutKrd({
-          text,
-          provider,
-          sport,
-          customPrompt: customPrompt || undefined,
-          zonesContext,
-        });
-
-        loadWorkout(krd);
-        setGeneration({ status: "success" });
-        analytics.event("workout-generated", {
-          provider: provider.id,
-          sport: sport ?? "",
-        });
-      } catch (error: unknown) {
-        const message =
-          error instanceof Error ? error.message : "Generation failed";
-        setGeneration({ status: "error", message });
-      }
+      await runAiGeneration({
+        text,
+        sport,
+        provider,
+        profile: profileRef.current,
+        customPrompt: customPromptRef.current ?? null,
+        setGeneration,
+        loadWorkout,
+        analytics,
+      });
     },
     [
-      getSelectedProvider,
-      customPrompt,
+      providersRef,
+      selectedProviderId,
+      customPromptRef,
       setGeneration,
       profileRef,
       loadWorkout,

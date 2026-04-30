@@ -1,9 +1,12 @@
-import { useAiStore } from "../../../store/ai-store";
+import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
+import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
 
 export const ModelSelector: React.FC = () => {
-  const { providers, selectedProviderId, selectForGeneration } = useAiStore();
+  const providers = useAiProvidersLive();
+  const selectedProviderId = useAiRuntimeStore((s) => s.selectedProviderId);
+  const selectForGeneration = useAiRuntimeStore((s) => s.selectForGeneration);
 
-  if (providers.length === 0) return null;
+  if (!providers || providers.length === 0) return null;
 
   const currentValue =
     selectedProviderId ??

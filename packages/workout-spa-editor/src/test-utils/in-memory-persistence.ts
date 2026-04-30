@@ -9,7 +9,10 @@
  */
 
 import type { PersistencePort } from "../ports/persistence-port";
-import { createInMemoryAiProviderRepository } from "./in-memory-ai-provider-repository";
+import {
+  createInMemoryAiProviderRepository,
+  type CustomPromptRef,
+} from "./in-memory-ai-provider-repository";
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
 import {
@@ -38,6 +41,7 @@ export function createInMemoryPersistence(): PersistencePort {
     coachingSyncState: new Map(),
   };
   const profileActiveIdRef: ActiveIdRef = { current: null };
+  const aiCustomPromptRef: CustomPromptRef = { current: null };
 
   return {
     workouts: createInMemoryWorkoutRepository(stores.workouts),
@@ -46,7 +50,10 @@ export function createInMemoryPersistence(): PersistencePort {
       stores.profiles,
       profileActiveIdRef
     ),
-    aiProviders: createInMemoryAiProviderRepository(stores.aiProviders),
+    aiProviders: createInMemoryAiProviderRepository(
+      stores.aiProviders,
+      aiCustomPromptRef
+    ),
     syncState: createInMemorySyncStateRepository(stores.syncState),
     usage: createInMemoryUsageRepository(stores.usage),
     coaching: createInMemoryCoachingRepository(stores.coaching),
@@ -54,11 +61,20 @@ export function createInMemoryPersistence(): PersistencePort {
       stores.coachingSyncState
     ),
     transaction: async <T>(fn: () => Promise<T>): Promise<T> => {
-      const snapshot = captureSnapshot(stores, profileActiveIdRef);
+      const snapshot = captureSnapshot(
+        stores,
+        profileActiveIdRef,
+        aiCustomPromptRef
+      );
       try {
         return await fn();
       } catch (err) {
-        restoreSnapshot(stores, profileActiveIdRef, snapshot);
+        restoreSnapshot(
+          stores,
+          profileActiveIdRef,
+          aiCustomPromptRef,
+          snapshot
+        );
         throw err;
       }
     },
