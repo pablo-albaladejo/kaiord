@@ -63,19 +63,24 @@ describe("check-no-zustand-writethrough", () => {
   });
 
   test("R-DexieImport: relative path import flags the file", () => {
+    // Arrange
     write(
       "store/leak-store.ts",
       'import { db } from "../adapters/dexie/dexie-database";\nexport const x = db;\n'
     );
+
+    // Act
     const violations = sandboxRun();
+
+    // Assert
     assert.equal(violations.length, 1);
     assert.equal(violations[0].rule, "R-DexieImport");
     assert.match(violations[0].file, /leak-store\.ts$/);
   });
 
-  test("R-DexieImport: alias path (@/...) flags the file", () => {
-    // The script's @/ alias is hard-wired to the production SPA src.
-    // Drop a synthetic file at that location and clean up afterwards.
+  test("R-DexieImport: alias path (@/...) flags the file via tsconfig paths", () => {
+    // Arrange — the alias map is loaded from the production tsconfig,
+    // so drop a synthetic file under the real SPA src tree.
     const aliasFile = join(REAL_SPA_SRC, "store", "__alias-fixture-leak.ts");
     mkdirSync(dirname(aliasFile), { recursive: true });
     writeFileSync(
@@ -83,8 +88,12 @@ describe("check-no-zustand-writethrough", () => {
       'import { db } from "@/adapters/dexie/dexie-database";\nexport const x = db;\n',
       "utf8"
     );
+
     try {
+      // Act
       const violations = runCheck();
+
+      // Assert
       const hit = violations.find((v) =>
         v.file.endsWith("__alias-fixture-leak.ts")
       );
@@ -96,6 +105,7 @@ describe("check-no-zustand-writethrough", () => {
   });
 
   test("R-DexieImport: barrel re-export flags the file", () => {
+    // Arrange
     write(
       "adapters/dexie/index.ts",
       'export { db } from "./dexie-database";\n'
@@ -104,24 +114,34 @@ describe("check-no-zustand-writethrough", () => {
       "store/barrel-leak-store.ts",
       'import { db } from "../adapters/dexie";\nexport const x = db;\n'
     );
+
+    // Act
     const violations = sandboxRun();
+
+    // Assert
     assert.equal(violations.length, 1);
     assert.equal(violations[0].rule, "R-DexieImport");
     assert.match(violations[0].file, /barrel-leak-store\.ts$/);
   });
 
   test("R-DexieImport: dynamic import() flags the file", () => {
+    // Arrange
     write(
       "store/dynamic-leak-store.ts",
       'export const load = async () => {\n  const m = await import("../adapters/dexie/dexie-database");\n  return m.db;\n};\n'
     );
+
+    // Act
     const violations = sandboxRun();
+
+    // Assert
     assert.equal(violations.length, 1);
     assert.equal(violations[0].rule, "R-DexieImport");
     assert.match(violations[0].file, /dynamic-leak-store\.ts$/);
   });
 
   test("R-PersistStateImport: named-import import detects persistState", () => {
+    // Arrange
     write(
       "store/persist-state-store.ts",
       'import { persistState } from "./persist-helpers";\nexport const init = () => persistState();\n'
@@ -130,10 +150,46 @@ describe("check-no-zustand-writethrough", () => {
       "store/persist-helpers.ts",
       "export const persistState = () => {};\n"
     );
+
+    // Act
     const violations = sandboxRun();
+
+    // Assert
     const hit = violations.find((v) => v.rule === "R-PersistStateImport");
     assert.ok(hit, "expected R-PersistStateImport violation");
     assert.match(hit.file, /persist-state-store\.ts$/);
+  });
+
+  test("R-PersistStateImport: default-import import is also caught", () => {
+    // Arrange
+    write(
+      "store/default-persist-store.ts",
+      'import persistState from "./persist-helpers";\nexport const init = () => persistState();\n'
+    );
+
+    // Act
+    const violations = sandboxRun();
+
+    // Assert
+    const hit = violations.find((v) => v.rule === "R-PersistStateImport");
+    assert.ok(hit, "default-import bypass must be caught");
+    assert.match(hit.file, /default-persist-store\.ts$/);
+  });
+
+  test("R-PersistStateImport: namespace-import import is also caught", () => {
+    // Arrange
+    write(
+      "store/namespace-persist-store.ts",
+      'import * as persistState from "./persist-helpers";\nexport const init = () => persistState.run();\n'
+    );
+
+    // Act
+    const violations = sandboxRun();
+
+    // Assert
+    const hit = violations.find((v) => v.rule === "R-PersistStateImport");
+    assert.ok(hit, "namespace-import bypass must be caught");
+    assert.match(hit.file, /namespace-persist-store\.ts$/);
   });
 
   test("allowlist exemption: an allowlisted store file with a dexie-database import passes", async () => {
@@ -179,25 +235,34 @@ describe("check-no-zustand-writethrough", () => {
   });
 
   test("R-AppDexieImport: an application-layer file importing dexie-database is flagged", () => {
+    // Arrange
     write(
       "application/foo/bar.ts",
       'import { db } from "../../adapters/dexie/dexie-database";\nexport const x = db;\n'
     );
+
+    // Act
     const violations = sandboxRun();
+
+    // Assert
     const hit = violations.find((v) => v.rule === "R-AppDexieImport");
     assert.ok(hit, "expected R-AppDexieImport violation");
     assert.match(hit.file, /application\/foo\/bar\.ts$/);
   });
 
   test("R-AppDexieImport: no allowlist exemption applies to application files", () => {
-    // Reuse the allowlist key from the store rule and put a fixture under
-    // application/. The script must still flag it because the allowlist
+    // Arrange — the same name used in the store-rule allowlist must NOT
+    // exempt a file living under application/, because that allowlist
     // is store-scoped.
     write(
       "application/workout-store-actions.ts",
       'import { db } from "../adapters/dexie/dexie-database";\nexport const x = db;\n'
     );
+
+    // Act
     const violations = sandboxRun();
+
+    // Assert
     const hit = violations.find(
       (v) =>
         v.rule === "R-AppDexieImport" &&
