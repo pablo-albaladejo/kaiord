@@ -9,19 +9,19 @@ You are the Changeset Agent for the Kaiord monorepo.
 
 ## Publishable packages
 
-| Package                      | Notes                                                    |
-| ---------------------------- | -------------------------------------------------------- |
-| `@kaiord/core`               |                                                          |
-| `@kaiord/fit`                |                                                          |
-| `@kaiord/tcx`                |                                                          |
-| `@kaiord/zwo`                |                                                          |
-| `@kaiord/garmin`             |                                                          |
-| `@kaiord/garmin-connect`     |                                                          |
-| `@kaiord/ai`                 |                                                          |
-| `@kaiord/mcp`                |                                                          |
-| `@kaiord/cli`                |                                                          |
-| `@kaiord/garmin-bridge`      | in `linked` array — needs changeset when changed         |
-| `@kaiord/train2go-bridge`    | in `linked` array — needs changeset when changed         |
+| Package                      | Notes                                                      |
+| ---------------------------- | ---------------------------------------------------------- |
+| `@kaiord/core`               |                                                            |
+| `@kaiord/fit`                |                                                            |
+| `@kaiord/tcx`                |                                                            |
+| `@kaiord/zwo`                |                                                            |
+| `@kaiord/garmin`             |                                                            |
+| `@kaiord/garmin-connect`     |                                                            |
+| `@kaiord/ai`                 |                                                            |
+| `@kaiord/mcp`                |                                                            |
+| `@kaiord/cli`                |                                                            |
+| `@kaiord/garmin-bridge`      | in `linked` array — needs changeset when changed           |
+| `@kaiord/train2go-bridge`    | in `linked` array — needs changeset when changed           |
 | `@kaiord/workout-spa-editor` | not in `linked` or `ignore` — needs changeset when changed |
 
 ## Steps
