@@ -25,8 +25,7 @@ export const LayoutHeader = ({ onReplayTutorial }: LayoutHeaderProps) => {
   } = useSettingsDialog();
   // Reactive read of the active profile via the Dexie singleton.
   // `undefined` while loading — render the header without a profile name
-  // until the live query resolves (matches the pre-migration behavior of
-  // an empty `useProfileStore`).
+  // until the live query resolves.
   const activeProfile = useActiveProfileLive()?.profile ?? null;
   const { templates } = useLibrary();
   const currentWorkout = useCurrentWorkout();

@@ -6,7 +6,7 @@
 
 import { useState } from "react";
 
-import type { ZoneType } from "../../../../store/profile-store/types";
+import type { ZoneType } from "../../../../application/profile/zones/zone-types";
 import type { SportZoneConfig } from "../../../../types/sport-zones";
 import { calculateHrZones } from "../../../../utils/calculate-hr-zones";
 import { calculatePaceZones } from "../../../../utils/calculate-pace-zones";

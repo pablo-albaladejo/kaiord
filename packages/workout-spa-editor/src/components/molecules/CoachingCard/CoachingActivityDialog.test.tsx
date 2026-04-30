@@ -17,8 +17,8 @@ vi.mock("../../../contexts/coaching-registry-context", () => ({
   useCoachingSourceFactories: () => [],
 }));
 
-vi.mock("../../../hooks/use-active-profile", () => ({
-  useActiveProfile: () => ({ id: null, profile: null }),
+vi.mock("../../../hooks/use-active-profile-live", () => ({
+  useActiveProfileLive: () => ({ id: null, profile: null }),
 }));
 
 import { CoachingActivityDialog } from "./CoachingActivityDialog";

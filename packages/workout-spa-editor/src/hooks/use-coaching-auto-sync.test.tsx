@@ -30,8 +30,8 @@ let mockProfile: { id: string | null; profile: Profile | null } = {
   profile: linkedProfile,
 };
 
-vi.mock("./use-active-profile", () => ({
-  useActiveProfile: () => mockProfile,
+vi.mock("./use-active-profile-live", () => ({
+  useActiveProfileLive: () => mockProfile,
 }));
 
 const makeSource = (

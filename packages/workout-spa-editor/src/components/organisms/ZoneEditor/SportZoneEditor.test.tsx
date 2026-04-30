@@ -1,85 +1,110 @@
 /**
  * SportZoneEditor Component Tests
+ *
+ * Migrated to fake-indexeddb-backed Dexie + PersistenceProvider per
+ * design D5.1. Test setup seeds the production Dexie singleton via
+ * the application use cases so the live-hook reads under test resolve
+ * the same way they would in production.
  */
 
-import { render, screen } from "@testing-library/react";
+import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
-import { useProfileStore } from "../../../store/profile-store";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import { db } from "../../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { createProfile } from "../../../application/profile/create-profile";
+import { updateSportThresholds } from "../../../application/profile/zones/update-sport-thresholds";
+import { renderWithProviders } from "../../../test-utils";
+import type { Profile } from "../../../types/profile";
 import { SportZoneEditor } from "./SportZoneEditor";
 
-describe("SportZoneEditor", () => {
-  beforeEach(() => {
-    localStorage.clear();
-    useProfileStore.setState({ profiles: [], activeProfileId: null });
+const renderEditor = (profileId: string) =>
+  renderWithProviders(<SportZoneEditor profileId={profileId} />, {
+    persistence: createDexiePersistence(db),
   });
 
-  function createTestProfile() {
-    const profile = useProfileStore.getState().createProfile("Test Athlete");
-    useProfileStore
-      .getState()
-      .updateSportThresholds(profile.id, "cycling", { lthr: 180, ftp: 250 });
-    return useProfileStore.getState().getProfile(profile.id)!;
-  }
+const seedProfile = async (): Promise<Profile> => {
+  const persistence = createDexiePersistence(db);
+  const profile = await createProfile(persistence, "Test Athlete");
+  await updateSportThresholds(persistence, profile.id, "cycling", {
+    lthr: 180,
+    ftp: 250,
+  });
+  const refreshed = await persistence.profiles.getById(profile.id);
+  if (!refreshed) throw new Error("seed failed");
+  return refreshed;
+};
+
+describe("SportZoneEditor", () => {
+  beforeEach(async () => {
+    localStorage.clear();
+    await Promise.all([db.table("profiles").clear(), db.table("meta").clear()]);
+  });
 
   describe("rendering", () => {
-    it("should render sport tabs", () => {
-      const profile = createTestProfile();
+    it("should render sport tabs", async () => {
+      const profile = await seedProfile();
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      expect(screen.getByRole("tab", { name: "Cycling" })).toBeInTheDocument();
+      expect(
+        await screen.findByRole("tab", { name: "Cycling" })
+      ).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: "Running" })).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: "Swimming" })).toBeInTheDocument();
       expect(screen.getByRole("tab", { name: "Generic" })).toBeInTheDocument();
     });
 
-    it("should default to cycling tab", () => {
-      const profile = createTestProfile();
+    it("should default to cycling tab", async () => {
+      const profile = await seedProfile();
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      expect(screen.getByRole("tab", { name: "Cycling" })).toHaveAttribute(
-        "aria-selected",
-        "true"
-      );
+      expect(
+        await screen.findByRole("tab", { name: "Cycling" })
+      ).toHaveAttribute("aria-selected", "true");
     });
 
-    it("should show HR zones section", () => {
-      const profile = createTestProfile();
+    it("should show HR zones section", async () => {
+      const profile = await seedProfile();
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      expect(screen.getByText("Heart Rate Zones")).toBeInTheDocument();
+      expect(await screen.findByText("Heart Rate Zones")).toBeInTheDocument();
     });
 
-    it("should show threshold inputs for cycling", () => {
-      const profile = createTestProfile();
+    it("should show threshold inputs for cycling", async () => {
+      const profile = await seedProfile();
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      expect(screen.getByLabelText("LTHR threshold")).toBeInTheDocument();
+      expect(
+        await screen.findByLabelText("LTHR threshold")
+      ).toBeInTheDocument();
       expect(screen.getByLabelText("FTP threshold")).toBeInTheDocument();
     });
 
-    it("should show zone method dropdown", () => {
-      const profile = createTestProfile();
+    it("should show zone method dropdown", async () => {
+      const profile = await seedProfile();
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      expect(screen.getByLabelText("hr zone method")).toBeInTheDocument();
+      expect(
+        await screen.findByLabelText("hr zone method")
+      ).toBeInTheDocument();
       expect(screen.getByLabelText("power zone method")).toBeInTheDocument();
     });
   });
 
   describe("tab switching", () => {
     it("should switch to running tab and show pace input", async () => {
-      const profile = createTestProfile();
+      const profile = await seedProfile();
       const user = userEvent.setup();
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      await user.click(screen.getByRole("tab", { name: "Running" }));
+      await user.click(await screen.findByRole("tab", { name: "Running" }));
 
       expect(screen.getByRole("tab", { name: "Running" })).toHaveAttribute(
         "aria-selected",
@@ -91,12 +116,12 @@ describe("SportZoneEditor", () => {
     });
 
     it("should switch to generic tab showing only HR zones", async () => {
-      const profile = createTestProfile();
+      const profile = await seedProfile();
       const user = userEvent.setup();
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      await user.click(screen.getByRole("tab", { name: "Generic" }));
+      await user.click(await screen.findByRole("tab", { name: "Generic" }));
 
       expect(screen.getByText("Heart Rate Zones")).toBeInTheDocument();
       expect(screen.queryByText("Power Zones")).not.toBeInTheDocument();
@@ -106,29 +131,34 @@ describe("SportZoneEditor", () => {
 
   describe("zone method selection", () => {
     it("should change power zone method", async () => {
-      const profile = createTestProfile();
+      const profile = await seedProfile();
       const user = userEvent.setup();
+      const persistence = createDexiePersistence(db);
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      const methodSelect = screen.getByLabelText("power zone method");
+      const methodSelect = await screen.findByLabelText("power zone method");
       await user.selectOptions(methodSelect, "british-cycling-6");
 
-      const updated = useProfileStore.getState().getProfile(profile.id);
-      expect(updated?.sportZones?.cycling?.powerZones?.method).toBe(
-        "british-cycling-6"
-      );
+      // Wait for the use case write to land via Dexie.
+      await vi.waitFor(async () => {
+        const updated = await persistence.profiles.getById(profile.id);
+        expect(updated?.sportZones?.cycling?.powerZones?.method).toBe(
+          "british-cycling-6"
+        );
+      });
     });
   });
 
   describe("inline editing", () => {
     it("should edit zone name inline", async () => {
-      const profile = createTestProfile();
+      const profile = await seedProfile();
       const user = userEvent.setup();
+      const persistence = createDexiePersistence(db);
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      const nameButtons = screen.getAllByLabelText("HR Zone 1 name");
+      const nameButtons = await screen.findAllByLabelText("HR Zone 1 name");
       await user.click(nameButtons[0]);
 
       const input = screen.getByRole("textbox", { name: "HR Zone 1 name" });
@@ -136,17 +166,19 @@ describe("SportZoneEditor", () => {
       await user.type(input, "Easy");
       await user.keyboard("{Enter}");
 
-      const updated = useProfileStore.getState().getProfile(profile.id);
-      const hrZones = updated?.sportZones?.cycling?.heartRateZones?.zones;
-      expect(hrZones?.[0].name).toBe("Easy");
+      await vi.waitFor(async () => {
+        const updated = await persistence.profiles.getById(profile.id);
+        const hrZones = updated?.sportZones?.cycling?.heartRateZones?.zones;
+        expect(hrZones?.[0].name).toBe("Easy");
+      });
     });
 
-    it("should render zone value buttons for editing", () => {
-      const profile = createTestProfile();
+    it("should render zone value buttons for editing", async () => {
+      const profile = await seedProfile();
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      const minButtons = screen.getAllByLabelText("HR Zone 1 min");
+      const minButtons = await screen.findAllByLabelText("HR Zone 1 min");
       expect(minButtons.length).toBeGreaterThan(0);
 
       const maxButtons = screen.getAllByLabelText("HR Zone 1 max");
@@ -154,27 +186,30 @@ describe("SportZoneEditor", () => {
     });
 
     it("should show add zone button when method is custom", async () => {
-      const profile = createTestProfile();
+      const profile = await seedProfile();
       const user = userEvent.setup();
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      const methodSelect = screen.getByLabelText("power zone method");
+      const methodSelect = await screen.findByLabelText("power zone method");
       await user.selectOptions(methodSelect, "custom");
 
-      expect(screen.getAllByText("+ Add Zone").length).toBeGreaterThan(0);
+      expect((await screen.findAllByText("+ Add Zone")).length).toBeGreaterThan(
+        0
+      );
     });
 
     it("should show remove buttons when method is custom", async () => {
-      const profile = createTestProfile();
+      const profile = await seedProfile();
       const user = userEvent.setup();
 
-      render(<SportZoneEditor profileId={profile.id} />);
+      renderEditor(profile.id);
 
-      const methodSelect = screen.getByLabelText("power zone method");
+      const methodSelect = await screen.findByLabelText("power zone method");
       await user.selectOptions(methodSelect, "custom");
 
-      const removeButtons = screen.getAllByLabelText(/Remove \w+ zone \d/);
+      const removeButtons =
+        await screen.findAllByLabelText(/Remove \w+ zone \d/);
       expect(removeButtons.length).toBeGreaterThan(0);
     });
   });

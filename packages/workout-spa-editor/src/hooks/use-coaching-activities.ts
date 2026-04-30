@@ -13,7 +13,7 @@ import { useCallback, useMemo } from "react";
 
 import { useCoachingSourceFactories } from "../contexts/coaching-registry-context";
 import type { CoachingActivity } from "../types/coaching-activity";
-import { useActiveProfile } from "./use-active-profile";
+import { useActiveProfileLive } from "./use-active-profile-live";
 
 export type CoachingSyncState = {
   id: string;
@@ -28,7 +28,9 @@ export type CoachingSyncState = {
 };
 
 export function useCoachingActivities(days: string[]) {
-  const { id: activeProfileId, profile } = useActiveProfile();
+  const live = useActiveProfileLive();
+  const activeProfileId = live?.id ?? null;
+  const profile = live?.profile ?? null;
   const factories = useCoachingSourceFactories();
 
   // Each factory is itself a hook; calling them in stable order from this

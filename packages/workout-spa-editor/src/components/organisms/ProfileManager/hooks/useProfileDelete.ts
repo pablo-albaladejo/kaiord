@@ -2,23 +2,27 @@
  * useProfileDelete Hook
  *
  * Profile deletion with coaching cascade. The cascade runs BEFORE the
- * Zustand store action removes the profile row, so a subsequent reload
- * doesn't see orphan coaching rows. deletedProfileId is captured at
+ * profile row is removed via `deleteProfile` so a subsequent reload
+ * doesn't see orphan coaching rows. `deletedProfileId` is captured at
  * confirm time — NEVER `getActiveId()` (would race when deleting a
  * non-active profile or right after a switch).
  */
 
+import { deleteProfile } from "../../../../application/profile/delete-profile";
 import { deleteProfileWithCascade } from "../../../../application/profile/delete-profile-with-cascade";
 import { usePersistence } from "../../../../contexts/persistence-context";
+import { useToastContext } from "../../../../contexts/ToastContext";
 
 type UseProfileDeleteParams = {
-  deleteProfile: (id: string) => void;
   setDeleteConfirmId: (id: string | null) => void;
 };
 
+const TOAST_ERROR = "Failed to delete profile — please retry.";
+
 export function useProfileDelete(params: UseProfileDeleteParams) {
-  const { deleteProfile, setDeleteConfirmId } = params;
+  const { setDeleteConfirmId } = params;
   const persistence = usePersistence();
+  const toast = useToastContext();
 
   const handleDelete = (profileId: string) => {
     setDeleteConfirmId(profileId);
@@ -36,18 +40,14 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
           },
           id
         );
-        deleteProfile(id);
+        await deleteProfile(persistence, id);
         setDeleteConfirmId(null);
       } catch {
-        // Cascade rejection: keep the confirm dialog open so the user
-        // can retry. Avoid unhandled-rejection crashes; the dialog
-        // state staying non-null is the signal that delete didn't complete.
+        toast.error(TOAST_ERROR);
+        // Keep the confirm dialog open so the user can retry.
       }
     })();
   };
 
-  return {
-    handleDelete,
-    confirmDelete,
-  };
+  return { handleDelete, confirmDelete };
 }
