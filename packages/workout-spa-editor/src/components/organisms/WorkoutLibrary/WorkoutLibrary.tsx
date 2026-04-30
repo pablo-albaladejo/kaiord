@@ -30,6 +30,7 @@ export const WorkoutLibrary: React.FC<WorkoutLibraryProps> = ({
 }) => {
   const {
     templates,
+    isTemplatesLoading,
     deleteTemplate,
     previewTemplate,
     setPreviewTemplate,
@@ -49,6 +50,7 @@ export const WorkoutLibrary: React.FC<WorkoutLibraryProps> = ({
         >
           <LibraryDialogContent
             templates={templates}
+            isTemplatesLoading={isTemplatesLoading}
             previewTemplate={previewTemplate}
             filters={filters}
             loader={loader}

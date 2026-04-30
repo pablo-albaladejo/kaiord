@@ -1,22 +1,23 @@
 /**
  * Save as Template Integration Test
  *
- * Verifies that saving a template via the library store
- * persists to the Dexie templates table.
+ * Verifies that the `addTemplate` application use case persists to
+ * the Dexie templates table via `PersistencePort`.
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../../adapters/dexie/dexie-database";
-import { useLibraryStore } from "../../store/library-store";
+import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
+import { addTemplate } from "../../application/library/add-template";
 
 describe("Save as Template", () => {
   beforeEach(async () => {
     await db.table("templates").clear();
-    useLibraryStore.setState({ templates: [] });
   });
 
   it("creates a template record in Dexie", async () => {
+    const persistence = createDexiePersistence(db);
     const krd = {
       version: "1.0",
       type: "structured_workout" as const,
@@ -30,13 +31,9 @@ describe("Save as Template", () => {
       },
     };
 
-    const { addTemplate } = useLibraryStore.getState();
-    addTemplate("My Template", "cycling", krd, {
+    await addTemplate(persistence, "My Template", "cycling", krd, {
       tags: ["endurance"],
     });
-
-    // Wait for async Dexie persistence
-    await new Promise((r) => setTimeout(r, 200));
 
     const templates = await db.table("templates").toArray();
     expect(templates).toHaveLength(1);
