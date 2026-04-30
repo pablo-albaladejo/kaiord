@@ -46,9 +46,17 @@ export function createNewTemplate(
   };
 }
 
+// Immutable identity / lifecycle fields are stripped from `updates` so
+// callers cannot rename a template's id or rewrite its createdAt — those
+// invariants belong to the persistence layer, not consumer hooks.
+export type UpdatableTemplateFields = Omit<
+  Partial<WorkoutTemplate>,
+  "id" | "createdAt" | "updatedAt"
+>;
+
 export function updateTemplateData(
   template: WorkoutTemplate,
-  updates: Partial<WorkoutTemplate>
+  updates: UpdatableTemplateFields
 ): WorkoutTemplate {
   const now = new Date().toISOString();
   const normalized = updates.krd

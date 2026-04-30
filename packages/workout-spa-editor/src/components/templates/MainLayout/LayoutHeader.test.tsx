@@ -404,7 +404,7 @@ describe("LayoutHeader", () => {
 
       // Assert
       expect(
-        await screen.findByLabelText(/1 workouts in library/i)
+        await screen.findByLabelText(/^1 workout in library$/i)
       ).toBeInTheDocument();
     });
   });
