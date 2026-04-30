@@ -1,13 +1,13 @@
 /**
  * createProfile — application use case.
  *
- * Persists a new profile via `PersistencePort`. When no profiles
- * exist yet, the profile row write AND the `meta.activeProfileId`
- * write are wrapped in `persistence.transaction` so the first
- * profile is consistently both stored AND selected; partial-failure
- * cannot leave an active id pointing at a non-existent row. For
- * subsequent profiles the existing active id is preserved with a
- * single-write put — no transaction needed.
+ * Persists a new profile via `PersistencePort` inside a single
+ * transaction that covers the count check, the profile row put, and
+ * the conditional `meta.activeProfileId` write. The first profile is
+ * consistently both stored AND selected; subsequent profiles preserve
+ * the existing active id but the read-modify-write still runs inside
+ * one transaction so concurrent callers cannot observe a stale
+ * `count` and clobber each other's active id (TOCTOU).
  *
  * Throws on persistence rejection; the calling component SHALL
  * surface a user-visible error.
