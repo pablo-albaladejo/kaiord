@@ -50,6 +50,7 @@ describe("SettingsPanel", () => {
 
   afterEach(async () => {
     await db.table("aiProviders").clear();
+    await db.table("meta").clear();
   });
 
   it("renders when open", () => {

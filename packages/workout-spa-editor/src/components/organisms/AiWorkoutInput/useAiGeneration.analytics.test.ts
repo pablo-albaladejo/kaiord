@@ -25,7 +25,9 @@ vi.mock("../../../store/ai-runtime-store", () => ({
   ),
 }));
 
-const mockProviders = vi.fn<() => Array<{ id: string; isDefault: boolean }>>();
+import type { LlmProviderConfig } from "../../../store/ai-store-types";
+
+const mockProviders = vi.fn<() => LlmProviderConfig[]>();
 vi.mock("../../../hooks/use-ai-providers-live", () => ({
   useAiProvidersLive: () => mockProviders(),
 }));

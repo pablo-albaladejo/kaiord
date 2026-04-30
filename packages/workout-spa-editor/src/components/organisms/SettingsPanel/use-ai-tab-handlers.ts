@@ -8,17 +8,13 @@
  * fragment can leak via interpolation.
  */
 
-import {
-  addProvider,
-  type AddProviderInput,
-} from "../../../application/ai/add-provider";
+import type { AddProviderInput } from "../../../application/ai/add-provider";
+import { addProvider } from "../../../application/ai/add-provider";
 import { removeProvider } from "../../../application/ai/remove-provider";
 import { setCustomPrompt } from "../../../application/ai/set-custom-prompt";
 import { setDefaultProvider } from "../../../application/ai/set-default-provider";
-import {
-  updateProvider,
-  type UpdateProviderInput,
-} from "../../../application/ai/update-provider";
+import type { UpdateProviderInput } from "../../../application/ai/update-provider";
+import { updateProvider } from "../../../application/ai/update-provider";
 import { usePersistence } from "../../../contexts/persistence-context";
 import { useToastContext } from "../../../contexts/ToastContext";
 
