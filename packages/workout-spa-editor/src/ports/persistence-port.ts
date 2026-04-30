@@ -49,11 +49,7 @@ export type ProfileRepository = {
   setActiveId: (id: string | null) => Promise<void>;
   put: (profile: Profile) => Promise<void>;
   delete: (id: string) => Promise<void>;
-  /**
-   * Lightweight existence check. Implementations SHOULD avoid
-   * materialising the full collection — use the underlying store's
-   * count primitive (Dexie `count()`, in-memory `Map.size`).
-   */
+  // Lightweight existence check; uses the underlying store's count primitive.
   count: () => Promise<number>;
 };
 
@@ -85,20 +81,9 @@ export type PersistencePort = {
   usage: UsageRepository;
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
-  /**
-   * Run a callback inside a persistence transaction with atomic
-   * commit-or-rollback semantics. Application use cases SHALL wrap
-   * multi-write operations whose partial application would leave
-   * inconsistent state (e.g., `createProfile` writing both a profile
-   * row AND `meta.activeProfileId` on the first profile;
-   * `deleteProfile` clearing the active id when it matches; provider
-   * I1/I2 invariants in `add-provider` / `remove-provider`).
-   *
-   * The Dexie adapter delegates to `db.transaction("rw", db.tables, fn)`.
-   * The in-memory adapter implements snapshot/revert: state captured
-   * before `fn`, restored on rejection, committed on resolution.
-   * Application code MUST NOT import `db` directly to obtain a
-   * transaction — go through this method.
-   */
+  // Atomic commit-or-rollback wrapper for multi-write or read-modify-write
+  // use cases. Dexie adapter delegates to db.transaction("rw", db.tables, fn);
+  // in-memory adapter implements snapshot/revert. Application code MUST NOT
+  // import `db` to obtain a transaction — go through this method.
   transaction: <T>(fn: () => Promise<T>) => Promise<T>;
 };
