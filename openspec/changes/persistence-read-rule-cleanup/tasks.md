@@ -207,22 +207,22 @@ Pattern for these tests per D5.1: mount inside `<PersistenceProvider persistence
 - [x] 3.7.5 Run `pnpm -r build` — clean.
 - [x] 3.7.6 Update internal docs.
 - [x] 3.7.7 Add a `patch` changeset titled `refactor(spa-editor): split AI store into persisted slice (Dexie/useLiveQuery) and runtime slice (Zustand)`.
-- [ ] 3.7.8 Open PR; ensure CI green; squash merge. Verify in production: AI providers reload after refresh; generation status still updates live; no encryption regression.
+- [x] 3.7.8 Open PR; ensure CI green; squash merge. Verify in production: AI providers reload after refresh; generation status still updates live; no encryption regression.
 
 ## 4. Phase 4 — Mechanical guard + final consolidation (PR #N+4)
 
 ### 4.1 — Guard script
 
-- [ ] 4.1.1 Create `scripts/check-no-zustand-writethrough.mjs` per design D4. Implementation: walk `packages/workout-spa-editor/src/store/**/*.{ts,tsx}` AND `packages/workout-spa-editor/src/application/**/*.{ts,tsx}` (excluding `*.test.{ts,tsx}`), parse each file's import statements (using the TypeScript compiler API or a small AST parser), and:
+- [x] 4.1.1 Create `scripts/check-no-zustand-writethrough.mjs` per design D4. Implementation: walk `packages/workout-spa-editor/src/store/**/*.{ts,tsx}` AND `packages/workout-spa-editor/src/application/**/*.{ts,tsx}` (excluding `*.test.{ts,tsx}`), parse each file's import statements (using the TypeScript compiler API or a small AST parser), and:
   - Fail (rule R-DexieImport) if any non-allowlisted file under `src/store/**` imports a path resolving to `adapters/dexie/dexie-database`. The script normalises through (a) relative paths, (b) tsconfig path aliases (parse from the workspace `tsconfig.json`), (c) barrel re-exports, (d) `await import(...)` dynamic imports.
   - Fail (rule R-PersistStateImport) if any non-allowlisted file under `src/store/**` imports an identifier named `persistState` from any path.
   - Fail (rule R-AppDexieImport) if ANY file under `src/application/**` imports a path resolving to `adapters/dexie/dexie-database` (no allowlist — application code MUST go through `PersistencePort`).
   - Output the offending file + import + rule on failure.
-- [ ] 4.1.2 Hard-coded allowlist in 4.1.1: file paths confirmed by reading the current `useWorkoutStore` implementation (after Phases 1–3 land). Each entry has a one-line comment explaining why.
+- [x] 4.1.2 Hard-coded allowlist in 4.1.1: file paths confirmed by reading the current `useWorkoutStore` implementation (after Phases 1–3 land). Each entry has a one-line comment explaining why.
 
 ### 4.2 — Co-located test
 
-- [ ] 4.2.1 Create `scripts/check-no-zustand-writethrough.test.mjs` (`node:test`) covering fixture files under `scripts/__fixtures__/check-no-zustand-writethrough/`:
+- [x] 4.2.1 Create `scripts/check-no-zustand-writethrough.test.mjs` (`node:test`) covering fixture files under `scripts/__fixtures__/check-no-zustand-writethrough/`:
   - Positive case: post-Phase-3 codebase passes.
   - R-DexieImport relative path negative.
   - R-DexieImport alias path (`@/...`) negative.
@@ -235,20 +235,20 @@ Pattern for these tests per D5.1: mount inside `<PersistenceProvider persistence
 
 ### 4.3 — Wire into CI
 
-- [ ] 4.3.1 Confirm `pnpm test:scripts` includes the new script. If not, update the script glob and `package.json`.
-- [ ] 4.3.2 Run `pnpm test:scripts` locally — all green including the new file.
+- [x] 4.3.1 Confirm `pnpm test:scripts` includes the new script. If not, update the script glob and `package.json`.
+- [x] 4.3.2 Run `pnpm test:scripts` locally — all green including the new file.
 
 ### 4.4 — Final dead-code sweep
 
-- [ ] 4.4.1 Search the repo for any leftover references to deleted modules (`useProfileStore`, `useLibraryStore`, `useAiStore`, `use-active-profile`, `use-library`, `use-ai-hydration`). All should be zero. Delete any orphaned imports.
-- [ ] 4.4.2 Confirm `useStoreHydration` no longer references AI hydration.
+- [x] 4.4.1 Search the repo for any leftover references to deleted modules (`useProfileStore`, `useLibraryStore`, `useAiStore`, `use-active-profile`, `use-library`, `use-ai-hydration`). All should be zero. Delete any orphaned imports.
+- [x] 4.4.2 Confirm `useStoreHydration` no longer references AI hydration.
 
 ### 4.5 — Validation
 
-- [ ] 4.5.1 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing.
-- [ ] 4.5.2 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
-- [ ] 4.5.3 Run `pnpm -r build` — clean.
-- [ ] 4.5.4 Run `pnpm test:scripts` — passing including the new guard.
+- [x] 4.5.1 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing.
+- [x] 4.5.2 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
+- [x] 4.5.3 Run `pnpm -r build` — clean.
+- [x] 4.5.4 Run `pnpm test:scripts` — passing including the new guard.
 - [ ] 4.5.5 Update internal docs to reference the new persistence rule and the guard script.
 - [ ] 4.5.6 Add a `patch` changeset titled `chore(spa-editor): lock in no-Zustand-write-through guard for persisted entities`.
 - [ ] 4.5.7 Open PR; ensure CI green; squash merge.
