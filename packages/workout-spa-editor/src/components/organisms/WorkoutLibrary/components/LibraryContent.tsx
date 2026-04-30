@@ -1,7 +1,7 @@
 /**
  * Library Content Component
  *
- * Main content area showing workout grid or empty state.
+ * Main content area showing workout grid, loading state, or empty state.
  */
 
 import type { WorkoutTemplate } from "../../../../types/workout-library";
@@ -10,6 +10,7 @@ import { WorkoutCard } from "./WorkoutCard";
 
 type LibraryContentProps = {
   templates: WorkoutTemplate[];
+  isTemplatesLoading: boolean;
   filteredTemplates: WorkoutTemplate[];
   hasActiveFilters: boolean;
   onLoadWorkout: (template: WorkoutTemplate) => void;
@@ -20,6 +21,7 @@ type LibraryContentProps = {
 
 export function LibraryContent({
   templates,
+  isTemplatesLoading,
   filteredTemplates,
   hasActiveFilters,
   onLoadWorkout,
@@ -27,6 +29,18 @@ export function LibraryContent({
   onPreviewWorkout,
   onClearFilters,
 }: LibraryContentProps) {
+  if (isTemplatesLoading) {
+    return (
+      <p
+        role="status"
+        aria-live="polite"
+        className="text-sm text-gray-500 dark:text-gray-400"
+      >
+        Loading library…
+      </p>
+    );
+  }
+
   if (filteredTemplates.length === 0) {
     return (
       <EmptyLibrary
