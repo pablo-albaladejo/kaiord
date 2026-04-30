@@ -647,6 +647,29 @@ describe("WorkoutLibrary", () => {
       // Assert
       expect(mockDeleteTemplate).not.toHaveBeenCalled();
     });
+
+    it("should swallow rejection from deleteTemplate so the dialog stays usable", async () => {
+      // Arrange
+      mockDeleteTemplate.mockRejectedValueOnce(new Error("disk full"));
+      const user = userEvent.setup();
+      renderLibrary({
+        open: true,
+        onOpenChange: mockOnOpenChange,
+        onLoadWorkout: mockOnLoadWorkout,
+      });
+
+      // Act
+      const cards = screen.getAllByTestId("workout-card");
+      const deleteButton = within(cards[0]).getByLabelText("Delete Easy Swim");
+      await user.click(deleteButton);
+      const confirmButton = screen.getByRole("button", { name: /delete/i });
+      await user.click(confirmButton);
+
+      // Assert — call landed and the rejection was caught (no unhandled promise).
+      await waitFor(() => {
+        expect(mockDeleteTemplate).toHaveBeenCalledWith(expect.anything(), "3");
+      });
+    });
   });
 
   describe("preview functionality", () => {
