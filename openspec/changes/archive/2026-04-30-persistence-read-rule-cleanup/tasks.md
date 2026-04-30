@@ -272,20 +272,21 @@ For each scenario in `specs/spa-persistence-port/spec.md`, identify the task tha
 | Multi-write use case rolls back on partial failure                                         | 1A.0.3 (in-memory adapter); 1A.2.6 (use-case-level: `createProfile` and `deleteProfile` rollback tests)                                  |
 | Application use case does not import Dexie directly                                        | 4.2.1 (R-AppDexieImport fixture — mechanical guard); 1A.5.3 (transitional grep sanity check before Phase 4 lands)                        |
 | PersistencePort.transaction MODIFIED scenario (multi-write use case uses port transaction) | 1A.2.6 (test fixtures explicitly use `persistence.transaction`); 1A.0.2 + 1A.0.3 (adapter behavior)                                      |
+| Store uses PersistencePort (preserved scenario under MODIFIED PersistencePort interface)   | structurally exercised by every use-case unit test against `createInMemoryPersistence()` and `createDexiePersistence(db)`                |
 | User edits a workout in the editor (preserved)                                             | existing `useWorkoutStore` tests; no change                                                                                              |
 | User saves workout to library (preserved)                                                  | existing test; no change                                                                                                                 |
 
-- [ ] 5.1.1 Confirm the table above is in sync with the final spec scenarios at archive time.
+- [x] 5.1.1 Confirm the table above is in sync with the final spec scenarios at archive time.
 
 ### 5.2 — Verify
 
-- [ ] 5.2.1 Run `/opsx-verify` against this change — every spec scenario across the three ADDED requirements and the two MODIFIED requirements covered by tests in the table above.
+- [x] 5.2.1 Run `/opsx-verify` against this change — every spec scenario across the three ADDED requirements and the two MODIFIED requirements covered by tests in the table above.
 
 ### 5.3 — Sync
 
-- [ ] 5.3.1 Run `/opsx-sync` — confirm `spa-persistence-port` spec is in sync with code after Phase 4. No drift expected because every requirement was implemented in lockstep.
+- [x] 5.3.1 Run `/opsx-sync` — confirm `spa-persistence-port` spec is in sync with code after Phase 4. No drift expected because every requirement was implemented in lockstep.
 
 ### 5.4 — Archive
 
-- [ ] 5.4.1 After all five PRs merged: `/opsx-archive` — moves change to `openspec/changes/archive/YYYY-MM-DD-persistence-read-rule-cleanup/`.
-- [ ] 5.4.2 Open follow-up issue: "PII / secret-leakage mechanical guard for SPA editor toasts and console" — captures the deferred Open Question from `design.md` "Open Questions / Follow-ups". Replace the placeholder TODO in `design.md` with the issue link before archiving.
+- [x] 5.4.1 After all five PRs merged: `/opsx-archive` — moves change to `openspec/changes/archive/YYYY-MM-DD-persistence-read-rule-cleanup/`.
+- [x] 5.4.2 Open follow-up issue: "PII / secret-leakage mechanical guard for SPA editor toasts and console" — captures the deferred Open Question from `design.md` "Open Questions / Follow-ups". Replace the placeholder TODO in `design.md` with the issue link before archiving.
