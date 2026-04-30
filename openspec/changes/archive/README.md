@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-04-30 | [`persistence-read-rule-cleanup`](./2026-04-30-persistence-read-rule-cleanup/) | Issue #385 — the Train2Go connect toast falsely says "Linked Train2Go to Pablo" while the dialog stays "Not connected" and a refresh wipes profiles from the UI… |
 | 2026-04-29 | [`coaching-test-coverage-fill`](./2026-04-29-coaching-test-coverage-fill/) | The train2go-profile-link change shipped (PR #372, archived 2026-04-28). The post-merge /opsx:verify report flagged 7 genuine test gaps; PR #374 fast-followed … |
 | 2026-04-28 | [`analytics-coverage-expansion`](./2026-04-28-analytics-coverage-expansion/) | The analytics-port-adapter change wired up the Analytics port but only tracked four coarse events in the editor (editor-loaded, workout-generated, workout-expo… |
 | 2026-04-28 | [`train2go-profile-link`](./2026-04-28-train2go-profile-link/) | Today, when the user clicks "Sync Train2Go" on the calendar, the activities appear as dashed cards but the data lives only in Zustand. Reloading the page or na… |

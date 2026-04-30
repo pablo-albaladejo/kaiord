@@ -285,7 +285,7 @@ Rollback per phase: `git revert <merge-sha>`. Each phase is independently revert
 
 All design questions are resolved in this document; the items below are deliberately out-of-scope follow-ups.
 
-- **Follow-up: PII / secret-leakage mechanical guard.** This change adds a guard for Zustand-to-Dexie writes. A complementary guard for "no `externalUserId` / `externalUserName` / API-key fragment in toast strings or `console.*` calls" is a separate hardening initiative. **TODO(before-archive)**: task `5.4.2` opens the follow-up issue after Phase 4 lands; replace this `TODO(before-archive)` marker with the issue URL at archive time.
+- **Follow-up: PII / secret-leakage mechanical guard.** This change adds a guard for Zustand-to-Dexie writes. A complementary guard for "no `externalUserId` / `externalUserName` / API-key fragment in toast strings or `console.*` calls" is a separate hardening initiative tracked as https://github.com/pablo-albaladejo/kaiord/issues/395.
 - **Follow-up: cross-tab atomicity.** Same-tab joins are atomic (D1); cross-tab is best-effort. If multi-tab usage of the editor becomes a primary scenario, design and ship a separate change that adds `BroadcastChannel`-based coordination at the join level (e.g., a "profile updated in another tab" toast or last-write-wins reconciliation).
 
 **Resolved decisions captured here for future readers (keyed to D1–D5):**
