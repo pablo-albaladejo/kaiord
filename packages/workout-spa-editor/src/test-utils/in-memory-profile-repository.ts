@@ -37,5 +37,7 @@ export function createInMemoryProfileRepository(
         activeIdRef.current = null;
       }
     },
+
+    count: async () => store.size,
   };
 }

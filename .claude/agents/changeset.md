@@ -22,7 +22,7 @@ You are the Changeset Agent for the Kaiord monorepo.
 | `@kaiord/cli`                |                                                          |
 | `@kaiord/garmin-bridge`      | in `linked` array — needs changeset when changed         |
 | `@kaiord/train2go-bridge`    | in `linked` array — needs changeset when changed         |
-| `@kaiord/workout-spa-editor` | not in `linked` or `ignore` — needs changeset if changed |
+| `@kaiord/workout-spa-editor` | not in `linked` or `ignore` — needs changeset when changed |
 
 ## Steps
 

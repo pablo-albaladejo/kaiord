@@ -1,6 +1,6 @@
 ---
 name: testing-standards
-description: Read this guideline when writing tests, reviewing test code, or deciding what kind of test to write for a given layer. Also applies when files match **/*.test.ts.
+description: Read this guideline when writing tests, reviewing test code, or deciding what kind of test to write for a given layer. Also applies when files match **/*.test.{ts,tsx,js,mjs}.
 ---
 
 # Testing Standards — Kaiord
@@ -44,6 +44,7 @@ it("converts power zone to explicit watts", () => {
 
 - `*.mapper.ts` — MUST NOT have tests (simple transform, no logic)
 - `*.converter.ts` — MUST have tests
+- Exception: if a `*.mapper.ts` grows non-trivial logic (validation, branching, side effects, anything beyond pure field-to-field transformation), refactor it to `*.converter.ts` and add tests.
 
 ## Fixture imports
 
@@ -52,7 +53,8 @@ Always import fixtures from `@kaiord/core/test-utils`. Never re-implement fixtur
 ## Test output capture
 
 ```bash
+set -o pipefail
 pnpm test 2>&1 | tee /tmp/out.txt
 ```
 
-Using `| tail` hides stderr warnings. Always capture both stdout and stderr when diagnosing issues.
+`pipefail` preserves the test runner's real exit code through the `tee` pipe — without it the pipeline always exits 0 and CI/local scripts treat broken tests as success. Always capture both stdout and stderr when diagnosing issues; using `| tail` alone hides stderr warnings.

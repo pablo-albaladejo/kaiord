@@ -25,9 +25,11 @@ export const createProfile = async (
   options: CreateProfileOptions = {}
 ): Promise<Profile> => {
   const profile = createNewProfile(name, options);
-  const existing = await persistence.profiles.getAll();
 
-  if (existing.length === 0) {
+  // Use the lightweight `count()` primitive instead of pulling the full
+  // collection just to test emptiness — keeps boot-time work cheap as
+  // the profile count grows.
+  if ((await persistence.profiles.count()) === 0) {
     await persistence.transaction(async () => {
       await persistence.profiles.put(profile);
       await persistence.profiles.setActiveId(profile.id);

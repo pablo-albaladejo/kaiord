@@ -19,15 +19,16 @@ export const updateSportZones = async (
   sport: SportKey,
   zoneType: ZoneType,
   zones: Array<unknown>
-): Promise<Profile> => {
-  const existing = await persistence.profiles.getById(profileId);
-  if (!existing) throw new ProfileNotFoundError(profileId);
+): Promise<Profile> =>
+  persistence.transaction(async () => {
+    const existing = await persistence.profiles.getById(profileId);
+    if (!existing) throw new ProfileNotFoundError(profileId);
 
-  const updated = updateSportConfig(existing, sport, (cfg) => {
-    const zc = cfg[zoneType];
-    if (!zc) return cfg;
-    return { ...cfg, [zoneType]: { ...zc, zones } };
+    const updated = updateSportConfig(existing, sport, (cfg) => {
+      const zc = cfg[zoneType];
+      if (!zc) return cfg;
+      return { ...cfg, [zoneType]: { ...zc, zones } };
+    });
+    await persistence.profiles.put(updated);
+    return updated;
   });
-  await persistence.profiles.put(updated);
-  return updated;
-};
