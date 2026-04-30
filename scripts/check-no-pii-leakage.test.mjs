@@ -18,10 +18,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { afterEach, beforeEach, describe, test } from "node:test";
 
-import {
-  ALLOWLIST,
-  runCheck,
-} from "./check-no-pii-leakage.mjs";
+import { ALLOWLIST, runCheck } from "./check-no-pii-leakage.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
@@ -136,8 +133,7 @@ describe("check-no-pii-leakage", () => {
 
     assert.ok(
       violations.some(
-        (v) =>
-          v.rule === "R-PIIInterpolation" && v.file.endsWith("indirect.ts")
+        (v) => v.rule === "R-PIIInterpolation" && v.file.endsWith("indirect.ts")
       ),
       "expected helper-call indirection rejection"
     );
@@ -155,8 +151,7 @@ describe("check-no-pii-leakage", () => {
 
     assert.ok(
       violations.some(
-        (v) =>
-          v.rule === "R-PIIInterpolation" && v.file.endsWith("computed.ts")
+        (v) => v.rule === "R-PIIInterpolation" && v.file.endsWith("computed.ts")
       ),
       "expected computed-member dispatch to be flagged"
     );
@@ -177,8 +172,7 @@ describe("check-no-pii-leakage", () => {
     assert.ok(
       violations.some(
         (v) =>
-          v.rule === "R-PIIInterpolation" &&
-          v.file.endsWith("destructured.ts")
+          v.rule === "R-PIIInterpolation" && v.file.endsWith("destructured.ts")
       ),
       "expected destructured dispatch to be flagged"
     );

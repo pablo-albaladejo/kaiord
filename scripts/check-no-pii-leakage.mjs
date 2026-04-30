@@ -51,12 +51,7 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
-const SPA_SRC = join(
-  REPO_ROOT,
-  "packages",
-  "workout-spa-editor",
-  "src"
-);
+const SPA_SRC = join(REPO_ROOT, "packages", "workout-spa-editor", "src");
 
 // Allowlisted files (relative to repo root, posix-style) that bypass
 // the rule. Each entry MUST carry a comment satisfying design.md D9
@@ -90,10 +85,8 @@ const COMPUTED_DISPATCH_RE = new RegExp(
   `(?:toast|useToastContext\\(\\))\\s*\\[\\s*["']${TOAST_METHODS}["']\\s*\\]\\s*\\(`,
   "g"
 );
-const DESTRUCTURE_RE =
-  /const\s*\{\s*([^}]+?)\s*\}\s*=\s*useToastContext\(\)/g;
-const REBIND_RE =
-  /const\s+([A-Za-z_$][\w$]*)\s*=\s*useToastContext\(\)/g;
+const DESTRUCTURE_RE = /const\s*\{\s*([^}]+?)\s*\}\s*=\s*useToastContext\(\)/g;
+const REBIND_RE = /const\s+([A-Za-z_$][\w$]*)\s*=\s*useToastContext\(\)/g;
 
 // Top-level `const ID = "literal"` declaration (depth-1 only).
 // The first capture is the identifier name; the second is the literal
@@ -339,10 +332,7 @@ function checkFile(file, violations) {
 
   // Re-bound dispatch: scan for `<receiver>.method(` calls.
   for (const recv of reboundReceivers) {
-    const re = new RegExp(
-      `\\b${recv}\\s*\\.\\s*${TOAST_METHODS}\\s*\\(`,
-      "g"
-    );
+    const re = new RegExp(`\\b${recv}\\s*\\.\\s*${TOAST_METHODS}\\s*\\(`, "g");
     for (const m of source.matchAll(re)) {
       const openParen = m.index + m[0].length - 1;
       const arg = extractFirstArg(source, openParen + 1);
@@ -395,9 +385,7 @@ export function runCheck({ src } = {}) {
   // Tests can override the source root by passing `src`.
   const root = src ?? SPA_SRC;
   const violations = [];
-  const files = src
-    ? collectAll(src)
-    : findFiles();
+  const files = src ? collectAll(src) : findFiles();
   for (const file of files) {
     if (isAllowlisted(file)) continue;
     checkFile(file, violations);
