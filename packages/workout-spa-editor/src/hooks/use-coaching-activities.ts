@@ -34,8 +34,13 @@ export function useCoachingActivities(days: string[]) {
   const factories = useCoachingSourceFactories();
 
   // Each factory is itself a hook; calling them in stable order from this
-  // hook satisfies rules-of-hooks (factories never change at runtime).
+  // hook satisfies rules-of-hooks (factories never change at runtime —
+  // they're registered once at bootstrap). The eslint plugin cannot
+  // statically prove the array is stable, so this is a sanctioned
+  // architectural exception. The `useFactory` parameter naming is
+  // load-bearing: the plugin detects hook calls by `use*` prefix.
   const sources = factories.map((useFactory) =>
+    // eslint-disable-next-line react-hooks/rules-of-hooks
     useFactory(activeProfileId, days)
   );
 
