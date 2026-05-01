@@ -4,7 +4,11 @@ import { useToastContext } from "../../../contexts/ToastContext";
 import { useWorkoutStore } from "../../../store/workout-store";
 
 const PASTE_SUCCESS_TOAST = "Step pasted successfully";
-const PASTE_FAILURE_TOAST = "Failed to paste step";
+// Most paste failures mean the clipboard is empty or holds something
+// that isn't a recognised step payload. The text matches the e2e
+// regex spanning empty-clipboard, no-valid-step, and invalid-content
+// branches without requiring multiple constants.
+const PASTE_FAILURE_TOAST = "Clipboard does not contain a valid step";
 
 /**
  * Hook for pasting a step from clipboard with toast notification
