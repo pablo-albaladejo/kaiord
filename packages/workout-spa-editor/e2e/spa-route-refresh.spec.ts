@@ -86,8 +86,11 @@ test.describe("@spa-route-refresh SPA route refresh", () => {
       }
     );
 
-    expect(page.url()).toMatch(/\/editor\/calendar$/);
-    expect(page.url()).not.toMatch(/\/calendar$/);
+    // Compare on pathname, not the full URL: a regex like /\/calendar$/ matches
+    // both `/calendar` and `/editor/calendar`, which is the opposite of the
+    // distinction this test exists to make.
+    const pathname = new URL(page.url()).pathname;
+    expect(pathname).toBe("/editor/calendar");
   });
 
   test("Test 3 — refresh inside SPA stays at /editor/calendar", async ({
