@@ -103,9 +103,15 @@ describe("useFocusOnRouteChange", () => {
       </Router>
     );
 
-    await waitFor(() => {
-      expect(warn).toHaveBeenCalled();
-    });
+    // The hook bounds its wait for a `[data-route-heading]` to appear
+    // (lazy-chunk resilience), then warns. The test must wait longer
+    // than that bound (`OBSERVE_TIMEOUT_MS` in the hook).
+    await waitFor(
+      () => {
+        expect(warn).toHaveBeenCalled();
+      },
+      { timeout: 3000 }
+    );
     // The fallback contract: focus owner is the body (or the closest
     // sensible element when body cannot accept focus). At minimum, no
     // route heading is the active element since none exists.
