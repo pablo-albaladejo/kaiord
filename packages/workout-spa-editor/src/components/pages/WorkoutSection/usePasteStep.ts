@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { useToastContext } from "../../../contexts/ToastContext";
 import { useWorkoutStore } from "../../../store/workout-store";
 
-const PASTE_SUCCESS_TOAST = "Step pasted from clipboard";
+const PASTE_SUCCESS_TOAST = "Step pasted successfully";
 const PASTE_FAILURE_TOAST = "Failed to paste step";
 
 /**
