@@ -31,6 +31,8 @@ import { readdirSync, readFileSync, statSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
+import { stripJsonc } from "./lib/strip-jsonc.mjs";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
 const SPA_SRC = join(REPO_ROOT, "packages", "workout-spa-editor", "src");
@@ -120,59 +122,6 @@ function importsPersistState(source) {
     if (m[1] === "persistState") return true;
   }
   return false;
-}
-
-// Strip TypeScript's allowed JSON-with-comments noise so JSON.parse
-// succeeds. tsconfig.json allows // and /* */ comments and trailing
-// commas. The naive regex pass treats `/*` inside a string literal
-// (e.g. `"@/*"`) as a block-comment opener, so we walk the source
-// character-by-character and only treat comment markers seen outside
-// strings as comments.
-function stripJsonc(source) {
-  let out = "";
-  let i = 0;
-  let inString = false;
-  let stringChar = "";
-  while (i < source.length) {
-    const ch = source[i];
-    const next = source[i + 1];
-    if (inString) {
-      out += ch;
-      if (ch === "\\" && i + 1 < source.length) {
-        out += next;
-        i += 2;
-        continue;
-      }
-      if (ch === stringChar) inString = false;
-      i += 1;
-      continue;
-    }
-    if (ch === '"' || ch === "'") {
-      inString = true;
-      stringChar = ch;
-      out += ch;
-      i += 1;
-      continue;
-    }
-    if (ch === "/" && next === "/") {
-      while (i < source.length && source[i] !== "\n") i += 1;
-      continue;
-    }
-    if (ch === "/" && next === "*") {
-      i += 2;
-      while (
-        i < source.length &&
-        !(source[i] === "*" && source[i + 1] === "/")
-      ) {
-        i += 1;
-      }
-      i += 2; // skip closing */
-      continue;
-    }
-    out += ch;
-    i += 1;
-  }
-  return out.replace(/,(\s*[}\]])/g, "$1");
 }
 
 let aliasCache;

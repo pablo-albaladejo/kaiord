@@ -1,6 +1,12 @@
 /**
  * PII / secret audit for the AI settings tab error toasts.
  *
+ * Defense-in-depth: scripts/check-no-pii-leakage.mjs provides repo-wide
+ * coverage of the same rule across components / hooks / lib. This
+ * focused vitest variant catches regressions in the AI tab's specific
+ * test surface — two test layers catching the same regression is the
+ * intent.
+ *
  * Axis 1 (allowlist match) is implicit: every error toast in
  * `useAiTabHandlers` is rendered with one of the exported
  * `AI_TAB_TOAST_MESSAGES` constants. Axis 2 (literal-source) walks

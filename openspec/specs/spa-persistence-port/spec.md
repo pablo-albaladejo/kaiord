@@ -5,7 +5,9 @@
 ## Purpose
 
 PersistencePort contract (workouts, templates, profiles, AI providers, sync state, monthly usage) and the Dexie adapter that backs editor-local state in IndexedDB.
+
 ## Requirements
+
 ### Requirement: PersistencePort interface
 
 The system SHALL define a PersistencePort interface with repository types for workouts, templates, profiles, AI providers, sync state, and usage tracking. Stores and use cases SHALL depend on the port interface, never on Dexie directly.
@@ -275,4 +277,3 @@ Application use cases that perform two or more writes whose partial application 
 
 - **WHEN** a contributor adds a file under `packages/workout-spa-editor/src/application/**` whose source imports `../adapters/dexie/dexie-database` (or any path resolving to it)
 - **THEN** `pnpm test:scripts` SHALL fail in CI with rule R-AppDexieImport, naming the offending file and the offending import path, blocking the merge — application code accesses persistence via `PersistencePort` only
-

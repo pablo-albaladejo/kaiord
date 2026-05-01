@@ -39,11 +39,14 @@ const FALLBACK_REASONS = new Set<FocusResolveReason>([
   "heading",
 ]);
 
+const FOCUS_UNRESOLVED_WARN =
+  "[focus] pendingFocusTarget unresolved; clearing without moving focus";
+
 const warnUnresolved = (reason: FocusResolveReason) => {
   if (import.meta.env.MODE === "production") return;
-  console.warn(
-    `[focus] pendingFocusTarget unresolved (reason=${reason}); clearing without moving focus`
-  );
+  // Pass `reason` as a structured second arg so DevTools renders it
+  // separately; the user-facing message stays statically known.
+  console.warn(FOCUS_UNRESOLVED_WARN, { reason });
 };
 
 const readFirstItemId = (): ItemId | null => {

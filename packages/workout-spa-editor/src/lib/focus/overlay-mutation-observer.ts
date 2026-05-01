@@ -42,14 +42,14 @@ export const resetMutationObserverMissingWarned = (): void => {
 
 const isProduction = () => import.meta.env.MODE === "production";
 
+const MUTATION_OBSERVER_MISSING_WARN =
+  "[focus] MutationObserver unavailable; overlay guard disabled, focus moves will fire without waiting for open dialogs/menus";
+
 export const warnMutationObserverMissing = (): void => {
   if (mutationObserverMissingWarned) return;
   mutationObserverMissingWarned = true;
   if (isProduction()) return;
-  console.warn(
-    "[focus] MutationObserver unavailable; overlay guard disabled, " +
-      "focus moves will fire without waiting for open dialogs/menus"
-  );
+  console.warn(MUTATION_OBSERVER_MISSING_WARN);
 };
 
 export const subscribeDegraded = (callback: OverlayCallback): (() => void) => {
