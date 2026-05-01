@@ -5,17 +5,14 @@ import {
   validateSnapshot,
   isAllowedSenderOrigin,
 } from "../profile-snapshot.js";
+import * as bridge from "../background.js";
 import {
   positiveSnapshotFixtures,
   negativeSnapshotFixtures,
 } from "@kaiord/core/test-utils";
 
-let bridge;
-
-beforeEach(async () => {
+beforeEach(() => {
   globalThis.__resetChromeMock();
-  vi.resetModules();
-  bridge = await import("../background.js");
 });
 
 afterEach(() => {
@@ -189,5 +186,91 @@ describe("background — handleExternalMessage origin gate", () => {
     expect(sendResponse).toHaveBeenCalledWith(
       expect.objectContaining({ ok: true, protocolVersion: 1 })
     );
+  });
+
+  it("non-snapshot actions bypass the origin gate (existing actions unaffected)", async () => {
+    const sendResponse = vi.fn();
+
+    bridge.handleExternalMessage(
+      { action: "open-garmin" },
+      { origin: "anything" },
+      sendResponse
+    );
+
+    await new Promise((r) => setTimeout(r, 10));
+    expect(sendResponse).toHaveBeenCalledWith(
+      expect.objectContaining({ ok: true, protocolVersion: 1 })
+    );
+  });
+
+  it("propagates handler errors via sendError envelope", async () => {
+    const sendResponse = vi.fn();
+
+    bridge.handleExternalMessage(
+      { action: "profile-snapshot", snapshot: { schemaVersion: 99 } },
+      ALLOWED_KEY_ORIGIN,
+      sendResponse
+    );
+
+    await new Promise((r) => setTimeout(r, 10));
+    expect(sendResponse).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ok: false,
+        protocolVersion: 1,
+        error: "Unsupported snapshot schema version",
+      })
+    );
+  });
+
+  it("rejects oversized snapshot with the wire-level error", async () => {
+    const oversized = {
+      schemaVersion: 1,
+      profile: { name: "x".repeat(100) },
+      thresholds: {},
+      heartRate: {},
+      generatedAt: "2026-05-01T00:00:00.000Z",
+      // pad to push over the 8192 cap
+      activeSport: "cycling",
+    };
+    // Force oversize by stuffing a giant top-level rejected key path:
+    // the validator checks size before allowed-key check, so a known-rejected
+    // payload still hits the size branch. Build the oversize via name length
+    // to be safe.
+    oversized.profile.name = "x".repeat(9000);
+
+    await expect(bridge.persistSnapshot(oversized)).rejects.toThrow(
+      "Snapshot too large"
+    );
+  });
+});
+
+describe("background — handleAction routing", () => {
+  it("routes profile-snapshot through the switch", async () => {
+    const result = await bridge.handleAction({
+      action: "profile-snapshot",
+      snapshot: positiveSnapshotFixtures[0],
+    });
+
+    expect(result.storedAt).toBeTypeOf("number");
+    expect(globalThis.__chromeLocalStore.profileSnapshot).toMatchObject(
+      positiveSnapshotFixtures[0]
+    );
+  });
+
+  it("routes profile-snapshot-clear through the switch", async () => {
+    globalThis.__chromeLocalStore.profileSnapshot = { dummy: true };
+
+    const result = await bridge.handleAction({
+      action: "profile-snapshot-clear",
+    });
+
+    expect(result).toBeNull();
+    expect(globalThis.__chromeLocalStore.profileSnapshot).toBeUndefined();
+  });
+
+  it("rejects an unknown action with a descriptive error", async () => {
+    await expect(
+      bridge.handleAction({ action: "no-such-action" })
+    ).rejects.toThrow(/Unknown action/);
   });
 });
