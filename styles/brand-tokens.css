@@ -2,13 +2,36 @@
    Changes here affect all three surfaces.
 
    NOTE: All values are dark-mode-specific.
-   When adding light mode, move these under .dark and add :root light defaults. */
+   When adding light mode, move these under .dark and add :root light defaults.
+
+   --------------------------------------------------------------------------
+   @font-face SHARED-INVARIANT NOTE — read before editing the block below.
+   --------------------------------------------------------------------------
+   The Inter @font-face declaration is duplicated across three files because
+   CSS does not allow `var()` inside `url()` for @font-face src declarations
+   (the at-rule is registered before custom-property substitution). The
+   three `src:` URLs differ because each surface deploys at a different
+   GitHub Pages base path:
+
+     - styles/brand-tokens.css                       → /fonts/...        (landing)
+     - packages/docs/.vitepress/theme/custom.css     → /docs/fonts/...   (docs)
+     - packages/workout-spa-editor/src/index.css     → /editor/fonts/... (editor)
+
+   ALL OTHER FIELDS — font-family, font-style, font-weight, font-display,
+   size-adjust, unicode-range — MUST stay byte-equal across the three
+   blocks. If you change one, change all three. A future contributor
+   may want to write a `pnpm lint:font-face` mechanical guard that
+   asserts the invariant; today the comment is the only enforcement. */
 
 @font-face {
   font-family: Inter;
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
+  /* size-adjust matches Inter's x-height to the system fallback so the
+     pre-load layout matches the post-load layout, eliminating CLS on
+     first paint. */
+  size-adjust: 100%;
   src: url("/fonts/inter-var-latin.woff2") format("woff2");
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
