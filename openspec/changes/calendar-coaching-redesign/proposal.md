@@ -1,0 +1,45 @@
+## Why
+
+The calendar week view is the home page of the SPA editor and the entry point for every coaching workflow, but its current state is broken in three compounding ways: (a) the `CoachingActivityCard` literally **overflows its container** — the word "pending" is rendered outside the card border on screens at the design width; (b) titles like "Z2/Z3 técnica" and "FASE 3 fuerza" are aggressively truncated, so the most important field on the card is the field least visible; (c) coaching activities (what the coach planned) and workouts (what the athlete did) live as two unrelated stacks in the same day column with no way to express that they describe the same session, despite this being the central question every athlete asks ("did I do what I was told?").
+
+The visual debt is the surface symptom; the missing **plan ↔ execution** model is the structural one. Both must be addressed together because any cosmetic fix would still leave the cards conceptually disconnected — the redesign and the data model have to land as one coherent screen.
+
+## What Changes
+
+- Fix the rendering bug in `CoachingActivityCard` (status overflow) and rebuild its visual hierarchy: title is the protagonist (`line-clamp-2`), sport icon is not duplicated by the sport label, origin (T2G / TP / manual) is a muted text chip, status drives the **lateral border color** (amber=pending, emerald=completed, slate=skipped) plus a small lucide icon — never an unstyled string in the layout.
+- Replace the rose dashed-border treatment with a calmer language consistent with the rest of the SPA: solid white background, slate borders, `border-l-2` accent for status. The pink palette currently reads as a warning state and competes with the rest of the calendar.
+- Introduce a **plan ↔ execution match model** in the domain: a `CoachingActivity` (plan) MAY be linked to a `WorkoutRecord` (actual). Three rendered states per day cell: `SOLO PLAN`, `SOLO ACTUAL`, and `MATCHED`. New use cases `matchSession`, `unmatchSession`, and `autoMatchSessions` (heuristic: same day + same sport + duration within ±20%, surfaced as a confirmable suggestion — never a silent mutation).
+- New `MatchedSessionCard` component that fuses planned and actual into a single card with a `planned / actual` two-row body and a duration-based **compliance hint** on the lateral border (gradient from amber → emerald). Richer compliance scoring (zones, TSS) is a follow-up.
+- New **density toggle** in the calendar header (`compact` ↔ `comfortable`), persisted via Dexie in a user-preferences table. Compact = color + icon, comfortable = color + icon + status text. Default: compact on desktop, comfortable on mobile.
+- Header refinements: human-readable week label ("Apr 27 – May 3 · W18" instead of "2026 W18"), `CoachingSyncButton` becomes an icon-only button with a tooltip showing "last sync Xm ago" and a discreet spinner — no longer rose-coloured.
+- `DayColumn` improvements: `min-w-[140px]` (was 120, which is too tight for the new card body), today is highlighted via a pill on the day label rather than a tinted background, the empty-day `+` becomes a hover-revealed menu (Plan / Workout / From template) so the affordance answers the implicit question "+ what?".
+- Mobile: horizontal scroller adopts `snap-x snap-mandatory` so swipes settle on a day rather than mid-column.
+
+Out of scope (mentioned here to bound the change; each lives as its own follow-up): drag-and-drop between days, zone/TSS-based compliance scoring, month and list calendar views, redesign of the `EmptyDayDialog` body itself (only its trigger is touched).
+
+## Capabilities
+
+### New Capabilities
+
+- `spa-session-match`: domain concept of a "session" formed by linking a planned coaching activity with an executed workout, including the `matchSession` / `unmatchSession` / `autoMatchSessions` use cases, the heuristic rules for auto-match suggestions, the `SessionMatchRepository` port, and the duration-based compliance score computed on the fly from the matched pair.
+- `spa-user-preferences`: persisted per-profile UI preferences (starting with `calendarDensity: 'compact' | 'comfortable'`), the `UserPreferencesRepository` port, defaults by viewport, and the read/update use cases. Established as its own capability so future preferences (theme override, default sport filter, etc.) have an obvious home rather than accreting in `spa-calendar`.
+
+### Modified Capabilities
+
+- `spa-calendar`: the "Coaching activities overlay" requirement is replaced by a richer set of requirements covering the three rendered card states (SOLO PLAN, SOLO ACTUAL, MATCHED), the new visual language (status-driven lateral border, no overflow, `line-clamp-2` titles, no duplicate sport label), the density toggle, the human-readable week label, the icon-only sync button, the `min-w-[140px]` day column, the today-as-pill treatment, the hover-revealed empty-day menu, and the mobile snap behavior. The "Workout cards with state indicators" requirement is amended so `WorkoutCard` and `CoachingActivityCard` share the same status-color language (currently they diverge — `WorkoutCard` uses textual indicators while `CoachingActivityCard` uses a rose box).
+- `spa-coaching-integration`: `CoachingActivityRecord` gains an optional `matchedWorkoutId: string | undefined` field carried through repository, sync, and dialog. The `CoachingActivityDialog` requirement is amended so the dialog surfaces the matched workout (if any) with a "Split" action, and offers a "Match to..." action when unmatched. Sync orphan-cleanup semantics are extended so deleting a coaching activity that is part of a match also clears the link on the workout side (no dangling references).
+
+## Impact
+
+- **Affected packages**: `@kaiord/workout-spa-editor` only. No changes to `@kaiord/core`, format adapters, CLI, or MCP.
+- **Affected layers (hexagonal)**:
+  - Domain: `CoachingActivity` type gains `matchedWorkoutId`, new `SessionMatch` value object, new `UserPreferences` aggregate.
+  - Application: new use cases `matchSession(input, deps)`, `unmatchSession(input, deps)`, `autoMatchSessions(input)`, `getUserPreferences(input, deps)`, `setCalendarDensity(input, deps)`, `dismissAutoMatchBanner(input, deps)`, `isAutoMatchBannerDismissed(input)`, plus the pure functions `parseCoachingDuration`, `computeComplianceScore`, `complianceBucket`, `canonicalSportFamily`. All use cases follow the `(input, deps)` shape with explicit injected dependencies (clock / repositories / idGenerator) for testability per the spec contracts. The existing `convertCoachingActivityToWorkout` use case auto-matches the produced workout to its source activity (replaces the current implicit conversion-without-link).
+  - Ports: new `SessionMatchRepository`, `UserPreferencesRepository`. No format-adapter changes.
+  - Infrastructure (Dexie): new tables `session_matches` and `user_preferences`; migration adds `matchedWorkoutId` index on the existing `coaching_activities` table.
+  - UI: new `MatchedSessionCard`, `DensityToggle` components; rewritten `CoachingActivityCard`, `CoachingSyncButton`, `WeekNavigation`; touched `WorkoutCard`, `DayColumn`, `CalendarHeader`, `CalendarWeekGrid`.
+- **Public API**: no breaking changes. The SPA editor is private (`@kaiord/workout-spa-editor`) so its component surface is internal. The `CoachingActivity` type is exported within the SPA package only; the new optional field is additive.
+- **Persistence migration**: Dexie schema bumps by one version. New tables (`session_matches`, `user_preferences`, `auto_match_dismissals`) are empty on first load; no existing rows are mutated; `CoachingActivityRecord` is **not** modified at the persistence layer (the `matchedWorkoutId` exposed to the UI is a derived view-model field only). Existing coaching activities and workouts continue to render correctly as `SOLO PLAN` / `SOLO ACTUAL` until matched (manually or via the auto-match suggestion). The migration is **forward-only** per design D12: rolling back to a prior bundle after deploy is not supported (Dexie schema versions are monotonic; the deploy invalidates the service-worker cache to prevent stale-bundle downgrade scenarios). Rollback strategy in the event of a P0 bug is forward-fix only.
+- **Dependencies**: no new runtime dependencies. Uses existing `lucide-react` icons (`Clock`, `Check`, `Minus`, `Link2`, `Unlink`, `LayoutGrid`, `List`) and Tailwind utilities. The `BridgeStatusContext` and existing `useCoachingActivities` hook are reused unchanged.
+- **Testing**: ~30 new unit/integration tests across domain (match invariants), application (use cases with stubbed ports), infrastructure (Dexie migration round-trip), and UI (Vitest + Testing Library for the three card states, density toggle, header). Visual regression covered by existing Storybook entries plus a new story per card state. Coverage threshold remains 70% for the SPA package.
+- **Quality gates**: zero new ESLint/TypeScript warnings (per `CLAUDE.md` zero-tolerance policy). Mechanical guards (`pnpm test:scripts`) continue to pass — no Zustand→Dexie writethrough, no PII interpolation in toasts/console.
