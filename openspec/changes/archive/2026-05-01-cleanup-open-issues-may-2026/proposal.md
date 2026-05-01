@@ -1,3 +1,5 @@
+> Completed: 2026-05-01
+
 ## Why
 
 The repo has 15 open issues. Triage shows the queue is mostly noise:
