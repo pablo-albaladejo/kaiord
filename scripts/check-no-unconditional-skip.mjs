@@ -82,21 +82,8 @@ const COMPUTED_SKIPIF_RE =
 // runtime-evaluated → ALLOW.
 const LITERAL_KEYWORDS = new Set(["true", "false", "null", "undefined"]);
 
-// R-NoUnconditionalSkip: must be empty before guidelines-compliance-harden archives.
-// Each entry MUST carry an inline comment naming (a) the rule ID, (b) the
-// offending file:line, (c) the planned drain PR.
-export const ALLOWLIST = new Set([
-  // R-NoUnconditionalSkip | packages/workout-spa-editor/src/components/pages/CalendarPage.test.tsx:89 | drained in PR4
-  "packages/workout-spa-editor/src/components/pages/CalendarPage.test.tsx:89",
-  // R-NoUnconditionalSkip | packages/workout-spa-editor/src/components/pages/CalendarPage.test.tsx:99 | drained in PR4
-  "packages/workout-spa-editor/src/components/pages/CalendarPage.test.tsx:99",
-  // R-NoUnconditionalSkip | packages/workout-spa-editor/src/components/pages/CalendarPage.test.tsx:113 | drained in PR4
-  "packages/workout-spa-editor/src/components/pages/CalendarPage.test.tsx:113",
-  // R-NoUnconditionalSkip | packages/workout-spa-editor/src/utils/json-parser.test.ts:462 | drained in PR4
-  "packages/workout-spa-editor/src/utils/json-parser.test.ts:462",
-  // R-NoUnconditionalSkip | packages/zwo/src/adapters/xsd-validator.test.ts:47 | drained in PR4
-  "packages/zwo/src/adapters/xsd-validator.test.ts:47",
-]);
+// R-NoUnconditionalSkip: drained in PR4 of guidelines-compliance-harden.
+export const ALLOWLIST = new Set([]);
 
 function relForRule(file) {
   return relative(REPO_ROOT, file).replaceAll("\\", "/");

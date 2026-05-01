@@ -1,54 +1,54 @@
 # Test Fixtures - Shared Across Packages
 
-Este directorio contiene fixtures de test compartidos entre todos los paquetes del monorepo.
+This directory contains test fixtures shared across all packages in the monorepo.
 
-## 📁 Estructura
+## 📁 Structure
 
 ```
 fixtures/
-├── fit-files/          # Archivos FIT binarios para tests
+├── fit-files/          # Binary FIT files for tests
 │   ├── WorkoutIndividualSteps.fit
 │   ├── WorkoutRepeatSteps.fit
 │   ├── WorkoutCustomTargetValues.fit
 │   └── WorkoutRepeatGreaterThanStep.fit
-├── krd-files/          # Archivos KRD (JSON) para tests
+├── krd-files/          # KRD (JSON) files for tests
 │   ├── WorkoutIndividualSteps.krd
 │   ├── WorkoutRepeatSteps.krd
 │   ├── WorkoutCustomTargetValues.krd
 │   └── WorkoutRepeatGreaterThanStep.krd
-└── README.md           # Este archivo
+└── README.md           # This file
 ```
 
-## 🎯 Propósito
+## 🎯 Purpose
 
-Estos fixtures son utilizados por:
+These fixtures are used by:
 
-1. **@kaiord/core** - Tests de conversión FIT ↔ KRD
-2. **@kaiord/cli** - Tests de comandos CLI
-3. **@kaiord/workout-spa-editor** - Tests de carga de archivos
+1. **@kaiord/core** - FIT ↔ KRD conversion tests
+2. **@kaiord/cli** - CLI command tests
+3. **@kaiord/workout-spa-editor** - File loading tests
 
-## 📝 Convenciones
+## 📝 Conventions
 
-### Nombres de Archivos
+### File Names
 
-Los archivos siguen la convención `PascalCase` para mantener consistencia con los nombres de tests de Garmin:
+Files follow the `PascalCase` convention to stay consistent with Garmin's test names:
 
-- `WorkoutIndividualSteps` - Workout con steps individuales
-- `WorkoutRepeatSteps` - Workout con bloques de repetición
-- `WorkoutCustomTargetValues` - Workout con targets personalizados
-- `WorkoutRepeatGreaterThanStep` - Workout con condiciones de repetición
+- `WorkoutIndividualSteps` - Workout with individual steps
+- `WorkoutRepeatSteps` - Workout with repeat blocks
+- `WorkoutCustomTargetValues` - Workout with custom targets
+- `WorkoutRepeatGreaterThanStep` - Workout with repeat conditions
 
-### Pares FIT/KRD
+### FIT/KRD Pairs
 
-Cada archivo `.fit` tiene su correspondiente `.krd` con el mismo nombre base. Esto permite:
+Every `.fit` file has a matching `.krd` with the same base name. This enables:
 
-- Tests de round-trip (FIT → KRD → FIT)
-- Validación de conversión
+- Round-trip tests (FIT → KRD → FIT)
+- Conversion validation
 - Golden tests
 
-## 🔧 Uso en Tests
+## 🔧 Use in Tests
 
-### Desde @kaiord/core
+### From @kaiord/core
 
 ```typescript
 import { readFileSync } from "fs";
@@ -64,7 +64,7 @@ const krdJson = readFileSync(
 );
 ```
 
-### Desde @kaiord/workout-spa-editor (Unit Tests)
+### From @kaiord/workout-spa-editor (Unit Tests)
 
 ```typescript
 // ✅ Recommended: Use test-utils helpers from @kaiord/core
@@ -83,7 +83,7 @@ const krdPath = join(
 );
 ```
 
-### Desde @kaiord/cli (Integration Tests)
+### From @kaiord/cli (Integration Tests)
 
 ```typescript
 // ✅ Recommended: Use fixture path helpers
@@ -105,81 +105,81 @@ const fixturePath = resolve(
 );
 ```
 
-## 📦 Agregar Nuevos Fixtures
+## 📦 Adding New Fixtures
 
-### 1. Agregar el archivo FIT
+### 1. Add the FIT file
 
 ```bash
-cp nuevo-workout.fit packages/core/src/tests/fixtures/fit-files/
+cp new-workout.fit packages/core/src/tests/fixtures/fit-files/
 ```
 
-### 2. Generar el KRD correspondiente
+### 2. Generate the matching KRD
 
 ```bash
 pnpm kaiord convert \
-  --input packages/core/src/tests/fixtures/fit-files/nuevo-workout.fit \
-  --output packages/core/src/tests/fixtures/krd-files/nuevo-workout.krd
+  --input packages/core/src/tests/fixtures/fit-files/new-workout.fit \
+  --output packages/core/src/tests/fixtures/krd-files/new-workout.krd
 ```
 
-### 3. Validar el par
+### 3. Validate the pair
 
 ```bash
 # Round-trip test
 pnpm kaiord convert \
-  --input packages/core/src/tests/fixtures/krd-files/nuevo-workout.krd \
+  --input packages/core/src/tests/fixtures/krd-files/new-workout.krd \
   --output /tmp/test.fit
 
-# Comparar con original
-diff packages/core/src/tests/fixtures/fit-files/nuevo-workout.fit /tmp/test.fit
+# Compare against the original
+diff packages/core/src/tests/fixtures/fit-files/new-workout.fit /tmp/test.fit
 ```
 
-## 🎨 Características de los Fixtures
+## 🎨 Fixture Characteristics
 
 ### WorkoutIndividualSteps.fit/krd
 
-- Steps individuales sin repeticiones
-- Diferentes tipos de duración (time, distance)
-- Diferentes tipos de target (power, heart_rate)
-- Intensidades variadas (warmup, active, cooldown)
+- Individual steps without repeats
+- Different duration types (time, distance)
+- Different target types (power, heart_rate)
+- Varied intensities (warmup, active, cooldown)
 
 ### WorkoutRepeatSteps.fit/krd
 
-- Bloques de repetición simples
-- Múltiples steps dentro de cada bloque
-- Conteo de repeticiones
+- Simple repeat blocks
+- Multiple steps inside each block
+- Repetition counts
 
 ### WorkoutCustomTargetValues.fit/krd
 
-- Targets con valores personalizados
-- Zonas de potencia
-- Rangos de frecuencia cardíaca
-- Porcentajes de FTP
+- Targets with custom values
+- Power zones
+- Heart-rate ranges
+- FTP percentages
 
 ### WorkoutRepeatGreaterThanStep.fit/krd
 
-- Condiciones de repetición avanzadas
+- Advanced repeat conditions
 - Repeat until power greater than
 - Repeat until heart rate less than
-- Duraciones condicionales
+- Conditional durations
 
-## 🔍 Validación
+## 🔍 Validation
 
-Todos los fixtures deben:
+Every fixture must:
 
-1. ✅ Validar contra el schema KRD
-2. ✅ Pasar round-trip tests (FIT → KRD → FIT)
-3. ✅ Ser archivos reales de Garmin (no sintéticos)
-4. ✅ Tener tamaño < 20KB (para tests rápidos)
-5. ✅ Estar anonimizados (sin datos personales)
+1. ✅ Validate against the KRD schema
+2. ✅ Pass round-trip tests (FIT → KRD → FIT)
+3. ✅ Be a real Garmin file (not synthetic)
+4. ✅ Stay under 20KB (for fast tests)
+5. ✅ Be anonymized (no personal data)
 
-## 📊 Tamaños de Archivos
+## 📊 File Sizes
 
-| Archivo                          | Tamaño | Uso                 |
-| -------------------------------- | ------ | ------------------- |
-| WorkoutIndividualSteps.fit       | ~2KB   | Tests básicos       |
-| WorkoutRepeatSteps.fit           | ~3KB   | Tests de repetición |
-| WorkoutCustomTargetValues.fit    | ~4KB   | Tests de targets    |
-| WorkoutRepeatGreaterThanStep.fit | ~5KB   | Tests avanzados     |
+| File                             | Size | Use            |
+| -------------------------------- | ---- | -------------- |
+| WorkoutIndividualSteps.fit       | ~2KB | Basic tests    |
+| WorkoutRepeatSteps.fit           | ~3KB | Repeat tests   |
+| WorkoutCustomTargetValues.fit    | ~4KB | Target tests   |
+| WorkoutRepeatGreaterThanStep.fit | ~5KB | Advanced tests |
 
 ## 🚀 Shared Test Utilities
 
@@ -215,14 +215,14 @@ const path = getFixturePath("fit", "WorkoutIndividualSteps.fit");
 const { fit, krd } = loadFixturePair(FIXTURE_NAMES.INDIVIDUAL_STEPS);
 ```
 
-## 📝 Mantenimiento
+## 📝 Maintenance
 
-- **Revisar fixtures** cuando el schema KRD cambie
-- **Regenerar KRD** si el formato de conversión mejora
-- **Validar round-trip** después de cambios en converters
-- **Mantener tamaños pequeños** para tests rápidos
+- **Review fixtures** when the KRD schema changes
+- **Regenerate KRD** when the conversion format improves
+- **Validate round-trip** after changes to converters
+- **Keep sizes small** for fast tests
 
-## 🔗 Referencias
+## 🔗 References
 
 - [KRD Format Spec](../../../../../docs/krd-format.md)
 - [Testing Guidelines](../../../../../docs/testing.md)

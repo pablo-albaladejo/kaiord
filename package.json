@@ -65,7 +65,7 @@
     "lint:package-deps": "node scripts/check-package-deps.mjs",
     "lint:architecture": "node scripts/check-architecture.mjs",
     "lint:no-unconditional-skip": "node scripts/check-no-unconditional-skip.mjs",
-    "lint:allowlists-empty": "node scripts/check-allowlists-empty.mjs --mode=warn",
+    "lint:allowlists-empty": "node scripts/check-allowlists-empty.mjs",
     "lint:links": "bash scripts/lint-links.sh",
     "test:scripts": "node --test scripts/*.test.mjs",
     "archive:index": "node scripts/generate-archive-index.mjs",

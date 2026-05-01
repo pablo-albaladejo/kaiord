@@ -1,7 +1,6 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
-import { Router } from "wouter";
+import { Route, Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../adapters/dexie/dexie-database";
@@ -52,7 +51,9 @@ function renderCalendar(path = "/calendar/2026-W15") {
         <GarminBridgeProvider>
           <CoachingRegistryProvider factories={[]}>
             <Router hook={hook}>
-              <CalendarPage />
+              <Route path="/calendar/:weekId?">
+                <CalendarPage />
+              </Route>
             </Router>
           </CoachingRegistryProvider>
         </GarminBridgeProvider>
@@ -84,9 +85,7 @@ describe("CalendarPage", () => {
     });
   });
 
-  // Covered by e2e: calendar-workouts.spec.ts "Week with workouts shows cards"
-  // useLiveQuery doesn't react to fake-indexeddb in jsdom
-  it.skip("renders workout cards in the correct day column", async () => {
+  it("renders workout cards in the correct day column", async () => {
     const workout = makeWorkout({ id: "w-mon", date: "2026-04-06" });
     await db.table("workouts").add(workout);
 
@@ -95,8 +94,7 @@ describe("CalendarPage", () => {
     expect(await screen.findByTestId("workout-card-w-mon")).toBeInTheDocument();
   });
 
-  // Covered by e2e: calendar-batch.spec.ts "banner shows count"
-  it.skip("shows batch processing banner when raw workouts exist", async () => {
+  it("shows batch processing banner when raw workouts exist", async () => {
     await db.table("workouts").add(makeWorkout({ date: "2026-04-07" }));
     await db
       .table("workouts")
@@ -109,8 +107,7 @@ describe("CalendarPage", () => {
     });
   });
 
-  // Covered by e2e: calendar-workouts.spec.ts "Multiple workouts per day"
-  it.skip("stacks multiple workouts per day by createdAt", async () => {
+  it("stacks multiple workouts per day by createdAt", async () => {
     const w1 = makeWorkout({
       id: "w-early",
       date: "2026-04-06",
