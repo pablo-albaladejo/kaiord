@@ -1,59 +1,68 @@
 /**
- * CoachingActivityCard — Read-only card for coach-planned activities.
+ * Read-only card for coach-planned activities (T2G / TP / future).
  *
  * Click opens a CoachingActivityDialog (managed by the calendar page).
- * Earlier in-place description toggle was replaced with a dialog (per
- * spa-coaching-integration "CoachingActivityDialog" requirement).
+ * Visual contract is shared with WorkoutCard and MatchedSessionCard via
+ * `CardShell` — status drives the lateral border colour, the sport icon
+ * is the sport identifier (no duplicate text label), and the origin
+ * (T2G, TP) is a muted text chip rather than a coloured badge.
  */
 
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { CardShell } from "../CardShell/CardShell";
+import { statusToColourClass, statusToIcon } from "../CardShell/status-tokens";
 
 export type CoachingActivityCardProps = {
   activity: CoachingActivity;
+  density?: "compact" | "comfortable";
   onClick?: (activity: CoachingActivity) => void;
-};
-
-const STATUS_COLORS: Record<string, string> = {
-  pending: "text-orange-500",
-  completed: "text-green-600",
-  skipped: "text-gray-400",
 };
 
 export function CoachingActivityCard({
   activity,
+  density = "compact",
   onClick,
 }: CoachingActivityCardProps) {
   const intensity = Math.min(activity.effort ?? 0, 5);
+  const status = statusToIcon(activity.status);
+  const StatusIcon = status.Component;
 
   return (
-    <button
-      type="button"
-      data-testid={`coaching-card-${activity.id}`}
-      className="w-full rounded-md border border-dashed border-rose-300 bg-rose-50 p-2 text-left text-sm transition-shadow hover:shadow-md dark:border-rose-800 dark:bg-rose-950"
+    <CardShell
+      borderClass={statusToColourClass(activity.status)}
+      ariaLabel={`${activity.title}, ${activity.sport.label}, ${status.label}`}
       onClick={() => onClick?.(activity)}
-    >
-      <div className="flex items-center gap-1.5">
-        <span title={activity.sport.label}>{activity.sport.icon}</span>
-        <span className="truncate font-medium">{activity.title}</span>
-        <span className="ml-auto rounded bg-rose-200 px-1 py-0.5 text-[10px] font-bold text-rose-700 dark:bg-rose-900 dark:text-rose-300">
-          {activity.sourceBadge}
-        </span>
-      </div>
-      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-        <span>{activity.sport.label}</span>
-        {activity.duration && <span>{activity.duration}</span>}
-        {intensity > 0 && (
-          <span title={`Intensity: ${intensity}/5`}>
-            {"●".repeat(intensity)}
-            {"○".repeat(5 - intensity)}
+      testId={`coaching-card-${activity.id}`}
+      originChip={activity.sourceBadge}
+      titleRow={
+        <>
+          <span role="img" aria-label={activity.sport.label}>
+            {activity.sport.icon}
           </span>
-        )}
-        <span
-          className={`ml-auto text-xs ${STATUS_COLORS[activity.status] ?? ""}`}
-        >
-          {activity.status}
-        </span>
-      </div>
-    </button>
+          <span className="min-w-0 flex-1">{activity.title}</span>
+          <StatusIcon
+            role="img"
+            aria-label={status.label}
+            className="h-4 w-4 shrink-0"
+          />
+        </>
+      }
+      metadataRow={
+        <>
+          {activity.duration && <span>{activity.duration}</span>}
+          {intensity > 0 && (
+            <span aria-label={`Intensity ${intensity} of 5`}>
+              {"●".repeat(intensity)}
+              {"○".repeat(5 - intensity)}
+            </span>
+          )}
+          {density === "comfortable" && (
+            <span className="ml-auto text-[10px] uppercase tracking-wide">
+              {status.label}
+            </span>
+          )}
+        </>
+      }
+    />
   );
 }
