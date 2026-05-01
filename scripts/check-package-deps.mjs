@@ -98,7 +98,9 @@ if (isMain) {
     process.exit(0);
   }
   if (violations.length === 0) {
-    console.log("✅ Every packages/* package.json respects the deps allowlist.");
+    console.log(
+      "✅ Every packages/* package.json respects the deps allowlist."
+    );
     process.exit(0);
   }
   console.error("❌ R-ArchPackageDeps violations:");

@@ -25,7 +25,7 @@ afterEach(() => {
 });
 
 describe("REJECT — non-empty ALLOWLIST", () => {
-  test("rejects export const ALLOWLIST = new Set([\"X\"])", () => {
+  test('rejects export const ALLOWLIST = new Set(["X"])', () => {
     write(
       "check-foo.mjs",
       `export const ALLOWLIST = new Set([\n  "packages/X/Y.ts",\n]);\n`
@@ -49,10 +49,7 @@ describe("REJECT — non-empty ALLOWLIST", () => {
   });
 
   test("rejects const ALLOWLIST (without export)", () => {
-    write(
-      "check-foo.mjs",
-      `const ALLOWLIST = new Set([\n  "X",\n]);\n`
-    );
+    write("check-foo.mjs", `const ALLOWLIST = new Set([\n  "X",\n]);\n`);
 
     const v = runCheck({ scriptsDir: sandbox });
 
@@ -62,10 +59,7 @@ describe("REJECT — non-empty ALLOWLIST", () => {
 
 describe("ALLOW — empty ALLOWLIST", () => {
   test("allows new Set()", () => {
-    write(
-      "check-foo.mjs",
-      `export const ALLOWLIST = new Set();\n`
-    );
+    write("check-foo.mjs", `export const ALLOWLIST = new Set();\n`);
 
     const v = runCheck({ scriptsDir: sandbox });
 
@@ -73,17 +67,14 @@ describe("ALLOW — empty ALLOWLIST", () => {
   });
 
   test("allows new Set([])", () => {
-    write(
-      "check-foo.mjs",
-      `export const ALLOWLIST = new Set([]);\n`
-    );
+    write("check-foo.mjs", `export const ALLOWLIST = new Set([]);\n`);
 
     const v = runCheck({ scriptsDir: sandbox });
 
     assert.equal(v.length, 0);
   });
 
-  test("allows comment fixture mentioning ALLOWLIST = new Set([\"X\"])", () => {
+  test('allows comment fixture mentioning ALLOWLIST = new Set(["X"])', () => {
     write(
       "check-foo.mjs",
       `// historical: ALLOWLIST = new Set(["X"]) was the old form\nexport const ALLOWLIST = new Set();\n`
@@ -108,10 +99,7 @@ describe("ALLOW — empty ALLOWLIST", () => {
 
 describe("scope", () => {
   test("ignores *.test.mjs files", () => {
-    write(
-      "check-foo.test.mjs",
-      `export const ALLOWLIST = new Set(["X"]);\n`
-    );
+    write("check-foo.test.mjs", `export const ALLOWLIST = new Set(["X"]);\n`);
 
     const v = runCheck({ scriptsDir: sandbox });
 
@@ -119,10 +107,7 @@ describe("scope", () => {
   });
 
   test("ignores files not starting with check-", () => {
-    write(
-      "audit-snapshot.mjs",
-      `export const ALLOWLIST = new Set(["X"]);\n`
-    );
+    write("audit-snapshot.mjs", `export const ALLOWLIST = new Set(["X"]);\n`);
 
     const v = runCheck({ scriptsDir: sandbox });
 

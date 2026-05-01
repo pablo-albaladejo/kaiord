@@ -69,7 +69,7 @@ describe("check-husky-no-bypass-hint — REJECT (imperative-voice)", () => {
   test("rejects something && HUSKY=0 git commit", () => {
     write(
       "pre-commit",
-      '#!/bin/sh\nif true; then true && HUSKY=0 git commit; fi\n'
+      "#!/bin/sh\nif true; then true && HUSKY=0 git commit; fi\n"
     );
 
     const v = runCheck({ huskyDir: sandbox });
@@ -78,7 +78,7 @@ describe("check-husky-no-bypass-hint — REJECT (imperative-voice)", () => {
   });
 
   test("rejects $(HUSKY=0 git commit)", () => {
-    write("pre-commit", '#!/bin/sh\nout=$(HUSKY=0 git commit)\n');
+    write("pre-commit", "#!/bin/sh\nout=$(HUSKY=0 git commit)\n");
 
     const v = runCheck({ huskyDir: sandbox });
 
@@ -128,7 +128,10 @@ describe("check-husky-no-bypass-hint — ALLOW (defensive comments)", () => {
   });
 
   test("allows # HUSKY=0 is prohibited", () => {
-    write("pre-commit", "#!/bin/sh\n# HUSKY=0 is prohibited; the hook MUST run\n");
+    write(
+      "pre-commit",
+      "#!/bin/sh\n# HUSKY=0 is prohibited; the hook MUST run\n"
+    );
 
     const v = runCheck({ huskyDir: sandbox });
 

@@ -64,8 +64,10 @@ export function runCheck({ packagesRoot } = {}) {
   const matches = findPackageFiles(root, (file) => MAPPER_TEST_RE.test(file));
   const violations = [];
   for (const file of matches) {
-    const rel = relative(root === PACKAGES_ROOT ? REPO_ROOT : root, file)
-      .replaceAll("\\", "/");
+    const rel = relative(
+      root === PACKAGES_ROOT ? REPO_ROOT : root,
+      file
+    ).replaceAll("\\", "/");
     const allowKey = root === PACKAGES_ROOT ? rel : rel;
     const isAllowed = root === PACKAGES_ROOT && ALLOWLIST.has(allowKey);
     if (isAllowed) continue;

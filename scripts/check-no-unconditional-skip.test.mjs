@@ -111,7 +111,10 @@ describe("Playwright runtime pattern (ALLOW)", () => {
   });
 
   test("allows test.skip(isMobile, reason)", () => {
-    write("e2e/x.spec.ts", `test.skip(isMobile, "Keyboard shortcuts not on mobile");\n`);
+    write(
+      "e2e/x.spec.ts",
+      `test.skip(isMobile, "Keyboard shortcuts not on mobile");\n`
+    );
 
     const v = runCheck({ packagesRoot: sandbox });
 
@@ -247,7 +250,7 @@ describe("skipIf — literal-only REJECTED", () => {
   });
 
   test("rejects backtick template without substitution", () => {
-    write("a/x.test.ts", "it.skipIf(`true`)(\"renders\", () => {});\n");
+    write("a/x.test.ts", 'it.skipIf(`true`)("renders", () => {});\n');
 
     const v = runCheck({ packagesRoot: sandbox });
 
