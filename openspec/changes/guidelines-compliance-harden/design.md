@@ -42,15 +42,15 @@ A secondary discovery: the `architecture-hexagonal` guideline doc says "logger i
 
 **Rules the script enforces (all hard-fail):**
 
-| Rule ID | Forbids | Layer |
-| --- | --- | --- |
-| `R-ArchLeftward` | `packages/core/src/domain/**` importing from `application/`, `adapters/`, or `ports/` | domain |
-| `R-ArchPortPure` | `packages/core/src/ports/**` importing from `application/`, `adapters/`, or any non-domain runtime module | ports |
-| `R-ArchAppPure` | `packages/core/src/application/**` importing from `adapters/` or any external library (allowlist: only relative `../domain`, `../ports`) | application |
-| `R-ArchDomainExt` | `packages/core/src/domain/**` importing from any external library other than `zod` | domain |
-| `R-ArchAdapterCross` | `packages/{fit,tcx,zwo,garmin}/src/**` importing from a sibling format adapter | adapters |
-| `R-ArchCoreAdapterAllowlist` | any new folder under `packages/core/src/adapters/` outside `{logger, analytics}` | core layout |
-| `R-ArchCoreAmbientTypes` | any `*.d.ts` under `packages/core/src/` that contains `declare module "<external-pkg>"` | core layout |
+| Rule ID                      | Forbids                                                                                                                                  | Layer       |
+| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- | ----------- |
+| `R-ArchLeftward`             | `packages/core/src/domain/**` importing from `application/`, `adapters/`, or `ports/`                                                    | domain      |
+| `R-ArchPortPure`             | `packages/core/src/ports/**` importing from `application/`, `adapters/`, or any non-domain runtime module                                | ports       |
+| `R-ArchAppPure`              | `packages/core/src/application/**` importing from `adapters/` or any external library (allowlist: only relative `../domain`, `../ports`) | application |
+| `R-ArchDomainExt`            | `packages/core/src/domain/**` importing from any external library other than `zod`                                                       | domain      |
+| `R-ArchAdapterCross`         | `packages/{fit,tcx,zwo,garmin}/src/**` importing from a sibling format adapter                                                           | adapters    |
+| `R-ArchCoreAdapterAllowlist` | any new folder under `packages/core/src/adapters/` outside `{logger, analytics}`                                                         | core layout |
+| `R-ArchCoreAmbientTypes`     | any `*.d.ts` under `packages/core/src/` that contains `declare module "<external-pkg>"`                                                  | core layout |
 
 The script reads only static source under `packages/`; no compilation is required. JSDoc-only references to forbidden symbols (e.g., `@kaiord/fit` inside a `/** ... */` block) are correctly ignored because the AST walker only inspects `ImportDeclaration` and `ExportNamedDeclaration` nodes.
 
@@ -60,13 +60,40 @@ The script reads only static source under `packages/`; no compilation is require
 
 ```js
 // commitlint.vocab.mjs
-export const TYPE_ENUM = ["feat","fix","chore","test","docs","refactor","perf"];
+export const TYPE_ENUM = [
+  "feat",
+  "fix",
+  "chore",
+  "test",
+  "docs",
+  "refactor",
+  "perf",
+];
 export const SCOPE_ENUM = [
-  "core","fit","tcx","zwo","garmin","garmin-connect","ai","cli","mcp",
-  "spa-editor","garmin-bridge","train2go-bridge",
-  "analytics","landing","docs-site",
-  "openspec","ci","docs","scripts",
-  "deploy","release","deps","deps-dev","e2e",
+  "core",
+  "fit",
+  "tcx",
+  "zwo",
+  "garmin",
+  "garmin-connect",
+  "ai",
+  "cli",
+  "mcp",
+  "spa-editor",
+  "garmin-bridge",
+  "train2go-bridge",
+  "analytics",
+  "landing",
+  "docs-site",
+  "openspec",
+  "ci",
+  "docs",
+  "scripts",
+  "deploy",
+  "release",
+  "deps",
+  "deps-dev",
+  "e2e",
 ];
 
 // commitlint.config.mjs
@@ -128,11 +155,11 @@ This carve-out preserves the legitimate env-gated pattern (e.g., `describe.skipI
 
 **Cleanup of the 5 current unconditional skips:**
 
-| Site | Treatment |
-| --- | --- |
-| `CalendarPage.test.tsx:89,99,113` (3×) | Fix the underlying drag-and-drop / fixture issue and unskip. RED → GREEN per test. |
+| Site                                        | Treatment                                                                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `CalendarPage.test.tsx:89,99,113` (3×)      | Fix the underlying drag-and-drop / fixture issue and unskip. RED → GREEN per test.                                                                                                                                                                                                                                                                         |
 | `json-parser.test.ts:462` (perf complexity) | Replace the skipped O(n) assertion with a deterministic three-input fast-path test that asserts ONLY what is currently true about `json-parser` (e.g., output equality on three increasing inputs, no time-budget assertion). No production code changes. If a future contributor wants a perf budget, that's a separate `json-parser-perf-budget` change. |
-| `xsd-validator.test.ts:47` (Node-only) | Convert to `it.skipIf(typeof window !== "undefined", "...")` so it actually runs in Node CI. |
+| `xsd-validator.test.ts:47` (Node-only)      | Convert to `it.skipIf(typeof window !== "undefined", "...")` so it actually runs in Node CI.                                                                                                                                                                                                                                                               |
 
 ### D5. Stale guideline doc gets the analytics carve-out (with drift-detection)
 
@@ -227,14 +254,14 @@ The empty-allowlist requirement at the end of each PR is mandatory: the change i
 
 ## Risks / Trade-offs
 
-| Risk | Mitigation |
-| --- | --- |
-| New commit-msg hook breaks in-flight branches whose commits use `openspec:` as a TYPE | P1 ships the hook; contributors with non-conformant in-flight branches rebase and reword. The rule was always documented as MUST. |
-| Architecture script over-flags a legitimate import (e.g., a planned `node:` import in a use case) | The script's allowlist for `application/` is "only relative `../domain` + `../ports`". `node:` modules in application code are already a guideline violation. If a real use-case-level `node:` import emerges later, the rule (and this script) is amended together — robust by design. |
-| Mapper→converter renames break consumer import paths | Consumers (CLI, MCP, SPA, tests) import from each adapter's barrel `index.ts`. Renaming the source file but keeping the exported symbol name preserves all consumer call sites. We MUST verify by running `pnpm -r build && pnpm -r test` after each rename batch. |
-| Coverage thresholds fail after the renames or after un-skipping tests | The renames preserve tests one-for-one (no coverage loss). Un-skipping the 3 CalendarPage tests increases coverage. The json-parser perf test rewrite is deterministic and runs every time. The xsd-validator `skipIf` only skips in browser-mode runs (Node CI is unaffected). All four sub-PRs run `pnpm -r test:coverage` before merge. |
-| commitlint config drifts from the guideline doc | A fixture test in `commitlint.config.test.mjs` (P1) imports the config and asserts that `type-enum` and `scope-enum` literals match a hard-coded string array; the same array is referenced in a comment inside `git-strategy/SKILL.md`. Drift fails CI. |
-| Removing `--no-verify` hint surprises contributors | The husky hook still works exactly as before; only the printed message changes. Contributors who actually need `--no-verify` for legitimate reasons (none documented today) can still type it manually — the rule against `--no-verify` lives in the guideline, not the hook. |
+| Risk                                                                                              | Mitigation                                                                                                                                                                                                                                                                                                                                 |
+| ------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| New commit-msg hook breaks in-flight branches whose commits use `openspec:` as a TYPE             | P1 ships the hook; contributors with non-conformant in-flight branches rebase and reword. The rule was always documented as MUST.                                                                                                                                                                                                          |
+| Architecture script over-flags a legitimate import (e.g., a planned `node:` import in a use case) | The script's allowlist for `application/` is "only relative `../domain` + `../ports`". `node:` modules in application code are already a guideline violation. If a real use-case-level `node:` import emerges later, the rule (and this script) is amended together — robust by design.                                                    |
+| Mapper→converter renames break consumer import paths                                              | Consumers (CLI, MCP, SPA, tests) import from each adapter's barrel `index.ts`. Renaming the source file but keeping the exported symbol name preserves all consumer call sites. We MUST verify by running `pnpm -r build && pnpm -r test` after each rename batch.                                                                         |
+| Coverage thresholds fail after the renames or after un-skipping tests                             | The renames preserve tests one-for-one (no coverage loss). Un-skipping the 3 CalendarPage tests increases coverage. The json-parser perf test rewrite is deterministic and runs every time. The xsd-validator `skipIf` only skips in browser-mode runs (Node CI is unaffected). All four sub-PRs run `pnpm -r test:coverage` before merge. |
+| commitlint config drifts from the guideline doc                                                   | A fixture test in `commitlint.config.test.mjs` (P1) imports the config and asserts that `type-enum` and `scope-enum` literals match a hard-coded string array; the same array is referenced in a comment inside `git-strategy/SKILL.md`. Drift fails CI.                                                                                   |
+| Removing `--no-verify` hint surprises contributors                                                | The husky hook still works exactly as before; only the printed message changes. Contributors who actually need `--no-verify` for legitimate reasons (none documented today) can still type it manually — the rule against `--no-verify` lives in the guideline, not the hook.                                                              |
 
 ## Migration Plan
 

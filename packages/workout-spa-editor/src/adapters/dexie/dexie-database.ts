@@ -23,6 +23,20 @@ const CORE_V4 = {
     "id, [profileId+date], [profileId+source+sourceId], [profileId+source]",
   coachingSyncState: "[source+profileId], source, profileId",
 };
+const CORE_V5 = {
+  ...CORE_V4,
+  // PK is `id` (nanoid). Indexes support all spec-mandated queries:
+  //   - [profileId+coachingActivityId] / [profileId+workoutId]: uniqueness checks
+  //   - [profileId+date]: weekly listByProfileAndWeek
+  //   - coachingActivityId / workoutId: cascade hooks
+  //   - profileId: profile-delete cascade
+  sessionMatches:
+    "id, [profileId+coachingActivityId], [profileId+workoutId], [profileId+date], coachingActivityId, workoutId, profileId",
+  // PK is `profileId` (one row per profile, lazy creation).
+  userPreferences: "profileId",
+  // PK is composite `[profileId+weekStart]`; index on profileId for cascade.
+  autoMatchDismissals: "[profileId+weekStart], profileId",
+};
 
 const backfillLinkedAccounts = (row: Record<string, unknown>): void => {
   if (!Array.isArray(row.linkedAccounts)) row.linkedAccounts = [];
@@ -49,6 +63,10 @@ export class KaiordDatabase extends Dexie {
           .toCollection()
           .modify(backfillLinkedAccounts);
       });
+    // v5 — session-match + user-preferences + auto-match-dismissals.
+    // All new tables are empty on first load; no existing rows are mutated.
+    // Forward-only: opening an older bundle against a v5 DB raises VersionError.
+    this.version(5).stores(CORE_V5);
   }
 }
 

@@ -53,7 +53,7 @@ Then §5 final-validation block runs and the change is archived.
 
 ### 1.5 No-unconditional-skip guard
 
-- [ ] 1.5.1 write failing test `scripts/check-no-unconditional-skip.test.mjs` (RED): positive fixtures cover all four dispatch shapes for each forbidden form: member (`it.skip`, `test.only`, `describe.todo`); computed-member (`it["skip"]`, `test["only"]`, `describe["todo"]`); destructured (`const { skip } = it; skip(...)`); re-bound (`const my = it; my.skip(...)`). Adversarial literal-only `skipIf` fixtures: `it.skipIf(true)`, `it.skipIf(1)`, `it.skipIf("x")`, `it.skipIf(null)`, `it.skipIf(!!1)`, `it.skipIf(1+1)`, `it.skipIf(true && true)`, `` it.skipIf(`true`) `` (TemplateLiteral without `${...}`). Negative fixtures (must PASS): `it.skipIf(process.env.X)`, `it.skipIf(typeof window !== 'undefined')`, `it.skipIf(someFn())`, `it.skipIf(!hasFlag())`, `it.skipIf(new URL(import.meta.url).hostname === "ci")` (NewExpression contributes runtime evaluation)
+- [ ] 1.5.1 write failing test `scripts/check-no-unconditional-skip.test.mjs` (RED): positive fixtures cover all four dispatch shapes for each forbidden form: member (`it.skip`, `test.only`, `describe.todo`); computed-member (`it["skip"]`, `test["only"]`, `describe["todo"]`); destructured (`const { skip } = it; skip(...)`); re-bound (`const my = it; my.skip(...)`). Adversarial literal-only `skipIf` fixtures: `it.skipIf(true)`, `it.skipIf(1)`, `it.skipIf("x")`, `it.skipIf(null)`, `it.skipIf(!!1)`, `it.skipIf(1+1)`, `it.skipIf(true && true)`, ``it.skipIf(`true`)`` (TemplateLiteral without `${...}`). Negative fixtures (must PASS): `it.skipIf(process.env.X)`, `it.skipIf(typeof window !== 'undefined')`, `it.skipIf(someFn())`, `it.skipIf(!hasFlag())`, `it.skipIf(new URL(import.meta.url).hostname === "ci")` (NewExpression contributes runtime evaluation)
 - [ ] 1.5.2 implement `scripts/check-no-unconditional-skip.mjs` (GREEN): AST-walk `*.test.{ts,tsx}` and `*.spec.{ts,tsx}` files for all four dispatch shapes (member, computed, destructured, re-bound). For `skipIf`, traverse the argument AST and ACCEPT only when at least one reachable node is of kind `Identifier`, `MemberExpression`, `CallExpression`, or `NewExpression`. All other constructs (`Literal`, `TemplateLiteral` without `${...}` substitutions, and `UnaryExpression` / `BinaryExpression` / `LogicalExpression` whose every reachable leaf is one of those) are REJECTED as literal-only. Rule ID `R-NoUnconditionalSkip`. Support a `--dry-run` flag emitting violations as JSON on stdout
 - [ ] 1.5.3 refactor: extract the dispatch-shape detector into a reusable helper (REFACTOR)
 - [ ] 1.5.4 seed `ALLOWLIST` from the audit snapshot (the 5 known unconditional skips; drained in PR4)
@@ -70,16 +70,16 @@ Then §5 final-validation block runs and the change is archived.
 
 - [ ] 1.7.1 add devDeps `@commitlint/cli` and `@commitlint/config-conventional` at the repo root (`pnpm add -Dw @commitlint/cli @commitlint/config-conventional`)
 - [ ] 1.7.2 create `commitlint.vocab.mjs` exporting:
-      ```js
-      export const TYPE_ENUM = ["feat","fix","chore","test","docs","refactor","perf"];
-      export const SCOPE_ENUM = [
-        "core","fit","tcx","zwo","garmin","garmin-connect","ai","cli","mcp",
-        "spa-editor","garmin-bridge","train2go-bridge",
-        "analytics","landing","docs-site",
-        "openspec","ci","docs","scripts",
-        "deploy","release","deps","deps-dev","e2e",
-      ];
-      ```
+      `js
+export const TYPE_ENUM = ["feat","fix","chore","test","docs","refactor","perf"];
+export const SCOPE_ENUM = [
+  "core","fit","tcx","zwo","garmin","garmin-connect","ai","cli","mcp",
+  "spa-editor","garmin-bridge","train2go-bridge",
+  "analytics","landing","docs-site",
+  "openspec","ci","docs","scripts",
+  "deploy","release","deps","deps-dev","e2e",
+];
+`
       Order is normative (alphabetical-by-tier; the test asserts array-equality, not Set-equality)
 - [ ] 1.7.3 create `commitlint.config.mjs` importing `TYPE_ENUM` and `SCOPE_ENUM` from `commitlint.vocab.mjs`. The config explicitly preserves `@commitlint/config-conventional` default single-scope behavior (no multi-scope opt-in). Per design D2, multi-scope subjects MUST be rejected
 - [ ] 1.7.4 update `.claude/skills/guidelines/git-strategy/SKILL.md`: REPLACE the existing scope list at lines 24-28 with a fenced markdown block bracketed by `<!-- commitlint-source-of-truth:start -->` and `<!-- commitlint-source-of-truth:end -->`. The block uses a STRICTLY MACHINE-READABLE shape: one entry per line, no prefixes, no indentation, blank lines and lines starting with `#` are comments and ignored by the parser. Section headers `# types` and `# scopes` separate the two arrays. The block contents MUST be EXACTLY (line-for-line, order-preserved):
@@ -122,15 +122,12 @@ Then §5 final-validation block runs and the change is archived.
       ```
 
       Add an explicit note above the block: "Source of truth: `commitlint.vocab.mjs` + this block. Drift between the two (insertion, deletion, or reorder) fails CI via `scripts/check-commitlint-config.test.mjs`."
-- [ ] 1.7.5 write `scripts/check-commitlint-config.test.mjs` (`node:test`): (a) parse the `<!-- commitlint-source-of-truth -->` block from `git-strategy/SKILL.md` with a trivial line-by-line parser — strip blank lines, strip lines starting with `#` BUT use the `# types`/`# scopes` markers as section separators; emit two arrays in document order; (b) dynamically import `commitlint.vocab.mjs`; (c) `assert.deepStrictEqual(parsedTypes, TYPE_ENUM)` and `assert.deepStrictEqual(parsedScopes, SCOPE_ENUM)` (array-equality, order-sensitive); (d) pipe four subjects through `pnpm exec commitlint` and assert exit codes:
-      - `chore(openspec): archive cleanup-may-2026` → exit 0
-      - `feat(banana): add new flow` → non-zero (unknown scope)
-      - `openspec: archive cleanup-may-2026` → non-zero (TYPE not allowed)
-      - `refactor(core,fit,tcx): unify foo` → non-zero (multi-scope rejected)
-      
+
+- [ ] 1.7.5 write `scripts/check-commitlint-config.test.mjs` (`node:test`): (a) parse the `<!-- commitlint-source-of-truth -->` block from `git-strategy/SKILL.md` with a trivial line-by-line parser — strip blank lines, strip lines starting with `#` BUT use the `# types`/`# scopes` markers as section separators; emit two arrays in document order; (b) dynamically import `commitlint.vocab.mjs`; (c) `assert.deepStrictEqual(parsedTypes, TYPE_ENUM)` and `assert.deepStrictEqual(parsedScopes, SCOPE_ENUM)` (array-equality, order-sensitive); (d) pipe four subjects through `pnpm exec commitlint` and assert exit codes: - `chore(openspec): archive cleanup-may-2026` → exit 0 - `feat(banana): add new flow` → non-zero (unknown scope) - `openspec: archive cleanup-may-2026` → non-zero (TYPE not allowed) - `refactor(core,fit,tcx): unify foo` → non-zero (multi-scope rejected)
       Parser tests: include a positive fixture (the canonical block) and three negative fixtures stressing parser correctness — block with extra blank lines (still parses correctly), block with extra non-`#` comment line (parser treats it as a list item, test FAILS — this is the desired strict behavior), block with reordered entries (test FAILS via `deepStrictEqual`). The parser MUST be ≤ 30 lines and unit-tested in isolation.
-      
+
       Subprocess strategy for the four commit-subject pipes: invoke `node_modules/.bin/commitlint` directly (NOT `pnpm exec commitlint`) to avoid the 200-500ms `pnpm`-wrapper overhead per call. Total target latency for the four pipes: ≤ 1 second. Use `node:child_process.spawnSync` with `{ input: subject, encoding: 'utf8' }` — synchronous (the test is short and sequential ordering is fine). Document this choice at the top of the test file
+
 - [ ] 1.7.6 add `.husky/commit-msg` running `pnpm exec commitlint --edit "$1"`; mark executable; verify the file contains no imperative-voice bypass instruction (the `R-NoBypassHint` rule applies to ALL `.husky/*` files including this new one — defensive comments are still allowed)
 - [ ] 1.7.7 wire `scripts/check-commitlint-config.test.mjs` into `pnpm test:scripts`
 
@@ -319,10 +316,5 @@ This task takes path (b) of the `R-NoUnconditionalSkip` requirement: "moved to a
 - [ ] 5.4 `/opsx-verify guidelines-compliance-harden` against all spec scenarios
 - [ ] 5.5 flip `scripts/check-allowlists-empty.mjs` from `--mode=warn` (used during PR1) to `--mode=error` (default). Run `pnpm test:scripts`; confirm `R-AllowlistsEmpty` passes — every `ALLOWLIST` Set in the 6 source-of-truth check scripts is `new Set()` (empty). Cross-check: `grep -rE "ALLOWLIST = new Set\(\[" scripts/check-architecture.mjs scripts/check-package-deps.mjs scripts/check-mapper-no-tests.mjs scripts/check-converter-has-tests.mjs scripts/check-no-unconditional-skip.mjs scripts/check-husky-no-bypass-hint.mjs` returns no lines
 - [ ] 5.6 `pnpm exec changeset status` shows no pending bumps (every PR landed as no-changeset; if any did add one, that's an audit failure to investigate). Cross-check the "Changeset exceptions" subsection added to `git-strategy/SKILL.md` in 4.6.4 — every PR matches one of the three documented exceptions
-- [ ] 5.7 absorb the change deltas into the canonical specs:
-      - rewrite every `check-architecture.js` reference in `openspec/specs/hexagonal-arch/spec.md` to `scripts/check-architecture.mjs` (`grep -rn "check-architecture\.js" openspec/ .claude/` MUST return no lines after this step)
-      - merge the `## ADDED Requirements` and `## MODIFIED Requirements` from `openspec/changes/guidelines-compliance-harden/specs/hexagonal-arch/spec.md` into `openspec/specs/hexagonal-arch/spec.md`. The five `## MODIFIED Requirements` (Layer Hierarchy, Domain Purity, Application Isolation, Port Contracts, Adapter Freedom) REPLACE their canonical counterparts; the four `## ADDED Requirements` (Architecture mechanical guard exists, Core adapter allowlist, Vendor SDK ambient types, Package dependency table is mechanically enforced) are appended. The `Package Dependencies` requirement table on the canonical spec MUST remain byte-identical for `@kaiord/docs` and `@kaiord/landing` rows
-      - merge the `## ADDED Requirements` from `openspec/changes/guidelines-compliance-harden/specs/spa-quality-gates/spec.md` into `openspec/specs/spa-quality-gates/spec.md` (eight new requirements appended; existing toast/PII/Zustand requirements untouched)
-      - update the `> Synced:` marker on BOTH canonical specs to `> Synced: <archive-date> (guidelines-compliance-harden)` (the archive-date is set in 5.8 and MUST match)
-      - run `pnpm lint:specs` (zero violations)
+- [ ] 5.7 absorb the change deltas into the canonical specs: - rewrite every `check-architecture.js` reference in `openspec/specs/hexagonal-arch/spec.md` to `scripts/check-architecture.mjs` (`grep -rn "check-architecture\.js" openspec/ .claude/` MUST return no lines after this step) - merge the `## ADDED Requirements` and `## MODIFIED Requirements` from `openspec/changes/guidelines-compliance-harden/specs/hexagonal-arch/spec.md` into `openspec/specs/hexagonal-arch/spec.md`. The five `## MODIFIED Requirements` (Layer Hierarchy, Domain Purity, Application Isolation, Port Contracts, Adapter Freedom) REPLACE their canonical counterparts; the four `## ADDED Requirements` (Architecture mechanical guard exists, Core adapter allowlist, Vendor SDK ambient types, Package dependency table is mechanically enforced) are appended. The `Package Dependencies` requirement table on the canonical spec MUST remain byte-identical for `@kaiord/docs` and `@kaiord/landing` rows - merge the `## ADDED Requirements` from `openspec/changes/guidelines-compliance-harden/specs/spa-quality-gates/spec.md` into `openspec/specs/spa-quality-gates/spec.md` (eight new requirements appended; existing toast/PII/Zustand requirements untouched) - update the `> Synced:` marker on BOTH canonical specs to `> Synced: <archive-date> (guidelines-compliance-harden)` (the archive-date is set in 5.8 and MUST match) - run `pnpm lint:specs` (zero violations)
 - [ ] 5.8 `/opsx-archive guidelines-compliance-harden` (sets `> Completed: YYYY-MM-DD` to today and moves to `openspec/changes/archive/YYYY-MM-DD-guidelines-compliance-harden/`); the `> Synced:` markers updated in 5.7 MUST equal the archive date
