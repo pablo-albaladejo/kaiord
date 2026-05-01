@@ -93,19 +93,21 @@ test.describe("Workout Library", () => {
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
       await page.getByRole("dialog").waitFor({ state: "hidden" });
 
-      // Act — visit the routed Library page; the editor still owns
-      // the active workout (Zustand retains in-session) so the CTA
-      // is gated-on and visible.
-      await page.goto("/library");
+      // Act — SPA-navigate to the routed Library page via the header
+      // button (a `page.goto('/library')` would full-reload and drop
+      // the Zustand current-workout state, hiding the CTA).
+      await page.getByRole("button", { name: /open workout library/i }).click();
+      await page.waitForURL(/\/library$/);
       await expect(page.getByTestId("library-page")).toBeVisible();
 
       const cta = page.getByTestId("card-load-into-editor").first();
       await cta.waitFor({ state: "visible" });
       await cta.click();
 
-      // After loading, navigate back to the editor and assert the
-      // step count reflects the loaded template.
-      await page.goto("/workout/new");
+      // The CTA loads the template into the store and SPA-navigates
+      // to /workout/new — no hard reload is required. Assert the
+      // editor mounts with the loaded steps.
+      await page.waitForURL(/\/workout\/new$/);
       await expect(page.getByTestId("step-card").first()).toBeVisible();
     });
 

@@ -206,9 +206,13 @@ test.describe("Calendar Workouts", () => {
     await page.waitForURL(new RegExp(`/workout/new\\?date=${dates[0]}`));
   });
 
-  test('EmptyDayDialog "Add from Library" navigates to /library', async ({
+  test('EmptyDayDialog "Add from Library" opens the in-flow template picker (no navigation)', async ({
     page,
   }) => {
+    // Per the SPA surface-classification rule (spec/spa-routing) the
+    // "Add from Library" affordance opens an in-flow picker dialog
+    // bound to the empty-day's date — it does NOT navigate to the
+    // routed /library page (which would lose the date context).
     const dates = getWeekDates();
     const weekId = getWeekId(dates[0]);
 
@@ -220,6 +224,7 @@ test.describe("Calendar Workouts", () => {
     await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
 
     await page.getByRole("button", { name: /Add from Library/i }).click();
-    await page.waitForURL(/\/library/);
+    await expect(page.getByTestId("template-picker-dialog")).toBeVisible();
+    expect(page.url()).toMatch(new RegExp(`/calendar/${weekId}$`));
   });
 });
