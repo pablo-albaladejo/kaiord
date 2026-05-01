@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { mapKrdTargetToGarmin } from "./target.mapper";
+import { mapKrdTargetToGarmin } from "./target.converter";
 import type { Target } from "@kaiord/core";
-import type { PaceZoneTable } from "./target.mapper";
+import type { PaceZoneTable } from "./target.converter";
 
 describe("mapKrdTargetToGarmin", () => {
   describe("pace zone resolution", () => {

@@ -36,17 +36,12 @@ const PACKAGES_ROOT = resolve(REPO_ROOT, "packages");
 const CONVERTER_RE = /\.converter\.(ts|tsx)$/;
 const CONVERTER_TEST_RE = /\.converter\.(test|spec)\.(ts|tsx)$/;
 
-// R-ConverterHasTests: must be empty before guidelines-compliance-harden archives.
-// Each entry MUST carry an inline comment naming (a) the rule ID, (b) the
-// offending converter file, (c) the planned drain PR.
-export const ALLOWLIST = new Set([
-  // R-ConverterHasTests | packages/zwo/src/adapters/krd-to-zwift.converter.ts | drained in PR3 (add tests)
-  "packages/zwo/src/adapters/krd-to-zwift.converter.ts",
-  // R-ConverterHasTests | packages/zwo/src/adapters/zwift-to-krd.converter.ts | drained in PR3
-  "packages/zwo/src/adapters/zwift-to-krd.converter.ts",
-  // R-ConverterHasTests | packages/garmin/src/adapters/converters/garmin-repetition.converter.ts | drained in PR3
-  "packages/garmin/src/adapters/converters/garmin-repetition.converter.ts",
-]);
+// R-ConverterHasTests: drained in PR3 of guidelines-compliance-harden.
+// The previously seeded entries (3 untested *.converter.ts files) were
+// resolved by adding co-located characterization tests. The set is
+// intentionally empty; new entries MUST NOT be added without an
+// OpenSpec amendment to the source-of-truth change.
+export const ALLOWLIST = new Set([]);
 
 function relForRule(file) {
   return relative(REPO_ROOT, file).replaceAll("\\", "/");
@@ -89,7 +84,7 @@ export function runCheck({ packagesRoot } = {}) {
         "*.converter.{ts,tsx} files MUST have a co-located " +
         `*.converter.test.{ts,tsx} sibling. Expected: ${rel.replace(
           CONVERTER_RE,
-          ".converter.test.ts"
+          ".converter.test.$1"
         )}`,
     });
   }

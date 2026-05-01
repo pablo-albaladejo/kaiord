@@ -7,7 +7,7 @@ import {
   mapGarminStrokeToKrd,
   strokeToFitValue,
 } from "../mappers/stroke.mapper";
-import { mapGarminTargetToKrd } from "../mappers/target.mapper";
+import { mapGarminTargetToKrd } from "../mappers/target.converter";
 import type { ParsedExecutableStep } from "../schemas/garmin-workout-parse.schema";
 
 export const mapExecutableStep = (

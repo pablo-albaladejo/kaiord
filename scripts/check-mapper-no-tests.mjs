@@ -35,25 +35,12 @@ const PACKAGES_ROOT = resolve(REPO_ROOT, "packages");
 
 const MAPPER_TEST_RE = /\.mapper\.(test|spec)\.(ts|tsx)$/;
 
-// R-MapperNoTests: must be empty before guidelines-compliance-harden archives.
-// Each entry MUST carry an inline comment naming (a) the rule ID, (b) the
-// offending file, (c) the planned drain PR.
-export const ALLOWLIST = new Set([
-  // R-MapperNoTests | packages/garmin/src/adapters/mappers/target.mapper.test.ts | drained in PR3 (rename to *.converter.ts)
-  "packages/garmin/src/adapters/mappers/target.mapper.test.ts",
-  // R-MapperNoTests | packages/fit/src/adapters/krd-to-fit/krd-to-fit-target-power.mapper.test.ts | drained in PR3
-  "packages/fit/src/adapters/krd-to-fit/krd-to-fit-target-power.mapper.test.ts",
-  // R-MapperNoTests | packages/fit/src/adapters/krd-to-fit/krd-to-fit-target-heart-rate.mapper.test.ts | drained in PR3
-  "packages/fit/src/adapters/krd-to-fit/krd-to-fit-target-heart-rate.mapper.test.ts",
-  // R-MapperNoTests | packages/fit/src/adapters/krd-to-fit/krd-to-fit-metadata.mapper.test.ts | drained in PR3
-  "packages/fit/src/adapters/krd-to-fit/krd-to-fit-metadata.mapper.test.ts",
-  // R-MapperNoTests | packages/tcx/src/adapters/target/tcx-to-krd.mapper.test.ts | drained in PR3
-  "packages/tcx/src/adapters/target/tcx-to-krd.mapper.test.ts",
-  // R-MapperNoTests | packages/tcx/src/adapters/duration/duration.mapper.test.ts | drained in PR3
-  "packages/tcx/src/adapters/duration/duration.mapper.test.ts",
-  // R-MapperNoTests | packages/workout-spa-editor/src/adapters/train2go/coaching-record-to-activity.mapper.test.ts | drained in PR3
-  "packages/workout-spa-editor/src/adapters/train2go/coaching-record-to-activity.mapper.test.ts",
-]);
+// R-MapperNoTests: drained in PR3 of guidelines-compliance-harden. The
+// previously seeded entries (7 *.mapper.test.{ts,tsx} files) were
+// resolved by renaming each pair to *.converter.{ts,tsx}. The set is
+// intentionally empty; new entries MUST NOT be added without an
+// OpenSpec amendment to the source-of-truth change.
+export const ALLOWLIST = new Set([]);
 
 function relForRule(file) {
   return relative(REPO_ROOT, file).replaceAll("\\", "/");
