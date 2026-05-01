@@ -97,13 +97,12 @@ const AMBIENT_MODULE_RE = /declare\s+module\s+["']([^"']+)["']/g;
 const PORT_RUNTIME_RE =
   /^(?:export\s+)?(?:async\s+)?(?:function\s+\w|class\s+\w|let\s+\w|var\s+\w|const\s+\w+\s*=\s*(?!\(|<))/m;
 
-// R-ArchCoreAmbientTypes: must be empty before guidelines-compliance-harden archives.
-// Each entry MUST carry an inline comment naming (a) the rule ID, (b) the
-// offending file, (c) the planned drain PR.
-export const ALLOWLIST = new Set([
-  // R-ArchCoreAmbientTypes | packages/core/src/types/garmin-fitsdk.d.ts | drained in PR2 (move to packages/fit/src/types/)
-  "packages/core/src/types/garmin-fitsdk.d.ts",
-]);
+// R-ArchCoreAmbientTypes: drained in PR2 of guidelines-compliance-harden
+// (the garmin-fitsdk.d.ts ambient declaration was duplicated under
+// packages/fit/src/types/ and the redundant copy under packages/core/src/types/
+// was deleted). To re-seed this allowlist, propose an OpenSpec amendment
+// per R-AllowlistsEmpty.
+export const ALLOWLIST = new Set([]);
 
 function safeStat(p) {
   try {
