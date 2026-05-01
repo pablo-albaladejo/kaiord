@@ -51,6 +51,7 @@ export default function CalendarPage() {
         onCloseWorkout={() => s.setSelectedWorkout(null)}
         onCloseDay={() => s.setEmptyDayDate(null)}
         onCloseCoaching={() => setSelectedActivity(null)}
+        expandActivity={coaching.expandActivity}
       />
     </div>
   );

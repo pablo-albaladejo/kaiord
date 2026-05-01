@@ -61,6 +61,9 @@ importers:
       eslint-plugin-boundaries:
         specifier: ^6.0.2
         version: 6.0.2(eslint@10.2.1(jiti@2.6.1))
+      eslint-plugin-react-hooks:
+        specifier: ^7.1.1
+        version: 7.1.1(eslint@10.2.1(jiti@2.6.1))
       eslint-plugin-simple-import-sort:
         specifier: ^13.0.0
         version: 13.0.0(eslint@10.2.1(jiti@2.6.1))
