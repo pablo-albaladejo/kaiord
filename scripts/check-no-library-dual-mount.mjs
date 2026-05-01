@@ -106,9 +106,7 @@ function stripExt(spec) {
 
 function specifierMatchesSuspect(spec) {
   const noExt = stripExt(spec);
-  return SUSPECT_PATHS.some(
-    (p) => noExt === p || noExt.endsWith(`/${p}`)
-  );
+  return SUSPECT_PATHS.some((p) => noExt === p || noExt.endsWith(`/${p}`));
 }
 
 function extractImportSpecs(source) {

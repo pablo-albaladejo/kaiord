@@ -65,7 +65,10 @@ describe("check-no-library-dual-mount", () => {
     // Assert
     assert.equal(violations.length, 1);
     assert.match(violations[0].file, /StealthLibrary\.tsx$/);
-    assert.match(violations[0].spec, /organisms\/WorkoutLibrary\/WorkoutLibrary$/);
+    assert.match(
+      violations[0].spec,
+      /organisms\/WorkoutLibrary\/WorkoutLibrary$/
+    );
   });
 
   test("flags an importer of the WorkoutLibrary barrel", () => {
