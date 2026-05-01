@@ -5,9 +5,12 @@ import { resolve } from "node:path";
 // Server-driven SPA fallback for GitHub Pages-equivalent hosts:
 // - Append a redirect script to `<dir>/404.html` that captures any /editor/*
 //   deep link into a ?p= query and bounces to /editor/?p=...
+// - Also bounce a closed allowlist of legacy SPA routes (`/calendar`,
+//   `/library`, `/workout/...`) to their `/editor/<path>` equivalent so
+//   bookmarks made before the wouter base alignment fix keep working.
 // - Inject a decoder snippet at the top of `<dir>/editor/index.html` <head>
 //   that runs synchronously before React boots, restoring the original URL
-//   via history.replaceState. Non-/editor/* 404s fall through unchanged.
+//   via history.replaceState. Other 404s fall through unchanged.
 //
 // This helper is the single source of truth shared by the deploy workflow
 // (.github/workflows/deploy-site.yml) and the production-base e2e fixture
@@ -17,11 +20,24 @@ const REDIRECT_SCRIPT = `
 <script>
   (function () {
     var l = window.location;
-    if (l.pathname.indexOf('/editor/') === 0) {
+    var p = l.pathname;
+    if (p.indexOf('/editor/') === 0) {
       l.replace(
         l.protocol + '//' + l.host +
           '/editor/?p=' +
-          encodeURIComponent(l.pathname + l.search) +
+          encodeURIComponent(p + l.search) +
+          l.hash
+      );
+      return;
+    }
+    // Legacy bookmarks: match the SPA's top-level wouter routes at root.
+    // Allowlist is intentionally narrow so unrelated 404s still surface
+    // the landing's blue 404 page.
+    if (/^\\/(calendar(\\/|$)|library$|workout(\\/|$))/.test(p)) {
+      l.replace(
+        l.protocol + '//' + l.host +
+          '/editor/?p=' +
+          encodeURIComponent('/editor' + p + l.search) +
           l.hash
       );
     }
