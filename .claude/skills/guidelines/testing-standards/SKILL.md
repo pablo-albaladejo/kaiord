@@ -52,11 +52,25 @@ Always import fixtures from `@kaiord/core/test-utils`. Never re-implement fixtur
 
 ## Never skip a test
 
-Never skip a test unconditionally. If a test fails, fix the code or update the test to reflect a deliberate behavior change — never silence it. The only acceptable form of skipping is a runtime-evaluated `*.skipIf(<expr>)` whose argument depends on the environment (e.g., `process.env.X`, `typeof window !== "undefined"`).
+Never skip a test unconditionally. If a test fails, fix the code or update the test to reflect a deliberate behavior change — never silence it. The acceptable forms of skipping are:
+
+1. A runtime-evaluated `*.skipIf(<expr>)` whose argument depends on the environment (e.g., `process.env.X`, `typeof window !== "undefined"`).
+2. A `*.todo(...)` call with an immediately-preceding `// TODO(YYYY-MM-DD): reason` comment whose deadline is not yet expired (Vitest's planned-test convention with a hard deadline). When the deadline passes, CI fails until the test is implemented or the deadline is extended via PR.
 
 Enforcement: `scripts/check-no-unconditional-skip.mjs` (R-NoUnconditionalSkip).
 
-The regex-based check covers two dispatch shapes mechanically: member (`it.skip("...", fn)`) and computed-member (`it["skip"]("...", fn)`). The destructured form (`const { skip } = it; skip("...", fn)`) and re-bound form (`const my = it; my.skip("...", fn)`) are documented residual risk — vanishingly rare in practice, not detected by the regex; if a contributor introduces one in the wild, file an issue and tighten the rule. The conditional `it.skipIf(<expr>)` form is allowed only when `<expr>` contains at least one `Identifier`, `MemberExpression`, `CallExpression`, or `NewExpression` node — literal-only arguments (e.g., `skipIf(true)`, `skipIf(!!1)`, ``skipIf(`true`)``) are rejected as functionally equivalent to unconditional skip.
+The check covers four dispatch shapes mechanically:
+
+1. **Member**: `it.skip("...", fn)` / `test.only(...)` / `describe.todo(...)`.
+2. **Computed-member**: `it["skip"]("...", fn)`, `test["only"](...)`, `describe["todo"](...)`.
+3. **Destructured**: `const { skip } = it; skip("...", fn);` and renames `const { only: myOnly } = test;` (depth-1).
+4. **Re-bound**: `const my = it; my.skip("...", fn);` (depth-1).
+
+Chain re-binds (e.g., `const my = it; const { skip } = my; skip(...)`) remain documented residual risk — vanishingly rare in practice and not depth-1.
+
+The conditional `it.skipIf(<expr>)` form is allowed only when `<expr>` contains at least one `Identifier`, `MemberExpression`, `CallExpression`, or `NewExpression` node — literal-only arguments (e.g., `skipIf(true)`, `skipIf(!!1)`, ``skipIf(`true`)``) are rejected as functionally equivalent to unconditional skip. The same literal-only rejection applies to `skipIf` accessed through destructured or re-bound aliases.
+
+The `*.todo` deadline allowance is recognized only when the comment is on the line **immediately above** the call (no blank line between). The date format is strictly `YYYY-MM-DD`. Once the deadline passes, the rule fails CI with the exact expired date in the message.
 
 ## Test output capture
 
