@@ -19,11 +19,16 @@ const SNAPSHOT_LENGTH_LIMIT = 8192;
 
 const FORBIDDEN_KEYS = new Set(["__proto__", "constructor", "prototype"]);
 
-const containsPollutedKey = (input: unknown): boolean => {
+const containsPollutedKey = (
+  input: unknown,
+  visited: WeakSet<object> = new WeakSet()
+): boolean => {
   if (input === null || typeof input !== "object") return false;
+  if (visited.has(input)) return false;
+  visited.add(input);
   for (const key of Object.getOwnPropertyNames(input)) {
     if (FORBIDDEN_KEYS.has(key)) return true;
-    if (containsPollutedKey((input as Record<string, unknown>)[key]))
+    if (containsPollutedKey((input as Record<string, unknown>)[key], visited))
       return true;
   }
   return false;
