@@ -77,6 +77,24 @@ describe("profileSnapshotSchema — negative fixtures", () => {
     ).toBeUndefined();
   });
 
+  it("rejects payloads with circular references", () => {
+    const circular: Record<string, unknown> = {
+      schemaVersion: 1,
+      profile: { name: "x" },
+      generatedAt: "2026-05-01T00:00:00.000Z",
+    };
+    circular.self = circular;
+
+    const result = profileSnapshotSchema.safeParse(circular);
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(JSON.stringify(result.error.issues)).toMatch(
+        /invalid snapshot payload/i
+      );
+    }
+  });
+
   it("rejects payloads whose JSON serialization exceeds 8192 code units", () => {
     const oversized = {
       schemaVersion: 1 as const,
