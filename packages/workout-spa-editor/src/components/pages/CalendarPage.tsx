@@ -40,12 +40,8 @@ export default function CalendarPage() {
   useCoachingAutoSync(coaching.syncSources, s.data.days[0]);
   const [selectedActivity, setSelectedActivity] =
     useState<CoachingActivity | null>(null);
-  const activeProfile = useActiveProfileLive();
-  const profileId = activeProfile?.id ?? null;
+  const profileId = useActiveProfileLive()?.id ?? null;
   const rawMatched = useMatchedSessions(profileId, s.data.days);
-  // Stabilize the empty-array fallback so downstream useMemo deps
-  // don't see a fresh `[]` reference on every render.
-  const matched = useMemo(() => rawMatched ?? [], [rawMatched]);
   const prefs = useUserPreferences({
     profileId,
     defaultDensity: viewportDefaultDensity(),
@@ -56,9 +52,9 @@ export default function CalendarPage() {
         days: s.data.days,
         workoutsByDay: s.data.workoutsByDay,
         coachingByDay: coaching.byDay,
-        matched,
+        matched: rawMatched ?? [],
       }),
-    [s.data.days, s.data.workoutsByDay, coaching.byDay, matched]
+    [s.data.days, s.data.workoutsByDay, coaching.byDay, rawMatched]
   );
   const handleDensityChange = useSetCalendarDensity(profileId);
 
