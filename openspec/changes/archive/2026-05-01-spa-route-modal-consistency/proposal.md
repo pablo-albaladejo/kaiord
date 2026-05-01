@@ -1,3 +1,5 @@
+> Completed: 2026-05-01
+
 ## Why
 
 The SPA editor's Library surface today exists as **two parallel implementations** that have drifted:
