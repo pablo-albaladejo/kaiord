@@ -12,6 +12,9 @@ import {
   planDurationText,
 } from "./matched-session-text";
 
+const hasFiniteCompliance = (score: number | null): score is number =>
+  score !== null && Number.isFinite(score);
+
 export const renderTitleRow = (s: MatchedSession) => (
   <>
     <span role="img" aria-label={s.activity.sport.label}>
@@ -25,7 +28,7 @@ export const renderComfortableMetadata = (s: MatchedSession) => (
   <>
     <span className="text-[10px] text-slate-500">Plan ·</span>
     <span>{planDurationText(s)}</span>
-    {s.complianceScore !== null && (
+    {hasFiniteCompliance(s.complianceScore) && (
       <span className="ml-auto text-[10px] text-slate-600">
         {formatPercent(s.complianceScore)}
       </span>
@@ -43,7 +46,7 @@ export const renderComfortableSecondary = (s: MatchedSession) => (
 export const renderCompactMetadata = (s: MatchedSession) => (
   <>
     <span>{actualDurationText(s)}</span>
-    {s.complianceScore !== null && (
+    {hasFiniteCompliance(s.complianceScore) && (
       <span className="ml-auto text-[10px] text-slate-600">
         {formatPercent(s.complianceScore)}
       </span>
