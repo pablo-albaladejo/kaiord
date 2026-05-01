@@ -68,8 +68,8 @@ Then §5 final-validation block runs and the change is archived.
 
 ### 1.7 Commit-format gate
 
-- [ ] 1.7.1 add devDeps `@commitlint/cli` and `@commitlint/config-conventional` at the repo root (`pnpm add -Dw @commitlint/cli @commitlint/config-conventional`)
-- [ ] 1.7.2 create `commitlint.vocab.mjs` exporting:
+- [x] 1.7.1 add devDeps `@commitlint/cli` and `@commitlint/config-conventional` at the repo root (`pnpm add -Dw @commitlint/cli @commitlint/config-conventional`)
+- [x] 1.7.2 create `commitlint.vocab.mjs` exporting:
       ```js
       export const TYPE_ENUM = ["feat","fix","chore","test","docs","refactor","perf"];
       export const SCOPE_ENUM = [
@@ -81,8 +81,8 @@ Then §5 final-validation block runs and the change is archived.
       ];
       ```
       Order is normative (alphabetical-by-tier; the test asserts array-equality, not Set-equality)
-- [ ] 1.7.3 create `commitlint.config.mjs` importing `TYPE_ENUM` and `SCOPE_ENUM` from `commitlint.vocab.mjs`. The config explicitly preserves `@commitlint/config-conventional` default single-scope behavior (no multi-scope opt-in). Per design D2, multi-scope subjects MUST be rejected
-- [ ] 1.7.4 update `.claude/skills/guidelines/git-strategy/SKILL.md`: REPLACE the existing scope list at lines 24-28 with a fenced markdown block bracketed by `<!-- commitlint-source-of-truth:start -->` and `<!-- commitlint-source-of-truth:end -->`. The block uses a STRICTLY MACHINE-READABLE shape: one entry per line, no prefixes, no indentation, blank lines and lines starting with `#` are comments and ignored by the parser. Section headers `# types` and `# scopes` separate the two arrays. The block contents MUST be EXACTLY (line-for-line, order-preserved):
+- [x] 1.7.3 create `commitlint.config.mjs` importing `TYPE_ENUM` and `SCOPE_ENUM` from `commitlint.vocab.mjs`. The config explicitly preserves `@commitlint/config-conventional` default single-scope behavior (no multi-scope opt-in). Per design D2, multi-scope subjects MUST be rejected
+- [x] 1.7.4 update `.claude/skills/guidelines/git-strategy/SKILL.md`: REPLACE the existing scope list at lines 24-28 with a fenced markdown block bracketed by `<!-- commitlint-source-of-truth:start -->` and `<!-- commitlint-source-of-truth:end -->`. The block uses a STRICTLY MACHINE-READABLE shape: one entry per line, no prefixes, no indentation, blank lines and lines starting with `#` are comments and ignored by the parser. Section headers `# types` and `# scopes` separate the two arrays. The block contents MUST be EXACTLY (line-for-line, order-preserved):
 
       ```
       # types
@@ -122,7 +122,7 @@ Then §5 final-validation block runs and the change is archived.
       ```
 
       Add an explicit note above the block: "Source of truth: `commitlint.vocab.mjs` + this block. Drift between the two (insertion, deletion, or reorder) fails CI via `scripts/check-commitlint-config.test.mjs`."
-- [ ] 1.7.5 write `scripts/check-commitlint-config.test.mjs` (`node:test`): (a) parse the `<!-- commitlint-source-of-truth -->` block from `git-strategy/SKILL.md` with a trivial line-by-line parser — strip blank lines, strip lines starting with `#` BUT use the `# types`/`# scopes` markers as section separators; emit two arrays in document order; (b) dynamically import `commitlint.vocab.mjs`; (c) `assert.deepStrictEqual(parsedTypes, TYPE_ENUM)` and `assert.deepStrictEqual(parsedScopes, SCOPE_ENUM)` (array-equality, order-sensitive); (d) pipe four subjects through `pnpm exec commitlint` and assert exit codes:
+- [x] 1.7.5 write `scripts/check-commitlint-config.test.mjs` (`node:test`): (a) parse the `<!-- commitlint-source-of-truth -->` block from `git-strategy/SKILL.md` with a trivial line-by-line parser — strip blank lines, strip lines starting with `#` BUT use the `# types`/`# scopes` markers as section separators; emit two arrays in document order; (b) dynamically import `commitlint.vocab.mjs`; (c) `assert.deepStrictEqual(parsedTypes, TYPE_ENUM)` and `assert.deepStrictEqual(parsedScopes, SCOPE_ENUM)` (array-equality, order-sensitive); (d) pipe four subjects through `pnpm exec commitlint` and assert exit codes:
       - `chore(openspec): archive cleanup-may-2026` → exit 0
       - `feat(banana): add new flow` → non-zero (unknown scope)
       - `openspec: archive cleanup-may-2026` → non-zero (TYPE not allowed)
@@ -131,24 +131,24 @@ Then §5 final-validation block runs and the change is archived.
       Parser tests: include a positive fixture (the canonical block) and three negative fixtures stressing parser correctness — block with extra blank lines (still parses correctly), block with extra non-`#` comment line (parser treats it as a list item, test FAILS — this is the desired strict behavior), block with reordered entries (test FAILS via `deepStrictEqual`). The parser MUST be ≤ 30 lines and unit-tested in isolation.
       
       Subprocess strategy for the four commit-subject pipes: invoke `node_modules/.bin/commitlint` directly (NOT `pnpm exec commitlint`) to avoid the 200-500ms `pnpm`-wrapper overhead per call. Total target latency for the four pipes: ≤ 1 second. Use `node:child_process.spawnSync` with `{ input: subject, encoding: 'utf8' }` — synchronous (the test is short and sequential ordering is fine). Document this choice at the top of the test file
-- [ ] 1.7.6 add `.husky/commit-msg` running `pnpm exec commitlint --edit "$1"`; mark executable; verify the file contains no imperative-voice bypass instruction (the `R-NoBypassHint` rule applies to ALL `.husky/*` files including this new one — defensive comments are still allowed)
-- [ ] 1.7.7 wire `scripts/check-commitlint-config.test.mjs` into `pnpm test:scripts`
+- [x] 1.7.6 add `.husky/commit-msg` running `pnpm exec commitlint --edit "$1"`; mark executable; verify the file contains no imperative-voice bypass instruction (the `R-NoBypassHint` rule applies to ALL `.husky/*` files including this new one — defensive comments are still allowed)
+- [x] 1.7.7 wire `scripts/check-commitlint-config.test.mjs` into `pnpm test:scripts`
 
 ### 1.8 Husky pre-commit hygiene & ordering
 
 - [x] 1.8.1 reorder `.husky/pre-commit` so `pnpm test:scripts` runs BEFORE `pnpm test`. The new order is: build → tsc --noEmit → test:scripts → test → (no further scripts:tests step). This guarantees `it.only` is rejected before the test runner can mask the suite
 - [x] 1.8.2 remove from `.husky/pre-commit` every imperative-voice instruction line containing `--no-verify` or `HUSKY=0` (e.g., `echo "To skip: git commit --no-verify"`). The hook still fails the same way; only the bypass hint is gone. The `R-NoBypassHint` script in 1.6 enforces this invariant going forward (defensive comments such as `# NEVER use --no-verify; CI re-runs all checks` are kept and explicitly allowed by the rule)
 - [ ] 1.8.3 manual smoke: `git commit --allow-empty -m "chore(scripts): hook hygiene smoke" 2>&1 | tee /tmp/hook-out.txt`; assert NO imperative-voice bypass instruction appears in the output (run `scripts/check-husky-no-bypass-hint.mjs --dry-run` for a JSON enumeration as a cross-check)
-- [ ] 1.8.4 add `scripts/check-allowlists-empty.mjs` + `scripts/check-allowlists-empty.test.mjs` (RED → GREEN → wire-in subsequence below):
-  - [ ] 1.8.4a write failing test `scripts/check-allowlists-empty.test.mjs` (RED): positive (REJECT in `--mode=error`) fixtures: `export const ALLOWLIST = new Set(["packages/X/Y.ts"])`, plus a stress fixture with a path containing brackets `export const ALLOWLIST = new Set(["packages/landing/src/pages/[slug].ts"])` (must still be flagged). Negative (ALLOW) fixtures: `export const ALLOWLIST = new Set()`, `export const ALLOWLIST = new Set([])` (both empty forms), AND a comment fixture: `// historical: ALLOWLIST = new Set(["X"]) was the old form` (must NOT be flagged — comments mentioning the rule are not violations)
-  - [ ] 1.8.4b implement `scripts/check-allowlists-empty.mjs` (GREEN): glob `scripts/check-*.mjs` (excluding the script itself and any `*.test.mjs`); strip line comments (`//.*$`) and block comments (`/\*[\s\S]*?\*/`) from the file source before regex matching, so commentary about the rule is not flagged as a violation. Match `^(?:\s*export\s+)?const\s+ALLOWLIST\s*=\s*new\s+Set\(\s*\[\s*['"]/m` — anchored on a real `const` declaration, requires the opening quote of a string entry after `[`, so `new Set([])` (empty array) does NOT match while `new Set(["X"])` DOES, regardless of whether `"X"` itself contains `]`. Rule ID `R-AllowlistsEmpty`. Support `--mode=warn` (exit 0, prints warnings) and `--mode=error` (default; exit non-zero on any match)
-  - [ ] 1.8.4c wire into `pnpm test:scripts` (default `--mode=error`) and `pnpm lint`. The script is wired into PR1 but its first run will FAIL because PR1 seeds non-empty allowlists for the audit-snapshot violations — therefore the script SHALL be invoked with `--mode=warn` during PR1, PR2, PR3 (override at the call site), then flipped to default `--mode=error` at the start of task 5.5 in the final validation block. Document this two-mode lifecycle in the script header. Once flipped at archive time, the script enforces the permanent invariant: no future PR may re-seed any drained allowlist without an OpenSpec amendment to this change
+- [x] 1.8.4 add `scripts/check-allowlists-empty.mjs` + `scripts/check-allowlists-empty.test.mjs` (RED → GREEN → wire-in subsequence below):
+  - [x] 1.8.4a write failing test `scripts/check-allowlists-empty.test.mjs` (RED): positive (REJECT in `--mode=error`) fixtures: `export const ALLOWLIST = new Set(["packages/X/Y.ts"])`, plus a stress fixture with a path containing brackets `export const ALLOWLIST = new Set(["packages/landing/src/pages/[slug].ts"])` (must still be flagged). Negative (ALLOW) fixtures: `export const ALLOWLIST = new Set()`, `export const ALLOWLIST = new Set([])` (both empty forms), AND a comment fixture: `// historical: ALLOWLIST = new Set(["X"]) was the old form` (must NOT be flagged — comments mentioning the rule are not violations)
+  - [x] 1.8.4b implement `scripts/check-allowlists-empty.mjs` (GREEN): glob `scripts/check-*.mjs` (excluding the script itself and any `*.test.mjs`); strip line comments (`//.*$`) and block comments (`/\*[\s\S]*?\*/`) from the file source before regex matching, so commentary about the rule is not flagged as a violation. Match `^(?:\s*export\s+)?const\s+ALLOWLIST\s*=\s*new\s+Set\(\s*\[\s*['"]/m` — anchored on a real `const` declaration, requires the opening quote of a string entry after `[`, so `new Set([])` (empty array) does NOT match while `new Set(["X"])` DOES, regardless of whether `"X"` itself contains `]`. Rule ID `R-AllowlistsEmpty`. Support `--mode=warn` (exit 0, prints warnings) and `--mode=error` (default; exit non-zero on any match)
+  - [x] 1.8.4c wire into `pnpm test:scripts` (default `--mode=error`) and `pnpm lint`. The script is wired into PR1 but its first run will FAIL because PR1 seeds non-empty allowlists for the audit-snapshot violations — therefore the script SHALL be invoked with `--mode=warn` during PR1, PR2, PR3 (override at the call site), then flipped to default `--mode=error` at the start of task 5.5 in the final validation block. Document this two-mode lifecycle in the script header. Once flipped at archive time, the script enforces the permanent invariant: no future PR may re-seed any drained allowlist without an OpenSpec amendment to this change
 
 ### 1.9 CI backstop
 
-- [ ] 1.9.1 inspect `.github/workflows/ci.yml`; if `pnpm test:scripts` is already a step (it is — confirmed at audit time), no change needed for that gate
-- [ ] 1.9.2 add a `commitlint` step to `.github/workflows/ci.yml` running `pnpm exec commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}"` on every pull_request event so `--no-verify`-bypassed commits are caught at merge time
-- [ ] 1.9.3 verify on a draft PR by deliberately committing a `feat(banana): x` with `--no-verify` and confirming the CI commitlint step fails
+- [x] 1.9.1 inspect `.github/workflows/ci.yml`; if `pnpm test:scripts` is already a step (it is — confirmed at audit time), no change needed for that gate
+- [x] 1.9.2 add a `commitlint` step to `.github/workflows/ci.yml` running `pnpm exec commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}"` on every pull_request event so `--no-verify`-bypassed commits are caught at merge time
+- [x] 1.9.3 verify on a draft PR by deliberately committing a `feat(banana): x` with `--no-verify` and confirming the CI commitlint step fails
 
 ### 1.10 PR1 close-out
 
