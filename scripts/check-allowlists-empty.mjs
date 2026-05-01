@@ -13,8 +13,9 @@
  * informational). At task 5.5 in the final-validation block, the call
  * site is flipped to default `--mode=error` (exit non-zero on any match).
  *
- * Implementation: glob scripts/check-*.mjs (excluding self + any
- * *.test.mjs); strip line + block comments before regex match (so
+ * Implementation: glob scripts/check-*.mjs (excluding self, *.test.mjs,
+ * and the OUT_OF_SCOPE list of pre-existing guards governed by their own
+ * change history); strip line + block comments before regex match (so
  * documentation about the rule does not trigger); regex anchors on a
  * real `const ALLOWLIST = new Set([` declaration followed by an opening
  * quote of a string entry. `new Set()` (no array literal) and
@@ -44,6 +45,16 @@ const LINE_COMMENT_RE = /(^|[^:])\/\/[^\n]*/g;
 
 const SELF = "check-allowlists-empty.mjs";
 
+// Pre-existing guards outside the guidelines-compliance-harden source-of-truth
+// set. Their allowlists are governed by their own change history, not by the
+// "every drained allowlist stays empty" invariant this guard enforces.
+const OUT_OF_SCOPE = new Set([
+  // Zustand write-through guard predates guidelines-compliance-harden; its
+  // single allowlist entry documents an explicit user-action writer pending
+  // a separate migration.
+  "check-no-zustand-writethrough.mjs",
+]);
+
 function relForRule(file) {
   return relative(REPO_ROOT, file).replaceAll("\\", "/");
 }
@@ -65,6 +76,7 @@ function listCheckScripts(dir) {
     if (!entry.name.endsWith(".mjs")) continue;
     if (entry.name.endsWith(".test.mjs")) continue;
     if (entry.name === SELF) continue;
+    if (OUT_OF_SCOPE.has(entry.name)) continue;
     out.push(join(dir, entry.name));
   }
   return out;

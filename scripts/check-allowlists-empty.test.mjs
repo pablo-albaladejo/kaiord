@@ -115,13 +115,24 @@ describe("scope", () => {
   });
 });
 
+describe("scope — out-of-scope pre-existing guards", () => {
+  test("ignores check-no-zustand-writethrough.mjs even when ALLOWLIST is non-empty", () => {
+    write(
+      "check-no-zustand-writethrough.mjs",
+      `export const ALLOWLIST = new Set(["X"]);\n`
+    );
+
+    const v = runCheck({ scriptsDir: sandbox });
+
+    assert.equal(v.length, 0);
+  });
+});
+
 describe("real scripts/ directory", () => {
-  test("runs against real scripts/ dir (warn mode expected during PR1)", () => {
-    // Real scripts/ has multiple non-empty ALLOWLISTs during PR1 (mapper,
-    // converter, no-skip, architecture). They are expected.
+  test("runs against real scripts/ dir and is empty after guidelines-compliance-harden archives", () => {
+    // After PR4, every in-scope check-*.mjs has an empty ALLOWLIST. Pre-
+    // existing out-of-scope guards (e.g., zustand-writethrough) are excluded.
     const v = runCheck();
-    // Just exercise the function — don't assert count, since it depends
-    // on PR phase. Sanity: must not throw.
-    assert.ok(Array.isArray(v));
+    assert.deepEqual(v, []);
   });
 });

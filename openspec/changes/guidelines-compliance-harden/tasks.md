@@ -253,60 +253,60 @@ For each rename (3.1–3.7), the cycle is: rename source + rename test + update 
 
 For each of the three skipped sites (lines 89, 99, 113), the cycle is RED → GREEN → REFACTOR with a contingency: if un-skipping the test passes immediately on first run (i.e., the underlying fixture/setup issue was already fixed by an unrelated change in the meantime), collapse RED+GREEN into a single combined checkbox marked "characterization-on-un-skip" and proceed to REFACTOR if needed. Otherwise apply the full RED/GREEN/REFACTOR cycle.
 
-- [ ] 4.1.1 line 89: flip `it.skip` → `it`; if the test fails (RED), fix the underlying drag-and-drop / `userEvent` setup issue (GREEN); if it passes immediately, mark as characterization-on-un-skip
-- [ ] 4.1.2 line 89: refactor the test for AAA clarity if needed (REFACTOR)
-- [ ] 4.1.3 line 99: same flow as 4.1.1
-- [ ] 4.1.4 line 99: REFACTOR
-- [ ] 4.1.5 line 113: same flow as 4.1.1
-- [ ] 4.1.6 line 113: REFACTOR
-- [ ] 4.1.7 `pnpm --filter @kaiord/workout-spa-editor test packages/workout-spa-editor/src/components/pages/CalendarPage.test.tsx` passes (zero skips)
+- [x] 4.1.1 line 89: flip `it.skip` → `it`; if the test fails (RED), fix the underlying drag-and-drop / `userEvent` setup issue (GREEN); if it passes immediately, mark as characterization-on-un-skip
+- [x] 4.1.2 line 89: refactor the test for AAA clarity if needed (REFACTOR)
+- [x] 4.1.3 line 99: same flow as 4.1.1
+- [x] 4.1.4 line 99: REFACTOR
+- [x] 4.1.5 line 113: same flow as 4.1.1
+- [x] 4.1.6 line 113: REFACTOR
+- [x] 4.1.7 `pnpm --filter @kaiord/workout-spa-editor test packages/workout-spa-editor/src/components/pages/CalendarPage.test.tsx` passes (zero skips)
 
 ### 4.2 json-parser.test.ts:462 perf complexity (path-(b) replacement per `R-NoUnconditionalSkip`)
 
 This task takes path (b) of the `R-NoUnconditionalSkip` requirement: "moved to a separate non-skipped fast-path test". Production code is NOT touched.
 
-- [ ] 4.2.1 read the existing `it.skip` block to understand what it intended to test
-- [ ] 4.2.2 write a deterministic three-input fast-path test that asserts ONLY what is currently true about `json-parser` (output equality on three increasing inputs, e.g., 100/200/400 tokens). Do NOT assert any timing budget — adding a perf budget is a separate change. The new test must pass against the CURRENT implementation without any production-code changes
-- [ ] 4.2.3 REPLACE (not merely delete) the existing `it.skip` block with the new fast-path test from 4.2.2
-- [ ] 4.2.4 verify `pnpm --filter @kaiord/workout-spa-editor test packages/workout-spa-editor/src/utils/json-parser.test.ts` passes; no production file is touched
+- [x] 4.2.1 read the existing `it.skip` block to understand what it intended to test
+- [x] 4.2.2 write a deterministic three-input fast-path test that asserts ONLY what is currently true about `json-parser` (output equality on three increasing inputs, e.g., 100/200/400 tokens). Do NOT assert any timing budget — adding a perf budget is a separate change. The new test must pass against the CURRENT implementation without any production-code changes
+- [x] 4.2.3 REPLACE (not merely delete) the existing `it.skip` block with the new fast-path test from 4.2.2
+- [x] 4.2.4 verify `pnpm --filter @kaiord/workout-spa-editor test packages/workout-spa-editor/src/utils/json-parser.test.ts` passes; no production file is touched
 
 ### 4.3 xsd-validator.test.ts:47 Node-only
 
-- [ ] 4.3.1 replace `it.skip("should use XSD validator in Node.js environment", ...)` with `it.skipIf(typeof window !== "undefined", ...)` so the test runs unconditionally in Node CI and skips cleanly in browser-mode runs
-- [ ] 4.3.2 verify the test passes locally with `pnpm --filter @kaiord/zwo test`; the `R-NoUnconditionalSkip` script accepts this form because `typeof window !== "undefined"` is a runtime-evaluated expression
+- [x] 4.3.1 replace `it.skip("should use XSD validator in Node.js environment", ...)` with `it.skipIf(typeof window !== "undefined", ...)` so the test runs unconditionally in Node CI and skips cleanly in browser-mode runs
+- [x] 4.3.2 verify the test passes locally with `pnpm --filter @kaiord/zwo test`; the `R-NoUnconditionalSkip` script accepts this form because `typeof window !== "undefined"` is a runtime-evaluated expression
 
 ### 4.4 Drain no-unconditional-skip allowlist
 
-- [ ] 4.4.1 set `ALLOWLIST` in `scripts/check-no-unconditional-skip.mjs` to `new Set()` (empty)
-- [ ] 4.4.2 `pnpm test:scripts` passes (only `*.skipIf(<runtime-expr>)` patterns remain)
+- [x] 4.4.1 set `ALLOWLIST` in `scripts/check-no-unconditional-skip.mjs` to `new Set()` (empty)
+- [x] 4.4.2 `pnpm test:scripts` passes (only `*.skipIf(<runtime-expr>)` patterns remain)
 
 ### 4.5 Translate fixtures README to English
 
-- [ ] 4.5.1 translate `packages/core/src/tests/fixtures/README.md` to English (preserve markdown structure and any code-block content unchanged)
-- [ ] 4.5.2 `pnpm lint:specs` and `pnpm lint:archive` still pass
+- [x] 4.5.1 translate `packages/core/src/tests/fixtures/README.md` to English (preserve markdown structure and any code-block content unchanged)
+- [x] 4.5.2 `pnpm lint:specs` and `pnpm lint:archive` still pass
 
 ### 4.6 Update guideline docs (5 files)
 
-- [ ] 4.6.1 update `.claude/skills/guidelines/architecture-hexagonal/SKILL.md`: replace every `check-architecture.js` reference with `scripts/check-architecture.mjs`; replace "only built-in adapter in core" with explicit `{logger, analytics}` allowlist; the `<!-- arch-vocab -->` block (added in 1.1.0) is already present here. Add the FIT-SDK-types-live-in-fit clause; add a pointer to `scripts/check-package-deps.mjs` for the package-dependency table
-- [ ] 4.6.2 update `.claude/skills/guidelines/design-principles/SKILL.md`: in the Mappers-vs-converters table, append a column "Enforcement" pointing at `scripts/check-mapper-no-tests.mjs` and `scripts/check-converter-has-tests.mjs`
-- [ ] 4.6.3 update `.claude/skills/guidelines/testing-standards/SKILL.md`: in the "Never skip a test" rule, append "Enforcement: `scripts/check-no-unconditional-skip.mjs`"; document the four dispatch shapes the rule covers (member, computed-member, destructured, re-bound), the `skipIf(<runtime-expr>)` allowance, and the literal-only rejection (including `!!1`, `1+1`, `true && true`, `` `true` `` template literals)
-- [ ] 4.6.4 update `.claude/skills/guidelines/git-strategy/SKILL.md`: (a) the `<!-- commitlint-source-of-truth -->` block was inserted in 1.7.4 — confirm it is byte-identical to the arrays in `commitlint.vocab.mjs` (the test in 1.7.5 enforces this; this task is a manual cross-check); (b) in the conventional-commit table, append "Enforcement: `commitlint.config.mjs` + `.husky/commit-msg` + `scripts/check-commitlint-config.test.mjs`"; (c) document the `--no-verify`-hint removal and the CI commitlint backstop; (d) add a new "Changeset exceptions" subsection codifying the rule used by PR1/PR2/PR3/PR4 in this change: "A changeset is NOT required when (i) the change touches only repo-root tooling (scripts/, .husky/, root package.json devDeps), (ii) the change is internal to a published package and exported symbol names are unchanged (e.g., file renames preserving the public API), or (iii) the change is test-only or docs-only. Examples in `openspec/changes/archive/<date>-guidelines-compliance-harden/` are illustrative."
-- [ ] 4.6.5 update `.claude/skills/guidelines/xp-tdd-practices/SKILL.md`: under the "Tasks without behavior" section, add a one-line example: "Characterization tests for unchanged production code (e.g., adding tests to a `*.converter.ts` whose logic is not modified) use plain checkboxes — they describe current behavior, not new behavior."
+- [x] 4.6.1 update `.claude/skills/guidelines/architecture-hexagonal/SKILL.md`: replace every `check-architecture.js` reference with `scripts/check-architecture.mjs`; replace "only built-in adapter in core" with explicit `{logger, analytics}` allowlist; the `<!-- arch-vocab -->` block (added in 1.1.0) is already present here. Add the FIT-SDK-types-live-in-fit clause; add a pointer to `scripts/check-package-deps.mjs` for the package-dependency table
+- [x] 4.6.2 update `.claude/skills/guidelines/design-principles/SKILL.md`: in the Mappers-vs-converters table, append a column "Enforcement" pointing at `scripts/check-mapper-no-tests.mjs` and `scripts/check-converter-has-tests.mjs`
+- [x] 4.6.3 update `.claude/skills/guidelines/testing-standards/SKILL.md`: in the "Never skip a test" rule, append "Enforcement: `scripts/check-no-unconditional-skip.mjs`"; document the four dispatch shapes the rule covers (member, computed-member, destructured, re-bound), the `skipIf(<runtime-expr>)` allowance, and the literal-only rejection (including `!!1`, `1+1`, `true && true`, `` `true` `` template literals)
+- [x] 4.6.4 update `.claude/skills/guidelines/git-strategy/SKILL.md`: (a) the `<!-- commitlint-source-of-truth -->` block was inserted in 1.7.4 — confirm it is byte-identical to the arrays in `commitlint.vocab.mjs` (the test in 1.7.5 enforces this; this task is a manual cross-check); (b) in the conventional-commit table, append "Enforcement: `commitlint.config.mjs` + `.husky/commit-msg` + `scripts/check-commitlint-config.test.mjs`"; (c) document the `--no-verify`-hint removal and the CI commitlint backstop; (d) add a new "Changeset exceptions" subsection codifying the rule used by PR1/PR2/PR3/PR4 in this change: "A changeset is NOT required when (i) the change touches only repo-root tooling (scripts/, .husky/, root package.json devDeps), (ii) the change is internal to a published package and exported symbol names are unchanged (e.g., file renames preserving the public API), or (iii) the change is test-only or docs-only. Examples in `openspec/changes/archive/<date>-guidelines-compliance-harden/` are illustrative."
+- [x] 4.6.5 update `.claude/skills/guidelines/xp-tdd-practices/SKILL.md`: under the "Tasks without behavior" section, add a one-line example: "Characterization tests for unchanged production code (e.g., adding tests to a `*.converter.ts` whose logic is not modified) use plain checkboxes — they describe current behavior, not new behavior."
 
 ### 4.7 Sweep for stale `check-architecture.js` references
 
-- [ ] 4.7.1 `grep -rn "check-architecture\.js" openspec/ .claude/` to enumerate every stale reference
-- [ ] 4.7.2 rewrite each occurrence to `scripts/check-architecture.mjs`
-- [ ] 4.7.3 confirm `grep -rn "check-architecture\.js" openspec/ .claude/` returns no lines
+- [x] 4.7.1 `grep -rn "check-architecture\.js" openspec/ .claude/` to enumerate every stale reference
+- [x] 4.7.2 rewrite each occurrence to `scripts/check-architecture.mjs` in operational docs (`openspec/specs/hexagonal-arch/spec.md`, `.claude/skills/guidelines/architecture-hexagonal/SKILL.md`); references inside `openspec/changes/guidelines-compliance-harden/{proposal,design,tasks}.md` are intentional — they describe the audit/work itself and would be corrupted by mechanical rewriting (verified at archive time per task 5.7)
+- [x] 4.7.3 confirm `grep -rn "check-architecture\.js" openspec/ .claude/` returns no lines outside the change folder
 
 ### 4.8 PR4 close-out
 
-- [ ] 4.8.1 `pnpm -r test:coverage` thresholds hold
-- [ ] 4.8.2 `pnpm -r build` zero warnings
-- [ ] 4.8.3 `pnpm lint` zero errors/warnings (includes `lint:specs`, `lint:archive`, `lint:archive-index`)
-- [ ] 4.8.4 `/opsx-verify guidelines-compliance-harden` against all spec scenarios
-- [ ] 4.8.5 NO changeset (test/docs only — no published-package behavior change)
-- [ ] 4.8.6 open PR titled `test(spa-editor): un-skip masked tests and align guideline docs` (single-scope; the json-parser, xsd-validator, fixtures-README, and SKILL.md updates are enumerated in the PR body)
+- [x] 4.8.1 `pnpm -r test:coverage` thresholds hold
+- [x] 4.8.2 `pnpm -r build` zero warnings
+- [x] 4.8.3 `pnpm lint` zero errors/warnings (includes `lint:specs`, `lint:archive`, `lint:archive-index`)
+- [x] 4.8.4 `/opsx-verify guidelines-compliance-harden` against all spec scenarios
+- [x] 4.8.5 NO changeset (test/docs only — no published-package behavior change)
+- [x] 4.8.6 open PR titled `test(spa-editor): un-skip masked tests and align guideline docs` (single-scope; the json-parser, xsd-validator, fixtures-README, and SKILL.md updates are enumerated in the PR body)
 
 ## 5. Final validation block (run before archiving)
 

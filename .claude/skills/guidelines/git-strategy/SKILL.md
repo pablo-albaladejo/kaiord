@@ -67,6 +67,8 @@ e2e
 
 <!-- commitlint-source-of-truth:end -->
 
+Enforcement: `commitlint.config.mjs` + `.husky/commit-msg` + `scripts/check-commitlint-config.test.mjs`.
+
 ## Changesets
 
 - One changeset per change (not per package) — packages in the linked array bump together
@@ -75,6 +77,16 @@ e2e
 - `garmin-bridge` and `train2go-bridge` are in the `linked` array — they need changesets when changed
 - `workout-spa-editor` is not in `linked` or `ignore` — needs a changeset if changed
 - The `private: true` flag prevents publishing but does not exempt a package from changesets
+
+## Changeset exceptions
+
+A changeset is NOT required when:
+
+1. The change touches only repo-root tooling (`scripts/`, `.husky/`, root `package.json` devDeps).
+2. The change is internal to a published package and exported symbol names are unchanged (e.g., file renames preserving the public API).
+3. The change is test-only or docs-only.
+
+Examples in `openspec/changes/archive/<date>-guidelines-compliance-harden/` are illustrative.
 
 ## OpenSpec archive naming
 
