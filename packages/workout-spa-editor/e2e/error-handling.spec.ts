@@ -14,9 +14,9 @@ import { expect, test } from "./fixtures/base";
 test.describe("Error Handling", () => {
   test.beforeEach(async ({ page }) => {
     await page.goto("/workout/new");
-    await expect(
-      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
-    ).toBeVisible();
+    // Editor route is mounted when its `<h1 data-route-heading>` is in
+    // the DOM. The brand label in the header is no longer an h1.
+    await expect(page.locator("[data-route-heading]")).toBeAttached();
   });
 
   test("should display specific error for invalid JSON", async ({ page }) => {
@@ -206,9 +206,9 @@ test.describe("Error Recovery", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/workout/new");
-    await expect(
-      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
-    ).toBeVisible();
+    // Editor route is mounted when its `<h1 data-route-heading>` is in
+    // the DOM. The brand label in the header is no longer an h1.
+    await expect(page.locator("[data-route-heading]")).toBeAttached();
   });
 
   test("should restore previous state after import error", async ({ page }) => {
@@ -377,9 +377,9 @@ test.describe("Error Handling - Mobile", () => {
   test("should display error messages on mobile", async ({ page }) => {
     // Arrange
     await page.goto("/workout/new");
-    await expect(
-      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
-    ).toBeVisible();
+    // Editor route is mounted when its `<h1 data-route-heading>` is in
+    // the DOM. The brand label in the header is no longer an h1.
+    await expect(page.locator("[data-route-heading]")).toBeAttached();
 
     // Act - Upload invalid file
     await expandFileUpload(page);
@@ -446,9 +446,9 @@ test.describe("Error Handling - Performance", () => {
   }) => {
     // Arrange
     await page.goto("/workout/new");
-    await expect(
-      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
-    ).toBeVisible();
+    // Editor route is mounted when its `<h1 data-route-heading>` is in
+    // the DOM. The brand label in the header is no longer an h1.
+    await expect(page.locator("[data-route-heading]")).toBeAttached();
 
     await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
@@ -478,9 +478,9 @@ test.describe("Error Handling - Performance", () => {
   }) => {
     // Arrange
     await page.goto("/workout/new");
-    await expect(
-      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
-    ).toBeVisible();
+    // Editor route is mounted when its `<h1 data-route-heading>` is in
+    // the DOM. The brand label in the header is no longer an h1.
+    await expect(page.locator("[data-route-heading]")).toBeAttached();
 
     await expandFileUpload(page);
     const fileInput = page.getByTestId("file-upload-input");
@@ -507,8 +507,8 @@ test.describe("Error Handling - Performance", () => {
     }
 
     // Assert - Page still responsive
-    await expect(
-      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
-    ).toBeVisible();
+    // Editor route is mounted when its `<h1 data-route-heading>` is in
+    // the DOM. The brand label in the header is no longer an h1.
+    await expect(page.locator("[data-route-heading]")).toBeAttached();
   });
 });

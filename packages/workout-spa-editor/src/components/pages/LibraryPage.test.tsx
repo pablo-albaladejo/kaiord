@@ -7,15 +7,19 @@
  * - Sport filtering
  * - Schedule action creates workout record
  * - Delete action removes template
+ * - "Load into editor" CTA visibility gated on hasCurrentWorkout
+ *   (parity with the deleted header modal's onLoadWorkout affordance)
  */
 
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
+import { useWorkoutStore } from "../../store/workout-store";
 import { renderWithProviders } from "../../test-utils";
+import type { KRD } from "../../types/krd";
 import type { WorkoutTemplate } from "../../types/workout-library";
 import LibraryPage from "./LibraryPage";
 
@@ -47,10 +51,24 @@ function makeTemplate(
   };
 }
 
+const ACTIVE_KRD: KRD = {
+  version: "1.0",
+  type: "structured_workout",
+  metadata: { created: "2026-04-01T00:00:00Z", sport: "running" },
+  extensions: {
+    structured_workout: { name: "Active", sport: "running", steps: [] },
+  },
+};
+
 describe("LibraryPage", () => {
   beforeEach(async () => {
+    useWorkoutStore.setState({ currentWorkout: null });
     await db.table("templates").clear();
     await db.table("workouts").clear();
+  });
+
+  afterEach(() => {
+    useWorkoutStore.setState({ currentWorkout: null });
   });
 
   it("renders templates from Dexie", async () => {
@@ -155,5 +173,67 @@ describe("LibraryPage", () => {
       expect(workouts[0].state).toBe("structured");
       expect(workouts[0].krd).not.toBeNull();
     });
+  });
+
+  it("hides the 'Load into editor' CTA when no active workout", async () => {
+    await db
+      .table("templates")
+      .add(makeTemplate({ id: "t1", name: "Easy Ride", sport: "cycling" }));
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Easy Ride")).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByTestId("card-load-into-editor")
+    ).not.toBeInTheDocument();
+  });
+
+  it("shows the 'Load into editor' CTA only when the editor has an active workout", async () => {
+    await db
+      .table("templates")
+      .add(makeTemplate({ id: "t1", name: "Easy Ride", sport: "cycling" }));
+    useWorkoutStore.setState({ currentWorkout: ACTIVE_KRD });
+
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByText("Easy Ride")).toBeInTheDocument();
+    });
+    expect(screen.getByTestId("card-load-into-editor")).toBeInTheDocument();
+  });
+
+  it("clicking 'Load into editor' loads the template KRD into the workout store", async () => {
+    const template = makeTemplate({
+      id: "t1",
+      name: "Easy Ride",
+      sport: "cycling",
+    });
+    await db.table("templates").add(template);
+    useWorkoutStore.setState({ currentWorkout: ACTIVE_KRD });
+
+    const user = userEvent.setup();
+    renderPage();
+
+    await waitFor(() => {
+      expect(screen.getByTestId("card-load-into-editor")).toBeInTheDocument();
+    });
+    await user.click(screen.getByTestId("card-load-into-editor"));
+
+    await waitFor(() => {
+      expect(useWorkoutStore.getState().currentWorkout).toEqual(template.krd);
+    });
+  });
+
+  it("renders the page heading with the route-heading attribute", async () => {
+    renderPage();
+
+    const heading = await screen.findByRole("heading", {
+      name: /workout library/i,
+    });
+    expect(heading.tagName).toBe("H1");
+    expect(heading).toHaveAttribute("data-route-heading");
+    expect(heading).toHaveAttribute("tabIndex", "-1");
   });
 });

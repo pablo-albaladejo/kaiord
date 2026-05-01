@@ -114,6 +114,14 @@
     outline: 2px solid currentColor;
     outline-offset: 2px;
   }
+
+  /* Routed-page primary heading: focused programmatically on each
+     pathname change by `useFocusOnRouteChange`. Suppress the default
+     ring for non-keyboard activations so the SR announcement happens
+     silently while keyboard users keep the `:focus-visible` ring. */
+  [data-route-heading]:focus:not(:focus-visible) {
+    outline: none;
+  }
 }
 
 @layer components {

@@ -18,10 +18,11 @@ test.describe("Workout Load, Edit, and Save Flow", () => {
     // Navigate to the application
     await page.goto("/workout/new");
 
-    // Wait for the welcome section to load (use heading with level to avoid strict mode)
-    await expect(
-      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
-    ).toBeVisible();
+    // Wait for the editor route to mount. Per the SPA surface-
+    // classification rule each routed page owns its own
+    // `<h1 data-route-heading>`; the brand label in the header is a
+    // <span>, not an <h1>. Gate on the route-heading contract.
+    await expect(page.locator("[data-route-heading]")).toBeAttached();
 
     // Load a workout file
     await expandFileUpload(page);

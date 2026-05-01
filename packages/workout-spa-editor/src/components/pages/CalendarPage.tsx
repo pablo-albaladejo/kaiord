@@ -20,6 +20,7 @@ import type { MatchedSessionWithMetadata as PageMatchedSession } from "../../hoo
 import { useMatchedSessions } from "../../hooks/use-matched-sessions";
 import { useSetCalendarDensity } from "../../hooks/use-set-calendar-density";
 import { useUserPreferences } from "../../hooks/use-user-preferences";
+import { ROUTE_HEADING_ATTR } from "../../routing/constants";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import { CalendarSkeleton } from "../molecules/WorkoutCard/CalendarSkeleton";
@@ -39,7 +40,6 @@ export default function CalendarPage() {
   useCoachingAutoSync(coaching.syncSources, s.data.days[0]);
   const [selectedActivity, setSelectedActivity] =
     useState<CoachingActivity | null>(null);
-
   const activeProfile = useActiveProfileLive();
   const profileId = activeProfile?.id ?? null;
   const matched = useMatchedSessions(profileId, s.data.days) ?? [];
@@ -47,7 +47,6 @@ export default function CalendarPage() {
     profileId,
     defaultDensity: viewportDefaultDensity(),
   });
-
   const buckets = useMemo(
     () =>
       buildBuckets({
@@ -58,24 +57,53 @@ export default function CalendarPage() {
       }),
     [s.data.days, s.data.workoutsByDay, coaching.byDay, matched]
   );
-
-  const handleActivityClick = (activity: CoachingActivity) => {
-    setSelectedActivity(activity);
-    coaching.expandActivity(activity);
-  };
-
   const handleDensityChange = useSetCalendarDensity(profileId);
 
   if (!s.data.isValidWeek) return <Redirect to="/calendar" />;
   if (s.data.hydration === "pending") return <CalendarSkeleton />;
 
   return (
+    <CalendarPageView
+      s={s}
+      coaching={coaching}
+      buckets={buckets}
+      density={prefs?.calendarDensity}
+      onDensityChange={handleDensityChange}
+      selectedActivity={selectedActivity}
+      setSelectedActivity={setSelectedActivity}
+    />
+  );
+}
+
+type CalendarPageViewProps = {
+  s: ReturnType<typeof useCalendarState>;
+  coaching: ReturnType<typeof useCoachingActivities>;
+  buckets: Buckets;
+  density: "compact" | "comfortable" | undefined;
+  onDensityChange: (d: "compact" | "comfortable") => void;
+  selectedActivity: CoachingActivity | null;
+  setSelectedActivity: (a: CoachingActivity | null) => void;
+};
+
+function CalendarPageView({
+  s,
+  coaching,
+  buckets,
+  density,
+  onDensityChange,
+  selectedActivity,
+  setSelectedActivity,
+}: CalendarPageViewProps) {
+  return (
     <div className="space-y-4" data-testid="calendar-page">
+      <h1 tabIndex={-1} {...{ [ROUTE_HEADING_ATTR]: "" }} className="sr-only">
+        Calendar
+      </h1>
       <CalendarHeader
         state={s}
         coaching={coaching}
-        density={prefs?.calendarDensity}
-        onDensityChange={handleDensityChange}
+        density={density}
+        onDensityChange={onDensityChange}
       />
       <CalendarWeekGrid
         days={s.data.days}
@@ -83,10 +111,13 @@ export default function CalendarPage() {
         soloPlansByDay={buckets.soloPlansByDay}
         soloActualsByDay={buckets.soloActualsByDay}
         todayDate={new Date().toISOString().slice(0, 10)}
-        density={prefs?.calendarDensity}
+        density={density}
         onWorkoutClick={s.handleWorkoutClick}
         onEmptyDayClick={s.setEmptyDayDate}
-        onActivityClick={handleActivityClick}
+        onActivityClick={(a) => {
+          setSelectedActivity(a);
+          coaching.expandActivity(a);
+        }}
       />
       <CalendarDialogs
         selectedWorkout={s.selectedWorkout}
