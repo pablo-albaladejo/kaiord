@@ -27,7 +27,7 @@ export function parseManifestFromPing(
   if (!response.ok || !response.data) return null;
   const result = bridgeManifestSchema.safeParse(response.data);
   if (!result.success) {
-    console.warn(`Bridge ${extensionId}: invalid manifest`);
+    console.warn("Bridge: invalid manifest", { extensionId });
     return null;
   }
   return {
