@@ -1,3 +1,9 @@
+<!-- opsx-ship: chunking
+PR 0 (proposal): openspec artifacts only — already open as #403
+PR 1 (implementation): §1, §2, §3, §4, §5, §7 — branch feature/fix-spa-router-basename
+PR 2 (archive): §6 — branch chore/fix-spa-router-basename-archive
+-->
+
 ## 1. Phase 1 — Implement the wouter base wrapper
 
 - [ ] 1.0 Worktree setup: `git worktree add -b feature/fix-spa-router-basename /Users/pablo/development/personal/kaiord-routerfix-impl main`. Run `pnpm install` and rebuild workspace deps.
