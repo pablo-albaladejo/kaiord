@@ -2,6 +2,7 @@ import "./index.css";
 
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
+import { Router } from "wouter";
 
 import { createCloudflareAnalytics } from "./adapters/analytics/cloudflare-analytics";
 import { createDexiePersistence } from "./adapters/dexie/dexie-persistence-adapter";
@@ -14,12 +15,15 @@ import {
 } from "./contexts";
 import { CoachingRegistryBootstrap } from "./contexts/coaching-registry-bootstrap";
 import { PersistenceProvider } from "./contexts/persistence-context";
+import { computeRouterBase } from "./router-base";
 
 const analytics = createCloudflareAnalytics(
   import.meta.env.VITE_CF_ANALYTICS_TOKEN as string | undefined
 );
 
 const persistence = createDexiePersistence();
+
+const routerBase = computeRouterBase(import.meta.env.BASE_URL);
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
@@ -29,7 +33,9 @@ createRoot(document.getElementById("root")!).render(
           <SettingsDialogProvider>
             <GarminBridgeProvider>
               <CoachingRegistryBootstrap>
-                <App />
+                <Router base={routerBase}>
+                  <App />
+                </Router>
               </CoachingRegistryBootstrap>
             </GarminBridgeProvider>
           </SettingsDialogProvider>
