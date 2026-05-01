@@ -11,8 +11,17 @@
 
 import { SCOPE_ENUM, TYPE_ENUM } from "./commitlint.vocab.mjs";
 
+// changesets/action commits the generated version-bump with subject
+// "Version Packages" (its built-in default). That commit is produced by
+// automation we control end-to-end; the conventional-commit type/scope
+// contract is for human authors. Allowlist that exact subject so the
+// Release workflow can land its bump commit through the husky commit-msg
+// hook.
+const CHANGESET_BOT_SUBJECT = /^Version Packages(\s|$)/;
+
 export default {
   extends: ["@commitlint/config-conventional"],
+  ignores: [(message) => CHANGESET_BOT_SUBJECT.test(message)],
   plugins: [
     {
       rules: {
