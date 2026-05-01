@@ -18,6 +18,7 @@ import { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import { useCoachingAutoSync } from "../../hooks/use-coaching-auto-sync";
 import type { MatchedSessionWithMetadata as PageMatchedSession } from "../../hooks/use-matched-sessions";
 import { useMatchedSessions } from "../../hooks/use-matched-sessions";
+import { useSetCalendarDensity } from "../../hooks/use-set-calendar-density";
 import { useUserPreferences } from "../../hooks/use-user-preferences";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
@@ -63,12 +64,19 @@ export default function CalendarPage() {
     coaching.expandActivity(activity);
   };
 
+  const handleDensityChange = useSetCalendarDensity(profileId);
+
   if (!s.data.isValidWeek) return <Redirect to="/calendar" />;
   if (s.data.hydration === "pending") return <CalendarSkeleton />;
 
   return (
     <div className="space-y-4" data-testid="calendar-page">
-      <CalendarHeader state={s} coaching={coaching} />
+      <CalendarHeader
+        state={s}
+        coaching={coaching}
+        density={prefs?.calendarDensity}
+        onDensityChange={handleDensityChange}
+      />
       <CalendarWeekGrid
         days={s.data.days}
         matchedByDay={buckets.matchedByDay}

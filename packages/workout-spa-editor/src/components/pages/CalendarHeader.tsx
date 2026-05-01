@@ -1,11 +1,14 @@
 /**
- * CalendarHeader — top-of-page banners + batch cost confirmation +
- * week navigation row. Kept out of CalendarPage so its render
- * function stays under the max-lines-per-function rule.
+ * Top-of-page banners + batch cost confirmation + week navigation row +
+ * density toggle. Kept out of CalendarPage so each render function
+ * stays under the per-function line cap.
  */
 
 import type { useCoachingActivities } from "../../hooks/use-coaching-activities";
+import type { CalendarDensity } from "../../types/user-preferences";
+import { formatWeekLabel } from "../../utils/format-week-label";
 import { CoachingSyncButton } from "../molecules/CoachingCard/CoachingSyncButton";
+import { DensityToggle } from "../molecules/DensityToggle/DensityToggle";
 import { WeekNavigation } from "../molecules/WorkoutCard/WeekNavigation";
 import { BatchCostConfirmation } from "../organisms/BatchCostConfirmation";
 import { CalendarEmptyBanners } from "./CalendarEmptyBanners";
@@ -14,9 +17,16 @@ import type { useCalendarState } from "./use-calendar-state";
 export type CalendarHeaderProps = {
   state: ReturnType<typeof useCalendarState>;
   coaching: ReturnType<typeof useCoachingActivities>;
+  density?: CalendarDensity;
+  onDensityChange?: (next: CalendarDensity) => void;
 };
 
-export function CalendarHeader({ state: s, coaching }: CalendarHeaderProps) {
+export function CalendarHeader({
+  state: s,
+  coaching,
+  density,
+  onDensityChange,
+}: CalendarHeaderProps) {
   return (
     <>
       <CalendarEmptyBanners
@@ -44,9 +54,12 @@ export function CalendarHeader({ state: s, coaching }: CalendarHeaderProps) {
       <div className="flex items-center justify-between">
         <WeekNavigation
           weekId={s.data.weekId}
-          weekLabel={s.data.weekId.replace("-W", " W")}
+          weekLabel={formatWeekLabel(s.data.weekId)}
         />
-        <div className="flex gap-2">
+        <div className="flex items-center gap-2">
+          {density && onDensityChange && (
+            <DensityToggle density={density} onToggle={onDensityChange} />
+          )}
           {coaching.syncSources
             .filter((src) => src.linked)
             .map((src) => (
