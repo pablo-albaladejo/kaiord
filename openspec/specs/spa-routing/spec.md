@@ -7,6 +7,7 @@
 Routing-layer rules for the SPA editor, including alignment between client-side router base configuration and Vite deploy base, plus any additional invariants needed to keep deep URLs refresh-safe under static hosting.
 
 ## Requirements
+
 ### Requirement: SPA router base alignment with Vite deploy base
 
 The `@kaiord/workout-spa-editor` SPA bootstrap (`packages/workout-spa-editor/src/main.tsx`) SHALL wrap `<App />` in wouter's `<Router>` component with a `base` prop derived from `import.meta.env.BASE_URL`. The derivation SHALL strip the trailing slash that Vite always emits, yielding an empty string in dev (`BASE_URL = "/"` → `base = ""`) or a path without trailing slash in production (`BASE_URL = "/editor/"` → `base = "/editor"`).
@@ -51,4 +52,3 @@ A unit test (`packages/workout-spa-editor/src/router-base.test.ts`) SHALL exerci
 
 - **WHEN** a user requests `/editor/<malformed-path>` directly (cold) on a Pages-equivalent host
 - **THEN** the rafgraph round-trip SHALL restore the URL, the SPA's router SHALL strip the configured base, the SPA's catch-all route SHALL redirect to the canonical calendar route, the URL bar SHALL settle at `/editor/calendar`, and no infinite redirect loop or XSS SHALL occur (the address bar containing user-supplied characters is treated as a path string by `history.replaceState`, never as HTML)
-
