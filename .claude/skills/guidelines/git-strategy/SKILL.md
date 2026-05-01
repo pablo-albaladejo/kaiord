@@ -17,15 +17,52 @@ NEVER use `HUSKY=0`, `--no-verify`, or any mechanism that skips pre-commit hooks
 
 Format: `type(scope): description`
 
-Valid types: `feat`, `fix`, `chore`, `test`, `docs`, `refactor`, `perf`
+Single-scope subjects are normative — multi-scope (`refactor(core,fit,tcx): ...`)
+is rejected by `commitlint.config.mjs`.
 
-Valid scopes:
+Source of truth: `commitlint.vocab.mjs` + the block below. Drift between
+the two (insertion, deletion, OR reorder) fails CI via
+`scripts/check-commitlint-config.test.mjs`. Enforcement: `commitlint.config.mjs`
++ `.husky/commit-msg` + `scripts/check-commitlint-config.test.mjs`.
 
+<!-- commitlint-source-of-truth:start -->
 ```
-core  fit  tcx  zwo  garmin  garmin-connect  ai  cli  mcp
-spa-editor  garmin-bridge  train2go-bridge
-openspec  ci  docs  scripts
+# types
+feat
+fix
+chore
+test
+docs
+refactor
+perf
+
+# scopes
+core
+fit
+tcx
+zwo
+garmin
+garmin-connect
+ai
+cli
+mcp
+spa-editor
+garmin-bridge
+train2go-bridge
+analytics
+landing
+docs-site
+openspec
+ci
+docs
+scripts
+deploy
+release
+deps
+deps-dev
+e2e
 ```
+<!-- commitlint-source-of-truth:end -->
 
 ## Changesets
 

@@ -228,6 +228,14 @@ jobs:
       - name: Run scripts unit tests
         run: pnpm test:scripts
 
+      - name: Validate commit messages (commitlint backstop)
+        if: github.event_name == 'pull_request'
+        # Re-validates every commit on the PR branch via commitlint, defending
+        # against contributors who bypassed the husky commit-msg hook with
+        # `--no-verify`. Rule R-CommitFormat is enforced both locally
+        # (commit-msg hook) and at merge time (this step).
+        run: pnpm exec commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}"
+
       - name: Check architecture boundaries
         run: pnpm arch:check
 
