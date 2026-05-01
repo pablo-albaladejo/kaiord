@@ -19,7 +19,7 @@ This gate is enforced by `pnpm lint` (specifically by the ESLint step within it)
 #### Scenario: rules-of-hooks blocks a hook call inside Array.map placed inside a non-hook scope
 
 - **WHEN** SPA editor source contains a hook call inside `Array.prototype.map` whose enclosing context is NOT a React function-component or custom-hook body — e.g., `useEffect(() => { items.map((useFooBar) => useFooBar()); }, [])` placed inside an effect body
-- **THEN** `pnpm lint` exits non-zero with a `react-hooks/rules-of-hooks` error (the plugin detects the call by the `use*` identifier prefix; this scenario covers the plugin's *scope* detection, while the misnamed-parameter case is covered by the separate "Hook-collection map parameter naming guard" requirement)
+- **THEN** `pnpm lint` exits non-zero with a `react-hooks/rules-of-hooks` error (the plugin detects the call by the `use*` identifier prefix; this scenario covers the plugin's _scope_ detection, while the misnamed-parameter case is covered by the separate "Hook-collection map parameter naming guard" requirement)
 
 #### Scenario: Plugin is loaded by the SPA files block of eslint.config.js
 

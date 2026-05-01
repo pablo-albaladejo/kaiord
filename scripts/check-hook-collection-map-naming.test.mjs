@@ -74,10 +74,7 @@ test("multiple violations in one file are all reported", () => {
   `;
   const v = findViolations(source);
   assert.equal(v.length, 2);
-  assert.deepEqual(
-    v.map((x) => x.param).sort(),
-    ["f", "g"]
-  );
+  assert.deepEqual(v.map((x) => x.param).sort(), ["f", "g"]);
 });
 
 test("post-rollout SPA codebase has zero violations", () => {
