@@ -115,7 +115,7 @@ The repo already enforces an analogous boundary for user-facing strings via `scr
 **`scrubAnalyticsString` design.** Pure function in `packages/workout-spa-editor/src/lib/scrub-analytics-string.ts`. Order of operations:
 
 1. Replace any UUID v4 / v5 substring (`/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi`) with `<uuid>`.
-2. Replace any `Bearer\s+\S+` substring with `Bearer <token>`.
+2. Replace any `Bearer\s+[A-Za-z0-9._\-+/=]+` substring with `Bearer <token>` (token-safe character class so trailing punctuation like `);` or `,` is preserved verbatim).
 3. Replace any Unicode-aware email-shaped substring with `<email>` (canonical regex per `analytics-port` spec rule 3: `/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}.-]+\.[\p{L}]{2,}/gu`). The `\p{L}` Unicode-category coverage catches Spanish (`usuario@correo.es`), CJK (`用户@example.cn`), and CJK-TLD (`用户@example.中国`) addresses. Word-boundary anchors (`\b`) are intentionally omitted because `\b` is ASCII-only and breaks on non-Latin character boundaries.
 4. Replace any 32+ hex-character run (heuristic for API keys) with `<hex>`.
 5. Replace any 40+ base64url-character run (`/[A-Za-z0-9_-]{40,}/g`) with `<token>`. This catches raw JWTs, OAuth refresh tokens, and other base64url-encoded secrets that appear in error messages without a `Bearer` prefix (e.g., `"401 Unauthorized: token eyJhbGciOi..."`). Step 5 runs AFTER step 2 so a `Bearer <jwt>` is fully replaced as a single Bearer-token unit, avoiding double-scrub.

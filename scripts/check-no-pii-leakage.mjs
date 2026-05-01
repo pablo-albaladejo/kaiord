@@ -91,6 +91,10 @@ const ANALYTICS_MEMBER_DISPATCH_RE = new RegExp(
   `(?:analytics|useAnalytics\\(\\))\\s*\\.\\s*${ANALYTICS_METHODS}\\s*\\(`,
   "g"
 );
+const ANALYTICS_COMPUTED_DISPATCH_RE = new RegExp(
+  `(?:analytics|useAnalytics\\(\\))\\s*\\[\\s*["']${ANALYTICS_METHODS}["']\\s*\\]\\s*\\(`,
+  "g"
+);
 
 // Destructure / rebind sources tracked file-locally. Each entry:
 // { sourceName, methodKeys } — the source-function name to match in
@@ -337,6 +341,7 @@ function checkFile(file, violations) {
     CONSOLE_DISPATCH_RE,
     COMPUTED_DISPATCH_RE,
     ANALYTICS_MEMBER_DISPATCH_RE,
+    ANALYTICS_COMPUTED_DISPATCH_RE,
   ]) {
     for (const m of source.matchAll(re)) {
       const openParen = m.index + m[0].length - 1;

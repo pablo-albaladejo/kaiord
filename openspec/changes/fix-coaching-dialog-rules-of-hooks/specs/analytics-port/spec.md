@@ -12,7 +12,7 @@ The system SHALL call `analytics.event('route-error', payload)` when `RouteError
 `scrubAnalyticsString(input: string, maxLen?: number): string` SHALL replace, in this order, all substring matches with the corresponding placeholder, then (when `maxLen` is provided) truncate the result to at most `maxLen` characters:
 
 1. UUID v4 / v5 (`/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi`) → `<uuid>`.
-2. Bearer tokens (`/Bearer\s+\S+/g`) → `Bearer <token>`.
+2. Bearer tokens (`/Bearer\s+[A-Za-z0-9._\-+/=]+/g`) → `Bearer <token>`. The character class is restricted to token-safe chars so trailing punctuation (e.g., `);` or `,`) is preserved verbatim — `Bearer\s+\S+` would greedily consume the punctuation and corrupt downstream message content.
 3. Email-shaped substrings, including internationalized local parts and TLDs (`/[\p{L}\p{N}._%+-]+@[\p{L}\p{N}.-]+\.[\p{L}]{2,}/gu`) → `<email>`. The Unicode-aware regex catches Train2Go-shaped (`usuario@correo.es`) and CJK-shaped (`用户@example.cn`) addresses that the ASCII-only `[A-Za-z0-9]` form would miss.
 4. Runs of 32 or more hexadecimal characters (`/[0-9a-f]{32,}/gi`) → `<hex>`.
 5. Long base64url-shaped runs of 40 or more characters (`/[A-Za-z0-9_-]{40,}/g`) → `<token>`. This catches raw JWTs (`eyJ...`), OAuth refresh tokens, and other base64url-encoded secrets that appear in error messages without a `Bearer` prefix. Note: hex runs ≥ 32 are also a subset of base64url; rule 4 runs FIRST, so a 60-character hex run produces `<hex>`, not `<token>`. Both placeholders mean "opaque secret" from a triage standpoint — the ambiguity is intentional.
