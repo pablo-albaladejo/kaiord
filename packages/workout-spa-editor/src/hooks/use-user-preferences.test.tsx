@@ -1,0 +1,101 @@
+import "fake-indexeddb/auto";
+
+import { renderHook, waitFor } from "@testing-library/react";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
+import { db } from "../adapters/dexie/dexie-database";
+import type { UserPreferences } from "../types/user-preferences";
+import { useUserPreferences } from "./use-user-preferences";
+
+const seed = async (row: UserPreferences): Promise<void> => {
+  await db.table<UserPreferences>("userPreferences").put(row);
+};
+
+const clear = () => db.table("userPreferences").clear();
+
+describe("useUserPreferences", () => {
+  beforeEach(clear);
+  afterEach(clear);
+
+  it("returns undefined when profileId is null", async () => {
+    const { result } = renderHook(() =>
+      useUserPreferences({ profileId: null, defaultDensity: "compact" })
+    );
+
+    await waitFor(() => {
+      expect(result.current).toBeUndefined();
+    });
+  });
+
+  it("returns the persisted row when one exists", async () => {
+    await seed({
+      profileId: "p1",
+      calendarDensity: "comfortable",
+      updatedAt: "2026-04-30T10:00:00.000Z",
+    });
+
+    const { result } = renderHook(() =>
+      useUserPreferences({ profileId: "p1", defaultDensity: "compact" })
+    );
+
+    await waitFor(() => {
+      expect(result.current?.calendarDensity).toBe("comfortable");
+    });
+  });
+
+  it("returns the viewport-derived default when no row exists", async () => {
+    const { result } = renderHook(() =>
+      useUserPreferences({ profileId: "p1", defaultDensity: "comfortable" })
+    );
+
+    await waitFor(() => {
+      expect(result.current?.calendarDensity).toBe("comfortable");
+    });
+  });
+
+  it("re-evaluates on profileId change without leaking previous-profile value", async () => {
+    await seed({
+      profileId: "p1",
+      calendarDensity: "comfortable",
+      updatedAt: "2026-04-30T10:00:00.000Z",
+    });
+
+    const { result, rerender } = renderHook(
+      ({ profileId }) =>
+        useUserPreferences({ profileId, defaultDensity: "compact" }),
+      { initialProps: { profileId: "p1" as string | null } }
+    );
+
+    await waitFor(() => {
+      expect(result.current?.calendarDensity).toBe("comfortable");
+    });
+
+    rerender({ profileId: "p2" });
+
+    await waitFor(() => {
+      // p2 has no row → falls back to defaultDensity (compact), not p1's comfortable
+      expect(result.current?.calendarDensity).toBe("compact");
+      expect(result.current?.profileId).toBe("p2");
+    });
+  });
+
+  it("re-fires when the underlying row is written", async () => {
+    const { result } = renderHook(() =>
+      useUserPreferences({ profileId: "p1", defaultDensity: "compact" })
+    );
+
+    await waitFor(() => {
+      expect(result.current?.calendarDensity).toBe("compact"); // default
+    });
+
+    await seed({
+      profileId: "p1",
+      calendarDensity: "comfortable",
+      updatedAt: "2026-05-01T12:00:00.000Z",
+    });
+
+    await waitFor(() => {
+      expect(result.current?.calendarDensity).toBe("comfortable");
+    });
+  });
+});
