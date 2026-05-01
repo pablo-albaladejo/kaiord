@@ -1,3 +1,5 @@
+> Completed: 2026-05-01
+
 ## Why
 
 The calendar week view is the home page of the SPA editor and the entry point for every coaching workflow, but its current state is broken in three compounding ways: (a) the `CoachingActivityCard` literally **overflows its container** — the word "pending" is rendered outside the card border on screens at the design width; (b) titles like "Z2/Z3 técnica" and "FASE 3 fuerza" are aggressively truncated, so the most important field on the card is the field least visible; (c) coaching activities (what the coach planned) and workouts (what the athlete did) live as two unrelated stacks in the same day column with no way to express that they describe the same session, despite this being the central question every athlete asks ("did I do what I was told?").

@@ -138,4 +138,29 @@ describe("commitlint subject acceptance", () => {
       `expected 0, got ${r.code}\n${r.stderr}\n${r.stdout}`
     );
   });
+
+  // changesets/action emits a "Version Packages" commit during the Release
+  // workflow. It has no conventional-commit type and would otherwise be
+  // rejected by the husky commit-msg hook, breaking the entire release
+  // pipeline. The `ignores` predicate in commitlint.config.mjs allowlists
+  // that exact subject.
+  test("Version Packages (changesets bot) → exit 0", () => {
+    const r = runCommitlint("Version Packages");
+    if (r.skipped) return;
+    assert.equal(
+      r.code,
+      0,
+      `expected 0, got ${r.code}\n${r.stderr}\n${r.stdout}`
+    );
+  });
+
+  test("Version Packagesfoo (lookalike, no boundary) → non-zero", () => {
+    const r = runCommitlint("Version Packagesfoo");
+    if (r.skipped) return;
+    assert.notEqual(
+      r.code,
+      0,
+      "expected non-zero: only the exact bot subject is allowlisted"
+    );
+  });
 });
