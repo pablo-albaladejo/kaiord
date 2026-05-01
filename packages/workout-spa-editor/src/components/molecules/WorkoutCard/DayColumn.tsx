@@ -1,20 +1,26 @@
 /**
- * DayColumn - Single day in the calendar week view.
- *
- * Shows day header and stacked workout cards.
- * Clickable empty area triggers add-workout flow.
+ * Renders three buckets in order: matched sessions, then solo coaching
+ * plans, then solo executed workouts. Today is signalled via a pill on
+ * the day-name label (NOT a column-wide tint), and the column carries
+ * `aria-current="date"` so assistive tech can locate it without
+ * relying on the visible pill. The empty-day affordance is permanently
+ * visible (rather than hover-only) so first-time and keyboard-first
+ * users discover it without hover state.
  */
 
+import type { MatchedSessionWithMetadata } from "../../../hooks/use-matched-sessions";
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
-import { CoachingActivityCard } from "../CoachingCard/CoachingActivityCard";
-import { WorkoutCard } from "./WorkoutCard";
+import type { CalendarDensity } from "../../../types/user-preferences";
+import { renderDayCards } from "./day-column-cards";
 
 export type DayColumnProps = {
   date: string;
   isToday: boolean;
-  workouts: WorkoutRecord[];
-  coachingActivities?: CoachingActivity[];
+  density?: CalendarDensity;
+  matchedSessions?: MatchedSessionWithMetadata[];
+  soloPlans?: CoachingActivity[];
+  soloActuals?: WorkoutRecord[];
   onWorkoutClick: (workout: WorkoutRecord) => void;
   onEmptyDayClick: (date: string) => void;
   onActivityClick?: (activity: CoachingActivity) => void;
@@ -22,53 +28,63 @@ export type DayColumnProps = {
 
 const DAY_NAMES = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-function getDayLabel(date: string): string {
+const getDayLabel = (date: string): { name: string; num: number } => {
   const d = new Date(date + "T12:00:00Z");
-  const dayIndex = (d.getUTCDay() + 6) % 7;
-  const dayNum = d.getUTCDate();
-  return `${DAY_NAMES[dayIndex]} ${dayNum}`;
-}
+  return {
+    name: DAY_NAMES[(d.getUTCDay() + 6) % 7] ?? "",
+    num: d.getUTCDate(),
+  };
+};
+
+const TODAY_PILL =
+  "rounded-full bg-primary-100 px-1.5 text-primary-900 dark:bg-primary-900 dark:text-primary-100";
 
 export function DayColumn({
   date,
   isToday,
-  workouts,
-  coachingActivities = [],
+  density = "compact",
+  matchedSessions = [],
+  soloPlans = [],
+  soloActuals = [],
   onWorkoutClick,
   onEmptyDayClick,
   onActivityClick,
 }: DayColumnProps) {
   const label = getDayLabel(date);
-  const todayClass = isToday ? "bg-primary-50 dark:bg-primary-950" : "";
+  const total = matchedSessions.length + soloPlans.length + soloActuals.length;
 
   return (
     <div
       data-testid={`day-column-${date}`}
-      className={`flex min-h-[120px] min-w-[120px] flex-1 flex-col rounded-lg border p-2 sm:min-w-0 ${todayClass}`}
+      aria-current={isToday ? "date" : undefined}
+      role="group"
+      className="flex min-h-[120px] min-w-[140px] flex-1 flex-col rounded-lg border p-2 sm:min-w-0"
     >
       <span className="mb-2 text-xs font-semibold text-muted-foreground">
-        {label}
+        <span className={isToday ? TODAY_PILL : ""}>
+          {label.name} {label.num}
+        </span>
+        {isToday && <span className="sr-only"> (today)</span>}
       </span>
       <div className="flex flex-1 flex-col gap-1.5">
-        {coachingActivities.map((a) => (
-          <CoachingActivityCard
-            key={a.id}
-            activity={a}
-            onClick={onActivityClick}
-          />
-        ))}
-        {workouts.map((w) => (
-          <WorkoutCard key={w.id} workout={w} onClick={onWorkoutClick} />
-        ))}
+        {renderDayCards({
+          matchedSessions,
+          soloPlans,
+          soloActuals,
+          density,
+          onWorkoutClick,
+          onActivityClick,
+        })}
       </div>
-      {workouts.length === 0 && coachingActivities.length === 0 && (
+      {total === 0 && (
         <button
           type="button"
           data-testid={`empty-day-${date}`}
-          className="flex-1 rounded border border-dashed border-gray-300 text-xs text-muted-foreground hover:border-primary-400 hover:text-primary-600 transition-colors dark:border-gray-600"
+          aria-label={`Add to ${label.name} ${label.num}`}
+          className="mt-1 flex-1 rounded border border-dashed border-gray-300 text-xs text-muted-foreground transition-colors hover:border-primary-400 hover:text-primary-600 dark:border-gray-600"
           onClick={() => onEmptyDayClick(date)}
         >
-          +
+          + Add
         </button>
       )}
     </div>
