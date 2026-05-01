@@ -100,56 +100,7 @@ jobs:
           echo "✅ All required files present in merged artifact"
 
       - name: Inject SPA route fallback
-        run: |
-          set -e
-          # Server-driven SPA fallback: GitHub Pages serves the root 404.html for any
-          # unresolved path. The redirect script captures /editor/* deep links into a
-          # ?p= query and bounces to the SPA's index.html, which decodes the query
-          # back into a real URL via history.replaceState before React Router boots.
-          # Non-/editor/* paths fall through to the landing's existing 404 markup.
-          cat >> merged-dist/404.html <<'EOF'
-          <script>
-            (function () {
-              var l = window.location;
-              if (l.pathname.indexOf('/editor/') === 0) {
-                l.replace(
-                  l.protocol + '//' + l.host +
-                    '/editor/?p=' +
-                    encodeURIComponent(l.pathname + l.search) +
-                    l.hash
-                );
-              }
-            })();
-          </script>
-          EOF
-
-          # Decoder runs synchronously before the React bundle so the URL settles
-          # to the user's intended deep link before any router subscribes.
-          python3 - <<'PY'
-          import re, pathlib
-          p = pathlib.Path('merged-dist/editor/index.html')
-          html = p.read_text()
-          decoder = (
-              '<script>'
-              '(function(){'
-              'var p=new URLSearchParams(window.location.search).get("p");'
-              'if(p){var d=decodeURIComponent(p);'
-              'window.history.replaceState(null,"",d+window.location.hash);}'
-              '})();'
-              '</script>'
-          )
-          new = re.sub(r'<head>', '<head>\n    ' + decoder, html, count=1)
-          if new == html:
-              raise SystemExit('Could not find <head> in editor/index.html')
-          p.write_text(new)
-          PY
-
-          # Verify both injections landed.
-          grep -q "indexOf('/editor/')" merged-dist/404.html \
-            || { echo "❌ 404.html redirect script missing after injection"; exit 1; }
-          grep -q "URLSearchParams" merged-dist/editor/index.html \
-            || { echo "❌ editor/index.html decoder missing after injection"; exit 1; }
-          echo "✅ SPA route fallback injected"
+        run: node scripts/inject-spa-fallback.mjs merged-dist
 
       - name: Capture SPA build marker
         id: spa_marker
