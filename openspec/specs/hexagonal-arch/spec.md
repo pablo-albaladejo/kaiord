@@ -32,7 +32,7 @@ Domain contains only pure TypeScript types and Zod schemas.
 
 - **GIVEN** an edit to a file in `packages/core/src/domain/`
 - **WHEN** the file contains `import { X } from '../adapters/...'`
-- **THEN** the `scripts/check-architecture.mjs` hook blocks the edit with exit code 2
+- **THEN** the `scripts/check-architecture.mjs` hook blocks the edit with a non-zero exit code (1)
 
 ### Requirement: Application Isolation
 

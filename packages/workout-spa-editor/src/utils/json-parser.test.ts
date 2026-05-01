@@ -465,13 +465,17 @@ describe("parseJSON", () => {
       // this fast-path replacement asserts only what is currently true —
       // parseJSON returns a defined value across small, deterministic sizes.
       // No timing assertions; no production code change.
+
+      // Arrange
       const sizes = [1024, 5 * 1024, 20 * 1024];
 
       for (const bytes of sizes) {
         const json = generateJSONOfSize(bytes);
 
+        // Act
         const result = parseJSON<{ data: unknown[] }>(json);
 
+        // Assert
         expect(result).toBeDefined();
         expect(Array.isArray(result.data)).toBe(true);
       }

@@ -4,7 +4,7 @@ This directory contains test fixtures shared across all packages in the monorepo
 
 ## 📁 Structure
 
-```
+```text
 fixtures/
 ├── fit-files/          # Binary FIT files for tests
 │   ├── WorkoutIndividualSteps.fit
