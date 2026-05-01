@@ -9,7 +9,7 @@ The guard `pathname.indexOf('/editor/') === 0` was added so non-editor 404s on t
 
 User-reported regression (2026-05-01): refreshing `kaiord.com/calendar` returns the blue 404. Investigation:
 
-```
+```text
   ┌──────────────────────────────────────────────────────────┐
   │  vite.config.ts:44                                       │
   │  base: process.env.VITE_BASE_PATH || "/"                 │

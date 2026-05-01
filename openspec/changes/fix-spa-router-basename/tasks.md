@@ -6,7 +6,7 @@ PR 2 (archive): §6 — branch chore/fix-spa-router-basename-archive
 
 ## 1. Phase 1 — Implement the wouter base wrapper
 
-- [ ] 1.0 Worktree setup: `git worktree add -b feature/fix-spa-router-basename /Users/pablo/development/personal/kaiord-routerfix-impl main`. Run `pnpm install` and rebuild workspace deps.
+- [ ] 1.0 Worktree setup: `git worktree add -b feature/fix-spa-router-basename <WORKTREE_DIR>/kaiord-routerfix-impl main` (replace `<WORKTREE_DIR>` with your local worktree parent directory). Run `pnpm install` and rebuild workspace deps.
 - [ ] 1.1 Create `packages/workout-spa-editor/src/router-base.ts` exporting `computeRouterBase(baseUrl: string): string`. Body: `return baseUrl.replace(/\/$/, "")`. One-line, zero dependencies, pure.
 - [ ] 1.2 Edit `packages/workout-spa-editor/src/main.tsx`:
   - Import `Router` from `wouter`.
@@ -69,7 +69,7 @@ PR 2 (archive): §6 — branch chore/fix-spa-router-basename-archive
 - [ ] 5.3 Ensure CI green (including the new `e2e-prod-base` job).
 - [ ] 5.4 Squash merge.
 - [ ] 5.5 Verify in production: navigate to `kaiord.com/editor/`, observe URL becomes `kaiord.com/editor/calendar`, refresh, confirm calendar view re-renders without the blue 404.
-- [ ] 5.6 After merge: clean local worktree (`git worktree remove /Users/pablo/development/personal/kaiord-routerfix-impl`) and delete local branch.
+- [ ] 5.6 After merge: clean local worktree (`git worktree remove <WORKTREE_DIR>/kaiord-routerfix-impl`) and delete local branch.
 
 ## 6. Phase 2 — Archive
 
