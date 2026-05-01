@@ -67,9 +67,9 @@ For each SPA editor component that **directly** consumes `useCoachingSourceFacto
 - Imports and uses the **real** registry bootstrap (e.g., `CoachingRegistryBootstrap` from `coaching-registry-bootstrap.tsx`) — NOT a mock of `useCoachingSourceFactories`.
 - Imports and uses the **real** factories that the production bootstrap registers, so every factory's hook composition runs in the test environment.
 - Provides every required runtime context the bootstrap and its factories transitively need (today, at minimum: `PersistenceProvider` with `createInMemoryPersistence()`).
-- Mounts the component AND co-mounts a `TestProbe` that calls `useCoachingActivities([0])` (or whatever hook materializes the factories at runtime) inside the same provider tree. This forces every registered factory hook to actually execute in the test, so a Rules-of-Hooks regression introduced INSIDE a factory body (not just at the dialog boundary) is caught at `pnpm -r test`. Without the probe, the dialog's post-fix decoupling from the registry would render the smoke test diagnostically inert for factory-internal regressions.
+- Mounts the component AND co-mounts a `TestProbe` that calls `useCoachingActivities(["YYYY-MM-DD"])` (or whatever hook materializes the factories at runtime) inside the same provider tree. This forces every registered factory hook to actually execute in the test, so a Rules-of-Hooks regression introduced INSIDE a factory body (not just at the dialog boundary) is caught at `pnpm -r test`. Without the probe, the dialog's post-fix decoupling from the registry would render the smoke test diagnostically inert for factory-internal regressions.
 - Asserts that rendering does not throw and the component is present in the DOM. Because the dialog is rendered into a body-level Radix portal, the assertion MUST target either the testid (`coaching-activity-dialog`) via `screen.getByTestId(...)` or `document.body`, NOT the test render's local `container`.
-- Additionally asserts the bootstrap registered at least one factory (non-vacuous registration). Today, this means asserting `useCoachingActivities([0]).syncSources.length >= 1` (or a sentinel-factory check). Without this assertion, a regression that empties the bootstrap's factory list would pass the smoke test trivially.
+- Additionally asserts the bootstrap registered at least one factory (non-vacuous registration). Today, this means asserting `useCoachingActivities(["YYYY-MM-DD"]).syncSources.length >= 1` (or a sentinel-factory check). Without this assertion, a regression that empties the bootstrap's factory list would pass the smoke test trivially.
 
 The in-scope component set today is exactly `{ CoachingActivityDialog }`. Any component ADDED in the future that directly consumes `useCoachingSourceFactories` SHALL ship with its own smoke-render test in the same PR.
 
@@ -84,7 +84,7 @@ The purpose of this requirement is to make Rules-of-Hooks regressions and regist
 
 - **GIVEN** a developer introduces a hook call inside a `useEffect` or inside `Array.map` in `useTrain2GoSource` (or any other factory registered by `CoachingRegistryBootstrap`)
 - **WHEN** `pnpm test` runs
-- **THEN** the smoke-render test fails because the `TestProbe` invokes `useCoachingActivities([0])` inside the same provider tree, which transitively calls every factory at hook top-level — the Rules-of-Hooks violation surfaces as React error #321 at render time, before merge
+- **THEN** the smoke-render test fails because the `TestProbe` invokes `useCoachingActivities(["YYYY-MM-DD"])` inside the same provider tree, which transitively calls every factory at hook top-level — the Rules-of-Hooks violation surfaces as React error #321 at render time, before merge
 
 #### Scenario: no-restricted-imports rejects re-coupling of the dialog to the registry at lint time
 

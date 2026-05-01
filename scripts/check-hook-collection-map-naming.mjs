@@ -141,8 +141,12 @@ export function findViolations(source) {
     const callEnd = findCallEndIndex(source, openerEnd);
     if (callEnd === -1) continue;
     const body = source.slice(openerEnd, callEnd);
+    // Match standalone identifier invocations only — `helper.f()` and
+    // `obj.f()` (where the callback param is `f`) MUST NOT count as
+    // an invocation of the callback parameter, otherwise compliant
+    // bodies like `.map((f) => helper.f())` would falsely fail.
     const invokesAsFunction = new RegExp(
-      `\\b${escapeRegex(param)}\\s*\\(`
+      `(?<![\\w$.])${escapeRegex(param)}\\s*\\(`
     ).test(body);
     if (!invokesAsFunction) continue;
     const line = source.slice(0, m.index).split("\n").length;
