@@ -12,6 +12,14 @@ coverage:
     patch:
       default:
         target: 80%
+      bridges:
+        # Bridge packages contain Chrome service-worker boilerplate
+        # (chrome.runtime.lastError handling, listener registrations)
+        # that is awkward to unit-test in isolation. Mirrors the CI
+        # threshold override for these packages.
+        target: 70%
+        flags:
+          - bridges
 
 comment:
   layout: "reach,diff,flags,files"
@@ -46,6 +54,11 @@ flags:
   frontend:
     paths:
       - packages/workout-spa-editor/src/
+    carryforward: true
+  bridges:
+    paths:
+      - packages/garmin-bridge/
+      - packages/train2go-bridge/
     carryforward: true
 
 bundle_analysis:
