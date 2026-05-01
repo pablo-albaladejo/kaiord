@@ -1,10 +1,16 @@
 /**
- * WorkoutCard - Compact card for calendar day columns.
+ * Compact card for executed workouts on the calendar week view.
  *
- * Displays sport, title, duration/distance, source, and state indicator.
+ * Visual contract is shared with CoachingActivityCard and
+ * MatchedSessionCard via CardShell — the workout `state` drives the
+ * lateral border colour (stale/raw → amber, structured/skipped →
+ * slate, ready/pushed → emerald) and the existing state symbol stays
+ * as the in-row indicator with an accessible label.
  */
 
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import { CardShell } from "../CardShell/CardShell";
+import { workoutStateToColourClass } from "../CardShell/status-tokens";
 import { formatDuration, getStateIndicator } from "./workout-card-utils";
 
 export type WorkoutCardProps = {
@@ -18,27 +24,32 @@ export function WorkoutCard({ workout, onClick }: WorkoutCardProps) {
   const duration = workout.raw?.duration;
 
   return (
-    <button
-      type="button"
-      data-testid={`workout-card-${workout.id}`}
-      className="w-full rounded-md border bg-white p-2 text-left text-sm shadow-sm hover:shadow-md transition-shadow dark:bg-gray-800 dark:border-gray-700"
+    <CardShell
+      borderClass={workoutStateToColourClass(workout.state)}
+      ariaLabel={`${title}, ${workout.sport}, ${indicator.label}`}
       onClick={() => onClick(workout)}
-    >
-      <div className="flex items-center gap-1.5">
-        <span
-          className={indicator.className}
-          title={indicator.label}
-          data-testid="state-indicator"
-        >
-          {indicator.symbol}
-        </span>
-        <span className="truncate font-medium">{title}</span>
-      </div>
-      <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
-        <span>{workout.sport}</span>
-        {duration && <span>{formatDuration(duration.value)}</span>}
-        <span className="ml-auto text-xs opacity-60">{workout.source}</span>
-      </div>
-    </button>
+      testId={`workout-card-${workout.id}`}
+      originChip={workout.source}
+      titleRow={
+        <>
+          <span
+            className={indicator.className}
+            data-testid="state-indicator"
+            role="img"
+            aria-label={indicator.label}
+            title={indicator.label}
+          >
+            {indicator.symbol}
+          </span>
+          <span className="min-w-0 flex-1">{title}</span>
+        </>
+      }
+      metadataRow={
+        <>
+          <span>{workout.sport}</span>
+          {duration && <span>{formatDuration(duration.value)}</span>}
+        </>
+      }
+    />
   );
 }

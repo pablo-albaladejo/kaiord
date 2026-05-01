@@ -84,7 +84,7 @@ describe("CalendarWeekGrid", () => {
     expect(screen.getByTestId("workout-card-w1")).toBeInTheDocument();
     expect(screen.getByTestId("coaching-card-c1")).toBeInTheDocument();
     expect(screen.getByText("Coach intervals")).toBeInTheDocument();
-    expect(screen.getByText("TST")).toBeInTheDocument();
+    expect(screen.getByText("· TST")).toBeInTheDocument();
   });
 
   it("renders coaching cards without workouts", () => {
