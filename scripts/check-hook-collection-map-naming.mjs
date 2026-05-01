@@ -34,8 +34,7 @@ const REPO_ROOT = path.resolve(
   ".."
 );
 
-const SPA_SRC_GLOB =
-  "packages/workout-spa-editor/src/**/*.{ts,tsx}";
+const SPA_SRC_GLOB = "packages/workout-spa-editor/src/**/*.{ts,tsx}";
 
 const MAP_CALLBACK_RE =
   /\.map\s*\(\s*\(?\s*([A-Za-z_$][\w$]*)\s*\)?\s*=>\s*([\s\S]*?)\)\s*[,;\.\)]/g;
