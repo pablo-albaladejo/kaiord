@@ -1,12 +1,17 @@
 /* Kaiord Brand Tokens — imported from shared styles */
 @import "../../../../styles/brand-tokens.css";
 
-/* Override @font-face for /docs/ base path — MUST be after brand-tokens import */
+/* Override @font-face for /docs/ base path — MUST be after brand-tokens import.
+   The unicode-range, font-weight, and size-adjust MUST stay byte-equal to
+   styles/brand-tokens.css and packages/workout-spa-editor/src/index.css;
+   only the src: URL differs across surfaces because each Pages base path
+   resolves /fonts/... differently. */
 @font-face {
   font-family: Inter;
   font-style: normal;
   font-weight: 100 900;
   font-display: swap;
+  size-adjust: 100%;
   src: url("/docs/fonts/inter-var-latin.woff2") format("woff2");
   unicode-range:
     U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC,
@@ -141,4 +146,16 @@
 
 .VPFooter a:hover {
   text-decoration: underline;
+}
+
+/* Unified focus-visible ring — see packages/workout-spa-editor/src/index.css
+   for the canonical rule. Width / colour / offset MUST stay in sync across
+   the three surfaces. */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
