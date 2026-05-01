@@ -1,9 +1,15 @@
 /**
  * MobileMenu - Hamburger menu toggle for mobile header nav.
+ *
+ * The Library entry inside the panel navigates to `/library` directly
+ * (via `useLocation`) rather than receiving an `onLibraryClick`
+ * proxy prop — Library is a routed page per the SPA surface-
+ * classification rule.
  */
 
 import { Menu } from "lucide-react";
 import { useState } from "react";
+import { useLocation } from "wouter";
 
 import { Button } from "../../../atoms/Button/Button";
 import { MobileMenuPanel } from "./MobileMenuPanel";
@@ -12,7 +18,6 @@ type MobileMenuProps = {
   activeProfileName: string | null;
   libraryCount: number;
   onProfileClick: () => void;
-  onLibraryClick: () => void;
   onHelpClick: () => void;
   onSettingsClick: () => void;
 };
@@ -21,15 +26,20 @@ export function MobileMenu({
   activeProfileName,
   libraryCount,
   onProfileClick,
-  onLibraryClick,
   onHelpClick,
   onSettingsClick,
 }: MobileMenuProps) {
   const [open, setOpen] = useState(false);
+  const [, navigate] = useLocation();
 
   const handle = (fn: () => void) => () => {
     fn();
     setOpen(false);
+  };
+
+  const handleLibrary = () => {
+    setOpen(false);
+    navigate("/library");
   };
 
   return (
@@ -49,7 +59,7 @@ export function MobileMenu({
             activeProfileName={activeProfileName}
             libraryCount={libraryCount}
             onProfile={handle(onProfileClick)}
-            onLibrary={handle(onLibraryClick)}
+            onLibrary={handleLibrary}
             onHelp={handle(onHelpClick)}
             onSettings={handle(onSettingsClick)}
           />

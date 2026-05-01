@@ -11,7 +11,6 @@ type DesktopNavProps = {
   activeProfileName: string | null;
   libraryCount: number;
   onProfileClick: () => void;
-  onLibraryClick: () => void;
   onHelpClick: () => void;
   onSettingsClick: () => void;
 };
@@ -20,7 +19,6 @@ export function DesktopNav({
   activeProfileName,
   libraryCount,
   onProfileClick,
-  onLibraryClick,
   onHelpClick,
   onSettingsClick,
 }: DesktopNavProps) {
@@ -35,10 +33,7 @@ export function DesktopNav({
         <User className="h-4 w-4" />
         <span>{activeProfileName || "Profiles"}</span>
       </Button>
-      <LibraryButton
-        libraryCount={libraryCount}
-        onLibraryClick={onLibraryClick}
-      />
+      <LibraryButton libraryCount={libraryCount} />
       <Button
         variant="tertiary"
         size="sm"
