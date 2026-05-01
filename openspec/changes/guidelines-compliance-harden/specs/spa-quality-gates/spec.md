@@ -142,7 +142,7 @@ Multi-scope commit subjects (e.g., `refactor(core,fit,tcx): foo`) SHALL be REJEC
 
 ### Requirement: Pre-commit hook does not normalize its own bypass
 
-The husky `pre-commit` hook (`.husky/pre-commit`) and any other file under `.husky/` SHALL NOT contain any line that ENDORSES, INSTRUCTS, or PROVIDES a recipe for bypassing the hook. The forbidden patterns target the *imperative-voice* framing only:
+The husky `pre-commit` hook (`.husky/pre-commit`) and any other file under `.husky/` SHALL NOT contain any line that ENDORSES, INSTRUCTS, or PROVIDES a recipe for bypassing the hook. The forbidden patterns target the _imperative-voice_ framing only:
 
 - `commit --no-verify` preceded by an instruction-form word (`use`, `try`, `run`, `execute`, `:` in a colon-separated list, or appearing inside a here-doc / printf / echo statement).
 - `HUSKY=0` set as an exported variable, suggested in stdout, or in a printed multi-line block.
