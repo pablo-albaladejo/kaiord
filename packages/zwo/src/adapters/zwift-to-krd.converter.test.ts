@@ -69,10 +69,12 @@ describe("convertZwiftToKRD (characterization)", () => {
 
     const zwift = krd.extensions?.zwift as Record<string, unknown> | undefined;
     expect(zwift).toBeDefined();
-    expect(Object.prototype.hasOwnProperty.call(zwift, "author")).toBe(true);
-    expect(Object.prototype.hasOwnProperty.call(zwift, "description")).toBe(
-      true
-    );
+    // The fixture has no top-level <author> or <description> elements, so
+    // the converter passes through `undefined` for both. Asserting the
+    // actual value (rather than just key presence) catches regressions
+    // where the converter starts injecting defaults or stops parsing.
+    expect(zwift?.author).toBeUndefined();
+    expect(zwift?.description).toBeUndefined();
     expect(zwift?.durationType).toBe("time");
   });
 
