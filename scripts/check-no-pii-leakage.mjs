@@ -128,7 +128,10 @@ function shouldScan(name) {
 
 function findFiles() {
   const out = [];
-  for (const sub of ["components", "hooks", "lib"]) {
+  // `lib` includes the new profile-snapshot push pipeline; `adapters/bridge`
+  // handles snapshot serialization and transport — both surface athlete PII
+  // (name, body weight, FTP, HR data) and MUST be subject to R-PIIInterpolation.
+  for (const sub of ["components", "hooks", "lib", "adapters/bridge"]) {
     walk(join(SPA_SRC, sub), (file) => out.push(file));
   }
   return out;

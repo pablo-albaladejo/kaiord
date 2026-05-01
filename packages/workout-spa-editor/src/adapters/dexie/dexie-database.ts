@@ -7,6 +7,16 @@
 
 import Dexie from "dexie";
 
+import {
+  backfillBridgeSnapshotState,
+  backfillUsageRow,
+} from "./dexie-migrations";
+
+export {
+  backfillBridgeSnapshotState,
+  backfillUsageRow,
+} from "./dexie-migrations";
+
 const CORE_V1 = {
   workouts: "id, date, [date+state], [source+sourceId], sport, *tags",
   templates: "id, sport, *tags",
@@ -67,22 +77,19 @@ export class KaiordDatabase extends Dexie {
     // All new tables are empty on first load; no existing rows are mutated.
     // Forward-only: opening an older bundle against a v5 DB raises VersionError.
     this.version(5).stores(CORE_V5);
-  }
-}
-
-export function backfillUsageRow(row: Record<string, unknown>): void {
-  if (typeof row.inputTokens === "number") return;
-  const total = typeof row.totalTokens === "number" ? row.totalTokens : 0;
-  row.inputTokens = total;
-  row.outputTokens = 0;
-  row.legacy = true;
-
-  if (Array.isArray(row.entries)) {
-    row.entries = row.entries.map((entry: Record<string, unknown>) => {
-      if (typeof entry.inputTokens === "number") return entry;
-      const tokens = typeof entry.tokens === "number" ? entry.tokens : 0;
-      return { ...entry, inputTokens: tokens, outputTokens: 0 };
-    });
+    // v6 — bridge profile-snapshot push: backfills `pendingClear: false`
+    // and `lastSuccessfulFingerprint: null` on existing bridge rows so
+    // the snapshot pusher's de-dup and right-to-be-forgotten paths can
+    // assume well-defined state. Stores config is unchanged (the new
+    // fields are non-indexed); the upgrade only touches data.
+    this.version(6)
+      .stores(CORE_V5)
+      .upgrade(async (tx) => {
+        await tx
+          .table("bridges")
+          .toCollection()
+          .modify(backfillBridgeSnapshotState);
+      });
   }
 }
 
