@@ -22,7 +22,7 @@ test.describe("Calendar Navigation", () => {
     await page.goto("/calendar/2026-W15");
     await expect(page.getByTestId("week-navigation")).toBeVisible();
     await expect(
-      page.getByTestId("week-navigation").getByText("2026 W15")
+      page.getByTestId("week-navigation").getByText(/· W15/)
     ).toBeVisible();
   });
 
@@ -63,25 +63,25 @@ test.describe("Calendar Navigation", () => {
 
   test("Click prev week changes URL", async ({ page }) => {
     await page.goto("/calendar/2026-W15");
-    await expect(page.getByText("2026 W15")).toBeVisible();
+    await expect(page.getByText(/· W15/)).toBeVisible();
 
     await page.getByRole("button", { name: "Previous week" }).click();
     await page.waitForURL(/\/calendar\/2026-W14/);
-    await expect(page.getByText("2026 W14")).toBeVisible();
+    await expect(page.getByText(/· W14/)).toBeVisible();
   });
 
   test("Click next week changes URL", async ({ page }) => {
     await page.goto("/calendar/2026-W15");
-    await expect(page.getByText("2026 W15")).toBeVisible();
+    await expect(page.getByText(/· W15/)).toBeVisible();
 
     await page.getByRole("button", { name: "Next week" }).click();
     await page.waitForURL(/\/calendar\/2026-W16/);
-    await expect(page.getByText("2026 W16")).toBeVisible();
+    await expect(page.getByText(/· W16/)).toBeVisible();
   });
 
   test('Click "Today" navigates to current week', async ({ page }) => {
     await page.goto("/calendar/2026-W01");
-    await expect(page.getByText("2026 W01")).toBeVisible();
+    await expect(page.getByText(/· W01/)).toBeVisible();
 
     await page.getByRole("button", { name: "Today" }).click();
 
