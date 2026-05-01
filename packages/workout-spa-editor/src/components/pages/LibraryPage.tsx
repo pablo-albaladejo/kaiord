@@ -4,12 +4,24 @@
  * Reads templates via `useLibraryTemplatesLive` (Dexie + useLiveQuery)
  * and dispatches deletes through the `deleteTemplate` application use
  * case via `usePersistence()`. Errors surface through the toast context.
+ *
+ * Surface contract: this page is the canonical Library destination
+ * (`/library` route). The "Load into editor" CTA per card is gated on
+ * the editor having an active workout — it preserves the workflow
+ * the deleted header-modal previously offered. The page renders an
+ * `<h1>` marked with the route-heading attribute so the focus-on-
+ * route-change hook can move focus deterministically.
  */
 
 import { deleteTemplate } from "../../application/library/delete-template";
 import { usePersistence } from "../../contexts/persistence-context";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useLibraryTemplatesLive } from "../../hooks/use-library-templates-live";
+import {
+  useCurrentWorkout,
+  useLoadWorkout,
+} from "../../store/workout-store-selectors";
+import type { WorkoutTemplate } from "../../types/workout-library";
 import { ScheduleDateDialog } from "../molecules/ScheduleDateDialog";
 import { LibraryPageContent } from "./LibraryPageContent";
 import { LibraryPageHeader } from "./LibraryPageHeader";
@@ -21,6 +33,9 @@ export default function LibraryPage() {
   const { error: showError } = useToastContext();
   const { scheduling, openScheduler, closeScheduler, confirmSchedule } =
     useScheduleTemplate();
+  const currentWorkout = useCurrentWorkout();
+  const loadWorkout = useLoadWorkout();
+  const hasCurrentWorkout = currentWorkout !== null;
 
   const handleDelete = async (id: string) => {
     try {
@@ -32,6 +47,10 @@ export default function LibraryPage() {
         { duration: 5000 }
       );
     }
+  };
+
+  const handleLoad = (template: WorkoutTemplate) => {
+    loadWorkout(template.krd);
   };
 
   if (templates === undefined) {
@@ -47,8 +66,10 @@ export default function LibraryPage() {
       <LibraryPageHeader />
       <LibraryPageContent
         templates={templates}
+        hasCurrentWorkout={hasCurrentWorkout}
         onDelete={handleDelete}
         onSchedule={openScheduler}
+        onLoad={handleLoad}
       />
       <ScheduleDateDialog
         open={scheduling !== null}

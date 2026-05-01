@@ -10,6 +10,7 @@ import { useSearch } from "wouter";
 
 import { useAppHandlers } from "../../hooks/useAppHandlers";
 import { useDeleteCleanup } from "../../hooks/useDeleteCleanup";
+import { ROUTE_HEADING_ATTR } from "../../routing/constants";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
 import { EditorLoading, EditorNoData } from "./EditorLoadingState";
@@ -45,6 +46,9 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   return (
     <div className="space-y-6">
+      <h1 tabIndex={-1} {...{ [ROUTE_HEADING_ATTR]: "" }} className="sr-only">
+        {id ? "Edit workout" : "New workout"}
+      </h1>
       {!id && dateParam && <DateBanner date={dateParam} />}
       {record && (
         <EditorWorkflowBar

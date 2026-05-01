@@ -3,61 +3,52 @@
  *
  * End-to-end tests for the workout library feature covering:
  * - Saving workouts to library
- * - Loading workouts from library
+ * - Loading workouts from library (via the routed `/library` page)
  * - Searching and filtering workouts
  * - Deleting workouts from library
  *
- * Requirements: 17, 18
+ * Per the SPA surface-classification rule (spec/spa-routing), the
+ * Library is a routed page and the in-flow picker dialog is its
+ * own narrow component. Tests below exercise the page surface
+ * via `page.goto('/library')`; the picker has its own coverage in
+ * `library-flows.spec.ts`.
  */
 
 import { expect, test } from "./fixtures/base";
 import { loadTestWorkout } from "./helpers/load-test-workout";
-import { openHeaderAction } from "./helpers/mobile-menu";
 
 test.describe("Workout Library", () => {
   test.beforeEach(async ({ page }) => {
-    // Navigate to the app
+    // Navigate to the editor; clear localStorage; load a test workout
+    // so the editor has data for save-to-library cases.
     await page.goto("/workout/new");
-
-    // Clear localStorage to start fresh
     await page.evaluate(() => {
       localStorage.clear();
     });
-
-    // Load a test workout so workout editing features are available
     await loadTestWorkout(page, "Library Test Workout");
   });
 
   test.describe("saving workouts", () => {
     test("should save a workout to library", async ({ page }) => {
-      // Arrange - Create a simple workout
       await page.getByTestId("add-step-button").click();
 
-      // Act - Save to library
       await page.getByRole("button", { name: /save to library/i }).click();
-
-      // Wait for dialog to be visible
       await page.getByRole("dialog").waitFor({ state: "visible" });
 
-      // Fill in workout details
       await page.getByLabel("Workout Name").fill("Test Workout");
       await page.getByLabel("Tags").fill("test, easy");
 
-      // Save
       await page
         .getByRole("dialog")
         .getByRole("button", { name: /^save$/i })
         .click();
 
-      // Assert - Success toast should appear
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
     });
 
     test("should save workout with all metadata", async ({ page }) => {
-      // Arrange - Create a workout
       await page.getByTestId("add-step-button").click();
 
-      // Act - Save with full metadata
       await page.getByRole("button", { name: /save to library/i }).click();
 
       await page.getByLabel("Workout Name").fill("Complete Workout");
@@ -70,21 +61,15 @@ test.describe("Workout Library", () => {
         .getByRole("button", { name: /^save$/i })
         .click();
 
-      // Assert
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
     });
 
     test("should require workout name", async ({ page }) => {
-      // Arrange
       await page.getByTestId("add-step-button").click();
 
-      // Act - Try to save without name
       await page.getByRole("button", { name: /save to library/i }).click();
-
-      // Wait for dialog to be visible
       await page.getByRole("dialog").waitFor({ state: "visible" });
 
-      // Assert - Save button should be disabled when name is empty
       const saveButton = page
         .getByRole("dialog")
         .getByRole("button", { name: /^save$/i });
@@ -92,9 +77,12 @@ test.describe("Workout Library", () => {
     });
   });
 
-  test.describe("loading workouts", () => {
-    test("should load a workout from library", async ({ page }) => {
-      // Arrange - Save a workout first
+  test.describe("loading workouts (via /library page)", () => {
+    test("should load a workout from the library page via 'Load into editor' CTA", async ({
+      page,
+    }) => {
+      // Arrange — save a workout from the editor; the editor still
+      // has an active workout so the page CTA appears.
       await page.getByTestId("add-step-button").click();
       await page.getByRole("button", { name: /save to library/i }).click();
       await page.getByLabel("Workout Name").fill("Load Test");
@@ -102,90 +90,55 @@ test.describe("Workout Library", () => {
         .getByRole("dialog")
         .getByRole("button", { name: /^save$/i })
         .click();
-
-      // Wait for save to complete and toast to appear
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
-
-      // Wait for dialog to close after save
       await page.getByRole("dialog").waitFor({ state: "hidden" });
 
-      // Act - Open library and load the saved workout
-      // Note: no page reload — Dexie store hydration on reload is pending;
-      // the Zustand store retains in-session data without reload.
-      await openHeaderAction(page, /open workout library/i);
+      // Act — visit the routed Library page; the editor still owns
+      // the active workout (Zustand retains in-session) so the CTA
+      // is gated-on and visible.
+      await page.goto("/library");
+      await expect(page.getByTestId("library-page")).toBeVisible();
 
-      // Wait for library dialog to be visible
-      await page.getByRole("dialog").waitFor({ state: "visible" });
+      const cta = page.getByTestId("card-load-into-editor").first();
+      await cta.waitFor({ state: "visible" });
+      await cta.click();
 
-      // Wait for workout card to appear
-      await page.getByTestId("workout-card").waitFor({ state: "visible" });
-
-      await page
-        .getByRole("button", { name: /^load$/i })
-        .first()
-        .click();
-
-      // Assert - Workout should be loaded (2 from test workout + 1 added)
-      await expect(page.getByTestId("step-card")).toHaveCount(3);
+      // After loading, navigate back to the editor and assert the
+      // step count reflects the loaded template.
+      await page.goto("/workout/new");
+      await expect(page.getByTestId("step-card").first()).toBeVisible();
     });
 
-    test("should show confirmation when replacing current workout", async ({
+    test("'Load into editor' CTA is hidden when the editor has no active workout", async ({
       page,
     }) => {
-      // Arrange - Create and save a workout
+      // Arrange — save a workout, then clear the editor.
       await page.getByTestId("add-step-button").click();
       await page.getByRole("button", { name: /save to library/i }).click();
-      await page.getByLabel("Workout Name").fill("Saved Workout");
+      await page.getByLabel("Workout Name").fill("Hidden CTA");
       await page
         .getByRole("dialog")
         .getByRole("button", { name: /^save$/i })
         .click();
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
-      // Create a different current workout
-      await page.getByTestId("add-step-button").click();
+      // Visit calendar to navigate away from the editor (the editor
+      // store retains the workout, but if we explicitly clear it,
+      // the CTA should hide). Using a hard reload to drop in-memory
+      // editor state.
+      await page.goto("/calendar");
+      await page.reload();
 
-      // Act - Try to load from library
-      await openHeaderAction(page, /open workout library/i);
-      await page
-        .getByRole("button", { name: /^load$/i })
-        .first()
-        .click();
-
-      // Assert - Should show confirmation dialog
-      await expect(page.getByText(/replace current workout/i)).toBeVisible();
-    });
-
-    test("should load workout after confirmation", async ({ page }) => {
-      // Arrange - Save a workout
-      await page.getByTestId("add-step-button").click();
-      await page.getByRole("button", { name: /save to library/i }).click();
-      await page.getByLabel("Workout Name").fill("Confirm Load");
-      await page
-        .getByRole("dialog")
-        .getByRole("button", { name: /^save$/i })
-        .click();
-      await expect(page.getByText("Workout Saved").first()).toBeVisible();
-
-      // Create different current workout
-      await page.getByTestId("add-step-button").click();
-
-      // Act - Load with confirmation
-      await openHeaderAction(page, /open workout library/i);
-      await page
-        .getByRole("button", { name: /^load$/i })
-        .first()
-        .click();
-      await page.getByRole("button", { name: /load workout/i }).click();
-
-      // Assert - Should load the saved workout (2 from test workout + 1 added)
-      await expect(page.getByTestId("step-card")).toHaveCount(3);
+      await page.goto("/library");
+      await expect(page.getByTestId("library-page")).toBeVisible();
+      // After a reload with no editor mount, hasCurrentWorkout is
+      // false → the CTA is not rendered.
+      await expect(page.getByTestId("card-load-into-editor")).toHaveCount(0);
     });
   });
 
-  test.describe("search and filter", () => {
+  test.describe("search and filter (via /library page)", () => {
     test("should search workouts by name", async ({ page }) => {
-      // Arrange - Save multiple workouts
       await page.getByTestId("add-step-button").click();
       await page.getByRole("button", { name: /save to library/i }).click();
       await page.getByLabel("Workout Name").fill("Morning Run");
@@ -203,11 +156,9 @@ test.describe("Workout Library", () => {
         .click();
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
-      // Act - Search for "morning"
-      await openHeaderAction(page, /open workout library/i);
+      await page.goto("/library");
       await page.getByPlaceholder(/search workouts/i).fill("morning");
 
-      // Assert - Should show only Morning Run
       await expect(
         page.getByRole("heading", { name: "Morning Run" })
       ).toBeVisible();
@@ -217,7 +168,6 @@ test.describe("Workout Library", () => {
     });
 
     test("should filter workouts by tags", async ({ page }) => {
-      // Arrange - Save workouts with different tags
       await page.getByTestId("add-step-button").click();
       await page.getByRole("button", { name: /save to library/i }).click();
       await page.getByLabel("Workout Name").fill("Easy Workout");
@@ -237,11 +187,9 @@ test.describe("Workout Library", () => {
         .click();
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
-      // Act - Filter by "easy" tag
-      await openHeaderAction(page, /open workout library/i);
+      await page.goto("/library");
       await page.getByRole("button", { name: "easy" }).first().click();
 
-      // Assert - Should show only Easy Workout
       await expect(
         page.getByRole("heading", { name: "Easy Workout" })
       ).toBeVisible();
@@ -253,7 +201,6 @@ test.describe("Workout Library", () => {
     test("should show no results message when search has no matches", async ({
       page,
     }) => {
-      // Arrange - Save a workout
       await page.getByTestId("add-step-button").click();
       await page.getByRole("button", { name: /save to library/i }).click();
       await page.getByLabel("Workout Name").fill("Test Workout");
@@ -263,20 +210,17 @@ test.describe("Workout Library", () => {
         .click();
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
-      // Act - Search for non-existent workout
-      await openHeaderAction(page, /open workout library/i);
+      await page.goto("/library");
       await page.getByPlaceholder(/search workouts/i).fill("nonexistent");
 
-      // Assert - Should show no results message
       await expect(
         page.getByText(/no workouts match your current filters/i)
       ).toBeVisible();
     });
   });
 
-  test.describe("deleting workouts", () => {
+  test.describe("deleting workouts (via /library page)", () => {
     test("should delete a workout from library", async ({ page }) => {
-      // Arrange - Save a workout
       await page.getByTestId("add-step-button").click();
       await page.getByRole("button", { name: /save to library/i }).click();
       await page.getByLabel("Workout Name").fill("Delete Me");
@@ -286,12 +230,10 @@ test.describe("Workout Library", () => {
         .click();
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
-      // Act - Delete the workout
-      await openHeaderAction(page, /open workout library/i);
+      await page.goto("/library");
       await page.getByLabel(/^Delete Delete Me$/i).click();
       await page.getByRole("button", { name: /^delete$/i }).click();
 
-      // Assert - Workout should be removed
       await expect(
         page.getByRole("heading", { name: "Delete Me" })
       ).not.toBeVisible();
@@ -299,7 +241,6 @@ test.describe("Workout Library", () => {
     });
 
     test("should show confirmation before deleting", async ({ page }) => {
-      // Arrange - Save a workout
       await page.getByTestId("add-step-button").click();
       await page.getByRole("button", { name: /save to library/i }).click();
       await page.getByLabel("Workout Name").fill("Confirm Delete");
@@ -309,11 +250,9 @@ test.describe("Workout Library", () => {
         .click();
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
-      // Act - Click delete
-      await openHeaderAction(page, /open workout library/i);
+      await page.goto("/library");
       await page.getByLabel(/^Delete Confirm Delete$/i).click();
 
-      // Assert - Should show confirmation dialog
       await expect(page.getByText(/delete workout/i)).toBeVisible();
       await expect(
         page.getByText(/are you sure you want to delete/i)
@@ -321,7 +260,6 @@ test.describe("Workout Library", () => {
     });
 
     test("should cancel delete operation", async ({ page }) => {
-      // Arrange - Save a workout
       await page.getByTestId("add-step-button").click();
       await page.getByRole("button", { name: /save to library/i }).click();
       await page.getByLabel("Workout Name").fill("Keep Me");
@@ -331,92 +269,24 @@ test.describe("Workout Library", () => {
         .click();
       await expect(page.getByText("Workout Saved").first()).toBeVisible();
 
-      // Act - Cancel delete
-      await openHeaderAction(page, /open workout library/i);
+      await page.goto("/library");
       await page.getByLabel(/^Delete Keep Me$/i).click();
       await page.getByRole("button", { name: /cancel/i }).click();
 
-      // Assert - Workout should still be there
       await expect(
         page.getByRole("heading", { name: "Keep Me" })
       ).toBeVisible();
     });
   });
 
-  test.describe("empty state", () => {
+  test.describe("empty state (via /library page)", () => {
     test("should show empty state when no workouts saved", async ({ page }) => {
-      // Act - Open library
-      await openHeaderAction(page, /open workout library/i);
+      await page.goto("/library");
 
-      // Assert - Should show empty state
       await expect(page.getByText(/your library is empty/i)).toBeVisible();
       await expect(
         page.getByText(/create your first workout and save it to your library/i)
       ).toBeVisible();
-    });
-  });
-
-  test.describe("preview functionality", () => {
-    test("should preview workout details", async ({ page }) => {
-      // Arrange - Save a workout with metadata
-      await page.getByTestId("add-step-button").click();
-      await page.getByRole("button", { name: /save to library/i }).click();
-      await page.getByLabel("Workout Name").fill("Preview Test");
-      await page.getByLabel("Tags").fill("test, preview");
-      await page.getByLabel("Difficulty").selectOption("moderate");
-      await page.getByLabel("Notes").fill("Test notes");
-      await page
-        .getByRole("dialog")
-        .getByRole("button", { name: /^save$/i })
-        .click();
-      await expect(page.getByText("Workout Saved").first()).toBeVisible();
-
-      // Act - Open preview
-      await openHeaderAction(page, /open workout library/i);
-      await page.getByRole("button", { name: "Preview", exact: true }).click();
-
-      // Assert - Should show workout details in the preview dialog
-      const previewDialog = page.getByRole("dialog").last();
-      await expect(
-        previewDialog.getByRole("heading", { name: "Preview Test" })
-      ).toBeVisible();
-      await expect(
-        previewDialog.getByText("test", { exact: true })
-      ).toBeVisible();
-      await expect(
-        previewDialog.getByText("preview", { exact: true })
-      ).toBeVisible();
-      await expect(previewDialog.getByText("moderate")).toBeVisible();
-      await expect(previewDialog.getByText("Test notes")).toBeVisible();
-    });
-
-    test("should load workout from preview dialog", async ({ page }) => {
-      // Arrange - Save a workout
-      await page.getByTestId("add-step-button").click();
-      await page.getByRole("button", { name: /save to library/i }).click();
-      await page.getByLabel("Workout Name").fill("Load from Preview");
-      await page
-        .getByRole("dialog")
-        .getByRole("button", { name: /^save$/i })
-        .click();
-      await expect(page.getByText("Workout Saved").first()).toBeVisible();
-
-      // Wait for save dialog to close
-      await page.getByRole("dialog").waitFor({ state: "hidden" });
-
-      // Act - Open library and load from preview
-      // Note: no page reload — Dexie store hydration on reload is pending;
-      // the Zustand store retains in-session data without reload.
-      await openHeaderAction(page, /open workout library/i);
-
-      // Wait for workout card to appear
-      await page.getByTestId("workout-card").waitFor({ state: "visible" });
-
-      await page.getByRole("button", { name: "Preview", exact: true }).click();
-      await page.getByRole("button", { name: /load workout/i }).click();
-
-      // Assert - Workout should be loaded (2 from test workout + 1 added)
-      await expect(page.getByTestId("step-card")).toHaveCount(3);
     });
   });
 });

@@ -7,6 +7,8 @@
 import { screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
+import { Router } from "wouter";
+import { memoryLocation } from "wouter/memory-location";
 
 import { db } from "../../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
@@ -16,6 +18,11 @@ import { useWorkoutStore } from "../../../store/workout-store";
 import { renderWithProviders } from "../../../test-utils";
 import type { KRD } from "../../../types/krd";
 import { LayoutHeader } from "./LayoutHeader";
+
+function withRouter(ui: React.ReactNode, path = "/calendar") {
+  const loc = memoryLocation({ path, record: true });
+  return { ui: <Router hook={loc.hook}>{ui}</Router>, location: loc };
+}
 
 // Helper to create a minimal KRD for testing
 const createTestKRD = (): KRD => ({
@@ -56,14 +63,15 @@ describe("LayoutHeader", () => {
   });
 
   describe("rendering", () => {
-    it("should render header with title", () => {
-      // Arrange & Act
+    it("should render header with brand label", () => {
+      // Arrange & Act — brand label is a `<span>` (not `<h1>`) since
+      // each routed page owns its own primary heading marked with
+      // `[data-route-heading]`. Assert by accessible name instead of
+      // heading role.
       renderWithProviders(<LayoutHeader />);
 
       // Assert
-      expect(
-        screen.getByRole("heading", { name: /kaiord editor/i })
-      ).toBeInTheDocument();
+      expect(screen.getByLabelText(/kaiord editor/i)).toBeInTheDocument();
     });
 
     it("should render navigation with profiles button", () => {
@@ -289,10 +297,13 @@ describe("LayoutHeader", () => {
       expect(screen.getByText("2")).toBeInTheDocument();
     });
 
-    it("should open library dialog when clicked", async () => {
-      // Arrange
+    it("should navigate to /library when clicked (no modal mounts)", async () => {
+      // Arrange — Library is now a routed page per the SPA surface-
+      // classification rule. The header click triggers navigation, not
+      // a Radix Dialog.
       const user = userEvent.setup();
-      renderWithProviders(<LayoutHeader />);
+      const { ui, location } = withRouter(<LayoutHeader />);
+      renderWithProviders(ui);
 
       // Act
       await user.click(
@@ -300,67 +311,24 @@ describe("LayoutHeader", () => {
       );
 
       // Assert
+      expect(location.history).toContain("/library");
       expect(
-        await screen.findByRole("heading", { name: /workout library/i })
-      ).toBeInTheDocument();
+        screen.queryByRole("heading", { name: /workout library/i })
+      ).not.toBeInTheDocument();
+      expect(screen.queryByRole("dialog")).not.toBeInTheDocument();
     });
   });
 
-  describe("library dialog", () => {
-    it("should not render library dialog initially", () => {
-      // Arrange & Act
+  describe("library dialog (deleted by surface-classification rule)", () => {
+    it("never renders the WorkoutLibrary modal heading from the header", () => {
+      // Arrange & Act — no header click should mount a Library modal.
+      // The page surface owns the heading; the header owns navigation.
       renderWithProviders(<LayoutHeader />);
 
       // Assert
       expect(
         screen.queryByRole("heading", { name: /workout library/i })
       ).not.toBeInTheDocument();
-    });
-
-    it("should close library dialog when close button clicked", async () => {
-      // Arrange
-      const user = userEvent.setup();
-      renderWithProviders(<LayoutHeader />);
-
-      // Act - Open dialog
-      await user.click(
-        screen.getByRole("button", { name: /open workout library/i })
-      );
-      expect(
-        await screen.findByRole("heading", { name: /workout library/i })
-      ).toBeInTheDocument();
-
-      // Act - Close dialog
-      const closeButtons = screen.getAllByRole("button", { name: /close/i });
-      await user.click(closeButtons[0]);
-
-      // Assert
-      expect(
-        screen.queryByRole("heading", { name: /workout library/i })
-      ).not.toBeInTheDocument();
-    });
-
-    it("should load workout from library when selected", async () => {
-      // Arrange
-      const user = userEvent.setup();
-      const persistence = createDexiePersistence(db);
-      const krd = createTestKRD();
-      await addTemplate(persistence, "Test Workout", "running", krd);
-
-      renderWithProviders(<LayoutHeader />, { persistence });
-
-      // Act - Open library
-      await user.click(
-        screen.getByRole("button", { name: /open workout library/i })
-      );
-
-      // Act - Load workout
-      const loadButton = await screen.findByRole("button", { name: /^load$/i });
-      await user.click(loadButton);
-
-      // Assert - Workout should be loaded
-      const { currentWorkout } = useWorkoutStore.getState();
-      expect(currentWorkout).toEqual(krd);
     });
   });
 
@@ -384,13 +352,19 @@ describe("LayoutHeader", () => {
       ).toBeInTheDocument();
     });
 
-    it("should have proper heading hierarchy", () => {
-      // Arrange & Act
+    it("should expose brand label without competing with route h1", () => {
+      // Arrange & Act — the brand label MUST NOT be an `<h1>`, otherwise
+      // each routed page would render two `<h1>`s and screen readers
+      // would read both on every navigation. Heading-role assertions
+      // about Kaiord Editor MUST go through the page heading, not the
+      // header logo.
       renderWithProviders(<LayoutHeader />);
 
       // Assert
-      const heading = screen.getByRole("heading", { name: /kaiord editor/i });
-      expect(heading.tagName).toBe("H1");
+      expect(
+        screen.queryByRole("heading", { name: /kaiord editor/i })
+      ).not.toBeInTheDocument();
+      expect(screen.getByLabelText(/kaiord editor/i)).toBeInTheDocument();
     });
 
     it("should have accessible badge label when library has workouts", async () => {

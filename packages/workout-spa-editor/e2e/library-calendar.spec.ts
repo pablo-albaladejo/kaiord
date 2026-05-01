@@ -94,20 +94,21 @@ test.describe("Library-Calendar Integration", () => {
     ).toHaveCount(1);
   });
 
-  test('Header "Library" button opens dialog (distinct from /library page)', async ({
+  test('Header "Library" button navigates to /library page (no modal)', async ({
     page,
   }) => {
     await page.goto("/calendar");
 
-    // The header Library button opens the dialog overlay, not the route
+    // Per surface-classification rule, Library is a routed page —
+    // the header click navigates, it does not open a modal.
     await openHeaderAction(page, /open workout library/i);
+    await page.waitForURL(/\/library$/);
 
-    await expect(page.getByRole("dialog")).toBeVisible();
-    // We should still be on /calendar, not /library
-    expect(page.url()).toContain("/calendar");
+    await expect(page.getByTestId("library-page")).toBeVisible();
+    await expect(page.getByRole("dialog")).toHaveCount(0);
   });
 
-  test('Empty day "Add from Library" navigates to /library', async ({
+  test('Empty day "Add from Library" opens the in-flow picker (no navigation)', async ({
     page,
   }) => {
     const dates = getWeekDates();
@@ -117,6 +118,7 @@ test.describe("Library-Calendar Integration", () => {
     await seedWorkouts(page, [
       makeWorkout({ date: dates[0], state: "structured" }),
     ]);
+    await seedTemplates(page, [makeTemplate({ name: "Z2 Ride" })]);
     await page.goto(`/calendar/${weekId}`);
 
     // Click empty day (day 1 has no workouts)
@@ -126,6 +128,9 @@ test.describe("Library-Calendar Integration", () => {
     await expect(page.getByTestId("empty-day-dialog")).toBeVisible();
 
     await page.getByRole("button", { name: /Add from Library/i }).click();
-    await page.waitForURL(/\/library/);
+
+    await expect(page.getByTestId("template-picker-dialog")).toBeVisible();
+    // URL must NOT have navigated to the page route.
+    expect(page.url()).toMatch(new RegExp(`/calendar/${weekId}$`));
   });
 });
