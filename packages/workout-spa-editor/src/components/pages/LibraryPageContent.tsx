@@ -3,6 +3,10 @@
  *
  * Renders library filters, grid, and schedule dialog.
  * Reuses WorkoutLibrary sub-components without dialog chrome.
+ *
+ * The "Load into editor" affordance is shown per-card when the editor
+ * has an active workout, preserving the workflow the deleted header
+ * modal offered (R1 mitigation in design.md).
  */
 
 import { useState } from "react";
@@ -17,14 +21,18 @@ import { LibraryPageGrid } from "./LibraryPageGrid";
 
 type LibraryPageContentProps = {
   templates: WorkoutTemplate[];
+  hasCurrentWorkout: boolean;
   onDelete: (id: string) => void;
   onSchedule: (template: WorkoutTemplate) => void;
+  onLoad: (template: WorkoutTemplate) => void;
 };
 
 export function LibraryPageContent({
   templates,
+  hasCurrentWorkout,
   onDelete,
   onSchedule,
+  onLoad,
 }: LibraryPageContentProps) {
   const filters = useLibraryFilters(templates);
   const [deleteTarget, setDeleteTarget] = useState<WorkoutTemplate | null>(
@@ -65,8 +73,10 @@ export function LibraryPageContent({
         <LibraryPageGrid
           templates={templates}
           filtered={filters.filteredAndSortedTemplates}
+          hasCurrentWorkout={hasCurrentWorkout}
           onDelete={setDeleteTarget}
           onSchedule={onSchedule}
+          onLoad={onLoad}
         />
       )}
       <DeleteWorkoutDialog

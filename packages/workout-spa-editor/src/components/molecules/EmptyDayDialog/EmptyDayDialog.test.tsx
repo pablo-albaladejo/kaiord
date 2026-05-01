@@ -1,20 +1,38 @@
-import { render, screen } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Router } from "wouter";
 import { memoryLocation } from "wouter/memory-location";
 
+import { db } from "../../../adapters/dexie/dexie-database";
+import { createDexiePersistence } from "../../../adapters/dexie/dexie-persistence-adapter";
+import { addTemplate } from "../../../application/library/add-template";
+import { renderWithProviders } from "../../../test-utils";
+import type { KRD } from "../../../types/krd";
 import { EmptyDayDialog } from "./EmptyDayDialog";
+
+const makeKrd = (): KRD => ({
+  version: "1.0",
+  type: "structured_workout",
+  metadata: { created: "2026-01-01T00:00:00.000Z", sport: "cycling" },
+});
 
 function renderWithRouter(ui: React.ReactNode, path = "/calendar") {
   const loc = memoryLocation({ path, record: true });
   return {
-    ...render(<Router hook={loc.hook}>{ui}</Router>),
+    ...renderWithProviders(<Router hook={loc.hook}>{ui}</Router>, {
+      persistence: createDexiePersistence(db),
+    }),
     location: loc,
   };
 }
 
 describe("EmptyDayDialog", () => {
+  beforeEach(async () => {
+    await db.table("templates").clear();
+    await db.table("workouts").clear();
+  });
+
   it("renders dialog when date is provided (open)", () => {
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
 
@@ -46,7 +64,7 @@ describe("EmptyDayDialog", () => {
     expect(screen.getByText("Create new workout")).toBeInTheDocument();
   });
 
-  it("navigates to library and closes on Add from Library click", async () => {
+  it("opens TemplatePickerDialog (does not navigate) on Add from Library", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
     const { location } = renderWithRouter(
@@ -55,8 +73,61 @@ describe("EmptyDayDialog", () => {
 
     await user.click(screen.getByText("Add from Library"));
 
-    expect(onClose).toHaveBeenCalledOnce();
-    expect(location.history).toContain("/library");
+    await waitFor(() => {
+      expect(screen.getByTestId("template-picker-dialog")).toBeInTheDocument();
+    });
+    // No navigation away from the calendar.
+    expect(location.history).not.toContain("/library");
+    // Empty-day dialog stays mounted while picker is open so the
+    // user can cancel and pick "Create new workout" without a re-open.
+    expect(onClose).not.toHaveBeenCalled();
+  });
+
+  it("does not show the page-level ScheduleDateDialog during the in-flow flow", async () => {
+    const user = userEvent.setup();
+    renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
+
+    await user.click(screen.getByText("Add from Library"));
+
+    await waitFor(() => {
+      expect(screen.getByTestId("template-picker-dialog")).toBeInTheDocument();
+    });
+    expect(
+      screen.queryByRole("dialog", { name: /schedule workout/i })
+    ).not.toBeInTheDocument();
+  });
+
+  it("schedules the picked template for the dialog's date and closes both dialogs", async () => {
+    const persistence = createDexiePersistence(db);
+    const template = await addTemplate(
+      persistence,
+      "Tempo Ride",
+      "cycling",
+      makeKrd()
+    );
+
+    const user = userEvent.setup();
+    const onClose = vi.fn();
+    renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={onClose} />);
+
+    await user.click(screen.getByText("Add from Library"));
+
+    await waitFor(() => {
+      expect(screen.getByText("Tempo Ride")).toBeInTheDocument();
+    });
+
+    await user.click(screen.getByText("Tempo Ride"));
+
+    await waitFor(() => {
+      expect(onClose).toHaveBeenCalled();
+    });
+    const workouts = await db.table("workouts").toArray();
+    expect(workouts).toHaveLength(1);
+    expect(workouts[0].date).toBe("2025-03-15");
+    expect(workouts[0].krd).toEqual(template.krd);
+    expect(
+      screen.queryByTestId("template-picker-dialog")
+    ).not.toBeInTheDocument();
   });
 
   it("navigates to new workout with date and closes on Create click", async () => {

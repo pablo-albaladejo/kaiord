@@ -50,9 +50,12 @@ test.describe("Import/Export Multiple Formats", () => {
 
   test.beforeEach(async ({ page }) => {
     await page.goto("/workout/new");
-    await expect(
-      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
-    ).toBeVisible();
+    // Editor is mounted once the route-heading h1 is in the DOM.
+    // Per the SPA surface-classification rule each routed page owns
+    // its own `<h1 data-route-heading>` (the brand label in the header
+    // is no longer an h1). Wait on that contract instead of a brand
+    // string so we don't recouple the gate to a marketing label.
+    await expect(page.locator("[data-route-heading]")).toBeAttached();
   });
 
   test("should import KRD file and display workout", async ({ page }) => {
@@ -439,9 +442,8 @@ test.describe("Import/Export Mobile Flow", () => {
   test("should handle file upload on mobile", async ({ page }) => {
     // Arrange
     await page.goto("/workout/new");
-    await expect(
-      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
-    ).toBeVisible();
+    // Wait for the editor route to mount (data-route-heading contract).
+    await expect(page.locator("[data-route-heading]")).toBeAttached();
 
     const testWorkout = {
       version: "1.0",
