@@ -1,0 +1,12 @@
+{
+  "name": "@kaiord/internal-shared-assets",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Non-publishable assets shared across extension packages (icon master SVG, popup CSS master). NOT distributed via npm; consumed at build time by repo-root scripts. Promote individual sub-trees to a published @kaiord/* package only if they grow runtime code.",
+  "files": [],
+  "scripts": {
+    "lint": "echo 'No source code — assets only' && exit 0",
+    "test": "echo 'No source code — assets only' && exit 0",
+    "build": "echo 'No source code — assets only' && exit 0"
+  }
+}
