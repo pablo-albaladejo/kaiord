@@ -9,7 +9,7 @@ The system SHALL call `analytics.event('route-error', payload)` when `RouteError
 - `message: string` — `error.message` scrubbed and then truncated to ≤ 500 characters (defaulting to the empty string when `error.message` is `undefined`, `null`, or empty).
 - `componentStack: string` — `info.componentStack` scrubbed and then truncated to ≤ 1000 characters (defaulting to the empty string when missing).
 
-`scrubAnalyticsString(input: string): string` SHALL replace, in this order, all substring matches with the corresponding placeholder:
+`scrubAnalyticsString(input: string, maxLen?: number): string` SHALL replace, in this order, all substring matches with the corresponding placeholder, then (when `maxLen` is provided) truncate the result to at most `maxLen` characters:
 
 1. UUID v4 / v5 (`/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi`) → `<uuid>`.
 2. Bearer tokens (`/Bearer\s+\S+/g`) → `Bearer <token>`.
