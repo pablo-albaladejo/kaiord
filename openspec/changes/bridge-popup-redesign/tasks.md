@@ -10,10 +10,10 @@ PR 7 (verify-and-archive):       §11 (lint/changesets/validate), §12 (e2e veri
 
 ## 1. Spike — confirm wire facts and tooling before committing
 
-- [ ] 1.1 From a logged-in browser session, capture one live `/api/v2/profile/ping` JSON response from Train2Go and pin which field (if any) carries the coach/trainer name. Record the verdict in `design.md` Open Questions Q2 and proceed accordingly (extract it OR drop the sub-line entirely — do NOT add a new endpoint).
-- [ ] 1.2 Run `pnpm why sharp` and `pnpm why @napi-rs/canvas` from the repo root; document the chosen rasterizer in `design.md` Open Questions Q1. If neither is present transitively, prefer `sharp` as a direct repo-root devDependency (script-only, NOT extension-shipped).
-- [ ] 1.3 Sanity-check that the existing Garmin `ping` envelope (`/workout-service/workouts?start=0&limit=1`) carries any user-display field; if not, the popup omits the display-name sub-line. Record verdict.
-- [ ] 1.4 Audit `packages/workout-spa-editor/src/adapters/bridge/bridge-transport.ts` `sendBridgeMessage(extensionId, message: unknown)` to confirm it accepts the new `{ action: "profile-snapshot" | "profile-snapshot-clear", ... }` shape without any port-surface change. If a port change IS required, halt and add a `spa-bridge-protocol` delta requirement BEFORE proceeding.
+- [x] 1.1 From a logged-in browser session, capture one live `/api/v2/profile/ping` JSON response from Train2Go and pin which field (if any) carries the coach/trainer name. Record the verdict in `design.md` Open Questions Q2 and proceed accordingly (extract it OR drop the sub-line entirely — do NOT add a new endpoint).
+- [x] 1.2 Run `pnpm why sharp` and `pnpm why @napi-rs/canvas` from the repo root; document the chosen rasterizer in `design.md` Open Questions Q1. If neither is present transitively, prefer `sharp` as a direct repo-root devDependency (script-only, NOT extension-shipped).
+- [x] 1.3 Sanity-check that the existing Garmin `ping` envelope (`/workout-service/workouts?start=0&limit=1`) carries any user-display field; if not, the popup omits the display-name sub-line. Record verdict.
+- [x] 1.4 Audit `packages/workout-spa-editor/src/adapters/bridge/bridge-transport.ts` `sendBridgeMessage(extensionId, message: unknown)` to confirm it accepts the new `{ action: "profile-snapshot" | "profile-snapshot-clear", ... }` shape without any port-surface change. If a port change IS required, halt and add a `spa-bridge-protocol` delta requirement BEFORE proceeding.
 
 ## 2. Snapshot DTO and constants in `@kaiord/core` (failing tests first)
 
@@ -60,12 +60,12 @@ PR 7 (verify-and-archive):       §11 (lint/changesets/validate), §12 (e2e veri
 
 ## 6. Icon master, build script, and mechanical guards — failing tests first
 
-- [ ] 6.1 Author the shared SVG master at `packages/_shared/extension-icon/master.svg` with a clearly-marked accent color attribute (`fill="var(--accent, #007cc3)"` or a `data-accent` placeholder) that the build script substitutes.
-- [ ] 6.2 Add `scripts/build-extension-icons.mjs` that takes `--bridge garmin|train2go` and `--out <path>` and writes `icon{16,48,128}.png`. Implementation rasterizes via the rasterizer chosen in 1.2.
-- [ ] 6.3 Add `scripts/build-extension-icons.test.mjs` (node:test) covering: produces three PNGs of the expected dimensions; the accent color is reflected in the output (sample-pixel test against the SVG accent token); running for both bridges yields six files. **Tests fail first.**
-- [ ] 6.4 Add `scripts/check-extension-icons-distinct.mjs` that fails if (a) Garmin and Train2Go PNGs of the same size are below an inter-icon mean-color-delta threshold OR (b) at 16×16, the accent color (within ±15° hue tolerance of the bridge's accent token) constitutes less than 25% of non-transparent pixel mass. Co-located test asserts the guard fails on identical inputs, fails on a thin-stripe accent fixture, and passes on the produced PNGs.
-- [ ] 6.5 Wire `pnpm icons:build` and `pnpm lint:icons-distinct` in the root `package.json`. Add `pnpm lint:icons-distinct` to the lint job alongside the existing script-tests so the husky `pre-commit` hook and CI pick it up.
-- [ ] 6.6 Run `pnpm icons:build` and commit the regenerated PNGs. Verify by eye in the toolbar that the two icons are distinguishable at 16×16.
+- [x] 6.1 Author the shared SVG master at `packages/_shared/extension-icon/master.svg` with a clearly-marked accent color attribute (`fill="var(--accent, #007cc3)"` or a `data-accent` placeholder) that the build script substitutes.
+- [x] 6.2 Add `scripts/build-extension-icons.mjs` that takes `--bridge garmin|train2go` and `--out <path>` and writes `icon{16,48,128}.png`. Implementation rasterizes via the rasterizer chosen in 1.2.
+- [x] 6.3 Add `scripts/build-extension-icons.test.mjs` (node:test) covering: produces three PNGs of the expected dimensions; the accent color is reflected in the output (sample-pixel test against the SVG accent token); running for both bridges yields six files. **Tests fail first.**
+- [x] 6.4 Add `scripts/check-extension-icons-distinct.mjs` that fails if (a) Garmin and Train2Go PNGs of the same size are below an inter-icon mean-color-delta threshold OR (b) at 16×16, the accent color (within ±15° hue tolerance of the bridge's accent token) constitutes less than 25% of non-transparent pixel mass. Co-located test asserts the guard fails on identical inputs, fails on a thin-stripe accent fixture, and passes on the produced PNGs.
+- [x] 6.5 Wire `pnpm icons:build` and `pnpm lint:icons-distinct` in the root `package.json`. Add `pnpm lint:icons-distinct` to the lint job alongside the existing script-tests so the husky `pre-commit` hook and CI pick it up.
+- [x] 6.6 Run `pnpm icons:build` and commit the regenerated PNGs. Verify by eye in the toolbar that the two icons are distinguishable at 16×16.
 
 ## 7. Privacy-surface mechanical guard
 

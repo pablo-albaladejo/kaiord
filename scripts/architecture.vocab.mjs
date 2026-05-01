@@ -70,4 +70,7 @@ export const PACKAGE_DEPS = {
   // dependency on @kaiord/core.
   "garmin-bridge": ["@kaiord/core"],
   "train2go-bridge": ["@kaiord/core"],
+  // Static-asset package — SVG icon master + popup CSS master shared
+  // across both bridges. Private, never published, zero deps.
+  _shared: [],
 };
