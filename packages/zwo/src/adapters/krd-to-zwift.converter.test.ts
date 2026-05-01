@@ -1,0 +1,72 @@
+import { describe, expect, it } from "vitest";
+import { createMockLogger, loadKrdFixture } from "@kaiord/core/test-utils";
+
+import { convertKRDToZwift } from "./krd-to-zwift.converter";
+
+// Characterization tests for convertKRDToZwift. Capture current behavior
+// against canonical KRD fixtures so the converter cannot regress without
+// a deliberate test update. Production code is not modified by PR3.
+describe("convertKRDToZwift (characterization)", () => {
+  it("emits an XML declaration and workout_file root element", () => {
+    const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
+    const logger = createMockLogger();
+
+    const xml = convertKRDToZwift(krd, logger);
+
+    expect(xml.startsWith('<?xml version="1.0" encoding="UTF-8"?>')).toBe(true);
+    expect(xml).toContain("<workout_file");
+    expect(xml).toContain("</workout_file>");
+  });
+
+  it("declares the kaiord namespace on the workout_file root", () => {
+    const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
+    const logger = createMockLogger();
+
+    const xml = convertKRDToZwift(krd, logger);
+
+    expect(xml).toContain(
+      'xmlns:kaiord="http://kaiord.dev/zwift-extensions/1.0"'
+    );
+  });
+
+  it("includes the workout name from extensions.structured_workout", () => {
+    const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
+    const logger = createMockLogger();
+
+    const xml = convertKRDToZwift(krd, logger);
+
+    expect(xml).toContain("<name>Example 1</name>");
+  });
+
+  it("emits a SteadyState block for individual steps fixture", () => {
+    const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
+    const logger = createMockLogger();
+
+    const xml = convertKRDToZwift(krd, logger);
+
+    expect(xml).toContain("<workout>");
+    expect(xml).toContain("SteadyState");
+  });
+
+  it("emits a repeating IntervalsT block for the repeat fixture", () => {
+    const krd = loadKrdFixture("WorkoutRepeatSteps.krd");
+    const logger = createMockLogger();
+
+    const xml = convertKRDToZwift(krd, logger);
+
+    expect(xml).toContain("<workout>");
+    expect(xml).toContain("IntervalsT");
+  });
+
+  it("throws when extensions.structured_workout is missing", () => {
+    const logger = createMockLogger();
+    const krd = {
+      version: "1.0" as const,
+      type: "structured_workout" as const,
+      metadata: { sport: "cycling" as const },
+      extensions: {},
+    };
+
+    expect(() => convertKRDToZwift(krd, logger)).toThrow();
+  });
+});

@@ -213,6 +213,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          # Deep clone so the commitlint backstop step can resolve the
+          # base..head revision range against the PR's merge base.
+          fetch-depth: 0
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
@@ -227,6 +231,14 @@ jobs:
 
       - name: Run scripts unit tests
         run: pnpm test:scripts
+
+      - name: Validate commit messages (commitlint backstop)
+        if: github.event_name == 'pull_request'
+        # Re-validates every commit on the PR branch via commitlint, defending
+        # against contributors who bypassed the husky commit-msg hook with
+        # `--no-verify`. Rule R-CommitFormat is enforced both locally
+        # (commit-msg hook) and at merge time (this step).
+        run: pnpm exec commitlint --from "${{ github.event.pull_request.base.sha }}" --to "${{ github.event.pull_request.head.sha }}"
 
       - name: Check architecture boundaries
         run: pnpm arch:check

@@ -44,22 +44,25 @@ describe("createZwiftValidator", () => {
       }
     );
 
-    it.skip("should use XSD validator in Node.js environment", async () => {
-      // SKIPPED: Dynamic imports with vi.resetModules() can timeout in CI
-      // Arrange
-      // Ensure we're in Node.js environment (window should be undefined)
-      const originalWindow = global.window;
-      // @ts-expect-error - Ensuring Node.js environment
-      global.window = undefined;
+    it.skipIf(typeof window !== "undefined")(
+      "should use XSD validator in Node.js environment",
+      { timeout: 30_000 },
+      async () => {
+        // Skips cleanly under browser-mode runs; runs in Node CI.
+        // Arrange
+        // Ensure we're in Node.js environment (window should be undefined)
+        const originalWindow = global.window;
+        // @ts-expect-error - Ensuring Node.js environment
+        global.window = undefined;
 
-      // Reset modules to force re-evaluation of isBrowser
-      vi.resetModules();
+        // Reset modules to force re-evaluation of isBrowser
+        vi.resetModules();
 
-      // Dynamically import to get fresh module with new isBrowser value
-      const { createZwiftValidator } = await import("./xsd-validator");
+        // Dynamically import to get fresh module with new isBrowser value
+        const { createZwiftValidator } = await import("./xsd-validator");
 
-      const validator = createZwiftValidator(logger);
-      const validXml = `<?xml version="1.0" encoding="UTF-8"?>
+        const validator = createZwiftValidator(logger);
+        const validXml = `<?xml version="1.0" encoding="UTF-8"?>
 <workout_file>
   <name>Test Workout</name>
   <sportType>bike</sportType>
@@ -68,16 +71,17 @@ describe("createZwiftValidator", () => {
   </workout>
 </workout_file>`;
 
-      // Act
-      const result = await validator(validXml);
+        // Act
+        const result = await validator(validXml);
 
-      // Assert
-      expect(result.valid).toBe(true);
-      expect(result.errors).toHaveLength(0);
+        // Assert
+        expect(result.valid).toBe(true);
+        expect(result.errors).toHaveLength(0);
 
-      // Cleanup
-      global.window = originalWindow;
-    });
+        // Cleanup
+        global.window = originalWindow;
+      }
+    );
 
     /**
      * Property 6: Environment detection reflects current state

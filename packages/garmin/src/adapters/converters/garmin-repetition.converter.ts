@@ -1,6 +1,6 @@
 import type { RepetitionBlock } from "@kaiord/core";
 
-import type { TargetMapperOptions } from "../mappers/target.mapper";
+import type { TargetMapperOptions } from "../mappers/target.converter";
 import { ConditionTypeId, StepTypeId } from "../schemas/common";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
 import { mapWorkoutStep } from "./garmin-workout-step.converter";

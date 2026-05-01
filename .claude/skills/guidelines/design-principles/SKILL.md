@@ -34,6 +34,8 @@ description: Read this guideline when writing or reviewing TypeScript code, nami
 | `*.mapper.ts`    | Simple transformation, no logic | MUST NOT have tests |
 | `*.converter.ts` | Complex logic, branching        | MUST have tests     |
 
+Enforcement: scripts/check-mapper-no-tests.mjs (R-MapperNoTests) and scripts/check-converter-has-tests.mjs (R-ConverterHasTests).
+
 ## Comments
 
 Write no comments by default. Add one only when the WHY is non-obvious: a hidden constraint, a subtle invariant, a specific bug workaround. Never describe WHAT the code does — well-named identifiers do that.

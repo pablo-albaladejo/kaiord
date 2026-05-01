@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import type { Logger } from "@kaiord/core";
-import { mapTargetType, convertTcxTarget } from "./tcx-to-krd.mapper";
+import { mapTargetType, convertTcxTarget } from "./tcx-target-walker.converter";
 
 const createMockLogger = (): Logger => ({
   debug: vi.fn(),
