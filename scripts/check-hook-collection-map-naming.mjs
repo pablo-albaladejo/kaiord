@@ -35,10 +35,16 @@ const TS_EXTENSIONS = new Set([".ts", ".tsx"]);
 
 // Match the start of every `.map(<param>` shape; the body length is
 // determined by a balanced-paren scan so multi-line / nested-brace
-// callback bodies are captured correctly. Three opener variants:
+// callback bodies are captured correctly. Arrow-function opener
+// variants only (function-keyword callbacks are NOT covered):
 //   1. .map((<param>) => ...
 //   2. .map(<param> => ...
-//   3. .map(function (<param>) { ... })  [not common; same param-name rule]
+//
+// TypeScript type annotations on the callback parameter (e.g.,
+// `(f: Type) => f(...)`) and return-type annotations (e.g.,
+// `(f): ReturnType => f(...)`) are also NOT covered. In practice
+// these forms are uncommon in hook-collection .map() calls; if they
+// emerge, extend MAP_OPENER_RE or add an explicit test fixture.
 const MAP_OPENER_RE =
   /\.map\s*\(\s*(?:\(\s*([A-Za-z_$][\w$]*)\s*\)|([A-Za-z_$][\w$]*))\s*=>/g;
 
