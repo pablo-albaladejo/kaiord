@@ -173,79 +173,79 @@ For each rename (3.1–3.7), the cycle is: rename source + rename test + update 
 
 ### 3.1 Garmin target mapper → converter
 
-- [ ] 3.1.1 `git mv packages/garmin/src/adapters/mappers/target.mapper.ts → target.converter.ts`
-- [ ] 3.1.2 `git mv packages/garmin/src/adapters/mappers/target.mapper.test.ts → target.converter.test.ts`
-- [ ] 3.1.3 update imports across `packages/garmin/src/**/*.ts` and any consumer that referenced the old path; update the package barrel `packages/garmin/src/index.ts` (or sub-barrel) so the exported symbol name is unchanged
-- [ ] 3.1.4 `pnpm --filter @kaiord/garmin test` passes; `pnpm --filter @kaiord/garmin build` passes (consumers' imports resolve via unchanged exported symbols)
+- [x] 3.1.1 `git mv packages/garmin/src/adapters/mappers/target.mapper.ts → target.converter.ts`
+- [x] 3.1.2 `git mv packages/garmin/src/adapters/mappers/target.mapper.test.ts → target.converter.test.ts`
+- [x] 3.1.3 update imports across `packages/garmin/src/**/*.ts` and any consumer that referenced the old path; update the package barrel `packages/garmin/src/index.ts` (or sub-barrel) so the exported symbol name is unchanged
+- [x] 3.1.4 `pnpm --filter @kaiord/garmin test` passes; `pnpm --filter @kaiord/garmin build` passes (consumers' imports resolve via unchanged exported symbols)
 
 ### 3.2 FIT krd-to-fit-target-power mapper → converter
 
-- [ ] 3.2.1 rename source + test (`git mv` ×2)
-- [ ] 3.2.2 update imports + `packages/fit/src/index.ts` barrel
-- [ ] 3.2.3 `pnpm --filter @kaiord/fit test` and `build` pass
+- [x] 3.2.1 rename source + test (`git mv` ×2)
+- [x] 3.2.2 update imports + `packages/fit/src/index.ts` barrel
+- [x] 3.2.3 `pnpm --filter @kaiord/fit test` and `build` pass
 
 ### 3.3 FIT krd-to-fit-target-heart-rate mapper → converter
 
-- [ ] 3.3.1 rename source + test (`git mv` ×2)
-- [ ] 3.3.2 update imports + barrel
-- [ ] 3.3.3 `pnpm --filter @kaiord/fit test` and `build` pass
+- [x] 3.3.1 rename source + test (`git mv` ×2)
+- [x] 3.3.2 update imports + barrel
+- [x] 3.3.3 `pnpm --filter @kaiord/fit test` and `build` pass
 
 ### 3.4 FIT krd-to-fit-metadata mapper → converter
 
-- [ ] 3.4.1 rename source + test (`git mv` ×2)
-- [ ] 3.4.2 update imports + barrel
-- [ ] 3.4.3 `pnpm --filter @kaiord/fit test` and `build` pass
+- [x] 3.4.1 rename source + test (`git mv` ×2)
+- [x] 3.4.2 update imports + barrel
+- [x] 3.4.3 `pnpm --filter @kaiord/fit test` and `build` pass
 
 ### 3.5 TCX tcx-to-krd target mapper → converter
 
-- [ ] 3.5.1 rename source + test under `packages/tcx/src/adapters/target/`
-- [ ] 3.5.2 update imports + `packages/tcx/src/index.ts` barrel
-- [ ] 3.5.3 `pnpm --filter @kaiord/tcx test` and `build` pass
+- [x] 3.5.1 rename source + test under `packages/tcx/src/adapters/target/`
+- [x] 3.5.2 update imports + `packages/tcx/src/index.ts` barrel
+- [x] 3.5.3 `pnpm --filter @kaiord/tcx test` and `build` pass
 
 ### 3.6 TCX duration mapper → converter
 
-- [ ] 3.6.1 rename source + test under `packages/tcx/src/adapters/duration/`
-- [ ] 3.6.2 update imports + barrel
-- [ ] 3.6.3 `pnpm --filter @kaiord/tcx test` and `build` pass
+- [x] 3.6.1 rename source + test under `packages/tcx/src/adapters/duration/`
+- [x] 3.6.2 update imports + barrel
+- [x] 3.6.3 `pnpm --filter @kaiord/tcx test` and `build` pass
 
 ### 3.7 SPA train2go coaching-record mapper → converter
 
-- [ ] 3.7.1 rename source + test under `packages/workout-spa-editor/src/adapters/train2go/`
-- [ ] 3.7.2 update imports + barrel (if any)
-- [ ] 3.7.3 `pnpm --filter @kaiord/workout-spa-editor test` and `build` pass
+- [x] 3.7.1 rename source + test under `packages/workout-spa-editor/src/adapters/train2go/`
+- [x] 3.7.2 update imports + barrel (if any)
+- [x] 3.7.3 `pnpm --filter @kaiord/workout-spa-editor test` and `build` pass
 
 ### 3.8 Drain mapper-no-tests allowlist
 
-- [ ] 3.8.1 set `ALLOWLIST` in `scripts/check-mapper-no-tests.mjs` to `new Set()` (empty)
-- [ ] 3.8.2 `pnpm test:scripts` passes (no remaining `*.mapper.test.{ts,tsx}` exist)
+- [x] 3.8.1 set `ALLOWLIST` in `scripts/check-mapper-no-tests.mjs` to `new Set()` (empty)
+- [x] 3.8.2 `pnpm test:scripts` passes (no remaining `*.mapper.test.{ts,tsx}` exist)
 
 ### 3.9 Add characterization tests for ZWO krd-to-zwift converter (production code unchanged)
 
-- [ ] 3.9.1 write characterization tests at `packages/zwo/src/adapters/krd-to-zwift.converter.test.ts` covering current behavior on canonical KRD fixtures (loaded via `@kaiord/core/test-utils`); each test asserts the converter's CURRENT output, not a desired output
-- [ ] 3.9.2 verify `pnpm --filter @kaiord/zwo test` passes (production code is unchanged; tests should be green on first run)
+- [x] 3.9.1 write characterization tests at `packages/zwo/src/adapters/krd-to-zwift.converter.test.ts` covering current behavior on canonical KRD fixtures (loaded via `@kaiord/core/test-utils`); each test asserts the converter's CURRENT output, not a desired output
+- [x] 3.9.2 verify `pnpm --filter @kaiord/zwo test` passes (production code is unchanged; tests should be green on first run)
 
 ### 3.10 Add characterization tests for ZWO zwift-to-krd converter
 
-- [ ] 3.10.1 write characterization tests at `packages/zwo/src/adapters/zwift-to-krd.converter.test.ts` for current behavior
-- [ ] 3.10.2 verify `pnpm --filter @kaiord/zwo test` passes
+- [x] 3.10.1 write characterization tests at `packages/zwo/src/adapters/zwift-to-krd.converter.test.ts` for current behavior
+- [x] 3.10.2 verify `pnpm --filter @kaiord/zwo test` passes
 
 ### 3.11 Add characterization tests for Garmin garmin-repetition converter
 
-- [ ] 3.11.1 write characterization tests at `packages/garmin/src/adapters/converters/garmin-repetition.converter.test.ts` for current behavior
-- [ ] 3.11.2 verify `pnpm --filter @kaiord/garmin test` passes
+- [x] 3.11.1 write characterization tests at `packages/garmin/src/adapters/converters/garmin-repetition.converter.test.ts` for current behavior
+- [x] 3.11.2 verify `pnpm --filter @kaiord/garmin test` passes
 
 ### 3.12 Drain converter-has-tests allowlist
 
-- [ ] 3.12.1 set `ALLOWLIST` in `scripts/check-converter-has-tests.mjs` to `new Set()` (empty)
-- [ ] 3.12.2 `pnpm test:scripts` passes
+- [x] 3.12.1 set `ALLOWLIST` in `scripts/check-converter-has-tests.mjs` to `new Set()` (empty)
+- [x] 3.12.2 `pnpm test:scripts` passes
 
 ### 3.13 PR3 close-out
 
-- [ ] 3.13.1 `pnpm -r test:coverage` (thresholds: 80% core, 70% frontend) — coverage MUST hold; renames preserve all tests, new converter tests can only raise coverage
-- [ ] 3.13.2 `pnpm -r build` zero warnings (consumer barrels still resolve every export; build verifies the rename did not break the public API of any package)
-- [ ] 3.13.3 `pnpm lint` zero errors/warnings
-- [ ] 3.13.4 NO changeset (file rename, exported symbol names unchanged → no behavioral change for consumers of `@kaiord/garmin`, `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, or `@kaiord/workout-spa-editor`). The "internal-rename-no-changeset" exception is codified in `git-strategy/SKILL.md` (see task 4.6.4)
-- [ ] 3.13.5 open PR titled `chore(scripts): mapper-to-converter rename driven by guideline guards` (the rename is mechanically driven by the `R-MapperNoTests` and `R-ConverterHasTests` scripts shipped in PR1, so `chore(scripts)` is the honest single scope; affected packages enumerated in PR body)
+- [x] 3.13.1 `pnpm -r test:coverage` (thresholds: 80% core, 70% frontend) — coverage MUST hold; renames preserve all tests, new converter tests can only raise coverage
+- [x] 3.13.2 `pnpm -r build` zero warnings (consumer barrels still resolve every export; build verifies the rename did not break the public API of any package)
+- [x] 3.13.3 `pnpm lint` zero errors/warnings
+- [x] 3.13.4 NO changeset (file rename, exported symbol names unchanged → no behavioral change for consumers of `@kaiord/garmin`, `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, or `@kaiord/workout-spa-editor`). The "internal-rename-no-changeset" exception is codified in `git-strategy/SKILL.md` (see task 4.6.4)
+- [x] 3.13.5 open PR titled `chore(scripts): mapper-to-converter rename driven by guideline guards` (the rename is mechanically driven by the `R-MapperNoTests` and `R-ConverterHasTests` scripts shipped in PR1, so `chore(scripts)` is the honest single scope; affected packages enumerated in PR body)
 
 ## 4. PR4 — Test hygiene + doc alignment (drain `R-NoUnconditionalSkip` + finish docs)
 

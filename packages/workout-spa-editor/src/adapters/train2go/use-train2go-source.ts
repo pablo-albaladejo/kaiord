@@ -16,7 +16,7 @@ import { useTrain2GoStore } from "../../store/train2go-store";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import type { CoachingSource } from "../../types/coaching-source";
 import { bridgeDiscovery } from "../bridge/bridge-discovery";
-import { toCoachingActivity } from "./coaching-record-to-activity.mapper";
+import { toCoachingActivity } from "./coaching-record-to-activity.converter";
 import { createTrain2GoCoachingTransport } from "./train2go-coaching-transport";
 import {
   useConnectCallback,

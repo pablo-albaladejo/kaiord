@@ -11,8 +11,8 @@ import {
   fitValueToStroke,
   mapKrdStrokeToGarmin,
 } from "../mappers/stroke.mapper";
-import type { TargetMapperOptions } from "../mappers/target.mapper";
-import { mapKrdTargetToGarmin } from "../mappers/target.mapper";
+import type { TargetMapperOptions } from "../mappers/target.converter";
+import { mapKrdTargetToGarmin } from "../mappers/target.converter";
 import { StepTypeId } from "../schemas/common";
 import type { GarminWorkoutStepInput } from "../schemas/input/types";
 

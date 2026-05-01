@@ -57,7 +57,7 @@ packages/garmin/
         intensity.mapper.ts
         sport.mapper.ts
         stroke.mapper.ts
-        target.mapper.ts
+        target.converter.ts
       schemas/             # Zod schemas
         common/            # Shared enums and types
         input/             # Flexible input schemas

@@ -3,7 +3,7 @@
  *
  * Replaces the old `train2go-mapper.test.ts`. The mapper chain is now
  * Train2GoActivity → CoachingActivityRecord (this file) →
- * CoachingActivity (coaching-record-to-activity.mapper.ts).
+ * CoachingActivity (coaching-record-to-activity.converter.ts).
  */
 
 import { describe, expect, it } from "vitest";
