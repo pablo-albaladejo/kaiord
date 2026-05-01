@@ -84,7 +84,7 @@ export function runCheck({ packagesRoot } = {}) {
         "*.converter.{ts,tsx} files MUST have a co-located " +
         `*.converter.test.{ts,tsx} sibling. Expected: ${rel.replace(
           CONVERTER_RE,
-          ".converter.test.ts"
+          ".converter.test.$1"
         )}`,
     });
   }
