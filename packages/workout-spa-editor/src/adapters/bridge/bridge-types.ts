@@ -24,6 +24,22 @@ export type RegisteredBridge = {
    * transition). Undefined for bridges never marked removed.
    */
   removedAt?: number;
+  /**
+   * Content fingerprint of the most recent successful `profile-snapshot`
+   * push to this bridge (FNV-1a 32-bit hex via `fingerprintSnapshot`
+   * from `@kaiord/core`). The SPA skips a push whose fingerprint
+   * matches this value, so consecutive pushes of identical content
+   * collapse to one transport call. `null` / `undefined` means no
+   * successful push has been recorded yet.
+   */
+  lastSuccessfulFingerprint?: string | null;
+  /**
+   * Right-to-be-forgotten flag: set when the user deletes the active
+   * profile while this bridge is UNAVAILABLE. The next VERIFIED
+   * transition emits `profile-snapshot-clear` BEFORE any fresh snapshot
+   * push, then clears the flag.
+   */
+  pendingClear?: boolean;
 };
 
 export type BridgePersistedRow = Omit<RegisteredBridge, never>;
