@@ -11,7 +11,7 @@ description: Read this guideline when placing new code in a layer, reviewing imp
 domain ← ports ← application ← adapters
 ```
 
-No rightward imports. Enforced by `check-architecture.js` pre-commit hook.
+No rightward imports. Enforced by `scripts/check-architecture.mjs` pre-commit hook.
 Canonical reference: `openspec/specs/hexagonal-arch/spec.md`.
 
 | Layer          | Lives in                                         | Depends on          | Rules                                                        |

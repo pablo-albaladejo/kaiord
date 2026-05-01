@@ -297,7 +297,7 @@ describe("scope", () => {
     );
   });
 
-  test("ALLOWLIST contains exactly 5 entries (drained in PR4)", () => {
-    assert.equal(ALLOWLIST.size, 5);
+  test("ALLOWLIST is empty (drained in PR4)", () => {
+    assert.equal(ALLOWLIST.size, 0);
   });
 });
