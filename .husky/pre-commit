@@ -9,9 +9,6 @@ if [ $? -ne 0 ]; then
   echo "❌ Build failed! Commit blocked."
   echo ""
   echo "Fix the build errors and try again."
-  echo ""
-  echo "To skip this check (NOT RECOMMENDED):"
-  echo "  git commit --no-verify"
   exit 1
 fi
 
@@ -28,13 +25,28 @@ if [ $? -ne 0 ]; then
   echo "❌ TypeScript type check failed! Commit blocked."
   echo ""
   echo "Fix the type errors and try again."
-  echo ""
-  echo "To skip this check (NOT RECOMMENDED):"
-  echo "  git commit --no-verify"
   exit 1
 fi
 
 echo "✅ Type check passed!"
+echo ""
+echo "🧪 Running scripts/ unit tests..."
+
+# scripts/*.test.mjs runs BEFORE pnpm test so an `it.only` (which silently
+# masks every other test in a file) is rejected before the test runner can
+# report a green run on a single test. See R-NoUnconditionalSkip.
+pnpm test:scripts
+
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ scripts/ tests failed! Commit blocked."
+  echo ""
+  echo "Fix the failing tests:"
+  echo "  pnpm test:scripts"
+  exit 1
+fi
+
+echo "✅ scripts/ tests passed!"
 echo ""
 echo "🧪 Running tests before commit..."
 
@@ -48,29 +60,7 @@ if [ $? -ne 0 ]; then
   echo ""
   echo "Fix the failing tests and try again:"
   echo "  pnpm test:watch"
-  echo ""
-  echo "To skip this check (NOT RECOMMENDED):"
-  echo "  git commit --no-verify"
   exit 1
 fi
 
 echo "✅ All tests passed!"
-echo ""
-echo "🧪 Running scripts/ unit tests..."
-
-# Run node:test for scripts/*.test.mjs (archive invariants, etc.)
-pnpm test:scripts
-
-if [ $? -ne 0 ]; then
-  echo ""
-  echo "❌ scripts/ tests failed! Commit blocked."
-  echo ""
-  echo "Fix the failing tests:"
-  echo "  pnpm test:scripts"
-  echo ""
-  echo "To skip this check (NOT RECOMMENDED):"
-  echo "  git commit --no-verify"
-  exit 1
-fi
-
-echo "✅ scripts/ tests passed!"

@@ -18,12 +18,14 @@ const baseActivity: CoachingActivity = {
 };
 
 describe("CoachingActivityCard", () => {
-  it("renders title and sport", () => {
+  it("renders title and the origin chip (sport label is icon-only)", () => {
     render(<CoachingActivityCard activity={baseActivity} />);
 
     expect(screen.getByText("Intervals")).toBeInTheDocument();
-    expect(screen.getByText("Cycling")).toBeInTheDocument();
-    expect(screen.getByText("T2G")).toBeInTheDocument();
+    // Sport label is conveyed by aria-label on the icon, not duplicated as text.
+    expect(screen.getByRole("img", { name: "Cycling" })).toBeInTheDocument();
+    expect(screen.queryByText("Cycling")).not.toBeInTheDocument();
+    expect(screen.getByText("· T2G")).toBeInTheDocument();
   });
 
   it("renders duration", () => {
@@ -31,14 +33,36 @@ describe("CoachingActivityCard", () => {
     expect(screen.getByText("1:30 h")).toBeInTheDocument();
   });
 
-  it("renders intensity dots", () => {
+  it("renders intensity dots with an accessible name", () => {
     render(<CoachingActivityCard activity={baseActivity} />);
-    expect(screen.getByTitle("Intensity: 3/5")).toBeInTheDocument();
+    expect(screen.getByLabelText("Intensity 3 of 5")).toBeInTheDocument();
   });
 
-  it("renders status", () => {
+  it("uses the lateral border colour driven by status (pending → amber-600)", () => {
     render(<CoachingActivityCard activity={baseActivity} />);
-    expect(screen.getByText("pending")).toBeInTheDocument();
+    const button = screen.getByTestId("coaching-card-train2go:123");
+    expect(button.className).toContain("border-l-4");
+    expect(button.className).toContain("border-amber-600");
+    expect(button.className).not.toContain("border-rose");
+    expect(button.className).not.toContain("dashed");
+  });
+
+  it("renders the status icon (Pending) with an accessible label", () => {
+    render(<CoachingActivityCard activity={baseActivity} />);
+    expect(screen.getByRole("img", { name: "Pending" })).toBeInTheDocument();
+  });
+
+  it("hides status text in compact density (icon only)", () => {
+    render(<CoachingActivityCard activity={baseActivity} density="compact" />);
+    // Text 'PENDING' must NOT be in the metadata row
+    expect(screen.queryByText(/^PENDING$/i)).not.toBeInTheDocument();
+  });
+
+  it("shows status text in comfortable density", () => {
+    render(
+      <CoachingActivityCard activity={baseActivity} density="comfortable" />
+    );
+    expect(screen.getByText("Pending")).toBeInTheDocument();
   });
 
   it("calls onClick with the activity (no inline expand)", async () => {
@@ -65,5 +89,23 @@ describe("CoachingActivityCard", () => {
     expect(screen.queryByRole("textbox")).not.toBeInTheDocument();
     expect(screen.queryByText("Edit")).not.toBeInTheDocument();
     expect(screen.queryByText("Delete")).not.toBeInTheDocument();
+  });
+
+  it("renders different border colours for completed and skipped", () => {
+    const { rerender } = render(
+      <CoachingActivityCard
+        activity={{ ...baseActivity, status: "completed" }}
+      />
+    );
+    expect(
+      screen.getByTestId("coaching-card-train2go:123").className
+    ).toContain("border-emerald-600");
+
+    rerender(
+      <CoachingActivityCard activity={{ ...baseActivity, status: "skipped" }} />
+    );
+    expect(
+      screen.getByTestId("coaching-card-train2go:123").className
+    ).toContain("border-slate-500");
   });
 });

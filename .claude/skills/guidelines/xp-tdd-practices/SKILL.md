@@ -22,6 +22,8 @@ The failing test task MUST immediately precede its implementation task. Do not b
 
 Types, interfaces, DTOs, config files, and pure wiring tasks are plain checkboxes — no TDD format.
 
+**Characterization tests** for unchanged production code (e.g., adding a `*.converter.test.ts` next to a `*.converter.ts` whose logic is not modified) use plain checkboxes — they describe current behavior, not new behavior, so the RED → GREEN → REFACTOR cycle does not apply.
+
 ## Bug fixes
 
 A bug fix that changes observable behavior MUST start with a failing regression test that reproduces the bug, then the fix that makes it pass.

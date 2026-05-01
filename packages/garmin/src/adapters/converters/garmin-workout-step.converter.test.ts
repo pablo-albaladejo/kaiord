@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { mapWorkoutStep } from "./garmin-workout-step.converter";
 import type { WorkoutStep } from "@kaiord/core";
-import type { PaceZoneTable } from "../mappers/target.mapper";
+import type { PaceZoneTable } from "../mappers/target.converter";
 
 const buildWorkoutStep = (overrides?: Partial<WorkoutStep>): WorkoutStep => ({
   stepIndex: 0,
