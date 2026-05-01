@@ -55,6 +55,7 @@ The application SHALL expose `getUserPreferences(input: { profileId: string, def
 3. Otherwise, returns a synthesised default `{ profileId: input.profileId, calendarDensity: input.defaultDensity ?? "compact", updatedAt: deps.clock() }` WITHOUT writing it.
 
 The derived default for `calendarDensity` SHALL be (computed by the caller, since the application layer is viewport-agnostic):
+
 - `compact` when the viewport width is `>= 768px` (desktop / tablet landscape)
 - `comfortable` when the viewport width is `< 768px` (mobile / tablet portrait)
 
