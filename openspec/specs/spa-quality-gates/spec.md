@@ -151,22 +151,27 @@ The script's `ALLOWLIST` MUST be the empty Set before this change is archived.
 
 The repository SHALL contain a static-source check at `scripts/check-no-unconditional-skip.mjs` that fails on any of: `it.skip`, `test.skip`, `describe.skip`, `it.only`, `test.only`, `describe.only`, `it.todo`, `test.todo` call-expression access in any `*.test.{ts,tsx}` or `*.spec.{ts,tsx}` file under `packages/`. The rule ID is `R-NoUnconditionalSkip`. The script SHALL be tested by `scripts/check-no-unconditional-skip.test.mjs` and wired into `pnpm test:scripts`.
 
-> Note on `it.todo`: rejection is currently unconditional. The team is aware this conflicts with Vitest's planned-test workflow; a follow-up `repo-quality-gates` change may revisit this decision (Open Question 2 in the proposal). Contributors blocked by this rule SHOULD open an issue rather than work around it with an empty `it("planned", () => {})`.
-
-The check SHALL recognize and reject all four syntactic dispatch shapes (mirroring the precedent in `scripts/check-no-pii-leakage.mjs`):
+The check SHALL recognize and reject all four syntactic dispatch shapes:
 
 1. **Member dispatch**: `it.skip(...)`, `test.only(...)`, `describe.todo(...)`.
 2. **Computed-member dispatch**: `it["skip"](...)`, `test["only"](...)`, `describe["todo"](...)`.
-3. **Destructured dispatch**: `const { skip } = it; skip(...);` — the script tracks `it`/`test`/`describe` destructurings within a file and treats subsequent calls to those bound names under the same rule.
-4. **Re-bound dispatch**: `const myIt = it; myIt.skip(...);` — the script tracks `const X = it|test|describe` rebindings and treats `<X>.<method>(...)` under the same rule.
+3. **Destructured dispatch**: `const { skip } = it; skip(...);` and renames `const { only: myOnly } = test;` — the script tracks depth-1 destructurings of `skip`, `only`, `todo`, and `skipIf` from `it`/`test`/`describe` and treats subsequent calls to those bound names under the same rule.
+4. **Re-bound dispatch**: `const myIt = it; myIt.skip(...);` — the script tracks depth-1 `const X = it|test|describe` rebindings and treats `<X>.<method>(...)` under the same rule.
+
+Chain re-binds (e.g., `const my = it; const { skip } = my; skip(...)`) remain documented residual risk — vanishingly rare in practice and not depth-1.
+
+#### Allowance: `*.todo` with non-expired deadline comment
+
+The check SHALL allow `*.todo(...)` calls (across all four dispatch shapes) when the line **immediately above** the call contains a comment of the form `// TODO(YYYY-MM-DD): <reason>` whose date is not yet expired (compared against the current system date). The date format is strictly `YYYY-MM-DD`. The deadline allowance applies ONLY to `*.todo` — `*.skip` and `*.only` remain unconditionally rejected. When the deadline passes, CI fails with the expired date in the message until the test is implemented or the deadline is extended via PR.
 
 The check SHALL allow the conditional forms `it.skipIf(<expr>)`, `test.skipIf(<expr>)`, `describe.skipIf(<expr>)` ONLY when `<expr>` contains at least one AST node of kind `Identifier`, `MemberExpression`, `CallExpression`, or `NewExpression`. All other constructs (literals; template literals without `${...}` substitutions; unary, binary, or logical expressions whose every reachable leaf is a literal — e.g., `!!1`, `1 + 1`, `true && true`) SHALL be rejected as literal-only because they are functionally equivalent to an unconditional skip. `NewExpression` is included so legitimate runtime forms like `skipIf(new URL(import.meta.url).hostname === "ci")` pass; the constructor invocation contributes runtime evaluation. The check SHALL apply the same four-shape dispatch detection to `skipIf` so a contributor cannot bypass via `it["skipIf"](true)` or destructured/re-bound forms.
 
-A test that cannot run unconditionally MUST take one of the three paths in `R-NoUnconditionalSkip`:
+A test that cannot run unconditionally MUST take one of the four paths in `R-NoUnconditionalSkip`:
 
 - **Path (a) — `skipIf(<runtime-expr>)`**: env-gated or feature-detected, e.g., `describe.skipIf(!process.env.GARMIN_EMAIL)`.
 - **Path (b) — fast-path replacement**: replace the skipped block with a deterministic test that asserts only what is currently true.
 - **Path (c) — deletion**: remove the test if the behavior is no longer relevant (with reasoning in the PR description).
+- **Path (d) — `*.todo` with deadline**: only for planned tests; an immediately-preceding `// TODO(YYYY-MM-DD): reason` comment with a non-expired date.
 
 The script's `ALLOWLIST` MUST be the empty Set before this change is archived.
 
@@ -207,6 +212,30 @@ The husky `pre-commit` hook SHALL run `pnpm test:scripts` BEFORE `pnpm test`, so
 - **GIVEN** a file containing `describe.skipIf(!process.env.GARMIN_EMAIL || !process.env.GARMIN_PASSWORD)("Garmin Connect Integration", ...)`
 - **WHEN** `pnpm test:scripts` runs
 - **THEN** the process exits with code 0 and stderr does NOT contain `R-NoUnconditionalSkip` for this file
+
+#### Scenario: it.todo with non-expired deadline is allowed
+
+- **GIVEN** a file containing two adjacent lines `// TODO(2030-01-01): finish auth flow` followed by `it.todo("auth flow", () => {});`
+- **WHEN** `pnpm test:scripts` runs
+- **THEN** the process exits with code 0 and stderr does NOT contain `R-NoUnconditionalSkip` for this file
+
+#### Scenario: it.todo with expired deadline is rejected
+
+- **GIVEN** a file containing two adjacent lines `// TODO(2020-01-01): finish auth flow` followed by `it.todo("auth flow", () => {});`
+- **WHEN** `pnpm test:scripts` runs
+- **THEN** the process exits with a non-zero code and stderr contains `R-NoUnconditionalSkip`, the file path, and the literal substring `expired` and the date `2020-01-01`
+
+#### Scenario: it.todo with no deadline comment is rejected
+
+- **GIVEN** a file containing `it.todo("auth flow", () => {});` with no immediately-preceding `// TODO(YYYY-MM-DD): ...` comment
+- **WHEN** `pnpm test:scripts` runs
+- **THEN** the process exits with a non-zero code and stderr contains `R-NoUnconditionalSkip` and the message `no deadline comment`
+
+#### Scenario: deadline allowance does NOT apply to .skip
+
+- **GIVEN** a file containing `// TODO(2030-01-01): fix later` immediately followed by `it.skip("renders", () => {});`
+- **WHEN** `pnpm test:scripts` runs
+- **THEN** the process exits with a non-zero code and stderr contains `R-NoUnconditionalSkip` for the `.skip` call (the deadline allowance applies only to `.todo`)
 
 ### Requirement: Conventional-commit format gate
 
