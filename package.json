@@ -52,7 +52,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test && pnpm test:scripts",
-    "lint": "pnpm -r lint && pnpm lint:archive && pnpm lint:archive-index && pnpm lint:specs && pnpm lint:tsup-watchdog && pnpm lint:mapper-no-tests && pnpm lint:converter-has-tests && pnpm lint:husky-no-bypass && pnpm lint:package-deps && pnpm lint:architecture && pnpm lint:no-unconditional-skip && pnpm lint:no-library-dual-mount && pnpm lint:allowlists-empty",
+    "lint": "pnpm -r lint && pnpm lint:archive && pnpm lint:archive-index && pnpm lint:specs && pnpm lint:tsup-watchdog && pnpm lint:mapper-no-tests && pnpm lint:converter-has-tests && pnpm lint:husky-no-bypass && pnpm lint:package-deps && pnpm lint:architecture && pnpm lint:no-unconditional-skip && pnpm lint:no-library-dual-mount && pnpm lint:allowlists-empty && pnpm lint:icons-distinct",
     "lint:fix": "pnpm -r lint:fix && prettier --write .",
     "lint:packages": "pnpm -r lint",
     "lint:archive": "node scripts/check-archive-dates.mjs",
@@ -67,7 +67,9 @@
     "lint:no-unconditional-skip": "node scripts/check-no-unconditional-skip.mjs",
     "lint:no-library-dual-mount": "node scripts/check-no-library-dual-mount.mjs",
     "lint:allowlists-empty": "node scripts/check-allowlists-empty.mjs",
+    "lint:icons-distinct": "node scripts/check-extension-icons-distinct.mjs",
     "lint:links": "bash scripts/lint-links.sh",
+    "icons:build": "node scripts/build-extension-icons.mjs",
     "test:scripts": "node --test scripts/*.test.mjs",
     "archive:index": "node scripts/generate-archive-index.mjs",
     "format": "prettier --write .",
