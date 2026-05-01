@@ -77,10 +77,10 @@ Clicking a workout card SHALL navigate to the editor. Clicking a coaching activi
 
 The view-model layer SHALL map the `complianceScore` (per `spa-session-match` "Compliance score derivation") to a visual bucket via a pure utility `complianceBucket(score: number | null): "neutral" | "amber" | "mid" | "emerald"` using these closed/open intervals:
 
-- `null`        → **neutral**  (slate-400 lateral border, no gradient)
-- `[0, 0.5)`    → **amber**    (amber-600 lateral border)
-- `[0.5, 0.8)` → **mid**      (linear gradient amber-600 → emerald-600 sampled at midpoint, ≈ `yellow-700`)
-- `[0.8, 1.0]` → **emerald**  (emerald-600 lateral border)
+- `null` → **neutral** (slate-400 lateral border, no gradient)
+- `[0, 0.5)` → **amber** (amber-600 lateral border)
+- `[0.5, 0.8)` → **mid** (linear gradient amber-600 → emerald-600 sampled at midpoint, ≈ `yellow-700`)
+- `[0.8, 1.0]` → **emerald** (emerald-600 lateral border)
 
 Boundaries are exact and deterministic — `0.5` is `mid`, `0.8` is `emerald`. The function is owned by `spa-calendar` (it is view-model presentation logic — it converts a domain score into a presentation bucket); it lives in `application/compliance-bucket.ts` (a SPA-internal pure module). The mid-bucket sampled colour (`yellow-700` per the contrast-test task 4.5) MUST achieve ≥ 3:1 contrast against a white card body per WCAG 1.4.11.
 
@@ -118,12 +118,14 @@ Defensive contract: although `computeComplianceScore` is specified to return val
 The calendar SHALL expose a hook `useMatchedSessions(profileId, days): MatchedSession[]` where each `MatchedSession` is `{ match: SessionMatch, activity: CoachingActivity, workout: WorkoutRecord, complianceScore: number | null }`. The `complianceScore` SHALL be computed by composing `parseCoachingDuration(activity.duration)` and `workout.raw.duration?.value` through the pure `computeComplianceScore` function (per `spa-session-match` "Compliance score derivation").
 
 The hook SHALL satisfy these observable invariants:
+
 - The hook SHALL NOT issue more than O(1) reads per cross-table dimension per render — concretely, no more than one read on `session_matches`, one read on `coachingActivities`, and one read on `workouts` per re-render of the hook (no per-row enumeration). The exact read mechanism (e.g., `useLiveQuery` + `bulkGet`) is implementation detail (see design D9), but tests SHALL assert the read-count budget by mock-call counting.
 - The hook SHALL re-evaluate when any of (a) the `session_matches` query result changes, (b) the active `profileId` changes, or (c) the consuming page re-renders (which itself happens when its own `coachingActivities` / `workouts` queries fire). It SHALL NOT subscribe directly to `coachingActivities` or `workouts` on its own — relying on the parent calendar page is intentional, to keep the read budget bounded.
 - **Parent-subscription contract (normative)**: the hook MUST be mounted within a parent that subscribes to `coachingActivities` and `workouts` for the same `profileId` and `days` window. The `CalendarPage` is the canonical caller; any future caller (month view, mobile drawer, etc.) MUST either provide equivalent parent subscriptions OR be implemented as a separate hook that includes the subscriptions internally. The hook SHALL emit a development-mode console warning (`process.env.NODE_ENV !== 'production'`) when no parent subscription is detected within one render cycle of mount, so misuse is caught early. This contract is documented in design D9.
 - The result SHALL be deterministic given the same inputs.
 
 `MatchedSessionCard` SHALL render with:
+
 - `aria-label="Matched session: <activity.title>; planned <plannedDur> minutes; actual <actualDur> minutes; <percent>% compliance"` (when both durations are present), or `aria-label="Matched session: <activity.title>; compliance unavailable"` when `complianceScore` is `null`.
 - A tooltip on the card root showing the same compliance reading as the `aria-label`. The tooltip SHALL follow the WAI-ARIA Tooltip pattern (focus-revealable, dismissable via Escape, paired with `aria-describedby` on the trigger). Native HTML `title=` MAY be present as a fallback for non-AT mouse hover but SHALL NOT be the only mechanism.
 - In `comfortable` density, the compliance percentage SHALL render as visible on-card text (`text-[10px] text-slate-600`) so it does not require hover to read.
@@ -242,10 +244,12 @@ The toggle's icon SHALL reflect the **next** state (the action it will perform),
 The toggle button SHALL use the WAI-ARIA Switch pattern: `role="switch"` with `aria-checked={density === "compact"}` (interpretation: "compact view is the active state" when checked). The action-label `aria-label` provides the verb; `aria-checked` provides the state — together, screen readers announce both. Example VoiceOver readout: "Switch to comfortable view, switch, on" when in compact, "Switch to compact view, switch, off" when in comfortable. The Switch pattern is preferred over `aria-pressed` because density is a binary on/off state selector, not an action toggle (per WAI-ARIA Authoring Practices §3.27).
 
 In `compact` density:
+
 - Cards render the lateral border colour and a small status icon (`Clock` / `Check` / `Minus`) with `aria-label` per "Workout cards with state indicators" — no visible status text.
 - `MatchedSessionCard` collapses to a single row showing only the actual duration with the compliance gradient on the lateral border; the compliance percentage remains in the `aria-label` and tooltip.
 
 In `comfortable` density:
+
 - Cards render the lateral border, the status icon, and the status text in small caps adjacent to the icon (e.g., `Pending`, `Completed`, `Skipped`).
 - `MatchedSessionCard` renders both "Plan" and "Actual" rows in the body, plus the visible compliance percentage.
 
