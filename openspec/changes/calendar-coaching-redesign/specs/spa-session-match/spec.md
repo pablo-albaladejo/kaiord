@@ -16,7 +16,6 @@ A `SessionMatch` SHALL be a domain aggregate that links exactly one `CoachingAct
 ```
 
 The `source` field SHALL distinguish three provenance cases for analytics and bug triage:
-
 - `"manual"`: the user explicitly invoked match via the dialog "Match to…" action.
 - `"auto-suggestion"`: the user accepted an auto-match suggestion produced by `autoMatchSessions`. Accepting a suggestion is recorded as `"auto-suggestion"`, NOT `"manual"`, so analytics can distinguish heuristic acceptance from explicit picker selection.
 - `"auto-conversion"`: the use case `convertCoachingActivity` produced a workout from a coaching activity and auto-linked them.
@@ -156,7 +155,6 @@ The heuristic SHALL be:
    - **Either side missing or unparseable**: `score = null` (semantic "unknown") and `reasons = [{ code: "sport-family-match", family }, { code: "duration-unknown" }]`. NOT the substituted `0.5` from earlier drafts — using `null` avoids collision with the `[0.5, 0.8)` mid bucket in the visual encoding (per `spa-calendar` "Compliance bucket boundaries"), which would otherwise paint an unknown-duration suggestion the same colour as a true 50%-compliance match. The UI SHALL render `null` via the `neutral` bucket (grey lateral border).
 
    Every accepted suggestion's `reasons[0]` SHALL be `{ code: "sport-family-match", family: <canonicalFamily> }` since same-sport-family is a precondition (step 1) that produced the candidate; it is recorded for UI display and analytics provenance.
-
 3. Filter to suggestions whose `score !== null AND score >= 0.6` **OR** whose `score === null` (the duration-unknown case). The `null` bypass keeps semantically-valid same-family candidates in the queue; the user reviews and decides. The heuristic does not silently drop unknown-duration candidates and does not falsely encode them as 50%-compliance.
 4. Apply greedy assignment with a deterministic tiebreaker. **Post-filter invariant (from step 3): every parsed-duration suggestion has `score ∈ [0.6, 1.0]`; every duration-unknown suggestion has `score === null`.** Sort suggestions by `(rank, activityId, workoutId)` lexicographically where `rank` is `−score` for parsed-duration suggestions (so `−1.0` sorts before `−0.6`, i.e., highest score first) and `+Infinity` for `score === null` (duration-unknown sorts last). The post-filter invariant guarantees `−score ∈ [−1.0, −0.6]` so the JS `−0`/`+0` equivalence quirk is unreachable. On tie, lower `activityId` first; on further tie, lower `workoutId` first. Accept each in order, skipping any whose `activityId` or `workoutId` was already accepted in an earlier suggestion. The result SHALL contain at most one suggestion per `activityId` and at most one per `workoutId`.
 
@@ -349,7 +347,6 @@ The banner SHALL list each suggestion as a row showing the planned activity titl
 The banner SHALL be visually bounded so it does not push the calendar grid below the fold on standard viewports: at most 2 suggestion rows are rendered in the collapsed state; if more suggestions exist, the banner SHALL show "Showing 2 of N — view all" with the remainder accessible via in-place expansion. Clicking "view all" SHALL expand the banner in-place to show all suggestion rows; the expanded banner SHALL retain a `max-h-64` (~256px) ceiling with internal vertical scroll if N > the capped row count. The collapsed banner height SHALL NOT exceed `max-h-32` (~128px) so the calendar grid remains visible on a 768px-tall viewport without scrolling. The banner SHALL be accompanied by a "Collapse" control when expanded.
 
 For accessibility (per WCAG 4.1.2 and 4.1.3), the banner SHALL:
-
 - Be a `role="region"` landmark with `aria-label="Auto-match suggestions"` so screen-reader users can locate and skip it.
 - Contain a dedicated visually-hidden `<div role="status" aria-live="polite" class="sr-only">` element (NOT applying `aria-live` to the region itself, which causes NVDA to re-announce the entire region on any DOM change). The status element SHALL receive textual updates on banner appearance and on each row action — see the action announcements below.
 - On banner appearance (first render after a sync that produced suggestions), the status element SHALL emit `"Auto-match suggestions: <N> pending"`.
@@ -461,11 +458,11 @@ In particular: deleting a `coachingActivities` row (e.g., during `syncWeek` orph
 
 **Cascade-table inventory** — the authoritative list of cascade tables per parent SHALL be co-located with the Dexie adapter (e.g., a `CASCADE_TABLES` constant in `adapters/dexie/cascade-tables.ts`) and each entry SHALL be unit-tested:
 
-| Parent table         | Cascade tables                                                                       |
-| -------------------- | ------------------------------------------------------------------------------------ |
-| `coachingActivities` | `session_matches`                                                                    |
-| `workouts`           | `session_matches`                                                                    |
-| `profiles`           | `coachingActivities`, `session_matches`, `user_preferences`, `auto_match_dismissals` |
+| Parent table             | Cascade tables                                                                              |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| `coachingActivities`     | `session_matches`                                                                            |
+| `workouts`               | `session_matches`                                                                            |
+| `profiles`               | `coachingActivities`, `session_matches`, `user_preferences`, `auto_match_dismissals`         |
 
 A unit test SHALL assert `CASCADE_TABLES` matches this inventory exactly — adding a new cascade table anywhere SHALL fail the test until the inventory is updated, preventing silent drift between the Dexie hooks and the transaction-table list. (The `profiles` cascade table list does NOT include `workouts` because workouts are profile-agnostic per `spa-coaching-integration` "Convert coaching activity to workout".)
 
@@ -483,3 +480,4 @@ A unit test SHALL assert `CASCADE_TABLES` matches this inventory exactly — add
 
 - **WHEN** profile `P` is deleted while it has rows in all four cascade-targeted tables
 - **THEN** all five operations (profile delete + four cascade deletes) commit atomically; a partial failure rolls back to the pre-delete state
+

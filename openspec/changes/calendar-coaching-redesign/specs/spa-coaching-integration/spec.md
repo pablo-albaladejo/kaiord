@@ -5,7 +5,6 @@
 The application layer SHALL expose a pure function `parseCoachingDuration(s: string | undefined): number | undefined` in `application/parse-coaching-duration.ts` that converts the free-text `CoachingActivityRecord.duration` field to seconds, returning `undefined` on parse failure.
 
 The function SHALL handle:
-
 - Plain minutes: `"45 min"`, `"45min"`, `"45 minutes"` → `2700`
 - Hours: `"1h"`, `"1 h"`, `"1 hour"` → `3600`
 - Hours and minutes: `"1h 30"`, `"1h30"`, `"1h 30m"`, `"1 h 30 min"` → `5400`
@@ -15,7 +14,6 @@ The function SHALL handle:
 - Ranges (use lower bound): `"45-50 min"` → `2700`; `"1h-1h30"` → `3600`
 
 The function SHALL return `undefined` for:
-
 - `undefined` input
 - Empty or whitespace-only string
 - Any input not matching one of the supported forms
@@ -170,7 +168,6 @@ The system SHALL provide a use case `convertCoachingActivity(activityId)` that:
 5. Auto-links the produced (or existing) workout to the activity by invoking `matchSession({ profileId: activity.profileId, coachingActivityId: activity.id, workoutId: <step 3 or 4 result>, source: "auto-conversion" })`. The auto-link step SHALL be a **no-op** if EITHER side is already part of an existing `SessionMatch` row in this profile (the existing match is preserved, no overwrite, no error). This preserves convert idempotency: repeated invocations on the same activity neither create duplicate workouts nor disrupt prior matches. The use case detects the no-op condition by calling `SessionMatchRepository.getByActivityId(profileId, activity.id)` AND `getByWorkoutId(profileId, workoutId)` BEFORE invoking `matchSession`; if either returns a row, the auto-link step is skipped silently.
 
    Concurrency: between the pre-check and the `matchSession` write, a concurrent matcher (e.g., another tab accepting an auto-match suggestion targeting the same workout) MAY win the race. If `matchSession` then throws `SessionAlreadyMatchedError` after the pre-check passed, the use case SHALL treat it as a no-op (the concurrent match is preserved; the convert flow does not overwrite or surface an error). Any other error from `matchSession` (e.g., `WorkoutNotFoundError` after a concurrent delete, `CrossProfileMatchError`, infrastructure failure) SHALL propagate to the caller — the workout produced in step 4 is already persisted (workouts have independent value), so partial commit is acceptable.
-
 6. Returns the workout id so the UI can navigate to `/workout/:id`.
 
 The `coachingActivities` row is NOT deleted on conversion — both records coexist (the activity is the source-of-truth from the coach; the workout is Kaiord's editable copy).
