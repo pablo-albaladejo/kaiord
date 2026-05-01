@@ -31,7 +31,7 @@ The script SHALL recognize four call-site dispatch shapes so contributors cannot
 3. **Destructured dispatch**: `const { error } = useToastContext(); error(...);` — the script tracks `useToastContext()` destructurings within a file and treats subsequent calls to those bound names as in-scope.
 4. **Re-bound dispatch**: `const ctx = useToastContext(); ctx.error(...);` — the script tracks `const <ID> = useToastContext()` rebindings within a file and treats subsequent `<ID>.<method>(...)` calls as member dispatch under the same rule. If a file contains conflicting bindings (e.g., two `const { error } = ...` from different sources, or both a re-bind and a destructure), the script treats every potentially-toast call as in-scope (false-positive bias is the safe default; the contributor either renames the conflict or refactors).
 
-A static guard at `scripts/check-no-pii-leakage.mjs`, executed in CI via `pnpm test:scripts`, SHALL enforce this rule across all four dispatch shapes. The script SHALL maintain a hard-coded allowlist mechanism — a Set of file paths where a legitimate exception is documented inline. **The initial production allowlist MUST be empty.** The SHALL on the allowlist applies to the *mechanism* (an exported `ALLOWLIST` Set the test fixture can manipulate), not to the *contents*. Allowlist entries are added only via PRs that satisfy reviewer-gated criteria below. Each allowlist entry MUST carry a comment block satisfying two criteria:
+A static guard at `scripts/check-no-pii-leakage.mjs`, executed in CI via `pnpm test:scripts`, SHALL enforce this rule across all four dispatch shapes. The script SHALL maintain a hard-coded allowlist mechanism — a Set of file paths where a legitimate exception is documented inline. **The initial production allowlist MUST be empty.** The SHALL on the allowlist applies to the _mechanism_ (an exported `ALLOWLIST` Set the test fixture can manipulate), not to the _contents_. Allowlist entries are added only via PRs that satisfy reviewer-gated criteria below. Each allowlist entry MUST carry a comment block satisfying two criteria:
 
 1. The interpolated value originates from the same user's same-render-frame input and never traverses a network boundary, persistent log, or analytics event.
 2. The interpolated value is not read from any field that the team's PII / secret classification considers sensitive. Illustrative (non-exhaustive) examples: `apiKey`, `externalUserId`, `externalUserName`, `email`, `phone`, `address`. Reviewers apply the spirit of this criterion to new field names not on the list (e.g., `ssn`, `dob`, `latitude`/`longitude`).
@@ -42,7 +42,7 @@ The rule supersedes the file-local audit at `packages/workout-spa-editor/src/com
 
 #### Scenario: Toast string with template-literal interpolation is rejected
 
-- **WHEN** a contributor adds a `toast.error(\`Failed: ${error.message}\`)` call in any file under `packages/workout-spa-editor/src/{components,hooks,lib}/**` not on the allowlist
+- **WHEN** a contributor adds a `toast.error(\`Failed: ${error.message}\`)`call in any file under`packages/workout-spa-editor/src/{components,hooks,lib}/\*\*` not on the allowlist
 - **THEN** `pnpm test:scripts` SHALL fail in CI with rule `R-PIIInterpolation`, naming the offending file, line number, and call expression, blocking the merge
 
 #### Scenario: Concatenation with a closure-captured error is rejected

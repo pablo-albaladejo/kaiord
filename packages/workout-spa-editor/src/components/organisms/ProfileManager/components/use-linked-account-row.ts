@@ -17,6 +17,9 @@ export type SourceMeta = {
   label: string;
 };
 
+const ACCOUNT_LINKED_TOAST = "Coaching account linked";
+const ACCOUNT_DISCONNECTED_TOAST = "Coaching account disconnected";
+
 export const useLinkedAccountRow = (
   profile: Profile,
   sourceMeta: SourceMeta
@@ -42,9 +45,10 @@ export const useLinkedAccountRow = (
         (a) => a.source === sourceMeta.id
       );
       if (!linked) return;
-      // PII rule: toast strings reference Kaiord profile name only;
-      // never externalUserName / externalUserId.
-      toasts.success(`Linked ${sourceMeta.label} to ${profile.name}`);
+      // Static toast string keeps user-typed and external-account fields
+      // out of the user-facing message; the source/profile context is
+      // already implicit from the row the user clicked.
+      toasts.success(ACCOUNT_LINKED_TOAST);
     } finally {
       setBusy(false);
     }
@@ -55,7 +59,7 @@ export const useLinkedAccountRow = (
     setBusy(true);
     try {
       await unlinkAccount(persistence.profiles, profile.id, sourceMeta.id);
-      toasts.info(`Disconnected ${sourceMeta.label}`);
+      toasts.info(ACCOUNT_DISCONNECTED_TOAST);
       analytics.event("coaching.unlink.success", { source: sourceMeta.id });
     } finally {
       setBusy(false);

@@ -2,14 +2,14 @@
 
 15 open issues. Triage matrix (state at proposal time, 2026-05-01):
 
-| Bucket | Issues | Action |
-| --- | --- | --- |
-| Stale CI failure auto-issues (commits superseded; main green) | #393, #355, #345 | Phase 1: close with reference to the green follow-up commit. |
-| Stale security alerts (high-severity criterion no longer met) | #168, #177, #178, #182 | Phase 1: close with per-issue specific CVE / advisory ID + current package state. |
-| Tracking meta-issue for an archived change | #388 | Phase 1: close with link to the archive folder. |
-| Real user-visible bug | #386 (404 on SPA refresh) | Phase 2: rafgraph SPA-fallback pattern in `deploy-site.yml`. |
-| Hardening follow-up | #395 (PII guard) | Phase 3: new mechanical guard script. |
-| Cosmetic polish (single-source `cosmetic-polish` change) | #266, #267, #268, #269, #270 | Phase 4: bundled UI refinements. |
+| Bucket                                                        | Issues                       | Action                                                                            |
+| ------------------------------------------------------------- | ---------------------------- | --------------------------------------------------------------------------------- |
+| Stale CI failure auto-issues (commits superseded; main green) | #393, #355, #345             | Phase 1: close with reference to the green follow-up commit.                      |
+| Stale security alerts (high-severity criterion no longer met) | #168, #177, #178, #182       | Phase 1: close with per-issue specific CVE / advisory ID + current package state. |
+| Tracking meta-issue for an archived change                    | #388                         | Phase 1: close with link to the archive folder.                                   |
+| Real user-visible bug                                         | #386 (404 on SPA refresh)    | Phase 2: rafgraph SPA-fallback pattern in `deploy-site.yml`.                      |
+| Hardening follow-up                                           | #395 (PII guard)             | Phase 3: new mechanical guard script.                                             |
+| Cosmetic polish (single-source `cosmetic-polish` change)      | #266, #267, #268, #269, #270 | Phase 4: bundled UI refinements.                                                  |
 
 Issue **#395** is explicitly the deferred follow-up captured in `openspec/changes/archive/2026-04-30-persistence-read-rule-cleanup/design.md` under "Open Questions / Follow-ups". This change closes that loop. The pattern being generalised is the file-local `packages/workout-spa-editor/src/components/organisms/SettingsPanel/use-ai-tab-handlers.audit.test.ts`, which audited two files; the new repo-wide guard subsumes its scope while the original test stays as defense-in-depth (see D6).
 
@@ -51,6 +51,7 @@ Mechanism (https://github.com/rafgraph/spa-github-pages):
 The redirect is server-driven (Pages serves `404.html`), so refresh, deep-link, and back-button all work uniformly. The decoder runs synchronously before React Router boots, so there is no flicker of `?p=...` in the URL bar.
 
 The deploy workflow change (`.github/workflows/deploy-site.yml`):
+
 - Replaces the root `merged-dist/404.html` with a rafgraph-shaped 404 (the existing landing's blue 404 markup PLUS the redirect script — the script triggers only if the path starts with `/editor/`, otherwise it lets the blue 404 render normally for landing routes).
 - Injects the decoder script into `merged-dist/editor/index.html` after the SPA build, before artifact upload.
 - VitePress already produces `docs/404.html`; docs is unaffected.
@@ -73,7 +74,7 @@ Other packages (core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, garmin-br
 Two accepted argument shapes for `toast.{error,success,info,warning}(...)`, `useToastContext().{error,success,info,warning}(...)`, and `console.{log,warn,error,info,debug}(...)`:
 
 1. A bare string literal: `toast.error("Failed to save profile")`.
-2. A bare SCREAMING_SNAKE_CASE identifier (`/^[A-Z][A-Z0-9_]*$/`) that resolves to a top-level `const X = "string-literal"` declaration whose right-hand side is **itself** a bare string literal — no template, no concatenation, no call, no other identifier.
+2. A bare `SCREAMING_SNAKE_CASE` identifier (matching `/^[A-Z][A-Z0-9_]*$/`) that resolves to a top-level `const X = "string-literal"` declaration (`export const` is also allowed) whose right-hand side is **itself** a bare string literal — no template, no concatenation, no call, no other identifier.
 
 Rejected:
 
@@ -110,6 +111,7 @@ Encoders for D1 SHALL emit absolute paths (`/editor/calendar`, never relative `e
 Single PR. The five chores total ≤300 lines of CSS + index.html changes (excluding the gray→slate remap, which is a single `@theme` alias block). Splitting them creates five trivial PRs each requiring its own CI pass; bundling reflects the user's recorded preference for fatter PRs over thinner ones.
 
 The high-risk one (#266 gray→slate via Tailwind 4 `@theme` alias) gets:
+
 - A **spike task** at Phase 4 task 4.5.1 that validates the `@theme` override actually propagates to already-emitted utility classes (`bg-gray-*`, `text-gray-*`, `dark:bg-gray-*`, etc.) before committing to the approach. The spike runs `pnpm dev` and inspects DevTools' computed-style values for at least one element using each gray utility shade.
 - An **explicit fallback** at Phase 4 task 4.5.X: if the `@theme` alias does not propagate (Tailwind 4's emission strategy may inline values at build time), the fallback is a per-file `gray-*` → `slate-*` find-and-replace across the ~90 files. The fallback is pre-decided here, not a runtime panic decision.
 - A **screenshot-diff gate** via Playwright fixtures: at minimum calendar week view, editor full-form, AI Tab + Privacy Tab in settings, library dialog. Before/after diffs posted in the PR description for human visual review.
@@ -143,6 +145,7 @@ Rationale: matches the existing audit (no chain following). Avoids cycle-detecti
 D3's structural rule is strict; legitimate exceptions exist (e.g., echoing a user-typed value back in the same render frame, where the value is the user's own data and not PII in the GDPR sense). To prevent the allowlist from becoming a leaky abstraction:
 
 **Allowlist criterion** (codified in the script's allowlist comment block):
+
 1. The interpolated value MUST originate from the same user's same-render-frame input (no traversal across a network boundary, no read from persisted storage of another entity, no read from any field named `apiKey` / `externalUserId` / `externalUserName` / `email` / `phone` / `address`).
 2. The interpolated value MUST never be written to a persistent log (`console.error`, `console.warn`, analytics events, server logs).
 3. Each allowlist entry MUST carry a one-line comment with: (a) the file path + line, (b) the value being interpolated, (c) why it satisfies criteria (1) and (2).
@@ -157,7 +160,7 @@ A PR adding to the allowlist must include a reviewer comment confirming criteria
 - **R2 — Phase 4 #266 visual regression.** Tailwind `gray-*` and `slate-*` differ in undertone (warm vs cool); some component combinations look fine in isolation but jarring side-by-side. Mitigations: the spike task validates the `@theme` mechanic before commit, the per-file fallback is pre-decided, the screenshot-diff gate runs against a representative fixture set, and the PR description carries before/after screenshots.
 - **R3 — Phase 3 PII guard false positives.** Sweep across all of `components/**`, `hooks/**`, `lib/**` will surface legitimate-but-not-allowlisted call sites. Mitigation: each surfaced site refactors to a SCREAMING_SNAKE_CASE constant; allowlist remains empty unless D9 criteria are met.
 - **R4 — Phase 2 rafgraph script edge cases.** The redirect-then-decode mechanic has known edge cases: hash fragments in the original URL, deep query strings, and routes that legitimately want a literal `?p=...` parameter. Mitigations: the rafgraph reference implementation handles fragments and double-encoding; route table contains no `p` query param today; the CI smoke step exercises the round-trip on at least one representative route.
-- **R5 — Phase 3 regex parser brittleness.** Iteration-3 closed the high-likelihood bypasses (`toast["error"](...)`, `const { error } = ...`, `const ctx = ...`). Genuinely exotic shapes remain known limitations: receiver type-assertions (`(toast as any).error(...)`), decorator-modified toast functions, dynamic `Function`-constructed dispatch. These are out-of-scope for the structural script — they fail human review on aesthetic grounds long before they fail a CI check. Mitigations: D2 scope excludes test files where these tricks are most likely; the existing AiTab audit (D6 keep) catches the *covered* shapes redundantly but does NOT extend coverage to type-assertion bypasses; the D9-criteria allowlist is the controlled escape hatch.
+- **R5 — Phase 3 regex parser brittleness.** Iteration-3 closed the high-likelihood bypasses (`toast["error"](...)`, `const { error } = ...`, `const ctx = ...`). Genuinely exotic shapes remain known limitations: receiver type-assertions (`(toast as any).error(...)`), decorator-modified toast functions, dynamic `Function`-constructed dispatch. These are out-of-scope for the structural script — they fail human review on aesthetic grounds long before they fail a CI check. Mitigations: D2 scope excludes test files where these tricks are most likely; the existing AiTab audit (D6 keep) catches the _covered_ shapes redundantly but does NOT extend coverage to type-assertion bypasses; the D9-criteria allowlist is the controlled escape hatch.
 
 ## Migration Plan
 
