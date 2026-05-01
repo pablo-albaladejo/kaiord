@@ -6,9 +6,9 @@ PR 2 (archive): §6 — branch chore/fix-spa-router-basename-archive
 
 ## 1. Phase 1 — Implement the wouter base wrapper
 
-- [ ] 1.0 Worktree setup: `git worktree add -b feature/fix-spa-router-basename <WORKTREE_DIR>/kaiord-routerfix-impl main` (replace `<WORKTREE_DIR>` with your local worktree parent directory). Run `pnpm install` and rebuild workspace deps.
-- [ ] 1.1 Create `packages/workout-spa-editor/src/router-base.ts` exporting `computeRouterBase(baseUrl: string): string`. Body: `return baseUrl.replace(/\/$/, "")`. One-line, zero dependencies, pure.
-- [ ] 1.2 Edit `packages/workout-spa-editor/src/main.tsx`:
+- [x] 1.0 Worktree setup: `git worktree add -b feature/fix-spa-router-basename <WORKTREE_DIR>/kaiord-routerfix-impl main` (replace `<WORKTREE_DIR>` with your local worktree parent directory). Run `pnpm install` and rebuild workspace deps.
+- [x] 1.1 Create `packages/workout-spa-editor/src/router-base.ts` exporting `computeRouterBase(baseUrl: string): string`. Body: `return baseUrl.replace(/\/$/, "")`. One-line, zero dependencies, pure.
+- [x] 1.2 Edit `packages/workout-spa-editor/src/main.tsx`:
   - Import `Router` from `wouter`.
   - Import `computeRouterBase` from `./router-base`.
   - Compute `base` at module top level: `const base = computeRouterBase(import.meta.env.BASE_URL)`.
@@ -18,7 +18,7 @@ PR 2 (archive): §6 — branch chore/fix-spa-router-basename-archive
 
 ## 2. Phase 1 — Pure-helper unit test
 
-- [ ] 2.1 Create `packages/workout-spa-editor/src/router-base.test.ts`. Vitest with table-driven cases:
+- [x] 2.1 Create `packages/workout-spa-editor/src/router-base.test.tsx` (TSX because the wouter contract test in 2.2 includes JSX). Vitest with table-driven cases:
 
       | input         | expected output | note |
       | ------------- | --------------- | ---- |
@@ -29,18 +29,18 @@ PR 2 (archive): §6 — branch chore/fix-spa-router-basename-archive
 
       AAA structure: arrange the input string, act `computeRouterBase`, assert against expected. The table drives a single `it.each` block. Add a comment next to the empty-string row recording the defensive intent so readers don't think it's a contract Vite emits.
 
-- [ ] 2.2 Add a wouter contract test in the same file: mount `<Router base="/editor"><Route path="/x">{() => "ok"}</Route></Router>` via Testing Library (`@testing-library/react`'s `render`) and assert that visiting `/editor/x` matches the route. Pin the wouter `package.json` resolved version in the assertion so a major-version bump that changes the base contract trips this test.
-- [ ] 2.3 Run `pnpm --filter @kaiord/workout-spa-editor test src/router-base.test.ts` — passing.
+- [x] 2.2 Add a wouter contract test in the same file: mount `<Router base="/editor"><Route path="/x">{() => "ok"}</Route></Router>` via Testing Library (`@testing-library/react`'s `render`) and assert that visiting `/editor/x` matches the route. Pin the wouter `package.json` resolved version in the assertion so a major-version bump that changes the base contract trips this test.
+- [x] 2.3 Run `pnpm --filter @kaiord/workout-spa-editor test src/router-base.test.tsx` — passing.
 
 ## 3. Phase 1 — E2E regression test (production-base build)
 
-- [ ] 3.0 **Custom Node static-server fixture (decision pre-committed).** GitHub Pages-equivalent behaviour requires: (a) serve files for known paths, (b) return the merged-dist `404.html` content with **status 404** for unknown paths, (c) NOT serve `index.html` as a SPA fallback. Only a custom fixture meets all three contracts byte-equally:
+- [x] 3.0 **Custom Node static-server fixture (decision pre-committed).** GitHub Pages-equivalent behaviour requires: (a) serve files for known paths, (b) return the merged-dist `404.html` content with **status 404** for unknown paths, (c) NOT serve `index.html` as a SPA fallback. Only a custom fixture meets all three contracts byte-equally:
   - `npx http-server` returns 200 for missing paths even with no SPA fallback — silently weakens Test 1's status-code expectation.
   - `npx serve` defaults to SPA fallback (`-s`) — would mask the bug.
   - **Custom fixture** at `packages/workout-spa-editor/e2e/fixtures/static-pages-server.ts`: small `http.createServer` reading from `merged-dist/`, serving the matching file with status 200 OR the `404.html` body with status 404 for unknown paths. The fixture exports `startStaticPagesServer(rootDir): Promise<{ url, close }>` so the e2e spec's `beforeAll` / `afterAll` can drive lifecycle cleanly.
     Implement the fixture; verify behaviour empirically against Pages parity (status code 404 on unknown, exact 404.html body served) before writing Test 1.
-- [ ] 3.0a **Extract the rafgraph injection helper** to `scripts/inject-spa-fallback.mjs`. The helper takes a `mergedDistDir` argument, appends the rafgraph redirect script to `<dir>/404.html`, and injects the decoder snippet into `<dir>/editor/index.html` — same logic as the inline bash heredoc in `.github/workflows/deploy-site.yml` lines 102-152. Update the workflow to call `node scripts/inject-spa-fallback.mjs merged-dist` instead of the inline bash + Python heredocs. Co-located test `scripts/inject-spa-fallback.test.mjs` exercises the helper against a temp-dir fixture. The e2e spec's `beforeAll` calls the same helper after the SPA build so the redirect script is byte-identical between production and tests.
-- [ ] 3.1 Create `packages/workout-spa-editor/e2e/spa-route-refresh.spec.ts`. The spec's top-level `describe` block carries the `@spa-route-refresh` tag (e.g. `test.describe("@spa-route-refresh SPA route refresh", () => { ... })`) so the CI grep filter in 3.2 selects this whole spec, not individual tests:
+- [x] 3.0a **Extract the rafgraph injection helper** to `scripts/inject-spa-fallback.mjs`. The helper takes a `mergedDistDir` argument, appends the rafgraph redirect script to `<dir>/404.html`, and injects the decoder snippet into `<dir>/editor/index.html` — same logic as the inline bash heredoc in `.github/workflows/deploy-site.yml` lines 102-152. Update the workflow to call `node scripts/inject-spa-fallback.mjs merged-dist` instead of the inline bash + Python heredocs. Co-located test `scripts/inject-spa-fallback.test.mjs` exercises the helper against a temp-dir fixture. The e2e spec's `beforeAll` calls the same helper after the SPA build so the redirect script is byte-identical between production and tests.
+- [x] 3.1 Create `packages/workout-spa-editor/e2e/spa-route-refresh.spec.ts`. The spec's top-level `describe` block carries the `@spa-route-refresh` tag (e.g. `test.describe("@spa-route-refresh SPA route refresh", () => { ... })`) so the CI grep filter in 3.2 selects this whole spec, not individual tests:
   - `test.skip` guard at the top: `test.skip(process.env.E2E_PROD_BASE !== "1", "Production-base e2e gated behind E2E_PROD_BASE=1");` so the standard `pnpm test:e2e` (dev-mode) continues to run unchanged.
   - `beforeAll`: shells out to `VITE_BASE_PATH=/editor/ pnpm --filter @kaiord/workout-spa-editor build`, mirrors the merged-dist structure, calls `inject-spa-fallback.mjs` (3.0a) so the rafgraph script is present byte-equal to production, starts the static-server fixture (3.0) on a free port.
   - `afterAll`: stops the server.
@@ -49,22 +49,22 @@ PR 2 (archive): §6 — branch chore/fix-spa-router-basename-archive
   - **Test 3 — refresh inside SPA**: continue from Test 2 state, call `page.reload()`, assert URL stays `/editor/calendar` and the calendar view re-renders (e.g., the calendar header is visible).
   - **Test 4 — analytics path remains base-relative**: install a `page.exposeFunction("__captureAnalytics", ...)` shim at boot, navigate to `/editor/calendar`, then assert: (a) `__captureAnalytics` was called at least once (count ≥ 1) — guards against a future refactor that silently stops emitting pageViews; (b) the captured path is `/calendar` (NOT `/editor/calendar`). Both assertions are required; without the count assertion the path assertion vacuously passes if no event is captured.
   - **Test 5 — garbage-path round-trip**: `page.goto(${baseUrl}/editor/<malformed%20path>)`, assert no infinite redirect, URL settles at `/editor/calendar` (catch-all), DOM contains no injected script tags from the path.
-- [ ] 3.2 Wire the test into CI: edit `.github/workflows/ci.yml` to add a job named `e2e-prod-base` that runs `E2E_PROD_BASE=1 pnpm --filter @kaiord/workout-spa-editor test:e2e --grep '@spa-route-refresh'` (or equivalent), gated by the same conditions as the existing e2e-frontend job. Document the job name in the PR description.
-- [ ] 3.3 Run the spec locally: `E2E_PROD_BASE=1 pnpm --filter @kaiord/workout-spa-editor test:e2e --grep '@spa-route-refresh'`. All five sub-tests pass.
+- [x] 3.2 Wire the test into CI: edit `.github/workflows/ci.yml` to add a job named `e2e-prod-base` that runs `E2E_PROD_BASE=1 pnpm --filter @kaiord/workout-spa-editor test:e2e --grep '@spa-route-refresh'` (or equivalent), gated by the same conditions as the existing e2e-frontend job. Document the job name in the PR description.
+- [ ] 3.3 Run the spec locally: `E2E_PROD_BASE=1 pnpm --filter @kaiord/workout-spa-editor test:e2e --grep '@spa-route-refresh'`. All five sub-tests pass. (Deferred to CI; runs via the new `e2e-prod-base` job.)
 
 ## 4. Phase 1 — Existing test-suite checks
 
-- [ ] 4.1 Run `pnpm --filter @kaiord/workout-spa-editor test` — full vitest. Confirm no regressions from the Router wrapper.
-- [ ] 4.2 Run `pnpm test:e2e` (dev-mode default) — full Playwright suite. Confirm no e2e regressions.
-- [ ] 4.3 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
-- [ ] 4.4 Run `pnpm -r build` — clean.
-- [ ] 4.5 Run `pnpm test:scripts` — passing including the existing fixtures from `cleanup-open-issues-may-2026` (count: confirm at branch time).
-- [ ] 4.6 Run `openspec validate fix-spa-router-basename --strict` — passing.
-- [ ] 4.7 Sweep e2e specs for hardcoded production-base URLs: `rg "kaiord\\.com/(calendar|library|workout)" packages/workout-spa-editor/e2e/`. Update any URL assertions that would diverge under the new prefix; if dev-mode tests use root-relative URLs, leave them — wouter base resolves to `""` in dev so they are still correct.
+- [x] 4.1 Run `pnpm --filter @kaiord/workout-spa-editor test` — full vitest. Confirm no regressions from the Router wrapper. (2844 passed / 4 skipped.)
+- [ ] 4.2 Run `pnpm test:e2e` (dev-mode default) — full Playwright suite. Confirm no e2e regressions. (Deferred to CI's existing `e2e-frontend` job; running locally takes ~25 min.)
+- [x] 4.3 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
+- [x] 4.4 Run `pnpm -r build` — clean.
+- [x] 4.5 Run `pnpm test:scripts` — 103 tests pass including new `inject-spa-fallback`.
+- [x] 4.6 Run `openspec validate fix-spa-router-basename --strict` — passing.
+- [x] 4.7 Sweep e2e specs for hardcoded production-base URLs: `rg "kaiord\\.com/(calendar|library|workout)" packages/workout-spa-editor/e2e/`. Result: zero matches. No existing e2e references the prod-base URL prefix.
 
 ## 5. Phase 1 — Validation, changeset, PR
 
-- [ ] 5.1 Add a `patch` changeset for `@kaiord/workout-spa-editor` titled `fix(spa-editor): align wouter Router base with Vite deploy base so /editor/<route> URLs survive refresh`. Body MUST include the user-facing note: "URLs deep-linked into the SPA editor now consistently include the `/editor/` prefix, matching the deploy path. Pre-fix bookmarks pointing at `kaiord.com/<route>` (without the prefix) never survived a refresh; the canonical address is now `kaiord.com/editor/<route>`. Open SPA tabs may briefly show a one-time URL update on the next navigation as the new base takes effect." This lands in the auto-generated release notes so external observers understand the URL-shape change.
+- [x] 5.1 Add a `patch` changeset for `@kaiord/workout-spa-editor` titled `fix(spa-editor): align wouter Router base with Vite deploy base so /editor/<route> URLs survive refresh`. Body MUST include the user-facing note: "URLs deep-linked into the SPA editor now consistently include the `/editor/` prefix, matching the deploy path. Pre-fix bookmarks pointing at `kaiord.com/<route>` (without the prefix) never survived a refresh; the canonical address is now `kaiord.com/editor/<route>`. Open SPA tabs may briefly show a one-time URL update on the next navigation as the new base takes effect." This lands in the auto-generated release notes so external observers understand the URL-shape change.
 - [ ] 5.2 Open PR with body referencing this change's `design.md` and the screenshot from the user demonstrating the bug. Test plan covers dev unchanged, prod refresh fixed, regression tests added, garbage-path safety asserted.
 - [ ] 5.3 Ensure CI green (including the new `e2e-prod-base` job).
 - [ ] 5.4 Squash merge.
