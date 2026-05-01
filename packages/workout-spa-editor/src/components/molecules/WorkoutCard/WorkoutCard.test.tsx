@@ -76,11 +76,29 @@ describe("WorkoutCard", () => {
     expect(screen.getByText("30m")).toBeInTheDocument();
   });
 
-  it("shows source label", () => {
+  it("shows source as a muted origin chip (no coloured badge)", () => {
     const workout = makeWorkout({ source: "train2go" });
 
     render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
 
-    expect(screen.getByText("train2go")).toBeInTheDocument();
+    expect(screen.getByText("· train2go")).toBeInTheDocument();
+  });
+
+  it("uses the lateral border colour driven by state", () => {
+    const workout = makeWorkout({ state: "pushed" });
+
+    render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
+
+    const button = screen.getByTestId("workout-card-w1");
+    expect(button.className).toContain("border-l-4");
+    expect(button.className).toContain("border-emerald-600");
+  });
+
+  it("state indicator has an accessible label", () => {
+    const workout = makeWorkout({ state: "raw" });
+
+    render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
+
+    expect(screen.getByRole("img", { name: "Raw" })).toBeInTheDocument();
   });
 });
