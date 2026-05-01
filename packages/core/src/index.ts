@@ -121,3 +121,11 @@ export { toBinary, toText } from "./application";
 // Round-Trip Validation
 export type { ValidateRoundTrip } from "./tests/round-trip/validate-round-trip";
 export { validateRoundTrip } from "./tests/round-trip/validate-round-trip";
+
+// Bridge Protocol — Profile Snapshot DTO + helpers
+export type { ProfileSnapshot } from "./types/profile-snapshot";
+export {
+  fingerprintSnapshot,
+  profileSnapshotSchema,
+  STALE_SNAPSHOT_THRESHOLD_DAYS,
+} from "./types/profile-snapshot";
