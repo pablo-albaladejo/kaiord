@@ -62,8 +62,8 @@ PR 2 (archive): §7
   - Query-string-only changes do not produce a new label.
   - Initial mount with a deep-linked URL produces a label on first render (no empty string).
 - [ ] 6.4 **Focus management on route change.** Implement `useFocusOnRouteChange()` (or fold into `MainLayout`): on each pathname change, find the page's `[data-route-heading]` element and call `.focus()` on it. Each routed page (each routed page) renders an `<h1>` (or other heading element) with `tabIndex={-1}` and the route-heading attribute via a shared constant: `export const ROUTE_HEADING_ATTR = 'data-route-heading' as const;` exported from `src/routing/constants.ts`. The CSS for `[data-route-heading]` MUST suppress the focus ring for non-keyboard activations: `[data-route-heading]:focus:not(:focus-visible) { outline: none; }`. The default `:focus-visible` ring stays so Tab navigation users still see the indicator.
-  Each routed page that backs a wouter route renders the heading; do not couple this task to a specific component name (resolve the actual page-component names at implementation time via `rg "<Route path=" packages/workout-spa-editor/src/App.tsx`).
-  Add tests:
+      Each routed page that backs a wouter route renders the heading; do not couple this task to a specific component name (resolve the actual page-component names at implementation time via `rg "<Route path=" packages/workout-spa-editor/src/App.tsx`).
+      Add tests:
   - `useFocusOnRouteChange.test.tsx` — simulate navigation and assert the new heading element has document focus.
   - For each routed page, a test that the heading element has `tabIndex={-1}` and the `data-route-heading` attribute (use the `ROUTE_HEADING_ATTR` constant in the assertion to catch typos).
   - A negative-path unit test: if `[data-route-heading]` is absent on the new page, the hook MUST log `console.warn` once with the offending pathname and fall back to focusing `document.body` so the contract failure is loud but not fatal.

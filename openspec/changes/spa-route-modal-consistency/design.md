@@ -7,20 +7,20 @@ The expert panel ran in `/opsx-explore` mode (5 Principal/Staff reviewers: UX ar
 ```text
 Current state                       Target state
 ─────────────                       ────────────
-                                    
+
 Header "Library" ──┬─→ MODAL        Header "Library" ──→ navigate('/library')
-                   │  (Radix Dialog, 
-                   │   no URL)              
-                                    
+                   │  (Radix Dialog,
+                   │   no URL)
+
 URL /editor/library ─→ PAGE         URL /editor/library ─→ PAGE
-                                    
+
 EmptyDayDialog ──→ navigate('/library')   EmptyDayDialog ──→ TemplatePickerDialog(date)
    (loses date context)                       (date prop, narrow UI)
-   
+
 WorkoutLibrary organism             Split into:
   Used as: modal AND page body        - LibraryDialogContent → page body
                                       - TemplatePickerDialog → narrow picker
-                                      
+
 Settings / Help / Profile           Settings / Help / Profile (unchanged)
    Modals (meta) ✓                    Modals (meta) ✓
 ```
@@ -65,15 +65,15 @@ The `EmptyDayDialog`'s legacy `navigate('/library')` is replaced by opening this
 
 The panel's IA review identified the latent rule already implicit in the routing table:
 
-| Surface | Today | Justification |
-|---|---|---|
-| Calendar | Page (`/calendar/:weekId?`) | Content destination |
-| Library | Mixed (drift) | → **Page** (content destination) |
-| Workout new | Page (`/workout/new`) | Content destination (deep editor) |
-| Workout edit | Page (`/workout/:id`) | Content destination |
-| Settings | Modal | Meta — preferences |
-| Help | Modal | Meta — auxiliary |
-| Profile | Modal | Meta — user-scoped quick-pick |
+| Surface      | Today                       | Justification                     |
+| ------------ | --------------------------- | --------------------------------- |
+| Calendar     | Page (`/calendar/:weekId?`) | Content destination               |
+| Library      | Mixed (drift)               | → **Page** (content destination)  |
+| Workout new  | Page (`/workout/new`)       | Content destination (deep editor) |
+| Workout edit | Page (`/workout/:id`)       | Content destination               |
+| Settings     | Modal                       | Meta — preferences                |
+| Help         | Modal                       | Meta — auxiliary                  |
+| Profile      | Modal                       | Meta — user-scoped quick-pick     |
 
 Workout new/edit are pages because they have meaningful internal state, deep-link semantics, and the user returns to them directly. Settings/Help/Profile are modals because they are meta — they don't represent content, they configure the parent.
 
@@ -91,7 +91,7 @@ PR #404 / #408 created the `spa-routing` capability with one requirement (router
 
 ### D6. No persistence migration; no data model change.
 
-The Library's underlying data store (Dexie templates table) is unchanged. The `useWorkoutLibrary` hook is unchanged. Only the *mounting* of the UI surface changes, plus a new dialog-shaped subcomponent reusing the same use cases (`scheduleTemplate`, `loadTemplate`).
+The Library's underlying data store (Dexie templates table) is unchanged. The `useWorkoutLibrary` hook is unchanged. Only the _mounting_ of the UI surface changes, plus a new dialog-shaped subcomponent reusing the same use cases (`scheduleTemplate`, `loadTemplate`).
 
 ## Risks / Trade-offs
 
