@@ -213,6 +213,10 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
+        with:
+          # Deep clone so the commitlint backstop step can resolve the
+          # base..head revision range against the PR's merge base.
+          fetch-depth: 0
 
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
