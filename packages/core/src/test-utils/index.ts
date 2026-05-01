@@ -31,3 +31,14 @@ export { buildWorkoutStep } from "../tests/fixtures/workout/workout-step.fixture
 export { buildWorkout } from "../tests/fixtures/workout/workout.fixtures";
 export { buildDuration } from "../tests/fixtures/workout/duration.fixtures";
 export { buildTarget } from "../tests/fixtures/workout/target.fixtures";
+
+// Profile snapshot fixtures (parity-tested by both SPA Zod and bridge plain-JS validators)
+export type { NegativeSnapshotFixture } from "./profile-snapshot-fixtures";
+export {
+  baselineSnapshot,
+  minimalSnapshot,
+  negativeSnapshotFixtures,
+  partialZoneSnapshot,
+  positiveSnapshotFixtures,
+  snapshotFixtures,
+} from "./profile-snapshot-fixtures";
