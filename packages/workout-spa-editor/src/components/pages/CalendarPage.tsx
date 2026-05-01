@@ -42,7 +42,10 @@ export default function CalendarPage() {
     useState<CoachingActivity | null>(null);
   const activeProfile = useActiveProfileLive();
   const profileId = activeProfile?.id ?? null;
-  const matched = useMatchedSessions(profileId, s.data.days) ?? [];
+  const rawMatched = useMatchedSessions(profileId, s.data.days);
+  // Stabilize the empty-array fallback so downstream useMemo deps
+  // don't see a fresh `[]` reference on every render.
+  const matched = useMemo(() => rawMatched ?? [], [rawMatched]);
   const prefs = useUserPreferences({
     profileId,
     defaultDensity: viewportDefaultDensity(),
