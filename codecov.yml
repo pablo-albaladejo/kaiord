@@ -11,15 +11,20 @@ coverage:
           - frontend
     patch:
       default:
+        # Default patch target excludes bridge packages — they contain
+        # Chrome service-worker boilerplate (listener registrations,
+        # chrome.runtime.lastError) that is awkward to unit-test in
+        # isolation. New bridge code is covered by a dedicated 70%
+        # check below; this mirrors the CI per-package threshold.
         target: 80%
+        paths:
+          - "!packages/garmin-bridge/**"
+          - "!packages/train2go-bridge/**"
       bridges:
-        # Bridge packages contain Chrome service-worker boilerplate
-        # (chrome.runtime.lastError handling, listener registrations)
-        # that is awkward to unit-test in isolation. Mirrors the CI
-        # threshold override for these packages.
         target: 70%
-        flags:
-          - bridges
+        paths:
+          - packages/garmin-bridge/**
+          - packages/train2go-bridge/**
 
 comment:
   layout: "reach,diff,flags,files"
