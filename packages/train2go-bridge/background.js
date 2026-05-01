@@ -28,6 +28,20 @@ try {
   parser = typeof require !== "undefined" ? require("./parser.js") : {};
 }
 
+let snapshotValidator;
+try {
+  importScripts("profile-snapshot.js");
+  snapshotValidator = globalThis;
+} catch {
+  snapshotValidator =
+    typeof require !== "undefined" ? require("./profile-snapshot.js") : {};
+}
+
+const SNAPSHOT_ACTIONS = new Set([
+  "profile-snapshot",
+  "profile-snapshot-clear",
+]);
+
 // ── Tab helpers ──
 
 const findTrain2GoTab = () =>
@@ -119,6 +133,25 @@ const openTrain2Go = async () => {
   await chrome.tabs.create({ url: TRAIN2GO_DASHBOARD });
 };
 
+const persistSnapshot = async (snapshot) => {
+  const result = snapshotValidator.validateSnapshot(snapshot);
+  if (!result.ok) {
+    const err = new Error(result.error);
+    err.retryable = false;
+    throw err;
+  }
+  const receivedAt = Date.now();
+  await chrome.storage.local.set({
+    profileSnapshot: { ...result.value, receivedAt },
+  });
+  return { storedAt: receivedAt };
+};
+
+const clearSnapshot = async () => {
+  await chrome.storage.local.remove(["profileSnapshot", "lastWeeklyRollup"]);
+  return null;
+};
+
 const handleAction = async (message) => {
   switch (message.action) {
     case "ping":
@@ -132,6 +165,10 @@ const handleAction = async (message) => {
     case "open-train2go":
       await openTrain2Go();
       return null;
+    case "profile-snapshot":
+      return await persistSnapshot(message.snapshot);
+    case "profile-snapshot-clear":
+      return await clearSnapshot();
     default:
       throw new Error(`Unknown action: ${message.action}`);
   }
@@ -156,14 +193,26 @@ const sendError = (err, sendResponse) => {
 
 // ── External messages (SPA ↔ Extension) ──
 
-chrome.runtime.onMessageExternal.addListener(
-  (message, _sender, sendResponse) => {
-    handleAction(message)
-      .then((data) => sendResult(data, sendResponse))
-      .catch((err) => sendError(err, sendResponse));
+const handleExternalMessage = (message, sender, sendResponse) => {
+  if (
+    SNAPSHOT_ACTIONS.has(message?.action) &&
+    !snapshotValidator.isAllowedSenderOrigin(sender)
+  ) {
+    sendResponse({
+      ok: false,
+      protocolVersion: PROTOCOL_VERSION,
+      error: "Origin not permitted",
+      retryable: false,
+    });
     return true;
   }
-);
+  handleAction(message)
+    .then((data) => sendResult(data, sendResponse))
+    .catch((err) => sendError(err, sendResponse));
+  return true;
+};
+
+chrome.runtime.onMessageExternal.addListener(handleExternalMessage);
 
 // ── Internal messages (popup) ──
 
@@ -181,11 +230,14 @@ if (typeof module !== "undefined") {
     PROTOCOL_VERSION,
     BRIDGE_MANIFEST,
     handleAction,
+    handleExternalMessage,
     findTrain2GoTab,
     train2goFetch,
     ping,
     readWeek,
     readDay,
     openTrain2Go,
+    persistSnapshot,
+    clearSnapshot,
   };
 }

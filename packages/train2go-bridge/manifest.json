@@ -4,7 +4,7 @@
   "version": "7.1.0",
   "description": "Reads training plans from Train2Go and bridges them to the Kaiord workout editor",
 
-  "permissions": ["tabs"],
+  "permissions": ["tabs", "storage"],
 
   "host_permissions": ["https://app.train2go.com/*"],
 

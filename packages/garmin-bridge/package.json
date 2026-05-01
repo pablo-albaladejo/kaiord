@@ -9,6 +9,7 @@
     "test:coverage": "vitest --run --coverage"
   },
   "devDependencies": {
+    "@kaiord/core": "workspace:*",
     "vitest": "^4.1.5"
   }
 }

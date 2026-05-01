@@ -63,6 +63,11 @@ export const PACKAGE_DEPS = {
     "@kaiord/mcp",
   ],
   landing: ["@kaiord/core"],
-  "garmin-bridge": [],
-  "train2go-bridge": [],
+  // Bridges depend on @kaiord/core ONLY at devDependency time (parity
+  // tests for the snapshot validator load shared fixtures from
+  // @kaiord/core/test-utils). At runtime each bridge ships its own
+  // hand-rolled plain-JS validator, so production bundles have zero
+  // dependency on @kaiord/core.
+  "garmin-bridge": ["@kaiord/core"],
+  "train2go-bridge": ["@kaiord/core"],
 };
