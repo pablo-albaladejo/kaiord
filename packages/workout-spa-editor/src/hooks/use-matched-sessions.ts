@@ -18,7 +18,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { db } from "../adapters/dexie/dexie-database";
-import { toCoachingActivity } from "../adapters/train2go/coaching-record-to-activity.mapper";
+import { toCoachingActivity } from "../adapters/train2go/coaching-record-to-activity.converter";
 import { computeComplianceScore } from "../application/compute-compliance-score";
 import { parseCoachingDuration } from "../application/parse-coaching-duration";
 import type { MatchedSession } from "../components/molecules/MatchedSessionCard/MatchedSessionCard";
