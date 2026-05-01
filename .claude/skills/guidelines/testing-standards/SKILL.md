@@ -56,7 +56,7 @@ Never skip a test unconditionally. If a test fails, fix the code or update the t
 
 Enforcement: `scripts/check-no-unconditional-skip.mjs` (R-NoUnconditionalSkip).
 
-The rule covers four dispatch shapes: member (`it.skip("...", fn)`), computed-member (`it["skip"]("...", fn)`), destructured (`const { skip } = it; skip("...", fn)`), and re-bound (`const my = it; my.skip("...", fn)`). The conditional `it.skipIf(<expr>)` form is allowed only when `<expr>` contains at least one `Identifier`, `MemberExpression`, `CallExpression`, or `NewExpression` node — literal-only arguments (e.g., `skipIf(true)`, `skipIf(!!1)`, ``skipIf(`true`)``) are rejected as functionally equivalent to unconditional skip.
+The regex-based check covers two dispatch shapes mechanically: member (`it.skip("...", fn)`) and computed-member (`it["skip"]("...", fn)`). The destructured form (`const { skip } = it; skip("...", fn)`) and re-bound form (`const my = it; my.skip("...", fn)`) are documented residual risk — vanishingly rare in practice, not detected by the regex; if a contributor introduces one in the wild, file an issue and tighten the rule. The conditional `it.skipIf(<expr>)` form is allowed only when `<expr>` contains at least one `Identifier`, `MemberExpression`, `CallExpression`, or `NewExpression` node — literal-only arguments (e.g., `skipIf(true)`, `skipIf(!!1)`, ``skipIf(`true`)``) are rejected as functionally equivalent to unconditional skip.
 
 ## Test output capture
 
