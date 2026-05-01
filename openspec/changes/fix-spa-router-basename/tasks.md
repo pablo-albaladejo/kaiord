@@ -22,6 +22,7 @@
       | `""`          | `""`            | defensive: Vite normalises BASE_URL to start+end with `/`; this row guards against a future Vite contract regression |
 
       AAA structure: arrange the input string, act `computeRouterBase`, assert against expected. The table drives a single `it.each` block. Add a comment next to the empty-string row recording the defensive intent so readers don't think it's a contract Vite emits.
+
 - [ ] 2.2 Add a wouter contract test in the same file: mount `<Router base="/editor"><Route path="/x">{() => "ok"}</Route></Router>` via Testing Library (`@testing-library/react`'s `render`) and assert that visiting `/editor/x` matches the route. Pin the wouter `package.json` resolved version in the assertion so a major-version bump that changes the base contract trips this test.
 - [ ] 2.3 Run `pnpm --filter @kaiord/workout-spa-editor test src/router-base.test.ts` — passing.
 
@@ -31,7 +32,7 @@
   - `npx http-server` returns 200 for missing paths even with no SPA fallback — silently weakens Test 1's status-code expectation.
   - `npx serve` defaults to SPA fallback (`-s`) — would mask the bug.
   - **Custom fixture** at `packages/workout-spa-editor/e2e/fixtures/static-pages-server.ts`: small `http.createServer` reading from `merged-dist/`, serving the matching file with status 200 OR the `404.html` body with status 404 for unknown paths. The fixture exports `startStaticPagesServer(rootDir): Promise<{ url, close }>` so the e2e spec's `beforeAll` / `afterAll` can drive lifecycle cleanly.
-  Implement the fixture; verify behaviour empirically against Pages parity (status code 404 on unknown, exact 404.html body served) before writing Test 1.
+    Implement the fixture; verify behaviour empirically against Pages parity (status code 404 on unknown, exact 404.html body served) before writing Test 1.
 - [ ] 3.0a **Extract the rafgraph injection helper** to `scripts/inject-spa-fallback.mjs`. The helper takes a `mergedDistDir` argument, appends the rafgraph redirect script to `<dir>/404.html`, and injects the decoder snippet into `<dir>/editor/index.html` — same logic as the inline bash heredoc in `.github/workflows/deploy-site.yml` lines 102-152. Update the workflow to call `node scripts/inject-spa-fallback.mjs merged-dist` instead of the inline bash + Python heredocs. Co-located test `scripts/inject-spa-fallback.test.mjs` exercises the helper against a temp-dir fixture. The e2e spec's `beforeAll` calls the same helper after the SPA build so the redirect script is byte-identical between production and tests.
 - [ ] 3.1 Create `packages/workout-spa-editor/e2e/spa-route-refresh.spec.ts`. The spec's top-level `describe` block carries the `@spa-route-refresh` tag (e.g. `test.describe("@spa-route-refresh SPA route refresh", () => { ... })`) so the CI grep filter in 3.2 selects this whole spec, not individual tests:
   - `test.skip` guard at the top: `test.skip(process.env.E2E_PROD_BASE !== "1", "Production-base e2e gated behind E2E_PROD_BASE=1");` so the standard `pnpm test:e2e` (dev-mode) continues to run unchanged.
@@ -84,14 +85,14 @@
 
 For each scenario in this change's `specs/spa-routing/spec.md` ADDED block, identify the task that delivers the test:
 
-| # | Scenario | Task that adds the test |
-| - | --- | --- |
-| 1 | Wouter is wrapped at SPA bootstrap | 3.1 / Test 2 (e2e exercises the wrapper presence behaviourally) |
-| 2 | computeRouterBase strips the Vite trailing slash | 2.1 (unit) |
-| 3 | Production base produces deploy-prefixed URLs | 3.1 / Test 2 (e2e) |
-| 4 | Refreshing a deep SPA URL keeps the SPA | 3.1 / Test 1 + Test 3 (e2e) |
-| 5 | Dev-mode behaviour is unchanged | 1.3 + 4.2 |
-| 6 | Analytics paths remain base-relative | 3.1 / Test 4 (e2e) |
-| 7 | Garbage path under the deploy base resolves to the catch-all | 3.1 / Test 5 (e2e) |
+| #   | Scenario                                                     | Task that adds the test                                         |
+| --- | ------------------------------------------------------------ | --------------------------------------------------------------- |
+| 1   | Wouter is wrapped at SPA bootstrap                           | 3.1 / Test 2 (e2e exercises the wrapper presence behaviourally) |
+| 2   | computeRouterBase strips the Vite trailing slash             | 2.1 (unit)                                                      |
+| 3   | Production base produces deploy-prefixed URLs                | 3.1 / Test 2 (e2e)                                              |
+| 4   | Refreshing a deep SPA URL keeps the SPA                      | 3.1 / Test 1 + Test 3 (e2e)                                     |
+| 5   | Dev-mode behaviour is unchanged                              | 1.3 + 4.2                                                       |
+| 6   | Analytics paths remain base-relative                         | 3.1 / Test 4 (e2e)                                              |
+| 7   | Garbage path under the deploy base resolves to the catch-all | 3.1 / Test 5 (e2e)                                              |
 
 - [ ] 7.1 Confirm the table is bidirectionally in sync with the final spec scenarios at archive time: every scenario maps to a task AND every test/sub-test maps to a scenario.
