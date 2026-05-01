@@ -30,7 +30,7 @@ const REDIRECT_SCRIPT = `
 `;
 
 const DECODER_SNIPPET =
-  '<script>' +
+  "<script>" +
   "(function(){" +
   'var p=new URLSearchParams(window.location.search).get("p");' +
   "if(p){var d=decodeURIComponent(p);" +
@@ -65,7 +65,9 @@ export function injectSpaFallback(mergedDistDir) {
 if (import.meta.url === `file://${process.argv[1]}`) {
   const target = process.argv[2];
   if (!target) {
-    console.error("Usage: node scripts/inject-spa-fallback.mjs <merged-dist-dir>");
+    console.error(
+      "Usage: node scripts/inject-spa-fallback.mjs <merged-dist-dir>"
+    );
     process.exit(1);
   }
   injectSpaFallback(target);
