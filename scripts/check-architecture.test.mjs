@@ -1,7 +1,13 @@
 // Tests for scripts/check-architecture.mjs using node:test.
 
 import { strict as assert } from "node:assert";
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import {
+  mkdirSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from "node:fs";
 import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
@@ -58,7 +64,10 @@ describe("R-ArchLeftward (cross-layer imports)", () => {
   });
 
   test("ports → application is rejected", () => {
-    write("core/src/ports/x.ts", "import type { Y } from '../application/foo';\n");
+    write(
+      "core/src/ports/x.ts",
+      "import type { Y } from '../application/foo';\n"
+    );
 
     const v = runCheck({ packagesRoot: sandbox });
 
@@ -126,10 +135,7 @@ describe("R-ArchAppPure (external libs in application)", () => {
   });
 
   test("external lib import is rejected", () => {
-    write(
-      "core/src/application/x.ts",
-      "import { z } from 'zod';\n"
-    );
+    write("core/src/application/x.ts", "import { z } from 'zod';\n");
 
     const v = runCheck({ packagesRoot: sandbox });
 
@@ -164,10 +170,7 @@ describe("R-ArchPortPure (runtime code in ports)", () => {
   });
 
   test("ports/ file with runtime const is rejected", () => {
-    write(
-      "core/src/ports/x.ts",
-      "export const FOO = 1;\n"
-    );
+    write("core/src/ports/x.ts", "export const FOO = 1;\n");
 
     const v = runCheck({ packagesRoot: sandbox });
 
@@ -175,10 +178,7 @@ describe("R-ArchPortPure (runtime code in ports)", () => {
   });
 
   test("ports/ file with runtime function is rejected", () => {
-    write(
-      "core/src/ports/x.ts",
-      "export function bar() { return 1; }\n"
-    );
+    write("core/src/ports/x.ts", "export function bar() { return 1; }\n");
 
     const v = runCheck({ packagesRoot: sandbox });
 

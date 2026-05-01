@@ -23,9 +23,11 @@ is rejected by `commitlint.config.mjs`.
 Source of truth: `commitlint.vocab.mjs` + the block below. Drift between
 the two (insertion, deletion, OR reorder) fails CI via
 `scripts/check-commitlint-config.test.mjs`. Enforcement: `commitlint.config.mjs`
-+ `.husky/commit-msg` + `scripts/check-commitlint-config.test.mjs`.
+
+- `.husky/commit-msg` + `scripts/check-commitlint-config.test.mjs`.
 
 <!-- commitlint-source-of-truth:start -->
+
 ```
 # types
 feat
@@ -62,6 +64,7 @@ deps
 deps-dev
 e2e
 ```
+
 <!-- commitlint-source-of-truth:end -->
 
 ## Changesets

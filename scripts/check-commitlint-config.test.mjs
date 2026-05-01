@@ -104,7 +104,11 @@ describe("commitlint subject acceptance", () => {
   test("chore(openspec): archive cleanup → exit 0", () => {
     const r = runCommitlint("chore(openspec): archive cleanup-may-2026");
     if (r.skipped) return;
-    assert.equal(r.code, 0, `expected 0, got ${r.code}\n${r.stderr}\n${r.stdout}`);
+    assert.equal(
+      r.code,
+      0,
+      `expected 0, got ${r.code}\n${r.stderr}\n${r.stdout}`
+    );
   });
 
   test("feat(banana): unknown scope → non-zero", () => {
@@ -128,6 +132,10 @@ describe("commitlint subject acceptance", () => {
   test("feat(core): valid subject → exit 0", () => {
     const r = runCommitlint("feat(core): add fromBinary");
     if (r.skipped) return;
-    assert.equal(r.code, 0, `expected 0, got ${r.code}\n${r.stderr}\n${r.stdout}`);
+    assert.equal(
+      r.code,
+      0,
+      `expected 0, got ${r.code}\n${r.stderr}\n${r.stdout}`
+    );
   });
 });

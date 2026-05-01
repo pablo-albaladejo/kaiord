@@ -105,10 +105,11 @@ function relForRule(file) {
 function stripComments(src) {
   // Preserve line numbers by replacing comments with whitespace of equal
   // length and preserving any newlines they contained.
-  let out = src.replace(BLOCK_COMMENT_RE, (m) =>
-    m.replace(/[^\n]/g, " ")
+  let out = src.replace(BLOCK_COMMENT_RE, (m) => m.replace(/[^\n]/g, " "));
+  out = out.replace(
+    LINE_COMMENT_RE,
+    (m, prefix) => prefix + " ".repeat(m.length - prefix.length)
   );
-  out = out.replace(LINE_COMMENT_RE, (m, prefix) => prefix + " ".repeat(m.length - prefix.length));
   return out;
 }
 

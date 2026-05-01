@@ -146,9 +146,7 @@ function walk(dir, visit) {
 }
 
 function stripComments(source) {
-  return source
-    .replace(BLOCK_COMMENT_RE, "")
-    .replace(LINE_COMMENT_RE, "$1");
+  return source.replace(BLOCK_COMMENT_RE, "").replace(LINE_COMMENT_RE, "$1");
 }
 
 function extractImports(source) {
@@ -207,7 +205,10 @@ function relativeEscapesTo(spec, fromLayer) {
   // domain/sub/X to ports/Y), the path must `../../ports/Y` or similar.
   // We look at the first non-`.`/non-`..` segment after the upward jumps.
   let i = 0;
-  while (i < parts.length && (parts[i] === "." || parts[i] === ".." || parts[i] === ""))
+  while (
+    i < parts.length &&
+    (parts[i] === "." || parts[i] === ".." || parts[i] === "")
+  )
     i++;
   const targetDir = parts[i];
   // Layers that signal an architectural escape:
@@ -238,7 +239,11 @@ function checkCoreSourceFile(file, source, packagesRoot) {
           file: rel,
           detail: `domain/ may not import ${escape}/ (specifier: ${spec})`,
         });
-      } else if (isExternalSpec(spec) && spec !== "zod" && !spec.startsWith("node:")) {
+      } else if (
+        isExternalSpec(spec) &&
+        spec !== "zod" &&
+        !spec.startsWith("node:")
+      ) {
         // node: builtins also forbidden in domain (no I/O).
         violations.push({
           rule: "R-ArchDomainExt",

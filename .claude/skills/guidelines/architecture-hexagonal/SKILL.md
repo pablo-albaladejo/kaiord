@@ -103,8 +103,10 @@ and is enforced by `scripts/check-architecture.mjs` under rule
 array-equality (order-sensitive) against the vocab module — drift fails CI.
 
 <!-- arch-vocab:start -->
+
 analytics
 logger
+
 <!-- arch-vocab:end -->
 
 Both are infrastructure-free, zero-runtime-dependency adapters that ship

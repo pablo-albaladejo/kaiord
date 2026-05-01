@@ -76,8 +76,10 @@ export function runCheck({ packagesRoot } = {}) {
   const violations = [];
   for (const file of converters) {
     if (siblingTestExists(file)) continue;
-    const rel = relative(root === PACKAGES_ROOT ? REPO_ROOT : root, file)
-      .replaceAll("\\", "/");
+    const rel = relative(
+      root === PACKAGES_ROOT ? REPO_ROOT : root,
+      file
+    ).replaceAll("\\", "/");
     const isAllowed = root === PACKAGES_ROOT && ALLOWLIST.has(rel);
     if (isAllowed) continue;
     violations.push({

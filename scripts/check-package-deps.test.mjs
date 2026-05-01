@@ -76,7 +76,11 @@ describe("check-package-deps", () => {
   test("non-@kaiord deps are ignored", () => {
     writePackage("fit", {
       name: "@kaiord/fit",
-      dependencies: { "@kaiord/core": "*", zod: "^4.0.0", "fast-xml-parser": "*" },
+      dependencies: {
+        "@kaiord/core": "*",
+        zod: "^4.0.0",
+        "fast-xml-parser": "*",
+      },
     });
 
     const violations = runCheck({ packagesRoot: sandbox });
