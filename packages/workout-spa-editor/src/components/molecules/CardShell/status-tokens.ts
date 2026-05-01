@@ -74,7 +74,9 @@ export const complianceBucketToBorderClass = (
     case "amber":
       return "border-amber-600";
     case "mid":
-      return "border-l-[3px] border-l-amber-600 [border-image:linear-gradient(to_bottom,theme(colors.amber.600),theme(colors.emerald.600))_1]";
+      // Match the shared CardShell border-l-4 width; only the border-image
+      // gradient distinguishes this bucket from the solid-colour ones.
+      return "border-l-4 border-l-amber-600 [border-image:linear-gradient(to_bottom,theme(colors.amber.600),theme(colors.emerald.600))_1]";
     case "emerald":
       return "border-emerald-600";
   }
