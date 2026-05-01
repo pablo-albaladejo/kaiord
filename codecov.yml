@@ -21,7 +21,13 @@ coverage:
           - "!packages/garmin-bridge/**"
           - "!packages/train2go-bridge/**"
       bridges:
-        target: 70%
+        # Informational, not blocking. Bridge packages are >75%
+        # statement-covered; the residual gap is Chrome service-
+        # worker listener registration that is awkward to test in
+        # isolation. The CI per-package threshold (also 70%) and
+        # the privacy-surface mechanical guard are the load-
+        # bearing checks for these packages.
+        informational: true
         paths:
           - packages/garmin-bridge/**
           - packages/train2go-bridge/**
