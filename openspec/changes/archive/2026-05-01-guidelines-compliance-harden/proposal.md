@@ -1,4 +1,4 @@
-> Completed: <YYYY-MM-DD>
+> Completed: 2026-05-01
 
 ## Why
 
