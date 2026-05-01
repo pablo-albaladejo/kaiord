@@ -87,15 +87,15 @@ The repository SHALL contain `scripts/check-architecture.mjs` that statically in
 
 The script SHALL implement at minimum these rules:
 
-| Rule ID | Forbids |
-| --- | --- |
-| `R-ArchLeftward` | `packages/core/src/domain/**` importing `application/`, `adapters/`, or `ports/`; `packages/core/src/ports/**` importing `application/` or `adapters/`; `packages/core/src/application/**` importing `adapters/` |
-| `R-ArchDomainExt` | `packages/core/src/domain/**` importing any external library other than `zod` |
-| `R-ArchAppPure` | `packages/core/src/application/**` importing any external library |
-| `R-ArchPortPure` | `packages/core/src/ports/**` containing any AST node other than type aliases, interfaces, or re-exports of the same |
-| `R-ArchAdapterCross` | `packages/{fit,tcx,zwo,garmin}/src/**` importing from a sibling format adapter (`@kaiord/{fit,tcx,zwo,garmin}` other than the package's own). Cross-package imports beyond format adapters are governed by `R-ArchPackageDeps`. |
-| `R-ArchCoreAdapterAllowlist` | any folder under `packages/core/src/adapters/` whose name is not `logger` or `analytics` |
-| `R-ArchCoreAmbientTypes` | any `*.d.ts` under `packages/core/src/` containing `declare module "<external-package>"` for a vendor SDK |
+| Rule ID                      | Forbids                                                                                                                                                                                                                         |
+| ---------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `R-ArchLeftward`             | `packages/core/src/domain/**` importing `application/`, `adapters/`, or `ports/`; `packages/core/src/ports/**` importing `application/` or `adapters/`; `packages/core/src/application/**` importing `adapters/`                |
+| `R-ArchDomainExt`            | `packages/core/src/domain/**` importing any external library other than `zod`                                                                                                                                                   |
+| `R-ArchAppPure`              | `packages/core/src/application/**` importing any external library                                                                                                                                                               |
+| `R-ArchPortPure`             | `packages/core/src/ports/**` containing any AST node other than type aliases, interfaces, or re-exports of the same                                                                                                             |
+| `R-ArchAdapterCross`         | `packages/{fit,tcx,zwo,garmin}/src/**` importing from a sibling format adapter (`@kaiord/{fit,tcx,zwo,garmin}` other than the package's own). Cross-package imports beyond format adapters are governed by `R-ArchPackageDeps`. |
+| `R-ArchCoreAdapterAllowlist` | any folder under `packages/core/src/adapters/` whose name is not `logger` or `analytics`                                                                                                                                        |
+| `R-ArchCoreAmbientTypes`     | any `*.d.ts` under `packages/core/src/` containing `declare module "<external-package>"` for a vendor SDK                                                                                                                       |
 
 The `{logger, analytics}` allowlist used by `R-ArchCoreAdapterAllowlist` SHALL live in a single source-of-truth module `scripts/architecture.vocab.mjs` exporting `CORE_ADAPTER_ALLOWLIST = ["analytics", "logger"]`. The same array SHALL be reproduced verbatim inside a fenced block in `.claude/skills/guidelines/architecture-hexagonal/SKILL.md` between the markers `<!-- arch-vocab:start -->` and `<!-- arch-vocab:end -->`. The test in `scripts/check-architecture.test.mjs` SHALL parse the SKILL.md block, import `architecture.vocab.mjs`, and assert array equality (order-sensitive). Drift between doc and code MUST fail CI.
 
@@ -164,18 +164,18 @@ The repository SHALL contain `scripts/check-package-deps.mjs` (+ co-located `*.t
 
 The allowlist (codified in the script as a `PACKAGE_DEPS` constant, byte-identical to the `Package Dependencies` requirement in this spec):
 
-| Package | Allowed `@kaiord/*` deps |
-| --- | --- |
-| `@kaiord/core` | _(none)_ |
-| `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin` | `@kaiord/core` |
-| `@kaiord/garmin-connect` | `@kaiord/core`, `@kaiord/garmin` |
-| `@kaiord/ai` | `@kaiord/core` |
-| `@kaiord/mcp` | `@kaiord/core` + all format adapters + `@kaiord/garmin-connect` |
-| `@kaiord/cli` | `@kaiord/core` + all adapters + `@kaiord/garmin-connect` |
-| `@kaiord/workout-spa-editor` | `@kaiord/core`, `@kaiord/ai`, `@kaiord/fit`, `@kaiord/garmin`, `@kaiord/tcx`, `@kaiord/zwo` |
-| `@kaiord/docs` | `@kaiord/core` + all adapters + `@kaiord/garmin-connect` + `@kaiord/cli` + `@kaiord/mcp` |
-| `@kaiord/landing` | `@kaiord/core` |
-| `@kaiord/garmin-bridge`, `@kaiord/train2go-bridge` | _(none — Chrome extensions)_ |
+| Package                                                       | Allowed `@kaiord/*` deps                                                                    |
+| ------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `@kaiord/core`                                                | _(none)_                                                                                    |
+| `@kaiord/fit`, `@kaiord/tcx`, `@kaiord/zwo`, `@kaiord/garmin` | `@kaiord/core`                                                                              |
+| `@kaiord/garmin-connect`                                      | `@kaiord/core`, `@kaiord/garmin`                                                            |
+| `@kaiord/ai`                                                  | `@kaiord/core`                                                                              |
+| `@kaiord/mcp`                                                 | `@kaiord/core` + all format adapters + `@kaiord/garmin-connect`                             |
+| `@kaiord/cli`                                                 | `@kaiord/core` + all adapters + `@kaiord/garmin-connect`                                    |
+| `@kaiord/workout-spa-editor`                                  | `@kaiord/core`, `@kaiord/ai`, `@kaiord/fit`, `@kaiord/garmin`, `@kaiord/tcx`, `@kaiord/zwo` |
+| `@kaiord/docs`                                                | `@kaiord/core` + all adapters + `@kaiord/garmin-connect` + `@kaiord/cli` + `@kaiord/mcp`    |
+| `@kaiord/landing`                                             | `@kaiord/core`                                                                              |
+| `@kaiord/garmin-bridge`, `@kaiord/train2go-bridge`            | _(none — Chrome extensions)_                                                                |
 
 #### Scenario: Disallowed workspace dep blocked
 
