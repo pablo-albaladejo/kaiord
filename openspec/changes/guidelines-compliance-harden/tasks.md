@@ -71,15 +71,15 @@ Then §5 final-validation block runs and the change is archived.
 - [x] 1.7.1 add devDeps `@commitlint/cli` and `@commitlint/config-conventional` at the repo root (`pnpm add -Dw @commitlint/cli @commitlint/config-conventional`)
 - [x] 1.7.2 create `commitlint.vocab.mjs` exporting:
       `js
-  export const TYPE_ENUM = ["feat","fix","chore","test","docs","refactor","perf"];
-  export const SCOPE_ENUM = [
-    "core","fit","tcx","zwo","garmin","garmin-connect","ai","cli","mcp",
-    "spa-editor","garmin-bridge","train2go-bridge",
-    "analytics","landing","docs-site",
-    "openspec","ci","docs","scripts",
-    "deploy","release","deps","deps-dev","e2e",
-  ];
-  `
+export const TYPE_ENUM = ["feat","fix","chore","test","docs","refactor","perf"];
+export const SCOPE_ENUM = [
+  "core","fit","tcx","zwo","garmin","garmin-connect","ai","cli","mcp",
+  "spa-editor","garmin-bridge","train2go-bridge",
+  "analytics","landing","docs-site",
+  "openspec","ci","docs","scripts",
+  "deploy","release","deps","deps-dev","e2e",
+];
+`
       Order is normative (alphabetical-by-tier; the test asserts array-equality, not Set-equality)
 - [x] 1.7.3 create `commitlint.config.mjs` importing `TYPE_ENUM` and `SCOPE_ENUM` from `commitlint.vocab.mjs`. The config explicitly preserves `@commitlint/config-conventional` default single-scope behavior (no multi-scope opt-in). Per design D2, multi-scope subjects MUST be rejected
 - [x] 1.7.4 update `.claude/skills/guidelines/git-strategy/SKILL.md`: REPLACE the existing scope list at lines 24-28 with a fenced markdown block bracketed by `<!-- commitlint-source-of-truth:start -->` and `<!-- commitlint-source-of-truth:end -->`. The block uses a STRICTLY MACHINE-READABLE shape: one entry per line, no prefixes, no indentation, blank lines and lines starting with `#` are comments and ignored by the parser. Section headers `# types` and `# scopes` separate the two arrays. The block contents MUST be EXACTLY (line-for-line, order-preserved):
