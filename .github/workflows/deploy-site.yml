@@ -14,6 +14,7 @@ on:
       - "packages/garmin/**"
       - "styles/**"
       - ".github/workflows/deploy-site.yml"
+      - "scripts/inject-spa-fallback.mjs"
   workflow_dispatch:
 
 permissions:
@@ -144,22 +145,52 @@ jobs:
             echo "❌ Missing build marker or page URL; cannot run smoke."
             exit 1
           fi
+          # The deep-route fallback works in two pieces:
+          #   1. /editor/index.html serves the SPA bundle (positive marker)
+          #   2. /404.html carries the rafgraph redirect script that bounces
+          #      /editor/* (and the legacy SPA route allowlist) into /editor/?p=…
+          # We probe both pieces directly. This sidesteps the prior smoke's
+          # design flaw, which fetched /editor/calendar with curl and expected
+          # the SPA bundle in the response body — but that bundle only appears
+          # after a JS-driven `window.location.replace` round-trip that curl
+          # cannot execute.
           # Pages CDN propagation is eventually consistent; retry up to 10x at 10s.
-          # The deep route /editor/calendar must serve the SPA bundle (positive marker)
-          # and never the landing's 404 markup (negative marker).
-          URL="${PAGE_URL%/}/editor/calendar"
-          echo "Smoke target: $URL"
-          echo "Looking for marker: $MARKER"
+          EDITOR_URL="${PAGE_URL%/}/editor/"
+          NOT_FOUND_URL="${PAGE_URL%/}/404.html"
+          echo "Smoke targets:"
+          echo "  - $EDITOR_URL (expect marker: $MARKER)"
+          echo "  - $NOT_FOUND_URL (expect rafgraph redirect script)"
           for i in $(seq 1 10); do
-            BODY=$(curl -sL --max-time 15 "$URL" || true)
-            if echo "$BODY" | grep -qF "$MARKER"; then
-              echo "✅ Attempt $i: SPA bundle served at deep route"
+            EDITOR_TMP=$(mktemp)
+            NOT_FOUND_TMP=$(mktemp)
+            # `--http-status` would be cleaner but isn't in older curl; capture
+            # the code via -w and the body via -o for portability. -L follows
+            # any HTTP-level redirect so we score the final response.
+            EDITOR_CODE=$(curl -sL --max-time 15 -o "$EDITOR_TMP" -w "%{http_code}" "$EDITOR_URL" || echo "000")
+            NOT_FOUND_CODE=$(curl -sL --max-time 15 -o "$NOT_FOUND_TMP" -w "%{http_code}" "$NOT_FOUND_URL" || echo "000")
+            EDITOR_BODY=$(cat "$EDITOR_TMP" 2>/dev/null || true)
+            NOT_FOUND_BODY=$(cat "$NOT_FOUND_TMP" 2>/dev/null || true)
+            rm -f "$EDITOR_TMP" "$NOT_FOUND_TMP"
+            EDITOR_OK=0
+            NOT_FOUND_OK=0
+            # /editor/ is the SPA entry — must serve 200 + the bundle marker.
+            [ "$EDITOR_CODE" = "200" ] && echo "$EDITOR_BODY" | grep -qF "$MARKER" && EDITOR_OK=1
+            # /404.html is itself a real artefact (GitHub Pages serves it as
+            # a regular file with status 200); Pages then ALSO uses its body
+            # for the not-found fallback. We assert 200 + that the rafgraph
+            # guard literal is present so the redirect only fires for
+            # SPA-related 404s.
+            [ "$NOT_FOUND_CODE" = "200" ] && echo "$NOT_FOUND_BODY" | grep -qF "indexOf('/editor/')" && NOT_FOUND_OK=1
+            if [ "$EDITOR_OK" = "1" ] && [ "$NOT_FOUND_OK" = "1" ]; then
+              echo "✅ Attempt $i: SPA bundle present at /editor/ (200) AND rafgraph redirect present at /404.html (200)"
               exit 0
             fi
-            echo "Attempt $i: marker not found yet; retrying in 10s"
+            echo "Attempt $i: editor=$EDITOR_OK (code=$EDITOR_CODE) 404=$NOT_FOUND_OK (code=$NOT_FOUND_CODE); retrying in 10s"
             sleep 10
           done
-          echo "❌ Smoke failed after 10 retries — deep route did not serve the SPA bundle."
+          echo "❌ Smoke failed after 10 retries:"
+          echo "    /editor/ status=$EDITOR_CODE (expect 200), marker present: $EDITOR_OK"
+          echo "    /404.html status=$NOT_FOUND_CODE (expect 200), rafgraph script: $NOT_FOUND_OK"
           exit 1
 
       # Rollback: use workflow_dispatch on last known-good main commit SHA,
