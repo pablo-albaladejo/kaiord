@@ -47,8 +47,9 @@ This change addresses both layers in one pass because either alone would leave t
 **Public-facing on the type:** `CoachingActivity` (the view-model the UI consumes) gains an optional, **derived** `matchedWorkoutId?: string` populated by the join in `useCoachingActivities` — but this is a view-model field, not a stored field on `CoachingActivityRecord`. The persistence boundary stays clean.
 
 **Alternatives considered:**
-- *Field on both sides*: rejected for the sync coupling and pollution reasons above.
-- *Single field on `CoachingActivity` only*: rejected because a workout without a matching activity (athlete uploads independently of any coach) can never offer "match this to a plan" without enumerating activities anyway.
+
+- _Field on both sides_: rejected for the sync coupling and pollution reasons above.
+- _Single field on `CoachingActivity` only_: rejected because a workout without a matching activity (athlete uploads independently of any coach) can never offer "match this to a plan" without enumerating activities anyway.
 
 ### D2 — Auto-match is a confirmable suggestion, not a silent mutation
 
@@ -59,8 +60,9 @@ This change addresses both layers in one pass because either alone would leave t
 **Heuristic for v1:** `score = 1 - |plan.duration - actual.duration| / plan.duration`, gated by `same date AND same sport`. Suggestions surface when `score >= 0.6` (i.e., ≤40% variance). Multiple workouts on the same day in the same sport produce one suggestion per highest-score pair, with no overlapping pairings (greedy assignment).
 
 **Alternatives considered:**
-- *Silent auto-match on sync*: rejected — incorrect matches become invisible, and re-sync semantics (does the auto-match re-run? does it overwrite manual matches?) become a pile of edge cases.
-- *Auto-match with toast undo*: rejected — toast disappears, the user moves on, the wrong match persists. Confirmation up front is cleaner than reversal after the fact.
+
+- _Silent auto-match on sync_: rejected — incorrect matches become invisible, and re-sync semantics (does the auto-match re-run? does it overwrite manual matches?) become a pile of edge cases.
+- _Auto-match with toast undo_: rejected — toast disappears, the user moves on, the wrong match persists. Confirmation up front is cleaner than reversal after the fact.
 
 ### D3 — Status drives the lateral border colour; origin is a muted text chip
 
@@ -150,8 +152,9 @@ This change addresses both layers in one pass because either alone would leave t
 - Defaults are computed at read time from viewport width, not stored, so a freshly-created profile doesn't need a preferences row to render correctly. The row is created on first user-driven mutation.
 
 **Alternatives considered:**
-- *localStorage*: rejected — not per-profile, doesn't survive profile switches cleanly, doesn't share the Dexie reactivity story used elsewhere in the SPA.
-- *Zustand + manual persist*: rejected per the project rule "Zustand only for editor runtime; persisted data goes to Dexie".
+
+- _localStorage_: rejected — not per-profile, doesn't survive profile switches cleanly, doesn't share the Dexie reactivity story used elsewhere in the SPA.
+- _Zustand + manual persist_: rejected per the project rule "Zustand only for editor runtime; persisted data goes to Dexie".
 
 ### D5 — Three card components, not one polymorphic card
 
