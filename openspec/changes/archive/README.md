@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-05-01 | [`calendar-coaching-redesign`](./2026-05-01-calendar-coaching-redesign/) | The calendar week view is the home page of the SPA editor and the entry point for every coaching workflow, but its current state is broken in three compounding… |
 | 2026-05-01 | [`cleanup-open-issues-may-2026`](./2026-05-01-cleanup-open-issues-may-2026/) | The repo has 15 open issues. Triage shows the queue is mostly noise: |
 | 2026-05-01 | [`fix-spa-router-basename`](./2026-05-01-fix-spa-router-basename/) | The Phase 2 SPA-fallback fix in cleanup-open-issues-may-2026 (PR #398) shipped the rafgraph redirect script wrapped behind a pathname.indexOf('/editor/') === 0… |
 | 2026-05-01 | [`guidelines-compliance-harden`](./2026-05-01-guidelines-compliance-harden/) | A guideline-vs-code audit (May 2026) surfaced eight drift points where the documented rules in .claude/skills/guidelines/ are not mechanically enforced. The mo… |
