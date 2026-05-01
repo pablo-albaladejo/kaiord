@@ -107,4 +107,3 @@ The rule supersedes the file-local audit at `packages/workout-spa-editor/src/com
 
 - **WHEN** `node scripts/check-no-pii-leakage.mjs` runs against the SPA editor source tree on the merge commit that closes this rollout
 - **THEN** the script exits 0 with `✅ No PII / secret leakage detected.`
-

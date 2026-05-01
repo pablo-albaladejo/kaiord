@@ -74,16 +74,17 @@ Two tests guard the rule:
 
 **Unit test** (`packages/workout-spa-editor/src/router-base.test.ts`): exercises a pure exported helper `computeRouterBase(baseUrl: string): string` declared in `packages/workout-spa-editor/src/router-base.ts` and consumed by `main.tsx`. The helper centralises the trailing-slash strip so the rule is testable in isolation, table-driven, and survives JSX-shape refactors:
 
-| input            | expected output |
-| ---------------- | --------------- |
-| `"/"`            | `""`            |
-| `"/editor/"`     | `"/editor"`     |
-| `"/a/b/"`        | `"/a/b"`        |
-| `""`             | `""`            |
+| input        | expected output |
+| ------------ | --------------- |
+| `"/"`        | `""`            |
+| `"/editor/"` | `"/editor"`     |
+| `"/a/b/"`    | `"/a/b"`        |
+| `""`         | `""`            |
 
 The helper exists so the unit test is behavioural (not a source-grep). `main.tsx` imports `computeRouterBase` and applies it to `import.meta.env.BASE_URL`. Vite normalises `BASE_URL` to always start AND end with `/` (verified in Vite's `resolveBaseUrl`), so the regex-strip's correctness is grounded in that invariant; if Vite ever changes the contract, the unit test catches the discrepancy.
 
 **E2E test** (`packages/workout-spa-editor/e2e/spa-route-refresh.spec.ts`, new): builds the SPA with `VITE_BASE_PATH=/editor/`, serves the merged dist (including the rafgraph 404) via a static server that does NOT expose SPA fallback, then:
+
 - GET `/editor/calendar` directly. Asserts the response is the SPA bundle (entry script tag) — proves Pages-equivalent fallback works.
 - Navigate to `/editor/`, then click into the calendar route, observe the URL becomes `/editor/calendar` (NOT `/calendar`).
 - Refresh from inside the SPA. Asserts the URL stays `/editor/calendar` and the calendar view re-renders.
