@@ -301,3 +301,200 @@ describe("scope", () => {
     assert.equal(ALLOWLIST.size, 0);
   });
 });
+
+describe("destructured dispatch (REJECT)", () => {
+  test("rejects const { skip } = it; skip('name', fn);", () => {
+    write("a/x.test.ts", `const { skip } = it;\nskip("renders", () => {});\n`);
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.equal(v[0].rule, "R-NoUnconditionalSkip");
+    assert.match(v[0].detail, /destructured/);
+  });
+
+  test("rejects const { only: myOnly } = test; myOnly('name', fn);", () => {
+    write(
+      "a/x.test.ts",
+      `const { only: myOnly } = test;\nmyOnly("focused", () => {});\n`
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.match(v[0].detail, /test\.only/);
+  });
+
+  test("rejects destructured todo without deadline comment", () => {
+    write("a/x.test.ts", `const { todo } = it;\ntodo("planned", () => {});\n`);
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.match(v[0].detail, /no deadline comment|TODO\(/);
+  });
+
+  test("rejects destructured skipIf with literal-only argument", () => {
+    write(
+      "a/x.test.ts",
+      `const { skipIf } = it;\nskipIf(true)("blocked", () => {});\n`
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.match(v[0].detail, /skipIf/);
+  });
+
+  test("allows destructured skipIf with runtime expression", () => {
+    write(
+      "a/x.test.ts",
+      `const { skipIf } = it;\nskipIf(process.env.X)("conditional", () => {});\n`
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 0);
+  });
+
+  test("ignores destructure from a non-test source", () => {
+    write("a/x.test.ts", `const { skip } = lodash;\nskip(arr, 5);\n`);
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 0);
+  });
+});
+
+describe("re-bound dispatch (REJECT)", () => {
+  test("rejects const my = it; my.skip('name', fn);", () => {
+    write("a/x.test.ts", `const my = it;\nmy.skip("renders", () => {});\n`);
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.match(v[0].detail, /re-bound/);
+  });
+
+  test("rejects const t = test; t.only('name', fn);", () => {
+    write("a/x.test.ts", `const t = test;\nt.only("focused", () => {});\n`);
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+  });
+
+  test("rejects re-bound skipIf with literal-only argument", () => {
+    write(
+      "a/x.test.ts",
+      `const my = it;\nmy.skipIf(true)("blocked", () => {});\n`
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.match(v[0].detail, /re-bound/);
+  });
+
+  test("allows re-bound skipIf with runtime expression", () => {
+    write(
+      "a/x.test.ts",
+      `const my = it;\nmy.skipIf(process.env.X)("conditional", () => {});\n`
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 0);
+  });
+});
+
+describe("it.todo deadline allowance", () => {
+  test("allows it.todo with non-expired deadline comment", () => {
+    write(
+      "a/x.test.ts",
+      `// TODO(2030-01-01): finish auth flow\nit.todo("auth flow", () => {});\n`
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 0);
+  });
+
+  test("rejects it.todo with expired deadline comment", () => {
+    write(
+      "a/x.test.ts",
+      `// TODO(2020-01-01): finish auth flow\nit.todo("auth flow", () => {});\n`
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.match(v[0].detail, /expired/);
+  });
+
+  test("rejects it.todo with no comment", () => {
+    write("a/x.test.ts", `it.todo("name", () => {});\n`);
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.match(v[0].detail, /no deadline comment/);
+  });
+
+  test("rejects it.todo with comment but no date", () => {
+    write("a/x.test.ts", `// TODO: finish later\nit.todo("name", () => {});\n`);
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.match(v[0].detail, /no deadline comment/);
+  });
+
+  test("rejects it.todo when deadline comment is two lines above (not adjacent)", () => {
+    write(
+      "a/x.test.ts",
+      `// TODO(2030-01-01): finish auth flow\n\nit.todo("auth flow", () => {});\n`
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 1);
+    assert.match(v[0].detail, /no deadline comment/);
+  });
+
+  test("allows test.todo with non-expired deadline comment", () => {
+    write(
+      "a/x.test.ts",
+      `// TODO(2030-12-31): refactor flow\ntest.todo("refactor", () => {});\n`
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 0);
+  });
+
+  test("does NOT apply deadline allowance to .skip", () => {
+    write(
+      "a/x.test.ts",
+      `// TODO(2030-01-01): fix later\nit.skip("renders", () => {});\n`
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    // .skip is rejected unconditionally; the deadline allowance only
+    // applies to .todo (Vitest planned-test convention).
+    assert.equal(v.length, 1);
+    assert.match(v[0].detail, /unconditional Vitest skip/);
+  });
+
+  test("allows destructured todo with non-expired deadline", () => {
+    write(
+      "a/x.test.ts",
+      `const { todo } = it;\n// TODO(2030-01-01): fix later\ntodo("auth flow", () => {});\n`
+    );
+
+    const v = runCheck({ packagesRoot: sandbox });
+
+    assert.equal(v.length, 0);
+  });
+});
