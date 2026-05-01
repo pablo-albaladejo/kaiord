@@ -9,6 +9,7 @@ import { CoachingRegistryProvider } from "../../contexts/coaching-registry-conte
 import { PersistenceProvider } from "../../contexts/persistence-context";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import type { WorkoutRecord } from "../../types/calendar-record";
+import { AppToastProvider } from "../providers/AppToastProvider";
 import CalendarPage from "./CalendarPage";
 
 function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
@@ -50,11 +51,13 @@ function renderCalendar(path = "/calendar/2026-W15") {
       <SettingsDialogProvider>
         <GarminBridgeProvider>
           <CoachingRegistryProvider factories={[]}>
-            <Router hook={hook}>
-              <Route path="/calendar/:weekId?">
-                <CalendarPage />
-              </Route>
-            </Router>
+            <AppToastProvider>
+              <Router hook={hook}>
+                <Route path="/calendar/:weekId?">
+                  <CalendarPage />
+                </Route>
+              </Router>
+            </AppToastProvider>
           </CoachingRegistryProvider>
         </GarminBridgeProvider>
       </SettingsDialogProvider>

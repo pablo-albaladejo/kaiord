@@ -483,9 +483,9 @@ test.describe("Accessibility", () => {
     }
     await page.waitForTimeout(500);
 
-    // Verify page is still functional - use specific heading level to avoid ambiguity
-    await expect(
-      page.getByRole("heading", { name: "Kaiord Editor", level: 1 })
-    ).toBeVisible();
+    // Verify page is still functional. Each routed page owns its own
+    // `<h1 data-route-heading>`; the brand label in the header is no
+    // longer an h1.
+    await expect(page.locator("[data-route-heading]")).toBeAttached();
   });
 });

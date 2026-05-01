@@ -3,6 +3,11 @@
  *
  * Desktop: all nav items visible inline.
  * Mobile: Calendar button + hamburger menu for the rest.
+ *
+ * Library navigation is handled inside the LibraryButton itself
+ * (and inside MobileMenu) per the SPA surface-classification rule
+ * — it is a destination, not a modal trigger, so no `onLibraryClick`
+ * proxy prop is forwarded.
  */
 
 import { Calendar } from "lucide-react";
@@ -17,7 +22,6 @@ type HeaderNavProps = {
   activeProfileName: string | null;
   libraryCount: number;
   onProfileClick: () => void;
-  onLibraryClick: () => void;
   onHelpClick: () => void;
   onSettingsClick: () => void;
 };

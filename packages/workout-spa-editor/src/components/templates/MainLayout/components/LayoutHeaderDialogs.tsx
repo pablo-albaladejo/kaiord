@@ -1,16 +1,10 @@
 import { lazy, Suspense } from "react";
 
 import type { useLazyDialog } from "../../../../hooks/use-lazy-dialog";
-import type { WorkoutTemplate } from "../../../../types/workout-library";
 
 const ProfileManager = lazy(() =>
   import("../../../organisms/ProfileManager/ProfileManager").then((m) => ({
     default: m.ProfileManager,
-  }))
-);
-const WorkoutLibrary = lazy(() =>
-  import("../../../organisms/WorkoutLibrary/WorkoutLibrary").then((m) => ({
-    default: m.WorkoutLibrary,
   }))
 );
 const HelpDialog = lazy(() =>
@@ -26,39 +20,23 @@ type LazyDialog = ReturnType<typeof useLazyDialog>;
 
 type LayoutHeaderDialogsProps = {
   profile: LazyDialog;
-  library: LazyDialog;
   help: LazyDialog;
   settingsOpen: boolean;
   settingsHide: () => void;
   onReplayTutorial?: () => void;
-  onLoadWorkout: (template: WorkoutTemplate) => void;
-  hasCurrentWorkout: boolean;
 };
 
 export const LayoutHeaderDialogs = ({
   profile,
-  library,
   help,
   settingsOpen,
   settingsHide,
   onReplayTutorial,
-  onLoadWorkout,
-  hasCurrentWorkout,
 }: LayoutHeaderDialogsProps) => (
   <>
     <Suspense fallback={null}>
       {profile.mounted && (
         <ProfileManager open={profile.open} onOpenChange={profile.setOpen} />
-      )}
-    </Suspense>
-    <Suspense fallback={null}>
-      {library.mounted && (
-        <WorkoutLibrary
-          open={library.open}
-          onOpenChange={library.setOpen}
-          onLoadWorkout={onLoadWorkout}
-          hasCurrentWorkout={hasCurrentWorkout}
-        />
       )}
     </Suspense>
     <Suspense fallback={null}>

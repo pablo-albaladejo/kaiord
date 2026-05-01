@@ -1,8 +1,14 @@
 /**
  * HeaderLogo Component
  *
- * Kaiord logo and title for the header.
- * Uses wouter Link for SPA navigation (no full page reload).
+ * Kaiord logo and title for the header. Uses wouter Link for SPA
+ * navigation (no full page reload).
+ *
+ * The brand label is a `<span>` (not `<h1>`) so each routed page
+ * owns its own primary heading marked with `[data-route-heading]`.
+ * This avoids two `<h1>`s on every page and lets the route-change
+ * announcer / focus-on-route-change hook target a single, page-
+ * scoped landmark.
  */
 
 import { Link } from "wouter";
@@ -28,9 +34,12 @@ export function HeaderLogo() {
           </g>
         </svg>
       </div>
-      <h1 className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl">
+      <span
+        className="text-xl font-bold text-gray-900 dark:text-white sm:text-2xl"
+        aria-label="Kaiord Editor"
+      >
         Kaiord Editor
-      </h1>
+      </span>
     </Link>
   );
 }
