@@ -29,11 +29,11 @@ Then §5 final-validation block runs and the change is archived.
 
 ### 1.2 Package-deps guard
 
-- [ ] 1.2.1 write failing test `scripts/check-package-deps.test.mjs` (RED): positive fixture is a `package.json` adding `@kaiord/tcx` to `@kaiord/fit`'s deps; negative is the canonical allowed set per the spec table
-- [ ] 1.2.2 implement `scripts/check-package-deps.mjs` (GREEN): hard-code the allowlist as `PACKAGE_DEPS` constant mirroring the `Package Dependencies` table in `hexagonal-arch/spec.md`; iterate every `packages/*/package.json`, flag any `@kaiord/*` entry not on its allowlist; rule ID `R-ArchPackageDeps`. Support a `--dry-run` flag emitting violations as JSON on stdout (used by `audit-snapshot.mjs`)
-- [ ] 1.2.3 refactor: extract the `package.json` reader to a small helper (REFACTOR)
-- [ ] 1.2.4 seed `ALLOWLIST` from the audit snapshot (expected: empty)
-- [ ] 1.2.5 wire into `pnpm test:scripts` and `pnpm lint`
+- [x] 1.2.1 write failing test `scripts/check-package-deps.test.mjs` (RED): positive fixture is a `package.json` adding `@kaiord/tcx` to `@kaiord/fit`'s deps; negative is the canonical allowed set per the spec table
+- [x] 1.2.2 implement `scripts/check-package-deps.mjs` (GREEN): hard-code the allowlist as `PACKAGE_DEPS` constant mirroring the `Package Dependencies` table in `hexagonal-arch/spec.md`; iterate every `packages/*/package.json`, flag any `@kaiord/*` entry not on its allowlist; rule ID `R-ArchPackageDeps`. Support a `--dry-run` flag emitting violations as JSON on stdout (used by `audit-snapshot.mjs`)
+- [x] 1.2.3 refactor: extract the `package.json` reader to a small helper (REFACTOR)
+- [x] 1.2.4 seed `ALLOWLIST` from the audit snapshot (expected: empty)
+- [x] 1.2.5 wire into `pnpm test:scripts` and `pnpm lint`
 
 ### 1.3 Mapper-no-tests guard
 

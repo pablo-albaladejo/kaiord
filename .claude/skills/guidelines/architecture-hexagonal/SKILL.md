@@ -77,7 +77,7 @@ packages/
 │   ├── domain/{types,schemas}/    # pure types + Zod
 │   ├── ports/                     # interfaces only
 │   ├── application/               # use cases
-│   └── adapters/logger/           # only built-in adapter in core
+│   └── adapters/{logger,analytics}/  # only built-in adapters in core (see arch-vocab below)
 ├── fit|tcx|zwo|garmin/src/adapters/
 ├── garmin-connect/src/            # Garmin Connect HTTP client
 ├── ai/src/                        # AI adapter
@@ -92,3 +92,29 @@ packages/
 
 Zod schemas: `packages/core/src/domain/schemas/`, exported via `@kaiord/core`.
 Test fixtures: import from `@kaiord/core/test-utils` — do not re-implement.
+
+## Core adapter allowlist (mechanically enforced)
+
+`packages/core/src/adapters/` MAY contain only the subfolders below. The
+allowlist lives in `scripts/architecture.vocab.mjs` (`CORE_ADAPTER_ALLOWLIST`)
+and is enforced by `scripts/check-architecture.mjs` under rule
+`R-ArchCoreAdapterAllowlist`. The test in
+`scripts/check-architecture.test.mjs` parses this block and asserts
+array-equality (order-sensitive) against the vocab module — drift fails CI.
+
+<!-- arch-vocab:start -->
+analytics
+logger
+<!-- arch-vocab:end -->
+
+Both are infrastructure-free, zero-runtime-dependency adapters that ship
+with `@kaiord/core` for ergonomic defaults. Any new adapter category
+MUST live in its own `@kaiord/<name>` package.
+
+## Enforcement
+
+The layer rules in this guideline are enforced by `scripts/check-architecture.mjs`
+(rules `R-ArchLeftward`, `R-ArchPortPure`, `R-ArchAppPure`, `R-ArchDomainExt`,
+`R-ArchAdapterCross`, `R-ArchCoreAdapterAllowlist`, `R-ArchCoreAmbientTypes`)
+and `scripts/check-package-deps.mjs` (rule `R-ArchPackageDeps`). Both run via
+`pnpm test:scripts`, the husky `pre-commit` hook, and `pnpm lint`.
