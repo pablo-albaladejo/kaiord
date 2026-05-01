@@ -158,14 +158,14 @@ export const SCOPE_ENUM = [
 
 ## 2. PR2 — Architecture cleanup (drain `R-ArchCoreAmbientTypes` allowlist)
 
-- [ ] 2.1 create `packages/fit/src/types/` directory
-- [ ] 2.2 `git mv packages/core/src/types/garmin-fitsdk.d.ts packages/fit/src/types/garmin-fitsdk.d.ts` (preserve history)
-- [ ] 2.3 update `packages/fit/tsconfig.json` `typeRoots` (or `include`) so the moved `*.d.ts` is picked up
-- [ ] 2.4 remove `packages/core/src/types/` folder entirely
-- [ ] 2.5 update `packages/core/tsconfig.json` if it referenced `src/types/`
-- [ ] 2.6 verify with `pnpm -r build`: `@kaiord/fit` still type-checks against `@garmin/fitsdk`; `@kaiord/core` no longer references it
-- [ ] 2.7 drain `scripts/check-architecture.mjs` `ALLOWLIST` for the `R-ArchCoreAmbientTypes` entry
-- [ ] 2.8 PR2 close-out: `pnpm -r test:coverage` (thresholds hold) → `pnpm -r build` → `pnpm lint` → NO changeset (internal-only ambient-type relocation) → open PR titled `refactor(core): relocate FIT SDK ambient types to fit package`
+- [x] 2.1 create `packages/fit/src/types/` directory
+- [x] 2.2 `git mv packages/core/src/types/garmin-fitsdk.d.ts packages/fit/src/types/garmin-fitsdk.d.ts` (preserve history)
+- [x] 2.3 update `packages/fit/tsconfig.json` `typeRoots` (or `include`) so the moved `*.d.ts` is picked up
+- [x] 2.4 remove `packages/core/src/types/` folder entirely
+- [x] 2.5 update `packages/core/tsconfig.json` if it referenced `src/types/`
+- [x] 2.6 verify with `pnpm -r build`: `@kaiord/fit` still type-checks against `@garmin/fitsdk`; `@kaiord/core` no longer references it
+- [x] 2.7 drain `scripts/check-architecture.mjs` `ALLOWLIST` for the `R-ArchCoreAmbientTypes` entry
+- [x] 2.8 PR2 close-out: `pnpm -r test:coverage` (thresholds hold) → `pnpm -r build` → `pnpm lint` → NO changeset (internal-only ambient-type relocation) → open PR titled `refactor(core): relocate FIT SDK ambient types to fit package`
 
 ## 3. PR3 — Mapper→converter renames + missing converter tests (drain two allowlists)
 

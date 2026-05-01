@@ -382,11 +382,7 @@ describe("smoke", () => {
     );
   });
 
-  test("ALLOWLIST currently contains exactly 1 entry (garmin-fitsdk.d.ts, drained in PR2)", () => {
-    assert.equal(ALLOWLIST.size, 1);
-    assert.ok(
-      ALLOWLIST.has("packages/core/src/types/garmin-fitsdk.d.ts"),
-      "expected garmin-fitsdk.d.ts in allowlist"
-    );
+  test("ALLOWLIST is empty (drained in PR2 of guidelines-compliance-harden)", () => {
+    assert.equal(ALLOWLIST.size, 0);
   });
 });
