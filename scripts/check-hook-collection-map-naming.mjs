@@ -132,7 +132,11 @@ export function findViolations(source) {
   const violations = [];
   for (const m of source.matchAll(MAP_OPENER_RE)) {
     const param = m[1] ?? m[2];
-    if (!param || param.startsWith("use")) continue;
+    // Mirror eslint-plugin-react-hooks isHookName: /^use[A-Z0-9]/.
+    // `user` and `usefactory` (lowercase after `use`) are NOT treated
+    // as hooks by the plugin, so this guard must reject them too —
+    // otherwise it gives a false sense of safety.
+    if (!param || /^use[A-Z0-9]/.test(param)) continue;
     const openerEnd = m.index + m[0].length;
     const callEnd = findCallEndIndex(source, openerEnd);
     if (callEnd === -1) continue;

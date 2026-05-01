@@ -73,7 +73,7 @@ Anywhere we map over a collection of hooks (today: `useCoachingSourceFactories()
 
 The existing correct call site in `use-coaching-activities.ts:38-40` already follows this convention. The bug site (`use-coaching-dialog.ts:42`) used `f` — which would not have been flagged by the linter even if the plugin had been wired. After D1 the dialog stops mapping, so the convention applies primarily to `use-coaching-activities.ts` (already compliant) and any future consumer.
 
-This is documented in `design-principles` and not enforced by a separate script (the rules-of-hooks plugin is the enforcement; the naming is the contract that makes the plugin effective).
+The naming is the contract that lets the rules-of-hooks plugin "see" the call (the plugin detects hooks by the `use[A-Z0-9]…` identifier pattern). Enforcement is layered: the plugin reports any in-effect or in-callback hook calls at the call site, and the dedicated mechanical guard in D9 below catches misnamed `factories.map(callback)` parameters at the upstream side so the plugin's detection isn't bypassed by a `f` / `factory` / `update` / `usefactory` callback name.
 
 ### D4. Smoke-render test through the real bootstrap
 

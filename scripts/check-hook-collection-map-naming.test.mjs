@@ -71,6 +71,28 @@ test("non-receiver-bound callable map is flagged", () => {
   assert.equal(v[0].param, "g");
 });
 
+test("misnamed `user` (lowercase after use) is flagged", () => {
+  // eslint-plugin-react-hooks isHookName uses /^use[A-Z0-9]/ — `user`
+  // is NOT recognized as a hook by the plugin (char after `use` is
+  // lowercase). Our guard must reject it for the same reason.
+  const source = `const xs = items.map((user) => user(args));`;
+  const v = findViolations(source);
+  assert.equal(v.length, 1);
+  assert.equal(v[0].param, "user");
+});
+
+test("misnamed `usefactory` (lowercase f) is flagged", () => {
+  const source = `const xs = items.map((usefactory) => usefactory(args));`;
+  const v = findViolations(source);
+  assert.equal(v.length, 1);
+  assert.equal(v[0].param, "usefactory");
+});
+
+test("compliant `use5Hook` (digit after use) passes", () => {
+  const source = `const xs = items.map((use5Hook) => use5Hook(args));`;
+  assert.deepEqual(findViolations(source), []);
+});
+
 test("multi-line body with braces and nested parens is parsed correctly", () => {
   const source = `
     const out = arr.map((f) => {
