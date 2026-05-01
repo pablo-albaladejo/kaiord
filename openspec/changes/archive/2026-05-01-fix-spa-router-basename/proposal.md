@@ -1,3 +1,5 @@
+> Completed: 2026-05-01
+
 ## Why
 
 The Phase 2 SPA-fallback fix in `cleanup-open-issues-may-2026` (PR #398) shipped the rafgraph redirect script wrapped behind a `pathname.indexOf('/editor/') === 0` guard, on the assumption that the editor's React Router resolves URLs under the `/editor/` deploy prefix. This assumption is wrong in production: the SPA uses **wouter**, and `main.tsx` does not wrap `<App />` in a `<Router>` with a `base` prop. The default wouter Router base is the empty string, so wouter's routes (`/`, `/calendar`, `/library`, `/workout/new`, `/workout/:id`) match against the address-bar pathname WITHOUT any deploy prefix.
