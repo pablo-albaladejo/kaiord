@@ -1,5 +1,6 @@
 import js from "@eslint/js";
 import boundaries from "eslint-plugin-boundaries";
+import reactHooks from "eslint-plugin-react-hooks";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import tseslint from "typescript-eslint";
 
@@ -182,6 +183,7 @@ export default tseslint.config(
     plugins: {
       "@typescript-eslint": tseslint.plugin,
       "simple-import-sort": simpleImportSort,
+      "react-hooks": reactHooks,
     },
     rules: {
       "max-lines": [
@@ -194,6 +196,13 @@ export default tseslint.config(
       ],
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
+      "react-hooks/rules-of-hooks": "error",
+      // exhaustive-deps downgraded from `error` to `warn` per the
+      // budget rule documented in fix-coaching-dialog-rules-of-hooks
+      // (8 pre-existing findings across the SPA exceeded the 5-finding
+      // threshold). Re-enable as `error` once the follow-up cleanup
+      // lands. TODO: file follow-up issue.
+      "react-hooks/exhaustive-deps": "warn",
       ...importRules,
       "@typescript-eslint/no-restricted-imports": [
         "error",
@@ -218,6 +227,51 @@ export default tseslint.config(
               name: "@kaiord/garmin",
               message: "Use dynamic import() for code splitting.",
               allowTypeImports: true,
+            },
+          ],
+        },
+      ],
+    },
+  },
+  {
+    // Playwright e2e fixtures: the `use` parameter is the Playwright
+    // fixture API, not a React hook. Disable react-hooks/* in e2e/.
+    files: ["packages/workout-spa-editor/e2e/**/*.ts"],
+    rules: {
+      "react-hooks/rules-of-hooks": "off",
+      "react-hooks/exhaustive-deps": "off",
+    },
+  },
+  {
+    // Coaching dialog files MUST NOT consume the coaching-source registry
+    // directly (Rules-of-Hooks compliance + single source materialization).
+    // The dialog receives `expandActivity` as a callback prop instead.
+    files: [
+      "packages/workout-spa-editor/src/components/molecules/CoachingCard/CoachingActivityDialog.tsx",
+      "packages/workout-spa-editor/src/components/molecules/CoachingCard/CoachingActivityDialogContent.tsx",
+      "packages/workout-spa-editor/src/components/molecules/CoachingCard/use-coaching-dialog.ts",
+    ],
+    plugins: {
+      "@typescript-eslint": tseslint.plugin,
+    },
+    rules: {
+      "@typescript-eslint/no-restricted-imports": [
+        "error",
+        {
+          patterns: [
+            {
+              group: [
+                "**/contexts/coaching-registry-context",
+                "**/contexts/coaching-registry-context.*",
+                "@/contexts/coaching-registry-context",
+                "@/contexts/coaching-registry-context.*",
+                "**/types/coaching-source",
+                "**/types/coaching-source.*",
+                "@/types/coaching-source",
+                "@/types/coaching-source.*",
+              ],
+              message:
+                "Coaching dialog must not consume the registry directly; receive `expandActivity` as a prop. Import `CoachingActivity` from `coaching-activity` instead.",
             },
           ],
         },

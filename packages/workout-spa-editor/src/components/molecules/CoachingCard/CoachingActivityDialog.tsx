@@ -16,15 +16,18 @@ import { useCoachingDialog } from "./use-coaching-dialog";
 export type CoachingActivityDialogProps = {
   activity: CoachingActivity | null;
   onClose: () => void;
+  expandActivity: (activity: CoachingActivity) => void;
 };
 
 export function CoachingActivityDialog({
   activity,
   onClose,
+  expandActivity,
 }: CoachingActivityDialogProps) {
   const { error, converting, handleConvert } = useCoachingDialog(
     activity,
-    onClose
+    onClose,
+    expandActivity
   );
 
   if (!activity) return null;

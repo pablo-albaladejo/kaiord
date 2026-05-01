@@ -6,6 +6,7 @@ import { describe, expect, it, vi } from "vitest";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { CoachingActivityDialog } from "./CoachingActivityDialog";
 
 const mockNavigate = vi.fn();
 
@@ -13,15 +14,9 @@ vi.mock("wouter", () => ({
   useLocation: () => ["/calendar", mockNavigate],
 }));
 
-vi.mock("../../../contexts/coaching-registry-context", () => ({
-  useCoachingSourceFactories: () => [],
-}));
-
 vi.mock("../../../hooks/use-active-profile-live", () => ({
   useActiveProfileLive: () => ({ id: null, profile: null }),
 }));
-
-import { CoachingActivityDialog } from "./CoachingActivityDialog";
 
 const baseActivity: CoachingActivity = {
   id: "train2go:12345",
@@ -45,7 +40,13 @@ const wrap = (children: ReactNode) => (
 describe("CoachingActivityDialog", () => {
   it("returns null when no activity is selected", () => {
     const { container } = render(
-      wrap(<CoachingActivityDialog activity={null} onClose={vi.fn()} />)
+      wrap(
+        <CoachingActivityDialog
+          activity={null}
+          onClose={vi.fn()}
+          expandActivity={vi.fn()}
+        />
+      )
     );
 
     expect(container.firstChild).toBeNull();
@@ -53,7 +54,13 @@ describe("CoachingActivityDialog", () => {
 
   it("renders title, sport, duration and description when activity has them", () => {
     render(
-      wrap(<CoachingActivityDialog activity={baseActivity} onClose={vi.fn()} />)
+      wrap(
+        <CoachingActivityDialog
+          activity={baseActivity}
+          onClose={vi.fn()}
+          expandActivity={vi.fn()}
+        />
+      )
     );
 
     expect(screen.getByText("FTP test")).toBeInTheDocument();
@@ -70,6 +77,7 @@ describe("CoachingActivityDialog", () => {
         <CoachingActivityDialog
           activity={{ ...baseActivity, description: undefined }}
           onClose={vi.fn()}
+          expandActivity={vi.fn()}
         />
       )
     );
@@ -85,6 +93,7 @@ describe("CoachingActivityDialog", () => {
         <CoachingActivityDialog
           activity={{ ...baseActivity, description: "" }}
           onClose={vi.fn()}
+          expandActivity={vi.fn()}
         />
       )
     );
@@ -97,7 +106,13 @@ describe("CoachingActivityDialog", () => {
   it("Close button calls onClose", async () => {
     const onClose = vi.fn();
     render(
-      wrap(<CoachingActivityDialog activity={baseActivity} onClose={onClose} />)
+      wrap(
+        <CoachingActivityDialog
+          activity={baseActivity}
+          onClose={onClose}
+          expandActivity={vi.fn()}
+        />
+      )
     );
 
     await userEvent.click(screen.getByText("Close"));
@@ -107,7 +122,13 @@ describe("CoachingActivityDialog", () => {
 
   it("Convert button is disabled while converting", () => {
     render(
-      wrap(<CoachingActivityDialog activity={baseActivity} onClose={vi.fn()} />)
+      wrap(
+        <CoachingActivityDialog
+          activity={baseActivity}
+          onClose={vi.fn()}
+          expandActivity={vi.fn()}
+        />
+      )
     );
 
     const btn = screen.getByText("Convert to workout");
