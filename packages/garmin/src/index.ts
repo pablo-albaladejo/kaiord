@@ -7,13 +7,13 @@ import { createConsoleLogger } from "@kaiord/core";
 
 import { createGarminReader as createGarminReaderImpl } from "./adapters/garmin-reader";
 import { createGarminWriter as createGarminWriterImpl } from "./adapters/garmin-writer";
-import type { PaceZoneTable } from "./adapters/mappers/target.mapper";
+import type { PaceZoneTable } from "./adapters/mappers/target.converter";
 import { isLogger } from "./adapters/utils/is-logger";
 
 export type {
   PaceZoneEntry,
   PaceZoneTable,
-} from "./adapters/mappers/target.mapper";
+} from "./adapters/mappers/target.converter";
 
 export type GarminWriterOptions = {
   logger?: Logger;

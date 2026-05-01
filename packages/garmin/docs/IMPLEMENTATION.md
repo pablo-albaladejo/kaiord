@@ -454,7 +454,7 @@ Converts KRD format to Garmin Connect API JSON payload.
 Mappers are simple transformation functions without business logic:
 
 - `sport.mapper.ts`: KRD sport ↔ Garmin sportTypeKey
-- `target.mapper.ts`: KRD targets ↔ Garmin target structures
+- `target.converter.ts`: KRD targets ↔ Garmin target structures
 - `condition.mapper.ts`: KRD duration ↔ Garmin endCondition
 - `stroke.mapper.ts`: KRD swimming ↔ Garmin strokeType
 - `equipment.mapper.ts`: KRD equipment ↔ Garmin equipmentType

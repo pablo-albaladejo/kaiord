@@ -99,7 +99,7 @@ describe("check-mapper-no-tests", () => {
     );
   });
 
-  test("ALLOWLIST currently contains exactly the 7 seeded entries", () => {
-    assert.equal(ALLOWLIST.size, 7);
+  test("ALLOWLIST is empty (drained in PR3)", () => {
+    assert.equal(ALLOWLIST.size, 0);
   });
 });

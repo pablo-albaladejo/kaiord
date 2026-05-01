@@ -1,7 +1,7 @@
 import type { KRD } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
 
-import { convertMetadataToFileId } from "../krd-to-fit/krd-to-fit-metadata.mapper";
+import { convertMetadataToFileId } from "../krd-to-fit/krd-to-fit-metadata.converter";
 
 const addActivityData = (
   messages: Record<string, unknown[]>,

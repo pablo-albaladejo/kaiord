@@ -97,7 +97,7 @@ describe("check-converter-has-tests", () => {
     );
   });
 
-  test("ALLOWLIST currently contains exactly the 3 seeded entries", () => {
-    assert.equal(ALLOWLIST.size, 3);
+  test("ALLOWLIST is empty (drained in PR3)", () => {
+    assert.equal(ALLOWLIST.size, 0);
   });
 });

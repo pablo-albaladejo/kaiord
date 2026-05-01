@@ -4,7 +4,7 @@ import {
   buildCoachingActivityId,
   type CoachingActivityRecord,
 } from "../../types/coaching-activity-record";
-import { toCoachingActivity } from "./coaching-record-to-activity.mapper";
+import { toCoachingActivity } from "./coaching-record-to-activity.converter";
 
 const baseRecord: CoachingActivityRecord = {
   id: buildCoachingActivityId("p1", "train2go", "12345"),

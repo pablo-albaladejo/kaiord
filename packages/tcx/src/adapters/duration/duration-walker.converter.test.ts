@@ -5,7 +5,7 @@ import {
   mapTimeDurationToTcx,
   mapDistanceDurationToTcx,
   mapOpenDurationToTcx,
-} from "./duration.mapper";
+} from "./duration-walker.converter";
 
 const createMockLogger = (): Logger => ({
   debug: vi.fn(),
