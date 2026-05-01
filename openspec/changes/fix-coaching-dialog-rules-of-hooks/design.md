@@ -12,6 +12,7 @@ Multiple defense layers were silent because the `react-hooks` ESLint plugin is i
 ## Goals / Non-Goals
 
 **Goals:**
+
 - Stop the crash on the user's flow (clicking a Train2Go-loaded workout).
 - Eliminate the structural cause (the dialog should not consume the registry directly).
 - Activate the mechanical guard (`react-hooks/rules-of-hooks`) that the repo already pulled in but never wired.
@@ -19,6 +20,7 @@ Multiple defense layers were silent because the `react-hooks` ESLint plugin is i
 - Improve `RouteErrorBoundary` payload so future render crashes are diagnosable from telemetry.
 
 **Non-Goals:**
+
 - Playwright E2E for the T2G click path (requires fixturing the bridge — separate change).
 - Wiring a non-noop analytics adapter in production (product decision).
 - Refactoring `useCoachingActivities` or other consumers — only the dialog path is in scope.
@@ -39,8 +41,9 @@ The dialog mounts as a child of the calendar page, which already calls `useCoach
 **Rationale:** Single source of truth. The calendar is the only place that materializes sources (one `useLiveQuery` subscription per source). The dialog becomes a leaf consumer of an opaque callback — simpler, decoupled, untestable for hook-composition errors because there are no hooks to compose.
 
 **Alternatives considered:**
-- *(A) Move the `factories.map` from `useEffect` to the body of `useCoachingDialog`.* Cheapest to write but instantiates sources twice in the render tree (once via the calendar, once via the dialog). Each materialization fires its own `useLiveQuery` against Dexie. Wasteful and leaves the dialog coupled to the registry — the kind of coupling that re-introduces the same class of bug if a future maintainer "optimizes" by moving things back into an effect.
-- *(C) Introduce a `useExpandCoachingActivity` helper.* Adds a third public hook. The callback approach achieves the same separation with less surface area.
+
+- _(A) Move the `factories.map` from `useEffect` to the body of `useCoachingDialog`._ Cheapest to write but instantiates sources twice in the render tree (once via the calendar, once via the dialog). Each materialization fires its own `useLiveQuery` against Dexie. Wasteful and leaves the dialog coupled to the registry — the kind of coupling that re-introduces the same class of bug if a future maintainer "optimizes" by moving things back into an effect.
+- _(C) Introduce a `useExpandCoachingActivity` helper._ Adds a third public hook. The callback approach achieves the same separation with less surface area.
 
 Decision: **B (callback)**.
 
@@ -58,6 +61,7 @@ The plugin is loaded only for the SPA package files block. Backend packages (cor
 **Rationale:** This is the single mechanical change with the highest ROI. The plugin is installed; the lift is "import + plugin slot + rules". Mechanical guards beat AI review for deterministic invariants — this is a textbook case.
 
 **Risk:** Activating the rule may reveal pre-existing violations in other dialogs/pages. Decision rule for findings:
+
 - If trivial (rename callback param, add missing dep): fix inside this change.
 - If structural (refactor required): suppress with `// eslint-disable-next-line` + open a follow-up issue. Document each suppression in the PR description.
 
@@ -100,13 +104,13 @@ After this change: `analytics.event("route-error", { route, name, message, compo
 
 **Threat model.** The default analytics adapter is `noop`, but `analytics-port` already ships a Cloudflare beacon adapter — once wired in production, every render error is sent to a third-party endpoint. `error.message` and `componentStack` are NOT PII-free in this codebase. Concrete leakage vectors I identified by reading the code:
 
-- Domain conversion errors include user-supplied workout `title` (e.g., `useCoachingConvert` may throw `new Error(\`Activity not found: \${activityId}\`)` — `activityId = profileId:source:sourceId`, which contains the profile UUID).
+- Domain conversion errors include user-supplied workout `title` (e.g., `useCoachingConvert` may throw `new Error(\`Activity not found: \${activityId}\`)`—`activityId = profileId:source:sourceId`, which contains the profile UUID).
 - Adapter errors from `JSON.parse(userInput)` include the offending excerpt verbatim.
 - Zod validation errors quote the parsed input value, which can include linked-account `externalUserName` and `externalUserId`.
 - Garmin / Train2Go transport errors may surface `Bearer <token>` strings.
 - Email patterns can appear in error messages from auth flows.
 
-The repo already enforces an analogous boundary for user-facing strings via `scripts/check-no-pii-leakage.mjs` (covers `toast.*` and `console.*`). Sending `error.message` to a third-party analytics endpoint without scrubbing violates the *spirit* of that guard for a different sink. We close the parallel hole.
+The repo already enforces an analogous boundary for user-facing strings via `scripts/check-no-pii-leakage.mjs` (covers `toast.*` and `console.*`). Sending `error.message` to a third-party analytics endpoint without scrubbing violates the _spirit_ of that guard for a different sink. We close the parallel hole.
 
 **`scrubAnalyticsString` design.** Pure function in `packages/workout-spa-editor/src/lib/scrub-analytics-string.ts`. Order of operations:
 
