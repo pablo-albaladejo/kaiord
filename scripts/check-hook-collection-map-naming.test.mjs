@@ -66,6 +66,33 @@ test("non-receiver-bound callable map is flagged", () => {
   assert.equal(v[0].param, "g");
 });
 
+test("multi-line body with braces and nested parens is parsed correctly", () => {
+  const source = `
+    const out = arr.map((f) => {
+      const x = f(1);
+      return x + 1;
+    });
+  `;
+  const v = findViolations(source);
+  assert.equal(v.length, 1);
+  assert.equal(v[0].param, "f");
+});
+
+test("nested parens inside callback body do not break detection", () => {
+  const source = `const xs = arr.map((f) => f(g(1, 2), h(3)));`;
+  const v = findViolations(source);
+  assert.equal(v.length, 1);
+});
+
+test("compliant useFactory with multi-line body passes", () => {
+  const source = `
+    const sources = factories.map((useFactory) => {
+      return useFactory(profileId, days);
+    });
+  `;
+  assert.deepEqual(findViolations(source), []);
+});
+
 test("multiple violations in one file are all reported", () => {
   const source = `
     const a = arr.map((f) => f(1));

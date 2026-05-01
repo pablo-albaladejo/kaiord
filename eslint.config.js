@@ -197,12 +197,7 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       "react-hooks/rules-of-hooks": "error",
-      // exhaustive-deps downgraded from `error` to `warn` per the
-      // budget rule documented in fix-coaching-dialog-rules-of-hooks
-      // (8 pre-existing findings across the SPA exceeded the 5-finding
-      // threshold). Re-enable as `error` once the follow-up cleanup
-      // lands. TODO: file follow-up issue.
-      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/exhaustive-deps": "error",
       ...importRules,
       "@typescript-eslint/no-restricted-imports": [
         "error",
