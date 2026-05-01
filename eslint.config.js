@@ -282,5 +282,90 @@ export default tseslint.config(
       ],
     },
   },
+  {
+    // SPA hexagonal layering: ports / application / adapters / hooks /
+    // components. Matches the convention used by @kaiord/core. Files in
+    // a higher layer must not bypass the layer below them.
+    files: ["packages/workout-spa-editor/src/**/*.{ts,tsx}"],
+    plugins: { boundaries },
+    settings: {
+      "boundaries/elements": [
+        {
+          type: "spa-ports",
+          pattern: "packages/workout-spa-editor/src/ports/**",
+        },
+        {
+          type: "spa-application",
+          pattern: "packages/workout-spa-editor/src/application/**",
+        },
+        {
+          type: "spa-adapters",
+          pattern: "packages/workout-spa-editor/src/adapters/**",
+        },
+        {
+          type: "spa-hooks",
+          pattern: "packages/workout-spa-editor/src/hooks/**",
+        },
+        {
+          type: "spa-components",
+          pattern: "packages/workout-spa-editor/src/components/**",
+        },
+      ],
+    },
+    rules: {
+      "boundaries/element-types": [
+        "error",
+        {
+          default: "allow",
+          rules: [
+            {
+              from: "spa-ports",
+              disallow: ["spa-adapters"],
+              message:
+                "Ports must not depend on adapters. Ports define interfaces only.",
+            },
+            {
+              from: "spa-application",
+              disallow: ["spa-adapters"],
+              message:
+                "Application use cases must not depend on adapters. Inject through ports instead.",
+            },
+            {
+              from: "spa-components",
+              disallow: ["spa-adapters"],
+              message:
+                "Components must not import from adapters directly. Go through hooks (which compose use cases with injected ports).",
+            },
+          ],
+        },
+      ],
+      "no-restricted-syntax": [
+        "error",
+        {
+          // MatchSuggestion type lives in src/application/match-suggestion.ts.
+          // Redeclaring elsewhere bypasses the single-source-of-truth contract
+          // between the auto-match heuristic (producer) and the banner UI
+          // (consumer). The canonical file is exempted in the override below.
+          selector: "TSTypeAliasDeclaration[id.name='MatchSuggestion']",
+          message:
+            "MatchSuggestion is owned by application/match-suggestion.ts. Import it from there instead of redeclaring.",
+        },
+        {
+          selector: "TSInterfaceDeclaration[id.name='MatchSuggestion']",
+          message:
+            "MatchSuggestion is owned by application/match-suggestion.ts. Import it from there instead of redeclaring.",
+        },
+      ],
+    },
+  },
+  {
+    // Canonical owner of MatchSuggestion — re-enable the type alias
+    // declaration that the no-restricted-syntax rule above forbids
+    // everywhere else.
+    files: ["packages/workout-spa-editor/src/application/match-suggestion.ts"],
+    rules: {
+      "no-restricted-syntax": "off",
+    },
+  },
   ...adapterBoundaryRules()
 );
