@@ -1,73 +1,44 @@
 <!doctype html>
-<html>
+<html lang="en">
   <head>
+    <meta charset="utf-8" />
+    <link rel="stylesheet" href="popup.css" />
     <style>
-      body {
-        width: 340px;
-        padding: 16px;
-        font-family: system-ui, sans-serif;
-        font-size: 13px;
-      }
-      h3 {
-        margin: 0 0 12px;
-      }
-      .status {
-        padding: 8px;
-        border-radius: 4px;
-        margin-bottom: 12px;
-      }
-      .ok {
-        background: #d4edda;
-        color: #155724;
-      }
-      .no {
-        background: #f8d7da;
-        color: #721c24;
-      }
-      .checking {
-        background: #fff3cd;
-        color: #856404;
-      }
-      button {
-        width: 100%;
-        padding: 8px;
-        margin-top: 8px;
-        background: #0066cc;
-        color: white;
-        border: none;
-        border-radius: 4px;
-        cursor: pointer;
-      }
-      button:hover {
-        background: #0052a3;
-      }
-      #workouts {
-        margin-top: 12px;
-        font-size: 12px;
-        max-height: 200px;
-        overflow-y: auto;
-      }
-      .workout {
-        padding: 4px 0;
-        border-bottom: 1px solid #eee;
-      }
-      .hint {
-        font-size: 11px;
-        color: #666;
-        margin-top: 4px;
+      :root {
+        --accent: #007cc3;
+        --accent-hover: #0066a8;
       }
     </style>
   </head>
   <body>
-    <h3>Kaiord Garmin Bridge</h3>
-    <div id="status" class="status checking">Checking...</div>
-    <p class="hint" id="hint" style="display: none">
-      Open Garmin Connect in another tab and navigate around to activate the
-      session.
-    </p>
-    <button id="check-btn">Check Session</button>
-    <button id="list-btn" style="display: none">List Workouts</button>
-    <div id="workouts"></div>
+    <header class="popup-header">
+      <span class="popup-header__dot" aria-hidden="true"></span>
+      <h1 class="popup-header__title">Kaiord Garmin Bridge</h1>
+      <button
+        id="refresh-btn"
+        class="popup-header__refresh popup-header__refresh--hidden"
+        aria-label="Refresh"
+        type="button"
+      >
+        ⟳
+      </button>
+    </header>
+
+    <div
+      id="status"
+      class="status status--checking"
+      role="status"
+      aria-live="polite"
+      aria-label="Checking connection"
+    >
+      <span class="status__glyph" aria-hidden="true">…</span>
+      <span id="status-text">Checking…</span>
+    </div>
+
+    <div id="athlete-region"></div>
+    <div id="rollup-region"></div>
+    <div id="footer-region"></div>
+
     <script src="popup.js"></script>
   </body>
 </html>
