@@ -1,0 +1,114 @@
+{
+  "garmin-bridge": {
+    "manifest": {
+      "permissions": [
+        "storage",
+        "tabs",
+        "webRequest"
+      ],
+      "host_permissions": [
+        "https://connect.garmin.com/*"
+      ],
+      "content_scripts_matches": [
+        [
+          "https://connect.garmin.com/*"
+        ],
+        [
+          "https://*.kaiord.com/*",
+          "http://localhost/*"
+        ]
+      ],
+      "externally_connectable_matches": [
+        "http://localhost:5173/*",
+        "http://localhost:5174/*",
+        "https://*.kaiord.com/*"
+      ]
+    },
+    "manifest_prod": {
+      "permissions": [
+        "storage",
+        "tabs",
+        "webRequest"
+      ],
+      "host_permissions": [
+        "https://connect.garmin.com/*"
+      ],
+      "content_scripts_matches": [
+        [
+          "https://connect.garmin.com/*"
+        ],
+        [
+          "https://*.kaiord.com/*"
+        ]
+      ],
+      "externally_connectable_matches": [
+        "https://*.kaiord.com/*"
+      ]
+    },
+    "allowed_paths": [
+      {
+        "method": "GET",
+        "pattern": "^\\/workout-service\\/workouts(\\?.*)?$"
+      },
+      {
+        "method": "POST",
+        "pattern": "^\\/workout-service\\/workout$"
+      }
+    ]
+  },
+  "train2go-bridge": {
+    "manifest": {
+      "permissions": [
+        "tabs",
+        "storage"
+      ],
+      "host_permissions": [
+        "https://app.train2go.com/*"
+      ],
+      "content_scripts_matches": [
+        [
+          "https://app.train2go.com/*"
+        ],
+        [
+          "https://*.kaiord.com/*",
+          "http://localhost/*"
+        ]
+      ],
+      "externally_connectable_matches": [
+        "http://localhost:5173/*",
+        "http://localhost:5174/*",
+        "https://*.kaiord.com/*"
+      ]
+    },
+    "manifest_prod": {
+      "permissions": [
+        "tabs",
+        "storage"
+      ],
+      "host_permissions": [
+        "https://app.train2go.com/*"
+      ],
+      "content_scripts_matches": [
+        [
+          "https://app.train2go.com/*"
+        ],
+        [
+          "https://*.kaiord.com/*"
+        ]
+      ],
+      "externally_connectable_matches": [
+        "https://*.kaiord.com/*"
+      ]
+    },
+    "allowed_paths": [
+      {
+        "method": "GET",
+        "pattern": "^\\/api\\/v2\\/profile\\/ping$"
+      },
+      {
+        "method": "GET",
+        "pattern": "^\\/api\\/v2\\/workplan\\/tooltip\\/activity\\/\\d+$"
+      }
+    ]
+  }
+}
