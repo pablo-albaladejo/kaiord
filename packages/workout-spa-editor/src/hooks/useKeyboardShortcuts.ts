@@ -9,6 +9,10 @@ import {
 export type { KeyboardShortcutHandlers } from "./keyboard-shortcut-handlers";
 
 export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers) {
+  // TODO(fix-coaching-dialog-rules-of-hooks-followup): the explicit
+  // per-handler deps are intentional — depending on the whole `handlers`
+  // object would re-bind listeners on every parent render.
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     const handleKeyDown = createKeyDownHandler(handlers);
     const handleEscape = createEscapeHandler(handlers.onClearSelection);
@@ -35,4 +39,5 @@ export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers) {
     handlers.onDelete,
     handlers.onClearSelection,
   ]);
+  /* eslint-enable react-hooks/exhaustive-deps */
 }

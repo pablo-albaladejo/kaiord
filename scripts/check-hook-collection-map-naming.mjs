@@ -24,20 +24,99 @@
  * `{components,hooks,lib}/**` scope) because Rules-of-Hooks applies
  * everywhere.
  */
-import { readFile } from "node:fs/promises";
-import { glob } from "node:fs/promises";
-import { fileURLToPath } from "node:url";
-import path from "node:path";
+import { readdirSync, readFileSync, statSync } from "node:fs";
+import { dirname, join, relative, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
-const REPO_ROOT = path.resolve(
-  path.dirname(fileURLToPath(import.meta.url)),
-  ".."
-);
+const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 
-const SPA_SRC_GLOB = "packages/workout-spa-editor/src/**/*.{ts,tsx}";
+const SPA_SRC = join(REPO_ROOT, "packages", "workout-spa-editor", "src");
+const TS_EXTENSIONS = new Set([".ts", ".tsx"]);
 
-const MAP_CALLBACK_RE =
-  /\.map\s*\(\s*\(?\s*([A-Za-z_$][\w$]*)\s*\)?\s*=>\s*([\s\S]*?)\)\s*[,;\.\)]/g;
+// Match the start of every `.map(<param>` shape; the body length is
+// determined by a balanced-paren scan so multi-line / nested-brace
+// callback bodies are captured correctly. Three opener variants:
+//   1. .map((<param>) => ...
+//   2. .map(<param> => ...
+//   3. .map(function (<param>) { ... })  [not common; same param-name rule]
+const MAP_OPENER_RE =
+  /\.map\s*\(\s*(?:\(\s*([A-Za-z_$][\w$]*)\s*\)|([A-Za-z_$][\w$]*))\s*=>/g;
+
+function findCallEndIndex(source, openerEndIndex) {
+  // openerEndIndex is the position right after `=>`. Scan from there
+  // until the matching close-paren of the outer `.map(...)`. Respects
+  // string / template / paren / brace nesting.
+  let i = openerEndIndex;
+  let inString = false;
+  let stringChar = "";
+  let inTemplate = false;
+  let templateBraceDepth = 0;
+  let parenDepth = 0;
+  let bracketDepth = 0;
+  let braceDepth = 0;
+  while (i < source.length) {
+    const ch = source[i];
+    if (inString) {
+      if (ch === "\\") {
+        i += 2;
+        continue;
+      }
+      if (ch === stringChar) inString = false;
+      i += 1;
+      continue;
+    }
+    if (inTemplate) {
+      if (ch === "\\") {
+        i += 2;
+        continue;
+      }
+      if (ch === "`" && templateBraceDepth === 0) {
+        inTemplate = false;
+        i += 1;
+        continue;
+      }
+      if (ch === "$" && source[i + 1] === "{") {
+        templateBraceDepth += 1;
+        i += 2;
+        continue;
+      }
+      if (ch === "}" && templateBraceDepth > 0) {
+        templateBraceDepth -= 1;
+        i += 1;
+        continue;
+      }
+      i += 1;
+      continue;
+    }
+    if (ch === '"' || ch === "'") {
+      inString = true;
+      stringChar = ch;
+      i += 1;
+      continue;
+    }
+    if (ch === "`") {
+      inTemplate = true;
+      templateBraceDepth = 0;
+      i += 1;
+      continue;
+    }
+    if (ch === "(") parenDepth += 1;
+    else if (ch === "[") bracketDepth += 1;
+    else if (ch === "{") braceDepth += 1;
+    else if (ch === "]") bracketDepth -= 1;
+    else if (ch === "}") braceDepth -= 1;
+    else if (ch === ")") {
+      if (parenDepth === 0) return i;
+      parenDepth -= 1;
+    }
+    i += 1;
+  }
+  return -1;
+}
+
+function escapeRegex(s) {
+  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 /**
  * Scan a single source string for violations.
@@ -45,30 +124,70 @@ const MAP_CALLBACK_RE =
  */
 export function findViolations(source) {
   const violations = [];
-  for (const match of source.matchAll(MAP_CALLBACK_RE)) {
-    const [, param, body] = match;
-    if (param.startsWith("use")) continue;
+  for (const m of source.matchAll(MAP_OPENER_RE)) {
+    const param = m[1] ?? m[2];
+    if (!param || param.startsWith("use")) continue;
+    const openerEnd = m.index + m[0].length;
+    const callEnd = findCallEndIndex(source, openerEnd);
+    if (callEnd === -1) continue;
+    const body = source.slice(openerEnd, callEnd);
     const invokesAsFunction = new RegExp(
       `\\b${escapeRegex(param)}\\s*\\(`
     ).test(body);
     if (!invokesAsFunction) continue;
-    const line = source.slice(0, match.index).split("\n").length;
+    const line = source.slice(0, m.index).split("\n").length;
     violations.push({ line, param });
   }
   return violations;
 }
 
-function escapeRegex(s) {
-  return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+function walk(dir, out = []) {
+  let entries;
+  try {
+    entries = readdirSync(dir, { withFileTypes: true });
+  } catch {
+    return out;
+  }
+  for (const entry of entries) {
+    const full = join(dir, entry.name);
+    if (entry.isDirectory()) walk(full, out);
+    else if (
+      entry.isFile() &&
+      TS_EXTENSIONS.has(extOf(entry.name)) &&
+      !entry.name.endsWith(".test.ts") &&
+      !entry.name.endsWith(".test.tsx")
+    ) {
+      out.push(full);
+    }
+  }
+  return out;
+}
+
+function extOf(name) {
+  const dot = name.lastIndexOf(".");
+  return dot >= 0 ? name.slice(dot) : "";
+}
+
+function safeStat(p) {
+  try {
+    return statSync(p);
+  } catch {
+    return null;
+  }
 }
 
 async function main() {
-  const files = await collectFiles();
+  if (!safeStat(SPA_SRC)) {
+    console.log(
+      `[check-hook-collection-map-naming] SPA src not found at ${SPA_SRC}; skipping.`
+    );
+    return;
+  }
+  const files = walk(SPA_SRC).sort();
   const all = [];
   for (const file of files) {
-    const source = await readFile(file, "utf8");
-    const violations = findViolations(source);
-    for (const v of violations) {
+    const source = readFileSync(file, "utf8");
+    for (const v of findViolations(source)) {
       all.push({ file, ...v });
     }
   }
@@ -79,7 +198,7 @@ async function main() {
     return;
   }
   for (const v of all) {
-    const rel = path.relative(REPO_ROOT, v.file);
+    const rel = relative(REPO_ROOT, v.file);
     console.error(
       `${rel}:${v.line} — \`.map((${v.param}) => ${v.param}(...))\` ` +
         `parameter \`${v.param}\` must start with \`use\` (rule R-HookMapNaming)`
@@ -93,15 +212,9 @@ async function main() {
   process.exit(1);
 }
 
-async function collectFiles() {
-  const out = [];
-  for await (const entry of glob(SPA_SRC_GLOB, { cwd: REPO_ROOT })) {
-    out.push(path.join(REPO_ROOT, entry));
-  }
-  return out.sort();
-}
-
-if (import.meta.url === `file://${process.argv[1]}`) {
+const isMain =
+  process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url;
+if (isMain) {
   main().catch((err) => {
     console.error(err);
     process.exit(1);
