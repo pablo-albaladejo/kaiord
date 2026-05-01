@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Kaiord extension icon — single source of truth for both bridges.
+
+  Substitution: scripts/build-extension-icons.mjs replaces __ACCENT__
+  with the per-bridge accent color before rasterising to PNG via
+  sharp. Garmin uses #007cc3 (Garmin-compatible blue); Train2Go uses
+  #f74464 (Kaiord coral matching the Train2Go popup brand).
+
+  The accent occupies the central hex + dot. The dark navy background
+  (#0f172a, slate-900) is shared so the family relationship reads at
+  a glance even at 16x16. The accent fills ≥25% of non-transparent
+  pixel mass at the smallest size — enforced by the distinctness
+  guard at scripts/check-extension-icons-distinct.mjs.
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  viewBox="0 0 128 128"
+  width="128"
+  height="128"
+>
+  <!-- Outer hex background (dark navy, slate-900) -->
+  <polygon
+    points="64,8 116,38 116,90 64,120 12,90 12,38"
+    fill="#0f172a"
+  />
+  <!-- Inner accent hex (filled, ~33% area) -->
+  <polygon
+    points="64,28 100,46 100,82 64,100 28,82 28,46"
+    fill="__ACCENT__"
+    fill-opacity="0.92"
+  />
+  <!-- Inner dark cutout — concentric hex to give the ring effect -->
+  <polygon
+    points="64,38 91,52 91,78 64,92 37,78 37,52"
+    fill="#0f172a"
+  />
+  <!-- Center accent dot — solid mass to keep accent reading at 16x16 -->
+  <circle cx="64" cy="64" r="14" fill="__ACCENT__" />
+</svg>
