@@ -135,10 +135,16 @@ describe("check-package-deps", () => {
     );
   });
 
-  test("PACKAGE_DEPS covers every package directory under packages/", () => {
-    // Mirrors a freshness invariant — when a new package directory is
-    // added, PACKAGE_DEPS MUST be updated. Otherwise the check becomes
-    // permissive (an unknown package name defaults to empty allowlist).
+  test("PACKAGE_DEPS covers every workspace package directory under packages/", () => {
+    // Mirrors a freshness invariant — when a new workspace package is added,
+    // PACKAGE_DEPS MUST be updated. Otherwise the check becomes permissive
+    // (an unknown package name defaults to empty allowlist).
+    //
+    // A "workspace package" is a directory that contains a package.json. CI
+    // environments occasionally retain stale empty directories from removed
+    // packages (e.g., packages/infra historically existed and was removed in
+    // #257); filtering by package.json presence makes the test resilient to
+    // that leftover state without weakening the invariant.
     const realDirs = new Set();
     for (const entry of readdirSyncSafe(REAL_PACKAGES_ROOT)) {
       const dirPath = join(REAL_PACKAGES_ROOT, entry);
@@ -146,6 +152,9 @@ describe("check-package-deps", () => {
         const stat = statSyncSafe(dirPath);
         if (!stat?.isDirectory()) continue;
         if (entry.startsWith(".")) continue;
+        const pkgJsonPath = join(dirPath, "package.json");
+        const pkgStat = statSyncSafe(pkgJsonPath);
+        if (!pkgStat?.isFile()) continue;
         realDirs.add(entry);
       } catch {
         // ignore
