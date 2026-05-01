@@ -37,19 +37,19 @@ Then §5 final-validation block runs and the change is archived.
 
 ### 1.3 Mapper-no-tests guard
 
-- [ ] 1.3.1 write failing test `scripts/check-mapper-no-tests.test.mjs` (RED): positive fixture is a tree with one `*.mapper.test.ts`; negative is a tree with only `*.mapper.ts`
-- [ ] 1.3.2 implement `scripts/check-mapper-no-tests.mjs` (GREEN): glob `packages/**/*.mapper.test.{ts,tsx}` excluding `node_modules/`, `dist/`; rule ID `R-MapperNoTests`. Support a `--dry-run` flag emitting violations as JSON on stdout
-- [ ] 1.3.3 refactor: share the path-glob helper with `check-converter-has-tests` (REFACTOR)
-- [ ] 1.3.4 seed `ALLOWLIST` from the audit snapshot (the 7 known mapper test files; drained in PR3)
-- [ ] 1.3.5 wire into `pnpm test:scripts` and `pnpm lint`
+- [x] 1.3.1 write failing test `scripts/check-mapper-no-tests.test.mjs` (RED): positive fixture is a tree with one `*.mapper.test.ts`; negative is a tree with only `*.mapper.ts`
+- [x] 1.3.2 implement `scripts/check-mapper-no-tests.mjs` (GREEN): glob `packages/**/*.mapper.test.{ts,tsx}` excluding `node_modules/`, `dist/`; rule ID `R-MapperNoTests`. Support a `--dry-run` flag emitting violations as JSON on stdout
+- [x] 1.3.3 refactor: share the path-glob helper with `check-converter-has-tests` (REFACTOR)
+- [x] 1.3.4 seed `ALLOWLIST` from the audit snapshot (the 7 known mapper test files; drained in PR3)
+- [x] 1.3.5 wire into `pnpm test:scripts` and `pnpm lint`
 
 ### 1.4 Converter-has-tests guard
 
-- [ ] 1.4.1 write failing test `scripts/check-converter-has-tests.test.mjs` (RED): positive is a converter without sibling test; negative is a paired set
-- [ ] 1.4.2 implement `scripts/check-converter-has-tests.mjs` (GREEN): glob `packages/**/*.converter.{ts,tsx}` and assert co-located `*.converter.test.{ts,tsx}` exists; rule ID `R-ConverterHasTests`. Support a `--dry-run` flag emitting violations as JSON on stdout
-- [ ] 1.4.3 refactor: use the shared path-glob helper from 1.3.3 (REFACTOR)
-- [ ] 1.4.4 seed `ALLOWLIST` from the audit snapshot (the 3 known untested converters; drained in PR3)
-- [ ] 1.4.5 wire into `pnpm test:scripts` and `pnpm lint`
+- [x] 1.4.1 write failing test `scripts/check-converter-has-tests.test.mjs` (RED): positive is a converter without sibling test; negative is a paired set
+- [x] 1.4.2 implement `scripts/check-converter-has-tests.mjs` (GREEN): glob `packages/**/*.converter.{ts,tsx}` and assert co-located `*.converter.test.{ts,tsx}` exists; rule ID `R-ConverterHasTests`. Support a `--dry-run` flag emitting violations as JSON on stdout
+- [x] 1.4.3 refactor: use the shared path-glob helper from 1.3.3 (REFACTOR)
+- [x] 1.4.4 seed `ALLOWLIST` from the audit snapshot (the 3 known untested converters; drained in PR3)
+- [x] 1.4.5 wire into `pnpm test:scripts` and `pnpm lint`
 
 ### 1.5 No-unconditional-skip guard
 
@@ -61,10 +61,10 @@ Then §5 final-validation block runs and the change is archived.
 
 ### 1.6 Husky no-bypass-hint guard
 
-- [ ] 1.6.1 write failing test `scripts/check-husky-no-bypass-hint.test.mjs` (RED): positive (REJECT) fixtures: lines with imperative-voice bypass, e.g., `echo "To skip: git commit --no-verify"`, `printf "use --no-verify"`, `: HUSKY=0 git commit ...`, `eval "HUSKY=0 git commit"`, `env HUSKY=0 git commit`, `something && HUSKY=0 git commit`, `$(HUSKY=0 git commit)`. Negative (ALLOW) fixtures: defensive comments, e.g., `# NEVER use --no-verify; CI re-runs all checks anyway`, `# do not use HUSKY=0`, `# --no-verify is forbidden`. Bare-`#`-comment-without-negation case `# use --no-verify`: REJECT (the rule requires explicit negation; the bare `#` is not enough). Cover this case explicitly in fixtures. The script MUST distinguish framing — endorsement is REJECTED, prohibition is ALLOWED
-- [ ] 1.6.2 implement `scripts/check-husky-no-bypass-hint.mjs` (GREEN): read every file under `.husky/` line-by-line. For each line containing `--no-verify` or `HUSKY=0`, REJECT only if the line matches the imperative-voice pattern (regex `/(use|try|run|execute|exec|eval|env|export|:\s|&&|\|\||\$\(|echo|printf|bash\s+-c|sh\s+-c)\s.*(--no-verify|HUSKY=0)/i`) AND does NOT contain any of the negation tokens `NEVER`, `do not`, `don't`, `forbidden`, `never use`, `must not`. Rule ID `R-NoBypassHint`. Document at the script header: (a) `--no-gpg-sign` is OUT OF SCOPE for this rule (separate signing concern; deferred to a future `R-NoGpgBypass` rule); (b) bare-`#`-comment-without-negation is REJECTED — contributors MUST include an explicit negation token; (c) known evasions accepted as residual risk: `bash <<<` here-strings with internal vars (rare in husky hooks)
-- [ ] 1.6.3 refactor (REFACTOR): extract the imperative-voice and negation-token sets to top-level consts; document them in a header block
-- [ ] 1.6.4 wire into `pnpm test:scripts` and `pnpm lint`
+- [x] 1.6.1 write failing test `scripts/check-husky-no-bypass-hint.test.mjs` (RED): positive (REJECT) fixtures: lines with imperative-voice bypass, e.g., `echo "To skip: git commit --no-verify"`, `printf "use --no-verify"`, `: HUSKY=0 git commit ...`, `eval "HUSKY=0 git commit"`, `env HUSKY=0 git commit`, `something && HUSKY=0 git commit`, `$(HUSKY=0 git commit)`. Negative (ALLOW) fixtures: defensive comments, e.g., `# NEVER use --no-verify; CI re-runs all checks anyway`, `# do not use HUSKY=0`, `# --no-verify is forbidden`. Bare-`#`-comment-without-negation case `# use --no-verify`: REJECT (the rule requires explicit negation; the bare `#` is not enough). Cover this case explicitly in fixtures. The script MUST distinguish framing — endorsement is REJECTED, prohibition is ALLOWED
+- [x] 1.6.2 implement `scripts/check-husky-no-bypass-hint.mjs` (GREEN): read every file under `.husky/` line-by-line. For each line containing `--no-verify` or `HUSKY=0`, REJECT only if the line matches the imperative-voice pattern (regex `/(use|try|run|execute|exec|eval|env|export|:\s|&&|\|\||\$\(|echo|printf|bash\s+-c|sh\s+-c)\s.*(--no-verify|HUSKY=0)/i`) AND does NOT contain any of the negation tokens `NEVER`, `do not`, `don't`, `forbidden`, `never use`, `must not`. Rule ID `R-NoBypassHint`. Document at the script header: (a) `--no-gpg-sign` is OUT OF SCOPE for this rule (separate signing concern; deferred to a future `R-NoGpgBypass` rule); (b) bare-`#`-comment-without-negation is REJECTED — contributors MUST include an explicit negation token; (c) known evasions accepted as residual risk: `bash <<<` here-strings with internal vars (rare in husky hooks)
+- [x] 1.6.3 refactor (REFACTOR): extract the imperative-voice and negation-token sets to top-level consts; document them in a header block
+- [x] 1.6.4 wire into `pnpm test:scripts` and `pnpm lint`
 
 ### 1.7 Commit-format gate
 
@@ -133,8 +133,8 @@ export const SCOPE_ENUM = [
 
 ### 1.8 Husky pre-commit hygiene & ordering
 
-- [ ] 1.8.1 reorder `.husky/pre-commit` so `pnpm test:scripts` runs BEFORE `pnpm test`. The new order is: build → tsc --noEmit → test:scripts → test → (no further scripts:tests step). This guarantees `it.only` is rejected before the test runner can mask the suite
-- [ ] 1.8.2 remove from `.husky/pre-commit` every imperative-voice instruction line containing `--no-verify` or `HUSKY=0` (e.g., `echo "To skip: git commit --no-verify"`). The hook still fails the same way; only the bypass hint is gone. The `R-NoBypassHint` script in 1.6 enforces this invariant going forward (defensive comments such as `# NEVER use --no-verify; CI re-runs all checks` are kept and explicitly allowed by the rule)
+- [x] 1.8.1 reorder `.husky/pre-commit` so `pnpm test:scripts` runs BEFORE `pnpm test`. The new order is: build → tsc --noEmit → test:scripts → test → (no further scripts:tests step). This guarantees `it.only` is rejected before the test runner can mask the suite
+- [x] 1.8.2 remove from `.husky/pre-commit` every imperative-voice instruction line containing `--no-verify` or `HUSKY=0` (e.g., `echo "To skip: git commit --no-verify"`). The hook still fails the same way; only the bypass hint is gone. The `R-NoBypassHint` script in 1.6 enforces this invariant going forward (defensive comments such as `# NEVER use --no-verify; CI re-runs all checks` are kept and explicitly allowed by the rule)
 - [ ] 1.8.3 manual smoke: `git commit --allow-empty -m "chore(scripts): hook hygiene smoke" 2>&1 | tee /tmp/hook-out.txt`; assert NO imperative-voice bypass instruction appears in the output (run `scripts/check-husky-no-bypass-hint.mjs --dry-run` for a JSON enumeration as a cross-check)
 - [ ] 1.8.4 add `scripts/check-allowlists-empty.mjs` + `scripts/check-allowlists-empty.test.mjs` (RED → GREEN → wire-in subsequence below):
   - [ ] 1.8.4a write failing test `scripts/check-allowlists-empty.test.mjs` (RED): positive (REJECT in `--mode=error`) fixtures: `export const ALLOWLIST = new Set(["packages/X/Y.ts"])`, plus a stress fixture with a path containing brackets `export const ALLOWLIST = new Set(["packages/landing/src/pages/[slug].ts"])` (must still be flagged). Negative (ALLOW) fixtures: `export const ALLOWLIST = new Set()`, `export const ALLOWLIST = new Set([])` (both empty forms), AND a comment fixture: `// historical: ALLOWLIST = new Set(["X"]) was the old form` (must NOT be flagged — comments mentioning the rule are not violations)
