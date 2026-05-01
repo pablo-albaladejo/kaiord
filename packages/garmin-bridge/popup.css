@@ -1,0 +1,235 @@
+/*
+ * Shared Bridge Popup CSS — single source of truth for both bridges.
+ *
+ * Sync target: copied byte-for-byte into packages/{garmin,train2go}-bridge/
+ * popup.css by `pnpm popup:sync`. The parity guard at
+ * scripts/check-popup-css-parity.test.mjs fails the lint job if either
+ * destination drifts from this master.
+ *
+ * Color tokens (--accent, --accent-hover) are defined per-bridge in
+ * popup.html's <style> block — only divergence between the two popups.
+ *
+ * Layout tokens follow design D6 of openspec/changes/bridge-popup-
+ * redesign/design.md. Font sizes are in `px` (not `rem`) because the
+ * Chrome popup has its own rendering context independent of the host
+ * page's root font.
+ */
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  width: 340px;
+  margin: 0;
+  padding: 16px;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color: #0f172a;
+  background: #ffffff;
+}
+
+/* ── Header (3-column grid; reserves a 16x16 slot for the refresh icon
+       so the title row never reflows between loading and success). ── */
+.popup-header {
+  display: grid;
+  grid-template-columns: 8px 1fr 16px;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.popup-header__dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+}
+
+.popup-header__title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.popup-header__refresh {
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--accent);
+  cursor: pointer;
+  font-size: 14px;
+  line-height: 1;
+}
+
+.popup-header__refresh--hidden {
+  visibility: hidden;
+}
+
+/* ── Status pill ── */
+.status {
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+}
+
+.status__glyph {
+  font-weight: 700;
+}
+
+.status--ok {
+  background: #d4edda;
+  color: #155724;
+}
+.status--no {
+  background: #f8d7da;
+  color: #721c24;
+}
+.status--checking {
+  background: #fff3cd;
+  color: #856404;
+}
+
+.status__sub {
+  display: block;
+  margin-top: 4px;
+  font-size: 12px;
+  opacity: 0.85;
+}
+
+/* ── Section caption ── */
+.caption {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: #475569;
+  margin: 12px 0 6px;
+}
+
+/* ── Athlete card grid (2-column micro-grid; switches to single full-width
+       cell when only one field is rendered). ── */
+.athlete {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px 12px;
+  margin-bottom: 12px;
+}
+
+.athlete--single {
+  grid-template-columns: 1fr;
+}
+
+.athlete__cell {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+}
+
+.athlete__label {
+  color: #475569;
+}
+
+.athlete__value {
+  font-weight: 600;
+}
+
+.athlete__updated {
+  grid-column: 1 / -1;
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+}
+
+.athlete--placeholder {
+  padding: 12px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 4px;
+  font-size: 12px;
+  color: #475569;
+  margin-bottom: 12px;
+}
+
+/* ── Rollup line ── */
+.rollup {
+  font-size: 12px;
+  color: #334155;
+  margin-bottom: 12px;
+}
+
+.rollup--unavailable {
+  color: #94a3b8;
+  font-style: italic;
+}
+
+/* ── Footer (primary CTA + secondary link) ── */
+.cta-primary {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0 6px;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.cta-primary:hover {
+  background: var(--accent-hover);
+}
+
+.cta-secondary {
+  display: block;
+  font-size: 12px;
+  color: var(--accent);
+  text-decoration: underline;
+  text-align: center;
+}
+
+.cta-retry {
+  display: block;
+  width: 100%;
+  padding: 8px;
+  margin: 8px 0;
+  border: none;
+  border-radius: 4px;
+  background: var(--accent);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skeleton {
+    animation: none;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #e2e8f0 0%, #f1f5f9 50%, #e2e8f0 100%);
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.4s ease-in-out infinite;
+  border-radius: 4px;
+}
+
+@keyframes skeleton-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
