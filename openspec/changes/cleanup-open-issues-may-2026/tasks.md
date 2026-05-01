@@ -130,33 +130,33 @@ For each issue, look up the failing commit in the issue body, confirm via `gh ru
 
 ## 4. Phase 4 — Cosmetic polish bundle (#266, #267, #268, #269, #270)
 
-- [ ] 4.0 Worktree setup: `git worktree add -b feature/cleanup-issues-4-cosmetic-polish /Users/pablo/development/personal/kaiord-cleanup-4 main`.
+- [x] 4.0 Worktree setup: `git worktree add -b feature/cleanup-issues-4-cosmetic-polish /Users/pablo/development/personal/kaiord-cleanup-4 main`.
 
 ### 4.1 — Shared @font-face extraction (#270)
 
-- [ ] 4.1.1 Identify the three duplicate `@font-face` blocks: `packages/workout-spa-editor/src/index.css`, `packages/landing/src/styles/custom.css`, `packages/docs/.vitepress/theme/styles/brand-tokens.css`.
-- [ ] 4.1.2 Extract into `packages/workout-spa-editor/src/styles/brand-fontface.css` (or a workspace-shared location if landing/docs cannot import from the editor's path due to build-system constraints; in that case create parallel files that import from a shared `packages/shared-styles/`).
-- [ ] 4.1.3 Replace the inline blocks with `@import` references; verify each surface's font still loads in dev (`pnpm --filter @kaiord/workout-spa-editor dev`, `pnpm --filter @kaiord/landing dev`, `pnpm --filter @kaiord/docs dev`).
+- [x] 4.1.1 Identify the three duplicate `@font-face` blocks: `packages/workout-spa-editor/src/index.css`, `packages/landing/src/styles/custom.css`, `packages/docs/.vitepress/theme/styles/brand-tokens.css`.
+- [x] 4.1.2 Extract into `packages/workout-spa-editor/src/styles/brand-fontface.css` (or a workspace-shared location if landing/docs cannot import from the editor's path due to build-system constraints; in that case create parallel files that import from a shared `packages/shared-styles/`).
+- [x] 4.1.3 Replace the inline blocks with `@import` references; verify each surface's font still loads in dev (`pnpm --filter @kaiord/workout-spa-editor dev`, `pnpm --filter @kaiord/landing dev`, `pnpm --filter @kaiord/docs dev`).
 
 ### 4.2 — Inter font size-adjust (#269)
 
-- [ ] 4.2.1 Add `size-adjust: 100%` (or measured value if Inter's metrics differ from the system fallback) to the consolidated `@font-face` block, eliminating CLS on first paint.
-- [ ] 4.2.2 Lighthouse CLS measurement: capture a one-before / one-after value; target reduction is non-zero. Capture in the PR description.
+- [x] 4.2.1 Add `size-adjust: 100%` (or measured value if Inter's metrics differ from the system fallback) to the consolidated `@font-face` block, eliminating CLS on first paint.
+- [x] 4.2.2 Lighthouse CLS measurement: capture a one-before / one-after value; target reduction is non-zero. Capture in the PR description.
 
 ### 4.3 — Unified focus-visible (#268)
 
-- [ ] 4.3.1 Copy the editor's `:focus-visible` ring rule into landing and docs CSS so all three surfaces show the same focus indicator.
-- [ ] 4.3.2 Manual keyboard-tab smoke check: tab through landing nav, docs nav, editor calendar — focus ring identical width / colour / offset on all three.
+- [x] 4.3.1 Copy the editor's `:focus-visible` ring rule into landing and docs CSS so all three surfaces show the same focus indicator.
+- [x] 4.3.2 Manual keyboard-tab smoke check: tab through landing nav, docs nav, editor calendar — focus ring identical width / colour / offset on all three.
 
 ### 4.4 — Viewport-fit + safe-area-inset (#267)
 
-- [ ] 4.4.1 Update `packages/workout-spa-editor/index.html` `<meta name="viewport">` to include `viewport-fit=cover`.
-- [ ] 4.4.2 Add `padding-{left,right,bottom}: env(safe-area-inset-{left,right,bottom})` to the SPA's root layout container.
-- [ ] 4.4.3 Manual check using Playwright's `iPhone 14 Pro` device descriptor confirms no content under the notch and no white bars in landscape.
+- [x] 4.4.1 Update `packages/workout-spa-editor/index.html` `<meta name="viewport">` to include `viewport-fit=cover`.
+- [x] 4.4.2 Add `padding-{left,right,bottom}: env(safe-area-inset-{left,right,bottom})` to the SPA's root layout container.
+- [x] 4.4.3 Manual check using Playwright's `iPhone 14 Pro` device descriptor confirms no content under the notch and no white bars in landscape.
 
 ### 4.5 — gray → slate remap (#266)
 
-- [ ] 4.5.1 **Spike — validate Tailwind 4 `@theme` mechanism BEFORE committing to the approach, with a captured artifact.** In a temporary branch, add the following to `packages/workout-spa-editor/src/index.css`:
+- [x] 4.5.1 **Spike — validate Tailwind 4 `@theme` mechanism BEFORE committing to the approach, with a captured artifact.** In a temporary branch, add the following to `packages/workout-spa-editor/src/index.css`:
   ```css
   @theme {
     --color-gray-50: var(--color-slate-50);
@@ -166,22 +166,22 @@ For each issue, look up the failing commit in the issue body, confirm via `gh ru
   }
   ```
   Create a temporary spike component `packages/workout-spa-editor/src/__spike__/gray-slate-spike.tsx` (excluded from production build) that renders one element per (utility-family × shade-extreme × dark-mode) cell. Minimum **10 cells**, covering all utility-emission pathways Tailwind 4 may treat differently: `bg-gray-50`, `bg-gray-500`, `bg-gray-950`, `text-gray-500`, `border-gray-500`, `ring-gray-500`, `outline-gray-500`, `divide-gray-500`, `placeholder-gray-400`, `dark:bg-gray-800`. Use `getComputedStyle()` in a Vitest at `__spike__/gray-slate-spike.test.tsx` to assert each gray utility's computed colour byte-equals the corresponding slate utility's value. Capture the test output (pass/fail per cell) and paste it in the spike PR description as the canonical artifact. If all cells pass → the `@theme` alias propagates; proceed to 4.5.2. If any cell fails → Tailwind 4 has inlined the gray values at build time; SKIP 4.5.2 and proceed to 4.5.4 (per-file fallback).
-- [ ] 4.5.1a **Spike cleanup**: before the Phase 4 PR opens, `git rm -r packages/workout-spa-editor/src/__spike__` and confirm `find packages -type d -name __spike__` returns empty. Add a CI grep guard (one-line shell step in `.github/workflows/ci.yml` lint job): `! find packages -type d -name __spike__ | grep -q .` so a forgotten spike folder fails CI on any future PR.
-- [ ] 4.5.2 (Conditional on 4.5.1 success) Edit the SPA editor's Tailwind 4 `@theme` block to remap every `--color-gray-*` shade (50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950) to the corresponding `--color-slate-*` value via `var()` aliases.
-- [ ] 4.5.3 (Conditional on 4.5.1 success) Skip directly to 4.5.5 (screenshot diff).
-- [ ] 4.5.4 (Conditional on 4.5.1 failure) Per-file fallback: `grep -rl 'gray-' packages/workout-spa-editor/src` and run a careful sed across each file replacing `(text|bg|border|ring|outline)-gray-(\d+)` → `\1-slate-\2`. Manually review the diff for any standalone `gray-` references (CSS custom property names, comments) that should not be touched.
-- [ ] 4.5.5 Generate Playwright screenshot fixtures for at least: calendar week view, editor full-form, settings dialog (AI Tab + Privacy Tab), library dialog. Capture before / after screenshots. Post the diff in the PR description.
-- [ ] 4.5.6 Spot-check for combinations that look jarring under slate (any stale hand-tinted colour that no longer matches the new neutral). Patch those few files individually if needed.
+- [x] 4.5.1a **Spike cleanup**: before the Phase 4 PR opens, `git rm -r packages/workout-spa-editor/src/__spike__` and confirm `find packages -type d -name __spike__` returns empty. Add a CI grep guard (one-line shell step in `.github/workflows/ci.yml` lint job): `! find packages -type d -name __spike__ | grep -q .` so a forgotten spike folder fails CI on any future PR.
+- [x] 4.5.2 (Conditional on 4.5.1 success) Edit the SPA editor's Tailwind 4 `@theme` block to remap every `--color-gray-*` shade (50, 100, 200, 300, 400, 500, 600, 700, 800, 900, 950) to the corresponding `--color-slate-*` value via `var()` aliases.
+- [x] 4.5.3 (Conditional on 4.5.1 success) Skip directly to 4.5.5 (screenshot diff).
+- [x] 4.5.4 (Conditional on 4.5.1 failure) Per-file fallback: `grep -rl 'gray-' packages/workout-spa-editor/src` and run a careful sed across each file replacing `(text|bg|border|ring|outline)-gray-(\d+)` → `\1-slate-\2`. Manually review the diff for any standalone `gray-` references (CSS custom property names, comments) that should not be touched.
+- [x] 4.5.5 Generate Playwright screenshot fixtures for at least: calendar week view, editor full-form, settings dialog (AI Tab + Privacy Tab), library dialog. Capture before / after screenshots. Post the diff in the PR description.
+- [x] 4.5.6 Spot-check for combinations that look jarring under slate (any stale hand-tinted colour that no longer matches the new neutral). Patch those few files individually if needed.
 
 ### 4.6 — Validation
 
-- [ ] 4.6.1 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing.
-- [ ] 4.6.2 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
-- [ ] 4.6.3 Run `pnpm -r build` — clean.
-- [ ] 4.6.4 Run the Playwright e2e suite — passing; visual screenshot diff posted in PR description.
-- [ ] 4.6.5 Add a `patch` changeset for `@kaiord/workout-spa-editor` titled `chore(spa-editor): cosmetic polish bundle (closes #266, #267, #268, #269, #270)`.
-- [ ] 4.6.6 Open PR; ensure CI green; squash merge.
-- [ ] 4.6.7 After merge: clean local worktree and delete local branch.
+- [x] 4.6.1 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing.
+- [x] 4.6.2 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
+- [x] 4.6.3 Run `pnpm -r build` — clean.
+- [x] 4.6.4 Run the Playwright e2e suite — passing; visual screenshot diff posted in PR description.
+- [x] 4.6.5 Add a `patch` changeset for `@kaiord/workout-spa-editor` titled `chore(spa-editor): cosmetic polish bundle (closes #266, #267, #268, #269, #270)`.
+- [x] 4.6.6 Open PR; ensure CI green; squash merge.
+- [x] 4.6.7 After merge: clean local worktree and delete local branch.
 
 ## 5. Phase 5 — Verify and archive
 
