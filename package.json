@@ -52,7 +52,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test && pnpm test:scripts",
-    "lint": "pnpm -r lint && pnpm lint:archive && pnpm lint:archive-index && pnpm lint:specs && pnpm lint:tsup-watchdog && pnpm lint:mapper-no-tests && pnpm lint:converter-has-tests && pnpm lint:husky-no-bypass && pnpm lint:package-deps && pnpm lint:architecture",
+    "lint": "pnpm -r lint && pnpm lint:archive && pnpm lint:archive-index && pnpm lint:specs && pnpm lint:tsup-watchdog && pnpm lint:mapper-no-tests && pnpm lint:converter-has-tests && pnpm lint:husky-no-bypass && pnpm lint:package-deps && pnpm lint:architecture && pnpm lint:no-unconditional-skip",
     "lint:fix": "pnpm -r lint:fix && prettier --write .",
     "lint:packages": "pnpm -r lint",
     "lint:archive": "node scripts/check-archive-dates.mjs",
@@ -64,6 +64,7 @@
     "lint:husky-no-bypass": "node scripts/check-husky-no-bypass-hint.mjs",
     "lint:package-deps": "node scripts/check-package-deps.mjs",
     "lint:architecture": "node scripts/check-architecture.mjs",
+    "lint:no-unconditional-skip": "node scripts/check-no-unconditional-skip.mjs",
     "lint:links": "bash scripts/lint-links.sh",
     "test:scripts": "node --test scripts/*.test.mjs",
     "archive:index": "node scripts/generate-archive-index.mjs",
