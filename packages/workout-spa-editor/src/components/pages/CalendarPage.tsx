@@ -20,6 +20,7 @@ import type { MatchedSessionWithMetadata as PageMatchedSession } from "../../hoo
 import { useMatchedSessions } from "../../hooks/use-matched-sessions";
 import { useSetCalendarDensity } from "../../hooks/use-set-calendar-density";
 import { useUserPreferences } from "../../hooks/use-user-preferences";
+import { ROUTE_HEADING_ATTR } from "../../routing/constants";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import { CalendarSkeleton } from "../molecules/WorkoutCard/CalendarSkeleton";
@@ -71,6 +72,9 @@ export default function CalendarPage() {
 
   return (
     <div className="space-y-4" data-testid="calendar-page">
+      <h1 tabIndex={-1} {...{ [ROUTE_HEADING_ATTR]: "" }} className="sr-only">
+        Calendar
+      </h1>
       <CalendarHeader
         state={s}
         coaching={coaching}
