@@ -161,24 +161,36 @@ jobs:
           echo "  - $EDITOR_URL (expect marker: $MARKER)"
           echo "  - $NOT_FOUND_URL (expect rafgraph redirect script)"
           for i in $(seq 1 10); do
-            EDITOR_BODY=$(curl -sL --max-time 15 "$EDITOR_URL" || true)
-            NOT_FOUND_BODY=$(curl -sL --max-time 15 "$NOT_FOUND_URL" || true)
+            EDITOR_TMP=$(mktemp)
+            NOT_FOUND_TMP=$(mktemp)
+            # `--http-status` would be cleaner but isn't in older curl; capture
+            # the code via -w and the body via -o for portability. -L follows
+            # any HTTP-level redirect so we score the final response.
+            EDITOR_CODE=$(curl -sL --max-time 15 -o "$EDITOR_TMP" -w "%{http_code}" "$EDITOR_URL" || echo "000")
+            NOT_FOUND_CODE=$(curl -sL --max-time 15 -o "$NOT_FOUND_TMP" -w "%{http_code}" "$NOT_FOUND_URL" || echo "000")
+            EDITOR_BODY=$(cat "$EDITOR_TMP" 2>/dev/null || true)
+            NOT_FOUND_BODY=$(cat "$NOT_FOUND_TMP" 2>/dev/null || true)
+            rm -f "$EDITOR_TMP" "$NOT_FOUND_TMP"
             EDITOR_OK=0
             NOT_FOUND_OK=0
-            echo "$EDITOR_BODY" | grep -qF "$MARKER" && EDITOR_OK=1
-            # Match the rafgraph guard literally; it must contain the /editor/ pathname
-            # check so the redirect only fires for SPA-related 404s.
-            echo "$NOT_FOUND_BODY" | grep -qF "indexOf('/editor/')" && NOT_FOUND_OK=1
+            # /editor/ is the SPA entry — must serve 200 + the bundle marker.
+            [ "$EDITOR_CODE" = "200" ] && echo "$EDITOR_BODY" | grep -qF "$MARKER" && EDITOR_OK=1
+            # /404.html is itself a real artefact (GitHub Pages serves it as
+            # a regular file with status 200); Pages then ALSO uses its body
+            # for the not-found fallback. We assert 200 + that the rafgraph
+            # guard literal is present so the redirect only fires for
+            # SPA-related 404s.
+            [ "$NOT_FOUND_CODE" = "200" ] && echo "$NOT_FOUND_BODY" | grep -qF "indexOf('/editor/')" && NOT_FOUND_OK=1
             if [ "$EDITOR_OK" = "1" ] && [ "$NOT_FOUND_OK" = "1" ]; then
-              echo "✅ Attempt $i: SPA bundle present at /editor/ AND rafgraph redirect present at /404.html"
+              echo "✅ Attempt $i: SPA bundle present at /editor/ (200) AND rafgraph redirect present at /404.html (200)"
               exit 0
             fi
-            echo "Attempt $i: editor=$EDITOR_OK 404=$NOT_FOUND_OK; retrying in 10s"
+            echo "Attempt $i: editor=$EDITOR_OK (code=$EDITOR_CODE) 404=$NOT_FOUND_OK (code=$NOT_FOUND_CODE); retrying in 10s"
             sleep 10
           done
           echo "❌ Smoke failed after 10 retries:"
-          echo "    /editor/ marker present:        $EDITOR_OK (expect 1)"
-          echo "    /404.html rafgraph script ok:   $NOT_FOUND_OK (expect 1)"
+          echo "    /editor/ status=$EDITOR_CODE (expect 200), marker present: $EDITOR_OK"
+          echo "    /404.html status=$NOT_FOUND_CODE (expect 200), rafgraph script: $NOT_FOUND_OK"
           exit 1
 
       # Rollback: use workflow_dispatch on last known-good main commit SHA,
