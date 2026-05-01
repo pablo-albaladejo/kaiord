@@ -7,7 +7,7 @@ import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";
 import {
   convertMetadataToFileId,
   convertWorkoutMetadata,
-} from "./krd-to-fit-metadata.mapper";
+} from "./krd-to-fit-metadata.converter";
 import { convertWorkoutSteps } from "./krd-to-fit-workout.mapper";
 
 /**

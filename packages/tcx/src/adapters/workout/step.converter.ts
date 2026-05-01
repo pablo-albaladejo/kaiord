@@ -1,6 +1,6 @@
 import type { Duration, Logger, Target, WorkoutStep } from "@kaiord/core";
 
-import { convertTcxDuration } from "../duration/duration.mapper";
+import { convertTcxDuration } from "../duration/duration-walker.converter";
 import { extractExtensions, extractIntensity } from "./step-helpers";
 import { convertTargetWithExtensions } from "./target-with-extensions.helper";
 

@@ -1,59 +1,107 @@
 import { describe, expect, it } from "vitest";
 import type { WorkoutStep } from "@kaiord/core";
-import { convertHeartRateTarget } from "./krd-to-fit-target-heart-rate.mapper";
+import { convertPowerTarget } from "./krd-to-fit-target-power.converter";
 
-describe("convertHeartRateTarget", () => {
-  it("should convert heart rate zone target", () => {
+describe("convertPowerTarget", () => {
+  it("should convert power zone target", () => {
     // Arrange
     const step: WorkoutStep = {
       stepIndex: 0,
       durationType: "time",
       duration: { type: "time", seconds: 300 },
-      targetType: "heart_rate",
+      targetType: "power",
       target: {
-        type: "heart_rate",
-        value: { unit: "zone", value: 3 },
+        type: "power",
+        value: { unit: "zone", value: 4 },
       },
     };
     const message: Record<string, unknown> = {};
 
     // Act
-    convertHeartRateTarget(step, message);
+    convertPowerTarget(step, message);
 
     // Assert
     expect(message).toStrictEqual({
-      targetType: "heartRate",
-      targetHrZone: 3,
+      targetType: "power",
+      targetPowerZone: 4,
     });
   });
 
-  it("should convert heart rate range target", () => {
+  it("should convert power range target", () => {
     // Arrange
     const step: WorkoutStep = {
       stepIndex: 0,
       durationType: "time",
       duration: { type: "time", seconds: 300 },
-      targetType: "heart_rate",
+      targetType: "power",
       target: {
-        type: "heart_rate",
-        value: { unit: "range", min: 140, max: 160 },
+        type: "power",
+        value: { unit: "range", min: 200, max: 250 },
       },
     };
     const message: Record<string, unknown> = {};
 
     // Act
-    convertHeartRateTarget(step, message);
+    convertPowerTarget(step, message);
 
     // Assert
     expect(message).toStrictEqual({
-      targetType: "heartRate",
+      targetType: "power",
       targetValue: 0,
-      customTargetHeartRateLow: 140,
-      customTargetHeartRateHigh: 160,
+      customTargetPowerLow: 200,
+      customTargetPowerHigh: 250,
     });
   });
 
-  it("should convert heart rate bpm target with offset", () => {
+  it("should convert power watts target with offset", () => {
+    // Arrange
+    const step: WorkoutStep = {
+      stepIndex: 0,
+      durationType: "time",
+      duration: { type: "time", seconds: 300 },
+      targetType: "power",
+      target: {
+        type: "power",
+        value: { unit: "watts", value: 250 },
+      },
+    };
+    const message: Record<string, unknown> = {};
+
+    // Act
+    convertPowerTarget(step, message);
+
+    // Assert
+    expect(message).toStrictEqual({
+      targetType: "power",
+      targetValue: 1250,
+    });
+  });
+
+  it("should convert power percent FTP target", () => {
+    // Arrange
+    const step: WorkoutStep = {
+      stepIndex: 0,
+      durationType: "time",
+      duration: { type: "time", seconds: 300 },
+      targetType: "power",
+      target: {
+        type: "power",
+        value: { unit: "percent_ftp", value: 85 },
+      },
+    };
+    const message: Record<string, unknown> = {};
+
+    // Act
+    convertPowerTarget(step, message);
+
+    // Assert
+    expect(message).toStrictEqual({
+      targetType: "power",
+      targetValue: 85,
+    });
+  });
+
+  it("should not modify message when target type is not power", () => {
     // Arrange
     const step: WorkoutStep = {
       stepIndex: 0,
@@ -68,59 +116,11 @@ describe("convertHeartRateTarget", () => {
     const message: Record<string, unknown> = {};
 
     // Act
-    convertHeartRateTarget(step, message);
+    convertPowerTarget(step, message);
 
     // Assert
     expect(message).toStrictEqual({
-      targetType: "heartRate",
-      targetValue: 250,
-    });
-  });
-
-  it("should convert heart rate percent max target", () => {
-    // Arrange
-    const step: WorkoutStep = {
-      stepIndex: 0,
-      durationType: "time",
-      duration: { type: "time", seconds: 300 },
-      targetType: "heart_rate",
-      target: {
-        type: "heart_rate",
-        value: { unit: "percent_max", value: 85 },
-      },
-    };
-    const message: Record<string, unknown> = {};
-
-    // Act
-    convertHeartRateTarget(step, message);
-
-    // Assert
-    expect(message).toStrictEqual({
-      targetType: "heartRate",
-      targetValue: 85,
-    });
-  });
-
-  it("should not modify message when target type is not heart rate", () => {
-    // Arrange
-    const step: WorkoutStep = {
-      stepIndex: 0,
-      durationType: "time",
-      duration: { type: "time", seconds: 300 },
       targetType: "power",
-      target: {
-        type: "power",
-        value: { unit: "watts", value: 200 },
-      },
-    };
-    const message: Record<string, unknown> = {};
-
-    // Act
-    convertHeartRateTarget(step, message);
-
-    // Assert
-    expect(message).toStrictEqual({
-      targetType: "heartRate",
     });
   });
 });
