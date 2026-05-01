@@ -48,8 +48,20 @@ export function stripJsonc(source) {
       i += 2; // skip closing */
       continue;
     }
+    if (ch === ",") {
+      // Look ahead for the next non-whitespace char. If it's `}` or `]`,
+      // this is a trailing comma that JSON.parse would reject; skip it.
+      // Whitespace within the lookahead is fine because we only look at
+      // top-level (out-of-string) characters here.
+      let j = i + 1;
+      while (j < source.length && /\s/.test(source[j])) j += 1;
+      if (j < source.length && (source[j] === "}" || source[j] === "]")) {
+        i += 1;
+        continue;
+      }
+    }
     out += ch;
     i += 1;
   }
-  return out.replace(/,(\s*[}\]])/g, "$1");
+  return out;
 }

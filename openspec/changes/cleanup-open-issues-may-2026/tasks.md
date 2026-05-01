@@ -118,13 +118,13 @@ For each issue, look up the failing commit in the issue body, confirm via `gh ru
 
 ### 3.6 — Validation
 
-- [x] - [ ] 3.6.1 Run the new guard against the current SPA editor source: `node scripts/check-no-pii-leakage.mjs`. Address every flagged call site (refactor to a SCREAMING_SNAKE_CASE constant; do NOT allowlist unless D9 criteria are met).
-- [x] - [ ] 3.6.2 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing, including the kept AiTab audit.
-- [x] - [ ] 3.6.3 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
-- [x] - [ ] 3.6.4 Run `pnpm test:scripts` — passing.
-- [x] - [ ] 3.6.5 Run `pnpm -r build` — clean.
-- [x] - [ ] 3.6.6 Update internal docs (`CLAUDE.md` "Quality Standards" section): add a bullet referencing the new guard alongside the existing no-Zustand-writethrough one.
-- [x] - [ ] 3.6.7 Add a `none` changeset unconditionally. The PR adds repo scripts (not packaged) and a comment-only edit to a `.test.ts` file inside the SPA editor; neither is a user-facing change. If the changeset bot complains, the right fix is to update `.changeset/config.json` `ignore` rules — never to misrepresent the change as `patch`.
+- [x] 3.6.1 Run the new guard against the current SPA editor source: `node scripts/check-no-pii-leakage.mjs`. Address every flagged call site (refactor to a SCREAMING_SNAKE_CASE constant; do NOT allowlist unless D9 criteria are met).
+- [x] 3.6.2 Run `pnpm --filter @kaiord/workout-spa-editor test` — passing, including the kept AiTab audit.
+- [x] 3.6.3 Run `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
+- [x] 3.6.4 Run `pnpm test:scripts` — passing.
+- [x] 3.6.5 Run `pnpm -r build` — clean.
+- [x] 3.6.6 Update internal docs (`CLAUDE.md` "Quality Standards" section): add a bullet referencing the new guard alongside the existing no-Zustand-writethrough one.
+- [x] 3.6.7 Add a `none` changeset unconditionally. The PR adds repo scripts (not packaged) and a comment-only edit to a `.test.ts` file inside the SPA editor; neither is a user-facing change. If the changeset bot complains, the right fix is to update `.changeset/config.json` `ignore` rules — never to misrepresent the change as `patch`.
 - [ ] 3.6.8 Open PR; ensure CI green; squash merge.
 - [ ] 3.6.9 After merge: clean local worktree and delete local branch.
 

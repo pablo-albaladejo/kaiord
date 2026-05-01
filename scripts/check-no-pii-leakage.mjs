@@ -89,11 +89,13 @@ const DESTRUCTURE_RE = /const\s*\{\s*([^}]+?)\s*\}\s*=\s*useToastContext\(\)/g;
 const REBIND_RE = /const\s+([A-Za-z_$][\w$]*)\s*=\s*useToastContext\(\)/g;
 
 // Top-level `const ID = "literal"` declaration (depth-1 only).
-// The first capture is the identifier name; the second is the literal
-// content (without surrounding quotes). The match must start at the
-// beginning of a line so we ignore nested const declarations.
+// Optional leading `export ` is allowed so `export const FOO = "..."`
+// also resolves. The first capture is the identifier name; the third
+// is the literal content (without surrounding quotes). The match
+// anchors at the beginning of a line so nested const declarations
+// inside functions are ignored.
 const TOP_LEVEL_CONST_RE =
-  /^const\s+([A-Z][A-Z0-9_]*)\s*(?::\s*\w+)?\s*=\s*(["'])((?:\\.|(?!\2).)*)\2\s*;?\s*$/gm;
+  /^(?:export\s+)?const\s+([A-Z][A-Z0-9_]*)\s*(?::\s*\w+)?\s*=\s*(["'])((?:\\.|(?!\2).)*)\2\s*;?\s*$/gm;
 
 const BARE_DOUBLE_LITERAL_RE = /^"(?:\\.|[^"\\])*"$/;
 const BARE_SINGLE_LITERAL_RE = /^'(?:\\.|[^'\\])*'$/;

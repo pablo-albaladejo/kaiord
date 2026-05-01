@@ -74,7 +74,7 @@ Other packages (core, fit, tcx, zwo, garmin, garmin-connect, cli, mcp, garmin-br
 Two accepted argument shapes for `toast.{error,success,info,warning}(...)`, `useToastContext().{error,success,info,warning}(...)`, and `console.{log,warn,error,info,debug}(...)`:
 
 1. A bare string literal: `toast.error("Failed to save profile")`.
-2. A bare SCREAMING*SNAKE_CASE identifier (`/^[A-Z]A-Z0-9*]\*$/`) that resolves to a top-level `const X = "string-literal"` declaration whose right-hand side is **itself** a bare string literal — no template, no concatenation, no call, no other identifier.
+2. A bare `SCREAMING_SNAKE_CASE` identifier (matching `/^[A-Z][A-Z0-9_]*$/`) that resolves to a top-level `const X = "string-literal"` declaration (`export const` is also allowed) whose right-hand side is **itself** a bare string literal — no template, no concatenation, no call, no other identifier.
 
 Rejected:
 

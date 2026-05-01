@@ -10,6 +10,7 @@ import {
   existsSync,
   mkdirSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   writeFileSync,
 } from "node:fs";
@@ -254,8 +255,19 @@ describe("check-no-pii-leakage", () => {
   });
 
   test("allowlisted file with a template literal passes (test-injected)", () => {
-    const target = "packages/workout-spa-editor/src/components/__alw.ts";
+    // Use a hidden-prefix path within the real SPA tree so the script's
+    // file-walk picks it up but the name is unlikely to collide with
+    // tracked source. If a file at this path already exists for any
+    // reason, snapshot its bytes and restore them in the finally block
+    // so the test can never clobber tracked content.
+    const target =
+      "packages/workout-spa-editor/src/components/__alw_pii_guard_fixture.ts";
     const realFile = join(REPO_ROOT, target);
+    const hadPriorContent = existsSync(realFile);
+    const priorContent = hadPriorContent
+      ? readFileSync(realFile, "utf8")
+      : null;
+
     mkdirSync(dirname(realFile), { recursive: true });
     writeFileSync(
       realFile,
@@ -278,7 +290,11 @@ describe("check-no-pii-leakage", () => {
       );
     } finally {
       ALLOWLIST.delete(target);
-      rmSync(realFile, { force: true });
+      if (hadPriorContent && priorContent !== null) {
+        writeFileSync(realFile, priorContent, "utf8");
+      } else {
+        rmSync(realFile, { force: true });
+      }
     }
   });
 });
