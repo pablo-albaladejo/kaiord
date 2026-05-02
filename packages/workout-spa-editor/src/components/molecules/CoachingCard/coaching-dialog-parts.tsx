@@ -61,30 +61,6 @@ export const DialogDescription = ({
   );
 };
 
-export const DialogFooter = ({
-  converting,
-  onClose,
-  onConvert,
-}: {
-  converting: boolean;
-  onClose: () => void;
-  onConvert: () => void;
-}) => (
-  <div className="flex justify-end gap-2 pt-3">
-    <button
-      type="button"
-      onClick={onClose}
-      className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
-    >
-      Close
-    </button>
-    <button
-      type="button"
-      disabled={converting}
-      onClick={onConvert}
-      className="rounded-md bg-rose-600 px-3 py-1 text-sm text-white hover:bg-rose-700 disabled:opacity-50"
-    >
-      {converting ? "Converting…" : "Convert to workout"}
-    </button>
-  </div>
-);
+// DialogFooter has moved into `CoachingDialogActions.tsx` to support the
+// matched-state branch (hide Convert, surface Split via LinkedWorkoutSection)
+// and the in-flow Match-to picker. Kept the rest of this file intact.

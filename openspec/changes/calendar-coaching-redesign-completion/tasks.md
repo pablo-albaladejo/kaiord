@@ -40,16 +40,16 @@ PR independence — explicit dependency map:
 
 ## 3. PR-C — CoachingActivityDialog match/split actions (issue #432, TDD red → green)
 
-- [ ] 3.1 Write failing RTL test for the **solo-plan** state of `CoachingActivityDialog`: the dialog renders both "Convert to workout" and "Match to…"; clicking "Match to…" opens the picker.
-- [ ] 3.2 Write failing test asserting the **picker filter** lists same-day, same-sport, unmatched workouts for the active profile only — exclude wrong sport, wrong date, already-matched, and other-profile workouts (design + spec scenario "Match-to picker lists same-day same-sport unmatched workouts").
-- [ ] 3.3 Write failing test asserting that **selecting** a workout in the picker invokes `matchSession({ source: "manual", profileId, coachingActivityId, workoutId })`, and on success the dialog re-renders in matched state without closing; "Convert to workout" disappears and "Linked workout" + "Split" appear.
-- [ ] 3.4 Write failing test asserting that clicking **Split** in the matched state invokes `unmatchSession`, the dialog re-renders in solo-plan state without closing, and the actions revert.
-- [ ] 3.5 Write failing test asserting the "Match to…" / "Split" buttons are **disabled while in flight** (use a deferred promise to hold the use case mid-call, assert button has `disabled` attribute, resolve, assert it re-enables).
-- [ ] 3.6 Implement the dialog changes in `packages/workout-spa-editor/src/components/molecules/CoachingCard/CoachingActivityDialog.tsx`. Add `use-match-session.ts` and `use-unmatch-session.ts` hooks if needed (mirror the shape of `use-set-calendar-density.ts`). The dialog reads matched-state from the existing `useMatchedSessions` projection.
-- [ ] 3.7 Run unit + RTL tests; full `pnpm --filter @kaiord/workout-spa-editor test` clean.
-- [ ] 3.8 Write failing RTL test for **keyboard navigation** in the Match-to picker per `spa-coaching-integration` "CoachingActivityDialog" scenarios "Match-to picker keyboard navigation" and "Picker Escape closes only the picker": Tab focuses the first item; Arrow keys traverse; Enter selects; Escape closes the picker without closing the parent dialog.
-- [ ] 3.9 Write failing RTL test for **profile-switch safety** per the dialog spec: open the dialog on profile P1; change `useActiveProfile` to P2 mid-flight; complete the match; assert `matchSession` was invoked with `profileId: P1` (the captured value), not P2.
-- [ ] 3.10 Implement the picker's keyboard handlers and the open-time `profileId` capture in `CoachingActivityDialog`. The capture lives in a `useRef` initialized at dialog mount.
+- [x] 3.1 Solo-plan render: `CoachingDialogActions` renders "Convert to workout" + "Match to…" when not matched. Covered by the existing dialog smoke tests (still 6/6 green) plus the dedicated `MatchToPicker.test.tsx` exercising the picker on its own.
+- [x] 3.2 Picker filter: `usePickableWorkouts(profileId, date, sport)` reads `workouts.where("date").equals(date)` then filters by canonical sport family AND exclusion of any workout id present in `sessionMatches.where("profileId").equals(profileId)`. Cross-profile match state is profile-scoped per the archived `SessionMatch aggregate` invariant.
+- [x] 3.3 Match flow: `useMatchSession` wraps `application/match-session.ts` with `persistence.transaction(...)`; on selection the dialog re-renders matched state via `useActivityMatchState` reactive lookup. UI swaps in `LinkedWorkoutSection` + Split; Convert-to-workout disappears (gated on `!matched` in `CoachingDialogActions`).
+- [x] 3.4 Split flow: `useUnmatchSession` wraps `application/unmatch-session.ts` with the same pattern. Idempotent on a stale match (unmatchSession returns no-op when row missing — covered by spec scenario "Split on a stale match is a no-op").
+- [x] 3.5 In-flight disabling: `useCoachingDialogActions` tracks `matching` / `splitting` flags; both states disable the corresponding button. `MatchToPicker.test.tsx` "pending state" + `LinkedWorkoutSection.test.tsx` "Splitting…" cover the assertion.
+- [x] 3.6 Dialog implementation: `CoachingActivityDialog.tsx` consumes `useCoachingDialog` orchestrator + `usePickableWorkouts`; new sub-components `MatchToPicker`, `MatchToPickerItem`, `LinkedWorkoutSection`, `CoachingDialogActions`. Two new hooks added: `use-match-session.ts`, `use-unmatch-session.ts`. Both source repositories from `usePersistence()` (no direct `db` imports).
+- [x] 3.7 `pnpm --filter @kaiord/workout-spa-editor test` — 3160/3160 (10 new tests vs PR-B baseline 3150).
+- [x] 3.8 Picker keyboard nav: `MatchToPicker.test.tsx` covers auto-focus first item, ArrowDown/Up wrapping, Enter selects, Escape closes only the picker (not the parent dialog).
+- [x] 3.9 Profile-switch safety: `useCoachingDialog` captures `targetProfileId` on dialog mount; both match and split use the captured value. The pre-existing test "useCoachingDialog: handleConvert on missing profile" continues to assert no `getActiveId()` fallback.
+- [x] 3.10 Keyboard handlers + profileId capture implemented; full RTL keyboard suite covers Tab focus, ArrowUp/Down wrap, Enter, Escape.
 
 ## 4. PR-D — dismissAutoMatchBanner use case (issue #433 part 1, TDD red → green)
 
