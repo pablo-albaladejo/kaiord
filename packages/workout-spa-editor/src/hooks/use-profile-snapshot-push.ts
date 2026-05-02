@@ -2,76 +2,81 @@
  * useProfileSnapshotPush — wires the SPA's active profile to the
  * bridge popup snapshot push pipeline.
  *
- * Triggers on every reactive change to the joined view of:
- *   - active profile (`useActiveProfileLive` → meta.activeProfileId
- *     joined with profiles[id]); a content fingerprint deduplicates
- *     no-op renders
- *   - registered bridges (live read of the `bridges` Dexie table)
+ * Sources of truth:
+ *   - active profile: `useActiveProfileLive` (live join of
+ *     meta.activeProfileId and profiles[id]).
+ *   - registered bridges: `useDiscoveredBridges`, which reads from
+ *     the in-memory `bridgeDiscovery` singleton (NOT the Dexie
+ *     `bridges` table — that table is unwritten in this repo today).
  *
- * On profile mutation OR a bridge transitioning to VERIFIED:
- *   - if profile is set → push fresh snapshot to every VERIFIED bridge
- *     (fingerprint-deduplicated by `createSnapshotPusher`)
- *   - if profile was deleted (id transitions from set to null)
- *     → emit `profile-snapshot-clear` to every VERIFIED bridge AND
- *     mark `pendingClear` on UNAVAILABLE bridges so the next VERIFIED
- *     transition emits the clear before any new push
- *
- * The push is non-blocking; the hook returns nothing.
+ * Per-bridge content-fingerprint dedup is held in an in-memory ref;
+ * we are not persisting it across reloads since the cost of an
+ * extra push on a fresh tab is negligible.
  */
 
-import { useLiveQuery } from "dexie-react-hooks";
+import { fingerprintSnapshot, type ProfileSnapshot } from "@kaiord/core";
 import { useEffect, useRef } from "react";
 
 import { sendBridgeMessage } from "../adapters/bridge/bridge-transport";
-import type { RegisteredBridge } from "../adapters/bridge/bridge-types";
-import { createOperationQueue } from "../adapters/bridge/operation-queue";
-import { createDexieBridgeRepository } from "../adapters/dexie/dexie-bridge-repository";
-import { db } from "../adapters/dexie/dexie-database";
-import {
-  clearActiveProfile,
-  pushActiveProfile,
-} from "../lib/profile-snapshot/push-active-profile";
+import { profileToSnapshot } from "../lib/profile-snapshot/profile-to-snapshot";
+import type { Profile } from "../types/profile";
 import { useActiveProfileLive } from "./use-active-profile-live";
+import { useDiscoveredBridges } from "./use-discovered-bridges";
 
-const BRIDGE_QUEUE = createOperationQueue();
-
-const liveBridges = (): RegisteredBridge[] | undefined =>
-  // Subscribed via useLiveQuery below.
-  undefined;
+const pickActiveSport = (
+  profile: Profile
+): "cycling" | "running" | "swimming" | undefined => {
+  if (profile.sportZones.cycling?.thresholds.ftp !== undefined)
+    return "cycling";
+  if (profile.sportZones.running?.thresholds.lthr !== undefined)
+    return "running";
+  if (profile.sportZones.swimming?.thresholds.thresholdPace !== undefined)
+    return "swimming";
+  if (profile.sportZones.cycling?.thresholds.lthr !== undefined)
+    return "cycling";
+  return undefined;
+};
 
 export const useProfileSnapshotPush = (): void => {
   const active = useActiveProfileLive();
-  const bridges = useLiveQuery<RegisteredBridge[]>(
-    () => db.table<RegisteredBridge>("bridges").toArray(),
-    []
-  );
+  const bridges = useDiscoveredBridges();
+  const lastFingerprintRef = useRef<Map<string, string>>(new Map());
   const lastProfileIdRef = useRef<string | null | undefined>(undefined);
 
   useEffect(() => {
-    if (active === undefined || bridges === undefined) return;
-
-    const repo = createDexieBridgeRepository(db);
-    const deps = {
-      transport: sendBridgeMessage,
-      bridgesRepo: repo,
-      enqueue: BRIDGE_QUEUE.enqueue,
-    } as const;
-
+    if (active === undefined) return;
     const previousId = lastProfileIdRef.current;
     lastProfileIdRef.current = active.id;
 
-    if (active.profile) {
-      void pushActiveProfile(active.profile, bridges, deps);
+    if (active.profile && bridges.length > 0) {
+      const profile = active.profile;
+      const snapshot: ProfileSnapshot = profileToSnapshot(
+        profile,
+        pickActiveSport(profile)
+      );
+      const fp = fingerprintSnapshot(profile.id, snapshot);
+      for (const bridge of bridges) {
+        if (lastFingerprintRef.current.get(bridge.extensionId) === fp) continue;
+        sendBridgeMessage(bridge.extensionId, {
+          action: "profile-snapshot",
+          snapshot,
+        })
+          .then((res) => {
+            if (res?.ok) lastFingerprintRef.current.set(bridge.extensionId, fp);
+          })
+          .catch(() => {});
+      }
       return;
     }
 
-    // Active profile was deleted (id transitioned set → null) — emit
-    // the clear. First-mount with null id is also handled (no-op
-    // because no bridges have stale snapshot from this session).
-    if (previousId && !active.id) {
-      void clearActiveProfile(bridges, deps);
+    if (previousId && !active.id && bridges.length > 0) {
+      for (const bridge of bridges) {
+        sendBridgeMessage(bridge.extensionId, {
+          action: "profile-snapshot-clear",
+        })
+          .then(() => lastFingerprintRef.current.delete(bridge.extensionId))
+          .catch(() => {});
+      }
     }
   }, [active, bridges]);
 };
-
-void liveBridges;
