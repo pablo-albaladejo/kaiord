@@ -88,7 +88,17 @@ const makeSeedRow = (
     case "userPreferences":
       return { profileId, calendarDensity: "compact" };
     case "autoMatchDismissals":
-      return { profileId, weekStart: WEEK_START, dismissedAt: NOW };
+      return {
+        profileId,
+        weekStart: WEEK_START,
+        dismissedPairs: [
+          {
+            activityId: `act-${profileId}`,
+            workoutId: `wkt-${profileId}`,
+            dismissedAt: NOW,
+          },
+        ],
+      };
     default:
       // Catch-all keeps the test honest: a new per-profile table without a
       // seed entry produces an obviously-broken row that the put will reject,

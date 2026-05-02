@@ -1,127 +1,234 @@
-import { describe, expect, it } from "vitest";
+/**
+ * Use-case tests for the per-pair dismissal model.
+ *
+ * Covers every scenario in `spa-session-match` "dismissAutoMatchBanner
+ * use case":
+ *   - first dismissal on a clean week
+ *   - second dismissal on the same week appends to the row
+ *   - re-dismissing the same pair updates dismissedAt in place
+ *   - read returns true for a recorded pair
+ *   - read returns false for an unrecorded pair (or absent row)
+ *   - empty input rejected on write path; safe-default false on read
+ *   - 257th distinct pair is a no-op
+ *   - re-dismiss at the cap updates the existing entry
+ */
+
+import { describe, expect, it, vi } from "vitest";
 
 import { createInMemoryAutoMatchDismissalRepository } from "../test-utils/in-memory-auto-match-dismissal-repository";
-import { DISMISSAL_TTL_MS } from "./auto-match-dismissal-ttl";
+import { InvalidInputError } from "../types/invalid-input-error";
 import {
   dismissAutoMatchBanner,
   isAutoMatchBannerDismissed,
 } from "./auto-match-dismissal";
 
-const fixedClock = () => "2026-05-01T12:00:00.000Z";
+const NOW_1 = "2026-05-01T10:00:00.000Z";
+const NOW_2 = "2026-05-01T11:00:00.000Z";
 
-describe("DISMISSAL_TTL_MS", () => {
-  it("is 24 hours expressed in milliseconds", () => {
-    expect(DISMISSAL_TTL_MS).toBe(24 * 60 * 60 * 1000);
-  });
-});
+const baseInput = {
+  profileId: "p1",
+  weekStart: "2026-04-27",
+  activityId: "a1",
+  workoutId: "w1",
+};
 
-describe("dismissAutoMatchBanner", () => {
-  it("upserts a row keyed by (profileId, weekStart) with dismissedAt from injected clock", async () => {
+describe("dismissAutoMatchBanner — happy paths", () => {
+  it("first dismissal writes a row with one entry", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
 
-    await dismissAutoMatchBanner(
-      { profileId: "p1", weekStart: "2026-04-27" },
-      { repository: repo, clock: fixedClock }
-    );
+    await dismissAutoMatchBanner(baseInput, {
+      repository: repo,
+      clock: () => NOW_1,
+    });
 
-    expect(await repo.getByProfileAndWeek("p1", "2026-04-27")).toEqual({
+    const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
+    expect(stored).toEqual({
       profileId: "p1",
       weekStart: "2026-04-27",
-      dismissedAt: "2026-05-01T12:00:00.000Z",
+      dismissedPairs: [
+        { activityId: "a1", workoutId: "w1", dismissedAt: NOW_1 },
+      ],
     });
   });
 
-  it("is idempotent — second dismiss refreshes dismissedAt", async () => {
+  it("second dismissal on the same week appends to the existing row", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
+    await dismissAutoMatchBanner(baseInput, {
+      repository: repo,
+      clock: () => NOW_1,
+    });
 
     await dismissAutoMatchBanner(
-      { profileId: "p1", weekStart: "2026-04-27" },
-      { repository: repo, clock: () => "2026-05-01T10:00:00.000Z" }
-    );
-    await dismissAutoMatchBanner(
-      { profileId: "p1", weekStart: "2026-04-27" },
-      { repository: repo, clock: () => "2026-05-01T15:00:00.000Z" }
+      { ...baseInput, activityId: "a2", workoutId: "w2" },
+      { repository: repo, clock: () => NOW_2 }
     );
 
-    expect(
-      (await repo.getByProfileAndWeek("p1", "2026-04-27"))?.dismissedAt
-    ).toBe("2026-05-01T15:00:00.000Z");
+    const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
+    expect(stored?.dismissedPairs).toEqual([
+      { activityId: "a1", workoutId: "w1", dismissedAt: NOW_1 },
+      { activityId: "a2", workoutId: "w2", dismissedAt: NOW_2 },
+    ]);
+  });
+
+  it("re-dismissing the same pair updates dismissedAt in place (no duplicate)", async () => {
+    const repo = createInMemoryAutoMatchDismissalRepository();
+    await dismissAutoMatchBanner(baseInput, {
+      repository: repo,
+      clock: () => NOW_1,
+    });
+
+    await dismissAutoMatchBanner(baseInput, {
+      repository: repo,
+      clock: () => NOW_2,
+    });
+
+    const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
+    expect(stored?.dismissedPairs).toHaveLength(1);
+    expect(stored?.dismissedPairs[0]?.dismissedAt).toBe(NOW_2);
   });
 });
 
 describe("isAutoMatchBannerDismissed", () => {
-  it("returns false when no row exists for (profileId, weekStart)", async () => {
+  it("returns true for a recorded pair", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
-
-    const result = await isAutoMatchBannerDismissed(
-      {
-        profileId: "p1",
-        weekStart: "2026-04-27",
-        now: new Date("2026-05-01T12:00:00Z"),
-      },
-      { repository: repo }
-    );
-
-    expect(result).toBe(false);
-  });
-
-  it("returns true when dismissedAt is within the TTL window", async () => {
-    const repo = createInMemoryAutoMatchDismissalRepository();
-    await repo.put({
-      profileId: "p1",
-      weekStart: "2026-04-27",
-      dismissedAt: "2026-05-01T10:00:00.000Z",
+    await dismissAutoMatchBanner(baseInput, {
+      repository: repo,
+      clock: () => NOW_1,
     });
 
-    const result = await isAutoMatchBannerDismissed(
-      {
-        profileId: "p1",
-        weekStart: "2026-04-27",
-        now: new Date("2026-05-01T12:00:00Z"), // 2h later
-      },
-      { repository: repo }
-    );
-
-    expect(result).toBe(true);
-  });
-
-  it("returns false when dismissedAt is older than the TTL window", async () => {
-    const repo = createInMemoryAutoMatchDismissalRepository();
-    await repo.put({
-      profileId: "p1",
-      weekStart: "2026-04-27",
-      dismissedAt: "2026-05-01T10:00:00.000Z",
+    const dismissed = await isAutoMatchBannerDismissed(baseInput, {
+      repository: repo,
     });
 
-    const result = await isAutoMatchBannerDismissed(
-      {
-        profileId: "p1",
-        weekStart: "2026-04-27",
-        now: new Date("2026-05-02T11:00:00Z"), // 25h later
-      },
-      { repository: repo }
-    );
-
-    expect(result).toBe(false);
+    expect(dismissed).toBe(true);
   });
 
-  it("returns true at the boundary when now === dismissedAt", async () => {
+  it("returns false for a different pair on the same week", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
-    await repo.put({
-      profileId: "p1",
-      weekStart: "2026-04-27",
-      dismissedAt: "2026-05-01T12:00:00.000Z",
+    await dismissAutoMatchBanner(baseInput, {
+      repository: repo,
+      clock: () => NOW_1,
     });
 
-    const result = await isAutoMatchBannerDismissed(
-      {
-        profileId: "p1",
-        weekStart: "2026-04-27",
-        now: new Date("2026-05-01T12:00:00Z"),
-      },
+    const dismissed = await isAutoMatchBannerDismissed(
+      { ...baseInput, activityId: "a-other" },
       { repository: repo }
     );
 
-    expect(result).toBe(true);
+    expect(dismissed).toBe(false);
+  });
+
+  it("returns false when no row exists for the (profileId, weekStart)", async () => {
+    const repo = createInMemoryAutoMatchDismissalRepository();
+
+    const dismissed = await isAutoMatchBannerDismissed(baseInput, {
+      repository: repo,
+    });
+
+    expect(dismissed).toBe(false);
+  });
+});
+
+describe("dismissAutoMatchBanner — defensive guards", () => {
+  it("rejects empty profileId on the write path", async () => {
+    const repo = createInMemoryAutoMatchDismissalRepository();
+
+    await expect(
+      dismissAutoMatchBanner(
+        { ...baseInput, profileId: "" },
+        { repository: repo, clock: () => NOW_1 }
+      )
+    ).rejects.toThrow(InvalidInputError);
+  });
+
+  it.each([["weekStart"], ["activityId"], ["workoutId"]])(
+    "rejects empty %s on the write path",
+    async (field) => {
+      const repo = createInMemoryAutoMatchDismissalRepository();
+
+      await expect(
+        dismissAutoMatchBanner(
+          { ...baseInput, [field]: "" },
+          { repository: repo, clock: () => NOW_1 }
+        )
+      ).rejects.toThrow(InvalidInputError);
+    }
+  );
+
+  it("safe-defaults to false on the read path for an empty input", async () => {
+    const repo = createInMemoryAutoMatchDismissalRepository();
+
+    const dismissed = await isAutoMatchBannerDismissed(
+      { ...baseInput, profileId: "" },
+      { repository: repo }
+    );
+
+    expect(dismissed).toBe(false);
+  });
+});
+
+describe("dismissAutoMatchBanner — 256-cap", () => {
+  const fillCap = async (
+    repo: ReturnType<typeof createInMemoryAutoMatchDismissalRepository>
+  ) => {
+    for (let i = 0; i < 256; i++) {
+      await dismissAutoMatchBanner(
+        { ...baseInput, activityId: `a${i}`, workoutId: `w${i}` },
+        { repository: repo, clock: () => NOW_1 }
+      );
+    }
+  };
+
+  it("the 257th distinct pair is a no-op (row unchanged, warning emitted)", async () => {
+    const repo = createInMemoryAutoMatchDismissalRepository();
+    const logger = { warn: vi.fn() };
+    await fillCap(repo);
+
+    await dismissAutoMatchBanner(
+      { ...baseInput, activityId: "a257", workoutId: "w257" },
+      { repository: repo, clock: () => NOW_2, logger }
+    );
+
+    const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
+    expect(stored?.dismissedPairs).toHaveLength(256);
+    expect(stored?.dismissedPairs.some((p) => p.activityId === "a257")).toBe(
+      false
+    );
+    expect(logger.warn).toHaveBeenCalledWith(
+      "dismissAutoMatchBanner: cap reached"
+    );
+  });
+
+  it("warning message is a static literal (no identifier interpolation)", async () => {
+    const repo = createInMemoryAutoMatchDismissalRepository();
+    const logger = { warn: vi.fn() };
+    await fillCap(repo);
+
+    await dismissAutoMatchBanner(
+      { ...baseInput, activityId: "a-leak", workoutId: "w-leak" },
+      { repository: repo, clock: () => NOW_2, logger }
+    );
+
+    const message = (logger.warn as ReturnType<typeof vi.fn>).mock
+      .calls[0]?.[0];
+    expect(message).toBe("dismissAutoMatchBanner: cap reached");
+    expect(message).not.toContain("a-leak");
+    expect(message).not.toContain("w-leak");
+    expect(message).not.toContain("p1");
+  });
+
+  it("re-dismiss at the cap updates the existing entry without violating the cap", async () => {
+    const repo = createInMemoryAutoMatchDismissalRepository();
+    await fillCap(repo);
+
+    await dismissAutoMatchBanner(
+      { ...baseInput, activityId: "a0", workoutId: "w0" },
+      { repository: repo, clock: () => NOW_2 }
+    );
+
+    const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
+    expect(stored?.dismissedPairs).toHaveLength(256);
+    const updated = stored?.dismissedPairs.find((p) => p.activityId === "a0");
+    expect(updated?.dismissedAt).toBe(NOW_2);
   });
 });
