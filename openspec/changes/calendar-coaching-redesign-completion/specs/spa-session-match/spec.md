@@ -6,16 +6,16 @@ The application SHALL expose `dismissAutoMatchBanner(input: DismissAutoMatchBann
 
 ```ts
 type DismissAutoMatchBannerInput = {
-  profileId: string,
-  weekStart: string,           // YYYY-MM-DD (ISO Monday)
-  activityId: string,          // CoachingActivityRecord.id
-  workoutId: string            // WorkoutRecord.id
-}
+  profileId: string;
+  weekStart: string; // YYYY-MM-DD (ISO Monday)
+  activityId: string; // CoachingActivityRecord.id
+  workoutId: string; // WorkoutRecord.id
+};
 
 type DismissAutoMatchBannerDeps = {
-  clock: () => string,         // ISO timestamp source — MUST be injected for determinism
-  repository: AutoMatchDismissalRepository
-}
+  clock: () => string; // ISO timestamp source — MUST be injected for determinism
+  repository: AutoMatchDismissalRepository;
+};
 ```
 
 The use case:
