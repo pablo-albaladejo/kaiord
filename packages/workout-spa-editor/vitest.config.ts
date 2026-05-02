@@ -59,6 +59,10 @@ export default defineConfig({
         // Storybook stories - documentation, not production code
         "**/*.stories.tsx",
         "**/*.stories.ts",
+        // Thin React-Dexie glue (useLiveQuery + module-singleton ops
+        // queue) — the orchestration logic is unit-tested in
+        // push-active-profile.test.ts.
+        "**/use-profile-snapshot-push.ts",
         // Type definition files - validated by TypeScript at compile-time
         "**/*.types.ts",
         // Re-export index files - no logic to test
