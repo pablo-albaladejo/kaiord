@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
  * Mechanical guard: user-facing strings rendered by the SPA editor
- * (toast invocations and console.* calls) MUST be statically known
- * so no runtime field — apiKey, externalUserId, error.message, etc. —
- * can be interpolated into a user-visible message or persistent log.
+ * (toast invocations, console.* calls, and analytics.event names)
+ * MUST be statically known so no runtime field — apiKey,
+ * externalUserId, error.message, etc. — can be interpolated into a
+ * user-visible message, persistent log, or third-party telemetry sink.
  *
  * Each call's first argument MUST resolve to one of exactly two shapes:
  *
@@ -72,6 +73,7 @@ const SKIP_EXTENSIONS = [
 
 const TOAST_METHODS = "(error|success|info|warning)";
 const CONSOLE_METHODS = "(log|warn|error|info|debug)";
+const ANALYTICS_METHODS = "(event)";
 
 const MEMBER_DISPATCH_RE = new RegExp(
   `(?:toast|useToastContext\\(\\))\\s*\\.\\s*${TOAST_METHODS}\\s*\\(`,
@@ -85,8 +87,37 @@ const COMPUTED_DISPATCH_RE = new RegExp(
   `(?:toast|useToastContext\\(\\))\\s*\\[\\s*["']${TOAST_METHODS}["']\\s*\\]\\s*\\(`,
   "g"
 );
-const DESTRUCTURE_RE = /const\s*\{\s*([^}]+?)\s*\}\s*=\s*useToastContext\(\)/g;
-const REBIND_RE = /const\s+([A-Za-z_$][\w$]*)\s*=\s*useToastContext\(\)/g;
+const ANALYTICS_MEMBER_DISPATCH_RE = new RegExp(
+  `(?:analytics|useAnalytics\\(\\))\\s*\\.\\s*${ANALYTICS_METHODS}\\s*\\(`,
+  "g"
+);
+const ANALYTICS_COMPUTED_DISPATCH_RE = new RegExp(
+  `(?:analytics|useAnalytics\\(\\))\\s*\\[\\s*["']${ANALYTICS_METHODS}["']\\s*\\]\\s*\\(`,
+  "g"
+);
+
+// Destructure / rebind sources tracked file-locally. Each entry:
+// { sourceName, methodKeys } — the source-function name to match in
+// `const { ... } = <sourceName>()` and the set of relevant keys whose
+// destructured local bindings should be treated as in-scope.
+const TRACKED_SOURCES = [
+  { sourceName: "useToastContext", methodKeys: TOAST_METHODS },
+  { sourceName: "useAnalytics", methodKeys: ANALYTICS_METHODS },
+];
+
+function makeDestructureRe(sourceName) {
+  return new RegExp(
+    `const\\s*\\{\\s*([^}]+?)\\s*\\}\\s*=\\s*${sourceName}\\(\\)`,
+    "g"
+  );
+}
+
+function makeRebindRe(sourceName) {
+  return new RegExp(
+    `const\\s+([A-Za-z_$][\\w$]*)\\s*=\\s*${sourceName}\\(\\)`,
+    "g"
+  );
+}
 
 // Top-level `const ID = "literal"` declaration (depth-1 only).
 // Optional leading `export ` is allowed so `export const FOO = "..."`
@@ -268,40 +299,49 @@ function checkFile(file, violations) {
   const source = readFileSync(file, "utf8");
   const stringConsts = getTopLevelStringConsts(source);
 
-  // Collect all bound toast-method names from destructures + the re-bound
-  // receiver names. Used to identify additional dispatch sites.
-  // Each destructure entry can be `error`, `error: alias`, `error = default`,
-  // or `error: alias = default`. We care about the LOCAL bound name (the
-  // alias when present, otherwise the original key) but only when the
-  // original key is a toast method.
-  const destructuredMethods = new Set();
+  // Collect all bound source-method names from destructures + the re-bound
+  // receiver names, across each tracked source (toast + analytics).
   const TOAST_KEYS = new Set(["error", "success", "info", "warning"]);
-  for (const m of source.matchAll(DESTRUCTURE_RE)) {
-    for (const piece of m[1].split(",")) {
-      const trimmed = piece.trim();
-      if (!trimmed) continue;
-      // Strip `= default` first; then split on `:` for alias.
-      const noDefault = trimmed.split("=")[0].trim();
-      const colonParts = noDefault.split(":");
-      const key = colonParts[0].trim();
-      const local = (colonParts[1] ?? colonParts[0]).trim();
-      if (TOAST_KEYS.has(key)) {
-        destructuredMethods.add(local);
+  const ANALYTICS_KEYS = new Set(["event"]);
+  const KEYSET_BY_SOURCE = {
+    useToastContext: TOAST_KEYS,
+    useAnalytics: ANALYTICS_KEYS,
+  };
+  // Map<localBoundName, methodGroupRegexFragment> for re-bound receivers
+  // so we can build the correct dispatch regex per receiver.
+  const destructuredMethods = new Set();
+  const reboundReceivers = new Map();
+  for (const { sourceName } of TRACKED_SOURCES) {
+    const keys = KEYSET_BY_SOURCE[sourceName];
+    for (const m of source.matchAll(makeDestructureRe(sourceName))) {
+      for (const piece of m[1].split(",")) {
+        const trimmed = piece.trim();
+        if (!trimmed) continue;
+        const noDefault = trimmed.split("=")[0].trim();
+        const colonParts = noDefault.split(":");
+        const key = colonParts[0].trim();
+        const local = (colonParts[1] ?? colonParts[0]).trim();
+        if (keys.has(key)) {
+          destructuredMethods.add(local);
+        }
       }
     }
-  }
-  const reboundReceivers = new Set();
-  for (const m of source.matchAll(REBIND_RE)) {
-    reboundReceivers.add(m[1]);
+    const methodGroup =
+      sourceName === "useToastContext" ? TOAST_METHODS : ANALYTICS_METHODS;
+    for (const m of source.matchAll(makeRebindRe(sourceName))) {
+      reboundReceivers.set(m[1], methodGroup);
+    }
   }
 
   const callSites = [];
 
-  // Member + computed-member + console dispatches.
+  // Member + computed-member + console + analytics-event dispatches.
   for (const re of [
     MEMBER_DISPATCH_RE,
     CONSOLE_DISPATCH_RE,
     COMPUTED_DISPATCH_RE,
+    ANALYTICS_MEMBER_DISPATCH_RE,
+    ANALYTICS_COMPUTED_DISPATCH_RE,
   ]) {
     for (const m of source.matchAll(re)) {
       const openParen = m.index + m[0].length - 1;
@@ -335,9 +375,11 @@ function checkFile(file, violations) {
     }
   }
 
-  // Re-bound dispatch: scan for `<receiver>.method(` calls.
-  for (const recv of reboundReceivers) {
-    const re = new RegExp(`\\b${recv}\\s*\\.\\s*${TOAST_METHODS}\\s*\\(`, "g");
+  // Re-bound dispatch: scan for `<receiver>.method(` calls. Each receiver
+  // tracks its own method group (toast or analytics) so the dispatch
+  // regex is source-aware.
+  for (const [recv, methodGroup] of reboundReceivers) {
+    const re = new RegExp(`\\b${recv}\\s*\\.\\s*${methodGroup}\\s*\\(`, "g");
     for (const m of source.matchAll(re)) {
       const openParen = m.index + m[0].length - 1;
       const arg = extractFirstArg(source, openParen + 1);
@@ -350,7 +392,18 @@ function checkFile(file, violations) {
     }
   }
 
-  for (const site of callSites) {
+  // Dedupe call sites by offset — the same dispatch can match both the
+  // literal-receiver regex (e.g., `analytics.event(...)`) and the
+  // rebound-receiver regex when a re-bind happens to use the literal
+  // identifier name (`const analytics = useAnalytics()`).
+  const seen = new Set();
+  const dedupedSites = callSites.filter((site) => {
+    if (seen.has(site.offset)) return false;
+    seen.add(site.offset);
+    return true;
+  });
+
+  for (const site of dedupedSites) {
     const result = checkArgument(site.argText);
     if (!result) continue;
     if (result.kind === "screaming-snake") {
