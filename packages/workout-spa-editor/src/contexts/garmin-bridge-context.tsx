@@ -9,6 +9,10 @@ const GarminBridgeContext = createContext<GarminBridgeState | null>(null);
 export const GarminBridgeProvider = ({ children }: { children: ReactNode }) => {
   const state = useGarminBridgeActions();
 
+  // TODO(fix-coaching-dialog-rules-of-hooks-followup): explicit field
+  // dependencies are deliberate — the store mutates `state` in place
+  // and we only want to re-render on the listed slices.
+  /* eslint-disable react-hooks/exhaustive-deps */
   const value = useMemo(
     () => state,
     [
@@ -18,6 +22,7 @@ export const GarminBridgeProvider = ({ children }: { children: ReactNode }) => {
       state.lastError,
     ]
   );
+  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <GarminBridgeContext.Provider value={value}>
