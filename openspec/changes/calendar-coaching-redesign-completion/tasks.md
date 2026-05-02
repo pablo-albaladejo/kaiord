@@ -32,11 +32,11 @@ PR independence — explicit dependency map:
 
 ## 2. PR-B — CoachingSyncButton refresh (issue #431, TDD red → green)
 
-- [ ] 2.1 Write failing tests for `formatRelativeTime(date: Date | undefined, now: Date): string` at `packages/workout-spa-editor/src/utils/format-relative-time.test.ts` covering the seven branches in design D17 (`undefined` → `"never synced"`, `<60_000` → `"just now"`, minutes, hours, `yesterday` (cross-day under 48h), days, ISO-fallback for older). Use injected `now` so no fake-timers are needed.
-- [ ] 2.2 Implement `format-relative-time.ts`. All seven branches return literal-string outputs (never interpolated user data) so the PII-toast lint passes.
-- [ ] 2.3 Write failing tests for `CoachingSyncButton` connected-state asserting: `aria-label="Sync <Label>"`, no visible text label, `title` reads `"<Label> · <relative-time>"`, the spinner replaces the icon in place during sync (button disabled), and `prefers-reduced-motion: reduce` collapses the spinner to a static glyph (mock `window.matchMedia`). Cover the `lastSyncedAt === undefined` → `"never synced"` branch.
-- [ ] 2.4 Update `CoachingSyncButton.tsx` to icon-only chrome with the slate color tokens per spec; reuse the existing tooltip primitive used elsewhere in `CalendarHeader`. The not-connected branch is unchanged.
-- [ ] 2.5 Run `pnpm --filter @kaiord/workout-spa-editor test` and `pnpm lint` — clean.
+- [x] 2.1 `format-relative-time.test.ts` covers all 7 branches with injected `now` (no fake timers). 9 tests.
+- [x] 2.2 `format-relative-time.ts` implements the helper with literal-string outputs only (R-PIIInterpolation green).
+- [x] 2.3 `CoachingSyncButton.test.tsx` rewritten covering: `aria-label="Sync <Label>"`, no visible text, `title` matches `<Label> · <relative-time>`, spinner-replaces-icon-in-place during sync (button disabled), `prefers-reduced-motion: reduce` static glyph, `lastSyncedAt === undefined` → `"never synced"`. 9 tests.
+- [x] 2.4 `CoachingSyncButton.tsx` rewritten with icon-only chrome (lucide `RefreshCw` / `Loader2`), 32×32 button, slate tokens. Tooltip composer + reduced-motion subscription extracted to `coaching-sync-button-tooltip.ts` to stay under the 80-line file cap. `CoachingSource` and `CoachingSyncState` ports gain `lastSyncedAt: string | undefined`; `use-train2go-source.ts` reads it via `coachingSyncState.getBySourceAndProfile`; `CalendarHeader` threads it through to the button.
+- [x] 2.5 `pnpm --filter @kaiord/workout-spa-editor test` — 3150/3150 (12 new tests vs PR-A baseline). `pnpm --filter @kaiord/workout-spa-editor lint` — clean. Build clean.
 
 ## 3. PR-C — CoachingActivityDialog match/split actions (issue #432, TDD red → green)
 
