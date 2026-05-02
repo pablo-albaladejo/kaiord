@@ -140,6 +140,7 @@ describe("parser", () => {
         userId: 99999,
         userName: "Test",
         sessionActive: true,
+        coachName: "Coach",
       });
     });
 
@@ -152,6 +153,47 @@ describe("parser", () => {
 
     it("handles null input gracefully", () => {
       expect(parsePingJson(null)).toEqual({ sessionActive: false });
+    });
+
+    it("extracts coachName from data.user.coach.name when present", () => {
+      const json = {
+        success: true,
+        data: {
+          user: { id: 1, name: "P", coach: { name: "Aritz Mardaras" } },
+        },
+      };
+      expect(parsePingJson(json)).toMatchObject({
+        userId: 1,
+        userName: "P",
+        sessionActive: true,
+        coachName: "Aritz Mardaras",
+      });
+    });
+
+    it("extracts coachName from data.user.trainer_name fallback", () => {
+      const json = {
+        success: true,
+        data: { user: { id: 2, name: "Q", trainer_name: "Coach K" } },
+      };
+      expect(parsePingJson(json)).toMatchObject({ coachName: "Coach K" });
+    });
+
+    it("omits coachName when no shape is present", () => {
+      const json = {
+        success: true,
+        data: { user: { id: 3, name: "R" } },
+      };
+      const result = parsePingJson(json);
+      expect(result).not.toHaveProperty("coachName");
+      expect(result.sessionActive).toBe(true);
+    });
+
+    it("omits coachName for empty string", () => {
+      const json = {
+        success: true,
+        data: { user: { id: 4, name: "S", coach_name: "" } },
+      };
+      expect(parsePingJson(json)).not.toHaveProperty("coachName");
     });
   });
 });
