@@ -113,10 +113,7 @@ function CalendarPageView({
         density={density}
         onWorkoutClick={s.handleWorkoutClick}
         onEmptyDayClick={s.setEmptyDayDate}
-        onActivityClick={(a) => {
-          setSelectedActivity(a);
-          coaching.expandActivity(a);
-        }}
+        onActivityClick={setSelectedActivity}
       />
       <CalendarDialogs
         selectedWorkout={s.selectedWorkout}
