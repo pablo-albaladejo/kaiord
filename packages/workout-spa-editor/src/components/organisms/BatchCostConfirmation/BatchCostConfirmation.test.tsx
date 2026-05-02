@@ -13,6 +13,7 @@ const anthropic: LlmProviderConfig = {
   model: "claude",
   label: "My Claude",
   isDefault: true,
+  createdAt: 0,
 };
 
 const workouts: WorkoutRecord[] = [

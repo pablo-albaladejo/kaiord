@@ -8,6 +8,7 @@
 import Dexie from "dexie";
 
 import {
+  applyV8Upgrade,
   backfillBridgeSnapshotState,
   backfillUsageRow,
 } from "./dexie-migrations";
@@ -15,6 +16,7 @@ import {
 export {
   backfillBridgeSnapshotState,
   backfillUsageRow,
+  makeBackfillAiProviderCreatedAt,
 } from "./dexie-migrations";
 
 const CORE_V1 = {
@@ -47,6 +49,10 @@ const CORE_V5 = {
   // PK is composite `[profileId+weekStart]`; index on profileId for cascade.
   autoMatchDismissals: "[profileId+weekStart], profileId",
 };
+// v8 — AI provider insertion-order index. `createdAt` becomes a Dexie
+// index so the repository's getAll can `orderBy("createdAt")` cheaply.
+// PK stays on `id`; the index is additive.
+const CORE_V8 = { ...CORE_V5, aiProviders: "id, createdAt" };
 
 const backfillLinkedAccounts = (row: Record<string, unknown>): void => {
   if (!Array.isArray(row.linkedAccounts)) row.linkedAccounts = [];
@@ -105,6 +111,12 @@ export class KaiordDatabase extends Dexie {
       .upgrade(async (tx) => {
         await tx.table("autoMatchDismissals").clear();
       });
+    // v8 — AI provider insertion-order. Adds a `createdAt` index on
+    // aiProviders and backfills the field on legacy rows so getAll()'s
+    // orderBy is stable. Without this, providers were ordered by their
+    // randomly-assigned UUIDs — a deterministic but probabilistic flake
+    // visible to users (selector reorders) and to E2E tests.
+    this.version(8).stores(CORE_V8).upgrade(applyV8Upgrade);
   }
 }
 

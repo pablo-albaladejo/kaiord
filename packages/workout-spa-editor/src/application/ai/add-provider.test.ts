@@ -41,4 +41,35 @@ describe("addProvider", () => {
     expect(await persistence.aiProviders.getAll()).toHaveLength(0);
     putSpy.mockRestore();
   });
+
+  it("stamps a numeric createdAt at the moment of creation", async () => {
+    const persistence = createInMemoryPersistence();
+    const before = Date.now();
+
+    const created = await addProvider(persistence, baseProvider);
+
+    const after = Date.now();
+    expect(typeof created.createdAt).toBe("number");
+    expect(created.createdAt).toBeGreaterThanOrEqual(before);
+    expect(created.createdAt).toBeLessThanOrEqual(after);
+  });
+
+  it("surfaces providers in insertion order via getAll", async () => {
+    const persistence = createInMemoryPersistence();
+    // vi.useFakeTimers gives us strictly monotonic createdAt values
+    // even when both calls land in the same millisecond.
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date("2026-05-01T00:00:00.000Z"));
+      const first = await addProvider(persistence, baseProvider);
+      vi.setSystemTime(new Date("2026-05-01T00:00:00.500Z"));
+      const second = await addProvider(persistence, secondProvider);
+
+      const all = await persistence.aiProviders.getAll();
+
+      expect(all.map((p) => p.id)).toEqual([first.id, second.id]);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

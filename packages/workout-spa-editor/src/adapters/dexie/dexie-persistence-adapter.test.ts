@@ -93,6 +93,7 @@ function makeProvider(
     model: "claude-sonnet-4-20250514",
     label: "Claude",
     isDefault: true,
+    createdAt: 0,
     ...overrides,
   };
 }
@@ -381,6 +382,22 @@ describe("DexieAiProviderRepository", () => {
     await aiProviders.delete("ai-1");
 
     expect(await aiProviders.getById("ai-1")).toBeUndefined();
+  });
+
+  it("returns providers in createdAt order regardless of UUID-pk order", async () => {
+    // Pick UUIDs whose alphabetic order is the OPPOSITE of their
+    // createdAt order so any reliance on PK ordering surfaces here.
+    const { aiProviders } = createDexiePersistence(testDb);
+    await aiProviders.put(
+      makeProvider({ id: "zzz-second", label: "Second", createdAt: 200 })
+    );
+    await aiProviders.put(
+      makeProvider({ id: "aaa-first", label: "First", createdAt: 100 })
+    );
+
+    const result = await aiProviders.getAll();
+
+    expect(result.map((p) => p.label)).toEqual(["First", "Second"]);
   });
 });
 

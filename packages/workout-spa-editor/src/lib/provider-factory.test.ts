@@ -25,6 +25,7 @@ const baseConfig: Omit<LlmProviderConfig, "type" | "model"> = {
   apiKey: "test-key",
   label: "Test",
   isDefault: false,
+  createdAt: 0,
 };
 
 describe("createLanguageModel", () => {

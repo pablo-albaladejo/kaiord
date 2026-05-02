@@ -17,7 +17,12 @@ export function createInMemoryAiProviderRepository(
   customPromptRef: CustomPromptRef = { current: null }
 ): AiProviderRepository {
   return {
-    getAll: async () => [...store.values()],
+    // Mirror the Dexie adapter's orderBy("createdAt") contract so use-case
+    // tests against this fake see the same insertion-order guarantees the
+    // SPA sees against IndexedDB. UUID-pk ordering is forbidden here for
+    // the same reason it was forbidden there.
+    getAll: async () =>
+      [...store.values()].sort((a, b) => a.createdAt - b.createdAt),
 
     getById: async (id) => store.get(id),
 

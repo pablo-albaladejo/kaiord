@@ -19,7 +19,8 @@ import { useAiProvidersLive } from "./use-ai-providers-live";
 const makeProvider = (
   id: string,
   apiKey: string,
-  isDefault = true
+  isDefault = true,
+  createdAt = 0
 ): LlmProviderConfig => ({
   id,
   type: "anthropic",
@@ -27,6 +28,7 @@ const makeProvider = (
   model: "claude-sonnet-4-5",
   label: "Test",
   isDefault,
+  createdAt,
 });
 
 const clear = () => db.table("aiProviders").clear();
