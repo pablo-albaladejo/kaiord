@@ -10,6 +10,7 @@ import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
 import { useAnalytics } from "./contexts";
 import { useOnboardingTutorial } from "./hooks/use-onboarding-tutorial";
+import { useProfileSnapshotPush } from "./hooks/use-profile-snapshot-push";
 import { useStoreHydration } from "./hooks/use-store-hydration";
 
 const CalendarPage = lazy(() => import("./components/pages/CalendarPage"));
@@ -57,6 +58,7 @@ function AppRoutes({ analytics }: AppRoutesProps) {
 
 function App() {
   useStoreHydration();
+  useProfileSnapshotPush();
   const { showTutorial, setShowTutorial } = useOnboardingTutorial();
   const analytics = useAnalytics();
   const [path] = useLocation();
