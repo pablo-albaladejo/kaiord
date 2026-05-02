@@ -16,12 +16,20 @@ const chromeMock = {
     onMessageExternal: {
       addListener: vi.fn(),
     },
+    onInstalled: {
+      addListener: vi.fn(),
+    },
     sendMessage: vi.fn(),
   },
   tabs: {
-    query: vi.fn((query, cb) => cb([])),
+    query: vi.fn((q, cb) =>
+      typeof cb === "function" ? cb([]) : Promise.resolve([])
+    ),
     sendMessage: vi.fn((tabId, msg, cb) => cb(undefined)),
     create: vi.fn(() => Promise.resolve({ id: 1 })),
+  },
+  scripting: {
+    executeScript: vi.fn(() => Promise.resolve([])),
   },
   webRequest: {
     onBeforeSendHeaders: {

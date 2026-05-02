@@ -7,6 +7,7 @@ const {
   handleAction,
   getCsrfToken,
   checkSession,
+  reinjectContentScripts,
 } = require("../background.js");
 const pkg = require("../package.json");
 
@@ -437,6 +438,72 @@ describe("background.js", () => {
       const result = await handleAction({ action: "push", gcn });
 
       expect(result).toEqual({ workoutId: 123 });
+    });
+  });
+
+  describe("reinjectContentScripts", () => {
+    it("re-injects content.js into existing connect.garmin.com tabs", async () => {
+      chrome.runtime.getManifest.mockReturnValue({
+        host_permissions: ["https://connect.garmin.com/*"],
+        content_scripts: [
+          {
+            matches: ["https://connect.garmin.com/*"],
+            js: ["content.js"],
+            run_at: "document_start",
+          },
+        ],
+      });
+      chrome.tabs.query.mockImplementation(() =>
+        Promise.resolve([{ id: 21, url: "https://connect.garmin.com/modern/" }])
+      );
+
+      await reinjectContentScripts();
+
+      expect(chrome.scripting.executeScript).toHaveBeenCalledWith({
+        target: { tabId: 21, allFrames: false },
+        files: ["content.js"],
+      });
+    });
+
+    it("skips content scripts whose matches are not in host_permissions", async () => {
+      chrome.runtime.getManifest.mockReturnValue({
+        host_permissions: ["https://connect.garmin.com/*"],
+        content_scripts: [
+          {
+            matches: ["https://*.kaiord.com/*"],
+            js: ["kaiord-announce.js"],
+          },
+        ],
+      });
+
+      await reinjectContentScripts();
+
+      expect(chrome.tabs.query).not.toHaveBeenCalled();
+      expect(chrome.scripting.executeScript).not.toHaveBeenCalled();
+    });
+
+    it("swallows per-tab executeScript errors", async () => {
+      chrome.runtime.getManifest.mockReturnValue({
+        host_permissions: ["https://connect.garmin.com/*"],
+        content_scripts: [
+          {
+            matches: ["https://connect.garmin.com/*"],
+            js: ["content.js"],
+          },
+        ],
+      });
+      chrome.tabs.query.mockImplementation(() =>
+        Promise.resolve([
+          { id: 21, url: "https://connect.garmin.com/modern/" },
+          { id: 22, url: "https://connect.garmin.com/modern/calendar" },
+        ])
+      );
+      chrome.scripting.executeScript
+        .mockRejectedValueOnce(new Error("Cannot access tab"))
+        .mockResolvedValueOnce([]);
+
+      await expect(reinjectContentScripts()).resolves.toBeUndefined();
+      expect(chrome.scripting.executeScript).toHaveBeenCalledTimes(2);
     });
   });
 });

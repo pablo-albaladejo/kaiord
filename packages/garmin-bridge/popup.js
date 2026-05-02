@@ -16,7 +16,7 @@ const STALE_SNAPSHOT_THRESHOLD_DAYS = 7;
 
 const PHASE_TIMEOUT_MS = 3_000;
 const SNAPSHOT_TIMEOUT_MS = 1_000;
-const OPEN_EDITOR_URL = "https://app.kaiord.com/";
+const OPEN_EDITOR_URL = "https://kaiord.com/editor/";
 const OPEN_GARMIN_URL = "https://connect.garmin.com/modern/";
 
 const $ = (id) => document.getElementById(id);
