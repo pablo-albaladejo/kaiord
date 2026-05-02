@@ -1,3 +1,5 @@
+> Completed: 2026-05-02
+
 ## Why
 
 Both browser-extension bridges (`@kaiord/garmin-bridge` and `@kaiord/train2go-bridge`) ship the **identical icon** (dark navy hex, blue inner mark) and a near-identical popup that surfaces a single low-value action button (`List Workouts`, `Read This Week`). With both extensions pinned to the toolbar at the same time, users cannot tell them apart at a glance, and clicking either popup yields information that is neither glanceable nor athlete-relevant. The popup is a debug tool, not an identity card.
