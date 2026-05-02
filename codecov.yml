@@ -11,15 +11,21 @@ coverage:
           - frontend
     patch:
       default:
-        # Default patch target excludes bridge packages — they contain
-        # Chrome service-worker boilerplate (listener registrations,
-        # chrome.runtime.lastError) that is awkward to unit-test in
-        # isolation. New bridge code is covered by a dedicated 70%
-        # check below; this mirrors the CI per-package threshold.
+        # Default patch target excludes bridge packages AND the SPA
+        # frontend — bridges contain Chrome service-worker boilerplate
+        # and the SPA contains React-Dexie glue (live hooks, root
+        # mounts) that is awkward to unit-test in isolation. Each has
+        # its own dedicated 70% check below — same threshold as the
+        # `project` status of those flags.
         target: 80%
         paths:
           - "!packages/garmin-bridge/**"
           - "!packages/train2go-bridge/**"
+          - "!packages/workout-spa-editor/**"
+      frontend:
+        target: 70%
+        paths:
+          - packages/workout-spa-editor/**
       bridges:
         # Informational, not blocking. Bridge packages are >75%
         # statement-covered; the residual gap is Chrome service-
