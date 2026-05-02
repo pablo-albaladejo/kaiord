@@ -10,20 +10,21 @@
  * plan / 10 solo actual. The `useMatchedSessions` hook contributes no
  * more than 30 ms to that budget.
  *
- * Seed data shape:
- *   - 30 rows total, all in the same visible week:
- *     * 10 coachingActivities + 10 workouts + 10 sessionMatches → matched
- *     * 10 coachingActivities (no match) → solo plans
- *     * 10 workouts (no match) → solo actuals
- *   - One profile is also seeded so `useActiveProfileLive` resolves.
+ * Seed flow:
+ *   1. Goto /calendar to let the SPA boot (Dexie initialises the schema
+ *      and exposes the db on `window.__KAIORD_DB__`).
+ *   2. Bootstrap a perf-test profile in the meta + profiles tables so
+ *      `useActiveProfileLive` resolves deterministically.
+ *   3. Seed 30 rows (10 matched + 10 solo plans + 10 solo actuals) for
+ *      the visible week via the exposed db.
+ *   4. Set CDP CPU throttling to factor 4×.
+ *   5. Navigate to /calendar/<weekId> — this is the perf measurement
+ *      navigation. FCP and useMatchedSessions measures are read off
+ *      that document.
  *
  * Reproduction:
  *   pnpm --filter @kaiord/workout-spa-editor test:e2e \
  *     --grep "CalendarPage performance budget"
- *
- * Failure semantics: the spec retries up to Playwright's default twice
- * to absorb runner variance; persistent failures across all retries are
- * real regressions and block the merge.
  */
 
 import { expect, test } from "./fixtures/base";
@@ -31,166 +32,145 @@ import { expect, test } from "./fixtures/base";
 const FCP_BUDGET_MS = 200;
 const USE_MATCHED_SESSIONS_BUDGET_MS = 30;
 const CPU_THROTTLE_RATE = 4;
-const PROFILE_ID = "11111111-1111-4111-8111-111111111111";
 const WEEK_ID = "2026-W18";
 const VISIBLE_DAY = "2026-04-29";
 const NOW = "2026-04-29T10:00:00.000Z";
+const PERF_PROFILE = "11111111-1111-4111-8111-111111111111";
 
-type SeedShape = {
-  matched: number;
-  soloPlans: number;
-  soloActuals: number;
-};
-
-const SEED: SeedShape = {
-  matched: 10,
-  soloPlans: 10,
-  soloActuals: 10,
-};
+const SEED = { matched: 10, soloPlans: 10, soloActuals: 10 };
 
 test.describe("CalendarPage performance budget", () => {
   test.use({ storageState: undefined });
 
   test("FCP ≤ 200ms and useMatchedSessions ≤ 30ms with 30-card week", async ({
     page,
-    browser,
   }) => {
-    // Throttle CPU before the navigation so the budget reflects the
-    // mid-tier-mobile reference baseline (Moto G Power 2022, ≈ 4×).
-    const context = page.context();
-    const cdp = await context.newCDPSession(page);
+    // 1. Boot the SPA (no throttling — only the calendar nav is measured).
+    await page.goto("/calendar");
+    await page.waitForFunction(
+      () =>
+        Boolean((window as unknown as Record<string, unknown>).__KAIORD_DB__),
+      { timeout: 10_000 }
+    );
+
+    // 2/3. Bootstrap a perf profile + seed the 30-card week.
+    await page.evaluate(
+      async ({ seed, visibleDay, now, profileId }) => {
+        type Db = {
+          table: (n: string) => {
+            put: (r: unknown) => Promise<unknown>;
+            bulkPut: (r: unknown[]) => Promise<unknown>;
+          };
+        };
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as Db;
+
+        await db.table("profiles").put({
+          id: profileId,
+          name: "Perf",
+          sportZones: {},
+          linkedAccounts: [],
+          createdAt: now,
+          updatedAt: now,
+        });
+        await db.table("meta").put({
+          key: "activeProfileId",
+          value: profileId,
+        });
+
+        const matchedActivities: unknown[] = [];
+        const matchedWorkouts: unknown[] = [];
+        const sessionMatches: unknown[] = [];
+        const makeWorkoutRow = (id: string) => ({
+          id,
+          date: visibleDay,
+          state: "raw",
+          sport: "cycling",
+          source: "manual",
+          sourceId: id,
+          planId: null,
+          raw: {
+            description: "x",
+            duration: { value: 3600, unit: "s" },
+          },
+          krd: null,
+          lastProcessingError: null,
+          feedback: null,
+          aiMeta: null,
+          garminPushId: null,
+          tags: [],
+          previousState: null,
+          createdAt: now,
+          modifiedAt: null,
+          updatedAt: now,
+        });
+        for (let i = 0; i < seed.matched; i += 1) {
+          const aid = `perf-act-matched-${i}`;
+          const wid = `perf-w-matched-${i}`;
+          matchedActivities.push({
+            id: aid,
+            profileId,
+            source: "train2go",
+            sourceId: `m-${i}`,
+            date: visibleDay,
+            sport: "cycling",
+            title: `M ${i}`,
+            status: "completed",
+            fetchedAt: now,
+          });
+          matchedWorkouts.push(makeWorkoutRow(wid));
+          sessionMatches.push({
+            id: `perf-match-${i}`,
+            profileId,
+            coachingActivityId: aid,
+            workoutId: wid,
+            date: visibleDay,
+            createdAt: now,
+            source: "manual",
+          });
+        }
+        const soloPlans = Array.from({ length: seed.soloPlans }, (_, i) => ({
+          id: `perf-act-solo-${i}`,
+          profileId,
+          source: "train2go",
+          sourceId: `sp-${i}`,
+          date: visibleDay,
+          sport: "cycling",
+          title: `SP ${i}`,
+          status: "pending",
+          fetchedAt: now,
+        }));
+        const soloActuals = Array.from({ length: seed.soloActuals }, (_, i) =>
+          makeWorkoutRow(`perf-w-solo-${i}`)
+        );
+
+        await db
+          .table("coachingActivities")
+          .bulkPut([...matchedActivities, ...soloPlans]);
+        await db
+          .table("workouts")
+          .bulkPut([...matchedWorkouts, ...soloActuals]);
+        await db.table("sessionMatches").bulkPut(sessionMatches);
+      },
+      {
+        seed: SEED,
+        visibleDay: VISIBLE_DAY,
+        now: NOW,
+        profileId: PERF_PROFILE,
+      }
+    );
+
+    // 4. Throttle CPU before the measurement nav.
+    const cdp = await page.context().newCDPSession(page);
     await cdp.send("Emulation.setCPUThrottlingRate", {
       rate: CPU_THROTTLE_RATE,
     });
 
-    // Disable the onboarding tutorial *and* seed the test database
-    // before the SPA boots — this puts everything in IndexedDB before
-    // the first React render so the FCP measurement reflects steady
-    // state, not the empty-week skeleton.
-    await page.addInitScript(
-      ({ seed, profileId, visibleDay, now }) => {
-        const open = indexedDB.open("kaiord-spa");
-        return new Promise<void>((resolve, reject) => {
-          open.onerror = () => reject(open.error);
-          open.onsuccess = () => {
-            const db = open.result;
-            const tx = db.transaction(
-              ["profiles", "coachingActivities", "workouts", "sessionMatches"],
-              "readwrite"
-            );
-            tx.objectStore("profiles").put({
-              id: profileId,
-              name: "Perf",
-              sportZones: {},
-              linkedAccounts: [],
-              createdAt: now,
-              updatedAt: now,
-            });
-            for (let i = 0; i < seed.matched; i += 1) {
-              const aid = `perf-act-matched-${i}`;
-              const wid = `perf-w-matched-${i}`;
-              tx.objectStore("coachingActivities").put({
-                id: aid,
-                profileId,
-                source: "train2go",
-                sourceId: `m-${i}`,
-                date: visibleDay,
-                sport: "cycling",
-                title: `M ${i}`,
-                status: "completed",
-                fetchedAt: now,
-              });
-              tx.objectStore("workouts").put({
-                id: wid,
-                date: visibleDay,
-                state: "raw",
-                sport: "cycling",
-                source: "manual",
-                sourceId: wid,
-                planId: null,
-                raw: { description: "x", duration: { value: 3600, unit: "s" } },
-                krd: null,
-                lastProcessingError: null,
-                feedback: null,
-                aiMeta: null,
-                garminPushId: null,
-                tags: [],
-                previousState: null,
-                createdAt: now,
-                modifiedAt: null,
-                updatedAt: now,
-              });
-              tx.objectStore("sessionMatches").put({
-                id: `perf-match-${i}`,
-                profileId,
-                coachingActivityId: aid,
-                workoutId: wid,
-                date: visibleDay,
-                createdAt: now,
-                source: "manual",
-              });
-            }
-            for (let i = 0; i < seed.soloPlans; i += 1) {
-              tx.objectStore("coachingActivities").put({
-                id: `perf-act-solo-${i}`,
-                profileId,
-                source: "train2go",
-                sourceId: `sp-${i}`,
-                date: visibleDay,
-                sport: "cycling",
-                title: `SP ${i}`,
-                status: "pending",
-                fetchedAt: now,
-              });
-            }
-            for (let i = 0; i < seed.soloActuals; i += 1) {
-              const wid = `perf-w-solo-${i}`;
-              tx.objectStore("workouts").put({
-                id: wid,
-                date: visibleDay,
-                state: "raw",
-                sport: "cycling",
-                source: "manual",
-                sourceId: wid,
-                planId: null,
-                raw: { description: "x", duration: { value: 3600, unit: "s" } },
-                krd: null,
-                lastProcessingError: null,
-                feedback: null,
-                aiMeta: null,
-                garminPushId: null,
-                tags: [],
-                previousState: null,
-                createdAt: now,
-                modifiedAt: null,
-                updatedAt: now,
-              });
-            }
-            tx.oncomplete = () => {
-              try {
-                localStorage.setItem("activeProfileId", profileId);
-              } catch (e) {
-                // ignore — surfaced again below if it actually matters
-              }
-              resolve();
-            };
-            tx.onerror = () => reject(tx.error);
-          };
-        });
-      },
-      {
-        seed: SEED,
-        profileId: PROFILE_ID,
-        visibleDay: VISIBLE_DAY,
-        now: NOW,
-      }
-    );
-
+    // 5. Measurement navigation.
     await page.goto(`/calendar/${WEEK_ID}`);
-
-    // Wait for the page to render its first card; without a settled
-    // DOM the FCP entry can predate the calendar grid mounting.
-    await page.getByTestId("calendar-page").waitFor({ state: "visible" });
+    await page
+      .getByTestId("calendar-page")
+      .waitFor({ state: "visible", timeout: 30_000 });
 
     const fcpMs = await page.evaluate(() => {
       const entry = performance.getEntriesByName("first-contentful-paint")[0];
@@ -198,12 +178,9 @@ test.describe("CalendarPage performance budget", () => {
     });
     expect(
       fcpMs,
-      `CalendarPage FCP ${fcpMs.toFixed(1)}ms exceeds the ${FCP_BUDGET_MS}ms budget (CPU throttle ${CPU_THROTTLE_RATE}×, 30-card week)`
+      `CalendarPage FCP ${fcpMs.toFixed(1)}ms exceeds the ${FCP_BUDGET_MS}ms budget`
     ).toBeLessThanOrEqual(FCP_BUDGET_MS);
 
-    // Take the worst single useMatchedSessions measure entry — multiple
-    // re-renders are normal under live-query re-fires; the budget is
-    // per-invocation, not aggregate.
     const useMatchedMaxMs = await page.evaluate(() => {
       const entries = performance.getEntriesByName("useMatchedSessions");
       if (entries.length === 0) return Number.POSITIVE_INFINITY;
@@ -211,11 +188,9 @@ test.describe("CalendarPage performance budget", () => {
     });
     expect(
       useMatchedMaxMs,
-      `useMatchedSessions worst measure ${useMatchedMaxMs.toFixed(1)}ms exceeds the ${USE_MATCHED_SESSIONS_BUDGET_MS}ms slice (CPU throttle ${CPU_THROTTLE_RATE}×, 10 matched rows)`
+      `useMatchedSessions worst measure ${useMatchedMaxMs.toFixed(1)}ms exceeds the ${USE_MATCHED_SESSIONS_BUDGET_MS}ms slice`
     ).toBeLessThanOrEqual(USE_MATCHED_SESSIONS_BUDGET_MS);
 
     await cdp.detach();
-    await context.close();
-    await browser.contexts().forEach(() => undefined);
   });
 });
