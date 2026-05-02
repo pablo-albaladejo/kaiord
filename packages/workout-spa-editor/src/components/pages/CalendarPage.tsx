@@ -6,6 +6,11 @@
  * once at the page level — DayColumn / CalendarWeekGrid then render
  * the buckets in the order spec'd by spa-calendar.
  *
+ * Auto-match suggestions surface above the grid via `AutoMatchBanner`
+ * when `useAutoMatchSuggestions` returns at least one undismissed pair
+ * for the visible week. Accept persists a `SessionMatch` (source
+ * `auto-suggestion`); Reject persists a per-pair dismissal.
+ *
  * Coaching data flows through the generic CoachingSource registry —
  * this file has zero platform-specific imports.
  */
@@ -13,17 +18,20 @@
 import { useMemo, useState } from "react";
 import { Redirect } from "wouter";
 
+import type { MatchSuggestion } from "../../application/match-suggestion";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
+import { useAutoMatchBannerActions } from "../../hooks/use-auto-match-banner-actions";
+import { useAutoMatchSuggestions } from "../../hooks/use-auto-match-suggestions";
 import { useCoachingActivities } from "../../hooks/use-coaching-activities";
 import { useCoachingAutoSync } from "../../hooks/use-coaching-auto-sync";
-import type { MatchedSessionWithMetadata as PageMatchedSession } from "../../hooks/use-matched-sessions";
 import { useMatchedSessions } from "../../hooks/use-matched-sessions";
 import { useSetCalendarDensity } from "../../hooks/use-set-calendar-density";
 import { useUserPreferences } from "../../hooks/use-user-preferences";
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
-import type { WorkoutRecord } from "../../types/calendar-record";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import { CalendarSkeleton } from "../molecules/WorkoutCard/CalendarSkeleton";
+import { AutoMatchBanner } from "../organisms/AutoMatchBanner/AutoMatchBanner";
+import { buildCalendarBuckets, type CalendarBuckets } from "./calendar-buckets";
 import { CalendarDialogs } from "./CalendarDialogs";
 import { CalendarHeader } from "./CalendarHeader";
 import { CalendarWeekGrid } from "./CalendarWeekGrid";
@@ -41,14 +49,17 @@ export default function CalendarPage() {
   const [selectedActivity, setSelectedActivity] =
     useState<CoachingActivity | null>(null);
   const profileId = useActiveProfileLive()?.id ?? null;
+  const weekStart = s.data.days[0] ?? "";
   const rawMatched = useMatchedSessions(profileId, s.data.days);
+  const suggestions = useAutoMatchSuggestions(profileId, weekStart);
+  const bannerActions = useAutoMatchBannerActions(profileId, weekStart);
   const prefs = useUserPreferences({
     profileId,
     defaultDensity: viewportDefaultDensity(),
   });
   const buckets = useMemo(
     () =>
-      buildBuckets({
+      buildCalendarBuckets({
         days: s.data.days,
         workoutsByDay: s.data.workoutsByDay,
         coachingByDay: coaching.byDay,
@@ -70,6 +81,8 @@ export default function CalendarPage() {
       onDensityChange={handleDensityChange}
       selectedActivity={selectedActivity}
       setSelectedActivity={setSelectedActivity}
+      suggestions={suggestions ?? []}
+      bannerActions={bannerActions}
     />
   );
 }
@@ -77,11 +90,16 @@ export default function CalendarPage() {
 type CalendarPageViewProps = {
   s: ReturnType<typeof useCalendarState>;
   coaching: ReturnType<typeof useCoachingActivities>;
-  buckets: Buckets;
+  buckets: CalendarBuckets;
   density: "compact" | "comfortable" | undefined;
   onDensityChange: (d: "compact" | "comfortable") => void;
   selectedActivity: CoachingActivity | null;
   setSelectedActivity: (a: CoachingActivity | null) => void;
+  suggestions: MatchSuggestion[];
+  bannerActions: {
+    onAccept: (s: MatchSuggestion) => Promise<void>;
+    onReject: (s: MatchSuggestion) => Promise<void>;
+  };
 };
 
 function CalendarPageView({
@@ -92,6 +110,8 @@ function CalendarPageView({
   onDensityChange,
   selectedActivity,
   setSelectedActivity,
+  suggestions,
+  bannerActions,
 }: CalendarPageViewProps) {
   return (
     <div className="space-y-4" data-testid="calendar-page">
@@ -104,6 +124,13 @@ function CalendarPageView({
         density={density}
         onDensityChange={onDensityChange}
       />
+      {suggestions.length > 0 && (
+        <AutoMatchBanner
+          suggestions={suggestions}
+          onAccept={bannerActions.onAccept}
+          onReject={bannerActions.onReject}
+        />
+      )}
       <CalendarWeekGrid
         days={s.data.days}
         matchedByDay={buckets.matchedByDay}
@@ -126,40 +153,4 @@ function CalendarPageView({
       />
     </div>
   );
-}
-
-type BuildBucketsArgs = {
-  days: string[];
-  workoutsByDay: Record<string, WorkoutRecord[]>;
-  coachingByDay: Record<string, CoachingActivity[]>;
-  matched: PageMatchedSession[];
-};
-
-type Buckets = {
-  matchedByDay: Record<string, PageMatchedSession[]>;
-  soloPlansByDay: Record<string, CoachingActivity[]>;
-  soloActualsByDay: Record<string, WorkoutRecord[]>;
-};
-
-function buildBuckets({
-  days,
-  workoutsByDay,
-  coachingByDay,
-  matched,
-}: BuildBucketsArgs): Buckets {
-  const matchedActivityIds = new Set(matched.map((m) => m.activity.id));
-  const matchedWorkoutIds = new Set(matched.map((m) => m.workout.id));
-  const matchedByDay: Record<string, PageMatchedSession[]> = {};
-  const soloPlansByDay: Record<string, CoachingActivity[]> = {};
-  const soloActualsByDay: Record<string, WorkoutRecord[]> = {};
-  for (const day of days) {
-    matchedByDay[day] = matched.filter((m) => m.match.date === day);
-    soloPlansByDay[day] = (coachingByDay[day] ?? []).filter(
-      (a) => !matchedActivityIds.has(a.id)
-    );
-    soloActualsByDay[day] = (workoutsByDay[day] ?? []).filter(
-      (w) => !matchedWorkoutIds.has(w.id)
-    );
-  }
-  return { matchedByDay, soloPlansByDay, soloActualsByDay };
 }

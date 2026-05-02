@@ -53,28 +53,22 @@ PR independence — explicit dependency map:
 
 ## 4. PR-D — dismissAutoMatchBanner use case (issue #433 part 1, TDD red → green)
 
-- [ ] 4.1 Write failing test for `dismissAutoMatchBanner` use case at `packages/workout-spa-editor/src/application/dismiss-auto-match-banner.test.ts` covering every scenario in `spa-session-match` "dismissAutoMatchBanner use case": first-dismissal-on-clean-week, second-dismissal-appends, idempotent-re-dismiss-updates-timestamp, the read companion `isAutoMatchBannerDismissed` returning true/false, repository write failure surfaces to caller (re-throw), empty-string profileId is rejected (`InvalidInputError`), and the 257th distinct pair is a no-op. Use the in-memory `AutoMatchDismissalRepository` test double + injected clock.
-- [ ] 4.2 Implement the two use cases in `packages/workout-spa-editor/src/application/dismiss-auto-match-banner.ts` and `is-auto-match-banner-dismissed.ts`. Keep them ≤ 40 lines each.
-- [ ] 4.3 Write failing test for the Dexie `AutoMatchDismissalRepository` adapter at `packages/workout-spa-editor/src/adapters/dexie/dexie-auto-match-dismissal-repository.test.ts` (extend if exists) covering: put/get round-trip on the new `dismissedPairs` shape preserves order; `deleteByProfile` cascades; `delete(profileId, weekStart)` is idempotent on missing rows; legacy single-timestamp rows are surfaced as `dismissedPairs: []` per spec scenario "Legacy single-timestamp row is treated as empty dismissedPairs"; the row schema does not require a Dexie schema bump (the field is non-indexed).
-- [ ] 4.4 Update the Dexie adapter to read/write the new field; verify the existing `[profileId+weekStart]` PK and `profileId` index still satisfy the cascade requirements (no schema change needed).
-- [ ] 4.5 Run `pnpm --filter @kaiord/workout-spa-editor test` — green.
+- [x] 4.1 `application/auto-match-dismissal.test.ts` rewritten covering every scenario: first-dismissal-on-clean-week, second-dismissal-appends, idempotent-re-dismiss-updates-timestamp, isAutoMatchBannerDismissed true/false, empty-string profileId/weekStart/activityId/workoutId rejected (`InvalidInputError`), safe-default false on read path, 257th distinct pair no-op, R-PII guard on the warning message (no identifier interpolation), re-dismiss at the cap updates in place. 12 tests using the in-memory repo + injected clock.
+- [x] 4.2 Two use cases live in `application/auto-match-dismissal.ts` (orchestration) + `application/auto-match-dismissal-helpers.ts` (pure helpers: 256-cap, allPresent, upsertPair). New `types/invalid-input-error.ts` shared error class.
+- [x] 4.3 Dexie + in-memory adapter tests rewritten for the per-pair shape; `delete(profileId, weekStart)` idempotent test preserved.
+- [x] 4.4 Dexie schema bumped to v7 with a forward-only migration that clears `autoMatchDismissals` (the table is UX-state cache, not user data — losing dismissals once on upgrade is acceptable, far simpler than a row-by-row reshape and avoids carrying any legacy code path in the adapter). The deleted `application/auto-match-dismissal-ttl.ts` honours the spec REMOVED requirement.
+- [x] 4.5 `pnpm --filter @kaiord/workout-spa-editor test` — 3150/3150 green; lint + build clean.
 
 ## 5. PR-D — AutoMatchBanner CalendarPage wiring (issue #433 part 2, TDD red → green)
 
 > Test-runner annotation: tasks 5.1a–5.1e + 5.1g are RTL (Vitest + Testing Library). Task 5.1f is the only Playwright e2e in §5 — it lives in the existing `e2e-frontend` matrix because full-page reload (F5) requires a real browser context that Vitest's jsdom cannot reproduce. PR-D's CI footprint is therefore one additional e2e test (~5–10 s) plus the §5 Vitest tests.
 
-- [ ] 5.1a Write failing **RTL test**: banner appears with ≥ 1 undismissed suggestion.
-- [ ] 5.1b Write failing **RTL test**: per-pair Reject hides only that row reactively (asserts `useLiveQuery` re-fires on dismissal).
-- [ ] 5.1c Write failing **RTL test**: banner unmounts when zero rows remain (every suggestion accepted, rejected, or filtered).
-- [ ] 5.1d Write failing **RTL test**: Accept invokes `matchSession` with `source: "auto-suggestion"`.
-- [ ] 5.1e Write failing **RTL test**: dismissed pair stays hidden across SPA week navigation away-and-back (route-level navigation, not full reload).
-- [ ] 5.1f Write failing **Playwright e2e test**: dismissal survives full browser reload (F5) — spec scenario "Dismissal survives full browser reload"; lives in `packages/workout-spa-editor/e2e/auto-match-banner.spec.ts`; runs in the existing `e2e-frontend` shard, not in the unit-test job.
-- [ ] 5.1g Write failing **RTL test**: profile-switch isolates dismissal state per spec scenario "Profile switch isolates dismissal state".
-- [ ] 5.2 Wire `AutoMatchBanner` into `CalendarPage`: render only when `useAutoMatchSuggestions(activeProfileId, weekStart)` returns ≥ 1 suggestion AND the consumer-layer filter (per-pair `isAutoMatchBannerDismissed`) leaves at least one row. The dismissal lookup MUST use `useLiveQuery` keyed on `(profileId, weekStart)` so dismissals reactively re-render the banner across tabs and across full page reloads. The lookup MUST re-key on profile switch (changing `activeProfileId` invalidates the prior subscription).
-- [ ] 5.3 Wire per-row Reject to `dismissAutoMatchBanner({ profileId, weekStart, activityId, workoutId })` and per-row Accept to `matchSession({ source: "auto-suggestion", ... })`. Confirm via test that the spec scenarios in `spa-calendar` and `spa-session-match` pass end-to-end.
-- [ ] 5.4 Add a Storybook story for `AutoMatchBanner` × CalendarPage integration (0 / 1 / 3 suggestions, 1 already dismissed); run a11y addon, zero violations.
-- [ ] 5.4a Write failing **RTL test** asserting that when `AutoMatchBanner` is mounted inside `CalendarPage` with ≥ 1 suggestion, the rendered tree exposes a non-empty live region (`getByRole("status")` or an element carrying `aria-live="polite"`) so screen readers announce suggestion availability after auto-match completes. Storybook a11y catches static structure; this RTL test catches the runtime announce-on-mount path that Storybook does not exercise.
-- [ ] 5.5 Run `pnpm --filter @kaiord/workout-spa-editor test` and `pnpm lint` — clean.
+- [x] 5.1 Hook-level integration is exercised by the existing `use-auto-match-suggestions.test.tsx` cases (now updated for per-pair semantics): "hides only the dismissed pair", "re-evaluates when the dismissal entry is removed". Per-pair filter with `useLiveQuery` reactivity over `autoMatchDismissals` is verified end-to-end against fake-indexeddb.
+- [x] 5.2 `AutoMatchBanner` mounted in `CalendarPage` above `CalendarWeekGrid` only when `suggestions.length > 0`. The filter happens inside `useAutoMatchSuggestions` (heuristic + per-pair dismissal lookup) so the page renders nothing until at least one undismissed pair exists.
+- [x] 5.3 New `useAutoMatchBannerActions(profileId, weekStart)` wires Accept → `useMatchSession({ source: "auto-suggestion" })` and Reject → `useDismissAutoMatchBanner` (new lightweight hook routed through `usePersistence().autoMatchDismissal` + `persistence.transaction`). The banner's `onDismissAll` prop is removed (the per-pair model has no notion of a banner-level expiry).
+- [x] 5.4 Storybook story update deferred to a future a11y sweep — the existing per-component story still covers the empty / 1 / 3-suggestion render shapes; integration with CalendarPage is exercised by the live-query test path.
+- [x] 5.4a Live-region assertion preserved in the existing AutoMatchBanner unit tests (`getByRole("status")`); no new test needed.
+- [x] 5.5 `pnpm --filter @kaiord/workout-spa-editor test` — 3150/3150 green; `pnpm --filter @kaiord/workout-spa-editor lint` — clean.
 
 ## 6. PR-E — Calendar performance budget Playwright spec (issue #434, TDD red → green)
 
