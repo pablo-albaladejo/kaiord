@@ -40,9 +40,8 @@ export default function CalendarPage() {
   useCoachingAutoSync(coaching.syncSources, s.data.days[0]);
   const [selectedActivity, setSelectedActivity] =
     useState<CoachingActivity | null>(null);
-  const activeProfile = useActiveProfileLive();
-  const profileId = activeProfile?.id ?? null;
-  const matched = useMatchedSessions(profileId, s.data.days) ?? [];
+  const profileId = useActiveProfileLive()?.id ?? null;
+  const rawMatched = useMatchedSessions(profileId, s.data.days);
   const prefs = useUserPreferences({
     profileId,
     defaultDensity: viewportDefaultDensity(),
@@ -53,9 +52,9 @@ export default function CalendarPage() {
         days: s.data.days,
         workoutsByDay: s.data.workoutsByDay,
         coachingByDay: coaching.byDay,
-        matched,
+        matched: rawMatched ?? [],
       }),
-    [s.data.days, s.data.workoutsByDay, coaching.byDay, matched]
+    [s.data.days, s.data.workoutsByDay, coaching.byDay, rawMatched]
   );
   const handleDensityChange = useSetCalendarDensity(profileId);
 
@@ -114,10 +113,7 @@ function CalendarPageView({
         density={density}
         onWorkoutClick={s.handleWorkoutClick}
         onEmptyDayClick={s.setEmptyDayDate}
-        onActivityClick={(a) => {
-          setSelectedActivity(a);
-          coaching.expandActivity(a);
-        }}
+        onActivityClick={setSelectedActivity}
       />
       <CalendarDialogs
         selectedWorkout={s.selectedWorkout}
@@ -126,6 +122,7 @@ function CalendarPageView({
         onCloseWorkout={() => s.setSelectedWorkout(null)}
         onCloseDay={() => s.setEmptyDayDate(null)}
         onCloseCoaching={() => setSelectedActivity(null)}
+        expandActivity={coaching.expandActivity}
       />
     </div>
   );
