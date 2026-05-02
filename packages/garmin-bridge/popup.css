@@ -169,6 +169,50 @@ body {
   font-style: italic;
 }
 
+/* ── Coach notes (collapsible) ── */
+.notes {
+  margin-bottom: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #fafafa;
+}
+
+.notes__summary {
+  padding: 8px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #475569;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+}
+
+.notes__summary::-webkit-details-marker {
+  display: none;
+}
+
+.notes__summary::before {
+  content: "▸ ";
+  display: inline-block;
+  margin-right: 4px;
+  transition: transform 0.15s ease;
+}
+
+.notes[open] .notes__summary::before {
+  transform: rotate(90deg);
+}
+
+.notes__body {
+  padding: 0 10px 10px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: #334155;
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
 /* ── Footer (primary CTA + secondary link) ── */
 .cta-primary {
   display: block;

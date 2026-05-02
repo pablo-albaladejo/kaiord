@@ -19,7 +19,7 @@ const SNAPSHOT_TIMEOUT_MS = 1_000;
 const ROLLUP_TIMEOUT_MS = 8_000;
 const ROLLUP_TTL_MS = 5 * 60 * 1_000;
 
-const OPEN_EDITOR_URL = "https://app.kaiord.com/";
+const OPEN_EDITOR_URL = "https://kaiord.com/editor/";
 const OPEN_TRAIN2GO_URL = "https://app.train2go.com/user/index";
 
 const $ = (id) => document.getElementById(id);
@@ -214,6 +214,32 @@ const renderRollupUnavailable = () => {
   region.appendChild(el);
 };
 
+// Render the trainer's free-text notes about the trainee inside a
+// collapsible <details> box. The body is set via textContent — never
+// innerHTML — so HTML in the upstream payload cannot inject markup.
+// `parsePingJson` already strips tags upstream; this is defense in
+// depth.
+const renderNotes = (notes) => {
+  const region = $("notes-region");
+  region.innerHTML = "";
+  if (typeof notes !== "string" || notes.length === 0) return;
+
+  const details = document.createElement("details");
+  details.className = "notes";
+
+  const summary = document.createElement("summary");
+  summary.className = "notes__summary";
+  summary.textContent = "Coach notes";
+  details.appendChild(summary);
+
+  const body = document.createElement("div");
+  body.className = "notes__body";
+  body.textContent = notes;
+  details.appendChild(body);
+
+  region.appendChild(details);
+};
+
 const renderFooter = () => {
   const region = $("footer-region");
   region.innerHTML = "";
@@ -322,6 +348,7 @@ const loadPopupData = async ({ bypassTtl = false } = {}) => {
     "Connected"
   );
   renderAthleteCard(storage.profileSnapshot);
+  renderNotes(ping.data.notes);
   renderFooter();
 
   // Rollup phase — failure here keeps the connected state.
