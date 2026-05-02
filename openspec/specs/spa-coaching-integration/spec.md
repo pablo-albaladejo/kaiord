@@ -5,9 +5,7 @@
 ## Purpose
 
 Profile-anchored coaching platform linking, persisted coaching activities, auto-sync with staleness gate, and conversion of coaching activities into editable workouts. Generic across coaching sources (Train2Go today, TrainingPeaks/others later).
-
 ## Requirements
-
 ### Requirement: LinkedCoachingAccount domain semantics
 
 A `Profile` SHALL be able to carry zero or more `LinkedCoachingAccount` entries, each shaped as `{ source: string, externalUserId: string, externalUserName: string, linkedAt: string (ISO datetime) }`. At most one entry per `source` per profile MUST exist.
@@ -240,6 +238,8 @@ Clicking a coaching activity card SHALL open a `CoachingActivityDialog` modal sh
 
 The dialog SHALL replace the current in-place description toggle on `CoachingActivityCard`. The card click handler SHALL only open the dialog (no toggling).
 
+`CoachingActivityDialog` and its backing `useCoachingDialog` hook MUST NOT consume the coaching-source registry directly (i.e., they MUST NOT call `useCoachingSourceFactories` and MUST NOT invoke any `CoachingSourceFactory`). The lazy-load action SHALL be triggered via an `expandActivity(activity)` callback supplied by the caller. The caller (the calendar page consuming `useCoachingActivities`) is the single site that materializes coaching sources for the render tree, ensuring at most one `useLiveQuery` subscription per source per render. This separation is required to keep the dialog free of the `CoachingSourceFactory` hook composition (factories ARE React hooks; invoking them inside `useEffect` or inside `Array.map` violates the Rules of Hooks).
+
 #### Scenario: Dialog opens with persisted description
 
 - **WHEN** the user clicks a coaching card and `description` is already populated
@@ -248,12 +248,17 @@ The dialog SHALL replace the current in-place description toggle on `CoachingAct
 #### Scenario: Dialog opens and lazy-loads description
 
 - **WHEN** the user clicks a coaching card and `description` is empty
-- **THEN** the dialog opens with a loading indicator in the description region, fires `read-day`, upserts every activity returned by `read-day` (siblings included), and re-renders with the description
+- **THEN** the dialog opens with a loading indicator in the description region; the dialog invokes its `expandActivity(activity)` callback (the same callback returned by `useCoachingActivities`, which calls `source.expand(profileId, activity.date)` — the source's `expand` method then fires the `read-day` bridge call per `spa-train2go-extension`); the use case upserts every activity returned by `read-day` (siblings included); the dialog re-renders with the description
 
 #### Scenario: Convert action navigates to editor
 
 - **WHEN** the user clicks "Convert to workout" inside the dialog
 - **THEN** the dialog closes, `convertCoachingActivity` runs, and the user is routed to `/workout/:id` for the resulting workout
+
+#### Scenario: Dialog renders without consuming the coaching registry
+
+- **WHEN** `CoachingActivityDialog` is mounted with a `CoachingActivity` whose `source` matches a real registered factory (e.g., the production `useTrain2GoSource`)
+- **THEN** rendering the dialog does not invoke any `CoachingSourceFactory` hook (no `useTrain2GoStore`, `useLiveQuery`, etc. fires from inside the dialog tree), and rendering does not throw a Rules-of-Hooks violation
 
 ### Requirement: Calendar Sync button gated on linked account
 
@@ -291,3 +296,4 @@ The `CoachingSource` port SHALL expose `query(profileId, days): CoachingActivity
 
 - **WHEN** the calendar renders the week grid
 - **THEN** the call graph from `CalendarPage` includes only `CoachingSource`-shaped types and `CoachingActivity` view-models — no `Train2GoActivity`, `Train2GoStore`, or `train2go-*` files
+

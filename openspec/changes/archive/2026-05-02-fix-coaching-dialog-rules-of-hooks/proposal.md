@@ -1,3 +1,5 @@
+> Completed: 2026-05-02
+
 ## Why
 
 Clicking a Train2Go-loaded workout in the calendar crashes the route with React error #321 ("Invalid hook call") and renders the `RouteErrorBoundary` fallback ("Something went wrong"). The crash has been live since PR #372 (the introduction of `train2go-profile-link`) and went undetected by every layer of the existing test/lint/telemetry stack:
