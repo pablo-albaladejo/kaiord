@@ -182,11 +182,20 @@ describe("createBridgeDiscovery", () => {
 });
 
 describe("bridgeDiscovery singleton (HMR resilience)", () => {
-  it("is parked on globalThis so re-imports of the module reuse it", async () => {
+  type GlobalShape = { __KAIORD_BRIDGE_DISCOVERY__?: unknown };
+
+  it("is parked on globalThis after first evaluation", async () => {
     const mod = await import("./bridge-discovery");
-    type GlobalShape = { __KAIORD_BRIDGE_DISCOVERY__?: unknown };
     const g = globalThis as unknown as GlobalShape;
 
     expect(g.__KAIORD_BRIDGE_DISCOVERY__).toBe(mod.bridgeDiscovery);
+  });
+
+  it("a fresh re-import returns the same instance (HMR scenario)", async () => {
+    const first = await import("./bridge-discovery");
+    vi.resetModules();
+    const second = await import("./bridge-discovery");
+
+    expect(second.bridgeDiscovery).toBe(first.bridgeDiscovery);
   });
 });
