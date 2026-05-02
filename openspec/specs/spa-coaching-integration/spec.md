@@ -5,7 +5,9 @@
 ## Purpose
 
 Profile-anchored coaching platform linking, persisted coaching activities, auto-sync with staleness gate, and conversion of coaching activities into editable workouts. Generic across coaching sources (Train2Go today, TrainingPeaks/others later).
+
 ## Requirements
+
 ### Requirement: LinkedCoachingAccount domain semantics
 
 A `Profile` SHALL be able to carry zero or more `LinkedCoachingAccount` entries, each shaped as `{ source: string, externalUserId: string, externalUserName: string, linkedAt: string (ISO datetime) }`. At most one entry per `source` per profile MUST exist.
@@ -296,4 +298,3 @@ The `CoachingSource` port SHALL expose `query(profileId, days): CoachingActivity
 
 - **WHEN** the calendar renders the week grid
 - **THEN** the call graph from `CalendarPage` includes only `CoachingSource`-shaped types and `CoachingActivity` view-models — no `Train2GoActivity`, `Train2GoStore`, or `train2go-*` files
-

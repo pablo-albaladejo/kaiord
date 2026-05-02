@@ -107,5 +107,3 @@ PR 2 (route-error-pii-scrubbing): §6 + final repo gates + archive
 - [x] 8.3 PR description: link to `proposal.md` (do not duplicate its Why-section text); list any `eslint-disable` suppressions added in step 1.4 (with follow-up issue references); list any `analytics.event` interpolation sites discovered/fixed in step 2.6; include a screenshot or screen-recording of the original repro working post-fix.
 - [x] 8.4 After merge: run `/opsx-archive fix-coaching-dialog-rules-of-hooks` to move this change to the archive.
 <!-- ci-trigger -->
-
-

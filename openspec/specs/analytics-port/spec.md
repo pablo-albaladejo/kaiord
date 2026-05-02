@@ -13,7 +13,9 @@ Provide a hexagonal-architecture-conformant analytics seam: a single `Analytics`
 ## Overview
 
 A lightweight, injectable analytics abstraction that follows the hexagonal architecture pattern. The `Analytics` port is defined in core (no external dependencies), with a noop default adapter and a Cloudflare Web Analytics adapter in each consumer package.
+
 ## Requirements
+
 ### Requirement: Analytics port is defined in core
 
 The system SHALL expose an `Analytics` type in `@kaiord/core/ports` with two methods: `pageView(path: string): void` and `event(name: string, props?: Record<string, string | number | boolean>): void`. The port MUST NOT depend on any external library or browser API.
@@ -264,4 +266,3 @@ The default `noop` adapter MUST continue to accept this richer payload without b
 
 - **WHEN** the supplied `analytics.event` implementation throws synchronously while reporting `route-error`
 - **THEN** the error boundary still renders the fallback UI and does not surface a secondary error
-

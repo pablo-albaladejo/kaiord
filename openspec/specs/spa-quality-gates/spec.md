@@ -5,7 +5,9 @@
 ## Purpose
 
 Mechanically enforced repo-wide quality gates implemented as static-source `pnpm test:scripts` checks. Each requirement specifies a structural rule the SPA editor source code SHALL obey, plus the script that enforces it in CI.
+
 ## Requirements
+
 ### Requirement: User-facing string hygiene
 
 User-facing strings rendered by the SPA editor — invocations of `useToastContext().{error,success,info,warning}(...)`, `toast.{error,success,info,warning}(...)`, and `console.{log,warn,error,info,debug}(...)` under `packages/workout-spa-editor/src/{components,hooks,lib}/**` (excluding `*.test.{ts,tsx}` and `*.stories.{ts,tsx}`) — SHALL pass a single first argument that resolves at audit time to a static string.
@@ -451,4 +453,3 @@ This rule extends the existing PII guard from user-facing string sinks (toast, c
 
 - **WHEN** a file contains `const { event } = useAnalytics(); event(\`x-${y}\`, {});`
 - **THEN** `pnpm test:scripts` exits non-zero (the destructure tracking already implemented for `toast` and `console` MUST cover `analytics` too)
-
