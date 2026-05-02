@@ -1,16 +1,17 @@
 /**
- * Enforces the Dexie-vs-Zustand persistence boundary for bridge-related
- * runtime state:
+ * Enforces the persistence boundary for bridge-related runtime state:
  *
- *   - The new `bridges` Dexie store IS the persistence layer for the
- *     registry.
+ *   - Bridges live in the in-memory `bridgeDiscovery` singleton; there
+ *     MUST NOT be a Dexie persistence adapter for them. Adding one
+ *     would create a second source of truth and re-introduce the bug
+ *     where the SPA reads from one place and the discovery layer
+ *     writes to another.
  *   - `train2go-store` and any `garmin-store` / bridge runtime store
  *     MUST remain in-memory Zustand — no `persist(` middleware import
  *     and no direct Dexie writes.
  *
  * See `CLAUDE.md` rule: "Editor runtime → Zustand. Persisted data →
- * Dexie. Local UI → React state." — and the proposal's
- * Dexie-vs-Zustand boundary clause.
+ * Dexie. Local UI → React state."
  */
 
 import { readdirSync, readFileSync, statSync } from "node:fs";
@@ -79,15 +80,16 @@ describe("bridge runtime stores stay in Zustand, never in Dexie", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("the Dexie bridges repository is the ONLY bridge-named persistence adapter", () => {
+  it("no bridge-named Dexie persistence adapter exists", () => {
     const dexieDir = resolve(__dirname, "..", "dexie");
     const files = walk(dexieDir)
       .map((f) => f.substring(dexieDir.length + 1))
       .filter((f) => /bridge/i.test(f) && !f.endsWith(".test.ts"));
 
-    // Exactly one adapter source + any non-test bridge artefact if added
-    // later. The regression bar is: no duplicated persistence paths.
+    // The bridge registry is owned by the in-memory bridgeDiscovery
+    // singleton; introducing a Dexie adapter would split the source of
+    // truth. The regression bar is zero bridge-named adapter files.
     const adapterFiles = files.filter((f) => f.endsWith(".ts"));
-    expect(adapterFiles).toEqual(["dexie-bridge-repository.ts"]);
+    expect(adapterFiles).toEqual([]);
   });
 });

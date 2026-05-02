@@ -143,12 +143,17 @@ const persistSnapshot = async (snapshot) => {
   const receivedAt = Date.now();
   await chrome.storage.local.set({
     profileSnapshot: { ...result.value, receivedAt },
+    lastPushReceipt: { at: receivedAt, name: result.value.profile.name },
   });
   return { storedAt: receivedAt };
 };
 
 const clearSnapshot = async () => {
-  await chrome.storage.local.remove(["profileSnapshot", "lastWeeklyRollup"]);
+  await chrome.storage.local.remove([
+    "profileSnapshot",
+    "lastWeeklyRollup",
+    "lastPushReceipt",
+  ]);
   return null;
 };
 

@@ -106,6 +106,17 @@ describe("background — profile-snapshot action", () => {
     expect(stored.receivedAt).toBe(result.storedAt);
   });
 
+  it("writes lastPushReceipt atomically with the snapshot", async () => {
+    const valid = positiveSnapshotFixtures[0];
+
+    const result = await bridge.persistSnapshot(valid);
+
+    const receipt = globalThis.__chromeLocalStore.lastPushReceipt;
+    expect(receipt).toBeDefined();
+    expect(receipt.at).toBe(result.storedAt);
+    expect(receipt.name).toBe(valid.profile.name);
+  });
+
   it("rejects an invalid payload as non-retryable error", async () => {
     await expect(bridge.persistSnapshot({ schemaVersion: 99 })).rejects.toThrow(
       "Unsupported snapshot schema version"
@@ -113,9 +124,10 @@ describe("background — profile-snapshot action", () => {
     expect(globalThis.__chromeLocalStore.profileSnapshot).toBeUndefined();
   });
 
-  it("clearSnapshot removes profileSnapshot and lastWeeklyRollup keys", async () => {
+  it("clearSnapshot removes profileSnapshot, lastWeeklyRollup and lastPushReceipt", async () => {
     globalThis.__chromeLocalStore.profileSnapshot = { keep: "no" };
     globalThis.__chromeLocalStore.lastWeeklyRollup = { keep: "no" };
+    globalThis.__chromeLocalStore.lastPushReceipt = { at: 1, name: "x" };
     globalThis.__chromeLocalStore.somethingElse = "untouched";
 
     const result = await bridge.clearSnapshot();
@@ -123,6 +135,7 @@ describe("background — profile-snapshot action", () => {
     expect(result).toBeNull();
     expect(globalThis.__chromeLocalStore.profileSnapshot).toBeUndefined();
     expect(globalThis.__chromeLocalStore.lastWeeklyRollup).toBeUndefined();
+    expect(globalThis.__chromeLocalStore.lastPushReceipt).toBeUndefined();
     expect(globalThis.__chromeLocalStore.somethingElse).toBe("untouched");
   });
 

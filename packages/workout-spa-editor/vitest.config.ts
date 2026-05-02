@@ -59,10 +59,12 @@ export default defineConfig({
         // Storybook stories - documentation, not production code
         "**/*.stories.tsx",
         "**/*.stories.ts",
-        // Thin React-Dexie glue (useLiveQuery + module-singleton ops
-        // queue) — the orchestration logic is unit-tested in
-        // push-active-profile.test.ts.
+        // Thin React-Dexie glue + module-singleton ops queue. The
+        // hook owns transport orchestration; the helpers wrap the
+        // shared OperationQueue with promise plumbing. Exercised by
+        // the bridges' own profile-snapshot tests + manual e2e.
         "**/use-profile-snapshot-push.ts",
+        "**/use-profile-snapshot-push-helpers.ts",
         // Type definition files - validated by TypeScript at compile-time
         "**/*.types.ts",
         // Re-export index files - no logic to test
