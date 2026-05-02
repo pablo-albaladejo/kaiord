@@ -27,11 +27,8 @@ import "fake-indexeddb/auto";
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
-import { createDexieAutoMatchDismissalRepository } from "../../adapters/dexie/dexie-auto-match-dismissal-repository";
 import { KaiordDatabase } from "../../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../../adapters/dexie/dexie-persistence-adapter";
-import { createDexieSessionMatchRepository } from "../../adapters/dexie/dexie-session-match-repository";
-import { createDexieUserPreferencesRepository } from "../../adapters/dexie/dexie-user-preferences-repository";
 import { isPerProfileTable } from "../../adapters/dexie/is-per-profile-table";
 import type { PersistencePort } from "../../ports/persistence-port";
 import { deleteProfile } from "./delete-profile";
@@ -104,7 +101,6 @@ const makeSeedRow = (
 };
 
 const performCascadeOrchestration = async (
-  database: KaiordDatabase,
   persistence: PersistencePort,
   profileId: string
 ): Promise<void> => {
@@ -113,9 +109,9 @@ const performCascadeOrchestration = async (
       {
         coaching: persistence.coaching,
         coachingSyncState: persistence.coachingSyncState,
-        sessionMatch: createDexieSessionMatchRepository(database),
-        autoMatchDismissal: createDexieAutoMatchDismissalRepository(database),
-        userPreferences: createDexieUserPreferencesRepository(database),
+        sessionMatch: persistence.sessionMatch,
+        autoMatchDismissal: persistence.autoMatchDismissal,
+        userPreferences: persistence.userPreferences,
       },
       profileId
     );
@@ -176,7 +172,7 @@ describe("deleteProfile cascade fan-out (integration)", () => {
       await seedRowFor(database, table.name, B);
     }
 
-    await performCascadeOrchestration(database, persistence, A);
+    await performCascadeOrchestration(persistence, A);
 
     // Assert: profile A has zero rows in every per-profile table; profile B
     // has exactly one. The dynamic enumeration means adding a new
@@ -219,9 +215,7 @@ describe("deleteProfile cascade fan-out (integration)", () => {
         Promise.reject(new Error("simulated mid-cascade failure"))
       );
 
-    await expect(
-      performCascadeOrchestration(database, persistence, A)
-    ).rejects.toThrow();
+    await expect(performCascadeOrchestration(persistence, A)).rejects.toThrow();
 
     // Every per-profile table still holds rows for BOTH profiles —
     // proves the outer transaction aborted and rolled the partial cascade

@@ -42,7 +42,7 @@ The decisions below extend (and are numbered to follow) the archived design's D1
 
 **Decision:** persist a per-suggestion dismissal as a row in the existing Dexie `autoMatchDismissals` table (provisioned in v5 by the archived change with composite PK `[profileId+weekStart]`). The PR-D implementation extends the row shape so a single weekStart row can carry multiple dismissed pairs:
 
-```
+```ts
 { profileId, weekStart, dismissedPairs: Array<{ activityId, workoutId, dismissedAt }> }
 ```
 

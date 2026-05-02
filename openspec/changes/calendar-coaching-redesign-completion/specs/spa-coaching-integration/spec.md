@@ -33,7 +33,7 @@ The Match-to picker SHALL be keyboard operable: `Tab` focuses the first list ite
 
 #### Scenario: Dialog opens and lazy-loads description
 
-- **WHEN** the user clicks a coaching card and `description` is empty
+- **WHEN** the user clicks a coaching card and `description` is `undefined` (never fetched), and a persisted empty string `""` is treated as "known empty" and does NOT re-fire per `spa-train2go-extension` "Fetch training plan on user action"
 - **THEN** the dialog opens with a loading indicator in the description region, fires `read-day`, upserts every activity returned by `read-day` (siblings included), and re-renders with the description
 
 #### Scenario: Convert action navigates to editor (solo plan only)
@@ -85,12 +85,12 @@ The Match-to picker SHALL be keyboard operable: `Tab` focuses the first list ite
 - **WHEN** workout `W` is deleted in another tab (cascade fires removing the `SessionMatch` row)
 - **THEN** the dialog re-renders in solo-plan state on the next live-query tick (via `useMatchedSessions`); the "Linked workout" section disappears; the "Convert to workout" and "Match to…" actions reappear; no error is thrown; the dialog does NOT close
 
-#### Scenario: Picker excludes wrong-profile candidates and includes other-profile-matched candidates
+#### Scenario: Picker filter respects profile-scoped match state
 
 - **GIVEN** the active profile is `P1` and the coaching activity has date=2026-05-04, sport=cycling
-- **AND** workouts `W1` (cycling, 2026-05-04, profile-agnostic, matched in `P1`), `W2` (cycling, 2026-05-04, profile-agnostic, matched in `P2` only), `W3` (cycling, 2026-05-04, profile-agnostic, unmatched), and `W4` (cycling, 2026-05-04, owned by `P2` exclusively) all exist
+- **AND** every `WorkoutRecord` is profile-agnostic (per `spa-coaching-integration` "Convert coaching activity to workout"); workouts `W1` (cycling, 2026-05-04, matched in `P1`), `W2` (cycling, 2026-05-04, matched in `P2` only — unmatched in `P1`), `W3` (cycling, 2026-05-04, unmatched in any profile), `W5` (running, 2026-05-04, unmatched), and `W6` (cycling, 2026-05-05, unmatched) all exist
 - **WHEN** the user clicks "Match to…"
-- **THEN** the picker lists `W2` and `W3` (both unmatched in `P1` per profile-scoped uniqueness); `W1` is excluded by `P1`-scoped match; `W4` is excluded because it does not belong to the active profile
+- **THEN** the picker lists `W2` and `W3` (both not part of any `SessionMatch` row scoped to `P1`); `W1` is excluded because a `SessionMatch` row already exists for `(P1, W1)`; `W5` is excluded by sport; `W6` is excluded by date
 
 #### Scenario: Profile switch mid-dialog preserves the original profile
 
