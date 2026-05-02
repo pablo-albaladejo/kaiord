@@ -23,6 +23,8 @@ export type CoachingSyncState = {
   connected: boolean;
   loading: boolean;
   error: string | null;
+  /** ISO timestamp of the last successful sync for the active profile. */
+  lastSyncedAt: string | undefined;
   sync: (weekStart: string) => Promise<void>;
   connect: () => Promise<void>;
 };
@@ -76,6 +78,7 @@ export function useCoachingActivities(days: string[]) {
       connected: s.connected,
       loading: s.loading,
       error: s.error,
+      lastSyncedAt: s.lastSyncedAt,
       sync: async (weekStart: string) => {
         if (!activeProfileId) return;
         await s.sync(activeProfileId, weekStart);
