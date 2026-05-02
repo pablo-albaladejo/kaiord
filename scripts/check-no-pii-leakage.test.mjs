@@ -297,4 +297,65 @@ describe("check-no-pii-leakage", () => {
       }
     }
   });
+
+  test("analytics.event with bare string literal first arg passes", () => {
+    write(
+      "components/Comp.tsx",
+      "import { useAnalytics } from '../x';\n" +
+        "export function f() {\n" +
+        "  const analytics = useAnalytics();\n" +
+        "  analytics.event('workout-saved', { id: 1 });\n" +
+        "}\n"
+    );
+
+    assert.deepEqual(sandboxRun(), []);
+  });
+
+  test("analytics.event with template-literal first arg is rejected", () => {
+    write(
+      "components/Comp.tsx",
+      "import { useAnalytics } from '../x';\n" +
+        "export function f(id: string) {\n" +
+        "  const analytics = useAnalytics();\n" +
+        "  analytics.event(`workout-${id}-saved`, {});\n" +
+        "}\n"
+    );
+
+    const violations = sandboxRun();
+
+    assert.equal(violations.length, 1);
+    assert.equal(violations[0].rule, "R-PIIInterpolation");
+  });
+
+  test("destructured analytics dispatch is covered", () => {
+    write(
+      "components/Comp.tsx",
+      "import { useAnalytics } from '../x';\n" +
+        "export function f(y: string) {\n" +
+        "  const { event } = useAnalytics();\n" +
+        "  event(`x-${y}`, {});\n" +
+        "}\n"
+    );
+
+    const violations = sandboxRun();
+
+    assert.equal(violations.length, 1);
+    assert.equal(violations[0].rule, "R-PIIInterpolation");
+  });
+
+  test("re-bound analytics dispatch is covered", () => {
+    write(
+      "components/Comp.tsx",
+      "import { useAnalytics } from '../x';\n" +
+        "export function f(z: string) {\n" +
+        "  const a = useAnalytics();\n" +
+        "  a.event(`evt-${z}`, {});\n" +
+        "}\n"
+    );
+
+    const violations = sandboxRun();
+
+    assert.equal(violations.length, 1);
+    assert.equal(violations[0].rule, "R-PIIInterpolation");
+  });
 });
