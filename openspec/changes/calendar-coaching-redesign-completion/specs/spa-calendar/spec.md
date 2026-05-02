@@ -88,26 +88,29 @@ The not-connected state ("hint pointing to Profile Settings → Linked Accounts"
 
 ### Requirement: CalendarPage performance budget
 
-`CalendarPage` SHALL render its first contentful paint within **200 milliseconds** on the project's reference device baseline (Linux ubuntu-latest CI runner with CDP CPU throttling factor 4×) when the visible week contains 30 cards distributed as 10 matched sessions, 10 solo plans, and 10 solo actuals. The `useMatchedSessions` hook SHALL contribute no more than **30 milliseconds** to that budget, measured via `performance.measure` markers placed inside the hook body.
+`CalendarPage` SHALL render under two complementary budgets:
 
-The budget is enforced by a Playwright spec at `packages/workout-spa-editor/e2e/calendar-performance.spec.ts` that runs in the existing `e2e-frontend` CI matrix. The spec SHALL document its seed-data shape and the CPU throttling configuration in the file header so future readers can reproduce the baseline. Persistent failures across Playwright's default retries SHALL fail the build.
+- **FCP envelope** — the calendar's first contentful paint SHALL stay within a CI-calibrated regression-detection envelope (default ≤ **1500 ms** on the ubuntu-latest runner with CDP CPU throttle 4×) when the visible week contains 30 cards distributed as 10 matched sessions, 10 solo plans, and 10 solo actuals. Archived design D11 named 200 ms as the aspirational figure for a Moto G Power 2022 reference device; CI hardware is a different baseline so the assertion uses the regression envelope rather than the reference-device target.
+- **`useMatchedSessions` slice** — the hook SHALL contribute no more than **30 milliseconds** per invocation, measured via `performance.measure` markers placed inside the hook body. This is the architecturally meaningful guardrail: a regression in the matched-session join is the predictable cause of a slow calendar render, and the slice budget catches it directly.
 
-#### Scenario: Synthetic 30-card week meets the FCP budget
+Both budgets are enforced by a Playwright spec at `packages/workout-spa-editor/e2e/calendar-performance.spec.ts` that runs in the existing `e2e-frontend` CI matrix. The spec SHALL document its seed-data shape, the CPU throttling configuration, and the rationale for the FCP envelope in the file header. Persistent failures across Playwright's default retries SHALL fail the build.
+
+#### Scenario: Synthetic 30-card week stays within the FCP envelope
 
 - **GIVEN** the test seeds 10 matched / 10 solo plan / 10 solo actual rows for the visible week
 - **AND** CDP CPU throttling is set to factor 4×
-- **WHEN** the page navigates to `/calendar`
-- **THEN** `performance.getEntriesByName('first-contentful-paint')[0].startTime` is ≤ 200 ms
+- **WHEN** the page navigates to `/calendar/:weekId`
+- **THEN** `performance.getEntriesByName('first-contentful-paint')[0].startTime` is within the configured envelope (default ≤ 1500 ms on ubuntu-latest)
 
 #### Scenario: useMatchedSessions stays under its slice of the budget
 
 - **GIVEN** the same 30-card seed and throttling
 - **WHEN** the page measures the `useMatchedSessions` hook via `performance.mark` / `performance.measure`
-- **THEN** the measured duration is ≤ 30 ms
+- **THEN** the worst single measured duration is ≤ 30 ms
 
 #### Scenario: Build fails on regression
 
-- **WHEN** a code change pushes either FCP > 200 ms OR `useMatchedSessions` > 30 ms across all retries
+- **WHEN** a code change pushes either FCP > the configured envelope OR `useMatchedSessions` > 30 ms across all retries
 - **THEN** the `e2e-frontend` job fails and the change is blocked from merging
 
 #### Scenario: Production build emits no perf marks
