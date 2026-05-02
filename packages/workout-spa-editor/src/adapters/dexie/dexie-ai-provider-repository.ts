@@ -38,6 +38,12 @@ export function createDexieAiProviderRepository(
   return {
     getAll: async () => {
       const all = await table().toArray();
+      // Sort by label so listings are deterministic. Dexie's
+      // primary-key order is UUID-random, which makes dependent UI
+      // tests flaky and the list visually arbitrary for the user.
+      all.sort((a, b) =>
+        String(a.label ?? "").localeCompare(String(b.label ?? ""))
+      );
       return Promise.all(all.map(decryptProvider));
     },
 
