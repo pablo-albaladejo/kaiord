@@ -52,6 +52,14 @@ export function useTrain2GoSource(
     );
   }, [activeProfileId, start, end]);
 
+  const syncStateRow = useLiveQuery(() => {
+    if (!activeProfileId) return Promise.resolve(undefined);
+    return persistence.coachingSyncState.getBySourceAndProfile(
+      TRAIN2GO,
+      activeProfileId
+    );
+  }, [activeProfileId]);
+
   const activities: CoachingActivity[] = useMemo(
     () => (records ?? []).map(toCoachingActivity),
     [records]
@@ -71,6 +79,7 @@ export function useTrain2GoSource(
     loading: store.loading,
     error: store.lastError,
     activities,
+    lastSyncedAt: syncStateRow?.lastSyncedAt,
     sync,
     expand,
     connect,
