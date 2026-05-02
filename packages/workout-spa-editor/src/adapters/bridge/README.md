@@ -1,53 +1,47 @@
 # Bridge Adapters
 
-Runtime adapters for extension bridges (Garmin Connect, Train2Go). The
-registry tracks each bridge's lifecycle (`verified` → `unavailable` →
-`removed`) and persists it to Dexie via `dexie-bridge-repository.ts` so
-the 24h timers survive browser restarts.
+Runtime adapters for extension bridges (Garmin Connect, Train2Go).
+
+## Source of truth
+
+The registry of currently-installed bridges lives in the in-memory
+`bridgeDiscovery` singleton (`bridge-discovery.ts`). Bridges announce
+themselves on page load via `kaiord-announce.js`, the discovery layer
+verifies them with a `ping`, and the result is exposed reactively to
+React via the `useDiscoveredBridges` hook
+(`useSyncExternalStore` over the singleton).
+
+There is intentionally no Dexie persistence layer for bridges:
+keeping a single source of truth (the singleton) avoids the class of
+bugs where the SPA reads from one place while the discovery layer
+writes to another. The non-regression guard lives in
+`bridge-store-persistence-boundary.test.ts`.
 
 ## Persistence boundary
 
-- **Persisted (Dexie)**: the bridge registry — one row per extension
-  keyed by `extensionId`, carrying `status`, `lastSeen`, `removedAt`
-  and `failCount`. The lifecycle timers anchor on these fields.
+- **In-memory (singleton)**: the bridge registry — discovered on every
+  SPA load, never persisted.
 - **Transient (Zustand)**: the bridge runtime stores
   (`train2go-store`, and any future `garmin-store`) remain in-memory
   — they hold ephemeral UX state (detection result, in-flight
   operations) that MUST NOT be written through the Dexie boundary.
-  The non-regression guard lives in
-  `bridge-store-persistence-boundary.test.ts`.
 
 See `CLAUDE.md` ("Editor runtime → Zustand. Persisted data → Dexie.
-Local UI → React state.") and the proposal's Dexie-vs-Zustand
-boundary clause in `openspec/changes/fix-spec-code-drift/`.
+Local UI → React state.")
 
-## Wall-clock caveat (lifecycle timers)
+## Profile snapshot push
 
-The 24h-unavailable and 24h-removed intervals are measured against
-`Date.now()` / `new Date(lastSeen).getTime()` — wall-clock time.
+The SPA pushes the active profile to every discovered bridge via
+`use-profile-snapshot-push.ts`:
 
-- A user whose system clock jumps (daylight-savings, NTP correction,
-  laptop resume from sleep) can see earlier or later transitions than
-  exactly 24h. This is acceptable; the spec allows approximate
-  lifecycle transitions.
-- We SHALL NOT substitute `performance.now()` here, because that clock
-  resets on every browser session and the whole point of the Dexie
-  persistence is to survive reloads.
-
-## State machine
-
-```
-verified ──(3 failed heartbeats)──► unavailable
-                                    │
-                                    │  24h elapsed since lastSeen
-                                    ▼
-                                 removed   (notifier fires)
-                                    │
-                                    │  24h elapsed since removedAt
-                                    ▼
-                                 deleted   (row leaves map + repo)
-```
-
-A successful heartbeat from any non-`verified` state clears
-`failCount`, resets `removedAt`, and returns the bridge to
-`verified`.
+- Content-fingerprint dedup (`fingerprintSnapshot` from `@kaiord/core`)
+  collapses identical consecutive pushes to a single transport call.
+- A shared `OperationQueue` enforces the 60/h-per-bridge cap mandated
+  by the SPA Bridge Protocol spec.
+- Each bridge writes `lastPushReceipt` to its own
+  `chrome.storage.local` atomically with the snapshot, so the popup
+  can render "Last push · N min ago — <name>" without a second round
+  trip.
+- Deleting the active profile while no bridges are reachable parks a
+  `pendingClear` flag; the next tick where bridges are present emits
+  `profile-snapshot-clear` to honour right-to-be-forgotten.
