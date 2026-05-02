@@ -179,4 +179,96 @@ describe("clearActiveProfile", () => {
     });
     expect(transport).not.toHaveBeenCalled();
   });
+
+  it("swallows per-bridge errors during clear", async () => {
+    const transport = vi
+      .fn()
+      .mockImplementationOnce(() => Promise.reject(new Error("boom")))
+      .mockResolvedValueOnce({ ok: true });
+    const bridgesRepo = setupRepo([
+      verified({ extensionId: "ext-fail" }),
+      verified({ extensionId: "ext-ok" }),
+    ]);
+    const bridges = await bridgesRepo.getAll();
+
+    await expect(
+      clearActiveProfile(bridges, {
+        transport,
+        bridgesRepo,
+        enqueue: passThrough,
+      })
+    ).resolves.toBeUndefined();
+    expect(transport).toHaveBeenCalledTimes(2);
+  });
+
+  it("pickActiveSport picks running when only running.lthr is set", async () => {
+    const transport = vi.fn().mockResolvedValue({ ok: true });
+    const bridgesRepo = setupRepo([verified()]);
+    const bridges = await bridgesRepo.getAll();
+    const runningOnly: Profile = {
+      ...baseProfile,
+      sportZones: {
+        running: {
+          thresholds: { lthr: 170 },
+          heartRateZones: { method: "manual", zones: [] },
+        },
+      },
+    };
+
+    await pushActiveProfile(runningOnly, bridges, {
+      transport,
+      bridgesRepo,
+      enqueue: passThrough,
+    });
+
+    const message = transport.mock.calls[0][1] as {
+      snapshot: { activeSport?: string; heartRate: { lthr?: number } };
+    };
+    expect(message.snapshot.activeSport).toBe("running");
+    expect(message.snapshot.heartRate.lthr).toBe(170);
+  });
+
+  it("pickActiveSport falls back to swimming when only thresholdPace is set", async () => {
+    const transport = vi.fn().mockResolvedValue({ ok: true });
+    const bridgesRepo = setupRepo([verified()]);
+    const bridges = await bridgesRepo.getAll();
+    const swimOnly: Profile = {
+      ...baseProfile,
+      sportZones: {
+        swimming: {
+          thresholds: { thresholdPace: 1.45, paceUnit: "min_per_100m" },
+          heartRateZones: { method: "manual", zones: [] },
+        },
+      },
+    };
+
+    await pushActiveProfile(swimOnly, bridges, {
+      transport,
+      bridgesRepo,
+      enqueue: passThrough,
+    });
+
+    const message = transport.mock.calls[0][1] as {
+      snapshot: { activeSport?: string };
+    };
+    expect(message.snapshot.activeSport).toBe("swimming");
+  });
+
+  it("pickActiveSport returns undefined when no thresholds are configured", async () => {
+    const transport = vi.fn().mockResolvedValue({ ok: true });
+    const bridgesRepo = setupRepo([verified()]);
+    const bridges = await bridgesRepo.getAll();
+    const empty: Profile = { ...baseProfile, sportZones: {} };
+
+    await pushActiveProfile(empty, bridges, {
+      transport,
+      bridgesRepo,
+      enqueue: passThrough,
+    });
+
+    const message = transport.mock.calls[0][1] as {
+      snapshot: { activeSport?: string };
+    };
+    expect(message.snapshot.activeSport).toBeUndefined();
+  });
 });
