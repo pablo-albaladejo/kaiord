@@ -180,3 +180,13 @@ describe("createBridgeDiscovery", () => {
     expect(verify).not.toHaveBeenCalled();
   });
 });
+
+describe("bridgeDiscovery singleton (HMR resilience)", () => {
+  it("is parked on globalThis so re-imports of the module reuse it", async () => {
+    const mod = await import("./bridge-discovery");
+    type GlobalShape = { __KAIORD_BRIDGE_DISCOVERY__?: unknown };
+    const g = globalThis as unknown as GlobalShape;
+
+    expect(g.__KAIORD_BRIDGE_DISCOVERY__).toBe(mod.bridgeDiscovery);
+  });
+});
