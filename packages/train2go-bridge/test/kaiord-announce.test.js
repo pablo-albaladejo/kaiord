@@ -4,6 +4,7 @@ const {
   buildAnnouncement,
   onDiscoverRequest,
   announce,
+  isContextValid,
 } = require("../kaiord-announce.js");
 
 describe("kaiord-announce.js (train2go-bridge)", () => {
@@ -73,6 +74,37 @@ describe("kaiord-announce.js (train2go-bridge)", () => {
         }),
         "https://kaiord.com"
       );
+    });
+
+    it("self-detaches and bails when the extension context is invalidated", () => {
+      const originalId = chrome.runtime.id;
+      // Simulate the post-reload state: chrome.runtime.id is undefined.
+      Object.defineProperty(chrome.runtime, "id", { value: undefined });
+
+      announce();
+
+      expect(window.postMessage).not.toHaveBeenCalled();
+      expect(window.removeEventListener).toHaveBeenCalledWith(
+        "message",
+        onDiscoverRequest
+      );
+
+      Object.defineProperty(chrome.runtime, "id", { value: originalId });
+    });
+  });
+
+  describe("isContextValid", () => {
+    it("returns true while chrome.runtime.id is set", () => {
+      expect(isContextValid()).toBe(true);
+    });
+
+    it("returns false when chrome.runtime.id is undefined", () => {
+      const originalId = chrome.runtime.id;
+      Object.defineProperty(chrome.runtime, "id", { value: undefined });
+
+      expect(isContextValid()).toBe(false);
+
+      Object.defineProperty(chrome.runtime, "id", { value: originalId });
     });
   });
 });
