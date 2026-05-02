@@ -44,11 +44,14 @@ export const useProfileSnapshotPush = (): void => {
     }
     lastProfileIdRef.current = active.id;
 
+    // Drain pending clear and fall through so the currently-active
+    // profile (if any) still gets pushed in the same effect run; both
+    // active and bridges may not change again before the user notices.
+    // QUEUE serialises per-bridgeId so the clear lands before the push.
     if (pendingClearRef.current && bridges.length > 0) {
       for (const bridge of bridges)
         void sendClear(bridge, lastFingerprintRef.current);
       pendingClearRef.current = false;
-      return;
     }
 
     if (!active.profile || bridges.length === 0) return;
