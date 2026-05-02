@@ -4,7 +4,7 @@
 
 The application SHALL expose `dismissAutoMatchBanner(input: DismissAutoMatchBannerInput, deps: DismissAutoMatchBannerDeps): Promise<void>` for persisting the user's rejection of a single auto-match suggestion. The use case SHALL be idempotent: dismissing the same `(profileId, weekStart, activityId, workoutId)` pair twice MUST leave a single dismissal recorded and MUST NOT throw.
 
-```
+```ts
 type DismissAutoMatchBannerInput = {
   profileId: string,
   weekStart: string,           // YYYY-MM-DD (ISO Monday)
@@ -101,7 +101,7 @@ The infrastructure layer SHALL implement `AutoMatchDismissalRepository` exposing
 
 The persisted row shape:
 
-```
+```ts
 {
   profileId: string,
   weekStart: string,                         // YYYY-MM-DD (ISO Monday)

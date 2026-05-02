@@ -9,12 +9,13 @@
  * database in the pre-delete state. `deletedProfileId` is captured at
  * confirm time — NEVER `getActiveId()` (would race when deleting a
  * non-active profile or right after a switch).
+ *
+ * Every cascade repository is sourced from the injected `persistence`
+ * object (not from any direct `db` import) so the outer transaction
+ * binds cleanly to the same database instance and a different
+ * `PersistencePort` cannot accidentally split writes.
  */
 
-import { createDexieAutoMatchDismissalRepository } from "../../../../adapters/dexie/dexie-auto-match-dismissal-repository";
-import { db } from "../../../../adapters/dexie/dexie-database";
-import { createDexieSessionMatchRepository } from "../../../../adapters/dexie/dexie-session-match-repository";
-import { createDexieUserPreferencesRepository } from "../../../../adapters/dexie/dexie-user-preferences-repository";
 import { deleteProfile } from "../../../../application/profile/delete-profile";
 import { deleteProfileWithCascade } from "../../../../application/profile/delete-profile-with-cascade";
 import { usePersistence } from "../../../../contexts/persistence-context";
@@ -40,19 +41,14 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
     const id = deleteConfirmId; // capture; never use getActiveId
     void (async () => {
       try {
-        // The cascade and the profile delete share one transaction so a
-        // mid-fan-out crash leaves the DB in the pre-delete state. The
-        // auxiliary repos use the same `db` instance, so Dexie's
-        // zone-tracked transaction picks them up alongside the
-        // PersistencePort-routed repos.
         await persistence.transaction(async () => {
           await deleteProfileWithCascade(
             {
               coaching: persistence.coaching,
               coachingSyncState: persistence.coachingSyncState,
-              sessionMatch: createDexieSessionMatchRepository(db),
-              autoMatchDismissal: createDexieAutoMatchDismissalRepository(db),
-              userPreferences: createDexieUserPreferencesRepository(db),
+              sessionMatch: persistence.sessionMatch,
+              autoMatchDismissal: persistence.autoMatchDismissal,
+              userPreferences: persistence.userPreferences,
             },
             id
           );

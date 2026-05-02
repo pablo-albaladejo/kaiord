@@ -6,12 +6,12 @@
 
 The banner's per-row Accept SHALL invoke `matchSession({ source: "auto-suggestion", profileId, coachingActivityId, workoutId })`. The banner's per-row Reject SHALL invoke `dismissAutoMatchBanner({ profileId, weekStart, activityId, workoutId })`. Both interactions live in `CalendarPage`; the `AutoMatchBanner` component itself is concerned only with rendering and event emission.
 
-The dismissal lookup SHALL be reactive: when a dismissal row is upserted, the page SHALL re-render with the dismissed suggestion no longer visible, without the user navigating away. This is achieved by reading `auto_match_dismissals` via `useLiveQuery` keyed on `(profileId, weekStart)`.
+The dismissal lookup SHALL be reactive: when a dismissal row is upserted, the page SHALL re-render with the dismissed suggestion no longer visible, without the user navigating away. This is achieved by reading `autoMatchDismissals` via `useLiveQuery` keyed on `(profileId, weekStart)`.
 
 #### Scenario: Banner appears with at least one undismissed suggestion
 
 - **GIVEN** the active profile has linked Train2Go and the visible week has 3 auto-match suggestions
-- **AND** `auto_match_dismissals` has no row for `(profileId, weekStart)`
+- **AND** `autoMatchDismissals` has no row for `(profileId, weekStart)`
 - **WHEN** the calendar mounts
 - **THEN** `AutoMatchBanner` is rendered above the week grid with 3 suggestion rows
 

@@ -4,8 +4,9 @@
  * `deleteProfile`.
  *
  * Adding a new per-profile table without updating `deleteProfile` MUST
- * cause the cascade fan-out test in `delete-profile.test.ts` to fail.
- * The contract is intentional — see design D18.
+ * cause the cascade fan-out test in
+ * `delete-profile.cascade.integration.test.ts` to fail. The contract is
+ * intentional — see design D18.
  */
 
 import "fake-indexeddb/auto";
