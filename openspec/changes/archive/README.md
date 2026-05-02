@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-05-02 | [`bridge-popup-redesign`](./2026-05-02-bridge-popup-redesign/) | Both browser-extension bridges (@kaiord/garmin-bridge and @kaiord/train2go-bridge) ship the identical icon (dark navy hex, blue inner mark) and a near-identica… |
 | 2026-05-01 | [`calendar-coaching-redesign`](./2026-05-01-calendar-coaching-redesign/) | The calendar week view is the home page of the SPA editor and the entry point for every coaching workflow, but its current state is broken in three compounding… |
 | 2026-05-01 | [`cleanup-open-issues-may-2026`](./2026-05-01-cleanup-open-issues-may-2026/) | The repo has 15 open issues. Triage shows the queue is mostly noise: |
 | 2026-05-01 | [`fix-spa-router-basename`](./2026-05-01-fix-spa-router-basename/) | The Phase 2 SPA-fallback fix in cleanup-open-issues-may-2026 (PR #398) shipped the rafgraph redirect script wrapped behind a pathname.indexOf('/editor/') === 0… |
