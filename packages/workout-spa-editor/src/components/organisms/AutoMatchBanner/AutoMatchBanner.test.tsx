@@ -16,12 +16,7 @@ const sug = (overrides: Partial<MatchSuggestion> = {}): MatchSuggestion => ({
 describe("AutoMatchBanner", () => {
   it("renders nothing when there are no suggestions", () => {
     render(
-      <AutoMatchBanner
-        suggestions={[]}
-        onAccept={vi.fn()}
-        onReject={vi.fn()}
-        onDismissAll={vi.fn()}
-      />
+      <AutoMatchBanner suggestions={[]} onAccept={vi.fn()} onReject={vi.fn()} />
     );
 
     expect(screen.queryByTestId("auto-match-banner")).not.toBeInTheDocument();
@@ -37,7 +32,6 @@ describe("AutoMatchBanner", () => {
         ]}
         onAccept={vi.fn()}
         onReject={vi.fn()}
-        onDismissAll={vi.fn()}
       />
     );
 
@@ -55,7 +49,6 @@ describe("AutoMatchBanner", () => {
         ]}
         onAccept={vi.fn()}
         onReject={vi.fn()}
-        onDismissAll={vi.fn()}
       />
     );
 
@@ -72,7 +65,6 @@ describe("AutoMatchBanner", () => {
         suggestions={[sug(), sug({ activityId: "a2", workoutId: "w2" })]}
         onAccept={onAccept}
         onReject={vi.fn()}
-        onDismissAll={vi.fn()}
       />
     );
 
@@ -93,7 +85,6 @@ describe("AutoMatchBanner", () => {
         suggestions={[sug(), sug({ activityId: "a2", workoutId: "w2" })]}
         onAccept={vi.fn()}
         onReject={onReject}
-        onDismissAll={vi.fn()}
       />
     );
 
@@ -107,20 +98,16 @@ describe("AutoMatchBanner", () => {
     );
   });
 
-  it("calls onDismissAll when 'Dismiss all' is clicked", async () => {
-    const onDismissAll = vi.fn();
+  it("does NOT render a 'Dismiss all' control (per-pair dismissal model)", () => {
     render(
       <AutoMatchBanner
         suggestions={[sug()]}
         onAccept={vi.fn()}
         onReject={vi.fn()}
-        onDismissAll={onDismissAll}
       />
     );
 
-    await userEvent.click(screen.getByText("Dismiss all"));
-
-    expect(onDismissAll).toHaveBeenCalled();
+    expect(screen.queryByText("Dismiss all")).not.toBeInTheDocument();
   });
 
   it("uses the resolveActivity / resolveWorkoutTitle helpers for friendly labels", () => {
@@ -129,7 +116,6 @@ describe("AutoMatchBanner", () => {
         suggestions={[sug({ activityId: "a1", workoutId: "w1" })]}
         onAccept={vi.fn()}
         onReject={vi.fn()}
-        onDismissAll={vi.fn()}
         resolveActivity={(id) => ({
           id,
           source: "train2go",
@@ -153,7 +139,6 @@ describe("AutoMatchBanner", () => {
         suggestions={[sug()]}
         onAccept={vi.fn()}
         onReject={vi.fn()}
-        onDismissAll={vi.fn()}
       />
     );
 

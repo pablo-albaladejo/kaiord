@@ -90,6 +90,21 @@ export class KaiordDatabase extends Dexie {
           .toCollection()
           .modify(backfillBridgeSnapshotState);
       });
+    // v7 — autoMatchDismissals row shape switched from a single
+    // `dismissedAt` timestamp to a per-pair `dismissedPairs: Array<{
+    // activityId, workoutId, dismissedAt }>` (per design D15 of
+    // calendar-coaching-redesign-completion). The table is UX-state
+    // cache, not user data, so the migration clears it forward-only —
+    // simpler than a row-by-row reshape and avoids carrying any
+    // legacy code path in the adapter. Users see the banner re-surface
+    // once after upgrade for any week where they had previously
+    // dismissed it; subsequent dismissals are recorded in the new
+    // shape.
+    this.version(7)
+      .stores(CORE_V5)
+      .upgrade(async (tx) => {
+        await tx.table("autoMatchDismissals").clear();
+      });
   }
 }
 
