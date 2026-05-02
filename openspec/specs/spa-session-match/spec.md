@@ -7,6 +7,7 @@
 Persists per-pair user verdicts on auto-match suggestions ("don't suggest this activity↔workout pair again for this week") and the cascade hooks that keep those verdicts coherent when the underlying activity / workout / profile is deleted. The broader SessionMatch surface (matchSession, unmatchSession, autoMatchSessions, useMatchedSessions, compliance score derivation) ships in production from PRs #410 and #415 of the archived `2026-05-01-calendar-coaching-redesign` change but is not yet promoted into this spec — see follow-up issue #460 (`/opsx-sync` lift of the archived requirements).
 
 ## Requirements
+
 ### Requirement: dismissAutoMatchBanner use case
 
 The application SHALL expose `dismissAutoMatchBanner(input: DismissAutoMatchBannerInput, deps: DismissAutoMatchBannerDeps): Promise<void>` for persisting the user's rejection of a single auto-match suggestion. The use case SHALL be idempotent: dismissing the same `(profileId, weekStart, activityId, workoutId)` pair twice MUST leave a single dismissal recorded and MUST NOT throw.
@@ -216,4 +217,3 @@ These hooks are the data-layer mechanism behind the spec scenarios "Coaching act
 - **GIVEN** the workout-delete cascade is mid-flight and the `dismissedPairs` purge throws
 - **WHEN** the transaction aborts
 - **THEN** the `workouts` row is NOT deleted; the `sessionMatches` row is NOT deleted; `dismissedPairs` is unchanged; the database returns to the pre-delete state
-

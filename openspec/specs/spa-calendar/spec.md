@@ -5,7 +5,9 @@
 ## Purpose
 
 Week-view calendar as the editor's home page — URL-addressable weeks, per-day workout grouping, state indicators, integration with batch processing, and overlay of planned activities from external coaching platforms (Train2Go, TrainingPeaks, etc.).
+
 ## Requirements
+
 ### Requirement: Calendar week view as home page
 
 The SPA SHALL display a calendar week view as the default home page at `/calendar`. The view SHALL show 7 days (Monday through Sunday) with workout cards for each day. The calendar SHALL support navigation between weeks via previous/next controls and a "Today" button.
@@ -278,4 +280,3 @@ Both budgets are enforced by a Playwright spec at `packages/workout-spa-editor/e
 - **GIVEN** the `useMatchedSessions` hook is built under `import.meta.env.PROD === true` (production bundle)
 - **WHEN** the hook executes
 - **THEN** no `performance.mark` or `performance.measure` calls are emitted; the production bundle has zero observable perf-instrumentation overhead; the marks ship only under DEV / test modes
-
