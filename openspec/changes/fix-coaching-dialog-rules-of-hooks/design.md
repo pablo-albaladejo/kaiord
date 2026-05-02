@@ -84,7 +84,7 @@ Add `CoachingActivityDialog.bootstrap.test.tsx` (or analogous filename) that:
 - Imports the real `CoachingRegistryBootstrap` from `coaching-registry-bootstrap.tsx` (NOT mocked).
 - Provides the persistence context with `createInMemoryPersistence()`.
 - Renders `<CoachingActivityDialog activity={baseActivity} onClose={vi.fn()} expandActivity={vi.fn()} />`.
-- Asserts: `expect(container).not.toBeEmptyDOMElement()` (no throw, dialog rendered).
+- Asserts: `expect(screen.getByTestId("coaching-activity-dialog")).toBeInTheDocument()` (portal-aware; the testid is declared on `Dialog.Content` in `CoachingActivityDialog.tsx`). Do NOT use `expect(container).not.toBeEmptyDOMElement()` — Radix Dialog renders into a `document.body`-level portal, so the test's local `container` is always empty and that assertion would pass trivially without proving the dialog rendered.
 
 The point is not to assert the dialog's behavior — the existing tests already do that. The point is to **execute the real factory hooks** in a test environment so any future Rules-of-Hooks regression in `useTrain2GoSource` (or any sibling factory) blows up at `pnpm -r test`, not in the user's browser.
 

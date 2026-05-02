@@ -36,10 +36,10 @@ The default `noop` adapter MUST continue to accept this richer payload without b
 - **WHEN** an `Error` thrown during render carries the message `"auth failed for user@example.com (Bearer abc.def.ghi); key=abcdef0123456789abcdef0123456789abcdef01"`
 - **THEN** the `message` field of the analytics payload equals `"auth failed for <email> (Bearer <token>); key=<hex>"`
 
-#### Scenario: Raw JWT and base64url tokens are scrubbed
+#### Scenario: Long base64url runs (e.g., JWT signature) are scrubbed
 
 - **WHEN** an `Error` thrown during render carries the message `"401 Unauthorized: token eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c expired"`
-- **THEN** the `message` field of the analytics payload contains `"<token>"` substituted for each base64url-shaped run of 40+ characters and contains no portion of the original JWT material
+- **THEN** the `message` field of the analytics payload contains `<token>` substituted for the 43-character signature portion (`SflKx...w5c`). The header (36 chars) and payload (27 chars) are BELOW the 40-character threshold of rule 5 and remain in plain text — by design: rule 5 targets opaque high-entropy secrets above 40 chars, not all JWT fragments. Callers that need full JWT scrubbing rely on rule 2 (`Bearer <jwt>` is matched as a single Bearer-token unit and replaced wholesale) or construct error messages without leaking the header/payload fragments
 
 #### Scenario: UUID positioned to span the truncation boundary is fully replaced
 

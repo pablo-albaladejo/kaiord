@@ -75,7 +75,7 @@ PR 2 (route-error-pii-scrubbing): §6 + final repo gates + archive
   - Specific JWT fixture: `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c` is fully replaced by `<token>` placeholders.
   - Internationalized email: `usuario@correo.es`, `用户@example.cn`, AND `用户@example.中国` (CJK TLD) are all replaced by `<email>`.
   - Order-of-operations: `Bearer <jwt>` is replaced as a single Bearer-token unit (not double-scrubbed); a 60-character hex run produces `<hex>` (rule 4 wins over rule 5).
-  - Bearer-with-punctuation: input `"Failed: Bearer abc.def.ghi); status=401"` produces `"Failed: Bearer <token> status=401"` (greedy `\S+` match consumes the trailing `);` — documented behavior, not a bug).
+  - Bearer-with-punctuation: input `"Failed: Bearer abc.def.ghi); status=401"` produces `"Failed: Bearer <token>); status=401"` — the token-safe character class `[A-Za-z0-9._\-+/=]+` stops before `)`, so trailing punctuation is preserved verbatim (aligned with `analytics-port` spec rule 2).
   - Multi-line componentStack: a 6-frame component stack with newlines, where frame 4 contains a UUID, scrubs the UUID without disturbing newline boundaries.
   - Truncation post-scrub (input scrubbed first, then sliced; placeholders never split mid-token).
   - UUID-at-truncation-boundary: a UUID positioned at input offsets 498-533 of a 600-char message is fully replaced by `<uuid>` and the output length is at most the requested `maxLen` of 500.
