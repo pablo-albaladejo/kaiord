@@ -8,6 +8,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | Date | Change | Summary |
 | ---- | ------ | ------- |
 | 2026-05-02 | [`bridge-popup-redesign`](./2026-05-02-bridge-popup-redesign/) | Both browser-extension bridges (@kaiord/garmin-bridge and @kaiord/train2go-bridge) ship the identical icon (dark navy hex, blue inner mark) and a near-identica… |
+| 2026-05-02 | [`calendar-coaching-redesign-completion`](./2026-05-02-calendar-coaching-redesign-completion/) | The 2026-05-01-calendar-coaching-redesign change (archived) shipped the structural redesign — three card states, the SessionMatch aggregate, density toggle, st… |
 | 2026-05-02 | [`fix-coaching-dialog-rules-of-hooks`](./2026-05-02-fix-coaching-dialog-rules-of-hooks/) | Clicking a Train2Go-loaded workout in the calendar crashes the route with React error #321 ("Invalid hook call") and renders the RouteErrorBoundary fallback ("… |
 | 2026-05-01 | [`calendar-coaching-redesign`](./2026-05-01-calendar-coaching-redesign/) | The calendar week view is the home page of the SPA editor and the entry point for every coaching workflow, but its current state is broken in three compounding… |
 | 2026-05-01 | [`cleanup-open-issues-may-2026`](./2026-05-01-cleanup-open-issues-may-2026/) | The repo has 15 open issues. Triage shows the queue is mostly noise: |
