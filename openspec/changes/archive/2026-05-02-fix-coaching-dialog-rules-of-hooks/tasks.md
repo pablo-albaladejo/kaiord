@@ -96,14 +96,14 @@ PR 2 (route-error-pii-scrubbing): §6 + final repo gates + archive
 
 ## 7. Spec compliance and full quality gates
 
-- [ ] 7.1 Run `pnpm lint:specs` and `openspec validate fix-coaching-dialog-rules-of-hooks`. Both MUST pass.
-- [ ] 7.2 Run `pnpm -r test && pnpm -r build && pnpm lint && pnpm test:scripts` from repo root. Zero warnings, zero errors (zero-tolerance policy from `CLAUDE.md`).
-- [ ] 7.3 Manually verify the original repro: build the SPA (`pnpm -F @kaiord/workout-spa-editor build && pnpm -F @kaiord/workout-spa-editor preview`), load a profile with Train2Go-loaded workouts, click one. Confirm the dialog opens, lazy-load fires (or stays empty if T2G is unavailable), and there is no "Something went wrong" screen.
+- [x] 7.1 Run `pnpm lint:specs` and `openspec validate fix-coaching-dialog-rules-of-hooks`. Both MUST pass.
+- [x] 7.2 Run `pnpm -r test && pnpm -r build && pnpm lint && pnpm test:scripts` from repo root. Zero warnings, zero errors (zero-tolerance policy from `CLAUDE.md`).
+- [x] 7.3 Manually verify the original repro: build the SPA (`pnpm -F @kaiord/workout-spa-editor build && pnpm -F @kaiord/workout-spa-editor preview`), load a profile with Train2Go-loaded workouts, click one. Confirm the dialog opens, lazy-load fires (or stays empty if T2G is unavailable), and there is no "Something went wrong" screen.
 
 ## 8. PR hygiene
 
-- [ ] 8.1 No changeset required. `@kaiord/workout-spa-editor` is `private: true` and is NOT in `.changeset/config.json#linked`. Document this rationale in the PR description so reviewers don't request one.
-- [ ] 8.2 Open PR with conventional-commit title `fix(spa-editor): coaching dialog rules-of-hooks crash + react-hooks lint gate`.
-- [ ] 8.3 PR description: link to `proposal.md` (do not duplicate its Why-section text); list any `eslint-disable` suppressions added in step 1.4 (with follow-up issue references); list any `analytics.event` interpolation sites discovered/fixed in step 2.6; include a screenshot or screen-recording of the original repro working post-fix.
-- [ ] 8.4 After merge: run `/opsx-archive fix-coaching-dialog-rules-of-hooks` to move this change to the archive.
+- [x] 8.1 No changeset required. `@kaiord/workout-spa-editor` is `private: true` and is NOT in `.changeset/config.json#linked`. Document this rationale in the PR description so reviewers don't request one.
+- [x] 8.2 Open PR with conventional-commit title `fix(spa-editor): coaching dialog rules-of-hooks crash + react-hooks lint gate`.
+- [x] 8.3 PR description: link to `proposal.md` (do not duplicate its Why-section text); list any `eslint-disable` suppressions added in step 1.4 (with follow-up issue references); list any `analytics.event` interpolation sites discovered/fixed in step 2.6; include a screenshot or screen-recording of the original repro working post-fix.
+- [x] 8.4 After merge: run `/opsx-archive fix-coaching-dialog-rules-of-hooks` to move this change to the archive.
 <!-- ci-trigger -->
