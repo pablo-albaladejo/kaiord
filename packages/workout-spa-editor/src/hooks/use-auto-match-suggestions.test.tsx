@@ -75,13 +75,19 @@ describe("useAutoMatchSuggestions", () => {
     });
   });
 
-  it("returns [] when banner is dismissed within TTL even if candidates exist", async () => {
+  it("hides only the dismissed pair; other candidates remain visible", async () => {
     await db.table("coachingActivities").put(seedActivity("2026-04-29"));
     await db.table("workouts").put(seedWorkout("2026-04-29", 3600));
     const dismissedRow: AutoMatchDismissal = {
       profileId: "p1",
       weekStart: "2026-04-27",
-      dismissedAt: new Date(Date.now() - 60 * 60 * 1000).toISOString(), // 1h ago
+      dismissedPairs: [
+        {
+          activityId: "p1:train2go:1",
+          workoutId: "w-1",
+          dismissedAt: new Date().toISOString(),
+        },
+      ],
     };
     await db.table("autoMatchDismissals").put(dismissedRow);
 
@@ -92,13 +98,19 @@ describe("useAutoMatchSuggestions", () => {
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
-  it("re-evaluates when the dismissal row is removed", async () => {
+  it("re-evaluates when the dismissal entry is removed", async () => {
     await db.table("coachingActivities").put(seedActivity("2026-04-29"));
     await db.table("workouts").put(seedWorkout("2026-04-29", 3600));
     await db.table("autoMatchDismissals").put({
       profileId: "p1",
       weekStart: "2026-04-27",
-      dismissedAt: new Date().toISOString(),
+      dismissedPairs: [
+        {
+          activityId: "p1:train2go:1",
+          workoutId: "w-1",
+          dismissedAt: new Date().toISOString(),
+        },
+      ],
     });
 
     const { result } = renderHook(() =>

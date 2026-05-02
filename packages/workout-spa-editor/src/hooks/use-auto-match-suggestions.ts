@@ -1,13 +1,18 @@
 /**
- * useAutoMatchSuggestions — gates `autoMatchSessions` enumeration by
- * the 24h dismissal state. Returns [] when the banner is dismissed
- * for the (profileId, weekStart) pair within the TTL window.
+ * useAutoMatchSuggestions — surfaces the auto-match heuristic output
+ * for the visible week, filtered against the per-pair dismissal state.
  *
- * Uses Dexie liveQuery so the hook re-fires on:
- *   - changes to `auto_match_dismissals` (Dismiss-all flips the gate)
- *   - changes to `session_matches` (Accept removes a candidate)
- *   - changes to `coachingActivities` / `workouts` (sync brings new
- *     candidates into scope)
+ * The heuristic itself (`autoMatchSessions`) is unchanged from the
+ * archived design D2 — same threshold, same `same date AND same sport`
+ * gating, same greedy pairing. The filter happens at the consumer
+ * layer: each suggestion is dropped if `isAutoMatchBannerDismissed`
+ * returns true for `(profileId, weekStart, activityId, workoutId)`.
+ *
+ * Reactivity comes from `useLiveQuery` over `autoMatchDismissals`
+ * keyed on `(profileId, weekStart)` plus the source tables Dexie
+ * already triggers re-fires for (`session_matches`, `coachingActivities`,
+ * `workouts`). When a Reject upserts a dismissal row, the next render
+ * sees the row hidden — no manual reload.
  */
 
 import { useLiveQuery } from "dexie-react-hooks";
@@ -27,14 +32,8 @@ export function useAutoMatchSuggestions(
 ): MatchSuggestion[] | undefined {
   return useLiveQuery<MatchSuggestion[]>(async () => {
     if (!profileId || !weekStart) return [];
-    const dismissalRepo = createDexieAutoMatchDismissalRepository(db);
-    const dismissed = await isAutoMatchBannerDismissed(
-      { profileId, weekStart, now: new Date() },
-      { repository: dismissalRepo }
-    );
-    if (dismissed) return [];
 
-    return autoMatchSessions(
+    const suggestions = await autoMatchSessions(
       { profileId, weekStart },
       {
         coachingRepository: createDexieCoachingRepository(db),
@@ -42,5 +41,22 @@ export function useAutoMatchSuggestions(
         repository: createDexieSessionMatchRepository(db),
       }
     );
+    if (suggestions.length === 0) return [];
+
+    const dismissalRepo = createDexieAutoMatchDismissalRepository(db);
+    const visible: MatchSuggestion[] = [];
+    for (const s of suggestions) {
+      const dismissed = await isAutoMatchBannerDismissed(
+        {
+          profileId,
+          weekStart,
+          activityId: s.activityId,
+          workoutId: s.workoutId,
+        },
+        { repository: dismissalRepo }
+      );
+      if (!dismissed) visible.push(s);
+    }
+    return visible;
   }, [profileId, weekStart]);
 }

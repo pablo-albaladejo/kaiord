@@ -210,12 +210,12 @@ describe("deleteProfileWithCascade", () => {
     await deps.autoMatchDismissal.put({
       profileId: "p1",
       weekStart: "2026-04-13",
-      dismissedAt: NOW,
+      dismissedPairs: [{ activityId: "a1", workoutId: "w1", dismissedAt: NOW }],
     });
     await deps.autoMatchDismissal.put({
       profileId: "p2",
       weekStart: "2026-04-13",
-      dismissedAt: NOW,
+      dismissedPairs: [{ activityId: "a2", workoutId: "w2", dismissedAt: NOW }],
     });
 
     await deleteProfileWithCascade(deps, "p1");

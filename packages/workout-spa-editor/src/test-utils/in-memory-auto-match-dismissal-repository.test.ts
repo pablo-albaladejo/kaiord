@@ -8,7 +8,13 @@ const baseRow = (
 ): AutoMatchDismissal => ({
   profileId: "p1",
   weekStart: "2026-04-27",
-  dismissedAt: "2026-05-01T12:00:00.000Z",
+  dismissedPairs: [
+    {
+      activityId: "a1",
+      workoutId: "w1",
+      dismissedAt: "2026-05-01T12:00:00.000Z",
+    },
+  ],
   ...overrides,
 });
 
@@ -30,12 +36,33 @@ describe("InMemoryAutoMatchDismissalRepository", () => {
 
   it("put is upsert by composite (profileId, weekStart)", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
-    await repo.put(baseRow({ dismissedAt: "2026-05-01T10:00:00.000Z" }));
+    await repo.put(
+      baseRow({
+        dismissedPairs: [
+          {
+            activityId: "a1",
+            workoutId: "w1",
+            dismissedAt: "2026-05-01T10:00:00.000Z",
+          },
+        ],
+      })
+    );
 
-    await repo.put(baseRow({ dismissedAt: "2026-05-01T15:00:00.000Z" }));
+    await repo.put(
+      baseRow({
+        dismissedPairs: [
+          {
+            activityId: "a1",
+            workoutId: "w1",
+            dismissedAt: "2026-05-01T15:00:00.000Z",
+          },
+        ],
+      })
+    );
 
     expect(
-      (await repo.getByProfileAndWeek("p1", "2026-04-27"))?.dismissedAt
+      (await repo.getByProfileAndWeek("p1", "2026-04-27"))?.dismissedPairs[0]
+        ?.dismissedAt
     ).toBe("2026-05-01T15:00:00.000Z");
   });
 

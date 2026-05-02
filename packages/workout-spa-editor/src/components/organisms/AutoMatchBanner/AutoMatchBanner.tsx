@@ -1,6 +1,8 @@
 /**
  * Surfaces auto-match suggestions for the current week and lets the
- * user accept / reject each pair, or dismiss the banner for 24h.
+ * user accept or reject each pair. Reject persists a per-pair dismissal
+ * via `dismissAutoMatchBanner` (the parent dispatches), so the row
+ * does NOT re-surface for that week on the same device.
  *
  * Renders as a `role="region"` landmark with a polite live-region
  * sub-element (NOT aria-live on the region itself, which causes NVDA
@@ -17,8 +19,7 @@ import { AutoMatchSuggestionRow } from "./AutoMatchSuggestionRow";
 export type AutoMatchBannerProps = {
   suggestions: MatchSuggestion[];
   onAccept: (s: MatchSuggestion) => Promise<void> | void;
-  onReject: (s: MatchSuggestion) => void;
-  onDismissAll: () => Promise<void> | void;
+  onReject: (s: MatchSuggestion) => Promise<void> | void;
   resolveActivity?: (id: string) => CoachingActivity | undefined;
   resolveWorkoutTitle?: (id: string) => string | undefined;
 };
@@ -34,7 +35,6 @@ export function AutoMatchBanner({
   suggestions,
   onAccept,
   onReject,
-  onDismissAll,
   resolveActivity,
   resolveWorkoutTitle,
 }: AutoMatchBannerProps) {
@@ -51,8 +51,8 @@ export function AutoMatchBanner({
     await onAccept(s);
     setStatus(remainingMessage("Session matched", suggestions.length - 1));
   };
-  const onRejectRow = (s: MatchSuggestion) => {
-    onReject(s);
+  const onRejectRow = async (s: MatchSuggestion) => {
+    await onReject(s);
     setStatus(remainingMessage("Suggestion dismissed", suggestions.length - 1));
   };
 
@@ -68,7 +68,6 @@ export function AutoMatchBanner({
         expanded={expanded}
         overflow={overflow}
         onToggleExpanded={() => setExpanded((e) => !e)}
-        onDismissAll={() => void onDismissAll()}
       />
       <ul className="space-y-1">
         {visible.map((s) => (
@@ -76,7 +75,7 @@ export function AutoMatchBanner({
             key={`${s.activityId}|${s.workoutId}`}
             suggestion={s}
             onAccept={() => void onAcceptRow(s)}
-            onReject={() => onRejectRow(s)}
+            onReject={() => void onRejectRow(s)}
             resolveActivity={resolveActivity}
             resolveWorkoutTitle={resolveWorkoutTitle}
           />
