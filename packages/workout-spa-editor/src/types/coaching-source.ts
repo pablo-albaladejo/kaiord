@@ -24,6 +24,12 @@ export type CoachingSource = {
   error: string | null;
   /** Activities for the supplied (profileId, days), live-queried. */
   activities: CoachingActivity[];
+  /**
+   * ISO timestamp of the last successful sync for the active profile.
+   * `undefined` when the platform has never been synced for this profile
+   * (drives the "never synced" tooltip on `CoachingSyncButton`).
+   */
+  lastSyncedAt: string | undefined;
   sync: (profileId: string, weekStart: string) => Promise<void>;
   expand: (profileId: string, date: string) => Promise<void>;
   connect: (profileId: string) => Promise<void>;

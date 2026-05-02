@@ -71,6 +71,7 @@ export function CalendarHeader({
                 onSync={() => src.sync(s.data.days[0])}
                 onConnect={src.connect}
                 label={src.label}
+                lastSyncedAt={src.lastSyncedAt}
               />
             ))}
         </div>

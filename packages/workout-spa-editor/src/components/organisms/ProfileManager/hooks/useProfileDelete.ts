@@ -1,11 +1,19 @@
 /**
  * useProfileDelete Hook
  *
- * Profile deletion with coaching cascade. The cascade runs BEFORE the
- * profile row is removed via `deleteProfile` so a subsequent reload
- * doesn't see orphan coaching rows. `deletedProfileId` is captured at
+ * Profile deletion with full cascade fan-out. The cascade clears all
+ * profile-scoped persistence (coaching activities, coaching sync state,
+ * session matches, auto-match dismissals, user preferences) BEFORE the
+ * profile row itself is removed via `deleteProfile`. The whole flow runs
+ * inside `persistence.transaction(...)` so a mid-cascade crash leaves the
+ * database in the pre-delete state. `deletedProfileId` is captured at
  * confirm time — NEVER `getActiveId()` (would race when deleting a
  * non-active profile or right after a switch).
+ *
+ * Every cascade repository is sourced from the injected `persistence`
+ * object (not from any direct `db` import) so the outer transaction
+ * binds cleanly to the same database instance and a different
+ * `PersistencePort` cannot accidentally split writes.
  */
 
 import { deleteProfile } from "../../../../application/profile/delete-profile";
@@ -33,14 +41,19 @@ export function useProfileDelete(params: UseProfileDeleteParams) {
     const id = deleteConfirmId; // capture; never use getActiveId
     void (async () => {
       try {
-        await deleteProfileWithCascade(
-          {
-            coaching: persistence.coaching,
-            coachingSyncState: persistence.coachingSyncState,
-          },
-          id
-        );
-        await deleteProfile(persistence, id);
+        await persistence.transaction(async () => {
+          await deleteProfileWithCascade(
+            {
+              coaching: persistence.coaching,
+              coachingSyncState: persistence.coachingSyncState,
+              sessionMatch: persistence.sessionMatch,
+              autoMatchDismissal: persistence.autoMatchDismissal,
+              userPreferences: persistence.userPreferences,
+            },
+            id
+          );
+          await deleteProfile(persistence, id);
+        });
         setDeleteConfirmId(null);
       } catch {
         toast.error(TOAST_ERROR);

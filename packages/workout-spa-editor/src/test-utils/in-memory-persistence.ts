@@ -13,6 +13,7 @@ import {
   createInMemoryAiProviderRepository,
   type CustomPromptRef,
 } from "./in-memory-ai-provider-repository";
+import { createInMemoryAutoMatchDismissalRepository } from "./in-memory-auto-match-dismissal-repository";
 import { createInMemoryCoachingRepository } from "./in-memory-coaching-repository";
 import { createInMemoryCoachingSyncStateRepository } from "./in-memory-coaching-sync-state-repository";
 import {
@@ -24,9 +25,11 @@ import {
   createInMemoryProfileRepository,
   type ActiveIdRef,
 } from "./in-memory-profile-repository";
+import { createInMemorySessionMatchRepository } from "./in-memory-session-match-repository";
 import { createInMemorySyncStateRepository } from "./in-memory-sync-state-repository";
 import { createInMemoryTemplateRepository } from "./in-memory-template-repository";
 import { createInMemoryUsageRepository } from "./in-memory-usage-repository";
+import { createInMemoryUserPreferencesRepository } from "./in-memory-user-preferences-repository";
 import { createInMemoryWorkoutRepository } from "./in-memory-workout-repository";
 
 export function createInMemoryPersistence(): PersistencePort {
@@ -39,6 +42,9 @@ export function createInMemoryPersistence(): PersistencePort {
     usage: new Map(),
     coaching: new Map(),
     coachingSyncState: new Map(),
+    sessionMatch: new Map(),
+    autoMatchDismissal: new Map(),
+    userPreferences: new Map(),
   };
   const profileActiveIdRef: ActiveIdRef = { current: null };
   const aiCustomPromptRef: CustomPromptRef = { current: null };
@@ -59,6 +65,13 @@ export function createInMemoryPersistence(): PersistencePort {
     coaching: createInMemoryCoachingRepository(stores.coaching),
     coachingSyncState: createInMemoryCoachingSyncStateRepository(
       stores.coachingSyncState
+    ),
+    sessionMatch: createInMemorySessionMatchRepository(stores.sessionMatch),
+    autoMatchDismissal: createInMemoryAutoMatchDismissalRepository(
+      stores.autoMatchDismissal
+    ),
+    userPreferences: createInMemoryUserPreferencesRepository(
+      stores.userPreferences
     ),
     transaction: async <T>(fn: () => Promise<T>): Promise<T> => {
       const snapshot = captureSnapshot(
