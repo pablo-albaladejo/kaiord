@@ -41,8 +41,12 @@ export function createDexieAiProviderRepository(
       // Sort by label so listings are deterministic. Dexie's
       // primary-key order is UUID-random, which makes dependent UI
       // tests flaky and the list visually arbitrary for the user.
+      // Pin locale to "en" + sensitivity:"base" so CI / Node / browser
+      // produce identical orderings across environments.
       all.sort((a, b) =>
-        String(a.label ?? "").localeCompare(String(b.label ?? ""))
+        String(a.label ?? "").localeCompare(String(b.label ?? ""), "en", {
+          sensitivity: "base",
+        })
       );
       return Promise.all(all.map(decryptProvider));
     },
