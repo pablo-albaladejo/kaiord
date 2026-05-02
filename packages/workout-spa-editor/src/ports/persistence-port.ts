@@ -12,15 +12,21 @@ import type { WorkoutRecord } from "../types/calendar-schemas";
 import type { Profile } from "../types/profile";
 import type { UsageRecord } from "../types/usage-schemas";
 import type { WorkoutTemplate } from "../types/workout-library";
+import type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
 import type {
   CoachingRepository,
   CoachingSyncStateRepository,
 } from "./coaching-repositories";
+import type { SessionMatchRepository } from "./session-match-repository";
+import type { UserPreferencesRepository } from "./user-preferences-repository";
 
+export type { AutoMatchDismissalRepository } from "./auto-match-dismissal-repository";
 export type {
   CoachingRepository,
   CoachingSyncStateRepository,
 } from "./coaching-repositories";
+export type { SessionMatchRepository } from "./session-match-repository";
+export type { UserPreferencesRepository } from "./user-preferences-repository";
 
 export type WorkoutRepository = {
   getById: (id: string) => Promise<WorkoutRecord | undefined>;
@@ -87,6 +93,14 @@ export type PersistencePort = {
   usage: UsageRepository;
   coaching: CoachingRepository;
   coachingSyncState: CoachingSyncStateRepository;
+  // Profile-scoped repos previously created on demand via direct `db`
+  // imports. Routing them through PersistencePort keeps the cascade
+  // (deleteProfileWithCascade) bound to the same database instance the
+  // outer `transaction` opens, so a different PersistencePort backed by
+  // a different db cannot accidentally split writes.
+  sessionMatch: SessionMatchRepository;
+  autoMatchDismissal: AutoMatchDismissalRepository;
+  userPreferences: UserPreferencesRepository;
   // Atomic commit-or-rollback wrapper for multi-write or read-modify-write
   // use cases. Dexie adapter delegates to db.transaction("rw", db.tables, fn);
   // in-memory adapter implements snapshot/revert. Application code MUST NOT
