@@ -154,8 +154,16 @@ const extractCompletion = (block) => {
 
 /**
  * Parse ping JSON response.
+ *
  * Input: parsed JSON from /api/v2/profile/ping
- * Returns: { userId, userName, sessionActive } or null
+ * Returns: { sessionActive, userId?, userName?, coachName? }.
+ *
+ * The coach/trainer name is opportunistically extracted from common
+ * shapes Train2Go has historically used (`data.user.coach.name`,
+ * `data.user.trainer.name`, `data.user.coach_name`,
+ * `data.user.trainer_name`). If none is present the field is omitted —
+ * the popup hides the sub-line gracefully. Per spec we MUST NOT add a
+ * new endpoint; this parser change does not touch the network.
  */
 const parsePingJson = (json) => {
   if (!json?.success || !json?.data?.user) {
@@ -163,10 +171,20 @@ const parsePingJson = (json) => {
   }
 
   const user = json.data.user;
+  const coachName =
+    user.coach?.name ??
+    user.trainer?.name ??
+    user.coach_name ??
+    user.trainer_name ??
+    undefined;
+
   return {
     userId: user.id,
     userName: user.name,
     sessionActive: true,
+    ...(typeof coachName === "string" && coachName.length > 0
+      ? { coachName }
+      : {}),
   };
 };
 
