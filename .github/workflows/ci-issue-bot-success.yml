@@ -1,0 +1,48 @@
+name: CI Issue Bot — Close on Green
+
+on:
+  workflow_run:
+    workflows: ["CI"]
+    branches: [main]
+    types: [completed]
+
+permissions:
+  issues: write
+
+jobs:
+  notify-success:
+    name: Auto-close stale CI failure issues
+    runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && vars.CI_ISSUE_BOT_ENABLED != 'false' }}
+    concurrency:
+      group: ci-issue-bot-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+          sparse-checkout-cone-mode: false
+      - name: Detect skipped jobs on the green run
+        id: skipcheck
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          RUN_ID: ${{ github.event.workflow_run.id }}
+          REPO: ${{ github.repository }}
+        run: |
+          # workflow_run jobs API: any job with conclusion = "skipped" means
+          # the green run did not exercise the full CI surface (path filter,
+          # matrix gating, etc.). v1 close-rule: never close on partial coverage.
+          # Filter out the "Auto Merge" wrapper which is path-filtered by design.
+          skipped=$(gh api "repos/$REPO/actions/runs/$RUN_ID/jobs" \
+            --jq '[.jobs[] | select(.conclusion == "skipped" and .name != "auto-merge")] | length')
+          [ "$skipped" -gt 0 ] && echo "any=true" >> "$GITHUB_OUTPUT" || echo "any=false" >> "$GITHUB_OUTPUT"
+      - name: Auto-close stale ci,automated issues on a fully-green run
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.event.workflow_run.head_sha }}
+          GITHUB_ACTOR: ${{ github.event.workflow_run.actor.login }}
+          GITHUB_RUN_ID: ${{ github.event.workflow_run.id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+        run: node scripts/ci-failure-issue.mjs close ${{ steps.skipcheck.outputs.any }}
