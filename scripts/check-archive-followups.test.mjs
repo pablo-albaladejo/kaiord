@@ -67,6 +67,10 @@ const buildDeferral = (issues) =>
     )
     .join("");
 
+const buildWithMarker = (completed, issues) =>
+  `> Tasks: ${completed} completed, ${issues.length} deferred\n\n` +
+  buildDeferral(issues);
+
 test("zero deferrals → exit 0, no count line for that archive", () => {
   const h = mkHarness((arc) =>
     writeTasks(arc, "2026-05-01-clean", ZERO_DEFERRAL)
@@ -169,6 +173,146 @@ test("multiple archives: one over-cap, one under, one zero — only the over-cap
     assert.ok(!r.stderr.includes("2026-05-06-clean"));
     assert.ok(!r.stderr.includes("2026-05-07-light"));
     assert.ok(r.stdout.includes("2026-05-07-light: 2 deferrals"));
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("v2 marker — healthy ratio (5 deferred / 30 completed) passes despite legacy cap", () => {
+  const h = mkHarness((arc) =>
+    writeTasks(
+      arc,
+      "2026-05-10-healthy-large",
+      buildWithMarker(30, [501, 502, 503, 504, 505, 506, 507])
+    )
+  );
+  try {
+    const r = h.run();
+    assert.equal(r.status, 0, r.stderr || r.stdout);
+    assert.ok(
+      r.stdout.includes(
+        "2026-05-10-healthy-large: 7 deferred / 30 completed (ratio mode)"
+      ),
+      r.stdout
+    );
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("v2 marker — overscoped ratio (5 deferred / 2 completed) fails with ratio violation", () => {
+  const h = mkHarness((arc) =>
+    writeTasks(
+      arc,
+      "2026-05-11-overscoped",
+      buildWithMarker(2, [601, 602, 603, 604, 605])
+    )
+  );
+  try {
+    const r = h.run();
+    assert.notEqual(r.status, 0);
+    assert.ok(
+      r.stderr.includes("5 deferred > 2 completed"),
+      r.stderr
+    );
+    assert.ok(r.stderr.includes("overscoped"), r.stderr);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("v2 marker — declared/actual count mismatch fails", () => {
+  const inconsistent =
+    `> Tasks: 10 completed, 3 deferred\n\n` +
+    `## 1. Foo\n\n` +
+    `- [ ] 1.1 a\n      > Deferred to: #700\n` +
+    `- [ ] 1.2 b\n      > Deferred to: #701\n`;
+  const h = mkHarness((arc) =>
+    writeTasks(arc, "2026-05-12-mismatch", inconsistent)
+  );
+  try {
+    const r = h.run();
+    assert.notEqual(r.status, 0);
+    assert.ok(
+      r.stderr.includes("declares 3 deferred but tasks.md contains 2"),
+      r.stderr
+    );
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("v2 marker — malformed (non-numeric) fails with parse error", () => {
+  const malformed =
+    `> Tasks: ten completed, two deferred\n\n## 1. Foo\n\n- [x] 1.1 done\n`;
+  const h = mkHarness((arc) =>
+    writeTasks(arc, "2026-05-13-malformed-marker", malformed)
+  );
+  try {
+    const r = h.run();
+    assert.notEqual(r.status, 0);
+    assert.ok(r.stderr.includes("malformed marker"), r.stderr);
+    assert.ok(r.stderr.includes("> Tasks:"), r.stderr);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("v2 marker — zero deferred + non-zero completed passes", () => {
+  const h = mkHarness((arc) =>
+    writeTasks(
+      arc,
+      "2026-05-14-clean-with-marker",
+      `> Tasks: 8 completed, 0 deferred\n\n## 1. Foo\n\n- [x] 1.1 done\n`
+    )
+  );
+  try {
+    const r = h.run();
+    assert.equal(r.status, 0, r.stderr || r.stdout);
+    assert.ok(
+      r.stdout.includes(
+        "2026-05-14-clean-with-marker: 0 deferred / 8 completed (ratio mode)"
+      ),
+      r.stdout
+    );
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("v2 marker — boundary ratio (D = C) passes", () => {
+  const h = mkHarness((arc) =>
+    writeTasks(
+      arc,
+      "2026-05-15-equal",
+      buildWithMarker(3, [801, 802, 803])
+    )
+  );
+  try {
+    const r = h.run();
+    assert.equal(r.status, 0, r.stderr || r.stdout);
+  } finally {
+    h.cleanup();
+  }
+});
+
+test("legacy cap still applies when Tasks marker is absent", () => {
+  const h = mkHarness((arc) =>
+    writeTasks(
+      arc,
+      "2026-05-16-legacy-tripped",
+      buildDeferral([901, 902, 903, 904, 905, 906])
+    )
+  );
+  try {
+    const r = h.run();
+    assert.notEqual(r.status, 0);
+    assert.ok(r.stderr.includes("2026-05-16-legacy-tripped"), r.stderr);
+    assert.ok(r.stderr.includes("≥ cap 6"), r.stderr);
+    assert.ok(
+      r.stderr.includes('add "> Tasks:'),
+      "error message should hint at the marker"
+    );
   } finally {
     h.cleanup();
   }
