@@ -22,13 +22,13 @@ To disable analytics for a deploy, leave the var unset (or set it to the empty s
 
 ## Events emitted
 
-| Event name              | Source                                                                  | Payload shape                                                                                                                                            |
-| ----------------------- | ----------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `pageView`              | router                                                                  | `{ path }`                                                                                                                                               |
-| `route-error`           | `RouteErrorBoundary` (`src/components/molecules/RouteErrorBoundary.tsx`) | Built by `src/lib/build-route-error-payload.ts`. Fully PII-scrubbed: `route`, `name`, `message ≤ 500`, `componentStack ≤ 1000`, all multi-class allow-listed. |
-| `coaching.sync.invoked` | Train2Go sync flow                                                      | `{ source, profileId, trigger }`                                                                                                                         |
-| `coaching.sync.result`  | Train2Go sync flow                                                      | `{ source, profileId, ok, reason?, durationMs }`                                                                                                         |
-| `coaching.expand_day.invoked` | Train2Go expand-day flow                                          | `{ source, profileId }`                                                                                                                                  |
+| Event name                    | Source                                                                   | Payload shape                                                                                                                                                 |
+| ----------------------------- | ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `pageView`                    | router                                                                   | `{ path }`                                                                                                                                                    |
+| `route-error`                 | `RouteErrorBoundary` (`src/components/molecules/RouteErrorBoundary.tsx`) | Built by `src/lib/build-route-error-payload.ts`. Fully PII-scrubbed: `route`, `name`, `message ≤ 500`, `componentStack ≤ 1000`, all multi-class allow-listed. |
+| `coaching.sync.invoked`       | Train2Go sync flow                                                       | `{ source, profileId, trigger }`                                                                                                                              |
+| `coaching.sync.result`        | Train2Go sync flow                                                       | `{ source, profileId, ok, reason?, durationMs }`                                                                                                              |
+| `coaching.expand_day.invoked` | Train2Go expand-day flow                                                 | `{ source, profileId }`                                                                                                                                       |
 
 The `route-error` payload is the most sensitive surface: an unscrubbed React error message can leak UUIDs, bearer tokens, emails, and base64 secrets present in user input or query strings. The boundary forwards the scrubbed payload only — see `src/lib/scrub-analytics-string.ts` for the regex allow-list (UUID / Bearer / email / hex / base64url).
 
