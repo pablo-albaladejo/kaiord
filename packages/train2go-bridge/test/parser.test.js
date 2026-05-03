@@ -4,6 +4,7 @@ const {
   parseWeeklyHtml,
   parseDailyHtml,
   parsePingJson,
+  parseDetailsHtml,
   decodeEntities,
   htmlToPlainText,
 } = require("../parser.js");
@@ -260,6 +261,95 @@ describe("parser", () => {
       expect(htmlToPlainText(undefined)).toBe("");
       expect(htmlToPlainText(null)).toBe("");
       expect(htmlToPlainText(0)).toBe("");
+    });
+  });
+
+  describe("parseDetailsHtml", () => {
+    const FORBIDDEN_KEYS = new Set([
+      "gender",
+      "birthday",
+      "fat",
+      "smoker",
+      "imc",
+      "bpm_rest",
+      "bpmRest",
+      "user_notes",
+      "userNotes",
+      "notes",
+      "coach",
+      "email",
+      "records",
+      "tests",
+      "height",
+    ]);
+
+    const walkAndCollectKeys = (node, acc = new Set()) => {
+      if (node === null || typeof node !== "object") return acc;
+      if (Array.isArray(node)) {
+        for (const child of node) walkAndCollectKeys(child, acc);
+        return acc;
+      }
+      for (const key of Object.keys(node)) {
+        acc.add(key);
+        walkAndCollectKeys(node[key], acc);
+      }
+      return acc;
+    };
+
+    it("extracts physiological / paces / hrZones from the live-shape fixture", () => {
+      const html = fixture("details-active.html");
+
+      const result = parseDetailsHtml(html);
+
+      expect(result.physiological).toEqual({ weight: 83, bpmMax: 187 });
+      expect(result.paces.cycling).toEqual({ z4Upper: 268, z5Lower: 269 });
+      expect(result.paces.running.z4Upper).toEqual({ min: 4, sec: 10 });
+      expect(result.paces.swimming.z4Upper).toEqual({ min: 1, sec: 32 });
+      expect(result.hrZones.cycling).toEqual({ z4Upper: 174 });
+      expect(result.hrZones.running).toEqual({ z4Upper: 168 });
+    });
+
+    it("redacts forbidden fields recursively at any nesting depth", () => {
+      const html = fixture("details-active.html");
+
+      const result = parseDetailsHtml(html);
+
+      const allKeys = walkAndCollectKeys(result);
+      for (const forbidden of FORBIDDEN_KEYS) {
+        expect(
+          allKeys.has(forbidden),
+          `forbidden key "${forbidden}" leaked`
+        ).toBe(false);
+      }
+    });
+
+    it("DOM 0-indexed name=z3_upper maps to payload key z4Upper", () => {
+      const html = fixture("details-active.html");
+
+      const result = parseDetailsHtml(html);
+
+      expect(result.hrZones.cycling.z4Upper).toBe(174);
+      expect(walkAndCollectKeys(result).has("z3Upper")).toBe(false);
+    });
+
+    it("returns an empty object for non-string / empty input", () => {
+      expect(parseDetailsHtml(undefined)).toEqual({});
+      expect(parseDetailsHtml(null)).toEqual({});
+      expect(parseDetailsHtml("")).toEqual({});
+    });
+
+    it("emits paces.cycling without z5Lower when only z4Upper is present", () => {
+      const html = `<main><section class="details">
+        <div id="paces-99999" class="details-paces">
+          <form action="/api/v2/paces/1"><input name="sport_id" type="hidden" value="3">
+            <input name="measurement[z3_upper][0]" type="number" value="268">
+          </form>
+        </div>
+      </section></main>`;
+
+      const result = parseDetailsHtml(html);
+
+      expect(result.paces.cycling).toEqual({ z4Upper: 268 });
     });
   });
 });
