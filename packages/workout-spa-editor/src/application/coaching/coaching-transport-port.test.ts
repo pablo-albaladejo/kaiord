@@ -1,0 +1,62 @@
+/**
+ * CoachingTransport port — shape smoke tests.
+ *
+ * Confirms the optional `readZones` capability is treated as truly
+ * optional: a Garmin-shaped transport (no readZones) still satisfies
+ * the type, while a Train2Go-shaped transport advertises the function.
+ * The runtime check `if (!transport.readZones)` is what use cases rely
+ * on — we exercise both branches here so the contract is locked in.
+ */
+import { describe, expect, it, vi } from "vitest";
+
+import type { ZonesPayload } from "../../types/coaching-zones";
+import type { CoachingTransport } from "./coaching-transport-port";
+
+const stubBase = (source: string): Omit<CoachingTransport, "readZones"> => ({
+  source,
+  ping: vi.fn(async () => ({
+    sessionActive: false,
+    externalUserId: null,
+    externalUserName: null,
+  })),
+  openExternal: vi.fn(async () => undefined),
+  readWeek: vi.fn(async () => []),
+  readDay: vi.fn(async () => []),
+});
+
+describe("CoachingTransport.readZones", () => {
+  it("is absent on a Garmin-shaped transport", () => {
+    const transport: CoachingTransport = stubBase("garmin");
+
+    expect(transport.readZones).toBeUndefined();
+  });
+
+  it("is callable on a Train2Go-shaped transport", async () => {
+    const payload: ZonesPayload = {
+      physiological: { weight: 83, bpmMax: 187 },
+    };
+    const readZones = vi.fn(async () => payload);
+    const transport: CoachingTransport = {
+      ...stubBase("train2go"),
+      readZones,
+    };
+
+    expect(typeof transport.readZones).toBe("function");
+    const result = await transport.readZones?.("99999");
+    expect(result).toBe(payload);
+    expect(readZones).toHaveBeenCalledWith("99999");
+  });
+
+  it("propagates the AbortSignal argument when supplied", async () => {
+    const readZones = vi.fn(async () => null);
+    const transport: CoachingTransport = {
+      ...stubBase("train2go"),
+      readZones,
+    };
+    const ac = new AbortController();
+
+    await transport.readZones?.("99999", ac.signal);
+
+    expect(readZones).toHaveBeenCalledWith("99999", ac.signal);
+  });
+});
