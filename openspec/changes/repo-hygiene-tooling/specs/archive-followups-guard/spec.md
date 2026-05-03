@@ -37,11 +37,11 @@ The script SHALL mirror the architectural pattern of `scripts/check-archive-date
 
 The script SHALL be wired as a sibling lint script in `package.json`:
 
-| Script | Behavior |
-|---|---|
-| `lint:archive` | Existing folder-vs-Completed invariant. Unchanged. |
-| `lint:archive-index` | Existing `archive/README.md` index freshness. Unchanged. |
-| `lint:archive-followups` | New. Runs `node scripts/check-archive-followups.mjs`. |
+| Script                   | Behavior                                                 |
+| ------------------------ | -------------------------------------------------------- |
+| `lint:archive`           | Existing folder-vs-Completed invariant. Unchanged.       |
+| `lint:archive-index`     | Existing `archive/README.md` index freshness. Unchanged. |
+| `lint:archive-followups` | New. Runs `node scripts/check-archive-followups.mjs`.    |
 
 The umbrella `pnpm lint` SHALL run all three. The husky `pre-commit` hook chain SHALL include `lint:archive-followups` so deferral-marker edits are caught locally before push.
 
@@ -75,11 +75,11 @@ The umbrella `pnpm lint` SHALL run all three. The husky `pre-commit` hook chain 
 
 Phase 2 SHALL backfill `> Deferred to: #N` markers into the three archives that spawned the 9-issue backlog observed at 2026-05-03. The backfill diff SHALL be marker-only — no checkbox flips, no text edits, no `> Completed:` line touches.
 
-| Archive | Markers added |
-|---|---|
-| `2026-05-01-calendar-coaching-redesign` | `#431`, `#432`, `#433`, `#434`, `#435` (5 markers) |
-| `2026-05-02-calendar-coaching-redesign-completion` | `#460` (1 marker) |
-| `2026-05-02-fix-coaching-dialog-rules-of-hooks` | `#450`, `#451`, `#454` (3 markers) |
+| Archive                                            | Markers added                                      |
+| -------------------------------------------------- | -------------------------------------------------- |
+| `2026-05-01-calendar-coaching-redesign`            | `#431`, `#432`, `#433`, `#434`, `#435` (5 markers) |
+| `2026-05-02-calendar-coaching-redesign-completion` | `#460` (1 marker)                                  |
+| `2026-05-02-fix-coaching-dialog-rules-of-hooks`    | `#450`, `#451`, `#454` (3 markers)                 |
 
 Backfill SHALL be permitted because the markers are inert annotations — they reference issues already created and known, do not modify behavior, and do not touch the `> Completed:` invariant enforced by `check-archive-dates.mjs`. The "archived = frozen" intuition applies to historical content; cross-references to known issues are annotation, not rewriting.
 
@@ -100,10 +100,10 @@ After backfill, the `2026-05-01-calendar-coaching-redesign` archive SHALL trip t
 
 The absolute-cap-of-5 implementation SHALL be replaced by a deferral-ratio invariant ("deferrals MUST NOT exceed shipped tasks per archive") when EITHER condition holds:
 
-| Trigger | Action |
-|---|---|
-| (a) A third archive trips the absolute cap | Open a PR replacing `ABSOLUTE_DEFERRAL_CAP` with a ratio invariant; assign architecture ownership |
-| (b) `tasks.md` gains a machine-readable shape that exposes completed-task counts (architectural prerequisite, tracked separately) | Open a PR replacing `ABSOLUTE_DEFERRAL_CAP` with a ratio invariant computed from the new shape |
+| Trigger                                                                                                                           | Action                                                                                            |
+| --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| (a) A third archive trips the absolute cap                                                                                        | Open a PR replacing `ABSOLUTE_DEFERRAL_CAP` with a ratio invariant; assign architecture ownership |
+| (b) `tasks.md` gains a machine-readable shape that exposes completed-task counts (architectural prerequisite, tracked separately) | Open a PR replacing `ABSOLUTE_DEFERRAL_CAP` with a ratio invariant computed from the new shape    |
 
 A follow-up issue SHALL be filed at Phase 2 ship-time titled `chore(openspec): add machine-readable shape to tasks.md for archive-followups ratio invariant`, cross-referencing this requirement.
 

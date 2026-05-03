@@ -144,7 +144,7 @@ This change is phased: Phase 1 ships the bot rework (high-value, immediate stops
 
 **Rationale:**
 
-- The "archived = frozen" intuition correctly applies to *historical content* — the change's completed scope, decisions, and outcomes. It does NOT apply to *retroactive cross-references* — annotations that point to issues already created and known. Adding `> Deferred to: #432` next to an already-checked task is annotating, not rewriting.
+- The "archived = frozen" intuition correctly applies to _historical content_ — the change's completed scope, decisions, and outcomes. It does NOT apply to _retroactive cross-references_ — annotations that point to issues already created and known. Adding `> Deferred to: #432` next to an already-checked task is annotating, not rewriting.
 - The `> Completed: YYYY-MM-DD` invariant enforced by `check-archive-dates.mjs` remains untouched. The `archive/README.md` index is regenerated mechanically by `pnpm archive:index` regardless of markers.
 - The backfill provides a real first-fail signal: post-backfill, `pnpm lint:archive-followups` fails on the calendar-redesign archive, and the threshold-tuning PR confirms the ≥5 cap is correctly calibrated.
 
