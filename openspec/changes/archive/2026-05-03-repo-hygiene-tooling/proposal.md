@@ -1,3 +1,5 @@
+> Completed: 2026-05-03
+
 ## Why
 
 Two distinct backlog-debt mechanics are leaking simultaneously:

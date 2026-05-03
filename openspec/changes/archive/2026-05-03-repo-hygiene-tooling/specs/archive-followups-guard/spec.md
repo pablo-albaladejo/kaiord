@@ -87,18 +87,18 @@ For the v1 backfill at Phase 2 ship-time, this means:
 
 Backfill SHALL be permitted because the markers are inert annotations — they reference issues already created and known, do not modify behavior, do not add scope, and do not touch the `> Completed:` invariant enforced by `check-archive-dates.mjs`. The "archived = frozen" intuition applies to historical content; cross-references to known issues on EXISTING task lines are annotation, not rewriting.
 
-After backfill, the `2026-05-01-calendar-coaching-redesign` archive holds 5 deferral markers. With the v1 cap shipped at 6 (per `tasks.md` §4.7 strategy (a)), the lint passes on first run and a follow-up PR lowers the cap to 5 to convert the 5-deferral signal into a fail.
+After backfill, the `2026-05-01-calendar-coaching-redesign` archive holds 5 deferral markers. The v1 cap ships at 6 and STAYS at 6 (revising `tasks.md` §4.7 strategy (a)). Lowering to 5 was originally proposed but would leave main permanently red: the calendar-redesign archive is immutable (its deferral count cannot drop) so a sub-5 cap would block every subsequent CI run on main. The honest path to a meaningful first-fail signal requires either (a) the deferral-ratio invariant from issue #465 (which lets healthy-but-large archives pass at any size), OR (b) an explicit grandfather allowlist for pre-existing overscoped archives. Both options are tracked under #465.
 
 #### Scenario: Backfill is committed in the same PR as the lint script
 
 - **WHEN** Phase 2's PR opens
 - **THEN** the diff SHALL include `scripts/check-archive-followups.{mjs,test.mjs}`, `openspec/SPEC_TEMPLATE.md`, `AGENTS.md`, `package.json`, AND the backfilled `tasks.md` of `2026-05-01-calendar-coaching-redesign` in a single coherent commit graph; CI SHALL never observe a state where the script lands without the backfill or vice versa
 
-#### Scenario: First-fail signal calibrated via threshold-lowering follow-up
+#### Scenario: First-fail signal arrives from a future overscoped archive
 
 - **GIVEN** Phase 2 has been merged with cap = 6 (calendar-redesign archive at 5 deferrals passes)
-- **WHEN** the threshold-lowering follow-up PR sets `ABSOLUTE_DEFERRAL_CAP = 5`
-- **THEN** `pnpm lint:archive-followups` SHALL fail listing `2026-05-01-calendar-coaching-redesign: 5 deferrals (≥ cap 5)` — the intended first-fail signal that the offending archive was overscoped at archive-time
+- **WHEN** any future archive lands with 6 or more `> Deferred to: #N` markers in its `tasks.md`
+- **THEN** `pnpm lint:archive-followups` SHALL fail listing the offending archive — the intended first-fail signal. The grandfathered calendar-redesign archive at 5 markers continues to pass
 
 #### Scenario: Marker convention is annotation-only, not retroactive scope addition
 
@@ -108,7 +108,7 @@ After backfill, the `2026-05-01-calendar-coaching-redesign` archive holds 5 defe
 
 ### Requirement: Sunset trigger for the v1 absolute-cap
 
-The absolute-cap implementation (initially 6, lowered to 5 by the threshold-tuning follow-up PR) SHALL be replaced by a deferral-ratio invariant ("deferrals MUST NOT exceed shipped tasks per archive") when EITHER condition holds:
+The absolute-cap implementation (cap = 6 in v1) SHALL be replaced by either a deferral-ratio invariant ("deferrals MUST NOT exceed shipped tasks per archive") or an explicit grandfather allowlist for pre-existing overscoped archives, when EITHER condition holds:
 
 | Trigger                                                                                                                           | Action                                                                                            |
 | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
