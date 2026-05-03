@@ -81,4 +81,14 @@ export function createBridgeDiscovery(
   };
 }
 
-export const bridgeDiscovery = createBridgeDiscovery();
+// Singleton survives Vite HMR by parking on globalThis: re-importing
+// this module after a hot update would otherwise instantiate a fresh
+// `BridgeDiscovery` with an empty `ids` map, while React hooks already
+// subscribed via `useSyncExternalStore` keep listening to the previous
+// instance — leading to "discovery says it has the bridges but my
+// hooks don't see them" bugs that only show up in dev.
+type GlobalWithDiscovery = { __KAIORD_BRIDGE_DISCOVERY__?: BridgeDiscovery };
+const g = globalThis as unknown as GlobalWithDiscovery;
+export const bridgeDiscovery: BridgeDiscovery =
+  g.__KAIORD_BRIDGE_DISCOVERY__ ?? createBridgeDiscovery();
+g.__KAIORD_BRIDGE_DISCOVERY__ = bridgeDiscovery;

@@ -117,6 +117,24 @@ describe("Garmin popup", () => {
     expect(retry.textContent).toBe("Retry");
   });
 
+  it("renders Last push line in disconnected state when receipt is present", async () => {
+    const tenMinAgo = new Date("2026-05-02T09:50:00Z").getTime();
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: { ok: true, data: { gcApi: { ok: false } } },
+        storage: { lastPushReceipt: { at: tenMinAgo, name: "Pablo" } },
+      })
+    );
+
+    dom.window.dispatchEvent(new dom.window.Event("DOMContentLoaded"));
+    await flushAsync();
+    await flushAsync();
+
+    const region = dom.window.document.getElementById("rollup-region");
+    expect(region.textContent).toContain("Last push");
+    expect(region.textContent).toContain("Pablo");
+  });
+
   it("shows snapshot placeholder when no snapshot exists", async () => {
     const dom = setupDom(
       buildChromeMock({
