@@ -285,11 +285,11 @@ In particular: deleting a `coachingActivities` row SHALL run inside `db.transact
 
 **Cascade-table inventory** — the authoritative list of cascade tables per parent SHALL be co-located with the Dexie adapter (e.g., `CASCADE_TABLES` in `adapters/dexie/cascade-tables.ts`) and unit-tested:
 
-| Parent table         | Cascade tables                                                                       |
-| -------------------- | ------------------------------------------------------------------------------------ |
-| `coachingActivities` | `sessionMatches`, `autoMatchDismissals`                                              |
-| `workouts`           | `sessionMatches`, `autoMatchDismissals`                                              |
-| `profiles`           | `coachingActivities`, `sessionMatches`, `userPreferences`, `autoMatchDismissals`     |
+| Parent table         | Cascade tables                                                                   |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `coachingActivities` | `sessionMatches`, `autoMatchDismissals`                                          |
+| `workouts`           | `sessionMatches`, `autoMatchDismissals`                                          |
+| `profiles`           | `coachingActivities`, `sessionMatches`, `userPreferences`, `autoMatchDismissals` |
 
 A unit test SHALL assert `CASCADE_TABLES` matches this inventory exactly. Adding a new cascade table anywhere SHALL fail the test until the inventory and the orchestrator transaction's table list are updated together.
 
