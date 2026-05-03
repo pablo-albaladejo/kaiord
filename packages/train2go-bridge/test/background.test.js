@@ -29,7 +29,7 @@ describe("background service worker", () => {
         name: "Kaiord Train2Go Bridge",
         version: pkg.version,
         protocolVersion: 1,
-        capabilities: ["read:training-plan"],
+        capabilities: ["read:training-plan", "read:training-zones"],
       });
     });
 
@@ -72,6 +72,7 @@ describe("background service worker", () => {
       "read:body",
       "read:sleep",
       "read:training-plan",
+      "read:training-zones",
     ]);
     return (m) => {
       const errors = [];
@@ -131,7 +132,7 @@ describe("background service worker", () => {
       expect(result).toMatchObject({
         id: "train2go-bridge",
         protocolVersion: 1,
-        capabilities: ["read:training-plan"],
+        capabilities: ["read:training-plan", "read:training-zones"],
         userId: 28035,
         userName: "Pablo",
         sessionActive: true,
@@ -146,7 +147,7 @@ describe("background service worker", () => {
       expect(result).toMatchObject({
         id: "train2go-bridge",
         protocolVersion: 1,
-        capabilities: ["read:training-plan"],
+        capabilities: ["read:training-plan", "read:training-zones"],
         sessionActive: false,
       });
     });
@@ -189,7 +190,7 @@ describe("background service worker", () => {
         name: "Kaiord Train2Go Bridge",
         version: pkg.version,
         protocolVersion: 1,
-        capabilities: ["read:training-plan"],
+        capabilities: ["read:training-plan", "read:training-zones"],
         sessionActive: true,
         userId: 28035,
         userName: "Pablo",
@@ -264,6 +265,40 @@ describe("background service worker", () => {
           userId: 28035,
         })
       ).rejects.toThrow("No Train2Go tab open");
+    });
+
+    it("handles read-details action: parses HTML body into a ZonesPayload", async () => {
+      const html = `<main><section><div id="physio-99999" class="details-physio"><form>
+        <input name="weight" type="number" value="83">
+        <input name="bpm_max" type="number" value="187">
+      </form></div></section></main>`;
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: true, status: 200, data: html })
+      );
+
+      const result = await handleAction({ action: "read-details" });
+
+      expect(result.physiological).toEqual({ weight: 83, bpmMax: 187 });
+    });
+
+    it("read-details fails when no tab is open", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([]));
+
+      await expect(handleAction({ action: "read-details" })).rejects.toThrow(
+        "No Train2Go tab open"
+      );
+    });
+
+    it("read-details fails when content script returns Session expired", async () => {
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: false, error: "Session expired" })
+      );
+
+      await expect(handleAction({ action: "read-details" })).rejects.toThrow(
+        /Read details failed|Session expired/
+      );
     });
   });
 

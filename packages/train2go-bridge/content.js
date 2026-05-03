@@ -13,25 +13,38 @@ const nativeFetch = fetch.bind(globalThis);
 
 const FETCH_TIMEOUT_MS = 30_000;
 
+// One-entry-per-line is required by the privacy-surface guard
+// (`scripts/check-bridge-privacy-surface.mjs`) which parses
+// `method: "..."` and `pattern: /.../` off the same line. Don't let
+// prettier wrap these — the long regexes are flagged with the
+// disable-next-line so the line stays single-physical.
 const ALLOWED = [
   { method: "GET", pattern: /^\/api\/v2\/profile\/ping$/ },
-  {
-    method: "GET",
-    pattern:
-      /^\/api\/v2\/workplan\/weekly\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/,
-  },
-  {
-    method: "GET",
-    pattern:
-      /^\/api\/v2\/workplan\/daily\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/,
-  },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/api\/v2\/workplan\/weekly\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/api\/v2\/workplan\/daily\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/ },
   { method: "GET", pattern: /^\/api\/v2\/workplan\/tooltip\/activity\/\d+$/ },
+  // Server-rendered HTML page used by the zones-sync feature; data is
+  // extracted by parseDetailsHtml on the bridge background side.
+  { method: "GET", pattern: /^\/user\/details$/ },
 ];
 
 const isAllowed = (method, path) =>
   ALLOWED.some(
     (rule) => rule.method === (method || "GET") && rule.pattern.test(path)
   );
+
+// Reads the response body dispatching by Content-Type. Falls back to
+// JSON when headers are unavailable (legacy test mocks). Extracted so
+// handleFetch stays under the 40-line file-cap.
+const readBody = (r) => {
+  const ct =
+    (r.headers && typeof r.headers.get === "function"
+      ? r.headers.get("content-type")
+      : "") || "";
+  return /^text\/html\b/i.test(ct) ? r.text() : r.json();
+};
 
 const handleFetch = async (msg) => {
   const { path, method } = msg;
@@ -56,7 +69,7 @@ const handleFetch = async (msg) => {
     }
 
     if (r.ok) {
-      const data = await r.json();
+      const data = await readBody(r);
       return { ok: true, status: r.status, data };
     }
 
