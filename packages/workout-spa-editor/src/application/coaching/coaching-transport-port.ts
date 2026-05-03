@@ -14,6 +14,7 @@
  */
 
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
+import type { ZonesPayload } from "../../types/coaching-zones";
 
 export type CoachingPingResult = {
   sessionActive: boolean;
@@ -49,4 +50,16 @@ export type CoachingTransport = {
     date: string,
     externalUserId: string
   ) => Promise<CoachingActivityRecord[]>;
+  /**
+   * Fetches the user's training thresholds and physiological values.
+   * Optional: only Train2Go implements it today; Garmin (when present)
+   * leaves it unset. The `syncZones` use case checks for presence and
+   * short-circuits with `{ ok: false, reason: "unsupported" }` when
+   * absent. Returns `null` when the platform has nothing to share for
+   * this user (e.g., session expired silently).
+   */
+  readZones?: (
+    externalUserId: string,
+    signal?: AbortSignal
+  ) => Promise<ZonesPayload | null>;
 };

@@ -178,4 +178,69 @@ describe("createTrain2GoCoachingTransport", () => {
       "Read day failed"
     );
   });
+
+  it("readZones() returns a parsed ZonesPayload on success", async () => {
+    (globalThis as Record<string, unknown>).chrome = {
+      runtime: {
+        lastError: null,
+        sendMessage: vi.fn(
+          (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+            cb({
+              ok: true,
+              protocolVersion: 1,
+              data: {
+                physiological: { weight: 83, bpmMax: 187 },
+                paces: { cycling: { z4Upper: 268, z5Lower: 270 } },
+                hrZones: { cycling: { z4Upper: 160 } },
+              },
+            });
+          }
+        ),
+      },
+    };
+    const t = createTrain2GoCoachingTransport(() => "ext-id");
+
+    const result = await t.readZones?.("99999");
+
+    expect(result?.physiological?.weight).toBe(83);
+    expect(result?.paces?.cycling?.z4Upper).toBe(268);
+    expect(result?.hrZones?.cycling?.z4Upper).toBe(160);
+  });
+
+  it("readZones() returns null when payload fails the Zod allowlist", async () => {
+    (globalThis as Record<string, unknown>).chrome = {
+      runtime: {
+        lastError: null,
+        sendMessage: vi.fn(
+          (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+            cb({
+              ok: true,
+              data: { physiological: { weight: "not-a-number" } },
+            });
+          }
+        ),
+      },
+    };
+    const t = createTrain2GoCoachingTransport(() => "ext-id");
+
+    const result = await t.readZones?.("99999");
+
+    expect(result).toBeNull();
+  });
+
+  it("readZones() throws Session expired when the bridge reports it", async () => {
+    (globalThis as Record<string, unknown>).chrome = {
+      runtime: {
+        lastError: null,
+        sendMessage: vi.fn(
+          (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
+            cb({ ok: false, error: "Session expired" });
+          }
+        ),
+      },
+    };
+    const t = createTrain2GoCoachingTransport(() => "ext-id");
+
+    await expect(t.readZones?.("99999")).rejects.toThrow("Session expired");
+  });
 });
