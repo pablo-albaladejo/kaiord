@@ -1,43 +1,4 @@
-> Synced: 2026-05-03 (tasks-machine-readable-shape)
-
-# Archive Followups Guard
-
-## Purpose
-
-Prevents OpenSpec change archives from accumulating silent overscope debt by enforcing the deferral invariant `deferred ≤ completed` (ratio mode) on archives that carry a machine-readable `> Tasks:` marker, with a legacy absolute-cap fallback for pre-v2 archives. The guard is mechanical (lint script + co-located node:test) per the project's `feedback_mechanical_over_ai` preference and runs as a sibling of `lint:archive` and `lint:archive-index`.
-
-## Requirements
-
-### Requirement: Canonical `> Deferred to: #N` marker in archived `tasks.md`
-
-A deferred task in an archived `openspec/changes/archive/<date>-<slug>/tasks.md` SHALL annotate its deferral with a Markdown blockquote as a sibling paragraph (blank line + 2-space indent — required so prettier does not collapse the marker onto the task line):
-
-```text
-- [ ] §N.M Task title
-
-  > Deferred to: #ISSUE_NUMBER
-```
-
-`ISSUE_NUMBER` SHALL be a positive integer prefixed with `#` (zero is rejected). URLs, free-form descriptions, and multi-issue references on one line SHALL NOT be valid forms; a task deferred to multiple issues SHALL emit one marker line per issue.
-
-The marker grammar SHALL belong to the same family as the existing `> Completed: YYYY-MM-DD` marker parsed by `scripts/check-archive-dates.mjs`. A single regex `^\s*> (Completed|Deferred to): (.+)$` SHALL distinguish the two marker types.
-
-`openspec/SPEC_TEMPLATE.md` and `AGENTS.md` SHALL document the marker shape, valid forms, and placement under their authoring guidance. `pnpm lint:specs` SHALL continue to pass on these documentation updates.
-
-#### Scenario: Single-issue deferral
-
-- **WHEN** a task in `tasks.md` is checked but its scope was deferred to issue #432
-- **THEN** the line immediately after the checkbox (with a blank-line separator and 2-space indent) SHALL read `> Deferred to: #432`
-
-#### Scenario: Multi-issue deferral emits one marker per issue
-
-- **WHEN** a task was split and deferred to issues #432 and #435
-- **THEN** two marker lines SHALL appear after the checkbox: `> Deferred to: #432` and `> Deferred to: #435`
-
-#### Scenario: Marker grammar is rejected for non-canonical forms
-
-- **WHEN** a `tasks.md` contains `> Deferred to: https://github.com/owner/repo/issues/432` OR `> Deferred to: issue 432` OR `> Deferred to: #432, #435` OR `> Deferred to: #0`
-- **THEN** `pnpm lint:archive-followups` SHALL fail with a parse error naming the offending file and line
+## ADDED Requirements
 
 ### Requirement: Canonical `> Tasks:` marker for shipped/deferred counts
 
@@ -67,7 +28,7 @@ When an archive carries a well-formed `> Tasks: <C> completed, <D> deferred` mar
 1. **Audit consistency:** `<D>` MUST equal the number of `> Deferred to: #N` markers in the same file. A mismatch SHALL fail the lint with a message naming the declared count vs. the actual count.
 2. **Ratio invariant:** `<D>` MUST be ≤ `<C>`. A change that defers more tasks than it shipped is genuinely overscoped — the lint SHALL fail with a message naming both counts.
 
-A healthy-but-large archive (e.g., 30 completed / 5 deferred) SHALL pass even when 5 ≥ ABSOLUTE_DEFERRAL_CAP — the ratio is the contract for marker-bearing archives, not the cap.
+A healthy-but-large archive (e.g., 30 completed / 7 deferred) SHALL pass even when `<D>` ≥ `ABSOLUTE_DEFERRAL_CAP` — the ratio is the contract for marker-bearing archives, not the cap.
 
 #### Scenario: Healthy ratio passes despite legacy cap
 
@@ -93,6 +54,8 @@ A healthy-but-large archive (e.g., 30 completed / 5 deferred) SHALL pass even wh
 - **WHEN** the lint runs
 - **THEN** the lint SHALL pass — the invariant is `D ≤ C`, not `D < C`
 
+## MODIFIED Requirements
+
 ### Requirement: Legacy absolute-cap fallback when `> Tasks:` marker is absent
 
 When an archive's `tasks.md` does NOT carry a `> Tasks:` marker, the script SHALL fall back to the legacy absolute-cap policy: if the count of `> Deferred to: #N` markers is ≥ `ABSOLUTE_DEFERRAL_CAP` (currently 6), the lint SHALL fail. The fallback exists so pre-v2 archives that never carried the new marker continue to be policed against silent overscope.
@@ -112,24 +75,3 @@ The fail message in fallback mode SHALL hint at the upgrade path — i.e., advis
 - **GIVEN** a `tasks.md` has 6 `> Deferred to:` markers and NO `> Tasks:` marker
 - **WHEN** the lint runs
 - **THEN** the script SHALL exit non-zero with a message including `(≥ cap 6)` AND a hint to add `> Tasks: <C> completed, <D> deferred` for ratio-based checking
-
-### Requirement: Architectural mirror of `check-archive-dates.mjs`
-
-The lint script SHALL mirror the architectural pattern of `scripts/check-archive-dates.mjs`: identical entry-point check (`pathToFileURL(process.argv[1]) === import.meta.url`), exported `checkArchiveFollowups()` function returning a violation-collection structure, exit-with-code-after-collection pattern. Non-zero exits SHALL list the offending archive folder names alongside their counts.
-
-The script SHALL be wired as a sibling lint script in `package.json`:
-
-| Script                   | Behavior                                                                                  |
-| ------------------------ | ----------------------------------------------------------------------------------------- |
-| `lint:archive`           | Existing folder-vs-Completed invariant. Unchanged.                                        |
-| `lint:archive-index`     | Existing `archive/README.md` index freshness. Unchanged.                                  |
-| `lint:archive-followups` | This. Runs `node scripts/check-archive-followups.mjs` (ratio + cap fallback per archive). |
-
-The umbrella `pnpm lint` SHALL run all three. The husky `pre-commit` hook chain SHALL include `lint:archive-followups` so deferral-marker edits are caught locally before push.
-
-`scripts/check-archive-followups.test.mjs` SHALL be a co-located node:test suite covering: zero-deferral archive (pass + silent), legacy below-cap archive (pass + log), legacy at-cap archive (fail + cap message + marker hint), legacy malformed deferred-to marker (fail + parse error), v2 healthy ratio (pass even when ≥ cap), v2 overscoped ratio (fail), v2 declared/actual mismatch (fail), v2 malformed `> Tasks:` marker (fail + parse error), v2 zero-deferred-non-zero-completed (pass), v2 boundary D = C (pass). Test fixtures SHALL be created in temporary directories so the suite does not depend on the state of `openspec/changes/archive/`.
-
-#### Scenario: Suite covers both modes
-
-- **WHEN** `pnpm test:scripts` runs
-- **THEN** the `check-archive-followups.test.mjs` suite SHALL include at least 14 tests (the original 8 legacy-mode branches + 6 new ratio-mode branches)
