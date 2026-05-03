@@ -14,22 +14,21 @@ function toBridgeState(installed: boolean, session: boolean): BridgeState {
 export const ExtensionsTab: React.FC = () => {
   const garmin = useGarminBridge();
   const train2go = useTrain2GoStore();
+  // Destructure stable method refs so the effect/callback dep arrays
+  // reference the methods directly — exhaustive-deps is satisfied
+  // without disabling the rule.
+  const { detectExtension: detectGarmin } = garmin;
+  const { detectExtension: detectTrain2go } = train2go;
 
-  // TODO(fix-coaching-dialog-rules-of-hooks-followup): the deps array
-  // intentionally references stable method handles, not the bridge
-  // objects themselves. Re-enable exhaustive-deps as error once the
-  // bridge contexts expose stable references.
   useEffect(() => {
-    garmin.detectExtension();
-    train2go.detectExtension();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [garmin.detectExtension, train2go.detectExtension]);
+    detectGarmin();
+    detectTrain2go();
+  }, [detectGarmin, detectTrain2go]);
 
   const refreshAll = useCallback(() => {
-    garmin.detectExtension();
-    train2go.detectExtension();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [garmin.detectExtension, train2go.detectExtension]);
+    detectGarmin();
+    detectTrain2go();
+  }, [detectGarmin, detectTrain2go]);
 
   return (
     <div className="space-y-4">
