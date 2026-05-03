@@ -4,7 +4,7 @@
   "version": "7.1.0",
   "description": "Connects the Kaiord workout editor to Garmin Connect via your browser session",
 
-  "permissions": ["storage", "tabs", "webRequest"],
+  "permissions": ["storage", "tabs", "webRequest", "scripting"],
 
   "host_permissions": ["https://connect.garmin.com/*"],
 

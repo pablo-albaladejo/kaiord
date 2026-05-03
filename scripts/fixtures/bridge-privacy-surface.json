@@ -4,7 +4,8 @@
       "permissions": [
         "storage",
         "tabs",
-        "webRequest"
+        "webRequest",
+        "scripting"
       ],
       "host_permissions": [
         "https://connect.garmin.com/*"
@@ -28,7 +29,8 @@
       "permissions": [
         "storage",
         "tabs",
-        "webRequest"
+        "webRequest",
+        "scripting"
       ],
       "host_permissions": [
         "https://connect.garmin.com/*"
@@ -60,7 +62,8 @@
     "manifest": {
       "permissions": [
         "tabs",
-        "storage"
+        "storage",
+        "scripting"
       ],
       "host_permissions": [
         "https://app.train2go.com/*"
@@ -83,7 +86,8 @@
     "manifest_prod": {
       "permissions": [
         "tabs",
-        "storage"
+        "storage",
+        "scripting"
       ],
       "host_permissions": [
         "https://app.train2go.com/*"

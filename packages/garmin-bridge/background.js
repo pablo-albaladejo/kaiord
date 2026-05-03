@@ -246,6 +246,42 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return true;
 });
 
+// ── Content-script re-inject after extension reload ──
+//
+// Chrome terminates content scripts in existing tabs when the extension
+// is reloaded but does NOT re-inject them. Tabs at connect.garmin.com
+// keep stale, dead listeners — chrome.tabs.sendMessage to them fails
+// with "Receiving end does not exist". Re-inject programmatically on
+// onInstalled so the user does not have to reload every Garmin tab
+// after touching the extension. Only re-inject scripts whose match
+// patterns are covered by host_permissions; `kaiord-announce.js` on
+// the SPA origin is out of scope (kept as the standard MV3 dev flow).
+const reinjectContentScripts = async () => {
+  const manifest = chrome.runtime.getManifest();
+  const hostPermissions = manifest.host_permissions ?? [];
+  for (const script of manifest.content_scripts ?? []) {
+    const matches = script.matches.filter((m) => hostPermissions.includes(m));
+    if (matches.length === 0) continue;
+    const tabs = await chrome.tabs.query({ url: matches });
+    for (const tab of tabs) {
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id, allFrames: !!script.all_frames },
+          files: script.js,
+        });
+      } catch {
+        // Tab may be in a restricted context or already injected; ignore.
+      }
+    }
+  }
+};
+
+if (typeof chrome !== "undefined" && chrome.runtime?.onInstalled) {
+  chrome.runtime.onInstalled.addListener(() => {
+    void reinjectContentScripts();
+  });
+}
+
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
@@ -262,5 +298,6 @@ if (typeof module !== "undefined") {
     openGarmin,
     persistSnapshot,
     clearSnapshot,
+    reinjectContentScripts,
   };
 }
