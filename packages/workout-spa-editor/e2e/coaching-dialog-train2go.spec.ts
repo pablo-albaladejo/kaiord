@@ -61,7 +61,16 @@ test.describe("Coaching activity dialog — Train2Go click path", () => {
     const RECORD_ID = `${PROFILE_ID}:${SOURCE}:${SOURCE_ID}`;
     const VIEW_MODEL_ID = `${SOURCE}:${SOURCE_ID}`;
     await page.evaluate(
-      async ({ profileId, activityId, source, sourceId, day, ts, title, description }) => {
+      async ({
+        profileId,
+        activityId,
+        source,
+        sourceId,
+        day,
+        ts,
+        title,
+        description,
+      }) => {
         type Db = {
           table: (n: string) => {
             put: (r: unknown) => Promise<unknown>;
@@ -79,7 +88,9 @@ test.describe("Coaching activity dialog — Train2Go click path", () => {
           createdAt: ts,
           updatedAt: ts,
         });
-        await db.table("meta").put({ key: "activeProfileId", value: profileId });
+        await db
+          .table("meta")
+          .put({ key: "activeProfileId", value: profileId });
 
         await db.table("coachingActivities").put({
           id: activityId,
@@ -156,8 +167,6 @@ test.describe("Coaching activity dialog — Train2Go click path", () => {
     await expect(
       page.getByRole("alert", { name: /something went wrong/i })
     ).not.toBeVisible();
-    await expect(
-      page.getByText(/something went wrong/i)
-    ).not.toBeVisible();
+    await expect(page.getByText(/something went wrong/i)).not.toBeVisible();
   });
 });
