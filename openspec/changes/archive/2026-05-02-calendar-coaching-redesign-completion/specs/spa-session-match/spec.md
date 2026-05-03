@@ -113,9 +113,9 @@ The persisted row shape:
 }
 ```
 
-The Dexie adapter SHALL register a cascade hook so deleting a `profiles` row deletes the corresponding `auto_match_dismissals` rows. The composite primary key `(profileId, weekStart)` was provisioned in Dexie schema v5; this requirement adds the `dismissedPairs` field shape on top of the existing index without bumping the schema (Dexie row shape is dynamic; only indexed fields require a version bump).
+The Dexie adapter SHALL register a cascade hook so deleting a `profiles` row deletes the corresponding `autoMatchDismissals` rows. The composite primary key `(profileId, weekStart)` was provisioned in Dexie schema v5; the new `dismissedPairs` field is non-indexed.
 
-The persisted shape **REPLACES** the prior archived form `{ profileId, weekStart, dismissedAt }` (single top-level timestamp). The top-level `dismissedAt` is removed; per-pair timestamps now live inside each `dismissedPairs` entry. Any installation that pre-dates this change and still carries the old single-timestamp row SHALL have that row surfaced by `getByProfileAndWeek` as `{ profileId, weekStart, dismissedPairs: [] }`. The adapter MUST NOT rewrite the underlying row at first read (zero-cost path — keeps reads side-effect-free); the legacy `dismissedAt` MAY remain in the row indefinitely as dead data and SHALL NOT be consulted. The first subsequent `put` upserts the row in the new shape and naturally drops the legacy field.
+The shape **REPLACES** the prior archived `{ profileId, weekStart, dismissedAt }` form (single top-level timestamp) via a forward-only Dexie schema bump (v7) whose upgrade hook clears the `autoMatchDismissals` table. The table is UX-state cache, not user data — losing dismissals once on upgrade is acceptable and far simpler than a row-by-row reshape. The adapter is single-shape: it never reads or writes the prior form, and no legacy code path lives in the call graph.
 
 #### Scenario: getByProfileAndWeek returns undefined for an unwritten pair
 
@@ -139,12 +139,6 @@ The persisted shape **REPLACES** the prior archived form `{ profileId, weekStart
 - **GIVEN** no row exists for `(P, W)`
 - **WHEN** `delete(P, W)` is called
 - **THEN** the call resolves successfully; no error is thrown; subsequent `getByProfileAndWeek(P, W)` continues to return `undefined`
-
-#### Scenario: Legacy single-timestamp row is treated as empty dismissedPairs
-
-- **GIVEN** an installation predates this change and `auto_match_dismissals` carries a row `{ profileId: P, weekStart: W, dismissedAt: T }` without a `dismissedPairs` field
-- **WHEN** `getByProfileAndWeek(P, W)` is called
-- **THEN** the adapter returns the row with `dismissedPairs: []`; the legacy `dismissedAt` is ignored; the underlying row is unchanged until a subsequent `put` upserts in the new shape (no read-time rewrite)
 
 #### Scenario: Profile delete cascade
 
@@ -222,4 +216,4 @@ These hooks are the data-layer mechanism behind the spec scenarios "Coaching act
 
 **Reason**: Replaced by the per-pair, weekStart-scoped, TTL-free dismissal model introduced by this change (see "Per-pair dismissals do not expire on a TTL" above and design D15). The archived "Auto-match dismissal TTL is a named constant" requirement defined a global `DISMISSAL_TTL_MS = 24h` that suppressed the entire banner for a profile-week. The new model dismisses individual pairs without a clock-based expiry, so a single named TTL constant is no longer meaningful.
 
-**Migration**: any code path that imported `DISMISSAL_TTL_MS` from `application/auto-match-dismissal-ttl.ts` SHALL be deleted; the file itself SHALL be removed. Implementations that previously relied on the 24h suppression to hide a noisy banner SHALL instead surface per-row Reject controls (already mandated by `spa-calendar` "Auto-match suggestion banner mounted in CalendarPage"). The persisted `auto_match_dismissals` row shape ALSO migrates from `{ profileId, weekStart, dismissedAt }` to `{ profileId, weekStart, dismissedPairs: [...] }` — the legacy-row treatment is specified in `AutoMatchDismissalRepository port` "Legacy single-timestamp row is treated as empty dismissedPairs".
+**Migration**: any code path that imported `DISMISSAL_TTL_MS` from `application/auto-match-dismissal-ttl.ts` SHALL be deleted; the file itself SHALL be removed. Implementations that previously relied on the 24h suppression to hide a noisy banner SHALL instead surface per-row Reject controls (already mandated by `spa-calendar` "Auto-match suggestion banner mounted in CalendarPage"). The persisted `autoMatchDismissals` row shape ALSO migrates from `{ profileId, weekStart, dismissedAt }` to `{ profileId, weekStart, dismissedPairs: [...] }` via a forward-only Dexie schema bump (v7) whose upgrade hook clears the table. The adapter is single-shape — no legacy code path remains.

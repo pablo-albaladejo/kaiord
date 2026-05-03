@@ -1,14 +1,17 @@
 /**
- * CoachingActivityDialog — read-only detail view for a coaching activity.
+ * CoachingActivityDialog — read-only detail view + match/split actions.
  *
  * Replaces the in-place description toggle on CoachingActivityCard.
  * Lazy-loads description when undefined (a persisted "" is "known empty"
- * and does NOT re-fire). "Convert to workout" routes to the editor on
- * success; on failure stays open with an inline error.
+ * and does NOT re-fire). Solo-plan state offers "Convert to workout" and
+ * "Match to…"; matched state hides Convert and surfaces "Linked workout"
+ * + "Split". Profile id is captured at dialog open so a profile switch
+ * does not reroute writes.
  */
 
 import * as Dialog from "@radix-ui/react-dialog";
 
+import { usePickableWorkouts } from "../../../hooks/use-pickable-workouts";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { CoachingActivityDialogContent } from "./CoachingActivityDialogContent";
 import { useCoachingDialog } from "./use-coaching-dialog";
@@ -24,13 +27,19 @@ export function CoachingActivityDialog({
   onClose,
   expandActivity,
 }: CoachingActivityDialogProps) {
-  const { error, converting, handleConvert } = useCoachingDialog(
-    activity,
-    onClose,
-    expandActivity
+  const dialog = useCoachingDialog(activity, onClose, expandActivity);
+  const pickable = usePickableWorkouts(
+    dialog.targetProfileId,
+    activity?.date ?? null,
+    activity?.sport.label ?? null
   );
 
   if (!activity) return null;
+
+  const matched = dialog.matchState?.kind === "matched";
+  const matchedWorkout =
+    dialog.matchState?.kind === "matched" ? dialog.matchState.workout : null;
+
   return (
     <Dialog.Root open onOpenChange={(open) => !open && onClose()}>
       <Dialog.Portal>
@@ -41,10 +50,20 @@ export function CoachingActivityDialog({
         >
           <CoachingActivityDialogContent
             activity={activity}
-            error={error}
-            converting={converting}
+            error={dialog.error}
+            converting={dialog.converting}
+            matched={matched}
+            matchedWorkout={matchedWorkout}
+            matching={dialog.matching}
+            splitting={dialog.splitting}
+            pickerOpen={dialog.pickerOpen}
+            pickerWorkouts={pickable ?? []}
             onClose={onClose}
-            onConvert={handleConvert}
+            onConvert={dialog.handleConvert}
+            onOpenPicker={dialog.openPicker}
+            onClosePicker={dialog.closePicker}
+            onSelectWorkout={dialog.handleSelectWorkout}
+            onSplit={dialog.handleSplit}
           />
         </Dialog.Content>
       </Dialog.Portal>
