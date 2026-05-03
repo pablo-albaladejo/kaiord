@@ -51,6 +51,22 @@ is enforced by `pnpm lint:archive-followups` once the change archives —
 archives carrying too many deferrals fail the lint as overscoped (the
 change should have been split before archiving).
 
+When archiving, also add a top-level `> Tasks: <C> completed, <D> deferred`
+marker at the very top of `tasks.md`. This unlocks the **ratio invariant**
+(`deferred ≤ completed` per archive — semantically correct overscope
+detection) instead of the legacy absolute cap. The declared `deferred`
+MUST match the count of `> Deferred to: #N` markers in the file; mismatch
+fails the lint. Archives without the marker fall back to the legacy cap
+for backward compat.
+
+```text
+> Tasks: 28 completed, 5 deferred
+
+<!-- opsx-ship: chunking ... -->
+
+## 1. ...
+```
+
 ## Ports & adapters (example: FIT)
 
 - **Ports** (`ports/fit.ts`): `FitReader.readToKRD(buf)`, `FitWriter.writeFromKRD(krd)`

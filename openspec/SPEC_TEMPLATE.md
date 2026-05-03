@@ -67,4 +67,24 @@ Authoring rules:
    `scripts/check-archive-followups.mjs` (run via
    `pnpm lint:archive-followups`) once the change archives; archives
    carrying ≥ ABSOLUTE_DEFERRAL_CAP markers fail the lint as overscoped.
+7. **Tasks marker (for change `tasks.md`, NOT this template):** when
+   a change archives, the author SHOULD add a top-level `> Tasks:`
+   marker that exposes shipped/deferred counts as machine-readable
+   data. This unlocks the **ratio invariant**: `deferred ≤ completed`
+   per archive — semantically correct overscope detection that
+   replaces the absolute cap on archives carrying the marker.
+
+   ```text
+   > Tasks: 28 completed, 5 deferred
+
+   <!-- opsx-ship: chunking ... -->
+
+   ## 1. ...
+   ```
+
+   Both counts are non-negative integers; the declared `deferred`
+   MUST equal the count of `> Deferred to: #N` markers in the same
+   file (audited by `pnpm lint:archive-followups`). Tasks.md files
+   without the marker fall back to the legacy absolute-cap policy
+   (see rule 6) for backward compat with pre-v2 archives.
 -->
