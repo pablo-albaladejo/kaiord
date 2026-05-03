@@ -11,7 +11,8 @@ import type { Profile } from "../../../../types/profile";
 import { ZonesConflictDialog } from "../../ZonesConflictDialog/ZonesConflictDialog";
 import { RowInfo } from "./RowInfo";
 import { SyncZonesToggle } from "./SyncZonesToggle";
-import { type SourceMeta, useLinkedAccountRow } from "./use-linked-account-row";
+import type { SourceMeta } from "./use-linked-account-row";
+import { useLinkedAccountRow } from "./use-linked-account-row";
 
 export function LinkedAccountRow({
   profile,
