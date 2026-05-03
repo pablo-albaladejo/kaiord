@@ -77,7 +77,9 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const { violations, counts } = checkArchiveFollowups();
 
   for (const { folder, count } of counts) {
-    console.log(`  ${folder}: ${count} deferrals (cap ${ABSOLUTE_DEFERRAL_CAP})`);
+    console.log(
+      `  ${folder}: ${count} deferrals (cap ${ABSOLUTE_DEFERRAL_CAP})`
+    );
   }
 
   if (violations.length > 0) {
@@ -91,5 +93,7 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
     process.exit(1);
   }
 
-  console.log(`openspec/changes/archive: deferrals ≤ ${ABSOLUTE_DEFERRAL_CAP - 1} per change.`);
+  console.log(
+    `openspec/changes/archive: deferrals ≤ ${ABSOLUTE_DEFERRAL_CAP - 1} per change.`
+  );
 }
