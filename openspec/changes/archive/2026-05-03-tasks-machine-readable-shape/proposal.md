@@ -1,3 +1,5 @@
+> Completed: 2026-05-03
+
 ## Why
 
 The `archive-followups-guard` capability shipped in PR #464 with an absolute cap (≥ 6 `> Deferred to: #N` markers per archive → fail). Per design D6 of `2026-05-03-repo-hygiene-tooling`, the cap is a **proxy** for the semantically correct invariant: "deferrals MUST NOT exceed shipped tasks per archive" (i.e., a change that defers more than it ships is genuinely overscoped).
