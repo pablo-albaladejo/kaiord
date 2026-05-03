@@ -19,6 +19,7 @@ import {
   readWeek,
 } from "../../store/train2go-extension-transport";
 import type { CoachingActivityRecord } from "../../types/coaching-activity-record";
+import { fetchZones } from "./train2go-fetch-zones";
 import { toCoachingActivityRecord } from "./train2go-record.converter";
 
 const TRAIN2GO = "train2go";
@@ -73,4 +74,7 @@ export const createTrain2GoCoachingTransport = (
     const res = await readDay(getExtensionId(), date, externalUserId);
     return fetchActivities("Read day", res, profileId, now());
   },
+
+  readZones: (externalUserId, signal) =>
+    fetchZones(getExtensionId, externalUserId, signal),
 });
