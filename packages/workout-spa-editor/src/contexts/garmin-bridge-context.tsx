@@ -9,20 +9,34 @@ const GarminBridgeContext = createContext<GarminBridgeState | null>(null);
 export const GarminBridgeProvider = ({ children }: { children: ReactNode }) => {
   const state = useGarminBridgeActions();
 
-  // TODO(fix-coaching-dialog-rules-of-hooks-followup): explicit field
-  // dependencies are deliberate — the store mutates `state` in place
-  // and we only want to re-render on the listed slices.
-  /* eslint-disable react-hooks/exhaustive-deps */
-  const value = useMemo(
-    () => state,
+  // Field-by-field spread so the memo recomputes only when the listed
+  // slices change. `useGarminBridgeActions` returns a fresh object literal
+  // every render, so we can't depend on `state` itself without losing the
+  // memoisation. Methods (detectExtension/pushWorkout/listWorkouts/setPushing)
+  // are stable references from useCallback/useState — including them in
+  // deps is safe.
+  const value = useMemo<GarminBridgeState>(
+    () => ({
+      extensionInstalled: state.extensionInstalled,
+      sessionActive: state.sessionActive,
+      pushing: state.pushing,
+      lastError: state.lastError,
+      detectExtension: state.detectExtension,
+      pushWorkout: state.pushWorkout,
+      listWorkouts: state.listWorkouts,
+      setPushing: state.setPushing,
+    }),
     [
       state.extensionInstalled,
       state.sessionActive,
       state.pushing,
       state.lastError,
+      state.detectExtension,
+      state.pushWorkout,
+      state.listWorkouts,
+      state.setPushing,
     ]
   );
-  /* eslint-enable react-hooks/exhaustive-deps */
 
   return (
     <GarminBridgeContext.Provider value={value}>
