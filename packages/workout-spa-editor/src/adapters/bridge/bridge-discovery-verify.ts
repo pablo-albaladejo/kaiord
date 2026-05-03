@@ -6,10 +6,8 @@
  * declared bridgeId and schema. Rejects spoofed announcements.
  */
 
-import {
-  type BridgeManifest,
-  bridgeManifestSchema,
-} from "../../types/bridge-schemas";
+import type { BridgeManifest } from "../../types/bridge-schemas";
+import { bridgeManifestSchema } from "../../types/bridge-schemas";
 import type { BridgeAnnouncement } from "./bridge-discovery-types";
 import { sendBridgeMessage } from "./bridge-transport";
 

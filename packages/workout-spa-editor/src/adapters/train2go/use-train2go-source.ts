@@ -25,10 +25,8 @@ import {
   useCoachingActivities,
   useTrain2GoSyncState,
 } from "./use-train2go-data";
-import {
-  useZonesSyncOrchestrator,
-  type ZonesSyncOrchestrator,
-} from "./use-zones-sync-orchestrator";
+import type { ZonesSyncOrchestrator } from "./use-zones-sync-orchestrator";
+import { useZonesSyncOrchestrator } from "./use-zones-sync-orchestrator";
 
 export type Train2GoSource = CoachingSource & {
   zonesSync: ZonesSyncOrchestrator;
