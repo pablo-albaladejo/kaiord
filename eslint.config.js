@@ -3,6 +3,7 @@ import boundaries from "eslint-plugin-boundaries";
 import reactHooks from "eslint-plugin-react-hooks";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import tseslint from "typescript-eslint";
+import vitest from "@vitest/eslint-plugin";
 
 const adapterPackages = ["fit", "tcx", "zwo", "garmin", "garmin-connect"];
 
@@ -56,13 +57,13 @@ export default tseslint.config(
       "**/*.config.js",
       "**/*.config.ts",
       "**/scripts/**",
-      "**/*.test.ts",
-      "**/*.test.tsx",
-      "**/*.test.js",
-      "**/*.spec.ts",
+      // Test files are NOT globally ignored anymore — they fall
+      // through to the test-files override block at lines ~145+
+      // which applies relaxed test-specific rules + the vitest
+      // plugin's `valid-title` rule (test-conventions-should-aaa
+      // change PR-1 §1.2). Storybook stories remain ignored.
       "**/*.stories.ts",
       "**/*.stories.tsx",
-      "**/tests/**/*.ts",
       "**/playwright-report/**",
       "**/test-results/**",
       "**/.playwright/**",
@@ -141,20 +142,56 @@ export default tseslint.config(
   },
   {
     // Test files: basic linting without type checking
-    files: ["**/*.test.ts", "**/*.spec.ts", "**/tests/**/*.ts"],
+    // Includes .tsx now (test-conventions-should-aaa PR-1 §1.4); without
+    // this extension, *.test.tsx would fall through to the SPA *.tsx
+    // block (max-lines 80, max-lines-per-function 60, react-hooks rules)
+    // and produce a flood of new lint errors.
+    files: [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/tests/**/*.{ts,tsx}",
+    ],
     languageOptions: {
       parser: tseslint.parser,
+      // Disable type-aware parsing on test files — they are not in the
+      // package tsconfig's `include`, so projectService=true (inherited
+      // from earlier blocks via flat-config merging) produces "file not
+      // found by project service" parse errors. Without this override
+      // the global-ignores-removal in the change above produces a flood
+      // of new errors. test-conventions-should-aaa PR-1.
+      parserOptions: {
+        projectService: false,
+        project: null,
+      },
     },
     plugins: {
       "@typescript-eslint": tseslint.plugin,
       "simple-import-sort": simpleImportSort,
+      vitest,
     },
     rules: {
       "max-lines": "off",
       "max-lines-per-function": "off",
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
-      ...importRules,
+      // Test-files-specific relaxations. These rules exist on production
+      // code; on tests they fire on pre-existing patterns that pre-date
+      // the test-conventions-should-aaa change. Tightening them is out
+      // of scope for this migration.
+      "simple-import-sort/imports": "off",
+      "simple-import-sort/exports": "off",
+      "@typescript-eslint/no-non-null-asserted-optional-chain": "off",
+      // Allow `_`-prefixed destructured discards in tests
+      // (`const { x: _, ...rest } = obj` is a common test idiom).
+      "@typescript-eslint/no-unused-vars": [
+        "error",
+        {
+          argsIgnorePattern: "^_",
+          varsIgnorePattern: "^_",
+          destructuredArrayIgnorePattern: "^_",
+        },
+      ],
       "no-magic-numbers": [
         "warn",
         {
@@ -163,6 +200,16 @@ export default tseslint.config(
           ignoreDefaultValues: true,
           enforceConst: true,
           detectObjects: false,
+        },
+      ],
+      // test-conventions-should-aaa change: title-rule dogma at IDE
+      // time. Severity is 'warn' during the migration window per D2
+      // (closes the IDE/pre-commit/CI parity gap that 'off' would
+      // create). Flipped to 'error' in PR-6 §6.3.
+      "vitest/valid-title": [
+        "warn",
+        {
+          mustMatch: { it: ["^should "] },
         },
       ],
     },
