@@ -31,27 +31,27 @@ PR 3 (spa-ui + e2e + listing): §7, §8, §9
 
 ## 4. SPA — domain types + transport port extension
 
-- [ ] 4.1 Add `ZonesPayload` and `ZonesReconciliation` domain types under `packages/workout-spa-editor/src/types/coaching-zones.ts`.
-- [ ] 4.2 Extend `CoachingTransport` port (`packages/workout-spa-editor/src/application/coaching/coaching-transport-port.ts`) with `readZones?: (externalUserId: string, signal?: AbortSignal) => Promise<ZonesPayload | null>`.
-- [ ] 4.3 Tests: type-only smoke + a Garmin-shaped no-op test asserting absence of `readZones`.
-- [ ] 4.4 Extend the `BridgeCapability` Zod enum in `packages/workout-spa-editor/src/types/bridge-schemas.ts` to include `read:training-zones`. Update the manifest-replica validators in both bridge `background.test.js` files to expect the new capability when present.
+- [x] 4.1 Add `ZonesPayload` and `ZonesReconciliation` domain types under `packages/workout-spa-editor/src/types/coaching-zones.ts`.
+- [x] 4.2 Extend `CoachingTransport` port (`packages/workout-spa-editor/src/application/coaching/coaching-transport-port.ts`) with `readZones?: (externalUserId: string, signal?: AbortSignal) => Promise<ZonesPayload | null>`.
+- [x] 4.3 Tests: type-only smoke + a Garmin-shaped no-op test asserting absence of `readZones`.
+- [x] 4.4 Extend the `BridgeCapability` Zod enum in `packages/workout-spa-editor/src/types/bridge-schemas.ts` to include `read:training-zones`. Update the manifest-replica validators in both bridge `background.test.js` files to expect the new capability when present.
 
 ## 5. SPA — Train2Go transport implementation
 
-- [ ] 5.1 Implement `readZones` in `packages/workout-spa-editor/src/store/train2go-extension-transport.ts` with timeout and `train2goSendMessage` envelope handling. Route the call through the existing `createOperationQueue` from `packages/workout-spa-editor/src/adapters/bridge/operation-queue.ts` (the same module used by `useProfileSnapshotPush`). Pre-existing `readWeek` / `readDay` calls bypass this queue today (a separate spec drift not in this change's scope); `readZones` SHALL be the second consumer of the queue and SHALL respect the 60/h-per-bridge cap from the spa-bridge-protocol spec.
-- [ ] 5.2 Wire `readZones` through `packages/workout-spa-editor/src/adapters/train2go/train2go-coaching-transport.ts`.
-- [ ] 5.3 Tests: transport unit tests covering envelope shape, timeout, transport-error, AND a rate-limit test asserting `readZones` and `readWeek` share a single per-bridge quota counter.
+- [x] 5.1 Implement `readZones` in `packages/workout-spa-editor/src/store/train2go-extension-transport.ts` with timeout and `train2goSendMessage` envelope handling. Route the call through the existing `createOperationQueue` from `packages/workout-spa-editor/src/adapters/bridge/operation-queue.ts` (the same module used by `useProfileSnapshotPush`). Pre-existing `readWeek` / `readDay` calls bypass this queue today (a separate spec drift not in this change's scope); `readZones` SHALL be the second consumer of the queue and SHALL respect the 60/h-per-bridge cap from the spa-bridge-protocol spec.
+- [x] 5.2 Wire `readZones` through `packages/workout-spa-editor/src/adapters/train2go/train2go-coaching-transport.ts`.
+- [x] 5.3 Tests: transport unit tests covering envelope shape, timeout, transport-error, AND a rate-limit test asserting `readZones` and `readWeek` share a single per-bridge quota counter.
 
 ## 6. SPA — `syncZones` use case + reconciliation
 
-- [ ] 6.1 Add `syncZones?: boolean` to `LinkedCoachingAccount` (optional → no Dexie schema-version bump required; existing rows read undefined and are treated as `false` at the use-case boundary via `?? false`).
-- [ ] 6.2a Implement `syncZones(profileId, transport, repo): Promise<SyncZonesResult>` where `SyncZonesResult = { ok: true, applied: WrittenField[], conflicts: ConflictItem[] } | { ok: false, reason: string }`. The use case writes silent fills to the profile EAGERLY (returns them in `applied`) but does NOT write conflicting values — those are returned in `conflicts` for the UI to present.
-- [ ] 6.2b Implement `commitConflictResolution(profileId, decisions: Record<FieldKey, 'accept' | 'reject'>, repo, transportPayload): Promise<void>`. Applies the user's per-row decisions (for each `accept`, write the T2G value; for each `reject`, no-op). Idempotent.
-- [ ] 6.3 Implement `application/coaching/sync-zones-helpers.ts` (split if needed under file-size cap): pace-unit conversion, threshold-extraction.
-- [ ] 6.4 Tests: 15 unit tests covering both functions:
+- [x] 6.1 Add `syncZones?: boolean` to `LinkedCoachingAccount` (optional → no Dexie schema-version bump required; existing rows read undefined and are treated as `false` at the use-case boundary via `?? false`).
+- [x] 6.2a Implement `syncZones(profileId, transport, repo): Promise<SyncZonesResult>` where `SyncZonesResult = { ok: true, applied: WrittenField[], conflicts: ConflictItem[] } | { ok: false, reason: string }`. The use case writes silent fills to the profile EAGERLY (returns them in `applied`) but does NOT write conflicting values — those are returned in `conflicts` for the UI to present.
+- [x] 6.2b Implement `commitConflictResolution(profileId, decisions: Record<FieldKey, 'accept' | 'reject'>, repo, transportPayload): Promise<void>`. Applies the user's per-row decisions (for each `accept`, write the T2G value; for each `reject`, no-op). Idempotent.
+- [x] 6.3 Implement `application/coaching/sync-zones-helpers.ts` (split if needed under file-size cap): pace-unit conversion, threshold-extraction.
+- [x] 6.4 Tests: 15 unit tests covering both functions:
   - syncZones tests (11): empty-fill (silent), no-op (same value), single-conflict (returns conflict), multi-conflict (returns multiple), mixed-fill-and-conflict (some applied, some conflict), ftp-fallback-absent (z4Upper key missing → z5Lower used), ftp-fallback-zero (z4Upper === 0 → z5Lower used), transport-error, shape-mismatch, unsupported-transport, profile-deleted-mid-sync.
   - commitConflictResolution tests (4): all-accept, all-reject, mixed, profile-deleted-mid-commit.
-- [ ] 6.5 Define toast/log message constants at top of `application/coaching/sync-zones.ts`: `TOAST_ZONES_FETCH_FAILED`, `TOAST_ZONES_SHAPE_MISMATCH`, `TOAST_ZONES_UNSUPPORTED`, `LOG_ZONES_SYNC_RUN`. Use ONLY these constants in toast/console calls — no template-literal interpolation as the first argument. The mechanical guard `pnpm test:scripts` (`check-no-pii-leakage.mjs`) enforces this.
+- [x] 6.5 Define toast/log message constants at top of `application/coaching/sync-zones.ts`: `TOAST_ZONES_FETCH_FAILED`, `TOAST_ZONES_SHAPE_MISMATCH`, `TOAST_ZONES_UNSUPPORTED`, `LOG_ZONES_SYNC_RUN`. Use ONLY these constants in toast/console calls — no template-literal interpolation as the first argument. The mechanical guard `pnpm test:scripts` (`check-no-pii-leakage.mjs`) enforces this.
 
 ## 7. SPA — UI: toggle + conflict dialog
 

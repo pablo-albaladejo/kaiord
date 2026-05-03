@@ -14,6 +14,8 @@ describe("bridgeCapabilitySchema", () => {
       "write:workouts",
       "read:body",
       "read:sleep",
+      "read:training-plan",
+      "read:training-zones",
     ];
 
     for (const cap of capabilities) {

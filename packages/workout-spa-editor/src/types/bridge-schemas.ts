@@ -13,6 +13,7 @@ export const bridgeCapabilitySchema = z.enum([
   "read:body",
   "read:sleep",
   "read:training-plan",
+  "read:training-zones",
 ]);
 
 export type BridgeCapability = z.infer<typeof bridgeCapabilitySchema>;
