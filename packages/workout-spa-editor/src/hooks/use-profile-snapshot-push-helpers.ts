@@ -10,11 +10,17 @@
 import type { ProfileSnapshot } from "@kaiord/core";
 
 import { sendBridgeMessage } from "../adapters/bridge/bridge-transport";
-import { createOperationQueue } from "../adapters/bridge/operation-queue";
+import { BRIDGE_QUEUE } from "../adapters/bridge/shared-operation-queue";
 import type { Profile } from "../types/profile";
 import type { DiscoveredBridge } from "./use-discovered-bridges";
 
-export const QUEUE = createOperationQueue(0);
+/**
+ * Re-exported alias of the shared per-bridge queue. Existing tests
+ * reference `QUEUE`; the singleton lives in
+ * `adapters/bridge/shared-operation-queue.ts` so non-hook callers
+ * (e.g., transport adapters) can share the same 60/h budget.
+ */
+export const QUEUE = BRIDGE_QUEUE;
 
 export const pickActiveSport = (
   profile: Profile

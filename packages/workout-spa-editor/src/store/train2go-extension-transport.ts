@@ -81,3 +81,5 @@ export const openTrain2Go = (
   extensionId: string
 ): Promise<Train2GoExtensionResponse> =>
   train2goSendMessage(extensionId, { action: "open-train2go" }, PING_T1);
+
+export { readZones } from "./train2go-extension-read-zones";
