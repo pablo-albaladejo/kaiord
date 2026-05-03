@@ -73,32 +73,42 @@ The umbrella `pnpm lint` SHALL run all three. The husky `pre-commit` hook chain 
 
 ### Requirement: Backfill of historical archives at Phase 2 ship-time
 
-Phase 2 SHALL backfill `> Deferred to: #N` markers into the three archives that spawned the 9-issue backlog observed at 2026-05-03. The backfill diff SHALL be marker-only — no checkbox flips, no text edits, no `> Completed:` line touches.
+Phase 2 SHALL backfill `> Deferred to: #N` markers into archived `tasks.md` files where annotatable deferred tasks already exist. The backfill diff SHALL be marker-only — no checkbox flips, no text edits, no new tasks added, no `> Completed:` line touches.
 
-| Archive                                            | Markers added                                      |
-| -------------------------------------------------- | -------------------------------------------------- |
-| `2026-05-01-calendar-coaching-redesign`            | `#431`, `#432`, `#433`, `#434`, `#435` (5 markers) |
-| `2026-05-02-calendar-coaching-redesign-completion` | `#460` (1 marker)                                  |
-| `2026-05-02-fix-coaching-dialog-rules-of-hooks`    | `#450`, `#451`, `#454` (3 markers)                 |
+The marker convention annotates a SPECIFIC task that was deferred in the original change. Where a follow-up issue exists but the original tasks.md has no corresponding deferred-task line (e.g., the deferral was captured only in proposal/design prose), the marker SHALL NOT be retroactively forced — adding new task lines would constitute scope rewriting, which D7's "inert annotation" defense does not cover.
 
-Backfill SHALL be permitted because the markers are inert annotations — they reference issues already created and known, do not modify behavior, and do not touch the `> Completed:` invariant enforced by `check-archive-dates.mjs`. The "archived = frozen" intuition applies to historical content; cross-references to known issues are annotation, not rewriting.
+For the v1 backfill at Phase 2 ship-time, this means:
 
-After backfill, the `2026-05-01-calendar-coaching-redesign` archive SHALL trip the absolute cap. Phase 2's PR SHALL document the intended first-fail signal in its description.
+| Archive                                            | Markers added                                      | Reason                                                                                                                                                                                         |
+| -------------------------------------------------- | -------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `2026-05-01-calendar-coaching-redesign`            | `#431`, `#432`, `#433`, `#434`, `#435` (5 markers) | Original tasks.md has 5 deferred sub-task entry-points (§8.5 → #431, §9.1 → #432, §10.3 → #433, §11.1 → #434, §12.4a → #435); markers attach to those existing lines without adding new tasks. |
+| `2026-05-02-calendar-coaching-redesign-completion` | 0 markers                                          | The spec-sync deferral (#460) was captured in proposal.md / design.md only; no annotatable task line.                                                                                          |
+| `2026-05-02-fix-coaching-dialog-rules-of-hooks`    | 0 markers                                          | The 3 follow-up issues (#450, #451, #454) were filed at archive-time per /opsx-ship convention but no tasks.md `[ ]` lines correspond.                                                         |
+
+Backfill SHALL be permitted because the markers are inert annotations — they reference issues already created and known, do not modify behavior, do not add scope, and do not touch the `> Completed:` invariant enforced by `check-archive-dates.mjs`. The "archived = frozen" intuition applies to historical content; cross-references to known issues on EXISTING task lines are annotation, not rewriting.
+
+After backfill, the `2026-05-01-calendar-coaching-redesign` archive holds 5 deferral markers. With the v1 cap shipped at 6 (per `tasks.md` §4.7 strategy (a)), the lint passes on first run and a follow-up PR lowers the cap to 5 to convert the 5-deferral signal into a fail.
 
 #### Scenario: Backfill is committed in the same PR as the lint script
 
 - **WHEN** Phase 2's PR opens
-- **THEN** the diff SHALL include `scripts/check-archive-followups.{mjs,test.mjs}`, `openspec/SPEC_TEMPLATE.md`, `package.json`, AND the three backfilled `tasks.md` files in a single coherent commit graph; CI SHALL never observe a state where the script lands without the backfill or vice versa
+- **THEN** the diff SHALL include `scripts/check-archive-followups.{mjs,test.mjs}`, `openspec/SPEC_TEMPLATE.md`, `AGENTS.md`, `package.json`, AND the backfilled `tasks.md` of `2026-05-01-calendar-coaching-redesign` in a single coherent commit graph; CI SHALL never observe a state where the script lands without the backfill or vice versa
 
-#### Scenario: First-fail signal on calendar-redesign archive
+#### Scenario: First-fail signal calibrated via threshold-lowering follow-up
 
-- **GIVEN** Phase 2 has been merged and the cap is 5
-- **WHEN** any subsequent CI run executes `pnpm lint:archive-followups`
-- **THEN** the lint SHALL fail listing `2026-05-01-calendar-coaching-redesign: 5 deferrals` until the calibration is adjusted via PR-2's documented strategy (see `tasks.md` 4.7) or the offending archive's deferral count drops
+- **GIVEN** Phase 2 has been merged with cap = 6 (calendar-redesign archive at 5 deferrals passes)
+- **WHEN** the threshold-lowering follow-up PR sets `ABSOLUTE_DEFERRAL_CAP = 5`
+- **THEN** `pnpm lint:archive-followups` SHALL fail listing `2026-05-01-calendar-coaching-redesign: 5 deferrals (≥ cap 5)` — the intended first-fail signal that the offending archive was overscoped at archive-time
+
+#### Scenario: Marker convention is annotation-only, not retroactive scope addition
+
+- **GIVEN** an archived change whose proposal/design prose mentions a deferred follow-up but whose tasks.md has no corresponding `[ ]` task line
+- **WHEN** Phase 2's backfill runs
+- **THEN** the backfill SHALL NOT add a new task line just to host a marker; the deferral remains documented in proposal/design but does not contribute to the lint count
 
 ### Requirement: Sunset trigger for the v1 absolute-cap
 
-The absolute-cap-of-5 implementation SHALL be replaced by a deferral-ratio invariant ("deferrals MUST NOT exceed shipped tasks per archive") when EITHER condition holds:
+The absolute-cap implementation (initially 6, lowered to 5 by the threshold-tuning follow-up PR) SHALL be replaced by a deferral-ratio invariant ("deferrals MUST NOT exceed shipped tasks per archive") when EITHER condition holds:
 
 | Trigger                                                                                                                           | Action                                                                                            |
 | --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
