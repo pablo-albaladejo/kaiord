@@ -13,8 +13,7 @@ const parser = require("../parser.js");
 const pkg = require("../package.json");
 
 // Capture at module load before __resetChromeMock clears mock.calls.
-const onInstalledCb =
-  chrome.runtime.onInstalled.addListener.mock.calls[0][0];
+const onInstalledCb = chrome.runtime.onInstalled.addListener.mock.calls[0][0];
 
 describe("background service worker", () => {
   beforeEach(() => __resetChromeMock());

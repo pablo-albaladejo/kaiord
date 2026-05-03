@@ -16,8 +16,7 @@ const externalCb =
 const internalCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 const webRequestCb =
   chrome.webRequest.onBeforeSendHeaders.addListener.mock.calls[0][0];
-const onInstalledCb =
-  chrome.runtime.onInstalled.addListener.mock.calls[0][0];
+const onInstalledCb = chrome.runtime.onInstalled.addListener.mock.calls[0][0];
 
 describe("background.js", () => {
   beforeEach(() => {
