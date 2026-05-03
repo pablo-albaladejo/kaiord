@@ -7,9 +7,13 @@ const {
   readWeek,
   readDay,
   openTrain2Go,
+  reinjectContentScripts,
 } = require("../background.js");
 const parser = require("../parser.js");
 const pkg = require("../package.json");
+
+// Capture at module load before __resetChromeMock clears mock.calls.
+const onInstalledCb = chrome.runtime.onInstalled.addListener.mock.calls[0][0];
 
 describe("background service worker", () => {
   beforeEach(() => __resetChromeMock());
@@ -260,6 +264,86 @@ describe("background service worker", () => {
           userId: 28035,
         })
       ).rejects.toThrow("No Train2Go tab open");
+    });
+  });
+
+  describe("reinjectContentScripts", () => {
+    it("re-injects content.js into existing app.train2go.com tabs", async () => {
+      chrome.runtime.getManifest.mockReturnValue({
+        host_permissions: ["https://app.train2go.com/*"],
+        content_scripts: [
+          {
+            matches: ["https://app.train2go.com/*"],
+            js: ["content.js"],
+            run_at: "document_start",
+          },
+        ],
+      });
+      chrome.tabs.query.mockImplementation(() =>
+        Promise.resolve([
+          { id: 11, url: "https://app.train2go.com/user/index" },
+          { id: 12, url: "https://app.train2go.com/user/index" },
+        ])
+      );
+
+      await reinjectContentScripts();
+
+      expect(chrome.scripting.executeScript).toHaveBeenCalledTimes(2);
+      expect(chrome.scripting.executeScript).toHaveBeenCalledWith({
+        target: { tabId: 11, allFrames: false },
+        files: ["content.js"],
+      });
+    });
+
+    it("skips content scripts whose matches are not in host_permissions", async () => {
+      chrome.runtime.getManifest.mockReturnValue({
+        host_permissions: ["https://app.train2go.com/*"],
+        content_scripts: [
+          {
+            matches: ["https://*.kaiord.com/*"],
+            js: ["kaiord-announce.js"],
+          },
+        ],
+      });
+
+      await reinjectContentScripts();
+
+      expect(chrome.tabs.query).not.toHaveBeenCalled();
+      expect(chrome.scripting.executeScript).not.toHaveBeenCalled();
+    });
+
+    it("swallows per-tab executeScript errors so one bad tab doesn't break the rest", async () => {
+      chrome.runtime.getManifest.mockReturnValue({
+        host_permissions: ["https://app.train2go.com/*"],
+        content_scripts: [
+          {
+            matches: ["https://app.train2go.com/*"],
+            js: ["content.js"],
+          },
+        ],
+      });
+      chrome.tabs.query.mockImplementation(() =>
+        Promise.resolve([
+          { id: 11, url: "https://app.train2go.com/user/index" },
+          { id: 12, url: "https://app.train2go.com/user/index" },
+        ])
+      );
+      chrome.scripting.executeScript
+        .mockRejectedValueOnce(new Error("Cannot access tab"))
+        .mockResolvedValueOnce([]);
+
+      await expect(reinjectContentScripts()).resolves.toBeUndefined();
+      expect(chrome.scripting.executeScript).toHaveBeenCalledTimes(2);
+    });
+
+    it("the onInstalled listener invokes reinjectContentScripts", async () => {
+      // onInstalledCb captured at module load (before __resetChromeMock).
+      chrome.runtime.getManifest.mockReturnValue({
+        host_permissions: [],
+        content_scripts: [],
+      });
+
+      await expect(Promise.resolve(onInstalledCb())).resolves.toBeUndefined();
     });
   });
 });
