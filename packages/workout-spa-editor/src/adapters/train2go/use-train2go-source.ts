@@ -8,7 +8,7 @@
  */
 
 import { useLiveQuery } from "dexie-react-hooks";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 
 import { useAnalytics } from "../../contexts";
 import { usePersistence } from "../../contexts/persistence-context";
@@ -68,7 +68,20 @@ export function useTrain2GoSource(
   const analytics = useAnalytics();
   const sync = useSyncCallback(persistence, transport, analytics);
   const expand = useExpandCallback(persistence, transport, analytics);
-  const connect = useConnectCallback(persistence, transport, analytics);
+  const connectImpl = useConnectCallback(persistence, transport, analytics);
+
+  // Wrap the inner connect so a successful link forces an immediate
+  // re-detect, bypassing the 30s detection cache. Without this the
+  // calendar header stays on "Connect to Train2Go" until the cache
+  // expires, contradicting the Profile Manager which already shows
+  // the freshly-linked account.
+  const connect = useCallback(
+    async (profileId: string) => {
+      await connectImpl(profileId);
+      await store.detectExtension({ force: true });
+    },
+    [connectImpl, store]
+  );
 
   return {
     id: TRAIN2GO,

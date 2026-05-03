@@ -21,7 +21,7 @@ export type Train2GoStore = {
   loading: boolean;
   lastError: string | null;
   lastDetectionTimestamp: number | null;
-  detectExtension: () => Promise<void>;
+  detectExtension: (opts?: { force?: boolean }) => Promise<void>;
   openTrain2Go: () => Promise<void>;
 };
 
