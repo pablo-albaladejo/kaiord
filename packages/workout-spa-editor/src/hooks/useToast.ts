@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { createToastItem, createVariantToast } from "./useToast.helpers";
+import { createToastItem } from "./useToast.helpers";
 import type { ToastItem, ToastOptions } from "./useToast.types";
 
 export type { ToastItem, ToastOptions };
@@ -37,18 +37,40 @@ export const useToast = () => {
     setTimeout(() => setToasts([]), 200);
   }, []);
 
-  // TODO(fix-coaching-dialog-rules-of-hooks-followup): rewrite as
-  // inline functions per the lint rule's preferred shape; the current
-  // `createVariantToast(toast, "...")` form passes a function whose
-  // dependencies the linter cannot infer.
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const success = useCallback(createVariantToast(toast, "success"), [toast]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const error = useCallback(createVariantToast(toast, "error"), [toast]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const warning = useCallback(createVariantToast(toast, "warning"), [toast]);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const info = useCallback(createVariantToast(toast, "info"), [toast]);
+  // Variant helpers: inline forms so exhaustive-deps can verify deps
+  // statically. Each forwards to `toast` with the variant baked in.
+  const success = useCallback(
+    (
+      title: string,
+      description?: string,
+      options?: Omit<ToastOptions, "title" | "description" | "variant">
+    ) => toast({ title, description, variant: "success", ...options }),
+    [toast]
+  );
+  const error = useCallback(
+    (
+      title: string,
+      description?: string,
+      options?: Omit<ToastOptions, "title" | "description" | "variant">
+    ) => toast({ title, description, variant: "error", ...options }),
+    [toast]
+  );
+  const warning = useCallback(
+    (
+      title: string,
+      description?: string,
+      options?: Omit<ToastOptions, "title" | "description" | "variant">
+    ) => toast({ title, description, variant: "warning", ...options }),
+    [toast]
+  );
+  const info = useCallback(
+    (
+      title: string,
+      description?: string,
+      options?: Omit<ToastOptions, "title" | "description" | "variant">
+    ) => toast({ title, description, variant: "info", ...options }),
+    [toast]
+  );
 
   return { toasts, toast, success, error, warning, info, dismiss, dismissAll };
 };
