@@ -53,6 +53,11 @@ const OUT_OF_SCOPE = new Set([
   // single allowlist entry documents an explicit user-action writer pending
   // a separate migration.
   "check-no-zustand-writethrough.mjs",
+  // Migration-state allowlists (test-conventions-should-aaa). Drained to
+  // empty by PR-6; OUT_OF_SCOPE entries removed by PR-6 §6.3b. See
+  // openspec/changes/test-conventions-should-aaa/design.md D17.
+  "check-test-title-should.mjs",
+  "check-test-aaa.mjs",
 ]);
 
 function relForRule(file) {
