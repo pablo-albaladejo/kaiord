@@ -79,12 +79,14 @@ Authoring rules:
 
    <!-- opsx-ship: chunking ... -->
 
-   ## 1. ...
-   ```
+## 1. ...
 
-   Both counts are non-negative integers; the declared `deferred`
-   MUST equal the count of `> Deferred to: #N` markers in the same
-   file (audited by `pnpm lint:archive-followups`). Tasks.md files
-   without the marker fall back to the legacy absolute-cap policy
-   (see rule 6) for backward compat with pre-v2 archives.
+```
+
+Both counts are non-negative integers; the declared `deferred`
+MUST equal the count of `> Deferred to: #N` markers in the same
+file (audited by `pnpm lint:archive-followups`). Tasks.md files
+without the marker fall back to the legacy absolute-cap policy
+(see rule 6) for backward compat with pre-v2 archives.
 -->
+```

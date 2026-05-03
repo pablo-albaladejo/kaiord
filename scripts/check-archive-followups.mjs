@@ -51,7 +51,8 @@ const malformedDeferredRe = /^\s*> Deferred to:(?! #[1-9]\d*\s*$).*$/gm;
 // counts. The script does NOT count `[x]` checkboxes (which conflate
 // fully-shipped and partially-shipped tasks).
 const tasksMarkerRe = /^\s*> Tasks: (\d+) completed, (\d+) deferred\s*$/m;
-const malformedTasksRe = /^\s*> Tasks:(?! \d+ completed, \d+ deferred\s*$).*$/gm;
+const malformedTasksRe =
+  /^\s*> Tasks:(?! \d+ completed, \d+ deferred\s*$).*$/gm;
 
 function parseTasksMarker(src) {
   const match = tasksMarkerRe.exec(src);

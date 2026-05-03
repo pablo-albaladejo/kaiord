@@ -211,10 +211,7 @@ test("v2 marker — overscoped ratio (5 deferred / 2 completed) fails with ratio
   try {
     const r = h.run();
     assert.notEqual(r.status, 0);
-    assert.ok(
-      r.stderr.includes("5 deferred > 2 completed"),
-      r.stderr
-    );
+    assert.ok(r.stderr.includes("5 deferred > 2 completed"), r.stderr);
     assert.ok(r.stderr.includes("overscoped"), r.stderr);
   } finally {
     h.cleanup();
@@ -243,8 +240,7 @@ test("v2 marker — declared/actual count mismatch fails", () => {
 });
 
 test("v2 marker — malformed (non-numeric) fails with parse error", () => {
-  const malformed =
-    `> Tasks: ten completed, two deferred\n\n## 1. Foo\n\n- [x] 1.1 done\n`;
+  const malformed = `> Tasks: ten completed, two deferred\n\n## 1. Foo\n\n- [x] 1.1 done\n`;
   const h = mkHarness((arc) =>
     writeTasks(arc, "2026-05-13-malformed-marker", malformed)
   );
@@ -282,11 +278,7 @@ test("v2 marker — zero deferred + non-zero completed passes", () => {
 
 test("v2 marker — boundary ratio (D = C) passes", () => {
   const h = mkHarness((arc) =>
-    writeTasks(
-      arc,
-      "2026-05-15-equal",
-      buildWithMarker(3, [801, 802, 803])
-    )
+    writeTasks(arc, "2026-05-15-equal", buildWithMarker(3, [801, 802, 803]))
   );
   try {
     const r = h.run();
