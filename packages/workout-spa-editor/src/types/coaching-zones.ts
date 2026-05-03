@@ -49,7 +49,17 @@ export type SyncZonesFailureReason =
   | "profile-deleted";
 
 export type SyncZonesResult =
-  | { ok: true; applied: WrittenField[]; conflicts: ConflictItem[] }
+  | {
+      ok: true;
+      applied: WrittenField[];
+      conflicts: ConflictItem[];
+      /**
+       * The validated bridge payload that produced this reconciliation.
+       * Returned so the UI can pass it back into
+       * `commitConflictResolution` without re-fetching.
+       */
+      payload: ZonesPayload;
+    }
   | { ok: false; reason: SyncZonesFailureReason; error?: string };
 
 export type ZonesReconciliation = {

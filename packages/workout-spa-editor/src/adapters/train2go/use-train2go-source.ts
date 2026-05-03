@@ -7,22 +7,32 @@
  * use cases (extracted to use-train2go-actions.ts to stay under lint).
  */
 
-import { useLiveQuery } from "dexie-react-hooks";
 import { useCallback, useMemo } from "react";
 
 import { useAnalytics } from "../../contexts";
 import { usePersistence } from "../../contexts/persistence-context";
+import { useToastContext } from "../../contexts/ToastContext";
 import { useTrain2GoStore } from "../../store/train2go-store";
-import type { CoachingActivity } from "../../types/coaching-activity";
 import type { CoachingSource } from "../../types/coaching-source";
 import { bridgeDiscovery } from "../bridge/bridge-discovery";
-import { toCoachingActivity } from "./coaching-record-to-activity.converter";
 import { createTrain2GoCoachingTransport } from "./train2go-coaching-transport";
 import {
   useConnectCallback,
   useExpandCallback,
   useSyncCallback,
 } from "./use-train2go-actions";
+import {
+  useCoachingActivities,
+  useTrain2GoSyncState,
+} from "./use-train2go-data";
+import {
+  useZonesSyncOrchestrator,
+  type ZonesSyncOrchestrator,
+} from "./use-zones-sync-orchestrator";
+
+export type Train2GoSource = CoachingSource & {
+  zonesSync: ZonesSyncOrchestrator;
+};
 
 const TRAIN2GO = "train2go";
 
@@ -32,43 +42,33 @@ const getExtensionId = (): string =>
 export function useTrain2GoSource(
   activeProfileId: string | null,
   days: string[]
-): CoachingSource {
+): Train2GoSource {
   const store = useTrain2GoStore();
   const persistence = usePersistence();
+  const toasts = useToastContext();
+  const analytics = useAnalytics();
 
   const transport = useMemo(
     () => createTrain2GoCoachingTransport(getExtensionId),
     []
   );
+  const zonesSync = useZonesSyncOrchestrator(persistence, transport, toasts);
+  const activities = useCoachingActivities(persistence, activeProfileId, days);
+  const lastSyncedAt = useTrain2GoSyncState(persistence, activeProfileId);
 
-  const start = days[0] ?? "";
-  const end = days[days.length - 1] ?? "";
-  const records = useLiveQuery(() => {
-    if (!activeProfileId || !start || !end) return Promise.resolve([]);
-    return persistence.coaching.getByProfileAndDateRange(
-      activeProfileId,
-      start,
-      end
-    );
-  }, [activeProfileId, start, end]);
-
-  const syncStateRow = useLiveQuery(() => {
-    if (!activeProfileId) return Promise.resolve(undefined);
-    return persistence.coachingSyncState.getBySourceAndProfile(
-      TRAIN2GO,
-      activeProfileId
-    );
-  }, [activeProfileId]);
-
-  const activities: CoachingActivity[] = useMemo(
-    () => (records ?? []).map(toCoachingActivity),
-    [records]
+  const sync = useSyncCallback(
+    persistence,
+    transport,
+    analytics,
+    zonesSync.runSync
   );
-
-  const analytics = useAnalytics();
-  const sync = useSyncCallback(persistence, transport, analytics);
   const expand = useExpandCallback(persistence, transport, analytics);
-  const connectImpl = useConnectCallback(persistence, transport, analytics);
+  const connectImpl = useConnectCallback(
+    persistence,
+    transport,
+    analytics,
+    zonesSync.runSync
+  );
 
   // Wrap the inner connect so a successful link forces an immediate
   // re-detect, bypassing the 30s detection cache. Without this the
@@ -92,9 +92,10 @@ export function useTrain2GoSource(
     loading: store.loading,
     error: store.lastError,
     activities,
-    lastSyncedAt: syncStateRow?.lastSyncedAt,
+    lastSyncedAt,
     sync,
     expand,
     connect,
+    zonesSync,
   };
 }

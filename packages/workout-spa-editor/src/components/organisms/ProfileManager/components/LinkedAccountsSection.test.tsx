@@ -10,6 +10,11 @@ import type { LinkedCoachingAccount } from "../../../../types/coaching-account";
 import type { Profile } from "../../../../types/profile";
 
 const mockConnect = vi.fn(async () => undefined);
+let mockSupportsZones = true;
+
+vi.mock("../../../../hooks/use-train2go-supports-zones", () => ({
+  useTrain2GoSupportsZones: () => mockSupportsZones,
+}));
 
 vi.mock("../../../../adapters/train2go/use-train2go-source", () => ({
   useTrain2GoSource: () => ({
@@ -24,6 +29,12 @@ vi.mock("../../../../adapters/train2go/use-train2go-source", () => ({
     sync: vi.fn(async () => undefined),
     expand: vi.fn(async () => undefined),
     connect: mockConnect,
+    zonesSync: {
+      pending: null,
+      runSync: vi.fn(async () => undefined),
+      confirmDecisions: vi.fn(async () => undefined),
+      cancel: vi.fn(),
+    },
   }),
 }));
 
@@ -81,5 +92,64 @@ describe("LinkedAccountsSection", () => {
     await userEvent.click(screen.getByText(/Connect Train2Go/));
 
     expect(mockConnect).toHaveBeenCalledWith("p1");
+  });
+
+  it("hides the Sync zones toggle when bridge does NOT advertise read:training-zones", () => {
+    mockSupportsZones = false;
+    render(
+      wrap(
+        <LinkedAccountsSection
+          profile={makeProfile({ linkedAccounts: [T2G_LINK] })}
+        />
+      )
+    );
+
+    expect(
+      screen.queryByTestId("sync-zones-toggle-train2go")
+    ).not.toBeInTheDocument();
+    mockSupportsZones = true;
+  });
+
+  it("renders the Sync zones toggle when linked AND bridge advertises capability", () => {
+    render(
+      wrap(
+        <LinkedAccountsSection
+          profile={makeProfile({ linkedAccounts: [T2G_LINK] })}
+        />
+      )
+    );
+
+    expect(
+      screen.getByTestId("sync-zones-toggle-train2go")
+    ).toBeInTheDocument();
+  });
+
+  it("persists the toggle state to the profile when clicked", async () => {
+    const persistence = createInMemoryPersistence();
+    const profile = {
+      ...makeProfile({ linkedAccounts: [T2G_LINK] }),
+    };
+    await persistence.profiles.put(profile);
+
+    render(
+      <PersistenceProvider persistence={persistence}>
+        <ToastContextProvider>
+          <LinkedAccountsSection profile={profile} />
+        </ToastContextProvider>
+      </PersistenceProvider>
+    );
+
+    const toggle = screen.getByTestId(
+      "sync-zones-toggle-train2go"
+    ) as HTMLLabelElement;
+    const checkbox = toggle.querySelector(
+      'input[type="checkbox"]'
+    ) as HTMLInputElement;
+    await userEvent.click(checkbox);
+
+    const after = await persistence.profiles.getById("p1");
+    expect(
+      after?.linkedAccounts.find((a) => a.source === "train2go")?.syncZones
+    ).toBe(true);
   });
 });
