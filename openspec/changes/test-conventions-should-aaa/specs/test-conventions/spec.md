@@ -6,19 +6,19 @@ Every `it`-rooted call in any `*.test.{ts,tsx}` file in scope SHALL pass a strin
 
 **Scope (in-scope file pattern):** `*.test.{ts,tsx}` under `packages/**`, EXCLUDING:
 
-| Excluded path                                       | Reason                                                             |
-| --------------------------------------------------- | ------------------------------------------------------------------ |
-| `packages/**/test-utils/**`                         | Shared fixture loaders; not test cases.                            |
-| `packages/workout-spa-editor/e2e/**`                | Playwright `test()` (different runner, different conventions).     |
-| `**/*.stories.{ts,tsx}`                             | Storybook stories; `play()` test functions tracked under a future `storybook-conventions` capability. |
-| `**/test-setup.ts`                                  | Vitest harness file; no `it(...)` calls.                            |
-| `node_modules/**`, `dist/**`, `coverage/**`         | Build artifacts.                                                   |
+| Excluded path                               | Reason                                                                                                |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `packages/**/test-utils/**`                 | Shared fixture loaders; not test cases.                                                               |
+| `packages/workout-spa-editor/e2e/**`        | Playwright `test()` (different runner, different conventions).                                        |
+| `**/*.stories.{ts,tsx}`                     | Storybook stories; `play()` test functions tracked under a future `storybook-conventions` capability. |
+| `**/test-setup.ts`                          | Vitest harness file; no `it(...)` calls.                                                              |
+| `node_modules/**`, `dist/**`, `coverage/**` | Build artifacts.                                                                                      |
 
 The future-proof scoping rule SHALL be: "any `*.test.{ts,tsx}` reachable by `git ls-files` minus the explicit exclusion list above". A repo restructure (e.g., adding `apps/`) MUST automatically include those test files without spec amendment.
 
 **`it`-rooted call detection (AST shape, not enumeration):** the guard SHALL match any `CallExpression` whose callee is either (a) the bare `Identifier("it")` or (b) a `PropertyAccessExpression` whose root expression is `Identifier("it")` — regardless of property name. This covers `it(...)`, `it.skip(...)`, `it.only(...)`, `it.todo(...)`, `it.fails(...)`, `it.concurrent(...)`, `it.runIf(...)`, `it.skipIf(...)`, `it.extend(...)`, `it.for(...)`, and any future vitest aliases without spec amendment. For `it.each([...])(...)` (a `CallExpression` whose callee is itself a `CallExpression`), the guard recurses into the outer call's first argument.
 
-Template literals with substitutions (e.g., `` it(`${prefix} renders X`) ``) SHALL be rejected with a parse error naming the file and line, because the static prefix cannot be verified. Authors SHALL re-shape such titles to embed `should ` as a literal prefix (e.g., `` it(`should render ${variant}`) ``).
+Template literals with substitutions (e.g., ``it(`${prefix} renders X`)``) SHALL be rejected with a parse error naming the file and line, because the static prefix cannot be verified. Authors SHALL re-shape such titles to embed `should ` as a literal prefix (e.g., ``it(`should render ${variant}`)``).
 
 `describe(...)` titles SHALL NOT be subject to this requirement. Describe blocks are noun-phrase agglomerators; the dogma applies only to test cases.
 
@@ -68,9 +68,9 @@ Where `<rule-id>` is `R-ItTitleShould`. The "Suggested rewrite" field is filled 
 
 #### Scenario: Template literal with substitution is rejected with parse error
 
-- **WHEN** a developer writes `` it(`${prefix} renders X`, () => { … }) `` where `prefix` is a runtime variable
+- **WHEN** a developer writes ``it(`${prefix} renders X`, () => { … })`` where `prefix` is a runtime variable
 - **THEN** the guard SHALL exit non-zero with a parse-error message stating that the static prefix cannot be verified
-- **AND** the recommended remediation SHALL be: rewrite as `` it(`should render X with ${variant}`) ``
+- **AND** the recommended remediation SHALL be: rewrite as ``it(`should render X with ${variant}`)``
 
 #### Scenario: `--changed-files` mode restricts inspection to staged files
 
@@ -92,16 +92,17 @@ The mechanical guard `scripts/check-test-aaa.mjs` SHALL enforce this requirement
 
 The escape-hatch allowlist SHALL be initialized empty after this change archives and SHALL grow only through subsequent OpenSpec changes. Permitted categories at this change's archive time:
 
-| Category                                                | Why exempt                                                      |
-| ------------------------------------------------------- | --------------------------------------------------------------- |
-| `*.integration.test.ts` against external network APIs   | Setup is harness-driven (`beforeAll` connects); per-`it` Arrange is empty by harness contract. |
-| Table-driven `it.each([...])` where every row is `[input, expected]` | The Arrange is the table; per-`it` Arrange is empty by data-driven design. |
+| Category                                                             | Why exempt                                                                                     |
+| -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `*.integration.test.ts` against external network APIs                | Setup is harness-driven (`beforeAll` connects); per-`it` Arrange is empty by harness contract. |
+| Table-driven `it.each([...])` where every row is `[input, expected]` | The Arrange is the table; per-`it` Arrange is empty by data-driven design.                     |
 
 Note: `test-utils/**` files are NOT in this escape-hatch table because they are out of scope per the title-rule's exclusion list above (no `it(...)` calls in fixture loaders means nothing for the AAA guard to enforce on).
 
 #### Scenario: Conformant test body passes the guard
 
 - **GIVEN** a test file containing:
+
   ```ts
   it("should reject mismatched activity ids", async () => {
     // Arrange
@@ -115,6 +116,7 @@ Note: `test-utils/**` files are NOT in this escape-hatch table because they are 
     expect(result).toBeNull();
   });
   ```
+
 - **WHEN** `pnpm test:scripts` runs `scripts/check-test-aaa.mjs` on it
 - **THEN** the guard SHALL exit zero
 
@@ -146,6 +148,7 @@ Note: `test-utils/**` files are NOT in this escape-hatch table because they are 
 #### Scenario: AAA markers required in `it.each(...)(...)` body
 
 - **GIVEN** the test file contains:
+
   ```ts
   it.each([1, 2])("should compute for %s", (v) => {
     // Arrange
@@ -158,6 +161,7 @@ Note: `test-utils/**` files are NOT in this escape-hatch table because they are 
     expect(result).toBeDefined();
   });
   ```
+
 - **WHEN** the guard runs
 - **THEN** it SHALL apply the same AAA markers requirement to the inner arrow body — the `it`-rooted detection rule (any CallExpression rooted at `Identifier("it")`, including `it.each([])()` whose callee is itself a CallExpression) SHALL recurse into the outer call's first argument and inspect its body
 - **AND** the guard SHALL exit zero because the canonical Pascal-case line comments are present in the correct order with blank-line separators
