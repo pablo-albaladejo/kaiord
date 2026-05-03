@@ -35,6 +35,17 @@ const isAllowed = (method, path) =>
     (rule) => rule.method === (method || "GET") && rule.pattern.test(path)
   );
 
+// Reads the response body dispatching by Content-Type. Falls back to
+// JSON when headers are unavailable (legacy test mocks). Extracted so
+// handleFetch stays under the 40-line file-cap.
+const readBody = (r) => {
+  const ct =
+    (r.headers && typeof r.headers.get === "function"
+      ? r.headers.get("content-type")
+      : "") || "";
+  return /^text\/html\b/i.test(ct) ? r.text() : r.json();
+};
+
 const handleFetch = async (msg) => {
   const { path, method } = msg;
 
@@ -58,20 +69,7 @@ const handleFetch = async (msg) => {
     }
 
     if (r.ok) {
-      // Dispatch by Content-Type so the same content script can carry
-      // both JSON endpoints (ping, workplan) and the HTML user-details
-      // page that the zones-sync feature consumes. r.json() on an HTML
-      // body throws; r.text() on JSON would skip parsing — neither is
-      // a default we can reuse blindly. Defensive: if the response
-      // happens to lack a `headers` object (legacy test fixtures), we
-      // default to JSON to preserve the existing contract for ping /
-      // workplan endpoints.
-      const contentType =
-        (r.headers && typeof r.headers.get === "function"
-          ? r.headers.get("content-type")
-          : "") || "";
-      const isHtml = /^text\/html\b/i.test(contentType);
-      const data = isHtml ? await r.text() : await r.json();
+      const data = await readBody(r);
       return { ok: true, status: r.status, data };
     }
 

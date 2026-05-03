@@ -249,71 +249,53 @@ const parsePingJson = (json) => {
  *     },
  *   }
  */
-const parseDetailsHtml = (html) => {
-  if (typeof html !== "string" || html.length === 0) {
-    return {};
-  }
-
+const parsePhysioBlock = (html) => {
+  const block = sliceBetween(html, /id="physio-\d+"/, "</form>");
+  if (!block) return null;
   const out = {};
+  const weight = extractInputValueAsNumber(block, "weight");
+  const bpmMax = extractInputValueAsNumber(block, "bpm_max");
+  if (typeof weight === "number") out.weight = weight;
+  if (typeof bpmMax === "number") out.bpmMax = bpmMax;
+  return Object.keys(out).length > 0 ? out : null;
+};
 
-  // Physiological — input values inside #physio-{userId}.
-  const physioBlock = sliceBetween(html, /id="physio-\d+"/, "</form>");
-  if (physioBlock) {
-    const physiological = {};
-    const weight = extractInputValueAsNumber(physioBlock, "weight");
-    const bpmMax = extractInputValueAsNumber(physioBlock, "bpm_max");
-    if (typeof weight === "number") physiological.weight = weight;
-    if (typeof bpmMax === "number") physiological.bpmMax = bpmMax;
-    if (Object.keys(physiological).length > 0)
-      out.physiological = physiological;
-  }
+const parsePacesBlock = (html) => {
+  const block = sliceBetween(html, /id="paces-\d+"/, /<\/main>|<\/section>/);
+  if (!block) return null;
+  const out = {};
+  const cycling = extractCyclingPaces(block);
+  if (cycling) out.cycling = cycling;
+  const running = extractMinSecPaces(block, /sport_id"[^>]+value="1"/);
+  if (running) out.running = running;
+  const swimming = extractMinSecPaces(block, /sport_id"[^>]+value="2"/);
+  if (swimming) out.swimming = swimming;
+  return Object.keys(out).length > 0 ? out : null;
+};
 
-  // Per-sport paces — driven by sport_id hidden inputs inside
-  // #paces-{userId}. We extract z4Upper for run/swim/cycle and an
-  // additional z5Lower for cycling (used as the FTP fallback).
-  const pacesBlock = sliceBetween(
-    html,
-    /id="paces-\d+"/,
-    /<\/main>|<\/section>/
-  );
-  if (pacesBlock) {
-    const paces = {};
-    const cyclingPaces = extractCyclingPaces(pacesBlock);
-    if (cyclingPaces) paces.cycling = cyclingPaces;
-    const runningPaces = extractMinSecPaces(
-      pacesBlock,
-      /sport_id"[^>]+value="1"/
-    );
-    if (runningPaces) paces.running = runningPaces;
-    const swimmingPaces = extractMinSecPaces(
-      pacesBlock,
-      /sport_id"[^>]+value="2"/
-    );
-    if (swimmingPaces) paces.swimming = swimmingPaces;
-    if (Object.keys(paces).length > 0) out.paces = paces;
-  }
-
+const parseHrZonesBlock = (html) => {
   // Per-sport HR zones — sport_id is implicit on the heart-rate-zone
   // wrapper (heart-rate-zone-cycling / -running). Generic HR zone is
   // intentionally NOT emitted; we only surface per-sport mappings.
-  const hrBlock = sliceBetween(
-    html,
-    /id="hrzones-\d+"/,
-    /<\/main>|<\/section>/
-  );
-  if (hrBlock) {
-    const hrZones = {};
-    const cyclingHr = extractHrZ4Upper(hrBlock, "cycling");
-    if (typeof cyclingHr === "number") {
-      hrZones.cycling = { z4Upper: cyclingHr };
-    }
-    const runningHr = extractHrZ4Upper(hrBlock, "running");
-    if (typeof runningHr === "number") {
-      hrZones.running = { z4Upper: runningHr };
-    }
-    if (Object.keys(hrZones).length > 0) out.hrZones = hrZones;
-  }
+  const block = sliceBetween(html, /id="hrzones-\d+"/, /<\/main>|<\/section>/);
+  if (!block) return null;
+  const out = {};
+  const cycling = extractHrZ4Upper(block, "cycling");
+  if (typeof cycling === "number") out.cycling = { z4Upper: cycling };
+  const running = extractHrZ4Upper(block, "running");
+  if (typeof running === "number") out.running = { z4Upper: running };
+  return Object.keys(out).length > 0 ? out : null;
+};
 
+const parseDetailsHtml = (html) => {
+  if (typeof html !== "string" || html.length === 0) return {};
+  const out = {};
+  const physiological = parsePhysioBlock(html);
+  if (physiological) out.physiological = physiological;
+  const paces = parsePacesBlock(html);
+  if (paces) out.paces = paces;
+  const hrZones = parseHrZonesBlock(html);
+  if (hrZones) out.hrZones = hrZones;
   return out;
 };
 
@@ -356,9 +338,11 @@ const Z4_UPPER_SEC_NAME = "z3_upper][1]";
 const Z5_LOWER_MIN_NAME = "z4_lower][0]";
 
 const extractMinSecPaces = (block, sportIdPattern) => {
-  // Slice from the sport_id input forward to the next `<form` boundary
-  // so the pattern matches don't bleed across sport blocks.
-  const sportSlice = sliceForward(block, sportIdPattern);
+  // Bound the slice to a single sport's <form>...</form> block so a
+  // partial sport block (e.g., running configured but no z3_upper
+  // saved yet) does NOT silently consume the next sport's inputs and
+  // assign the wrong threshold.
+  const sportSlice = sliceWithinForm(block, sportIdPattern);
   if (!sportSlice) return null;
   const min = extractInputValueByNameSuffix(sportSlice, Z4_UPPER_MIN_NAME);
   const sec = extractInputValueByNameSuffix(sportSlice, Z4_UPPER_SEC_NAME);
@@ -367,7 +351,7 @@ const extractMinSecPaces = (block, sportIdPattern) => {
 };
 
 const extractCyclingPaces = (block) => {
-  const sportSlice = sliceForward(block, /sport_id"[^>]+value="3"/);
+  const sportSlice = sliceWithinForm(block, /sport_id"[^>]+value="3"/);
   if (!sportSlice) return null;
   const z4Upper = extractInputValueByNameSuffix(sportSlice, Z4_UPPER_MIN_NAME);
   const z5Lower = extractInputValueByNameSuffix(sportSlice, Z5_LOWER_MIN_NAME);
@@ -377,10 +361,15 @@ const extractCyclingPaces = (block) => {
   return Object.keys(out).length > 0 ? out : null;
 };
 
-const sliceForward = (text, fromPattern) => {
+// Returns the inner content of the <form>...</form> that contains the
+// matched `fromPattern`. Bounded slicing prevents pace extractors from
+// leaking across sport blocks when a sport is partially configured.
+const sliceWithinForm = (text, fromPattern) => {
   const m = text.match(fromPattern);
   if (!m || typeof m.index !== "number") return null;
-  return text.slice(m.index);
+  const after = text.slice(m.index);
+  const formClose = after.indexOf("</form>");
+  return formClose >= 0 ? after.slice(0, formClose) : after;
 };
 
 const extractInputValueByNameSuffix = (block, suffix) => {
