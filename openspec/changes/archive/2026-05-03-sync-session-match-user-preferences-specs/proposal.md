@@ -1,3 +1,5 @@
+> Completed: 2026-05-03
+
 ## Why
 
 Two capability specs in production diverged from `openspec/specs/`:
