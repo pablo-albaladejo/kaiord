@@ -87,10 +87,10 @@ The v1 cap SHALL ship at 6 and SHALL NOT be lowered to 5 even though the worst-o
 
 The honest path to a meaningful first-fail signal that does NOT break main is one of:
 
-| Option                                                                            | Where tracked  |
-| --------------------------------------------------------------------------------- | -------------- |
+| Option                                                                                                                                                                                                                             | Where tracked                                                              |
+| ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
 | (a) Replace the absolute cap with a deferral-ratio invariant ("deferrals MUST NOT exceed shipped tasks per archive") so healthy-but-large archives pass at any size; calendar-redesign at 5/many shipped tasks would pass on ratio | Issue #465 (architectural prerequisite: machine-readable `tasks.md` shape) |
-| (b) Add an explicit grandfather allowlist for pre-existing overscoped archives so the cap can be lowered without tripping known-bad archives | Issue #465 (alternative path) |
+| (b) Add an explicit grandfather allowlist for pre-existing overscoped archives so the cap can be lowered without tripping known-bad archives                                                                                       | Issue #465 (alternative path)                                              |
 
 Until either path lands, the v1 cap remains at 6. A meaningful first-fail signal SHALL come naturally from a future archive that hits 6 or more deferral markers — at which point the offending change is genuinely overscoped and the lint correctly fails the archive PR.
 
@@ -110,10 +110,10 @@ Until either path lands, the v1 cap remains at 6. A meaningful first-fail signal
 
 The absolute-cap implementation (cap = 6 in v1) SHALL be replaced by either a deferral-ratio invariant or an explicit grandfather allowlist when EITHER condition holds:
 
-| Trigger                                                                                                                           | Action                                                                                                       |
-| --------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| Trigger                                                                                                                           | Action                                                                                                         |
+| --------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | (a) A second archive hits the absolute cap                                                                                        | Open a PR replacing `ABSOLUTE_DEFERRAL_CAP` with a ratio invariant or allowlist; assign architecture ownership |
-| (b) `tasks.md` gains a machine-readable shape that exposes completed-task counts (architectural prerequisite, tracked separately) | Open a PR replacing `ABSOLUTE_DEFERRAL_CAP` with a ratio invariant computed from the new shape               |
+| (b) `tasks.md` gains a machine-readable shape that exposes completed-task counts (architectural prerequisite, tracked separately) | Open a PR replacing `ABSOLUTE_DEFERRAL_CAP` with a ratio invariant computed from the new shape                 |
 
 Until either trigger fires, the absolute cap SHALL remain in force.
 
