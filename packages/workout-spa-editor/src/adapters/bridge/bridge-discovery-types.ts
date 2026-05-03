@@ -20,6 +20,12 @@ export type BridgeDiscovery = {
   start: () => void;
   stop: () => void;
   getExtensionId: (bridgeId: string) => string | null;
+  /**
+   * Verified capabilities for a discovered bridge, sourced from its
+   * pinged manifest (NOT from the wire announcement, which is
+   * spoofable). `null` until verification completes for this bridge.
+   */
+  getCapabilities: (bridgeId: string) => readonly string[] | null;
   subscribe: (listener: DiscoveryListener) => () => void;
 };
 

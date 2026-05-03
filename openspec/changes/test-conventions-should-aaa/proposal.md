@@ -33,32 +33,32 @@ This change converts both conventions into mechanically-enforced invariants and 
 
 - New `scripts/codemod-should-prefix.mjs` (TypeScript Compiler API) walks each `*.test.{ts,tsx}` and rewrites the first argument of every `it(...)` call whose title does not start with `should ` AND whose first word matches the verb-mapping table:
 
-  | Title starts with | Rewrites to     |
-  | ----------------- | --------------- |
-  | `renders X`       | `should render X` |
-  | `returns X`       | `should return X` |
-  | `is X`            | `should be X`     |
-  | `does not X`      | `should not X`    |
-  | `does X`          | `should do X`     |
-  | `rejects X`       | `should reject X` |
-  | `accepts X`       | `should accept X` |
-  | `throws X`        | `should throw X`  |
-  | `shows X`         | `should show X`   |
-  | `hides X`         | `should hide X`   |
-  | `fires X`         | `should fire X`   |
-  | `emits X`         | `should emit X`   |
-  | `calls X`         | `should call X`   |
-  | `uses X`          | `should use X`    |
-  | `maps X`          | `should map X`    |
-  | `replaces X`      | `should replace X` |
+  | Title starts with | Rewrites to         |
+  | ----------------- | ------------------- |
+  | `renders X`       | `should render X`   |
+  | `returns X`       | `should return X`   |
+  | `is X`            | `should be X`       |
+  | `does not X`      | `should not X`      |
+  | `does X`          | `should do X`       |
+  | `rejects X`       | `should reject X`   |
+  | `accepts X`       | `should accept X`   |
+  | `throws X`        | `should throw X`    |
+  | `shows X`         | `should show X`     |
+  | `hides X`         | `should hide X`     |
+  | `fires X`         | `should fire X`     |
+  | `emits X`         | `should emit X`     |
+  | `calls X`         | `should call X`     |
+  | `uses X`          | `should use X`      |
+  | `maps X`          | `should map X`      |
+  | `replaces X`      | `should replace X`  |
   | `preserves X`     | `should preserve X` |
-  | `removes X`       | `should remove X` |
-  | `passes X`        | `should pass X`   |
-  | `updates X`       | `should update X` |
-  | `focuses X`       | `should focus X`  |
-  | `falls X`         | `should fall X`   |
-  | `resolves X`      | `should resolve X` |
-  | `includes X`      | `should include X` |
+  | `removes X`       | `should remove X`   |
+  | `passes X`        | `should pass X`     |
+  | `updates X`       | `should update X`   |
+  | `focuses X`       | `should focus X`    |
+  | `falls X`         | `should fall X`     |
+  | `resolves X`      | `should resolve X`  |
+  | `includes X`      | `should include X`  |
 
   The 24-row table covers ≥ 95% of the 1,409 violations per the frequency histogram measured at PR-1 ship-time. Unmapped first words → emitted to `REVIEW_QUEUE.md` for one-shot manual review (estimate: 60–80 entries).
 

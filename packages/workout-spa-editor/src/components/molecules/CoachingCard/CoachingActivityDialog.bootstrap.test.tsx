@@ -20,6 +20,7 @@ import { describe, expect, it, vi } from "vitest";
 import { CoachingRegistryBootstrap } from "../../../contexts/coaching-registry-bootstrap";
 import { useCoachingSourceFactories } from "../../../contexts/coaching-registry-context";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
+import { ToastContextProvider } from "../../../contexts/ToastContext";
 import { useCoachingActivities } from "../../../hooks/use-coaching-activities";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import type { CoachingActivity } from "../../../types/coaching-activity";
@@ -76,14 +77,16 @@ describe("CoachingActivityDialog (bootstrap-real smoke)", () => {
 
     render(
       <PersistenceProvider persistence={createInMemoryPersistence()}>
-        <CoachingRegistryBootstrap>
-          <TestProbe onFactoryCount={(n) => (factoryCount = n)} />
-          <CoachingActivityDialog
-            activity={baseActivity}
-            onClose={vi.fn()}
-            expandActivity={vi.fn()}
-          />
-        </CoachingRegistryBootstrap>
+        <ToastContextProvider>
+          <CoachingRegistryBootstrap>
+            <TestProbe onFactoryCount={(n) => (factoryCount = n)} />
+            <CoachingActivityDialog
+              activity={baseActivity}
+              onClose={vi.fn()}
+              expandActivity={vi.fn()}
+            />
+          </CoachingRegistryBootstrap>
+        </ToastContextProvider>
       </PersistenceProvider>
     );
 

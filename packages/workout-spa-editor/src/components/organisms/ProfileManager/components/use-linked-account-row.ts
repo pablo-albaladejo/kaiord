@@ -66,5 +66,27 @@ export const useLinkedAccountRow = (
     }
   }, [persistence, profile, sourceMeta, toasts, analytics]);
 
-  return { busy, handleConnect, handleDisconnect };
+  const handleToggleSyncZones = useCallback(
+    async (next: boolean) => {
+      const refreshed = await persistence.profiles.getById(profile.id);
+      if (!refreshed) return;
+      const updatedAccounts = refreshed.linkedAccounts.map((a) =>
+        a.source === sourceMeta.id ? { ...a, syncZones: next } : a
+      );
+      await persistence.profiles.put({
+        ...refreshed,
+        linkedAccounts: updatedAccounts,
+        updatedAt: new Date().toISOString(),
+      });
+    },
+    [persistence, profile, sourceMeta]
+  );
+
+  return {
+    busy,
+    handleConnect,
+    handleDisconnect,
+    handleToggleSyncZones,
+    zonesSync: t2gSource.zonesSync,
+  };
 };
