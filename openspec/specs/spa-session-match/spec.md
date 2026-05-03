@@ -578,11 +578,11 @@ In particular: deleting a `coachingActivities` row SHALL run inside a `db.transa
 
 **Cascade-table inventory** — the authoritative list of cascade tables per parent SHALL be co-located with the Dexie adapter (e.g., a `CASCADE_TABLES` constant in `adapters/dexie/cascade-tables.ts`) and each entry SHALL be unit-tested:
 
-| Parent table         | Cascade tables                                                                       |
-| -------------------- | ------------------------------------------------------------------------------------ |
-| `coachingActivities` | `sessionMatches`, `autoMatchDismissals`                                              |
-| `workouts`           | `sessionMatches`, `autoMatchDismissals`                                              |
-| `profiles`           | `coachingActivities`, `sessionMatches`, `userPreferences`, `autoMatchDismissals`     |
+| Parent table         | Cascade tables                                                                   |
+| -------------------- | -------------------------------------------------------------------------------- |
+| `coachingActivities` | `sessionMatches`, `autoMatchDismissals`                                          |
+| `workouts`           | `sessionMatches`, `autoMatchDismissals`                                          |
+| `profiles`           | `coachingActivities`, `sessionMatches`, `userPreferences`, `autoMatchDismissals` |
 
 A unit test SHALL assert `CASCADE_TABLES` matches this inventory exactly — adding a new cascade table anywhere SHALL fail the test until the inventory is updated, preventing silent drift between the Dexie hooks and the transaction-table list. (The `profiles` cascade table list does NOT include `workouts` because workouts are profile-agnostic.)
 
