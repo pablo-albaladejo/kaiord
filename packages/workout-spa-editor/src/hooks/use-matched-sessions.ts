@@ -9,6 +9,13 @@
  * tables itself — the parent calendar page already does, and a
  * separate subscription would defeat the budget.
  *
+ * Performance instrumentation: the hook wraps the live query in
+ * `performance.mark` / `performance.measure` calls under DEV / test
+ * mode only (gated by `import.meta.env`). The Playwright performance
+ * spec reads the resulting measure entry to enforce the 30 ms slice
+ * of the CalendarPage FCP budget (per design D16). Production builds
+ * tree-shake these calls out — see `scripts/check-no-perf-marks-in-prod.mjs`.
+ *
  * Returns the same `MatchedSession` shape `MatchedSessionCard`
  * consumes (view-model `CoachingActivity`, not the persistence
  * record) — the record→view-model mapping is platform-aware via
@@ -25,6 +32,10 @@ import type { MatchedSession } from "../components/molecules/MatchedSessionCard/
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { SessionMatch } from "../types/session-match";
+import {
+  markUseMatchedSessionsEnd,
+  markUseMatchedSessionsStart,
+} from "./use-matched-sessions-perf";
 
 export type MatchedSessionWithMetadata = MatchedSession & {
   match: SessionMatch;
@@ -77,18 +88,23 @@ export function useMatchedSessions(
   days: string[]
 ): MatchedSessionWithMetadata[] | undefined {
   return useLiveQuery<MatchedSessionWithMetadata[]>(async () => {
-    if (!profileId || days.length === 0) return [];
-    const matches = await db
-      .table<SessionMatch>("sessionMatches")
-      .where("[profileId+date]")
-      .between(
-        [profileId, firstDayOf(days)],
-        [profileId, lastDayOf(days)],
-        true,
-        true
-      )
-      .toArray();
-    if (matches.length === 0) return [];
-    return hydrate(matches);
+    markUseMatchedSessionsStart();
+    try {
+      if (!profileId || days.length === 0) return [];
+      const matches = await db
+        .table<SessionMatch>("sessionMatches")
+        .where("[profileId+date]")
+        .between(
+          [profileId, firstDayOf(days)],
+          [profileId, lastDayOf(days)],
+          true,
+          true
+        )
+        .toArray();
+      if (matches.length === 0) return [];
+      return await hydrate(matches);
+    } finally {
+      markUseMatchedSessionsEnd();
+    }
   }, [profileId, days.join(",")]);
 }

@@ -1,3 +1,5 @@
+> Completed: 2026-05-02
+
 ## Why
 
 The `2026-05-01-calendar-coaching-redesign` change (archived) shipped the structural redesign — three card states, the `SessionMatch` aggregate, density toggle, status palette — but its §8.5/§8.6, §9, §10.3, §11, and §12.4a tasks (originally chunked under PR 3 and PR 4) were deferred to follow-up issues #431–#435 and never landed. The resulting state is incoherent in three ways: (a) the auto-match heuristic exists end-to-end yet **never reaches the user** because `AutoMatchBanner` is built and unit-tested but unmounted in `CalendarPage`; (b) the `match`/`unmatch` use cases are wired into the data layer but the `CoachingActivityDialog` still treats coaching activities and workouts as two disconnected stacks, so users cannot manually fuse a plan to an actual or split a wrong match; (c) the perf budget that was supposed to gate the redesigned `CalendarPage` was deferred — and must be set against the **final** shape, not the current half-shipped one.

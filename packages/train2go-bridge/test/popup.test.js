@@ -163,6 +163,55 @@ describe("Train2Go popup", () => {
     expect(sub.textContent).toBe("");
   });
 
+  it("renders coach notes inside a collapsible <details> when ping carries notes", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: {
+          ok: true,
+          data: {
+            sessionActive: true,
+            userName: "Pablo",
+            userId: 28035,
+            notes: "Plan: pablo / pwd\n\nGoals\nSub-3 marathon",
+          },
+        },
+        readWeekResponse: { ok: true, data: { activities: [] } },
+      })
+    );
+
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    const region = dom.window.document.getElementById("notes-region");
+    const details = region.querySelector("details");
+    expect(details).not.toBeNull();
+    expect(details.querySelector("summary").textContent).toBe("Coach notes");
+    const body = details.querySelector(".notes__body");
+    expect(body.textContent).toContain("Sub-3 marathon");
+    // Defense in depth: body uses textContent so HTML is never parsed.
+    expect(body.querySelector("script")).toBeNull();
+  });
+
+  it("does not render notes-region content when ping omits notes", async () => {
+    const dom = setupDom(
+      buildChromeMock({
+        pingResponse: {
+          ok: true,
+          data: { sessionActive: true, userName: "P", userId: 1 },
+        },
+        readWeekResponse: { ok: true, data: { activities: [] } },
+      })
+    );
+
+    await flushAsync();
+    await flushAsync();
+    await flushAsync();
+
+    const region = dom.window.document.getElementById("notes-region");
+    expect(region.children.length).toBe(0);
+  });
+
   it("uses cached rollup when fresh and skips read-week", async () => {
     const mock = buildChromeMock({
       pingResponse: {

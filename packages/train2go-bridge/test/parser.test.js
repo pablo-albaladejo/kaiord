@@ -5,6 +5,7 @@ const {
   parseDailyHtml,
   parsePingJson,
   decodeEntities,
+  htmlToPlainText,
 } = require("../parser.js");
 
 const fixture = (name) =>
@@ -194,6 +195,71 @@ describe("parser", () => {
         data: { user: { id: 4, name: "S", coach_name: "" } },
       };
       expect(parsePingJson(json)).not.toHaveProperty("coachName");
+    });
+
+    it("extracts notes from data.user.user_notes (HTML stripped to text)", () => {
+      const json = {
+        success: true,
+        data: {
+          user: {
+            id: 5,
+            name: "T",
+            user_notes:
+              "<p>Plan: pablo / pwd</p><p>Test: 200 W FTP</p><h3>Goals</h3><p>Sub-3 marathon</p>",
+          },
+        },
+      };
+      const result = parsePingJson(json);
+      expect(result.notes).toBe(
+        "Plan: pablo / pwd\nTest: 200 W FTP\nGoals\nSub-3 marathon"
+      );
+    });
+
+    it("omits notes when user_notes is missing or empty", () => {
+      const empty = parsePingJson({
+        success: true,
+        data: { user: { id: 6, name: "U" } },
+      });
+      const blank = parsePingJson({
+        success: true,
+        data: { user: { id: 7, name: "V", user_notes: "" } },
+      });
+      expect(empty).not.toHaveProperty("notes");
+      expect(blank).not.toHaveProperty("notes");
+    });
+  });
+
+  describe("htmlToPlainText", () => {
+    it("strips tags and preserves paragraph breaks", () => {
+      expect(htmlToPlainText("<p>One</p><p>Two</p>")).toBe("One\nTwo");
+    });
+
+    it("converts <br> to newlines", () => {
+      expect(htmlToPlainText("a<br>b<br/>c")).toBe("a\nb\nc");
+    });
+
+    it("collapses runs of empty lines to a single blank line", () => {
+      expect(htmlToPlainText("<p>a</p><p><br></p><p><br></p><p>b</p>")).toBe(
+        "a\n\nb"
+      );
+    });
+
+    it("decodes HTML entities", () => {
+      expect(htmlToPlainText("<p>R&amp;D &amp; rest</p>")).toBe("R&D & rest");
+    });
+
+    it("strips <script>, <style> and any other arbitrary tags", () => {
+      const dirty = "<p>safe</p><script>alert(1)</script><style>x{}</style>";
+      const clean = htmlToPlainText(dirty);
+      expect(clean).not.toContain("<");
+      expect(clean).not.toContain("alert");
+      expect(clean).toContain("safe");
+    });
+
+    it("returns empty string for non-strings", () => {
+      expect(htmlToPlainText(undefined)).toBe("");
+      expect(htmlToPlainText(null)).toBe("");
+      expect(htmlToPlainText(0)).toBe("");
     });
   });
 });

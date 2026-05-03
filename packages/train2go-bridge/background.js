@@ -98,6 +98,8 @@ const ping = async () => {
       userId: session.userId,
       userName: session.userName,
     };
+    // session may also carry coachName / notes — both are spread above
+    // and only the BRIDGE_MANIFEST keys are explicitly overwritten.
   } catch {
     return { ...BRIDGE_MANIFEST, sessionActive: false };
   }
@@ -229,6 +231,48 @@ chrome.runtime.onMessage.addListener((message, _sender, sendResponse) => {
   return true;
 });
 
+// ── Content-script re-inject after extension reload ──
+//
+// When the extension is reloaded (DevTools, update, install), Chrome
+// terminates content scripts in existing tabs but does NOT re-inject
+// them automatically. Tabs that were already open at app.train2go.com
+// keep stale, dead listeners — chrome.tabs.sendMessage to them fails
+// with "Receiving end does not exist", and the bridge's `train2goFetch`
+// silently returns sessionActive: false. Re-inject programmatically on
+// onInstalled so the user does not have to reload every Train2Go tab
+// after touching the extension.
+//
+// Only patterns covered by `host_permissions` are re-injected.
+// `kaiord-announce.js` runs on `*.kaiord.com` (production) and on
+// `localhost` in dev — those are NOT in host_permissions, so the SPA
+// tab still needs a manual reload after a bridge update. That is the
+// standard MV3 dev experience and out of scope for this fix.
+const reinjectContentScripts = async () => {
+  const manifest = chrome.runtime.getManifest();
+  const hostPermissions = manifest.host_permissions ?? [];
+  for (const script of manifest.content_scripts ?? []) {
+    const matches = script.matches.filter((m) => hostPermissions.includes(m));
+    if (matches.length === 0) continue;
+    const tabs = await chrome.tabs.query({ url: matches });
+    for (const tab of tabs) {
+      try {
+        await chrome.scripting.executeScript({
+          target: { tabId: tab.id, allFrames: !!script.all_frames },
+          files: script.js,
+        });
+      } catch {
+        // Tab may be in a restricted context or already injected; ignore.
+      }
+    }
+  }
+};
+
+if (typeof chrome !== "undefined" && chrome.runtime?.onInstalled) {
+  chrome.runtime.onInstalled.addListener(() => {
+    void reinjectContentScripts();
+  });
+}
+
 // Exported for testing
 if (typeof module !== "undefined") {
   module.exports = {
@@ -244,5 +288,6 @@ if (typeof module !== "undefined") {
     openTrain2Go,
     persistSnapshot,
     clearSnapshot,
+    reinjectContentScripts,
   };
 }
