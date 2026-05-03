@@ -12,6 +12,7 @@ import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { PersistenceProvider } from "../../contexts/persistence-context";
+import { ToastContextProvider } from "../../contexts/ToastContext";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 
 const mockSync = vi.fn(async () => ({
@@ -71,7 +72,7 @@ import { useTrain2GoSource } from "./use-train2go-source";
 
 const wrap = (children: ReactNode) => (
   <PersistenceProvider persistence={createInMemoryPersistence()}>
-    {children}
+    <ToastContextProvider>{children}</ToastContextProvider>
   </PersistenceProvider>
 );
 

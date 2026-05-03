@@ -78,11 +78,11 @@ This change is phased across six PRs because the migration scope (1,409 title re
 
 The sharded layout:
 
-| Shard                                  | Initial size | Drain target | Drained by |
-| -------------------------------------- | ------------ | ------------ | ---------- |
-| `AAA_ALLOWLIST_BACKEND`                | ~118 entries | empty        | PR-3       |
-| `AAA_ALLOWLIST_SPA_NON_COMPONENT`      | ~110 entries | empty        | PR-4       |
-| `AAA_ALLOWLIST_SPA_COMPONENT`          | ~90 entries  | empty        | PR-5       |
+| Shard                             | Initial size | Drain target | Drained by |
+| --------------------------------- | ------------ | ------------ | ---------- |
+| `AAA_ALLOWLIST_BACKEND`           | ~118 entries | empty        | PR-3       |
+| `AAA_ALLOWLIST_SPA_NON_COMPONENT` | ~110 entries | empty        | PR-4       |
+| `AAA_ALLOWLIST_SPA_COMPONENT`     | ~90 entries  | empty        | PR-5       |
 
 (Exact counts are determined at PR-1 ship-time after the bootstrap-script run; the sums equal the 318-violator total measured at proposal time.)
 
@@ -121,10 +121,10 @@ The same procedure applies to PR-3 and PR-4. PR-2's revert (codemod for `should`
 
 **Two distinct allowlist patterns coexist in this repo. Do not conflate them.**
 
-| Pattern                       | Initial state                  | Drain target           | Examples in repo                                                                              |
-| ----------------------------- | ------------------------------ | ---------------------- | --------------------------------------------------------------------------------------------- |
-| **Exception allowlist**       | `new Set([])` (empty)          | Stays empty forever    | `scripts/check-no-pii-leakage.mjs:64`, `scripts/check-no-zustand-writethrough.mjs`            |
-| **Migration-state allowlist** | seeded with N entries at PR-1  | drained to empty by PR-N | this change's two new guards; `guidelines-compliance-harden`'s 4 cleanup guards (precedent)   |
+| Pattern                       | Initial state                 | Drain target             | Examples in repo                                                                            |
+| ----------------------------- | ----------------------------- | ------------------------ | ------------------------------------------------------------------------------------------- |
+| **Exception allowlist**       | `new Set([])` (empty)         | Stays empty forever      | `scripts/check-no-pii-leakage.mjs:64`, `scripts/check-no-zustand-writethrough.mjs`          |
+| **Migration-state allowlist** | seeded with N entries at PR-1 | drained to empty by PR-N | this change's two new guards; `guidelines-compliance-harden`'s 4 cleanup guards (precedent) |
 
 The two patterns LOOK identical at the source level (both export `const ALLOWLIST = new Set([...])`) and the existing `scripts/check-allowlists-empty.mjs` guard treats both the same way (regex match for non-empty `new Set([...])`). The semantic difference is operational: an exception allowlist requires a justifying reviewer-gated comment per entry; a migration-state allowlist is bulk-seeded and bulk-drained without per-entry justification. To keep the existing guard happy during the migration window, this change uses the per-guard `OUT_OF_SCOPE` extension in `scripts/check-allowlists-empty.mjs` (see D17 below and PR-1 §1.4b in tasks.md) — adding the two new guards to the targeted exemption Set rather than flipping the global `--mode=warn` flag, which would silently disable the ratchet for every other guard. The header comments of the two new guards SHALL explicitly state which pattern they implement so a future contributor reading either script can tell at sight whether they are looking at exception state or migration state.
 
@@ -236,7 +236,7 @@ The `--base` flag is the explicit dependency: PR-3 / PR-4 / PR-5 CI workflows pa
 
 **Rationale:**
 
-- Reuse over invention. Adding a new top-level script (`pnpm lint:test-conventions`) duplicates infrastructure: a separate husky entry, a separate CI step, separate documentation. The existing `test:scripts` harness already owns "run all scripts/check-*.mjs co-located node:test suites" — these guards fit the contract exactly.
+- Reuse over invention. Adding a new top-level script (`pnpm lint:test-conventions`) duplicates infrastructure: a separate husky entry, a separate CI step, separate documentation. The existing `test:scripts` harness already owns "run all scripts/check-\*.mjs co-located node:test suites" — these guards fit the contract exactly.
 - The guards' co-located `*.test.mjs` files exercise the guards themselves (do they pass on conformant fixtures? do they fail on non-conformant fixtures?). The harness picks them up automatically; no wiring needed beyond file placement.
 
 **Trade-off:** developers who want to run only the convention checks (not all script tests) need `node --test scripts/check-test-{title-should,aaa}.test.mjs` rather than a named script. Acceptable — the existing scripts share this property.
@@ -266,10 +266,10 @@ Two sentences, satisfying the template rule. PR-6 §6.7b copies this paragraph v
 
 | Test shape                                                                                  | Arrange                          | Act                          | Assert                       |
 | ------------------------------------------------------------------------------------------- | -------------------------------- | ---------------------------- | ---------------------------- |
-| Render-then-interact: `render(<C/>); await userEvent.click(...); expect(screen.find...)`   | `render(<C/>)`                   | `await userEvent.click(...)` | `expect(screen.find...)`     |
+| Render-then-interact: `render(<C/>); await userEvent.click(...); expect(screen.find...)`    | `render(<C/>)`                   | `await userEvent.click(...)` | `expect(screen.find...)`     |
 | Render-then-assert-paint: `render(<C/>); expect(screen.getBy...).toBeInTheDocument()`       | (empty — the harness IS Arrange) | `render(<C/>)`               | `expect(screen.getBy...)`    |
-| Hook-test: `const { result } = renderHook(...); act(() => ...); expect(result.current...)` | `renderHook(...)`                | `act(() => ...)`             | `expect(result.current...)`  |
-| Form fill: `render(<Form/>); await userEvent.type(...); await userEvent.click(submit); ...`| `render(<Form/>)`                | both `userEvent` calls       | `expect(...)` for the result |
+| Hook-test: `const { result } = renderHook(...); act(() => ...); expect(result.current...)`  | `renderHook(...)`                | `act(() => ...)`             | `expect(result.current...)`  |
+| Form fill: `render(<Form/>); await userEvent.type(...); await userEvent.click(submit); ...` | `render(<Form/>)`                | both `userEvent` calls       | `expect(...)` for the result |
 
 **Rationale:**
 

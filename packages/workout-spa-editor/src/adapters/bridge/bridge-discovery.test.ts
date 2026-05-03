@@ -37,7 +37,13 @@ describe("createBridgeDiscovery", () => {
   });
 
   it("registers extension id after a verified announcement", async () => {
-    const verify = vi.fn().mockResolvedValue(true);
+    const verify = vi.fn().mockResolvedValue({
+      id: "x",
+      name: "x",
+      version: "1.0.0",
+      protocolVersion: 1,
+      capabilities: [],
+    });
     const discovery = createBridgeDiscovery({ verify });
     discovery.start();
 
@@ -50,7 +56,7 @@ describe("createBridgeDiscovery", () => {
   });
 
   it("rejects announcements that fail verification (spoof)", async () => {
-    const verify = vi.fn().mockResolvedValue(false);
+    const verify = vi.fn().mockResolvedValue(null);
     const discovery = createBridgeDiscovery({ verify });
     discovery.start();
 
@@ -62,7 +68,13 @@ describe("createBridgeDiscovery", () => {
   });
 
   it("registers multiple bridges independently", async () => {
-    const verify = vi.fn().mockResolvedValue(true);
+    const verify = vi.fn().mockResolvedValue({
+      id: "x",
+      name: "x",
+      version: "1.0.0",
+      protocolVersion: 1,
+      capabilities: [],
+    });
     const discovery = createBridgeDiscovery({ verify });
     discovery.start();
 
@@ -76,7 +88,13 @@ describe("createBridgeDiscovery", () => {
   });
 
   it("ignores announcements with invalid shape", async () => {
-    const verify = vi.fn().mockResolvedValue(true);
+    const verify = vi.fn().mockResolvedValue({
+      id: "x",
+      name: "x",
+      version: "1.0.0",
+      protocolVersion: 1,
+      capabilities: [],
+    });
     const discovery = createBridgeDiscovery({ verify });
     discovery.start();
 
@@ -93,7 +111,13 @@ describe("createBridgeDiscovery", () => {
   it("posts KAIORD_BRIDGE_DISCOVER after 3s when no bridges announced", () => {
     const postSpy = vi.spyOn(window, "postMessage");
     const discovery = createBridgeDiscovery({
-      verify: vi.fn().mockResolvedValue(true),
+      verify: vi.fn().mockResolvedValue({
+        id: "x",
+        name: "x",
+        version: "1.0.0",
+        protocolVersion: 1,
+        capabilities: [],
+      }),
     });
     discovery.start();
 
@@ -109,7 +133,13 @@ describe("createBridgeDiscovery", () => {
   it("does not post KAIORD_BRIDGE_DISCOVER when a bridge has already announced", async () => {
     const postSpy = vi.spyOn(window, "postMessage");
     const discovery = createBridgeDiscovery({
-      verify: vi.fn().mockResolvedValue(true),
+      verify: vi.fn().mockResolvedValue({
+        id: "x",
+        name: "x",
+        version: "1.0.0",
+        protocolVersion: 1,
+        capabilities: [],
+      }),
     });
     discovery.start();
 
@@ -126,7 +156,13 @@ describe("createBridgeDiscovery", () => {
   it("notifies subscribers when a bridge is registered", async () => {
     const listener = vi.fn();
     const discovery = createBridgeDiscovery({
-      verify: vi.fn().mockResolvedValue(true),
+      verify: vi.fn().mockResolvedValue({
+        id: "x",
+        name: "x",
+        version: "1.0.0",
+        protocolVersion: 1,
+        capabilities: [],
+      }),
     });
     discovery.start();
     discovery.subscribe(listener);
@@ -141,7 +177,13 @@ describe("createBridgeDiscovery", () => {
   it("unsubscribes cleanly", async () => {
     const listener = vi.fn();
     const discovery = createBridgeDiscovery({
-      verify: vi.fn().mockResolvedValue(true),
+      verify: vi.fn().mockResolvedValue({
+        id: "x",
+        name: "x",
+        version: "1.0.0",
+        protocolVersion: 1,
+        capabilities: [],
+      }),
     });
     discovery.start();
     const unsubscribe = discovery.subscribe(listener);
@@ -155,7 +197,13 @@ describe("createBridgeDiscovery", () => {
   });
 
   it("skips verification when the same announcement is received twice", async () => {
-    const verify = vi.fn().mockResolvedValue(true);
+    const verify = vi.fn().mockResolvedValue({
+      id: "x",
+      name: "x",
+      version: "1.0.0",
+      protocolVersion: 1,
+      capabilities: [],
+    });
     const discovery = createBridgeDiscovery({ verify });
     discovery.start();
 
@@ -169,7 +217,13 @@ describe("createBridgeDiscovery", () => {
   });
 
   it("removes window listeners on stop()", async () => {
-    const verify = vi.fn().mockResolvedValue(true);
+    const verify = vi.fn().mockResolvedValue({
+      id: "x",
+      name: "x",
+      version: "1.0.0",
+      protocolVersion: 1,
+      capabilities: [],
+    });
     const discovery = createBridgeDiscovery({ verify });
     discovery.start();
     discovery.stop();
