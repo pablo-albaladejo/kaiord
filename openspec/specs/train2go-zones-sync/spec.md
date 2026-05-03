@@ -62,7 +62,7 @@ The `syncZones(profileId, transport, repo): Promise<SyncZonesResult>` use case S
 | Same value as Train2Go         | No-op                                                         |
 | Different value (manual entry) | Include in `conflicts` (NOT written)                          |
 
-The success result is `{ ok: true, applied: WrittenField[], conflicts: ConflictItem[] }`. Conflicting values MUST NOT be written to the profile by `syncZones` itself — they are returned to the caller (the UI) for presentation. Silent fills ARE written eagerly during `syncZones` execution.
+The success result is `{ ok: true, applied: WrittenField[], conflicts: ConflictItem[], payload: ZonesPayload }`. The `payload` field is the validated bridge response, returned so the UI can pass it back into `commitConflictResolution` without re-fetching. Conflicting values MUST NOT be written to the profile by `syncZones` itself — they are returned to the caller (the UI) for presentation. Silent fills ARE written eagerly during `syncZones` execution.
 
 #### Scenario: Triathlete profile gets per-sport LTHR (silent fills)
 
