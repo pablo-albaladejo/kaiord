@@ -8,6 +8,8 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | Date | Change | Summary |
 | ---- | ------ | ------- |
 | 2026-05-03 | [`repo-hygiene-tooling`](./2026-05-03-repo-hygiene-tooling/) | Two distinct backlog-debt mechanics are leaking simultaneously: |
+| 2026-05-03 | [`sync-session-match-user-preferences-specs`](./2026-05-03-sync-session-match-user-preferences-specs/) | Two capability specs in production diverged from openspec/specs/: |
+| 2026-05-03 | [`tasks-machine-readable-shape`](./2026-05-03-tasks-machine-readable-shape/) | The archive-followups-guard capability shipped in PR #464 with an absolute cap (≥ 6 > Deferred to: #N markers per archive → fail). Per design D6 of 2026-05-03-… |
 | 2026-05-02 | [`bridge-popup-redesign`](./2026-05-02-bridge-popup-redesign/) | Both browser-extension bridges (@kaiord/garmin-bridge and @kaiord/train2go-bridge) ship the identical icon (dark navy hex, blue inner mark) and a near-identica… |
 | 2026-05-02 | [`calendar-coaching-redesign-completion`](./2026-05-02-calendar-coaching-redesign-completion/) | The 2026-05-01-calendar-coaching-redesign change (archived) shipped the structural redesign — three card states, the SessionMatch aggregate, density toggle, st… |
 | 2026-05-02 | [`fix-coaching-dialog-rules-of-hooks`](./2026-05-02-fix-coaching-dialog-rules-of-hooks/) | Clicking a Train2Go-loaded workout in the calendar crashes the route with React error #321 ("Invalid hook call") and renders the RouteErrorBoundary fallback ("… |
