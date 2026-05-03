@@ -229,6 +229,10 @@ const loadPopupData = async () => {
   } catch {
     setStatus("no", "✗", "Not connected", "Not connected");
     renderAthleteCard(storage.profileSnapshot);
+    // lastPushReceipt is independent of the Garmin Connect session;
+    // it tells the user when the SPA last synced their profile, which
+    // is useful even when Garmin Connect is unreachable.
+    renderRollup(undefined, storage.lastPushReceipt);
     renderFooter();
     renderRetry(() => loadPopupData());
     return;
@@ -243,6 +247,7 @@ const loadPopupData = async () => {
       "Not connected"
     );
     renderAthleteCard(storage.profileSnapshot);
+    renderRollup(ping?.data, storage.lastPushReceipt);
     renderFooter();
     renderRetry(() => loadPopupData());
     return;
