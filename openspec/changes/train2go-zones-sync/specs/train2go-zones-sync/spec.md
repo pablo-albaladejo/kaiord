@@ -57,7 +57,7 @@ The success result is `{ ok: true, applied: WrittenField[], conflicts: ConflictI
 - **GIVEN** the parsed `/user/details` payload has `payload.hrZones.cycling.z4Upper = 160` (bpm) and `payload.hrZones.running.z4Upper = 168` (bpm)
 - **AND** the user's profile has both `cycling.thresholds.lthr` and `running.thresholds.lthr` empty
 - **WHEN** `syncZones` runs
-- **THEN** the result SHALL be `{ ok: true, applied: [{cycling.thresholds.lthr: 160}, {running.thresholds.lthr: 168}], conflicts: [] }`
+- **THEN** the result SHALL be `{ ok: true, applied: [{ field: "cycling.thresholds.lthr", value: 160 }, { field: "running.thresholds.lthr", value: 168 }], conflicts: [] }`
 - **AND** `cycling.thresholds.lthr` SHALL be `160` after the call
 - **AND** `running.thresholds.lthr` SHALL be `168` after the call
 - **AND** swimming LTHR SHALL NOT be written (no consumer in Kaiord)

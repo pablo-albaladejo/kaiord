@@ -30,7 +30,7 @@ Two existing flows constrain the design:
 
 When the SPA fetches Train2Go zones, it builds a per-field diff against the persisted profile. Three buckets:
 
-```
+```text
   Kaiord field state               Action
   ───────────────────              ─────────────────────
   empty                            silent fill from Train2Go
@@ -117,7 +117,7 @@ export type ConflictDecision = "accept" | "reject";
 
 `commitConflictResolution(profileId, decisions: Record<FieldKey, ConflictDecision>, repo, transportPayload): Promise<void>` — the second-phase function the UI invokes after the user's per-row choices.
 
-```
+```text
   Layer                  Owner
   ─────                  ─────
   types/coaching-zones.ts FieldKey, WrittenField, ConflictItem, SyncZonesResult, ConflictDecision (NEW; sibling of types/coaching-account.ts)

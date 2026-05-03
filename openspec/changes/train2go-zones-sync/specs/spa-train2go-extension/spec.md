@@ -33,12 +33,12 @@ The Train2Go transport's `readZones` implementation SHALL go through the existin
 - **WHEN** the SPA invokes `readZones` (a 61st op)
 - **THEN** the call SHALL be queued by `OperationQueue.enqueue` and SHALL NOT execute until the per-hour window slides forward enough to free a slot
 
-#### Scenario: readWeek and readZones share a single per-bridge quota counter
+#### Scenario: any future queue consumer shares the same per-bridge counter
 
-- **GIVEN** a bridge that has already executed 59 `readWeek` ops via the OperationQueue within the past hour
+- **GIVEN** a bridge that has already executed 59 ops via the OperationQueue within the past hour (across all queue consumers — today only `useProfileSnapshotPush` and the new `readZones`)
 - **WHEN** the SPA invokes `readZones`
-- **THEN** the call SHALL succeed (60th op across the mixed action set, still within cap)
-- **AND** any subsequent op (any action kind — readWeek, readDay, readZones) within the same hour SHALL be queued behind the cap, proving the counter is shared across action kinds, not per-action
+- **THEN** the call SHALL succeed (60th op, still within cap)
+- **AND** any 61st op routed through the queue (regardless of action kind) within the same hour SHALL be queued behind the cap. (Note: pre-existing `readWeek` / `readDay` calls bypass the queue today and therefore do NOT count toward this cap; bringing them onto the queue is tracked outside this change.)
 
 ### Requirement: `LinkedAccountRow` exposes the `Sync zones` toggle
 
@@ -105,7 +105,7 @@ The `ZonesConflictDialog` component MUST NOT use `dangerouslySetInnerHTML`. Fiel
 - **THEN** zones-sync SHALL NOT be invoked
 - **AND** the user SHALL see the existing calendar-sync error UX
 
-### Requirement: `bodyWeight` and `heartRate.max` are populated from the existing ping payload, not the zones endpoint
+### Requirement: `bodyWeight` and `heartRate.max` are populated from the `/user/details` physiological block, not the ping payload
 
 When zones-sync runs (toggle is on, link/sync trigger fired), the use case SHALL extract `bodyWeight` and `heartRate.max` from the `physiological` block of the parsed `/user/details` response. The `/profile/ping` payload's `data.user.weight` and `data.user.bpm_max` are NOT consulted by zones-sync — they remain an independent source used by the heartbeat / Profile Manager status display only.
 

@@ -351,5 +351,28 @@ describe("parser", () => {
 
       expect(result.paces.cycling).toEqual({ z4Upper: 268 });
     });
+
+    it("does NOT leak z3_upper across sport blocks when running is partially configured", () => {
+      // Regression for CodeRabbit finding 471: running has sport_id=1 but
+      // no z3_upper saved yet; the next form (cycling, sport_id=3) has
+      // a z3_upper. Without bounded form-slicing, running would silently
+      // pick up cycling's value (a real data-corruption bug for triathletes).
+      const html = `<main><section class="details">
+        <div id="paces-99999" class="details-paces">
+          <form action="/api/v2/paces/run"><input name="sport_id" type="hidden" value="1">
+            <input name="measurement[z0_lower][0]" type="number" value="06">
+            <input name="measurement[z0_lower][1]" type="number" value="34">
+          </form>
+          <form action="/api/v2/paces/cycle"><input name="sport_id" type="hidden" value="3">
+            <input name="measurement[z3_upper][0]" type="number" value="268">
+          </form>
+        </div>
+      </section></main>`;
+
+      const result = parseDetailsHtml(html);
+
+      expect(result.paces.running).toBeUndefined();
+      expect(result.paces.cycling).toEqual({ z4Upper: 268 });
+    });
   });
 });

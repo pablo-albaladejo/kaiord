@@ -78,6 +78,10 @@ describe("bridge privacy surface guard", () => {
       const start = contentSrc.indexOf("const ALLOWED");
       assert.ok(start >= 0, `${bridge}: content.js has no ALLOWED const`);
       const end = contentSrc.indexOf("];", start);
+      assert.ok(
+        end >= 0,
+        `${bridge}: content.js ALLOWED array has no closing "];" — array was probably truncated`
+      );
       const body = contentSrc.slice(start, end + 2);
       const inLineEntryCount = body
         .split("\n")
