@@ -81,12 +81,14 @@ PR 4 (perf-quality-gates): §11, §12 — Playwright performance test, ESLint la
 - [ ] 8.3 Write failing tests for `DensityToggle`: renders the next-state icon (LayoutGrid when current=comfortable, List when current=compact); `aria-label` and `title` read "Switch to <next> view" and update reactively after click; click invokes `setCalendarDensity` with the new density; reflects viewport-derived default when no preference exists. Then implement in `packages/workout-spa-editor/src/components/molecules/DensityToggle/DensityToggle.tsx`
 - [ ] 8.4 Mount `DensityToggle` in `CalendarHeader` next to the sync button(s)
 - [ ] 8.5 Write failing tests for `formatRelativeTime(Date | undefined, now: Date)` (returns `"never synced"` on undefined, `"12m ago"`, `"3h ago"`, `"2d ago"`). Then implement
+      > Deferred to: #431
 - [ ] 8.6 Write failing tests for the rewritten `CoachingSyncButton` connected state: 32×32 icon button with `RefreshCw`, tooltip showing `"<Label> · last sync <relative-time>"` (or `"<Label> · syncing…"`, or `"<Label> · never synced"`); not rose-coloured (uses neutral chrome `border-slate-300`, `text-slate-700`, `hover:bg-slate-100`); spinner replaces icon in-place during sync, button disabled; respects `prefers-reduced-motion` (spinner becomes static). Then update the component
 - [ ] 8.7 Verify the not-connected state still renders the contextual hint per `spa-coaching-integration` — no regression test plus existing tests pass
 
 ## 9. CoachingActivityDialog — match / split actions (TDD)
 
 - [ ] 9.1 Write failing tests for `CoachingActivityDialog` reading the joined view-model so it knows whether the activity is matched
+      > Deferred to: #432
 - [ ] 9.2 Write failing tests for the "Linked workout" section rendered when matched: shows the matched workout's title, sport, duration, and a "Split" button invoking `unmatchSession`. Then implement
 - [ ] 9.3 Write failing tests verifying the "Convert to workout" action is hidden when the activity is already matched
 - [ ] 9.4 Write failing tests for the "Match to…" action when no match exists: opens a sub-picker listing same-day same-sport unmatched workouts; selecting one invokes `matchSession({source:"manual"})`; the dialog updates to show the new linked-workout section
@@ -97,12 +99,14 @@ PR 4 (perf-quality-gates): §11, §12 — Playwright performance test, ESLint la
 - [ ] 10.1 Write failing tests for `AutoMatchBanner`: renders one row per `MatchSuggestion` with title, compliance percentage, Accept/Reject controls; "Dismiss all" control persists a dismissal via `dismissAutoMatchBanner`; banner hides when all suggestions processed; Accept invokes `matchSession({source:"auto-suggestion"})`; Reject removes the row without writing
 - [ ] 10.2 Implement `AutoMatchBanner` component in `packages/workout-spa-editor/src/components/organisms/AutoMatchBanner/AutoMatchBanner.tsx`
 - [ ] 10.3 Wire `AutoMatchBanner` into `CalendarPage`: render only when `useAutoMatchSuggestions(activeProfileId, weekStart)` returns ≥1 suggestion; integration test asserting it does NOT render within 24h of a dismissal
+      > Deferred to: #433
 - [ ] 10.4 Add Storybook story for the banner (0 / 1 / 3 suggestions states); run a11y addon
 
 ## 11. Performance budget verification
 
 - [ ] 11.0 Add Playwright as a dev dependency to `packages/workout-spa-editor` (it is the only test framework in this stack that supports CDP CPU throttling required by the budget); add a `pnpm test:perf` script and a CI job stub
 - [ ] 11.1 Write failing Playwright performance test asserting the redesigned `CalendarPage` renders within 200 ms FCP on a synthetic seeded week containing 30 cards (10 matched, 10 solo plans, 10 solo actuals) with `client.send('Emulation.setCPUThrottlingRate', { rate: 4 })`; assert `useMatchedSessions` does not contribute > 30 ms (measured via a `performance.mark` inside the hook)
+      > Deferred to: #434
 - [ ] 11.2 Iterate on implementation until perf test passes
 
 ## 12. Quality gates and rollout
@@ -120,6 +124,7 @@ PR 4 (perf-quality-gates): §11, §12 — Playwright performance test, ESLint la
   Additionally, add a `no-restricted-syntax` rule (or a tiny custom rule) that flags any `type MatchSuggestion = ...` / `interface MatchSuggestion` declaration outside `src/application/match-suggestion.ts` — preventing the type from being silently redeclared in a UI component. Add regression tests for each rule that an intentional violation fails the lint
 
 - [ ] 12.4a Verify or add a `deleteProfile(profileId)` use case (or extend the existing one) that wraps the profile delete in `db.transaction('rw', [profiles, coachingActivities, session_matches, user_preferences, auto_match_dismissals], ...)` so all chained Dexie cascade hooks run inside a single transaction. Add an integration test that forces an abort mid-fan-out and asserts all five tables roll back to the pre-delete state
+      > Deferred to: #435
 - [ ] 12.5 Confirm the release pipeline supports a staged rollout for the SPA bundle (5% → 25% → 100%); if not, document a manual canary deploy procedure in the PR description (deploy to a preview URL, verify, then promote to prod). Document the forward-only rollback constraint (per design D12) in the release notes
 - [ ] 12.6 Manually verify in the dev server: open `/calendar` on a desktop viewport (1440px), confirm no card overflow on a week with multi-line titles and `pending` activities; toggle density both ways and confirm the toggle's accessible name AND `aria-pressed` update; tab through the grid and confirm one tab stop per day column with arrow-key traversal within; resize to mobile (375px) and confirm `comfortable` default + `snap-proximity` scroll + permanently visible empty-day "+ Add" trigger; click an activity and verify the dialog shows the right match controls; use VoiceOver / NVDA to navigate today column and confirm "(today)" is announced; toggle `prefers-reduced-motion` in the OS and confirm spinner becomes static and `snap-none` applies
 - [ ] 12.7 Confirm whether `@kaiord/workout-spa-editor` is part of the changeset workflow (it is private per `package.json`); if NOT, skip changeset; if yes, add a changeset describing the visible behaviour changes
