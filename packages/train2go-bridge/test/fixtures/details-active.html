@@ -1,0 +1,231 @@
+<!-- Sanitized fixture; user IDs and CSRF replaced with placeholders.
+     Source: /user/details against an authenticated Train2Go session.
+     Trims most prose / SVG / footer markup; retains the DOM IDs and
+     `name=` attributes the parser keys off (#physio-{id},
+     #hrzones-{id}, #paces-{id}). Forbidden fields (gender, birthday,
+     fat, smoker, IMC, bpm_rest, user_notes, coach.email/.name, email,
+     records, tests) are intentionally PRESENT here so the redaction
+     test can assert they are dropped at parse time. -->
+<!doctype html>
+<html lang="en">
+  <body>
+    <main>
+      <section class="details">
+        <div class="panel" id="physio">
+          <div class="details-physio" id="physio-99999">
+            <form
+              action="https://app.train2go.com/api/v2/details/physio/99999"
+              class="remote"
+            >
+              <input name="_token" type="hidden" value="TEST_CSRF" />
+              <select id="gender" name="gender">
+                <option value="male" selected="selected">Male</option>
+              </select>
+              <input
+                name="birthday"
+                type="date"
+                value="1984-07-01"
+                id="birthday"
+              />
+              <input name="height" type="number" value="1.74" id="height" />
+              <input name="weight" type="number" value="83" id="weight" />
+              <input id="bpm_rest" name="bpm_rest" type="number" value="51" />
+              <input id="bpm_max" name="bpm_max" type="number" value="187" />
+              <input name="fat" type="number" value="18" id="fat" />
+              <input name="imc" type="number" id="imc" />
+              <select id="smoker" name="smoker">
+                <option value="0" selected>No</option>
+              </select>
+              <textarea name="user_notes" id="general_comments">
+private trainer notes — should be redacted</textarea
+              >
+            </form>
+          </div>
+        </div>
+        <div class="panel" id="pulse">
+          <div class="details-hrzones" id="hrzones-99999">
+            <div class="heart-rate-zone heart-rate-zone-cycling">
+              <form
+                action="https://app.train2go.com/api/v2/hrzones/8045"
+                class="remote hrzone-form"
+              >
+                <input name="user_id" type="hidden" value="99999" />
+                <input name="z0_lower" type="number" value="107" />
+                <input name="z0_upper" type="number" value="133" />
+                <input name="z1_lower" type="number" value="134" />
+                <input name="z1_upper" type="number" value="147" />
+                <input name="z2_lower" type="number" value="148" />
+                <input name="z2_upper" type="number" value="160" />
+                <input name="z3_lower" type="number" value="161" />
+                <input name="z3_upper" type="number" value="174" />
+                <input name="z4_lower" type="number" value="175" />
+                <input name="z4_upper" type="number" value="187" />
+              </form>
+            </div>
+            <div class="heart-rate-zone heart-rate-zone-running">
+              <form
+                action="https://app.train2go.com/api/v2/hrzones/8046"
+                class="remote hrzone-form"
+              >
+                <input name="user_id" type="hidden" value="99999" />
+                <input name="z3_upper" type="number" value="168" />
+              </form>
+            </div>
+          </div>
+        </div>
+        <div class="panel" id="paces">
+          <div class="details-paces" id="paces-99999">
+            <div class="row no-gutters paces-row">
+              <div class="col pace-zone" data-sport="running">
+                <form
+                  action="https://app.train2go.com/api/v2/paces/8984"
+                  class="remote"
+                >
+                  <input name="sport_id" type="hidden" value="1" />
+                  <input name="pupil_id" type="hidden" value="99999" />
+                  <input
+                    name="measurement[z0_lower][0]"
+                    type="number"
+                    value="06"
+                  />
+                  <input
+                    name="measurement[z0_lower][1]"
+                    type="number"
+                    value="34"
+                  />
+                  <input
+                    name="measurement[z0_upper][0]"
+                    type="number"
+                    value="05"
+                  />
+                  <input
+                    name="measurement[z0_upper][1]"
+                    type="number"
+                    value="50"
+                  />
+                  <input
+                    name="measurement[z3_lower][0]"
+                    type="number"
+                    value="04"
+                  />
+                  <input
+                    name="measurement[z3_lower][1]"
+                    type="number"
+                    value="44"
+                  />
+                  <input
+                    name="measurement[z3_upper][0]"
+                    type="number"
+                    value="04"
+                  />
+                  <input
+                    name="measurement[z3_upper][1]"
+                    type="number"
+                    value="10"
+                  />
+                  <input
+                    name="measurement[z4_lower][0]"
+                    type="number"
+                    value="04"
+                  />
+                  <input
+                    name="measurement[z4_lower][1]"
+                    type="number"
+                    value="09"
+                  />
+                </form>
+              </div>
+              <div class="col pace-zone" data-sport="swimming">
+                <form
+                  action="https://app.train2go.com/api/v2/paces/11241"
+                  class="remote"
+                >
+                  <input name="sport_id" type="hidden" value="2" />
+                  <input name="pupil_id" type="hidden" value="99999" />
+                  <input
+                    name="measurement[z3_lower][0]"
+                    type="number"
+                    value="01"
+                  />
+                  <input
+                    name="measurement[z3_lower][1]"
+                    type="number"
+                    value="39"
+                  />
+                  <input
+                    name="measurement[z3_upper][0]"
+                    type="number"
+                    value="01"
+                  />
+                  <input
+                    name="measurement[z3_upper][1]"
+                    type="number"
+                    value="32"
+                  />
+                </form>
+              </div>
+              <div class="col pace-zone" data-sport="cycling">
+                <form
+                  action="https://app.train2go.com/api/v2/paces/10418"
+                  class="remote"
+                >
+                  <input name="sport_id" type="hidden" value="3" />
+                  <input name="pupil_id" type="hidden" value="99999" />
+                  <input
+                    name="measurement[z3_lower][0]"
+                    type="number"
+                    value="240"
+                  />
+                  <input
+                    name="measurement[z3_upper][0]"
+                    type="number"
+                    value="268"
+                  />
+                  <input
+                    name="measurement[z4_lower][0]"
+                    type="number"
+                    value="269"
+                  />
+                  <input
+                    name="measurement[z4_upper][0]"
+                    type="number"
+                    value="386"
+                  />
+                </form>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="panel" id="records">
+          <div class="tailwind" id="records-99999">
+            <form
+              action="https://app.train2go.com/api/v2/records/14327"
+              class="remote"
+            >
+              <input name="sport_id" type="hidden" value="3" />
+              <input name="user_id" type="hidden" value="99999" />
+              <div>FTP</div>
+              <label>263</label>
+              <small>Watt</small>
+            </form>
+          </div>
+        </div>
+        <div class="panel" id="tests">
+          <div class="details-tests" id="tests-99999">
+            <form
+              action="https://app.train2go.com/api/v2/tests/16133"
+              class="remote"
+            >
+              <input name="sport_id" type="hidden" value="3" />
+              <input name="user_id" type="hidden" value="99999" />
+              <div class="display">Functional Threshold Power (FTP)</div>
+              <div class="measurement">
+                <input disabled name="value" type="text" value="263" />
+              </div>
+            </form>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

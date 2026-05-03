@@ -63,6 +63,35 @@ describe("bridge privacy surface guard", () => {
     // Smoke test that the import side-effect isn't broken.
     assert.doesNotThrow(() => execFileSync("node", [SCRIPT], { cwd: REPO }));
   });
+
+  it("fixture allowed_paths count matches each bridge's content.js ALLOWED count", () => {
+    // Mechanical drift catcher: if a future PR adds an entry to content.js
+    // ALLOWED but forgets the golden, this assertion fires before the guard
+    // run-comparison even gets to surface the diff. Mirrors §2.2b of the
+    // train2go-zones-sync change.
+    const golden = JSON.parse(readFileSync(GOLDEN, "utf8"));
+    for (const bridge of Object.keys(golden)) {
+      const contentSrc = readFileSync(
+        join(REPO, "packages", bridge, "content.js"),
+        "utf8"
+      );
+      const start = contentSrc.indexOf("const ALLOWED");
+      assert.ok(start >= 0, `${bridge}: content.js has no ALLOWED const`);
+      const end = contentSrc.indexOf("];", start);
+      const body = contentSrc.slice(start, end + 2);
+      const inLineEntryCount = body
+        .split("\n")
+        .filter(
+          (l) => /method:\s*"[A-Z]+"/.test(l) && /pattern:\s*\//.test(l)
+        ).length;
+      const fixtureCount = golden[bridge].allowed_paths.length;
+      assert.equal(
+        fixtureCount,
+        inLineEntryCount,
+        `${bridge}: fixture has ${fixtureCount} allowed_paths but content.js ALLOWED has ${inLineEntryCount} single-line entries`
+      );
+    }
+  });
 });
 
 void copyFileSync;

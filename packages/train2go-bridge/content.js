@@ -13,19 +13,21 @@ const nativeFetch = fetch.bind(globalThis);
 
 const FETCH_TIMEOUT_MS = 30_000;
 
+// One-entry-per-line is required by the privacy-surface guard
+// (`scripts/check-bridge-privacy-surface.mjs`) which parses
+// `method: "..."` and `pattern: /.../` off the same line. Don't let
+// prettier wrap these — the long regexes are flagged with the
+// disable-next-line so the line stays single-physical.
 const ALLOWED = [
   { method: "GET", pattern: /^\/api\/v2\/profile\/ping$/ },
-  {
-    method: "GET",
-    pattern:
-      /^\/api\/v2\/workplan\/weekly\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/,
-  },
-  {
-    method: "GET",
-    pattern:
-      /^\/api\/v2\/workplan\/daily\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/,
-  },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/api\/v2\/workplan\/weekly\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/ },
+  // prettier-ignore
+  { method: "GET", pattern: /^\/api\/v2\/workplan\/daily\/\d{4}-\d{2}-\d{2}(\?user=\d+(&source=\w+)?)?$/ },
   { method: "GET", pattern: /^\/api\/v2\/workplan\/tooltip\/activity\/\d+$/ },
+  // Server-rendered HTML page used by the zones-sync feature; data is
+  // extracted by parseDetailsHtml on the bridge background side.
+  { method: "GET", pattern: /^\/user\/details$/ },
 ];
 
 const isAllowed = (method, path) =>
@@ -56,7 +58,20 @@ const handleFetch = async (msg) => {
     }
 
     if (r.ok) {
-      const data = await r.json();
+      // Dispatch by Content-Type so the same content script can carry
+      // both JSON endpoints (ping, workplan) and the HTML user-details
+      // page that the zones-sync feature consumes. r.json() on an HTML
+      // body throws; r.text() on JSON would skip parsing — neither is
+      // a default we can reuse blindly. Defensive: if the response
+      // happens to lack a `headers` object (legacy test fixtures), we
+      // default to JSON to preserve the existing contract for ping /
+      // workplan endpoints.
+      const contentType =
+        (r.headers && typeof r.headers.get === "function"
+          ? r.headers.get("content-type")
+          : "") || "";
+      const isHtml = /^text\/html\b/i.test(contentType);
+      const data = isHtml ? await r.text() : await r.json();
       return { ok: true, status: r.status, data };
     }
 
