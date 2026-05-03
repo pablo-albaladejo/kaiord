@@ -808,6 +808,7 @@ jobs:
     if: |
       always() &&
       github.ref == 'refs/heads/main' &&
+      vars.CI_ISSUE_BOT_ENABLED != 'false' &&
       (needs.lint.result == 'failure' ||
        needs.check-links.result == 'failure' ||
        needs.typecheck.result == 'failure' ||
@@ -820,103 +821,37 @@ jobs:
        needs.round-trip.result == 'failure')
     permissions:
       issues: write
+    concurrency:
+      group: ci-issue-bot-${{ github.ref }}
+      cancel-in-progress: false
     steps:
-      - name: Create failure issue
-        uses: actions/github-script@v9
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          script: |
-            const failedJobs = [];
-
-            if ('${{ needs.lint.result }}' === 'failure') {
-              failedJobs.push('Lint');
-            }
-            if ('${{ needs.check-links.result }}' === 'failure') {
-              failedJobs.push('Link Checker');
-            }
-            if ('${{ needs.typecheck.result }}' === 'failure') {
-              failedJobs.push('Type Check');
-            }
-            if ('${{ needs.test.result }}' === 'failure') {
-              failedJobs.push('Tests (Core/Adapters)');
-            }
-            if ('${{ needs.test-cli.result }}' === 'failure') {
-              failedJobs.push('Tests (CLI)');
-            }
-            if ('${{ needs.test-frontend.result }}' === 'failure') {
-              failedJobs.push('Tests (Frontend)');
-            }
-            if ('${{ needs.e2e-frontend.result }}' === 'failure') {
-              failedJobs.push('E2E Tests (Frontend)');
-            }
-            if ('${{ needs.e2e-prod-base.result }}' === 'failure') {
-              failedJobs.push('E2E Tests (Production Base)');
-            }
-            if ('${{ needs.build.result }}' === 'failure') {
-              failedJobs.push('Build');
-            }
-            if ('${{ needs.round-trip.result }}' === 'failure') {
-              failedJobs.push('Round-trip Tests');
-            }
-            const title = `🚨 CI Failure on main branch`;
-
-            const body = `## CI Workflow Failed on Main Branch
-
-            **Commit:** ${context.sha.substring(0, 7)}
-            **Author:** @${context.actor}
-            **Workflow Run:** ${context.payload.repository.html_url}/actions/runs/${context.runId}
-            **Triggered:** ${new Date().toISOString()}
-
-            ### Failed Jobs
-
-            ${failedJobs.map(job => `- ❌ ${job}`).join('\n')}
-
-            ### Workflow Details
-
-            - **Branch:** main
-            - **Commit Message:** ${context.payload.head_commit?.message || 'N/A'}
-            - **Commit URL:** ${context.payload.repository.html_url}/commit/${context.sha}
-
-            ### Error Logs
-
-            View the complete error logs in the [workflow run](${context.payload.repository.html_url}/actions/runs/${context.runId}).
-
-            ### Remediation Steps
-
-            1. **Review the workflow logs** to identify the root cause
-            2. **Check recent commits** that may have introduced the failure
-            3. **Run tests locally** to reproduce the issue:
-               \`\`\`bash
-               pnpm install
-               pnpm lint
-               pnpm exec tsc --noEmit
-               pnpm test
-               pnpm -r build
-               \`\`\`
-            4. **Fix the issue** and push a new commit
-            5. **Verify the fix** by checking the next workflow run
-            6. **Close this issue** once the workflow passes
-
-            ### Priority
-
-            🔴 **HIGH:** Main branch is broken - immediate action required
-
-            ### Next Steps
-
-            - [ ] Investigate root cause
-            - [ ] Fix the failing jobs
-            - [ ] Verify fix with local tests
-            - [ ] Push fix to main
-            - [ ] Confirm workflow passes
-            - [ ] Close this issue
-
-            ---
-
-            **Note:** This issue was automatically created by the CI workflow.`;
-
-            await github.rest.issues.create({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              title: title,
-              body: body,
-              labels: ['ci', 'bug', 'automated', 'priority-high']
-            });
+          sparse-checkout: scripts
+          sparse-checkout-cone-mode: false
+      - name: Assemble failed-jobs JSON (uses job-IDs to match workflow_run jobs API)
+        id: jobs
+        run: |
+          jobs=()
+          [ "${{ needs.lint.result }}" = "failure" ] && jobs+=("lint")
+          [ "${{ needs.check-links.result }}" = "failure" ] && jobs+=("check-links")
+          [ "${{ needs.typecheck.result }}" = "failure" ] && jobs+=("typecheck")
+          [ "${{ needs.test.result }}" = "failure" ] && jobs+=("test")
+          [ "${{ needs.test-cli.result }}" = "failure" ] && jobs+=("test-cli")
+          [ "${{ needs.test-frontend.result }}" = "failure" ] && jobs+=("test-frontend")
+          [ "${{ needs.e2e-frontend.result }}" = "failure" ] && jobs+=("e2e-frontend")
+          [ "${{ needs.e2e-prod-base.result }}" = "failure" ] && jobs+=("e2e-prod-base")
+          [ "${{ needs.build.result }}" = "failure" ] && jobs+=("build")
+          [ "${{ needs.round-trip.result }}" = "failure" ] && jobs+=("round-trip")
+          json=$(printf '%s\n' "${jobs[@]}" | jq -R . | jq -sc .)
+          echo "json=$json" >> "$GITHUB_OUTPUT"
+      - name: Create / dedupe failure issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+        run: node scripts/ci-failure-issue.mjs create '${{ steps.jobs.outputs.json }}'
