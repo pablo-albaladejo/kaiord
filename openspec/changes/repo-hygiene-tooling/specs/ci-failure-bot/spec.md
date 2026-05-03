@@ -31,14 +31,14 @@ A created issue body SHALL embed a single machine-readable HTML-comment footer i
 
 The close-pass SHALL parse the footer with these failure modes, in order:
 
-| Footer state | Action |
-|---|---|
-| Absent | Do not close. Log `skipped: missing-footer`. |
-| Present, malformed JSON | Do not close. Log `skipped: malformed-footer`. Bot MUST NOT throw. |
-| Present, `schema` field absent | Treat as `schema: 1`. Proceed. |
-| Present, `schema: 1`, `failed-jobs` valid | Proceed. |
+| Footer state                                                       | Action                                                                                                  |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| Absent                                                             | Do not close. Log `skipped: missing-footer`.                                                            |
+| Present, malformed JSON                                            | Do not close. Log `skipped: malformed-footer`. Bot MUST NOT throw.                                      |
+| Present, `schema` field absent                                     | Treat as `schema: 1`. Proceed.                                                                          |
+| Present, `schema: 1`, `failed-jobs` valid                          | Proceed.                                                                                                |
 | Present, `failed-jobs` contains the synthetic `"canary-job"` token | Do not close. Log `skipped: canary-issue` (canary issues stay open until manually resolved by the DRI). |
-| Present, `schema: N` where N ≠ 1 and N is unknown to this bot | Do not close. Log `skipped: unknown-schema`. |
+| Present, `schema: N` where N ≠ 1 and N is unknown to this bot      | Do not close. Log `skipped: unknown-schema`.                                                            |
 
 In v1, the footer is informational + forward-compatible (a future schema-2 bot MAY use `failed-jobs` for per-job matching). The v1 close-rule does NOT match against `failed-jobs` because the workflow_run jobs API returns display names that do not reliably map to the matrix-aware identifiers used in `notify-failure` aggregation. Per-job matching is deferred to v2; v1 uses the coarser "fully-green run" rule documented in the next requirement.
 

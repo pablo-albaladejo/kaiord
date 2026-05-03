@@ -22,14 +22,24 @@ export function parseFooter(body) {
   } catch {
     return { error: "malformed-footer" };
   }
-  if (!Array.isArray(failedJobs) || !failedJobs.every((j) => typeof j === "string")) {
+  if (
+    !Array.isArray(failedJobs) ||
+    !failedJobs.every((j) => typeof j === "string")
+  ) {
     return { error: "malformed-footer" };
   }
   const schema = schemaLine ? Number(schemaLine[1]) : SCHEMA_V1;
   return { failedJobs, schema };
 }
 
-export function buildIssueBody({ sha, actor, runUrl, failedJobs, timestamp, isCanary }) {
+export function buildIssueBody({
+  sha,
+  actor,
+  runUrl,
+  failedJobs,
+  timestamp,
+  isCanary,
+}) {
   const tag = isCanary ? "[CANARY] " : "";
   const jobsList = failedJobs.map((j) => `- ❌ ${j}`).join("\n");
   return [
@@ -51,7 +61,13 @@ export function buildIssueBody({ sha, actor, runUrl, failedJobs, timestamp, isCa
   ].join("\n");
 }
 
-export function formatBumpComment({ sha, actor, runUrl, failedJobs, timestamp }) {
+export function formatBumpComment({
+  sha,
+  actor,
+  runUrl,
+  failedJobs,
+  timestamp,
+}) {
   const jobsList = failedJobs.map((j) => `\`${j}\``).join(", ");
   return `Re-detected at ${timestamp}\nCommit ${sha.slice(0, 7)} by @${actor}; failed jobs: ${jobsList}\nRun: ${runUrl}`;
 }
@@ -66,16 +82,27 @@ export function formatLabelArgs(labels) {
 
 export function listOpenBotIssues(deps) {
   const out = deps.exec("gh", [
-    "issue", "list", "--state", "open",
-    "--label", BOT_LABELS.join(","),
-    "--json", "number,title,body", "--limit", "50",
+    "issue",
+    "list",
+    "--state",
+    "open",
+    "--label",
+    BOT_LABELS.join(","),
+    "--json",
+    "number,title,body",
+    "--limit",
+    "50",
   ]);
   return JSON.parse(out || "[]");
 }
 
 export function getIssue(num, deps) {
   const out = deps.exec("gh", [
-    "issue", "view", String(num), "--json", "number,state,body",
+    "issue",
+    "view",
+    String(num),
+    "--json",
+    "number,state,body",
   ]);
   return JSON.parse(out);
 }
@@ -85,16 +112,37 @@ export function runCreate({ failedJobs, isCanary, ctx }, deps) {
   const target = open.find((i) => !isCanaryIssue(i));
   if (target && !isCanary) {
     deps.exec("gh", [
-      "issue", "comment", String(target.number),
-      "--body", formatBumpComment({ ...ctx, failedJobs }),
+      "issue",
+      "comment",
+      String(target.number),
+      "--body",
+      formatBumpComment({ ...ctx, failedJobs }),
     ]);
     return { action: "bumped", issue: target.number };
   }
   const body = buildIssueBody({ ...ctx, failedJobs, isCanary });
-  const title = isCanary ? "[CANARY] 🚨 CI Failure on main branch" : "🚨 CI Failure on main branch";
-  const labelArgs = formatLabelArgs([...BOT_LABELS, "bug", "priority-high", ...(isCanary ? ["canary"] : [])]);
-  const out = deps.exec("gh", ["issue", "create", "--title", title, ...labelArgs, "--body", body]);
-  return { action: "created", issue: parseIssueNumberFromUrl(String(out).trim()) };
+  const title = isCanary
+    ? "[CANARY] 🚨 CI Failure on main branch"
+    : "🚨 CI Failure on main branch";
+  const labelArgs = formatLabelArgs([
+    ...BOT_LABELS,
+    "bug",
+    "priority-high",
+    ...(isCanary ? ["canary"] : []),
+  ]);
+  const out = deps.exec("gh", [
+    "issue",
+    "create",
+    "--title",
+    title,
+    ...labelArgs,
+    "--body",
+    body,
+  ]);
+  return {
+    action: "created",
+    issue: parseIssueNumberFromUrl(String(out).trim()),
+  };
 }
 
 // Close-pass v1 rule: close iff (a) no real-CI jobs were skipped on the green run,
@@ -115,22 +163,42 @@ export function runClose({ anyJobsSkipped, ctx }, deps) {
   return open.map((issue) => {
     const decision = decideClose(issue, anyJobsSkipped, ctx, deps);
     if (decision.action === "closed") {
-      deps.exec("gh", ["issue", "close", String(issue.number), "--comment", decision.comment]);
+      deps.exec("gh", [
+        "issue",
+        "close",
+        String(issue.number),
+        "--comment",
+        decision.comment,
+      ]);
     }
     return decision;
   });
 }
 
 function decideClose(issue, anyJobsSkipped, ctx, deps) {
-  if (anyJobsSkipped) return { issue: issue.number, action: "skipped", reason: "jobs-skipped-on-green-run" };
+  if (anyJobsSkipped)
+    return {
+      issue: issue.number,
+      action: "skipped",
+      reason: "jobs-skipped-on-green-run",
+    };
   const parsed = parseFooter(issue.body);
-  if (!parsed) return { issue: issue.number, action: "skipped", reason: "missing-footer" };
-  if (parsed.error) return { issue: issue.number, action: "skipped", reason: parsed.error };
-  if (parsed.schema !== SCHEMA_V1) return { issue: issue.number, action: "skipped", reason: "unknown-schema" };
-  if (parsed.failedJobs.includes("canary-job")) return { issue: issue.number, action: "skipped", reason: "canary-issue" };
+  if (!parsed)
+    return { issue: issue.number, action: "skipped", reason: "missing-footer" };
+  if (parsed.error)
+    return { issue: issue.number, action: "skipped", reason: parsed.error };
+  if (parsed.schema !== SCHEMA_V1)
+    return { issue: issue.number, action: "skipped", reason: "unknown-schema" };
+  if (parsed.failedJobs.includes("canary-job"))
+    return { issue: issue.number, action: "skipped", reason: "canary-issue" };
   const fresh = getIssue(issue.number, deps);
-  if (fresh.state !== "OPEN") return { issue: issue.number, action: "skipped", reason: "race-closed" };
-  return { issue: issue.number, action: "closed", comment: formatAuditComment({ ...ctx, jobs: parsed.failedJobs }) };
+  if (fresh.state !== "OPEN")
+    return { issue: issue.number, action: "skipped", reason: "race-closed" };
+  return {
+    issue: issue.number,
+    action: "closed",
+    comment: formatAuditComment({ ...ctx, jobs: parsed.failedJobs }),
+  };
 }
 
 function isCanaryIssue(issue) {
