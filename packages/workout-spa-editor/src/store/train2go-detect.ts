@@ -18,15 +18,24 @@ const DETECTION_CACHE_MS = 30_000;
 const SUPPORTED_PROTOCOLS = [1];
 
 export const createDetectAction =
-  (set: Set, get: Get, getExtensionId: () => string) => async () => {
+  (set: Set, get: Get, getExtensionId: () => string) =>
+  async (opts: { force?: boolean } = {}) => {
     const extensionId = getExtensionId();
     if (!extensionId) return;
 
-    const { lastDetectionTimestamp, extensionInstalled } = get();
+    const { lastDetectionTimestamp, extensionInstalled, sessionActive } = get();
     const now = Date.now();
+    // Only cache positive detection results. A previous "session
+    // inactive" (e.g., bridge content script not yet injected, no
+    // Train2Go tab open, transient cookie issue) MUST NOT block the
+    // next detection — otherwise the calendar header keeps showing
+    // "Connect to <X>" long after the user has already linked
+    // successfully via the explicit Connect dance.
     if (
+      !opts.force &&
       lastDetectionTimestamp &&
       extensionInstalled &&
+      sessionActive &&
       now - lastDetectionTimestamp < DETECTION_CACHE_MS
     ) {
       return;

@@ -48,10 +48,16 @@ describe("Train2Go detection cache — integration", () => {
       get as never,
       () => "train2go-ext-id"
     );
+    // Match the Train2GoPingResult shape that the real `ping()` returns
+    // after `toPingResult` mapping; the previous fixture leaked the
+    // raw extension envelope, which used to "work" only because the
+    // detection cache didn't read sessionActive.
     vi.mocked(ping).mockResolvedValue({
       ok: true,
       protocolVersion: 1,
-      data: { sessionActive: true, userId: 42, userName: "Test" },
+      sessionActive: true,
+      externalUserId: "42",
+      externalUserName: "Test",
     });
   });
 
@@ -70,6 +76,37 @@ describe("Train2Go detection cache — integration", () => {
     state.lastDetectionTimestamp =
       (state.lastDetectionTimestamp as number) - 30_001;
     await detect();
+
+    expect(ping).toHaveBeenCalledTimes(2);
+  });
+
+  it("does NOT cache a negative result — re-detect after a transient sessionActive=false", async () => {
+    vi.mocked(ping).mockResolvedValueOnce({
+      ok: true,
+      protocolVersion: 1,
+      sessionActive: false,
+      externalUserId: null,
+      externalUserName: null,
+    });
+    vi.mocked(ping).mockResolvedValueOnce({
+      ok: true,
+      protocolVersion: 1,
+      sessionActive: true,
+      externalUserId: "42",
+      externalUserName: "Test",
+    });
+
+    await detect();
+    await detect();
+
+    expect(ping).toHaveBeenCalledTimes(2);
+    expect(state.sessionActive).toBe(true);
+  });
+
+  it("force: true bypasses the positive cache for an explicit re-check", async () => {
+    await detect();
+
+    await detect({ force: true });
 
     expect(ping).toHaveBeenCalledTimes(2);
   });
