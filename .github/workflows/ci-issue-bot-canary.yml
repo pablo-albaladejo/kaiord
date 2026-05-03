@@ -1,0 +1,35 @@
+name: CI Issue Bot — Canary
+
+# Manually trigger via the GitHub UI ("Run workflow") to validate the
+# create-pass against a synthetic failure. The resulting issue is
+# titled `[CANARY] 🚨 CI Failure on main branch` and labeled `canary`
+# so it is trivially distinguishable from real CI-failure issues.
+# Use this when main has been green for ≥7 days post-merge of the bot
+# rework and the natural canary path has not fired.
+
+on:
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  canary:
+    name: Synthetic CI-failure canary
+    runs-on: ubuntu-latest
+    if: ${{ vars.CI_ISSUE_BOT_ENABLED != 'false' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          sparse-checkout: scripts
+          sparse-checkout-cone-mode: false
+      - name: Create canary issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_SHA: ${{ github.sha }}
+          GITHUB_ACTOR: ${{ github.actor }}
+          GITHUB_RUN_ID: ${{ github.run_id }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SERVER_URL: ${{ github.server_url }}
+        run: node scripts/ci-failure-issue.mjs create '["canary-job"]' --canary
