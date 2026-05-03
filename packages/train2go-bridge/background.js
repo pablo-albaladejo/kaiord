@@ -14,7 +14,7 @@ const BRIDGE_MANIFEST = {
   name: "Kaiord Train2Go Bridge",
   version: "7.1.0",
   protocolVersion: PROTOCOL_VERSION,
-  capabilities: ["read:training-plan"],
+  capabilities: ["read:training-plan", "read:training-zones"],
 };
 
 // ── Parser (loaded inline for service worker) ──
@@ -131,6 +131,18 @@ const readDay = async (date, userId) => {
   return { activities: parser.parseDailyHtml(html) };
 };
 
+// Reads the server-rendered /user/details page and extracts a raw-shape
+// `ZonesPayload` per the parser's allowlist. The SPA-side syncZones use
+// case maps this to Kaiord-domain thresholds; the bridge stays
+// platform-shaped.
+const readDetails = async () => {
+  const res = await train2goFetch("/user/details");
+  if (!res?.ok) throw toBridgeError("Read details failed", res);
+  // The content script returns the raw HTML body for text/html responses.
+  const html = typeof res.data === "string" ? res.data : "";
+  return parser.parseDetailsHtml(html);
+};
+
 const openTrain2Go = async () => {
   await chrome.tabs.create({ url: TRAIN2GO_DASHBOARD });
 };
@@ -169,6 +181,8 @@ const handleAction = async (message) => {
     case "read-day":
       if (!message.userId) throw new Error("Missing userId");
       return await readDay(message.date, message.userId);
+    case "read-details":
+      return await readDetails();
     case "open-train2go":
       await openTrain2Go();
       return null;
@@ -285,6 +299,7 @@ if (typeof module !== "undefined") {
     ping,
     readWeek,
     readDay,
+    readDetails,
     openTrain2Go,
     persistSnapshot,
     clearSnapshot,
