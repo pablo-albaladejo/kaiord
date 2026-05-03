@@ -119,11 +119,11 @@ The lint script SHALL mirror the architectural pattern of `scripts/check-archive
 
 The script SHALL be wired as a sibling lint script in `package.json`:
 
-| Script                   | Behavior                                                                                       |
-| ------------------------ | ---------------------------------------------------------------------------------------------- |
-| `lint:archive`           | Existing folder-vs-Completed invariant. Unchanged.                                             |
-| `lint:archive-index`     | Existing `archive/README.md` index freshness. Unchanged.                                       |
-| `lint:archive-followups` | This. Runs `node scripts/check-archive-followups.mjs` (ratio + cap fallback per archive).      |
+| Script                   | Behavior                                                                                  |
+| ------------------------ | ----------------------------------------------------------------------------------------- |
+| `lint:archive`           | Existing folder-vs-Completed invariant. Unchanged.                                        |
+| `lint:archive-index`     | Existing `archive/README.md` index freshness. Unchanged.                                  |
+| `lint:archive-followups` | This. Runs `node scripts/check-archive-followups.mjs` (ratio + cap fallback per archive). |
 
 The umbrella `pnpm lint` SHALL run all three. The husky `pre-commit` hook chain SHALL include `lint:archive-followups` so deferral-marker edits are caught locally before push.
 
