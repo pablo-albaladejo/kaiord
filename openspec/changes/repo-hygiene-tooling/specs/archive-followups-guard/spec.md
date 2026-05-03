@@ -79,10 +79,10 @@ The marker convention annotates a SPECIFIC task that was deferred in the origina
 
 For the v1 backfill at Phase 2 ship-time, this means:
 
-| Archive                                            | Markers added                                      | Reason                                                                                                 |
-| -------------------------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `2026-05-01-calendar-coaching-redesign`            | `#431`, `#432`, `#433`, `#434`, `#435` (5 markers) | Original tasks.md has 5 unchecked tasks that map 1:1 to the follow-up issues; markers attach cleanly. |
-| `2026-05-02-calendar-coaching-redesign-completion` | 0 markers                                          | The spec-sync deferral (#460) was captured in proposal.md / design.md only; no annotatable task line. |
+| Archive                                            | Markers added                                      | Reason                                                                                                                                 |
+| -------------------------------------------------- | -------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| `2026-05-01-calendar-coaching-redesign`            | `#431`, `#432`, `#433`, `#434`, `#435` (5 markers) | Original tasks.md has 5 unchecked tasks that map 1:1 to the follow-up issues; markers attach cleanly.                                  |
+| `2026-05-02-calendar-coaching-redesign-completion` | 0 markers                                          | The spec-sync deferral (#460) was captured in proposal.md / design.md only; no annotatable task line.                                  |
 | `2026-05-02-fix-coaching-dialog-rules-of-hooks`    | 0 markers                                          | The 3 follow-up issues (#450, #451, #454) were filed at archive-time per /opsx-ship convention but no tasks.md `[ ]` lines correspond. |
 
 Backfill SHALL be permitted because the markers are inert annotations — they reference issues already created and known, do not modify behavior, do not add scope, and do not touch the `> Completed:` invariant enforced by `check-archive-dates.mjs`. The "archived = frozen" intuition applies to historical content; cross-references to known issues on EXISTING task lines are annotation, not rewriting.

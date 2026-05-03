@@ -63,13 +63,14 @@ const buildDeferral = (issues) =>
   `## 1. Foo\n\n` +
   issues
     .map(
-      (n, i) =>
-        `- [x] 1.${i + 1} task ${i + 1}\n      > Deferred to: #${n}\n`
+      (n, i) => `- [x] 1.${i + 1} task ${i + 1}\n      > Deferred to: #${n}\n`
     )
     .join("");
 
 test("zero deferrals → exit 0, no count line for that archive", () => {
-  const h = mkHarness((arc) => writeTasks(arc, "2026-05-01-clean", ZERO_DEFERRAL));
+  const h = mkHarness((arc) =>
+    writeTasks(arc, "2026-05-01-clean", ZERO_DEFERRAL)
+  );
   try {
     const r = h.run();
     assert.equal(r.status, 0, r.stderr || r.stdout);
@@ -111,9 +112,10 @@ test("at-cap deferrals → exit non-zero, archive named in stderr", () => {
 });
 
 test("malformed marker (URL form) fails with parse error naming the file", () => {
-  const malformed =
-    `## 1. Foo\n\n- [x] 1.1 task\n      > Deferred to: https://github.com/owner/repo/issues/432\n`;
-  const h = mkHarness((arc) => writeTasks(arc, "2026-05-04-malformed", malformed));
+  const malformed = `## 1. Foo\n\n- [x] 1.1 task\n      > Deferred to: https://github.com/owner/repo/issues/432\n`;
+  const h = mkHarness((arc) =>
+    writeTasks(arc, "2026-05-04-malformed", malformed)
+  );
   try {
     const r = h.run();
     assert.notEqual(r.status, 0);
@@ -125,9 +127,10 @@ test("malformed marker (URL form) fails with parse error naming the file", () =>
 });
 
 test("malformed marker (no hash) fails", () => {
-  const malformed =
-    `## 1. Foo\n\n- [x] 1.1 task\n      > Deferred to: 432\n`;
-  const h = mkHarness((arc) => writeTasks(arc, "2026-05-05-no-hash", malformed));
+  const malformed = `## 1. Foo\n\n- [x] 1.1 task\n      > Deferred to: 432\n`;
+  const h = mkHarness((arc) =>
+    writeTasks(arc, "2026-05-05-no-hash", malformed)
+  );
   try {
     const r = h.run();
     assert.notEqual(r.status, 0);

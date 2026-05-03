@@ -65,4 +65,3 @@ Authoring rules:
    archives carrying ≥ ABSOLUTE_DEFERRAL_CAP markers fail the lint as
    overscoped.
 -->
-
