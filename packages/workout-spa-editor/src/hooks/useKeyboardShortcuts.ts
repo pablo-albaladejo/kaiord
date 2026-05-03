@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 import type { KeyboardShortcutHandlers } from "./keyboard-shortcut-handlers";
 import {
@@ -9,13 +9,21 @@ import {
 export type { KeyboardShortcutHandlers } from "./keyboard-shortcut-handlers";
 
 export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers) {
-  // TODO(fix-coaching-dialog-rules-of-hooks-followup): the explicit
-  // per-handler deps are intentional — depending on the whole `handlers`
-  // object would re-bind listeners on every parent render.
-  /* eslint-disable react-hooks/exhaustive-deps */
+  // Latest-handlers ref: bind listeners ONCE on mount but always invoke
+  // whatever handlers were passed on the most recent render. Avoids
+  // re-binding on every parent render (which the previous explicit-deps
+  // form was trying to manage manually) and satisfies exhaustive-deps
+  // cleanly because the effect references only the ref (stable).
+  const handlersRef = useRef(handlers);
+  handlersRef.current = handlers;
+
   useEffect(() => {
-    const handleKeyDown = createKeyDownHandler(handlers);
-    const handleEscape = createEscapeHandler(handlers.onClearSelection);
+    // Listeners read handlersRef.current at FIRE-TIME (not at mount-time)
+    // so handler updates from parent renders are reflected immediately.
+    const handleKeyDown = (event: KeyboardEvent) =>
+      createKeyDownHandler(handlersRef.current)(event);
+    const handleEscape = (event: KeyboardEvent) =>
+      createEscapeHandler(handlersRef.current.onClearSelection)(event);
 
     window.addEventListener("keydown", handleKeyDown);
     window.addEventListener("keydown", handleEscape);
@@ -24,20 +32,5 @@ export function useKeyboardShortcuts(handlers: KeyboardShortcutHandlers) {
       window.removeEventListener("keydown", handleKeyDown);
       window.removeEventListener("keydown", handleEscape);
     };
-  }, [
-    handlers.onSave,
-    handlers.onUndo,
-    handlers.onRedo,
-    handlers.onMoveStepUp,
-    handlers.onMoveStepDown,
-    handlers.onCopy,
-    handlers.onCut,
-    handlers.onPaste,
-    handlers.onCreateBlock,
-    handlers.onUngroupBlock,
-    handlers.onSelectAll,
-    handlers.onDelete,
-    handlers.onClearSelection,
-  ]);
-  /* eslint-enable react-hooks/exhaustive-deps */
+  }, []);
 }
