@@ -12,6 +12,10 @@ const {
 const parser = require("../parser.js");
 const pkg = require("../package.json");
 
+// Capture at module load before __resetChromeMock clears mock.calls.
+const onInstalledCb =
+  chrome.runtime.onInstalled.addListener.mock.calls[0][0];
+
 describe("background service worker", () => {
   beforeEach(() => __resetChromeMock());
   // Restore any vi.spyOn() patches from individual tests (e.g. the
@@ -331,6 +335,16 @@ describe("background service worker", () => {
 
       await expect(reinjectContentScripts()).resolves.toBeUndefined();
       expect(chrome.scripting.executeScript).toHaveBeenCalledTimes(2);
+    });
+
+    it("the onInstalled listener invokes reinjectContentScripts", async () => {
+      // onInstalledCb captured at module load (before __resetChromeMock).
+      chrome.runtime.getManifest.mockReturnValue({
+        host_permissions: [],
+        content_scripts: [],
+      });
+
+      await expect(Promise.resolve(onInstalledCb())).resolves.toBeUndefined();
     });
   });
 });

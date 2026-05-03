@@ -16,6 +16,8 @@ const externalCb =
 const internalCb = chrome.runtime.onMessage.addListener.mock.calls[0][0];
 const webRequestCb =
   chrome.webRequest.onBeforeSendHeaders.addListener.mock.calls[0][0];
+const onInstalledCb =
+  chrome.runtime.onInstalled.addListener.mock.calls[0][0];
 
 describe("background.js", () => {
   beforeEach(() => {
@@ -504,6 +506,18 @@ describe("background.js", () => {
 
       await expect(reinjectContentScripts()).resolves.toBeUndefined();
       expect(chrome.scripting.executeScript).toHaveBeenCalledTimes(2);
+    });
+
+    it("the onInstalled listener invokes reinjectContentScripts", async () => {
+      // onInstalledCb was captured at module load (before
+      // __resetChromeMock cleared the mock.calls log); invoking it
+      // exercises the otherwise-unreached arrow function.
+      chrome.runtime.getManifest.mockReturnValue({
+        host_permissions: [],
+        content_scripts: [],
+      });
+
+      await expect(Promise.resolve(onInstalledCb())).resolves.toBeUndefined();
     });
   });
 });
