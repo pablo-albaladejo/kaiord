@@ -36,18 +36,20 @@ archiving, run `pnpm archive:index` to refresh
 
 When a task is deferred to a follow-up GitHub issue, annotate the
 checkbox in `tasks.md` with a single canonical Markdown blockquote
-on the next line:
+as a sibling paragraph (blank line + 2-space indent — required so
+prettier does not collapse the marker onto the task line):
 
-```
+```text
 - [ ] §N.M Task title
-      > Deferred to: #ISSUE_NUMBER
+
+  > Deferred to: #ISSUE_NUMBER
 ```
 
-`ISSUE_NUMBER` MUST be a positive integer prefixed with `#`. URLs and
-free-form descriptions are rejected. The invariant is enforced by
-`pnpm lint:archive-followups` once the change archives — archives
-carrying too many deferrals fail the lint as overscoped (the change
-should have been split before archiving).
+`ISSUE_NUMBER` MUST be a positive integer prefixed with `#` (zero is
+rejected). URLs and free-form descriptions are rejected. The invariant
+is enforced by `pnpm lint:archive-followups` once the change archives —
+archives carrying too many deferrals fail the lint as overscoped (the
+change should have been split before archiving).
 
 ## Ports & adapters (example: FIT)
 

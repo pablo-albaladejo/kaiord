@@ -140,6 +140,18 @@ test("malformed marker (no hash) fails", () => {
   }
 });
 
+test("malformed marker (#0 rejected — issue numbers must be positive)", () => {
+  const malformed = `## 1. Foo\n\n- [x] 1.1 task\n\n      > Deferred to: #0\n`;
+  const h = mkHarness((arc) => writeTasks(arc, "2026-05-05a-zero", malformed));
+  try {
+    const r = h.run();
+    assert.notEqual(r.status, 0);
+    assert.ok(r.stderr.includes("malformed marker"), r.stderr);
+  } finally {
+    h.cleanup();
+  }
+});
+
 test("multiple archives: one over-cap, one under, one zero — only the over-cap fails", () => {
   const h = mkHarness((arc) => {
     writeTasks(arc, "2026-05-06-clean", ZERO_DEFERRAL);

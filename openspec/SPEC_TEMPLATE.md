@@ -50,18 +50,21 @@ Authoring rules:
    in CI as part of `pnpm lint`.
 6. **Deferred-task marker (for change `tasks.md`, NOT this template):**
    when a task is deferred to a follow-up GitHub issue, annotate the
-   checkbox with a single canonical Markdown blockquote on the next line:
+   checkbox with a sibling Markdown blockquote (blank line + 2-space
+   indent — required so prettier does not collapse the marker onto
+   the task line):
 
-   ```
+   ```text
    - [ ] §N.M Task title
-         > Deferred to: #ISSUE_NUMBER
+
+     > Deferred to: #ISSUE_NUMBER
    ```
 
-   `ISSUE_NUMBER` MUST be a positive integer prefixed with `#`. URLs,
-   free-form descriptions, and multi-issue references on one line are
-   rejected. A task deferred to multiple issues emits one marker line
-   per issue. The marker is enforced by `scripts/check-archive-followups.mjs`
-   (run via `pnpm lint:archive-followups`) once the change archives;
-   archives carrying ≥ ABSOLUTE_DEFERRAL_CAP markers fail the lint as
-   overscoped.
+   `ISSUE_NUMBER` MUST be a positive integer prefixed with `#` (zero
+   is rejected). URLs, free-form descriptions, and multi-issue
+   references on one line are rejected. A task deferred to multiple
+   issues emits one marker line per issue. The marker is enforced by
+   `scripts/check-archive-followups.mjs` (run via
+   `pnpm lint:archive-followups`) once the change archives; archives
+   carrying ≥ ABSOLUTE_DEFERRAL_CAP markers fail the lint as overscoped.
 -->
