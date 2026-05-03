@@ -32,8 +32,10 @@ export const ABSOLUTE_DEFERRAL_CAP = 6;
 // Markers live indented under the checkbox they annotate (per spec example
 // in openspec/SPEC_TEMPLATE.md and openspec/AGENTS.md). Allow any leading
 // whitespace; reject any non-canonical body after `> Deferred to:`.
-const deferredRe = /^\s*> Deferred to: #(\d+)\s*$/gm;
-const malformedRe = /^\s*> Deferred to:(?! #\d+\s*$).*$/gm;
+// Issue numbers MUST be POSITIVE integers (#0 rejected) — the spec contract
+// names a positive-integer GitHub issue number.
+const deferredRe = /^\s*> Deferred to: #([1-9]\d*)\s*$/gm;
+const malformedRe = /^\s*> Deferred to:(?! #[1-9]\d*\s*$).*$/gm;
 
 export function checkArchiveFollowups(archiveDir = ARCHIVE_DIR) {
   const violations = [];
