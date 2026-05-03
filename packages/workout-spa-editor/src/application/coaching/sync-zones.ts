@@ -69,7 +69,12 @@ export const syncZones = async (
       updatedAt: new Date().toISOString(),
     });
   }
-  return { ok: true, applied: result.applied, conflicts: result.conflicts };
+  return {
+    ok: true,
+    applied: result.applied,
+    conflicts: result.conflicts,
+    payload,
+  };
 };
 
 export { commitConflictResolution } from "./commit-conflict-resolution";

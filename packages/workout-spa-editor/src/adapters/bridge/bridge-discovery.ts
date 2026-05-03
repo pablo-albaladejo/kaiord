@@ -7,6 +7,7 @@
  * build-time `VITE_*_EXTENSION_ID` env var coupling.
  */
 
+import type { BridgeManifest } from "../../types/bridge-schemas";
 import {
   type BridgeAnnouncement,
   type BridgeDiscovery,
@@ -17,7 +18,7 @@ import { verifyAnnouncement } from "./bridge-discovery-verify";
 
 const DISCOVER_REQUEST_DELAY_MS = 3_000;
 
-type VerifyFn = (ann: BridgeAnnouncement) => Promise<boolean>;
+type VerifyFn = (ann: BridgeAnnouncement) => Promise<BridgeManifest | null>;
 
 export type CreateBridgeDiscoveryOptions = {
   verify?: VerifyFn;
@@ -30,6 +31,7 @@ export function createBridgeDiscovery(
   const verify = options.verify ?? verifyAnnouncement;
   const discoverDelayMs = options.discoverDelayMs ?? DISCOVER_REQUEST_DELAY_MS;
   const ids = new Map<string, string>();
+  const caps = new Map<string, readonly string[]>();
   const listeners = new Set<DiscoveryListener>();
   let handler: ((event: MessageEvent) => void) | null = null;
   let discoverTimer: ReturnType<typeof setTimeout> | null = null;
@@ -38,9 +40,10 @@ export function createBridgeDiscovery(
 
   async function handleAnnouncement(ann: BridgeAnnouncement): Promise<void> {
     if (ids.get(ann.bridgeId) === ann.extensionId) return;
-    const ok = await verify(ann);
-    if (!ok) return;
+    const manifest = await verify(ann);
+    if (!manifest) return;
     ids.set(ann.bridgeId, ann.extensionId);
+    caps.set(ann.bridgeId, manifest.capabilities);
     notify();
   }
 
@@ -72,6 +75,7 @@ export function createBridgeDiscovery(
     start,
     stop,
     getExtensionId: (id) => ids.get(id) ?? null,
+    getCapabilities: (id) => caps.get(id) ?? null,
     subscribe: (listener) => {
       listeners.add(listener);
       return () => {
