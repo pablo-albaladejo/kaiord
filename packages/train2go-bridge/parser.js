@@ -153,17 +153,48 @@ const extractCompletion = (block) => {
 };
 
 /**
+ * Strip HTML tags from a string, preserving paragraph and line breaks
+ * as actual newlines. Use over innerHTML to keep XSS surface zero —
+ * the popup renders the result inside a <pre>/textContent boundary.
+ *
+ * Trims trailing whitespace and collapses 3+ newlines to 2 so the
+ * pre-wrap rendering isn't dominated by empty paragraphs.
+ */
+const htmlToPlainText = (html) => {
+  if (typeof html !== "string" || html.length === 0) return "";
+  // Drop script/style blocks ENTIRE — including their text content —
+  // before the tag-strip pass; otherwise the inner JS/CSS leaks into
+  // the popup's textContent.
+  const noEmbedded = html.replace(/<(script|style)[^>]*>[\s\S]*?<\/\1>/gi, "");
+  const withBreaks = noEmbedded
+    .replace(/<\/(p|h[1-6]|li|div)>/gi, "$&\n")
+    .replace(/<br\s*\/?>/gi, "\n");
+  const stripped = withBreaks.replace(/<[^>]+>/g, "");
+  const decoded = decodeEntities(stripped);
+  return decoded
+    .replace(/\r\n?/g, "\n")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+};
+
+/**
  * Parse ping JSON response.
  *
  * Input: parsed JSON from /api/v2/profile/ping
- * Returns: { sessionActive, userId?, userName?, coachName? }.
+ * Returns: { sessionActive, userId?, userName?, coachName?, notes? }.
  *
  * The coach/trainer name is opportunistically extracted from common
  * shapes Train2Go has historically used (`data.user.coach.name`,
  * `data.user.trainer.name`, `data.user.coach_name`,
  * `data.user.trainer_name`). If none is present the field is omitted —
- * the popup hides the sub-line gracefully. Per spec we MUST NOT add a
- * new endpoint; this parser change does not touch the network.
+ * the popup hides the sub-line gracefully.
+ *
+ * `notes` mirrors `data.user.user_notes` (the trainer's free-text
+ * notes about the trainee) stripped to plain text so the popup can
+ * render it via textContent without an XSS surface. Empty → omitted.
+ *
+ * Per spec we MUST NOT add a new endpoint; this parser change does
+ * not touch the network.
  */
 const parsePingJson = (json) => {
   if (!json?.success || !json?.data?.user) {
@@ -178,6 +209,8 @@ const parsePingJson = (json) => {
     user.trainer_name ??
     undefined;
 
+  const notes = htmlToPlainText(user.user_notes ?? "");
+
   return {
     userId: user.id,
     userName: user.name,
@@ -185,6 +218,7 @@ const parsePingJson = (json) => {
     ...(typeof coachName === "string" && coachName.length > 0
       ? { coachName }
       : {}),
+    ...(notes.length > 0 ? { notes } : {}),
   };
 };
 
@@ -207,5 +241,6 @@ if (typeof module !== "undefined") {
     decodeEntities,
     extractDescription,
     extractCompletion,
+    htmlToPlainText,
   };
 }
