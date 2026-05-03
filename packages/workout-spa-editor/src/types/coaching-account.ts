@@ -22,6 +22,13 @@ export const linkedCoachingAccountSchema = z.object({
   externalUserId: z.string().min(1),
   externalUserName: z.string().min(1),
   linkedAt: z.iso.datetime(),
+  /**
+   * Opt-in flag — when true, the connect/sync flows ALSO fan out into
+   * a zones-sync against this platform. Existing rows persisted before
+   * the field was introduced read `undefined`; the use case treats
+   * undefined as `false` (no Dexie schema bump required).
+   */
+  syncZones: z.boolean().optional(),
 });
 
 export type LinkedCoachingAccount = z.infer<typeof linkedCoachingAccountSchema>;

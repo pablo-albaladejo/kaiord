@@ -30,11 +30,17 @@ export { heartRateZoneSchema, powerZoneSchema } from "./zone-schemas";
 
 /**
  * Profile Schema
+ *
+ * `maxHeartRate` is the cross-sport hard ceiling (the value coaches
+ * use to cap zone scaling on the most aerobic discipline). Sport-
+ * specific HR zones live under `sportZones.<sport>.heartRateZones`;
+ * `maxHeartRate` is the global safety cap, not a per-sport derivative.
  */
 export const profileSchema = z.object({
   id: z.uuid(),
   name: z.string().min(1).max(100),
   bodyWeight: z.number().positive().optional(),
+  maxHeartRate: z.number().int().positive().max(250).optional(),
   sportZones: sportZonesRecordSchema,
   linkedAccounts: z.array(linkedCoachingAccountSchema).default([]),
   createdAt: z.iso.datetime(),
