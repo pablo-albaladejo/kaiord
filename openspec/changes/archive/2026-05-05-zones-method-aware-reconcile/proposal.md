@@ -1,3 +1,5 @@
+> Completed: 2026-05-05
+
 ## Why
 
 The shipped `train2go-zones-sync-full-bands` change (PRs #495-498) extracts T2G's full Z1-Z5 zone bands and writes them to the persisted profile. After running it once against a real T2G account, the conflict dialog surfaced 30+ rows of "0 bpm → 148 bpm" pseudo-conflicts on a freshly-created profile. The user reported the UX as "no es para nada UX" — and they're right: the profile was newly created with the Kaiord template defaults (HR all-zero, cycling power Coggan-7) and contained zero user-customized data, yet every band surfaced as a conflict requiring per-row attention.
