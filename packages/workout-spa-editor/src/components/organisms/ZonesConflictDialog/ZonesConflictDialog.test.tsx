@@ -140,7 +140,7 @@ describe("ZonesConflictDialog", () => {
     });
   });
 
-  it("should render a band-level conflict row with a generated label (5.2a)", () => {
+  it("should render a band-level conflict as a single group row with band-count summary (5.2a)", () => {
     // Arrange
     const bandConflicts: ConflictItem[] = [
       {
@@ -160,17 +160,24 @@ describe("ZonesConflictDialog", () => {
       />
     );
 
-    // Assert
+    // Assert — group row uses the new testid; per-band row exists in
+    // the DOM (inside collapsed Detail) but is hidden via aria-hidden.
+    expect(
+      screen.getByTestId("zones-conflict-group-cycling.heartRateZones")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Cycling HR Zones")).toBeInTheDocument();
+    expect(screen.getByText("1 band differs")).toBeInTheDocument();
     expect(
       screen.getByTestId("zones-conflict-row-cycling.heartRateZones.z2.maxBpm")
     ).toBeInTheDocument();
-    expect(screen.getByText("Cycling HR Z2 max")).toBeInTheDocument();
   });
 
-  it("should preserve insertion order grouping scalars and band-level conflicts (5.2b)", () => {
-    // Arrange — mixed scalar + band conflicts, scalar first
+  it("should preserve insertion order grouping scalars first then band groups (5.2b)", () => {
+    // Arrange — mixed scalar + band conflicts; scalar (LTHR) first.
+    // FTP would couple with cycling.powerZones — use cycling.thresholds.lthr to
+    // avoid the FTP+power coupling and test pure ordering.
     const mixed: ConflictItem[] = [
-      { field: "cycling.thresholds.ftp", current: 200, incoming: 270 },
+      { field: "cycling.thresholds.lthr", current: 160, incoming: 174 },
       {
         field: "cycling.heartRateZones.z2.minBpm",
         current: 131,
@@ -193,20 +200,19 @@ describe("ZonesConflictDialog", () => {
       />
     );
 
-    // Assert — all three rows render with distinct testids
+    // Assert — scalar keeps its per-row testid; bands collapse into one group.
     expect(
-      screen.getByTestId("zones-conflict-row-cycling.thresholds.ftp")
+      screen.getByTestId("zones-conflict-row-cycling.thresholds.lthr")
     ).toBeInTheDocument();
     expect(
-      screen.getByTestId("zones-conflict-row-cycling.heartRateZones.z2.minBpm")
+      screen.getByTestId("zones-conflict-group-cycling.heartRateZones")
     ).toBeInTheDocument();
-    expect(
-      screen.getByTestId("zones-conflict-row-cycling.heartRateZones.z2.maxBpm")
-    ).toBeInTheDocument();
+    expect(screen.getByText("2 bands differ")).toBeInTheDocument();
   });
 
-  it("should emit accept decisions for all rows of a sport-kind table when each is toggled (5.2c)", async () => {
-    // Arrange
+  it("should emit accept decisions for all bands when the group's accept radio is selected (5.2c)", async () => {
+    // Arrange — 4 conflicts in cycling.heartRateZones; user clicks ONCE
+    // on the group's accept radio (NOT 4 individual radios).
     const tableConflicts: ConflictItem[] = [
       {
         field: "cycling.heartRateZones.z1.minBpm",
@@ -238,23 +244,81 @@ describe("ZonesConflictDialog", () => {
         onCancel={vi.fn()}
       />
     );
-    for (const c of tableConflicts) {
-      const row = screen.getByTestId(`zones-conflict-row-${c.field}`);
-      const acceptInput = row.querySelector(
-        'input[value="accept"]'
-      ) as HTMLInputElement;
-      await userEvent.click(acceptInput);
-    }
+    const group = screen.getByTestId(
+      "zones-conflict-group-cycling.heartRateZones"
+    );
+    const acceptInput = group.querySelector(
+      'input[value="accept"]'
+    ) as HTMLInputElement;
+    await userEvent.click(acceptInput);
 
     // Act
     await userEvent.click(screen.getByRole("button", { name: "Apply" }));
 
-    // Assert
+    // Assert — single group click emits accept for all 4 band-bound keys.
     expect(onConfirm).toHaveBeenCalledWith({
       "cycling.heartRateZones.z1.minBpm": "accept",
       "cycling.heartRateZones.z1.maxBpm": "accept",
       "cycling.heartRateZones.z2.minBpm": "accept",
       "cycling.heartRateZones.z2.maxBpm": "accept",
+    });
+  });
+
+  it("should couple FTP scalar + cycling.powerZones into a single group (5.2d / D-MA6)", async () => {
+    // Arrange — FTP scalar conflict alongside cycling-power band conflicts
+    // SHALL render as one coupled group, not separate.
+    const coupled: ConflictItem[] = [
+      { field: "cycling.thresholds.ftp", current: 200, incoming: 268 },
+      {
+        field: "cycling.powerZones.z4.minPercent",
+        current: 91,
+        incoming: 90,
+      },
+      {
+        field: "cycling.powerZones.z4.maxPercent",
+        current: 105,
+        incoming: 100,
+      },
+    ];
+    const onConfirm = vi.fn();
+    render(
+      <ZonesConflictDialog
+        open
+        conflicts={coupled}
+        onConfirm={onConfirm}
+        onCancel={vi.fn()}
+      />
+    );
+
+    // Assert — coupled group exists; the FTP row testid lives INSIDE
+    // the coupled group's Detail view (per the spec — Detail keeps all
+    // rows in DOM via aria-hidden), NOT as a standalone scalar row.
+    const coupledGroup = screen.getByTestId(
+      "zones-conflict-group-cycling.threshold-and-zones"
+    );
+    expect(coupledGroup).toBeInTheDocument();
+    expect(screen.getByText("Cycling threshold + zones")).toBeInTheDocument();
+    // FTP testid is INSIDE the coupled group, not at top level.
+    const ftpRow = screen.getByTestId(
+      "zones-conflict-row-cycling.thresholds.ftp"
+    );
+    expect(coupledGroup.contains(ftpRow)).toBe(true);
+
+    // Act — accept the coupled group; both FTP and bands should be in the decisions.
+    const group = screen.getByTestId(
+      "zones-conflict-group-cycling.threshold-and-zones"
+    );
+    const acceptInput = group.querySelector(
+      'input[value="accept"]'
+    ) as HTMLInputElement;
+    await userEvent.click(acceptInput);
+    await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+
+    // Assert
+    expect(onConfirm).toHaveBeenCalledWith({
+      "cycling.thresholds.ftp": "accept",
+      "cycling.powerZones.z4.minPercent": "accept",
+      "cycling.powerZones.z4.maxPercent": "accept",
     });
   });
 });
