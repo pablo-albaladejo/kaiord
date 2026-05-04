@@ -112,7 +112,7 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     // Assert
   });
 
-  it("syncState store schema string equals 'source' byte-identically (no compound index added)", async () => {
+  it("should have syncState store schema string equal 'source' byte-identically (no compound index added)", async () => {
     // Arrange
     const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
     await seedV3(dbName);
@@ -128,7 +128,7 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     // Assert
   });
 
-  it("coachingSyncState store schema string equals '[source+profileId], source, profileId' byte-identically", async () => {
+  it("should have coachingSyncState store schema string equal '[source+profileId], source, profileId' byte-identically", async () => {
     // Arrange
     const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
     await seedV3(dbName);

@@ -149,7 +149,7 @@ describe("selectAllSteps single-parent invariant", () => {
     expect(useWorkoutStore.getState().selectedStepIds).toEqual(ids);
   });
 
-  it("filters out cross-parent ids, keeping only those sharing the first id's parent", () => {
+  it("should filter out cross-parent ids, keeping only those sharing the first id's parent", () => {
     // Arrange
     useWorkoutStore
       .getState()

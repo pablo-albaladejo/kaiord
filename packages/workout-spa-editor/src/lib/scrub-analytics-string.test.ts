@@ -39,7 +39,7 @@ describe("scrubAnalyticsString", () => {
       );
     });
 
-    it("preserves trailing punctuation (token-safe class stops at `)`)", () => {
+    it("should preserve trailing punctuation (token-safe class stops at `)`)", () => {
       // Arrange
 
       // Act

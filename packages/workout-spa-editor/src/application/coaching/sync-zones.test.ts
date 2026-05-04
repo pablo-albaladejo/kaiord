@@ -263,7 +263,7 @@ describe("syncZones — silent fills and conflicts", () => {
     });
   });
 
-  it("transport-error: thrown exception surfaces as { ok: false, reason: 'transport-error' }", async () => {
+  it("should surface { ok: false, reason: 'transport-error' } when a transport-error exception is thrown", async () => {
     // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
@@ -281,7 +281,7 @@ describe("syncZones — silent fills and conflicts", () => {
     expect(result.error).toBe("Bridge unavailable");
   });
 
-  it("shape-mismatch: null payload surfaces as { ok: false, reason: 'shape-mismatch' }", async () => {
+  it("should surface { ok: false, reason: 'shape-mismatch' } when payload is null (shape-mismatch)", async () => {
     // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
@@ -296,7 +296,7 @@ describe("syncZones — silent fills and conflicts", () => {
     expect(result.reason).toBe("shape-mismatch");
   });
 
-  it("unsupported-transport: returns { ok: false, reason: 'unsupported' } when readZones is absent", async () => {
+  it("should return { ok: false, reason: 'unsupported' } when readZones is absent (unsupported-transport)", async () => {
     // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
@@ -311,7 +311,7 @@ describe("syncZones — silent fills and conflicts", () => {
     expect(result.reason).toBe("unsupported");
   });
 
-  it("profile-deleted-mid-sync: missing profile returns { ok: false, reason: 'profile-deleted' }", async () => {
+  it("should return { ok: false, reason: 'profile-deleted' } when profile is missing mid-sync", async () => {
     // Arrange
     const repo = createInMemoryProfileRepository();
     const transport = makeTransport(async () => PAYLOAD_FULL);

@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { DensityToggle } from "./DensityToggle";
 
 describe("DensityToggle", () => {
-  it("renders 'Switch to comfortable view' + aria-checked=true when current is compact", () => {
+  it("should render 'Switch to comfortable view' + aria-checked=true when current is compact", () => {
     // Arrange
 
     render(<DensityToggle density="compact" onToggle={vi.fn()} />);
@@ -22,7 +22,7 @@ describe("DensityToggle", () => {
     expect(btn.getAttribute("title")).toBe("Switch to comfortable view");
   });
 
-  it("renders 'Switch to compact view' + aria-checked=false when current is comfortable", () => {
+  it("should render 'Switch to compact view' + aria-checked=false when current is comfortable", () => {
     // Arrange
 
     render(<DensityToggle density="comfortable" onToggle={vi.fn()} />);
@@ -51,7 +51,7 @@ describe("DensityToggle", () => {
     expect(onToggle).toHaveBeenCalledWith("comfortable");
   });
 
-  it("calls onToggle with 'compact' when current is comfortable", async () => {
+  it("should call onToggle with 'compact' when current is comfortable", async () => {
     // Arrange
 
     const onToggle = vi.fn();

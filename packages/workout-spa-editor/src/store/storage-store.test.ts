@@ -7,7 +7,7 @@ describe("storage-store", () => {
     vi.clearAllMocks();
   });
 
-  it("starts in the 'checking' status", () => {
+  it("should start in the 'checking' status", () => {
     // Arrange
     const probe = vi.fn().mockResolvedValue("complete");
 
@@ -18,7 +18,7 @@ describe("storage-store", () => {
     expect(store.getState().status).toBe("checking");
   });
 
-  it("transitions to 'ok' when the probe resolves 'complete'", async () => {
+  it("should transition to 'ok' when the probe resolves 'complete'", async () => {
     // Arrange
     const probe = vi.fn().mockResolvedValue("complete");
     const store = createStorageStore({ probe });
@@ -31,7 +31,7 @@ describe("storage-store", () => {
     expect(probe).toHaveBeenCalledTimes(1);
   });
 
-  it("transitions to 'failed' when the probe resolves 'failed'", async () => {
+  it("should transition to 'failed' when the probe resolves 'failed'", async () => {
     // Arrange
     const probe = vi.fn().mockResolvedValue("failed");
     const store = createStorageStore({ probe });
@@ -43,7 +43,7 @@ describe("storage-store", () => {
     expect(store.getState().status).toBe("failed");
   });
 
-  it("transitions to 'failed' when the probe throws", async () => {
+  it("should transition to 'failed' when the probe throws", async () => {
     // Arrange
     const probe = vi.fn().mockRejectedValue(new Error("boom"));
     const store = createStorageStore({ probe });

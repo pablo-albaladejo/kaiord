@@ -179,7 +179,7 @@ describe("processBatch", () => {
     expect(last.counts.processing).toBe(0);
   });
 
-  it("records 'failed' per-workout status on processOne failure", async () => {
+  it("should record 'failed' per-workout status on processOne failure", async () => {
     // Arrange
     const workouts = makeWorkouts(2);
     const processOne = vi
@@ -225,7 +225,7 @@ describe("processBatch", () => {
     expect(firstFrame.counts.queued + firstFrame.counts.processing).toBe(3);
   });
 
-  it("byId snapshots are isolated — later mutations don't leak back", async () => {
+  it("should have byId snapshots isolated — later mutations don't leak back", async () => {
     // Arrange
     const workouts = makeWorkouts(2);
     const processOne = vi.fn().mockResolvedValue(ok);

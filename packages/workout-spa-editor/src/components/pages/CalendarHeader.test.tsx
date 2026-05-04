@@ -227,7 +227,7 @@ describe("CalendarHeader", () => {
     expect(screen.queryByTestId("mock-sync-Train2Go")).not.toBeInTheDocument();
   });
 
-  it("passes batch.pending presence to the cost confirmation's open prop", () => {
+  it("should pass batch.pending presence to the cost confirmation's open prop", () => {
     // Arrange
 
     const stateWithPending = {

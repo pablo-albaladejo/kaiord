@@ -208,7 +208,7 @@ describe("LibraryPage", () => {
     });
   });
 
-  it("hides the 'Load into editor' CTA when no active workout", async () => {
+  it("should hide the 'Load into editor' CTA when no active workout", async () => {
     // Arrange
 
     await db
@@ -229,7 +229,7 @@ describe("LibraryPage", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("shows the 'Load into editor' CTA only when the editor has an active workout", async () => {
+  it("should show the 'Load into editor' CTA only when the editor has an active workout", async () => {
     // Arrange
 
     await db
@@ -249,7 +249,7 @@ describe("LibraryPage", () => {
     expect(screen.getByTestId("card-load-into-editor")).toBeInTheDocument();
   });
 
-  it("clicking 'Load into editor' loads the template KRD into the workout store", async () => {
+  it("should load the template KRD into the workout store when 'Load into editor' is clicked", async () => {
     // Arrange
 
     const template = makeTemplate({

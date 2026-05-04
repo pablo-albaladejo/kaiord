@@ -148,7 +148,7 @@ describe("useCoachingDialog", () => {
     expect(expandActivity).not.toHaveBeenCalled();
   });
 
-  it("does NOT trigger expandActivity when description is known-empty ('')", () => {
+  it("should not trigger expandActivity when description is known-empty ('')", () => {
     // Arrange
 
     const expandActivity = vi.fn();
@@ -174,7 +174,7 @@ describe("useCoachingDialog", () => {
     expect(expandActivity).not.toHaveBeenCalled();
   });
 
-  it("handleConvert: surfaces 'Activity not found' when record missing in repo", async () => {
+  it("should surface 'Activity not found' via handleConvert when record is missing in repo", async () => {
     // Arrange
 
     const onClose = vi.fn();

@@ -99,7 +99,36 @@ toText(krd: KRD, writer: TextWriter, logger?: Logger): Promise<string>
 - Round‑trip (FIT/TCX/ZWO ↔ KRD) with tolerances: time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm
 - CLI smoke: `kaiord convert --in sample.krd --out out.tcx`
 - Test utilities: `@kaiord/core/test-utils` exports fixture loaders
-- AAA pattern: Arrange, Act, Assert (blank lines between sections)
+
+### Test conventions (mechanically enforced)
+
+Two structural invariants on every `*.test.{ts,tsx}` file under `packages/**`:
+
+1. **Title rule** (`R-ItTitleShould`) — every `it()`/`it.skip()`/`it.only()`/`it.each([...])(...)` title MUST start with the literal `should ` (case-sensitive lowercase). Aliases via AST shape (any `it[.<alias>]`); vitest substitution placeholders (`%s`, `%d`, `$prop`) stripped before the prefix check.
+2. **AAA rule** (`R-ItBodyAAA`) — every `it()` body MUST contain canonical Pascal-case line comments `// Arrange`, `// Act`, `// Assert` (in that order, separated by blank lines). Multiple statements per section; empty sections allowed (the marker is required, the body can be empty).
+
+```ts
+// Good
+it("should reject malformed input", () => {
+  // Arrange
+  const input = "bad";
+
+  // Act
+  const result = parse(input);
+
+  // Assert
+  expect(result.error).toBe("malformed");
+});
+```
+
+Out-of-scope files: `**/*.stories.{ts,tsx}` (Storybook), `**/test-utils/**`, `**/test-setup.ts`, `e2e/**` (Playwright).
+
+Enforced at three layers:
+- **IDE**: ESLint `vitest/valid-title` rule at `'error'` (yellow squiggle).
+- **pre-commit**: `pnpm test:scripts` runs `scripts/check-test-{title-should,aaa}.mjs` on staged files via `--changed-files`.
+- **CI**: same scripts in full-tree mode.
+
+See `openspec/specs/test-conventions/spec.md` for the canonical contract.
 
 ## Commands
 

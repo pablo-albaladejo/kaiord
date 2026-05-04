@@ -146,7 +146,7 @@ describe("useCoachingAutoSync", () => {
     expect(src.sync).not.toHaveBeenCalled();
   });
 
-  it("profile switch invalidates staleness — A's fresh row does NOT suppress sync for B", async () => {
+  it("should invalidate staleness on profile switch — A's fresh row does NOT suppress sync for B", async () => {
     // Arrange
     const persistence = createInMemoryPersistence();
     const recent = new Date(Date.now() - 60_000).toISOString();

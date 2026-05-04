@@ -69,7 +69,7 @@ describe("isFormFieldFocused", () => {
     expect(isFormFieldFocused(root)).toBe(true);
   });
 
-  it("returns false for an input type='checkbox'", () => {
+  it("should return false for an input type='checkbox'", () => {
     // Arrange
     const chk = document.createElement("input");
     chk.type = "checkbox";

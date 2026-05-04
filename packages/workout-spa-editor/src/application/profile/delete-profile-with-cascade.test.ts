@@ -72,7 +72,7 @@ const makeDeps = (
 });
 
 describe("deleteProfileWithCascade", () => {
-  it("removes only the targeted profile's coaching activities", async () => {
+  it("should remove only the targeted profile's coaching activities", async () => {
     // Arrange
     const coaching = createInMemoryCoachingRepository();
     const coachingSyncState = createInMemoryCoachingSyncStateRepository();
@@ -97,7 +97,7 @@ describe("deleteProfileWithCascade", () => {
     ).toHaveLength(1);
   });
 
-  it("removes only the targeted profile's coachingSyncState rows", async () => {
+  it("should remove only the targeted profile's coachingSyncState rows", async () => {
     // Arrange
     const coaching = createInMemoryCoachingRepository();
     const coachingSyncState = createInMemoryCoachingSyncStateRepository();
