@@ -200,6 +200,43 @@ test("(f) injecting pull_request_target into on: fails", () => {
   }
 });
 
+test("(h) consumer with failure() in if: fails (fail-open status function)", () => {
+  const broken = POST_FANOUT_CI.replace(
+    "  lint:\n    runs-on: ubuntu-latest\n    needs: [detect-changes, build]\n    if: needs.detect-changes.outputs.should-test == 'true'",
+    "  lint:\n    runs-on: ubuntu-latest\n    needs: [detect-changes, build]\n    if: failure() || needs.detect-changes.outputs.should-test == 'true'"
+  );
+  const t = withTmpYml(broken);
+  try {
+    const violations = runCheck({ ciPath: t.path });
+    assert.ok(
+      violations.some(
+        (v) => /'lint'/.test(v.detail) && /failure\(\)/.test(v.detail)
+      )
+    );
+  } finally {
+    t.cleanup();
+  }
+});
+
+test("(i) renaming a consumer fails closed", () => {
+  // Rename `lint` → `lint-renamed` in the workflow. The script's
+  // CONSUMERS enumeration still contains `lint`, so the check should
+  // fire a "missing from ci.yml" violation rather than silently
+  // skipping enforcement.
+  const broken = POST_FANOUT_CI.replace(/^  lint:$/m, "  lint-renamed:");
+  const t = withTmpYml(broken);
+  try {
+    const violations = runCheck({ ciPath: t.path });
+    assert.ok(
+      violations.some(
+        (v) => /'lint'/.test(v.detail) && /missing from ci\.yml/.test(v.detail)
+      )
+    );
+  } finally {
+    t.cleanup();
+  }
+});
+
 test("(g) consumer with pnpm -r build step fails", () => {
   const broken = POST_FANOUT_CI.replace(
     "  lint:\n    runs-on: ubuntu-latest\n    needs: [detect-changes, build]\n    if: needs.detect-changes.outputs.should-test == 'true'\n    steps:\n      - uses: ./.github/actions/consume-build-artifacts\n      - run: pnpm lint",

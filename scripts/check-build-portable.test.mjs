@@ -193,6 +193,89 @@ export default defineConfig({
   }
 });
 
+test("(j) `process.env.X || 'default'` (BinaryExpression) fails", () => {
+  const fixtures = makeTempPackages();
+  try {
+    const pkg = fixtures.addPackage("binexpr");
+    pkg.writeConfig(
+      "tsup.config.ts",
+      `import { defineConfig } from 'tsup';
+export default defineConfig({
+  entry: ['src/index.ts'],
+  define: { __X__: process.env.API_URL || 'http://default' },
+});
+`
+    );
+    const violations = runCheck({ packagesRoot: fixtures.root });
+    assert.equal(violations.length, 1);
+    assert.match(violations[0].detail, /process\.env/);
+  } finally {
+    fixtures.cleanup();
+  }
+});
+
+test("(k) template-literal value reading process.env fails", () => {
+  const fixtures = makeTempPackages();
+  try {
+    const pkg = fixtures.addPackage("templit");
+    pkg.writeConfig(
+      "tsup.config.ts",
+      `import { defineConfig } from 'tsup';
+export default defineConfig({
+  entry: ['src/index.ts'],
+  define: { __URL__: \`http://\${process.env.API_HOST}\` },
+});
+`
+    );
+    const violations = runCheck({ packagesRoot: fixtures.root });
+    assert.equal(violations.length, 1);
+  } finally {
+    fixtures.cleanup();
+  }
+});
+
+test("(l) factory-form defineConfig with arrow returning bare object fails", () => {
+  const fixtures = makeTempPackages();
+  try {
+    const pkg = fixtures.addPackage("factory-arrow");
+    pkg.writeConfig(
+      "tsup.config.ts",
+      `import { defineConfig } from 'tsup';
+export default defineConfig((env) => ({
+  entry: ['src/index.ts'],
+  define: { __X__: process.env.API_URL },
+}));
+`
+    );
+    const violations = runCheck({ packagesRoot: fixtures.root });
+    assert.equal(violations.length, 1);
+  } finally {
+    fixtures.cleanup();
+  }
+});
+
+test("(m) factory-form defineConfig with block + return fails", () => {
+  const fixtures = makeTempPackages();
+  try {
+    const pkg = fixtures.addPackage("factory-block");
+    pkg.writeConfig(
+      "tsup.config.ts",
+      `import { defineConfig } from 'tsup';
+export default defineConfig((env) => {
+  return {
+    entry: ['src/index.ts'],
+    define: { __X__: process.env.API_URL },
+  };
+});
+`
+    );
+    const violations = runCheck({ packagesRoot: fixtures.root });
+    assert.equal(violations.length, 1);
+  } finally {
+    fixtures.cleanup();
+  }
+});
+
 test("(i) comment containing } inside define block does not false-negative", () => {
   const fixtures = makeTempPackages();
   try {

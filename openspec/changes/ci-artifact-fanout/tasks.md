@@ -293,7 +293,19 @@ always() drop). User preference for bundled coherent chunks in CI/refactor work.
 - [ ] 13.1 Open the rollout PR with conventional-commit subject `chore(ci): fan build artifacts to consumer jobs`. Body MUST include: (a) §1.1 byte-diff results, (b) §1.2 baseline + §10 measured wall-clock, (c) §9.1-§9.4 verification screenshots/links.
 - [ ] 13.2 After merge, monitor the next 5 PR runs on `main` for unexpected skips, stale artifacts, or matrix-leg divergence. If any consumer reports `dist/` missing, roll back per design.md Migration Plan.
 - [ ] 13.3 Open a follow-up issue: "Remove redundant TypeScript dist cache from setup-pnpm composite action" (Decision 8).
+
+  > Deferred to: #482
+
 - [ ] 13.4 Open a follow-up issue: "Extend `Verify build outputs` step in the build job to include `workout-spa-editor`, `garmin-bridge`, `train2go-bridge`" — currently it only iterates `core fit tcx zwo garmin garmin-connect cli mcp ai`, which leaves SPA + bridge dist gaps undetected.
+
+  > Deferred to: #483
+
 - [ ] 13.5 **Issue MUST be filed before this PR merges; assignee MUST be set within 30 days of merge.** Title: "Add `build` to branch-protection required-checks list". Decision 12 fixes the summary-job whitelist gap inside workflow code; adding `build` to required checks is the belt-and-braces repo-settings change tracked here. Issue references this change's PR; rollout PR description links to the issue.
+
+  > Deferred to: #481
+
 - [ ] 13.6 Verify `dependabot.yml` covers `package-ecosystem: github-actions` so that future GHSA advisories on `actions/upload-artifact@v7` and `actions/download-artifact@v7` produce auto-PRs. If the ecosystem is missing, open a follow-up issue to add it (do not block this change).
+
+  > Deferred to: #484
+
 - [ ] 13.7 Run `/opsx:archive` once the PR is merged.

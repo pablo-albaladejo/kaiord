@@ -94,6 +94,33 @@ function valueReadsEnv(node) {
   if (ts.isArrowFunction(node) || ts.isFunctionExpression(node)) {
     if (node.body) return valueReadsEnv(node.body);
   }
+  if (ts.isBlock(node)) {
+    return node.statements.some(valueReadsEnv);
+  }
+  if (ts.isReturnStatement(node)) {
+    return valueReadsEnv(node.expression);
+  }
+  if (ts.isBinaryExpression(node)) {
+    // Catches `process.env.X || 'default'`, `process.env.X ?? 'd'`,
+    // `'prefix' + process.env.X`, etc. Whitelist the comparison form
+    // `process.env.NODE_ENV === 'production'` (left or right operand
+    // is the NODE_ENV access AND the operator is a comparison).
+    const isComparison =
+      node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsEqualsToken ||
+      node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsEqualsToken ||
+      node.operatorToken.kind === ts.SyntaxKind.EqualsEqualsToken ||
+      node.operatorToken.kind === ts.SyntaxKind.ExclamationEqualsToken;
+    if (isComparison) {
+      const leftIsNodeEnv = envName(node.left) === "NODE_ENV";
+      const rightIsNodeEnv = envName(node.right) === "NODE_ENV";
+      if (leftIsNodeEnv || rightIsNodeEnv) return false;
+    }
+    return valueReadsEnv(node.left) || valueReadsEnv(node.right);
+  }
+  if (ts.isTemplateExpression(node)) {
+    // Template literal like `` `http://${process.env.HOST}` ``.
+    return node.templateSpans.some((s) => valueReadsEnv(s.expression));
+  }
   if (ts.isConditionalExpression(node)) {
     return valueReadsEnv(node.whenTrue) || valueReadsEnv(node.whenFalse);
   }
@@ -145,6 +172,20 @@ function visitDefineProperties(defineObject, file, violations) {
   }
 }
 
+function inspectConfigObject(obj, file, violations) {
+  if (!obj || !ts.isObjectLiteralExpression(obj)) return;
+  for (const prop of obj.properties) {
+    if (
+      ts.isPropertyAssignment(prop) &&
+      ts.isIdentifier(prop.name) &&
+      prop.name.text === "define" &&
+      ts.isObjectLiteralExpression(prop.initializer)
+    ) {
+      visitDefineProperties(prop.initializer, file, violations);
+    }
+  }
+}
+
 function findDefineCalls(node, file, violations) {
   if (
     ts.isCallExpression(node) &&
@@ -153,14 +194,33 @@ function findDefineCalls(node, file, violations) {
   ) {
     const arg = node.arguments[0];
     if (arg && ts.isObjectLiteralExpression(arg)) {
-      for (const prop of arg.properties) {
-        if (
-          ts.isPropertyAssignment(prop) &&
-          ts.isIdentifier(prop.name) &&
-          prop.name.text === "define" &&
-          ts.isObjectLiteralExpression(prop.initializer)
-        ) {
-          visitDefineProperties(prop.initializer, file, violations);
+      // Object form: defineConfig({ define: {...} })
+      inspectConfigObject(arg, file, violations);
+    } else if (arg && (ts.isArrowFunction(arg) || ts.isFunctionExpression(arg))) {
+      // Factory form: defineConfig((env) => ({ define: {...} })).
+      // tsup and vite both document this as a first-class pattern for
+      // env-dependent config. The body is either an expression
+      // (concise arrow) or a block whose return statement carries the
+      // config object.
+      const body = arg.body;
+      if (body) {
+        if (ts.isObjectLiteralExpression(body)) {
+          inspectConfigObject(body, file, violations);
+        } else if (ts.isParenthesizedExpression(body) && ts.isObjectLiteralExpression(body.expression)) {
+          inspectConfigObject(body.expression, file, violations);
+        } else if (ts.isBlock(body)) {
+          for (const stmt of body.statements) {
+            if (ts.isReturnStatement(stmt) && stmt.expression) {
+              if (ts.isObjectLiteralExpression(stmt.expression)) {
+                inspectConfigObject(stmt.expression, file, violations);
+              } else if (
+                ts.isParenthesizedExpression(stmt.expression) &&
+                ts.isObjectLiteralExpression(stmt.expression.expression)
+              ) {
+                inspectConfigObject(stmt.expression.expression, file, violations);
+              }
+            }
+          }
         }
       }
     }

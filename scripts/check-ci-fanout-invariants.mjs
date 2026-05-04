@@ -51,13 +51,20 @@ function ifClauseText(job) {
   return String(job.if);
 }
 
+// Fail-open status functions that defeat default `success()`-over-`needs:`
+// short-circuit. Any of these in a consumer's `if:` would let it run
+// even when `build` failed/skipped, breaking the fail-fast guarantee.
+const FAIL_OPEN_FUNCTIONS = ["always()", "failure()", "cancelled()"];
+
 function checkConsumer(jobName, job, violations) {
   const ifClause = ifClauseText(job);
-  if (ifClause.includes("always()")) {
-    violations.push({
-      rule: "R-CIFanout",
-      detail: `consumer job '${jobName}' has 'always()' in if: clause; this defeats fail-fast on build failure`,
-    });
+  for (const fn of FAIL_OPEN_FUNCTIONS) {
+    if (ifClause.includes(fn)) {
+      violations.push({
+        rule: "R-CIFanout",
+        detail: `consumer job '${jobName}' has '${fn}' in if: clause; fail-open status functions defeat fail-fast on build failure`,
+      });
+    }
   }
   if (!needsList(job).includes("build")) {
     violations.push({
@@ -128,6 +135,23 @@ export function runCheck({ ciPath } = {}) {
   const violations = [];
   checkTriggers(workflow, violations);
   const jobs = workflow?.jobs ?? {};
+  // Fail closed when a CONSUMER drifts (renamed or removed) — every
+  // consumer is required and silently disappearing is the bug. The fix
+  // is either rename the job back, or amend
+  // openspec/specs/ci-build-fanout/spec.md AND update this script's
+  // CONSUMERS set together.
+  //
+  // NON_CONSUMERS are NOT checked for presence: they are optional
+  // jobs that, if they exist, must not have `needs: build`. A
+  // hypothetical workflow without `check-links` is fine.
+  for (const expected of CONSUMERS) {
+    if (!(expected in jobs)) {
+      violations.push({
+        rule: "R-CIFanout",
+        detail: `enumerated consumer job '${expected}' is missing from ci.yml; rename or amend spec/script enumerations together`,
+      });
+    }
+  }
   for (const [name, job] of Object.entries(jobs)) {
     if (CONSUMERS.has(name)) {
       checkConsumer(name, job, violations);
