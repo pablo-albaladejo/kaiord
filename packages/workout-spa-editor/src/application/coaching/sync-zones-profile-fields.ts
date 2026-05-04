@@ -1,53 +1,59 @@
 /**
- * `FieldKey` ↔ `Profile` field accessors.
- *
- * `FieldKey` is the logical contract used by the use case + UI; the
- * actual storage paths are an implementation detail. These helpers
- * encapsulate that mapping so adding a new `FieldKey` is a single-file
- * change (here + the union in `coaching-zones.ts`).
+ * `FieldKey` ↔ `Profile` field accessors. Routes to threshold-scalar
+ * helpers (`sync-zones-threshold-fields.ts`) or band-level helpers
+ * (`sync-zones-band-fields.ts`/`sync-zones-band-writes.ts`) based on
+ * the FieldKey shape.
  */
-import type { FieldKey } from "../../types/coaching-zones";
+import type { FieldKey, ThresholdFieldKey } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
+import {
+  readHrBand,
+  readPaceBand,
+  readPowerBand,
+} from "./sync-zones-band-fields";
+import type { ParsedBandKey } from "./sync-zones-band-key";
+import { parseBandKey } from "./sync-zones-band-key";
+import {
+  writeHrBand,
+  writePaceBand,
+  writePowerBand,
+} from "./sync-zones-band-writes";
+import { readThreshold, writeThreshold } from "./sync-zones-threshold-fields";
+
+const readBandField = (
+  profile: Profile,
+  parsed: NonNullable<ParsedBandKey>
+): number | undefined => {
+  if (parsed.kind === "hr") {
+    return readHrBand(profile, parsed.sport, parsed.band, parsed.bound);
+  }
+  if (parsed.kind === "power") {
+    return readPowerBand(profile, parsed.band, parsed.bound);
+  }
+  return readPaceBand(profile, parsed.sport, parsed.band, parsed.bound);
+};
+
+const writeBandField = (
+  profile: Profile,
+  parsed: NonNullable<ParsedBandKey>,
+  value: number
+): Profile => {
+  if (parsed.kind === "hr") {
+    return writeHrBand(profile, parsed.sport, parsed.band, parsed.bound, value);
+  }
+  if (parsed.kind === "power") {
+    return writePowerBand(profile, parsed.band, parsed.bound, value);
+  }
+  return writePaceBand(profile, parsed.sport, parsed.band, parsed.bound, value);
+};
 
 export const readField = (
   profile: Profile,
   field: FieldKey
 ): number | undefined => {
-  switch (field) {
-    case "bodyWeight":
-      return profile.bodyWeight;
-    case "heartRate.max":
-      return profile.maxHeartRate;
-    case "cycling.thresholds.ftp":
-      return profile.sportZones.cycling?.thresholds.ftp;
-    case "cycling.thresholds.lthr":
-      return profile.sportZones.cycling?.thresholds.lthr;
-    case "running.thresholds.lthr":
-      return profile.sportZones.running?.thresholds.lthr;
-    case "running.thresholds.thresholdPaceSecPerKm":
-      return profile.sportZones.running?.thresholds.thresholdPace;
-    case "swimming.thresholds.cssPaceSecPer100m":
-      return profile.sportZones.swimming?.thresholds.thresholdPace;
-  }
-};
-
-const setSportThreshold = (
-  profile: Profile,
-  sport: "cycling" | "running" | "swimming",
-  patch: { ftp?: number; lthr?: number; thresholdPace?: number }
-): Profile => {
-  const existing = profile.sportZones[sport];
-  const thresholds = { ...(existing?.thresholds ?? {}), ...patch };
-  const sportConfig = existing
-    ? { ...existing, thresholds }
-    : {
-        thresholds,
-        heartRateZones: { method: "manual", zones: [] },
-      };
-  return {
-    ...profile,
-    sportZones: { ...profile.sportZones, [sport]: sportConfig },
-  };
+  const parsed = parseBandKey(field);
+  if (parsed) return readBandField(profile, parsed);
+  return readThreshold(profile, field as ThresholdFieldKey);
 };
 
 export const writeField = (
@@ -55,20 +61,7 @@ export const writeField = (
   field: FieldKey,
   value: number
 ): Profile => {
-  switch (field) {
-    case "bodyWeight":
-      return { ...profile, bodyWeight: value };
-    case "heartRate.max":
-      return { ...profile, maxHeartRate: value };
-    case "cycling.thresholds.ftp":
-      return setSportThreshold(profile, "cycling", { ftp: value });
-    case "cycling.thresholds.lthr":
-      return setSportThreshold(profile, "cycling", { lthr: value });
-    case "running.thresholds.lthr":
-      return setSportThreshold(profile, "running", { lthr: value });
-    case "running.thresholds.thresholdPaceSecPerKm":
-      return setSportThreshold(profile, "running", { thresholdPace: value });
-    case "swimming.thresholds.cssPaceSecPer100m":
-      return setSportThreshold(profile, "swimming", { thresholdPace: value });
-  }
+  const parsed = parseBandKey(field);
+  if (parsed) return writeBandField(profile, parsed, value);
+  return writeThreshold(profile, field as ThresholdFieldKey, value);
 };
