@@ -21,9 +21,11 @@ describe("kaiord_convert", () => {
   });
 
   it("should convert KRD content to TCX", async () => {
+    // Arrange
     const client = await createTestClient();
     const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
 
+    // Act
     const result = (await client.callTool({
       name: "kaiord_convert",
       arguments: {
@@ -33,28 +35,34 @@ describe("kaiord_convert", () => {
       },
     })) as McpToolResult;
 
+    // Assert
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain("TrainingCenterDatabase");
   });
 
   it("should convert KRD file to TCX", async () => {
+    // Arrange
     const client = await createTestClient();
     const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
     const filePath = join(tmpDir, "input.krd");
     await writeFile(filePath, krdJson);
 
+    // Act
     const result = (await client.callTool({
       name: "kaiord_convert",
       arguments: { input_file: filePath, output_format: "tcx" },
     })) as McpToolResult;
 
+    // Assert
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain("TrainingCenterDatabase");
   });
 
   it("should return error when both inputs provided", async () => {
+    // Arrange
     const client = await createTestClient();
 
+    // Act
     const result = (await client.callTool({
       name: "kaiord_convert",
       arguments: {
@@ -65,14 +73,17 @@ describe("kaiord_convert", () => {
       },
     })) as McpToolResult;
 
+    // Assert
     expect(result.isError).toBe(true);
   });
 
   it("should write FIT output to file", async () => {
+    // Arrange
     const client = await createTestClient();
     const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
     const outPath = join(tmpDir, "output.fit");
 
+    // Act
     const result = (await client.callTool({
       name: "kaiord_convert",
       arguments: {
@@ -83,6 +94,7 @@ describe("kaiord_convert", () => {
       },
     })) as McpToolResult;
 
+    // Assert
     expect(result.isError).toBeUndefined();
     expect(result.content[0].text).toContain("Written to:");
   });

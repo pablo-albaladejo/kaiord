@@ -15,7 +15,6 @@ describe("FIT Writer Integration", () => {
     const logger = createMockLogger();
     const writer = createGarminFitSdkWriter(logger);
     const reader = createGarminFitSdkReader(logger);
-
     const krd = buildKRD.build({
       version: "1.0",
       type: "structured_workout",
@@ -41,18 +40,14 @@ describe("FIT Writer Integration", () => {
         },
       },
     });
-
-    // Act - Write KRD to FIT
     const fitBuffer = await writer(krd);
-
-    // Assert - Buffer should be created
     expect(fitBuffer).toBeInstanceOf(Uint8Array);
     expect(fitBuffer.length).toBeGreaterThan(0);
 
-    // Act - Read FIT back to KRD
+    // Act
     const decodedKrd = await reader(fitBuffer);
 
-    // Assert - Basic structure preserved
+    // Assert
     expect(decodedKrd.version).toBe("1.0");
     expect(decodedKrd.type).toBe("structured_workout");
     expect(decodedKrd.metadata.sport).toBe("cycling");

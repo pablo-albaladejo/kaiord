@@ -106,7 +106,7 @@ describe("logger-factory", () => {
   describe("explicit logger type", () => {
     it("should create pretty logger when type is specified", async () => {
       // Arrange
-      process.env.CI = "true"; // Even in CI
+      process.env.CI = "true";
 
       // Act
       const logger = await createLogger({ type: "pretty" });
@@ -141,7 +141,9 @@ describe("logger-factory", () => {
 
   describe("logger options", () => {
     it("should pass options to logger implementation", async () => {
-      // Arrange & Act
+      // Arrange
+
+      // Act
       const logger = await createLogger({
         level: "warn",
         quiet: true,

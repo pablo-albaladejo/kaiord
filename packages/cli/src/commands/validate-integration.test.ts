@@ -23,18 +23,18 @@ describe("validate command integration tests", () => {
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
-
-        // Act
         const result = await execa("tsx", [
           "src/bin/kaiord.ts",
           "validate",
           "--input",
           fitFile,
         ]);
+        expect(result.exitCode).toBe(0);
+
+        // Act
+        const output = stripAnsi(result.stdout);
 
         // Assert
-        expect(result.exitCode).toBe(0);
-        const output = stripAnsi(result.stdout);
         expect(output).toContain("Round-trip validation passed");
       }
     );
@@ -45,8 +45,6 @@ describe("validate command integration tests", () => {
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
-
-        // Act
         const result = await execa("tsx", [
           "src/bin/kaiord.ts",
           "validate",
@@ -54,8 +52,10 @@ describe("validate command integration tests", () => {
           fitFile,
         ]);
 
-        // Assert
+        // Act
         const output = stripAnsi(result.stdout);
+
+        // Assert
         expect(output).toMatch(/validation.*passed/i);
       }
     );
@@ -82,8 +82,6 @@ describe("validate command integration tests", () => {
           toleranceConfigPath,
           JSON.stringify(toleranceConfig, null, 2)
         );
-
-        // Act
         const result = await execa("tsx", [
           "src/bin/kaiord.ts",
           "validate",
@@ -92,10 +90,12 @@ describe("validate command integration tests", () => {
           "--tolerance-config",
           toleranceConfigPath,
         ]);
+        expect(result.exitCode).toBe(0);
+
+        // Act
+        const output = stripAnsi(result.stdout);
 
         // Assert
-        expect(result.exitCode).toBe(0);
-        const output = stripAnsi(result.stdout);
         expect(output).toContain("Round-trip validation passed");
       }
     );
@@ -107,9 +107,11 @@ describe("validate command integration tests", () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
         const toleranceConfigPath = join(tempDir, "invalid-tolerance.json");
+
+        // Act
         await writeFile(toleranceConfigPath, "{ invalid json }");
 
-        // Act & Assert
+        // Assert
         await expect(
           execa("tsx", [
             "src/bin/kaiord.ts",
@@ -127,9 +129,11 @@ describe("validate command integration tests", () => {
   describe("error handling", () => {
     it("should fail with exit code 2 for missing file", async () => {
       // Arrange
+
+      // Act
       const nonExistentFile = join(tempDir, "nonexistent.fit");
 
-      // Act & Assert
+      // Assert
       try {
         await execa("tsx", [
           "src/bin/kaiord.ts",
@@ -150,9 +154,11 @@ describe("validate command integration tests", () => {
       { timeout: 10000 },
       async () => {
         // Arrange
+
+        // Act
         const nonExistentFile = join(tempDir, "nonexistent.fit");
 
-        // Act & Assert
+        // Assert
         try {
           await execa("tsx", [
             "src/bin/kaiord.ts",
@@ -171,9 +177,11 @@ describe("validate command integration tests", () => {
 
     it("should fail for non-FIT files", { timeout: 10000 }, async () => {
       // Arrange
+
+      // Act
       const krdFile = getFixturePath("krd", "WorkoutIndividualSteps.krd");
 
-      // Act & Assert
+      // Assert
       try {
         await execa("tsx", [
           "src/bin/kaiord.ts",
@@ -198,8 +206,6 @@ describe("validate command integration tests", () => {
       async () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
-
-        // Act
         const result = await execa("tsx", [
           "src/bin/kaiord.ts",
           "validate",
@@ -207,10 +213,12 @@ describe("validate command integration tests", () => {
           fitFile,
           "--json",
         ]);
+        expect(result.exitCode).toBe(0);
+
+        // Act
+        const output = JSON.parse(result.stdout);
 
         // Assert
-        expect(result.exitCode).toBe(0);
-        const output = JSON.parse(result.stdout);
         expect(output).toHaveProperty("success", true);
         expect(output).toHaveProperty("file");
         expect(output).toHaveProperty("format", "fit");
@@ -226,7 +234,6 @@ describe("validate command integration tests", () => {
         // Arrange
         const fitFile = getFixturePath("fit", "WorkoutIndividualSteps.fit");
         const toleranceConfigPath = join(tempDir, "strict-tolerance.json");
-        // Create very strict tolerances that will likely fail
         const strictConfig = {
           timeTolerance: 0.001,
           distanceTolerance: 0.001,
@@ -236,12 +243,14 @@ describe("validate command integration tests", () => {
           cadenceTolerance: 0.001,
           paceTolerance: 0.00001,
         };
+
+        // Act
         await writeFile(
           toleranceConfigPath,
           JSON.stringify(strictConfig, null, 2)
         );
 
-        // Act
+        // Assert
         try {
           await execa("tsx", [
             "src/bin/kaiord.ts",
@@ -255,7 +264,6 @@ describe("validate command integration tests", () => {
         } catch (error: unknown) {
           const execaError = error as { exitCode: number; stdout: string };
 
-          // Assert
           // Note: This test may pass if the round-trip is perfect
           // We're testing the JSON structure, not necessarily that it fails
           if (execaError.exitCode === 1) {
@@ -288,8 +296,6 @@ describe("validate command integration tests", () => {
 
         // Assert
         expect(result.exitCode).toBe(0);
-        // Verbose mode should include debug information
-        // The exact output depends on logger implementation
       }
     );
 
@@ -311,7 +317,6 @@ describe("validate command integration tests", () => {
 
         // Assert
         expect(result.exitCode).toBe(0);
-        // Quiet mode should have minimal output
         expect(result.stdout.length).toBeLessThan(100);
       }
     );

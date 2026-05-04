@@ -135,9 +135,11 @@ describe("convertToKrd", () => {
 
   it("should throw for unsupported format", async () => {
     // Arrange
+
+    // Act
     const data = "some data";
 
-    // Act & Assert
+    // Assert
     await expect(convertToKrd(data, "invalid", mockLogger)).rejects.toThrow(
       "Unsupported format: invalid"
     );
@@ -145,9 +147,11 @@ describe("convertToKrd", () => {
 
   it("should throw when FIT format receives string", async () => {
     // Arrange
+
+    // Act
     const data = "string data";
 
-    // Act & Assert
+    // Assert
     await expect(convertToKrd(data, "fit", mockLogger)).rejects.toThrow(
       "FIT input must be Uint8Array"
     );
@@ -155,9 +159,11 @@ describe("convertToKrd", () => {
 
   it("should throw when text format receives Uint8Array", async () => {
     // Arrange
+
+    // Act
     const data = new Uint8Array([1, 2, 3]);
 
-    // Act & Assert
+    // Assert
     await expect(convertToKrd(data, "tcx", mockLogger)).rejects.toThrow(
       "TCX input must be string"
     );
@@ -244,6 +250,8 @@ describe("convertFromKrd", () => {
   });
 
   it("should serialize KRD to JSON string", async () => {
+    // Arrange
+
     // Act
     const result = await convertFromKrd(mockKrd, "krd", mockLogger);
 
@@ -252,7 +260,11 @@ describe("convertFromKrd", () => {
   });
 
   it("should throw for unsupported format", async () => {
-    // Act & Assert
+    // Arrange
+
+    // Act
+
+    // Assert
     await expect(
       convertFromKrd(mockKrd, "invalid", mockLogger)
     ).rejects.toThrow("Unsupported output format: invalid");
@@ -261,7 +273,11 @@ describe("convertFromKrd", () => {
 
 describe("loadFileAsKrd", () => {
   it("should throw for unknown file format", async () => {
-    // Act & Assert
+    // Arrange
+
+    // Act
+
+    // Assert
     await expect(
       loadFileAsKrd("/path/to/file.unknown", undefined, mockLogger)
     ).rejects.toThrow("Unable to detect format for file");

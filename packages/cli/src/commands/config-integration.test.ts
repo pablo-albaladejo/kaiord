@@ -16,21 +16,18 @@ describe("config file integration", () => {
   });
 
   it("should use config file defaults for convert command", async () => {
-    // Arrange - Create config file
+    // Arrange
     const configPath = join(tmpDir.path, ".kaiordrc.json");
     const config = {
       defaultOutputFormat: "krd",
       verbose: true,
     };
     await writeFile(configPath, JSON.stringify(config, null, 2));
-
-    // Create a minimal FIT file (just for testing config loading)
     const inputPath = join(tmpDir.path, "workout.fit");
     await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
-
     const outputPath = join(tmpDir.path, "workout.krd");
 
-    // Act - Run convert command from tmpDir (where config file is)
+    // Act
     const result = await execa(
       "node",
       [
@@ -47,8 +44,7 @@ describe("config file integration", () => {
       }
     );
 
-    // Assert - Config should be loaded (verbose logging should be enabled)
-    // Note: This test verifies config loading, not actual conversion
+    // Assert
     expect(result.exitCode).toBeDefined();
   });
 
@@ -56,20 +52,17 @@ describe("config file integration", () => {
     "should prioritize CLI options over config defaults",
     { timeout: 15000 },
     async () => {
-      // Arrange - Create config file with verbose: true
+      // Arrange
       const configPath = join(tmpDir.path, ".kaiordrc.json");
       const config = {
         verbose: true,
       };
       await writeFile(configPath, JSON.stringify(config, null, 2));
-
-      // Create a minimal FIT file
       const inputPath = join(tmpDir.path, "workout.fit");
       await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
-
       const outputPath = join(tmpDir.path, "workout.krd");
 
-      // Act - Run convert command with --quiet (should override config)
+      // Act
       const result = await execa(
         "node",
         [
@@ -87,28 +80,25 @@ describe("config file integration", () => {
         }
       );
 
-      // Assert - CLI option should override config
+      // Assert
       expect(result.exitCode).toBeDefined();
     }
   );
 
   it("should use default output directory from config", async () => {
-    // Arrange - Create config file with defaultOutputDir
+    // Arrange
     const outputDir = join(tmpDir.path, "output");
     await mkdir(outputDir, { recursive: true });
-
     const configPath = join(tmpDir.path, ".kaiordrc.json");
     const config = {
       defaultOutputDir: outputDir,
       defaultOutputFormat: "krd",
     };
     await writeFile(configPath, JSON.stringify(config, null, 2));
-
-    // Create a minimal FIT file
     const inputPath = join(tmpDir.path, "workout.fit");
     await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
 
-    // Act - Run convert command with glob pattern (batch mode)
+    // Act
     const result = await execa(
       "node",
       ["dist/bin/kaiord.js", "convert", "--input", "*.fit"],
@@ -118,12 +108,12 @@ describe("config file integration", () => {
       }
     );
 
-    // Assert - Config should be loaded
+    // Assert
     expect(result.exitCode).toBeDefined();
   });
 
   it("should use default tolerance config from config file", async () => {
-    // Arrange - Create tolerance config file
+    // Arrange
     const toleranceConfigPath = join(tmpDir.path, "tolerance.json");
     const toleranceConfig = {
       time: { absolute: 2, unit: "seconds" },
@@ -133,19 +123,15 @@ describe("config file integration", () => {
       toleranceConfigPath,
       JSON.stringify(toleranceConfig, null, 2)
     );
-
-    // Create config file with defaultToleranceConfig
     const configPath = join(tmpDir.path, ".kaiordrc.json");
     const config = {
       defaultToleranceConfig: toleranceConfigPath,
     };
     await writeFile(configPath, JSON.stringify(config, null, 2));
-
-    // Create a minimal FIT file
     const inputPath = join(tmpDir.path, "workout.fit");
     await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
 
-    // Act - Run validate command
+    // Act
     const result = await execa(
       "node",
       ["dist/bin/kaiord.js", "validate", "--input", inputPath],
@@ -155,18 +141,17 @@ describe("config file integration", () => {
       }
     );
 
-    // Assert - Config should be loaded
+    // Assert
     expect(result.exitCode).toBeDefined();
   }, 15000); // Increased timeout for process spawning under load
 
   it("should work without config file", async () => {
-    // Arrange - No config file created
+    // Arrange
     const inputPath = join(tmpDir.path, "workout.fit");
     await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
-
     const outputPath = join(tmpDir.path, "workout.krd");
 
-    // Act - Run convert command
+    // Act
     const result = await execa(
       "node",
       [
@@ -183,21 +168,19 @@ describe("config file integration", () => {
       }
     );
 
-    // Assert - Should work without config file
+    // Assert
     expect(result.exitCode).toBeDefined();
   });
 
   it("should handle invalid config file gracefully", async () => {
-    // Arrange - Create invalid config file
+    // Arrange
     const configPath = join(tmpDir.path, ".kaiordrc.json");
     await writeFile(configPath, "invalid json");
-
     const inputPath = join(tmpDir.path, "workout.fit");
     await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
-
     const outputPath = join(tmpDir.path, "workout.krd");
 
-    // Act - Run convert command
+    // Act
     const result = await execa(
       "node",
       [
@@ -214,7 +197,7 @@ describe("config file integration", () => {
       }
     );
 
-    // Assert - Should handle invalid config gracefully
+    // Assert
     expect(result.exitCode).toBeDefined();
   }, 15000); // Increased timeout for process spawning under load
 });

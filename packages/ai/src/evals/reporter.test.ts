@@ -22,10 +22,13 @@ const failingResult: EvalResult = {
 
 describe("createReport", () => {
   it("should calculate pass rate and totals", () => {
+    // Arrange
     const results = [passingResult, failingResult];
 
+    // Act
     const report = createReport(results, "openai", "gpt-4");
 
+    // Assert
     expect(report.provider).toBe("openai");
     expect(report.model).toBe("gpt-4");
     expect(report.total).toBe(2);
@@ -36,27 +39,36 @@ describe("createReport", () => {
   });
 
   it("should compute 100% pass rate when all pass", () => {
+    // Arrange
     const results = [passingResult, { ...passingResult, id: "cycling-en-002" }];
 
+    // Act
     const report = createReport(results, "anthropic", "claude");
 
+    // Assert
     expect(report.passRate).toBe(100);
     expect(report.failed).toBe(0);
   });
 
   it("should compute 0% pass rate when all fail", () => {
+    // Arrange
     const results = [failingResult];
 
+    // Act
     const report = createReport(results, "openai", "gpt-4");
 
+    // Assert
     expect(report.passRate).toBe(0);
   });
 
   it("should group by category from id prefix", () => {
+    // Arrange
     const results = [passingResult, failingResult];
 
+    // Act
     const report = createReport(results, "openai", "gpt-4");
 
+    // Assert
     expect(report.byCategory).toStrictEqual({
       cycling: { total: 1, passed: 1 },
       running: { total: 1, passed: 0 },
@@ -64,10 +76,13 @@ describe("createReport", () => {
   });
 
   it("should group by language from id second segment", () => {
+    // Arrange
     const results = [passingResult, failingResult];
 
+    // Act
     const report = createReport(results, "openai", "gpt-4");
 
+    // Assert
     expect(report.byLanguage).toStrictEqual({
       en: { total: 1, passed: 1 },
       es: { total: 1, passed: 0 },
@@ -75,22 +90,29 @@ describe("createReport", () => {
   });
 
   it("should include ISO timestamp", () => {
+    // Arrange
+
+    // Act
     const report = createReport([passingResult], "openai", "gpt-4");
 
+    // Assert
     expect(report.timestamp).toMatch(/^\d{4}-\d{2}-\d{2}T/);
   });
 });
 
 describe("formatReport", () => {
   it("should format report as markdown-like text", () => {
+    // Arrange
     const report = createReport(
       [passingResult, failingResult],
       "openai",
       "gpt-4"
     );
 
+    // Act
     const output = formatReport(report);
 
+    // Assert
     expect(output).toContain("# Eval Report: openai / gpt-4");
     expect(output).toContain("Pass rate: 50% (1/2)");
     expect(output).toContain("[PASS] cycling-en-001");
@@ -102,20 +124,26 @@ describe("formatReport", () => {
   });
 
   it("should include duration in milliseconds for each result", () => {
+    // Arrange
     const report = createReport([passingResult], "anthropic", "claude");
 
+    // Act
     const output = formatReport(report);
 
+    // Assert
     expect(output).toContain("(1200ms)");
   });
 
   it("should indent error messages under failing results", () => {
+    // Arrange
     const report = createReport([failingResult], "openai", "gpt-4");
-
     const output = formatReport(report);
     const lines = output.split("\n");
+
+    // Act
     const errorLine = lines.find((l) => l.includes("Sport mismatch"));
 
+    // Assert
     expect(errorLine).toMatch(/^\s{4}/);
   });
 });

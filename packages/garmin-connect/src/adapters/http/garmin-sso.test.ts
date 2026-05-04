@@ -38,6 +38,7 @@ const createMockFetch = (
 
 describe("garminSso", () => {
   it("should complete the 5-step SSO flow and return tokens", async () => {
+    // Arrange
     const mockFetch = createMockFetch([
       { json: { consumer_key: "ck", consumer_secret: "cs" } },
       { text: "" },
@@ -47,8 +48,10 @@ describe("garminSso", () => {
       { json: JSON.parse(OAUTH2_RESPONSE) },
     ]);
 
+    // Act
     const result = await garminSso("user", "pass", mockLogger, mockFetch);
 
+    // Assert
     expect(result.oauth1.oauth_token).toBe("tok1");
     expect(result.oauth1.oauth_token_secret).toBe("sec1");
     expect(result.oauth2.access_token).toBe("bearer-token");
@@ -56,18 +59,25 @@ describe("garminSso", () => {
   });
 
   it("should throw when CSRF token is not found", async () => {
+    // Arrange
+
+    // Act
     const mockFetch = createMockFetch([
       { json: { consumer_key: "ck", consumer_secret: "cs" } },
       { text: "" },
       { text: "<html>no csrf here</html>" },
     ]);
 
+    // Assert
     await expect(
       garminSso("user", "pass", mockLogger, mockFetch)
     ).rejects.toThrow("CSRF token not found");
   });
 
   it("should throw when ticket is not found", async () => {
+    // Arrange
+
+    // Act
     const mockFetch = createMockFetch([
       { json: { consumer_key: "ck", consumer_secret: "cs" } },
       { text: "" },
@@ -75,13 +85,17 @@ describe("garminSso", () => {
       { text: "<html>no ticket here</html>" },
     ]);
 
+    // Assert
     await expect(
       garminSso("user", "pass", mockLogger, mockFetch)
     ).rejects.toThrow("Login failed: ticket not found");
   });
 
   it("should throw on account locked", async () => {
+    // Arrange
     const lockedHtml = 'var status="ACCOUNT_LOCKED"';
+
+    // Act
     const mockFetch = createMockFetch([
       { json: { consumer_key: "ck", consumer_secret: "cs" } },
       { text: "" },
@@ -89,6 +103,7 @@ describe("garminSso", () => {
       { text: lockedHtml },
     ]);
 
+    // Assert
     await expect(
       garminSso("user", "pass", mockLogger, mockFetch)
     ).rejects.toThrow("Account locked");

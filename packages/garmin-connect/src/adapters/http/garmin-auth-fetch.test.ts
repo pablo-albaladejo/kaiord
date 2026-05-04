@@ -32,11 +32,14 @@ describe("authFetch", () => {
   });
 
   it("should send request with Bearer token", async () => {
+    // Arrange
     mockFetch.mockResolvedValue(okResponse());
     const reader = createMockReader();
 
+    // Act
     await authFetch("https://api/data", undefined, reader, mockFetch);
 
+    // Assert
     expect(mockFetch).toHaveBeenCalledWith(
       "https://api/data",
       expect.objectContaining({
@@ -48,6 +51,7 @@ describe("authFetch", () => {
   });
 
   it("should refresh before request when not authenticated", async () => {
+    // Arrange
     let callCount = 0;
     const reader = createMockReader({
       isAuthenticated: vi.fn(() => {
@@ -57,12 +61,15 @@ describe("authFetch", () => {
     });
     mockFetch.mockResolvedValue(okResponse());
 
+    // Act
     await authFetch("https://api/data", undefined, reader, mockFetch);
 
+    // Assert
     expect(reader.refresh).toHaveBeenCalledTimes(1);
   });
 
   it("should refresh and retry on 401 with same generation", async () => {
+    // Arrange
     const reader = createMockReader({
       getGeneration: vi.fn(() => 1),
       getAccessToken: vi.fn(() => "refreshed-token"),
@@ -71,6 +78,7 @@ describe("authFetch", () => {
       .mockResolvedValueOnce(unauthorizedResponse())
       .mockResolvedValueOnce(okResponse({ ok: true }));
 
+    // Act
     const res = await authFetch(
       "https://api/data",
       undefined,
@@ -78,12 +86,14 @@ describe("authFetch", () => {
       mockFetch
     );
 
+    // Assert
     expect(reader.refresh).toHaveBeenCalledTimes(1);
     expect(res.ok).toBe(true);
     expect(mockFetch).toHaveBeenCalledTimes(2);
   });
 
   it("should skip refresh on 401 when generation changed", async () => {
+    // Arrange
     let gen = 1;
     const reader = createMockReader({
       getGeneration: vi.fn(() => gen),
@@ -97,6 +107,7 @@ describe("authFetch", () => {
       return okResponse();
     });
 
+    // Act
     const res = await authFetch(
       "https://api/data",
       undefined,
@@ -104,37 +115,50 @@ describe("authFetch", () => {
       mockFetch
     );
 
+    // Assert
     expect(reader.refresh).not.toHaveBeenCalled();
     expect(res.ok).toBe(true);
   });
 
   it("should throw on non-401 error responses", async () => {
+    // Arrange
     mockFetch.mockResolvedValue(errorResponse(500, "Internal Server Error"));
+
+    // Act
     const reader = createMockReader();
 
+    // Assert
     await expect(
       authFetch("https://api/data", undefined, reader, mockFetch)
     ).rejects.toThrow("API request failed");
   });
 
   it("should throw when not authenticated and no token", async () => {
+    // Arrange
+
+    // Act
     const reader = createMockReader({
       isAuthenticated: vi.fn(() => false),
       getAccessToken: vi.fn(() => undefined),
       refresh: vi.fn(async () => {}),
     });
 
+    // Assert
     await expect(
       authFetch("https://api/data", undefined, reader, mockFetch)
     ).rejects.toThrow("Not authenticated");
   });
 
   it("should throw after retry fails", async () => {
+    // Arrange
     const reader = createMockReader();
+
+    // Act
     mockFetch
       .mockResolvedValueOnce(unauthorizedResponse())
       .mockResolvedValueOnce(errorResponse(403, "Forbidden"));
 
+    // Assert
     await expect(
       authFetch("https://api/data", undefined, reader, mockFetch)
     ).rejects.toThrow("API request failed after token refresh");

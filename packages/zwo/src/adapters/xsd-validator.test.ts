@@ -12,17 +12,10 @@ describe("createZwiftValidator", () => {
       { timeout: 30_000 },
       async () => {
         // Arrange
-        // Simulate browser environment by setting window
         const originalWindow = global.window;
-        // @ts-expect-error - Simulating browser environment
         global.window = {};
-
-        // Reset modules to force re-evaluation of isBrowser
         vi.resetModules();
-
-        // Dynamically import to get fresh module with new isBrowser value
         const { createZwiftValidator } = await import("./xsd-validator");
-
         const validator = createZwiftValidator(logger);
         const validXml = `<?xml version="1.0" encoding="UTF-8"?>
 <workout_file>
@@ -32,16 +25,14 @@ describe("createZwiftValidator", () => {
     <SteadyState Duration="300" Power="0.75"/>
   </workout>
 </workout_file>`;
-
-        // Act
         const result = await validator(validXml);
-
-        // Assert
         expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
 
-        // Cleanup
+        // Act
         global.window = originalWindow;
+
+        // Assert
       }
     );
 
@@ -49,19 +40,11 @@ describe("createZwiftValidator", () => {
       "should use XSD validator in Node.js environment",
       { timeout: 30_000 },
       async () => {
-        // Skips cleanly under browser-mode runs; runs in Node CI.
         // Arrange
-        // Ensure we're in Node.js environment (window should be undefined)
         const originalWindow = global.window;
-        // @ts-expect-error - Ensuring Node.js environment
         global.window = undefined;
-
-        // Reset modules to force re-evaluation of isBrowser
         vi.resetModules();
-
-        // Dynamically import to get fresh module with new isBrowser value
         const { createZwiftValidator } = await import("./xsd-validator");
-
         const validator = createZwiftValidator(logger);
         const validXml = `<?xml version="1.0" encoding="UTF-8"?>
 <workout_file>
@@ -71,16 +54,14 @@ describe("createZwiftValidator", () => {
     <SteadyState Duration="300" Power="0.75"/>
   </workout>
 </workout_file>`;
-
-        // Act
         const result = await validator(validXml);
-
-        // Assert
         expect(result.valid).toBe(true);
         expect(result.errors).toHaveLength(0);
 
-        // Cleanup
+        // Act
         global.window = originalWindow;
+
+        // Assert
       }
     );
 
@@ -123,23 +104,18 @@ describe("createZwiftValidator", () => {
         it(`should detect browser environment when window is ${description}`, async () => {
           // Arrange
           const originalWindow = global.window;
-          // @ts-expect-error - Simulating browser environment
           global.window = value;
-
-          // Reset modules to force re-evaluation of isBrowser
           vi.resetModules();
-
-          // Act
           const { createZwiftValidator } = await import("./xsd-validator");
           const validator = createZwiftValidator(logger);
           const result = await validator(validXml);
-
-          // Assert - Should use well-formedness validator (browser behavior)
           expect(result.valid).toBe(true);
           expect(result.errors).toHaveLength(0);
 
-          // Cleanup
+          // Act
           global.window = originalWindow;
+
+          // Assert
         });
       });
 
@@ -149,23 +125,18 @@ describe("createZwiftValidator", () => {
         async () => {
           // Arrange
           const originalWindow = global.window;
-          // @ts-expect-error - Simulating Node.js environment
           global.window = undefined;
-
-          // Reset modules to force re-evaluation of isBrowser
           vi.resetModules();
-
-          // Act
           const { createZwiftValidator } = await import("./xsd-validator");
           const validator = createZwiftValidator(logger);
           const result = await validator(validXml);
-
-          // Assert - Should use XSD validator (Node.js behavior)
           expect(result.valid).toBe(true);
           expect(result.errors).toHaveLength(0);
 
-          // Cleanup
+          // Act
           global.window = originalWindow;
+
+          // Assert
         }
       );
 
@@ -175,44 +146,30 @@ describe("createZwiftValidator", () => {
         async () => {
           // Arrange
           const originalWindow = global.window;
-
-          // First, set to browser environment
-          // @ts-expect-error - Simulating browser environment
           global.window = {};
           vi.resetModules();
           const { createZwiftValidator: createBrowserValidator } =
             await import("./xsd-validator");
           const browserValidator = createBrowserValidator(logger);
-
-          // Then, change to Node.js environment WITHOUT module reload
-          // @ts-expect-error - Simulating Node.js environment
           global.window = undefined;
-          // Note: NOT calling vi.resetModules() here
-
-          // Act - Import again without reset (should get cached module)
           const { createZwiftValidator: createCachedValidator } =
             await import("./xsd-validator");
           const cachedValidator = createCachedValidator(logger);
-
-          // Assert - Both validators should behave the same (browser mode)
-          // because module wasn't reloaded
           const browserResult = await browserValidator(validXml);
           const cachedResult = await cachedValidator(validXml);
-
           expect(browserResult.valid).toBe(true);
           expect(cachedResult.valid).toBe(true);
-
-          // Now reset modules and verify Node.js behavior
           vi.resetModules();
           const { createZwiftValidator: createNodeValidator } =
             await import("./xsd-validator");
           const nodeValidator = createNodeValidator(logger);
           const nodeResult = await nodeValidator(validXml);
-
           expect(nodeResult.valid).toBe(true);
 
-          // Cleanup
+          // Act
           global.window = originalWindow;
+
+          // Assert
         }
       );
 
@@ -223,8 +180,6 @@ describe("createZwiftValidator", () => {
           // Arrange
           const originalWindow = global.window;
           const iterations = 5;
-
-          // Act & Assert - Test consistency across multiple reloads
           for (let i = 0; i < iterations; i++) {
             // Browser environment
             // @ts-expect-error - Simulating browser environment
@@ -247,8 +202,10 @@ describe("createZwiftValidator", () => {
             expect(nodeResult.valid).toBe(true);
           }
 
-          // Cleanup
+          // Act
           global.window = originalWindow;
+
+          // Assert
         }
       );
     });

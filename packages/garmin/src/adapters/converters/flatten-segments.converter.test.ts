@@ -38,25 +38,32 @@ const buildRepeatGroup = (
 describe("flattenSegmentsToSteps", () => {
   describe("empty segments", () => {
     it("should return empty array for empty segments", () => {
+      // Arrange
       const logger = createLogger();
 
+      // Act
       const result = flattenSegmentsToSteps([], logger);
 
+      // Assert
       expect(result).toStrictEqual([]);
     });
 
     it("should return empty array for segment with no workoutSteps", () => {
+      // Arrange
       const logger = createLogger();
       const segments: ParsedSegment[] = [{}];
 
+      // Act
       const result = flattenSegmentsToSteps(segments, logger);
 
+      // Assert
       expect(result).toStrictEqual([]);
     });
   });
 
   describe("executable steps", () => {
     it("should map a single executable step", () => {
+      // Arrange
       const logger = createLogger();
       const segments: ParsedSegment[] = [
         {
@@ -69,8 +76,10 @@ describe("flattenSegmentsToSteps", () => {
         },
       ];
 
+      // Act
       const result = flattenSegmentsToSteps(segments, logger);
 
+      // Assert
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
         stepIndex: 0,
@@ -80,6 +89,7 @@ describe("flattenSegmentsToSteps", () => {
     });
 
     it("should assign sequential stepIndex across multiple steps", () => {
+      // Arrange
       const logger = createLogger();
       const segments: ParsedSegment[] = [
         {
@@ -90,14 +100,17 @@ describe("flattenSegmentsToSteps", () => {
         },
       ];
 
+      // Act
       const result = flattenSegmentsToSteps(segments, logger);
 
+      // Assert
       expect(result).toHaveLength(2);
       expect(result[0]).toMatchObject({ stepIndex: 0 });
       expect(result[1]).toMatchObject({ stepIndex: 1 });
     });
 
     it("should handle multiple segments", () => {
+      // Arrange
       const logger = createLogger();
       const segments: ParsedSegment[] = [
         {
@@ -108,8 +121,10 @@ describe("flattenSegmentsToSteps", () => {
         },
       ];
 
+      // Act
       const result = flattenSegmentsToSteps(segments, logger);
 
+      // Assert
       expect(result).toHaveLength(2);
       expect(result[0]).toMatchObject({ stepIndex: 0 });
       expect(result[1]).toMatchObject({ stepIndex: 1 });
@@ -118,6 +133,7 @@ describe("flattenSegmentsToSteps", () => {
 
   describe("repeat groups", () => {
     it("should map a repeat group with executable steps", () => {
+      // Arrange
       const logger = createLogger();
       const segments: ParsedSegment[] = [
         {
@@ -132,11 +148,13 @@ describe("flattenSegmentsToSteps", () => {
           ],
         },
       ];
-
       const result = flattenSegmentsToSteps(segments, logger);
-
       expect(result).toHaveLength(1);
+
+      // Act
       const block = result[0];
+
+      // Assert
       expect("repeatCount" in block).toBe(true);
       if ("repeatCount" in block) {
         expect(block.repeatCount).toBe(5);
@@ -145,6 +163,7 @@ describe("flattenSegmentsToSteps", () => {
     });
 
     it("should correctly track stepIndex after repeat group", () => {
+      // Arrange
       const logger = createLogger();
       const segments: ParsedSegment[] = [
         {
@@ -160,12 +179,13 @@ describe("flattenSegmentsToSteps", () => {
           ],
         },
       ];
-
       const result = flattenSegmentsToSteps(segments, logger);
-
       expect(result).toHaveLength(2);
-      // After repeat group with 2 steps (index 0, 1), next step should be index 2
+
+      // Act
       const lastStep = result[1];
+
+      // Assert
       expect("stepIndex" in lastStep).toBe(true);
       if ("stepIndex" in lastStep) {
         expect(lastStep.stepIndex).toBe(2);
@@ -175,6 +195,7 @@ describe("flattenSegmentsToSteps", () => {
 
   describe("nested repeat groups", () => {
     it("should flatten nested repeat groups and log a warning", () => {
+      // Arrange
       const logger = createLogger();
       const nestedGroup = buildRepeatGroup(
         [buildExecutableStep({ endConditionValue: 30 })],
@@ -186,15 +207,17 @@ describe("flattenSegmentsToSteps", () => {
           workoutSteps: [outerGroup],
         },
       ];
-
       const result = flattenSegmentsToSteps(segments, logger);
-
       expect(result).toHaveLength(1);
       expect(logger.warn).toHaveBeenCalledWith(
         "Nested repeat groups are flattened",
         { iterations: 2 }
       );
+
+      // Act
       const block = result[0];
+
+      // Assert
       if ("repeatCount" in block) {
         expect(block.repeatCount).toBe(3);
         // Nested group steps should be flattened into outer
@@ -205,6 +228,7 @@ describe("flattenSegmentsToSteps", () => {
 
   describe("mixed steps", () => {
     it("should handle mix of executable steps and repeat groups", () => {
+      // Arrange
       const logger = createLogger();
       const segments: ParsedSegment[] = [
         {
@@ -228,17 +252,13 @@ describe("flattenSegmentsToSteps", () => {
         },
       ];
 
+      // Act
       const result = flattenSegmentsToSteps(segments, logger);
 
+      // Assert
       expect(result).toHaveLength(3);
-
-      // First step: warmup
       expect(result[0]).toMatchObject({ stepIndex: 0, intensity: "warmup" });
-
-      // Second: repeat block
       expect("repeatCount" in result[1]).toBe(true);
-
-      // Third step: cooldown (stepIndex should be 3: warmup=0, repeat inner=1,2, cooldown=3)
       expect(result[2]).toMatchObject({ stepIndex: 3, intensity: "cooldown" });
     });
   });

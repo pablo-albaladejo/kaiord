@@ -33,6 +33,7 @@ describe("listCommand", () => {
   });
 
   it("should list workouts as table by default", async () => {
+    // Arrange
     const logger = createMockLogger();
     const mockService = { list: vi.fn().mockResolvedValue(mockWorkouts) };
     const mockAuth = { is_authenticated: vi.fn().mockReturnValue(true) };
@@ -41,18 +42,21 @@ describe("listCommand", () => {
       service: mockService,
     } as never);
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-
     const result = await listCommand({}, logger);
-
     expect(result).toBe(ExitCode.SUCCESS);
     expect(mockService.list).toHaveBeenCalledWith({ limit: 20, offset: 0 });
     expect(consoleSpy).toHaveBeenCalled();
     const output = consoleSpy.mock.calls[0][0] as string;
     expect(output).toContain("Morning Run");
+
+    // Act
     consoleSpy.mockRestore();
+
+    // Assert
   });
 
   it("should output JSON when --json flag is set", async () => {
+    // Arrange
     const logger = createMockLogger();
     const mockService = { list: vi.fn().mockResolvedValue(mockWorkouts) };
     const mockAuth = { is_authenticated: vi.fn().mockReturnValue(true) };
@@ -61,17 +65,20 @@ describe("listCommand", () => {
       service: mockService,
     } as never);
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-
     const result = await listCommand({ json: true }, logger);
-
     expect(result).toBe(ExitCode.SUCCESS);
     expect(consoleSpy).toHaveBeenCalledWith(
       JSON.stringify(mockWorkouts, null, 2)
     );
+
+    // Act
     consoleSpy.mockRestore();
+
+    // Assert
   });
 
   it("should return AUTH_ERROR when not authenticated", async () => {
+    // Arrange
     const logger = createMockLogger();
     const mockAuth = { is_authenticated: vi.fn().mockReturnValue(false) };
     vi.mocked(createCliGarminClient).mockResolvedValue({
@@ -79,8 +86,10 @@ describe("listCommand", () => {
       service: {} as never,
     } as never);
 
+    // Act
     const result = await listCommand({}, logger);
 
+    // Assert
     expect(result).toBe(ExitCode.AUTH_ERROR);
     expect(logger.error).toHaveBeenCalledWith(
       "Not authenticated. Run: kaiord garmin login"
@@ -88,6 +97,7 @@ describe("listCommand", () => {
   });
 
   it("should return AUTH_ERROR on ServiceAuthError", async () => {
+    // Arrange
     const logger = createMockLogger();
     const mockService = {
       list: vi.fn().mockRejectedValue(new ServiceAuthError("Expired")),
@@ -98,8 +108,10 @@ describe("listCommand", () => {
       service: mockService,
     } as never);
 
+    // Act
     const result = await listCommand({}, logger);
 
+    // Assert
     expect(result).toBe(ExitCode.AUTH_ERROR);
     expect(logger.error).toHaveBeenCalledWith(
       "Authentication expired. Run: kaiord garmin login"

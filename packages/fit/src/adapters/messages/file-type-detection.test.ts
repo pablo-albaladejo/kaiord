@@ -114,7 +114,7 @@ describe("File type detection", () => {
 
   describe("file type priority", () => {
     it("should prioritize workout over activity when both present", () => {
-      // Arrange - Both workout and session messages
+      // Arrange
       const messages: FitMessages = {
         [fitMessageKeySchema.enum.fileIdMesgs]: [
           {
@@ -198,7 +198,7 @@ describe("File type detection", () => {
     });
 
     it("should detect activity even with FILE_ID type 6", () => {
-      // Arrange - FILE_ID type 6 but sessionMesgs present means detected as activity
+      // Arrange
       const messages: FitMessages = {
         [fitMessageKeySchema.enum.fileIdMesgs]: [
           {
@@ -213,7 +213,7 @@ describe("File type detection", () => {
       // Act
       const krd = mapMessagesToKRD(messages, logger);
 
-      // Assert - File is detected as recorded_activity (due to sessionMesgs)
+      // Assert
       expect(krd.type).toBe(fileTypeSchema.enum.recorded_activity);
     });
 

@@ -30,36 +30,49 @@ import ts from "typescript";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolve(__dirname, "..");
 
-// Trivia kinds the scanner emits between meaningful tokens. Filtered
-// out before comparison so comment-only diffs pass cleanly.
-const TRIVIA_KINDS = new Set([
-  ts.SyntaxKind.SingleLineCommentTrivia,
-  ts.SyntaxKind.MultiLineCommentTrivia,
-  ts.SyntaxKind.NewLineTrivia,
-  ts.SyntaxKind.WhitespaceTrivia,
-  ts.SyntaxKind.ShebangTrivia,
-  ts.SyntaxKind.ConflictMarkerTrivia,
-]);
-
+// AST-driven tokenization: parses the source into a TypeScript AST and
+// walks the terminal tokens (non-trivia leaves). This is robust against
+// template-literal substitution context (where a raw scanner without
+// `reScanTemplateToken` mis-tokenizes everything after the first `${...}`)
+// because the parser maintains the necessary state internally. Comment
+// trivia is naturally absent from terminal tokens, so comment-only edits
+// produce identical token sequences.
 export function scanTokens(source) {
-  const tokens = [];
-  const scanner = ts.createScanner(
+  const sf = ts.createSourceFile(
+    "in.tsx",
+    source,
     ts.ScriptTarget.Latest,
-    /* skipTrivia */ false,
-    ts.LanguageVariant.JSX,
-    source
+    /* setParentNodes */ false,
+    ts.ScriptKind.TSX
   );
-  let kind = scanner.scan();
-  while (kind !== ts.SyntaxKind.EndOfFileToken) {
-    if (!TRIVIA_KINDS.has(kind)) {
-      tokens.push({
-        kind,
-        text: scanner.getTokenText(),
-        line: source.slice(0, scanner.getTokenStart()).split(/\n/).length,
-      });
+  const tokens = [];
+  function walk(node) {
+    // JSDoc nodes carry doc-comment payloads (TS preserves them as AST
+    // descendants under JSDocComment containers). Skip the entire
+    // subtree — they are conceptually trivia for our purposes.
+    if (
+      node.kind === ts.SyntaxKind.JSDocComment ||
+      node.kind === ts.SyntaxKind.JSDoc
+    ) {
+      return;
     }
-    kind = scanner.scan();
+    if (
+      node.getChildCount(sf) === 0 &&
+      node.kind !== ts.SyntaxKind.SourceFile &&
+      node.kind !== ts.SyntaxKind.EndOfFileToken
+    ) {
+      const start = node.getStart(sf);
+      const end = node.getEnd();
+      tokens.push({
+        kind: node.kind,
+        text: source.slice(start, end),
+        line: source.slice(0, start).split(/\n/).length,
+      });
+      return;
+    }
+    node.forEachChild(walk);
   }
+  walk(sf);
   return tokens;
 }
 

@@ -4,10 +4,13 @@ import { convertPaceTargetToTcx } from "./pace.converter";
 
 describe("convertPaceTargetToTcx", () => {
   it("should convert zone unit to Speed_t with same low and high", () => {
+    // Arrange
     const value = { unit: "zone", value: 3.5 };
 
+    // Act
     const result = convertPaceTargetToTcx(value);
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Speed_t",
       SpeedZone: {
@@ -19,10 +22,13 @@ describe("convertPaceTargetToTcx", () => {
   });
 
   it("should convert range unit to Speed_t with min and max", () => {
+    // Arrange
     const value = { unit: "range", min: 3.0, max: 4.5 };
 
+    // Act
     const result = convertPaceTargetToTcx(value);
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Speed_t",
       SpeedZone: {
@@ -34,10 +40,13 @@ describe("convertPaceTargetToTcx", () => {
   });
 
   it("should convert mps unit to Speed_t with same low and high", () => {
+    // Arrange
     const value = { unit: "mps", value: 4.2 };
 
+    // Act
     const result = convertPaceTargetToTcx(value);
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Speed_t",
       SpeedZone: {
@@ -49,18 +58,24 @@ describe("convertPaceTargetToTcx", () => {
   });
 
   it("should return None_t for unsupported unit", () => {
+    // Arrange
     const value = { unit: "unknown", value: 5 };
 
+    // Act
     const result = convertPaceTargetToTcx(value);
 
+    // Assert
     expect(result).toStrictEqual({ "@_xsi:type": "None_t" });
   });
 
   it("should handle zone unit with undefined value", () => {
+    // Arrange
     const value = { unit: "zone" };
 
+    // Act
     const result = convertPaceTargetToTcx(value);
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Speed_t",
       SpeedZone: {
@@ -72,10 +87,13 @@ describe("convertPaceTargetToTcx", () => {
   });
 
   it("should handle range unit with undefined min and max", () => {
+    // Arrange
     const value = { unit: "range" };
 
+    // Act
     const result = convertPaceTargetToTcx(value);
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Speed_t",
       SpeedZone: {
@@ -87,10 +105,13 @@ describe("convertPaceTargetToTcx", () => {
   });
 
   it("should handle fast running pace", () => {
+    // Arrange
     const value = { unit: "mps", value: 5.56 };
 
+    // Act
     const result = convertPaceTargetToTcx(value);
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Speed_t",
       SpeedZone: {
@@ -102,10 +123,13 @@ describe("convertPaceTargetToTcx", () => {
   });
 
   it("should handle slow walking pace", () => {
+    // Arrange
     const value = { unit: "mps", value: 1.2 };
 
+    // Act
     const result = convertPaceTargetToTcx(value);
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Speed_t",
       SpeedZone: {
