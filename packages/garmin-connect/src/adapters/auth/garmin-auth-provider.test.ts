@@ -1,7 +1,8 @@
-import { describe, it, expect, vi } from "vitest";
-import { createGarminAuthProvider } from "./garmin-auth-provider";
-import type { TokenManager } from "../token/token-manager.types";
 import type { Logger } from "@kaiord/core";
+import { describe, expect, it, vi } from "vitest";
+
+import type { TokenManager } from "../token/token-manager.types";
+import { createGarminAuthProvider } from "./garmin-auth-provider";
 
 vi.mock("../http/garmin-sso", () => ({
   garminSso: vi.fn(async () => ({

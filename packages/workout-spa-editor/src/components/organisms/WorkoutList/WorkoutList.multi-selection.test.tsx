@@ -12,6 +12,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { WorkoutList } from "./WorkoutList";
 
@@ -39,7 +40,6 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
   describe("Multi-selection with duplicate stepIndex values", () => {
     it("should independently add main workout step to selection without selecting block steps with same stepIndex", async () => {
       // Arrange
-      const user = userEvent.setup();
       const onToggleStepSelection = vi.fn();
 
       // Create workout with duplicate stepIndex values:

@@ -1,5 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { useWorkoutListDnd } from "./use-workout-list-dnd";
 
@@ -571,7 +572,7 @@ describe("useWorkoutListDnd", () => {
 
       // Act
       const { result } = renderHook(() => useWorkoutListDnd(workout));
-      const { sortableIds, generateStepId } = result.current;
+      const { sortableIds } = result.current;
 
       // Assert - Both should be empty
       expect(sortableIds).toEqual([]);
@@ -695,15 +696,6 @@ describe("useWorkoutListDnd", () => {
       };
 
       const { result } = renderHook(() => useWorkoutListDnd(workout));
-
-      // Act - Simulate drag start
-      const dragStartEvent = {
-        active: { id: "block-0", data: { current: undefined } },
-        over: null,
-        delta: { x: 0, y: 0 },
-        activatorEvent: new MouseEvent("mousedown"),
-        collisions: null,
-      };
 
       // Assert - The hook should provide the active ID for DragOverlay
       expect(result.current.sortableIds).toContain("block-0");

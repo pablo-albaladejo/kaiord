@@ -6,9 +6,9 @@
  * and clear the table between tests — same pattern as LibraryPage tests.
  */
 
-import { useState } from "react";
 import { screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { useState } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { db } from "../../../adapters/dexie/dexie-database";

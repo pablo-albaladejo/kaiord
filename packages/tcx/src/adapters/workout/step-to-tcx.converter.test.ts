@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
 import type { Logger, WorkoutStep } from "@kaiord/core";
+import { describe, expect, it, vi } from "vitest";
+
 import { convertStepToTcx } from "./step-to-tcx.converter";
 
 const createMockLogger = (): Logger => ({

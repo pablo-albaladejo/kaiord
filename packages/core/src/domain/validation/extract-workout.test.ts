@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import type { KRD } from "../schemas/krd";
 import { KrdValidationError } from "../types/errors";
 import { extractWorkout } from "./extract-workout";

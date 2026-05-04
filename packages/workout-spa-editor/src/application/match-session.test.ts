@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 
+import type { CoachingRepository } from "../ports/persistence-port";
+import type { WorkoutRepository } from "../ports/persistence-port";
 import { createInMemorySessionMatchRepository } from "../test-utils/in-memory-session-match-repository";
+import type { WorkoutRecord } from "../types/calendar-record";
+import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import {
   CoachingActivityNotFoundError,
   CrossProfileMatchError,
   SessionAlreadyMatchedError,
   WorkoutNotFoundError,
 } from "../types/session-match-errors";
-import type { CoachingActivityRecord } from "../types/coaching-activity-record";
-import type { CoachingRepository } from "../ports/persistence-port";
-import type { WorkoutRepository } from "../ports/persistence-port";
-import type { WorkoutRecord } from "../types/calendar-record";
 import { matchSession } from "./match-session";
 
 const stubActivity = (

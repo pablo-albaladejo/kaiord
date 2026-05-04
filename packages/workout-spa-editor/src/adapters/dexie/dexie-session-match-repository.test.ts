@@ -2,8 +2,8 @@ import "fake-indexeddb/auto";
 
 import { beforeEach, describe, expect, it } from "vitest";
 
-import { SessionAlreadyMatchedError } from "../../types/session-match-errors";
 import type { SessionMatch } from "../../types/session-match";
+import { SessionAlreadyMatchedError } from "../../types/session-match-errors";
 import { KaiordDatabase } from "./dexie-database";
 import { createDexieSessionMatchRepository } from "./dexie-session-match-repository";
 

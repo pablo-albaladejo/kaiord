@@ -1,10 +1,11 @@
 import "fake-indexeddb/auto";
+
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { hydrateUIWorkout } from "../../store/hydrate-ui-workout";
 import type { WorkoutRecord } from "../../types/calendar-schemas";
-import { isRepetitionBlock } from "../../types/krd";
 import type { KRD, Workout } from "../../types/krd";
+import { isRepetitionBlock } from "../../types/krd";
 import type { WorkoutTemplate } from "../../types/workout-library";
 import { KaiordDatabase } from "./dexie-database";
 import { createDexieTemplateRepository } from "./dexie-template-repository";

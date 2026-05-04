@@ -141,80 +141,6 @@ export default tseslint.config(
     },
   },
   {
-    // Test files: basic linting without type checking
-    // Includes .tsx now (test-conventions-should-aaa PR-1 §1.4); without
-    // this extension, *.test.tsx would fall through to the SPA *.tsx
-    // block (max-lines 80, max-lines-per-function 60, react-hooks rules)
-    // and produce a flood of new lint errors.
-    files: [
-      "**/*.test.ts",
-      "**/*.test.tsx",
-      "**/*.spec.ts",
-      "**/tests/**/*.{ts,tsx}",
-    ],
-    languageOptions: {
-      parser: tseslint.parser,
-      // Disable type-aware parsing on test files — they are not in the
-      // package tsconfig's `include`, so projectService=true (inherited
-      // from earlier blocks via flat-config merging) produces "file not
-      // found by project service" parse errors. Without this override
-      // the global-ignores-removal in the change above produces a flood
-      // of new errors. test-conventions-should-aaa PR-1.
-      parserOptions: {
-        projectService: false,
-        project: null,
-      },
-    },
-    plugins: {
-      "@typescript-eslint": tseslint.plugin,
-      "simple-import-sort": simpleImportSort,
-      vitest,
-    },
-    rules: {
-      "max-lines": "off",
-      "max-lines-per-function": "off",
-      "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
-      // Test-files-specific relaxations. These rules exist on production
-      // code; on tests they fire on pre-existing patterns that pre-date
-      // the test-conventions-should-aaa change. Tightening them is out
-      // of scope for this migration.
-      "simple-import-sort/imports": "off",
-      "simple-import-sort/exports": "off",
-      "@typescript-eslint/no-non-null-asserted-optional-chain": "off",
-      // Allow `_`-prefixed destructured discards in tests
-      // (`const { x: _, ...rest } = obj` is a common test idiom).
-      "@typescript-eslint/no-unused-vars": [
-        "error",
-        {
-          argsIgnorePattern: "^_",
-          varsIgnorePattern: "^_",
-          destructuredArrayIgnorePattern: "^_",
-        },
-      ],
-      "no-magic-numbers": [
-        "warn",
-        {
-          ignore: [0, 1, 2, -1, 100, 200, 400, 404, 500],
-          ignoreArrayIndexes: true,
-          ignoreDefaultValues: true,
-          enforceConst: true,
-          detectObjects: false,
-        },
-      ],
-      // test-conventions-should-aaa change: title-rule dogma at IDE
-      // time. Severity is 'warn' during the migration window per D2
-      // (closes the IDE/pre-commit/CI parity gap that 'off' would
-      // create). Flipped to 'error' in PR-6 §6.3.
-      "vitest/valid-title": [
-        "warn",
-        {
-          mustMatch: { it: ["^should "] },
-        },
-      ],
-    },
-  },
-  {
     // Frontend package: relaxed 60 lines per function for React components
     files: [
       "packages/workout-spa-editor/**/*.ts",
@@ -463,5 +389,69 @@ export default tseslint.config(
       "no-restricted-syntax": "off",
     },
   },
-  ...adapterBoundaryRules()
+  ...adapterBoundaryRules(),
+  {
+    // Test files: relaxed test-specific rules + the vitest plugin's
+    // `valid-title` rule (test-conventions-should-aaa change PR-1).
+    //
+    // Placed AFTER every production-code block so that, in flat-config
+    // cascade order, this block's relaxations win for any *.test.{ts,tsx}
+    // / *.spec.ts file that ALSO matched a stricter production block
+    // (the SPA `*.tsx` block, the pages block, the core/backend blocks).
+    // Tests are still linted by the production blocks above — only the
+    // rules listed here are overridden.
+    files: [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/tests/**/*.{ts,tsx}",
+    ],
+    languageOptions: {
+      parser: tseslint.parser,
+      // Test files are not in the package tsconfig's `include`, so
+      // `projectService: true` (inherited from earlier blocks) produces
+      // "file not found by project service" parse errors. Disable
+      // type-aware parsing for tests.
+      parserOptions: {
+        projectService: false,
+        project: null,
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tseslint.plugin,
+      "simple-import-sort": simpleImportSort,
+      vitest,
+    },
+    rules: {
+      // Production-code structural limits don't apply to tests:
+      // describe/it bodies are naturally branchy and longer than
+      // production functions. Same precedent the original test-files
+      // block established for max-lines/max-lines-per-function.
+      "max-lines": "off",
+      "max-lines-per-function": "off",
+      complexity: "off",
+      "max-depth": "off",
+      "max-params": "off",
+      "no-magic-numbers": [
+        "warn",
+        {
+          ignore: [0, 1, 2, -1, 100, 200, 400, 404, 500],
+          ignoreArrayIndexes: true,
+          ignoreDefaultValues: true,
+          enforceConst: true,
+          detectObjects: false,
+        },
+      ],
+      // test-conventions-should-aaa change: title-rule dogma at IDE
+      // time. Severity is 'warn' during the migration window per D2
+      // (closes the IDE/pre-commit/CI parity gap that 'off' would
+      // create). Flipped to 'error' in PR-6 §6.3.
+      "vitest/valid-title": [
+        "warn",
+        {
+          mustMatch: { it: ["^should "] },
+        },
+      ],
+    },
+  }
 );

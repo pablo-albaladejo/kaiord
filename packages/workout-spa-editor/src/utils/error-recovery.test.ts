@@ -5,6 +5,7 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
+
 import type { KRD } from "../types/krd";
 import { withErrorRecovery, withErrorRecoverySync } from "./error-recovery";
 

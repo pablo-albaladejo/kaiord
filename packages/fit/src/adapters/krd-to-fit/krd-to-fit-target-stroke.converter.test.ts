@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import type { WorkoutStep } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
+
 import { convertStrokeTarget } from "./krd-to-fit-target-stroke.converter";
 
 describe("convertStrokeTarget", () => {

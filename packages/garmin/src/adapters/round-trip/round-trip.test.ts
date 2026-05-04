@@ -1,8 +1,10 @@
-import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+
 import type { Workout } from "@kaiord/core";
 import { createToleranceChecker, isRepetitionBlock } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
+
 import { convertGarminToKRD } from "../converters/garmin-to-krd.converter";
 import { convertKRDToGarmin } from "../converters/krd-to-garmin.converter";
 

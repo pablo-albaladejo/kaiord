@@ -6,6 +6,7 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import { pasteStepAction } from "./paste-step-action";
 

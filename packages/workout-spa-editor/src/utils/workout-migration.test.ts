@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import type { RepetitionBlock, Workout } from "../types/krd";
 import { migrateRepetitionBlocks } from "./workout-migration";
 

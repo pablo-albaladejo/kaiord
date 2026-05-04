@@ -1,5 +1,6 @@
 import { act, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { useWorkoutStore } from "../../store/workout-store";
 import { renderWithProviders } from "../../test-utils";
 import type { KRD, Workout, WorkoutStep } from "../../types/krd";

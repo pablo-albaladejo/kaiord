@@ -1,6 +1,7 @@
-import { expandFileUpload } from "./helpers/expand-file-upload";
-import { expect, test } from "./fixtures/base";
 import type { Page } from "@playwright/test";
+
+import { expect, test } from "./fixtures/base";
+import { expandFileUpload } from "./helpers/expand-file-upload";
 
 /**
  * E2E Tests for Button Improvements

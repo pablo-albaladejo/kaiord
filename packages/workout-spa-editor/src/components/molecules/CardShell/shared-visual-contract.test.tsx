@@ -1,12 +1,12 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
-import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import type { CoachingActivity } from "../../../types/coaching-activity";
 import { CoachingActivityCard } from "../CoachingCard/CoachingActivityCard";
 import {
-  MatchedSessionCard,
   type MatchedSession,
+  MatchedSessionCard,
 } from "../MatchedSessionCard/MatchedSessionCard";
 import { WorkoutCard } from "../WorkoutCard/WorkoutCard";
 

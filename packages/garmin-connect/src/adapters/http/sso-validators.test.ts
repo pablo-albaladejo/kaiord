@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
-import { checkAccountLocked, checkPageTitle } from "./sso-validators";
 import type { Logger } from "@kaiord/core";
+import { describe, expect, it, vi } from "vitest";
+
+import { checkAccountLocked, checkPageTitle } from "./sso-validators";
 
 const mockLogger: Logger = {
   debug: vi.fn(),

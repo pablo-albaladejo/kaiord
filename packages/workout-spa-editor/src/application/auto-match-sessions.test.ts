@@ -1,12 +1,12 @@
 import { describe, expect, it } from "vitest";
 
-import { createInMemorySessionMatchRepository } from "../test-utils/in-memory-session-match-repository";
-import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { CoachingRepository } from "../ports/persistence-port";
-import type { SessionMatch } from "../types/session-match";
-import type { SessionMatchRepository } from "../ports/session-match-repository";
-import type { WorkoutRecord } from "../types/calendar-record";
 import type { WorkoutRepository } from "../ports/persistence-port";
+import type { SessionMatchRepository } from "../ports/session-match-repository";
+import { createInMemorySessionMatchRepository } from "../test-utils/in-memory-session-match-repository";
+import type { WorkoutRecord } from "../types/calendar-record";
+import type { CoachingActivityRecord } from "../types/coaching-activity-record";
+import type { SessionMatch } from "../types/session-match";
 import { autoMatchSessions } from "./auto-match-sessions";
 
 const a = (

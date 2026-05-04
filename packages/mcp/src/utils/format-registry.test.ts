@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { FORMAT_REGISTRY, detectFormatFromPath } from "./format-registry";
+
+import { detectFormatFromPath, FORMAT_REGISTRY } from "./format-registry";
 
 describe("FORMAT_REGISTRY", () => {
   it("should have entries for all five formats", () => {

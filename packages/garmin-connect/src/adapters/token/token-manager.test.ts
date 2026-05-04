@@ -1,8 +1,9 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { ServiceApiError } from "@kaiord/core";
-import { createTokenManager } from "./token-manager";
 import type { Logger, TokenStore } from "@kaiord/core";
+import { ServiceApiError } from "@kaiord/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { OAuth1Token, OAuth2Token } from "../http/types";
+import { createTokenManager } from "./token-manager";
 import type { RefreshFn } from "./token-manager.types";
 
 const OAUTH1: OAuth1Token = {

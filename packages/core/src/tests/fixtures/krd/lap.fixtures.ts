@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
+
 import type { KRDLap } from "../../../domain/schemas/krd";
 
 export const buildKRDLap = new Factory<KRDLap>()

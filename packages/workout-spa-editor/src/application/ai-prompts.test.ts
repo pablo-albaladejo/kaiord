@@ -1,10 +1,10 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  PROMPT_VERSION,
-  SPANISH_ABBREVIATION_DICTIONARY,
   buildSystemPrompt,
   buildUserPrompt,
+  PROMPT_VERSION,
+  SPANISH_ABBREVIATION_DICTIONARY,
 } from "./ai-prompts";
 
 describe("PROMPT_VERSION", () => {

@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
+
 import type { Duration } from "../../../domain/schemas/duration";
 
 const DURATION_TYPES = [

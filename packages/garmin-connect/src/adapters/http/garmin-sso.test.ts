@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
-import { garminSso } from "./garmin-sso";
 import type { Logger } from "@kaiord/core";
+import { describe, expect, it, vi } from "vitest";
+
+import { garminSso } from "./garmin-sso";
 
 const mockLogger: Logger = {
   debug: vi.fn(),
@@ -8,11 +9,6 @@ const mockLogger: Logger = {
   warn: vi.fn(),
   error: vi.fn(),
 };
-
-const CONSUMER_JSON = JSON.stringify({
-  consumer_key: "test-key",
-  consumer_secret: "test-secret",
-});
 
 const CSRF_HTML = '<input name="_csrf" value="csrf-token-123" />';
 const TICKET_HTML = 'ticket=ST-12345-abc"';

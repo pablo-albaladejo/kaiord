@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest";
-import { fileTypeSchema } from "@kaiord/core";
 import type { KRD } from "@kaiord/core";
+import { fileTypeSchema } from "@kaiord/core";
 import { buildKRD } from "@kaiord/core/test-utils";
 import { buildKRDMetadata } from "@kaiord/core/test-utils";
 import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it } from "vitest";
+
 import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
 import { createFitMessages } from "./messages.mapper";
 

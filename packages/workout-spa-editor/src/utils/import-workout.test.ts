@@ -6,6 +6,7 @@
 
 import type { KRD } from "@kaiord/core";
 import { describe, expect, it, vi } from "vitest";
+
 import { ImportError, importWorkout } from "./import-workout";
 
 /**

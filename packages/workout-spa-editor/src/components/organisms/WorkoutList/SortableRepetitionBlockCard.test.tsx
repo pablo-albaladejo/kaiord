@@ -2,6 +2,7 @@ import { DndContext } from "@dnd-kit/core";
 import { SortableContext } from "@dnd-kit/sortable";
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+
 import { expectNoReactWarnings } from "../../../test-utils/console-spy";
 import type { RepetitionBlock } from "../../../types/krd";
 import { SortableRepetitionBlockCard } from "./SortableRepetitionBlockCard";

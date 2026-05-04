@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
+
 import type { KRD } from "../../../domain/schemas/krd";
 import { buildKRDEvent } from "./event.fixtures";
 import { buildKRDLap } from "./lap.fixtures";

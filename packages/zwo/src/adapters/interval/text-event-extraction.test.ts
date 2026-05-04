@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { mapFreeRideToKrd } from "./free-ride.mapper";
 import { mapIntervalsTToKrd } from "./intervals-t.mapper";
 import { mapRampToKrd } from "./ramp.mapper";

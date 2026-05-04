@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
+
 import {
   createToleranceChecker,
   DEFAULT_TOLERANCES,
-  toleranceConfigSchema,
   type ToleranceConfig,
+  toleranceConfigSchema,
 } from "./tolerance-checker";
 
 describe("createToleranceChecker", () => {

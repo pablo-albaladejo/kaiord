@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
+
 import type { KRDEvent } from "../../../domain/schemas/krd";
 
 export const buildKRDEvent = new Factory<KRDEvent>()

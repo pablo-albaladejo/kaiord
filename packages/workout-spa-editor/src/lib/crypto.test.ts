@@ -1,5 +1,6 @@
-import { describe, it, expect } from "vitest";
-import { encrypt, decrypt } from "./crypto";
+import { describe, expect, it } from "vitest";
+
+import { decrypt, encrypt } from "./crypto";
 
 describe("crypto", () => {
   const passphrase = "test-passphrase-123";

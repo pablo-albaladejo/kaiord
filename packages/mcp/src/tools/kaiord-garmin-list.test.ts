@@ -1,5 +1,5 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
 import type { Logger } from "@kaiord/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockList = vi.fn();
 const mockIsAuthenticated = vi.fn();

@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
+
 import type { RepetitionBlock } from "../../../domain/schemas/workout";
 import { buildWorkoutStep } from "./workout-step.fixtures";
 

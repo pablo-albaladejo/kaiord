@@ -1,7 +1,7 @@
 import { assert, describe, expect, it } from "vitest";
 
-import { isRepetitionBlock, isWorkoutStep } from "../types/krd";
 import type { KRD, Workout } from "../types/krd";
+import { isRepetitionBlock, isWorkoutStep } from "../types/krd";
 import { hydrateUIWorkout } from "./hydrate-ui-workout";
 import { asItemId } from "./providers/item-id";
 

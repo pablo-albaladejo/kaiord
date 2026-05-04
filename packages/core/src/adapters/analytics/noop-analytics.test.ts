@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { createNoopAnalytics } from "./noop-analytics";
 
 describe("createNoopAnalytics", () => {

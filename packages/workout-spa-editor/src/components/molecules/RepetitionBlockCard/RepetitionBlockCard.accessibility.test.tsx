@@ -13,6 +13,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+
 import type { RepetitionBlock } from "../../../types/krd";
 import { RepetitionBlockCard } from "./RepetitionBlockCard";
 
@@ -100,7 +101,6 @@ describe("RepetitionBlockCard - Accessibility", () => {
     it("should prevent default browser behavior for Backspace", async () => {
       // Arrange
       const handleDelete = vi.fn();
-      const user = userEvent.setup();
       render(<RepetitionBlockCard block={mockBlock} onDelete={handleDelete} />);
       const blockCard = screen.getByTestId("repetition-block-card");
 

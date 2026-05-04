@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import type { Target } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
+
 import { buildFitTargetData } from "../../tests/fixtures/fit-target.fixtures";
 import { convertFitTarget } from "./target.converter";
 

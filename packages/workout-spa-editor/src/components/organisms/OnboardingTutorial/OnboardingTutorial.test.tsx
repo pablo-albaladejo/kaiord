@@ -11,10 +11,11 @@
 
 import { waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { renderWithProviders, screen, userEvent } from "../../../test-utils";
 import {
-  OnboardingTutorial,
   hasCompletedOnboarding,
+  OnboardingTutorial,
   resetOnboarding,
   type TutorialStep,
 } from "./OnboardingTutorial";

@@ -1,5 +1,7 @@
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import type { Page } from "@playwright/test";
+
 import { expect, test } from "./fixtures/base";
+import { expandFileUpload } from "./helpers/expand-file-upload";
 
 /**
  * Critical Path: Mobile Responsiveness and Touch Interactions
@@ -302,7 +304,7 @@ test.describe("Workout Actions Overflow", () => {
     },
   };
 
-  async function loadWorkout(page: import("@playwright/test").Page) {
+  async function loadWorkout(page: Page) {
     await page.goto("/workout/new");
     await expandFileUpload(page);
     const fileInput = page.locator('input[type="file"]');

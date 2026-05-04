@@ -1,8 +1,10 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
-import { FormatDropdown } from "./FormatDropdown";
+
+import type { WorkoutFileFormat } from "../../../utils/file-format-detector";
 import type { FormatOption } from "./format-options";
+import { FormatDropdown } from "./FormatDropdown";
 
 const mockFormatOptions: FormatOption[] = [
   {
@@ -481,7 +483,7 @@ describe("FormatDropdown - Unit Tests", () => {
       render(
         <FormatDropdown
           isOpen={true}
-          currentFormat={"unknown" as any}
+          currentFormat={"unknown" as WorkoutFileFormat}
           formatOptions={mockFormatOptions}
           onToggle={onToggle}
           onFormatSelect={onFormatSelect}

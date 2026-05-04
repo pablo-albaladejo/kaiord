@@ -1,4 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import { createCloudflareAnalytics } from "./cloudflare-analytics";
 
 describe("createCloudflareAnalytics", () => {
