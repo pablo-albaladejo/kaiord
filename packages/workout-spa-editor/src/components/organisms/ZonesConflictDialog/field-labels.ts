@@ -4,9 +4,12 @@
  * The conflict dialog renders these as React children (auto-escaped),
  * NEVER from any T2G-controlled string. This is the load-bearing line
  * that keeps `dangerouslySetInnerHTML` unnecessary in the dialog —
- * never widen a label by interpolating an external value.
+ * never widen a label by interpolating an external value. Band-level
+ * entries are generated at module-load time via
+ * `field-labels-bands.ts`; every string literal there is hardcoded.
  */
 import type { FieldKey } from "../../../types/coaching-zones";
+import { buildBandLabels, buildBandUnits } from "./field-labels-bands";
 
 export const FIELD_LABELS: Record<FieldKey, string> = {
   "cycling.thresholds.ftp": "FTP",
@@ -16,6 +19,7 @@ export const FIELD_LABELS: Record<FieldKey, string> = {
   "swimming.thresholds.cssPaceSecPer100m": "Swimming CSS",
   "heartRate.max": "Max HR",
   bodyWeight: "Body weight",
+  ...buildBandLabels(),
 };
 
 const PACE_FIELDS: ReadonlySet<FieldKey> = new Set([
@@ -37,9 +41,14 @@ const UNITS: Record<FieldKey, string> = {
   "swimming.thresholds.cssPaceSecPer100m": "/100m",
   "heartRate.max": "bpm",
   bodyWeight: "kg",
+  ...buildBandUnits(),
 };
+
+const PACE_BAND_RE =
+  /^(running|swimming)\.paceZones\.z[1-5]\.(minPace|maxPace)$/;
 
 export const formatFieldValue = (field: FieldKey, value: number): string => {
   if (PACE_FIELDS.has(field)) return formatPace(value, UNITS[field]);
+  if (PACE_BAND_RE.test(field)) return formatPace(value, UNITS[field]);
   return `${value} ${UNITS[field]}`.trim();
 };
