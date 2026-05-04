@@ -22,7 +22,7 @@ describe("DensityToggle", () => {
     expect(btn.getAttribute("aria-checked")).toBe("false");
   });
 
-  it("calls onToggle with the next density when clicked", async () => {
+  it("should call onToggle with the next density when clicked", async () => {
     const onToggle = vi.fn();
     render(<DensityToggle density="compact" onToggle={onToggle} />);
 

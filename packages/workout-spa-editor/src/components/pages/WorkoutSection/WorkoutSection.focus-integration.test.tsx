@@ -120,7 +120,7 @@ describe.each([
     document.body.innerHTML = "";
   });
 
-  it("focuses the next sibling after deleting a step", () => {
+  it("should focus the next sibling after deleting a step", () => {
     // Arrange — two steps; delete the first.
     renderSection(buildKrd([step(0), step(1)]));
     const initialSecondId = readInner().steps[1].id;
@@ -150,7 +150,7 @@ describe.each([
     expect(initialSecondId).toBeDefined();
   });
 
-  it("focuses the new step after createStep", () => {
+  it("should focus the new step after createStep", () => {
     // Arrange
     renderSection(buildKrd([step(0)]));
 
@@ -172,7 +172,7 @@ describe.each([
     ).toBe("step-card");
   });
 
-  it("focuses the Add Step button when the list becomes empty", () => {
+  it("should focus the Add Step button when the list becomes empty", () => {
     // Arrange — one step; delete it.
     renderSection(buildKrd([step(0)]));
 
@@ -193,7 +193,7 @@ describe.each([
     expect(document.activeElement).toBe(addStepButton);
   });
 
-  it("does not move focus while an input inside the editor is focused", () => {
+  it("should not move focus while an input inside the editor is focused", () => {
     // Arrange
     renderSection(buildKrd([step(0), step(1)]));
     // Inject an input inside the editor root; focus it; then trigger
@@ -223,7 +223,7 @@ describe.each([
   // pseudo-classes, so we assert the marker classes are present in the
   // className string — verifying the ring is wired even if we cannot
   // measure the pixel outline.
-  it("applies focus-visible ring classes to every focusable item target", () => {
+  it("should apply focus-visible ring classes to every focusable item target", () => {
     // Arrange
     renderSection(buildKrd([step(0), { repeatCount: 2, steps: [step(0)] }]));
 
@@ -249,7 +249,7 @@ describe.each([
   // moving. Instead we assert the preconditions: the step card has
   // `tabIndex={0}` (not -1), i.e. it participates in the normal
   // sequential order.
-  it("step cards participate in normal sequential focus order (tabIndex=0)", () => {
+  it("should let step cards participate in normal sequential focus order (tabIndex=0)", () => {
     // Arrange
     renderSection(buildKrd([step(0)]));
     const stepCard = document.querySelector(

@@ -28,7 +28,7 @@ const t2g = (
 });
 
 describe("linkCoachingAccount", () => {
-  it("appends an account when none of that source exists", () => {
+  it("should append an account when none of that source exists", () => {
     const account = t2g();
 
     const result = linkCoachingAccount(baseProfile, account);
@@ -36,7 +36,7 @@ describe("linkCoachingAccount", () => {
     expect(result.linkedAccounts).toEqual([account]);
   });
 
-  it("preserves accounts of other sources", () => {
+  it("should preserve accounts of other sources", () => {
     const tp = t2g({ source: "trainingpeaks", externalUserId: "tp-1" });
     const profile = { ...baseProfile, linkedAccounts: [tp] };
     const t2gAccount = t2g();
@@ -48,7 +48,7 @@ describe("linkCoachingAccount", () => {
     expect(result.linkedAccounts).toContainEqual(t2gAccount);
   });
 
-  it("replaces an existing entry of the same source (one-per-source invariant)", () => {
+  it("should replace an existing entry of the same source (one-per-source invariant)", () => {
     const old = t2g({ externalUserId: "111", externalUserName: "Old" });
     const profile = { ...baseProfile, linkedAccounts: [old] };
     const fresh = t2g({ externalUserId: "222", externalUserName: "New" });
@@ -58,7 +58,7 @@ describe("linkCoachingAccount", () => {
     expect(result.linkedAccounts).toEqual([fresh]);
   });
 
-  it("source comparison is case-sensitive (canonical lowercase ASCII)", () => {
+  it("should treat source comparison as case-sensitive (canonical lowercase ASCII)", () => {
     const lower = t2g({ source: "train2go", externalUserId: "111" });
     const profile = { ...baseProfile, linkedAccounts: [lower] };
     const upper = t2g({ source: "Train2Go", externalUserId: "222" });
@@ -69,7 +69,7 @@ describe("linkCoachingAccount", () => {
     expect(result.linkedAccounts).toHaveLength(2);
   });
 
-  it("does not mutate the input profile", () => {
+  it("should not mutate the input profile", () => {
     const account = t2g();
 
     linkCoachingAccount(baseProfile, account);
@@ -79,7 +79,7 @@ describe("linkCoachingAccount", () => {
 });
 
 describe("unlinkCoachingAccount", () => {
-  it("removes an entry of the given source", () => {
+  it("should remove an entry of the given source", () => {
     const account = t2g();
     const profile = { ...baseProfile, linkedAccounts: [account] };
 
@@ -88,7 +88,7 @@ describe("unlinkCoachingAccount", () => {
     expect(result.linkedAccounts).toEqual([]);
   });
 
-  it("preserves accounts of other sources", () => {
+  it("should preserve accounts of other sources", () => {
     const t2gAccount = t2g();
     const tp = t2g({ source: "trainingpeaks", externalUserId: "tp-1" });
     const profile = { ...baseProfile, linkedAccounts: [t2gAccount, tp] };
@@ -98,7 +98,7 @@ describe("unlinkCoachingAccount", () => {
     expect(result.linkedAccounts).toEqual([tp]);
   });
 
-  it("is a no-op when the source is not linked", () => {
+  it("should be a no-op when the source is not linked", () => {
     const tp = t2g({ source: "trainingpeaks", externalUserId: "tp-1" });
     const profile = { ...baseProfile, linkedAccounts: [tp] };
 
@@ -107,7 +107,7 @@ describe("unlinkCoachingAccount", () => {
     expect(result.linkedAccounts).toEqual([tp]);
   });
 
-  it("does not mutate the input profile", () => {
+  it("should not mutate the input profile", () => {
     const account = t2g();
     const profile = { ...baseProfile, linkedAccounts: [account] };
 

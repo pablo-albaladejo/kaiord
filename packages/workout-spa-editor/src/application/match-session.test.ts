@@ -70,7 +70,7 @@ const fixedClock = () => "2026-05-01T12:00:00.000Z";
 const fixedId = () => "M1";
 
 describe("matchSession", () => {
-  it("writes a SessionMatch with injected clock and idGenerator", async () => {
+  it("should write a SessionMatch with injected clock and idGenerator", async () => {
     const activity = stubActivity();
     const workout = stubWorkout();
     const repo = createInMemorySessionMatchRepository();
@@ -102,7 +102,7 @@ describe("matchSession", () => {
     expect(await repo.getByActivityId("p1", activity.id)).toEqual(result);
   });
 
-  it("uses explicit source when provided", async () => {
+  it("should use explicit source when provided", async () => {
     const activity = stubActivity();
     const workout = stubWorkout();
 
@@ -125,7 +125,7 @@ describe("matchSession", () => {
     expect(result.source).toBe("auto-conversion");
   });
 
-  it("throws CoachingActivityNotFoundError when the activity is missing", async () => {
+  it("should throw CoachingActivityNotFoundError when the activity is missing", async () => {
     await expect(
       matchSession(
         {
@@ -144,7 +144,7 @@ describe("matchSession", () => {
     ).rejects.toBeInstanceOf(CoachingActivityNotFoundError);
   });
 
-  it("throws CrossProfileMatchError when the activity belongs to a different profile", async () => {
+  it("should throw CrossProfileMatchError when the activity belongs to a different profile", async () => {
     const activity = stubActivity({
       id: "p2:train2go:12345",
       profileId: "p2",
@@ -169,7 +169,7 @@ describe("matchSession", () => {
     ).rejects.toBeInstanceOf(CrossProfileMatchError);
   });
 
-  it("throws WorkoutNotFoundError when the workout is missing", async () => {
+  it("should throw WorkoutNotFoundError when the workout is missing", async () => {
     const activity = stubActivity();
 
     await expect(
@@ -190,7 +190,7 @@ describe("matchSession", () => {
     ).rejects.toBeInstanceOf(WorkoutNotFoundError);
   });
 
-  it("propagates SessionAlreadyMatchedError from the repository", async () => {
+  it("should propagate SessionAlreadyMatchedError from the repository", async () => {
     const activity = stubActivity();
     const workout = stubWorkout();
     const repo = createInMemorySessionMatchRepository();
@@ -228,7 +228,7 @@ describe("matchSession", () => {
     ).rejects.toBeInstanceOf(SessionAlreadyMatchedError);
   });
 
-  it("permits the same workout matched in two profiles", async () => {
+  it("should permit the same workout matched in two profiles", async () => {
     const a1 = stubActivity({ id: "p1:train2go:1", profileId: "p1" });
     const a2 = stubActivity({ id: "p2:train2go:1", profileId: "p2" });
     const w = stubWorkout({ id: "w-shared" });

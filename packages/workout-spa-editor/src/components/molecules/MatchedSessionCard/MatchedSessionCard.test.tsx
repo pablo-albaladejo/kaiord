@@ -55,7 +55,7 @@ const session = (overrides: Partial<MatchedSession> = {}): MatchedSession => ({
 });
 
 describe("MatchedSessionCard", () => {
-  it("renders the actual workout title in compact mode", () => {
+  it("should render the actual workout title in compact mode", () => {
     render(<MatchedSessionCard session={session()} density="compact" />);
 
     expect(screen.getByText("FTP test executed")).toBeInTheDocument();
@@ -63,7 +63,7 @@ describe("MatchedSessionCard", () => {
     expect(screen.queryByText("FTP test")).not.toBeInTheDocument();
   });
 
-  it("preserves the planned title in tooltip and aria-label in compact mode", () => {
+  it("should preserve the planned title in tooltip and aria-label in compact mode", () => {
     render(<MatchedSessionCard session={session()} density="compact" />);
 
     const button = screen.getByTestId("matched-card-train2go:123");
@@ -71,7 +71,7 @@ describe("MatchedSessionCard", () => {
     expect(button.getAttribute("title")).toContain("(1h 0m / 60 min)");
   });
 
-  it("renders plan AND actual rows with their labels in comfortable mode", () => {
+  it("should render plan AND actual rows with their labels in comfortable mode", () => {
     render(<MatchedSessionCard session={session()} density="comfortable" />);
 
     expect(screen.getByText("Plan ·")).toBeInTheDocument();
@@ -80,27 +80,27 @@ describe("MatchedSessionCard", () => {
     expect(screen.getByText("1h 0m")).toBeInTheDocument();
   });
 
-  it("renders the visible compliance percentage in comfortable mode", () => {
+  it("should render the visible compliance percentage in comfortable mode", () => {
     render(<MatchedSessionCard session={session()} density="comfortable" />);
 
     expect(screen.getByText("95%")).toBeInTheDocument();
   });
 
-  it("uses emerald lateral border for high-compliance sessions", () => {
+  it("should use emerald lateral border for high-compliance sessions", () => {
     render(<MatchedSessionCard session={session({ complianceScore: 0.95 })} />);
 
     const button = screen.getByTestId("matched-card-train2go:123");
     expect(button.className).toContain("border-emerald-600");
   });
 
-  it("uses amber lateral border for low-compliance sessions", () => {
+  it("should use amber lateral border for low-compliance sessions", () => {
     render(<MatchedSessionCard session={session({ complianceScore: 0.3 })} />);
 
     const button = screen.getByTestId("matched-card-train2go:123");
     expect(button.className).toContain("border-amber-600");
   });
 
-  it("uses neutral slate-500 lateral border when complianceScore is null", () => {
+  it("should use neutral slate-500 lateral border when complianceScore is null", () => {
     render(<MatchedSessionCard session={session({ complianceScore: null })} />);
 
     const button = screen.getByTestId("matched-card-train2go:123");
@@ -110,13 +110,13 @@ describe("MatchedSessionCard", () => {
     );
   });
 
-  it("includes the compliance percentage in the aria-label", () => {
+  it("should include the compliance percentage in the aria-label", () => {
     render(<MatchedSessionCard session={session({ complianceScore: 0.92 })} />);
 
     expect(screen.getByLabelText(/Matched session.*92%/i)).toBeInTheDocument();
   });
 
-  it("calls onClick with the activity when clicked", async () => {
+  it("should call onClick with the activity when clicked", async () => {
     const onClick = vi.fn();
 
     render(<MatchedSessionCard session={session()} onClick={onClick} />);

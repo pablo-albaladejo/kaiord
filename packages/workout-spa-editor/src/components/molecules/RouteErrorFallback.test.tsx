@@ -17,20 +17,20 @@ function renderWithRouter(ui: React.ReactNode, path = "/test") {
 describe("RouteErrorFallback", () => {
   const error = new Error("Something broke");
 
-  it("renders the error message", () => {
+  it("should render the error message", () => {
     renderWithRouter(<RouteErrorFallback error={error} onRetry={vi.fn()} />);
 
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
     expect(screen.getByText("Something broke")).toBeInTheDocument();
   });
 
-  it("has role=alert for accessibility", () => {
+  it("should have role=alert for accessibility", () => {
     renderWithRouter(<RouteErrorFallback error={error} onRetry={vi.fn()} />);
 
     expect(screen.getByRole("alert")).toBeInTheDocument();
   });
 
-  it("calls onRetry when Retry button is clicked", async () => {
+  it("should call onRetry when Retry button is clicked", async () => {
     const user = userEvent.setup();
     const onRetry = vi.fn();
 
@@ -41,13 +41,13 @@ describe("RouteErrorFallback", () => {
     expect(onRetry).toHaveBeenCalledOnce();
   });
 
-  it("renders Go to Calendar button", () => {
+  it("should render Go to Calendar button", () => {
     renderWithRouter(<RouteErrorFallback error={error} onRetry={vi.fn()} />);
 
     expect(screen.getByText("Go to Calendar")).toBeInTheDocument();
   });
 
-  it("navigates to /calendar when Go to Calendar is clicked", async () => {
+  it("should navigate to /calendar when Go to Calendar is clicked", async () => {
     const user = userEvent.setup();
     const { location } = renderWithRouter(
       <RouteErrorFallback error={new Error("fail")} onRetry={vi.fn()} />

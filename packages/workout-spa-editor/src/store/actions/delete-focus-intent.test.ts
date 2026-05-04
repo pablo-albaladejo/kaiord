@@ -49,7 +49,7 @@ const resetStore = () => {
 describe("deleteStepAction focus intent", () => {
   afterEach(resetStore);
 
-  it("focuses the next sibling when one exists", () => {
+  it("should focus the next sibling when one exists", () => {
     // Arrange — three steps; delete the middle one.
     useWorkoutStore
       .getState()
@@ -68,7 +68,7 @@ describe("deleteStepAction focus intent", () => {
     });
   });
 
-  it("falls back to the previous sibling when the tail was deleted", () => {
+  it("should fall back to the previous sibling when the tail was deleted", () => {
     // Arrange
     useWorkoutStore.getState().loadWorkout(buildKrd([step(0), step(1)]));
     const firstId = (
@@ -86,7 +86,7 @@ describe("deleteStepAction focus intent", () => {
     });
   });
 
-  it("falls back to empty-state when the list becomes empty", () => {
+  it("should fall back to empty-state when the list becomes empty", () => {
     // Arrange
     useWorkoutStore.getState().loadWorkout(buildKrd([step(0)]));
 
@@ -103,7 +103,7 @@ describe("deleteStepAction focus intent", () => {
 describe("deleteRepetitionBlockAction focus intent", () => {
   afterEach(resetStore);
 
-  it("focuses the next main-list sibling after a block delete", () => {
+  it("should focus the next main-list sibling after a block delete", () => {
     // Arrange — a block followed by a top-level step.
     useWorkoutStore
       .getState()
@@ -123,7 +123,7 @@ describe("deleteRepetitionBlockAction focus intent", () => {
     });
   });
 
-  it("falls back to empty-state when the block was the only item", () => {
+  it("should fall back to empty-state when the block was the only item", () => {
     // Arrange
     useWorkoutStore
       .getState()

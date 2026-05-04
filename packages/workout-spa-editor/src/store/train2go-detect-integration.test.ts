@@ -60,7 +60,7 @@ describe("Train2Go detection cache — integration", () => {
     });
   });
 
-  it("Settings opens twice in <30s — ping fires once", async () => {
+  it("should fire ping once when Settings opens twice in <30s", async () => {
     await detect();
     await detect();
     await detect();
@@ -69,7 +69,7 @@ describe("Train2Go detection cache — integration", () => {
     expect(state.extensionInstalled).toBe(true);
   });
 
-  it("Settings re-opened after 30s — ping fires again", async () => {
+  it("should fire ping again when Settings is re-opened after 30s", async () => {
     await detect();
 
     state.lastDetectionTimestamp =
@@ -79,7 +79,7 @@ describe("Train2Go detection cache — integration", () => {
     expect(ping).toHaveBeenCalledTimes(2);
   });
 
-  it("does NOT cache a negative result — re-detect after a transient sessionActive=false", async () => {
+  it("should do NOT cache a negative result — re-detect after a transient sessionActive=false", async () => {
     vi.mocked(ping).mockResolvedValueOnce({
       ok: true,
       protocolVersion: 1,
@@ -102,7 +102,7 @@ describe("Train2Go detection cache — integration", () => {
     expect(state.sessionActive).toBe(true);
   });
 
-  it("force: true bypasses the positive cache for an explicit re-check", async () => {
+  it("should bypass the positive cache for an explicit re-check when force: true", async () => {
     await detect();
 
     await detect({ force: true });

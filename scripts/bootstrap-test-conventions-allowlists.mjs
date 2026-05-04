@@ -45,12 +45,9 @@ const EXCLUDED_FRAGMENTS = [
 ];
 const EXCLUDED_BASENAMES = new Set(["test-setup.ts"]);
 
-// Regex contracts (must stay in sync with the guards):
-// - Title: any `it`-rooted call followed by a quoted title.
-const IT_TITLE_RE =
-  /\bit\b(?:\.[a-z]+)?\s*\([^"'`]{0,400}?(["'`])([A-Za-z][^"'`]*)\1/g;
-// - it() call detector (counts how many it()-rooted calls a file has)
-const IT_CALL_RE = /\bit\b(?:\.[a-z]+)?\s*\(/g;
+// Title extraction + it()-call detector via shared helper that does
+// the two-pass regex needed to correctly handle `it.each([...])(...)`.
+import { findItTitles, IT_CALL_RE } from "./it-title-extractor.mjs";
 // - canonical Pascal-case Arrange/Act/Assert markers (must match all
 //   three to be a conformant file; same heuristic as the guard).
 const ARRANGE_MARKER_RE = /^\s*\/\/\s+Arrange\s*$/gm;
@@ -99,11 +96,9 @@ function lineOf(source, charIndex) {
 
 export function findTitleViolators(source) {
   const out = [];
-  for (const match of source.matchAll(IT_TITLE_RE)) {
-    const title = match[2];
+  for (const { title, titleStart } of findItTitles(source)) {
     if (title.startsWith("should ")) continue;
-    const titleStartIdx = match.index + match[0].lastIndexOf(title);
-    out.push({ line: lineOf(source, titleStartIdx), title });
+    out.push({ line: lineOf(source, titleStart), title });
   }
   return out;
 }

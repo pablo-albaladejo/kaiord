@@ -31,7 +31,7 @@ describe("useProfileByIdLive", () => {
   beforeEach(clear);
   afterEach(clear);
 
-  it("resolves to the profile row when the id matches", async () => {
+  it("should resolve to the profile row when the id matches", async () => {
     const persistence = createDexiePersistence(db);
     await persistence.profiles.put(makeProfile(PROFILE_UUID_1, "A"));
 
@@ -42,7 +42,7 @@ describe("useProfileByIdLive", () => {
     });
   });
 
-  it("resolves to undefined for an unknown id", async () => {
+  it("should resolve to undefined for an unknown id", async () => {
     const { result } = renderHook(() =>
       useProfileByIdLive(PROFILE_UUID_MISSING)
     );
@@ -52,14 +52,14 @@ describe("useProfileByIdLive", () => {
     expect(result.current).toBeUndefined();
   });
 
-  it("returns undefined when id is null without firing a query", async () => {
+  it("should return undefined when id is null without firing a query", async () => {
     const { result } = renderHook(() => useProfileByIdLive(null));
 
     await new Promise((resolve) => setTimeout(resolve, 50));
     expect(result.current).toBeUndefined();
   });
 
-  it("re-fires when the watched profile is updated", async () => {
+  it("should re-fire when the watched profile is updated", async () => {
     const persistence = createDexiePersistence(db);
     await persistence.profiles.put(makeProfile(PROFILE_UUID_1, "Original"));
 

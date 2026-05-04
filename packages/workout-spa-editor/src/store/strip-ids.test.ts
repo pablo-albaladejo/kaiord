@@ -38,7 +38,7 @@ const sampleKrd: KRD = {
 };
 
 describe("stripIds", () => {
-  it("removes id fields from every step and block", () => {
+  it("should remove id fields from every step and block", () => {
     const ui = hydrateUIWorkout(sampleKrd);
     const stripped = stripIds(ui);
 
@@ -57,13 +57,13 @@ describe("stripIds", () => {
     }
   });
 
-  it("is idempotent for already-stripped payloads", () => {
+  it("should be idempotent for already-stripped payloads", () => {
     const stripped = stripIds(sampleKrd);
 
     expect(stripped).toEqual(sampleKrd);
   });
 
-  it("passes through a workout with no structured_workout extension", () => {
+  it("should pass through a workout with no structured_workout extension", () => {
     const krd: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -73,7 +73,7 @@ describe("stripIds", () => {
     expect(stripIds(krd)).toEqual(krd);
   });
 
-  it("hydrate + strip round-trips cleanly", () => {
+  it("should round-trip cleanly via hydrate + strip", () => {
     const ui = hydrateUIWorkout(sampleKrd);
     const stripped = stripIds(ui);
 

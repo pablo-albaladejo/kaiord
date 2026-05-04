@@ -12,7 +12,7 @@ import {
 } from "./calendar-schemas";
 
 describe("workoutStateSchema", () => {
-  it("accepts all valid states", () => {
+  it("should accept all valid states", () => {
     const states = [
       "raw",
       "structured",
@@ -28,13 +28,13 @@ describe("workoutStateSchema", () => {
     }
   });
 
-  it("rejects invalid state", () => {
+  it("should reject invalid state", () => {
     expect(() => workoutStateSchema.parse("invalid")).toThrow();
   });
 });
 
 describe("conditionSchema", () => {
-  it("accepts all valid conditions", () => {
+  it("should accept all valid conditions", () => {
     const conditions = [
       "rain",
       "wind",
@@ -51,25 +51,25 @@ describe("conditionSchema", () => {
     }
   });
 
-  it("rejects invalid condition", () => {
+  it("should reject invalid condition", () => {
     expect(() => conditionSchema.parse("snow")).toThrow();
   });
 });
 
 describe("valueWithUnitSchema", () => {
-  it("accepts valid value with unit", () => {
+  it("should accept valid value with unit", () => {
     const result = valueWithUnitSchema.parse({ value: 10.5, unit: "km" });
 
     expect(result).toEqual({ value: 10.5, unit: "km" });
   });
 
-  it("rejects missing unit", () => {
+  it("should reject missing unit", () => {
     expect(() => valueWithUnitSchema.parse({ value: 10 })).toThrow();
   });
 });
 
 describe("workoutCommentSchema", () => {
-  it("accepts valid comment with ISO timestamp", () => {
+  it("should accept valid comment with ISO timestamp", () => {
     const comment = {
       author: "coach",
       text: "Great session",
@@ -79,7 +79,7 @@ describe("workoutCommentSchema", () => {
     expect(workoutCommentSchema.parse(comment)).toEqual(comment);
   });
 
-  it("rejects non-ISO timestamp", () => {
+  it("should reject non-ISO timestamp", () => {
     expect(() =>
       workoutCommentSchema.parse({
         author: "coach",
@@ -101,29 +101,29 @@ describe("workoutRawSchema", () => {
     rawHash: "abc123",
   };
 
-  it("accepts valid raw payload", () => {
+  it("should accept valid raw payload", () => {
     expect(workoutRawSchema.parse(validRaw)).toEqual(validRaw);
   });
 
-  it("accepts null distance and duration", () => {
+  it("should accept null distance and duration", () => {
     const raw = { ...validRaw, distance: null, duration: null };
 
     expect(workoutRawSchema.parse(raw)).toEqual(raw);
   });
 
-  it("rejects prescribedRpe below 1", () => {
+  it("should reject prescribedRpe below 1", () => {
     expect(() =>
       workoutRawSchema.parse({ ...validRaw, prescribedRpe: 0 })
     ).toThrow();
   });
 
-  it("rejects prescribedRpe above 10", () => {
+  it("should reject prescribedRpe above 10", () => {
     expect(() =>
       workoutRawSchema.parse({ ...validRaw, prescribedRpe: 11 })
     ).toThrow();
   });
 
-  it("accepts null prescribedRpe", () => {
+  it("should accept null prescribedRpe", () => {
     const raw = { ...validRaw, prescribedRpe: null };
 
     expect(workoutRawSchema.parse(raw)).toEqual(raw);
@@ -131,7 +131,7 @@ describe("workoutRawSchema", () => {
 });
 
 describe("workoutFeedbackSchema", () => {
-  it("accepts all-null feedback", () => {
+  it("should accept all-null feedback", () => {
     const feedback = {
       actualRpe: null,
       completionNotes: null,
@@ -145,7 +145,7 @@ describe("workoutFeedbackSchema", () => {
     expect(workoutFeedbackSchema.parse(feedback)).toEqual(feedback);
   });
 
-  it("accepts fully populated feedback", () => {
+  it("should accept fully populated feedback", () => {
     const feedback = {
       actualRpe: 7,
       completionNotes: "Felt strong",
@@ -159,7 +159,7 @@ describe("workoutFeedbackSchema", () => {
     expect(workoutFeedbackSchema.parse(feedback)).toEqual(feedback);
   });
 
-  it("rejects invalid condition in array", () => {
+  it("should reject invalid condition in array", () => {
     expect(() =>
       workoutFeedbackSchema.parse({
         actualRpe: null,
@@ -175,7 +175,7 @@ describe("workoutFeedbackSchema", () => {
 });
 
 describe("aiMetaSchema", () => {
-  it("accepts valid AI metadata", () => {
+  it("should accept valid AI metadata", () => {
     const meta = {
       promptVersion: "1.2.0",
       model: "gpt-4o",
@@ -186,7 +186,7 @@ describe("aiMetaSchema", () => {
     expect(aiMetaSchema.parse(meta)).toEqual(meta);
   });
 
-  it("rejects non-ISO processedAt", () => {
+  it("should reject non-ISO processedAt", () => {
     expect(() =>
       aiMetaSchema.parse({
         promptVersion: "1.0.0",
@@ -220,29 +220,29 @@ describe("workoutRecordSchema", () => {
     updatedAt: "2025-01-15T08:00:00Z",
   };
 
-  it("accepts valid workout record", () => {
+  it("should accept valid workout record", () => {
     expect(workoutRecordSchema.parse(validRecord)).toEqual(validRecord);
   });
 
-  it("rejects invalid UUID", () => {
+  it("should reject invalid UUID", () => {
     expect(() =>
       workoutRecordSchema.parse({ ...validRecord, id: "not-a-uuid" })
     ).toThrow();
   });
 
-  it("rejects invalid date format", () => {
+  it("should reject invalid date format", () => {
     expect(() =>
       workoutRecordSchema.parse({ ...validRecord, date: "15-01-2025" })
     ).toThrow();
   });
 
-  it("rejects invalid state", () => {
+  it("should reject invalid state", () => {
     expect(() =>
       workoutRecordSchema.parse({ ...validRecord, state: "archived" })
     ).toThrow();
   });
 
-  it("accepts all workout states", () => {
+  it("should accept all workout states", () => {
     const states = [
       "raw",
       "structured",
@@ -260,7 +260,7 @@ describe("workoutRecordSchema", () => {
     }
   });
 
-  it("rejects non-ISO createdAt", () => {
+  it("should reject non-ISO createdAt", () => {
     expect(() =>
       workoutRecordSchema.parse({
         ...validRecord,

@@ -17,7 +17,7 @@ describe("useUserPreferences", () => {
   beforeEach(clear);
   afterEach(clear);
 
-  it("returns undefined when profileId is null", async () => {
+  it("should return undefined when profileId is null", async () => {
     const { result } = renderHook(() =>
       useUserPreferences({ profileId: null, defaultDensity: "compact" })
     );
@@ -27,7 +27,7 @@ describe("useUserPreferences", () => {
     });
   });
 
-  it("returns the persisted row when one exists", async () => {
+  it("should return the persisted row when one exists", async () => {
     await seed({
       profileId: "p1",
       calendarDensity: "comfortable",
@@ -43,7 +43,7 @@ describe("useUserPreferences", () => {
     });
   });
 
-  it("returns the viewport-derived default when no row exists", async () => {
+  it("should return the viewport-derived default when no row exists", async () => {
     const { result } = renderHook(() =>
       useUserPreferences({ profileId: "p1", defaultDensity: "comfortable" })
     );
@@ -53,7 +53,7 @@ describe("useUserPreferences", () => {
     });
   });
 
-  it("re-evaluates on profileId change without leaking previous-profile value", async () => {
+  it("should re-evaluate on profileId change without leaking previous-profile value", async () => {
     await seed({
       profileId: "p1",
       calendarDensity: "comfortable",
@@ -79,7 +79,7 @@ describe("useUserPreferences", () => {
     });
   });
 
-  it("re-fires when the underlying row is written", async () => {
+  it("should re-fire when the underlying row is written", async () => {
     const { result } = renderHook(() =>
       useUserPreferences({ profileId: "p1", defaultDensity: "compact" })
     );

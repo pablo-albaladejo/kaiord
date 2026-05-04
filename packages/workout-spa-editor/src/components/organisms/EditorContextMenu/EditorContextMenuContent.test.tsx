@@ -54,79 +54,79 @@ const renderContent = (overrides: Partial<typeof defaultProps> = {}) =>
 
 describe("EditorContextMenuContent", () => {
   describe("visibility logic", () => {
-    it("hides Cut when showCut is false", () => {
+    it("should hide Cut when showCut is false", () => {
       renderContent({ showCut: false });
       expect(screen.queryByText("Cut")).toBeNull();
     });
 
-    it("shows Cut when showCut is true", () => {
+    it("should show Cut when showCut is true", () => {
       renderContent({ showCut: true });
       expect(screen.getByText("Cut")).toBeTruthy();
     });
 
-    it("hides Copy when showCopy is false", () => {
+    it("should hide Copy when showCopy is false", () => {
       renderContent({ showCopy: false });
       expect(screen.queryByText("Copy")).toBeNull();
     });
 
-    it("shows Copy when showCopy is true", () => {
+    it("should show Copy when showCopy is true", () => {
       renderContent({ showCopy: true });
       expect(screen.getByText("Copy")).toBeTruthy();
     });
 
-    it("hides Paste when showPaste is false", () => {
+    it("should hide Paste when showPaste is false", () => {
       renderContent({ showPaste: false });
       expect(screen.queryByText("Paste")).toBeNull();
     });
 
-    it("shows Paste when showPaste is true", () => {
+    it("should show Paste when showPaste is true", () => {
       renderContent({ showPaste: true });
       expect(screen.getByText("Paste")).toBeTruthy();
     });
 
-    it("hides Delete when showDelete is false", () => {
+    it("should hide Delete when showDelete is false", () => {
       renderContent({ showDelete: false });
       expect(screen.queryByText("Delete")).toBeNull();
     });
 
-    it("shows Delete when showDelete is true", () => {
+    it("should show Delete when showDelete is true", () => {
       renderContent({ showDelete: true });
       expect(screen.getByText("Delete")).toBeTruthy();
     });
 
-    it("hides Select All when showSelectAll is false", () => {
+    it("should hide Select All when showSelectAll is false", () => {
       renderContent({ showSelectAll: false });
       expect(screen.queryByText("Select All")).toBeNull();
     });
 
-    it("shows Select All when showSelectAll is true", () => {
+    it("should show Select All when showSelectAll is true", () => {
       renderContent({ showSelectAll: true });
       expect(screen.getByText("Select All")).toBeTruthy();
     });
 
-    it("hides Group when showGroup is false", () => {
+    it("should hide Group when showGroup is false", () => {
       renderContent({ showGroup: false });
       expect(screen.queryByText("Group")).toBeNull();
     });
 
-    it("shows Group when showGroup is true", () => {
+    it("should show Group when showGroup is true", () => {
       renderContent({ showGroup: true });
       expect(screen.getByText("Group")).toBeTruthy();
     });
 
-    it("hides Ungroup when showUngroup is false", () => {
+    it("should hide Ungroup when showUngroup is false", () => {
       renderContent({ showUngroup: false });
       expect(screen.queryByText("Ungroup")).toBeNull();
     });
 
-    it("shows Ungroup when showUngroup is true", () => {
+    it("should show Ungroup when showUngroup is true", () => {
       renderContent({ showUngroup: true });
       expect(screen.getByText("Ungroup")).toBeTruthy();
     });
   });
 
   describe("separator", () => {
-    it("shows separator when both edit and structural actions present", () => {
+    it("should show separator when both edit and structural actions present", () => {
       const { container } = renderContent({
         showCopy: true,
         showSelectAll: true,
@@ -136,14 +136,14 @@ describe("EditorContextMenuContent", () => {
       expect(separator).toBeTruthy();
     });
 
-    it("does not show separator when only edit actions present", () => {
+    it("should not show separator when only edit actions present", () => {
       const { container } = renderContent({ showCopy: true });
 
       const separator = container.querySelector("[role='separator']");
       expect(separator).toBeNull();
     });
 
-    it("does not show separator when only structural actions present", () => {
+    it("should not show separator when only structural actions present", () => {
       const { container } = renderContent({ showSelectAll: true });
 
       const separator = container.querySelector("[role='separator']");
@@ -152,7 +152,7 @@ describe("EditorContextMenuContent", () => {
   });
 
   describe("aria-keyshortcuts", () => {
-    it("includes aria-keyshortcuts on Copy item", () => {
+    it("should include aria-keyshortcuts on Copy item", () => {
       renderContent({ showCopy: true });
 
       const item = screen.getByText("Copy").closest("[role='menuitem']");
@@ -161,7 +161,7 @@ describe("EditorContextMenuContent", () => {
       );
     });
 
-    it("includes aria-keyshortcuts on Delete item", () => {
+    it("should include aria-keyshortcuts on Delete item", () => {
       renderContent({ showDelete: true });
 
       const item = screen.getByText("Delete").closest("[role='menuitem']");

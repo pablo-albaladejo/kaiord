@@ -43,24 +43,10 @@ const EXCLUDED_FRAGMENTS = [
 // Excluded basenames.
 const EXCLUDED_BASENAMES = new Set(["test-setup.ts"]);
 
-// Title-extracting regex.
-//
-// `\bit\b`            — the literal `it` as a whole word.
-// `(?:\.[a-z]+)?`     — optional `.skip`, `.only`, `.todo`, `.each`,
-//                       `.fails`, `.concurrent`, `.runIf`, etc.
-// `\s*\(`             — open paren of the first call.
-// `[^"'`]{0,400}?`    — up to 400 non-quote chars (handles the array
-//                       arg of `it.each([1, 2])` as long as no string
-//                       literal lives inside it; tests never have
-//                       string literals in the it.each table because
-//                       table-driven titles use placeholders).
-// `["'\`]`            — opening quote of the title literal.
-// `([A-Za-z][^"'\`]*)` — title body starting with a letter; first
-//                       capture group.
-// `["'\`]`            — closing quote (same kind, but we don't
-//                       enforce backreference for liberal matching).
-const IT_TITLE_RE =
-  /\bit\b(?:\.[a-z]+)?\s*\([^"'`]{0,400}?["'`]([A-Za-z][^"'`]*)["'`]/g;
+// Title extraction via shared helper that does the two-pass regex
+// needed to correctly handle `it.each([...])(title)` (a naive single-
+// regex matches inner array strings as the title).
+import { findItTitles } from "./it-title-extractor.mjs";
 
 export function listTestFiles(rootDir = PACKAGES_DIR) {
   const files = [];
@@ -96,9 +82,8 @@ function walk(dir, out) {
 
 export function extractFirstWords(source) {
   const words = [];
-  for (const match of source.matchAll(IT_TITLE_RE)) {
-    const title = match[1].trim();
-    const firstWord = title.split(/\s+/)[0];
+  for (const { title } of findItTitles(source)) {
+    const firstWord = title.trim().split(/\s+/)[0];
     if (firstWord) words.push(firstWord);
   }
   return words;

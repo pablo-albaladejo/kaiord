@@ -151,7 +151,7 @@ describe("deleteProfile cascade fan-out (integration)", () => {
     });
   });
 
-  it("clears every per-profile table for the deleted profile and preserves the other", async () => {
+  it("should clear every per-profile table for the deleted profile and preserves the other", async () => {
     const perProfileTables = database.tables.filter(isPerProfileTable);
     expect(perProfileTables.length).toBeGreaterThan(0);
 
@@ -205,7 +205,7 @@ describe("deleteProfile cascade fan-out (integration)", () => {
     }
   });
 
-  it("rolls every per-profile table back when one cascade step throws mid-fan-out", async () => {
+  it("should roll every per-profile table back when one cascade step throws mid-fan-out", async () => {
     const perProfileTables = database.tables.filter(isPerProfileTable);
     const A = "00000000-0000-4000-8000-0000000000c1";
     const B = "00000000-0000-4000-8000-0000000000c2";

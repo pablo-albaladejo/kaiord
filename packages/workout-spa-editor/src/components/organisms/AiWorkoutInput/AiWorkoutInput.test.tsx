@@ -27,7 +27,7 @@ describe("AiWorkoutInput", () => {
     await db.table("aiProviders").clear();
   });
 
-  it("shows the empty-state CTA when no providers are configured", async () => {
+  it("should show the empty-state CTA when no providers are configured", async () => {
     renderInput();
 
     await waitFor(() => {
@@ -36,7 +36,7 @@ describe("AiWorkoutInput", () => {
     expect(screen.getByText("Open Settings")).toBeInTheDocument();
   });
 
-  it("invokes onSettingsClick when the empty-state button is clicked", async () => {
+  it("should invoke onSettingsClick when the empty-state button is clicked", async () => {
     const onClick = vi.fn();
     renderInput(onClick);
 
@@ -48,7 +48,7 @@ describe("AiWorkoutInput", () => {
     expect(onClick).toHaveBeenCalledOnce();
   });
 
-  it("shows the input form once a provider is persisted", async () => {
+  it("should show the input form once a provider is persisted", async () => {
     const persistence = createDexiePersistence(db);
     await addProvider(persistence, {
       type: "anthropic",
@@ -67,7 +67,7 @@ describe("AiWorkoutInput", () => {
     expect(screen.getByText("Generate Workout")).toBeInTheDocument();
   });
 
-  it("renders the runtime-store error message inline", async () => {
+  it("should render the runtime-store error message inline", async () => {
     const persistence = createDexiePersistence(db);
     await addProvider(persistence, {
       type: "anthropic",
@@ -86,7 +86,7 @@ describe("AiWorkoutInput", () => {
     });
   });
 
-  it("disables the generate button while the prompt textarea is empty", async () => {
+  it("should disable the generate button while the prompt textarea is empty", async () => {
     const persistence = createDexiePersistence(db);
     await addProvider(persistence, {
       type: "openai",

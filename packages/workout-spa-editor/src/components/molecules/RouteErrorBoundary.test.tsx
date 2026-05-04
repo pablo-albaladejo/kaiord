@@ -35,7 +35,7 @@ describe("RouteErrorBoundary analytics", () => {
     consoleErrorSpy.mockRestore();
   });
 
-  it("fires route-error event with the full scrubbed payload when a child throws", () => {
+  it("should fire route-error event with the full scrubbed payload when a child throws", () => {
     // Arrange
     const analytics: Analytics = {
       pageView: vi.fn(),
@@ -68,7 +68,7 @@ describe("RouteErrorBoundary analytics", () => {
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
   });
 
-  it("does not invoke the payload builder when no analytics prop is provided (zero scrub work in noop deployments)", async () => {
+  it("should not invoke the payload builder when no analytics prop is provided (zero scrub work in noop deployments)", async () => {
     // Arrange — spy on the payload builder
     const buildModule = await import("../../lib/build-route-error-payload");
     const buildSpy = vi.spyOn(buildModule, "buildRouteErrorPayload");
@@ -85,7 +85,7 @@ describe("RouteErrorBoundary analytics", () => {
     buildSpy.mockRestore();
   });
 
-  it("renders fallback when analytics.event throws synchronously", () => {
+  it("should render fallback when analytics.event throws synchronously", () => {
     // Arrange — analytics.event throws (e.g., adapter misconfig)
     const analytics: Analytics = {
       pageView: vi.fn(),
@@ -105,7 +105,7 @@ describe("RouteErrorBoundary analytics", () => {
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
   });
 
-  it("renders fallback without throwing when no analytics prop is provided", () => {
+  it("should render fallback without throwing when no analytics prop is provided", () => {
     // Arrange & Act
     renderWithRouter(
       <RouteErrorBoundary>
@@ -117,7 +117,7 @@ describe("RouteErrorBoundary analytics", () => {
     expect(screen.getByText("Something went wrong")).toBeInTheDocument();
   });
 
-  it("does not fire route-error when child renders successfully", () => {
+  it("should not fire route-error when child renders successfully", () => {
     // Arrange
     const analytics: Analytics = {
       pageView: vi.fn(),

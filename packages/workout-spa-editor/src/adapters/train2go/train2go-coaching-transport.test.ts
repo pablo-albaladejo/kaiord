@@ -20,13 +20,13 @@ describe("createTrain2GoCoachingTransport", () => {
     delete (globalThis as Record<string, unknown>).chrome;
   });
 
-  it("source identifier is train2go", () => {
+  it("should expose train2go as the source identifier", () => {
     const t = createTrain2GoCoachingTransport(() => "ext-id");
 
     expect(t.source).toBe("train2go");
   });
 
-  it("ping() maps Train2GoPingResult into CoachingPingResult shape", async () => {
+  it("should map Train2GoPingResult into CoachingPingResult shape via ping()", async () => {
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
         cb({
@@ -50,7 +50,7 @@ describe("createTrain2GoCoachingTransport", () => {
     });
   });
 
-  it("preserves a userId larger than Number.MAX_SAFE_INTEGER as a string at the JSON parse boundary", async () => {
+  it("should preserve a userId larger than Number.MAX_SAFE_INTEGER as a string at the JSON parse boundary", async () => {
     // 9007199254740993 is one above Number.MAX_SAFE_INTEGER (2^53 - 1) and
     // cannot be represented losslessly as a JS number. The bridge extension's
     // JSON reviver delivers the raw digits as a string; the SPA-side
@@ -80,7 +80,7 @@ describe("createTrain2GoCoachingTransport", () => {
     expect(typeof result.externalUserId).toBe("string");
   });
 
-  it("openExternal() resolves on success without throwing", async () => {
+  it("should resolve on success without throwing via openExternal()", async () => {
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
         cb({ ok: true });
@@ -94,7 +94,7 @@ describe("createTrain2GoCoachingTransport", () => {
     await expect(t.openExternal()).resolves.toBeUndefined();
   });
 
-  it("readWeek() throws Session expired on session-expired error", async () => {
+  it("should throw Session expired on session-expired error via readWeek()", async () => {
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
         cb({ ok: false, error: "Session expired" });
@@ -110,7 +110,7 @@ describe("createTrain2GoCoachingTransport", () => {
     );
   });
 
-  it("readWeek() maps wire activities to CoachingActivityRecord[]", async () => {
+  it("should map wire activities to CoachingActivityRecord[] via readWeek()", async () => {
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
         cb({
@@ -147,7 +147,7 @@ describe("createTrain2GoCoachingTransport", () => {
     expect(result[0]?.fetchedAt).toBe("2026-04-28T10:00:00.000Z");
   });
 
-  it("readDay() returns empty array when wire response has no activities", async () => {
+  it("should return empty array when wire response has no activities via readDay()", async () => {
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
         cb({ ok: true, data: { activities: [] } });
@@ -163,7 +163,7 @@ describe("createTrain2GoCoachingTransport", () => {
     expect(result).toEqual([]);
   });
 
-  it("readDay() throws fallback message on generic transport error", async () => {
+  it("should throw fallback message on generic transport error via readDay()", async () => {
     const mockSend = vi.fn(
       (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
         cb({ ok: false });
@@ -179,7 +179,7 @@ describe("createTrain2GoCoachingTransport", () => {
     );
   });
 
-  it("readZones() returns a parsed ZonesPayload on success", async () => {
+  it("should return a parsed ZonesPayload on success via readZones()", async () => {
     (globalThis as Record<string, unknown>).chrome = {
       runtime: {
         lastError: null,
@@ -207,7 +207,7 @@ describe("createTrain2GoCoachingTransport", () => {
     expect(result?.hrZones?.cycling?.z4Upper).toBe(160);
   });
 
-  it("readZones() returns null when payload fails the Zod allowlist", async () => {
+  it("should return null when payload fails the Zod allowlist via readZones()", async () => {
     (globalThis as Record<string, unknown>).chrome = {
       runtime: {
         lastError: null,
@@ -228,7 +228,7 @@ describe("createTrain2GoCoachingTransport", () => {
     expect(result).toBeNull();
   });
 
-  it("readZones() throws Session expired when the bridge reports it", async () => {
+  it("should throw Session expired when the bridge reports it via readZones()", async () => {
     (globalThis as Record<string, unknown>).chrome = {
       runtime: {
         lastError: null,

@@ -31,7 +31,7 @@ const ok: ProcessResult = {
 const fail: ProcessResult = { ok: false, error: "LLM error", retried: false };
 
 describe("processBatch", () => {
-  it("processes all workouts successfully", async () => {
+  it("should process all workouts successfully", async () => {
     const workouts = makeWorkouts(3);
     const processOne = vi.fn().mockResolvedValue(ok);
     const onProgress = vi.fn();
@@ -48,7 +48,7 @@ describe("processBatch", () => {
     expect(result.cancelled).toBe(false);
   });
 
-  it("continues on failure", async () => {
+  it("should continue on failure", async () => {
     const workouts = makeWorkouts(3);
     const processOne = vi
       .fn()
@@ -69,7 +69,7 @@ describe("processBatch", () => {
     expect(result.failed[0].error).toBe("LLM error");
   });
 
-  it("stops on abort signal", async () => {
+  it("should stop on abort signal", async () => {
     const workouts = makeWorkouts(5);
     const controller = new AbortController();
     let callCount = 0;
@@ -90,7 +90,7 @@ describe("processBatch", () => {
     expect(processOne).toHaveBeenCalledTimes(2);
   });
 
-  it("reports progress after each item", async () => {
+  it("should report progress after each item", async () => {
     const workouts = makeWorkouts(2);
     const processOne = vi.fn().mockResolvedValue(ok);
     const onProgress = vi.fn();
@@ -114,7 +114,7 @@ describe("processBatch", () => {
     expect(firstAfter.processed).toBe(1);
   });
 
-  it("waits 500ms between API calls", async () => {
+  it("should wait 500ms between API calls", async () => {
     vi.useFakeTimers();
     const workouts = makeWorkouts(2);
     const processOne = vi.fn().mockResolvedValue(ok);
@@ -137,7 +137,7 @@ describe("processBatch", () => {
     vi.useRealTimers();
   });
 
-  it("reports per-workout status via byId (queued → processing → succeeded)", async () => {
+  it("should report per-workout status via byId (queued → processing → succeeded)", async () => {
     const workouts = makeWorkouts(2);
     const processOne = vi.fn().mockResolvedValue(ok);
     const onProgress = vi.fn();
@@ -194,7 +194,7 @@ describe("processBatch", () => {
     expect(last.counts.succeeded).toBe(1);
   });
 
-  it("initial frames include every workout as queued before processing starts", async () => {
+  it("should include every workout as queued in initial frames before processing starts", async () => {
     const workouts = makeWorkouts(3);
     const processOne = vi.fn().mockResolvedValue(ok);
     const onProgress = vi.fn();
@@ -235,7 +235,7 @@ describe("processBatch", () => {
     expect(frames[0][workouts[0].id]).toBe("processing");
   });
 
-  it("passes allowRetry=true until budget exhausted", async () => {
+  it("should pass allowRetry=true until budget exhausted", async () => {
     const workouts = makeWorkouts(5);
     const retriedResult: ProcessResult = {
       ok: true,

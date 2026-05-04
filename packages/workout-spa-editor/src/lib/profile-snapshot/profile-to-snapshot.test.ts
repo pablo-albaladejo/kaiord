@@ -32,7 +32,7 @@ const baseProfile: Profile = {
 };
 
 describe("profileToSnapshot", () => {
-  it("derives a baseline cycling snapshot", () => {
+  it("should derive a baseline cycling snapshot", () => {
     const snapshot = profileToSnapshot(baseProfile, "cycling", FIXED_NOW);
 
     expect(snapshot.schemaVersion).toBe(1);
@@ -44,7 +44,7 @@ describe("profileToSnapshot", () => {
     expect(snapshot.generatedAt).toBe(FIXED_NOW.toISOString());
   });
 
-  it("converts running pace from min/km to seconds/km", () => {
+  it("should convert running pace from min/km to seconds/km", () => {
     const snapshot = profileToSnapshot(baseProfile, "running", FIXED_NOW);
 
     expect(snapshot.thresholds.running?.thresholdPaceSecPerKm).toBe(255);
@@ -52,14 +52,14 @@ describe("profileToSnapshot", () => {
     expect(snapshot.heartRate?.lthr).toBe(170);
   });
 
-  it("converts swimming pace from min/100m to seconds/100m", () => {
+  it("should convert swimming pace from min/100m to seconds/100m", () => {
     const snapshot = profileToSnapshot(baseProfile, "swimming", FIXED_NOW);
 
     expect(snapshot.thresholds.swimming?.cssPaceSecPer100m).toBe(87);
     expect(snapshot.activeSport).toBe("swimming");
   });
 
-  it("omits bodyWeight when undefined on the profile", () => {
+  it("should omit bodyWeight when undefined on the profile", () => {
     const profile: Profile = { ...baseProfile, bodyWeight: undefined };
 
     const snapshot = profileToSnapshot(profile, "cycling", FIXED_NOW);
@@ -67,7 +67,7 @@ describe("profileToSnapshot", () => {
     expect(snapshot.profile.bodyWeight).toBeUndefined();
   });
 
-  it("omits activeSport when caller passes undefined", () => {
+  it("should omit activeSport when caller passes undefined", () => {
     const snapshot = profileToSnapshot(baseProfile, undefined, FIXED_NOW);
 
     expect(snapshot.activeSport).toBeUndefined();
@@ -90,7 +90,7 @@ describe("profileToSnapshot", () => {
     expect(snapshot.thresholds.swimming).toBeUndefined();
   });
 
-  it("emits ISO datetime for generatedAt", () => {
+  it("should emit ISO datetime for generatedAt", () => {
     const snapshot = profileToSnapshot(baseProfile, "cycling", FIXED_NOW);
 
     expect(snapshot.generatedAt).toMatch(

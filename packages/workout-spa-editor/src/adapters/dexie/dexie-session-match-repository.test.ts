@@ -24,7 +24,7 @@ describe("DexieSessionMatchRepository", () => {
     db = new KaiordDatabase(`kaiord-match-test-${Date.now()}-${Math.random()}`);
   });
 
-  it("put-and-get round trip via getByActivityId", async () => {
+  it("should round-trip via put-and-get on getByActivityId", async () => {
     const repo = createDexieSessionMatchRepository(db);
     const m = makeMatch();
 
@@ -33,7 +33,7 @@ describe("DexieSessionMatchRepository", () => {
     expect(await repo.getByActivityId("p1", m.coachingActivityId)).toEqual(m);
   });
 
-  it("put-and-get round trip via getByWorkoutId", async () => {
+  it("should round-trip via put-and-get on getByWorkoutId", async () => {
     const repo = createDexieSessionMatchRepository(db);
     const m = makeMatch();
 
@@ -42,7 +42,7 @@ describe("DexieSessionMatchRepository", () => {
     expect(await repo.getByWorkoutId("p1", m.workoutId)).toEqual(m);
   });
 
-  it("rejects double-match on activity side with SessionAlreadyMatchedError", async () => {
+  it("should reject double-match on activity side with SessionAlreadyMatchedError", async () => {
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1" }));
 
@@ -51,7 +51,7 @@ describe("DexieSessionMatchRepository", () => {
     ).rejects.toBeInstanceOf(SessionAlreadyMatchedError);
   });
 
-  it("rejects double-match on workout side", async () => {
+  it("should reject double-match on workout side", async () => {
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1" }));
 
@@ -65,7 +65,7 @@ describe("DexieSessionMatchRepository", () => {
     ).rejects.toBeInstanceOf(SessionAlreadyMatchedError);
   });
 
-  it("permits same workout matched in different profiles", async () => {
+  it("should permit same workout matched in different profiles", async () => {
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(
       makeMatch({
@@ -91,7 +91,7 @@ describe("DexieSessionMatchRepository", () => {
     expect((await repo.getByWorkoutId("p2", "w-shared"))?.profileId).toBe("p2");
   });
 
-  it("upsert by id is idempotent (re-put same id replaces, no uniqueness error)", async () => {
+  it("should be idempotent on upsert by id (re-put same id replaces, no uniqueness error)", async () => {
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1", source: "manual" }));
 
@@ -104,7 +104,7 @@ describe("DexieSessionMatchRepository", () => {
     ).toBe("auto-suggestion");
   });
 
-  it("listByProfileAndWeek inclusive, profile-scoped", async () => {
+  it("should list inclusive and profile-scoped via listByProfileAndWeek", async () => {
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1", date: "2026-04-27" }));
     await repo.put(
@@ -142,13 +142,13 @@ describe("DexieSessionMatchRepository", () => {
     expect(result.map((m) => m.id).sort()).toEqual(["M1", "M2"]);
   });
 
-  it("delete is no-op on missing", async () => {
+  it("should be a no-op on delete when missing", async () => {
     const repo = createDexieSessionMatchRepository(db);
 
     await expect(repo.delete("never")).resolves.toBeUndefined();
   });
 
-  it("delete by id removes the row", async () => {
+  it("should remove the row on delete by id", async () => {
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1" }));
 
@@ -159,7 +159,7 @@ describe("DexieSessionMatchRepository", () => {
     ).toBeUndefined();
   });
 
-  it("deleteByActivityId removes only matching rows, idempotent on miss", async () => {
+  it("should remove only matching rows via deleteByActivityId, idempotent on miss", async () => {
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1" }));
     await repo.put(
@@ -182,7 +182,7 @@ describe("DexieSessionMatchRepository", () => {
     await expect(repo.deleteByActivityId("never")).resolves.toBeUndefined();
   });
 
-  it("deleteByWorkoutId removes only matching rows, idempotent on miss", async () => {
+  it("should remove only matching rows via deleteByWorkoutId, idempotent on miss", async () => {
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1", workoutId: "w-drop" }));
     await repo.put(

@@ -320,7 +320,7 @@ describe("LayoutHeader", () => {
   });
 
   describe("library dialog (deleted by surface-classification rule)", () => {
-    it("never renders the WorkoutLibrary modal heading from the header", () => {
+    it("should never render the WorkoutLibrary modal heading from the header", () => {
       // Arrange & Act — no header click should mount a Library modal.
       // The page surface owns the heading; the header owns navigation.
       renderWithProviders(<LayoutHeader />);

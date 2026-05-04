@@ -31,7 +31,7 @@ describe("convertTarget (dispatcher)", () => {
     expect(message).toStrictEqual({ targetType: "open" });
   });
 
-  it("dispatches power → convertPowerTarget", () => {
+  it("should dispatch power → convertPowerTarget", () => {
     // Arrange
     const step = baseStep("power", {
       type: "power",
@@ -47,7 +47,7 @@ describe("convertTarget (dispatcher)", () => {
     expect(message.targetPowerZone).toBe(3);
   });
 
-  it("dispatches heart_rate → convertHeartRateTarget", () => {
+  it("should dispatch heart_rate → convertHeartRateTarget", () => {
     // Arrange
     const step = baseStep("heart_rate", {
       type: "heart_rate",
@@ -64,7 +64,7 @@ describe("convertTarget (dispatcher)", () => {
     expect(message.targetHrZone).toBe(2);
   });
 
-  it("dispatches cadence → convertCadenceTarget", () => {
+  it("should dispatch cadence → convertCadenceTarget", () => {
     // Arrange
     const step = baseStep("cadence", {
       type: "cadence",
@@ -79,7 +79,7 @@ describe("convertTarget (dispatcher)", () => {
     expect(message.targetType).toBe("cadence");
   });
 
-  it("dispatches pace → convertPaceTarget", () => {
+  it("should dispatch pace → convertPaceTarget", () => {
     // Arrange
     const step = baseStep("pace", {
       type: "pace",
@@ -94,7 +94,7 @@ describe("convertTarget (dispatcher)", () => {
     expect(message.targetType).toBe("speed");
   });
 
-  it("dispatches stroke_type → convertStrokeTarget", () => {
+  it("should dispatch stroke_type → convertStrokeTarget", () => {
     // Arrange
     const step = baseStep("stroke_type", {
       type: "stroke_type",
@@ -110,7 +110,7 @@ describe("convertTarget (dispatcher)", () => {
     expect(message.targetType).toBe("swimStroke");
   });
 
-  it("does not throw when target.type is unhandled (fall-through)", () => {
+  it("should not throw when target.type is unhandled (fall-through)", () => {
     // Arrange — synthesize an "unknown" target type that the dispatcher
     // doesn't have a branch for. Current behavior: silently no-op (no
     // mutation of `message`).

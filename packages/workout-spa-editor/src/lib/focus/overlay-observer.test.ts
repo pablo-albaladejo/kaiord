@@ -50,7 +50,7 @@ describe("subscribeToOverlayCount", () => {
     document.body.innerHTML = "";
   });
 
-  it("delivers the initial count synchronously", () => {
+  it("should deliver the initial count synchronously", () => {
     // Arrange
     const root = makeRoot();
     root.appendChild(makeOverlay("dialog"));
@@ -64,7 +64,7 @@ describe("subscribeToOverlayCount", () => {
     expect(cb).toHaveBeenLastCalledWith(1);
   });
 
-  it("updates the count when an overlay opens inside the root", async () => {
+  it("should update the count when an overlay opens inside the root", async () => {
     // Arrange
     const root = makeRoot();
     const cb = vi.fn();
@@ -80,7 +80,7 @@ describe("subscribeToOverlayCount", () => {
     expect(cb).toHaveBeenCalledWith(1);
   });
 
-  it("does not fire for an overlay outside the root (DoS mitigation)", async () => {
+  it("should not fire for an overlay outside the root (DoS mitigation)", async () => {
     // Arrange — foreign overlay lives under body, not under our root.
     const root = makeRoot();
     const cb = vi.fn();
@@ -97,7 +97,7 @@ describe("subscribeToOverlayCount", () => {
     }
   });
 
-  it("ignores overlays without a data-radix-* attribute", async () => {
+  it("should ignore overlays without a data-radix-* attribute", async () => {
     // Arrange
     const root = makeRoot();
     const cb = vi.fn();
@@ -118,7 +118,7 @@ describe("subscribeToOverlayCount", () => {
     }
   });
 
-  it("fires once when closing the last overlay", async () => {
+  it("should fire once when closing the last overlay", async () => {
     // Arrange
     const root = makeRoot();
     const overlay = makeOverlay("dialog");
@@ -136,7 +136,7 @@ describe("subscribeToOverlayCount", () => {
     expect(cb).toHaveBeenCalledWith(0);
   });
 
-  it("deduplicates consecutive equal counts", async () => {
+  it("should deduplicate consecutive equal counts", async () => {
     // Arrange
     const root = makeRoot();
     const cb = vi.fn();
@@ -154,7 +154,7 @@ describe("subscribeToOverlayCount", () => {
     expect(cb).not.toHaveBeenCalled();
   });
 
-  it("shares one observer across subscribers on the same root", async () => {
+  it("should share one observer across subscribers on the same root", async () => {
     // Arrange — two subscribers, both see the same transition.
     const root = makeRoot();
     const cbA = vi.fn();
@@ -174,7 +174,7 @@ describe("subscribeToOverlayCount", () => {
     expect(cbB).toHaveBeenCalledWith(1);
   });
 
-  it("stops delivering after unsubscribe", async () => {
+  it("should stop delivering after unsubscribe", async () => {
     // Arrange
     const root = makeRoot();
     const cb = vi.fn();
@@ -208,7 +208,7 @@ describe("subscribeToOverlayCount", () => {
       warnSpy.mockRestore();
     });
 
-    it("calls back with 0, warns once, and does not throw", () => {
+    it("should call back with 0, warns once, and does not throw", () => {
       // Arrange
       const root = makeRoot();
       const cbA = vi.fn();
@@ -231,7 +231,7 @@ describe("subscribeToOverlayCount", () => {
   });
 
   describe("singleton reset in test mode", () => {
-    it("mirrors the singleton on globalThis in test env", () => {
+    it("should mirror the singleton on globalThis in test env", () => {
       // Arrange
       const root = makeRoot();
       const cb = vi.fn();

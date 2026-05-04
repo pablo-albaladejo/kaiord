@@ -22,7 +22,7 @@ const makeUI = (marker: string): UIWorkout =>
 
 // Task 4.1.a — HistoryEntry shape and undoHistory typing
 describe("HistoryEntry type shape", () => {
-  it("HistoryEntry is an object with workout and selection fields", () => {
+  it("should expose HistoryEntry as an object with workout and selection fields", () => {
     const entry: HistoryEntry = {
       workout: makeUI("a"),
       selection: asItemId("sel-1"),
@@ -32,13 +32,13 @@ describe("HistoryEntry type shape", () => {
     expect(entry.selection).toBe("sel-1");
   });
 
-  it("HistoryEntry selection can be null", () => {
+  it("should allow HistoryEntry selection to be null", () => {
     const entry: HistoryEntry = { workout: makeUI("b"), selection: null };
 
     expect(entry.selection).toBeNull();
   });
 
-  it("UndoHistory is an array of HistoryEntry", () => {
+  it("should expose UndoHistory as an array of HistoryEntry", () => {
     const history: UndoHistory = [
       { workout: makeUI("a"), selection: null },
       { workout: makeUI("b"), selection: asItemId("sel-1") },
@@ -51,7 +51,7 @@ describe("HistoryEntry type shape", () => {
 
 // Task 4.2.a — pushHistorySnapshot 1-arg signature
 describe("pushHistorySnapshot (1-arg HistoryEntry form)", () => {
-  it("accepts a single HistoryEntry and pushes atomically", () => {
+  it("should accept a single HistoryEntry and pushes atomically", () => {
     const entry: HistoryEntry = {
       workout: makeUI("a"),
       selection: asItemId("sel-1"),
@@ -68,7 +68,7 @@ describe("pushHistorySnapshot (1-arg HistoryEntry form)", () => {
     expect(result.historyIndex).toBe(0);
   });
 
-  it("keeps undoHistory entries parallel (no length drift possible)", () => {
+  it("should keep undoHistory entries parallel (no length drift possible)", () => {
     const state0 = { undoHistory: [] as UndoHistory, historyIndex: -1 };
     const r1 = pushHistorySnapshot(state0, {
       workout: makeUI("a"),
@@ -84,7 +84,7 @@ describe("pushHistorySnapshot (1-arg HistoryEntry form)", () => {
     expect(r2.undoHistory[1].selection).toBe("sel-2");
   });
 
-  it("truncates to 50 entries, keeping the most recent tail", () => {
+  it("should truncate to 50 entries, keeping the most recent tail", () => {
     let state = { undoHistory: [] as UndoHistory, historyIndex: -1 };
     for (let i = 0; i < 52; i++) {
       state = pushHistorySnapshot(state, {
@@ -107,11 +107,11 @@ describe("WorkoutStore undo/redo with undoHistory", () => {
     useWorkoutStore.setState({ undoHistory: [], historyIndex: -1 });
   });
 
-  it("WorkoutStore initial state has undoHistory as empty array", () => {
+  it("should keep WorkoutStore initial state with undoHistory as empty array", () => {
     expect(useWorkoutStore.getState().undoHistory).toEqual([]);
   });
 
-  it("undo reads the paired {workout, selection} from undoHistory", () => {
+  it("should read the paired {workout, selection} from undoHistory on undo", () => {
     const workout0 = makeUI("initial");
     const workout1 = makeUI("after-mutation");
     const selId = asItemId("step-abc");
@@ -138,7 +138,7 @@ describe("clearWorkout resets undoHistory", () => {
     useWorkoutStore.setState({ undoHistory: [], historyIndex: -1 });
   });
 
-  it("resets undoHistory to empty array and historyIndex to -1", () => {
+  it("should reset undoHistory to empty array and historyIndex to -1", () => {
     useWorkoutStore.setState({
       undoHistory: [{ workout: makeUI("x"), selection: null }],
       historyIndex: 0,

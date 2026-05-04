@@ -17,7 +17,7 @@ const makeMatch = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
 });
 
 describe("unmatchSession", () => {
-  it("deletes the row identified by matchId", async () => {
+  it("should delete the row identified by matchId", async () => {
     const repo = createInMemorySessionMatchRepository();
     await repo.put(makeMatch({ id: "M1" }));
 
@@ -31,7 +31,7 @@ describe("unmatchSession", () => {
     ).toBeUndefined();
   });
 
-  it("is idempotent on missing matchId", async () => {
+  it("should be idempotent on missing matchId", async () => {
     const repo = createInMemorySessionMatchRepository();
 
     await expect(
@@ -42,7 +42,7 @@ describe("unmatchSession", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("throws CrossProfileMatchError when match belongs to a different profile", async () => {
+  it("should throw CrossProfileMatchError when match belongs to a different profile", async () => {
     const repo = createInMemorySessionMatchRepository();
     await repo.put(makeMatch({ id: "M1", profileId: "p1" }));
 

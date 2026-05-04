@@ -69,7 +69,7 @@ describe("useFocusOnRouteChange", () => {
     vi.restoreAllMocks();
   });
 
-  it("focuses the data-route-heading element on pathname change", async () => {
+  it("should focus the data-route-heading element on pathname change", async () => {
     const loc = memoryLocation({ path: "/calendar" });
     const { rerender } = render(
       <Router hook={loc.hook}>
@@ -93,7 +93,7 @@ describe("useFocusOnRouteChange", () => {
     });
   });
 
-  it("warns once and falls back to body when no [data-route-heading] is present", async () => {
+  it("should warn once and falls back to body when no [data-route-heading] is present", async () => {
     const warn = vi.spyOn(console, "warn").mockImplementation(() => undefined);
     const { hook } = memoryLocation({ path: "/calendar" });
 

@@ -20,7 +20,7 @@ const workoutWith = (ids: Array<string>): Workout =>
   }) as unknown as Workout;
 
 describe("nextAfterMultiDelete", () => {
-  it("focuses the first remaining item after the last-deleted position (contiguous)", () => {
+  it("should focus the first remaining item after the last-deleted position (contiguous)", () => {
     // Arrange — original [a, b, c, d, e]; deleted [b, c] at indices [1, 2];
     // post-delete workout = [a, d, e]; the item "after last-deleted" is d
     // at post-delete position (2 - 1) = 1.
@@ -36,7 +36,7 @@ describe("nextAfterMultiDelete", () => {
     expect(target).toEqual({ kind: "item", id: "d" });
   });
 
-  it("handles non-contiguous deletions the same way", () => {
+  it("should handle non-contiguous deletions the same way", () => {
     // Arrange — original [a, b, c, d, e]; deleted [a, c] at indices [0, 2];
     // post-delete workout = [b, d, e]. lastDeleted=2, removedCount=2 →
     // position 2-1=1 → "d".
@@ -52,7 +52,7 @@ describe("nextAfterMultiDelete", () => {
     expect(target).toEqual({ kind: "item", id: "d" });
   });
 
-  it("falls back to the previous-sibling when nothing sits after the deletion", () => {
+  it("should fall back to the previous-sibling when nothing sits after the deletion", () => {
     // Arrange — original [a, b, c]; deleted the tail [b, c] at [1, 2];
     // post-delete workout = [a]; no item after last-deleted; fallback
     // to previous-sibling of first-deleted (index 0) → "a".
@@ -68,7 +68,7 @@ describe("nextAfterMultiDelete", () => {
     expect(target).toEqual({ kind: "item", id: "a" });
   });
 
-  it("anchors on a surviving item when both after-last and before-first checks miss", () => {
+  it("should anchor on a surviving item when both after-last and before-first checks miss", () => {
     // Arrange — original [a, b, c]; deleted [0, 2]; post-delete [b].
     // `afterLast` position = 2 - 1 = 1 → undefined (only 1 item now).
     // `firstDeleted` = 0, so no previous-sibling check applies. Without
@@ -86,7 +86,7 @@ describe("nextAfterMultiDelete", () => {
     expect(target).toEqual({ kind: "item", id: "b" });
   });
 
-  it("returns empty-state when every item was deleted", () => {
+  it("should return empty-state when every item was deleted", () => {
     // Arrange — list is empty post-delete.
     const workout = workoutWith([]);
 
@@ -100,7 +100,7 @@ describe("nextAfterMultiDelete", () => {
     expect(target).toEqual({ kind: "empty-state" });
   });
 
-  it("returns empty-state when workout is undefined", () => {
+  it("should return empty-state when workout is undefined", () => {
     // Act
     const target = nextAfterMultiDelete({
       workout: undefined,
@@ -111,7 +111,7 @@ describe("nextAfterMultiDelete", () => {
     expect(target).toEqual({ kind: "empty-state" });
   });
 
-  it("returns empty-state when no indices were passed", () => {
+  it("should return empty-state when no indices were passed", () => {
     // Arrange
     const workout = workoutWith(["a"]);
 

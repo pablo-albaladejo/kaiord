@@ -221,7 +221,7 @@ describe("ProfileManager", () => {
   });
 
   describe("error handling", () => {
-    it("surfaces a toast when createProfile rejects", async () => {
+    it("should surface a toast when createProfile rejects", async () => {
       const user = userEvent.setup();
       const persistence = createDexiePersistence(db);
       persistence.profiles.put = vi.fn(() =>

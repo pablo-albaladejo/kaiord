@@ -26,7 +26,7 @@ const assertNoPII = (analytics: Analytics) => {
 };
 
 describe("emitSyncResult", () => {
-  it("emits coaching.sync.success with profileId, counts, duration on ok", () => {
+  it("should emit coaching.sync.success with profileId, counts, duration on ok", () => {
     const a = makeAnalytics();
 
     emitSyncResult(
@@ -47,7 +47,7 @@ describe("emitSyncResult", () => {
     assertNoPII(a);
   });
 
-  it("emits coaching.sync.failure with normalized errorKind", () => {
+  it("should emit coaching.sync.failure with normalized errorKind", () => {
     const a = makeAnalytics();
 
     emitSyncResult(
@@ -69,7 +69,7 @@ describe("emitSyncResult", () => {
 });
 
 describe("emitLinkResult", () => {
-  it("emits coaching.link.success with profileId on ok", () => {
+  it("should emit coaching.link.success with profileId on ok", () => {
     const a = makeAnalytics();
 
     emitLinkResult(a, "train2go", "p1", { ok: true });
@@ -81,7 +81,7 @@ describe("emitLinkResult", () => {
     assertNoPII(a);
   });
 
-  it("emits coaching.link.abort on aborted with normalized reason", () => {
+  it("should emit coaching.link.abort on aborted with normalized reason", () => {
     const a = makeAnalytics();
 
     emitLinkResult(a, "train2go", "p1", { ok: false, reason: "aborted" });
@@ -94,7 +94,7 @@ describe("emitLinkResult", () => {
     assertNoPII(a);
   });
 
-  it("emits coaching.link.failure with normalized errorKind", () => {
+  it("should emit coaching.link.failure with normalized errorKind", () => {
     const a = makeAnalytics();
     const reasons = [
       "profile-deleted",

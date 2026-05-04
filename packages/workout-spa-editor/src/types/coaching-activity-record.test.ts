@@ -23,11 +23,11 @@ const valid = {
 };
 
 describe("coachingActivityRecordSchema", () => {
-  it("accepts a minimal valid record", () => {
+  it("should accept a minimal valid record", () => {
     expect(() => coachingActivityRecordSchema.parse(valid)).not.toThrow();
   });
 
-  it("preserves workload unclamped", () => {
+  it("should preserve workload unclamped", () => {
     const record = coachingActivityRecordSchema.parse({
       ...valid,
       workload: 7,
@@ -35,7 +35,7 @@ describe("coachingActivityRecordSchema", () => {
     expect(record.workload).toBe(7);
   });
 
-  it("accepts intensity in 1..5", () => {
+  it("should accept intensity in 1..5", () => {
     for (const intensity of [1, 2, 3, 4, 5] as const) {
       expect(() =>
         coachingActivityRecordSchema.parse({ ...valid, intensity })
@@ -43,7 +43,7 @@ describe("coachingActivityRecordSchema", () => {
     }
   });
 
-  it("rejects intensity outside 1..5", () => {
+  it("should reject intensity outside 1..5", () => {
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, intensity: 6 })
     ).toThrow();
@@ -52,7 +52,7 @@ describe("coachingActivityRecordSchema", () => {
     ).toThrow();
   });
 
-  it("accepts completionPercent in 0..100", () => {
+  it("should accept completionPercent in 0..100", () => {
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, completionPercent: 0 })
     ).not.toThrow();
@@ -64,7 +64,7 @@ describe("coachingActivityRecordSchema", () => {
     ).not.toThrow();
   });
 
-  it("rejects completionPercent outside 0..100", () => {
+  it("should reject completionPercent outside 0..100", () => {
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, completionPercent: -1 })
     ).toThrow();
@@ -73,7 +73,7 @@ describe("coachingActivityRecordSchema", () => {
     ).toThrow();
   });
 
-  it("rejects mismatched composite id", () => {
+  it("should reject mismatched composite id", () => {
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, id: "wrong" })
     ).toThrow();
@@ -82,7 +82,7 @@ describe("coachingActivityRecordSchema", () => {
     ).toThrow();
   });
 
-  it("accepts sourceIds with colons or hyphens (no regex on id)", () => {
+  it("should accept sourceIds with colons or hyphens (no regex on id)", () => {
     const record = {
       ...valid,
       sourceId: "abc-123:xyz",
@@ -91,13 +91,13 @@ describe("coachingActivityRecordSchema", () => {
     expect(() => coachingActivityRecordSchema.parse(record)).not.toThrow();
   });
 
-  it("rejects malformed date", () => {
+  it("should reject malformed date", () => {
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, date: "13/04/2026" })
     ).toThrow();
   });
 
-  it("rejects invalid status enum", () => {
+  it("should reject invalid status enum", () => {
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, status: "in-progress" })
     ).toThrow();
@@ -105,7 +105,7 @@ describe("coachingActivityRecordSchema", () => {
 });
 
 describe("buildCoachingActivityId", () => {
-  it("composes the canonical id format", () => {
+  it("should compose the canonical id format", () => {
     expect(buildCoachingActivityId("p1", "train2go", "12345")).toBe(
       "p1:train2go:12345"
     );
@@ -113,11 +113,11 @@ describe("buildCoachingActivityId", () => {
 });
 
 describe("namespaceSourceId", () => {
-  it("namespaces by profile, omitting source (workout has its own column)", () => {
+  it("should namespace by profile, omitting source (workout has its own column)", () => {
     expect(namespaceSourceId("p1", "12345")).toBe("p1:12345");
   });
 
-  it("produces distinct namespaces for different profiles with the same raw id", () => {
+  it("should produce distinct namespaces for different profiles with the same raw id", () => {
     expect(namespaceSourceId("p1", "12345")).not.toBe(
       namespaceSourceId("p2", "12345")
     );

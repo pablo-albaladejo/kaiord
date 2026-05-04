@@ -28,7 +28,7 @@ const HR_ZONE: HeartRateZone = {
 };
 
 describe("updateSportThresholds", () => {
-  it("recalculates pace zones when threshold pace is set with daniels-5 (running)", async () => {
+  it("should recalculate pace zones when threshold pace is set with daniels-5 (running)", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     profile.sportZones.running!.paceZones = {
@@ -48,7 +48,7 @@ describe("updateSportThresholds", () => {
     expect(updated.sportZones.running?.paceZones?.zones).toHaveLength(5);
   });
 
-  it("recalculates HR zones when LTHR is set and method is non-custom", async () => {
+  it("should recalculate HR zones when LTHR is set and method is non-custom", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     profile.sportZones.cycling!.heartRateZones = {
@@ -70,7 +70,7 @@ describe("updateSportThresholds", () => {
     ).toBeGreaterThan(0);
   });
 
-  it("throws ProfileNotFoundError for an unknown id", async () => {
+  it("should throw ProfileNotFoundError for an unknown id", async () => {
     const persistence = createInMemoryPersistence();
     await expect(
       updateSportThresholds(persistence, "missing", "cycling", {})
@@ -79,7 +79,7 @@ describe("updateSportThresholds", () => {
 });
 
 describe("updateSportZones", () => {
-  it("replaces the zones array for the (sport, zoneType) pair", async () => {
+  it("should replace the zones array for the (sport, zoneType) pair", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     await seedProfile(persistence, profile);
@@ -95,7 +95,7 @@ describe("updateSportZones", () => {
     expect(updated.sportZones.cycling?.heartRateZones.zones).toEqual([HR_ZONE]);
   });
 
-  it("is a no-op when the zoneType is missing on the sport config", async () => {
+  it("should be a no-op when the zoneType is missing on the sport config", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     await seedProfile(persistence, profile);
@@ -111,7 +111,7 @@ describe("updateSportZones", () => {
     expect(updated.sportZones.swimming?.powerZones).toBeUndefined();
   });
 
-  it("throws ProfileNotFoundError for an unknown id", async () => {
+  it("should throw ProfileNotFoundError for an unknown id", async () => {
     const persistence = createInMemoryPersistence();
     await expect(
       updateSportZones(persistence, "missing", "cycling", "heartRateZones", [])
@@ -120,7 +120,7 @@ describe("updateSportZones", () => {
 });
 
 describe("setZoneMethod", () => {
-  it("sets method and zones together", async () => {
+  it("should set method and zones together", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     await seedProfile(persistence, profile);
@@ -140,7 +140,7 @@ describe("setZoneMethod", () => {
     expect(updated.sportZones.cycling?.heartRateZones.zones).toEqual([HR_ZONE]);
   });
 
-  it("throws ProfileNotFoundError for an unknown id", async () => {
+  it("should throw ProfileNotFoundError for an unknown id", async () => {
     const persistence = createInMemoryPersistence();
     await expect(
       setZoneMethod(
@@ -156,7 +156,7 @@ describe("setZoneMethod", () => {
 });
 
 describe("addCustomZone", () => {
-  it("appends a zone within the 10-zone bound", async () => {
+  it("should append a zone within the 10-zone bound", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     await seedProfile(persistence, profile);
@@ -173,7 +173,7 @@ describe("addCustomZone", () => {
     expect(zones[zones.length - 1]).toEqual(HR_ZONE);
   });
 
-  it("is a no-op when the zoneType is missing on the sport config", async () => {
+  it("should be a no-op when the zoneType is missing on the sport config", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     await seedProfile(persistence, profile);
@@ -189,7 +189,7 @@ describe("addCustomZone", () => {
     expect(updated.sportZones.swimming?.powerZones).toBeUndefined();
   });
 
-  it("is a no-op once the 10-zone limit is reached", async () => {
+  it("should be a no-op once the 10-zone limit is reached", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     profile.sportZones.cycling!.heartRateZones = {
@@ -212,7 +212,7 @@ describe("addCustomZone", () => {
     expect(updated.sportZones.cycling?.heartRateZones.zones).toHaveLength(10);
   });
 
-  it("throws ProfileNotFoundError for an unknown id", async () => {
+  it("should throw ProfileNotFoundError for an unknown id", async () => {
     const persistence = createInMemoryPersistence();
     await expect(
       addCustomZone(
@@ -227,7 +227,7 @@ describe("addCustomZone", () => {
 });
 
 describe("removeCustomZone", () => {
-  it("removes the zone at the given index", async () => {
+  it("should remove the zone at the given index", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     profile.sportZones.cycling!.heartRateZones = {
@@ -253,7 +253,7 @@ describe("removeCustomZone", () => {
     expect(zones.map((z) => z.zone)).toEqual([1, 3]);
   });
 
-  it("is a no-op when only one zone remains", async () => {
+  it("should be a no-op when only one zone remains", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     profile.sportZones.cycling!.heartRateZones = {
@@ -273,7 +273,7 @@ describe("removeCustomZone", () => {
     expect(updated.sportZones.cycling?.heartRateZones.zones).toHaveLength(1);
   });
 
-  it("throws ProfileNotFoundError for an unknown id", async () => {
+  it("should throw ProfileNotFoundError for an unknown id", async () => {
     const persistence = createInMemoryPersistence();
     await expect(
       removeCustomZone(persistence, "missing", "cycling", "heartRateZones", 0)

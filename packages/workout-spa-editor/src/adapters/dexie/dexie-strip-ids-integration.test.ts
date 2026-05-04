@@ -64,7 +64,7 @@ describe("Dexie write paths strip ids", () => {
     await testDb.table("templates").clear();
   });
 
-  it("workout repository strips ids from persisted records", async () => {
+  it("should strip ids from persisted records via the workout repository", async () => {
     const ui = hydrateUIWorkout(buildKrd());
     const record: WorkoutRecord = {
       id: "00000000-0000-4000-8000-000000000111",
@@ -94,7 +94,7 @@ describe("Dexie write paths strip ids", () => {
     assertNoIds(reloaded?.krd ?? null);
   });
 
-  it("template repository strips ids from persisted templates", async () => {
+  it("should strip ids from persisted templates via the template repository", async () => {
     const ui = hydrateUIWorkout(buildKrd());
     const template: WorkoutTemplate = {
       id: "00000000-0000-4000-8000-000000000222",

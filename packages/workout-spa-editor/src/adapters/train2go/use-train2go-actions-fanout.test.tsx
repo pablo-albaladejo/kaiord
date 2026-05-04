@@ -83,7 +83,7 @@ const wrapPersistence = (
 describe("useConnectCallback fan-out", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("calls runZonesSync after attemptLink ok AND syncZones flag is true", async () => {
+  it("should call runZonesSync after attemptLink ok AND syncZones flag is true", async () => {
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK_WITH_FLAG));
     const runZonesSync = vi.fn(async () => undefined);
@@ -97,7 +97,7 @@ describe("useConnectCallback fan-out", () => {
     expect(runZonesSync).toHaveBeenCalledExactlyOnceWith("p1");
   });
 
-  it("does NOT call runZonesSync when the syncZones flag is false", async () => {
+  it("should do NOT call runZonesSync when the syncZones flag is false", async () => {
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK_WITHOUT_FLAG));
     const runZonesSync = vi.fn(async () => undefined);
@@ -111,7 +111,7 @@ describe("useConnectCallback fan-out", () => {
     expect(runZonesSync).not.toHaveBeenCalled();
   });
 
-  it("swallows runZonesSync errors so the connect still resolves", async () => {
+  it("should swallow runZonesSync errors so the connect still resolves", async () => {
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK_WITH_FLAG));
     const runZonesSync = vi.fn(async () => {
@@ -130,7 +130,7 @@ describe("useConnectCallback fan-out", () => {
 describe("useSyncCallback fan-out", () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it("calls runZonesSync after syncWeek ok AND syncZones flag is true", async () => {
+  it("should call runZonesSync after syncWeek ok AND syncZones flag is true", async () => {
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK_WITH_FLAG));
     const runZonesSync = vi.fn(async () => undefined);
@@ -144,7 +144,7 @@ describe("useSyncCallback fan-out", () => {
     expect(runZonesSync).toHaveBeenCalledExactlyOnceWith("p1");
   });
 
-  it("does NOT call runZonesSync when syncWeek fails", async () => {
+  it("should do NOT call runZonesSync when syncWeek fails", async () => {
     mockSyncWeek.mockResolvedValueOnce({
       ok: false as const,
       reason: "shape-mismatch",

@@ -68,13 +68,13 @@ describe("RawWorkoutDialog", () => {
     onUnskip: vi.fn(),
   };
 
-  it("does not render content when workout is null", () => {
+  it("should not render content when workout is null", () => {
     renderWithRouter(<RawWorkoutDialog {...defaultProps} workout={null} />);
 
     expect(screen.queryByTestId("raw-workout-dialog")).not.toBeInTheDocument();
   });
 
-  it("renders dialog content when workout is provided", () => {
+  it("should render dialog content when workout is provided", () => {
     renderWithRouter(
       <RawWorkoutDialog {...defaultProps} workout={makeWorkout()} />
     );
@@ -82,7 +82,7 @@ describe("RawWorkoutDialog", () => {
     expect(screen.getByTestId("raw-workout-dialog")).toBeInTheDocument();
   });
 
-  it("displays the workout title", () => {
+  it("should display the workout title", () => {
     renderWithRouter(
       <RawWorkoutDialog {...defaultProps} workout={makeWorkout()} />
     );
@@ -90,7 +90,7 @@ describe("RawWorkoutDialog", () => {
     expect(screen.getByText("Easy Run")).toBeInTheDocument();
   });
 
-  it("displays the coach description", () => {
+  it("should display the coach description", () => {
     renderWithRouter(
       <RawWorkoutDialog {...defaultProps} workout={makeWorkout()} />
     );
@@ -100,7 +100,7 @@ describe("RawWorkoutDialog", () => {
     ).toBeInTheDocument();
   });
 
-  it("displays comments with checkboxes", () => {
+  it("should display comments with checkboxes", () => {
     renderWithRouter(
       <RawWorkoutDialog {...defaultProps} workout={makeWorkout()} />
     );
@@ -113,7 +113,7 @@ describe("RawWorkoutDialog", () => {
     expect(screen.getByText("Afternoon feedback")).toBeInTheDocument();
   });
 
-  it("pre-selects comments before noon", () => {
+  it("should pre-select comments before noon", () => {
     renderWithRouter(
       <RawWorkoutDialog {...defaultProps} workout={makeWorkout()} />
     );
@@ -128,7 +128,7 @@ describe("RawWorkoutDialog", () => {
     expect(checkboxes[1]).not.toBeChecked();
   });
 
-  it("shows no comments message when there are none", () => {
+  it("should show no comments message when there are none", () => {
     const workout = makeWorkout({
       raw: {
         title: "Easy Run",
@@ -146,7 +146,7 @@ describe("RawWorkoutDialog", () => {
     expect(screen.getByText("No comments available.")).toBeInTheDocument();
   });
 
-  it("calls onProcess with workout id and selected comment indices", async () => {
+  it("should call onProcess with workout id and selected comment indices", async () => {
     const user = userEvent.setup();
     const onProcess = vi.fn();
 
@@ -163,7 +163,7 @@ describe("RawWorkoutDialog", () => {
     expect(onProcess).toHaveBeenCalledWith("w-1", [0]);
   });
 
-  it("calls onSkip with workout id", async () => {
+  it("should call onSkip with workout id", async () => {
     const user = userEvent.setup();
     const onSkip = vi.fn();
 
@@ -180,7 +180,7 @@ describe("RawWorkoutDialog", () => {
     expect(onSkip).toHaveBeenCalledWith("w-1");
   });
 
-  it("shows Un-skip button for skipped workouts", () => {
+  it("should show Un-skip button for skipped workouts", () => {
     const workout = makeWorkout({ state: "skipped" });
 
     renderWithRouter(<RawWorkoutDialog {...defaultProps} workout={workout} />);
@@ -190,7 +190,7 @@ describe("RawWorkoutDialog", () => {
     expect(screen.queryByText("Skip")).not.toBeInTheDocument();
   });
 
-  it("calls onUnskip when Un-skip is clicked", async () => {
+  it("should call onUnskip when Un-skip is clicked", async () => {
     const user = userEvent.setup();
     const onUnskip = vi.fn();
     const workout = makeWorkout({ state: "skipped" });
@@ -208,7 +208,7 @@ describe("RawWorkoutDialog", () => {
     expect(onUnskip).toHaveBeenCalledWith("w-1");
   });
 
-  it("toggles comment selection on checkbox click", async () => {
+  it("should toggle comment selection on checkbox click", async () => {
     const user = userEvent.setup();
 
     renderWithRouter(
@@ -230,7 +230,7 @@ describe("RawWorkoutDialog", () => {
     expect(checkboxes[1]).toBeChecked();
   });
 
-  it("calls onClose when dialog is dismissed", async () => {
+  it("should call onClose when dialog is dismissed", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
 
@@ -247,7 +247,7 @@ describe("RawWorkoutDialog", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("disables buttons when isSubmitting is true", () => {
+  it("should disable buttons when isSubmitting is true", () => {
     renderWithRouter(
       <RawWorkoutDialog
         {...defaultProps}

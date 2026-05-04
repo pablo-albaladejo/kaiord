@@ -40,7 +40,7 @@ describe("Library badge regressions", () => {
   beforeEach(clear);
   afterEach(clear);
 
-  it("shows the correct badge count after a fresh mount over pre-populated Dexie", async () => {
+  it("should show the correct badge count after a fresh mount over pre-populated Dexie", async () => {
     const persistence = createDexiePersistence(db);
     await addTemplate(persistence, "Workout 1", "running", makeKrd());
     await addTemplate(persistence, "Workout 2", "cycling", makeKrd());

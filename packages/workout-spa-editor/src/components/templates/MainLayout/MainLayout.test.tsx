@@ -135,7 +135,7 @@ describe("MainLayout", () => {
     expect(screen.getByText("Content")).toBeInTheDocument();
   });
 
-  it("mounts the storage-availability banner region exactly once", () => {
+  it("should mount the storage-availability banner region exactly once", () => {
     // Arrange & Act
     const { container } = renderWithProviders(
       <MainLayout>

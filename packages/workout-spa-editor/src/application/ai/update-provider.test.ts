@@ -7,7 +7,7 @@ import { baseProvider } from "./test-fixtures";
 import { updateProvider } from "./update-provider";
 
 describe("updateProvider", () => {
-  it("merges the partial update onto the existing provider", async () => {
+  it("should merge the partial update onto the existing provider", async () => {
     const persistence = createInMemoryPersistence();
     const created = await addProvider(persistence, baseProvider);
 
@@ -22,7 +22,7 @@ describe("updateProvider", () => {
     expect(updated.isDefault).toBe(true);
   });
 
-  it("throws ProviderNotFoundError for unknown ids", async () => {
+  it("should throw ProviderNotFoundError for unknown ids", async () => {
     const persistence = createInMemoryPersistence();
 
     await expect(

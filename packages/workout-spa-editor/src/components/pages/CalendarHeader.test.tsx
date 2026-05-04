@@ -62,7 +62,7 @@ const baseState = {
 } as unknown as Parameters<typeof CalendarHeader>[0]["state"];
 
 describe("CalendarHeader", () => {
-  it("renders empty banners, cost confirmation, and week navigation", () => {
+  it("should render empty banners, cost confirmation, and week navigation", () => {
     render(
       <CalendarHeader
         state={baseState}
@@ -79,7 +79,7 @@ describe("CalendarHeader", () => {
     expect(screen.getByTestId("mock-week-nav")).toHaveTextContent("2026-W16");
   });
 
-  it("renders a sync button per LINKED coaching source (gates on linked)", () => {
+  it("should render a sync button per LINKED coaching source (gates on linked)", () => {
     const coaching = {
       syncSources: [
         {
@@ -123,7 +123,7 @@ describe("CalendarHeader", () => {
     expect(screen.queryByTestId("mock-sync-Unlinked")).not.toBeInTheDocument();
   });
 
-  it("Manual Sync button bypasses staleness gate", async () => {
+  it("should bypass staleness gate via Manual Sync button", async () => {
     // The staleness gate (lastSyncedAt < 10 minutes blocks auto-sync) lives
     // inside useCoachingActivities, NOT inside CalendarHeader. The CalendarHeader
     // wires the Sync button directly to src.sync(weekStart) — clicking it always
@@ -157,7 +157,7 @@ describe("CalendarHeader", () => {
     expect(sync).toHaveBeenCalledWith(weekStart);
   });
 
-  it("hides the Sync button when active profile has no linked accounts", () => {
+  it("should hide the Sync button when active profile has no linked accounts", () => {
     // Models switching from a Train2Go-linked profile to one with no linked
     // accounts via two distinct mounts (D4 in design.md): avoids relying on
     // useLiveQuery / useActiveProfile flush ordering on rerender.

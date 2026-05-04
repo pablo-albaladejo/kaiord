@@ -16,7 +16,7 @@ describe("Save as Template", () => {
     await db.table("templates").clear();
   });
 
-  it("creates a template record in Dexie", async () => {
+  it("should create a template record in Dexie", async () => {
     const persistence = createDexiePersistence(db);
     const krd = {
       version: "1.0",

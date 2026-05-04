@@ -37,7 +37,7 @@ vi.mock("./coaching-registry-context", () => ({
 import { CoachingRegistryBootstrap } from "./coaching-registry-bootstrap";
 
 describe("CoachingRegistryBootstrap", () => {
-  it("renders children inside the provider", () => {
+  it("should render children inside the provider", () => {
     render(
       <CoachingRegistryBootstrap>
         <span>Child content</span>
@@ -47,7 +47,7 @@ describe("CoachingRegistryBootstrap", () => {
     expect(screen.getByText("Child content")).toBeInTheDocument();
   });
 
-  it("passes the factory array to the provider", () => {
+  it("should pass the factory array to the provider", () => {
     render(
       <CoachingRegistryBootstrap>
         <span>Test</span>

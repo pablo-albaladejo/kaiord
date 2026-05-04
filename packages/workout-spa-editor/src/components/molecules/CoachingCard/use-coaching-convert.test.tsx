@@ -91,7 +91,7 @@ describe("useCoachingConvert", () => {
     expect(result.current.error).toBeNull();
   });
 
-  it("sets error and does NOT navigate or close on convertCoachingActivity rejection", async () => {
+  it("should set error and does NOT navigate or close on convertCoachingActivity rejection", async () => {
     const onClose = vi.fn();
     const persistence = createInMemoryPersistence();
     await persistence.coaching.put(makeRecord());

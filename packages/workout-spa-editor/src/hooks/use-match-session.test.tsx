@@ -43,7 +43,7 @@ const makeWorkout = (): WorkoutRecord =>
   }) as unknown as WorkoutRecord;
 
 describe("useMatchSession", () => {
-  it("creates a SessionMatch row through the injected PersistencePort", async () => {
+  it("should create a SessionMatch row through the injected PersistencePort", async () => {
     const persistence = createInMemoryPersistence();
     const activity = makeActivity();
     const workout = makeWorkout();
@@ -76,7 +76,7 @@ describe("useMatchSession", () => {
     expect(stored?.profileId).toBe(PROFILE);
   });
 
-  it("rejects when the activity does not exist in the injected port", async () => {
+  it("should reject when the activity does not exist in the injected port", async () => {
     const persistence = createInMemoryPersistence();
     await persistence.workouts.put(makeWorkout());
 

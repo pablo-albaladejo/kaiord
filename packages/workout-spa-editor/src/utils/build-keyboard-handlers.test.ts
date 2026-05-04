@@ -46,40 +46,40 @@ const makeWorkout = (stepCount: number) => ({
 
 describe("buildKeyboardHandlers return values", () => {
   describe("onSave", () => {
-    it("returns true always", () => {
+    it("should return true always", () => {
       const h = buildKeyboardHandlers(mockDeps());
       expect(h.onSave!()).toBe(true);
     });
   });
 
   describe("onUndo", () => {
-    it("returns true always", () => {
+    it("should return true always", () => {
       const h = buildKeyboardHandlers(mockDeps());
       expect(h.onUndo!()).toBe(true);
     });
   });
 
   describe("onRedo", () => {
-    it("returns true always", () => {
+    it("should return true always", () => {
       const h = buildKeyboardHandlers(mockDeps());
       expect(h.onRedo!()).toBe(true);
     });
   });
 
   describe("onMoveStepUp", () => {
-    it("returns false when no step selected", () => {
+    it("should return false when no step selected", () => {
       const h = buildKeyboardHandlers(mockDeps());
       expect(h.onMoveStepUp!()).toBe(false);
     });
 
-    it("returns false when first step selected", () => {
+    it("should return false when first step selected", () => {
       const h = buildKeyboardHandlers(
         mockDeps({ stepIndex: () => 0, workout: makeWorkout(3) })
       );
       expect(h.onMoveStepUp!()).toBe(false);
     });
 
-    it("returns true when movable step selected", () => {
+    it("should return true when movable step selected", () => {
       const h = buildKeyboardHandlers(
         mockDeps({ stepIndex: () => 1, workout: makeWorkout(3) })
       );
@@ -88,19 +88,19 @@ describe("buildKeyboardHandlers return values", () => {
   });
 
   describe("onMoveStepDown", () => {
-    it("returns false when no step selected", () => {
+    it("should return false when no step selected", () => {
       const h = buildKeyboardHandlers(mockDeps());
       expect(h.onMoveStepDown!()).toBe(false);
     });
 
-    it("returns false when last step selected", () => {
+    it("should return false when last step selected", () => {
       const h = buildKeyboardHandlers(
         mockDeps({ stepIndex: () => 2, workout: makeWorkout(3) })
       );
       expect(h.onMoveStepDown!()).toBe(false);
     });
 
-    it("returns true when movable step selected", () => {
+    it("should return true when movable step selected", () => {
       const h = buildKeyboardHandlers(
         mockDeps({ stepIndex: () => 0, workout: makeWorkout(3) })
       );
@@ -109,12 +109,12 @@ describe("buildKeyboardHandlers return values", () => {
   });
 
   describe("onCopy", () => {
-    it("returns false when no step selected", () => {
+    it("should return false when no step selected", () => {
       const h = buildKeyboardHandlers(mockDeps());
       expect(h.onCopy!()).toBe(false);
     });
 
-    it("returns true when step selected", () => {
+    it("should return true when step selected", () => {
       const h = buildKeyboardHandlers(
         mockDeps({ stepIndex: () => 0, workout: makeWorkout(2) })
       );
@@ -123,12 +123,12 @@ describe("buildKeyboardHandlers return values", () => {
   });
 
   describe("onCut", () => {
-    it("returns false when no step selected", () => {
+    it("should return false when no step selected", () => {
       const h = buildKeyboardHandlers(mockDeps());
       expect(h.onCut!()).toBe(false);
     });
 
-    it("returns false when multi-selection active", () => {
+    it("should return false when multi-selection active", () => {
       const h = buildKeyboardHandlers(
         mockDeps({
           stepIndex: () => 0,
@@ -139,7 +139,7 @@ describe("buildKeyboardHandlers return values", () => {
       expect(h.onCut!()).toBe(false);
     });
 
-    it("returns true when single step selected", () => {
+    it("should return true when single step selected", () => {
       const deps = mockDeps({
         stepIndex: () => 0,
         workout: makeWorkout(2),
@@ -154,14 +154,14 @@ describe("buildKeyboardHandlers return values", () => {
   });
 
   describe("onPaste", () => {
-    it("returns false when clipboard is empty", () => {
+    it("should return false when clipboard is empty", () => {
       const h = buildKeyboardHandlers(
         mockDeps({ stepIndex: () => 0, workout: makeWorkout(2) })
       );
       expect(h.onPaste!()).toBe(false);
     });
 
-    it("returns false when clipboard has content but no workout", () => {
+    it("should return false when clipboard has content but no workout", () => {
       vi.mocked(hasClipboardContent).mockReturnValue(true);
       const h = buildKeyboardHandlers(mockDeps());
 
@@ -169,7 +169,7 @@ describe("buildKeyboardHandlers return values", () => {
       vi.mocked(hasClipboardContent).mockReturnValue(false);
     });
 
-    it("returns true when clipboard has content and step selected", () => {
+    it("should return true when clipboard has content and step selected", () => {
       vi.mocked(hasClipboardContent).mockReturnValue(true);
       const h = buildKeyboardHandlers(
         mockDeps({ stepIndex: () => 0, workout: makeWorkout(2) })
@@ -179,7 +179,7 @@ describe("buildKeyboardHandlers return values", () => {
       vi.mocked(hasClipboardContent).mockReturnValue(false);
     });
 
-    it("returns true when clipboard has content, no step, but workout exists", () => {
+    it("should return true when clipboard has content, no step, but workout exists", () => {
       vi.mocked(hasClipboardContent).mockReturnValue(true);
       const h = buildKeyboardHandlers(mockDeps({ workout: makeWorkout(2) }));
 
@@ -189,12 +189,12 @@ describe("buildKeyboardHandlers return values", () => {
   });
 
   describe("onDelete", () => {
-    it("returns false when no step selected", () => {
+    it("should return false when no step selected", () => {
       const h = buildKeyboardHandlers(mockDeps());
       expect(h.onDelete!()).toBe(false);
     });
 
-    it("returns true when step selected", () => {
+    it("should return true when step selected", () => {
       const deps = mockDeps({
         stepIndex: () => 0,
         workout: makeWorkout(2),
@@ -207,14 +207,14 @@ describe("buildKeyboardHandlers return values", () => {
   });
 
   describe("onCreateBlock", () => {
-    it("returns false when fewer than 2 steps selected", () => {
+    it("should return false when fewer than 2 steps selected", () => {
       const h = buildKeyboardHandlers(
         mockDeps({ selectedStepIds: ["step-0"] })
       );
       expect(h.onCreateBlock!()).toBe(false);
     });
 
-    it("returns true when 2+ steps selected", () => {
+    it("should return true when 2+ steps selected", () => {
       const h = buildKeyboardHandlers(
         mockDeps({ selectedStepIds: ["step-0", "step-1"] })
       );
@@ -223,12 +223,12 @@ describe("buildKeyboardHandlers return values", () => {
   });
 
   describe("onUngroupBlock", () => {
-    it("returns false when no step selected", () => {
+    it("should return false when no step selected", () => {
       const h = buildKeyboardHandlers(mockDeps());
       expect(h.onUngroupBlock!()).toBe(false);
     });
 
-    it("returns false when the selected id points at a step, not a block", () => {
+    it("should return false when the selected id points at a step, not a block", () => {
       // A workout with a top-level step `id-step-1` and no matching block.
       const workout = {
         steps: [
@@ -246,7 +246,7 @@ describe("buildKeyboardHandlers return values", () => {
       expect(h.onUngroupBlock!()).toBe(false);
     });
 
-    it("returns true when the selected id points at a repetition block", () => {
+    it("should return true when the selected id points at a repetition block", () => {
       // A workout with a block whose `id` matches the selection.
       const workout = {
         steps: [
@@ -275,34 +275,34 @@ describe("buildKeyboardHandlers return values", () => {
   });
 
   describe("onSelectAll", () => {
-    it("returns false when no workout", () => {
+    it("should return false when no workout", () => {
       const h = buildKeyboardHandlers(mockDeps());
       expect(h.onSelectAll!()).toBe(false);
     });
 
-    it("returns false when workout has no steps", () => {
+    it("should return false when workout has no steps", () => {
       const h = buildKeyboardHandlers(mockDeps({ workout: makeWorkout(0) }));
       expect(h.onSelectAll!()).toBe(false);
     });
 
-    it("returns true when workout has steps", () => {
+    it("should return true when workout has steps", () => {
       const h = buildKeyboardHandlers(mockDeps({ workout: makeWorkout(3) }));
       expect(h.onSelectAll!()).toBe(true);
     });
   });
 
   describe("onClearSelection", () => {
-    it("returns false when no selection", () => {
+    it("should return false when no selection", () => {
       const h = buildKeyboardHandlers(mockDeps());
       expect(h.onClearSelection!()).toBe(false);
     });
 
-    it("returns true when single step selected", () => {
+    it("should return true when single step selected", () => {
       const h = buildKeyboardHandlers(mockDeps({ selectedStepId: "step-0" }));
       expect(h.onClearSelection!()).toBe(true);
     });
 
-    it("returns true when multi-selection active", () => {
+    it("should return true when multi-selection active", () => {
       const h = buildKeyboardHandlers(
         mockDeps({ selectedStepIds: ["step-0", "step-1"] })
       );

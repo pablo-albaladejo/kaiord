@@ -32,7 +32,7 @@ const captureValue = (sink: { current: FocusRegistryValue | null }) => {
 };
 
 describe("FocusRegistryContext", () => {
-  it("registerItem stores the element under its id", () => {
+  it("should store the element under its id via registerItem", () => {
     // Arrange
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
@@ -46,7 +46,7 @@ describe("FocusRegistryContext", () => {
     expect(sink.current!.getItem(id)).toBe(el);
   });
 
-  it("registerItem is idempotent for the same (id, el) pair", () => {
+  it("should be idempotent via registerItem for the same (id, el) pair", () => {
     // Arrange
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
@@ -61,7 +61,7 @@ describe("FocusRegistryContext", () => {
     expect(sink.current!.getItem(id)).toBe(el);
   });
 
-  it("registerItem with a new element for the same id replaces the entry", () => {
+  it("should replace the entry via registerItem with a new element for the same id", () => {
     // Arrange
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
@@ -77,7 +77,7 @@ describe("FocusRegistryContext", () => {
     expect(sink.current!.getItem(id)).toBe(second);
   });
 
-  it("unregisterItem deletes only when the stored element matches (StrictMode guard)", () => {
+  it("should delete only when the stored element matches via unregisterItem (StrictMode guard)", () => {
     // Arrange — simulate StrictMode double-mount order:
     //   first mount registers `first`
     //   second mount registers `second`        (replaces)
@@ -103,7 +103,7 @@ describe("FocusRegistryContext", () => {
     expect(sink.current!.getItem(id)).toBeUndefined();
   });
 
-  it("value reference is stable across re-renders with no registry mutations", () => {
+  it("should keep value reference stable across re-renders with no registry mutations", () => {
     // Arrange — a parent that re-renders on a state toggle. The context
     // value must be reference-equal across the toggle so a memoized
     // consumer does not re-render.
@@ -138,7 +138,7 @@ describe("FocusRegistryContext", () => {
     expect(observedValues.size).toBe(1);
   });
 
-  it("supports multiple ids independently", () => {
+  it("should support multiple ids independently", () => {
     // Arrange
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
@@ -161,7 +161,7 @@ describe("FocusRegistryContext", () => {
     expect(sink.current!.getItem(b)).toBe(elB);
   });
 
-  it("integrates with a typical useEffect register/unregister pattern", () => {
+  it("should integrate with a typical useEffect register/unregister pattern", () => {
     // Arrange — a component that mounts, registers on effect, unmounts.
     const sink = { current: null as FocusRegistryValue | null };
 

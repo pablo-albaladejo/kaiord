@@ -62,7 +62,7 @@ describe("ManualCreateSection analytics", () => {
     vi.clearAllTimers();
   });
 
-  it("fires workout-imported with detected format on successful import", async () => {
+  it("should fire workout-imported with detected format on successful import", async () => {
     // Arrange
     const { importWorkout } = await import("../../utils/import-workout");
     vi.mocked(importWorkout).mockResolvedValue(mockKRD);
@@ -93,7 +93,7 @@ describe("ManualCreateSection analytics", () => {
     });
   });
 
-  it("fires workout-imported with format=fit on successful FIT import", async () => {
+  it("should fire workout-imported with format=fit on successful FIT import", async () => {
     // Arrange
     const { importWorkout } = await import("../../utils/import-workout");
     vi.mocked(importWorkout).mockResolvedValue(mockKRD);
@@ -124,7 +124,7 @@ describe("ManualCreateSection analytics", () => {
     });
   });
 
-  it("does NOT fire workout-imported when the import fails", async () => {
+  it("should do NOT fire workout-imported when the import fails", async () => {
     // Arrange
     const { importWorkout, ImportError } =
       await import("../../utils/import-workout");

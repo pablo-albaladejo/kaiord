@@ -30,13 +30,13 @@ describe("DexieAutoMatchDismissalRepository", () => {
     );
   });
 
-  it("get returns undefined when no row exists", async () => {
+  it("should return undefined from get when no row exists", async () => {
     const repo = createDexieAutoMatchDismissalRepository(db);
 
     expect(await repo.getByProfileAndWeek("p1", "2026-04-27")).toBeUndefined();
   });
 
-  it("put-and-get round trip", async () => {
+  it("should round-trip via put-and-get", async () => {
     const repo = createDexieAutoMatchDismissalRepository(db);
     const row = baseRow();
 
@@ -45,7 +45,7 @@ describe("DexieAutoMatchDismissalRepository", () => {
     expect(await repo.getByProfileAndWeek("p1", "2026-04-27")).toEqual(row);
   });
 
-  it("put is upsert by composite (profileId, weekStart)", async () => {
+  it("should upsert via put by composite (profileId, weekStart)", async () => {
     const repo = createDexieAutoMatchDismissalRepository(db);
     await repo.put(
       baseRow({
@@ -77,13 +77,13 @@ describe("DexieAutoMatchDismissalRepository", () => {
     ).toBe("2026-05-01T15:00:00.000Z");
   });
 
-  it("delete is idempotent on missing rows", async () => {
+  it("should be idempotent on delete when rows are missing", async () => {
     const repo = createDexieAutoMatchDismissalRepository(db);
 
     await expect(repo.delete("never", "2026-04-27")).resolves.toBeUndefined();
   });
 
-  it("delete removes only the matching row", async () => {
+  it("should remove only the matching row on delete", async () => {
     const repo = createDexieAutoMatchDismissalRepository(db);
     await repo.put(baseRow({ weekStart: "2026-04-27" }));
     await repo.put(baseRow({ weekStart: "2026-05-04" }));

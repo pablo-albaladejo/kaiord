@@ -6,7 +6,7 @@ import { removeProvider } from "./remove-provider";
 import { baseProvider, secondProvider } from "./test-fixtures";
 
 describe("removeProvider", () => {
-  it("deletes the target and promotes the next provider when the deleted was default (I2)", async () => {
+  it("should delete the target and promotes the next provider when the deleted was default (I2)", async () => {
     const persistence = createInMemoryPersistence();
     const first = await addProvider(persistence, baseProvider);
     const second = await addProvider(persistence, secondProvider);
@@ -19,7 +19,7 @@ describe("removeProvider", () => {
     expect(all[0].isDefault).toBe(true);
   });
 
-  it("leaves the existing default untouched when removing a non-default provider", async () => {
+  it("should leave the existing default untouched when removing a non-default provider", async () => {
     const persistence = createInMemoryPersistence();
     const first = await addProvider(persistence, baseProvider);
     const second = await addProvider(persistence, secondProvider);
@@ -32,7 +32,7 @@ describe("removeProvider", () => {
     expect(all[0].isDefault).toBe(true);
   });
 
-  it("no-ops when the target id does not exist", async () => {
+  it("should be a no-op when the target id does not exist", async () => {
     const persistence = createInMemoryPersistence();
     await addProvider(persistence, baseProvider);
 

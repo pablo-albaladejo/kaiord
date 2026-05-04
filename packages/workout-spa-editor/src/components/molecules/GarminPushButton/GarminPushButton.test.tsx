@@ -27,13 +27,13 @@ describe("GarminPushButton", () => {
     mockState.lastError = null;
   });
 
-  it("renders nothing when extension is not installed", () => {
+  it("should render nothing when extension is not installed", () => {
     const { container } = render(<GarminPushButton />);
 
     expect(container.innerHTML).toBe("");
   });
 
-  it("shows disabled button when no session", () => {
+  it("should show disabled button when no session", () => {
     mockState.extensionInstalled = true;
     mockState.sessionActive = false;
 
@@ -44,7 +44,7 @@ describe("GarminPushButton", () => {
     expect(button.textContent).toContain("Garmin (no session)");
   });
 
-  it("shows send button when session active", () => {
+  it("should show send button when session active", () => {
     mockState.extensionInstalled = true;
     mockState.sessionActive = true;
 
@@ -55,7 +55,7 @@ describe("GarminPushButton", () => {
     expect(button.textContent).toContain("Send to Garmin");
   });
 
-  it("shows success feedback", () => {
+  it("should show success feedback", () => {
     mockState.extensionInstalled = true;
     mockState.sessionActive = true;
     mockState.pushing = { status: "success" };
@@ -65,7 +65,7 @@ describe("GarminPushButton", () => {
     expect(screen.getByText("Sent to Garmin")).toBeInTheDocument();
   });
 
-  it("shows error feedback", () => {
+  it("should show error feedback", () => {
     mockState.extensionInstalled = true;
     mockState.sessionActive = true;
     mockState.pushing = { status: "error", message: "Push failed" };

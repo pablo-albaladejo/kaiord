@@ -67,7 +67,7 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     useWorkoutStore.setState({ currentWorkout: null });
   });
 
-  it("acceptWorkout on STRUCTURED with edits bumps modifiedAt", async () => {
+  it("should bump modifiedAt via acceptWorkout on STRUCTURED with edits", async () => {
     const record = makeRecord({ state: "structured" });
     useWorkoutStore.setState({ currentWorkout: EDITED_KRD });
 
@@ -82,7 +82,7 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     expect(persisted?.modifiedAt).not.toBeNull();
   });
 
-  it("acceptWorkout on STRUCTURED without edits does NOT bump modifiedAt", async () => {
+  it("should NOT bump modifiedAt via acceptWorkout on STRUCTURED without edits", async () => {
     const record = makeRecord({ state: "structured" });
     // currentWorkout matches the record's KRD — no edit.
     useWorkoutStore.setState({ currentWorkout: ORIGINAL_KRD });
@@ -97,7 +97,7 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     expect(persisted?.modifiedAt).toBeNull();
   });
 
-  it("pushWorkout on READY with edits bumps modifiedAt", async () => {
+  it("should bump modifiedAt via pushWorkout on READY with edits", async () => {
     const record = makeRecord({ state: "ready", krd: ORIGINAL_KRD });
     useWorkoutStore.setState({ currentWorkout: EDITED_KRD });
 
@@ -113,7 +113,7 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
     expect(persisted?.modifiedAt).not.toBeNull();
   });
 
-  it("markModified on PUSHED bumps modifiedAt (regression check)", async () => {
+  it("should bump modifiedAt via markModified on PUSHED (regression check)", async () => {
     const record = makeRecord({
       state: "pushed",
       krd: ORIGINAL_KRD,

@@ -86,7 +86,7 @@ describe("useFocusAfterAction — telemetry", () => {
 
   // 3.1.a ----------------------------------------------------------------
   describe("unresolved-target-fallback", () => {
-    it("emits fallback=empty-state when an item target falls back to the empty-state button", () => {
+    it("should emit fallback=empty-state when an item target falls back to the empty-state button", () => {
       // Arrange: no currentWorkout → firstItemId=null → item ghost falls to empty-state
       const spy = vi.fn<FocusTelemetry>();
       withTelemetry(spy, <HookConsumer />);
@@ -111,7 +111,7 @@ describe("useFocusAfterAction — telemetry", () => {
       });
     });
 
-    it("emits fallback=first-item when an item target falls back to the first registered item", () => {
+    it("should emit fallback=first-item when an item target falls back to the first registered item", () => {
       // Arrange: currentWorkout has one step so firstItemId is "first-id";
       // "first-id" is registered; "unknown" is not
       const spy = vi.fn<FocusTelemetry>();
@@ -168,7 +168,7 @@ describe("useFocusAfterAction — telemetry", () => {
       });
     });
 
-    it("emits fallback=heading when an item target falls all the way to the heading", () => {
+    it("should emit fallback=heading when an item target falls all the way to the heading", () => {
       // Arrange: no empty-state button, no first item → only heading remains
       const spy = vi.fn<FocusTelemetry>();
       const HeadingOnlyConsumer = () => {
@@ -213,7 +213,7 @@ describe("useFocusAfterAction — telemetry", () => {
 
   // 3.2.a ----------------------------------------------------------------
   describe("form-field-short-circuit", () => {
-    it("emits exactly one event for 5 short-circuits within 500ms", () => {
+    it("should emit exactly one event for 5 short-circuits within 500ms", () => {
       // Arrange
       const spy = vi.fn<FocusTelemetry>();
       const { baseElement } = withTelemetry(spy, <HookConsumer />);
@@ -243,7 +243,7 @@ describe("useFocusAfterAction — telemetry", () => {
       expect(shortCircuits).toHaveLength(1);
     });
 
-    it("emits a second event after the 1000ms debounce window expires", () => {
+    it("should emit a second event after the 1000ms debounce window expires", () => {
       // Arrange
       const spy = vi.fn<FocusTelemetry>();
       const { baseElement } = withTelemetry(spy, <HookConsumer />);
@@ -283,7 +283,7 @@ describe("useFocusAfterAction — telemetry", () => {
 
   // 3.3.a ----------------------------------------------------------------
   describe("overlay-deferred-apply", () => {
-    it("emits deferredForMs quantized to 100ms buckets after overlay closes", async () => {
+    it("should emit deferredForMs quantized to 100ms buckets after overlay closes", async () => {
       // Arrange
       const spy = vi.fn<FocusTelemetry>();
       const rafSpy = vi
@@ -344,7 +344,7 @@ describe("useFocusAfterAction — telemetry", () => {
 
   // 3.4.a ----------------------------------------------------------------
   describe("wiring-canary", () => {
-    it("fires exactly once on first editor mount with a custom telemetry function", () => {
+    it("should fire exactly once on first editor mount with a custom telemetry function", () => {
       const spy = vi.fn<FocusTelemetry>();
       withTelemetry(spy, <HookConsumer />);
 
@@ -352,7 +352,7 @@ describe("useFocusAfterAction — telemetry", () => {
       expect(canaries).toHaveLength(1);
     });
 
-    it("does not fire on a second mount in the same session", () => {
+    it("should not fire on a second mount in the same session", () => {
       const spy1 = vi.fn<FocusTelemetry>();
       const { unmount } = withTelemetry(spy1, <HookConsumer />);
       unmount();
@@ -365,7 +365,7 @@ describe("useFocusAfterAction — telemetry", () => {
       expect(canaries2).toHaveLength(0);
     });
 
-    it("fires again after __resetCanaryForTests resets the session flag", () => {
+    it("should fire again after __resetCanaryForTests resets the session flag", () => {
       const spy1 = vi.fn<FocusTelemetry>();
       const { unmount } = withTelemetry(spy1, <HookConsumer />);
       unmount();
@@ -382,7 +382,7 @@ describe("useFocusAfterAction — telemetry", () => {
 
   // 3.5.a ----------------------------------------------------------------
   describe("focus-error", () => {
-    it("emits { phase: focus } when el.focus() throws", () => {
+    it("should emit { phase: focus } when el.focus() throws", () => {
       // Arrange
       const spy = vi.fn<FocusTelemetry>();
       const ThrowingItem = ({ id }: { id: string }) => {
@@ -423,7 +423,7 @@ describe("useFocusAfterAction — telemetry", () => {
       expect(errors[0][0]).toEqual({ type: "focus-error", phase: "focus" });
     });
 
-    it("emits { phase: scrollIntoView } when scrollIntoView throws", () => {
+    it("should emit { phase: scrollIntoView } when scrollIntoView throws", () => {
       // Arrange
       const spy = vi.fn<FocusTelemetry>();
       const ThrowingScrollItem = ({ id }: { id: string }) => {

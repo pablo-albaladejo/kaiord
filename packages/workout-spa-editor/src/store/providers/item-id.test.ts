@@ -3,14 +3,14 @@ import { describe, expect, it } from "vitest";
 import { asItemId, type ItemId } from "./item-id";
 
 describe("ItemId branded type", () => {
-  it("asItemId brands a plain string", () => {
+  it("should brand a plain string via asItemId", () => {
     const id = asItemId("abc");
 
     expect(typeof id).toBe("string");
     expect(id).toBe("abc");
   });
 
-  it("prevents plain-string assignment without asItemId cast", () => {
+  it("should prevent plain-string assignment without asItemId cast", () => {
     const plain: string = "raw-positional-id";
 
     // @ts-expect-error: plain string cannot be assigned to branded ItemId

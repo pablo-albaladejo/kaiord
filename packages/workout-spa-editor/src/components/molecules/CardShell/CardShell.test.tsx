@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { CardShell } from "./CardShell";
 
 describe("CardShell", () => {
-  it("renders title and metadata slots", () => {
+  it("should render title and metadata slots", () => {
     render(
       <CardShell
         borderClass="border-amber-600"
@@ -19,7 +19,7 @@ describe("CardShell", () => {
     expect(screen.getByText("45 min")).toBeInTheDocument();
   });
 
-  it("applies the lateral border class", () => {
+  it("should apply the lateral border class", () => {
     render(
       <CardShell
         borderClass="border-emerald-600"
@@ -34,7 +34,7 @@ describe("CardShell", () => {
     expect(button.className).toContain("border-emerald-600");
   });
 
-  it("uses line-clamp-2 on the title row", () => {
+  it("should use line-clamp-2 on the title row", () => {
     render(
       <CardShell
         borderClass="border-amber-600"
@@ -49,7 +49,7 @@ describe("CardShell", () => {
     expect(titleContainer?.className).toContain("line-clamp-2");
   });
 
-  it("renders origin chip when provided", () => {
+  it("should render origin chip when provided", () => {
     render(
       <CardShell
         borderClass="border-amber-600"
@@ -63,7 +63,7 @@ describe("CardShell", () => {
     expect(screen.getByText("· T2G")).toBeInTheDocument();
   });
 
-  it("does not render origin chip when omitted", () => {
+  it("should not render origin chip when omitted", () => {
     render(
       <CardShell
         borderClass="border-amber-600"
@@ -76,7 +76,7 @@ describe("CardShell", () => {
     expect(screen.queryByText(/^·/)).not.toBeInTheDocument();
   });
 
-  it("attaches aria-label to the button root", () => {
+  it("should attach aria-label to the button root", () => {
     render(
       <CardShell
         borderClass="border-amber-600"
@@ -92,7 +92,7 @@ describe("CardShell", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders secondary row when provided (matched-card pattern)", () => {
+  it("should render secondary row when provided (matched-card pattern)", () => {
     render(
       <CardShell
         borderClass="border-emerald-600"

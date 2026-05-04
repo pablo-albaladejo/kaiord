@@ -7,7 +7,7 @@ import { makeKrd } from "./test-fixtures";
 import { updateTemplate } from "./update-template";
 
 describe("updateTemplate", () => {
-  it("applies the supplied updates and bumps updatedAt", async () => {
+  it("should apply the supplied updates and bumps updatedAt", async () => {
     const persistence = createInMemoryPersistence();
     const original = await addTemplate(
       persistence,
@@ -31,7 +31,7 @@ describe("updateTemplate", () => {
     expect(stored).toEqual(updated);
   });
 
-  it("throws TemplateNotFoundError for an unknown id", async () => {
+  it("should throw TemplateNotFoundError for an unknown id", async () => {
     const persistence = createInMemoryPersistence();
 
     await expect(
@@ -39,7 +39,7 @@ describe("updateTemplate", () => {
     ).rejects.toBeInstanceOf(TemplateNotFoundError);
   });
 
-  it("rolls back when the put rejects mid-transaction", async () => {
+  it("should roll back when the put rejects mid-transaction", async () => {
     const persistence = createInMemoryPersistence();
     const original = await addTemplate(
       persistence,

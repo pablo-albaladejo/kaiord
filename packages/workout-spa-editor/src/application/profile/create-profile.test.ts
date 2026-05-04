@@ -4,7 +4,7 @@ import { createInMemoryPersistence } from "../../test-utils/in-memory-persistenc
 import { createProfile } from "./create-profile";
 
 describe("createProfile", () => {
-  it("persists a profile and selects it as active when none existed", async () => {
+  it("should persist a profile and selects it as active when none existed", async () => {
     const persistence = createInMemoryPersistence();
 
     const profile = await createProfile(persistence, "Pablo");
@@ -15,7 +15,7 @@ describe("createProfile", () => {
     expect(await persistence.profiles.getActiveId()).toBe(profile.id);
   });
 
-  it("preserves the existing active id when a profile already exists", async () => {
+  it("should preserve the existing active id when a profile already exists", async () => {
     const persistence = createInMemoryPersistence();
     const first = await createProfile(persistence, "First");
 
@@ -26,7 +26,7 @@ describe("createProfile", () => {
     expect(second.id).not.toBe(first.id);
   });
 
-  it("initializes the default sportZones structure for all 4 sports", async () => {
+  it("should initialize the default sportZones structure for all 4 sports", async () => {
     const persistence = createInMemoryPersistence();
 
     const profile = await createProfile(persistence, "Athlete", {
@@ -53,7 +53,7 @@ describe("createProfile", () => {
     expect(profile.sportZones.cycling?.heartRateZones.method).toBe("custom");
   });
 
-  it("generates a fresh id per profile", async () => {
+  it("should generate a fresh id per profile", async () => {
     const persistence = createInMemoryPersistence();
 
     const a = await createProfile(persistence, "A");
@@ -62,7 +62,7 @@ describe("createProfile", () => {
     expect(a.id).not.toBe(b.id);
   });
 
-  it("rolls back the put when setActiveId rejects on the first profile (transaction atomicity)", async () => {
+  it("should roll back the put when setActiveId rejects on the first profile (transaction atomicity)", async () => {
     const persistence = createInMemoryPersistence();
     persistence.profiles.setActiveId = () =>
       Promise.reject(new Error("simulated"));

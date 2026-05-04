@@ -13,11 +13,11 @@ import type { KRD } from "./krd-core";
 import type { UIWorkout } from "./ui-workout";
 
 describe("UIWorkout type boundary", () => {
-  it("does not accept a plain KRD (ids required in structured_workout)", () => {
+  it("should not accept a plain KRD (ids required in structured_workout)", () => {
     expectTypeOf<KRD>().not.toMatchTypeOf<UIWorkout>();
   });
 
-  it("UIWorkout is assignable to KRD (portable shape is a supertype)", () => {
+  it("should make UIWorkout assignable to KRD (portable shape is a supertype)", () => {
     expectTypeOf<UIWorkout>().toMatchTypeOf<KRD>();
   });
 });

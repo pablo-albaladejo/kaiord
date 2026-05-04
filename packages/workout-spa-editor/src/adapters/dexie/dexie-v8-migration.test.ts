@@ -56,7 +56,7 @@ describe("Dexie v7 → v8 migration", () => {
     await Dexie.delete(name);
   });
 
-  it("backfills createdAt as a number on every legacy aiProvider row", async () => {
+  it("should backfill createdAt as a number on every legacy aiProvider row", async () => {
     await seedV7(name);
 
     const v8 = new KaiordDatabase(name);
@@ -71,7 +71,7 @@ describe("Dexie v7 → v8 migration", () => {
     }
   });
 
-  it("preserves all pre-existing fields verbatim", async () => {
+  it("should preserve all pre-existing fields verbatim", async () => {
     await seedV7(name);
 
     const v8 = new KaiordDatabase(name);
@@ -89,7 +89,7 @@ describe("Dexie v7 → v8 migration", () => {
     });
   });
 
-  it("orders legacy rows before any post-upgrade insertion via the new index", async () => {
+  it("should order legacy rows before any post-upgrade insertion via the new index", async () => {
     await seedV7(name);
 
     const v8 = new KaiordDatabase(name);
@@ -116,7 +116,7 @@ describe("Dexie v7 → v8 migration", () => {
 });
 
 describe("makeBackfillAiProviderCreatedAt", () => {
-  it("stamps the supplied timestamp on a row missing createdAt", () => {
+  it("should stamp the supplied timestamp on a row missing createdAt", () => {
     const row: Record<string, unknown> = { id: "p1" };
 
     makeBackfillAiProviderCreatedAt(1_700_000_000_000)(row);
@@ -124,7 +124,7 @@ describe("makeBackfillAiProviderCreatedAt", () => {
     expect(row.createdAt).toBe(1_700_000_000_000);
   });
 
-  it("preserves an existing numeric createdAt", () => {
+  it("should preserve an existing numeric createdAt", () => {
     const row: Record<string, unknown> = { id: "p1", createdAt: 42 };
 
     makeBackfillAiProviderCreatedAt(1_700_000_000_000)(row);

@@ -58,7 +58,7 @@ describe("Dexie v5 → v6 migration", () => {
     await Dexie.delete(name);
   });
 
-  it("backfills pendingClear=false and lastSuccessfulFingerprint=null on existing bridges", async () => {
+  it("should backfill pendingClear=false and lastSuccessfulFingerprint=null on existing bridges", async () => {
     await seedV5(name);
 
     const v6 = new KaiordDatabase(name);
@@ -73,7 +73,7 @@ describe("Dexie v5 → v6 migration", () => {
     }
   });
 
-  it("preserves existing fields verbatim", async () => {
+  it("should preserve existing fields verbatim", async () => {
     await seedV5(name);
 
     const v6 = new KaiordDatabase(name);
@@ -96,7 +96,7 @@ describe("Dexie v5 → v6 migration", () => {
 });
 
 describe("backfillBridgeSnapshotState", () => {
-  it("sets defaults on a row missing both fields", () => {
+  it("should set defaults on a row missing both fields", () => {
     const row: Record<string, unknown> = { extensionId: "ext-1" };
 
     backfillBridgeSnapshotState(row);
@@ -105,7 +105,7 @@ describe("backfillBridgeSnapshotState", () => {
     expect(row.lastSuccessfulFingerprint).toBeNull();
   });
 
-  it("preserves an existing pendingClear=true value", () => {
+  it("should preserve an existing pendingClear=true value", () => {
     const row: Record<string, unknown> = {
       extensionId: "ext-1",
       pendingClear: true,

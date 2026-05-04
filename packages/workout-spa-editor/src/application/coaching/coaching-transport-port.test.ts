@@ -25,13 +25,13 @@ const stubBase = (source: string): Omit<CoachingTransport, "readZones"> => ({
 });
 
 describe("CoachingTransport.readZones", () => {
-  it("is absent on a Garmin-shaped transport", () => {
+  it("should be absent on a Garmin-shaped transport", () => {
     const transport: CoachingTransport = stubBase("garmin");
 
     expect(transport.readZones).toBeUndefined();
   });
 
-  it("is callable on a Train2Go-shaped transport", async () => {
+  it("should be callable on a Train2Go-shaped transport", async () => {
     const payload: ZonesPayload = {
       physiological: { weight: 83, bpmMax: 187 },
     };
@@ -47,7 +47,7 @@ describe("CoachingTransport.readZones", () => {
     expect(readZones).toHaveBeenCalledWith("99999");
   });
 
-  it("propagates the AbortSignal argument when supplied", async () => {
+  it("should propagate the AbortSignal argument when supplied", async () => {
     const readZones = vi.fn(async () => null);
     const transport: CoachingTransport = {
       ...stubBase("train2go"),

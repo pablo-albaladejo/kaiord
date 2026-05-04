@@ -38,7 +38,7 @@ describe("createDetectAction", () => {
     vi.clearAllMocks();
   });
 
-  it("sets extensionInstalled + sessionActive on successful ping", async () => {
+  it("should set extensionInstalled + sessionActive on successful ping", async () => {
     mockPing.mockResolvedValue({
       ok: true,
       protocolVersion: 1,
@@ -53,7 +53,7 @@ describe("createDetectAction", () => {
     expect(state.sessionActive).toBe(true);
   });
 
-  it("does NOT write any user identity field to the store (anti-auto-link)", async () => {
+  it("should do NOT write any user identity field to the store (anti-auto-link)", async () => {
     mockPing.mockResolvedValue({
       ok: true,
       protocolVersion: 1,
@@ -70,7 +70,7 @@ describe("createDetectAction", () => {
     expect("userName" in state).toBe(false);
   });
 
-  it("sets not installed when ping fails", async () => {
+  it("should set not installed when ping fails", async () => {
     mockPing.mockResolvedValue({
       ok: false,
       sessionActive: false,
@@ -85,7 +85,7 @@ describe("createDetectAction", () => {
     expect(state.sessionActive).toBe(false);
   });
 
-  it("shows update message on protocol mismatch", async () => {
+  it("should show update message on protocol mismatch", async () => {
     mockPing.mockResolvedValue({
       ok: true,
       protocolVersion: 99,
@@ -101,7 +101,7 @@ describe("createDetectAction", () => {
     expect(state.lastError).toContain("Update");
   });
 
-  it("uses detection cache within 30s", async () => {
+  it("should use detection cache within 30s", async () => {
     mockPing.mockResolvedValue({
       ok: true,
       protocolVersion: 1,
@@ -117,7 +117,7 @@ describe("createDetectAction", () => {
     expect(mockPing).toHaveBeenCalledTimes(1);
   });
 
-  it("skips detection when extension ID is empty", async () => {
+  it("should skip detection when extension ID is empty", async () => {
     const detectEmpty = createDetectAction(
       set as never,
       get as never,
@@ -129,7 +129,7 @@ describe("createDetectAction", () => {
     expect(mockPing).not.toHaveBeenCalled();
   });
 
-  it("handles session expired (installed but inactive)", async () => {
+  it("should handle session expired (installed but inactive)", async () => {
     mockPing.mockResolvedValue({
       ok: true,
       protocolVersion: 1,
@@ -153,7 +153,7 @@ describe("createDetectAction", () => {
       externalUserName: null,
     };
 
-    it("re-pings when the cached timestamp is older than 30s", async () => {
+    it("should re-ping when the cached timestamp is older than 30s", async () => {
       mockPing.mockResolvedValue(okPing);
 
       await detect();
@@ -165,7 +165,7 @@ describe("createDetectAction", () => {
       expect(mockPing).toHaveBeenCalledTimes(2);
     });
 
-    it("always pings when no detection has ever run (timestamp = null)", async () => {
+    it("should always ping when no detection has ever run (timestamp = null)", async () => {
       mockPing.mockResolvedValue(okPing);
       expect(state.lastDetectionTimestamp).toBeNull();
 
@@ -193,7 +193,7 @@ describe("createDetectAction", () => {
       expect(mockPing).toHaveBeenCalledTimes(2);
     });
 
-    it("short-circuits without updating lastDetectionTimestamp", async () => {
+    it("should short-circuit without updating lastDetectionTimestamp", async () => {
       mockPing.mockResolvedValue(okPing);
 
       await detect();

@@ -57,7 +57,7 @@ describe("TemplatePickerDialog", () => {
     await db.table("templates").clear();
   });
 
-  it("renders template cards from Dexie", async () => {
+  it("should render template cards from Dexie", async () => {
     const persistence = createDexiePersistence(db);
     await addTemplate(persistence, "Tempo Ride", "cycling", makeKrd());
     await addTemplate(persistence, "Easy Spin", "cycling", makeKrd());
@@ -70,7 +70,7 @@ describe("TemplatePickerDialog", () => {
     });
   });
 
-  it("filters templates by search term", async () => {
+  it("should filter templates by search term", async () => {
     const persistence = createDexiePersistence(db);
     await addTemplate(persistence, "Tempo Ride", "cycling", makeKrd());
     await addTemplate(persistence, "Easy Spin", "cycling", makeKrd());
@@ -90,7 +90,7 @@ describe("TemplatePickerDialog", () => {
     });
   });
 
-  it("invokes onPick with the template id and closes on selection", async () => {
+  it("should invoke onPick with the template id and closes on selection", async () => {
     const persistence = createDexiePersistence(db);
     const created = await addTemplate(
       persistence,
@@ -117,7 +117,7 @@ describe("TemplatePickerDialog", () => {
     });
   });
 
-  it("closes on Esc key", async () => {
+  it("should close on Esc key", async () => {
     const user = userEvent.setup();
     renderPicker({ date: "2026-05-04", onPick: vi.fn() });
 
@@ -134,7 +134,7 @@ describe("TemplatePickerDialog", () => {
     });
   });
 
-  it("does not render delete or edit affordances", async () => {
+  it("should not render delete or edit affordances", async () => {
     const persistence = createDexiePersistence(db);
     await addTemplate(persistence, "Tempo Ride", "cycling", makeKrd());
 
@@ -152,7 +152,7 @@ describe("TemplatePickerDialog", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("includes the formatted date in the dialog accessible name", async () => {
+  it("should include the formatted date in the dialog accessible name", async () => {
     renderPicker({ date: "2026-05-04", onPick: vi.fn() });
 
     await waitFor(() => {
@@ -162,7 +162,7 @@ describe("TemplatePickerDialog", () => {
     });
   });
 
-  it("returns focus to the document on close so SR users land outside the dialog tree", async () => {
+  it("should return focus to the document on close so SR users land outside the dialog tree", async () => {
     // Radix Dialog captures `document.activeElement` at open time and
     // restores focus to it on close. In jsdom the captured element is
     // unreliable due to event-loop quirks, so we assert the weaker

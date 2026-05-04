@@ -7,7 +7,7 @@ import { convertKRDToZwift } from "./krd-to-zwift.converter";
 // against canonical KRD fixtures so the converter cannot regress without
 // a deliberate test update. Production code is not modified by PR3.
 describe("convertKRDToZwift (characterization)", () => {
-  it("emits an XML declaration and workout_file root element", () => {
+  it("should emit an XML declaration and workout_file root element", () => {
     const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
     const logger = createMockLogger();
 
@@ -18,7 +18,7 @@ describe("convertKRDToZwift (characterization)", () => {
     expect(xml).toContain("</workout_file>");
   });
 
-  it("declares the kaiord namespace on the workout_file root", () => {
+  it("should declare the kaiord namespace on the workout_file root", () => {
     const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
     const logger = createMockLogger();
 
@@ -29,7 +29,7 @@ describe("convertKRDToZwift (characterization)", () => {
     );
   });
 
-  it("includes the workout name from extensions.structured_workout", () => {
+  it("should include the workout name from extensions.structured_workout", () => {
     const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
     const logger = createMockLogger();
 
@@ -38,7 +38,7 @@ describe("convertKRDToZwift (characterization)", () => {
     expect(xml).toContain("<name>Example 1</name>");
   });
 
-  it("emits a SteadyState block for individual steps fixture", () => {
+  it("should emit a SteadyState block for individual steps fixture", () => {
     const krd = loadKrdFixture("WorkoutIndividualSteps.krd");
     const logger = createMockLogger();
 
@@ -48,7 +48,7 @@ describe("convertKRDToZwift (characterization)", () => {
     expect(xml).toContain("SteadyState");
   });
 
-  it("emits a repeating IntervalsT block for the repeat fixture", () => {
+  it("should emit a repeating IntervalsT block for the repeat fixture", () => {
     const krd = loadKrdFixture("WorkoutRepeatSteps.krd");
     const logger = createMockLogger();
 
@@ -58,7 +58,7 @@ describe("convertKRDToZwift (characterization)", () => {
     expect(xml).toContain("IntervalsT");
   });
 
-  it("throws when extensions.structured_workout is missing", () => {
+  it("should throw when extensions.structured_workout is missing", () => {
     const logger = createMockLogger();
     const krd = {
       version: "1.0" as const,

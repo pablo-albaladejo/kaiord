@@ -41,7 +41,7 @@ describe("train2go-store-actions", () => {
     vi.clearAllMocks();
   });
 
-  it("openTrain2Go delegates to the transport with the extension id", async () => {
+  it("should delegate to the transport with the extension id via openTrain2Go", async () => {
     mockOpenTrain2Go.mockResolvedValue({ ok: true });
     const actions = createTrain2GoActions(
       set as never,
@@ -54,7 +54,7 @@ describe("train2go-store-actions", () => {
     expect(mockOpenTrain2Go).toHaveBeenCalledWith("ext-id");
   });
 
-  it("does NOT expose fetchWeek / fetchDay on the action surface", () => {
+  it("should do NOT expose fetchWeek / fetchDay on the action surface", () => {
     const actions = createTrain2GoActions(
       set as never,
       get as never,

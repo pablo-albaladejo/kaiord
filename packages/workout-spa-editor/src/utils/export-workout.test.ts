@@ -255,12 +255,12 @@ describe("exportWorkout", () => {
       );
     });
 
-    it("exports a GCN buffer for the gcn format", async () => {
+    it("should export a GCN buffer for the gcn format", async () => {
       const buffer = await exportWorkout(mockKrd, "gcn");
       expect(buffer.byteLength).toBeGreaterThan(0);
     });
 
-    it("strips UI ids before handing off to any exporter", async () => {
+    it("should strip UI ids before handing off to any exporter", async () => {
       const uiKrd = {
         ...mockKrd,
         extensions: {

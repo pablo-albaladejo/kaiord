@@ -17,7 +17,7 @@ import { describe, expect, it } from "vitest";
 import { backfillUsageRow, KaiordDatabase } from "./dexie-database";
 
 describe("backfillUsageRow (unit)", () => {
-  it("fills inputTokens from totalTokens and sets outputTokens=0, legacy=true", () => {
+  it("should fill inputTokens from totalTokens and set outputTokens=0, legacy=true", () => {
     const row: Record<string, unknown> = {
       yearMonth: "2026-03",
       totalTokens: 500,
@@ -33,7 +33,7 @@ describe("backfillUsageRow (unit)", () => {
     expect(row.totalTokens).toBe(500);
   });
 
-  it("backfills every entry alongside the record-level fields", () => {
+  it("should backfill every entry alongside the record-level fields", () => {
     const row: Record<string, unknown> = {
       yearMonth: "2026-03",
       totalTokens: 80,
@@ -49,7 +49,7 @@ describe("backfillUsageRow (unit)", () => {
     expect(entry.tokens).toBe(80);
   });
 
-  it("is idempotent — rows already carrying inputTokens are untouched", () => {
+  it("should be idempotent — rows already carrying inputTokens are untouched", () => {
     const row: Record<string, unknown> = {
       yearMonth: "2026-04",
       inputTokens: 120,
@@ -65,7 +65,7 @@ describe("backfillUsageRow (unit)", () => {
     expect(JSON.stringify(row)).toBe(before);
   });
 
-  it("handles rows missing totalTokens gracefully", () => {
+  it("should handle rows missing totalTokens gracefully", () => {
     const row: Record<string, unknown> = {
       yearMonth: "2026-02",
       totalCost: 0,
@@ -81,7 +81,7 @@ describe("backfillUsageRow (unit)", () => {
 });
 
 describe("Dexie v2 → v3 upgrade (integration)", () => {
-  it("migrates legacy usage rows in-place on open", async () => {
+  it("should migrate legacy usage rows in-place on open", async () => {
     const dbName = `kaiord-usage-migration-${Date.now()}-${Math.random()}`;
 
     // Seed a v2-shape database directly (no `inputTokens` field).

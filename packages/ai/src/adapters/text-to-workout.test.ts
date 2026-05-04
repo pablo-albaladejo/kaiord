@@ -62,7 +62,7 @@ describe("createTextToWorkout", () => {
     vi.clearAllMocks();
   });
 
-  it("parses running workout from natural language", async () => {
+  it("should parse running workout from natural language", async () => {
     mockGenerateText.mockResolvedValueOnce({
       output: RUNNING_WORKOUT,
     } as never);
@@ -75,7 +75,7 @@ describe("createTextToWorkout", () => {
     expect(mockGenerateText).toHaveBeenCalledOnce();
   });
 
-  it("passes sport hint to system prompt", async () => {
+  it("should pass sport hint to system prompt", async () => {
     mockGenerateText.mockResolvedValueOnce({
       output: RUNNING_WORKOUT,
     } as never);
@@ -90,7 +90,7 @@ describe("createTextToWorkout", () => {
     expect(callArgs.system).toContain("running");
   });
 
-  it("applies name override as post-processing", async () => {
+  it("should apply name override as post-processing", async () => {
     mockGenerateText.mockResolvedValueOnce({
       output: { ...RUNNING_WORKOUT, name: "LLM Name" },
     } as never);
@@ -101,7 +101,7 @@ describe("createTextToWorkout", () => {
     expect(result.name).toBe("My Workout");
   });
 
-  it("retries on first failure and succeeds on second attempt", async () => {
+  it("should retry on first failure and succeeds on second attempt", async () => {
     mockGenerateText
       .mockRejectedValueOnce(new Error("Schema validation failed"))
       .mockResolvedValueOnce({
@@ -115,7 +115,7 @@ describe("createTextToWorkout", () => {
     expect(mockGenerateText).toHaveBeenCalledTimes(2);
   });
 
-  it("includes error feedback in retry prompt", async () => {
+  it("should include error feedback in retry prompt", async () => {
     mockGenerateText
       .mockRejectedValueOnce(new Error("Invalid duration"))
       .mockResolvedValueOnce({
@@ -131,7 +131,7 @@ describe("createTextToWorkout", () => {
     expect(retryArgs.prompt).toContain("Invalid duration");
   });
 
-  it("throws AiParsingError after max retries exhausted", async () => {
+  it("should throw AiParsingError after max retries exhausted", async () => {
     mockGenerateText.mockRejectedValue(new Error("Always fails"));
     const parse = createTextToWorkout({ model: mockModel, maxRetries: 1 });
 
@@ -141,14 +141,14 @@ describe("createTextToWorkout", () => {
     });
   });
 
-  it("throws AiParsingError when output is null", async () => {
+  it("should throw AiParsingError when output is null", async () => {
     mockGenerateText.mockResolvedValue({ output: null } as never);
     const parse = createTextToWorkout({ model: mockModel, maxRetries: 0 });
 
     await expect(parse("test")).rejects.toThrow(AiParsingError);
   });
 
-  it("reindexes non-sequential stepIndex values", async () => {
+  it("should reindex non-sequential stepIndex values", async () => {
     const badIndices: Workout = {
       sport: "running",
       steps: [
@@ -179,7 +179,7 @@ describe("createTextToWorkout", () => {
     expect(result.steps[1]).toMatchObject({ stepIndex: 1 });
   });
 
-  it("logs at debug, info, and warn levels", async () => {
+  it("should log at debug, info, and warn levels", async () => {
     const logger = {
       debug: vi.fn(),
       info: vi.fn(),
@@ -200,7 +200,7 @@ describe("createTextToWorkout", () => {
     expect(logger.warn).toHaveBeenCalled();
   });
 
-  it("throws on invalid sport option before calling LLM", async () => {
+  it("should throw on invalid sport option before calling LLM", async () => {
     const parse = createTextToWorkout({ model: mockModel });
 
     await expect(
@@ -210,7 +210,7 @@ describe("createTextToWorkout", () => {
     expect(mockGenerateText).not.toHaveBeenCalled();
   });
 
-  it("preserves LLM name when options has no name override", async () => {
+  it("should preserve LLM name when options has no name override", async () => {
     mockGenerateText.mockResolvedValueOnce({
       output: { ...RUNNING_WORKOUT, name: "LLM Name" },
     } as never);
@@ -221,7 +221,7 @@ describe("createTextToWorkout", () => {
     expect(result.name).toBe("LLM Name");
   });
 
-  it("throws AiParsingError on empty input without calling LLM", async () => {
+  it("should throw AiParsingError on empty input without calling LLM", async () => {
     const parse = createTextToWorkout({ model: mockModel });
 
     await expect(parse("")).rejects.toThrow(AiParsingError);
@@ -229,7 +229,7 @@ describe("createTextToWorkout", () => {
     expect(mockGenerateText).not.toHaveBeenCalled();
   });
 
-  it("throws AiParsingError on input exceeding max length", async () => {
+  it("should throw AiParsingError on input exceeding max length", async () => {
     const parse = createTextToWorkout({ model: mockModel });
     const longInput = "a".repeat(2001);
 
@@ -238,7 +238,7 @@ describe("createTextToWorkout", () => {
     expect(mockGenerateText).not.toHaveBeenCalled();
   });
 
-  it("passes default config values to generateText", async () => {
+  it("should pass default config values to generateText", async () => {
     mockGenerateText.mockResolvedValueOnce({
       output: RUNNING_WORKOUT,
     } as never);
@@ -255,7 +255,7 @@ describe("createTextToWorkout", () => {
     expect(callArgs.temperature).toBe(0);
   });
 
-  it("handles non-Error thrown values in catch", async () => {
+  it("should handle non-Error thrown values in catch", async () => {
     mockGenerateText
       .mockRejectedValueOnce("plain string error")
       .mockResolvedValueOnce({

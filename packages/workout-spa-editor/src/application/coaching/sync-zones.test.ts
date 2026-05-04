@@ -73,7 +73,7 @@ const PAYLOAD_FULL: ZonesPayload = {
 };
 
 describe("syncZones — silent fills and conflicts", () => {
-  it("empty-fill: writes every incoming value silently when profile is empty", async () => {
+  it("should write every incoming value silently when profile is empty (empty-fill)", async () => {
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => PAYLOAD_FULL);
@@ -91,7 +91,7 @@ describe("syncZones — silent fills and conflicts", () => {
     expect(after?.maxHeartRate).toBe(187);
   });
 
-  it("no-op: incoming === current produces no applied or conflicts", async () => {
+  it("should produce no applied or conflicts when incoming === current (no-op)", async () => {
     const repo = createInMemoryProfileRepository();
     await repo.put(
       makeProfile({
@@ -122,7 +122,7 @@ describe("syncZones — silent fills and conflicts", () => {
     expect(result.conflicts).toEqual([]);
   });
 
-  it("single-conflict: differing FTP returns one conflict, NOT written", async () => {
+  it("should return one conflict (NOT written) for differing FTP (single-conflict)", async () => {
     const repo = createInMemoryProfileRepository();
     await repo.put(
       makeProfile({
@@ -148,7 +148,7 @@ describe("syncZones — silent fills and conflicts", () => {
     expect(after?.sportZones.cycling?.thresholds.ftp).toBe(200);
   });
 
-  it("multi-conflict: per-sport LTHR each return their own conflict row", async () => {
+  it("should return per-sport LTHR conflict rows (multi-conflict)", async () => {
     const repo = createInMemoryProfileRepository();
     await repo.put(
       makeProfile({
@@ -181,7 +181,7 @@ describe("syncZones — silent fills and conflicts", () => {
     ]);
   });
 
-  it("mixed-fill-and-conflict: empty bodyWeight filled, manual FTP returns conflict", async () => {
+  it("should fill empty bodyWeight and return a conflict for manual FTP (mixed-fill-and-conflict)", async () => {
     const repo = createInMemoryProfileRepository();
     await repo.put(
       makeProfile({
@@ -210,7 +210,7 @@ describe("syncZones — silent fills and conflicts", () => {
     expect(after?.sportZones.cycling?.thresholds.ftp).toBe(200);
   });
 
-  it("ftp-fallback-absent: z4Upper undefined → z5Lower used", async () => {
+  it("should use z5Lower when z4Upper is undefined (ftp-fallback-absent)", async () => {
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => ({
@@ -226,7 +226,7 @@ describe("syncZones — silent fills and conflicts", () => {
     });
   });
 
-  it("ftp-fallback-zero: z4Upper === 0 → z5Lower used", async () => {
+  it("should use z5Lower when z4Upper === 0 (ftp-fallback-zero)", async () => {
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => ({
@@ -320,7 +320,7 @@ describe("commitConflictResolution", () => {
     return { repo };
   };
 
-  it("all-accept: writes every accepted field", async () => {
+  it("should write every accepted field (all-accept)", async () => {
     const { repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
       "cycling.thresholds.ftp": "accept",
@@ -339,7 +339,7 @@ describe("commitConflictResolution", () => {
     expect(after?.sportZones.running?.thresholds.lthr).toBe(168);
   });
 
-  it("all-reject: leaves the profile untouched", async () => {
+  it("should leave the profile untouched (all-reject)", async () => {
     const { repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
       "cycling.thresholds.ftp": "reject",
@@ -358,7 +358,7 @@ describe("commitConflictResolution", () => {
     expect(after?.sportZones.running?.thresholds.lthr).toBe(150);
   });
 
-  it("mixed: accepts some and rejects others; idempotent on second call", async () => {
+  it("should accept some and reject others, idempotent on second call (mixed)", async () => {
     const { repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
       "cycling.thresholds.ftp": "reject",
@@ -383,7 +383,7 @@ describe("commitConflictResolution", () => {
     expect(after?.sportZones.running?.thresholds.lthr).toBe(168);
   });
 
-  it("profile-deleted-mid-commit: throws ProfileNotFoundError", async () => {
+  it("should throw ProfileNotFoundError when profile deleted mid-commit", async () => {
     const repo = createInMemoryProfileRepository();
     const decisions: Record<FieldKey, ConflictDecision> = {
       "cycling.thresholds.ftp": "accept",

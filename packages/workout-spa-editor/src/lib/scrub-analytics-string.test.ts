@@ -4,13 +4,13 @@ import { scrubAnalyticsString } from "./scrub-analytics-string";
 
 describe("scrubAnalyticsString", () => {
   describe("UUID (rule 1)", () => {
-    it("replaces a UUID v4 with <uuid>", () => {
+    it("should replace a UUID v4 with <uuid>", () => {
       expect(
         scrubAnalyticsString("not found: 6e3ad6f0-1234-4cdf-9abc-1234567890ab")
       ).toBe("not found: <uuid>");
     });
 
-    it("does NOT replace a non-UUID hex sequence", () => {
+    it("should do NOT replace a non-UUID hex sequence", () => {
       expect(scrubAnalyticsString("short id: deadbeef")).toBe(
         "short id: deadbeef"
       );
@@ -18,7 +18,7 @@ describe("scrubAnalyticsString", () => {
   });
 
   describe("Bearer (rule 2)", () => {
-    it("replaces Bearer <token>", () => {
+    it("should replace Bearer <token>", () => {
       expect(scrubAnalyticsString("auth: Bearer abc.def.ghi")).toBe(
         "auth: Bearer <token>"
       );
@@ -30,7 +30,7 @@ describe("scrubAnalyticsString", () => {
       ).toBe("Failed: Bearer <token>); status=401");
     });
 
-    it("does NOT replace a non-Bearer prefix", () => {
+    it("should do NOT replace a non-Bearer prefix", () => {
       expect(scrubAnalyticsString("authorization: token")).toBe(
         "authorization: token"
       );
@@ -38,60 +38,60 @@ describe("scrubAnalyticsString", () => {
   });
 
   describe("Email (rule 3)", () => {
-    it("replaces ASCII email", () => {
+    it("should replace ASCII email", () => {
       expect(scrubAnalyticsString("from user@example.com")).toBe(
         "from <email>"
       );
     });
 
-    it("replaces Spanish-style internationalized email", () => {
+    it("should replace Spanish-style internationalized email", () => {
       expect(scrubAnalyticsString("from usuario@correo.es")).toBe(
         "from <email>"
       );
     });
 
-    it("replaces CJK local part email", () => {
+    it("should replace CJK local part email", () => {
       expect(scrubAnalyticsString("from 用户@example.cn")).toBe("from <email>");
     });
 
-    it("replaces email with CJK TLD", () => {
+    it("should replace email with CJK TLD", () => {
       expect(scrubAnalyticsString("from 用户@example.中国")).toBe(
         "from <email>"
       );
     });
 
-    it("does NOT replace bare @ without a TLD", () => {
+    it("should do NOT replace bare @ without a TLD", () => {
       expect(scrubAnalyticsString("look @here")).toBe("look @here");
     });
   });
 
   describe("Hex run ≥32 (rule 4)", () => {
-    it("replaces a 32-char hex run with <hex>", () => {
+    it("should replace a 32-char hex run with <hex>", () => {
       expect(scrubAnalyticsString("a".repeat(32))).toBe("<hex>");
     });
 
-    it("does NOT replace a 31-char hex run", () => {
+    it("should do NOT replace a 31-char hex run", () => {
       const s = "a".repeat(31);
       expect(scrubAnalyticsString(s)).toBe(s);
     });
 
-    it("rule 4 wins over rule 5 for a 60-char hex run", () => {
+    it("should make rule 4 win over rule 5 for a 60-char hex run", () => {
       expect(scrubAnalyticsString("a".repeat(60))).toBe("<hex>");
     });
   });
 
   describe("Base64url run ≥40 (rule 5)", () => {
-    it("replaces a 40-char base64url run with <token>", () => {
+    it("should replace a 40-char base64url run with <token>", () => {
       const s = "X".repeat(40);
       expect(scrubAnalyticsString(s)).toBe("<token>");
     });
 
-    it("does NOT replace a 39-char base64url run", () => {
+    it("should do NOT replace a 39-char base64url run", () => {
       const s = "X".repeat(39);
       expect(scrubAnalyticsString(s)).toBe(s);
     });
 
-    it("scrubs the long signature portion of a JWT", () => {
+    it("should scrub the long signature portion of a JWT", () => {
       const jwt =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
       const scrubbed = scrubAnalyticsString(`401 token ${jwt} expired`);
@@ -104,12 +104,12 @@ describe("scrubAnalyticsString", () => {
       expect(scrubbed).toContain("<token>");
     });
 
-    it("does NOT match across spaces (workout titles are safe)", () => {
+    it("should do NOT match across spaces (workout titles are safe)", () => {
       const s = "My Big Long Indoor Cycling Workout";
       expect(scrubAnalyticsString(s)).toBe(s);
     });
 
-    it("DOES over-scrub a 42-char contiguous alphanumeric run (false-positive bias is intentional per design.md D5)", () => {
+    it("should over-scrub a 42-char contiguous alphanumeric run (false-positive bias is intentional per design.md D5)", () => {
       // Non-hex chars (Z is outside [0-9a-f]) so rule 4 (hex) doesn't
       // intercept; rule 5 base64url matches the full 42-char run.
       const s = "Z".repeat(42);
@@ -118,14 +118,14 @@ describe("scrubAnalyticsString", () => {
   });
 
   describe("Order of operations", () => {
-    it("Bearer wins over base64url (Bearer + JWT replaced as one unit)", () => {
+    it("should make Bearer win over base64url (Bearer + JWT replaced as one unit)", () => {
       const jwt =
         "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
       const scrubbed = scrubAnalyticsString(`auth: Bearer ${jwt}`);
       expect(scrubbed).toBe("auth: Bearer <token>");
     });
 
-    it("Bearer + email + hex are all independently scrubbed", () => {
+    it("should independently scrub Bearer + email + hex", () => {
       const input =
         "auth failed for user@example.com (Bearer abc.def.ghi); key=abcdef0123456789abcdef0123456789abcdef01";
       const out = scrubAnalyticsString(input);
@@ -138,7 +138,7 @@ describe("scrubAnalyticsString", () => {
   });
 
   describe("Multi-line inputs", () => {
-    it("scrubs a UUID inside a 6-frame component stack without disturbing newlines", () => {
+    it("should scrub a UUID inside a 6-frame component stack without disturbing newlines", () => {
       const stack = [
         "    in CoachingActivityDialog",
         "    in DialogContent (id=6e3ad6f0-1234-4cdf-9abc-1234567890ab)",
@@ -154,7 +154,7 @@ describe("scrubAnalyticsString", () => {
   });
 
   describe("Truncation", () => {
-    it("truncates AFTER scrubbing — placeholders straddling the cut are excluded entirely (never split mid-token)", () => {
+    it("should truncate AFTER scrubbing — placeholders straddling the cut are excluded entirely (never split mid-token)", () => {
       // UUID positioned so the resulting <uuid> placeholder spans
       // offsets 498-503 (length 6). Truncating to 500 would naively
       // produce "....<u". Instead, the truncator backs up to before
@@ -174,7 +174,7 @@ describe("scrubAnalyticsString", () => {
       expect(out).not.toMatch(/<[a-z]+>[^>]*<[a-z]+$/);
     });
 
-    it("includes a placeholder that fits fully within maxLen", () => {
+    it("should include a placeholder that fits fully within maxLen", () => {
       // UUID positioned so its scrubbed form ends well before maxLen.
       const before = ".".repeat(100);
       const uuid = "6e3ad6f0-1234-4cdf-9abc-1234567890ab";
@@ -186,7 +186,7 @@ describe("scrubAnalyticsString", () => {
       expect(out).toContain("<uuid>");
     });
 
-    it("truncates a 600-char message with no scrub matches to exactly 500 chars", () => {
+    it("should truncate a 600-char message with no scrub matches to exactly 500 chars", () => {
       const input = ".".repeat(600);
 
       const out = scrubAnalyticsString(input, 500);
@@ -194,7 +194,7 @@ describe("scrubAnalyticsString", () => {
       expect(out.length).toBe(500);
     });
 
-    it("truncates a 1100-char componentStack to exactly 1000 chars", () => {
+    it("should truncate a 1100-char componentStack to exactly 1000 chars", () => {
       const input = ".".repeat(1100);
 
       const out = scrubAnalyticsString(input, 1000);
@@ -202,7 +202,7 @@ describe("scrubAnalyticsString", () => {
       expect(out.length).toBe(1000);
     });
 
-    it("does NOT truncate when input is already under maxLen", () => {
+    it("should do NOT truncate when input is already under maxLen", () => {
       const input = "short";
 
       const out = scrubAnalyticsString(input, 500);
@@ -212,7 +212,7 @@ describe("scrubAnalyticsString", () => {
   });
 
   describe("Idempotence", () => {
-    it("scrub(scrub(x)) === scrub(x)", () => {
+    it("should be idempotent: scrub(scrub(x)) === scrub(x)", () => {
       const inputs = [
         "not found: 6e3ad6f0-1234-4cdf-9abc-1234567890ab",
         "auth: Bearer abc.def.ghi",

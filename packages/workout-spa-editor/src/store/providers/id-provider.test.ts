@@ -10,13 +10,13 @@ describe("defaultIdProvider", () => {
     vi.unstubAllGlobals();
   });
 
-  it("returns a UUID v4 string", () => {
+  it("should return a UUID v4 string", () => {
     const id = defaultIdProvider();
 
     expect(id).toMatch(UUID_V4_REGEX);
   });
 
-  it("is unique over 10k calls", () => {
+  it("should be unique over 10k calls", () => {
     const ids = new Set<string>();
 
     for (let i = 0; i < 10_000; i++) {
@@ -26,7 +26,7 @@ describe("defaultIdProvider", () => {
     expect(ids.size).toBe(10_000);
   });
 
-  it("falls back to crypto.getRandomValues when randomUUID is undefined", () => {
+  it("should fall back to crypto.getRandomValues when randomUUID is undefined", () => {
     const realGetRandomValues = crypto.getRandomValues.bind(crypto);
 
     vi.stubGlobal("crypto", {
@@ -38,7 +38,7 @@ describe("defaultIdProvider", () => {
     expect(id).toMatch(UUID_V4_REGEX);
   });
 
-  it("throws when no secure random source is available", () => {
+  it("should throw when no secure random source is available", () => {
     vi.stubGlobal("crypto", {});
 
     expect(() => defaultIdProvider()).toThrow(/No secure random source/);

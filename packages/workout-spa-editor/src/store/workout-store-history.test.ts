@@ -18,7 +18,7 @@ const makeUI = (marker: string): UIWorkout =>
   }) as unknown as UIWorkout;
 
 describe("pushHistorySnapshot", () => {
-  it("appends a HistoryEntry atomically", () => {
+  it("should append a HistoryEntry atomically", () => {
     const result = pushHistorySnapshot(
       { undoHistory: [], historyIndex: -1 },
       { workout: makeUI("a"), selection: asItemId("sel-1") }
@@ -28,7 +28,7 @@ describe("pushHistorySnapshot", () => {
     expect(result.historyIndex).toBe(0);
   });
 
-  it("keeps workout and selection together in each entry", () => {
+  it("should keep workout and selection together in each entry", () => {
     const r1 = pushHistorySnapshot(
       { undoHistory: [], historyIndex: -1 },
       { workout: makeUI("a"), selection: null }
@@ -42,7 +42,7 @@ describe("pushHistorySnapshot", () => {
     expect(r2.undoHistory[1].selection).toBe("sel-2");
   });
 
-  it("truncates future entries when pushing after an undo", () => {
+  it("should truncate future entries when pushing after an undo", () => {
     const rA = pushHistorySnapshot(
       { undoHistory: [], historyIndex: -1 },
       { workout: makeUI("a"), selection: null }
@@ -60,7 +60,7 @@ describe("pushHistorySnapshot", () => {
     expect(rC.undoHistory[1].selection).toBe("sel-c");
   });
 
-  it("trims at MAX_HISTORY_SIZE (50), keeping the most recent tail", () => {
+  it("should trim at MAX_HISTORY_SIZE (50), keeping the most recent tail", () => {
     let state = { undoHistory: [] as UndoHistory, historyIndex: -1 };
     for (let i = 0; i < 50; i++) {
       state = pushHistorySnapshot(state, {
@@ -93,7 +93,7 @@ describe("loadWorkout seeds undoHistory with a single null-selection entry", () 
     });
   });
 
-  it("initialises undoHistory with one entry and null selection", () => {
+  it("should initialise undoHistory with one entry and null selection", () => {
     const krd: KRD = {
       version: "1.0",
       type: "structured_workout",

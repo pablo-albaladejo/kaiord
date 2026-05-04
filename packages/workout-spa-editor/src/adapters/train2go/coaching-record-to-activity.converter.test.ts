@@ -29,19 +29,19 @@ describe("toCoachingActivity (record → view-model)", () => {
     expect(result.source).toBe("train2go");
   });
 
-  it("uses T2G as badge for train2go source", () => {
+  it("should use T2G as badge for train2go source", () => {
     const result = toCoachingActivity(baseRecord);
 
     expect(result.sourceBadge).toBe("T2G");
   });
 
-  it("falls back to upper-cased source label for unknown badges", () => {
+  it("should fall back to upper-cased source label for unknown badges", () => {
     const result = toCoachingActivity({ ...baseRecord, source: "future-src" });
 
     expect(result.sourceBadge).toBe("FUTURE-SRC");
   });
 
-  it("maps duration / status / intensity fields through", () => {
+  it("should map duration / status / intensity fields through", () => {
     const result = toCoachingActivity(baseRecord);
 
     expect(result.duration).toBe("01:00:00");
@@ -49,7 +49,7 @@ describe("toCoachingActivity (record → view-model)", () => {
     expect(result.effort).toBe(3);
   });
 
-  it("omits empty duration", () => {
+  it("should omit empty duration", () => {
     const result = toCoachingActivity({ ...baseRecord, duration: "" });
 
     expect(result.duration).toBeUndefined();

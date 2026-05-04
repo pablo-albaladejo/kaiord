@@ -57,7 +57,7 @@ describe("creation-action focus intent (§6.3–6.6)", () => {
     resetStore();
   });
 
-  it("createStep focuses the new step", () => {
+  it("should focus the new step via createStep", () => {
     // Arrange
     useWorkoutStore.getState().loadWorkout(buildKrd([step(0)]));
 
@@ -72,7 +72,7 @@ describe("creation-action focus intent (§6.3–6.6)", () => {
     });
   });
 
-  it("duplicateStep focuses the fresh duplicate", () => {
+  it("should focus the fresh duplicate via duplicateStep", () => {
     // Arrange
     useWorkoutStore.getState().loadWorkout(buildKrd([step(0)]));
     const originalId = readInner().steps[0].id;
@@ -89,7 +89,7 @@ describe("creation-action focus intent (§6.3–6.6)", () => {
     });
   });
 
-  it("createEmptyRepetitionBlock focuses the new block card", () => {
+  it("should focus the new block card via createEmptyRepetitionBlock", () => {
     // Arrange
     useWorkoutStore.getState().loadWorkout(buildKrd([step(0)]));
 
@@ -105,7 +105,7 @@ describe("creation-action focus intent (§6.3–6.6)", () => {
     });
   });
 
-  it("addStepToRepetitionBlock focuses the new nested step", () => {
+  it("should focus the new nested step via addStepToRepetitionBlock", () => {
     // Arrange — workout with one block containing a single step.
     useWorkoutStore
       .getState()
@@ -124,7 +124,7 @@ describe("creation-action focus intent (§6.3–6.6)", () => {
     });
   });
 
-  it("duplicateStepInRepetitionBlock focuses the duplicate", () => {
+  it("should focus the duplicate via duplicateStepInRepetitionBlock", () => {
     // Arrange
     useWorkoutStore
       .getState()
@@ -143,7 +143,7 @@ describe("creation-action focus intent (§6.3–6.6)", () => {
     });
   });
 
-  it("createRepetitionBlock focuses the newly-wrapped block", () => {
+  it("should focus the newly-wrapped block via createRepetitionBlock", () => {
     // Arrange — three top-level steps, select the first two to wrap.
     useWorkoutStore
       .getState()
@@ -161,7 +161,7 @@ describe("creation-action focus intent (§6.3–6.6)", () => {
     });
   });
 
-  it("pasteStep focuses the freshly-regenerated paste id, not the clipboard id", async () => {
+  it("should focus the freshly-regenerated paste id, not the clipboard id, via pasteStep", async () => {
     // Arrange — clipboard carries an attacker-supplied id.
     const clipboardStep = {
       id: "attacker-supplied-id",

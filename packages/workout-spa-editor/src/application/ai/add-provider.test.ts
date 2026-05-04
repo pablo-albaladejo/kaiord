@@ -5,7 +5,7 @@ import { addProvider } from "./add-provider";
 import { baseProvider, secondProvider } from "./test-fixtures";
 
 describe("addProvider", () => {
-  it("marks the first provider as default (invariant I1)", async () => {
+  it("should mark the first provider as default (invariant I1)", async () => {
     const persistence = createInMemoryPersistence();
 
     const created = await addProvider(persistence, baseProvider);
@@ -16,7 +16,7 @@ describe("addProvider", () => {
     expect(all[0].id).toBe(created.id);
   });
 
-  it("does not promote subsequent providers to default", async () => {
+  it("should not promote subsequent providers to default", async () => {
     const persistence = createInMemoryPersistence();
     const first = await addProvider(persistence, baseProvider);
 
@@ -28,7 +28,7 @@ describe("addProvider", () => {
     expect(all.find((p) => p.id === second.id)?.isDefault).toBe(false);
   });
 
-  it("propagates persistence rejection so the caller can surface a toast", async () => {
+  it("should propagate persistence rejection so the caller can surface a toast", async () => {
     const persistence = createInMemoryPersistence();
     const putSpy = vi
       .spyOn(persistence.aiProviders, "put")
@@ -42,7 +42,7 @@ describe("addProvider", () => {
     putSpy.mockRestore();
   });
 
-  it("stamps a numeric createdAt at the moment of creation", async () => {
+  it("should stamp a numeric createdAt at the moment of creation", async () => {
     const persistence = createInMemoryPersistence();
     const before = Date.now();
 
@@ -54,7 +54,7 @@ describe("addProvider", () => {
     expect(created.createdAt).toBeLessThanOrEqual(after);
   });
 
-  it("surfaces providers in insertion order via getAll", async () => {
+  it("should surface providers in insertion order via getAll", async () => {
     const persistence = createInMemoryPersistence();
     // vi.useFakeTimers gives us strictly monotonic createdAt values
     // even when both calls land in the same millisecond.

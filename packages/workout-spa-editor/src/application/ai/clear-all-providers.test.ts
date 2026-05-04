@@ -6,7 +6,7 @@ import { clearAllProviders } from "./clear-all-providers";
 import { baseProvider, secondProvider } from "./test-fixtures";
 
 describe("clearAllProviders", () => {
-  it("removes every provider", async () => {
+  it("should remove every provider", async () => {
     const persistence = createInMemoryPersistence();
     await addProvider(persistence, baseProvider);
     await addProvider(persistence, secondProvider);
@@ -16,7 +16,7 @@ describe("clearAllProviders", () => {
     expect(await persistence.aiProviders.getAll()).toHaveLength(0);
   });
 
-  it("propagates persistence rejection so the caller can surface a toast", async () => {
+  it("should propagate persistence rejection so the caller can surface a toast", async () => {
     const persistence = createInMemoryPersistence();
     await addProvider(persistence, baseProvider);
 

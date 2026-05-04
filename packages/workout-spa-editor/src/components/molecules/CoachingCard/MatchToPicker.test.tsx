@@ -26,7 +26,7 @@ const makeWorkout = (
   }) as unknown as WorkoutRecord;
 
 describe("MatchToPicker — empty state", () => {
-  it("renders the empty placeholder when no workouts are pickable", () => {
+  it("should render the empty placeholder when no workouts are pickable", () => {
     render(
       <MatchToPicker
         workouts={[]}
@@ -62,7 +62,7 @@ describe("MatchToPicker — keyboard navigation", () => {
     return { onSelect, onClose };
   };
 
-  it("auto-focuses the first list item on mount", () => {
+  it("should auto-focus the first list item on mount", () => {
     setup();
 
     const firstOption = screen.getAllByRole("option")[0]!;
@@ -70,7 +70,7 @@ describe("MatchToPicker — keyboard navigation", () => {
     expect(firstOption.getAttribute("aria-selected")).toBe("true");
   });
 
-  it("ArrowDown moves focus to the next item; ArrowUp moves it back; both wrap", () => {
+  it("should move focus on ArrowDown to next, ArrowUp back, both wrapping", () => {
     setup();
     const listbox = screen.getByRole("listbox");
     const options = screen.getAllByRole("option");
@@ -88,7 +88,7 @@ describe("MatchToPicker — keyboard navigation", () => {
     expect(options[2]).toHaveFocus(); // wrap to end
   });
 
-  it("Enter selects the focused item via onSelect(workoutId)", () => {
+  it("should select the focused item on Enter via onSelect(workoutId)", () => {
     const { onSelect } = setup();
     const listbox = screen.getByRole("listbox");
 
@@ -101,7 +101,7 @@ describe("MatchToPicker — keyboard navigation", () => {
     expect(onSelect).toHaveBeenCalledWith("w2");
   });
 
-  it("Escape closes the picker via onClose without bubbling", () => {
+  it("should close the picker on Escape via onClose without bubbling", () => {
     const { onClose } = setup();
     const listbox = screen.getByRole("listbox");
 
@@ -112,7 +112,7 @@ describe("MatchToPicker — keyboard navigation", () => {
 });
 
 describe("MatchToPicker — pending state", () => {
-  it("disables every option while a selection is in flight", () => {
+  it("should disable every option while a selection is in flight", () => {
     render(
       <MatchToPicker
         workouts={[makeWorkout("w1", "cycling")]}

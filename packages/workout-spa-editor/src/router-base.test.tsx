@@ -14,7 +14,7 @@ describe("computeRouterBase", () => {
     // Vite normalises BASE_URL to start+end with `/`. The empty-string row is
     // a defensive guard against a future Vite contract regression.
     ["", ""],
-  ])("strips trailing slash from %j to produce %j", (input, expected) => {
+  ])("should strip trailing slash from %j to produce %j", (input, expected) => {
     const result = computeRouterBase(input);
 
     expect(result).toBe(expected);
@@ -22,7 +22,7 @@ describe("computeRouterBase", () => {
 });
 
 describe("wouter Router base contract", () => {
-  it("matches a route at /editor/x when base is /editor", () => {
+  it("should match a route at /editor/x when base is /editor", () => {
     const { hook } = memoryLocation({ path: "/editor/x" });
 
     render(
@@ -34,7 +34,7 @@ describe("wouter Router base contract", () => {
     expect(screen.getByText("ok")).toBeTruthy();
   });
 
-  it("is pinned to wouter major version 3", () => {
+  it("should be pinned to wouter major version 3", () => {
     expect(wouterPkg.version.split(".")[0]).toBe("3");
   });
 });

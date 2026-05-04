@@ -83,7 +83,7 @@ describe("useAiGeneration — analytics call-site", () => {
     vi.clearAllMocks();
   });
 
-  it("fires workout-generated with provider and sport after successful generation", async () => {
+  it("should fire workout-generated with provider and sport after successful generation", async () => {
     const { result } = renderHook(() => useAiGeneration());
 
     await act(async () => {
@@ -96,7 +96,7 @@ describe("useAiGeneration — analytics call-site", () => {
     });
   });
 
-  it("fires workout-generated with empty sport when no sport is passed", async () => {
+  it("should fire workout-generated with empty sport when no sport is passed", async () => {
     const { result } = renderHook(() => useAiGeneration());
 
     await act(async () => {
@@ -109,7 +109,7 @@ describe("useAiGeneration — analytics call-site", () => {
     });
   });
 
-  it("does not fire workout-generated when generation fails", async () => {
+  it("should not fire workout-generated when generation fails", async () => {
     mockGenerateWorkoutKrd.mockRejectedValue(new Error("API error"));
     const { result } = renderHook(() => useAiGeneration());
 

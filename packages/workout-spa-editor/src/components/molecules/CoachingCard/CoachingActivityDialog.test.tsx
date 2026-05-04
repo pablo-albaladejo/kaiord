@@ -38,7 +38,7 @@ const wrap = (children: ReactNode) => (
 );
 
 describe("CoachingActivityDialog", () => {
-  it("returns null when no activity is selected", () => {
+  it("should return null when no activity is selected", () => {
     const { container } = render(
       wrap(
         <CoachingActivityDialog
@@ -52,7 +52,7 @@ describe("CoachingActivityDialog", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders title, sport, duration and description when activity has them", () => {
+  it("should render title, sport, duration and description when activity has them", () => {
     render(
       wrap(
         <CoachingActivityDialog
@@ -71,7 +71,7 @@ describe("CoachingActivityDialog", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows the loading description placeholder when description is undefined", () => {
+  it("should show the loading description placeholder when description is undefined", () => {
     render(
       wrap(
         <CoachingActivityDialog
@@ -103,7 +103,7 @@ describe("CoachingActivityDialog", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("Close button calls onClose", async () => {
+  it("should call onClose when Close button is clicked", async () => {
     const onClose = vi.fn();
     render(
       wrap(
@@ -120,7 +120,7 @@ describe("CoachingActivityDialog", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("Convert button is disabled while converting", () => {
+  it("should disable Convert button while converting", () => {
     render(
       wrap(
         <CoachingActivityDialog

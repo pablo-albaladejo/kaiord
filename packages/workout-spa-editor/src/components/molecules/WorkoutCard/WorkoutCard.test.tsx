@@ -38,7 +38,7 @@ function makeWorkout(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
 }
 
 describe("WorkoutCard", () => {
-  it("renders title and sport", () => {
+  it("should render title and sport", () => {
     const workout = makeWorkout();
 
     render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
@@ -47,7 +47,7 @@ describe("WorkoutCard", () => {
     expect(screen.getByText("running")).toBeInTheDocument();
   });
 
-  it("shows state indicator", () => {
+  it("should show state indicator", () => {
     const workout = makeWorkout({ state: "pushed" });
 
     render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
@@ -56,7 +56,7 @@ describe("WorkoutCard", () => {
     expect(indicator).toHaveTextContent("\u2713");
   });
 
-  it("calls onClick when clicked", async () => {
+  it("should call onClick when clicked", async () => {
     const user = userEvent.setup();
     const onClick = vi.fn();
     const workout = makeWorkout();
@@ -68,7 +68,7 @@ describe("WorkoutCard", () => {
     expect(onClick).toHaveBeenCalledWith(workout);
   });
 
-  it("shows duration when present", () => {
+  it("should show duration when present", () => {
     const workout = makeWorkout();
 
     render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
@@ -76,7 +76,7 @@ describe("WorkoutCard", () => {
     expect(screen.getByText("30m")).toBeInTheDocument();
   });
 
-  it("shows source as a muted origin chip (no coloured badge)", () => {
+  it("should show source as a muted origin chip (no coloured badge)", () => {
     const workout = makeWorkout({ source: "train2go" });
 
     render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
@@ -84,7 +84,7 @@ describe("WorkoutCard", () => {
     expect(screen.getByText("· train2go")).toBeInTheDocument();
   });
 
-  it("uses the lateral border colour driven by state", () => {
+  it("should use the lateral border colour driven by state", () => {
     const workout = makeWorkout({ state: "pushed" });
 
     render(<WorkoutCard workout={workout} onClick={vi.fn()} />);
@@ -94,7 +94,7 @@ describe("WorkoutCard", () => {
     expect(button.className).toContain("border-emerald-600");
   });
 
-  it("state indicator has an accessible label", () => {
+  it("should give the state indicator an accessible label", () => {
     const workout = makeWorkout({ state: "raw" });
 
     render(<WorkoutCard workout={workout} onClick={vi.fn()} />);

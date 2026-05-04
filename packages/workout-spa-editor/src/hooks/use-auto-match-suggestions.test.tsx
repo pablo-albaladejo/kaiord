@@ -47,21 +47,21 @@ describe("useAutoMatchSuggestions", () => {
   beforeEach(clearAll);
   afterEach(clearAll);
 
-  it("returns [] when no profileId or weekStart", async () => {
+  it("should return [] when no profileId or weekStart", async () => {
     const { result } = renderHook(() =>
       useAutoMatchSuggestions(null, "2026-04-27")
     );
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
-  it("returns [] when no candidates exist", async () => {
+  it("should return [] when no candidates exist", async () => {
     const { result } = renderHook(() =>
       useAutoMatchSuggestions("p1", "2026-04-27")
     );
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
-  it("returns suggestions when candidates exist and not dismissed", async () => {
+  it("should return suggestions when candidates exist and not dismissed", async () => {
     await db.table("coachingActivities").put(seedActivity("2026-04-29"));
     await db.table("workouts").put(seedWorkout("2026-04-29", 3600));
 
@@ -75,7 +75,7 @@ describe("useAutoMatchSuggestions", () => {
     });
   });
 
-  it("hides only the dismissed pair; other candidates remain visible", async () => {
+  it("should hide only the dismissed pair; other candidates remain visible", async () => {
     await db.table("coachingActivities").put(seedActivity("2026-04-29"));
     await db.table("workouts").put(seedWorkout("2026-04-29", 3600));
     const dismissedRow: AutoMatchDismissal = {
@@ -98,7 +98,7 @@ describe("useAutoMatchSuggestions", () => {
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
-  it("re-evaluates when the dismissal entry is removed", async () => {
+  it("should re-evaluate when the dismissal entry is removed", async () => {
     await db.table("coachingActivities").put(seedActivity("2026-04-29"));
     await db.table("workouts").put(seedWorkout("2026-04-29", 3600));
     await db.table("autoMatchDismissals").put({

@@ -37,7 +37,7 @@ const workout = {
 } as unknown as WorkoutRecord;
 
 describe("useBatchRunner", () => {
-  it("flips isProcessing around the batch run and calls processBatch", async () => {
+  it("should flip isProcessing around the batch run and calls processBatch", async () => {
     processBatchSpy.mockResolvedValueOnce(undefined);
     const setMessage = vi.fn();
 
@@ -52,7 +52,7 @@ describe("useBatchRunner", () => {
     expect(result.current.isProcessing).toBe(false);
   });
 
-  it("surfaces an error message when processBatch throws", async () => {
+  it("should surface an error message when processBatch throws", async () => {
     processBatchSpy.mockRejectedValueOnce(new Error("boom"));
     const setMessage = vi.fn();
 

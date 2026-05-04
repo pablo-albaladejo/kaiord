@@ -19,7 +19,7 @@ describe("useAiCustomPromptLive", () => {
   beforeEach(clearMeta);
   afterEach(clearMeta);
 
-  it("resolves to null when no row exists in the meta table", async () => {
+  it("should resolve to null when no row exists in the meta table", async () => {
     const { result } = renderHook(() => useAiCustomPromptLive());
 
     await waitFor(() => {
@@ -27,7 +27,7 @@ describe("useAiCustomPromptLive", () => {
     });
   });
 
-  it("resolves to the stored string and re-fires on update", async () => {
+  it("should resolve to the stored string and re-fires on update", async () => {
     const { result } = renderHook(() => useAiCustomPromptLive());
 
     await waitFor(() => {
@@ -43,7 +43,7 @@ describe("useAiCustomPromptLive", () => {
     });
   });
 
-  it("resolves to an empty string when the user clears the prompt", async () => {
+  it("should resolve to an empty string when the user clears the prompt", async () => {
     await db.table("meta").put({ key: "ai_custom_prompt", value: "" });
 
     const { result } = renderHook(() => useAiCustomPromptLive());

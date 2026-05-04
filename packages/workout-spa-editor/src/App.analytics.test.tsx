@@ -71,7 +71,7 @@ describe("App analytics", () => {
     localStorage.setItem("workout-spa-onboarding-completed", "true");
   });
 
-  it("fires pageView on initial mount with the current path", async () => {
+  it("should fire pageView on initial mount with the current path", async () => {
     // Arrange
     const analytics: Analytics = {
       pageView: vi.fn(),
@@ -87,7 +87,7 @@ describe("App analytics", () => {
     });
   });
 
-  it("fires pageView on client-side navigation", async () => {
+  it("should fire pageView on client-side navigation", async () => {
     // Arrange
     const analytics: Analytics = {
       pageView: vi.fn(),
@@ -109,7 +109,7 @@ describe("App analytics", () => {
     });
   });
 
-  it("fires pageView with full path including dynamic segments", async () => {
+  it("should fire pageView with full path including dynamic segments", async () => {
     // Arrange
     const analytics: Analytics = {
       pageView: vi.fn(),

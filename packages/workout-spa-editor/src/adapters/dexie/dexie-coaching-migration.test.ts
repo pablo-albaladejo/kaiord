@@ -44,7 +44,7 @@ const seedV3 = async (dbName: string) => {
 };
 
 describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
-  it("backfills linkedAccounts: [] on existing profile rows", async () => {
+  it("should backfill linkedAccounts: [] on existing profile rows", async () => {
     const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
     await seedV3(dbName);
 
@@ -59,7 +59,7 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     v4.close();
   });
 
-  it("creates an empty coachingActivities table", async () => {
+  it("should create an empty coachingActivities table", async () => {
     const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
     await seedV3(dbName);
 
@@ -71,7 +71,7 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     v4.close();
   });
 
-  it("creates an empty coachingSyncState table", async () => {
+  it("should create an empty coachingSyncState table", async () => {
     const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
     await seedV3(dbName);
 
@@ -83,7 +83,7 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     v4.close();
   });
 
-  it("leaves bridge-discovery syncState rows byte-identically unchanged", async () => {
+  it("should leave bridge-discovery syncState rows byte-identically unchanged", async () => {
     const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;
     await seedV3(dbName);
 
@@ -132,7 +132,7 @@ describe("Dexie v3 → v4 upgrade (coaching integration)", () => {
     v4.close();
   });
 
-  it("forward-tolerance: a v4-migrated profile row still readable under v3 schema", async () => {
+  it("should keep a v4-migrated profile row readable under v3 schema (forward-tolerance)", async () => {
     // Open the same DB under v3 schema after v4 has written linkedAccounts.
     // Dexie preserves unknown fields on rows even if the schema string omits indexes for them.
     const dbName = `kaiord-coaching-migration-${Date.now()}-${Math.random()}`;

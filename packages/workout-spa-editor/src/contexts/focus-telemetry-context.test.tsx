@@ -16,7 +16,7 @@ import {
 // Task 2.1.a — FocusTelemetryContext.Provider wraps the editor and exposes
 // the current FocusTelemetry via useFocusTelemetry()
 describe("FocusTelemetryContext", () => {
-  it("useFocusTelemetry returns the defaultFocusTelemetry when no provider is mounted", () => {
+  it("should return the defaultFocusTelemetry via useFocusTelemetry when no provider is mounted", () => {
     // Arrange
     let captured: FocusTelemetry | null = null;
     const Probe = () => {
@@ -31,7 +31,7 @@ describe("FocusTelemetryContext", () => {
     expect(captured).toBe(defaultFocusTelemetry);
   });
 
-  it("useFocusTelemetry returns the provided FocusTelemetry when a provider is mounted", () => {
+  it("should return the provided FocusTelemetry via useFocusTelemetry when a provider is mounted", () => {
     // Arrange
     const spy = vi.fn<FocusTelemetry>();
     let captured: FocusTelemetry | null = null;
@@ -51,7 +51,7 @@ describe("FocusTelemetryContext", () => {
     expect(captured).toBe(spy);
   });
 
-  it("useContext(FocusTelemetryContext) resolves the same value as useFocusTelemetry", () => {
+  it("should resolve the same value via useContext(FocusTelemetryContext) as useFocusTelemetry", () => {
     // Arrange
     const spy = vi.fn<FocusTelemetry>();
     const fromHook = { current: null as FocusTelemetry | null };
@@ -75,7 +75,7 @@ describe("FocusTelemetryContext", () => {
     expect(fromHook.current).toBe(spy);
   });
 
-  it("value reference is stable across re-renders when the same function is provided", () => {
+  it("should keep value reference stable across re-renders when the same function is provided", () => {
     // Arrange
     const observedValues = new Set<FocusTelemetry>();
     let triggerRerender = () => {};
@@ -106,7 +106,7 @@ describe("FocusTelemetryContext", () => {
     expect(observedValues.size).toBe(1);
   });
 
-  it("the provided telemetry function is called when a consumer invokes it", () => {
+  it("should call the provided telemetry function when a consumer invokes it", () => {
     // Arrange
     const spy = vi.fn<FocusTelemetry>();
     const event = wiringCanaryEvent();

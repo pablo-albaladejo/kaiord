@@ -38,7 +38,7 @@ const makeCoaching = (id: string, date: string): CoachingActivity => ({
 });
 
 describe("CalendarWeekGrid", () => {
-  it("renders 7 day columns", () => {
+  it("should render 7 day columns", () => {
     render(
       <CalendarWeekGrid
         days={DAYS}
@@ -53,7 +53,7 @@ describe("CalendarWeekGrid", () => {
     expect(screen.getAllByTestId(/^day-column-/)).toHaveLength(7);
   });
 
-  it("renders workout cards in correct day", () => {
+  it("should render workout cards in correct day", () => {
     render(
       <CalendarWeekGrid
         days={DAYS}
@@ -67,7 +67,7 @@ describe("CalendarWeekGrid", () => {
     expect(screen.getByTestId("workout-card-w1")).toBeInTheDocument();
   });
 
-  it("renders coaching cards alongside workouts", () => {
+  it("should render coaching cards alongside workouts", () => {
     render(
       <CalendarWeekGrid
         days={DAYS}
@@ -87,7 +87,7 @@ describe("CalendarWeekGrid", () => {
     expect(screen.getByText("· TST")).toBeInTheDocument();
   });
 
-  it("renders coaching cards without workouts", () => {
+  it("should render coaching cards without workouts", () => {
     render(
       <CalendarWeekGrid
         days={DAYS}
@@ -104,7 +104,7 @@ describe("CalendarWeekGrid", () => {
     expect(screen.getByTestId("coaching-card-c2")).toBeInTheDocument();
   });
 
-  it("shows empty-day button only when no workouts AND no coaching", () => {
+  it("should show empty-day button only when no workouts AND no coaching", () => {
     render(
       <CalendarWeekGrid
         days={DAYS}
@@ -124,7 +124,7 @@ describe("CalendarWeekGrid", () => {
     expect(screen.getByTestId("empty-day-2026-04-07")).toBeInTheDocument();
   });
 
-  it("renders with empty coaching data (no registry)", () => {
+  it("should render with empty coaching data (no registry)", () => {
     render(
       <CalendarWeekGrid
         days={DAYS}

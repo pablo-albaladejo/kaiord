@@ -20,7 +20,7 @@ function withRouter(ui: React.ReactNode, path = "/calendar") {
 }
 
 describe("FirstVisitState", () => {
-  it("renders three entry paths", () => {
+  it("should render three entry paths", () => {
     render(withRouter(<FirstVisitState />));
 
     expect(screen.getByText("Create")).toBeInTheDocument();
@@ -28,13 +28,13 @@ describe("FirstVisitState", () => {
     expect(screen.getByText("Connect")).toBeInTheDocument();
   });
 
-  it("renders welcome message", () => {
+  it("should render welcome message", () => {
     render(withRouter(<FirstVisitState />));
 
     expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
   });
 
-  it("calls onSettingsClick when Connect is clicked", async () => {
+  it("should call onSettingsClick when Connect is clicked", async () => {
     const user = userEvent.setup();
     const onSettingsClick = vi.fn();
 
@@ -45,7 +45,7 @@ describe("FirstVisitState", () => {
     expect(onSettingsClick).toHaveBeenCalledOnce();
   });
 
-  it("opens settings dialog when Connect is clicked without prop", async () => {
+  it("should open settings dialog when Connect is clicked without prop", async () => {
     const user = userEvent.setup();
 
     render(withRouter(<FirstVisitState />));
@@ -54,7 +54,7 @@ describe("FirstVisitState", () => {
     await user.click(screen.getByText("Connect"));
   });
 
-  it("navigates to /workout/new when Create is clicked", async () => {
+  it("should navigate to /workout/new when Create is clicked", async () => {
     const user = userEvent.setup();
 
     render(withRouter(<FirstVisitState />));
@@ -63,7 +63,7 @@ describe("FirstVisitState", () => {
     // Navigate is called - no error thrown
   });
 
-  it("navigates to import when Import is clicked", async () => {
+  it("should navigate to import when Import is clicked", async () => {
     const user = userEvent.setup();
 
     render(withRouter(<FirstVisitState />));
@@ -74,13 +74,13 @@ describe("FirstVisitState", () => {
 });
 
 describe("EmptyWeekState", () => {
-  it("shows add workout button", () => {
+  it("should show add workout button", () => {
     render(withRouter(<EmptyWeekState />));
 
     expect(screen.getByText("Add workout")).toBeInTheDocument();
   });
 
-  it("navigates when Add workout is clicked", async () => {
+  it("should navigate when Add workout is clicked", async () => {
     const user = userEvent.setup();
 
     render(withRouter(<EmptyWeekState />));
@@ -89,19 +89,19 @@ describe("EmptyWeekState", () => {
     // Navigate to /workout/new is called - no error thrown
   });
 
-  it("shows go to latest when callback provided", () => {
+  it("should show go to latest when callback provided", () => {
     render(withRouter(<EmptyWeekState onGoToLatest={vi.fn()} />));
 
     expect(screen.getByText("Go to latest")).toBeInTheDocument();
   });
 
-  it("does not show go to latest when no callback", () => {
+  it("should not show go to latest when no callback", () => {
     render(withRouter(<EmptyWeekState />));
 
     expect(screen.queryByText("Go to latest")).not.toBeInTheDocument();
   });
 
-  it("calls onGoToLatest when clicked", async () => {
+  it("should call onGoToLatest when clicked", async () => {
     const user = userEvent.setup();
     const onGoToLatest = vi.fn();
 
@@ -114,7 +114,7 @@ describe("EmptyWeekState", () => {
 });
 
 describe("NoBridgesState", () => {
-  it("renders install prompt", () => {
+  it("should render install prompt", () => {
     render(<NoBridgesState />);
 
     expect(screen.getByTestId("no-bridges-state")).toBeInTheDocument();
@@ -124,7 +124,7 @@ describe("NoBridgesState", () => {
     expect(screen.getByText(/Garmin Connect, Train2Go/)).toBeInTheDocument();
   });
 
-  it("renders learn more link to bridge docs", () => {
+  it("should render learn more link to bridge docs", () => {
     render(<NoBridgesState />);
 
     const link = screen.getByText("Learn more");
@@ -136,7 +136,7 @@ describe("NoBridgesState", () => {
 });
 
 describe("NoAiProviderState", () => {
-  it("renders configure prompt", () => {
+  it("should render configure prompt", () => {
     render(withRouter(<NoAiProviderState />));
 
     expect(screen.getByTestId("no-ai-provider-state")).toBeInTheDocument();

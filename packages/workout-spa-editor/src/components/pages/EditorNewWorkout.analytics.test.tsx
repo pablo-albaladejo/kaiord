@@ -53,7 +53,7 @@ describe("EditorNewWorkout analytics", () => {
     localStorage.clear();
   });
 
-  it("fires workout-created with source=manual when a manual workout is saved", async () => {
+  it("should fire workout-created with source=manual when a manual workout is saved", async () => {
     // Arrange
     const analytics: Analytics = {
       pageView: vi.fn(),

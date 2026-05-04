@@ -132,7 +132,7 @@ describe.each([
     document.body.innerHTML = "";
   });
 
-  it("focuses the empty-state button for an empty-state target", () => {
+  it("should focus the empty-state button for an empty-state target", () => {
     // Arrange
     const { ref } = renderHarness();
 
@@ -149,7 +149,7 @@ describe.each([
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
   });
 
-  it("falls back to the heading when the item id is unknown and the list is empty", () => {
+  it("should fall back to the heading when the item id is unknown and the list is empty", () => {
     // Arrange — no items registered, so `ghost-id` falls all the way
     // through the fallback chain. An explicit empty-state button exists,
     // so that wins before the heading; disable it to force heading.
@@ -171,7 +171,7 @@ describe.each([
     expect(document.activeElement).toBe(ref.current!.heading);
   });
 
-  it("clears the target without moving focus while a form field inside the editor is focused", () => {
+  it("should clear the target without moving focus while a form field inside the editor is focused", () => {
     // Arrange
     const { ref } = renderHarness();
     const input = document.createElement("input");
@@ -193,7 +193,7 @@ describe.each([
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
   });
 
-  it("does not re-run on unrelated store key changes while pendingFocusTarget stays null", () => {
+  it("should not re-run on unrelated store key changes while pendingFocusTarget stays null", () => {
     // Arrange — spy on element.focus to count focus moves.
     const { ref } = renderHarness();
     const focusSpy = vi.spyOn(ref.current!.emptyState, "focus");
@@ -213,7 +213,7 @@ describe.each([
     expect(focusSpy).not.toHaveBeenCalled();
   });
 
-  it("collapses rapid sequential set calls into a single focus", () => {
+  it("should collapse rapid sequential set calls into a single focus", () => {
     // Arrange
     const { ref } = renderHarness();
     const focusSpy = vi.spyOn(ref.current!.emptyState, "focus");
@@ -234,7 +234,7 @@ describe.each([
     expect(document.activeElement).toBe(ref.current!.emptyState);
   });
 
-  it("does not re-focus when the same target is set twice", () => {
+  it("should not re-focus when the same target is set twice", () => {
     // Arrange
     const { ref } = renderHarness();
     const focusSpy = vi.spyOn(ref.current!.emptyState, "focus");
@@ -262,7 +262,7 @@ describe.each([
     expect(focusSpy.mock.calls.length).toBeLessThanOrEqual(2);
   });
 
-  it("clears pendingFocusTarget when the fallback chain yields nothing", () => {
+  it("should clear pendingFocusTarget when the fallback chain yields nothing", () => {
     // Arrange — render a harness with NO empty-state and NO heading,
     // so `focusItem(ghost)` has no resolution path.
     const ref = { current: null as HarnessRefs | null };
@@ -318,7 +318,7 @@ describe.each([
     warnSpy.mockRestore();
   });
 
-  it("stashes the target while a Radix dialog is open and re-applies it on close via rAF", () => {
+  it("should stash the target while a Radix dialog is open and re-apply it on close via rAF", () => {
     // Arrange — a Radix-flagged dialog that renders INSIDE the editor
     // root through a prop toggle. Starting the test with the dialog
     // present guarantees the observer's initial synchronous count is
@@ -402,7 +402,7 @@ describe.each([
     view.unmount();
   });
 
-  it("focuses an item registered via the context", () => {
+  it("should focus an item registered via the context", () => {
     // Arrange — render a child that registers itself in the registry.
     const ref = { current: null as HarnessRefs | null };
     const Item = ({ id }: { id: string }) => {
@@ -443,7 +443,7 @@ describe.each([
   // Task 6.1.d — wiring-canary must fire exactly once under both modes.
   // Under StrictMode, React double-invokes effects; the module-level
   // hasFiredCanaryThisSession flag prevents double-emission.
-  it("wiring-canary fires exactly once even under StrictMode double-mount", () => {
+  it("should fire wiring-canary exactly once even under StrictMode double-mount", () => {
     // Arrange
     const spy = vi.fn<FocusTelemetry>();
     const harnessRef = { current: null as HarnessRefs | null };

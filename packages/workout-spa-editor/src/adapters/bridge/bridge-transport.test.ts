@@ -11,7 +11,7 @@ describe("sendBridgeMessage", () => {
     vi.useRealTimers();
   });
 
-  it("returns error when chrome runtime is not available", async () => {
+  it("should return error when chrome runtime is not available", async () => {
     // Arrange - ensure chrome is undefined
     const originalChrome = globalThis.chrome;
     // @ts-expect-error -- intentionally removing chrome for test
@@ -30,7 +30,7 @@ describe("sendBridgeMessage", () => {
     globalThis.chrome = originalChrome;
   });
 
-  it("sends message via chrome.runtime.sendMessage", async () => {
+  it("should send message via chrome.runtime.sendMessage", async () => {
     // Arrange
     const mockResponse = { ok: true, protocolVersion: 1 };
     const sendMessage = vi.fn(
@@ -58,7 +58,7 @@ describe("sendBridgeMessage", () => {
     expect(result).toEqual(mockResponse);
   });
 
-  it("returns error when chrome.runtime.lastError is set", async () => {
+  it("should return error when chrome.runtime.lastError is set", async () => {
     // Arrange
     const sendMessage = vi.fn(
       (_extId: string, _msg: unknown, cb: (r: unknown) => void) => {
@@ -83,7 +83,7 @@ describe("sendBridgeMessage", () => {
     });
   });
 
-  it("returns no-response error when callback receives null", async () => {
+  it("should return no-response error when callback receives null", async () => {
     // Arrange
     const sendMessage = vi.fn(
       (_extId: string, _msg: unknown, cb: (r: unknown) => void) => {
@@ -105,7 +105,7 @@ describe("sendBridgeMessage", () => {
     expect(result).toEqual({ ok: false, error: "No response" });
   });
 
-  it("resolves with timeout error when extension does not respond", async () => {
+  it("should resolve with timeout error when extension does not respond", async () => {
     // Arrange
     const sendMessage = vi.fn(); // never calls callback
 
@@ -128,7 +128,7 @@ describe("sendBridgeMessage", () => {
     });
   });
 
-  it("returns error when sendMessage throws", async () => {
+  it("should return error when sendMessage throws", async () => {
     // Arrange
     const sendMessage = vi.fn(() => {
       throw new Error("Extension crashed");

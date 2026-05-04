@@ -34,19 +34,19 @@ const validManifest = {
 };
 
 describe("verifyAnnouncement", () => {
-  it("returns the verified manifest for a matching ping", async () => {
+  it("should return the verified manifest for a matching ping", async () => {
     mockSend.mockResolvedValue(validManifest);
 
     await expect(verifyAnnouncement(ann)).resolves.toEqual(validManifest.data);
   });
 
-  it("returns false when the ping fails", async () => {
+  it("should return false when the ping fails", async () => {
     mockSend.mockResolvedValue({ ok: false, error: "no" });
 
     await expect(verifyAnnouncement(ann)).resolves.toBeNull();
   });
 
-  it("returns false when the manifest fails schema validation", async () => {
+  it("should return false when the manifest fails schema validation", async () => {
     mockSend.mockResolvedValue({
       ok: true,
       data: { id: "garmin-bridge", name: "x" },
@@ -55,7 +55,7 @@ describe("verifyAnnouncement", () => {
     await expect(verifyAnnouncement(ann)).resolves.toBeNull();
   });
 
-  it("returns false when manifest.id does not match the announced bridgeId", async () => {
+  it("should return false when manifest.id does not match the announced bridgeId", async () => {
     mockSend.mockResolvedValue({
       ok: true,
       data: {
@@ -67,7 +67,7 @@ describe("verifyAnnouncement", () => {
     await expect(verifyAnnouncement(ann)).resolves.toBeNull();
   });
 
-  it("returns false when the protocol version is unsupported", async () => {
+  it("should return false when the protocol version is unsupported", async () => {
     mockSend.mockResolvedValue({
       ok: true,
       data: {

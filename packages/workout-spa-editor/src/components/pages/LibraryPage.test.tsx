@@ -71,7 +71,7 @@ describe("LibraryPage", () => {
     useWorkoutStore.setState({ currentWorkout: null });
   });
 
-  it("renders templates from Dexie", async () => {
+  it("should render templates from Dexie", async () => {
     await db
       .table("templates")
       .bulkAdd([
@@ -87,7 +87,7 @@ describe("LibraryPage", () => {
     });
   });
 
-  it("shows empty state when no templates", async () => {
+  it("should show empty state when no templates", async () => {
     renderPage();
 
     await waitFor(() => {
@@ -95,7 +95,7 @@ describe("LibraryPage", () => {
     });
   });
 
-  it("filters templates by search", async () => {
+  it("should filter templates by search", async () => {
     await db
       .table("templates")
       .bulkAdd([
@@ -119,7 +119,7 @@ describe("LibraryPage", () => {
     });
   });
 
-  it("filters templates by sport", async () => {
+  it("should filter templates by sport", async () => {
     await db
       .table("templates")
       .bulkAdd([
@@ -143,7 +143,7 @@ describe("LibraryPage", () => {
     });
   });
 
-  it("schedule creates a workout record in workouts table", async () => {
+  it("should create a workout record in workouts table on schedule", async () => {
     await db
       .table("templates")
       .add(makeTemplate({ id: "t1", name: "Easy Ride", sport: "cycling" }));
@@ -226,7 +226,7 @@ describe("LibraryPage", () => {
     });
   });
 
-  it("renders the page heading with the route-heading attribute", async () => {
+  it("should render the page heading with the route-heading attribute", async () => {
     renderPage();
 
     const heading = await screen.findByRole("heading", {

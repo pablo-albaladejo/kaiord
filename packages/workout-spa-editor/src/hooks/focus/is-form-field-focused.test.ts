@@ -18,7 +18,7 @@ describe("isFormFieldFocused", () => {
     document.body.innerHTML = "";
   });
 
-  it("returns true when a text input inside the editor root is focused", () => {
+  it("should return true when a text input inside the editor root is focused", () => {
     // Arrange
     const input = document.createElement("input");
     input.type = "text";
@@ -29,7 +29,7 @@ describe("isFormFieldFocused", () => {
     expect(isFormFieldFocused(root)).toBe(true);
   });
 
-  it("returns true for a textarea", () => {
+  it("should return true for a textarea", () => {
     // Arrange
     const ta = document.createElement("textarea");
     const root = mountInRoot(ta);
@@ -39,7 +39,7 @@ describe("isFormFieldFocused", () => {
     expect(isFormFieldFocused(root)).toBe(true);
   });
 
-  it("returns true for a select", () => {
+  it("should return true for a select", () => {
     // Arrange
     const sel = document.createElement("select");
     const root = mountInRoot(sel);
@@ -49,7 +49,7 @@ describe("isFormFieldFocused", () => {
     expect(isFormFieldFocused(root)).toBe(true);
   });
 
-  it("returns true for a contentEditable element", () => {
+  it("should return true for a contentEditable element", () => {
     // Arrange — use setAttribute because jsdom's `contentEditable`
     // setter does not always mirror the attribute.
     const div = document.createElement("div");
@@ -74,7 +74,7 @@ describe("isFormFieldFocused", () => {
     expect(isFormFieldFocused(root)).toBe(false);
   });
 
-  it("returns false when the focused input lives outside the editor root", () => {
+  it("should return false when the focused input lives outside the editor root", () => {
     // Arrange — focused input on body, editor root is empty.
     const root = document.createElement("div");
     document.body.appendChild(root);
@@ -87,12 +87,12 @@ describe("isFormFieldFocused", () => {
     expect(isFormFieldFocused(root)).toBe(false);
   });
 
-  it("returns false when there is no editor root", () => {
+  it("should return false when there is no editor root", () => {
     // Act + Assert
     expect(isFormFieldFocused(null)).toBe(false);
   });
 
-  it("returns false for a button inside the editor root", () => {
+  it("should return false for a button inside the editor root", () => {
     // Arrange
     const btn = document.createElement("button");
     const root = mountInRoot(btn);

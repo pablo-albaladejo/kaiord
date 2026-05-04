@@ -60,7 +60,7 @@ describe("prepareBatch", () => {
     mockWorkouts = [];
   });
 
-  it("returns the default provider when one is flagged isDefault", async () => {
+  it("should return the default provider when one is flagged isDefault", async () => {
     mockProviders = [secondaryProvider, defaultProvider];
     mockWorkouts = [rawWorkout];
 
@@ -73,7 +73,7 @@ describe("prepareBatch", () => {
     });
   });
 
-  it("falls back to the first provider when none are flagged isDefault", async () => {
+  it("should fall back to the first provider when none are flagged isDefault", async () => {
     const noDefault = { ...defaultProvider, isDefault: false };
     mockProviders = [noDefault, secondaryProvider];
     mockWorkouts = [rawWorkout];
@@ -83,7 +83,7 @@ describe("prepareBatch", () => {
     expect(result).toMatchObject({ ok: true, provider: noDefault });
   });
 
-  it("returns a user-friendly error when no providers are configured", async () => {
+  it("should return a user-friendly error when no providers are configured", async () => {
     mockProviders = [];
     mockWorkouts = [rawWorkout];
 
@@ -95,7 +95,7 @@ describe("prepareBatch", () => {
     });
   });
 
-  it("returns a user-friendly error when the week has no raw workouts", async () => {
+  it("should return a user-friendly error when the week has no raw workouts", async () => {
     mockProviders = [defaultProvider];
     mockWorkouts = [];
 

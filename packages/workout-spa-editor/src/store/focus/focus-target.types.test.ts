@@ -9,7 +9,7 @@ import type {
 import { focusEmptyState, focusItem } from "./focus-target.types";
 
 describe("FocusTarget discriminated union", () => {
-  it("focusItem produces a FocusTargetItem with the supplied ItemId", () => {
+  it("should produce a FocusTargetItem with the supplied ItemId via focusItem", () => {
     // Arrange
     const id = asItemId("some-item");
 
@@ -21,7 +21,7 @@ describe("FocusTarget discriminated union", () => {
     expectTypeOf(target).toEqualTypeOf<FocusTargetItem>();
   });
 
-  it("focusEmptyState is a FocusTargetEmptyState sentinel", () => {
+  it("should expose focusEmptyState as a FocusTargetEmptyState sentinel", () => {
     // Arrange + Act: focusEmptyState is a pre-built sentinel constant.
 
     // Assert

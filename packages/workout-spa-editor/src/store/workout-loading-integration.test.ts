@@ -322,7 +322,7 @@ describe("workout loading integration", () => {
       expect(block1.id).not.toBe(block2.id);
     });
 
-    it("assigns a fresh UUID to every block even when ids are mixed present/absent", () => {
+    it("should assign a fresh UUID to every block even when ids are mixed present/absent", () => {
       // Arrange
       const existingId = "block-1234567890-abc123";
       const mockKrd: KRD = {

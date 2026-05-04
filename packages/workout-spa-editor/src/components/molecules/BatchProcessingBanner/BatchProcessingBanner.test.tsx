@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { BatchProcessingBanner } from "./BatchProcessingBanner";
 
 describe("BatchProcessingBanner", () => {
-  it("renders nothing when no raw workouts and not processing", () => {
+  it("should render nothing when no raw workouts and not processing", () => {
     const { container } = render(
       <BatchProcessingBanner
         rawCount={0}
@@ -19,7 +19,7 @@ describe("BatchProcessingBanner", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("shows raw count and process button when idle", () => {
+  it("should show raw count and process button when idle", () => {
     render(
       <BatchProcessingBanner
         rawCount={3}
@@ -34,7 +34,7 @@ describe("BatchProcessingBanner", () => {
     expect(screen.getByText("Process all with AI")).toBeInTheDocument();
   });
 
-  it("calls onProcess when button clicked", async () => {
+  it("should call onProcess when button clicked", async () => {
     const user = userEvent.setup();
     const onProcess = vi.fn();
 
@@ -53,7 +53,7 @@ describe("BatchProcessingBanner", () => {
     expect(onProcess).toHaveBeenCalled();
   });
 
-  it("shows progress during processing", () => {
+  it("should show progress during processing", () => {
     render(
       <BatchProcessingBanner
         rawCount={3}
@@ -75,7 +75,7 @@ describe("BatchProcessingBanner", () => {
     );
   });
 
-  it("shows cancel button during processing", async () => {
+  it("should show cancel button during processing", async () => {
     const user = userEvent.setup();
     const onCancel = vi.fn();
 
@@ -100,7 +100,7 @@ describe("BatchProcessingBanner", () => {
     expect(onCancel).toHaveBeenCalled();
   });
 
-  it("shows progress counter as X of N", () => {
+  it("should show progress counter as X of N", () => {
     render(
       <BatchProcessingBanner
         rawCount={5}
@@ -122,7 +122,7 @@ describe("BatchProcessingBanner", () => {
     );
   });
 
-  it("uses singular form for 1 raw workout", () => {
+  it("should use singular form for 1 raw workout", () => {
     render(
       <BatchProcessingBanner
         rawCount={1}
@@ -136,7 +136,7 @@ describe("BatchProcessingBanner", () => {
     expect(screen.getByText(/1 raw workout this/)).toBeInTheDocument();
   });
 
-  it("renders the per-bucket breakdown from progress.counts", () => {
+  it("should render the per-bucket breakdown from progress.counts", () => {
     render(
       <BatchProcessingBanner
         rawCount={5}

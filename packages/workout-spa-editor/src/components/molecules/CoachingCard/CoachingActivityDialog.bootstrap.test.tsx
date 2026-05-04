@@ -73,7 +73,7 @@ function TestProbe({
 }
 
 describe("CoachingActivityDialog (bootstrap-real smoke)", () => {
-  it("renders through CoachingRegistryBootstrap without throwing and registers ≥1 factory", () => {
+  it("should render through CoachingRegistryBootstrap without throwing and registers ≥1 factory", () => {
     let factoryCount = -1;
 
     render(

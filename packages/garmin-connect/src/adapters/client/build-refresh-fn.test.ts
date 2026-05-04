@@ -45,7 +45,7 @@ describe("buildRefreshFn", () => {
     vi.clearAllMocks();
   });
 
-  it("caches consumer: fetchOAuthConsumer called only once for two refreshes", async () => {
+  it("should cache consumer: fetchOAuthConsumer called only once for two refreshes", async () => {
     vi.mocked(fetchOAuthConsumer).mockResolvedValue(CONSUMER);
     vi.mocked(exchangeOAuth2).mockResolvedValue(OAUTH2);
 
@@ -64,7 +64,7 @@ describe("buildRefreshFn", () => {
     );
   });
 
-  it("clears consumer cache on failure and re-fetches on retry", async () => {
+  it("should clear consumer cache on failure and re-fetches on retry", async () => {
     const freshConsumer: OAuthConsumer = {
       key: "ck_new",
       secret: "cs_new",

@@ -49,7 +49,7 @@ describe("applyFocusToElement", () => {
     });
   });
 
-  it("does not call scrollIntoView when focus throws", () => {
+  it("should not call scrollIntoView when focus throws", () => {
     // Arrange
     const el = document.createElement("div");
     vi.spyOn(el, "focus").mockImplementation(() => {
@@ -67,7 +67,7 @@ describe("applyFocusToElement", () => {
     expect(scrollSpy).not.toHaveBeenCalled();
   });
 
-  it("still succeeds when scrollIntoView throws (legacy browser)", () => {
+  it("should still succeed when scrollIntoView throws (legacy browser)", () => {
     // Arrange — legacy runtime where scrollIntoView doesn't accept the
     // options-object form.
     const el = document.createElement("div");
@@ -104,7 +104,7 @@ describe("prefersReducedMotion", () => {
     expect(prefersReducedMotion()).toBe(true);
   });
 
-  it("returns false when matchMedia is unavailable", () => {
+  it("should return false when matchMedia is unavailable", () => {
     // Arrange
     Object.defineProperty(window, "matchMedia", {
       writable: true,
