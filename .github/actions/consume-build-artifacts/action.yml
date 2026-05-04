@@ -1,0 +1,66 @@
+# The single chokepoint where a consumer job receives the run-scoped
+# build artifact. See openspec/specs/ci-build-fanout/spec.md. The
+# consumer enumeration is hardcoded in
+# scripts/check-ci-fanout-invariants.mjs; adding a new consumer
+# requires updating that whitelist alongside the consumer's YAML.
+name: "Consume build artifacts"
+description: "Wipe stale dist, download build-artifacts, verify result."
+
+inputs:
+  expected-packages:
+    description: "Space-separated list of package names whose packages/<name>/dist/ MUST exist after download. Default covers all publishable packages."
+    required: false
+    default: "core fit tcx zwo garmin garmin-connect cli mcp ai"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Wipe stale dist (artifact is source of truth)
+      # INVARIANT: every package under packages/*/ is in the upload glob
+      # (packages/*/dist/). Wiping packages/*/dist before download is
+      # safe because the subsequent download re-creates every required
+      # dist/ directory; the Verify step fails fast if any expected one
+      # is missing. The wipe neutralises setup-pnpm's TypeScript-cache
+      # restore so it cannot leak files into a hybrid filesystem.
+      shell: bash
+      run: rm -rf packages/*/dist
+
+    - name: Download build artifacts
+      uses: actions/download-artifact@v7
+      with:
+        name: build-artifacts
+        path: .
+
+    - name: Verify dist exists and contains no symlinks
+      # SECURITY: input is materialized into env first so a future
+      # caller passing `core; rm -rf /` becomes a literal token in
+      # the array, not a shell metacharacter.
+      shell: bash
+      env:
+        EXPECTED: ${{ inputs.expected-packages }}
+      run: |
+        read -ra pkgs <<< "$EXPECTED"
+        missing=0
+        for pkg in "${pkgs[@]}"; do
+          if [ ! -d "packages/$pkg/dist" ]; then
+            echo "::error::Artifact 'build-artifacts' from job 'build' did not land packages/$pkg/dist."
+            echo "::error::Possible causes: (1) artifact expired (>30 days); (2) build-job upload step failed silently; (3) workflow misconfiguration."
+            echo "::error::Inspect the run's Artifacts panel; if missing, push an empty commit to rebuild:"
+            echo "::error::  git commit --allow-empty -m 'chore(ci): re-trigger build'"
+            missing=1
+          fi
+        done
+        [ $missing -eq 0 ] || exit 1
+        # CORRECTNESS: scan INSIDE every packages/*/dist for symlinks.
+        # The earlier `-path 'packages/*/dist' -type d -prune` form was
+        # wrong — it pruned the dist roots and so missed symlinks within
+        # them, defeating the entire check. -mindepth 0 keeps the dist
+        # root itself in scope (defends against root-symlink attacks:
+        # `packages/foo/dist -> /attacker-controlled`); do NOT
+        # "tighten" to -mindepth 1 — that silently loses root coverage.
+        symlinks=$(find packages/*/dist -mindepth 0 -type l -print 2>/dev/null | head -5)
+        if [ -n "$symlinks" ]; then
+          echo "::error::Symlinks under packages/*/dist/ are forbidden (potential malicious build):"
+          echo "$symlinks"
+          exit 1
+        fi
