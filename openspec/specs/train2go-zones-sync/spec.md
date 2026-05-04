@@ -9,7 +9,9 @@ into the active Kaiord profile. The capability runs on explicit user-trigger
 events only (link-time fan-out, manual calendar sync) — NEVER on heartbeat — and
 applies an "ask before overwrite" conflict policy that preserves manually-entered
 Kaiord values unless the user accepts each per-row diff.
+
 ## Requirements
+
 ### Requirement: Zone-sync toggle is opt-in per linked Train2Go account
 
 The SPA SHALL expose a `Sync zones` toggle on the Linked Account row for Train2Go. The toggle's state MUST persist alongside the linked-account record (`profile.linkedAccounts[i].syncZones: boolean`) and MUST default to `false` when an account is first linked. Toggling it OFF SHALL NOT revert previously-synced threshold values in the profile (toggle controls future syncs only).
@@ -303,4 +305,3 @@ The `commitConflictResolution` use case SHALL apply per-row decisions; for any s
 - **AND** the persisted `zones` SHALL stay byte-identical
 - **AND** equality comparison SHALL use the rounded Kaiord-domain integers (`minPercent: 41 == 41`), NOT the raw bridge watts (`minWatts: 111`)
 - **AND** the same property SHALL hold for HR bands (integer bpm equality across re-syncs of identical T2G data) and for pace bands (integer seconds equality across re-syncs of identical T2G `{min, sec}` data) — the round-trip stability invariant applies uniformly to all three domains.
-

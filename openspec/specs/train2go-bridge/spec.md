@@ -5,7 +5,9 @@
 ## Purpose
 
 Chrome extension that imports coaching plans from Train2Go into the workout editor by read-only DOM access on `app.train2go.com` — no credentials stored, no persistence, content-script-only communication.
+
 ## Requirements
+
 ### Requirement: Extension manifest
 
 The extension SHALL target Chrome (Chromium-based browsers) only using Manifest V3.
@@ -446,4 +448,3 @@ The bridge content script's `handleFetch` SHALL inspect the upstream `Content-Ty
 - **GIVEN** the upstream returns `Content-Type: text/html; charset=utf-8` with body `<html>...</html>`
 - **WHEN** the bridge content script's `handleFetch` processes the response
 - **THEN** the envelope SHALL be `{ ok: true, status: 200, data: "<html>...</html>" }`
-

@@ -5,7 +5,9 @@
 ## Purpose
 
 SPA-side integration with the train2go-bridge extension — runtime discovery via content script announcement and read-only import of coaching plans rendered on Train2Go pages.
+
 ## Requirements
+
 ### Requirement: Bridge capability schema extension
 
 The `BridgeCapability` Zod enum (in `packages/workout-spa-editor/src/types/bridge-schemas.ts`) SHALL include both `read:training-plan` AND `read:training-zones`. (Both must be valid for `bridgeManifestSchema` to validate manifests advertising either capability.)
@@ -477,4 +479,3 @@ For each sport `s ∈ { cycling, running, swimming }`, the SPA-side `syncZones` 
 - **AND** the running profile zones SHALL be written from `payload.hrZones.running`
 - **AND** the swimming profile zones SHALL be written from `payload.hrZones.swimming`
 - **AND** `payload.hrZones.generic` SHALL NOT be consulted for any sport (Specific wins for all three; Generic is only the fallback when Specific is absent)
-
