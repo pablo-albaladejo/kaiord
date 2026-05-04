@@ -35,7 +35,7 @@ describe("mapRepetitionBlock (characterization)", () => {
     expect(result.endConditionValue).toBe(3);
   });
 
-  it("uses stepTypeKey 'repeat' with displayOrder 6 in the stepType field", () => {
+  it("should use stepTypeKey 'repeat' with displayOrder 6 in the stepType field", () => {
     // Arrange
     const block: RepetitionBlock = {
       repeatCount: 2,

@@ -71,7 +71,7 @@ describe("buildRouteErrorPayload", () => {
       expect(out.name).toBe("TypeError");
     });
 
-    it("falls back to 'Error' when name is empty", () => {
+    it("should fall back to 'Error' when name is empty", () => {
       // Arrange
       const err = new Error("x");
       err.name = "";

@@ -51,7 +51,7 @@ describe("BatchCostConfirmation", () => {
     expect(screen.getByTestId("batch-cost-usd")).toHaveTextContent("$");
   });
 
-  it("renders 'No provider selected' and disables Confirm when provider is null", () => {
+  it("should render 'No provider selected' and disable Confirm when provider is null", () => {
     // Arrange
 
     // Act

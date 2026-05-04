@@ -199,7 +199,7 @@ describe("createDetectAction", () => {
       expect(mockPing).toHaveBeenCalledTimes(1);
     });
 
-    it("re-pings even within 30s when the cached result was 'not installed'", async () => {
+    it("should re-ping even within 30s when the cached result was 'not installed'", async () => {
       // Arrange
       mockPing.mockResolvedValue({
         ok: false,

@@ -139,7 +139,7 @@ describe("EmptyDayDialog", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("schedules the picked template for the dialog's date and closes both dialogs", async () => {
+  it("should schedule the picked template for the dialog's date and close both dialogs", async () => {
     // Arrange
 
     const persistence = createDexiePersistence(db);

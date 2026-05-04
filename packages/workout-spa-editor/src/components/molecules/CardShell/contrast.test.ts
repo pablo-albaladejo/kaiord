@@ -49,7 +49,7 @@ const contrastRatio = (a: string, b: string): number => {
 
 describe("WCAG 1.4.11 contrast against white card body", () => {
   it.each(Object.entries(PALETTE))(
-    "%s achieves ≥ 3:1 contrast against #ffffff",
+    "should achieve ≥ 3:1 contrast against #ffffff for %s",
     (_token, hex) => {
       // Arrange
 

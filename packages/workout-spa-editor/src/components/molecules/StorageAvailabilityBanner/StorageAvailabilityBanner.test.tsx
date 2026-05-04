@@ -7,7 +7,7 @@ const STORAGE_UNAVAILABLE_MESSAGE =
   "Storage unavailable — changes in this session won't be saved";
 
 describe("StorageAvailabilityBanner", () => {
-  it("renders the spec-exact message when status is 'failed'", () => {
+  it("should render the spec-exact message when status is 'failed'", () => {
     // Arrange
 
     // Act
@@ -19,7 +19,7 @@ describe("StorageAvailabilityBanner", () => {
     expect(screen.getByText(STORAGE_UNAVAILABLE_MESSAGE)).toBeInTheDocument();
   });
 
-  it("uses role='alert' so assistive tech announces it", () => {
+  it("should use role='alert' so assistive tech announces it", () => {
     // Arrange
 
     // Act
@@ -33,7 +33,7 @@ describe("StorageAvailabilityBanner", () => {
     );
   });
 
-  it("renders nothing when status is 'checking'", () => {
+  it("should render nothing when status is 'checking'", () => {
     // Arrange
 
     // Act
@@ -47,7 +47,7 @@ describe("StorageAvailabilityBanner", () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it("renders nothing when status is 'ok'", () => {
+  it("should render nothing when status is 'ok'", () => {
     // Arrange
 
     // Act

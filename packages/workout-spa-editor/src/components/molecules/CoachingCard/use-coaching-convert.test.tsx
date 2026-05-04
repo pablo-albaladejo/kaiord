@@ -69,7 +69,7 @@ describe("useCoachingConvert", () => {
     vi.clearAllMocks();
   });
 
-  it("calls navigate('/workout/<workoutId>') and onClose() exactly once on success", async () => {
+  it("should call navigate('/workout/<workoutId>') and onClose() exactly once on success", async () => {
     // Arrange
 
     const onClose = vi.fn();

@@ -158,7 +158,6 @@ Rule: "Editor runtime -> Zustand. Persisted data -> Dexie. Local UI -> React sta
 
 ## Testing
 
-- **AAA pattern**: Arrange, Act, Assert (with blank lines between)
 - **Round-trip tolerances**: time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm
 - **Coverage**: 80% for core, 70% for frontend
 - Test utilities: `@kaiord/core/test-utils` exports fixture loaders
@@ -169,6 +168,30 @@ Rule: "Editor runtime -> Zustand. Persisted data -> Dexie. Local UI -> React sta
 - Integration tests for conversion pipelines
 - Round-trip tests (FIT ↔ KRD ↔ TCX)
 - CLI smoke: `kaiord convert --in sample.krd --out out.tcx`
+
+### Test conventions (mechanically enforced — see `openspec/specs/test-conventions/spec.md`)
+
+Two structural invariants on every `*.test.{ts,tsx}` file under `packages/**`:
+
+1. **Title rule** (`R-ItTitleShould`) — every `it()`/`it.skip()`/`it.only()`/`it.each([...])(...)` title MUST start with the literal seven characters `s`, `h`, `o`, `u`, `l`, `d`, space (case-sensitive lowercase). Aliases via AST shape (any `it[.<alias>]`); vitest substitution placeholders stripped before the prefix check.
+2. **AAA rule** (`R-ItBodyAAA`) — every `it()` body MUST contain canonical Pascal-case line comments `// Arrange`, `// Act`, `// Assert` (in that order, separated by blank lines). Multiple statements per section; empty sections allowed (the marker is required, the body can be empty).
+
+```ts
+it("should reject malformed input", () => {
+  // Arrange
+  const input = "bad";
+
+  // Act
+  const result = parse(input);
+
+  // Assert
+  expect(result.error).toBe("malformed");
+});
+```
+
+Out-of-scope: `*.stories.{ts,tsx}`, `test-utils/`, `test-setup.ts`, `e2e/`.
+
+Enforced at IDE (ESLint `vitest/valid-title` at `'error'`), pre-commit (`scripts/check-test-{title-should,aaa}.mjs --changed-files`), and CI (full-tree mode).
 
 ## Contribution Flow
 

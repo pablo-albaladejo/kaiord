@@ -39,7 +39,7 @@ describe("isPerProfileTable", () => {
     return db;
   };
 
-  it("returns true when the primary key is `profileId` alone", async () => {
+  it("should return true when the primary key is `profileId` alone", async () => {
     // Arrange
 
     // Act
@@ -49,7 +49,7 @@ describe("isPerProfileTable", () => {
     expect(isPerProfileTable(d.table("userPreferences"))).toBe(true);
   });
 
-  it("returns true when the primary key is compound starting with `profileId`", async () => {
+  it("should return true when the primary key is compound starting with `profileId`", async () => {
     // Arrange
 
     // Act
@@ -63,7 +63,7 @@ describe("isPerProfileTable", () => {
     expect(isPerProfileTable(d.table("dismissals"))).toBe(true);
   });
 
-  it("returns true when the primary key is generic but a top-level `profileId` index exists", async () => {
+  it("should return true when the primary key is generic but a top-level `profileId` index exists", async () => {
     // Arrange
 
     // Act
@@ -75,7 +75,7 @@ describe("isPerProfileTable", () => {
     expect(isPerProfileTable(d.table("coachingActivities"))).toBe(true);
   });
 
-  it("returns true when the table has only compound indexes that start with `profileId`", async () => {
+  it("should return true when the table has only compound indexes that start with `profileId`", async () => {
     // Arrange
 
     // Act
@@ -88,7 +88,7 @@ describe("isPerProfileTable", () => {
     expect(isPerProfileTable(d.table("coachingActivities"))).toBe(true);
   });
 
-  it("returns false when the table has no `profileId` PK or index", async () => {
+  it("should return false when the table has no `profileId` PK or index", async () => {
     // Arrange
 
     // Act
@@ -102,7 +102,7 @@ describe("isPerProfileTable", () => {
     expect(isPerProfileTable(d.table("bridges"))).toBe(false);
   });
 
-  it("returns false when `profileId` only appears inside a compound index that does not start with it", async () => {
+  it("should return false when `profileId` only appears inside a compound index that does not start with it", async () => {
     // Arrange
 
     // Act

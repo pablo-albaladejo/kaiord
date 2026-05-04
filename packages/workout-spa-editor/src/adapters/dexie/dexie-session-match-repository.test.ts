@@ -235,7 +235,7 @@ describe("DexieSessionMatchRepository", () => {
     await expect(repo.deleteByWorkoutId("never")).resolves.toBeUndefined();
   });
 
-  it("deleteByProfile removes only that profile's rows", async () => {
+  it("should remove only that profile's rows when deleteByProfile is called", async () => {
     // Arrange
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1", profileId: "p1" }));

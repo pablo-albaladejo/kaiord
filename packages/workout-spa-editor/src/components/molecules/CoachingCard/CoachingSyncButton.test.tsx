@@ -96,7 +96,7 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
   beforeEach(() => mockMatchMedia(false));
   afterEach(() => vi.restoreAllMocks());
 
-  it("renders an icon-only button with aria-label='Sync <Label>' and no visible text label", () => {
+  it("should render an icon-only button with aria-label='Sync <Label>' and no visible text label", () => {
     // Arrange
 
     render(
@@ -146,7 +146,7 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
     expect(button.getAttribute("title")).toMatch(/^Train2Go · \d+m ago$/);
   });
 
-  it("surfaces 'never synced' when lastSyncedAt is undefined", () => {
+  it("should surface 'never synced' when lastSyncedAt is undefined", () => {
     // Arrange
 
     render(

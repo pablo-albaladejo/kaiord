@@ -1,3 +1,5 @@
+> Completed: 2026-05-04
+
 ## Why
 
 The repo's test suite has two well-understood conventions documented in `AGENTS.md` ("AAA pattern: Arrange, Act, Assert (blank lines between sections)") and `CLAUDE.md` ("Follow TDD strictly … AAA pattern"), but neither is enforced anywhere. Today's measurement against `main` (commit `b9ca78ec`):
