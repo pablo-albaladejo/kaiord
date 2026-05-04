@@ -4,6 +4,7 @@ import {
   ToastContextProvider,
   useToastContext,
 } from "../../contexts/ToastContext";
+import { Train2GoZonesSyncProvider } from "../../contexts/train2go-zones-sync-context";
 import { Toast, ToastProvider } from "../atoms/Toast";
 
 function ToastRenderer() {
@@ -33,7 +34,7 @@ export function AppToastProvider({ children }: { children: ReactNode }) {
   return (
     <ToastProvider>
       <ToastContextProvider>
-        {children}
+        <Train2GoZonesSyncProvider>{children}</Train2GoZonesSyncProvider>
         <ToastRenderer />
       </ToastContextProvider>
     </ToastProvider>

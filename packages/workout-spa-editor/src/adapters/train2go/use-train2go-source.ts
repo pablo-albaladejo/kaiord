@@ -5,13 +5,17 @@
  * Activities come from a useLiveQuery over the persisted
  * coachingActivities table; sync/expand/connect delegate to application
  * use cases (extracted to use-train2go-actions.ts to stay under lint).
+ *
+ * Zones-sync state is owned by `Train2GoZonesSyncProvider` (one
+ * instance per app), so multiple consumers of this factory all share
+ * the same `pending` state and the same dialog mount.
  */
 
 import { useCallback, useMemo } from "react";
 
 import { useAnalytics } from "../../contexts";
 import { usePersistence } from "../../contexts/persistence-context";
-import { useToastContext } from "../../contexts/ToastContext";
+import { useTrain2GoZonesSync } from "../../contexts/train2go-zones-sync-context";
 import { useTrain2GoStore } from "../../store/train2go-store";
 import type { CoachingSource } from "../../types/coaching-source";
 import { bridgeDiscovery } from "../bridge/bridge-discovery";
@@ -26,7 +30,6 @@ import {
   useTrain2GoSyncState,
 } from "./use-train2go-data";
 import type { ZonesSyncOrchestrator } from "./use-zones-sync-orchestrator";
-import { useZonesSyncOrchestrator } from "./use-zones-sync-orchestrator";
 
 export type Train2GoSource = CoachingSource & {
   zonesSync: ZonesSyncOrchestrator;
@@ -43,14 +46,13 @@ export function useTrain2GoSource(
 ): Train2GoSource {
   const store = useTrain2GoStore();
   const persistence = usePersistence();
-  const toasts = useToastContext();
   const analytics = useAnalytics();
+  const zonesSync = useTrain2GoZonesSync();
 
   const transport = useMemo(
     () => createTrain2GoCoachingTransport(getExtensionId),
     []
   );
-  const zonesSync = useZonesSyncOrchestrator(persistence, transport, toasts);
   const activities = useCoachingActivities(persistence, activeProfileId, days);
   const lastSyncedAt = useTrain2GoSyncState(persistence, activeProfileId);
 

@@ -18,7 +18,9 @@ import {
   SettingsDialogProvider,
   ThemeProvider,
 } from "./contexts";
+import { PersistenceProvider } from "./contexts/persistence-context";
 import { ToastContextProvider } from "./contexts/ToastContext";
+import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
 import { useWorkoutStore } from "./store/workout-store";
 
 type RenderArgs = {
@@ -31,19 +33,21 @@ function renderAtPath({ path, analytics }: RenderArgs) {
 
   const result = render(
     <AnalyticsProvider analytics={analytics}>
-      <ThemeProvider>
-        <SettingsDialogProvider>
-          <GarminBridgeProvider>
-            <ToastProvider>
-              <ToastContextProvider>
-                <Router hook={hook}>
-                  <App />
-                </Router>
-              </ToastContextProvider>
-            </ToastProvider>
-          </GarminBridgeProvider>
-        </SettingsDialogProvider>
-      </ThemeProvider>
+      <PersistenceProvider persistence={createInMemoryPersistence()}>
+        <ThemeProvider>
+          <SettingsDialogProvider>
+            <GarminBridgeProvider>
+              <ToastProvider>
+                <ToastContextProvider>
+                  <Router hook={hook}>
+                    <App />
+                  </Router>
+                </ToastContextProvider>
+              </ToastProvider>
+            </GarminBridgeProvider>
+          </SettingsDialogProvider>
+        </ThemeProvider>
+      </PersistenceProvider>
     </AnalyticsProvider>
   );
 
