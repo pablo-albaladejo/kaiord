@@ -1,26 +1,25 @@
 /**
- * ZonesConflictDialog — phase-2 of the zones-sync flow.
- *
- * The use case `syncZones` returns an array of `ConflictItem`s with
- * the user's current value and the incoming Train2Go value. The user
- * picks accept or reject per row; on confirm the parent invokes
- * `commitConflictResolution` with the per-row decisions.
- *
- * Hard contract (verified by tests + ESLint react/no-danger):
- *   - NEVER use `dangerouslySetInnerHTML`.
- *   - Field labels come from the static `FIELD_LABELS` map keyed by
- *     `FieldKey`, NEVER from a T2G-supplied string.
- *   - Numeric values render as React children so React's default
- *     escaping handles any future shape drift.
+ * ZonesConflictDialog — phase-2 of the zones-sync flow. Conflicts are
+ * grouped by `<sport>.<kind>` table for usability (per D-MA5/D-MA6 of
+ * zones-method-aware-reconcile). Layout shell extracted to
+ * `DialogShell.tsx`; group rendering extracted to `ConflictGroupList`;
+ * decision state extracted to `useConflictDecisions`.
  */
-import { useState } from "react";
+import { useMemo } from "react";
 
 import type {
   ConflictDecision,
   ConflictItem,
   FieldKey,
 } from "../../../types/coaching-zones";
+import { ConflictGroupList } from "./ConflictGroupList";
 import { ConflictRow } from "./ConflictRow";
+import { DialogShell } from "./DialogShell";
+import { groupConflicts } from "./group-conflicts";
+import {
+  buildConfirmDecisions,
+  useConflictDecisions,
+} from "./use-conflict-decisions";
 
 export type ZonesConflictDialogProps = {
   open: boolean;
@@ -29,71 +28,40 @@ export type ZonesConflictDialogProps = {
   onCancel: () => void;
 };
 
-const initialDecisions = (
-  conflicts: readonly ConflictItem[]
-): Record<FieldKey, ConflictDecision> => {
-  const out = {} as Record<FieldKey, ConflictDecision>;
-  for (const c of conflicts) out[c.field] = "reject";
-  return out;
-};
-
 export const ZonesConflictDialog = ({
   open,
   conflicts,
   onConfirm,
   onCancel,
 }: ZonesConflictDialogProps) => {
-  const [decisions, setDecisions] = useState<
-    Record<FieldKey, ConflictDecision>
-  >(() => initialDecisions(conflicts));
-
+  const grouped = useMemo(() => groupConflicts(conflicts), [conflicts]);
+  const ds = useConflictDecisions(grouped);
   if (!open) return null;
-
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="zones-conflict-title"
-      data-testid="zones-conflict-dialog"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50"
+    <DialogShell
+      onCancel={onCancel}
+      onApply={() =>
+        onConfirm(
+          buildConfirmDecisions(grouped, ds.scalarDecisions, ds.groupDecisions)
+        )
+      }
     >
-      <div className="w-full max-w-md rounded-lg bg-white p-4 shadow-lg dark:bg-gray-900">
-        <h2 id="zones-conflict-title" className="text-base font-semibold">
-          Resolve zones-sync conflicts
-        </h2>
-        <p className="mt-1 text-xs text-muted-foreground">
-          Train2Go has different values for these fields. Pick which to keep —
-          Kaiord (current) or Train2Go (incoming).
-        </p>
-        <ul className="mt-3 space-y-2">
-          {conflicts.map((c) => (
-            <ConflictRow
-              key={c.field}
-              conflict={c}
-              decision={decisions[c.field] ?? "reject"}
-              onChange={(d) =>
-                setDecisions((prev) => ({ ...prev, [c.field]: d }))
-              }
-            />
-          ))}
-        </ul>
-        <div className="mt-4 flex justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={() => onConfirm(decisions)}
-            className="rounded-md bg-rose-600 px-3 py-1 text-sm text-white hover:bg-rose-700"
-          >
-            Apply
-          </button>
-        </div>
-      </div>
-    </div>
+      {grouped.scalars.map((c) => (
+        <ConflictRow
+          key={c.field}
+          conflict={c}
+          decision={ds.scalarDecisions[c.field] ?? "reject"}
+          onChange={(d) => ds.setScalar(c.field, d)}
+        />
+      ))}
+      <ConflictGroupList
+        bandGroups={grouped.bandGroups}
+        ftpCoupled={grouped.ftpCoupled}
+        groupDecisions={ds.groupDecisions}
+        expanded={ds.expanded}
+        onSetGroup={ds.setGroup}
+        onToggleExpand={ds.toggleExpand}
+      />
+    </DialogShell>
   );
 };
