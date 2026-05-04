@@ -111,8 +111,8 @@ test("compareSources fails when a number literal changes", () => {
 
 test("compareSources reports the line of the first divergent token", () => {
   // Arrange
-  const base = ['const x = 1;', 'const y = 2;', 'const z = 3;'].join("\n");
-  const head = ['const x = 1;', 'const y = 99;', 'const z = 3;'].join("\n");
+  const base = ["const x = 1;", "const y = 2;", "const z = 3;"].join("\n");
+  const head = ["const x = 1;", "const y = 99;", "const z = 3;"].join("\n");
 
   // Act
   const result = compareSources(base, head);

@@ -26,7 +26,11 @@ test("findTitleViolators flags non-should titles", () => {
 
 test("findTitleViolators tracks line numbers", () => {
   // Arrange
-  const source = ['describe("X", () => {', '  it("renders", () => {});', "});"].join("\n");
+  const source = [
+    'describe("X", () => {',
+    '  it("renders", () => {});',
+    "});",
+  ].join("\n");
 
   // Act
   const violators = findTitleViolators(source);

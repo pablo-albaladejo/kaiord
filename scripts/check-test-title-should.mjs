@@ -1363,9 +1363,7 @@ const EXCLUDED_FRAGMENTS = [
   "/e2e/",
   "/.storybook/",
 ];
-const EXCLUDED_BASENAMES = new Set([
-  "test-setup.ts",
-]);
+const EXCLUDED_BASENAMES = new Set(["test-setup.ts"]);
 
 export function isInScope(repoRelPath) {
   const p = repoRelPath.replaceAll("\\", "/");
@@ -1477,8 +1475,7 @@ export function collectTitleViolations({
   repoRoot = REPO_ROOT,
   files,
 } = {}) {
-  const targetFiles =
-    files !== undefined ? files : findFiles({ packagesDir });
+  const targetFiles = files !== undefined ? files : findFiles({ packagesDir });
   const violations = [];
   for (const file of targetFiles) {
     const rel = relative(repoRoot, file).replaceAll("\\", "/");

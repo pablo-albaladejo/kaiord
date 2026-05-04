@@ -634,8 +634,7 @@ export function collectAaaViolations({
   repoRoot = REPO_ROOT,
   files,
 } = {}) {
-  const targetFiles =
-    files !== undefined ? files : findFiles({ packagesDir });
+  const targetFiles = files !== undefined ? files : findFiles({ packagesDir });
   const violations = [];
   for (const file of targetFiles) {
     const rel = relative(repoRoot, file).replaceAll("\\", "/");
