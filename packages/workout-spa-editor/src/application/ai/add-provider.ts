@@ -30,6 +30,9 @@ export const addProvider = async (
     ...input,
     id: crypto.randomUUID(),
     isDefault: existing.length === 0,
+    // Drives orderBy("createdAt") in the repository; immutable after
+    // creation (updateProvider's typed input excludes this field).
+    createdAt: Date.now(),
   };
   await persistence.aiProviders.put(provider);
   return provider;
