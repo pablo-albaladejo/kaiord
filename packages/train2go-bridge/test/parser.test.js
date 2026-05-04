@@ -265,6 +265,11 @@ describe("parser", () => {
   });
 
   describe("parseDetailsHtml", () => {
+    // FORBIDDEN_KEYS — keys that MUST NOT appear at any depth in the
+    // parsed output. `bpmRest` is REMOVED from this set in the
+    // full-bands change (now allowlisted under physiological.bpmRest
+    // per D-FB8). The DOM-level snake_case `bpm_rest` is still
+    // forbidden — only the camelCased emit form is valid.
     const FORBIDDEN_KEYS = new Set([
       "gender",
       "birthday",
@@ -272,7 +277,6 @@ describe("parser", () => {
       "smoker",
       "imc",
       "bpm_rest",
-      "bpmRest",
       "user_notes",
       "userNotes",
       "notes",
@@ -296,17 +300,56 @@ describe("parser", () => {
       return acc;
     };
 
-    it("extracts physiological / paces / hrZones from the live-shape fixture", () => {
+    it("should extract physiological / paces / hrZones from the live-shape fixture (full Z1-Z5 bands)", () => {
+      // Arrange
       const html = fixture("details-active.html");
 
+      // Act
       const result = parseDetailsHtml(html);
 
-      expect(result.physiological).toEqual({ weight: 83, bpmMax: 187 });
-      expect(result.paces.cycling).toEqual({ z4Upper: 268, z5Lower: 269 });
+      // Assert
+      // Physiological now includes bpmRest (D-FB8 allowlist).
+      expect(result.physiological).toEqual({
+        weight: 83,
+        bpmMax: 187,
+        bpmRest: 51,
+      });
+
+      // Cycling pace block carries WATTS (single integer per bound)
+      // with full Z1-Z5 + the existing z4Upper/z5Lower convenience.
+      expect(result.paces.cycling).toEqual({
+        z1: { lower: 111, upper: 149 },
+        z2: { lower: 150, upper: 203 },
+        z3: { lower: 204, upper: 239 },
+        z4: { lower: 240, upper: 268 },
+        z5: { lower: 269, upper: 386 },
+        z4Upper: 268,
+        z5Lower: 269,
+      });
+
+      // Running pace: full Z1-Z5 with {min, sec} bounds + convenience
+      // z4Upper.
+      expect(result.paces.running.z4).toEqual({
+        lower: { min: 4, sec: 44 },
+        upper: { min: 4, sec: 10 },
+      });
       expect(result.paces.running.z4Upper).toEqual({ min: 4, sec: 10 });
+
+      // Swimming pace: full bands.
+      expect(result.paces.swimming.z4).toEqual({
+        lower: { min: 1, sec: 39 },
+        upper: { min: 1, sec: 32 },
+      });
       expect(result.paces.swimming.z4Upper).toEqual({ min: 1, sec: 32 });
-      expect(result.hrZones.cycling).toEqual({ z4Upper: 174 });
-      expect(result.hrZones.running).toEqual({ z4Upper: 168 });
+
+      // HR zones: cycling (Specific) + running (Specific) + Generic.
+      // Swimming HR is absent in this fixture (no per-sport block).
+      expect(result.hrZones.generic.z4).toEqual({ lower: 161, upper: 174 });
+      expect(result.hrZones.cycling.z4).toEqual({ lower: 161, upper: 174 });
+      expect(result.hrZones.cycling.z4Upper).toBe(174);
+      expect(result.hrZones.running.z4).toEqual({ lower: 158, upper: 168 });
+      expect(result.hrZones.running.z4Upper).toBe(168);
+      expect("swimming" in result.hrZones).toBe(false);
     });
 
     it("redacts forbidden fields recursively at any nesting depth", () => {
@@ -338,7 +381,8 @@ describe("parser", () => {
       expect(parseDetailsHtml("")).toEqual({});
     });
 
-    it("emits paces.cycling without z5Lower when only z4Upper is present", () => {
+    it("should emit paces.cycling z4Upper convenience scalar even when only DOM z3_upper is present (backwards compat for partial forms)", () => {
+      // Arrange
       const html = `<main><section class="details">
         <div id="paces-99999" class="details-paces">
           <form action="/api/v2/paces/1"><input name="sport_id" type="hidden" value="3">
@@ -347,12 +391,19 @@ describe("parser", () => {
         </div>
       </section></main>`;
 
+      // Act
       const result = parseDetailsHtml(html);
 
+      // Assert
+      // No complete band (z3_lower missing) → no `z4` key emitted,
+      // but the convenience scalar `z4Upper` falls back to direct
+      // DOM extraction so older fixtures and partial coach configs
+      // still surface FTP for the threshold-scalar write path.
       expect(result.paces.cycling).toEqual({ z4Upper: 268 });
     });
 
-    it("does NOT leak z3_upper across sport blocks when running is partially configured", () => {
+    it("should NOT leak z3_upper across sport blocks when running is partially configured", () => {
+      // Arrange
       // Regression for CodeRabbit finding 471: running has sport_id=1 but
       // no z3_upper saved yet; the next form (cycling, sport_id=3) has
       // a z3_upper. Without bounded form-slicing, running would silently
@@ -369,10 +420,144 @@ describe("parser", () => {
         </div>
       </section></main>`;
 
+      // Act
       const result = parseDetailsHtml(html);
 
+      // Assert
       expect(result.paces.running).toBeUndefined();
       expect(result.paces.cycling).toEqual({ z4Upper: 268 });
+    });
+
+    // Tasks 1.3a-1.3h — full Z1-Z5 band coverage, Generic block,
+    // swimming-absent-when-not-present, bpm_rest extraction, and an
+    // expanded redaction key-walk that asserts the snake_case
+    // `bpm_rest` form is never emitted (only camelCased `bpmRest`).
+
+    it("should emit hrZones.generic with all five {lower, upper} bands when the upstream HTML has heart-rate-zone-generic", () => {
+      // Arrange
+      const html = fixture("details-active.html");
+
+      // Act
+      const result = parseDetailsHtml(html);
+
+      // Assert
+      expect(result.hrZones.generic).toEqual({
+        z1: { lower: 107, upper: 133 },
+        z2: { lower: 134, upper: 147 },
+        z3: { lower: 148, upper: 160 },
+        z4: { lower: 161, upper: 174 },
+        z5: { lower: 175, upper: 187 },
+        z4Upper: 174,
+      });
+    });
+
+    it("should preserve the z4Upper convenience field on the cycling Specific block alongside the full bands (1.3b)", () => {
+      // Arrange
+      const html = fixture("details-active.html");
+
+      // Act
+      const result = parseDetailsHtml(html);
+
+      // Assert
+      expect(result.hrZones.cycling.z3).toEqual({ lower: 148, upper: 160 });
+      expect(result.hrZones.cycling.z4Upper).toBe(174);
+    });
+
+    it("should omit hrZones.swimming when no heart-rate-zone-swimming block is present in the upstream HTML (1.3c)", () => {
+      // Arrange
+      const html = fixture("details-active.html");
+
+      // Act
+      const result = parseDetailsHtml(html);
+
+      // Assert
+      expect("swimming" in result.hrZones).toBe(false);
+    });
+
+    it("should emit cycling pace bands as integer watts (single value per bound, not min:sec) (1.3d)", () => {
+      // Arrange
+      const html = fixture("details-active.html");
+
+      // Act
+      const result = parseDetailsHtml(html);
+
+      // Assert
+      expect(result.paces.cycling.z1.lower).toBe(111);
+      expect(result.paces.cycling.z4.upper).toBe(268);
+      expect(result.paces.cycling.z4Upper).toBe(268);
+    });
+
+    it("should emit running pace bands as {min, sec} pairs per band (1.3e)", () => {
+      // Arrange
+      const html = fixture("details-active.html");
+
+      // Act
+      const result = parseDetailsHtml(html);
+
+      // Assert
+      expect(result.paces.running.z4.upper).toEqual({ min: 4, sec: 10 });
+      expect(result.paces.running.z4Upper).toEqual({ min: 4, sec: 10 });
+    });
+
+    it("should emit swimming pace bands as {min, sec} pairs per band (1.3f)", () => {
+      // Arrange
+      const html = fixture("details-active.html");
+
+      // Act
+      const result = parseDetailsHtml(html);
+
+      // Assert
+      expect(result.paces.swimming.z5.upper).toEqual({ min: 1, sec: 26 });
+    });
+
+    it("should extract bpm_rest from the physio block as camelCased bpmRest (1.3g) and never emit the snake_case form", () => {
+      // Arrange
+      const html = fixture("details-active.html");
+
+      // Act
+      const result = parseDetailsHtml(html);
+
+      // Assert
+      expect(result.physiological.bpmRest).toBe(51);
+      // Snake_case `bpm_rest` MUST NOT surface at any nesting depth
+      // — only the camelCased emit form is permitted (per spec
+      // scenario "bpm_rest is allowlisted and emitted (camelCase
+      // only)").
+      expect(walkAndCollectKeys(result).has("bpm_rest")).toBe(false);
+    });
+
+    it("should emit hrZones.swimming as a full Z1-Z5 band object when the upstream HTML has heart-rate-zone-swimming", () => {
+      // Arrange
+      // Build a minimal HTML that includes a swimming HR Specific
+      // block (NOT in the standard fixture — the shipped parser
+      // didn't emit this; the full-bands change adds it).
+      const html = `<main><section class="details">
+        <div id="hrzones-99999" class="details-hrzones">
+          <div class="heart-rate-zone heart-rate-zone-swimming">
+            <form action="/api/v2/hrzones/swim" class="remote">
+              <input name="z0_lower" type="number" value="120" />
+              <input name="z0_upper" type="number" value="135" />
+              <input name="z1_lower" type="number" value="136" />
+              <input name="z1_upper" type="number" value="148" />
+              <input name="z2_lower" type="number" value="149" />
+              <input name="z2_upper" type="number" value="160" />
+              <input name="z3_lower" type="number" value="161" />
+              <input name="z3_upper" type="number" value="172" />
+              <input name="z4_lower" type="number" value="173" />
+              <input name="z4_upper" type="number" value="185" />
+            </form>
+          </div>
+        </div>
+      </section></main>`;
+
+      // Act
+      const result = parseDetailsHtml(html);
+
+      // Assert
+      expect(result.hrZones.swimming.z1).toEqual({ lower: 120, upper: 135 });
+      expect(result.hrZones.swimming.z4).toEqual({ lower: 161, upper: 172 });
+      expect(result.hrZones.swimming.z5).toEqual({ lower: 173, upper: 185 });
+      expect(result.hrZones.swimming.z4Upper).toBe(172);
     });
   });
 });

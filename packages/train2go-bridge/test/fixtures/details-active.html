@@ -3,9 +3,15 @@
      Trims most prose / SVG / footer markup; retains the DOM IDs and
      `name=` attributes the parser keys off (#physio-{id},
      #hrzones-{id}, #paces-{id}). Forbidden fields (gender, birthday,
-     fat, smoker, IMC, bpm_rest, user_notes, coach.email/.name, email,
-     records, tests) are intentionally PRESENT here so the redaction
-     test can assert they are dropped at parse time. -->
+     fat, smoker, imc, user_notes, coach.email/.name, email, records,
+     tests) are intentionally PRESENT here so the redaction key-walk
+     test can assert they are dropped at parse time. NOTE: bpm_rest
+     (DOM snake_case) is allowlisted under the camelCased emit key
+     `bpmRest` (D-FB8); the parsed output MUST NOT contain the
+     snake_case form. `imc` is now explicitly enumerated in
+     FORBIDDEN_KEYS (was prose-only before). The Generic HR block
+     (heart-rate-zone-generic) and swimming HR block
+     (heart-rate-zone-swimming) are NEW in the full-bands change. -->
 <!doctype html>
 <html lang="en">
   <body>
@@ -32,7 +38,7 @@
               <input id="bpm_rest" name="bpm_rest" type="number" value="51" />
               <input id="bpm_max" name="bpm_max" type="number" value="187" />
               <input name="fat" type="number" value="18" id="fat" />
-              <input name="imc" type="number" id="imc" />
+              <input name="imc" type="number" value="27.4" id="imc" />
               <select id="smoker" name="smoker">
                 <option value="0" selected>No</option>
               </select>
@@ -44,6 +50,24 @@ private trainer notes — should be redacted</textarea
         </div>
         <div class="panel" id="pulse">
           <div class="details-hrzones" id="hrzones-99999">
+            <div class="heart-rate-zone heart-rate-zone-generic">
+              <form
+                action="https://app.train2go.com/api/v2/hrzones/8044"
+                class="remote hrzone-form"
+              >
+                <input name="user_id" type="hidden" value="99999" />
+                <input name="z0_lower" type="number" value="107" />
+                <input name="z0_upper" type="number" value="133" />
+                <input name="z1_lower" type="number" value="134" />
+                <input name="z1_upper" type="number" value="147" />
+                <input name="z2_lower" type="number" value="148" />
+                <input name="z2_upper" type="number" value="160" />
+                <input name="z3_lower" type="number" value="161" />
+                <input name="z3_upper" type="number" value="174" />
+                <input name="z4_lower" type="number" value="175" />
+                <input name="z4_upper" type="number" value="187" />
+              </form>
+            </div>
             <div class="heart-rate-zone heart-rate-zone-cycling">
               <form
                 action="https://app.train2go.com/api/v2/hrzones/8045"
@@ -68,7 +92,16 @@ private trainer notes — should be redacted</textarea
                 class="remote hrzone-form"
               >
                 <input name="user_id" type="hidden" value="99999" />
+                <input name="z0_lower" type="number" value="100" />
+                <input name="z0_upper" type="number" value="130" />
+                <input name="z1_lower" type="number" value="131" />
+                <input name="z1_upper" type="number" value="145" />
+                <input name="z2_lower" type="number" value="146" />
+                <input name="z2_upper" type="number" value="157" />
+                <input name="z3_lower" type="number" value="158" />
                 <input name="z3_upper" type="number" value="168" />
+                <input name="z4_lower" type="number" value="169" />
+                <input name="z4_upper" type="number" value="180" />
               </form>
             </div>
           </div>
@@ -83,56 +116,26 @@ private trainer notes — should be redacted</textarea
                 >
                   <input name="sport_id" type="hidden" value="1" />
                   <input name="pupil_id" type="hidden" value="99999" />
-                  <input
-                    name="measurement[z0_lower][0]"
-                    type="number"
-                    value="06"
-                  />
-                  <input
-                    name="measurement[z0_lower][1]"
-                    type="number"
-                    value="34"
-                  />
-                  <input
-                    name="measurement[z0_upper][0]"
-                    type="number"
-                    value="05"
-                  />
-                  <input
-                    name="measurement[z0_upper][1]"
-                    type="number"
-                    value="50"
-                  />
-                  <input
-                    name="measurement[z3_lower][0]"
-                    type="number"
-                    value="04"
-                  />
-                  <input
-                    name="measurement[z3_lower][1]"
-                    type="number"
-                    value="44"
-                  />
-                  <input
-                    name="measurement[z3_upper][0]"
-                    type="number"
-                    value="04"
-                  />
-                  <input
-                    name="measurement[z3_upper][1]"
-                    type="number"
-                    value="10"
-                  />
-                  <input
-                    name="measurement[z4_lower][0]"
-                    type="number"
-                    value="04"
-                  />
-                  <input
-                    name="measurement[z4_lower][1]"
-                    type="number"
-                    value="09"
-                  />
+                  <input name="measurement[z0_lower][0]" type="number" value="06" />
+                  <input name="measurement[z0_lower][1]" type="number" value="34" />
+                  <input name="measurement[z0_upper][0]" type="number" value="05" />
+                  <input name="measurement[z0_upper][1]" type="number" value="50" />
+                  <input name="measurement[z1_lower][0]" type="number" value="05" />
+                  <input name="measurement[z1_lower][1]" type="number" value="49" />
+                  <input name="measurement[z1_upper][0]" type="number" value="05" />
+                  <input name="measurement[z1_upper][1]" type="number" value="20" />
+                  <input name="measurement[z2_lower][0]" type="number" value="05" />
+                  <input name="measurement[z2_lower][1]" type="number" value="19" />
+                  <input name="measurement[z2_upper][0]" type="number" value="04" />
+                  <input name="measurement[z2_upper][1]" type="number" value="45" />
+                  <input name="measurement[z3_lower][0]" type="number" value="04" />
+                  <input name="measurement[z3_lower][1]" type="number" value="44" />
+                  <input name="measurement[z3_upper][0]" type="number" value="04" />
+                  <input name="measurement[z3_upper][1]" type="number" value="10" />
+                  <input name="measurement[z4_lower][0]" type="number" value="04" />
+                  <input name="measurement[z4_lower][1]" type="number" value="09" />
+                  <input name="measurement[z4_upper][0]" type="number" value="03" />
+                  <input name="measurement[z4_upper][1]" type="number" value="30" />
                 </form>
               </div>
               <div class="col pace-zone" data-sport="swimming">
@@ -142,26 +145,26 @@ private trainer notes — should be redacted</textarea
                 >
                   <input name="sport_id" type="hidden" value="2" />
                   <input name="pupil_id" type="hidden" value="99999" />
-                  <input
-                    name="measurement[z3_lower][0]"
-                    type="number"
-                    value="01"
-                  />
-                  <input
-                    name="measurement[z3_lower][1]"
-                    type="number"
-                    value="39"
-                  />
-                  <input
-                    name="measurement[z3_upper][0]"
-                    type="number"
-                    value="01"
-                  />
-                  <input
-                    name="measurement[z3_upper][1]"
-                    type="number"
-                    value="32"
-                  />
+                  <input name="measurement[z0_lower][0]" type="number" value="02" />
+                  <input name="measurement[z0_lower][1]" type="number" value="20" />
+                  <input name="measurement[z0_upper][0]" type="number" value="01" />
+                  <input name="measurement[z0_upper][1]" type="number" value="59" />
+                  <input name="measurement[z1_lower][0]" type="number" value="01" />
+                  <input name="measurement[z1_lower][1]" type="number" value="58" />
+                  <input name="measurement[z1_upper][0]" type="number" value="01" />
+                  <input name="measurement[z1_upper][1]" type="number" value="46" />
+                  <input name="measurement[z2_lower][0]" type="number" value="01" />
+                  <input name="measurement[z2_lower][1]" type="number" value="45" />
+                  <input name="measurement[z2_upper][0]" type="number" value="01" />
+                  <input name="measurement[z2_upper][1]" type="number" value="40" />
+                  <input name="measurement[z3_lower][0]" type="number" value="01" />
+                  <input name="measurement[z3_lower][1]" type="number" value="39" />
+                  <input name="measurement[z3_upper][0]" type="number" value="01" />
+                  <input name="measurement[z3_upper][1]" type="number" value="32" />
+                  <input name="measurement[z4_lower][0]" type="number" value="01" />
+                  <input name="measurement[z4_lower][1]" type="number" value="31" />
+                  <input name="measurement[z4_upper][0]" type="number" value="01" />
+                  <input name="measurement[z4_upper][1]" type="number" value="26" />
                 </form>
               </div>
               <div class="col pace-zone" data-sport="cycling">
@@ -171,26 +174,16 @@ private trainer notes — should be redacted</textarea
                 >
                   <input name="sport_id" type="hidden" value="3" />
                   <input name="pupil_id" type="hidden" value="99999" />
-                  <input
-                    name="measurement[z3_lower][0]"
-                    type="number"
-                    value="240"
-                  />
-                  <input
-                    name="measurement[z3_upper][0]"
-                    type="number"
-                    value="268"
-                  />
-                  <input
-                    name="measurement[z4_lower][0]"
-                    type="number"
-                    value="269"
-                  />
-                  <input
-                    name="measurement[z4_upper][0]"
-                    type="number"
-                    value="386"
-                  />
+                  <input name="measurement[z0_lower][0]" type="number" value="111" />
+                  <input name="measurement[z0_upper][0]" type="number" value="149" />
+                  <input name="measurement[z1_lower][0]" type="number" value="150" />
+                  <input name="measurement[z1_upper][0]" type="number" value="203" />
+                  <input name="measurement[z2_lower][0]" type="number" value="204" />
+                  <input name="measurement[z2_upper][0]" type="number" value="239" />
+                  <input name="measurement[z3_lower][0]" type="number" value="240" />
+                  <input name="measurement[z3_upper][0]" type="number" value="268" />
+                  <input name="measurement[z4_lower][0]" type="number" value="269" />
+                  <input name="measurement[z4_upper][0]" type="number" value="386" />
                 </form>
               </div>
             </div>
