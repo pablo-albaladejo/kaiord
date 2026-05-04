@@ -170,9 +170,9 @@ describe("updateSportZones", () => {
 
     // Assert
     expect(updated.sportZones.cycling?.heartRateZones?.method).toBe("user");
-    expect(
-      updated.sportZones.cycling?.heartRateZones?.zones[1]?.maxBpm
-    ).toBe(145);
+    expect(updated.sportZones.cycling?.heartRateZones?.zones[1]?.maxBpm).toBe(
+      145
+    );
   });
 
   it("should flip method from 'custom' to 'user' on manual band edit (4.3b)", async () => {
