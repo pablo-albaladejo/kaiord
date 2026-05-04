@@ -62,8 +62,11 @@ export const syncZones = async (
     return { ok: false, reason: "shape-mismatch" };
   }
   const incoming = mapPayloadToIncoming(payload);
-  const result = reconcile(profile, incoming);
-  if (result.applied.length > 0) {
+  const result = reconcile(profile, incoming, transport.source);
+  // Persist whenever reconcile mutated the profile — covers silent-fills
+  // (applied), method-flips on default-template/method-derived tables,
+  // and snapshot-write on train2go-synced-clean re-syncs (per D-MA4).
+  if (result.profile !== profile) {
     await repo.put({
       ...result.profile,
       updatedAt: new Date().toISOString(),

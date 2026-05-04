@@ -22,7 +22,7 @@ const mergeSport = (profile: Profile, sport: Sport, patch: object): Profile => {
   const existing = profile.sportZones[sport];
   const base = existing ?? {
     thresholds: {},
-    heartRateZones: { method: "manual", zones: [] },
+    heartRateZones: { method: "custom", zones: [] },
   };
   return {
     ...profile,
@@ -42,7 +42,7 @@ export const writeHrBand = (
   );
   if (bound === "minBpm") zones[BAND_INDEX[band]].minBpm = value;
   else zones[BAND_INDEX[band]].maxBpm = value;
-  const method = profile.sportZones[sport]?.heartRateZones?.method ?? "manual";
+  const method = profile.sportZones[sport]?.heartRateZones?.method ?? "custom";
   return mergeSport(profile, sport, { heartRateZones: { method, zones } });
 };
 
@@ -57,7 +57,7 @@ export const writePowerBand = (
   );
   if (bound === "minPercent") zones[BAND_INDEX[band]].minPercent = value;
   else zones[BAND_INDEX[band]].maxPercent = value;
-  const method = profile.sportZones.cycling?.powerZones?.method ?? "manual";
+  const method = profile.sportZones.cycling?.powerZones?.method ?? "custom";
   return mergeSport(profile, "cycling", { powerZones: { method, zones } });
 };
 
@@ -74,6 +74,6 @@ export const writePaceBand = (
   );
   if (bound === "minPace") zones[BAND_INDEX[band]].minPace = value;
   else zones[BAND_INDEX[band]].maxPace = value;
-  const method = profile.sportZones[sport]?.paceZones?.method ?? "manual";
+  const method = profile.sportZones[sport]?.paceZones?.method ?? "custom";
   return mergeSport(profile, sport, { paceZones: { method, zones } });
 };
