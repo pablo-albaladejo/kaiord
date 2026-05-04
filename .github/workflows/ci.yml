@@ -500,14 +500,13 @@ jobs:
 
       - name: Verify build outputs
         # Verify every package whose dist/ a downstream consumer reads.
-        # `test` matrix has a garmin-bridge leg; `test-frontend`,
-        # `e2e-frontend`, and `e2e-prod-base` consume `workout-spa-editor/dist`.
-        # If any of these silently produces an empty dist/, fail at the
-        # build job rather than fanning out to consumer verify-step
-        # failures (which would surface the same error N times in less
-        # actionable form).
+        # `test-frontend`, `e2e-frontend`, and `e2e-prod-base` consume
+        # `workout-spa-editor/dist` (the SPA's vite build). The bridges
+        # (`garmin-bridge`, `train2go-bridge`) are raw Chrome-extension
+        # source — they have no `build` script and produce no dist/, so
+        # they are intentionally excluded.
         run: |
-          for pkg in core fit tcx zwo garmin garmin-connect cli mcp ai garmin-bridge train2go-bridge workout-spa-editor; do
+          for pkg in core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor; do
             if [ ! -d "packages/$pkg/dist" ]; then
               echo "::error::@kaiord/$pkg build output not found"
               exit 1
