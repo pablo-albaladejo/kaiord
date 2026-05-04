@@ -36,7 +36,7 @@ describe("statusToColourClass", () => {
 });
 
 describe("statusToIcon", () => {
-  it("returns Clock with 'Pending' label for pending", () => {
+  it("should return Clock with 'Pending' label for pending", () => {
     // Arrange
 
     // Act
@@ -49,7 +49,7 @@ describe("statusToIcon", () => {
     expect(icon.Component).toBeDefined();
   });
 
-  it("returns Check with 'Completed' label for completed", () => {
+  it("should return Check with 'Completed' label for completed", () => {
     // Arrange
 
     // Act
@@ -61,7 +61,7 @@ describe("statusToIcon", () => {
     expect(icon.label).toBe("Completed");
   });
 
-  it("returns Minus with 'Skipped' label for skipped", () => {
+  it("should return Minus with 'Skipped' label for skipped", () => {
     // Arrange
 
     // Act

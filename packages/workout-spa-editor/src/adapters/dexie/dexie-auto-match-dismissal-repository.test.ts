@@ -111,7 +111,7 @@ describe("DexieAutoMatchDismissalRepository", () => {
     expect(await repo.getByProfileAndWeek("p1", "2026-05-04")).toBeDefined();
   });
 
-  it("deleteByProfile removes only that profile's rows", async () => {
+  it("should remove only that profile's rows when deleteByProfile is called", async () => {
     // Arrange
     const repo = createDexieAutoMatchDismissalRepository(db);
     await repo.put(baseRow({ profileId: "p1", weekStart: "2026-04-27" }));

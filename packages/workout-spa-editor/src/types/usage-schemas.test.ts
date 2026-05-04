@@ -105,7 +105,7 @@ describe("usageRecordSchema", () => {
     ).toThrow(/totalTokens/);
   });
 
-  it("accepts `legacy: true` on migrated rows", () => {
+  it("should accept `legacy: true` on migrated rows", () => {
     // Arrange
 
     const record = {
@@ -127,7 +127,7 @@ describe("usageRecordSchema", () => {
     expect(parsed.legacy).toBe(true);
   });
 
-  it("treats `legacy` as optional and absent by default", () => {
+  it("should treat `legacy` as optional and absent by default", () => {
     // Arrange
 
     const record = {

@@ -129,7 +129,7 @@ describe("useMatchedSessions", () => {
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
-  it("scopes to profile (other profiles' matches do not leak)", async () => {
+  it("should scope to profile (other profiles' matches do not leak)", async () => {
     // Arrange
     await db
       .table("coachingActivities")

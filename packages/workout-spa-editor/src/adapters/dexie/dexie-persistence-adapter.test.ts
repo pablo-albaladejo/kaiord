@@ -673,7 +673,7 @@ describe("DexiePersistence.transaction", () => {
     expect(await persistence.profiles.getAll()).toEqual([]);
   });
 
-  it("returns the callback's resolved value on success", async () => {
+  it("should return the callback's resolved value on success", async () => {
     // Arrange
     const persistence = createDexiePersistence(testDb);
 

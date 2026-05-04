@@ -16,7 +16,7 @@ describe("useLatestRef", () => {
     expect(result.current.current).toBe("initial");
   });
 
-  it("updates ref.current to the latest render's value", () => {
+  it("should update ref.current to the latest render's value", () => {
     // Arrange
     const { result, rerender } = renderHook(({ v }) => useLatestRef(v), {
       initialProps: { v: 1 },

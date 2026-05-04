@@ -86,7 +86,7 @@ describe("Issue #385 regressions", () => {
   beforeEach(clearDexie);
   afterEach(clearDexie);
 
-  it("(1B.3.1) linkAccount via PersistencePort flips the Connect → Sync probe without remount", async () => {
+  it("should (1B.3.1) linkAccount via PersistencePort flip the Connect → Sync probe without remount", async () => {
     // Arrange
 
     const persistence = createDexiePersistence(db);
@@ -112,7 +112,7 @@ describe("Issue #385 regressions", () => {
     });
   });
 
-  it("(1B.3.2) profiles and the active id survive a refresh — fresh mount sees the persisted state", async () => {
+  it("should (1B.3.2) have profiles and the active id survive a refresh — fresh mount sees the persisted state", async () => {
     // Arrange
 
     const persistence = createDexiePersistence(db);
@@ -147,7 +147,7 @@ describe("Issue #385 regressions", () => {
     expect(a.id).not.toBe(b.id);
   });
 
-  it("(1B.3.3) sibling-driven setActiveProfile transition is observed atomically — never sees { id: B, profile: <other> }", async () => {
+  it("should (1B.3.3) observe sibling-driven setActiveProfile transition atomically — never sees { id: B, profile: <other> }", async () => {
     // Arrange
 
     const persistence = createDexiePersistence(db);

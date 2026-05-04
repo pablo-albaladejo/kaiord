@@ -8,6 +8,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | Date | Change | Summary |
 | ---- | ------ | ------- |
 | 2026-05-04 | [`ci-artifact-fanout`](./2026-05-04-ci-artifact-fanout/) | CI currently runs pnpm -r build 30+ times on a single PR — once per job (lint, typecheck, build, test×9 packages, test-cli, test-frontend, round-trip×2, e2e-fr… |
+| 2026-05-04 | [`test-conventions-should-aaa`](./2026-05-04-test-conventions-should-aaa/) | The repo's test suite has two well-understood conventions documented in AGENTS.md ("AAA pattern: Arrange, Act, Assert (blank lines between sections)") and CLAU… |
 | 2026-05-03 | [`repo-hygiene-tooling`](./2026-05-03-repo-hygiene-tooling/) | Two distinct backlog-debt mechanics are leaking simultaneously: |
 | 2026-05-03 | [`sync-session-match-user-preferences-specs`](./2026-05-03-sync-session-match-user-preferences-specs/) | Two capability specs in production diverged from openspec/specs/: |
 | 2026-05-03 | [`tasks-machine-readable-shape`](./2026-05-03-tasks-machine-readable-shape/) | The archive-followups-guard capability shipped in PR #464 with an absolute cap (≥ 6 > Deferred to: #N markers per archive → fail). Per design D6 of 2026-05-03-… |

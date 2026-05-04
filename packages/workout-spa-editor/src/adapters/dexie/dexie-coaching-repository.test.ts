@@ -103,7 +103,7 @@ describe("DexieCoachingRepository", () => {
     await expect(repo.delete("missing-id")).resolves.toBeUndefined();
   });
 
-  it("deleteByProfile removes only the targeted profile's rows", async () => {
+  it("should remove only the targeted profile's rows when deleteByProfile is called", async () => {
     // Arrange
     const repo = createDexieCoachingRepository(db);
     await repo.upsertMany([

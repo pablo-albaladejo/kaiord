@@ -48,14 +48,7 @@ const PACKAGES_DIR = join(REPO_ROOT, "packages");
 // level allowlist per D4).
 let AAA_ALLOWLIST_BACKEND = new Set();
 
-let AAA_ALLOWLIST_SPA_NON_COMPONENT = new Set([
-  // Escape hatch: title literal contains the substring `it (` (matches the
-  // count-based IT_CALL_RE heuristic as a 5th `it`-call), so the marker
-  // counter expects 5 of each but only 4 it() bodies exist. The file IS
-  // canonically compliant per the spec's per-it() rule. PR-6 §6.6 may
-  // tighten the heuristic to disregard string-literal hits.
-  "packages/workout-spa-editor/src/application/get-user-preferences.test.ts",
-]);
+let AAA_ALLOWLIST_SPA_NON_COMPONENT = new Set();
 
 let AAA_ALLOWLIST_SPA_COMPONENT = new Set();
 
@@ -116,15 +109,17 @@ export function inferShard(repoRelPath) {
   return "BACKEND";
 }
 
-// Shared `it`-call detector — kept in sync with the title-rule guards.
-import { IT_CALL_RE } from "./it-title-extractor.mjs";
+// Shared `it`-call counter — strips string-literal contents so
+// titles like `"opens it (twice)"` don't false-positive as a 5th
+// `it()`-call. PR-6 §6.2 graduated this away from the loose IT_CALL_RE.
+import { countItCalls } from "./it-title-extractor.mjs";
 
 const ARRANGE_RE = /^\s*\/\/\s+Arrange\s*$/gm;
 const ACT_RE = /^\s*\/\/\s+Act\s*$/gm;
 const ASSERT_RE = /^\s*\/\/\s+Assert\s*$/gm;
 
 export function hasCanonicalMarkers(source) {
-  const itCount = (source.match(IT_CALL_RE) || []).length;
+  const itCount = countItCalls(source);
   if (itCount === 0) return true;
   const arrangeCount = (source.match(ARRANGE_RE) || []).length;
   if (arrangeCount < itCount) return false;

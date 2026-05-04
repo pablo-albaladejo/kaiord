@@ -17,7 +17,7 @@ const daysAgo = (n: number): Date =>
   new Date(NOW.getTime() - n * 24 * 60 * 60 * 1000);
 
 describe("formatRelativeTime", () => {
-  it("returns 'never synced' when date is undefined", () => {
+  it("should return 'never synced' when date is undefined", () => {
     // Arrange
 
     // Act
@@ -26,7 +26,7 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(undefined, NOW)).toBe("never synced");
   });
 
-  it("returns 'just now' under one minute", () => {
+  it("should return 'just now' under one minute", () => {
     // Arrange
 
     // Act
@@ -40,7 +40,7 @@ describe("formatRelativeTime", () => {
     );
   });
 
-  it("returns 'Nm ago' between 1 minute and 1 hour", () => {
+  it("should return 'Nm ago' between 1 minute and 1 hour", () => {
     // Arrange
 
     // Act
@@ -51,7 +51,7 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(minutesAgo(59), NOW)).toBe("59m ago");
   });
 
-  it("returns 'Nh ago' between 1 hour and 1 day", () => {
+  it("should return 'Nh ago' between 1 hour and 1 day", () => {
     // Arrange
 
     // Act
@@ -62,7 +62,7 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(hoursAgo(23), NOW)).toBe("23h ago");
   });
 
-  it("returns 'yesterday' for cross-day differences under 48h", () => {
+  it("should return 'yesterday' for cross-day differences under 48h", () => {
     // 30h ago crosses a calendar boundary AND is under 48h.
     // Arrange
 
@@ -72,7 +72,7 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(hoursAgo(30), NOW)).toBe("yesterday");
   });
 
-  it("does NOT return 'yesterday' when ≥48h has elapsed even if calendar diff is 1", () => {
+  it("should not return 'yesterday' when ≥48h has elapsed even if calendar diff is 1", () => {
     // Exactly 2 days back — falls into the days-ago branch.
     // Arrange
 
@@ -82,7 +82,7 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(daysAgo(2), NOW)).toBe("2d ago");
   });
 
-  it("returns 'Nd ago' between 2 days and 1 week", () => {
+  it("should return 'Nd ago' between 2 days and 1 week", () => {
     // Arrange
 
     // Act
@@ -105,7 +105,7 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(daysAgo(30), NOW)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
   });
 
-  it("formats the ISO fallback in local-calendar form (matches the date's components)", () => {
+  it("should format the ISO fallback in local-calendar form (matches the date's components)", () => {
     // Arrange
 
     const stamp = daysAgo(10);

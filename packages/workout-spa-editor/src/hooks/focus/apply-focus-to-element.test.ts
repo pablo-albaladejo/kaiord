@@ -14,7 +14,7 @@ describe("applyFocusToElement", () => {
     vi.restoreAllMocks();
   });
 
-  it("calls focus with preventScroll and scrollIntoView with 'auto' when motion is allowed", () => {
+  it("should call focus with preventScroll and scrollIntoView with 'auto' when motion is allowed", () => {
     // Arrange
     const el = document.createElement("div");
     const focusSpy = vi.spyOn(el, "focus");
@@ -32,7 +32,7 @@ describe("applyFocusToElement", () => {
     });
   });
 
-  it("uses 'instant' scrollIntoView when reduce-motion is set", () => {
+  it("should use 'instant' scrollIntoView when reduce-motion is set", () => {
     // Arrange
     const el = document.createElement("div");
     vi.spyOn(el, "focus").mockImplementation(() => {});
@@ -90,7 +90,7 @@ describe("prefersReducedMotion", () => {
     vi.restoreAllMocks();
   });
 
-  it("reflects matchMedia('(prefers-reduced-motion: reduce)')", () => {
+  it("should reflect matchMedia('(prefers-reduced-motion: reduce)')", () => {
     // Arrange
 
     // Act

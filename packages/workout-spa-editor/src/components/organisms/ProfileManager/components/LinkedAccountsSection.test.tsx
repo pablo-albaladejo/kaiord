@@ -98,7 +98,7 @@ describe("LinkedAccountsSection", () => {
     expect(screen.queryByText(/Connect Train2Go/)).not.toBeInTheDocument();
   });
 
-  it("invokes useTrain2GoSource.connect with the row's profileId on click", async () => {
+  it("should invoke useTrain2GoSource.connect with the row's profileId on click", async () => {
     // Arrange
 
     render(wrap(<LinkedAccountsSection profile={makeProfile()} />));

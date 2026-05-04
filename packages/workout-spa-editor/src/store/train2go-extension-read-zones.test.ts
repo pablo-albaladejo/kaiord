@@ -87,7 +87,7 @@ describe("readZones", () => {
     expect(queue.getHourlyCount("ext-id")).toBe(0);
   });
 
-  it("counts against the queue's per-bridge hourly counter on success", async () => {
+  it("should count against the queue's per-bridge hourly counter on success", async () => {
     // Arrange
     const queue = createOperationQueue(0);
 

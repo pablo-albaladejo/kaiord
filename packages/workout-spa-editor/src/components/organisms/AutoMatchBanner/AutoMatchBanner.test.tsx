@@ -51,7 +51,7 @@ describe("AutoMatchBanner", () => {
     expect(screen.getByText(/view all/i)).toBeInTheDocument();
   });
 
-  it("expands to show all rows when 'view all' is clicked", async () => {
+  it("should expand to show all rows when 'view all' is clicked", async () => {
     // Arrange
 
     render(
@@ -128,7 +128,7 @@ describe("AutoMatchBanner", () => {
     );
   });
 
-  it("does NOT render a 'Dismiss all' control (per-pair dismissal model)", () => {
+  it("should not render a 'Dismiss all' control (per-pair dismissal model)", () => {
     // Arrange
 
     // Act

@@ -243,7 +243,7 @@ describe("subscribeToOverlayCount", () => {
       expect((globalThis as Record<string, unknown>)[globalKey]).toBeDefined();
     });
 
-    it("__resetOverlayObserverForTests disconnects and nulls the singleton", async () => {
+    it("should disconnect and null the singleton via __resetOverlayObserverForTests", async () => {
       // Arrange
       const root = makeRoot();
       const cb = vi.fn();

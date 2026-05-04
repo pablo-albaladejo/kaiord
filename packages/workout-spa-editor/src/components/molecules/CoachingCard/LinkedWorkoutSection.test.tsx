@@ -26,7 +26,7 @@ const makeWorkout = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
   }) as unknown as WorkoutRecord;
 
 describe("LinkedWorkoutSection", () => {
-  it("renders the matched workout's title, sport, and duration", () => {
+  it("should render the matched workout's title, sport, and duration", () => {
     // Arrange
 
     // Act
@@ -85,7 +85,7 @@ describe("LinkedWorkoutSection", () => {
     expect(screen.getByRole("button", { name: "Splitting…" })).toBeDisabled();
   });
 
-  it("falls back to a description-truncated title when no `raw.title` is set", () => {
+  it("should fall back to a description-truncated title when no `raw.title` is set", () => {
     // Arrange
 
     // Act

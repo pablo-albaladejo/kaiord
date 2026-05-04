@@ -41,7 +41,7 @@ describe("AI tab toast PII / secret audit", () => {
   });
 
   it.each(CONSUMER_FILES)(
-    "%s passes toast.error a bare identifier (no template-literal interpolation)",
+    "should pass toast.error a bare identifier (no template-literal interpolation) for %s",
     (filename) => {
       // Arrange
 

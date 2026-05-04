@@ -19,7 +19,7 @@ const baseStep = (
 });
 
 describe("convertTarget (dispatcher)", () => {
-  it("emits open targetType when step.target.type === 'open'", () => {
+  it("should emit open targetType when step.target.type === 'open'", () => {
     // Arrange
     const step = baseStep("open", { type: "open" });
     const message: Record<string, unknown> = {};
