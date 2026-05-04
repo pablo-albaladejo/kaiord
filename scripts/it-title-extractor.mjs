@@ -32,10 +32,8 @@ const IT_EACH_TITLE_RE =
 // pair, but only matches the call shape (no title capture). Used by
 // `countItCalls` (below) which de-duplicates plain vs each matches via
 // match position, so a single it.each(...)(...) is counted once.
-const IT_CALL_DETECT_PLAIN_RE =
-  /\bit\b(?:\.(?!each\b)[a-z]+)?\s*\(/g;
-const IT_CALL_DETECT_EACH_RE =
-  /\bit\.each\s*\([\s\S]*?\]\s*\)\s*\(/g;
+const IT_CALL_DETECT_PLAIN_RE = /\bit\b(?:\.(?!each\b)[a-z]+)?\s*\(/g;
+const IT_CALL_DETECT_EACH_RE = /\bit\.each\s*\([\s\S]*?\]\s*\)\s*\(/g;
 
 // Public surface kept for backwards-compat with code that just wants
 // to grep "is this an it()-call" — a permissive single regex. Use
@@ -47,13 +45,15 @@ export const IT_CALL_RE = /\bit\b(?:\.[a-z]+)?\s*\(/g;
 // strings of the same shape) so a literal like `"... it (something)"`
 // in a title doesn't get counted as an `it()`-call.
 function stripStringLiteralContents(source) {
-  return source
-    // template literals (handles single-line and multi-line)
-    .replace(/`(?:\\.|[^`\\])*`/g, "``")
-    // double-quoted strings
-    .replace(/"(?:\\.|[^"\\])*"/g, '""')
-    // single-quoted strings
-    .replace(/'(?:\\.|[^'\\])*'/g, "''");
+  return (
+    source
+      // template literals (handles single-line and multi-line)
+      .replace(/`(?:\\.|[^`\\])*`/g, "``")
+      // double-quoted strings
+      .replace(/"(?:\\.|[^"\\])*"/g, '""')
+      // single-quoted strings
+      .replace(/'(?:\\.|[^'\\])*'/g, "''")
+  );
 }
 
 // Count it()-rooted calls accurately. Strips string-literal contents
