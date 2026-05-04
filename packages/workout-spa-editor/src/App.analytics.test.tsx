@@ -20,8 +20,8 @@ import {
 } from "./contexts";
 import { PersistenceProvider } from "./contexts/persistence-context";
 import { ToastContextProvider } from "./contexts/ToastContext";
-import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
 import { useWorkoutStore } from "./store/workout-store";
+import { createInMemoryPersistence } from "./test-utils/in-memory-persistence";
 
 type RenderArgs = {
   path: string;
