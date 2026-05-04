@@ -869,27 +869,6 @@ If a deployment introduces critical issues:
 
 ## Local Testing
 
-### Using the CI Testing Script
-
-Before pushing changes, test the deployment process locally:
-
-```bash
-# Make script executable (first time only)
-chmod +x scripts/test-ci-workflows.sh
-
-# Run all tests
-./scripts/test-ci-workflows.sh
-```
-
-The script validates:
-
-- ✅ Core package builds successfully
-- ✅ SPA builds with core dependency
-- ✅ Build artifacts exist and are valid
-- ✅ Base path is correctly configured
-- ✅ Dependency order is enforced
-- ✅ Frozen lockfile is up to date
-
 ### Manual Local Testing
 
 1. **Clean build test**:
@@ -1115,13 +1094,7 @@ git push origin main
    - Add secret: `ACTIONS_STEP_DEBUG` = `true`
    - Re-run workflow
 
-3. **Test locally with CI script**:
-
-   ```bash
-   ./scripts/test-ci-workflows.sh
-   ```
-
-4. **Check workflow syntax**:
+3. **Check workflow syntax**:
 
    ```bash
    # Install act (GitHub Actions local runner)
@@ -1139,10 +1112,9 @@ git push origin main
 If you encounter issues not covered here:
 
 1. **Check workflow logs**: Detailed error messages in Actions tab
-2. **Run CI testing script**: `./scripts/test-ci-workflows.sh`
-3. **Review recent changes**: Check commits that may have broken deployment
-4. **Open an issue**: [GitHub Issues](https://github.com/pablo-albaladejo/kaiord/issues)
-5. **Check GitHub Pages status**: [GitHub Status](https://www.githubstatus.com/)
+2. **Review recent changes**: Check commits that may have broken deployment
+3. **Open an issue**: [GitHub Issues](https://github.com/pablo-albaladejo/kaiord/issues)
+4. **Check GitHub Pages status**: [GitHub Status](https://www.githubstatus.com/)
 
 ## Configuration
 
@@ -1242,25 +1214,19 @@ concurrency:
 
 ### Before Pushing to Main
 
-1. **Test locally**:
-
-   ```bash
-   ./scripts/test-ci-workflows.sh
-   ```
-
-2. **Run tests**:
+1. **Run tests**:
 
    ```bash
    pnpm -r test
    ```
 
-3. **Check linting**:
+2. **Check linting**:
 
    ```bash
    pnpm -r lint
    ```
 
-4. **Verify build**:
+3. **Verify build**:
    ```bash
    pnpm -r build
    ```
