@@ -80,5 +80,5 @@ When zones-sync runs (toggle is on, link/sync trigger fired), the use case SHALL
 
 - **GIVEN** the parsed `/user/details` HTML returns `physiological: { weight: 83, bpmMax: 187, bpmRest: 51 }`
 - **WHEN** `syncZones` runs against an empty profile
-- **THEN** the persisted profile's `bodyWeight`, `maxHeartRate` SHALL be updated as before
+- **THEN** the persisted profile's `bodyWeight`, `heartRate.max` SHALL be updated as before
 - **AND** the profile SHALL NOT gain a `restingHeartRate` field as a result of this sync (Kaiord has no consumer in v1)
