@@ -340,7 +340,7 @@ Any field present in the page that falls outside the allowlist MUST be discarded
 
 The post-change FORBIDDEN SET is the EXACT enumeration below — any change to this set requires a separate privacy-surface review:
 
-```
+```text
 FORBIDDEN_KEYS = {
   "gender",
   "birthday",
