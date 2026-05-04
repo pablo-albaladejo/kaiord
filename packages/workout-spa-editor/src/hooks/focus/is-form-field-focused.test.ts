@@ -23,9 +23,11 @@ describe("isFormFieldFocused", () => {
     const input = document.createElement("input");
     input.type = "text";
     const root = mountInRoot(input);
+
+    // Act
     input.focus();
 
-    // Act + Assert
+    // Assert
     expect(isFormFieldFocused(root)).toBe(true);
   });
 
@@ -33,9 +35,11 @@ describe("isFormFieldFocused", () => {
     // Arrange
     const ta = document.createElement("textarea");
     const root = mountInRoot(ta);
+
+    // Act
     ta.focus();
 
-    // Act + Assert
+    // Assert
     expect(isFormFieldFocused(root)).toBe(true);
   });
 
@@ -43,23 +47,25 @@ describe("isFormFieldFocused", () => {
     // Arrange
     const sel = document.createElement("select");
     const root = mountInRoot(sel);
+
+    // Act
     sel.focus();
 
-    // Act + Assert
+    // Assert
     expect(isFormFieldFocused(root)).toBe(true);
   });
 
   it("should return true for a contentEditable element", () => {
-    // Arrange — use setAttribute because jsdom's `contentEditable`
-    // setter does not always mirror the attribute.
+    // Arrange
     const div = document.createElement("div");
     div.setAttribute("contenteditable", "true");
-    // Make the div focusable for jsdom.
     div.setAttribute("tabindex", "0");
     const root = mountInRoot(div);
+
+    // Act
     div.focus();
 
-    // Act + Assert
+    // Assert
     expect(isFormFieldFocused(root)).toBe(true);
   });
 
@@ -68,27 +74,35 @@ describe("isFormFieldFocused", () => {
     const chk = document.createElement("input");
     chk.type = "checkbox";
     const root = mountInRoot(chk);
+
+    // Act
     chk.focus();
 
-    // Act + Assert
+    // Assert
     expect(isFormFieldFocused(root)).toBe(false);
   });
 
   it("should return false when the focused input lives outside the editor root", () => {
-    // Arrange — focused input on body, editor root is empty.
+    // Arrange
     const root = document.createElement("div");
     document.body.appendChild(root);
     const outside = document.createElement("input");
     outside.type = "text";
     document.body.appendChild(outside);
+
+    // Act
     outside.focus();
 
-    // Act + Assert
+    // Assert
     expect(isFormFieldFocused(root)).toBe(false);
   });
 
   it("should return false when there is no editor root", () => {
-    // Act + Assert
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(isFormFieldFocused(null)).toBe(false);
   });
 
@@ -96,9 +110,11 @@ describe("isFormFieldFocused", () => {
     // Arrange
     const btn = document.createElement("button");
     const root = mountInRoot(btn);
+
+    // Act
     btn.focus();
 
-    // Act + Assert
+    // Assert
     expect(isFormFieldFocused(root)).toBe(false);
   });
 });

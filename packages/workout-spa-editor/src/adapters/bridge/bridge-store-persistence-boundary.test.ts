@@ -43,7 +43,10 @@ function walk(dir: string): string[] {
 
 describe("bridge runtime stores stay in Zustand, never in Dexie", () => {
   it("should not have any bridge-runtime store import zustand/middleware persist", () => {
+    // Arrange
     const offenders: string[] = [];
+
+    // Act
     for (const name of BRIDGE_RUNTIME_STORES) {
       const path = join(STORE_ROOT, name);
       let source: string;
@@ -57,11 +60,15 @@ describe("bridge runtime stores stay in Zustand, never in Dexie", () => {
       }
     }
 
+    // Assert
     expect(offenders).toEqual([]);
   });
 
   it("should not have any bridge-runtime store write to Dexie directly", () => {
+    // Arrange
     const offenders: string[] = [];
+
+    // Act
     for (const name of BRIDGE_RUNTIME_STORES) {
       const path = join(STORE_ROOT, name);
       let source: string;
@@ -78,19 +85,21 @@ describe("bridge runtime stores stay in Zustand, never in Dexie", () => {
       }
     }
 
+    // Assert
     expect(offenders).toEqual([]);
   });
 
   it("should not have any bridge-named Dexie persistence adapter", () => {
+    // Arrange
     const dexieDir = resolve(__dirname, "..", "dexie");
     const files = walk(dexieDir)
       .map((f) => f.substring(dexieDir.length + 1))
       .filter((f) => /bridge/i.test(f) && !f.endsWith(".test.ts"));
 
-    // The bridge registry is owned by the in-memory bridgeDiscovery
-    // singleton; introducing a Dexie adapter would split the source of
-    // truth. The regression bar is zero bridge-named adapter files.
+    // Act
     const adapterFiles = files.filter((f) => f.endsWith(".ts"));
+
+    // Assert
     expect(adapterFiles).toEqual([]);
   });
 });

@@ -39,6 +39,8 @@ const handleEvent = (event: FocusTelemetryEvent): string => {
 describe("FocusTelemetryEvent discriminated union", () => {
   it("should cover all five variants in an exhaustive switch without hitting the never branch", () => {
     // Arrange
+
+    // Act
     const events: FocusTelemetryEvent[] = [
       wiringCanaryEvent(),
       unresolvedTargetFallbackEvent("item", "first-item"),
@@ -47,7 +49,7 @@ describe("FocusTelemetryEvent discriminated union", () => {
       focusErrorEvent("focus"),
     ];
 
-    // Act & Assert — no throw means all branches are handled
+    // Assert
     for (const event of events) {
       expect(() => handleEvent(event)).not.toThrow();
     }
@@ -56,6 +58,11 @@ describe("FocusTelemetryEvent discriminated union", () => {
 
 describe("defaultFocusTelemetry", () => {
   it("should be a no-op function that does not throw", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() => defaultFocusTelemetry(wiringCanaryEvent())).not.toThrow();
     expect(() =>
       defaultFocusTelemetry(unresolvedTargetFallbackEvent("item", "first-item"))
@@ -80,11 +87,13 @@ describe("safeEmit", () => {
 
   it("should not throw when the telemetry function throws", () => {
     // Arrange
+
+    // Act
     const throwing: FocusTelemetry = () => {
       throw new Error("telemetry down");
     };
 
-    // Act & Assert — focus behavior must not be interrupted
+    // Assert
     expect(() => safeEmit(throwing, wiringCanaryEvent())).not.toThrow();
   });
 
@@ -94,26 +103,36 @@ describe("safeEmit", () => {
       throw new Error("telemetry down");
     };
     const warnSpy = vi.spyOn(console, "warn").mockImplementation(() => {});
+    safeEmit(throwing, wiringCanaryEvent());
+    expect(warnSpy).toHaveBeenCalledOnce();
 
     // Act
-    safeEmit(throwing, wiringCanaryEvent());
+    warnSpy.mockRestore();
 
     // Assert
-    expect(warnSpy).toHaveBeenCalledOnce();
-    warnSpy.mockRestore();
   });
 });
 
 // Task 1.3.a — Event payloads contain no ItemId, step/block names, or workout titles
 describe("event payload shape — no PII, no ItemId", () => {
   it("should expose only the type field on wiringCanaryEvent", () => {
+    // Arrange
+
+    // Act
     const event = wiringCanaryEvent();
+
+    // Assert
     expect(Object.keys(event)).toEqual(["type"]);
     expect(event.type).toBe("wiring-canary");
   });
 
   it("should expose only type, targetKind, fallback on unresolvedTargetFallbackEvent", () => {
+    // Arrange
+
+    // Act
     const event = unresolvedTargetFallbackEvent("item", "first-item");
+
+    // Assert
     expect(Object.keys(event).sort()).toEqual(
       ["fallback", "targetKind", "type"].sort()
     );
@@ -123,25 +142,45 @@ describe("event payload shape — no PII, no ItemId", () => {
   });
 
   it("should expose only the type field on formFieldShortCircuitEvent", () => {
+    // Arrange
+
+    // Act
     const event = formFieldShortCircuitEvent();
+
+    // Assert
     expect(Object.keys(event)).toEqual(["type"]);
     expect(event.type).toBe("form-field-short-circuit");
   });
 
   it("should expose only type and deferredForMs on overlayDeferredApplyEvent", () => {
+    // Arrange
+
+    // Act
     const event = overlayDeferredApplyEvent(250);
+
+    // Assert
     expect(Object.keys(event).sort()).toEqual(["deferredForMs", "type"].sort());
     expect(event.type).toBe("overlay-deferred-apply");
   });
 
   it("should expose only type and phase on focusErrorEvent", () => {
+    // Arrange
+
+    // Act
     const event = focusErrorEvent("focus");
+
+    // Assert
     expect(Object.keys(event).sort()).toEqual(["phase", "type"].sort());
     expect(event.type).toBe("focus-error");
     expect(event.phase).toBe("focus");
   });
 
   it("should quantize deferredForMs to 100ms buckets via overlayDeferredApplyEvent", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(overlayDeferredApplyEvent(0).deferredForMs).toBe(0);
     expect(overlayDeferredApplyEvent(50).deferredForMs).toBe(100);
     expect(overlayDeferredApplyEvent(149).deferredForMs).toBe(100);
@@ -151,7 +190,12 @@ describe("event payload shape — no PII, no ItemId", () => {
   });
 
   it("should always make overlayDeferredApplyEvent.deferredForMs a non-negative integer", () => {
+    // Arrange
+
+    // Act
     const values = [0, 50, 99, 150, 500, 1234];
+
+    // Assert
     for (const ms of values) {
       const { deferredForMs } = overlayDeferredApplyEvent(ms);
       expect(deferredForMs).toBeGreaterThanOrEqual(0);

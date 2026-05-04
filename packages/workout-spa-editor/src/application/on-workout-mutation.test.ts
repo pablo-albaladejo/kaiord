@@ -33,35 +33,45 @@ function makeRecord(overrides: Partial<WorkoutRecord> = {}): WorkoutRecord {
 
 describe("onWorkoutMutation", () => {
   it("should advance modifiedAt and updatedAt when no timestamp is given", () => {
+    // Arrange
     const record = makeRecord({ modifiedAt: null });
 
+    // Act
     const result = onWorkoutMutation(record);
 
+    // Assert
     expect(result.modifiedAt).not.toBeNull();
     expect(result.updatedAt).not.toBe(record.updatedAt);
   });
 
   it("should use the supplied batch timestamp so two calls in one batch share it", () => {
+    // Arrange
     const record = makeRecord({ modifiedAt: null });
     const stamp = "2026-04-20T09:00:00.000Z";
-
     const first = onWorkoutMutation(record, { timestamp: stamp });
+
+    // Act
     const second = onWorkoutMutation(first, { timestamp: stamp });
 
+    // Assert
     expect(first.modifiedAt).toBe(stamp);
     expect(second.modifiedAt).toBe(stamp);
     expect(first.updatedAt).toBe(stamp);
   });
 
   it("should preserve the state by default — mutation alone does not transition", () => {
+    // Arrange
     const record = makeRecord({ state: "structured" });
 
+    // Act
     const result = onWorkoutMutation(record);
 
+    // Assert
     expect(result.state).toBe("structured");
   });
 
   it("should pass through an optional nextState when a transition applies", () => {
+    // Arrange
     const record = makeRecord({
       state: "pushed",
       garminPushId: "garmin-1",
@@ -72,22 +82,28 @@ describe("onWorkoutMutation", () => {
       },
     });
 
+    // Act
     const result = onWorkoutMutation(record, { nextState: "modified" });
 
+    // Assert
     expect(result.state).toBe("modified");
     expect(result.modifiedAt).not.toBeNull();
   });
 
   it("should be a pure function — does not mutate the input", () => {
+    // Arrange
     const record = makeRecord({ modifiedAt: null });
     const snapshot = JSON.stringify(record);
 
+    // Act
     onWorkoutMutation(record);
 
+    // Assert
     expect(JSON.stringify(record)).toBe(snapshot);
   });
 
   it("should carry a replacement KRD when provided (edit-step / reorder / paste)", () => {
+    // Arrange
     const record = makeRecord();
     const nextKrd = {
       version: "1.0" as const,
@@ -95,42 +111,46 @@ describe("onWorkoutMutation", () => {
       metadata: { created: "2026-04-20T08:00:00Z", sport: "cycling" as const },
     };
 
+    // Act
     const result = onWorkoutMutation(record, { krd: nextKrd });
 
+    // Assert
     expect(result.krd).toBe(nextKrd);
     expect(result.modifiedAt).not.toBeNull();
   });
 
   it("should advance modifiedAt for STRUCTURED edits without changing state", () => {
+    // Arrange
     const record = makeRecord({ state: "structured", modifiedAt: null });
 
+    // Act
     const result = onWorkoutMutation(record);
 
+    // Assert
     expect(result.state).toBe("structured");
     expect(result.modifiedAt).not.toBeNull();
   });
 
   it("should advance modifiedAt for READY edits without changing state", () => {
+    // Arrange
     const record = makeRecord({ state: "ready", modifiedAt: null });
 
+    // Act
     const result = onWorkoutMutation(record);
 
+    // Assert
     expect(result.state).toBe("ready");
     expect(result.modifiedAt).not.toBeNull();
   });
 
   it("should NOT route selection-only actions through the helper — guarding note", () => {
-    // The helper is the chokepoint for mutations only. Selection-only
-    // actions (focus, hover, highlight) MUST NOT call it. We encode
-    // that contract by asserting: if the helper is never called,
-    // modifiedAt stays unchanged — trivially true in the test, but the
-    // assertion guards readers against the anti-pattern of wrapping
-    // everything in onWorkoutMutation.
+    // Arrange
     const record = makeRecord({ modifiedAt: "2026-04-20T07:00:00Z" });
 
-    // No helper call — simulate selection-only path.
+    // Act
     const unchanged = record;
 
+    // Assert
     expect(unchanged.modifiedAt).toBe("2026-04-20T07:00:00Z");
   });
 });

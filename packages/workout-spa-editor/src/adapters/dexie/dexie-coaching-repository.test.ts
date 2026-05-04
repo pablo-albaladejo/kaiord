@@ -38,21 +38,25 @@ describe("DexieCoachingRepository", () => {
   });
 
   it("should upsert via composite primary key (idempotent)", async () => {
+    // Arrange
     const repo = createDexieCoachingRepository(db);
     const r = makeRecord();
-
     await repo.upsertMany([r]);
     await repo.upsertMany([r]);
 
+    // Act
     const all = await repo.getByProfileAndDateRange(
       "p1",
       "2026-04-01",
       "2026-05-01"
     );
+
+    // Assert
     expect(all).toHaveLength(1);
   });
 
   it("should filter by profile and inclusive date range via getByProfileAndDateRange", async () => {
+    // Arrange
     const repo = createDexieCoachingRepository(db);
     await repo.upsertMany([
       makeRecord({ date: "2026-04-13", sourceId: "1" }),
@@ -61,35 +65,46 @@ describe("DexieCoachingRepository", () => {
       makeRecord({ profileId: "p2", date: "2026-04-15", sourceId: "4" }),
     ]);
 
+    // Act
     const result = await repo.getByProfileAndDateRange(
       "p1",
       "2026-04-13",
       "2026-04-19"
     );
 
+    // Assert
     expect(result.map((r) => r.sourceId).sort()).toEqual(["1", "2"]);
   });
 
   it("should scope lookup by profile via getByProfileAndSourceId (no cross-profile leak)", async () => {
+    // Arrange
     const repo = createDexieCoachingRepository(db);
     await repo.upsertMany([
       makeRecord({ profileId: "p1", sourceId: "shared" }),
       makeRecord({ profileId: "p2", sourceId: "shared" }),
     ]);
-
     const p1 = await repo.getByProfileAndSourceId("p1", "train2go", "shared");
+
+    // Act
     const p2 = await repo.getByProfileAndSourceId("p2", "train2go", "shared");
 
+    // Assert
     expect(p1?.profileId).toBe("p1");
     expect(p2?.profileId).toBe("p2");
   });
 
   it("should be a no-op on delete when the row does not exist", async () => {
+    // Arrange
+
+    // Act
     const repo = createDexieCoachingRepository(db);
+
+    // Assert
     await expect(repo.delete("missing-id")).resolves.toBeUndefined();
   });
 
   it("deleteByProfile removes only the targeted profile's rows", async () => {
+    // Arrange
     const repo = createDexieCoachingRepository(db);
     await repo.upsertMany([
       makeRecord({ profileId: "p1", sourceId: "1", date: "2026-04-13" }),
@@ -97,8 +112,10 @@ describe("DexieCoachingRepository", () => {
       makeRecord({ profileId: "p2", sourceId: "3" }),
     ]);
 
+    // Act
     await repo.deleteByProfile("p1");
 
+    // Assert
     expect(
       await repo.getByProfileAndDateRange("p1", "2026-01-01", "2026-12-31")
     ).toHaveLength(0);
@@ -108,20 +125,24 @@ describe("DexieCoachingRepository", () => {
   });
 
   it("should not affect W1 rows when syncing W2 (multi-week persistence)", async () => {
+    // Arrange
     const repo = createDexieCoachingRepository(db);
     await repo.upsertMany([makeRecord({ date: "2026-04-06", sourceId: "w1" })]);
     await repo.upsertMany([makeRecord({ date: "2026-04-13", sourceId: "w2" })]);
-
     const w1 = await repo.getByProfileAndDateRange(
       "p1",
       "2026-04-06",
       "2026-04-12"
     );
+
+    // Act
     const w2 = await repo.getByProfileAndDateRange(
       "p1",
       "2026-04-13",
       "2026-04-19"
     );
+
+    // Assert
     expect(w1).toHaveLength(1);
     expect(w2).toHaveLength(1);
   });

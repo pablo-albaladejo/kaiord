@@ -71,6 +71,9 @@ const noWriteRepo = (): SessionMatchRepository =>
 
 describe("autoMatchSessions", () => {
   it("should return one obvious pair (same day, same family, ≤20% duration variance)", async () => {
+    // Arrange
+
+    // Act
     const result = await autoMatchSessions(
       { profileId: "p1", weekStart: "2026-04-27" },
       {
@@ -84,6 +87,7 @@ describe("autoMatchSessions", () => {
       }
     );
 
+    // Assert
     expect(result).toHaveLength(1);
     expect(result[0]).toMatchObject({
       activityId: "a1",
@@ -97,6 +101,9 @@ describe("autoMatchSessions", () => {
   });
 
   it("should return no suggestions for cross-sport pairs (same day)", async () => {
+    // Arrange
+
+    // Act
     const result = await autoMatchSessions(
       { profileId: "p1", weekStart: "2026-04-27" },
       {
@@ -114,10 +121,14 @@ describe("autoMatchSessions", () => {
       }
     );
 
+    // Assert
     expect(result).toEqual([]);
   });
 
   it("should filter out below-threshold scores (>20% variance)", async () => {
+    // Arrange
+
+    // Act
     const result = await autoMatchSessions(
       { profileId: "p1", weekStart: "2026-04-27" },
       {
@@ -135,10 +146,14 @@ describe("autoMatchSessions", () => {
       }
     );
 
+    // Assert
     expect(result).toEqual([]);
   });
 
   it("should preserve null-score (duration-unknown) suggestions through the filter", async () => {
+    // Arrange
+
+    // Act
     const result = await autoMatchSessions(
       { profileId: "p1", weekStart: "2026-04-27" },
       {
@@ -152,6 +167,7 @@ describe("autoMatchSessions", () => {
       }
     );
 
+    // Assert
     expect(result).toHaveLength(1);
     expect(result[0]!.score).toBeNull();
     expect(result[0]!.reasons.some((r) => r.code === "duration-unknown")).toBe(
@@ -160,6 +176,7 @@ describe("autoMatchSessions", () => {
   });
 
   it("should perform greedy assignment with deterministic tiebreaker (lower activityId, then workoutId)", async () => {
+    // Arrange
     const result = await autoMatchSessions(
       { profileId: "p1", weekStart: "2026-04-27" },
       {
@@ -182,14 +199,17 @@ describe("autoMatchSessions", () => {
         repository: noWriteRepo(),
       }
     );
-
     expect(result.map((r) => r.activityId).sort()).toEqual(["a-A", "a-B"]);
-    // No overlapping pairings.
+
+    // Act
     const ids = result.map((r) => `${r.activityId}|${r.workoutId}`).sort();
+
+    // Assert
     expect(ids).toEqual(["a-A|w-A", "a-B|w-B"]);
   });
 
   it("should skip already-matched activities and workouts in the current profile", async () => {
+    // Arrange
     const repo = createInMemorySessionMatchRepository();
     const existing: SessionMatch = {
       id: "M-existing",
@@ -202,6 +222,7 @@ describe("autoMatchSessions", () => {
     };
     await repo.put(existing);
 
+    // Act
     const result = await autoMatchSessions(
       { profileId: "p1", weekStart: "2026-04-27" },
       {
@@ -215,12 +236,15 @@ describe("autoMatchSessions", () => {
       }
     );
 
+    // Assert
     expect(result.find((r) => r.activityId === "a-1")).toBeUndefined();
   });
 
   it("should do NOT write any SessionMatch row (read-only)", async () => {
+    // Arrange
     const repo = createInMemorySessionMatchRepository();
 
+    // Act
     await autoMatchSessions(
       { profileId: "p1", weekStart: "2026-04-27" },
       {
@@ -230,19 +254,20 @@ describe("autoMatchSessions", () => {
       }
     );
 
+    // Assert
     expect(
       await repo.listByProfileAndWeek("p1", "2026-04-27", "2026-05-03")
     ).toEqual([]);
   });
 
   it("should be deterministic — same inputs produce same outputs", async () => {
+    // Arrange
     const inputs = {
       coaching: [a({ id: "a-1", duration: "45 min" })],
       workouts: [
         w({ id: "w-1", raw: { duration: { value: 2580, unit: "s" } } }),
       ],
     };
-
     const r1 = await autoMatchSessions(
       { profileId: "p1", weekStart: "2026-04-27" },
       {
@@ -251,6 +276,8 @@ describe("autoMatchSessions", () => {
         repository: noWriteRepo(),
       }
     );
+
+    // Act
     const r2 = await autoMatchSessions(
       { profileId: "p1", weekStart: "2026-04-27" },
       {
@@ -260,6 +287,7 @@ describe("autoMatchSessions", () => {
       }
     );
 
+    // Assert
     expect(r1).toEqual(r2);
   });
 });

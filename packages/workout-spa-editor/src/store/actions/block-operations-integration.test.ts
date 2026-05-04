@@ -69,21 +69,20 @@ describe("Block Operations Integration", () => {
         repeatCount: 5,
         steps: [step1],
       };
-
       const krd = createMockKRD([block1, block2]);
       const state = createMockState();
-
-      // Act - Edit first block
       const result = editRepetitionBlockAction(krd, blockId1, 10, state);
-
-      // Assert - Only first block should be updated
       const updatedWorkout =
         result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(2);
       const updatedBlock1 = updatedWorkout?.steps[0] as RepetitionBlock;
+
+      // Act
       const updatedBlock2 = updatedWorkout?.steps[1] as RepetitionBlock;
+
+      // Assert
       expect(updatedBlock1.repeatCount).toBe(10);
-      expect(updatedBlock2.repeatCount).toBe(5); // Unchanged
+      expect(updatedBlock2.repeatCount).toBe(5);
     });
 
     it("should add step to correct block by ID", () => {
@@ -101,21 +100,20 @@ describe("Block Operations Integration", () => {
         repeatCount: 5,
         steps: [step1],
       };
-
       const krd = createMockKRD([block1, block2]);
       const state = createMockState();
-
-      // Act - Add step to second block
       const result = addStepToRepetitionBlockAction(krd, blockId2, state);
-
-      // Assert - Only second block should have new step
       const updatedWorkout =
         result.currentWorkout?.extensions?.structured_workout;
       expect(updatedWorkout?.steps).toHaveLength(2);
       const updatedBlock1 = updatedWorkout?.steps[0] as RepetitionBlock;
+
+      // Act
       const updatedBlock2 = updatedWorkout?.steps[1] as RepetitionBlock;
-      expect(updatedBlock1.steps).toHaveLength(1); // Unchanged
-      expect(updatedBlock2.steps).toHaveLength(2); // New step added
+
+      // Assert
+      expect(updatedBlock1.steps).toHaveLength(1);
+      expect(updatedBlock2.steps).toHaveLength(2);
     });
 
     it("should ungroup correct block by ID", () => {
@@ -134,20 +132,17 @@ describe("Block Operations Integration", () => {
         repeatCount: 5,
         steps: [step2],
       };
-
       const krd = createMockKRD([block1, block2]);
       const state = createMockState();
-
-      // Act - Ungroup first block
       const result = ungroupRepetitionBlockAction(krd, blockId1, state);
 
-      // Assert - First block should be ungrouped, second should remain
+      // Act
       const updatedWorkout =
         result.currentWorkout?.extensions?.structured_workout;
+
+      // Assert
       expect(updatedWorkout?.steps).toHaveLength(2);
-      // First item should be the ungrouped step
       expect((updatedWorkout?.steps[0] as WorkoutStep).stepIndex).toBe(0);
-      // Second item should still be block2
       expect((updatedWorkout?.steps[1] as RepetitionBlock).id).toBe(blockId2);
     });
 
@@ -172,16 +167,15 @@ describe("Block Operations Integration", () => {
         repeatCount: 4,
         steps: [step1],
       };
-
       const krd = createMockKRD([block1, block2, block3]);
       const state = createMockState();
-
-      // Act - Edit middle block
       const result = editRepetitionBlockAction(krd, blockId2, 10, state);
 
-      // Assert - Only middle block should be updated
+      // Act
       const updatedWorkout =
         result.currentWorkout?.extensions?.structured_workout;
+
+      // Assert
       expect(updatedWorkout?.steps).toHaveLength(3);
       expect((updatedWorkout?.steps[0] as RepetitionBlock).repeatCount).toBe(2);
       expect((updatedWorkout?.steps[1] as RepetitionBlock).repeatCount).toBe(
@@ -197,8 +191,6 @@ describe("Block Operations Integration", () => {
       const step1 = createMockStep(0);
       const krd = createMockKRD([step1]);
       const state = createMockState();
-
-      // Act
       const editResult = editRepetitionBlockAction(
         krd,
         "nonexistent-id",
@@ -210,6 +202,8 @@ describe("Block Operations Integration", () => {
         "nonexistent-id",
         state
       );
+
+      // Act
       const ungroupResult = ungroupRepetitionBlockAction(
         krd,
         "nonexistent-id",

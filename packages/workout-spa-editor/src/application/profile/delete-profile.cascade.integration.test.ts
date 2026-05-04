@@ -152,11 +152,9 @@ describe("deleteProfile cascade fan-out (integration)", () => {
   });
 
   it("should clear every per-profile table for the deleted profile and preserves the other", async () => {
+    // Arrange
     const perProfileTables = database.tables.filter(isPerProfileTable);
     expect(perProfileTables.length).toBeGreaterThan(0);
-
-    // Sanity: ensure the test discovers the tables we expect — guards
-    // against the predicate accidentally regressing to "false for everything".
     const discoveredNames = perProfileTables.map((t) => t.name).sort();
     expect(discoveredNames).toEqual(
       expect.arrayContaining([
@@ -167,12 +165,6 @@ describe("deleteProfile cascade fan-out (integration)", () => {
         "userPreferences",
       ])
     );
-
-    // Seed: one row per per-profile table for each of profiles A and B.
-    // The `profiles` table is also per-profile (PK is `id`, NOT `profileId`,
-    // so isPerProfileTable returns false for it — which is correct: profile
-    // delete is the parent operation, not a cascade child). Seed it
-    // separately so deleteProfile has a row to delete.
     const A = "00000000-0000-4000-8000-0000000000a1";
     const B = "00000000-0000-4000-8000-0000000000b2";
     await seedRowFor(database, "profiles", A);
@@ -182,11 +174,10 @@ describe("deleteProfile cascade fan-out (integration)", () => {
       await seedRowFor(database, table.name, B);
     }
 
+    // Act
     await performCascadeOrchestration(persistence, A);
 
-    // Assert: profile A has zero rows in every per-profile table; profile B
-    // has exactly one. The dynamic enumeration means adding a new
-    // per-profile table without extending the cascade surfaces here.
+    // Assert
     for (const table of perProfileTables) {
       const remainingForA = await table
         .filter((row) => (row as { profileId?: string }).profileId === A)
@@ -206,6 +197,7 @@ describe("deleteProfile cascade fan-out (integration)", () => {
   });
 
   it("should roll every per-profile table back when one cascade step throws mid-fan-out", async () => {
+    // Arrange
     const perProfileTables = database.tables.filter(isPerProfileTable);
     const A = "00000000-0000-4000-8000-0000000000c1";
     const B = "00000000-0000-4000-8000-0000000000c2";
@@ -215,21 +207,12 @@ describe("deleteProfile cascade fan-out (integration)", () => {
       await seedRowFor(database, table.name, A);
       await seedRowFor(database, table.name, B);
     }
-
-    // Patch one repo method to throw mid-cascade. Pick userPreferences.delete
-    // because UserPreferencesRepository uses `delete(profileId)` (PK is
-    // profileId), not `deleteByProfile` — a slightly different shape.
     const userPrefsSpy = vi
       .spyOn(database.table("userPreferences"), "delete")
       .mockImplementationOnce(() =>
         Promise.reject(new Error("simulated mid-cascade failure"))
       );
-
     await expect(performCascadeOrchestration(persistence, A)).rejects.toThrow();
-
-    // Every per-profile table still holds rows for BOTH profiles —
-    // proves the outer transaction aborted and rolled the partial cascade
-    // back, leaving the database in the pre-delete state.
     for (const table of perProfileTables) {
       const countForA = await table
         .filter((row) => (row as { profileId?: string }).profileId === A)
@@ -246,13 +229,14 @@ describe("deleteProfile cascade fan-out (integration)", () => {
         `${table.name} lost B's row despite a mid-cascade failure`
       ).toBe(1);
     }
-
-    // Profile rows themselves also untouched.
     const profileA = await database.table("profiles").get(A);
     const profileB = await database.table("profiles").get(B);
     expect(profileA).toBeDefined();
     expect(profileB).toBeDefined();
 
+    // Act
     userPrefsSpy.mockRestore();
+
+    // Assert
   });
 });

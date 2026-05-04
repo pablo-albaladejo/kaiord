@@ -59,30 +59,23 @@ describe("duplicateStep", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act
     useWorkoutStore.getState().duplicateStep(0);
     const state = useWorkoutStore.getState();
 
-    // Assert
+    // Act
     const workout = state.currentWorkout?.extensions?.structured_workout;
-    expect(workout?.steps).toHaveLength(3);
 
-    // Original step at index 0
+    // Assert
+    expect(workout?.steps).toHaveLength(3);
     expect(workout?.steps[0].stepIndex).toBe(0);
     expect(workout?.steps[0].duration).toEqual({ type: "time", seconds: 300 });
-
-    // Duplicated step at index 1
     expect(workout?.steps[1].stepIndex).toBe(1);
     expect(workout?.steps[1].duration).toEqual({ type: "time", seconds: 300 });
     expect(workout?.steps[1].target).toEqual({
       type: "power",
       value: { unit: "watts", value: 200 },
     });
-
-    // Original second step now at index 2
     expect(workout?.steps[2].stepIndex).toBe(2);
     expect(workout?.steps[2].duration).toEqual({
       type: "distance",
@@ -118,18 +111,15 @@ describe("duplicateStep", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act
     useWorkoutStore.getState().duplicateStep(0);
     const state = useWorkoutStore.getState();
 
-    // Assert
+    // Act
     const workout = state.currentWorkout?.extensions?.structured_workout;
-    expect(workout?.steps).toHaveLength(2);
 
-    // Verify the duplicated step is a deep clone (with a fresh ItemId)
+    // Assert
+    expect(workout?.steps).toHaveLength(2);
     expect(workout?.steps[1]).toEqual({
       id: expect.any(String),
       stepIndex: 1,
@@ -145,8 +135,6 @@ describe("duplicateStep", () => {
     expect((workout?.steps[1] as { id: string }).id).not.toBe(
       (workout?.steps[0] as { id: string }).id
     );
-
-    // Verify they are not the same object reference
     expect(workout?.steps[0]).not.toBe(workout?.steps[1]);
   });
 
@@ -188,36 +176,30 @@ describe("duplicateStep", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act - Duplicate the first step
     useWorkoutStore.getState().duplicateStep(0);
     const state = useWorkoutStore.getState();
 
-    // Assert
+    // Act
     const workout = state.currentWorkout?.extensions?.structured_workout;
-    expect(workout?.steps).toHaveLength(4);
 
-    // Verify all stepIndex values are sequential
+    // Assert
+    expect(workout?.steps).toHaveLength(4);
     expect(workout?.steps[0].stepIndex).toBe(0);
     expect(workout?.steps[0].duration).toEqual({
       type: "distance",
       meters: 500,
     });
-
     expect(workout?.steps[1].stepIndex).toBe(1);
     expect(workout?.steps[1].duration).toEqual({
       type: "distance",
       meters: 500,
     });
-
     expect(workout?.steps[2].stepIndex).toBe(2);
     expect(workout?.steps[2].duration).toEqual({
       type: "distance",
       meters: 1000,
     });
-
     expect(workout?.steps[3].stepIndex).toBe(3);
     expect(workout?.steps[3].duration).toEqual({
       type: "distance",
@@ -249,11 +231,10 @@ describe("duplicateStep", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
+    useWorkoutStore.getState().duplicateStep(0);
 
     // Act
-    useWorkoutStore.getState().duplicateStep(0);
     const state = useWorkoutStore.getState();
 
     // Assert
@@ -268,9 +249,9 @@ describe("duplicateStep", () => {
       undoHistory: [],
       historyIndex: -1,
     });
+    useWorkoutStore.getState().duplicateStep(0);
 
     // Act
-    useWorkoutStore.getState().duplicateStep(0);
     const state = useWorkoutStore.getState();
 
     // Assert
@@ -305,17 +286,16 @@ describe("duplicateStep", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act - Try to duplicate non-existent step
     useWorkoutStore.getState().duplicateStep(5);
     const state = useWorkoutStore.getState();
 
-    // Assert - Workout should remain unchanged
+    // Act
     const workout = state.currentWorkout?.extensions?.structured_workout;
+
+    // Assert
     expect(workout?.steps).toHaveLength(1);
-    expect(state.undoHistory).toHaveLength(1); // Only the initial load
+    expect(state.undoHistory).toHaveLength(1);
   });
 
   it("should duplicate the last step in workout", () => {
@@ -355,22 +335,18 @@ describe("duplicateStep", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act - Duplicate the last step
     useWorkoutStore.getState().duplicateStep(1);
     const state = useWorkoutStore.getState();
 
-    // Assert
+    // Act
     const workout = state.currentWorkout?.extensions?.structured_workout;
-    expect(workout?.steps).toHaveLength(3);
 
+    // Assert
+    expect(workout?.steps).toHaveLength(3);
     expect(workout?.steps[0].stepIndex).toBe(0);
     expect(workout?.steps[1].stepIndex).toBe(1);
     expect(workout?.steps[2].stepIndex).toBe(2);
-
-    // Verify the last step is duplicated
     expect(workout?.steps[2].duration).toEqual({ type: "time", seconds: 600 });
     expect(workout?.steps[2].target).toEqual({
       type: "power",
@@ -407,18 +383,15 @@ describe("duplicateStep", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act
     useWorkoutStore.getState().duplicateStep(0);
     const state = useWorkoutStore.getState();
 
-    // Assert
+    // Act
     const workout = state.currentWorkout?.extensions?.structured_workout;
-    expect(workout?.steps).toHaveLength(2);
 
-    // Verify complex structure is preserved (with a fresh ItemId)
+    // Assert
+    expect(workout?.steps).toHaveLength(2);
     expect(workout?.steps[1]).toEqual({
       id: expect.any(String),
       stepIndex: 1,

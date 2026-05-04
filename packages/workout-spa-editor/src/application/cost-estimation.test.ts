@@ -5,6 +5,7 @@ import { makeWorkoutRecord } from "./test-helpers";
 
 describe("estimateTokens", () => {
   it("should estimate tokens from description length", () => {
+    // Arrange
     const workout = makeWorkoutRecord({
       raw: {
         title: "Run",
@@ -17,13 +18,15 @@ describe("estimateTokens", () => {
       },
     });
 
+    // Act
     const result = estimateTokens([workout]);
 
-    // 300 chars / 3 = 100 input tokens + 500 output = 600
+    // Assert
     expect(result).toBe(600);
   });
 
   it("should include comment text in estimation", () => {
+    // Arrange
     const workout = makeWorkoutRecord({
       raw: {
         title: "Run",
@@ -42,21 +45,26 @@ describe("estimateTokens", () => {
       },
     });
 
+    // Act
     const result = estimateTokens([workout]);
 
-    // (300 + 150) / 3 = 150 input + 500 output = 650
+    // Assert
     expect(result).toBe(650);
   });
 
   it("should skip workouts without raw data", () => {
+    // Arrange
     const workout = makeWorkoutRecord({ raw: null });
 
+    // Act
     const result = estimateTokens([workout]);
 
+    // Assert
     expect(result).toBe(0);
   });
 
   it("should sum tokens across multiple workouts", () => {
+    // Arrange
     const w1 = makeWorkoutRecord({
       raw: {
         title: "A",
@@ -80,13 +88,15 @@ describe("estimateTokens", () => {
       },
     });
 
+    // Act
     const result = estimateTokens([w1, w2]);
 
-    // w1: 100 + 500 = 600, w2: 200 + 500 = 700 => 1300
+    // Assert
     expect(result).toBe(1300);
   });
 
   it("should round up fractional tokens", () => {
+    // Arrange
     const workout = makeWorkoutRecord({
       raw: {
         title: "X",
@@ -99,29 +109,42 @@ describe("estimateTokens", () => {
       },
     });
 
+    // Act
     const result = estimateTokens([workout]);
 
-    // 10 / 3 = 3.33 -> ceil = 4, + 500 = 504
+    // Assert
     expect(result).toBe(504);
   });
 });
 
 describe("estimateCost", () => {
   it("should calculate cost at given rate per million", () => {
+    // Arrange
+
+    // Act
     const result = estimateCost(1_000_000, 3.0);
 
+    // Assert
     expect(result).toBe(3.0);
   });
 
   it("should calculate fractional cost", () => {
+    // Arrange
+
+    // Act
     const result = estimateCost(500, 10.0);
 
+    // Assert
     expect(result).toBeCloseTo(0.005);
   });
 
   it("should return zero for zero tokens", () => {
+    // Arrange
+
+    // Act
     const result = estimateCost(0, 5.0);
 
+    // Assert
     expect(result).toBe(0);
   });
 });

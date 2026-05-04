@@ -56,21 +56,18 @@ describe("workout loading integration", () => {
           },
         },
       };
-
-      // Act
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
-
-      // Assert
       expect(state.currentWorkout).toBeDefined();
       const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(1);
 
+      // Act
       const block = workout?.steps[0] as RepetitionBlock;
+
+      // Assert
       expect(block.id).toBeDefined();
       expect(typeof block.id).toBe("string");
-      // Every block id comes from `defaultIdProvider()` (UUID v4) —
-      // there is no more `block-{timestamp}-{random}` legacy format.
       expect(block.id).toMatch(
         /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
       );
@@ -123,17 +120,16 @@ describe("workout loading integration", () => {
           },
         },
       };
-
-      // Act
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
-
-      // Assert
       const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(2);
-
       const block1 = workout?.steps[0] as RepetitionBlock;
+
+      // Act
       const block2 = workout?.steps[1] as RepetitionBlock;
+
+      // Assert
       expect(block1.id).toBeDefined();
       expect(block2.id).toBeDefined();
       expect(block1.id).not.toBe(block2.id);
@@ -191,16 +187,15 @@ describe("workout loading integration", () => {
           },
         },
       };
-
-      // Act
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
-
-      // Assert
       const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(3);
 
+      // Act
       const block = workout?.steps[1] as RepetitionBlock;
+
+      // Assert
       expect(block.id).toBeDefined();
       expect(typeof block.id).toBe("string");
     });
@@ -241,15 +236,14 @@ describe("workout loading integration", () => {
           },
         },
       };
-
-      // Act
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
-
-      // Assert: stable ids are UI-scope (design decision 6); the portable
-      // KRD id is never carried into the in-memory UIWorkout.
       const workout = state.currentWorkout?.extensions?.structured_workout;
+
+      // Act
       const block = workout?.steps[0] as RepetitionBlock;
+
+      // Assert
       expect(block.id).toBeDefined();
       expect(block.id).not.toBe(existingId);
       expect(block.id).toMatch(
@@ -308,15 +302,15 @@ describe("workout loading integration", () => {
           },
         },
       };
-
-      // Act
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
-
-      // Assert: both block ids are regenerated and distinct.
       const workout = state.currentWorkout?.extensions?.structured_workout;
       const block1 = workout?.steps[0] as RepetitionBlock;
+
+      // Act
       const block2 = workout?.steps[1] as RepetitionBlock;
+
+      // Assert
       expect(block1.id).not.toBe(existingId1);
       expect(block2.id).not.toBe(existingId2);
       expect(block1.id).not.toBe(block2.id);
@@ -371,16 +365,15 @@ describe("workout loading integration", () => {
           },
         },
       };
-
-      // Act
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
-
-      // Assert: both block ids are regenerated regardless of whether the
-      // payload had one or not.
       const workout = state.currentWorkout?.extensions?.structured_workout;
       const block1 = workout?.steps[0] as RepetitionBlock;
+
+      // Act
       const block2 = workout?.steps[1] as RepetitionBlock;
+
+      // Assert
       expect(block1.id).not.toBe(existingId);
       expect(block2.id).toBeDefined();
       expect(block1.id).not.toBe(block2.id);
@@ -450,17 +443,10 @@ describe("workout loading integration", () => {
           },
         },
       };
-
-      // Act
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
-
-      // Assert
       const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(3);
-
-      // Verify all blocks have stable UUID v4 ids produced by
-      // `defaultIdProvider()` during hydration.
       const blocks = workout?.steps as RepetitionBlock[];
       blocks.forEach((block) => {
         expect(block.id).toBeDefined();
@@ -469,10 +455,12 @@ describe("workout loading integration", () => {
           /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/
         );
       });
-
-      // Verify all IDs are unique
       const ids = blocks.map((block) => block.id);
+
+      // Act
       const uniqueIds = new Set(ids);
+
+      // Assert
       expect(uniqueIds.size).toBe(blocks.length);
     });
 
@@ -508,16 +496,16 @@ describe("workout loading integration", () => {
           },
         },
       };
-
-      // Act
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
-
-      // Assert
       expect(state.undoHistory).toHaveLength(1);
       const historyWorkout =
         state.undoHistory[0].workout.extensions?.structured_workout;
+
+      // Act
       const historyBlock = historyWorkout?.steps[0] as RepetitionBlock;
+
+      // Assert
       expect(historyBlock.id).toBeDefined();
       expect(typeof historyBlock.id).toBe("string");
     });
@@ -538,14 +526,14 @@ describe("workout loading integration", () => {
           },
         },
       };
-
-      // Act
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
+      expect(state.currentWorkout).toBeDefined();
+
+      // Act
+      const workout = state.currentWorkout?.extensions?.structured_workout;
 
       // Assert
-      expect(state.currentWorkout).toBeDefined();
-      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(0);
     });
 
@@ -586,16 +574,15 @@ describe("workout loading integration", () => {
           },
         },
       };
-
-      // Act
       useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
+      expect(state.currentWorkout).toBeDefined();
+
+      // Act
+      const workout = state.currentWorkout?.extensions?.structured_workout;
 
       // Assert
-      expect(state.currentWorkout).toBeDefined();
-      const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(2);
-      // Individual steps don't need IDs, only repetition blocks
     });
   });
 });

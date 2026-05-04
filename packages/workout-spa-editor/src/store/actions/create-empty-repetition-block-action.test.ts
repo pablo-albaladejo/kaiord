@@ -51,6 +51,11 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
      * with the default values (5 minutes duration, open target, active intensity)
      */
     it("should add exactly one default step to empty repetition blocks", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           // Generate random repeat counts (1-10)
@@ -108,6 +113,11 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
     });
 
     it("should add default step with correct properties regardless of existing steps", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           // Generate random repeat counts
@@ -182,6 +192,11 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
      * in a block containing exactly those steps with no additions or removals
      */
     it("should preserve exact step count when creating block from selected steps", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           // Generate random number of steps (1-10)
@@ -252,6 +267,11 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
     });
 
     it("should not add default step when creating block from selected steps", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           // Generate random number of steps (1-5)

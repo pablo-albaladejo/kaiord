@@ -39,14 +39,17 @@ const sampleKrd: KRD = {
 
 describe("stripIds", () => {
   it("should remove id fields from every step and block", () => {
+    // Arrange
     const ui = hydrateUIWorkout(sampleKrd);
     const stripped = stripIds(ui);
 
+    // Act
     const workout = stripped.extensions?.structured_workout as
       | Workout
       | undefined;
-    expect(workout).toBeDefined();
 
+    // Assert
+    expect(workout).toBeDefined();
     for (const item of workout!.steps) {
       expect((item as { id?: string }).id).toBeUndefined();
       if (isRepetitionBlock(item)) {
@@ -58,25 +61,37 @@ describe("stripIds", () => {
   });
 
   it("should be idempotent for already-stripped payloads", () => {
+    // Arrange
+
+    // Act
     const stripped = stripIds(sampleKrd);
 
+    // Assert
     expect(stripped).toEqual(sampleKrd);
   });
 
   it("should pass through a workout with no structured_workout extension", () => {
+    // Arrange
+
+    // Act
     const krd: KRD = {
       version: "1.0",
       type: "structured_workout",
       metadata: { created: "2025-01-15T10:30:00Z", sport: "cycling" },
     };
 
+    // Assert
     expect(stripIds(krd)).toEqual(krd);
   });
 
   it("should round-trip cleanly via hydrate + strip", () => {
+    // Arrange
     const ui = hydrateUIWorkout(sampleKrd);
+
+    // Act
     const stripped = stripIds(ui);
 
+    // Assert
     expect(stripped).toEqual(sampleKrd);
   });
 });

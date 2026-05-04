@@ -12,7 +12,9 @@ describe("FocusSlice", () => {
   });
 
   it("should default to pendingFocusTarget: null on a fresh store", () => {
-    // Arrange + Act: the default store state is the system under test.
+    // Arrange
+
+    // Act
 
     // Assert
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
@@ -30,7 +32,9 @@ describe("FocusSlice", () => {
   });
 
   it("should write the empty-state sentinel via setPendingFocusTarget", () => {
-    // Arrange + Act
+    // Arrange
+
+    // Act
     useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
 
     // Assert
@@ -40,7 +44,7 @@ describe("FocusSlice", () => {
   });
 
   it("should clear via null through setPendingFocusTarget", () => {
-    // Arrange: put the slice into a non-null state first.
+    // Arrange
     useWorkoutStore.getState().setPendingFocusTarget(focusItem(asItemId("a")));
 
     // Act
@@ -64,10 +68,11 @@ describe("FocusSlice", () => {
   });
 
   it("should accept an id that does not exist in the current workout", () => {
-    // Arrange: resolving the id to a DOM node is the hook's job (§7), not
-    // the slice's — the slice only stores whatever it's given.
+    // Arrange
 
-    // Act + Assert
+    // Act
+
+    // Assert
     expect(() =>
       useWorkoutStore
         .getState()
@@ -79,7 +84,9 @@ describe("FocusSlice", () => {
   });
 
   it("should start selectionHistory empty on a fresh store", () => {
-    // Arrange + Act: the default store state is the system under test.
+    // Arrange
+
+    // Act
 
     // Assert
     expect(useWorkoutStore.getState().undoHistory).toEqual([]);

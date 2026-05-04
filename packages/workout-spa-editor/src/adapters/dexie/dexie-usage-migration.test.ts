@@ -18,6 +18,7 @@ import { backfillUsageRow, KaiordDatabase } from "./dexie-database";
 
 describe("backfillUsageRow (unit)", () => {
   it("should fill inputTokens from totalTokens and set outputTokens=0, legacy=true", () => {
+    // Arrange
     const row: Record<string, unknown> = {
       yearMonth: "2026-03",
       totalTokens: 500,
@@ -25,8 +26,10 @@ describe("backfillUsageRow (unit)", () => {
       entries: [{ date: "2026-03-12", tokens: 500, cost: 0.01 }],
     };
 
+    // Act
     backfillUsageRow(row);
 
+    // Assert
     expect(row.inputTokens).toBe(500);
     expect(row.outputTokens).toBe(0);
     expect(row.legacy).toBe(true);
@@ -34,22 +37,26 @@ describe("backfillUsageRow (unit)", () => {
   });
 
   it("should backfill every entry alongside the record-level fields", () => {
+    // Arrange
     const row: Record<string, unknown> = {
       yearMonth: "2026-03",
       totalTokens: 80,
       totalCost: 0.001,
       entries: [{ date: "2026-03-12", tokens: 80, cost: 0.001 }],
     };
-
     backfillUsageRow(row);
 
+    // Act
     const entry = (row.entries as Array<Record<string, unknown>>)[0];
+
+    // Assert
     expect(entry.inputTokens).toBe(80);
     expect(entry.outputTokens).toBe(0);
     expect(entry.tokens).toBe(80);
   });
 
   it("should be idempotent — rows already carrying inputTokens are untouched", () => {
+    // Arrange
     const row: Record<string, unknown> = {
       yearMonth: "2026-04",
       inputTokens: 120,
@@ -58,22 +65,27 @@ describe("backfillUsageRow (unit)", () => {
       totalCost: 0.02,
       entries: [],
     };
-
     const before = JSON.stringify(row);
+
+    // Act
     backfillUsageRow(row);
 
+    // Assert
     expect(JSON.stringify(row)).toBe(before);
   });
 
   it("should handle rows missing totalTokens gracefully", () => {
+    // Arrange
     const row: Record<string, unknown> = {
       yearMonth: "2026-02",
       totalCost: 0,
       entries: [],
     };
 
+    // Act
     backfillUsageRow(row);
 
+    // Assert
     expect(row.inputTokens).toBe(0);
     expect(row.outputTokens).toBe(0);
     expect(row.legacy).toBe(true);
@@ -82,9 +94,8 @@ describe("backfillUsageRow (unit)", () => {
 
 describe("Dexie v2 → v3 upgrade (integration)", () => {
   it("should migrate legacy usage rows in-place on open", async () => {
+    // Arrange
     const dbName = `kaiord-usage-migration-${Date.now()}-${Math.random()}`;
-
-    // Seed a v2-shape database directly (no `inputTokens` field).
     const v2 = new Dexie(dbName);
     v2.version(2).stores({
       workouts: "id, date, [date+state], [source+sourceId], sport, *tags",
@@ -104,8 +115,6 @@ describe("Dexie v2 → v3 upgrade (integration)", () => {
       entries: [{ date: "2026-03-12", tokens: 750, cost: 0.015 }],
     });
     v2.close();
-
-    // Open via the current KaiordDatabase (version 3) — triggers upgrade.
     const v3 = new KaiordDatabase(dbName);
     await v3.open();
     const migrated = await v3
@@ -118,7 +127,6 @@ describe("Dexie v2 → v3 upgrade (integration)", () => {
         entries: Array<Record<string, unknown>>;
       }>("usage")
       .get("2026-03");
-
     expect(migrated).toBeDefined();
     expect(migrated!.inputTokens).toBe(750);
     expect(migrated!.outputTokens).toBe(0);
@@ -127,6 +135,9 @@ describe("Dexie v2 → v3 upgrade (integration)", () => {
     expect(migrated!.entries[0].inputTokens).toBe(750);
     expect(migrated!.entries[0].outputTokens).toBe(0);
 
+    // Act
     v3.close();
+
+    // Assert
   });
 });

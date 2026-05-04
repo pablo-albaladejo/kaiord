@@ -70,12 +70,15 @@ const makeWorkout = (
 
 describe("transitionToStructured", () => {
   it("should transition from raw to structured", () => {
+    // Arrange
     const workout = makeWorkout({ state: "raw" });
     const krd = makeKrd();
     const aiMeta = makeAiMeta();
 
+    // Act
     const result = transitionToStructured(workout, krd, aiMeta);
 
+    // Assert
     expect(result.state).toBe("structured");
     expect(result.krd).toBe(krd);
     expect(result.aiMeta).toBe(aiMeta);
@@ -83,8 +86,12 @@ describe("transitionToStructured", () => {
   });
 
   it("should throw for non-raw source state", () => {
+    // Arrange
+
+    // Act
     const workout = makeWorkout({ state: "structured" });
 
+    // Assert
     expect(() =>
       transitionToStructured(workout, makeKrd(), makeAiMeta())
     ).toThrow("Cannot transition from structured to structured");
@@ -93,16 +100,23 @@ describe("transitionToStructured", () => {
 
 describe("transitionToReady", () => {
   it("should transition from structured to ready", () => {
+    // Arrange
     const workout = makeWorkout({ state: "structured", krd: makeKrd() });
 
+    // Act
     const result = transitionToReady(workout);
 
+    // Assert
     expect(result.state).toBe("ready");
   });
 
   it("should throw for non-structured source state", () => {
+    // Arrange
+
+    // Act
     const workout = makeWorkout({ state: "raw" });
 
+    // Assert
     expect(() => transitionToReady(workout)).toThrow(
       "Cannot transition from raw to ready"
     );
@@ -111,32 +125,42 @@ describe("transitionToReady", () => {
 
 describe("transitionToPushed", () => {
   it("should transition from ready to pushed", () => {
+    // Arrange
     const workout = makeWorkout({ state: "ready", krd: makeKrd() });
 
+    // Act
     const result = transitionToPushed(workout, "garmin-123");
 
+    // Assert
     expect(result.state).toBe("pushed");
     expect(result.garminPushId).toBe("garmin-123");
   });
 
   it("should transition from modified to pushed", () => {
+    // Arrange
     const workout = makeWorkout({
       state: "modified",
       krd: makeKrd(),
       garminPushId: "garmin-old",
     });
 
+    // Act
     const result = transitionToPushed(workout, "garmin-456");
 
+    // Assert
     expect(result.state).toBe("pushed");
     expect(result.garminPushId).toBe("garmin-456");
   });
 
   it("should throw for invalid source states", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       transitionToPushed(makeWorkout({ state: "raw" }), "g-1")
     ).toThrow("Cannot transition from raw to pushed");
-
     expect(() =>
       transitionToPushed(makeWorkout({ state: "skipped" }), "g-1")
     ).toThrow("Cannot transition from skipped to pushed");
@@ -145,6 +169,7 @@ describe("transitionToPushed", () => {
 
 describe("transitionToModified", () => {
   it("should transition from pushed to modified with new KRD", () => {
+    // Arrange
     const workout = makeWorkout({
       state: "pushed",
       krd: makeKrd(),
@@ -152,8 +177,10 @@ describe("transitionToModified", () => {
     });
     const newKrd = makeKrd();
 
+    // Act
     const result = transitionToModified(workout, newKrd);
 
+    // Assert
     expect(result.state).toBe("modified");
     expect(result.krd).toBe(newKrd);
     expect(result.modifiedAt).not.toBeNull();
@@ -161,6 +188,11 @@ describe("transitionToModified", () => {
   });
 
   it("should throw for non-pushed source state", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       transitionToModified(makeWorkout({ state: "ready" }), makeKrd())
     ).toThrow("Cannot transition from ready to modified");
@@ -169,12 +201,21 @@ describe("transitionToModified", () => {
 
 describe("transitionToSkipped", () => {
   it("should transition from raw to skipped", () => {
+    // Arrange
+
+    // Act
     const result = transitionToSkipped(makeWorkout({ state: "raw" }));
 
+    // Assert
     expect(result.state).toBe("skipped");
   });
 
   it("should throw for non-raw source state", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       transitionToSkipped(makeWorkout({ state: "structured" }))
     ).toThrow("Cannot transition from structured to skipped");
@@ -183,12 +224,21 @@ describe("transitionToSkipped", () => {
 
 describe("transitionToRaw (un-skip)", () => {
   it("should transition from skipped to raw", () => {
+    // Arrange
+
+    // Act
     const result = transitionToRaw(makeWorkout({ state: "skipped" }));
 
+    // Assert
     expect(result.state).toBe("raw");
   });
 
   it("should throw for non-skipped source state", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() => transitionToRaw(makeWorkout({ state: "pushed" }))).toThrow(
       "Cannot transition from pushed to raw"
     );
@@ -197,6 +247,7 @@ describe("transitionToRaw (un-skip)", () => {
 
 describe("detectStale", () => {
   it("should return unchanged when rawHash matches", async () => {
+    // Arrange
     const raw = makeRaw("Run 5k easy");
     const workout = makeWorkout({
       state: "structured",
@@ -206,33 +257,42 @@ describe("detectStale", () => {
     const hash = await computeRawHash(raw);
     workout.raw = { ...raw, rawHash: hash };
 
+    // Act
     const result = await detectStale(workout, raw);
 
+    // Assert
     expect(result).toBe(workout);
   });
 
   it("should update raw in-place for raw state", async () => {
+    // Arrange
     const workout = makeWorkout({ state: "raw", raw: makeRaw("old") });
     const newRaw = makeRaw("new description");
 
+    // Act
     const result = await detectStale(workout, newRaw);
 
+    // Assert
     expect(result.state).toBe("raw");
     expect(result.raw?.description).toBe("new description");
     expect(result).not.toBe(workout);
   });
 
   it("should not transition skipped to stale", async () => {
+    // Arrange
     const workout = makeWorkout({ state: "skipped", raw: makeRaw("old") });
     const newRaw = makeRaw("new description");
 
+    // Act
     const result = await detectStale(workout, newRaw);
 
+    // Assert
     expect(result.state).toBe("skipped");
     expect(result).toBe(workout);
   });
 
   it("should transition structured to stale", async () => {
+    // Arrange
     const workout = makeWorkout({
       state: "structured",
       krd: makeKrd(),
@@ -241,8 +301,10 @@ describe("detectStale", () => {
     });
     const newRaw = makeRaw("updated by coach");
 
+    // Act
     const result = await detectStale(workout, newRaw);
 
+    // Assert
     expect(result.state).toBe("stale");
     expect(result.previousState).toBe("structured");
     expect(result.krd).toBe(workout.krd);
@@ -250,6 +312,7 @@ describe("detectStale", () => {
   });
 
   it("should transition pushed to stale preserving garminPushId", async () => {
+    // Arrange
     const workout = makeWorkout({
       state: "pushed",
       krd: makeKrd(),
@@ -258,14 +321,17 @@ describe("detectStale", () => {
     });
     const newRaw = makeRaw("coach changed it");
 
+    // Act
     const result = await detectStale(workout, newRaw);
 
+    // Assert
     expect(result.state).toBe("stale");
     expect(result.previousState).toBe("pushed");
     expect(result.garminPushId).toBe("garmin-123");
   });
 
   it("should transition modified to stale", async () => {
+    // Arrange
     const workout = makeWorkout({
       state: "modified",
       krd: makeKrd(),
@@ -274,13 +340,16 @@ describe("detectStale", () => {
     });
     const newRaw = makeRaw("coach changed it again");
 
+    // Act
     const result = await detectStale(workout, newRaw);
 
+    // Assert
     expect(result.state).toBe("stale");
     expect(result.previousState).toBe("modified");
   });
 
   it("should transition ready to stale", async () => {
+    // Arrange
     const workout = makeWorkout({
       state: "ready",
       krd: makeKrd(),
@@ -288,8 +357,10 @@ describe("detectStale", () => {
     });
     const newRaw = makeRaw("updated");
 
+    // Act
     const result = await detectStale(workout, newRaw);
 
+    // Assert
     expect(result.state).toBe("stale");
     expect(result.previousState).toBe("ready");
   });
@@ -297,10 +368,18 @@ describe("detectStale", () => {
 
 describe("hasConflict", () => {
   it("should return false for non-stale workout", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(hasConflict(makeWorkout({ state: "raw" }))).toBe(false);
   });
 
   it("should return false when no user edits", () => {
+    // Arrange
+
+    // Act
     const workout = makeWorkout({
       state: "stale",
       previousState: "structured",
@@ -308,10 +387,14 @@ describe("hasConflict", () => {
       modifiedAt: null,
     });
 
+    // Assert
     expect(hasConflict(workout)).toBe(false);
   });
 
   it("should return false when modifiedAt <= processedAt", () => {
+    // Arrange
+
+    // Act
     const workout = makeWorkout({
       state: "stale",
       previousState: "structured",
@@ -319,10 +402,14 @@ describe("hasConflict", () => {
       modifiedAt: "2026-01-01T11:00:00Z",
     });
 
+    // Assert
     expect(hasConflict(workout)).toBe(false);
   });
 
   it("should return true when modifiedAt > processedAt", () => {
+    // Arrange
+
+    // Act
     const workout = makeWorkout({
       state: "stale",
       previousState: "pushed",
@@ -330,10 +417,14 @@ describe("hasConflict", () => {
       modifiedAt: "2026-01-01T13:00:00Z",
     });
 
+    // Assert
     expect(hasConflict(workout)).toBe(true);
   });
 
   it("should return true for null aiMeta with modifiedAt", () => {
+    // Arrange
+
+    // Act
     const workout = makeWorkout({
       state: "stale",
       previousState: "structured",
@@ -341,10 +432,14 @@ describe("hasConflict", () => {
       modifiedAt: "2026-01-01T10:00:00Z",
     });
 
+    // Assert
     expect(hasConflict(workout)).toBe(true);
   });
 
   it("should return false for null aiMeta without modifiedAt", () => {
+    // Arrange
+
+    // Act
     const workout = makeWorkout({
       state: "stale",
       previousState: "structured",
@@ -352,12 +447,14 @@ describe("hasConflict", () => {
       modifiedAt: null,
     });
 
+    // Assert
     expect(hasConflict(workout)).toBe(false);
   });
 });
 
 describe("keepUserVersion", () => {
   it("should restore previousState", () => {
+    // Arrange
     const workout = makeWorkout({
       state: "stale",
       previousState: "pushed",
@@ -365,8 +462,10 @@ describe("keepUserVersion", () => {
       garminPushId: "garmin-123",
     });
 
+    // Act
     const result = keepUserVersion(workout);
 
+    // Assert
     expect(result.state).toBe("pushed");
     expect(result.previousState).toBeNull();
     expect(result.krd).toBe(workout.krd);
@@ -374,12 +473,22 @@ describe("keepUserVersion", () => {
   });
 
   it("should throw for non-stale workout", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() => keepUserVersion(makeWorkout({ state: "raw" }))).toThrow(
       "Can only keep user version on a stale workout"
     );
   });
 
   it("should throw for stale without previousState", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       keepUserVersion(makeWorkout({ state: "stale", previousState: null }))
     ).toThrow("Can only keep user version on a stale workout");

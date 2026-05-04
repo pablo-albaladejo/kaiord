@@ -79,8 +79,7 @@ describe("resolveFocusElement", () => {
   });
 
   it("should fall back to the empty-state button when the item id is gone and the list is empty", () => {
-    // Arrange — item target whose element is not registered, AND no
-    // first item either (list is empty). Empty-state is the next step.
+    // Arrange
     const button = el("empty-state-btn");
 
     // Act
@@ -122,7 +121,7 @@ describe("resolveFocusElement", () => {
     // Arrange
     const heading = el("editor-heading");
 
-    // Act — no registered item, no empty-state button, only the heading.
+    // Act
     const result = resolveFocusElement({
       target: focusItem(asItemId("ghost-id")),
       getRegisteredItem: () => undefined,
@@ -137,6 +136,8 @@ describe("resolveFocusElement", () => {
   });
 
   it("should return null (and reason=unresolved) when every fallback is missing", () => {
+    // Arrange
+
     // Act
     const result = resolveFocusElement({
       target: focusItem(asItemId("ghost-id")),
@@ -152,7 +153,7 @@ describe("resolveFocusElement", () => {
   });
 
   it("should skip a first-item id whose element is not registered and proceeds to the heading", () => {
-    // Arrange — firstItemId exists but the registry has nothing for it.
+    // Arrange
     const heading = el("editor-heading");
 
     // Act
@@ -170,7 +171,7 @@ describe("resolveFocusElement", () => {
   });
 
   it("should reject detached elements (isConnected=false) — focus moves would be silently dropped", () => {
-    // Arrange — a detached heading ref; isUsable must reject it.
+    // Arrange
     const detached = document.createElement("div");
 
     // Act
@@ -188,7 +189,7 @@ describe("resolveFocusElement", () => {
   });
 
   it("should never resolve to an element with role=list", () => {
-    // Arrange — a malicious / buggy heading ref that carries role=list.
+    // Arrange
     const badHeading = el("bad-heading");
     badHeading.setAttribute("role", "list");
 
@@ -201,7 +202,7 @@ describe("resolveFocusElement", () => {
       editorHeading: badHeading,
     });
 
-    // Assert — the heading slot was rejected; unresolved.
+    // Assert
     expect(result.element).toBeNull();
     expect(result.reason).toBe("unresolved");
   });

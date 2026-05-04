@@ -264,6 +264,11 @@ describe("deleteRepetitionBlockAction", () => {
      * Validates: Requirements 1.1, 1.2, 1.3, 1.4
      */
     it("should delete the correct block when identified by ID", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 2, max: 5 }), // Number of blocks
@@ -335,6 +340,11 @@ describe("deleteRepetitionBlockAction", () => {
     });
 
     it("should delete the correct block from mixed steps and blocks", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 1, max: 3 }), // Steps before first block
@@ -414,6 +424,11 @@ describe("deleteRepetitionBlockAction", () => {
      * Validates: Requirements 2.1
      */
     it("should remove the entire block and all its steps from the workout", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 1, max: 5 }), // Number of steps before block
@@ -462,6 +477,11 @@ describe("deleteRepetitionBlockAction", () => {
     });
 
     it("should handle deletion of multiple blocks correctly", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 2, max: 5 }), // Number of blocks
@@ -504,6 +524,11 @@ describe("deleteRepetitionBlockAction", () => {
      * Validates: Requirements 1.5
      */
     it("should recalculate step indices correctly after deleting any block", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 2, max: 5 }), // Number of blocks
@@ -571,6 +596,11 @@ describe("deleteRepetitionBlockAction", () => {
     });
 
     it("should maintain sequential indices when deleting blocks at different positions", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 3, max: 6 }), // Total number of items
@@ -639,6 +669,11 @@ describe("deleteRepetitionBlockAction", () => {
      * Validates: Requirements 2.2
      */
     it("should recalculate stepIndex for all remaining steps to be sequential", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 1, max: 10 }), // Steps before block
@@ -695,6 +730,11 @@ describe("deleteRepetitionBlockAction", () => {
      * Validates: Requirements 2.3, 2.4
      */
     it("should restore exact original state after delete then undo", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 0, max: 5 }), // Steps before block
@@ -803,6 +843,11 @@ describe("deleteRepetitionBlockAction", () => {
      * Validates: Requirements 2.5
      */
     it("should clear selections when deleting a block", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 1, max: 5 }), // Steps in block
@@ -842,6 +887,11 @@ describe("deleteRepetitionBlockAction", () => {
      * Validates: Requirements 2.7
      */
     it("should maintain consistent workout statistics after deletion", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 1, max: 10 }), // Steps before block
@@ -952,7 +1002,6 @@ describe("deleteRepetitionBlockAction", () => {
           sport: "cycling",
         },
       };
-
       const state = createInitialState(krd);
 
       // Act
@@ -980,12 +1029,12 @@ describe("deleteRepetitionBlockAction", () => {
       const block = createRepetitionBlock(3);
       const krd = createKRDWithWorkout([block]);
       const state = createInitialState(krd);
-
-      // Act
       const result = deleteRepetitionBlockAction(krd, block.id!, state);
 
-      // Assert
+      // Act
       const workout = result.currentWorkout?.extensions?.structured_workout;
+
+      // Assert
       expect(workout).toBeDefined();
       expect(workout!.steps.length).toBe(0);
     });

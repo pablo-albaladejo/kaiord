@@ -40,11 +40,14 @@ describe("useLibraryTemplatesLive", () => {
   afterEach(clear);
 
   it("should return undefined while loading and resolves to the persisted list", async () => {
+    // Arrange
     const persistence = createDexiePersistence(db);
     await persistence.templates.put(makeTemplate(TEMPLATE_UUID_1, "Tempo"));
 
+    // Act
     const { result } = renderHook(() => useLibraryTemplatesLive());
 
+    // Assert
     await waitFor(() => {
       expect(result.current).toBeDefined();
     });
@@ -53,16 +56,17 @@ describe("useLibraryTemplatesLive", () => {
   });
 
   it("should re-fire when a new template is written through PersistencePort", async () => {
+    // Arrange
     const persistence = createDexiePersistence(db);
-
     const { result } = renderHook(() => useLibraryTemplatesLive());
-
     await waitFor(() => {
       expect(result.current).toEqual([]);
     });
 
+    // Act
     await persistence.templates.put(makeTemplate(TEMPLATE_UUID_2, "VO2"));
 
+    // Assert
     await waitFor(() => {
       expect(result.current).toHaveLength(1);
       expect(result.current?.[0].id).toBe(TEMPLATE_UUID_2);

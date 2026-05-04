@@ -29,7 +29,6 @@ describe("copyStepAction", () => {
           },
         },
       };
-
       const mockWriteText = vi.fn().mockResolvedValue(undefined);
       Object.assign(navigator, {
         clipboard: {
@@ -82,7 +81,6 @@ describe("copyStepAction", () => {
           },
         },
       };
-
       const mockWriteText = vi.fn().mockResolvedValue(undefined);
       Object.assign(navigator, {
         clipboard: {
@@ -155,7 +153,7 @@ describe("copyStepAction", () => {
     });
 
     it("should succeed with fallback when clipboard write fails", async () => {
-      // Arrange - clipboard API fails but in-memory fallback handles it
+      // Arrange
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "time",
@@ -178,7 +176,6 @@ describe("copyStepAction", () => {
           },
         },
       };
-
       const mockWriteText = vi
         .fn()
         .mockRejectedValue(new Error("Clipboard error"));
@@ -191,7 +188,7 @@ describe("copyStepAction", () => {
       // Act
       const result = await copyStepAction(krd, 0);
 
-      // Assert - succeeds via in-memory fallback
+      // Assert
       expect(result.success).toBe(true);
       expect(result.message).toBe("Step copied to clipboard");
     });
