@@ -11,11 +11,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Set poolLength
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -27,16 +23,15 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
       workout.poolLength = 25;
       workout.poolLengthUnit = "meters";
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert
+    // Act
     const workoutMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(workoutMsg).toBeDefined();
     expect(workoutMsg.poolLength).toBe(25);
     expect(workoutMsg.poolLengthUnit).toBe(0);
@@ -47,10 +42,12 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
+
+    // Act
     const poolLengths = [25, 50, 33.33];
 
+    // Assert
     for (const poolLength of poolLengths) {
-      // Act - FIT → KRD
       const krd = await reader(originalBuffer);
 
       // Set poolLength
@@ -66,10 +63,8 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
         workout.poolLengthUnit = "meters";
       }
 
-      // Act - KRD → FIT messages
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert - Within ±0.01 meters tolerance
       const workoutMsg = messages.find(
         (msg: unknown) =>
           (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
@@ -85,11 +80,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Set poolLength (KRD always stores in meters)
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -101,16 +92,15 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
       workout.poolLength = 50;
       workout.poolLengthUnit = "meters";
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert - poolLengthUnit should always be 0 (meters)
+    // Act
     const workoutMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(workoutMsg).toBeDefined();
     expect(workoutMsg.poolLengthUnit).toBe(0);
   });
@@ -120,11 +110,7 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Ensure poolLength is undefined
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -136,16 +122,15 @@ describe("Round-trip: Swimming workouts - pool length conversion and unit handli
       workout.poolLength = undefined;
       workout.poolLengthUnit = undefined;
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert
+    // Act
     const workoutMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(workoutMsg).toBeDefined();
     expect(workoutMsg).not.toHaveProperty("poolLength");
     expect(workoutMsg).not.toHaveProperty("poolLengthUnit");
@@ -158,11 +143,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Set equipment on first step
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -177,11 +158,9 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
         workout.steps[0].equipment = "swim_fins";
       }
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert
+    // Act
     const stepMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -189,6 +168,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
         (msg as { messageIndex?: number }).messageIndex === 0
     ) as { mesgNum: number; equipment: string } | undefined;
 
+    // Assert
     expect(stepMsg?.equipment).toBe("swimFins");
   });
 
@@ -198,7 +178,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
-    // Test multiple equipment values
+    // Act
     const equipmentValues = [
       { krd: "swim_fins", fit: "swimFins" },
       { krd: "swim_kickboard", fit: "swimKickboard" },
@@ -207,8 +187,8 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
       { krd: "swim_snorkel", fit: "swimSnorkel" },
     ];
 
+    // Assert
     for (const equipment of equipmentValues) {
-      // Act - FIT → KRD
       const krd = await reader(originalBuffer);
 
       // Set equipment
@@ -227,10 +207,8 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
         }
       }
 
-      // Act - KRD → FIT messages
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
       const stepMsg = messages.find(
         (msg: unknown) =>
           (msg as { mesgNum?: number }).mesgNum ===
@@ -247,11 +225,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Ensure equipment is undefined
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -266,11 +240,9 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
         workout.steps[0].equipment = undefined;
       }
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert
+    // Act
     const stepMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -278,6 +250,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
         (msg as { messageIndex?: number }).messageIndex === 0
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(stepMsg).not.toHaveProperty("equipment");
   });
 
@@ -292,11 +265,7 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
       { krd: "swim_paddles", fit: "swimPaddles" },
       { krd: "none", fit: "none" },
     ];
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Add equipment to all steps
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -314,10 +283,10 @@ describe("Round-trip: Swimming workouts - equipment mapping (snake_case ↔ came
       });
     }
 
-    // Act - KRD → FIT messages
+    // Act
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert - Check all steps have correct equipment
+    // Assert
     for (let i = 0; i < equipmentArray.length; i++) {
       const stepMsg = messages.find(
         (msg: unknown) =>
@@ -339,11 +308,7 @@ describe("Round-trip: Swimming workouts - combined pool length and equipment", (
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
     const testPoolLength = 50;
     const testEquipment = "swim_fins";
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Set both poolLength and equipment
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -362,23 +327,18 @@ describe("Round-trip: Swimming workouts - combined pool length and equipment", (
         workout.steps[0].equipment = testEquipment;
       }
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
-
-    // Assert - Check workout message has poolLength
     const workoutMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
     ) as
       | { mesgNum: number; poolLength: number; poolLengthUnit: number }
       | undefined;
-
     expect(workoutMsg).toBeDefined();
     expect(workoutMsg.poolLength).toBe(testPoolLength);
     expect(workoutMsg.poolLengthUnit).toBe(0);
 
-    // Assert - Check step message has equipment
+    // Act
     const stepMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -386,6 +346,7 @@ describe("Round-trip: Swimming workouts - combined pool length and equipment", (
         (msg as { messageIndex?: number }).messageIndex === 0
     ) as { mesgNum: number; equipment: string } | undefined;
 
+    // Assert
     expect(stepMsg?.equipment).toBe("swimFins");
   });
 });

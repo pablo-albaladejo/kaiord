@@ -50,16 +50,20 @@ describe("Domain Errors", () => {
 
     it("should work with instanceof checks", () => {
       // Arrange
+
+      // Act
       const error = new FitParsingError("Test");
 
-      // Act & Assert
+      // Assert
       expect(error instanceof Error).toBe(true);
       expect(error instanceof FitParsingError).toBe(true);
       expect(error instanceof KrdValidationError).toBe(false);
     });
 
     it("should preserve stack trace", () => {
-      // Arrange & Act
+      // Arrange
+
+      // Act
       const error = new FitParsingError("Test error");
 
       // Assert
@@ -131,9 +135,11 @@ describe("Domain Errors", () => {
 
     it("should work with instanceof checks", () => {
       // Arrange
+
+      // Act
       const error = new KrdValidationError("Test", []);
 
-      // Act & Assert
+      // Assert
       expect(error instanceof Error).toBe(true);
       expect(error instanceof KrdValidationError).toBe(true);
       expect(error instanceof FitParsingError).toBe(false);
@@ -210,9 +216,11 @@ describe("Domain Errors", () => {
 
     it("should work with instanceof checks", () => {
       // Arrange
+
+      // Act
       const error = new ToleranceExceededError("Test", []);
 
-      // Act & Assert
+      // Assert
       expect(error instanceof Error).toBe(true);
       expect(error instanceof ToleranceExceededError).toBe(true);
       expect(error instanceof KrdValidationError).toBe(false);
@@ -276,9 +284,11 @@ describe("Domain Errors", () => {
 
     it("should work with instanceof checks", () => {
       // Arrange
+
+      // Act
       const error = new TcxParsingError("Test");
 
-      // Act & Assert
+      // Assert
       expect(error instanceof Error).toBe(true);
       expect(error instanceof TcxParsingError).toBe(true);
       expect(error instanceof FitParsingError).toBe(false);
@@ -286,7 +296,9 @@ describe("Domain Errors", () => {
     });
 
     it("should preserve stack trace", () => {
-      // Arrange & Act
+      // Arrange
+
+      // Act
       const error = new TcxParsingError("Test error");
 
       // Assert
@@ -355,9 +367,11 @@ describe("Domain Errors", () => {
 
     it("should work with instanceof checks", () => {
       // Arrange
+
+      // Act
       const error = new ZwiftParsingError("Test");
 
-      // Act & Assert
+      // Assert
       expect(error instanceof Error).toBe(true);
       expect(error instanceof ZwiftParsingError).toBe(true);
       expect(error instanceof FitParsingError).toBe(false);
@@ -366,7 +380,9 @@ describe("Domain Errors", () => {
     });
 
     it("should preserve stack trace", () => {
-      // Arrange & Act
+      // Arrange
+
+      // Act
       const error = new ZwiftParsingError("Test error");
 
       // Assert
@@ -438,9 +454,11 @@ describe("Domain Errors", () => {
 
     it("should work with instanceof checks", () => {
       // Arrange
+
+      // Act
       const error = new ZwiftValidationError("Test", []);
 
-      // Act & Assert
+      // Assert
       expect(error instanceof Error).toBe(true);
       expect(error instanceof ZwiftValidationError).toBe(true);
       expect(error instanceof TcxValidationError).toBe(false);
@@ -467,11 +485,13 @@ describe("Domain Errors", () => {
   describe("Error catching patterns", () => {
     it("should catch specific error types", () => {
       // Arrange
+
+      // Act
       const throwFitError = () => {
         throw new FitParsingError("Parse failed");
       };
 
-      // Act & Assert
+      // Assert
       try {
         throwFitError();
         expect.fail("Should have thrown");
@@ -485,11 +505,13 @@ describe("Domain Errors", () => {
 
     it("should catch TCX parsing errors", () => {
       // Arrange
+
+      // Act
       const throwTcxError = () => {
         throw new TcxParsingError("TCX parse failed");
       };
 
-      // Act & Assert
+      // Assert
       try {
         throwTcxError();
         expect.fail("Should have thrown");
@@ -503,11 +525,13 @@ describe("Domain Errors", () => {
 
     it("should catch Zwift parsing errors", () => {
       // Arrange
+
+      // Act
       const throwZwiftError = () => {
         throw new ZwiftParsingError("Zwift parse failed");
       };
 
-      // Act & Assert
+      // Assert
       try {
         throwZwiftError();
         expect.fail("Should have thrown");
@@ -521,6 +545,8 @@ describe("Domain Errors", () => {
 
     it("should distinguish between error types", () => {
       // Arrange
+
+      // Act
       const errors = [
         new FitParsingError("FIT error"),
         new TcxParsingError("TCX error"),
@@ -530,7 +556,7 @@ describe("Domain Errors", () => {
         new ZwiftValidationError("Zwift validation error", []),
       ];
 
-      // Act & Assert
+      // Assert
       for (const error of errors) {
         if (error instanceof FitParsingError) {
           expect(error.name).toBe("FitParsingError");

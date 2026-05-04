@@ -18,7 +18,6 @@ describe("convertKrdToFitSession", () => {
     // Assert
     expect(result.startTime).toBe(1704067200);
     expect(result.totalElapsedTime).toBe(3600000);
-    // FIT requires totalTimerTime, defaults to elapsed when not provided
     expect(result.totalTimerTime).toBe(3600000);
   });
 
@@ -133,7 +132,7 @@ describe("convertKrdToFitSession", () => {
 
 describe("round-trip conversion", () => {
   it("should preserve data through KRD -> FIT -> KRD with tolerances", () => {
-    // Arrange - start with KRD
+    // Arrange
     const originalKrd = {
       startTime: "2024-01-01T00:00:00.000Z",
       totalElapsedTime: 3600,
@@ -147,17 +146,15 @@ describe("round-trip conversion", () => {
       totalAscent: 500,
       totalDescent: 450,
     };
-
-    // Act - convert to FIT and back to KRD
     const fitResult = convertKrdToFitSession(originalKrd);
     const roundTrippedKrd = convertFitToKrdSession(fitResult as never);
-
-    // Assert - timestamp within 1 second tolerance
     const originalTime = new Date(originalKrd.startTime).getTime();
-    const roundTrippedTime = new Date(roundTrippedKrd.startTime).getTime();
-    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(1000);
 
-    // Assert - time values preserved (note: ms precision may differ)
+    // Act
+    const roundTrippedTime = new Date(roundTrippedKrd.startTime).getTime();
+
+    // Assert
+    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(1000);
     expect(roundTrippedKrd.totalElapsedTime).toBeCloseTo(
       originalKrd.totalElapsedTime,
       0
@@ -166,20 +163,12 @@ describe("round-trip conversion", () => {
       originalKrd.totalTimerTime,
       0
     );
-
-    // Assert - heart rate within 1 bpm
     expect(roundTrippedKrd.avgHeartRate).toBe(originalKrd.avgHeartRate);
     expect(roundTrippedKrd.maxHeartRate).toBe(originalKrd.maxHeartRate);
-
-    // Assert - power within 1W
     expect(roundTrippedKrd.avgPower).toBe(originalKrd.avgPower);
     expect(roundTrippedKrd.maxPower).toBe(originalKrd.maxPower);
-
-    // Assert - sport/subSport preserved
     expect(roundTrippedKrd.sport).toBe(originalKrd.sport);
     expect(roundTrippedKrd.subSport).toBe(originalKrd.subSport);
-
-    // Assert - elevation data preserved
     expect(roundTrippedKrd.totalAscent).toBe(originalKrd.totalAscent);
     expect(roundTrippedKrd.totalDescent).toBe(originalKrd.totalDescent);
   });
@@ -192,9 +181,9 @@ describe("round-trip conversion", () => {
       totalTimerTime: 0,
       sport: "cycling",
     };
+    const fitResult = convertKrdToFitSession(originalKrd);
 
     // Act
-    const fitResult = convertKrdToFitSession(originalKrd);
     const roundTrippedKrd = convertFitToKrdSession(fitResult as never);
 
     // Assert

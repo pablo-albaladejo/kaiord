@@ -7,7 +7,9 @@ import {
 
 describe("detectFormat", () => {
   it("should detect FIT format from .fit extension", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = detectFormat("workout.fit");
 
     // Assert
@@ -15,7 +17,9 @@ describe("detectFormat", () => {
   });
 
   it("should detect KRD format from .krd extension", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = detectFormat("workout.krd");
 
     // Assert
@@ -23,7 +27,9 @@ describe("detectFormat", () => {
   });
 
   it("should detect TCX format from .tcx extension", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = detectFormat("workout.tcx");
 
     // Assert
@@ -31,7 +37,9 @@ describe("detectFormat", () => {
   });
 
   it("should detect ZWO format from .zwo extension", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = detectFormat("workout.zwo");
 
     // Assert
@@ -39,7 +47,9 @@ describe("detectFormat", () => {
   });
 
   it("should handle uppercase extensions", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = detectFormat("workout.FIT");
 
     // Assert
@@ -47,7 +57,9 @@ describe("detectFormat", () => {
   });
 
   it("should handle paths with directories", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = detectFormat("/path/to/workout.krd");
 
     // Assert
@@ -55,7 +67,9 @@ describe("detectFormat", () => {
   });
 
   it("should return null for unknown extensions", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = detectFormat("workout.txt");
 
     // Assert
@@ -63,7 +77,9 @@ describe("detectFormat", () => {
   });
 
   it("should return null for files without extensions", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = detectFormat("workout");
 
     // Assert
@@ -73,7 +89,9 @@ describe("detectFormat", () => {
 
 describe("validateFormat", () => {
   it("should validate fit as valid format", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = validateFormat("fit");
 
     // Assert
@@ -81,7 +99,9 @@ describe("validateFormat", () => {
   });
 
   it("should validate krd as valid format", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = validateFormat("krd");
 
     // Assert
@@ -89,7 +109,9 @@ describe("validateFormat", () => {
   });
 
   it("should validate tcx as valid format", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = validateFormat("tcx");
 
     // Assert
@@ -97,7 +119,9 @@ describe("validateFormat", () => {
   });
 
   it("should validate zwo as valid format", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = validateFormat("zwo");
 
     // Assert
@@ -105,7 +129,9 @@ describe("validateFormat", () => {
   });
 
   it("should reject invalid format strings", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = validateFormat("invalid");
 
     // Assert
@@ -113,7 +139,9 @@ describe("validateFormat", () => {
   });
 
   it("should reject empty strings", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = validateFormat("");
 
     // Assert
@@ -123,7 +151,9 @@ describe("validateFormat", () => {
 
 describe("fileFormatSchema", () => {
   it("should parse valid format strings", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = fileFormatSchema.safeParse("fit");
 
     // Assert
@@ -134,7 +164,9 @@ describe("fileFormatSchema", () => {
   });
 
   it("should reject invalid format strings", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = fileFormatSchema.safeParse("invalid");
 
     // Assert

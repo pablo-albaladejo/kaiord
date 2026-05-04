@@ -4,7 +4,9 @@ import { createNoopAnalytics } from "./noop-analytics";
 
 describe("createNoopAnalytics", () => {
   it("should create adapter with all required methods", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const analytics = createNoopAnalytics();
 
     // Assert
@@ -14,17 +16,21 @@ describe("createNoopAnalytics", () => {
 
   it("should not throw when pageView is called", () => {
     // Arrange
+
+    // Act
     const analytics = createNoopAnalytics();
 
-    // Act & Assert
+    // Assert
     expect(() => analytics.pageView("/editor/")).not.toThrow();
   });
 
   it("should not throw when event is called with props", () => {
     // Arrange
+
+    // Act
     const analytics = createNoopAnalytics();
 
-    // Act & Assert
+    // Assert
     expect(() =>
       analytics.event("workout-generated", {
         provider: "claude",
@@ -35,15 +41,19 @@ describe("createNoopAnalytics", () => {
 
   it("should not throw when event is called without props", () => {
     // Arrange
+
+    // Act
     const analytics = createNoopAnalytics();
 
-    // Act & Assert
+    // Assert
     expect(() => analytics.event("editor-loaded")).not.toThrow();
   });
 
   it("should produce no side effects on pageView", () => {
     // Arrange
     const analytics = createNoopAnalytics();
+
+    // Act
     const result = analytics.pageView("/test/");
 
     // Assert
@@ -53,6 +63,8 @@ describe("createNoopAnalytics", () => {
   it("should produce no side effects on event", () => {
     // Arrange
     const analytics = createNoopAnalytics();
+
+    // Act
     const result = analytics.event("garmin-synced", { result: "success" });
 
     // Assert

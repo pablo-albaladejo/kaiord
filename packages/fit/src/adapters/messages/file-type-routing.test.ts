@@ -115,7 +115,7 @@ describe("File type routing", () => {
       // Act
       const messages = createFitMessages(krd, logger);
 
-      // Assert - Should route to workout handler
+      // Assert
       expect(messages.fileIdMesgs).toBeDefined();
       expect(messages.workoutMesgs).toBeDefined();
     });
@@ -155,12 +155,12 @@ describe("File type routing", () => {
           },
         },
       });
-
-      // Act
       const messages = createFitMessages(krd, logger);
 
-      // Assert
+      // Act
       const fileId = messages.fileIdMesgs[0] as { type: number };
+
+      // Assert
       expect(fileId.type).toBe(FIT_FILE_TYPE_TO_NUMBER.activity);
       expect(fileId.type).toBe(4);
     });
@@ -174,12 +174,12 @@ describe("File type routing", () => {
           course: { name: "Test" },
         },
       });
-
-      // Act
       const messages = createFitMessages(krd, logger);
 
-      // Assert
+      // Act
       const fileId = messages.fileIdMesgs[0] as { type: number };
+
+      // Assert
       expect(fileId.type).toBe(FIT_FILE_TYPE_TO_NUMBER.course);
       expect(fileId.type).toBe(6);
     });

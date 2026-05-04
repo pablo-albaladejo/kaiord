@@ -21,50 +21,62 @@ describe("kaiord_validate", () => {
   });
 
   it("should validate valid KRD content", async () => {
+    // Arrange
     const client = await createTestClient();
     const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
 
+    // Act
     const result = (await client.callTool({
       name: "kaiord_validate",
       arguments: { input_content: krdJson },
     })) as McpToolResult;
 
+    // Assert
     expect(result.content[0].text).toContain("Valid KRD document");
   });
 
   it("should validate valid KRD file", async () => {
+    // Arrange
     const client = await createTestClient();
     const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
     const filePath = join(tmpDir, "test.krd");
     await writeFile(filePath, krdJson);
 
+    // Act
     const result = (await client.callTool({
       name: "kaiord_validate",
       arguments: { input_file: filePath },
     })) as McpToolResult;
 
+    // Assert
     expect(result.content[0].text).toContain("Valid KRD document");
   });
 
   it("should return error for invalid JSON", async () => {
+    // Arrange
     const client = await createTestClient();
 
+    // Act
     const result = (await client.callTool({
       name: "kaiord_validate",
       arguments: { input_content: "not json" },
     })) as McpToolResult;
 
+    // Assert
     expect(result.isError).toBe(true);
   });
 
   it("should return error for schema mismatch", async () => {
+    // Arrange
     const client = await createTestClient();
 
+    // Act
     const result = (await client.callTool({
       name: "kaiord_validate",
       arguments: { input_content: '{"foo": "bar"}' },
     })) as McpToolResult;
 
+    // Assert
     expect(result.isError).toBe(true);
   });
 });

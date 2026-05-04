@@ -10,8 +10,12 @@ import {
 
 describe("convertHeartRateToTcx", () => {
   it("should convert zone to PredefinedHeartRateZone_t", () => {
+    // Arrange
+
+    // Act
     const result = convertHeartRateToTcx({ unit: "zone", value: 3 });
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "HeartRate_t",
       HeartRateZone: {
@@ -22,8 +26,12 @@ describe("convertHeartRateToTcx", () => {
   });
 
   it("should convert bpm to CustomHeartRateZone_t", () => {
+    // Arrange
+
+    // Act
     const result = convertHeartRateToTcx({ unit: "bpm", value: 150 });
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "HeartRate_t",
       HeartRateZone: {
@@ -35,12 +43,16 @@ describe("convertHeartRateToTcx", () => {
   });
 
   it("should convert range to CustomHeartRateZone_t with min/max", () => {
+    // Arrange
+
+    // Act
     const result = convertHeartRateToTcx({
       unit: "range",
       min: 120,
       max: 160,
     });
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "HeartRate_t",
       HeartRateZone: {
@@ -52,19 +64,27 @@ describe("convertHeartRateToTcx", () => {
   });
 
   it("should return None_t for unsupported unit", () => {
+    // Arrange
+
+    // Act
     const result = convertHeartRateToTcx({ unit: "unknown", value: 100 });
 
+    // Assert
     expect(result).toStrictEqual({ "@_xsi:type": "None_t" });
   });
 });
 
 describe("convertPaceToTcx", () => {
   it("should convert meters_per_second to CustomSpeedZone_t", () => {
+    // Arrange
+
+    // Act
     const result = convertPaceToTcx({
       unit: "meters_per_second",
       value: 4.2,
     });
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Speed_t",
       SpeedZone: {
@@ -76,8 +96,12 @@ describe("convertPaceToTcx", () => {
   });
 
   it("should convert range to CustomSpeedZone_t with min/max", () => {
+    // Arrange
+
+    // Act
     const result = convertPaceToTcx({ unit: "range", min: 3.0, max: 4.5 });
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Speed_t",
       SpeedZone: {
@@ -89,16 +113,24 @@ describe("convertPaceToTcx", () => {
   });
 
   it("should return None_t for unsupported unit", () => {
+    // Arrange
+
+    // Act
     const result = convertPaceToTcx({ unit: "zone", value: 3 });
 
+    // Assert
     expect(result).toStrictEqual({ "@_xsi:type": "None_t" });
   });
 });
 
 describe("convertCadenceToTcx", () => {
   it("should convert rpm to CustomCadenceZone_t", () => {
+    // Arrange
+
+    // Act
     const result = convertCadenceToTcx({ unit: "rpm", value: 90 });
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Cadence_t",
       CadenceZone: {
@@ -110,8 +142,12 @@ describe("convertCadenceToTcx", () => {
   });
 
   it("should convert range to CustomCadenceZone_t with min/max", () => {
+    // Arrange
+
+    // Act
     const result = convertCadenceToTcx({ unit: "range", min: 80, max: 100 });
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Cadence_t",
       CadenceZone: {
@@ -123,24 +159,32 @@ describe("convertCadenceToTcx", () => {
   });
 
   it("should return None_t for unsupported unit", () => {
+    // Arrange
+
+    // Act
     const result = convertCadenceToTcx({ unit: "zone", value: 3 });
 
+    // Assert
     expect(result).toStrictEqual({ "@_xsi:type": "None_t" });
   });
 });
 
 describe("convertTargetToTcx", () => {
   it("should convert open target to None_t", () => {
+    // Arrange
     const step = {
       target: { type: "open" },
     } as WorkoutStep;
 
+    // Act
     const result = convertTargetToTcx(step);
 
+    // Assert
     expect(result).toStrictEqual({ "@_xsi:type": "None_t" });
   });
 
   it("should convert heart_rate target with zone", () => {
+    // Arrange
     const step = {
       target: {
         type: "heart_rate",
@@ -148,8 +192,10 @@ describe("convertTargetToTcx", () => {
       },
     } as WorkoutStep;
 
+    // Act
     const result = convertTargetToTcx(step);
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "HeartRate_t",
       HeartRateZone: {
@@ -160,6 +206,7 @@ describe("convertTargetToTcx", () => {
   });
 
   it("should convert pace target with meters_per_second", () => {
+    // Arrange
     const step = {
       target: {
         type: "pace",
@@ -167,8 +214,10 @@ describe("convertTargetToTcx", () => {
       },
     } as WorkoutStep;
 
+    // Act
     const result = convertTargetToTcx(step);
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Speed_t",
       SpeedZone: {
@@ -180,6 +229,7 @@ describe("convertTargetToTcx", () => {
   });
 
   it("should convert cadence target with rpm", () => {
+    // Arrange
     const step = {
       target: {
         type: "cadence",
@@ -187,8 +237,10 @@ describe("convertTargetToTcx", () => {
       },
     } as WorkoutStep;
 
+    // Act
     const result = convertTargetToTcx(step);
 
+    // Assert
     expect(result).toStrictEqual({
       "@_xsi:type": "Cadence_t",
       CadenceZone: {
@@ -200,6 +252,7 @@ describe("convertTargetToTcx", () => {
   });
 
   it("should return None_t for power target (not supported in TCX)", () => {
+    // Arrange
     const step = {
       target: {
         type: "power",
@@ -207,18 +260,23 @@ describe("convertTargetToTcx", () => {
       },
     } as WorkoutStep;
 
+    // Act
     const result = convertTargetToTcx(step);
 
+    // Assert
     expect(result).toStrictEqual({ "@_xsi:type": "None_t" });
   });
 
   it("should return None_t for heart_rate without value", () => {
+    // Arrange
     const step = {
       target: { type: "heart_rate" },
     } as WorkoutStep;
 
+    // Act
     const result = convertTargetToTcx(step);
 
+    // Assert
     expect(result).toStrictEqual({ "@_xsi:type": "None_t" });
   });
 });

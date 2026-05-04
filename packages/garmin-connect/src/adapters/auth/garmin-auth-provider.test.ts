@@ -44,17 +44,22 @@ const createMockTokenManager = (
 
 describe("createGarminAuthProvider", () => {
   it("should not be authenticated initially", () => {
+    // Arrange
     const tm = createMockTokenManager();
+
+    // Act
     const auth = createGarminAuthProvider({
       tokenManager: tm,
       logger: mockLogger,
       fetchFn: mockFetch,
     });
 
+    // Assert
     expect(auth.is_authenticated()).toBe(false);
   });
 
   it("should call setTokens after login", async () => {
+    // Arrange
     const tm = createMockTokenManager();
     const auth = createGarminAuthProvider({
       tokenManager: tm,
@@ -62,8 +67,10 @@ describe("createGarminAuthProvider", () => {
       fetchFn: mockFetch,
     });
 
+    // Act
     await auth.login("user", "pass");
 
+    // Assert
     expect(tm.setTokens).toHaveBeenCalledWith(
       expect.objectContaining({ oauth_token: "o1" }),
       expect.objectContaining({ access_token: "at" })
@@ -71,20 +78,25 @@ describe("createGarminAuthProvider", () => {
   });
 
   it("should delegate is_authenticated to TokenManager", () => {
+    // Arrange
     const tm = createMockTokenManager({
       isAuthenticated: vi.fn(() => true),
     });
+
+    // Act
     const auth = createGarminAuthProvider({
       tokenManager: tm,
       logger: mockLogger,
       fetchFn: mockFetch,
     });
 
+    // Assert
     expect(auth.is_authenticated()).toBe(true);
     expect(tm.isAuthenticated).toHaveBeenCalled();
   });
 
   it("should restore tokens via setTokens", async () => {
+    // Arrange
     const tm = createMockTokenManager();
     const auth = createGarminAuthProvider({
       tokenManager: tm,
@@ -92,6 +104,7 @@ describe("createGarminAuthProvider", () => {
       fetchFn: mockFetch,
     });
 
+    // Act
     await auth.restore_tokens({
       oauth1: { oauth_token: "t1", oauth_token_secret: "s1" },
       oauth2: {
@@ -104,6 +117,7 @@ describe("createGarminAuthProvider", () => {
       },
     });
 
+    // Assert
     expect(tm.setTokens).toHaveBeenCalledWith(
       expect.objectContaining({ oauth_token: "t1" }),
       expect.objectContaining({ access_token: "at" })
@@ -111,6 +125,7 @@ describe("createGarminAuthProvider", () => {
   });
 
   it("should call clearTokens on logout", async () => {
+    // Arrange
     const tm = createMockTokenManager();
     const auth = createGarminAuthProvider({
       tokenManager: tm,
@@ -118,12 +133,15 @@ describe("createGarminAuthProvider", () => {
       fetchFn: mockFetch,
     });
 
+    // Act
     await auth.logout();
 
+    // Assert
     expect(tm.clearTokens).toHaveBeenCalled();
   });
 
   it("should export tokens from TokenManager", async () => {
+    // Arrange
     const oauth2 = {
       access_token: "at",
       refresh_token: "rt",
@@ -145,8 +163,10 @@ describe("createGarminAuthProvider", () => {
       fetchFn: mockFetch,
     });
 
+    // Act
     const tokens = await auth.export_tokens();
 
+    // Assert
     expect(tokens.oauth1).toStrictEqual({
       oauth_token: "o1",
       oauth_token_secret: "s1",
@@ -155,13 +175,17 @@ describe("createGarminAuthProvider", () => {
   });
 
   it("should throw when exporting tokens without login", async () => {
+    // Arrange
     const tm = createMockTokenManager();
+
+    // Act
     const auth = createGarminAuthProvider({
       tokenManager: tm,
       logger: mockLogger,
       fetchFn: mockFetch,
     });
 
+    // Assert
     await expect(auth.export_tokens()).rejects.toThrow("No tokens to export");
   });
 });

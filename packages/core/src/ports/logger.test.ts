@@ -5,6 +5,8 @@ import type { Logger } from "./logger";
 describe("Logger", () => {
   it("should define logger interface", () => {
     // Arrange
+
+    // Act
     const mockLogger: Logger = {
       debug: () => {},
       info: () => {},
@@ -12,7 +14,7 @@ describe("Logger", () => {
       error: () => {},
     };
 
-    // Act & Assert
+    // Assert
     expect(mockLogger).toBeDefined();
     expect(mockLogger.debug).toBeDefined();
     expect(mockLogger.info).toBeDefined();

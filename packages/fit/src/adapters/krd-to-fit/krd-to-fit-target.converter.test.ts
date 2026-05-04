@@ -42,7 +42,7 @@ describe("convertTarget (dispatcher)", () => {
     // Act
     convertTarget(step, message);
 
-    // Assert — convertPowerTarget populated targetType + zone
+    // Assert
     expect(message.targetType).toBe("power");
     expect(message.targetPowerZone).toBe(3);
   });
@@ -58,8 +58,7 @@ describe("convertTarget (dispatcher)", () => {
     // Act
     convertTarget(step, message);
 
-    // Assert — convertHeartRateTarget populated targetType + zone
-    // (FIT adapter enum values are camelCase per design-principles)
+    // Assert
     expect(message.targetType).toBe("heartRate");
     expect(message.targetHrZone).toBe(2);
   });
@@ -75,7 +74,7 @@ describe("convertTarget (dispatcher)", () => {
     // Act
     convertTarget(step, message);
 
-    // Assert — convertCadenceTarget populated targetType
+    // Assert
     expect(message.targetType).toBe("cadence");
   });
 
@@ -90,7 +89,7 @@ describe("convertTarget (dispatcher)", () => {
     // Act
     convertTarget(step, message);
 
-    // Assert — convertPaceTarget populated targetType
+    // Assert
     expect(message.targetType).toBe("speed");
   });
 
@@ -105,15 +104,12 @@ describe("convertTarget (dispatcher)", () => {
     // Act
     convertTarget(step, message);
 
-    // Assert — convertStrokeTarget populated targetType
-    // (FIT adapter enum values are camelCase per design-principles)
+    // Assert
     expect(message.targetType).toBe("swimStroke");
   });
 
   it("should not throw when target.type is unhandled (fall-through)", () => {
-    // Arrange — synthesize an "unknown" target type that the dispatcher
-    // doesn't have a branch for. Current behavior: silently no-op (no
-    // mutation of `message`).
+    // Arrange
     const step = {
       stepIndex: 0,
       durationType: "time" as const,
@@ -126,7 +122,7 @@ describe("convertTarget (dispatcher)", () => {
     // Act
     convertTarget(step, message);
 
-    // Assert — message is unmodified (no targetType set)
+    // Assert
     expect(message).toStrictEqual({});
   });
 });

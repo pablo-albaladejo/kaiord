@@ -18,13 +18,9 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const writer = createFastXmlTcxWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
     const originalXml = loadTcxFixture("WorkoutHeartRateTargets.tcx");
-
-    // Act - TCX → KRD → TCX → KRD
     const krd1 = await reader(originalXml);
     const convertedXml = await writer(krd1);
     const krd2 = await reader(convertedXml);
-
-    // Assert - Compare workout structures
     const workout1 = krd1.extensions?.structured_workout as {
       name?: string;
       sport: string;
@@ -38,6 +34,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       }>;
     };
 
+    // Act
     const workout2 = krd2.extensions?.structured_workout as {
       name?: string;
       sport: string;
@@ -51,11 +48,10 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       }>;
     };
 
+    // Assert
     expect(workout2.name).toBe(workout1.name);
     expect(workout2.sport).toBe(workout1.sport);
     expect(workout2.steps.length).toBe(workout1.steps.length);
-
-    // Check heart rate targets with tolerance
     for (let i = 0; i < workout1.steps.length; i++) {
       const step1 = workout1.steps[i];
       const step2 = workout2.steps[i];
@@ -94,13 +90,9 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const writer = createFastXmlTcxWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
     const originalXml = loadTcxFixture("WorkoutSpeedTargets.tcx");
-
-    // Act - TCX → KRD → TCX → KRD
     const krd1 = await reader(originalXml);
     const convertedXml = await writer(krd1);
     const krd2 = await reader(convertedXml);
-
-    // Assert - Check pace targets with tolerance
     const workout1 = krd1.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
@@ -112,6 +104,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       }>;
     };
 
+    // Act
     const workout2 = krd2.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
@@ -123,6 +116,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       }>;
     };
 
+    // Assert
     for (let i = 0; i < workout1.steps.length; i++) {
       const step1 = workout1.steps[i];
       const step2 = workout2.steps[i];
@@ -170,13 +164,9 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
     const originalXml = loadTcxFixture("WorkoutRepeatBlocks.tcx");
-
-    // Act - TCX → KRD → TCX → KRD
     const krd1 = await reader(originalXml);
     const convertedXml = await writer(krd1);
     const krd2 = await reader(convertedXml);
-
-    // Assert - Check repetition blocks
     const workout1 = krd1.extensions?.structured_workout as {
       steps: Array<
         | { stepIndex: number }
@@ -191,6 +181,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       >;
     };
 
+    // Act
     const workout2 = krd2.extensions?.structured_workout as {
       steps: Array<
         | { stepIndex: number }
@@ -205,9 +196,8 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       >;
     };
 
+    // Assert
     expect(workout2.steps.length).toBe(workout1.steps.length);
-
-    // Find and compare repetition blocks
     for (let i = 0; i < workout1.steps.length; i++) {
       const step1 = workout1.steps[i];
       const step2 = workout2.steps[i];
@@ -233,13 +223,9 @@ describe("Round-trip: TCX → KRD → TCX", () => {
     const writer = createFastXmlTcxWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
     const originalXml = loadTcxFixture("WorkoutMixedDurations.tcx");
-
-    // Act - TCX → KRD → TCX → KRD
     const krd1 = await reader(originalXml);
     const convertedXml = await writer(krd1);
     const krd2 = await reader(convertedXml);
-
-    // Assert - Check all duration types
     const workout1 = krd1.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
@@ -257,6 +243,7 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       }>;
     };
 
+    // Act
     const workout2 = krd2.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
@@ -274,8 +261,8 @@ describe("Round-trip: TCX → KRD → TCX", () => {
       }>;
     };
 
+    // Assert
     expect(workout2.steps.length).toBe(workout1.steps.length);
-
     for (let i = 0; i < workout1.steps.length; i++) {
       const step1 = workout1.steps[i];
       const step2 = workout2.steps[i];
@@ -357,7 +344,6 @@ describe("Round-trip: KRD → TCX → KRD", () => {
     const validator = createXsdTcxValidator(logger);
     const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
-
     const originalKrd: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -398,12 +384,8 @@ describe("Round-trip: KRD → TCX → KRD", () => {
         },
       },
     };
-
-    // Act - KRD → TCX → KRD
     const tcxXml = await writer(originalKrd);
     const convertedKrd = await reader(tcxXml);
-
-    // Assert - Advanced duration types should be preserved via kaiord extensions
     const originalWorkout = originalKrd.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
@@ -416,6 +398,7 @@ describe("Round-trip: KRD → TCX → KRD", () => {
       }>;
     };
 
+    // Act
     const convertedWorkout = convertedKrd.extensions?.structured_workout as {
       steps: Array<{
         durationType: string;
@@ -428,8 +411,8 @@ describe("Round-trip: KRD → TCX → KRD", () => {
       }>;
     };
 
+    // Assert
     expect(convertedWorkout.steps.length).toBe(originalWorkout.steps.length);
-
     for (let i = 0; i < originalWorkout.steps.length; i++) {
       const originalStep = originalWorkout.steps[i];
       const convertedStep = convertedWorkout.steps[i];
@@ -447,14 +430,11 @@ describe("Round-trip: KRD → TCX → KRD", () => {
         );
       }
     }
-
-    // Metadata should also be preserved
     expect(convertedKrd.metadata.created).toBe(originalKrd.metadata.created);
     expect(convertedKrd.metadata.manufacturer).toBe(
       originalKrd.metadata.manufacturer
     );
     expect(convertedKrd.metadata.product).toBe(originalKrd.metadata.product);
-    // serialNumber may be parsed as number by XML parser
     expect(String(convertedKrd.metadata.serialNumber)).toBe(
       String(originalKrd.metadata.serialNumber)
     );
@@ -467,7 +447,6 @@ describe("Round-trip: KRD → TCX → KRD", () => {
     const reader = createFastXmlTcxReader(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
     const toleranceChecker = createToleranceChecker();
-
     const originalKrd: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -514,16 +493,11 @@ describe("Round-trip: KRD → TCX → KRD", () => {
         },
       },
     };
-
-    // Act - KRD → TCX → KRD
     const tcxXml = await writer(originalKrd);
     const convertedKrd = await reader(tcxXml);
-
-    // Assert - Compare structures
     expect(convertedKrd.version).toBe(originalKrd.version);
     expect(convertedKrd.type).toBe(originalKrd.type);
     expect(convertedKrd.metadata.sport).toBe(originalKrd.metadata.sport);
-
     const originalWorkout = originalKrd.extensions?.structured_workout as {
       name?: string;
       sport: string;
@@ -540,6 +514,7 @@ describe("Round-trip: KRD → TCX → KRD", () => {
       }>;
     };
 
+    // Act
     const convertedWorkout = convertedKrd.extensions?.structured_workout as {
       name?: string;
       sport: string;
@@ -556,11 +531,10 @@ describe("Round-trip: KRD → TCX → KRD", () => {
       }>;
     };
 
+    // Assert
     expect(convertedWorkout.name).toBe(originalWorkout.name);
     expect(convertedWorkout.sport).toBe(originalWorkout.sport);
     expect(convertedWorkout.steps.length).toBe(originalWorkout.steps.length);
-
-    // Check each step with tolerance
     for (let i = 0; i < originalWorkout.steps.length; i++) {
       const originalStep = originalWorkout.steps[i];
       const convertedStep = convertedWorkout.steps[i];
@@ -624,7 +598,6 @@ describe("Round-trip: KRD → TCX → KRD", () => {
     const logger = createMockLogger();
     const validator = createXsdTcxValidator(logger);
     const writer = createFastXmlTcxWriter(logger, validator);
-
     const krd: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -649,12 +622,12 @@ describe("Round-trip: KRD → TCX → KRD", () => {
         },
       },
     };
-
-    // Act - KRD → TCX (writer validates internally)
     const tcxXml = await writer(krd);
 
-    // Assert - Validate again explicitly
+    // Act
     const validationResult = await validator(tcxXml);
+
+    // Assert
     expect(validationResult.valid).toBe(true);
     expect(validationResult.errors).toHaveLength(0);
   });

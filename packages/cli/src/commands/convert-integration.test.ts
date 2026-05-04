@@ -30,8 +30,6 @@ describe("convert command integration tests", () => {
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
       const outputPath = join(tempDir.path, "output.krd");
-
-      // Act
       const result = await execa(
         "tsx",
         [cliPath, "convert", "--input", inputPath, "--output", outputPath],
@@ -39,13 +37,13 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
+      expect(result.exitCode).toBe(0);
+      const outputContent = await readFile(outputPath, "utf-8");
+
+      // Act
+      const krd = JSON.parse(outputContent);
 
       // Assert
-      expect(result.exitCode).toBe(0);
-
-      // Verify output file exists and is valid JSON
-      const outputContent = await readFile(outputPath, "utf-8");
-      const krd = JSON.parse(outputContent);
       expect(krd.version).toBeDefined();
       expect(krd.type).toBe("structured_workout");
     }
@@ -59,8 +57,6 @@ describe("convert command integration tests", () => {
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
       const outputPath = join(tempDir.path, "output.fit");
-
-      // Act
       const result = await execa(
         "tsx",
         [cliPath, "convert", "--input", inputPath, "--output", outputPath],
@@ -68,12 +64,12 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-
-      // Assert
       expect(result.exitCode).toBe(0);
 
-      // Verify output file exists and is binary
+      // Act
       const outputBuffer = await readFile(outputPath);
+
+      // Assert
       expect(outputBuffer.length).toBeGreaterThan(0);
     }
   );
@@ -86,8 +82,6 @@ describe("convert command integration tests", () => {
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = "nonexistent.fit";
       const outputPath = join(tempDir.path, "output.krd");
-
-      // Act
       const result = await execa(
         "tsx",
         [cliPath, "convert", "--input", inputPath, "--output", outputPath],
@@ -95,10 +89,12 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
+      expect(result.exitCode).toBe(2);
+
+      // Act
+      const output = stripAnsi(result.stderr);
 
       // Assert
-      expect(result.exitCode).toBe(2); // Exit code 2 for file not found
-      const output = stripAnsi(result.stderr);
       expect(output).toContain("File not found");
     }
   );
@@ -112,8 +108,6 @@ describe("convert command integration tests", () => {
       const corruptedPath = join(tempDir.path, "corrupted.fit");
       await writeFile(corruptedPath, Buffer.from([0, 0, 0, 0]));
       const outputPath = join(tempDir.path, "output.krd");
-
-      // Act
       const result = await execa(
         "tsx",
         [cliPath, "convert", "--input", corruptedPath, "--output", outputPath],
@@ -121,10 +115,12 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
+      expect(result.exitCode).toBe(4);
+
+      // Act
+      const output = stripAnsi(result.stderr);
 
       // Assert
-      expect(result.exitCode).toBe(4); // Exit code 4 for parsing errors
-      const output = stripAnsi(result.stderr);
       expect(output).toContain("Error");
     }
   );
@@ -137,8 +133,6 @@ describe("convert command integration tests", () => {
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
       const outputPath = join(tempDir.path, "output.krd");
-
-      // Act
       const result = await execa(
         "tsx",
         [cliPath, "convert", "--input", inputPath, "--output", outputPath],
@@ -146,12 +140,12 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
-
-      // Assert
       expect(result.exitCode).toBe(0);
 
-      // Verify output file was created
+      // Act
       const outputContent = await readFile(outputPath, "utf-8");
+
+      // Assert
       expect(outputContent.length).toBeGreaterThan(0);
     }
   );
@@ -164,8 +158,6 @@ describe("convert command integration tests", () => {
       const cliPath = resolve(__dirname, "../bin/kaiord.ts");
       const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
       const outputPath = join(tempDir.path, "output.json");
-
-      // Act
       const result = await execa(
         "tsx",
         [
@@ -184,13 +176,13 @@ describe("convert command integration tests", () => {
           reject: false,
         }
       );
+      expect(result.exitCode).toBe(0);
+      const outputContent = await readFile(outputPath, "utf-8");
+
+      // Act
+      const krd = JSON.parse(outputContent);
 
       // Assert
-      expect(result.exitCode).toBe(0);
-
-      // Verify output file is valid KRD despite .json extension
-      const outputContent = await readFile(outputPath, "utf-8");
-      const krd = JSON.parse(outputContent);
       expect(krd.version).toBeDefined();
       expect(krd.type).toBe("structured_workout");
     }
@@ -205,8 +197,6 @@ describe("convert command integration tests", () => {
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
         const outputPath = join(tempDir.path, "output.krd");
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -222,12 +212,12 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-
-        // Assert
         expect(result.exitCode).toBe(0);
 
-        // Verify debug messages appear in stderr
+        // Act
         const stderr = stripAnsi(result.stderr);
+
+        // Assert
         expect(stderr).toContain("Convert command initialized");
       }
     );
@@ -240,8 +230,6 @@ describe("convert command integration tests", () => {
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
         const outputPath = join(tempDir.path, "output.krd");
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -257,12 +245,12 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-
-        // Assert
         expect(result.exitCode).toBe(0);
 
-        // Verify minimal output (no success messages in stdout)
+        // Act
         const stdout = stripAnsi(result.stdout);
+
+        // Assert
         expect(stdout).not.toContain("Conversion complete");
       }
     );
@@ -275,8 +263,6 @@ describe("convert command integration tests", () => {
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
         const outputPath = join(tempDir.path, "output.krd");
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -292,12 +278,12 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-
-        // Assert
         expect(result.exitCode).toBe(0);
 
-        // Parse and validate JSON output
+        // Act
         const output = JSON.parse(result.stdout);
+
+        // Assert
         expect(output.success).toBe(true);
         expect(output.inputFile).toBe(inputPath);
         expect(output.outputFile).toBe(outputPath);
@@ -314,8 +300,6 @@ describe("convert command integration tests", () => {
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
         const outputPath = join(tempDir.path, "output.krd");
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -333,15 +317,11 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-
-        // Assert
         expect(result.exitCode).toBe(0);
-
-        // Verify JSON log format in stderr
         const stderr = result.stderr;
         const lines = stderr.split("\n").filter((line) => line.trim());
 
-        // At least one line should be valid JSON with timestamp and level
+        // Act
         const hasJsonLog = lines.some((line) => {
           try {
             const log = JSON.parse(line);
@@ -351,6 +331,7 @@ describe("convert command integration tests", () => {
           }
         });
 
+        // Assert
         expect(hasJsonLog).toBe(true);
       }
     );
@@ -363,8 +344,6 @@ describe("convert command integration tests", () => {
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
         const outputPath = join(tempDir.path, "output.krd");
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -386,21 +365,16 @@ describe("convert command integration tests", () => {
             },
           }
         );
-
-        // Assert
         expect(result.exitCode).toBe(0);
-
-        // Verify ANSI codes are present in output (colored output)
-        // Check both stdout and stderr as logs may go to either
         const combinedOutput = result.stdout + result.stderr;
+
+        // Act
         const strippedOutput = stripAnsi(combinedOutput);
 
-        // If there's any output, it should have ANSI codes when FORCE_COLOR=1
+        // Assert
         if (combinedOutput.length > 0) {
           expect(combinedOutput).not.toBe(strippedOutput); // Has ANSI codes
         }
-
-        // At minimum, verify the command succeeded
         expect(result.exitCode).toBe(0);
       }
     );
@@ -414,7 +388,7 @@ describe("convert command integration tests", () => {
         const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
         const outputPath = join(tempDir.path, "output.krd");
 
-        // Act - Run without FORCE_COLOR to simulate non-TTY
+        // Act
         const result = await execa(
           "tsx",
           [
@@ -437,11 +411,6 @@ describe("convert command integration tests", () => {
 
         // Assert
         expect(result.exitCode).toBe(0);
-
-        // In non-TTY mode, the logger-factory should detect this and use structured logger
-        // or the pretty logger should not add colors
-        // We can't easily test TTY detection in integration tests, but we can verify
-        // that the command completes successfully
         expect(result.exitCode).toBe(0);
       }
     );
@@ -454,8 +423,6 @@ describe("convert command integration tests", () => {
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const fixturesDir = getFixturesDir("fit");
         const outputDir = join(tempDir.path, "batch-output");
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -473,12 +440,12 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-
-        // Assert
         expect(result.exitCode).toBe(0);
 
-        // Parse and validate JSON output
+        // Act
         const output = JSON.parse(result.stdout);
+
+        // Assert
         expect(output.success).toBe(true);
         expect(output.total).toBeGreaterThan(0);
         expect(output.successful).toBe(output.total);
@@ -498,8 +465,6 @@ describe("convert command integration tests", () => {
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const fixturesDir = getFixturesDir("fit");
         const outputDir = join(tempDir.path, "batch-output");
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -516,12 +481,12 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-
-        // Assert
         expect(result.exitCode).toBe(0);
 
-        // Verify summary output shows successful/failed counts
+        // Act
         const output = stripAnsi(result.stdout);
+
+        // Assert
         expect(output).toMatch(/Batch conversion complete/);
         expect(output).toMatch(/Successful: \d+\/\d+/);
         expect(output).toMatch(/Total time: \d+\.\d+s/);
@@ -536,12 +501,8 @@ describe("convert command integration tests", () => {
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const testDir = join(tempDir.path, "test-files");
         const outputDir = join(tempDir.path, "batch-output");
-
-        // Create test directory first
         const { mkdir } = await import("fs/promises");
         await mkdir(testDir, { recursive: true });
-
-        // Create test directory with multiple files
         await writeFile(
           join(testDir, "valid.fit"),
           await readFile(getFixturePath("fit", "WorkoutIndividualSteps.fit"))
@@ -551,8 +512,6 @@ describe("convert command integration tests", () => {
           join(testDir, "valid2.fit"),
           await readFile(getFixturePath("fit", "WorkoutRepeatSteps.fit"))
         );
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -569,16 +528,14 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-
-        // Assert - should exit with PARTIAL_SUCCESS since some files succeeded
         expect(result.exitCode).toBe(ExitCode.PARTIAL_SUCCESS);
 
-        // Verify summary shows both successful and failed conversions
+        // Act
         const output = stripAnsi(result.stdout);
+
+        // Assert
         expect(output).toMatch(/Successful: \d+\/3/);
         expect(output).toMatch(/Failed: \d+\/3/);
-
-        // Verify failed conversions are reported
         expect(output).toMatch(/Failed conversions:/);
       }
     );
@@ -591,21 +548,14 @@ describe("convert command integration tests", () => {
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const testDir = join(tempDir.path, "test-files");
         const outputDir = join(tempDir.path, "batch-output");
-
-        // Create test directory first
         const { mkdir } = await import("fs/promises");
         await mkdir(testDir, { recursive: true });
-
-        // Create multiple test files
         const fitContent = await readFile(
           getFixturePath("fit", "WorkoutIndividualSteps.fit")
         );
-
         await writeFile(join(testDir, "workout1.fit"), fitContent);
         await writeFile(join(testDir, "workout2.fit"), fitContent);
         await writeFile(join(testDir, "workout3.fit"), fitContent);
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -622,12 +572,12 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
-
-        // Assert
         expect(result.exitCode).toBe(0);
 
-        // Verify batch conversion completed successfully
+        // Act
         const output = stripAnsi(result.stdout);
+
+        // Assert
         expect(output).toMatch(/Batch conversion complete/);
         expect(output).toMatch(/Successful: 3\/3/);
       }
@@ -640,8 +590,6 @@ describe("convert command integration tests", () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const fixturesDir = getFixturesDir("fit");
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -656,10 +604,12 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
+        expect(result.exitCode).toBe(1);
+
+        // Act
+        const output = stripAnsi(result.stderr);
 
         // Assert
-        expect(result.exitCode).toBe(1);
-        const output = stripAnsi(result.stderr);
         expect(output).toContain("Batch mode requires --output-dir flag");
       }
     );
@@ -672,8 +622,6 @@ describe("convert command integration tests", () => {
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const fixturesDir = getFixturesDir("fit");
         const outputDir = join(tempDir.path, "batch-output");
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -688,10 +636,12 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
+        expect(result.exitCode).toBe(1);
+
+        // Act
+        const output = stripAnsi(result.stderr);
 
         // Assert
-        expect(result.exitCode).toBe(1);
-        const output = stripAnsi(result.stderr);
         expect(output).toContain(
           "Batch mode requires --output-format flag to specify target format"
         );
@@ -705,8 +655,6 @@ describe("convert command integration tests", () => {
         // Arrange
         const cliPath = resolve(__dirname, "../bin/kaiord.ts");
         const outputDir = join(tempDir.path, "batch-output");
-
-        // Act
         const result = await execa(
           "tsx",
           [
@@ -723,10 +671,12 @@ describe("convert command integration tests", () => {
             reject: false,
           }
         );
+        expect(result.exitCode).toBe(1);
+
+        // Act
+        const output = stripAnsi(result.stderr);
 
         // Assert
-        expect(result.exitCode).toBe(1);
-        const output = stripAnsi(result.stderr);
         expect(output).toContain("No files found matching pattern");
       }
     );

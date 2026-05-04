@@ -21,23 +21,27 @@ describe("kaiord_diff", () => {
   });
 
   it("should show no metadata differences for identical files", async () => {
+    // Arrange
     const client = await createTestClient();
     const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
     const file1 = join(tmpDir, "a.krd");
     const file2 = join(tmpDir, "b.krd");
     await writeFile(file1, krdJson);
     await writeFile(file2, krdJson);
-
     const result = (await client.callTool({
       name: "kaiord_diff",
       arguments: { file1, file2 },
     })) as McpToolResult;
 
+    // Act
     const diff = JSON.parse(result.content[0].text);
+
+    // Assert
     expect(diff.metadata).toHaveLength(0);
   });
 
   it("should detect metadata differences", async () => {
+    // Arrange
     const client = await createTestClient();
     const krd1 = JSON.parse(loadKrdFixtureRaw("WorkoutIndividualSteps.krd"));
     const krd2 = { ...krd1, metadata: { ...krd1.metadata, sport: "running" } };
@@ -45,28 +49,33 @@ describe("kaiord_diff", () => {
     const file2 = join(tmpDir, "b.krd");
     await writeFile(file1, JSON.stringify(krd1));
     await writeFile(file2, JSON.stringify(krd2));
-
     const result = (await client.callTool({
       name: "kaiord_diff",
       arguments: { file1, file2 },
     })) as McpToolResult;
-
     const diff = JSON.parse(result.content[0].text);
     expect(diff.metadata.length).toBeGreaterThan(0);
+
+    // Act
     const sportDiff = diff.metadata.find(
       (d: { field: string }) => d.field === "sport"
     );
+
+    // Assert
     expect(sportDiff).toBeDefined();
   });
 
   it("should return error for non-existent file", async () => {
+    // Arrange
     const client = await createTestClient();
 
+    // Act
     const result = (await client.callTool({
       name: "kaiord_diff",
       arguments: { file1: "/nonexistent/a.krd", file2: "/nonexistent/b.krd" },
     })) as McpToolResult;
 
+    // Assert
     expect(result.isError).toBe(true);
   });
 });

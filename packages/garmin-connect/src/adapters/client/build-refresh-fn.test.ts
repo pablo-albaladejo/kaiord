@@ -46,14 +46,16 @@ describe("buildRefreshFn", () => {
   });
 
   it("should cache consumer: fetchOAuthConsumer called only once for two refreshes", async () => {
+    // Arrange
     vi.mocked(fetchOAuthConsumer).mockResolvedValue(CONSUMER);
     vi.mocked(exchangeOAuth2).mockResolvedValue(OAUTH2);
-
     const refreshFn = buildRefreshFn(mockFetch, mockLogger);
-
-    await refreshFn(OAUTH1);
     await refreshFn(OAUTH1);
 
+    // Act
+    await refreshFn(OAUTH1);
+
+    // Assert
     expect(fetchOAuthConsumer).toHaveBeenCalledTimes(1);
     expect(exchangeOAuth2).toHaveBeenCalledTimes(2);
     expect(exchangeOAuth2).toHaveBeenCalledWith(
@@ -65,23 +67,23 @@ describe("buildRefreshFn", () => {
   });
 
   it("should clear consumer cache on failure and re-fetches on retry", async () => {
+    // Arrange
     const freshConsumer: OAuthConsumer = {
       key: "ck_new",
       secret: "cs_new",
     };
-
     vi.mocked(exchangeOAuth2)
       .mockRejectedValueOnce(new Error("consumer rejected"))
       .mockResolvedValueOnce(OAUTH2);
-
     vi.mocked(fetchOAuthConsumer)
       .mockResolvedValueOnce(CONSUMER)
       .mockResolvedValueOnce(freshConsumer);
-
     const refreshFn = buildRefreshFn(mockFetch, mockLogger);
 
+    // Act
     const result = await refreshFn(OAUTH1);
 
+    // Assert
     expect(fetchOAuthConsumer).toHaveBeenCalledTimes(2);
     expect(exchangeOAuth2).toHaveBeenCalledTimes(2);
     expect(exchangeOAuth2).toHaveBeenLastCalledWith(

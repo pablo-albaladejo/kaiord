@@ -16,6 +16,7 @@ describe("fetchOAuthConsumer", () => {
   });
 
   it("should return consumer key and secret on success", async () => {
+    // Arrange
     const mockFetch = vi.fn(async () => ({
       ok: true,
       status: 200,
@@ -25,22 +26,27 @@ describe("fetchOAuthConsumer", () => {
       }),
     })) as unknown as typeof globalThis.fetch;
 
+    // Act
     const result = await fetchOAuthConsumer(mockFetch, mockLogger);
 
+    // Assert
     expect(result).toStrictEqual({ key: "my-key", secret: "my-secret" });
   });
 
   it("should throw when fetch response is not ok", async () => {
+    // Arrange
+
+    // Act
     const mockFetch = vi.fn(async () => ({
       ok: false,
       status: 503,
       statusText: "Service Unavailable",
     })) as unknown as typeof globalThis.fetch;
 
+    // Assert
     await expect(fetchOAuthConsumer(mockFetch, mockLogger)).rejects.toThrow(
       "Failed to fetch OAuth consumer"
     );
-
     expect(mockLogger.error).toHaveBeenCalledWith(
       "[SSO] OAuth consumer fetch failed",
       { status: 503 }

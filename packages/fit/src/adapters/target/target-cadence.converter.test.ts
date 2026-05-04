@@ -6,13 +6,16 @@ import { convertCadenceTarget } from "./target-cadence.converter";
 describe("convertCadenceTarget", () => {
   describe("range target using specific cadence fields", () => {
     it("should return cadence range when customTargetCadenceLow and High are set", () => {
+      // Arrange
       const data: FitTargetData = {
         customTargetCadenceLow: 80,
         customTargetCadenceHigh: 100,
       };
 
+      // Act
       const result = convertCadenceTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "cadence",
         value: { unit: "range", min: 80, max: 100 },
@@ -22,13 +25,16 @@ describe("convertCadenceTarget", () => {
 
   describe("range target using generic custom fields", () => {
     it("should return cadence range when customTargetValueLow and High are set", () => {
+      // Arrange
       const data: FitTargetData = {
         customTargetValueLow: 70,
         customTargetValueHigh: 90,
       };
 
+      // Act
       const result = convertCadenceTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "cadence",
         value: { unit: "range", min: 70, max: 90 },
@@ -38,6 +44,7 @@ describe("convertCadenceTarget", () => {
 
   describe("range target priority", () => {
     it("should prefer specific cadence fields over generic custom fields", () => {
+      // Arrange
       const data: FitTargetData = {
         customTargetCadenceLow: 80,
         customTargetCadenceHigh: 100,
@@ -45,8 +52,10 @@ describe("convertCadenceTarget", () => {
         customTargetValueHigh: 90,
       };
 
+      // Act
       const result = convertCadenceTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "cadence",
         value: { unit: "range", min: 80, max: 100 },
@@ -56,12 +65,15 @@ describe("convertCadenceTarget", () => {
 
   describe("zone target", () => {
     it("should return cadence zone when targetCadenceZone is set", () => {
+      // Arrange
       const data: FitTargetData = {
         targetCadenceZone: 3,
       };
 
+      // Act
       const result = convertCadenceTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "cadence",
         value: { unit: "rpm", value: 3 },
@@ -71,12 +83,15 @@ describe("convertCadenceTarget", () => {
 
   describe("value target", () => {
     it("should return cadence value when targetValue is set", () => {
+      // Arrange
       const data: FitTargetData = {
         targetValue: 90,
       };
 
+      // Act
       const result = convertCadenceTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "cadence",
         value: { unit: "rpm", value: 90 },
@@ -86,6 +101,7 @@ describe("convertCadenceTarget", () => {
 
   describe("fallback priority", () => {
     it("should prefer range over zone", () => {
+      // Arrange
       const data: FitTargetData = {
         customTargetCadenceLow: 80,
         customTargetCadenceHigh: 100,
@@ -93,8 +109,10 @@ describe("convertCadenceTarget", () => {
         targetValue: 90,
       };
 
+      // Act
       const result = convertCadenceTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "cadence",
         value: { unit: "range", min: 80, max: 100 },
@@ -102,13 +120,16 @@ describe("convertCadenceTarget", () => {
     });
 
     it("should prefer zone over value", () => {
+      // Arrange
       const data: FitTargetData = {
         targetCadenceZone: 3,
         targetValue: 90,
       };
 
+      // Act
       const result = convertCadenceTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "cadence",
         value: { unit: "rpm", value: 3 },
@@ -118,20 +139,26 @@ describe("convertCadenceTarget", () => {
 
   describe("open target fallback", () => {
     it("should return open target when no cadence data is present", () => {
+      // Arrange
       const data: FitTargetData = {};
 
+      // Act
       const result = convertCadenceTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({ type: "open" });
     });
 
     it("should return open when only low custom value is set (no high)", () => {
+      // Arrange
       const data: FitTargetData = {
         customTargetCadenceLow: 80,
       };
 
+      // Act
       const result = convertCadenceTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({ type: "open" });
     });
   });

@@ -13,17 +13,17 @@ describe("extract-workout command integration tests", () => {
     async () => {
       // Arrange
       const inputPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
-
-      // Act
       const result = await execa(
         "tsx",
         [cliPath, "extract-workout", "--input", inputPath],
         { reject: false }
       );
+      expect(result.exitCode).toBe(0);
+
+      // Act
+      const workout = JSON.parse(result.stdout);
 
       // Assert
-      expect(result.exitCode).toBe(0);
-      const workout = JSON.parse(result.stdout);
       expect(workout.sport).toBeDefined();
       expect(workout.steps).toBeDefined();
       expect(Array.isArray(workout.steps)).toBe(true);
@@ -37,17 +37,17 @@ describe("extract-workout command integration tests", () => {
     async () => {
       // Arrange
       const inputPath = getFixturePath("fit", "WorkoutIndividualSteps.fit");
-
-      // Act
       const result = await execa(
         "tsx",
         [cliPath, "extract-workout", "--input", inputPath],
         { reject: false }
       );
+      expect(result.exitCode).toBe(0);
+
+      // Act
+      const workout = JSON.parse(result.stdout);
 
       // Assert
-      expect(result.exitCode).toBe(0);
-      const workout = JSON.parse(result.stdout);
       expect(workout.sport).toBeDefined();
       expect(workout.steps).toBeDefined();
     }
@@ -57,16 +57,18 @@ describe("extract-workout command integration tests", () => {
     "should fail with exit code 2 for missing file",
     { timeout: 30_000 },
     async () => {
-      // Arrange & Act
+      // Arrange
       const result = await execa(
         "tsx",
         [cliPath, "extract-workout", "--input", "nonexistent.fit"],
         { reject: false }
       );
+      expect(result.exitCode).toBe(2);
+
+      // Act
+      const output = stripAnsi(result.stderr);
 
       // Assert
-      expect(result.exitCode).toBe(2);
-      const output = stripAnsi(result.stderr);
       expect(output).toContain("File not found");
     }
   );
@@ -77,19 +79,19 @@ describe("extract-workout command integration tests", () => {
     async () => {
       // Arrange
       const inputPath = getFixturePath("krd", "WorkoutIndividualSteps.krd");
-
-      // Act
       const result = await execa(
         "tsx",
         [cliPath, "extract-workout", "--input", inputPath, "--quiet"],
         { reject: false }
       );
-
-      // Assert
       expect(result.exitCode).toBe(0);
       const workout = JSON.parse(result.stdout);
       expect(workout.sport).toBeDefined();
+
+      // Act
       const stderr = stripAnsi(result.stderr);
+
+      // Assert
       expect(stderr).not.toContain("Extracting workout");
     }
   );

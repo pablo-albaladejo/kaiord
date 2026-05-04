@@ -119,11 +119,13 @@ describe("convertFitToKrdSession", () => {
 
   it("should throw error for invalid FIT session", () => {
     // Arrange
+
+    // Act
     const invalidSession = {
       timestamp: "invalid",
     };
 
-    // Act & Assert
+    // Assert
     expect(() => convertFitToKrdSession(invalidSession)).toThrow();
   });
 });

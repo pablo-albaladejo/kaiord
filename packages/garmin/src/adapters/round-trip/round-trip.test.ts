@@ -24,90 +24,100 @@ describe("Garmin GCN Round-Trip", () => {
   const toleranceChecker = createToleranceChecker();
 
   it("should preserve running workout through round-trip", () => {
+    // Arrange
     const original = loadFixture("WorkoutRunningNestedRepeatsOutput.gcn");
-
     const krd1 = convertGarminToKRD(original, mockLogger);
     const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
-
     const w1 = krd1.extensions?.structured_workout as Workout;
     const w2 = krd2.extensions?.structured_workout as Workout;
-
     expect(w2.name).toBe(w1.name);
     expect(w2.sport).toBe(w1.sport);
     expect(w2.steps.length).toBe(w1.steps.length);
 
+    // Act
     compareSteps(w1.steps, w2.steps, toleranceChecker);
+
+    // Assert
   });
 
   it("should preserve cycling workout through round-trip", () => {
+    // Arrange
     const original = loadFixture("WorkoutCyclingPowerCadenceOutput.gcn");
-
     const krd1 = convertGarminToKRD(original, mockLogger);
     const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
-
     const w1 = krd1.extensions?.structured_workout as Workout;
     const w2 = krd2.extensions?.structured_workout as Workout;
-
     expect(w2.sport).toBe(w1.sport);
     expect(w2.steps.length).toBe(w1.steps.length);
 
+    // Act
     compareSteps(w1.steps, w2.steps, toleranceChecker);
+
+    // Assert
   });
 
   it("should preserve swimming workout pool length through round-trip", () => {
+    // Arrange
     const original = loadFixture("WorkoutSwimmingAllStrokesOutput.gcn");
-
     const krd1 = convertGarminToKRD(original, mockLogger);
     const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
-
     const w1 = krd1.extensions?.structured_workout as Workout;
+
+    // Act
     const w2 = krd2.extensions?.structured_workout as Workout;
 
+    // Assert
     expect(w2.poolLength).toBe(w1.poolLength);
     expect(w2.poolLengthUnit).toBe(w1.poolLengthUnit);
     expect(w2.steps.length).toBe(w1.steps.length);
   });
 
   it("should preserve strength workout through round-trip", () => {
+    // Arrange
     const original = loadFixture("WorkoutStrengthRepsOutput.gcn");
-
     const krd1 = convertGarminToKRD(original, mockLogger);
     const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
-
     const w1 = krd1.extensions?.structured_workout as Workout;
+
+    // Act
     const w2 = krd2.extensions?.structured_workout as Workout;
 
+    // Assert
     expect(w2.sport).toBe(w1.sport);
     expect(w2.steps.length).toBe(w1.steps.length);
   });
 
   it("should handle edge cases through round-trip", () => {
+    // Arrange
     const original = loadFixture("WorkoutEdgeCasesOutput.gcn");
-
     const krd1 = convertGarminToKRD(original, mockLogger);
     const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
-
     const w1 = krd1.extensions?.structured_workout as Workout;
+
+    // Act
     const w2 = krd2.extensions?.structured_workout as Workout;
 
+    // Assert
     expect(w2.steps.length).toBe(w1.steps.length);
   });
 
   it("should preserve multisport workout steps through round-trip", () => {
+    // Arrange
     const original = loadFixture("WorkoutMultisportTriathlonOutput.gcn");
-
     const krd1 = convertGarminToKRD(original, mockLogger);
     const gcnOutput = convertKRDToGarmin(krd1, { logger: mockLogger });
     const krd2 = convertGarminToKRD(gcnOutput, mockLogger);
-
     const w1 = krd1.extensions?.structured_workout as Workout;
+
+    // Act
     const w2 = krd2.extensions?.structured_workout as Workout;
 
+    // Assert
     expect(w2.steps.length).toBe(w1.steps.length);
   });
 });

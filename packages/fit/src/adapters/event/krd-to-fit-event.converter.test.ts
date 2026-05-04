@@ -152,6 +152,8 @@ describe("convertKrdToFitEvents", () => {
 describe("round-trip conversion", () => {
   it("should preserve common event types through KRD -> FIT -> KRD", () => {
     // Arrange
+
+    // Act
     const eventTypes = [
       "event_start",
       "event_stop",
@@ -160,6 +162,7 @@ describe("round-trip conversion", () => {
       "event_marker",
     ] as const;
 
+    // Assert
     eventTypes.forEach((eventType) => {
       const originalKrd = {
         timestamp: "2024-01-01T00:00:00.000Z",
@@ -168,21 +171,17 @@ describe("round-trip conversion", () => {
         data: 42,
       };
 
-      // Act
       const fitResult = convertKrdToFitEvent(originalKrd);
       const roundTrippedKrd = convertFitToKrdEvent(fitResult as never);
 
-      // Assert - timestamp within 1 second tolerance
       const originalTime = new Date(originalKrd.timestamp).getTime();
       const roundTrippedTime = new Date(roundTrippedKrd.timestamp).getTime();
       expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(
         1000
       );
 
-      // Assert - event type preserved (note: pause -> stopDisable -> pause)
       expect(roundTrippedKrd.eventType).toBe(eventType);
 
-      // Assert - optional fields preserved
       expect(roundTrippedKrd.eventGroup).toBe(originalKrd.eventGroup);
       expect(roundTrippedKrd.data).toBe(originalKrd.data);
     });
@@ -194,14 +193,14 @@ describe("round-trip conversion", () => {
       timestamp: "2024-01-01T00:00:00.500Z",
       eventType: "event_start" as const,
     };
-
-    // Act
     const fitResult = convertKrdToFitEvent(originalKrd);
     const roundTrippedKrd = convertFitToKrdEvent(fitResult as never);
-
-    // Assert - timestamp within 1 second tolerance (FIT loses milliseconds)
     const originalTime = new Date(originalKrd.timestamp).getTime();
+
+    // Act
     const roundTrippedTime = new Date(roundTrippedKrd.timestamp).getTime();
+
+    // Assert
     expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(1000);
     expect(roundTrippedKrd.eventType).toBe("event_start");
   });

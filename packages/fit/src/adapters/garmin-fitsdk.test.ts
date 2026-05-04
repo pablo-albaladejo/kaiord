@@ -53,17 +53,17 @@ describe("createGarminFitSdkReader", () => {
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
       const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
+      const result = await reader(buffer);
+      expect(result.extensions?.structured_workout).toBeDefined();
 
       // Act
-      const result = await reader(buffer);
-
-      // Assert
-      expect(result.extensions?.structured_workout).toBeDefined();
       const workout = result.extensions?.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<unknown>;
       };
+
+      // Assert
       expect(workout.name).toBe("Example 1");
       expect(workout.steps).toHaveLength(4);
       expect(workout.steps[0]).toMatchObject({
@@ -89,11 +89,7 @@ describe("createGarminFitSdkReader", () => {
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
       const buffer = loadFitFixture("WorkoutRepeatSteps.fit");
-
-      // Act
       const result = await reader(buffer);
-
-      // Assert
       expect(result.extensions?.structured_workout).toBeDefined();
       const workout = result.extensions?.structured_workout as {
         name?: string;
@@ -103,10 +99,13 @@ describe("createGarminFitSdkReader", () => {
       expect(workout.name).toBe("Example 2");
       expect(workout.steps).toHaveLength(3);
 
+      // Act
       const repetitionBlock = workout.steps[1] as {
         repeatCount: number;
         steps: Array<unknown>;
       };
+
+      // Assert
       expect(repetitionBlock.repeatCount).toBe(3);
       expect(repetitionBlock.steps).toHaveLength(2);
     });
@@ -116,17 +115,17 @@ describe("createGarminFitSdkReader", () => {
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
       const buffer = loadFitFixture("WorkoutRepeatGreaterThanStep.fit");
+      const result = await reader(buffer);
+      expect(result.extensions?.structured_workout).toBeDefined();
 
       // Act
-      const result = await reader(buffer);
-
-      // Assert
-      expect(result.extensions?.structured_workout).toBeDefined();
       const workout = result.extensions?.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<unknown>;
       };
+
+      // Assert
       expect(workout.steps).toBeDefined();
       expect(Array.isArray(workout.steps)).toBe(true);
     });
@@ -136,17 +135,17 @@ describe("createGarminFitSdkReader", () => {
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
       const buffer = loadFitFixture("WorkoutCustomTargetValues.fit");
+      const result = await reader(buffer);
+      expect(result.extensions?.structured_workout).toBeDefined();
 
       // Act
-      const result = await reader(buffer);
-
-      // Assert
-      expect(result.extensions?.structured_workout).toBeDefined();
       const workout = result.extensions?.structured_workout as {
         name?: string;
         sport: string;
         steps: Array<unknown>;
       };
+
+      // Assert
       expect(workout.steps).toBeDefined();
       expect(Array.isArray(workout.steps)).toBe(true);
     });
@@ -155,9 +154,11 @@ describe("createGarminFitSdkReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
+
+      // Act
       const corruptedBuffer = new Uint8Array([0, 0, 0, 0]);
 
-      // Act & Assert
+      // Assert
       await expect(reader(corruptedBuffer)).rejects.toThrow(FitParsingError);
     });
 
@@ -165,9 +166,11 @@ describe("createGarminFitSdkReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
+
+      // Act
       const emptyBuffer = new Uint8Array([]);
 
-      // Act & Assert
+      // Assert
       await expect(reader(emptyBuffer)).rejects.toThrow(FitParsingError);
     });
 
@@ -238,13 +241,13 @@ describe("createGarminFitSdkReader", () => {
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
       const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
+      const result = await reader(buffer);
+      expect(result.extensions?.fit).toBeDefined();
 
       // Act
-      const result = await reader(buffer);
+      const fitExt = result.extensions?.fit as Record<string, unknown>;
 
       // Assert
-      expect(result.extensions?.fit).toBeDefined();
-      const fitExt = result.extensions?.fit as Record<string, unknown>;
       if (fitExt.unknownMessages) {
         expect(typeof fitExt.unknownMessages).toBe("object");
       }
@@ -256,15 +259,15 @@ describe("createGarminFitSdkReader", () => {
       const infoSpy = vi.spyOn(logger, "info");
       const reader = createGarminFitSdkReader(logger);
       const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
+      await reader(buffer);
+      const infoCalls = infoSpy.mock.calls.map((call) => call[0]);
 
       // Act
-      await reader(buffer);
-
-      // Assert
-      const infoCalls = infoSpy.mock.calls.map((call) => call[0]);
       const hasExtensionLog =
         infoCalls.some((msg) => msg.includes("developer fields")) ||
         infoCalls.some((msg) => msg.includes("unknown message"));
+
+      // Assert
       expect(
         hasExtensionLog || infoCalls.includes("FIT file parsed successfully")
       ).toBe(true);
@@ -275,13 +278,13 @@ describe("createGarminFitSdkReader", () => {
       const logger = createMockLogger();
       const reader = createGarminFitSdkReader(logger);
       const buffer = loadFitFixture("WorkoutIndividualSteps.fit");
+      const result = await reader(buffer);
+      expect(result.extensions?.fit).toBeDefined();
 
       // Act
-      const result = await reader(buffer);
+      const fitExt = result.extensions?.fit as Record<string, unknown>;
 
       // Assert
-      expect(result.extensions?.fit).toBeDefined();
-      const fitExt = result.extensions?.fit as Record<string, unknown>;
       expect(typeof fitExt).toBe("object");
     });
   });
@@ -293,12 +296,14 @@ describe("createGarminFitSdkWriter", () => {
       // Arrange
       const logger = createMockLogger();
       const writer = createGarminFitSdkWriter(logger);
+
+      // Act
       const krd = buildKRD.build({
         version: "1.0",
         type: "structured_workout",
       });
 
-      // Act & Assert
+      // Assert
       await expect(writer(krd)).rejects.toThrow(FitParsingError);
     });
 
@@ -307,12 +312,14 @@ describe("createGarminFitSdkWriter", () => {
       const logger = createMockLogger();
       const debugSpy = vi.spyOn(logger, "debug");
       const writer = createGarminFitSdkWriter(logger);
+
+      // Act
       const krd = buildKRD.build({
         version: "1.0",
         type: "structured_workout",
       });
 
-      // Act & Assert
+      // Assert
       await expect(writer(krd)).rejects.toThrow();
       expect(debugSpy).toHaveBeenCalledWith("Encoding KRD to FIT");
     });
@@ -322,12 +329,14 @@ describe("createGarminFitSdkWriter", () => {
       const logger = createMockLogger();
       const debugSpy = vi.spyOn(logger, "debug");
       const writer = createGarminFitSdkWriter(logger);
+
+      // Act
       const krd = buildKRD.build({
         version: "1.0",
         type: "structured_workout",
       });
 
-      // Act & Assert
+      // Assert
       await expect(writer(krd)).rejects.toThrow();
       expect(debugSpy).toHaveBeenCalledWith("Converting KRD to FIT messages");
     });
@@ -337,12 +346,14 @@ describe("createGarminFitSdkWriter", () => {
       const logger = createMockLogger();
       const debugSpy = vi.spyOn(logger, "debug");
       const writer = createGarminFitSdkWriter(logger);
+
+      // Act
       const krd = buildKRD.build({
         version: "1.0",
         type: "structured_workout",
       });
 
-      // Act & Assert
+      // Assert
       await expect(writer(krd)).rejects.toThrow();
       expect(debugSpy).toHaveBeenCalled();
     });
@@ -351,6 +362,8 @@ describe("createGarminFitSdkWriter", () => {
       // Arrange
       const logger = createMockLogger();
       const writer = createGarminFitSdkWriter(logger);
+
+      // Act
       const krd = buildKRD.build({
         version: "1.0",
         type: "structured_workout",
@@ -359,7 +372,7 @@ describe("createGarminFitSdkWriter", () => {
         }),
       });
 
-      // Act & Assert
+      // Assert
       await expect(writer(krd)).rejects.toThrow(FitParsingError);
     });
 
@@ -367,12 +380,14 @@ describe("createGarminFitSdkWriter", () => {
       // Arrange
       const logger = createMockLogger();
       const writer = createGarminFitSdkWriter(logger);
+
+      // Act
       const krd = buildKRD.build({
         version: "1.0",
         type: "structured_workout",
       });
 
-      // Act & Assert
+      // Assert
       await expect(writer(krd)).rejects.toThrow(FitParsingError);
     });
   });

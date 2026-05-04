@@ -21,6 +21,11 @@ describe.skipIf(!email || !password)("Garmin Connect Integration", () => {
   }, 30_000);
 
   it("should login and obtain valid tokens", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(sharedTokens).toBeDefined();
     expect(sharedTokens.oauth1).toBeDefined();
     expect(sharedTokens.oauth2).toBeDefined();
@@ -30,18 +35,25 @@ describe.skipIf(!email || !password)("Garmin Connect Integration", () => {
   });
 
   it("should export and restore tokens across clients", async () => {
+    // Arrange
     const client = createGarminConnectClient();
+
+    // Act
     await client.auth.restore_tokens(sharedTokens);
 
+    // Assert
     expect(client.auth.is_authenticated()).toBe(true);
   });
 
   it("should list workouts", async () => {
+    // Arrange
     const { auth, service } = createGarminConnectClient();
     await auth.restore_tokens(sharedTokens);
 
+    // Act
     const workouts = await service.list({ limit: 5 });
 
+    // Assert
     expect(Array.isArray(workouts)).toBe(true);
     for (const w of workouts) {
       expect(w).toHaveProperty("id");
@@ -51,9 +63,9 @@ describe.skipIf(!email || !password)("Garmin Connect Integration", () => {
   }, 30_000);
 
   it("should push a workout", async () => {
+    // Arrange
     const { auth, service } = createGarminConnectClient();
     await auth.restore_tokens(sharedTokens);
-
     const krd: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -98,8 +110,10 @@ describe.skipIf(!email || !password)("Garmin Connect Integration", () => {
       },
     };
 
+    // Act
     const result = await service.push(krd);
 
+    // Assert
     expect(result.id).toBeDefined();
     expect(result.name).toBeDefined();
   }, 30_000);
