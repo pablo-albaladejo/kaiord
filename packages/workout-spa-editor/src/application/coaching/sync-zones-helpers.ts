@@ -1,86 +1,70 @@
 /**
  * `reconcile` — splits an `IncomingMap` against the persisted profile
- * into silent fills (current value absent) vs. conflicts (current value
- * differs from incoming). No-op when current === incoming. Returns a
- * fresh profile with silent fills already applied; conflicts are NOT
- * written here — the caller (`syncZones`) returns them to the UI for
- * per-row confirmation.
+ * into silent-replaces (via classifier dispatch per D-MA1) vs.
+ * per-band conflicts (user-customized or train2go-synced-edited tables).
+ * Updates the linked-account snapshot atomically per D-MA2.
  *
- * For band-level FieldKeys (`<sport>.<kind>.zN.<bound>`), reconcile
- * operates at TABLE granularity for empty-detection: when the
- * persisted sport-kind table is empty (zones array missing OR
- * length === 0), ALL bands of that table are silent-fills regardless
- * of incoming values. Once the table has data, per-band comparisons
- * apply (conflicts on differing values, no-op on matching).
+ * Threshold scalars keep their per-key path (delegated to
+ * `reconcileThresholds`); only band-level FieldKeys go through the
+ * 6-state classifier.
  */
-import type { ZonesReconciliation } from "../../types/coaching-zones";
 import type {
   ConflictItem,
-  FieldKey,
   WrittenField,
+  ZonesReconciliation,
 } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
+import { reconcileBandTable } from "./sync-zones-band-table-reconcile";
+import { partitionIncoming, reconcileThresholds } from "./sync-zones-partition";
 import type { IncomingMap } from "./sync-zones-payload-mapper";
-import { readField, writeField } from "./sync-zones-profile-fields";
-
-const BAND_KEY_RE =
-  /^(cycling|running|swimming)\.(heartRateZones|powerZones|paceZones)\.z[1-5]\.(minBpm|maxBpm|minPercent|maxPercent|minPace|maxPace)$/;
-
-const tableSlotKey = (field: FieldKey): string | null => {
-  const m = BAND_KEY_RE.exec(field);
-  return m ? `${m[1]}.${m[2]}` : null;
-};
-
-const isTableEmpty = (
-  profile: Profile,
-  sport: "cycling" | "running" | "swimming",
-  kind: "heartRateZones" | "powerZones" | "paceZones"
-): boolean => {
-  const sportConfig = profile.sportZones[sport];
-  if (!sportConfig) return true;
-  const config = (sportConfig as Record<string, unknown>)[kind] as
-    | { zones?: unknown[] }
-    | undefined;
-  if (!config) return true;
-  if (!Array.isArray(config.zones) || config.zones.length === 0) return true;
-  return false;
-};
-
-const isBandKeyInEmptyTable = (profile: Profile, field: FieldKey): boolean => {
-  const slot = tableSlotKey(field);
-  if (!slot) return false;
-  const [sport, kind] = slot.split(".") as [
-    "cycling" | "running" | "swimming",
-    "heartRateZones" | "powerZones" | "paceZones",
-  ];
-  return isTableEmpty(profile, sport, kind);
-};
+import {
+  getSnapshotZones,
+  snapshotZonesToFieldMap,
+} from "./sync-zones-snapshot";
+import { updateSnapshot } from "./sync-zones-snapshot-write";
+import { classifyZoneTable } from "./zone-table-classifier";
+import type { Sport, ZoneKind } from "./zone-table-classifier-types";
 
 export const reconcile = (
   profile: Profile,
-  incoming: IncomingMap
+  incoming: IncomingMap,
+  source: string
 ): { profile: Profile } & ZonesReconciliation => {
-  const applied: WrittenField[] = [];
-  const conflicts: ConflictItem[] = [];
-  let next = profile;
-  for (const [field, value] of incoming) {
-    // For band-level keys, "empty table" is silent-fill regardless of
-    // any seeded zero defaults that writeField may have introduced.
-    // Snapshot the empty state against the ORIGINAL profile (before
-    // any writes from this reconcile pass) so the first band-write
-    // doesn't flip the table's empty-status mid-pass.
-    if (isBandKeyInEmptyTable(profile, field)) {
-      next = writeField(next, field, value);
-      applied.push({ field, value });
-      continue;
-    }
-    const current = readField(next, field);
-    if (current === undefined) {
-      next = writeField(next, field, value);
-      applied.push({ field, value });
-    } else if (current !== value) {
-      conflicts.push({ field, current, incoming: value });
-    }
+  const account = profile.linkedAccounts.find((a) => a.source === source);
+  const snapshot = account?.lastSyncedZonesSnapshot;
+  const { thresholds, tables } = partitionIncoming(incoming);
+  const thrResult = reconcileThresholds(profile, thresholds);
+  let next = thrResult.profile;
+  const applied: WrittenField[] = [...thrResult.applied];
+  const conflicts: ConflictItem[] = [...thrResult.conflicts];
+  const replacedTables: Array<{ sport: Sport; kind: ZoneKind }> = [];
+  for (const [tk, tableIncoming] of tables) {
+    const [sport, kind] = tk.split(".") as [Sport, ZoneKind];
+    const state = classifyZoneTable(profile, sport, kind, snapshot);
+    const snapZones = getSnapshotZones(snapshot, sport, kind);
+    const snapshotByField = snapZones
+      ? snapshotZonesToFieldMap(snapZones, sport, kind)
+      : undefined;
+    const result = reconcileBandTable(
+      next,
+      state,
+      sport,
+      kind,
+      tableIncoming,
+      snapshotByField
+    );
+    next = result.profile;
+    applied.push(...result.applied);
+    conflicts.push(...result.conflicts);
+    if (result.applied.length > 0) replacedTables.push({ sport, kind });
+  }
+  if (replacedTables.length > 0) {
+    next = updateSnapshot(
+      next,
+      source,
+      replacedTables,
+      new Date().toISOString()
+    );
   }
   return { profile: next, applied, conflicts };
 };

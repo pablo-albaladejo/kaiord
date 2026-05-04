@@ -37,7 +37,7 @@ const setSportThreshold = (
   const thresholds = { ...(existing?.thresholds ?? {}), ...patch };
   const sportConfig = existing
     ? { ...existing, thresholds }
-    : { thresholds, heartRateZones: { method: "manual", zones: [] } };
+    : { thresholds, heartRateZones: { method: "custom", zones: [] } };
   return {
     ...profile,
     sportZones: { ...profile.sportZones, [sport]: sportConfig },
