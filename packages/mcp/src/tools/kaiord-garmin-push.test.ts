@@ -1,5 +1,6 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import type * as KaiordCore from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockPush = vi.fn();
 const mockIsAuthenticated = vi.fn();
@@ -16,15 +17,15 @@ vi.mock("../utils/resolve-input", () => ({
 }));
 
 vi.mock("@kaiord/core", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@kaiord/core")>();
+  const actual = await importOriginal<typeof KaiordCore>();
   return {
     ...actual,
     validateKrd: vi.fn((data) => data),
   };
 });
 
-import { registerGarminPushTool } from "./kaiord-garmin-push";
 import { resolveTextInput } from "../utils/resolve-input";
+import { registerGarminPushTool } from "./kaiord-garmin-push";
 
 const createMockLogger = (): Logger => ({
   debug: vi.fn(),

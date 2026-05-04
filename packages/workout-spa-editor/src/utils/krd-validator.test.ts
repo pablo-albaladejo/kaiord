@@ -3,6 +3,7 @@
  */
 
 import { describe, expect, it } from "vitest";
+
 import { ValidationError } from "../types/errors";
 import { validateKRD } from "./krd-validator";
 

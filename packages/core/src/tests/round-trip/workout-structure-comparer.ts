@@ -1,4 +1,5 @@
 import { expect } from "vitest";
+
 import type { KRD } from "../../domain/schemas/krd";
 import type { ToleranceChecker } from "../../domain/validation/tolerance-checker";
 
@@ -73,7 +74,7 @@ const compareStep = (
   ) {
     const violation = toleranceChecker.checkPower(
       step1.target.value.value,
-      step2.target.value?.value!
+      step2.target.value?.value ?? 0
     );
     expect(
       violation,
@@ -89,7 +90,7 @@ const compareStep = (
     if (step1.target.value.min !== undefined) {
       const violation = toleranceChecker.checkHeartRate(
         step1.target.value.min,
-        step2.target.value?.min!
+        step2.target.value?.min ?? 0
       );
       expect(
         violation,
@@ -99,7 +100,7 @@ const compareStep = (
     if (step1.target.value.max !== undefined) {
       const violation = toleranceChecker.checkHeartRate(
         step1.target.value.max,
-        step2.target.value?.max!
+        step2.target.value?.max ?? 0
       );
       expect(
         violation,

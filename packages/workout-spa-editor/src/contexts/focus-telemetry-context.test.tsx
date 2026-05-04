@@ -1,17 +1,17 @@
 import { render, screen } from "@testing-library/react";
-import { useContext, useCallback, useState } from "react";
+import { useCallback, useContext, useState } from "react";
 import { describe, expect, it, vi } from "vitest";
 
+import {
+  defaultFocusTelemetry,
+  type FocusTelemetry,
+  wiringCanaryEvent,
+} from "../store/providers/focus-telemetry";
 import {
   FocusTelemetryContext,
   FocusTelemetryProvider,
   useFocusTelemetry,
 } from "./focus-telemetry-context";
-import {
-  defaultFocusTelemetry,
-  wiringCanaryEvent,
-  type FocusTelemetry,
-} from "../store/providers/focus-telemetry";
 
 // Task 2.1.a — FocusTelemetryContext.Provider wraps the editor and exposes
 // the current FocusTelemetry via useFocusTelemetry()

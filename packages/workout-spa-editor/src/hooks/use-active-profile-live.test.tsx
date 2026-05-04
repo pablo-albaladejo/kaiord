@@ -20,8 +20,8 @@ import { db } from "../adapters/dexie/dexie-database";
 import { createDexiePersistence } from "../adapters/dexie/dexie-persistence-adapter";
 import type { Profile } from "../types/profile";
 import {
-  useActiveProfileLive,
   type ActiveProfile,
+  useActiveProfileLive,
 } from "./use-active-profile-live";
 
 const PROFILE_A = "00000000-0000-4000-8000-0000000000c1";

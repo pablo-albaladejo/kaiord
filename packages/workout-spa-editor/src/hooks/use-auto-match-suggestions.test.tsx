@@ -5,8 +5,8 @@ import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../adapters/dexie/dexie-database";
 import type { AutoMatchDismissal } from "../types/auto-match-dismissal";
-import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { WorkoutRecord } from "../types/calendar-record";
+import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import { useAutoMatchSuggestions } from "./use-auto-match-suggestions";
 
 const seedActivity = (

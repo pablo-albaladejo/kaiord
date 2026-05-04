@@ -1,8 +1,9 @@
-import { describe, expect, it, vi } from "vitest";
 import type { KRD } from "@kaiord/core";
 import { TcxParsingError } from "@kaiord/core";
-import type { TcxValidator } from "../types";
 import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it, vi } from "vitest";
+
+import type { TcxValidator } from "../types";
 import {
   createFastXmlTcxReader,
   createFastXmlTcxWriter,
@@ -89,7 +90,7 @@ describe("createFastXmlTcxReader", () => {
       // Act & Assert
       try {
         await reader(validTcx);
-      } catch (error) {
+      } catch {
         // Expected to throw "not yet implemented"
       }
 
@@ -590,7 +591,7 @@ describe("createFastXmlTcxWriter", () => {
       // Act & Assert
       try {
         await writer(krd);
-      } catch (error) {
+      } catch {
         // Expected to throw "Not implemented"
       }
 
@@ -680,7 +681,7 @@ describe("createFastXmlTcxWriter", () => {
       // Act & Assert
       try {
         await writer(krd);
-      } catch (error) {
+      } catch {
         // Expected to throw "Not implemented"
       }
 
@@ -716,7 +717,7 @@ describe("createFastXmlTcxWriter", () => {
       // Act & Assert
       try {
         await writer(krd);
-      } catch (error) {
+      } catch {
         // Expected to throw "Not implemented"
       }
 
@@ -752,7 +753,7 @@ describe("createFastXmlTcxWriter", () => {
       // Act & Assert
       try {
         await writer(krd);
-      } catch (error) {
+      } catch {
         // Expected to throw "Not implemented"
       }
 

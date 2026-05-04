@@ -4,9 +4,9 @@ import { renderHook, waitFor } from "@testing-library/react";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../adapters/dexie/dexie-database";
+import type { WorkoutRecord } from "../types/calendar-record";
 import type { CoachingActivityRecord } from "../types/coaching-activity-record";
 import type { SessionMatch } from "../types/session-match";
-import type { WorkoutRecord } from "../types/calendar-record";
 import { useMatchedSessions } from "./use-matched-sessions";
 
 const WEEK = [

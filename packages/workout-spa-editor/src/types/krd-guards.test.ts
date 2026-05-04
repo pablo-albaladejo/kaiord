@@ -8,6 +8,7 @@
  */
 
 import { describe, expect, it } from "vitest";
+
 import type { RepetitionBlock, WorkoutStep } from "./krd";
 import { isRepetitionBlock, isWorkoutStep } from "./krd-guards";
 

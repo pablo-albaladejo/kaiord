@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import type { Profile } from "../../types/profile";
-
 import { profileToSnapshot } from "./profile-to-snapshot";
 
 const FIXED_NOW = new Date("2026-05-01T08:30:00.000Z");

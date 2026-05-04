@@ -1,13 +1,13 @@
+import { createMockLogger } from "@kaiord/core/test-utils";
 import { mkdtemp, rm, writeFile } from "fs/promises";
 import { tmpdir } from "os";
 import { join } from "path";
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 
-import { createMockLogger } from "@kaiord/core/test-utils";
 import {
+  loadFitFixture,
   loadKrdFixtureRaw,
   loadTcxFixture,
-  loadFitFixture,
 } from "../tests/helpers/test-fixtures";
 import { convertToKrd } from "./convert-to-krd";
 

@@ -8,6 +8,7 @@
  */
 
 import { describe, expect, it } from "vitest";
+
 import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
 import { ungroupRepetitionBlockAction } from "./ungroup-repetition-block-action";

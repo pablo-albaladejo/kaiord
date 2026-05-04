@@ -1,12 +1,13 @@
 import "fake-indexeddb/auto";
+
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { LlmProviderConfig } from "../../store/ai-store-types";
 import type { SyncState } from "../../types/bridge-schemas";
 import type { WorkoutRecord } from "../../types/calendar-schemas";
 import type { Profile } from "../../types/profile";
-import type { UsageRecord } from "../../types/usage-schemas";
 import type { KRD } from "../../types/schemas";
+import type { UsageRecord } from "../../types/usage-schemas";
 import type { WorkoutTemplate } from "../../types/workout-library";
 import { KaiordDatabase } from "./dexie-database";
 import { createDexiePersistence } from "./dexie-persistence-adapter";

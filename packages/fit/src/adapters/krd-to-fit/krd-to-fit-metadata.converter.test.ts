@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker";
-import { describe, expect, it, vi } from "vitest";
 import type { KRD } from "@kaiord/core";
 import type { Logger } from "@kaiord/core";
+import { describe, expect, it, vi } from "vitest";
+
 import { convertMetadataToFileId } from "./krd-to-fit-metadata.converter";
 
 const createMockLogger = (): Logger => ({

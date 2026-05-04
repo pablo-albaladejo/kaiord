@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
+
 import {
+  createFitParsingError,
+  createKrdValidationError,
+  createTcxParsingError,
+  createToleranceExceededError,
+  createZwiftParsingError,
+  createZwiftValidationError,
   FitParsingError,
   KrdValidationError,
   TcxParsingError,
@@ -7,12 +14,6 @@ import {
   ToleranceExceededError,
   ZwiftParsingError,
   ZwiftValidationError,
-  createFitParsingError,
-  createKrdValidationError,
-  createTcxParsingError,
-  createToleranceExceededError,
-  createZwiftParsingError,
-  createZwiftValidationError,
 } from "./errors";
 
 describe("Domain Errors", () => {

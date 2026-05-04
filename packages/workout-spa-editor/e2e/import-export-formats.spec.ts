@@ -1,4 +1,5 @@
-import { expandFileUpload } from "./helpers/expand-file-upload";
+import { readFileSync } from "node:fs";
+
 /**
  * E2E Tests: Import/Export Multiple Formats
  *
@@ -15,9 +16,8 @@ import { expandFileUpload } from "./helpers/expand-file-upload";
  * - Requirement 36.3: Show loading states during conversion
  * - Requirement 36.4: Handle conversion errors gracefully
  */
-
 import { expect, test } from "./fixtures/base";
-import { readFileSync } from "node:fs";
+import { expandFileUpload } from "./helpers/expand-file-upload";
 
 test.describe("Import/Export Multiple Formats", () => {
   const testWorkout = {

@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { applyValueChange } from "./parse-zone-field";
+
 import type { HeartRateZone, PowerZone } from "../../../../types/profile";
 import type { PaceZone } from "../../../../types/sport-zones";
+import { applyValueChange } from "./parse-zone-field";
 
 const hrZones: Array<HeartRateZone> = [
   { zone: 1, name: "Z1", minBpm: 100, maxBpm: 130 },

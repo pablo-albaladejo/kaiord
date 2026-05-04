@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { calculatePaceZones } from "./calculate-pace-zones";
 
 describe("calculatePaceZones", () => {

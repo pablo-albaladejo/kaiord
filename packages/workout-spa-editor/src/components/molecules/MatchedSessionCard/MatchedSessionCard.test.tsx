@@ -2,9 +2,9 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
 
-import type { CoachingActivity } from "../../../types/coaching-activity";
 import type { WorkoutRecord } from "../../../types/calendar-record";
-import { MatchedSessionCard, type MatchedSession } from "./MatchedSessionCard";
+import type { CoachingActivity } from "../../../types/coaching-activity";
+import { type MatchedSession, MatchedSessionCard } from "./MatchedSessionCard";
 
 const baseActivity: CoachingActivity = {
   id: "train2go:123",

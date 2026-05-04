@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
+
 import type { Sport } from "../../../domain/schemas/sport";
 import type { SubSport } from "../../../domain/schemas/sub-sport";
 import type { Workout } from "../../../domain/schemas/workout";

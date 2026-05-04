@@ -13,6 +13,7 @@
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+
 import { ConfirmationModal } from "./ConfirmationModal";
 
 describe("ConfirmationModal - Accessibility", () => {
@@ -266,7 +267,6 @@ describe("ConfirmationModal - Accessibility", () => {
   describe("focus restoration", () => {
     it("should restore focus after modal closes", async () => {
       // Arrange
-      const user = userEvent.setup();
       const handleCancel = vi.fn();
       const { rerender } = render(
         <div>
@@ -377,7 +377,6 @@ describe("ConfirmationModal - Accessibility", () => {
       );
 
       // Assert - Background button should not be accessible
-      const backgroundButton = screen.getByText("Background Button");
       const backdrop = screen.getByTestId("modal-backdrop");
 
       // Backdrop should be on top (higher z-index)

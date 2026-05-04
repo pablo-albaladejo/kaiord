@@ -5,6 +5,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { WorkoutTemplate } from "../types/workout-library";
 import { clearLibrary, loadLibrary, saveLibrary } from "./library-storage";
 

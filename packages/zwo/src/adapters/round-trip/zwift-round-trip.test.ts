@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
 import { createToleranceChecker } from "@kaiord/core";
 import { createMockLogger, loadZwoFixture } from "@kaiord/core/test-utils";
+import { describe, expect, it } from "vitest";
+
 import {
   createFastXmlZwiftReader,
   createFastXmlZwiftWriter,
@@ -17,7 +18,6 @@ describe("Zwift Round-trip: WorkoutIndividualSteps.zwo", () => {
       const validator = createXsdZwiftValidator(logger);
       const reader = createFastXmlZwiftReader(logger, validator);
       const writer = createFastXmlZwiftWriter(logger, validator);
-      const toleranceChecker = createToleranceChecker();
 
       const originalXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
 
@@ -347,7 +347,7 @@ describe("Zwift Round-trip: WorkoutRepeatSteps.zwo", () => {
             ) {
               const violation = toleranceChecker.checkPower(
                 step1.target.value.value,
-                step2.target.value?.value!
+                step2.target.value?.value ?? 0
               );
               expect(violation).toBeNull();
             }
@@ -419,7 +419,7 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
           if (step1.target.value.value !== undefined) {
             const violation = toleranceChecker.checkPower(
               step1.target.value.value,
-              step2.target.value?.value!
+              step2.target.value?.value ?? 0
             );
             expect(violation).toBeNull();
           }
@@ -430,11 +430,11 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
           ) {
             const minViolation = toleranceChecker.checkPower(
               step1.target.value.min,
-              step2.target.value?.min!
+              step2.target.value?.min ?? 0
             );
             const maxViolation = toleranceChecker.checkPower(
               step1.target.value.max,
-              step2.target.value?.max!
+              step2.target.value?.max ?? 0
             );
             expect(minViolation).toBeNull();
             expect(maxViolation).toBeNull();
@@ -446,7 +446,7 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
           if (step1.target.value.value !== undefined) {
             const violation = toleranceChecker.checkCadence(
               step1.target.value.value,
-              step2.target.value?.value!
+              step2.target.value?.value ?? 0
             );
             expect(violation).toBeNull();
           }
@@ -457,7 +457,7 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
           if (step1.target.value.value !== undefined) {
             const violation = toleranceChecker.checkPace(
               step1.target.value.value,
-              step2.target.value?.value!
+              step2.target.value?.value ?? 0
             );
             expect(violation).toBeNull();
           }
@@ -506,7 +506,7 @@ describe("Zwift Round-trip: WorkoutCustomTargetValues.zwo", () => {
         ) {
           const violation = toleranceChecker.checkCadence(
             step1.target.value.value,
-            step2.target.value?.value!
+            step2.target.value?.value ?? 0
           );
           expect(violation).toBeNull();
         }
@@ -645,7 +645,7 @@ describe("Zwift Round-trip: KRD → Zwift → KRD", () => {
         ) {
           const violation = toleranceChecker.checkPower(
             step1.target.value.value,
-            step2.target.value?.value!
+            step2.target.value?.value ?? 0
           );
           expect(violation).toBeNull();
         }
@@ -749,7 +749,7 @@ describe("Zwift Round-trip: WorkoutRepeatGreaterThanStep.zwo", () => {
           if (step1.target.value?.value !== undefined) {
             const violation = toleranceChecker.checkHeartRate(
               step1.target.value.value,
-              step2.target.value?.value!
+              step2.target.value?.value ?? 0
             );
             expect(violation).toBeNull();
           }

@@ -8,7 +8,7 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type { KRD, RepetitionBlock } from "../../types/krd";
 import { isRepetitionBlock } from "../../types/krd";
 import { useWorkoutStore } from "../workout-store";
 

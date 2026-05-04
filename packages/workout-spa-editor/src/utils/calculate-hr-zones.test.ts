@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { calculateHrZones } from "./calculate-hr-zones";
 
 describe("calculateHrZones", () => {

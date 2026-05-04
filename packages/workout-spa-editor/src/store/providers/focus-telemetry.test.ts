@@ -2,14 +2,14 @@ import { describe, expect, it, vi } from "vitest";
 
 import {
   defaultFocusTelemetry,
-  formFieldShortCircuitEvent,
   focusErrorEvent,
+  type FocusTelemetry,
+  type FocusTelemetryEvent,
+  formFieldShortCircuitEvent,
   overlayDeferredApplyEvent,
   safeEmit,
   unresolvedTargetFallbackEvent,
   wiringCanaryEvent,
-  type FocusTelemetry,
-  type FocusTelemetryEvent,
 } from "./focus-telemetry";
 
 // Task 1.1.a — Exhaustive switch coverage via `never` assertion.

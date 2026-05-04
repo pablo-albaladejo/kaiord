@@ -6,6 +6,7 @@
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
+
 import type { KRD, RepetitionBlock } from "../types/krd";
 import { useWorkoutStore } from "./workout-store";
 

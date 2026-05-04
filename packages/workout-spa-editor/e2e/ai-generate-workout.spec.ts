@@ -1,5 +1,7 @@
-import { expect, test } from "./fixtures/base";
+import type { Page } from "@playwright/test";
+
 import { mockLlmApis } from "./fixtures/api-mocks";
+import { expect, test } from "./fixtures/base";
 import { openHeaderAction } from "./helpers/mobile-menu";
 
 /**
@@ -78,7 +80,7 @@ test.describe("AI Generate Workout Flow", () => {
  * Helper: add a test AI provider through the Settings UI.
  */
 async function addTestProvider(
-  page: import("@playwright/test").Page,
+  page: Page,
   label = "Test Claude",
   type = "anthropic"
 ): Promise<void> {

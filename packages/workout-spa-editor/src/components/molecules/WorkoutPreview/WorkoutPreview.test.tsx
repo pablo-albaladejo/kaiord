@@ -1,5 +1,6 @@
-import { render, screen, fireEvent } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { calculateNormalizedHeight } from "./bar-height";
 import { flattenWorkoutSteps } from "./flatten-steps";

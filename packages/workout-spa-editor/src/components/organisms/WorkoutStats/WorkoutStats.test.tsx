@@ -1,5 +1,6 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
+
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { WorkoutStats } from "./WorkoutStats";
 

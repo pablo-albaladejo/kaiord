@@ -10,6 +10,7 @@
  */
 
 import { describe, expect, it, vi } from "vitest";
+
 import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import { copyStepAction } from "./copy-step-action";
 import { pasteStepAction } from "./paste-step-action";

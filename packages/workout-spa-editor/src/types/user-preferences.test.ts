@@ -2,8 +2,8 @@ import { describe, expect, it } from "vitest";
 
 import {
   calendarDensitySchema,
-  userPreferencesSchema,
   type UserPreferences,
+  userPreferencesSchema,
 } from "./user-preferences";
 
 const baseRow = (

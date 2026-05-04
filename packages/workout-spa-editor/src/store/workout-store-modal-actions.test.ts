@@ -6,6 +6,7 @@
  */
 
 import { beforeEach, describe, expect, it } from "vitest";
+
 import { useWorkoutStore } from "./workout-store";
 
 describe("Modal Store Actions", () => {

@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
+import type { WorkoutStep } from "@kaiord/core";
 import { intensitySchema } from "@kaiord/core";
 import { targetTypeSchema } from "@kaiord/core";
 import { targetUnitSchema } from "@kaiord/core";
-import type { WorkoutStep } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
+
 import { detectIntervalType } from "./interval-type-detector";
 
 describe("detectIntervalType", () => {

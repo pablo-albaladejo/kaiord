@@ -1,6 +1,7 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { authFetch } from "./garmin-auth-fetch";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { TokenReader } from "../token/token-manager.types";
+import { authFetch } from "./garmin-auth-fetch";
 
 const createMockReader = (overrides?: Partial<TokenReader>): TokenReader => ({
   getAccessToken: vi.fn(() => "token-v1"),

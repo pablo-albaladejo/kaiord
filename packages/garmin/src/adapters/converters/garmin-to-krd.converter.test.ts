@@ -1,8 +1,10 @@
-import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+
 import type { KRD, RepetitionBlock, Workout, WorkoutStep } from "@kaiord/core";
 import { createGarminParsingError, isRepetitionBlock } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
+
 import { convertGarminToKRD } from "./garmin-to-krd.converter";
 
 const fixturesDir = join(__dirname, "../../../../../test-fixtures/gcn");

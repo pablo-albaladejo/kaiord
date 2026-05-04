@@ -1,7 +1,8 @@
-import { describe, it, expect } from "vitest";
-import { formatZonesContext } from "./zones-formatter";
+import { describe, expect, it } from "vitest";
+
 import type { Profile } from "../../../types/profile";
 import type { SportZoneConfig } from "../../../types/sport-zones";
+import { formatZonesContext } from "./zones-formatter";
 
 const emptyHrZones = {
   method: "custom",

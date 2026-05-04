@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import type { WorkoutStep } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
 
 import { convertTarget } from "./krd-to-fit-target.converter";
 

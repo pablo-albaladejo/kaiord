@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { KrdValidationError } from "../types/errors";
 import { createWorkoutKRD } from "./workout-to-krd.converter";
 
@@ -46,11 +47,17 @@ describe("createWorkoutKRD", () => {
   });
 
   it("should omit subSport from metadata when absent", () => {
-    const { subSport: _, ...workoutWithoutSubSport } = validWorkout;
+    const workoutWithoutSubSport: Partial<typeof validWorkout> = {
+      ...validWorkout,
+    };
+    delete workoutWithoutSubSport.subSport;
 
-    const krd = createWorkoutKRD(workoutWithoutSubSport, {
-      created: "2025-01-15T10:00:00Z",
-    });
+    const krd = createWorkoutKRD(
+      workoutWithoutSubSport as typeof validWorkout,
+      {
+        created: "2025-01-15T10:00:00Z",
+      }
+    );
 
     expect(krd.metadata.subSport).toBeUndefined();
   });

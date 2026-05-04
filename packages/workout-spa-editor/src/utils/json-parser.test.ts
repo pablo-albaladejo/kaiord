@@ -3,6 +3,7 @@
  */
 
 import { describe, expect, it } from "vitest";
+
 import { FileParsingError } from "../types/errors";
 import { parseJSON } from "./json-parser";
 

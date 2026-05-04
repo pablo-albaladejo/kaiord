@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { convertCadenceTarget } from "./target-cadence.converter";
+
 import type { FitTargetData } from "./target.types";
+import { convertCadenceTarget } from "./target-cadence.converter";
 
 describe("convertCadenceTarget", () => {
   describe("range target using specific cadence fields", () => {
