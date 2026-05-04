@@ -1,3 +1,6 @@
+> Completed: 2026-05-05
+> Tasks: 35 completed, 0 deferred
+
 ## Why
 
 `scripts/` has accumulated orphan files. The README documents code that no longer exists (`test-ci-workflows.sh`, the `publishing/` helpers), legacy npm-token setup scripts that have been superseded by Trusted Publishing in `release.yml`, predecessor scripts that lost their wiring (`validate-links.sh` → `lint-links.sh`, `generate-extension-icons.mjs` → `build-extension-icons.mjs`), and personal-tooling that hasn't been touched in months (the `autonomous-loop.sh` stack).

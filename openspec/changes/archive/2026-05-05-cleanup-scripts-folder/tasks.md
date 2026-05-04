@@ -52,9 +52,9 @@ Post-archive (out-of-PR): §7 — /opsx-sync invocation
 ## 6. Validate and archive
 
 - [x] 6.1 Run `pnpm exec openspec validate cleanup-scripts-folder --strict` and fix any spec-format issues
-- [ ] 6.2 After PR lands on main, run `/opsx-archive` to move this change under `openspec/changes/archive/YYYY-MM-DD-cleanup-scripts-folder/`
+- [x] 6.2 After PR lands on main, run `/opsx-archive` to move this change under `openspec/changes/archive/YYYY-MM-DD-cleanup-scripts-folder/`
 
 ## 7. OpenSpec sync (post-archive)
 
-- [ ] 7.1 Run `/opsx-sync` to refresh every domain spec under `openspec/specs/` against the new repo state; the pass is mandatory because `scripts/README.md` is rewritten and `R-ScriptsNoOrphans` lands
-- [ ] 7.2 If `/opsx-sync` finds drift, land the resulting spec edits as a separate `chore(specs): sync after scripts cleanup` commit
+- [x] 7.1 Run `/opsx-sync` to refresh every domain spec under `openspec/specs/` against the new repo state; the pass is mandatory because `scripts/README.md` is rewritten and `R-ScriptsNoOrphans` lands
+- [x] 7.2 If `/opsx-sync` finds drift, land the resulting spec edits as a separate `chore(specs): sync after scripts cleanup` commit
