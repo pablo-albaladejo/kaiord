@@ -26,10 +26,17 @@ runs:
       run: rm -rf packages/*/dist
 
     - name: Download build artifacts
+      # actions/upload-artifact uses the least-common-ancestor of the
+      # configured `path:` glob set as the artifact root. With our
+      # upload paths (packages/*/dist/, packages/*/package.json), the
+      # LCA is `packages/` — so the artifact internal structure is
+      # `core/dist/...`, `core/package.json`, etc. (NO leading
+      # `packages/`). Extracting to `path: packages` re-introduces the
+      # prefix so consumers see `packages/core/dist/...` as expected.
       uses: actions/download-artifact@v7
       with:
         name: build-artifacts
-        path: .
+        path: packages
 
     - name: Verify dist exists and contains no symlinks
       # SECURITY: input is materialized into env first so a future
