@@ -129,13 +129,11 @@ describe("syncZones method-aware — first-sync (3.4a)", () => {
       "train2go"
     );
     expect(persisted?.sportZones.cycling?.powerZones?.method).toBe("train2go");
-    expect(persisted?.sportZones.cycling?.heartRateZones?.zones[3]).toMatchObject(
-      { minBpm: 161, maxBpm: 174 }
-    );
-    // Snapshot established.
     expect(
-      persisted?.linkedAccounts[0]?.lastSyncedZonesSnapshot
-    ).toBeDefined();
+      persisted?.sportZones.cycling?.heartRateZones?.zones[3]
+    ).toMatchObject({ minBpm: 161, maxBpm: 174 });
+    // Snapshot established.
+    expect(persisted?.linkedAccounts[0]?.lastSyncedZonesSnapshot).toBeDefined();
   });
 });
 

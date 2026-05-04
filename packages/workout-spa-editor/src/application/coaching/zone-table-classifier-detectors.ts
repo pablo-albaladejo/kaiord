@@ -15,8 +15,7 @@ import {
 } from "./zone-table-classifier-types";
 
 export const isAllZeroHr = (zones: HeartRateZone[]): boolean =>
-  zones.length === 5 &&
-  zones.every((z) => z.minBpm === 0 && z.maxBpm === 0);
+  zones.length === 5 && zones.every((z) => z.minBpm === 0 && z.maxBpm === 0);
 
 export const isAllZeroPace = (zones: PaceZone[]): boolean =>
   zones.length === 5 && zones.every((z) => z.minPace === 0 && z.maxPace === 0);
@@ -24,14 +23,18 @@ export const isAllZeroPace = (zones: PaceZone[]): boolean =>
 export const isFormulaId = (method: string): boolean =>
   ALL_FORMULA_IDS.has(method);
 
-export const equalsHrZones = (a: HeartRateZone[], b: HeartRateZone[]): boolean =>
+export const equalsHrZones = (
+  a: HeartRateZone[],
+  b: HeartRateZone[]
+): boolean =>
   a.length === b.length &&
   a.every((z, i) => z.minBpm === b[i].minBpm && z.maxBpm === b[i].maxBpm);
 
 export const equalsPowerZones = (a: PowerZone[], b: PowerZone[]): boolean =>
   a.length === b.length &&
   a.every(
-    (z, i) => z.minPercent === b[i].minPercent && z.maxPercent === b[i].maxPercent
+    (z, i) =>
+      z.minPercent === b[i].minPercent && z.maxPercent === b[i].maxPercent
   );
 
 export const equalsPaceZones = (a: PaceZone[], b: PaceZone[]): boolean =>
@@ -64,7 +67,10 @@ export const matchesPaceFormula = (
   unit: "min_per_km" | "min_per_100m" | undefined
 ): boolean => {
   if (!thresholdPace || thresholdPace <= 0 || !unit) return false;
-  return equalsPaceZones(zones, calculatePaceZones(thresholdPace, unit, method));
+  return equalsPaceZones(
+    zones,
+    calculatePaceZones(thresholdPace, unit, method)
+  );
 };
 
 export const getThreshold = (

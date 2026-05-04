@@ -2,11 +2,7 @@
  * Per-state detection helpers for `classifyZoneTable`. Co-located so
  * the classifier stays under the 80-line file cap.
  */
-import type {
-  HeartRateZone,
-  PowerZone,
-  Profile,
-} from "../../types/profile";
+import type { HeartRateZone, PowerZone, Profile } from "../../types/profile";
 import type { PaceZone } from "../../types/sport-zones";
 import {
   equalsHrZones,
@@ -53,7 +49,10 @@ export const equalsSnapshot = (
 ): boolean => {
   if (!snapshotZones) return false;
   if (kind === "heartRateZones")
-    return equalsHrZones(zones as HeartRateZone[], snapshotZones as HeartRateZone[]);
+    return equalsHrZones(
+      zones as HeartRateZone[],
+      snapshotZones as HeartRateZone[]
+    );
   if (kind === "powerZones")
     return equalsPowerZones(zones as PowerZone[], snapshotZones as PowerZone[]);
   return equalsPaceZones(zones as PaceZone[], snapshotZones as PaceZone[]);
