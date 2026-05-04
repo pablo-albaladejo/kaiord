@@ -89,16 +89,6 @@ To manually trigger a deployment:
 Test the deployment process locally:
 
 ```bash
-# Make script executable (first time only)
-chmod +x scripts/test-ci-workflows.sh
-
-# Run all tests
-./scripts/test-ci-workflows.sh
-```
-
-Or test manually:
-
-```bash
 # Build with production base path
 VITE_BASE_PATH="/kaiord/" pnpm --filter @kaiord/workout-spa-editor build
 
@@ -190,20 +180,7 @@ You should see provenance information with SLSA predicate type.
 
 ### Token-Based Publishing (Legacy)
 
-If you prefer using tokens, follow these steps:
-
-#### Quick Setup
-
-```bash
-pnpm setup:npm
-```
-
-The script will:
-
-1. Check if you're logged in to npm
-2. Guide you through token creation
-3. Configure GitHub secrets automatically
-4. Verify the setup
+If you prefer using tokens, follow the manual flow below.
 
 #### Manual Token Creation
 
@@ -667,25 +644,19 @@ pnpm audit fix
 
 ### Before Pushing to Main
 
-1. **Test locally:**
-
-   ```bash
-   ./scripts/test-ci-workflows.sh
-   ```
-
-2. **Run tests:**
+1. **Run tests:**
 
    ```bash
    pnpm -r test
    ```
 
-3. **Check linting:**
+2. **Check linting:**
 
    ```bash
    pnpm -r lint
    ```
 
-4. **Verify build:**
+3. **Verify build:**
    ```bash
    pnpm -r build
    ```
