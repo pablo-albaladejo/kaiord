@@ -68,7 +68,10 @@ export const writePaceBand = (
   bound: PaceBound,
   value: number
 ): Profile => {
-  const zones = seedPaceZones(sport, profile.sportZones[sport]?.paceZones?.zones);
+  const zones = seedPaceZones(
+    sport,
+    profile.sportZones[sport]?.paceZones?.zones
+  );
   if (bound === "minPace") zones[BAND_INDEX[band]].minPace = value;
   else zones[BAND_INDEX[band]].maxPace = value;
   const method = profile.sportZones[sport]?.paceZones?.method ?? "manual";

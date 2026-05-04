@@ -61,7 +61,8 @@ export const readHrBand = (
   band: Band,
   bound: HrBound
 ): number | undefined => {
-  const z = profile.sportZones[sport]?.heartRateZones?.zones?.[BAND_INDEX[band]];
+  const z =
+    profile.sportZones[sport]?.heartRateZones?.zones?.[BAND_INDEX[band]];
   return z ? (bound === "minBpm" ? z.minBpm : z.maxBpm) : undefined;
 };
 

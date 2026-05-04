@@ -46,10 +46,7 @@ const isTableEmpty = (
   return false;
 };
 
-const isBandKeyInEmptyTable = (
-  profile: Profile,
-  field: FieldKey
-): boolean => {
+const isBandKeyInEmptyTable = (profile: Profile, field: FieldKey): boolean => {
   const slot = tableSlotKey(field);
   if (!slot) return false;
   const [sport, kind] = slot.split(".") as [
