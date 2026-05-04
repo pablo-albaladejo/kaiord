@@ -11,36 +11,49 @@ describe("defaultIdProvider", () => {
   });
 
   it("should return a UUID v4 string", () => {
+    // Arrange
+
+    // Act
     const id = defaultIdProvider();
 
+    // Assert
     expect(id).toMatch(UUID_V4_REGEX);
   });
 
   it("should be unique over 10k calls", () => {
+    // Arrange
     const ids = new Set<string>();
 
+    // Act
     for (let i = 0; i < 10_000; i++) {
       ids.add(defaultIdProvider());
     }
 
+    // Assert
     expect(ids.size).toBe(10_000);
   });
 
   it("should fall back to crypto.getRandomValues when randomUUID is undefined", () => {
+    // Arrange
     const realGetRandomValues = crypto.getRandomValues.bind(crypto);
-
     vi.stubGlobal("crypto", {
       getRandomValues: (buf: Uint8Array) => realGetRandomValues(buf),
     });
 
+    // Act
     const id = defaultIdProvider();
 
+    // Assert
     expect(id).toMatch(UUID_V4_REGEX);
   });
 
   it("should throw when no secure random source is available", () => {
+    // Arrange
+
+    // Act
     vi.stubGlobal("crypto", {});
 
+    // Assert
     expect(() => defaultIdProvider()).toThrow(/No secure random source/);
   });
 });

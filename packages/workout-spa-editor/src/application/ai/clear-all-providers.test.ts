@@ -7,28 +7,33 @@ import { baseProvider, secondProvider } from "./test-fixtures";
 
 describe("clearAllProviders", () => {
   it("should remove every provider", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     await addProvider(persistence, baseProvider);
     await addProvider(persistence, secondProvider);
 
+    // Act
     await clearAllProviders(persistence);
 
+    // Assert
     expect(await persistence.aiProviders.getAll()).toHaveLength(0);
   });
 
   it("should propagate persistence rejection so the caller can surface a toast", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     await addProvider(persistence, baseProvider);
-
     const original = persistence.aiProviders.delete.bind(
       persistence.aiProviders
     );
     persistence.aiProviders.delete = async () => {
       throw new Error("disk full");
     };
-
     await expect(clearAllProviders(persistence)).rejects.toThrow("disk full");
 
+    // Act
     persistence.aiProviders.delete = original;
+
+    // Assert
   });
 });

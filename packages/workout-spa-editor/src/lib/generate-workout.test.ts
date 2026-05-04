@@ -44,81 +44,111 @@ describe("generateWorkoutKrd", () => {
   });
 
   it("should create language model from provider config", async () => {
+    // Arrange
+
+    // Act
     await generateWorkoutKrd(baseOptions);
 
+    // Assert
     expect(createLanguageModel).toHaveBeenCalledWith(baseOptions.provider);
   });
 
   it("should call createTextToWorkout with the language model", async () => {
+    // Arrange
+
+    // Act
     await generateWorkoutKrd(baseOptions);
 
+    // Assert
     expect(createTextToWorkout).toHaveBeenCalledWith({
       model: { modelId: "test-model" },
     });
   });
 
   it("should pass user text as prompt", async () => {
+    // Arrange
+
+    // Act
     await generateWorkoutKrd(baseOptions);
 
+    // Assert
     expect(mockTextToWorkout).toHaveBeenCalledWith("30 minute endurance ride", {
       sport: undefined,
     });
   });
 
   it("should pass sport option when provided", async () => {
+    // Arrange
+
+    // Act
     await generateWorkoutKrd({
       ...baseOptions,
       text: "easy run",
       sport: "running",
     });
 
+    // Assert
     expect(mockTextToWorkout).toHaveBeenCalledWith("easy run", {
       sport: "running",
     });
   });
 
   it("should append zones context to prompt when provided", async () => {
+    // Arrange
     await generateWorkoutKrd({
       ...baseOptions,
       zonesContext: "FTP: 250W\nPower zones: Z1: 0-137W",
     });
 
+    // Act
     const prompt = mockTextToWorkout.mock.calls[0][0] as string;
+
+    // Assert
     expect(prompt).toContain("30 minute endurance ride");
     expect(prompt).toContain("Training zones:");
     expect(prompt).toContain("FTP: 250W");
   });
 
   it("should append custom prompt when provided", async () => {
+    // Arrange
     await generateWorkoutKrd({
       ...baseOptions,
       customPrompt: "focus on sweet spot",
     });
 
+    // Act
     const prompt = mockTextToWorkout.mock.calls[0][0] as string;
+
+    // Assert
     expect(prompt).toContain("Additional instructions:");
     expect(prompt).toContain("focus on sweet spot");
   });
 
   it("should truncate custom prompt to 500 characters", async () => {
+    // Arrange
     const longPrompt = "a".repeat(600);
-
     await generateWorkoutKrd({
       ...baseOptions,
       customPrompt: longPrompt,
     });
-
     const prompt = mockTextToWorkout.mock.calls[0][0] as string;
+
+    // Act
     const additionalSection = prompt.split("Additional instructions:\n")[1];
+
+    // Assert
     expect(additionalSection).toHaveLength(500);
   });
 
   it("should wrap result with createWorkoutKRD", async () => {
+    // Arrange
     const fakeWorkout = { name: "Endurance Ride", steps: [] };
     mockTextToWorkout.mockResolvedValueOnce(fakeWorkout);
 
+    // Act
     await generateWorkoutKrd(baseOptions);
 
+    // Assert
     expect(createWorkoutKRD).toHaveBeenCalledWith(fakeWorkout);
   });
 });

@@ -31,21 +31,29 @@ describe("DexieAutoMatchDismissalRepository", () => {
   });
 
   it("should return undefined from get when no row exists", async () => {
+    // Arrange
+
+    // Act
     const repo = createDexieAutoMatchDismissalRepository(db);
 
+    // Assert
     expect(await repo.getByProfileAndWeek("p1", "2026-04-27")).toBeUndefined();
   });
 
   it("should round-trip via put-and-get", async () => {
+    // Arrange
     const repo = createDexieAutoMatchDismissalRepository(db);
     const row = baseRow();
 
+    // Act
     await repo.put(row);
 
+    // Assert
     expect(await repo.getByProfileAndWeek("p1", "2026-04-27")).toEqual(row);
   });
 
   it("should upsert via put by composite (profileId, weekStart)", async () => {
+    // Arrange
     const repo = createDexieAutoMatchDismissalRepository(db);
     await repo.put(
       baseRow({
@@ -59,6 +67,7 @@ describe("DexieAutoMatchDismissalRepository", () => {
       })
     );
 
+    // Act
     await repo.put(
       baseRow({
         dismissedPairs: [
@@ -71,6 +80,7 @@ describe("DexieAutoMatchDismissalRepository", () => {
       })
     );
 
+    // Assert
     expect(
       (await repo.getByProfileAndWeek("p1", "2026-04-27"))?.dismissedPairs[0]
         ?.dismissedAt
@@ -78,30 +88,40 @@ describe("DexieAutoMatchDismissalRepository", () => {
   });
 
   it("should be idempotent on delete when rows are missing", async () => {
+    // Arrange
+
+    // Act
     const repo = createDexieAutoMatchDismissalRepository(db);
 
+    // Assert
     await expect(repo.delete("never", "2026-04-27")).resolves.toBeUndefined();
   });
 
   it("should remove only the matching row on delete", async () => {
+    // Arrange
     const repo = createDexieAutoMatchDismissalRepository(db);
     await repo.put(baseRow({ weekStart: "2026-04-27" }));
     await repo.put(baseRow({ weekStart: "2026-05-04" }));
 
+    // Act
     await repo.delete("p1", "2026-04-27");
 
+    // Assert
     expect(await repo.getByProfileAndWeek("p1", "2026-04-27")).toBeUndefined();
     expect(await repo.getByProfileAndWeek("p1", "2026-05-04")).toBeDefined();
   });
 
   it("deleteByProfile removes only that profile's rows", async () => {
+    // Arrange
     const repo = createDexieAutoMatchDismissalRepository(db);
     await repo.put(baseRow({ profileId: "p1", weekStart: "2026-04-27" }));
     await repo.put(baseRow({ profileId: "p1", weekStart: "2026-05-04" }));
     await repo.put(baseRow({ profileId: "p2", weekStart: "2026-04-27" }));
 
+    // Act
     await repo.deleteByProfile("p1");
 
+    // Assert
     expect(await repo.getByProfileAndWeek("p1", "2026-04-27")).toBeUndefined();
     expect(await repo.getByProfileAndWeek("p1", "2026-05-04")).toBeUndefined();
     expect(await repo.getByProfileAndWeek("p2", "2026-04-27")).toBeDefined();

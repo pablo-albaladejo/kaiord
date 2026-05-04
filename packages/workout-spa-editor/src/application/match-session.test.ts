@@ -71,10 +71,12 @@ const fixedId = () => "M1";
 
 describe("matchSession", () => {
   it("should write a SessionMatch with injected clock and idGenerator", async () => {
+    // Arrange
     const activity = stubActivity();
     const workout = stubWorkout();
     const repo = createInMemorySessionMatchRepository();
 
+    // Act
     const result = await matchSession(
       {
         profileId: "p1",
@@ -90,6 +92,7 @@ describe("matchSession", () => {
       }
     );
 
+    // Assert
     expect(result).toEqual({
       id: "M1",
       profileId: "p1",
@@ -103,9 +106,11 @@ describe("matchSession", () => {
   });
 
   it("should use explicit source when provided", async () => {
+    // Arrange
     const activity = stubActivity();
     const workout = stubWorkout();
 
+    // Act
     const result = await matchSession(
       {
         profileId: "p1",
@@ -122,10 +127,16 @@ describe("matchSession", () => {
       }
     );
 
+    // Assert
     expect(result.source).toBe("auto-conversion");
   });
 
   it("should throw CoachingActivityNotFoundError when the activity is missing", async () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     await expect(
       matchSession(
         {
@@ -145,12 +156,16 @@ describe("matchSession", () => {
   });
 
   it("should throw CrossProfileMatchError when the activity belongs to a different profile", async () => {
+    // Arrange
     const activity = stubActivity({
       id: "p2:train2go:12345",
       profileId: "p2",
     });
+
+    // Act
     const workout = stubWorkout();
 
+    // Assert
     await expect(
       matchSession(
         {
@@ -170,8 +185,12 @@ describe("matchSession", () => {
   });
 
   it("should throw WorkoutNotFoundError when the workout is missing", async () => {
+    // Arrange
+
+    // Act
     const activity = stubActivity();
 
+    // Assert
     await expect(
       matchSession(
         {
@@ -191,10 +210,12 @@ describe("matchSession", () => {
   });
 
   it("should propagate SessionAlreadyMatchedError from the repository", async () => {
+    // Arrange
     const activity = stubActivity();
     const workout = stubWorkout();
     const repo = createInMemorySessionMatchRepository();
 
+    // Act
     await matchSession(
       {
         profileId: "p1",
@@ -210,6 +231,7 @@ describe("matchSession", () => {
       }
     );
 
+    // Assert
     await expect(
       matchSession(
         {
@@ -229,11 +251,13 @@ describe("matchSession", () => {
   });
 
   it("should permit the same workout matched in two profiles", async () => {
+    // Arrange
     const a1 = stubActivity({ id: "p1:train2go:1", profileId: "p1" });
     const a2 = stubActivity({ id: "p2:train2go:1", profileId: "p2" });
     const w = stubWorkout({ id: "w-shared" });
     const repo = createInMemorySessionMatchRepository();
 
+    // Act
     await matchSession(
       { profileId: "p1", coachingActivityId: a1.id, workoutId: w.id },
       {
@@ -245,6 +269,7 @@ describe("matchSession", () => {
       }
     );
 
+    // Assert
     await expect(
       matchSession(
         { profileId: "p2", coachingActivityId: a2.id, workoutId: w.id },

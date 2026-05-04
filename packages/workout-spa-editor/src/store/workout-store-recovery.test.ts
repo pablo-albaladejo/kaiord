@@ -41,11 +41,10 @@ describe("Workout Store - Error Recovery", () => {
           },
         },
       };
-
       useWorkoutStore.setState({ currentWorkout: mockWorkout });
+      useWorkoutStore.getState().createBackup();
 
       // Act
-      useWorkoutStore.getState().createBackup();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -54,8 +53,10 @@ describe("Workout Store - Error Recovery", () => {
     });
 
     it("should not create backup when no workout exists", () => {
-      // Act
+      // Arrange
       useWorkoutStore.getState().createBackup();
+
+      // Act
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -81,11 +82,10 @@ describe("Workout Store - Error Recovery", () => {
           },
         },
       };
-
       useWorkoutStore.setState({ lastBackup: mockBackup });
+      const success = useWorkoutStore.getState().restoreFromBackup();
 
       // Act
-      const success = useWorkoutStore.getState().restoreFromBackup();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -96,6 +96,8 @@ describe("Workout Store - Error Recovery", () => {
     });
 
     it("should return false when no backup exists", () => {
+      // Arrange
+
       // Act
       const success = useWorkoutStore.getState().restoreFromBackup();
 
@@ -120,7 +122,6 @@ describe("Workout Store - Error Recovery", () => {
           },
         },
       };
-
       const mockCurrent: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -136,16 +137,15 @@ describe("Workout Store - Error Recovery", () => {
           },
         },
       };
-
       useWorkoutStore.setState({
         currentWorkout: mockCurrent,
         undoHistory: [{ workout: mockCurrent, selection: null }],
         historyIndex: 0,
         lastBackup: mockBackup,
       });
+      useWorkoutStore.getState().restoreFromBackup();
 
       // Act
-      useWorkoutStore.getState().restoreFromBackup();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -157,8 +157,10 @@ describe("Workout Store - Error Recovery", () => {
 
   describe("enableSafeMode", () => {
     it("should enable safe mode", () => {
-      // Act
+      // Arrange
       useWorkoutStore.getState().enableSafeMode();
+
+      // Act
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -170,9 +172,9 @@ describe("Workout Store - Error Recovery", () => {
     it("should disable safe mode", () => {
       // Arrange
       useWorkoutStore.setState({ safeMode: true });
+      useWorkoutStore.getState().disableSafeMode();
 
       // Act
-      useWorkoutStore.getState().disableSafeMode();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -198,7 +200,6 @@ describe("Workout Store - Error Recovery", () => {
           },
         },
       };
-
       useWorkoutStore.setState({ lastBackup: mockBackup });
 
       // Act
@@ -209,6 +210,8 @@ describe("Workout Store - Error Recovery", () => {
     });
 
     it("should return false when no backup exists", () => {
+      // Arrange
+
       // Act
       const hasBackup = useWorkoutStore.getState().hasBackup();
 
@@ -235,7 +238,6 @@ describe("Workout Store - Error Recovery", () => {
           },
         },
       };
-
       const modifiedWorkout: KRD = {
         ...originalWorkout,
         extensions: {
@@ -246,26 +248,19 @@ describe("Workout Store - Error Recovery", () => {
           },
         },
       };
-
       useWorkoutStore.setState({ currentWorkout: originalWorkout });
-
-      // Act - Create backup
       useWorkoutStore.getState().createBackup();
-
-      // Act - Modify workout
       useWorkoutStore.getState().updateWorkout(modifiedWorkout);
       const modifiedState = useWorkoutStore.getState();
-
-      // Assert - Workout is modified
       expect(
         modifiedState.currentWorkout?.extensions?.structured_workout?.name
       ).toBe("Modified Workout");
-
-      // Act - Restore from backup
       useWorkoutStore.getState().restoreFromBackup();
+
+      // Act
       const restoredState = useWorkoutStore.getState();
 
-      // Assert - Workout is restored
+      // Assert
       expect(
         restoredState.currentWorkout?.extensions?.structured_workout?.name
       ).toBe("Original Workout");

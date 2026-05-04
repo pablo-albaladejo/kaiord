@@ -44,28 +44,33 @@ describe("useActiveProfileLive", () => {
   afterEach(clear);
 
   it("should return { id: null, profile: null } when no active profile is set", async () => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(() => useActiveProfileLive());
 
+    // Assert
     await waitFor(() => {
       expect(result.current).toEqual({ id: null, profile: null });
     });
   });
 
   it("should resolve to the active profile and re-fires when active id changes", async () => {
+    // Arrange
     const persistence = createDexiePersistence(db);
     await persistence.profiles.put(makeProfile(PROFILE_A, "A"));
     await persistence.profiles.setActiveId(PROFILE_A);
-
     const { result } = renderHook(() => useActiveProfileLive());
-
     await waitFor(() => {
       expect(result.current?.id).toBe(PROFILE_A);
       expect(result.current?.profile?.name).toBe("A");
     });
-
     await persistence.profiles.put(makeProfile(PROFILE_B, "B"));
+
+    // Act
     await persistence.profiles.setActiveId(PROFILE_B);
 
+    // Assert
     await waitFor(() => {
       expect(result.current?.id).toBe(PROFILE_B);
       expect(result.current?.profile?.name).toBe("B");
@@ -73,34 +78,31 @@ describe("useActiveProfileLive", () => {
   });
 
   it("should never observe an intermediate { id: B, profile: ProfileA | null } during a same-tab transition", async () => {
+    // Arrange
     const persistence = createDexiePersistence(db);
     await persistence.profiles.put(makeProfile(PROFILE_A, "A"));
     await persistence.profiles.put(makeProfile(PROFILE_B, "B"));
     await persistence.profiles.setActiveId(PROFILE_A);
-
     const observed: ActiveProfile[] = [];
     const { result } = renderHook(() => {
       const value = useActiveProfileLive();
       if (value !== undefined) observed.push(value);
       return value;
     });
-
     await waitFor(() => {
       expect(result.current?.id).toBe(PROFILE_A);
       expect(result.current?.profile?.id).toBe(PROFILE_A);
     });
-
-    // Same-tab transition: change active id, then make an unrelated
-    // profiles-table mutation. The atomic join inside useLiveQuery
-    // must never expose { id: B, profile: A } or { id: B, profile: null }.
     await persistence.profiles.setActiveId(PROFILE_B);
+
+    // Act
     await persistence.profiles.put(makeProfile(UNRELATED, "Unrelated"));
 
+    // Assert
     await waitFor(() => {
       expect(result.current?.id).toBe(PROFILE_B);
       expect(result.current?.profile?.id).toBe(PROFILE_B);
     });
-
     for (const snapshot of observed) {
       const inconsistent =
         snapshot.id === PROFILE_B && snapshot.profile?.id !== PROFILE_B;

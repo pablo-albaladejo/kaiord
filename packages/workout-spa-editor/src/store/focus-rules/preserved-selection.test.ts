@@ -32,7 +32,7 @@ describe("preservedSelectionTarget", () => {
   });
 
   it("should fall back to the item now at the same-index when the prior id is gone", () => {
-    // Arrange — "b" was deleted; position 1 is now "c".
+    // Arrange
     const workout = workoutWith(["a", "c"]);
 
     // Act
@@ -57,7 +57,7 @@ describe("preservedSelectionTarget", () => {
     // Arrange
     const workout = workoutWith(["a"]);
 
-    // Act — fallbackIndex out of range.
+    // Act
     const target = preservedSelectionTarget(workout, asItemId("ghost"), 5);
 
     // Assert
@@ -65,6 +65,8 @@ describe("preservedSelectionTarget", () => {
   });
 
   it("should fall back to empty-state when the workout is undefined", () => {
+    // Arrange
+
     // Act
     const target = preservedSelectionTarget(undefined, asItemId("x"), 0);
 

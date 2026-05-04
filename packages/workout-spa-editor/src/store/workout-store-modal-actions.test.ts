@@ -29,9 +29,9 @@ describe("Modal Store Actions", () => {
         onCancel: () => {},
         variant: "destructive" as const,
       };
+      useWorkoutStore.getState().showConfirmationModal(config);
 
       // Act
-      useWorkoutStore.getState().showConfirmationModal(config);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -49,9 +49,9 @@ describe("Modal Store Actions", () => {
         onCancel: () => {},
         variant: "destructive" as const,
       };
+      useWorkoutStore.getState().showConfirmationModal(config);
 
       // Act
-      useWorkoutStore.getState().showConfirmationModal(config);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -71,9 +71,9 @@ describe("Modal Store Actions", () => {
         onCancel,
         variant: "default" as const,
       };
+      useWorkoutStore.getState().showConfirmationModal(config);
 
       // Act
-      useWorkoutStore.getState().showConfirmationModal(config);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -102,9 +102,9 @@ describe("Modal Store Actions", () => {
           variant: "default",
         },
       });
+      useWorkoutStore.getState().hideConfirmationModal();
 
       // Act
-      useWorkoutStore.getState().hideConfirmationModal();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -125,9 +125,9 @@ describe("Modal Store Actions", () => {
           variant: "default",
         },
       });
+      useWorkoutStore.getState().hideConfirmationModal();
 
       // Act
-      useWorkoutStore.getState().hideConfirmationModal();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -140,9 +140,9 @@ describe("Modal Store Actions", () => {
         isModalOpen: false,
         modalConfig: null,
       });
+      useWorkoutStore.getState().hideConfirmationModal();
 
       // Act
-      useWorkoutStore.getState().hideConfirmationModal();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -163,21 +163,19 @@ describe("Modal Store Actions", () => {
         onCancel: () => {},
         variant: "default" as const,
       };
-
-      // Act & Assert - Initial state
       let state = useWorkoutStore.getState();
       expect(state.isModalOpen).toBe(false);
       expect(state.modalConfig).toBeNull();
-
-      // Act & Assert - Open modal
       useWorkoutStore.getState().showConfirmationModal(config);
       state = useWorkoutStore.getState();
       expect(state.isModalOpen).toBe(true);
       expect(state.modalConfig).toEqual(config);
-
-      // Act & Assert - Close modal
       useWorkoutStore.getState().hideConfirmationModal();
+
+      // Act
       state = useWorkoutStore.getState();
+
+      // Assert
       expect(state.isModalOpen).toBe(false);
       expect(state.modalConfig).toBeNull();
     });
@@ -193,7 +191,6 @@ describe("Modal Store Actions", () => {
         onCancel: () => {},
         variant: "default" as const,
       };
-
       const secondConfig = {
         title: "Second Modal",
         message: "Second message",
@@ -203,15 +200,13 @@ describe("Modal Store Actions", () => {
         onCancel: () => {},
         variant: "destructive" as const,
       };
-
-      // Act - Open first modal
       useWorkoutStore.getState().showConfirmationModal(firstConfig);
-
-      // Act - Open second modal (replaces first)
       useWorkoutStore.getState().showConfirmationModal(secondConfig);
+
+      // Act
       const state = useWorkoutStore.getState();
 
-      // Assert - Second modal config is active
+      // Assert
       expect(state.isModalOpen).toBe(true);
       expect(state.modalConfig?.title).toBe("Second Modal");
       expect(state.modalConfig?.variant).toBe("destructive");

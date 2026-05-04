@@ -12,22 +12,19 @@ describe("sendBridgeMessage", () => {
   });
 
   it("should return error when chrome runtime is not available", async () => {
-    // Arrange - ensure chrome is undefined
+    // Arrange
     const originalChrome = globalThis.chrome;
-    // @ts-expect-error -- intentionally removing chrome for test
     delete globalThis.chrome;
-
-    // Act
     const result = await sendBridgeMessage("ext-id", { type: "ping" });
-
-    // Assert
     expect(result).toEqual({
       ok: false,
       error: "Chrome runtime not available",
     });
 
-    // Restore
+    // Act
     globalThis.chrome = originalChrome;
+
+    // Assert
   });
 
   it("should send message via chrome.runtime.sendMessage", async () => {
@@ -38,7 +35,6 @@ describe("sendBridgeMessage", () => {
         cb(mockResponse);
       }
     );
-
     globalThis.chrome = {
       runtime: {
         sendMessage: sendMessage,
@@ -65,7 +61,6 @@ describe("sendBridgeMessage", () => {
         cb(undefined);
       }
     );
-
     globalThis.chrome = {
       runtime: {
         sendMessage: sendMessage,
@@ -90,7 +85,6 @@ describe("sendBridgeMessage", () => {
         cb(null);
       }
     );
-
     globalThis.chrome = {
       runtime: {
         sendMessage: sendMessage,
@@ -107,18 +101,17 @@ describe("sendBridgeMessage", () => {
 
   it("should resolve with timeout error when extension does not respond", async () => {
     // Arrange
-    const sendMessage = vi.fn(); // never calls callback
-
+    const sendMessage = vi.fn();
     globalThis.chrome = {
       runtime: {
         sendMessage: sendMessage,
         lastError: undefined,
       },
     } as unknown as typeof chrome;
-
-    // Act
     const promise = sendBridgeMessage("ext-123", { type: "ping" }, 1000);
     vi.advanceTimersByTime(1000);
+
+    // Act
     const result = await promise;
 
     // Assert
@@ -133,7 +126,6 @@ describe("sendBridgeMessage", () => {
     const sendMessage = vi.fn(() => {
       throw new Error("Extension crashed");
     });
-
     globalThis.chrome = {
       runtime: {
         sendMessage: sendMessage,

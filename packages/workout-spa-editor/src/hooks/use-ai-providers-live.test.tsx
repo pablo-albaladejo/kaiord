@@ -38,32 +38,35 @@ describe("useAiProvidersLive", () => {
   afterEach(clear);
 
   it("should resolve with plaintext apiKey while keeping ciphertext at rest", async () => {
+    // Arrange
     const persistence = createDexiePersistence(db);
     const provider = makeProvider("p1", "sk-plaintext");
     await persistence.aiProviders.put(provider);
-
     const { result } = renderHook(() => useAiProvidersLive());
-
     await waitFor(() => {
       expect(result.current).toBeDefined();
     });
     expect(result.current?.[0].apiKey).toBe("sk-plaintext");
 
+    // Act
     const stored = await db.table("aiProviders").get("p1");
+
+    // Assert
     expect(stored.apiKey).not.toBe("sk-plaintext");
   });
 
   it("should re-fire when a provider is written through PersistencePort", async () => {
+    // Arrange
     const persistence = createDexiePersistence(db);
-
     const { result } = renderHook(() => useAiProvidersLive());
-
     await waitFor(() => {
       expect(result.current).toEqual([]);
     });
 
+    // Act
     await persistence.aiProviders.put(makeProvider("p2", "sk-second"));
 
+    // Assert
     await waitFor(() => {
       expect(result.current).toHaveLength(1);
       expect(result.current?.[0].id).toBe("p2");

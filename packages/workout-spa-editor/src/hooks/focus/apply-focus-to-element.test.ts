@@ -56,32 +56,31 @@ describe("applyFocusToElement", () => {
       throw new Error("detached");
     });
     const scrollSpy = vi.fn();
+
+    // Act
     el.scrollIntoView = scrollSpy;
 
-    // Act — must NOT throw out of the function.
+    // Assert
     expect(() =>
       applyFocusToElement(el, { reduceMotion: false })
     ).not.toThrow();
-
-    // Assert — scroll is skipped when focus failed.
     expect(scrollSpy).not.toHaveBeenCalled();
   });
 
   it("should still succeed when scrollIntoView throws (legacy browser)", () => {
-    // Arrange — legacy runtime where scrollIntoView doesn't accept the
-    // options-object form.
+    // Arrange
     const el = document.createElement("div");
     const focusSpy = vi.spyOn(el, "focus").mockImplementation(() => {});
+
+    // Act
     el.scrollIntoView = () => {
       throw new TypeError("scrollIntoView");
     };
 
-    // Act
+    // Assert
     expect(() =>
       applyFocusToElement(el, { reduceMotion: false })
     ).not.toThrow();
-
-    // Assert — focus still happened.
     expect(focusSpy).toHaveBeenCalled();
   });
 });
@@ -92,27 +91,30 @@ describe("prefersReducedMotion", () => {
   });
 
   it("reflects matchMedia('(prefers-reduced-motion: reduce)')", () => {
-    // Arrange — patch `window.matchMedia` directly; `prefersReducedMotion`
-    // reads it off `window`.
+    // Arrange
+
+    // Act
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       configurable: true,
       value: vi.fn(() => ({ matches: true }) as unknown as MediaQueryList),
     });
 
-    // Act + Assert
+    // Assert
     expect(prefersReducedMotion()).toBe(true);
   });
 
   it("should return false when matchMedia is unavailable", () => {
     // Arrange
+
+    // Act
     Object.defineProperty(window, "matchMedia", {
       writable: true,
       configurable: true,
       value: undefined,
     });
 
-    // Act + Assert
+    // Assert
     expect(prefersReducedMotion()).toBe(false);
   });
 });

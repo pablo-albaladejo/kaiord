@@ -23,10 +23,20 @@ const makeTransport = (
 
 describe("attempt-link helpers", () => {
   it("should return the canonical aborted shape via aborted()", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(aborted()).toEqual({ ok: false, reason: "aborted" });
   });
 
   it("should convert Error and string-coerce unknown via transportError()", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(transportError(new Error("fail"))).toEqual({
       ok: false,
       reason: "transport-error",
@@ -40,19 +50,27 @@ describe("attempt-link helpers", () => {
   });
 
   it("should return null on success via safeOpenExternal", async () => {
+    // Arrange
+
+    // Act
     const t = makeTransport({ openExternal: vi.fn(async () => undefined) });
+
+    // Assert
     expect(await safeOpenExternal(t)).toBeNull();
   });
 
   it("should return transportError on rejection via safeOpenExternal", async () => {
+    // Arrange
     const t = makeTransport({
       openExternal: vi.fn(async () => {
         throw new Error("denied");
       }),
     });
 
+    // Act
     const result = await safeOpenExternal(t);
 
+    // Assert
     expect(result).toEqual({
       ok: false,
       reason: "transport-error",
@@ -61,18 +79,23 @@ describe("attempt-link helpers", () => {
   });
 
   it("should return null when signal is aborted via safeOpenExternal (caller gates)", async () => {
+    // Arrange
     const t = makeTransport({
       openExternal: vi.fn(async () => {
         throw new Error("denied");
       }),
     });
     const ctrl = new AbortController();
+
+    // Act
     ctrl.abort();
 
+    // Assert
     expect(await safeOpenExternal(t, ctrl.signal)).toBeNull();
   });
 
   it("should return ok:true when linkAccount succeeds via persistLinkOrDeleted", async () => {
+    // Arrange
     const profiles = createInMemoryProfileRepository();
     await profiles.put({
       id: "p1",
@@ -84,6 +107,7 @@ describe("attempt-link helpers", () => {
     });
     const t = makeTransport();
 
+    // Act
     const result = await persistLinkOrDeleted(
       profiles,
       t,
@@ -96,13 +120,16 @@ describe("attempt-link helpers", () => {
       "2026-04-28T10:00:00.000Z"
     );
 
+    // Assert
     expect(result).toEqual({ ok: true });
   });
 
   it("should return profile-deleted on ProfileNotFoundError via persistLinkOrDeleted", async () => {
+    // Arrange
     const profiles = createInMemoryProfileRepository();
     const t = makeTransport();
 
+    // Act
     const result = await persistLinkOrDeleted(
       profiles,
       t,
@@ -115,16 +142,21 @@ describe("attempt-link helpers", () => {
       "2026-04-28T10:00:00.000Z"
     );
 
+    // Assert
     expect(result).toEqual({ ok: false, reason: "profile-deleted" });
   });
 
   it("should re-throw non-ProfileNotFoundError errors via persistLinkOrDeleted", async () => {
+    // Arrange
     const failing = createInMemoryProfileRepository();
     failing.getById = async () => {
       throw new Error("network error");
     };
+
+    // Act
     const t = makeTransport();
 
+    // Assert
     await expect(
       persistLinkOrDeleted(
         failing,
@@ -141,7 +173,12 @@ describe("attempt-link helpers", () => {
   });
 
   it("should match ProfileNotFoundError via instanceof", () => {
+    // Arrange
+
+    // Act
     const err = new ProfileNotFoundError("p1");
+
+    // Assert
     expect(err).toBeInstanceOf(ProfileNotFoundError);
     expect(err.profileId).toBe("p1");
   });

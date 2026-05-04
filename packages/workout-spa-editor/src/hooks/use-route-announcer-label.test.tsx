@@ -33,30 +33,39 @@ describe("useRouteAnnouncerLabel", () => {
     ["/workout/new", "New workout"],
     ["/workout/abc-123", "Edit workout"],
   ])("should return %s -> %s", (path, expected) => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(() => useRouteAnnouncerLabel(), {
       wrapper: wrapWithRouter(path),
     });
 
+    // Assert
     expect(result.current).toBe(expected);
   });
 
   it("should return a non-empty label on initial mount with a deep-linked URL", () => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(() => useRouteAnnouncerLabel(), {
       wrapper: wrapWithRouter("/library"),
     });
 
+    // Assert
     expect(result.current).not.toBe("");
     expect(result.current).toBe("Library page");
   });
 
   it("should not change the label on query-string changes (pathname stays /library)", () => {
-    // wouter's useLocation returns the pathname only — query string
-    // changes do not propagate as new locations, so the hook never
-    // sees them and the label is stable.
+    // Arrange
+
+    // Act
     const { result } = renderHook(() => useRouteAnnouncerLabel(), {
       wrapper: wrapWithRouter("/library?filter=running"),
     });
 
+    // Assert
     expect(result.current).toBe("Library page");
   });
 });

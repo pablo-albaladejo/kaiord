@@ -4,6 +4,11 @@ import { canonicalSportFamily } from "./canonical-sport-family";
 
 describe("canonicalSportFamily", () => {
   it("should collapse swim variants to swimming", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(canonicalSportFamily("swim")).toBe("swimming");
     expect(canonicalSportFamily("open_water_swim")).toBe("swimming");
     expect(canonicalSportFamily("lap_swimming")).toBe("swimming");
@@ -11,6 +16,11 @@ describe("canonicalSportFamily", () => {
   });
 
   it("should collapse bike variants to cycling", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(canonicalSportFamily("bike")).toBe("cycling");
     expect(canonicalSportFamily("cycling")).toBe("cycling");
     expect(canonicalSportFamily("road_cycling")).toBe("cycling");
@@ -21,6 +31,11 @@ describe("canonicalSportFamily", () => {
   });
 
   it("should collapse run variants to running", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(canonicalSportFamily("run")).toBe("running");
     expect(canonicalSportFamily("running")).toBe("running");
     expect(canonicalSportFamily("trail_running")).toBe("running");
@@ -29,6 +44,11 @@ describe("canonicalSportFamily", () => {
   });
 
   it("should collapse gym variants to strength", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(canonicalSportFamily("gym")).toBe("strength");
     expect(canonicalSportFamily("strength")).toBe("strength");
     expect(canonicalSportFamily("strength_training")).toBe("strength");
@@ -37,16 +57,25 @@ describe("canonicalSportFamily", () => {
   });
 
   it("should return the raw key for unmapped sports (no cross-sport false matches)", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(canonicalSportFamily("yoga")).toBe("yoga");
     expect(canonicalSportFamily("kayaking")).toBe("kayaking");
     expect(canonicalSportFamily("pilates")).toBe("pilates");
-    // Distinct keys remain distinct.
     expect(canonicalSportFamily("yoga")).not.toBe(
       canonicalSportFamily("kayaking")
     );
   });
 
   it("should normalize case so input variations agree", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(canonicalSportFamily("SWIM")).toBe("swimming");
     expect(canonicalSportFamily("Cycling")).toBe("cycling");
   });

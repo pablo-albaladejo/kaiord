@@ -73,6 +73,7 @@ const makeDeps = (
 
 describe("deleteProfileWithCascade", () => {
   it("removes only the targeted profile's coaching activities", async () => {
+    // Arrange
     const coaching = createInMemoryCoachingRepository();
     const coachingSyncState = createInMemoryCoachingSyncStateRepository();
     await coaching.upsertMany([
@@ -81,11 +82,13 @@ describe("deleteProfileWithCascade", () => {
       makeRecord("p2", "3"),
     ]);
 
+    // Act
     await deleteProfileWithCascade(
       makeDeps({ coaching, coachingSyncState }),
       "p1"
     );
 
+    // Assert
     expect(
       await coaching.getByProfileAndDateRange("p1", "2026-01-01", "2026-12-31")
     ).toHaveLength(0);
@@ -95,6 +98,7 @@ describe("deleteProfileWithCascade", () => {
   });
 
   it("removes only the targeted profile's coachingSyncState rows", async () => {
+    // Arrange
     const coaching = createInMemoryCoachingRepository();
     const coachingSyncState = createInMemoryCoachingSyncStateRepository();
     await coachingSyncState.put({
@@ -108,11 +112,13 @@ describe("deleteProfileWithCascade", () => {
       lastSyncedAt: NOW,
     });
 
+    // Act
     await deleteProfileWithCascade(
       makeDeps({ coaching, coachingSyncState }),
       "p1"
     );
 
+    // Assert
     expect(
       await coachingSyncState.getBySourceAndProfile("train2go", "p1")
     ).toBeUndefined();
@@ -122,21 +128,20 @@ describe("deleteProfileWithCascade", () => {
   });
 
   it("should do NOT cascade to converted WorkoutRecord rows (workouts survive)", async () => {
-    // deleteProfileWithCascade has no access to WorkoutRepository by design —
-    // workouts are profile-agnostic. This test documents the invariant.
+    // Arrange
     const coaching = createInMemoryCoachingRepository();
     const coachingSyncState = createInMemoryCoachingSyncStateRepository();
     const workouts = createInMemoryWorkoutRepository();
-
     await workouts.put(makeWorkout("w1"));
     await coaching.upsertMany([makeRecord("p1", "1")]);
 
+    // Act
     await deleteProfileWithCascade(
       makeDeps({ coaching, coachingSyncState }),
       "p1"
     );
 
-    // Coaching activities deleted; workout is untouched
+    // Assert
     expect(
       await coaching.getByProfileAndDateRange("p1", "2026-01-01", "2026-12-31")
     ).toHaveLength(0);
@@ -144,19 +149,18 @@ describe("deleteProfileWithCascade", () => {
   });
 
   it("should use the supplied id (NOT getActiveId)", async () => {
-    // No active-id surface to leak; the use case takes only the
-    // explicit profileId argument and the two repos. This assertion
-    // is structural: there is no other source of profile identity in
-    // the function signature.
+    // Arrange
     const coaching = createInMemoryCoachingRepository();
     const coachingSyncState = createInMemoryCoachingSyncStateRepository();
     await coaching.upsertMany([makeRecord("p-explicit", "1")]);
 
+    // Act
     await deleteProfileWithCascade(
       makeDeps({ coaching, coachingSyncState }),
       "p-explicit"
     );
 
+    // Assert
     expect(
       await coaching.getByProfileAndDateRange(
         "p-explicit",
@@ -167,6 +171,7 @@ describe("deleteProfileWithCascade", () => {
   });
 
   it("should cascade sessionMatch.deleteByProfile", async () => {
+    // Arrange
     const deps = makeDeps();
     await deps.sessionMatch.put({
       id: "m1",
@@ -187,8 +192,10 @@ describe("deleteProfileWithCascade", () => {
       source: "manual",
     });
 
+    // Act
     await deleteProfileWithCascade(deps, "p1");
 
+    // Assert
     expect(
       await deps.sessionMatch.listByProfileAndWeek(
         "p1",
@@ -206,6 +213,7 @@ describe("deleteProfileWithCascade", () => {
   });
 
   it("should cascade autoMatchDismissal.deleteByProfile", async () => {
+    // Arrange
     const deps = makeDeps();
     await deps.autoMatchDismissal.put({
       profileId: "p1",
@@ -218,8 +226,10 @@ describe("deleteProfileWithCascade", () => {
       dismissedPairs: [{ activityId: "a2", workoutId: "w2", dismissedAt: NOW }],
     });
 
+    // Act
     await deleteProfileWithCascade(deps, "p1");
 
+    // Assert
     expect(
       await deps.autoMatchDismissal.getByProfileAndWeek("p1", "2026-04-13")
     ).toBeUndefined();
@@ -229,6 +239,7 @@ describe("deleteProfileWithCascade", () => {
   });
 
   it("should cascade userPreferences.delete", async () => {
+    // Arrange
     const deps = makeDeps();
     await deps.userPreferences.put({
       profileId: "p1",
@@ -239,8 +250,10 @@ describe("deleteProfileWithCascade", () => {
       calendarDensity: "comfortable",
     });
 
+    // Act
     await deleteProfileWithCascade(deps, "p1");
 
+    // Assert
     expect(await deps.userPreferences.get("p1")).toBeUndefined();
     expect(await deps.userPreferences.get("p2")).toBeDefined();
   });

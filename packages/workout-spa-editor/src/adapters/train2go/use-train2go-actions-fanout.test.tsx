@@ -84,45 +84,54 @@ describe("useConnectCallback fan-out", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("should call runZonesSync after attemptLink ok AND syncZones flag is true", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK_WITH_FLAG));
     const runZonesSync = vi.fn(async () => undefined);
-
     const { result } = renderHook(
       () => useConnectCallback(persistence, transport, analytics, runZonesSync),
       wrapPersistence(persistence)
     );
+
+    // Act
     await result.current("p1");
 
+    // Assert
     expect(runZonesSync).toHaveBeenCalledExactlyOnceWith("p1");
   });
 
   it("should do NOT call runZonesSync when the syncZones flag is false", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK_WITHOUT_FLAG));
     const runZonesSync = vi.fn(async () => undefined);
-
     const { result } = renderHook(
       () => useConnectCallback(persistence, transport, analytics, runZonesSync),
       wrapPersistence(persistence)
     );
+
+    // Act
     await result.current("p1");
 
+    // Assert
     expect(runZonesSync).not.toHaveBeenCalled();
   });
 
   it("should swallow runZonesSync errors so the connect still resolves", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK_WITH_FLAG));
     const runZonesSync = vi.fn(async () => {
       throw new Error("zones boom");
     });
 
+    // Act
     const { result } = renderHook(
       () => useConnectCallback(persistence, transport, analytics, runZonesSync),
       wrapPersistence(persistence)
     );
 
+    // Assert
     await expect(result.current("p1")).resolves.toBeUndefined();
   });
 });
@@ -131,20 +140,24 @@ describe("useSyncCallback fan-out", () => {
   beforeEach(() => vi.clearAllMocks());
 
   it("should call runZonesSync after syncWeek ok AND syncZones flag is true", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK_WITH_FLAG));
     const runZonesSync = vi.fn(async () => undefined);
-
     const { result } = renderHook(
       () => useSyncCallback(persistence, transport, analytics, runZonesSync),
       wrapPersistence(persistence)
     );
+
+    // Act
     await result.current("p1", "2026-04-13");
 
+    // Assert
     expect(runZonesSync).toHaveBeenCalledExactlyOnceWith("p1");
   });
 
   it("should do NOT call runZonesSync when syncWeek fails", async () => {
+    // Arrange
     mockSyncWeek.mockResolvedValueOnce({
       ok: false as const,
       reason: "shape-mismatch",
@@ -152,13 +165,15 @@ describe("useSyncCallback fan-out", () => {
     const persistence = createInMemoryPersistence();
     await persistence.profiles.put(makeProfile(T2G_LINK_WITH_FLAG));
     const runZonesSync = vi.fn(async () => undefined);
-
     const { result } = renderHook(
       () => useSyncCallback(persistence, transport, analytics, runZonesSync),
       wrapPersistence(persistence)
     );
+
+    // Act
     await result.current("p1", "2026-04-13");
 
+    // Assert
     expect(runZonesSync).not.toHaveBeenCalled();
   });
 });

@@ -12,28 +12,32 @@ describe("FocusTarget discriminated union", () => {
   it("should produce a FocusTargetItem with the supplied ItemId via focusItem", () => {
     // Arrange
     const id = asItemId("some-item");
+    const target = focusItem(id);
+    expect(target).toEqual({ kind: "item", id: "some-item" });
 
     // Act
-    const target = focusItem(id);
+    expectTypeOf(target).toEqualTypeOf<FocusTargetItem>();
 
     // Assert
-    expect(target).toEqual({ kind: "item", id: "some-item" });
-    expectTypeOf(target).toEqualTypeOf<FocusTargetItem>();
   });
 
   it("should expose focusEmptyState as a FocusTargetEmptyState sentinel", () => {
-    // Arrange + Act: focusEmptyState is a pre-built sentinel constant.
+    // Arrange
+    expect(focusEmptyState).toEqual({ kind: "empty-state" });
+
+    // Act
+    expectTypeOf(focusEmptyState).toEqualTypeOf<FocusTargetEmptyState>();
 
     // Assert
-    expect(focusEmptyState).toEqual({ kind: "empty-state" });
-    expectTypeOf(focusEmptyState).toEqualTypeOf<FocusTargetEmptyState>();
   });
 
   it("narrows on `kind` at call sites", () => {
     // Arrange
+
+    // Act
     const target: FocusTarget = focusItem(asItemId("narrow-me"));
 
-    // Act + Assert: the conditional narrows the type inside the branch.
+    // Assert
     if (target.kind === "item") {
       expectTypeOf(target.id).toBeString();
       expect(target.id).toBe("narrow-me");
@@ -46,11 +50,13 @@ describe("FocusTarget discriminated union", () => {
     // Arrange
     const target: FocusTarget = focusEmptyState;
 
-    // Act + Assert
+    // Act
     if (target.kind === "empty-state") {
       expectTypeOf(target).toEqualTypeOf<FocusTargetEmptyState>();
     } else {
       assert.fail("Expected empty-state kind");
     }
+
+    // Assert
   });
 });

@@ -17,8 +17,12 @@ import { useGarminDetection } from "./use-garmin-detection";
 
 describe("useGarminDetection", () => {
   it("should call detectExtension on mount even without a discovered id", () => {
+    // Arrange
+
+    // Act
     renderHook(() => useGarminDetection());
 
+    // Assert
     expect(mockDetectExtension).toHaveBeenCalledTimes(1);
   });
 });
