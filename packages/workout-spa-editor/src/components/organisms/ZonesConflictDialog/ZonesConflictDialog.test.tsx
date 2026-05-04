@@ -139,4 +139,122 @@ describe("ZonesConflictDialog", () => {
       "running.thresholds.lthr": "reject",
     });
   });
+
+  it("should render a band-level conflict row with a generated label (5.2a)", () => {
+    // Arrange
+    const bandConflicts: ConflictItem[] = [
+      {
+        field: "cycling.heartRateZones.z2.maxBpm",
+        current: 145,
+        incoming: 147,
+      },
+    ];
+
+    // Act
+    render(
+      <ZonesConflictDialog
+        open
+        conflicts={bandConflicts}
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    // Assert
+    expect(
+      screen.getByTestId("zones-conflict-row-cycling.heartRateZones.z2.maxBpm")
+    ).toBeInTheDocument();
+    expect(screen.getByText("Cycling HR Z2 max")).toBeInTheDocument();
+  });
+
+  it("should preserve insertion order grouping scalars and band-level conflicts (5.2b)", () => {
+    // Arrange — mixed scalar + band conflicts, scalar first
+    const mixed: ConflictItem[] = [
+      { field: "cycling.thresholds.ftp", current: 200, incoming: 270 },
+      {
+        field: "cycling.heartRateZones.z2.minBpm",
+        current: 131,
+        incoming: 134,
+      },
+      {
+        field: "cycling.heartRateZones.z2.maxBpm",
+        current: 145,
+        incoming: 147,
+      },
+    ];
+
+    // Act
+    render(
+      <ZonesConflictDialog
+        open
+        conflicts={mixed}
+        onConfirm={vi.fn()}
+        onCancel={vi.fn()}
+      />
+    );
+
+    // Assert — all three rows render with distinct testids
+    expect(
+      screen.getByTestId("zones-conflict-row-cycling.thresholds.ftp")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("zones-conflict-row-cycling.heartRateZones.z2.minBpm")
+    ).toBeInTheDocument();
+    expect(
+      screen.getByTestId("zones-conflict-row-cycling.heartRateZones.z2.maxBpm")
+    ).toBeInTheDocument();
+  });
+
+  it("should emit accept decisions for all rows of a sport-kind table when each is toggled (5.2c)", async () => {
+    // Arrange
+    const tableConflicts: ConflictItem[] = [
+      {
+        field: "cycling.heartRateZones.z1.minBpm",
+        current: 100,
+        incoming: 107,
+      },
+      {
+        field: "cycling.heartRateZones.z1.maxBpm",
+        current: 130,
+        incoming: 133,
+      },
+      {
+        field: "cycling.heartRateZones.z2.minBpm",
+        current: 131,
+        incoming: 134,
+      },
+      {
+        field: "cycling.heartRateZones.z2.maxBpm",
+        current: 145,
+        incoming: 147,
+      },
+    ];
+    const onConfirm = vi.fn();
+    render(
+      <ZonesConflictDialog
+        open
+        conflicts={tableConflicts}
+        onConfirm={onConfirm}
+        onCancel={vi.fn()}
+      />
+    );
+    for (const c of tableConflicts) {
+      const row = screen.getByTestId(`zones-conflict-row-${c.field}`);
+      const acceptInput = row.querySelector(
+        'input[value="accept"]'
+      ) as HTMLInputElement;
+      await userEvent.click(acceptInput);
+    }
+
+    // Act
+    await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+
+    // Assert
+    expect(onConfirm).toHaveBeenCalledWith({
+      "cycling.heartRateZones.z1.minBpm": "accept",
+      "cycling.heartRateZones.z1.maxBpm": "accept",
+      "cycling.heartRateZones.z2.minBpm": "accept",
+      "cycling.heartRateZones.z2.maxBpm": "accept",
+    });
+  });
 });
