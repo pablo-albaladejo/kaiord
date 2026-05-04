@@ -5,7 +5,9 @@
 ## Purpose
 
 SPA-side integration with the train2go-bridge extension — runtime discovery via content script announcement and read-only import of coaching plans rendered on Train2Go pages.
+
 ## Requirements
+
 ### Requirement: Bridge capability schema extension
 
 The `BridgeCapability` Zod enum (in `packages/workout-spa-editor/src/types/bridge-schemas.ts`) SHALL include both `read:training-plan` AND `read:training-zones`. (Both must be valid for `bridgeManifestSchema` to validate manifests advertising either capability.)
@@ -568,4 +570,3 @@ The Dexie schema SHALL bump to v9 with an `applyV9Upgrade` helper (mirrors the v
 - **THEN** the entire `linkedAccounts[0]` entry SHALL be removed from the array (existing behavior)
 - **AND** the corresponding `lastSyncedZonesSnapshot` SHALL be removed atomically with the account (no orphan snapshot data persists)
 - **AND** if the user re-links the same external account later (same `externalUserId`), the new linked-account record SHALL start with `lastSyncedZonesSnapshot` absent (next sync establishes a fresh baseline; no stale snapshot is preserved across re-links)
-
