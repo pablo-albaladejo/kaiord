@@ -69,6 +69,7 @@ describe("useAiGeneration — analytics call-site", () => {
     model: "claude-sonnet-4-5",
     label: "Claude",
     isDefault: true,
+    createdAt: 0,
   };
   const fakeKrd = { extensions: {} };
 

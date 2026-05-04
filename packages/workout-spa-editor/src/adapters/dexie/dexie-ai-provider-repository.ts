@@ -37,17 +37,13 @@ export function createDexieAiProviderRepository(
 
   return {
     getAll: async () => {
-      const all = await table().toArray();
-      // Sort by label so listings are deterministic. Dexie's
-      // primary-key order is UUID-random, which makes dependent UI
-      // tests flaky and the list visually arbitrary for the user.
-      // Pin locale to "en" + sensitivity:"base" so CI / Node / browser
-      // produce identical orderings across environments.
-      all.sort((a, b) =>
-        String(a.label ?? "").localeCompare(String(b.label ?? ""), "en", {
-          sensitivity: "base",
-        })
-      );
+      // orderBy("createdAt") guarantees insertion-order surfacing so
+      // the ModelSelector / SettingsPanel listings are stable across
+      // reloads. PK-default ordering (UUID) is essentially random.
+      // Supersedes the locale-aware label sort that landed in main —
+      // insertion order matches the user's mental model of "the one I
+      // added most recently is at the bottom" better than alphabetical.
+      const all = await table().orderBy("createdAt").toArray();
       return Promise.all(all.map(decryptProvider));
     },
 

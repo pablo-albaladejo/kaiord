@@ -34,6 +34,7 @@ const defaultProvider: LlmProviderConfig = {
   model: "claude",
   label: "Default",
   isDefault: true,
+  createdAt: 1,
 };
 
 const secondaryProvider: LlmProviderConfig = {
@@ -43,6 +44,7 @@ const secondaryProvider: LlmProviderConfig = {
   model: "gpt",
   label: "Secondary",
   isDefault: false,
+  createdAt: 2,
 };
 
 const rawWorkout = {

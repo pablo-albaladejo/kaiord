@@ -32,6 +32,7 @@ const baseOptions: GenerateWorkoutOptions = {
     model: "claude-sonnet-4-5-20241022",
     label: "Test",
     isDefault: true,
+    createdAt: 0,
   },
 };
 

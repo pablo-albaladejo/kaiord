@@ -89,6 +89,7 @@ function makeProvider(
     model: "claude-sonnet-4-20250514",
     label: "Claude",
     isDefault: true,
+    createdAt: 0,
     ...overrides,
   };
 }

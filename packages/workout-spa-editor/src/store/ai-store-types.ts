@@ -7,6 +7,10 @@ export type LlmProviderConfig = {
   model: string;
   label: string;
   isDefault: boolean;
+  // Epoch ms stamped at addProvider; immutable thereafter. Drives the
+  // canonical insertion order surfaced by getAll(), so ModelSelector
+  // and SettingsPanel listings are deterministic across reloads.
+  createdAt: number;
 };
 
 export type GenerationState =
@@ -21,7 +25,9 @@ export type AiStore = {
   selectedProviderId: string | null;
   generation: GenerationState;
   hydrated: boolean;
-  addProvider: (config: Omit<LlmProviderConfig, "id" | "isDefault">) => string;
+  addProvider: (
+    config: Omit<LlmProviderConfig, "id" | "isDefault" | "createdAt">
+  ) => string;
   removeProvider: (id: string) => void;
   updateProvider: (
     id: string,

@@ -44,6 +44,7 @@ const provider: LlmProviderConfig = {
   model: "claude",
   label: "Default",
   isDefault: true,
+  createdAt: 0,
 };
 
 const workout = {
