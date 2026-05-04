@@ -68,18 +68,33 @@ describe("LayoutHeader", () => {
       // each routed page owns its own primary heading marked with
       // `[data-route-heading]`. Assert by accessible name instead of
       // heading role.
+      // Arrange
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByLabelText(/kaiord editor/i)).toBeInTheDocument();
     });
 
     it("should render navigation with profiles button", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Act
+
       const nav = screen.getByRole("navigation", { name: /main navigation/i });
+
+      // Assert
+
       expect(nav).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: /open profile manager/i })
@@ -88,9 +103,16 @@ describe("LayoutHeader", () => {
 
     it("should render library button", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByRole("button", { name: /open workout library/i })
       ).toBeInTheDocument();
@@ -98,9 +120,16 @@ describe("LayoutHeader", () => {
 
     it("should render theme toggle", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByRole("button", { name: /switch to (light|dark) mode/i })
       ).toBeInTheDocument();
@@ -108,9 +137,16 @@ describe("LayoutHeader", () => {
 
     it("should render help button", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByRole("button", { name: /open help/i })
       ).toBeInTheDocument();
@@ -118,10 +154,18 @@ describe("LayoutHeader", () => {
 
     it("should display help button with keyboard shortcut hint", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Act
+
       const helpButton = screen.getByRole("button", { name: /open help/i });
+
+      // Assert
+
       expect(helpButton).toHaveAttribute("title", "Help (?)");
     });
   });
@@ -129,21 +173,36 @@ describe("LayoutHeader", () => {
   describe("profiles button", () => {
     it("should display 'Profiles' text when no active profile", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText(/^profiles$/i)).toBeInTheDocument();
     });
 
     it("should display active profile name when profile is active", async () => {
       // Arrange — first profile auto-sets active id (createProfile I1).
+      // Arrange
+
       const persistence = createDexiePersistence(db);
       await createProfile(persistence, "My Training Profile");
 
       // Act
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(
         await screen.findByText(/my training profile/i)
       ).toBeInTheDocument();
@@ -152,15 +211,23 @@ describe("LayoutHeader", () => {
 
     it("should open profile manager when clicked", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       renderWithProviders(<LayoutHeader />);
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /open profile manager/i })
       );
 
       // Assert
+
+      // Assert
+
       expect(
         await screen.findByRole("heading", { name: /profile manager/i })
       ).toBeInTheDocument();
@@ -170,9 +237,16 @@ describe("LayoutHeader", () => {
   describe("profile manager dialog", () => {
     it("should not render profile manager initially", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.queryByRole("heading", { name: /profile manager/i })
       ).not.toBeInTheDocument();
@@ -180,13 +254,21 @@ describe("LayoutHeader", () => {
 
     it("should close profile manager when close button clicked", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       renderWithProviders(<LayoutHeader />);
 
       // Act - Open dialog
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /open profile manager/i })
       );
+
+      // Assert
+
       expect(
         await screen.findByRole("heading", { name: /profile manager/i })
       ).toBeInTheDocument();
@@ -204,6 +286,8 @@ describe("LayoutHeader", () => {
   describe("help button", () => {
     it("should open help dialog when clicked", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       renderWithProviders(<LayoutHeader />);
 
@@ -211,9 +295,15 @@ describe("LayoutHeader", () => {
       await user.click(screen.getByRole("button", { name: /open help/i }));
 
       // Assert
+
+      // Act
+
       const headings = await screen.findAllByRole("heading", {
         name: /help & documentation/i,
       });
+
+      // Assert
+
       expect(headings.length).toBeGreaterThan(0);
       expect(headings[0]).toBeInTheDocument();
     });
@@ -222,9 +312,16 @@ describe("LayoutHeader", () => {
   describe("help dialog", () => {
     it("should not render help dialog initially", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.queryByRole("heading", { name: /help & documentation/i })
       ).not.toBeInTheDocument();
@@ -232,14 +329,22 @@ describe("LayoutHeader", () => {
 
     it("should close help dialog when close button clicked", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       renderWithProviders(<LayoutHeader />);
 
       // Act - Open dialog
       await user.click(screen.getByRole("button", { name: /open help/i }));
+
+      // Act
+
       const headings = await screen.findAllByRole("heading", {
         name: /help & documentation/i,
       });
+
+      // Assert
+
       expect(headings.length).toBeGreaterThan(0);
 
       // Act - Close dialog
@@ -254,13 +359,21 @@ describe("LayoutHeader", () => {
 
     it("should display help content when open", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       renderWithProviders(<LayoutHeader />);
 
       // Act
+
+      // Act
+
       await user.click(screen.getByRole("button", { name: /open help/i }));
 
       // Assert
+
+      // Assert
+
       expect(await screen.findByText(/getting started/i)).toBeInTheDocument();
       expect(screen.getByText(/keyboard shortcuts/i)).toBeInTheDocument();
       expect(
@@ -272,9 +385,16 @@ describe("LayoutHeader", () => {
   describe("library button", () => {
     it("should not show badge when library is empty", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.queryByLabelText(/workouts in library/i)
       ).not.toBeInTheDocument();
@@ -282,15 +402,23 @@ describe("LayoutHeader", () => {
 
     it("should show badge with count when library has workouts", async () => {
       // Arrange
+      // Arrange
+
       const persistence = createDexiePersistence(db);
       const krd = createTestKRD();
       await addTemplate(persistence, "Workout 1", "running", krd);
       await addTemplate(persistence, "Workout 2", "cycling", krd);
 
       // Act
+
+      // Act
+
       renderWithProviders(<LayoutHeader />, { persistence });
 
       // Assert
+
+      // Assert
+
       expect(
         await screen.findByLabelText(/2 workouts in library/i)
       ).toBeInTheDocument();
@@ -301,16 +429,24 @@ describe("LayoutHeader", () => {
       // Arrange — Library is now a routed page per the SPA surface-
       // classification rule. The header click triggers navigation, not
       // a Radix Dialog.
+      // Arrange
+
       const user = userEvent.setup();
       const { ui, location } = withRouter(<LayoutHeader />);
       renderWithProviders(ui);
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /open workout library/i })
       );
 
       // Assert
+
+      // Assert
+
       expect(location.history).toContain("/library");
       expect(
         screen.queryByRole("heading", { name: /workout library/i })
@@ -323,9 +459,16 @@ describe("LayoutHeader", () => {
     it("should never render the WorkoutLibrary modal heading from the header", () => {
       // Arrange & Act — no header click should mount a Library modal.
       // The page surface owns the heading; the header owns navigation.
+      // Arrange
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.queryByRole("heading", { name: /workout library/i })
       ).not.toBeInTheDocument();
@@ -335,9 +478,16 @@ describe("LayoutHeader", () => {
   describe("accessibility", () => {
     it("should have proper ARIA labels", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByRole("navigation", { name: /main navigation/i })
       ).toBeInTheDocument();
@@ -358,9 +508,16 @@ describe("LayoutHeader", () => {
       // would read both on every navigation. Heading-role assertions
       // about Kaiord Editor MUST go through the page heading, not the
       // header logo.
+      // Arrange
+
+      // Act
+
       renderWithProviders(<LayoutHeader />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.queryByRole("heading", { name: /kaiord editor/i })
       ).not.toBeInTheDocument();
@@ -369,14 +526,22 @@ describe("LayoutHeader", () => {
 
     it("should have accessible badge label when library has workouts", async () => {
       // Arrange
+      // Arrange
+
       const persistence = createDexiePersistence(db);
       const krd = createTestKRD();
       await addTemplate(persistence, "Workout 1", "running", krd);
 
       // Act
+
+      // Act
+
       renderWithProviders(<LayoutHeader />, { persistence });
 
       // Assert
+
+      // Assert
+
       expect(
         await screen.findByLabelText(/^1 workout in library$/i)
       ).toBeInTheDocument();

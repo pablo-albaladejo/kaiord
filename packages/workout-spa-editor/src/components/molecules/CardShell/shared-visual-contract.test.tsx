@@ -59,7 +59,14 @@ const matched: MatchedSession = {
 
 describe("Shared visual contract across card variants", () => {
   it("should render the same lateral border width (border-l-4) on all three cards", () => {
+    // Arrange
+
+    // Act
+
     const { rerender } = render(<CoachingActivityCard activity={activity} />);
+
+    // Assert
+
     expect(screen.getByTestId("coaching-card-a1").className).toContain(
       "border-l-4"
     );
@@ -76,7 +83,14 @@ describe("Shared visual contract across card variants", () => {
   });
 
   it("should render the same emerald token across all three when status / state / score align", () => {
+    // Arrange
+
+    // Act
+
     const { rerender } = render(<CoachingActivityCard activity={activity} />);
+
+    // Assert
+
     expect(screen.getByTestId("coaching-card-a1").className).toContain(
       "border-emerald-600"
     );

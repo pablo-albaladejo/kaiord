@@ -13,6 +13,12 @@ import {
 
 describe("workoutStateSchema", () => {
   it("should accept all valid states", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+
     const states = [
       "raw",
       "structured",
@@ -29,12 +35,23 @@ describe("workoutStateSchema", () => {
   });
 
   it("should reject invalid state", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() => workoutStateSchema.parse("invalid")).toThrow();
   });
 });
 
 describe("conditionSchema", () => {
   it("should accept all valid conditions", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+
     const conditions = [
       "rain",
       "wind",
@@ -52,34 +69,61 @@ describe("conditionSchema", () => {
   });
 
   it("should reject invalid condition", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() => conditionSchema.parse("snow")).toThrow();
   });
 });
 
 describe("valueWithUnitSchema", () => {
   it("should accept valid value with unit", () => {
+    // Arrange
+
+    // Act
+
     const result = valueWithUnitSchema.parse({ value: 10.5, unit: "km" });
+
+    // Assert
 
     expect(result).toEqual({ value: 10.5, unit: "km" });
   });
 
   it("should reject missing unit", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() => valueWithUnitSchema.parse({ value: 10 })).toThrow();
   });
 });
 
 describe("workoutCommentSchema", () => {
   it("should accept valid comment with ISO timestamp", () => {
+    // Arrange
+
+    // Act
+
     const comment = {
       author: "coach",
       text: "Great session",
       timestamp: "2025-01-15T10:30:00Z",
     };
 
+    // Assert
+
     expect(workoutCommentSchema.parse(comment)).toEqual(comment);
   });
 
   it("should reject non-ISO timestamp", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       workoutCommentSchema.parse({
         author: "coach",
@@ -102,29 +146,56 @@ describe("workoutRawSchema", () => {
   };
 
   it("should accept valid raw payload", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(workoutRawSchema.parse(validRaw)).toEqual(validRaw);
   });
 
   it("should accept null distance and duration", () => {
+    // Arrange
+
+    // Act
+
     const raw = { ...validRaw, distance: null, duration: null };
+
+    // Assert
 
     expect(workoutRawSchema.parse(raw)).toEqual(raw);
   });
 
   it("should reject prescribedRpe below 1", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       workoutRawSchema.parse({ ...validRaw, prescribedRpe: 0 })
     ).toThrow();
   });
 
   it("should reject prescribedRpe above 10", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       workoutRawSchema.parse({ ...validRaw, prescribedRpe: 11 })
     ).toThrow();
   });
 
   it("should accept null prescribedRpe", () => {
+    // Arrange
+
+    // Act
+
     const raw = { ...validRaw, prescribedRpe: null };
+
+    // Assert
 
     expect(workoutRawSchema.parse(raw)).toEqual(raw);
   });
@@ -132,6 +203,10 @@ describe("workoutRawSchema", () => {
 
 describe("workoutFeedbackSchema", () => {
   it("should accept all-null feedback", () => {
+    // Arrange
+
+    // Act
+
     const feedback = {
       actualRpe: null,
       completionNotes: null,
@@ -142,10 +217,16 @@ describe("workoutFeedbackSchema", () => {
       customConditions: null,
     };
 
+    // Assert
+
     expect(workoutFeedbackSchema.parse(feedback)).toEqual(feedback);
   });
 
   it("should accept fully populated feedback", () => {
+    // Arrange
+
+    // Act
+
     const feedback = {
       actualRpe: 7,
       completionNotes: "Felt strong",
@@ -156,10 +237,17 @@ describe("workoutFeedbackSchema", () => {
       customConditions: ["jetlag"],
     };
 
+    // Assert
+
     expect(workoutFeedbackSchema.parse(feedback)).toEqual(feedback);
   });
 
   it("should reject invalid condition in array", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       workoutFeedbackSchema.parse({
         actualRpe: null,
@@ -176,6 +264,10 @@ describe("workoutFeedbackSchema", () => {
 
 describe("aiMetaSchema", () => {
   it("should accept valid AI metadata", () => {
+    // Arrange
+
+    // Act
+
     const meta = {
       promptVersion: "1.2.0",
       model: "gpt-4o",
@@ -183,10 +275,17 @@ describe("aiMetaSchema", () => {
       processedAt: "2025-01-15T12:00:00Z",
     };
 
+    // Assert
+
     expect(aiMetaSchema.parse(meta)).toEqual(meta);
   });
 
   it("should reject non-ISO processedAt", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       aiMetaSchema.parse({
         promptVersion: "1.0.0",
@@ -221,28 +320,54 @@ describe("workoutRecordSchema", () => {
   };
 
   it("should accept valid workout record", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(workoutRecordSchema.parse(validRecord)).toEqual(validRecord);
   });
 
   it("should reject invalid UUID", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       workoutRecordSchema.parse({ ...validRecord, id: "not-a-uuid" })
     ).toThrow();
   });
 
   it("should reject invalid date format", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       workoutRecordSchema.parse({ ...validRecord, date: "15-01-2025" })
     ).toThrow();
   });
 
   it("should reject invalid state", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       workoutRecordSchema.parse({ ...validRecord, state: "archived" })
     ).toThrow();
   });
 
   it("should accept all workout states", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+
     const states = [
       "raw",
       "structured",
@@ -261,6 +386,11 @@ describe("workoutRecordSchema", () => {
   });
 
   it("should reject non-ISO createdAt", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       workoutRecordSchema.parse({
         ...validRecord,

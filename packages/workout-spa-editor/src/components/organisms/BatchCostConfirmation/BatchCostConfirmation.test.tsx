@@ -27,6 +27,10 @@ const workouts: WorkoutRecord[] = [
 
 describe("BatchCostConfirmation", () => {
   it("should render provider, tokens, and cost when open with a provider", () => {
+    // Arrange
+
+    // Act
+
     render(
       <BatchCostConfirmation
         open
@@ -37,6 +41,8 @@ describe("BatchCostConfirmation", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByTestId("batch-cost-provider")).toHaveTextContent(
       "My Claude"
     );
@@ -46,6 +52,10 @@ describe("BatchCostConfirmation", () => {
   });
 
   it("renders 'No provider selected' and disables Confirm when provider is null", () => {
+    // Arrange
+
+    // Act
+
     render(
       <BatchCostConfirmation
         open
@@ -56,6 +66,8 @@ describe("BatchCostConfirmation", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByTestId("batch-cost-provider")).toHaveTextContent(
       "No provider selected"
     );
@@ -64,6 +76,8 @@ describe("BatchCostConfirmation", () => {
   });
 
   it("should fire onConfirm when Confirm clicked", async () => {
+    // Arrange
+
     const onConfirm = vi.fn();
     const user = userEvent.setup();
 
@@ -77,12 +91,18 @@ describe("BatchCostConfirmation", () => {
       />
     );
 
+    // Act
+
     await user.click(screen.getByTestId("batch-cost-confirm"));
+
+    // Assert
 
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
   it("should fire onCancel when Cancel clicked", async () => {
+    // Arrange
+
     const onCancel = vi.fn();
     const user = userEvent.setup();
 
@@ -96,12 +116,20 @@ describe("BatchCostConfirmation", () => {
       />
     );
 
+    // Act
+
     await user.click(screen.getByTestId("batch-cost-cancel"));
+
+    // Assert
 
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   it("should render nothing when open is false", () => {
+    // Arrange
+
+    // Act
+
     render(
       <BatchCostConfirmation
         open={false}
@@ -111,6 +139,8 @@ describe("BatchCostConfirmation", () => {
         onCancel={vi.fn()}
       />
     );
+
+    // Assert
 
     expect(screen.queryByTestId("batch-cost-provider")).toBeNull();
   });

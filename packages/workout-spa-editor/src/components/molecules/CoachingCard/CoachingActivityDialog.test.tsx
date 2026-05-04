@@ -39,6 +39,10 @@ const wrap = (children: ReactNode) => (
 
 describe("CoachingActivityDialog", () => {
   it("should return null when no activity is selected", () => {
+    // Arrange
+
+    // Act
+
     const { container } = render(
       wrap(
         <CoachingActivityDialog
@@ -49,10 +53,16 @@ describe("CoachingActivityDialog", () => {
       )
     );
 
+    // Assert
+
     expect(container.firstChild).toBeNull();
   });
 
   it("should render title, sport, duration and description when activity has them", () => {
+    // Arrange
+
+    // Act
+
     render(
       wrap(
         <CoachingActivityDialog
@@ -63,6 +73,8 @@ describe("CoachingActivityDialog", () => {
       )
     );
 
+    // Assert
+
     expect(screen.getByText("FTP test")).toBeInTheDocument();
     expect(screen.getByText("Cycling")).toBeInTheDocument();
     expect(screen.getByText(/01:00:00/)).toBeInTheDocument();
@@ -72,6 +84,10 @@ describe("CoachingActivityDialog", () => {
   });
 
   it("should show the loading description placeholder when description is undefined", () => {
+    // Arrange
+
+    // Act
+
     render(
       wrap(
         <CoachingActivityDialog
@@ -82,12 +98,18 @@ describe("CoachingActivityDialog", () => {
       )
     );
 
+    // Assert
+
     expect(
       screen.getByTestId("coaching-dialog-description-loading")
     ).toBeInTheDocument();
   });
 
   it("does NOT show the loading placeholder for known-empty description ('')", () => {
+    // Arrange
+
+    // Act
+
     render(
       wrap(
         <CoachingActivityDialog
@@ -98,12 +120,16 @@ describe("CoachingActivityDialog", () => {
       )
     );
 
+    // Assert
+
     expect(
       screen.queryByTestId("coaching-dialog-description-loading")
     ).not.toBeInTheDocument();
   });
 
   it("should call onClose when Close button is clicked", async () => {
+    // Arrange
+
     const onClose = vi.fn();
     render(
       wrap(
@@ -115,12 +141,18 @@ describe("CoachingActivityDialog", () => {
       )
     );
 
+    // Act
+
     await userEvent.click(screen.getByText("Close"));
+
+    // Assert
 
     expect(onClose).toHaveBeenCalled();
   });
 
   it("should disable Convert button while converting", () => {
+    // Arrange
+
     render(
       wrap(
         <CoachingActivityDialog
@@ -131,7 +163,12 @@ describe("CoachingActivityDialog", () => {
       )
     );
 
+    // Act
+
     const btn = screen.getByText("Convert to workout");
+
+    // Assert
+
     expect(btn).toBeEnabled(); // initial state
   });
 });

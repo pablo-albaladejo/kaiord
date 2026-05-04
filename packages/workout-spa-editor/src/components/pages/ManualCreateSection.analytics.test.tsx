@@ -64,6 +64,8 @@ describe("ManualCreateSection analytics", () => {
 
   it("should fire workout-imported with detected format on successful import", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../utils/import-workout");
     vi.mocked(importWorkout).mockResolvedValue(mockKRD);
 
@@ -83,9 +85,14 @@ describe("ManualCreateSection analytics", () => {
       type: "application/xml",
     });
 
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(analytics.event).toHaveBeenCalledWith("workout-imported", {
         format: "tcx",
@@ -95,6 +102,8 @@ describe("ManualCreateSection analytics", () => {
 
   it("should fire workout-imported with format=fit on successful FIT import", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../utils/import-workout");
     vi.mocked(importWorkout).mockResolvedValue(mockKRD);
 
@@ -114,9 +123,14 @@ describe("ManualCreateSection analytics", () => {
       type: "application/octet-stream",
     });
 
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(analytics.event).toHaveBeenCalledWith("workout-imported", {
         format: "fit",
@@ -126,6 +140,8 @@ describe("ManualCreateSection analytics", () => {
 
   it("should do NOT fire workout-imported when the import fails", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout, ImportError } =
       await import("../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValue(
@@ -148,10 +164,15 @@ describe("ManualCreateSection analytics", () => {
       type: "application/json",
     });
 
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert — wait until the import has actually run, then verify no
     // workout-imported event was emitted.
+
+    // Assert
+
     await waitFor(() => {
       expect(importWorkout).toHaveBeenCalled();
     });

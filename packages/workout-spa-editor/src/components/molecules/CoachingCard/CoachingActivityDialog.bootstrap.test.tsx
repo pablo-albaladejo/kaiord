@@ -74,7 +74,11 @@ function TestProbe({
 
 describe("CoachingActivityDialog (bootstrap-real smoke)", () => {
   it("should render through CoachingRegistryBootstrap without throwing and registers ≥1 factory", () => {
+    // Arrange
+
     let factoryCount = -1;
+
+    // Act
 
     render(
       <PersistenceProvider persistence={createInMemoryPersistence()}>
@@ -92,6 +96,8 @@ describe("CoachingActivityDialog (bootstrap-real smoke)", () => {
         </ToastContextProvider>
       </PersistenceProvider>
     );
+
+    // Assert
 
     expect(screen.getByTestId("coaching-activity-dialog")).toBeInTheDocument();
     // The probe ran the real factories; non-vacuous registration is the

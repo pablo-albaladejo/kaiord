@@ -60,10 +60,16 @@ describe("profile-storage", () => {
 
   describe("saveProfiles", () => {
     it("should save profiles to localStorage", () => {
+      // Arrange
+
       const profiles: Array<Profile> = [testProfile];
       const activeProfileId = "550e8400-e29b-41d4-a716-446655440000";
 
+      // Act
+
       const error = saveProfiles(profiles, activeProfileId);
+
+      // Assert
 
       expect(error).toBeNull();
       const stored = localStorage.getItem("workout-spa-profiles");
@@ -75,7 +81,13 @@ describe("profile-storage", () => {
     });
 
     it("should save empty profiles array", () => {
+      // Arrange
+
+      // Act
+
       const error = saveProfiles([], null);
+
+      // Assert
 
       expect(error).toBeNull();
       const stored = localStorage.getItem("workout-spa-profiles");
@@ -85,13 +97,19 @@ describe("profile-storage", () => {
     });
 
     it("should handle quota exceeded error", () => {
+      // Arrange
+
       const quotaError = new Error("QuotaExceededError");
       quotaError.name = "QuotaExceededError";
       vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
         throw quotaError;
       });
 
+      // Act
+
       const error = saveProfiles([testProfile], null);
+
+      // Assert
 
       expect(error).not.toBeNull();
       expect(error?.type).toBe("quota_exceeded");
@@ -99,11 +117,17 @@ describe("profile-storage", () => {
     });
 
     it("should handle unknown errors", () => {
+      // Arrange
+
       vi.spyOn(Storage.prototype, "setItem").mockImplementation(() => {
         throw new Error("Unknown error");
       });
 
+      // Act
+
       const error = saveProfiles([testProfile], null);
+
+      // Assert
 
       expect(error).not.toBeNull();
       expect(error?.type).toBe("unknown_error");
@@ -113,13 +137,20 @@ describe("profile-storage", () => {
 
   describe("loadProfiles", () => {
     it("should load profiles from localStorage", () => {
+      // Arrange
+
       const state: StorageState = {
         profiles: [testProfile],
         activeProfileId: "550e8400-e29b-41d4-a716-446655440000",
       };
       localStorage.setItem("workout-spa-profiles", JSON.stringify(state));
 
+      // Act
+
       const result = loadProfiles();
+
+      // Assert
+
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.profiles).toHaveLength(1);
@@ -131,7 +162,13 @@ describe("profile-storage", () => {
     });
 
     it("should return empty state when no data exists", () => {
+      // Arrange
+
+      // Act
+
       const result = loadProfiles();
+
+      // Assert
 
       expect(result.success).toBe(true);
       if (result.success) {
@@ -141,9 +178,15 @@ describe("profile-storage", () => {
     });
 
     it("should handle invalid JSON", () => {
+      // Arrange
+
       localStorage.setItem("workout-spa-profiles", "invalid json");
 
+      // Act
+
       const result = loadProfiles();
+
+      // Assert
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -152,6 +195,8 @@ describe("profile-storage", () => {
     });
 
     it("should handle invalid schema", () => {
+      // Arrange
+
       const invalidState = {
         profiles: [{ id: "not-a-uuid", name: "Test" }],
         activeProfileId: null,
@@ -161,7 +206,11 @@ describe("profile-storage", () => {
         JSON.stringify(invalidState)
       );
 
+      // Act
+
       const result = loadProfiles();
+
+      // Assert
 
       expect(result.success).toBe(false);
       if (!result.success) {
@@ -173,16 +222,27 @@ describe("profile-storage", () => {
 
   describe("clearProfiles", () => {
     it("should clear all profile data from localStorage", () => {
+      // Arrange
+
       localStorage.setItem("workout-spa-profiles", "test data");
       localStorage.setItem("workout-spa-active-profile", "test id");
 
+      // Act
+
       clearProfiles();
+
+      // Assert
 
       expect(localStorage.getItem("workout-spa-profiles")).toBeNull();
       expect(localStorage.getItem("workout-spa-active-profile")).toBeNull();
     });
 
     it("should not throw when storage is already empty", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       expect(() => clearProfiles()).not.toThrow();
     });
   });

@@ -42,43 +42,67 @@ describe("ThemeContext", () => {
   describe("initialization", () => {
     it("should initialize with system theme by default", () => {
       // Arrange
+      // Arrange
+
       const wrapper = ({ children }: { children: ReactNode }) => (
         <ThemeProvider>{children}</ThemeProvider>
       );
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Assert
+
+      // Assert
+
       expect(result.current.theme).toBe("system");
       expect(result.current.resolvedTheme).toMatch(/^(light|dark)$/);
     });
 
     it("should initialize with stored theme from localStorage", () => {
       // Arrange
+      // Arrange
+
       localStorageMock.setItem("workout-editor-theme", "dark");
       const wrapper = ({ children }: { children: ReactNode }) => (
         <ThemeProvider>{children}</ThemeProvider>
       );
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Assert
+
+      // Assert
+
       expect(result.current.theme).toBe("dark");
       expect(result.current.resolvedTheme).toBe("dark");
     });
 
     it("should initialize with custom default theme", () => {
       // Arrange
+      // Arrange
+
       const wrapper = ({ children }: { children: ReactNode }) => (
         <ThemeProvider defaultTheme="light">{children}</ThemeProvider>
       );
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Assert
+
+      // Assert
+
       expect(result.current.theme).toBe("light");
       expect(result.current.resolvedTheme).toBe("light");
     });
@@ -87,6 +111,8 @@ describe("ThemeContext", () => {
   describe("theme switching", () => {
     it("should switch to light theme", () => {
       // Arrange
+      // Arrange
+
       Object.defineProperty(window, "matchMedia", {
         writable: true,
         value: vi.fn().mockImplementation((query) => ({
@@ -107,11 +133,17 @@ describe("ThemeContext", () => {
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Act
+
+      // Act
+
       act(() => {
         result.current.setTheme("light");
       });
 
       // Assert
+
+      // Assert
+
       expect(result.current.theme).toBe("light");
       expect(result.current.resolvedTheme).toBe("light");
       expect(document.documentElement.classList.contains("dark")).toBe(false);
@@ -119,6 +151,8 @@ describe("ThemeContext", () => {
 
     it("should switch to dark theme", () => {
       // Arrange
+      // Arrange
+
       Object.defineProperty(window, "matchMedia", {
         writable: true,
         value: vi.fn().mockImplementation((query) => ({
@@ -139,11 +173,17 @@ describe("ThemeContext", () => {
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Act
+
+      // Act
+
       act(() => {
         result.current.setTheme("dark");
       });
 
       // Assert
+
+      // Assert
+
       expect(result.current.theme).toBe("dark");
       expect(result.current.resolvedTheme).toBe("dark");
       expect(document.documentElement.classList.contains("dark")).toBe(true);
@@ -151,6 +191,8 @@ describe("ThemeContext", () => {
 
     it("should switch to system theme", () => {
       // Arrange
+      // Arrange
+
       Object.defineProperty(window, "matchMedia", {
         writable: true,
         value: vi.fn().mockImplementation((query) => ({
@@ -171,11 +213,17 @@ describe("ThemeContext", () => {
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Act
+
+      // Act
+
       act(() => {
         result.current.setTheme("system");
       });
 
       // Assert
+
+      // Assert
+
       expect(result.current.theme).toBe("system");
       expect(result.current.resolvedTheme).toMatch(/^(light|dark)$/);
     });
@@ -184,6 +232,8 @@ describe("ThemeContext", () => {
   describe("localStorage persistence", () => {
     it("should persist theme to localStorage when changed", () => {
       // Arrange
+      // Arrange
+
       Object.defineProperty(window, "matchMedia", {
         writable: true,
         value: vi.fn().mockImplementation((query) => ({
@@ -204,31 +254,47 @@ describe("ThemeContext", () => {
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Act
+
+      // Act
+
       act(() => {
         result.current.setTheme("dark");
       });
 
       // Assert
+
+      // Assert
+
       expect(localStorageMock.getItem("workout-editor-theme")).toBe("dark");
     });
 
     it("should load persisted theme on mount", () => {
       // Arrange
+      // Arrange
+
       localStorageMock.setItem("workout-editor-theme", "light");
       const wrapper = ({ children }: { children: ReactNode }) => (
         <ThemeProvider>{children}</ThemeProvider>
       );
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Assert
+
+      // Assert
+
       expect(result.current.theme).toBe("light");
       expect(result.current.resolvedTheme).toBe("light");
     });
 
     it("should handle localStorage errors gracefully", () => {
       // Arrange
+      // Arrange
+
       Object.defineProperty(window, "matchMedia", {
         writable: true,
         value: vi.fn().mockImplementation((query) => ({
@@ -259,11 +325,17 @@ describe("ThemeContext", () => {
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Act
+
+      // Act
+
       act(() => {
         result.current.setTheme("dark");
       });
 
       // Assert
+
+      // Assert
+
       expect(result.current.theme).toBe("dark");
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         "Failed to store theme in localStorage",
@@ -278,6 +350,8 @@ describe("ThemeContext", () => {
   describe("system theme detection", () => {
     it("should detect light system preference", () => {
       // Arrange
+      // Arrange
+
       Object.defineProperty(window, "matchMedia", {
         writable: true,
         value: vi.fn().mockImplementation((query) => ({
@@ -295,15 +369,23 @@ describe("ThemeContext", () => {
       );
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Assert
+
+      // Assert
+
       expect(result.current.theme).toBe("system");
       expect(result.current.resolvedTheme).toBe("light");
     });
 
     it("should detect dark system preference", () => {
       // Arrange
+      // Arrange
+
       Object.defineProperty(window, "matchMedia", {
         writable: true,
         value: vi.fn().mockImplementation((query) => ({
@@ -321,15 +403,23 @@ describe("ThemeContext", () => {
       );
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Assert
+
+      // Assert
+
       expect(result.current.theme).toBe("system");
       expect(result.current.resolvedTheme).toBe("dark");
     });
 
     it("should listen for system theme changes", async () => {
       // Arrange
+      // Arrange
+
       let changeHandler: ((e: MediaQueryListEvent) => void) | null = null;
 
       Object.defineProperty(window, "matchMedia", {
@@ -354,6 +444,9 @@ describe("ThemeContext", () => {
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Act - Simulate system theme change to dark
+
+      // Act
+
       act(() => {
         if (changeHandler) {
           changeHandler({ matches: true } as MediaQueryListEvent);
@@ -361,6 +454,9 @@ describe("ThemeContext", () => {
       });
 
       // Assert
+
+      // Assert
+
       await waitFor(() => {
         expect(result.current.resolvedTheme).toBe("dark");
       });
@@ -370,6 +466,8 @@ describe("ThemeContext", () => {
   describe("DOM updates", () => {
     it("should add dark class to document root when dark theme is active", () => {
       // Arrange
+      // Arrange
+
       Object.defineProperty(window, "matchMedia", {
         writable: true,
         value: vi.fn().mockImplementation((query) => ({
@@ -390,16 +488,24 @@ describe("ThemeContext", () => {
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Act
+
+      // Act
+
       act(() => {
         result.current.setTheme("dark");
       });
 
       // Assert
+
+      // Assert
+
       expect(document.documentElement.classList.contains("dark")).toBe(true);
     });
 
     it("should remove dark class from document root when light theme is active", () => {
       // Arrange
+      // Arrange
+
       Object.defineProperty(window, "matchMedia", {
         writable: true,
         value: vi.fn().mockImplementation((query) => ({
@@ -421,11 +527,17 @@ describe("ThemeContext", () => {
       const { result } = renderHook(() => useTheme(), { wrapper });
 
       // Act
+
+      // Act
+
       act(() => {
         result.current.setTheme("light");
       });
 
       // Assert
+
+      // Assert
+
       expect(document.documentElement.classList.contains("dark")).toBe(false);
     });
   });
@@ -433,6 +545,11 @@ describe("ThemeContext", () => {
   describe("error handling", () => {
     it("should throw error when useTheme is used outside ThemeProvider", () => {
       // Arrange & Act & Assert
+      // Arrange
+
+      // Act
+
+      // Assert
       expect(() => {
         renderHook(() => useTheme());
       }).toThrow("useTheme must be used within a ThemeProvider");

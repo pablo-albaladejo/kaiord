@@ -20,6 +20,10 @@ describe("ConfirmationModal", () => {
   describe("rendering", () => {
     it("should not render when isOpen is false", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <ConfirmationModal
           isOpen={false}
@@ -34,11 +38,18 @@ describe("ConfirmationModal", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(screen.queryByText("Test Title")).not.toBeInTheDocument();
     });
 
     it("should render when isOpen is true", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <ConfirmationModal
           isOpen={true}
@@ -53,12 +64,19 @@ describe("ConfirmationModal", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("Test Title")).toBeInTheDocument();
       expect(screen.getByText("Test message")).toBeInTheDocument();
     });
 
     it("should render confirm and cancel buttons with correct labels", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <ConfirmationModal
           isOpen={true}
@@ -73,6 +91,9 @@ describe("ConfirmationModal", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByRole("button", { name: "Delete" })
       ).toBeInTheDocument();
@@ -81,6 +102,8 @@ describe("ConfirmationModal", () => {
 
     it("should use danger variant for destructive actions", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <ConfirmationModal
           isOpen={true}
@@ -95,12 +118,20 @@ describe("ConfirmationModal", () => {
       );
 
       // Assert
+
+      // Act
+
       const confirmButton = screen.getByRole("button", { name: "Delete" });
+
+      // Assert
+
       expect(confirmButton).toHaveClass("bg-red-600");
     });
 
     it("should use primary variant for default actions", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <ConfirmationModal
           isOpen={true}
@@ -115,7 +146,13 @@ describe("ConfirmationModal", () => {
       );
 
       // Assert
+
+      // Act
+
       const confirmButton = screen.getByRole("button", { name: "Confirm" });
+
+      // Assert
+
       expect(confirmButton).toHaveClass("bg-primary-600");
     });
   });
@@ -123,6 +160,8 @@ describe("ConfirmationModal", () => {
   describe("interactions", () => {
     it("should call onConfirm when confirm button is clicked", async () => {
       // Arrange
+      // Arrange
+
       const handleConfirm = vi.fn();
       const user = userEvent.setup();
       render(
@@ -139,14 +178,22 @@ describe("ConfirmationModal", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(screen.getByRole("button", { name: "Confirm" }));
 
       // Assert
+
+      // Assert
+
       expect(handleConfirm).toHaveBeenCalledOnce();
     });
 
     it("should call onCancel when cancel button is clicked", async () => {
       // Arrange
+      // Arrange
+
       const handleCancel = vi.fn();
       const user = userEvent.setup();
       render(
@@ -163,14 +210,22 @@ describe("ConfirmationModal", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(screen.getByRole("button", { name: "Cancel" }));
 
       // Assert
+
+      // Assert
+
       expect(handleCancel).toHaveBeenCalledOnce();
     });
 
     it("should call onCancel when close button is clicked", async () => {
       // Arrange
+      // Arrange
+
       const handleCancel = vi.fn();
       const user = userEvent.setup();
       render(
@@ -188,9 +243,15 @@ describe("ConfirmationModal", () => {
 
       // Act
       const closeButton = screen.getByRole("button", { name: "Close" });
+
+      // Act
+
       await user.click(closeButton);
 
       // Assert
+
+      // Assert
+
       expect(handleCancel).toHaveBeenCalledOnce();
     });
   });
@@ -198,6 +259,8 @@ describe("ConfirmationModal", () => {
   describe("backdrop", () => {
     it("should render backdrop with dim effect", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <ConfirmationModal
           isOpen={true}
@@ -212,7 +275,13 @@ describe("ConfirmationModal", () => {
       );
 
       // Assert
+
+      // Act
+
       const backdrop = document.querySelector('[data-testid="modal-backdrop"]');
+
+      // Assert
+
       expect(backdrop).toBeInTheDocument();
       expect(backdrop).toHaveClass("bg-black/50");
     });

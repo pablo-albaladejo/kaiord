@@ -61,10 +61,16 @@ describe("prepareBatch", () => {
   });
 
   it("should return the default provider when one is flagged isDefault", async () => {
+    // Arrange
+
     mockProviders = [secondaryProvider, defaultProvider];
     mockWorkouts = [rawWorkout];
 
+    // Act
+
     const result = await prepareBatch("2026-04-13", "2026-04-19");
+
+    // Assert
 
     expect(result).toEqual({
       ok: true,
@@ -74,20 +80,32 @@ describe("prepareBatch", () => {
   });
 
   it("should fall back to the first provider when none are flagged isDefault", async () => {
+    // Arrange
+
     const noDefault = { ...defaultProvider, isDefault: false };
     mockProviders = [noDefault, secondaryProvider];
     mockWorkouts = [rawWorkout];
 
+    // Act
+
     const result = await prepareBatch("2026-04-13", "2026-04-19");
+
+    // Assert
 
     expect(result).toMatchObject({ ok: true, provider: noDefault });
   });
 
   it("should return a user-friendly error when no providers are configured", async () => {
+    // Arrange
+
     mockProviders = [];
     mockWorkouts = [rawWorkout];
 
+    // Act
+
     const result = await prepareBatch("2026-04-13", "2026-04-19");
+
+    // Assert
 
     expect(result).toEqual({
       ok: false,
@@ -96,10 +114,16 @@ describe("prepareBatch", () => {
   });
 
   it("should return a user-friendly error when the week has no raw workouts", async () => {
+    // Arrange
+
     mockProviders = [defaultProvider];
     mockWorkouts = [];
 
+    // Act
+
     const result = await prepareBatch("2026-04-13", "2026-04-19");
+
+    // Assert
 
     expect(result).toEqual({
       ok: false,

@@ -40,6 +40,8 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
   describe("Multi-selection with duplicate stepIndex values", () => {
     it("should independently add main workout step to selection without selecting block steps with same stepIndex", async () => {
       // Arrange
+      // Arrange
+
       const onToggleStepSelection = vi.fn();
 
       // Create workout with duplicate stepIndex values:
@@ -73,16 +75,24 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       const mainWorkoutStep = screen.getAllByRole("button", {
         name: /Step 1:/,
       })[0];
+
+      // Act
+
       fireEvent.click(mainWorkoutStep, { ctrlKey: true });
 
       // Assert
       // Should call onToggleStepSelection with the main workout step's hierarchical ID
+
+      // Assert
+
       expect(onToggleStepSelection).toHaveBeenCalledWith("step-0");
       expect(onToggleStepSelection).toHaveBeenCalledTimes(1);
     });
 
     it("should independently add step from Block A to selection without selecting main workout or Block B steps", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       const onToggleStepSelection = vi.fn();
 
@@ -119,15 +129,23 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
         name: /Step 1:/,
       });
       // The second "Step 1" button should be in Block A (after main workout step)
+
+      // Act
+
       fireEvent.click(allStep1Buttons[1], { ctrlKey: true });
 
       // Assert
       // Should call onToggleStepSelection with the step's hierarchical ID from Block A
+
+      // Assert
+
       expect(onToggleStepSelection).toHaveBeenCalledWith("block-1-step-0");
     });
 
     it("should add multiple steps with same stepIndex from different blocks to selection", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       const onToggleStepSelection = vi.fn();
 
@@ -171,10 +189,16 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       fireEvent.click(allStep1Buttons[1], { ctrlKey: true }); // Block A
 
       // Cmd/Ctrl+click on Block B Step 1
+
+      // Act
+
       fireEvent.click(allStep1Buttons[2], { ctrlKey: true }); // Block B
 
       // Assert
       // Should have called onToggleStepSelection 3 times, once for each step
+
+      // Assert
+
       expect(onToggleStepSelection).toHaveBeenCalledTimes(3);
       // Each call should be with the unique hierarchical ID
       expect(onToggleStepSelection).toHaveBeenNthCalledWith(1, "step-0");
@@ -192,6 +216,8 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
   describe("Multi-selection visual indicators", () => {
     it("should show multi-selection indicator only on explicitly selected steps", () => {
       // Arrange
+      // Arrange
+
       const blockA: RepetitionBlock = {
         repeatCount: 2,
         steps: [createMockStep(0), createMockStep(1)],
@@ -215,10 +241,16 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Assert
+
+      // Act
+
       const mainWorkoutStep = screen.getAllByRole("button", {
         name: /Step 1:/,
       })[0];
       // Main workout step should be highlighted (multi-selected)
+
+      // Assert
+
       expect(mainWorkoutStep.className).toContain("border-primary-500");
 
       // Note: Block steps are not visible until expanded, but the IDs ensure
@@ -227,6 +259,8 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
 
     it("should not show multi-selection indicator on steps with same stepIndex that were not clicked", () => {
       // Arrange
+      // Arrange
+
       const blockA: RepetitionBlock = {
         repeatCount: 2,
         steps: [createMockStep(0), createMockStep(1)],
@@ -242,10 +276,16 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       );
 
       // Assert
+
+      // Act
+
       const mainWorkoutStep = screen.getAllByRole("button", {
         name: /Step 1:/,
       })[0];
       // Main workout step should NOT be highlighted
+
+      // Assert
+
       expect(mainWorkoutStep.className).not.toContain("border-primary-500");
     });
   });
@@ -253,6 +293,8 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
   describe("Removing steps from multi-selection", () => {
     it("should remove only the clicked step from multi-selection", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       const onToggleStepSelection = vi.fn();
 
@@ -282,16 +324,24 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       const allStep1Buttons = screen.getAllByRole("button", {
         name: /Step 1:/,
       });
+
+      // Act
+
       fireEvent.click(allStep1Buttons[0], { ctrlKey: true }); // Main workout step
 
       // Assert
       // Should call onToggleStepSelection to remove the main workout step
+
+      // Assert
+
       expect(onToggleStepSelection).toHaveBeenCalledWith("step-0");
       expect(onToggleStepSelection).toHaveBeenCalledTimes(1);
     });
 
     it("should independently remove step from Block A without affecting Block B selection", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       const onToggleStepSelection = vi.fn();
 
@@ -326,10 +376,16 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       const allStep1Buttons = await screen.findAllByRole("button", {
         name: /Step 1:/,
       });
+
+      // Act
+
       fireEvent.click(allStep1Buttons[1], { ctrlKey: true }); // Block A step (after main workout)
 
       // Assert
       // Should call onToggleStepSelection to remove the Block A step
+
+      // Assert
+
       expect(onToggleStepSelection).toHaveBeenCalledWith("block-1-step-0");
       expect(onToggleStepSelection).toHaveBeenCalledTimes(1);
     });
@@ -338,6 +394,8 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
   describe("Multi-selection with complex workout structures", () => {
     it("should handle multi-selection across multiple blocks with duplicate stepIndex values", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       const onToggleStepSelection = vi.fn();
 
@@ -388,10 +446,16 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       fireEvent.click(allStep1Buttons[1], { ctrlKey: true });
 
       // Click Block B Step 1 (stepIndex: 0)
+
+      // Act
+
       fireEvent.click(allStep1Buttons[2], { ctrlKey: true });
 
       // Assert
       // Should have called onToggleStepSelection 3 times with unique hierarchical IDs
+
+      // Assert
+
       expect(onToggleStepSelection).toHaveBeenCalledTimes(3);
       // Each call should be with the unique hierarchical ID
       expect(onToggleStepSelection).toHaveBeenNthCalledWith(1, "step-0");
@@ -407,6 +471,8 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
 
     it("should maintain correct multi-selection state when steps are added and removed", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       const onToggleStepSelection = vi.fn();
 
@@ -466,6 +532,9 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
       fireEvent.click(allStep1Buttons[0], { ctrlKey: true });
 
       // Update selection state after deselection
+
+      // Act
+
       rerender(
         <WorkoutList
           workout={workout}
@@ -476,6 +545,9 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
 
       // Assert
       // Should have called onToggleStepSelection 3 times total
+
+      // Assert
+
       expect(onToggleStepSelection).toHaveBeenCalledTimes(3);
 
       // Verify the final state shows only Block A step selected
@@ -489,6 +561,8 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
   describe("Selection set verification", () => {
     it("should contain only explicitly clicked step IDs in selection set", () => {
       // Arrange
+      // Arrange
+
       const blockA: RepetitionBlock = {
         repeatCount: 2,
         steps: [createMockStep(0), createMockStep(1)],
@@ -505,10 +579,16 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
 
       // Act - Select specific steps with same stepIndex from different contexts
       const selectedIds = ["step-0", "block-2-step-0"];
+
+      // Act
+
       render(<WorkoutList workout={workout} selectedStepIds={selectedIds} />);
 
       // Assert
       // The selection set should contain exactly the IDs we specified
+
+      // Assert
+
       expect(selectedIds).toHaveLength(2);
       expect(selectedIds).toContain("step-0");
       expect(selectedIds).toContain("block-2-step-0");
@@ -518,6 +598,8 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
 
     it("should verify all selected step IDs are unique", () => {
       // Arrange
+      // Arrange
+
       const blockA: RepetitionBlock = {
         repeatCount: 2,
         steps: [createMockStep(0), createMockStep(1), createMockStep(2)],
@@ -546,7 +628,13 @@ describe("WorkoutList - Multi-Selection Uniqueness (Property 4)", () => {
 
       // Assert
       // All IDs should be unique
+
+      // Act
+
       const uniqueIds = new Set(selectedIds);
+
+      // Assert
+
       expect(uniqueIds.size).toBe(selectedIds.length);
 
       // Verify no duplicate IDs

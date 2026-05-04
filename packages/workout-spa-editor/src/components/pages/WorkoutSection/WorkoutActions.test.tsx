@@ -33,23 +33,39 @@ describe("WorkoutActions", () => {
   describe("button spacing", () => {
     it("should have 12px gap between button groups", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
+
+      // Act
+
       const container = screen.getByTestId(
         "discard-workout-button"
       ).parentElement;
+
+      // Assert
+
       expect(container).toHaveClass("gap-3"); // gap-3 = 12px in Tailwind
     });
 
     it("should use flex layout for button container", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
+
+      // Act
+
       const container = screen.getByTestId(
         "discard-workout-button"
       ).parentElement;
+
+      // Assert
+
       expect(container).toHaveClass("flex");
     });
   });
@@ -57,12 +73,20 @@ describe("WorkoutActions", () => {
   describe("button alignment", () => {
     it("should use flex-wrap for responsive layout", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
+
+      // Act
+
       const container = screen.getByTestId(
         "discard-workout-button"
       ).parentElement;
+
+      // Assert
+
       expect(container).toHaveClass("flex-wrap");
     });
   });
@@ -70,20 +94,36 @@ describe("WorkoutActions", () => {
   describe("button variants", () => {
     it("should use primary variant for save button", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
+
+      // Act
+
       const saveButton = screen.getByRole("button", { name: /save workout/i });
       // SaveButton component should use primary variant by default
+
+      // Assert
+
       expect(saveButton).toBeInTheDocument();
     });
 
     it("should use tertiary variant for discard button", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
+
+      // Act
+
       const discardButton = screen.getByRole("button", { name: /discard/i });
+
+      // Assert
+
       expect(discardButton).toHaveClass("text-red-600");
     });
   });
@@ -91,6 +131,8 @@ describe("WorkoutActions", () => {
   describe("button organization", () => {
     it("should render save button before library button", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
@@ -98,19 +140,33 @@ describe("WorkoutActions", () => {
       const saveButtonIndex = buttons.findIndex((btn) =>
         btn.textContent?.includes("Save")
       );
+
+      // Act
+
       const libraryButtonIndex = buttons.findIndex((btn) =>
         btn.textContent?.includes("Library")
       );
+
+      // Assert
+
       expect(saveButtonIndex).toBeLessThan(libraryButtonIndex);
     });
 
     it("should render discard button last", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(<WorkoutActions {...defaultProps} />);
 
       // Assert
       const buttons = screen.getAllByRole("button");
+
+      // Act
+
       const discardButton = buttons[buttons.length - 1];
+
+      // Assert
+
       expect(discardButton.textContent).toContain("Discard");
     });
   });
@@ -118,6 +174,8 @@ describe("WorkoutActions", () => {
   describe("interactions", () => {
     it("should call onDiscard when discard button is clicked", async () => {
       // Arrange
+      // Arrange
+
       const handleDiscard = vi.fn();
       const user = userEvent.setup();
       renderWithProviders(
@@ -126,9 +184,15 @@ describe("WorkoutActions", () => {
 
       // Act
       const discardButton = screen.getByRole("button", { name: /discard/i });
+
+      // Act
+
       await user.click(discardButton);
 
       // Assert
+
+      // Assert
+
       expect(handleDiscard).toHaveBeenCalledOnce();
     });
   });

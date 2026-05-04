@@ -31,50 +31,81 @@ describe("WorkoutStats", () => {
   describe("rendering", () => {
     it("should render workout stats heading", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 300 }),
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("Workout Stats")).toBeInTheDocument();
     });
 
     it("should not render when workout is null", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       const { container } = render(<WorkoutStats workout={null} />);
 
       // Assert
+
+      // Assert
+
       expect(container.firstChild).toBeNull();
     });
 
     it("should apply custom className", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 300 }),
       ]);
 
       // Act
+
+      // Act
+
       const { container } = render(
         <WorkoutStats workout={workout} className="custom-class" />
       );
 
       // Assert
+
+      // Assert
+
       expect(container.firstChild).toHaveClass("custom-class");
     });
 
     it("should have proper ARIA role", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 300 }),
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByRole("region", { name: "Workout statistics" })
       ).toBeInTheDocument();
@@ -84,44 +115,68 @@ describe("WorkoutStats", () => {
   describe("duration statistics", () => {
     it("should display total duration for time-based steps", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 300 }), // 5 min
         createMockStep(1, { type: "time", seconds: 600 }), // 10 min
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("Total Duration:")).toBeInTheDocument();
       expect(screen.getByText("15:00")).toBeInTheDocument();
     });
 
     it("should format duration in hours and minutes for long workouts", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 3600 }), // 1 hour
         createMockStep(1, { type: "time", seconds: 1800 }), // 30 min
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("1:30:00")).toBeInTheDocument();
     });
 
     it("should show estimate indicator for open-ended steps", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 300 }),
         createMockStep(1, { type: "open" }),
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText(/estimate/i)).toBeInTheDocument();
     });
   });
@@ -129,42 +184,66 @@ describe("WorkoutStats", () => {
   describe("distance statistics", () => {
     it("should display total distance for distance-based steps", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "distance", meters: 5000 }), // 5 km
         createMockStep(1, { type: "distance", meters: 3000 }), // 3 km
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("Total Distance:")).toBeInTheDocument();
       expect(screen.getByText("8.00 km")).toBeInTheDocument();
     });
 
     it("should format distance in meters for short distances", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "distance", meters: 500 }),
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("500 m")).toBeInTheDocument();
     });
 
     it("should display placeholder when no distance-based steps", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 300 }),
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("Total Distance:")).toBeInTheDocument();
       expect(screen.getByText("—")).toBeInTheDocument();
     });
@@ -173,6 +252,8 @@ describe("WorkoutStats", () => {
   describe("step count statistics", () => {
     it("should display total step count", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 300 }),
         createMockStep(1, { type: "time", seconds: 600 }),
@@ -180,15 +261,23 @@ describe("WorkoutStats", () => {
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("Total Steps:")).toBeInTheDocument();
       expect(screen.getByText("3 steps")).toBeInTheDocument();
     });
 
     it("should count steps within repetition blocks", () => {
       // Arrange
+      // Arrange
+
       const repetitionBlock: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -202,10 +291,16 @@ describe("WorkoutStats", () => {
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
       // 1 regular step + (2 steps * 3 repeats) = 7 total steps
+
+      // Assert
+
       expect(screen.getByText("Total Steps:")).toBeInTheDocument();
       expect(screen.getByText("7 steps")).toBeInTheDocument();
     });
@@ -214,6 +309,8 @@ describe("WorkoutStats", () => {
   describe("repetition block statistics", () => {
     it("should calculate duration including repetitions", () => {
       // Arrange
+      // Arrange
+
       const repetitionBlock: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -224,15 +321,23 @@ describe("WorkoutStats", () => {
       const workout = createMockWorkout([repetitionBlock]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
       // (5 min + 5 min) * 3 = 30 min
+
+      // Assert
+
       expect(screen.getByText("30:00")).toBeInTheDocument();
     });
 
     it("should calculate distance including repetitions", () => {
       // Arrange
+      // Arrange
+
       const repetitionBlock: RepetitionBlock = {
         repeatCount: 2,
         steps: [
@@ -243,15 +348,23 @@ describe("WorkoutStats", () => {
       const workout = createMockWorkout([repetitionBlock]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
       // (1 km + 0.5 km) * 2 = 3 km
+
+      // Assert
+
       expect(screen.getByText("3.00 km")).toBeInTheDocument();
     });
 
     it("should handle mixed steps and repetition blocks", () => {
       // Arrange
+      // Arrange
+
       const repetitionBlock: RepetitionBlock = {
         repeatCount: 2,
         steps: [createMockStep(1, { type: "time", seconds: 300 })], // 5 min
@@ -263,10 +376,16 @@ describe("WorkoutStats", () => {
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
       // 10 + 10 + 5 = 25 min
+
+      // Assert
+
       expect(screen.getByText("25:00")).toBeInTheDocument();
     });
   });
@@ -274,6 +393,8 @@ describe("WorkoutStats", () => {
   describe("mixed duration types", () => {
     it("should handle workout with both time and distance steps", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 600 }), // 10 min
         createMockStep(1, { type: "distance", meters: 5000 }), // 5 km
@@ -281,10 +402,16 @@ describe("WorkoutStats", () => {
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
       // When mixing time and distance steps, neither can be calculated precisely
+
+      // Assert
+
       expect(screen.getByText("Total Duration:")).toBeInTheDocument();
       expect(screen.getByText("Total Distance:")).toBeInTheDocument();
       expect(screen.getAllByText("—")).toHaveLength(2); // Both duration and distance show placeholders
@@ -292,6 +419,8 @@ describe("WorkoutStats", () => {
 
     it("should handle workout with open-ended steps", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 300 }),
         createMockStep(1, { type: "open" }),
@@ -299,10 +428,16 @@ describe("WorkoutStats", () => {
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
       // When there are open-ended steps, duration cannot be calculated
+
+      // Assert
+
       expect(screen.getAllByText("—")).toHaveLength(2); // Duration and Distance both show placeholder
       expect(screen.getByText(/estimate/i)).toBeInTheDocument();
     });
@@ -311,12 +446,20 @@ describe("WorkoutStats", () => {
   describe("edge cases", () => {
     it("should handle empty workout", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("Workout Stats")).toBeInTheDocument();
       expect(screen.getByText("Total Steps:")).toBeInTheDocument();
       expect(screen.getByText("0 steps")).toBeInTheDocument();
@@ -324,44 +467,68 @@ describe("WorkoutStats", () => {
 
     it("should handle workout with only open-ended steps", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "open" }),
         createMockStep(1, { type: "open" }),
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("Total Steps:")).toBeInTheDocument();
       expect(screen.getByText("2 steps")).toBeInTheDocument();
     });
 
     it("should handle very large durations", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 7200 }), // 2 hours
         createMockStep(1, { type: "time", seconds: 5400 }), // 1.5 hours
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("3:30:00")).toBeInTheDocument();
     });
 
     it("should handle very large distances", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout([
         createMockStep(0, { type: "distance", meters: 50000 }), // 50 km
         createMockStep(1, { type: "distance", meters: 30000 }), // 30 km
       ]);
 
       // Act
+
+      // Act
+
       render(<WorkoutStats workout={workout} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("80.00 km")).toBeInTheDocument();
     });
   });
@@ -369,11 +536,18 @@ describe("WorkoutStats", () => {
   describe("real-time updates", () => {
     it("should recalculate stats when workout changes", () => {
       // Arrange
+      // Arrange
+
       const workout1 = createMockWorkout([
         createMockStep(0, { type: "time", seconds: 300 }),
       ]);
 
+      // Act
+
       const { rerender } = render(<WorkoutStats workout={workout1} />);
+
+      // Assert
+
       expect(screen.getByText("5:00")).toBeInTheDocument();
 
       // Act - Update workout

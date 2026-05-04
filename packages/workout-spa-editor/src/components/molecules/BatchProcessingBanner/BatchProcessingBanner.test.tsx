@@ -6,6 +6,10 @@ import { BatchProcessingBanner } from "./BatchProcessingBanner";
 
 describe("BatchProcessingBanner", () => {
   it("should render nothing when no raw workouts and not processing", () => {
+    // Arrange
+
+    // Act
+
     const { container } = render(
       <BatchProcessingBanner
         rawCount={0}
@@ -16,10 +20,16 @@ describe("BatchProcessingBanner", () => {
       />
     );
 
+    // Assert
+
     expect(container.firstChild).toBeNull();
   });
 
   it("should show raw count and process button when idle", () => {
+    // Arrange
+
+    // Act
+
     render(
       <BatchProcessingBanner
         rawCount={3}
@@ -30,11 +40,15 @@ describe("BatchProcessingBanner", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByText(/3 raw workouts/)).toBeInTheDocument();
     expect(screen.getByText("Process all with AI")).toBeInTheDocument();
   });
 
   it("should call onProcess when button clicked", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     const onProcess = vi.fn();
 
@@ -48,12 +62,20 @@ describe("BatchProcessingBanner", () => {
       />
     );
 
+    // Act
+
     await user.click(screen.getByText("Process all with AI"));
+
+    // Assert
 
     expect(onProcess).toHaveBeenCalled();
   });
 
   it("should show progress during processing", () => {
+    // Arrange
+
+    // Act
+
     render(
       <BatchProcessingBanner
         rawCount={3}
@@ -70,12 +92,16 @@ describe("BatchProcessingBanner", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByTestId("batch-progress")).toHaveTextContent(
       "Processing 1 of 3"
     );
   });
 
   it("should show cancel button during processing", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     const onCancel = vi.fn();
 
@@ -95,12 +121,20 @@ describe("BatchProcessingBanner", () => {
       />
     );
 
+    // Act
+
     await user.click(screen.getByLabelText("Cancel batch processing"));
+
+    // Assert
 
     expect(onCancel).toHaveBeenCalled();
   });
 
   it("should show progress counter as X of N", () => {
+    // Arrange
+
+    // Act
+
     render(
       <BatchProcessingBanner
         rawCount={5}
@@ -117,12 +151,18 @@ describe("BatchProcessingBanner", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByTestId("batch-progress")).toHaveTextContent(
       "Processing 2 of 5"
     );
   });
 
   it("should use singular form for 1 raw workout", () => {
+    // Arrange
+
+    // Act
+
     render(
       <BatchProcessingBanner
         rawCount={1}
@@ -133,10 +173,16 @@ describe("BatchProcessingBanner", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByText(/1 raw workout this/)).toBeInTheDocument();
   });
 
   it("should render the per-bucket breakdown from progress.counts", () => {
+    // Arrange
+
+    // Act
+
     render(
       <BatchProcessingBanner
         rawCount={5}
@@ -160,6 +206,8 @@ describe("BatchProcessingBanner", () => {
         onCancel={vi.fn()}
       />
     );
+
+    // Assert
 
     expect(screen.getByTestId("batch-count-queued")).toHaveTextContent(
       "Queued 2"

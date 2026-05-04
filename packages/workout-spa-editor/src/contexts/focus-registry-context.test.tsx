@@ -34,20 +34,30 @@ const captureValue = (sink: { current: FocusRegistryValue | null }) => {
 describe("FocusRegistryContext", () => {
   it("should store the element under its id via registerItem", () => {
     // Arrange
+    // Arrange
+
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
     const id = asItemId("item-1");
     const el = document.createElement("div");
 
     // Act
+
+    // Act
+
     sink.current!.registerItem(id, el);
 
     // Assert
+
+    // Assert
+
     expect(sink.current!.getItem(id)).toBe(el);
   });
 
   it("should be idempotent via registerItem for the same (id, el) pair", () => {
     // Arrange
+    // Arrange
+
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
     const id = asItemId("item-2");
@@ -55,14 +65,22 @@ describe("FocusRegistryContext", () => {
 
     // Act — register twice with the same pair.
     sink.current!.registerItem(id, el);
+
+    // Act
+
     sink.current!.registerItem(id, el);
 
     // Assert — still the same element, no crash, no duplicate entry.
+
+    // Assert
+
     expect(sink.current!.getItem(id)).toBe(el);
   });
 
   it("should replace the entry via registerItem with a new element for the same id", () => {
     // Arrange
+    // Arrange
+
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
     const id = asItemId("item-3");
@@ -71,9 +89,15 @@ describe("FocusRegistryContext", () => {
 
     // Act — StrictMode's second mount registers a fresh element.
     sink.current!.registerItem(id, first);
+
+    // Act
+
     sink.current!.registerItem(id, second);
 
     // Assert — the live element wins.
+
+    // Assert
+
     expect(sink.current!.getItem(id)).toBe(second);
   });
 
@@ -83,6 +107,8 @@ describe("FocusRegistryContext", () => {
     //   second mount registers `second`        (replaces)
     //   first mount cleanup calls unregister(id, first)   (stale — MUST NOT evict)
     //   second mount cleanup calls unregister(id, second) (live — evicts)
+    // Arrange
+
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
     const id = asItemId("item-4");
@@ -92,10 +118,16 @@ describe("FocusRegistryContext", () => {
     // Act
     sink.current!.registerItem(id, first);
     sink.current!.registerItem(id, second);
+
+    // Act
+
     sink.current!.unregisterItem(id, first); // stale cleanup from first mount
 
     // Assert — the live `second` is still registered because the stale
     // cleanup identity did not match.
+
+    // Assert
+
     expect(sink.current!.getItem(id)).toBe(second);
 
     // Act — the live cleanup correctly evicts.
@@ -107,6 +139,8 @@ describe("FocusRegistryContext", () => {
     // Arrange — a parent that re-renders on a state toggle. The context
     // value must be reference-equal across the toggle so a memoized
     // consumer does not re-render.
+    // Arrange
+
     const observedValues = new Set<FocusRegistryValue>();
     let triggerRerender = () => {};
 
@@ -132,14 +166,22 @@ describe("FocusRegistryContext", () => {
 
     // Act
     triggerRerender();
+
+    // Act
+
     triggerRerender();
 
     // Assert — every render saw the same context-value reference.
+
+    // Assert
+
     expect(observedValues.size).toBe(1);
   });
 
   it("should support multiple ids independently", () => {
     // Arrange
+    // Arrange
+
     const sink = { current: null as FocusRegistryValue | null };
     render(<FocusRegistryProvider>{captureValue(sink)}</FocusRegistryProvider>);
     const a = asItemId("item-a");
@@ -149,9 +191,15 @@ describe("FocusRegistryContext", () => {
 
     // Act
     sink.current!.registerItem(a, elA);
+
+    // Act
+
     sink.current!.registerItem(b, elB);
 
     // Assert
+
+    // Assert
+
     expect(sink.current!.getItem(a)).toBe(elA);
     expect(sink.current!.getItem(b)).toBe(elB);
 
@@ -163,6 +211,8 @@ describe("FocusRegistryContext", () => {
 
   it("should integrate with a typical useEffect register/unregister pattern", () => {
     // Arrange — a component that mounts, registers on effect, unmounts.
+    // Arrange
+
     const sink = { current: null as FocusRegistryValue | null };
 
     const ItemCard = ({ id }: { id: string }) => {
@@ -186,9 +236,14 @@ describe("FocusRegistryContext", () => {
       </FocusRegistryProvider>
     );
 
+    // Act
+
     const { rerender, unmount } = render(<App show />);
 
     // Assert — after mount, the card is registered.
+
+    // Assert
+
     expect(sink.current!.getItem(asItemId("card-1"))).not.toBeUndefined();
 
     // Act — unmount the card.

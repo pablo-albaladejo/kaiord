@@ -56,9 +56,16 @@ describe("WorkoutHeader", () => {
   describe("rendering", () => {
     it("should render workout name and sport", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(<WorkoutHeader workout={mockWorkout} krd={mockKrd} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("Test Workout")).toBeInTheDocument();
       expect(
         screen.getByText(/Sport: cycling • indoor_cycling/i)
@@ -67,37 +74,60 @@ describe("WorkoutHeader", () => {
 
     it("should render 'Untitled Workout' when name is not provided", () => {
       // Arrange
+      // Arrange
+
       const workoutWithoutName: Workout = {
         ...mockWorkout,
         name: undefined,
       };
 
       // Act
+
+      // Act
+
       render(<WorkoutHeader workout={workoutWithoutName} krd={mockKrd} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("Untitled Workout")).toBeInTheDocument();
     });
 
     it("should render sport without sub-sport when sub-sport is not provided", () => {
       // Arrange
+      // Arrange
+
       const workoutWithoutSubSport: Workout = {
         ...mockWorkout,
         subSport: undefined,
       };
 
       // Act
+
+      // Act
+
       render(<WorkoutHeader workout={workoutWithoutSubSport} krd={mockKrd} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText(/^Sport: cycling$/)).toBeInTheDocument();
     });
 
     it("should render edit metadata button", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(<WorkoutHeader workout={mockWorkout} krd={mockKrd} />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByRole("button", { name: /edit workout metadata/i })
       ).toBeInTheDocument();
@@ -105,9 +135,16 @@ describe("WorkoutHeader", () => {
 
     it("should render save and discard buttons", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(<WorkoutHeader workout={mockWorkout} krd={mockKrd} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByTestId("save-button")).toBeInTheDocument();
       expect(screen.getByTestId("save-to-library-button")).toBeInTheDocument();
       expect(
@@ -121,15 +158,23 @@ describe("WorkoutHeader", () => {
   describe("interactions", () => {
     it("should show metadata editor when edit button is clicked", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(<WorkoutHeader workout={mockWorkout} krd={mockKrd} />);
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /edit workout metadata/i })
       );
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByRole("form", { name: /edit workout metadata/i })
       ).toBeInTheDocument();
@@ -138,6 +183,8 @@ describe("WorkoutHeader", () => {
 
     it("should hide metadata editor when cancel is clicked", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(<WorkoutHeader workout={mockWorkout} krd={mockKrd} />);
 
@@ -145,9 +192,15 @@ describe("WorkoutHeader", () => {
       await user.click(
         screen.getByRole("button", { name: /edit workout metadata/i })
       );
+
+      // Act
+
       await user.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Assert
+
+      // Assert
+
       expect(
         screen.queryByRole("form", { name: /edit workout metadata/i })
       ).not.toBeInTheDocument();
@@ -156,6 +209,8 @@ describe("WorkoutHeader", () => {
 
     it("should update workout and hide editor when save is clicked", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       useWorkoutStore.setState({ currentWorkout: mockKrd });
       render(<WorkoutHeader workout={mockWorkout} krd={mockKrd} />);
@@ -172,7 +227,13 @@ describe("WorkoutHeader", () => {
       await user.click(screen.getByRole("button", { name: /save/i }));
 
       // Assert
+
+      // Act
+
       const state = useWorkoutStore.getState();
+
+      // Assert
+
       expect(state.currentWorkout?.extensions?.structured_workout?.name).toBe(
         "Updated Workout"
       );
@@ -185,9 +246,16 @@ describe("WorkoutHeader", () => {
   describe("accessibility", () => {
     it("should have proper ARIA labels", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(<WorkoutHeader workout={mockWorkout} krd={mockKrd} />);
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByRole("button", { name: /edit workout metadata/i })
       ).toBeInTheDocument();

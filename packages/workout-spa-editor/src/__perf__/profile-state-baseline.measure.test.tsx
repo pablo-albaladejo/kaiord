@@ -174,8 +174,15 @@ describe("profile-state perf gate", () => {
   });
 
   it("should keep post-migration render counts within 2x of the committed baseline", async () => {
+    // Arrange
+
     const layoutHeader = await measureLayoutHeader();
+
+    // Act
+
     const useAiGeneration = await measureUseAiGeneration();
+
+    // Assert
 
     expect(layoutHeader).toBeGreaterThan(0);
     expect(useAiGeneration).toBeGreaterThan(0);
