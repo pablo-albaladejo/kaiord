@@ -38,7 +38,7 @@ export function backfillBridgeSnapshotState(
 }
 
 /**
- * v6 → v7: stamps `createdAt` on legacy AI provider rows so getAll()
+ * v7 → v8: stamps `createdAt` on legacy AI provider rows so getAll()
  * can orderBy("createdAt") and produce a stable insertion-order listing.
  *
  * Legacy rows have no insertion timestamp; we cannot reconstruct one,
