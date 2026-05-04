@@ -66,25 +66,21 @@ describe("Dexie v5 migration round-trip", () => {
   const dbName = `kaiord-migration-test-${Date.now()}-${Math.random()}`;
 
   it("should preserve every pre-existing row and creates new tables empty", async () => {
+    // Arrange
     await seedV4(dbName, fixture);
-
     const db = new KaiordDatabase(dbName);
     await db.open();
-
     const profiles = await db.table("profiles").toArray();
     const workouts = await db.table("workouts").toArray();
     const activities = await db.table("coachingActivities").toArray();
     const sync = await db.table("coachingSyncState").toArray();
-
     expect(profiles).toEqual(fixture.profiles);
     expect(workouts).toEqual(fixture.workouts);
     expect(activities).toEqual(fixture.coachingActivities);
     expect(sync).toEqual(fixture.coachingSyncState);
-
     const sessionMatches = createDexieSessionMatchRepository(db);
     const userPrefs = createDexieUserPreferencesRepository(db);
     const dismissals = createDexieAutoMatchDismissalRepository(db);
-
     expect(
       await sessionMatches.listByProfileAndWeek(
         "p1",
@@ -97,6 +93,9 @@ describe("Dexie v5 migration round-trip", () => {
       await dismissals.getByProfileAndWeek("p1", "2026-04-27")
     ).toBeUndefined();
 
+    // Act
     db.close();
+
+    // Assert
   });
 });

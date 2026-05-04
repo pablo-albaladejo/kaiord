@@ -5,10 +5,13 @@ import { createProfile } from "./create-profile";
 
 describe("createProfile", () => {
   it("should persist a profile and selects it as active when none existed", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
 
+    // Act
     const profile = await createProfile(persistence, "Pablo");
 
+    // Assert
     expect(profile.name).toBe("Pablo");
     expect(profile.id).toBeDefined();
     expect(await persistence.profiles.getAll()).toHaveLength(1);
@@ -16,23 +19,29 @@ describe("createProfile", () => {
   });
 
   it("should preserve the existing active id when a profile already exists", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     const first = await createProfile(persistence, "First");
 
+    // Act
     const second = await createProfile(persistence, "Second");
 
+    // Assert
     expect(await persistence.profiles.getAll()).toHaveLength(2);
     expect(await persistence.profiles.getActiveId()).toBe(first.id);
     expect(second.id).not.toBe(first.id);
   });
 
   it("should initialize the default sportZones structure for all 4 sports", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
 
+    // Act
     const profile = await createProfile(persistence, "Athlete", {
       bodyWeight: 70,
     });
 
+    // Assert
     expect(profile.bodyWeight).toBe(70);
     expect(profile.sportZones.cycling).toBeDefined();
     expect(profile.sportZones.running).toBeDefined();
@@ -42,35 +51,37 @@ describe("createProfile", () => {
     expect(profile.sportZones.running?.heartRateZones).toBeDefined();
     expect(profile.sportZones.swimming?.heartRateZones).toBeDefined();
     expect(profile.sportZones.generic?.heartRateZones).toBeDefined();
-    // Cycling power zones default to coggan-7 with 7 zones; the first
-    // zone is "Active Recovery". Locks the legacy structural contract
-    // (migrated from the deleted profile-store.test.ts).
     expect(profile.sportZones.cycling?.powerZones?.zones).toHaveLength(7);
     expect(profile.sportZones.cycling?.powerZones?.zones[0]?.name).toBe(
       "Active Recovery"
     );
-    // No thresholds set yet → HR method falls back to "custom".
     expect(profile.sportZones.cycling?.heartRateZones.method).toBe("custom");
   });
 
   it("should generate a fresh id per profile", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
-
     const a = await createProfile(persistence, "A");
+
+    // Act
     const b = await createProfile(persistence, "B");
 
+    // Assert
     expect(a.id).not.toBe(b.id);
   });
 
   it("should roll back the put when setActiveId rejects on the first profile (transaction atomicity)", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
+
+    // Act
     persistence.profiles.setActiveId = () =>
       Promise.reject(new Error("simulated"));
 
+    // Assert
     await expect(createProfile(persistence, "Pablo")).rejects.toThrow(
       "simulated"
     );
-
     expect(await persistence.profiles.getAll()).toEqual([]);
     expect(await persistence.profiles.getActiveId()).toBeNull();
   });

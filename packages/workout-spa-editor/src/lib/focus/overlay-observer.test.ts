@@ -59,7 +59,7 @@ describe("subscribeToOverlayCount", () => {
     // Act
     subscribeToOverlayCount(root, cb);
 
-    // Assert — first call is the initial count.
+    // Assert
     expect(cb).toHaveBeenCalledTimes(1);
     expect(cb).toHaveBeenLastCalledWith(1);
   });
@@ -70,10 +70,10 @@ describe("subscribeToOverlayCount", () => {
     const cb = vi.fn();
     subscribeToOverlayCount(root, cb);
     cb.mockClear();
-
-    // Act — add an open dialog under the root.
     root.appendChild(makeOverlay("dialog"));
-    await Promise.resolve(); // let the MutationObserver flush
+    await Promise.resolve();
+
+    // Act
     await Promise.resolve();
 
     // Assert
@@ -81,7 +81,7 @@ describe("subscribeToOverlayCount", () => {
   });
 
   it("should not fire for an overlay outside the root (DoS mitigation)", async () => {
-    // Arrange — foreign overlay lives under body, not under our root.
+    // Arrange
     const root = makeRoot();
     const cb = vi.fn();
     subscribeToOverlayCount(root, cb);
@@ -89,9 +89,11 @@ describe("subscribeToOverlayCount", () => {
     const foreign = makeOverlay("dialog");
     document.body.appendChild(foreign);
     await Promise.resolve();
+
+    // Act
     await Promise.resolve();
 
-    // Assert — count stays at 0; foreign overlay is ignored.
+    // Assert
     for (const [count] of cb.mock.calls) {
       expect(count).toBe(0);
     }
@@ -103,16 +105,16 @@ describe("subscribeToOverlayCount", () => {
     const cb = vi.fn();
     subscribeToOverlayCount(root, cb);
     cb.mockClear();
-
-    // Act — add a dialog without any data-radix-* attribute.
     const plain = document.createElement("div");
     plain.setAttribute("role", "dialog");
     plain.setAttribute("data-state", "open");
     root.appendChild(plain);
     await Promise.resolve();
+
+    // Act
     await Promise.resolve();
 
-    // Assert — not counted.
+    // Assert
     for (const [count] of cb.mock.calls) {
       expect(count).toBe(0);
     }
@@ -126,10 +128,10 @@ describe("subscribeToOverlayCount", () => {
     const cb = vi.fn();
     subscribeToOverlayCount(root, cb);
     cb.mockClear();
-
-    // Act — transition the overlay to closed.
     overlay.setAttribute("data-state", "closed");
     await Promise.resolve();
+
+    // Act
     await Promise.resolve();
 
     // Assert
@@ -142,20 +144,20 @@ describe("subscribeToOverlayCount", () => {
     const cb = vi.fn();
     subscribeToOverlayCount(root, cb);
     cb.mockClear();
-
-    // Act — add and remove a non-overlay element (no state change).
     const noise = document.createElement("span");
     root.appendChild(noise);
     await Promise.resolve();
     root.removeChild(noise);
+
+    // Act
     await Promise.resolve();
 
-    // Assert — no redundant 0→0 callbacks.
+    // Assert
     expect(cb).not.toHaveBeenCalled();
   });
 
   it("should share one observer across subscribers on the same root", async () => {
-    // Arrange — two subscribers, both see the same transition.
+    // Arrange
     const root = makeRoot();
     const cbA = vi.fn();
     const cbB = vi.fn();
@@ -163,13 +165,13 @@ describe("subscribeToOverlayCount", () => {
     subscribeToOverlayCount(root, cbB);
     cbA.mockClear();
     cbB.mockClear();
-
-    // Act
     root.appendChild(makeOverlay("menu"));
     await Promise.resolve();
+
+    // Act
     await Promise.resolve();
 
-    // Assert — both see the new count.
+    // Assert
     expect(cbA).toHaveBeenCalledWith(1);
     expect(cbB).toHaveBeenCalledWith(1);
   });
@@ -181,10 +183,10 @@ describe("subscribeToOverlayCount", () => {
     const unsubscribe = subscribeToOverlayCount(root, cb);
     cb.mockClear();
     unsubscribe();
-
-    // Act
     root.appendChild(makeOverlay("dialog"));
     await Promise.resolve();
+
+    // Act
     await Promise.resolve();
 
     // Assert
@@ -213,18 +215,15 @@ describe("subscribeToOverlayCount", () => {
       const root = makeRoot();
       const cbA = vi.fn();
       const cbB = vi.fn();
-
-      // Act — two subscriptions, each should see 0, and the warning
-      // must fire exactly once per process.
       const unsubA = subscribeToOverlayCount(root, cbA);
+
+      // Act
       const unsubB = subscribeToOverlayCount(root, cbB);
 
       // Assert
       expect(cbA).toHaveBeenCalledWith(0);
       expect(cbB).toHaveBeenCalledWith(0);
       expect(warnSpy).toHaveBeenCalledTimes(1);
-
-      // Cleanup (must be a function even in the fallback path).
       expect(() => unsubA()).not.toThrow();
       expect(() => unsubB()).not.toThrow();
     });
@@ -235,12 +234,12 @@ describe("subscribeToOverlayCount", () => {
       // Arrange
       const root = makeRoot();
       const cb = vi.fn();
-
-      // Act
       subscribeToOverlayCount(root, cb);
 
-      // Assert — test-only handle is defined in vitest.
+      // Act
       const globalKey = "__kaiord_overlayObserver__";
+
+      // Assert
       expect((globalThis as Record<string, unknown>)[globalKey]).toBeDefined();
     });
 
@@ -250,18 +249,16 @@ describe("subscribeToOverlayCount", () => {
       const cb = vi.fn();
       subscribeToOverlayCount(root, cb);
       const globalKey = "__kaiord_overlayObserver__";
-
-      // Act
       __resetOverlayObserverForTests();
-
-      // Assert
       expect(
         (globalThis as Record<string, unknown>)[globalKey]
       ).toBeUndefined();
-
-      // And a fresh subscribe after reset works.
       cb.mockClear();
+
+      // Act
       subscribeToOverlayCount(root, cb);
+
+      // Assert
       expect(cb).toHaveBeenCalled();
     });
   });

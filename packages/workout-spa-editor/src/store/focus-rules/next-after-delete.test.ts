@@ -21,7 +21,7 @@ const block = (id: string, innerIds: Array<string>) => ({
 
 describe("nextAfterDelete (main list)", () => {
   it("should focus the next sibling when one exists", () => {
-    // Arrange — deleted was at index 1; post-delete, step "c" now sits there.
+    // Arrange
     const workout = {
       sport: "cycling",
       steps: [step("a", 0), step("c", 2)],
@@ -35,13 +35,13 @@ describe("nextAfterDelete (main list)", () => {
   });
 
   it("should focus the previous sibling when the deleted item was the tail", () => {
-    // Arrange — deleted was last; post-delete, only "a" and "b" remain.
+    // Arrange
     const workout = {
       sport: "cycling",
       steps: [step("a", 0), step("b", 1)],
     } as unknown as Workout;
 
-    // Act — deletedIndex = 2 (past the end of the post-delete array).
+    // Act
     const target = nextAfterDelete({ workout, deletedIndex: 2 });
 
     // Assert
@@ -60,6 +60,8 @@ describe("nextAfterDelete (main list)", () => {
   });
 
   it("should fall back to empty-state when the workout is undefined", () => {
+    // Arrange
+
     // Act
     const target = nextAfterDelete({ workout: undefined, deletedIndex: 0 });
 
@@ -70,7 +72,7 @@ describe("nextAfterDelete (main list)", () => {
 
 describe("nextAfterDelete (inside a repetition block)", () => {
   it("should focus the next sibling inside the same block", () => {
-    // Arrange — block had [x, y, z]; y was deleted; now [x, z] and z sits at index 1.
+    // Arrange
     const workout = {
       sport: "cycling",
       steps: [block("blk-1", ["x", "z"])],
@@ -88,13 +90,13 @@ describe("nextAfterDelete (inside a repetition block)", () => {
   });
 
   it("should focus the previous sibling when the deleted item was the tail of the block", () => {
-    // Arrange — deleted was tail; post-delete the block has [x, y].
+    // Arrange
     const workout = {
       sport: "cycling",
       steps: [block("blk-1", ["x", "y"])],
     } as unknown as Workout;
 
-    // Act — deletedIndex = 2 (past end of block after delete).
+    // Act
     const target = nextAfterDelete({
       workout,
       deletedIndex: 2,
@@ -106,9 +108,7 @@ describe("nextAfterDelete (inside a repetition block)", () => {
   });
 
   it("should anchor focus to the parent block card when the block became empty", () => {
-    // Arrange — the block lost its last inner step. The consumer is
-    // expected to cascade into deleteRepetitionBlock next; the rule
-    // parks focus on the parent in the meantime.
+    // Arrange
     const workout = {
       sport: "cycling",
       steps: [block("blk-1", [])],
@@ -126,7 +126,7 @@ describe("nextAfterDelete (inside a repetition block)", () => {
   });
 
   it("should fall back to main-list rules when the parent block is gone", () => {
-    // Arrange — caller passed a block id that no longer exists.
+    // Arrange
     const workout = {
       sport: "cycling",
       steps: [step("a", 0)],
@@ -139,7 +139,7 @@ describe("nextAfterDelete (inside a repetition block)", () => {
       parentBlockId: asItemId("ghost-block"),
     });
 
-    // Assert — falls through to "next in main list" which picks "a".
+    // Assert
     expect(target).toEqual({ kind: "item", id: "a" });
   });
 });

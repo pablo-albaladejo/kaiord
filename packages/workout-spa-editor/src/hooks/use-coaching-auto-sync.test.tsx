@@ -60,66 +60,77 @@ describe("useCoachingAutoSync", () => {
   });
 
   it("should fire sync for each linked source on mount when stale", async () => {
+    // Arrange
     const src = makeSource();
 
+    // Act
     renderHook(() => useCoachingAutoSync([src], "2026-04-13"), {
       wrapper: ({ children }) => wrap(children),
     });
 
+    // Assert
     await waitFor(() => {
       expect(src.sync).toHaveBeenCalledWith("2026-04-13");
     });
   });
 
   it("should do NOT fire when profile has no linked account for that source", async () => {
+    // Arrange
     mockProfile = {
       id: "p1",
       profile: { ...linkedProfile, linkedAccounts: [] },
     };
     const src = makeSource({ linked: false });
-
     renderHook(() => useCoachingAutoSync([src], "2026-04-13"), {
       wrapper: ({ children }) => wrap(children),
     });
 
-    // Give the effect a tick to run; assert it stayed silent.
+    // Act
     await new Promise((r) => setTimeout(r, 5));
+
+    // Assert
     expect(src.sync).not.toHaveBeenCalled();
   });
 
   it("should do NOT fire when no profile is active", async () => {
+    // Arrange
     mockProfile = { id: null, profile: null };
     const src = makeSource();
-
     renderHook(() => useCoachingAutoSync([src], "2026-04-13"), {
       wrapper: ({ children }) => wrap(children),
     });
 
+    // Act
     await new Promise((r) => setTimeout(r, 5));
+
+    // Assert
     expect(src.sync).not.toHaveBeenCalled();
   });
 
   it("should do NOT fire when weekStart is undefined", async () => {
+    // Arrange
     const src = makeSource();
-
     renderHook(() => useCoachingAutoSync([src], undefined), {
       wrapper: ({ children }) => wrap(children),
     });
 
+    // Act
     await new Promise((r) => setTimeout(r, 5));
+
+    // Assert
     expect(src.sync).not.toHaveBeenCalled();
   });
 
   it("should skip sync when lastSyncedAt is fresh (<10min)", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
-    const recent = new Date(Date.now() - 60_000).toISOString(); // 1 min ago
+    const recent = new Date(Date.now() - 60_000).toISOString();
     await persistence.coachingSyncState.put({
       source: "train2go",
       profileId: "p1",
       lastSyncedAt: recent,
     });
     const src = makeSource();
-
     renderHook(() => useCoachingAutoSync([src], "2026-04-13"), {
       wrapper: ({ children }) => (
         <PersistenceProvider persistence={persistence}>
@@ -128,13 +139,15 @@ describe("useCoachingAutoSync", () => {
       ),
     });
 
+    // Act
     await new Promise((r) => setTimeout(r, 5));
+
+    // Assert
     expect(src.sync).not.toHaveBeenCalled();
   });
 
   it("profile switch invalidates staleness — A's fresh row does NOT suppress sync for B", async () => {
-    // Profile A has a fresh syncState row; the active profile is B which has
-    // no row at all. The hook MUST read B's own row, not A's.
+    // Arrange
     const persistence = createInMemoryPersistence();
     const recent = new Date(Date.now() - 60_000).toISOString();
     await persistence.coachingSyncState.put({
@@ -148,6 +161,7 @@ describe("useCoachingAutoSync", () => {
     };
     const src = makeSource();
 
+    // Act
     renderHook(() => useCoachingAutoSync([src], "2026-04-13"), {
       wrapper: ({ children }) => (
         <PersistenceProvider persistence={persistence}>
@@ -156,7 +170,7 @@ describe("useCoachingAutoSync", () => {
       ),
     });
 
-    // B has no syncState row → stale → sync fires
+    // Assert
     await waitFor(() => {
       expect(src.sync).toHaveBeenCalledWith("2026-04-13");
     });

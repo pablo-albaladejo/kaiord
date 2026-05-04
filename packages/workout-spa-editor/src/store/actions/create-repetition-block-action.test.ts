@@ -70,21 +70,13 @@ describe("createRepetitionBlock", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act - Wrap steps 0 and 1 in a repetition block
     useWorkoutStore.getState().createRepetitionBlock([0, 1], 3);
     const state = useWorkoutStore.getState();
-
-    // Assert
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
-
-    // First item should be a repetition block
     const firstItem = workout?.steps[0];
     expect(isRepetitionBlock(firstItem)).toBe(true);
-
     if (isRepetitionBlock(firstItem)) {
       expect(firstItem.repeatCount).toBe(3);
       expect(firstItem.steps).toHaveLength(2);
@@ -98,10 +90,11 @@ describe("createRepetitionBlock", () => {
       });
     }
 
-    // Second item should be the remaining step with recalculated index
+    // Act
     const secondItem = workout?.steps[1];
-    expect(isWorkoutStep(secondItem)).toBe(true);
 
+    // Assert
+    expect(isWorkoutStep(secondItem)).toBe(true);
     if (isWorkoutStep(secondItem)) {
       expect(secondItem.stepIndex).toBe(0);
       expect(secondItem.duration).toEqual({ type: "time", seconds: 300 });
@@ -157,21 +150,13 @@ describe("createRepetitionBlock", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act - Wrap steps 0 and 2 (non-contiguous)
     useWorkoutStore.getState().createRepetitionBlock([0, 2], 2);
     const state = useWorkoutStore.getState();
-
-    // Assert
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(3);
-
-    // First item should be a repetition block with steps 0 and 2
     const firstItem = workout?.steps[0];
     expect(isRepetitionBlock(firstItem)).toBe(true);
-
     if (isRepetitionBlock(firstItem)) {
       expect(firstItem.repeatCount).toBe(2);
       expect(firstItem.steps).toHaveLength(2);
@@ -184,8 +169,6 @@ describe("createRepetitionBlock", () => {
         seconds: 900,
       });
     }
-
-    // Remaining steps should be reindexed
     const secondItem = workout?.steps[1];
     expect(isWorkoutStep(secondItem)).toBe(true);
     if (isWorkoutStep(secondItem)) {
@@ -193,7 +176,10 @@ describe("createRepetitionBlock", () => {
       expect(secondItem.duration).toEqual({ type: "time", seconds: 600 });
     }
 
+    // Act
     const thirdItem = workout?.steps[2];
+
+    // Assert
     expect(isWorkoutStep(thirdItem)).toBe(true);
     if (isWorkoutStep(thirdItem)) {
       expect(thirdItem.stepIndex).toBe(1);
@@ -239,20 +225,17 @@ describe("createRepetitionBlock", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act - Pass indices in reverse order
     useWorkoutStore.getState().createRepetitionBlock([2, 0, 1], 4);
     const state = useWorkoutStore.getState();
-
-    // Assert
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(1);
 
+    // Act
     const block = workout?.steps[0];
-    expect(isRepetitionBlock(block)).toBe(true);
 
+    // Assert
+    expect(isRepetitionBlock(block)).toBe(true);
     if (isRepetitionBlock(block)) {
       expect(block.repeatCount).toBe(4);
       expect(block.steps).toHaveLength(3);
@@ -303,11 +286,10 @@ describe("createRepetitionBlock", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
+    useWorkoutStore.getState().createRepetitionBlock([0, 1], 2);
 
     // Act
-    useWorkoutStore.getState().createRepetitionBlock([0, 1], 2);
     const state = useWorkoutStore.getState();
 
     // Assert
@@ -322,9 +304,9 @@ describe("createRepetitionBlock", () => {
       undoHistory: [],
       historyIndex: -1,
     });
+    useWorkoutStore.getState().createRepetitionBlock([0, 1], 2);
 
     // Act
-    useWorkoutStore.getState().createRepetitionBlock([0, 1], 2);
     const state = useWorkoutStore.getState();
 
     // Assert
@@ -359,17 +341,16 @@ describe("createRepetitionBlock", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act
     useWorkoutStore.getState().createRepetitionBlock([], 2);
     const state = useWorkoutStore.getState();
 
-    // Assert
+    // Act
     const workout = state.currentWorkout?.extensions?.structured_workout;
+
+    // Assert
     expect(workout?.steps).toHaveLength(1);
-    expect(state.undoHistory).toHaveLength(1); // Only the initial load
+    expect(state.undoHistory).toHaveLength(1);
   });
 
   it("should do nothing when repeat count is less than 2", () => {
@@ -403,17 +384,16 @@ describe("createRepetitionBlock", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act
     useWorkoutStore.getState().createRepetitionBlock([0, 1], 1);
     const state = useWorkoutStore.getState();
 
-    // Assert
+    // Act
     const workout = state.currentWorkout?.extensions?.structured_workout;
+
+    // Assert
     expect(workout?.steps).toHaveLength(2);
-    expect(state.undoHistory).toHaveLength(1); // Only the initial load
+    expect(state.undoHistory).toHaveLength(1);
   });
 
   it("should wrap a single step in a repetition block", () => {
@@ -453,20 +433,13 @@ describe("createRepetitionBlock", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act - Wrap only step 0
     useWorkoutStore.getState().createRepetitionBlock([0], 5);
     const state = useWorkoutStore.getState();
-
-    // Assert
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
-
     const firstItem = workout?.steps[0];
     expect(isRepetitionBlock(firstItem)).toBe(true);
-
     if (isRepetitionBlock(firstItem)) {
       expect(firstItem.repeatCount).toBe(5);
       expect(firstItem.steps).toHaveLength(1);
@@ -476,7 +449,10 @@ describe("createRepetitionBlock", () => {
       });
     }
 
+    // Act
     const secondItem = workout?.steps[1];
+
+    // Assert
     expect(isWorkoutStep(secondItem)).toBe(true);
     if (isWorkoutStep(secondItem)) {
       expect(secondItem.stepIndex).toBe(0);
@@ -512,19 +488,16 @@ describe("createRepetitionBlock", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act
     useWorkoutStore.getState().createRepetitionBlock([0], 3);
     const state = useWorkoutStore.getState();
-
-    // Assert
     const workout = state.currentWorkout?.extensions?.structured_workout;
+
+    // Act
     const block = workout?.steps[0];
 
+    // Assert
     expect(isRepetitionBlock(block)).toBe(true);
-
     if (isRepetitionBlock(block)) {
       // Block id comes from `defaultIdProvider()` — uniform UUID v4
       // ItemId contract shared with step ids (design decision 1).
@@ -584,17 +557,16 @@ describe("createRepetitionBlock - Property Tests", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act
     useWorkoutStore.getState().createRepetitionBlock([0, 1], 2);
     const state = useWorkoutStore.getState();
 
-    // Assert
+    // Act
     const workout = state.currentWorkout?.extensions?.structured_workout;
+
+    // Assert
     expect(workout?.steps).toHaveLength(0);
-    expect(state.undoHistory).toHaveLength(1); // Only the initial load
+    expect(state.undoHistory).toHaveLength(1);
   });
 
   it("should handle workout with existing repetition blocks", () => {
@@ -653,21 +625,13 @@ describe("createRepetitionBlock - Property Tests", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act - Wrap steps 0 and 3 (skipping the existing repetition block)
     useWorkoutStore.getState().createRepetitionBlock([0, 3], 2);
     const state = useWorkoutStore.getState();
-
-    // Assert
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(2);
-
-    // First item should be the new repetition block
     const firstItem = workout?.steps[0];
     expect(isRepetitionBlock(firstItem)).toBe(true);
-
     if (isRepetitionBlock(firstItem)) {
       expect(firstItem.repeatCount).toBe(2);
       expect(firstItem.steps).toHaveLength(2);
@@ -681,10 +645,11 @@ describe("createRepetitionBlock - Property Tests", () => {
       });
     }
 
-    // Second item should be the existing repetition block (preserved)
+    // Act
     const secondItem = workout?.steps[1];
-    expect(isRepetitionBlock(secondItem)).toBe(true);
 
+    // Assert
+    expect(isRepetitionBlock(secondItem)).toBe(true);
     if (isRepetitionBlock(secondItem)) {
       expect(secondItem.repeatCount).toBe(3);
       expect(secondItem.steps).toHaveLength(2);
@@ -741,34 +706,27 @@ describe("createRepetitionBlock - Property Tests", () => {
         },
       },
     };
-
     useWorkoutStore.getState().loadWorkout(mockKrd);
-
-    // Act - Wrap steps 2 and 3 (after the existing block)
     useWorkoutStore.getState().createRepetitionBlock([2, 3], 4);
     const state = useWorkoutStore.getState();
-
-    // Assert
     const workout = state.currentWorkout?.extensions?.structured_workout;
     expect(workout?.steps).toHaveLength(3);
-
-    // First item should be step 0
     const firstItem = workout?.steps[0];
     expect(isWorkoutStep(firstItem)).toBe(true);
     if (isWorkoutStep(firstItem)) {
       expect(firstItem.stepIndex).toBe(0);
       expect(firstItem.duration).toEqual({ type: "time", seconds: 300 });
     }
-
-    // Second item should be the existing repetition block
     const secondItem = workout?.steps[1];
     expect(isRepetitionBlock(secondItem)).toBe(true);
     if (isRepetitionBlock(secondItem)) {
       expect(secondItem.repeatCount).toBe(2);
     }
 
-    // Third item should be the new repetition block
+    // Act
     const thirdItem = workout?.steps[2];
+
+    // Assert
     expect(isRepetitionBlock(thirdItem)).toBe(true);
     if (isRepetitionBlock(thirdItem)) {
       expect(thirdItem.repeatCount).toBe(4);
@@ -792,9 +750,12 @@ describe("createRepetitionBlock - Property Tests", () => {
    * non-selected steps and existing blocks should remain unchanged.
    */
   it("should preserve relative order of non-selected items (property test)", () => {
-    // Run property test with multiple iterations
+    // Arrange
+
+    // Act
     const iterations = 100;
 
+    // Assert
     for (let i = 0; i < iterations; i++) {
       // Arrange - Generate random workout structure
       const numSteps = Math.floor(Math.random() * 10) + 3; // 3-12 steps

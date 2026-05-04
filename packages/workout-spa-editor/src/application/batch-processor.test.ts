@@ -32,10 +32,12 @@ const fail: ProcessResult = { ok: false, error: "LLM error", retried: false };
 
 describe("processBatch", () => {
   it("should process all workouts successfully", async () => {
+    // Arrange
     const workouts = makeWorkouts(3);
     const processOne = vi.fn().mockResolvedValue(ok);
     const onProgress = vi.fn();
 
+    // Act
     const result = await processBatch(
       workouts,
       processOne,
@@ -43,12 +45,14 @@ describe("processBatch", () => {
       new AbortController().signal
     );
 
+    // Assert
     expect(result.succeeded).toHaveLength(3);
     expect(result.failed).toHaveLength(0);
     expect(result.cancelled).toBe(false);
   });
 
   it("should continue on failure", async () => {
+    // Arrange
     const workouts = makeWorkouts(3);
     const processOne = vi
       .fn()
@@ -57,6 +61,7 @@ describe("processBatch", () => {
       .mockResolvedValueOnce(ok);
     const onProgress = vi.fn();
 
+    // Act
     const result = await processBatch(
       workouts,
       processOne,
@@ -64,12 +69,14 @@ describe("processBatch", () => {
       new AbortController().signal
     );
 
+    // Assert
     expect(result.succeeded).toHaveLength(2);
     expect(result.failed).toHaveLength(1);
     expect(result.failed[0].error).toBe("LLM error");
   });
 
   it("should stop on abort signal", async () => {
+    // Arrange
     const workouts = makeWorkouts(5);
     const controller = new AbortController();
     let callCount = 0;
@@ -79,6 +86,7 @@ describe("processBatch", () => {
       return ok;
     });
 
+    // Act
     const result = await processBatch(
       workouts,
       processOne,
@@ -86,85 +94,84 @@ describe("processBatch", () => {
       controller.signal
     );
 
+    // Assert
     expect(result.cancelled).toBe(true);
     expect(processOne).toHaveBeenCalledTimes(2);
   });
 
   it("should report progress after each item", async () => {
+    // Arrange
     const workouts = makeWorkouts(2);
     const processOne = vi.fn().mockResolvedValue(ok);
     const onProgress = vi.fn();
-
     await processBatch(
       workouts,
       processOne,
       onProgress,
       new AbortController().signal
     );
-
-    // 2 calls per workout: before (current set) + after (current null)
     expect(onProgress).toHaveBeenCalledTimes(4);
-
     const firstBefore = onProgress.mock.calls[0][0];
     expect(firstBefore.current).toBe(workouts[0].id);
     expect(firstBefore.processed).toBe(0);
 
+    // Act
     const firstAfter = onProgress.mock.calls[1][0];
+
+    // Assert
     expect(firstAfter.current).toBeNull();
     expect(firstAfter.processed).toBe(1);
   });
 
   it("should wait 500ms between API calls", async () => {
+    // Arrange
     vi.useFakeTimers();
     const workouts = makeWorkouts(2);
     const processOne = vi.fn().mockResolvedValue(ok);
-
     const promise = processBatch(
       workouts,
       processOne,
       vi.fn(),
       new AbortController().signal
     );
-
     await vi.advanceTimersByTimeAsync(0);
     expect(processOne).toHaveBeenCalledTimes(1);
-
     await vi.advanceTimersByTimeAsync(500);
     await vi.advanceTimersByTimeAsync(0);
     expect(processOne).toHaveBeenCalledTimes(2);
-
     await promise;
+
+    // Act
     vi.useRealTimers();
+
+    // Assert
   });
 
   it("should report per-workout status via byId (queued → processing → succeeded)", async () => {
+    // Arrange
     const workouts = makeWorkouts(2);
     const processOne = vi.fn().mockResolvedValue(ok);
     const onProgress = vi.fn();
-
     await processBatch(
       workouts,
       processOne,
       onProgress,
       new AbortController().signal
     );
-
     const [w0, w1] = workouts;
     const frames = onProgress.mock.calls.map((c) => c[0]);
-
-    // First frame: w0 processing, w1 queued
     expect(frames[0].byId[w0.id]).toBe("processing");
     expect(frames[0].byId[w1.id]).toBe("queued");
     expect(frames[0].counts.queued).toBe(1);
     expect(frames[0].counts.processing).toBe(1);
-
-    // After w0 done: succeeded=1, next w1 queued
     expect(frames[1].byId[w0.id]).toBe("succeeded");
     expect(frames[1].byId[w1.id]).toBe("queued");
     expect(frames[1].counts.succeeded).toBe(1);
 
-    // Final frame: both succeeded
+    // Act
     const last = frames[frames.length - 1];
+
+    // Assert
     expect(last.byId[w0.id]).toBe("succeeded");
     expect(last.byId[w1.id]).toBe("succeeded");
     expect(last.counts.succeeded).toBe(2);
@@ -173,13 +180,13 @@ describe("processBatch", () => {
   });
 
   it("records 'failed' per-workout status on processOne failure", async () => {
+    // Arrange
     const workouts = makeWorkouts(2);
     const processOne = vi
       .fn()
       .mockResolvedValueOnce(fail)
       .mockResolvedValueOnce(ok);
     const onProgress = vi.fn();
-
     await processBatch(
       workouts,
       processOne,
@@ -187,7 +194,10 @@ describe("processBatch", () => {
       new AbortController().signal
     );
 
+    // Act
     const last = onProgress.mock.calls[onProgress.mock.calls.length - 1][0];
+
+    // Assert
     expect(last.byId[workouts[0].id]).toBe("failed");
     expect(last.byId[workouts[1].id]).toBe("succeeded");
     expect(last.counts.failed).toBe(1);
@@ -195,10 +205,10 @@ describe("processBatch", () => {
   });
 
   it("should include every workout as queued in initial frames before processing starts", async () => {
+    // Arrange
     const workouts = makeWorkouts(3);
     const processOne = vi.fn().mockResolvedValue(ok);
     const onProgress = vi.fn();
-
     await processBatch(
       workouts,
       processOne,
@@ -206,16 +216,17 @@ describe("processBatch", () => {
       new AbortController().signal
     );
 
+    // Act
     const firstFrame = onProgress.mock.calls[0][0];
 
-    // Three workouts total, one immediately flipped to processing,
-    // the remaining two still queued.
+    // Assert
     expect(firstFrame.total).toBe(3);
     expect(Object.keys(firstFrame.byId)).toHaveLength(3);
     expect(firstFrame.counts.queued + firstFrame.counts.processing).toBe(3);
   });
 
   it("byId snapshots are isolated — later mutations don't leak back", async () => {
+    // Arrange
     const workouts = makeWorkouts(2);
     const processOne = vi.fn().mockResolvedValue(ok);
     const frames: Array<Record<string, string>> = [];
@@ -223,6 +234,7 @@ describe("processBatch", () => {
       frames.push(p.byId);
     };
 
+    // Act
     await processBatch(
       workouts,
       processOne,
@@ -230,12 +242,12 @@ describe("processBatch", () => {
       new AbortController().signal
     );
 
-    // The first frame must still report w0 as "processing", not
-    // "succeeded" — each emit should be a fresh snapshot.
+    // Assert
     expect(frames[0][workouts[0].id]).toBe("processing");
   });
 
   it("should pass allowRetry=true until budget exhausted", async () => {
+    // Arrange
     const workouts = makeWorkouts(5);
     const retriedResult: ProcessResult = {
       ok: true,
@@ -254,14 +266,14 @@ describe("processBatch", () => {
       },
       retried: true,
     };
-
     const processOne = vi
       .fn()
       .mockResolvedValueOnce(retriedResult) // retry 1
       .mockResolvedValueOnce(retriedResult) // retry 2
       .mockResolvedValueOnce(retriedResult) // retry 3
-      .mockResolvedValue(ok); // no more retries allowed
+      .mockResolvedValue(ok);
 
+    // Act
     await processBatch(
       workouts,
       processOne,
@@ -269,11 +281,10 @@ describe("processBatch", () => {
       new AbortController().signal
     );
 
-    // First 3 calls: allowRetry=true (budget available)
+    // Assert
     expect(processOne.mock.calls[0][1]).toBe(true);
     expect(processOne.mock.calls[1][1]).toBe(true);
     expect(processOne.mock.calls[2][1]).toBe(true);
-    // After 3 retries used: allowRetry=false
     expect(processOne.mock.calls[3][1]).toBe(false);
     expect(processOne.mock.calls[4][1]).toBe(false);
   });

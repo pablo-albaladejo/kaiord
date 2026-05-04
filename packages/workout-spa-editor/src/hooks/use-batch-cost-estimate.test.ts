@@ -25,8 +25,12 @@ const anthropic: LlmProviderConfig = {
 
 describe("useBatchCostEstimate", () => {
   it("should return zero tokens and null cost when no workouts and no provider", () => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(() => useBatchCostEstimate([], null));
 
+    // Assert
     expect(result.current).toEqual({
       tokens: 0,
       costUsd: null,
@@ -35,30 +39,35 @@ describe("useBatchCostEstimate", () => {
   });
 
   it("should compute tokens for raw workouts using the chars/3 heuristic", () => {
-    // 3 raw chars + 500 output = 501 tokens per workout (ceil(3/3)=1, +500).
+    // Arrange
     const workouts = [makeWorkout("abc"), makeWorkout("def")];
 
+    // Act
     const { result } = renderHook(() => useBatchCostEstimate(workouts, null));
 
+    // Assert
     expect(result.current.tokens).toBe(1002);
     expect(result.current.costUsd).toBeNull();
     expect(result.current.providerLabel).toBeNull();
   });
 
   it("should compute cost via the blended anthropic rate when a provider is given", () => {
-    // 1 workout with 3 chars → 501 tokens. anthropic rate = $3/M → ~$0.001503.
+    // Arrange
     const workouts = [makeWorkout("abc")];
 
+    // Act
     const { result } = renderHook(() =>
       useBatchCostEstimate(workouts, anthropic)
     );
 
+    // Assert
     expect(result.current.tokens).toBe(501);
     expect(result.current.costUsd).toBeCloseTo((501 * 3) / 1_000_000, 6);
     expect(result.current.providerLabel).toBe("My Claude");
   });
 
   it("should cache the result when inputs are referentially stable", () => {
+    // Arrange
     const workouts = [makeWorkout("abc")];
     const { result, rerender } = renderHook(
       ({ w, p }: { w: WorkoutRecord[]; p: LlmProviderConfig | null }) =>
@@ -67,8 +76,10 @@ describe("useBatchCostEstimate", () => {
     );
     const first = result.current;
 
+    // Act
     rerender({ w: workouts, p: anthropic });
 
+    // Assert
     expect(result.current).toBe(first);
   });
 });

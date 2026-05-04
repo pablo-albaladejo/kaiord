@@ -31,14 +31,17 @@ const baseConfig: Omit<LlmProviderConfig, "type" | "model"> = {
 
 describe("createLanguageModel", () => {
   it("should create an Anthropic model with browser access header", async () => {
+    // Arrange
     const config: LlmProviderConfig = {
       ...baseConfig,
       type: "anthropic",
       model: "claude-sonnet-4-5-20241022",
     };
 
+    // Act
     const result = await createLanguageModel(config);
 
+    // Assert
     expect(createAnthropic).toHaveBeenCalledWith({
       apiKey: "test-key",
       headers: { "anthropic-dangerous-direct-browser-access": "true" },
@@ -47,27 +50,33 @@ describe("createLanguageModel", () => {
   });
 
   it("should create an OpenAI model", async () => {
+    // Arrange
     const config: LlmProviderConfig = {
       ...baseConfig,
       type: "openai",
       model: "gpt-4o",
     };
 
+    // Act
     const result = await createLanguageModel(config);
 
+    // Assert
     expect(createOpenAI).toHaveBeenCalledWith({ apiKey: "test-key" });
     expect(result).toEqual({ modelId: "openai-model" });
   });
 
   it("should create a Google model", async () => {
+    // Arrange
     const config: LlmProviderConfig = {
       ...baseConfig,
       type: "google",
       model: "gemini-2.0-flash",
     };
 
+    // Act
     const result = await createLanguageModel(config);
 
+    // Assert
     expect(createGoogleGenerativeAI).toHaveBeenCalledWith({
       apiKey: "test-key",
     });

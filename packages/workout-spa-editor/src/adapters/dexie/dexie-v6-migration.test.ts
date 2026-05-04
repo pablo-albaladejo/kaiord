@@ -59,13 +59,16 @@ describe("Dexie v5 → v6 migration", () => {
   });
 
   it("should backfill pendingClear=false and lastSuccessfulFingerprint=null on existing bridges", async () => {
+    // Arrange
     await seedV5(name);
-
     const v6 = new KaiordDatabase(name);
     await v6.open();
     const rows = await v6.table("bridges").toArray();
+
+    // Act
     v6.close();
 
+    // Assert
     expect(rows).toHaveLength(2);
     for (const row of rows) {
       expect(row.pendingClear).toBe(false);
@@ -74,13 +77,16 @@ describe("Dexie v5 → v6 migration", () => {
   });
 
   it("should preserve existing fields verbatim", async () => {
+    // Arrange
     await seedV5(name);
-
     const v6 = new KaiordDatabase(name);
     await v6.open();
     const verified = await v6.table("bridges").get("ext-legacy-verified");
+
+    // Act
     v6.close();
 
+    // Assert
     expect(verified).toMatchObject({
       extensionId: "ext-legacy-verified",
       id: "garmin-bridge",
@@ -97,23 +103,29 @@ describe("Dexie v5 → v6 migration", () => {
 
 describe("backfillBridgeSnapshotState", () => {
   it("should set defaults on a row missing both fields", () => {
+    // Arrange
     const row: Record<string, unknown> = { extensionId: "ext-1" };
 
+    // Act
     backfillBridgeSnapshotState(row);
 
+    // Assert
     expect(row.pendingClear).toBe(false);
     expect(row.lastSuccessfulFingerprint).toBeNull();
   });
 
   it("should preserve an existing pendingClear=true value", () => {
+    // Arrange
     const row: Record<string, unknown> = {
       extensionId: "ext-1",
       pendingClear: true,
       lastSuccessfulFingerprint: "deadbeef",
     };
 
+    // Act
     backfillBridgeSnapshotState(row);
 
+    // Assert
     expect(row.pendingClear).toBe(true);
     expect(row.lastSuccessfulFingerprint).toBe("deadbeef");
   });

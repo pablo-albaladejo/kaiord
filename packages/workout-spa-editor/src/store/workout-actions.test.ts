@@ -14,10 +14,14 @@ import { createEmptyWorkoutAction } from "./workout-actions";
 
 describe("createEmptyWorkoutAction", () => {
   it("should build an empty UIWorkout with a single-snapshot history", () => {
+    // Arrange
     const patch = createEmptyWorkoutAction("New ride", "cycling");
-
     expect(patch.currentWorkout).toBeDefined();
+
+    // Act
     const inner = patch.currentWorkout?.extensions?.structured_workout;
+
+    // Assert
     expect(inner).toEqual({ name: "New ride", sport: "cycling", steps: [] });
     expect(patch.undoHistory).toHaveLength(1);
     expect(patch.historyIndex).toBe(0);
@@ -25,8 +29,12 @@ describe("createEmptyWorkoutAction", () => {
   });
 
   it("should clear both single- and multi-selection slots", () => {
+    // Arrange
+
+    // Act
     const patch = createEmptyWorkoutAction("New ride", "cycling");
 
+    // Assert
     expect(patch.selectedStepId).toBeNull();
     expect(patch.selectedStepIds).toEqual([]);
   });

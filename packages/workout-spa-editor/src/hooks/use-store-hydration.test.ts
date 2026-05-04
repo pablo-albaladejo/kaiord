@@ -26,8 +26,12 @@ import { useStoreHydration } from "./use-store-hydration";
 
 describe("useStoreHydration", () => {
   it("should delegate to every persisted-state runtime detector", () => {
+    // Arrange
+
+    // Act
     renderHook(() => useStoreHydration());
 
+    // Assert
     expect(mockUseStorageProbe).toHaveBeenCalledTimes(1);
     expect(mockUseBridgeDiscoveryBootstrap).toHaveBeenCalledTimes(1);
     expect(mockUseGarminDetection).toHaveBeenCalledTimes(1);

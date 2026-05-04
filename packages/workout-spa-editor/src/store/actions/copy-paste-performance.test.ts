@@ -50,33 +50,31 @@ describe("Copy/Paste Performance", () => {
 
   describe("large repetition blocks", () => {
     it("should copy large repetition block within 500ms", async () => {
-      // Arrange - Create block with 50 steps
+      // Arrange
       const largeBlock = createRepetitionBlock(50, 5);
       const krd = createMockKrd([largeBlock]);
-
       const mockWriteText = vi.fn().mockResolvedValue(undefined);
       Object.assign(navigator, {
         clipboard: {
           writeText: mockWriteText,
         },
       });
-
-      // Act - Measure copy time
       const startTime = performance.now();
       const result = await copyStepAction(krd, 0);
       const endTime = performance.now();
+
+      // Act
       const duration = endTime - startTime;
 
       // Assert
       expect(result.success).toBe(true);
-      expect(duration).toBeLessThan(500); // Should complete in < 500ms
+      expect(duration).toBeLessThan(500);
     });
 
     it("should paste large repetition block within 500ms", async () => {
-      // Arrange - Create block with 50 steps
+      // Arrange
       const largeBlock = createRepetitionBlock(50, 5);
       const krd = createMockKrd([createWorkoutStep(0)]);
-
       const mockReadText = vi
         .fn()
         .mockResolvedValue(JSON.stringify(largeBlock));
@@ -85,23 +83,22 @@ describe("Copy/Paste Performance", () => {
           readText: mockReadText,
         },
       });
-
-      // Act - Measure paste time
       const startTime = performance.now();
       const result = await pasteStepAction(krd);
       const endTime = performance.now();
+
+      // Act
       const duration = endTime - startTime;
 
       // Assert
       expect(result.success).toBe(true);
-      expect(duration).toBeLessThan(500); // Should complete in < 500ms
+      expect(duration).toBeLessThan(500);
     });
 
     it("should handle repetition block with 100 steps", async () => {
-      // Arrange - Create very large block
+      // Arrange
       const veryLargeBlock = createRepetitionBlock(100, 3);
       const krd = createMockKrd([veryLargeBlock]);
-
       let clipboardContent = "";
       const mockWriteText = vi.fn().mockImplementation((text: string) => {
         clipboardContent = text;
@@ -110,25 +107,22 @@ describe("Copy/Paste Performance", () => {
       const mockReadText = vi.fn().mockImplementation(() => {
         return Promise.resolve(clipboardContent);
       });
-
       Object.assign(navigator, {
         clipboard: {
           writeText: mockWriteText,
           readText: mockReadText,
         },
       });
-
-      // Act - Copy and paste
       const copyResult = await copyStepAction(krd, 0);
       const pasteResult = await pasteStepAction(krd);
-
-      // Assert - Operations succeed
       expect(copyResult.success).toBe(true);
       expect(pasteResult.success).toBe(true);
 
-      // Verify data integrity
+      // Act
       const pastedBlock = pasteResult.updatedKrd!.extensions!
         .structured_workout!.steps[1] as RepetitionBlock;
+
+      // Assert
       expect(pastedBlock.steps).toHaveLength(100);
       expect(pastedBlock.repeatCount).toBe(3);
     });
@@ -136,23 +130,22 @@ describe("Copy/Paste Performance", () => {
 
   describe("many steps", () => {
     it("should copy workout with 100 steps within 500ms", async () => {
-      // Arrange - Create workout with 100 steps
+      // Arrange
       const manySteps = Array.from({ length: 100 }, (_, i) =>
         createWorkoutStep(i)
       );
       const krd = createMockKrd(manySteps);
-
       const mockWriteText = vi.fn().mockResolvedValue(undefined);
       Object.assign(navigator, {
         clipboard: {
           writeText: mockWriteText,
         },
       });
-
-      // Act - Measure copy time for middle step
       const startTime = performance.now();
       const result = await copyStepAction(krd, 50);
       const endTime = performance.now();
+
+      // Act
       const duration = endTime - startTime;
 
       // Assert
@@ -161,12 +154,11 @@ describe("Copy/Paste Performance", () => {
     });
 
     it("should paste into workout with 100 steps within 500ms", async () => {
-      // Arrange - Create workout with 100 steps
+      // Arrange
       const manySteps = Array.from({ length: 100 }, (_, i) =>
         createWorkoutStep(i)
       );
       const krd = createMockKrd(manySteps);
-
       const stepToPaste = createWorkoutStep(999);
       const mockReadText = vi
         .fn()
@@ -176,11 +168,11 @@ describe("Copy/Paste Performance", () => {
           readText: mockReadText,
         },
       });
-
-      // Act - Measure paste time at middle position
       const startTime = performance.now();
       const result = await pasteStepAction(krd, 50);
       const endTime = performance.now();
+
+      // Act
       const duration = endTime - startTime;
 
       // Assert
@@ -192,12 +184,11 @@ describe("Copy/Paste Performance", () => {
     });
 
     it("should recalculate indices for 100 steps efficiently", async () => {
-      // Arrange - Create workout with 100 steps
+      // Arrange
       const manySteps = Array.from({ length: 100 }, (_, i) =>
         createWorkoutStep(i)
       );
       const krd = createMockKrd(manySteps);
-
       const stepToPaste = createWorkoutStep(999);
       const mockReadText = vi
         .fn()
@@ -207,19 +198,17 @@ describe("Copy/Paste Performance", () => {
           readText: mockReadText,
         },
       });
-
-      // Act - Paste at beginning (worst case for recalculation)
       const startTime = performance.now();
       const result = await pasteStepAction(krd, 0);
       const endTime = performance.now();
       const duration = endTime - startTime;
-
-      // Assert - Recalculation is fast
       expect(result.success).toBe(true);
       expect(duration).toBeLessThan(500);
 
-      // Verify all indices are correct
+      // Act
       const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
+
+      // Assert
       steps.forEach((step, index) => {
         if ("stepIndex" in step) {
           expect(step.stepIndex).toBe(index);
@@ -230,7 +219,7 @@ describe("Copy/Paste Performance", () => {
 
   describe("complex nested structures", () => {
     it("should handle workout with mixed steps and blocks", async () => {
-      // Arrange - Create complex workout
+      // Arrange
       const complexWorkout: Array<WorkoutStep | RepetitionBlock> = [
         createWorkoutStep(0),
         createRepetitionBlock(10, 3),
@@ -240,7 +229,6 @@ describe("Copy/Paste Performance", () => {
         createRepetitionBlock(15, 4),
       ];
       const krd = createMockKrd(complexWorkout);
-
       let clipboardContent = "";
       const mockWriteText = vi.fn().mockImplementation((text: string) => {
         clipboardContent = text;
@@ -249,19 +237,18 @@ describe("Copy/Paste Performance", () => {
       const mockReadText = vi.fn().mockImplementation(() => {
         return Promise.resolve(clipboardContent);
       });
-
       Object.assign(navigator, {
         clipboard: {
           writeText: mockWriteText,
           readText: mockReadText,
         },
       });
-
-      // Act - Copy and paste a block
       const startTime = performance.now();
-      await copyStepAction(krd, 1); // Copy first block
+      await copyStepAction(krd, 1);
       const pasteResult = await pasteStepAction(krd);
       const endTime = performance.now();
+
+      // Act
       const duration = endTime - startTime;
 
       // Assert
@@ -273,10 +260,9 @@ describe("Copy/Paste Performance", () => {
     });
 
     it("should maintain data integrity with large clipboard payload", async () => {
-      // Arrange - Create block with complex data
+      // Arrange
       const complexBlock = createRepetitionBlock(50, 5);
       const krd = createMockKrd([complexBlock]);
-
       let clipboardContent = "";
       const mockWriteText = vi.fn().mockImplementation((text: string) => {
         clipboardContent = text;
@@ -285,28 +271,24 @@ describe("Copy/Paste Performance", () => {
       const mockReadText = vi.fn().mockImplementation(() => {
         return Promise.resolve(clipboardContent);
       });
-
       Object.assign(navigator, {
         clipboard: {
           writeText: mockWriteText,
           readText: mockReadText,
         },
       });
-
-      // Act - Copy and paste
       await copyStepAction(krd, 0);
       const pasteResult = await pasteStepAction(krd);
-
-      // Assert - All data is preserved
       const originalBlock = krd.extensions!.structured_workout!
         .steps[0] as RepetitionBlock;
+
+      // Act
       const pastedBlock = pasteResult.updatedKrd!.extensions!
         .structured_workout!.steps[1] as RepetitionBlock;
 
+      // Assert
       expect(pastedBlock.repeatCount).toBe(originalBlock.repeatCount);
       expect(pastedBlock.steps).toHaveLength(originalBlock.steps.length);
-
-      // Verify each step in the block
       pastedBlock.steps.forEach((step, index) => {
         const originalStep = originalBlock.steps[index];
         expect(step.durationType).toBe(originalStep.durationType);
@@ -322,7 +304,6 @@ describe("Copy/Paste Performance", () => {
       // Arrange
       const block = createRepetitionBlock(20, 3);
       const krd = createMockKrd([block]);
-
       let clipboardContent = "";
       const mockWriteText = vi.fn().mockImplementation((text: string) => {
         clipboardContent = text;
@@ -331,23 +312,22 @@ describe("Copy/Paste Performance", () => {
       const mockReadText = vi.fn().mockImplementation(() => {
         return Promise.resolve(clipboardContent);
       });
-
       Object.assign(navigator, {
         clipboard: {
           writeText: mockWriteText,
           readText: mockReadText,
         },
       });
-
-      // Act - Perform many copy/paste operations
       let currentKrd = krd;
+
+      // Act
       for (let i = 0; i < 50; i++) {
         await copyStepAction(currentKrd, 0);
         const result = await pasteStepAction(currentKrd);
         currentKrd = result.updatedKrd!;
       }
 
-      // Assert - All operations succeeded
+      // Assert
       expect(currentKrd.extensions!.structured_workout!.steps).toHaveLength(51);
       expect(mockWriteText).toHaveBeenCalledTimes(50);
       expect(mockReadText).toHaveBeenCalledTimes(50);

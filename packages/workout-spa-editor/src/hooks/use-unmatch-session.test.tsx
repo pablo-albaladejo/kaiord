@@ -22,6 +22,7 @@ describe("useUnmatchSession", () => {
   };
 
   it("should remove a SessionMatch row by id when the profile owns it", async () => {
+    // Arrange
     const { Wrapper, persistence } = wrap();
     await persistence.sessionMatch.put({
       id: "m-1",
@@ -32,24 +33,29 @@ describe("useUnmatchSession", () => {
       createdAt: "2026-04-13T10:00:00.000Z",
       source: "manual",
     });
-
     const { result } = renderHook(() => useUnmatchSession(), {
       wrapper: Wrapper,
     });
 
+    // Act
     await act(async () => {
       await result.current({ profileId: "p1", matchId: "m-1" });
     });
 
+    // Assert
     expect(await persistence.sessionMatch.getById("m-1")).toBeUndefined();
   });
 
   it("should be idempotent on a missing row (resolves without throwing)", async () => {
+    // Arrange
     const { Wrapper } = wrap();
+
+    // Act
     const { result } = renderHook(() => useUnmatchSession(), {
       wrapper: Wrapper,
     });
 
+    // Assert
     await expect(
       result.current({ profileId: "p1", matchId: "missing" })
     ).resolves.toBeUndefined();

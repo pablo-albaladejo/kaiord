@@ -135,11 +135,11 @@ describe.each([
   it("should focus the empty-state button for an empty-state target", () => {
     // Arrange
     const { ref } = renderHarness();
-
-    // Act
     act(() => {
       useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
     });
+
+    // Act
     act(() => {
       vi.runAllTimers();
     });
@@ -150,19 +150,17 @@ describe.each([
   });
 
   it("should fall back to the heading when the item id is unknown and the list is empty", () => {
-    // Arrange — no items registered, so `ghost-id` falls all the way
-    // through the fallback chain. An explicit empty-state button exists,
-    // so that wins before the heading; disable it to force heading.
+    // Arrange
     const { ref } = renderHarness();
     const btn = ref.current!.emptyState;
-    btn.remove(); // kill the empty-state option
-
-    // Act
+    btn.remove();
     act(() => {
       useWorkoutStore
         .getState()
         .setPendingFocusTarget(focusItem(asItemId("ghost-id")));
     });
+
+    // Act
     act(() => {
       vi.runAllTimers();
     });
@@ -179,37 +177,37 @@ describe.each([
     ref.current!.root.appendChild(input);
     input.focus();
     expect(document.activeElement).toBe(input);
-
-    // Act
     act(() => {
       useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
     });
+
+    // Act
     act(() => {
       vi.runAllTimers();
     });
 
-    // Assert — focus stayed on the input; pendingFocusTarget cleared.
+    // Assert
     expect(document.activeElement).toBe(input);
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
   });
 
   it("should not re-run on unrelated store key changes while pendingFocusTarget stays null", () => {
-    // Arrange — spy on element.focus to count focus moves.
+    // Arrange
     const { ref } = renderHarness();
     const focusSpy = vi.spyOn(ref.current!.emptyState, "focus");
-
-    // Act — poke an unrelated key (selectedStepId) several times.
     act(() => {
       useWorkoutStore.setState({ selectedStepId: "a" as never });
     });
     act(() => {
       useWorkoutStore.setState({ selectedStepId: "b" as never });
     });
+
+    // Act
     act(() => {
       vi.runAllTimers();
     });
 
-    // Assert — no focus moved.
+    // Assert
     expect(focusSpy).not.toHaveBeenCalled();
   });
 
@@ -217,19 +215,19 @@ describe.each([
     // Arrange
     const { ref } = renderHarness();
     const focusSpy = vi.spyOn(ref.current!.emptyState, "focus");
-
-    // Act — three sets in one act() batch; React re-renders once.
     act(() => {
       const s = useWorkoutStore.getState();
       s.setPendingFocusTarget(focusItem(asItemId("x")));
       s.setPendingFocusTarget(focusItem(asItemId("y")));
       s.setPendingFocusTarget(focusEmptyState);
     });
+
+    // Act
     act(() => {
       vi.runAllTimers();
     });
 
-    // Assert — exactly one focus call, targeting the last value.
+    // Assert
     expect(focusSpy).toHaveBeenCalledTimes(1);
     expect(document.activeElement).toBe(ref.current!.emptyState);
   });
@@ -238,8 +236,6 @@ describe.each([
     // Arrange
     const { ref } = renderHarness();
     const focusSpy = vi.spyOn(ref.current!.emptyState, "focus");
-
-    // Act — first set focuses, second set with the same target is a no-op.
     act(() => {
       useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
     });
@@ -250,21 +246,19 @@ describe.each([
     act(() => {
       useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
     });
+
+    // Act
     act(() => {
       vi.runAllTimers();
     });
 
     // Assert
     expect(afterFirst).toBe(1);
-    // prevTargetRef still holds the prior target, so the second set
-    // either short-circuits (same reference) or re-fires only once.
-    // Either way we must NOT exceed 2 cumulative calls.
     expect(focusSpy.mock.calls.length).toBeLessThanOrEqual(2);
   });
 
   it("should clear pendingFocusTarget when the fallback chain yields nothing", () => {
-    // Arrange — render a harness with NO empty-state and NO heading,
-    // so `focusItem(ghost)` has no resolution path.
+    // Arrange
     const ref = { current: null as HarnessRefs | null };
     const BareHarness = () => {
       const rootRef = useRef<HTMLDivElement | null>(null);
@@ -300,8 +294,6 @@ describe.each([
         </FocusRegistryProvider>
       </Wrapper>
     );
-
-    // Act
     act(() => {
       useWorkoutStore
         .getState()
@@ -310,20 +302,17 @@ describe.each([
     act(() => {
       vi.runAllTimers();
     });
-
-    // Assert — cleared; dev warning emitted.
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
     expect(warnSpy).toHaveBeenCalled();
 
+    // Act
     warnSpy.mockRestore();
+
+    // Assert
   });
 
   it("should stash the target while a Radix dialog is open and re-apply it on close via rAF", () => {
-    // Arrange — a Radix-flagged dialog that renders INSIDE the editor
-    // root through a prop toggle. Starting the test with the dialog
-    // present guarantees the observer's initial synchronous count is
-    // 1, so we do not have to rely on the MutationObserver microtask
-    // firing under fake timers.
+    // Arrange
     const HarnessWithDialog = ({
       harnessRef,
       dialogOpen,
@@ -377,33 +366,30 @@ describe.each([
         </FocusRegistryProvider>
       </Wrapper>
     );
-
     const rafSpy = vi
       .spyOn(globalThis, "requestAnimationFrame")
       .mockImplementation((cb) => {
         cb(0);
         return 0;
       });
-
-    // Act — set pendingFocusTarget while the dialog is open.
     act(() => {
       useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
     });
     act(() => {
       vi.runAllTimers();
     });
-
-    // Assert — store cleared (stash path) and focus did NOT move to
-    // the empty-state button while the overlay was open.
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
     expect(document.activeElement).not.toBe(ref.current!.emptyState);
-
     rafSpy.mockRestore();
+
+    // Act
     view.unmount();
+
+    // Assert
   });
 
   it("should focus an item registered via the context", () => {
-    // Arrange — render a child that registers itself in the registry.
+    // Arrange
     const ref = { current: null as HarnessRefs | null };
     const Item = ({ id }: { id: string }) => {
       const value = useContext(FocusRegistryContext);
@@ -424,8 +410,6 @@ describe.each([
         </FocusRegistryProvider>
       </Wrapper>
     );
-
-    // Act
     act(() => {
       useWorkoutStore
         .getState()
@@ -435,8 +419,10 @@ describe.each([
       vi.runAllTimers();
     });
 
-    // Assert
+    // Act
     const target = document.querySelector('[data-testid="step-a"]');
+
+    // Assert
     expect(document.activeElement).toBe(target);
   });
 
@@ -447,8 +433,6 @@ describe.each([
     // Arrange
     const spy = vi.fn<FocusTelemetry>();
     const harnessRef = { current: null as HarnessRefs | null };
-
-    // Act
     render(
       <Wrapper>
         <FocusTelemetryContext.Provider value={spy}>
@@ -459,8 +443,10 @@ describe.each([
       </Wrapper>
     );
 
-    // Assert — exactly one canary regardless of mount count.
+    // Act
     const canaries = spy.mock.calls.filter(([e]) => e.type === "wiring-canary");
+
+    // Assert
     expect(canaries).toHaveLength(1);
   });
 });

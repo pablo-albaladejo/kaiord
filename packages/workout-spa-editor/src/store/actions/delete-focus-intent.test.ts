@@ -50,7 +50,7 @@ describe("deleteStepAction focus intent", () => {
   afterEach(resetStore);
 
   it("should focus the next sibling when one exists", () => {
-    // Arrange — three steps; delete the middle one.
+    // Arrange
     useWorkoutStore
       .getState()
       .loadWorkout(buildKrd([step(0), step(1), step(2)]));
@@ -76,7 +76,7 @@ describe("deleteStepAction focus intent", () => {
         .structured_workout as { steps: Array<{ id: string }> }
     ).steps[0].id;
 
-    // Act — delete the last step.
+    // Act
     useWorkoutStore.getState().deleteStep(1);
 
     // Assert
@@ -104,7 +104,7 @@ describe("deleteRepetitionBlockAction focus intent", () => {
   afterEach(resetStore);
 
   it("should focus the next main-list sibling after a block delete", () => {
-    // Arrange — a block followed by a top-level step.
+    // Arrange
     useWorkoutStore
       .getState()
       .loadWorkout(buildKrd([{ repeatCount: 2, steps: [step(0)] }, step(1)]));

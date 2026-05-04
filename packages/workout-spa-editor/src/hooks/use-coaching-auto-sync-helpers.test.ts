@@ -35,20 +35,40 @@ const NOW_MS = Date.now();
 
 describe("isStale", () => {
   it("should return true when lastSyncedAt is undefined", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(isStale(undefined, NOW_MS)).toBe(true);
   });
 
   it("should return true when lastSyncedAt is unparseable", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(isStale("not-a-date", NOW_MS)).toBe(true);
   });
 
   it("should return false when lastSyncedAt is within 10 minutes", () => {
+    // Arrange
+
+    // Act
     const recent = new Date(NOW_MS - 5 * 60 * 1000).toISOString();
+
+    // Assert
     expect(isStale(recent, NOW_MS)).toBe(false);
   });
 
   it("should return true when lastSyncedAt is older than 10 minutes", () => {
+    // Arrange
+
+    // Act
     const old = new Date(NOW_MS - 11 * 60 * 1000).toISOString();
+
+    // Assert
     expect(isStale(old, NOW_MS)).toBe(true);
   });
 });
@@ -63,12 +83,14 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
   });
 
   it("should emit coaching.sync.failure with isAutoSync: true when src.sync throws", async () => {
+    // Arrange
     const src = makeSource({
       sync: vi.fn(async () => {
         throw new Error("tab closed");
       }),
     });
 
+    // Act
     await runSourceSync(
       src,
       "p1",
@@ -79,6 +101,7 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
       analytics
     );
 
+    // Assert
     expect(analytics.event).toHaveBeenCalledWith("coaching.sync.failure", {
       source: "train2go",
       profileId: "p1",
@@ -88,12 +111,14 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
   });
 
   it("should emit coaching.sync.failure with isAutoSync: true when src.error is set after sync", async () => {
+    // Arrange
     const src = makeSource({
       sync: vi.fn(async () => {
         src.error = "session expired";
       }),
     });
 
+    // Act
     await runSourceSync(
       src,
       "p1",
@@ -104,6 +129,7 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
       analytics
     );
 
+    // Assert
     expect(analytics.event).toHaveBeenCalledWith("coaching.sync.failure", {
       source: "train2go",
       profileId: "p1",
@@ -113,8 +139,10 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
   });
 
   it("should emit coaching.sync.invoked before syncing", async () => {
+    // Arrange
     const src = makeSource();
 
+    // Act
     await runSourceSync(
       src,
       "p1",
@@ -125,6 +153,7 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
       analytics
     );
 
+    // Assert
     expect(analytics.event).toHaveBeenCalledWith("coaching.sync.invoked", {
       source: "train2go",
       profileId: "p1",
@@ -133,6 +162,7 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
   });
 
   it("should skip sync and emits nothing when state is fresh", async () => {
+    // Arrange
     const fresh = new Date(NOW_MS - 60_000).toISOString();
     await persistence.coachingSyncState.put({
       source: "train2go",
@@ -141,6 +171,7 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
     });
     const src = makeSource();
 
+    // Act
     await runSourceSync(
       src,
       "p1",
@@ -151,6 +182,7 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
       analytics
     );
 
+    // Assert
     expect(src.sync).not.toHaveBeenCalled();
     expect(analytics.event).not.toHaveBeenCalled();
   });

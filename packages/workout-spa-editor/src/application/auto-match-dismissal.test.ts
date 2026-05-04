@@ -34,14 +34,17 @@ const baseInput = {
 
 describe("dismissAutoMatchBanner — happy paths", () => {
   it("should write a row with one entry on first dismissal", async () => {
+    // Arrange
     const repo = createInMemoryAutoMatchDismissalRepository();
-
     await dismissAutoMatchBanner(baseInput, {
       repository: repo,
       clock: () => NOW_1,
     });
 
+    // Act
     const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
+
+    // Assert
     expect(stored).toEqual({
       profileId: "p1",
       weekStart: "2026-04-27",
@@ -52,18 +55,21 @@ describe("dismissAutoMatchBanner — happy paths", () => {
   });
 
   it("should append to the existing row on second dismissal in the same week", async () => {
+    // Arrange
     const repo = createInMemoryAutoMatchDismissalRepository();
     await dismissAutoMatchBanner(baseInput, {
       repository: repo,
       clock: () => NOW_1,
     });
-
     await dismissAutoMatchBanner(
       { ...baseInput, activityId: "a2", workoutId: "w2" },
       { repository: repo, clock: () => NOW_2 }
     );
 
+    // Act
     const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
+
+    // Assert
     expect(stored?.dismissedPairs).toEqual([
       { activityId: "a1", workoutId: "w1", dismissedAt: NOW_1 },
       { activityId: "a2", workoutId: "w2", dismissedAt: NOW_2 },
@@ -71,18 +77,21 @@ describe("dismissAutoMatchBanner — happy paths", () => {
   });
 
   it("should update dismissedAt in place when re-dismissing the same pair (no duplicate)", async () => {
+    // Arrange
     const repo = createInMemoryAutoMatchDismissalRepository();
     await dismissAutoMatchBanner(baseInput, {
       repository: repo,
       clock: () => NOW_1,
     });
-
     await dismissAutoMatchBanner(baseInput, {
       repository: repo,
       clock: () => NOW_2,
     });
 
+    // Act
     const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
+
+    // Assert
     expect(stored?.dismissedPairs).toHaveLength(1);
     expect(stored?.dismissedPairs[0]?.dismissedAt).toBe(NOW_2);
   });
@@ -90,49 +99,62 @@ describe("dismissAutoMatchBanner — happy paths", () => {
 
 describe("isAutoMatchBannerDismissed", () => {
   it("should return true for a recorded pair", async () => {
+    // Arrange
     const repo = createInMemoryAutoMatchDismissalRepository();
     await dismissAutoMatchBanner(baseInput, {
       repository: repo,
       clock: () => NOW_1,
     });
 
+    // Act
     const dismissed = await isAutoMatchBannerDismissed(baseInput, {
       repository: repo,
     });
 
+    // Assert
     expect(dismissed).toBe(true);
   });
 
   it("should return false for a different pair on the same week", async () => {
+    // Arrange
     const repo = createInMemoryAutoMatchDismissalRepository();
     await dismissAutoMatchBanner(baseInput, {
       repository: repo,
       clock: () => NOW_1,
     });
 
+    // Act
     const dismissed = await isAutoMatchBannerDismissed(
       { ...baseInput, activityId: "a-other" },
       { repository: repo }
     );
 
+    // Assert
     expect(dismissed).toBe(false);
   });
 
   it("should return false when no row exists for the (profileId, weekStart)", async () => {
+    // Arrange
     const repo = createInMemoryAutoMatchDismissalRepository();
 
+    // Act
     const dismissed = await isAutoMatchBannerDismissed(baseInput, {
       repository: repo,
     });
 
+    // Assert
     expect(dismissed).toBe(false);
   });
 });
 
 describe("dismissAutoMatchBanner — defensive guards", () => {
   it("should reject empty profileId on the write path", async () => {
+    // Arrange
+
+    // Act
     const repo = createInMemoryAutoMatchDismissalRepository();
 
+    // Assert
     await expect(
       dismissAutoMatchBanner(
         { ...baseInput, profileId: "" },
@@ -144,8 +166,12 @@ describe("dismissAutoMatchBanner — defensive guards", () => {
   it.each([["weekStart"], ["activityId"], ["workoutId"]])(
     "should reject empty %s on the write path",
     async (field) => {
+      // Arrange
+
+      // Act
       const repo = createInMemoryAutoMatchDismissalRepository();
 
+      // Assert
       await expect(
         dismissAutoMatchBanner(
           { ...baseInput, [field]: "" },
@@ -156,13 +182,16 @@ describe("dismissAutoMatchBanner — defensive guards", () => {
   );
 
   it("should safe-default to false on the read path for an empty input", async () => {
+    // Arrange
     const repo = createInMemoryAutoMatchDismissalRepository();
 
+    // Act
     const dismissed = await isAutoMatchBannerDismissed(
       { ...baseInput, profileId: "" },
       { repository: repo }
     );
 
+    // Assert
     expect(dismissed).toBe(false);
   });
 });
@@ -180,16 +209,19 @@ describe("dismissAutoMatchBanner — 256-cap", () => {
   };
 
   it("should be a no-op for the 257th distinct pair (row unchanged, warning emitted)", async () => {
+    // Arrange
     const repo = createInMemoryAutoMatchDismissalRepository();
     const logger = { warn: vi.fn() };
     await fillCap(repo);
-
     await dismissAutoMatchBanner(
       { ...baseInput, activityId: "a257", workoutId: "w257" },
       { repository: repo, clock: () => NOW_2, logger }
     );
 
+    // Act
     const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
+
+    // Assert
     expect(stored?.dismissedPairs).toHaveLength(256);
     expect(stored?.dismissedPairs.some((p) => p.activityId === "a257")).toBe(
       false
@@ -200,17 +232,20 @@ describe("dismissAutoMatchBanner — 256-cap", () => {
   });
 
   it("should keep the warning message as a static literal (no identifier interpolation)", async () => {
+    // Arrange
     const repo = createInMemoryAutoMatchDismissalRepository();
     const logger = { warn: vi.fn() };
     await fillCap(repo);
-
     await dismissAutoMatchBanner(
       { ...baseInput, activityId: "a-leak", workoutId: "w-leak" },
       { repository: repo, clock: () => NOW_2, logger }
     );
 
+    // Act
     const message = (logger.warn as ReturnType<typeof vi.fn>).mock
       .calls[0]?.[0];
+
+    // Assert
     expect(message).toBe("dismissAutoMatchBanner: cap reached");
     expect(message).not.toContain("a-leak");
     expect(message).not.toContain("w-leak");
@@ -218,17 +253,20 @@ describe("dismissAutoMatchBanner — 256-cap", () => {
   });
 
   it("should re-dismis at the cap updates the existing entry without violating the cap", async () => {
+    // Arrange
     const repo = createInMemoryAutoMatchDismissalRepository();
     await fillCap(repo);
-
     await dismissAutoMatchBanner(
       { ...baseInput, activityId: "a0", workoutId: "w0" },
       { repository: repo, clock: () => NOW_2 }
     );
-
     const stored = await repo.getByProfileAndWeek("p1", "2026-04-27");
     expect(stored?.dismissedPairs).toHaveLength(256);
+
+    // Act
     const updated = stored?.dismissedPairs.find((p) => p.activityId === "a0");
+
+    // Assert
     expect(updated?.dismissedAt).toBe(NOW_2);
   });
 });

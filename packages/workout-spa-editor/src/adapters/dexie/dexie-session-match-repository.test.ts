@@ -25,36 +25,50 @@ describe("DexieSessionMatchRepository", () => {
   });
 
   it("should round-trip via put-and-get on getByActivityId", async () => {
+    // Arrange
     const repo = createDexieSessionMatchRepository(db);
     const m = makeMatch();
 
+    // Act
     await repo.put(m);
 
+    // Assert
     expect(await repo.getByActivityId("p1", m.coachingActivityId)).toEqual(m);
   });
 
   it("should round-trip via put-and-get on getByWorkoutId", async () => {
+    // Arrange
     const repo = createDexieSessionMatchRepository(db);
     const m = makeMatch();
 
+    // Act
     await repo.put(m);
 
+    // Assert
     expect(await repo.getByWorkoutId("p1", m.workoutId)).toEqual(m);
   });
 
   it("should reject double-match on activity side with SessionAlreadyMatchedError", async () => {
+    // Arrange
     const repo = createDexieSessionMatchRepository(db);
+
+    // Act
     await repo.put(makeMatch({ id: "M1" }));
 
+    // Assert
     await expect(
       repo.put(makeMatch({ id: "M2", workoutId: "w-other" }))
     ).rejects.toBeInstanceOf(SessionAlreadyMatchedError);
   });
 
   it("should reject double-match on workout side", async () => {
+    // Arrange
     const repo = createDexieSessionMatchRepository(db);
+
+    // Act
     await repo.put(makeMatch({ id: "M1" }));
 
+    // Assert
     await expect(
       repo.put(
         makeMatch({
@@ -66,7 +80,10 @@ describe("DexieSessionMatchRepository", () => {
   });
 
   it("should permit same workout matched in different profiles", async () => {
+    // Arrange
     const repo = createDexieSessionMatchRepository(db);
+
+    // Act
     await repo.put(
       makeMatch({
         id: "M1",
@@ -76,6 +93,7 @@ describe("DexieSessionMatchRepository", () => {
       })
     );
 
+    // Assert
     await expect(
       repo.put(
         makeMatch({
@@ -86,25 +104,28 @@ describe("DexieSessionMatchRepository", () => {
         })
       )
     ).resolves.toBeUndefined();
-
     expect((await repo.getByWorkoutId("p1", "w-shared"))?.profileId).toBe("p1");
     expect((await repo.getByWorkoutId("p2", "w-shared"))?.profileId).toBe("p2");
   });
 
   it("should be idempotent on upsert by id (re-put same id replaces, no uniqueness error)", async () => {
+    // Arrange
     const repo = createDexieSessionMatchRepository(db);
+
+    // Act
     await repo.put(makeMatch({ id: "M1", source: "manual" }));
 
+    // Assert
     await expect(
       repo.put(makeMatch({ id: "M1", source: "auto-suggestion" }))
     ).resolves.toBeUndefined();
-
     expect(
       (await repo.getByActivityId("p1", "p1:train2go:12345"))?.source
     ).toBe("auto-suggestion");
   });
 
   it("should list inclusive and profile-scoped via listByProfileAndWeek", async () => {
+    // Arrange
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1", date: "2026-04-27" }));
     await repo.put(
@@ -133,33 +154,43 @@ describe("DexieSessionMatchRepository", () => {
       })
     );
 
+    // Act
     const result = await repo.listByProfileAndWeek(
       "p1",
       "2026-04-27",
       "2026-05-03"
     );
 
+    // Assert
     expect(result.map((m) => m.id).sort()).toEqual(["M1", "M2"]);
   });
 
   it("should be a no-op on delete when missing", async () => {
+    // Arrange
+
+    // Act
     const repo = createDexieSessionMatchRepository(db);
 
+    // Assert
     await expect(repo.delete("never")).resolves.toBeUndefined();
   });
 
   it("should remove the row on delete by id", async () => {
+    // Arrange
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1" }));
 
+    // Act
     await repo.delete("M1");
 
+    // Assert
     expect(
       await repo.getByActivityId("p1", "p1:train2go:12345")
     ).toBeUndefined();
   });
 
   it("should remove only matching rows via deleteByActivityId, idempotent on miss", async () => {
+    // Arrange
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1" }));
     await repo.put(
@@ -170,19 +201,21 @@ describe("DexieSessionMatchRepository", () => {
       })
     );
 
+    // Act
     await repo.deleteByActivityId("p1:train2go:12345");
 
+    // Assert
     expect(
       await repo.getByActivityId("p1", "p1:train2go:12345")
     ).toBeUndefined();
     expect((await repo.getByActivityId("p1", "p1:train2go:keep"))?.id).toBe(
       "M2"
     );
-
     await expect(repo.deleteByActivityId("never")).resolves.toBeUndefined();
   });
 
   it("should remove only matching rows via deleteByWorkoutId, idempotent on miss", async () => {
+    // Arrange
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1", workoutId: "w-drop" }));
     await repo.put(
@@ -193,15 +226,17 @@ describe("DexieSessionMatchRepository", () => {
       })
     );
 
+    // Act
     await repo.deleteByWorkoutId("w-drop");
 
+    // Assert
     expect(await repo.getByWorkoutId("p1", "w-drop")).toBeUndefined();
     expect((await repo.getByWorkoutId("p1", "w-keep"))?.id).toBe("M2");
-
     await expect(repo.deleteByWorkoutId("never")).resolves.toBeUndefined();
   });
 
   it("deleteByProfile removes only that profile's rows", async () => {
+    // Arrange
     const repo = createDexieSessionMatchRepository(db);
     await repo.put(makeMatch({ id: "M1", profileId: "p1" }));
     await repo.put(
@@ -213,8 +248,10 @@ describe("DexieSessionMatchRepository", () => {
       })
     );
 
+    // Act
     await repo.deleteByProfile("p1");
 
+    // Assert
     expect(
       await repo.getByActivityId("p1", "p1:train2go:12345")
     ).toBeUndefined();

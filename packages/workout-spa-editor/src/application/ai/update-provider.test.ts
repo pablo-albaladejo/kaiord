@@ -8,14 +8,17 @@ import { updateProvider } from "./update-provider";
 
 describe("updateProvider", () => {
   it("should merge the partial update onto the existing provider", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     const created = await addProvider(persistence, baseProvider);
 
+    // Act
     const updated = await updateProvider(persistence, created.id, {
       label: "Renamed",
       model: "claude-haiku-4-5",
     });
 
+    // Assert
     expect(updated.label).toBe("Renamed");
     expect(updated.model).toBe("claude-haiku-4-5");
     expect(updated.id).toBe(created.id);
@@ -23,8 +26,12 @@ describe("updateProvider", () => {
   });
 
   it("should throw ProviderNotFoundError for unknown ids", async () => {
+    // Arrange
+
+    // Act
     const persistence = createInMemoryPersistence();
 
+    // Assert
     await expect(
       updateProvider(persistence, "missing-id", { label: "Whatever" })
     ).rejects.toBeInstanceOf(ProviderNotFoundError);

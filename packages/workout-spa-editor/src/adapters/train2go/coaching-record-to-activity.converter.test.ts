@@ -23,35 +23,55 @@ const baseRecord: CoachingActivityRecord = {
 
 describe("toCoachingActivity (record → view-model)", () => {
   it("builds a stable view-model id of the form `${source}:${sourceId}`", () => {
+    // Arrange
+
+    // Act
     const result = toCoachingActivity(baseRecord);
 
+    // Assert
     expect(result.id).toBe("train2go:12345");
     expect(result.source).toBe("train2go");
   });
 
   it("should use T2G as badge for train2go source", () => {
+    // Arrange
+
+    // Act
     const result = toCoachingActivity(baseRecord);
 
+    // Assert
     expect(result.sourceBadge).toBe("T2G");
   });
 
   it("should fall back to upper-cased source label for unknown badges", () => {
+    // Arrange
+
+    // Act
     const result = toCoachingActivity({ ...baseRecord, source: "future-src" });
 
+    // Assert
     expect(result.sourceBadge).toBe("FUTURE-SRC");
   });
 
   it("should map duration / status / intensity fields through", () => {
+    // Arrange
+
+    // Act
     const result = toCoachingActivity(baseRecord);
 
+    // Assert
     expect(result.duration).toBe("01:00:00");
     expect(result.status).toBe("pending");
     expect(result.effort).toBe(3);
   });
 
   it("should omit empty duration", () => {
+    // Arrange
+
+    // Act
     const result = toCoachingActivity({ ...baseRecord, duration: "" });
 
+    // Assert
     expect(result.duration).toBeUndefined();
   });
 });

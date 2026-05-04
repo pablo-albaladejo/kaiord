@@ -32,6 +32,8 @@ describe("restoredAfterUndoTarget", () => {
   });
 
   it("should fall back to empty-state when the workout is undefined", () => {
+    // Arrange
+
     // Act
     const target = restoredAfterUndoTarget(undefined, asItemId("ghost"));
 

@@ -8,6 +8,7 @@ import { updateTemplate } from "./update-template";
 
 describe("updateTemplate", () => {
   it("should apply the supplied updates and bumps updatedAt", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     const original = await addTemplate(
       persistence,
@@ -16,30 +17,37 @@ describe("updateTemplate", () => {
       makeKrd(),
       { tags: ["old"], duration: 30 }
     );
-
     const updated = await updateTemplate(persistence, original.id, {
       name: "New Name",
       tags: ["new", "fresh"],
       duration: 45,
     });
-
     expect(updated.name).toBe("New Name");
     expect(updated.tags).toEqual(["new", "fresh"]);
     expect(updated.duration).toBe(45);
     expect(updated.updatedAt >= original.updatedAt).toBe(true);
+
+    // Act
     const stored = await persistence.templates.getById(original.id);
+
+    // Assert
     expect(stored).toEqual(updated);
   });
 
   it("should throw TemplateNotFoundError for an unknown id", async () => {
+    // Arrange
+
+    // Act
     const persistence = createInMemoryPersistence();
 
+    // Assert
     await expect(
       updateTemplate(persistence, "missing-id", { name: "X" })
     ).rejects.toBeInstanceOf(TemplateNotFoundError);
   });
 
   it("should roll back when the put rejects mid-transaction", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     const original = await addTemplate(
       persistence,
@@ -47,16 +55,17 @@ describe("updateTemplate", () => {
       "cycling",
       makeKrd()
     );
-
     const realPut = persistence.templates.put;
     persistence.templates.put = () => Promise.reject(new Error("simulated"));
-
     await expect(
       updateTemplate(persistence, original.id, { name: "Renamed" })
     ).rejects.toThrow("simulated");
-
     persistence.templates.put = realPut;
+
+    // Act
     const stored = await persistence.templates.getById(original.id);
+
+    // Assert
     expect(stored?.name).toBe("Original");
   });
 });

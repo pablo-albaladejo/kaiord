@@ -128,67 +128,86 @@ beforeEach(async () => {
 
 describe("DexieWorkoutRepository", () => {
   it("should put and getById", async () => {
+    // Arrange
     const { workouts } = createDexiePersistence(testDb);
     const workout = makeWorkout();
-
     await workouts.put(workout);
+
+    // Act
     const result = await workouts.getById("w-1");
 
+    // Assert
     expect(result).toEqual(workout);
   });
 
   it("should return undefined for non-existent id", async () => {
+    // Arrange
     const { workouts } = createDexiePersistence(testDb);
 
+    // Act
     const result = await workouts.getById("missing");
 
+    // Assert
     expect(result).toBeUndefined();
   });
 
   it("should delete a workout", async () => {
+    // Arrange
     const { workouts } = createDexiePersistence(testDb);
     await workouts.put(makeWorkout());
-
     await workouts.delete("w-1");
+
+    // Act
     const result = await workouts.getById("w-1");
 
+    // Assert
     expect(result).toBeUndefined();
   });
 
   it("should filter by date range (inclusive)", async () => {
+    // Arrange
     const { workouts } = createDexiePersistence(testDb);
     await workouts.put(makeWorkout({ id: "w-1", date: "2026-04-06" }));
     await workouts.put(makeWorkout({ id: "w-2", date: "2026-04-07" }));
     await workouts.put(makeWorkout({ id: "w-3", date: "2026-04-08" }));
     await workouts.put(makeWorkout({ id: "w-4", date: "2026-04-09" }));
-
     const result = await workouts.getByDateRange("2026-04-07", "2026-04-08");
 
+    // Act
     const ids = result.map((w) => w.id).sort();
+
+    // Assert
     expect(ids).toEqual(["w-2", "w-3"]);
   });
 
   it("should return empty array for no matches", async () => {
+    // Arrange
     const { workouts } = createDexiePersistence(testDb);
 
+    // Act
     const result = await workouts.getByDateRange("2026-01-01", "2026-01-07");
 
+    // Assert
     expect(result).toEqual([]);
   });
 
   it("should filter by state", async () => {
+    // Arrange
     const { workouts } = createDexiePersistence(testDb);
     await workouts.put(makeWorkout({ id: "w-1", state: "raw" }));
     await workouts.put(makeWorkout({ id: "w-2", state: "pushed" }));
     await workouts.put(makeWorkout({ id: "w-3", state: "raw" }));
-
     const result = await workouts.getByState("raw");
 
+    // Act
     const ids = result.map((w) => w.id).sort();
+
+    // Assert
     expect(ids).toEqual(["w-1", "w-3"]);
   });
 
   it("should find by source and sourceId", async () => {
+    // Arrange
     const { workouts } = createDexiePersistence(testDb);
     await workouts.put(
       makeWorkout({
@@ -198,26 +217,34 @@ describe("DexieWorkoutRepository", () => {
       })
     );
 
+    // Act
     const result = await workouts.getBySourceId("train2go", "ext-42");
 
+    // Assert
     expect(result?.id).toBe("w-1");
   });
 
   it("should return undefined when sourceId not found", async () => {
+    // Arrange
     const { workouts } = createDexiePersistence(testDb);
 
+    // Act
     const result = await workouts.getBySourceId("train2go", "missing");
 
+    // Assert
     expect(result).toBeUndefined();
   });
 
   it("should overwrite on put with same id", async () => {
+    // Arrange
     const { workouts } = createDexiePersistence(testDb);
     await workouts.put(makeWorkout({ id: "w-1", state: "raw" }));
-
     await workouts.put(makeWorkout({ id: "w-1", state: "pushed" }));
+
+    // Act
     const result = await workouts.getById("w-1");
 
+    // Assert
     expect(result?.state).toBe("pushed");
   });
 });
@@ -226,34 +253,44 @@ describe("DexieWorkoutRepository", () => {
 
 describe("DexieTemplateRepository", () => {
   it("should put and getById", async () => {
+    // Arrange
     const { templates } = createDexiePersistence(testDb);
     const template = makeTemplate();
-
     await templates.put(template);
+
+    // Act
     const result = await templates.getById(TEMPLATE_UUID_1);
 
+    // Assert
     expect(result).toEqual(template);
   });
 
   it("should return undefined for non-existent id", async () => {
+    // Arrange
     const { templates } = createDexiePersistence(testDb);
 
+    // Act
     const result = await templates.getById("missing");
 
+    // Assert
     expect(result).toBeUndefined();
   });
 
   it("should getAll", async () => {
+    // Arrange
     const { templates } = createDexiePersistence(testDb);
     await templates.put(makeTemplate({ id: TEMPLATE_UUID_1 }));
     await templates.put(makeTemplate({ id: TEMPLATE_UUID_2 }));
 
+    // Act
     const result = await templates.getAll();
 
+    // Assert
     expect(result).toHaveLength(2);
   });
 
   it("should filter getBySport", async () => {
+    // Arrange
     const { templates } = createDexiePersistence(testDb);
     await templates.put(
       makeTemplate({ id: TEMPLATE_UUID_1, sport: "cycling" })
@@ -262,18 +299,23 @@ describe("DexieTemplateRepository", () => {
       makeTemplate({ id: TEMPLATE_UUID_2, sport: "running" })
     );
 
+    // Act
     const result = await templates.getBySport("cycling");
 
+    // Assert
     expect(result).toHaveLength(1);
     expect(result[0].id).toBe(TEMPLATE_UUID_1);
   });
 
   it("should delete a template", async () => {
+    // Arrange
     const { templates } = createDexiePersistence(testDb);
     await templates.put(makeTemplate());
 
+    // Act
     await templates.delete(TEMPLATE_UUID_1);
 
+    // Assert
     expect(await templates.getById(TEMPLATE_UUID_1)).toBeUndefined();
     expect(await templates.getAll()).toHaveLength(0);
   });
@@ -283,52 +325,66 @@ describe("DexieTemplateRepository", () => {
 
 describe("DexieProfileRepository", () => {
   it("should put and getById", async () => {
+    // Arrange
     const { profiles } = createDexiePersistence(testDb);
     const profile = makeProfile();
-
     await profiles.put(profile);
+
+    // Act
     const result = await profiles.getById(PROFILE_UUID_1);
 
+    // Assert
     expect(result).toEqual(profile);
   });
 
   it("should track active profile id", async () => {
+    // Arrange
     const { profiles } = createDexiePersistence(testDb);
-
     expect(await profiles.getActiveId()).toBeNull();
 
+    // Act
     await profiles.setActiveId(PROFILE_UUID_1);
 
+    // Assert
     expect(await profiles.getActiveId()).toBe(PROFILE_UUID_1);
   });
 
   it("should clear active id on null", async () => {
+    // Arrange
     const { profiles } = createDexiePersistence(testDb);
     await profiles.setActiveId(PROFILE_UUID_1);
 
+    // Act
     await profiles.setActiveId(null);
 
+    // Assert
     expect(await profiles.getActiveId()).toBeNull();
   });
 
   it("should clear active id when deleting active profile", async () => {
+    // Arrange
     const { profiles } = createDexiePersistence(testDb);
     await profiles.put(makeProfile({ id: PROFILE_UUID_1 }));
     await profiles.setActiveId(PROFILE_UUID_1);
 
+    // Act
     await profiles.delete(PROFILE_UUID_1);
 
+    // Assert
     expect(await profiles.getActiveId()).toBeNull();
     expect(await profiles.getById(PROFILE_UUID_1)).toBeUndefined();
   });
 
   it("should getAll profiles", async () => {
+    // Arrange
     const { profiles } = createDexiePersistence(testDb);
     await profiles.put(makeProfile({ id: PROFILE_UUID_1 }));
     await profiles.put(makeProfile({ id: PROFILE_UUID_2 }));
 
+    // Act
     const result = await profiles.getAll();
 
+    // Assert
     expect(result).toHaveLength(2);
   });
 });
@@ -337,57 +393,72 @@ describe("DexieProfileRepository", () => {
 
 describe("DexieAiProviderRepository", () => {
   it("should put and getById with encryption round-trip", async () => {
+    // Arrange
     const { aiProviders } = createDexiePersistence(testDb);
     const provider = makeProvider();
-
     await aiProviders.put(provider);
+
+    // Act
     const result = await aiProviders.getById("ai-1");
 
+    // Assert
     expect(result).toEqual(provider);
     expect(result?.apiKey).toBe("test-key-not-real");
   });
 
   it("should store encrypted apiKey in database", async () => {
+    // Arrange
     const { aiProviders } = createDexiePersistence(testDb);
     await aiProviders.put(makeProvider());
 
+    // Act
     const raw = await testDb.table("aiProviders").get("ai-1");
 
+    // Assert
     expect(raw.apiKey).not.toBe("test-key-not-real");
     expect(typeof raw.apiKey).toBe("string");
     expect(raw.apiKey.length).toBeGreaterThan(0);
   });
 
   it("should return undefined for non-existent id", async () => {
+    // Arrange
+
+    // Act
     const { aiProviders } = createDexiePersistence(testDb);
 
+    // Assert
     expect(await aiProviders.getById("missing")).toBeUndefined();
   });
 
   it("should getAll providers with decryption", async () => {
+    // Arrange
     const { aiProviders } = createDexiePersistence(testDb);
     await aiProviders.put(makeProvider({ id: "ai-1" }));
     await aiProviders.put(makeProvider({ id: "ai-2", apiKey: "another-key" }));
-
     const result = await aiProviders.getAll();
-
     expect(result).toHaveLength(2);
+
+    // Act
     const keys = result.map((p) => p.apiKey).sort();
+
+    // Assert
     expect(keys).toEqual(["another-key", "test-key-not-real"]);
   });
 
   it("should delete a provider", async () => {
+    // Arrange
     const { aiProviders } = createDexiePersistence(testDb);
     await aiProviders.put(makeProvider());
 
+    // Act
     await aiProviders.delete("ai-1");
 
+    // Assert
     expect(await aiProviders.getById("ai-1")).toBeUndefined();
   });
 
   it("should return providers in createdAt order regardless of UUID-pk order", async () => {
-    // Pick UUIDs whose alphabetic order is the OPPOSITE of their
-    // createdAt order so any reliance on PK ordering surfaces here.
+    // Arrange
     const { aiProviders } = createDexiePersistence(testDb);
     await aiProviders.put(
       makeProvider({ id: "zzz-second", label: "Second", createdAt: 200 })
@@ -396,8 +467,10 @@ describe("DexieAiProviderRepository", () => {
       makeProvider({ id: "aaa-first", label: "First", createdAt: 100 })
     );
 
+    // Act
     const result = await aiProviders.getAll();
 
+    // Assert
     expect(result.map((p) => p.label)).toEqual(["First", "Second"]);
   });
 });
@@ -406,47 +479,63 @@ describe("DexieAiProviderRepository", () => {
 
 describe("DexieSyncStateRepository", () => {
   it("should put and getBySource", async () => {
+    // Arrange
     const { syncState } = createDexiePersistence(testDb);
     const state = makeSyncState();
-
     await syncState.put(state);
+
+    // Act
     const result = await syncState.getBySource("garmin");
 
+    // Assert
     expect(result).toEqual(state);
   });
 
   it("should return undefined for non-existent source", async () => {
+    // Arrange
+
+    // Act
     const { syncState } = createDexiePersistence(testDb);
 
+    // Assert
     expect(await syncState.getBySource("missing")).toBeUndefined();
   });
 
   it("should getAll sync states", async () => {
+    // Arrange
     const { syncState } = createDexiePersistence(testDb);
     await syncState.put(makeSyncState({ source: "garmin" }));
     await syncState.put(makeSyncState({ source: "train2go" }));
 
+    // Act
     const result = await syncState.getAll();
 
+    // Assert
     expect(result).toHaveLength(2);
   });
 
   it("should delete by source", async () => {
+    // Arrange
     const { syncState } = createDexiePersistence(testDb);
     await syncState.put(makeSyncState());
 
+    // Act
     await syncState.delete("garmin");
 
+    // Assert
     expect(await syncState.getBySource("garmin")).toBeUndefined();
   });
 
   it("should overwrite on put with same source", async () => {
+    // Arrange
     const { syncState } = createDexiePersistence(testDb);
     await syncState.put(makeSyncState({ protocolVersion: 1 }));
-
     await syncState.put(makeSyncState({ protocolVersion: 2 }));
+
+    // Act
     const result = await syncState.getBySource("garmin");
 
+    // Assert
     expect(result?.protocolVersion).toBe(2);
   });
 });
@@ -455,6 +544,7 @@ describe("DexieSyncStateRepository", () => {
 
 describe("DexieUsageRepository", () => {
   it("should put and getByMonth", async () => {
+    // Arrange
     const { usage } = createDexiePersistence(testDb);
     const record: UsageRecord = {
       yearMonth: "2026-04",
@@ -472,20 +562,27 @@ describe("DexieUsageRepository", () => {
         },
       ],
     };
-
     await usage.put(record);
+
+    // Act
     const result = await usage.getByMonth("2026-04");
 
+    // Assert
     expect(result).toEqual(record);
   });
 
   it("should return undefined for non-existent month", async () => {
+    // Arrange
+
+    // Act
     const { usage } = createDexiePersistence(testDb);
 
+    // Assert
     expect(await usage.getByMonth("2025-01")).toBeUndefined();
   });
 
   it("should overwrite on put with same yearMonth", async () => {
+    // Arrange
     const { usage } = createDexiePersistence(testDb);
     await usage.put({
       yearMonth: "2026-04",
@@ -495,7 +592,6 @@ describe("DexieUsageRepository", () => {
       totalCost: 0.01,
       entries: [],
     });
-
     await usage.put({
       yearMonth: "2026-04",
       inputTokens: 160,
@@ -512,8 +608,11 @@ describe("DexieUsageRepository", () => {
         },
       ],
     });
+
+    // Act
     const result = await usage.getByMonth("2026-04");
 
+    // Assert
     expect(result?.totalTokens).toBe(200);
     expect(result?.entries).toHaveLength(1);
   });
@@ -523,22 +622,29 @@ describe("DexieUsageRepository", () => {
 
 describe("DexiePersistence.transaction", () => {
   it("should commit both writes on success", async () => {
+    // Arrange
     const persistence = createDexiePersistence(testDb);
     const profile = makeProfile({ id: PROFILE_UUID_1 });
 
+    // Act
     await persistence.transaction(async () => {
       await persistence.profiles.put(profile);
       await persistence.profiles.setActiveId(profile.id);
     });
 
+    // Assert
     expect(await persistence.profiles.getById(PROFILE_UUID_1)).toEqual(profile);
     expect(await persistence.profiles.getActiveId()).toBe(PROFILE_UUID_1);
   });
 
   it("should roll back both writes when the callback rejects", async () => {
+    // Arrange
     const persistence = createDexiePersistence(testDb);
+
+    // Act
     const profile = makeProfile({ id: PROFILE_UUID_1 });
 
+    // Assert
     await expect(
       persistence.transaction(async () => {
         await persistence.profiles.put(profile);
@@ -546,36 +652,38 @@ describe("DexiePersistence.transaction", () => {
         throw new Error("simulated mid-transaction failure");
       })
     ).rejects.toThrow("simulated mid-transaction failure");
-
     expect(await persistence.profiles.getById(PROFILE_UUID_1)).toBeUndefined();
     expect(await persistence.profiles.getActiveId()).toBeNull();
   });
 
   it("should roll back a write even when no second write follows (fake-indexeddb sanity)", async () => {
-    // Sanity sub-test from task 1A.0.2: verifies fake-indexeddb honors
-    // Dexie's transaction.abort() — write A then throw, expect getAll()
-    // to return [] after rollback.
+    // Arrange
     const persistence = createDexiePersistence(testDb);
+
+    // Act
     const profile = makeProfile({ id: PROFILE_UUID_1 });
 
+    // Assert
     await expect(
       persistence.transaction(async () => {
         await persistence.profiles.put(profile);
         throw new Error("abort before second write");
       })
     ).rejects.toThrow("abort before second write");
-
     expect(await persistence.profiles.getAll()).toEqual([]);
   });
 
   it("returns the callback's resolved value on success", async () => {
+    // Arrange
     const persistence = createDexiePersistence(testDb);
 
+    // Act
     const result = await persistence.transaction(async () => {
       await persistence.profiles.put(makeProfile({ id: PROFILE_UUID_1 }));
       return "committed";
     });
 
+    // Assert
     expect(result).toBe("committed");
   });
 });
@@ -584,8 +692,12 @@ describe("DexiePersistence.transaction", () => {
 
 describe("probeStorage", () => {
   it("should return complete when IndexedDB is available", async () => {
+    // Arrange
+
+    // Act
     const status = await probeStorage();
 
+    // Assert
     expect(status).toBe("complete");
   });
 });

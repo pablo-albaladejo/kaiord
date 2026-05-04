@@ -35,27 +35,42 @@ const validManifest = {
 
 describe("verifyAnnouncement", () => {
   it("should return the verified manifest for a matching ping", async () => {
+    // Arrange
+
+    // Act
     mockSend.mockResolvedValue(validManifest);
 
+    // Assert
     await expect(verifyAnnouncement(ann)).resolves.toEqual(validManifest.data);
   });
 
   it("should return false when the ping fails", async () => {
+    // Arrange
+
+    // Act
     mockSend.mockResolvedValue({ ok: false, error: "no" });
 
+    // Assert
     await expect(verifyAnnouncement(ann)).resolves.toBeNull();
   });
 
   it("should return false when the manifest fails schema validation", async () => {
+    // Arrange
+
+    // Act
     mockSend.mockResolvedValue({
       ok: true,
       data: { id: "garmin-bridge", name: "x" },
     });
 
+    // Assert
     await expect(verifyAnnouncement(ann)).resolves.toBeNull();
   });
 
   it("should return false when manifest.id does not match the announced bridgeId", async () => {
+    // Arrange
+
+    // Act
     mockSend.mockResolvedValue({
       ok: true,
       data: {
@@ -64,10 +79,14 @@ describe("verifyAnnouncement", () => {
       },
     });
 
+    // Assert
     await expect(verifyAnnouncement(ann)).resolves.toBeNull();
   });
 
   it("should return false when the protocol version is unsupported", async () => {
+    // Arrange
+
+    // Act
     mockSend.mockResolvedValue({
       ok: true,
       data: {
@@ -76,6 +95,7 @@ describe("verifyAnnouncement", () => {
       },
     });
 
+    // Assert
     await expect(verifyAnnouncement(ann)).resolves.toBeNull();
   });
 });

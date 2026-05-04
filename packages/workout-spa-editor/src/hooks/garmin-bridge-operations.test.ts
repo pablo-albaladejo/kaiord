@@ -11,18 +11,26 @@ import { evaluatePingResult } from "./garmin-bridge-operations";
 
 describe("evaluatePingResult", () => {
   it("should return installed=false when response is not ok", () => {
+    // Arrange
+
+    // Act
     const result = evaluatePingResult({ ok: false });
 
+    // Assert
     expect(result).toEqual({ installed: false });
   });
 
   it("should detect supported protocol version", () => {
+    // Arrange
+
+    // Act
     const result = evaluatePingResult({
       ok: true,
       protocolVersion: 1,
       data: { gcApi: { ok: true } },
     });
 
+    // Assert
     expect(result).toEqual({
       installed: true,
       session: true,
@@ -31,12 +39,16 @@ describe("evaluatePingResult", () => {
   });
 
   it("should flag outdated bridge with unsupported protocol version", () => {
+    // Arrange
+
+    // Act
     const result = evaluatePingResult({
       ok: true,
       protocolVersion: 999,
       data: { gcApi: { ok: true } },
     });
 
+    // Assert
     expect(result).toEqual({
       installed: true,
       session: false,
@@ -45,11 +57,15 @@ describe("evaluatePingResult", () => {
   });
 
   it("should flag missing protocol version as outdated", () => {
+    // Arrange
+
+    // Act
     const result = evaluatePingResult({
       ok: true,
       data: { gcApi: { ok: true } },
     });
 
+    // Assert
     expect(result).toEqual({
       installed: true,
       session: false,
@@ -58,12 +74,16 @@ describe("evaluatePingResult", () => {
   });
 
   it("should report session=false when gcApi is not ok", () => {
+    // Arrange
+
+    // Act
     const result = evaluatePingResult({
       ok: true,
       protocolVersion: 1,
       data: { gcApi: { ok: false } },
     });
 
+    // Assert
     expect(result).toEqual({
       installed: true,
       session: false,
