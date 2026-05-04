@@ -48,11 +48,41 @@ const t2gHr = () => [
 ];
 
 const allZeroPace = () => [
-  { zone: 1, name: "Recovery", minPace: 0, maxPace: 0, unit: "min_per_km" as const },
-  { zone: 2, name: "Aerobic", minPace: 0, maxPace: 0, unit: "min_per_km" as const },
-  { zone: 3, name: "Tempo", minPace: 0, maxPace: 0, unit: "min_per_km" as const },
-  { zone: 4, name: "Threshold", minPace: 0, maxPace: 0, unit: "min_per_km" as const },
-  { zone: 5, name: "VO2 Max", minPace: 0, maxPace: 0, unit: "min_per_km" as const },
+  {
+    zone: 1,
+    name: "Recovery",
+    minPace: 0,
+    maxPace: 0,
+    unit: "min_per_km" as const,
+  },
+  {
+    zone: 2,
+    name: "Aerobic",
+    minPace: 0,
+    maxPace: 0,
+    unit: "min_per_km" as const,
+  },
+  {
+    zone: 3,
+    name: "Tempo",
+    minPace: 0,
+    maxPace: 0,
+    unit: "min_per_km" as const,
+  },
+  {
+    zone: 4,
+    name: "Threshold",
+    minPace: 0,
+    maxPace: 0,
+    unit: "min_per_km" as const,
+  },
+  {
+    zone: 5,
+    name: "VO2 Max",
+    minPace: 0,
+    maxPace: 0,
+    unit: "min_per_km" as const,
+  },
 ];
 
 const snapshotFor = (cyclingHrZones: unknown): LastSyncedZonesSnapshot =>
@@ -69,7 +99,12 @@ const snapshotFor = (cyclingHrZones: unknown): LastSyncedZonesSnapshot =>
 describe("classifyZoneTable — empty (2.2a)", () => {
   it("should return 'empty' when zones array is missing", () => {
     // Arrange + Act
-    const state = classifyZoneTable(baseProfile(), "cycling", "heartRateZones", undefined);
+    const state = classifyZoneTable(
+      baseProfile(),
+      "cycling",
+      "heartRateZones",
+      undefined
+    );
 
     // Assert
     expect(state).toBe("empty");
@@ -78,11 +113,19 @@ describe("classifyZoneTable — empty (2.2a)", () => {
   it("should return 'empty' when zones array is length 0", () => {
     // Arrange
     const profile = baseProfile({
-      cycling: { thresholds: {}, heartRateZones: { method: "custom", zones: [] } },
+      cycling: {
+        thresholds: {},
+        heartRateZones: { method: "custom", zones: [] },
+      },
     });
 
     // Act
-    const state = classifyZoneTable(profile, "cycling", "heartRateZones", undefined);
+    const state = classifyZoneTable(
+      profile,
+      "cycling",
+      "heartRateZones",
+      undefined
+    );
 
     // Assert
     expect(state).toBe("empty");
@@ -100,7 +143,12 @@ describe("classifyZoneTable — default-template (2.2b)", () => {
     });
 
     // Act
-    const state = classifyZoneTable(profile, "cycling", "heartRateZones", undefined);
+    const state = classifyZoneTable(
+      profile,
+      "cycling",
+      "heartRateZones",
+      undefined
+    );
 
     // Assert
     expect(state).toBe("default-template");
@@ -131,12 +179,20 @@ describe("classifyZoneTable — method-derived (2.2c)", () => {
       cycling: {
         thresholds: { ftp: 268 },
         heartRateZones: { method: "custom", zones: [] },
-        powerZones: { method: "coggan-7", zones: calculatePowerZones("coggan-7") },
+        powerZones: {
+          method: "coggan-7",
+          zones: calculatePowerZones("coggan-7"),
+        },
       },
     });
 
     // Act
-    const state = classifyZoneTable(profile, "cycling", "powerZones", undefined);
+    const state = classifyZoneTable(
+      profile,
+      "cycling",
+      "powerZones",
+      undefined
+    );
 
     // Assert
     expect(state).toBe("method-derived");
@@ -156,7 +212,12 @@ describe("classifyZoneTable — method-derived (2.2c)", () => {
     });
 
     // Act
-    const state = classifyZoneTable(profile, "cycling", "heartRateZones", undefined);
+    const state = classifyZoneTable(
+      profile,
+      "cycling",
+      "heartRateZones",
+      undefined
+    );
 
     // Assert
     expect(state).toBe("method-derived");
@@ -197,7 +258,12 @@ describe("classifyZoneTable — train2go-synced-clean (2.2d)", () => {
     const snapshot = snapshotFor(t2gHr());
 
     // Act
-    const state = classifyZoneTable(profile, "cycling", "heartRateZones", snapshot);
+    const state = classifyZoneTable(
+      profile,
+      "cycling",
+      "heartRateZones",
+      snapshot
+    );
 
     // Assert
     expect(state).toBe("train2go-synced-clean");
@@ -219,7 +285,12 @@ describe("classifyZoneTable — train2go-synced-edited (2.2e)", () => {
     const snapshot = snapshotFor(t2gHr());
 
     // Act
-    const state = classifyZoneTable(profile, "cycling", "heartRateZones", snapshot);
+    const state = classifyZoneTable(
+      profile,
+      "cycling",
+      "heartRateZones",
+      snapshot
+    );
 
     // Assert
     expect(state).toBe("train2go-synced-edited");
@@ -237,7 +308,12 @@ describe("classifyZoneTable — user-customized (2.2f, 2.2g)", () => {
     });
 
     // Act
-    const state = classifyZoneTable(profile, "cycling", "heartRateZones", undefined);
+    const state = classifyZoneTable(
+      profile,
+      "cycling",
+      "heartRateZones",
+      undefined
+    );
 
     // Assert
     expect(state).toBe("user-customized");
@@ -255,7 +331,12 @@ describe("classifyZoneTable — user-customized (2.2f, 2.2g)", () => {
     });
 
     // Act
-    const state = classifyZoneTable(profile, "cycling", "heartRateZones", undefined);
+    const state = classifyZoneTable(
+      profile,
+      "cycling",
+      "heartRateZones",
+      undefined
+    );
 
     // Assert
     expect(state).toBe("user-customized");
@@ -273,7 +354,12 @@ describe("classifyZoneTable — user-customized (2.2f, 2.2g)", () => {
     });
 
     // Act
-    const state = classifyZoneTable(profile, "running", "heartRateZones", undefined);
+    const state = classifyZoneTable(
+      profile,
+      "running",
+      "heartRateZones",
+      undefined
+    );
 
     // Assert
     expect(state).toBe("default-template");
@@ -289,7 +375,12 @@ describe("classifyZoneTable — user-customized (2.2f, 2.2g)", () => {
     });
 
     // Act
-    const state = classifyZoneTable(profile, "cycling", "heartRateZones", undefined);
+    const state = classifyZoneTable(
+      profile,
+      "cycling",
+      "heartRateZones",
+      undefined
+    );
 
     // Assert
     expect(state).toBe("user-customized");

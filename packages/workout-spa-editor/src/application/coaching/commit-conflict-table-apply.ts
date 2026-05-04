@@ -3,10 +3,7 @@
  * table. All-accept → method "train2go"; mixed → "user"; all-reject →
  * untouched (per D-MA4 of zones-method-aware-reconcile).
  */
-import type {
-  ConflictDecision,
-  FieldKey,
-} from "../../types/coaching-zones";
+import type { ConflictDecision, FieldKey } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
 import { writeField } from "./sync-zones-profile-fields";
 import type { Sport, ZoneKind } from "./zone-table-classifier-types";

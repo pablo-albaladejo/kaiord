@@ -15,10 +15,7 @@ import type {
 } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
 import { reconcileBandTable } from "./sync-zones-band-table-reconcile";
-import {
-  partitionIncoming,
-  reconcileThresholds,
-} from "./sync-zones-partition";
+import { partitionIncoming, reconcileThresholds } from "./sync-zones-partition";
 import type { IncomingMap } from "./sync-zones-payload-mapper";
 import {
   getSnapshotZones,

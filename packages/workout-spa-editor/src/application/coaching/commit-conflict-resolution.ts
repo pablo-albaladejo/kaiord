@@ -76,7 +76,12 @@ export const commitConflictResolution = async (
   if (!profile) throw new ProfileNotFoundError(profileId);
   const incoming = mapPayloadToIncoming(transportPayload);
   const { thresholdKeys, bandTableKeys } = partitionDecisions(decisions);
-  let next = applyThresholdDecisions(profile, thresholdKeys, decisions, incoming);
+  let next = applyThresholdDecisions(
+    profile,
+    thresholdKeys,
+    decisions,
+    incoming
+  );
   next = applyBandTableDecisions(
     next,
     bandTableKeys,

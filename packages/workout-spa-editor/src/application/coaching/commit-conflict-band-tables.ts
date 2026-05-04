@@ -8,10 +8,7 @@
  * persisted zones (per D-MA4): accepted bands take T2G; rejected bands
  * keep pre-sync user values.
  */
-import type {
-  ConflictDecision,
-  FieldKey,
-} from "../../types/coaching-zones";
+import type { ConflictDecision, FieldKey } from "../../types/coaching-zones";
 import type { Profile } from "../../types/profile";
 import { applyOneTable } from "./commit-conflict-table-apply";
 import { updateSnapshot } from "./sync-zones-snapshot-write";
