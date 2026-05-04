@@ -208,10 +208,26 @@ describe("ZonesConflictDialog", () => {
   it("should emit accept decisions for all rows of a sport-kind table when each is toggled (5.2c)", async () => {
     // Arrange
     const tableConflicts: ConflictItem[] = [
-      { field: "cycling.heartRateZones.z1.minBpm", current: 100, incoming: 107 },
-      { field: "cycling.heartRateZones.z1.maxBpm", current: 130, incoming: 133 },
-      { field: "cycling.heartRateZones.z2.minBpm", current: 131, incoming: 134 },
-      { field: "cycling.heartRateZones.z2.maxBpm", current: 145, incoming: 147 },
+      {
+        field: "cycling.heartRateZones.z1.minBpm",
+        current: 100,
+        incoming: 107,
+      },
+      {
+        field: "cycling.heartRateZones.z1.maxBpm",
+        current: 130,
+        incoming: 133,
+      },
+      {
+        field: "cycling.heartRateZones.z2.minBpm",
+        current: 131,
+        incoming: 134,
+      },
+      {
+        field: "cycling.heartRateZones.z2.maxBpm",
+        current: 145,
+        incoming: 147,
+      },
     ];
     const onConfirm = vi.fn();
     render(
