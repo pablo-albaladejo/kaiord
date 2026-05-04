@@ -9,7 +9,9 @@ into the active Kaiord profile. The capability runs on explicit user-trigger
 events only (link-time fan-out, manual calendar sync) — NEVER on heartbeat — and
 applies an "ask before overwrite" conflict policy that preserves manually-entered
 Kaiord values unless the user accepts each per-row diff.
+
 ## Requirements
+
 ### Requirement: Zone-sync toggle is opt-in per linked Train2Go account
 
 The SPA SHALL expose a `Sync zones` toggle on the Linked Account row for Train2Go. The toggle's state MUST persist alongside the linked-account record (`profile.linkedAccounts[i].syncZones: boolean`) and MUST default to `false` when an account is first linked. Toggling it OFF SHALL NOT revert previously-synced threshold values in the profile (toggle controls future syncs only).
@@ -520,4 +522,3 @@ Standalone (non-coupled) cycling-power band groups MAY preserve per-band display
 - **WHEN** the dialog renders
 - **THEN** the FTP conflict SHALL render as a standalone row (the existing per-row scalar UI), NOT a coupled group
 - **AND** the testid `zones-conflict-row-cycling.thresholds.ftp` SHALL be present (existing test selector unchanged)
-
