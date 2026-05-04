@@ -64,3 +64,11 @@ export const applyV8Upgrade = async (tx: Transaction): Promise<void> => {
     .toCollection()
     .modify(makeBackfillAiProviderCreatedAt());
 };
+
+// v9 migration helpers live in `./dexie-v9-migration.ts` to keep this
+// file under the 80-line cap. Re-exported for the database class.
+export {
+  applyV9Upgrade,
+  hasUserData,
+  reclassifyZoneMethods,
+} from "./dexie-v9-migration";

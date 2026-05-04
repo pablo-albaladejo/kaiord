@@ -9,6 +9,7 @@ import Dexie from "dexie";
 
 import {
   applyV8Upgrade,
+  applyV9Upgrade,
   backfillBridgeSnapshotState,
   backfillUsageRow,
 } from "./dexie-migrations";
@@ -117,6 +118,17 @@ export class KaiordDatabase extends Dexie {
     // randomly-assigned UUIDs — a deterministic but probabilistic flake
     // visible to users (selector reorders) and to E2E tests.
     this.version(8).stores(CORE_V8).upgrade(applyV8Upgrade);
+    // v9 — zone-method-aware reconcile prep
+    // (zones-method-aware-reconcile change). Stores config is unchanged;
+    // the upgrade only mutates row data:
+    //   - Normalizes `method = "manual"` (introduced by the prior
+    //     train2go-zones-sync-full-bands change) to `"custom"`.
+    //   - Conservatively reclassifies `method = "custom"` + clearly-
+    //     edited zones to `method = "user"` so the new classifier
+    //     correctly emits per-band conflicts on user-customized tables.
+    // `lastSyncedZonesSnapshot` stays absent for migrated profiles —
+    // next sync establishes the baseline.
+    this.version(9).stores(CORE_V8).upgrade(applyV9Upgrade);
   }
 }
 
