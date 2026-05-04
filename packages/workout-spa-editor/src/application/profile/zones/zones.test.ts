@@ -139,6 +139,118 @@ describe("updateSportZones", () => {
       updateSportZones(persistence, "missing", "cycling", "heartRateZones", [])
     ).rejects.toBeInstanceOf(ProfileNotFoundError);
   });
+
+  it("should flip method to 'user' on manual band edit (4.3a)", async () => {
+    // Arrange — profile starts with method = "train2go" (post-T2G-sync).
+    const persistence = createInMemoryPersistence();
+    const profile = makeProfile();
+    profile.sportZones.cycling = {
+      thresholds: {},
+      heartRateZones: {
+        method: "train2go",
+        zones: [
+          { zone: 1, name: "Recovery", minBpm: 107, maxBpm: 133 },
+          { zone: 2, name: "Aerobic", minBpm: 134, maxBpm: 147 },
+        ],
+      },
+    };
+    await seedProfile(persistence, profile);
+
+    // Act — user manually edits Z2.maxBpm via Profile Manager.
+    const updated = await updateSportZones(
+      persistence,
+      profile.id,
+      "cycling",
+      "heartRateZones",
+      [
+        { zone: 1, name: "Recovery", minBpm: 107, maxBpm: 133 },
+        { zone: 2, name: "Aerobic", minBpm: 134, maxBpm: 145 },
+      ]
+    );
+
+    // Assert
+    expect(updated.sportZones.cycling?.heartRateZones?.method).toBe("user");
+    expect(updated.sportZones.cycling?.heartRateZones?.zones[1]?.maxBpm).toBe(
+      145
+    );
+  });
+
+  it("should flip method from 'custom' to 'user' on manual band edit (4.3b)", async () => {
+    // Arrange — fresh profile starting at "custom".
+    const persistence = createInMemoryPersistence();
+    const profile = makeProfile();
+    profile.sportZones.cycling = {
+      thresholds: {},
+      heartRateZones: { method: "custom", zones: [] },
+    };
+    await seedProfile(persistence, profile);
+
+    // Act
+    const updated = await updateSportZones(
+      persistence,
+      profile.id,
+      "cycling",
+      "heartRateZones",
+      [{ zone: 1, name: "Recovery", minBpm: 107, maxBpm: 133 }]
+    );
+
+    // Assert
+    expect(updated.sportZones.cycling?.heartRateZones?.method).toBe("user");
+  });
+
+  it("should not affect setZoneMethod (formula path stays as-is) (4.3c)", async () => {
+    // Arrange — calling setZoneMethod (the formula-recompute path)
+    // should keep the chosen method id, NOT flip to "user".
+    const persistence = createInMemoryPersistence();
+    const profile = makeProfile();
+    profile.sportZones.cycling = {
+      thresholds: { lthr: 174 },
+      heartRateZones: { method: "user", zones: [] },
+    };
+    await seedProfile(persistence, profile);
+
+    // Act
+    const { setZoneMethod } = await import("./set-zone-method");
+    const updated = await setZoneMethod(
+      persistence,
+      profile.id,
+      "cycling",
+      "heartRateZones",
+      "karvonen-5",
+      [{ zone: 1, name: "Recovery", minBpm: 0, maxBpm: 142 }]
+    );
+
+    // Assert
+    expect(updated.sportZones.cycling?.heartRateZones?.method).toBe(
+      "karvonen-5"
+    );
+  });
+
+  it("should flip from formula method to 'user' when user manually edits a band (4.3d)", async () => {
+    // Arrange — profile in `karvonen-5` formula state.
+    const persistence = createInMemoryPersistence();
+    const profile = makeProfile();
+    profile.sportZones.cycling = {
+      thresholds: { lthr: 174 },
+      heartRateZones: {
+        method: "karvonen-5",
+        zones: [{ zone: 1, name: "Recovery", minBpm: 0, maxBpm: 142 }],
+      },
+    };
+    await seedProfile(persistence, profile);
+
+    // Act — user touches a band via Profile Manager.
+    const updated = await updateSportZones(
+      persistence,
+      profile.id,
+      "cycling",
+      "heartRateZones",
+      [{ zone: 1, name: "Recovery", minBpm: 0, maxBpm: 140 }]
+    );
+
+    // Assert
+    expect(updated.sportZones.cycling?.heartRateZones?.method).toBe("user");
+  });
 });
 
 describe("setZoneMethod", () => {

@@ -1,10 +1,17 @@
 /**
  * updateSportZones — application use case.
  *
- * Replaces the zones array for a (sport, zoneType) pair, leaving the
- * method untouched. No-op if the sport config has no entry for that
- * zoneType (matches legacy semantics). Throws `ProfileNotFoundError`
- * when the id is unknown.
+ * Replaces the zones array for a (sport, zoneType) pair AND flips
+ * `method` to `"user"` (per D-MA3 of zones-method-aware-reconcile).
+ * This is the band-edit pathway from the Profile Manager `ZoneEditor`
+ * — manually editing a band signals the table is now user-customized
+ * and subsequent T2G syncs MUST emit per-band conflicts rather than
+ * silent-replace. The dropdown's formula-recompute pathway uses
+ * `setZoneMethod` instead, which preserves the chosen method id.
+ *
+ * No-op if the sport config has no entry for that zoneType (matches
+ * legacy semantics). Throws `ProfileNotFoundError` when the id is
+ * unknown.
  */
 
 import type { PersistencePort } from "../../../ports/persistence-port";
@@ -27,7 +34,7 @@ export const updateSportZones = async (
     const updated = updateSportConfig(existing, sport, (cfg) => {
       const zc = cfg[zoneType];
       if (!zc) return cfg;
-      return { ...cfg, [zoneType]: { ...zc, zones } };
+      return { ...cfg, [zoneType]: { ...zc, method: "user", zones } };
     });
     await persistence.profiles.put(updated);
     return updated;
