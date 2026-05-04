@@ -771,10 +771,14 @@ jobs:
         # job-level if:. Materialize the secret into env first, then
         # guard at step level via env. On fork PRs env is empty → step
         # is skipped, the job exits zero with no upload.
+        # The `...` selector includes workspace dependencies; required
+        # since the TypeScript dist cache was removed in #489 and
+        # @kaiord/core/fit/tcx/zwo/garmin must be built before tsc -b
+        # in the SPA package can resolve their type declarations.
         env:
           CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
         if: env.CODECOV_TOKEN != ''
-        run: pnpm --filter @kaiord/workout-spa-editor build
+        run: pnpm --filter "@kaiord/workout-spa-editor..." build
 
   # Summary jobs for branch protection
   # These jobs have fixed names that match branch protection requirements.
