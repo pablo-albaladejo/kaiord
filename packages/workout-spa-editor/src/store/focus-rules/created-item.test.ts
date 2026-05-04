@@ -4,7 +4,7 @@ import { asItemId } from "../providers/item-id";
 import { createdItemTarget } from "./created-item";
 
 describe("createdItemTarget", () => {
-  it("returns a { kind: 'item', id } target for the new id", () => {
+  it("should return a { kind: 'item', id } target for the new id", () => {
     // Arrange
     const newId = asItemId("new-item-id");
 

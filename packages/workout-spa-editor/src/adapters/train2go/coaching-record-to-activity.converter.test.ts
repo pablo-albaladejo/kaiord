@@ -22,7 +22,7 @@ const baseRecord: CoachingActivityRecord = {
 };
 
 describe("toCoachingActivity (record → view-model)", () => {
-  it("builds a stable view-model id of the form `${source}:${sourceId}`", () => {
+  it("should build a stable view-model id of the form `${source}:${sourceId}`", () => {
     // Arrange
 
     // Act

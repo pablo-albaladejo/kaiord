@@ -127,7 +127,7 @@ describe("useCoachingDialogActions — handleSelectWorkout", () => {
     expect(mockMatch).not.toHaveBeenCalled();
   });
 
-  it("toggles `matching` true while in flight; resets on completion", async () => {
+  it("should toggle `matching` true while in flight and reset on completion", async () => {
     // Arrange
 
     let resolve!: () => void;
@@ -230,7 +230,7 @@ describe("useCoachingDialogActions — handleSplit", () => {
     expect(mockUnmatch).not.toHaveBeenCalled();
   });
 
-  it("toggles `splitting` true while in flight; resets on completion", async () => {
+  it("should toggle `splitting` true while in flight and reset on completion", async () => {
     // Arrange
 
     let resolve!: () => void;

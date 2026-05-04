@@ -92,7 +92,7 @@ describe("profileToSnapshot", () => {
     expect(snapshot.activeSport).toBeUndefined();
   });
 
-  it("omits a sport's thresholds when no values are present", () => {
+  it("should omit a sport's thresholds when no values are present", () => {
     // Arrange
     const profile: Profile = {
       ...baseProfile,

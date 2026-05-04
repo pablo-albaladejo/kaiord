@@ -31,7 +31,7 @@ describe("FocusTarget discriminated union", () => {
     // Assert
   });
 
-  it("narrows on `kind` at call sites", () => {
+  it("should narrow on `kind` at call sites", () => {
     // Arrange
 
     // Act
@@ -46,7 +46,7 @@ describe("FocusTarget discriminated union", () => {
     }
   });
 
-  it("narrows on `kind` to the empty-state branch", () => {
+  it("should narrow on `kind` to the empty-state branch", () => {
     // Arrange
     const target: FocusTarget = focusEmptyState;
 

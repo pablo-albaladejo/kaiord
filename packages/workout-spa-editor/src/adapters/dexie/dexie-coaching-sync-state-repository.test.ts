@@ -85,7 +85,7 @@ describe("DexieCoachingSyncStateRepository", () => {
     expect(p2?.lastSyncedAt).toBe("2026-04-28T11:00:00.000Z");
   });
 
-  it("deleteByProfile removes only the targeted profile's rows", async () => {
+  it("should remove only the targeted profile's rows when deleteByProfile is called", async () => {
     // Arrange
     const repo = createDexieCoachingSyncStateRepository(db);
     await repo.put({

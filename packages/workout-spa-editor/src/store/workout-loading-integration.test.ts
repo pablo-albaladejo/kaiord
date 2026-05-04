@@ -251,7 +251,7 @@ describe("workout loading integration", () => {
       );
     });
 
-    it("regenerates every block ID on load regardless of the payload's ids", () => {
+    it("should regenerate every block ID on load regardless of the payload's ids", () => {
       // Arrange
       const existingId1 = "block-1111111111-aaa111";
       const existingId2 = "block-2222222222-bbb222";

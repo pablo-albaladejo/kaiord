@@ -55,7 +55,7 @@ describe("Train2Go PII redaction audit", () => {
     delete (globalThis as Record<string, unknown>).chrome;
   });
 
-  it("(a) ping() failure path does NOT log any PII via console.error", async () => {
+  it("should not log any PII via console.error on ping() failure path", async () => {
     // Arrange
 
     // Act
@@ -68,7 +68,7 @@ describe("Train2Go PII redaction audit", () => {
     }
   });
 
-  it("(b) ping() error string never contains PII", async () => {
+  it("should never contain PII in the ping() error string", async () => {
     // Arrange
 
     // Act
@@ -80,7 +80,7 @@ describe("Train2Go PII redaction audit", () => {
     expect(result.error ?? "").not.toMatch(PII.externalUserId);
   });
 
-  it("(c) toast string templates from LinkedAccountsSection use only Kaiord profile name", () => {
+  it("should use only Kaiord profile name in toast string templates from LinkedAccountsSection", () => {
     // Arrange
     const linkTemplate = (label: string, kaiordName: string) =>
       `Linked ${label} to ${kaiordName}`;

@@ -105,7 +105,7 @@ describe("CoachingActivityDialog", () => {
     ).toBeInTheDocument();
   });
 
-  it("does NOT show the loading placeholder for known-empty description ('')", () => {
+  it("should not show the loading placeholder for known-empty description ('')", () => {
     // Arrange
 
     // Act

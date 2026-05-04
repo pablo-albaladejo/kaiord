@@ -32,7 +32,7 @@ describe("UsageTable", () => {
     expect(screen.getByTestId("usage-output-2026-04")).toHaveTextContent("300");
   });
 
-  it("shows `—` under Output for legacy rows", () => {
+  it("should show `—` under Output for legacy rows", () => {
     // Arrange
 
     const legacy = makeRow({

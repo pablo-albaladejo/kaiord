@@ -442,12 +442,11 @@ export default tseslint.config(
           detectObjects: false,
         },
       ],
-      // test-conventions-should-aaa change: title-rule dogma at IDE
-      // time. Severity is 'warn' during the migration window per D2
-      // (closes the IDE/pre-commit/CI parity gap that 'off' would
-      // create). Flipped to 'error' in PR-6 §6.3.
+      // test-conventions: every it()/it.alias()/it.each([])() title
+      // SHALL start with "should " (case-sensitive lowercase). Locked
+      // at 'error' after the title-allowlist drained to empty.
       "vitest/valid-title": [
-        "warn",
+        "error",
         {
           mustMatch: { it: ["^should "] },
         },
