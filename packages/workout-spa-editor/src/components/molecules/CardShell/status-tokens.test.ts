@@ -7,15 +7,15 @@ import {
 } from "./status-tokens";
 
 describe("statusToColourClass", () => {
-  it("maps pending to amber-600", () => {
+  it("should map pending to amber-600", () => {
     expect(statusToColourClass("pending")).toBe("border-amber-600");
   });
 
-  it("maps completed to emerald-600", () => {
+  it("should map completed to emerald-600", () => {
     expect(statusToColourClass("completed")).toBe("border-emerald-600");
   });
 
-  it("maps skipped to slate-500", () => {
+  it("should map skipped to slate-500", () => {
     expect(statusToColourClass("skipped")).toBe("border-slate-500");
   });
 });
@@ -39,19 +39,19 @@ describe("statusToIcon", () => {
 });
 
 describe("complianceBucketToBorderClass", () => {
-  it("maps neutral to slate-500 (slate-400 fails WCAG 1.4.11)", () => {
+  it("should map neutral to slate-500 (slate-400 fails WCAG 1.4.11)", () => {
     expect(complianceBucketToBorderClass("neutral")).toBe("border-slate-500");
   });
 
-  it("maps amber to amber-600", () => {
+  it("should map amber to amber-600", () => {
     expect(complianceBucketToBorderClass("amber")).toBe("border-amber-600");
   });
 
-  it("maps emerald to emerald-600", () => {
+  it("should map emerald to emerald-600", () => {
     expect(complianceBucketToBorderClass("emerald")).toBe("border-emerald-600");
   });
 
-  it("maps mid to a gradient class involving amber and emerald", () => {
+  it("should map mid to a gradient class involving amber and emerald", () => {
     const cls = complianceBucketToBorderClass("mid");
     expect(cls).toContain("amber");
     expect(cls).toContain("emerald");

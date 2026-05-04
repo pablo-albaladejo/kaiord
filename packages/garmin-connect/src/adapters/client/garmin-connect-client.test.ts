@@ -89,7 +89,7 @@ describe("createGarminConnectClient", () => {
   });
 
   describe("init", () => {
-    it("restores tokens from store and returns restored true", async () => {
+    it("should restore tokens from store and returns restored true", async () => {
       const store = createMockStore({ oauth1: OAUTH1, oauth2: OAUTH2 });
       const client = createGarminConnectClient({
         logger,
@@ -103,7 +103,7 @@ describe("createGarminConnectClient", () => {
       expect(client.auth.is_authenticated()).toBe(true);
     });
 
-    it("returns restored false when store is empty", async () => {
+    it("should return restored false when store is empty", async () => {
       const store = createMockStore(null);
       const client = createGarminConnectClient({
         logger,
@@ -117,7 +117,7 @@ describe("createGarminConnectClient", () => {
       expect(client.auth.is_authenticated()).toBe(false);
     });
 
-    it("returns restored false without tokenStore", async () => {
+    it("should return restored false without tokenStore", async () => {
       const client = createGarminConnectClient({
         logger,
         fetchFn: mockFetchOk(),
@@ -130,7 +130,7 @@ describe("createGarminConnectClient", () => {
   });
 
   describe("retry wiring", () => {
-    it("retries API calls on 429 when retry options provided", async () => {
+    it("should retry API calls on 429 when retry options provided", async () => {
       const store = createMockStore({ oauth1: OAUTH1, oauth2: OAUTH2 });
       const apiFetch = vi
         .fn<typeof globalThis.fetch>()
@@ -162,7 +162,7 @@ describe("createGarminConnectClient", () => {
   });
 
   describe("login uses raw fetch (no retry)", () => {
-    it("does not retry SSO login on 5xx", async () => {
+    it("should not retry SSO login on 5xx", async () => {
       const rawFetch = mockFetchOk();
       const client = createGarminConnectClient({
         logger,

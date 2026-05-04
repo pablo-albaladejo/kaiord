@@ -3,7 +3,7 @@ import type { Workout } from "@kaiord/core";
 import { reindexSteps } from "./reindex-steps";
 
 describe("reindexSteps", () => {
-  it("reindexes top-level steps sequentially", () => {
+  it("should reindex top-level steps sequentially", () => {
     const workout: Workout = {
       sport: "running",
       steps: [
@@ -30,7 +30,7 @@ describe("reindexSteps", () => {
     expect(result.steps[1]).toMatchObject({ stepIndex: 1 });
   });
 
-  it("reindexes nested steps inside repetition blocks", () => {
+  it("should reindex nested steps inside repetition blocks", () => {
     const workout: Workout = {
       sport: "cycling",
       steps: [
@@ -69,7 +69,7 @@ describe("reindexSteps", () => {
     }
   });
 
-  it("handles empty steps array", () => {
+  it("should handle empty steps array", () => {
     const workout: Workout = { sport: "running", steps: [] };
 
     const result = reindexSteps(workout);
@@ -78,7 +78,7 @@ describe("reindexSteps", () => {
     expect(result).not.toBe(workout);
   });
 
-  it("skips RepetitionBlocks in top-level index sequence", () => {
+  it("should skip RepetitionBlocks in top-level index sequence", () => {
     const workout: Workout = {
       sport: "running",
       steps: [
@@ -117,7 +117,7 @@ describe("reindexSteps", () => {
     expect(result.steps[2]).toMatchObject({ stepIndex: 1 });
   });
 
-  it("does not mutate the original workout", () => {
+  it("should not mutate the original workout", () => {
     const workout: Workout = {
       sport: "running",
       steps: [

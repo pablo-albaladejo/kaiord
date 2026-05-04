@@ -58,14 +58,14 @@ describe("useCoachingActivities", () => {
     vi.clearAllMocks();
   });
 
-  it("invokes each factory with (activeProfileId, days)", () => {
+  it("should invoke each factory with (activeProfileId, days)", () => {
     const days = ["2026-04-13", "2026-04-14"];
     renderHook(() => useCoachingActivities(days));
 
     expect(factory).toHaveBeenCalledWith(ACTIVE_PROFILE_ID, days);
   });
 
-  it("groups activities by day", () => {
+  it("should group activities by day", () => {
     const { result } = renderHook(() =>
       useCoachingActivities(["2026-04-13", "2026-04-14", "2026-04-15"])
     );
@@ -75,7 +75,7 @@ describe("useCoachingActivities", () => {
     expect(result.current.byDay["2026-04-15"]).toHaveLength(0);
   });
 
-  it("returns syncSources for available sources", () => {
+  it("should return syncSources for available sources", () => {
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
 
     expect(result.current.syncSources).toHaveLength(1);
@@ -83,7 +83,7 @@ describe("useCoachingActivities", () => {
     expect(result.current.syncSources[0]?.connected).toBe(true);
   });
 
-  it("expandActivity calls source.expand with (activeProfileId, date)", async () => {
+  it("should call source.expand with (activeProfileId, date) via expandActivity", async () => {
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
 
     result.current.expandActivity({
@@ -102,7 +102,7 @@ describe("useCoachingActivities", () => {
     );
   });
 
-  it("expandActivity does nothing for unknown source", () => {
+  it("should do nothing for unknown source via expandActivity", () => {
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
 
     result.current.expandActivity({
@@ -118,7 +118,7 @@ describe("useCoachingActivities", () => {
     expect(fakeSource.expand).not.toHaveBeenCalled();
   });
 
-  it("syncSources.sync injects activeProfileId before calling source.sync", async () => {
+  it("should inject activeProfileId before calling source.sync via syncSources.sync", async () => {
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
     const source = result.current.syncSources[0]!;
 

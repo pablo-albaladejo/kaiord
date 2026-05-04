@@ -173,7 +173,7 @@ describe("profile-state perf gate", () => {
     await clearProfileTables();
   });
 
-  it("post-migration render counts stay within 2x of the committed baseline", async () => {
+  it("should keep post-migration render counts within 2x of the committed baseline", async () => {
     const layoutHeader = await measureLayoutHeader();
     const useAiGeneration = await measureUseAiGeneration();
 

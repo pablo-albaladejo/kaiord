@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import { usageEntrySchema, usageRecordSchema } from "./usage-schemas";
 
 describe("usageEntrySchema", () => {
-  it("requires inputTokens and outputTokens", () => {
+  it("should require inputTokens and outputTokens", () => {
     const entry = {
       date: "2026-04-20",
       inputTokens: 80,
@@ -15,7 +15,7 @@ describe("usageEntrySchema", () => {
     expect(usageEntrySchema.parse(entry)).toEqual(entry);
   });
 
-  it("rejects entries missing inputTokens", () => {
+  it("should reject entries missing inputTokens", () => {
     expect(() =>
       usageEntrySchema.parse({
         date: "2026-04-20",
@@ -26,7 +26,7 @@ describe("usageEntrySchema", () => {
     ).toThrow();
   });
 
-  it("enforces tokens === inputTokens + outputTokens", () => {
+  it("should enforce tokens === inputTokens + outputTokens", () => {
     expect(() =>
       usageEntrySchema.parse({
         date: "2026-04-20",
@@ -40,7 +40,7 @@ describe("usageEntrySchema", () => {
 });
 
 describe("usageRecordSchema", () => {
-  it("requires inputTokens, outputTokens, totalTokens, totalCost", () => {
+  it("should require inputTokens, outputTokens, totalTokens, totalCost", () => {
     const record = {
       yearMonth: "2026-04",
       inputTokens: 120,
@@ -65,7 +65,7 @@ describe("usageRecordSchema", () => {
     });
   });
 
-  it("enforces totalTokens === inputTokens + outputTokens", () => {
+  it("should enforce totalTokens === inputTokens + outputTokens", () => {
     expect(() =>
       usageRecordSchema.parse({
         yearMonth: "2026-04",

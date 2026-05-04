@@ -17,7 +17,7 @@ function makeRow(overrides: Partial<UsageRecord> = {}): UsageRecord {
 }
 
 describe("UsageTable", () => {
-  it("renders input and output tokens as separate columns for fresh rows", () => {
+  it("should render input and output tokens as separate columns for fresh rows", () => {
     render(<UsageTable rows={[makeRow()]} monthsWindow={3} />);
 
     expect(screen.getByTestId("usage-input-2026-04")).toHaveTextContent(
@@ -42,7 +42,7 @@ describe("UsageTable", () => {
     expect(screen.getByTestId("usage-input-2026-03")).toHaveTextContent("500");
   });
 
-  it("renders multiple rows without cross-row leakage", () => {
+  it("should render multiple rows without cross-row leakage", () => {
     const fresh = makeRow({ yearMonth: "2026-04" });
     const legacy = makeRow({
       yearMonth: "2026-03",

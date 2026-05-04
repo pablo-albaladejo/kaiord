@@ -34,20 +34,20 @@ const makeSource = (
 const NOW_MS = Date.now();
 
 describe("isStale", () => {
-  it("returns true when lastSyncedAt is undefined", () => {
+  it("should return true when lastSyncedAt is undefined", () => {
     expect(isStale(undefined, NOW_MS)).toBe(true);
   });
 
-  it("returns true when lastSyncedAt is unparseable", () => {
+  it("should return true when lastSyncedAt is unparseable", () => {
     expect(isStale("not-a-date", NOW_MS)).toBe(true);
   });
 
-  it("returns false when lastSyncedAt is within 10 minutes", () => {
+  it("should return false when lastSyncedAt is within 10 minutes", () => {
     const recent = new Date(NOW_MS - 5 * 60 * 1000).toISOString();
     expect(isStale(recent, NOW_MS)).toBe(false);
   });
 
-  it("returns true when lastSyncedAt is older than 10 minutes", () => {
+  it("should return true when lastSyncedAt is older than 10 minutes", () => {
     const old = new Date(NOW_MS - 11 * 60 * 1000).toISOString();
     expect(isStale(old, NOW_MS)).toBe(true);
   });
@@ -62,7 +62,7 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
     persistence = createInMemoryPersistence();
   });
 
-  it("emits coaching.sync.failure with isAutoSync: true when src.sync throws", async () => {
+  it("should emit coaching.sync.failure with isAutoSync: true when src.sync throws", async () => {
     const src = makeSource({
       sync: vi.fn(async () => {
         throw new Error("tab closed");
@@ -87,7 +87,7 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
     });
   });
 
-  it("emits coaching.sync.failure with isAutoSync: true when src.error is set after sync", async () => {
+  it("should emit coaching.sync.failure with isAutoSync: true when src.error is set after sync", async () => {
     const src = makeSource({
       sync: vi.fn(async () => {
         src.error = "session expired";
@@ -112,7 +112,7 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
     });
   });
 
-  it("emits coaching.sync.invoked before syncing", async () => {
+  it("should emit coaching.sync.invoked before syncing", async () => {
     const src = makeSource();
 
     await runSourceSync(
@@ -132,7 +132,7 @@ describe("runSourceSync — auto-sync failure emits isAutoSync: true (spec §12.
     });
   });
 
-  it("skips sync and emits nothing when state is fresh", async () => {
+  it("should skip sync and emits nothing when state is fresh", async () => {
     const fresh = new Date(NOW_MS - 60_000).toISOString();
     await persistence.coachingSyncState.put({
       source: "train2go",

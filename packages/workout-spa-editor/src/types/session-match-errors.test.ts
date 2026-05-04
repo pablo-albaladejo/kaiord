@@ -9,7 +9,7 @@ import {
 } from "./session-match-errors";
 
 describe("session-match error classes", () => {
-  it("SessionAlreadyMatchedError carries name and message", () => {
+  it("should carry name and message on SessionAlreadyMatchedError", () => {
     const err = new SessionAlreadyMatchedError("activity already matched");
 
     expect(err).toBeInstanceOf(Error);
@@ -18,7 +18,7 @@ describe("session-match error classes", () => {
     expect(err.message).toBe("activity already matched");
   });
 
-  it("CrossProfileMatchError carries name and message", () => {
+  it("should carry name and message on CrossProfileMatchError", () => {
     const err = new CrossProfileMatchError("activity belongs to p1");
 
     expect(err).toBeInstanceOf(Error);
@@ -26,28 +26,28 @@ describe("session-match error classes", () => {
     expect(err.message).toBe("activity belongs to p1");
   });
 
-  it("CoachingActivityNotFoundError carries name and message", () => {
+  it("should carry name and message on CoachingActivityNotFoundError", () => {
     const err = new CoachingActivityNotFoundError("p1:train2go:9999");
 
     expect(err.name).toBe("CoachingActivityNotFoundError");
     expect(err.message).toBe("p1:train2go:9999");
   });
 
-  it("WorkoutNotFoundError carries name and message", () => {
+  it("should carry name and message on WorkoutNotFoundError", () => {
     const err = new WorkoutNotFoundError("w-deleted");
 
     expect(err.name).toBe("WorkoutNotFoundError");
     expect(err.message).toBe("w-deleted");
   });
 
-  it("ProfileNotFoundError carries name and message", () => {
+  it("should carry name and message on ProfileNotFoundError", () => {
     const err = new ProfileNotFoundError("p-deleted");
 
     expect(err.name).toBe("ProfileNotFoundError");
     expect(err.message).toBe("p-deleted");
   });
 
-  it("each error has its own constructor for instanceof discrimination", () => {
+  it("should give each error its own constructor for instanceof discrimination", () => {
     const a = new SessionAlreadyMatchedError("x");
     const b = new CrossProfileMatchError("x");
 

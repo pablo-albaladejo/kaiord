@@ -39,7 +39,7 @@ beforeEach(() => {
 });
 
 describe("useCoachingDialogActions — picker open/close", () => {
-  it("openPicker flips pickerOpen to true; closePicker flips it back", () => {
+  it("should flip pickerOpen to true via openPicker and back via closePicker", () => {
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, "p1", { kind: "solo" }),
       { wrapper: wrap }
@@ -54,7 +54,7 @@ describe("useCoachingDialogActions — picker open/close", () => {
 });
 
 describe("useCoachingDialogActions — handleSelectWorkout", () => {
-  it("invokes useMatchSession with profileId / activity / workout / source=manual", async () => {
+  it("should invoke useMatchSession with profileId / activity / workout / source=manual", async () => {
     mockMatch.mockResolvedValue(undefined);
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, "p1", { kind: "solo" }),
@@ -76,7 +76,7 @@ describe("useCoachingDialogActions — handleSelectWorkout", () => {
     expect(result.current.pickerOpen).toBe(false);
   });
 
-  it("is a no-op when activity is null", async () => {
+  it("should be a no-op when activity is null", async () => {
     const { result } = renderHook(
       () => useCoachingDialogActions(null, "p1", { kind: "solo" }),
       { wrapper: wrap }
@@ -89,7 +89,7 @@ describe("useCoachingDialogActions — handleSelectWorkout", () => {
     expect(mockMatch).not.toHaveBeenCalled();
   });
 
-  it("is a no-op when targetProfileId is null", async () => {
+  it("should be a no-op when targetProfileId is null", async () => {
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, null, { kind: "solo" }),
       { wrapper: wrap }
@@ -136,7 +136,7 @@ describe("useCoachingDialogActions — handleSplit", () => {
     workout: { id: "w-1" } as never,
   };
 
-  it("invokes useUnmatchSession with profileId + matchId from matchState", async () => {
+  it("should invoke useUnmatchSession with profileId + matchId from matchState", async () => {
     mockUnmatch.mockResolvedValue(undefined);
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, "p1", matchedState),
@@ -153,7 +153,7 @@ describe("useCoachingDialogActions — handleSplit", () => {
     });
   });
 
-  it("is a no-op when matchState is solo", async () => {
+  it("should be a no-op when matchState is solo", async () => {
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, "p1", { kind: "solo" }),
       { wrapper: wrap }
@@ -166,7 +166,7 @@ describe("useCoachingDialogActions — handleSplit", () => {
     expect(mockUnmatch).not.toHaveBeenCalled();
   });
 
-  it("is a no-op when targetProfileId is null", async () => {
+  it("should be a no-op when targetProfileId is null", async () => {
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, null, matchedState),
       { wrapper: wrap }

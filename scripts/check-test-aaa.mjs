@@ -215,12 +215,14 @@ let AAA_ALLOWLIST_SPA_NON_COMPONENT = new Set([
   "packages/workout-spa-editor/src/adapters/dexie/dexie-user-preferences-repository.test.ts",
   "packages/workout-spa-editor/src/adapters/dexie/dexie-v5-migration.test.ts",
   "packages/workout-spa-editor/src/adapters/dexie/dexie-v6-migration.test.ts",
+  "packages/workout-spa-editor/src/adapters/dexie/dexie-v8-migration.test.ts",
   "packages/workout-spa-editor/src/adapters/dexie/is-per-profile-table.test.ts",
   "packages/workout-spa-editor/src/adapters/train2go/coaching-record-to-activity.converter.test.ts",
   "packages/workout-spa-editor/src/adapters/train2go/coaching-telemetry.test.ts",
   "packages/workout-spa-editor/src/adapters/train2go/train2go-coaching-transport.test.ts",
   "packages/workout-spa-editor/src/adapters/train2go/train2go-record.converter.test.ts",
   "packages/workout-spa-editor/src/adapters/train2go/train2go-sport-map.test.ts",
+  "packages/workout-spa-editor/src/adapters/train2go/use-train2go-actions-fanout.test.tsx",
   "packages/workout-spa-editor/src/adapters/train2go/use-train2go-source.test.tsx",
   "packages/workout-spa-editor/src/application/ai-prompts.test.ts",
   "packages/workout-spa-editor/src/application/ai-workout-processor.test.ts",
@@ -455,6 +457,7 @@ let AAA_ALLOWLIST_SPA_COMPONENT = new Set([
   "packages/workout-spa-editor/src/components/organisms/ZoneEditor/components/EditableZoneName.test.tsx",
   "packages/workout-spa-editor/src/components/organisms/ZoneEditor/components/EditableZoneValue.test.tsx",
   "packages/workout-spa-editor/src/components/organisms/ZoneEditor/utils/parse-zone-field.test.ts",
+  "packages/workout-spa-editor/src/components/organisms/ZonesConflictDialog/ZonesConflictDialog.test.tsx",
   "packages/workout-spa-editor/src/components/pages/CalendarHeader.test.tsx",
   "packages/workout-spa-editor/src/components/pages/CalendarPage.test.tsx",
   "packages/workout-spa-editor/src/components/pages/CalendarWeekGrid.test.tsx",
@@ -582,7 +585,9 @@ export function inferShard(repoRelPath) {
   return "BACKEND";
 }
 
-const IT_CALL_RE = /\bit\b(?:\.[a-z]+)?\s*\(/g;
+// Shared `it`-call detector — kept in sync with the title-rule guards.
+import { IT_CALL_RE } from "./it-title-extractor.mjs";
+
 const ARRANGE_RE = /^\s*\/\/\s+Arrange\s*$/gm;
 const ACT_RE = /^\s*\/\/\s+Act\s*$/gm;
 const ASSERT_RE = /^\s*\/\/\s+Assert\s*$/gm;

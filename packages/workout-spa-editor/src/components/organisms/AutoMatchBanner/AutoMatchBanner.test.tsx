@@ -14,7 +14,7 @@ const sug = (overrides: Partial<MatchSuggestion> = {}): MatchSuggestion => ({
 });
 
 describe("AutoMatchBanner", () => {
-  it("renders nothing when there are no suggestions", () => {
+  it("should render nothing when there are no suggestions", () => {
     render(
       <AutoMatchBanner suggestions={[]} onAccept={vi.fn()} onReject={vi.fn()} />
     );
@@ -22,7 +22,7 @@ describe("AutoMatchBanner", () => {
     expect(screen.queryByTestId("auto-match-banner")).not.toBeInTheDocument();
   });
 
-  it("renders one row per suggestion (capped at 2 in collapsed state)", () => {
+  it("should render one row per suggestion (capped at 2 in collapsed state)", () => {
     render(
       <AutoMatchBanner
         suggestions={[
@@ -58,7 +58,7 @@ describe("AutoMatchBanner", () => {
     expect(screen.getByText("Collapse")).toBeInTheDocument();
   });
 
-  it("calls onAccept and announces remaining count when Accept is clicked", async () => {
+  it("should call onAccept and announces remaining count when Accept is clicked", async () => {
     const onAccept = vi.fn();
     render(
       <AutoMatchBanner
@@ -78,7 +78,7 @@ describe("AutoMatchBanner", () => {
     );
   });
 
-  it("calls onReject and announces remaining count when Reject is clicked", async () => {
+  it("should call onReject and announces remaining count when Reject is clicked", async () => {
     const onReject = vi.fn();
     render(
       <AutoMatchBanner
@@ -110,7 +110,7 @@ describe("AutoMatchBanner", () => {
     expect(screen.queryByText("Dismiss all")).not.toBeInTheDocument();
   });
 
-  it("uses the resolveActivity / resolveWorkoutTitle helpers for friendly labels", () => {
+  it("should use the resolveActivity / resolveWorkoutTitle helpers for friendly labels", () => {
     render(
       <AutoMatchBanner
         suggestions={[sug({ activityId: "a1", workoutId: "w1" })]}
@@ -133,7 +133,7 @@ describe("AutoMatchBanner", () => {
     expect(screen.getByText(/FTP test executed/)).toBeInTheDocument();
   });
 
-  it("is a region landmark with an accessible label", () => {
+  it("should be a region landmark with an accessible label", () => {
     render(
       <AutoMatchBanner
         suggestions={[sug()]}

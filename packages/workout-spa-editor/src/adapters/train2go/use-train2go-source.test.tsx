@@ -84,7 +84,7 @@ describe("useTrain2GoSource", () => {
     vi.clearAllMocks();
   });
 
-  it("returns a CoachingSource with the expected static fields", () => {
+  it("should return a CoachingSource with the expected static fields", () => {
     const { result } = renderHook(
       () => useTrain2GoSource("p1", ["2026-04-13"]),
       {
@@ -99,7 +99,7 @@ describe("useTrain2GoSource", () => {
     expect(result.current.connected).toBe(true);
   });
 
-  it("returns empty activities when the live-query yields []", () => {
+  it("should return empty activities when the live-query yields []", () => {
     const { result } = renderHook(
       () => useTrain2GoSource("p1", ["2026-04-13"]),
       {
@@ -110,7 +110,7 @@ describe("useTrain2GoSource", () => {
     expect(result.current.activities).toEqual([]);
   });
 
-  it("sync(profileId, weekStart) delegates to syncWeek use case", async () => {
+  it("should delegate to syncWeek use case via sync(profileId, weekStart)", async () => {
     const { result } = renderHook(
       () => useTrain2GoSource("p1", ["2026-04-13"]),
       {
@@ -125,7 +125,7 @@ describe("useTrain2GoSource", () => {
     expect(mockSync.mock.calls[0]?.[2]).toBe("2026-04-13");
   });
 
-  it("expand(profileId, date) delegates to expandDay use case", async () => {
+  it("should delegate to expandDay use case via expand(profileId, date)", async () => {
     const { result } = renderHook(
       () => useTrain2GoSource("p1", ["2026-04-13"]),
       {
@@ -140,7 +140,7 @@ describe("useTrain2GoSource", () => {
     expect(mockExpand.mock.calls[0]?.[2]).toBe("2026-04-13");
   });
 
-  it("connect(profileId) delegates to attemptLink with an AbortSignal", async () => {
+  it("should delegate to attemptLink with an AbortSignal via connect(profileId)", async () => {
     const { result } = renderHook(
       () => useTrain2GoSource("p1", ["2026-04-13"]),
       {

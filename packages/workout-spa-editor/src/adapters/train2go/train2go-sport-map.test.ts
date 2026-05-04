@@ -3,29 +3,29 @@ import { describe, expect, it } from "vitest";
 import { getT2GSportDisplay } from "./train2go-sport-map";
 
 describe("getT2GSportDisplay", () => {
-  it("maps known sport", () => {
+  it("should map known sport", () => {
     const result = getT2GSportDisplay("cycling");
     expect(result.label).toBe("Cycling");
     expect(result.icon).toBeTruthy();
   });
 
-  it("is case insensitive", () => {
+  it("should be case insensitive", () => {
     expect(getT2GSportDisplay("SWIMMING").label).toBe("Swimming");
     expect(getT2GSportDisplay("Running").label).toBe("Running");
   });
 
-  it("returns fallback for unknown sport", () => {
+  it("should return fallback for unknown sport", () => {
     const result = getT2GSportDisplay("quidditch");
     expect(result.label).toBe("Activity");
     expect(result.icon).toBeTruthy();
   });
 
-  it("returns fallback for empty string", () => {
+  it("should return fallback for empty string", () => {
     const result = getT2GSportDisplay("");
     expect(result.label).toBe("Activity");
   });
 
-  it("maps all 24 known sports without throwing", () => {
+  it("should map all 24 known sports without throwing", () => {
     const sports = [
       "cycling",
       "running",

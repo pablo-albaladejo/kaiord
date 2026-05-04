@@ -20,7 +20,7 @@ const workoutWith = (ids: Array<string>): Workout =>
   }) as unknown as Workout;
 
 describe("preservedSelectionTarget", () => {
-  it("returns the prior selection when it is still present", () => {
+  it("should return the prior selection when it is still present", () => {
     // Arrange
     const workout = workoutWith(["a", "b", "c"]);
 
@@ -31,7 +31,7 @@ describe("preservedSelectionTarget", () => {
     expect(target).toEqual({ kind: "item", id: "b" });
   });
 
-  it("falls back to the item now at the same-index when the prior id is gone", () => {
+  it("should fall back to the item now at the same-index when the prior id is gone", () => {
     // Arrange — "b" was deleted; position 1 is now "c".
     const workout = workoutWith(["a", "c"]);
 
@@ -42,7 +42,7 @@ describe("preservedSelectionTarget", () => {
     expect(target).toEqual({ kind: "item", id: "c" });
   });
 
-  it("falls back to the same-index item when the prior selection is null", () => {
+  it("should fall back to the same-index item when the prior selection is null", () => {
     // Arrange
     const workout = workoutWith(["a", "b"]);
 
@@ -53,7 +53,7 @@ describe("preservedSelectionTarget", () => {
     expect(target).toEqual({ kind: "item", id: "a" });
   });
 
-  it("falls back to empty-state when no item sits at the fallback index", () => {
+  it("should fall back to empty-state when no item sits at the fallback index", () => {
     // Arrange
     const workout = workoutWith(["a"]);
 
@@ -64,7 +64,7 @@ describe("preservedSelectionTarget", () => {
     expect(target).toEqual({ kind: "empty-state" });
   });
 
-  it("falls back to empty-state when the workout is undefined", () => {
+  it("should fall back to empty-state when the workout is undefined", () => {
     // Act
     const target = preservedSelectionTarget(undefined, asItemId("x"), 0);
 
@@ -72,7 +72,7 @@ describe("preservedSelectionTarget", () => {
     expect(target).toEqual({ kind: "empty-state" });
   });
 
-  it("falls back to empty-state when the workout has no steps at all", () => {
+  it("should fall back to empty-state when the workout has no steps at all", () => {
     // Arrange
     const workout = workoutWith([]);
 

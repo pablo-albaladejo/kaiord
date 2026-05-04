@@ -57,7 +57,7 @@ describe("createTokenManager", () => {
   });
 
   describe("state encapsulation", () => {
-    it("returns no mutable state properties", () => {
+    it("should return no mutable state properties", () => {
       const tm = createTokenManager({ refreshFn, logger });
       const keys = Object.keys(tm);
       expect(keys).not.toContain("oauth1");
@@ -67,7 +67,7 @@ describe("createTokenManager", () => {
   });
 
   describe("token generation counter", () => {
-    it("increments on setTokens", async () => {
+    it("should increment on setTokens", async () => {
       const tm = createTokenManager({ refreshFn, logger });
       expect(tm.getGeneration()).toBe(0);
 
@@ -78,7 +78,7 @@ describe("createTokenManager", () => {
       expect(tm.getGeneration()).toBe(2);
     });
 
-    it("increments on refresh", async () => {
+    it("should increment on refresh", async () => {
       const tm = createTokenManager({ refreshFn, logger });
       await tm.setTokens(OAUTH1, OAUTH2);
       const genBefore = tm.getGeneration();
@@ -89,7 +89,7 @@ describe("createTokenManager", () => {
   });
 
   describe("setTokens", () => {
-    it("persists to tokenStore", async () => {
+    it("should persist to tokenStore", async () => {
       const store = createMockStore();
       const tm = createTokenManager({ refreshFn, logger, tokenStore: store });
 
@@ -101,7 +101,7 @@ describe("createTokenManager", () => {
       });
     });
 
-    it("logs warning on persist failure without propagating", async () => {
+    it("should log warning on persist failure without propagating", async () => {
       const store = createMockStore();
       store.save.mockRejectedValue(new Error("disk full"));
       const tm = createTokenManager({ refreshFn, logger, tokenStore: store });
@@ -115,7 +115,7 @@ describe("createTokenManager", () => {
   });
 
   describe("refresh", () => {
-    it("delegates to refreshFn and updates token", async () => {
+    it("should delegate to refreshFn and updates token", async () => {
       const tm = createTokenManager({ refreshFn, logger });
       await tm.setTokens(OAUTH1, OAUTH2);
 
@@ -125,7 +125,7 @@ describe("createTokenManager", () => {
       expect(tm.getAccessToken()).toBe("acc_refreshed");
     });
 
-    it("persists refreshed tokens to store", async () => {
+    it("should persist refreshed tokens to store", async () => {
       const store = createMockStore();
       const tm = createTokenManager({ refreshFn, logger, tokenStore: store });
       await tm.setTokens(OAUTH1, OAUTH2);
@@ -135,14 +135,14 @@ describe("createTokenManager", () => {
       expect(store.save).toHaveBeenCalledTimes(2);
     });
 
-    it("throws ServiceApiError without OAuth1 token", async () => {
+    it("should throw ServiceApiError without OAuth1 token", async () => {
       const tm = createTokenManager({ refreshFn, logger });
 
       await expect(tm.refresh()).rejects.toThrow(ServiceApiError);
       expect(refreshFn).not.toHaveBeenCalled();
     });
 
-    it("throws ServiceApiError after clearTokens", async () => {
+    it("should throw ServiceApiError after clearTokens", async () => {
       const tm = createTokenManager({ refreshFn, logger });
       await tm.setTokens(OAUTH1, OAUTH2);
       await tm.clearTokens();
@@ -150,7 +150,7 @@ describe("createTokenManager", () => {
       await expect(tm.refresh()).rejects.toThrow(ServiceApiError);
     });
 
-    it("subscriber pattern: concurrent callers get same result", async () => {
+    it("should give concurrent callers the same result via subscriber pattern", async () => {
       let resolveRefresh!: (v: OAuth2Token) => void;
       const slowRefresh: RefreshFn = vi.fn(
         () =>
@@ -174,7 +174,7 @@ describe("createTokenManager", () => {
       expect(tm.getAccessToken()).toBe("acc_refreshed");
     });
 
-    it("subscriber pattern: rejects all on failure", async () => {
+    it("should reject all subscribers on failure via subscriber pattern", async () => {
       const failRefresh: RefreshFn = vi
         .fn()
         .mockRejectedValue(new Error("network"));
@@ -190,7 +190,7 @@ describe("createTokenManager", () => {
   });
 
   describe("init", () => {
-    it("restores valid tokens from store", async () => {
+    it("should restore valid tokens from store", async () => {
       const store = createMockStore({ oauth1: OAUTH1, oauth2: OAUTH2 });
       const tm = createTokenManager({ refreshFn, logger, tokenStore: store });
 
@@ -202,7 +202,7 @@ describe("createTokenManager", () => {
       expect(tm.getGeneration()).toBe(1);
     });
 
-    it("restores expired tokens with warning", async () => {
+    it("should restore expired tokens with warning", async () => {
       const store = createMockStore({
         oauth1: OAUTH1,
         oauth2: expiredOAuth2(),
@@ -216,7 +216,7 @@ describe("createTokenManager", () => {
       expect(logger.warn).toHaveBeenCalledWith("Restored tokens are expired");
     });
 
-    it("returns restored false for empty store", async () => {
+    it("should return restored false for empty store", async () => {
       const store = createMockStore(null);
       const tm = createTokenManager({ refreshFn, logger, tokenStore: store });
 
@@ -226,7 +226,7 @@ describe("createTokenManager", () => {
       expect(tm.isAuthenticated()).toBe(false);
     });
 
-    it("returns restored false without tokenStore", async () => {
+    it("should return restored false without tokenStore", async () => {
       const tm = createTokenManager({ refreshFn, logger });
 
       const result = await tm.init();
@@ -234,7 +234,7 @@ describe("createTokenManager", () => {
       expect(result).toEqual({ restored: false });
     });
 
-    it("is idempotent: no-op if tokens in memory", async () => {
+    it("should be idempotent: no-op if tokens in memory", async () => {
       const store = createMockStore({ oauth1: OAUTH1, oauth2: OAUTH2 });
       const tm = createTokenManager({ refreshFn, logger, tokenStore: store });
       await tm.setTokens(OAUTH1, OAUTH2);
@@ -245,7 +245,7 @@ describe("createTokenManager", () => {
       expect(tm.getGeneration()).toBe(1);
     });
 
-    it("concurrent init calls do not corrupt state", async () => {
+    it("should not corrupt state on concurrent init calls", async () => {
       const store = createMockStore({ oauth1: OAUTH1, oauth2: OAUTH2 });
       const tm = createTokenManager({ refreshFn, logger, tokenStore: store });
 
@@ -256,7 +256,7 @@ describe("createTokenManager", () => {
       expect(tm.getAccessToken()).toBe("acc_valid");
     });
 
-    it("returns restored false for invalid store data", async () => {
+    it("should return restored false for invalid store data", async () => {
       const store = createMockStore({ bad: "data" });
       const tm = createTokenManager({ refreshFn, logger, tokenStore: store });
 
@@ -267,7 +267,7 @@ describe("createTokenManager", () => {
   });
 
   describe("clearTokens", () => {
-    it("nulls memory synchronously and clears store", async () => {
+    it("should null memory synchronously and clear store", async () => {
       const store = createMockStore();
       const tm = createTokenManager({ refreshFn, logger, tokenStore: store });
       await tm.setTokens(OAUTH1, OAUTH2);
@@ -305,21 +305,21 @@ describe("createTokenManager", () => {
   });
 
   describe("isAuthenticated", () => {
-    it("returns true with valid token", async () => {
+    it("should return true with valid token", async () => {
       const tm = createTokenManager({ refreshFn, logger });
       await tm.setTokens(OAUTH1, OAUTH2);
 
       expect(tm.isAuthenticated()).toBe(true);
     });
 
-    it("returns false with expired token", async () => {
+    it("should return false with expired token", async () => {
       const tm = createTokenManager({ refreshFn, logger });
       await tm.setTokens(OAUTH1, expiredOAuth2());
 
       expect(tm.isAuthenticated()).toBe(false);
     });
 
-    it("returns false with no tokens", () => {
+    it("should return false with no tokens", () => {
       const tm = createTokenManager({ refreshFn, logger });
 
       expect(tm.isAuthenticated()).toBe(false);
@@ -327,7 +327,7 @@ describe("createTokenManager", () => {
   });
 
   describe("token values never in logs", () => {
-    it("does not log token values", async () => {
+    it("should not log token values", async () => {
       const store = createMockStore({ oauth1: OAUTH1, oauth2: OAUTH2 });
       const tm = createTokenManager({ refreshFn, logger, tokenStore: store });
 

@@ -59,7 +59,7 @@ describe("useCoachingAutoSync", () => {
     mockProfile = { id: "p1", profile: linkedProfile };
   });
 
-  it("fires sync for each linked source on mount when stale", async () => {
+  it("should fire sync for each linked source on mount when stale", async () => {
     const src = makeSource();
 
     renderHook(() => useCoachingAutoSync([src], "2026-04-13"), {
@@ -71,7 +71,7 @@ describe("useCoachingAutoSync", () => {
     });
   });
 
-  it("does NOT fire when profile has no linked account for that source", async () => {
+  it("should do NOT fire when profile has no linked account for that source", async () => {
     mockProfile = {
       id: "p1",
       profile: { ...linkedProfile, linkedAccounts: [] },
@@ -87,7 +87,7 @@ describe("useCoachingAutoSync", () => {
     expect(src.sync).not.toHaveBeenCalled();
   });
 
-  it("does NOT fire when no profile is active", async () => {
+  it("should do NOT fire when no profile is active", async () => {
     mockProfile = { id: null, profile: null };
     const src = makeSource();
 
@@ -99,7 +99,7 @@ describe("useCoachingAutoSync", () => {
     expect(src.sync).not.toHaveBeenCalled();
   });
 
-  it("does NOT fire when weekStart is undefined", async () => {
+  it("should do NOT fire when weekStart is undefined", async () => {
     const src = makeSource();
 
     renderHook(() => useCoachingAutoSync([src], undefined), {
@@ -110,7 +110,7 @@ describe("useCoachingAutoSync", () => {
     expect(src.sync).not.toHaveBeenCalled();
   });
 
-  it("skips sync when lastSyncedAt is fresh (<10min)", async () => {
+  it("should skip sync when lastSyncedAt is fresh (<10min)", async () => {
     const persistence = createInMemoryPersistence();
     const recent = new Date(Date.now() - 60_000).toISOString(); // 1 min ago
     await persistence.coachingSyncState.put({

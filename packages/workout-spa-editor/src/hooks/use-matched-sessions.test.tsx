@@ -72,17 +72,17 @@ describe("useMatchedSessions", () => {
   beforeEach(clearAll);
   afterEach(clearAll);
 
-  it("returns [] when no profileId or empty days", async () => {
+  it("should return [] when no profileId or empty days", async () => {
     const { result } = renderHook(() => useMatchedSessions(null, WEEK));
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
-  it("returns [] when no matches exist", async () => {
+  it("should return [] when no matches exist", async () => {
     const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
-  it("hydrates matches with activity, workout, and compliance score", async () => {
+  it("should hydrate matches with activity, workout, and compliance score", async () => {
     await db
       .table("coachingActivities")
       .put(seedActivity("p1:train2go:1", "p1", "2026-04-29"));
@@ -101,7 +101,7 @@ describe("useMatchedSessions", () => {
     expect(ms.complianceScore).toBeCloseTo(0.983, 2);
   });
 
-  it("filters out matches outside the week range", async () => {
+  it("should filter out matches outside the week range", async () => {
     await db
       .table("coachingActivities")
       .put(seedActivity("p1:train2go:1", "p1", "2026-04-20"));
@@ -130,7 +130,7 @@ describe("useMatchedSessions", () => {
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
-  it("tolerates dangling references (skips if activity or workout missing)", async () => {
+  it("should tolerate dangling references (skips if activity or workout missing)", async () => {
     await db.table("sessionMatches").put(seedMatch());
     // No activity / workout seeded.
 
@@ -138,7 +138,7 @@ describe("useMatchedSessions", () => {
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
-  it("re-evaluates when a new match is written", async () => {
+  it("should re-evaluate when a new match is written", async () => {
     await db
       .table("coachingActivities")
       .put(seedActivity("p1:train2go:1", "p1", "2026-04-29"));

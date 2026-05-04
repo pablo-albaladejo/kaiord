@@ -34,14 +34,14 @@ describe("UsageTab", () => {
     lastFactory = null;
   });
 
-  it("renders the empty state when no records exist", () => {
+  it("should render the empty state when no records exist", () => {
     render(<UsageTab />);
 
     expect(screen.getByText(/No AI usage recorded yet/i)).toBeInTheDocument();
     expect(screen.queryByTestId("usage-table")).toBeNull();
   });
 
-  it("renders rows in reverse-chronological order when records exist", () => {
+  it("should render rows in reverse-chronological order when records exist", () => {
     mockRows = [
       {
         yearMonth: "2026-02",
@@ -78,7 +78,7 @@ describe("UsageTab", () => {
     expect(rows[2].getAttribute("data-testid")).toBe("usage-row-2026-02");
   });
 
-  it("formats totals with thousands separator and 4-decimal USD", () => {
+  it("should format totals with thousands separator and 4-decimal USD", () => {
     mockRows = [
       {
         yearMonth: "2026-04",
@@ -97,7 +97,7 @@ describe("UsageTab", () => {
     expect(row).toHaveTextContent("$0.0123");
   });
 
-  it("queries the last 6 calendar months (current + 5 prior)", () => {
+  it("should query the last 6 calendar months (current + 5 prior)", () => {
     mockRows = [];
 
     render(<UsageTab />);

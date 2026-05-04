@@ -6,7 +6,7 @@ import { makeProfile, seedProfile } from "./test-fixtures";
 import { updateProfile } from "./update-profile";
 
 describe("updateProfile", () => {
-  it("applies name and bodyWeight updates and bumps updatedAt", async () => {
+  it("should apply name and bodyWeight updates and bumps updatedAt", async () => {
     const persistence = createInMemoryPersistence();
     const original = makeProfile({ name: "Original", bodyWeight: 70 });
     await seedProfile(persistence, original);
@@ -23,7 +23,7 @@ describe("updateProfile", () => {
     expect(stored?.name).toBe("Renamed");
   });
 
-  it("throws ProfileNotFoundError for an unknown id", async () => {
+  it("should throw ProfileNotFoundError for an unknown id", async () => {
     const persistence = createInMemoryPersistence();
 
     await expect(

@@ -121,7 +121,7 @@ describe("deleteProfileWithCascade", () => {
     ).toBeDefined();
   });
 
-  it("does NOT cascade to converted WorkoutRecord rows (workouts survive)", async () => {
+  it("should do NOT cascade to converted WorkoutRecord rows (workouts survive)", async () => {
     // deleteProfileWithCascade has no access to WorkoutRepository by design —
     // workouts are profile-agnostic. This test documents the invariant.
     const coaching = createInMemoryCoachingRepository();
@@ -143,7 +143,7 @@ describe("deleteProfileWithCascade", () => {
     expect(await workouts.getById("w1")).toBeDefined();
   });
 
-  it("uses the supplied id (NOT getActiveId)", async () => {
+  it("should use the supplied id (NOT getActiveId)", async () => {
     // No active-id surface to leak; the use case takes only the
     // explicit profileId argument and the two repos. This assertion
     // is structural: there is no other source of profile identity in
@@ -166,7 +166,7 @@ describe("deleteProfileWithCascade", () => {
     ).toHaveLength(0);
   });
 
-  it("cascades sessionMatch.deleteByProfile", async () => {
+  it("should cascade sessionMatch.deleteByProfile", async () => {
     const deps = makeDeps();
     await deps.sessionMatch.put({
       id: "m1",
@@ -205,7 +205,7 @@ describe("deleteProfileWithCascade", () => {
     ).toHaveLength(1);
   });
 
-  it("cascades autoMatchDismissal.deleteByProfile", async () => {
+  it("should cascade autoMatchDismissal.deleteByProfile", async () => {
     const deps = makeDeps();
     await deps.autoMatchDismissal.put({
       profileId: "p1",
@@ -228,7 +228,7 @@ describe("deleteProfileWithCascade", () => {
     ).toBeDefined();
   });
 
-  it("cascades userPreferences.delete", async () => {
+  it("should cascade userPreferences.delete", async () => {
     const deps = makeDeps();
     await deps.userPreferences.put({
       profileId: "p1",

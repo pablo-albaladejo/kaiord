@@ -11,14 +11,14 @@ describe("FocusSlice", () => {
     });
   });
 
-  it("defaults to pendingFocusTarget: null on a fresh store", () => {
+  it("should default to pendingFocusTarget: null on a fresh store", () => {
     // Arrange + Act: the default store state is the system under test.
 
     // Assert
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
   });
 
-  it("setPendingFocusTarget writes an item target", () => {
+  it("should write an item target via setPendingFocusTarget", () => {
     // Arrange
     const target = focusItem(asItemId("step-x"));
 
@@ -29,7 +29,7 @@ describe("FocusSlice", () => {
     expect(useWorkoutStore.getState().pendingFocusTarget).toEqual(target);
   });
 
-  it("setPendingFocusTarget writes the empty-state sentinel", () => {
+  it("should write the empty-state sentinel via setPendingFocusTarget", () => {
     // Arrange + Act
     useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
 
@@ -39,7 +39,7 @@ describe("FocusSlice", () => {
     );
   });
 
-  it("setPendingFocusTarget clears via null", () => {
+  it("should clear via null through setPendingFocusTarget", () => {
     // Arrange: put the slice into a non-null state first.
     useWorkoutStore.getState().setPendingFocusTarget(focusItem(asItemId("a")));
 
@@ -50,7 +50,7 @@ describe("FocusSlice", () => {
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
   });
 
-  it("overwrites a prior target without throwing", () => {
+  it("should overwrite a prior target without throwing", () => {
     // Arrange
     useWorkoutStore.getState().setPendingFocusTarget(focusItem(asItemId("a")));
 
@@ -63,7 +63,7 @@ describe("FocusSlice", () => {
     );
   });
 
-  it("accepts an id that does not exist in the current workout", () => {
+  it("should accept an id that does not exist in the current workout", () => {
     // Arrange: resolving the id to a DOM node is the hook's job (§7), not
     // the slice's — the slice only stores whatever it's given.
 
@@ -78,7 +78,7 @@ describe("FocusSlice", () => {
     );
   });
 
-  it("selectionHistory starts empty on a fresh store", () => {
+  it("should start selectionHistory empty on a fresh store", () => {
     // Arrange + Act: the default store state is the system under test.
 
     // Assert

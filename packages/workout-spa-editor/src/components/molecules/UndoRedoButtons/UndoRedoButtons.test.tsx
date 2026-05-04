@@ -12,14 +12,14 @@ describe("UndoRedoButtons", () => {
     onRedo: vi.fn(),
   };
 
-  it("renders undo and redo buttons", () => {
+  it("should render undo and redo buttons", () => {
     render(<UndoRedoButtons {...defaultProps} />);
 
     expect(screen.getByTestId("undo-button")).toBeInTheDocument();
     expect(screen.getByTestId("redo-button")).toBeInTheDocument();
   });
 
-  it("calls onUndo when undo button is clicked", async () => {
+  it("should call onUndo when undo button is clicked", async () => {
     const user = userEvent.setup();
     const onUndo = vi.fn();
 
@@ -30,7 +30,7 @@ describe("UndoRedoButtons", () => {
     expect(onUndo).toHaveBeenCalledTimes(1);
   });
 
-  it("calls onRedo when redo button is clicked", async () => {
+  it("should call onRedo when redo button is clicked", async () => {
     const user = userEvent.setup();
     const onRedo = vi.fn();
 
@@ -41,19 +41,19 @@ describe("UndoRedoButtons", () => {
     expect(onRedo).toHaveBeenCalledTimes(1);
   });
 
-  it("disables undo button when canUndo is false", () => {
+  it("should disable undo button when canUndo is false", () => {
     render(<UndoRedoButtons {...defaultProps} canUndo={false} />);
 
     expect(screen.getByTestId("undo-button")).toBeDisabled();
   });
 
-  it("disables redo button when canRedo is false", () => {
+  it("should disable redo button when canRedo is false", () => {
     render(<UndoRedoButtons {...defaultProps} canRedo={false} />);
 
     expect(screen.getByTestId("redo-button")).toBeDisabled();
   });
 
-  it("has correct accessibility attributes", () => {
+  it("should have correct accessibility attributes", () => {
     render(<UndoRedoButtons {...defaultProps} />);
 
     const group = screen.getByRole("group");

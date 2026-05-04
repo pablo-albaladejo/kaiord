@@ -4,7 +4,7 @@ import { describe, expect, it } from "vitest";
 import { useLatestRef } from "./use-latest-ref";
 
 describe("useLatestRef", () => {
-  it("returns the initial value via ref.current after mount", () => {
+  it("should return the initial value via ref.current after mount", () => {
     const { result } = renderHook(({ v }) => useLatestRef(v), {
       initialProps: { v: "initial" },
     });
@@ -25,7 +25,7 @@ describe("useLatestRef", () => {
     expect(result.current).toBe(firstRef);
   });
 
-  it("preserves the ref identity across renders", () => {
+  it("should preserve the ref identity across renders", () => {
     const { result, rerender } = renderHook(({ v }) => useLatestRef(v), {
       initialProps: { v: "a" },
     });

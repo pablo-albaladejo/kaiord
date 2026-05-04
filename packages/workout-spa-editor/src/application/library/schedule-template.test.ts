@@ -6,7 +6,7 @@ import { scheduleTemplate } from "./schedule-template";
 import { makeKrd } from "./test-fixtures";
 
 describe("scheduleTemplate", () => {
-  it("creates a workout record from the template on the given date", async () => {
+  it("should create a workout record from the template on the given date", async () => {
     const persistence = createInMemoryPersistence();
     const template = await addTemplate(
       persistence,
@@ -29,7 +29,7 @@ describe("scheduleTemplate", () => {
     expect(record.tags).toEqual(["tempo", "z3"]);
   });
 
-  it("persists the workout via PersistencePort.workouts.put", async () => {
+  it("should persist the workout via PersistencePort.workouts.put", async () => {
     const persistence = createInMemoryPersistence();
     const template = await addTemplate(
       persistence,
@@ -47,7 +47,7 @@ describe("scheduleTemplate", () => {
     expect(stored).toEqual(record);
   });
 
-  it("throws when the template id is unknown", async () => {
+  it("should throw when the template id is unknown", async () => {
     const persistence = createInMemoryPersistence();
 
     await expect(
@@ -58,7 +58,7 @@ describe("scheduleTemplate", () => {
     ).rejects.toThrow(/Template not found/);
   });
 
-  it("propagates rejections from persistence", async () => {
+  it("should propagate rejections from persistence", async () => {
     const persistence = createInMemoryPersistence();
     const template = await addTemplate(persistence, "Z2", "running", makeKrd());
     persistence.workouts.put = () => Promise.reject(new Error("simulated"));

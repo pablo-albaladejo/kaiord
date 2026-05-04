@@ -33,7 +33,7 @@ const baseInput = {
 };
 
 describe("dismissAutoMatchBanner — happy paths", () => {
-  it("first dismissal writes a row with one entry", async () => {
+  it("should write a row with one entry on first dismissal", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
 
     await dismissAutoMatchBanner(baseInput, {
@@ -51,7 +51,7 @@ describe("dismissAutoMatchBanner — happy paths", () => {
     });
   });
 
-  it("second dismissal on the same week appends to the existing row", async () => {
+  it("should append to the existing row on second dismissal in the same week", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
     await dismissAutoMatchBanner(baseInput, {
       repository: repo,
@@ -70,7 +70,7 @@ describe("dismissAutoMatchBanner — happy paths", () => {
     ]);
   });
 
-  it("re-dismissing the same pair updates dismissedAt in place (no duplicate)", async () => {
+  it("should update dismissedAt in place when re-dismissing the same pair (no duplicate)", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
     await dismissAutoMatchBanner(baseInput, {
       repository: repo,
@@ -89,7 +89,7 @@ describe("dismissAutoMatchBanner — happy paths", () => {
 });
 
 describe("isAutoMatchBannerDismissed", () => {
-  it("returns true for a recorded pair", async () => {
+  it("should return true for a recorded pair", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
     await dismissAutoMatchBanner(baseInput, {
       repository: repo,
@@ -103,7 +103,7 @@ describe("isAutoMatchBannerDismissed", () => {
     expect(dismissed).toBe(true);
   });
 
-  it("returns false for a different pair on the same week", async () => {
+  it("should return false for a different pair on the same week", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
     await dismissAutoMatchBanner(baseInput, {
       repository: repo,
@@ -118,7 +118,7 @@ describe("isAutoMatchBannerDismissed", () => {
     expect(dismissed).toBe(false);
   });
 
-  it("returns false when no row exists for the (profileId, weekStart)", async () => {
+  it("should return false when no row exists for the (profileId, weekStart)", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
 
     const dismissed = await isAutoMatchBannerDismissed(baseInput, {
@@ -130,7 +130,7 @@ describe("isAutoMatchBannerDismissed", () => {
 });
 
 describe("dismissAutoMatchBanner — defensive guards", () => {
-  it("rejects empty profileId on the write path", async () => {
+  it("should reject empty profileId on the write path", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
 
     await expect(
@@ -142,7 +142,7 @@ describe("dismissAutoMatchBanner — defensive guards", () => {
   });
 
   it.each([["weekStart"], ["activityId"], ["workoutId"]])(
-    "rejects empty %s on the write path",
+    "should reject empty %s on the write path",
     async (field) => {
       const repo = createInMemoryAutoMatchDismissalRepository();
 
@@ -155,7 +155,7 @@ describe("dismissAutoMatchBanner — defensive guards", () => {
     }
   );
 
-  it("safe-defaults to false on the read path for an empty input", async () => {
+  it("should safe-default to false on the read path for an empty input", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
 
     const dismissed = await isAutoMatchBannerDismissed(
@@ -179,7 +179,7 @@ describe("dismissAutoMatchBanner — 256-cap", () => {
     }
   };
 
-  it("the 257th distinct pair is a no-op (row unchanged, warning emitted)", async () => {
+  it("should be a no-op for the 257th distinct pair (row unchanged, warning emitted)", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
     const logger = { warn: vi.fn() };
     await fillCap(repo);
@@ -199,7 +199,7 @@ describe("dismissAutoMatchBanner — 256-cap", () => {
     );
   });
 
-  it("warning message is a static literal (no identifier interpolation)", async () => {
+  it("should keep the warning message as a static literal (no identifier interpolation)", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
     const logger = { warn: vi.fn() };
     await fillCap(repo);
@@ -217,7 +217,7 @@ describe("dismissAutoMatchBanner — 256-cap", () => {
     expect(message).not.toContain("p1");
   });
 
-  it("re-dismiss at the cap updates the existing entry without violating the cap", async () => {
+  it("should re-dismis at the cap updates the existing entry without violating the cap", async () => {
     const repo = createInMemoryAutoMatchDismissalRepository();
     await fillCap(repo);
 

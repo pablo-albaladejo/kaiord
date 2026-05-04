@@ -460,7 +460,7 @@ describe("parseJSON", () => {
       expect(duration).toBeLessThan(100);
     });
 
-    it("parses three increasing input sizes deterministically (fast-path)", () => {
+    it("should parse three increasing input sizes deterministically (fast-path)", () => {
       // Characterization-on-un-skip: drained by guidelines-compliance-harden PR4.
       // The original timing-based test was flaky and environment-dependent;
       // this fast-path replacement asserts only what is currently true —

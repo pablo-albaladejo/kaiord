@@ -28,7 +28,7 @@ const CONSUMER_FILES = ["use-ai-tab-handlers.ts", "PrivacyTab.tsx"];
 const TOAST_CALL_REGEX = /toast\.error\(([^)]*)\)/g;
 
 describe("AI tab toast PII / secret audit", () => {
-  it("exposes a finite allowlist of error messages", () => {
+  it("should expose a finite allowlist of error messages", () => {
     expect(AI_TAB_TOAST_MESSAGES.length).toBeGreaterThan(0);
     for (const message of AI_TAB_TOAST_MESSAGES) {
       expect(message).not.toMatch(/sk-|apiKey|provider\./i);

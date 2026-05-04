@@ -18,7 +18,7 @@ describe("garmin-bridge-context", () => {
     vi.restoreAllMocks();
   });
 
-  it("initializes with default state", () => {
+  it("should initialize with default state", () => {
     const { result } = renderHook(() => useGarminBridge(), { wrapper });
 
     expect(result.current.extensionInstalled).toBe(false);
@@ -27,7 +27,7 @@ describe("garmin-bridge-context", () => {
     expect(result.current.lastError).toBeNull();
   });
 
-  it("updates pushing state", () => {
+  it("should update pushing state", () => {
     const { result } = renderHook(() => useGarminBridge(), { wrapper });
 
     act(() => result.current.setPushing({ status: "loading" }));
@@ -35,7 +35,7 @@ describe("garmin-bridge-context", () => {
     expect(result.current.pushing).toEqual({ status: "loading" });
   });
 
-  it("sets push error state", () => {
+  it("should set push error state", () => {
     const { result } = renderHook(() => useGarminBridge(), { wrapper });
 
     act(() =>
@@ -51,7 +51,7 @@ describe("garmin-bridge-context", () => {
     });
   });
 
-  it("sets push success state", () => {
+  it("should set push success state", () => {
     const { result } = renderHook(() => useGarminBridge(), { wrapper });
 
     act(() => result.current.setPushing({ status: "success" }));
@@ -59,7 +59,7 @@ describe("garmin-bridge-context", () => {
     expect(result.current.pushing).toEqual({ status: "success" });
   });
 
-  it("throws when used outside provider", () => {
+  it("should throw when used outside provider", () => {
     expect(() => {
       renderHook(() => useGarminBridge());
     }).toThrow("useGarminBridge must be used within GarminBridgeProvider");

@@ -57,7 +57,7 @@ describe("formatRelativeTime", () => {
     expect(formatRelativeTime(daysAgo(6), NOW)).toBe("6d ago");
   });
 
-  it("returns ISO YYYY-MM-DD for anything ≥ 1 week", () => {
+  it("should return ISO YYYY-MM-DD for anything ≥ 1 week", () => {
     const eightDays = daysAgo(8);
     expect(formatRelativeTime(eightDays, NOW)).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(formatRelativeTime(daysAgo(30), NOW)).toMatch(/^\d{4}-\d{2}-\d{2}$/);

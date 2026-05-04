@@ -71,7 +71,7 @@ const stubWorkoutRepo = (rows: WorkoutRecord[] = []): WorkoutRepository => {
 const fixedClock = () => "2026-05-01T12:00:00.000Z";
 
 describe("convertAndAutoMatch", () => {
-  it("first-time conversion creates workout AND SessionMatch with source: auto-conversion", async () => {
+  it("should create workout AND SessionMatch with source: auto-conversion on first-time conversion", async () => {
     const activity = stubActivity();
     const coaching = stubCoachingRepo([activity]);
     const workouts = stubWorkoutRepo();
@@ -99,7 +99,7 @@ describe("convertAndAutoMatch", () => {
     });
   });
 
-  it("idempotent re-conversion preserves existing match (no overwrite)", async () => {
+  it("should preserve existing match on idempotent re-conversion (no overwrite)", async () => {
     const activity = stubActivity();
     const existingWorkout: WorkoutRecord = {
       id: "w-existing",
@@ -144,7 +144,7 @@ describe("convertAndAutoMatch", () => {
     );
   });
 
-  it("re-conversion after manual unmatch does NOT recreate the match", async () => {
+  it("should NOT recreate the match on re-conversion after manual unmatch", async () => {
     const activity = stubActivity();
     const existingWorkout: WorkoutRecord = {
       id: "w-was-matched",
@@ -176,7 +176,7 @@ describe("convertAndAutoMatch", () => {
     expect(await matches.getByWorkoutId("p1", "w-was-matched")).toBeUndefined();
   });
 
-  it("propagates CoachingActivityNotFoundError-equivalent when activity is missing", async () => {
+  it("should propagate CoachingActivityNotFoundError-equivalent when activity is missing", async () => {
     await expect(
       convertAndAutoMatch(
         { activityId: "missing" },
@@ -192,7 +192,7 @@ describe("convertAndAutoMatch", () => {
     ).rejects.toBeInstanceOf(CoachingActivityNotFoundError);
   });
 
-  it("swallows SessionAlreadyMatchedError if a concurrent matcher wins the race", async () => {
+  it("should swallow SessionAlreadyMatchedError if a concurrent matcher wins the race", async () => {
     const activity = stubActivity();
     const coaching = stubCoachingRepo([activity]);
     const workouts = stubWorkoutRepo();

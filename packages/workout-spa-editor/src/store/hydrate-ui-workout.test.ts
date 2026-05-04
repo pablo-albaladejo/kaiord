@@ -26,7 +26,7 @@ const bareStep = {
 };
 
 describe("hydrateUIWorkout", () => {
-  it("passes through a KRD without structured_workout unchanged", () => {
+  it("should pass through a KRD without structured_workout unchanged", () => {
     const krd: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -36,7 +36,7 @@ describe("hydrateUIWorkout", () => {
     expect(hydrateUIWorkout(krd)).toBe(krd);
   });
 
-  it("passes through a KRD whose extensions omit structured_workout", () => {
+  it("should pass through a KRD whose extensions omit structured_workout", () => {
     const krd: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -47,7 +47,7 @@ describe("hydrateUIWorkout", () => {
     expect(hydrateUIWorkout(krd)).toBe(krd);
   });
 
-  it("regenerates every id by default (design decision 6)", () => {
+  it("should regenerate every id by default (design decision 6)", () => {
     let counter = 0;
     const deterministic = () => asItemId(`regen-${counter++}`);
 
@@ -76,7 +76,7 @@ describe("hydrateUIWorkout", () => {
     expect((block.steps[0] as { id: string }).id).toBe("regen-2");
   });
 
-  it("generates ids for steps/blocks lacking one (covers items without an id)", () => {
+  it("should generate ids for steps/blocks lacking one (covers items without an id)", () => {
     let counter = 0;
     const deterministic = () => asItemId(`id-${counter++}`);
 
@@ -100,7 +100,7 @@ describe("hydrateUIWorkout", () => {
     expect((block.steps[0] as { id: string }).id).toBe("id-2");
   });
 
-  it("keeps existing ids when preserveExistingIds: true (opt-in migration mode)", () => {
+  it("should keep existing ids when preserveExistingIds: true (opt-in migration mode)", () => {
     const ui = hydrateUIWorkout(
       buildKrd([
         { ...bareStep, id: "keep-step" } as never,
@@ -125,7 +125,7 @@ describe("hydrateUIWorkout", () => {
     expect((block.steps[0] as { id: string }).id).toBe("keep-nested");
   });
 
-  it("accepts a custom IdProvider for deterministic regeneration", () => {
+  it("should accept a custom IdProvider for deterministic regeneration", () => {
     let counter = 0;
     const deterministic = () => asItemId(`uuid-${counter++}`);
 

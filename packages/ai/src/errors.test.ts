@@ -2,7 +2,7 @@ import { describe, it, expect } from "vitest";
 import { AiParsingError, createAiParsingError } from "./errors";
 
 describe("AiParsingError", () => {
-  it("sets all fields correctly", () => {
+  it("should set all fields correctly", () => {
     const error = new AiParsingError("msg", "input text", 3, "last err");
 
     expect(error.message).toBe("msg");
@@ -14,13 +14,13 @@ describe("AiParsingError", () => {
     expect(error).toBeInstanceOf(Error);
   });
 
-  it("sets lastError to undefined when not provided", () => {
+  it("should set lastError to undefined when not provided", () => {
     const error = new AiParsingError("msg", "input", 0);
 
     expect(error.lastError).toBeUndefined();
   });
 
-  it("createAiParsingError produces an AiParsingError instance", () => {
+  it("should produce an AiParsingError instance via createAiParsingError", () => {
     const error = createAiParsingError("fail", "raw", 2, "root cause");
 
     expect(error).toBeInstanceOf(AiParsingError);

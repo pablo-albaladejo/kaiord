@@ -30,13 +30,13 @@ const buildWorkout = (): Workout =>
   }) as unknown as Workout;
 
 describe("findById", () => {
-  it("returns null for missing workout or id", () => {
+  it("should return null for missing workout or id", () => {
     expect(findById(undefined, asItemId("x"))).toBeNull();
     expect(findById(buildWorkout(), null)).toBeNull();
     expect(findById(buildWorkout(), "")).toBeNull();
   });
 
-  it("finds a top-level step with its flat index", () => {
+  it("should find a top-level step with its flat index", () => {
     const hit = findById(buildWorkout(), asItemId("top-2"));
     expect(hit).toEqual({
       kind: "step",
@@ -45,7 +45,7 @@ describe("findById", () => {
     });
   });
 
-  it("finds a repetition block at its flat index", () => {
+  it("should find a repetition block at its flat index", () => {
     const hit = findById(buildWorkout(), asItemId("block-1"));
     expect(hit?.kind).toBe("block");
     if (hit?.kind === "block") {
@@ -54,7 +54,7 @@ describe("findById", () => {
     }
   });
 
-  it("finds a nested step with both its block and step indices", () => {
+  it("should find a nested step with both its block and step indices", () => {
     const hit = findById(buildWorkout(), asItemId("inner-1"));
     expect(hit?.kind).toBe("nested-step");
     if (hit?.kind === "nested-step") {
@@ -65,7 +65,7 @@ describe("findById", () => {
     }
   });
 
-  it("returns null when the id is not in the workout", () => {
+  it("should return null when the id is not in the workout", () => {
     expect(findById(buildWorkout(), asItemId("ghost"))).toBeNull();
   });
 });

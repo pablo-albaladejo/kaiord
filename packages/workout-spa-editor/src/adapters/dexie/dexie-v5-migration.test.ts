@@ -65,7 +65,7 @@ async function seedV4(name: string, data: Fixture): Promise<void> {
 describe("Dexie v5 migration round-trip", () => {
   const dbName = `kaiord-migration-test-${Date.now()}-${Math.random()}`;
 
-  it("preserves every pre-existing row and creates new tables empty", async () => {
+  it("should preserve every pre-existing row and creates new tables empty", async () => {
     await seedV4(dbName, fixture);
 
     const db = new KaiordDatabase(dbName);

@@ -59,7 +59,7 @@ describe("store mutations assign fresh ItemIds", () => {
     });
   });
 
-  it("loadWorkout hydrates every step with a distinct ItemId", () => {
+  it("should hydrate every step with a distinct ItemId via loadWorkout", () => {
     useWorkoutStore
       .getState()
       .loadWorkout(buildKrd([baseStep, { ...baseStep, stepIndex: 1 }]));
@@ -71,7 +71,7 @@ describe("store mutations assign fresh ItemIds", () => {
     expect(new Set(ids).size).toBe(ids.length);
   });
 
-  it("createStep assigns a fresh ItemId to the new step", () => {
+  it("should assign a fresh ItemId to the new step via createStep", () => {
     useWorkoutStore.getState().loadWorkout(buildKrd([baseStep]));
     const [originalId] = innerSteps().map((s) => (s as { id?: string }).id);
 
@@ -83,7 +83,7 @@ describe("store mutations assign fresh ItemIds", () => {
     expect(ids[1]).not.toBe(originalId);
   });
 
-  it("duplicateStep assigns a fresh ItemId to the duplicate", () => {
+  it("should assign a fresh ItemId to the duplicate via duplicateStep", () => {
     useWorkoutStore.getState().loadWorkout(buildKrd([baseStep]));
     const originalId = (innerSteps()[0] as { id: string }).id;
 
@@ -97,7 +97,7 @@ describe("store mutations assign fresh ItemIds", () => {
     expect(duplicateId).not.toBe(originalId);
   });
 
-  it("createEmptyRepetitionBlock assigns an ItemId to the new block and its default step", () => {
+  it("should assign an ItemId to the new block and its default step via createEmptyRepetitionBlock", () => {
     useWorkoutStore.getState().loadWorkout(buildKrd([baseStep]));
 
     useWorkoutStore.getState().createEmptyRepetitionBlock(3);
@@ -110,7 +110,7 @@ describe("store mutations assign fresh ItemIds", () => {
     expect(block.steps[0]).toMatchObject({ id: expect.any(String) });
   });
 
-  it("addStepToRepetitionBlock assigns an ItemId to the new nested step", () => {
+  it("should assign an ItemId to the new nested step via addStepToRepetitionBlock", () => {
     useWorkoutStore.getState().loadWorkout(buildKrd([baseStep]));
     useWorkoutStore.getState().createEmptyRepetitionBlock(2);
     const block = innerSteps().find((s) =>
@@ -129,7 +129,7 @@ describe("store mutations assign fresh ItemIds", () => {
     );
   });
 
-  it("duplicateStepInRepetitionBlock assigns a fresh ItemId to the duplicate", () => {
+  it("should assign a fresh ItemId to the duplicate via duplicateStepInRepetitionBlock", () => {
     useWorkoutStore.getState().loadWorkout(buildKrd([baseStep]));
     useWorkoutStore.getState().createEmptyRepetitionBlock(2);
     const block = innerSteps().find((s) =>
@@ -147,7 +147,7 @@ describe("store mutations assign fresh ItemIds", () => {
     );
   });
 
-  it("pasteStep regenerates ids on the pasted payload (trust boundary)", async () => {
+  it("should regenerate ids on the pasted payload via pasteStep (trust boundary)", async () => {
     const clipboardStep = {
       id: "attacker-supplied-id",
       stepIndex: 99,
@@ -182,7 +182,7 @@ describe("undoDelete + undo/redo preserve item ids", () => {
     });
   });
 
-  it("undoDelete restores the same ItemId the user saw before deletion", () => {
+  it("should restore the same ItemId the user saw before deletion via undoDelete", () => {
     useWorkoutStore
       .getState()
       .loadWorkout(buildKrd([baseStep, { ...baseStep, stepIndex: 1 }]));
@@ -202,7 +202,7 @@ describe("undoDelete + undo/redo preserve item ids", () => {
     expect(restoredIds).toEqual([firstId, secondId]);
   });
 
-  it("undo/redo traverse snapshots without losing ItemIds", () => {
+  it("should traverse snapshots without losing ItemIds via undo/redo", () => {
     useWorkoutStore.getState().loadWorkout(buildKrd([baseStep]));
     const originalId = (innerSteps()[0] as { id: string }).id;
 

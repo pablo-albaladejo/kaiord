@@ -5,7 +5,7 @@ import { addTemplate } from "./add-template";
 import { makeKrd } from "./test-fixtures";
 
 describe("addTemplate", () => {
-  it("persists a new template with the supplied fields", async () => {
+  it("should persist a new template with the supplied fields", async () => {
     const persistence = createInMemoryPersistence();
 
     const template = await addTemplate(
@@ -25,7 +25,7 @@ describe("addTemplate", () => {
     expect(stored).toEqual(template);
   });
 
-  it("generates a fresh id per template", async () => {
+  it("should generate a fresh id per template", async () => {
     const persistence = createInMemoryPersistence();
 
     const a = await addTemplate(persistence, "A", "cycling", makeKrd());
@@ -35,7 +35,7 @@ describe("addTemplate", () => {
     expect(await persistence.templates.getAll()).toHaveLength(2);
   });
 
-  it("propagates rejections from the persistence port", async () => {
+  it("should propagate rejections from the persistence port", async () => {
     const persistence = createInMemoryPersistence();
     persistence.templates.put = () =>
       Promise.reject(new Error("simulated quota exceeded"));

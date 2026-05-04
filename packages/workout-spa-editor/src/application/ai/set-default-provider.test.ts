@@ -7,7 +7,7 @@ import { setDefaultProvider } from "./set-default-provider";
 import { baseProvider, secondProvider } from "./test-fixtures";
 
 describe("setDefaultProvider", () => {
-  it("flips the default flag to a single provider", async () => {
+  it("should flip the default flag to a single provider", async () => {
     const persistence = createInMemoryPersistence();
     const first = await addProvider(persistence, baseProvider);
     const second = await addProvider(persistence, secondProvider);
@@ -19,7 +19,7 @@ describe("setDefaultProvider", () => {
     expect(all.find((p) => p.id === second.id)?.isDefault).toBe(true);
   });
 
-  it("throws ProviderNotFoundError for unknown ids", async () => {
+  it("should throw ProviderNotFoundError for unknown ids", async () => {
     const persistence = createInMemoryPersistence();
     await addProvider(persistence, baseProvider);
 

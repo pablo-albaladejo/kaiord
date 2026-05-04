@@ -21,23 +21,23 @@ const baseRow = (
 });
 
 describe("autoMatchDismissalSchema", () => {
-  it("accepts a well-formed row", () => {
+  it("should accept a well-formed row", () => {
     expect(autoMatchDismissalSchema.parse(baseRow())).toEqual(baseRow());
   });
 
-  it("accepts a row with an empty dismissedPairs array", () => {
+  it("should accept a row with an empty dismissedPairs array", () => {
     expect(() =>
       autoMatchDismissalSchema.parse(baseRow({ dismissedPairs: [] }))
     ).not.toThrow();
   });
 
-  it("requires non-empty profileId", () => {
+  it("should require non-empty profileId", () => {
     expect(() =>
       autoMatchDismissalSchema.parse(baseRow({ profileId: "" }))
     ).toThrow();
   });
 
-  it("requires weekStart to match YYYY-MM-DD", () => {
+  it("should require weekStart to match YYYY-MM-DD", () => {
     expect(() =>
       autoMatchDismissalSchema.parse(baseRow({ weekStart: "2026-13-01" }))
     ).not.toThrow(); // regex permits the format; semantic week-Monday check is enforced upstream
@@ -49,7 +49,7 @@ describe("autoMatchDismissalSchema", () => {
     ).toThrow();
   });
 
-  it("requires every dismissedPairs entry to be a well-formed pair", () => {
+  it("should require every dismissedPairs entry to be a well-formed pair", () => {
     expect(() =>
       autoMatchDismissalSchema.parse(
         baseRow({

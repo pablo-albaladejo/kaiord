@@ -32,7 +32,7 @@ const stubProfileRepo = (rows: Profile[]): ProfileRepository => {
 const fixedClock = () => "2026-05-01T12:00:00.000Z";
 
 describe("setCalendarDensity", () => {
-  it("creates the row on first call with updatedAt from injected clock", async () => {
+  it("should create the row on first call with updatedAt from injected clock", async () => {
     const repo = createInMemoryUserPreferencesRepository();
     const profileRepo = stubProfileRepo([stubProfile()]);
 
@@ -48,7 +48,7 @@ describe("setCalendarDensity", () => {
     });
   });
 
-  it("updates the row in place on subsequent calls", async () => {
+  it("should update the row in place on subsequent calls", async () => {
     const repo = createInMemoryUserPreferencesRepository();
     const profileRepo = stubProfileRepo([stubProfile()]);
     await setCalendarDensity(
@@ -76,7 +76,7 @@ describe("setCalendarDensity", () => {
     });
   });
 
-  it("idempotent on same value still refreshes updatedAt", async () => {
+  it("should still refresh updatedAt when idempotent on same value", async () => {
     const repo = createInMemoryUserPreferencesRepository();
     const profileRepo = stubProfileRepo([stubProfile()]);
     await setCalendarDensity(
@@ -100,7 +100,7 @@ describe("setCalendarDensity", () => {
     expect((await repo.get("p1"))?.updatedAt).toBe("2026-05-01T15:00:00.000Z");
   });
 
-  it("throws ProfileNotFoundError when profile is missing (concurrent delete)", async () => {
+  it("should throw ProfileNotFoundError when profile is missing (concurrent delete)", async () => {
     const repo = createInMemoryUserPreferencesRepository();
     const profileRepo = stubProfileRepo([]); // no profiles
 
@@ -115,7 +115,7 @@ describe("setCalendarDensity", () => {
     expect(await repo.get("p1")).toBeUndefined();
   });
 
-  it("uses injected clock — no real-time leakage", async () => {
+  it("should use injected clock — no real-time leakage", async () => {
     const repo = createInMemoryUserPreferencesRepository();
     const profileRepo = stubProfileRepo([stubProfile()]);
 

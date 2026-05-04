@@ -4,7 +4,7 @@ import { createInMemoryPersistence } from "../../test-utils/in-memory-persistenc
 import { setCustomPrompt } from "./set-custom-prompt";
 
 describe("setCustomPrompt", () => {
-  it("persists the prompt and exposes it through the repository", async () => {
+  it("should persist the prompt and exposes it through the repository", async () => {
     const persistence = createInMemoryPersistence();
 
     await setCustomPrompt(persistence, "knee injury context");
@@ -14,7 +14,7 @@ describe("setCustomPrompt", () => {
     );
   });
 
-  it("preserves the empty-string clear case as a distinct value", async () => {
+  it("should preserve the empty-string clear case as a distinct value", async () => {
     const persistence = createInMemoryPersistence();
     await setCustomPrompt(persistence, "first prompt");
 

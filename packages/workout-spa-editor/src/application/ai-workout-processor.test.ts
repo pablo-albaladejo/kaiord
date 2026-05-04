@@ -17,7 +17,7 @@ function makeParams(overrides: Partial<ProcessorParams> = {}): ProcessorParams {
 }
 
 describe("processWorkoutWithAi", () => {
-  it("returns success with valid LLM output", async () => {
+  it("should return success with valid LLM output", async () => {
     const params = makeParams();
 
     const result = await processWorkoutWithAi(params);
@@ -32,7 +32,7 @@ describe("processWorkoutWithAi", () => {
     }
   });
 
-  it("returns error when workout has no raw data", async () => {
+  it("should return error when workout has no raw data", async () => {
     const params = makeParams({
       workout: makeWorkoutRecord({ raw: null }),
     });
@@ -45,7 +45,7 @@ describe("processWorkoutWithAi", () => {
     }
   });
 
-  it("retries once on first failure then succeeds", async () => {
+  it("should retry once on first failure then succeeds", async () => {
     const generateFn = vi
       .fn<GenerateFn>()
       .mockRejectedValueOnce(new Error("Network error"))
@@ -58,7 +58,7 @@ describe("processWorkoutWithAi", () => {
     expect(generateFn).toHaveBeenCalledTimes(2);
   });
 
-  it("returns error after both attempts fail", async () => {
+  it("should return error after both attempts fail", async () => {
     const generateFn = vi
       .fn<GenerateFn>()
       .mockRejectedValue(new Error("Persistent error"));
@@ -72,7 +72,7 @@ describe("processWorkoutWithAi", () => {
     }
   });
 
-  it("retries when sanity check fails", async () => {
+  it("should retry when sanity check fails", async () => {
     const badKrd = makeValidKrd(0, 3600);
     const goodKrd = makeValidKrd(3, 3600);
     const generateFn = vi
@@ -86,7 +86,7 @@ describe("processWorkoutWithAi", () => {
     expect(generateFn).toHaveBeenCalledTimes(2);
   });
 
-  it("includes error context in retry prompt", async () => {
+  it("should include error context in retry prompt", async () => {
     const generateFn = vi
       .fn<GenerateFn>()
       .mockRejectedValueOnce(new Error("Invalid JSON"))
@@ -99,7 +99,7 @@ describe("processWorkoutWithAi", () => {
     expect(retryPrompt).toContain("Invalid JSON");
   });
 
-  it("passes selected comments to prompt", async () => {
+  it("should pass selected comments to prompt", async () => {
     const generateFn = vi.fn<GenerateFn>().mockResolvedValue(makeValidKrd());
 
     await processWorkoutWithAi(
@@ -113,7 +113,7 @@ describe("processWorkoutWithAi", () => {
     expect(prompt).toContain("Keep HR low");
   });
 
-  it("does not retry when allowRetry is false", async () => {
+  it("should not retry when allowRetry is false", async () => {
     const generateFn = vi.fn<GenerateFn>().mockRejectedValue(new Error("Fail"));
 
     const result = await processWorkoutWithAi(

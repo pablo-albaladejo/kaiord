@@ -12,7 +12,7 @@ describe("createOperationQueue", () => {
   });
 
   describe("enqueue", () => {
-    it("executes an operation and returns result", async () => {
+    it("should execute an operation and return result", async () => {
       const queue = createOperationQueue(0);
       const op = { bridgeId: "b1", execute: vi.fn().mockResolvedValue(42) };
 
@@ -24,7 +24,7 @@ describe("createOperationQueue", () => {
       expect(op.execute).toHaveBeenCalledOnce();
     });
 
-    it("serializes operations for the same bridge", async () => {
+    it("should serialize operations for the same bridge", async () => {
       const order: number[] = [];
       const queue = createOperationQueue(0);
 
@@ -47,7 +47,7 @@ describe("createOperationQueue", () => {
       expect(order).toEqual([1, 2]);
     });
 
-    it("applies delay between operations", async () => {
+    it("should apply delay between operations", async () => {
       const queue = createOperationQueue(500);
       const start = Date.now();
       const timestamps: number[] = [];
@@ -72,7 +72,7 @@ describe("createOperationQueue", () => {
   });
 
   describe("hourly rate limit", () => {
-    it("rejects when 60 operations reached in an hour", async () => {
+    it("should reject when 60 operations reached in an hour", async () => {
       const queue = createOperationQueue(0);
       const bridgeId = "b1";
 
@@ -87,7 +87,7 @@ describe("createOperationQueue", () => {
       expect(op.execute).not.toHaveBeenCalled();
     });
 
-    it("allows operations after hour window passes", async () => {
+    it("should allow operations after hour window passes", async () => {
       const queue = createOperationQueue(0);
       const bridgeId = "b1";
       const oneHourAgo = Date.now() - 60 * 60 * 1_000 - 1;
@@ -107,7 +107,7 @@ describe("createOperationQueue", () => {
   });
 
   describe("exponential backoff on 429", () => {
-    it("retries with backoff on 429 error", async () => {
+    it("should retry with backoff on 429 error", async () => {
       const queue = createOperationQueue(0);
       const error429 = Object.assign(new Error("Too Many"), {
         status: 429,
@@ -129,7 +129,7 @@ describe("createOperationQueue", () => {
       expect(execute).toHaveBeenCalledTimes(2);
     });
 
-    it("gives up after MAX_RETRIES (5) on repeated 429", async () => {
+    it("should give up after MAX_RETRIES (5) on repeated 429", async () => {
       const queue = createOperationQueue(0);
       const error429 = Object.assign(new Error("Too Many"), {
         status: 429,
@@ -151,7 +151,7 @@ describe("createOperationQueue", () => {
       expect(execute).toHaveBeenCalledTimes(5);
     });
 
-    it("propagates non-429 errors immediately", async () => {
+    it("should propagate non-429 errors immediately", async () => {
       vi.useRealTimers();
       const queue = createOperationQueue(0);
       const error = new Error("Network failure");

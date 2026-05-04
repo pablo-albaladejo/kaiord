@@ -5,7 +5,7 @@ import { deleteProfile } from "./delete-profile";
 import { makeProfile, seedProfile } from "./test-fixtures";
 
 describe("deleteProfile", () => {
-  it("removes the profile and clears the active id when it matched", async () => {
+  it("should remove the profile and clears the active id when it matched", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     await seedProfile(persistence, profile);
@@ -17,7 +17,7 @@ describe("deleteProfile", () => {
     expect(await persistence.profiles.getActiveId()).toBeNull();
   });
 
-  it("preserves a non-matching active id", async () => {
+  it("should preserve a non-matching active id", async () => {
     const persistence = createInMemoryPersistence();
     const a = makeProfile({ id: "00000000-0000-4000-8000-0000000000e1" });
     const b = makeProfile({ id: "00000000-0000-4000-8000-0000000000e2" });
@@ -31,7 +31,7 @@ describe("deleteProfile", () => {
     expect(await persistence.profiles.getById(b.id)).toBeUndefined();
   });
 
-  it("rolls back the delete when setActiveId rejects (transaction atomicity)", async () => {
+  it("should roll back the delete when setActiveId rejects (transaction atomicity)", async () => {
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     await seedProfile(persistence, profile);
