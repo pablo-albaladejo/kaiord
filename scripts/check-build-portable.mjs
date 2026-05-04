@@ -196,7 +196,10 @@ function findDefineCalls(node, file, violations) {
     if (arg && ts.isObjectLiteralExpression(arg)) {
       // Object form: defineConfig({ define: {...} })
       inspectConfigObject(arg, file, violations);
-    } else if (arg && (ts.isArrowFunction(arg) || ts.isFunctionExpression(arg))) {
+    } else if (
+      arg &&
+      (ts.isArrowFunction(arg) || ts.isFunctionExpression(arg))
+    ) {
       // Factory form: defineConfig((env) => ({ define: {...} })).
       // tsup and vite both document this as a first-class pattern for
       // env-dependent config. The body is either an expression
@@ -206,7 +209,10 @@ function findDefineCalls(node, file, violations) {
       if (body) {
         if (ts.isObjectLiteralExpression(body)) {
           inspectConfigObject(body, file, violations);
-        } else if (ts.isParenthesizedExpression(body) && ts.isObjectLiteralExpression(body.expression)) {
+        } else if (
+          ts.isParenthesizedExpression(body) &&
+          ts.isObjectLiteralExpression(body.expression)
+        ) {
           inspectConfigObject(body.expression, file, violations);
         } else if (ts.isBlock(body)) {
           for (const stmt of body.statements) {
@@ -217,7 +223,11 @@ function findDefineCalls(node, file, violations) {
                 ts.isParenthesizedExpression(stmt.expression) &&
                 ts.isObjectLiteralExpression(stmt.expression.expression)
               ) {
-                inspectConfigObject(stmt.expression.expression, file, violations);
+                inspectConfigObject(
+                  stmt.expression.expression,
+                  file,
+                  violations
+                );
               }
             }
           }
