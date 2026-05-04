@@ -16,7 +16,10 @@
  */
 import { describe, expect, it } from "vitest";
 
-import { readField, writeField } from "../../application/coaching/sync-zones-profile-fields";
+import {
+  readField,
+  writeField,
+} from "../../application/coaching/sync-zones-profile-fields";
 import { v8Reconcile } from "../../test-utils/v8-reconcile-snapshot";
 import type {
   ConflictItem,
@@ -35,43 +38,44 @@ const userEditedHr = () => [
   { zone: 5, name: "VO2 Max", minBpm: 171, maxBpm: 187 },
 ];
 
-const v9MigratedProfile = (): Profile => ({
-  id: "00000000-0000-0000-0000-000000000099",
-  name: "Pablo (v9-migrated)",
-  bodyWeight: 83,
-  sportZones: {
-    cycling: {
-      thresholds: { ftp: 200 },
-      // method "user" — flipped by the v9 migration because zones differ
-      // from the all-zero seed. Rolling back to v8 reconcile, this MUST
-      // route the same way as if method were still "custom" + populated.
-      heartRateZones: { method: "user", zones: userEditedHr() },
-    },
-  },
-  linkedAccounts: [
-    {
-      source: "train2go",
-      externalUserId: "99999",
-      externalUserName: "Pablo",
-      linkedAt: NOW,
-      syncZones: true,
-      // lastSyncedZonesSnapshot present (v9 schema). The v8 reconcile
-      // doesn't read it; Zod's .optional() accepts the absent path on
-      // older builds. This field's presence MUST NOT crash v8 reconcile.
-      lastSyncedZonesSnapshot: {
-        syncedAt: NOW,
-        cyclingHr: userEditedHr(),
-        runningHr: [],
-        swimmingHr: [],
-        cyclingPower: [],
-        runningPace: [],
-        swimmingPace: [],
+const v9MigratedProfile = (): Profile =>
+  ({
+    id: "00000000-0000-0000-0000-000000000099",
+    name: "Pablo (v9-migrated)",
+    bodyWeight: 83,
+    sportZones: {
+      cycling: {
+        thresholds: { ftp: 200 },
+        // method "user" — flipped by the v9 migration because zones differ
+        // from the all-zero seed. Rolling back to v8 reconcile, this MUST
+        // route the same way as if method were still "custom" + populated.
+        heartRateZones: { method: "user", zones: userEditedHr() },
       },
     },
-  ],
-  createdAt: NOW,
-  updatedAt: NOW,
-} as Profile);
+    linkedAccounts: [
+      {
+        source: "train2go",
+        externalUserId: "99999",
+        externalUserName: "Pablo",
+        linkedAt: NOW,
+        syncZones: true,
+        // lastSyncedZonesSnapshot present (v9 schema). The v8 reconcile
+        // doesn't read it; Zod's .optional() accepts the absent path on
+        // older builds. This field's presence MUST NOT crash v8 reconcile.
+        lastSyncedZonesSnapshot: {
+          syncedAt: NOW,
+          cyclingHr: userEditedHr(),
+          runningHr: [],
+          swimmingHr: [],
+          cyclingPower: [],
+          runningPace: [],
+          swimmingPace: [],
+        },
+      },
+    ],
+    createdAt: NOW,
+    updatedAt: NOW,
+  }) as Profile;
 
 describe("v9 rollback regression — frozen v8 reconcile against v9 profile", () => {
   it("should NOT silently overwrite user-edited HR zones when method = 'user' (1.6.5 — load-bearing)", () => {
@@ -93,15 +97,31 @@ describe("v9 rollback regression — frozen v8 reconcile against v9 profile", ()
     // overwrite. The user's edited values stay byte-identical.
     expect(result.applied).toEqual<WrittenField[]>([]);
     expect(result.conflicts).toEqual<ConflictItem[]>([
-      { field: "cycling.heartRateZones.z1.minBpm", current: 100, incoming: 107 },
-      { field: "cycling.heartRateZones.z1.maxBpm", current: 130, incoming: 133 },
-      { field: "cycling.heartRateZones.z2.minBpm", current: 131, incoming: 134 },
-      { field: "cycling.heartRateZones.z2.maxBpm", current: 145, incoming: 147 },
+      {
+        field: "cycling.heartRateZones.z1.minBpm",
+        current: 100,
+        incoming: 107,
+      },
+      {
+        field: "cycling.heartRateZones.z1.maxBpm",
+        current: 130,
+        incoming: 133,
+      },
+      {
+        field: "cycling.heartRateZones.z2.minBpm",
+        current: 131,
+        incoming: 134,
+      },
+      {
+        field: "cycling.heartRateZones.z2.maxBpm",
+        current: 145,
+        incoming: 147,
+      },
     ]);
     // Persisted profile zones unchanged.
-    expect(
-      result.profile.sportZones.cycling?.heartRateZones?.zones
-    ).toEqual(userEditedHr());
+    expect(result.profile.sportZones.cycling?.heartRateZones?.zones).toEqual(
+      userEditedHr()
+    );
   });
 
   it("should silently fill an empty sport-kind table on v9 profile (sanity check — v8 path still works)", () => {

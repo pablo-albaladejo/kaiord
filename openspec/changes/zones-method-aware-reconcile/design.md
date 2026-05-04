@@ -16,19 +16,20 @@ Two failure modes coincide:
 
 The deeper insight — and what this change addresses — is that the schema already has a `method` field on each `ZoneConfig` that carries the right semantic, but the shipped reconcile never reads it:
 
-| `method` value | Semantic (current usage) | Reconcile should... |
-| -------------- | ------------------------ | ------------------- |
-| `"custom"` | Template default OR user-edited (ambiguous) | depends on zones content |
-| `"coggan-7"` / `"karvonen-5"` / `"daniels-5"` | Formula-derived from threshold | silent-replace from T2G |
-| `"train2go"` | Last sync wrote these zones | silent re-sync if zones === last snapshot |
-| `"user"` *(new)* | User manually edited bands | emit conflicts |
-| `"manual"` | Introduced by my PR 2 in `sync-zones-band-writes.ts:25`; doesn't fit the existing vocabulary | normalized away |
+| `method` value                                | Semantic (current usage)                                                                     | Reconcile should...                       |
+| --------------------------------------------- | -------------------------------------------------------------------------------------------- | ----------------------------------------- |
+| `"custom"`                                    | Template default OR user-edited (ambiguous)                                                  | depends on zones content                  |
+| `"coggan-7"` / `"karvonen-5"` / `"daniels-5"` | Formula-derived from threshold                                                               | silent-replace from T2G                   |
+| `"train2go"`                                  | Last sync wrote these zones                                                                  | silent re-sync if zones === last snapshot |
+| `"user"` _(new)_                              | User manually edited bands                                                                   | emit conflicts                            |
+| `"manual"`                                    | Introduced by my PR 2 in `sync-zones-band-writes.ts:25`; doesn't fit the existing vocabulary | normalized away                           |
 
 This change makes `method` first-class: introduces `"user"` as a new value, normalizes `"manual"` to `"custom"` via migration, sets `method = "train2go"` when sync writes, and uses a 5-state classifier in reconcile.
 
 ## Conventions
 
 **Capitalization:**
+
 - `Method` (capitalized) — refers to the schema field as a proper noun ("the Method field").
 - `method` (code-style backticks) — code identifier.
 - `"user"` / `"custom"` / `"train2go"` / `"coggan-7"` — string literal values; always quoted.
@@ -38,6 +39,7 @@ This change makes `method` first-class: introduces `"user"` as a new value, norm
 **Decision IDs:** D-MA1..D-MA9 (`MA` = Method-Aware, distinguishes from prior D1..D9 + D-FB1..D-FB8).
 
 **Format:**
+
 - `Z1-Z5` ASCII hyphen.
 - `FieldKey` PascalCase (TypeScript type), "field key" lowercase (prose).
 - `ZoneType` PascalCase — the existing TS type `"heartRateZones" | "powerZones" | "paceZones"` (per `useMethodSwitch.ts:9`); _kind_ (lowercase, prose) is the conceptual name.
@@ -61,6 +63,7 @@ Single canonical form across design.md, spec scenarios, and tasks. **Do NOT use*
 The set of method ids accepted as `method-derived` is `[...HR_METHODS, ...POWER_METHODS, ...PACE_METHODS].map(m => m.id)` from `packages/workout-spa-editor/src/lib/zone-methods/`. Examples in this design (`coggan-7`, `karvonen-5`, `daniels-5`) are NOT exhaustive — the registry is authoritative. The classifier reads the registry at runtime; tests use the registry, never a hardcoded list.
 
 **Function-length cap (per the project's `CLAUDE.md` "Code Style"):**
+
 - ≤40 lines per function for non-component code.
 - ≤60 lines per React component body.
 - Tests exempt.
@@ -204,13 +207,13 @@ When the user edits any band's bound via the Profile Manager `ZoneEditor`, the c
 
 **Snapshot persistence rules (load-bearing — must match the spec verbatim):**
 
-| Sync outcome for a sport-kind table | Post-sync `method` | Post-sync `snapshot.<sportKind>` |
-| ----------------------------------- | ------------------ | -------------------------------- |
-| Silent-replace (states `empty`, `default-template`, `method-derived`, `train2go-synced-clean`) | `"train2go"` | `incoming` (T2G's full array) |
-| Silent re-sync (no diffs) — same as above | `"train2go"` | `incoming` (timestamp updated even if values byte-identical) |
-| All-accept on conflicts (any state with conflicts) | `"train2go"` | `incoming` (T2G's full array; user accepted everything) |
-| Mixed accept/reject on conflicts | `"user"` | **post-merge persisted zones** (accepted bands take T2G value; rejected bands keep pre-sync user value). The snapshot reflects the FINAL persisted state, NOT the raw T2G payload. |
-| All-reject on conflicts | unchanged from pre-call | unchanged from pre-call |
+| Sync outcome for a sport-kind table                                                            | Post-sync `method`      | Post-sync `snapshot.<sportKind>`                                                                                                                                                   |
+| ---------------------------------------------------------------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Silent-replace (states `empty`, `default-template`, `method-derived`, `train2go-synced-clean`) | `"train2go"`            | `incoming` (T2G's full array)                                                                                                                                                      |
+| Silent re-sync (no diffs) — same as above                                                      | `"train2go"`            | `incoming` (timestamp updated even if values byte-identical)                                                                                                                       |
+| All-accept on conflicts (any state with conflicts)                                             | `"train2go"`            | `incoming` (T2G's full array; user accepted everything)                                                                                                                            |
+| Mixed accept/reject on conflicts                                                               | `"user"`                | **post-merge persisted zones** (accepted bands take T2G value; rejected bands keep pre-sync user value). The snapshot reflects the FINAL persisted state, NOT the raw T2G payload. |
+| All-reject on conflicts                                                                        | unchanged from pre-call | unchanged from pre-call                                                                                                                                                            |
 
 **Rationale for mixed-decision snapshot semantics**: the snapshot answers "what is currently persisted, and where did each value come from on the last accepted sync?" — so the next sync's `train2go-synced-edited` detection works correctly. If we recorded raw incoming for rejected bands, the next sync would think the user "edited since" those bands (because persisted != snapshot[i]) and emit redundant conflicts. Recording post-merge values keeps the contract: snapshot == persisted at the moment the sync completed.
 
@@ -310,6 +313,7 @@ applyV9Upgrade(tx: Transaction) {
 **Migration is idempotent**: running it twice produces the same result (no state machine).
 
 **Migration test**: `dexie-v9-migration.test.ts` mirrors the v8 pattern. Cases covered:
+
 1. Fresh profile (factory output) → method values are `"custom"` (HR) and `"coggan-7"` (cycling power). Migration changes nothing.
 2. Profile with `method = "manual"` from the recent PR 2 sync → flips to `"custom"`. Snapshot stays absent.
 3. Profile with `method = "custom"` AND HR zones `[{minBpm: 130, maxBpm: 145}, ...]` (clearly user-edited) → flips to `"user"`.
@@ -341,20 +345,20 @@ This invariant prevents a future drift where someone adds per-band control insid
 
 ## Risks / Trade-offs
 
-| Risk | Mitigation |
-| ---- | ---------- |
-| Migration v9 mis-classifies a real-user-edited table as `"custom"` (false negative). | Conservative migration — only flip to `"user"` when zones clearly differ from defaults. Wrong cases produce conflicts on next sync (handled by the new dialog gracefully); right cases stay correct. |
-| Migration v9 mis-classifies a default-seed table as `"user"` (false positive). | The migration's `hasUserData` heuristic is unit-tested per kind. If it fires falsely, every sync after produces conflicts — UX is bad but recoverable (user picks "Accept Train2Go" once and method becomes `"train2go"`). |
-| `method-derived` state silently loses the formula reference on T2G accept. | Documented intentional. User can re-pick from the dropdown to recompute against new threshold. Alternative (preserve formula + override values) creates an inconsistent state we don't want to support. |
-| Snapshot grows the linked-account record by ~2KB (5 zones × 3 sports × 3 kinds × ~50 bytes). | Acceptable. Profile records are infrequent (one per user) and the snapshot is bounded. |
-| Re-sync correctness depends on snapshot integrity. If snapshot is stale (e.g., user manually pasted T2G's bands without sync), classifier returns `train2go-synced-edited` → conflict surfaces unnecessarily. | Acceptable: false-positive conflict, not silent data loss. User sees what looks like a no-op conflict and accepts. |
-| Dialog grouping changes per-row testids. | All existing dialog tests use the per-row `zones-conflict-row-<field>` testid. New tests use `zones-conflict-group-<sport>-<kind>` for groups. Per-row testids stay valid INSIDE the expandable detail view (DOM persists, just hidden). Migration of test selectors is part of the change. |
-| FTP+bands coupling collapses two semantic decisions into one — user loses the ability to accept FTP without bands. | This is intentional: accepting one without the other creates inconsistency (D-MA6). If a user genuinely wants the FTP scalar but not the bands, they can accept and then manually edit the bands post-sync. |
-| Migration runs at db-open and could be slow if the user has many profiles. | Profile count is small (≤10 in real usage). Modify-by-collection runs in a single tx. Tested with 100-profile fixture, completes in <50ms. |
-| ZoneEditor's "user" flag depends on every band edit going through our save handler. | Confirmed via grep: all bound `<input>` onChange handlers funnel through `applyChange` in `useMethodSwitch.ts` or the parent ZoneEditor save handler. No bypass paths exist. Tracked in tasks §3.1. The classifier's content-detection tail rule (D-MA1 `user-customized`) absorbs any bypass that slips through. |
-| Post-sync FTP change leaves persisted `%FTP` bands intact but the displayed watts derive from a stale band → user → display inconsistency. | Documented as Q-MA3 (open question). Out of scope for this change; no blocker for first ship. The user can re-pick the formula from the dropdown to recompute. |
-| Migration false-positive (`hasUserData` reclassifies a default-template table to `"user"`) means the user sees conflicts on every sync until they explicitly accept once. With the new dialog grouping (one accept/reject per table), the first accept transitions the table to `"train2go"` cleanly. | Acceptable: false-positive UX is "click Accept once" → recoverable in one action. Tracked as Q-MA6 for whether we want to surface "this flag came from migration vs from explicit edit" in the UI. |
-| Old code (pre-this-change JS bundle) reading a v9-migrated profile encounters `method = "user"` on tables the migration reclassified. | Old reconcile reads `method` opaquely; "user" doesn't trigger any new path. Old `isTableEmpty` check returns false (zones populated), routes to per-band conflict — same path as today's `method = "custom"` + populated. **No silent data loss on rollback.** Pinned by regression test in PR 1 §1.6.5. |
+| Risk                                                                                                                                                                                                                                                                                                  | Mitigation                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Migration v9 mis-classifies a real-user-edited table as `"custom"` (false negative).                                                                                                                                                                                                                  | Conservative migration — only flip to `"user"` when zones clearly differ from defaults. Wrong cases produce conflicts on next sync (handled by the new dialog gracefully); right cases stay correct.                                                                                                              |
+| Migration v9 mis-classifies a default-seed table as `"user"` (false positive).                                                                                                                                                                                                                        | The migration's `hasUserData` heuristic is unit-tested per kind. If it fires falsely, every sync after produces conflicts — UX is bad but recoverable (user picks "Accept Train2Go" once and method becomes `"train2go"`).                                                                                        |
+| `method-derived` state silently loses the formula reference on T2G accept.                                                                                                                                                                                                                            | Documented intentional. User can re-pick from the dropdown to recompute against new threshold. Alternative (preserve formula + override values) creates an inconsistent state we don't want to support.                                                                                                           |
+| Snapshot grows the linked-account record by ~2KB (5 zones × 3 sports × 3 kinds × ~50 bytes).                                                                                                                                                                                                          | Acceptable. Profile records are infrequent (one per user) and the snapshot is bounded.                                                                                                                                                                                                                            |
+| Re-sync correctness depends on snapshot integrity. If snapshot is stale (e.g., user manually pasted T2G's bands without sync), classifier returns `train2go-synced-edited` → conflict surfaces unnecessarily.                                                                                         | Acceptable: false-positive conflict, not silent data loss. User sees what looks like a no-op conflict and accepts.                                                                                                                                                                                                |
+| Dialog grouping changes per-row testids.                                                                                                                                                                                                                                                              | All existing dialog tests use the per-row `zones-conflict-row-<field>` testid. New tests use `zones-conflict-group-<sport>-<kind>` for groups. Per-row testids stay valid INSIDE the expandable detail view (DOM persists, just hidden). Migration of test selectors is part of the change.                       |
+| FTP+bands coupling collapses two semantic decisions into one — user loses the ability to accept FTP without bands.                                                                                                                                                                                    | This is intentional: accepting one without the other creates inconsistency (D-MA6). If a user genuinely wants the FTP scalar but not the bands, they can accept and then manually edit the bands post-sync.                                                                                                       |
+| Migration runs at db-open and could be slow if the user has many profiles.                                                                                                                                                                                                                            | Profile count is small (≤10 in real usage). Modify-by-collection runs in a single tx. Tested with 100-profile fixture, completes in <50ms.                                                                                                                                                                        |
+| ZoneEditor's "user" flag depends on every band edit going through our save handler.                                                                                                                                                                                                                   | Confirmed via grep: all bound `<input>` onChange handlers funnel through `applyChange` in `useMethodSwitch.ts` or the parent ZoneEditor save handler. No bypass paths exist. Tracked in tasks §3.1. The classifier's content-detection tail rule (D-MA1 `user-customized`) absorbs any bypass that slips through. |
+| Post-sync FTP change leaves persisted `%FTP` bands intact but the displayed watts derive from a stale band → user → display inconsistency.                                                                                                                                                            | Documented as Q-MA3 (open question). Out of scope for this change; no blocker for first ship. The user can re-pick the formula from the dropdown to recompute.                                                                                                                                                    |
+| Migration false-positive (`hasUserData` reclassifies a default-template table to `"user"`) means the user sees conflicts on every sync until they explicitly accept once. With the new dialog grouping (one accept/reject per table), the first accept transitions the table to `"train2go"` cleanly. | Acceptable: false-positive UX is "click Accept once" → recoverable in one action. Tracked as Q-MA6 for whether we want to surface "this flag came from migration vs from explicit edit" in the UI.                                                                                                                |
+| Old code (pre-this-change JS bundle) reading a v9-migrated profile encounters `method = "user"` on tables the migration reclassified.                                                                                                                                                                 | Old reconcile reads `method` opaquely; "user" doesn't trigger any new path. Old `isTableEmpty` check returns false (zones populated), routes to per-band conflict — same path as today's `method = "custom"` + populated. **No silent data loss on rollback.** Pinned by regression test in PR 1 §1.6.5.          |
 
 ## Migration Plan
 
