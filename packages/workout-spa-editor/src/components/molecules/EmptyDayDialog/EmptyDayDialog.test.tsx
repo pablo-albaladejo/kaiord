@@ -33,38 +33,38 @@ describe("EmptyDayDialog", () => {
     await db.table("workouts").clear();
   });
 
-  it("renders dialog when date is provided (open)", () => {
+  it("should render dialog when date is provided (open)", () => {
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
 
     expect(screen.getByTestId("empty-day-dialog")).toBeInTheDocument();
     expect(screen.getByText("Add workout")).toBeInTheDocument();
   });
 
-  it("does not render dialog content when date is null (closed)", () => {
+  it("should not render dialog content when date is null (closed)", () => {
     renderWithRouter(<EmptyDayDialog date={null} onClose={vi.fn()} />);
 
     expect(screen.queryByTestId("empty-day-dialog")).not.toBeInTheDocument();
   });
 
-  it("shows formatted date label", () => {
+  it("should show formatted date label", () => {
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
 
     expect(screen.getByText(/Saturday, March 15/)).toBeInTheDocument();
   });
 
-  it("renders Add from Library button", () => {
+  it("should render Add from Library button", () => {
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
 
     expect(screen.getByText("Add from Library")).toBeInTheDocument();
   });
 
-  it("renders Create new workout button", () => {
+  it("should render Create new workout button", () => {
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
 
     expect(screen.getByText("Create new workout")).toBeInTheDocument();
   });
 
-  it("opens TemplatePickerDialog (does not navigate) on Add from Library", async () => {
+  it("should open TemplatePickerDialog (does not navigate) on Add from Library", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
     const { location } = renderWithRouter(
@@ -83,7 +83,7 @@ describe("EmptyDayDialog", () => {
     expect(onClose).not.toHaveBeenCalled();
   });
 
-  it("does not show the page-level ScheduleDateDialog during the in-flow flow", async () => {
+  it("should not show the page-level ScheduleDateDialog during the in-flow flow", async () => {
     const user = userEvent.setup();
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
 
@@ -130,7 +130,7 @@ describe("EmptyDayDialog", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("navigates to new workout with date and closes on Create click", async () => {
+  it("should navigate to new workout with date and closes on Create click", async () => {
     const user = userEvent.setup();
     const onClose = vi.fn();
     const { location } = renderWithRouter(

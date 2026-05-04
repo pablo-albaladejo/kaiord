@@ -53,17 +53,17 @@ describe("SettingsPanel", () => {
     await db.table("meta").clear();
   });
 
-  it("renders when open", () => {
+  it("should render when open", () => {
     renderPanel();
     expect(screen.getByText("Settings")).toBeInTheDocument();
   });
 
-  it("shows the AI tab by default", () => {
+  it("should show the AI tab by default", () => {
     renderPanel();
     expect(screen.getByText("LLM Providers")).toBeInTheDocument();
   });
 
-  it("switches to the Extensions tab", () => {
+  it("should switch to the Extensions tab", () => {
     renderPanel();
     fireEvent.click(screen.getByText("Extensions"));
     expect(screen.getByText("Garmin Connect")).toBeInTheDocument();
@@ -71,20 +71,20 @@ describe("SettingsPanel", () => {
     expect(screen.getByText("Refresh Status")).toBeInTheDocument();
   });
 
-  it("switches to the Privacy tab", () => {
+  it("should switch to the Privacy tab", () => {
     renderPanel();
     fireEvent.click(screen.getByText("Privacy"));
     expect(screen.getByText("Privacy Information")).toBeInTheDocument();
   });
 
-  it("shows the provider list as empty initially", () => {
+  it("should show the provider list as empty initially", () => {
     renderPanel();
     expect(
       screen.getByText("No providers configured. Add one below.")
     ).toBeInTheDocument();
   });
 
-  it("shows privacy disclaimers", () => {
+  it("should show privacy disclaimers", () => {
     renderPanel();
     fireEvent.click(screen.getByText("Privacy"));
     expect(

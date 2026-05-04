@@ -22,13 +22,13 @@ describe("DexieUserPreferencesRepository", () => {
     db = new KaiordDatabase(`kaiord-prefs-test-${Date.now()}-${Math.random()}`);
   });
 
-  it("get returns undefined when no row exists", async () => {
+  it("should return undefined from get when no row exists", async () => {
     const repo = createDexieUserPreferencesRepository(db);
 
     expect(await repo.get("p1")).toBeUndefined();
   });
 
-  it("put-and-get round trip", async () => {
+  it("should round-trip via put-and-get", async () => {
     const repo = createDexieUserPreferencesRepository(db);
     const row = baseRow();
 
@@ -37,7 +37,7 @@ describe("DexieUserPreferencesRepository", () => {
     expect(await repo.get("p1")).toEqual(row);
   });
 
-  it("put is upsert by profileId — second put replaces in place", async () => {
+  it("should upsert via put by profileId — second put replaces in place", async () => {
     const repo = createDexieUserPreferencesRepository(db);
     await repo.put(baseRow({ calendarDensity: "compact" }));
 
@@ -46,13 +46,13 @@ describe("DexieUserPreferencesRepository", () => {
     expect((await repo.get("p1"))?.calendarDensity).toBe("comfortable");
   });
 
-  it("delete is idempotent on missing rows", async () => {
+  it("should be idempotent on delete when rows are missing", async () => {
     const repo = createDexieUserPreferencesRepository(db);
 
     await expect(repo.delete("never-existed")).resolves.toBeUndefined();
   });
 
-  it("delete removes the row", async () => {
+  it("should remove the row on delete", async () => {
     const repo = createDexieUserPreferencesRepository(db);
     await repo.put(baseRow());
 
@@ -61,7 +61,7 @@ describe("DexieUserPreferencesRepository", () => {
     expect(await repo.get("p1")).toBeUndefined();
   });
 
-  it("each profile has its own row", async () => {
+  it("should keep each profile in its own row", async () => {
     const repo = createDexieUserPreferencesRepository(db);
 
     await repo.put(baseRow({ profileId: "p1", calendarDensity: "compact" }));

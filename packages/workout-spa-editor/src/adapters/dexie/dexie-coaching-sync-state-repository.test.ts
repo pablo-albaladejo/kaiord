@@ -13,13 +13,13 @@ describe("DexieCoachingSyncStateRepository", () => {
     );
   });
 
-  it("get returns undefined for missing compound key", async () => {
+  it("should return undefined from get for missing compound key", async () => {
     const repo = createDexieCoachingSyncStateRepository(db);
     const result = await repo.getBySourceAndProfile("train2go", "p1");
     expect(result).toBeUndefined();
   });
 
-  it("put round-trips by [source+profileId] compound key", async () => {
+  it("should round-trip via put by [source+profileId] compound key", async () => {
     const repo = createDexieCoachingSyncStateRepository(db);
     const record = {
       source: "train2go",
@@ -33,7 +33,7 @@ describe("DexieCoachingSyncStateRepository", () => {
     expect(result).toEqual(record);
   });
 
-  it("put overwrites existing entry by compound key", async () => {
+  it("should overwrite existing entry via put by compound key", async () => {
     const repo = createDexieCoachingSyncStateRepository(db);
     await repo.put({
       source: "train2go",
@@ -50,7 +50,7 @@ describe("DexieCoachingSyncStateRepository", () => {
     expect(result?.lastSyncedAt).toBe("2026-04-28T11:00:00.000Z");
   });
 
-  it("isolates entries by profile", async () => {
+  it("should isolate entries by profile", async () => {
     const repo = createDexieCoachingSyncStateRepository(db);
     await repo.put({
       source: "train2go",

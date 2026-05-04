@@ -67,7 +67,7 @@ describe("createUpdatedWorkout", () => {
     }) as Workout;
 
   describe("updating main workout steps", () => {
-    it("updates only the main-list step whose ItemId matches selectedStepId", () => {
+    it("should update only the main-list step whose ItemId matches selectedStepId", () => {
       const workout = createMockWorkout();
       const updatedStep: WorkoutStep = {
         ...createMockStep(1),
@@ -99,7 +99,7 @@ describe("createUpdatedWorkout", () => {
   });
 
   describe("updating block steps", () => {
-    it("updates only the nested step in Block A when its ItemId is selected", () => {
+    it("should update only the nested step in Block A when its ItemId is selected", () => {
       const workout = createMockWorkout();
       const updatedStep: WorkoutStep = {
         ...createMockStep(1),
@@ -138,7 +138,7 @@ describe("createUpdatedWorkout", () => {
       }
     });
 
-    it("updates only the nested step in Block B when its ItemId is selected", () => {
+    it("should update only the nested step in Block B when its ItemId is selected", () => {
       const workout = createMockWorkout();
       const updatedStep: WorkoutStep = {
         ...createMockStep(1),
@@ -175,7 +175,7 @@ describe("createUpdatedWorkout", () => {
   });
 
   describe("edge cases", () => {
-    it("returns the workout unchanged when selectedStepId is null", () => {
+    it("should return the workout unchanged when selectedStepId is null", () => {
       const workout = createMockWorkout();
       const updatedStep = createMockStep(1);
 
@@ -184,7 +184,7 @@ describe("createUpdatedWorkout", () => {
       expect(result).toEqual(workout);
     });
 
-    it("returns the workout unchanged when the id does not match any item", () => {
+    it("should return the workout unchanged when the id does not match any item", () => {
       const workout = createMockWorkout();
       const updatedStep = createMockStep(1);
 

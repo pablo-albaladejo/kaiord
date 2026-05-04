@@ -17,7 +17,7 @@ const buildStep = (overrides: Partial<WorkoutStep> = {}): WorkoutStep => ({
 });
 
 describe("mapRepetitionBlock (characterization)", () => {
-  it("emits a RepeatGroupDTO with iteration end-condition", () => {
+  it("should emit a RepeatGroupDTO with iteration end-condition", () => {
     const block: RepetitionBlock = {
       repeatCount: 3,
       steps: [buildStep()],
@@ -45,7 +45,7 @@ describe("mapRepetitionBlock (characterization)", () => {
     expect(result.stepType.displayOrder).toBe(6);
   });
 
-  it("consumes one stepOrder slot from the counter for the repeat itself", () => {
+  it("should consume one stepOrder slot from the counter for the repeat itself", () => {
     const block: RepetitionBlock = {
       repeatCount: 2,
       steps: [buildStep(), buildStep({ stepIndex: 1 })],
@@ -59,7 +59,7 @@ describe("mapRepetitionBlock (characterization)", () => {
     expect(counter.value).toBe(8);
   });
 
-  it("maps inner steps in order under workoutSteps", () => {
+  it("should map inner steps in order under workoutSteps", () => {
     const block: RepetitionBlock = {
       repeatCount: 4,
       steps: [
@@ -76,7 +76,7 @@ describe("mapRepetitionBlock (characterization)", () => {
     expect(result.workoutSteps[1].stepOrder).toBe(2);
   });
 
-  it("propagates numberOfIterations from repeatCount", () => {
+  it("should propagate numberOfIterations from repeatCount", () => {
     const block: RepetitionBlock = {
       repeatCount: 7,
       steps: [buildStep()],
@@ -89,7 +89,7 @@ describe("mapRepetitionBlock (characterization)", () => {
     expect(result.endConditionValue).toBe(7);
   });
 
-  it("emits an empty workoutSteps array when the block contains no steps", () => {
+  it("should emit an empty workoutSteps array when the block contains no steps", () => {
     const block: RepetitionBlock = {
       repeatCount: 2,
       steps: [],

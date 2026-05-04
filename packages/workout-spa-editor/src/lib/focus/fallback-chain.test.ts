@@ -39,7 +39,7 @@ describe("resolveFocusElement", () => {
     document.body.innerHTML = "";
   });
 
-  it("returns the registered element when the item target resolves", () => {
+  it("should return the registered element when the item target resolves", () => {
     // Arrange
     const target = el("step-1");
     const getRegisteredItem = vi.fn((id: string) =>
@@ -60,7 +60,7 @@ describe("resolveFocusElement", () => {
     expect(result.reason).toBe("target");
   });
 
-  it("returns the empty-state button for an empty-state target", () => {
+  it("should return the empty-state button for an empty-state target", () => {
     // Arrange
     const button = el("empty-state-btn");
 
@@ -78,7 +78,7 @@ describe("resolveFocusElement", () => {
     expect(result.reason).toBe("empty-state");
   });
 
-  it("falls back to the empty-state button when the item id is gone and the list is empty", () => {
+  it("should fall back to the empty-state button when the item id is gone and the list is empty", () => {
     // Arrange — item target whose element is not registered, AND no
     // first item either (list is empty). Empty-state is the next step.
     const button = el("empty-state-btn");
@@ -97,7 +97,7 @@ describe("resolveFocusElement", () => {
     expect(result.reason).toBe("empty-state");
   });
 
-  it("falls back to the first registered item when the requested item is gone but the list is not", () => {
+  it("should fall back to the first registered item when the requested item is gone but the list is not", () => {
     // Arrange
     const first = el("first-step");
     const getRegisteredItem = vi.fn((id: string) =>
@@ -118,7 +118,7 @@ describe("resolveFocusElement", () => {
     expect(result.reason).toBe("first-item");
   });
 
-  it("falls back to the editor heading when nothing else is available", () => {
+  it("should fall back to the editor heading when nothing else is available", () => {
     // Arrange
     const heading = el("editor-heading");
 
@@ -136,7 +136,7 @@ describe("resolveFocusElement", () => {
     expect(result.reason).toBe("heading");
   });
 
-  it("returns null (and reason=unresolved) when every fallback is missing", () => {
+  it("should return null (and reason=unresolved) when every fallback is missing", () => {
     // Act
     const result = resolveFocusElement({
       target: focusItem(asItemId("ghost-id")),
@@ -151,7 +151,7 @@ describe("resolveFocusElement", () => {
     expect(result.reason).toBe("unresolved");
   });
 
-  it("skips a first-item id whose element is not registered and proceeds to the heading", () => {
+  it("should skip a first-item id whose element is not registered and proceeds to the heading", () => {
     // Arrange — firstItemId exists but the registry has nothing for it.
     const heading = el("editor-heading");
 
@@ -169,7 +169,7 @@ describe("resolveFocusElement", () => {
     expect(result.reason).toBe("heading");
   });
 
-  it("rejects detached elements (isConnected=false) — focus moves would be silently dropped", () => {
+  it("should reject detached elements (isConnected=false) — focus moves would be silently dropped", () => {
     // Arrange — a detached heading ref; isUsable must reject it.
     const detached = document.createElement("div");
 
@@ -187,7 +187,7 @@ describe("resolveFocusElement", () => {
     expect(result.reason).toBe("unresolved");
   });
 
-  it("never resolves to an element with role=list", () => {
+  it("should never resolve to an element with role=list", () => {
     // Arrange — a malicious / buggy heading ref that carries role=list.
     const badHeading = el("bad-heading");
     badHeading.setAttribute("role", "list");

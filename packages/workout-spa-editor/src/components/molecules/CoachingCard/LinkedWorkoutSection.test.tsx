@@ -40,7 +40,7 @@ describe("LinkedWorkoutSection", () => {
     expect(screen.getByTestId("linked-workout-section")).toBeInTheDocument();
   });
 
-  it("invokes onSplit when the Split button is clicked", async () => {
+  it("should invoke onSplit when the Split button is clicked", async () => {
     const onSplit = vi.fn();
     render(
       <LinkedWorkoutSection
@@ -55,7 +55,7 @@ describe("LinkedWorkoutSection", () => {
     expect(onSplit).toHaveBeenCalledTimes(1);
   });
 
-  it("disables the Split button while a split is in flight", () => {
+  it("should disable the Split button while a split is in flight", () => {
     render(
       <LinkedWorkoutSection
         workout={makeWorkout()}

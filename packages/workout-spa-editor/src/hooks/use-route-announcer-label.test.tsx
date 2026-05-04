@@ -32,7 +32,7 @@ describe("useRouteAnnouncerLabel", () => {
     ["/library", "Library page"],
     ["/workout/new", "New workout"],
     ["/workout/abc-123", "Edit workout"],
-  ])("returns %s -> %s", (path, expected) => {
+  ])("should return %s -> %s", (path, expected) => {
     const { result } = renderHook(() => useRouteAnnouncerLabel(), {
       wrapper: wrapWithRouter(path),
     });
@@ -40,7 +40,7 @@ describe("useRouteAnnouncerLabel", () => {
     expect(result.current).toBe(expected);
   });
 
-  it("returns a non-empty label on initial mount with a deep-linked URL", () => {
+  it("should return a non-empty label on initial mount with a deep-linked URL", () => {
     const { result } = renderHook(() => useRouteAnnouncerLabel(), {
       wrapper: wrapWithRouter("/library"),
     });
@@ -49,7 +49,7 @@ describe("useRouteAnnouncerLabel", () => {
     expect(result.current).toBe("Library page");
   });
 
-  it("query-string changes do not change the label (pathname stays /library)", () => {
+  it("should not change the label on query-string changes (pathname stays /library)", () => {
     // wouter's useLocation returns the pathname only — query string
     // changes do not propagate as new locations, so the hook never
     // sees them and the label is stable.

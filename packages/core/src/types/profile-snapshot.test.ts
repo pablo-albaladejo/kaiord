@@ -13,13 +13,13 @@ import {
 } from "./profile-snapshot";
 
 describe("STALE_SNAPSHOT_THRESHOLD_DAYS", () => {
-  it("is 7 days", () => {
+  it("should be 7 days", () => {
     expect(STALE_SNAPSHOT_THRESHOLD_DAYS).toBe(7);
   });
 });
 
 describe("profileSnapshotSchema — positive fixtures", () => {
-  it.each(positiveSnapshotFixtures)("accepts %#", (fixture) => {
+  it.each(positiveSnapshotFixtures)("should accept %#", (fixture) => {
     const result = profileSnapshotSchema.safeParse(fixture);
 
     expect(result.success).toBe(true);
@@ -28,7 +28,7 @@ describe("profileSnapshotSchema — positive fixtures", () => {
     }
   });
 
-  it("accepts a partial-zone payload (running.lthr only)", () => {
+  it("should accept a partial-zone payload (running.lthr only)", () => {
     const partial: ProfileSnapshot = {
       schemaVersion: 1,
       profile: { name: "Partial" },
@@ -53,7 +53,7 @@ describe("profileSnapshotSchema — positive fixtures", () => {
 
 describe("profileSnapshotSchema — negative fixtures", () => {
   it.each(negativeSnapshotFixtures)(
-    "rejects $name",
+    "should reject $name",
     ({ value, expectedError }) => {
       const result = profileSnapshotSchema.safeParse(value);
 
@@ -65,7 +65,7 @@ describe("profileSnapshotSchema — negative fixtures", () => {
     }
   );
 
-  it("does not mutate Object.prototype when rejecting a poisoned payload", () => {
+  it("should not mutate Object.prototype when rejecting a poisoned payload", () => {
     const polluted = JSON.parse(
       `{"__proto__":{"isAdmin":true},"schemaVersion":1,"profile":{"name":"P"},"generatedAt":"2026-05-01T00:00:00.000Z"}`
     ) as unknown;
@@ -77,7 +77,7 @@ describe("profileSnapshotSchema — negative fixtures", () => {
     ).toBeUndefined();
   });
 
-  it("rejects payloads with circular references", () => {
+  it("should reject payloads with circular references", () => {
     const circular: Record<string, unknown> = {
       schemaVersion: 1,
       profile: { name: "x" },
@@ -95,7 +95,7 @@ describe("profileSnapshotSchema — negative fixtures", () => {
     }
   });
 
-  it("rejects payloads whose JSON serialization exceeds 8192 code units", () => {
+  it("should reject payloads whose JSON serialization exceeds 8192 code units", () => {
     const oversized = {
       schemaVersion: 1 as const,
       profile: { name: "x".repeat(9000) },
@@ -114,20 +114,20 @@ describe("profileSnapshotSchema — negative fixtures", () => {
 });
 
 describe("fingerprintSnapshot", () => {
-  it("returns 8-character lowercase hex", () => {
+  it("should return 8-character lowercase hex", () => {
     const fp = fingerprintSnapshot("profile-1", baselineSnapshot);
 
     expect(fp).toMatch(/^[0-9a-f]{8}$/);
   });
 
-  it("is deterministic across calls", () => {
+  it("should be deterministic across calls", () => {
     const a = fingerprintSnapshot("profile-1", baselineSnapshot);
     const b = fingerprintSnapshot("profile-1", baselineSnapshot);
 
     expect(a).toBe(b);
   });
 
-  it("ignores generatedAt — same content with different timestamp produces the same fingerprint", () => {
+  it("should ignore generatedAt — same content with different timestamp produces the same fingerprint", () => {
     const earlier: ProfileSnapshot = {
       ...baselineSnapshot,
       generatedAt: "2026-05-01T08:00:00.000Z",
@@ -142,7 +142,7 @@ describe("fingerprintSnapshot", () => {
     );
   });
 
-  it("differs when FTP changes", () => {
+  it("should differ when FTP changes", () => {
     const before: ProfileSnapshot = baselineSnapshot;
     const after: ProfileSnapshot = {
       ...baselineSnapshot,
@@ -157,7 +157,7 @@ describe("fingerprintSnapshot", () => {
     );
   });
 
-  it("differs when profileId changes — guards against cross-profile collision", () => {
+  it("should differ when profileId changes — guards against cross-profile collision", () => {
     expect(fingerprintSnapshot("profile-1", baselineSnapshot)).not.toBe(
       fingerprintSnapshot("profile-2", baselineSnapshot)
     );

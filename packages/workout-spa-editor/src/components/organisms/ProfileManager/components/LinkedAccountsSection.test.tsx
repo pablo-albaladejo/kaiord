@@ -64,7 +64,7 @@ const wrap = (children: ReactNode) => (
 );
 
 describe("LinkedAccountsSection", () => {
-  it("shows Connect button when source is not linked", () => {
+  it("should show Connect button when source is not linked", () => {
     render(wrap(<LinkedAccountsSection profile={makeProfile()} />));
 
     expect(screen.getByText("Not connected")).toBeInTheDocument();
@@ -72,7 +72,7 @@ describe("LinkedAccountsSection", () => {
     expect(screen.queryByText("Disconnect")).not.toBeInTheDocument();
   });
 
-  it("shows Disconnect button + externalUserName when source is linked", () => {
+  it("should show Disconnect button + externalUserName when source is linked", () => {
     render(
       wrap(
         <LinkedAccountsSection
@@ -94,7 +94,7 @@ describe("LinkedAccountsSection", () => {
     expect(mockConnect).toHaveBeenCalledWith("p1");
   });
 
-  it("hides the Sync zones toggle when bridge does NOT advertise read:training-zones", () => {
+  it("should hide the Sync zones toggle when bridge does NOT advertise read:training-zones", () => {
     mockSupportsZones = false;
     render(
       wrap(
@@ -110,7 +110,7 @@ describe("LinkedAccountsSection", () => {
     mockSupportsZones = true;
   });
 
-  it("renders the Sync zones toggle when linked AND bridge advertises capability", () => {
+  it("should render the Sync zones toggle when linked AND bridge advertises capability", () => {
     render(
       wrap(
         <LinkedAccountsSection
@@ -124,7 +124,7 @@ describe("LinkedAccountsSection", () => {
     ).toBeInTheDocument();
   });
 
-  it("persists the toggle state to the profile when clicked", async () => {
+  it("should persist the toggle state to the profile when clicked", async () => {
     const persistence = createInMemoryPersistence();
     const profile = {
       ...makeProfile({ linkedAccounts: [T2G_LINK] }),

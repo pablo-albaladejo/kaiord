@@ -19,31 +19,31 @@ describe("zone method registries", () => {
       expect(POWER_METHODS).toHaveLength(6);
     });
 
-    it("Coggan 7-zone should have 7 zones", () => {
+    it("should have 7 zones for Coggan 7-zone", () => {
       const coggan = findMethod(POWER_METHODS, "coggan-7");
       expect(coggan?.zoneCount).toBe(7);
       expect(coggan?.defaults).toHaveLength(7);
     });
 
-    it("Friel 7-zone should have 7 zones", () => {
+    it("should have 7 zones for Friel 7-zone", () => {
       const friel = findMethod(POWER_METHODS, "friel-7");
       expect(friel?.zoneCount).toBe(7);
       expect(friel?.defaults).toHaveLength(7);
     });
 
-    it("British Cycling should have 6 zones", () => {
+    it("should have 6 zones for British Cycling", () => {
       const bc = findMethod(POWER_METHODS, "british-cycling-6");
       expect(bc?.zoneCount).toBe(6);
       expect(bc?.defaults).toHaveLength(6);
     });
 
-    it("Custom should have 5 default zones", () => {
+    it("should have 5 default zones for Custom", () => {
       const custom = findMethod(POWER_METHODS, "custom");
       expect(custom?.zoneCount).toBe(5);
       expect(custom?.defaults).toHaveLength(5);
     });
 
-    it("Coggan Z1 should be 0-55%", () => {
+    it("should set Coggan Z1 to 0-55%", () => {
       const coggan = findMethod(POWER_METHODS, "coggan-7")!;
       expect(coggan.defaults[0]).toEqual({
         name: "Active Recovery",
@@ -58,13 +58,13 @@ describe("zone method registries", () => {
       expect(HR_METHODS).toHaveLength(4);
     });
 
-    it("Karvonen 5-zone should have 5 zones", () => {
+    it("should have 5 zones for Karvonen 5-zone", () => {
       const karvonen = findMethod(HR_METHODS, "karvonen-5");
       expect(karvonen?.zoneCount).toBe(5);
       expect(karvonen?.defaults).toHaveLength(5);
     });
 
-    it("Karvonen Z1 should be 0-82%", () => {
+    it("should set Karvonen Z1 to 0-82%", () => {
       const karvonen = findMethod(HR_METHODS, "karvonen-5")!;
       expect(karvonen.defaults[0]).toEqual({
         name: "Recovery",
@@ -79,7 +79,7 @@ describe("zone method registries", () => {
       expect(PACE_METHODS).toHaveLength(2);
     });
 
-    it("Daniels 5-zone should have 5 zones", () => {
+    it("should have 5 zones for Daniels 5-zone", () => {
       const daniels = findMethod(PACE_METHODS, "daniels-5");
       expect(daniels?.zoneCount).toBe(5);
       expect(daniels?.defaults).toHaveLength(5);
@@ -115,7 +115,7 @@ describe("zone method registries", () => {
   });
 
   describe("percentage ranges", () => {
-    it("all power methods should have non-negative percentages", () => {
+    it("should ensure all power methods have non-negative percentages", () => {
       for (const method of POWER_METHODS) {
         for (const def of method.defaults) {
           expect(def.minPercent).toBeGreaterThanOrEqual(0);
@@ -124,7 +124,7 @@ describe("zone method registries", () => {
       }
     });
 
-    it("all HR methods should have non-negative percentages", () => {
+    it("should ensure all HR methods have non-negative percentages", () => {
       for (const method of HR_METHODS) {
         for (const def of method.defaults) {
           expect(def.minPercent).toBeGreaterThanOrEqual(0);

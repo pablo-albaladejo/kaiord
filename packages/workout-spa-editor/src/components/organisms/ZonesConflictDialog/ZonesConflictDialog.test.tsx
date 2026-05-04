@@ -18,7 +18,7 @@ const CONFLICTS: ConflictItem[] = [
 ];
 
 describe("ZonesConflictDialog", () => {
-  it("does NOT render when open is false", () => {
+  it("should do NOT render when open is false", () => {
     render(
       <ZonesConflictDialog
         open={false}
@@ -31,7 +31,7 @@ describe("ZonesConflictDialog", () => {
     expect(screen.queryByTestId("zones-conflict-dialog")).toBeNull();
   });
 
-  it("renders one row per conflict with the static FieldKey label", () => {
+  it("should render one row per conflict with the static FieldKey label", () => {
     render(
       <ZonesConflictDialog
         open
@@ -48,7 +48,7 @@ describe("ZonesConflictDialog", () => {
     ).toBeInTheDocument();
   });
 
-  it("calls onCancel when the Cancel button is clicked", async () => {
+  it("should call onCancel when the Cancel button is clicked", async () => {
     const onCancel = vi.fn();
     render(
       <ZonesConflictDialog
@@ -64,7 +64,7 @@ describe("ZonesConflictDialog", () => {
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
-  it("emits all-reject decisions by default when Apply is clicked without changing rows", async () => {
+  it("should emit all-reject decisions by default when Apply is clicked without changing rows", async () => {
     const onConfirm = vi.fn();
     render(
       <ZonesConflictDialog
@@ -83,7 +83,7 @@ describe("ZonesConflictDialog", () => {
     } satisfies Record<FieldKey, ConflictDecision>);
   });
 
-  it("emits per-row accept/reject after the user toggles a row", async () => {
+  it("should emit per-row accept/reject after the user toggles a row", async () => {
     const onConfirm = vi.fn();
     render(
       <ZonesConflictDialog

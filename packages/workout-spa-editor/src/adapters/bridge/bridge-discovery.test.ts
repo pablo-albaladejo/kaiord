@@ -36,7 +36,7 @@ describe("createBridgeDiscovery", () => {
     vi.useRealTimers();
   });
 
-  it("registers extension id after a verified announcement", async () => {
+  it("should register extension id after a verified announcement", async () => {
     const verify = vi.fn().mockResolvedValue({
       id: "x",
       name: "x",
@@ -55,7 +55,7 @@ describe("createBridgeDiscovery", () => {
     discovery.stop();
   });
 
-  it("rejects announcements that fail verification (spoof)", async () => {
+  it("should reject announcements that fail verification (spoof)", async () => {
     const verify = vi.fn().mockResolvedValue(null);
     const discovery = createBridgeDiscovery({ verify });
     discovery.start();
@@ -67,7 +67,7 @@ describe("createBridgeDiscovery", () => {
     discovery.stop();
   });
 
-  it("registers multiple bridges independently", async () => {
+  it("should register multiple bridges independently", async () => {
     const verify = vi.fn().mockResolvedValue({
       id: "x",
       name: "x",
@@ -87,7 +87,7 @@ describe("createBridgeDiscovery", () => {
     discovery.stop();
   });
 
-  it("ignores announcements with invalid shape", async () => {
+  it("should ignore announcements with invalid shape", async () => {
     const verify = vi.fn().mockResolvedValue({
       id: "x",
       name: "x",
@@ -108,7 +108,7 @@ describe("createBridgeDiscovery", () => {
     discovery.stop();
   });
 
-  it("posts KAIORD_BRIDGE_DISCOVER after 3s when no bridges announced", () => {
+  it("should post KAIORD_BRIDGE_DISCOVER after 3s when no bridges announced", () => {
     const postSpy = vi.spyOn(window, "postMessage");
     const discovery = createBridgeDiscovery({
       verify: vi.fn().mockResolvedValue({
@@ -130,7 +130,7 @@ describe("createBridgeDiscovery", () => {
     discovery.stop();
   });
 
-  it("does not post KAIORD_BRIDGE_DISCOVER when a bridge has already announced", async () => {
+  it("should not post KAIORD_BRIDGE_DISCOVER when a bridge has already announced", async () => {
     const postSpy = vi.spyOn(window, "postMessage");
     const discovery = createBridgeDiscovery({
       verify: vi.fn().mockResolvedValue({
@@ -153,7 +153,7 @@ describe("createBridgeDiscovery", () => {
     discovery.stop();
   });
 
-  it("notifies subscribers when a bridge is registered", async () => {
+  it("should notify subscribers when a bridge is registered", async () => {
     const listener = vi.fn();
     const discovery = createBridgeDiscovery({
       verify: vi.fn().mockResolvedValue({
@@ -174,7 +174,7 @@ describe("createBridgeDiscovery", () => {
     discovery.stop();
   });
 
-  it("unsubscribes cleanly", async () => {
+  it("should unsubscribe cleanly", async () => {
     const listener = vi.fn();
     const discovery = createBridgeDiscovery({
       verify: vi.fn().mockResolvedValue({
@@ -196,7 +196,7 @@ describe("createBridgeDiscovery", () => {
     discovery.stop();
   });
 
-  it("skips verification when the same announcement is received twice", async () => {
+  it("should skip verification when the same announcement is received twice", async () => {
     const verify = vi.fn().mockResolvedValue({
       id: "x",
       name: "x",
@@ -216,7 +216,7 @@ describe("createBridgeDiscovery", () => {
     discovery.stop();
   });
 
-  it("removes window listeners on stop()", async () => {
+  it("should remove window listeners on stop()", async () => {
     const verify = vi.fn().mockResolvedValue({
       id: "x",
       name: "x",
@@ -238,14 +238,14 @@ describe("createBridgeDiscovery", () => {
 describe("bridgeDiscovery singleton (HMR resilience)", () => {
   type GlobalShape = { __KAIORD_BRIDGE_DISCOVERY__?: unknown };
 
-  it("is parked on globalThis after first evaluation", async () => {
+  it("should be parked on globalThis after first evaluation", async () => {
     const mod = await import("./bridge-discovery");
     const g = globalThis as unknown as GlobalShape;
 
     expect(g.__KAIORD_BRIDGE_DISCOVERY__).toBe(mod.bridgeDiscovery);
   });
 
-  it("a fresh re-import returns the same instance (HMR scenario)", async () => {
+  it("should return the same instance on a fresh re-import (HMR scenario)", async () => {
     const first = await import("./bridge-discovery");
     vi.resetModules();
     const second = await import("./bridge-discovery");

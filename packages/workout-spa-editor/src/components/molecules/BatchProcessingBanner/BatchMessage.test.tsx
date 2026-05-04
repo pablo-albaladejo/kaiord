@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { BatchMessage } from "./BatchMessage";
 
 describe("BatchMessage", () => {
-  it("renders message text", () => {
+  it("should render message text", () => {
     render(
       <BatchMessage message="Processing 3 workouts..." onDismiss={vi.fn()} />
     );
@@ -13,7 +13,7 @@ describe("BatchMessage", () => {
     expect(screen.getByText("Processing 3 workouts...")).toBeInTheDocument();
   });
 
-  it("calls onDismiss when dismiss clicked", async () => {
+  it("should call onDismiss when dismiss clicked", async () => {
     const onDismiss = vi.fn();
 
     render(<BatchMessage message="Done" onDismiss={onDismiss} />);

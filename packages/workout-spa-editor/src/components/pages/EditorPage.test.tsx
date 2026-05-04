@@ -95,7 +95,7 @@ describe("EditorPage", () => {
     });
   });
 
-  it("loads workout from Dexie by ID", async () => {
+  it("should load workout from Dexie by ID", async () => {
     await db.table("workouts").add(makeRecord());
 
     renderEditor("w-test");
@@ -108,7 +108,7 @@ describe("EditorPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("shows no-data message for workout without KRD", async () => {
+  it("should show no-data message for workout without KRD", async () => {
     await db.table("workouts").add(makeRecord({ krd: null }));
 
     renderEditor("w-test");
@@ -120,7 +120,7 @@ describe("EditorPage", () => {
     });
   });
 
-  it("accept transitions structured -> ready", async () => {
+  it("should transition structured -> ready on accept", async () => {
     const user = userEvent.setup();
     await db.table("workouts").add(makeRecord({ state: "structured" }));
 
@@ -140,7 +140,7 @@ describe("EditorPage", () => {
     });
   });
 
-  it("push transitions ready -> pushed", async () => {
+  it("should transition ready -> pushed on push", async () => {
     const user = userEvent.setup();
     await db.table("workouts").add(makeRecord({ state: "ready" }));
 
@@ -161,7 +161,7 @@ describe("EditorPage", () => {
     });
   });
 
-  it("shows modified indicator for modified workouts", async () => {
+  it("should show modified indicator for modified workouts", async () => {
     await db.table("workouts").add(
       makeRecord({
         state: "modified",
@@ -179,7 +179,7 @@ describe("EditorPage", () => {
     ).toBeInTheDocument();
   });
 
-  it("re-push transitions modified -> pushed", async () => {
+  it("should transition modified -> pushed on re-push", async () => {
     const user = userEvent.setup();
     await db.table("workouts").add(
       makeRecord({

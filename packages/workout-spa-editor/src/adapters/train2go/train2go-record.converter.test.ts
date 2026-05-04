@@ -27,7 +27,7 @@ const base: Train2GoActivity = {
 const NOW = "2026-04-28T10:00:00.000Z";
 
 describe("toCoachingActivityRecord", () => {
-  it("produces composite id and stringifies sourceId at the boundary", () => {
+  it("should produce composite id and stringifies sourceId at the boundary", () => {
     const result = toCoachingActivityRecord("p1", base, NOW);
 
     expect(result.id).toBe("p1:train2go:12345");
@@ -35,7 +35,7 @@ describe("toCoachingActivityRecord", () => {
     expect(typeof result.sourceId).toBe("string");
   });
 
-  it("preserves raw workload unclamped and computes intensity 1..5", () => {
+  it("should preserve raw workload unclamped and computes intensity 1..5", () => {
     const result = toCoachingActivityRecord(
       "p1",
       { ...base, workload: 7 },
@@ -46,7 +46,7 @@ describe("toCoachingActivityRecord", () => {
     expect(result.intensity).toBe(5);
   });
 
-  it("rounds non-integer workloads to a literal intensity (no decimals)", () => {
+  it("should round non-integer workloads to a literal intensity (no decimals)", () => {
     const result = toCoachingActivityRecord(
       "p1",
       { ...base, workload: 4.7 },
@@ -58,7 +58,7 @@ describe("toCoachingActivityRecord", () => {
     expect(Number.isInteger(result.intensity)).toBe(true);
   });
 
-  it("emits intensity undefined when workload is 0", () => {
+  it("should emit intensity undefined when workload is 0", () => {
     const result = toCoachingActivityRecord(
       "p1",
       { ...base, workload: 0 },
@@ -73,7 +73,7 @@ describe("toCoachingActivityRecord", () => {
     [0, "pending"],
     [1, "completed"],
     [-1, "skipped"],
-  ] as const)("maps status %s → %s", (code, expected) => {
+  ] as const)("should map status %s → %s", (code, expected) => {
     const result = toCoachingActivityRecord(
       "p1",
       { ...base, status: code },
@@ -83,13 +83,13 @@ describe("toCoachingActivityRecord", () => {
     expect(result.status).toBe(expected);
   });
 
-  it("falls back to pending for unknown status codes", () => {
+  it("should fall back to pending for unknown status codes", () => {
     const result = toCoachingActivityRecord("p1", { ...base, status: 99 }, NOW);
 
     expect(result.status).toBe("pending");
   });
 
-  it("carries completion → completionPercent", () => {
+  it("should carry completion → completionPercent", () => {
     const result = toCoachingActivityRecord(
       "p1",
       { ...base, completion: 85 },
@@ -99,7 +99,7 @@ describe("toCoachingActivityRecord", () => {
     expect(result.completionPercent).toBe(85);
   });
 
-  it("STATUS_MAP parity test — guards against drift", () => {
+  it("should guard against drift via STATUS_MAP parity test", () => {
     expect(TRAIN2GO_STATUS_MAP).toEqual({
       0: "pending",
       1: "completed",

@@ -82,7 +82,7 @@ const makeTransport = (
 });
 
 describe("linkAccount", () => {
-  it("writes to the supplied profileId (NOT getActiveId)", async () => {
+  it("should write to the supplied profileId (NOT getActiveId)", async () => {
     const profiles = createInMemoryProfileRepository();
     await profiles.put(makeProfile("A"));
     await profiles.put(makeProfile("B"));
@@ -96,7 +96,7 @@ describe("linkAccount", () => {
     expect(b?.linkedAccounts).toEqual([]);
   });
 
-  it("throws ProfileNotFoundError when the profile was deleted", async () => {
+  it("should throw ProfileNotFoundError when the profile was deleted", async () => {
     const profiles = createInMemoryProfileRepository();
 
     await expect(
@@ -106,7 +106,7 @@ describe("linkAccount", () => {
 });
 
 describe("unlinkAccount", () => {
-  it("is a silent no-op when the profile no longer exists", async () => {
+  it("should be a silent no-op when the profile no longer exists", async () => {
     const profiles = createInMemoryProfileRepository();
 
     await expect(
@@ -114,7 +114,7 @@ describe("unlinkAccount", () => {
     ).resolves.toBeUndefined();
   });
 
-  it("is a silent no-op when the source is not linked", async () => {
+  it("should be a silent no-op when the source is not linked", async () => {
     const profiles = createInMemoryProfileRepository();
     await profiles.put(makeProfile("A"));
 
@@ -126,7 +126,7 @@ describe("unlinkAccount", () => {
     expect(a?.linkedAccounts).toEqual([]);
   });
 
-  it("removes a linked account when present", async () => {
+  it("should remove a linked account when present", async () => {
     const profiles = createInMemoryProfileRepository();
     await profiles.put(makeProfile("A", [T2G_LINK]));
 
@@ -136,7 +136,7 @@ describe("unlinkAccount", () => {
     expect(a?.linkedAccounts).toEqual([]);
   });
 
-  it("does NOT cascade to coachingActivities (disconnect retains historical activities)", async () => {
+  it("should do NOT cascade to coachingActivities (disconnect retains historical activities)", async () => {
     // Spec: "Persisted coachingActivities rows for that profile remain on disk;
     // only profile deletion fully purges them."
     const profiles = createInMemoryProfileRepository();
@@ -175,7 +175,7 @@ describe("syncWeek", () => {
     };
   });
 
-  it("errors when the profile has no link for the source", async () => {
+  it("should error when the profile has no link for the source", async () => {
     await deps.profiles.put(makeProfile("p2"));
 
     const result = await syncWeek(deps, "p2", "2026-04-13");
@@ -183,7 +183,7 @@ describe("syncWeek", () => {
     expect(result).toEqual({ ok: false, reason: "not-linked" });
   });
 
-  it("upserts fetched activities and updates lastSyncedAt", async () => {
+  it("should upsert fetched activities and updates lastSyncedAt", async () => {
     const t = makeTransport({
       readWeek: vi.fn(async () => [makeRecord({ sourceId: "1" })]),
     });
@@ -205,7 +205,7 @@ describe("syncWeek", () => {
     expect(sync?.lastSyncedAt).toBe(NOW);
   });
 
-  it("updates lastSyncedAt UNCONDITIONALLY on zero-activity responses", async () => {
+  it("should update lastSyncedAt UNCONDITIONALLY on zero-activity responses", async () => {
     const result = await syncWeek(deps, "p1", "2026-04-13");
 
     expect(result).toEqual({ ok: true, activityCount: 0, orphansDeleted: 0 });
@@ -216,7 +216,7 @@ describe("syncWeek", () => {
     expect(sync?.lastSyncedAt).toBe(NOW);
   });
 
-  it("deletes orphans within the week but leaves other weeks untouched", async () => {
+  it("should delete orphans within the week but leaves other weeks untouched", async () => {
     await deps.coaching.upsertMany([
       makeRecord({ sourceId: "in-week-orphan", date: "2026-04-15" }),
       makeRecord({ sourceId: "other-week", date: "2026-04-22" }),
@@ -241,7 +241,7 @@ describe("syncWeek", () => {
     expect(ids).toEqual(["kept", "other-week"]);
   });
 
-  it("surfaces session-expired distinctly from transport errors", async () => {
+  it("should surface session-expired distinctly from transport errors", async () => {
     const t = makeTransport({
       readWeek: vi.fn(async () => {
         throw new Error("Session expired");
@@ -256,7 +256,7 @@ describe("syncWeek", () => {
 });
 
 describe("expandDay", () => {
-  it("upserts ALL activities returned by readDay (siblings included)", async () => {
+  it("should upsert ALL activities returned by readDay (siblings included)", async () => {
     const profiles = createInMemoryProfileRepository();
     await profiles.put(makeProfile("p1", [T2G_LINK]));
     const coaching = createInMemoryCoachingRepository();
@@ -284,7 +284,7 @@ describe("expandDay", () => {
     expect(y?.description).toBe("Y desc");
   });
 
-  it("does NOT update coachingSyncState.lastSyncedAt", async () => {
+  it("should do NOT update coachingSyncState.lastSyncedAt", async () => {
     const profiles = createInMemoryProfileRepository();
     await profiles.put(makeProfile("p1", [T2G_LINK]));
     const coaching = createInMemoryCoachingRepository();
@@ -312,7 +312,7 @@ describe("convertCoachingActivity", () => {
     };
   });
 
-  it("creates a raw workout on first conversion (within profile)", async () => {
+  it("should create a raw workout on first conversion (within profile)", async () => {
     const activity = makeRecord({ profileId: "p1", sourceId: "12345" });
     await deps.coaching.put(activity);
 
@@ -324,7 +324,7 @@ describe("convertCoachingActivity", () => {
     expect(w?.sourceId).toBe("p1:12345");
   });
 
-  it("is idempotent within the same profile", async () => {
+  it("should be idempotent within the same profile", async () => {
     const activity = makeRecord({ profileId: "p1" });
     await deps.coaching.put(activity);
     await convertCoachingActivity(deps, activity.id);
@@ -335,7 +335,7 @@ describe("convertCoachingActivity", () => {
     expect(result.workoutId).toBe("wk-test-id");
   });
 
-  it("creates distinct workouts in different profiles for the same source activity", async () => {
+  it("should create distinct workouts in different profiles for the same source activity", async () => {
     let counter = 0;
     deps = {
       ...deps,
@@ -356,7 +356,7 @@ describe("convertCoachingActivity", () => {
     expect(w2?.sourceId).toBe("p2:12345");
   });
 
-  it("preserves the coachingActivities row after a successful conversion", async () => {
+  it("should preserve the coachingActivities row after a successful conversion", async () => {
     // The conversion creates a Workout (state: "raw"); the source coaching row
     // MUST remain on disk so re-conversion is idempotent and the user can
     // re-run the conversion or inspect history. This is locked in here so a
@@ -374,7 +374,7 @@ describe("convertCoachingActivity", () => {
     expect(stillThere).toEqual(activity);
   });
 
-  it("re-throws when WorkoutRepository.put rejects (so caller does not navigate)", async () => {
+  it("should re-throw when WorkoutRepository.put rejects (so caller does not navigate)", async () => {
     const activity = makeRecord();
     await deps.coaching.put(activity);
     const failingWorkouts = createInMemoryWorkoutRepository();
@@ -407,7 +407,7 @@ describe("attemptLink", () => {
     } as Parameters<typeof attemptLink>[0];
   };
 
-  it("aborts cleanly mid-poll without writing the link", async () => {
+  it("should abort cleanly mid-poll without writing the link", async () => {
     const profiles = createInMemoryProfileRepository();
     await profiles.put(makeProfile("A"));
     const controller = new AbortController();
@@ -423,7 +423,7 @@ describe("attemptLink", () => {
     expect(a?.linkedAccounts).toEqual([]);
   });
 
-  it("returns aborted and writes nothing when the signal is aborted mid-poll", async () => {
+  it("should return aborted and writes nothing when the signal is aborted mid-poll", async () => {
     // Distinct from "aborts cleanly mid-poll without writing the link" above:
     // there, signal.aborted is already true on entry (early return). Here, the
     // call begins on a non-aborted signal, parks at the in-loop delay() await,
@@ -458,7 +458,7 @@ describe("attemptLink", () => {
     expect(a?.linkedAccounts).toEqual([]);
   });
 
-  it("links to the captured target profile even if the active profile changed", async () => {
+  it("should link to the captured target profile even if the active profile changed", async () => {
     const profiles = createInMemoryProfileRepository();
     await profiles.put(makeProfile("A"));
     await profiles.put(makeProfile("B"));
@@ -491,7 +491,7 @@ describe("attemptLink", () => {
     expect(b?.linkedAccounts).toHaveLength(0);
   });
 
-  it("returns profile-deleted when the target profile is gone at write time", async () => {
+  it("should return profile-deleted when the target profile is gone at write time", async () => {
     const profiles = createInMemoryProfileRepository();
     const ping = vi.fn<() => Promise<CoachingPingResult>>().mockResolvedValue({
       sessionActive: true,
@@ -505,7 +505,7 @@ describe("attemptLink", () => {
     expect(result).toEqual({ ok: false, reason: "profile-deleted" });
   });
 
-  it("times out as session-not-active after maxAttempts pings without a session", async () => {
+  it("should time out as session-not-active after maxAttempts pings without a session", async () => {
     const profiles = createInMemoryProfileRepository();
     await profiles.put(makeProfile("A"));
     const deps = makeDeps({ profiles });

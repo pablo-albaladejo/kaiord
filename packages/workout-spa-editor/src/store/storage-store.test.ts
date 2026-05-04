@@ -42,7 +42,7 @@ describe("storage-store", () => {
     expect(store.getState().status).toBe("failed");
   });
 
-  it("is idempotent — second call does not re-probe", async () => {
+  it("should be idempotent — second call does not re-probe", async () => {
     const probe = vi.fn().mockResolvedValue("complete");
     const store = createStorageStore({ probe });
 
@@ -53,7 +53,7 @@ describe("storage-store", () => {
     expect(store.getState().status).toBe("ok");
   });
 
-  it("concurrent calls share the same in-flight probe", async () => {
+  it("should share the same in-flight probe across concurrent calls", async () => {
     const probe = vi.fn().mockResolvedValue("complete");
     const store = createStorageStore({ probe });
 
@@ -62,7 +62,7 @@ describe("storage-store", () => {
     expect(probe).toHaveBeenCalledTimes(1);
   });
 
-  it("exposes a stable status shape for subscribers", async () => {
+  it("should expose a stable status shape for subscribers", async () => {
     const probe = vi.fn().mockResolvedValue("failed");
     const store = createStorageStore({ probe });
 

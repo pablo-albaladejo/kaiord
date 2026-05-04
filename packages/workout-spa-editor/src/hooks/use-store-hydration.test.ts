@@ -25,7 +25,7 @@ vi.mock("./use-train2go-detection", () => ({
 import { useStoreHydration } from "./use-store-hydration";
 
 describe("useStoreHydration", () => {
-  it("delegates to every persisted-state runtime detector", () => {
+  it("should delegate to every persisted-state runtime detector", () => {
     renderHook(() => useStoreHydration());
 
     expect(mockUseStorageProbe).toHaveBeenCalledTimes(1);

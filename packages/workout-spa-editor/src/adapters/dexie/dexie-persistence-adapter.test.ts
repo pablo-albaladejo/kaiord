@@ -385,7 +385,7 @@ describe("DexieAiProviderRepository", () => {
     expect(await aiProviders.getById("ai-1")).toBeUndefined();
   });
 
-  it("returns providers in createdAt order regardless of UUID-pk order", async () => {
+  it("should return providers in createdAt order regardless of UUID-pk order", async () => {
     // Pick UUIDs whose alphabetic order is the OPPOSITE of their
     // createdAt order so any reliance on PK ordering surfaces here.
     const { aiProviders } = createDexiePersistence(testDb);
@@ -522,7 +522,7 @@ describe("DexieUsageRepository", () => {
 // --- Transaction (multi-write atomicity) ---
 
 describe("DexiePersistence.transaction", () => {
-  it("commits both writes on success", async () => {
+  it("should commit both writes on success", async () => {
     const persistence = createDexiePersistence(testDb);
     const profile = makeProfile({ id: PROFILE_UUID_1 });
 
@@ -535,7 +535,7 @@ describe("DexiePersistence.transaction", () => {
     expect(await persistence.profiles.getActiveId()).toBe(PROFILE_UUID_1);
   });
 
-  it("rolls back both writes when the callback rejects", async () => {
+  it("should roll back both writes when the callback rejects", async () => {
     const persistence = createDexiePersistence(testDb);
     const profile = makeProfile({ id: PROFILE_UUID_1 });
 
@@ -551,7 +551,7 @@ describe("DexiePersistence.transaction", () => {
     expect(await persistence.profiles.getActiveId()).toBeNull();
   });
 
-  it("rolls back a write even when no second write follows (fake-indexeddb sanity)", async () => {
+  it("should roll back a write even when no second write follows (fake-indexeddb sanity)", async () => {
     // Sanity sub-test from task 1A.0.2: verifies fake-indexeddb honors
     // Dexie's transaction.abort() — write A then throw, expect getAll()
     // to return [] after rollback.

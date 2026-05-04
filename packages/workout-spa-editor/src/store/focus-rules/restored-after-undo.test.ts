@@ -20,7 +20,7 @@ const workoutWith = (ids: Array<string>): Workout =>
   }) as unknown as Workout;
 
 describe("restoredAfterUndoTarget", () => {
-  it("focuses the restored item when it exists in the post-undo workout", () => {
+  it("should focus the restored item when it exists in the post-undo workout", () => {
     // Arrange
     const workout = workoutWith(["a", "b", "c"]);
 
@@ -31,7 +31,7 @@ describe("restoredAfterUndoTarget", () => {
     expect(target).toEqual({ kind: "item", id: "b" });
   });
 
-  it("falls back to empty-state when the workout is undefined", () => {
+  it("should fall back to empty-state when the workout is undefined", () => {
     // Act
     const target = restoredAfterUndoTarget(undefined, asItemId("ghost"));
 
@@ -39,7 +39,7 @@ describe("restoredAfterUndoTarget", () => {
     expect(target).toEqual({ kind: "empty-state" });
   });
 
-  it("falls back to empty-state when the restored id is not present", () => {
+  it("should fall back to empty-state when the restored id is not present", () => {
     // Arrange
     const workout = workoutWith(["a", "b"]);
 
@@ -50,7 +50,7 @@ describe("restoredAfterUndoTarget", () => {
     expect(target).toEqual({ kind: "empty-state" });
   });
 
-  it("also resolves restored nested-step ids inside a repetition block", () => {
+  it("should also resolve restored nested-step ids inside a repetition block", () => {
     // Arrange
     const workout = {
       sport: "cycling",

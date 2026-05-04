@@ -5,7 +5,7 @@ import { describe, expect, it, vi } from "vitest";
 import { EmptyWorkoutState } from "./EmptyWorkoutState";
 
 describe("EmptyWorkoutState", () => {
-  it("renders heading and description", () => {
+  it("should render heading and description", () => {
     const onAddStep = vi.fn();
 
     render(<EmptyWorkoutState onAddStep={onAddStep} />);
@@ -16,7 +16,7 @@ describe("EmptyWorkoutState", () => {
     ).toBeInTheDocument();
   });
 
-  it("calls onAddStep when button is clicked", async () => {
+  it("should call onAddStep when button is clicked", async () => {
     const user = userEvent.setup();
     const onAddStep = vi.fn();
 
@@ -27,7 +27,7 @@ describe("EmptyWorkoutState", () => {
     expect(onAddStep).toHaveBeenCalledTimes(1);
   });
 
-  it("has correct accessibility attributes", () => {
+  it("should have correct accessibility attributes", () => {
     const onAddStep = vi.fn();
 
     render(<EmptyWorkoutState onAddStep={onAddStep} />);

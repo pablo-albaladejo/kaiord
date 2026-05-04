@@ -43,7 +43,7 @@ describe("useActiveProfileLive", () => {
   beforeEach(clear);
   afterEach(clear);
 
-  it("returns { id: null, profile: null } when no active profile is set", async () => {
+  it("should return { id: null, profile: null } when no active profile is set", async () => {
     const { result } = renderHook(() => useActiveProfileLive());
 
     await waitFor(() => {
@@ -51,7 +51,7 @@ describe("useActiveProfileLive", () => {
     });
   });
 
-  it("resolves to the active profile and re-fires when active id changes", async () => {
+  it("should resolve to the active profile and re-fires when active id changes", async () => {
     const persistence = createDexiePersistence(db);
     await persistence.profiles.put(makeProfile(PROFILE_A, "A"));
     await persistence.profiles.setActiveId(PROFILE_A);
@@ -72,7 +72,7 @@ describe("useActiveProfileLive", () => {
     });
   });
 
-  it("never observes an intermediate { id: B, profile: ProfileA | null } during a same-tab transition", async () => {
+  it("should never observe an intermediate { id: B, profile: ProfileA | null } during a same-tab transition", async () => {
     const persistence = createDexiePersistence(db);
     await persistence.profiles.put(makeProfile(PROFILE_A, "A"));
     await persistence.profiles.put(makeProfile(PROFILE_B, "B"));

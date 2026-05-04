@@ -16,7 +16,7 @@ const parseZwiftXml = (xmlString: string): unknown => {
 };
 
 describe("convertZwiftToKRD (characterization)", () => {
-  it("produces a structured_workout KRD at version 1.0", () => {
+  it("should produce a structured_workout KRD at version 1.0", () => {
     const zwoXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
     const zwoData = parseZwiftXml(zwoXml);
     const logger = createMockLogger();
@@ -27,7 +27,7 @@ describe("convertZwiftToKRD (characterization)", () => {
     expect(krd.type).toBe("structured_workout");
   });
 
-  it("maps sportType=bike to cycling in metadata", () => {
+  it("should map sportType=bike to cycling in metadata", () => {
     const zwoXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
     const zwoData = parseZwiftXml(zwoXml);
     const logger = createMockLogger();
@@ -37,7 +37,7 @@ describe("convertZwiftToKRD (characterization)", () => {
     expect(krd.metadata.sport).toBe("cycling");
   });
 
-  it("preserves workout name in extensions.structured_workout.name", () => {
+  it("should preserve workout name in extensions.structured_workout.name", () => {
     const zwoXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
     const zwoData = parseZwiftXml(zwoXml);
     const logger = createMockLogger();
@@ -48,7 +48,7 @@ describe("convertZwiftToKRD (characterization)", () => {
     expect(sw?.name).toBe("Example 1");
   });
 
-  it("emits one step per SteadyState block in the source XML", () => {
+  it("should emit one step per SteadyState block in the source XML", () => {
     const zwoXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
     const zwoData = parseZwiftXml(zwoXml);
     const logger = createMockLogger();
@@ -60,7 +60,7 @@ describe("convertZwiftToKRD (characterization)", () => {
     expect(sw?.steps?.length).toBe(4);
   });
 
-  it("populates the zwift extensions block with author/description/durationType", () => {
+  it("should populate the zwift extensions block with author/description/durationType", () => {
     const zwoXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
     const zwoData = parseZwiftXml(zwoXml);
     const logger = createMockLogger();
@@ -78,7 +78,7 @@ describe("convertZwiftToKRD (characterization)", () => {
     expect(zwift?.durationType).toBe("time");
   });
 
-  it("captures kaiord round-trip metadata attributes when present", () => {
+  it("should capture kaiord round-trip metadata attributes when present", () => {
     const zwoXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
     const zwoData = parseZwiftXml(zwoXml);
     const logger = createMockLogger();
@@ -92,7 +92,7 @@ describe("convertZwiftToKRD (characterization)", () => {
     expect(krd.metadata.created).toBe("2009-09-09T20:38:00.000Z");
   });
 
-  it("emits a non-empty steps array for the repeat fixture", () => {
+  it("should emit a non-empty steps array for the repeat fixture", () => {
     const zwoXml = loadZwoFixture("WorkoutRepeatSteps.zwo");
     const zwoData = parseZwiftXml(zwoXml);
     const logger = createMockLogger();

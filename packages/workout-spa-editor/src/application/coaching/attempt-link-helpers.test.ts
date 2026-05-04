@@ -22,11 +22,11 @@ const makeTransport = (
 });
 
 describe("attempt-link helpers", () => {
-  it("aborted() returns the canonical aborted shape", () => {
+  it("should return the canonical aborted shape via aborted()", () => {
     expect(aborted()).toEqual({ ok: false, reason: "aborted" });
   });
 
-  it("transportError() converts Error and string-coerces unknown", () => {
+  it("should convert Error and string-coerce unknown via transportError()", () => {
     expect(transportError(new Error("fail"))).toEqual({
       ok: false,
       reason: "transport-error",
@@ -39,12 +39,12 @@ describe("attempt-link helpers", () => {
     });
   });
 
-  it("safeOpenExternal returns null on success", async () => {
+  it("should return null on success via safeOpenExternal", async () => {
     const t = makeTransport({ openExternal: vi.fn(async () => undefined) });
     expect(await safeOpenExternal(t)).toBeNull();
   });
 
-  it("safeOpenExternal returns transportError on rejection", async () => {
+  it("should return transportError on rejection via safeOpenExternal", async () => {
     const t = makeTransport({
       openExternal: vi.fn(async () => {
         throw new Error("denied");
@@ -60,7 +60,7 @@ describe("attempt-link helpers", () => {
     });
   });
 
-  it("safeOpenExternal returns null when signal is aborted (caller gates)", async () => {
+  it("should return null when signal is aborted via safeOpenExternal (caller gates)", async () => {
     const t = makeTransport({
       openExternal: vi.fn(async () => {
         throw new Error("denied");
@@ -72,7 +72,7 @@ describe("attempt-link helpers", () => {
     expect(await safeOpenExternal(t, ctrl.signal)).toBeNull();
   });
 
-  it("persistLinkOrDeleted returns ok:true when linkAccount succeeds", async () => {
+  it("should return ok:true when linkAccount succeeds via persistLinkOrDeleted", async () => {
     const profiles = createInMemoryProfileRepository();
     await profiles.put({
       id: "p1",
@@ -99,7 +99,7 @@ describe("attempt-link helpers", () => {
     expect(result).toEqual({ ok: true });
   });
 
-  it("persistLinkOrDeleted returns profile-deleted on ProfileNotFoundError", async () => {
+  it("should return profile-deleted on ProfileNotFoundError via persistLinkOrDeleted", async () => {
     const profiles = createInMemoryProfileRepository();
     const t = makeTransport();
 
@@ -118,7 +118,7 @@ describe("attempt-link helpers", () => {
     expect(result).toEqual({ ok: false, reason: "profile-deleted" });
   });
 
-  it("persistLinkOrDeleted re-throws non-ProfileNotFoundError errors", async () => {
+  it("should re-throw non-ProfileNotFoundError errors via persistLinkOrDeleted", async () => {
     const failing = createInMemoryProfileRepository();
     failing.getById = async () => {
       throw new Error("network error");
@@ -140,7 +140,7 @@ describe("attempt-link helpers", () => {
     ).rejects.toThrow("network error");
   });
 
-  it("ProfileNotFoundError is matched via instanceof", () => {
+  it("should match ProfileNotFoundError via instanceof", () => {
     const err = new ProfileNotFoundError("p1");
     expect(err).toBeInstanceOf(ProfileNotFoundError);
     expect(err.profileId).toBe("p1");

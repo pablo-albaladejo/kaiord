@@ -23,7 +23,7 @@ describe("buildRouteErrorPayload", () => {
   });
 
   describe("route", () => {
-    it("uses window.location.pathname", () => {
+    it("should use window.location.pathname", () => {
       setPath("/calendar/2026-W18");
 
       const out = buildRouteErrorPayload(
@@ -35,7 +35,7 @@ describe("buildRouteErrorPayload", () => {
       expect(out.route).toBe("/calendar/2026-W18");
     });
 
-    it("scrubs UUIDs in the route", () => {
+    it("should scrub UUIDs in the route", () => {
       setPath("/workout/6e3ad6f0-1234-4cdf-9abc-1234567890ab");
 
       const out = buildRouteErrorPayload(
@@ -49,7 +49,7 @@ describe("buildRouteErrorPayload", () => {
   });
 
   describe("name", () => {
-    it("uses error.name", () => {
+    it("should use error.name", () => {
       const err = new Error("x");
       err.name = "TypeError";
 
@@ -77,7 +77,7 @@ describe("buildRouteErrorPayload", () => {
   });
 
   describe("message", () => {
-    it("scrubs UUID in the message", () => {
+    it("should scrub UUID in the message", () => {
       const out = buildRouteErrorPayload(
         new Error("not found: 6e3ad6f0-1234-4cdf-9abc-1234567890ab"),
         { componentStack: "" },
@@ -87,7 +87,7 @@ describe("buildRouteErrorPayload", () => {
       expect(out.message).toBe("not found: <uuid>");
     });
 
-    it("falls back to empty string when message is undefined", () => {
+    it("should fall back to empty string when message is undefined", () => {
       const err = new Error();
 
       const out = buildRouteErrorPayload(
@@ -99,7 +99,7 @@ describe("buildRouteErrorPayload", () => {
       expect(out.message).toBe("");
     });
 
-    it("truncates a 600-char message to exactly 500 chars", () => {
+    it("should truncate a 600-char message to exactly 500 chars", () => {
       const out = buildRouteErrorPayload(
         new Error(".".repeat(600)),
         { componentStack: "" },
@@ -111,7 +111,7 @@ describe("buildRouteErrorPayload", () => {
   });
 
   describe("componentStack", () => {
-    it("scrubs a multi-line stack with embedded UUID", () => {
+    it("should scrub a multi-line stack with embedded UUID", () => {
       const stack = [
         "    in CoachingActivityDialog",
         "    in DialogContent (id=6e3ad6f0-1234-4cdf-9abc-1234567890ab)",
@@ -129,7 +129,7 @@ describe("buildRouteErrorPayload", () => {
       expect(out.componentStack.split("\n")).toHaveLength(4);
     });
 
-    it("falls back to empty string when componentStack is undefined", () => {
+    it("should fall back to empty string when componentStack is undefined", () => {
       const out = buildRouteErrorPayload(
         new Error("x"),
         { componentStack: undefined as unknown as string },
@@ -139,7 +139,7 @@ describe("buildRouteErrorPayload", () => {
       expect(out.componentStack).toBe("");
     });
 
-    it("truncates a 1100-char componentStack to exactly 1000 chars", () => {
+    it("should truncate a 1100-char componentStack to exactly 1000 chars", () => {
       const out = buildRouteErrorPayload(
         new Error("x"),
         { componentStack: ".".repeat(1100) },
@@ -150,7 +150,7 @@ describe("buildRouteErrorPayload", () => {
     });
   });
 
-  it("returns all four fields with safe defaults for an empty error", () => {
+  it("should return all four fields with safe defaults for an empty error", () => {
     const err = new Error();
     err.name = "";
 

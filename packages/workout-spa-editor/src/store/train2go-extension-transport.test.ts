@@ -24,7 +24,7 @@ describe("train2go-extension-transport", () => {
   });
 
   describe("ping (Train2GoPingResult)", () => {
-    it("returns sessionActive on first success", async () => {
+    it("should return sessionActive on first success", async () => {
       const mockSend = vi.fn(
         (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
           cb({
@@ -45,7 +45,7 @@ describe("train2go-extension-transport", () => {
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
-    it("stringifies userId at the boundary (lossless capture)", async () => {
+    it("should stringify userId at the boundary (lossless capture)", async () => {
       const mockSend = vi.fn(
         (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
           cb({
@@ -66,7 +66,7 @@ describe("train2go-extension-transport", () => {
       expect(result.externalUserName).toBe("Pablo");
     });
 
-    it("passes through string userIds verbatim (no double-stringify)", async () => {
+    it("should pass through string userIds verbatim (no double-stringify)", async () => {
       const giant = "9999999999999999";
       const mockSend = vi.fn(
         (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
@@ -86,7 +86,7 @@ describe("train2go-extension-transport", () => {
       expect(result.externalUserId).toBe(giant);
     });
 
-    it("retries on timeout", async () => {
+    it("should retry on timeout", async () => {
       let callCount = 0;
       const mockSend = vi.fn(
         (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
@@ -109,7 +109,7 @@ describe("train2go-extension-transport", () => {
       expect(mockSend).toHaveBeenCalledTimes(2);
     });
 
-    it("returns ok:false with error when chrome is unavailable", async () => {
+    it("should return ok:false with error when chrome is unavailable", async () => {
       delete (globalThis as Record<string, unknown>).chrome;
 
       const result = await ping("ext-id");
@@ -120,7 +120,7 @@ describe("train2go-extension-transport", () => {
       expect(result.externalUserId).toBeNull();
     });
 
-    it("does not retry on lastError", async () => {
+    it("should not retry on lastError", async () => {
       const mockSend = vi.fn(
         (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
           (
@@ -143,7 +143,7 @@ describe("train2go-extension-transport", () => {
   });
 
   describe("readWeek", () => {
-    it("sends read-week with stringified userId", async () => {
+    it("should send read-week with stringified userId", async () => {
       const mockSend = vi.fn(
         (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
           cb({ ok: true, data: { activities: [{ id: 1 }] } });
@@ -163,7 +163,7 @@ describe("train2go-extension-transport", () => {
       );
     });
 
-    it("resolves with timeout on no response", async () => {
+    it("should resolve with timeout on no response", async () => {
       const mockSend = vi.fn();
       (globalThis as Record<string, unknown>).chrome = {
         runtime: { lastError: null, sendMessage: mockSend },
@@ -178,7 +178,7 @@ describe("train2go-extension-transport", () => {
   });
 
   describe("readDay", () => {
-    it("sends read-day with stringified userId", async () => {
+    it("should send read-day with stringified userId", async () => {
       const mockSend = vi.fn(
         (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
           cb({ ok: true, data: { activities: [{ id: 2 }] } });
@@ -200,7 +200,7 @@ describe("train2go-extension-transport", () => {
   });
 
   describe("openTrain2Go", () => {
-    it("sends open-train2go action", async () => {
+    it("should send open-train2go action", async () => {
       const mockSend = vi.fn(
         (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
           cb({ ok: true });
@@ -222,7 +222,7 @@ describe("train2go-extension-transport", () => {
   });
 
   describe("sendMessage edge cases", () => {
-    it("ping resolves with ok:false when sendMessage throws", async () => {
+    it("should resolve ping with ok:false when sendMessage throws", async () => {
       const mockSend = vi.fn(() => {
         throw new Error("fail");
       });
@@ -236,7 +236,7 @@ describe("train2go-extension-transport", () => {
       expect(result.error).toBe("Extension not available");
     });
 
-    it("ping resolves with No response when callback gets null", async () => {
+    it("should resolve ping with No response when callback gets null", async () => {
       const mockSend = vi.fn(
         (_id: string, _msg: unknown, cb: (r: unknown) => void) => {
           cb(null);

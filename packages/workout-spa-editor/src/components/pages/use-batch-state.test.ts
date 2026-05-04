@@ -62,7 +62,7 @@ describe("useBatchState (two-phase start)", () => {
     runSpy.mockResolvedValue();
   });
 
-  it("surfaces a message when no providers are configured", async () => {
+  it("should surface a message when no providers are configured", async () => {
     mockProviderCount = 0;
     const { result } = renderHook(() =>
       useBatchState("2026-04-13", "2026-04-19")
@@ -76,7 +76,7 @@ describe("useBatchState (two-phase start)", () => {
     expect(result.current.pending).toBeNull();
   });
 
-  it("surfaces prepareBatch errors without dispatching the run", async () => {
+  it("should surface prepareBatch errors without dispatching the run", async () => {
     mockProviderCount = 1;
     mockPrep = { ok: false, message: "No raw workouts to process this week." };
 
@@ -95,7 +95,7 @@ describe("useBatchState (two-phase start)", () => {
     expect(runSpy).not.toHaveBeenCalled();
   });
 
-  it("stages pending on successful requestStart without auto-dispatching", async () => {
+  it("should stage pending on successful requestStart without auto-dispatching", async () => {
     mockProviderCount = 1;
     mockPrep = { ok: true, provider, workouts: [workout] };
 
@@ -114,7 +114,7 @@ describe("useBatchState (two-phase start)", () => {
     expect(runSpy).not.toHaveBeenCalled();
   });
 
-  it("confirmStart runs the staged batch and clears pending", async () => {
+  it("should run the staged batch and clear pending via confirmStart", async () => {
     mockProviderCount = 1;
     mockPrep = { ok: true, provider, workouts: [workout] };
 
@@ -137,7 +137,7 @@ describe("useBatchState (two-phase start)", () => {
     expect(result.current.pending).toBeNull();
   });
 
-  it("cancelRequest clears pending without calling run", async () => {
+  it("should clear pending without calling run via cancelRequest", async () => {
     mockProviderCount = 1;
     mockPrep = { ok: true, provider, workouts: [workout] };
 
@@ -156,7 +156,7 @@ describe("useBatchState (two-phase start)", () => {
     expect(runSpy).not.toHaveBeenCalled();
   });
 
-  it("confirmStart is a no-op when nothing is pending", async () => {
+  it("should be a no-op via confirmStart when nothing is pending", async () => {
     mockProviderCount = 1;
 
     const { result } = renderHook(() =>

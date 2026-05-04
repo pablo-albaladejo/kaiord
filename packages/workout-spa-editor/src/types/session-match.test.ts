@@ -18,7 +18,7 @@ const baseRow = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
 });
 
 describe("sessionMatchSourceSchema", () => {
-  it("accepts the three documented provenance values", () => {
+  it("should accept the three documented provenance values", () => {
     expect(sessionMatchSourceSchema.parse("manual")).toBe("manual");
     expect(sessionMatchSourceSchema.parse("auto-suggestion")).toBe(
       "auto-suggestion"
@@ -28,7 +28,7 @@ describe("sessionMatchSourceSchema", () => {
     );
   });
 
-  it("rejects any other value", () => {
+  it("should reject any other value", () => {
     expect(() => sessionMatchSourceSchema.parse("auto")).toThrow();
     expect(() => sessionMatchSourceSchema.parse("system")).toThrow();
     expect(() => sessionMatchSourceSchema.parse("")).toThrow();
@@ -36,7 +36,7 @@ describe("sessionMatchSourceSchema", () => {
 });
 
 describe("sessionMatchSchema", () => {
-  it("accepts a well-formed row with each provenance value", () => {
+  it("should accept a well-formed row with each provenance value", () => {
     expect(sessionMatchSchema.parse(baseRow({ source: "manual" })).source).toBe(
       "manual"
     );
@@ -48,7 +48,7 @@ describe("sessionMatchSchema", () => {
     ).toBe("auto-conversion");
   });
 
-  it("requires non-empty id, profileId, coachingActivityId, workoutId", () => {
+  it("should require non-empty id, profileId, coachingActivityId, workoutId", () => {
     expect(() => sessionMatchSchema.parse(baseRow({ id: "" }))).toThrow();
     expect(() =>
       sessionMatchSchema.parse(baseRow({ profileId: "" }))
@@ -61,7 +61,7 @@ describe("sessionMatchSchema", () => {
     ).toThrow();
   });
 
-  it("requires createdAt to be ISO datetime", () => {
+  it("should require createdAt to be ISO datetime", () => {
     expect(() =>
       sessionMatchSchema.parse(baseRow({ createdAt: "not-a-date" }))
     ).toThrow();
@@ -70,14 +70,14 @@ describe("sessionMatchSchema", () => {
     ).toThrow();
   });
 
-  it("requires date to match YYYY-MM-DD", () => {
+  it("should require date to match YYYY-MM-DD", () => {
     expect(() => sessionMatchSchema.parse(baseRow({ date: "2026" }))).toThrow();
     expect(() =>
       sessionMatchSchema.parse(baseRow({ date: "2026-04-29T00:00" }))
     ).toThrow();
   });
 
-  it("rejects unknown source values", () => {
+  it("should reject unknown source values", () => {
     expect(() =>
       // @ts-expect-error — verifying runtime rejection of disallowed literal
       sessionMatchSchema.parse(baseRow({ source: "auto" }))

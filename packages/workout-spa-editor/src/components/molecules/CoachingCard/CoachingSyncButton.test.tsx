@@ -27,7 +27,7 @@ describe("CoachingSyncButton — not-connected state", () => {
   beforeEach(() => mockMatchMedia(false));
   afterEach(() => vi.restoreAllMocks());
 
-  it("renders connect CTA with the platform label", () => {
+  it("should render connect CTA with the platform label", () => {
     render(
       <CoachingSyncButton
         connected={false}
@@ -42,7 +42,7 @@ describe("CoachingSyncButton — not-connected state", () => {
     expect(screen.getByText("Connect to Train2Go")).toBeInTheDocument();
   });
 
-  it("shows error text alongside the connect CTA", () => {
+  it("should show error text alongside the connect CTA", () => {
     render(
       <CoachingSyncButton
         connected={false}
@@ -56,7 +56,7 @@ describe("CoachingSyncButton — not-connected state", () => {
     expect(screen.getByText("Session expired")).toBeInTheDocument();
   });
 
-  it("invokes onConnect when the CTA is clicked", async () => {
+  it("should invoke onConnect when the CTA is clicked", async () => {
     const onConnect = vi.fn();
     render(
       <CoachingSyncButton
@@ -96,7 +96,7 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
     expect(screen.queryByText("Sync Train2Go")).toBeNull();
   });
 
-  it("surfaces the relative-time tooltip via the title attribute", () => {
+  it("should surface the relative-time tooltip via the title attribute", () => {
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     render(
       <CoachingSyncButton
@@ -130,7 +130,7 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
     expect(button.getAttribute("title")).toBe("Train2Go · never synced");
   });
 
-  it("replaces the icon with a spinner in place during sync and disables the button", () => {
+  it("should replace the icon with a spinner in place during sync and disables the button", () => {
     render(
       <CoachingSyncButton
         connected={true}
@@ -150,7 +150,7 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
     expect(spinner?.getAttribute("class")).toMatch(/animate-spin/);
   });
 
-  it("invokes onSync when clicked", async () => {
+  it("should invoke onSync when clicked", async () => {
     const onSync = vi.fn();
     render(
       <CoachingSyncButton
@@ -175,7 +175,7 @@ describe("CoachingSyncButton — prefers-reduced-motion", () => {
   beforeEach(() => mockMatchMedia(true));
   afterEach(() => vi.restoreAllMocks());
 
-  it("collapses the spinner to a static glyph (no animate-spin class)", () => {
+  it("should collapse the spinner to a static glyph (no animate-spin class)", () => {
     render(
       <CoachingSyncButton
         connected={true}

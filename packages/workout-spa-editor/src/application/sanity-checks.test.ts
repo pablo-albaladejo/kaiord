@@ -4,7 +4,7 @@ import { validateSanity } from "./sanity-checks";
 import { makeValidKrd } from "./test-helpers";
 
 describe("validateSanity", () => {
-  it("returns null for valid KRD", () => {
+  it("should return null for valid KRD", () => {
     const krd = makeValidKrd(5, 3600);
 
     const result = validateSanity(krd);
@@ -12,7 +12,7 @@ describe("validateSanity", () => {
     expect(result).toBeNull();
   });
 
-  it("rejects zero steps", () => {
+  it("should reject zero steps", () => {
     const krd = makeValidKrd(0, 3600);
 
     const result = validateSanity(krd);
@@ -20,7 +20,7 @@ describe("validateSanity", () => {
     expect(result).toContain("Step count 0");
   });
 
-  it("rejects more than 200 steps", () => {
+  it("should reject more than 200 steps", () => {
     const krd = makeValidKrd(201, 3600);
 
     const result = validateSanity(krd);
@@ -28,7 +28,7 @@ describe("validateSanity", () => {
     expect(result).toContain("Step count 201");
   });
 
-  it("rejects duration under 1 minute", () => {
+  it("should reject duration under 1 minute", () => {
     const krd = makeValidKrd(3, 30);
 
     const result = validateSanity(krd);
@@ -36,7 +36,7 @@ describe("validateSanity", () => {
     expect(result).toContain("Duration 30s");
   });
 
-  it("rejects duration over 8 hours", () => {
+  it("should reject duration over 8 hours", () => {
     const krd = makeValidKrd(3, 30000);
 
     const result = validateSanity(krd);
@@ -44,7 +44,7 @@ describe("validateSanity", () => {
     expect(result).toContain("Duration 30000s");
   });
 
-  it("accepts KRD without structured_workout extension", () => {
+  it("should accept KRD without structured_workout extension", () => {
     const krd = makeValidKrd();
     delete krd.extensions;
 
@@ -53,7 +53,7 @@ describe("validateSanity", () => {
     expect(result).toBeNull();
   });
 
-  it("accepts KRD with no steps array", () => {
+  it("should accept KRD with no steps array", () => {
     const krd = makeValidKrd();
     const ext = krd.extensions!["structured_workout"] as Record<
       string,
@@ -66,7 +66,7 @@ describe("validateSanity", () => {
     expect(result).toBeNull();
   });
 
-  it("accepts KRD with no estimatedDuration", () => {
+  it("should accept KRD with no estimatedDuration", () => {
     const krd = makeValidKrd();
     const ext = krd.extensions!["structured_workout"] as Record<
       string,

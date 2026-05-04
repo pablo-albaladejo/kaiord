@@ -70,7 +70,7 @@ describe("CalendarPage", () => {
     await db.table("workouts").clear();
   });
 
-  it("shows first-visit state when no workouts exist", async () => {
+  it("should show first-visit state when no workouts exist", async () => {
     renderCalendar();
 
     await waitFor(() => {
@@ -78,7 +78,7 @@ describe("CalendarPage", () => {
     });
   });
 
-  it("shows empty-week state when workouts exist in other weeks", async () => {
+  it("should show empty-week state when workouts exist in other weeks", async () => {
     await db.table("workouts").add(makeWorkout({ date: "2026-03-30" }));
 
     renderCalendar();
@@ -88,7 +88,7 @@ describe("CalendarPage", () => {
     });
   });
 
-  it("renders workout cards in the correct day column", async () => {
+  it("should render workout cards in the correct day column", async () => {
     const workout = makeWorkout({ id: "w-mon", date: "2026-04-06" });
     await db.table("workouts").add(workout);
 
@@ -97,7 +97,7 @@ describe("CalendarPage", () => {
     expect(await screen.findByTestId("workout-card-w-mon")).toBeInTheDocument();
   });
 
-  it("shows batch processing banner when raw workouts exist", async () => {
+  it("should show batch processing banner when raw workouts exist", async () => {
     await db.table("workouts").add(makeWorkout({ date: "2026-04-07" }));
     await db
       .table("workouts")
@@ -110,7 +110,7 @@ describe("CalendarPage", () => {
     });
   });
 
-  it("stacks multiple workouts per day by createdAt", async () => {
+  it("should stack multiple workouts per day by createdAt", async () => {
     const w1 = makeWorkout({
       id: "w-early",
       date: "2026-04-06",
@@ -151,7 +151,7 @@ describe("CalendarPage", () => {
     });
   });
 
-  it("shows week navigation controls", async () => {
+  it("should show week navigation controls", async () => {
     await db.table("workouts").add(makeWorkout({ date: "2026-04-06" }));
 
     renderCalendar();

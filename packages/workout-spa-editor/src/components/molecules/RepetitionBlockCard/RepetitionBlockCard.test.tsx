@@ -519,7 +519,7 @@ describe("RepetitionBlockCard", () => {
      * component keys React children by that id rather than a positional
      * `block-N-step-M` string.
      */
-    it("renders one step card per inner step of a multi-step block", () => {
+    it("should render one step card per inner step of a multi-step block", () => {
       // Arrange
       const blockIndex = 2;
       const multiStepBlock: RepetitionBlock = {
@@ -571,7 +571,7 @@ describe("RepetitionBlockCard", () => {
       expect(stepCards).toHaveLength(3);
     });
 
-    it("renders one step card per block regardless of blockIndex", () => {
+    it("should render one step card per block regardless of blockIndex", () => {
       // Arrange
       const block1Index = 1;
       const block2Index = 3;
@@ -658,7 +658,7 @@ describe("RepetitionBlockCard", () => {
       expect(stepCards[0]).toBeInTheDocument();
     });
 
-    it("renders steps with the same stepIndex in different blocks independently", () => {
+    it("should render steps with the same stepIndex in different blocks independently", () => {
       // Step identity is now a stable ItemId — two blocks containing
       // steps with identical `stepIndex` are rendered independently
       // because each step card binds to its own id, not the positional

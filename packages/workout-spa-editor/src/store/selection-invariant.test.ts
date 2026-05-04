@@ -52,7 +52,7 @@ const resetStore = () => {
 describe("toggleStepSelection single-parent invariant", () => {
   afterEach(resetStore);
 
-  it("extends the selection when toggling two main-list steps", () => {
+  it("should extend the selection when toggling two main-list steps", () => {
     // Arrange — two top-level steps, no blocks.
     useWorkoutStore.getState().loadWorkout(buildKrd([step(0), step(1)]));
     const [a, b] = readInner().steps;
@@ -65,7 +65,7 @@ describe("toggleStepSelection single-parent invariant", () => {
     expect(useWorkoutStore.getState().selectedStepIds).toEqual([a.id, b.id]);
   });
 
-  it("extends the selection when toggling two nested steps in the same block", () => {
+  it("should extend the selection when toggling two nested steps in the same block", () => {
     // Arrange
     useWorkoutStore
       .getState()
@@ -81,7 +81,7 @@ describe("toggleStepSelection single-parent invariant", () => {
     expect(useWorkoutStore.getState().selectedStepIds).toEqual([n0.id, n1.id]);
   });
 
-  it("replaces the selection when toggling mixes main-list + nested-step", () => {
+  it("should replace the selection when toggling mixes main-list + nested-step", () => {
     // Arrange — a top-level step plus a block with one nested step.
     useWorkoutStore
       .getState()
@@ -99,7 +99,7 @@ describe("toggleStepSelection single-parent invariant", () => {
     expect(useWorkoutStore.getState().selectedStepIds).toEqual([nested.id]);
   });
 
-  it("replaces the selection when toggling mixes two different blocks", () => {
+  it("should replace the selection when toggling mixes two different blocks", () => {
     // Arrange — two blocks, each with one nested step.
     useWorkoutStore.getState().loadWorkout(
       buildKrd([
@@ -120,7 +120,7 @@ describe("toggleStepSelection single-parent invariant", () => {
     expect(useWorkoutStore.getState().selectedStepIds).toEqual([nestedB]);
   });
 
-  it("removes an already-selected id without triggering the replace branch", () => {
+  it("should remove an already-selected id without triggering the replace branch", () => {
     // Arrange
     useWorkoutStore.getState().loadWorkout(buildKrd([step(0), step(1)]));
     const [a, b] = readInner().steps;
@@ -138,7 +138,7 @@ describe("toggleStepSelection single-parent invariant", () => {
 describe("selectAllSteps single-parent invariant", () => {
   afterEach(resetStore);
 
-  it("accepts a homogeneous set of main-list ids", () => {
+  it("should accept a homogeneous set of main-list ids", () => {
     // Arrange
     useWorkoutStore.getState().loadWorkout(buildKrd([step(0), step(1)]));
     const ids = readInner().steps.map((s) => s.id);

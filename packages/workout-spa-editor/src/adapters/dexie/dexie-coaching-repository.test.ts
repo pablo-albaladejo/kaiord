@@ -37,7 +37,7 @@ describe("DexieCoachingRepository", () => {
     );
   });
 
-  it("upserts via composite primary key (idempotent)", async () => {
+  it("should upsert via composite primary key (idempotent)", async () => {
     const repo = createDexieCoachingRepository(db);
     const r = makeRecord();
 
@@ -52,7 +52,7 @@ describe("DexieCoachingRepository", () => {
     expect(all).toHaveLength(1);
   });
 
-  it("getByProfileAndDateRange filters by profile and inclusive date range", async () => {
+  it("should filter by profile and inclusive date range via getByProfileAndDateRange", async () => {
     const repo = createDexieCoachingRepository(db);
     await repo.upsertMany([
       makeRecord({ date: "2026-04-13", sourceId: "1" }),
@@ -70,7 +70,7 @@ describe("DexieCoachingRepository", () => {
     expect(result.map((r) => r.sourceId).sort()).toEqual(["1", "2"]);
   });
 
-  it("getByProfileAndSourceId scopes lookup by profile (no cross-profile leak)", async () => {
+  it("should scope lookup by profile via getByProfileAndSourceId (no cross-profile leak)", async () => {
     const repo = createDexieCoachingRepository(db);
     await repo.upsertMany([
       makeRecord({ profileId: "p1", sourceId: "shared" }),
@@ -84,7 +84,7 @@ describe("DexieCoachingRepository", () => {
     expect(p2?.profileId).toBe("p2");
   });
 
-  it("delete is a no-op when the row does not exist", async () => {
+  it("should be a no-op on delete when the row does not exist", async () => {
     const repo = createDexieCoachingRepository(db);
     await expect(repo.delete("missing-id")).resolves.toBeUndefined();
   });
@@ -107,7 +107,7 @@ describe("DexieCoachingRepository", () => {
     ).toHaveLength(1);
   });
 
-  it("multi-week persistence — sync of W2 does not affect W1 rows", async () => {
+  it("should not affect W1 rows when syncing W2 (multi-week persistence)", async () => {
     const repo = createDexieCoachingRepository(db);
     await repo.upsertMany([makeRecord({ date: "2026-04-06", sourceId: "w1" })]);
     await repo.upsertMany([makeRecord({ date: "2026-04-13", sourceId: "w2" })]);

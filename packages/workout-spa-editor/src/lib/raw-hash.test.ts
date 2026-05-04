@@ -15,13 +15,13 @@ const makeRaw = (overrides: Partial<WorkoutRaw> = {}): WorkoutRaw => ({
 });
 
 describe("computeRawHash", () => {
-  it("returns a 64-character hex string (SHA-256)", async () => {
+  it("should return a 64-character hex string (SHA-256)", async () => {
     const hash = await computeRawHash(makeRaw());
 
     expect(hash).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it("produces deterministic output for same input", async () => {
+  it("should produce deterministic output for same input", async () => {
     const raw = makeRaw();
 
     const hash1 = await computeRawHash(raw);
@@ -30,21 +30,21 @@ describe("computeRawHash", () => {
     expect(hash1).toBe(hash2);
   });
 
-  it("trims title whitespace", async () => {
+  it("should trim title whitespace", async () => {
     const hash1 = await computeRawHash(makeRaw({ title: "Run" }));
     const hash2 = await computeRawHash(makeRaw({ title: "  Run  " }));
 
     expect(hash1).toBe(hash2);
   });
 
-  it("trims description whitespace", async () => {
+  it("should trim description whitespace", async () => {
     const hash1 = await computeRawHash(makeRaw({ description: "Zone 2" }));
     const hash2 = await computeRawHash(makeRaw({ description: "  Zone 2  " }));
 
     expect(hash1).toBe(hash2);
   });
 
-  it("normalizes CRLF to LF in description", async () => {
+  it("should normalize CRLF to LF in description", async () => {
     const hash1 = await computeRawHash(
       makeRaw({ description: "line1\nline2" })
     );
@@ -55,20 +55,20 @@ describe("computeRawHash", () => {
     expect(hash1).toBe(hash2);
   });
 
-  it("produces different hash for different content", async () => {
+  it("should produce different hash for different content", async () => {
     const hash1 = await computeRawHash(makeRaw({ title: "Run" }));
     const hash2 = await computeRawHash(makeRaw({ title: "Bike" }));
 
     expect(hash1).not.toBe(hash2);
   });
 
-  it("handles empty comments array", async () => {
+  it("should handle empty comments array", async () => {
     const hash = await computeRawHash(makeRaw({ comments: [] }));
 
     expect(hash).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it("sorts comments by timestamp ascending", async () => {
+  it("should sort comments by timestamp ascending", async () => {
     const comments = [
       { author: "coach", text: "b", timestamp: "2025-01-15T12:00:00Z" },
       { author: "coach", text: "a", timestamp: "2025-01-15T10:00:00Z" },
@@ -81,7 +81,7 @@ describe("computeRawHash", () => {
     expect(hash1).toBe(hash2);
   });
 
-  it("breaks timestamp tie by author then text", async () => {
+  it("should break timestamp tie by author then text", async () => {
     const ts = "2025-01-15T10:00:00Z";
     const comments = [
       { author: "bob", text: "z", timestamp: ts },
@@ -95,7 +95,7 @@ describe("computeRawHash", () => {
     expect(hash1).toBe(hash2);
   });
 
-  it("breaks author tie by text lexicographically", async () => {
+  it("should break author tie by text lexicographically", async () => {
     const ts = "2025-01-15T10:00:00Z";
     const comments = [
       { author: "coach", text: "beta", timestamp: ts },
@@ -109,7 +109,7 @@ describe("computeRawHash", () => {
     expect(hash1).toBe(hash2);
   });
 
-  it("trims comment text", async () => {
+  it("should trim comment text", async () => {
     const c1 = [
       { author: "coach", text: "hello", timestamp: "2025-01-15T10:00:00Z" },
     ];
@@ -127,7 +127,7 @@ describe("computeRawHash", () => {
     expect(hash1).toBe(hash2);
   });
 
-  it("handles Unicode content correctly", async () => {
+  it("should handle Unicode content correctly", async () => {
     const raw = makeRaw({
       title: "Entrenamiento de fuerza",
       description: "Sentadillas con barra olimpica",
@@ -145,7 +145,7 @@ describe("computeRawHash", () => {
     expect(hash).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it("handles emoji in content", async () => {
+  it("should handle emoji in content", async () => {
     const raw = makeRaw({
       title: "Morning run",
       description: "Easy pace with strides",

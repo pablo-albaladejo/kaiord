@@ -26,7 +26,7 @@ const workouts: WorkoutRecord[] = [
 ];
 
 describe("BatchCostConfirmation", () => {
-  it("renders provider, tokens, and cost when open with a provider", () => {
+  it("should render provider, tokens, and cost when open with a provider", () => {
     render(
       <BatchCostConfirmation
         open
@@ -63,7 +63,7 @@ describe("BatchCostConfirmation", () => {
     expect(screen.getByTestId("batch-cost-confirm")).toBeDisabled();
   });
 
-  it("fires onConfirm when Confirm clicked", async () => {
+  it("should fire onConfirm when Confirm clicked", async () => {
     const onConfirm = vi.fn();
     const user = userEvent.setup();
 
@@ -82,7 +82,7 @@ describe("BatchCostConfirmation", () => {
     expect(onConfirm).toHaveBeenCalledTimes(1);
   });
 
-  it("fires onCancel when Cancel clicked", async () => {
+  it("should fire onCancel when Cancel clicked", async () => {
     const onCancel = vi.fn();
     const user = userEvent.setup();
 
@@ -101,7 +101,7 @@ describe("BatchCostConfirmation", () => {
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
-  it("renders nothing when open is false", () => {
+  it("should render nothing when open is false", () => {
     render(
       <BatchCostConfirmation
         open={false}

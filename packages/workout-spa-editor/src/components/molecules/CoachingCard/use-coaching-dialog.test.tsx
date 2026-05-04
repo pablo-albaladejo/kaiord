@@ -75,7 +75,7 @@ describe("useCoachingDialog", () => {
     vi.clearAllMocks();
   });
 
-  it("does nothing when activity is null", () => {
+  it("should do nothing when activity is null", () => {
     const expandActivity = vi.fn();
 
     const { result } = renderHook(
@@ -88,7 +88,7 @@ describe("useCoachingDialog", () => {
     expect(expandActivity).not.toHaveBeenCalled();
   });
 
-  it("triggers expandActivity when activity has undefined description", async () => {
+  it("should trigger expandActivity when activity has undefined description", async () => {
     const expandActivity = vi.fn();
     const activity = {
       id: "train2go:12345",
@@ -110,7 +110,7 @@ describe("useCoachingDialog", () => {
     });
   });
 
-  it("does NOT trigger expandActivity when description is already populated", () => {
+  it("should do NOT trigger expandActivity when description is already populated", () => {
     const expandActivity = vi.fn();
     const activity = {
       id: "train2go:12345",
@@ -185,7 +185,7 @@ describe("useCoachingDialog", () => {
     expect(mockNavigate).not.toHaveBeenCalled();
   });
 
-  it("handleConvert: navigates to /workout/:id on successful conversion", async () => {
+  it("should navigate to /workout/:id on successful conversion via handleConvert", async () => {
     const onClose = vi.fn();
     const expandActivity = vi.fn();
     const activity = {

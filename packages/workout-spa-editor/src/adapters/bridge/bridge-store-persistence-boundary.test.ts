@@ -42,7 +42,7 @@ function walk(dir: string): string[] {
 }
 
 describe("bridge runtime stores stay in Zustand, never in Dexie", () => {
-  it("no bridge-runtime store imports zustand/middleware persist", () => {
+  it("should not have any bridge-runtime store import zustand/middleware persist", () => {
     const offenders: string[] = [];
     for (const name of BRIDGE_RUNTIME_STORES) {
       const path = join(STORE_ROOT, name);
@@ -60,7 +60,7 @@ describe("bridge runtime stores stay in Zustand, never in Dexie", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("no bridge-runtime store writes to Dexie directly", () => {
+  it("should not have any bridge-runtime store write to Dexie directly", () => {
     const offenders: string[] = [];
     for (const name of BRIDGE_RUNTIME_STORES) {
       const path = join(STORE_ROOT, name);
@@ -81,7 +81,7 @@ describe("bridge runtime stores stay in Zustand, never in Dexie", () => {
     expect(offenders).toEqual([]);
   });
 
-  it("no bridge-named Dexie persistence adapter exists", () => {
+  it("should not have any bridge-named Dexie persistence adapter", () => {
     const dexieDir = resolve(__dirname, "..", "dexie");
     const files = walk(dexieDir)
       .map((f) => f.substring(dexieDir.length + 1))

@@ -9,7 +9,7 @@ import {
 } from "./week-utils";
 
 describe("parseWeekId", () => {
-  it("parses valid week ID", () => {
+  it("should parse valid week ID", () => {
     const result = parseWeekId("2026-W15");
 
     expect(result).toEqual({
@@ -19,14 +19,14 @@ describe("parseWeekId", () => {
     });
   });
 
-  it("returns null for malformed input", () => {
+  it("should return null for malformed input", () => {
     expect(parseWeekId("not-a-week")).toBeNull();
     expect(parseWeekId("2026-W00")).toBeNull();
     expect(parseWeekId("2026-W99")).toBeNull();
     expect(parseWeekId("")).toBeNull();
   });
 
-  it("parses week 1 of the year", () => {
+  it("should parse week 1 of the year", () => {
     const result = parseWeekId("2026-W01");
 
     expect(result).not.toBeNull();
@@ -35,7 +35,7 @@ describe("parseWeekId", () => {
 });
 
 describe("getCurrentWeekId", () => {
-  it("returns a valid week ID format", () => {
+  it("should return a valid week ID format", () => {
     const weekId = getCurrentWeekId();
 
     expect(weekId).toMatch(/^\d{4}-W\d{2}$/);
@@ -43,7 +43,7 @@ describe("getCurrentWeekId", () => {
 });
 
 describe("getWeekIdForDate", () => {
-  it("returns correct week ID for a known date", () => {
+  it("should return correct week ID for a known date", () => {
     const result = getWeekIdForDate(new Date("2026-04-11"));
 
     expect(result).toBe("2026-W15");
@@ -51,25 +51,25 @@ describe("getWeekIdForDate", () => {
 });
 
 describe("getAdjacentWeekId", () => {
-  it("returns next week", () => {
+  it("should return next week", () => {
     const result = getAdjacentWeekId("2026-W15", 1);
 
     expect(result).toBe("2026-W16");
   });
 
-  it("returns previous week", () => {
+  it("should return previous week", () => {
     const result = getAdjacentWeekId("2026-W15", -1);
 
     expect(result).toBe("2026-W14");
   });
 
-  it("handles year boundary", () => {
+  it("should handle year boundary", () => {
     const result = getAdjacentWeekId("2026-W01", -1);
 
     expect(result).toBe("2025-W52");
   });
 
-  it("falls back to current week for invalid input", () => {
+  it("should fall back to current week for invalid input", () => {
     const result = getAdjacentWeekId("invalid", 1);
 
     expect(result).toMatch(/^\d{4}-W\d{2}$/);
@@ -77,7 +77,7 @@ describe("getAdjacentWeekId", () => {
 });
 
 describe("getWeekDays", () => {
-  it("returns 7 days for a valid week", () => {
+  it("should return 7 days for a valid week", () => {
     const days = getWeekDays("2026-W15");
 
     expect(days).toHaveLength(7);
@@ -85,7 +85,7 @@ describe("getWeekDays", () => {
     expect(days[6]).toBe("2026-04-12");
   });
 
-  it("returns empty for invalid week", () => {
+  it("should return empty for invalid week", () => {
     const days = getWeekDays("invalid");
 
     expect(days).toHaveLength(0);

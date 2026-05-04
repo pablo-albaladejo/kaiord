@@ -55,13 +55,13 @@ describe("Routing", () => {
     localStorage.setItem("workout-spa-onboarding-completed", "true");
   });
 
-  it("renders CalendarPage at /calendar", async () => {
+  it("should render CalendarPage at /calendar", async () => {
     renderAtPath("/calendar");
 
     expect(await screen.findByText("Welcome to Kaiord")).toBeInTheDocument();
   });
 
-  it("renders LibraryPage at /library", async () => {
+  it("should render LibraryPage at /library", async () => {
     renderAtPath("/library");
 
     await waitFor(() => {
@@ -69,7 +69,7 @@ describe("Routing", () => {
     });
   });
 
-  it("renders EditorPage at /workout/new", async () => {
+  it("should render EditorPage at /workout/new", async () => {
     renderAtPath("/workout/new");
 
     await waitFor(() => {
@@ -78,7 +78,7 @@ describe("Routing", () => {
     });
   });
 
-  it("redirects / to /calendar", async () => {
+  it("should redirect / to /calendar", async () => {
     renderAtPath("/");
 
     await waitFor(() => {
@@ -86,7 +86,7 @@ describe("Routing", () => {
     });
   });
 
-  it("redirects unknown routes to /calendar", async () => {
+  it("should redirect unknown routes to /calendar", async () => {
     renderAtPath("/nonexistent");
 
     await waitFor(() => {
@@ -94,7 +94,7 @@ describe("Routing", () => {
     });
   });
 
-  it("renders CalendarPage with weekId param", async () => {
+  it("should render CalendarPage with weekId param", async () => {
     renderAtPath("/calendar/2026-W15");
 
     await waitFor(() => {

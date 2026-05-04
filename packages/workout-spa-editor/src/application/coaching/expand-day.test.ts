@@ -46,7 +46,7 @@ describe("expandDay", () => {
     };
   });
 
-  it("returns not-linked when the profile has no link for the source", async () => {
+  it("should return not-linked when the profile has no link for the source", async () => {
     await deps.profiles.put(profile([]));
 
     const result = await expandDay(deps, "p1", "2026-04-13");
@@ -54,7 +54,7 @@ describe("expandDay", () => {
     expect(result).toEqual({ ok: false, reason: "not-linked" });
   });
 
-  it("returns not-linked when profile is missing", async () => {
+  it("should return not-linked when profile is missing", async () => {
     const empty = createInMemoryProfileRepository();
     deps = { ...deps, profiles: empty };
 
@@ -63,7 +63,7 @@ describe("expandDay", () => {
     expect(result).toEqual({ ok: false, reason: "not-linked" });
   });
 
-  it("surfaces session-expired distinctly from transport errors", async () => {
+  it("should surface session-expired distinctly from transport errors", async () => {
     const t = transport({
       readDay: vi.fn(async () => {
         throw new Error("Session expired");
@@ -76,7 +76,7 @@ describe("expandDay", () => {
     expect(result).toEqual({ ok: false, reason: "session-expired" });
   });
 
-  it("returns transport-error for generic transport rejections", async () => {
+  it("should return transport-error for generic transport rejections", async () => {
     const t = transport({
       readDay: vi.fn(async () => {
         throw new Error("network down");

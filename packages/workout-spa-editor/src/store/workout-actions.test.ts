@@ -13,7 +13,7 @@ import { describe, expect, it } from "vitest";
 import { createEmptyWorkoutAction } from "./workout-actions";
 
 describe("createEmptyWorkoutAction", () => {
-  it("builds an empty UIWorkout with a single-snapshot history", () => {
+  it("should build an empty UIWorkout with a single-snapshot history", () => {
     const patch = createEmptyWorkoutAction("New ride", "cycling");
 
     expect(patch.currentWorkout).toBeDefined();
@@ -24,7 +24,7 @@ describe("createEmptyWorkoutAction", () => {
     expect(patch.isEditing).toBe(false);
   });
 
-  it("clears both single- and multi-selection slots", () => {
+  it("should clear both single- and multi-selection slots", () => {
     const patch = createEmptyWorkoutAction("New ride", "cycling");
 
     expect(patch.selectedStepId).toBeNull();

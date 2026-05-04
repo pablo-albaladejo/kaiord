@@ -6,7 +6,7 @@ import { getUserPreferences } from "./get-user-preferences";
 const fixedClock = () => "2026-05-01T12:00:00.000Z";
 
 describe("getUserPreferences", () => {
-  it("returns the persisted row when one exists", async () => {
+  it("should return the persisted row when one exists", async () => {
     const repo = createInMemoryUserPreferencesRepository();
     await repo.put({
       profileId: "p1",
@@ -26,7 +26,7 @@ describe("getUserPreferences", () => {
     });
   });
 
-  it("returns the synthesised default when no row exists (no write)", async () => {
+  it("should return the synthesised default when no row exists (no write)", async () => {
     const repo = createInMemoryUserPreferencesRepository();
 
     const result = await getUserPreferences(
@@ -43,7 +43,7 @@ describe("getUserPreferences", () => {
     expect(await repo.get("p1")).toBeUndefined();
   });
 
-  it("falls back to compact when no defaultDensity provided", async () => {
+  it("should fall back to compact when no defaultDensity provided", async () => {
     const repo = createInMemoryUserPreferencesRepository();
 
     const result = await getUserPreferences(
@@ -54,7 +54,7 @@ describe("getUserPreferences", () => {
     expect(result.calendarDensity).toBe("compact");
   });
 
-  it("uses comfortable default when caller passes it (mobile viewport)", async () => {
+  it("should use comfortable default when caller passes it (mobile viewport)", async () => {
     const repo = createInMemoryUserPreferencesRepository();
 
     const result = await getUserPreferences(

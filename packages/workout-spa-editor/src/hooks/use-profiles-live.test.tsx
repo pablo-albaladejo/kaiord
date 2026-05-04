@@ -32,7 +32,7 @@ describe("useProfilesLive", () => {
   beforeEach(clearProfiles);
   afterEach(clearProfiles);
 
-  it("returns undefined while loading and resolves to the persisted list", async () => {
+  it("should return undefined while loading and resolves to the persisted list", async () => {
     const persistence = createDexiePersistence(db);
     await persistence.profiles.put(makeProfile(PROFILE_UUID_1, "A"));
 
@@ -45,7 +45,7 @@ describe("useProfilesLive", () => {
     expect(result.current?.[0].id).toBe(PROFILE_UUID_1);
   });
 
-  it("re-fires when a new profile is written through PersistencePort", async () => {
+  it("should re-fire when a new profile is written through PersistencePort", async () => {
     const persistence = createDexiePersistence(db);
 
     const { result } = renderHook(() => useProfilesLive());
