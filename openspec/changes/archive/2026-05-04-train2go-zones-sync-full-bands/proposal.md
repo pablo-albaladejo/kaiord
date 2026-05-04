@@ -1,3 +1,5 @@
+> Completed: 2026-05-04
+
 ## Why
 
 The shipped `train2go-zones-sync` capability extracts only one number per sport (the threshold at z4Upper) and writes it to the profile. But Train2Go's `/user/details` page already exposes the **full Z1-Z5 band table** for HR, power, and pace — pre-computed by T2G via Karvonen %FCR, Coggan, and VAM. After the first sync, Pablo's Profile Manager shows `FTP=268W` and `cycling LTHR=174 bpm` correctly but the actual zone bands stay at `0-0`, because Kaiord has no zone-derivation logic of its own. The user expected the bands to populate alongside the threshold ("the FTP came through, why didn't the FTP zones?"), and confirmed the right policy out loud while inspecting the live HTML: _"si hay específicas, tomamos las específicas, sino las generales"_.
