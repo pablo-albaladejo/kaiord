@@ -2,9 +2,9 @@
 
 Repo-wide tooling: lint guards, CI helpers, manual maintainer commands.
 Every non-trivial script ships with a co-located `*.test.mjs` exercised by
-`pnpm test:scripts`. Orphan files are forbidden — see
-[scripts-folder-hygiene](../openspec/specs/scripts-folder-hygiene/spec.md)
-(rule `R-ScriptsNoOrphans`).
+`pnpm test:scripts`. Orphan files are forbidden — see the
+`scripts-folder-hygiene` capability (rule `R-ScriptsNoOrphans`) under
+`openspec/specs/`.
 
 ## Active scripts
 
