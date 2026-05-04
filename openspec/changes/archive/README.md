@@ -8,6 +8,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 | Date | Change | Summary |
 | ---- | ------ | ------- |
 | 2026-05-05 | [`cleanup-scripts-folder`](./2026-05-05-cleanup-scripts-folder/) | scripts/ has accumulated orphan files. The README documents code that no longer exists (test-ci-workflows.sh, the publishing/ helpers), legacy npm-token setup … |
+| 2026-05-05 | [`zones-method-aware-reconcile`](./2026-05-05-zones-method-aware-reconcile/) | The shipped train2go-zones-sync-full-bands change (PRs #495-498) extracts T2G's full Z1-Z5 zone bands and writes them to the persisted profile. After running i… |
 | 2026-05-04 | [`ci-artifact-fanout`](./2026-05-04-ci-artifact-fanout/) | CI currently runs pnpm -r build 30+ times on a single PR — once per job (lint, typecheck, build, test×9 packages, test-cli, test-frontend, round-trip×2, e2e-fr… |
 | 2026-05-04 | [`test-conventions-should-aaa`](./2026-05-04-test-conventions-should-aaa/) | The repo's test suite has two well-understood conventions documented in AGENTS.md ("AAA pattern: Arrange, Act, Assert (blank lines between sections)") and CLAU… |
 | 2026-05-04 | [`train2go-zones-sync-full-bands`](./2026-05-04-train2go-zones-sync-full-bands/) | The shipped train2go-zones-sync capability extracts only one number per sport (the threshold at z4Upper) and writes it to the profile. But Train2Go's /user/det… |
