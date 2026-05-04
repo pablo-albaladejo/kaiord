@@ -180,7 +180,11 @@ test("file with zero it() calls silently passes (no enforcement)", () => {
       `describe("X", () => { /* placeholder */ });`
     );
   });
-  __setAllowlistsForTest({ BACKEND: new Set(), SPA_NON_COMPONENT: new Set(), SPA_COMPONENT: new Set() });
+  __setAllowlistsForTest({
+    BACKEND: new Set(),
+    SPA_NON_COMPONENT: new Set(),
+    SPA_COMPONENT: new Set(),
+  });
 
   try {
     // Act

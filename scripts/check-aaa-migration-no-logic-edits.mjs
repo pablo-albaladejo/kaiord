@@ -55,8 +55,7 @@ export function scanTokens(source) {
       tokens.push({
         kind,
         text: scanner.getTokenText(),
-        line:
-          source.slice(0, scanner.getTokenStart()).split(/\n/).length,
+        line: source.slice(0, scanner.getTokenStart()).split(/\n/).length,
       });
     }
     kind = scanner.scan();
@@ -113,9 +112,7 @@ function listChangedTestFiles(base) {
   if (!out) return [];
   return out
     .split(/\n/)
-    .filter(
-      (p) => p.endsWith(".test.ts") || p.endsWith(".test.tsx")
-    )
+    .filter((p) => p.endsWith(".test.ts") || p.endsWith(".test.tsx"))
     .filter((p) => !p.includes("/node_modules/"));
 }
 

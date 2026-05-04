@@ -190,11 +190,7 @@ function formatOutput({ titleViolators, aaaShards }) {
       titleViolators,
       (v) => `  "${v.repoPath}:${v.line}",`
     ),
-    formatBlock(
-      "AAA_ALLOWLIST_BACKEND",
-      aaaShards.BACKEND,
-      (p) => `  "${p}",`
-    ),
+    formatBlock("AAA_ALLOWLIST_BACKEND", aaaShards.BACKEND, (p) => `  "${p}",`),
     formatBlock(
       "AAA_ALLOWLIST_SPA_NON_COMPONENT",
       aaaShards.SPA_NON_COMPONENT,
