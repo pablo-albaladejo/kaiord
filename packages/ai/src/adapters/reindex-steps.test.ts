@@ -4,6 +4,7 @@ import { reindexSteps } from "./reindex-steps";
 
 describe("reindexSteps", () => {
   it("should reindex top-level steps sequentially", () => {
+    // Arrange
     const workout: Workout = {
       sport: "running",
       steps: [
@@ -24,13 +25,16 @@ describe("reindexSteps", () => {
       ],
     };
 
+    // Act
     const result = reindexSteps(workout);
 
+    // Assert
     expect(result.steps[0]).toMatchObject({ stepIndex: 0 });
     expect(result.steps[1]).toMatchObject({ stepIndex: 1 });
   });
 
   it("should reindex nested steps inside repetition blocks", () => {
+    // Arrange
     const workout: Workout = {
       sport: "cycling",
       steps: [
@@ -58,10 +62,12 @@ describe("reindexSteps", () => {
         },
       ],
     };
-
     const result = reindexSteps(workout);
 
+    // Act
     const block = result.steps[0];
+
+    // Assert
     expect("repeatCount" in block).toBe(true);
     if ("repeatCount" in block) {
       expect(block.steps[0]).toMatchObject({ stepIndex: 0 });
@@ -70,15 +76,19 @@ describe("reindexSteps", () => {
   });
 
   it("should handle empty steps array", () => {
+    // Arrange
     const workout: Workout = { sport: "running", steps: [] };
 
+    // Act
     const result = reindexSteps(workout);
 
+    // Assert
     expect(result.steps).toHaveLength(0);
     expect(result).not.toBe(workout);
   });
 
   it("should skip RepetitionBlocks in top-level index sequence", () => {
+    // Arrange
     const workout: Workout = {
       sport: "running",
       steps: [
@@ -111,13 +121,16 @@ describe("reindexSteps", () => {
       ],
     };
 
+    // Act
     const result = reindexSteps(workout);
 
+    // Assert
     expect(result.steps[0]).toMatchObject({ stepIndex: 0 });
     expect(result.steps[2]).toMatchObject({ stepIndex: 1 });
   });
 
   it("should not mutate the original workout", () => {
+    // Arrange
     const workout: Workout = {
       sport: "running",
       steps: [
@@ -131,8 +144,10 @@ describe("reindexSteps", () => {
       ],
     };
 
+    // Act
     const result = reindexSteps(workout);
 
+    // Assert
     expect(result).not.toBe(workout);
     expect(result.steps[0]).toMatchObject({ stepIndex: 0 });
     expect(workout.steps[0]).toMatchObject({ stepIndex: 5 });

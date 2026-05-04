@@ -35,6 +35,7 @@ describe("pushCommand", () => {
   });
 
   it("should push workout and return SUCCESS", async () => {
+    // Arrange
     const logger = createMockLogger();
     const mockService = { push: vi.fn().mockResolvedValue(mockPushResult) };
     const mockAuth = { is_authenticated: vi.fn().mockReturnValue(true) };
@@ -44,8 +45,10 @@ describe("pushCommand", () => {
     } as never);
     vi.mocked(loadFileAsKrd).mockResolvedValue(mockKrd);
 
+    // Act
     const result = await pushCommand({ input: "workout.krd" }, logger);
 
+    // Assert
     expect(result).toBe(ExitCode.SUCCESS);
     expect(loadFileAsKrd).toHaveBeenCalledWith(
       "workout.krd",
@@ -64,6 +67,7 @@ describe("pushCommand", () => {
   });
 
   it("should output JSON when --json flag is set", async () => {
+    // Arrange
     const logger = createMockLogger();
     const mockService = { push: vi.fn().mockResolvedValue(mockPushResult) };
     const mockAuth = { is_authenticated: vi.fn().mockReturnValue(true) };
@@ -73,20 +77,23 @@ describe("pushCommand", () => {
     } as never);
     vi.mocked(loadFileAsKrd).mockResolvedValue(mockKrd);
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-
     const result = await pushCommand(
       { input: "workout.krd", json: true },
       logger
     );
-
     expect(result).toBe(ExitCode.SUCCESS);
     expect(consoleSpy).toHaveBeenCalledWith(
       JSON.stringify(mockPushResult, null, 2)
     );
+
+    // Act
     consoleSpy.mockRestore();
+
+    // Assert
   });
 
   it("should return AUTH_ERROR when not authenticated", async () => {
+    // Arrange
     const logger = createMockLogger();
     const mockAuth = { is_authenticated: vi.fn().mockReturnValue(false) };
     vi.mocked(createCliGarminClient).mockResolvedValue({
@@ -94,8 +101,10 @@ describe("pushCommand", () => {
       service: {} as never,
     } as never);
 
+    // Act
     const result = await pushCommand({ input: "workout.krd" }, logger);
 
+    // Assert
     expect(result).toBe(ExitCode.AUTH_ERROR);
     expect(logger.error).toHaveBeenCalledWith(
       "Not authenticated. Run: kaiord garmin login"
@@ -103,6 +112,7 @@ describe("pushCommand", () => {
   });
 
   it("should return AUTH_ERROR on ServiceAuthError", async () => {
+    // Arrange
     const logger = createMockLogger();
     const mockService = {
       push: vi.fn().mockRejectedValue(new ServiceAuthError("Expired")),
@@ -114,8 +124,10 @@ describe("pushCommand", () => {
     } as never);
     vi.mocked(loadFileAsKrd).mockResolvedValue(mockKrd);
 
+    // Act
     const result = await pushCommand({ input: "workout.krd" }, logger);
 
+    // Assert
     expect(result).toBe(ExitCode.AUTH_ERROR);
   });
 });

@@ -46,40 +46,52 @@ describe("kaiord_garmin_list", () => {
   });
 
   it("should list workouts when authenticated", async () => {
+    // Arrange
     mockIsAuthenticated.mockReturnValue(true);
     mockList.mockResolvedValue(mockWorkouts);
-
     const result = await handler({});
-
     expect(result.isError).toBeUndefined();
+
+    // Act
     const parsed = JSON.parse(result.content[0].text) as unknown;
+
+    // Assert
     expect(parsed).toEqual(mockWorkouts);
   });
 
   it("should return error when not authenticated", async () => {
+    // Arrange
     mockIsAuthenticated.mockReturnValue(false);
 
+    // Act
     const result = await handler({});
 
+    // Assert
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Not authenticated");
   });
 
   it("should pass limit and offset options", async () => {
+    // Arrange
     mockIsAuthenticated.mockReturnValue(true);
     mockList.mockResolvedValue([]);
 
+    // Act
     await handler({ limit: 5, offset: 10 });
 
+    // Assert
     expect(mockList).toHaveBeenCalledWith({ limit: 5, offset: 10 });
   });
 
   it("should return error on service failure", async () => {
+    // Arrange
     mockIsAuthenticated.mockReturnValue(true);
     mockList.mockRejectedValue(new Error("API error"));
 
+    // Act
     const result = await handler({});
 
+    // Assert
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("API error");
   });

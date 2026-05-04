@@ -9,11 +9,21 @@ describe("kaiord-mcp binary build artifact", () => {
   const lines = content.split("\n");
 
   it("should start with exactly one shebang", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(lines[0]).toBe("#!/usr/bin/env node");
     expect(lines[1]).not.toContain("#!");
   });
 
   it("should be valid ESM (no SyntaxError on import)", async () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     await expect(import(DIST_BIN)).resolves.toBeDefined();
   });
 });

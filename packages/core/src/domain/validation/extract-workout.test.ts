@@ -28,16 +28,24 @@ const validKrd: KRD = {
 
 describe("extractWorkout", () => {
   it("should return workout for valid structured_workout KRD", () => {
+    // Arrange
+
+    // Act
     const workout = extractWorkout(validKrd);
 
+    // Assert
     expect(workout.name).toBe("Test Workout");
     expect(workout.sport).toBe("cycling");
     expect(workout.steps).toHaveLength(1);
   });
 
   it("should throw for wrong KRD type", () => {
+    // Arrange
+
+    // Act
     const krd: KRD = { ...validKrd, type: "recorded_activity" };
 
+    // Assert
     expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
     expect(() => extractWorkout(krd)).toThrow(
       'Expected type "structured_workout"'
@@ -45,61 +53,86 @@ describe("extractWorkout", () => {
   });
 
   it("should throw for missing extensions", () => {
+    // Arrange
+
+    // Act
     const krd: KRD = {
       version: "1.0",
       type: "structured_workout",
       metadata: { created: "2025-01-15T10:00:00Z", sport: "cycling" },
     };
 
+    // Assert
     expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
   });
 
   it("should throw for missing extensions.structured_workout", () => {
+    // Arrange
+
+    // Act
     const krd: KRD = {
       ...validKrd,
       extensions: { fit: {} },
     };
 
+    // Assert
     expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
   });
 
   it("should throw for primitive structured_workout value", () => {
+    // Arrange
+
+    // Act
     const krd: KRD = {
       ...validKrd,
       extensions: { structured_workout: "not an object" },
     };
 
+    // Assert
     expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
   });
 
   it("should throw for null structured_workout value", () => {
+    // Arrange
+
+    // Act
     const krd: KRD = {
       ...validKrd,
       extensions: { structured_workout: null },
     };
 
+    // Assert
     expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
   });
 
   it("should throw for array structured_workout value", () => {
+    // Arrange
+
+    // Act
     const krd: KRD = {
       ...validKrd,
       extensions: { structured_workout: [1, 2, 3] },
     };
 
+    // Assert
     expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
   });
 
   it("should throw for invalid workout structure", () => {
+    // Arrange
+
+    // Act
     const krd: KRD = {
       ...validKrd,
       extensions: { structured_workout: { name: "No sport or steps" } },
     };
 
+    // Assert
     expect(() => extractWorkout(krd)).toThrow(KrdValidationError);
   });
 
   it("should preserve all optional workout fields", () => {
+    // Arrange
     const fullWorkout = {
       ...validWorkout,
       subSport: "indoor_cycling",
@@ -111,8 +144,10 @@ describe("extractWorkout", () => {
       extensions: { structured_workout: fullWorkout },
     };
 
+    // Act
     const workout = extractWorkout(krd);
 
+    // Assert
     expect(workout.subSport).toBe("indoor_cycling");
     expect(workout.poolLength).toBe(25);
   });

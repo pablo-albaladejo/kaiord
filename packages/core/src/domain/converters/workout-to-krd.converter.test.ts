@@ -21,37 +21,51 @@ const validWorkout = {
 
 describe("createWorkoutKRD", () => {
   it("should create valid KRD from raw workout JSON", () => {
+    // Arrange
+
+    // Act
     const krd = createWorkoutKRD(validWorkout, {
       created: "2025-01-15T10:00:00Z",
     });
 
+    // Assert
     expect(krd.version).toBe("1.0");
     expect(krd.type).toBe("structured_workout");
     expect(krd.extensions?.structured_workout).toEqual(validWorkout);
   });
 
   it("should set metadata.sport from workout", () => {
+    // Arrange
+
+    // Act
     const krd = createWorkoutKRD(validWorkout, {
       created: "2025-01-15T10:00:00Z",
     });
 
+    // Assert
     expect(krd.metadata.sport).toBe("cycling");
   });
 
   it("should propagate subSport to metadata when present", () => {
+    // Arrange
+
+    // Act
     const krd = createWorkoutKRD(validWorkout, {
       created: "2025-01-15T10:00:00Z",
     });
 
+    // Assert
     expect(krd.metadata.subSport).toBe("indoor_cycling");
   });
 
   it("should omit subSport from metadata when absent", () => {
+    // Arrange
     const workoutWithoutSubSport: Partial<typeof validWorkout> = {
       ...validWorkout,
     };
     delete workoutWithoutSubSport.subSport;
 
+    // Act
     const krd = createWorkoutKRD(
       workoutWithoutSubSport as typeof validWorkout,
       {
@@ -59,38 +73,58 @@ describe("createWorkoutKRD", () => {
       }
     );
 
+    // Assert
     expect(krd.metadata.subSport).toBeUndefined();
   });
 
   it("should use provided created timestamp", () => {
+    // Arrange
+
+    // Act
     const krd = createWorkoutKRD(validWorkout, {
       created: "2025-06-01T12:00:00Z",
     });
 
+    // Assert
     expect(krd.metadata.created).toBe("2025-06-01T12:00:00Z");
   });
 
   it("should generate valid ISO timestamp when created not provided", () => {
+    // Arrange
+
+    // Act
     const krd = createWorkoutKRD(validWorkout);
 
+    // Assert
     expect(krd.metadata.created).toMatch(
       /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/
     );
   });
 
   it("should throw KrdValidationError for invalid workout", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() => createWorkoutKRD({ name: "No sport" })).toThrow(
       KrdValidationError
     );
   });
 
   it("should throw KrdValidationError for missing steps", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() => createWorkoutKRD({ sport: "cycling" })).toThrow(
       KrdValidationError
     );
   });
 
   it("should preserve optional poolLength fields", () => {
+    // Arrange
     const swimming = {
       sport: "swimming",
       subSport: "lap_swimming",
@@ -106,15 +140,17 @@ describe("createWorkoutKRD", () => {
         },
       ],
     };
-
     const krd = createWorkoutKRD(swimming, {
       created: "2025-01-15T10:00:00Z",
     });
+
+    // Act
     const workout = krd.extensions?.structured_workout as Record<
       string,
       unknown
     >;
 
+    // Assert
     expect(workout.poolLength).toBe(25);
     expect(workout.poolLengthUnit).toBe("meters");
   });

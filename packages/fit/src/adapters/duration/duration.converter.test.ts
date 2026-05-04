@@ -741,7 +741,7 @@ describe("convertFitDuration", () => {
 
   describe("boundary value edge cases", () => {
     it("should handle negative time values", () => {
-      // Arrange - negative values may come from corrupted FIT files
+      // Arrange
       const data = buildFitDurationData.build({
         durationType: "time",
         durationTime: -100,
@@ -750,7 +750,7 @@ describe("convertFitDuration", () => {
       // Act
       const result = convertFitDuration(data);
 
-      // Assert - converter passes value through (validation is separate concern)
+      // Assert
       expect(result).toStrictEqual({
         type: "time",
         seconds: -100,
@@ -775,7 +775,7 @@ describe("convertFitDuration", () => {
     });
 
     it("should handle very large time values", () => {
-      // Arrange - 24 hours in seconds
+      // Arrange
       const data = buildFitDurationData.build({
         durationType: "time",
         durationTime: 86400,
@@ -792,7 +792,7 @@ describe("convertFitDuration", () => {
     });
 
     it("should handle very large distance values", () => {
-      // Arrange - 100km marathon in meters
+      // Arrange
       const data = buildFitDurationData.build({
         durationType: "distance",
         durationDistance: 100000,
@@ -843,7 +843,7 @@ describe("convertFitDuration", () => {
     });
 
     it("should handle NaN as duration value by treating it as undefined", () => {
-      // Arrange - NaN !== undefined so converter will process it
+      // Arrange
       const data = buildFitDurationData.build({
         durationType: "time",
         durationTime: NaN,
@@ -852,7 +852,7 @@ describe("convertFitDuration", () => {
       // Act
       const result = convertFitDuration(data);
 
-      // Assert - NaN is passed through (validation is separate concern)
+      // Assert
       expect(result).toStrictEqual({
         type: "time",
         seconds: NaN,

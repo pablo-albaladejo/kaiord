@@ -31,12 +31,10 @@ describe("convertKRDToMessages", () => {
           structured_workout: buildWorkout.build({ sport: "cycling" }),
         },
       });
+      const messages = convertKRDToMessages(krd, logger);
+      expect(messages.length).toBeGreaterThan(0);
 
       // Act
-      const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
-      expect(messages.length).toBeGreaterThan(0);
       const fileIdMsg = messages[0] as {
         mesgNum: number;
         type: number;
@@ -44,6 +42,8 @@ describe("convertKRDToMessages", () => {
         serialNumber: number;
         timeCreated: Date;
       };
+
+      // Assert
       expect(fileIdMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.FILE_ID);
       expect(fileIdMsg.type).toBe(FIT_FILE_TYPE_TO_NUMBER.workout);
       expect(fileIdMsg.manufacturer).toBe(krd.metadata.manufacturer);
@@ -64,15 +64,15 @@ describe("convertKRDToMessages", () => {
           structured_workout: buildWorkout.build(),
         },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const fileIdMsg = messages[0] as {
         mesgNum: number;
         manufacturer: string;
       };
+
+      // Assert
       expect(fileIdMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.FILE_ID);
       expect(fileIdMsg.manufacturer).toBe("garmin");
     });
@@ -89,15 +89,15 @@ describe("convertKRDToMessages", () => {
           structured_workout: buildWorkout.build(),
         },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const fileIdMsg = messages[0] as {
         mesgNum: number;
         timeCreated: Date;
       };
+
+      // Assert
       expect(fileIdMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.FILE_ID);
       expect(fileIdMsg.timeCreated).toBeInstanceOf(Date);
       expect(fileIdMsg.timeCreated.toISOString()).toBe(krd.metadata.created);
@@ -117,17 +117,17 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const workoutMsg = messages[1] as {
         mesgNum: number;
         wktName: string;
         sport: string;
         numValidSteps: number;
       };
+
+      // Assert
       expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
       expect(workoutMsg.wktName).toBe(workout.name);
       expect(workoutMsg.sport).toBe(workout.sport);
@@ -146,11 +146,9 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const workoutMsg = messages[1] as {
         mesgNum: number;
         wktName: string;
@@ -158,6 +156,8 @@ describe("convertKRDToMessages", () => {
         subSport: string;
         numValidSteps: number;
       };
+
+      // Assert
       expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
       expect(workoutMsg.wktName).toBe(workout.name);
       expect(workoutMsg.sport).toBe(workout.sport);
@@ -177,12 +177,12 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const workoutMsg = messages[1] as Record<string, unknown>;
+
+      // Assert
       expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
       expect(workoutMsg).not.toHaveProperty("subSport");
     });
@@ -200,16 +200,16 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const workoutMsg = messages[1] as {
         mesgNum: number;
         poolLength: number;
         poolLengthUnit: number;
       };
+
+      // Assert
       expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
       expect(workoutMsg.poolLength).toBe(25);
       expect(workoutMsg.poolLengthUnit).toBe(0);
@@ -227,12 +227,12 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const workoutMsg = messages[1] as Record<string, unknown>;
+
+      // Assert
       expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
       expect(workoutMsg).not.toHaveProperty("poolLength");
       expect(workoutMsg).not.toHaveProperty("poolLengthUnit");
@@ -268,15 +268,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const workoutMsg = messages[1] as {
         mesgNum: number;
         numValidSteps: number;
       };
+
+      // Assert
       expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
       expect(workoutMsg.numValidSteps).toBe(2);
     });
@@ -327,15 +327,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const workoutMsg = messages[1] as {
         mesgNum: number;
         numValidSteps: number;
       };
+
+      // Assert
       expect(workoutMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT);
       expect(workoutMsg.numValidSteps).toBe(4);
     });
@@ -362,11 +362,7 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       const stepMsg = messages[2] as {
         mesgNum: number;
         messageIndex: number;
@@ -376,14 +372,17 @@ describe("convertKRDToMessages", () => {
         targetType: string;
         targetValue: number;
       };
+
+      // Act
       const step = steps[0];
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.messageIndex).toBe(step.stepIndex);
       expect(stepMsg.durationType).toBe(fitDurationTypeSchema.enum.time);
       expect(stepMsg.durationTime).toBe(step.duration.seconds);
       expect(stepMsg.durationValue).toBe(step.duration.seconds * 1000);
       expect(stepMsg.targetType).toBe("power");
-      // Garmin encoding: 200 watts = 1200 (200 + 1000 offset)
       expect(stepMsg.targetValue).toBe(1200);
     });
 
@@ -408,15 +407,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as {
         mesgNum: number;
         notes: string;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.notes).toBe("Focus on form and breathing");
     });
@@ -442,12 +441,12 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as Record<string, unknown>;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).not.toHaveProperty("notes");
     });
@@ -456,8 +455,6 @@ describe("convertKRDToMessages", () => {
       // Arrange
       const logger = createMockLogger();
       const longNotes = "a".repeat(300);
-      // Note: Using type assertion to bypass TypeScript schema validation
-      // to test runtime Zod validation behavior
       const workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -475,12 +472,14 @@ describe("convertKRDToMessages", () => {
           },
         ],
       };
+
+      // Act
       const krd = buildKRD.build({
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
 
-      // Act & Assert
+      // Assert
       expect(() => convertKRDToMessages(krd, logger)).toThrow(/notes.*256/i);
     });
 
@@ -506,15 +505,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as {
         mesgNum: number;
         notes: string;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.notes).toBe(maxNotes);
       expect(stepMsg.notes.length).toBe(256);
@@ -540,14 +539,14 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       const stepMsg = messages[2] as Record<string, unknown>;
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
+
+      // Act
       const step = steps[0];
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.messageIndex).toBe(step.stepIndex);
       expect(stepMsg.durationType).toBe(fitDurationTypeSchema.enum.distance);
@@ -575,15 +574,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as {
         mesgNum: number;
         durationType: string;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.durationType).toBe(fitDurationTypeSchema.enum.open);
     });
@@ -606,15 +605,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as {
         mesgNum: number;
         equipment: string;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.equipment).toBe("swimFins");
     });
@@ -637,12 +636,12 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as Record<string, unknown>;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).not.toHaveProperty("equipment");
     });
@@ -669,18 +668,17 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as {
         mesgNum: number;
         targetType: string;
         targetValue: number;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
-      // Garmin encoding: 250 watts = 1250 (250 + 1000 offset)
       expect(stepMsg.targetType).toBe("power");
       expect(stepMsg.targetValue).toBe(1250);
     });
@@ -705,18 +703,17 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as {
         mesgNum: number;
         targetType: string;
         targetValue: number;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
-      // Garmin encoding: 85% FTP = 85 (no offset for percentages)
       expect(stepMsg.targetType).toBe("power");
       expect(stepMsg.targetValue).toBe(85);
     });
@@ -741,21 +738,21 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       const stepMsg = messages[2] as {
         mesgNum: number;
         targetType: string;
         targetPowerZone: number;
       };
       const step = steps[0];
+
+      // Act
       const targetZone =
         step.target.type === "power" && step.target.value.unit === "zone"
           ? step.target.value.value
           : undefined;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.targetType).toBe("power");
       expect(stepMsg.targetPowerZone).toBe(targetZone);
@@ -781,11 +778,7 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       const stepMsg = messages[2] as {
         mesgNum: number;
         targetType: string;
@@ -797,10 +790,14 @@ describe("convertKRDToMessages", () => {
         step.target.type === "power" && step.target.value.unit === "range"
           ? step.target.value.min
           : undefined;
+
+      // Act
       const targetMax =
         step.target.type === "power" && step.target.value.unit === "range"
           ? step.target.value.max
           : undefined;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.targetType).toBe("power");
       expect(stepMsg.customTargetPowerLow).toBe(targetMin);
@@ -827,14 +824,13 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as Record<string, unknown>;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
-      // Garmin encoding: 150 bpm = 250 (150 + 100 offset)
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         targetType: "heartRate",
@@ -862,18 +858,18 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       const stepMsg = messages[2] as Record<string, unknown>;
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       const step = steps[0];
+
+      // Act
       const targetZone =
         step.target.type === "heart_rate" && step.target.value.unit === "zone"
           ? step.target.value.value
           : undefined;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         targetType: "heartRate",
@@ -901,18 +897,18 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       const stepMsg = messages[2] as Record<string, unknown>;
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       const step = steps[0];
+
+      // Act
       const targetValue =
         step.target.type === "cadence" && step.target.value.unit === "rpm"
           ? step.target.value.value
           : undefined;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         targetType: "cadence",
@@ -941,18 +937,18 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       const stepMsg = messages[2] as Record<string, unknown>;
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       const step = steps[0];
+
+      // Act
       const targetValue =
         step.target.type === "pace" && step.target.value.unit === "mps"
           ? step.target.value.value
           : undefined;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         targetType: "speed",
@@ -978,12 +974,12 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as Record<string, unknown>;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.targetType).toBe("open");
     });
@@ -1024,12 +1020,10 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
+      const messages = convertKRDToMessages(krd, logger);
+      expect(messages.length).toBe(5);
 
       // Act
-      const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
-      expect(messages.length).toBe(5);
       const repeatMsg = messages[4] as {
         mesgNum: number;
         messageIndex: number;
@@ -1038,6 +1032,8 @@ describe("convertKRDToMessages", () => {
         repeatSteps: number;
         targetType: string;
       };
+
+      // Assert
       expect(repeatMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(repeatMsg.durationType).toBe(
         fitDurationTypeSchema.enum.repeatUntilStepsCmplt
@@ -1086,11 +1082,7 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       expect(messages.length).toBe(6);
       const repeat1Msg = messages[3] as Record<string, unknown>;
       expect(repeat1Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
@@ -1100,7 +1092,10 @@ describe("convertKRDToMessages", () => {
         durationStep: 0,
       });
 
+      // Act
       const repeat2Msg = messages[5] as Record<string, unknown>;
+
+      // Assert
       expect(repeat2Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(repeat2Msg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(repeat2Msg).toMatchObject({
@@ -1114,11 +1109,13 @@ describe("convertKRDToMessages", () => {
     it("should throw FitParsingError when workout is missing", () => {
       // Arrange
       const logger = createMockLogger();
+
+      // Act
       const krd = buildKRD.build({
         extensions: {},
       });
 
-      // Act & Assert
+      // Assert
       expect(() => convertKRDToMessages(krd, logger)).toThrow(FitParsingError);
       expect(() => convertKRDToMessages(krd, logger)).toThrow(
         "KRD missing workout data in extensions"
@@ -1128,13 +1125,15 @@ describe("convertKRDToMessages", () => {
     it("should throw FitParsingError when extensions is undefined", () => {
       // Arrange
       const logger = createMockLogger();
+
+      // Act
       const krd: KRD = {
         version: "1.0",
         type: "structured_workout",
         metadata: buildKRDMetadata.build(),
       };
 
-      // Act & Assert
+      // Assert
       expect(() => convertKRDToMessages(krd, logger)).toThrow(FitParsingError);
     });
   });
@@ -1157,12 +1156,12 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as Record<string, unknown>;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         messageIndex: 0,
@@ -1200,15 +1199,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         messageIndex: 1,
@@ -1243,21 +1242,20 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       const step1Msg = messages[2] as {
         mesgNum: number;
         messageIndex: number;
       };
       expect(step1Msg.durationCalories).toBe(1);
 
+      // Act
       const step2Msg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(step2Msg.durationCalories).toBe(10000);
     });
   });
@@ -1280,12 +1278,12 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as Record<string, unknown>;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         messageIndex: 0,
@@ -1312,12 +1310,12 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as Record<string, unknown>;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         messageIndex: 0,
@@ -1355,15 +1353,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         messageIndex: 1,
@@ -1402,15 +1400,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         messageIndex: 1,
@@ -1445,21 +1443,20 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       const step1Msg = messages[2] as {
         mesgNum: number;
         messageIndex: number;
       };
       expect(step1Msg.durationPower).toBe(50);
 
+      // Act
       const step2Msg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(step2Msg.durationPower).toBe(1000);
     });
   });
@@ -1493,15 +1490,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         messageIndex: 1,
@@ -1540,15 +1537,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         messageIndex: 1,
@@ -1587,15 +1584,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toMatchObject({
         messageIndex: 1,
@@ -1652,13 +1649,8 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       expect(messages.length).toBe(6);
-
       const step2Msg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
@@ -1669,10 +1661,13 @@ describe("convertKRDToMessages", () => {
         durationStep: 0,
       });
 
+      // Act
       const step4Msg = messages[5] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(step4Msg).toMatchObject({
         durationType: fitDurationTypeSchema.enum.repeatUntilDistance,
         durationDistance: 3000,
@@ -1699,12 +1694,12 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as Record<string, unknown>;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toHaveProperty("durationCalories");
       expect(stepMsg).not.toHaveProperty("durationTime");
@@ -1730,12 +1725,12 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as Record<string, unknown>;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg).toHaveProperty("durationPower");
       expect(stepMsg).not.toHaveProperty("durationTime");
@@ -1772,15 +1767,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(stepMsg).toHaveProperty("durationStep");
       expect(stepMsg.durationStep).toBe(0);
     });
@@ -1809,28 +1804,27 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
-
-      // Assert
       const step1Msg = messages[2] as {
         mesgNum: number;
         messageIndex: number;
       };
       expect(step1Msg).not.toHaveProperty("durationStep");
 
+      // Act
       const step2Msg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(step2Msg).not.toHaveProperty("durationStep");
     });
   });
 
   describe("advanced duration types - edge cases", () => {
     it("should reject zero calorie values due to schema validation", () => {
-      // Arrange - Zero calories is invalid per schema (positive required)
+      // Arrange
       const logger = createMockLogger();
       const workout = {
         name: "Test",
@@ -1845,12 +1839,14 @@ describe("convertKRDToMessages", () => {
           },
         ],
       };
+
+      // Act
       const krd = buildKRD.build({
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
 
-      // Act & Assert
+      // Assert
       expect(() => convertKRDToMessages(krd, logger)).toThrow(/calories/i);
     });
 
@@ -1871,18 +1867,18 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as Record<string, unknown>;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.durationCalories).toBe(1);
     });
 
     it("should reject zero power values due to schema validation", () => {
-      // Arrange - Zero power is invalid per schema (positive required)
+      // Arrange
       const logger = createMockLogger();
       const workout = {
         name: "Test",
@@ -1897,12 +1893,14 @@ describe("convertKRDToMessages", () => {
           },
         ],
       };
+
+      // Act
       const krd = buildKRD.build({
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
 
-      // Act & Assert
+      // Assert
       expect(() => convertKRDToMessages(krd, logger)).toThrow(/watts/i);
     });
 
@@ -1923,12 +1921,12 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[2] as Record<string, unknown>;
+
+      // Assert
       expect(stepMsg.mesgNum).toBe(FIT_MESSAGE_NUMBERS.WORKOUT_STEP);
       expect(stepMsg.durationPower).toBe(1);
     });
@@ -1961,15 +1959,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[3] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(stepMsg.durationStep).toBe(0);
     });
 
@@ -2015,15 +2013,15 @@ describe("convertKRDToMessages", () => {
         type: "structured_workout" as const,
         extensions: { structured_workout: workout },
       });
-
-      // Act
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
+      // Act
       const stepMsg = messages[5] as {
         mesgNum: number;
         messageIndex: number;
       };
+
+      // Assert
       expect(stepMsg.durationStep).toBe(0);
     });
   });

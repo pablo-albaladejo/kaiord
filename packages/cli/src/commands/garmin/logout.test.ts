@@ -23,6 +23,7 @@ describe("logoutCommand", () => {
   });
 
   it("should return SUCCESS after logout", async () => {
+    // Arrange
     const logger = createMockLogger();
     const mockAuth = { logout: vi.fn() };
     vi.mocked(createCliGarminClient).mockResolvedValue({
@@ -30,14 +31,17 @@ describe("logoutCommand", () => {
       service: {} as never,
     } as never);
 
+    // Act
     const result = await logoutCommand(logger);
 
+    // Assert
     expect(result).toBe(ExitCode.SUCCESS);
     expect(mockAuth.logout).toHaveBeenCalled();
     expect(logger.info).toHaveBeenCalledWith("Logged out from Garmin Connect");
   });
 
   it("should output JSON when --json flag is set", async () => {
+    // Arrange
     const logger = createMockLogger();
     const mockAuth = { logout: vi.fn() };
     vi.mocked(createCliGarminClient).mockResolvedValue({
@@ -45,15 +49,18 @@ describe("logoutCommand", () => {
       service: {} as never,
     } as never);
     const consoleSpy = vi.spyOn(console, "log").mockImplementation(() => {});
-
     const result = await logoutCommand(logger, true);
-
     expect(result).toBe(ExitCode.SUCCESS);
     expect(consoleSpy).toHaveBeenCalledWith(JSON.stringify({ success: true }));
+
+    // Act
     consoleSpy.mockRestore();
+
+    // Assert
   });
 
   it("should return AUTH_ERROR on ServiceAuthError", async () => {
+    // Arrange
     const logger = createMockLogger();
     vi.mocked(createCliGarminClient).mockResolvedValue({
       auth: {
@@ -62,8 +69,10 @@ describe("logoutCommand", () => {
       service: {} as never,
     } as never);
 
+    // Act
     const result = await logoutCommand(logger);
 
+    // Assert
     expect(result).toBe(ExitCode.AUTH_ERROR);
     expect(logger.error).toHaveBeenCalledWith("Logout failed", {
       error: "expired",
@@ -71,12 +80,16 @@ describe("logoutCommand", () => {
   });
 
   it("should rethrow unknown errors", async () => {
+    // Arrange
     const logger = createMockLogger();
+
+    // Act
     vi.mocked(createCliGarminClient).mockResolvedValue({
       auth: { logout: vi.fn().mockRejectedValue(new Error("network")) },
       service: {} as never,
     } as never);
 
+    // Assert
     await expect(logoutCommand(logger)).rejects.toThrow("network");
   });
 });

@@ -9,10 +9,12 @@ const __dirname = dirname(__filename);
 
 describe("CLI smoke tests", () => {
   it("should display help with --help flag", async () => {
-    // Arrange & Act
+    // Arrange
     const { stdout } = await execa("./dist/bin/kaiord.js", ["--help"], {
       cwd: join(__dirname, "../.."),
     });
+
+    // Act
     const output = stripAnsi(stdout);
 
     // Assert
@@ -22,10 +24,12 @@ describe("CLI smoke tests", () => {
   });
 
   it("should display version with --version flag", async () => {
-    // Arrange & Act
+    // Arrange
     const { stdout } = await execa("./dist/bin/kaiord.js", ["--version"], {
       cwd: join(__dirname, "../.."),
     });
+
+    // Act
     const output = stripAnsi(stdout);
 
     // Assert
@@ -33,7 +37,11 @@ describe("CLI smoke tests", () => {
   });
 
   it("should show error for invalid command", async () => {
-    // Arrange & Act & Assert
+    // Arrange
+
+    // Act
+
+    // Assert
     try {
       await execa("./dist/bin/kaiord.js", ["invalid-command"], {
         cwd: join(__dirname, "../.."),
@@ -52,7 +60,11 @@ describe("CLI smoke tests", () => {
     "should show usage when convert command is missing required args",
     { timeout: 15000 },
     async () => {
-      // Arrange & Act & Assert
+      // Arrange
+
+      // Act
+
+      // Assert
       try {
         await execa("./dist/bin/kaiord.js", ["convert"], {
           cwd: join(__dirname, "../.."),

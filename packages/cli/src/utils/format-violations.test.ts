@@ -16,73 +16,88 @@ describe("formatValidationErrors", () => {
   });
 
   it("should return empty string for empty errors array", () => {
+    // Arrange
     const errors: Array<ValidationError> = [];
 
+    // Act
     const result = formatValidationErrors(errors);
 
+    // Assert
     expect(result).toBe("");
   });
 
   it("should format a single validation error", () => {
+    // Arrange
     const errors: Array<ValidationError> = [
       { field: "version", message: "Required field missing" },
     ];
-
     const result = formatValidationErrors(errors);
+
+    // Act
     const stripped = stripAnsi(result);
 
+    // Assert
     expect(stripped).toContain("Validation errors:");
     expect(stripped).toContain("version: Required field missing");
   });
 
   it("should format multiple validation errors", () => {
+    // Arrange
     const errors: Array<ValidationError> = [
       { field: "version", message: "Required field missing" },
       { field: "type", message: "Invalid value" },
     ];
-
     const result = formatValidationErrors(errors);
+
+    // Act
     const stripped = stripAnsi(result);
 
+    // Assert
     expect(stripped).toContain("Validation errors:");
     expect(stripped).toContain("version: Required field missing");
     expect(stripped).toContain("type: Invalid value");
   });
 
   it("should include bullet points", () => {
+    // Arrange
     const errors: Array<ValidationError> = [
       { field: "version", message: "Required" },
     ];
-
     const result = formatValidationErrors(errors);
+
+    // Act
     const stripped = stripAnsi(result);
 
+    // Assert
     expect(stripped).toContain("\u2022");
   });
 
   it("should still contain correct content when FORCE_COLOR is set", () => {
+    // Arrange
     process.env.FORCE_COLOR = "1";
     const errors: Array<ValidationError> = [
       { field: "test", message: "error" },
     ];
-
     const result = formatValidationErrors(errors);
+
+    // Act
     const stripped = stripAnsi(result);
 
-    // Content is correct regardless of color support
+    // Assert
     expect(stripped).toContain("Validation errors:");
     expect(stripped).toContain("test: error");
   });
 
   it("should produce plain output when not in TTY and no FORCE_COLOR", () => {
+    // Arrange
     const errors: Array<ValidationError> = [
       { field: "field1", message: "msg1" },
     ];
 
+    // Act
     const result = formatValidationErrors(errors);
 
-    // Without TTY or FORCE_COLOR, shouldUseColors returns false
-    // so chalk wrapping is skipped and output is plain text
+    // Assert
     expect(result).toContain("Validation errors:");
     expect(result).toContain("field1: msg1");
   });
@@ -94,14 +109,18 @@ describe("formatToleranceViolations", () => {
   });
 
   it("should return empty string for empty violations array", () => {
+    // Arrange
     const violations: Array<ToleranceViolation> = [];
 
+    // Act
     const result = formatToleranceViolations(violations);
 
+    // Assert
     expect(result).toBe("");
   });
 
   it("should format a single violation", () => {
+    // Arrange
     const violations: Array<ToleranceViolation> = [
       {
         field: "steps[0].duration.seconds",
@@ -111,10 +130,12 @@ describe("formatToleranceViolations", () => {
         tolerance: 1,
       },
     ];
-
     const result = formatToleranceViolations(violations);
+
+    // Act
     const stripped = stripAnsi(result);
 
+    // Assert
     expect(stripped).toContain("Tolerance violations:");
     expect(stripped).toContain("steps[0].duration.seconds");
     expect(stripped).toContain("expected 300, got 301");
@@ -122,6 +143,7 @@ describe("formatToleranceViolations", () => {
   });
 
   it("should format multiple violations", () => {
+    // Arrange
     const violations: Array<ToleranceViolation> = [
       {
         field: "power",
@@ -138,15 +160,18 @@ describe("formatToleranceViolations", () => {
         tolerance: 1,
       },
     ];
-
     const result = formatToleranceViolations(violations);
+
+    // Act
     const stripped = stripAnsi(result);
 
+    // Assert
     expect(stripped).toContain("power");
     expect(stripped).toContain("heartRate");
   });
 
   it("should show absolute deviation for negative deviations", () => {
+    // Arrange
     const violations: Array<ToleranceViolation> = [
       {
         field: "power",
@@ -156,14 +181,17 @@ describe("formatToleranceViolations", () => {
         tolerance: 1,
       },
     ];
-
     const result = formatToleranceViolations(violations);
+
+    // Act
     const stripped = stripAnsi(result);
 
+    // Assert
     expect(stripped).toContain("deviation: 2");
   });
 
   it("should still contain correct content when FORCE_COLOR is set", () => {
+    // Arrange
     process.env.FORCE_COLOR = "1";
     const violations: Array<ToleranceViolation> = [
       {
@@ -174,17 +202,19 @@ describe("formatToleranceViolations", () => {
         tolerance: 1,
       },
     ];
-
     const result = formatToleranceViolations(violations);
+
+    // Act
     const stripped = stripAnsi(result);
 
-    // Content is correct regardless of color support
+    // Assert
     expect(stripped).toContain("Tolerance violations:");
     expect(stripped).toContain("power");
     expect(stripped).toContain("expected 250, got 252");
   });
 
   it("should produce plain output when not in TTY and no FORCE_COLOR", () => {
+    // Arrange
     const violations: Array<ToleranceViolation> = [
       {
         field: "hr",
@@ -195,8 +225,10 @@ describe("formatToleranceViolations", () => {
       },
     ];
 
+    // Act
     const result = formatToleranceViolations(violations);
 
+    // Assert
     expect(result).toContain("Tolerance violations:");
     expect(result).toContain("hr");
     expect(result).toContain("expected 150, got 152");

@@ -21,13 +21,9 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
       const originalXml = loadZwoFixture("WorkoutIndividualSteps.zwo");
-
-      // Act - Zwift → KRD → Zwift → KRD
       const krd1 = await reader(originalXml);
       const convertedXml = await writer(krd1);
       const krd2 = await reader(convertedXml);
-
-      // Assert - Compare workout structures
       const workout1 = krd1.extensions?.structured_workout as {
         name?: string;
         sport: string;
@@ -43,6 +39,7 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
         }>;
       };
 
+      // Act
       const workout2 = krd2.extensions?.structured_workout as {
         name?: string;
         sport: string;
@@ -58,11 +55,10 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
         }>;
       };
 
+      // Assert
       expect(workout2.name).toBe(workout1.name);
       expect(workout2.sport).toBe(workout1.sport);
       expect(workout2.steps.length).toBe(workout1.steps.length);
-
-      // Check power targets with tolerance
       for (let i = 0; i < workout1.steps.length; i++) {
         const step1 = workout1.steps[i];
         const step2 = workout2.steps[i];
@@ -105,13 +101,9 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
       const writer = createFastXmlZwiftWriter(logger, validator);
       const toleranceChecker = createToleranceChecker();
       const originalXml = loadZwoFixture("WorkoutRepeatSteps.zwo");
-
-      // Act - Zwift → KRD → Zwift → KRD
       const krd1 = await reader(originalXml);
       const convertedXml = await writer(krd1);
       const krd2 = await reader(convertedXml);
-
-      // Assert - Check repetition blocks
       const workout1 = krd1.extensions?.structured_workout as {
         steps: Array<
           | { stepIndex: number }
@@ -130,7 +122,6 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
             }
         >;
       };
-
       const workout2 = krd2.extensions?.structured_workout as {
         steps: Array<
           | { stepIndex: number }
@@ -149,10 +140,9 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
             }
         >;
       };
-
       expect(workout2.steps.length).toBe(workout1.steps.length);
 
-      // Find and compare repetition blocks
+      // Act
       for (let i = 0; i < workout1.steps.length; i++) {
         compareRepetitionBlocks(
           workout1.steps[i],
@@ -160,6 +150,8 @@ describe("Round-trip: Zwift → KRD → Zwift", () => {
           toleranceChecker
         );
       }
+
+      // Assert
     }
   );
 });

@@ -160,19 +160,15 @@ describe("round-trip conversion", () => {
       eventGroup: 1,
       data: 42,
     };
+    const krdResult = convertFitToKrdEvent(originalFit);
 
     // Act
-    const krdResult = convertFitToKrdEvent(originalFit);
     const roundTrippedFit = convertKrdToFitEvent(krdResult);
 
-    // Assert - timestamp preserved
+    // Assert
     expect(roundTrippedFit.timestamp).toBe(originalFit.timestamp);
-
-    // Assert - event type preserved
     expect(roundTrippedFit.event).toBe("timer");
     expect(roundTrippedFit.eventType).toBe("start");
-
-    // Assert - optional fields preserved
     expect(roundTrippedFit.eventGroup).toBe(originalFit.eventGroup);
     expect(roundTrippedFit.data).toBe(originalFit.data);
   });
@@ -184,9 +180,9 @@ describe("round-trip conversion", () => {
       event: "lap" as const,
       eventType: "marker" as const,
     };
+    const krdResult = convertFitToKrdEvent(originalFit);
 
     // Act
-    const krdResult = convertFitToKrdEvent(originalFit);
     const roundTrippedFit = convertKrdToFitEvent(krdResult);
 
     // Assert
@@ -202,9 +198,9 @@ describe("round-trip conversion", () => {
       event: "timer" as const,
       eventType: "stopDisable" as const,
     };
+    const krdResult = convertFitToKrdEvent(originalFit);
 
     // Act
-    const krdResult = convertFitToKrdEvent(originalFit);
     const roundTrippedFit = convertKrdToFitEvent(krdResult);
 
     // Assert

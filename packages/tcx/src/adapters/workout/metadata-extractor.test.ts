@@ -4,36 +4,46 @@ import { extractKaiordMetadata } from "./metadata-extractor";
 
 describe("extractKaiordMetadata", () => {
   it("should extract created timestamp from kaiord attributes", () => {
+    // Arrange
     const tcd = {
       "@_kaiord:timeCreated": "2024-01-15T10:00:00Z",
     };
     const workout = { sport: "cycling" as const, steps: [] };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result.created).toBe("2024-01-15T10:00:00Z");
   });
 
   it("should use current date when no created timestamp", () => {
+    // Arrange
     const tcd = {};
     const workout = { sport: "cycling" as const, steps: [] };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result.created).toBeDefined();
     expect(typeof result.created).toBe("string");
   });
 
   it("should extract sport from workout", () => {
+    // Arrange
     const tcd = {};
     const workout = { sport: "running" as const, steps: [] };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result.sport).toBe("running");
   });
 
   it("should extract subSport from workout", () => {
+    // Arrange
     const tcd = {};
     const workout = {
       sport: "cycling" as const,
@@ -41,83 +51,107 @@ describe("extractKaiordMetadata", () => {
       steps: [],
     };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result.subSport).toBe("indoor_cycling");
   });
 
   it("should extract manufacturer from kaiord attributes", () => {
+    // Arrange
     const tcd = {
       "@_kaiord:manufacturer": "Garmin",
     };
     const workout = { sport: "cycling" as const, steps: [] };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result.manufacturer).toBe("Garmin");
   });
 
   it("should extract product from kaiord attributes", () => {
+    // Arrange
     const tcd = {
       "@_kaiord:product": "Edge 1040",
     };
     const workout = { sport: "cycling" as const, steps: [] };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result.product).toBe("Edge 1040");
   });
 
   it("should extract serialNumber from kaiord attributes", () => {
+    // Arrange
     const tcd = {
       "@_kaiord:serialNumber": "ABC123",
     };
     const workout = { sport: "cycling" as const, steps: [] };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result.serialNumber).toBe("ABC123");
   });
 
   it("should convert numeric serialNumber to string", () => {
+    // Arrange
     const tcd = {
       "@_kaiord:serialNumber": 12345,
     };
     const workout = { sport: "cycling" as const, steps: [] };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result.serialNumber).toBe("12345");
   });
 
   it("should not include manufacturer when not present", () => {
+    // Arrange
     const tcd = {};
     const workout = { sport: "cycling" as const, steps: [] };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result.manufacturer).toBeUndefined();
   });
 
   it("should not include product when not present", () => {
+    // Arrange
     const tcd = {};
     const workout = { sport: "cycling" as const, steps: [] };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result.product).toBeUndefined();
   });
 
   it("should not include serialNumber when not present", () => {
+    // Arrange
     const tcd = {};
     const workout = { sport: "cycling" as const, steps: [] };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result.serialNumber).toBeUndefined();
   });
 
   it("should extract all metadata fields together", () => {
+    // Arrange
     const tcd = {
       "@_kaiord:timeCreated": "2024-01-15T10:00:00Z",
       "@_kaiord:manufacturer": "Garmin",
@@ -130,8 +164,10 @@ describe("extractKaiordMetadata", () => {
       steps: [],
     };
 
+    // Act
     const result = extractKaiordMetadata(tcd, workout);
 
+    // Assert
     expect(result).toStrictEqual({
       created: "2024-01-15T10:00:00Z",
       sport: "cycling",

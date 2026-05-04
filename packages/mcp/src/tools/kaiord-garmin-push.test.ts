@@ -62,33 +62,42 @@ describe("kaiord_garmin_push", () => {
   });
 
   it("should push workout when authenticated", async () => {
+    // Arrange
     mockIsAuthenticated.mockReturnValue(true);
     vi.mocked(resolveTextInput).mockResolvedValue('{"version":"1.0"}');
     mockPush.mockResolvedValue(mockPushResult);
-
     const result = await handler({ input_content: '{"version":"1.0"}' });
-
     expect(result.isError).toBeUndefined();
+
+    // Act
     const parsed = JSON.parse(result.content[0].text) as unknown;
+
+    // Assert
     expect(parsed).toEqual(mockPushResult);
   });
 
   it("should return error when not authenticated", async () => {
+    // Arrange
     mockIsAuthenticated.mockReturnValue(false);
 
+    // Act
     const result = await handler({ input_content: '{"version":"1.0"}' });
 
+    // Assert
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Not authenticated");
   });
 
   it("should return error on push failure", async () => {
+    // Arrange
     mockIsAuthenticated.mockReturnValue(true);
     vi.mocked(resolveTextInput).mockResolvedValue('{"version":"1.0"}');
     mockPush.mockRejectedValue(new Error("Push failed"));
 
+    // Act
     const result = await handler({ input_content: '{"version":"1.0"}' });
 
+    // Assert
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Push failed");
   });

@@ -43,10 +43,13 @@ describe("kaiord_garmin_logout", () => {
   });
 
   it("should return success after logout", async () => {
+    // Arrange
     mockLogout.mockResolvedValue(undefined);
 
+    // Act
     const result = await handler({});
 
+    // Assert
     expect(result.content[0].text).toContain("Logged out");
     expect(result.isError).toBeUndefined();
     expect(mockLogout).toHaveBeenCalled();
@@ -54,10 +57,13 @@ describe("kaiord_garmin_logout", () => {
   });
 
   it("should return error on logout failure", async () => {
+    // Arrange
     mockLogout.mockRejectedValue(new Error("Logout failed"));
 
+    // Act
     const result = await handler({});
 
+    // Assert
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Logout failed");
   });

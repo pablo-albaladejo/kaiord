@@ -48,13 +48,12 @@ describe("createFastXmlTcxReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createFastXmlTcxReader(logger);
-      // fast-xml-parser is lenient, so we need truly invalid XML
+
+      // Act
       const malformedXml =
         "<TrainingCenterDatabase><Workouts></TrainingCenterDatabase>";
 
-      // Act & Assert
-      // This will parse but fail validation (missing TrainingCenterDatabase structure)
-      // or throw "not yet implemented" if it passes validation
+      // Assert
       await expect(reader(malformedXml)).rejects.toThrow();
     });
 
@@ -62,12 +61,14 @@ describe("createFastXmlTcxReader", () => {
       // Arrange
       const logger = createMockLogger();
       const reader = createFastXmlTcxReader(logger);
+
+      // Act
       const invalidTcx = `<?xml version="1.0" encoding="UTF-8"?>
 <SomeOtherRoot>
   <Data>Invalid</Data>
 </SomeOtherRoot>`;
 
-      // Act & Assert
+      // Assert
       await expect(reader(invalidTcx)).rejects.toThrow(TcxParsingError);
       await expect(reader(invalidTcx)).rejects.toThrow(
         "Invalid TCX format: missing TrainingCenterDatabase element"
@@ -87,14 +88,14 @@ describe("createFastXmlTcxReader", () => {
   </Workouts>
 </TrainingCenterDatabase>`;
 
-      // Act & Assert
+      // Act
       try {
         await reader(validTcx);
       } catch {
         // Expected to throw "not yet implemented"
       }
 
-      // Logger should have been called (we can't verify exact calls with simple mock)
+      // Assert
       expect(logger).toBeDefined();
     });
 
@@ -116,17 +117,17 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-
-      // Act
       const result = await reader(tcxWithMetadata);
-
-      // Assert
       expect(result.metadata.sport).toBe("cycling");
       expect(result.extensions?.structured_workout).toBeDefined();
+
+      // Act
       const workout = result.extensions?.structured_workout as {
         name?: string;
         sport: string;
       };
+
+      // Assert
       expect(workout.name).toBe("Cycling Intervals");
       expect(workout.sport).toBe("cycling");
     });
@@ -148,14 +149,14 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-
-      // Act
       const result = await reader(tcxWithTimeStep);
 
-      // Assert
+      // Act
       const workout = result.extensions?.structured_workout as {
         steps: Array<{ duration: { type: string; seconds?: number } }>;
       };
+
+      // Assert
       expect(workout.steps).toHaveLength(1);
       expect(workout.steps[0].duration.type).toBe("time");
       expect(workout.steps[0].duration.seconds).toBe(1800);
@@ -178,14 +179,14 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-
-      // Act
       const result = await reader(tcxWithDistanceStep);
 
-      // Assert
+      // Act
       const workout = result.extensions?.structured_workout as {
         steps: Array<{ duration: { type: string; meters?: number } }>;
       };
+
+      // Assert
       expect(workout.steps).toHaveLength(1);
       expect(workout.steps[0].duration.type).toBe("distance");
       expect(workout.steps[0].duration.meters).toBe(5000);
@@ -212,16 +213,16 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-
-      // Act
       const result = await reader(tcxWithHRZone);
 
-      // Assert
+      // Act
       const workout = result.extensions?.structured_workout as {
         steps: Array<{
           target: { type: string; value?: { unit: string; value: number } };
         }>;
       };
+
+      // Assert
       expect(workout.steps).toHaveLength(1);
       expect(workout.steps[0].target.type).toBe("heart_rate");
       expect(workout.steps[0].target.value?.unit).toBe("zone");
@@ -263,14 +264,14 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-
-      // Act
       const result = await reader(tcxWithMultipleSteps);
 
-      // Assert
+      // Act
       const workout = result.extensions?.structured_workout as {
         steps: Array<{ stepIndex: number; name?: string; intensity?: string }>;
       };
+
+      // Assert
       expect(workout.steps).toHaveLength(3);
       expect(workout.steps[0].stepIndex).toBe(0);
       expect(workout.steps[0].name).toBe("Warmup");
@@ -303,14 +304,14 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-
-      // Act
       const result = await reader(tcxWithStepExtensions);
 
-      // Assert
+      // Act
       const workout = result.extensions?.structured_workout as {
         steps: Array<{ extensions?: { tcx: Record<string, unknown> } }>;
       };
+
+      // Assert
       expect(workout.steps).toHaveLength(1);
       expect(workout.steps[0].extensions).toBeDefined();
       expect(workout.steps[0].extensions?.tcx).toBeDefined();
@@ -339,21 +340,21 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-
-      // Act
       const result = await reader(tcxWithPowerExtensions);
-
-      // Assert
       const workout = result.extensions?.structured_workout as {
         steps: Array<{ extensions?: { tcx: Record<string, unknown> } }>;
       };
       expect(workout.steps).toHaveLength(1);
       expect(workout.steps[0].extensions).toBeDefined();
       expect(workout.steps[0].extensions?.tcx).toBeDefined();
+
+      // Act
       const tpx = workout.steps[0].extensions?.tcx.TPX as Record<
         string,
         unknown
       >;
+
+      // Assert
       expect(tpx).toBeDefined();
       expect(tpx.Watts).toBe(250);
     });
@@ -380,17 +381,17 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-
-      // Act
       const result = await reader(tcxWithPowerExtensions);
 
-      // Assert
+      // Act
       const workout = result.extensions?.structured_workout as {
         steps: Array<{
           targetType: string;
           target: { type: string; value?: { unit: string; value: number } };
         }>;
       };
+
+      // Assert
       expect(workout.steps).toHaveLength(1);
       expect(workout.steps[0].targetType).toBe("power");
       expect(workout.steps[0].target.type).toBe("power");
@@ -418,14 +419,14 @@ describe("createFastXmlTcxReader", () => {
     </Workout>
   </Workouts>
 </TrainingCenterDatabase>`;
-
-      // Act
       const result = await reader(tcxWithWorkoutExtensions);
 
-      // Assert
+      // Act
       const workout = result.extensions?.structured_workout as {
         extensions?: { tcx: Record<string, unknown> };
       };
+
+      // Assert
       expect(workout.extensions).toBeDefined();
       expect(workout.extensions?.tcx).toBeDefined();
       expect(workout.extensions?.tcx.WorkoutCustomField).toBe(
@@ -453,13 +454,13 @@ describe("createFastXmlTcxReader", () => {
     <DatabaseCustomField>DatabaseCustomValue</DatabaseCustomField>
   </Extensions>
 </TrainingCenterDatabase>`;
+      const result = await reader(tcxWithDatabaseExtensions);
+      expect(result.extensions?.tcx).toBeDefined();
 
       // Act
-      const result = await reader(tcxWithDatabaseExtensions);
+      const tcxExtensions = result.extensions?.tcx as Record<string, unknown>;
 
       // Assert
-      expect(result.extensions?.tcx).toBeDefined();
-      const tcxExtensions = result.extensions?.tcx as Record<string, unknown>;
       expect(tcxExtensions.DatabaseCustomField).toBe("DatabaseCustomValue");
     });
 
@@ -489,25 +490,20 @@ describe("createFastXmlTcxReader", () => {
     <DatabaseField>DatabaseValue</DatabaseField>
   </Extensions>
 </TrainingCenterDatabase>`;
-
-      // Act
       const result = await reader(tcxWithAllExtensions);
-
-      // Assert
-      // Database level
       expect(result.extensions?.tcx).toBeDefined();
       const tcxExtensions = result.extensions?.tcx as Record<string, unknown>;
       expect(tcxExtensions.DatabaseField).toBe("DatabaseValue");
 
-      // Workout level
+      // Act
       const workout = result.extensions?.structured_workout as {
         extensions?: { tcx: Record<string, unknown> };
         steps: Array<{ extensions?: { tcx: Record<string, unknown> } }>;
       };
+
+      // Assert
       expect(workout.extensions?.tcx).toBeDefined();
       expect(workout.extensions?.tcx.WorkoutField).toBe("WorkoutValue");
-
-      // Step level
       expect(workout.steps[0].extensions?.tcx).toBeDefined();
       expect(workout.steps[0].extensions?.tcx.StepField).toBe("StepValue");
     });
@@ -524,7 +520,6 @@ describe("createFastXmlTcxWriter", () => {
         errors: [],
       });
       const writer = createFastXmlTcxWriter(logger, mockValidator);
-
       const krd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -571,7 +566,6 @@ describe("createFastXmlTcxWriter", () => {
         errors: [],
       });
       const writer = createFastXmlTcxWriter(logger, mockValidator);
-
       const krd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -588,15 +582,14 @@ describe("createFastXmlTcxWriter", () => {
         },
       };
 
-      // Act & Assert
+      // Act
       try {
         await writer(krd);
       } catch {
         // Expected to throw "Not implemented"
       }
 
-      // Validator should be called once conversion is implemented
-      // For now, it won't be called because conversion throws first
+      // Assert
     });
 
     it("should throw TcxValidationError when XSD validation fails", async () => {
@@ -613,6 +606,7 @@ describe("createFastXmlTcxWriter", () => {
       });
       const writer = createFastXmlTcxWriter(logger, mockValidator);
 
+      // Act
       const krd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -629,8 +623,7 @@ describe("createFastXmlTcxWriter", () => {
         },
       };
 
-      // Act & Assert
-      // Currently throws "Not implemented" before validation
+      // Assert
       await expect(writer(krd)).rejects.toThrow();
     });
 
@@ -643,13 +636,14 @@ describe("createFastXmlTcxWriter", () => {
       });
       const writer = createFastXmlTcxWriter(logger, mockValidator);
 
+      // Act
       const invalidKrd = {
         version: "1.0",
         type: "structured_workout",
         // Missing required metadata
       } as unknown as KRD;
 
-      // Act & Assert
+      // Assert
       await expect(writer(invalidKrd)).rejects.toThrow(TcxParsingError);
     });
 
@@ -661,7 +655,6 @@ describe("createFastXmlTcxWriter", () => {
         errors: [],
       });
       const writer = createFastXmlTcxWriter(logger, mockValidator);
-
       const krd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -678,14 +671,14 @@ describe("createFastXmlTcxWriter", () => {
         },
       };
 
-      // Act & Assert
+      // Act
       try {
         await writer(krd);
       } catch {
         // Expected to throw "Not implemented"
       }
 
-      // Logger should have been called
+      // Assert
       expect(logger).toBeDefined();
     });
 
@@ -697,7 +690,6 @@ describe("createFastXmlTcxWriter", () => {
         errors: [],
       });
       const writer = createFastXmlTcxWriter(logger, mockValidator);
-
       const krd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -714,14 +706,14 @@ describe("createFastXmlTcxWriter", () => {
         },
       };
 
-      // Act & Assert
+      // Act
       try {
         await writer(krd);
       } catch {
         // Expected to throw "Not implemented"
       }
 
-      // Verify logger was injected and used
+      // Assert
       expect(logger).toBeDefined();
     });
 
@@ -733,7 +725,6 @@ describe("createFastXmlTcxWriter", () => {
         errors: [],
       });
       const writer = createFastXmlTcxWriter(logger, mockValidator);
-
       const krd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -750,14 +741,14 @@ describe("createFastXmlTcxWriter", () => {
         },
       };
 
-      // Act & Assert
+      // Act
       try {
         await writer(krd);
       } catch {
         // Expected to throw "Not implemented"
       }
 
-      // Validator should be available for use once conversion is implemented
+      // Assert
       expect(mockValidator).toBeDefined();
     });
   });
@@ -771,7 +762,6 @@ it("should convert workout metadata correctly", async () => {
     errors: [],
   });
   const writer = createFastXmlTcxWriter(logger, mockValidator);
-
   const krd: KRD = {
     version: "1.0",
     type: "structured_workout",
@@ -804,7 +794,6 @@ it("should convert time-based duration steps", async () => {
     errors: [],
   });
   const writer = createFastXmlTcxWriter(logger, mockValidator);
-
   const krd: KRD = {
     version: "1.0",
     type: "structured_workout",
@@ -845,7 +834,6 @@ it("should convert distance-based duration steps", async () => {
     errors: [],
   });
   const writer = createFastXmlTcxWriter(logger, mockValidator);
-
   const krd: KRD = {
     version: "1.0",
     type: "structured_workout",
@@ -886,7 +874,6 @@ it("should convert heart rate zone targets", async () => {
     errors: [],
   });
   const writer = createFastXmlTcxWriter(logger, mockValidator);
-
   const krd: KRD = {
     version: "1.0",
     type: "structured_workout",
@@ -933,7 +920,6 @@ it("should preserve step order", async () => {
     errors: [],
   });
   const writer = createFastXmlTcxWriter(logger, mockValidator);
-
   const krd: KRD = {
     version: "1.0",
     type: "structured_workout",
@@ -977,22 +963,20 @@ it("should preserve step order", async () => {
       },
     },
   };
-
-  // Act
   const result = await writer(krd);
-
-  // Assert
   expect(result).toContain("<Name>Warmup</Name>");
   expect(result).toContain("<Name>Work</Name>");
   expect(result).toContain("<Name>Cooldown</Name>");
   expect(result).toContain("<Intensity>Warmup</Intensity>");
   expect(result).toContain("<Intensity>Active</Intensity>");
   expect(result).toContain("<Intensity>Cooldown</Intensity>");
-
-  // Verify order by checking positions
   const warmupIndex = result.indexOf("<Name>Warmup</Name>");
   const workIndex = result.indexOf("<Name>Work</Name>");
+
+  // Act
   const cooldownIndex = result.indexOf("<Name>Cooldown</Name>");
+
+  // Assert
   expect(warmupIndex).toBeLessThan(workIndex);
   expect(workIndex).toBeLessThan(cooldownIndex);
 });
@@ -1005,7 +989,6 @@ it("should restore TCX extensions at step level", async () => {
     errors: [],
   });
   const writer = createFastXmlTcxWriter(logger, mockValidator);
-
   const krd: KRD = {
     version: "1.0",
     type: "structured_workout",
@@ -1051,7 +1034,6 @@ it("should restore power data to TCX extensions", async () => {
     errors: [],
   });
   const writer = createFastXmlTcxWriter(logger, mockValidator);
-
   const krd: KRD = {
     version: "1.0",
     type: "structured_workout",
@@ -1096,7 +1078,6 @@ it("should restore TCX extensions at workout level", async () => {
     errors: [],
   });
   const writer = createFastXmlTcxWriter(logger, mockValidator);
-
   const krd: KRD = {
     version: "1.0",
     type: "structured_workout",
@@ -1136,7 +1117,6 @@ it("should restore TCX extensions at TrainingCenterDatabase level", async () => 
     errors: [],
   });
   const writer = createFastXmlTcxWriter(logger, mockValidator);
-
   const krd: KRD = {
     version: "1.0",
     type: "structured_workout",
@@ -1174,7 +1154,6 @@ it("should restore extensions at all levels simultaneously", async () => {
     errors: [],
   });
   const writer = createFastXmlTcxWriter(logger, mockValidator);
-
   const krd: KRD = {
     version: "1.0",
     type: "structured_workout",

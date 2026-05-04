@@ -22,24 +22,31 @@ describe("mapWorkoutStep", () => {
     ];
 
     it("should resolve pace zone when paceZones provided", () => {
+      // Arrange
       const step = buildWorkoutStep({
         targetType: "pace",
         target: { type: "pace", value: { unit: "zone", value: 3 } },
       });
 
+      // Act
       const result = mapWorkoutStep(step, { value: 1 }, { paceZones });
 
+      // Assert
       expect(result.targetValueOne).toBe(3.08);
       expect(result.targetValueTwo).toBe(3.51);
       expect(result.zoneNumber).toBeNull();
     });
 
     it("should throw for pace zone without paceZones", () => {
+      // Arrange
+
+      // Act
       const step = buildWorkoutStep({
         targetType: "pace",
         target: { type: "pace", value: { unit: "zone", value: 3 } },
       });
 
+      // Assert
       expect(() => mapWorkoutStep(step, { value: 1 })).toThrow(
         /pace zone .* require/i
       );

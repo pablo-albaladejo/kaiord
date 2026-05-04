@@ -78,25 +78,31 @@ describe("readFile", () => {
 
   it("should throw error for missing file", async () => {
     // Arrange
+
+    // Act
     const filePath = join(TEST_DIR, "nonexistent.fit");
 
-    // Act & Assert
+    // Assert
     await expect(readFile(filePath, "fit")).rejects.toThrow("File not found");
   });
 
   it("should throw error for permission denied", async () => {
     // Arrange
+
+    // Act
     const filePath = "/root/protected.fit";
 
-    // Act & Assert
+    // Assert
     await expect(readFile(filePath, "fit")).rejects.toThrow();
   });
 
   it("should throw error for path with null bytes", async () => {
     // Arrange
+
+    // Act
     const filePath = "/valid/path\0/injection";
 
-    // Act & Assert
+    // Assert
     await expect(readFile(filePath, "krd")).rejects.toThrow(
       "Invalid path: dangerous characters detected"
     );
@@ -116,12 +122,12 @@ describe("writeFile", () => {
     // Arrange
     const filePath = join(TEST_DIR, "output.fit");
     const testData = new Uint8Array([1, 2, 3, 4, 5]);
-
-    // Act
     await writeFile(filePath, testData, "fit");
 
-    // Assert
+    // Act
     const result = await readFile(filePath, "fit");
+
+    // Assert
     expect(result).toBeInstanceOf(Uint8Array);
     expect(Array.from(result as Uint8Array)).toEqual([1, 2, 3, 4, 5]);
   });
@@ -130,12 +136,12 @@ describe("writeFile", () => {
     // Arrange
     const filePath = join(TEST_DIR, "output.krd");
     const testData = '{"version":"1.0","type":"structured_workout"}';
-
-    // Act
     await writeFile(filePath, testData, "krd");
 
-    // Assert
+    // Act
     const result = await readFile(filePath, "krd");
+
+    // Assert
     expect(typeof result).toBe("string");
     expect(result).toBe(testData);
   });
@@ -144,12 +150,12 @@ describe("writeFile", () => {
     // Arrange
     const filePath = join(TEST_DIR, "output.tcx");
     const testData = '<?xml version="1.0"?><TrainingCenterDatabase/>';
-
-    // Act
     await writeFile(filePath, testData, "tcx");
 
-    // Assert
+    // Act
     const result = await readFile(filePath, "tcx");
+
+    // Assert
     expect(typeof result).toBe("string");
     expect(result).toBe(testData);
   });
@@ -158,12 +164,12 @@ describe("writeFile", () => {
     // Arrange
     const filePath = join(TEST_DIR, "output.zwo");
     const testData = '<?xml version="1.0"?><workout_file/>';
-
-    // Act
     await writeFile(filePath, testData, "zwo");
 
-    // Assert
+    // Act
     const result = await readFile(filePath, "zwo");
+
+    // Assert
     expect(typeof result).toBe("string");
     expect(result).toBe(testData);
   });
@@ -172,21 +178,23 @@ describe("writeFile", () => {
     // Arrange
     const filePath = join(TEST_DIR, "nested", "dir", "output.krd");
     const testData = '{"version":"1.0"}';
-
-    // Act
     await writeFile(filePath, testData, "krd");
 
-    // Assert
+    // Act
     const result = await readFile(filePath, "krd");
+
+    // Assert
     expect(result).toBe(testData);
   });
 
   it("should throw error when writing FIT with string data", async () => {
     // Arrange
     const filePath = join(TEST_DIR, "output.fit");
+
+    // Act
     const testData = "invalid string data";
 
-    // Act & Assert
+    // Assert
     await expect(writeFile(filePath, testData, "fit")).rejects.toThrow(
       "FIT files require Uint8Array data"
     );
@@ -195,9 +203,11 @@ describe("writeFile", () => {
   it("should throw error when writing text file with Uint8Array", async () => {
     // Arrange
     const filePath = join(TEST_DIR, "output.krd");
+
+    // Act
     const testData = new Uint8Array([1, 2, 3]);
 
-    // Act & Assert
+    // Assert
     await expect(writeFile(filePath, testData, "krd")).rejects.toThrow(
       "Text files require string data"
     );
@@ -205,9 +215,11 @@ describe("writeFile", () => {
 
   it("should throw error for path with shell metacharacters", async () => {
     // Arrange
+
+    // Act
     const filePath = "path;rm -rf /";
 
-    // Act & Assert
+    // Assert
     await expect(writeFile(filePath, "data", "krd")).rejects.toThrow(
       "Invalid path: dangerous characters detected"
     );
@@ -217,25 +229,31 @@ describe("writeFile", () => {
 describe("validatePathSecurity", () => {
   it("should allow absolute paths", () => {
     // Arrange
+
+    // Act
     const validPath = "/Users/test/file.txt";
 
-    // Act & Assert
+    // Assert
     expect(() => validatePathSecurity(validPath)).not.toThrow();
   });
 
   it("should allow relative paths including parent traversal", () => {
-    // Arrange - CLI tools legitimately need to access parent directories
+    // Arrange
+
+    // Act
     const validPath = "../other-project/file.txt";
 
-    // Act & Assert
+    // Assert
     expect(() => validatePathSecurity(validPath)).not.toThrow();
   });
 
   it("should reject paths with null bytes", () => {
     // Arrange
+
+    // Act
     const invalidPath = "/valid/path\0/injection";
 
-    // Act & Assert
+    // Assert
     expect(() => validatePathSecurity(invalidPath)).toThrow(
       "Invalid path: dangerous characters detected"
     );
@@ -243,9 +261,11 @@ describe("validatePathSecurity", () => {
 
   it("should reject paths with shell metacharacters", () => {
     // Arrange
+
+    // Act
     const invalidPath = "path|cat /etc/passwd";
 
-    // Act & Assert
+    // Assert
     expect(() => validatePathSecurity(invalidPath)).toThrow(
       "Invalid path: dangerous characters detected"
     );
@@ -255,22 +275,30 @@ describe("validatePathSecurity", () => {
 describe("isNodeSystemError", () => {
   it("should return true for errors with code property", () => {
     // Arrange
+
+    // Act
     const error = Object.assign(new Error("test"), { code: "ENOENT" });
 
-    // Act & Assert
+    // Assert
     expect(isNodeSystemError(error)).toBe(true);
   });
 
   it("should return false for regular errors", () => {
     // Arrange
+
+    // Act
     const error = new Error("test");
 
-    // Act & Assert
+    // Assert
     expect(isNodeSystemError(error)).toBe(false);
   });
 
   it("should return false for non-error values", () => {
-    // Act & Assert
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(isNodeSystemError("string")).toBe(false);
     expect(isNodeSystemError(null)).toBe(false);
     expect(isNodeSystemError(undefined)).toBe(false);
@@ -319,7 +347,9 @@ describe("findFiles", () => {
   });
 
   it("should return empty array when no files match", async () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const result = await findFiles(join(TEST_DIR, "*.fit"));
 
     // Assert

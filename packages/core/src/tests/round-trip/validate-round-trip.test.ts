@@ -14,7 +14,6 @@ describe("validateRoundTrip", () => {
       // Arrange
       const originalFit = new Uint8Array([1, 2, 3, 4]);
       const krd = buildKRD.build();
-
       const mockFitReader = vi.fn().mockResolvedValue(krd);
       const mockFitWriter = vi.fn().mockResolvedValue(originalFit);
       const mockToleranceChecker: ToleranceChecker = {
@@ -66,13 +65,11 @@ describe("validateRoundTrip", () => {
           },
         ],
       });
-
       const mockFitReader = vi
         .fn()
         .mockResolvedValueOnce(krd1)
         .mockResolvedValueOnce(krd2);
       const mockFitWriter = vi.fn().mockResolvedValue(originalFit);
-
       const powerViolation: ToleranceViolation = {
         field: "power",
         expected: 250,
@@ -80,7 +77,6 @@ describe("validateRoundTrip", () => {
         deviation: 5,
         tolerance: 1,
       };
-
       const mockToleranceChecker: ToleranceChecker = {
         checkTime: vi.fn().mockReturnValue(null),
         checkDistance: vi.fn().mockReturnValue(null),
@@ -110,7 +106,6 @@ describe("validateRoundTrip", () => {
       // Arrange
       const originalFit = new Uint8Array([1, 2, 3, 4]);
       const readerError = new Error("Failed to read FIT file");
-
       const mockFitReader = vi.fn().mockRejectedValue(readerError);
       const mockFitWriter = vi.fn();
       const mockToleranceChecker: ToleranceChecker = {
@@ -121,9 +116,11 @@ describe("validateRoundTrip", () => {
         checkCadence: vi.fn(),
         checkPace: vi.fn(),
       };
+
+      // Act
       const logger = createMockLogger();
 
-      // Act & Assert
+      // Assert
       await expect(
         validateRoundTrip(
           mockFitReader,
@@ -139,7 +136,6 @@ describe("validateRoundTrip", () => {
       const originalFit = new Uint8Array([1, 2, 3, 4]);
       const krd = buildKRD.build();
       const writerError = new Error("Failed to write FIT file");
-
       const mockFitReader = vi.fn().mockResolvedValue(krd);
       const mockFitWriter = vi.fn().mockRejectedValue(writerError);
       const mockToleranceChecker: ToleranceChecker = {
@@ -150,9 +146,11 @@ describe("validateRoundTrip", () => {
         checkCadence: vi.fn(),
         checkPace: vi.fn(),
       };
+
+      // Act
       const logger = createMockLogger();
 
-      // Act & Assert
+      // Assert
       await expect(
         validateRoundTrip(
           mockFitReader,
@@ -169,7 +167,6 @@ describe("validateRoundTrip", () => {
       // Arrange
       const originalKrd = buildKRD.build();
       const fitBuffer = new Uint8Array([1, 2, 3, 4]);
-
       const mockFitReader = vi.fn().mockResolvedValue(originalKrd);
       const mockFitWriter = vi.fn().mockResolvedValue(fitBuffer);
       const mockToleranceChecker: ToleranceChecker = {
@@ -223,13 +220,11 @@ describe("validateRoundTrip", () => {
         records: undefined,
       });
       const fitBuffer = new Uint8Array([1, 2, 3, 4]);
-
       const mockFitReader = vi
         .fn()
         .mockResolvedValueOnce(originalKrd)
         .mockResolvedValueOnce(krd2);
       const mockFitWriter = vi.fn().mockResolvedValue(fitBuffer);
-
       const hrViolation: ToleranceViolation = {
         field: "heartRate",
         expected: 150,
@@ -237,7 +232,6 @@ describe("validateRoundTrip", () => {
         deviation: 5,
         tolerance: 1,
       };
-
       const mockToleranceChecker: ToleranceChecker = {
         checkTime: vi.fn().mockReturnValue(null),
         checkDistance: vi.fn().mockReturnValue(null),
@@ -267,7 +261,6 @@ describe("validateRoundTrip", () => {
       // Arrange
       const originalKrd = buildKRD.build();
       const writerError = new Error("Failed to write FIT file");
-
       const mockFitReader = vi.fn();
       const mockFitWriter = vi.fn().mockRejectedValue(writerError);
       const mockToleranceChecker: ToleranceChecker = {
@@ -278,9 +271,11 @@ describe("validateRoundTrip", () => {
         checkCadence: vi.fn(),
         checkPace: vi.fn(),
       };
+
+      // Act
       const logger = createMockLogger();
 
-      // Act & Assert
+      // Assert
       await expect(
         validateRoundTrip(
           mockFitReader,
@@ -296,7 +291,6 @@ describe("validateRoundTrip", () => {
       const originalKrd = buildKRD.build();
       const fitBuffer = new Uint8Array([1, 2, 3, 4]);
       const readerError = new Error("Failed to read FIT file");
-
       const mockFitReader = vi.fn().mockRejectedValue(readerError);
       const mockFitWriter = vi.fn().mockResolvedValue(fitBuffer);
       const mockToleranceChecker: ToleranceChecker = {
@@ -307,9 +301,11 @@ describe("validateRoundTrip", () => {
         checkCadence: vi.fn(),
         checkPace: vi.fn(),
       };
+
+      // Act
       const logger = createMockLogger();
 
-      // Act & Assert
+      // Assert
       await expect(
         validateRoundTrip(
           mockFitReader,
@@ -355,13 +351,11 @@ describe("validateRoundTrip", () => {
         laps: undefined,
         records: undefined,
       });
-
       const mockFitReader = vi
         .fn()
         .mockResolvedValueOnce(krd1)
         .mockResolvedValueOnce(krd2);
       const mockFitWriter = vi.fn().mockResolvedValue(originalFit);
-
       const mockToleranceChecker: ToleranceChecker = {
         checkTime: vi.fn().mockReturnValue({
           field: "time",
@@ -454,13 +448,11 @@ describe("validateRoundTrip", () => {
         ],
         records: undefined,
       });
-
       const mockFitReader = vi
         .fn()
         .mockResolvedValueOnce(krd1)
         .mockResolvedValueOnce(krd2);
       const mockFitWriter = vi.fn().mockResolvedValue(originalFit);
-
       const mockToleranceChecker: ToleranceChecker = {
         checkTime: vi.fn().mockReturnValue({
           field: "time",
@@ -539,13 +531,11 @@ describe("validateRoundTrip", () => {
           },
         ],
       });
-
       const mockFitReader = vi
         .fn()
         .mockResolvedValueOnce(krd1)
         .mockResolvedValueOnce(krd2);
       const mockFitWriter = vi.fn().mockResolvedValue(originalFit);
-
       const mockToleranceChecker: ToleranceChecker = {
         checkTime: vi.fn().mockReturnValue(null),
         checkDistance: vi.fn().mockReturnValue({

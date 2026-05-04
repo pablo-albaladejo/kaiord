@@ -20,6 +20,7 @@ const createMockHttpClient = (): GarminHttpClient => ({
 
 describe("createGarminWorkoutService", () => {
   it("should list workouts", async () => {
+    // Arrange
     const httpClient = createMockHttpClient();
     vi.mocked(httpClient.get).mockResolvedValue([
       {
@@ -30,10 +31,12 @@ describe("createGarminWorkoutService", () => {
         updatedDate: 1700000000000,
       },
     ]);
-
     const service = createGarminWorkoutService(httpClient, mockLogger);
+
+    // Act
     const workouts = await service.list({ offset: 0, limit: 10 });
 
+    // Assert
     expect(workouts).toHaveLength(1);
     expect(workouts[0].id).toBe("1");
     expect(workouts[0].name).toBe("Run");
@@ -44,14 +47,13 @@ describe("createGarminWorkoutService", () => {
   });
 
   it("should push a workout", async () => {
+    // Arrange
     const httpClient = createMockHttpClient();
     vi.mocked(httpClient.post).mockResolvedValue({
       workoutId: 999,
       workoutName: "Pushed",
     });
-
     const service = createGarminWorkoutService(httpClient, mockLogger);
-
     const krd: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -77,8 +79,10 @@ describe("createGarminWorkoutService", () => {
       },
     };
 
+    // Act
     const result = await service.push(krd);
 
+    // Assert
     expect(result.id).toBe("999");
     expect(result.name).toBe("Pushed");
     expect(result.url).toContain("999");
@@ -89,11 +93,12 @@ describe("createGarminWorkoutService", () => {
   });
 
   it("should throw a ServiceApiError when push fails", async () => {
+    // Arrange
     const httpClient = createMockHttpClient();
     vi.mocked(httpClient.post).mockRejectedValue(new Error("network error"));
-
     const service = createGarminWorkoutService(httpClient, mockLogger);
 
+    // Act
     const krd: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -119,19 +124,24 @@ describe("createGarminWorkoutService", () => {
       },
     };
 
+    // Assert
     await expect(service.push(krd)).rejects.toThrow("Failed to push workout");
   });
 
   it("should throw a ServiceApiError when list fails", async () => {
+    // Arrange
     const httpClient = createMockHttpClient();
     vi.mocked(httpClient.get).mockRejectedValue(new Error("network error"));
 
+    // Act
     const service = createGarminWorkoutService(httpClient, mockLogger);
 
+    // Assert
     await expect(service.list()).rejects.toThrow("Failed to list workouts");
   });
 
   it("should pull a workout and return KRD", async () => {
+    // Arrange
     const httpClient = createMockHttpClient();
     const gcnPayload = {
       workoutName: "Morning Run",
@@ -151,40 +161,51 @@ describe("createGarminWorkoutService", () => {
       ],
     };
     vi.mocked(httpClient.get).mockResolvedValue(gcnPayload);
-
     const service = createGarminWorkoutService(httpClient, mockLogger);
+
+    // Act
     const krd = await service.pull("42");
 
+    // Assert
     expect(krd).toBeDefined();
     expect(krd.type).toBe("structured_workout");
     expect(httpClient.get).toHaveBeenCalledWith(`${WORKOUT_URL}/workout/42`);
   });
 
   it("should throw a ServiceApiError when pull fails", async () => {
+    // Arrange
     const httpClient = createMockHttpClient();
     vi.mocked(httpClient.get).mockRejectedValue(new Error("network error"));
 
+    // Act
     const service = createGarminWorkoutService(httpClient, mockLogger);
 
+    // Assert
     await expect(service.pull("42")).rejects.toThrow("Failed to pull workout");
   });
 
   it("should remove a workout", async () => {
+    // Arrange
     const httpClient = createMockHttpClient();
     vi.mocked(httpClient.del).mockResolvedValue(undefined);
-
     const service = createGarminWorkoutService(httpClient, mockLogger);
+
+    // Act
     await service.remove("42");
 
+    // Assert
     expect(httpClient.del).toHaveBeenCalledWith(`${WORKOUT_URL}/workout/42`);
   });
 
   it("should throw a ServiceApiError when remove fails", async () => {
+    // Arrange
     const httpClient = createMockHttpClient();
     vi.mocked(httpClient.del).mockRejectedValue(new Error("network error"));
 
+    // Act
     const service = createGarminWorkoutService(httpClient, mockLogger);
 
+    // Assert
     await expect(service.remove("42")).rejects.toThrow(
       "Failed to remove workout"
     );

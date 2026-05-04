@@ -12,7 +12,10 @@ const mockLogger: Logger = {
 
 describe("getLoginTicket", () => {
   it("should throw when SSO login page returns non-ok status", async () => {
+    // Arrange
     let callCount = 0;
+
+    // Act
     const mockFetch = vi.fn(async () => {
       callCount++;
       if (callCount === 1) {
@@ -26,6 +29,7 @@ describe("getLoginTicket", () => {
       };
     }) as unknown as typeof globalThis.fetch;
 
+    // Assert
     await expect(
       getLoginTicket("user", "pass", mockFetch, mockLogger)
     ).rejects.toThrow("SSO login page returned 503");

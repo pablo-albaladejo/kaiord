@@ -41,26 +41,32 @@ describe("kaiord_garmin_login", () => {
   });
 
   it("should return success on valid login", async () => {
+    // Arrange
     mockLogin.mockResolvedValue(undefined);
 
+    // Act
     const result = await handler({
       email: "user@test.com",
       password: "pass123",
     });
 
+    // Assert
     expect(result.content[0].text).toContain("Logged in");
     expect(result.isError).toBeUndefined();
     expect(mockLogin).toHaveBeenCalledWith("user@test.com", "pass123");
   });
 
   it("should return error on login failure", async () => {
+    // Arrange
     mockLogin.mockRejectedValue(new Error("Invalid credentials"));
 
+    // Act
     const result = await handler({
       email: "user@test.com",
       password: "wrong",
     });
 
+    // Assert
     expect(result.isError).toBe(true);
     expect(result.content[0].text).toContain("Invalid credentials");
   });

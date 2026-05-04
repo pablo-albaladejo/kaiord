@@ -126,13 +126,15 @@ describe("convertFitToKrdRecord", () => {
 
   it("should throw error for out-of-range coordinates", () => {
     // Arrange
+
+    // Act
     const fitRecord = {
       timestamp: 1704067200,
       positionLat: degreesToSemicircles(91), // Invalid: > 90
       positionLong: degreesToSemicircles(0),
     };
 
-    // Act & Assert
+    // Assert
     expect(() => convertFitToKrdRecord(fitRecord)).toThrow(
       "Invalid coordinates"
     );
@@ -140,13 +142,15 @@ describe("convertFitToKrdRecord", () => {
 
   it("should throw error for NaN coordinates", () => {
     // Arrange
+
+    // Act
     const fitRecord = {
       timestamp: 1704067200,
       positionLat: NaN,
       positionLong: 0,
     };
 
-    // Act & Assert - Zod catches NaN at parse time
+    // Assert
     expect(() => convertFitToKrdRecord(fitRecord)).toThrow();
   });
 });
@@ -173,21 +177,21 @@ describe("convertFitToKrdRecords", () => {
 
 describe("performance", () => {
   it("should process 10000 records in under 500ms", () => {
-    // Arrange - CI runners are slower than local machines
+    // Arrange
     const fitRecords = Array.from({ length: 10000 }, (_, i) => ({
       timestamp: 1704067200 + i,
       heartRate: 145,
       cadence: 90,
       power: 250,
     }));
-
-    // Act
     const start = performance.now();
     const results = convertFitToKrdRecords(fitRecords);
+
+    // Act
     const duration = performance.now() - start;
 
     // Assert
     expect(results).toHaveLength(10000);
-    expect(duration).toBeLessThan(500); // Relaxed for CI environments
+    expect(duration).toBeLessThan(500);
   });
 });
