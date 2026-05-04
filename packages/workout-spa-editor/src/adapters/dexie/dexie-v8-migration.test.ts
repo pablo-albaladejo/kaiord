@@ -57,13 +57,16 @@ describe("Dexie v7 → v8 migration", () => {
   });
 
   it("should backfill createdAt as a number on every legacy aiProvider row", async () => {
+    // Arrange
     await seedV7(name);
-
     const v8 = new KaiordDatabase(name);
     await v8.open();
     const rows = await v8.table("aiProviders").toArray();
+
+    // Act
     v8.close();
 
+    // Assert
     expect(rows).toHaveLength(2);
     for (const row of rows) {
       expect(typeof row.createdAt).toBe("number");
@@ -72,13 +75,16 @@ describe("Dexie v7 → v8 migration", () => {
   });
 
   it("should preserve all pre-existing fields verbatim", async () => {
+    // Arrange
     await seedV7(name);
-
     const v8 = new KaiordDatabase(name);
     await v8.open();
     const claude = await v8.table("aiProviders").get("legacy-anthropic");
+
+    // Act
     v8.close();
 
+    // Assert
     expect(claude).toMatchObject({
       id: "legacy-anthropic",
       type: "anthropic",
@@ -90,12 +96,10 @@ describe("Dexie v7 → v8 migration", () => {
   });
 
   it("should order legacy rows before any post-upgrade insertion via the new index", async () => {
+    // Arrange
     await seedV7(name);
-
     const v8 = new KaiordDatabase(name);
     await v8.open();
-    // Insert a fresh row with a stamp strictly newer than any backfilled
-    // legacy row could have received during open().
     await v8.table("aiProviders").put({
       id: "fresh",
       type: "google",
@@ -109,26 +113,35 @@ describe("Dexie v7 → v8 migration", () => {
       .table("aiProviders")
       .orderBy("createdAt")
       .toArray();
+
+    // Act
     v8.close();
 
+    // Assert
     expect(ordered.map((r) => r.id).slice(-1)).toEqual(["fresh"]);
   });
 });
 
 describe("makeBackfillAiProviderCreatedAt", () => {
   it("should stamp the supplied timestamp on a row missing createdAt", () => {
+    // Arrange
     const row: Record<string, unknown> = { id: "p1" };
 
+    // Act
     makeBackfillAiProviderCreatedAt(1_700_000_000_000)(row);
 
+    // Assert
     expect(row.createdAt).toBe(1_700_000_000_000);
   });
 
   it("should preserve an existing numeric createdAt", () => {
+    // Arrange
     const row: Record<string, unknown> = { id: "p1", createdAt: 42 };
 
+    // Act
     makeBackfillAiProviderCreatedAt(1_700_000_000_000)(row);
 
+    // Assert
     expect(row.createdAt).toBe(42);
   });
 });

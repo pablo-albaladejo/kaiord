@@ -65,6 +65,7 @@ describe("Dexie write paths strip ids", () => {
   });
 
   it("should strip ids from persisted records via the workout repository", async () => {
+    // Arrange
     const ui = hydrateUIWorkout(buildKrd());
     const record: WorkoutRecord = {
       id: "00000000-0000-4000-8000-000000000111",
@@ -86,15 +87,18 @@ describe("Dexie write paths strip ids", () => {
       modifiedAt: null,
       updatedAt: "2026-04-20T12:00:00Z",
     };
-
     const repo = createDexieWorkoutRepository(testDb);
     await repo.put(record);
     const reloaded = await repo.getById(record.id);
 
+    // Act
     assertNoIds(reloaded?.krd ?? null);
+
+    // Assert
   });
 
   it("should strip ids from persisted templates via the template repository", async () => {
+    // Arrange
     const ui = hydrateUIWorkout(buildKrd());
     const template: WorkoutTemplate = {
       id: "00000000-0000-4000-8000-000000000222",
@@ -105,12 +109,14 @@ describe("Dexie write paths strip ids", () => {
       createdAt: "2026-04-20T12:00:00Z",
       updatedAt: "2026-04-20T12:00:00Z",
     };
-
     const repo = createDexieTemplateRepository(testDb);
     await repo.put(template);
     const reloaded = await repo.getById(template.id);
-
     expect(reloaded).toBeDefined();
+
+    // Act
     assertNoIds(reloaded!.krd);
+
+    // Assert
   });
 });

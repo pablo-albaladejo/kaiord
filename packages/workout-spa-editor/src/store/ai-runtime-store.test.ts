@@ -19,28 +19,41 @@ describe("useAiRuntimeStore", () => {
   });
 
   it("should start with no selection and idle generation", () => {
+    // Arrange
+
+    // Act
     const state = useAiRuntimeStore.getState();
+
+    // Assert
     expect(state.selectedProviderId).toBeNull();
     expect(state.generation).toEqual({ status: "idle" });
   });
 
   it("should update selectedProviderId via selectForGeneration", () => {
+    // Arrange
     useAiRuntimeStore.getState().selectForGeneration("p-1");
     expect(useAiRuntimeStore.getState().selectedProviderId).toBe("p-1");
 
+    // Act
     useAiRuntimeStore.getState().selectForGeneration(null);
+
+    // Assert
     expect(useAiRuntimeStore.getState().selectedProviderId).toBeNull();
   });
 
   it("should update generation via setGeneration", () => {
+    // Arrange
     useAiRuntimeStore.getState().setGeneration({ status: "loading" });
     expect(useAiRuntimeStore.getState().generation).toEqual({
       status: "loading",
     });
 
+    // Act
     useAiRuntimeStore
       .getState()
       .setGeneration({ status: "error", message: "boom" });
+
+    // Assert
     expect(useAiRuntimeStore.getState().generation).toEqual({
       status: "error",
       message: "boom",

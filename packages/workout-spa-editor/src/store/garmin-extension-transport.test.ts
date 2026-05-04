@@ -20,6 +20,7 @@ describe("garmin-extension-transport", () => {
 
   describe("sendMessage", () => {
     it("should resolve with extension response", async () => {
+      // Arrange
       const mockSend = vi.fn((_id, _msg, cb: (r: unknown) => void) => {
         cb({ ok: true, data: "test" });
       });
@@ -27,16 +28,21 @@ describe("garmin-extension-transport", () => {
         runtime: { lastError: null, sendMessage: mockSend },
       };
 
+      // Act
       const result = await sendMessage("ext-id", { action: "ping" }, 2000);
 
+      // Assert
       expect(result).toEqual({ ok: true, data: "test" });
     });
 
     it("should resolve with error when chrome.runtime is unavailable", async () => {
+      // Arrange
       delete (globalThis as Record<string, unknown>).chrome;
 
+      // Act
       const result = await sendMessage("ext-id", { action: "ping" }, 2000);
 
+      // Assert
       expect(result).toEqual({
         ok: false,
         error: "Chrome runtime not available",
@@ -44,15 +50,18 @@ describe("garmin-extension-transport", () => {
     });
 
     it("should resolve with timeout error when no response", async () => {
+      // Arrange
       const mockSend = vi.fn();
       (globalThis as Record<string, unknown>).chrome = {
         runtime: { lastError: null, sendMessage: mockSend },
       };
-
       const promise = sendMessage("ext-id", { action: "ping" }, 2000);
       vi.advanceTimersByTime(2000);
+
+      // Act
       const result = await promise;
 
+      // Assert
       expect(result).toEqual({
         ok: false,
         error: "Extension did not respond",
@@ -60,6 +69,7 @@ describe("garmin-extension-transport", () => {
     });
 
     it("should resolve with lastError when extension not found", async () => {
+      // Arrange
       const mockSend = vi.fn((_id, _msg, cb: (r: unknown) => void) => {
         (
           globalThis as unknown as {
@@ -74,8 +84,10 @@ describe("garmin-extension-transport", () => {
         runtime: { lastError: null, sendMessage: mockSend },
       };
 
+      // Act
       const result = await sendMessage("ext-id", { action: "ping" }, 2000);
 
+      // Assert
       expect(result).toEqual({
         ok: false,
         error: "Could not establish connection",
@@ -83,6 +95,7 @@ describe("garmin-extension-transport", () => {
     });
 
     it("should resolve with error when sendMessage throws", async () => {
+      // Arrange
       const mockSend = vi.fn(() => {
         throw new Error("fail");
       });
@@ -90,8 +103,10 @@ describe("garmin-extension-transport", () => {
         runtime: { lastError: null, sendMessage: mockSend },
       };
 
+      // Act
       const result = await sendMessage("ext-id", { action: "ping" }, 2000);
 
+      // Assert
       expect(result).toEqual({
         ok: false,
         error: "Extension not available",
@@ -101,6 +116,7 @@ describe("garmin-extension-transport", () => {
 
   describe("ping", () => {
     it("should return on first success", async () => {
+      // Arrange
       const mockSend = vi.fn((_id, _msg, cb: (r: unknown) => void) => {
         cb({ ok: true, protocolVersion: 1, data: { gcApi: { ok: true } } });
       });
@@ -108,13 +124,16 @@ describe("garmin-extension-transport", () => {
         runtime: { lastError: null, sendMessage: mockSend },
       };
 
+      // Act
       const result = await ping("ext-id");
 
+      // Assert
       expect(result.ok).toBe(true);
       expect(mockSend).toHaveBeenCalledTimes(1);
     });
 
     it("should retry on timeout", async () => {
+      // Arrange
       let callCount = 0;
       const mockSend = vi.fn((_id, _msg, cb: (r: unknown) => void) => {
         callCount++;
@@ -125,17 +144,20 @@ describe("garmin-extension-transport", () => {
       (globalThis as Record<string, unknown>).chrome = {
         runtime: { lastError: null, sendMessage: mockSend },
       };
-
       const promise = ping("ext-id");
       vi.advanceTimersByTime(2000);
       await vi.advanceTimersByTimeAsync(100);
+
+      // Act
       const result = await promise;
 
+      // Assert
       expect(result.ok).toBe(true);
       expect(mockSend).toHaveBeenCalledTimes(2);
     });
 
     it("should not retry on lastError", async () => {
+      // Arrange
       const mockSend = vi.fn((_id, _msg, cb: (r: unknown) => void) => {
         (
           globalThis as unknown as {
@@ -148,8 +170,10 @@ describe("garmin-extension-transport", () => {
         runtime: { lastError: null, sendMessage: mockSend },
       };
 
+      // Act
       const result = await ping("ext-id");
 
+      // Assert
       expect(result.ok).toBe(false);
       expect(mockSend).toHaveBeenCalledTimes(1);
     });

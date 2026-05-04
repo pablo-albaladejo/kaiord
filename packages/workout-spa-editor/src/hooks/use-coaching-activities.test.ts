@@ -59,33 +59,47 @@ describe("useCoachingActivities", () => {
   });
 
   it("should invoke each factory with (activeProfileId, days)", () => {
+    // Arrange
     const days = ["2026-04-13", "2026-04-14"];
+
+    // Act
     renderHook(() => useCoachingActivities(days));
 
+    // Assert
     expect(factory).toHaveBeenCalledWith(ACTIVE_PROFILE_ID, days);
   });
 
   it("should group activities by day", () => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(() =>
       useCoachingActivities(["2026-04-13", "2026-04-14", "2026-04-15"])
     );
 
+    // Assert
     expect(result.current.byDay["2026-04-13"]).toHaveLength(1);
     expect(result.current.byDay["2026-04-14"]).toHaveLength(1);
     expect(result.current.byDay["2026-04-15"]).toHaveLength(0);
   });
 
   it("should return syncSources for available sources", () => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
 
+    // Assert
     expect(result.current.syncSources).toHaveLength(1);
     expect(result.current.syncSources[0]?.id).toBe("train2go");
     expect(result.current.syncSources[0]?.connected).toBe(true);
   });
 
   it("should call source.expand with (activeProfileId, date) via expandActivity", async () => {
+    // Arrange
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
 
+    // Act
     result.current.expandActivity({
       id: "train2go:1",
       source: "train2go",
@@ -96,6 +110,7 @@ describe("useCoachingActivities", () => {
       status: "pending",
     });
 
+    // Assert
     expect(fakeSource.expand).toHaveBeenCalledWith(
       ACTIVE_PROFILE_ID,
       "2026-04-13"
@@ -103,8 +118,10 @@ describe("useCoachingActivities", () => {
   });
 
   it("should do nothing for unknown source via expandActivity", () => {
+    // Arrange
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
 
+    // Act
     result.current.expandActivity({
       id: "unknown:1",
       source: "unknown",
@@ -115,16 +132,20 @@ describe("useCoachingActivities", () => {
       status: "pending",
     });
 
+    // Assert
     expect(fakeSource.expand).not.toHaveBeenCalled();
   });
 
   it("should inject activeProfileId before calling source.sync via syncSources.sync", async () => {
+    // Arrange
     const { result } = renderHook(() => useCoachingActivities(["2026-04-13"]));
     const source = result.current.syncSources[0]!;
-
     await source.sync("2026-04-13");
+
+    // Act
     await source.connect();
 
+    // Assert
     expect(fakeSource.sync).toHaveBeenCalledWith(
       ACTIVE_PROFILE_ID,
       "2026-04-13"

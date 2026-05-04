@@ -50,7 +50,6 @@ describe("Copy/Paste Integration", () => {
         target: { type: "power", value: { unit: "watts", value: 210 } },
       };
       const krd = createMockKrd([step1, step2]);
-
       let clipboardContent = "";
       const mockWriteText = vi.fn().mockImplementation((text: string) => {
         clipboardContent = text;
@@ -59,35 +58,28 @@ describe("Copy/Paste Integration", () => {
       const mockReadText = vi.fn().mockImplementation(() => {
         return Promise.resolve(clipboardContent);
       });
-
       Object.assign(navigator, {
         clipboard: {
           writeText: mockWriteText,
           readText: mockReadText,
         },
       });
-
-      // Act - Copy step 0
       const copyResult = await copyStepAction(krd, 0);
-
-      // Assert - Copy succeeded
       expect(copyResult.success).toBe(true);
       expect(mockWriteText).toHaveBeenCalledOnce();
-
-      // Act - Paste at end
       const pasteResult = await pasteStepAction(krd);
-
-      // Assert - Paste succeeded
       expect(pasteResult.success).toBe(true);
       expect(pasteResult.updatedKrd).toBeDefined();
       expect(
         pasteResult.updatedKrd!.extensions!.structured_workout!.steps
       ).toHaveLength(3);
-
-      // Verify pasted step matches original
       const steps =
         pasteResult.updatedKrd!.extensions!.structured_workout!.steps;
+
+      // Act
       const pastedStep = steps[2] as WorkoutStep;
+
+      // Assert
       expect(pastedStep.durationType).toBe("time");
       expect(pastedStep.duration).toEqual({ type: "time", seconds: 300 });
       expect(pastedStep.targetType).toBe("power");
@@ -118,7 +110,6 @@ describe("Copy/Paste Integration", () => {
         steps: [step1, step2],
       };
       const krd = createMockKrd([block]);
-
       let clipboardContent = "";
       const mockWriteText = vi.fn().mockImplementation((text: string) => {
         clipboardContent = text;
@@ -127,34 +118,27 @@ describe("Copy/Paste Integration", () => {
       const mockReadText = vi.fn().mockImplementation(() => {
         return Promise.resolve(clipboardContent);
       });
-
       Object.assign(navigator, {
         clipboard: {
           writeText: mockWriteText,
           readText: mockReadText,
         },
       });
-
-      // Act - Copy block
       const copyResult = await copyStepAction(krd, 0);
-
-      // Assert - Copy succeeded
       expect(copyResult.success).toBe(true);
       expect(copyResult.message).toBe("Repetition block copied to clipboard");
-
-      // Act - Paste block
       const pasteResult = await pasteStepAction(krd);
-
-      // Assert - Paste succeeded
       expect(pasteResult.success).toBe(true);
       expect(pasteResult.message).toBe("Repetition block pasted successfully");
       expect(
         pasteResult.updatedKrd!.extensions!.structured_workout!.steps
       ).toHaveLength(2);
 
-      // Verify pasted block matches original
+      // Act
       const pastedBlock = pasteResult.updatedKrd!.extensions!
         .structured_workout!.steps[1] as RepetitionBlock;
+
+      // Assert
       expect(pastedBlock.repeatCount).toBe(3);
       expect(pastedBlock.steps).toHaveLength(2);
     });
@@ -183,7 +167,6 @@ describe("Copy/Paste Integration", () => {
         target: { type: "power", value: { unit: "watts", value: 220 } },
       };
       const krd = createMockKrd([step1, step2, step3]);
-
       let clipboardContent = "";
       const mockWriteText = vi.fn().mockImplementation((text: string) => {
         clipboardContent = text;
@@ -192,21 +175,20 @@ describe("Copy/Paste Integration", () => {
       const mockReadText = vi.fn().mockImplementation(() => {
         return Promise.resolve(clipboardContent);
       });
-
       Object.assign(navigator, {
         clipboard: {
           writeText: mockWriteText,
           readText: mockReadText,
         },
       });
-
-      // Act - Copy step 0 and paste at index 1
       await copyStepAction(krd, 0);
       const pasteResult = await pasteStepAction(krd, 1);
 
-      // Assert - All step indices are sequential
+      // Act
       const steps =
         pasteResult.updatedKrd!.extensions!.structured_workout!.steps;
+
+      // Assert
       expect(steps).toHaveLength(4);
       expect((steps[0] as WorkoutStep).stepIndex).toBe(0);
       expect((steps[1] as WorkoutStep).stepIndex).toBe(1);
@@ -224,7 +206,6 @@ describe("Copy/Paste Integration", () => {
         target: { type: "power", value: { unit: "watts", value: 200 } },
       };
       const krd = createMockKrd([step1]);
-
       let clipboardContent = "";
       const mockWriteText = vi.fn().mockImplementation((text: string) => {
         clipboardContent = text;
@@ -233,25 +214,22 @@ describe("Copy/Paste Integration", () => {
       const mockReadText = vi.fn().mockImplementation(() => {
         return Promise.resolve(clipboardContent);
       });
-
       Object.assign(navigator, {
         clipboard: {
           writeText: mockWriteText,
           readText: mockReadText,
         },
       });
-
-      // Act - Copy and paste multiple times
       await copyStepAction(krd, 0);
       const paste1 = await pasteStepAction(krd);
-
       await copyStepAction(paste1.updatedKrd!, 0);
       const paste2 = await pasteStepAction(paste1.updatedKrd!);
-
       await copyStepAction(paste2.updatedKrd!, 0);
+
+      // Act
       const paste3 = await pasteStepAction(paste2.updatedKrd!);
 
-      // Assert - All operations succeeded
+      // Assert
       expect(
         paste3.updatedKrd!.extensions!.structured_workout!.steps
       ).toHaveLength(4);
@@ -271,21 +249,19 @@ describe("Copy/Paste Integration", () => {
         target: { type: "power", value: { unit: "watts", value: 200 } },
       };
       const krd = createMockKrd([step]);
-
       const mockWriteText = vi.fn().mockResolvedValue(undefined);
       const mockReadText = vi
         .fn()
         .mockResolvedValue("corrupted clipboard content");
-
       Object.assign(navigator, {
         clipboard: {
           writeText: mockWriteText,
           readText: mockReadText,
         },
       });
-
-      // Act - Copy succeeds, paste fails
       const copyResult = await copyStepAction(krd, 0);
+
+      // Act
       const pasteResult = await pasteStepAction(krd);
 
       // Assert
@@ -304,16 +280,14 @@ describe("Copy/Paste Integration", () => {
         target: { type: "power", value: { unit: "watts", value: 200 } },
       };
       const krd = createMockKrd([step]);
-
       const mockReadText = vi.fn().mockResolvedValue("");
-
       Object.assign(navigator, {
         clipboard: {
           readText: mockReadText,
         },
       });
 
-      // Act - Paste without copy
+      // Act
       const pasteResult = await pasteStepAction(krd);
 
       // Assert

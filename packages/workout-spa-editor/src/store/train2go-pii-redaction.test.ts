@@ -56,8 +56,12 @@ describe("Train2Go PII redaction audit", () => {
   });
 
   it("(a) ping() failure path does NOT log any PII via console.error", async () => {
+    // Arrange
+
+    // Act
     await ping("ext-id");
 
+    // Assert
     for (const call of consoleErrorSpy.mock.calls) {
       const serialized = call.map((arg: unknown) => String(arg)).join(" ");
       expect(containsAnyPII(serialized)).toBe(false);
@@ -65,27 +69,28 @@ describe("Train2Go PII redaction audit", () => {
   });
 
   it("(b) ping() error string never contains PII", async () => {
+    // Arrange
+
+    // Act
     const result = await ping("ext-id");
 
+    // Assert
     expect(result.ok).toBe(false);
-    // The transport surfaces a session-expired error. The error string
-    // is what flows into the store's lastError; assert no PII leak.
     expect(result.error ?? "").not.toMatch(PII.externalUserName);
     expect(result.error ?? "").not.toMatch(PII.externalUserId);
   });
 
   it("(c) toast string templates from LinkedAccountsSection use only Kaiord profile name", () => {
-    // Structural assertion: the supported templates are
-    //   "Linked <Source> to <Kaiord profile name>"
-    //   "Disconnected <Source>"
-    // Neither references externalUserName / externalUserId.
+    // Arrange
     const linkTemplate = (label: string, kaiordName: string) =>
       `Linked ${label} to ${kaiordName}`;
     const unlinkTemplate = (label: string) => `Disconnected ${label}`;
-
     const link = linkTemplate("Train2Go", "Pablo (Kaiord)");
+
+    // Act
     const unlink = unlinkTemplate("Train2Go");
 
+    // Assert
     expect(containsAnyPII(link)).toBe(false);
     expect(containsAnyPII(unlink)).toBe(false);
   });

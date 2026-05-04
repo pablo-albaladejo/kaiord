@@ -94,11 +94,7 @@ describe("pasteStepAction", () => {
       vi.spyOn(navigator.clipboard, "readText").mockResolvedValue(
         JSON.stringify(mockStep)
       );
-
-      // Act
       const result = await pasteStepAction(mockKrd);
-
-      // Assert
       expect(result.success).toBe(true);
       expect(result.message).toBe("Step pasted successfully");
       expect(result.updatedKrd).toBeDefined();
@@ -106,7 +102,10 @@ describe("pasteStepAction", () => {
         result.updatedKrd!.extensions!.structured_workout!.steps
       ).toHaveLength(3);
 
+      // Act
       const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
+
+      // Assert
       expect(steps[2]).toMatchObject({
         durationType: "time",
         duration: { type: "time", seconds: 600 },
@@ -119,17 +118,16 @@ describe("pasteStepAction", () => {
       vi.spyOn(navigator.clipboard, "readText").mockResolvedValue(
         JSON.stringify(mockStep)
       );
-
-      // Act
       const result = await pasteStepAction(mockKrd, 1);
-
-      // Assert
       expect(result.success).toBe(true);
       expect(
         result.updatedKrd!.extensions!.structured_workout!.steps
       ).toHaveLength(3);
 
+      // Act
       const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
+
+      // Assert
       expect(steps[1]).toMatchObject({
         durationType: "time",
         duration: { type: "time", seconds: 600 },
@@ -142,12 +140,12 @@ describe("pasteStepAction", () => {
       vi.spyOn(navigator.clipboard, "readText").mockResolvedValue(
         JSON.stringify(mockStep)
       );
-
-      // Act
       const result = await pasteStepAction(mockKrd, 1);
 
-      // Assert
+      // Act
       const steps = result.updatedKrd!.extensions!.structured_workout!.steps;
+
+      // Assert
       expect(steps[0]).toHaveProperty("stepIndex", 0);
       expect(steps[1]).toHaveProperty("stepIndex", 1);
       expect(steps[2]).toHaveProperty("stepIndex", 2);
@@ -158,19 +156,18 @@ describe("pasteStepAction", () => {
       vi.spyOn(navigator.clipboard, "readText").mockResolvedValue(
         JSON.stringify(mockRepetitionBlock)
       );
-
-      // Act
       const result = await pasteStepAction(mockKrd);
-
-      // Assert
       expect(result.success).toBe(true);
       expect(result.message).toBe("Repetition block pasted successfully");
       expect(
         result.updatedKrd!.extensions!.structured_workout!.steps
       ).toHaveLength(3);
 
+      // Act
       const lastStep =
         result.updatedKrd!.extensions!.structured_workout!.steps[2];
+
+      // Assert
       expect(lastStep).toHaveProperty("repeatCount", 3);
     });
   });
@@ -232,7 +229,7 @@ describe("pasteStepAction", () => {
     });
 
     it("should return error when clipboard API fails", async () => {
-      // Arrange - clipboard API fails, fallback returns empty
+      // Arrange
       vi.spyOn(navigator.clipboard, "readText").mockRejectedValue(
         new Error("Clipboard error")
       );
@@ -240,7 +237,7 @@ describe("pasteStepAction", () => {
       // Act
       const result = await pasteStepAction(mockKrd);
 
-      // Assert - fallback returns empty string, treated as empty clipboard
+      // Assert
       expect(result.success).toBe(false);
       expect(result.message).toBe("No content in clipboard");
     });

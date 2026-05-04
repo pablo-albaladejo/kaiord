@@ -50,7 +50,6 @@ describe("deleteStepAction", () => {
           },
         },
       };
-
       const state: WorkoutState = {
         currentWorkout: krd,
         undoHistory: [{ workout: krd, selection: null }],
@@ -94,7 +93,6 @@ describe("deleteStepAction", () => {
           value: { unit: "watts", value: 100 },
         },
       };
-
       const krd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -131,7 +129,6 @@ describe("deleteStepAction", () => {
           },
         },
       };
-
       const state: WorkoutState = {
         currentWorkout: krd,
         undoHistory: [{ workout: krd, selection: null }],
@@ -189,7 +186,6 @@ describe("deleteStepAction", () => {
           },
         },
       };
-
       const state: WorkoutState = {
         currentWorkout: krd,
         undoHistory: [{ workout: krd, selection: null }],
@@ -238,7 +234,6 @@ describe("deleteStepAction", () => {
           },
         },
       };
-
       const state: WorkoutState = {
         currentWorkout: krd,
         undoHistory: [{ workout: krd, selection: null }],
@@ -286,7 +281,6 @@ describe("deleteStepAction", () => {
           },
         },
       };
-
       const state: WorkoutState = {
         currentWorkout: krd,
         undoHistory: [{ workout: krd, selection: null }],
@@ -312,7 +306,6 @@ describe("deleteStepAction", () => {
     it("should record timestamp when step is deleted", () => {
       // Arrange
       const beforeTimestamp = Date.now();
-
       const krd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -339,7 +332,6 @@ describe("deleteStepAction", () => {
           },
         },
       };
-
       const state: WorkoutState = {
         currentWorkout: krd,
         undoHistory: [{ workout: krd, selection: null }],
@@ -351,9 +343,9 @@ describe("deleteStepAction", () => {
         lastBackup: null,
         deletedSteps: [],
       };
+      const result = deleteStepAction(krd, 0, state);
 
       // Act
-      const result = deleteStepAction(krd, 0, state);
       const afterTimestamp = Date.now();
 
       // Assert
@@ -404,7 +396,6 @@ describe("deleteStepAction", () => {
           },
         },
       };
-
       const state: WorkoutState = {
         currentWorkout: krd,
         undoHistory: [{ workout: krd, selection: null }],
@@ -416,19 +407,15 @@ describe("deleteStepAction", () => {
         lastBackup: null,
         deletedSteps: [],
       };
-
-      // Act - First deletion
       const result1 = deleteStepAction(krd, 1, state);
       const timestamp1 = result1.deletedSteps?.[0].timestamp;
-
-      // Update state with first deletion
       const stateAfterFirst: WorkoutState = {
         ...state,
         deletedSteps: result1.deletedSteps || [],
       };
-
-      // Act - Second deletion (after small delay to ensure different timestamp)
       const result2 = deleteStepAction(krd, 0, stateAfterFirst);
+
+      // Act
       const timestamp2 = result2.deletedSteps?.[1].timestamp;
 
       // Assert
@@ -477,7 +464,6 @@ describe("deleteStepAction", () => {
           },
         },
       };
-
       const state: WorkoutState = {
         currentWorkout: krd,
         undoHistory: [{ workout: krd, selection: null }],
@@ -489,12 +475,12 @@ describe("deleteStepAction", () => {
         lastBackup: null,
         deletedSteps: [],
       };
-
-      // Act
       const result = deleteStepAction(krd, 1, state);
 
-      // Assert
+      // Act
       const workout = result.currentWorkout?.extensions?.structured_workout;
+
+      // Assert
       expect(workout?.steps).toHaveLength(1);
       expect(workout?.steps[0].stepIndex).toBe(0);
     });
@@ -547,7 +533,6 @@ describe("deleteStepAction", () => {
           },
         },
       };
-
       const state: WorkoutState = {
         currentWorkout: krd,
         undoHistory: [{ workout: krd, selection: null }],
@@ -559,12 +544,12 @@ describe("deleteStepAction", () => {
         lastBackup: null,
         deletedSteps: [],
       };
-
-      // Act - Delete middle step
       const result = deleteStepAction(krd, 1, state);
 
-      // Assert
+      // Act
       const workout = result.currentWorkout?.extensions?.structured_workout;
+
+      // Assert
       expect(workout?.steps).toHaveLength(2);
       expect(workout?.steps[0].stepIndex).toBe(0);
       expect(workout?.steps[1].stepIndex).toBe(1);
@@ -580,7 +565,6 @@ describe("deleteStepAction", () => {
           sport: "cycling",
         },
       };
-
       const state: WorkoutState = {
         currentWorkout: krd,
         undoHistory: [{ workout: krd, selection: null }],

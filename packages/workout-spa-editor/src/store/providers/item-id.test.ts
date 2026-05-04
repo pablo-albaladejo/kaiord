@@ -4,21 +4,25 @@ import { asItemId, type ItemId } from "./item-id";
 
 describe("ItemId branded type", () => {
   it("should brand a plain string via asItemId", () => {
+    // Arrange
+
+    // Act
     const id = asItemId("abc");
 
+    // Assert
     expect(typeof id).toBe("string");
     expect(id).toBe("abc");
   });
 
   it("should prevent plain-string assignment without asItemId cast", () => {
+    // Arrange
     const plain: string = "raw-positional-id";
-
-    // @ts-expect-error: plain string cannot be assigned to branded ItemId
     const notAllowed: ItemId = plain;
 
-    // Sanity: the cast helper is the only supported path.
+    // Act
     const allowed: ItemId = asItemId(plain);
 
+    // Assert
     expect(notAllowed).toBe("raw-positional-id");
     expect(allowed).toBe("raw-positional-id");
   });

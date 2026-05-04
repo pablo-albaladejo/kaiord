@@ -32,47 +32,58 @@ describe("useProfileByIdLive", () => {
   afterEach(clear);
 
   it("should resolve to the profile row when the id matches", async () => {
+    // Arrange
     const persistence = createDexiePersistence(db);
     await persistence.profiles.put(makeProfile(PROFILE_UUID_1, "A"));
 
+    // Act
     const { result } = renderHook(() => useProfileByIdLive(PROFILE_UUID_1));
 
+    // Assert
     await waitFor(() => {
       expect(result.current?.id).toBe(PROFILE_UUID_1);
     });
   });
 
   it("should resolve to undefined for an unknown id", async () => {
+    // Arrange
     const { result } = renderHook(() =>
       useProfileByIdLive(PROFILE_UUID_MISSING)
     );
 
-    // Resolves quickly to undefined (after the loading window).
+    // Act
     await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Assert
     expect(result.current).toBeUndefined();
   });
 
   it("should return undefined when id is null without firing a query", async () => {
+    // Arrange
     const { result } = renderHook(() => useProfileByIdLive(null));
 
+    // Act
     await new Promise((resolve) => setTimeout(resolve, 50));
+
+    // Assert
     expect(result.current).toBeUndefined();
   });
 
   it("should re-fire when the watched profile is updated", async () => {
+    // Arrange
     const persistence = createDexiePersistence(db);
     await persistence.profiles.put(makeProfile(PROFILE_UUID_1, "Original"));
-
     const { result } = renderHook(() => useProfileByIdLive(PROFILE_UUID_1));
-
     await waitFor(() => {
       expect(result.current?.name).toBe("Original");
     });
 
+    // Act
     await persistence.profiles.put({
       ...makeProfile(PROFILE_UUID_1, "Renamed"),
     });
 
+    // Assert
     await waitFor(() => {
       expect(result.current?.name).toBe("Renamed");
     });

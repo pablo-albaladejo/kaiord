@@ -87,11 +87,9 @@ describe("useFocusAfterAction — telemetry", () => {
   // 3.1.a ----------------------------------------------------------------
   describe("unresolved-target-fallback", () => {
     it("should emit fallback=empty-state when an item target falls back to the empty-state button", () => {
-      // Arrange: no currentWorkout → firstItemId=null → item ghost falls to empty-state
+      // Arrange
       const spy = vi.fn<FocusTelemetry>();
       withTelemetry(spy, <HookConsumer />);
-
-      // Act
       act(() => {
         useWorkoutStore
           .getState()
@@ -101,8 +99,10 @@ describe("useFocusAfterAction — telemetry", () => {
         vi.runAllTimers();
       });
 
-      // Assert
+      // Act
       const fallbacks = eventsOfType(spy, "unresolved-target-fallback");
+
+      // Assert
       expect(fallbacks).toHaveLength(1);
       expect(fallbacks[0][0]).toEqual({
         type: "unresolved-target-fallback",
@@ -112,8 +112,7 @@ describe("useFocusAfterAction — telemetry", () => {
     });
 
     it("should emit fallback=first-item when an item target falls back to the first registered item", () => {
-      // Arrange: currentWorkout has one step so firstItemId is "first-id";
-      // "first-id" is registered; "unknown" is not
+      // Arrange
       const spy = vi.fn<FocusTelemetry>();
       const ItemRegistrant = ({ id }: { id: string }) => {
         const ctx = useContext(FocusRegistryContext);
@@ -147,8 +146,6 @@ describe("useFocusAfterAction — telemetry", () => {
           <ItemRegistrant id="first-id" />
         </>
       );
-
-      // Act: request unknown id → fallback to first registered item
       act(() => {
         useWorkoutStore
           .getState()
@@ -158,8 +155,10 @@ describe("useFocusAfterAction — telemetry", () => {
         vi.runAllTimers();
       });
 
-      // Assert
+      // Act
       const fallbacks = eventsOfType(spy, "unresolved-target-fallback");
+
+      // Assert
       expect(fallbacks).toHaveLength(1);
       expect(fallbacks[0][0]).toMatchObject({
         type: "unresolved-target-fallback",
@@ -169,7 +168,7 @@ describe("useFocusAfterAction — telemetry", () => {
     });
 
     it("should emit fallback=heading when an item target falls all the way to the heading", () => {
-      // Arrange: no empty-state button, no first item → only heading remains
+      // Arrange
       const spy = vi.fn<FocusTelemetry>();
       const HeadingOnlyConsumer = () => {
         const rootRef = useRef<HTMLDivElement | null>(null);
@@ -189,8 +188,6 @@ describe("useFocusAfterAction — telemetry", () => {
         );
       };
       withTelemetry(spy, <HeadingOnlyConsumer />);
-
-      // Act
       act(() => {
         useWorkoutStore
           .getState()
@@ -200,8 +197,10 @@ describe("useFocusAfterAction — telemetry", () => {
         vi.runAllTimers();
       });
 
-      // Assert
+      // Act
       const fallbacks = eventsOfType(spy, "unresolved-target-fallback");
+
+      // Assert
       expect(fallbacks).toHaveLength(1);
       expect(fallbacks[0][0]).toMatchObject({
         type: "unresolved-target-fallback",
@@ -224,8 +223,6 @@ describe("useFocusAfterAction — telemetry", () => {
       input.type = "text";
       root.appendChild(input);
       input.focus();
-
-      // Act: 5 short-circuits with different targets, each 50ms apart (total 250ms)
       for (const id of ["a", "b", "c", "d", "e"]) {
         act(() => {
           useWorkoutStore
@@ -238,8 +235,10 @@ describe("useFocusAfterAction — telemetry", () => {
         vi.runAllTimers();
       });
 
-      // Assert
+      // Act
       const shortCircuits = eventsOfType(spy, "form-field-short-circuit");
+
+      // Assert
       expect(shortCircuits).toHaveLength(1);
     });
 
@@ -254,18 +253,12 @@ describe("useFocusAfterAction — telemetry", () => {
       input.type = "text";
       root.appendChild(input);
       input.focus();
-
-      // First short-circuit
       act(() => {
         useWorkoutStore
           .getState()
           .setPendingFocusTarget(focusItem(asItemId("x")));
       });
-
-      // Advance past the 1000ms debounce window
       vi.advanceTimersByTime(1100);
-
-      // Second short-circuit
       act(() => {
         useWorkoutStore
           .getState()
@@ -275,8 +268,10 @@ describe("useFocusAfterAction — telemetry", () => {
         vi.runAllTimers();
       });
 
-      // Assert
+      // Act
       const shortCircuits = eventsOfType(spy, "form-field-short-circuit");
+
+      // Assert
       expect(shortCircuits).toHaveLength(2);
     });
   });
@@ -296,28 +291,19 @@ describe("useFocusAfterAction — telemetry", () => {
       const root = baseElement.querySelector(
         "[data-testid='editor-root']"
       ) as HTMLElement;
-
-      // Add dialog to DOM directly so the MO detects count=1
       const dialog = document.createElement("div");
       dialog.setAttribute("role", "dialog");
       dialog.setAttribute("data-state", "open");
       dialog.setAttribute("data-radix-popper-content-wrapper", "");
       root.appendChild(dialog);
-      // Flush MO microtasks (jsdom fires MO as microtasks)
       await new Promise<void>((r) => queueMicrotask(r));
       await new Promise<void>((r) => queueMicrotask(r));
-
-      // Stash target while overlay is open (performance.now = T0)
       act(() => {
         useWorkoutStore.getState().setPendingFocusTarget(focusEmptyState);
       });
-
-      // Advance fake clock by 250ms → performance.now = T0+250
       act(() => {
         vi.advanceTimersByTime(250);
       });
-
-      // Close dialog → MO fires → rAF fires (mocked) → emit + apply
       await act(async () => {
         dialog.remove();
         await new Promise<void>((r) => queueMicrotask(r));
@@ -326,56 +312,66 @@ describe("useFocusAfterAction — telemetry", () => {
       act(() => {
         vi.runAllTimers();
       });
-
-      // Assert
       const events = eventsOfType(spy, "overlay-deferred-apply");
       expect(events).toHaveLength(1);
       const { deferredForMs } = events[0][0] as {
         type: string;
         deferredForMs: number;
       };
-      // 250ms → Math.round(250/100)*100 = 300ms
       expect(deferredForMs).toBe(300);
       expect(deferredForMs % 100).toBe(0);
 
+      // Act
       rafSpy.mockRestore();
+
+      // Assert
     });
   });
 
   // 3.4.a ----------------------------------------------------------------
   describe("wiring-canary", () => {
     it("should fire exactly once on first editor mount with a custom telemetry function", () => {
+      // Arrange
       const spy = vi.fn<FocusTelemetry>();
       withTelemetry(spy, <HookConsumer />);
 
+      // Act
       const canaries = eventsOfType(spy, "wiring-canary");
+
+      // Assert
       expect(canaries).toHaveLength(1);
     });
 
     it("should not fire on a second mount in the same session", () => {
+      // Arrange
       const spy1 = vi.fn<FocusTelemetry>();
       const { unmount } = withTelemetry(spy1, <HookConsumer />);
       unmount();
       document.body.innerHTML = "";
-
       const spy2 = vi.fn<FocusTelemetry>();
       withTelemetry(spy2, <HookConsumer />);
 
+      // Act
       const canaries2 = eventsOfType(spy2, "wiring-canary");
+
+      // Assert
       expect(canaries2).toHaveLength(0);
     });
 
     it("should fire again after __resetCanaryForTests resets the session flag", () => {
+      // Arrange
       const spy1 = vi.fn<FocusTelemetry>();
       const { unmount } = withTelemetry(spy1, <HookConsumer />);
       unmount();
       document.body.innerHTML = "";
       __resetCanaryForTests();
-
       const spy2 = vi.fn<FocusTelemetry>();
       withTelemetry(spy2, <HookConsumer />);
 
+      // Act
       const canaries2 = eventsOfType(spy2, "wiring-canary");
+
+      // Assert
       expect(canaries2).toHaveLength(1);
     });
   });
@@ -406,8 +402,6 @@ describe("useFocusAfterAction — telemetry", () => {
           <ThrowingItem id="bad-item" />
         </>
       );
-
-      // Act
       act(() => {
         useWorkoutStore
           .getState()
@@ -417,8 +411,10 @@ describe("useFocusAfterAction — telemetry", () => {
         vi.runAllTimers();
       });
 
-      // Assert
+      // Act
       const errors = eventsOfType(spy, "focus-error");
+
+      // Assert
       expect(errors).toHaveLength(1);
       expect(errors[0][0]).toEqual({ type: "focus-error", phase: "focus" });
     });
@@ -448,8 +444,6 @@ describe("useFocusAfterAction — telemetry", () => {
           <ThrowingScrollItem id="scroll-item" />
         </>
       );
-
-      // Act
       act(() => {
         useWorkoutStore
           .getState()
@@ -459,8 +453,10 @@ describe("useFocusAfterAction — telemetry", () => {
         vi.runAllTimers();
       });
 
-      // Assert
+      // Act
       const errors = eventsOfType(spy, "focus-error");
+
+      // Assert
       expect(errors).toHaveLength(1);
       expect(errors[0][0]).toEqual({
         type: "focus-error",

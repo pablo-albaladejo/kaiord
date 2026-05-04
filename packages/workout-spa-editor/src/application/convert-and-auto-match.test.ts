@@ -72,11 +72,11 @@ const fixedClock = () => "2026-05-01T12:00:00.000Z";
 
 describe("convertAndAutoMatch", () => {
   it("should create workout AND SessionMatch with source: auto-conversion on first-time conversion", async () => {
+    // Arrange
     const activity = stubActivity();
     const coaching = stubCoachingRepo([activity]);
     const workouts = stubWorkoutRepo();
     const matches = createInMemorySessionMatchRepository();
-
     const result = await convertAndAutoMatch(
       { activityId: activity.id },
       {
@@ -88,10 +88,13 @@ describe("convertAndAutoMatch", () => {
         clock: fixedClock,
       }
     );
-
     expect(result.workoutId).toBe("w-new");
     expect(result.created).toBe(true);
+
+    // Act
     const match = await matches.getByActivityId("p1", activity.id);
+
+    // Assert
     expect(match).toMatchObject({
       coachingActivityId: activity.id,
       workoutId: "w-new",
@@ -100,6 +103,7 @@ describe("convertAndAutoMatch", () => {
   });
 
   it("should preserve existing match on idempotent re-conversion (no overwrite)", async () => {
+    // Arrange
     const activity = stubActivity();
     const existingWorkout: WorkoutRecord = {
       id: "w-existing",
@@ -125,6 +129,7 @@ describe("convertAndAutoMatch", () => {
     };
     await matches.put(existingMatch);
 
+    // Act
     const result = await convertAndAutoMatch(
       { activityId: activity.id },
       {
@@ -137,6 +142,7 @@ describe("convertAndAutoMatch", () => {
       }
     );
 
+    // Assert
     expect(result.workoutId).toBe("w-existing");
     expect(result.created).toBe(false);
     expect(await matches.getByActivityId("p1", activity.id)).toEqual(
@@ -145,6 +151,7 @@ describe("convertAndAutoMatch", () => {
   });
 
   it("should NOT recreate the match on re-conversion after manual unmatch", async () => {
+    // Arrange
     const activity = stubActivity();
     const existingWorkout: WorkoutRecord = {
       id: "w-was-matched",
@@ -160,6 +167,7 @@ describe("convertAndAutoMatch", () => {
     workouts.setSourceLookup(existingWorkout);
     const matches = createInMemorySessionMatchRepository();
 
+    // Act
     const result = await convertAndAutoMatch(
       { activityId: activity.id },
       {
@@ -172,11 +180,17 @@ describe("convertAndAutoMatch", () => {
       }
     );
 
+    // Assert
     expect(result.workoutId).toBe("w-was-matched");
     expect(await matches.getByWorkoutId("p1", "w-was-matched")).toBeUndefined();
   });
 
   it("should propagate CoachingActivityNotFoundError-equivalent when activity is missing", async () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     await expect(
       convertAndAutoMatch(
         { activityId: "missing" },
@@ -193,6 +207,7 @@ describe("convertAndAutoMatch", () => {
   });
 
   it("should swallow SessionAlreadyMatchedError if a concurrent matcher wins the race", async () => {
+    // Arrange
     const activity = stubActivity();
     const coaching = stubCoachingRepo([activity]);
     const workouts = stubWorkoutRepo();
@@ -206,6 +221,7 @@ describe("convertAndAutoMatch", () => {
       },
     };
 
+    // Act
     const result = await convertAndAutoMatch(
       { activityId: activity.id },
       {
@@ -218,6 +234,7 @@ describe("convertAndAutoMatch", () => {
       }
     );
 
+    // Assert
     expect(result.workoutId).toBe("w-new");
     expect(result.created).toBe(true);
   });

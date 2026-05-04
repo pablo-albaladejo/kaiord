@@ -33,7 +33,6 @@ describe("createBackupAction", () => {
         },
       },
     };
-
     const state: WorkoutStore = {
       currentWorkout: mockWorkout,
       undoHistory: [{ workout: mockWorkout, selection: null }],
@@ -50,7 +49,7 @@ describe("createBackupAction", () => {
     // Assert
     expect(result.lastBackup).toBeDefined();
     expect(result.lastBackup).toEqual(mockWorkout);
-    expect(result.lastBackup).not.toBe(mockWorkout); // Should be a clone
+    expect(result.lastBackup).not.toBe(mockWorkout);
   });
 
   it("should return empty object when no current workout", () => {
@@ -91,7 +90,6 @@ describe("restoreFromBackupAction", () => {
         },
       },
     };
-
     const state: WorkoutStore = {
       currentWorkout: null,
       undoHistory: [],
@@ -108,7 +106,7 @@ describe("restoreFromBackupAction", () => {
     // Assert
     expect(result.success).toBe(true);
     expect(result.currentWorkout).toEqual(mockBackup);
-    expect(result.currentWorkout).not.toBe(mockBackup); // Should be a clone
+    expect(result.currentWorkout).not.toBe(mockBackup);
     expect(result.undoHistory).toEqual([
       { workout: mockBackup, selection: null },
     ]);
@@ -138,6 +136,8 @@ describe("restoreFromBackupAction", () => {
 
 describe("enableSafeModeAction", () => {
   it("should enable safe mode", () => {
+    // Arrange
+
     // Act
     const result = enableSafeModeAction();
 
@@ -148,6 +148,8 @@ describe("enableSafeModeAction", () => {
 
 describe("disableSafeModeAction", () => {
   it("should disable safe mode", () => {
+    // Arrange
+
     // Act
     const result = disableSafeModeAction();
 

@@ -18,22 +18,29 @@ const makeMatch = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({
 
 describe("unmatchSession", () => {
   it("should delete the row identified by matchId", async () => {
+    // Arrange
     const repo = createInMemorySessionMatchRepository();
     await repo.put(makeMatch({ id: "M1" }));
 
+    // Act
     await unmatchSession(
       { profileId: "p1", matchId: "M1" },
       { repository: repo }
     );
 
+    // Assert
     expect(
       await repo.getByActivityId("p1", "p1:train2go:12345")
     ).toBeUndefined();
   });
 
   it("should be idempotent on missing matchId", async () => {
+    // Arrange
+
+    // Act
     const repo = createInMemorySessionMatchRepository();
 
+    // Assert
     await expect(
       unmatchSession(
         { profileId: "p1", matchId: "never" },
@@ -43,9 +50,13 @@ describe("unmatchSession", () => {
   });
 
   it("should throw CrossProfileMatchError when match belongs to a different profile", async () => {
+    // Arrange
     const repo = createInMemorySessionMatchRepository();
+
+    // Act
     await repo.put(makeMatch({ id: "M1", profileId: "p1" }));
 
+    // Assert
     await expect(
       unmatchSession({ profileId: "p2", matchId: "M1" }, { repository: repo })
     ).rejects.toBeInstanceOf(CrossProfileMatchError);

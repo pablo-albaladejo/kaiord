@@ -42,6 +42,7 @@ describe("train2go-store-actions", () => {
   });
 
   it("should delegate to the transport with the extension id via openTrain2Go", async () => {
+    // Arrange
     mockOpenTrain2Go.mockResolvedValue({ ok: true });
     const actions = createTrain2GoActions(
       set as never,
@@ -49,20 +50,24 @@ describe("train2go-store-actions", () => {
       () => "ext-id"
     );
 
+    // Act
     await actions.openTrain2Go();
 
+    // Assert
     expect(mockOpenTrain2Go).toHaveBeenCalledWith("ext-id");
   });
 
   it("should do NOT expose fetchWeek / fetchDay on the action surface", () => {
+    // Arrange
+
+    // Act
     const actions = createTrain2GoActions(
       set as never,
       get as never,
       () => "ext-id"
     );
 
-    // Activity fetching moved to application use cases — verify the
-    // store API stays minimal (transport only).
+    // Assert
     expect("fetchWeek" in actions).toBe(false);
     expect("fetchDay" in actions).toBe(false);
   });

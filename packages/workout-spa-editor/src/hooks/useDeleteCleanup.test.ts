@@ -30,11 +30,9 @@ describe("useDeleteCleanup", () => {
     vi.mocked(store.useClearExpiredDeletes).mockReturnValue(
       mockClearExpiredDeletes
     );
-
-    // Act
     renderHook(() => useDeleteCleanup());
 
-    // Fast-forward 3 seconds
+    // Act
     vi.advanceTimersByTime(3000);
 
     // Assert
@@ -47,19 +45,15 @@ describe("useDeleteCleanup", () => {
     vi.mocked(store.useClearExpiredDeletes).mockReturnValue(
       mockClearExpiredDeletes
     );
-
-    // Act
     const { unmount } = renderHook(() => useDeleteCleanup());
-
-    // Fast-forward 2 seconds
     vi.advanceTimersByTime(2000);
     expect(mockClearExpiredDeletes).toHaveBeenCalledTimes(2);
-
-    // Unmount and advance more time
     unmount();
+
+    // Act
     vi.advanceTimersByTime(2000);
 
-    // Assert - should not be called after unmount
+    // Assert
     expect(mockClearExpiredDeletes).toHaveBeenCalledTimes(2);
   });
 });

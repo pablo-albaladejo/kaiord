@@ -40,59 +40,77 @@ describe("isPerProfileTable", () => {
   };
 
   it("returns true when the primary key is `profileId` alone", async () => {
+    // Arrange
+
+    // Act
     const d = await open({ userPreferences: "profileId" });
 
+    // Assert
     expect(isPerProfileTable(d.table("userPreferences"))).toBe(true);
   });
 
   it("returns true when the primary key is compound starting with `profileId`", async () => {
+    // Arrange
+
+    // Act
     const d = await open({
       sessions: "[profileId+coachingActivityId]",
       dismissals: "[profileId+weekStart]",
     });
 
+    // Assert
     expect(isPerProfileTable(d.table("sessions"))).toBe(true);
     expect(isPerProfileTable(d.table("dismissals"))).toBe(true);
   });
 
   it("returns true when the primary key is generic but a top-level `profileId` index exists", async () => {
+    // Arrange
+
+    // Act
     const d = await open({
       coachingActivities: "id, profileId, [profileId+date]",
     });
 
+    // Assert
     expect(isPerProfileTable(d.table("coachingActivities"))).toBe(true);
   });
 
   it("returns true when the table has only compound indexes that start with `profileId`", async () => {
-    // Mirrors the production `coachingActivities` schema: PK is `id`, no
-    // top-level profileId index, but every secondary index is compound and
-    // starts with profileId. Dexie treats these as profile-scoped entry
-    // points; the cascade test relies on this case to discover the table.
+    // Arrange
+
+    // Act
     const d = await open({
       coachingActivities:
         "id, [profileId+date], [profileId+source+sourceId], [profileId+source]",
     });
 
+    // Assert
     expect(isPerProfileTable(d.table("coachingActivities"))).toBe(true);
   });
 
   it("returns false when the table has no `profileId` PK or index", async () => {
+    // Arrange
+
+    // Act
     const d = await open({
       workouts: "id, date, sport",
       bridges: "extensionId, status, lastSeen",
     });
 
+    // Assert
     expect(isPerProfileTable(d.table("workouts"))).toBe(false);
     expect(isPerProfileTable(d.table("bridges"))).toBe(false);
   });
 
   it("returns false when `profileId` only appears inside a compound index that does not start with it", async () => {
-    // A `[date+profileId]` compound index does NOT mark the table per-profile —
-    // the predicate only honors `profileId` as a primary entry-point identifier.
+    // Arrange
+
+    // Act
     const d = await open({
       activities: "id, [date+profileId]",
     });
 
+    // Assert
     expect(isPerProfileTable(d.table("activities"))).toBe(false);
   });
 });

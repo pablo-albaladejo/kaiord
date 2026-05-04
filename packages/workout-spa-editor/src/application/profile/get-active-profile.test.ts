@@ -15,24 +15,36 @@ const makeProfile = (id: string): Profile => ({
 
 describe("getActiveProfile", () => {
   it("should return null when no active profile id is set", async () => {
+    // Arrange
+
+    // Act
     const profiles = createInMemoryProfileRepository();
+
+    // Assert
     expect(await getActiveProfile(profiles)).toBeNull();
   });
 
   it("should return null when active id points to a deleted profile", async () => {
+    // Arrange
     const profiles = createInMemoryProfileRepository();
+
+    // Act
     await profiles.setActiveId("missing");
 
+    // Assert
     expect(await getActiveProfile(profiles)).toBeNull();
   });
 
   it("should return the profile referenced by the active id", async () => {
+    // Arrange
     const profiles = createInMemoryProfileRepository();
     await profiles.put(makeProfile("p1"));
     await profiles.setActiveId("p1");
 
+    // Act
     const result = await getActiveProfile(profiles);
 
+    // Assert
     expect(result?.id).toBe("p1");
   });
 });

@@ -85,6 +85,9 @@ describe("useTrain2GoSource", () => {
   });
 
   it("should return a CoachingSource with the expected static fields", () => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(
       () => useTrain2GoSource("p1", ["2026-04-13"]),
       {
@@ -92,6 +95,7 @@ describe("useTrain2GoSource", () => {
       }
     );
 
+    // Assert
     expect(result.current.id).toBe("train2go");
     expect(result.current.label).toBe("Train2Go");
     expect(result.current.badge).toBe("T2G");
@@ -100,6 +104,9 @@ describe("useTrain2GoSource", () => {
   });
 
   it("should return empty activities when the live-query yields []", () => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(
       () => useTrain2GoSource("p1", ["2026-04-13"]),
       {
@@ -107,10 +114,12 @@ describe("useTrain2GoSource", () => {
       }
     );
 
+    // Assert
     expect(result.current.activities).toEqual([]);
   });
 
   it("should delegate to syncWeek use case via sync(profileId, weekStart)", async () => {
+    // Arrange
     const { result } = renderHook(
       () => useTrain2GoSource("p1", ["2026-04-13"]),
       {
@@ -118,14 +127,17 @@ describe("useTrain2GoSource", () => {
       }
     );
 
+    // Act
     await result.current.sync("p1", "2026-04-13");
 
+    // Assert
     expect(mockSync).toHaveBeenCalledTimes(1);
     expect(mockSync.mock.calls[0]?.[1]).toBe("p1");
     expect(mockSync.mock.calls[0]?.[2]).toBe("2026-04-13");
   });
 
   it("should delegate to expandDay use case via expand(profileId, date)", async () => {
+    // Arrange
     const { result } = renderHook(
       () => useTrain2GoSource("p1", ["2026-04-13"]),
       {
@@ -133,26 +145,31 @@ describe("useTrain2GoSource", () => {
       }
     );
 
+    // Act
     await result.current.expand("p1", "2026-04-13");
 
+    // Assert
     expect(mockExpand).toHaveBeenCalledTimes(1);
     expect(mockExpand.mock.calls[0]?.[1]).toBe("p1");
     expect(mockExpand.mock.calls[0]?.[2]).toBe("2026-04-13");
   });
 
   it("should delegate to attemptLink with an AbortSignal via connect(profileId)", async () => {
+    // Arrange
     const { result } = renderHook(
       () => useTrain2GoSource("p1", ["2026-04-13"]),
       {
         wrapper: ({ children }) => wrap(children),
       }
     );
-
     await result.current.connect("p1");
-
     expect(mockAttempt).toHaveBeenCalledTimes(1);
     expect(mockAttempt.mock.calls[0]?.[1]).toBe("p1");
+
+    // Act
     const signal = mockAttempt.mock.calls[0]?.[2] as AbortSignal | undefined;
+
+    // Assert
     expect(signal).toBeInstanceOf(AbortSignal);
   });
 });

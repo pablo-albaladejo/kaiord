@@ -119,17 +119,17 @@ runbook for any single PR (in design.md D4) does not require touching the others
 
 ## 4. PR-4 §4 — AAA migration on SPA non-component layers (subagent-driven)
 
-- [ ] 4.0 Re-bootstrap AAA allowlist shard at PR-4 branch base — see §3.0a for the protocol; this PR touches `AAA_ALLOWLIST_SPA_NON_COMPONENT` only. Append any net-new violators in a dedicated commit at the head of PR-4 with message `chore(scripts): rebase AAA SPA non-component allowlist for net-new violators landed during PR-1/PR-2/PR-3 review window`.
+- [x] 4.0 Re-bootstrap AAA allowlist shard at PR-4 branch base — see §3.0a for the protocol; this PR touches `AAA_ALLOWLIST_SPA_NON_COMPONENT` only. Append any net-new violators in a dedicated commit at the head of PR-4 with message `chore(scripts): rebase AAA SPA non-component allowlist for net-new violators landed during PR-1/PR-2/PR-3 review window`.
 
-- [ ] 4.1 Subagent invocation per SPA subdirectory: `application` (41) → `adapters` (24) → `store` (52) → `hooks` (29) → `lib` (11) + remaining roots (`App.test.tsx`, `App.analytics.test.tsx`, `routes.test.tsx`, `router-base.test.tsx`) = ~157 files.
+- [x] 4.1 Subagent invocation per SPA subdirectory: `application` (41) → `adapters` (24) → `store` (52) → `hooks` (29) → `lib` (11) + remaining roots (`App.test.tsx`, `App.analytics.test.tsx`, `routes.test.tsx`, `router-base.test.tsx`) = ~157 files.
 
-- [ ] 4.2 Same per-subdirectory contract as §3.2 — except this PR drains ONLY `AAA_ALLOWLIST_SPA_NON_COMPONENT` (per D4 sharding); the BACKEND and SPA_COMPONENT shards are untouched here. Subagent pass → diff review → `pnpm -r test` → drain SPA_NON_COMPONENT shard → run `check-aaa-migration-no-logic-edits.mjs` → `pnpm test:scripts` → commit. Commit message: `chore(tests-spa-<sub>): add AAA markers to SPA <sub> tests`. Sequential per-subdirectory, no parallel within the PR.
+- [x] 4.2 Same per-subdirectory contract as §3.2 — except this PR drains ONLY `AAA_ALLOWLIST_SPA_NON_COMPONENT` (per D4 sharding); the BACKEND and SPA_COMPONENT shards are untouched here. Subagent pass → diff review → `pnpm -r test` → drain SPA_NON_COMPONENT shard → run `check-aaa-migration-no-logic-edits.mjs` → `pnpm test:scripts` → commit. Commit message: `chore(tests-spa-<sub>): add AAA markers to SPA <sub> tests`. Sequential per-subdirectory, no parallel within the PR.
 
-- [ ] 4.3 SPA-specific risk: tests under `packages/workout-spa-editor/src/components/**` and `packages/workout-spa-editor/src/hooks/**` may use Testing Library's `render()` + `screen.*` patterns where the boundary between Arrange and Act is subjective. Reviewer judgment call documented per file as needed. If the reviewer disagrees with the subagent's section boundary on a file, revert the file and re-run with an explicit note in the prompt about the canonical placement.
+- [x] 4.3 SPA-specific risk: tests under `packages/workout-spa-editor/src/components/**` and `packages/workout-spa-editor/src/hooks/**` may use Testing Library's `render()` + `screen.*` patterns where the boundary between Arrange and Act is subjective. Reviewer judgment call documented per file as needed. If the reviewer disagrees with the subagent's section boundary on a file, revert the file and re-run with an explicit note in the prompt about the canonical placement.
 
-- [ ] 4.4 PR-4 description: per-subdirectory file count migrated; sample diff from a `hooks/` test (the layer with the most subjective Arrange/Act boundary).
+- [x] 4.4 PR-4 description: per-subdirectory file count migrated; sample diff from a `hooks/` test (the layer with the most subjective Arrange/Act boundary).
 
-- [ ] 4.5 Changeset added (`chore`-class per D15); commit message: `chore(tests): AAA structure markers on SPA non-component tests`.
+- [x] 4.5 Changeset added (`chore`-class per D15); commit message: `chore(tests): AAA structure markers on SPA non-component tests`.
 
 ## 5. PR-5 §5 — AAA migration on SPA components + remaining files (subagent-driven)
 

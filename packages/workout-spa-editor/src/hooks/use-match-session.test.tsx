@@ -44,19 +44,18 @@ const makeWorkout = (): WorkoutRecord =>
 
 describe("useMatchSession", () => {
   it("should create a SessionMatch row through the injected PersistencePort", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     const activity = makeActivity();
     const workout = makeWorkout();
     await persistence.coaching.put(activity);
     await persistence.workouts.put(workout);
-
     const wrap = ({ children }: { children: ReactNode }) => (
       <PersistenceProvider persistence={persistence}>
         {children}
       </PersistenceProvider>
     );
     const { result } = renderHook(() => useMatchSession(), { wrapper: wrap });
-
     await act(async () => {
       await result.current({
         profileId: PROFILE,
@@ -66,10 +65,13 @@ describe("useMatchSession", () => {
       });
     });
 
+    // Act
     const stored = await persistence.sessionMatch.getByActivityId(
       PROFILE,
       activity.id
     );
+
+    // Assert
     expect(stored).toBeDefined();
     expect(stored?.workoutId).toBe(workout.id);
     expect(stored?.source).toBe("manual");
@@ -77,16 +79,19 @@ describe("useMatchSession", () => {
   });
 
   it("should reject when the activity does not exist in the injected port", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     await persistence.workouts.put(makeWorkout());
-
     const wrap = ({ children }: { children: ReactNode }) => (
       <PersistenceProvider persistence={persistence}>
         {children}
       </PersistenceProvider>
     );
+
+    // Act
     const { result } = renderHook(() => useMatchSession(), { wrapper: wrap });
 
+    // Assert
     await expect(
       result.current({
         profileId: PROFILE,

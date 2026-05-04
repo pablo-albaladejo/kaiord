@@ -48,27 +48,40 @@ describe("useAutoMatchSuggestions", () => {
   afterEach(clearAll);
 
   it("should return [] when no profileId or weekStart", async () => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(() =>
       useAutoMatchSuggestions(null, "2026-04-27")
     );
+
+    // Assert
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
   it("should return [] when no candidates exist", async () => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(() =>
       useAutoMatchSuggestions("p1", "2026-04-27")
     );
+
+    // Assert
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
   it("should return suggestions when candidates exist and not dismissed", async () => {
+    // Arrange
     await db.table("coachingActivities").put(seedActivity("2026-04-29"));
     await db.table("workouts").put(seedWorkout("2026-04-29", 3600));
 
+    // Act
     const { result } = renderHook(() =>
       useAutoMatchSuggestions("p1", "2026-04-27")
     );
 
+    // Assert
     await waitFor(() => {
       expect(result.current).toHaveLength(1);
       expect(result.current![0]!.activityId).toBe("p1:train2go:1");
@@ -76,6 +89,7 @@ describe("useAutoMatchSuggestions", () => {
   });
 
   it("should hide only the dismissed pair; other candidates remain visible", async () => {
+    // Arrange
     await db.table("coachingActivities").put(seedActivity("2026-04-29"));
     await db.table("workouts").put(seedWorkout("2026-04-29", 3600));
     const dismissedRow: AutoMatchDismissal = {
@@ -91,14 +105,17 @@ describe("useAutoMatchSuggestions", () => {
     };
     await db.table("autoMatchDismissals").put(dismissedRow);
 
+    // Act
     const { result } = renderHook(() =>
       useAutoMatchSuggestions("p1", "2026-04-27")
     );
 
+    // Assert
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
   it("should re-evaluate when the dismissal entry is removed", async () => {
+    // Arrange
     await db.table("coachingActivities").put(seedActivity("2026-04-29"));
     await db.table("workouts").put(seedWorkout("2026-04-29", 3600));
     await db.table("autoMatchDismissals").put({
@@ -112,14 +129,15 @@ describe("useAutoMatchSuggestions", () => {
         },
       ],
     });
-
     const { result } = renderHook(() =>
       useAutoMatchSuggestions("p1", "2026-04-27")
     );
     await waitFor(() => expect(result.current).toEqual([]));
 
+    // Act
     await db.table("autoMatchDismissals").clear();
 
+    // Assert
     await waitFor(() => {
       expect(result.current).toHaveLength(1);
     });

@@ -33,48 +33,54 @@ function makeRaw(overrides?: Partial<WorkoutRaw>): WorkoutRaw {
 
 describe("stale detection integration", () => {
   it("should detect stale when description changes", async () => {
+    // Arrange
     const originalRaw = makeRaw();
     originalRaw.rawHash = await computeRawHash(originalRaw);
-
     const record = makeWorkoutRecord({
       state: "structured",
       raw: originalRaw,
     }) as WorkoutRecord;
-
     const updatedRaw = makeRaw({ description: "2K z1 + 5K z3 + 2K z1" });
+
+    // Act
     const result = await detectStale(record, updatedRaw);
 
+    // Assert
     expect(result.state).toBe("stale");
     expect(result.previousState).toBe("structured");
   });
 
   it("should not detect stale when content is identical", async () => {
+    // Arrange
     const raw = makeRaw();
     raw.rawHash = await computeRawHash(raw);
-
     const record = makeWorkoutRecord({
       state: "ready",
       raw,
     }) as WorkoutRecord;
-
     const sameRaw = makeRaw();
+
+    // Act
     const result = await detectStale(record, sameRaw);
 
+    // Assert
     expect(result.state).toBe("ready");
   });
 
   it("should update raw in-place for RAW state workouts", async () => {
+    // Arrange
     const raw = makeRaw();
     raw.rawHash = await computeRawHash(raw);
-
     const record = makeWorkoutRecord({
       state: "raw",
       raw,
     }) as WorkoutRecord;
-
     const updatedRaw = makeRaw({ title: "Updated Long Run" });
+
+    // Act
     const result = await detectStale(record, updatedRaw);
 
+    // Assert
     expect(result.state).toBe("raw");
     expect(result.raw?.title).toBe("Updated Long Run");
   });

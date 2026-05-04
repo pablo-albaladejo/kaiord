@@ -74,16 +74,19 @@ const PAYLOAD_FULL: ZonesPayload = {
 
 describe("syncZones — silent fills and conflicts", () => {
   it("should write every incoming value silently when profile is empty (empty-fill)", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => PAYLOAD_FULL);
-
     const result = await syncZones(PROFILE_ID, transport, repo);
-
     if (!result.ok) throw new Error("expected ok");
     expect(result.conflicts).toEqual([]);
     expect(result.applied.length).toBeGreaterThanOrEqual(7);
+
+    // Act
     const after = await repo.getById(PROFILE_ID);
+
+    // Assert
     expect(after?.sportZones.cycling?.thresholds.ftp).toBe(268);
     expect(after?.sportZones.cycling?.thresholds.lthr).toBe(160);
     expect(after?.sportZones.running?.thresholds.lthr).toBe(168);
@@ -92,6 +95,7 @@ describe("syncZones — silent fills and conflicts", () => {
   });
 
   it("should produce no applied or conflicts when incoming === current (no-op)", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(
       makeProfile({
@@ -114,15 +118,18 @@ describe("syncZones — silent fills and conflicts", () => {
       })
     );
     const transport = makeTransport(async () => PAYLOAD_FULL);
-
     const result = await syncZones(PROFILE_ID, transport, repo);
 
+    // Act
     if (!result.ok) throw new Error("expected ok");
+
+    // Assert
     expect(result.applied).toEqual([]);
     expect(result.conflicts).toEqual([]);
   });
 
   it("should return one conflict (NOT written) for differing FTP (single-conflict)", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(
       makeProfile({
@@ -137,18 +144,21 @@ describe("syncZones — silent fills and conflicts", () => {
     const transport = makeTransport(async () => ({
       paces: { cycling: { z4Upper: 270 } },
     }));
-
     const result = await syncZones(PROFILE_ID, transport, repo);
-
     if (!result.ok) throw new Error("expected ok");
     expect(result.conflicts).toEqual([
       { field: "cycling.thresholds.ftp", current: 200, incoming: 270 },
     ]);
+
+    // Act
     const after = await repo.getById(PROFILE_ID);
+
+    // Assert
     expect(after?.sportZones.cycling?.thresholds.ftp).toBe(200);
   });
 
   it("should return per-sport LTHR conflict rows (multi-conflict)", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(
       makeProfile({
@@ -170,11 +180,13 @@ describe("syncZones — silent fills and conflicts", () => {
         running: { z4Upper: 168 },
       },
     }));
-
     const result = await syncZones(PROFILE_ID, transport, repo);
-
     if (!result.ok) throw new Error("expected ok");
+
+    // Act
     const fields = result.conflicts.map((c) => c.field).sort();
+
+    // Assert
     expect(fields).toEqual([
       "cycling.thresholds.lthr",
       "running.thresholds.lthr",
@@ -182,6 +194,7 @@ describe("syncZones — silent fills and conflicts", () => {
   });
 
   it("should fill empty bodyWeight and return a conflict for manual FTP (mixed-fill-and-conflict)", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(
       makeProfile({
@@ -197,29 +210,34 @@ describe("syncZones — silent fills and conflicts", () => {
       physiological: { weight: 72 },
       paces: { cycling: { z4Upper: 270 } },
     }));
-
     const result = await syncZones(PROFILE_ID, transport, repo);
-
     if (!result.ok) throw new Error("expected ok");
     expect(result.applied).toEqual([{ field: "bodyWeight", value: 72 }]);
     expect(result.conflicts).toEqual([
       { field: "cycling.thresholds.ftp", current: 200, incoming: 270 },
     ]);
+
+    // Act
     const after = await repo.getById(PROFILE_ID);
+
+    // Assert
     expect(after?.bodyWeight).toBe(72);
     expect(after?.sportZones.cycling?.thresholds.ftp).toBe(200);
   });
 
   it("should use z5Lower when z4Upper is undefined (ftp-fallback-absent)", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => ({
       paces: { cycling: { z5Lower: 270 } },
     }));
-
     const result = await syncZones(PROFILE_ID, transport, repo);
 
+    // Act
     if (!result.ok) throw new Error("expected ok");
+
+    // Assert
     expect(result.applied).toContainEqual({
       field: "cycling.thresholds.ftp",
       value: 270,
@@ -227,15 +245,18 @@ describe("syncZones — silent fills and conflicts", () => {
   });
 
   it("should use z5Lower when z4Upper === 0 (ftp-fallback-zero)", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => ({
       paces: { cycling: { z4Upper: 0, z5Lower: 270 } },
     }));
-
     const result = await syncZones(PROFILE_ID, transport, repo);
 
+    // Act
     if (!result.ok) throw new Error("expected ok");
+
+    // Assert
     expect(result.applied).toContainEqual({
       field: "cycling.thresholds.ftp",
       value: 270,
@@ -243,52 +264,64 @@ describe("syncZones — silent fills and conflicts", () => {
   });
 
   it("transport-error: thrown exception surfaces as { ok: false, reason: 'transport-error' }", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => {
       throw new Error("Bridge unavailable");
     });
-
     const result = await syncZones(PROFILE_ID, transport, repo);
-
     expect(result.ok).toBe(false);
+
+    // Act
     if (result.ok) throw new Error("unreachable");
+
+    // Assert
     expect(result.reason).toBe("transport-error");
     expect(result.error).toBe("Bridge unavailable");
   });
 
   it("shape-mismatch: null payload surfaces as { ok: false, reason: 'shape-mismatch' }", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
     const transport = makeTransport(async () => null);
-
     const result = await syncZones(PROFILE_ID, transport, repo);
-
     expect(result.ok).toBe(false);
+
+    // Act
     if (result.ok) throw new Error("unreachable");
+
+    // Assert
     expect(result.reason).toBe("shape-mismatch");
   });
 
   it("unsupported-transport: returns { ok: false, reason: 'unsupported' } when readZones is absent", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
     await repo.put(makeProfile());
-    const transport = makeTransport(); // no readZones
-
+    const transport = makeTransport();
     const result = await syncZones(PROFILE_ID, transport, repo);
-
     expect(result.ok).toBe(false);
+
+    // Act
     if (result.ok) throw new Error("unreachable");
+
+    // Assert
     expect(result.reason).toBe("unsupported");
   });
 
   it("profile-deleted-mid-sync: missing profile returns { ok: false, reason: 'profile-deleted' }", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
     const transport = makeTransport(async () => PAYLOAD_FULL);
-
     const result = await syncZones(PROFILE_ID, transport, repo);
-
     expect(result.ok).toBe(false);
+
+    // Act
     if (result.ok) throw new Error("unreachable");
+
+    // Assert
     expect(result.reason).toBe("profile-deleted");
   });
 });
@@ -321,12 +354,12 @@ describe("commitConflictResolution", () => {
   };
 
   it("should write every accepted field (all-accept)", async () => {
+    // Arrange
     const { repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
       "cycling.thresholds.ftp": "accept",
       "running.thresholds.lthr": "accept",
     } as Record<FieldKey, ConflictDecision>;
-
     await commitConflictResolution(
       PROFILE_ID,
       decisions,
@@ -334,18 +367,21 @@ describe("commitConflictResolution", () => {
       conflictPayload
     );
 
+    // Act
     const after = await repo.getById(PROFILE_ID);
+
+    // Assert
     expect(after?.sportZones.cycling?.thresholds.ftp).toBe(270);
     expect(after?.sportZones.running?.thresholds.lthr).toBe(168);
   });
 
   it("should leave the profile untouched (all-reject)", async () => {
+    // Arrange
     const { repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
       "cycling.thresholds.ftp": "reject",
       "running.thresholds.lthr": "reject",
     } as Record<FieldKey, ConflictDecision>;
-
     await commitConflictResolution(
       PROFILE_ID,
       decisions,
@@ -353,18 +389,21 @@ describe("commitConflictResolution", () => {
       conflictPayload
     );
 
+    // Act
     const after = await repo.getById(PROFILE_ID);
+
+    // Assert
     expect(after?.sportZones.cycling?.thresholds.ftp).toBe(200);
     expect(after?.sportZones.running?.thresholds.lthr).toBe(150);
   });
 
   it("should accept some and reject others, idempotent on second call (mixed)", async () => {
+    // Arrange
     const { repo } = await seedConflictedProfile();
     const decisions: Record<FieldKey, ConflictDecision> = {
       "cycling.thresholds.ftp": "reject",
       "running.thresholds.lthr": "accept",
     } as Record<FieldKey, ConflictDecision>;
-
     await commitConflictResolution(
       PROFILE_ID,
       decisions,
@@ -378,17 +417,24 @@ describe("commitConflictResolution", () => {
       conflictPayload
     );
 
+    // Act
     const after = await repo.getById(PROFILE_ID);
+
+    // Assert
     expect(after?.sportZones.cycling?.thresholds.ftp).toBe(200);
     expect(after?.sportZones.running?.thresholds.lthr).toBe(168);
   });
 
   it("should throw ProfileNotFoundError when profile deleted mid-commit", async () => {
+    // Arrange
     const repo = createInMemoryProfileRepository();
+
+    // Act
     const decisions: Record<FieldKey, ConflictDecision> = {
       "cycling.thresholds.ftp": "accept",
     } as Record<FieldKey, ConflictDecision>;
 
+    // Assert
     await expect(
       commitConflictResolution(PROFILE_ID, decisions, repo, conflictPayload)
     ).rejects.toThrow(ProfileNotFoundError);

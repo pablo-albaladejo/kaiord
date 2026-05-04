@@ -23,7 +23,9 @@ describe("useWorkoutStore", () => {
 
   describe("initial state", () => {
     it("should have null workout initially", () => {
-      // Arrange & Act
+      // Arrange
+
+      // Act
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -31,7 +33,9 @@ describe("useWorkoutStore", () => {
     });
 
     it("should have null selectedStepId initially", () => {
-      // Arrange & Act
+      // Arrange
+
+      // Act
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -39,7 +43,9 @@ describe("useWorkoutStore", () => {
     });
 
     it("should have isEditing false initially", () => {
-      // Arrange & Act
+      // Arrange
+
+      // Act
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -65,9 +71,9 @@ describe("useWorkoutStore", () => {
           },
         },
       };
+      useWorkoutStore.getState().loadWorkout(mockKrd);
 
       // Act
-      useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -90,11 +96,10 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.setState({ selectedStepId: "step-123" });
+      useWorkoutStore.getState().loadWorkout(mockKrd);
 
       // Act
-      useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -117,11 +122,10 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.setState({ isEditing: true });
+      useWorkoutStore.getState().loadWorkout(mockKrd);
 
       // Act
-      useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -147,7 +151,6 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       const updatedKrd: KRD = {
         ...initialKrd,
         extensions: {
@@ -158,11 +161,10 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(initialKrd);
+      useWorkoutStore.getState().updateWorkout(updatedKrd);
 
       // Act
-      useWorkoutStore.getState().updateWorkout(updatedKrd);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -192,14 +194,13 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.setState({
         currentWorkout: mockKrd,
         selectedStepId: "step-456",
       });
+      useWorkoutStore.getState().updateWorkout(mockKrd);
 
       // Act
-      useWorkoutStore.getState().updateWorkout(mockKrd);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -222,14 +223,13 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.setState({
         currentWorkout: mockKrd,
         isEditing: true,
       });
+      useWorkoutStore.getState().updateWorkout(mockKrd);
 
       // Act
-      useWorkoutStore.getState().updateWorkout(mockKrd);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -241,9 +241,9 @@ describe("useWorkoutStore", () => {
     it("should select a step by ID", () => {
       // Arrange
       const stepId = "step-789";
+      useWorkoutStore.getState().selectStep(stepId);
 
       // Act
-      useWorkoutStore.getState().selectStep(stepId);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -253,9 +253,9 @@ describe("useWorkoutStore", () => {
     it("should deselect when passed null", () => {
       // Arrange
       useWorkoutStore.setState({ selectedStepId: "step-123" });
+      useWorkoutStore.getState().selectStep(null);
 
       // Act
-      useWorkoutStore.getState().selectStep(null);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -265,9 +265,9 @@ describe("useWorkoutStore", () => {
     it("should allow changing selection from one step to another", () => {
       // Arrange
       useWorkoutStore.setState({ selectedStepId: "step-1" });
+      useWorkoutStore.getState().selectStep("step-2");
 
       // Act
-      useWorkoutStore.getState().selectStep("step-2");
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -277,8 +277,10 @@ describe("useWorkoutStore", () => {
 
   describe("setEditing", () => {
     it("should set isEditing to true", () => {
-      // Arrange & Act
+      // Arrange
       useWorkoutStore.getState().setEditing(true);
+
+      // Act
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -288,9 +290,9 @@ describe("useWorkoutStore", () => {
     it("should set isEditing to false", () => {
       // Arrange
       useWorkoutStore.setState({ isEditing: true });
+      useWorkoutStore.getState().setEditing(false);
 
       // Act
-      useWorkoutStore.getState().setEditing(false);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -315,15 +317,14 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.setState({
         currentWorkout: mockKrd,
         selectedStepId: "step-123",
         isEditing: true,
       });
+      useWorkoutStore.getState().clearWorkout();
 
       // Act
-      useWorkoutStore.getState().clearWorkout();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -335,7 +336,9 @@ describe("useWorkoutStore", () => {
 
   describe("undo/redo functionality", () => {
     it("should initialize with empty history", () => {
-      // Arrange & Act
+      // Arrange
+
+      // Act
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -360,9 +363,9 @@ describe("useWorkoutStore", () => {
           },
         },
       };
+      useWorkoutStore.getState().loadWorkout(mockKrd);
 
       // Act
-      useWorkoutStore.getState().loadWorkout(mockKrd);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -388,7 +391,6 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       const updatedKrd: KRD = {
         ...initialKrd,
         extensions: {
@@ -399,11 +401,10 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(initialKrd);
+      useWorkoutStore.getState().updateWorkout(updatedKrd);
 
       // Act
-      useWorkoutStore.getState().updateWorkout(updatedKrd);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -430,7 +431,6 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       const krd2: KRD = {
         ...krd1,
         extensions: {
@@ -441,12 +441,11 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(krd1);
       useWorkoutStore.getState().updateWorkout(krd2);
+      useWorkoutStore.getState().undo();
 
       // Act
-      useWorkoutStore.getState().undo();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -471,7 +470,6 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       const krd2: KRD = {
         ...krd1,
         extensions: {
@@ -482,13 +480,12 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(krd1);
       useWorkoutStore.getState().updateWorkout(krd2);
       useWorkoutStore.getState().undo();
+      useWorkoutStore.getState().redo();
 
       // Act
-      useWorkoutStore.getState().redo();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -512,11 +509,10 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
+      useWorkoutStore.getState().undo();
 
       // Act
-      useWorkoutStore.getState().undo();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -541,7 +537,6 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       const krd2: KRD = {
         ...krd1,
         extensions: {
@@ -552,12 +547,11 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(krd1);
       useWorkoutStore.getState().updateWorkout(krd2);
+      useWorkoutStore.getState().redo();
 
       // Act
-      useWorkoutStore.getState().redo();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -582,7 +576,6 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       const krd2: KRD = {
         ...krd1,
         extensions: {
@@ -593,7 +586,6 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       const krd3: KRD = {
         ...krd1,
         extensions: {
@@ -604,13 +596,12 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(krd1);
       useWorkoutStore.getState().updateWorkout(krd2);
       useWorkoutStore.getState().undo();
+      useWorkoutStore.getState().updateWorkout(krd3);
 
       // Act
-      useWorkoutStore.getState().updateWorkout(krd3);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -637,10 +628,7 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(baseKrd);
-
-      // Act - Add 60 updates
       for (let i = 1; i <= 60; i++) {
         const updatedKrd: KRD = {
           ...baseKrd,
@@ -655,6 +643,7 @@ describe("useWorkoutStore", () => {
         useWorkoutStore.getState().updateWorkout(updatedKrd);
       }
 
+      // Act
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -692,7 +681,6 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       const krd2: KRD = {
         ...krd1,
         extensions: {
@@ -703,20 +691,16 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
-      // Act & Assert - No history
       expect(useWorkoutStore.getState().canUndo()).toBe(false);
-
-      // Load workout
       useWorkoutStore.getState().loadWorkout(krd1);
       expect(useWorkoutStore.getState().canUndo()).toBe(false);
-
-      // Update workout
       useWorkoutStore.getState().updateWorkout(krd2);
       expect(useWorkoutStore.getState().canUndo()).toBe(true);
 
-      // Undo
+      // Act
       useWorkoutStore.getState().undo();
+
+      // Assert
       expect(useWorkoutStore.getState().canUndo()).toBe(false);
     });
 
@@ -736,7 +720,6 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       const krd2: KRD = {
         ...krd1,
         extensions: {
@@ -747,21 +730,17 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
-      // Act & Assert - No history
       expect(useWorkoutStore.getState().canRedo()).toBe(false);
-
-      // Load and update
       useWorkoutStore.getState().loadWorkout(krd1);
       useWorkoutStore.getState().updateWorkout(krd2);
       expect(useWorkoutStore.getState().canRedo()).toBe(false);
-
-      // Undo
       useWorkoutStore.getState().undo();
       expect(useWorkoutStore.getState().canRedo()).toBe(true);
 
-      // Redo
+      // Act
       useWorkoutStore.getState().redo();
+
+      // Assert
       expect(useWorkoutStore.getState().canRedo()).toBe(false);
     });
 
@@ -781,12 +760,11 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
       useWorkoutStore.getState().updateWorkout(mockKrd);
+      useWorkoutStore.getState().clearWorkout();
 
       // Act
-      useWorkoutStore.getState().clearWorkout();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -824,18 +802,16 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
-
-      // Act
       useWorkoutStore.getState().createStep();
       const state = useWorkoutStore.getState();
-
-      // Assert
       const workout = state.currentWorkout?.extensions?.structured_workout;
       expect(workout?.steps).toHaveLength(2);
 
+      // Act
       const newStep = workout?.steps[1];
+
+      // Assert
       expect(newStep).toEqual({
         id: expect.any(String),
         stepIndex: 1,
@@ -863,11 +839,10 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
+      useWorkoutStore.getState().createStep();
 
       // Act
-      useWorkoutStore.getState().createStep();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -891,15 +866,14 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
-
-      // Act
       useWorkoutStore.getState().createStep();
       const state = useWorkoutStore.getState();
 
-      // Assert
+      // Act
       const workout = state.currentWorkout?.extensions?.structured_workout;
+
+      // Assert
       expect(workout?.steps).toHaveLength(1);
       expect(workout?.steps[0]).toMatchObject({
         stepIndex: 0,
@@ -913,9 +887,9 @@ describe("useWorkoutStore", () => {
         undoHistory: [],
         historyIndex: -1,
       });
+      useWorkoutStore.getState().createStep();
 
       // Act
-      useWorkoutStore.getState().createStep();
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -939,17 +913,15 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
-
-      // Act
       useWorkoutStore.getState().createStep();
       const state = useWorkoutStore.getState();
-
-      // Assert
       const workout = state.currentWorkout?.extensions?.structured_workout;
+
+      // Act
       const newStep = workout?.steps[0];
 
+      // Assert
       expect(newStep?.durationType).toBe("open");
       expect(newStep?.duration).toEqual({ type: "open" });
       expect(newStep?.targetType).toBe("open");
@@ -1003,15 +975,14 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
-
-      // Act
       useWorkoutStore.getState().deleteStep(1);
       const state = useWorkoutStore.getState();
 
-      // Assert
+      // Act
       const workout = state.currentWorkout?.extensions?.structured_workout;
+
+      // Assert
       expect(workout?.steps).toHaveLength(2);
       expect(workout?.steps[0].stepIndex).toBe(0);
       expect(workout?.steps[1].stepIndex).toBe(1);
@@ -1064,15 +1035,14 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
-
-      // Act - Delete first step
       useWorkoutStore.getState().deleteStep(0);
       const state = useWorkoutStore.getState();
 
-      // Assert
+      // Act
       const workout = state.currentWorkout?.extensions?.structured_workout;
+
+      // Assert
       expect(workout?.steps).toHaveLength(2);
       expect(workout?.steps[0].stepIndex).toBe(0);
       expect(workout?.steps[0].duration).toEqual({
@@ -1117,11 +1087,10 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
+      useWorkoutStore.getState().deleteStep(0);
 
       // Act
-      useWorkoutStore.getState().deleteStep(0);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -1136,9 +1105,9 @@ describe("useWorkoutStore", () => {
         undoHistory: [],
         historyIndex: -1,
       });
+      useWorkoutStore.getState().deleteStep(0);
 
       // Act
-      useWorkoutStore.getState().deleteStep(0);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -1170,15 +1139,14 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
-
-      // Act
       useWorkoutStore.getState().deleteStep(0);
       const state = useWorkoutStore.getState();
 
-      // Assert
+      // Act
       const workout = state.currentWorkout?.extensions?.structured_workout;
+
+      // Assert
       expect(workout?.steps).toHaveLength(0);
     });
 
@@ -1219,15 +1187,14 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
-
-      // Act
       useWorkoutStore.getState().deleteStep(1);
       const state = useWorkoutStore.getState();
 
-      // Assert
+      // Act
       const workout = state.currentWorkout?.extensions?.structured_workout;
+
+      // Assert
       expect(workout?.steps).toHaveLength(1);
       expect(workout?.steps[0].stepIndex).toBe(0);
       expect(workout?.steps[0].duration).toEqual({
@@ -1254,7 +1221,6 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.setState({ currentWorkout: mockKrd });
 
       // Act
@@ -1340,11 +1306,10 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
+      useWorkoutStore.getState().deleteStep(0);
 
       // Act
-      useWorkoutStore.getState().deleteStep(0);
       const state = useWorkoutStore.getState();
 
       // Assert
@@ -1391,18 +1356,17 @@ describe("useWorkoutStore", () => {
           },
         },
       };
-
       useWorkoutStore.getState().loadWorkout(mockKrd);
       useWorkoutStore.getState().deleteStep(0);
       const deletedTimestamp =
         useWorkoutStore.getState().deletedSteps[0].timestamp;
-
-      // Act
       useWorkoutStore.getState().undoDelete(deletedTimestamp);
       const state = useWorkoutStore.getState();
 
-      // Assert
+      // Act
       const workout = state.currentWorkout?.extensions?.structured_workout;
+
+      // Assert
       expect(workout?.steps).toHaveLength(2);
       expect(workout?.steps[0].stepIndex).toBe(0);
       expect(workout?.steps[1].stepIndex).toBe(1);
@@ -1444,9 +1408,9 @@ describe("useWorkoutStore", () => {
           },
         ],
       });
+      useWorkoutStore.getState().clearExpiredDeletes();
 
       // Act
-      useWorkoutStore.getState().clearExpiredDeletes();
       const state = useWorkoutStore.getState();
 
       // Assert

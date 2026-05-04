@@ -21,9 +21,7 @@ const workoutWith = (ids: Array<string>): Workout =>
 
 describe("nextAfterMultiDelete", () => {
   it("should focus the first remaining item after the last-deleted position (contiguous)", () => {
-    // Arrange — original [a, b, c, d, e]; deleted [b, c] at indices [1, 2];
-    // post-delete workout = [a, d, e]; the item "after last-deleted" is d
-    // at post-delete position (2 - 1) = 1.
+    // Arrange
     const workout = workoutWith(["a", "d", "e"]);
 
     // Act
@@ -37,9 +35,7 @@ describe("nextAfterMultiDelete", () => {
   });
 
   it("should handle non-contiguous deletions the same way", () => {
-    // Arrange — original [a, b, c, d, e]; deleted [a, c] at indices [0, 2];
-    // post-delete workout = [b, d, e]. lastDeleted=2, removedCount=2 →
-    // position 2-1=1 → "d".
+    // Arrange
     const workout = workoutWith(["b", "d", "e"]);
 
     // Act
@@ -53,9 +49,7 @@ describe("nextAfterMultiDelete", () => {
   });
 
   it("should fall back to the previous-sibling when nothing sits after the deletion", () => {
-    // Arrange — original [a, b, c]; deleted the tail [b, c] at [1, 2];
-    // post-delete workout = [a]; no item after last-deleted; fallback
-    // to previous-sibling of first-deleted (index 0) → "a".
+    // Arrange
     const workout = workoutWith(["a"]);
 
     // Act
@@ -69,11 +63,7 @@ describe("nextAfterMultiDelete", () => {
   });
 
   it("should anchor on a surviving item when both after-last and before-first checks miss", () => {
-    // Arrange — original [a, b, c]; deleted [0, 2]; post-delete [b].
-    // `afterLast` position = 2 - 1 = 1 → undefined (only 1 item now).
-    // `firstDeleted` = 0, so no previous-sibling check applies. Without
-    // the "anchor to surviving" fallback this would collapse to
-    // empty-state even though "b" is still in the list.
+    // Arrange
     const workout = workoutWith(["b"]);
 
     // Act
@@ -87,7 +77,7 @@ describe("nextAfterMultiDelete", () => {
   });
 
   it("should return empty-state when every item was deleted", () => {
-    // Arrange — list is empty post-delete.
+    // Arrange
     const workout = workoutWith([]);
 
     // Act
@@ -101,6 +91,8 @@ describe("nextAfterMultiDelete", () => {
   });
 
   it("should return empty-state when workout is undefined", () => {
+    // Arrange
+
     // Act
     const target = nextAfterMultiDelete({
       workout: undefined,

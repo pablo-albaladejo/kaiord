@@ -53,15 +53,15 @@ describe("toggleStepSelection single-parent invariant", () => {
   afterEach(resetStore);
 
   it("should extend the selection when toggling two main-list steps", () => {
-    // Arrange — two top-level steps, no blocks.
+    // Arrange
     useWorkoutStore.getState().loadWorkout(buildKrd([step(0), step(1)]));
     const [a, b] = readInner().steps;
+    useWorkoutStore.getState().toggleStepSelection(a.id);
 
     // Act
-    useWorkoutStore.getState().toggleStepSelection(a.id);
     useWorkoutStore.getState().toggleStepSelection(b.id);
 
-    // Assert — same-parent (main list) → extend.
+    // Assert
     expect(useWorkoutStore.getState().selectedStepIds).toEqual([a.id, b.id]);
   });
 
@@ -72,9 +72,9 @@ describe("toggleStepSelection single-parent invariant", () => {
       .loadWorkout(buildKrd([{ repeatCount: 2, steps: [step(0), step(1)] }]));
     const block = readInner().steps[0] as unknown as RepetitionBlock;
     const [n0, n1] = block.steps as Array<{ id: string }>;
+    useWorkoutStore.getState().toggleStepSelection(n0.id);
 
     // Act
-    useWorkoutStore.getState().toggleStepSelection(n0.id);
     useWorkoutStore.getState().toggleStepSelection(n1.id);
 
     // Assert
@@ -82,25 +82,24 @@ describe("toggleStepSelection single-parent invariant", () => {
   });
 
   it("should replace the selection when toggling mixes main-list + nested-step", () => {
-    // Arrange — a top-level step plus a block with one nested step.
+    // Arrange
     useWorkoutStore
       .getState()
       .loadWorkout(buildKrd([step(0), { repeatCount: 2, steps: [step(0)] }]));
     const top = readInner().steps[0];
     const block = readInner().steps[1] as unknown as RepetitionBlock;
     const nested = block.steps[0] as { id: string };
-
-    // Act — select the top-level first, then a nested step.
     useWorkoutStore.getState().toggleStepSelection(top.id);
+
+    // Act
     useWorkoutStore.getState().toggleStepSelection(nested.id);
 
-    // Assert — the previous selection is dropped; only the nested id
-    // remains (cross-parent toggle replaced rather than extended).
+    // Assert
     expect(useWorkoutStore.getState().selectedStepIds).toEqual([nested.id]);
   });
 
   it("should replace the selection when toggling mixes two different blocks", () => {
-    // Arrange — two blocks, each with one nested step.
+    // Arrange
     useWorkoutStore.getState().loadWorkout(
       buildKrd([
         { repeatCount: 2, steps: [step(0)] },
@@ -111,12 +110,12 @@ describe("toggleStepSelection single-parent invariant", () => {
     const blockB = readInner().steps[1] as unknown as RepetitionBlock;
     const nestedA = (blockA.steps[0] as { id: string }).id;
     const nestedB = (blockB.steps[0] as { id: string }).id;
+    useWorkoutStore.getState().toggleStepSelection(nestedA);
 
     // Act
-    useWorkoutStore.getState().toggleStepSelection(nestedA);
     useWorkoutStore.getState().toggleStepSelection(nestedB);
 
-    // Assert — cross-block toggle replaces.
+    // Assert
     expect(useWorkoutStore.getState().selectedStepIds).toEqual([nestedB]);
   });
 
@@ -127,7 +126,7 @@ describe("toggleStepSelection single-parent invariant", () => {
     useWorkoutStore.getState().toggleStepSelection(a.id);
     useWorkoutStore.getState().toggleStepSelection(b.id);
 
-    // Act — deselect `a`.
+    // Act
     useWorkoutStore.getState().toggleStepSelection(a.id);
 
     // Assert
@@ -151,7 +150,7 @@ describe("selectAllSteps single-parent invariant", () => {
   });
 
   it("filters out cross-parent ids, keeping only those sharing the first id's parent", () => {
-    // Arrange — a top-level step and a nested step.
+    // Arrange
     useWorkoutStore
       .getState()
       .loadWorkout(buildKrd([step(0), { repeatCount: 2, steps: [step(0)] }]));
@@ -159,10 +158,10 @@ describe("selectAllSteps single-parent invariant", () => {
     const block = readInner().steps[1] as unknown as RepetitionBlock;
     const nestedId = (block.steps[0] as { id: string }).id;
 
-    // Act — first id is the top-level, so we keep main-list ids only.
+    // Act
     useWorkoutStore.getState().selectAllSteps([topId, nestedId]);
 
-    // Assert — nested id is dropped.
+    // Assert
     expect(useWorkoutStore.getState().selectedStepIds).toEqual([topId]);
   });
 });

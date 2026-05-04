@@ -73,28 +73,41 @@ describe("useMatchedSessions", () => {
   afterEach(clearAll);
 
   it("should return [] when no profileId or empty days", async () => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(() => useMatchedSessions(null, WEEK));
+
+    // Assert
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
   it("should return [] when no matches exist", async () => {
+    // Arrange
+
+    // Act
     const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
+
+    // Assert
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
   it("should hydrate matches with activity, workout, and compliance score", async () => {
+    // Arrange
     await db
       .table("coachingActivities")
       .put(seedActivity("p1:train2go:1", "p1", "2026-04-29"));
     await db.table("workouts").put(seedWorkout("w-1", "2026-04-29", 3540));
     await db.table("sessionMatches").put(seedMatch());
-
     const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
-
     await waitFor(() => {
       expect(result.current).toHaveLength(1);
     });
+
+    // Act
     const ms = result.current![0]!;
+
+    // Assert
     expect(ms.match.id).toBe("M1");
     expect(ms.activity.title).toBe("FTP test");
     expect(ms.workout.id).toBe("w-1");
@@ -102,17 +115,22 @@ describe("useMatchedSessions", () => {
   });
 
   it("should filter out matches outside the week range", async () => {
+    // Arrange
     await db
       .table("coachingActivities")
       .put(seedActivity("p1:train2go:1", "p1", "2026-04-20"));
     await db.table("workouts").put(seedWorkout("w-1", "2026-04-20", 3600));
     await db.table("sessionMatches").put(seedMatch({ date: "2026-04-20" }));
 
+    // Act
     const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
+
+    // Assert
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
   it("scopes to profile (other profiles' matches do not leak)", async () => {
+    // Arrange
     await db
       .table("coachingActivities")
       .put(seedActivity("p2:train2go:9", "p2", "2026-04-29"));
@@ -126,29 +144,37 @@ describe("useMatchedSessions", () => {
       })
     );
 
+    // Act
     const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
+
+    // Assert
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
   it("should tolerate dangling references (skips if activity or workout missing)", async () => {
+    // Arrange
     await db.table("sessionMatches").put(seedMatch());
-    // No activity / workout seeded.
 
+    // Act
     const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
+
+    // Assert
     await waitFor(() => expect(result.current).toEqual([]));
   });
 
   it("should re-evaluate when a new match is written", async () => {
+    // Arrange
     await db
       .table("coachingActivities")
       .put(seedActivity("p1:train2go:1", "p1", "2026-04-29"));
     await db.table("workouts").put(seedWorkout("w-1", "2026-04-29"));
-
     const { result } = renderHook(() => useMatchedSessions("p1", WEEK));
     await waitFor(() => expect(result.current).toEqual([]));
 
+    // Act
     await db.table("sessionMatches").put(seedMatch());
 
+    // Assert
     await waitFor(() => {
       expect(result.current).toHaveLength(1);
     });

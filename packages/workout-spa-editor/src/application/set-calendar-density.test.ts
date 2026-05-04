@@ -33,14 +33,17 @@ const fixedClock = () => "2026-05-01T12:00:00.000Z";
 
 describe("setCalendarDensity", () => {
   it("should create the row on first call with updatedAt from injected clock", async () => {
+    // Arrange
     const repo = createInMemoryUserPreferencesRepository();
     const profileRepo = stubProfileRepo([stubProfile()]);
 
+    // Act
     await setCalendarDensity(
       { profileId: "p1", density: "comfortable" },
       { clock: fixedClock, repository: repo, profileRepository: profileRepo }
     );
 
+    // Assert
     expect(await repo.get("p1")).toEqual({
       profileId: "p1",
       calendarDensity: "comfortable",
@@ -49,6 +52,7 @@ describe("setCalendarDensity", () => {
   });
 
   it("should update the row in place on subsequent calls", async () => {
+    // Arrange
     const repo = createInMemoryUserPreferencesRepository();
     const profileRepo = stubProfileRepo([stubProfile()]);
     await setCalendarDensity(
@@ -60,6 +64,7 @@ describe("setCalendarDensity", () => {
       }
     );
 
+    // Act
     await setCalendarDensity(
       { profileId: "p1", density: "compact" },
       {
@@ -69,6 +74,7 @@ describe("setCalendarDensity", () => {
       }
     );
 
+    // Assert
     expect(await repo.get("p1")).toEqual({
       profileId: "p1",
       calendarDensity: "compact",
@@ -77,6 +83,7 @@ describe("setCalendarDensity", () => {
   });
 
   it("should still refresh updatedAt when idempotent on same value", async () => {
+    // Arrange
     const repo = createInMemoryUserPreferencesRepository();
     const profileRepo = stubProfileRepo([stubProfile()]);
     await setCalendarDensity(
@@ -88,6 +95,7 @@ describe("setCalendarDensity", () => {
       }
     );
 
+    // Act
     await setCalendarDensity(
       { profileId: "p1", density: "compact" },
       {
@@ -97,28 +105,33 @@ describe("setCalendarDensity", () => {
       }
     );
 
+    // Assert
     expect((await repo.get("p1"))?.updatedAt).toBe("2026-05-01T15:00:00.000Z");
   });
 
   it("should throw ProfileNotFoundError when profile is missing (concurrent delete)", async () => {
+    // Arrange
     const repo = createInMemoryUserPreferencesRepository();
-    const profileRepo = stubProfileRepo([]); // no profiles
 
+    // Act
+    const profileRepo = stubProfileRepo([]);
+
+    // Assert
     await expect(
       setCalendarDensity(
         { profileId: "p1", density: "compact" },
         { clock: fixedClock, repository: repo, profileRepository: profileRepo }
       )
     ).rejects.toBeInstanceOf(ProfileNotFoundError);
-
-    // No orphan row written.
     expect(await repo.get("p1")).toBeUndefined();
   });
 
   it("should use injected clock — no real-time leakage", async () => {
+    // Arrange
     const repo = createInMemoryUserPreferencesRepository();
     const profileRepo = stubProfileRepo([stubProfile()]);
 
+    // Act
     await setCalendarDensity(
       { profileId: "p1", density: "compact" },
       {
@@ -128,6 +141,7 @@ describe("setCalendarDensity", () => {
       }
     );
 
+    // Assert
     expect((await repo.get("p1"))?.updatedAt).toBe("2026-04-01T00:00:00.000Z");
   });
 });

@@ -6,7 +6,9 @@ import { useToast } from "./useToast";
 describe("useToast", () => {
   describe("toast management", () => {
     it("should initialize with empty toasts array", () => {
-      // Arrange & Act
+      // Arrange
+
+      // Act
       const { result } = renderHook(() => useToast());
 
       // Assert
@@ -35,11 +37,10 @@ describe("useToast", () => {
     it("should generate unique ID for each toast", () => {
       // Arrange
       const { result } = renderHook(() => useToast());
-
-      // Act
       let id1: string;
       let id2: string;
 
+      // Act
       act(() => {
         id1 = result.current.toast({ title: "Toast 1" });
         id2 = result.current.toast({ title: "Toast 2" });
@@ -161,7 +162,6 @@ describe("useToast", () => {
       // Arrange
       const { result } = renderHook(() => useToast());
       let toastId: string;
-
       act(() => {
         toastId = result.current.toast({ title: "Test toast" });
       });
@@ -180,30 +180,26 @@ describe("useToast", () => {
       vi.useFakeTimers();
       const { result } = renderHook(() => useToast());
       let toastId: string;
-
       act(() => {
         toastId = result.current.toast({ title: "Test toast" });
       });
-
-      // Act
       act(() => {
         result.current.dismiss(toastId!);
       });
-
       act(() => {
         vi.advanceTimersByTime(200);
       });
-
-      // Assert
       expect(result.current.toasts).toHaveLength(0);
 
+      // Act
       vi.useRealTimers();
+
+      // Assert
     });
 
     it("should dismiss all toasts", () => {
       // Arrange
       const { result } = renderHook(() => useToast());
-
       act(() => {
         result.current.toast({ title: "Toast 1" });
         result.current.toast({ title: "Toast 2" });
@@ -223,32 +219,28 @@ describe("useToast", () => {
       // Arrange
       vi.useFakeTimers();
       const { result } = renderHook(() => useToast());
-
       act(() => {
         result.current.toast({ title: "Toast 1" });
         result.current.toast({ title: "Toast 2" });
       });
-
-      // Act
       act(() => {
         result.current.dismissAll();
       });
-
       act(() => {
         vi.advanceTimersByTime(200);
       });
-
-      // Assert
       expect(result.current.toasts).toHaveLength(0);
 
+      // Act
       vi.useRealTimers();
+
+      // Assert
     });
 
     it("should only dismiss specified toast, not others", () => {
       // Arrange
       const { result } = renderHook(() => useToast());
       let id1: string;
-
       act(() => {
         id1 = result.current.toast({ title: "Toast 1" });
         result.current.toast({ title: "Toast 2" });
@@ -297,8 +289,6 @@ describe("useToast", () => {
       // Arrange
       const { result } = renderHook(() => useToast());
       const action = "custom-action";
-
-      // Act
       act(() => {
         result.current.toast({
           title: "Complete toast",
@@ -309,8 +299,10 @@ describe("useToast", () => {
         });
       });
 
-      // Assert
+      // Act
       const toast = result.current.toasts[0];
+
+      // Assert
       expect(toast.title).toBe("Complete toast");
       expect(toast.description).toBe("With all options");
       expect(toast.variant).toBe("success");

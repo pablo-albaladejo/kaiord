@@ -89,6 +89,11 @@ describe("Block ID Stability", () => {
      * **Validates: Requirements 2.3**
      */
     it("should preserve block ID when editing repeat count", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.string({ minLength: 10, maxLength: 30 }), // Block ID
@@ -148,6 +153,11 @@ describe("Block ID Stability", () => {
      * **Validates: Requirements 2.3**
      */
     it("should preserve block ID when adding steps to block", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.string({ minLength: 10, maxLength: 30 }), // Block ID
@@ -201,6 +211,11 @@ describe("Block ID Stability", () => {
      * **Validates: Requirements 2.3**
      */
     it("should preserve block ID when reordering workout steps", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 2, max: 5 }), // Number of blocks
@@ -272,6 +287,11 @@ describe("Block ID Stability", () => {
      * **Validates: Requirements 2.3**
      */
     it("should preserve block ID across multiple operations", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.string({ minLength: 10, maxLength: 30 }), // Block ID
@@ -360,6 +380,11 @@ describe("Block ID Stability", () => {
      * **Validates: Requirements 2.3**
      */
     it("should preserve all block IDs when operating on one block", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
       fc.assert(
         fc.property(
           fc.integer({ min: 2, max: 5 }), // Number of blocks

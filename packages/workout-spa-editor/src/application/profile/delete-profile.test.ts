@@ -6,18 +6,22 @@ import { makeProfile, seedProfile } from "./test-fixtures";
 
 describe("deleteProfile", () => {
   it("should remove the profile and clears the active id when it matched", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     await seedProfile(persistence, profile);
     await persistence.profiles.setActiveId(profile.id);
 
+    // Act
     await deleteProfile(persistence, profile.id);
 
+    // Assert
     expect(await persistence.profiles.getById(profile.id)).toBeUndefined();
     expect(await persistence.profiles.getActiveId()).toBeNull();
   });
 
   it("should preserve a non-matching active id", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     const a = makeProfile({ id: "00000000-0000-4000-8000-0000000000e1" });
     const b = makeProfile({ id: "00000000-0000-4000-8000-0000000000e2" });
@@ -25,30 +29,34 @@ describe("deleteProfile", () => {
     await seedProfile(persistence, b);
     await persistence.profiles.setActiveId(a.id);
 
+    // Act
     await deleteProfile(persistence, b.id);
 
+    // Assert
     expect(await persistence.profiles.getActiveId()).toBe(a.id);
     expect(await persistence.profiles.getById(b.id)).toBeUndefined();
   });
 
   it("should roll back the delete when setActiveId rejects (transaction atomicity)", async () => {
+    // Arrange
     const persistence = createInMemoryPersistence();
     const profile = makeProfile();
     await seedProfile(persistence, profile);
     await persistence.profiles.setActiveId(profile.id);
-
     const realSetActiveId = persistence.profiles.setActiveId;
     let invocations = 0;
+
+    // Act
     persistence.profiles.setActiveId = (id) => {
       invocations += 1;
       if (invocations === 1) return Promise.reject(new Error("simulated"));
       return realSetActiveId(id);
     };
 
+    // Assert
     await expect(deleteProfile(persistence, profile.id)).rejects.toThrow(
       "simulated"
     );
-
     expect(await persistence.profiles.getById(profile.id)).toEqual(profile);
     expect(await persistence.profiles.getActiveId()).toBe(profile.id);
   });
