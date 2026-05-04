@@ -5,10 +5,14 @@
  * toggle. The toggle is gated on TWO conditions: the row is currently
  * `linked`, AND the discovered Train2Go bridge advertises
  * `read:training-zones`. Older bridges never see the control.
+ *
+ * The conflict dialog itself lives at app root via
+ * `Train2GoZonesSyncProvider` so its visibility is decoupled from the
+ * Profile Manager being open — clicking sync from the calendar header
+ * still surfaces the dialog.
  */
 import { useTrain2GoSupportsZones } from "../../../../hooks/use-train2go-supports-zones";
 import type { Profile } from "../../../../types/profile";
-import { ZonesConflictDialog } from "../../ZonesConflictDialog/ZonesConflictDialog";
 import { RowInfo } from "./RowInfo";
 import { SyncZonesToggle } from "./SyncZonesToggle";
 import type { SourceMeta } from "./use-linked-account-row";
@@ -22,13 +26,8 @@ export function LinkedAccountRow({
   sourceMeta: SourceMeta;
 }) {
   const linked = profile.linkedAccounts.find((a) => a.source === sourceMeta.id);
-  const {
-    busy,
-    handleConnect,
-    handleDisconnect,
-    handleToggleSyncZones,
-    zonesSync,
-  } = useLinkedAccountRow(profile, sourceMeta);
+  const { busy, handleConnect, handleDisconnect, handleToggleSyncZones } =
+    useLinkedAccountRow(profile, sourceMeta);
   const supportsZones = useTrain2GoSupportsZones();
 
   return (
@@ -65,12 +64,6 @@ export function LinkedAccountRow({
           onChange={handleToggleSyncZones}
         />
       ) : null}
-      <ZonesConflictDialog
-        open={zonesSync.pending !== null}
-        conflicts={zonesSync.pending?.conflicts ?? []}
-        onConfirm={zonesSync.confirmDecisions}
-        onCancel={zonesSync.cancel}
-      />
     </div>
   );
 }

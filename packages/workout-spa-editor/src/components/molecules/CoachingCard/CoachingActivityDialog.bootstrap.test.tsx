@@ -21,6 +21,7 @@ import { CoachingRegistryBootstrap } from "../../../contexts/coaching-registry-b
 import { useCoachingSourceFactories } from "../../../contexts/coaching-registry-context";
 import { PersistenceProvider } from "../../../contexts/persistence-context";
 import { ToastContextProvider } from "../../../contexts/ToastContext";
+import { Train2GoZonesSyncProvider } from "../../../contexts/train2go-zones-sync-context";
 import { useCoachingActivities } from "../../../hooks/use-coaching-activities";
 import { createInMemoryPersistence } from "../../../test-utils/in-memory-persistence";
 import type { CoachingActivity } from "../../../types/coaching-activity";
@@ -78,14 +79,16 @@ describe("CoachingActivityDialog (bootstrap-real smoke)", () => {
     render(
       <PersistenceProvider persistence={createInMemoryPersistence()}>
         <ToastContextProvider>
-          <CoachingRegistryBootstrap>
-            <TestProbe onFactoryCount={(n) => (factoryCount = n)} />
-            <CoachingActivityDialog
-              activity={baseActivity}
-              onClose={vi.fn()}
-              expandActivity={vi.fn()}
-            />
-          </CoachingRegistryBootstrap>
+          <Train2GoZonesSyncProvider>
+            <CoachingRegistryBootstrap>
+              <TestProbe onFactoryCount={(n) => (factoryCount = n)} />
+              <CoachingActivityDialog
+                activity={baseActivity}
+                onClose={vi.fn()}
+                expandActivity={vi.fn()}
+              />
+            </CoachingRegistryBootstrap>
+          </Train2GoZonesSyncProvider>
         </ToastContextProvider>
       </PersistenceProvider>
     );

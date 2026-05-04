@@ -87,6 +87,5 @@ export const useLinkedAccountRow = (
     handleConnect,
     handleDisconnect,
     handleToggleSyncZones,
-    zonesSync: t2gSource.zonesSync,
   };
 };
