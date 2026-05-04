@@ -60,6 +60,7 @@ When `payload.hrZones.<sport>` (Specific) OR `payload.hrZones.generic` (Generic 
 The `syncZones` use case SHALL detect band-level conflicts independently for each Z-band of each `<sport>.{heartRateZones, powerZones, paceZones}` table. A conflict is emitted as a separate `ConflictItem` per band (and per bound, e.g., one row for `cycling.heartRateZones.z2.minBpm` and a separate row for `cycling.heartRateZones.z2.maxBpm` when both differ).
 
 **Equality semantics (load-bearing):** the conflict-detection comparison operates on the ROUNDED Kaiord-domain value, NOT the raw bridge-domain value. Specifically:
+
 - HR bands: integer bpm vs integer bpm.
 - Power bands: integer percent vs integer percent (after the watts→% rounding per D-FB6, using T2G's `z4Upper` as divisor on both sides).
 - Pace bands: integer seconds vs integer seconds (after the `min*60+sec` conversion per D-FB7).
@@ -211,18 +212,18 @@ The `commitConflictResolution(profileId, decisions, repo, transportPayload): Pro
 
 - **GIVEN** the profile pre-sync has `sportZones.cycling.heartRateZones.zones`, with conflicts and decisions per the table below (single source of truth — every cell is mechanically encodable in `it.each`):
 
-  | Band | bound  | persisted | T2G  | differs? | user decision |
-  | ---- | ------ | --------- | ---- | -------- | ------------- |
-  | Z1   | minBpm | 100       | 107  | yes      | accept        |
-  | Z1   | maxBpm | 130       | 133  | yes      | accept        |
-  | Z2   | minBpm | 131       | 134  | yes      | reject        |
-  | Z2   | maxBpm | 145       | 147  | yes      | reject        |
-  | Z3   | minBpm | 146       | 148  | yes      | reject        |
-  | Z3   | maxBpm | 160       | 160  | no       | n/a           |
-  | Z4   | minBpm | 161       | 161  | no       | n/a           |
-  | Z4   | maxBpm | 170       | 174  | yes      | accept        |
-  | Z5   | minBpm | 171       | 175  | yes      | accept        |
-  | Z5   | maxBpm | 187       | 187  | no       | n/a           |
+  | Band | bound  | persisted | T2G | differs? | user decision |
+  | ---- | ------ | --------- | --- | -------- | ------------- |
+  | Z1   | minBpm | 100       | 107 | yes      | accept        |
+  | Z1   | maxBpm | 130       | 133 | yes      | accept        |
+  | Z2   | minBpm | 131       | 134 | yes      | reject        |
+  | Z2   | maxBpm | 145       | 147 | yes      | reject        |
+  | Z3   | minBpm | 146       | 148 | yes      | reject        |
+  | Z3   | maxBpm | 160       | 160 | no       | n/a           |
+  | Z4   | minBpm | 161       | 161 | no       | n/a           |
+  | Z4   | maxBpm | 170       | 174 | yes      | accept        |
+  | Z5   | minBpm | 171       | 175 | yes      | accept        |
+  | Z5   | maxBpm | 187       | 187 | no       | n/a           |
 
 - **AND** `syncZones` therefore emits 7 conflict rows (the 7 rows where `differs? = yes`); `n/a` rows are NOT in the conflict set
 - **AND** the user accept set is the 4 rows marked `accept` and the reject set is the 3 rows marked `reject`

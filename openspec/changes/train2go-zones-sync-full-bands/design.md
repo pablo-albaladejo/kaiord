@@ -41,19 +41,23 @@ This change is a **mapper extension on top of the shipped capability**, not a re
 ## Conventions
 
 **Capitalization (used throughout this change):**
+
 - **Specific** / **Generic** (capitalized) — refers to T2G's UI block names (proper-noun usage; e.g., "the Specific block", "the Generic Karvonen-derived block").
 - _specific_ / _generic_ (lowercase) — adjective usage in prose (e.g., "this sport-specific override", "the generic case").
 - `specific` / `generic` (lowercase, code-style) — payload key names; e.g., `payload.hrZones.generic`.
 
 **Format:**
+
 - `Z1-Z5` always uses ASCII hyphen `-`, never en-dash.
 - `FieldKey` (PascalCase) is the TypeScript type name; "field key" (two words, lowercase) is the conceptual noun in prose.
 
 **Acronyms:**
+
 - The DOM field is `name="imc"` (lowercase, matching T2G's HTML form name); the user-facing acronym is `IMC` (uppercase, matching the medical convention for "Índice de Masa Corporal" / Body Mass Index). Code-block forbidden-set entries use the DOM-side lowercase form (`"imc"`); prose enumeration in `proposal.md` and `store-listing.md` uses the uppercase acronym (`IMC`).
 - `FTP`, `LTHR`, `CSS`, `HR`, `SPA`, `CWS`, `T2G` are always uppercase (acronyms in code-comments, prose, and tests).
 
 **Function-length cap (per the project's `CLAUDE.md` at the repo root, "Code Style" section):**
+
 - ≤40 lines per function for non-component code (mappers, helpers, parsers).
 - ≤60 lines per function for React component bodies.
 - Tests are exempt.
@@ -83,6 +87,7 @@ For each sport `s ∈ { cycling, running, swimming }`, the mapper's HR-band look
 **Naming pun (load-bearing, called out for reviewers):** the payload key `payload.paces.cycling` carries **WATTS**, not pace. T2G's HTML organises both pace bands (running/swimming, in min:sec) and the cycling power table under the same `paces` form (their internal naming) keyed by `sport_id`. Kaiord's bridge intentionally preserves T2G's form-key naming so the parser stays a thin shim — the 0-indexed `z3_upper` DOM names map uniformly across all three sports without per-sport branching at the bridge layer. The semantic flip from "pace" → "power" happens in one place, the SPA mapper, where `payload.paces.cycling` is fed into `powerZones`. Renaming `payload.paces.cycling` to `payload.power.cycling` is OUT OF SCOPE here; revisit when adding a non-T2G power source where the symmetry no longer holds.
 
 To make the units self-describing in tests and to prevent shape drift, each block carries an implicit unit by its location:
+
 - `payload.paces.cycling.zN.{lower,upper}` — `number` (watts)
 - `payload.paces.{running,swimming}.zN.{lower,upper}` — `{ min: number, sec: number }` (min:sec/km or /100m)
 - `payload.hrZones.*.zN.{lower,upper}` — `number` (bpm)
@@ -137,13 +142,14 @@ A test (`sync-zones.test.ts` 4.7q) asserts: GIVEN a profile with `cycling.powerZ
 
 Conflict detection compares each Z-band's `{ minBpm, maxBpm }` (or power / pace equivalents) against the persisted profile's same-zone band. Three states per band:
 
-| Persisted band state             | Action                                                                       |
-| -------------------------------- | ---------------------------------------------------------------------------- |
-| Empty (`zones=[]` or zone absent) | Write the full T2G array silently and include each band in `applied`.         |
-| Same as T2G                      | No-op (the band's row is omitted from `conflicts`).                          |
-| Different from T2G               | Include in `conflicts` (NOT written by `syncZones`).                         |
+| Persisted band state              | Action                                                                |
+| --------------------------------- | --------------------------------------------------------------------- |
+| Empty (`zones=[]` or zone absent) | Write the full T2G array silently and include each band in `applied`. |
+| Same as T2G                       | No-op (the band's row is omitted from `conflicts`).                   |
+| Different from T2G                | Include in `conflicts` (NOT written by `syncZones`).                  |
 
 `commitConflictResolution` then merges per the user's per-row decisions:
+
 - If ANY band of `{ heartRateZones | powerZones | paceZones }.<sport>` is accepted, the full T2G array is written (with the user's pre-sync values restored for rejected bands).
 - If ALL bands of that sport's table are rejected, no write happens.
 
@@ -163,6 +169,7 @@ Conflict detection compares each Z-band's `{ minBpm, maxBpm }` (or power / pace 
 ```
 
 The static label map in `field-labels.ts` gains entries like:
+
 ```ts
 "cycling.heartRateZones.z2.maxBpm": "Cycling HR Z2 max",
 "cycling.powerZones.z4.maxPercent": "Cycling Power Z4 max",
@@ -195,8 +202,9 @@ Verified by tasks.md task 4.7t (unit test against the render helper at `src/lib/
 The existing `paceZone.minPace` / `maxPace` is `number ≥ 0` with a `unit: "min_per_km" | "min_per_100m"` discriminator. The mapper converts T2G's `{ min, sec }` to integer seconds per the unit (`min * 60 + sec`), the same conversion used for the threshold scalars in the original change.
 
 **Inversion rule (load-bearing):** T2G's `lower` is the SLOWER edge of a pace band (larger seconds-per-km — e.g., `{ min: 4, sec: 44 }` → `284 s/km`) and `upper` is the FASTER edge (smaller seconds-per-km — e.g., `{ min: 4, sec: 10 }` → `250 s/km`). This is the natural T2G HTML convention. Kaiord's `paceZoneSchema` follows the opposite numeric convention: `minPace` is the smaller numeric (faster), `maxPace` is the larger numeric (slower). The mapper therefore assigns:
-- `minPace = secondsOf(payload.<sport>.zN.upper)`  (FASTER edge)
-- `maxPace = secondsOf(payload.<sport>.zN.lower)`  (SLOWER edge)
+
+- `minPace = secondsOf(payload.<sport>.zN.upper)` (FASTER edge)
+- `maxPace = secondsOf(payload.<sport>.zN.lower)` (SLOWER edge)
 
 This is NOT an `if (a > b) swap` — the assignment is unconditional. The bridge intentionally preserves T2G's `lower`/`upper` naming (matches the HTML form names). The semantic flip from "edge label" (lower-pace = slower) to "magnitude label" (minPace = smaller seconds) happens in one place, the SPA mapper, and is asserted by the spec scenario "Pace minPace/maxPace invariant holds across all bands".
 
@@ -210,14 +218,14 @@ The redaction key-walk test re-asserts the forbidden-set is unchanged after this
 
 ## Risks / Trade-offs
 
-| Risk                                                                                                 | Mitigation                                                                                                                                                                                                                                                                                                              |
-| ---------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `FieldKey` union grows from 7 to ~50+ entries — schema bloat, slower autocomplete, larger label map. | Acceptable: TypeScript handles 100+-member string unions without measurable compile cost. Label map is generated by sport × kind × band cross-product (helper at the top of `field-labels.ts` keeps the source size linear, not quadratic).                                                                              |
+| Risk                                                                                                 | Mitigation                                                                                                                                                                                                                                                                                                                |
+| ---------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FieldKey` union grows from 7 to ~50+ entries — schema bloat, slower autocomplete, larger label map. | Acceptable: TypeScript handles 100+-member string unions without measurable compile cost. Label map is generated by sport × kind × band cross-product (helper at the top of `field-labels.ts` keeps the source size linear, not quadratic).                                                                               |
 | Conflict dialog with 50 potential rows is overwhelming.                                              | v1 ships raw per-band rows. Rows are grouped visually by sport-kind in the dialog (insertion order respects this). Heuristic collapse ("all Z1-Z5 of cycling.heartRateZones changed → single 'Accept cycling HR table' row") is a documented follow-up, NOT in scope. Cancel-dialog still works (silent fills committed). |
-| User toggles T2G's `Auto-calculate` switch on/off → Generic bands recompute from changed maxHR.       | Same staleness window as today's threshold sync (10 min auto-sync gate + manual sync button). The conflict dialog will surface every recomputed band as a row on next sync, giving the user explicit accept/reject — not silent.                                                                                       |
-| Cycling Specific bands today equal Generic bands (T2G default for one configured sport).            | Mapper picks Specific anyway per D-FB1; result is identical numbers — no conflict surfaces, profile gets the bands. If the coach later differentiates cycling from generic, the Specific override flows through cleanly.                                                                                              |
-| Power-zone % conversion rounds → 1-2W drift between displayed and Kaiord-stored bands.               | Round-trip tolerance is the same one Kaiord already accepts for power (`±1W or ±1% FTP` per `docs/krd-format.md` round-trip tolerances). Test with FTP=268, Z4 240-268 W → `90-100%` after rounding → `~241-268 W` displayed back; within tolerance.                                                                  |
-| User's Profile Manager already has manually-entered bands → entire table flagged as conflict.        | Per-band granularity exposes this clearly: each band is its own row. User can accept the coach's update or keep their manual values per band. The merge in `commitConflictResolution` (D-FB4) ensures rejected bands keep their pre-sync values.                                                                       |
+| User toggles T2G's `Auto-calculate` switch on/off → Generic bands recompute from changed maxHR.      | Same staleness window as today's threshold sync (10 min auto-sync gate + manual sync button). The conflict dialog will surface every recomputed band as a row on next sync, giving the user explicit accept/reject — not silent.                                                                                          |
+| Cycling Specific bands today equal Generic bands (T2G default for one configured sport).             | Mapper picks Specific anyway per D-FB1; result is identical numbers — no conflict surfaces, profile gets the bands. If the coach later differentiates cycling from generic, the Specific override flows through cleanly.                                                                                                  |
+| Power-zone % conversion rounds → 1-2W drift between displayed and Kaiord-stored bands.               | Round-trip tolerance is the same one Kaiord already accepts for power (`±1W or ±1% FTP` per `docs/krd-format.md` round-trip tolerances). Test with FTP=268, Z4 240-268 W → `90-100%` after rounding → `~241-268 W` displayed back; within tolerance.                                                                      |
+| User's Profile Manager already has manually-entered bands → entire table flagged as conflict.        | Per-band granularity exposes this clearly: each band is its own row. User can accept the coach's update or keep their manual values per band. The merge in `commitConflictResolution` (D-FB4) ensures rejected bands keep their pre-sync values.                                                                          |
 | Backwards compatibility for downstream callers reading `payload.hrZones.cycling.z4Upper`.            | Parser keeps emitting the convenience field (D-FB2). Bridge unit tests pin both the new shape AND the legacy field to prevent regressions.                                                                                                                                                                                |
 
 ## Migration Plan
@@ -225,6 +233,7 @@ The redaction key-walk test re-asserts the forbidden-set is unchanged after this
 This change is **forward-compatible** at the data layer — no Dexie schema bump, no profile-version bump. New writes populate `sportZones.<sport>.{heartRateZones,powerZones,paceZones}.zones` in slots that were already optional and present (just empty arrays for users who never edited them). Older builds reading a profile written by this change see populated arrays and render them; no breakage.
 
 Bridge upgrade order:
+
 1. **PR 1** ships the parser shape change. Older SPA builds keep reading `z4Upper` (still emitted); they ignore the new band fields.
 2. **PR 2** ships the SPA mapper extension. New SPA builds read the band fields when present, fall back to the legacy `z4Upper` only path if the user is on an older bridge that still emits the original shape (the parser is forward-compatible: new shape includes `z4Upper`, but if the bridge is ancient and only emits `z4Upper`, the SPA mapper handles that gracefully — the band-array writes simply don't fire for that sport-kind).
 3. **PR 3** ships the FieldKey + label-map + dialog test extension.
