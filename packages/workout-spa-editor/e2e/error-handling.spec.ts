@@ -1,4 +1,3 @@
-import { expandFileUpload } from "./helpers/expand-file-upload";
 /**
  * E2E Tests: Error Handling and Recovery
  *
@@ -8,8 +7,8 @@ import { expandFileUpload } from "./helpers/expand-file-upload";
  * - Requirement 36.4: Specific error messages for file parsing
  * - Requirement 36.5: Error recovery mechanisms
  */
-
 import { expect, test } from "./fixtures/base";
+import { expandFileUpload } from "./helpers/expand-file-upload";
 
 test.describe("Error Handling", () => {
   test.beforeEach(async ({ page }) => {
@@ -214,7 +213,7 @@ test.describe("Error Recovery", () => {
   test("should restore previous state after import error", async ({ page }) => {
     // Arrange - Load valid workout first
     await expandFileUpload(page);
-    let fileInput = page.getByTestId("file-upload-input");
+    const fileInput = page.getByTestId("file-upload-input");
     await fileInput.setInputFiles({
       name: "valid.krd",
       mimeType: "application/json",

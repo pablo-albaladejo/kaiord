@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import type { Logger } from "./logger";
 
 describe("Logger", () => {

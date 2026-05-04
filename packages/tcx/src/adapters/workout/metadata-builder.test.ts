@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import type { KRD } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
+
 import { addKaiordMetadata } from "./metadata-builder";
 
 const createKrd = (overrides: Partial<KRD["metadata"]> = {}): KRD => ({

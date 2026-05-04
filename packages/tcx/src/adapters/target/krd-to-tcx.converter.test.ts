@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import type { Target } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
+
 import { convertKrdTargetToTcx } from "./krd-to-tcx.converter";
 
 describe("convertKrdTargetToTcx", () => {

@@ -1,6 +1,7 @@
-import { expandFileUpload } from "./helpers/expand-file-upload";
-import { expect, test } from "./fixtures/base";
 import { readFileSync } from "fs";
+
+import { expect, test } from "./fixtures/base";
+import { expandFileUpload } from "./helpers/expand-file-upload";
 
 /**
  * Critical Path: Load Workout → View → Edit Step → Save

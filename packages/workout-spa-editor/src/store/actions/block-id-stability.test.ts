@@ -10,6 +10,7 @@
 import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
+
 import type { KRD } from "../../types/krd";
 import { isRepetitionBlock } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";

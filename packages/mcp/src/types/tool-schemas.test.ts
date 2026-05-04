@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { BINARY_FORMATS, formatSchema, isBinaryFormat } from "./tool-schemas";
 
 describe("formatSchema", () => {

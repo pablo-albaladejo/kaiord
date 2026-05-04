@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { formatError, formatSuccess } from "./error-formatter";
 
 describe("formatSuccess", () => {

@@ -1,5 +1,5 @@
-import { expandFileUpload } from "./helpers/expand-file-upload";
 import { expect, test } from "./fixtures/base";
+import { expandFileUpload } from "./helpers/expand-file-upload";
 
 /**
  * E2E Tests: Repetition Blocks

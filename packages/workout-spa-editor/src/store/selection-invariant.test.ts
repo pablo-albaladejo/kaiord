@@ -7,7 +7,7 @@
 
 import { afterEach, describe, expect, it } from "vitest";
 
-import type { KRD, RepetitionBlock, Workout } from "../types/krd";
+import type { KRD, RepetitionBlock } from "../types/krd";
 import { useWorkoutStore } from "./workout-store";
 
 const step = (stepIndex: number) => ({

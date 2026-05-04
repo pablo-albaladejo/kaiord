@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { convertFitToKrdEvent } from "./fit-to-krd-event.converter";
 import {
   convertKrdToFitEvent,

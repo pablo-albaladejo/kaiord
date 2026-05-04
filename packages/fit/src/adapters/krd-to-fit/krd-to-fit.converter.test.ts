@@ -1,12 +1,13 @@
-import { describe, expect, it, vi } from "vitest";
 import type { KRD } from "@kaiord/core";
-import { RepetitionBlock, WorkoutStep } from "@kaiord/core";
+import type { RepetitionBlock, WorkoutStep } from "@kaiord/core";
 import { FitParsingError } from "@kaiord/core";
 import { buildKRD } from "@kaiord/core/test-utils";
 import { buildKRDMetadata } from "@kaiord/core/test-utils";
 import { buildWorkoutStep } from "@kaiord/core/test-utils";
 import { buildWorkout } from "@kaiord/core/test-utils";
 import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it, vi } from "vitest";
+
 import { fitDurationTypeSchema } from "../schemas/fit-duration";
 import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
 import { FIT_MESSAGE_NUMBERS } from "../shared/message-numbers";

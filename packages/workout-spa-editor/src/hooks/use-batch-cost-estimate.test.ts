@@ -1,9 +1,9 @@
-import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react";
+import { describe, expect, it } from "vitest";
 
-import { useBatchCostEstimate } from "./use-batch-cost-estimate";
 import type { LlmProviderConfig } from "../store/ai-store-types";
 import type { WorkoutRecord } from "../types/calendar-record";
+import { useBatchCostEstimate } from "./use-batch-cost-estimate";
 
 const makeWorkout = (description: string): WorkoutRecord =>
   ({

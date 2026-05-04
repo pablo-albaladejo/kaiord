@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { renderWithProviders, screen } from "../../test-utils";
 import type { RepetitionBlock, WorkoutStep } from "../../types/krd";
 import { RepetitionBlockHeaderRight } from "./RepetitionBlockCard/RepetitionBlockHeaderRight";

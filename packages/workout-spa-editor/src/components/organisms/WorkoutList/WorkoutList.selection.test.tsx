@@ -12,6 +12,7 @@
 import { render, screen } from "@testing-library/react";
 import { userEvent } from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+
 import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
 import { WorkoutList } from "./WorkoutList";
 

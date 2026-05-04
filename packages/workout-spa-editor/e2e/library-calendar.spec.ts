@@ -11,9 +11,9 @@ import {
   getWeekDates,
   getWeekId,
   makeTemplate,
+  makeWorkout,
   seedTemplates,
   seedWorkouts,
-  makeWorkout,
 } from "./helpers/seed-dexie";
 
 test.describe("Library-Calendar Integration", () => {

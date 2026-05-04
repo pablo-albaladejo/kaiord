@@ -7,6 +7,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { describe, expect, it, vi } from "vitest";
+
 import type { Profile } from "../../../types/profile";
 import {
   DEFAULT_HEART_RATE_ZONES,

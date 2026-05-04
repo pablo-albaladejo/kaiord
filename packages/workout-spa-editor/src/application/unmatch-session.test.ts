@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import { createInMemorySessionMatchRepository } from "../test-utils/in-memory-session-match-repository";
-import { CrossProfileMatchError } from "../types/session-match-errors";
 import type { SessionMatch } from "../types/session-match";
+import { CrossProfileMatchError } from "../types/session-match-errors";
 import { unmatchSession } from "./unmatch-session";
 
 const makeMatch = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({

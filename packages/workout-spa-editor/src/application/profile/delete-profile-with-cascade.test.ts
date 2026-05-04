@@ -10,12 +10,12 @@ import { createInMemoryCoachingSyncStateRepository } from "../../test-utils/in-m
 import { createInMemorySessionMatchRepository } from "../../test-utils/in-memory-session-match-repository";
 import { createInMemoryUserPreferencesRepository } from "../../test-utils/in-memory-user-preferences-repository";
 import { createInMemoryWorkoutRepository } from "../../test-utils/in-memory-workout-repository";
-import type { DeleteProfileWithCascadeDeps } from "./delete-profile-with-cascade";
 import type { WorkoutRecord } from "../../types/calendar-record";
 import {
   buildCoachingActivityId,
   type CoachingActivityRecord,
 } from "../../types/coaching-activity-record";
+import type { DeleteProfileWithCascadeDeps } from "./delete-profile-with-cascade";
 import { deleteProfileWithCascade } from "./delete-profile-with-cascade";
 
 const NOW = "2026-04-28T10:00:00.000Z";

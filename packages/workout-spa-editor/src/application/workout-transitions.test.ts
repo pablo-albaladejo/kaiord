@@ -10,7 +10,6 @@ import { describe, expect, it } from "vitest";
 import type { AiMeta, WorkoutRaw } from "../types/calendar-fragments";
 import type { WorkoutRecord } from "../types/calendar-record";
 import type { KRD } from "../types/schemas";
-
 import { detectStale } from "./stale-detection";
 import { hasConflict, keepUserVersion } from "./stale-resolution";
 import {

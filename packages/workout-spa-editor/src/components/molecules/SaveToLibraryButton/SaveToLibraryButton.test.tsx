@@ -4,8 +4,9 @@
  * Tests for the SaveToLibraryButton component.
  */
 
-import { KRD } from "@kaiord/core";
+import type { KRD } from "@kaiord/core";
 import { describe, expect, it } from "vitest";
+
 import { renderWithProviders, screen, userEvent } from "../../../test-utils";
 import { SaveToLibraryButton } from "./SaveToLibraryButton";
 

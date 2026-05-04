@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import type { Duration } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
+
 import { buildFitDurationData } from "../../tests/fixtures/fit-duration.fixtures";
 import { convertFitDuration } from "../duration/duration.converter";
 

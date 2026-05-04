@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
-import { createInMemoryUserPreferencesRepository } from "../test-utils/in-memory-user-preferences-repository";
-import { ProfileNotFoundError } from "../types/session-match-errors";
 import type { ProfileRepository } from "../ports/persistence-port";
+import { createInMemoryUserPreferencesRepository } from "../test-utils/in-memory-user-preferences-repository";
 import type { Profile } from "../types/profile";
+import { ProfileNotFoundError } from "../types/session-match-errors";
 import { setCalendarDensity } from "./set-calendar-density";
 
 const stubProfile = (overrides: Partial<Profile> = {}): Profile => ({

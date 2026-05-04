@@ -1,7 +1,8 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
-import { createGarminHttpClient } from "./garmin-http-client";
-import type { TokenReader } from "../token/token-manager.types";
 import type { Logger } from "@kaiord/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
+import type { TokenReader } from "../token/token-manager.types";
+import { createGarminHttpClient } from "./garmin-http-client";
 
 const mockLogger: Logger = {
   debug: vi.fn(),

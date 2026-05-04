@@ -1,11 +1,12 @@
-import { XMLParser } from "fast-xml-parser";
-import { describe, expect, it } from "vitest";
 import {
   buildKRD,
   buildWorkoutStep,
   createMockLogger,
   loadZwoFixture,
 } from "@kaiord/core/test-utils";
+import { XMLParser } from "fast-xml-parser";
+import { describe, expect, it } from "vitest";
+
 import { convertKRDToZwift } from "./krd-to-zwift.converter";
 import { convertZwiftToKRD } from "./zwift-to-krd.converter";
 

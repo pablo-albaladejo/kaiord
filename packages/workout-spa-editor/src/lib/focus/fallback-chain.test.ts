@@ -17,12 +17,12 @@
 
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { resolveFocusElement } from "./fallback-chain";
 import {
   focusEmptyState,
   focusItem,
 } from "../../store/focus/focus-target.types";
 import { asItemId } from "../../store/providers/item-id";
+import { resolveFocusElement } from "./fallback-chain";
 
 // Elements must be attached to the document tree because the resolver
 // rejects detached nodes — a detached node cannot accept focus anyway.

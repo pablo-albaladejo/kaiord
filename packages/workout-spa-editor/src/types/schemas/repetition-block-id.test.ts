@@ -10,6 +10,7 @@
 import type { RepetitionBlock } from "@kaiord/core";
 import * as fc from "fast-check";
 import { describe, expect, it } from "vitest";
+
 import { generateBlockId } from "../../utils/id-generation";
 
 /**
@@ -119,7 +120,7 @@ describe("Repetition Block ID Uniqueness", () => {
         fc.property(
           fc.integer({ min: 2, max: 10 }), // Number of blocks
           fc.integer({ min: 0, max: 5 }), // Number of individual steps
-          (blockCount, stepCount) => {
+          (blockCount) => {
             // Arrange: Create workout with blocks and steps
             const blocks: Array<RepetitionBlock> = [];
             for (let i = 0; i < blockCount; i++) {

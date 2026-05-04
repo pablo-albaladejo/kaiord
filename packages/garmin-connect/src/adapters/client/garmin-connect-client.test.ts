@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import type { Logger, TokenStore } from "@kaiord/core";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { OAuth1Token, OAuth2Token } from "../http/types";
 
 vi.mock("../http/cookie-fetch", () => ({
@@ -20,10 +21,10 @@ vi.mock("../http/sso-oauth", () => ({
   exchangeOAuth2: vi.fn(),
 }));
 
-import { createGarminConnectClient } from "./garmin-connect-client";
 import { garminSso } from "../http/garmin-sso";
 import { fetchOAuthConsumer } from "../http/oauth-consumer";
 import { exchangeOAuth2 } from "../http/sso-oauth";
+import { createGarminConnectClient } from "./garmin-connect-client";
 
 const OAUTH1: OAuth1Token = {
   oauth_token: "tok_1",

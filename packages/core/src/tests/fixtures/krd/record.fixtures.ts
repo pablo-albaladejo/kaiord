@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
+
 import type { KRDRecord } from "../../../domain/schemas/krd";
 
 export const buildKRDRecord = new Factory<KRDRecord>()

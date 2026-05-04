@@ -1,8 +1,8 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
-import type { CoachingActivity } from "../../types/coaching-activity";
 import type { WorkoutRecord } from "../../types/calendar-record";
+import type { CoachingActivity } from "../../types/coaching-activity";
 import { CalendarWeekGrid } from "./CalendarWeekGrid";
 
 const DAYS = [

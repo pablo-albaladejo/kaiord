@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest";
 import type { WorkoutStep } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
+
 import {
+  convertCadenceToTcx,
   convertHeartRateToTcx,
   convertPaceToTcx,
-  convertCadenceToTcx,
   convertTargetToTcx,
 } from "./target-to-tcx.converter";
 

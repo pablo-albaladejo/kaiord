@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
 import type { KRD, Logger } from "@kaiord/core";
+import { describe, expect, it, vi } from "vitest";
+
 import { convertKRDToTcx } from "./tcx.converter";
 
 const createMockLogger = (): Logger => ({

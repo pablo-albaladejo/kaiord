@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
+
 import type { KRDMetadata } from "../../../domain/schemas/krd";
 
 export const buildKRDMetadata = new Factory<KRDMetadata>()

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { convertStrokeTypeTarget } from "./target-stroke.converter";
+
 import type { FitTargetData } from "./target.types";
+import { convertStrokeTypeTarget } from "./target-stroke.converter";
 
 describe("convertStrokeTypeTarget", () => {
   describe("stroke type target", () => {

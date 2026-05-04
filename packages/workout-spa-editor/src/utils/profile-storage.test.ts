@@ -5,6 +5,7 @@
  */
 
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { Profile } from "../types/profile";
 import {
   clearProfiles,

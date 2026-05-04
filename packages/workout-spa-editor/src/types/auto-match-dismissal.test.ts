@@ -1,8 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  autoMatchDismissalSchema,
   type AutoMatchDismissal,
+  autoMatchDismissalSchema,
 } from "./auto-match-dismissal";
 
 const baseRow = (

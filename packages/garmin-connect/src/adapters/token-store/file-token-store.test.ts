@@ -1,7 +1,9 @@
-import { describe, it, expect, afterEach } from "vitest";
-import { join } from "node:path";
 import { mkdtemp, rm } from "node:fs/promises";
 import { tmpdir } from "node:os";
+import { join } from "node:path";
+
+import { afterEach, describe, expect, it } from "vitest";
+
 import { createFileTokenStore } from "./file-token-store";
 
 describe("createFileTokenStore", () => {

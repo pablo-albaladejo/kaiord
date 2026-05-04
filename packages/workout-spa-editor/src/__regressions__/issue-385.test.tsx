@@ -26,8 +26,8 @@ import { linkAccount } from "../application/coaching/link-account";
 import { createProfile } from "../application/profile/create-profile";
 import { setActiveProfile } from "../application/profile/set-active-profile";
 import {
-  useActiveProfileLive,
   type ActiveProfile,
+  useActiveProfileLive,
 } from "../hooks/use-active-profile-live";
 import { useProfilesLive } from "../hooks/use-profiles-live";
 import type { Profile } from "../types/profile";

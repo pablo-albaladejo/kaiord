@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { convertTcxTarget, type TcxTargetData } from "./tcx-to-krd.converter";
 
 describe("convertTcxTarget (tcx-to-krd)", () => {

@@ -1,5 +1,6 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Logger } from "@kaiord/core";
+import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import type { OAuth1Token, OAuth2Token, OAuthConsumer } from "../http/types";
 
 vi.mock("../http/oauth-consumer", () => ({
@@ -10,9 +11,9 @@ vi.mock("../http/sso-oauth", () => ({
   exchangeOAuth2: vi.fn(),
 }));
 
-import { buildRefreshFn } from "./build-refresh-fn";
 import { fetchOAuthConsumer } from "../http/oauth-consumer";
 import { exchangeOAuth2 } from "../http/sso-oauth";
+import { buildRefreshFn } from "./build-refresh-fn";
 
 const OAUTH1: OAuth1Token = {
   oauth_token: "tok_1",

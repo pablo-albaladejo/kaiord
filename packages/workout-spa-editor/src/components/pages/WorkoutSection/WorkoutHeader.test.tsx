@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { useWorkoutStore } from "../../../store/workout-store";
 import type { KRD, Workout } from "../../../types/krd";
 import { WorkoutHeader } from "./WorkoutHeader";

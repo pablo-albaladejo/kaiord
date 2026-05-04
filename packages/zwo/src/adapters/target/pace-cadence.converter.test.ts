@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
+
 import {
-  convertZwiftPaceTarget,
-  convertZwiftCadenceTarget,
-  convertKrdPaceToZwift,
   convertKrdCadenceToZwift,
+  convertKrdPaceToZwift,
+  convertZwiftCadenceTarget,
+  convertZwiftPaceTarget,
 } from "./pace-cadence.converter";
 
 describe("convertZwiftPaceTarget", () => {

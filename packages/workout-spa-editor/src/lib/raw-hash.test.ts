@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 
 import type { WorkoutRaw } from "../types/calendar-fragments";
-
 import { computeRawHash } from "./raw-hash";
 
 const makeRaw = (overrides: Partial<WorkoutRaw> = {}): WorkoutRaw => ({

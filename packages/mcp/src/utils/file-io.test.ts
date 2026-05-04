@@ -1,8 +1,9 @@
 import { writeFile } from "fs/promises";
-import { join } from "path";
-import { tmpdir } from "os";
 import { mkdtemp, rm } from "fs/promises";
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { tmpdir } from "os";
+import { join } from "path";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+
 import {
   readFileAsBuffer,
   readFileAsText,

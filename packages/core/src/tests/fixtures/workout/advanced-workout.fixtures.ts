@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { Factory } from "rosie";
+
 import type { Workout, WorkoutStep } from "../../../domain/schemas/workout";
 
 export const buildAdvancedWorkoutStep = new Factory<WorkoutStep>()

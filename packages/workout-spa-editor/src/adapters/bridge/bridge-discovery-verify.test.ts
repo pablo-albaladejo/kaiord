@@ -1,7 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 
-import { verifyAnnouncement } from "./bridge-discovery-verify";
 import type { BridgeAnnouncement } from "./bridge-discovery-types";
+import { verifyAnnouncement } from "./bridge-discovery-verify";
 
 vi.mock("./bridge-transport", () => ({
   sendBridgeMessage: vi.fn(),

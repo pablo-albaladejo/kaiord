@@ -6,7 +6,9 @@
 
 import type { KRD } from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { ExportError, downloadWorkout, exportWorkout } from "./export-workout";
+
+import { downloadWorkout, ExportError, exportWorkout } from "./export-workout";
+import type { WorkoutFileFormat } from "./file-format-detector";
 
 describe("exportWorkout", () => {
   const mockKrd: KRD = {
@@ -242,7 +244,7 @@ describe("exportWorkout", () => {
 
     it("should throw ExportError for unsupported format", async () => {
       // Arrange
-      const unsupportedFormat = "pdf" as any;
+      const unsupportedFormat = "pdf" as WorkoutFileFormat;
 
       // Act & Assert
       await expect(exportWorkout(mockKrd, unsupportedFormat)).rejects.toThrow(

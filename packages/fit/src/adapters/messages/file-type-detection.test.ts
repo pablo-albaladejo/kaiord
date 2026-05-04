@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
 import { fileTypeSchema } from "@kaiord/core";
 import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it } from "vitest";
+
 import { fitMessageKeySchema } from "../schemas/fit-message-keys";
 import type { FitMessages } from "../shared/types";
 import { mapMessagesToKRD } from "./messages.mapper";

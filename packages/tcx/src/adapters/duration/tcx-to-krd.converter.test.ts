@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { convertTcxDuration } from "./tcx-to-krd.converter";
 
 describe("convertTcxDuration (tcx-to-krd.converter)", () => {

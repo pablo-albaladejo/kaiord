@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import type { ParsedExecutableStep } from "../schemas/garmin-workout-parse.schema";
 import { mapExecutableStep } from "./executable-step.converter";
 
