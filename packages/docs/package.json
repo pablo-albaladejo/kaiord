@@ -29,7 +29,7 @@
     "typedoc": "^0.28.19",
     "typedoc-plugin-markdown": "^4.11.0",
     "vitepress": "2.0.0-alpha.17",
-    "vitepress-plugin-llms": "^1.12.1",
+    "vitepress-plugin-llms": "^1.12.2",
     "vue": "^3.5.33"
   }
 }
