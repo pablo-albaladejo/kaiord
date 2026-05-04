@@ -1,3 +1,5 @@
+> Completed: 2026-05-04
+
 ## Why
 
 CI currently runs `pnpm -r build` 30+ times on a single PR — once per job (lint, typecheck, build, test×9 packages, test-cli, test-frontend, round-trip×2, e2e-frontend×4 shards, e2e-prod-base), each across two Node versions. The `build` job already uploads `packages/*/dist/` as a `build-artifacts` artifact, but no consumer reads it, so the upload is dead weight today. Fanning the existing artifact out to consumers eliminates redundant rebuilds within a single CI run, capturing most of the wall-clock savings of a Turborepo migration without adding a new build tool.
