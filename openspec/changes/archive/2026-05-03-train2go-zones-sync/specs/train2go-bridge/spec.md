@@ -66,7 +66,7 @@ The bridge content script's `handleFetch` SHALL inspect the upstream `Content-Ty
 
 ## MODIFIED Requirements
 
-### Requirement: Bridge ALLOWED list
+### Requirement: Content script path allowlist
 
 The Train2Go bridge content script's `ALLOWED` list (`packages/train2go-bridge/content.js`) SHALL include exactly the following path/method pairs:
 
@@ -90,7 +90,7 @@ Any path not in the explicit list MUST be rejected with `Blocked: disallowed pat
 - **THEN** the fetch SHALL be rejected with `{ ok: false, error: "Blocked: disallowed path or method" }`
 - **AND** no upstream HTTP request SHALL be made
 
-### Requirement: BRIDGE_MANIFEST capabilities array
+### Requirement: Bridge manifest for protocol discovery
 
 The Train2Go bridge's `BRIDGE_MANIFEST.capabilities` array SHALL include exactly the following capability strings:
 

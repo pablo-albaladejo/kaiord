@@ -1,3 +1,5 @@
+> Completed: 2026-05-03
+
 ## Why
 
 Today the user manually duplicates threshold values (FTP, LTHR, threshold pace, max HR, body weight) from `app.train2go.com/user/details` into Kaiord's Profile Manager → Training Zones. Train2Go is the source of truth — the user's coach configures the zones there — and the duplication is a friction point that surfaced during the bridge-popup-redesign manual e2e (PR #447): even after linking Train2Go and seeing "Connected as Pablo · Coach: Daniel" in the popup, the athlete card stays empty until the user re-types every value by hand.
