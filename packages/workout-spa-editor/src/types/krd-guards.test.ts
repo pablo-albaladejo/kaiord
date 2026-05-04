@@ -16,6 +16,8 @@ describe("krd-guards", () => {
   describe("isRepetitionBlock", () => {
     it("should return true for valid RepetitionBlock", () => {
       // Arrange
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -33,14 +35,22 @@ describe("krd-guards", () => {
       };
 
       // Act
+
+      // Act
+
       const result = isRepetitionBlock(block);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(true);
     });
 
     it("should return false for WorkoutStep", () => {
       // Arrange
+      // Arrange
+
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "time",
@@ -53,14 +63,22 @@ describe("krd-guards", () => {
       };
 
       // Act
+
+      // Act
+
       const result = isRepetitionBlock(step);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(false);
     });
 
     it("should return true for RepetitionBlock with multiple steps", () => {
       // Arrange
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 5,
         steps: [
@@ -88,27 +106,47 @@ describe("krd-guards", () => {
       };
 
       // Act
+
+      // Act
+
       const result = isRepetitionBlock(block);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(true);
     });
 
     it("should return true for RepetitionBlock with empty steps array", () => {
       // Arrange
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 2,
         steps: [],
       };
 
       // Act
+
+      // Act
+
       const result = isRepetitionBlock(block);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(true);
     });
 
     it("should correctly narrow type in conditional", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const item: WorkoutStep | RepetitionBlock = {
         repeatCount: 3,
@@ -138,6 +176,8 @@ describe("krd-guards", () => {
   describe("isWorkoutStep", () => {
     it("should return true for valid WorkoutStep", () => {
       // Arrange
+      // Arrange
+
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "time",
@@ -150,14 +190,22 @@ describe("krd-guards", () => {
       };
 
       // Act
+
+      // Act
+
       const result = isWorkoutStep(step);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(true);
     });
 
     it("should return false for RepetitionBlock", () => {
       // Arrange
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -175,14 +223,22 @@ describe("krd-guards", () => {
       };
 
       // Act
+
+      // Act
+
       const result = isWorkoutStep(block);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(false);
     });
 
     it("should return true for WorkoutStep with all optional fields", () => {
       // Arrange
+      // Arrange
+
       const step: WorkoutStep = {
         stepIndex: 5,
         durationType: "distance",
@@ -197,14 +253,22 @@ describe("krd-guards", () => {
       };
 
       // Act
+
+      // Act
+
       const result = isWorkoutStep(step);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(true);
     });
 
     it("should return true for WorkoutStep with open duration", () => {
       // Arrange
+      // Arrange
+
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "open",
@@ -214,13 +278,25 @@ describe("krd-guards", () => {
       };
 
       // Act
+
+      // Act
+
       const result = isWorkoutStep(step);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(true);
     });
 
     it("should correctly narrow type in conditional", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const item: WorkoutStep | RepetitionBlock = {
         stepIndex: 2,
@@ -248,6 +324,8 @@ describe("krd-guards", () => {
   describe("type guard mutual exclusivity", () => {
     it("should never return true for both guards on same object", () => {
       // Arrange
+      // Arrange
+
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "time",
@@ -256,12 +334,17 @@ describe("krd-guards", () => {
         target: { type: "open" },
       };
 
+      // Act
+
       const block: RepetitionBlock = {
         repeatCount: 2,
         steps: [step],
       };
 
       // Act & Assert
+
+      // Assert
+
       expect(isWorkoutStep(step)).toBe(true);
       expect(isRepetitionBlock(step)).toBe(false);
 
@@ -271,6 +354,8 @@ describe("krd-guards", () => {
 
     it("should handle union type correctly in array", () => {
       // Arrange
+      // Arrange
+
       const items: Array<WorkoutStep | RepetitionBlock> = [
         {
           stepIndex: 0,
@@ -302,9 +387,15 @@ describe("krd-guards", () => {
 
       // Act
       const steps = items.filter(isWorkoutStep);
+
+      // Act
+
       const blocks = items.filter(isRepetitionBlock);
 
       // Assert
+
+      // Assert
+
       expect(steps).toHaveLength(2);
       expect(blocks).toHaveLength(1);
       expect(steps[0].stepIndex).toBe(0);

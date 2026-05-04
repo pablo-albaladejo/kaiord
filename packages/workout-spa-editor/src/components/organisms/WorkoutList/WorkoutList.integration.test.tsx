@@ -28,12 +28,20 @@ describe("WorkoutList - Drag and Drop Integration", () => {
 
   it("should render with DndContext wrapper", () => {
     // Arrange
+    // Arrange
+
     const workout = createMockWorkout(3);
 
     // Act
+
+    // Act
+
     render(<WorkoutList workout={workout} />);
 
     // Assert
+
+    // Assert
+
     expect(
       screen.getByRole("list", { name: "Workout steps" })
     ).toBeInTheDocument();
@@ -44,6 +52,8 @@ describe("WorkoutList - Drag and Drop Integration", () => {
 
   it("should call onStepReorder when drag ends", () => {
     // Arrange
+    // Arrange
+
     const workout = createMockWorkout(3);
     const onStepReorder = vi.fn();
 
@@ -52,7 +62,13 @@ describe("WorkoutList - Drag and Drop Integration", () => {
 
     // Simulate drag end event by calling the handler directly
     // Note: Full drag simulation requires more complex setup with @dnd-kit/testing
+
+    // Act
+
     const list = screen.getByRole("list", { name: "Workout steps" });
+
+    // Assert
+
     expect(list).toBeInTheDocument();
 
     // Assert - component renders correctly with drag-and-drop enabled
@@ -61,18 +77,28 @@ describe("WorkoutList - Drag and Drop Integration", () => {
 
   it("should render sortable items with correct IDs", () => {
     // Arrange
+    // Arrange
+
     const workout = createMockWorkout(3);
 
     // Act
     const { container } = render(<WorkoutList workout={workout} />);
 
     // Assert - check that sortable items are rendered
+
+    // Act
+
     const stepCards = container.querySelectorAll('[data-testid="step-card"]');
+
+    // Assert
+
     expect(stepCards.length).toBe(3);
   });
 
   it("should handle empty workout", () => {
     // Arrange
+    // Arrange
+
     const workout: Workout = {
       name: "Empty Workout",
       sport: "cycling",
@@ -80,9 +106,15 @@ describe("WorkoutList - Drag and Drop Integration", () => {
     };
 
     // Act
+
+    // Act
+
     render(<WorkoutList workout={workout} />);
 
     // Assert
+
+    // Assert
+
     expect(
       screen.getByRole("list", { name: "Workout steps" })
     ).toBeInTheDocument();
@@ -91,6 +123,8 @@ describe("WorkoutList - Drag and Drop Integration", () => {
 
   it("should handle workout with repetition blocks", () => {
     // Arrange
+    // Arrange
+
     const workout: Workout = {
       name: "Test Workout",
       sport: "cycling",
@@ -126,9 +160,15 @@ describe("WorkoutList - Drag and Drop Integration", () => {
     };
 
     // Act
+
+    // Act
+
     render(<WorkoutList workout={workout} />);
 
     // Assert
+
+    // Assert
+
     expect(screen.getByText("Step 1")).toBeInTheDocument();
     expect(screen.getByText("3x")).toBeInTheDocument();
     expect(screen.getByText("Repeat Block")).toBeInTheDocument();
@@ -136,13 +176,21 @@ describe("WorkoutList - Drag and Drop Integration", () => {
 
   it("should maintain accessibility during drag operations", () => {
     // Arrange
+    // Arrange
+
     const workout = createMockWorkout(3);
 
     // Act
     render(<WorkoutList workout={workout} />);
 
     // Assert - check ARIA attributes
+
+    // Act
+
     const list = screen.getByRole("list", { name: "Workout steps" });
+
+    // Assert
+
     expect(list).toBeInTheDocument();
 
     // Check that step cards are accessible
@@ -152,17 +200,25 @@ describe("WorkoutList - Drag and Drop Integration", () => {
 
   it("should handle large number of steps efficiently", () => {
     // Arrange
+    // Arrange
+
     const workout = createMockWorkout(50);
 
     // Act
     const startTime = performance.now();
     render(<WorkoutList workout={workout} />);
+
+    // Act
+
     const endTime = performance.now();
 
     // Assert - rendering should complete (performance varies by environment)
     // Note: CI environments can be significantly slower than local development
     // (observed >2.7s on shared runners). Threshold is a sanity cap to catch
     // pathological regressions, not a strict performance budget.
+
+    // Assert
+
     expect(endTime - startTime).toBeLessThan(5000); // 5 seconds max
     expect(screen.getByText("Step 1")).toBeInTheDocument();
     expect(screen.getByText("Step 50")).toBeInTheDocument();
@@ -170,6 +226,8 @@ describe("WorkoutList - Drag and Drop Integration", () => {
 
   it("should preserve step content including name after reorder", () => {
     // Arrange
+    // Arrange
+
     const workout: Workout = {
       name: "Test Workout",
       sport: "running",
@@ -197,9 +255,15 @@ describe("WorkoutList - Drag and Drop Integration", () => {
     const onStepReorder = vi.fn();
 
     // Act
+
+    // Act
+
     render(<WorkoutList workout={workout} onStepReorder={onStepReorder} />);
 
     // Assert - verify custom step names are displayed in header
+
+    // Assert
+
     expect(screen.getByText("Warmup")).toBeInTheDocument();
     expect(screen.getByText("Main Set")).toBeInTheDocument();
 

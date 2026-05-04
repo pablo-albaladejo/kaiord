@@ -15,7 +15,13 @@ function renderRow(props: Parameters<typeof BridgeStatusRow>[0]) {
 
 describe("BridgeStatusRow", () => {
   it("should show connected state with green dot", () => {
+    // Arrange
+
+    // Act
+
     renderRow({ name: "Garmin Connect", state: "connected", hint: "" });
+
+    // Assert
 
     expect(screen.getByText("Garmin Connect")).toBeInTheDocument();
     expect(screen.getByText("Connected")).toBeInTheDocument();
@@ -23,7 +29,13 @@ describe("BridgeStatusRow", () => {
   });
 
   it("should show no-session state with yellow dot and hint", () => {
+    // Arrange
+
+    // Act
+
     renderRow({ name: "Train2Go", state: "no-session", hint: "Log in" });
+
+    // Assert
 
     expect(screen.getByText("Train2Go")).toBeInTheDocument();
     expect(screen.getByText("Session inactive")).toBeInTheDocument();
@@ -34,11 +46,17 @@ describe("BridgeStatusRow", () => {
   });
 
   it("should show not-detected state with gray dot and hint", () => {
+    // Arrange
+
+    // Act
+
     renderRow({
       name: "Garmin Connect",
       state: "not-detected",
       hint: "Install",
     });
+
+    // Assert
 
     expect(screen.getByText("Not detected")).toBeInTheDocument();
     expect(screen.getByText(/Install/)).toBeInTheDocument();
@@ -46,7 +64,13 @@ describe("BridgeStatusRow", () => {
   });
 
   it("should hide hint when connected", () => {
+    // Arrange
+
+    // Act
+
     renderRow({ name: "Garmin Connect", state: "connected", hint: "Unused" });
+
+    // Assert
 
     expect(screen.queryByText(/Unused/)).not.toBeInTheDocument();
   });

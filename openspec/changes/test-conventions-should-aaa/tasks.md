@@ -133,17 +133,17 @@ runbook for any single PR (in design.md D4) does not require touching the others
 
 ## 5. PR-5 §5 — AAA migration on SPA components + remaining files (subagent-driven)
 
-- [ ] 5.0 Re-bootstrap AAA allowlist shard at PR-5 branch base — see §3.0a for the protocol; this PR touches `AAA_ALLOWLIST_SPA_COMPONENT` only. Append any net-new violators in a dedicated commit at the head of PR-5 with message `chore(scripts): rebase AAA SPA component allowlist for net-new violators landed during PR-1/PR-2/PR-3/PR-4 review window`.
+- [x] 5.0 Re-bootstrap AAA allowlist shard at PR-5 branch base — see §3.0a for the protocol; this PR touches `AAA_ALLOWLIST_SPA_COMPONENT` only. Append any net-new violators in a dedicated commit at the head of PR-5 with message `chore(scripts): rebase AAA SPA component allowlist for net-new violators landed during PR-1/PR-2/PR-3/PR-4 review window`.
 
-- [ ] 5.1 Subagent invocation: `components/**` (129 files), then any remaining `*.test.{ts,tsx}` not yet covered by PR-3/PR-4 (sweep `git ls-files "packages/**/*.test.{ts,tsx}" | sort | comm -23 - <(git log --name-only PR-3..HEAD PR-4..HEAD | sort -u)` to identify the residual). Total expected: ~135 files.
+- [x] 5.1 Subagent invocation: `components/**` (129 files), then any remaining `*.test.{ts,tsx}` not yet covered by PR-3/PR-4 (sweep `git ls-files "packages/**/*.test.{ts,tsx}" | sort | comm -23 - <(git log --name-only PR-3..HEAD PR-4..HEAD | sort -u)` to identify the residual). Total expected: ~135 files.
 
-- [ ] 5.2 Same per-subdirectory contract as §4.2 — except this PR drains ONLY `AAA_ALLOWLIST_SPA_COMPONENT` (per D4 sharding). Components further split by category for review tractability: `atoms/` → `molecules/` → `organisms/` → `templates/` (atomic-design hierarchy already used in the SPA). After each subdirectory: subagent → diff review → `pnpm -r test` → drain SPA_COMPONENT entries for that subdirectory only → `check-aaa-migration-no-logic-edits.mjs` → `pnpm test:scripts` → commit (`chore(tests-spa-components-<atomic-tier>): ...`).
+- [x] 5.2 Same per-subdirectory contract as §4.2 — except this PR drains ONLY `AAA_ALLOWLIST_SPA_COMPONENT` (per D4 sharding). Components further split by category for review tractability: `atoms/` → `molecules/` → `organisms/` → `templates/` (atomic-design hierarchy already used in the SPA). After each subdirectory: subagent → diff review → `pnpm -r test` → drain SPA_COMPONENT entries for that subdirectory only → `check-aaa-migration-no-logic-edits.mjs` → `pnpm test:scripts` → commit (`chore(tests-spa-components-<atomic-tier>): ...`).
 
-- [ ] 5.3 Per design.md D7, retain in allowlist any component test that drives a Storybook-derived fixture loop (table-driven `it.each` per fixture file). Document the entries in the allowlist with a leading comment block citing D7's category.
+- [x] 5.3 Per design.md D7, retain in allowlist any component test that drives a Storybook-derived fixture loop (table-driven `it.each` per fixture file). Document the entries in the allowlist with a leading comment block citing D7's category.
 
-- [ ] 5.4 PR-5 description includes the final per-category count of files migrated, the final escape-hatch list (≤ 5 entries expected per design D7), and the diff stat.
+- [x] 5.4 PR-5 description includes the final per-category count of files migrated, the final escape-hatch list (≤ 5 entries expected per design D7), and the diff stat.
 
-- [ ] 5.5 Changeset added (`chore`-class per D15); commit message: `chore(tests): AAA structure markers on SPA component tests`.
+- [x] 5.5 Changeset added (`chore`-class per D15); commit message: `chore(tests): AAA structure markers on SPA component tests`.
 
 ## 6. PR-6 §6 — Lock empty-allowlist state, flip ESLint rule, write docs
 

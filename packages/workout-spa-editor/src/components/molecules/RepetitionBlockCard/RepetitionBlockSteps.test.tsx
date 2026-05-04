@@ -45,6 +45,8 @@ describe("RepetitionBlockSteps", () => {
   describe("rendering", () => {
     it("should render steps without React warnings", () => {
       // Arrange
+      // Arrange
+
       const warningChecker = expectNoReactWarnings();
       const steps = [mockStep1, mockStep2];
 
@@ -52,7 +54,13 @@ describe("RepetitionBlockSteps", () => {
       render(<RepetitionBlockSteps steps={steps} />);
 
       // Assert
+
+      // Act
+
       const stepCards = screen.getAllByTestId("step-card");
+
+      // Assert
+
       expect(stepCards).toHaveLength(2);
 
       warningChecker.verify();
@@ -60,6 +68,8 @@ describe("RepetitionBlockSteps", () => {
 
     it("should render with all props without warnings", () => {
       // Arrange
+      // Arrange
+
       const warningChecker = expectNoReactWarnings();
       const steps = [mockStep1, mockStep2];
       const onSelectStep = vi.fn();
@@ -86,7 +96,13 @@ describe("RepetitionBlockSteps", () => {
       );
 
       // Assert
+
+      // Act
+
       const stepCards = screen.getAllByTestId("step-card");
+
+      // Assert
+
       expect(stepCards).toHaveLength(2);
 
       warningChecker.verify();
@@ -94,6 +110,8 @@ describe("RepetitionBlockSteps", () => {
 
     it("should render add step button when onAddStep is provided", () => {
       // Arrange
+      // Arrange
+
       const warningChecker = expectNoReactWarnings();
       const steps = [mockStep1];
       const onAddStep = vi.fn();
@@ -102,7 +120,13 @@ describe("RepetitionBlockSteps", () => {
       render(<RepetitionBlockSteps steps={steps} onAddStep={onAddStep} />);
 
       // Assert
+
+      // Act
+
       const addButton = screen.getByTestId("add-step-button");
+
+      // Assert
+
       expect(addButton).toBeInTheDocument();
 
       warningChecker.verify();
@@ -110,13 +134,21 @@ describe("RepetitionBlockSteps", () => {
 
     it("should not render add step button when onAddStep is not provided", () => {
       // Arrange
+      // Arrange
+
       const warningChecker = expectNoReactWarnings();
       const steps = [mockStep1];
 
       // Act
+
+      // Act
+
       render(<RepetitionBlockSteps steps={steps} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.queryByTestId("add-step-button")).not.toBeInTheDocument();
 
       warningChecker.verify();
@@ -126,6 +158,8 @@ describe("RepetitionBlockSteps", () => {
   describe("prop handling", () => {
     it("should not pass component-specific props to DOM elements", () => {
       // Arrange
+      // Arrange
+
       const warningChecker = expectNoReactWarnings();
       const steps = [mockStep1, mockStep2];
       const onSelectStep = vi.fn();
@@ -152,7 +186,13 @@ describe("RepetitionBlockSteps", () => {
       );
 
       // Assert - Component should render without warnings
+
+      // Act
+
       const stepCards = screen.getAllByTestId("step-card");
+
+      // Assert
+
       expect(stepCards).toHaveLength(2);
 
       warningChecker.verify();
@@ -160,6 +200,8 @@ describe("RepetitionBlockSteps", () => {
 
     it("should handle empty steps array without warnings", () => {
       // Arrange
+      // Arrange
+
       const warningChecker = expectNoReactWarnings();
       const steps: WorkoutStep[] = [];
 
@@ -167,7 +209,13 @@ describe("RepetitionBlockSteps", () => {
       render(<RepetitionBlockSteps steps={steps} />);
 
       // Assert
+
+      // Act
+
       const stepCards = screen.queryAllByTestId("step-card");
+
+      // Assert
+
       expect(stepCards).toHaveLength(0);
 
       warningChecker.verify();
@@ -175,6 +223,8 @@ describe("RepetitionBlockSteps", () => {
 
     it("should handle single step without warnings", () => {
       // Arrange
+      // Arrange
+
       const warningChecker = expectNoReactWarnings();
       const steps = [mockStep1];
 
@@ -182,7 +232,13 @@ describe("RepetitionBlockSteps", () => {
       render(<RepetitionBlockSteps steps={steps} blockIndex={0} />);
 
       // Assert
+
+      // Act
+
       const stepCards = screen.getAllByTestId("step-card");
+
+      // Assert
+
       expect(stepCards).toHaveLength(1);
 
       warningChecker.verify();
@@ -190,6 +246,8 @@ describe("RepetitionBlockSteps", () => {
 
     it("should handle multiple selected steps without warnings", () => {
       // Arrange
+      // Arrange
+
       const warningChecker = expectNoReactWarnings();
       const steps = [mockStep1, mockStep2];
       const selectedStepIds = ["block-0-step-0", "block-0-step-1"];
@@ -204,7 +262,13 @@ describe("RepetitionBlockSteps", () => {
       );
 
       // Assert
+
+      // Act
+
       const stepCards = screen.getAllByTestId("step-card");
+
+      // Assert
+
       expect(stepCards).toHaveLength(2);
 
       warningChecker.verify();

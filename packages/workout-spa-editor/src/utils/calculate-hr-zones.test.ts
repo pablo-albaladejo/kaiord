@@ -4,7 +4,13 @@ import { calculateHrZones } from "./calculate-hr-zones";
 
 describe("calculateHrZones", () => {
   it("should calculate 5 zones from LTHR=170", () => {
+    // Arrange
+
+    // Act
+
     const zones = calculateHrZones(170);
+
+    // Assert
 
     expect(zones).toHaveLength(5);
     expect(zones[0]).toEqual({
@@ -40,15 +46,28 @@ describe("calculateHrZones", () => {
   });
 
   it("should calculate zones from LTHR=180", () => {
+    // Arrange
+
+    // Act
+
     const zones = calculateHrZones(180);
+
+    // Assert
 
     expect(zones[0]).toMatchObject({ minBpm: 0, maxBpm: 148 });
     expect(zones[3]).toMatchObject({ minBpm: 170, maxBpm: 180 });
   });
 
   it("should return zone names in correct order", () => {
+    // Arrange
+
     const zones = calculateHrZones(170);
+
+    // Act
+
     const names = zones.map((z) => z.name);
+
+    // Assert
 
     expect(names).toEqual([
       "Recovery",

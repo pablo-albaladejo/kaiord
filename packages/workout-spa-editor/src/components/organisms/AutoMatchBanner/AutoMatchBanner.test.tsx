@@ -15,14 +15,24 @@ const sug = (overrides: Partial<MatchSuggestion> = {}): MatchSuggestion => ({
 
 describe("AutoMatchBanner", () => {
   it("should render nothing when there are no suggestions", () => {
+    // Arrange
+
+    // Act
+
     render(
       <AutoMatchBanner suggestions={[]} onAccept={vi.fn()} onReject={vi.fn()} />
     );
+
+    // Assert
 
     expect(screen.queryByTestId("auto-match-banner")).not.toBeInTheDocument();
   });
 
   it("should render one row per suggestion (capped at 2 in collapsed state)", () => {
+    // Arrange
+
+    // Act
+
     render(
       <AutoMatchBanner
         suggestions={[
@@ -35,11 +45,15 @@ describe("AutoMatchBanner", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getAllByRole("listitem")).toHaveLength(2);
     expect(screen.getByText(/view all/i)).toBeInTheDocument();
   });
 
   it("expands to show all rows when 'view all' is clicked", async () => {
+    // Arrange
+
     render(
       <AutoMatchBanner
         suggestions={[
@@ -52,13 +66,19 @@ describe("AutoMatchBanner", () => {
       />
     );
 
+    // Act
+
     await userEvent.click(screen.getByText(/view all/i));
+
+    // Assert
 
     expect(screen.getAllByRole("listitem")).toHaveLength(3);
     expect(screen.getByText("Collapse")).toBeInTheDocument();
   });
 
   it("should call onAccept and announces remaining count when Accept is clicked", async () => {
+    // Arrange
+
     const onAccept = vi.fn();
     render(
       <AutoMatchBanner
@@ -68,9 +88,13 @@ describe("AutoMatchBanner", () => {
       />
     );
 
+    // Act
+
     await userEvent.click(
       screen.getAllByRole("button", { name: /accept/i })[0]!
     );
+
+    // Assert
 
     expect(onAccept).toHaveBeenCalled();
     expect(screen.getByRole("status")).toHaveTextContent(
@@ -79,6 +103,8 @@ describe("AutoMatchBanner", () => {
   });
 
   it("should call onReject and announces remaining count when Reject is clicked", async () => {
+    // Arrange
+
     const onReject = vi.fn();
     render(
       <AutoMatchBanner
@@ -88,9 +114,13 @@ describe("AutoMatchBanner", () => {
       />
     );
 
+    // Act
+
     await userEvent.click(
       screen.getAllByRole("button", { name: /reject/i })[0]!
     );
+
+    // Assert
 
     expect(onReject).toHaveBeenCalled();
     expect(screen.getByRole("status")).toHaveTextContent(
@@ -99,6 +129,10 @@ describe("AutoMatchBanner", () => {
   });
 
   it("does NOT render a 'Dismiss all' control (per-pair dismissal model)", () => {
+    // Arrange
+
+    // Act
+
     render(
       <AutoMatchBanner
         suggestions={[sug()]}
@@ -107,10 +141,16 @@ describe("AutoMatchBanner", () => {
       />
     );
 
+    // Assert
+
     expect(screen.queryByText("Dismiss all")).not.toBeInTheDocument();
   });
 
   it("should use the resolveActivity / resolveWorkoutTitle helpers for friendly labels", () => {
+    // Arrange
+
+    // Act
+
     render(
       <AutoMatchBanner
         suggestions={[sug({ activityId: "a1", workoutId: "w1" })]}
@@ -129,11 +169,17 @@ describe("AutoMatchBanner", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByText("FTP test plan")).toBeInTheDocument();
     expect(screen.getByText(/FTP test executed/)).toBeInTheDocument();
   });
 
   it("should be a region landmark with an accessible label", () => {
+    // Arrange
+
+    // Act
+
     render(
       <AutoMatchBanner
         suggestions={[sug()]}
@@ -141,6 +187,8 @@ describe("AutoMatchBanner", () => {
         onReject={vi.fn()}
       />
     );
+
+    // Assert
 
     expect(
       screen.getByRole("region", { name: /auto-match suggestions/i })

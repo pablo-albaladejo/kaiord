@@ -21,7 +21,13 @@ function withRouter(ui: React.ReactNode, path = "/calendar") {
 
 describe("FirstVisitState", () => {
   it("should render three entry paths", () => {
+    // Arrange
+
+    // Act
+
     render(withRouter(<FirstVisitState />));
+
+    // Assert
 
     expect(screen.getByText("Create")).toBeInTheDocument();
     expect(screen.getByText("Import")).toBeInTheDocument();
@@ -29,23 +35,41 @@ describe("FirstVisitState", () => {
   });
 
   it("should render welcome message", () => {
+    // Arrange
+
+    // Act
+
     render(withRouter(<FirstVisitState />));
+
+    // Assert
 
     expect(screen.getByText("Welcome to Kaiord")).toBeInTheDocument();
   });
 
   it("should call onSettingsClick when Connect is clicked", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     const onSettingsClick = vi.fn();
 
     render(withRouter(<FirstVisitState onSettingsClick={onSettingsClick} />));
 
+    // Act
+
     await user.click(screen.getByText("Connect"));
+
+    // Assert
 
     expect(onSettingsClick).toHaveBeenCalledOnce();
   });
 
   it("should open settings dialog when Connect is clicked without prop", async () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+
     const user = userEvent.setup();
 
     render(withRouter(<FirstVisitState />));
@@ -55,6 +79,12 @@ describe("FirstVisitState", () => {
   });
 
   it("should navigate to /workout/new when Create is clicked", async () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+
     const user = userEvent.setup();
 
     render(withRouter(<FirstVisitState />));
@@ -64,6 +94,12 @@ describe("FirstVisitState", () => {
   });
 
   it("should navigate to import when Import is clicked", async () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+
     const user = userEvent.setup();
 
     render(withRouter(<FirstVisitState />));
@@ -75,12 +111,24 @@ describe("FirstVisitState", () => {
 
 describe("EmptyWeekState", () => {
   it("should show add workout button", () => {
+    // Arrange
+
+    // Act
+
     render(withRouter(<EmptyWeekState />));
+
+    // Assert
 
     expect(screen.getByText("Add workout")).toBeInTheDocument();
   });
 
   it("should navigate when Add workout is clicked", async () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+
     const user = userEvent.setup();
 
     render(withRouter(<EmptyWeekState />));
@@ -90,24 +138,42 @@ describe("EmptyWeekState", () => {
   });
 
   it("should show go to latest when callback provided", () => {
+    // Arrange
+
+    // Act
+
     render(withRouter(<EmptyWeekState onGoToLatest={vi.fn()} />));
+
+    // Assert
 
     expect(screen.getByText("Go to latest")).toBeInTheDocument();
   });
 
   it("should not show go to latest when no callback", () => {
+    // Arrange
+
+    // Act
+
     render(withRouter(<EmptyWeekState />));
+
+    // Assert
 
     expect(screen.queryByText("Go to latest")).not.toBeInTheDocument();
   });
 
   it("should call onGoToLatest when clicked", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     const onGoToLatest = vi.fn();
 
     render(withRouter(<EmptyWeekState onGoToLatest={onGoToLatest} />));
 
+    // Act
+
     await user.click(screen.getByText("Go to latest"));
+
+    // Assert
 
     expect(onGoToLatest).toHaveBeenCalled();
   });
@@ -115,7 +181,13 @@ describe("EmptyWeekState", () => {
 
 describe("NoBridgesState", () => {
   it("should render install prompt", () => {
+    // Arrange
+
+    // Act
+
     render(<NoBridgesState />);
+
+    // Assert
 
     expect(screen.getByTestId("no-bridges-state")).toBeInTheDocument();
     expect(
@@ -125,9 +197,15 @@ describe("NoBridgesState", () => {
   });
 
   it("should render learn more link to bridge docs", () => {
+    // Arrange
+
     render(<NoBridgesState />);
 
+    // Act
+
     const link = screen.getByText("Learn more");
+
+    // Assert
 
     expect(link).toBeInTheDocument();
     expect(link).toHaveAttribute("href", "https://kaiord.com/docs/bridges");
@@ -137,7 +215,13 @@ describe("NoBridgesState", () => {
 
 describe("NoAiProviderState", () => {
   it("should render configure prompt", () => {
+    // Arrange
+
+    // Act
+
     render(withRouter(<NoAiProviderState />));
+
+    // Assert
 
     expect(screen.getByTestId("no-ai-provider-state")).toBeInTheDocument();
     expect(screen.getByText("Configure")).toBeInTheDocument();

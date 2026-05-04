@@ -29,6 +29,11 @@ const TOAST_CALL_REGEX = /toast\.error\(([^)]*)\)/g;
 
 describe("AI tab toast PII / secret audit", () => {
   it("should expose a finite allowlist of error messages", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(AI_TAB_TOAST_MESSAGES.length).toBeGreaterThan(0);
     for (const message of AI_TAB_TOAST_MESSAGES) {
       expect(message).not.toMatch(/sk-|apiKey|provider\./i);
@@ -38,8 +43,16 @@ describe("AI tab toast PII / secret audit", () => {
   it.each(CONSUMER_FILES)(
     "%s passes toast.error a bare identifier (no template-literal interpolation)",
     (filename) => {
+      // Arrange
+
       const source = readFileSync(resolve(__dirname, filename), "utf8");
+
+      // Act
+
       const matches = [...source.matchAll(TOAST_CALL_REGEX)];
+
+      // Assert
+
       expect(matches.length).toBeGreaterThan(0);
       for (const [, arg] of matches) {
         const trimmed = arg.trim();

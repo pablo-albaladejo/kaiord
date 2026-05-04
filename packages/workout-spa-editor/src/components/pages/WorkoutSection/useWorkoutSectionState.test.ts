@@ -98,6 +98,10 @@ describe("useWorkoutSectionState", () => {
   describe("deleteStep function", () => {
     it("should return deleteStep function", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       const { result } = renderHook(() =>
         useWorkoutSectionState(
           mockWorkout,
@@ -110,12 +114,17 @@ describe("useWorkoutSectionState", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(result.current.deleteStep).toBeDefined();
       expect(typeof result.current.deleteStep).toBe("function");
     });
 
     it("should delegate to useDeleteStepWithToast", async () => {
       // Arrange
+      // Arrange
+
       const mockDeleteStep = vi.fn();
       const { useDeleteStepWithToast } =
         await import("./use-delete-step-with-toast");
@@ -133,9 +142,15 @@ describe("useWorkoutSectionState", () => {
       );
 
       // Act
+
+      // Act
+
       result.current.deleteStep(0);
 
       // Assert
+
+      // Assert
+
       expect(mockDeleteStep).toHaveBeenCalledWith(0);
       expect(mockDeleteStep).toHaveBeenCalledTimes(1);
     });

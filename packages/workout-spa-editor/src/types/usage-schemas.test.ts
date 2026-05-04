@@ -4,6 +4,10 @@ import { usageEntrySchema, usageRecordSchema } from "./usage-schemas";
 
 describe("usageEntrySchema", () => {
   it("should require inputTokens and outputTokens", () => {
+    // Arrange
+
+    // Act
+
     const entry = {
       date: "2026-04-20",
       inputTokens: 80,
@@ -12,10 +16,17 @@ describe("usageEntrySchema", () => {
       cost: 0.001,
     };
 
+    // Assert
+
     expect(usageEntrySchema.parse(entry)).toEqual(entry);
   });
 
   it("should reject entries missing inputTokens", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       usageEntrySchema.parse({
         date: "2026-04-20",
@@ -27,6 +38,11 @@ describe("usageEntrySchema", () => {
   });
 
   it("should enforce tokens === inputTokens + outputTokens", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       usageEntrySchema.parse({
         date: "2026-04-20",
@@ -41,6 +57,10 @@ describe("usageEntrySchema", () => {
 
 describe("usageRecordSchema", () => {
   it("should require inputTokens, outputTokens, totalTokens, totalCost", () => {
+    // Arrange
+
+    // Act
+
     const record = {
       yearMonth: "2026-04",
       inputTokens: 120,
@@ -58,6 +78,8 @@ describe("usageRecordSchema", () => {
       ],
     };
 
+    // Assert
+
     expect(usageRecordSchema.parse(record)).toMatchObject({
       inputTokens: 120,
       outputTokens: 30,
@@ -66,6 +88,11 @@ describe("usageRecordSchema", () => {
   });
 
   it("should enforce totalTokens === inputTokens + outputTokens", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       usageRecordSchema.parse({
         yearMonth: "2026-04",
@@ -79,6 +106,8 @@ describe("usageRecordSchema", () => {
   });
 
   it("accepts `legacy: true` on migrated rows", () => {
+    // Arrange
+
     const record = {
       yearMonth: "2026-03",
       inputTokens: 200,
@@ -89,11 +118,18 @@ describe("usageRecordSchema", () => {
       legacy: true,
     };
 
+    // Act
+
     const parsed = usageRecordSchema.parse(record);
+
+    // Assert
+
     expect(parsed.legacy).toBe(true);
   });
 
   it("treats `legacy` as optional and absent by default", () => {
+    // Arrange
+
     const record = {
       yearMonth: "2026-04",
       inputTokens: 100,
@@ -103,7 +139,12 @@ describe("usageRecordSchema", () => {
       entries: [],
     };
 
+    // Act
+
     const parsed = usageRecordSchema.parse(record);
+
+    // Assert
+
     expect(parsed.legacy).toBeUndefined();
   });
 });

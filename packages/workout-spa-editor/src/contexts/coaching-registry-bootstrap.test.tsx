@@ -38,23 +38,36 @@ import { CoachingRegistryBootstrap } from "./coaching-registry-bootstrap";
 
 describe("CoachingRegistryBootstrap", () => {
   it("should render children inside the provider", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CoachingRegistryBootstrap>
         <span>Child content</span>
       </CoachingRegistryBootstrap>
     );
 
+    // Assert
+
     expect(screen.getByText("Child content")).toBeInTheDocument();
   });
 
   it("should pass the factory array to the provider", () => {
+    // Arrange
+
     render(
       <CoachingRegistryBootstrap>
         <span>Test</span>
       </CoachingRegistryBootstrap>
     );
 
+    // Act
+
     const provider = screen.getByTestId("provider");
+
+    // Assert
+
     expect(provider).toHaveAttribute("data-factories", "1");
   });
 });

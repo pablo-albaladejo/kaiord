@@ -58,11 +58,17 @@ describe("TemplatePickerDialog", () => {
   });
 
   it("should render template cards from Dexie", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     await addTemplate(persistence, "Tempo Ride", "cycling", makeKrd());
     await addTemplate(persistence, "Easy Spin", "cycling", makeKrd());
 
+    // Act
+
     renderPicker({ date: "2026-05-04", onPick: vi.fn() });
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Tempo Ride")).toBeInTheDocument();
@@ -71,12 +77,19 @@ describe("TemplatePickerDialog", () => {
   });
 
   it("should filter templates by search term", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     await addTemplate(persistence, "Tempo Ride", "cycling", makeKrd());
     await addTemplate(persistence, "Easy Spin", "cycling", makeKrd());
 
     const user = userEvent.setup();
+
+    // Act
+
     renderPicker({ date: "2026-05-04", onPick: vi.fn() });
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Tempo Ride")).toBeInTheDocument();
@@ -91,6 +104,8 @@ describe("TemplatePickerDialog", () => {
   });
 
   it("should invoke onPick with the template id and closes on selection", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     const created = await addTemplate(
       persistence,
@@ -101,7 +116,12 @@ describe("TemplatePickerDialog", () => {
     const onPick = vi.fn();
 
     const user = userEvent.setup();
+
+    // Act
+
     renderPicker({ date: "2026-05-04", onPick });
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Tempo Ride")).toBeInTheDocument();
@@ -118,8 +138,15 @@ describe("TemplatePickerDialog", () => {
   });
 
   it("should close on Esc key", async () => {
+    // Arrange
+
     const user = userEvent.setup();
+
+    // Act
+
     renderPicker({ date: "2026-05-04", onPick: vi.fn() });
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByTestId("template-picker-dialog")).toBeInTheDocument();
@@ -135,10 +162,16 @@ describe("TemplatePickerDialog", () => {
   });
 
   it("should not render delete or edit affordances", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     await addTemplate(persistence, "Tempo Ride", "cycling", makeKrd());
 
+    // Act
+
     renderPicker({ date: "2026-05-04", onPick: vi.fn() });
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Tempo Ride")).toBeInTheDocument();
@@ -153,7 +186,13 @@ describe("TemplatePickerDialog", () => {
   });
 
   it("should include the formatted date in the dialog accessible name", async () => {
+    // Arrange
+
+    // Act
+
     renderPicker({ date: "2026-05-04", onPick: vi.fn() });
+
+    // Assert
 
     await waitFor(() => {
       expect(
@@ -169,12 +208,19 @@ describe("TemplatePickerDialog", () => {
     // contract: after Esc the focused element MUST NOT be inside the
     // dialog tree. The strict trigger-restoration is exercised end-to-
     // end in the Playwright suite (real-browser focus model).
+    // Arrange
+
     const user = userEvent.setup();
+
+    // Act
+
     renderPicker({
       date: "2026-05-04",
       onPick: vi.fn(),
       initialOpen: true,
     });
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByTestId("template-picker-dialog")).toBeInTheDocument();

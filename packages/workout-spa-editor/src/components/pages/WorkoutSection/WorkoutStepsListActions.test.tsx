@@ -19,6 +19,10 @@ describe("WorkoutStepsListActions", () => {
   describe("CreateRepetitionBlockButton integration", () => {
     it("should not show create repetition block button when no steps selected", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <WorkoutStepsListActions
           hasMultipleSelection={false}
@@ -30,6 +34,9 @@ describe("WorkoutStepsListActions", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(
         screen.queryByTestId("create-repetition-block-button")
       ).not.toBeInTheDocument();
@@ -37,6 +44,10 @@ describe("WorkoutStepsListActions", () => {
 
     it("should not show create repetition block button when only 1 step selected", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <WorkoutStepsListActions
           hasMultipleSelection={false}
@@ -48,6 +59,9 @@ describe("WorkoutStepsListActions", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(
         screen.queryByTestId("create-repetition-block-button")
       ).not.toBeInTheDocument();
@@ -55,6 +69,10 @@ describe("WorkoutStepsListActions", () => {
 
     it("should show selection hint when 1 step selected", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <WorkoutStepsListActions
           hasMultipleSelection={false}
@@ -66,6 +84,9 @@ describe("WorkoutStepsListActions", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(screen.getByTestId("selection-hint")).toBeInTheDocument();
       expect(screen.getByTestId("selection-hint")).toHaveTextContent(
         /Ctrl\+click another step/
@@ -74,6 +95,8 @@ describe("WorkoutStepsListActions", () => {
 
     it("should show create repetition block button when 2 steps selected", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <WorkoutStepsListActions
           hasMultipleSelection={true}
@@ -85,13 +108,21 @@ describe("WorkoutStepsListActions", () => {
       );
 
       // Assert
+
+      // Act
+
       const button = screen.getByTestId("create-repetition-block-button");
+
+      // Assert
+
       expect(button).toBeInTheDocument();
       expect(button).toHaveTextContent("Create Repetition Block (2 steps)");
     });
 
     it("should show create repetition block button when 3+ steps selected", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <WorkoutStepsListActions
           hasMultipleSelection={true}
@@ -103,13 +134,21 @@ describe("WorkoutStepsListActions", () => {
       );
 
       // Assert
+
+      // Act
+
       const button = screen.getByTestId("create-repetition-block-button");
+
+      // Assert
+
       expect(button).toBeInTheDocument();
       expect(button).toHaveTextContent("Create Repetition Block (5 steps)");
     });
 
     it("should call onCreateRepetitionBlock when button clicked", async () => {
       // Arrange
+      // Arrange
+
       const handleCreateBlock = vi.fn();
       const user = userEvent.setup();
 
@@ -125,14 +164,22 @@ describe("WorkoutStepsListActions", () => {
 
       // Act
       const button = screen.getByTestId("create-repetition-block-button");
+
+      // Act
+
       await user.click(button);
 
       // Assert
+
+      // Assert
+
       expect(handleCreateBlock).toHaveBeenCalledOnce();
     });
 
     it("should have proper accessibility attributes", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <WorkoutStepsListActions
           hasMultipleSelection={true}
@@ -144,7 +191,13 @@ describe("WorkoutStepsListActions", () => {
       );
 
       // Assert
+
+      // Act
+
       const button = screen.getByTestId("create-repetition-block-button");
+
+      // Assert
+
       expect(button).toHaveAttribute(
         "aria-label",
         "Create repetition block from selected steps"
@@ -155,6 +208,10 @@ describe("WorkoutStepsListActions", () => {
   describe("Button layout and responsiveness", () => {
     it("should render all action buttons", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <WorkoutStepsListActions
           hasMultipleSelection={false}
@@ -166,6 +223,9 @@ describe("WorkoutStepsListActions", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByTestId("create-empty-repetition-block-button")
       ).toBeInTheDocument();
@@ -174,6 +234,10 @@ describe("WorkoutStepsListActions", () => {
 
     it("should render paste button when onPasteStep provided", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <WorkoutStepsListActions
           hasMultipleSelection={false}
@@ -186,11 +250,18 @@ describe("WorkoutStepsListActions", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(screen.getByTestId("paste-step-button")).toBeInTheDocument();
     });
 
     it("should not render paste button when onPasteStep not provided", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <WorkoutStepsListActions
           hasMultipleSelection={false}
@@ -202,11 +273,16 @@ describe("WorkoutStepsListActions", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(screen.queryByTestId("paste-step-button")).not.toBeInTheDocument();
     });
 
     it("should have responsive classes for mobile", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <WorkoutStepsListActions
           hasMultipleSelection={true}
@@ -218,9 +294,15 @@ describe("WorkoutStepsListActions", () => {
       );
 
       // Assert - Buttons have responsive width classes
+
+      // Act
+
       const createBlockButton = screen.getByTestId(
         "create-repetition-block-button"
       );
+
+      // Assert
+
       expect(createBlockButton).toHaveClass("w-full");
       expect(createBlockButton).toHaveClass("sm:w-auto");
 
@@ -234,6 +316,8 @@ describe("WorkoutStepsListActions", () => {
   describe("Button interaction flow", () => {
     it("should call correct handlers for each button", async () => {
       // Arrange
+      // Arrange
+
       const handleCreateBlock = vi.fn();
       const handleCreateEmpty = vi.fn();
       const handleAddStep = vi.fn();
@@ -252,7 +336,13 @@ describe("WorkoutStepsListActions", () => {
       );
 
       // Act & Assert - Create repetition block
+
+      // Act
+
       await user.click(screen.getByTestId("create-repetition-block-button"));
+
+      // Assert
+
       expect(handleCreateBlock).toHaveBeenCalledOnce();
 
       // Act & Assert - Create empty repetition block

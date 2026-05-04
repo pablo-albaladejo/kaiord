@@ -36,6 +36,8 @@ describe("importWorkout", () => {
   describe("KRD file import", () => {
     it("should import valid KRD JSON file", async () => {
       // Arrange
+      // Arrange
+
       const mockKrd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -56,14 +58,22 @@ describe("importWorkout", () => {
       const file = createMockFile(jsonContent, "workout.krd");
 
       // Act
+
+      // Act
+
       const result = await importWorkout(file);
 
       // Assert
+
+      // Assert
+
       expect(result).toStrictEqual(mockKrd);
     });
 
     it("should import KRD file with .json extension", async () => {
       // Arrange
+      // Arrange
+
       const mockKrd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -84,19 +94,33 @@ describe("importWorkout", () => {
       const file = createMockFile(jsonContent, "workout.json");
 
       // Act
+
+      // Act
+
       const result = await importWorkout(file);
 
       // Assert
+
+      // Assert
+
       expect(result.type).toBe("structured_workout");
       expect(result.metadata.sport).toBe("cycling");
     });
 
     it("should throw ImportError for invalid JSON", async () => {
       // Arrange
+      // Arrange
+
       const invalidJson = "{ invalid json }";
+
+      // Act
+
       const file = createMockFile(invalidJson, "invalid.krd");
 
       // Act & Assert
+
+      // Assert
+
       await expect(importWorkout(file)).rejects.toThrow(ImportError);
       await expect(importWorkout(file)).rejects.toThrow(
         /Failed to parse KRD file/
@@ -104,6 +128,12 @@ describe("importWorkout", () => {
     });
 
     it("should provide useful error message for invalid JSON", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const invalidJson = '{\n  "name": "test",\n  "value": invalid\n}';
       const file = createMockFile(invalidJson, "invalid.krd");
@@ -122,18 +152,32 @@ describe("importWorkout", () => {
 
     it("should throw ValidationError for missing required fields", async () => {
       // Arrange
+      // Arrange
+
       const invalidKrd = JSON.stringify({
         version: "1.0",
         // missing type and metadata
       });
+
+      // Act
+
       const file = createMockFile(invalidKrd, "invalid.krd");
 
       // Act & Assert
+
+      // Assert
+
       await expect(importWorkout(file)).rejects.toThrow(ImportError);
       await expect(importWorkout(file)).rejects.toThrow(/Validation failed/);
     });
 
     it("should list all missing fields in validation error", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const invalidKrd = JSON.stringify({
         version: "1.0",
@@ -157,6 +201,8 @@ describe("importWorkout", () => {
 
     it("should call progress callback during KRD import", async () => {
       // Arrange
+      // Arrange
+
       const mockKrd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -179,9 +225,15 @@ describe("importWorkout", () => {
       const onProgress = vi.fn();
 
       // Act
+
+      // Act
+
       await importWorkout(file, onProgress);
 
       // Assert
+
+      // Assert
+
       expect(onProgress).toHaveBeenCalled();
       expect(onProgress).toHaveBeenCalledWith(10);
       expect(onProgress).toHaveBeenCalledWith(30);
@@ -194,10 +246,18 @@ describe("importWorkout", () => {
   describe("format detection errors", () => {
     it("should throw ImportError for unsupported file extension", async () => {
       // Arrange
+      // Arrange
+
       const buffer = new Uint8Array([1, 2, 3]);
+
+      // Act
+
       const file = createMockFile(buffer, "workout.txt");
 
       // Act & Assert
+
+      // Assert
+
       await expect(importWorkout(file)).rejects.toThrow(ImportError);
       await expect(importWorkout(file)).rejects.toThrow(
         /Unsupported file format/
@@ -206,20 +266,36 @@ describe("importWorkout", () => {
 
     it("should throw ImportError for empty filename", async () => {
       // Arrange
+      // Arrange
+
       const buffer = new Uint8Array([1, 2, 3]);
+
+      // Act
+
       const file = createMockFile(buffer, "");
 
       // Act & Assert
+
+      // Assert
+
       await expect(importWorkout(file)).rejects.toThrow(ImportError);
       await expect(importWorkout(file)).rejects.toThrow(/Invalid filename/);
     });
 
     it("should throw ImportError for filename without extension", async () => {
       // Arrange
+      // Arrange
+
       const buffer = new Uint8Array([1, 2, 3]);
+
+      // Act
+
       const file = createMockFile(buffer, "workout");
 
       // Act & Assert
+
+      // Assert
+
       await expect(importWorkout(file)).rejects.toThrow(ImportError);
       await expect(importWorkout(file)).rejects.toThrow(
         /Unsupported file format/
@@ -229,6 +305,12 @@ describe("importWorkout", () => {
 
   describe("error handling", () => {
     it("should preserve format in ImportError", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const invalidJson = "not json";
       const file = createMockFile(invalidJson, "workout.krd");
@@ -244,6 +326,12 @@ describe("importWorkout", () => {
     });
 
     it("should include cause in ImportError", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const invalidJson = "{ invalid }";
       const file = createMockFile(invalidJson, "workout.krd");
@@ -262,10 +350,18 @@ describe("importWorkout", () => {
   describe("FIT file import", () => {
     it("should throw ImportError for invalid FIT file", async () => {
       // Arrange
+      // Arrange
+
       const invalidFitData = new Uint8Array([0, 0, 0, 0]);
+
+      // Act
+
       const file = createMockFile(invalidFitData, "workout.fit");
 
       // Act & Assert
+
+      // Assert
+
       await expect(importWorkout(file)).rejects.toThrow(ImportError);
       await expect(importWorkout(file)).rejects.toThrow(
         /Failed to parse FIT file/
@@ -274,11 +370,16 @@ describe("importWorkout", () => {
 
     it("should call progress callback during FIT import", async () => {
       // Arrange
+      // Arrange
+
       const invalidFitData = new Uint8Array([0, 0, 0, 0]);
       const file = createMockFile(invalidFitData, "workout.fit");
       const onProgress = vi.fn();
 
       // Act & Assert
+
+      // Act
+
       try {
         await importWorkout(file, onProgress);
       } catch {
@@ -286,6 +387,9 @@ describe("importWorkout", () => {
       }
 
       // Assert
+
+      // Assert
+
       expect(onProgress).toHaveBeenCalled();
       expect(onProgress).toHaveBeenCalledWith(10);
       expect(onProgress).toHaveBeenCalledWith(30);
@@ -296,10 +400,18 @@ describe("importWorkout", () => {
   describe("TCX file import", () => {
     it("should throw ImportError for invalid TCX file", async () => {
       // Arrange
+      // Arrange
+
       const invalidTcxData = new TextEncoder().encode("<invalid>xml</invalid>");
+
+      // Act
+
       const file = createMockFile(invalidTcxData, "workout.tcx");
 
       // Act & Assert
+
+      // Assert
+
       await expect(importWorkout(file)).rejects.toThrow(ImportError);
       await expect(importWorkout(file)).rejects.toThrow(
         /Failed to parse TCX file/
@@ -308,11 +420,16 @@ describe("importWorkout", () => {
 
     it("should call progress callback during TCX import", async () => {
       // Arrange
+      // Arrange
+
       const invalidTcxData = new TextEncoder().encode("<invalid>xml</invalid>");
       const file = createMockFile(invalidTcxData, "workout.tcx");
       const onProgress = vi.fn();
 
       // Act & Assert
+
+      // Act
+
       try {
         await importWorkout(file, onProgress);
       } catch {
@@ -320,6 +437,9 @@ describe("importWorkout", () => {
       }
 
       // Assert
+
+      // Assert
+
       expect(onProgress).toHaveBeenCalled();
       expect(onProgress).toHaveBeenCalledWith(10);
       expect(onProgress).toHaveBeenCalledWith(30);
@@ -330,10 +450,18 @@ describe("importWorkout", () => {
   describe("ZWO file import", () => {
     it("should throw ImportError for invalid ZWO file", async () => {
       // Arrange
+      // Arrange
+
       const invalidZwoData = new TextEncoder().encode("<invalid>xml</invalid>");
+
+      // Act
+
       const file = createMockFile(invalidZwoData, "workout.zwo");
 
       // Act & Assert
+
+      // Assert
+
       await expect(importWorkout(file)).rejects.toThrow(ImportError);
       await expect(importWorkout(file)).rejects.toThrow(
         /Failed to parse ZWO file/
@@ -342,11 +470,16 @@ describe("importWorkout", () => {
 
     it("should call progress callback during ZWO import", async () => {
       // Arrange
+      // Arrange
+
       const invalidZwoData = new TextEncoder().encode("<invalid>xml</invalid>");
       const file = createMockFile(invalidZwoData, "workout.zwo");
       const onProgress = vi.fn();
 
       // Act & Assert
+
+      // Act
+
       try {
         await importWorkout(file, onProgress);
       } catch {
@@ -354,6 +487,9 @@ describe("importWorkout", () => {
       }
 
       // Assert
+
+      // Assert
+
       expect(onProgress).toHaveBeenCalled();
       expect(onProgress).toHaveBeenCalledWith(10);
       expect(onProgress).toHaveBeenCalledWith(30);
@@ -364,6 +500,8 @@ describe("importWorkout", () => {
   describe("abort signal support", () => {
     it("should abort KRD import when signal is aborted", async () => {
       // Arrange
+      // Arrange
+
       const mockKrd: KRD = {
         version: "1.0",
         type: "structured_workout",
@@ -384,9 +522,15 @@ describe("importWorkout", () => {
       const file = createMockFile(jsonContent, "workout.krd");
 
       const controller = new AbortController();
+
+      // Act
+
       controller.abort();
 
       // Act & Assert
+
+      // Assert
+
       await expect(
         importWorkout(file, undefined, controller.signal)
       ).rejects.toThrow();

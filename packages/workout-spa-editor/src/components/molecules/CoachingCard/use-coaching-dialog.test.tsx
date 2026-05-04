@@ -76,12 +76,18 @@ describe("useCoachingDialog", () => {
   });
 
   it("should do nothing when activity is null", () => {
+    // Arrange
+
     const expandActivity = vi.fn();
+
+    // Act
 
     const { result } = renderHook(
       () => useCoachingDialog(null, vi.fn(), expandActivity),
       { wrapper: ({ children }) => wrap(children) }
     );
+
+    // Assert
 
     expect(result.current.error).toBeNull();
     expect(result.current.converting).toBe(false);
@@ -89,6 +95,8 @@ describe("useCoachingDialog", () => {
   });
 
   it("should trigger expandActivity when activity has undefined description", async () => {
+    // Arrange
+
     const expandActivity = vi.fn();
     const activity = {
       id: "train2go:12345",
@@ -101,9 +109,13 @@ describe("useCoachingDialog", () => {
       // description: undefined
     };
 
+    // Act
+
     renderHook(() => useCoachingDialog(activity, vi.fn(), expandActivity), {
       wrapper: ({ children }) => wrap(children),
     });
+
+    // Assert
 
     await waitFor(() => {
       expect(expandActivity).toHaveBeenCalledWith(activity);
@@ -111,6 +123,8 @@ describe("useCoachingDialog", () => {
   });
 
   it("should do NOT trigger expandActivity when description is already populated", () => {
+    // Arrange
+
     const expandActivity = vi.fn();
     const activity = {
       id: "train2go:12345",
@@ -123,14 +137,20 @@ describe("useCoachingDialog", () => {
       description: "Already there",
     };
 
+    // Act
+
     renderHook(() => useCoachingDialog(activity, vi.fn(), expandActivity), {
       wrapper: ({ children }) => wrap(children),
     });
+
+    // Assert
 
     expect(expandActivity).not.toHaveBeenCalled();
   });
 
   it("does NOT trigger expandActivity when description is known-empty ('')", () => {
+    // Arrange
+
     const expandActivity = vi.fn();
     const activity = {
       id: "train2go:12345",
@@ -143,14 +163,20 @@ describe("useCoachingDialog", () => {
       description: "",
     };
 
+    // Act
+
     renderHook(() => useCoachingDialog(activity, vi.fn(), expandActivity), {
       wrapper: ({ children }) => wrap(children),
     });
+
+    // Assert
 
     expect(expandActivity).not.toHaveBeenCalled();
   });
 
   it("handleConvert: surfaces 'Activity not found' when record missing in repo", async () => {
+    // Arrange
+
     const onClose = vi.fn();
     const expandActivity = vi.fn();
     const activity = {
@@ -176,7 +202,11 @@ describe("useCoachingDialog", () => {
       }
     );
 
+    // Act
+
     await result.current.handleConvert();
+
+    // Assert
 
     await waitFor(() => {
       expect(result.current.error).toBe("Activity not found");
@@ -186,6 +216,8 @@ describe("useCoachingDialog", () => {
   });
 
   it("should navigate to /workout/:id on successful conversion via handleConvert", async () => {
+    // Arrange
+
     const onClose = vi.fn();
     const expandActivity = vi.fn();
     const activity = {
@@ -212,7 +244,11 @@ describe("useCoachingDialog", () => {
       }
     );
 
+    // Act
+
     await result.current.handleConvert();
+
+    // Assert
 
     await waitFor(() => {
       expect(onClose).toHaveBeenCalled();

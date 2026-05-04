@@ -17,6 +17,8 @@ describe("Save as Template", () => {
   });
 
   it("should create a template record in Dexie", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     const krd = {
       version: "1.0",
@@ -35,7 +37,12 @@ describe("Save as Template", () => {
       tags: ["endurance"],
     });
 
+    // Act
+
     const templates = await db.table("templates").toArray();
+
+    // Assert
+
     expect(templates).toHaveLength(1);
     expect(templates[0].name).toBe("My Template");
     expect(templates[0].sport).toBe("cycling");

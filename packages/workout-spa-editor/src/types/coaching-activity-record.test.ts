@@ -24,18 +24,36 @@ const valid = {
 
 describe("coachingActivityRecordSchema", () => {
   it("should accept a minimal valid record", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() => coachingActivityRecordSchema.parse(valid)).not.toThrow();
   });
 
   it("should preserve workload unclamped", () => {
+    // Arrange
+
+    // Act
+
     const record = coachingActivityRecordSchema.parse({
       ...valid,
       workload: 7,
     });
+
+    // Assert
+
     expect(record.workload).toBe(7);
   });
 
   it("should accept intensity in 1..5", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+
     for (const intensity of [1, 2, 3, 4, 5] as const) {
       expect(() =>
         coachingActivityRecordSchema.parse({ ...valid, intensity })
@@ -44,6 +62,11 @@ describe("coachingActivityRecordSchema", () => {
   });
 
   it("should reject intensity outside 1..5", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, intensity: 6 })
     ).toThrow();
@@ -53,6 +76,11 @@ describe("coachingActivityRecordSchema", () => {
   });
 
   it("should accept completionPercent in 0..100", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, completionPercent: 0 })
     ).not.toThrow();
@@ -65,6 +93,11 @@ describe("coachingActivityRecordSchema", () => {
   });
 
   it("should reject completionPercent outside 0..100", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, completionPercent: -1 })
     ).toThrow();
@@ -74,6 +107,11 @@ describe("coachingActivityRecordSchema", () => {
   });
 
   it("should reject mismatched composite id", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, id: "wrong" })
     ).toThrow();
@@ -83,21 +121,38 @@ describe("coachingActivityRecordSchema", () => {
   });
 
   it("should accept sourceIds with colons or hyphens (no regex on id)", () => {
+    // Arrange
+
+    // Act
+
     const record = {
       ...valid,
       sourceId: "abc-123:xyz",
       id: "p1:train2go:abc-123:xyz",
     };
+
+    // Assert
+
     expect(() => coachingActivityRecordSchema.parse(record)).not.toThrow();
   });
 
   it("should reject malformed date", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, date: "13/04/2026" })
     ).toThrow();
   });
 
   it("should reject invalid status enum", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(() =>
       coachingActivityRecordSchema.parse({ ...valid, status: "in-progress" })
     ).toThrow();
@@ -106,6 +161,11 @@ describe("coachingActivityRecordSchema", () => {
 
 describe("buildCoachingActivityId", () => {
   it("should compose the canonical id format", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(buildCoachingActivityId("p1", "train2go", "12345")).toBe(
       "p1:train2go:12345"
     );
@@ -114,10 +174,20 @@ describe("buildCoachingActivityId", () => {
 
 describe("namespaceSourceId", () => {
   it("should namespace by profile, omitting source (workout has its own column)", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(namespaceSourceId("p1", "12345")).toBe("p1:12345");
   });
 
   it("should produce distinct namespaces for different profiles with the same raw id", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(namespaceSourceId("p1", "12345")).not.toBe(
       namespaceSourceId("p2", "12345")
     );

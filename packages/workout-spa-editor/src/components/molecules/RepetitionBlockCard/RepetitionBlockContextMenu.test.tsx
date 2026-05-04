@@ -14,6 +14,8 @@ describe("RepetitionBlockContextMenu", () => {
   describe("rendering", () => {
     it("should render trigger button", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <RepetitionBlockContextMenu
           onEditCount={vi.fn()}
@@ -24,13 +26,21 @@ describe("RepetitionBlockContextMenu", () => {
       );
 
       // Assert
+
+      // Act
+
       const trigger = screen.getByTestId("block-actions-trigger");
+
+      // Assert
+
       expect(trigger).toBeInTheDocument();
       expect(trigger).toHaveAttribute("aria-label", "Block actions");
     });
 
     it("should show menu when trigger is clicked", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <RepetitionBlockContextMenu
@@ -42,14 +52,22 @@ describe("RepetitionBlockContextMenu", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(screen.getByTestId("block-actions-trigger"));
 
       // Assert
+
+      // Assert
+
       expect(screen.getByTestId("block-actions-menu")).toBeInTheDocument();
     });
 
     it("should render all menu items", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <RepetitionBlockContextMenu
@@ -61,9 +79,15 @@ describe("RepetitionBlockContextMenu", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(screen.getByTestId("block-actions-trigger"));
 
       // Assert
+
+      // Assert
+
       expect(screen.getByTestId("edit-count-action")).toBeInTheDocument();
       expect(screen.getByTestId("add-step-action")).toBeInTheDocument();
       expect(screen.getByTestId("ungroup-action")).toBeInTheDocument();
@@ -72,6 +96,8 @@ describe("RepetitionBlockContextMenu", () => {
 
     it("should render menu items with correct text", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <RepetitionBlockContextMenu
@@ -83,9 +109,15 @@ describe("RepetitionBlockContextMenu", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(screen.getByTestId("block-actions-trigger"));
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText("Edit Count")).toBeInTheDocument();
       expect(screen.getByText("Add Step")).toBeInTheDocument();
       expect(screen.getByText("Ungroup")).toBeInTheDocument();
@@ -96,6 +128,8 @@ describe("RepetitionBlockContextMenu", () => {
   describe("interactions", () => {
     it("should call onEditCount when Edit Count is clicked", async () => {
       // Arrange
+      // Arrange
+
       const handleEditCount = vi.fn();
       const user = userEvent.setup();
       render(
@@ -109,14 +143,22 @@ describe("RepetitionBlockContextMenu", () => {
 
       // Act
       await user.click(screen.getByTestId("block-actions-trigger"));
+
+      // Act
+
       await user.click(screen.getByTestId("edit-count-action"));
 
       // Assert
+
+      // Assert
+
       expect(handleEditCount).toHaveBeenCalledOnce();
     });
 
     it("should call onAddStep when Add Step is clicked", async () => {
       // Arrange
+      // Arrange
+
       const handleAddStep = vi.fn();
       const user = userEvent.setup();
       render(
@@ -130,14 +172,22 @@ describe("RepetitionBlockContextMenu", () => {
 
       // Act
       await user.click(screen.getByTestId("block-actions-trigger"));
+
+      // Act
+
       await user.click(screen.getByTestId("add-step-action"));
 
       // Assert
+
+      // Assert
+
       expect(handleAddStep).toHaveBeenCalledOnce();
     });
 
     it("should call onUngroup when Ungroup is clicked", async () => {
       // Arrange
+      // Arrange
+
       const handleUngroup = vi.fn();
       const user = userEvent.setup();
       render(
@@ -151,14 +201,22 @@ describe("RepetitionBlockContextMenu", () => {
 
       // Act
       await user.click(screen.getByTestId("block-actions-trigger"));
+
+      // Act
+
       await user.click(screen.getByTestId("ungroup-action"));
 
       // Assert
+
+      // Assert
+
       expect(handleUngroup).toHaveBeenCalledOnce();
     });
 
     it("should call onDelete when Delete is clicked", async () => {
       // Arrange
+      // Arrange
+
       const handleDelete = vi.fn();
       const user = userEvent.setup();
       render(
@@ -172,14 +230,22 @@ describe("RepetitionBlockContextMenu", () => {
 
       // Act
       await user.click(screen.getByTestId("block-actions-trigger"));
+
+      // Act
+
       await user.click(screen.getByTestId("delete-action"));
 
       // Assert
+
+      // Assert
+
       expect(handleDelete).toHaveBeenCalledOnce();
     });
 
     it("should close menu after selecting an action", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <RepetitionBlockContextMenu
@@ -192,9 +258,15 @@ describe("RepetitionBlockContextMenu", () => {
 
       // Act
       await user.click(screen.getByTestId("block-actions-trigger"));
+
+      // Act
+
       await user.click(screen.getByTestId("edit-count-action"));
 
       // Assert
+
+      // Assert
+
       expect(
         screen.queryByTestId("block-actions-menu")
       ).not.toBeInTheDocument();
@@ -204,6 +276,8 @@ describe("RepetitionBlockContextMenu", () => {
   describe("accessibility", () => {
     it("should have proper aria-label on trigger", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <RepetitionBlockContextMenu
           onEditCount={vi.fn()}
@@ -214,12 +288,20 @@ describe("RepetitionBlockContextMenu", () => {
       );
 
       // Assert
+
+      // Act
+
       const trigger = screen.getByTestId("block-actions-trigger");
+
+      // Assert
+
       expect(trigger).toHaveAttribute("aria-label", "Block actions");
     });
 
     it("should be keyboard navigable", async () => {
       // Arrange
+      // Arrange
+
       const handleEditCount = vi.fn();
       const user = userEvent.setup();
       render(
@@ -237,9 +319,15 @@ describe("RepetitionBlockContextMenu", () => {
 
       // Wait for menu to appear
       const editCountAction = await screen.findByTestId("edit-count-action");
+
+      // Act
+
       await user.click(editCountAction);
 
       // Assert
+
+      // Assert
+
       expect(handleEditCount).toHaveBeenCalledOnce();
     });
   });
@@ -247,6 +335,8 @@ describe("RepetitionBlockContextMenu", () => {
   describe("styling", () => {
     it("should apply danger styling to delete action", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <RepetitionBlockContextMenu
@@ -261,12 +351,20 @@ describe("RepetitionBlockContextMenu", () => {
       await user.click(screen.getByTestId("block-actions-trigger"));
 
       // Assert
+
+      // Act
+
       const deleteAction = screen.getByTestId("delete-action");
+
+      // Assert
+
       expect(deleteAction).toHaveClass("text-red-600");
     });
 
     it("should have separator before delete action", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <RepetitionBlockContextMenu
@@ -282,7 +380,13 @@ describe("RepetitionBlockContextMenu", () => {
 
       // Assert
       const menu = screen.getByTestId("block-actions-menu");
+
+      // Act
+
       const separator = menu.querySelector('[role="separator"]');
+
+      // Assert
+
       expect(separator).toBeInTheDocument();
     });
   });

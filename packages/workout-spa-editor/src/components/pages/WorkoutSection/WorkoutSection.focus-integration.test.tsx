@@ -122,6 +122,8 @@ describe.each([
 
   it("should focus the next sibling after deleting a step", () => {
     // Arrange — two steps; delete the first.
+    // Arrange
+
     renderSection(buildKrd([step(0), step(1)]));
     const initialSecondId = readInner().steps[1].id;
 
@@ -134,9 +136,15 @@ describe.each([
     });
 
     // Assert — focus landed on what was the second step (now index 0).
+
+    // Act
+
     const activeId = (
       document.activeElement as HTMLElement | null
     )?.getAttribute("data-testid");
+
+    // Assert
+
     expect(activeId).toBe("step-card");
     // And it is the same DOM node as the original second step's card.
     const stepCards = document.querySelectorAll(
@@ -152,6 +160,8 @@ describe.each([
 
   it("should focus the new step after createStep", () => {
     // Arrange
+    // Arrange
+
     renderSection(buildKrd([step(0)]));
 
     // Act
@@ -163,7 +173,13 @@ describe.each([
     });
 
     // Assert — a second step exists and focus lives on a step card.
+
+    // Act
+
     const stepCards = document.querySelectorAll('[data-testid="step-card"]');
+
+    // Assert
+
     expect(stepCards.length).toBe(2);
     expect(
       (document.activeElement as HTMLElement | null)?.getAttribute(
@@ -174,6 +190,8 @@ describe.each([
 
   it("should focus the Add Step button when the list becomes empty", () => {
     // Arrange — one step; delete it.
+    // Arrange
+
     renderSection(buildKrd([step(0)]));
 
     // Act
@@ -187,14 +205,22 @@ describe.each([
     // Assert — focus on the Add Step button (the empty-state target).
     // Capture AFTER the mutation so we compare against the live
     // post-re-render DOM node, not a stale pre-mutation reference.
+
+    // Act
+
     const addStepButton = document.querySelector(
       '[data-testid="add-step-button"]'
     );
+
+    // Assert
+
     expect(document.activeElement).toBe(addStepButton);
   });
 
   it("should not move focus while an input inside the editor is focused", () => {
     // Arrange
+    // Arrange
+
     renderSection(buildKrd([step(0), step(1)]));
     // Inject an input inside the editor root; focus it; then trigger
     // a mutation that would normally move focus.
@@ -210,11 +236,17 @@ describe.each([
     act(() => {
       useWorkoutStore.getState().deleteStep(0);
     });
+
+    // Act
+
     act(() => {
       vi.runAllTimers();
     });
 
     // Assert — focus stayed on the input; pendingFocusTarget cleared.
+
+    // Assert
+
     expect(document.activeElement).toBe(input);
     expect(useWorkoutStore.getState().pendingFocusTarget).toBeNull();
   });
@@ -225,15 +257,23 @@ describe.each([
   // measure the pixel outline.
   it("should apply focus-visible ring classes to every focusable item target", () => {
     // Arrange
+    // Arrange
+
     renderSection(buildKrd([step(0), { repeatCount: 2, steps: [step(0)] }]));
 
     // Assert — both a step card and the block card carry the ring class.
     const stepCard = document.querySelector(
       '[data-testid="step-card"]'
     ) as HTMLElement;
+
+    // Act
+
     const blockCard = document.querySelector(
       '[data-testid="repetition-block-card"]'
     ) as HTMLElement;
+
+    // Assert
+
     expect(stepCard.className).toContain("focus-visible:ring-2");
     expect(blockCard.className).toContain("focus-visible:ring-2");
 
@@ -251,7 +291,12 @@ describe.each([
   // sequential order.
   it("should let step cards participate in normal sequential focus order (tabIndex=0)", () => {
     // Arrange
+    // Arrange
+
     renderSection(buildKrd([step(0)]));
+
+    // Act
+
     const stepCard = document.querySelector(
       '[data-testid="step-card"]'
     ) as HTMLElement;
@@ -259,6 +304,9 @@ describe.each([
     // Assert — tabIndex 0 means the user can Tab onto it; a focus move
     // by the hook lands on a normally-tabbable target, not a roving
     // -1 trap.
+
+    // Assert
+
     expect(stepCard.tabIndex).toBe(0);
   });
 });

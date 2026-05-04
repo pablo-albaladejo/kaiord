@@ -26,21 +26,35 @@ describe("ZoneIndicator", () => {
   });
 
   it("should show setup hint when no profile is selected", async () => {
+    // Arrange
+
+    // Act
+
     render(<ZoneIndicator sport="" />);
+
+    // Assert
 
     expect(await screen.findByText(/no profile selected/i)).toBeInTheDocument();
   });
 
   it("should show profile name when no sport is selected", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     await createProfile(persistence, "My Athlete");
 
+    // Act
+
     render(<ZoneIndicator sport="" />);
+
+    // Assert
 
     expect(await screen.findByText(/my athlete/i)).toBeInTheDocument();
   });
 
   it("should show thresholds for selected sport", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     const profile = await createProfile(persistence, "Cyclist");
     await updateSportThresholds(persistence, profile.id, "cycling", {
@@ -48,7 +62,11 @@ describe("ZoneIndicator", () => {
       ftp: 280,
     });
 
+    // Act
+
     render(<ZoneIndicator sport="cycling" />);
+
+    // Assert
 
     expect(await screen.findByText(/cyclist/i)).toBeInTheDocument();
     expect(await screen.findByText(/LTHR: 175bpm/)).toBeInTheDocument();
@@ -56,12 +74,19 @@ describe("ZoneIndicator", () => {
   });
 
   it("should show profile name for unconfigured sport thresholds", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     await createProfile(persistence, "Runner");
 
     // All sports have a sportZones entry by default; without thresholds
     // the component falls back to "{name}" with no summary suffix.
+
+    // Act
+
     render(<ZoneIndicator sport="cycling" />);
+
+    // Assert
 
     expect(await screen.findByText(/runner/i)).toBeInTheDocument();
   });

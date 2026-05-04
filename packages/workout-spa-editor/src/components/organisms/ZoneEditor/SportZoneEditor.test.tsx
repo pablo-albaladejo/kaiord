@@ -44,9 +44,15 @@ describe("SportZoneEditor", () => {
 
   describe("rendering", () => {
     it("should render sport tabs", async () => {
+      // Arrange
+
       const profile = await seedProfile();
 
+      // Act
+
       renderEditor(profile.id);
+
+      // Assert
 
       expect(
         await screen.findByRole("tab", { name: "Cycling" })
@@ -57,9 +63,15 @@ describe("SportZoneEditor", () => {
     });
 
     it("should default to cycling tab", async () => {
+      // Arrange
+
       const profile = await seedProfile();
 
+      // Act
+
       renderEditor(profile.id);
+
+      // Assert
 
       expect(
         await screen.findByRole("tab", { name: "Cycling" })
@@ -67,17 +79,29 @@ describe("SportZoneEditor", () => {
     });
 
     it("should show HR zones section", async () => {
+      // Arrange
+
       const profile = await seedProfile();
 
+      // Act
+
       renderEditor(profile.id);
+
+      // Assert
 
       expect(await screen.findByText("Heart Rate Zones")).toBeInTheDocument();
     });
 
     it("should show threshold inputs for cycling", async () => {
+      // Arrange
+
       const profile = await seedProfile();
 
+      // Act
+
       renderEditor(profile.id);
+
+      // Assert
 
       expect(
         await screen.findByLabelText("LTHR threshold")
@@ -86,9 +110,15 @@ describe("SportZoneEditor", () => {
     });
 
     it("should show zone method dropdown", async () => {
+      // Arrange
+
       const profile = await seedProfile();
 
+      // Act
+
       renderEditor(profile.id);
+
+      // Assert
 
       expect(
         await screen.findByLabelText("hr zone method")
@@ -99,12 +129,18 @@ describe("SportZoneEditor", () => {
 
   describe("tab switching", () => {
     it("should switch to running tab and show pace input", async () => {
+      // Arrange
+
       const profile = await seedProfile();
       const user = userEvent.setup();
 
       renderEditor(profile.id);
 
+      // Act
+
       await user.click(await screen.findByRole("tab", { name: "Running" }));
+
+      // Assert
 
       expect(screen.getByRole("tab", { name: "Running" })).toHaveAttribute(
         "aria-selected",
@@ -116,12 +152,18 @@ describe("SportZoneEditor", () => {
     });
 
     it("should switch to generic tab showing only HR zones", async () => {
+      // Arrange
+
       const profile = await seedProfile();
       const user = userEvent.setup();
 
       renderEditor(profile.id);
 
+      // Act
+
       await user.click(await screen.findByRole("tab", { name: "Generic" }));
+
+      // Assert
 
       expect(screen.getByText("Heart Rate Zones")).toBeInTheDocument();
       expect(screen.queryByText("Power Zones")).not.toBeInTheDocument();
@@ -131,6 +173,12 @@ describe("SportZoneEditor", () => {
 
   describe("zone method selection", () => {
     it("should change power zone method", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       const profile = await seedProfile();
       const user = userEvent.setup();
       const persistence = createDexiePersistence(db);
@@ -152,6 +200,12 @@ describe("SportZoneEditor", () => {
 
   describe("inline editing", () => {
     it("should edit zone name inline", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       const profile = await seedProfile();
       const user = userEvent.setup();
       const persistence = createDexiePersistence(db);
@@ -174,11 +228,18 @@ describe("SportZoneEditor", () => {
     });
 
     it("should render zone value buttons for editing", async () => {
+      // Arrange
+
       const profile = await seedProfile();
 
       renderEditor(profile.id);
 
+      // Act
+
       const minButtons = await screen.findAllByLabelText("HR Zone 1 min");
+
+      // Assert
+
       expect(minButtons.length).toBeGreaterThan(0);
 
       const maxButtons = screen.getAllByLabelText("HR Zone 1 max");
@@ -186,13 +247,20 @@ describe("SportZoneEditor", () => {
     });
 
     it("should show add zone button when method is custom", async () => {
+      // Arrange
+
       const profile = await seedProfile();
       const user = userEvent.setup();
 
       renderEditor(profile.id);
 
       const methodSelect = await screen.findByLabelText("power zone method");
+
+      // Act
+
       await user.selectOptions(methodSelect, "custom");
+
+      // Assert
 
       expect((await screen.findAllByText("+ Add Zone")).length).toBeGreaterThan(
         0
@@ -200,6 +268,8 @@ describe("SportZoneEditor", () => {
     });
 
     it("should show remove buttons when method is custom", async () => {
+      // Arrange
+
       const profile = await seedProfile();
       const user = userEvent.setup();
 
@@ -208,8 +278,13 @@ describe("SportZoneEditor", () => {
       const methodSelect = await screen.findByLabelText("power zone method");
       await user.selectOptions(methodSelect, "custom");
 
+      // Act
+
       const removeButtons =
         await screen.findAllByLabelText(/Remove \w+ zone \d/);
+
+      // Assert
+
       expect(removeButtons.length).toBeGreaterThan(0);
     });
   });

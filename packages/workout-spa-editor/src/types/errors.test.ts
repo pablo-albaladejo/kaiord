@@ -9,9 +9,16 @@ import { ConversionError, FileParsingError, ValidationError } from "./errors";
 describe("FileParsingError", () => {
   it("should create error with message only", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     const error = new FileParsingError("Test error");
 
     // Assert
+
+    // Assert
+
     expect(error).toBeInstanceOf(Error);
     expect(error).toBeInstanceOf(FileParsingError);
     expect(error.name).toBe("FileParsingError");
@@ -23,9 +30,16 @@ describe("FileParsingError", () => {
 
   it("should create error with line and column", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     const error = new FileParsingError("Test error", 5, 12);
 
     // Assert
+
+    // Assert
+
     expect(error.message).toBe("Test error");
     expect(error.line).toBe(5);
     expect(error.column).toBe(12);
@@ -33,12 +47,20 @@ describe("FileParsingError", () => {
 
   it("should create error with cause", () => {
     // Arrange
+    // Arrange
+
     const cause = new Error("Original error");
 
     // Act
+
+    // Act
+
     const error = new FileParsingError("Test error", 5, 12, cause);
 
     // Assert
+
+    // Assert
+
     expect(error.cause).toBe(cause);
   });
 });
@@ -46,15 +68,23 @@ describe("FileParsingError", () => {
 describe("ValidationError", () => {
   it("should create error with field errors", () => {
     // Arrange
+    // Arrange
+
     const errors = [
       { field: "version", message: "Required field missing" },
       { field: "type", message: "Invalid value" },
     ];
 
     // Act
+
+    // Act
+
     const error = new ValidationError("Validation failed", errors);
 
     // Assert
+
+    // Assert
+
     expect(error).toBeInstanceOf(Error);
     expect(error).toBeInstanceOf(ValidationError);
     expect(error.name).toBe("ValidationError");
@@ -65,13 +95,21 @@ describe("ValidationError", () => {
 
   it("should create error with cause", () => {
     // Arrange
+    // Arrange
+
     const cause = new Error("Original error");
     const errors = [{ field: "test", message: "Test error" }];
 
     // Act
+
+    // Act
+
     const error = new ValidationError("Validation failed", errors, cause);
 
     // Assert
+
+    // Assert
+
     expect(error.cause).toBe(cause);
   });
 });
@@ -79,9 +117,16 @@ describe("ValidationError", () => {
 describe("ConversionError", () => {
   it("should create error with format", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     const error = new ConversionError("Conversion failed", "fit");
 
     // Assert
+
+    // Assert
+
     expect(error).toBeInstanceOf(Error);
     expect(error).toBeInstanceOf(ConversionError);
     expect(error.name).toBe("ConversionError");
@@ -93,6 +138,10 @@ describe("ConversionError", () => {
 
   it("should create error with details", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     const error = new ConversionError(
       "Conversion failed",
       "tcx",
@@ -100,15 +149,23 @@ describe("ConversionError", () => {
     );
 
     // Assert
+
+    // Assert
+
     expect(error.format).toBe("tcx");
     expect(error.details).toBe("Invalid XML structure");
   });
 
   it("should create error with cause", () => {
     // Arrange
+    // Arrange
+
     const cause = new Error("Original error");
 
     // Act
+
+    // Act
+
     const error = new ConversionError(
       "Conversion failed",
       "zwo",
@@ -117,6 +174,9 @@ describe("ConversionError", () => {
     );
 
     // Assert
+
+    // Assert
+
     expect(error.cause).toBe(cause);
   });
 });
