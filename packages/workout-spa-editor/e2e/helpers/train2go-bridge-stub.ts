@@ -32,13 +32,40 @@ export const TRAIN2GO_BRIDGE_ID = "train2go-bridge";
  * Kept alongside the stub so the e2e and the bridge can drift in lockstep.
  */
 export const FIXTURE_ZONES_PAYLOAD = {
-  physiological: { weight: 83, bpmMax: 187 },
+  physiological: { weight: 83, bpmMax: 187, bpmRest: 51 },
   paces: {
-    cycling: { z4Upper: 268, z5Lower: 269 },
-    running: { z4Upper: { min: 4, sec: 10 } },
-    swimming: { z4Upper: { min: 1, sec: 32 } },
+    cycling: {
+      z1: { lower: 111, upper: 149 },
+      z2: { lower: 150, upper: 203 },
+      z3: { lower: 204, upper: 239 },
+      z4: { lower: 240, upper: 268 },
+      z5: { lower: 269, upper: 386 },
+      z4Upper: 268,
+      z5Lower: 269,
+    },
+    running: {
+      z4: {
+        lower: { min: 4, sec: 44 },
+        upper: { min: 4, sec: 10 },
+      },
+      z4Upper: { min: 4, sec: 10 },
+    },
+    swimming: {
+      z4: {
+        lower: { min: 1, sec: 39 },
+        upper: { min: 1, sec: 32 },
+      },
+      z4Upper: { min: 1, sec: 32 },
+    },
   },
   hrZones: {
+    generic: {
+      z1: { lower: 107, upper: 133 },
+      z2: { lower: 134, upper: 147 },
+      z3: { lower: 148, upper: 160 },
+      z4: { lower: 161, upper: 174 },
+      z5: { lower: 175, upper: 187 },
+    },
     cycling: { z4Upper: 174 },
     running: { z4Upper: 168 },
   },
