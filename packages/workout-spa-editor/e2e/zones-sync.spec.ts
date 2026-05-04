@@ -313,62 +313,87 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     // power bands. T2G payload provides FTP=268 + power Z1-Z5 bands.
     // Per D-MA6 the dialog SHALL render a single "Cycling threshold +
     // zones" group, NOT separate FTP scalar row + power bands group.
-    await page.evaluate(async ({ profileId, ts }) => {
-      type Db = {
-        table: (n: string) => {
-          put: (r: unknown) => Promise<unknown>;
-          clear: () => Promise<unknown>;
-          bulkPut?: (r: unknown[]) => Promise<unknown>;
+    await page.evaluate(
+      async ({ profileId, ts }) => {
+        type Db = {
+          table: (n: string) => {
+            put: (r: unknown) => Promise<unknown>;
+            clear: () => Promise<unknown>;
+            bulkPut?: (r: unknown[]) => Promise<unknown>;
+          };
         };
-      };
-      const db = (window as unknown as Record<string, unknown>)
-        .__KAIORD_DB__ as Db;
-      await db.table("profiles").clear();
-      await db.table("meta").put({ key: "activeProfileId", value: profileId });
-      await db.table("profiles").put({
-        id: profileId,
-        name: "FTP+Power E2E",
-        sportZones: {
-          cycling: {
-            thresholds: { ftp: 200 },
-            heartRateZones: { method: "custom", zones: [] },
-            // Power bands are method = "user" with values that differ
-            // from T2G's bands (so the classifier returns
-            // user-customized → emits per-band conflicts).
-            powerZones: {
-              method: "user",
-              zones: [
-                { zone: 1, name: "Active Recovery", minPercent: 0, maxPercent: 60 },
-                { zone: 2, name: "Endurance", minPercent: 61, maxPercent: 80 },
-                { zone: 3, name: "Tempo", minPercent: 81, maxPercent: 95 },
-                { zone: 4, name: "Lactate Threshold", minPercent: 96, maxPercent: 110 },
-                { zone: 5, name: "VO2 Max", minPercent: 111, maxPercent: 130 },
-              ],
+        const db = (window as unknown as Record<string, unknown>)
+          .__KAIORD_DB__ as Db;
+        await db.table("profiles").clear();
+        await db
+          .table("meta")
+          .put({ key: "activeProfileId", value: profileId });
+        await db.table("profiles").put({
+          id: profileId,
+          name: "FTP+Power E2E",
+          sportZones: {
+            cycling: {
+              thresholds: { ftp: 200 },
+              heartRateZones: { method: "custom", zones: [] },
+              // Power bands are method = "user" with values that differ
+              // from T2G's bands (so the classifier returns
+              // user-customized → emits per-band conflicts).
+              powerZones: {
+                method: "user",
+                zones: [
+                  {
+                    zone: 1,
+                    name: "Active Recovery",
+                    minPercent: 0,
+                    maxPercent: 60,
+                  },
+                  {
+                    zone: 2,
+                    name: "Endurance",
+                    minPercent: 61,
+                    maxPercent: 80,
+                  },
+                  { zone: 3, name: "Tempo", minPercent: 81, maxPercent: 95 },
+                  {
+                    zone: 4,
+                    name: "Lactate Threshold",
+                    minPercent: 96,
+                    maxPercent: 110,
+                  },
+                  {
+                    zone: 5,
+                    name: "VO2 Max",
+                    minPercent: 111,
+                    maxPercent: 130,
+                  },
+                ],
+              },
             },
           },
-        },
-        linkedAccounts: [
-          {
-            source: "train2go",
-            externalUserId: "99999",
-            externalUserName: "Test User",
-            linkedAt: ts,
-            syncZones: true,
-          },
-        ],
-        createdAt: ts,
-        updatedAt: ts,
-      });
-      const dbWithBulk = db as Db & {
-        table: (n: string) => {
-          put: (r: unknown) => Promise<unknown>;
-          clear: () => Promise<unknown>;
-          bulkPut?: (r: unknown[]) => Promise<unknown>;
+          linkedAccounts: [
+            {
+              source: "train2go",
+              externalUserId: "99999",
+              externalUserName: "Test User",
+              linkedAt: ts,
+              syncZones: true,
+            },
+          ],
+          createdAt: ts,
+          updatedAt: ts,
+        });
+        const dbWithBulk = db as Db & {
+          table: (n: string) => {
+            put: (r: unknown) => Promise<unknown>;
+            clear: () => Promise<unknown>;
+            bulkPut?: (r: unknown[]) => Promise<unknown>;
+          };
         };
-      };
-      const wo = dbWithBulk.table("workouts");
-      if (wo.bulkPut) await wo.bulkPut([]);
-    }, { profileId: PROFILE_ID, ts: NOW_ISO });
+        const wo = dbWithBulk.table("workouts");
+        if (wo.bulkPut) await wo.bulkPut([]);
+      },
+      { profileId: PROFILE_ID, ts: NOW_ISO }
+    );
 
     await navigateToWeek(page);
     await waitForSyncButton(page);
