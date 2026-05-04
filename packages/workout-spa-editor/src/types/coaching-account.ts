@@ -11,24 +11,54 @@
  * `externalUserId` is stored as `string` and MUST be captured at the
  * JSON parse boundary in the platform-specific transport adapter
  * (never `String(parsedNumber)` — lossy for ids above MAX_SAFE_INTEGER).
+ *
+ * `lastSyncedZonesSnapshot` (added in v9) captures the post-mapper
+ * Kaiord-domain zones + threshold scalars from the most recent
+ * successful T2G sync. Used by the zone-table classifier to detect
+ * "user edited zones since last sync" without per-zone tracking.
  */
 
 import { z } from "zod";
 
 import type { Profile } from "./profile";
+import { heartRateZoneSchema, powerZoneSchema } from "./zone-schemas";
+
+const paceZoneSchema = z.object({
+  zone: z.number().int().min(1).max(5),
+  name: z.string().min(1).max(50),
+  minPace: z.number().min(0),
+  maxPace: z.number().min(0),
+  unit: z.enum(["min_per_km", "min_per_100m"]),
+});
+
+export const lastSyncedZonesSnapshotSchema = z.object({
+  syncedAt: z.iso.datetime(),
+  cyclingHr: z.array(heartRateZoneSchema).length(5),
+  runningHr: z.array(heartRateZoneSchema).length(5),
+  swimmingHr: z.array(heartRateZoneSchema).length(5),
+  cyclingPower: z.array(powerZoneSchema).length(5),
+  runningPace: z.array(paceZoneSchema).length(5),
+  swimmingPace: z.array(paceZoneSchema).length(5),
+  bodyWeight: z.number().positive().optional(),
+  maxHeartRate: z.number().int().positive().max(250).optional(),
+  cyclingFtp: z.number().int().positive().optional(),
+  cyclingLthr: z.number().int().positive().max(250).optional(),
+  runningLthr: z.number().int().positive().max(250).optional(),
+  runningThresholdPace: z.number().positive().optional(),
+  swimmingCss: z.number().positive().optional(),
+});
+
+export type LastSyncedZonesSnapshot = z.infer<
+  typeof lastSyncedZonesSnapshotSchema
+>;
 
 export const linkedCoachingAccountSchema = z.object({
   source: z.string().min(1),
   externalUserId: z.string().min(1),
   externalUserName: z.string().min(1),
   linkedAt: z.iso.datetime(),
-  /**
-   * Opt-in flag — when true, the connect/sync flows ALSO fan out into
-   * a zones-sync against this platform. Existing rows persisted before
-   * the field was introduced read `undefined`; the use case treats
-   * undefined as `false` (no Dexie schema bump required).
-   */
   syncZones: z.boolean().optional(),
+  lastSyncedZonesSnapshot: lastSyncedZonesSnapshotSchema.optional(),
 });
 
 export type LinkedCoachingAccount = z.infer<typeof linkedCoachingAccountSchema>;
@@ -53,6 +83,10 @@ export function linkCoachingAccount(
 /**
  * Removes a linked coaching account by source. No-op if not present.
  * Returns a new Profile; does not mutate the input.
+ *
+ * Atomic snapshot removal: the per-account `lastSyncedZonesSnapshot`
+ * is removed alongside the account record (it lives on `linkedAccounts[i]`,
+ * so removing the entry removes the snapshot — no orphan data).
  */
 export function unlinkCoachingAccount(
   profile: Profile,
