@@ -204,8 +204,8 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
-    needs: detect-changes
-    if: always() && needs.detect-changes.outputs.should-test == 'true'
+    needs: [detect-changes, build]
+    if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -223,8 +223,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build packages (required for type checking)
-        run: pnpm -r build
+      - name: Consume build artifacts
+        uses: ./.github/actions/consume-build-artifacts
 
       - name: Run linting (ESLint + Prettier)
         run: pnpm lint
@@ -393,8 +393,8 @@ jobs:
 
   typecheck:
     runs-on: ubuntu-latest
-    needs: detect-changes
-    if: always() && needs.detect-changes.outputs.should-test == 'true'
+    needs: [detect-changes, build]
+    if: needs.detect-changes.outputs.should-test == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -402,16 +402,16 @@ jobs:
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
 
-      - name: Build packages (required for type checking)
-        run: pnpm -r build
+      - name: Consume build artifacts
+        uses: ./.github/actions/consume-build-artifacts
 
       - name: Run TypeScript type checking
         run: pnpm -r exec tsc --noEmit
 
   test:
     runs-on: ubuntu-latest
-    needs: detect-changes
-    if: always() && needs.detect-changes.outputs.should-test == 'true'
+    needs: [detect-changes, build]
+    if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -437,8 +437,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build dependencies
-        run: pnpm -r build
+      - name: Consume build artifacts
+        uses: ./.github/actions/consume-build-artifacts
 
       - name: Run tests with coverage
         run: pnpm --filter @kaiord/${{ matrix.package }} test:coverage
@@ -483,7 +483,11 @@ jobs:
   build:
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: always() && needs.detect-changes.outputs.should-test == 'true'
+    # Actor check is redundant with detect-changes' own gate (line ~31),
+    # but kept as belt-and-braces; if detect-changes' gate ever moves,
+    # build still skips bot commits. Default success() over needs:
+    # propagates the skip to consumers via their own needs:[..., build].
+    if: github.actor != 'github-actions[bot]' && needs.detect-changes.outputs.should-test == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -495,8 +499,14 @@ jobs:
         run: pnpm -r build
 
       - name: Verify build outputs
+        # Verify every package whose dist/ a downstream consumer reads.
+        # `test-frontend`, `e2e-frontend`, and `e2e-prod-base` consume
+        # `workout-spa-editor/dist` (the SPA's vite build). The bridges
+        # (`garmin-bridge`, `train2go-bridge`) are raw Chrome-extension
+        # source — they have no `build` script and produce no dist/, so
+        # they are intentionally excluded.
         run: |
-          for pkg in core fit tcx zwo garmin garmin-connect cli mcp ai; do
+          for pkg in core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor; do
             if [ ! -d "packages/$pkg/dist" ]; then
               echo "::error::@kaiord/$pkg build output not found"
               exit 1
@@ -512,12 +522,14 @@ jobs:
           path: |
             packages/*/dist/
             packages/*/package.json
-          retention-days: 7
+          # 30 days covers the typical PR review cycle so "Re-run failed
+          # jobs only" stays usable; spec floor 14, ceiling 90.
+          retention-days: 30
 
   test-frontend:
     runs-on: ubuntu-latest
-    needs: detect-changes
-    if: always() && needs.detect-changes.outputs.should-test == 'true'
+    needs: [detect-changes, build]
+    if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -531,11 +543,10 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build dependencies
-        # CODECOV_TOKEN enables bundle analysis upload for SPA (only on the minimum supported Node version)
-        env:
-          CODECOV_TOKEN: ${{ matrix.node-version == '22.18.0' && secrets.CODECOV_TOKEN || '' }}
-        run: pnpm -r build
+      - name: Consume build artifacts
+        uses: ./.github/actions/consume-build-artifacts
+        with:
+          expected-packages: "core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor"
 
       - name: Run frontend tests with coverage
         run: pnpm --filter @kaiord/workout-spa-editor test:coverage
@@ -564,8 +575,8 @@ jobs:
 
   test-cli:
     runs-on: ubuntu-latest
-    needs: detect-changes
-    if: always() && needs.detect-changes.outputs.should-test == 'true'
+    needs: [detect-changes, build]
+    if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -579,8 +590,8 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
 
-      - name: Build all packages (CLI depends on all adapters)
-        run: pnpm -r build
+      - name: Consume build artifacts
+        uses: ./.github/actions/consume-build-artifacts
 
       - name: Run CLI tests with coverage
         run: pnpm --filter @kaiord/cli test:coverage
@@ -609,8 +620,8 @@ jobs:
 
   round-trip:
     runs-on: ubuntu-latest
-    needs: detect-changes
-    if: always() && needs.detect-changes.outputs.should-test == 'true'
+    needs: [detect-changes, build]
+    if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
       fail-fast: false
       matrix:
@@ -622,8 +633,8 @@ jobs:
       - name: Setup pnpm with caching
         uses: ./.github/actions/setup-pnpm
 
-      - name: Build dependencies
-        run: pnpm -r build
+      - name: Consume build artifacts
+        uses: ./.github/actions/consume-build-artifacts
 
       - name: Run round-trip tests
         run: |
@@ -661,8 +672,10 @@ jobs:
   e2e-frontend:
     runs-on: ubuntu-latest
     needs: [detect-changes, build]
+    # needs.build.result success check is redundant with default success()
+    # over needs:, but kept explicit since this clause uses if: | multi-line
+    # and the frontend-changed gate is the load-bearing narrowing.
     if: |
-      needs.build.result == 'success' &&
       needs.detect-changes.outputs.should-test == 'true' &&
       needs.detect-changes.outputs.frontend-changed == 'true'
     strategy:
@@ -678,8 +691,10 @@ jobs:
         with:
           node-version: "22.18.0"
 
-      - name: Build dependencies
-        run: pnpm -r build
+      - name: Consume build artifacts
+        uses: ./.github/actions/consume-build-artifacts
+        with:
+          expected-packages: "core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor"
 
       - name: Install Playwright browsers
         run: pnpm --filter @kaiord/workout-spa-editor exec playwright install --with-deps chromium
@@ -699,7 +714,6 @@ jobs:
     runs-on: ubuntu-latest
     needs: [detect-changes, build]
     if: |
-      needs.build.result == 'success' &&
       needs.detect-changes.outputs.should-test == 'true' &&
       needs.detect-changes.outputs.frontend-changed == 'true'
     steps:
@@ -711,8 +725,10 @@ jobs:
         with:
           node-version: "22.18.0"
 
-      - name: Build dependencies
-        run: pnpm -r build
+      - name: Consume build artifacts
+        uses: ./.github/actions/consume-build-artifacts
+        with:
+          expected-packages: "core fit tcx zwo garmin garmin-connect cli mcp ai workout-spa-editor"
 
       - name: Install Playwright browsers
         run: pnpm --filter @kaiord/workout-spa-editor exec playwright install --with-deps chromium
@@ -730,63 +746,143 @@ jobs:
           path: packages/workout-spa-editor/playwright-report/
           retention-days: 30
 
+  # Bundle-size analysis (Codecov Vite plugin). The plugin instruments
+  # vite build via a Vite plugin hook, so it cannot consume the
+  # packages/*/dist artifact and is intentionally NOT a build consumer.
+  # See openspec/specs/ci-build-fanout/spec.md "Bundle-analysis exception".
+  bundle-analysis:
+    name: bundle-analysis
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: |
+      needs.detect-changes.outputs.should-test == 'true' &&
+      needs.detect-changes.outputs.frontend-changed == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm with caching
+        uses: ./.github/actions/setup-pnpm
+        with:
+          node-version: "22.18.0"
+
+      - name: Build SPA with Codecov bundle plugin
+        # Step-level fork-PR skip: secrets.* is not reliably evaluable in
+        # job-level if:. Materialize the secret into env first, then
+        # guard at step level via env. On fork PRs env is empty → step
+        # is skipped, the job exits zero with no upload.
+        env:
+          CODECOV_TOKEN: ${{ secrets.CODECOV_TOKEN }}
+        if: env.CODECOV_TOKEN != ''
+        run: pnpm --filter @kaiord/workout-spa-editor build
+
   # Summary jobs for branch protection
-  # These jobs have fixed names that match branch protection requirements
+  # These jobs have fixed names that match branch protection requirements.
+  # They retain `if: always()` legitimately because they observe consumer
+  # status — they are NOT consumers themselves and are correctly excluded
+  # from the consumer enumeration in scripts/check-ci-fanout-invariants.mjs.
+  #
+  # Four-state logic per Decision 12 (spec "Branch-protection summary jobs
+  # reflect build status"):
+  #   build=skipped → consumer=skipped → green (docs-only PR; intentional).
+  #   build=failure → consumer=skipped → red, naming build as upstream cause.
+  #   build=success + consumer=success → green.
+  #   build=success + consumer=skipped → red (workflow misconfiguration).
   lint-summary:
     name: lint
     runs-on: ubuntu-latest
-    needs: lint
+    needs: [build, lint]
     if: always()
     steps:
-      - name: Check lint status
+      - name: Check lint status (with build awareness)
         run: |
-          if [ "${{ needs.lint.result }}" != "success" ] && [ "${{ needs.lint.result }}" != "skipped" ]; then
-            echo "Lint failed"
+          build_result="${{ needs.build.result }}"
+          lint_result="${{ needs.lint.result }}"
+          if [ "$build_result" = "skipped" ]; then
+            echo "Build skipped (docs-only); lint correctly not run."
+            exit 0
+          fi
+          if [ "$build_result" = "failure" ]; then
+            echo "::error::Build failed; lint did not run. Fix the build error and re-run."
             exit 1
           fi
-          echo "Lint passed or skipped"
+          if [ "$lint_result" != "success" ]; then
+            echo "::error::Build succeeded but lint did not. Lint result: $lint_result"
+            exit 1
+          fi
+          echo "Lint passed."
 
   test-summary:
     name: test
     runs-on: ubuntu-latest
-    needs: test
+    needs: [build, test]
     if: always()
     steps:
-      - name: Check test status
+      - name: Check test status (with build awareness)
         run: |
-          if [ "${{ needs.test.result }}" != "success" ] && [ "${{ needs.test.result }}" != "skipped" ]; then
-            echo "Tests failed"
+          build_result="${{ needs.build.result }}"
+          test_result="${{ needs.test.result }}"
+          if [ "$build_result" = "skipped" ]; then
+            echo "Build skipped (docs-only); test correctly not run."
+            exit 0
+          fi
+          if [ "$build_result" = "failure" ]; then
+            echo "::error::Build failed; test did not run. Fix the build error and re-run."
             exit 1
           fi
-          echo "Tests passed or skipped"
+          if [ "$test_result" != "success" ]; then
+            echo "::error::Build succeeded but test did not. Test result: $test_result"
+            exit 1
+          fi
+          echo "Tests passed."
 
   round-trip-summary:
     name: round-trip
     runs-on: ubuntu-latest
-    needs: round-trip
+    needs: [build, round-trip]
     if: always()
     steps:
-      - name: Check round-trip status
+      - name: Check round-trip status (with build awareness)
         run: |
-          if [ "${{ needs.round-trip.result }}" != "success" ] && [ "${{ needs.round-trip.result }}" != "skipped" ]; then
-            echo "Round-trip tests failed"
+          build_result="${{ needs.build.result }}"
+          rt_result="${{ needs.round-trip.result }}"
+          if [ "$build_result" = "skipped" ]; then
+            echo "Build skipped (docs-only); round-trip correctly not run."
+            exit 0
+          fi
+          if [ "$build_result" = "failure" ]; then
+            echo "::error::Build failed; round-trip did not run. Fix the build error and re-run."
             exit 1
           fi
-          echo "Round-trip tests passed or skipped"
+          if [ "$rt_result" != "success" ]; then
+            echo "::error::Build succeeded but round-trip did not. Round-trip result: $rt_result"
+            exit 1
+          fi
+          echo "Round-trip tests passed."
 
   test-frontend-summary:
     name: test-frontend
     runs-on: ubuntu-latest
-    needs: test-frontend
+    needs: [build, test-frontend]
     if: always()
     steps:
-      - name: Check frontend test status
+      - name: Check frontend test status (with build awareness)
         run: |
-          if [ "${{ needs.test-frontend.result }}" != "success" ] && [ "${{ needs.test-frontend.result }}" != "skipped" ]; then
-            echo "Frontend tests failed"
+          build_result="${{ needs.build.result }}"
+          tf_result="${{ needs.test-frontend.result }}"
+          if [ "$build_result" = "skipped" ]; then
+            echo "Build skipped (docs-only); test-frontend correctly not run."
+            exit 0
+          fi
+          if [ "$build_result" = "failure" ]; then
+            echo "::error::Build failed; test-frontend did not run. Fix the build error and re-run."
             exit 1
           fi
-          echo "Frontend tests passed or skipped"
+          if [ "$tf_result" != "success" ]; then
+            echo "::error::Build succeeded but test-frontend did not. Test-frontend result: $tf_result"
+            exit 1
+          fi
+          echo "Frontend tests passed."
 
   notify-failure:
     name: Notify on Failure

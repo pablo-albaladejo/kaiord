@@ -52,7 +52,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test && pnpm test:scripts",
-    "lint": "pnpm -r lint && pnpm lint:archive && pnpm lint:archive-index && pnpm lint:archive-followups && pnpm lint:specs && pnpm lint:tsup-watchdog && pnpm lint:mapper-no-tests && pnpm lint:converter-has-tests && pnpm lint:husky-no-bypass && pnpm lint:package-deps && pnpm lint:architecture && pnpm lint:no-unconditional-skip && pnpm lint:no-library-dual-mount && pnpm lint:allowlists-empty && pnpm lint:icons-distinct",
+    "lint": "pnpm -r lint && pnpm lint:archive && pnpm lint:archive-index && pnpm lint:archive-followups && pnpm lint:specs && pnpm lint:tsup-watchdog && pnpm lint:mapper-no-tests && pnpm lint:converter-has-tests && pnpm lint:husky-no-bypass && pnpm lint:package-deps && pnpm lint:architecture && pnpm lint:no-unconditional-skip && pnpm lint:no-library-dual-mount && pnpm lint:allowlists-empty && pnpm lint:icons-distinct && pnpm lint:build-portable && pnpm lint:ci-fanout",
     "lint:fix": "pnpm -r lint:fix && prettier --write .",
     "lint:packages": "pnpm -r lint",
     "lint:archive": "node scripts/check-archive-dates.mjs",
@@ -69,6 +69,8 @@
     "lint:no-library-dual-mount": "node scripts/check-no-library-dual-mount.mjs",
     "lint:allowlists-empty": "node scripts/check-allowlists-empty.mjs",
     "lint:icons-distinct": "node scripts/check-extension-icons-distinct.mjs",
+    "lint:build-portable": "node scripts/check-build-portable.mjs",
+    "lint:ci-fanout": "node scripts/check-ci-fanout-invariants.mjs",
     "lint:links": "bash scripts/lint-links.sh",
     "icons:build": "node scripts/build-extension-icons.mjs",
     "popup:sync": "node scripts/sync-popup-css.mjs",
@@ -109,6 +111,7 @@
     "sharp": "^0.34.5",
     "size-limit": "^12.1.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.1"
+    "typescript-eslint": "^8.59.1",
+    "yaml": "^2.8.3"
   }
 }
