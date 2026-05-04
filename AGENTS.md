@@ -124,6 +124,7 @@ it("should reject malformed input", () => {
 Out-of-scope files: `**/*.stories.{ts,tsx}` (Storybook), `**/test-utils/**`, `**/test-setup.ts`, `e2e/**` (Playwright).
 
 Enforced at three layers:
+
 - **IDE**: ESLint `vitest/valid-title` rule at `'error'` (yellow squiggle).
 - **pre-commit**: `pnpm test:scripts` runs `scripts/check-test-{title-should,aaa}.mjs` on staged files via `--changed-files`.
 - **CI**: same scripts in full-tree mode.

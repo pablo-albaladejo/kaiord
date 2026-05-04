@@ -8,7 +8,6 @@ The `test-conventions` capability defines two structural invariants every Vitest
 
 ## Requirements
 
-
 ### Requirement: `it(...)` titles SHALL start with `should ` (dogma)
 
 Every `it`-rooted call in any `*.test.{ts,tsx}` file in scope SHALL pass a string-literal or template-literal first argument whose textual prefix (after stripping vitest substitution placeholders `%s`, `%d`, `%i`, `%j`, `%o`, `%#`, `$1`, `$2`, and named `$prop` references per vitest's `test.each` API) equals `should ` (the literal seven characters `s`, `h`, `o`, `u`, `l`, `d`, space — case-sensitive lowercase).
