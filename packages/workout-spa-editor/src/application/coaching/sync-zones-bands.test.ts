@@ -123,16 +123,22 @@ describe("syncZones full-bands — HR fallback chain", () => {
     expect(result.ok).toBe(true);
     if (!result.ok) return;
     const persisted = await repo.getById(PROFILE_ID);
-    expect(persisted?.sportZones.cycling?.heartRateZones.zones[3]).toMatchObject({
+    expect(
+      persisted?.sportZones.cycling?.heartRateZones.zones[3]
+    ).toMatchObject({
       minBpm: 161,
       maxBpm: 174,
     });
-    expect(persisted?.sportZones.running?.heartRateZones.zones[3]).toMatchObject({
+    expect(
+      persisted?.sportZones.running?.heartRateZones.zones[3]
+    ).toMatchObject({
       minBpm: 158,
       maxBpm: 168,
     });
     // Swimming has no Specific block → falls back to Generic.
-    expect(persisted?.sportZones.swimming?.heartRateZones.zones[3]).toMatchObject({
+    expect(
+      persisted?.sportZones.swimming?.heartRateZones.zones[3]
+    ).toMatchObject({
       minBpm: 161,
       maxBpm: 174,
     });
@@ -374,7 +380,10 @@ describe("mapPayloadToIncoming — direct unit tests for the band paths", () => 
   });
 });
 
-const collectKeys = (node: unknown, acc: Set<string> = new Set()): Set<string> => {
+const collectKeys = (
+  node: unknown,
+  acc: Set<string> = new Set()
+): Set<string> => {
   if (node === null || typeof node !== "object") return acc;
   if (Array.isArray(node)) {
     for (const child of node) collectKeys(child, acc);

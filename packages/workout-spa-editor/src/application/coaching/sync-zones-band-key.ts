@@ -24,7 +24,8 @@ export type ParsedBandKey =
 
 const HR_BAND_RE =
   /^(cycling|running|swimming)\.heartRateZones\.(z[1-5])\.(minBpm|maxBpm)$/;
-const POWER_BAND_RE = /^cycling\.powerZones\.(z[1-5])\.(minPercent|maxPercent)$/;
+const POWER_BAND_RE =
+  /^cycling\.powerZones\.(z[1-5])\.(minPercent|maxPercent)$/;
 const PACE_BAND_RE =
   /^(running|swimming)\.paceZones\.(z[1-5])\.(minPace|maxPace)$/;
 

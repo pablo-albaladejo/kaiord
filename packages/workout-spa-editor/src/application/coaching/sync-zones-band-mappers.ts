@@ -79,9 +79,7 @@ export const setCyclingPowerBands = (
   }
 };
 
-type RunSwimPaces = NonNullable<
-  NonNullable<ZonesPayload["paces"]>["running"]
->;
+type RunSwimPaces = NonNullable<NonNullable<ZonesPayload["paces"]>["running"]>;
 
 const minSecToSeconds = (ms: { min: number; sec: number }): number =>
   ms.min * 60 + ms.sec;

@@ -19,7 +19,8 @@ type Sport = "cycling" | "running" | "swimming";
 type Band = "z1" | "z2" | "z3" | "z4" | "z5";
 
 type HrBoundKey = `${Sport}.heartRateZones.${Band}.${"minBpm" | "maxBpm"}`;
-type PowerBoundKey = `cycling.powerZones.${Band}.${"minPercent" | "maxPercent"}`;
+type PowerBoundKey =
+  `cycling.powerZones.${Band}.${"minPercent" | "maxPercent"}`;
 type PaceBoundKey = `${"running" | "swimming"}.paceZones.${Band}.${
   | "minPace"
   | "maxPace"}`;
