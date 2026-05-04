@@ -26,12 +26,7 @@
 // completes (the title-guard's empty allowlist + ESLint vitest/valid-title
 // at 'error' enforce the contract going forward).
 
-import {
-  readFileSync,
-  readdirSync,
-  statSync,
-  writeFileSync,
-} from "node:fs";
+import { readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -512,9 +507,7 @@ function formatQueue(queue) {
 if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   const argv = process.argv.slice(2);
   const targetFiles =
-    argv.length > 0
-      ? argv.map((p) => resolve(REPO_ROOT, p))
-      : listTestFiles();
+    argv.length > 0 ? argv.map((p) => resolve(REPO_ROOT, p)) : listTestFiles();
 
   const queue = [];
   let modifiedCount = 0;
@@ -539,6 +532,8 @@ if (import.meta.url === pathToFileURL(process.argv[1]).href) {
   console.log(
     `[codemod-should-prefix] modified ${modifiedCount} file(s); ` +
       `${queue.length} title(s) queued for manual review` +
-      (queue.length > 0 ? ` in ${relative(REPO_ROOT, REVIEW_QUEUE_PATH)}.` : ".")
+      (queue.length > 0
+        ? ` in ${relative(REPO_ROOT, REVIEW_QUEUE_PATH)}.`
+        : ".")
   );
 }

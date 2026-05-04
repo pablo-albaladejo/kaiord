@@ -46,7 +46,13 @@ export function* findItTitles(source) {
         match.index + match[0].lastIndexOf(`${quote}${title}${quote}`) + 1;
       if (seen.has(titleStart)) continue;
       seen.add(titleStart);
-      yield { quote, title, titleStart, fullMatch: match[0], matchIndex: match.index };
+      yield {
+        quote,
+        title,
+        titleStart,
+        fullMatch: match[0],
+        matchIndex: match.index,
+      };
     }
   }
   // Order matters: it.each first so its title wins over any plain

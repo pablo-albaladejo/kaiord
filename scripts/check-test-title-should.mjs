@@ -42,9 +42,7 @@ const PACKAGES_DIR = join(REPO_ROOT, "packages");
 // net-new violators landed during prior PR review windows.
 //
 // Format: `<repo-relative-path>:<line>` (POSIX path separators).
-let ALLOWLIST = new Set([
-
-]);
+let ALLOWLIST = new Set([]);
 
 // Hook for tests — allows tests to substitute a controlled allowlist.
 export function __setAllowlistForTest(allowlist) {

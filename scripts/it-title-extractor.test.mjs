@@ -27,7 +27,10 @@ test("findItTitles: it.skip / it.only / it.todo / it.fails", () => {
   const titles = [...findItTitles(source)].map((t) => t.title);
 
   // Assert
-  assert.deepEqual(titles.sort(), ["handles c", "rejects b", "returns a", "throws d"].sort());
+  assert.deepEqual(
+    titles.sort(),
+    ["handles c", "rejects b", "returns a", "throws d"].sort()
+  );
 });
 
 test("findItTitles: it.each(array)(title) does NOT capture array contents as title", () => {
@@ -68,7 +71,11 @@ test("findItTitles: mix of plain and it.each in same file", () => {
   const titles = [...findItTitles(source)].map((t) => t.title);
 
   // Assert
-  assert.deepEqual(titles.sort(), ["another plain", "each title %s", "plain title"]);
+  assert.deepEqual(titles.sort(), [
+    "another plain",
+    "each title %s",
+    "plain title",
+  ]);
 });
 
 test("findItTitles: titleStart points at the first character inside the opening quote", () => {

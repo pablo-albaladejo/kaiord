@@ -9,12 +9,18 @@ import {
 
 test("rewriteTitle: drop-s rule for `renders`", () => {
   // Arrange / Act / Assert
-  assert.equal(rewriteTitle("renders the calendar"), "should render the calendar");
+  assert.equal(
+    rewriteTitle("renders the calendar"),
+    "should render the calendar"
+  );
 });
 
 test("rewriteTitle: drop-s rule for `returns`", () => {
   // Arrange / Act / Assert
-  assert.equal(rewriteTitle("returns null on empty input"), "should return null on empty input");
+  assert.equal(
+    rewriteTitle("returns null on empty input"),
+    "should return null on empty input"
+  );
 });
 
 test("rewriteTitle: be-substitution for `is`", () => {
@@ -32,7 +38,10 @@ test("rewriteTitle: negation-elision for `does not`", () => {
 
 test("rewriteTitle: `does` (no `not`) gets `should do`", () => {
   // Arrange / Act / Assert
-  assert.equal(rewriteTitle("does the right thing"), "should do the right thing");
+  assert.equal(
+    rewriteTitle("does the right thing"),
+    "should do the right thing"
+  );
 });
 
 test("rewriteTitle: idempotent — already-prefixed title returns null", () => {
@@ -84,7 +93,10 @@ test("transformSource: leaves unmapped titles alone, adds to queue", () => {
   const source = `it("zarks the bar", () => {});`;
 
   // Act
-  const { source: out, queue } = transformSource(source, "packages/x/y.test.ts");
+  const { source: out, queue } = transformSource(
+    source,
+    "packages/x/y.test.ts"
+  );
 
   // Assert
   assert.equal(out, source);
