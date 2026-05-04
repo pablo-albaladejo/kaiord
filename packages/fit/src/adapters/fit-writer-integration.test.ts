@@ -1,8 +1,9 @@
-import { describe, expect, it } from "vitest";
 import { buildKRD } from "@kaiord/core/test-utils";
 import { buildKRDMetadata } from "@kaiord/core/test-utils";
 import { buildWorkoutStep } from "@kaiord/core/test-utils";
 import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it } from "vitest";
+
 import {
   createGarminFitSdkReader,
   createGarminFitSdkWriter,

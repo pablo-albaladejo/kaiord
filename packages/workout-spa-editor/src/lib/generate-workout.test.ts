@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
 const mockTextToWorkout = vi.fn();
 
@@ -19,9 +19,10 @@ vi.mock("./provider-factory", () => ({
 
 import { createTextToWorkout } from "@kaiord/ai";
 import { createWorkoutKRD } from "@kaiord/core";
-import { createLanguageModel } from "./provider-factory";
-import { generateWorkoutKrd } from "./generate-workout";
+
 import type { GenerateWorkoutOptions } from "./generate-workout";
+import { generateWorkoutKrd } from "./generate-workout";
+import { createLanguageModel } from "./provider-factory";
 
 const baseOptions: GenerateWorkoutOptions = {
   text: "30 minute endurance ride",

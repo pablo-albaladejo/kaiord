@@ -1,24 +1,24 @@
 import type { KRD } from "@kaiord/core";
 import {
   buildKRD,
+  FIXTURE_NAMES,
+  getFixturePath,
   loadFitFixture,
   loadKrdFixture,
   loadKrdFixtureRaw,
   loadTcxFixture,
   loadZwoFixture,
-  getFixturePath,
-  FIXTURE_NAMES,
 } from "@kaiord/core/test-utils";
 
 export {
   buildKRD,
+  FIXTURE_NAMES,
+  getFixturePath,
   loadFitFixture,
   loadKrdFixture,
   loadKrdFixtureRaw,
   loadTcxFixture,
   loadZwoFixture,
-  getFixturePath,
-  FIXTURE_NAMES,
 };
 
 export const createMinimalKrd = (overrides?: Partial<KRD>): KRD => ({

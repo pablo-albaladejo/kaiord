@@ -11,7 +11,8 @@
  */
 
 import "fake-indexeddb/auto";
-import { renderHook, act } from "@testing-library/react";
+
+import { act, renderHook } from "@testing-library/react";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import { db } from "../../adapters/dexie/dexie-database";

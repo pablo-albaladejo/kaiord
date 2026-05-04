@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  type SessionMatch,
   sessionMatchSchema,
   sessionMatchSourceSchema,
-  type SessionMatch,
 } from "./session-match";
 
 const baseRow = (overrides: Partial<SessionMatch> = {}): SessionMatch => ({

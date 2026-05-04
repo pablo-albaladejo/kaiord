@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { convertHeartRateZone } from "./heart-rate.converter";
 
 describe("convertHeartRateZone", () => {

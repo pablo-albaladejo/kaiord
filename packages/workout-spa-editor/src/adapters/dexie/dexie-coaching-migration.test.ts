@@ -6,6 +6,7 @@
  */
 
 import "fake-indexeddb/auto";
+
 import Dexie from "dexie";
 import { describe, expect, it } from "vitest";
 

@@ -3,6 +3,7 @@ import boundaries from "eslint-plugin-boundaries";
 import reactHooks from "eslint-plugin-react-hooks";
 import simpleImportSort from "eslint-plugin-simple-import-sort";
 import tseslint from "typescript-eslint";
+import vitest from "@vitest/eslint-plugin";
 
 const adapterPackages = ["fit", "tcx", "zwo", "garmin", "garmin-connect"];
 
@@ -56,13 +57,13 @@ export default tseslint.config(
       "**/*.config.js",
       "**/*.config.ts",
       "**/scripts/**",
-      "**/*.test.ts",
-      "**/*.test.tsx",
-      "**/*.test.js",
-      "**/*.spec.ts",
+      // Test files are NOT globally ignored anymore — they fall
+      // through to the test-files override block at lines ~145+
+      // which applies relaxed test-specific rules + the vitest
+      // plugin's `valid-title` rule (test-conventions-should-aaa
+      // change PR-1 §1.2). Storybook stories remain ignored.
       "**/*.stories.ts",
       "**/*.stories.tsx",
-      "**/tests/**/*.ts",
       "**/playwright-report/**",
       "**/test-results/**",
       "**/.playwright/**",
@@ -137,34 +138,6 @@ export default tseslint.config(
       "@typescript-eslint/no-explicit-any": "error",
       "@typescript-eslint/consistent-type-definitions": ["error", "type"],
       ...importRules,
-    },
-  },
-  {
-    // Test files: basic linting without type checking
-    files: ["**/*.test.ts", "**/*.spec.ts", "**/tests/**/*.ts"],
-    languageOptions: {
-      parser: tseslint.parser,
-    },
-    plugins: {
-      "@typescript-eslint": tseslint.plugin,
-      "simple-import-sort": simpleImportSort,
-    },
-    rules: {
-      "max-lines": "off",
-      "max-lines-per-function": "off",
-      "@typescript-eslint/no-explicit-any": "error",
-      "@typescript-eslint/consistent-type-definitions": ["error", "type"],
-      ...importRules,
-      "no-magic-numbers": [
-        "warn",
-        {
-          ignore: [0, 1, 2, -1, 100, 200, 400, 404, 500],
-          ignoreArrayIndexes: true,
-          ignoreDefaultValues: true,
-          enforceConst: true,
-          detectObjects: false,
-        },
-      ],
     },
   },
   {
@@ -416,5 +389,69 @@ export default tseslint.config(
       "no-restricted-syntax": "off",
     },
   },
-  ...adapterBoundaryRules()
+  ...adapterBoundaryRules(),
+  {
+    // Test files: relaxed test-specific rules + the vitest plugin's
+    // `valid-title` rule (test-conventions-should-aaa change PR-1).
+    //
+    // Placed AFTER every production-code block so that, in flat-config
+    // cascade order, this block's relaxations win for any *.test.{ts,tsx}
+    // / *.spec.ts file that ALSO matched a stricter production block
+    // (the SPA `*.tsx` block, the pages block, the core/backend blocks).
+    // Tests are still linted by the production blocks above — only the
+    // rules listed here are overridden.
+    files: [
+      "**/*.test.ts",
+      "**/*.test.tsx",
+      "**/*.spec.ts",
+      "**/tests/**/*.{ts,tsx}",
+    ],
+    languageOptions: {
+      parser: tseslint.parser,
+      // Test files are not in the package tsconfig's `include`, so
+      // `projectService: true` (inherited from earlier blocks) produces
+      // "file not found by project service" parse errors. Disable
+      // type-aware parsing for tests.
+      parserOptions: {
+        projectService: false,
+        project: null,
+      },
+    },
+    plugins: {
+      "@typescript-eslint": tseslint.plugin,
+      "simple-import-sort": simpleImportSort,
+      vitest,
+    },
+    rules: {
+      // Production-code structural limits don't apply to tests:
+      // describe/it bodies are naturally branchy and longer than
+      // production functions. Same precedent the original test-files
+      // block established for max-lines/max-lines-per-function.
+      "max-lines": "off",
+      "max-lines-per-function": "off",
+      complexity: "off",
+      "max-depth": "off",
+      "max-params": "off",
+      "no-magic-numbers": [
+        "warn",
+        {
+          ignore: [0, 1, 2, -1, 100, 200, 400, 404, 500],
+          ignoreArrayIndexes: true,
+          ignoreDefaultValues: true,
+          enforceConst: true,
+          detectObjects: false,
+        },
+      ],
+      // test-conventions-should-aaa change: title-rule dogma at IDE
+      // time. Severity is 'warn' during the migration window per D2
+      // (closes the IDE/pre-commit/CI parity gap that 'off' would
+      // create). Flipped to 'error' in PR-6 §6.3.
+      "vitest/valid-title": [
+        "warn",
+        {
+          mustMatch: { it: ["^should "] },
+        },
+      ],
+    },
+  }
 );

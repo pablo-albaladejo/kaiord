@@ -1,6 +1,6 @@
+import { createMockLogger, loadZwoFixture } from "@kaiord/core/test-utils";
 import { XMLParser } from "fast-xml-parser";
 import { describe, expect, it } from "vitest";
-import { createMockLogger, loadZwoFixture } from "@kaiord/core/test-utils";
 
 import { convertZwiftToKRD } from "./zwift-to-krd.converter";
 

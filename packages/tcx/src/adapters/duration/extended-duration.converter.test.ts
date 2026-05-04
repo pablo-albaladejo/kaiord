@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { convertExtendedDuration } from "./extended-duration.converter";
+
 import type { TcxDurationType } from "../schemas/tcx-duration";
+import { convertExtendedDuration } from "./extended-duration.converter";
 
 describe("convertExtendedDuration", () => {
   it("should convert HeartRateAbove with bpm", () => {

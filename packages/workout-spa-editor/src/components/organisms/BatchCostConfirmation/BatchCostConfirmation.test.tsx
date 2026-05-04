@@ -1,10 +1,10 @@
-import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { describe, expect, it, vi } from "vitest";
 
-import { BatchCostConfirmation } from "./BatchCostConfirmation";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
 import type { WorkoutRecord } from "../../../types/calendar-record";
+import { BatchCostConfirmation } from "./BatchCostConfirmation";
 
 const anthropic: LlmProviderConfig = {
   id: "p1",

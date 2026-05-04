@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+
 import { KrdValidationError } from "../domain/types/errors.js";
 import type { BinaryReader, TextReader } from "../ports/format-strategy";
 import { buildKRD } from "../tests/fixtures/krd/krd.fixtures.js";

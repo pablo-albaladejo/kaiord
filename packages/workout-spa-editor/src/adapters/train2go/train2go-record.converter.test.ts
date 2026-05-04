@@ -10,8 +10,8 @@ import { describe, expect, it } from "vitest";
 
 import type { Train2GoActivity } from "../../store/train2go-extension-transport";
 import {
-  TRAIN2GO_STATUS_MAP,
   toCoachingActivityRecord,
+  TRAIN2GO_STATUS_MAP,
 } from "./train2go-record.converter";
 
 const base: Train2GoActivity = {

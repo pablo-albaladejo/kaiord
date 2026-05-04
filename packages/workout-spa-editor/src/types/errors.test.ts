@@ -3,6 +3,7 @@
  */
 
 import { describe, expect, it } from "vitest";
+
 import { ConversionError, FileParsingError, ValidationError } from "./errors";
 
 describe("FileParsingError", () => {

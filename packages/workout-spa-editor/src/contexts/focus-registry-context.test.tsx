@@ -16,12 +16,12 @@ import { render } from "@testing-library/react";
 import { useContext, useEffect, useRef, useState } from "react";
 import { describe, expect, it } from "vitest";
 
+import { asItemId } from "../store/providers/item-id";
 import {
   FocusRegistryContext,
   FocusRegistryProvider,
   type FocusRegistryValue,
 } from "./focus-registry-context";
-import { asItemId } from "../store/providers/item-id";
 
 const captureValue = (sink: { current: FocusRegistryValue | null }) => {
   const Probe = () => {

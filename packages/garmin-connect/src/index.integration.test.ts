@@ -1,5 +1,6 @@
-import { beforeAll, describe, expect, it } from "vitest";
 import type { KRD } from "@kaiord/core";
+import { beforeAll, describe, expect, it } from "vitest";
+
 import { createGarminConnectClient } from "./index";
 
 const email = process.env.GARMIN_TEST_EMAIL;

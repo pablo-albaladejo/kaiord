@@ -1,16 +1,16 @@
 import { describe, expect, it } from "vitest";
 
 import {
-  fingerprintSnapshot,
-  profileSnapshotSchema,
-  STALE_SNAPSHOT_THRESHOLD_DAYS,
-  type ProfileSnapshot,
-} from "./profile-snapshot";
-import {
   baselineSnapshot,
   negativeSnapshotFixtures,
   positiveSnapshotFixtures,
 } from "../test-utils/profile-snapshot-fixtures";
+import {
+  fingerprintSnapshot,
+  type ProfileSnapshot,
+  profileSnapshotSchema,
+  STALE_SNAPSHOT_THRESHOLD_DAYS,
+} from "./profile-snapshot";
 
 describe("STALE_SNAPSHOT_THRESHOLD_DAYS", () => {
   it("is 7 days", () => {

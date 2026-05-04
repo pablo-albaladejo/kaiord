@@ -62,32 +62,6 @@ const HookConsumer = () => {
   );
 };
 
-const HookConsumerDialog = ({ dialogOpen }: { dialogOpen: boolean }) => {
-  const rootRef = useRef<HTMLDivElement | null>(null);
-  const emptyStateRef = useRef<HTMLButtonElement | null>(null);
-  const headingRef = useRef<HTMLHeadingElement | null>(null);
-  useFocusAfterAction({
-    editorRootRef: rootRef,
-    emptyStateButtonRef: emptyStateRef,
-    editorHeadingRef: headingRef,
-  });
-  return (
-    <div ref={rootRef} data-testid="editor-root">
-      <h2 ref={headingRef} tabIndex={-1}>
-        Editor
-      </h2>
-      <button ref={emptyStateRef}>Add step</button>
-      {dialogOpen && (
-        <div
-          role="dialog"
-          data-state="open"
-          data-radix-popper-content-wrapper=""
-        />
-      )}
-    </div>
-  );
-};
-
 const withTelemetry = (spy: FocusTelemetry, ui: React.ReactElement) =>
   render(
     <FocusTelemetryContext.Provider value={spy}>

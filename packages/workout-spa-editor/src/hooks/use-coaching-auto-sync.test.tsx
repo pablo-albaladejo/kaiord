@@ -6,8 +6,8 @@ import { PersistenceProvider } from "../contexts/persistence-context";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
 import type { LinkedCoachingAccount } from "../types/coaching-account";
 import type { Profile } from "../types/profile";
-import { useCoachingAutoSync } from "./use-coaching-auto-sync";
 import type { CoachingSyncState } from "./use-coaching-activities";
+import { useCoachingAutoSync } from "./use-coaching-auto-sync";
 
 const T2G_LINK: LinkedCoachingAccount = {
   source: "train2go",

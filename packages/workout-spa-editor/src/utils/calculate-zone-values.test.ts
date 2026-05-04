@@ -3,11 +3,12 @@
  */
 
 import { describe, expect, it } from "vitest";
-import { calculateZoneValues } from "./calculate-zone-values";
-import { calculatePowerZoneValues } from "./calculate-power-zones";
+
+import { findMethod, HR_METHODS, POWER_METHODS } from "../lib/zone-methods";
 import { calculateHrZones } from "./calculate-hr-zones";
 import { calculatePaceZones } from "./calculate-pace-zones";
-import { findMethod, POWER_METHODS, HR_METHODS } from "../lib/zone-methods";
+import { calculatePowerZoneValues } from "./calculate-power-zones";
+import { calculateZoneValues } from "./calculate-zone-values";
 
 describe("calculateZoneValues", () => {
   it("should calculate Coggan zones with FTP=250", () => {

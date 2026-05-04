@@ -4,11 +4,11 @@
  */
 import { afterEach, describe, expect, it } from "vitest";
 
-import { asItemId } from "./providers/item-id";
 import type { UIWorkout } from "../types/krd-ui";
+import { asItemId } from "./providers/item-id";
 import type { HistoryEntry, UndoHistory } from "./workout-state.types";
-import { pushHistorySnapshot } from "./workout-store-history";
 import { useWorkoutStore } from "./workout-store";
+import { pushHistorySnapshot } from "./workout-store-history";
 
 const makeUI = (marker: string): UIWorkout =>
   ({

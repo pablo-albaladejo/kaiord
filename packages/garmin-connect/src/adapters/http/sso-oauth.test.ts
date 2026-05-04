@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
 import type { Logger } from "@kaiord/core";
-import { getOAuth1Token, exchangeOAuth2 } from "./sso-oauth";
+import { describe, expect, it, vi } from "vitest";
+
+import { exchangeOAuth2, getOAuth1Token } from "./sso-oauth";
 import type { OAuthConsumer } from "./types";
 
 vi.mock("./oauth-signer", () => ({

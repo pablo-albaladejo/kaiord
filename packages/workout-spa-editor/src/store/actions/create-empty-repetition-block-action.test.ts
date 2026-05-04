@@ -6,6 +6,7 @@
 
 import { fc } from "@fast-check/vitest";
 import { describe, expect, it } from "vitest";
+
 import type { KRD, Workout, WorkoutStep } from "../../types/krd";
 import { isRepetitionBlock } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
@@ -302,7 +303,7 @@ describe("createEmptyRepetitionBlockAction - Property Tests", () => {
               expect(block.steps).toHaveLength(stepCount);
 
               // Verify steps are the original ones, not default steps
-              block.steps.forEach((step, index) => {
+              block.steps.forEach((step) => {
                 expect(step.durationType).toBe("distance");
                 expect(step.targetType).toBe("power");
                 // Should NOT have default step properties

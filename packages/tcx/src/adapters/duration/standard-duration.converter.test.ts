@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { convertStandardDuration } from "./standard-duration.converter";
+
 import type { TcxDurationType } from "../schemas/tcx-duration";
+import { convertStandardDuration } from "./standard-duration.converter";
 
 describe("convertStandardDuration", () => {
   it("should convert Time duration with seconds", () => {

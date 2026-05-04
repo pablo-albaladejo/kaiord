@@ -19,11 +19,11 @@ import { Fragment, StrictMode } from "react";
 import { act } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
+import { __resetCanaryForTests } from "../../../hooks/focus/use-focus-telemetry-emitter";
 import { __resetOverlayObserverForTests } from "../../../lib/focus/overlay-observer";
 import { useWorkoutStore } from "../../../store/workout-store";
 import { renderWithProviders } from "../../../test-utils";
 import type { KRD } from "../../../types/krd";
-import { __resetCanaryForTests } from "../../../hooks/focus/use-focus-telemetry-emitter";
 import { WorkoutSection } from "./WorkoutSection";
 
 // Mock WorkoutStats and WorkoutPreview to skip heavy chart rendering

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { convertPowerTarget } from "./target-power.converter";
+
 import type { FitTargetData } from "./target.types";
+import { convertPowerTarget } from "./target-power.converter";
 
 describe("convertPowerTarget", () => {
   describe("range target using specific power fields", () => {

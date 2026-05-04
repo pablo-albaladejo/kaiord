@@ -1,5 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
+
 import { useToast } from "./useToast";
 
 describe("useToast", () => {
@@ -247,11 +248,10 @@ describe("useToast", () => {
       // Arrange
       const { result } = renderHook(() => useToast());
       let id1: string;
-      let id2: string;
 
       act(() => {
         id1 = result.current.toast({ title: "Toast 1" });
-        id2 = result.current.toast({ title: "Toast 2" });
+        result.current.toast({ title: "Toast 2" });
       });
 
       // Act

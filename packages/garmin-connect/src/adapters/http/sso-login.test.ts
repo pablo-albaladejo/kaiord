@@ -1,6 +1,7 @@
-import { describe, it, expect, vi } from "vitest";
-import { getLoginTicket } from "./sso-login";
 import type { Logger } from "@kaiord/core";
+import { describe, expect, it, vi } from "vitest";
+
+import { getLoginTicket } from "./sso-login";
 
 const mockLogger: Logger = {
   debug: vi.fn(),

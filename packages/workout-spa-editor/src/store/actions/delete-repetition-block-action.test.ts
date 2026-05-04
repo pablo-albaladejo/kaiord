@@ -8,6 +8,7 @@
 
 import fc from "fast-check";
 import { describe, expect, it } from "vitest";
+
 import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import { isRepetitionBlock, isWorkoutStep } from "../../types/krd";
 import type { WorkoutState } from "../workout-actions";
@@ -575,8 +576,6 @@ describe("deleteRepetitionBlockAction", () => {
           fc.integer({ min: 3, max: 6 }), // Total number of items
           fc.integer({ min: 1, max: 3 }), // Number of blocks
           (totalItems, numBlocks) => {
-            // Ensure we have at least one step
-            const numSteps = Math.max(1, totalItems - numBlocks);
             const actualNumBlocks = Math.min(numBlocks, totalItems - 1);
 
             // Arrange - Create mixed workout

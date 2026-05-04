@@ -15,7 +15,6 @@ vi.mock("./train2go-extension-transport", () => ({
   ping: vi.fn(),
 }));
 
-// eslint-disable-next-line simple-import-sort/imports
 import { ping } from "./train2go-extension-transport";
 
 describe("Train2Go detection cache — integration", () => {

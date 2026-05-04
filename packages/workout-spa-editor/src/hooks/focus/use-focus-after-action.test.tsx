@@ -17,8 +17,8 @@
  * double-mount / double-effect semantics do not break focus behaviour.
  */
 
-import { Fragment, StrictMode, useContext, useEffect, useRef } from "react";
 import { act, render } from "@testing-library/react";
+import { Fragment, StrictMode, useContext, useEffect, useRef } from "react";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 import {

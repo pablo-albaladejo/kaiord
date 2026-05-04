@@ -3,8 +3,8 @@ import { describe, expect, it } from "vitest";
 import { createInMemoryPersistence } from "../../test-utils/in-memory-persistence";
 import { addProvider } from "./add-provider";
 import { ProviderNotFoundError } from "./errors";
-import { updateProvider } from "./update-provider";
 import { baseProvider } from "./test-fixtures";
+import { updateProvider } from "./update-provider";
 
 describe("updateProvider", () => {
   it("merges the partial update onto the existing provider", async () => {

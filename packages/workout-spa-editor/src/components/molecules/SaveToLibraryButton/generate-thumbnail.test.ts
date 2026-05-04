@@ -4,8 +4,9 @@
  * Tests for the thumbnail generation utility.
  */
 
-import { KRD, WorkoutStep } from "@kaiord/core";
+import type { KRD, WorkoutStep } from "@kaiord/core";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+
 import { generateThumbnail } from "./generate-thumbnail";
 
 describe("generateThumbnail", () => {

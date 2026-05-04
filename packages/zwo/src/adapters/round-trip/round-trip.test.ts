@@ -1,6 +1,7 @@
-import { describe, expect, it } from "vitest";
 import { createToleranceChecker } from "@kaiord/core";
 import { createMockLogger, loadZwoFixture } from "@kaiord/core/test-utils";
+import { describe, expect, it } from "vitest";
+
 import {
   createFastXmlZwiftReader,
   createFastXmlZwiftWriter,

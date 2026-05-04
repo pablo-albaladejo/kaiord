@@ -11,11 +11,11 @@ import { describe, expect, it } from "vitest";
 
 import { PersistenceProvider } from "../contexts/persistence-context";
 import { createInMemoryPersistence } from "../test-utils/in-memory-persistence";
+import type { WorkoutRecord } from "../types/calendar-record";
 import {
   buildCoachingActivityId,
   type CoachingActivityRecord,
 } from "../types/coaching-activity-record";
-import type { WorkoutRecord } from "../types/calendar-record";
 import { useMatchSession } from "./use-match-session";
 
 const NOW = "2026-04-28T10:00:00.000Z";

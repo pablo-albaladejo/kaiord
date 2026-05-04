@@ -1,6 +1,7 @@
 import { waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it } from "vitest";
+
 import App from "./App";
 import { useWorkoutStore } from "./store/workout-store";
 import { renderWithProviders, screen } from "./test-utils";

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { convertDurationToTcx } from "./duration-to-tcx-encoder";
 
 describe("convertDurationToTcx", () => {

@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it } from "vitest";
+
 import { createWellFormednessValidator } from "./well-formedness-validator";
 
 describe("createWellFormednessValidator", () => {

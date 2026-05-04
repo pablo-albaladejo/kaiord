@@ -1,8 +1,9 @@
-import { describe, it, expect, vi } from "vitest";
-import { createGarminWorkoutService } from "./garmin-workout-service";
-import type { GarminHttpClient } from "../http/types";
 import type { KRD, Logger } from "@kaiord/core";
+import { describe, expect, it, vi } from "vitest";
+
+import type { GarminHttpClient } from "../http/types";
 import { WORKOUT_URL } from "../http/urls";
+import { createGarminWorkoutService } from "./garmin-workout-service";
 
 const mockLogger: Logger = {
   debug: vi.fn(),

@@ -5,6 +5,7 @@
  */
 
 import { describe, expect, it } from "vitest";
+
 import type { RepetitionBlock, Workout } from "../types/krd";
 import { calculateWorkoutStats } from "./workout-stats";
 

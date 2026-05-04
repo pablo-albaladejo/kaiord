@@ -1,8 +1,8 @@
-import { describe, it, expect, beforeEach, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { UsageTab } from "./UsageTab";
 import type { UsageRecord } from "../../../types/usage-schemas";
+import { UsageTab } from "./UsageTab";
 
 type QueryFactory = () => Promise<UsageRecord[]>;
 

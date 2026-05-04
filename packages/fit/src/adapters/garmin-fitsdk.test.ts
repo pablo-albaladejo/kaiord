@@ -1,4 +1,3 @@
-import { describe, expect, it, vi } from "vitest";
 import { FitParsingError } from "@kaiord/core";
 import {
   buildKRD,
@@ -6,6 +5,8 @@ import {
   createMockLogger,
   loadFitFixture,
 } from "@kaiord/core/test-utils";
+import { describe, expect, it, vi } from "vitest";
+
 import {
   createGarminFitSdkReader,
   createGarminFitSdkWriter,

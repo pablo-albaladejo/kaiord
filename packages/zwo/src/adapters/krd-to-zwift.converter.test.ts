@@ -1,5 +1,5 @@
-import { describe, expect, it } from "vitest";
 import { createMockLogger, loadKrdFixture } from "@kaiord/core/test-utils";
+import { describe, expect, it } from "vitest";
 
 import { convertKRDToZwift } from "./krd-to-zwift.converter";
 

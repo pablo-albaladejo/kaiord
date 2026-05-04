@@ -4,8 +4,8 @@
 
 import { describe, expect, it } from "vitest";
 
-import { linkCoachingAccount, unlinkCoachingAccount } from "./coaching-account";
 import type { LinkedCoachingAccount } from "./coaching-account";
+import { linkCoachingAccount, unlinkCoachingAccount } from "./coaching-account";
 import type { Profile } from "./profile";
 
 const baseProfile: Profile = {

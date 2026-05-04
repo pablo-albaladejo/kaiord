@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { convertHeartRateTarget } from "./target-heart-rate.converter";
+
 import type { FitTargetData } from "./target.types";
+import { convertHeartRateTarget } from "./target-heart-rate.converter";
 
 describe("convertHeartRateTarget", () => {
   describe("range target using specific HR fields", () => {

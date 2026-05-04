@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import { Heart, Zap } from "lucide-react";
 import { describe, expect, it } from "vitest";
+
 import { Icon } from "./Icon";
 
 describe("Icon", () => {

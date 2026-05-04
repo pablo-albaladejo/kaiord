@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { convertPaceTarget } from "./target-pace.converter";
+
 import type { FitTargetData } from "./target.types";
+import { convertPaceTarget } from "./target-pace.converter";
 
 describe("convertPaceTarget", () => {
   describe("range target using specific speed fields", () => {

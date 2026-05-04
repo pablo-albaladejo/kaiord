@@ -1,5 +1,6 @@
-import { describe, expect, it, vi } from "vitest";
 import { createMockLogger } from "@kaiord/core/test-utils";
+import { describe, expect, it, vi } from "vitest";
+
 import { createXsdZwiftValidator } from "./xsd-validator";
 
 describe("createZwiftValidator", () => {

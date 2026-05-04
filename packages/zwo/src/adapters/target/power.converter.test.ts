@@ -1,10 +1,11 @@
 import { describe, expect, it } from "vitest";
+
 import {
-  convertZwiftPowerTarget,
-  convertZwiftPowerRange,
-  convertKrdPowerToZwift,
   convertKrdPowerRangeToZwift,
+  convertKrdPowerToZwift,
   convertPowerZoneToPercentFtp,
+  convertZwiftPowerRange,
+  convertZwiftPowerTarget,
 } from "./power.converter";
 
 describe("convertZwiftPowerTarget", () => {

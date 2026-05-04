@@ -1,9 +1,10 @@
-import { describe, expect, it, vi } from "vitest";
 import type { Logger } from "@kaiord/core";
+import { describe, expect, it, vi } from "vitest";
+
 import {
+  extractExtensions,
   extractIntensity,
   extractPowerFromExtensions,
-  extractExtensions,
 } from "./step-helpers";
 
 const createMockLogger = (): Logger => ({

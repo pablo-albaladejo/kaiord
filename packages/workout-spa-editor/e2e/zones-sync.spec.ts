@@ -11,6 +11,8 @@
  * SPA's `bridgeDiscovery` handshake completes against a deterministic
  * in-page fake.
  */
+import type { Page } from "@playwright/test";
+
 import { expect, test } from "./fixtures/base";
 import { clearDexie, getWeekDates, getWeekId } from "./helpers/seed-dexie";
 import {
@@ -26,7 +28,7 @@ type SyncZonesFlag = boolean;
 type CyclingFtp = number | undefined;
 
 const seedProfile = async (
-  page: import("@playwright/test").Page,
+  page: Page,
   syncZones: SyncZonesFlag,
   ftp: CyclingFtp
 ): Promise<void> => {
@@ -110,16 +112,12 @@ const seedProfile = async (
   );
 };
 
-const navigateToWeek = async (
-  page: import("@playwright/test").Page
-): Promise<void> => {
+const navigateToWeek = async (page: Page): Promise<void> => {
   const weekId = getWeekId(getWeekDates(0)[2]);
   await page.goto(`/calendar/${weekId}`);
 };
 
-const waitForSyncButton = async (
-  page: import("@playwright/test").Page
-): Promise<void> => {
+const waitForSyncButton = async (page: Page): Promise<void> => {
   const syncBtn = page.getByRole("button", { name: /^sync train2go$/i });
   await syncBtn.waitFor({ state: "visible", timeout: 15_000 });
 };

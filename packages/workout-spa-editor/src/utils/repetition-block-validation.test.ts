@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
+
 import {
-  validateRepetitionBlockCreation,
   type RepetitionBlockValidationError,
+  validateRepetitionBlockCreation,
 } from "./repetition-block-validation";
 
 describe("validateRepetitionBlockCreation", () => {

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+
 import { semicirclesToDegrees } from "../shared/coordinate.converter";
 import { convertFitToKrdRecord } from "./fit-to-krd-record.converter";
 import {

@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import type { WorkoutStep } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
+
 import { convertHeartRateTarget } from "./krd-to-fit-target-heart-rate.converter";
 
 describe("convertHeartRateTarget", () => {

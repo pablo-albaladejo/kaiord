@@ -1,5 +1,6 @@
-import { describe, expect, it } from "vitest";
 import { durationTypeSchema } from "@kaiord/core";
+import { describe, expect, it } from "vitest";
+
 import {
   convertKrdDistanceDurationToZwift,
   convertKrdDurationToZwift,

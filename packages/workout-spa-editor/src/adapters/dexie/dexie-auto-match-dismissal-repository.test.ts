@@ -3,8 +3,8 @@ import "fake-indexeddb/auto";
 import { beforeEach, describe, expect, it } from "vitest";
 
 import type { AutoMatchDismissal } from "../../types/auto-match-dismissal";
-import { KaiordDatabase } from "./dexie-database";
 import { createDexieAutoMatchDismissalRepository } from "./dexie-auto-match-dismissal-repository";
+import { KaiordDatabase } from "./dexie-database";
 
 const baseRow = (
   overrides: Partial<AutoMatchDismissal> = {}

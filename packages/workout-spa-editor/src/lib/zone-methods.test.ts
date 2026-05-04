@@ -3,13 +3,14 @@
  */
 
 import { describe, expect, it } from "vitest";
+
 import {
-  POWER_METHODS,
-  HR_METHODS,
-  PACE_METHODS,
   findMethod,
   getDefaultMethodId,
   getMethodsForType,
+  HR_METHODS,
+  PACE_METHODS,
+  POWER_METHODS,
 } from "./zone-methods";
 
 describe("zone method registries", () => {

@@ -1,5 +1,5 @@
-import { createNoopAnalytics } from "@kaiord/core";
 import type { Analytics } from "@kaiord/core";
+import { createNoopAnalytics } from "@kaiord/core";
 import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { describe, expect, it, vi } from "vitest";
