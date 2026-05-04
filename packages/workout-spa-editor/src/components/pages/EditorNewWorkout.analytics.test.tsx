@@ -55,6 +55,8 @@ describe("EditorNewWorkout analytics", () => {
 
   it("should fire workout-created with source=manual when a manual workout is saved", async () => {
     // Arrange
+    // Arrange
+
     const analytics: Analytics = {
       pageView: vi.fn(),
       event: vi.fn(),
@@ -78,9 +80,15 @@ describe("EditorNewWorkout analytics", () => {
 
     // Act — submit
     const submitButton = getByRole("button", { name: /^create$/i });
+
+    // Act
+
     await user.click(submitButton);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(analytics.event).toHaveBeenCalledWith("workout-created", {
         source: "manual",

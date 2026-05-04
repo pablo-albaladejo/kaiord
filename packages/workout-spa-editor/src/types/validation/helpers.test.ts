@@ -19,52 +19,84 @@ describe("validation helpers", () => {
   describe("getFieldError", () => {
     it("should return error message for matching path", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [
         { path: ["name"], message: "Required field" },
         { path: ["sport"], message: "Invalid sport" },
       ];
 
       // Act
+
+      // Act
+
       const result = getFieldError(errors, ["name"]);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe("Required field");
     });
 
     it("should return undefined for non-matching path", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [
         { path: ["name"], message: "Required field" },
       ];
 
       // Act
+
+      // Act
+
       const result = getFieldError(errors, ["sport"]);
 
       // Assert
+
+      // Assert
+
       expect(result).toBeUndefined();
     });
 
     it("should handle nested paths", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [
         { path: ["steps", 0, "duration"], message: "Invalid duration" },
       ];
 
       // Act
+
+      // Act
+
       const result = getFieldError(errors, ["steps", 0, "duration"]);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe("Invalid duration");
     });
 
     it("should return undefined for empty errors array", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [];
 
       // Act
+
+      // Act
+
       const result = getFieldError(errors, ["name"]);
 
       // Assert
+
+      // Assert
+
       expect(result).toBeUndefined();
     });
   });
@@ -72,51 +104,83 @@ describe("validation helpers", () => {
   describe("hasFieldError", () => {
     it("should return true for existing error", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [
         { path: ["name"], message: "Required field" },
       ];
 
       // Act
+
+      // Act
+
       const result = hasFieldError(errors, ["name"]);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(true);
     });
 
     it("should return false for non-existing error", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [
         { path: ["name"], message: "Required field" },
       ];
 
       // Act
+
+      // Act
+
       const result = hasFieldError(errors, ["sport"]);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(false);
     });
 
     it("should handle nested paths", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [
         { path: ["steps", 0, "target"], message: "Invalid target" },
       ];
 
       // Act
+
+      // Act
+
       const result = hasFieldError(errors, ["steps", 0, "target"]);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(true);
     });
 
     it("should return false for empty errors array", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [];
 
       // Act
+
+      // Act
+
       const result = hasFieldError(errors, ["name"]);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe(false);
     });
   });
@@ -124,6 +188,8 @@ describe("validation helpers", () => {
   describe("getNestedErrors", () => {
     it("should return errors under parent path", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [
         { path: ["steps", 0, "duration"], message: "Invalid duration" },
         { path: ["steps", 0, "target"], message: "Invalid target" },
@@ -132,9 +198,15 @@ describe("validation helpers", () => {
       ];
 
       // Act
+
+      // Act
+
       const result = getNestedErrors(errors, ["steps", 0]);
 
       // Assert
+
+      // Assert
+
       expect(result).toHaveLength(2);
       expect(result[0].path).toEqual(["steps", 0, "duration"]);
       expect(result[1].path).toEqual(["steps", 0, "target"]);
@@ -142,34 +214,52 @@ describe("validation helpers", () => {
 
     it("should return empty array when no nested errors", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [
         { path: ["name"], message: "Required field" },
       ];
 
       // Act
+
+      // Act
+
       const result = getNestedErrors(errors, ["steps", 0]);
 
       // Assert
+
+      // Assert
+
       expect(result).toHaveLength(0);
     });
 
     it("should not return errors at same level as parent", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [
         { path: ["steps"], message: "Required field" },
         { path: ["steps", 0, "duration"], message: "Invalid duration" },
       ];
 
       // Act
+
+      // Act
+
       const result = getNestedErrors(errors, ["steps"]);
 
       // Assert
+
+      // Assert
+
       expect(result).toHaveLength(1);
       expect(result[0].path).toEqual(["steps", 0, "duration"]);
     });
 
     it("should handle deep nesting", () => {
       // Arrange
+      // Arrange
+
       const errors: Array<ValidationError> = [
         {
           path: [
@@ -185,12 +275,18 @@ describe("validation helpers", () => {
       ];
 
       // Act
+
+      // Act
+
       const result = getNestedErrors(errors, [
         "extensions",
         "structured_workout",
       ]);
 
       // Assert
+
+      // Assert
+
       expect(result).toHaveLength(1);
       expect(result[0].message).toBe("Must be positive");
     });
@@ -199,6 +295,8 @@ describe("validation helpers", () => {
   describe("mergeValidationErrors", () => {
     it("should merge multiple error arrays", () => {
       // Arrange
+      // Arrange
+
       const errors1: Array<ValidationError> = [
         { path: ["name"], message: "Required field" },
       ];
@@ -207,14 +305,22 @@ describe("validation helpers", () => {
       ];
 
       // Act
+
+      // Act
+
       const result = mergeValidationErrors(errors1, errors2);
 
       // Assert
+
+      // Assert
+
       expect(result).toHaveLength(2);
     });
 
     it("should remove duplicate errors", () => {
       // Arrange
+      // Arrange
+
       const errors1: Array<ValidationError> = [
         { path: ["name"], message: "Required field" },
       ];
@@ -223,28 +329,44 @@ describe("validation helpers", () => {
       ];
 
       // Act
+
+      // Act
+
       const result = mergeValidationErrors(errors1, errors2);
 
       // Assert
+
+      // Assert
+
       expect(result).toHaveLength(1);
     });
 
     it("should handle empty arrays", () => {
       // Arrange
+      // Arrange
+
       const errors1: Array<ValidationError> = [];
       const errors2: Array<ValidationError> = [
         { path: ["sport"], message: "Invalid sport" },
       ];
 
       // Act
+
+      // Act
+
       const result = mergeValidationErrors(errors1, errors2);
 
       // Assert
+
+      // Assert
+
       expect(result).toHaveLength(1);
     });
 
     it("should merge more than two arrays", () => {
       // Arrange
+      // Arrange
+
       const errors1: Array<ValidationError> = [
         { path: ["name"], message: "Required field" },
       ];
@@ -256,14 +378,22 @@ describe("validation helpers", () => {
       ];
 
       // Act
+
+      // Act
+
       const result = mergeValidationErrors(errors1, errors2, errors3);
 
       // Assert
+
+      // Assert
+
       expect(result).toHaveLength(3);
     });
 
     it("should preserve error details when merging", () => {
       // Arrange
+      // Arrange
+
       const errors1: Array<ValidationError> = [
         { path: ["name"], message: "Required field", code: "required" },
       ];
@@ -272,9 +402,15 @@ describe("validation helpers", () => {
       ];
 
       // Act
+
+      // Act
+
       const result = mergeValidationErrors(errors1, errors2);
 
       // Assert
+
+      // Assert
+
       expect(result[0].code).toBe("required");
       expect(result[1].code).toBe("invalid_enum");
     });
@@ -283,6 +419,8 @@ describe("validation helpers", () => {
   describe("createDebouncedValidator", () => {
     it("should debounce validation calls", async () => {
       // Arrange
+      // Arrange
+
       const mockValidator = vi.fn(() => ({
         success: true,
         data: {},
@@ -297,15 +435,23 @@ describe("validation helpers", () => {
       debouncedValidator({}, mockCallback);
 
       // Wait for debounce
+
+      // Act
+
       await new Promise((resolve) => setTimeout(resolve, 150));
 
       // Assert
+
+      // Assert
+
       expect(mockValidator).toHaveBeenCalledTimes(1);
       expect(mockCallback).toHaveBeenCalledTimes(1);
     });
 
     it("should call callback with validation result", async () => {
       // Arrange
+      // Arrange
+
       const validationResult = {
         success: false,
         errors: [{ path: ["name"], message: "Required field" }],
@@ -318,14 +464,22 @@ describe("validation helpers", () => {
       debouncedValidator({ name: "" }, mockCallback);
 
       // Wait for debounce
+
+      // Act
+
       await new Promise((resolve) => setTimeout(resolve, 100));
 
       // Assert
+
+      // Assert
+
       expect(mockCallback).toHaveBeenCalledWith(validationResult);
     });
 
     it("should use default delay of 300ms", async () => {
       // Arrange
+      // Arrange
+
       const mockValidator = vi.fn(() => ({
         success: true,
         data: {},
@@ -338,7 +492,13 @@ describe("validation helpers", () => {
       debouncedValidator({}, mockCallback);
 
       // Check before delay
+
+      // Act
+
       await new Promise((resolve) => setTimeout(resolve, 200));
+
+      // Assert
+
       expect(mockCallback).not.toHaveBeenCalled();
 
       // Check after delay
@@ -348,6 +508,8 @@ describe("validation helpers", () => {
 
     it("should cancel previous timeout on new call", async () => {
       // Arrange
+      // Arrange
+
       const mockValidator = vi.fn(() => ({
         success: true,
         data: {},
@@ -364,9 +526,15 @@ describe("validation helpers", () => {
       debouncedValidator({ value: 3 }, mockCallback);
 
       // Wait for final debounce
+
+      // Act
+
       await new Promise((resolve) => setTimeout(resolve, 150));
 
       // Assert
+
+      // Assert
+
       expect(mockValidator).toHaveBeenCalledTimes(1);
       expect(mockValidator).toHaveBeenCalledWith({ value: 3 });
     });

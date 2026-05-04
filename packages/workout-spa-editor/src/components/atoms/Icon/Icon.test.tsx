@@ -7,30 +7,54 @@ import { Icon } from "./Icon";
 describe("Icon", () => {
   it("should render icon component", () => {
     // Arrange & Act
+    // Arrange
+
     render(<Icon icon={Heart} data-testid="icon" />);
 
     // Assert
+
+    // Act
+
     const icon = screen.getByTestId("icon");
+
+    // Assert
+
     expect(icon).toBeInTheDocument();
   });
 
   it("should apply default size classes", () => {
     // Arrange & Act
+    // Arrange
+
     render(<Icon icon={Heart} data-testid="icon" />);
 
     // Assert
+
+    // Act
+
     const icon = screen.getByTestId("icon");
+
+    // Assert
+
     expect(icon).toHaveClass("w-5", "h-5");
   });
 
   it("should apply size variant classes", () => {
     // Arrange & Act
+    // Arrange
+
     const { rerender } = render(
       <Icon icon={Heart} size="xs" data-testid="icon" />
     );
 
     // Assert
+
+    // Act
+
     let icon = screen.getByTestId("icon");
+
+    // Assert
+
     expect(icon).toHaveClass("w-3", "h-3");
 
     // Act
@@ -57,21 +81,37 @@ describe("Icon", () => {
 
   it("should apply default color classes", () => {
     // Arrange & Act
+    // Arrange
+
     render(<Icon icon={Heart} data-testid="icon" />);
 
     // Assert
+
+    // Act
+
     const icon = screen.getByTestId("icon");
+
+    // Assert
+
     expect(icon).toHaveClass("text-gray-700", "dark:text-gray-200");
   });
 
   it("should apply color variant classes", () => {
     // Arrange & Act
+    // Arrange
+
     const { rerender } = render(
       <Icon icon={Heart} color="primary" data-testid="icon" />
     );
 
     // Assert
+
+    // Act
+
     let icon = screen.getByTestId("icon");
+
+    // Assert
+
     expect(icon).toHaveClass("text-primary-600", "dark:text-primary-400");
 
     // Act
@@ -98,19 +138,35 @@ describe("Icon", () => {
 
   it("should apply custom className", () => {
     // Arrange & Act
+    // Arrange
+
     render(<Icon icon={Heart} className="custom-class" data-testid="icon" />);
 
     // Assert
+
+    // Act
+
     const icon = screen.getByTestId("icon");
+
+    // Assert
+
     expect(icon).toHaveClass("custom-class");
   });
 
   it("should render different icon components", () => {
     // Arrange & Act
+    // Arrange
+
     const { rerender } = render(<Icon icon={Heart} data-testid="icon" />);
 
     // Assert
+
+    // Act
+
     let icon = screen.getByTestId("icon");
+
+    // Assert
+
     expect(icon).toBeInTheDocument();
 
     // Act
@@ -123,10 +179,18 @@ describe("Icon", () => {
 
   it("should apply base classes", () => {
     // Arrange & Act
+    // Arrange
+
     render(<Icon icon={Heart} data-testid="icon" />);
 
     // Assert
+
+    // Act
+
     const icon = screen.getByTestId("icon");
+
+    // Assert
+
     expect(icon).toHaveClass(
       "inline-flex",
       "items-center",
@@ -137,21 +201,37 @@ describe("Icon", () => {
 
   it("should forward ref", () => {
     // Arrange
+    // Arrange
+
     const ref = { current: null };
 
     // Act
+
+    // Act
+
     render(<Icon icon={Heart} ref={ref} />);
 
     // Assert
+
+    // Assert
+
     expect(ref.current).toBeInstanceOf(HTMLSpanElement);
   });
 
   it("should pass through HTML attributes", () => {
     // Arrange & Act
+    // Arrange
+
     render(<Icon icon={Heart} data-testid="icon" aria-label="Heart icon" />);
 
     // Assert
+
+    // Act
+
     const icon = screen.getByTestId("icon");
+
+    // Assert
+
     expect(icon).toHaveAttribute("aria-label", "Heart icon");
   });
 });

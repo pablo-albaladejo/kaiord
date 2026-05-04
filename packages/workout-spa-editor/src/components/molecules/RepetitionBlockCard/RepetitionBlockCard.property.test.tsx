@@ -25,6 +25,8 @@ describe("RepetitionBlockCard - Property Tests", () => {
   describe("Property 8: UI delete triggers actual deletion", () => {
     it("should call onDelete when delete button is clicked for any block", async () => {
       // Arrange - Generate a random repetition block
+      // Arrange
+
       const randomRepeatCount = Math.floor(Math.random() * 10) + 1;
       const randomStepCount = Math.floor(Math.random() * 5) + 1;
 
@@ -60,14 +62,22 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Act
       render(<RepetitionBlockCard block={block} onDelete={onDelete} />);
       const deleteButton = screen.getByTestId("delete-block-button");
+
+      // Act
+
       await user.click(deleteButton);
 
       // Assert
+
+      // Assert
+
       expect(onDelete).toHaveBeenCalledOnce();
     });
 
     it("should call onDelete exactly once per click for multiple clicks", async () => {
       // Arrange
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -97,13 +107,25 @@ describe("RepetitionBlockCard - Property Tests", () => {
       // Click multiple times
       await user.click(deleteButton);
       await user.click(deleteButton);
+
+      // Act
+
       await user.click(deleteButton);
 
       // Assert - Should be called 3 times (once per click)
+
+      // Assert
+
       expect(onDelete).toHaveBeenCalledTimes(3);
     });
 
     it("should trigger delete for blocks with varying step counts", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange - Test with different step counts
       const stepCounts = [1, 2, 5, 10];
 
@@ -149,6 +171,12 @@ describe("RepetitionBlockCard - Property Tests", () => {
     });
 
     it("should trigger delete for blocks with varying repeat counts", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange - Test with different repeat counts
       const repeatCounts = [1, 2, 5, 10, 20];
 
@@ -192,6 +220,8 @@ describe("RepetitionBlockCard - Property Tests", () => {
 
     it("should not call onDelete when button is not provided", async () => {
       // Arrange
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -212,9 +242,15 @@ describe("RepetitionBlockCard - Property Tests", () => {
       };
 
       // Act
+
+      // Act
+
       render(<RepetitionBlockCard block={block} />);
 
       // Assert - Delete button should not exist
+
+      // Assert
+
       expect(
         screen.queryByTestId("delete-block-button")
       ).not.toBeInTheDocument();
@@ -232,6 +268,8 @@ describe("RepetitionBlockCard - Property Tests", () => {
   describe("Property 9: Keyboard delete equivalence", () => {
     it("should call onDelete when Delete key is pressed for any block", async () => {
       // Arrange - Generate a random repetition block
+      // Arrange
+
       const randomRepeatCount = Math.floor(Math.random() * 10) + 1;
       const randomStepCount = Math.floor(Math.random() * 5) + 1;
 
@@ -268,14 +306,22 @@ describe("RepetitionBlockCard - Property Tests", () => {
       render(<RepetitionBlockCard block={block} onDelete={onDelete} />);
       const blockCard = screen.getByTestId("repetition-block-card");
       blockCard.focus();
+
+      // Act
+
       await user.keyboard("{Delete}");
 
       // Assert
+
+      // Assert
+
       expect(onDelete).toHaveBeenCalledOnce();
     });
 
     it("should call onDelete when Backspace key is pressed for any block", async () => {
       // Arrange - Generate a random repetition block
+      // Arrange
+
       const randomRepeatCount = Math.floor(Math.random() * 10) + 1;
       const randomStepCount = Math.floor(Math.random() * 5) + 1;
 
@@ -312,14 +358,22 @@ describe("RepetitionBlockCard - Property Tests", () => {
       render(<RepetitionBlockCard block={block} onDelete={onDelete} />);
       const blockCard = screen.getByTestId("repetition-block-card");
       blockCard.focus();
+
+      // Act
+
       await user.keyboard("{Backspace}");
 
       // Assert
+
+      // Assert
+
       expect(onDelete).toHaveBeenCalledOnce();
     });
 
     it("should produce identical results for Delete key, Backspace key, and UI button", async () => {
       // Arrange - Create identical blocks for each deletion method
+      // Arrange
+
       const createBlock = (): RepetitionBlock => ({
         repeatCount: 3,
         steps: [
@@ -398,10 +452,16 @@ describe("RepetitionBlockCard - Property Tests", () => {
       const blockCard2 = screen.getByTestId("repetition-block-card");
       blockCard2.focus();
       await user.keyboard("{Backspace}");
+
+      // Act
+
       unmount3();
 
       // Assert - All three methods should call onDelete exactly once
       // This demonstrates equivalence: all three methods trigger deletion
+
+      // Assert
+
       expect(onDeleteViaButton).toHaveBeenCalledOnce();
       expect(onDeleteViaDeleteKey).toHaveBeenCalledOnce();
       expect(onDeleteViaBackspaceKey).toHaveBeenCalledOnce();
@@ -409,6 +469,8 @@ describe("RepetitionBlockCard - Property Tests", () => {
 
     it("should not call onDelete when other keys are pressed", async () => {
       // Arrange
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -442,14 +504,22 @@ describe("RepetitionBlockCard - Property Tests", () => {
       await user.keyboard("{Space}");
       await user.keyboard("a");
       await user.keyboard("{ArrowUp}");
+
+      // Act
+
       await user.keyboard("{ArrowDown}");
 
       // Assert
+
+      // Assert
+
       expect(onDelete).not.toHaveBeenCalled();
     });
 
     it("should not call onDelete via keyboard when onDelete is not provided", async () => {
       // Arrange
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -478,9 +548,15 @@ describe("RepetitionBlockCard - Property Tests", () => {
 
       // Try to delete via keyboard - should not throw error
       await user.keyboard("{Delete}");
+
+      // Act
+
       await user.keyboard("{Backspace}");
 
       // Assert - No error should be thrown, component should still be rendered
+
+      // Assert
+
       expect(blockCard).toBeInTheDocument();
     });
   });
@@ -500,6 +576,8 @@ describe("RepetitionBlockCard - Property Tests", () => {
   describe("Property 10: Focus management after deletion", () => {
     it("should maintain focusability via tabIndex for keyboard navigation", () => {
       // Arrange
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -523,14 +601,22 @@ describe("RepetitionBlockCard - Property Tests", () => {
 
       // Act
       render(<RepetitionBlockCard block={block} onDelete={onDelete} />);
+
+      // Act
+
       const blockCard = screen.getByTestId("repetition-block-card");
 
       // Assert - Component should be focusable via keyboard
+
+      // Assert
+
       expect(blockCard).toHaveAttribute("tabIndex", "0");
     });
 
     it("should allow focus to be programmatically set for any block", () => {
       // Arrange - Create multiple blocks with different configurations
+      // Arrange
+
       const blocks: RepetitionBlock[] = [
         {
           repeatCount: 2,
@@ -582,7 +668,13 @@ describe("RepetitionBlockCard - Property Tests", () => {
       });
 
       // Assert - Focus can be programmatically set
+
+      // Act
+
       (blockCards[0] as HTMLElement).focus();
+
+      // Assert
+
       expect(document.activeElement).toBe(blockCards[0]);
 
       (blockCards[1] as HTMLElement).focus();
@@ -591,6 +683,8 @@ describe("RepetitionBlockCard - Property Tests", () => {
 
     it("should maintain focus on the block when keyboard shortcuts are used", async () => {
       // Arrange
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -618,7 +712,13 @@ describe("RepetitionBlockCard - Property Tests", () => {
       const blockCard = screen.getByTestId("repetition-block-card");
 
       // Focus the block
+
+      // Act
+
       blockCard.focus();
+
+      // Assert
+
       expect(document.activeElement).toBe(blockCard);
 
       // Press Delete key
@@ -630,6 +730,8 @@ describe("RepetitionBlockCard - Property Tests", () => {
 
     it("should not interfere with focus when deletion is triggered", async () => {
       // Arrange
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -660,14 +762,26 @@ describe("RepetitionBlockCard - Property Tests", () => {
       const blockCard = screen.getByTestId("repetition-block-card");
 
       blockCard.focus();
+
+      // Act
+
       await user.keyboard("{Delete}");
 
       // Assert - Focus should still be on the block when onDelete is called
       // This allows the parent component to determine where to move focus
+
+      // Assert
+
       expect(focusBeforeDeletion).toBe(blockCard);
     });
 
     it("should support keyboard navigation for blocks with varying configurations", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange - Test with different block configurations
       const configurations = [
         { repeatCount: 1, stepCount: 1 },

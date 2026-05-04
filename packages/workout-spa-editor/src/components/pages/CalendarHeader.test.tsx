@@ -63,6 +63,10 @@ const baseState = {
 
 describe("CalendarHeader", () => {
   it("should render empty banners, cost confirmation, and week navigation", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CalendarHeader
         state={baseState}
@@ -74,12 +78,16 @@ describe("CalendarHeader", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByTestId("mock-empty-banners")).toBeInTheDocument();
     expect(screen.getByTestId("mock-cost-confirmation")).toBeInTheDocument();
     expect(screen.getByTestId("mock-week-nav")).toHaveTextContent("2026-W16");
   });
 
   it("should render a sync button per LINKED coaching source (gates on linked)", () => {
+    // Arrange
+
     const coaching = {
       syncSources: [
         {
@@ -115,7 +123,11 @@ describe("CalendarHeader", () => {
       ],
     } as unknown as Parameters<typeof CalendarHeader>[0]["coaching"];
 
+    // Act
+
     render(<CalendarHeader state={baseState} coaching={coaching} />);
+
+    // Assert
 
     expect(screen.getByTestId("mock-sync-Garmin")).toBeInTheDocument();
     expect(screen.getByTestId("mock-sync-Train2Go")).toBeInTheDocument();
@@ -128,6 +140,8 @@ describe("CalendarHeader", () => {
     // inside useCoachingActivities, NOT inside CalendarHeader. The CalendarHeader
     // wires the Sync button directly to src.sync(weekStart) — clicking it always
     // fires sync, regardless of when the last sync ran.
+    // Arrange
+
     const sync = vi.fn();
     const weekStart = "2026-04-13";
     const stateAtWeek = {
@@ -151,7 +165,11 @@ describe("CalendarHeader", () => {
     const user = userEvent.setup();
     render(<CalendarHeader state={stateAtWeek} coaching={coaching} />);
 
+    // Act
+
     await user.click(screen.getByTestId("mock-sync-Train2Go"));
+
+    // Assert
 
     expect(sync).toHaveBeenCalledTimes(1);
     expect(sync).toHaveBeenCalledWith(weekStart);
@@ -161,6 +179,8 @@ describe("CalendarHeader", () => {
     // Models switching from a Train2Go-linked profile to one with no linked
     // accounts via two distinct mounts (D4 in design.md): avoids relying on
     // useLiveQuery / useActiveProfile flush ordering on rerender.
+    // Arrange
+
     const linkedCoaching = {
       syncSources: [
         {
@@ -176,9 +196,13 @@ describe("CalendarHeader", () => {
       ],
     } as unknown as Parameters<typeof CalendarHeader>[0]["coaching"];
 
+    // Act
+
     const { unmount } = render(
       <CalendarHeader state={baseState} coaching={linkedCoaching} />
     );
+
+    // Assert
 
     expect(screen.getByTestId("mock-sync-Train2Go")).toBeInTheDocument();
 
@@ -204,6 +228,8 @@ describe("CalendarHeader", () => {
   });
 
   it("passes batch.pending presence to the cost confirmation's open prop", () => {
+    // Arrange
+
     const stateWithPending = {
       ...baseState,
       batch: {
@@ -215,6 +241,8 @@ describe("CalendarHeader", () => {
       },
     } as unknown as Parameters<typeof CalendarHeader>[0]["state"];
 
+    // Act
+
     render(
       <CalendarHeader
         state={stateWithPending}
@@ -225,6 +253,8 @@ describe("CalendarHeader", () => {
         }
       />
     );
+
+    // Assert
 
     expect(screen.getByTestId("mock-cost-confirmation").dataset.open).toBe(
       "true"

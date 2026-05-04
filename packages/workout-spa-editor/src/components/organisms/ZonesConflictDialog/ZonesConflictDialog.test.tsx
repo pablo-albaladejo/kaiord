@@ -19,6 +19,10 @@ const CONFLICTS: ConflictItem[] = [
 
 describe("ZonesConflictDialog", () => {
   it("should do NOT render when open is false", () => {
+    // Arrange
+
+    // Act
+
     render(
       <ZonesConflictDialog
         open={false}
@@ -28,10 +32,16 @@ describe("ZonesConflictDialog", () => {
       />
     );
 
+    // Assert
+
     expect(screen.queryByTestId("zones-conflict-dialog")).toBeNull();
   });
 
   it("should render one row per conflict with the static FieldKey label", () => {
+    // Arrange
+
+    // Act
+
     render(
       <ZonesConflictDialog
         open
@@ -41,6 +51,8 @@ describe("ZonesConflictDialog", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByText("FTP")).toBeInTheDocument();
     expect(screen.getByText("Running LTHR")).toBeInTheDocument();
     expect(
@@ -49,6 +61,8 @@ describe("ZonesConflictDialog", () => {
   });
 
   it("should call onCancel when the Cancel button is clicked", async () => {
+    // Arrange
+
     const onCancel = vi.fn();
     render(
       <ZonesConflictDialog
@@ -59,12 +73,18 @@ describe("ZonesConflictDialog", () => {
       />
     );
 
+    // Act
+
     await userEvent.click(screen.getByRole("button", { name: "Cancel" }));
+
+    // Assert
 
     expect(onCancel).toHaveBeenCalledTimes(1);
   });
 
   it("should emit all-reject decisions by default when Apply is clicked without changing rows", async () => {
+    // Arrange
+
     const onConfirm = vi.fn();
     render(
       <ZonesConflictDialog
@@ -75,7 +95,11 @@ describe("ZonesConflictDialog", () => {
       />
     );
 
+    // Act
+
     await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+
+    // Assert
 
     expect(onConfirm).toHaveBeenCalledWith({
       "cycling.thresholds.ftp": "reject",
@@ -84,6 +108,8 @@ describe("ZonesConflictDialog", () => {
   });
 
   it("should emit per-row accept/reject after the user toggles a row", async () => {
+    // Arrange
+
     const onConfirm = vi.fn();
     render(
       <ZonesConflictDialog
@@ -101,7 +127,12 @@ describe("ZonesConflictDialog", () => {
       'input[value="accept"]'
     ) as HTMLInputElement;
     await userEvent.click(acceptFtp);
+
+    // Act
+
     await userEvent.click(screen.getByRole("button", { name: "Apply" }));
+
+    // Assert
 
     expect(onConfirm).toHaveBeenCalledWith({
       "cycling.thresholds.ftp": "accept",

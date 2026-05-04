@@ -34,44 +34,80 @@ describe("EmptyDayDialog", () => {
   });
 
   it("should render dialog when date is provided (open)", () => {
+    // Arrange
+
+    // Act
+
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
+
+    // Assert
 
     expect(screen.getByTestId("empty-day-dialog")).toBeInTheDocument();
     expect(screen.getByText("Add workout")).toBeInTheDocument();
   });
 
   it("should not render dialog content when date is null (closed)", () => {
+    // Arrange
+
+    // Act
+
     renderWithRouter(<EmptyDayDialog date={null} onClose={vi.fn()} />);
+
+    // Assert
 
     expect(screen.queryByTestId("empty-day-dialog")).not.toBeInTheDocument();
   });
 
   it("should show formatted date label", () => {
+    // Arrange
+
+    // Act
+
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
+
+    // Assert
 
     expect(screen.getByText(/Saturday, March 15/)).toBeInTheDocument();
   });
 
   it("should render Add from Library button", () => {
+    // Arrange
+
+    // Act
+
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
+
+    // Assert
 
     expect(screen.getByText("Add from Library")).toBeInTheDocument();
   });
 
   it("should render Create new workout button", () => {
+    // Arrange
+
+    // Act
+
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
+
+    // Assert
 
     expect(screen.getByText("Create new workout")).toBeInTheDocument();
   });
 
   it("should open TemplatePickerDialog (does not navigate) on Add from Library", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     const onClose = vi.fn();
     const { location } = renderWithRouter(
       <EmptyDayDialog date="2025-03-15" onClose={onClose} />
     );
 
+    // Act
+
     await user.click(screen.getByText("Add from Library"));
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByTestId("template-picker-dialog")).toBeInTheDocument();
@@ -84,10 +120,16 @@ describe("EmptyDayDialog", () => {
   });
 
   it("should not show the page-level ScheduleDateDialog during the in-flow flow", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={vi.fn()} />);
 
+    // Act
+
     await user.click(screen.getByText("Add from Library"));
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByTestId("template-picker-dialog")).toBeInTheDocument();
@@ -98,6 +140,8 @@ describe("EmptyDayDialog", () => {
   });
 
   it("schedules the picked template for the dialog's date and closes both dialogs", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     const template = await addTemplate(
       persistence,
@@ -110,7 +154,11 @@ describe("EmptyDayDialog", () => {
     const onClose = vi.fn();
     renderWithRouter(<EmptyDayDialog date="2025-03-15" onClose={onClose} />);
 
+    // Act
+
     await user.click(screen.getByText("Add from Library"));
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Tempo Ride")).toBeInTheDocument();
@@ -131,13 +179,19 @@ describe("EmptyDayDialog", () => {
   });
 
   it("should navigate to new workout with date and closes on Create click", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     const onClose = vi.fn();
     const { location } = renderWithRouter(
       <EmptyDayDialog date="2025-03-15" onClose={onClose} />
     );
 
+    // Act
+
     await user.click(screen.getByText("Create new workout"));
+
+    // Assert
 
     expect(onClose).toHaveBeenCalledOnce();
     expect(location.history).toContain("/workout/new?date=2025-03-15");

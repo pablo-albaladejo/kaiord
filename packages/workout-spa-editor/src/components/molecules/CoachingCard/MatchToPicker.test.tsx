@@ -27,6 +27,10 @@ const makeWorkout = (
 
 describe("MatchToPicker — empty state", () => {
   it("should render the empty placeholder when no workouts are pickable", () => {
+    // Arrange
+
+    // Act
+
     render(
       <MatchToPicker
         workouts={[]}
@@ -35,6 +39,8 @@ describe("MatchToPicker — empty state", () => {
         onClose={vi.fn()}
       />
     );
+
+    // Assert
 
     expect(
       screen.getByText(/no same-day, same-sport workouts/i)
@@ -63,19 +69,33 @@ describe("MatchToPicker — keyboard navigation", () => {
   };
 
   it("should auto-focus the first list item on mount", () => {
+    // Arrange
+
     setup();
 
+    // Act
+
     const firstOption = screen.getAllByRole("option")[0]!;
+
+    // Assert
+
     expect(firstOption).toHaveFocus();
     expect(firstOption.getAttribute("aria-selected")).toBe("true");
   });
 
   it("should move focus on ArrowDown to next, ArrowUp back, both wrapping", () => {
+    // Arrange
+
     setup();
     const listbox = screen.getByRole("listbox");
     const options = screen.getAllByRole("option");
 
+    // Act
+
     fireEvent.keyDown(listbox, { key: "ArrowDown" });
+
+    // Assert
+
     expect(options[1]).toHaveFocus();
 
     fireEvent.keyDown(listbox, { key: "ArrowDown" });
@@ -89,12 +109,19 @@ describe("MatchToPicker — keyboard navigation", () => {
   });
 
   it("should select the focused item on Enter via onSelect(workoutId)", () => {
+    // Arrange
+
     const { onSelect } = setup();
     const listbox = screen.getByRole("listbox");
 
     fireEvent.keyDown(listbox, { key: "ArrowDown" }); // focus w2
 
+    // Act
+
     const focused = document.activeElement as HTMLButtonElement | null;
+
+    // Assert
+
     expect(focused).not.toBeNull();
     fireEvent.click(focused!);
 
@@ -102,10 +129,16 @@ describe("MatchToPicker — keyboard navigation", () => {
   });
 
   it("should close the picker on Escape via onClose without bubbling", () => {
+    // Arrange
+
     const { onClose } = setup();
     const listbox = screen.getByRole("listbox");
 
+    // Act
+
     fireEvent.keyDown(listbox, { key: "Escape" });
+
+    // Assert
 
     expect(onClose).toHaveBeenCalledTimes(1);
   });
@@ -113,6 +146,8 @@ describe("MatchToPicker — keyboard navigation", () => {
 
 describe("MatchToPicker — pending state", () => {
   it("should disable every option while a selection is in flight", () => {
+    // Arrange
+
     render(
       <MatchToPicker
         workouts={[makeWorkout("w1", "cycling")]}
@@ -122,7 +157,12 @@ describe("MatchToPicker — pending state", () => {
       />
     );
 
+    // Act
+
     const option = screen.getByRole("option");
+
+    // Assert
+
     expect(option).toBeDisabled();
   });
 });

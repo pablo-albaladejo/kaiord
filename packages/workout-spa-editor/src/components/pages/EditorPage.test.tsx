@@ -96,9 +96,15 @@ describe("EditorPage", () => {
   });
 
   it("should load workout from Dexie by ID", async () => {
+    // Arrange
+
     await db.table("workouts").add(makeRecord());
 
+    // Act
+
     renderEditor("w-test");
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByTestId("workflow-bar")).toBeInTheDocument();
@@ -109,9 +115,15 @@ describe("EditorPage", () => {
   });
 
   it("should show no-data message for workout without KRD", async () => {
+    // Arrange
+
     await db.table("workouts").add(makeRecord({ krd: null }));
 
+    // Act
+
     renderEditor("w-test");
+
+    // Assert
 
     await waitFor(() => {
       expect(
@@ -121,10 +133,16 @@ describe("EditorPage", () => {
   });
 
   it("should transition structured -> ready on accept", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     await db.table("workouts").add(makeRecord({ state: "structured" }));
 
+    // Act
+
     renderEditor("w-test");
+
+    // Assert
 
     await waitFor(() => {
       expect(
@@ -141,10 +159,16 @@ describe("EditorPage", () => {
   });
 
   it("should transition ready -> pushed on push", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     await db.table("workouts").add(makeRecord({ state: "ready" }));
 
+    // Act
+
     renderEditor("w-test");
+
+    // Assert
 
     await waitFor(() => {
       expect(
@@ -162,6 +186,8 @@ describe("EditorPage", () => {
   });
 
   it("should show modified indicator for modified workouts", async () => {
+    // Arrange
+
     await db.table("workouts").add(
       makeRecord({
         state: "modified",
@@ -169,7 +195,11 @@ describe("EditorPage", () => {
       })
     );
 
+    // Act
+
     renderEditor("w-test");
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByTestId("modified-indicator")).toBeInTheDocument();
@@ -180,6 +210,8 @@ describe("EditorPage", () => {
   });
 
   it("should transition modified -> pushed on re-push", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     await db.table("workouts").add(
       makeRecord({
@@ -188,7 +220,11 @@ describe("EditorPage", () => {
       })
     );
 
+    // Act
+
     renderEditor("w-test");
+
+    // Assert
 
     await waitFor(() => {
       expect(

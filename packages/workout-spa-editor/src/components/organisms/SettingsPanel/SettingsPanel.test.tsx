@@ -54,39 +54,84 @@ describe("SettingsPanel", () => {
   });
 
   it("should render when open", () => {
+    // Arrange
+
+    // Act
+
     renderPanel();
+
+    // Assert
+
     expect(screen.getByText("Settings")).toBeInTheDocument();
   });
 
   it("should show the AI tab by default", () => {
+    // Arrange
+
+    // Act
+
     renderPanel();
+
+    // Assert
+
     expect(screen.getByText("LLM Providers")).toBeInTheDocument();
   });
 
   it("should switch to the Extensions tab", () => {
+    // Arrange
+
     renderPanel();
+
+    // Act
+
     fireEvent.click(screen.getByText("Extensions"));
+
+    // Assert
+
     expect(screen.getByText("Garmin Connect")).toBeInTheDocument();
     expect(screen.getByText("Train2Go")).toBeInTheDocument();
     expect(screen.getByText("Refresh Status")).toBeInTheDocument();
   });
 
   it("should switch to the Privacy tab", () => {
+    // Arrange
+
     renderPanel();
+
+    // Act
+
     fireEvent.click(screen.getByText("Privacy"));
+
+    // Assert
+
     expect(screen.getByText("Privacy Information")).toBeInTheDocument();
   });
 
   it("should show the provider list as empty initially", () => {
+    // Arrange
+
+    // Act
+
     renderPanel();
+
+    // Assert
+
     expect(
       screen.getByText("No providers configured. Add one below.")
     ).toBeInTheDocument();
   });
 
   it("should show privacy disclaimers", () => {
+    // Arrange
+
     renderPanel();
+
+    // Act
+
     fireEvent.click(screen.getByText("Privacy"));
+
+    // Assert
+
     expect(
       screen.getByText(/We do not store your credentials/)
     ).toBeInTheDocument();

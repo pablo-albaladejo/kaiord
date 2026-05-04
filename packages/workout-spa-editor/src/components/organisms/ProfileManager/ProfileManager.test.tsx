@@ -33,7 +33,13 @@ describe("ProfileManager", () => {
 
   describe("rendering", () => {
     it("should render when open", () => {
+      // Arrange
+
+      // Act
+
       renderManager();
+
+      // Assert
 
       expect(
         screen.getByRole("heading", { name: /profile manager/i })
@@ -41,15 +47,27 @@ describe("ProfileManager", () => {
     });
 
     it("should display empty state when no profiles exist", async () => {
+      // Arrange
+
+      // Act
+
       renderManager();
+
+      // Assert
 
       expect(await screen.findByText(/no profiles yet/i)).toBeInTheDocument();
     });
 
     it("should display profile count", async () => {
+      // Arrange
+
       await seedProfile("Test Profile");
 
+      // Act
+
       renderManager();
+
+      // Assert
 
       expect(
         await screen.findByText(/saved profiles \(1\)/i)
@@ -57,7 +75,13 @@ describe("ProfileManager", () => {
     });
 
     it("should not show Edit Profile card", () => {
+      // Arrange
+
+      // Act
+
       renderManager();
+
+      // Assert
 
       expect(screen.queryByText("Edit Profile")).not.toBeInTheDocument();
     });
@@ -65,11 +89,18 @@ describe("ProfileManager", () => {
 
   describe("profile creation", () => {
     it("should create a new profile with name only", async () => {
+      // Arrange
+
       const user = userEvent.setup();
       renderManager();
 
       await user.type(screen.getByLabelText(/^name$/i), "New Profile");
+
+      // Act
+
       await user.click(screen.getByRole("button", { name: /create profile/i }));
+
+      // Assert
 
       expect(
         await screen.findByText(/saved profiles \(1\)/i)
@@ -78,7 +109,13 @@ describe("ProfileManager", () => {
     });
 
     it("should disable create button when name is empty", () => {
+      // Arrange
+
+      // Act
+
       renderManager();
+
+      // Assert
 
       expect(
         screen.getByRole("button", { name: /create profile/i })
@@ -86,6 +123,12 @@ describe("ProfileManager", () => {
     });
 
     it("should clear form after creating profile", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       const user = userEvent.setup();
       renderManager();
 
@@ -102,11 +145,17 @@ describe("ProfileManager", () => {
 
   describe("profile editing", () => {
     it("should show tabs when editing a profile", async () => {
+      // Arrange
+
       const user = userEvent.setup();
       await seedProfile("Original");
       renderManager();
 
+      // Act
+
       await user.click(await screen.findByRole("button", { name: /^edit$/i }));
+
+      // Assert
 
       expect(
         screen.getByRole("tab", { name: /training zones/i })
@@ -117,11 +166,17 @@ describe("ProfileManager", () => {
     });
 
     it("should show sport zone editor by default when editing", async () => {
+      // Arrange
+
       const user = userEvent.setup();
       await seedProfile("Athlete");
       renderManager();
 
+      // Act
+
       await user.click(await screen.findByRole("button", { name: /^edit$/i }));
+
+      // Assert
 
       expect(
         await screen.findByRole("tab", { name: "Cycling" })
@@ -131,6 +186,8 @@ describe("ProfileManager", () => {
 
   describe("profile deletion", () => {
     it("should show delete confirmation dialog", async () => {
+      // Arrange
+
       const user = userEvent.setup();
       await seedProfile("Profile 1");
       await seedProfile("Profile 2");
@@ -139,7 +196,12 @@ describe("ProfileManager", () => {
       const deleteButtons = await screen.findAllByRole("button", {
         name: /^delete profile$/i,
       });
+
+      // Act
+
       await user.click(deleteButtons[0]);
+
+      // Assert
 
       expect(
         await screen.findByRole("heading", { name: /delete profile/i })
@@ -147,6 +209,12 @@ describe("ProfileManager", () => {
     });
 
     it("should delete profile after confirmation", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       const user = userEvent.setup();
       const persistence = createDexiePersistence(db);
       await seedProfile("Profile 1");
@@ -170,19 +238,32 @@ describe("ProfileManager", () => {
     });
 
     it("should disable delete button when only one profile exists", async () => {
+      // Arrange
+
       await seedProfile("Only Profile");
 
       renderManager();
 
+      // Act
+
       const deleteButton = await screen.findByRole("button", {
         name: /^delete profile$/i,
       });
+
+      // Assert
+
       expect(deleteButton).toBeDisabled();
     });
   });
 
   describe("active profile", () => {
     it("should set active profile", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       const user = userEvent.setup();
       const persistence = createDexiePersistence(db);
       await seedProfile("Profile 1"); // first → auto-active by I1
@@ -203,18 +284,31 @@ describe("ProfileManager", () => {
 
   describe("profile import", () => {
     it("should have import input element", () => {
+      // Arrange
+
       renderManager();
+
+      // Act
 
       const input = document.getElementById(
         "import-profile"
       ) as HTMLInputElement;
+
+      // Assert
+
       expect(input).toBeInTheDocument();
       expect(input).toHaveAttribute("type", "file");
       expect(input).toHaveAttribute("accept", ".json");
     });
 
     it("should show import button", () => {
+      // Arrange
+
+      // Act
+
       renderManager();
+
+      // Assert
 
       expect(screen.getByText(/import profile/i)).toBeInTheDocument();
     });
@@ -222,6 +316,8 @@ describe("ProfileManager", () => {
 
   describe("error handling", () => {
     it("should surface a toast when createProfile rejects", async () => {
+      // Arrange
+
       const user = userEvent.setup();
       const persistence = createDexiePersistence(db);
       persistence.profiles.put = vi.fn(() =>
@@ -234,7 +330,12 @@ describe("ProfileManager", () => {
       );
 
       await user.type(screen.getByLabelText(/^name$/i), "Will Fail");
+
+      // Act
+
       await user.click(screen.getByRole("button", { name: /create profile/i }));
+
+      // Assert
 
       expect(
         await screen.findByText(/failed to create profile/i)

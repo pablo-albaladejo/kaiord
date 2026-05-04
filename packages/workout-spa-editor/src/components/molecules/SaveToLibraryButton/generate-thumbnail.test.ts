@@ -64,6 +64,8 @@ describe("generateThumbnail", () => {
   describe("empty workout", () => {
     it("should generate thumbnail for empty workout", async () => {
       // Arrange
+      // Arrange
+
       const workout: KRD = {
         ...mockKRD,
         extensions: {
@@ -76,9 +78,15 @@ describe("generateThumbnail", () => {
       };
 
       // Act
+
+      // Act
+
       const result = await generateThumbnail(workout);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe("data:image/png;base64,mockdata");
     });
   });
@@ -86,6 +94,8 @@ describe("generateThumbnail", () => {
   describe("workout with steps", () => {
     it("should generate thumbnail for workout with time-based steps", async () => {
       // Arrange
+      // Arrange
+
       const step1: WorkoutStep = {
         ...mockWorkoutStep,
         duration: { type: "time", seconds: 300 },
@@ -109,14 +119,22 @@ describe("generateThumbnail", () => {
       };
 
       // Act
+
+      // Act
+
       const result = await generateThumbnail(workout);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe("data:image/png;base64,mockdata");
     });
 
     it("should generate thumbnail for workout with repetition blocks", async () => {
       // Arrange
+      // Arrange
+
       const step: WorkoutStep = {
         ...mockWorkoutStep,
         duration: { type: "time", seconds: 300 },
@@ -139,14 +157,22 @@ describe("generateThumbnail", () => {
       };
 
       // Act
+
+      // Act
+
       const result = await generateThumbnail(workout);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe("data:image/png;base64,mockdata");
     });
 
     it("should handle non-time duration steps", async () => {
       // Arrange
+      // Arrange
+
       const step: WorkoutStep = {
         ...mockWorkoutStep,
         duration: { type: "distance", meters: 5000 },
@@ -164,9 +190,15 @@ describe("generateThumbnail", () => {
       };
 
       // Act
+
+      // Act
+
       const result = await generateThumbnail(workout);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe("data:image/png;base64,mockdata");
     });
   });
@@ -174,6 +206,8 @@ describe("generateThumbnail", () => {
   describe("error handling", () => {
     it("should throw error when canvas context is not available", async () => {
       // Arrange
+      // Arrange
+
       const mockCanvas = {
         getContext: vi.fn(() => null),
       };
@@ -182,9 +216,14 @@ describe("generateThumbnail", () => {
         mockCanvas as unknown as HTMLCanvasElement
       );
 
+      // Act
+
       const workout = mockKRD;
 
       // Act & Assert
+
+      // Assert
+
       await expect(generateThumbnail(workout)).rejects.toThrow(
         "Failed to get canvas context"
       );
@@ -194,6 +233,8 @@ describe("generateThumbnail", () => {
   describe("intensity colors", () => {
     it("should use different colors for different intensities", async () => {
       // Arrange
+      // Arrange
+
       const warmup: WorkoutStep = {
         ...mockWorkoutStep,
         duration: { type: "time", seconds: 300 },
@@ -227,9 +268,15 @@ describe("generateThumbnail", () => {
       };
 
       // Act
+
+      // Act
+
       const result = await generateThumbnail(workout);
 
       // Assert
+
+      // Assert
+
       expect(result).toBe("data:image/png;base64,mockdata");
     });
   });

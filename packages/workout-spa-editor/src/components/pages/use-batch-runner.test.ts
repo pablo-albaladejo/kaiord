@@ -38,10 +38,16 @@ const workout = {
 
 describe("useBatchRunner", () => {
   it("should flip isProcessing around the batch run and calls processBatch", async () => {
+    // Arrange
+
     processBatchSpy.mockResolvedValueOnce(undefined);
     const setMessage = vi.fn();
 
+    // Act
+
     const { result } = renderHook(() => useBatchRunner(setMessage));
+
+    // Assert
 
     expect(result.current.isProcessing).toBe(false);
     await act(async () => {
@@ -53,14 +59,20 @@ describe("useBatchRunner", () => {
   });
 
   it("should surface an error message when processBatch throws", async () => {
+    // Arrange
+
     processBatchSpy.mockRejectedValueOnce(new Error("boom"));
     const setMessage = vi.fn();
 
     const { result } = renderHook(() => useBatchRunner(setMessage));
 
+    // Act
+
     await act(async () => {
       await result.current.run({ provider, workouts: [workout] });
     });
+
+    // Assert
 
     expect(setMessage).toHaveBeenCalledWith(
       "Batch processing encountered an unexpected error."

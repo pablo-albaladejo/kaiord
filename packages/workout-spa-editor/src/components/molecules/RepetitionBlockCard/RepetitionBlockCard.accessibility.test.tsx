@@ -35,15 +35,25 @@ describe("RepetitionBlockCard - Accessibility", () => {
   describe("keyboard navigation through blocks", () => {
     it("should be focusable via tabIndex", () => {
       // Arrange & Act
+      // Arrange
+
       render(<RepetitionBlockCard block={mockBlock} />);
+
+      // Act
+
       const blockCard = screen.getByTestId("repetition-block-card");
 
       // Assert
+
+      // Assert
+
       expect(blockCard).toHaveAttribute("tabIndex", "0");
     });
 
     it("should handle Delete key for block deletion", async () => {
       // Arrange
+      // Arrange
+
       const handleDelete = vi.fn();
       const user = userEvent.setup();
       render(<RepetitionBlockCard block={mockBlock} onDelete={handleDelete} />);
@@ -51,14 +61,22 @@ describe("RepetitionBlockCard - Accessibility", () => {
 
       // Act
       blockCard.focus();
+
+      // Act
+
       await user.keyboard("{Delete}");
 
       // Assert
+
+      // Assert
+
       expect(handleDelete).toHaveBeenCalledOnce();
     });
 
     it("should handle Backspace key for block deletion", async () => {
       // Arrange
+      // Arrange
+
       const handleDelete = vi.fn();
       const user = userEvent.setup();
       render(<RepetitionBlockCard block={mockBlock} onDelete={handleDelete} />);
@@ -66,14 +84,22 @@ describe("RepetitionBlockCard - Accessibility", () => {
 
       // Act
       blockCard.focus();
+
+      // Act
+
       await user.keyboard("{Backspace}");
 
       // Assert
+
+      // Assert
+
       expect(handleDelete).toHaveBeenCalledOnce();
     });
 
     it("should not trigger deletion when editing repeat count", async () => {
       // Arrange
+      // Arrange
+
       const handleDelete = vi.fn();
       const handleEditRepeatCount = vi.fn();
       const user = userEvent.setup();
@@ -92,14 +118,22 @@ describe("RepetitionBlockCard - Accessibility", () => {
       // Try to delete while editing
       const blockCard = screen.getByTestId("repetition-block-card");
       blockCard.focus();
+
+      // Act
+
       await user.keyboard("{Delete}");
 
       // Assert - Delete should not be called while editing
+
+      // Assert
+
       expect(handleDelete).not.toHaveBeenCalled();
     });
 
     it("should prevent default browser behavior for Backspace", async () => {
       // Arrange
+      // Arrange
+
       const handleDelete = vi.fn();
       render(<RepetitionBlockCard block={mockBlock} onDelete={handleDelete} />);
       const blockCard = screen.getByTestId("repetition-block-card");
@@ -112,9 +146,15 @@ describe("RepetitionBlockCard - Accessibility", () => {
         cancelable: true,
       });
       const preventDefaultSpy = vi.spyOn(event, "preventDefault");
+
+      // Act
+
       blockCard.dispatchEvent(event);
 
       // Assert - preventDefault should be called to prevent browser back navigation
+
+      // Assert
+
       expect(preventDefaultSpy).toHaveBeenCalled();
     });
   });
@@ -122,59 +162,99 @@ describe("RepetitionBlockCard - Accessibility", () => {
   describe("ARIA attributes", () => {
     it("should have proper role for interactive element", () => {
       // Arrange & Act
+      // Arrange
+
       render(<RepetitionBlockCard block={mockBlock} />);
+
+      // Act
+
       const blockCard = screen.getByTestId("repetition-block-card");
 
       // Assert - Block should be focusable but not have a specific role
       // (it's a container with keyboard handlers)
+
+      // Assert
+
       expect(blockCard).toBeInTheDocument();
       expect(blockCard).toHaveAttribute("tabIndex", "0");
     });
 
     it("should have accessible delete button with aria-label", () => {
       // Arrange & Act
+      // Arrange
+
       render(<RepetitionBlockCard block={mockBlock} onDelete={vi.fn()} />);
 
       // Assert
+
+      // Act
+
       const deleteButton = screen.getByRole("button", {
         name: /delete repetition block/i,
       });
+
+      // Assert
+
       expect(deleteButton).toBeInTheDocument();
       expect(deleteButton).toHaveAccessibleName();
     });
 
     it("should have accessible block actions menu", () => {
       // Arrange & Act
+      // Arrange
+
       render(<RepetitionBlockCard block={mockBlock} onUngroup={vi.fn()} />);
 
       // Assert
+
+      // Act
+
       const actionsButton = screen.getByRole("button", {
         name: /block actions/i,
       });
+
+      // Assert
+
       expect(actionsButton).toBeInTheDocument();
       expect(actionsButton).toHaveAccessibleName();
     });
 
     it("should have accessible add step button", () => {
       // Arrange & Act
+      // Arrange
+
       render(<RepetitionBlockCard block={mockBlock} onAddStep={vi.fn()} />);
 
       // Assert
+
+      // Act
+
       const addButton = screen.getByRole("button", {
         name: /add step/i,
       });
+
+      // Assert
+
       expect(addButton).toBeInTheDocument();
       expect(addButton).toHaveAccessibleName();
     });
 
     it("should have accessible expand/collapse button", () => {
       // Arrange & Act
+      // Arrange
+
       render(<RepetitionBlockCard block={mockBlock} />);
 
       // Assert
+
+      // Act
+
       const expandButton = screen.getByRole("button", {
         name: /collapse|expand/i,
       });
+
+      // Assert
+
       expect(expandButton).toBeInTheDocument();
       expect(expandButton).toHaveAccessibleName();
     });
@@ -183,24 +263,40 @@ describe("RepetitionBlockCard - Accessibility", () => {
   describe("screen reader announcements", () => {
     it("should provide context about repeat count in accessible name", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(<RepetitionBlockCard block={mockBlock} />);
 
       // Assert - Repeat count should be visible to screen readers
       // The UI shows "3x" format instead of "repeat 3 times"
+
+      // Assert
+
       expect(screen.getByText(/3/)).toBeInTheDocument();
       expect(screen.getByText(/x/)).toBeInTheDocument();
     });
 
     it("should announce step count within block", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(<RepetitionBlockCard block={mockBlock} />);
 
       // Assert - Step count should be visible
+
+      // Assert
+
       expect(screen.getByText(/1 step/i)).toBeInTheDocument();
     });
 
     it("should announce multiple steps correctly", () => {
       // Arrange
+      // Arrange
+
       const blockWithMultipleSteps: RepetitionBlock = {
         repeatCount: 2,
         steps: [
@@ -224,9 +320,15 @@ describe("RepetitionBlockCard - Accessibility", () => {
       };
 
       // Act
+
+      // Act
+
       render(<RepetitionBlockCard block={blockWithMultipleSteps} />);
 
       // Assert
+
+      // Assert
+
       expect(screen.getByText(/2 steps/i)).toBeInTheDocument();
     });
   });
@@ -234,28 +336,44 @@ describe("RepetitionBlockCard - Accessibility", () => {
   describe("focus management", () => {
     it("should maintain focus on block after keyboard interaction", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(<RepetitionBlockCard block={mockBlock} />);
       const blockCard = screen.getByTestId("repetition-block-card");
 
       // Act
+
+      // Act
+
       await user.click(blockCard);
 
       // Assert
+
+      // Assert
+
       expect(blockCard).toHaveFocus();
     });
 
     it("should allow focus to move to child buttons", async () => {
       // Arrange
+      // Arrange
+
       render(<RepetitionBlockCard block={mockBlock} onDelete={vi.fn()} />);
 
       // Act - Focus on a button
       const deleteButton = screen.getByRole("button", {
         name: /delete repetition block/i,
       });
+
+      // Act
+
       deleteButton.focus();
 
       // Assert - Button should have focus
+
+      // Assert
+
       expect(deleteButton).toHaveFocus();
     });
   });
@@ -263,19 +381,29 @@ describe("RepetitionBlockCard - Accessibility", () => {
   describe("touch target sizes", () => {
     it("should have minimum touch target size for delete button", () => {
       // Arrange & Act
+      // Arrange
+
       render(<RepetitionBlockCard block={mockBlock} onDelete={vi.fn()} />);
+
+      // Act
+
       const deleteButton = screen.getByRole("button", {
         name: /delete repetition block/i,
       });
 
       // Assert - Button should have adequate size classes
       // Tailwind classes like h-8 w-8 or p-2 ensure minimum 44x44px touch target
+
+      // Assert
+
       expect(deleteButton).toBeInTheDocument();
       expect(deleteButton.className).toMatch(/h-\d+|p-\d+/);
     });
 
     it("should have minimum touch target size for all interactive elements", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <RepetitionBlockCard
           block={mockBlock}
@@ -286,7 +414,13 @@ describe("RepetitionBlockCard - Accessibility", () => {
       );
 
       // Assert - All buttons should be present and interactive
+
+      // Act
+
       const buttons = screen.getAllByRole("button");
+
+      // Assert
+
       expect(buttons.length).toBeGreaterThan(0);
 
       buttons.forEach((button) => {
@@ -299,20 +433,35 @@ describe("RepetitionBlockCard - Accessibility", () => {
   describe("color contrast", () => {
     it("should render delete button with destructive styling", () => {
       // Arrange & Act
+      // Arrange
+
       render(<RepetitionBlockCard block={mockBlock} onDelete={vi.fn()} />);
+
+      // Act
+
       const deleteButton = screen.getByRole("button", {
         name: /delete repetition block/i,
       });
 
       // Assert - Button should have red/destructive color classes
+
+      // Assert
+
       expect(deleteButton.className).toMatch(/text-red|hover:text-red/);
     });
 
     it("should have visible text in all intensity states", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(<RepetitionBlockCard block={mockBlock} />);
 
       // Assert - Text should be visible
+
+      // Assert
+
       expect(screen.getByText(/repeat block/i)).toBeVisible();
       expect(screen.getByText(/1 step/i)).toBeVisible();
     });

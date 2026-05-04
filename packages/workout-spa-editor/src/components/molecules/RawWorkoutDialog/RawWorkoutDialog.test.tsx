@@ -69,31 +69,55 @@ describe("RawWorkoutDialog", () => {
   };
 
   it("should not render content when workout is null", () => {
+    // Arrange
+
+    // Act
+
     renderWithRouter(<RawWorkoutDialog {...defaultProps} workout={null} />);
+
+    // Assert
 
     expect(screen.queryByTestId("raw-workout-dialog")).not.toBeInTheDocument();
   });
 
   it("should render dialog content when workout is provided", () => {
+    // Arrange
+
+    // Act
+
     renderWithRouter(
       <RawWorkoutDialog {...defaultProps} workout={makeWorkout()} />
     );
+
+    // Assert
 
     expect(screen.getByTestId("raw-workout-dialog")).toBeInTheDocument();
   });
 
   it("should display the workout title", () => {
+    // Arrange
+
+    // Act
+
     renderWithRouter(
       <RawWorkoutDialog {...defaultProps} workout={makeWorkout()} />
     );
+
+    // Assert
 
     expect(screen.getByText("Easy Run")).toBeInTheDocument();
   });
 
   it("should display the coach description", () => {
+    // Arrange
+
+    // Act
+
     renderWithRouter(
       <RawWorkoutDialog {...defaultProps} workout={makeWorkout()} />
     );
+
+    // Assert
 
     expect(
       screen.getByText("Coach says: take it easy today.")
@@ -101,12 +125,19 @@ describe("RawWorkoutDialog", () => {
   });
 
   it("should display comments with checkboxes", () => {
+    // Arrange
+
     renderWithRouter(
       <RawWorkoutDialog {...defaultProps} workout={makeWorkout()} />
     );
 
     const selector = screen.getByTestId("comment-selector");
+
+    // Act
+
     const checkboxes = within(selector).getAllByRole("checkbox");
+
+    // Assert
 
     expect(checkboxes).toHaveLength(2);
     expect(screen.getByText("Morning prep note")).toBeInTheDocument();
@@ -114,21 +145,30 @@ describe("RawWorkoutDialog", () => {
   });
 
   it("should pre-select comments before noon", () => {
+    // Arrange
+
     renderWithRouter(
       <RawWorkoutDialog {...defaultProps} workout={makeWorkout()} />
     );
+
+    // Act
 
     const checkboxes = within(
       screen.getByTestId("comment-selector")
     ).getAllByRole("checkbox");
 
     // First comment at 08:00 (before noon) should be checked
+
+    // Assert
+
     expect(checkboxes[0]).toBeChecked();
     // Second comment at 14:00 (after noon) should not be checked
     expect(checkboxes[1]).not.toBeChecked();
   });
 
   it("should show no comments message when there are none", () => {
+    // Arrange
+
     const workout = makeWorkout({
       raw: {
         title: "Easy Run",
@@ -141,12 +181,18 @@ describe("RawWorkoutDialog", () => {
       },
     });
 
+    // Act
+
     renderWithRouter(<RawWorkoutDialog {...defaultProps} workout={workout} />);
+
+    // Assert
 
     expect(screen.getByText("No comments available.")).toBeInTheDocument();
   });
 
   it("should call onProcess with workout id and selected comment indices", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     const onProcess = vi.fn();
 
@@ -158,12 +204,18 @@ describe("RawWorkoutDialog", () => {
       />
     );
 
+    // Act
+
     await user.click(screen.getByText("Process with AI"));
+
+    // Assert
 
     expect(onProcess).toHaveBeenCalledWith("w-1", [0]);
   });
 
   it("should call onSkip with workout id", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     const onSkip = vi.fn();
 
@@ -175,15 +227,25 @@ describe("RawWorkoutDialog", () => {
       />
     );
 
+    // Act
+
     await user.click(screen.getByText("Skip"));
+
+    // Assert
 
     expect(onSkip).toHaveBeenCalledWith("w-1");
   });
 
   it("should show Un-skip button for skipped workouts", () => {
+    // Arrange
+
     const workout = makeWorkout({ state: "skipped" });
 
+    // Act
+
     renderWithRouter(<RawWorkoutDialog {...defaultProps} workout={workout} />);
+
+    // Assert
 
     expect(screen.getByText("Un-skip")).toBeInTheDocument();
     expect(screen.queryByText("Process with AI")).not.toBeInTheDocument();
@@ -191,6 +253,8 @@ describe("RawWorkoutDialog", () => {
   });
 
   it("should call onUnskip when Un-skip is clicked", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     const onUnskip = vi.fn();
     const workout = makeWorkout({ state: "skipped" });
@@ -203,23 +267,34 @@ describe("RawWorkoutDialog", () => {
       />
     );
 
+    // Act
+
     await user.click(screen.getByText("Un-skip"));
+
+    // Assert
 
     expect(onUnskip).toHaveBeenCalledWith("w-1");
   });
 
   it("should toggle comment selection on checkbox click", async () => {
+    // Arrange
+
     const user = userEvent.setup();
 
     renderWithRouter(
       <RawWorkoutDialog {...defaultProps} workout={makeWorkout()} />
     );
 
+    // Act
+
     const checkboxes = within(
       screen.getByTestId("comment-selector")
     ).getAllByRole("checkbox");
 
     // First checkbox starts checked (before noon), uncheck it
+
+    // Assert
+
     expect(checkboxes[0]).toBeChecked();
     await user.click(checkboxes[0]);
     expect(checkboxes[0]).not.toBeChecked();
@@ -231,6 +306,8 @@ describe("RawWorkoutDialog", () => {
   });
 
   it("should call onClose when dialog is dismissed", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     const onClose = vi.fn();
 
@@ -242,12 +319,20 @@ describe("RawWorkoutDialog", () => {
       />
     );
 
+    // Act
+
     await user.click(screen.getByLabelText("Close"));
+
+    // Assert
 
     expect(onClose).toHaveBeenCalled();
   });
 
   it("should disable buttons when isSubmitting is true", () => {
+    // Arrange
+
+    // Act
+
     renderWithRouter(
       <RawWorkoutDialog
         {...defaultProps}
@@ -255,6 +340,8 @@ describe("RawWorkoutDialog", () => {
         isSubmitting={true}
       />
     );
+
+    // Assert
 
     expect(
       screen.getByText("Process with AI").closest("button")

@@ -51,9 +51,16 @@ describe("FileUpload", () => {
 
   it("should render upload button", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     render(<FileUpload onFileLoad={vi.fn()} />);
 
     // Assert
+
+    // Assert
+
     expect(
       screen.getByRole("button", { name: /upload workout file/i })
     ).toBeInTheDocument();
@@ -61,6 +68,8 @@ describe("FileUpload", () => {
 
   it("should trigger file input when button is clicked", async () => {
     // Arrange
+    // Arrange
+
     const user = userEvent.setup();
     render(<FileUpload onFileLoad={vi.fn()} />);
     const button = screen.getByRole("button", { name: /upload workout file/i });
@@ -69,12 +78,20 @@ describe("FileUpload", () => {
     await user.click(button);
 
     // Assert
+
+    // Act
+
     const fileInput = screen.getByLabelText(/upload workout file/i);
+
+    // Assert
+
     expect(fileInput).toBeInTheDocument();
   });
 
   it("should call onFileLoad with valid KRD file", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockResolvedValue(mockKRD);
 
@@ -88,9 +105,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(onFileLoad).toHaveBeenCalledWith(mockKRD);
     });
@@ -98,6 +121,8 @@ describe("FileUpload", () => {
 
   it("should call onError with invalid file", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout, ImportError } =
       await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValue(
@@ -114,9 +139,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(onError).toHaveBeenCalled();
     });
@@ -124,6 +155,8 @@ describe("FileUpload", () => {
 
   it("should display error message with retry button for invalid file", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout, ImportError } =
       await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValue(
@@ -139,9 +172,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(screen.getByText("Import Failed")).toBeInTheDocument();
       expect(
@@ -155,6 +194,8 @@ describe("FileUpload", () => {
 
   it("should call onError with invalid KRD schema", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout, ImportError } =
       await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValue(
@@ -173,9 +214,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(onError).toHaveBeenCalled();
     });
@@ -183,6 +230,8 @@ describe("FileUpload", () => {
 
   it("should display error for invalid file", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout, ImportError } =
       await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValue(
@@ -200,9 +249,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(screen.getByText("Import Failed")).toBeInTheDocument();
       expect(
@@ -213,6 +268,8 @@ describe("FileUpload", () => {
 
   it("should display file name and format badge after successful load", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockResolvedValue(mockKRD);
 
@@ -225,9 +282,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(screen.getByText(/loaded: test-workout.krd/i)).toBeInTheDocument();
       expect(
@@ -238,19 +301,35 @@ describe("FileUpload", () => {
 
   it("should be disabled when disabled prop is true", () => {
     // Arrange & Act
+    // Arrange
+
     render(<FileUpload onFileLoad={vi.fn()} disabled={true} />);
 
     // Assert
+
+    // Act
+
     const button = screen.getByRole("button", { name: /upload workout file/i });
+
+    // Assert
+
     expect(button).toBeDisabled();
   });
 
   it("should accept multiple file formats by default", () => {
     // Arrange & Act
+    // Arrange
+
     render(<FileUpload onFileLoad={vi.fn()} />);
 
     // Assert
+
+    // Act
+
     const fileInput = screen.getByLabelText(/upload workout file/i);
+
+    // Assert
+
     expect(fileInput).toHaveAttribute(
       "accept",
       ".fit,.tcx,.zwo,.krd,.json,.gcn"
@@ -259,15 +338,25 @@ describe("FileUpload", () => {
 
   it("should accept custom file types", () => {
     // Arrange & Act
+    // Arrange
+
     render(<FileUpload onFileLoad={vi.fn()} accept=".json" />);
 
     // Assert
+
+    // Act
+
     const fileInput = screen.getByLabelText(/upload workout file/i);
+
+    // Assert
+
     expect(fileInput).toHaveAttribute("accept", ".json");
   });
 
   it("should reject files larger than 10 MB", async () => {
     // Arrange
+    // Arrange
+
     const onError = vi.fn();
     const user = userEvent.setup();
     render(<FileUpload onFileLoad={vi.fn()} onError={onError} />);
@@ -281,9 +370,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(onError).toHaveBeenCalled();
       expect(screen.getByText("File too large")).toBeInTheDocument();
@@ -292,6 +387,8 @@ describe("FileUpload", () => {
 
   it("should retry file upload when Try Again button is clicked", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout, ImportError } =
       await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValueOnce(
@@ -307,7 +404,11 @@ describe("FileUpload", () => {
       type: "application/json",
     });
 
+    // Act
+
     await user.upload(fileInput, invalidFile);
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Import Failed")).toBeInTheDocument();
@@ -336,6 +437,8 @@ describe("FileUpload", () => {
 
   it("should dismiss error when Dismiss button is clicked", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout, ImportError } =
       await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValue(
@@ -350,7 +453,11 @@ describe("FileUpload", () => {
       type: "application/json",
     });
 
+    // Act
+
     await user.upload(fileInput, file);
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Import Failed")).toBeInTheDocument();
@@ -368,6 +475,8 @@ describe("FileUpload", () => {
 
   it("should clear error when new file is selected", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout, ImportError } =
       await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockRejectedValueOnce(
@@ -382,7 +491,11 @@ describe("FileUpload", () => {
       type: "application/json",
     });
 
+    // Act
+
     await user.upload(fileInput, invalidFile);
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Import Failed")).toBeInTheDocument();
@@ -409,6 +522,8 @@ describe("FileUpload", () => {
 
   it("should show format badge for FIT files", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockResolvedValue(mockKRD);
 
@@ -421,9 +536,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(
         screen.getByRole("status", { name: /file format: fit/i })
@@ -433,6 +554,8 @@ describe("FileUpload", () => {
 
   it("should show format badge for TCX files", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockResolvedValue(mockKRD);
 
@@ -445,9 +568,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(
         screen.getByRole("status", { name: /file format: tcx/i })
@@ -457,6 +586,8 @@ describe("FileUpload", () => {
 
   it("should show format badge for ZWO files", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockResolvedValue(mockKRD);
 
@@ -469,9 +600,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert
+
+    // Assert
+
     await waitFor(() => {
       expect(
         screen.getByRole("status", { name: /file format: zwo/i })
@@ -481,6 +618,8 @@ describe("FileUpload", () => {
 
   it("should display conversion progress during import", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockImplementation(async (file, onProgress) => {
       onProgress?.(30);
@@ -500,9 +639,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     const uploadPromise = user.upload(fileInput, file);
 
     // Assert - check for progress bar while loading
+
+    // Assert
+
     await waitFor(() => {
       const progressBar = screen.queryByRole("progressbar");
       expect(progressBar).toBeInTheDocument();
@@ -513,6 +658,8 @@ describe("FileUpload", () => {
 
   it("should show converting status during import", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockImplementation(async (file, onProgress) => {
       onProgress?.(30);
@@ -530,14 +677,22 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     await user.upload(fileInput, file);
 
     // Assert - check for converting message (it may disappear quickly)
+
+    // Assert
+
     expect(screen.getByText(/converting workout.fit/i)).toBeInTheDocument();
   });
 
   it("should show spinner during conversion", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockImplementation(async (file, onProgress) => {
       onProgress?.(30);
@@ -554,9 +709,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     const uploadPromise = user.upload(fileInput, file);
 
     // Assert - check for spinner
+
+    // Assert
+
     await waitFor(() => {
       const spinner = document.querySelector(".animate-spin");
       expect(spinner).toBeInTheDocument();
@@ -567,6 +728,8 @@ describe("FileUpload", () => {
 
   it("should disable UI during conversion", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockImplementation(async (file, onProgress) => {
       onProgress?.(30);
@@ -583,9 +746,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     const uploadPromise = user.upload(fileInput, file);
 
     // Assert - button should be disabled during loading
+
+    // Assert
+
     await waitFor(() => {
       const button = screen.queryByRole("button", {
         name: /loading/i,
@@ -599,6 +768,8 @@ describe("FileUpload", () => {
 
   it("should display time estimate during long conversion", async () => {
     // Arrange
+    // Arrange
+
     const { importWorkout } = await import("../../../utils/import-workout");
     vi.mocked(importWorkout).mockImplementation(async (file, onProgress) => {
       onProgress?.(10);
@@ -619,9 +790,15 @@ describe("FileUpload", () => {
     });
 
     // Act
+
+    // Act
+
     const uploadPromise = user.upload(fileInput, file);
 
     // Assert - check for time estimate
+
+    // Assert
+
     await waitFor(
       () => {
         expect(screen.getByText(/remaining/i)).toBeInTheDocument();

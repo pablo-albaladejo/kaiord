@@ -84,11 +84,17 @@ describe("useAiGeneration — analytics call-site", () => {
   });
 
   it("should fire workout-generated with provider and sport after successful generation", async () => {
+    // Arrange
+
     const { result } = renderHook(() => useAiGeneration());
+
+    // Act
 
     await act(async () => {
       await result.current.generate("45min sweet spot", "cycling" as never);
     });
+
+    // Assert
 
     expect(mockAnalyticsEvent).toHaveBeenCalledWith("workout-generated", {
       provider: "claude",
@@ -97,11 +103,17 @@ describe("useAiGeneration — analytics call-site", () => {
   });
 
   it("should fire workout-generated with empty sport when no sport is passed", async () => {
+    // Arrange
+
     const { result } = renderHook(() => useAiGeneration());
+
+    // Act
 
     await act(async () => {
       await result.current.generate("45min sweet spot");
     });
+
+    // Assert
 
     expect(mockAnalyticsEvent).toHaveBeenCalledWith("workout-generated", {
       provider: "claude",
@@ -110,12 +122,18 @@ describe("useAiGeneration — analytics call-site", () => {
   });
 
   it("should not fire workout-generated when generation fails", async () => {
+    // Arrange
+
     mockGenerateWorkoutKrd.mockRejectedValue(new Error("API error"));
     const { result } = renderHook(() => useAiGeneration());
+
+    // Act
 
     await act(async () => {
       await result.current.generate("45min sweet spot");
     });
+
+    // Assert
 
     expect(mockAnalyticsEvent).not.toHaveBeenCalled();
   });

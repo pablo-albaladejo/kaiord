@@ -100,7 +100,13 @@ const swimmingConfig: SportZoneConfig = {
 describe("formatZonesContext", () => {
   describe("empty profile", () => {
     it("should return empty string when profile has no threshold data", () => {
+      // Arrange
+
+      // Act
+
       const result = formatZonesContext(baseProfile);
+
+      // Assert
 
       expect(result).toBe("");
     });
@@ -108,12 +114,18 @@ describe("formatZonesContext", () => {
 
   describe("cycling sport", () => {
     it("should format power + HR zones with method names", () => {
+      // Arrange
+
       const profile: Profile = {
         ...baseProfile,
         sportZones: { cycling: cyclingConfig },
       };
 
+      // Act
+
       const result = formatZonesContext(profile, "cycling");
+
+      // Assert
 
       expect(result).toContain("LTHR: 170bpm");
       expect(result).toContain("FTP: 250W");
@@ -126,12 +138,18 @@ describe("formatZonesContext", () => {
 
   describe("running sport", () => {
     it("should format pace + HR zones with method names", () => {
+      // Arrange
+
       const profile: Profile = {
         ...baseProfile,
         sportZones: { running: runningConfig },
       };
 
+      // Act
+
       const result = formatZonesContext(profile, "running");
+
+      // Assert
 
       expect(result).toContain("LTHR: 170bpm");
       expect(result).toContain("Threshold Pace: 5:00/km");
@@ -142,12 +160,18 @@ describe("formatZonesContext", () => {
 
   describe("swimming sport", () => {
     it("should format pace + HR zones with /100m unit", () => {
+      // Arrange
+
       const profile: Profile = {
         ...baseProfile,
         sportZones: { swimming: swimmingConfig },
       };
 
+      // Act
+
       const result = formatZonesContext(profile, "swimming");
+
+      // Assert
 
       expect(result).toContain("LTHR: 160bpm");
       expect(result).toContain("Pace zones (Daniels 5-zone):");
@@ -157,24 +181,36 @@ describe("formatZonesContext", () => {
 
   describe("pace zone formatting", () => {
     it("should format min/km pace zones as mm:ss/km", () => {
+      // Arrange
+
       const profile: Profile = {
         ...baseProfile,
         sportZones: { running: runningConfig },
       };
 
+      // Act
+
       const result = formatZonesContext(profile, "running");
+
+      // Assert
 
       expect(result).toContain("Z1 Easy: 5:45-10:00/km");
       expect(result).toContain("Z2 Aerobic: 5:24-5:45/km");
     });
 
     it("should format min/100m pace zones as mm:ss/100m", () => {
+      // Arrange
+
       const profile: Profile = {
         ...baseProfile,
         sportZones: { swimming: swimmingConfig },
       };
 
+      // Act
+
       const result = formatZonesContext(profile, "swimming");
+
+      // Assert
 
       expect(result).toContain("Z1 Easy: 1:55-3:20/100m");
     });
@@ -182,6 +218,8 @@ describe("formatZonesContext", () => {
 
   describe("fallback (no sport selected)", () => {
     it("should format all sports when no sport is provided", () => {
+      // Arrange
+
       const profile: Profile = {
         ...baseProfile,
         sportZones: {
@@ -190,7 +228,11 @@ describe("formatZonesContext", () => {
         },
       };
 
+      // Act
+
       const result = formatZonesContext(profile);
+
+      // Assert
 
       expect(result).toContain("[cycling]");
       expect(result).toContain("[running]");
@@ -199,6 +241,8 @@ describe("formatZonesContext", () => {
 
   describe("custom zone names in formatter", () => {
     it("should output custom zone names", () => {
+      // Arrange
+
       const config: SportZoneConfig = {
         ...cyclingConfig,
         powerZones: {
@@ -213,7 +257,11 @@ describe("formatZonesContext", () => {
         sportZones: { cycling: config },
       };
 
+      // Act
+
       const result = formatZonesContext(profile, "cycling");
+
+      // Assert
 
       expect(result).toContain("Z1 My Easy Zone: 0-150W");
     });

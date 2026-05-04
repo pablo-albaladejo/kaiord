@@ -12,6 +12,10 @@ import { isRepetitionBlock, isWorkoutStep } from "./krd";
 describe("Type Guards", () => {
   describe("isWorkoutStep", () => {
     it("should return true for WorkoutStep", () => {
+      // Arrange
+
+      // Act
+
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "time",
@@ -23,10 +27,16 @@ describe("Type Guards", () => {
         },
       };
 
+      // Assert
+
       expect(isWorkoutStep(step)).toBe(true);
     });
 
     it("should return false for RepetitionBlock", () => {
+      // Arrange
+
+      // Act
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -42,6 +52,8 @@ describe("Type Guards", () => {
           },
         ],
       };
+
+      // Assert
 
       expect(isWorkoutStep(block)).toBe(false);
     });
@@ -49,6 +61,10 @@ describe("Type Guards", () => {
 
   describe("isRepetitionBlock", () => {
     it("should return true for RepetitionBlock", () => {
+      // Arrange
+
+      // Act
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -65,10 +81,16 @@ describe("Type Guards", () => {
         ],
       };
 
+      // Assert
+
       expect(isRepetitionBlock(block)).toBe(true);
     });
 
     it("should return false for WorkoutStep", () => {
+      // Arrange
+
+      // Act
+
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "time",
@@ -80,12 +102,16 @@ describe("Type Guards", () => {
         },
       };
 
+      // Assert
+
       expect(isRepetitionBlock(step)).toBe(false);
     });
   });
 
   describe("Type narrowing", () => {
     it("should narrow type correctly in conditional", () => {
+      // Arrange
+
       const items: Array<WorkoutStep | RepetitionBlock> = [
         {
           stepIndex: 0,
@@ -115,7 +141,12 @@ describe("Type Guards", () => {
       ];
 
       const steps = items.filter(isWorkoutStep);
+
+      // Act
+
       const blocks = items.filter(isRepetitionBlock);
+
+      // Assert
 
       expect(steps).toHaveLength(1);
       expect(blocks).toHaveLength(1);

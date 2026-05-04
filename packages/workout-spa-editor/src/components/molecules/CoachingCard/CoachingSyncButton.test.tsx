@@ -28,6 +28,10 @@ describe("CoachingSyncButton — not-connected state", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("should render connect CTA with the platform label", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CoachingSyncButton
         connected={false}
@@ -39,10 +43,16 @@ describe("CoachingSyncButton — not-connected state", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByText("Connect to Train2Go")).toBeInTheDocument();
   });
 
   it("should show error text alongside the connect CTA", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CoachingSyncButton
         connected={false}
@@ -53,10 +63,14 @@ describe("CoachingSyncButton — not-connected state", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByText("Session expired")).toBeInTheDocument();
   });
 
   it("should invoke onConnect when the CTA is clicked", async () => {
+    // Arrange
+
     const onConnect = vi.fn();
     render(
       <CoachingSyncButton
@@ -68,7 +82,11 @@ describe("CoachingSyncButton — not-connected state", () => {
       />
     );
 
+    // Act
+
     await userEvent.click(screen.getByText("Connect to Coach"));
+
+    // Assert
 
     expect(onConnect).toHaveBeenCalledTimes(1);
   });
@@ -79,6 +97,8 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("renders an icon-only button with aria-label='Sync <Label>' and no visible text label", () => {
+    // Arrange
+
     render(
       <CoachingSyncButton
         connected={true}
@@ -90,13 +110,20 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
       />
     );
 
+    // Act
+
     const button = screen.getByRole("button", { name: "Sync Train2Go" });
+
+    // Assert
+
     expect(button).toBeInTheDocument();
     // No visible text — only the icon is rendered.
     expect(screen.queryByText("Sync Train2Go")).toBeNull();
   });
 
   it("should surface the relative-time tooltip via the title attribute", () => {
+    // Arrange
+
     const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
     render(
       <CoachingSyncButton
@@ -110,11 +137,18 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
       />
     );
 
+    // Act
+
     const button = screen.getByRole("button", { name: "Sync Train2Go" });
+
+    // Assert
+
     expect(button.getAttribute("title")).toMatch(/^Train2Go · \d+m ago$/);
   });
 
   it("surfaces 'never synced' when lastSyncedAt is undefined", () => {
+    // Arrange
+
     render(
       <CoachingSyncButton
         connected={true}
@@ -126,11 +160,18 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
       />
     );
 
+    // Act
+
     const button = screen.getByRole("button", { name: "Sync Train2Go" });
+
+    // Assert
+
     expect(button.getAttribute("title")).toBe("Train2Go · never synced");
   });
 
   it("should replace the icon with a spinner in place during sync and disables the button", () => {
+    // Arrange
+
     render(
       <CoachingSyncButton
         connected={true}
@@ -142,7 +183,12 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
       />
     );
 
+    // Act
+
     const button = screen.getByRole("button", { name: "Sync Train2Go" });
+
+    // Assert
+
     expect(button).toBeDisabled();
     expect(button.getAttribute("title")).toBe("Train2Go · syncing…");
     // Spinner uses the lucide Loader2 icon with the spin animation class.
@@ -151,6 +197,8 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
   });
 
   it("should invoke onSync when clicked", async () => {
+    // Arrange
+
     const onSync = vi.fn();
     render(
       <CoachingSyncButton
@@ -163,9 +211,13 @@ describe("CoachingSyncButton — connected state (icon-only chrome)", () => {
       />
     );
 
+    // Act
+
     await userEvent.click(
       screen.getByRole("button", { name: "Sync Train2Go" })
     );
+
+    // Assert
 
     expect(onSync).toHaveBeenCalledTimes(1);
   });
@@ -176,6 +228,8 @@ describe("CoachingSyncButton — prefers-reduced-motion", () => {
   afterEach(() => vi.restoreAllMocks());
 
   it("should collapse the spinner to a static glyph (no animate-spin class)", () => {
+    // Arrange
+
     render(
       <CoachingSyncButton
         connected={true}
@@ -188,7 +242,13 @@ describe("CoachingSyncButton — prefers-reduced-motion", () => {
     );
 
     const button = screen.getByRole("button", { name: "Sync Train2Go" });
+
+    // Act
+
     const spinner = button.querySelector("svg");
+
+    // Assert
+
     expect(spinner?.getAttribute("class")).not.toMatch(/animate-spin/);
     // Tooltip still updates so the canonical signal is preserved.
     expect(button.getAttribute("title")).toBe("Train2Go · syncing…");

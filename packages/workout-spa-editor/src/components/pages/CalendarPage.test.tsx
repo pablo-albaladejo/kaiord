@@ -71,7 +71,13 @@ describe("CalendarPage", () => {
   });
 
   it("should show first-visit state when no workouts exist", async () => {
+    // Arrange
+
+    // Act
+
     renderCalendar();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByTestId("first-visit-state")).toBeInTheDocument();
@@ -79,9 +85,15 @@ describe("CalendarPage", () => {
   });
 
   it("should show empty-week state when workouts exist in other weeks", async () => {
+    // Arrange
+
     await db.table("workouts").add(makeWorkout({ date: "2026-03-30" }));
 
+    // Act
+
     renderCalendar();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByTestId("empty-week-state")).toBeInTheDocument();
@@ -89,21 +101,33 @@ describe("CalendarPage", () => {
   });
 
   it("should render workout cards in the correct day column", async () => {
+    // Arrange
+
     const workout = makeWorkout({ id: "w-mon", date: "2026-04-06" });
     await db.table("workouts").add(workout);
 
+    // Act
+
     renderCalendar();
+
+    // Assert
 
     expect(await screen.findByTestId("workout-card-w-mon")).toBeInTheDocument();
   });
 
   it("should show batch processing banner when raw workouts exist", async () => {
+    // Arrange
+
     await db.table("workouts").add(makeWorkout({ date: "2026-04-07" }));
     await db
       .table("workouts")
       .add(makeWorkout({ date: "2026-04-08", id: "w2" }));
 
+    // Act
+
     renderCalendar();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText(/2 raw workouts/)).toBeInTheDocument();
@@ -111,6 +135,8 @@ describe("CalendarPage", () => {
   });
 
   it("should stack multiple workouts per day by createdAt", async () => {
+    // Arrange
+
     const w1 = makeWorkout({
       id: "w-early",
       date: "2026-04-06",
@@ -141,7 +167,11 @@ describe("CalendarPage", () => {
     });
     await db.table("workouts").bulkAdd([w2, w1]);
 
+    // Act
+
     renderCalendar();
+
+    // Assert
 
     await waitFor(() => {
       const cards = screen.getAllByTestId(/^workout-card-/);
@@ -152,9 +182,15 @@ describe("CalendarPage", () => {
   });
 
   it("should show week navigation controls", async () => {
+    // Arrange
+
     await db.table("workouts").add(makeWorkout({ date: "2026-04-06" }));
 
+    // Act
+
     renderCalendar();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByTestId("week-navigation")).toBeInTheDocument();

@@ -53,6 +53,10 @@ const mockProfile: Profile = {
 
 describe("ZoneEditor - rendering", () => {
   it("should render power zones editor", () => {
+    // Arrange
+
+    // Act
+
     render(
       <ZoneEditor
         profile={mockProfile}
@@ -62,12 +66,18 @@ describe("ZoneEditor - rendering", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByText("Power Zones")).toBeInTheDocument();
     expect(screen.getByText(/Configure 7 power zones/)).toBeInTheDocument();
     expect(screen.getByText(/250W/)).toBeInTheDocument();
   });
 
   it("should render heart rate zones editor", () => {
+    // Arrange
+
+    // Act
+
     render(
       <ZoneEditor
         profile={mockProfile}
@@ -77,6 +87,8 @@ describe("ZoneEditor - rendering", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByText("Heart Rate Zones")).toBeInTheDocument();
     expect(
       screen.getByText(/Configure 5 heart rate zones/)
@@ -85,6 +97,12 @@ describe("ZoneEditor - rendering", () => {
   });
 
   it("should render all power zones", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+
     render(
       <ZoneEditor
         profile={mockProfile}
@@ -100,6 +118,12 @@ describe("ZoneEditor - rendering", () => {
   });
 
   it("should render all heart rate zones", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+
     render(
       <ZoneEditor
         profile={mockProfile}
@@ -115,6 +139,8 @@ describe("ZoneEditor - rendering", () => {
   });
 
   it("should render zone preview with power values", () => {
+    // Arrange
+
     render(
       <ZoneEditor
         profile={mockProfile}
@@ -124,11 +150,20 @@ describe("ZoneEditor - rendering", () => {
       />
     );
 
+    // Act
+
     const previews = screen.getAllByText(/W -/);
+
+    // Assert
+
     expect(previews.length).toBeGreaterThan(0);
   });
 
   it("should display calculated power values when FTP is set", () => {
+    // Arrange
+
+    // Act
+
     render(
       <ZoneEditor
         profile={mockProfile}
@@ -139,6 +174,9 @@ describe("ZoneEditor - rendering", () => {
     );
 
     // Zone 1: 0-55% of 250W = 0-138W
+
+    // Assert
+
     expect(screen.getByText(/0W - 138W/)).toBeInTheDocument();
   });
 });
@@ -149,6 +187,8 @@ describe("ZoneEditor - rendering", () => {
 
 describe("ZoneEditor - interactions", () => {
   it("should call onCancel when cancel button is clicked", async () => {
+    // Arrange
+
     const handleCancel = vi.fn();
     const user = userEvent.setup();
     render(
@@ -160,12 +200,18 @@ describe("ZoneEditor - interactions", () => {
       />
     );
 
+    // Act
+
     await user.click(screen.getByRole("button", { name: /cancel/i }));
+
+    // Assert
 
     expect(handleCancel).toHaveBeenCalledOnce();
   });
 
   it("should call onSave with updated zones when save button is clicked", async () => {
+    // Arrange
+
     const handleSave = vi.fn();
     const user = userEvent.setup();
     render(
@@ -177,13 +223,19 @@ describe("ZoneEditor - interactions", () => {
       />
     );
 
+    // Act
+
     await user.click(screen.getByRole("button", { name: /save zones/i }));
+
+    // Assert
 
     expect(handleSave).toHaveBeenCalledOnce();
     expect(handleSave).toHaveBeenCalledWith(DEFAULT_POWER_ZONES);
   });
 
   it("should update zone name when input changes", async () => {
+    // Arrange
+
     const handleSave = vi.fn();
     const user = userEvent.setup();
     render(
@@ -198,7 +250,12 @@ describe("ZoneEditor - interactions", () => {
     const nameInput = screen.getByDisplayValue("Active Recovery");
     await user.clear(nameInput);
     await user.type(nameInput, "Easy Zone");
+
+    // Act
+
     await user.click(screen.getByRole("button", { name: /save zones/i }));
+
+    // Assert
 
     expect(handleSave).toHaveBeenCalledOnce();
     const savedZones = handleSave.mock.calls[0][0];
@@ -206,6 +263,8 @@ describe("ZoneEditor - interactions", () => {
   });
 
   it("should update zone percentage values", async () => {
+    // Arrange
+
     const handleSave = vi.fn();
     const user = userEvent.setup();
     render(
@@ -220,7 +279,12 @@ describe("ZoneEditor - interactions", () => {
     const minInputs = screen.getAllByLabelText(/min %/i);
     await user.clear(minInputs[0]);
     await user.type(minInputs[0], "10");
+
+    // Act
+
     await user.click(screen.getByRole("button", { name: /save zones/i }));
+
+    // Assert
 
     expect(handleSave).toHaveBeenCalledOnce();
     const savedZones = handleSave.mock.calls[0][0];
@@ -228,6 +292,8 @@ describe("ZoneEditor - interactions", () => {
   });
 
   it("should update heart rate zone BPM values", async () => {
+    // Arrange
+
     const handleSave = vi.fn();
     const user = userEvent.setup();
     render(
@@ -242,7 +308,12 @@ describe("ZoneEditor - interactions", () => {
     const minInputs = screen.getAllByLabelText(/min bpm/i);
     await user.clear(minInputs[0]);
     await user.type(minInputs[0], "55");
+
+    // Act
+
     await user.click(screen.getByRole("button", { name: /save zones/i }));
+
+    // Assert
 
     expect(handleSave).toHaveBeenCalledOnce();
     const savedZones = handleSave.mock.calls[0][0];
@@ -256,6 +327,8 @@ describe("ZoneEditor - interactions", () => {
 
 describe("ZoneEditor - validation", () => {
   it("should show validation error when min >= max", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     render(
       <ZoneEditor
@@ -268,13 +341,20 @@ describe("ZoneEditor - validation", () => {
 
     const maxInputs = screen.getAllByLabelText(/max %/i);
     await user.clear(maxInputs[0]);
+
+    // Act
+
     await user.type(maxInputs[0], "0");
+
+    // Assert
 
     expect(screen.getByText("Validation Errors")).toBeInTheDocument();
     expect(screen.getByText(/Min must be less than max/)).toBeInTheDocument();
   });
 
   it("should show validation error when zones overlap", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     render(
       <ZoneEditor
@@ -287,13 +367,20 @@ describe("ZoneEditor - validation", () => {
 
     const maxInputs = screen.getAllByLabelText(/max %/i);
     await user.clear(maxInputs[0]);
+
+    // Act
+
     await user.type(maxInputs[0], "60");
+
+    // Assert
 
     expect(screen.getByText("Validation Errors")).toBeInTheDocument();
     expect(screen.getByText(/Overlaps with next zone/)).toBeInTheDocument();
   });
 
   it("should disable save button when validation errors exist", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     render(
       <ZoneEditor
@@ -308,11 +395,18 @@ describe("ZoneEditor - validation", () => {
     await user.clear(maxInputs[0]);
     await user.type(maxInputs[0], "0");
 
+    // Act
+
     const saveButton = screen.getByRole("button", { name: /save zones/i });
+
+    // Assert
+
     expect(saveButton).toBeDisabled();
   });
 
   it("should not call onSave when validation errors exist", async () => {
+    // Arrange
+
     const handleSave = vi.fn();
     const user = userEvent.setup();
     render(
@@ -328,12 +422,19 @@ describe("ZoneEditor - validation", () => {
     await user.clear(maxInputs[0]);
     await user.type(maxInputs[0], "0");
 
+    // Act
+
     const saveButton = screen.getByRole("button", { name: /save zones/i });
+
+    // Assert
+
     expect(saveButton).toBeDisabled();
     expect(handleSave).not.toHaveBeenCalled();
   });
 
   it("should validate heart rate zones correctly", async () => {
+    // Arrange
+
     const user = userEvent.setup();
     render(
       <ZoneEditor
@@ -346,7 +447,12 @@ describe("ZoneEditor - validation", () => {
 
     const maxInputs = screen.getAllByLabelText(/max bpm/i);
     await user.clear(maxInputs[0]);
+
+    // Act
+
     await user.type(maxInputs[0], "40");
+
+    // Assert
 
     expect(screen.getByText("Validation Errors")).toBeInTheDocument();
     expect(
@@ -361,6 +467,8 @@ describe("ZoneEditor - validation", () => {
 
 describe("ZoneEditor - edge cases", () => {
   it("should handle profile without FTP", () => {
+    // Arrange
+
     const profileWithoutFtp: Profile = {
       ...mockProfile,
       sportZones: {
@@ -372,6 +480,8 @@ describe("ZoneEditor - edge cases", () => {
       },
     };
 
+    // Act
+
     render(
       <ZoneEditor
         profile={profileWithoutFtp}
@@ -381,11 +491,15 @@ describe("ZoneEditor - edge cases", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByText(/Configure 7 power zones/)).toBeInTheDocument();
     expect(screen.queryByText(/250W/)).not.toBeInTheDocument();
   });
 
   it("should handle profile without LTHR", () => {
+    // Arrange
+
     const profileWithoutLthr: Profile = {
       ...mockProfile,
       sportZones: {
@@ -397,6 +511,8 @@ describe("ZoneEditor - edge cases", () => {
       },
     };
 
+    // Act
+
     render(
       <ZoneEditor
         profile={profileWithoutLthr}
@@ -405,6 +521,8 @@ describe("ZoneEditor - edge cases", () => {
         onCancel={vi.fn()}
       />
     );
+
+    // Assert
 
     expect(
       screen.getByText(/Configure 5 heart rate zones/)

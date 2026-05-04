@@ -51,6 +51,11 @@ describe("WCAG 1.4.11 contrast against white card body", () => {
   it.each(Object.entries(PALETTE))(
     "%s achieves ≥ 3:1 contrast against #ffffff",
     (_token, hex) => {
+      // Arrange
+
+      // Act
+
+      // Assert
       expect(contrastRatio(hex, WHITE)).toBeGreaterThanOrEqual(3);
     }
   );

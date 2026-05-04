@@ -7,6 +7,8 @@ describe("getPreSelectedComments", () => {
   const workoutDate = "2026-04-06";
 
   it("should pre-select comments before noon", () => {
+    // Arrange
+
     const comments: WorkoutComment[] = [
       {
         author: "Coach",
@@ -20,19 +22,31 @@ describe("getPreSelectedComments", () => {
       },
     ];
 
+    // Act
+
     const selected = getPreSelectedComments(comments, workoutDate);
+
+    // Assert
 
     expect(selected.has(0)).toBe(true);
     expect(selected.has(1)).toBe(false);
   });
 
   it("should return empty set for no comments", () => {
+    // Arrange
+
+    // Act
+
     const selected = getPreSelectedComments([], workoutDate);
+
+    // Assert
 
     expect(selected.size).toBe(0);
   });
 
   it("should pre-select by timestamp relative to workout date noon", () => {
+    // Arrange
+
     const comments: WorkoutComment[] = [
       {
         author: "Coach",
@@ -56,9 +70,14 @@ describe("getPreSelectedComments", () => {
       },
     ];
 
+    // Act
+
     const selected = getPreSelectedComments(comments, workoutDate);
 
     // Day before and morning are pre-selected
+
+    // Assert
+
     expect(selected.has(0)).toBe(true);
     expect(selected.has(1)).toBe(true);
     // Exactly noon and after are NOT pre-selected
@@ -68,6 +87,8 @@ describe("getPreSelectedComments", () => {
   });
 
   it("should select all pre-noon comments", () => {
+    // Arrange
+
     const comments: WorkoutComment[] = [
       { author: "A", text: "Early", timestamp: "2026-04-06T06:00:00.000Z" },
       {
@@ -77,7 +98,11 @@ describe("getPreSelectedComments", () => {
       },
     ];
 
+    // Act
+
     const selected = getPreSelectedComments(comments, workoutDate);
+
+    // Assert
 
     expect(selected.size).toBe(2);
   });

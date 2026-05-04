@@ -5,6 +5,10 @@ import { CardShell } from "./CardShell";
 
 describe("CardShell", () => {
   it("should render title and metadata slots", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CardShell
         borderClass="border-amber-600"
@@ -14,12 +18,16 @@ describe("CardShell", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByTestId("shell-1")).toBeInTheDocument();
     expect(screen.getByText("Z2/Z3 técnica")).toBeInTheDocument();
     expect(screen.getByText("45 min")).toBeInTheDocument();
   });
 
   it("should apply the lateral border class", () => {
+    // Arrange
+
     render(
       <CardShell
         borderClass="border-emerald-600"
@@ -29,12 +37,19 @@ describe("CardShell", () => {
       />
     );
 
+    // Act
+
     const button = screen.getByTestId("shell-2");
+
+    // Assert
+
     expect(button.className).toContain("border-l-4");
     expect(button.className).toContain("border-emerald-600");
   });
 
   it("should use line-clamp-2 on the title row", () => {
+    // Arrange
+
     render(
       <CardShell
         borderClass="border-amber-600"
@@ -45,11 +60,21 @@ describe("CardShell", () => {
     );
 
     const button = screen.getByTestId("shell-3");
+
+    // Act
+
     const titleContainer = button.querySelector("div");
+
+    // Assert
+
     expect(titleContainer?.className).toContain("line-clamp-2");
   });
 
   it("should render origin chip when provided", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CardShell
         borderClass="border-amber-600"
@@ -60,10 +85,16 @@ describe("CardShell", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByText("· T2G")).toBeInTheDocument();
   });
 
   it("should not render origin chip when omitted", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CardShell
         borderClass="border-amber-600"
@@ -73,10 +104,16 @@ describe("CardShell", () => {
       />
     );
 
+    // Assert
+
     expect(screen.queryByText(/^·/)).not.toBeInTheDocument();
   });
 
   it("should attach aria-label to the button root", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CardShell
         borderClass="border-amber-600"
@@ -87,12 +124,18 @@ describe("CardShell", () => {
       />
     );
 
+    // Assert
+
     expect(
       screen.getByRole("button", { name: /matched session/i })
     ).toBeInTheDocument();
   });
 
   it("should render secondary row when provided (matched-card pattern)", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CardShell
         borderClass="border-emerald-600"
@@ -102,6 +145,8 @@ describe("CardShell", () => {
         testId="shell-7"
       />
     );
+
+    // Assert
 
     expect(screen.getByText("Plan · 45 min")).toBeInTheDocument();
     expect(screen.getByText("Actual · 42 min")).toBeInTheDocument();

@@ -35,12 +35,18 @@ describe("groupWorkoutsByDay", () => {
   const days = ["2026-04-06", "2026-04-07", "2026-04-08"];
 
   it("should group workouts by date", () => {
+    // Arrange
+
     const workouts = [
       makeWorkout("w1", "2026-04-06", "2026-04-06T08:00:00.000Z"),
       makeWorkout("w2", "2026-04-08", "2026-04-08T10:00:00.000Z"),
     ];
 
+    // Act
+
     const result = groupWorkoutsByDay(workouts, days);
+
+    // Assert
 
     expect(result["2026-04-06"]).toHaveLength(1);
     expect(result["2026-04-07"]).toHaveLength(0);
@@ -48,19 +54,31 @@ describe("groupWorkoutsByDay", () => {
   });
 
   it("should sort by createdAt ascending", () => {
+    // Arrange
+
     const workouts = [
       makeWorkout("late", "2026-04-06", "2026-04-06T18:00:00.000Z"),
       makeWorkout("early", "2026-04-06", "2026-04-06T06:00:00.000Z"),
     ];
 
+    // Act
+
     const result = groupWorkoutsByDay(workouts, days);
+
+    // Assert
 
     expect(result["2026-04-06"][0].id).toBe("early");
     expect(result["2026-04-06"][1].id).toBe("late");
   });
 
   it("should handle undefined workouts", () => {
+    // Arrange
+
+    // Act
+
     const result = groupWorkoutsByDay(undefined, days);
+
+    // Assert
 
     expect(result["2026-04-06"]).toHaveLength(0);
   });
@@ -68,16 +86,27 @@ describe("groupWorkoutsByDay", () => {
 
 describe("countRawWorkouts", () => {
   it("should count only raw state workouts", () => {
+    // Arrange
+
+    // Act
+
     const workouts = [
       makeWorkout("w1", "2026-04-06", "2026-04-06T08:00:00.000Z", "raw"),
       makeWorkout("w2", "2026-04-06", "2026-04-06T09:00:00.000Z", "pushed"),
       makeWorkout("w3", "2026-04-07", "2026-04-07T08:00:00.000Z", "raw"),
     ];
 
+    // Assert
+
     expect(countRawWorkouts(workouts)).toBe(2);
   });
 
   it("should return 0 for undefined", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(countRawWorkouts(undefined)).toBe(0);
   });
 });

@@ -35,13 +35,21 @@ describe("UsageTab", () => {
   });
 
   it("should render the empty state when no records exist", () => {
+    // Arrange
+
+    // Act
+
     render(<UsageTab />);
+
+    // Assert
 
     expect(screen.getByText(/No AI usage recorded yet/i)).toBeInTheDocument();
     expect(screen.queryByTestId("usage-table")).toBeNull();
   });
 
   it("should render rows in reverse-chronological order when records exist", () => {
+    // Arrange
+
     mockRows = [
       {
         yearMonth: "2026-02",
@@ -72,13 +80,21 @@ describe("UsageTab", () => {
     render(<UsageTab />);
 
     const table = screen.getByTestId("usage-table");
+
+    // Act
+
     const rows = table.querySelectorAll("tbody tr");
+
+    // Assert
+
     expect(rows[0].getAttribute("data-testid")).toBe("usage-row-2026-04");
     expect(rows[1].getAttribute("data-testid")).toBe("usage-row-2026-03");
     expect(rows[2].getAttribute("data-testid")).toBe("usage-row-2026-02");
   });
 
   it("should format totals with thousands separator and 4-decimal USD", () => {
+    // Arrange
+
     mockRows = [
       {
         yearMonth: "2026-04",
@@ -92,13 +108,22 @@ describe("UsageTab", () => {
 
     render(<UsageTab />);
 
+    // Act
+
     const row = screen.getByTestId("usage-row-2026-04");
+
+    // Assert
+
     expect(row).toHaveTextContent("12,345");
     expect(row).toHaveTextContent("$0.0123");
   });
 
   it("should query the last 6 calendar months (current + 5 prior)", () => {
+    // Arrange
+
     mockRows = [];
+
+    // Act
 
     render(<UsageTab />);
 
@@ -106,6 +131,9 @@ describe("UsageTab", () => {
     // returns mockRows directly, but the factory itself was called
     // during render so we can't assert on its closure input. Instead
     // we confirm the factory was passed (smoke-test).
+
+    // Assert
+
     expect(lastFactory).toBeTypeOf("function");
   });
 });

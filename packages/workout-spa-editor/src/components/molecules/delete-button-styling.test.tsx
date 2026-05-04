@@ -45,6 +45,8 @@ describe("Delete Button Styling Consistency", () => {
   describe("Shared Characteristics", () => {
     it("should use same icon type (Trash2) in both buttons", () => {
       // Arrange & Act
+      // Arrange
+
       const { container: blockContainer } = renderWithProviders(
         <RepetitionBlockHeaderRight
           block={mockBlock}
@@ -61,9 +63,14 @@ describe("Delete Button Styling Consistency", () => {
       const blockIcon = blockContainer.querySelector(
         '[data-testid="delete-block-button"] svg'
       );
+
+      // Act
+
       const stepIcon = stepContainer.querySelector(
         '[data-testid="delete-step-button"] svg'
       );
+
+      // Assert
 
       expect(blockIcon).toBeInTheDocument();
       expect(stepIcon).toBeInTheDocument();
@@ -71,6 +78,8 @@ describe("Delete Button Styling Consistency", () => {
 
     it("should use same icon size (h-4 w-4) in both buttons", () => {
       // Arrange & Act
+      // Arrange
+
       const { container: blockContainer } = renderWithProviders(
         <RepetitionBlockHeaderRight
           block={mockBlock}
@@ -87,9 +96,14 @@ describe("Delete Button Styling Consistency", () => {
       const blockIcon = blockContainer.querySelector(
         '[data-testid="delete-block-button"] svg'
       );
+
+      // Act
+
       const stepIcon = stepContainer.querySelector(
         '[data-testid="delete-step-button"] svg'
       );
+
+      // Assert
 
       expect(blockIcon).toHaveClass("h-4", "w-4");
       expect(stepIcon).toHaveClass("h-4", "w-4");
@@ -97,6 +111,8 @@ describe("Delete Button Styling Consistency", () => {
 
     it("should have proper accessibility attributes", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(
         <RepetitionBlockHeaderRight
           block={mockBlock}
@@ -109,7 +125,12 @@ describe("Delete Button Styling Consistency", () => {
 
       // Assert - Both should have aria-label
       const blockButton = screen.getByTestId("delete-block-button");
+
+      // Act
+
       const stepButton = screen.getByTestId("delete-step-button");
+
+      // Assert
 
       expect(blockButton).toHaveAttribute("aria-label");
       expect(stepButton).toHaveAttribute("aria-label");
@@ -117,6 +138,8 @@ describe("Delete Button Styling Consistency", () => {
 
     it("should have test identifiers", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(
         <RepetitionBlockHeaderRight
           block={mockBlock}
@@ -125,9 +148,14 @@ describe("Delete Button Styling Consistency", () => {
         />
       );
 
+      // Act
+
       renderWithProviders(<StepCard step={mockStep} onDelete={vi.fn()} />);
 
       // Assert - Both should have data-testid
+
+      // Assert
+
       expect(screen.getByTestId("delete-block-button")).toBeInTheDocument();
       expect(screen.getByTestId("delete-step-button")).toBeInTheDocument();
     });
@@ -136,6 +164,8 @@ describe("Delete Button Styling Consistency", () => {
   describe("RepetitionBlock Delete Button Styling", () => {
     it("should have inline button styling with red text", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(
         <RepetitionBlockHeaderRight
           block={mockBlock}
@@ -145,9 +175,15 @@ describe("Delete Button Styling Consistency", () => {
       );
 
       // Assert
+
+      // Act
+
       const button = screen.getByTestId("delete-block-button");
 
       // Verify red color scheme (Requirement 5.1)
+
+      // Assert
+
       expect(button).toHaveClass("text-red-600");
 
       // Verify hover states (Requirement 5.3)
@@ -169,12 +205,20 @@ describe("Delete Button Styling Consistency", () => {
   describe("StepCard Delete Button Styling", () => {
     it("should have overlay button styling with background and border", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(<StepCard step={mockStep} onDelete={vi.fn()} />);
 
       // Assert
+
+      // Act
+
       const button = screen.getByTestId("delete-step-button");
 
       // Verify red color scheme on hover (Requirement 5.1)
+
+      // Assert
+
       expect(button).toHaveClass("hover:text-red-600");
       expect(button).toHaveClass("hover:border-red-500");
 
@@ -199,6 +243,8 @@ describe("Delete Button Styling Consistency", () => {
   describe("Intentional Differences", () => {
     it("should have different positioning strategies", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(
         <RepetitionBlockHeaderRight
           block={mockBlock}
@@ -211,9 +257,15 @@ describe("Delete Button Styling Consistency", () => {
 
       // Assert
       const blockButton = screen.getByTestId("delete-block-button");
+
+      // Act
+
       const stepButton = screen.getByTestId("delete-step-button");
 
       // RepetitionBlock: inline (no absolute positioning)
+
+      // Assert
+
       expect(blockButton).not.toHaveClass("absolute");
 
       // StepCard: overlay (positioned via parent container)
@@ -222,6 +274,8 @@ describe("Delete Button Styling Consistency", () => {
 
     it("should have different initial state styling", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(
         <RepetitionBlockHeaderRight
           block={mockBlock}
@@ -234,9 +288,15 @@ describe("Delete Button Styling Consistency", () => {
 
       // Assert
       const blockButton = screen.getByTestId("delete-block-button");
+
+      // Act
+
       const stepButton = screen.getByTestId("delete-step-button");
 
       // RepetitionBlock: transparent with red text
+
+      // Assert
+
       expect(blockButton).toHaveClass("text-red-600");
       expect(blockButton).not.toHaveClass("bg-white");
 
@@ -247,6 +307,8 @@ describe("Delete Button Styling Consistency", () => {
 
     it("should have different padding sizes", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(
         <RepetitionBlockHeaderRight
           block={mockBlock}
@@ -259,9 +321,15 @@ describe("Delete Button Styling Consistency", () => {
 
       // Assert
       const blockButton = screen.getByTestId("delete-block-button");
+
+      // Act
+
       const stepButton = screen.getByTestId("delete-step-button");
 
       // RepetitionBlock: smaller padding (p-1) for inline context
+
+      // Assert
+
       expect(blockButton).toHaveClass("p-1");
 
       // StepCard: larger padding (p-2) for overlay context
@@ -270,6 +338,8 @@ describe("Delete Button Styling Consistency", () => {
 
     it("should have different border radius", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(
         <RepetitionBlockHeaderRight
           block={mockBlock}
@@ -282,9 +352,15 @@ describe("Delete Button Styling Consistency", () => {
 
       // Assert
       const blockButton = screen.getByTestId("delete-block-button");
+
+      // Act
+
       const stepButton = screen.getByTestId("delete-step-button");
 
       // RepetitionBlock: standard rounded corners
+
+      // Assert
+
       expect(blockButton).toHaveClass("rounded");
       expect(blockButton).not.toHaveClass("rounded-full");
 
@@ -296,6 +372,8 @@ describe("Delete Button Styling Consistency", () => {
   describe("Consistency Validation", () => {
     it("should maintain consistent hover background color (red-50)", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(
         <RepetitionBlockHeaderRight
           block={mockBlock}
@@ -308,7 +386,12 @@ describe("Delete Button Styling Consistency", () => {
 
       // Assert - Both should use hover:bg-red-50
       const blockButton = screen.getByTestId("delete-block-button");
+
+      // Act
+
       const stepButton = screen.getByTestId("delete-step-button");
+
+      // Assert
 
       expect(blockButton).toHaveClass("hover:bg-red-50");
       expect(stepButton).toHaveClass("hover:bg-red-50");
@@ -316,6 +399,8 @@ describe("Delete Button Styling Consistency", () => {
 
     it("should maintain consistent dark mode hover background (red-900/30)", () => {
       // Arrange & Act
+      // Arrange
+
       renderWithProviders(
         <RepetitionBlockHeaderRight
           block={mockBlock}
@@ -328,7 +413,12 @@ describe("Delete Button Styling Consistency", () => {
 
       // Assert - Both should use dark:hover:bg-red-900/30
       const blockButton = screen.getByTestId("delete-block-button");
+
+      // Act
+
       const stepButton = screen.getByTestId("delete-step-button");
+
+      // Assert
 
       expect(blockButton).toHaveClass("dark:hover:bg-red-900/30");
       expect(stepButton).toHaveClass("dark:hover:bg-red-900/30");

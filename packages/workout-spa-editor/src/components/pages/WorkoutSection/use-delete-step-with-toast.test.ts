@@ -40,14 +40,23 @@ describe("useDeleteStepWithToast", () => {
 
   it("should return a function", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     const { result } = renderHook(() => useDeleteStepWithToast());
 
     // Assert
+
+    // Assert
+
     expect(typeof result.current).toBe("function");
   });
 
   it("should call store deleteStep and show toast", async () => {
     // Arrange
+    // Arrange
+
     const mockDeleteStep = vi.fn();
     const mockToast = vi.fn();
 
@@ -84,9 +93,15 @@ describe("useDeleteStepWithToast", () => {
     result.current(0);
 
     // Wait for setTimeout to complete
+
+    // Act
+
     await new Promise((resolve) => setTimeout(resolve, 10));
 
     // Assert
+
+    // Assert
+
     expect(mockDeleteStep).toHaveBeenCalledWith(0);
     expect(mockDeleteStep).toHaveBeenCalledTimes(1);
     expect(mockToast).toHaveBeenCalledTimes(1);
