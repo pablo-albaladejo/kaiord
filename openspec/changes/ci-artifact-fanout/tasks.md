@@ -27,7 +27,6 @@ always() drop). User preference for bundled coherent chunks in CI/refactor work.
   ```
 
   The guard MUST use the **TypeScript compiler API** (`import * as ts from 'typescript'`; `typescript` is already a workspace dep) to AST-parse `tsup.config.{ts,mts,cts}` and `vite.config.{ts,mts,cts}` files — no regex over source text. It walks every `define:` property in `defineConfig({ define: {...} })` (and bare-object equivalents) and fails if any property value is `process.env.*` (direct identifier access), `JSON.stringify(process.env.*)`, an arrow-function returning either of those, a spread of an object containing either, or a computed-property whose key uses `process.env.*`. It whitelists `process.env.NODE_ENV` only as a comparison operand (`BinaryExpression` where `process.env.NODE_ENV` is `left` or `right` and operator is `===`/`!==`/`==`/`!=`), never as a `define:` value. The guard ALSO:
-
   - Greps `packages/*/src/**/*.{ts,tsx,mjs,cjs}` for `process.env.NODE_VERSION` (no whitelist; this should never appear in build-time code).
   - Scans `packages/*/dist/` (when present) for `*.node`, `*.so`, or `*.dylib` files.
 
@@ -36,18 +35,17 @@ always() drop). User preference for bundled coherent chunks in CI/refactor work.
 - [ ] 2.2 Create `scripts/check-build-portable.test.mjs` using `node:test` with **nine cases**: (a) clean repo passes; (b) `define: { __X__: JSON.stringify(process.env.API_URL) }` fails; (c) `define: { __DEV__: process.env.NODE_ENV !== 'production' ? 'true' : 'false' }` PASSES (comparison operand); (d) `process.env.NODE_VERSION === '22'` in fixture `src/build-helper.ts` fails; (e) `dist/native.node` file fails; (f) computed property `define: { ['__X__']: process.env.API_URL }` fails; (g) spread `define: { ...{ __X__: process.env.X } }` fails; (h) template-literal-key with `process.env.X` value fails; (i) comment containing `}` inside a `define:` block does NOT cause a false negative (regression test for the AST approach vs. naive regex).
 
 - [ ] 2.3 Create `scripts/check-ci-fanout-invariants.mjs` whose docstring opens with: `// SCOPE: enforces ONLY ci.yml fanout invariants (consumer-needs-build, no always() in consumers, non-consumer build dependency, pull_request_target prohibition). Adding new checks requires a separate guard with its own design entry.` Use **`yaml@2.x`** (already in `pnpm.overrides` as `>=2.8.3`; verify with `pnpm why yaml` at workspace root) — NOT `js-yaml`, NOT `safeLoad`. Import as `import { parse } from 'yaml'`. The guard parses `.github/workflows/ci.yml` and fails if:
-
   1. Any consumer job's `if:` clause (string field on the parsed job object) contains the literal `always()`. Consumers enumerated literally: `lint`, `typecheck`, `test`, `test-cli`, `test-frontend`, `round-trip`, `e2e-frontend`, `e2e-prod-base`.
   2. Any consumer job's `needs:` (whether scalar or sequence) does NOT include `build`.
   3. Any non-consumer job declares `needs: build`. Non-consumers enumerated: `check-links`, `log-bot-skip`, `bundle-analysis`. The single whitelisted exception is `notify-failure` (per spec "Non-consumer jobs do not declare build dependency" Exception clause). The script hardcodes the literal name `notify-failure` AND the comment block: `// WHITELIST: only 'notify-failure' qualifies under the spec Exception. Adding a new job here REQUIRES amending openspec/specs/ci-build-fanout/spec.md first.`
+  4. The workflow `on:` block contains `pull_request_target` (per spec "Workflow trigger SHALL NOT switch to pull_request_target").
 
   Note for future readers: summary jobs (`lint-summary`, `test-summary`, `round-trip-summary`, `test-frontend-summary`) are NOT in the consumer list above. They observe consumer status and legitimately retain `if: always()` (per §8.5) — that is permitted because they are not consumers. Adding any of them to the consumer enumeration would be a category error.
-  4. The workflow `on:` block contains `pull_request_target` (per spec "Workflow trigger SHALL NOT switch to pull_request_target").
 
 - [ ] 2.4 Create `scripts/check-ci-fanout-invariants.test.mjs` using `node:test` with cases: (a) current `ci.yml` (post-rollout) passes; (b) injecting `if: always() && …` into `lint`'s `if:` fails with a message naming `lint`; (c) removing `build` from `test`'s `needs:` fails; (d) adding `needs: [detect-changes, build]` to `check-links` fails; (e) `notify-failure` keeping `always()` and `build` in `needs:` PASSES (whitelist); (f) injecting `pull_request_target:` into the `on:` block fails.
 
 - [ ] 2.5 Wire both guards into the root `lint` script: add `pnpm lint:build-portable` and `pnpm lint:ci-fanout` as sub-targets in `package.json` and append them to the root `lint` aggregator. Confirm `pnpm test:scripts` discovers and runs both new tests.
-- [ ] 2.6 Add `"yaml": "^2.8.3"` to root `devDependencies` in `package.json` (run `pnpm add -Dw yaml@^2.8.3`). The `pnpm.overrides` clause pins the *version* if `yaml` appears in the resolution graph, but does not *install* it. Adding it as an explicit root devDep makes the guard self-sufficient and survives unrelated dep removals.
+- [ ] 2.6 Add `"yaml": "^2.8.3"` to root `devDependencies` in `package.json` (run `pnpm add -Dw yaml@^2.8.3`). The `pnpm.overrides` clause pins the _version_ if `yaml` appears in the resolution graph, but does not _install_ it. Adding it as an explicit root devDep makes the guard self-sufficient and survives unrelated dep removals.
 - [ ] 2.7 Extend `scripts/check-ci-fanout-invariants.mjs` with **invariant 5**: no consumer job's `steps:` array contains a step whose `run:` field matches `^pnpm (-r )?build($|\s)` or any equivalent multi-package compilation command. This catches the regression where a future contributor adds back the build-from-source pattern alongside the artifact download. Add a test case (g): injecting `run: pnpm -r build` into `lint`'s steps fails the guard with a message naming the consumer + the offending step.
 
 ## 3. Gate the build job on docs-only short-circuit
@@ -264,11 +262,11 @@ always() drop). User preference for bundled coherent chunks in CI/refactor work.
 
 - [ ] 10.1 Capture at least **5** force-pushed runs of the rollout PR (n=3 is below the noise floor for GitHub-hosted runners; n=5 brings the 95% CI of the median to ~±20%, comparable to baseline variance). Compute the median end-to-end wall-clock across those 5 runs.
 - [ ] 10.2 Compare the §10.1 median against the §1.2 baseline median (also computed from at least 5 recent merged PRs). The proposal claims a 30-60% reduction in PR wall-clock for non-docs PRs. The gate is **two clauses, BOTH must hold**:
-
   1. **Magnitude floor**: median improvement ≥ **20%** (relaxed from 30% to account for runner noise; the proposal's 30-60% claim remains the expected target but the floor is the ship gate).
   2. **Directional significance**: a one-sided Mann-Whitney U test (`scipy.stats.mannwhitneyu(post_fanout, baseline, alternative='less')`, or equivalent) MUST reject the null at p<0.05. The one-sided alternative is critical — a two-sided test could reject the null for a regression as easily as for an improvement. Note: at n1=n2=5 the smallest exact one-sided p-value is ~1/252 ≈ 0.004, so p<0.05 is achievable but the test has limited power; the 20% magnitudinal floor is the dominant signal, MWU is the directional sanity check.
 
   If median improvement is between 20% and 30%, document the gap in the rollout PR description and link to a follow-up issue exploring cross-run cache adoption (Decision 8 → Turborepo path). If median improvement is <20% OR the one-sided MWU fails to reject at p<0.05, halt and investigate before merging.
+
 - [ ] 10.3 Capture per-job timings in a table (build job duration vs. saved time across consumers) with min/median/max columns for each of the 5 sample runs and include in the PR description for future audits.
 
 ## 11. Verify orthogonal workflows are unaffected
@@ -282,7 +280,6 @@ always() drop). User preference for bundled coherent chunks in CI/refactor work.
 - [ ] 12.2 Run `pnpm lint:specs` and `pnpm lint` end-to-end on the rollout branch.
 - [ ] 12.3 Add an empty changeset (`pnpm exec changeset --empty`) — this is repo-tooling-only, no package version bumps. Description: "ci: build packages once per workflow run and fan dist out to consumer jobs."
 - [ ] 12.4 **Archive spec hand-off**: when this change archives via `/opsx:archive`, the spec at `openspec/changes/ci-artifact-fanout/specs/ci-build-fanout/spec.md` is lifted to `openspec/specs/ci-build-fanout/spec.md`. The lifted spec MUST satisfy **all four** SPEC_TEMPLATE.md rules:
-
   - **(rule 1)** First non-empty line is `> Synced: YYYY-MM-DD (ci-artifact-fanout)` — the date is the archive date and the change-slug is the canonical reference.
   - **(rule 2)** Exactly one `# CI Build Fanout` H1, exactly one `## Purpose` H2 (lifted from the HTML capability-scope comment at the top of the change-delta), exactly one `## Requirements` H2.
   - **(rule 4)** The `## ADDED Requirements` change-delta header MUST be renamed to `## Requirements`. All `### Requirement: …` headers under it are preserved as-is. The HTML comment block at the top of the change-delta MUST be removed (its content is now in `## Purpose`).
