@@ -15,13 +15,16 @@ describe("mapKrdTargetToGarmin", () => {
     ];
 
     it("should resolve pace zone to m/s range when table provided", () => {
+      // Arrange
       const target: Target = {
         type: "pace",
         value: { unit: "zone", value: 3 },
       };
 
+      // Act
       const result = mapKrdTargetToGarmin(target, { paceZones });
 
+      // Assert
       expect(result.zoneNumber).toBeNull();
       expect(result.targetValueOne).toBe(3.08);
       expect(result.targetValueTwo).toBe(3.51);
@@ -29,35 +32,46 @@ describe("mapKrdTargetToGarmin", () => {
     });
 
     it("should throw when pace zone used without table", () => {
+      // Arrange
+
+      // Act
       const target: Target = {
         type: "pace",
         value: { unit: "zone", value: 3 },
       };
 
+      // Assert
       expect(() => mapKrdTargetToGarmin(target)).toThrow(
         /pace zone .* require/i
       );
     });
 
     it("should throw for unknown zone number", () => {
+      // Arrange
+
+      // Act
       const target: Target = {
         type: "pace",
         value: { unit: "zone", value: 9 },
       };
 
+      // Assert
       expect(() => mapKrdTargetToGarmin(target, { paceZones })).toThrow(
         /zone 9/i
       );
     });
 
     it("should pass pace range through unchanged", () => {
+      // Arrange
       const target: Target = {
         type: "pace",
         value: { unit: "range", min: 3.5, max: 4.0 },
       };
 
+      // Act
       const result = mapKrdTargetToGarmin(target);
 
+      // Assert
       expect(result.targetValueOne).toBe(3.5);
       expect(result.targetValueTwo).toBe(4.0);
       expect(result.zoneNumber).toBeNull();
@@ -66,13 +80,16 @@ describe("mapKrdTargetToGarmin", () => {
 
   describe("power zone passthrough", () => {
     it("should still use zoneNumber for power zones", () => {
+      // Arrange
       const target: Target = {
         type: "power",
         value: { unit: "zone", value: 3 },
       };
 
+      // Act
       const result = mapKrdTargetToGarmin(target);
 
+      // Assert
       expect(result.zoneNumber).toBe(3);
       expect(result.targetValueOne).toBeNull();
       expect(result.targetValueTwo).toBeNull();
@@ -81,13 +98,16 @@ describe("mapKrdTargetToGarmin", () => {
 
   describe("heart rate zone passthrough", () => {
     it("should still use zoneNumber for HR zones", () => {
+      // Arrange
       const target: Target = {
         type: "heart_rate",
         value: { unit: "zone", value: 4 },
       };
 
+      // Act
       const result = mapKrdTargetToGarmin(target);
 
+      // Assert
       expect(result.zoneNumber).toBe(4);
       expect(result.targetValueOne).toBeNull();
       expect(result.targetValueTwo).toBeNull();

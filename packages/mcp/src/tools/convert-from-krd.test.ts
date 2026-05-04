@@ -21,43 +21,62 @@ describe("convertFromKrd", () => {
   });
 
   it("should convert KRD to TCX text", async () => {
+    // Arrange
+
+    // Act
     const result = await convertFromKrd(krd, "tcx", undefined, logger);
 
+    // Assert
     expect(result.content).toContain("TrainingCenterDatabase");
     expect(result.writtenTo).toBeNull();
   });
 
   it("should convert KRD to KRD JSON text", async () => {
+    // Arrange
     const result = await convertFromKrd(krd, "krd", undefined, logger);
 
+    // Act
     const parsed = JSON.parse(result.content);
+
+    // Assert
     expect(parsed.version).toBe("1.0");
     expect(result.writtenTo).toBeNull();
   });
 
   it("should write text output file when path provided", async () => {
+    // Arrange
     const outPath = join(tmpDir, "output.tcx");
-
     const result = await convertFromKrd(krd, "tcx", outPath, logger);
-
     expect(result.writtenTo).toBe(outPath);
+
+    // Act
     const written = await readFile(outPath, "utf-8");
+
+    // Assert
     expect(written).toContain("TrainingCenterDatabase");
   });
 
   it("should throw when output_file missing for binary FIT format", async () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     await expect(convertFromKrd(krd, "fit", undefined, logger)).rejects.toThrow(
       "output_file is required for binary format"
     );
   });
 
   it("should write FIT binary output", async () => {
+    // Arrange
     const outPath = join(tmpDir, "output.fit");
-
     const result = await convertFromKrd(krd, "fit", outPath, logger);
-
     expect(result.writtenTo).toBe(outPath);
+
+    // Act
     const buffer = await readFile(outPath);
+
+    // Assert
     expect(buffer.length).toBeGreaterThan(0);
   });
 });

@@ -54,40 +54,51 @@ describe("executeValidation", () => {
   });
 
   it("should throw when format cannot be detected", async () => {
+    // Arrange
     const logger = createMockLogger();
+
+    // Act
     vi.mocked(detectFormat).mockReturnValue(null);
 
+    // Assert
     await expect(
       executeValidation({ input: "unknown.xyz" }, logger)
     ).rejects.toThrow("Unable to detect format from file: unknown.xyz");
   });
 
   it("should throw when format is not FIT", async () => {
+    // Arrange
     const logger = createMockLogger();
+
+    // Act
     vi.mocked(detectFormat).mockReturnValue("tcx");
 
+    // Assert
     await expect(
       executeValidation({ input: "workout.tcx" }, logger)
     ).rejects.toThrow("Validation currently only supports FIT files. Got: tcx");
   });
 
   it("should throw when FIT file returns string data", async () => {
+    // Arrange
     const logger = createMockLogger();
     vi.mocked(detectFormat).mockReturnValue("fit");
+
+    // Act
     vi.mocked(readFile).mockResolvedValue("string data");
 
+    // Assert
     await expect(
       executeValidation({ input: "workout.fit" }, logger)
     ).rejects.toThrow("Expected binary data for FIT file");
   });
 
   it("should execute validation for valid FIT file", async () => {
+    // Arrange
     const logger = createMockLogger();
     const binaryData = new Uint8Array([0, 1, 2, 3]);
-
     vi.mocked(detectFormat).mockReturnValue("fit");
     vi.mocked(readFile).mockResolvedValue(binaryData);
-
     const mockValidateResult = {
       isValid: true,
       totalFields: 10,
@@ -100,8 +111,10 @@ describe("executeValidation", () => {
     };
     vi.mocked(validateRoundTrip).mockReturnValue(mockValidator);
 
+    // Act
     const result = await executeValidation({ input: "workout.fit" }, logger);
 
+    // Assert
     expect(result).toStrictEqual(mockValidateResult);
     expect(readFile).toHaveBeenCalledWith("workout.fit", "fit");
     expect(logger.info).toHaveBeenCalledWith("Starting round-trip validation", {
@@ -110,6 +123,7 @@ describe("executeValidation", () => {
   });
 
   it("should load custom tolerance config when provided", async () => {
+    // Arrange
     const logger = createMockLogger();
     const binaryData = new Uint8Array([0, 1, 2, 3]);
     const toleranceConfig = {
@@ -121,21 +135,21 @@ describe("executeValidation", () => {
       cadenceTolerance: 1,
       paceTolerance: 0.01,
     };
-
     vi.mocked(detectFormat).mockReturnValue("fit");
     vi.mocked(readFile).mockResolvedValue(binaryData);
     vi.mocked(fsReadFile).mockResolvedValue(JSON.stringify(toleranceConfig));
-
     const mockValidator = {
       validateFitToKrdToFit: vi.fn().mockResolvedValue({ isValid: true }),
     };
     vi.mocked(validateRoundTrip).mockReturnValue(mockValidator);
 
+    // Act
     await executeValidation(
       { input: "workout.fit", toleranceConfig: "/path/to/config.json" },
       logger
     );
 
+    // Assert
     expect(fsReadFile).toHaveBeenCalledWith("/path/to/config.json", "utf-8");
     expect(logger.debug).toHaveBeenCalledWith(
       "Loading custom tolerance config",
@@ -144,19 +158,20 @@ describe("executeValidation", () => {
   });
 
   it("should log debug messages for format and path", async () => {
+    // Arrange
     const logger = createMockLogger();
     const binaryData = new Uint8Array([0, 1, 2, 3]);
-
     vi.mocked(detectFormat).mockReturnValue("fit");
     vi.mocked(readFile).mockResolvedValue(binaryData);
-
     const mockValidator = {
       validateFitToKrdToFit: vi.fn().mockResolvedValue({ isValid: true }),
     };
     vi.mocked(validateRoundTrip).mockReturnValue(mockValidator);
 
+    // Act
     await executeValidation({ input: "workout.fit" }, logger);
 
+    // Assert
     expect(logger.debug).toHaveBeenCalledWith("Reading input file", {
       path: "workout.fit",
       format: "fit",

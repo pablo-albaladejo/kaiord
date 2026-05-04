@@ -6,14 +6,16 @@ import { convertPowerTarget } from "./target-power.converter";
 describe("convertPowerTarget", () => {
   describe("range target using specific power fields", () => {
     it("should return power range with interpreted values for customTargetPowerLow/High", () => {
-      // Values < 1000 are percentage of FTP
+      // Arrange
       const data: FitTargetData = {
         customTargetPowerLow: 200,
         customTargetPowerHigh: 250,
       };
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "range", min: 200, max: 250 },
@@ -21,14 +23,16 @@ describe("convertPowerTarget", () => {
     });
 
     it("should interpret absolute watts for high values (>= 1000 offset)", () => {
-      // 1200 => watts: 200, 1300 => watts: 300
+      // Arrange
       const data: FitTargetData = {
         customTargetPowerLow: 1200,
         customTargetPowerHigh: 1300,
       };
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "range", min: 200, max: 300 },
@@ -38,13 +42,16 @@ describe("convertPowerTarget", () => {
 
   describe("range target using generic custom fields", () => {
     it("should return power range for customTargetValueLow/High", () => {
+      // Arrange
       const data: FitTargetData = {
         customTargetValueLow: 180,
         customTargetValueHigh: 220,
       };
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "range", min: 180, max: 220 },
@@ -54,6 +61,7 @@ describe("convertPowerTarget", () => {
 
   describe("range target priority", () => {
     it("should prefer specific power fields over generic custom fields", () => {
+      // Arrange
       const data: FitTargetData = {
         customTargetPowerLow: 200,
         customTargetPowerHigh: 250,
@@ -61,8 +69,10 @@ describe("convertPowerTarget", () => {
         customTargetValueHigh: 220,
       };
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "range", min: 200, max: 250 },
@@ -72,12 +82,15 @@ describe("convertPowerTarget", () => {
 
   describe("zone target", () => {
     it("should return power zone when targetPowerZone is set", () => {
+      // Arrange
       const data: FitTargetData = {
         targetPowerZone: 4,
       };
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "zone", value: 4 },
@@ -85,8 +98,12 @@ describe("convertPowerTarget", () => {
     });
 
     it("should accept zone 1 (lower boundary)", () => {
+      // Arrange
+
+      // Act
       const result = convertPowerTarget({ targetPowerZone: 1 });
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "zone", value: 1 },
@@ -94,8 +111,12 @@ describe("convertPowerTarget", () => {
     });
 
     it("should accept zone 7 (upper boundary)", () => {
+      // Arrange
+
+      // Act
       const result = convertPowerTarget({ targetPowerZone: 7 });
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "zone", value: 7 },
@@ -103,14 +124,22 @@ describe("convertPowerTarget", () => {
     });
 
     it("should treat zone 0 as open (invalid zone, convertPowerValue returns null)", () => {
+      // Arrange
+
+      // Act
       const result = convertPowerTarget({ targetPowerZone: 0 });
 
+      // Assert
       expect(result).toStrictEqual({ type: "open" });
     });
 
     it("should treat zone 8 as percent_ftp (invalid zone, fallback)", () => {
+      // Arrange
+
+      // Act
       const result = convertPowerTarget({ targetPowerZone: 8 });
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "percent_ftp", value: 8 },
@@ -118,8 +147,12 @@ describe("convertPowerTarget", () => {
     });
 
     it("should treat zone 1299 as watts (invalid zone, value > 1000)", () => {
+      // Arrange
+
+      // Act
       const result = convertPowerTarget({ targetPowerZone: 1299 });
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "watts", value: 299 },
@@ -129,13 +162,15 @@ describe("convertPowerTarget", () => {
 
   describe("value target", () => {
     it("should return absolute watts for targetValue > 1000", () => {
-      // 1325 => 325 watts
+      // Arrange
       const data: FitTargetData = {
         targetValue: 1325,
       };
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "watts", value: 325 },
@@ -143,12 +178,15 @@ describe("convertPowerTarget", () => {
     });
 
     it("should return percent FTP for targetValue between 1 and 1000", () => {
+      // Arrange
       const data: FitTargetData = {
         targetValue: 85,
       };
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "percent_ftp", value: 85 },
@@ -156,18 +194,22 @@ describe("convertPowerTarget", () => {
     });
 
     it("should return open for targetValue of 0", () => {
+      // Arrange
       const data: FitTargetData = {
         targetValue: 0,
       };
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({ type: "open" });
     });
   });
 
   describe("fallback priority", () => {
     it("should prefer range over zone", () => {
+      // Arrange
       const data: FitTargetData = {
         customTargetPowerLow: 200,
         customTargetPowerHigh: 250,
@@ -175,8 +217,10 @@ describe("convertPowerTarget", () => {
         targetValue: 1325,
       };
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "range", min: 200, max: 250 },
@@ -184,13 +228,16 @@ describe("convertPowerTarget", () => {
     });
 
     it("should prefer zone over value", () => {
+      // Arrange
       const data: FitTargetData = {
         targetPowerZone: 4,
         targetValue: 1325,
       };
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({
         type: "power",
         value: { unit: "zone", value: 4 },
@@ -200,20 +247,26 @@ describe("convertPowerTarget", () => {
 
   describe("open target fallback", () => {
     it("should return open target when no power data is present", () => {
+      // Arrange
       const data: FitTargetData = {};
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({ type: "open" });
     });
 
     it("should return open when only low custom value is set (no high)", () => {
+      // Arrange
       const data: FitTargetData = {
         customTargetPowerLow: 200,
       };
 
+      // Act
       const result = convertPowerTarget(data);
 
+      // Assert
       expect(result).toStrictEqual({ type: "open" });
     });
   });

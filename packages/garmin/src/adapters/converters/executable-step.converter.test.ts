@@ -17,25 +17,31 @@ const buildStep = (
 describe("mapExecutableStep", () => {
   describe("duration mapping", () => {
     it("should map time condition to time duration", () => {
+      // Arrange
       const step = buildStep({
         endCondition: { conditionTypeKey: "time" },
         endConditionValue: 600,
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.durationType).toBe("time");
       expect(result.duration).toStrictEqual({ type: "time", seconds: 600 });
     });
 
     it("should map distance condition to distance duration", () => {
+      // Arrange
       const step = buildStep({
         endCondition: { conditionTypeKey: "distance" },
         endConditionValue: 1000,
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.durationType).toBe("distance");
       expect(result.duration).toStrictEqual({
         type: "distance",
@@ -44,13 +50,16 @@ describe("mapExecutableStep", () => {
     });
 
     it("should map calories condition to calories duration", () => {
+      // Arrange
       const step = buildStep({
         endCondition: { conditionTypeKey: "calories" },
         endConditionValue: 500,
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.durationType).toBe("calories");
       expect(result.duration).toStrictEqual({
         type: "calories",
@@ -59,13 +68,16 @@ describe("mapExecutableStep", () => {
     });
 
     it("should map lap.button condition to open duration", () => {
+      // Arrange
       const step = buildStep({
         endCondition: { conditionTypeKey: "lap.button" },
         endConditionValue: 0,
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.durationType).toBe("open");
       expect(result.duration).toStrictEqual({ type: "open" });
     });
@@ -73,76 +85,97 @@ describe("mapExecutableStep", () => {
 
   describe("intensity mapping", () => {
     it("should map warmup step type to warmup intensity", () => {
+      // Arrange
       const step = buildStep({
         stepType: { stepTypeKey: "warmup" },
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.intensity).toBe("warmup");
     });
 
     it("should map cooldown step type to cooldown intensity", () => {
+      // Arrange
       const step = buildStep({
         stepType: { stepTypeKey: "cooldown" },
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.intensity).toBe("cooldown");
     });
 
     it("should map interval step type to active intensity", () => {
+      // Arrange
       const step = buildStep({
         stepType: { stepTypeKey: "interval" },
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.intensity).toBe("active");
     });
 
     it("should map recovery step type to recovery intensity", () => {
+      // Arrange
       const step = buildStep({
         stepType: { stepTypeKey: "recovery" },
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.intensity).toBe("recovery");
     });
 
     it("should map rest step type to rest intensity", () => {
+      // Arrange
       const step = buildStep({
         stepType: { stepTypeKey: "rest" },
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.intensity).toBe("rest");
     });
   });
 
   describe("target mapping", () => {
     it("should map no.target to open target", () => {
+      // Arrange
       const step = buildStep({
         targetType: { workoutTargetTypeKey: "no.target" },
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.targetType).toBe("open");
       expect(result.target).toStrictEqual({ type: "open" });
     });
 
     it("should map power.zone target with zone number", () => {
+      // Arrange
       const step = buildStep({
         targetType: { workoutTargetTypeKey: "power.zone" },
         zoneNumber: 3,
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.targetType).toBe("power");
       expect(result.target).toStrictEqual({
         type: "power",
@@ -151,14 +184,17 @@ describe("mapExecutableStep", () => {
     });
 
     it("should map power.zone target with range values", () => {
+      // Arrange
       const step = buildStep({
         targetType: { workoutTargetTypeKey: "power.zone" },
         targetValueOne: 200,
         targetValueTwo: 250,
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.targetType).toBe("power");
       expect(result.target).toStrictEqual({
         type: "power",
@@ -167,13 +203,16 @@ describe("mapExecutableStep", () => {
     });
 
     it("should map heart.rate.zone target with zone number", () => {
+      // Arrange
       const step = buildStep({
         targetType: { workoutTargetTypeKey: "heart.rate.zone" },
         zoneNumber: 4,
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.targetType).toBe("heart_rate");
       expect(result.target).toStrictEqual({
         type: "heart_rate",
@@ -182,14 +221,17 @@ describe("mapExecutableStep", () => {
     });
 
     it("should map cadence target with range values", () => {
+      // Arrange
       const step = buildStep({
         targetType: { workoutTargetTypeKey: "cadence" },
         targetValueOne: 80,
         targetValueTwo: 100,
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.targetType).toBe("cadence");
       expect(result.target).toStrictEqual({
         type: "cadence",
@@ -200,6 +242,7 @@ describe("mapExecutableStep", () => {
 
   describe("secondary target", () => {
     it("should use secondary target when primary is open", () => {
+      // Arrange
       const step = buildStep({
         targetType: { workoutTargetTypeKey: "no.target" },
         secondaryTargetType: { workoutTargetTypeKey: "power.zone" },
@@ -207,8 +250,10 @@ describe("mapExecutableStep", () => {
         secondaryTargetValueTwo: 220,
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.targetType).toBe("power");
       expect(result.target).toStrictEqual({
         type: "power",
@@ -217,6 +262,7 @@ describe("mapExecutableStep", () => {
     });
 
     it("should not use secondary target when primary is defined", () => {
+      // Arrange
       const step = buildStep({
         targetType: { workoutTargetTypeKey: "power.zone" },
         zoneNumber: 3,
@@ -224,8 +270,10 @@ describe("mapExecutableStep", () => {
         secondaryZoneNumber: 4,
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.targetType).toBe("power");
       expect(result.target).toStrictEqual({
         type: "power",
@@ -236,43 +284,55 @@ describe("mapExecutableStep", () => {
 
   describe("equipment mapping", () => {
     it("should include equipment when equipmentType is present", () => {
+      // Arrange
       const step = buildStep({
         equipmentType: { equipmentTypeKey: "fins" },
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.equipment).toBe("swim_fins");
     });
 
     it("should not include equipment when equipmentType is null", () => {
+      // Arrange
       const step = buildStep({
         equipmentType: null,
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.equipment).toBeUndefined();
     });
 
     it("should not include equipment when equipmentType is absent", () => {
+      // Arrange
       const step = buildStep();
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.equipment).toBeUndefined();
     });
   });
 
   describe("stroke mapping", () => {
     it("should override target with stroke_type when stroke is present", () => {
+      // Arrange
       const step = buildStep({
         strokeType: { strokeTypeKey: "free", strokeTypeId: 6 },
         targetType: { workoutTargetTypeKey: "no.target" },
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.targetType).toBe("stroke_type");
       expect(result.target).toStrictEqual({
         type: "stroke_type",
@@ -281,58 +341,75 @@ describe("mapExecutableStep", () => {
     });
 
     it("should not set stroke target when strokeType has id 0", () => {
+      // Arrange
       const step = buildStep({
         strokeType: { strokeTypeKey: "free", strokeTypeId: 0 },
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
-      // strokeTypeId 0 means mapGarminStrokeToKrd returns undefined
+      // Assert
       expect(result.targetType).toBe("open");
     });
 
     it("should not set stroke target when strokeTypeKey is null", () => {
+      // Arrange
       const step = buildStep({
         strokeType: { strokeTypeKey: null, strokeTypeId: 6 },
       });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.targetType).toBe("open");
     });
   });
 
   describe("notes mapping", () => {
     it("should map description to notes when present", () => {
+      // Arrange
       const step = buildStep({ description: "RPE 8: 250W" });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.notes).toBe("RPE 8: 250W");
     });
 
     it("should omit notes when description is absent", () => {
+      // Arrange
       const step = buildStep();
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.notes).toBeUndefined();
     });
 
     it("should omit notes when description is null", () => {
+      // Arrange
       const step = buildStep({ description: null });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.notes).toBeUndefined();
     });
 
     it("should truncate description to 256 characters", () => {
+      // Arrange
       const longDescription = "A".repeat(300);
       const step = buildStep({ description: longDescription });
 
+      // Act
       const result = mapExecutableStep(step, 0);
 
+      // Assert
       expect(result.notes).toHaveLength(256);
       expect(result.notes).toBe("A".repeat(256));
     });
@@ -340,10 +417,13 @@ describe("mapExecutableStep", () => {
 
   describe("stepIndex", () => {
     it("should assign the provided stepIndex", () => {
+      // Arrange
       const step = buildStep();
 
+      // Act
       const result = mapExecutableStep(step, 5);
 
+      // Assert
       expect(result.stepIndex).toBe(5);
     });
   });

@@ -5,7 +5,9 @@ import { createSchemaValidator } from "./schema-validator.js";
 
 describe("createSchemaValidator", () => {
   it("should create a schema validator with validate method", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const validator = createSchemaValidator();
 
     // Assert
@@ -239,14 +241,14 @@ describe("SchemaValidator.validate", () => {
         },
       ],
     };
-
-    // Act
     const errors = validator.validate(invalidKrd);
 
-    // Assert
+    // Act
     const sessionError = errors.find((e) =>
       e.field.includes("sessions.0.totalElapsedTime")
     );
+
+    // Assert
     expect(sessionError).toBeDefined();
     expect(sessionError?.message).toBeDefined();
   });

@@ -21,12 +21,14 @@ const mockLogger: Logger = {
 
 describe("getOAuth1Token", () => {
   it("should return OAuth1 tokens on success", async () => {
+    // Arrange
     const mockFetch = vi.fn(async () => ({
       ok: true,
       status: 200,
       text: async () => "oauth_token=tok1&oauth_token_secret=sec1",
     })) as unknown as typeof globalThis.fetch;
 
+    // Act
     const result = await getOAuth1Token(
       "ticket-123",
       consumer,
@@ -34,6 +36,7 @@ describe("getOAuth1Token", () => {
       mockLogger
     );
 
+    // Assert
     expect(result).toStrictEqual({
       oauth_token: "tok1",
       oauth_token_secret: "sec1",
@@ -41,24 +44,32 @@ describe("getOAuth1Token", () => {
   });
 
   it("should throw when response is not ok", async () => {
+    // Arrange
+
+    // Act
     const mockFetch = vi.fn(async () => ({
       ok: false,
       status: 401,
       statusText: "Unauthorized",
     })) as unknown as typeof globalThis.fetch;
 
+    // Assert
     await expect(
       getOAuth1Token("ticket-123", consumer, mockFetch, mockLogger)
     ).rejects.toThrow("OAuth1 token request failed");
   });
 
   it("should throw when oauth_token is missing from response", async () => {
+    // Arrange
+
+    // Act
     const mockFetch = vi.fn(async () => ({
       ok: true,
       status: 200,
       text: async () => "some_other_param=value",
     })) as unknown as typeof globalThis.fetch;
 
+    // Assert
     await expect(
       getOAuth1Token("ticket-123", consumer, mockFetch, mockLogger)
     ).rejects.toThrow("OAuth1 token exchange failed");
@@ -69,6 +80,7 @@ describe("exchangeOAuth2", () => {
   const oauth1 = { oauth_token: "t1", oauth_token_secret: "s1" };
 
   it("should return OAuth2 token with computed expires_at", async () => {
+    // Arrange
     const mockFetch = vi.fn(async () => ({
       ok: true,
       status: 200,
@@ -81,6 +93,7 @@ describe("exchangeOAuth2", () => {
       }),
     })) as unknown as typeof globalThis.fetch;
 
+    // Act
     const result = await exchangeOAuth2(
       oauth1,
       consumer,
@@ -88,17 +101,22 @@ describe("exchangeOAuth2", () => {
       mockLogger
     );
 
+    // Assert
     expect(result.access_token).toBe("bearer");
     expect(result.expires_at).toBeGreaterThan(Math.floor(Date.now() / 1000));
   });
 
   it("should throw when response is not ok", async () => {
+    // Arrange
+
+    // Act
     const mockFetch = vi.fn(async () => ({
       ok: false,
       status: 500,
       statusText: "Internal Server Error",
     })) as unknown as typeof globalThis.fetch;
 
+    // Assert
     await expect(
       exchangeOAuth2(oauth1, consumer, mockFetch, mockLogger)
     ).rejects.toThrow("OAuth2 exchange failed");

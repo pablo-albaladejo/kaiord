@@ -11,11 +11,7 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Set calorie duration on first step
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -32,11 +28,9 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
         workout.steps[0].duration = { type: "calories", calories: 250 };
       }
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert
+    // Act
     const stepMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -44,6 +38,7 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
         (msg as { messageIndex?: number }).messageIndex === 0
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(stepMsg?.durationType).toBe("calories");
     expect(stepMsg?.durationCalories).toBe(250);
   });
@@ -53,10 +48,12 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
+
+    // Act
     const calorieValues = [100, 250, 500, 1000];
 
+    // Assert
     for (const calories of calorieValues) {
-      // Act - FIT → KRD
       const krd = await reader(originalBuffer);
 
       // Set calorie duration
@@ -77,10 +74,8 @@ describe("Round-trip: Advanced duration types - calorie duration", () => {
         }
       }
 
-      // Act - KRD → FIT messages
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert - Exact value preservation
       const stepMsg = messages.find(
         (msg: unknown) =>
           (msg as { mesgNum?: number }).mesgNum ===
@@ -99,11 +94,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Set power_less_than duration
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -120,11 +111,9 @@ describe("Round-trip: Advanced duration types - power duration", () => {
         workout.steps[0].duration = { type: "power_less_than", watts: 200 };
       }
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert
+    // Act
     const stepMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -132,6 +121,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
         (msg as { messageIndex?: number }).messageIndex === 0
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(stepMsg?.durationType).toBe("powerLessThan");
     expect(stepMsg?.durationPower).toBe(200);
   });
@@ -141,11 +131,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Set power_greater_than duration
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -162,11 +148,9 @@ describe("Round-trip: Advanced duration types - power duration", () => {
         workout.steps[0].duration = { type: "power_greater_than", watts: 300 };
       }
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert
+    // Act
     const stepMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -174,6 +158,7 @@ describe("Round-trip: Advanced duration types - power duration", () => {
         (msg as { messageIndex?: number }).messageIndex === 0
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(stepMsg?.durationType).toBe("powerGreaterThan");
     expect(stepMsg?.durationPower).toBe(300);
   });
@@ -183,10 +168,12 @@ describe("Round-trip: Advanced duration types - power duration", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
+
+    // Act
     const powerValues = [150, 200, 250, 300, 350];
 
+    // Assert
     for (const watts of powerValues) {
-      // Act - FIT → KRD
       const krd = await reader(originalBuffer);
 
       // Set power duration
@@ -207,10 +194,8 @@ describe("Round-trip: Advanced duration types - power duration", () => {
         }
       }
 
-      // Act - KRD → FIT messages
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert - Within ±1W tolerance
       const stepMsg = messages.find(
         (msg: unknown) =>
           (msg as { mesgNum?: number }).mesgNum ===
@@ -230,11 +215,7 @@ describe("Round-trip: Repeat step conditionals - calories", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Set repeat_until_calories duration on first step
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -255,11 +236,9 @@ describe("Round-trip: Repeat step conditionals - calories", () => {
         };
       }
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert
+    // Act
     const stepMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -267,6 +246,7 @@ describe("Round-trip: Repeat step conditionals - calories", () => {
         (msg as { messageIndex?: number }).messageIndex === 0
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(stepMsg?.durationType).toBe("repeatUntilCalories");
     expect(stepMsg?.durationCalories).toBe(500);
     expect(stepMsg?.durationStep).toBe(0);
@@ -279,11 +259,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Set power conditional
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -304,11 +280,9 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
         };
       }
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert
+    // Act
     const stepMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -316,6 +290,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
         (msg as { messageIndex?: number }).messageIndex === 0
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(stepMsg?.durationType).toBe("repeatUntilPowerLessThan");
     expect(stepMsg?.durationPower).toBe(180);
     expect(stepMsg?.durationStep).toBe(0);
@@ -326,11 +301,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Set power conditional
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -351,11 +322,9 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
         };
       }
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert
+    // Act
     const stepMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -363,6 +332,7 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
         (msg as { messageIndex?: number }).messageIndex === 0
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(stepMsg?.durationType).toBe("repeatUntilPowerGreaterThan");
     expect(stepMsg?.durationPower).toBe(250);
     expect(stepMsg?.durationStep).toBe(0);
@@ -373,10 +343,12 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
+
+    // Act
     const powerValues = [150, 200, 250, 300];
 
+    // Assert
     for (const watts of powerValues) {
-      // Act - FIT → KRD
       const krd = await reader(originalBuffer);
 
       // Set power conditional
@@ -401,10 +373,8 @@ describe("Round-trip: Repeat step conditionals - power conditionals", () => {
         }
       }
 
-      // Act - KRD → FIT messages
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert - Within ±1W tolerance
       const stepMsg = messages.find(
         (msg: unknown) =>
           (msg as { mesgNum?: number }).mesgNum ===
@@ -424,11 +394,7 @@ describe("Round-trip: Combined advanced duration types", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Set different duration types on different steps
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -454,18 +420,13 @@ describe("Round-trip: Combined advanced duration types", () => {
         workout.steps[2].duration = { type: "power_greater_than", watts: 250 };
       }
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
-
-    // Assert - Check all steps have correct duration types
     const step0 = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
           FIT_MESSAGE_NUMBERS.WORKOUT_STEP &&
         (msg as { messageIndex?: number }).messageIndex === 0
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
-
     const step1 = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -473,6 +434,7 @@ describe("Round-trip: Combined advanced duration types", () => {
         (msg as { messageIndex?: number }).messageIndex === 1
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Act
     const step2 = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum ===
@@ -480,12 +442,11 @@ describe("Round-trip: Combined advanced duration types", () => {
         (msg as { messageIndex?: number }).messageIndex === 2
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(step0?.durationType).toBe("calories");
     expect(step0?.durationCalories).toBe(200);
-
     expect(step1?.durationType).toBe("powerLessThan");
     expect(step1?.durationPower).toBe(180);
-
     expect(step2?.durationType).toBe("powerGreaterThan");
     expect(step2?.durationPower).toBe(250);
   });

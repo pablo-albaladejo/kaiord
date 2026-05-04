@@ -15,7 +15,9 @@ describe("createConsoleLogger", () => {
   });
 
   it("should create logger with all required methods", () => {
-    // Arrange & Act
+    // Arrange
+
+    // Act
     const logger = createConsoleLogger();
 
     // Assert

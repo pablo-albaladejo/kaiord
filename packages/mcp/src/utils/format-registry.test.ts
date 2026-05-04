@@ -4,8 +4,12 @@ import { detectFormatFromPath, FORMAT_REGISTRY } from "./format-registry";
 
 describe("FORMAT_REGISTRY", () => {
   it("should have entries for all five formats", () => {
+    // Arrange
+
+    // Act
     const keys = Object.keys(FORMAT_REGISTRY);
 
+    // Assert
     expect(keys).toContain("fit");
     expect(keys).toContain("tcx");
     expect(keys).toContain("zwo");
@@ -15,10 +19,20 @@ describe("FORMAT_REGISTRY", () => {
   });
 
   it("should mark FIT as binary", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(FORMAT_REGISTRY.fit.binary).toBe(true);
   });
 
   it("should mark text formats as non-binary", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(FORMAT_REGISTRY.tcx.binary).toBe(false);
     expect(FORMAT_REGISTRY.zwo.binary).toBe(false);
     expect(FORMAT_REGISTRY.gcn.binary).toBe(false);
@@ -26,6 +40,11 @@ describe("FORMAT_REGISTRY", () => {
   });
 
   it("should have correct extensions", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(FORMAT_REGISTRY.fit.extension).toBe(".fit");
     expect(FORMAT_REGISTRY.tcx.extension).toBe(".tcx");
     expect(FORMAT_REGISTRY.zwo.extension).toBe(".zwo");
@@ -36,40 +55,85 @@ describe("FORMAT_REGISTRY", () => {
 
 describe("detectFormatFromPath", () => {
   it("should detect FIT format from file path", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(detectFormatFromPath("/path/to/file.fit")).toBe("fit");
   });
 
   it("should detect TCX format from file path", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(detectFormatFromPath("/path/to/file.tcx")).toBe("tcx");
   });
 
   it("should detect ZWO format from file path", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(detectFormatFromPath("workout.zwo")).toBe("zwo");
   });
 
   it("should detect GCN format from file path", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(detectFormatFromPath("workout.gcn")).toBe("gcn");
   });
 
   it("should detect KRD format from file path", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(detectFormatFromPath("data.krd")).toBe("krd");
   });
 
   it("should be case-insensitive for extensions", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(detectFormatFromPath("file.FIT")).toBe("fit");
     expect(detectFormatFromPath("file.Tcx")).toBe("tcx");
   });
 
   it("should return null for unknown extensions", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(detectFormatFromPath("file.txt")).toBeNull();
     expect(detectFormatFromPath("file.json")).toBeNull();
   });
 
   it("should return null for paths without extensions", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(detectFormatFromPath("noextension")).toBeNull();
   });
 
   it("should return null for filenames matching format names without dot", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(detectFormatFromPath("fit")).toBeNull();
     expect(detectFormatFromPath("tcx")).toBeNull();
   });

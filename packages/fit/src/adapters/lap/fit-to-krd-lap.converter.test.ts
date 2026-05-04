@@ -148,6 +148,8 @@ describe("convertFitToKrdLap", () => {
 
   it("should convert position triggers to position", () => {
     // Arrange
+
+    // Act
     const triggers = [
       "positionStart",
       "positionLap",
@@ -155,6 +157,7 @@ describe("convertFitToKrdLap", () => {
       "positionMarked",
     ];
 
+    // Assert
     for (const trigger of triggers) {
       const fitLap = {
         timestamp: 1704067800,
@@ -164,10 +167,8 @@ describe("convertFitToKrdLap", () => {
         lapTrigger: trigger,
       };
 
-      // Act
       const result = convertFitToKrdLap(fitLap);
 
-      // Assert
       expect(result.trigger).toBe("position");
     }
   });
@@ -205,7 +206,7 @@ describe("convertFitToKrdLap", () => {
 
     // Assert
     expect(result.numLengths).toBe(4);
-    expect(result.swimStroke).toBe("breaststroke"); // FIT 2 = breaststroke
+    expect(result.swimStroke).toBe("breaststroke");
   });
 
   it("should convert lap with workout step index", () => {
@@ -246,12 +247,14 @@ describe("convertFitToKrdLap", () => {
 
   it("should throw error for invalid data", () => {
     // Arrange
+
+    // Act
     const invalidLap = {
       timestamp: 1704067800,
       // Missing required fields
     };
 
-    // Act & Assert
+    // Assert
     expect(() => convertFitToKrdLap(invalidLap)).toThrow();
   });
 });

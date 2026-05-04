@@ -149,12 +149,14 @@ describe("convertKrdToFitLap", () => {
 
   it("should throw error for invalid KRD lap", () => {
     // Arrange
+
+    // Act
     const invalidLap = {
       startTime: "invalid-date",
       totalElapsedTime: 600,
     };
 
-    // Act & Assert
+    // Assert
     expect(() => convertKrdToFitLap(invalidLap)).toThrow();
   });
 });
@@ -213,22 +215,18 @@ describe("round-trip conversion", () => {
       totalElapsedTime: 600,
       totalTimerTime: 580,
     };
-
-    // Act
     const fitResult = convertKrdToFitLap(originalKrd);
     const roundTrippedKrd = convertFitToKrdLap(fitResult);
-
-    // Assert - time within 1 second tolerance
     const originalTime = new Date(originalKrd.startTime).getTime();
-    const roundTrippedTime = new Date(roundTrippedKrd.startTime).getTime();
-    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(1000);
 
-    // Assert - elapsed time within 1 second
+    // Act
+    const roundTrippedTime = new Date(roundTrippedKrd.startTime).getTime();
+
+    // Assert
+    expect(Math.abs(originalTime - roundTrippedTime)).toBeLessThanOrEqual(1000);
     expect(
       Math.abs(roundTrippedKrd.totalElapsedTime - originalKrd.totalElapsedTime)
     ).toBeLessThanOrEqual(1);
-
-    // Assert - timer time within 1 second
     expect(
       Math.abs(roundTrippedKrd.totalTimerTime! - originalKrd.totalTimerTime)
     ).toBeLessThanOrEqual(1);
@@ -241,9 +239,9 @@ describe("round-trip conversion", () => {
       totalElapsedTime: 600,
       totalTimerTime: 0,
     };
+    const fitResult = convertKrdToFitLap(originalKrd);
 
     // Act
-    const fitResult = convertKrdToFitLap(originalKrd);
     const roundTrippedKrd = convertFitToKrdLap(fitResult);
 
     // Assert
@@ -261,27 +259,26 @@ describe("round-trip conversion", () => {
       avgPower: 220,
       maxPower: 350,
     };
+    const fitResult = convertKrdToFitLap(originalKrd);
 
     // Act
-    const fitResult = convertKrdToFitLap(originalKrd);
     const roundTrippedKrd = convertFitToKrdLap(fitResult);
 
-    // Assert - heart rate within 1 bpm
+    // Assert
     expect(roundTrippedKrd.avgHeartRate).toBe(originalKrd.avgHeartRate);
     expect(roundTrippedKrd.maxHeartRate).toBe(originalKrd.maxHeartRate);
-
-    // Assert - power within 1W
     expect(roundTrippedKrd.avgPower).toBe(originalKrd.avgPower);
     expect(roundTrippedKrd.maxPower).toBe(originalKrd.maxPower);
-
-    // Assert - cadence within 1 rpm
     expect(roundTrippedKrd.avgCadence).toBe(originalKrd.avgCadence);
   });
 
   it("should preserve trigger through round-trip (simple triggers)", () => {
     // Arrange
+
+    // Act
     const simpleTriggers = ["manual", "time", "distance"] as const;
 
+    // Assert
     for (const trigger of simpleTriggers) {
       const originalKrd = {
         startTime: "2024-01-01T00:00:00.000Z",
@@ -289,11 +286,9 @@ describe("round-trip conversion", () => {
         trigger,
       };
 
-      // Act
       const fitResult = convertKrdToFitLap(originalKrd);
       const roundTrippedKrd = convertFitToKrdLap(fitResult);
 
-      // Assert
       expect(roundTrippedKrd.trigger).toBe(trigger);
     }
   });
@@ -306,9 +301,9 @@ describe("round-trip conversion", () => {
       avgSpeed: 5.5,
       maxSpeed: 7.5,
     };
+    const fitResult = convertKrdToFitLap(originalKrd);
 
     // Act
-    const fitResult = convertKrdToFitLap(originalKrd);
     const roundTrippedKrd = convertFitToKrdLap(fitResult);
 
     // Assert
@@ -324,9 +319,9 @@ describe("round-trip conversion", () => {
       totalAscent: 150,
       totalDescent: 80,
     };
+    const fitResult = convertKrdToFitLap(originalKrd);
 
     // Act
-    const fitResult = convertKrdToFitLap(originalKrd);
     const roundTrippedKrd = convertFitToKrdLap(fitResult);
 
     // Assert
@@ -341,9 +336,9 @@ describe("round-trip conversion", () => {
       totalElapsedTime: 600,
       totalDistance: 5000,
     };
+    const fitResult = convertKrdToFitLap(originalKrd);
 
     // Act
-    const fitResult = convertKrdToFitLap(originalKrd);
     const roundTrippedKrd = convertFitToKrdLap(fitResult);
 
     // Assert
@@ -352,8 +347,11 @@ describe("round-trip conversion", () => {
 
   it("should preserve all trigger types through round-trip", () => {
     // Arrange
+
+    // Act
     const triggers = ["session_end", "fitness_equipment", "position"] as const;
 
+    // Assert
     for (const trigger of triggers) {
       const originalKrd = {
         startTime: "2024-01-01T00:00:00.000Z",
@@ -361,11 +359,9 @@ describe("round-trip conversion", () => {
         trigger,
       };
 
-      // Act
       const fitResult = convertKrdToFitLap(originalKrd);
       const roundTrippedKrd = convertFitToKrdLap(fitResult);
 
-      // Assert
       expect(roundTrippedKrd.trigger).toBe(trigger);
     }
   });
@@ -377,9 +373,9 @@ describe("round-trip conversion", () => {
       totalElapsedTime: 600,
       totalCalories: 250,
     };
+    const fitResult = convertKrdToFitLap(originalKrd);
 
     // Act
-    const fitResult = convertKrdToFitLap(originalKrd);
     const roundTrippedKrd = convertFitToKrdLap(fitResult);
 
     // Assert

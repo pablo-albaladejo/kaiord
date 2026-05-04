@@ -27,7 +27,6 @@ describe("createFastXmlZwiftReader", () => {
     <SteadyState Duration="300" Power="1.0"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -51,7 +50,6 @@ describe("createFastXmlZwiftReader", () => {
 <invalid_root>
   <name>Test</name>
 </invalid_root>`;
-
       const validationErrors = [
         { path: "root", message: "Expected workout_file element" },
       ];
@@ -60,9 +58,11 @@ describe("createFastXmlZwiftReader", () => {
         errors: validationErrors,
       });
       const logger = createMockLogger();
+
+      // Act
       const reader = createFastXmlZwiftReader(logger, mockValidator);
 
-      // Act & Assert
+      // Assert
       await expect(reader(invalidXml)).rejects.toThrow(
         "Zwift file does not conform to XSD schema"
       );
@@ -85,7 +85,6 @@ describe("createFastXmlZwiftReader", () => {
     <SteadyState Duration="300" Power="1.0"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -110,15 +109,16 @@ describe("createFastXmlZwiftReader", () => {
 <root>
   <name>Test</name>
 </root>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
       });
       const logger = createMockLogger();
+
+      // Act
       const reader = createFastXmlZwiftReader(logger, mockValidator);
 
-      // Act & Assert
+      // Assert
       await expect(reader(xmlWithoutWorkoutFile)).rejects.toThrow(
         "Invalid Zwift format: missing workout_file element"
       );
@@ -141,7 +141,6 @@ describe("createFastXmlZwiftReader", () => {
     <SteadyState Duration="300" Power="1.0"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -175,7 +174,6 @@ describe("createFastXmlZwiftReader", () => {
     <SteadyState Duration="300" Power="1.0"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -208,7 +206,6 @@ describe("createFastXmlZwiftReader", () => {
     <SteadyState Duration="5000" pace="240"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -234,7 +231,6 @@ describe("createFastXmlZwiftReader", () => {
     <SteadyState Duration="300" pace="240"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -259,7 +255,6 @@ describe("createFastXmlZwiftReader", () => {
     <SteadyState Duration="300" Power="1.0"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -285,7 +280,6 @@ describe("createFastXmlZwiftReader", () => {
     <SteadyState Duration="300" pace="240"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -316,7 +310,6 @@ describe("createFastXmlZwiftReader", () => {
     <SteadyState Duration="300" Power="1.0"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -345,7 +338,6 @@ describe("createFastXmlZwiftReader", () => {
     <SteadyState Duration="300" Power="1.0"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -372,7 +364,6 @@ describe("createFastXmlZwiftReader", () => {
     <FreeRide Duration="600" Cadence="90" FlatRoad="1"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -409,7 +400,6 @@ describe("createFastXmlZwiftReader", () => {
     <SteadyState Duration="5000" pace="240"/>
   </workout>
 </workout_file>`;
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -451,7 +441,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -485,7 +474,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const validationErrors = [
         { path: "workout_file", message: "Invalid structure" },
       ];
@@ -494,9 +482,11 @@ describe("createFastXmlZwiftWriter", () => {
         errors: validationErrors,
       });
       const logger = createMockLogger();
+
+      // Act
       const writer = createFastXmlZwiftWriter(logger, mockValidator);
 
-      // Act & Assert
+      // Assert
       await expect(writer(krd)).rejects.toThrow(
         "Generated Zwift XML does not conform to XSD schema"
       );
@@ -518,15 +508,16 @@ describe("createFastXmlZwiftWriter", () => {
           sport: "cycling",
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
       });
       const logger = createMockLogger();
+
+      // Act
       const writer = createFastXmlZwiftWriter(logger, mockValidator);
 
-      // Act & Assert
+      // Assert
       await expect(writer(invalidKrd)).rejects.toThrow(
         "Failed to convert KRD to Zwift"
       );
@@ -555,7 +546,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -606,7 +596,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -643,7 +632,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -675,7 +663,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -737,7 +724,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -802,7 +788,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -867,7 +852,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -959,7 +943,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1020,7 +1003,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1085,7 +1067,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1149,7 +1130,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1223,7 +1203,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1269,7 +1248,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1365,7 +1343,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1416,7 +1393,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1428,8 +1404,6 @@ describe("createFastXmlZwiftWriter", () => {
       const result = await writer(krd);
 
       // Assert
-      // Note: durationType is not included in generated XML as it's not part of Zwift XSD schema
-      // It's stored in extensions for round-trip preservation but not written to XML
       expect(result).not.toContain("<durationType>");
     });
 
@@ -1465,7 +1439,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1500,7 +1473,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1548,7 +1520,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1605,7 +1576,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1623,7 +1593,6 @@ describe("createFastXmlZwiftWriter", () => {
       );
       expect(result).toContain('name="Test"');
       expect(result).toContain('name="Extensions"');
-      // Note: durationType is not included in generated XML as it's not part of Zwift XSD schema
       expect(result).toContain("<thresholdSecPerKm>240</thresholdSecPerKm>");
     });
 
@@ -1645,7 +1614,6 @@ describe("createFastXmlZwiftWriter", () => {
           zwift: {},
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1678,7 +1646,6 @@ describe("createFastXmlZwiftWriter", () => {
           zwift: {},
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1719,7 +1686,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],
@@ -1755,7 +1721,6 @@ describe("createFastXmlZwiftWriter", () => {
           },
         },
       };
-
       const mockValidator = vi.fn<ZwiftValidator>().mockResolvedValue({
         valid: true,
         errors: [],

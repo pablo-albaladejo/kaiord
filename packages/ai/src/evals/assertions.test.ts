@@ -50,10 +50,13 @@ const baseBenchmark: Benchmark = {
 
 describe("evaluateBenchmark", () => {
   it("should pass when workout meets all criteria", () => {
+    // Arrange
     const workout = createWorkout();
 
+    // Act
     const result = evaluateBenchmark(baseBenchmark, workout, 1500);
 
+    // Assert
     expect(result.pass).toBe(true);
     expect(result.errors).toHaveLength(0);
     expect(result.id).toBe("cycling-en-001");
@@ -63,10 +66,13 @@ describe("evaluateBenchmark", () => {
   });
 
   it("should fail when sport does not match expected", () => {
+    // Arrange
     const workout = createWorkout({ sport: "running" });
 
+    // Act
     const result = evaluateBenchmark(baseBenchmark, workout, 1000);
 
+    // Assert
     expect(result.pass).toBe(false);
     expect(result.errors).toContain(
       "Sport mismatch: expected cycling, got running"
@@ -74,26 +80,33 @@ describe("evaluateBenchmark", () => {
   });
 
   it("should fail when step count is below minimum", () => {
+    // Arrange
     const benchmark: Benchmark = { ...baseBenchmark, minSteps: 5 };
     const workout = createWorkout();
 
+    // Act
     const result = evaluateBenchmark(benchmark, workout, 1000);
 
+    // Assert
     expect(result.pass).toBe(false);
     expect(result.errors.some((e) => e.includes("Too few steps"))).toBe(true);
   });
 
   it("should fail when step count exceeds maximum", () => {
+    // Arrange
     const benchmark: Benchmark = { ...baseBenchmark, maxSteps: 2 };
     const workout = createWorkout();
 
+    // Act
     const result = evaluateBenchmark(benchmark, workout, 1000);
 
+    // Assert
     expect(result.pass).toBe(false);
     expect(result.errors.some((e) => e.includes("Too many steps"))).toBe(true);
   });
 
   it("should count repeat block steps correctly", () => {
+    // Arrange
     const workout = createWorkout({
       steps: [
         {
@@ -122,35 +135,42 @@ describe("evaluateBenchmark", () => {
       ],
     });
 
+    // Act
     const result = evaluateBenchmark(
       { ...baseBenchmark, minSteps: 3, maxSteps: 3 },
       workout,
       1000
     );
 
-    // 1 repeat block + 2 inner steps = 3
+    // Assert
     expect(result.stepCount).toBe(3);
     expect(result.pass).toBe(true);
   });
 
   it("should fail with schema validation error for invalid workout", () => {
+    // Arrange
     const invalidWorkout = { name: "Bad" } as unknown as Workout;
 
+    // Act
     const result = evaluateBenchmark(baseBenchmark, invalidWorkout, 500);
 
+    // Assert
     expect(result.pass).toBe(false);
     expect(result.errors[0]).toContain("Schema validation failed");
   });
 
   it("should pass when no expectedSport is set", () => {
+    // Arrange
     const benchmark: Benchmark = {
       ...baseBenchmark,
       expectedSport: undefined,
     };
     const workout = createWorkout({ sport: "running" });
 
+    // Act
     const result = evaluateBenchmark(benchmark, workout, 1000);
 
+    // Assert
     expect(result.errors.every((e) => !e.includes("Sport mismatch"))).toBe(
       true
     );
@@ -158,6 +178,7 @@ describe("evaluateBenchmark", () => {
 
   describe("zone checks", () => {
     it("should fail when target min is below expected minValue with 5% tolerance", () => {
+      // Arrange
       const benchmark: Benchmark = {
         ...baseBenchmark,
         zoneCheck: {
@@ -167,17 +188,16 @@ describe("evaluateBenchmark", () => {
       };
       const workout = createWorkout();
 
+      // Act
       const result = evaluateBenchmark(benchmark, workout, 1000);
 
-      // The step has target.value = { unit: "range", min: 200, max: 250 }
-      // checkZones accesses target as Record<string, unknown>
-      // target.value = { unit: "range", min: 200, max: 250 }
-      // min = value.min = 200, minValue * 0.95 = 209, 200 < 209 -> error
+      // Assert
       expect(result.pass).toBe(false);
       expect(result.errors.some((e) => e.includes("Zone low"))).toBe(true);
     });
 
     it("should fail when target max exceeds expected maxValue with 5% tolerance", () => {
+      // Arrange
       const benchmark: Benchmark = {
         ...baseBenchmark,
         zoneCheck: {
@@ -187,14 +207,16 @@ describe("evaluateBenchmark", () => {
       };
       const workout = createWorkout();
 
+      // Act
       const result = evaluateBenchmark(benchmark, workout, 1000);
 
-      // max = value.max = 250, maxValue * 1.05 = 241.5, 250 > 241.5 -> error
+      // Assert
       expect(result.pass).toBe(false);
       expect(result.errors.some((e) => e.includes("Zone high"))).toBe(true);
     });
 
     it("should pass when target values are within tolerance", () => {
+      // Arrange
       const benchmark: Benchmark = {
         ...baseBenchmark,
         zoneCheck: {
@@ -205,12 +227,15 @@ describe("evaluateBenchmark", () => {
       };
       const workout = createWorkout();
 
+      // Act
       const result = evaluateBenchmark(benchmark, workout, 1000);
 
+      // Assert
       expect(result.errors.filter((e) => e.includes("Zone"))).toHaveLength(0);
     });
 
     it("should skip zone check when no active steps match targetType", () => {
+      // Arrange
       const benchmark: Benchmark = {
         ...baseBenchmark,
         zoneCheck: {
@@ -220,8 +245,10 @@ describe("evaluateBenchmark", () => {
       };
       const workout = createWorkout();
 
+      // Act
       const result = evaluateBenchmark(benchmark, workout, 1000);
 
+      // Assert
       expect(result.errors.filter((e) => e.includes("Zone"))).toHaveLength(0);
     });
   });

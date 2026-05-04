@@ -351,6 +351,10 @@ describe("createToleranceChecker", () => {
 
   describe("DEFAULT_TOLERANCES", () => {
     it("should have correct default values", () => {
+      // Arrange
+
+      // Act
+
       // Assert
       expect(DEFAULT_TOLERANCES).toStrictEqual({
         timeTolerance: 1,

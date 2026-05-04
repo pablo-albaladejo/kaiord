@@ -21,36 +21,44 @@ describe("kaiord_extract_workout", () => {
   });
 
   it("should extract workout from KRD content", async () => {
+    // Arrange
     const client = await createTestClient();
     const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
-
     const result = (await client.callTool({
       name: "kaiord_extract_workout",
       arguments: { input_content: krdJson, input_format: "krd" },
     })) as McpToolResult;
 
+    // Act
     const workout = JSON.parse(result.content[0].text);
+
+    // Assert
     expect(workout).toHaveProperty("steps");
   });
 
   it("should extract workout from KRD file", async () => {
+    // Arrange
     const client = await createTestClient();
     const krdJson = loadKrdFixtureRaw("WorkoutIndividualSteps.krd");
     const filePath = join(tmpDir, "workout.krd");
     await writeFile(filePath, krdJson);
-
     const result = (await client.callTool({
       name: "kaiord_extract_workout",
       arguments: { input_file: filePath },
     })) as McpToolResult;
 
+    // Act
     const workout = JSON.parse(result.content[0].text);
+
+    // Assert
     expect(workout).toHaveProperty("steps");
   });
 
   it("should return error when both input_file and input_content provided", async () => {
+    // Arrange
     const client = await createTestClient();
 
+    // Act
     const result = (await client.callTool({
       name: "kaiord_extract_workout",
       arguments: {
@@ -60,6 +68,7 @@ describe("kaiord_extract_workout", () => {
       },
     })) as McpToolResult;
 
+    // Assert
     expect(result.isError).toBe(true);
   });
 });

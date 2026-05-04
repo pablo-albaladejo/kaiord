@@ -12,6 +12,7 @@ const createMockLogger = (): Logger => ({
 
 describe("convertTcxToKRD", () => {
   it("should convert a minimal TCX workout to KRD", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxData = {
       TrainingCenterDatabase: {
@@ -30,8 +31,10 @@ describe("convertTcxToKRD", () => {
       },
     };
 
+    // Act
     const result = convertTcxToKRD(tcxData, logger);
 
+    // Assert
     expect(result.version).toBe("1.0");
     expect(result.type).toBe("structured_workout");
     expect(result.metadata.sport).toBe("running");
@@ -39,6 +42,7 @@ describe("convertTcxToKRD", () => {
   });
 
   it("should extract kaiord metadata from TrainingCenterDatabase", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxData = {
       TrainingCenterDatabase: {
@@ -56,8 +60,10 @@ describe("convertTcxToKRD", () => {
       },
     };
 
+    // Act
     const result = convertTcxToKRD(tcxData, logger);
 
+    // Assert
     expect(result.metadata.created).toBe("2024-01-15T10:00:00Z");
     expect(result.metadata.manufacturer).toBe("Garmin");
     expect(result.metadata.product).toBe("Edge 1040");
@@ -65,17 +71,22 @@ describe("convertTcxToKRD", () => {
   });
 
   it("should throw when no workouts found", () => {
+    // Arrange
     const logger = createMockLogger();
+
+    // Act
     const tcxData = {
       TrainingCenterDatabase: {},
     };
 
+    // Assert
     expect(() => convertTcxToKRD(tcxData, logger)).toThrow(
       "No workouts found in TCX file"
     );
   });
 
   it("should handle workout array and use first workout", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxData = {
       TrainingCenterDatabase: {
@@ -95,15 +106,18 @@ describe("convertTcxToKRD", () => {
         },
       },
     };
-
     const result = convertTcxToKRD(tcxData, logger);
-
     expect(result.metadata.sport).toBe("running");
+
+    // Act
     const workout = result.extensions?.structured_workout as { name: string };
+
+    // Assert
     expect(workout.name).toBe("First Workout");
   });
 
   it("should preserve TCX extensions from TrainingCenterDatabase", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxData = {
       TrainingCenterDatabase: {
@@ -120,14 +134,17 @@ describe("convertTcxToKRD", () => {
       },
     };
 
+    // Act
     const result = convertTcxToKRD(tcxData, logger);
 
+    // Assert
     expect(result.extensions?.tcx).toStrictEqual({
       CustomData: "test_value",
     });
   });
 
   it("should not include tcx extensions when not present", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxData = {
       TrainingCenterDatabase: {
@@ -141,12 +158,15 @@ describe("convertTcxToKRD", () => {
       },
     };
 
+    // Act
     const result = convertTcxToKRD(tcxData, logger);
 
+    // Assert
     expect(result.extensions?.tcx).toBeUndefined();
   });
 
   it("should log debug messages during conversion", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxData = {
       TrainingCenterDatabase: {
@@ -160,8 +180,10 @@ describe("convertTcxToKRD", () => {
       },
     };
 
+    // Act
     convertTcxToKRD(tcxData, logger);
 
+    // Assert
     expect(logger.debug).toHaveBeenCalledWith("Converting TCX to KRD");
     expect(logger.debug).toHaveBeenCalledWith("TCX to KRD conversion complete");
   });

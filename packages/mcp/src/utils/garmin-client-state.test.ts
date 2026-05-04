@@ -31,22 +31,28 @@ describe("garmin-client-state", () => {
   });
 
   it("should create a singleton client", () => {
+    // Arrange
     const logger = createMockLogger();
-
     const client1 = getGarminClient(logger);
+
+    // Act
     const client2 = getGarminClient(logger);
 
+    // Assert
     expect(client1).toBe(client2);
     expect(createGarminConnectClient).toHaveBeenCalledTimes(1);
   });
 
   it("should create new client after reset", () => {
+    // Arrange
     const logger = createMockLogger();
-
     const client1 = getGarminClient(logger);
     resetGarminClient();
+
+    // Act
     const client2 = getGarminClient(logger);
 
+    // Assert
     expect(client1).not.toBe(client2);
     expect(createGarminConnectClient).toHaveBeenCalledTimes(2);
   });

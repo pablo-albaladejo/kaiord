@@ -8,30 +8,44 @@ import {
 
 describe("semicirclesToDegrees", () => {
   it("should convert 0 semicircles to 0 degrees", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(semicirclesToDegrees(0)).toBe(0);
   });
 
   it("should convert positive semicircles to positive degrees", () => {
-    // 2^31 semicircles = 180 degrees
+    // Arrange
+
+    // Act
     const maxSemicircles = Math.pow(2, 31);
 
+    // Assert
     expect(semicirclesToDegrees(maxSemicircles)).toBeCloseTo(180, 6);
   });
 
   it("should convert negative semicircles to negative degrees", () => {
+    // Arrange
+
+    // Act
     const minSemicircles = -Math.pow(2, 31);
 
+    // Assert
     expect(semicirclesToDegrees(minSemicircles)).toBeCloseTo(-180, 6);
   });
 
   it("should convert real GPS coordinates correctly", () => {
-    // Barcelona: 41.3851° N, 2.1734° E
-    // Calculate semicircles from degrees for test
+    // Arrange
     const barcelonaLat = 41.3851;
     const barcelonaLon = 2.1734;
     const barcelonaLatSemi = degreesToSemicircles(barcelonaLat);
+
+    // Act
     const barcelonaLonSemi = degreesToSemicircles(barcelonaLon);
 
+    // Assert
     expect(semicirclesToDegrees(barcelonaLatSemi)).toBeCloseTo(barcelonaLat, 5);
     expect(semicirclesToDegrees(barcelonaLonSemi)).toBeCloseTo(barcelonaLon, 5);
   });
@@ -39,30 +53,50 @@ describe("semicirclesToDegrees", () => {
 
 describe("degreesToSemicircles", () => {
   it("should convert 0 degrees to 0 semicircles", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(degreesToSemicircles(0)).toBe(0);
   });
 
   it("should convert 180 degrees to max semicircles", () => {
+    // Arrange
+
+    // Act
     const maxSemicircles = Math.pow(2, 31);
 
+    // Assert
     expect(degreesToSemicircles(180)).toBe(maxSemicircles);
   });
 
   it("should convert -180 degrees to min semicircles", () => {
+    // Arrange
+
+    // Act
     const minSemicircles = -Math.pow(2, 31);
 
+    // Assert
     expect(degreesToSemicircles(-180)).toBe(minSemicircles);
   });
 
   it("should round to integer", () => {
+    // Arrange
+
+    // Act
     const result = degreesToSemicircles(41.3851);
 
+    // Assert
     expect(Number.isInteger(result)).toBe(true);
   });
 });
 
 describe("round-trip conversion", () => {
   it("should preserve precision within 6 decimal places", () => {
+    // Arrange
+
+    // Act
     const coordinates = [
       { lat: 41.385064, lon: 2.173404 }, // Barcelona
       { lat: 40.416775, lon: -3.70379 }, // Madrid
@@ -71,16 +105,14 @@ describe("round-trip conversion", () => {
       { lat: 35.689487, lon: 139.691711 }, // Tokyo
     ];
 
+    // Assert
     coordinates.forEach(({ lat, lon }) => {
-      // Arrange
       const latSemi = degreesToSemicircles(lat);
       const lonSemi = degreesToSemicircles(lon);
 
-      // Act
       const resultLat = semicirclesToDegrees(latSemi);
       const resultLon = semicirclesToDegrees(lonSemi);
 
-      // Assert - precision within 6 decimal places
       expect(resultLat).toBeCloseTo(lat, 6);
       expect(resultLon).toBeCloseTo(lon, 6);
     });
@@ -89,24 +121,28 @@ describe("round-trip conversion", () => {
 
 describe("validateCoordinates", () => {
   it("should return true for valid coordinates", () => {
+    // Arrange
     const latSemi = degreesToSemicircles(41.3851);
+
+    // Act
     const lonSemi = degreesToSemicircles(2.1734);
 
+    // Assert
     expect(validateCoordinates(latSemi, lonSemi)).toBe(true);
   });
 
   it("should return true for edge case coordinates", () => {
-    // North Pole
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(
       validateCoordinates(degreesToSemicircles(90), degreesToSemicircles(0))
     ).toBe(true);
-
-    // South Pole
     expect(
       validateCoordinates(degreesToSemicircles(-90), degreesToSemicircles(0))
     ).toBe(true);
-
-    // International Date Line
     expect(
       validateCoordinates(degreesToSemicircles(0), degreesToSemicircles(180))
     ).toBe(true);
@@ -116,27 +152,43 @@ describe("validateCoordinates", () => {
   });
 
   it("should return false for NaN", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(validateCoordinates(NaN, 0)).toBe(false);
     expect(validateCoordinates(0, NaN)).toBe(false);
     expect(validateCoordinates(NaN, NaN)).toBe(false);
   });
 
   it("should return false for Infinity", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(validateCoordinates(Infinity, 0)).toBe(false);
     expect(validateCoordinates(0, -Infinity)).toBe(false);
   });
 
   it("should return false for out-of-range latitude", () => {
-    // Latitude > 90°
+    // Arrange
+
+    // Act
     const invalidLatSemi = degreesToSemicircles(91);
 
+    // Assert
     expect(validateCoordinates(invalidLatSemi, 0)).toBe(false);
   });
 
   it("should return false for out-of-range longitude", () => {
-    // Longitude > 180°
+    // Arrange
+
+    // Act
     const invalidLonSemi = degreesToSemicircles(181);
 
+    // Assert
     expect(validateCoordinates(0, invalidLonSemi)).toBe(false);
   });
 });

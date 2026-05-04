@@ -18,8 +18,6 @@ describe("diff command integration", () => {
     async () => {
       // Arrange
       const fixturePath = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
-
-      // Act
       const { stdout, exitCode } = await execa("node", [
         CLI_PATH,
         "diff",
@@ -28,10 +26,12 @@ describe("diff command integration", () => {
         "--file2",
         fixturePath,
       ]);
+      expect(exitCode).toBe(0);
+
+      // Act
+      const output = stripAnsi(stdout);
 
       // Assert
-      expect(exitCode).toBe(0);
-      const output = stripAnsi(stdout);
       expect(output).toContain("Files are identical");
     },
     INTEGRATION_TIMEOUT
@@ -43,23 +43,22 @@ describe("diff command integration", () => {
       // Arrange
       const file1 = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
       const file2 = join(FIXTURES_PATH, "fit/WorkoutRepeatSteps.fit");
-
-      // Act - use reject: false to capture non-zero exit codes
       const { stdout, stderr, exitCode } = await execa(
         "node",
         [CLI_PATH, "diff", "--file1", file1, "--file2", file2],
         { reject: false }
       );
-
-      // Assert
-      // Exit code 0 = identical, 10 = differences found (not an error)
       if (![ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND].includes(exitCode)) {
         console.error("Unexpected exit code", { exitCode, stderr, stdout });
       }
       expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(
         exitCode
       );
+
+      // Act
       const output = stripAnsi(stdout);
+
+      // Assert
       expect(output).toBeTruthy();
     },
     INTEGRATION_TIMEOUT
@@ -70,8 +69,6 @@ describe("diff command integration", () => {
     async () => {
       // Arrange
       const fixturePath = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
-
-      // Act
       const { stdout, exitCode } = await execa("node", [
         CLI_PATH,
         "diff",
@@ -81,10 +78,12 @@ describe("diff command integration", () => {
         fixturePath,
         "--json",
       ]);
+      expect(exitCode).toBe(0);
+
+      // Act
+      const result = JSON.parse(stdout);
 
       // Assert
-      expect(exitCode).toBe(0);
-      const result = JSON.parse(stdout);
       expect(result).toHaveProperty("success", true);
       expect(result).toHaveProperty("identical", true);
       expect(result).toHaveProperty("file1");
@@ -98,9 +97,11 @@ describe("diff command integration", () => {
     async () => {
       // Arrange
       const validFile = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
+
+      // Act
       const missingFile = join(FIXTURES_PATH, "nonexistent.fit");
 
-      // Act & Assert
+      // Assert
       await expect(
         execa("node", [
           CLI_PATH,
@@ -120,8 +121,6 @@ describe("diff command integration", () => {
     async () => {
       // Arrange
       const fixturePath = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
-
-      // Act
       const { stdout, exitCode } = await execa("node", [
         CLI_PATH,
         "diff",
@@ -134,10 +133,12 @@ describe("diff command integration", () => {
         "--format2",
         "fit",
       ]);
+      expect(exitCode).toBe(0);
+
+      // Act
+      const output = stripAnsi(stdout);
 
       // Assert
-      expect(exitCode).toBe(0);
-      const output = stripAnsi(stdout);
       expect(output).toContain("Files are identical");
     },
     INTEGRATION_TIMEOUT
@@ -149,24 +150,22 @@ describe("diff command integration", () => {
       // Arrange
       const fitFile = join(FIXTURES_PATH, "fit/WorkoutIndividualSteps.fit");
       const krdFile = join(FIXTURES_PATH, "krd/WorkoutIndividualSteps.krd");
-
-      // Act - use reject: false to capture non-zero exit codes
       const { stdout, stderr, exitCode } = await execa(
         "node",
         [CLI_PATH, "diff", "--file1", fitFile, "--file2", krdFile],
         { reject: false }
       );
-
-      // Assert
-      // Exit code 0 = identical, 10 = differences found (not an error)
-      // Log stderr for debugging flaky CI failures (exit code 1 under load)
       if (![ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND].includes(exitCode)) {
         console.error("Unexpected exit code", { exitCode, stderr, stdout });
       }
       expect([ExitCode.SUCCESS, ExitCode.DIFFERENCES_FOUND]).toContain(
         exitCode
       );
+
+      // Act
       const output = stripAnsi(stdout);
+
+      // Assert
       expect(output).toBeTruthy();
     },
     INTEGRATION_TIMEOUT

@@ -12,6 +12,7 @@ const createMockLogger = (): Logger => ({
 
 describe("convertTcxStep", () => {
   it("should convert a basic TCX step with time duration and open target", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxStep = {
       "@_xsi:type": "Step_t",
@@ -26,8 +27,10 @@ describe("convertTcxStep", () => {
       Intensity: "Warmup",
     };
 
+    // Act
     const result = convertTcxStep(tcxStep, 0, logger);
 
+    // Assert
     expect(result).not.toBeNull();
     expect(result?.stepIndex).toBe(0);
     expect(result?.name).toBe("Warm Up");
@@ -37,6 +40,7 @@ describe("convertTcxStep", () => {
   });
 
   it("should convert step with distance duration", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxStep = {
       "@_xsi:type": "Step_t",
@@ -50,13 +54,16 @@ describe("convertTcxStep", () => {
       Intensity: "Active",
     };
 
+    // Act
     const result = convertTcxStep(tcxStep, 1, logger);
 
+    // Assert
     expect(result).not.toBeNull();
     expect(result?.duration).toStrictEqual({ type: "distance", meters: 1000 });
   });
 
   it("should convert step with heart rate target", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxStep = {
       "@_xsi:type": "Step_t",
@@ -74,8 +81,10 @@ describe("convertTcxStep", () => {
       Intensity: "Active",
     };
 
+    // Act
     const result = convertTcxStep(tcxStep, 0, logger);
 
+    // Assert
     expect(result).not.toBeNull();
     expect(result?.target).toStrictEqual({
       type: "heart_rate",
@@ -84,14 +93,17 @@ describe("convertTcxStep", () => {
   });
 
   it("should return null for Repeat_t step type", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxStep = {
       "@_xsi:type": "Repeat_t",
       Repetitions: 3,
     };
 
+    // Act
     const result = convertTcxStep(tcxStep, 0, logger);
 
+    // Assert
     expect(result).toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
       "Repetition blocks not yet supported",
@@ -100,14 +112,17 @@ describe("convertTcxStep", () => {
   });
 
   it("should return null when duration is missing", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxStep = {
       "@_xsi:type": "Step_t",
       Target: { "@_xsi:type": "None_t" },
     };
 
+    // Act
     const result = convertTcxStep(tcxStep, 0, logger);
 
+    // Assert
     expect(result).toBeNull();
     expect(logger.warn).toHaveBeenCalledWith(
       "Step has no valid duration, skipping",
@@ -116,6 +131,7 @@ describe("convertTcxStep", () => {
   });
 
   it("should extract extensions from step", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxStep = {
       "@_xsi:type": "Step_t",
@@ -132,8 +148,10 @@ describe("convertTcxStep", () => {
       },
     };
 
+    // Act
     const result = convertTcxStep(tcxStep, 0, logger);
 
+    // Assert
     expect(result).not.toBeNull();
     expect(result?.extensions).toStrictEqual({
       tcx: { TPX: { Watts: 250 } },
@@ -141,6 +159,7 @@ describe("convertTcxStep", () => {
   });
 
   it("should convert power from extensions to power target", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxStep = {
       "@_xsi:type": "Step_t",
@@ -157,8 +176,10 @@ describe("convertTcxStep", () => {
       },
     };
 
+    // Act
     const result = convertTcxStep(tcxStep, 0, logger);
 
+    // Assert
     expect(result).not.toBeNull();
     expect(result?.target).toStrictEqual({
       type: "power",
@@ -167,6 +188,7 @@ describe("convertTcxStep", () => {
   });
 
   it("should handle step without name", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxStep = {
       "@_xsi:type": "Step_t",
@@ -179,13 +201,16 @@ describe("convertTcxStep", () => {
       },
     };
 
+    // Act
     const result = convertTcxStep(tcxStep, 0, logger);
 
+    // Assert
     expect(result).not.toBeNull();
     expect(result?.name).toBeUndefined();
   });
 
   it("should handle step without extensions", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxStep = {
       "@_xsi:type": "Step_t",
@@ -198,13 +223,16 @@ describe("convertTcxStep", () => {
       },
     };
 
+    // Act
     const result = convertTcxStep(tcxStep, 0, logger);
 
+    // Assert
     expect(result).not.toBeNull();
     expect(result?.extensions).toBeUndefined();
   });
 
   it("should log debug message with step index", () => {
+    // Arrange
     const logger = createMockLogger();
     const tcxStep = {
       "@_xsi:type": "Step_t",
@@ -217,8 +245,10 @@ describe("convertTcxStep", () => {
       },
     };
 
+    // Act
     convertTcxStep(tcxStep, 5, logger);
 
+    // Assert
     expect(logger.debug).toHaveBeenCalledWith("Converting TCX step", {
       stepIndex: 5,
     });

@@ -5,6 +5,9 @@ import { isRepetitionBlock } from "./type-guards";
 
 describe("isRepetitionBlock", () => {
   it("should return true for a valid RepetitionBlock", () => {
+    // Arrange
+
+    // Act
     const block: RepetitionBlock = {
       repeatCount: 3,
       steps: [
@@ -18,10 +21,14 @@ describe("isRepetitionBlock", () => {
       ],
     };
 
+    // Assert
     expect(isRepetitionBlock(block)).toBe(true);
   });
 
   it("should return false for a WorkoutStep", () => {
+    // Arrange
+
+    // Act
     const step: WorkoutStep = {
       stepIndex: 0,
       durationType: "time",
@@ -31,10 +38,12 @@ describe("isRepetitionBlock", () => {
       intensity: "warmup",
     };
 
+    // Assert
     expect(isRepetitionBlock(step)).toBe(false);
   });
 
   it("should work as a type-narrowing filter", () => {
+    // Arrange
     const step: WorkoutStep = {
       stepIndex: 0,
       durationType: "time",
@@ -46,10 +55,12 @@ describe("isRepetitionBlock", () => {
       repeatCount: 2,
       steps: [step],
     };
-
     const items: Array<WorkoutStep | RepetitionBlock> = [step, block, step];
+
+    // Act
     const blocks = items.filter(isRepetitionBlock);
 
+    // Assert
     expect(blocks).toHaveLength(1);
     expect(blocks[0].repeatCount).toBe(2);
   });

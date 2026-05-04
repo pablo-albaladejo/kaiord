@@ -4,16 +4,20 @@ import { createCloudflareAnalytics } from "./cloudflare-analytics";
 describe("createCloudflareAnalytics", () => {
   describe("when token is falsy", () => {
     it("should return noop on undefined token", () => {
-      // Arrange & Act
+      // Arrange
+
+      // Act
       const analytics = createCloudflareAnalytics(undefined);
 
-      // Assert — noop: no throw, no side effects
+      // Assert
       expect(() => analytics.pageView("/")).not.toThrow();
       expect(() => analytics.event("test")).not.toThrow();
     });
 
     it("should return noop on empty string token", () => {
-      // Arrange & Act
+      // Arrange
+
+      // Act
       const analytics = createCloudflareAnalytics("");
 
       // Assert
@@ -69,9 +73,11 @@ describe("createCloudflareAnalytics", () => {
     it("should not throw when beacon is absent", () => {
       // Arrange
       delete (window as unknown as Record<string, unknown>).cfBeacon;
+
+      // Act
       const analytics = createCloudflareAnalytics("test-token");
 
-      // Act & Assert
+      // Assert
       expect(() => analytics.event("editor-opened")).not.toThrow();
     });
 
@@ -80,9 +86,11 @@ describe("createCloudflareAnalytics", () => {
       pushEvent.mockImplementation(() => {
         throw new Error("beacon error");
       });
+
+      // Act
       const analytics = createCloudflareAnalytics("test-token");
 
-      // Act & Assert
+      // Assert
       expect(() =>
         analytics.event("garmin-synced", { result: "success" })
       ).not.toThrow();

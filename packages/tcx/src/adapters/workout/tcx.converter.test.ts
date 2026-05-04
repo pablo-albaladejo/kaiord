@@ -38,13 +38,16 @@ const createMinimalKrd = (overrides: Partial<KRD> = {}): KRD => ({
 
 describe("convertKRDToTcx", () => {
   it("should convert minimal KRD to TCX structure", () => {
+    // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd();
-
     const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
-
     expect(result.TrainingCenterDatabase).toBeDefined();
+
+    // Act
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
+
+    // Assert
     expect(tcd["@_xmlns"]).toBe(
       "http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2"
     );
@@ -55,18 +58,22 @@ describe("convertKRDToTcx", () => {
   });
 
   it("should include Workouts with proper sport", () => {
+    // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd();
-
     const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
     const workouts = tcd.Workouts as Record<string, unknown>;
+
+    // Act
     const workout = workouts.Workout as Record<string, unknown>;
 
+    // Assert
     expect(workout["@_Sport"]).toBe("Biking");
   });
 
   it("should map running sport to Running", () => {
+    // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd({
       metadata: { created: "2024-01-15T10:00:00Z", sport: "running" },
@@ -78,17 +85,22 @@ describe("convertKRDToTcx", () => {
         },
       },
     });
-
     const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
     const workouts = tcd.Workouts as Record<string, unknown>;
+
+    // Act
     const workout = workouts.Workout as Record<string, unknown>;
 
+    // Assert
     expect(workout["@_Sport"]).toBe("Running");
   });
 
   it("should throw when KRD has no structured_workout", () => {
+    // Arrange
     const logger = createMockLogger();
+
+    // Act
     const krd: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -96,12 +108,14 @@ describe("convertKRDToTcx", () => {
       extensions: {},
     };
 
+    // Assert
     expect(() => convertKRDToTcx(krd, logger)).toThrow(
       "KRD does not contain workout data in extensions"
     );
   });
 
   it("should add kaiord metadata to TrainingCenterDatabase", () => {
+    // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd({
       metadata: {
@@ -112,10 +126,12 @@ describe("convertKRDToTcx", () => {
         serialNumber: "ABC123",
       },
     });
-
     const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
+
+    // Act
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
 
+    // Assert
     expect(tcd["@_kaiord:timeCreated"]).toBe("2024-01-15T10:00:00Z");
     expect(tcd["@_kaiord:manufacturer"]).toBe("Garmin");
     expect(tcd["@_kaiord:product"]).toBe("Edge 1040");
@@ -123,6 +139,7 @@ describe("convertKRDToTcx", () => {
   });
 
   it("should restore TCX extensions from KRD", () => {
+    // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd({
       extensions: {
@@ -134,14 +151,17 @@ describe("convertKRDToTcx", () => {
         tcx: { CustomField: "custom_value" },
       },
     });
-
     const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
+
+    // Act
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
 
+    // Assert
     expect(tcd.Extensions).toStrictEqual({ CustomField: "custom_value" });
   });
 
   it("should restore workout-level TCX extensions", () => {
+    // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd({
       extensions: {
@@ -155,26 +175,32 @@ describe("convertKRDToTcx", () => {
         },
       },
     });
-
     const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
     const workouts = tcd.Workouts as Record<string, unknown>;
+
+    // Act
     const workout = workouts.Workout as Record<string, unknown>;
 
+    // Assert
     expect(workout.Extensions).toStrictEqual({ WorkoutCustom: "value" });
   });
 
   it("should not include Extensions when not present", () => {
+    // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd();
-
     const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
+
+    // Act
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
 
+    // Assert
     expect(tcd.Extensions).toBeUndefined();
   });
 
   it("should convert steps with correct StepId", () => {
+    // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd({
       extensions: {
@@ -202,24 +228,29 @@ describe("convertKRDToTcx", () => {
         },
       },
     });
-
     const result = convertKRDToTcx(krd, logger) as Record<string, unknown>;
     const tcd = result.TrainingCenterDatabase as Record<string, unknown>;
     const workouts = tcd.Workouts as Record<string, unknown>;
     const workout = workouts.Workout as Record<string, unknown>;
+
+    // Act
     const steps = workout.Step as Array<Record<string, unknown>>;
 
+    // Assert
     expect(steps).toHaveLength(2);
     expect(steps[0].StepId).toBe(1);
     expect(steps[1].StepId).toBe(2);
   });
 
   it("should log debug messages during conversion", () => {
+    // Arrange
     const logger = createMockLogger();
     const krd = createMinimalKrd();
 
+    // Act
     convertKRDToTcx(krd, logger);
 
+    // Assert
     expect(logger.debug).toHaveBeenCalledWith(
       "Converting KRD to TCX structure"
     );

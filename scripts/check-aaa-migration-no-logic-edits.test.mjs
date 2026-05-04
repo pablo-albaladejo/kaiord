@@ -157,3 +157,31 @@ test("getBaseRef defaults to origin/main when neither flag nor env set", () => {
   // Assert
   assert.equal(base, "origin/main");
 });
+
+test("compareSources handles template literals with `${}` substitutions across comment-only edits", () => {
+  // Arrange — regression: a naive scanner without `reScanTemplateToken`
+  // misinterprets the closing `}` of `${X}` as a regular brace and then
+  // treats the rest of the file (until the next backtick) as one giant
+  // template literal. AST-driven tokenization avoids this trap.
+  const base = `it("should X", () => {
+  const url = \`\${BASE}/api\`;
+  const result = await fetch(url);
+  expect(result.ok).toBe(true);
+});`;
+  const head = `it("should X", () => {
+  // Arrange
+  const url = \`\${BASE}/api\`;
+
+  // Act
+  const result = await fetch(url);
+
+  // Assert
+  expect(result.ok).toBe(true);
+});`;
+
+  // Act
+  const result = compareSources(base, head);
+
+  // Assert
+  assert.equal(result.equal, true);
+});

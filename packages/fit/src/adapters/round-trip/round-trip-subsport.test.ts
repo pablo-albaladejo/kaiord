@@ -11,11 +11,7 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Manually set subSport for testing (since test files may not have it)
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -25,16 +21,15 @@ describe("Round-trip: Workout metadata - subSport field", () => {
       };
       workout.subSport = "trail";
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert - Check workout message has subSport
+    // Act
     const workoutMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(workoutMsg).toBeDefined();
     expect(workoutMsg?.subSport).toBe("trail");
   });
@@ -45,11 +40,11 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
 
-    // Test multiple subSport values
+    // Act
     const subSportValues = ["trail", "road", "track", "treadmill", "mountain"];
 
+    // Assert
     for (const subSport of subSportValues) {
-      // Act - FIT → KRD
       const krd = await reader(originalBuffer);
 
       // Set subSport
@@ -63,10 +58,8 @@ describe("Round-trip: Workout metadata - subSport field", () => {
         workout.subSport = subSport;
       }
 
-      // Act - KRD → FIT messages
       const messages = convertKRDToMessages(krd, logger);
 
-      // Assert
       const workoutMsg = messages.find(
         (msg: unknown) =>
           (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
@@ -81,11 +74,7 @@ describe("Round-trip: Workout metadata - subSport field", () => {
     const logger = createMockLogger();
     const reader = createGarminFitSdkReader(logger);
     const originalBuffer = loadFitFixture("WorkoutIndividualSteps.fit");
-
-    // Act - FIT → KRD
     const krd = await reader(originalBuffer);
-
-    // Ensure subSport is undefined
     if (krd.extensions?.structured_workout) {
       const workout = krd.extensions.structured_workout as {
         name?: string;
@@ -95,16 +84,15 @@ describe("Round-trip: Workout metadata - subSport field", () => {
       };
       workout.subSport = undefined;
     }
-
-    // Act - KRD → FIT messages
     const messages = convertKRDToMessages(krd, logger);
 
-    // Assert
+    // Act
     const workoutMsg = messages.find(
       (msg: unknown) =>
         (msg as { mesgNum?: number }).mesgNum === FIT_MESSAGE_NUMBERS.WORKOUT
     ) as { mesgNum: number; [key: string]: unknown } | undefined;
 
+    // Assert
     expect(workoutMsg)?.not.toHaveProperty("subSport");
   });
 });
