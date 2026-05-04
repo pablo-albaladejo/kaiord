@@ -34,6 +34,7 @@ FORBIDDEN_NESTED_PATHS = {
 ```
 
 **Comparison semantics (load-bearing for the spec↔test invariant):**
+
 - `FORBIDDEN_KEYS` is a **Set** — the spec↔test invariant compares set-equality (order-insensitive, duplicate-tolerant in source, unique in semantics).
 - Keys are **case-sensitive lowercase** (matches the DOM `name=` attribute); the test loader MUST NOT lowercase or normalize before comparing.
 - Whitespace in the spec's code block is ignored by the parser (the test loader strips lines and re-tokenizes).

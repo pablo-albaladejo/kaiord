@@ -53,6 +53,7 @@ PR independence:
   > After enabling Sync zones, the extension reads the following fields from your Train2Go user-details page (`https://app.train2go.com/user/details`): your training thresholds (FTP, LTHR per sport, threshold pace, CSS), the full Z1-Z5 zone tables for heart rate, power, and pace per configured sport, your maximum heart rate (`bpm_max`), your resting heart rate (`bpm_rest`), and your body weight. The extension never reads or transmits gender, birthday, body fat percentage, IMC, smoking status, body composition labels, coach contact details (email, name), records, tests, email, or user notes. All fields are read on-demand when you click "Sync zones" — the extension does not background-poll your Train2Go account.
 
   Verification: PR 1 diff against `tasks.md` §2.2 produces an exact match in `packages/train2go-bridge/store-listing.md`.
+
 - [ ] 2.3 Add a changeset entry: `@kaiord/train2go-bridge: minor`. Body summarises the new emitted fields per the proposal's "What Changes" list.
 
 ## 3. SPA — `ZonesPayload` type extension (implements D-FB2, D-FB5)
@@ -109,6 +110,7 @@ PR independence:
     - Reuse: if `packages/workout-spa-editor/src/test-utils/zod-walk.ts` already exists, use it. Otherwise add the helper there (export `zodWalk(schema): Set<string>`) so other tests can share it.
 
     The diff between pre-sync and post-sync profile MUST include only keys whose dotted path matches one of those derived paths. Rationale: a hardcoded whitelist drifts when the schema gains a new field (e.g., a hypothetical future `cycling.thresholds.criticalPower`); deriving it means schema additions either auto-extend the whitelist (legitimate) or fail noisily (forcing explicit review). Any other key surfacing in the diff MUST fail the test, including a hypothetical future `restingHeartRate`, `physiology.bpmRest`, or any other consumer derived from `bpmRest`. Flipping this assertion in a future PR is intentional (when a consumer is added).
+
   - 4.7q Power-zone count mismatch (T2G 5 vs Kaiord 7 default — per D-FB3): given the profile pre-sync has `sportZones.cycling.powerZones.zones = DEFAULT_POWER_ZONES.slice()` (i.e., 7 entries Z1-Z7 with default percentages), and the T2G payload provides full Z1-Z5 power bands with FTP=268, after `syncZones` the post-sync `sportZones.cycling.powerZones.zones` SHALL have exactly 5 entries (length === 5); the entries SHALL be Z1-Z5 derived from T2G's bands; Z6 and Z7 SHALL NOT be in the persisted array.
   - 4.7r Re-sync stability — HR bands: given a profile previously sync'd from T2G with HR bands persisted, re-running `syncZones` against the same T2G payload SHALL produce zero conflicts and zero applied entries for that sport's HR bands. Equality is integer bpm (no tolerance).
   - 4.7s Re-sync stability — pace bands: given a profile previously sync'd from T2G with running pace bands persisted, re-running `syncZones` against the same T2G payload SHALL produce zero conflicts and zero applied entries for `running.paceZones.*`. Equality is integer seconds (no tolerance).
@@ -117,6 +119,7 @@ PR independence:
     **Render helper location**: if a discrete pure function does NOT yet exist, extracting it is in scope of 4.7t. Suggested location: `packages/workout-spa-editor/src/lib/profile/zone-display-watts.ts` exporting `renderPowerZoneWatts(zone: PowerZone, ftp: number): { lowerW: number; upperW: number }`. The Profile Manager component (e.g., `PowerZonesTable.tsx`) imports this helper rather than inlining the multiplication.
 
     **Chunking**: 4.7t ships with **PR 2** if the helper lands in `src/lib/profile/` (application-layer pure function, naturally PR-2-aligned with the mapper writes). It ships with **PR 3** if the helper is co-located with the Profile Manager component (e.g., `src/components/.../zone-display-watts.ts`). The PR-2 path is preferred because the helper is a pure function and pulling it from the component is a clean split. The PR author SHALL pick at PR-2-write time and document the choice in the PR description; if the choice slips to PR 3, update the chunking comment at the top of tasks.md.
+
 - [ ] 4.8 Add changeset: `@kaiord/workout-spa-editor: minor`. Body summarises the mapper + conflict-policy extension.
 
 ## 5. SPA — UI: FieldKey label map + dialog tests (implements D-FB5)

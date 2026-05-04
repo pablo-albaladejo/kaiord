@@ -358,10 +358,22 @@ const extractMinSecPaces = (block, sportIdPattern) => {
   if (!sportSlice) return null;
   const out = {};
   for (const i of DOM_BAND_INDEXES) {
-    const lowerMin = extractInputValueByNameSuffix(sportSlice, `z${i}_lower][0]`);
-    const lowerSec = extractInputValueByNameSuffix(sportSlice, `z${i}_lower][1]`);
-    const upperMin = extractInputValueByNameSuffix(sportSlice, `z${i}_upper][0]`);
-    const upperSec = extractInputValueByNameSuffix(sportSlice, `z${i}_upper][1]`);
+    const lowerMin = extractInputValueByNameSuffix(
+      sportSlice,
+      `z${i}_lower][0]`
+    );
+    const lowerSec = extractInputValueByNameSuffix(
+      sportSlice,
+      `z${i}_lower][1]`
+    );
+    const upperMin = extractInputValueByNameSuffix(
+      sportSlice,
+      `z${i}_upper][0]`
+    );
+    const upperSec = extractInputValueByNameSuffix(
+      sportSlice,
+      `z${i}_upper][1]`
+    );
     if (
       typeof lowerMin === "number" &&
       typeof lowerSec === "number" &&
