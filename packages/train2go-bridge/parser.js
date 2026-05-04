@@ -227,27 +227,34 @@ const parsePingJson = (json) => {
  * fields are an explicit allowlist (defense in depth: the bridge's
  * ALLOWED grant lets the page itself be fetched, but downstream
  * consumers see only the fields below — gender, birthday, fat,
- * smoker, IMC, bpm_rest, user_notes, coach.email, coach.name, email,
- * records, tests are dropped at parse time).
+ * smoker, imc, user_notes, coach.email, coach.name, email, records,
+ * tests are dropped at parse time).
  *
  * The DOM uses 0-indexed `name=` attributes (e.g. `z3_upper` is the
  * upper bound of visual Z4). The parsed payload uses 1-indexed
- * camelCase keys (`z4Upper`). This mapping is the parser's contract
- * and is asserted by tests.
+ * camelCase keys (`z4.upper`, `z4Upper`). This mapping is the
+ * parser's contract and is asserted by tests.
  *
  * Returns:
  *   {
- *     physiological?: { weight?, bpmMax? },
+ *     physiological?: { weight?, bpmMax?, bpmRest? },
  *     paces?: {
- *       cycling?: { z4Upper?, z5Lower? },
- *       running?: { z4Upper? },
- *       swimming?: { z4Upper? },
+ *       cycling?: { z1..z5: { lower, upper }, z4Upper?, z5Lower? },
+ *       running?: { z1..z5: { lower:{min,sec}, upper:{min,sec} }, z4Upper? },
+ *       swimming?: { z1..z5: { lower:{min,sec}, upper:{min,sec} }, z4Upper? },
  *     },
  *     hrZones?: {
- *       cycling?: { z4Upper? },
- *       running?: { z4Upper? },
+ *       generic?:  { z1..z5: { lower, upper } },
+ *       cycling?:  { z1..z5: { lower, upper }, z4Upper? },
+ *       running?:  { z1..z5: { lower, upper }, z4Upper? },
+ *       swimming?: { z1..z5: { lower, upper }, z4Upper? },
  *     },
  *   }
+ *
+ * Naming pun: payload.paces.cycling carries WATTS (single integer
+ * per bound), not pace. T2G's HTML form is named `paces` for all
+ * three sports; we keep the name to mirror the form id. The semantic
+ * flip from "pace" → "power" happens in the SPA mapper, not here.
  */
 const parsePhysioBlock = (html) => {
   const block = sliceBetween(html, /id="physio-\d+"/, "</form>");
@@ -255,8 +262,10 @@ const parsePhysioBlock = (html) => {
   const out = {};
   const weight = extractInputValueAsNumber(block, "weight");
   const bpmMax = extractInputValueAsNumber(block, "bpm_max");
+  const bpmRest = extractInputValueAsNumber(block, "bpm_rest");
   if (typeof weight === "number") out.weight = weight;
   if (typeof bpmMax === "number") out.bpmMax = bpmMax;
+  if (typeof bpmRest === "number") out.bpmRest = bpmRest;
   return Object.keys(out).length > 0 ? out : null;
 };
 
@@ -274,16 +283,20 @@ const parsePacesBlock = (html) => {
 };
 
 const parseHrZonesBlock = (html) => {
-  // Per-sport HR zones — sport_id is implicit on the heart-rate-zone
-  // wrapper (heart-rate-zone-cycling / -running). Generic HR zone is
-  // intentionally NOT emitted; we only surface per-sport mappings.
+  // Per-sport HR zones plus the Generic Karvonen-derived block.
+  // sport_id is implicit on the heart-rate-zone wrapper
+  // (heart-rate-zone-{generic,cycling,running,swimming}). Each block
+  // is emitted ONLY when present in the upstream HTML — the SPA
+  // mapper applies a Specific → Generic → skip fallback per D-FB1.
   const block = sliceBetween(html, /id="hrzones-\d+"/, /<\/main>|<\/section>/);
   if (!block) return null;
   const out = {};
-  const cycling = extractHrZ4Upper(block, "cycling");
-  if (typeof cycling === "number") out.cycling = { z4Upper: cycling };
-  const running = extractHrZ4Upper(block, "running");
-  if (typeof running === "number") out.running = { z4Upper: running };
+  const generic = extractHrFullBands(block, "generic");
+  if (generic) out.generic = generic;
+  for (const sport of ["cycling", "running", "swimming"]) {
+    const bands = extractHrFullBands(block, sport);
+    if (bands) out[sport] = bands;
+  }
   return Object.keys(out).length > 0 ? out : null;
 };
 
@@ -328,14 +341,13 @@ const extractInputValueAsNumber = (block, name) => {
   return Number.isFinite(num) ? num : undefined;
 };
 
-// For each sport, the paces table has 5 measurement-blocks (Z1..Z5);
-// each block has lower/upper inputs split into [min, sec] pairs for
-// run/swim or a single integer (watts) for cycling.
-//
-// The form indexes them 0..4 (z0..z4); visual Z4 upper is `z3_upper`.
-const Z4_UPPER_MIN_NAME = "z3_upper][0]";
-const Z4_UPPER_SEC_NAME = "z3_upper][1]";
-const Z5_LOWER_MIN_NAME = "z4_lower][0]";
+// For each sport, the paces table has 5 measurement-blocks. The DOM
+// indexes them 0..4 (`z0_lower` .. `z4_upper`); visual Z1..Z5 maps
+// 1-indexed in the payload. Run/swim bands are `[min, sec]` pairs;
+// cycling bands are single watts integers.
+
+// The five DOM index names; payload key is `zN+1` (1-indexed).
+const DOM_BAND_INDEXES = [0, 1, 2, 3, 4];
 
 const extractMinSecPaces = (block, sportIdPattern) => {
   // Bound the slice to a single sport's <form>...</form> block so a
@@ -344,20 +356,84 @@ const extractMinSecPaces = (block, sportIdPattern) => {
   // assign the wrong threshold.
   const sportSlice = sliceWithinForm(block, sportIdPattern);
   if (!sportSlice) return null;
-  const min = extractInputValueByNameSuffix(sportSlice, Z4_UPPER_MIN_NAME);
-  const sec = extractInputValueByNameSuffix(sportSlice, Z4_UPPER_SEC_NAME);
-  if (typeof min !== "number" || typeof sec !== "number") return null;
-  return { z4Upper: { min, sec } };
+  const out = {};
+  for (const i of DOM_BAND_INDEXES) {
+    const lowerMin = extractInputValueByNameSuffix(
+      sportSlice,
+      `z${i}_lower][0]`
+    );
+    const lowerSec = extractInputValueByNameSuffix(
+      sportSlice,
+      `z${i}_lower][1]`
+    );
+    const upperMin = extractInputValueByNameSuffix(
+      sportSlice,
+      `z${i}_upper][0]`
+    );
+    const upperSec = extractInputValueByNameSuffix(
+      sportSlice,
+      `z${i}_upper][1]`
+    );
+    if (
+      typeof lowerMin === "number" &&
+      typeof lowerSec === "number" &&
+      typeof upperMin === "number" &&
+      typeof upperSec === "number"
+    ) {
+      out[`z${i + 1}`] = {
+        lower: { min: lowerMin, sec: lowerSec },
+        upper: { min: upperMin, sec: upperSec },
+      };
+    }
+  }
+  // Convenience scalar (visual Z4 upper, DOM z3_upper). When the z4
+  // band is complete, derive from `out.z4.upper` for consistency.
+  // When the band is partial (e.g., only z3_upper saved), fall back
+  // to direct DOM extraction so backwards-compat with older fixtures
+  // and partial coach configurations keeps working.
+  if (out.z4) {
+    out.z4Upper = out.z4.upper;
+  } else {
+    const directMin = extractInputValueByNameSuffix(sportSlice, `z3_upper][0]`);
+    const directSec = extractInputValueByNameSuffix(sportSlice, `z3_upper][1]`);
+    if (typeof directMin === "number" && typeof directSec === "number") {
+      out.z4Upper = { min: directMin, sec: directSec };
+    }
+  }
+  return Object.keys(out).length > 0 ? out : null;
 };
 
 const extractCyclingPaces = (block) => {
+  // Cycling pace block carries WATTS, not min:sec — single integer
+  // per bound. The naming pun (`paces.cycling` for watts) is
+  // intentional: T2G's HTML form id is shared across sports.
   const sportSlice = sliceWithinForm(block, /sport_id"[^>]+value="3"/);
   if (!sportSlice) return null;
-  const z4Upper = extractInputValueByNameSuffix(sportSlice, Z4_UPPER_MIN_NAME);
-  const z5Lower = extractInputValueByNameSuffix(sportSlice, Z5_LOWER_MIN_NAME);
   const out = {};
-  if (typeof z4Upper === "number") out.z4Upper = z4Upper;
-  if (typeof z5Lower === "number") out.z5Lower = z5Lower;
+  for (const i of DOM_BAND_INDEXES) {
+    const lower = extractInputValueByNameSuffix(sportSlice, `z${i}_lower][0]`);
+    const upper = extractInputValueByNameSuffix(sportSlice, `z${i}_upper][0]`);
+    if (typeof lower === "number" && typeof upper === "number") {
+      out[`z${i + 1}`] = { lower, upper };
+    }
+  }
+  // Convenience scalars: visual Z4 upper (DOM z3_upper) is FTP;
+  // visual Z5 lower (DOM z4_lower) is the FTP fallback per D5 of the
+  // original change. When the corresponding band is complete, derive
+  // from the band; otherwise fall back to direct DOM extraction so
+  // partially-configured forms still surface the threshold scalars.
+  if (out.z4) {
+    out.z4Upper = out.z4.upper;
+  } else {
+    const direct = extractInputValueByNameSuffix(sportSlice, `z3_upper][0]`);
+    if (typeof direct === "number") out.z4Upper = direct;
+  }
+  if (out.z5) {
+    out.z5Lower = out.z5.lower;
+  } else {
+    const direct = extractInputValueByNameSuffix(sportSlice, `z4_lower][0]`);
+    if (typeof direct === "number") out.z5Lower = direct;
+  }
   return Object.keys(out).length > 0 ? out : null;
 };
 
@@ -390,19 +466,45 @@ const extractInputValueByNameSuffix = (block, suffix) => {
 
 const escapeForRegex = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 
-const extractHrZ4Upper = (block, sport) => {
-  // The cycling/running blocks are wrapped in
-  // `heart-rate-zone heart-rate-zone-<sport>`. Slice that block,
-  // then read `name="z3_upper"` inside.
+const extractHrFullBands = (block, label) => {
+  // The HR zone blocks are wrapped in
+  // `heart-rate-zone heart-rate-zone-<label>` where <label> is one
+  // of: generic, cycling, running, swimming. Slice the matching
+  // wrapper, then read each `name="zN_lower"` / `name="zN_upper"`
+  // pair inside (DOM 0-indexed N=0..4 → payload 1-indexed Z1..Z5).
+  // Returns null when the wrapper is absent (the block is omitted).
   const wrapperRe = new RegExp(
-    `heart-rate-zone-${sport}[\\s\\S]*?(?=heart-rate-zone-(?!${sport})|<\\/section>|$)`,
+    `heart-rate-zone-${label}[\\s\\S]*?(?=heart-rate-zone-(?!${label})|<\\/section>|$)`,
     "i"
   );
   const m = block.match(wrapperRe);
-  if (!m) return undefined;
+  if (!m) return null;
   const sportBlock = m[0];
-  const valRe =
-    /\bname="z3_upper"[^>]*\bvalue="(\d+)"|\bvalue="(\d+)"[^>]*\bname="z3_upper"/i;
+  const out = {};
+  for (const i of DOM_BAND_INDEXES) {
+    const lower = extractHrBandValue(sportBlock, `z${i}_lower`);
+    const upper = extractHrBandValue(sportBlock, `z${i}_upper`);
+    if (typeof lower === "number" && typeof upper === "number") {
+      out[`z${i + 1}`] = { lower, upper };
+    }
+  }
+  // Convenience scalar (visual Z4 upper, DOM z3_upper). Derive from
+  // the band when complete; otherwise fall back to direct DOM
+  // extraction so partial blocks still surface LTHR.
+  if (out.z4) {
+    out.z4Upper = out.z4.upper;
+  } else {
+    const direct = extractHrBandValue(sportBlock, "z3_upper");
+    if (typeof direct === "number") out.z4Upper = direct;
+  }
+  return Object.keys(out).length > 0 ? out : null;
+};
+
+const extractHrBandValue = (sportBlock, name) => {
+  const valRe = new RegExp(
+    `\\bname="${name}"[^>]*\\bvalue="(\\d+)"|\\bvalue="(\\d+)"[^>]*\\bname="${name}"`,
+    "i"
+  );
   const v = sportBlock.match(valRe);
   if (!v) return undefined;
   const raw = v[1] ?? v[2];

@@ -17,7 +17,7 @@ Features:
 • Import individual workouts into the Kaiord editor
 • View coaching calendar with planned sessions
 • Automatic detection of workout types (running, cycling, swimming, strength)
-• Optional opt-in zones sync: pull your athlete thresholds (FTP, LTHR, threshold pace, CSS), maximum heart rate, and body weight directly from Train2Go into your Kaiord profile — defaults off, enabled per linked account in Profile Manager → Linked Accounts
+• Optional opt-in zones sync: pull your athlete thresholds (FTP, LTHR, threshold pace, CSS), the full Z1-Z5 zone tables for heart rate, power, and pace per configured sport, your maximum heart rate, your resting heart rate, and your body weight directly from Train2Go into your Kaiord profile — defaults off, enabled per linked account in Profile Manager → Linked Accounts
 
 How it works:
 
@@ -29,7 +29,7 @@ Privacy:
 • No data collection, no analytics, no telemetry
 • No passwords or tokens stored — reads from your existing browser session
 • Open source: https://github.com/pablo-albaladejo/kaiord
-• Zones-sync read scope: when you enable "Sync zones" on a linked Train2Go account, the extension reads from your Train2Go user-details page: training thresholds (FTP, LTHR, threshold pace, CSS), heart-rate maximum, and body weight. Other fields on that page (birthday, gender, body-fat percentage, body-mass index, smoker status, resting heart rate, coach contact details) are read by the page itself but are NOT extracted, transmitted, or persisted by Kaiord — they are dropped at parse time by an explicit field allowlist. Zones-sync is off by default.
+• Zones-sync read scope: when you enable "Sync zones" on a linked Train2Go account, the extension reads the following fields from your Train2Go user-details page (https://app.train2go.com/user/details): your training thresholds (FTP, LTHR per sport, threshold pace, CSS), the full Z1-Z5 zone tables for heart rate, power, and pace per configured sport, your maximum and resting heart rate, and your body weight. The extension never reads or transmits gender, birthday, body fat percentage, IMC (body-mass index), smoking status, body composition labels, coach contact details (email, name), records, tests, email, or user notes. All fields are read on-demand when you click "Sync zones" — the extension does not background-poll your Train2Go account. Zones-sync is off by default.
 
 ## Metadata
 
