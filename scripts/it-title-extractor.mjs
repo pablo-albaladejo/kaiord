@@ -41,12 +41,16 @@ const IT_CALL_DETECT_EACH_RE = /\bit\.each\s*\([\s\S]*?\]\s*\)\s*\(/g;
 // strips string-literal contents).
 export const IT_CALL_RE = /\bit\b(?:\.[a-z]+)?\s*\(/g;
 
-// Strip string and template literal contents (replacing with empty
-// strings of the same shape) so a literal like `"... it (something)"`
-// in a title doesn't get counted as an `it()`-call.
+// Strip comments AND string/template-literal contents so a literal
+// like `"... it (something)"`, `// it(...)`, or `/* it(...) */` in
+// source doesn't get counted as an `it()`-call.
 function stripStringLiteralContents(source) {
   return (
     source
+      // block comments
+      .replace(/\/\*[\s\S]*?\*\//g, "")
+      // line comments (preserve newlines for line-number stability)
+      .replace(/\/\/[^\n]*/g, "")
       // template literals (handles single-line and multi-line)
       .replace(/`(?:\\.|[^`\\])*`/g, "``")
       // double-quoted strings

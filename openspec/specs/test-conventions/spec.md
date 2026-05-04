@@ -32,7 +32,7 @@ Template literals with substitutions (e.g., ``it(`${prefix} renders X`)``) SHALL
 
 The ESLint rule `vitest/valid-title` from `@vitest/eslint-plugin` SHALL be configured with `mustMatch: { it: ['^should '] }` in the test-files block of `eslint.config.js`, providing IDE-time enforcement. The mechanical guard `scripts/check-test-title-should.mjs` SHALL be the source-of-truth enforcement, called by `pnpm test:scripts` (which is invoked by both husky `pre-commit` and the CI lint job). The guard SHALL exit non-zero (`process.exit(1)`) on violation. The stderr SHALL contain, for each violating call, exactly one line in the format:
 
-```
+```text
 <rule-id>: <repo-relative-path>:<line> — title "<actual title>" must start with "should ". Suggested rewrite: "should <suggested rewrite>".
 ```
 

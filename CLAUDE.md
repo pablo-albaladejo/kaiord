@@ -173,7 +173,7 @@ Rule: "Editor runtime -> Zustand. Persisted data -> Dexie. Local UI -> React sta
 
 Two structural invariants on every `*.test.{ts,tsx}` file under `packages/**`:
 
-1. **Title rule** (`R-ItTitleShould`) — every `it()`/`it.skip()`/`it.only()`/`it.each([...])(...)` title MUST start with the literal `should ` (case-sensitive lowercase). Aliases via AST shape (any `it[.<alias>]`); vitest substitution placeholders stripped before the prefix check.
+1. **Title rule** (`R-ItTitleShould`) — every `it()`/`it.skip()`/`it.only()`/`it.each([...])(...)` title MUST start with the literal seven characters `s`, `h`, `o`, `u`, `l`, `d`, space (case-sensitive lowercase). Aliases via AST shape (any `it[.<alias>]`); vitest substitution placeholders stripped before the prefix check.
 2. **AAA rule** (`R-ItBodyAAA`) — every `it()` body MUST contain canonical Pascal-case line comments `// Arrange`, `// Act`, `// Assert` (in that order, separated by blank lines). Multiple statements per section; empty sections allowed (the marker is required, the body can be empty).
 
 ```ts
