@@ -65,7 +65,13 @@ const wrap = (children: ReactNode) => (
 
 describe("LinkedAccountsSection", () => {
   it("should show Connect button when source is not linked", () => {
+    // Arrange
+
+    // Act
+
     render(wrap(<LinkedAccountsSection profile={makeProfile()} />));
+
+    // Assert
 
     expect(screen.getByText("Not connected")).toBeInTheDocument();
     expect(screen.getByText(/Connect Train2Go/)).toBeInTheDocument();
@@ -73,6 +79,10 @@ describe("LinkedAccountsSection", () => {
   });
 
   it("should show Disconnect button + externalUserName when source is linked", () => {
+    // Arrange
+
+    // Act
+
     render(
       wrap(
         <LinkedAccountsSection
@@ -80,6 +90,8 @@ describe("LinkedAccountsSection", () => {
         />
       )
     );
+
+    // Assert
 
     expect(screen.getByText("Pablo")).toBeInTheDocument();
     expect(screen.getByText("Disconnect")).toBeInTheDocument();
@@ -87,15 +99,26 @@ describe("LinkedAccountsSection", () => {
   });
 
   it("invokes useTrain2GoSource.connect with the row's profileId on click", async () => {
+    // Arrange
+
     render(wrap(<LinkedAccountsSection profile={makeProfile()} />));
 
+    // Act
+
     await userEvent.click(screen.getByText(/Connect Train2Go/));
+
+    // Assert
 
     expect(mockConnect).toHaveBeenCalledWith("p1");
   });
 
   it("should hide the Sync zones toggle when bridge does NOT advertise read:training-zones", () => {
+    // Arrange
+
     mockSupportsZones = false;
+
+    // Act
+
     render(
       wrap(
         <LinkedAccountsSection
@@ -103,6 +126,8 @@ describe("LinkedAccountsSection", () => {
         />
       )
     );
+
+    // Assert
 
     expect(
       screen.queryByTestId("sync-zones-toggle-train2go")
@@ -111,6 +136,10 @@ describe("LinkedAccountsSection", () => {
   });
 
   it("should render the Sync zones toggle when linked AND bridge advertises capability", () => {
+    // Arrange
+
+    // Act
+
     render(
       wrap(
         <LinkedAccountsSection
@@ -119,12 +148,16 @@ describe("LinkedAccountsSection", () => {
       )
     );
 
+    // Assert
+
     expect(
       screen.getByTestId("sync-zones-toggle-train2go")
     ).toBeInTheDocument();
   });
 
   it("should persist the toggle state to the profile when clicked", async () => {
+    // Arrange
+
     const persistence = createInMemoryPersistence();
     const profile = {
       ...makeProfile({ linkedAccounts: [T2G_LINK] }),
@@ -147,7 +180,12 @@ describe("LinkedAccountsSection", () => {
     ) as HTMLInputElement;
     await userEvent.click(checkbox);
 
+    // Act
+
     const after = await persistence.profiles.getById("p1");
+
+    // Assert
+
     expect(
       after?.linkedAccounts.find((a) => a.source === "train2go")?.syncZones
     ).toBe(true);

@@ -31,6 +31,8 @@ describe("ExportFormatSelector", () => {
   describe("rendering", () => {
     it("should render with current format", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <ExportFormatSelector
           currentFormat="fit"
@@ -40,9 +42,15 @@ describe("ExportFormatSelector", () => {
       );
 
       // Assert
+
+      // Act
+
       const button = screen.getByRole("button", {
         name: /select export format/i,
       });
+
+      // Assert
+
       expect(button).toBeInTheDocument();
       expect(screen.getByText("FIT")).toBeInTheDocument();
       expect(screen.getByText("(.fit)")).toBeInTheDocument();
@@ -50,6 +58,8 @@ describe("ExportFormatSelector", () => {
 
     it("should render all format options when opened", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <ExportFormatSelector
@@ -60,11 +70,17 @@ describe("ExportFormatSelector", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /select export format/i })
       );
 
       // Assert
+
+      // Assert
+
       await waitFor(() => {
         expect(screen.getByRole("menu")).toBeInTheDocument();
       });
@@ -81,6 +97,8 @@ describe("ExportFormatSelector", () => {
 
     it("should show format descriptions", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <ExportFormatSelector
@@ -91,11 +109,17 @@ describe("ExportFormatSelector", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /select export format/i })
       );
 
       // Assert
+
+      // Assert
+
       await waitFor(() => {
         expect(
           screen.getByText(
@@ -122,6 +146,8 @@ describe("ExportFormatSelector", () => {
 
     it("should show compatibility information", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <ExportFormatSelector
@@ -132,11 +158,17 @@ describe("ExportFormatSelector", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /select export format/i })
       );
 
       // Assert
+
+      // Assert
+
       await waitFor(() => {
         expect(screen.getAllByText("Garmin devices")).toHaveLength(2); // FIT and GCN
       });
@@ -148,6 +180,8 @@ describe("ExportFormatSelector", () => {
 
     it("should highlight selected format", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <ExportFormatSelector
@@ -158,11 +192,17 @@ describe("ExportFormatSelector", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /select export format/i })
       );
 
       // Assert
+
+      // Assert
+
       await waitFor(() => {
         const tcxOption = screen
           .getAllByRole("menuitem")
@@ -175,6 +215,8 @@ describe("ExportFormatSelector", () => {
   describe("interactions", () => {
     it("should call onFormatChange when format is selected", async () => {
       // Arrange
+      // Arrange
+
       const handleFormatChange = vi.fn();
       const user = userEvent.setup();
       render(
@@ -186,9 +228,14 @@ describe("ExportFormatSelector", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /select export format/i })
       );
+
+      // Assert
 
       await waitFor(() => {
         expect(screen.getByRole("menu")).toBeInTheDocument();
@@ -205,6 +252,8 @@ describe("ExportFormatSelector", () => {
 
     it("should close dropdown after selection", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <ExportFormatSelector
@@ -215,9 +264,14 @@ describe("ExportFormatSelector", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /select export format/i })
       );
+
+      // Assert
 
       await waitFor(() => {
         expect(screen.getByRole("menu")).toBeInTheDocument();
@@ -236,6 +290,8 @@ describe("ExportFormatSelector", () => {
 
     it("should toggle dropdown on button click", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <ExportFormatSelector
@@ -250,9 +306,15 @@ describe("ExportFormatSelector", () => {
       });
 
       // Act - Open
+
+      // Act
+
       await user.click(button);
 
       // Assert - Open
+
+      // Assert
+
       await waitFor(() => {
         expect(screen.getByRole("menu")).toBeInTheDocument();
       });
@@ -268,6 +330,8 @@ describe("ExportFormatSelector", () => {
 
     it("should not open dropdown when disabled", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <ExportFormatSelector
@@ -279,11 +343,17 @@ describe("ExportFormatSelector", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /select export format/i })
       );
 
       // Assert
+
+      // Assert
+
       expect(screen.queryByRole("menu")).not.toBeInTheDocument();
     });
   });
@@ -291,6 +361,8 @@ describe("ExportFormatSelector", () => {
   describe("validation", () => {
     it("should validate workout before format change", async () => {
       // Arrange
+      // Arrange
+
       const handleFormatChange = vi.fn();
       const user = userEvent.setup();
       render(
@@ -302,9 +374,14 @@ describe("ExportFormatSelector", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /select export format/i })
       );
+
+      // Assert
 
       await waitFor(() => {
         expect(screen.getByRole("menu")).toBeInTheDocument();
@@ -327,6 +404,8 @@ describe("ExportFormatSelector", () => {
 
     it("should show validation errors for invalid workout", async () => {
       // Arrange
+      // Arrange
+
       const invalidWorkout = {
         version: "1.0",
       } as KRD;
@@ -340,9 +419,14 @@ describe("ExportFormatSelector", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /select export format/i })
       );
+
+      // Assert
 
       await waitFor(() => {
         expect(screen.getByRole("menu")).toBeInTheDocument();
@@ -365,6 +449,8 @@ describe("ExportFormatSelector", () => {
 
     it("should allow format change for valid workout", async () => {
       // Arrange
+      // Arrange
+
       const handleFormatChange = vi.fn();
       const user = userEvent.setup();
       render(
@@ -376,9 +462,14 @@ describe("ExportFormatSelector", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /select export format/i })
       );
+
+      // Assert
 
       await waitFor(() => {
         expect(screen.getByRole("menu")).toBeInTheDocument();
@@ -400,6 +491,10 @@ describe("ExportFormatSelector", () => {
   describe("warnings", () => {
     it("should show warning for FIT format", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <ExportFormatSelector
           currentFormat="fit"
@@ -409,6 +504,9 @@ describe("ExportFormatSelector", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByText(/FIT format may not support all workout features/i)
       ).toBeInTheDocument();
@@ -416,6 +514,10 @@ describe("ExportFormatSelector", () => {
 
     it("should show warning for TCX format", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <ExportFormatSelector
           currentFormat="tcx"
@@ -425,6 +527,9 @@ describe("ExportFormatSelector", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByText(/TCX format has limited support for advanced targets/i)
       ).toBeInTheDocument();
@@ -432,6 +537,10 @@ describe("ExportFormatSelector", () => {
 
     it("should show warning for ZWO format", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <ExportFormatSelector
           currentFormat="zwo"
@@ -441,6 +550,9 @@ describe("ExportFormatSelector", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByText(/ZWO format only supports cycling workouts/i)
       ).toBeInTheDocument();
@@ -448,6 +560,10 @@ describe("ExportFormatSelector", () => {
 
     it("should show warning for GCN format", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <ExportFormatSelector
           currentFormat="gcn"
@@ -457,6 +573,9 @@ describe("ExportFormatSelector", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByText(/GCN format is designed for the Garmin Connect API/i)
       ).toBeInTheDocument();
@@ -464,6 +583,10 @@ describe("ExportFormatSelector", () => {
 
     it("should not show warning for KRD format", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <ExportFormatSelector
           currentFormat="krd"
@@ -473,6 +596,9 @@ describe("ExportFormatSelector", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(
         screen.queryByText(/may not support all workout features/i)
       ).not.toBeInTheDocument();
@@ -482,6 +608,8 @@ describe("ExportFormatSelector", () => {
   describe("states", () => {
     it("should be disabled when disabled prop is true", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <ExportFormatSelector
           currentFormat="krd"
@@ -492,14 +620,22 @@ describe("ExportFormatSelector", () => {
       );
 
       // Assert
+
+      // Act
+
       const button = screen.getByRole("button", {
         name: /select export format/i,
       });
+
+      // Assert
+
       expect(button).toBeDisabled();
     });
 
     it("should apply custom className", () => {
       // Arrange & Act
+      // Arrange
+
       const { container } = render(
         <ExportFormatSelector
           currentFormat="krd"
@@ -510,7 +646,13 @@ describe("ExportFormatSelector", () => {
       );
 
       // Assert
+
+      // Act
+
       const wrapper = container.firstChild as HTMLElement;
+
+      // Assert
+
       expect(wrapper).toHaveClass("custom-class");
     });
   });
@@ -518,6 +660,8 @@ describe("ExportFormatSelector", () => {
   describe("accessibility", () => {
     it("should have proper ARIA attributes", () => {
       // Arrange & Act
+      // Arrange
+
       render(
         <ExportFormatSelector
           currentFormat="krd"
@@ -527,15 +671,23 @@ describe("ExportFormatSelector", () => {
       );
 
       // Assert
+
+      // Act
+
       const button = screen.getByRole("button", {
         name: /select export format/i,
       });
+
+      // Assert
+
       expect(button).toHaveAttribute("aria-expanded", "false");
       expect(button).toHaveAttribute("aria-haspopup", "menu");
     });
 
     it("should update aria-expanded when opened", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <ExportFormatSelector
@@ -550,9 +702,15 @@ describe("ExportFormatSelector", () => {
       });
 
       // Act
+
+      // Act
+
       await user.click(button);
 
       // Assert
+
+      // Assert
+
       await waitFor(() => {
         expect(button).toHaveAttribute("aria-expanded", "true");
       });
@@ -560,6 +718,8 @@ describe("ExportFormatSelector", () => {
 
     it("should mark selected option with aria-current", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <ExportFormatSelector
@@ -570,11 +730,17 @@ describe("ExportFormatSelector", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(
         screen.getByRole("button", { name: /select export format/i })
       );
 
       // Assert
+
+      // Assert
+
       await waitFor(() => {
         const fitOption = screen
           .getAllByRole("menuitem")

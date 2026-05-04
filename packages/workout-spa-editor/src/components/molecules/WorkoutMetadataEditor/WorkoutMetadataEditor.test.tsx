@@ -27,6 +27,10 @@ describe("WorkoutMetadataEditor", () => {
   describe("rendering", () => {
     it("should render with workout metadata", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <WorkoutMetadataEditor
           krd={mockKrd}
@@ -36,6 +40,9 @@ describe("WorkoutMetadataEditor", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(screen.getByLabelText("Workout name")).toHaveValue("Test Workout");
       expect(screen.getByLabelText("Sport type")).toHaveValue("cycling");
       expect(screen.getByLabelText("Sub-sport type")).toHaveValue(
@@ -45,6 +52,8 @@ describe("WorkoutMetadataEditor", () => {
 
     it("should render with empty name when workout has no name", () => {
       // Arrange
+      // Arrange
+
       const krdWithoutName: KRD = {
         ...mockKrd,
         extensions: {
@@ -56,6 +65,9 @@ describe("WorkoutMetadataEditor", () => {
       };
 
       // Act
+
+      // Act
+
       render(
         <WorkoutMetadataEditor
           krd={krdWithoutName}
@@ -65,11 +77,18 @@ describe("WorkoutMetadataEditor", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(screen.getByLabelText("Workout name")).toHaveValue("");
     });
 
     it("should render save and cancel buttons", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <WorkoutMetadataEditor
           krd={mockKrd}
@@ -79,6 +98,9 @@ describe("WorkoutMetadataEditor", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(screen.getByRole("button", { name: /save/i })).toBeInTheDocument();
       expect(
         screen.getByRole("button", { name: /cancel/i })
@@ -89,6 +111,8 @@ describe("WorkoutMetadataEditor", () => {
   describe("interactions", () => {
     it("should update name when typing", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <WorkoutMetadataEditor
@@ -101,14 +125,22 @@ describe("WorkoutMetadataEditor", () => {
       // Act
       const nameInput = screen.getByLabelText("Workout name");
       await user.clear(nameInput);
+
+      // Act
+
       await user.type(nameInput, "New Workout Name");
 
       // Assert
+
+      // Assert
+
       expect(nameInput).toHaveValue("New Workout Name");
     });
 
     it("should update sport when selecting", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <WorkoutMetadataEditor
@@ -120,14 +152,22 @@ describe("WorkoutMetadataEditor", () => {
 
       // Act
       const sportSelect = screen.getByLabelText("Sport type");
+
+      // Act
+
       await user.selectOptions(sportSelect, "running");
 
       // Assert
+
+      // Assert
+
       expect(sportSelect).toHaveValue("running");
     });
 
     it("should reset sub-sport to generic when sport changes", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       render(
         <WorkoutMetadataEditor
@@ -142,12 +182,20 @@ describe("WorkoutMetadataEditor", () => {
       await user.selectOptions(sportSelect, "running");
 
       // Assert
+
+      // Act
+
       const subSportSelect = screen.getByLabelText("Sub-sport type");
+
+      // Assert
+
       expect(subSportSelect).toHaveValue("generic");
     });
 
     it("should call onSave with updated KRD when save button is clicked", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       const handleSave = vi.fn();
       render(
@@ -169,9 +217,14 @@ describe("WorkoutMetadataEditor", () => {
       const subSportSelect = screen.getByLabelText("Sub-sport type");
       await user.selectOptions(subSportSelect, "trail");
 
+      // Act
+
       await user.click(screen.getByRole("button", { name: /save/i }));
 
       // Assert
+
+      // Assert
+
       expect(handleSave).toHaveBeenCalledOnce();
       const updatedKrd = handleSave.mock.calls[0][0];
       expect(updatedKrd.extensions?.structured_workout?.name).toBe(
@@ -185,6 +238,8 @@ describe("WorkoutMetadataEditor", () => {
 
     it("should call onCancel when cancel button is clicked", async () => {
       // Arrange
+      // Arrange
+
       const user = userEvent.setup();
       const handleCancel = vi.fn();
       render(
@@ -196,9 +251,15 @@ describe("WorkoutMetadataEditor", () => {
       );
 
       // Act
+
+      // Act
+
       await user.click(screen.getByRole("button", { name: /cancel/i }));
 
       // Assert
+
+      // Assert
+
       expect(handleCancel).toHaveBeenCalledOnce();
     });
   });
@@ -206,6 +267,10 @@ describe("WorkoutMetadataEditor", () => {
   describe("accessibility", () => {
     it("should have proper ARIA labels", () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       render(
         <WorkoutMetadataEditor
           krd={mockKrd}
@@ -215,6 +280,9 @@ describe("WorkoutMetadataEditor", () => {
       );
 
       // Assert
+
+      // Assert
+
       expect(
         screen.getByRole("form", { name: /edit workout metadata/i })
       ).toBeInTheDocument();

@@ -9,15 +9,24 @@ import { AnalyticsProvider, useAnalytics } from "./analytics-context";
 describe("useAnalytics", () => {
   it("should return noop analytics when used without a provider", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     const { result } = renderHook(() => useAnalytics());
 
     // Assert — noop: methods exist and do not throw
+
+    // Assert
+
     expect(() => result.current.pageView("/")).not.toThrow();
     expect(() => result.current.event("test")).not.toThrow();
   });
 
   it("should return injected analytics when wrapped in AnalyticsProvider", () => {
     // Arrange
+    // Arrange
+
     const mockAnalytics: Analytics = {
       pageView: vi.fn(),
       event: vi.fn(),
@@ -31,9 +40,15 @@ describe("useAnalytics", () => {
 
     // Act
     const { result } = renderHook(() => useAnalytics(), { wrapper });
+
+    // Act
+
     result.current.event("test-event", { key: "value" });
 
     // Assert
+
+    // Assert
+
     expect(mockAnalytics.event).toHaveBeenCalledWith("test-event", {
       key: "value",
     });
@@ -41,6 +56,8 @@ describe("useAnalytics", () => {
 
   it("should forward pageView calls to the injected adapter", () => {
     // Arrange
+    // Arrange
+
     const mockAnalytics: Analytics = {
       pageView: vi.fn(),
       event: vi.fn(),
@@ -54,20 +71,34 @@ describe("useAnalytics", () => {
 
     // Act
     const { result } = renderHook(() => useAnalytics(), { wrapper });
+
+    // Act
+
     result.current.pageView("/editor/");
 
     // Assert
+
+    // Assert
+
     expect(mockAnalytics.pageView).toHaveBeenCalledWith("/editor/");
   });
 
   it("should use noop by default (context default value)", () => {
     // Arrange
+    // Arrange
+
     const noop = createNoopAnalytics();
 
     // Act — without provider wrapper, should behave like noop
+
+    // Act
+
     const { result } = renderHook(() => useAnalytics());
 
     // Assert — same interface, no throws
+
+    // Assert
+
     expect(result.current.event).toBeTypeOf("function");
     expect(result.current.pageView).toBeTypeOf("function");
     expect(() => result.current.event("any-event")).not.toThrow();

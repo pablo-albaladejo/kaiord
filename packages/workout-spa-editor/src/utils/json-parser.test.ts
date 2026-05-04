@@ -11,34 +11,58 @@ describe("parseJSON", () => {
   describe("valid JSON", () => {
     it("should parse valid JSON object", () => {
       // Arrange
+      // Arrange
+
       const json = '{"name": "test", "value": 42}';
 
       // Act
+
+      // Act
+
       const result = parseJSON(json);
 
       // Assert
+
+      // Assert
+
       expect(result).toStrictEqual({ name: "test", value: 42 });
     });
 
     it("should parse valid JSON array", () => {
       // Arrange
+      // Arrange
+
       const json = "[1, 2, 3]";
 
       // Act
+
+      // Act
+
       const result = parseJSON(json);
 
       // Assert
+
+      // Assert
+
       expect(result).toStrictEqual([1, 2, 3]);
     });
 
     it("should parse nested JSON", () => {
       // Arrange
+      // Arrange
+
       const json = '{"outer": {"inner": "value"}}';
 
       // Act
+
+      // Act
+
       const result = parseJSON(json);
 
       // Assert
+
+      // Assert
+
       expect(result).toStrictEqual({ outer: { inner: "value" } });
     });
   });
@@ -46,13 +70,26 @@ describe("parseJSON", () => {
   describe("invalid JSON", () => {
     it("should throw FileParsingError for invalid JSON", () => {
       // Arrange
+      // Arrange
+
+      // Act
+
       const json = '{"name": "test"';
 
       // Act & Assert
+
+      // Assert
+
       expect(() => parseJSON(json)).toThrow(FileParsingError);
     });
 
     it("should include error message even when line and column are undefined", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const json = '{\n  "name": "test",\n  "value": invalid\n}';
 
@@ -73,25 +110,46 @@ describe("parseJSON", () => {
 
     it("should handle missing closing brace", () => {
       // Arrange
+      // Arrange
+
+      // Act
+
       const json = '{"name": "test", "value": 42';
 
       // Act & Assert
+
+      // Assert
+
       expect(() => parseJSON(json)).toThrow(FileParsingError);
     });
 
     it("should handle trailing comma", () => {
       // Arrange
+      // Arrange
+
+      // Act
+
       const json = '{"name": "test",}';
 
       // Act & Assert
+
+      // Assert
+
       expect(() => parseJSON(json)).toThrow(FileParsingError);
     });
 
     it("should handle unquoted keys", () => {
       // Arrange
+      // Arrange
+
+      // Act
+
       const json = '{name: "test"}';
 
       // Act & Assert
+
+      // Assert
+
       expect(() => parseJSON(json)).toThrow(FileParsingError);
     });
   });
@@ -99,45 +157,77 @@ describe("parseJSON", () => {
   describe("edge cases", () => {
     it("should parse empty object", () => {
       // Arrange
+      // Arrange
+
       const json = "{}";
 
       // Act
+
+      // Act
+
       const result = parseJSON(json);
 
       // Assert
+
+      // Assert
+
       expect(result).toStrictEqual({});
     });
 
     it("should parse empty array", () => {
       // Arrange
+      // Arrange
+
       const json = "[]";
 
       // Act
+
+      // Act
+
       const result = parseJSON(json);
 
       // Assert
+
+      // Assert
+
       expect(result).toStrictEqual([]);
     });
 
     it("should parse null", () => {
       // Arrange
+      // Arrange
+
       const json = "null";
 
       // Act
+
+      // Act
+
       const result = parseJSON(json);
 
       // Assert
+
+      // Assert
+
       expect(result).toBeNull();
     });
 
     it("should parse boolean values", () => {
       // Arrange
+      // Arrange
+
       const json = '{"flag": true, "other": false}';
 
       // Act
+
+      // Act
+
       const result = parseJSON(json);
 
       // Assert
+
+      // Assert
+
       expect(result).toStrictEqual({ flag: true, other: false });
     });
   });
@@ -152,6 +242,8 @@ describe("parseJSON", () => {
      */
     it("should complete error parsing in linear time for various input sizes", () => {
       // Arrange - Generate invalid JSON strings of different sizes
+      // Arrange
+
       const sizes = [100, 1000, 10000];
       const timings: Array<{ size: number; time: number }> = [];
 
@@ -177,11 +269,17 @@ describe("parseJSON", () => {
       // If O(n²), time ratio should be ~100x when size increases 10x
       // If O(n), time ratio should be ~10x when size increases 10x
       const ratio1 = timings[1].time / timings[0].time; // 1000/100 = 10x size
+
+      // Act
+
       const ratio2 = timings[2].time / timings[1].time; // 10000/1000 = 10x size
 
       // Allow some variance but ensure it's not quadratic
       // Quadratic would be ~100x, linear would be ~10x
       // We allow up to 50x to account for variance and overhead
+
+      // Assert
+
       expect(ratio1).toBeLessThan(100);
       expect(ratio2).toBeLessThan(100);
 
@@ -194,6 +292,8 @@ describe("parseJSON", () => {
 
     it("should handle large valid JSON without performance degradation", () => {
       // Arrange - Generate large valid JSON
+      // Arrange
+
       const largeObject = {
         data: Array.from({ length: 1000 }, (_, i) => ({
           id: i,
@@ -207,9 +307,15 @@ describe("parseJSON", () => {
       const start = performance.now();
       const result = parseJSON(json);
       const end = performance.now();
+
+      // Act
+
       const duration = end - start;
 
       // Assert
+
+      // Assert
+
       expect(result).toStrictEqual(largeObject);
       expect(duration).toBeLessThan(10); // Should be fast
     });
@@ -218,6 +324,8 @@ describe("parseJSON", () => {
   describe("integration tests", () => {
     it("should handle valid JSON with nested structures", () => {
       // Arrange
+      // Arrange
+
       const json = JSON.stringify({
         structured_workout: {
           name: "Test Workout",
@@ -233,9 +341,15 @@ describe("parseJSON", () => {
       });
 
       // Act
+
+      // Act
+
       const result = parseJSON(json);
 
       // Assert
+
+      // Assert
+
       expect(result).toStrictEqual({
         structured_workout: {
           name: "Test Workout",
@@ -252,6 +366,12 @@ describe("parseJSON", () => {
     });
 
     it("should provide useful error message for unexpected token", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const json = '{"name": test}'; // Missing quotes around test
 
@@ -272,6 +392,12 @@ describe("parseJSON", () => {
 
     it("should provide useful error message for unexpected end of input", () => {
       // Arrange
+
+      // Act
+
+      // Assert
+
+      // Arrange
       const json = '{"name": "test", "value":'; // Incomplete
 
       // Act & Assert
@@ -288,6 +414,12 @@ describe("parseJSON", () => {
     });
 
     it("should provide useful error message for invalid escape sequence", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const json = '{"name": "test\\x"}'; // Invalid escape
 
@@ -306,16 +438,30 @@ describe("parseJSON", () => {
 
     it("should provide useful error message for duplicate keys", () => {
       // Arrange
+      // Arrange
+
       const json = '{"name": "test", "name": "duplicate"}';
 
       // Act - Note: JSON.parse allows duplicate keys (last one wins)
+
+      // Act
+
       const result = parseJSON(json);
 
       // Assert - This is valid JSON, just not ideal
+
+      // Assert
+
       expect(result).toStrictEqual({ name: "duplicate" });
     });
 
     it("should handle large JSON files with errors", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange - Large JSON with error at the end
       const largeData = Array.from({ length: 1000 }, (_, i) => ({
         id: i,
@@ -338,6 +484,12 @@ describe("parseJSON", () => {
     });
 
     it("should handle various JSON error types gracefully", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange - Collection of various invalid JSON strings
       const invalidJSONs = [
         '{"unclosed": "string',
@@ -366,6 +518,12 @@ describe("parseJSON", () => {
     });
 
     it("should preserve original error information in cause", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const json = '{"invalid": }';
 
@@ -400,45 +558,69 @@ describe("parseJSON", () => {
 
     it("should parse 1KB JSON in under 10ms", () => {
       // Arrange
+      // Arrange
+
       const json = generateJSONOfSize(1024); // 1KB
 
       // Act
       const start = performance.now();
       const result = parseJSON(json);
       const end = performance.now();
+
+      // Act
+
       const duration = end - start;
 
       // Assert
+
+      // Assert
+
       expect(result).toBeDefined();
       expect(duration).toBeLessThan(10);
     });
 
     it("should parse 10KB JSON in under 10ms", () => {
       // Arrange
+      // Arrange
+
       const json = generateJSONOfSize(10 * 1024); // 10KB
 
       // Act
       const start = performance.now();
       const result = parseJSON(json);
       const end = performance.now();
+
+      // Act
+
       const duration = end - start;
 
       // Assert
+
+      // Assert
+
       expect(result).toBeDefined();
       expect(duration).toBeLessThan(10);
     });
 
     it("should parse 100KB JSON in reasonable time", () => {
       // Arrange
+      // Arrange
+
       const json = generateJSONOfSize(100 * 1024); // 100KB
 
       // Act
       const start = performance.now();
       const result = parseJSON(json);
       const end = performance.now();
+
+      // Act
+
       const duration = end - start;
 
       // Assert
+
+      // Assert
+
       expect(result).toBeDefined();
       // Reasonable time for 100KB: < 50ms (allows for JSON.parse overhead)
       expect(duration).toBeLessThan(100);
@@ -446,21 +628,35 @@ describe("parseJSON", () => {
 
     it("should parse 1MB JSON in reasonable time", () => {
       // Arrange
+      // Arrange
+
       const json = generateJSONOfSize(1024 * 1024); // 1MB
 
       // Act
       const start = performance.now();
       const result = parseJSON(json);
       const end = performance.now();
+
+      // Act
+
       const duration = end - start;
 
       // Assert
+
+      // Assert
+
       expect(result).toBeDefined();
       // Reasonable time for 1MB: < 100ms (allows for JSON.parse overhead)
       expect(duration).toBeLessThan(100);
     });
 
     it("should parse three increasing input sizes deterministically (fast-path)", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Characterization-on-un-skip: drained by guidelines-compliance-harden PR4.
       // The original timing-based test was flaky and environment-dependent;
       // this fast-path replacement asserts only what is currently true —

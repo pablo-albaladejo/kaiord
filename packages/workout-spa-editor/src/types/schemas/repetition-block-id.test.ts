@@ -36,6 +36,12 @@ describe("Repetition Block ID Uniqueness", () => {
      * **Validates: Requirements 2.1, 2.2**
      */
     it("should generate unique IDs for all blocks in a workout", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       fc.assert(
         fc.property(
           // Generate random number of blocks (2-20)
@@ -73,6 +79,12 @@ describe("Repetition Block ID Uniqueness", () => {
      * for lookups and comparisons.
      */
     it("should generate non-empty string IDs", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       fc.assert(
         fc.property(fc.integer({ min: 1, max: 10 }), (count) => {
           // Arrange & Act: Generate multiple IDs
@@ -96,6 +108,12 @@ describe("Repetition Block ID Uniqueness", () => {
      * they remain unique (important for batch operations).
      */
     it("should generate unique IDs even when created rapidly", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       fc.assert(
         fc.property(fc.integer({ min: 10, max: 50 }), (count) => {
           // Arrange & Act: Generate many IDs rapidly
@@ -116,6 +134,12 @@ describe("Repetition Block ID Uniqueness", () => {
      * both individual steps and repetition blocks.
      */
     it("should maintain unique block IDs in workouts with mixed content", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       fc.assert(
         fc.property(
           fc.integer({ min: 2, max: 10 }), // Number of blocks
@@ -155,6 +179,8 @@ describe("Repetition Block ID Uniqueness", () => {
      */
     it("should generate IDs quickly", () => {
       // Arrange
+      // Arrange
+
       const iterations = 1000;
 
       // Act
@@ -165,7 +191,13 @@ describe("Repetition Block ID Uniqueness", () => {
       const endTime = performance.now();
 
       // Assert: Average time per ID should be < 1ms
+
+      // Act
+
       const avgTimePerIdMs = (endTime - startTime) / iterations;
+
+      // Assert
+
       expect(avgTimePerIdMs).toBeLessThan(1);
     });
   });

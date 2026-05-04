@@ -11,6 +11,8 @@ describe("validateKRD", () => {
   describe("valid KRD", () => {
     it("should validate minimal valid workout KRD", () => {
       // Arrange
+      // Arrange
+
       const data = {
         version: "1.0",
         type: "structured_workout",
@@ -27,14 +29,22 @@ describe("validateKRD", () => {
       };
 
       // Act
+
+      // Act
+
       const result = validateKRD(data);
 
       // Assert
+
+      // Assert
+
       expect(result).toStrictEqual(data);
     });
 
     it("should validate recorded activity KRD", () => {
       // Arrange
+      // Arrange
+
       const data = {
         version: "1.0",
         type: "recorded_activity",
@@ -45,15 +55,27 @@ describe("validateKRD", () => {
       };
 
       // Act
+
+      // Act
+
       const result = validateKRD(data);
 
       // Assert
+
+      // Assert
+
       expect(result).toStrictEqual(data);
     });
   });
 
   describe("missing required fields", () => {
     it("should throw ValidationError when version is missing", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const data = {
         type: "structured_workout",
@@ -80,6 +102,12 @@ describe("validateKRD", () => {
 
     it("should throw ValidationError when type is missing", () => {
       // Arrange
+
+      // Act
+
+      // Assert
+
+      // Arrange
       const data = {
         version: "1.0",
         metadata: {
@@ -105,6 +133,12 @@ describe("validateKRD", () => {
 
     it("should throw ValidationError when metadata is missing", () => {
       // Arrange
+
+      // Act
+
+      // Assert
+
+      // Arrange
       const data = {
         version: "1.0",
         type: "structured_workout",
@@ -126,6 +160,12 @@ describe("validateKRD", () => {
     });
 
     it("should throw ValidationError when metadata.created is missing", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const data = {
         version: "1.0",
@@ -152,6 +192,12 @@ describe("validateKRD", () => {
 
     it("should throw ValidationError when metadata.sport is missing", () => {
       // Arrange
+
+      // Act
+
+      // Assert
+
+      // Arrange
       const data = {
         version: "1.0",
         type: "structured_workout",
@@ -176,6 +222,12 @@ describe("validateKRD", () => {
     });
 
     it("should throw ValidationError when extensions.structured_workout is missing for workout type", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const data = {
         version: "1.0",
@@ -204,6 +256,12 @@ describe("validateKRD", () => {
 
     it("should list all missing fields", () => {
       // Arrange
+
+      // Act
+
+      // Assert
+
+      // Arrange
       const data = {};
 
       // Act & Assert
@@ -222,6 +280,12 @@ describe("validateKRD", () => {
 
   describe("invalid field values", () => {
     it("should throw ValidationError when version is not a string", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const data = {
         version: 1.0,
@@ -249,6 +313,12 @@ describe("validateKRD", () => {
 
     it("should throw ValidationError when type is invalid", () => {
       // Arrange
+
+      // Act
+
+      // Assert
+
+      // Arrange
       const data = {
         version: "1.0",
         type: "invalid",
@@ -275,6 +345,12 @@ describe("validateKRD", () => {
 
     it("should throw ValidationError when metadata is not an object", () => {
       // Arrange
+
+      // Act
+
+      // Assert
+
+      // Arrange
       const data = {
         version: "1.0",
         type: "structured_workout",
@@ -297,6 +373,12 @@ describe("validateKRD", () => {
     });
 
     it("should throw ValidationError when data is not an object", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const data = "invalid";
 

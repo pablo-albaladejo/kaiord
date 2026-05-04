@@ -12,8 +12,15 @@ import { calculateZoneValues } from "./calculate-zone-values";
 
 describe("calculateZoneValues", () => {
   it("should calculate Coggan zones with FTP=250", () => {
+    // Arrange
+
     const method = findMethod(POWER_METHODS, "coggan-7")!;
+
+    // Act
+
     const zones = calculateZoneValues(method, 250);
+
+    // Assert
 
     expect(zones).toHaveLength(7);
     expect(zones[0]).toEqual({
@@ -32,8 +39,15 @@ describe("calculateZoneValues", () => {
   });
 
   it("should calculate Karvonen HR zones with LTHR=170", () => {
+    // Arrange
+
     const method = findMethod(HR_METHODS, "karvonen-5")!;
+
+    // Act
+
     const zones = calculateZoneValues(method, 170);
+
+    // Assert
 
     expect(zones).toHaveLength(5);
     expect(zones[0]).toEqual({ zone: 1, name: "Recovery", min: 0, max: 139 });
@@ -43,7 +57,13 @@ describe("calculateZoneValues", () => {
 
 describe("calculatePowerZoneValues", () => {
   it("should return watt values for Coggan with FTP=250", () => {
+    // Arrange
+
+    // Act
+
     const zones = calculatePowerZoneValues(250, "coggan-7");
+
+    // Assert
 
     expect(zones).toHaveLength(7);
     expect(zones[0].minWatts).toBe(0);
@@ -55,7 +75,13 @@ describe("calculatePowerZoneValues", () => {
   });
 
   it("should return watt values for British Cycling 6-zone", () => {
+    // Arrange
+
+    // Act
+
     const zones = calculatePowerZoneValues(300, "british-cycling-6");
+
+    // Assert
 
     expect(zones).toHaveLength(6);
     expect(zones[0].name).toBe("Active Recovery");
@@ -63,7 +89,13 @@ describe("calculatePowerZoneValues", () => {
   });
 
   it("should return watt values for Friel 7-zone", () => {
+    // Arrange
+
+    // Act
+
     const zones = calculatePowerZoneValues(250, "friel-7");
+
+    // Assert
 
     expect(zones).toHaveLength(7);
     expect(zones[0].name).toBe("Active Recovery");
@@ -72,7 +104,13 @@ describe("calculatePowerZoneValues", () => {
 
 describe("calculateHrZones", () => {
   it("should calculate Karvonen zones with LTHR=170", () => {
+    // Arrange
+
+    // Act
+
     const zones = calculateHrZones(170, "karvonen-5");
+
+    // Assert
 
     expect(zones).toHaveLength(5);
     expect(zones[0].maxBpm).toBe(139);
@@ -80,7 +118,13 @@ describe("calculateHrZones", () => {
   });
 
   it("should calculate Friel HR zones", () => {
+    // Arrange
+
+    // Act
+
     const zones = calculateHrZones(170, "friel-hr-5");
+
+    // Assert
 
     expect(zones).toHaveLength(5);
     expect(zones[0].name).toBe("Recovery");
@@ -88,7 +132,13 @@ describe("calculateHrZones", () => {
   });
 
   it("should default to karvonen-5 with no method specified", () => {
+    // Arrange
+
+    // Act
+
     const zones = calculateHrZones(170);
+
+    // Assert
 
     expect(zones).toHaveLength(5);
     expect(zones[0].name).toBe("Recovery");
@@ -97,7 +147,13 @@ describe("calculateHrZones", () => {
 
 describe("calculatePaceZones", () => {
   it("should calculate Daniels zones with threshold 300s", () => {
+    // Arrange
+
+    // Act
+
     const zones = calculatePaceZones(300, "min_per_km", "daniels-5");
+
+    // Assert
 
     expect(zones).toHaveLength(5);
     expect(zones[0].name).toBe("Easy");
@@ -105,7 +161,13 @@ describe("calculatePaceZones", () => {
   });
 
   it("should default to daniels-5", () => {
+    // Arrange
+
+    // Act
+
     const zones = calculatePaceZones(300, "min_per_km");
+
+    // Assert
 
     expect(zones).toHaveLength(5);
   });

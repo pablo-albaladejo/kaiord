@@ -68,6 +68,8 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
   });
 
   it("should bump modifiedAt via acceptWorkout on STRUCTURED with edits", async () => {
+    // Arrange
+
     const record = makeRecord({ state: "structured" });
     useWorkoutStore.setState({ currentWorkout: EDITED_KRD });
 
@@ -76,13 +78,20 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
       await result.current.acceptWorkout();
     });
 
+    // Act
+
     const persisted = await loadPersisted(record.id);
+
+    // Assert
+
     expect(persisted?.state).toBe("ready");
     expect(persisted?.krd).toEqual(EDITED_KRD);
     expect(persisted?.modifiedAt).not.toBeNull();
   });
 
   it("should NOT bump modifiedAt via acceptWorkout on STRUCTURED without edits", async () => {
+    // Arrange
+
     const record = makeRecord({ state: "structured" });
     // currentWorkout matches the record's KRD — no edit.
     useWorkoutStore.setState({ currentWorkout: ORIGINAL_KRD });
@@ -92,12 +101,19 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
       await result.current.acceptWorkout();
     });
 
+    // Act
+
     const persisted = await loadPersisted(record.id);
+
+    // Assert
+
     expect(persisted?.state).toBe("ready");
     expect(persisted?.modifiedAt).toBeNull();
   });
 
   it("should bump modifiedAt via pushWorkout on READY with edits", async () => {
+    // Arrange
+
     const record = makeRecord({ state: "ready", krd: ORIGINAL_KRD });
     useWorkoutStore.setState({ currentWorkout: EDITED_KRD });
 
@@ -106,7 +122,12 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
       await result.current.pushWorkout("garmin-xyz");
     });
 
+    // Act
+
     const persisted = await loadPersisted(record.id);
+
+    // Assert
+
     expect(persisted?.state).toBe("pushed");
     expect(persisted?.garminPushId).toBe("garmin-xyz");
     expect(persisted?.krd).toEqual(EDITED_KRD);
@@ -114,6 +135,8 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
   });
 
   it("should bump modifiedAt via markModified on PUSHED (regression check)", async () => {
+    // Arrange
+
     const record = makeRecord({
       state: "pushed",
       krd: ORIGINAL_KRD,
@@ -126,7 +149,12 @@ describe("useEditorActions — modifiedAt on STRUCTURED / READY edits", () => {
       await result.current.markModified(EDITED_KRD);
     });
 
+    // Act
+
     const persisted = await loadPersisted(record.id);
+
+    // Assert
+
     expect(persisted?.state).toBe("modified");
     expect(persisted?.modifiedAt).not.toBeNull();
   });

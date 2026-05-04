@@ -70,6 +70,8 @@ describe("useCoachingConvert", () => {
   });
 
   it("calls navigate('/workout/<workoutId>') and onClose() exactly once on success", async () => {
+    // Arrange
+
     const onClose = vi.fn();
     const persistence = createInMemoryPersistence();
     await persistence.coaching.put(makeRecord());
@@ -79,7 +81,11 @@ describe("useCoachingConvert", () => {
       { wrapper: wrap(persistence) }
     );
 
+    // Act
+
     await result.current.handleConvert();
+
+    // Assert
 
     await waitFor(() => {
       expect(onClose).toHaveBeenCalledTimes(1);
@@ -92,6 +98,8 @@ describe("useCoachingConvert", () => {
   });
 
   it("should set error and does NOT navigate or close on convertCoachingActivity rejection", async () => {
+    // Arrange
+
     const onClose = vi.fn();
     const persistence = createInMemoryPersistence();
     await persistence.coaching.put(makeRecord());
@@ -105,7 +113,11 @@ describe("useCoachingConvert", () => {
       { wrapper: wrap(persistence) }
     );
 
+    // Act
+
     await result.current.handleConvert();
+
+    // Assert
 
     await waitFor(() => {
       expect(result.current.error).toBe("quota exceeded");

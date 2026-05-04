@@ -8,14 +8,25 @@ import { ErrorMessage } from "./ErrorMessage";
 describe("ErrorMessage", () => {
   it("should render error title", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     render(<ErrorMessage title="Error occurred" />);
 
     // Assert
+
+    // Assert
+
     expect(screen.getByText("Error occurred")).toBeInTheDocument();
   });
 
   it("should render error message when provided", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     render(
       <ErrorMessage
         title="Error occurred"
@@ -24,6 +35,9 @@ describe("ErrorMessage", () => {
     );
 
     // Assert
+
+    // Assert
+
     expect(
       screen.getByText("Something went wrong with the file")
     ).toBeInTheDocument();
@@ -31,12 +45,17 @@ describe("ErrorMessage", () => {
 
   it("should render validation errors when provided", () => {
     // Arrange
+    // Arrange
+
     const validationErrors: Array<ValidationError> = [
       { path: ["version"], message: "Required field missing" },
       { path: ["type"], message: "Invalid value" },
     ];
 
     // Act
+
+    // Act
+
     render(
       <ErrorMessage
         title="Validation failed"
@@ -45,6 +64,9 @@ describe("ErrorMessage", () => {
     );
 
     // Assert
+
+    // Assert
+
     expect(screen.getByText("Validation errors:")).toBeInTheDocument();
     expect(screen.getByText("version")).toBeInTheDocument();
     expect(screen.getByText(/Required field missing/)).toBeInTheDocument();
@@ -54,32 +76,52 @@ describe("ErrorMessage", () => {
 
   it("should call onRetry when Try Again button is clicked", async () => {
     // Arrange
+    // Arrange
+
     const onRetry = vi.fn();
     const user = userEvent.setup();
     render(<ErrorMessage title="Error occurred" onRetry={onRetry} />);
 
     // Act
+
+    // Act
+
     await user.click(screen.getByRole("button", { name: /try again/i }));
 
     // Assert
+
+    // Assert
+
     expect(onRetry).toHaveBeenCalledOnce();
   });
 
   it("should call onDismiss when Dismiss button is clicked", async () => {
     // Arrange
+    // Arrange
+
     const onDismiss = vi.fn();
     const user = userEvent.setup();
     render(<ErrorMessage title="Error occurred" onDismiss={onDismiss} />);
 
     // Act
+
+    // Act
+
     await user.click(screen.getByRole("button", { name: /dismiss/i }));
 
     // Assert
+
+    // Assert
+
     expect(onDismiss).toHaveBeenCalledOnce();
   });
 
   it("should render both retry and dismiss buttons when both callbacks provided", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     render(
       <ErrorMessage
         title="Error occurred"
@@ -89,6 +131,9 @@ describe("ErrorMessage", () => {
     );
 
     // Assert
+
+    // Assert
+
     expect(
       screen.getByRole("button", { name: /try again/i })
     ).toBeInTheDocument();
@@ -99,9 +144,16 @@ describe("ErrorMessage", () => {
 
   it("should not render buttons when no callbacks provided", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     render(<ErrorMessage title="Error occurred" />);
 
     // Assert
+
+    // Assert
+
     expect(
       screen.queryByRole("button", { name: /try again/i })
     ).not.toBeInTheDocument();
@@ -112,21 +164,36 @@ describe("ErrorMessage", () => {
 
   it("should have alert role for accessibility", () => {
     // Arrange & Act
+    // Arrange
+
     render(<ErrorMessage title="Error occurred" />);
 
     // Assert
+
+    // Act
+
     const alert = screen.getByRole("alert");
+
+    // Assert
+
     expect(alert).toBeInTheDocument();
     expect(alert).toHaveAttribute("aria-live", "assertive");
   });
 
   it("should apply custom className", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     const { container } = render(
       <ErrorMessage title="Error occurred" className="custom-class" />
     );
 
     // Assert
+
+    // Assert
+
     expect(container.firstChild).toHaveClass("custom-class");
   });
 });

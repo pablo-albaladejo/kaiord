@@ -24,12 +24,20 @@ describe("useWorkoutListDnd", () => {
   describe("sortableIds generation", () => {
     it("should generate sortable IDs for workout steps", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout(3);
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useWorkoutListDnd(workout));
 
       // Assert
+
+      // Assert
+
       expect(result.current.sortableIds).toEqual([
         "step-0",
         "step-1",
@@ -39,6 +47,8 @@ describe("useWorkoutListDnd", () => {
 
     it("should generate sortable IDs for repetition blocks", () => {
       // Arrange
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -74,9 +84,15 @@ describe("useWorkoutListDnd", () => {
       };
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useWorkoutListDnd(workout));
 
       // Assert - IDs based on array position, not content
+
+      // Assert
+
       expect(result.current.sortableIds).toEqual(["step-0", "block-1"]);
     });
   });
@@ -84,6 +100,8 @@ describe("useWorkoutListDnd", () => {
   describe("handleDragEnd", () => {
     it("should call onStepReorder with correct indices", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout(3);
       const onStepReorder = vi.fn();
       const { result } = renderHook(() =>
@@ -91,6 +109,9 @@ describe("useWorkoutListDnd", () => {
       );
 
       // Act
+
+      // Act
+
       result.current.handleDragEnd({
         active: { id: "step-0", data: { current: undefined } },
         over: { id: "step-2", data: { current: undefined } },
@@ -100,11 +121,16 @@ describe("useWorkoutListDnd", () => {
       });
 
       // Assert
+
+      // Assert
+
       expect(onStepReorder).toHaveBeenCalledWith(0, 2);
     });
 
     it("should not call onStepReorder when dropped on same position", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout(3);
       const onStepReorder = vi.fn();
       const { result } = renderHook(() =>
@@ -112,6 +138,9 @@ describe("useWorkoutListDnd", () => {
       );
 
       // Act
+
+      // Act
+
       result.current.handleDragEnd({
         active: { id: "step-1", data: { current: undefined } },
         over: { id: "step-1", data: { current: undefined } },
@@ -121,11 +150,16 @@ describe("useWorkoutListDnd", () => {
       });
 
       // Assert
+
+      // Assert
+
       expect(onStepReorder).not.toHaveBeenCalled();
     });
 
     it("should not call onStepReorder when over is null", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout(3);
       const onStepReorder = vi.fn();
       const { result } = renderHook(() =>
@@ -133,6 +167,9 @@ describe("useWorkoutListDnd", () => {
       );
 
       // Act
+
+      // Act
+
       result.current.handleDragEnd({
         active: { id: "step-0", data: { current: undefined } },
         over: null,
@@ -142,15 +179,26 @@ describe("useWorkoutListDnd", () => {
       });
 
       // Assert
+
+      // Assert
+
       expect(onStepReorder).not.toHaveBeenCalled();
     });
 
     it("should not call onStepReorder when callback is not provided", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout(3);
+
+      // Act
+
       const { result } = renderHook(() => useWorkoutListDnd(workout));
 
       // Act & Assert - should not throw
+
+      // Assert
+
       expect(() => {
         result.current.handleDragEnd({
           active: { id: "step-0", data: { current: undefined } },
@@ -166,24 +214,40 @@ describe("useWorkoutListDnd", () => {
   describe("sensors configuration", () => {
     it("should configure pointer and keyboard sensors", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout(3);
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useWorkoutListDnd(workout));
 
       // Assert
+
+      // Assert
+
       expect(result.current.sensors).toBeDefined();
       expect(Array.isArray(result.current.sensors)).toBe(true);
     });
 
     it("should use closestCenter collision detection", () => {
       // Arrange
+      // Arrange
+
       const workout = createMockWorkout(3);
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useWorkoutListDnd(workout));
 
       // Assert
+
+      // Assert
+
       expect(result.current.collisionDetection).toBeDefined();
     });
   });
@@ -199,6 +263,8 @@ describe("useWorkoutListDnd", () => {
      */
     it("should generate IDs based on stepIndex for steps, position for blocks", () => {
       // Arrange - Create steps with arbitrary stepIndex values (content)
+      // Arrange
+
       const steps: Array<WorkoutStep | RepetitionBlock> = [
         {
           stepIndex: 99, // Arbitrary content value
@@ -248,9 +314,15 @@ describe("useWorkoutListDnd", () => {
 
       // Act
       const { result } = renderHook(() => useWorkoutListDnd(workout));
+
+      // Act
+
       const ids = result.current.sortableIds;
 
       // Assert - IDs should be based on stepIndex (content), not array position
+
+      // Assert
+
       expect(ids).toEqual([
         "step-99", // stepIndex=99
         "step-42", // stepIndex=42
@@ -265,6 +337,12 @@ describe("useWorkoutListDnd", () => {
     });
 
     it("should generate stepIndex-based IDs for steps, position-based for blocks", () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange - Test with multiple positions
       const positions = [0, 1, 5, 10, 99];
 
@@ -314,6 +392,8 @@ describe("useWorkoutListDnd", () => {
      */
     it("should update IDs when stepIndex changes", () => {
       // Arrange - Create a step at position 0
+      // Arrange
+
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "time" as const,
@@ -338,9 +418,15 @@ describe("useWorkoutListDnd", () => {
       // Act - Change stepIndex (simulating reindexing)
       step.stepIndex = 5;
       const { result: result2 } = renderHook(() => useWorkoutListDnd(workout));
+
+      // Act
+
       const id2 = result2.current.generateStepId(step, 0);
 
       // Assert - ID should change when stepIndex changes (IDs are based on stepIndex)
+
+      // Assert
+
       expect(id1).toBe("step-0");
       expect(id2).toBe("step-5");
       expect(id1).not.toBe(id2);
@@ -348,6 +434,8 @@ describe("useWorkoutListDnd", () => {
 
     it("should maintain stable IDs when non-stepIndex properties change", () => {
       // Arrange - Create a step at position 1
+      // Arrange
+
       const step: WorkoutStep = {
         stepIndex: 1,
         durationType: "time" as const,
@@ -390,9 +478,15 @@ describe("useWorkoutListDnd", () => {
       step.intensity = "cooldown";
 
       const { result: result2 } = renderHook(() => useWorkoutListDnd(workout));
+
+      // Act
+
       const id2 = result2.current.generateStepId(step, 1);
 
       // Assert - ID should remain stable despite content changes
+
+      // Assert
+
       expect(id1).toBe("step-1");
       expect(id2).toBe("step-1");
       expect(id1).toBe(id2);
@@ -400,6 +494,8 @@ describe("useWorkoutListDnd", () => {
 
     it("should maintain stable IDs for repetition blocks when repeatCount changes", () => {
       // Arrange - Create a repetition block at position 0
+      // Arrange
+
       const block: RepetitionBlock = {
         repeatCount: 3,
         steps: [
@@ -429,9 +525,15 @@ describe("useWorkoutListDnd", () => {
       // Act - Change repeatCount
       block.repeatCount = 10;
       const { result: result2 } = renderHook(() => useWorkoutListDnd(workout));
+
+      // Act
+
       const id2 = result2.current.generateStepId(block, 0);
 
       // Assert - ID should remain stable despite repeatCount change
+
+      // Assert
+
       expect(id1).toBe("block-0");
       expect(id2).toBe("block-0");
       expect(id1).toBe(id2);
@@ -448,6 +550,8 @@ describe("useWorkoutListDnd", () => {
      */
     it("should generate consistent IDs for React keys and sortable items", () => {
       // Arrange - Create workout with various items
+      // Arrange
+
       const steps: Array<WorkoutStep | RepetitionBlock> = [
         {
           stepIndex: 0,
@@ -500,6 +604,9 @@ describe("useWorkoutListDnd", () => {
       const { sortableIds, generateStepId } = result.current;
 
       // Assert - For each item, the sortableId should match what generateStepId produces
+
+      // Act
+
       steps.forEach((step, index) => {
         const expectedId = generateStepId(step, index);
         const actualId = sortableIds[index];
@@ -508,11 +615,16 @@ describe("useWorkoutListDnd", () => {
       });
 
       // Verify specific IDs
+
+      // Assert
+
       expect(sortableIds).toEqual(["step-0", "block-1", "step-2"]);
     });
 
     it("should maintain ID consistency across multiple renders", () => {
       // Arrange - Create workout
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -545,9 +657,15 @@ describe("useWorkoutListDnd", () => {
       // Act - Render multiple times
       const { result: result1 } = renderHook(() => useWorkoutListDnd(workout));
       const { result: result2 } = renderHook(() => useWorkoutListDnd(workout));
+
+      // Act
+
       const { result: result3 } = renderHook(() => useWorkoutListDnd(workout));
 
       // Assert - All renders should produce identical IDs
+
+      // Assert
+
       expect(result1.current.sortableIds).toEqual(result2.current.sortableIds);
       expect(result2.current.sortableIds).toEqual(result3.current.sortableIds);
 
@@ -564,6 +682,8 @@ describe("useWorkoutListDnd", () => {
 
     it("should generate matching IDs for empty workout", () => {
       // Arrange - Empty workout
+      // Arrange
+
       const workout: Workout = {
         name: "Empty Workout",
         sport: "cycling",
@@ -572,15 +692,23 @@ describe("useWorkoutListDnd", () => {
 
       // Act
       const { result } = renderHook(() => useWorkoutListDnd(workout));
+
+      // Act
+
       const { sortableIds } = result.current;
 
       // Assert - Both should be empty
+
+      // Assert
+
       expect(sortableIds).toEqual([]);
       expect(workout.steps.length).toBe(0);
     });
 
     it("should generate matching IDs for large workouts", () => {
       // Arrange - Create workout with many items
+      // Arrange
+
       const steps: WorkoutStep[] = Array.from({ length: 50 }, (_, i) => ({
         stepIndex: i,
         durationType: "time" as const,
@@ -601,9 +729,15 @@ describe("useWorkoutListDnd", () => {
 
       // Act
       const { result } = renderHook(() => useWorkoutListDnd(workout));
+
+      // Act
+
       const { sortableIds, generateStepId } = result.current;
 
       // Assert - All IDs should match
+
+      // Assert
+
       expect(sortableIds.length).toBe(50);
 
       steps.forEach((step, index) => {
@@ -617,6 +751,8 @@ describe("useWorkoutListDnd", () => {
 
     it("should generate matching IDs after content changes", () => {
       // Arrange - Create workout
+      // Arrange
+
       const step: WorkoutStep = {
         stepIndex: 0,
         durationType: "time" as const,
@@ -648,9 +784,15 @@ describe("useWorkoutListDnd", () => {
       // Re-render with changed content
       const { result: result2 } = renderHook(() => useWorkoutListDnd(workout));
       const newId = result2.current.generateStepId(step, 0);
+
+      // Act
+
       const newSortableId = result2.current.sortableIds[0];
 
       // Assert - IDs should change when stepIndex changes
+
+      // Assert
+
       expect(initialId).toBe("step-0");
       expect(newId).toBe("step-99");
       expect(initialSortableId).toBe("step-0");
@@ -672,6 +814,8 @@ describe("useWorkoutListDnd", () => {
      */
     it("should provide activeId for DragOverlay when dragging", () => {
       // Arrange
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -695,15 +839,22 @@ describe("useWorkoutListDnd", () => {
         ],
       };
 
+      // Act
+
       const { result } = renderHook(() => useWorkoutListDnd(workout));
 
       // Assert - The hook should provide the active ID for DragOverlay
+
+      // Assert
+
       expect(result.current.sortableIds).toContain("block-0");
       expect(result.current.sortableIds[0]).toBe("block-0");
     });
 
     it("should maintain consistent ID format for all item types", () => {
       // Arrange - Create workout with mixed items
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -750,9 +901,15 @@ describe("useWorkoutListDnd", () => {
       };
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useWorkoutListDnd(workout));
 
       // Assert - All IDs should follow consistent format
+
+      // Assert
+
       expect(result.current.sortableIds).toEqual([
         "step-0",
         "block-1",
@@ -780,6 +937,8 @@ describe("useWorkoutListDnd", () => {
      */
     it("should maintain state consistency after drag end", () => {
       // Arrange
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -822,6 +981,9 @@ describe("useWorkoutListDnd", () => {
       const initialIds = [...result.current.sortableIds];
 
       // Act - Simulate drag and drop
+
+      // Act
+
       result.current.handleDragEnd({
         active: { id: "block-0", data: { current: undefined } },
         over: { id: "step-1", data: { current: undefined } },
@@ -831,12 +993,17 @@ describe("useWorkoutListDnd", () => {
       });
 
       // Assert - State should be consistent after drop
+
+      // Assert
+
       expect(onStepReorder).toHaveBeenCalledWith(0, 1);
       expect(result.current.sortableIds).toEqual(initialIds);
     });
 
     it("should handle drop on same position without state changes", () => {
       // Arrange
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -868,6 +1035,9 @@ describe("useWorkoutListDnd", () => {
       const initialIds = [...result.current.sortableIds];
 
       // Act - Drop on same position
+
+      // Act
+
       result.current.handleDragEnd({
         active: { id: "block-0", data: { current: undefined } },
         over: { id: "block-0", data: { current: undefined } },
@@ -877,6 +1047,9 @@ describe("useWorkoutListDnd", () => {
       });
 
       // Assert - No state changes
+
+      // Assert
+
       expect(onStepReorder).not.toHaveBeenCalled();
       expect(result.current.sortableIds).toEqual(initialIds);
     });
@@ -895,6 +1068,8 @@ describe("useWorkoutListDnd", () => {
      */
     it("should use same collision detection for all item types", () => {
       // Arrange - Create workout with mixed items
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -930,15 +1105,23 @@ describe("useWorkoutListDnd", () => {
       };
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useWorkoutListDnd(workout));
 
       // Assert - Same collision detection for all items
+
+      // Assert
+
       expect(result.current.collisionDetection).toBeDefined();
       expect(typeof result.current.collisionDetection).toBe("function");
     });
 
     it("should use same sensors for all item types", () => {
       // Arrange - Create workout with mixed items
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -974,9 +1157,15 @@ describe("useWorkoutListDnd", () => {
       };
 
       // Act
+
+      // Act
+
       const { result } = renderHook(() => useWorkoutListDnd(workout));
 
       // Assert - Sensors are configured consistently
+
+      // Assert
+
       expect(result.current.sensors).toBeDefined();
       expect(Array.isArray(result.current.sensors)).toBe(true);
       expect(result.current.sensors.length).toBeGreaterThan(0);
@@ -984,6 +1173,8 @@ describe("useWorkoutListDnd", () => {
 
     it("should handle drag events consistently for steps and blocks", () => {
       // Arrange
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -1024,6 +1215,9 @@ describe("useWorkoutListDnd", () => {
       );
 
       // Act - Drag step over block
+
+      // Act
+
       result.current.handleDragEnd({
         active: { id: "step-0", data: { current: undefined } },
         over: { id: "block-1", data: { current: undefined } },
@@ -1033,6 +1227,9 @@ describe("useWorkoutListDnd", () => {
       });
 
       // Assert - Handler works for both types
+
+      // Assert
+
       expect(onStepReorder).toHaveBeenCalledWith(0, 1);
 
       // Act - Drag block over step
@@ -1061,6 +1258,8 @@ describe("useWorkoutListDnd", () => {
      */
     it("should maintain stepIndex-based IDs after reordering", () => {
       // Arrange - Create workout with 3 steps
+      // Arrange
+
       const steps: WorkoutStep[] = [
         {
           stepIndex: 0,
@@ -1118,9 +1317,15 @@ describe("useWorkoutListDnd", () => {
       const { result: result2 } = renderHook(() =>
         useWorkoutListDnd(reorderedWorkout)
       );
+
+      // Act
+
       const newIds = result2.current.sortableIds;
 
       // Assert - IDs should reflect stepIndex values (not array positions)
+
+      // Assert
+
       expect(initialIds).toEqual(["step-0", "step-1", "step-2"]);
       expect(newIds).toEqual([
         "step-1", // step1 has stepIndex=1
@@ -1142,6 +1347,8 @@ describe("useWorkoutListDnd", () => {
 
     it("should maintain stepIndex-based IDs after multiple reorders", () => {
       // Arrange - Create workout with mixed steps and blocks
+      // Arrange
+
       const steps: Array<WorkoutStep | RepetitionBlock> = [
         {
           stepIndex: 0,
@@ -1197,9 +1404,15 @@ describe("useWorkoutListDnd", () => {
       };
 
       const { result } = renderHook(() => useWorkoutListDnd(reorderedWorkout));
+
+      // Act
+
       const newIds = result.current.sortableIds;
 
       // Assert - IDs should reflect stepIndex values (steps) and positions (blocks)
+
+      // Assert
+
       expect(newIds).toEqual([
         "block-0", // Block at position 0
         "step-0", // Step has stepIndex=0
@@ -1218,6 +1431,8 @@ describe("useWorkoutListDnd", () => {
      */
     it("should generate unique IDs for main workout steps", () => {
       // Arrange
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -1249,15 +1464,23 @@ describe("useWorkoutListDnd", () => {
 
       // Act
       const { result } = renderHook(() => useWorkoutListDnd(workout));
+
+      // Act
+
       const ids = result.current.sortableIds;
 
       // Assert
+
+      // Assert
+
       expect(ids).toEqual(["step-1", "step-2"]);
       expect(new Set(ids).size).toBe(ids.length); // All IDs are unique
     });
 
     it("should generate unique IDs for repetition blocks", () => {
       // Arrange
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -1299,15 +1522,23 @@ describe("useWorkoutListDnd", () => {
 
       // Act
       const { result } = renderHook(() => useWorkoutListDnd(workout));
+
+      // Act
+
       const ids = result.current.sortableIds;
 
       // Assert
+
+      // Assert
+
       expect(ids).toEqual(["block-0", "block-1"]);
       expect(new Set(ids).size).toBe(ids.length); // All IDs are unique
     });
 
     it("should generate hierarchical IDs for steps inside blocks with parent context", () => {
       // Arrange
+      // Arrange
+
       const step: WorkoutStep = {
         stepIndex: 1,
         durationType: "time" as const,
@@ -1333,9 +1564,15 @@ describe("useWorkoutListDnd", () => {
       // Test with different parent block indices
       const id1 = generateStepId(step, 0, 2); // Step in block at index 2
       const id2 = generateStepId(step, 0, 5); // Step in block at index 5
+
+      // Act
+
       const id3 = generateStepId(step, 0, undefined); // Step in main workout
 
       // Assert
+
+      // Assert
+
       expect(id1).toBe("block-2-step-1");
       expect(id2).toBe("block-5-step-1");
       expect(id3).toBe("step-1");
@@ -1344,6 +1581,8 @@ describe("useWorkoutListDnd", () => {
 
     it("should generate unique IDs across complex workout with duplicate stepIndex values", () => {
       // Arrange - Workout with steps having same stepIndex in different contexts
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -1418,9 +1657,14 @@ describe("useWorkoutListDnd", () => {
         (step, idx) => generateStepId(step, idx, 2)
       );
 
+      // Act
+
       const allIds = [...mainStepIds, ...block1StepIds, ...block2StepIds];
 
       // Assert - All IDs must be unique
+
+      // Assert
+
       expect(mainStepIds).toEqual(["step-1", "block-1", "block-2", "step-2"]);
       expect(block1StepIds).toEqual(["block-1-step-1"]);
       expect(block2StepIds).toEqual(["block-2-step-1"]);
@@ -1429,6 +1673,8 @@ describe("useWorkoutListDnd", () => {
 
     it("should generate unique IDs for multiple blocks with multiple steps each", () => {
       // Arrange
+      // Arrange
+
       const workout: Workout = {
         name: "Test Workout",
         sport: "cycling",
@@ -1502,6 +1748,8 @@ describe("useWorkoutListDnd", () => {
         (step, idx) => generateStepId(step, idx, 1)
       );
 
+      // Act
+
       const allIds = [
         ...result.current.sortableIds,
         ...block0StepIds,
@@ -1509,6 +1757,9 @@ describe("useWorkoutListDnd", () => {
       ];
 
       // Assert
+
+      // Assert
+
       expect(block0StepIds).toEqual(["block-0-step-0", "block-0-step-1"]);
       expect(block1StepIds).toEqual(["block-1-step-0", "block-1-step-1"]);
       expect(new Set(allIds).size).toBe(allIds.length); // All IDs are unique

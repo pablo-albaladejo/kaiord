@@ -35,11 +35,18 @@ describe("useWorkoutSectionHandlers", () => {
 
   it("should return only non-delete handlers", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     const { result } = renderHook(() =>
       useWorkoutSectionHandlers(mockWorkout, mockKrd, mockOnStepSelect)
     );
 
     // Assert
+
+    // Assert
+
     expect(result.current).toHaveProperty("handleStepSelect");
     expect(result.current).toHaveProperty("handleSave");
     expect(result.current).toHaveProperty("handleCancel");
@@ -47,11 +54,18 @@ describe("useWorkoutSectionHandlers", () => {
 
   it("should not include delete-related handlers", () => {
     // Arrange & Act
+    // Arrange
+
+    // Act
+
     const { result } = renderHook(() =>
       useWorkoutSectionHandlers(mockWorkout, mockKrd, mockOnStepSelect)
     );
 
     // Assert - Verify no delete handlers exist
+
+    // Assert
+
     expect(result.current).not.toHaveProperty("handleDeleteRequest");
     expect(result.current).not.toHaveProperty("handleDeleteConfirm");
     expect(result.current).not.toHaveProperty("handleDeleteCancel");
@@ -60,12 +74,20 @@ describe("useWorkoutSectionHandlers", () => {
 
   it("should return exactly three handlers", () => {
     // Arrange & Act
+    // Arrange
+
     const { result } = renderHook(() =>
       useWorkoutSectionHandlers(mockWorkout, mockKrd, mockOnStepSelect)
     );
 
     // Assert
+
+    // Act
+
     const handlerKeys = Object.keys(result.current);
+
+    // Assert
+
     expect(handlerKeys).toHaveLength(3);
     expect(handlerKeys).toEqual([
       "handleStepSelect",

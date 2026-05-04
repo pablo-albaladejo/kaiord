@@ -40,10 +40,16 @@ beforeEach(() => {
 
 describe("useCoachingDialogActions — picker open/close", () => {
   it("should flip pickerOpen to true via openPicker and back via closePicker", () => {
+    // Arrange
+
+    // Act
+
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, "p1", { kind: "solo" }),
       { wrapper: wrap }
     );
+
+    // Assert
 
     expect(result.current.pickerOpen).toBe(false);
     act(() => result.current.openPicker());
@@ -55,6 +61,8 @@ describe("useCoachingDialogActions — picker open/close", () => {
 
 describe("useCoachingDialogActions — handleSelectWorkout", () => {
   it("should invoke useMatchSession with profileId / activity / workout / source=manual", async () => {
+    // Arrange
+
     mockMatch.mockResolvedValue(undefined);
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, "p1", { kind: "solo" }),
@@ -62,9 +70,14 @@ describe("useCoachingDialogActions — handleSelectWorkout", () => {
     );
 
     act(() => result.current.openPicker());
+
+    // Act
+
     await act(async () => {
       await result.current.handleSelectWorkout("w-1");
     });
+
+    // Assert
 
     expect(mockMatch).toHaveBeenCalledWith({
       profileId: "p1",
@@ -77,32 +90,46 @@ describe("useCoachingDialogActions — handleSelectWorkout", () => {
   });
 
   it("should be a no-op when activity is null", async () => {
+    // Arrange
+
     const { result } = renderHook(
       () => useCoachingDialogActions(null, "p1", { kind: "solo" }),
       { wrapper: wrap }
     );
 
+    // Act
+
     await act(async () => {
       await result.current.handleSelectWorkout("w-1");
     });
+
+    // Assert
 
     expect(mockMatch).not.toHaveBeenCalled();
   });
 
   it("should be a no-op when targetProfileId is null", async () => {
+    // Arrange
+
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, null, { kind: "solo" }),
       { wrapper: wrap }
     );
 
+    // Act
+
     await act(async () => {
       await result.current.handleSelectWorkout("w-1");
     });
+
+    // Assert
 
     expect(mockMatch).not.toHaveBeenCalled();
   });
 
   it("toggles `matching` true while in flight; resets on completion", async () => {
+    // Arrange
+
     let resolve!: () => void;
     mockMatch.mockReturnValue(
       new Promise<void>((r) => {
@@ -115,9 +142,15 @@ describe("useCoachingDialogActions — handleSelectWorkout", () => {
     );
 
     let promise: Promise<void>;
+
+    // Act
+
     act(() => {
       promise = result.current.handleSelectWorkout("w-1");
     });
+
+    // Assert
+
     await waitFor(() => expect(result.current.matching).toBe(true));
 
     await act(async () => {
@@ -137,15 +170,21 @@ describe("useCoachingDialogActions — handleSplit", () => {
   };
 
   it("should invoke useUnmatchSession with profileId + matchId from matchState", async () => {
+    // Arrange
+
     mockUnmatch.mockResolvedValue(undefined);
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, "p1", matchedState),
       { wrapper: wrap }
     );
 
+    // Act
+
     await act(async () => {
       await result.current.handleSplit();
     });
+
+    // Assert
 
     expect(mockUnmatch).toHaveBeenCalledWith({
       profileId: "p1",
@@ -154,32 +193,46 @@ describe("useCoachingDialogActions — handleSplit", () => {
   });
 
   it("should be a no-op when matchState is solo", async () => {
+    // Arrange
+
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, "p1", { kind: "solo" }),
       { wrapper: wrap }
     );
 
+    // Act
+
     await act(async () => {
       await result.current.handleSplit();
     });
+
+    // Assert
 
     expect(mockUnmatch).not.toHaveBeenCalled();
   });
 
   it("should be a no-op when targetProfileId is null", async () => {
+    // Arrange
+
     const { result } = renderHook(
       () => useCoachingDialogActions(activity, null, matchedState),
       { wrapper: wrap }
     );
 
+    // Act
+
     await act(async () => {
       await result.current.handleSplit();
     });
+
+    // Assert
 
     expect(mockUnmatch).not.toHaveBeenCalled();
   });
 
   it("toggles `splitting` true while in flight; resets on completion", async () => {
+    // Arrange
+
     let resolve!: () => void;
     mockUnmatch.mockReturnValue(
       new Promise<void>((r) => {
@@ -192,9 +245,15 @@ describe("useCoachingDialogActions — handleSplit", () => {
     );
 
     let promise: Promise<void>;
+
+    // Act
+
     act(() => {
       promise = result.current.handleSplit();
     });
+
+    // Assert
+
     await waitFor(() => expect(result.current.splitting).toBe(true));
 
     await act(async () => {

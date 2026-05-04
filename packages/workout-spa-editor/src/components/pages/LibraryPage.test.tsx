@@ -72,6 +72,8 @@ describe("LibraryPage", () => {
   });
 
   it("should render templates from Dexie", async () => {
+    // Arrange
+
     await db
       .table("templates")
       .bulkAdd([
@@ -79,7 +81,11 @@ describe("LibraryPage", () => {
         makeTemplate({ id: "t2", name: "Bike Intervals", sport: "cycling" }),
       ]);
 
+    // Act
+
     renderPage();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Morning Run")).toBeInTheDocument();
@@ -88,7 +94,13 @@ describe("LibraryPage", () => {
   });
 
   it("should show empty state when no templates", async () => {
+    // Arrange
+
+    // Act
+
     renderPage();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Your library is empty")).toBeInTheDocument();
@@ -96,6 +108,8 @@ describe("LibraryPage", () => {
   });
 
   it("should filter templates by search", async () => {
+    // Arrange
+
     await db
       .table("templates")
       .bulkAdd([
@@ -104,7 +118,12 @@ describe("LibraryPage", () => {
       ]);
 
     const user = userEvent.setup();
+
+    // Act
+
     renderPage();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Morning Run")).toBeInTheDocument();
@@ -120,6 +139,8 @@ describe("LibraryPage", () => {
   });
 
   it("should filter templates by sport", async () => {
+    // Arrange
+
     await db
       .table("templates")
       .bulkAdd([
@@ -128,7 +149,12 @@ describe("LibraryPage", () => {
       ]);
 
     const user = userEvent.setup();
+
+    // Act
+
     renderPage();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Morning Run")).toBeInTheDocument();
@@ -144,12 +170,19 @@ describe("LibraryPage", () => {
   });
 
   it("should create a workout record in workouts table on schedule", async () => {
+    // Arrange
+
     await db
       .table("templates")
       .add(makeTemplate({ id: "t1", name: "Easy Ride", sport: "cycling" }));
 
     const user = userEvent.setup();
+
+    // Act
+
     renderPage();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Easy Ride")).toBeInTheDocument();
@@ -176,11 +209,17 @@ describe("LibraryPage", () => {
   });
 
   it("hides the 'Load into editor' CTA when no active workout", async () => {
+    // Arrange
+
     await db
       .table("templates")
       .add(makeTemplate({ id: "t1", name: "Easy Ride", sport: "cycling" }));
 
+    // Act
+
     renderPage();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Easy Ride")).toBeInTheDocument();
@@ -191,12 +230,18 @@ describe("LibraryPage", () => {
   });
 
   it("shows the 'Load into editor' CTA only when the editor has an active workout", async () => {
+    // Arrange
+
     await db
       .table("templates")
       .add(makeTemplate({ id: "t1", name: "Easy Ride", sport: "cycling" }));
     useWorkoutStore.setState({ currentWorkout: ACTIVE_KRD });
 
+    // Act
+
     renderPage();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByText("Easy Ride")).toBeInTheDocument();
@@ -205,6 +250,8 @@ describe("LibraryPage", () => {
   });
 
   it("clicking 'Load into editor' loads the template KRD into the workout store", async () => {
+    // Arrange
+
     const template = makeTemplate({
       id: "t1",
       name: "Easy Ride",
@@ -214,7 +261,12 @@ describe("LibraryPage", () => {
     useWorkoutStore.setState({ currentWorkout: ACTIVE_KRD });
 
     const user = userEvent.setup();
+
+    // Act
+
     renderPage();
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByTestId("card-load-into-editor")).toBeInTheDocument();
@@ -227,11 +279,18 @@ describe("LibraryPage", () => {
   });
 
   it("should render the page heading with the route-heading attribute", async () => {
+    // Arrange
+
     renderPage();
+
+    // Act
 
     const heading = await screen.findByRole("heading", {
       name: /workout library/i,
     });
+
+    // Assert
+
     expect(heading.tagName).toBe("H1");
     expect(heading).toHaveAttribute("data-route-heading");
     expect(heading).toHaveAttribute("tabIndex", "-1");

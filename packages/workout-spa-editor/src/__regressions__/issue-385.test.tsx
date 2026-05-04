@@ -87,10 +87,16 @@ describe("Issue #385 regressions", () => {
   afterEach(clearDexie);
 
   it("(1B.3.1) linkAccount via PersistencePort flips the Connect → Sync probe without remount", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     const profile = await createProfile(persistence, "Pablo");
 
+    // Act
+
     render(<Train2GoLinkProbe />);
+
+    // Assert
 
     expect(await screen.findByText("Connect Pablo")).toBeInTheDocument();
 
@@ -107,12 +113,18 @@ describe("Issue #385 regressions", () => {
   });
 
   it("(1B.3.2) profiles and the active id survive a refresh — fresh mount sees the persisted state", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     const a = await createProfile(persistence, "Alpha");
     const b = await createProfile(persistence, "Beta");
     await setActiveProfile(persistence, b.id);
 
+    // Act
+
     render(<ProfileListProbe />);
+
+    // Assert
 
     await waitFor(() => {
       const list = screen.getByTestId("profile-list");
@@ -136,12 +148,16 @@ describe("Issue #385 regressions", () => {
   });
 
   it("(1B.3.3) sibling-driven setActiveProfile transition is observed atomically — never sees { id: B, profile: <other> }", async () => {
+    // Arrange
+
     const persistence = createDexiePersistence(db);
     const a = await createProfile(persistence, "A");
     const b = await createProfile(persistence, "B");
     await setActiveProfile(persistence, a.id);
 
     const observed: ActiveProfile[] = [];
+
+    // Act
 
     render(
       <>
@@ -154,6 +170,8 @@ describe("Issue #385 regressions", () => {
         />
       </>
     );
+
+    // Assert
 
     await waitFor(() => {
       expect(screen.getByTestId("active")).toHaveTextContent("A");

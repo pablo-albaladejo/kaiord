@@ -27,6 +27,10 @@ const makeWorkout = (overrides: Partial<WorkoutRecord> = {}): WorkoutRecord =>
 
 describe("LinkedWorkoutSection", () => {
   it("renders the matched workout's title, sport, and duration", () => {
+    // Arrange
+
+    // Act
+
     render(
       <LinkedWorkoutSection
         workout={makeWorkout()}
@@ -35,12 +39,16 @@ describe("LinkedWorkoutSection", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByText("Sweet spot intervals")).toBeInTheDocument();
     expect(screen.getByText(/Cycling.*60min/)).toBeInTheDocument();
     expect(screen.getByTestId("linked-workout-section")).toBeInTheDocument();
   });
 
   it("should invoke onSplit when the Split button is clicked", async () => {
+    // Arrange
+
     const onSplit = vi.fn();
     render(
       <LinkedWorkoutSection
@@ -50,12 +58,20 @@ describe("LinkedWorkoutSection", () => {
       />
     );
 
+    // Act
+
     await userEvent.click(screen.getByRole("button", { name: "Split" }));
+
+    // Assert
 
     expect(onSplit).toHaveBeenCalledTimes(1);
   });
 
   it("should disable the Split button while a split is in flight", () => {
+    // Arrange
+
+    // Act
+
     render(
       <LinkedWorkoutSection
         workout={makeWorkout()}
@@ -64,10 +80,16 @@ describe("LinkedWorkoutSection", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByRole("button", { name: "Splitting…" })).toBeDisabled();
   });
 
   it("falls back to a description-truncated title when no `raw.title` is set", () => {
+    // Arrange
+
+    // Act
+
     render(
       <LinkedWorkoutSection
         workout={makeWorkout({
@@ -79,6 +101,8 @@ describe("LinkedWorkoutSection", () => {
         onSplit={vi.fn()}
       />
     );
+
+    // Assert
 
     expect(
       screen.getByText("30 minute endurance ride at zone 2")

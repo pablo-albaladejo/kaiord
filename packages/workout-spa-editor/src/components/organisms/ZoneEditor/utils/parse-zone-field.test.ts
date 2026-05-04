@@ -23,68 +23,149 @@ const paceZones: Array<PaceZone> = [
 
 describe("applyValueChange", () => {
   it("should update HR min value", () => {
+    // Arrange
+
+    // Act
+
     const result = applyValueChange(hrZones, 0, "min", "110", "heartRate");
+
+    // Assert
+
     expect((result![0] as HeartRateZone).minBpm).toBe(110);
   });
 
   it("should update HR max value", () => {
+    // Arrange
+
+    // Act
+
     const result = applyValueChange(hrZones, 1, "max", "170", "heartRate");
+
+    // Assert
+
     expect((result![1] as HeartRateZone).maxBpm).toBe(170);
   });
 
   it("should return null for invalid HR input", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(applyValueChange(hrZones, 0, "min", "abc", "heartRate")).toBeNull();
   });
 
   it("should convert watts to percent with threshold", () => {
+    // Arrange
+
+    // Act
+
     const result = applyValueChange(powerZones, 0, "max", "150", "power", 300);
+
+    // Assert
+
     expect((result![0] as PowerZone).maxPercent).toBe(50);
   });
 
   it("should convert bare number to percent when threshold exists", () => {
+    // Arrange
+
+    // Act
+
     const result = applyValueChange(powerZones, 0, "max", "200", "power", 250);
+
+    // Assert
+
     expect(Math.round((result![0] as PowerZone).maxPercent)).toBe(80);
   });
 
   it("should treat bare number as percent when no threshold", () => {
+    // Arrange
+
+    // Act
+
     const result = applyValueChange(powerZones, 0, "max", "80", "power");
+
+    // Assert
+
     expect(Math.round((result![0] as PowerZone).maxPercent)).toBe(80);
   });
 
   it("should update pace from mm:ss format", () => {
+    // Arrange
+
+    // Act
+
     const result = applyValueChange(paceZones, 0, "min", "5:30", "pace");
+
+    // Assert
+
     expect((result![0] as PaceZone).minPace).toBe(330);
   });
 
   it("should return null for invalid pace format", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(applyValueChange(paceZones, 0, "min", "invalid", "pace")).toBeNull();
   });
 
   // Cascade tests
   it("should cascade max change to next zone min (HR)", () => {
+    // Arrange
+
+    // Act
+
     const result = applyValueChange(hrZones, 0, "max", "140", "heartRate");
+
+    // Assert
+
     expect((result![0] as HeartRateZone).maxBpm).toBe(140);
     expect((result![1] as HeartRateZone).minBpm).toBe(141);
   });
 
   it("should cascade min change to previous zone max (HR)", () => {
+    // Arrange
+
+    // Act
+
     const result = applyValueChange(hrZones, 1, "min", "125", "heartRate");
+
+    // Assert
+
     expect((result![1] as HeartRateZone).minBpm).toBe(125);
     expect((result![0] as HeartRateZone).maxBpm).toBe(124);
   });
 
   it("should cascade max change to next zone min (power with threshold)", () => {
+    // Arrange
+
     const result = applyValueChange(powerZones, 0, "max", "200", "power", 250);
     // 200W → 80%, next zone min should be 201W → 80% (rounded)
     const z1 = result![0] as PowerZone;
+
+    // Act
+
     const z2 = result![1] as PowerZone;
+
+    // Assert
+
     expect(Math.round(z1.maxPercent)).toBe(80);
     const z2MinW = Math.round((250 * z2.minPercent) / 100);
     expect(z2MinW).toBe(201);
   });
 
   it("should not cascade beyond first zone", () => {
+    // Arrange
+
+    // Act
+
     const result = applyValueChange(hrZones, 0, "min", "90", "heartRate");
+
+    // Assert
+
     expect((result![0] as HeartRateZone).minBpm).toBe(90);
     // Untouched zones remain the same
     expect((result![1] as HeartRateZone).minBpm).toBe(131);
@@ -95,7 +176,14 @@ describe("applyValueChange", () => {
   });
 
   it("should not cascade beyond last zone", () => {
+    // Arrange
+
+    // Act
+
     const result = applyValueChange(hrZones, 2, "max", "200", "heartRate");
+
+    // Assert
+
     expect((result![2] as HeartRateZone).maxBpm).toBe(200);
     // Untouched zones remain the same
     expect((result![0] as HeartRateZone).minBpm).toBe(100);
@@ -108,7 +196,14 @@ describe("applyValueChange", () => {
   it("should cascade pace max to next zone min", () => {
     // Cascade treats pace like ascending zones (minPace->maxPace).
     // Increasing Z1 maxPace pushes Z2 minPace forward.
+    // Arrange
+
+    // Act
+
     const result = applyValueChange(paceZones, 0, "max", "7:30", "pace");
+
+    // Assert
+
     expect((result![0] as PaceZone).maxPace).toBe(450);
     expect((result![1] as PaceZone).minPace).toBe(451);
     // Z2 max pushed since 451 > 359
@@ -120,11 +215,18 @@ it("should cascade recursively when max pushes through next zone", () => {
   // Z1: 100-130, Z2: 131-160, Z3: 161-190
   // Set Z1 max to 180 → Z2 min=181, Z2 max (160) < 181 → push Z2 max to 182
   // → Z3 min=183
+  // Arrange
+
   const result = applyValueChange(hrZones, 0, "max", "180", "heartRate");
 
   const z1 = result![0] as HeartRateZone;
   const z2 = result![1] as HeartRateZone;
+
+  // Act
+
   const z3 = result![2] as HeartRateZone;
+
+  // Assert
 
   expect(z1.maxBpm).toBe(180);
   expect(z2.minBpm).toBe(181);
@@ -138,6 +240,8 @@ it("should fix same zone when min exceeds max and cascade forward", () => {
   // Z1=0-137W, Z2=140-187W, Z3=190-225W
   // Set Z3 min to 285W (114%) → Z3 max (225W) < 285W
   // → Z3 max pushed to 286W, Z4+ would cascade
+  // Arrange
+
   const zones: Array<PowerZone> = [
     { zone: 1, name: "Z1", minPercent: 0, maxPercent: 55 },
     { zone: 2, name: "Z2", minPercent: 56, maxPercent: 75 },
@@ -146,8 +250,14 @@ it("should fix same zone when min exceeds max and cascade forward", () => {
   const result = applyValueChange(zones, 2, "min", "285", "power", 250);
 
   const z2 = result![1] as PowerZone;
+
+  // Act
+
   const z3 = result![2] as PowerZone;
   // Z3 min = 285W → 114%
+
+  // Assert
+
   expect(Math.round(z3.minPercent)).toBe(114);
   // Z3 max must be >= Z3 min
   const z3MaxW = Math.round((250 * z3.maxPercent) / 100);

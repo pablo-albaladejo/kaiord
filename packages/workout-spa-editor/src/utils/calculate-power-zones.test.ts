@@ -4,7 +4,13 @@ import { calculatePowerZones } from "./calculate-power-zones";
 
 describe("calculatePowerZones", () => {
   it("should return 7 Coggan power zones", () => {
+    // Arrange
+
+    // Act
+
     const zones = calculatePowerZones();
+
+    // Assert
 
     expect(zones).toHaveLength(7);
     expect(zones[0]).toEqual({
@@ -28,15 +34,29 @@ describe("calculatePowerZones", () => {
   });
 
   it("should return consistent results on multiple calls", () => {
+    // Arrange
+
     const first = calculatePowerZones();
+
+    // Act
+
     const second = calculatePowerZones();
+
+    // Assert
 
     expect(first).toEqual(second);
   });
 
   it("should return zone names matching Coggan model", () => {
+    // Arrange
+
     const zones = calculatePowerZones();
+
+    // Act
+
     const names = zones.map((z) => z.name);
+
+    // Assert
 
     expect(names).toEqual([
       "Active Recovery",

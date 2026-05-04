@@ -15,7 +15,13 @@ describe("computeRouterBase", () => {
     // a defensive guard against a future Vite contract regression.
     ["", ""],
   ])("should strip trailing slash from %j to produce %j", (input, expected) => {
+    // Arrange
+
+    // Act
+
     const result = computeRouterBase(input);
+
+    // Assert
 
     expect(result).toBe(expected);
   });
@@ -23,7 +29,11 @@ describe("computeRouterBase", () => {
 
 describe("wouter Router base contract", () => {
   it("should match a route at /editor/x when base is /editor", () => {
+    // Arrange
+
     const { hook } = memoryLocation({ path: "/editor/x" });
+
+    // Act
 
     render(
       <Router base="/editor" hook={hook}>
@@ -31,10 +41,17 @@ describe("wouter Router base contract", () => {
       </Router>
     );
 
+    // Assert
+
     expect(screen.getByText("ok")).toBeTruthy();
   });
 
   it("should be pinned to wouter major version 3", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
     expect(wouterPkg.version.split(".")[0]).toBe("3");
   });
 });

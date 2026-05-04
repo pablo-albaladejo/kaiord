@@ -27,13 +27,21 @@ describe("WorkoutList - Drag Integration", () => {
 
   it("should call onStepReorder when provided", () => {
     // Arrange
+    // Arrange
+
     const workout = createMockWorkout(3);
     const onStepReorder = vi.fn();
 
     // Act
+
+    // Act
+
     render(<WorkoutList workout={workout} onStepReorder={onStepReorder} />);
 
     // Assert - component renders
+
+    // Assert
+
     expect(
       screen.getByRole("list", { name: "Workout steps" })
     ).toBeInTheDocument();
@@ -45,6 +53,8 @@ describe("WorkoutList - Drag Integration", () => {
 
   it("should pass onReorderStepsInBlock to repetition blocks", () => {
     // Arrange
+    // Arrange
+
     const workout: Workout = {
       name: "Test Workout",
       sport: "cycling",
@@ -81,6 +91,9 @@ describe("WorkoutList - Drag Integration", () => {
     const onReorderStepsInBlock = vi.fn();
 
     // Act
+
+    // Act
+
     render(
       <WorkoutList
         workout={workout}
@@ -89,15 +102,25 @@ describe("WorkoutList - Drag Integration", () => {
     );
 
     // Assert - component renders with repetition block
+
+    // Assert
+
     expect(screen.getByText("3x")).toBeInTheDocument();
     expect(onReorderStepsInBlock).not.toHaveBeenCalled();
   });
 
   it("should work without callbacks", () => {
     // Arrange
+    // Arrange
+
+    // Act
+
     const workout = createMockWorkout(3);
 
     // Act & Assert - should not throw
+
+    // Assert
+
     expect(() => {
       render(<WorkoutList workout={workout} />);
     }).not.toThrow();

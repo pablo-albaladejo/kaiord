@@ -47,6 +47,8 @@ describe("Property 13: No browser alerts for confirmations", () => {
 
   it("should never call window.alert when showing confirmations", async () => {
     // Arrange
+    // Arrange
+
     const mockWorkout: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -72,9 +74,15 @@ describe("Property 13: No browser alerts for confirmations", () => {
     });
 
     // Act
+
+    // Act
+
     await promptBackupDownload(mockWorkout, "Delete All Steps", mockShowModal);
 
     // Assert - No browser alerts should be called
+
+    // Assert
+
     expect(window.alert).not.toHaveBeenCalled();
     expect(window.confirm).not.toHaveBeenCalled();
     expect(window.prompt).not.toHaveBeenCalled();
@@ -84,6 +92,8 @@ describe("Property 13: No browser alerts for confirmations", () => {
 
   it("should never call window.confirm when showing confirmations", async () => {
     // Arrange
+    // Arrange
+
     const mockWorkout: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -106,9 +116,15 @@ describe("Property 13: No browser alerts for confirmations", () => {
     });
 
     // Act
+
+    // Act
+
     await promptBackupDownload(mockWorkout, "Clear Workout", mockShowModal);
 
     // Assert - No browser alerts should be called
+
+    // Assert
+
     expect(window.alert).not.toHaveBeenCalled();
     expect(window.confirm).not.toHaveBeenCalled();
     expect(window.prompt).not.toHaveBeenCalled();
@@ -118,6 +134,8 @@ describe("Property 13: No browser alerts for confirmations", () => {
 
   it("should never call window.prompt when showing confirmations", async () => {
     // Arrange
+    // Arrange
+
     const mockWorkout: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -144,9 +162,15 @@ describe("Property 13: No browser alerts for confirmations", () => {
     });
 
     // Act
+
+    // Act
+
     await promptBackupDownload(mockWorkout, "Import Workout", mockShowModal);
 
     // Assert - No browser alerts should be called
+
+    // Assert
+
     expect(window.alert).not.toHaveBeenCalled();
     expect(window.confirm).not.toHaveBeenCalled();
     expect(window.prompt).not.toHaveBeenCalled();
@@ -156,6 +180,8 @@ describe("Property 13: No browser alerts for confirmations", () => {
 
   it("should use modal system for all confirmation scenarios", async () => {
     // Arrange
+    // Arrange
+
     const mockWorkout: KRD = {
       version: "1.0",
       type: "structured_workout",
@@ -192,9 +218,15 @@ describe("Property 13: No browser alerts for confirmations", () => {
     });
 
     // Act
+
+    // Act
+
     await promptBackupDownload(mockWorkout, "Delete All Steps", mockShowModal);
 
     // Assert - Modal system should be used, not browser alerts
+
+    // Assert
+
     expect(mockShowModal).toHaveBeenCalled();
     expect(window.alert).not.toHaveBeenCalled();
     expect(window.confirm).not.toHaveBeenCalled();

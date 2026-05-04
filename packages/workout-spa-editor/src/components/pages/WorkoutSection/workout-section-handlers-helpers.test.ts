@@ -68,6 +68,8 @@ describe("createUpdatedWorkout", () => {
 
   describe("updating main workout steps", () => {
     it("should update only the main-list step whose ItemId matches selectedStepId", () => {
+      // Arrange
+
       const workout = createMockWorkout();
       const updatedStep: WorkoutStep = {
         ...createMockStep(1),
@@ -76,7 +78,12 @@ describe("createUpdatedWorkout", () => {
 
       const result = createUpdatedWorkout(workout, updatedStep, MAIN_STEP_1);
 
+      // Act
+
       const mainStep = result.steps[1] as WorkoutStep & { id: string };
+
+      // Assert
+
       expect(mainStep.duration).toEqual({ type: "time", seconds: 600 });
       // Stable id is preserved across the update.
       expect(mainStep.id).toBe(MAIN_STEP_1);
@@ -100,17 +107,23 @@ describe("createUpdatedWorkout", () => {
 
   describe("updating block steps", () => {
     it("should update only the nested step in Block A when its ItemId is selected", () => {
+      // Arrange
+
       const workout = createMockWorkout();
       const updatedStep: WorkoutStep = {
         ...createMockStep(1),
         duration: { type: "time", seconds: 900 },
       };
 
+      // Act
+
       const result = createUpdatedWorkout(
         workout,
         updatedStep,
         BLOCK_A_INNER_0
       );
+
+      // Assert
 
       expect((result.steps[1] as WorkoutStep).duration).toEqual({
         type: "time",
@@ -139,17 +152,23 @@ describe("createUpdatedWorkout", () => {
     });
 
     it("should update only the nested step in Block B when its ItemId is selected", () => {
+      // Arrange
+
       const workout = createMockWorkout();
       const updatedStep: WorkoutStep = {
         ...createMockStep(1),
         duration: { type: "time", seconds: 1200 },
       };
 
+      // Act
+
       const result = createUpdatedWorkout(
         workout,
         updatedStep,
         BLOCK_B_INNER_0
       );
+
+      // Assert
 
       expect((result.steps[1] as WorkoutStep).duration).toEqual({
         type: "time",
@@ -176,23 +195,35 @@ describe("createUpdatedWorkout", () => {
 
   describe("edge cases", () => {
     it("should return the workout unchanged when selectedStepId is null", () => {
+      // Arrange
+
       const workout = createMockWorkout();
       const updatedStep = createMockStep(1);
 
+      // Act
+
       const result = createUpdatedWorkout(workout, updatedStep, null);
+
+      // Assert
 
       expect(result).toEqual(workout);
     });
 
     it("should return the workout unchanged when the id does not match any item", () => {
+      // Arrange
+
       const workout = createMockWorkout();
       const updatedStep = createMockStep(1);
+
+      // Act
 
       const result = createUpdatedWorkout(
         workout,
         updatedStep,
         "id-that-does-not-exist"
       );
+
+      // Assert
 
       expect(result).toEqual(workout);
     });

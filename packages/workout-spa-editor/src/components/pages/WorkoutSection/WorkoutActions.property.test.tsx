@@ -40,6 +40,12 @@ describe("WorkoutActions - Property Tests", () => {
    * (first letter of major words capitalized, minor words like "to" lowercase)
    */
   it("should use title case for all button labels", () => {
+    // Arrange
+
+    // Act
+
+    // Assert
+
     // Arrange & Act
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
@@ -107,32 +113,56 @@ describe("WorkoutActions - Property Tests", () => {
    */
   it("should have 'Save Workout' button in title case", () => {
     // Arrange & Act
+    // Arrange
+
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
+
+    // Act
+
     const saveButton = screen.getByRole("button", { name: /save workout/i });
+
+    // Assert
+
     expect(saveButton.textContent).toContain("Save Workout");
   });
 
   it("should have 'Save to Library' button in title case", () => {
     // Arrange & Act
+    // Arrange
+
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
+
+    // Act
+
     const libraryButton = screen.getByRole("button", {
       name: /save to library/i,
     });
+
+    // Assert
+
     expect(libraryButton.textContent).toContain("Save to Library");
   });
 
   it("should have 'Discard' button in title case", () => {
     // Arrange & Act
+    // Arrange
+
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
+
+    // Act
+
     const discardButton = screen.getByRole("button", {
       name: /discard/i,
     });
+
+    // Assert
+
     expect(discardButton.textContent).toContain("Discard");
   });
 
@@ -143,14 +173,22 @@ describe("WorkoutActions - Property Tests", () => {
    */
   it("should have responsive layout classes with flex-wrap", () => {
     // Arrange & Act
+    // Arrange
+
     renderWithProviders(<WorkoutActions {...defaultProps} />);
 
     // Assert
+
+    // Act
+
     const container = screen.getByTestId(
       "discard-workout-button"
     ).parentElement;
 
     // Flex-wrap allows buttons to flow and wrap naturally
+
+    // Assert
+
     expect(container).toHaveClass("flex-wrap");
 
     // Proper spacing

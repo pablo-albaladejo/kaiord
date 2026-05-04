@@ -30,9 +30,16 @@ describe("exportWorkout", () => {
   describe("KRD file export", () => {
     it("should export KRD to JSON buffer", async () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       const buffer = await exportWorkout(mockKrd, "krd");
 
       // Assert
+
+      // Assert
+
       expect(buffer).toBeDefined();
       expect(buffer.length).toBeGreaterThan(0);
 
@@ -44,10 +51,17 @@ describe("exportWorkout", () => {
 
     it("should format JSON with indentation", async () => {
       // Arrange & Act
+      // Arrange
+
       const buffer = await exportWorkout(mockKrd, "krd");
 
       // Assert
+
+      // Act
+
       const text = new TextDecoder().decode(buffer);
+
+      // Assert
 
       expect(text).toContain("\n");
       expect(text).toContain("  ");
@@ -55,12 +69,20 @@ describe("exportWorkout", () => {
 
     it("should call progress callback during KRD export", async () => {
       // Arrange
+      // Arrange
+
       const onProgress = vi.fn();
 
       // Act
+
+      // Act
+
       await exportWorkout(mockKrd, "krd", onProgress);
 
       // Assert
+
+      // Assert
+
       expect(onProgress).toHaveBeenCalled();
       expect(onProgress).toHaveBeenCalledWith(10);
       expect(onProgress).toHaveBeenCalledWith(50);
@@ -70,6 +92,12 @@ describe("exportWorkout", () => {
 
   describe("FIT file export", () => {
     it("should attempt to export KRD to FIT buffer", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange & Act & Assert
       // Note: FIT export may fail in test environment due to encoder limitations
       // The important thing is that our code correctly calls the conversion function
@@ -86,9 +114,14 @@ describe("exportWorkout", () => {
 
     it("should call progress callback during FIT export attempt", async () => {
       // Arrange
+      // Arrange
+
       const onProgress = vi.fn();
 
       // Act & Assert
+
+      // Act
+
       try {
         await exportWorkout(mockKrd, "fit", onProgress);
       } catch {
@@ -96,18 +129,28 @@ describe("exportWorkout", () => {
       }
 
       // Progress should be called regardless of success/failure
+
+      // Assert
+
       expect(onProgress).toHaveBeenCalled();
       expect(onProgress).toHaveBeenCalledWith(10);
     });
 
     it("should throw ExportError for invalid KRD", async () => {
       // Arrange
+      // Arrange
+
+      // Act
+
       const invalidKrd = {
         version: "1.0",
         // Missing required fields
       } as unknown as KRD;
 
       // Act & Assert
+
+      // Assert
+
       await expect(exportWorkout(invalidKrd, "fit")).rejects.toThrow(
         ExportError
       );
@@ -120,9 +163,16 @@ describe("exportWorkout", () => {
   describe("TCX file export", () => {
     it("should export KRD to TCX buffer", async () => {
       // Arrange & Act
+      // Arrange
+
+      // Act
+
       const buffer = await exportWorkout(mockKrd, "tcx");
 
       // Assert
+
+      // Assert
+
       expect(buffer).toBeDefined();
       expect(buffer.length).toBeGreaterThan(0);
 
@@ -132,12 +182,20 @@ describe("exportWorkout", () => {
 
     it("should call progress callback during TCX export", async () => {
       // Arrange
+      // Arrange
+
       const onProgress = vi.fn();
 
       // Act
+
+      // Act
+
       await exportWorkout(mockKrd, "tcx", onProgress);
 
       // Assert
+
+      // Assert
+
       expect(onProgress).toHaveBeenCalled();
       expect(onProgress).toHaveBeenCalledWith(10);
       expect(onProgress).toHaveBeenCalledWith(50);
@@ -146,12 +204,19 @@ describe("exportWorkout", () => {
 
     it("should throw ExportError for invalid KRD", async () => {
       // Arrange
+      // Arrange
+
+      // Act
+
       const invalidKrd = {
         version: "1.0",
         // Missing required fields
       } as unknown as KRD;
 
       // Act & Assert
+
+      // Assert
+
       await expect(exportWorkout(invalidKrd, "tcx")).rejects.toThrow(
         ExportError
       );
@@ -163,6 +228,12 @@ describe("exportWorkout", () => {
 
   describe("ZWO file export", () => {
     it("should attempt to export KRD to ZWO buffer", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange & Act & Assert
       // Note: ZWO export may fail in test environment due to XSD schema path issues
       // The important thing is that our code correctly calls the conversion function
@@ -182,9 +253,14 @@ describe("exportWorkout", () => {
 
     it("should call progress callback during ZWO export attempt", async () => {
       // Arrange
+      // Arrange
+
       const onProgress = vi.fn();
 
       // Act & Assert
+
+      // Act
+
       try {
         await exportWorkout(mockKrd, "zwo", onProgress);
       } catch {
@@ -192,18 +268,28 @@ describe("exportWorkout", () => {
       }
 
       // Progress should be called regardless of success/failure
+
+      // Assert
+
       expect(onProgress).toHaveBeenCalled();
       expect(onProgress).toHaveBeenCalledWith(10);
     });
 
     it("should throw ExportError for invalid KRD", async () => {
       // Arrange
+      // Arrange
+
+      // Act
+
       const invalidKrd = {
         version: "1.0",
         // Missing required fields
       } as unknown as KRD;
 
       // Act & Assert
+
+      // Assert
+
       await expect(exportWorkout(invalidKrd, "zwo")).rejects.toThrow(
         ExportError
       );
@@ -215,6 +301,12 @@ describe("exportWorkout", () => {
 
   describe("error handling", () => {
     it("should preserve format in ExportError", async () => {
+      // Arrange
+
+      // Act
+
+      // Assert
+
       // Arrange
       const invalidKrd = {} as unknown as KRD;
 
@@ -230,6 +322,12 @@ describe("exportWorkout", () => {
 
     it("should include cause in ExportError", async () => {
       // Arrange
+
+      // Act
+
+      // Assert
+
+      // Arrange
       const invalidKrd = {} as unknown as KRD;
 
       // Act & Assert
@@ -244,9 +342,16 @@ describe("exportWorkout", () => {
 
     it("should throw ExportError for unsupported format", async () => {
       // Arrange
+      // Arrange
+
+      // Act
+
       const unsupportedFormat = "pdf" as WorkoutFileFormat;
 
       // Act & Assert
+
+      // Assert
+
       await expect(exportWorkout(mockKrd, unsupportedFormat)).rejects.toThrow(
         ExportError
       );
@@ -256,11 +361,20 @@ describe("exportWorkout", () => {
     });
 
     it("should export a GCN buffer for the gcn format", async () => {
+      // Arrange
+
+      // Act
+
       const buffer = await exportWorkout(mockKrd, "gcn");
+
+      // Assert
+
       expect(buffer.byteLength).toBeGreaterThan(0);
     });
 
     it("should strip UI ids before handing off to any exporter", async () => {
+      // Arrange
+
       const uiKrd = {
         ...mockKrd,
         extensions: {
@@ -282,7 +396,13 @@ describe("exportWorkout", () => {
 
       // GCN: the exporter may silently drop unknown keys, so this check
       // alone is a weak proxy.
+
+      // Act
+
       const gcnBuffer = await exportWorkout(uiKrd, "gcn");
+
+      // Assert
+
       expect(new TextDecoder().decode(gcnBuffer)).not.toContain("leaked-ui-id");
 
       // KRD: the canonical format round-trips unknown keys, so the only
@@ -306,6 +426,8 @@ describe("downloadWorkout", () => {
 
   it("should create download link with correct filename", () => {
     // Arrange
+    // Arrange
+
     const buffer = new Uint8Array([1, 2, 3]);
     const filename = "workout.fit";
 
@@ -315,15 +437,23 @@ describe("downloadWorkout", () => {
     global.URL.revokeObjectURL = vi.fn();
 
     // Act
+
+    // Act
+
     downloadWorkout(buffer, filename, "fit");
 
     // Assert
+
+    // Assert
+
     expect(global.URL.createObjectURL).toHaveBeenCalled();
     expect(global.URL.revokeObjectURL).toHaveBeenCalledWith(mockUrl);
   });
 
   it("should create blob with correct MIME type for FIT", () => {
     // Arrange
+    // Arrange
+
     const buffer = new Uint8Array([1, 2, 3]);
     const filename = "workout.fit";
 
@@ -335,14 +465,22 @@ describe("downloadWorkout", () => {
     global.URL.revokeObjectURL = vi.fn();
 
     // Act
+
+    // Act
+
     downloadWorkout(buffer, filename, "fit");
 
     // Assert
+
+    // Assert
+
     expect(global.URL.createObjectURL).toHaveBeenCalled();
   });
 
   it("should create blob with correct MIME type for TCX", () => {
     // Arrange
+    // Arrange
+
     const buffer = new Uint8Array([1, 2, 3]);
     const filename = "workout.tcx";
 
@@ -354,14 +492,22 @@ describe("downloadWorkout", () => {
     global.URL.revokeObjectURL = vi.fn();
 
     // Act
+
+    // Act
+
     downloadWorkout(buffer, filename, "tcx");
 
     // Assert
+
+    // Assert
+
     expect(global.URL.createObjectURL).toHaveBeenCalled();
   });
 
   it("should create blob with correct MIME type for ZWO", () => {
     // Arrange
+    // Arrange
+
     const buffer = new Uint8Array([1, 2, 3]);
     const filename = "workout.zwo";
 
@@ -373,14 +519,22 @@ describe("downloadWorkout", () => {
     global.URL.revokeObjectURL = vi.fn();
 
     // Act
+
+    // Act
+
     downloadWorkout(buffer, filename, "zwo");
 
     // Assert
+
+    // Assert
+
     expect(global.URL.createObjectURL).toHaveBeenCalled();
   });
 
   it("should create blob with correct MIME type for KRD", () => {
     // Arrange
+    // Arrange
+
     const buffer = new Uint8Array([1, 2, 3]);
     const filename = "workout.krd";
 
@@ -392,14 +546,22 @@ describe("downloadWorkout", () => {
     global.URL.revokeObjectURL = vi.fn();
 
     // Act
+
+    // Act
+
     downloadWorkout(buffer, filename, "krd");
 
     // Assert
+
+    // Assert
+
     expect(global.URL.createObjectURL).toHaveBeenCalled();
   });
 
   it("should clean up URL after download", () => {
     // Arrange
+    // Arrange
+
     const buffer = new Uint8Array([1, 2, 3]);
     const filename = "workout.fit";
 
@@ -408,9 +570,15 @@ describe("downloadWorkout", () => {
     global.URL.revokeObjectURL = vi.fn();
 
     // Act
+
+    // Act
+
     downloadWorkout(buffer, filename, "fit");
 
     // Assert
+
+    // Assert
+
     expect(global.URL.revokeObjectURL).toHaveBeenCalledWith(mockUrl);
   });
 });

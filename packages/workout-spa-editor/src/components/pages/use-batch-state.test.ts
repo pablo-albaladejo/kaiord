@@ -63,20 +63,28 @@ describe("useBatchState (two-phase start)", () => {
   });
 
   it("should surface a message when no providers are configured", async () => {
+    // Arrange
+
     mockProviderCount = 0;
     const { result } = renderHook(() =>
       useBatchState("2026-04-13", "2026-04-19")
     );
 
+    // Act
+
     await act(async () => {
       await result.current.requestStart();
     });
+
+    // Assert
 
     expect(result.current.message).toMatch(/Configure an AI provider/i);
     expect(result.current.pending).toBeNull();
   });
 
   it("should surface prepareBatch errors without dispatching the run", async () => {
+    // Arrange
+
     mockProviderCount = 1;
     mockPrep = { ok: false, message: "No raw workouts to process this week." };
 
@@ -84,9 +92,13 @@ describe("useBatchState (two-phase start)", () => {
       useBatchState("2026-04-13", "2026-04-19")
     );
 
+    // Act
+
     await act(async () => {
       await result.current.requestStart();
     });
+
+    // Assert
 
     expect(result.current.message).toBe(
       "No raw workouts to process this week."
@@ -96,6 +108,8 @@ describe("useBatchState (two-phase start)", () => {
   });
 
   it("should stage pending on successful requestStart without auto-dispatching", async () => {
+    // Arrange
+
     mockProviderCount = 1;
     mockPrep = { ok: true, provider, workouts: [workout] };
 
@@ -103,9 +117,13 @@ describe("useBatchState (two-phase start)", () => {
       useBatchState("2026-04-13", "2026-04-19")
     );
 
+    // Act
+
     await act(async () => {
       await result.current.requestStart();
     });
+
+    // Assert
 
     expect(result.current.pending).toEqual({
       provider,
@@ -115,6 +133,8 @@ describe("useBatchState (two-phase start)", () => {
   });
 
   it("should run the staged batch and clear pending via confirmStart", async () => {
+    // Arrange
+
     mockProviderCount = 1;
     mockPrep = { ok: true, provider, workouts: [workout] };
 
@@ -125,9 +145,14 @@ describe("useBatchState (two-phase start)", () => {
     await act(async () => {
       await result.current.requestStart();
     });
+
+    // Act
+
     await act(async () => {
       await result.current.confirmStart();
     });
+
+    // Assert
 
     await waitFor(() => expect(runSpy).toHaveBeenCalledTimes(1));
     expect(runSpy.mock.calls[0][0]).toEqual({
@@ -138,6 +163,8 @@ describe("useBatchState (two-phase start)", () => {
   });
 
   it("should clear pending without calling run via cancelRequest", async () => {
+    // Arrange
+
     mockProviderCount = 1;
     mockPrep = { ok: true, provider, workouts: [workout] };
 
@@ -148,24 +175,35 @@ describe("useBatchState (two-phase start)", () => {
     await act(async () => {
       await result.current.requestStart();
     });
+
+    // Act
+
     act(() => {
       result.current.cancelRequest();
     });
+
+    // Assert
 
     expect(result.current.pending).toBeNull();
     expect(runSpy).not.toHaveBeenCalled();
   });
 
   it("should be a no-op via confirmStart when nothing is pending", async () => {
+    // Arrange
+
     mockProviderCount = 1;
 
     const { result } = renderHook(() =>
       useBatchState("2026-04-13", "2026-04-19")
     );
 
+    // Act
+
     await act(async () => {
       await result.current.confirmStart();
     });
+
+    // Assert
 
     expect(runSpy).not.toHaveBeenCalled();
   });

@@ -39,6 +39,10 @@ const makeCoaching = (id: string, date: string): CoachingActivity => ({
 
 describe("CalendarWeekGrid", () => {
   it("should render 7 day columns", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CalendarWeekGrid
         days={DAYS}
@@ -49,11 +53,17 @@ describe("CalendarWeekGrid", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByTestId("calendar-week-grid")).toBeInTheDocument();
     expect(screen.getAllByTestId(/^day-column-/)).toHaveLength(7);
   });
 
   it("should render workout cards in correct day", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CalendarWeekGrid
         days={DAYS}
@@ -64,10 +74,16 @@ describe("CalendarWeekGrid", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByTestId("workout-card-w1")).toBeInTheDocument();
   });
 
   it("should render coaching cards alongside workouts", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CalendarWeekGrid
         days={DAYS}
@@ -81,6 +97,8 @@ describe("CalendarWeekGrid", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByTestId("workout-card-w1")).toBeInTheDocument();
     expect(screen.getByTestId("coaching-card-c1")).toBeInTheDocument();
     expect(screen.getByText("Coach intervals")).toBeInTheDocument();
@@ -88,6 +106,10 @@ describe("CalendarWeekGrid", () => {
   });
 
   it("should render coaching cards without workouts", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CalendarWeekGrid
         days={DAYS}
@@ -101,10 +123,16 @@ describe("CalendarWeekGrid", () => {
       />
     );
 
+    // Assert
+
     expect(screen.getByTestId("coaching-card-c2")).toBeInTheDocument();
   });
 
   it("should show empty-day button only when no workouts AND no coaching", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CalendarWeekGrid
         days={DAYS}
@@ -118,6 +146,8 @@ describe("CalendarWeekGrid", () => {
       />
     );
 
+    // Assert
+
     expect(
       screen.queryByTestId("empty-day-2026-04-06")
     ).not.toBeInTheDocument();
@@ -125,6 +155,10 @@ describe("CalendarWeekGrid", () => {
   });
 
   it("should render with empty coaching data (no registry)", () => {
+    // Arrange
+
+    // Act
+
     render(
       <CalendarWeekGrid
         days={DAYS}
@@ -134,6 +168,8 @@ describe("CalendarWeekGrid", () => {
         onEmptyDayClick={vi.fn()}
       />
     );
+
+    // Assert
 
     expect(screen.getAllByTestId(/^empty-day-/)).toHaveLength(7);
   });
