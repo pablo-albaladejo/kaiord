@@ -75,7 +75,7 @@ Every consumer job in `ci.yml` (`lint`, `typecheck`, `test`, `test-cli`, `test-f
 #### Scenario: Consumer job downloads build-artifacts
 
 - **WHEN** a consumer job listed above runs after a successful `build` job
-- **THEN** the job SHALL contain a step that uses `actions/download-artifact@v7` with `name: build-artifacts` and `path: .` BEFORE any step that depends on compiled output
+- **THEN** the job SHALL invoke the `.github/actions/consume-build-artifacts` composite action (which wraps `actions/download-artifact@v7` with `path: packages` so the artifact's LCA-stripped internal layout — `core/dist/...`, NOT `packages/core/dist/...` — is re-prefixed before tests run) BEFORE any step that depends on compiled output. Direct use of `actions/download-artifact` with `path: .` is FORBIDDEN because the resulting filesystem layout (files at `./core/dist/...` instead of `./packages/core/dist/...`) breaks every consumer's pnpm-workspace dependency resolution.
 
 #### Scenario: Consumer job declares build dependency
 
