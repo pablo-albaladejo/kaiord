@@ -19,6 +19,8 @@ jobs:
   gate:
     name: Quality Metrics Gate
     runs-on: ubuntu-latest
+    # P95 = 335s; ceil(P95 × 1.5 / 60) = 9; capped at test-family ceiling 30.
+    timeout-minutes: 9
     if: github.actor != 'github-actions[bot]'
     steps:
       - name: Checkout
