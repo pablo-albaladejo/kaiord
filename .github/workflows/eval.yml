@@ -14,6 +14,8 @@ permissions:
 jobs:
   eval:
     runs-on: ubuntu-latest
+    # 0 successful runs → fall back to test-family ceiling 30 (already set
+    # to this value).
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v6
