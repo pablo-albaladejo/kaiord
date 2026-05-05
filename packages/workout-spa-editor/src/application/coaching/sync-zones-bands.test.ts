@@ -144,6 +144,25 @@ describe("syncZones full-bands — HR fallback chain", () => {
     });
   });
 
+  it("should write LTHR scalars for running and swimming from Generic z4Upper when only cycling Specific is present", async () => {
+    // Arrange — same fallback chain as bands but for the LTHR scalar.
+    // Pablo's account shape: cycling Specific present, running and
+    // swimming inherit Generic.
+    const repo = createInMemoryProfileRepository();
+    await repo.put(makeProfile());
+    const transport = makeTransport(async () => PAYLOAD_TRIATHLETE);
+
+    // Act
+    await syncZones(PROFILE_ID, transport, repo);
+
+    // Assert
+    const persisted = await repo.getById(PROFILE_ID);
+    expect(persisted?.sportZones.cycling?.thresholds.lthr).toBe(174);
+    expect(persisted?.sportZones.running?.thresholds.lthr).toBe(168);
+    // Swimming's Specific is absent → Generic z4Upper (174) flows in.
+    expect(persisted?.sportZones.swimming?.thresholds.lthr).toBe(174);
+  });
+
   it("should NOT touch a sport's HR bands when both Specific and Generic are absent (4.7j)", async () => {
     // Arrange
     const repo = createInMemoryProfileRepository();
