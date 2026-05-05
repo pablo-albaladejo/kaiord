@@ -1,8 +1,4 @@
-import {
-  type Target,
-  targetTypeSchema,
-  zoneToPercentFtp,
-} from "@kaiord/core";
+import { type Target, targetTypeSchema, zoneToPercentFtp } from "@kaiord/core";
 
 /**
  * Convert Zwift power target (FTP percentage 0.0-3.0) to KRD power target
