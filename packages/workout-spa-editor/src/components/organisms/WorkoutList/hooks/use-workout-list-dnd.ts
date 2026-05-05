@@ -10,8 +10,12 @@ import {
 import { sortableKeyboardCoordinates } from "@dnd-kit/sortable";
 import { useState } from "react";
 
-import type { RepetitionBlock, Workout, WorkoutStep } from "../../../types/krd";
-import { isWorkoutStep } from "../../../types/krd";
+import type {
+  RepetitionBlock,
+  Workout,
+  WorkoutStep,
+} from "../../../../types/krd";
+import { isWorkoutStep } from "../../../../types/krd";
 
 /**
  * Returns the item's stable `ItemId`.
