@@ -17,6 +17,7 @@ The fix:
 - Refactors `setThresholdScalars` to resolve LTHR for all three sports through a new `resolveLthrScalar` helper that mirrors `resolveHrBands`' Specific → Generic → undefined chain, but keys on `z4Upper` directly (the legacy payload shape that has only `z4Upper` without the full Z1-Z5 bands still resolves correctly).
 
 Behavior summary post-fix on Pablo's account (cycling Specific = Generic = 107-187, no running/swimming Specific):
+
 - Cycling LTHR → 174 ✓ (unchanged: Specific block has z4Upper)
 - Running LTHR → 174 ✓ (was empty: Generic-fallback now fires)
 - Swimming LTHR → 174 ✓ (was empty: new field + Generic-fallback)
