@@ -32,6 +32,8 @@ jobs:
   auto-merge:
     name: Auto-merge Labeled PR
     runs-on: ubuntu-latest
+    # P95 = 6s; ceil(P95 × 1.5 / 60) = 1; capped at lint-family ceiling 10.
+    timeout-minutes: 1
     # Only run for 'automerge' label events
     if: |
       (github.event_name == 'pull_request' && github.event.label.name == 'automerge') ||

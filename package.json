@@ -52,7 +52,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "test": "pnpm -r test && pnpm test:scripts",
-    "lint": "pnpm -r lint && pnpm lint:archive && pnpm lint:archive-index && pnpm lint:archive-followups && pnpm lint:specs && pnpm lint:tsup-watchdog && pnpm lint:mapper-no-tests && pnpm lint:converter-has-tests && pnpm lint:husky-no-bypass && pnpm lint:package-deps && pnpm lint:architecture && pnpm lint:no-unconditional-skip && pnpm lint:no-library-dual-mount && pnpm lint:allowlists-empty && pnpm lint:icons-distinct && pnpm lint:build-portable && pnpm lint:ci-fanout && pnpm lint:scripts-orphans",
+    "lint": "pnpm -r lint && pnpm lint:archive && pnpm lint:archive-index && pnpm lint:archive-followups && pnpm lint:specs && pnpm lint:tsup-watchdog && pnpm lint:mapper-no-tests && pnpm lint:converter-has-tests && pnpm lint:husky-no-bypass && pnpm lint:package-deps && pnpm lint:architecture && pnpm lint:no-unconditional-skip && pnpm lint:no-library-dual-mount && pnpm lint:allowlists-empty && pnpm lint:icons-distinct && pnpm lint:build-portable && pnpm lint:ci-fanout && pnpm lint:scripts-orphans && pnpm lint:workflow-timeouts",
     "lint:fix": "pnpm -r lint:fix && prettier --write .",
     "lint:packages": "pnpm -r lint",
     "lint:archive": "node scripts/check-archive-dates.mjs",
@@ -72,6 +72,7 @@
     "lint:build-portable": "node scripts/check-build-portable.mjs",
     "lint:ci-fanout": "node scripts/check-ci-fanout-invariants.mjs",
     "lint:scripts-orphans": "node scripts/check-scripts-orphans.mjs",
+    "lint:workflow-timeouts": "node scripts/check-workflow-timeouts.mjs",
     "lint:links": "bash scripts/lint-links.sh",
     "icons:build": "node scripts/build-extension-icons.mjs",
     "popup:sync": "node scripts/sync-popup-css.mjs",

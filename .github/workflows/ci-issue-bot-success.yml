@@ -13,6 +13,8 @@ jobs:
   notify-success:
     name: Auto-close stale CI failure issues
     runs-on: ubuntu-latest
+    # P95 = 8s; ceil(P95 × 1.5 / 60) = 1; capped at lint-family ceiling 10.
+    timeout-minutes: 1
     if: ${{ github.event.workflow_run.conclusion == 'success' && vars.CI_ISSUE_BOT_ENABLED != 'false' }}
     concurrency:
       group: ci-issue-bot-${{ github.ref }}
