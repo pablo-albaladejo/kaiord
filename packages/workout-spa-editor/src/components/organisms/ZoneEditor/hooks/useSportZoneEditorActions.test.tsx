@@ -91,7 +91,11 @@ describe("useSportZoneEditorActions - applyMethod", () => {
     ];
 
     // Act
-    result.current.actions.applyMethod("powerZones", "british-cycling-6", newZones);
+    result.current.actions.applyMethod(
+      "powerZones",
+      "british-cycling-6",
+      newZones
+    );
 
     // Assert
     await waitFor(async () => {
@@ -185,7 +189,10 @@ describe("useSportZoneEditorActions - handleAddCustom", () => {
     const { result } = renderActions(persistence, "no-id");
 
     // Act
-    result.current.actions.handleAddCustom("powerZones", { zone: 1, name: "x" });
+    result.current.actions.handleAddCustom("powerZones", {
+      zone: 1,
+      name: "x",
+    });
 
     // Assert
     await waitFor(() => {

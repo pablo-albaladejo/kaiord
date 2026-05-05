@@ -171,8 +171,7 @@ describe("useSportZoneEditor - handleAddZone", () => {
     // Assert
     await vi.waitFor(async () => {
       const updated = await persistence.profiles.getById("p4");
-      const zones =
-        updated?.sportZones?.cycling?.heartRateZones?.zones ?? [];
+      const zones = updated?.sportZones?.cycling?.heartRateZones?.zones ?? [];
       expect(zones).toHaveLength(2);
       expect(zones[1]).toMatchObject({ zone: 2, name: "Zone 2" });
     });
@@ -241,9 +240,7 @@ describe("useSportZoneEditor - method-switch surface", () => {
     // Assert
     await vi.waitFor(async () => {
       const updated = await persistence.profiles.getById("p7");
-      expect(updated?.sportZones?.cycling?.powerZones?.method).toBe(
-        "coggan-7"
-      );
+      expect(updated?.sportZones?.cycling?.powerZones?.method).toBe("coggan-7");
     });
     expect(result.current.confirmMethod).toBeNull();
   });

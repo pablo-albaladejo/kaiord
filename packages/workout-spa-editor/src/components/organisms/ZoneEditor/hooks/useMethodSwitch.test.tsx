@@ -12,10 +12,7 @@ import { act, renderHook } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 
 import type { ZoneType } from "../../../../application/profile/zones/zone-types";
-import type {
-  HeartRateZone,
-  PowerZone,
-} from "../../../../types/profile";
+import type { HeartRateZone, PowerZone } from "../../../../types/profile";
 import type { PaceZone, SportZoneConfig } from "../../../../types/sport-zones";
 import { useMethodSwitch } from "./useMethodSwitch";
 
