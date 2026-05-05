@@ -93,3 +93,11 @@ export {
   toleranceViolationSchema,
   validateKrd,
 } from "./validation";
+export type { PowerZone } from "./zones";
+export {
+  isPowerZone,
+  percentFtpToZone,
+  POWER_ZONE_PERCENT_FTP,
+  POWER_ZONES,
+  zoneToPercentFtp,
+} from "./zones";
