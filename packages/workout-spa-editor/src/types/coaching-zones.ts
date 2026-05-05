@@ -30,6 +30,7 @@ export type ThresholdFieldKey =
   | "cycling.thresholds.lthr"
   | "running.thresholds.lthr"
   | "running.thresholds.thresholdPaceSecPerKm"
+  | "swimming.thresholds.lthr"
   | "swimming.thresholds.cssPaceSecPer100m"
   | "heartRate.max"
   | "bodyWeight";
