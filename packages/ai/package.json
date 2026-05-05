@@ -27,16 +27,16 @@
   },
   "dependencies": {
     "@kaiord/core": "workspace:^",
-    "zod": "^4.0.0"
+    "zod": "^4.4.3"
   },
   "peerDependencies": {
-    "ai": "^6.0.168"
+    "ai": "^6.0.175"
   },
   "devDependencies": {
-    "@ai-sdk/anthropic": "^3.0.71",
+    "@ai-sdk/anthropic": "^3.0.74",
     "@types/node": "^25.6.0",
     "@vitest/coverage-v8": "^4.1.5",
-    "ai": "^6.0.168",
+    "ai": "^6.0.175",
     "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^6.0.3",
