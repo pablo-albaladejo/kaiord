@@ -283,19 +283,32 @@ const parsePacesBlock = (html) => {
 };
 
 const parseHrZonesBlock = (html) => {
-  // Per-sport HR zones plus the Generic Karvonen-derived block.
-  // sport_id is implicit on the heart-rate-zone wrapper
-  // (heart-rate-zone-{generic,cycling,running,swimming}). Each block
-  // is emitted ONLY when present in the upstream HTML — the SPA
-  // mapper applies a Specific → Generic → skip fallback per D-FB1.
-  const block = sliceBetween(html, /id="hrzones-\d+"/, /<\/main>|<\/section>/);
-  if (!block) return null;
+  // Sport-specific blocks (cycling/running/swimming) live INSIDE the
+  // per-user `<div id="hrzones-{id}">` container; the Generic block
+  // is rendered as a SIBLING under <section class="pupil-details">
+  // and ends up OUTSIDE that container. We therefore parse Generic
+  // from the full HTML and the sport-specific blocks from the
+  // narrower slice. extractHrFullBands' lazy regex is self-anchored
+  // on `heart-rate-zone-generic` and stops at the next
+  // `heart-rate-zone-X` or `</section>`, so it can't bleed into the
+  // sport-specific blocks. The SPA mapper applies a Specific →
+  // Generic → skip fallback per D-FB1. HTML comments are stripped
+  // first so prose mentions of zone class names (e.g. fixture
+  // headers) cannot anchor the wrapper regex.
+  const stripped = html.replace(/<!--[\s\S]*?-->/g, "");
+  const block = sliceBetween(
+    stripped,
+    /id="hrzones-\d+"/,
+    /<\/main>|<\/section>/
+  );
   const out = {};
-  const generic = extractHrFullBands(block, "generic");
+  const generic = extractHrFullBands(stripped, "generic");
   if (generic) out.generic = generic;
-  for (const sport of ["cycling", "running", "swimming"]) {
-    const bands = extractHrFullBands(block, sport);
-    if (bands) out[sport] = bands;
+  if (block) {
+    for (const sport of ["cycling", "running", "swimming"]) {
+      const bands = extractHrFullBands(block, sport);
+      if (bands) out[sport] = bands;
+    }
   }
   return Object.keys(out).length > 0 ? out : null;
 };
