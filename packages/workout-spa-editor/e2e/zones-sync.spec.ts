@@ -446,15 +446,15 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     // power+pace populate via the same reconcile path.
     const profile = await readProfile(page);
     expect(profile.sportZones.cycling?.heartRateZones?.method).toBe("train2go");
-    expect(profile.sportZones.cycling?.heartRateZones?.zones?.[0]).toMatchObject(
-      { minBpm: 107, maxBpm: 133 }
-    );
-    expect(profile.sportZones.running?.heartRateZones?.method).toBe("train2go");
-    expect(profile.sportZones.swimming?.heartRateZones?.method).toBe("train2go");
-    // Snapshot recorded so flow (h) can assert idempotence.
     expect(
-      profile.linkedAccounts?.[0]?.lastSyncedZonesSnapshot
-    ).toBeDefined();
+      profile.sportZones.cycling?.heartRateZones?.zones?.[0]
+    ).toMatchObject({ minBpm: 107, maxBpm: 133 });
+    expect(profile.sportZones.running?.heartRateZones?.method).toBe("train2go");
+    expect(profile.sportZones.swimming?.heartRateZones?.method).toBe(
+      "train2go"
+    );
+    // Snapshot recorded so flow (h) can assert idempotence.
+    expect(profile.linkedAccounts?.[0]?.lastSyncedZonesSnapshot).toBeDefined();
   });
 
   test("(h) idempotent re-sync produces zero conflicts and no zone changes", async ({
@@ -472,9 +472,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     const before = await readProfile(page);
 
     // Act: trigger sync via the manual button.
-    await page
-      .getByRole("button", { name: /^sync train2go$/i })
-      .click();
+    await page.getByRole("button", { name: /^sync train2go$/i }).click();
 
     // Wait for read-details to fire (the manual sync triggers the
     // bridge fan-out exactly once).
@@ -532,9 +530,7 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     expect(mid.z4MaxBpm).toBe(180);
 
     // Act: trigger sync via the manual button.
-    await page
-      .getByRole("button", { name: /^sync train2go$/i })
-      .click();
+    await page.getByRole("button", { name: /^sync train2go$/i }).click();
 
     // Assert: dialog renders ONE group row for the cycling HR table
     // (D-MA5 — per-band rows live behind the [▼ Detail] disclosure,
@@ -826,7 +822,9 @@ const waitForCyclingFtp = async (page: Page): Promise<void> => {
                 sportZones?: {
                   cycling?: {
                     thresholds?: { ftp?: number };
-                    heartRateZones?: { zones?: { minBpm: number; maxBpm: number }[] };
+                    heartRateZones?: {
+                      zones?: { minBpm: number; maxBpm: number }[];
+                    };
                   };
                 };
                 linkedAccounts?: {
@@ -917,4 +915,3 @@ const editAndReadCyclingHrBand = async (
     },
     { id: PROFILE_ID, target: newZ4Max }
   );
-
