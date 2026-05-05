@@ -15,8 +15,9 @@ fi
 echo ""
 echo "🔍 Running TypeScript type check..."
 
-# Type check all packages
-pnpm -r exec tsc --noEmit
+# Type check all packages — serially (see .husky/pre-commit comment;
+# avoids transient tsc worker failures under concurrent load).
+pnpm -r --workspace-concurrency=1 exec tsc --noEmit
 
 # Check exit code
 if [ $? -ne 0 ]; then
