@@ -1,17 +1,18 @@
-# Run lint:fix before pushing
-echo "🔍 Running lint:fix before push..."
-pnpm lint:fix
+# Verify lint before pushing (read-only — does NOT write to the working tree).
+echo "🔍 Running lint check before push..."
+pnpm lint
 
-# Check if lint:fix made any changes
-if [ -n "$(git status --porcelain)" ]; then
-  echo "❌ Lint fixes were applied. Please review and commit them:"
-  git status --short
+# Check exit code — fail the push if lint reports any errors.
+if [ $? -ne 0 ]; then
   echo ""
-  echo "Run: git add . && git commit -m 'chore: apply lint fixes'"
+  echo "❌ Lint check failed! Push blocked."
+  echo ""
+  echo "Run 'pnpm lint:fix' yourself to apply auto-fixes, review the changes,"
+  echo "then commit them and retry the push."
   exit 1
-else
-  echo "✅ Lint check passed!"
 fi
+
+echo "✅ Lint check passed!"
 echo ""
 echo "🔍 Running TypeScript type check..."
 
