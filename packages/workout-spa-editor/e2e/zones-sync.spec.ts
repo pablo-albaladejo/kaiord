@@ -471,19 +471,29 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
 
     const before = await readProfile(page);
 
+    // Snapshot the read-details count BEFORE the click so we can
+    // wait for a strictly-greater count after — a `some()` check
+    // would false-pass on any pre-existing call from earlier in the
+    // test scaffolding (defense-in-depth even though the current
+    // pre-seed shape doesn't fire one).
+    const detailsCallsBefore = await countReadDetails(page);
+
     // Act: trigger sync via the manual button.
     await page.getByRole("button", { name: /^sync train2go$/i }).click();
 
-    // Wait for read-details to fire (the manual sync triggers the
-    // bridge fan-out exactly once).
+    // Wait for the click-induced read-details to fire (count
+    // strictly increases past the snapshotted baseline).
     await page.waitForFunction(
-      () => {
+      ({ baseline }) => {
         const calls =
           ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
             | { action: string }[]
             | undefined) ?? [];
-        return calls.some((c) => c.action === "read-details");
+        return (
+          calls.filter((c) => c.action === "read-details").length > baseline
+        );
       },
+      { baseline: detailsCallsBefore },
       { timeout: 10_000 }
     );
     // One extra tick so the orchestrator's repo.put (if any) settles.
@@ -493,11 +503,12 @@ test.describe("Train2Go zones-sync — auto-sync flows", () => {
     // train2go-synced-clean → silent no-op).
     await expect(page.getByTestId("zones-conflict-dialog")).not.toBeVisible();
 
-    // Assert: zones are byte-identical; method stays "train2go".
+    // Assert: full sportZones tree is byte-identical (covers HR,
+    // power, pace across all sports — not just cycling). Method +
+    // ftp checks stay as explicit guards so a regression like
+    // "method silently flipped to user" surfaces with a useful diff.
     const after = await readProfile(page);
-    expect(after.sportZones.cycling?.heartRateZones?.zones).toEqual(
-      before.sportZones.cycling?.heartRateZones?.zones
-    );
+    expect(after.sportZones).toEqual(before.sportZones);
     expect(after.sportZones.cycling?.heartRateZones?.method).toBe("train2go");
     expect(after.sportZones.cycling?.thresholds.ftp).toBe(
       before.sportZones.cycling?.thresholds.ftp
@@ -713,6 +724,61 @@ const seedTrain2GoSyncedProfile = async (page: Page): Promise<void> => {
         method: "train2go",
         zones: t2gHrBands.map((z) => ({ ...z })),
       };
+      // Power/pace bands kept schema-aligned (length 5) per
+      // `lastSyncedZonesSnapshotSchema` — the snapshot writer would
+      // populate full arrays after a real sync, so the seed mirrors
+      // that shape rather than empty arrays. Power %FTP percentages
+      // come from FIXTURE_ZONES_PAYLOAD's cycling watts table
+      // divided by FTP=268; pace bands come from the same fixture.
+      const t2gCyclingPower = [
+        {
+          zone: 1,
+          name: "Active Recovery",
+          minPercent: 41,
+          maxPercent: 56,
+        },
+        { zone: 2, name: "Endurance", minPercent: 56, maxPercent: 76 },
+        { zone: 3, name: "Tempo", minPercent: 76, maxPercent: 89 },
+        {
+          zone: 4,
+          name: "Lactate Threshold",
+          minPercent: 90,
+          maxPercent: 100,
+        },
+        { zone: 5, name: "VO2 Max", minPercent: 100, maxPercent: 144 },
+      ];
+      const t2gRunningPace = [
+        { zone: 1, name: "Recovery", minPace: 250, maxPace: 394 },
+        { zone: 2, name: "Aerobic", minPace: 250, maxPace: 349 },
+        { zone: 3, name: "Tempo", minPace: 250, maxPace: 285 },
+        { zone: 4, name: "Threshold", minPace: 250, maxPace: 284 },
+        { zone: 5, name: "VO2 Max", minPace: 210, maxPace: 249 },
+      ];
+      const t2gSwimmingPace = [
+        { zone: 1, name: "Recovery", minPace: 92, maxPace: 140 },
+        { zone: 2, name: "Aerobic", minPace: 92, maxPace: 118 },
+        { zone: 3, name: "Tempo", minPace: 92, maxPace: 108 },
+        { zone: 4, name: "Threshold", minPace: 92, maxPace: 99 },
+        { zone: 5, name: "VO2 Max", minPace: 86, maxPace: 91 },
+      ];
+      // Seed `sportZones` to MATCH the snapshot exactly. If the
+      // profile lacks a table the snapshot says was synced (e.g.
+      // cycling.powerZones present in snapshot but missing in
+      // sportZones), the next reconcile classifies it as "empty"
+      // and silent-fills — which would make the idempotence
+      // assertion fail because the profile DID change post-click.
+      const train2goPower = {
+        method: "train2go",
+        zones: t2gCyclingPower.map((z) => ({ ...z })),
+      };
+      const train2goRunPace = {
+        method: "train2go",
+        zones: t2gRunningPace.map((z) => ({ ...z })),
+      };
+      const train2goSwimPace = {
+        method: "train2go",
+        zones: t2gSwimmingPace.map((z) => ({ ...z })),
+      };
       await db.table("profiles").put({
         id: profileId,
         name: "Train2Go-Synced-Clean E2E",
@@ -720,9 +786,25 @@ const seedTrain2GoSyncedProfile = async (page: Page): Promise<void> => {
           cycling: {
             thresholds: { ftp: 268, lthr: 174 },
             heartRateZones: { ...train2goHr },
+            powerZones: { ...train2goPower },
           },
-          running: { thresholds: {}, heartRateZones: { ...train2goHr } },
-          swimming: { thresholds: {}, heartRateZones: { ...train2goHr } },
+          running: {
+            // Seed threshold scalars to match what reconcileThresholds
+            // would write so the silent no-op stays a no-op.
+            // running.thresholds.lthr from running Specific (168);
+            // thresholdPace from running pace Z4 upper 4:10 → 250s.
+            thresholds: { lthr: 168, thresholdPace: 250 },
+            heartRateZones: { ...train2goHr },
+            paceZones: { ...train2goRunPace },
+          },
+          swimming: {
+            // swimming.thresholds.lthr falls back to Generic z4Upper
+            // (174) per the Specific→Generic chain; swim pace Z4
+            // upper 1:32 → 92s.
+            thresholds: { lthr: 174, thresholdPace: 92 },
+            heartRateZones: { ...train2goHr },
+            paceZones: { ...train2goSwimPace },
+          },
         },
         linkedAccounts: [
           {
@@ -736,9 +818,9 @@ const seedTrain2GoSyncedProfile = async (page: Page): Promise<void> => {
               cyclingHr: t2gHrBands.map((z) => ({ ...z })),
               runningHr: t2gHrBands.map((z) => ({ ...z })),
               swimmingHr: t2gHrBands.map((z) => ({ ...z })),
-              cyclingPower: [],
-              runningPace: [],
-              swimmingPace: [],
+              cyclingPower: t2gCyclingPower.map((z) => ({ ...z })),
+              runningPace: t2gRunningPace.map((z) => ({ ...z })),
+              swimmingPace: t2gSwimmingPace.map((z) => ({ ...z })),
             },
           },
         ],
@@ -794,6 +876,15 @@ type ProfileSnapshot = {
   };
   linkedAccounts?: { lastSyncedZonesSnapshot?: { syncedAt?: string } }[];
 };
+
+const countReadDetails = async (page: Page): Promise<number> =>
+  page.evaluate(() => {
+    const calls =
+      ((window as unknown as Record<string, unknown>).__T2G_STUB_CALLS__ as
+        | { action: string }[]
+        | undefined) ?? [];
+    return calls.filter((c) => c.action === "read-details").length;
+  });
 
 const readProfile = async (page: Page): Promise<ProfileSnapshot> =>
   page.evaluate(async (id) => {
