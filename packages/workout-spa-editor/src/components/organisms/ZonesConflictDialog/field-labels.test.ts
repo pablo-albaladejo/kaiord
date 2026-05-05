@@ -14,7 +14,9 @@ import { FIELD_LABELS } from "./field-labels";
 
 describe("FIELD_LABELS", () => {
   it("should contain the 8 threshold-scalar labels plus exactly 60 band-level entries (5.1a)", () => {
-    // Arrange + Act
+    // Arrange
+
+    // Act
     const total = Object.keys(FIELD_LABELS).length;
 
     // Assert
