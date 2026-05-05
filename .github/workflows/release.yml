@@ -30,6 +30,10 @@ jobs:
   release:
     name: Version & Publish
     runs-on: ubuntu-latest
+    # P95 = 480s; ceil(P95 × 1.5 / 60) = 12; capped at test-family ceiling 30.
+    # (npm publish is the dominant cost — classify as test-family for the
+    # ceiling since it's external-network-bound, not a long-running build.)
+    timeout-minutes: 12
     steps:
       # Mint a short-lived (1h) token from the kaiord-release-bot GitHub App.
       # Required so the "Version Packages" PR pushed by changesets/action

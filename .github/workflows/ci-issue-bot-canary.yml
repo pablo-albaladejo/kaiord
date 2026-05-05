@@ -17,6 +17,8 @@ jobs:
   canary:
     name: Synthetic CI-failure canary
     runs-on: ubuntu-latest
+    # 0 successful runs of this job → fall back to lint-family ceiling 10.
+    timeout-minutes: 10
     if: ${{ vars.CI_ISSUE_BOT_ENABLED != 'false' }}
     steps:
       - name: Checkout

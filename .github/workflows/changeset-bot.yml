@@ -13,6 +13,8 @@ jobs:
   changeset-check:
     name: Check for Changeset
     runs-on: ubuntu-latest
+    # P95 = 7s; ceil(P95 × 1.5 / 60) = 1; capped at lint-family ceiling 10.
+    timeout-minutes: 1
     # Skip for automated PRs and version commits
     if: |
       !contains(github.head_ref, 'changeset-release') &&

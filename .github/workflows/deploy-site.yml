@@ -30,6 +30,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # P95 = 118s; ceil(P95 × 1.5 / 60) = 3; capped at build-family ceiling 20.
+    timeout-minutes: 3
     outputs:
       spa_marker: ${{ steps.spa_marker.outputs.marker }}
     steps:
@@ -155,6 +157,11 @@ jobs:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     runs-on: ubuntu-latest
+    # P95 = 12s; ceil(P95 × 1.5 / 60) = 1; capped at build-family ceiling 20.
+    # Note: smoke-test retries 10×10s = 100s worst case; if Pages CDN
+    # propagation regresses, raise to 3–5 in a follow-up rather than reverting
+    # the timeout invariant.
+    timeout-minutes: 1
     needs: build
     steps:
       - name: Deploy to GitHub Pages

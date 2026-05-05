@@ -24,6 +24,8 @@ jobs:
   audit:
     name: Dependency Security Audit
     runs-on: ubuntu-latest
+    # P95 = 44s; ceil(P95 × 1.5 / 60) = 2; capped at lint-family ceiling 10.
+    timeout-minutes: 2
 
     steps:
       - name: Checkout code
