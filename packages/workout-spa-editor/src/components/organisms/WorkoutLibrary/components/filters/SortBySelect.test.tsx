@@ -1,5 +1,3 @@
-/* eslint-disable no-magic-numbers -- option counts are literal for clarity */
-
 /**
  * SortBySelect tests.
  *
@@ -12,6 +10,8 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, userEvent } from "../../../../../test-utils";
 import { SortBySelect } from "./SortBySelect";
 
+const EXPECTED_OPTION_COUNT = 3;
+
 describe("SortBySelect", () => {
   it("should render the Sort By label and three options", () => {
     // Arrange
@@ -22,7 +22,7 @@ describe("SortBySelect", () => {
     // Assert
     const select = screen.getByLabelText("Sort By") as HTMLSelectElement;
     expect(select).toBeInTheDocument();
-    expect(select.options).toHaveLength(3);
+    expect(select.options).toHaveLength(EXPECTED_OPTION_COUNT);
   });
 
   it("should reflect the controlled value", () => {

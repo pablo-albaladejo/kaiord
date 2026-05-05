@@ -1,5 +1,3 @@
-/* eslint-disable no-magic-numbers -- option counts are literal for clarity */
-
 /**
  * DifficultyFilter tests.
  *
@@ -13,6 +11,8 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, userEvent } from "../../../../../test-utils";
 import { DifficultyFilter } from "./DifficultyFilter";
 
+const EXPECTED_OPTION_COUNT = 4;
+
 describe("DifficultyFilter", () => {
   it("should render the Difficulty label and a select with four options", () => {
     // Arrange
@@ -23,7 +23,7 @@ describe("DifficultyFilter", () => {
     // Assert
     const select = screen.getByLabelText("Difficulty") as HTMLSelectElement;
     expect(select).toBeInTheDocument();
-    expect(select.options).toHaveLength(4);
+    expect(select.options).toHaveLength(EXPECTED_OPTION_COUNT);
   });
 
   it("should reflect the controlled value in the select", () => {

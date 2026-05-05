@@ -1,5 +1,3 @@
-/* eslint-disable no-magic-numbers -- option counts and call ordinals are literal for clarity */
-
 /**
  * SportFilter tests.
  *
@@ -13,6 +11,11 @@ import { describe, expect, it, vi } from "vitest";
 import { render, screen, userEvent } from "../../../../../test-utils";
 import { SportFilter } from "./SportFilter";
 
+const EXPECTED_OPTION_COUNT = 5;
+const FIRST_CALL = 1;
+const SECOND_CALL = 2;
+const THIRD_CALL = 3;
+
 describe("SportFilter", () => {
   it("should render the Sport label and five options", () => {
     // Arrange
@@ -23,7 +26,7 @@ describe("SportFilter", () => {
     // Assert
     const select = screen.getByLabelText("Sport") as HTMLSelectElement;
     expect(select).toBeInTheDocument();
-    expect(select.options).toHaveLength(5);
+    expect(select.options).toHaveLength(EXPECTED_OPTION_COUNT);
   });
 
   it("should reflect the controlled value", () => {
@@ -48,9 +51,9 @@ describe("SportFilter", () => {
     await user.selectOptions(screen.getByLabelText("Sport"), "generic");
 
     // Assert
-    expect(onChange).toHaveBeenNthCalledWith(1, "running");
-    expect(onChange).toHaveBeenNthCalledWith(2, "swimming");
-    expect(onChange).toHaveBeenNthCalledWith(3, "generic");
+    expect(onChange).toHaveBeenNthCalledWith(FIRST_CALL, "running");
+    expect(onChange).toHaveBeenNthCalledWith(SECOND_CALL, "swimming");
+    expect(onChange).toHaveBeenNthCalledWith(THIRD_CALL, "generic");
   });
 
   it("should call onChange with all when the user resets to All Sports", async () => {
