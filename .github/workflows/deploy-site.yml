@@ -57,8 +57,34 @@ jobs:
       - name: Build SPA Editor
         env:
           VITE_BASE_PATH: /editor/
-          VITE_CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
         run: pnpm --filter @kaiord/workout-spa-editor... build
+
+      # Inject the Cloudflare Web Analytics token at deploy time (runtime
+      # config). The bundle itself is environment-agnostic per 12-factor
+      # III + V — see packages/workout-spa-editor/docs/analytics.md. When the
+      # secret is absent the placeholder remains and the SPA's noop analytics
+      # adapter wins.
+      - name: Substitute analytics token in SPA index.html
+        env:
+          CF_ANALYTICS_TOKEN: ${{ secrets.CF_ANALYTICS_TOKEN }}
+        run: |
+          set -e
+          if [ -z "${CF_ANALYTICS_TOKEN:-}" ]; then
+            echo "CF_ANALYTICS_TOKEN unset; leaving placeholder in index.html (analytics disabled)"
+            exit 0
+          fi
+          INDEX="packages/workout-spa-editor/dist/index.html"
+          test -f "$INDEX" || { echo "::error::SPA build artifact missing: $INDEX"; exit 1; }
+          # Use | as the delimiter to avoid escaping issues if the token
+          # contains slashes.
+          sed -i "s|__CF_ANALYTICS_TOKEN__|${CF_ANALYTICS_TOKEN}|g" "$INDEX"
+          # Verify substitution actually replaced the placeholder so a
+          # silent failure does not ship a no-analytics build.
+          if grep -q "__CF_ANALYTICS_TOKEN__" "$INDEX"; then
+            echo "::error::Placeholder __CF_ANALYTICS_TOKEN__ still present after sed"
+            exit 1
+          fi
+          echo "Analytics token injected at runtime"
 
       - name: Build Docs
         run: pnpm --filter @kaiord/docs... build
