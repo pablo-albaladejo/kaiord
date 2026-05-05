@@ -36,6 +36,7 @@ Every non-trivial script ships with a co-located `*.test.mjs` exercised by
 | `check-no-pii-leakage.mjs`                                | `R-PIIInterpolation` — toast/console first-arg literal-only.                         | `pnpm test:scripts`                                                           |
 | `check-no-unconditional-skip.mjs`                         | `R-NoUnconditionalSkip` — bare `it.only`/`describe.skip` rejected.                   | `pnpm lint:no-unconditional-skip`                                             |
 | `check-no-zustand-writethrough.mjs`                       | `R-DexieImport` — Zustand stores MUST NOT touch Dexie.                               | `pnpm test:scripts`                                                           |
+| `check-overrides-stale.mjs`                               | `R-OverridesStale` — every `pnpm.overrides` entry is required or allowlisted.        | `pnpm lint:overrides-stale`                                                   |
 | `check-package-deps.mjs`                                  | `R-ArchPackageDeps` — `@kaiord/*` cross-package allowlist.                           | `pnpm lint:package-deps`                                                      |
 | `check-popup-css-parity.test.mjs`                         | Test-only parity on extension popup CSS.                                             | `pnpm test:scripts`                                                           |
 | `check-scripts-orphans.mjs`                               | `R-ScriptsNoOrphans` — every `scripts/*` file is wired or allowlisted.               | `pnpm lint:scripts-orphans`                                                   |
@@ -81,6 +82,32 @@ tree — keep the format `- \`<filename>\` — When to run: <reason>`.
 
 These three folders are excluded from the orphan lint — their files are
 internal-only modules of their parent script.
+
+## pnpm.overrides allowlist
+
+Each entry below is read by `check-overrides-stale.mjs` (rule
+`R-OverridesStale`). The check classifies an override as **stale** when no
+transitive dependency in `pnpm-lock.yaml` would, without the override,
+resolve to a version inside its vulnerable range. Rather than dropping a
+defensive pin and risking a regression if a future dep introduces a
+vulnerable transitive, an override may be kept in place by adding a row
+here that names the override key and a one-line "Why kept" justification.
+
+Format: `- \`<override-key>\` — Why kept: <reason>`. The override key MUST
+match a current entry in `package.json#pnpm.overrides`; orphan or no-longer-
+stale entries fail the check.
+
+<!-- overrides-allowlist:start -->
+
+- `lodash@<4.17.23` — Why kept: defensive pin against historical lodash CVE-2020-8203 / CVE-2021-23337; no transitive currently pulls lodash but the pin guards future drift.
+- `@isaacs/brace-expansion@<=5.0.0` — Why kept: defensive pin against CVE-2025-5889 ReDoS; not currently in the tree but kept as forward-defense.
+- `undici@<6.23.0` — Why kept: defensive pin against CVE-2025-22150 / CVE-2025-47279; current transitives request newer 6.x but pin guards regression.
+- `minimatch@>=9.0.0 <9.0.7` — Why kept: defensive pin against minimatch 9.0.x ReDoS; current transitives request 9.0.9+ but pin guards regression.
+- `fast-xml-parser@<5.5.6` — Why kept: workspace adapters use ^5.7.2; pin retained as belt-and-braces against future transitive ingestion of older versions.
+- `undici@>=7.0.0 <7.24.0` — Why kept: defensive pin paired with the 6.x undici pin; both guard against future undici CVEs in the 7.x line.
+- `smol-toml@<1.6.1` — Why kept: defensive pin against pre-1.6.1 smol-toml parsing CVE; current transitives are clean but pin guards regression.
+
+<!-- overrides-allowlist:end -->
 
 ## Authoring a new script
 
