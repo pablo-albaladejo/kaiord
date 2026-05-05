@@ -65,7 +65,7 @@ echo "🔍 Running incremental TypeScript type check..."
 # first cold run, only the changed dependency graph is re-checked.
 # `pnpm build` is intentionally NOT in pre-commit — it stays in CI where
 # it has dedicated runners. Local commits should not pay full-build cost.
-pnpm -r exec tsc --noEmit --incremental
+pnpm -r --workspace-concurrency=1 exec tsc --noEmit --incremental
 
 if [ $? -ne 0 ]; then
   echo ""

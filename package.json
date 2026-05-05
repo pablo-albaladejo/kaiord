@@ -94,8 +94,8 @@
     "*.{ts,tsx}": [
       "eslint --fix --max-warnings=0"
     ],
-    "*.{md,json,yml}": [
-      "prettier --check"
+    "*.{md,json,yml,yaml}": [
+      "prettier --write"
     ]
   },
   "devDependencies": {
