@@ -26,7 +26,7 @@ This change is structured for autonomous execution under `/opsx-ship`: each work
 
 - No new product capability or user-facing feature.
 - No accessibility, privacy, or GDPR work (those flow through their own streams).
-- No bundle-size *reduction* — we only **measure** via size-limit. If the ratchet fires, the response is a follow-up change.
+- No bundle-size _reduction_ — we only **measure** via size-limit. If the ratchet fires, the response is a follow-up change.
 - No release-cadence work. The 47 unconsumed changesets are out of scope; they are flagged in the audit but will not be touched here.
 - No changes to the public API of any published package.
 - No domain-spec changes other than the W1.5 extension of `scripts-folder-hygiene`.
@@ -56,9 +56,9 @@ W6 is **substantially narrower** than the original draft. See D2 ("W6 audit and 
 
 **Alternatives considered:**
 
-- *One mega-PR per wave.* Rejected: too coarse-grained for `/opsx-ship` to dispatch in parallel; one stuck task blocks the entire wave.
-- *Strictly serial waves.* Rejected: leaves >50 % of agent time idle; W3 has no real dependency on W2.
-- *Flat task list, no waves.* Rejected: humans need the wave headlines to track progress; the orchestrator needs sequencing constraints expressed somewhere.
+- _One mega-PR per wave._ Rejected: too coarse-grained for `/opsx-ship` to dispatch in parallel; one stuck task blocks the entire wave.
+- _Strictly serial waves._ Rejected: leaves >50 % of agent time idle; W3 has no real dependency on W2.
+- _Flat task list, no waves._ Rejected: humans need the wave headlines to track progress; the orchestrator needs sequencing constraints expressed somewhere.
 
 ### D2. W6 audit and rescope (code-inspection findings)
 
@@ -83,17 +83,17 @@ The original draft claimed cross-adapter duplication of "zone↔watts, bpm↔%ma
 
 Each task names exactly one agent type so `/opsx-ship` does not have to decide:
 
-| Task family | Agent | Why |
-|---|---|---|
-| CI workflow / size-limit / jscpd / timeouts | `cicd-guardian` | Owns `.github/workflows/**`, knows pipeline shape. |
-| Hook config (pre-commit, pre-push) | `cicd-guardian` | Same scope (DX wiring). |
-| Missing READMEs / docs drift | `docs-expert` | Owns documentation tone and structure. |
-| Test coverage lifts | `test-improver` | Existing autonomous test-coverage improver. |
-| Oversized file splits / function extraction | `complexity-reducer` | Existing autonomous complexity reducer. |
-| `lint:overrides-stale` script + delta spec edit | `general-purpose` | Cross-cutting (script + spec + root `package.json`). |
-| Cross-adapter helper extraction (W6) | `architecture-guardian` | Touches domain layer + three adapters; needs hex-arch awareness. |
-| Round-trip verification (W6.5) | `validate-roundtrip` | Existing roundtrip validator. |
-| SPA bundle env-agnosticism (W1.6) | `spa-expert` | React/Vite expert; owns `workout-spa-editor` runtime patterns. |
+| Task family                                     | Agent                   | Why                                                              |
+| ----------------------------------------------- | ----------------------- | ---------------------------------------------------------------- |
+| CI workflow / size-limit / jscpd / timeouts     | `cicd-guardian`         | Owns `.github/workflows/**`, knows pipeline shape.               |
+| Hook config (pre-commit, pre-push)              | `cicd-guardian`         | Same scope (DX wiring).                                          |
+| Missing READMEs / docs drift                    | `docs-expert`           | Owns documentation tone and structure.                           |
+| Test coverage lifts                             | `test-improver`         | Existing autonomous test-coverage improver.                      |
+| Oversized file splits / function extraction     | `complexity-reducer`    | Existing autonomous complexity reducer.                          |
+| `lint:overrides-stale` script + delta spec edit | `general-purpose`       | Cross-cutting (script + spec + root `package.json`).             |
+| Cross-adapter helper extraction (W6)            | `architecture-guardian` | Touches domain layer + three adapters; needs hex-arch awareness. |
+| Round-trip verification (W6.5)                  | `validate-roundtrip`    | Existing roundtrip validator.                                    |
+| SPA bundle env-agnosticism (W1.6)               | `spa-expert`            | React/Vite expert; owns `workout-spa-editor` runtime patterns.   |
 
 ### D4. Acceptance check shape
 
@@ -208,28 +208,37 @@ W3.1 and W3.2 acceptance use a coverage threshold (see tasks.md), not a file-cou
 Before dispatching ANY PR for this change, `/opsx-ship` MUST execute the following parser-shape assertion against `openspec/changes/repo-quality-maintenance-waves/tasks.md`:
 
 ```js
-import { readFileSync } from 'node:fs';
-const md = readFileSync('openspec/changes/repo-quality-maintenance-waves/tasks.md', 'utf8');
-const tasks = [...md.matchAll(/^## §(\d+\.\d+)\s+(.*)$/gm)].map(m => ({ id: m[1], title: m[2] }));
-const ids = new Set(tasks.map(t => t.id));
+import { readFileSync } from "node:fs";
+const md = readFileSync(
+  "openspec/changes/repo-quality-maintenance-waves/tasks.md",
+  "utf8"
+);
+const tasks = [...md.matchAll(/^## §(\d+\.\d+)\s+(.*)$/gm)].map((m) => ({
+  id: m[1],
+  title: m[2],
+}));
+const ids = new Set(tasks.map((t) => t.id));
 const errors = [];
 for (const t of tasks) {
   const block = md.split(`## §${t.id}`)[1].split(/^## §/m)[0];
-  const dep = (block.match(/\*\*Depends on:\*\*\s*(.*)/) || [, ''])[1].trim();
-  const agent = (block.match(/\*\*Agent:\*\*\s*(.*)/) || [, ''])[1].trim();
+  const dep = (block.match(/\*\*Depends on:\*\*\s*(.*)/) || [, ""])[1].trim();
+  const agent = (block.match(/\*\*Agent:\*\*\s*(.*)/) || [, ""])[1].trim();
   const scope = (block.match(/\*\*Scope:\*\*/) || [])[0];
   const accept = (block.match(/\*\*Accept:\*\*/) || [])[0];
   if (!agent) errors.push(`§${t.id}: missing **Agent:**`);
   if (!scope) errors.push(`§${t.id}: missing **Scope:**`);
   if (!accept) errors.push(`§${t.id}: missing **Accept:**`);
   if (!dep) errors.push(`§${t.id}: missing **Depends on:**`);
-  if (dep && dep !== 'none') {
-    for (const id of dep.split(/,\s*/).map(s => s.replace(/^§/, ''))) {
+  if (dep && dep !== "none") {
+    for (const id of dep.split(/,\s*/).map((s) => s.replace(/^§/, ""))) {
       if (!ids.has(id)) errors.push(`§${t.id}: unknown dependency §${id}`);
     }
   }
 }
-if (errors.length) { console.error(errors.join('\n')); process.exit(1); }
+if (errors.length) {
+  console.error(errors.join("\n"));
+  process.exit(1);
+}
 console.log(`OK: ${tasks.length} tasks, all dependencies resolve`);
 ```
 
@@ -247,8 +256,8 @@ Tasks within the same wave that have no `Depends on:` line are parallel-safe. Ta
 
 ## Risks / Trade-offs
 
-- **[Risk]** Wave 1.5 (overrides audit) may discover overrides that *cannot* be safely removed (transitively required by old upstreams). → **Mitigation:** the new `R-OverridesStale` rule includes an allowlist mechanism (analogous to the existing scripts-folder allowlist) so a justified override stays, with a one-line "Why kept" note.
-- **[Risk]** Wave 2.2 (parallelizing `pnpm lint`) may surface implicit ordering between checks (e.g. archive-index expects archive-dates to have run first). → **Mitigation:** introduce two parallel groups: an *independent* group and a *post* group, sequenced by `npm-run-all2`. The agent identifies the post group by reading each check's `--help` or source.
+- **[Risk]** Wave 1.5 (overrides audit) may discover overrides that _cannot_ be safely removed (transitively required by old upstreams). → **Mitigation:** the new `R-OverridesStale` rule includes an allowlist mechanism (analogous to the existing scripts-folder allowlist) so a justified override stays, with a one-line "Why kept" note.
+- **[Risk]** Wave 2.2 (parallelizing `pnpm lint`) may surface implicit ordering between checks (e.g. archive-index expects archive-dates to have run first). → **Mitigation:** introduce two parallel groups: an _independent_ group and a _post_ group, sequenced by `npm-run-all2`. The agent identifies the post group by reading each check's `--help` or source.
 - **[Risk]** Wave 4 refactors land before Wave 5 tests are added, leaving an undertest window. → **Mitigation:** the existing organism-hooks coverage is already 0 %, so refactoring without new tests does not strictly worsen the situation, and the W4 PRs MUST include round-trip-style smoke tests. The deeper coverage lift is W5.
 - **[Risk]** Wave 6 changes the call signature of conversion helpers and introduces tolerance drift. → **Mitigation:** W6.5 is a closing PR that runs `pnpm -r test:roundtrip` and gates on existing tolerances (`time ±1s, power ±1W or ±1%FTP, HR ±1bpm, cadence ±1rpm`). If any tolerance fails, W6.5 cannot merge.
 - **[Trade-off]** Six waves means the change ships across many PRs (~27). A one-shot bundle would be smaller in calendar time but unreviewable. We accept the multi-PR overhead because each PR stays scoped, reviewable, and revertible.
