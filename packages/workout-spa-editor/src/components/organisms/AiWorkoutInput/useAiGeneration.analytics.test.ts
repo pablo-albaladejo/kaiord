@@ -45,7 +45,7 @@ vi.mock("../../../hooks/use-active-profile-live", () => ({
 }));
 
 const mockLoadWorkout = vi.fn();
-vi.mock("../../../store/workout-store-selectors", () => ({
+vi.mock("../../../store/selectors", () => ({
   useLoadWorkout: vi.fn(() => mockLoadWorkout),
 }));
 

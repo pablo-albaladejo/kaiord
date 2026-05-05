@@ -11,7 +11,7 @@ import {
   useOpenCreateBlockDialog,
   useSelectedStepIds,
   useUngroupRepetitionBlock,
-} from "../../../store/workout-store-selectors";
+} from "../../../store/selectors";
 import type { Workout } from "../../../types/krd";
 import {
   buildHandleConfirmCreateBlock,

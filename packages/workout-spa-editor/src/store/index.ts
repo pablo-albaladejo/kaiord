@@ -2,7 +2,6 @@
  * Store - Barrel export for all stores
  */
 
-export { useWorkoutStore, type WorkoutStore } from "./workout-store";
 export {
   useCanRedo,
   useCanUndo,
@@ -22,4 +21,5 @@ export {
   useUndo,
   useUndoDelete,
   useUpdateWorkout,
-} from "./workout-store-selectors";
+} from "./selectors";
+export { useWorkoutStore, type WorkoutStore } from "./workout-store";

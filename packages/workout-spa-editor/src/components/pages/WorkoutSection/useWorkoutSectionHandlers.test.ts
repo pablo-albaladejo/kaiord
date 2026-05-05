@@ -5,7 +5,7 @@ import type { KRD, Workout } from "../../../types/krd";
 import { useWorkoutSectionHandlers } from "./useWorkoutSectionHandlers";
 
 // Mock the store selectors
-vi.mock("../../../store/workout-store-selectors", () => ({
+vi.mock("../../../store/selectors", () => ({
   useSelectStep: vi.fn(() => vi.fn()),
   useSelectedStepId: vi.fn(() => null),
   useSetEditing: vi.fn(() => vi.fn()),
@@ -88,7 +88,8 @@ describe("useWorkoutSectionHandlers", () => {
 
     // Assert
 
-    expect(handlerKeys).toHaveLength(3);
+    const EXPECTED_HANDLER_COUNT = 3;
+    expect(handlerKeys).toHaveLength(EXPECTED_HANDLER_COUNT);
     expect(handlerKeys).toEqual([
       "handleStepSelect",
       "handleSave",

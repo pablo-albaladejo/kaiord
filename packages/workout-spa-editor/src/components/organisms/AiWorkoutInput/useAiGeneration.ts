@@ -8,7 +8,7 @@ import { useAiProvidersLive } from "../../../hooks/use-ai-providers-live";
 import { useLatestRef } from "../../../hooks/use-latest-ref";
 import { useAiRuntimeStore } from "../../../store/ai-runtime-store";
 import type { LlmProviderConfig } from "../../../store/ai-store-types";
-import { useLoadWorkout } from "../../../store/workout-store-selectors";
+import { useLoadWorkout } from "../../../store/selectors";
 import { runAiGeneration } from "./run-ai-generation";
 import { useAiFallbackEffect } from "./use-ai-fallback-effect";
 
