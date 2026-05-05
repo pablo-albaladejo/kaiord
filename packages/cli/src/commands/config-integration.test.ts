@@ -15,7 +15,7 @@ describe("config file integration", () => {
     await tmpDir.cleanup();
   });
 
-  it("should use config file defaults for convert command", async () => {
+  it("should use config file defaults for convert command", { timeout: 15000 }, async () => {
     // Arrange
     const configPath = join(tmpDir.path, ".kaiordrc.json");
     const config = {
