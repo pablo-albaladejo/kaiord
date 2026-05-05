@@ -1,3 +1,4 @@
+/* eslint-disable no-magic-numbers -- test fixtures use literal FTP/percent/zone values for clarity */
 import { describe, expect, it } from "vitest";
 
 import {
@@ -274,33 +275,36 @@ describe("convertPowerZoneToPercentFtp", () => {
     expect(result).toBe(200);
   });
 
-  it("should default to 100% for unknown zone", () => {
+  it("should throw RangeError for zone 0 (below range)", () => {
     // Arrange
+    const invalidZone = 0;
 
     // Act
-    const result = convertPowerZoneToPercentFtp(0);
+    const act = () => convertPowerZoneToPercentFtp(invalidZone);
 
     // Assert
-    expect(result).toBe(100);
+    expect(act).toThrow(RangeError);
   });
 
-  it("should default to 100% for zone 8 (out of range)", () => {
+  it("should throw RangeError for zone 8 (above range)", () => {
     // Arrange
+    const invalidZone = 8;
 
     // Act
-    const result = convertPowerZoneToPercentFtp(8);
+    const act = () => convertPowerZoneToPercentFtp(invalidZone);
 
     // Assert
-    expect(result).toBe(100);
+    expect(act).toThrow(RangeError);
   });
 
-  it("should default to 100% for negative zone", () => {
+  it("should throw RangeError for negative zone", () => {
     // Arrange
+    const invalidZone = -1;
 
     // Act
-    const result = convertPowerZoneToPercentFtp(-1);
+    const act = () => convertPowerZoneToPercentFtp(invalidZone);
 
     // Assert
-    expect(result).toBe(100);
+    expect(act).toThrow(RangeError);
   });
 });

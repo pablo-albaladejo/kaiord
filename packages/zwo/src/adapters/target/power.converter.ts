@@ -1,4 +1,8 @@
-import { type Target, targetTypeSchema } from "@kaiord/core";
+import {
+  type Target,
+  targetTypeSchema,
+  zoneToPercentFtp,
+} from "@kaiord/core";
 
 /**
  * Convert Zwift power target (FTP percentage 0.0-3.0) to KRD power target
@@ -53,26 +57,19 @@ export const convertKrdPowerRangeToZwift = (
 };
 
 /**
- * Convert power zone (1-7) to percent FTP
- * Uses typical power zone definitions:
- * Zone 1 (Recovery): 55% FTP
- * Zone 2 (Endurance): 75% FTP
- * Zone 3 (Tempo): 90% FTP
- * Zone 4 (Threshold): 105% FTP
- * Zone 5 (VO2 Max): 120% FTP
- * Zone 6 (Anaerobic): 150% FTP
- * Zone 7 (Neuromuscular): 200% FTP
+ * Convert a Coggan power zone (1..7) to its percent-FTP value.
+ *
+ * Thin adapter-side delegate over the canonical domain helper
+ * `zoneToPercentFtp` from `@kaiord/core`: the table is a fitness-domain
+ * truth and lives in the domain layer, not in this format adapter.
+ *
+ * Contract is strict: invalid zones (non-integer, out of [1, 7], NaN,
+ * Infinity) propagate a `RangeError`. The KRD `powerValueSchema`
+ * already constrains `unit: "zone"` values to `int().min(1).max(7)`, so
+ * every in-flight call site receives a validated zone — there is no
+ * silent fallback to 100% FTP.
+ *
+ * @throws RangeError when `zone` is not an integer in [1, 7].
  */
-export const convertPowerZoneToPercentFtp = (zone: number): number => {
-  const zoneMap: Record<number, number> = {
-    1: 55,
-    2: 75,
-    3: 90,
-    4: 105,
-    5: 120,
-    6: 150,
-    7: 200,
-  };
-
-  return zoneMap[zone] || 100;
-};
+export const convertPowerZoneToPercentFtp = (zone: number): number =>
+  zoneToPercentFtp(zone);
