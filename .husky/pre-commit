@@ -16,8 +16,11 @@ echo "✅ Build passed!"
 echo ""
 echo "🔍 Running TypeScript type check..."
 
-# Type check all packages
-pnpm -r exec tsc --noEmit
+# Type check all packages — serially. Parallel `--workspace-concurrency`
+# saturates dev machines and produces transient tsc worker failures
+# under load (the dev hook is the wrong place to push parallelism;
+# CI runners are the right place for that).
+pnpm -r --workspace-concurrency=1 exec tsc --noEmit
 
 # Check exit code
 if [ $? -ne 0 ]; then
@@ -50,8 +53,13 @@ echo "✅ scripts/ tests passed!"
 echo ""
 echo "🧪 Running tests before commit..."
 
-# Run all tests in the monorepo
-pnpm test
+# Run all tests in the monorepo — serially. Parallel test execution
+# across 11 packages saturates worker pools (vitest pool-runner timeouts,
+# sharp transients, individual-test timeouts), causing different flakes
+# on every retry. Serial execution adds a few minutes to the local hook
+# but eliminates the flakes — CI runners with dedicated capacity continue
+# to use the parallel `pnpm test` script.
+pnpm -r --workspace-concurrency=1 test
 
 # Check exit code
 if [ $? -ne 0 ]; then
