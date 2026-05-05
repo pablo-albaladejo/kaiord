@@ -1,43 +1,51 @@
-echo "🏗️  Running build before commit..."
+echo "🔍 Running lint-staged on changed files..."
 
-# Build all packages
-pnpm build
+# Step 1: file-scoped formatting / linting on staged files only.
+#   - *.{ts,tsx} → `eslint --fix --max-warnings=0`
+#   - *.{md,json,yml} → `prettier --check`
+# Configuration lives in the root `package.json`'s `lint-staged` block.
+# Touches only what the developer staged: O(diff), not O(repo).
+pnpm exec lint-staged
 
-# Check exit code
 if [ $? -ne 0 ]; then
   echo ""
-  echo "❌ Build failed! Commit blocked."
+  echo "❌ lint-staged failed! Commit blocked."
   echo ""
-  echo "Fix the build errors and try again."
+  echo "Fix the reported issues and try again."
   exit 1
 fi
 
-echo "✅ Build passed!"
+echo "✅ lint-staged passed!"
 echo ""
-echo "🔍 Running TypeScript type check..."
+echo "🧪 Running staged test-file structural checks..."
 
-# Type check all packages — serially. Parallel `--workspace-concurrency`
-# saturates dev machines and produces transient tsc worker failures
-# under load (the dev hook is the wrong place to push parallelism;
-# CI runners are the right place for that).
-pnpm -r --workspace-concurrency=1 exec tsc --noEmit
-
-# Check exit code
+# Test-AAA + test-title-should ride on lint-staged's same diff (R-ItBodyAAA,
+# R-ItTitleShould). Each script reads `git diff --cached` and is a no-op
+# when no `*.test.{ts,tsx}` is staged.
+node scripts/check-test-aaa.mjs --changed-files
 if [ $? -ne 0 ]; then
   echo ""
-  echo "❌ TypeScript type check failed! Commit blocked."
-  echo ""
-  echo "Fix the type errors and try again."
+  echo "❌ Test-AAA structural check failed! Commit blocked."
   exit 1
 fi
 
-echo "✅ Type check passed!"
-echo ""
-echo "🧪 Running scripts/ unit tests..."
+node scripts/check-test-title-should.mjs --changed-files
+if [ $? -ne 0 ]; then
+  echo ""
+  echo "❌ Test-title-should structural check failed! Commit blocked."
+  exit 1
+fi
 
-# scripts/*.test.mjs runs BEFORE pnpm test so an `it.only` (which silently
-# masks every other test in a file) is rejected before the test runner can
-# report a green run on a single test. See R-NoUnconditionalSkip.
+echo "✅ Staged test checks passed!"
+echo ""
+echo "🧪 Running scripts/ unit tests (whole-tree mechanical guards)..."
+
+# Whole-tree mechanical guards: R-LibraryNoDualMount, R-OverridesStale,
+# R-ScriptsNoOrphans, R-AppDexieImport, R-NoUnconditionalSkip, etc.
+# These are file-set invariants that file-scoped tooling cannot prove
+# (cross-file imports, orphan detection, lockfile parity); they must run
+# whole-tree to catch regressions a partial diff would miss. The suite
+# runs in <30s on a warm cache.
 pnpm test:scripts
 
 if [ $? -ne 0 ]; then
@@ -51,24 +59,20 @@ fi
 
 echo "✅ scripts/ tests passed!"
 echo ""
-echo "🧪 Running tests before commit..."
+echo "🔍 Running incremental TypeScript type check..."
 
-# Run all tests in the monorepo — serially. Parallel test execution
-# across 11 packages saturates worker pools (vitest pool-runner timeouts,
-# sharp transients, individual-test timeouts), causing different flakes
-# on every retry. Serial execution adds a few minutes to the local hook
-# but eliminates the flakes — CI runners with dedicated capacity continue
-# to use the parallel `pnpm test` script.
-pnpm -r --workspace-concurrency=1 test
+# Incremental tsc reuses .tsbuildinfo across runs (gitignored). After the
+# first cold run, only the changed dependency graph is re-checked.
+# `pnpm build` is intentionally NOT in pre-commit — it stays in CI where
+# it has dedicated runners. Local commits should not pay full-build cost.
+pnpm -r --workspace-concurrency=1 exec tsc --noEmit --incremental
 
-# Check exit code
 if [ $? -ne 0 ]; then
   echo ""
-  echo "❌ Tests failed! Commit blocked."
+  echo "❌ TypeScript type check failed! Commit blocked."
   echo ""
-  echo "Fix the failing tests and try again:"
-  echo "  pnpm test:watch"
+  echo "Fix the type errors and try again."
   exit 1
 fi
 
-echo "✅ All tests passed!"
+echo "✅ Type check passed!"

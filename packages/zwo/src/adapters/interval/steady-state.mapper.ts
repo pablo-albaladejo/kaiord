@@ -1,12 +1,11 @@
-import type { Target, WorkoutStep } from "@kaiord/core";
-import { intensitySchema, targetTypeSchema } from "@kaiord/core";
+import type { WorkoutStep } from "@kaiord/core";
+import { intensitySchema } from "@kaiord/core";
 
 import type { ZwiftDurationData } from "../duration/duration.mapper";
 import { mapZwiftDuration } from "../duration/duration.mapper";
-import { convertZwiftPowerTarget } from "../target/target.converter";
 import type { ZwiftTextEvent } from "./index";
 import { extractTextEvents } from "./index";
-import { restoreHeartRateTarget } from "./target-restoration";
+import { restoreSteadyStateTarget } from "./steady-state-target.helpers";
 
 export type ZwiftSteadyStateData = {
   Duration?: number;
@@ -32,35 +31,6 @@ export type ZwiftSteadyStateData = {
   "kaiord:originalWatts"?: number;
   "kaiord:powerZone"?: number;
   "kaiord:assumedFtp"?: number;
-};
-
-const restoreSteadyStateTarget = (data: ZwiftSteadyStateData): Target => {
-  if (data["kaiord:powerUnit"] === "watts" && data["kaiord:originalWatts"]) {
-    return {
-      type: targetTypeSchema.enum.power,
-      value: {
-        unit: "watts",
-        value: data["kaiord:originalWatts"],
-      },
-    };
-  }
-
-  if (data["kaiord:powerUnit"] === "zone" && data["kaiord:powerZone"]) {
-    return {
-      type: targetTypeSchema.enum.power,
-      value: {
-        unit: "zone",
-        value: data["kaiord:powerZone"],
-      },
-    };
-  }
-
-  if (data.Power !== undefined) {
-    return convertZwiftPowerTarget(data.Power);
-  }
-
-  const hrTarget = restoreHeartRateTarget(data);
-  return hrTarget || { type: targetTypeSchema.enum.open };
 };
 
 export const mapSteadyStateToKrd = (

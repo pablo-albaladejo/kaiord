@@ -1,44 +1,27 @@
-import { Profile } from "@garmin/fitsdk";
-import type { KRD } from "@kaiord/core";
-import type { RepetitionBlock, Workout, WorkoutStep } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
-import { isRepetitionBlock } from "@kaiord/core";
+import type { KRD, Logger, Workout } from "@kaiord/core";
 
+import type { FitFileType } from "../schemas/fit-file-type";
 import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
 import { mapSubSportToFit } from "../sub-sport/sub-sport.mapper";
+import { mapManufacturer } from "./krd-to-fit-manufacturer.converter";
+import { countValidSteps } from "./krd-to-fit-step-count.helpers";
 
-const DEFAULT_MANUFACTURER = "garmin";
+const resolveFitFileType = (krdType: KRD["type"]): FitFileType => {
+  if (krdType === "structured_workout") return "workout";
+  if (krdType === "recorded_activity") return "activity";
+  if (krdType === "course") return "course";
+  return "workout";
+};
 
-/**
- * Maps KRD manufacturer string to valid FIT Profile manufacturer enum value.
- * Uses fuzzy matching (case-insensitive, prefix matching).
- */
-const mapManufacturer = (
-  manufacturer: string | undefined,
-  logger: Logger
-): string => {
-  if (!manufacturer) {
-    return DEFAULT_MANUFACTURER;
+const assignParsedNumber = (
+  target: Record<string, unknown>,
+  key: string,
+  raw: string
+): void => {
+  const parsed = parseInt(raw, 10);
+  if (!isNaN(parsed)) {
+    target[key] = parsed;
   }
-
-  const manufacturerEnum = Profile.types.manufacturer;
-  const manufacturerValues = Object.values(manufacturerEnum);
-  const normalized = manufacturer.toLowerCase();
-
-  const matched = manufacturerValues.find(
-    (value) =>
-      value.toLowerCase() === normalized ||
-      value.toLowerCase().startsWith(normalized) ||
-      normalized.startsWith(value.toLowerCase())
-  );
-
-  if (matched) return matched;
-
-  logger.warn(
-    `Unknown manufacturer "${manufacturer}", using fallback "${DEFAULT_MANUFACTURER}"`,
-    { original: manufacturer, fallback: DEFAULT_MANUFACTURER }
-  );
-  return DEFAULT_MANUFACTURER;
 };
 
 export const convertMetadataToFileId = (
@@ -47,33 +30,20 @@ export const convertMetadataToFileId = (
 ): Record<string, unknown> => {
   logger.debug("Converting metadata to file_id message");
 
-  const fileType =
-    krd.type === "structured_workout"
-      ? "workout"
-      : krd.type === "recorded_activity"
-        ? "activity"
-        : krd.type === "course"
-          ? "course"
-          : "workout";
+  const fileType = resolveFitFileType(krd.type);
 
   const fileId: Record<string, unknown> = {
-    type: FIT_FILE_TYPE_TO_NUMBER[fileType] ?? FIT_FILE_TYPE_TO_NUMBER.workout,
+    type: FIT_FILE_TYPE_TO_NUMBER[fileType],
     timeCreated: new Date(krd.metadata.created),
     manufacturer: mapManufacturer(krd.metadata.manufacturer, logger),
   };
 
   if (krd.metadata.product !== undefined) {
-    const productNumber = parseInt(krd.metadata.product, 10);
-    if (!isNaN(productNumber)) {
-      fileId.product = productNumber;
-    }
+    assignParsedNumber(fileId, "product", krd.metadata.product);
   }
 
   if (krd.metadata.serialNumber) {
-    const serialNumber = parseInt(krd.metadata.serialNumber, 10);
-    if (!isNaN(serialNumber)) {
-      fileId.serialNumber = serialNumber;
-    }
+    assignParsedNumber(fileId, "serialNumber", krd.metadata.serialNumber);
   }
 
   return fileId;
@@ -103,18 +73,4 @@ export const convertWorkoutMetadata = (
   }
 
   return workoutMesg;
-};
-
-const countValidSteps = (
-  steps: Array<WorkoutStep | RepetitionBlock>
-): number => {
-  let count = 0;
-  for (const step of steps) {
-    if (isRepetitionBlock(step)) {
-      count += step.steps.length + 1;
-    } else {
-      count += 1;
-    }
-  }
-  return count;
 };
