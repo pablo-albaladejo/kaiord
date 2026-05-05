@@ -1,11 +1,9 @@
-import type { KRD } from "@kaiord/core";
-import type { Workout } from "@kaiord/core";
-import type { Logger } from "@kaiord/core";
+import type { KRD, Logger, Workout } from "@kaiord/core";
 
 import type { FitFileType } from "../schemas/fit-file-type";
 import { FIT_FILE_TYPE_TO_NUMBER } from "../schemas/fit-file-type";
 import { mapSubSportToFit } from "../sub-sport/sub-sport.mapper";
-import { mapManufacturer } from "./krd-to-fit-manufacturer.mapper";
+import { mapManufacturer } from "./krd-to-fit-manufacturer.converter";
 import { countValidSteps } from "./krd-to-fit-step-count.helpers";
 
 const resolveFitFileType = (krdType: KRD["type"]): FitFileType => {

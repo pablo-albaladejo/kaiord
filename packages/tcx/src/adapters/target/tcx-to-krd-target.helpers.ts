@@ -63,7 +63,7 @@ export const convertSpeedTarget = (data: TcxTargetData): Target => {
  */
 export const convertCadenceTarget = (data: TcxTargetData): Target => {
   if (data.cadenceLow !== undefined && data.cadenceHigh !== undefined) {
-    const isRunning = data.sport === "running" || data.sport === "Running";
+    const isRunning = data.sport?.toLowerCase() === "running";
     // Convert SPM to RPM for running (SPM = 2 * RPM, so RPM = SPM / 2)
     const minRpm = isRunning ? data.cadenceLow / 2 : data.cadenceLow;
     const maxRpm = isRunning ? data.cadenceHigh / 2 : data.cadenceHigh;
