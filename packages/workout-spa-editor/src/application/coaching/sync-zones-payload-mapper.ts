@@ -2,16 +2,18 @@
  * `ZonesPayload` (raw bridge shape) → Kaiord-domain `IncomingMap`.
  *
  * Per design D5/D6 (threshold scalars) and D-FB1/D-FB6/D-FB7 (full
- * band tables). Per-sport HR fallback chain is implemented here;
- * watts→%FTP and pace inversion live in `sync-zones-band-mappers.ts`.
+ * band tables). The Specific → Generic → skip HR fallback lives in
+ * `sync-zones-hr-fallback.ts`; watts→%FTP and pace inversion live
+ * in `sync-zones-band-mappers.ts`.
  */
-import type { HrBandBlock, ZonesPayload } from "../../types/coaching-zones";
+import type { ZonesPayload } from "../../types/coaching-zones";
 import type { IncomingMap } from "./sync-zones-band-mappers";
 import {
   setCyclingPowerBands,
   setHrBands,
   setPaceBands,
 } from "./sync-zones-band-mappers";
+import { resolveHrBands, resolveLthrScalar } from "./sync-zones-hr-fallback";
 
 export type { IncomingMap } from "./sync-zones-band-mappers";
 
@@ -38,34 +40,17 @@ const pickFtp = (
   return cycling.z5Lower;
 };
 
-const hasAnyBand = (block: HrBandBlock | undefined): boolean =>
-  Boolean(block && (block.z1 || block.z2 || block.z3 || block.z4 || block.z5));
-
-const resolveHrBands = (
-  payload: ZonesPayload,
-  sport: "cycling" | "running" | "swimming"
-): HrBandBlock | undefined => {
-  const specific = payload.hrZones?.[sport];
-  if (hasAnyBand(specific)) return specific;
-  const generic = payload.hrZones?.generic;
-  if (hasAnyBand(generic)) return generic;
-  return undefined;
-};
-
 const setThresholdScalars = (out: IncomingMap, payload: ZonesPayload): void => {
   setIfPositive(out, "bodyWeight", payload.physiological?.weight);
   setIfPositive(out, "heartRate.max", payload.physiological?.bpmMax);
   setIfPositive(out, "cycling.thresholds.ftp", pickFtp(payload.paces?.cycling));
-  setIfPositive(
-    out,
-    "cycling.thresholds.lthr",
-    payload.hrZones?.cycling?.z4Upper
-  );
-  setIfPositive(
-    out,
-    "running.thresholds.lthr",
-    payload.hrZones?.running?.z4Upper
-  );
+  for (const sport of ["cycling", "running", "swimming"] as const) {
+    setIfPositive(
+      out,
+      `${sport}.thresholds.lthr`,
+      resolveLthrScalar(payload, sport)
+    );
+  }
   const runZ4 = payload.paces?.running?.z4Upper;
   if (runZ4) {
     out.set("running.thresholds.thresholdPaceSecPerKm", minSecToSeconds(runZ4));

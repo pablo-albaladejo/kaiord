@@ -23,6 +23,8 @@ export const readThreshold = (
       return profile.sportZones.running?.thresholds.lthr;
     case "running.thresholds.thresholdPaceSecPerKm":
       return profile.sportZones.running?.thresholds.thresholdPace;
+    case "swimming.thresholds.lthr":
+      return profile.sportZones.swimming?.thresholds.lthr;
     case "swimming.thresholds.cssPaceSecPer100m":
       return profile.sportZones.swimming?.thresholds.thresholdPace;
   }
@@ -62,6 +64,8 @@ export const writeThreshold = (
       return setSportThreshold(profile, "running", { lthr: value });
     case "running.thresholds.thresholdPaceSecPerKm":
       return setSportThreshold(profile, "running", { thresholdPace: value });
+    case "swimming.thresholds.lthr":
+      return setSportThreshold(profile, "swimming", { lthr: value });
     case "swimming.thresholds.cssPaceSecPer100m":
       return setSportThreshold(profile, "swimming", { thresholdPace: value });
   }
