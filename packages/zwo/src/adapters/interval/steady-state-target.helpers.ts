@@ -8,7 +8,10 @@ import { restoreHeartRateTarget } from "./target-restoration";
 export const restoreSteadyStateTarget = (
   data: ZwiftSteadyStateData
 ): Target => {
-  if (data["kaiord:powerUnit"] === "watts" && data["kaiord:originalWatts"]) {
+  if (
+    data["kaiord:powerUnit"] === "watts" &&
+    data["kaiord:originalWatts"] !== undefined
+  ) {
     return {
       type: targetTypeSchema.enum.power,
       value: {
@@ -18,7 +21,10 @@ export const restoreSteadyStateTarget = (
     };
   }
 
-  if (data["kaiord:powerUnit"] === "zone" && data["kaiord:powerZone"]) {
+  if (
+    data["kaiord:powerUnit"] === "zone" &&
+    data["kaiord:powerZone"] !== undefined
+  ) {
     return {
       type: targetTypeSchema.enum.power,
       value: {
