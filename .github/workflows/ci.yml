@@ -16,6 +16,8 @@ jobs:
   # Log when CI is skipped for bot commits
   log-bot-skip:
     runs-on: ubuntu-latest
+    # 0 successful runs (bot-only path) → fall back to lint-family ceiling 10.
+    timeout-minutes: 10
     if: github.actor == 'github-actions[bot]'
     steps:
       - name: Log bot commit skip
@@ -27,6 +29,8 @@ jobs:
 
   detect-changes:
     runs-on: ubuntu-latest
+    # P95 = 8s; ceil(P95 × 1.5 / 60) = 1; capped at lint-family ceiling 10.
+    timeout-minutes: 1
     # Skip CI jobs for bot commits to prevent infinite loops
     if: github.actor != 'github-actions[bot]'
     outputs:
@@ -204,6 +208,8 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    # P95 = 134s; ceil(P95 × 1.5 / 60) = 4; capped at lint-family ceiling 10.
+    timeout-minutes: 4
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
@@ -386,6 +392,8 @@ jobs:
   # the `SIZE_LIMIT_BOT_ENABLED` precedent (design D8).
   jscpd:
     runs-on: ubuntu-latest
+    # Lint-family job (duplication detection) → ceiling 10 minutes.
+    timeout-minutes: 10
     needs: detect-changes
     if: |
       needs.detect-changes.outputs.should-test == 'true' &&
@@ -408,6 +416,8 @@ jobs:
   check-links:
     name: Link checker
     runs-on: ubuntu-latest
+    # P95 = 10s; ceil(P95 × 1.5 / 60) = 1; capped at lint-family ceiling 10.
+    timeout-minutes: 1
     steps:
       - name: Checkout code
         uses: actions/checkout@v6
@@ -422,6 +432,8 @@ jobs:
 
   typecheck:
     runs-on: ubuntu-latest
+    # n=13 (<20 successful runs) → fall back to lint-family ceiling 10.
+    timeout-minutes: 10
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     steps:
@@ -449,6 +461,8 @@ jobs:
   # set by `vars.CI_ISSUE_BOT_ENABLED`.
   size-limit:
     runs-on: ubuntu-latest
+    # Lint-family job (bundle-size measurement on prebuilt artifacts) → ceiling 10 minutes.
+    timeout-minutes: 10
     needs: [detect-changes, build]
     if: |
       needs.detect-changes.outputs.should-test == 'true' &&
@@ -470,6 +484,9 @@ jobs:
 
   test:
     runs-on: ubuntu-latest
+    # P95 = 69s (worst matrix shard); ceil(P95 × 1.5 / 60) = 2; capped at
+    # test-family ceiling 30.
+    timeout-minutes: 2
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
@@ -542,6 +559,8 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    # n=13 (<20 successful runs) → fall back to build-family ceiling 20.
+    timeout-minutes: 20
     needs: detect-changes
     # Actor check is redundant with detect-changes' own gate (line ~31),
     # but kept as belt-and-braces; if detect-changes' gate ever moves,
@@ -588,6 +607,9 @@ jobs:
 
   test-frontend:
     runs-on: ubuntu-latest
+    # P95 = 334s (worst matrix shard); ceil(P95 × 1.5 / 60) = 9; capped at
+    # test-family ceiling 30.
+    timeout-minutes: 9
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
@@ -635,6 +657,8 @@ jobs:
 
   test-cli:
     runs-on: ubuntu-latest
+    # n=13 (<20 successful runs) → fall back to test-family ceiling 30.
+    timeout-minutes: 30
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
@@ -680,6 +704,9 @@ jobs:
 
   round-trip:
     runs-on: ubuntu-latest
+    # P95 = 47s (worst matrix shard); ceil(P95 × 1.5 / 60) = 2; capped at
+    # test-family ceiling 30.
+    timeout-minutes: 2
     needs: [detect-changes, build]
     if: needs.detect-changes.outputs.should-test == 'true'
     strategy:
@@ -731,6 +758,8 @@ jobs:
 
   e2e-frontend:
     runs-on: ubuntu-latest
+    # n=13 (<20 successful runs) → fall back to e2e-family ceiling 45.
+    timeout-minutes: 45
     needs: [detect-changes, build]
     # needs.build.result success check is redundant with default success()
     # over needs:, but kept explicit since this clause uses if: | multi-line
@@ -772,6 +801,8 @@ jobs:
 
   e2e-prod-base:
     runs-on: ubuntu-latest
+    # n=13 (<20 successful runs) → fall back to e2e-family ceiling 45.
+    timeout-minutes: 45
     needs: [detect-changes, build]
     if: |
       needs.detect-changes.outputs.should-test == 'true' &&
@@ -813,6 +844,8 @@ jobs:
   bundle-analysis:
     name: bundle-analysis
     runs-on: ubuntu-latest
+    # n=13 (<20 successful runs) → fall back to lint-family ceiling 10.
+    timeout-minutes: 10
     needs: detect-changes
     if: |
       needs.detect-changes.outputs.should-test == 'true' &&
@@ -855,6 +888,8 @@ jobs:
   lint-summary:
     name: lint
     runs-on: ubuntu-latest
+    # Pure aggregator (no compute) → lint-family ceiling 10 as the upper bound.
+    timeout-minutes: 10
     needs: [build, lint, jscpd, size-limit]
     if: always()
     steps:
@@ -897,6 +932,8 @@ jobs:
   test-summary:
     name: test
     runs-on: ubuntu-latest
+    # Pure aggregator (no compute) → lint-family ceiling 10 as the upper bound.
+    timeout-minutes: 10
     needs: [build, test]
     if: always()
     steps:
@@ -921,6 +958,8 @@ jobs:
   round-trip-summary:
     name: round-trip
     runs-on: ubuntu-latest
+    # Pure aggregator (no compute) → lint-family ceiling 10 as the upper bound.
+    timeout-minutes: 10
     needs: [build, round-trip]
     if: always()
     steps:
@@ -945,6 +984,8 @@ jobs:
   test-frontend-summary:
     name: test-frontend
     runs-on: ubuntu-latest
+    # Pure aggregator (no compute) → lint-family ceiling 10 as the upper bound.
+    timeout-minutes: 10
     needs: [build, test-frontend]
     if: always()
     steps:
@@ -969,6 +1010,8 @@ jobs:
   notify-failure:
     name: Notify on Failure
     runs-on: ubuntu-latest
+    # Pure notifier (issue create) → lint-family ceiling 10 as the upper bound.
+    timeout-minutes: 10
     needs:
       [
         detect-changes,

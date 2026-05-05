@@ -14,6 +14,8 @@ on:
 jobs:
   check-ci-status:
     runs-on: ubuntu-latest
+    # P95 = 5s; ceil(P95 × 1.5 / 60) = 1; capped at lint-family ceiling 10.
+    timeout-minutes: 1
     if: github.event.workflow_run.conclusion == 'success'
     outputs:
       should-run: ${{ steps.check.outputs.should-run }}
