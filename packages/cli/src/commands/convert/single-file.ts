@@ -1,8 +1,10 @@
 import type { Logger } from "@kaiord/core";
 import ora from "ora";
 import { writeFile } from "../../utils/file-handler";
-import { detectFormat, type FileFormat } from "../../utils/format-detector";
+import type { FileFormat } from "../../utils/format-detector";
 import { convertFromKrd, loadFileAsKrd } from "../../utils/krd-converter";
+import { resolveSingleFileFormats } from "./single-file-formats";
+import { reportConversionSuccess } from "./single-file-reporter";
 import type { ValidatedConvertOptions } from "./types";
 
 /**
@@ -27,37 +29,12 @@ export const executeSingleFileConversion = async (
   options: ValidatedConvertOptions,
   logger: Logger
 ): Promise<void> => {
-  const inputFormat = options.inputFormat || detectFormat(options.input);
-
-  if (!inputFormat) {
-    const error = new Error(
-      `Unable to detect input format from file: ${options.input}. ` +
-        `Supported formats: .fit, .gcn, .krd, .tcx, .zwo`
-    );
-    error.name = "InvalidArgumentError";
-    throw error;
-  }
-
-  if (!options.output) {
-    const error = new Error("Output file is required");
-    error.name = "InvalidArgumentError";
-    throw error;
-  }
-
-  const outputFormat = options.outputFormat || detectFormat(options.output);
-
-  if (!outputFormat) {
-    const error = new Error(
-      `Unable to detect output format from file: ${options.output}. ` +
-        `Supported formats: .fit, .gcn, .krd, .tcx, .zwo`
-    );
-    error.name = "InvalidArgumentError";
-    throw error;
-  }
+  const { inputFormat, outputFormat, output } =
+    resolveSingleFileFormats(options);
 
   logger.debug("Convert command initialized", {
     input: options.input,
-    output: options.output,
+    output,
     inputFormat,
     outputFormat,
   });
@@ -68,36 +45,21 @@ export const executeSingleFileConversion = async (
   try {
     await convertSingleFile(
       options.input,
-      options.output,
+      output,
       inputFormat,
       outputFormat,
       logger
     );
 
-    if (options.json) {
-      console.log(
-        JSON.stringify(
-          {
-            success: true,
-            inputFile: options.input,
-            outputFile: options.output,
-            inputFormat,
-            outputFormat,
-          },
-          null,
-          2
-        )
-      );
-    } else if (spinner) {
-      spinner.succeed(
-        `Conversion complete: ${options.input} -> ${options.output}`
-      );
-    } else {
-      logger.info("Conversion complete", {
-        input: options.input,
-        output: options.output,
-      });
-    }
+    reportConversionSuccess({
+      input: options.input,
+      output,
+      inputFormat,
+      outputFormat,
+      json: options.json,
+      spinner,
+      logger,
+    });
   } catch (error) {
     if (spinner) {
       spinner.fail("Conversion failed");
