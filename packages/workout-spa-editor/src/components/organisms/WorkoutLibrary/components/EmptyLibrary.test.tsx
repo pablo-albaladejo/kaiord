@@ -21,9 +21,7 @@ describe("EmptyLibrary", () => {
 
     // Assert
     expect(screen.getByText("Your library is empty")).toBeInTheDocument();
-    expect(
-      screen.getByText(/Create your first workout/)
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Create your first workout/)).toBeInTheDocument();
   });
 
   it("should not render the Clear Filters button when not filtered even if onClearFilters is provided", () => {

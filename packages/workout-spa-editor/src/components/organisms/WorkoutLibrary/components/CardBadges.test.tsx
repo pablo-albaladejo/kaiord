@@ -22,7 +22,9 @@ describe("CardBadges", () => {
 
     // Assert
     expect(screen.getByText("cycling")).toBeInTheDocument();
-    expect(screen.queryByText(/^easy$|^medium$|^hard$/)).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(/^easy$|^medium$|^hard$/)
+    ).not.toBeInTheDocument();
     expect(screen.queryByText(/m$/)).not.toBeInTheDocument();
   });
 
@@ -72,9 +74,7 @@ describe("CardBadges", () => {
     // Arrange
 
     // Act
-    render(
-      <CardBadges sport="swimming" difficulty="hard" duration={2700} />
-    );
+    render(<CardBadges sport="swimming" difficulty="hard" duration={2700} />);
 
     // Assert
     expect(screen.getByText("swimming")).toBeInTheDocument();

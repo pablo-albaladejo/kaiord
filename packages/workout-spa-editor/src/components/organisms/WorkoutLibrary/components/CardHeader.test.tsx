@@ -44,9 +44,7 @@ describe("CardHeader", () => {
     render(<CardHeader workoutName="Tempo Ride" onDelete={onDelete} />);
 
     // Act
-    await user.click(
-      screen.getByRole("button", { name: "Delete Tempo Ride" })
-    );
+    await user.click(screen.getByRole("button", { name: "Delete Tempo Ride" }));
 
     // Assert
     expect(onDelete).toHaveBeenCalledTimes(1);

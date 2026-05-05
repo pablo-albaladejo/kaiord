@@ -17,11 +17,7 @@ describe("TagFilterButtons", () => {
 
     // Act
     const { container } = render(
-      <TagFilterButtons
-        allTags={[]}
-        selectedTags={[]}
-        onTagToggle={vi.fn()}
-      />
+      <TagFilterButtons allTags={[]} selectedTags={[]} onTagToggle={vi.fn()} />
     );
 
     // Assert
