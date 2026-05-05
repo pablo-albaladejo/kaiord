@@ -437,6 +437,37 @@ jobs:
       - name: Run TypeScript type checking
         run: pnpm -r exec tsc --noEmit
 
+  # Bundle-size budget enforcement. Reads `.size-limit.json` and fails
+  # when any package's `dist/index.js` exceeds its configured budget.
+  # Single-run on node-version 22.18.0 — measuring a build artifact is
+  # node-version-invariant so the matrix used by `lint`/`test` would
+  # only duplicate work without adding signal.
+  #
+  # Kill-switch: `vars.SIZE_LIMIT_BOT_ENABLED` repository variable. Set
+  # it to the string `false` via the GitHub UI (Settings → Variables)
+  # to disable the gate without a code change, mirroring the precedent
+  # set by `vars.CI_ISSUE_BOT_ENABLED`.
+  size-limit:
+    runs-on: ubuntu-latest
+    needs: [detect-changes, build]
+    if: |
+      needs.detect-changes.outputs.should-test == 'true' &&
+      vars.SIZE_LIMIT_BOT_ENABLED != 'false'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v6
+
+      - name: Setup pnpm with caching
+        uses: ./.github/actions/setup-pnpm
+        with:
+          node-version: "22.18.0"
+
+      - name: Consume build artifacts
+        uses: ./.github/actions/consume-build-artifacts
+
+      - name: Run size-limit
+        run: pnpm size
+
   test:
     runs-on: ubuntu-latest
     needs: [detect-changes, build]
@@ -824,7 +855,7 @@ jobs:
   lint-summary:
     name: lint
     runs-on: ubuntu-latest
-    needs: [build, lint, jscpd]
+    needs: [build, lint, jscpd, size-limit]
     if: always()
     steps:
       - name: Check lint status (with build awareness)
@@ -832,6 +863,7 @@ jobs:
           build_result="${{ needs.build.result }}"
           lint_result="${{ needs.lint.result }}"
           jscpd_result="${{ needs.jscpd.result }}"
+          size_limit_result="${{ needs['size-limit'].result }}"
           if [ "$build_result" = "skipped" ]; then
             echo "Build skipped (docs-only); lint correctly not run."
             exit 0
@@ -849,6 +881,15 @@ jobs:
           # state is a real failure.
           if [ "$jscpd_result" != "success" ] && [ "$jscpd_result" != "skipped" ]; then
             echo "::error::Code-duplication gate (jscpd) did not pass. Result: $jscpd_result"
+            exit 1
+          fi
+          # size-limit is gated behind vars.SIZE_LIMIT_BOT_ENABLED. Treat
+          # 'skipped' as success so toggling the kill-switch does not
+          # block the summary; treat 'success' as success; anything else
+          # (failure / cancelled) fails the summary so the gate is
+          # required when enabled.
+          if [ "$size_limit_result" != "success" ] && [ "$size_limit_result" != "skipped" ]; then
+            echo "::error::size-limit gate did not pass. Result: $size_limit_result"
             exit 1
           fi
           echo "Lint passed."
