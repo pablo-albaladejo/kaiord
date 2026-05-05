@@ -5,7 +5,7 @@ import {
 } from "@dnd-kit/sortable";
 
 import { dndAnnouncements } from "./dnd-announcements";
-import { useWorkoutListDnd } from "./use-workout-list-dnd";
+import { useWorkoutListDnd } from "./hooks/use-workout-list-dnd";
 import type { WorkoutListProps } from "./WorkoutList.types";
 import { WorkoutListContent } from "./WorkoutListContent";
 import { WorkoutListDragOverlay } from "./WorkoutListDragOverlay";

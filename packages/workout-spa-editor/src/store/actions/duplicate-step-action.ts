@@ -4,29 +4,22 @@
  * Action for duplicating a workout step and inserting it after the original.
  */
 
-import type {
-  KRD,
-  RepetitionBlock,
-  Workout,
-  WorkoutStep,
-} from "../../types/krd";
+import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import { isWorkoutStep } from "../../types/krd";
 import { createdItemTarget } from "../focus-rules";
 import { defaultIdProvider } from "../providers/id-provider";
 import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import { buildKrdWithWorkout, extractStructuredWorkout } from "./_helpers";
 
 export const duplicateStepAction = (
   krd: KRD,
   stepIndex: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.structured_workout) {
-    return {};
-  }
-
-  const workout = krd.extensions.structured_workout as Workout;
+  const workout = extractStructuredWorkout(krd);
+  if (!workout) return {};
 
   // Find the step to duplicate
   const stepToDuplicate = workout.steps.find(
@@ -38,9 +31,7 @@ export const duplicateStepAction = (
     }
   ) as WorkoutStep | undefined;
 
-  if (!stepToDuplicate) {
-    return {};
-  }
+  if (!stepToDuplicate) return {};
 
   // Create a deep clone of the step and assign a fresh ItemId so focus /
   // selection can reference the duplicate distinctly from the original.
@@ -62,18 +53,10 @@ export const duplicateStepAction = (
     stepIndex: index,
   }));
 
-  const updatedWorkout = {
+  const updatedKrd: KRD = buildKrdWithWorkout(krd, {
     ...workout,
     steps: reindexedSteps,
-  };
-
-  const updatedKrd: KRD = {
-    ...krd,
-    extensions: {
-      ...krd.extensions,
-      structured_workout: updatedWorkout,
-    },
-  };
+  });
 
   return {
     ...createUpdateWorkoutAction(updatedKrd, state),
