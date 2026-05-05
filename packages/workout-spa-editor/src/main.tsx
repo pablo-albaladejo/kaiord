@@ -15,11 +15,13 @@ import {
 } from "./contexts";
 import { CoachingRegistryBootstrap } from "./contexts/coaching-registry-bootstrap";
 import { PersistenceProvider } from "./contexts/persistence-context";
+import { getCfAnalyticsToken } from "./lib/runtime-config";
 import { computeRouterBase } from "./router-base";
 
-const analytics = createCloudflareAnalytics(
-  import.meta.env.VITE_CF_ANALYTICS_TOKEN as string | undefined
-);
+// Analytics token is read from runtime config (window.__KAIORD_CONFIG__),
+// populated by an inline <script> in index.html whose value is substituted at
+// deploy time. The bundle stays environment-agnostic (12-factor III + V).
+const analytics = createCloudflareAnalytics(getCfAnalyticsToken());
 
 const persistence = createDexiePersistence();
 

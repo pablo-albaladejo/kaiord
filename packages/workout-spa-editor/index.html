@@ -52,13 +52,34 @@
     />
     <meta name="twitter:image" content="https://kaiord.com/og-image.png" />
 
-    <!-- CF_BEACON_START -->
-    <script
-      defer
-      src="https://static.cloudflareinsights.com/beacon.min.js"
-      data-cf-beacon='{"token": "%VITE_CF_ANALYTICS_TOKEN%"}'
-    ></script>
-    <!-- CF_BEACON_END -->
+    <!--
+      Runtime configuration. The placeholder __CF_ANALYTICS_TOKEN__ is
+      substituted by the deploy step (NOT by Vite). When the placeholder is
+      still in place — local dev, preview builds, or deploys without a
+      token — the conditional loader below treats it as "no token" and the
+      Cloudflare beacon is never injected. 12-factor III + V: the build
+      artifact is environment-agnostic.
+    -->
+    <script>
+      // Defaults; the deploy step substitutes the placeholder. Earlier scripts
+      // (e.g., test fixtures using Playwright's addInitScript) may pre-seed
+      // window.__KAIORD_CONFIG__ — preserve their values.
+      window.__KAIORD_CONFIG__ = window.__KAIORD_CONFIG__ || {
+        cfAnalyticsToken: "__CF_ANALYTICS_TOKEN__",
+      };
+    </script>
+    <script>
+      (function () {
+        var cfg = window.__KAIORD_CONFIG__ || {};
+        var token = cfg.cfAnalyticsToken;
+        if (!token || token === "__CF_ANALYTICS_TOKEN__") return;
+        var s = document.createElement("script");
+        s.defer = true;
+        s.src = "https://static.cloudflareinsights.com/beacon.min.js";
+        s.setAttribute("data-cf-beacon", JSON.stringify({ token: token }));
+        document.head.appendChild(s);
+      })();
+    </script>
   </head>
   <body>
     <div id="root"></div>
