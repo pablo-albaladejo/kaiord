@@ -8,18 +8,14 @@
  * - Automatically add a default step (5 minutes, open target, active intensity)
  */
 
-import type {
-  KRD,
-  RepetitionBlock,
-  Workout,
-  WorkoutStep,
-} from "../../types/krd";
-import { isWorkoutStep } from "../../types/krd";
+import type { KRD, RepetitionBlock, WorkoutStep } from "../../types/krd";
 import { createdItemTarget } from "../focus-rules";
 import { defaultIdProvider } from "../providers/id-provider";
 import type { ItemId } from "../providers/item-id";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import { buildKrdWithWorkout, extractStructuredWorkout } from "./_helpers";
+import { recalculateStepIndices } from "./recalculate-step-indices";
 
 /**
  * Default step template for new empty repetition blocks
@@ -29,14 +25,9 @@ import { createUpdateWorkoutAction } from "../workout-actions";
  */
 const DEFAULT_STEP: Omit<WorkoutStep, "stepIndex"> = {
   durationType: "time",
-  duration: {
-    type: "time",
-    seconds: 300, // 5 minutes
-  },
+  duration: { type: "time", seconds: 300 },
   targetType: "open",
-  target: {
-    type: "open",
-  },
+  target: { type: "open" },
   intensity: "active",
 };
 
@@ -53,60 +44,34 @@ export const createEmptyRepetitionBlockAction = (
   repeatCount: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.structured_workout) {
-    return {};
-  }
-
-  // Validate inputs
+  const workout = extractStructuredWorkout(krd);
+  if (!workout) return {};
   if (repeatCount < 1) return {};
 
-  const workout = krd.extensions.structured_workout as Workout;
-
-  // Create default step with stepIndex 0 (within the block context) and a
-  // stable ItemId so focus / selection can reference it.
+  // Default step gets stepIndex 0 in-block plus a stable ItemId so
+  // focus / selection can reference it. Block and step ids both come
+  // from `defaultIdProvider()` so the in-memory ItemId contract is
+  // uniform across steps and blocks.
   const defaultStep: WorkoutStep & { id: string } = {
     ...DEFAULT_STEP,
     stepIndex: 0,
     id: defaultIdProvider(),
   };
-
-  // Block and nested step ids all come from `defaultIdProvider()` so the
-  // in-memory ItemId contract is uniform across steps and blocks.
   const repetitionBlock: RepetitionBlock = {
     id: defaultIdProvider(),
     repeatCount,
     steps: [defaultStep],
   };
 
-  // Add the repetition block at the end
+  // Append the new block, then recompute stepIndex across the whole
+  // workout so top-level WorkoutSteps stay contiguous.
   const newSteps = [...workout.steps, repetitionBlock];
+  const reindexedSteps = recalculateStepIndices(newSteps);
 
-  // Recalculate stepIndex for all WorkoutSteps
-  let currentIndex = 0;
-  const reindexedSteps = newSteps.map((step) => {
-    if (isWorkoutStep(step)) {
-      const reindexedStep = {
-        ...step,
-        stepIndex: currentIndex,
-      };
-      currentIndex++;
-      return reindexedStep;
-    }
-    return step;
-  });
-
-  const updatedWorkout = {
+  const updatedKrd: KRD = buildKrdWithWorkout(krd, {
     ...workout,
     steps: reindexedSteps,
-  };
-
-  const updatedKrd: KRD = {
-    ...krd,
-    extensions: {
-      ...krd.extensions,
-      structured_workout: updatedWorkout,
-    },
-  };
+  });
 
   return {
     ...createUpdateWorkoutAction(updatedKrd, state),

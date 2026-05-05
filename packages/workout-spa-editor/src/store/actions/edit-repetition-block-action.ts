@@ -8,10 +8,15 @@
  * - Requirement 2.4: Use block ID for operations
  */
 
-import type { KRD, RepetitionBlock, Workout } from "../../types/krd";
+import type { KRD, RepetitionBlock } from "../../types/krd";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import {
+  buildKrdWithWorkout,
+  extractStructuredWorkout,
+  replaceBlockAtPosition,
+} from "./_helpers";
 
 /**
  * Updates the repeat count of a repetition block by its ID
@@ -28,22 +33,12 @@ export const editRepetitionBlockAction = (
   repeatCount: number,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.structured_workout) {
-    return {};
-  }
+  const workout = extractStructuredWorkout(krd);
+  if (!workout) return {};
+  if (repeatCount < 1) return {};
 
-  if (repeatCount < 1) {
-    return {};
-  }
-
-  const workout = krd.extensions.structured_workout as Workout;
-
-  // Find block by ID
   const blockInfo = findBlockById(workout, blockId);
-
-  if (!blockInfo) {
-    return {};
-  }
+  if (!blockInfo) return {};
 
   const { position } = blockInfo;
 
@@ -52,21 +47,12 @@ export const editRepetitionBlockAction = (
     repeatCount,
   };
 
-  const updatedSteps = [...workout.steps];
-  updatedSteps[position] = updatedBlock;
-
-  const updatedWorkout: Workout = {
-    ...workout,
-    steps: updatedSteps,
-  };
-
-  const updatedKrd: KRD = {
-    ...krd,
-    extensions: {
-      ...krd.extensions,
-      structured_workout: updatedWorkout,
-    },
-  };
+  const updatedWorkout = replaceBlockAtPosition(
+    workout,
+    position,
+    updatedBlock
+  );
+  const updatedKrd: KRD = buildKrdWithWorkout(krd, updatedWorkout);
 
   return createUpdateWorkoutAction(updatedKrd, state);
 };
