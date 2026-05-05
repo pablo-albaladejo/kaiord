@@ -567,20 +567,23 @@ describe("parser", () => {
       // is rendered as a sibling under <section class="pupil-details">
       // — outside the slice the legacy parseHrZonesBlock used to
       // anchor on. The fix parses Generic from the full HTML.
+      // Cycling and Generic use DISTINCT band values so the test
+      // would fail if extraction bled across siblings (e.g. cycling
+      // accidentally read the generic block or vice versa).
       const html = `<main><section class="pupil-details">
         <div id="hrzones-28035" class="details-hrzones">
           <div class="heart-rate-zone heart-rate-zone-cycling">
             <form action="/api/v2/hrzones/cyc" class="remote">
-              <input name="z0_lower" type="number" value="107" />
-              <input name="z0_upper" type="number" value="133" />
-              <input name="z1_lower" type="number" value="134" />
-              <input name="z1_upper" type="number" value="147" />
-              <input name="z2_lower" type="number" value="148" />
-              <input name="z2_upper" type="number" value="160" />
-              <input name="z3_lower" type="number" value="161" />
-              <input name="z3_upper" type="number" value="174" />
-              <input name="z4_lower" type="number" value="175" />
-              <input name="z4_upper" type="number" value="187" />
+              <input name="z0_lower" type="number" value="110" />
+              <input name="z0_upper" type="number" value="136" />
+              <input name="z1_lower" type="number" value="137" />
+              <input name="z1_upper" type="number" value="150" />
+              <input name="z2_lower" type="number" value="151" />
+              <input name="z2_upper" type="number" value="163" />
+              <input name="z3_lower" type="number" value="164" />
+              <input name="z3_upper" type="number" value="177" />
+              <input name="z4_lower" type="number" value="178" />
+              <input name="z4_upper" type="number" value="190" />
             </form>
           </div>
         </div>
@@ -612,7 +615,8 @@ describe("parser", () => {
         z5: { lower: 175, upper: 187 },
         z4Upper: 174,
       });
-      expect(result.hrZones.cycling.z4).toEqual({ lower: 161, upper: 174 });
+      expect(result.hrZones.cycling.z4).toEqual({ lower: 164, upper: 177 });
+      expect(result.hrZones.cycling.z4Upper).toBe(177);
     });
   });
 });
