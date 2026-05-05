@@ -37,7 +37,11 @@ module.exports = [
     path: "packages/tcx/dist/index.js",
     limit: "30 kB",
     import: "*",
-    modifyEsbuildConfig: externalize(["fast-xml-parser", "zod", "@kaiord/core"]),
+    modifyEsbuildConfig: externalize([
+      "fast-xml-parser",
+      "zod",
+      "@kaiord/core",
+    ]),
   },
   {
     name: "@kaiord/zwo",
