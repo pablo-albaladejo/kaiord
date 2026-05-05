@@ -15,38 +15,42 @@ describe("config file integration", () => {
     await tmpDir.cleanup();
   });
 
-  it("should use config file defaults for convert command", { timeout: 15000 }, async () => {
-    // Arrange
-    const configPath = join(tmpDir.path, ".kaiordrc.json");
-    const config = {
-      defaultOutputFormat: "krd",
-      verbose: true,
-    };
-    await writeFile(configPath, JSON.stringify(config, null, 2));
-    const inputPath = join(tmpDir.path, "workout.fit");
-    await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
-    const outputPath = join(tmpDir.path, "workout.krd");
+  it(
+    "should use config file defaults for convert command",
+    { timeout: 15000 },
+    async () => {
+      // Arrange
+      const configPath = join(tmpDir.path, ".kaiordrc.json");
+      const config = {
+        defaultOutputFormat: "krd",
+        verbose: true,
+      };
+      await writeFile(configPath, JSON.stringify(config, null, 2));
+      const inputPath = join(tmpDir.path, "workout.fit");
+      await writeFile(inputPath, Buffer.from([0x0e, 0x10, 0x00, 0x00]));
+      const outputPath = join(tmpDir.path, "workout.krd");
 
-    // Act
-    const result = await execa(
-      "node",
-      [
-        "dist/bin/kaiord.js",
-        "convert",
-        "--input",
-        inputPath,
-        "--output",
-        outputPath,
-      ],
-      {
-        cwd: tmpDir.path,
-        reject: false,
-      }
-    );
+      // Act
+      const result = await execa(
+        "node",
+        [
+          "dist/bin/kaiord.js",
+          "convert",
+          "--input",
+          inputPath,
+          "--output",
+          outputPath,
+        ],
+        {
+          cwd: tmpDir.path,
+          reject: false,
+        }
+      );
 
-    // Assert
-    expect(result.exitCode).toBeDefined();
-  });
+      // Assert
+      expect(result.exitCode).toBeDefined();
+    }
+  );
 
   it(
     "should prioritize CLI options over config defaults",
