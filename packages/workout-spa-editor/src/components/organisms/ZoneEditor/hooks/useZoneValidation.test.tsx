@@ -97,9 +97,9 @@ describe("useZoneValidation - power zones", () => {
     const errors = result.current.validateZones(zones);
 
     // Assert
-    expect(errors.filter((e) => e.message === "Overlaps with next zone")).toHaveLength(
-      0
-    );
+    expect(
+      errors.filter((e) => e.message === "Overlaps with next zone")
+    ).toHaveLength(0);
   });
 });
 
