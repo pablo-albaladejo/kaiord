@@ -90,6 +90,14 @@
     "metrics": "node .github/scripts/collect-metrics.js",
     "metrics:compare": "node .github/scripts/compare-metrics.js"
   },
+  "lint-staged": {
+    "*.{ts,tsx}": [
+      "eslint --fix --max-warnings=0"
+    ],
+    "*.{md,json,yml}": [
+      "prettier --check"
+    ]
+  },
   "devDependencies": {
     "@changesets/cli": "^2.31.0",
     "@commitlint/cli": "^20.5.3",
@@ -109,6 +117,7 @@
     "husky": "^9.1.7",
     "jscpd": "^4.0.9",
     "knip": "^6.7.0",
+    "lint-staged": "^16.4.0",
     "prettier": "^3.8.3",
     "sharp": "^0.34.5",
     "size-limit": "^12.1.0",
