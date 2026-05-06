@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 import { useClearWorkout } from "../../../store";
-import { useShowConfirmationModal } from "../../../store/workout-store-selectors";
+import { useShowConfirmationModal } from "../../../store/selectors";
 
 const DISCARD_MODAL_CONFIG = {
   title: "Discard Workout",

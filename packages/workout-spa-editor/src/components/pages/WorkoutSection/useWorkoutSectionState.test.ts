@@ -11,7 +11,7 @@ import type { KRD, Workout } from "../../../types/krd";
 import { useWorkoutSectionState } from "./useWorkoutSectionState";
 
 // Mock the store selectors
-vi.mock("../../../store/workout-store-selectors", () => ({
+vi.mock("../../../store/selectors", () => ({
   useCreateStep: vi.fn(() => vi.fn()),
   useDuplicateStep: vi.fn(() => vi.fn()),
   useIsEditing: vi.fn(() => false),
