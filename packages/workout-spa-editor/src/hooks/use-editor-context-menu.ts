@@ -1,10 +1,10 @@
 import { useCallback } from "react";
 
 import { hasClipboardContent } from "../store/clipboard-store";
+import { useContextMenuStore } from "../store/selectors";
 import type { Workout } from "../types/krd";
 import { buildKeyboardHandlers } from "../utils/build-keyboard-handlers";
 import { getSelectedStepIndex } from "../utils/get-selected-step-index";
-import { useContextMenuStore } from "./use-context-menu-store";
 
 export function useEditorContextMenu() {
   const store = useContextMenuStore();

@@ -6,7 +6,7 @@ import {
   useDeleteRepetitionBlock,
   useShowConfirmationModal,
   useUndoDelete,
-} from "../../../store/workout-store-selectors";
+} from "../../../store/selectors";
 import type { Workout } from "../../../types/krd";
 import { executeDeleteWithToast } from "./delete-block-with-toast";
 
