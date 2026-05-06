@@ -48,6 +48,9 @@ export function CoachingActivityDialog({
           data-testid="coaching-activity-dialog"
           className="fixed left-1/2 top-1/2 z-50 w-full max-w-md -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800"
         >
+          <Dialog.Description className="sr-only">
+            Coaching activity details with match-to-workout and split actions.
+          </Dialog.Description>
           <CoachingActivityDialogContent
             activity={activity}
             error={dialog.error}
