@@ -111,21 +111,21 @@
     "@size-limit/file": "^12.1.0",
     "@types/node": "^25.6.0",
     "@vitest/eslint-plugin": "^1.6.16",
-    "dependency-cruiser": "^17.0.0",
-    "eslint": "^10.2.1",
+    "dependency-cruiser": "^17.4.0",
+    "eslint": "^10.3.0",
     "eslint-plugin-boundaries": "^6.0.2",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-simple-import-sort": "^13.0.0",
     "husky": "^9.1.7",
     "jscpd": "^4.0.9",
-    "knip": "^6.7.0",
+    "knip": "^6.11.0",
     "lint-staged": "^16.4.0",
     "npm-run-all2": "^8.0.4",
     "prettier": "^3.8.3",
     "sharp": "^0.34.5",
     "size-limit": "^12.1.0",
     "typescript": "^6.0.3",
-    "typescript-eslint": "^8.59.1",
-    "yaml": "^2.8.3"
+    "typescript-eslint": "^8.59.2",
+    "yaml": "^2.8.4"
   }
 }
