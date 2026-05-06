@@ -97,8 +97,16 @@ const parseDailyHtml = (html) => {
   ];
   const statusMatches = [...html.matchAll(/data-status="([^"]+)"/g)];
 
-  // Split on activity boundaries to extract descriptions
-  const activityBlocks = html.split(/class="activity activity-default/);
+  // Split on activity boundaries to extract descriptions. T2G's
+  // daily HTML labels each activity wrapper with
+  // `activity activity-{level}` where `{level}` mirrors the workload
+  // intensity (default | low | medium | high). The previous regex
+  // only matched `-default` and therefore failed to split blocks for
+  // any other intensity, leaving `extractDescription("")` to return
+  // `""` even when the response carried a populated description.
+  // Loosened to match any `activity-<word>` suffix so all intensity
+  // levels split correctly.
+  const activityBlocks = html.split(/class="activity activity-\w+/);
 
   for (let i = 0; i < titleMatches.length; i++) {
     const block = activityBlocks[i + 1] ?? "";
