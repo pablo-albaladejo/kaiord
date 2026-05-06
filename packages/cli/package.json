@@ -62,7 +62,7 @@
     "ora": "^9.4.0",
     "winston": "^3.19.0",
     "yargs": "^18.0.0",
-    "zod": "^4.0.0"
+    "zod": "^4.4.3"
   },
   "devDependencies": {
     "@types/yargs": "^17.0.32",
