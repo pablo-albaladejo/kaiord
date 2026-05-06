@@ -242,7 +242,8 @@ describe("background service worker", () => {
       ).rejects.toThrow("Missing userId");
     });
 
-    it("read-day backfills the date param onto every parsed activity (the daily HTML fragment lacks a date anchor)", async () => {
+    it("should backfill the date param onto every parsed activity from read-day (the daily HTML fragment lacks a date anchor)", async () => {
+      // Arrange
       // Without backfill, expandDay would upsert records with date:""
       // and the activity would drop out of every per-day calendar
       // bucket — appearing as the card disappearing the moment the
@@ -258,12 +259,14 @@ describe("background service worker", () => {
         cb({ ok: true, status: 200, data: { data: { content: html } } })
       );
 
+      // Act
       const result = await handleAction({
         action: "read-day",
         date: "2026-05-07",
         userId: 28035,
       });
 
+      // Assert
       expect(result.activities).toHaveLength(1);
       expect(result.activities[0]).toMatchObject({
         id: 9001,
