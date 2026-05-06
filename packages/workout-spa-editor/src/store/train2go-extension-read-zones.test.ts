@@ -74,7 +74,7 @@ describe("readZones", () => {
     expect(res).toEqual({ ok: false, error: "Aborted" });
   });
 
-  it("should do NOT consume a queue slot when aborted pre-call", async () => {
+  it("should not consume a queue slot when aborted pre-call", async () => {
     // Arrange
     const ac = new AbortController();
     ac.abort();
