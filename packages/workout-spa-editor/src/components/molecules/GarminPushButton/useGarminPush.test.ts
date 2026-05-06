@@ -25,7 +25,7 @@ const workoutState: { currentWorkout: unknown } = {
   currentWorkout: { name: "test workout" },
 };
 
-vi.mock("../../../store/workout-store-selectors", () => ({
+vi.mock("../../../store/selectors", () => ({
   useCurrentWorkout: vi.fn(() => workoutState.currentWorkout),
 }));
 
