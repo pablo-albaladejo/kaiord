@@ -242,6 +242,35 @@ describe("background service worker", () => {
       ).rejects.toThrow("Missing userId");
     });
 
+    it("read-day backfills the date param onto every parsed activity (the daily HTML fragment lacks a date anchor)", async () => {
+      // Without backfill, expandDay would upsert records with date:""
+      // and the activity would drop out of every per-day calendar
+      // bucket — appearing as the card disappearing the moment the
+      // user opened its detail dialog. Regression for that bug.
+      const html = `<div data-id="9001" data-status="0" class="activity activity-default">
+        <span class="activity-title"><strong>Test workout</strong></span>
+        <figure class="icon-sportscycling"></figure>
+        <span class="measured">60min</span>
+        <span class="workload-default" data-value="3"></span>
+      </div>`;
+      chrome.tabs.query.mockImplementation((q, cb) => cb([{ id: 1 }]));
+      chrome.tabs.sendMessage.mockImplementation((tabId, msg, cb) =>
+        cb({ ok: true, status: 200, data: { data: { content: html } } })
+      );
+
+      const result = await handleAction({
+        action: "read-day",
+        date: "2026-05-07",
+        userId: 28035,
+      });
+
+      expect(result.activities).toHaveLength(1);
+      expect(result.activities[0]).toMatchObject({
+        id: 9001,
+        date: "2026-05-07",
+      });
+    });
+
     it("handles open-train2go action", async () => {
       await handleAction({ action: "open-train2go" });
       expect(chrome.tabs.create).toHaveBeenCalledWith({

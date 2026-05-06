@@ -128,7 +128,18 @@ const readDay = async (date, userId) => {
   if (!res?.ok) throw toBridgeError("Read day failed", res);
 
   const html = res.data?.data?.content ?? "";
-  return { activities: parser.parseDailyHtml(html) };
+  // Backfill `date` from the request param: the daily HTML fragment
+  // is single-day, so `parseDailyHtml` cannot extract the date the
+  // way `parseWeeklyHtml` does (via the `workplan-table-date-YYYY-MM-DD`
+  // CSS-class anchor — absent in the daily endpoint). Without this
+  // step, `expandDay` upserts records with `date: ""`, causing the
+  // activity to drop out of every per-day calendar bucket — the
+  // visible symptom is the card disappearing the moment the user
+  // opens its detail dialog (which lazy-fetches via expandDay).
+  const activities = parser
+    .parseDailyHtml(html)
+    .map((a) => ({ ...a, date }));
+  return { activities };
 };
 
 // Reads the server-rendered /user/details page and extracts a raw-shape
