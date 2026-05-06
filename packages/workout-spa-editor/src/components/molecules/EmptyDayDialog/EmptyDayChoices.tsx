@@ -32,9 +32,9 @@ export function EmptyDayChoices({
           </button>
         </Dialog.Close>
       </div>
-      <p className="text-sm text-muted-foreground">
+      <Dialog.Description className="text-sm text-muted-foreground">
         {formatDateLabel(date ?? "")}
-      </p>
+      </Dialog.Description>
       <div className="flex flex-col gap-2">
         <button
           type="button"

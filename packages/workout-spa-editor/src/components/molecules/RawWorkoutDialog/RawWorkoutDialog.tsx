@@ -34,6 +34,10 @@ export function RawWorkoutDialog({
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
         <Dialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-lg bg-white p-6 shadow-xl dark:bg-gray-800">
+          <Dialog.Description className="sr-only">
+            Raw workout details with coach description, comment selection, and
+            actions to process or skip.
+          </Dialog.Description>
           {workout && (
             <RawWorkoutContent
               workout={workout}
