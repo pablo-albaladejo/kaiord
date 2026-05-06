@@ -5,7 +5,7 @@ import {
   useSelectStep,
   useSetEditing,
   useUpdateWorkout,
-} from "../../../store/workout-store-selectors";
+} from "../../../store/selectors";
 import type { KRD, Workout, WorkoutStep } from "../../../types/krd";
 import {
   createUpdatedKrd,

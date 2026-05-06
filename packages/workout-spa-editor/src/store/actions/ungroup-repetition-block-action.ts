@@ -8,12 +8,13 @@
  * - Requirement 2.4: Use block ID for operations
  */
 
-import type { KRD, Workout } from "../../types/krd";
+import type { KRD } from "../../types/krd";
 import { createdItemTarget } from "../focus-rules";
 import type { ItemId } from "../providers/item-id";
 import { findBlockById } from "../utils/block-utils";
 import type { WorkoutState } from "../workout-actions";
 import { createUpdateWorkoutAction } from "../workout-actions";
+import { buildKrdWithWorkout, extractStructuredWorkout } from "./_helpers";
 import { recalculateStepIndices } from "./recalculate-step-indices";
 
 /**
@@ -29,46 +30,28 @@ export const ungroupRepetitionBlockAction = (
   blockId: string,
   state: WorkoutState
 ): Partial<WorkoutState> => {
-  if (!krd.extensions?.structured_workout) {
-    return {};
-  }
+  const workout = extractStructuredWorkout(krd);
+  if (!workout) return {};
 
-  const workout = krd.extensions.structured_workout as Workout;
-
-  // Find block by ID
   const blockInfo = findBlockById(workout, blockId);
-
-  if (!blockInfo) {
-    return {};
-  }
+  if (!blockInfo) return {};
 
   const { block, position } = blockInfo;
 
-  // Extract steps from the block
+  // Extract steps from the block, splice them in at the block's slot,
+  // then rebuild contiguous top-level stepIndex values.
   const extractedSteps = block.steps;
-
-  // Remove the block and insert the extracted steps at its position
   const newSteps = [
     ...workout.steps.slice(0, position),
     ...extractedSteps,
     ...workout.steps.slice(position + 1),
   ];
-
-  // Recalculate step indices for all steps
   const reindexedSteps = recalculateStepIndices(newSteps);
 
-  const updatedWorkout: Workout = {
+  const updatedKrd: KRD = buildKrdWithWorkout(krd, {
     ...workout,
     steps: reindexedSteps,
-  };
-
-  const updatedKrd: KRD = {
-    ...krd,
-    extensions: {
-      ...krd.extensions,
-      structured_workout: updatedWorkout,
-    },
-  };
+  });
 
   // Focus lands on the first formerly-child step at its new top-level
   // position (the same `position` the block occupied). Falls back to
