@@ -131,6 +131,37 @@ describe("parser", () => {
     it("returns empty array on null input", () => {
       expect(parseDailyHtml(null)).toEqual([]);
     });
+
+    it("should extract description for activity intensities other than default (regression: -medium/-low/-high)", () => {
+      // Arrange
+      // Real T2G daily HTML labels each activity wrapper with
+      // `activity activity-{level}` where {level} matches the
+      // workload intensity. The previous split regex anchored on
+      // `activity-default` only, so any non-default intensity left
+      // `extractDescription` running on an empty slice and returning
+      // "". This fixture mirrors the live response Pablo captured for
+      // a `-medium` activity.
+      const html = `<aside><div class="activity activity-medium  activity-expanded  " data-status="0" data-id="18012835">
+        <figure class="icon icon-sportscycling"></figure>
+        <span class="measured">1:55 h</span>
+        <div class="workload workload-default" data-value="2"></div>
+        <div class="activity-title"><strong>Arrancadas</strong></div>
+        <div class="activity-description  activity-description-empty ">
+          <p>Avituallamiento intraentreno con 60grHC.</p>
+          <p><strong>Calentamiento:</strong> 20 Z1 + 15' Z2.</p>
+          <p>3x15' Z3 d/5' Z1</p>
+        </div>
+      </div></aside>`;
+
+      // Act
+      const activities = parseDailyHtml(html);
+
+      // Assert
+      expect(activities).toHaveLength(1);
+      expect(activities[0].description).toContain("Avituallamiento intraentreno");
+      expect(activities[0].description).toContain("**Calentamiento:**");
+      expect(activities[0].description).toContain("3x15' Z3 d/5' Z1");
+    });
   });
 
   describe("parsePingJson", () => {
