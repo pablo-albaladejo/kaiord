@@ -1,3 +1,5 @@
+> Completed: 2026-05-06
+
 ## Why
 
 The kaiord codebase is structurally healthy (clean hex arch, strict TS, zero skipped tests, no dead code) but has accumulated discrete pockets of maintenance debt that hurt daily DX, mask regressions, and concentrate risk in a few oversized files. We have a dedicated maintenance window now and want to drain the queue in a controlled, parallel-friendly way before evolutionary work resumes — without introducing any new product capability.

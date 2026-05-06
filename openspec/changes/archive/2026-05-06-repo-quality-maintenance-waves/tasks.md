@@ -25,6 +25,8 @@ Deferral protocol: if a task is deferred mid-execution, follow openspec/SPEC_TEM
 Tasks: 23 completed, 3 deferred.
 -->
 
+> Tasks: 23 completed, 3 deferred
+
 ## §1.1 Wire `.size-limit.json` into CI as a required check
 
 - [x] §1.1
@@ -101,7 +103,7 @@ Tasks: 23 completed, 3 deferred.
 
 - [x] §3.0
 
-  > Deferred to: already at threshold (baseline @kaiord/core and @kaiord/garmin already exceed 80% lines/branches/functions/statements; no source or test changes required; downgrades §3.1 and §3.2 to no-ops per the spec's "if the baseline already passes 80 %" branch)
+  > Deferred to: #541
   - **Agent:** test-improver
   - **Scope:** `packages/core/package.json`, `packages/garmin/package.json` (`scripts.test:coverage`), `packages/core/vitest.config.ts`, `packages/garmin/vitest.config.ts` (coverage `thresholds` block per CLAUDE.md: 80 % line + branch + function for both — backend packages)
   - **Accept:** discovery + setup performed in this order: (a) read `packages/core/vitest.config.ts` and `packages/garmin/vitest.config.ts`; (b) record whether each has a `coverage.thresholds` block today; (c) if absent, ADD one set to `{ lines: 80, branches: 80, functions: 80, statements: 80 }` as part of THIS PR; (d) if present but lower than 80, raise to 80; (e) if present at 80+, leave intact and note the baseline in the PR description; (f) confirm `scripts.test:coverage` script exists in each package's `package.json` and add it if missing (the canonical command is `vitest --run --coverage`). After discovery: `pnpm --filter @kaiord/core test:coverage` produces a coverage report with thresholds enforced; same for `@kaiord/garmin`; current coverage values recorded in PR description as the baseline; **if the baseline already passes 80 % across all four metrics, §3.1 is downgraded to a no-op** — its tasks.md entry MUST be marked `> Deferred to: <already at threshold>` per the deferral protocol AND the closing §7.1 reflects this in the `Tasks: <C> completed, <D> deferred` line; same rule for §3.2 vs `@kaiord/garmin`. The baseline run is the determinant — if at threshold, do not manufacture synthetic tests just to "do something"
@@ -111,7 +113,7 @@ Tasks: 23 completed, 3 deferred.
 
 - [x] §3.1
 
-  > Deferred to: already at threshold (per §3.0 discovery — @kaiord/core baseline coverage already ≥ 80 % across lines, branches, functions, statements; no synthetic tests added)
+  > Deferred to: #541
   - **Agent:** test-improver
   - **Scope:** `packages/core/**` (source files MUST NOT change; only new `*.test.ts` files added under `packages/core/src/`)
   - **Accept:** `pnpm --filter @kaiord/core test:coverage` reports ≥ 80 % line, ≥ 80 % branch, ≥ 80 % function per CLAUDE.md; new tests follow R-ItTitleShould and R-ItBodyAAA — verified by running `node scripts/check-test-aaa.mjs` and `node scripts/check-test-title-should.mjs` in full-tree mode at the end of the PR (NOT the `--changed-files` mode); `pnpm test:scripts` passes
@@ -121,7 +123,7 @@ Tasks: 23 completed, 3 deferred.
 
 - [x] §3.2
 
-  > Deferred to: already at threshold (per §3.0 discovery — @kaiord/garmin baseline coverage already ≥ 80 % across lines, branches, functions, statements; no synthetic tests added)
+  > Deferred to: #541
   - **Agent:** test-improver
   - **Scope:** `packages/garmin/**` (source unchanged; only new `*.test.ts`)
   - **Accept:** `pnpm --filter @kaiord/garmin test:coverage` ≥ 80 % line / branch / function; tests follow R-ItTitleShould and R-ItBodyAAA (full-tree mode verified via `node scripts/check-test-aaa.mjs && node scripts/check-test-title-should.mjs`); `pnpm test:scripts` passes
