@@ -163,7 +163,7 @@ Tasks: 0 completed, 0 deferred.
 
 ## §4.5 Right-size remaining files over budget
 
-- [ ] §4.5
+- [x] §4.5
   - **Agent:** complexity-reducer
   - **Scope:** `packages/workout-spa-editor/src/adapters/dexie/dexie-database.ts` (140 LOC), `src/utils/save-workout.ts` (123 LOC), `src/utils/profile-storage.ts` (114 LOC), `src/components/pages/WorkoutSection/use-repetition-block-handlers.tsx` (118 LOC)
   - **Accept:** every file in scope ≤ 100 LOC; every function ≤ 40 LOC (60 for components); existing tests still pass; `R-DexieImport`, `R-PersistStateImport`, `R-AppDexieImport` still satisfied
