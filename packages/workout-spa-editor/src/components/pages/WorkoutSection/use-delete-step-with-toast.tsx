@@ -8,11 +8,8 @@
 import { useCallback } from "react";
 
 import { useToastContext } from "../../../contexts/ToastContext";
+import { useDeleteStep, useUndoDelete } from "../../../store/selectors";
 import { useWorkoutStore } from "../../../store/workout-store";
-import {
-  useDeleteStep,
-  useUndoDelete,
-} from "../../../store/workout-store-selectors";
 
 export function useDeleteStepWithToast() {
   const storeDeleteStep = useDeleteStep();

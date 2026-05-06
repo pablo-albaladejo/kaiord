@@ -5,7 +5,7 @@ import {
   useReorderStep,
   useSelectStep,
   useToggleStepSelection,
-} from "../../../store/workout-store-selectors";
+} from "../../../store/selectors";
 import type { KRD, Workout } from "../../../types/krd";
 import { useDeleteStepWithToast } from "./use-delete-step-with-toast";
 import { useRepetitionBlockHandlers } from "./use-repetition-block-handlers";

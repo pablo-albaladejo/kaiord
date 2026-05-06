@@ -9,7 +9,7 @@ import {
   useHideConfirmationModal,
   useIsModalOpen,
   useModalConfig,
-} from "../../../store/workout-store-selectors";
+} from "../../../store/selectors";
 import { ConfirmationModal } from "./ConfirmationModal";
 
 export function StoreConfirmationModal() {

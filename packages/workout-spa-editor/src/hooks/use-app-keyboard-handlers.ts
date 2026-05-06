@@ -19,10 +19,10 @@ import { useCallback, useMemo } from "react";
 
 import { useCopyStep } from "../components/pages/WorkoutSection/useCopyStep";
 import { usePasteStep } from "../components/pages/WorkoutSection/usePasteStep";
+import { useKeyboardStoreSelectors } from "../store/selectors";
 import type { Workout } from "../types/krd";
 import { buildKeyboardHandlers } from "../utils/build-keyboard-handlers";
 import { getSelectedStepIndex } from "../utils/get-selected-step-index";
-import { useKeyboardStoreSelectors } from "./use-keyboard-store-selectors";
 import { useKeyboardShortcuts } from "./useKeyboardShortcuts";
 
 export const useAppKeyboardHandlers = () => {

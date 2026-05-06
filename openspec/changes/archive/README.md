@@ -7,6 +7,7 @@ CI verifies freshness via `pnpm lint:archive-index`.
 
 | Date | Change | Summary |
 | ---- | ------ | ------- |
+| 2026-05-06 | [`repo-quality-maintenance-waves`](./2026-05-06-repo-quality-maintenance-waves/) | The kaiord codebase is structurally healthy (clean hex arch, strict TS, zero skipped tests, no dead code) but has accumulated discrete pockets of maintenance d… |
 | 2026-05-05 | [`cleanup-scripts-folder`](./2026-05-05-cleanup-scripts-folder/) | scripts/ has accumulated orphan files. The README documents code that no longer exists (test-ci-workflows.sh, the publishing/ helpers), legacy npm-token setup … |
 | 2026-05-05 | [`zones-method-aware-reconcile`](./2026-05-05-zones-method-aware-reconcile/) | The shipped train2go-zones-sync-full-bands change (PRs #495-498) extracts T2G's full Z1-Z5 zone bands and writes them to the persisted profile. After running i… |
 | 2026-05-04 | [`ci-artifact-fanout`](./2026-05-04-ci-artifact-fanout/) | CI currently runs pnpm -r build 30+ times on a single PR — once per job (lint, typecheck, build, test×9 packages, test-cli, test-frontend, round-trip×2, e2e-fr… |

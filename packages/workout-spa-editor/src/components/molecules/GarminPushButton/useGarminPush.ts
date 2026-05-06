@@ -1,7 +1,7 @@
 import { useCallback } from "react";
 
 import { useAnalytics, useGarminBridge } from "../../../contexts";
-import { useCurrentWorkout } from "../../../store/workout-store-selectors";
+import { useCurrentWorkout } from "../../../store/selectors";
 import { exportGcnWorkout } from "../../../utils/export-workout-formats";
 
 export const useGarminPush = () => {

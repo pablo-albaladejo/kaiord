@@ -25,10 +25,7 @@ import { deleteTemplate } from "../../application/library/delete-template";
 import { usePersistence } from "../../contexts/persistence-context";
 import { useToastContext } from "../../contexts/ToastContext";
 import { useLibraryTemplatesLive } from "../../hooks/use-library-templates-live";
-import {
-  useCurrentWorkout,
-  useLoadWorkout,
-} from "../../store/workout-store-selectors";
+import { useCurrentWorkout, useLoadWorkout } from "../../store/selectors";
 import type { WorkoutTemplate } from "../../types/workout-library";
 import { ScheduleDateDialog } from "../molecules/ScheduleDateDialog";
 import { LibraryPageContent } from "./LibraryPageContent";

@@ -10,7 +10,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { useDeleteStepWithToast } from "./use-delete-step-with-toast";
 
 // Mock the store selectors
-vi.mock("../../../store/workout-store-selectors", () => ({
+vi.mock("../../../store/selectors", () => ({
   useDeleteStep: vi.fn(() => vi.fn()),
   useUndoDelete: vi.fn(() => vi.fn()),
 }));
@@ -60,8 +60,7 @@ describe("useDeleteStepWithToast", () => {
     const mockDeleteStep = vi.fn();
     const mockToast = vi.fn();
 
-    const { useDeleteStep } =
-      await import("../../../store/workout-store-selectors");
+    const { useDeleteStep } = await import("../../../store/selectors");
     const { useToastContext } = await import("../../../contexts/ToastContext");
     const { useWorkoutStore } = await import("../../../store/workout-store");
 
@@ -96,7 +95,8 @@ describe("useDeleteStepWithToast", () => {
 
     // Act
 
-    await new Promise((resolve) => setTimeout(resolve, 10));
+    const SETTIMEOUT_FLUSH_MS = 10;
+    await new Promise((resolve) => setTimeout(resolve, SETTIMEOUT_FLUSH_MS));
 
     // Assert
 

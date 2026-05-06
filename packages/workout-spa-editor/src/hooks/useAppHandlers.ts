@@ -4,11 +4,8 @@
  * Custom hook that provides event handlers for the main App component.
  */
 
+import { useLoadWorkout, useSelectStep } from "../store/selectors";
 import { useWorkoutStore } from "../store/workout-store";
-import {
-  useLoadWorkout,
-  useSelectStep,
-} from "../store/workout-store-selectors";
 import type { KRD } from "../types/krd";
 import type { Sport } from "../types/krd-core";
 
