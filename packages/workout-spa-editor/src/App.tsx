@@ -5,6 +5,7 @@ import { Redirect, Route, Switch, useLocation } from "wouter";
 import { AppKeyboardShortcuts } from "./components/AppKeyboardShortcuts";
 import { AppTutorial } from "./components/AppTutorial";
 import { RouteSpinner } from "./components/atoms/RouteSpinner";
+import { MigrationBoot } from "./components/MigrationBoot";
 import { RouteErrorBoundary } from "./components/molecules/RouteErrorBoundary";
 import { AppToastProvider } from "./components/providers/AppToastProvider";
 import { MainLayout } from "./components/templates/MainLayout";
@@ -77,6 +78,7 @@ function App() {
 
   return (
     <AppToastProvider>
+      <MigrationBoot />
       <AppKeyboardShortcuts />
       <MainLayout onReplayTutorial={() => setShowTutorial(true)}>
         <AppRoutes analytics={analytics} />

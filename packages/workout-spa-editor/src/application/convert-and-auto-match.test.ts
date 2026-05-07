@@ -150,7 +150,7 @@ describe("convertAndAutoMatch", () => {
     );
   });
 
-  it("should NOT recreate the match on re-conversion after manual unmatch", async () => {
+  it("should auto-heal a missing SessionMatch on re-conversion of a converted-without-match workout", async () => {
     // Arrange
     const activity = stubActivity();
     const existingWorkout: WorkoutRecord = {
@@ -175,14 +175,20 @@ describe("convertAndAutoMatch", () => {
         workouts,
         sessionMatches: matches,
         newWorkoutId: () => "wont-use",
-        newMatchId: () => "M-new",
+        newMatchId: () => "M-healed",
         clock: fixedClock,
       }
     );
 
     // Assert
     expect(result.workoutId).toBe("w-was-matched");
-    expect(await matches.getByWorkoutId("p1", "w-was-matched")).toBeUndefined();
+    expect(result.created).toBe(false);
+    const healed = await matches.getByWorkoutId("p1", "w-was-matched");
+    expect(healed).toMatchObject({
+      coachingActivityId: activity.id,
+      workoutId: "w-was-matched",
+      source: "auto-conversion",
+    });
   });
 
   it("should propagate CoachingActivityNotFoundError-equivalent when activity is missing", async () => {
