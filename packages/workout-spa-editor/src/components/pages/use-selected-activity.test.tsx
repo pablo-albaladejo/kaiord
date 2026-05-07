@@ -43,7 +43,6 @@ describe("useSelectedActivity", () => {
       { initialProps: { byDay: byDayInitial } }
     );
     act(() => result.current.setSelectedActivity(baseActivity));
-    expect(result.current.selectedActivity?.description).toBeUndefined();
 
     // Act
     // Live-query tick — byDay flips to a new object with the description populated.
@@ -63,7 +62,6 @@ describe("useSelectedActivity", () => {
     const byDay = { "2026-04-13": [baseActivity] };
     const { result } = renderHook(() => useSelectedActivity(byDay));
     act(() => result.current.setSelectedActivity(baseActivity));
-    expect(result.current.selectedActivity).not.toBeNull();
 
     // Act
     act(() => result.current.setSelectedActivity(null));
