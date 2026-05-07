@@ -1,5 +1,19 @@
 # @kaiord/core
 
+## 7.2.0
+
+### Minor Changes
+
+- 79be4f3: Add `profileSnapshotSchema` + `ProfileSnapshot` DTO, `STALE_SNAPSHOT_THRESHOLD_DAYS` constant, and `fingerprintSnapshot` content-hash helper as the cross-cutting protocol contract for the SPA → Bridge popup snapshot push. Also exposes `snapshotFixtures` from `@kaiord/core/test-utils` for parity tests across the SPA and each bridge's plain-JS validator.
+- d66e509: Extract the 7-band Coggan power-zone-to-percent-FTP table into a pure domain helper at `packages/core/src/domain/zones/power-zones.ts`. Adds new exports to the public API of `@kaiord/core` (additive only — no removals, no signature changes):
+  - `POWER_ZONES`, `POWER_ZONE_PERCENT_FTP` — readonly constants
+  - `PowerZone` — type alias for `1 | 2 | 3 | 4 | 5 | 6 | 7`
+  - `isPowerZone(value)` — type guard
+  - `zoneToPercentFtp(zone)` — strict mapping; throws `RangeError` on invalid input (does NOT silently fall back to 100% like the legacy zwo copy)
+  - `percentFtpToZone(percent)` — strict inverse for round-trip identity
+
+  The single in-repo duplicate (`packages/zwo/src/adapters/target/power.converter.ts`) will migrate to consume this helper in a follow-up PR (§6.2 of `repo-quality-maintenance-waves`).
+
 ## 7.1.2
 
 ### Patch Changes

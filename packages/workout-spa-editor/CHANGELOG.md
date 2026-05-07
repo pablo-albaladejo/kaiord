@@ -1,5 +1,278 @@
 # @kaiord/workout-spa-editor
 
+## 0.4.0
+
+### Minor Changes
+
+- 0b3c81b: Coaching activity dialog redesign — dialog UI (PR 2/4):
+  - Replaces the 2-state (solo/matched) dialog with a 3-state dispatch (`no-workout`, `converted`, `matched`) computed reactively from `workouts` + `sessionMatches` so the UX never depends on which write path created the workout.
+  - No-workout layout: `[AI process]`, `[Edit manually]`, `[Match existing]`, `[Close]`. The AI hint surfaces above the buttons when the activity description is empty so users know the prompt falls back to title + sport.
+  - Synchronous AI flow: clicking `[AI process]` swaps the dialog body for an in-flight spinner with a `[Cancel]` button. On success the dialog closes and navigates to the editor; on failure (no provider, transport, invalid KRD, timeout, AI error) it renders an inline error state with `[Retry AI]`, `[Edit manually]`, `[Match existing]`, `[Close]`. AbortController is plumbed through to the use case.
+  - Matched-state actions are workout-state-conditional: `raw → [Process with AI] [Open editor]`, `structured → [Open editor] [Push to Garmin disabled]`, `ready → [Open editor] [Push to Garmin enabled]`, `pushed → [Open editor]`. Split is always available alongside.
+  - Auto-heal on dialog open: legacy "converted-without-match" rows (pre-Dexie-v10 data, or any concurrent winner) get their `SessionMatch` created silently using `ensureSessionMatch` with `source="auto-coaching-v10-migration"` (D8 belt-and-braces).
+  - Emits `coaching.dialog.state_observed` exactly once per dialog open so analytics reflect what the user actually saw, not how many times React re-rendered.
+
+- aa9c1aa: Domain foundation for the coaching activity dialog redesign (PR 1/4):
+  - Adds `convertCoachingActivityWithAi` and `convertCoachingActivityManual` use cases that persist a structured workout and its `SessionMatch` atomically. AI failures (network, abort, invalid KRD, timeout) write nothing.
+  - Adds the warmup KRD template builder used by the manual-conversion path so the editor renders a non-empty starting point.
+  - Extends `convertAndAutoMatch` to auto-heal a missing `SessionMatch` on every legacy convert call (matches the v10 retro-fix invariant per-call).
+  - Ships the Dexie v9 → v10 retro-match migration: scans `coachingActivities` × `workouts` once on next app boot, writes the missing `sessionMatches` rows with `source="auto-coaching-v10-migration"`, and surfaces the count via an info toast plus the `coaching.dexie_v10.migrated` analytics event.
+  - Wires `coaching.convert_with_ai.invoked / success / failure / cancelled` and `coaching.convert_manual.invoked / success` analytics events.
+
+  UI changes (3-state dialog, EditorPage sidebar, E2E flows) follow in subsequent PRs.
+
+- cd95ae2: Coaching activity dialog redesign — editor sidebar (PR 3/4):
+  - `EditorPage` now detects coaching-derived workouts by reading `SessionMatchRepository.getByWorkoutId(profileId, workoutId)` reactively and renders a right-hand `CoachingSidebar` alongside the step editor when the match source is `auto-conversion`, `auto-coaching-v10-migration`, or `manual` (per design D4).
+  - The sidebar shows the activity title, sport icon + label, status, and formatted coach description. The formatter preserves `<p>` paragraph breaks and `<strong>` emphasis, strips every other tag, and walks a typed AST → React (no `dangerouslySetInnerHTML`).
+  - Collapse toggle persists to `localStorage` under `kaiord.editor.coachSidebar.collapsed`; default expanded ≥768px and collapsed <768px on first mount.
+  - Reactive: the sidebar's live query is keyed on `(profileId, workoutId)`, so bridge re-syncs of the coaching description update the sidebar without a full editor reload.
+
+- 28252df: SPA mapper now consumes the new full-Z1-Z5-band Train2Go payload shape and writes the full HR / power / pace zone arrays to the persisted profile. Band-level entries flow through the existing `IncomingMap` / `reconcile` / `commitConflictResolution` pipeline as ~60 new band-level `FieldKey` entries.
+
+  **HR fallback chain** (D-FB1): per sport, `payload.hrZones.<sport>` (Specific) wins when present; `payload.hrZones.generic` (Karvonen) is the fallback; otherwise the sport's HR bands are not touched. A triathlete with only cycling Specific configured gets running and swimming HR bands populated from the Generic block.
+
+  **Cycling power conversion** (D-FB6): watts → %FTP via `Math.round(watts / z4Upper * 100)`. The divisor is `payload.paces.cycling.z4Upper` (T2G's view of FTP), NEVER the persisted profile's FTP — mixing sources distorts %. When `z4Upper` is absent or zero, cycling power band writes are skipped entirely.
+
+  **Pace inversion** (D-FB7): T2G `lower` is the SLOWER edge (larger seconds) → maps to `maxPace`; T2G `upper` is the FASTER edge (smaller seconds) → maps to `minPace`. The Kaiord `minPace <= maxPace` invariant follows from this unconditional assignment.
+
+  **Power-zone count mismatch** (D-FB3): Kaiord's `DEFAULT_POWER_ZONES` defines 7 zones (Z1=Active Recovery..Z7=Neuromuscular Power) but T2G emits 5. The mapper writes a 5-element array; pre-existing Z6/Z7 entries are NOT preserved (T2G is the source of truth at sync time per the design).
+
+  **Per-band conflict policy**: when the persisted sport-kind table is empty (zones array missing OR length === 0), all bands are silent-fills. When the table is populated, per-band conflicts surface as `{<sport>.<kind>.zN.<bound>}` rows in the existing dialog. `commitConflictResolution` accepts band-level decisions; merge: accepted bands take T2G; rejected bands keep pre-sync values.
+
+  **bpmRest flow-through-but-not-persisted** (D-FB8): the new `physiological.bpmRest` field flows through the validated payload but the SPA mapper does NOT write it to the profile in this change — Kaiord has no `restingHeartRate` consumer field yet. Pinned by a deep-diff test.
+
+  UI label-map changes for the new ~60 band-level keys are auto-generated at module-load time from a hardcoded cross-product (`Cycling HR Z2 max`-style) — never interpolates an external string. PR 3 polishes the label format and adds dedicated dialog tests; this PR just keeps the dialog rendering correct values for the new keys.
+
+  Type: `ZonesPayload` Zod schema extended with `physiological.bpmRest`, `paces.cycling.z1..z5: { lower, upper }`, `paces.{running,swimming}.z1..z5: { lower:{min,sec}, upper:{min,sec} }`, `hrZones.generic.z1..z5`, `hrZones.{cycling,running,swimming}.z1..z5`. Backwards-compat: existing convenience scalars (`z4Upper`, `z5Lower`) are preserved; older bridge payloads with only `z4Upper` continue to work for threshold-scalar writes.
+
+  12 new unit tests in `sync-zones-bands.test.ts` cover the HR fallback chain, watts→%FTP, pace inversion, re-sync stability, bpmRest non-persistence, power-zone count mismatch, and band-level merge.
+
+- 790462a: Add the SPA-side backend for Train2Go zones-sync (PR 2/3 of the `train2go-zones-sync` change).
+  - New `CoachingTransport.readZones` port on `application/coaching/coaching-transport-port.ts` (optional — Garmin-shaped transports leave it unset; `syncZones` short-circuits with `{ ok: false, reason: "unsupported" }`).
+  - Train2Go transport implements `readZones` via the new `read-details` bridge action; the wire fetch is routed through the shared `BRIDGE_QUEUE` so zones-sync, snapshot-push and any future queue consumer share a single per-bridge 60/h budget.
+  - New domain types in `types/coaching-zones.ts`: `FieldKey`, `WrittenField`, `ConflictItem`, `SyncZonesResult`, `ConflictDecision`, `ZonesPayload` (Zod-validated raw bridge shape).
+  - `BridgeCapability` Zod enum extended with `read:training-zones`. `LinkedCoachingAccount` gains `syncZones?: boolean` (optional → no Dexie schema bump).
+  - New application use cases in `application/coaching/`:
+    - `syncZones(profileId, transport, repo)` — fetches the bridge payload, eagerly writes silent fills to the persisted profile, returns conflicts UNWRITTEN for the UI.
+    - `commitConflictResolution(profileId, decisions, repo, transportPayload)` — phase-2; idempotent.
+  - FTP precedence (design D5): `payload.paces.cycling.z4Upper` wins; `z5Lower` fallback only when `z4Upper` is absent OR `=== 0` (semantically "not set" for a watt threshold).
+  - Per-sport LTHR via `payload.hrZones.<sport>.z4Upper`; swimming LTHR is intentionally NOT mapped (no consumer in Kaiord today).
+  - Profile schema gains `maxHeartRate?: number` so the `heartRate.max` `FieldKey` has a stable storage path.
+  - Toast/log copy lives at the top of `sync-zones.ts` as SCREAMING_SNAKE_CASE constants so the `check-no-pii-leakage.mjs` mechanical guard can prove the strings are static.
+  - Tests: 25 new unit tests (transport port shape, wire-fetch + queue counter contract, adapter envelope, 11 syncZones cases, 4 commitConflictResolution cases).
+
+  This PR ships the application + adapter layer with no UI; the toggle, conflict dialog and connect/sync fan-out land in PR 3.
+
+- d95188b: Train2Go zones-sync — UI + connect/sync fan-out (PR 3/3 of the `train2go-zones-sync` change).
+  - New "Sync zones" toggle on the Linked Account row for Train2Go. Visible only while linked AND the discovered bridge advertises `read:training-zones` (older bridges never see the control). Defaults off; persists alongside the linked-account record.
+  - New `ZonesConflictDialog` component with per-row accept/reject. Hard XSS contract: NEVER uses `dangerouslySetInnerHTML`; field labels come from a static `FieldKey` → human-label map, NEVER from any T2G-supplied string. Numeric values render as React children.
+  - `useConnectCallback` and `useSyncCallback` fan out into the `syncZones` use case after a successful link / weekly read AND the persisted account has `syncZones === true`. Errors are toasted, never thrown — the connect / calendar sync still succeeds when the zones-sync side-quest fails.
+  - New `useZonesSyncOrchestrator` hook owns the two-phase flow: `runSync` invokes the use case + stashes conflicts; `confirmDecisions` invokes `commitConflictResolution` with the user's per-row choices. Idempotent.
+  - Bridge discovery now exposes `getCapabilities(bridgeId)` returning the verified manifest's capability list. The new `useTrain2GoSupportsZones` hook wires this through `useSyncExternalStore` so the toggle updates reactively when the bridge announces.
+  - Toast copy comes from the SCREAMING_SNAKE_CASE constants in `application/coaching/sync-zones.ts` (mechanical guard `check-no-pii-leakage` enforces static toast strings).
+  - Web Store listing copy enumerates the read scope when zones-sync is enabled, plus the explicit deny-list of fields NOT extracted (gender, birthday, fat%, IMC, smoker, bpm_rest, coach contact details).
+  - 16 new unit tests cover toggle visibility / capability gating / persistence, dialog render + accept/reject/cancel paths, and connect/sync fan-out + error isolation.
+
+  Manual e2e (per design tasks §9.5) is the user's verification step; an automated Playwright e2e at `packages/workout-spa-editor/e2e/zones-sync.spec.ts` is deferred to a follow-up issue (real bridge stub requires a loaded extension).
+
+- efe3cae: Method-aware reconcile + classifier (PR 2 of 6 of `zones-method-aware-reconcile`).
+
+  **Behaviour change:** the conflict dialog no longer surfaces 30+ pseudo-conflict rows on a freshly-created profile's first sync. Tables on the seed/template/method-derived path are silent-replaced; only genuinely user-customized tables produce per-band conflicts.
+
+  **Changes:**
+  - New `classifyZoneTable(profile, sport, kind, snapshot)` returns one of six canonical states (`empty`, `default-template`, `method-derived`, `train2go-synced-clean`, `train2go-synced-edited`, `user-customized`).
+  - `reconcile` rewritten to use the classifier. Strategy per state (per design D-MA4):
+    - `empty` / `default-template` / `method-derived` / `train2go-synced-clean` → silent-replace; flip method to `"train2go"`; record snapshot.
+    - `train2go-synced-edited` → per-band conflict only for bands user touched since last sync (snapshot-diff).
+    - `user-customized` → per-band conflict for every disagreeing band.
+  - `commitConflictResolution` now updates `method` and `lastSyncedZonesSnapshot` per D-MA4: all-accept → method `"train2go"`; mixed → method `"user"`; all-reject → unchanged. Snapshot reflects post-merge persisted zones (not raw T2G).
+  - `sync-zones-band-writes.ts` and `sync-zones-threshold-fields.ts`: replaced fallback method `"manual"` with `"custom"` (the existing canonical vocabulary).
+
+  **Files:**
+  - New: `zone-table-classifier.ts`, `zone-table-classifier-types.ts`, `zone-table-classifier-detectors.ts`, `zone-table-classifier-state-helpers.ts`.
+  - New: `sync-zones-band-table-reconcile.ts`, `sync-zones-band-strategies.ts`, `sync-zones-partition.ts`.
+  - New: `sync-zones-snapshot.ts`, `sync-zones-snapshot-write.ts`.
+  - New: `commit-conflict-band-tables.ts`, `commit-conflict-table-apply.ts`.
+  - Modified: `sync-zones-helpers.ts`, `commit-conflict-resolution.ts`, `sync-zones.ts`, `sync-zones-band-writes.ts`, `sync-zones-threshold-fields.ts`.
+
+  Test coverage: 18 new cases (13 classifier states + 5 method-aware end-to-end). Total 3257 tests pass (3239 → 3257).
+
+- 9b4fce6: Conflict dialog grouped by sport-kind table + FTP/power-bands coupling (PR 4 of 6 of `zones-method-aware-reconcile`).
+
+  **UX behavior change:** the conflict dialog no longer renders a 30-row scroll-fest of per-band-bound rows. Band-level conflicts are grouped into a single decision unit per `<sport>.<kind>` table (e.g., "Cycling HR Zones — 5 bands differ") with one [Accept Train2Go] / [Keep current] radio plus an expandable [Detail] view showing per-band rows.
+
+  When the FTP scalar is in conflicts AND any cycling.powerZones bands are also in conflicts, the dialog couples them into a single "Cycling threshold + zones" decision unit (per D-MA6) — accepting either implies accepting both, since power bands are stored as %FTP and accepting one without the other creates display inconsistency.
+
+  **New components:**
+  - `group-conflicts.ts` — partitions conflicts into scalars / band groups / coupled FTP+power.
+  - `ConflictGroup.tsx` — single group row with header, accept/reject radio, expandable detail.
+  - `ConflictGroupHeader.tsx`, `ConflictGroupRadios.tsx`, `ConflictGroupDetail.tsx`, `ConflictGroupList.tsx`, `DialogShell.tsx` — extracted from the dialog to fit React 60-line component cap.
+  - `use-conflict-decisions.ts` — owns per-row + per-group decision + expand state.
+
+  **Test changes:**
+  - 3 PR-3-era band tests rewritten to use group testids (5.2a/b/c).
+  - 1 new test for FTP+power-bands coupling (5.2d / D-MA6).
+  - Total 3262 tests pass (3261 → 3262).
+
+  Existing per-band testids (`zones-conflict-row-<field>`) are preserved INSIDE the expandable Detail view (DOM persists, hidden via `aria-hidden`).
+
+- 86d2c48: Schema bump for the upcoming zone-method-aware reconcile (PR 1 of 6 of `zones-method-aware-reconcile`).
+
+  **No reconcile/UI behavior changes in this PR.** The new schema field stays unread and the migrated `method` values stay opaque to the existing reconcile until PR 2 ships the classifier.
+
+  **Changes:**
+  - `LinkedCoachingAccount` schema gains `lastSyncedZonesSnapshot?: LastSyncedZonesSnapshot` — captures the post-mapper Kaiord-domain zone arrays + threshold scalars from the most recent successful T2G sync. Used by the upcoming classifier (PR 2) to detect "user edited zones since last sync" without per-zone tracking.
+  - Dexie schema bumps to v9. `applyV9Upgrade` runs at db-open time on every existing profile and applies two row-level mutations (per design D-MA7):
+    1. Normalize `method = "manual"` (introduced by sync-zones-band-writes in the prior `train2go-zones-sync-full-bands` change) → `"custom"`. The `"manual"` value didn't fit the existing vocabulary.
+    2. Conservatively reclassify `method = "custom"` AND zones-clearly-not-defaults → `method = "user"`. False-negatives produce conflicts on next sync (handled by the upcoming new dialog gracefully); false-positives produce conflicts forever (avoided).
+
+  **Rollback safety:** IndexedDB doesn't permit version downgrade; "rollback" means deploying old JS bundle while the user's local DB stays at v9. Old code reading the v9-migrated profile encounters `method = "user"` (opaque to old reconcile) and `lastSyncedZonesSnapshot` (Zod `.optional()`, ignored). Pinned by `dexie-v9-rollback.test.ts` — frozen v8 reconcile against a v9-migrated profile produces identical applied/conflicts as the v8-state baseline. **No silent data loss.**
+
+  Test additions: 18 new cases (10 forward migration + 8 `hasUserData` heuristic + 3 rollback regression).
+
+### Patch Changes
+
+- 19537b1: Park the `bridgeDiscovery` singleton on `globalThis` so Vite HMR doesn't split it into two instances. Without this, editing any module in the bridge-discovery import chain caused the React `useSyncExternalStore` hook to keep listening to the previous instance while a fresh one took over the imports — leaving "the discovery says it has the bridges but my hooks don't see them" bugs that only show up in dev. The first hard reload always recovered. New unit test asserts the singleton is on `globalThis` so future regressions are caught at CI time.
+- d2dd5c6: Add SPA-side foundation for the bridge popup profile-snapshot push: pure mapper from domain `Profile` to `ProfileSnapshot`, push adapter with content-fingerprint de-duplication via `@kaiord/core`'s `fingerprintSnapshot`, Dexie v6 schema migration that backfills `pendingClear: false` and `lastSuccessfulFingerprint: null` on existing bridge rows, and an extension of the R-PIIInterpolation guard to the bridge adapter directory. The trigger wiring (active-profile mutation effect, bridge-VERIFIED transition, profile-deletion clear) lands in a follow-up commit on the same PR.
+- 352e9ed: Bridge popup trigger wiring + lastPushReceipt + dead-code sweep.
+
+  SPA: `useProfileSnapshotPush` (mounted in `App`) now reads the discovered bridges from the in-memory `bridgeDiscovery` singleton (the actual source of truth) instead of an empty Dexie table that no other code wrote to. The hook drives a shared `OperationQueue` that enforces the 60/h-per-bridge cap from the SPA Bridge Protocol spec, and parks a `pendingClear` flag when the active profile is deleted while no bridges are reachable so `profile-snapshot-clear` still fires the next tick a bridge appears. The previously-unused `dexie-bridge-repository`, `bridge-registry`/`-helpers`/`-prune`, `push-active-profile`, and `snapshot-pusher` modules are removed; the in-memory singleton is the only registry.
+
+  Bridges (Garmin + Train2Go): `persistSnapshot` now writes `lastPushReceipt: { at, name }` to `chrome.storage.local` atomically with the snapshot, and `clearSnapshot` removes it alongside `profileSnapshot` and `lastWeeklyRollup`. The Garmin popup's "Last push · N min ago — <name>" line now actually renders; before, the writer side was never wired and the popup silently fell back to omitting the line.
+
+- d7d4a8a: chore(spa-editor): cosmetic polish bundle (closes #266, #267, #268, #269, #270)
+  - Remap `gray-*` utilities to `slate-*` via the Tailwind 4 `@theme` alias block — every `bg-gray-*`, `text-gray-*`, `border-gray-*`, etc. now resolves through `var(--color-slate-*)` without touching the ~90 call sites individually.
+  - Add `size-adjust: 100%` to the Inter `@font-face` declaration across all three surfaces (landing, docs, editor) to eliminate Cumulative Layout Shift on first paint.
+  - Unify `:focus-visible` ring across landing / docs / editor surfaces so a keyboard user sees the same indicator everywhere.
+  - Add `viewport-fit=cover` to the SPA's viewport meta and reserve `safe-area-inset-{left,right,bottom}` on the body so notch / rounded-corner devices do not crop SPA content.
+  - Document the shared `@font-face` invariant (unicode-range / font-weight / size-adjust must stay byte-equal across the three surface CSS files; only the `src:` URL differs by Pages base path).
+
+- cf79580: Coaching activity dialog redesign — e2e regression specs (PR 4/4):
+  - Adds `e2e/coaching-dialog-redesign.spec.ts` with three Playwright specs:
+    - **Flow (d)** — `[Edit manually]` creates a structured workout + session_match and navigates to the editor with the sidebar visible.
+    - **Flow (e)** — a seeded converted-without-match workout (legacy state) is silently auto-healed when the dialog opens; the dialog re-renders into the matched state with `LinkedWorkoutSection`.
+    - **Flow (h)** — an empty-description activity surfaces the AI hint in the dialog footer.
+
+  The AI-bound flows (a/b/c/f/g) require Playwright route mocking for the LLM transport and are tracked as follow-up issues filed at archive time.
+
+- ab015f9: test: close 6 coaching test gaps from train2go-profile-link verify report
+
+  Adds 6 surgical test assertions for previously-untested coaching invariants:
+  manual-sync bypass of the staleness gate, coachingActivities row preservation
+  on convert, useCoachingConvert navigation + onClose, profile-switch reactivity
+  on the calendar header, lossless userId at the JSON parse boundary, and
+  abort-mid-poll for attemptLink. Tests-only — no production code changes.
+
+- fbf2583: fix(spa-editor): redirect legacy SPA bookmarks (`/calendar`, `/library`, `/workout/*`) to `/editor/<path>`
+
+  Pre-fix bookmarks pointing at `kaiord.com/<route>` (without the `/editor/` prefix) were dropping users on the landing's blue 404. The deploy-time rafgraph fallback now also handles a closed allowlist of legacy SPA routes — `/calendar`, `/calendar/<weekId>`, `/library`, `/workout`, `/workout/<id>` — and redirects them to `kaiord.com/editor/<path>` so the SPA loads at the intended view. Unrelated 404s (`/typo`, `/calendarx`, etc.) continue to surface the landing's blue 404 as before.
+
+- 744098b: fix(spa-editor): align wouter Router base with Vite deploy base so /editor/<route> URLs survive refresh
+
+  URLs deep-linked into the SPA editor now consistently include the `/editor/` prefix, matching the deploy path. Pre-fix bookmarks pointing at `kaiord.com/<route>` (without the prefix) never survived a refresh; the canonical address is now `kaiord.com/editor/<route>`. Open SPA tabs may briefly show a one-time URL update on the next navigation as the new base takes effect.
+
+  Internally the SPA bootstrap now wraps `<App />` in `<Router base={computeRouterBase(import.meta.env.BASE_URL)}>`, so wouter routes match against the deploy-relative path. The pre-existing rafgraph 404 fallback (introduced in `cleanup-open-issues-may-2026`) now matches the URLs the SPA actually emits.
+
+  A new production-base e2e suite (`packages/workout-spa-editor/e2e/spa-route-refresh.spec.ts`, gated by `E2E_PROD_BASE=1`, exercised via the new CI job `e2e-prod-base`) builds the SPA with `VITE_BASE_PATH=/editor/` and serves it through a custom Node static-server fixture that mimics GitHub Pages' 404 contract byte-equally, so the regression cannot silently re-introduce. The rafgraph injection logic was extracted from the deploy workflow into `scripts/inject-spa-fallback.mjs` so production and tests share a single source of truth.
+
+- 86669ae: fix(spa-editor): migrate profile state to Dexie + useLiveQuery — closes #385
+
+  Phase 1B of `persistence-read-rule-cleanup`. User-visible fix for #385: Connect Train2Go updates the calendar header in real time, profiles survive a refresh, and the active-profile join is observed atomically within a tab.
+  - Migrates the 4 high-risk read sites (`useProfileManager`, `useAiGeneration` via `useLatestRef`, `useSportZoneEditor`, the `use-active-profile` shim consumers) to the Dexie-backed live hooks introduced in Phase 1A; every write goes through the application use cases so persistence rejections surface as toasts instead of silently swallowing.
+  - Adds three #385 regression tests under `src/__regressions__/issue-385.test.tsx` (Train2Go reactive Sync button; profiles survive refresh; sibling-driven `setActiveProfile` is atomic).
+  - Deletes `src/store/profile-store.ts` + `src/store/profile-store/` (recursive) + `src/hooks/use-active-profile.ts`.
+  - Switches the perf gate to compare-mode against the Phase 1A baseline (`profile-state-baseline.json`); fails the build if `LayoutHeader` or `useAiGeneration` render counts exceed 2× baseline. Both metrics still measure 2 renders post-1B.
+
+  Behavior change documented in tasks.md: `deleteProfile` now clears `meta.activeProfileId` when it matches the deleted id (legacy reassign-to-first-remaining is intentionally dropped per the design's `clear-if-matching` rule). Users re-select an active profile after deletion.
+
+- 8ea4d89: fix(spa-editor): migrate library state to Dexie + useLiveQuery (latent bug from same root cause as #385)
+
+  Phase 2 of `persistence-read-rule-cleanup`. Reuses the foundation from Phase 1A/1B. No new ports, no schema changes — pure read/write rewiring.
+  - Renames `useLibraryTemplates` → `useLibraryTemplatesLive` and relocates it to `src/hooks/use-library-templates-live.ts` so consumers read templates reactively from Dexie.
+  - Adds three application use cases under `application/library/`: `addTemplate` (single-write put), `updateTemplate` (read-modify-write inside `persistence.transaction`, throws `TemplateNotFoundError`), `deleteTemplate` (single-write delete). Co-located unit tests against `createInMemoryPersistence()`.
+  - Helpers (`createNewTemplate`, `updateTemplateData`, search/filter/extract) move from `store/library-store/helpers.ts` to `application/library/helpers/`.
+  - Migrates 4 consumer files to read via the live hook + dispatch through the use cases via `usePersistence()`: `LayoutHeader.tsx` (badge counter), `useWorkoutLibrary.ts`, `useSaveToLibrary.ts`, and `LibraryPage.tsx` (which had been doing direct `db.table().delete()` — now goes through the use case).
+  - Deletes legacy: `src/store/library-store.ts` + `src/store/library-store/` (recursive) + `src/hooks/use-library.ts` shim + `src/components/pages/library-hooks.ts`.
+  - Adds a regression test at `src/__regressions__/library-badge.test.tsx` that pre-populates Dexie with two templates, mounts `LayoutHeader`, and asserts the badge shows "2" without any user interaction (locks in "library badge after refresh").
+
+  Latent bug fixed: pre-Phase 2 the Zustand store loaded empty on boot, so the badge showed "0" until the user opened the library dialog and triggered a write. Same root cause as #385 (Phase 1B) but lower visibility.
+
+- e59efe1: refactor(spa-editor): split AI store into persisted slice (Dexie/useLiveQuery) and runtime slice (Zustand)
+
+  Persisted state (providers, customPrompt) now lives in IndexedDB and is read via `useAiProvidersLive` / `useAiCustomPromptLive`; mutations go through application use cases against `PersistencePort`. Runtime-only state (`selectedProviderId`, `generation`) stays in a focused Zustand store. The legacy `useAiStore` and `useAiHydration` shim are deleted.
+
+- cf14aa4: chore(spa-editor): lock in no-Zustand-write-through guard for persisted entities
+
+  Adds `scripts/check-no-zustand-writethrough.mjs`, a `pnpm test:scripts`-wired static-import check that fails CI if a file under `packages/workout-spa-editor/src/store/**` imports `adapters/dexie/dexie-database` (relative, alias, barrel re-export, or dynamic import) or imports a `persistState` identifier — and if any file under `packages/workout-spa-editor/src/application/**` imports `dexie-database` at all. A small allowlist exempts explicit-user-action writers from the store rule. The application rule has no allowlist.
+
+- 1456d6a: feat(spa-editor): unify Library to a routed page; add narrow TemplatePickerDialog for in-flow picking
+
+  The header Library button now navigates to `/library` (a routed page) instead of opening a modal over the current view. Bookmark-friendly and back-button-friendly. Calendar empty-day's "Add from Library" opens a focused template picker that preserves the day's date instead of navigating away.
+
+  Internally this ratifies a `spa-routing` capability rule: routed pages for content destinations, modals for meta surfaces and in-flow pickers. The previous header-mounted Library modal is deleted; a new no-dual-mount mechanical guard (`scripts/check-no-library-dual-mount.mjs`) enforces that the Library content component cannot be silently re-summoned as a modal in a future PR. A live route announcer (`aria-live="polite"`, `aria-atomic="true"`) and `useFocusOnRouteChange` restore the focus / SR announcement equity the deleted modal provided via Radix Dialog.
+
+- 710c2e3: Fix the calendar header showing "Connect to Train2Go" right after the user successfully linked the account in Profile Manager. The Train2Go detection cache was holding onto stale negative results and the SPA never re-detected after the link dance, so the source's `sessionActive` flag would say `false` while the persisted `linkedAccounts` already had the entry — a UX contradiction the user could only resolve by hard-reloading the tab. Three small changes:
+  - `createDetectAction` now caches only positive results (was: any result with `extensionInstalled: true`). A previous "session inactive" no longer suppresses subsequent detections.
+  - `detectExtension({ force: true })` bypasses the cache for an explicit re-check.
+  - The Train2Go `connect` callback fires a forced re-detect after `attemptLink` succeeds, so the source's `connected` flag flips to `true` immediately.
+  - `useTrain2GoDetection` also runs a forced detect on `visibilitychange` so returning to the tab after a Connect dance always reflects reality.
+
+- 0285a84: Fix LTHR-scalar sync from Train2Go for sports without a Specific HR block.
+
+  Two coupled issues:
+  1. **Swimming LTHR was never written.** The mapper only emitted `cycling.thresholds.lthr` and `running.thresholds.lthr`; `swimming.thresholds.lthr` had no corresponding `FieldKey`, no read/write accessor, no field label, and was missing from the `IncomingMap`. After sync, the LTHR field on the Swimming tab stayed empty even when Generic HR was configured upstream.
+  2. **Cycling/running/swimming LTHR scalars didn't apply the Specific → Generic → skip fallback** that the band tables already use (D-FB1). The mapper read `payload.hrZones.{sport}.z4Upper` directly, so on profiles with only the Generic Karvonen block configured (the common shape — Pablo's account has cycling Specific only, running and swimming inherit Generic) the running LTHR field stayed empty too.
+
+  The fix:
+  - Adds `swimming.thresholds.lthr` to `ThresholdFieldKey`, with read/write cases in `sync-zones-threshold-fields.ts`.
+  - Adds the corresponding label ("Swimming LTHR") and unit ("bpm") to `field-labels.ts`.
+  - Refactors `setThresholdScalars` to resolve LTHR for all three sports through a new `resolveLthrScalar` helper that mirrors `resolveHrBands`' Specific → Generic → undefined chain, but keys on `z4Upper` directly (the legacy payload shape that has only `z4Upper` without the full Z1-Z5 bands still resolves correctly).
+
+  Behavior summary post-fix on Pablo's account (cycling Specific = Generic = 107-187, no running/swimming Specific):
+  - Cycling LTHR → 174 ✓ (unchanged: Specific block has z4Upper)
+  - Running LTHR → 174 ✓ (was empty: Generic-fallback now fires)
+  - Swimming LTHR → 174 ✓ (was empty: new field + Generic-fallback)
+
+- e06743a: Add band-level dialog test coverage and label-map count invariants for the train2go-zones-sync-full-bands change. PR 3 of 4.
+  - 3 new ZonesConflictDialog test cases (5.2a/b/c per `tasks.md`): band-level row rendering with auto-generated label, mixed scalar+band conflicts preserving insertion order, accept-all-rows-of-a-table emits per-row decisions.
+  - 1 new field-labels test file (5.1a) asserting (a) total label count is exactly 67 (7 threshold scalars + 60 band-level entries from the cross-product helper), (b) no T2G-controlled substring (coach, email, birthday, gender, fat, smoker, imc, user_notes) leaks into any label, (c) every entry has a non-empty value.
+
+  The label map and dialog rendering for band-level keys was shipped functional in PR 2 (`@kaiord/workout-spa-editor` minor); this PR locks the contract via tests so a future regression that drops a band's label, leaks a forbidden substring, or breaks the per-row decision emit fails loudly.
+
+- 739755b: Train2Go zones-sync — Playwright e2e + shared orchestrator (closes #478).
+  - New `packages/workout-spa-editor/e2e/zones-sync.spec.ts` covers the three user-visible flows the unit tests can't fully exercise in a real browser: (a) toggle-off auto-sync MUST NOT issue `read-details`, (b) toggle-on with empty profile silently fills every threshold/physio value, (c) toggle-on with a manual FTP opens the `ZonesConflictDialog` with the diff. Stable across 5/5 runs in `pnpm exec playwright test --project=chromium`.
+  - New helpers `e2e/helpers/train2go-bridge-stub.ts` + `train2go-bridge-stub-page-script.ts` install a self-contained Train2Go bridge stub via `addInitScript`: stubs `chrome.runtime.sendMessage`, posts `KAIORD_BRIDGE_ANNOUNCE` (and re-posts on `KAIORD_BRIDGE_DISCOVER`), tracks every action call so tests can assert what fired (`read-details`) and what didn't.
+  - **Architectural fix**: lift the zones-sync orchestrator out of per-source instances into a single `Train2GoZonesSyncProvider` mounted at app root (inside `AppToastProvider`). Before this, the calendar header's sync button and the `LinkedAccountRow`'s mounted dialog used different orchestrator instances — clicking sync on the calendar set `pending` on instance A while the dialog was mounted under instance B. The provider now owns the state and renders the dialog itself, so any trigger surfaces the dialog regardless of which page is open. The calendar's call site (via the registry's `useTrain2GoSource` factory) and the Profile Manager's row both consume the same context.
+  - `useTrain2GoSource` no longer creates its own orchestrator; it reads from the new context. The `Train2GoSource.zonesSync` field is preserved for backwards compatibility (some tests reference it).
+  - `LinkedAccountRow` no longer renders `ZonesConflictDialog` (the provider does). `useLinkedAccountRow` no longer returns `zonesSync`.
+
+  This closes the integration gap that PR 3 (#474) shipped — the per-instance orchestrator design passed all 16 unit tests because each one tested in isolation, but the dialog never appeared in the calendar-triggered flow that PR 3 was supposed to wire up.
+
+- cc54e4a: E2E coverage for zone-method-aware reconcile (PR 5 of 6 of `zones-method-aware-reconcile`).
+  - Extended `FIXTURE_ZONES_PAYLOAD` in `e2e/helpers/train2go-bridge-stub.ts` with full Z1-Z5 bands per block (HR Generic + cycling power watts + running/swimming pace `{min,sec}`) so the new payload shape is exercised end-to-end. Also added `physiological.bpmRest` (allowlisted but not persisted per D-FB8).
+  - Added new flow (d) in `e2e/zones-sync.spec.ts`: FTP scalar conflict + cycling.powerZones band conflicts → coupled `"Cycling threshold + zones"` group row (per D-MA6). Verifies that the dialog renders the coupled group testid (`zones-conflict-group-cycling.threshold-and-zones`) and NOT a standalone FTP scalar row.
+
+  Existing flows (a) toggle-off, (b) silent-fill empty profile, (c) FTP conflict are unchanged — they exercise threshold-scalar paths that continue to work with the new payload shape via the convenience scalars (z4Upper, z5Lower).
+
+  Manual verification with Pablo's real T2G account + 3-iteration stability gate (§6.3, §6.4 of the change tasks) are deferred to follow-up issues filed at archive time.
+
+- 78ca138: ZoneEditor manual band edits now flip `method = "user"` (PR 3 of 6 of `zones-method-aware-reconcile`).
+
+  When the user edits any zone band via the Profile Manager `ZoneEditor`, the corresponding `<sport>.<kind>.method` is updated to `"user"` as part of the persistence write. Subsequent T2G syncs treat that table as `user-customized` (per the classifier in PR 2) and emit per-band conflicts rather than silent-replacing.
+
+  The dropdown's formula-recompute pathway (`setZoneMethod`) is unchanged — it preserves the chosen method id (`"karvonen-5"`, `"coggan-7"`, etc.) so formula-derived zones stay classifiable as `method-derived`.
+
+  `updateSportZones` use case is the manual-band-edit signal; `setZoneMethod` is the dropdown signal. The two pathways are now semantically distinct per design D-MA3 of zones-method-aware-reconcile.
+
+  Test coverage: 4 new cases (4.3a-d) in `zones.test.ts` covering: train2go → user, custom → user, setZoneMethod stays formula, formula → user on band edit. Total 3261 tests pass (3257 → 3261).
+
+- Updated dependencies [79be4f3]
+- Updated dependencies [d66e509]
+- Updated dependencies [b556758]
+- Updated dependencies [744a78f]
+  - @kaiord/core@7.2.0
+  - @kaiord/zwo@7.2.0
+
 ## 0.3.0
 
 ### Minor Changes
