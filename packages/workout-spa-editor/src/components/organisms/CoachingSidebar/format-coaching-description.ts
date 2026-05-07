@@ -17,7 +17,7 @@ export type DescriptionParagraph = {
   inlines: DescriptionInline[];
 };
 
-const STRONG_RE = /<strong>([\s\S]*?)<\/strong>/gi;
+const STRONG_RE = /<strong\b[^>]*>([\s\S]*?)<\/strong>/gi;
 
 const stripTagsExceptStrong = (html: string): string => {
   // Remove every tag except <strong>...</strong> markers (the strong

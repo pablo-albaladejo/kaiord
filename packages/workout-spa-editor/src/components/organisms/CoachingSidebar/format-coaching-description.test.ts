@@ -66,6 +66,20 @@ describe("formatCoachingDescription", () => {
     expect(result[1]?.inlines[0]?.value).toBe("Then 4×5 min Z4.");
   });
 
+  it("should preserve <strong> with attributes", () => {
+    // Arrange
+    const html = '<p>Effort <strong class="zone-4">Z4</strong></p>';
+
+    // Act
+    const result = formatCoachingDescription(html);
+
+    // Assert
+    expect(result[0]?.inlines).toEqual([
+      { kind: "text", value: "Effort" },
+      { kind: "strong", value: "Z4" },
+    ]);
+  });
+
   it("should decode common HTML entities", () => {
     // Arrange
     const html = "<p>Pace &lt; threshold &amp; effort &gt; Z3</p>";
