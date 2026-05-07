@@ -7,6 +7,7 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import { formatCoachingDescription } from "../../organisms/CoachingSidebar/format-coaching-description";
 
 export const STATUS_LABEL: Record<string, string> = {
   pending: "Pending",
@@ -54,9 +55,23 @@ export const DialogDescription = ({
     );
   }
   if (!activity.description) return null;
+  const paragraphs = formatCoachingDescription(activity.description);
   return (
-    <div className="whitespace-pre-line border-t pt-3 text-sm">
-      {activity.description}
+    <div className="space-y-2 border-t pt-3 text-sm leading-relaxed">
+      {paragraphs.map((p, pi) => (
+        <p key={pi}>
+          {p.inlines.map((inline, ii) =>
+            inline.kind === "strong" ? (
+              <strong key={ii}>{inline.value}</strong>
+            ) : (
+              <span key={ii}>
+                {ii > 0 ? " " : ""}
+                {inline.value}
+              </span>
+            )
+          )}
+        </p>
+      ))}
     </div>
   );
 };

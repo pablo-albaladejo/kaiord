@@ -1,12 +1,15 @@
 /**
- * Minimal HTML formatter for coaching descriptions: preserves `<p>`
- * paragraph breaks and `<strong>` emphasis, strips every other tag
- * (per design D4 / spec §9.3). Returns a structured AST so the
- * renderer can map to React without using `dangerouslySetInnerHTML`.
+ * Minimal formatter for coaching descriptions: preserves paragraph
+ * breaks and bold emphasis, strips every other tag (per design D4 /
+ * spec §9.3). Returns a structured AST so the renderer can map to
+ * React without using `dangerouslySetInnerHTML`.
+ *
+ * Bold input shapes (both supported):
+ *   - HTML  `<strong>X</strong>` — what Train2Go ships natively.
+ *   - Markdown `**X**` — what the train2go-bridge currently stores
+ *     after its HTML→text conversion (`<strong>` → `**`).
  *
  * Out of scope: full HTML, links, lists, line breaks via `<br>`.
- * Train2Go descriptions are short prose with optional bold; richer
- * markup falls back to plain text inside paragraphs.
  */
 
 export type DescriptionInline =
@@ -17,7 +20,8 @@ export type DescriptionParagraph = {
   inlines: DescriptionInline[];
 };
 
-const STRONG_RE = /<strong\b[^>]*>([\s\S]*?)<\/strong>/gi;
+const STRONG_RE =
+  /<strong\b[^>]*>([\s\S]*?)<\/strong>|\*\*([^*\n][^*]*?)\*\*/gi;
 
 const stripTagsExceptStrong = (html: string): string => {
   // Remove every tag except <strong>...</strong> markers (the strong
@@ -45,7 +49,11 @@ const splitInlines = (paragraph: string): DescriptionInline[] => {
       );
       if (text) inlines.push({ kind: "text", value: text });
     }
-    const inner = decodeEntities(stripTagsExceptStrong(match[1] ?? ""));
+    // Two capture groups: HTML `<strong>...</strong>` (group 1) OR
+    // markdown `**...**` (group 2). Whichever matched is the bold body.
+    const inner = decodeEntities(
+      stripTagsExceptStrong(match[1] ?? match[2] ?? "")
+    );
     if (inner) inlines.push({ kind: "strong", value: inner });
     lastIndex = start + match[0].length;
   }
