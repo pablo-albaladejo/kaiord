@@ -1,14 +1,20 @@
 /**
- * convertAndAutoMatch — composes the existing `convertCoachingActivity`
- * use case with `matchSession` so the dialog "Convert" flow auto-creates
- * the plan↔execution link in one application call.
+ * convertAndAutoMatch — composes the legacy `convertCoachingActivity`
+ * use case with the auto-match invariant so the dialog "Convert" flow
+ * always produces a single matched calendar card per training session.
  *
- * No-op semantics for the auto-link step (per spec):
- * - If the activity is ALREADY part of a match, skip silently.
- * - If the produced/existing workout is ALREADY matched (to any activity
- *   in this profile), skip silently.
- * - If a concurrent matcher wins between the pre-check and the put,
- *   `SessionAlreadyMatchedError` is swallowed; other errors propagate.
+ * Auto-heal semantics (per spa-coaching-integration "Convert coaching
+ * activity to workout" spec, MODIFIED requirement):
+ * - First-time conversion: writes the workout AND a session_match.
+ * - Idempotent re-call where the workout already exists but no match
+ *   does (legacy data, or this code path running for the first time
+ *   on a previously converted activity): writes the missing match.
+ *   This is the same auto-heal applied by the Dexie v10 migration in
+ *   bulk; running it per-call closes the window between v10 boot and
+ *   the dialog open.
+ * - Re-call where activity OR workout side already has a match: skip.
+ *   `SessionAlreadyMatchedError` from a concurrent winner is treated
+ *   as a benign no-op.
  *
  * The use case returns the same `{workoutId, created}` shape as the
  * underlying convert so existing callers can switch with minimal diff.
@@ -19,10 +25,9 @@ import type {
   WorkoutRepository,
 } from "../ports/persistence-port";
 import type { SessionMatchRepository } from "../ports/session-match-repository";
-import type { SessionMatch } from "../types/session-match";
 import { CoachingActivityNotFoundError } from "../types/session-match-errors";
-import { SessionAlreadyMatchedError } from "../types/session-match-errors";
 import { convertCoachingActivity } from "./coaching/convert-coaching-activity";
+import { ensureSessionMatch } from "./coaching/ensure-session-match";
 
 export type ConvertAndAutoMatchInput = {
   activityId: string;
@@ -54,40 +59,14 @@ export async function convertAndAutoMatch(
     input.activityId
   );
 
-  // Auto-link only on first-ever convert. When `created === false` the
-  // workout already existed (idempotent re-convert OR re-convert after a
-  // manual unmatch), so re-asserting the match by side effect would
-  // override either an existing link or the user's explicit unmatch
-  // intent. The dialog's "Match to..." action stays available for either
-  // case if the user wants to relink manually.
-  if (!conversion.created) return conversion;
-
-  const [activitySide, workoutSide] = await Promise.all([
-    deps.sessionMatches.getByActivityId(activity.profileId, activity.id),
-    deps.sessionMatches.getByWorkoutId(
-      activity.profileId,
-      conversion.workoutId
-    ),
-  ]);
-  if (activitySide || workoutSide) return conversion;
-
-  const match: SessionMatch = {
-    id: deps.newMatchId(),
+  await ensureSessionMatch(deps.sessionMatches, {
     profileId: activity.profileId,
     coachingActivityId: activity.id,
     workoutId: conversion.workoutId,
     date: activity.date,
-    createdAt: deps.clock(),
     source: "auto-conversion",
-  };
-
-  try {
-    await deps.sessionMatches.put(match);
-  } catch (err) {
-    // Concurrent matcher beat us between pre-check and write — preserve
-    // the concurrent match, do not surface an error to the caller.
-    if (err instanceof SessionAlreadyMatchedError) return conversion;
-    throw err;
-  }
+    newId: deps.newMatchId,
+    clock: deps.clock,
+  });
   return conversion;
 }

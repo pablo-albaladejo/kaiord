@@ -19,6 +19,8 @@ import { createDexieUserPreferencesRepository } from "./dexie-user-preferences-r
 
 type Fixture = typeof fixture;
 
+const SCHEMA_V4 = 4;
+
 async function seedV4(name: string, data: Fixture): Promise<void> {
   const v4 = new Dexie(name);
   v4.version(1).stores({
@@ -40,7 +42,7 @@ async function seedV4(name: string, data: Fixture): Promise<void> {
     meta: "key",
     bridges: "extensionId, status, lastSeen",
   });
-  v4.version(4).stores({
+  v4.version(SCHEMA_V4).stores({
     workouts: "id, date, [date+state], [source+sourceId], sport, *tags",
     templates: "id, sport, *tags",
     profiles: "id",
@@ -81,13 +83,24 @@ describe("Dexie v5 migration round-trip", () => {
     const sessionMatches = createDexieSessionMatchRepository(db);
     const userPrefs = createDexieUserPreferencesRepository(db);
     const dismissals = createDexieAutoMatchDismissalRepository(db);
-    expect(
-      await sessionMatches.listByProfileAndWeek(
-        "p1",
-        "2000-01-01",
-        "2099-12-31"
-      )
-    ).toEqual([]);
+    // userPreferences and autoMatchDismissals are still untouched by
+    // any forward migration. sessionMatches MAY contain v10 retro-fix
+    // rows (per coaching-activity-dialog-redesign / D8) when a
+    // converted-without-match pair exists in the fixture; this fixture
+    // has exactly one such pair, so we assert the row's shape rather
+    // than emptiness.
+    const matches = await sessionMatches.listByProfileAndWeek(
+      "p1",
+      "2000-01-01",
+      "2099-12-31"
+    );
+    expect(matches).toHaveLength(1);
+    expect(matches[0]).toMatchObject({
+      profileId: "p1",
+      coachingActivityId: "p1:train2go:12345",
+      workoutId: "w-pre-1",
+      source: "auto-coaching-v10-migration",
+    });
     expect(await userPrefs.get("p1")).toBeUndefined();
     expect(
       await dismissals.getByProfileAndWeek("p1", "2026-04-27")
