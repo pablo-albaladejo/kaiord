@@ -116,7 +116,7 @@ const seedConvertedWorkout = async (page: Page, args: SeedRunArgs) => {
       state: "raw",
       sport: "cycling",
       source: a.source,
-      sourceId: `${a.profileId}::${a.sourceId}`,
+      sourceId: `${a.profileId}:${a.sourceId}`,
       planId: null,
       raw: {
         description: a.description ?? "",

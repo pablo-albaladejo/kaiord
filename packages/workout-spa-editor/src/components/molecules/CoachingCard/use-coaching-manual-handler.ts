@@ -40,8 +40,12 @@ export const useCoachingManual = (
     setError(null);
     setCreating(true);
     try {
+      // The view-model `activity.id` is `${source}:${sourceId}`; the
+      // persistence record id (what `coaching.getById` keys on) is the
+      // composite `${profileId}:${source}:${sourceId}` — see
+      // `buildCoachingActivityId`.
       const result = await convertCoachingActivityManual(
-        { activityId: activity.id },
+        { activityId: `${profileId}:${activity.id}` },
         {
           coaching: persistence.coaching,
           workouts: persistence.workouts,
