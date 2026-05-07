@@ -1,46 +1,37 @@
 /**
- * Inner JSX for CoachingActivityDialog. The dialog body switches between
- * solo-plan (Convert + Match-to) and matched (LinkedWorkout + Split)
- * modes based on `matchState`.
+ * Inner JSX for CoachingActivityDialog. Dispatches on the 3-state
+ * `dialogState` (per design D5):
  *
- * Sub-components live in coaching-dialog-parts.tsx + dedicated files
- * (`MatchToPicker`, `LinkedWorkoutSection`) so this file stays under the
- * lint-enforced size limits.
+ *   - "no-workout" → AI/Manual/Match buttons + AI hint when desc empty.
+ *                    Switches to in-flight spinner OR error inline state.
+ *   - "converted"  → render as no-workout while auto-heal is in flight.
+ *                    The next live-query tick flips to "matched".
+ *   - "matched"    → LinkedWorkoutSection + workout-state-conditional
+ *                    contextual buttons.
  */
 
-import type { WorkoutRecord } from "../../../types/calendar-record";
-import type { CoachingActivity } from "../../../types/coaching-activity";
+import {
+  type CoachingDialogBodyProps,
+  renderMatchedBody,
+  renderNoWorkoutBody,
+} from "./coaching-dialog-body";
 import {
   DialogDescription,
   DialogHeader,
   DialogMeta,
   STATUS_LABEL,
 } from "./coaching-dialog-parts";
-import { CoachingDialogActions } from "./CoachingDialogActions";
-import { LinkedWorkoutSection } from "./LinkedWorkoutSection";
+import type { CoachingDialogState } from "./use-coaching-dialog-state";
 
-export type CoachingActivityDialogContentProps = {
-  activity: CoachingActivity;
-  error: string | null;
-  converting: boolean;
-  matched: boolean;
-  matchedWorkout: WorkoutRecord | null;
-  matching: boolean;
-  splitting: boolean;
-  pickerOpen: boolean;
-  pickerWorkouts: WorkoutRecord[];
-  onClose: () => void;
-  onConvert: () => void;
-  onOpenPicker: () => void;
-  onClosePicker: () => void;
-  onSelectWorkout: (workoutId: string) => void;
-  onSplit: () => void;
+export type CoachingActivityDialogContentProps = CoachingDialogBodyProps & {
+  dialogState: CoachingDialogState | undefined;
 };
 
 export function CoachingActivityDialogContent(
   props: CoachingActivityDialogContentProps
 ) {
-  const { activity, error, matched, matchedWorkout, splitting } = props;
+  const { activity, dialogState } = props;
+  const matched = dialogState?.kind === "matched" ? dialogState : null;
   return (
     <div className="space-y-3">
       <DialogHeader activity={activity} />
@@ -51,19 +42,9 @@ export function CoachingActivityDialogContent(
         </span>
       </div>
       <DialogDescription activity={activity} />
-      {matched && matchedWorkout && (
-        <LinkedWorkoutSection
-          workout={matchedWorkout}
-          splitting={splitting}
-          onSplit={props.onSplit}
-        />
-      )}
-      {error && (
-        <p data-testid="coaching-dialog-error" className="text-xs text-red-500">
-          {error}
-        </p>
-      )}
-      <CoachingDialogActions {...props} />
+      {matched
+        ? renderMatchedBody(props, matched.workout)
+        : renderNoWorkoutBody(props)}
     </div>
   );
 }

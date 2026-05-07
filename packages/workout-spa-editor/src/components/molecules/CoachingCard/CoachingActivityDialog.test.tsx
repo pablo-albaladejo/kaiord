@@ -150,7 +150,7 @@ describe("CoachingActivityDialog", () => {
     expect(onClose).toHaveBeenCalled();
   });
 
-  it("should disable Convert button while converting", () => {
+  it("should render the no-workout AI/Manual/Match buttons in solo mode", () => {
     // Arrange
 
     render(
@@ -165,10 +165,14 @@ describe("CoachingActivityDialog", () => {
 
     // Act
 
-    const btn = screen.getByText("Convert to workout");
+    const aiBtn = screen.getByTestId("coaching-dialog-ai-process");
+    const manualBtn = screen.getByTestId("coaching-dialog-edit-manually");
+    const matchBtn = screen.getByTestId("coaching-dialog-match-existing");
 
     // Assert
 
-    expect(btn).toBeEnabled(); // initial state
+    expect(aiBtn).toBeEnabled();
+    expect(manualBtn).toBeEnabled();
+    expect(matchBtn).toBeEnabled();
   });
 });

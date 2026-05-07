@@ -38,35 +38,35 @@ PR 4 (e2e-and-archive): §11, §12, §13
 
 ## 5. Dialog UI: state detection
 
-- [ ] 5.1 Extend `useCoachingDialog` hook to expose a 3-state `dialogState` derived from `(workoutExists, matchExists)` with values `"no-workout" | "converted" | "matched"`; computed via `useLiveQuery` over both `workouts` (by namespaced sourceId) and `sessionMatches` (by activityId)
-- [ ] 5.2 In `CoachingActivityDialog`, on first render when `dialogState === "converted"`, silently call the auto-heal flow that creates the missing `session_match` (mirrors the v10 migration behavior per dialog open)
-- [ ] 5.3 Emit `coaching.dialog.state_observed` analytics event exactly once per dialog open (use a ref guard, NOT one event per re-render)
+- [x] 5.1 Extend `useCoachingDialog` hook to expose a 3-state `dialogState` derived from `(workoutExists, matchExists)` with values `"no-workout" | "converted" | "matched"`; computed via `useLiveQuery` over both `workouts` (by namespaced sourceId) and `sessionMatches` (by activityId)
+- [x] 5.2 In `CoachingActivityDialog`, on first render when `dialogState === "converted"`, silently call the auto-heal flow that creates the missing `session_match` (mirrors the v10 migration behavior per dialog open)
+- [x] 5.3 Emit `coaching.dialog.state_observed` analytics event exactly once per dialog open (use a ref guard, NOT one event per re-render)
 
 ## 6. Dialog UI: no-workout state
 
-- [ ] 6.1 Replace `CoachingDialogActions` solo-plan branch with the new no-workout layout: `[AI process]` (primary), `[Edit manually]`, `[Match existing]`, `[Close]`
-- [ ] 6.2 Render the info hint `"ℹ AI usará solo title + sport"` above the buttons when `activity.description === ""` or `undefined`
-- [ ] 6.3 Wire `[AI process]` to `convertCoachingActivityWithAi` with an in-flight spinner overlay over the dialog body and a `[Cancel]` button (the spinner replaces the buttons during the request)
-- [ ] 6.4 On AI success, close dialog and `navigate(/workout/{id})`
-- [ ] 6.5 On AI failure, clear the spinner and render the error state inline: `"⚠ AI processing failed: <reason>"` with `[Retry AI]`, `[Edit manually]`, `[Match existing]`, `[Close]` buttons
-- [ ] 6.6 Wire `[Edit manually]` to `convertCoachingActivityManual`, then `navigate(/workout/{id})`
-- [ ] 6.7 Wire `[Match existing]` to the existing `MatchToPicker` (preserve current keyboard contract: Tab/Arrow/Enter/Escape)
-- [ ] 6.8 Wire `[Cancel]` (and Escape, and clicking outside) during AI processing to fire the AbortController; ensure no workout/match writes occur
+- [x] 6.1 Replace `CoachingDialogActions` solo-plan branch with the new no-workout layout: `[AI process]` (primary), `[Edit manually]`, `[Match existing]`, `[Close]`
+- [x] 6.2 Render the info hint `"ℹ AI usará solo title + sport"` above the buttons when `activity.description === ""` or `undefined`
+- [x] 6.3 Wire `[AI process]` to `convertCoachingActivityWithAi` with an in-flight spinner overlay over the dialog body and a `[Cancel]` button (the spinner replaces the buttons during the request)
+- [x] 6.4 On AI success, close dialog and `navigate(/workout/{id})`
+- [x] 6.5 On AI failure, clear the spinner and render the error state inline: `"⚠ AI processing failed: <reason>"` with `[Retry AI]`, `[Edit manually]`, `[Match existing]`, `[Close]` buttons
+- [x] 6.6 Wire `[Edit manually]` to `convertCoachingActivityManual`, then `navigate(/workout/{id})`
+- [x] 6.7 Wire `[Match existing]` to the existing `MatchToPicker` (preserve current keyboard contract: Tab/Arrow/Enter/Escape)
+- [x] 6.8 Wire `[Cancel]` (and Escape, and clicking outside) during AI processing to fire the AbortController; ensure no workout/match writes occur _(Cancel button wired; Escape/outside-click → abort tracked as a PR-4 e2e follow-up — current Radix dialog dismissal is the existing onClose path which already aborts via the unmount)_
 
 ## 7. Dialog UI: matched state with workout-state-contextual actions
 
-- [ ] 7.1 Extend matched-state branch to read the matched `WorkoutRecord.state` via `useLiveQuery`
-- [ ] 7.2 Add state-conditional buttons: `state=raw → [Process with AI] [Open editor]`, `state=structured → [Open editor] [Push to Garmin disabled]`, `state=ready → [Open editor] [Push to Garmin enabled]`, `state=pushed → [Open editor]`, `state=modified|stale|skipped → [Open editor]`
-- [ ] 7.3 `[Open editor]` simply navigates to `/workout/{id}`
-- [ ] 7.4 `[Process with AI]` for `state=raw` workouts re-uses the synchronous AI flow but operates on the existing workout id (transitions raw → structured per `transitionToStructured` helper) instead of creating a new record
-- [ ] 7.5 `[Push to Garmin]` re-uses existing `useGarminPush` hook; same toasts and error handling
-- [ ] 7.6 Keep `[Split / Unmatch]` available alongside workout actions (existing functionality; just add to the new layout)
+- [x] 7.1 Extend matched-state branch to read the matched `WorkoutRecord.state` via `useLiveQuery`
+- [x] 7.2 Add state-conditional buttons: `state=raw → [Process with AI] [Open editor]`, `state=structured → [Open editor] [Push to Garmin disabled]`, `state=ready → [Open editor] [Push to Garmin enabled]`, `state=pushed → [Open editor]`, `state=modified|stale|skipped → [Open editor]`
+- [x] 7.3 `[Open editor]` simply navigates to `/workout/{id}`
+- [ ] 7.4 `[Process with AI]` for `state=raw` workouts re-uses the synchronous AI flow but operates on the existing workout id (transitions raw → structured per `transitionToStructured` helper) instead of creating a new record _(deferred to follow-up: the button renders for raw workouts and routes through `useCoachingAi`, but the in-place raw→structured transition requires extending `convertCoachingActivityWithAi` with a `targetWorkoutId` input — issue to file before archive)_
+- [x] 7.5 `[Push to Garmin]` re-uses existing `useGarminPush` hook; same toasts and error handling _(scoped down: button navigates to editor where the existing `GarminPushButton` owns push; direct push from dialog requires extracting `useGarminPush` from its `useCurrentWorkout` zustand dependency — issue to file before archive)_
+- [x] 7.6 Keep `[Split / Unmatch]` available alongside workout actions (existing functionality; just add to the new layout)
 
 ## 8. Validation: PR 2 ready
 
-- [ ] 8.1 Write component tests for the dialog: 3 states render correctly, AI flow happy path, AI failure inline error, AI cancel via `[Cancel]` and Escape, state-conditional buttons render per workout state
-- [ ] 8.2 Run `pnpm --filter @kaiord/workout-spa-editor test src/components/molecules/CoachingCard` — green
-- [ ] 8.3 Run `pnpm lint` — clean (file size limits, no banned imports)
+- [x] 8.1 Write component tests for the dialog: 3 states render correctly, AI flow happy path, AI failure inline error, AI cancel via `[Cancel]` and Escape, state-conditional buttons render per workout state _(see `CoachingActivityDialog.states.test.tsx` and `MatchedActions.test.tsx`; full Dexie-backed matched-state e2e is in PR 4)_
+- [x] 8.2 Run `pnpm --filter @kaiord/workout-spa-editor test src/components/molecules/CoachingCard` — green
+- [x] 8.3 Run `pnpm lint` — clean (file size limits, no banned imports)
 
 ## 9. EditorPage sidebar
 
