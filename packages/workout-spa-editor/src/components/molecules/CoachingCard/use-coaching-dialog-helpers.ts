@@ -2,7 +2,7 @@
  * Helpers for `useCoachingDialog`. Lives in its own file so the parent
  * hook stays under the line caps.
  */
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
 import type { ActivityMatchState } from "../../../hooks/use-activity-match-state";
@@ -28,12 +28,16 @@ export const useTargetProfileId = (
 ): string | null => {
   const activeProfileId = useActiveProfileLive()?.id ?? null;
   const [targetProfileId, setTargetProfileId] = useState<string | null>(null);
+  const capturedForId = useRef<string | null>(null);
   useEffect(() => {
     if (!activity) {
       setTargetProfileId(null);
+      capturedForId.current = null;
       return;
     }
-    setTargetProfileId((prev) => prev ?? activeProfileId);
+    if (capturedForId.current === activity.id) return;
+    capturedForId.current = activity.id;
+    setTargetProfileId(activeProfileId);
   }, [activity, activeProfileId]);
   return targetProfileId;
 };

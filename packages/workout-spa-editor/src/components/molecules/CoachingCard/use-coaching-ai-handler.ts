@@ -7,6 +7,9 @@
  * to the workout editor. On failure the handler surfaces a typed
  * reason so the dialog renders the inline error state.
  *
+ * Re-entrancy: the in-flight `AbortController` doubles as the lock —
+ * a second `startAi` call while one is pending is a silent no-op.
+ *
  * NOTE: AbortController is plumbed through to the use case but the
  * underlying `generateWorkoutKrd` does not yet propagate the signal to
  * the LLM transport — cancel today means "abandon the result", not
@@ -51,7 +54,7 @@ export const useCoachingAi = (
   const abortRef = useRef<AbortController | null>(null);
 
   const startAi = useCallback(async () => {
-    if (!activity || !profileId) return;
+    if (!activity || !profileId || abortRef.current) return;
     const provider = pickProvider(providers, selectedProviderId);
     if (!provider) return setFailure({ reason: "no-provider" });
     setFailure(null);
@@ -93,6 +96,7 @@ export const useCoachingAi = (
     cancelAi: useCallback(() => {
       abortRef.current?.abort();
       abortRef.current = null;
+      setProcessing(false);
     }, []),
   };
 };

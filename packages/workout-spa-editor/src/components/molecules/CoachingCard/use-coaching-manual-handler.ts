@@ -7,7 +7,7 @@
  * user fills in steps from the read-only coach description sidebar
  * (rendered in EditorPage from PR 3).
  */
-import { useCallback, useState } from "react";
+import { useCallback, useRef, useState } from "react";
 import { useLocation } from "wouter";
 
 import { convertCoachingActivityManual } from "../../../application/coaching/convert-coaching-activity-manual";
@@ -32,9 +32,11 @@ export const useCoachingManual = (
   const [, navigate] = useLocation();
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const inFlight = useRef(false);
 
   const startManual = useCallback(async () => {
-    if (!activity || !profileId) return;
+    if (!activity || !profileId || inFlight.current) return;
+    inFlight.current = true;
     setError(null);
     setCreating(true);
     try {
@@ -56,6 +58,7 @@ export const useCoachingManual = (
       setError(err instanceof Error ? err.message : "Manual creation failed");
     } finally {
       setCreating(false);
+      inFlight.current = false;
     }
   }, [activity, profileId, persistence, analytics, navigate, onClose]);
 

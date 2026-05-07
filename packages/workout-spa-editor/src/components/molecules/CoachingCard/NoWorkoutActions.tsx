@@ -10,6 +10,7 @@
 import type { WorkoutRecord } from "../../../types/calendar-record";
 import type { CoachingActivity } from "../../../types/coaching-activity";
 import { MatchToPicker } from "./MatchToPicker";
+import { NoWorkoutButtons } from "./no-workout-buttons";
 
 export type NoWorkoutActionsProps = {
   activity: CoachingActivity;
@@ -32,6 +33,8 @@ const isDescriptionEmpty = (activity: CoachingActivity): boolean => {
 
 export function NoWorkoutActions(props: NoWorkoutActionsProps) {
   const showHint = isDescriptionEmpty(props.activity);
+  // Single-writer invariant: a fast user must not queue two creation paths.
+  const writeInFlight = props.creatingManual || props.matching;
   return (
     <div className="space-y-3 pt-3">
       {showHint && (
@@ -50,42 +53,15 @@ export function NoWorkoutActions(props: NoWorkoutActionsProps) {
           onClose={props.onClosePicker}
         />
       )}
-      <div className="flex flex-wrap justify-end gap-2">
-        <button
-          type="button"
-          onClick={props.onClose}
-          className="rounded-md border px-3 py-1 text-sm hover:bg-gray-50 dark:hover:bg-gray-800"
-        >
-          Close
-        </button>
-        {!props.pickerOpen && (
-          <button
-            type="button"
-            data-testid="coaching-dialog-match-existing"
-            onClick={props.onOpenPicker}
-            className="rounded-md border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100 dark:border-slate-700 dark:hover:bg-slate-800"
-          >
-            Match existing
-          </button>
-        )}
-        <button
-          type="button"
-          data-testid="coaching-dialog-edit-manually"
-          disabled={props.creatingManual}
-          onClick={props.onEditManually}
-          className="rounded-md border border-slate-300 px-3 py-1 text-sm hover:bg-slate-100 disabled:opacity-50 dark:border-slate-700 dark:hover:bg-slate-800"
-        >
-          {props.creatingManual ? "Creating…" : "Edit manually"}
-        </button>
-        <button
-          type="button"
-          data-testid="coaching-dialog-ai-process"
-          onClick={props.onAiProcess}
-          className="rounded-md bg-rose-600 px-3 py-1 text-sm text-white hover:bg-rose-700 disabled:opacity-50"
-        >
-          AI process
-        </button>
-      </div>
+      <NoWorkoutButtons
+        pickerOpen={props.pickerOpen}
+        writeInFlight={writeInFlight}
+        creatingManual={props.creatingManual}
+        onClose={props.onClose}
+        onOpenPicker={props.onOpenPicker}
+        onEditManually={props.onEditManually}
+        onAiProcess={props.onAiProcess}
+      />
     </div>
   );
 }

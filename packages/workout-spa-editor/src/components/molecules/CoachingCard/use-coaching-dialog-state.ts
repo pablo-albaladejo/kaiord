@@ -41,6 +41,10 @@ const resolveState = async (
     const workout = await db
       .table<WorkoutRecord>("workouts")
       .get(match.workoutId);
+    // Dangling-ref tolerance (mirrors `useActivityMatchState`): if the
+    // match references a workout that no longer exists, fall through
+    // to the no-workout branch so the dialog re-offers AI/Manual/Match.
+    // Stale-match cleanup belongs to the cascade hooks, not the dialog.
     if (!workout) return { kind: "no-workout" };
     return { kind: "matched", matchId: match.id, workout };
   }

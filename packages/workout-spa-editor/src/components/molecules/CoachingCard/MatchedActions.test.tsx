@@ -65,14 +65,16 @@ describe("MatchedActions", () => {
     expect(screen.getByTestId("coaching-dialog-push")).toBeDisabled();
   });
 
-  it("should render Push to Garmin enabled for ready workouts", () => {
+  it("should render Push to Garmin disabled for ready workouts (deferred handler)", () => {
     // Arrange
+    // Push from the dialog stays disabled until the dialog grows a real
+    // push handler — see MatchedActions header comment.
 
     // Act
     renderWithState("ready");
 
     // Assert
-    expect(screen.getByTestId("coaching-dialog-push")).toBeEnabled();
+    expect(screen.getByTestId("coaching-dialog-push")).toBeDisabled();
   });
 
   it("should hide Push to Garmin for pushed workouts", () => {
@@ -101,5 +103,27 @@ describe("MatchedActions", () => {
       screen.getByTestId("coaching-dialog-open-editor")
     ).toBeInTheDocument();
     expect(screen.getByTestId("coaching-dialog-split")).toBeInTheDocument();
+  });
+
+  it("should disable the Split button while splitting is in progress", () => {
+    // Arrange
+
+    // Act
+    render(
+      <MatchedActions
+        workout={buildWorkout("ready")}
+        splitting={true}
+        onClose={vi.fn()}
+        onOpenEditor={vi.fn()}
+        onAiProcess={vi.fn()}
+        onPushToGarmin={vi.fn()}
+        onSplit={vi.fn()}
+      />
+    );
+
+    // Assert
+    const splitBtn = screen.getByTestId("coaching-dialog-split");
+    expect(splitBtn).toBeDisabled();
+    expect(splitBtn).toHaveTextContent("Splitting…");
   });
 });

@@ -4,7 +4,7 @@
  * Buttons toggled by the matched workout's `state`:
  *   - raw       → [Process with AI] [Open editor]
  *   - structured→ [Open editor] [Push to Garmin] (disabled)
- *   - ready     → [Open editor] [Push to Garmin] (enabled)
+ *   - ready     → [Open editor] [Push to Garmin] (disabled, deferred)
  *   - pushed    → [Open editor]
  *   - any other → [Open editor]
  *
@@ -12,10 +12,10 @@
  * (the use case detects the existing workout id and transitions raw →
  * structured in place rather than creating a new record).
  *
- * `[Push to Garmin]` is intentionally not wired here: clicking it
- * navigates to the editor (where the existing GarminPushButton owns
- * the push toasts). Direct push from the dialog is tracked as a
- * follow-up — the affordance lives here so users see the path.
+ * `[Push to Garmin]` is rendered for `ready`/`structured` but stays
+ * disabled until the dialog grows a real push handler. Wiring it to
+ * the editor's `useGarminPush` hook requires extracting that hook from
+ * its `useCurrentWorkout` zustand dependency — tracked as a follow-up.
  */
 import type { WorkoutRecord } from "../../../types/calendar-record";
 
@@ -33,7 +33,10 @@ export function MatchedActions(props: MatchedActionsProps) {
   const state = props.workout.state;
   const showAi = state === "raw";
   const showPush = state === "structured" || state === "ready";
-  const pushDisabled = state === "structured";
+  // Push from the dialog is deferred (see file header). Keep the
+  // affordance visible but disabled so users see the path without
+  // routing them through a misleading no-op.
+  const pushDisabled = true;
   return (
     <div className="flex flex-wrap justify-end gap-2 pt-3">
       <button

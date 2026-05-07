@@ -28,18 +28,24 @@ export const useCoachingAutoHeal = (
     if (dialogState?.kind !== "converted") return;
     const key = `${profileId}:${activity.id}:${dialogState.workout.id}`;
     if (healedRef.current === key) return;
-    healedRef.current = key;
     void (async () => {
-      const result = await ensureSessionMatch(persistence.sessionMatch, {
-        profileId,
-        coachingActivityId: activity.id,
-        workoutId: dialogState.workout.id,
-        date: activity.date,
-        source: "auto-coaching-v10-migration",
-        newId: () => crypto.randomUUID(),
-        clock: () => new Date().toISOString(),
-      });
-      if (result.created) analytics.event("coaching.dialog.auto_healed");
+      try {
+        const result = await ensureSessionMatch(persistence.sessionMatch, {
+          profileId,
+          coachingActivityId: activity.id,
+          workoutId: dialogState.workout.id,
+          date: activity.date,
+          source: "auto-coaching-v10-migration",
+          newId: () => crypto.randomUUID(),
+          clock: () => new Date().toISOString(),
+        });
+        healedRef.current = key;
+        if (result.created) analytics.event("coaching.dialog.auto_healed");
+      } catch (err) {
+        analytics.event("coaching.dialog.auto_heal_failed", {
+          error: err instanceof Error ? err.message : String(err),
+        });
+      }
     })();
   }, [activity, profileId, dialogState, persistence, analytics]);
 };

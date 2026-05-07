@@ -67,7 +67,9 @@ export function CoachingActivityDialog({
         onClosePicker={dialog.closePicker}
         onSelectWorkout={dialog.handleSelectWorkout}
         onOpenEditor={onOpenEditor}
-        onPushToGarmin={onOpenEditor}
+        onPushToGarmin={
+          onOpenEditor /* disabled in MatchedActions until dialog grows a real push handler */
+        }
         onSplit={dialog.handleSplit}
       />
     </CoachingDialogShell>
