@@ -4,15 +4,25 @@
  * When `id` is provided, loads the workout from Dexie and shows
  * workflow actions (accept, push, re-push). Otherwise shows the
  * standard editor with file upload / AI input.
+ *
+ * For coaching-derived workouts (`session_match` row exists with a
+ * coaching source per design D4), `EditorBody` renders a
+ * `CoachingSidebar` to the right of the step editor so the user can
+ * read the original prescription while building or refining the
+ * structured workout.
  */
 
 import { useSearch } from "wouter";
 
+import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import { useAppHandlers } from "../../hooks/useAppHandlers";
 import { useDeleteCleanup } from "../../hooks/useDeleteCleanup";
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
+import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";
+import { DateBanner } from "./DateBanner";
+import { EditorBody } from "./EditorBody";
 import { EditorLoading, EditorNoData } from "./EditorLoadingState";
 import { EditorNewWorkout } from "./EditorNewWorkout";
 import { EditorWorkflowBar } from "./EditorWorkflowBar";
@@ -36,6 +46,8 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   const { record, loading } = useWorkoutRecord(id);
   const { acceptWorkout, pushWorkout } = useEditorActions(record);
+  const profileId = useActiveProfileLive()?.id ?? null;
+  const sidebarData = useCoachingSidebar(profileId, id);
 
   const workout = currentWorkout?.extensions?.structured_workout as
     | Workout
@@ -60,33 +72,17 @@ export default function EditorPage({ id }: EditorPageProps) {
       )}
       {!id && <EditorNewWorkout workout={workout} />}
       {workout && currentWorkout && (
-        <WorkoutSection
-          workout={workout}
-          krd={currentWorkout}
-          selectedStepId={selectedStepId}
-          onStepSelect={handleStepSelect}
-          onStepReorder={reorderStep}
-          onReorderStepsInBlock={reorderStepsInBlock}
-        />
+        <EditorBody sidebar={sidebarData}>
+          <WorkoutSection
+            workout={workout}
+            krd={currentWorkout}
+            selectedStepId={selectedStepId}
+            onStepSelect={handleStepSelect}
+            onStepReorder={reorderStep}
+            onReorderStepsInBlock={reorderStepsInBlock}
+          />
+        </EditorBody>
       )}
     </div>
-  );
-}
-
-function DateBanner({ date }: { date: string }) {
-  const parsed = new Date(date + "T12:00:00Z");
-  if (isNaN(parsed.getTime())) return null;
-
-  const formatted = parsed.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-
-  return (
-    <p data-testid="date-banner" className="text-sm text-muted-foreground">
-      Creating workout for {formatted}
-    </p>
   );
 }

@@ -70,17 +70,17 @@ PR 4 (e2e-and-archive): §11, §12, §13
 
 ## 9. EditorPage sidebar
 
-- [ ] 9.1 Detect coaching-derived workouts in EditorPage by reading `SessionMatchRepository.getByWorkoutId(workoutId)` (single read, cached via React Query or simple `useLiveQuery`)
-- [ ] 9.2 If matched and source ∈ {"auto-coaching", "auto-coaching-v10-migration", "manual"}, fetch the linked `coachingActivities` row and render the sidebar
-- [ ] 9.3 Sidebar component: title heading, sport icon + label, status, formatted coach description (preserve `<p>` paragraphs and `<strong>` markers as visual emphasis; HTML otherwise stripped per existing parser semantics)
-- [ ] 9.4 Add collapse toggle with localStorage persistence (key `kaiord.editor.coachSidebar.collapsed`); default expanded ≥768px, collapsed <768px
-- [ ] 9.5 Reactive update: sidebar listens to the same `coachingActivities` live query so bridge re-syncs of the description update the sidebar without full reload
+- [x] 9.1 Detect coaching-derived workouts in EditorPage by reading `SessionMatchRepository.getByWorkoutId(workoutId)` (single read, cached via React Query or simple `useLiveQuery`)
+- [x] 9.2 If matched and source ∈ {"auto-coaching", "auto-coaching-v10-migration", "manual"}, fetch the linked `coachingActivities` row and render the sidebar _(currently checking the in-tree `auto-conversion`/`auto-coaching-v10-migration`/`manual` enum values; the `auto-coaching` rename lands with PR 4 once added to the SessionMatchSource Zod enum)_
+- [x] 9.3 Sidebar component: title heading, sport icon + label, status, formatted coach description (preserve `<p>` paragraphs and `<strong>` markers as visual emphasis; HTML otherwise stripped per existing parser semantics)
+- [x] 9.4 Add collapse toggle with localStorage persistence (key `kaiord.editor.coachSidebar.collapsed`); default expanded ≥768px, collapsed <768px
+- [x] 9.5 Reactive update: sidebar listens to the same `coachingActivities` live query so bridge re-syncs of the description update the sidebar without full reload
 
 ## 10. Validation: PR 3 ready
 
-- [ ] 10.1 Component tests: sidebar renders for AI-converted workout, sidebar renders for manually-created workout, sidebar absent for non-coaching workout, collapse state persists across mount/unmount
-- [ ] 10.2 Visual regression test (Playwright snapshot OR component story) for the sidebar layout at 1024px and 768px widths
-- [ ] 10.3 Run `pnpm lint` — clean
+- [x] 10.1 Component tests: sidebar renders for AI-converted workout, sidebar renders for manually-created workout, sidebar absent for non-coaching workout, collapse state persists across mount/unmount _(see `CoachingSidebar.test.tsx` and `format-coaching-description.test.ts`; the absent-sidebar branch is covered by `useCoachingSidebar` returning `undefined` short-circuit)_
+- [ ] 10.2 Visual regression test (Playwright snapshot OR component story) for the sidebar layout at 1024px and 768px widths _(deferred to PR 4 e2e — Playwright is the natural home for snapshot/visual regression and PR 4 already runs the full Playwright matrix)_
+- [x] 10.3 Run `pnpm lint` — clean
 
 ## 11. E2E flows
 
