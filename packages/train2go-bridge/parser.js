@@ -130,8 +130,14 @@ const parseDailyHtml = (html) => {
 };
 
 const extractDescription = (block) => {
+  // The lookahead boundary MUST stop at the start of the next sibling
+  // tag (the `<div class="activity-hint-ecos ...">` block, or the form
+  // / aside close), not at the substring "activity-hint-ecos" — otherwise
+  // the captured chunk includes the partial opening `<div class="` and
+  // leaks it into the rendered description (the trailing tag has no `>`
+  // so the strip-divs-with-content regex below never matches it).
   const descMatch = block.match(
-    /activity-description[^>]*>([\s\S]*?)(?=activity-hint-ecos|<\/form>|<\/aside>|$)/
+    /activity-description[^>]*>([\s\S]*?)(?=<div[^>]*activity-hint-ecos|<\/form>|<\/aside>|$)/
   );
   if (!descMatch) return "";
 
