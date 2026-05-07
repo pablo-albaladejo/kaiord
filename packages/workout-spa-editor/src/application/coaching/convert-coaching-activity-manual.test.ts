@@ -135,6 +135,34 @@ describe("convertCoachingActivityManual", () => {
     expect(stored?.raw?.description).toBe("Specific Z2 endurance ride 90 min");
   });
 
+  it("should populate the template KRD when an existing workout has krd=null (legacy raw)", async () => {
+    // Arrange
+    const activity = stubActivity();
+    const existing: WorkoutRecord = {
+      id: "w-legacy-raw",
+      date: activity.date,
+      sport: activity.sport,
+      source: activity.source,
+      state: "raw",
+      krd: null,
+      updatedAt: "2026-01-01T00:00:00Z",
+    } as WorkoutRecord;
+    const workouts = buildStubWorkoutRepo([existing]);
+    workouts.setSourceLookup(existing);
+    const deps = buildDeps({
+      coaching: buildStubCoachingRepo([activity]),
+      workouts,
+    });
+
+    // Act
+    await convertCoachingActivityManual({ activityId: activity.id }, deps);
+
+    // Assert
+    const stored = await deps.workouts.getById("w-legacy-raw");
+    expect(stored?.krd).not.toBeNull();
+    expect(stored?.state).toBe("structured");
+  });
+
   it("should emit invoked + success analytics events", async () => {
     // Arrange
     const activity = stubActivity();

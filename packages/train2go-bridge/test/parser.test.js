@@ -162,6 +162,42 @@ describe("parser", () => {
       expect(activities[0].description).toContain("**Calentamiento:**");
       expect(activities[0].description).toContain("3x15' Z3 d/5' Z1");
     });
+
+    it("should not leak the opening tag of the next sibling block into the description (regression: <div class=\" trailing fragment)", () => {
+      // Arrange
+      // The live T2G response has the activity-description block followed
+      // by an `activity-hint-ecos` div. The previous lookahead matched the
+      // substring "activity-hint-ecos" but the captured chunk reached up
+      // to (but not including) that substring — which means the opening
+      // `<div class="` of the hint-ecos div leaked through. The strip-divs
+      // regex below `extractDescription` only matches complete
+      // `<div>...</div>` blocks, so the partial opening tag survived and
+      // ended up in the rendered description as a literal `<div class="`.
+      const html = `<aside><div class="activity activity-default  activity-expanded  " data-status="0" data-id="1">
+        <figure class="icon icon-sportscycling"></figure>
+        <span class="measured">1:55 h</span>
+        <div class="workload workload-default" data-value="2"></div>
+        <div class="activity-title"><strong>Test</strong></div>
+        <div class="activity-description  activity-description-empty ">
+          <p>Avituallamiento intraentreno con 60grHC</p>
+          <p><strong>Calentamiento:</strong> 20 Z1 + 15' Z2.</p>
+          <p>10' Soltar Z2-1.</p>
+          <div class="activity-hint-ecos d-flex flex-row">
+            <div class="activity-hint-ecos-count"><strong>0</strong></div>
+          </div>
+        </div>
+      </div></aside>`;
+
+      // Act
+      const activities = parseDailyHtml(html);
+
+      // Assert
+      expect(activities).toHaveLength(1);
+      expect(activities[0].description).not.toContain("<div");
+      expect(activities[0].description).not.toContain("class=");
+      expect(activities[0].description).toContain("Avituallamiento");
+      expect(activities[0].description).toContain("Soltar Z2-1");
+    });
   });
 
   describe("parsePingJson", () => {
