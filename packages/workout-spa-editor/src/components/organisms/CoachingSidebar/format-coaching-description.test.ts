@@ -66,6 +66,29 @@ describe("formatCoachingDescription", () => {
     expect(result[1]?.inlines[0]?.value).toBe("Then 4×5 min Z4.");
   });
 
+  it("should recognize markdown **bold** as strong (bridge converts <strong> → ** before storing)", () => {
+    // Arrange
+    const text =
+      "Avituallamiento intraentreno\n\n**Calentamiento:** 20 Z1 + 15' Z2.\n\n**Parte Principal:**\n\n3x15' Z3 d/5' Z1";
+
+    // Act
+    const result = formatCoachingDescription(text);
+
+    // Assert
+    const calentamiento = result.find((p) =>
+      p.inlines.some(
+        (i) => i.kind === "strong" && i.value === "Calentamiento:"
+      )
+    );
+    expect(calentamiento).toBeDefined();
+    const parte = result.find((p) =>
+      p.inlines.some(
+        (i) => i.kind === "strong" && i.value === "Parte Principal:"
+      )
+    );
+    expect(parte).toBeDefined();
+  });
+
   it("should preserve <strong> with attributes", () => {
     // Arrange
     const html = '<p>Effort <strong class="zone-4">Z4</strong></p>';
