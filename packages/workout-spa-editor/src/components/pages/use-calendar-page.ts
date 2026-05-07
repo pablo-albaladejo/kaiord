@@ -12,7 +12,7 @@
  * id), so the view falls back to a profile-less calendar without crashing.
  */
 
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 
 import type { MatchSuggestion } from "../../application/match-suggestion";
 import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
@@ -29,6 +29,7 @@ import { useUserPreferences } from "../../hooks/use-user-preferences";
 import type { CoachingActivity } from "../../types/coaching-activity";
 import { buildCalendarBuckets, type CalendarBuckets } from "./calendar-buckets";
 import { useCalendarState } from "./use-calendar-state";
+import { useSelectedActivity } from "./use-selected-activity";
 
 const viewportDefaultDensity = (): "compact" | "comfortable" =>
   typeof window !== "undefined" && window.innerWidth >= 768
@@ -57,8 +58,9 @@ export function useCalendarPage(): CalendarPageState {
   const s = useCalendarState();
   const coaching = useCoachingActivities(s.data.days);
   useCoachingAutoSync(coaching.syncSources, s.data.days[0]);
-  const [selectedActivity, setSelectedActivity] =
-    useState<CoachingActivity | null>(null);
+  const { selectedActivity, setSelectedActivity } = useSelectedActivity(
+    coaching.byDay
+  );
   const profileId = useActiveProfileLive()?.id ?? null;
   const weekStart = s.data.days[0] ?? "";
   const rawMatched = useMatchedSessions(profileId, s.data.days);
