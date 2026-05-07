@@ -10,6 +10,10 @@ import type {
 } from "../../ports/persistence-port";
 import type { SessionMatchRepository } from "../../ports/session-match-repository";
 
+export type CoachingActivityForConvert = NonNullable<
+  Awaited<ReturnType<CoachingRepository["getById"]>>
+>;
+
 export type ConvertManualInput = { activityId: string };
 
 export type ConvertManualDeps = {

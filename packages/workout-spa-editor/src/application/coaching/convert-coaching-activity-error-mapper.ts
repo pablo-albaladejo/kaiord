@@ -31,10 +31,13 @@ const isTimeout = (err: unknown): boolean =>
   err instanceof Error && /timeout|timed out/i.test(err.message);
 
 const isTransport = (err: unknown): boolean => {
-  if (err instanceof TypeError) return true; // fetch network failure
-  if (err instanceof Error && /network|fetch failed/i.test(err.message))
-    return true;
-  return false;
+  // Don't treat ALL TypeErrors as transport errors — internal coding
+  // bugs in the AI pipeline (e.g. `undefined.foo`) also throw
+  // TypeError and would otherwise be misclassified as network. Only
+  // accept TypeError when its message clearly indicates a fetch /
+  // network failure; let everything else fall through to "ai-error".
+  if (!(err instanceof Error)) return false;
+  return /network|fetch|failed to fetch/i.test(err.message);
 };
 
 const isInvalidKrd = (err: unknown): boolean => {

@@ -13,7 +13,12 @@
 import { namespaceSourceId } from "../../types/coaching-activity-record";
 import { buildCoachingTemplateKrd } from "./coaching-template";
 import { buildStructuredCoachingWorkout } from "./coaching-workout-builder";
+import {
+  handleExistingManualWorkout,
+  manualMatchSource,
+} from "./convert-coaching-activity-manual-helpers";
 import type {
+  CoachingActivityForConvert,
   ConvertManualDeps,
   ConvertManualInput,
   ConvertManualResult,
@@ -26,46 +31,11 @@ export type {
   ConvertManualResult,
 } from "./convert-coaching-activity-manual-types";
 
-const ensureMatch = (
+const createNewWorkout = async (
   deps: ConvertManualDeps,
-  profileId: string,
-  coachingActivityId: string,
-  workoutId: string,
-  date: string
-): Promise<{ created: boolean }> =>
-  ensureSessionMatch(deps.sessionMatches, {
-    profileId,
-    coachingActivityId,
-    workoutId,
-    date,
-    source: "auto-conversion",
-    newId: deps.newMatchId,
-    clock: deps.clock,
-  });
-
-export const convertCoachingActivityManual = async (
-  input: ConvertManualInput,
-  deps: ConvertManualDeps
+  activity: CoachingActivityForConvert,
+  ns: string
 ): Promise<ConvertManualResult> => {
-  deps.analytics.event("coaching.convert_manual.invoked");
-  const activity = await deps.coaching.getById(input.activityId);
-  if (!activity)
-    throw new Error(`Coaching activity not found: ${input.activityId}`);
-
-  const ns = namespaceSourceId(activity.profileId, activity.sourceId);
-  const existing = await deps.workouts.getBySourceId(activity.source, ns);
-  if (existing) {
-    await ensureMatch(
-      deps,
-      activity.profileId,
-      activity.id,
-      existing.id,
-      activity.date
-    );
-    deps.analytics.event("coaching.convert_manual.success", { created: false });
-    return { workoutId: existing.id, created: false };
-  }
-
   const workout = buildStructuredCoachingWorkout({
     id: deps.newWorkoutId(),
     activity,
@@ -75,13 +45,34 @@ export const convertCoachingActivityManual = async (
     now: deps.clock(),
   });
   await deps.workouts.put(workout);
-  await ensureMatch(
-    deps,
-    activity.profileId,
-    activity.id,
-    workout.id,
-    activity.date
-  );
+  await ensureSessionMatch(deps.sessionMatches, {
+    profileId: activity.profileId,
+    coachingActivityId: activity.id,
+    workoutId: workout.id,
+    date: activity.date,
+    source: manualMatchSource,
+    newId: deps.newMatchId,
+    clock: deps.clock,
+  });
   deps.analytics.event("coaching.convert_manual.success", { created: true });
   return { workoutId: workout.id, created: true };
+};
+
+export const convertCoachingActivityManual = async (
+  input: ConvertManualInput,
+  deps: ConvertManualDeps
+): Promise<ConvertManualResult> => {
+  // Existence guard runs BEFORE the `invoked` analytics event so a
+  // missing activity does not produce an orphaned invoked → no
+  // success/failure pair (telemetry contract).
+  const activity = await deps.coaching.getById(input.activityId);
+  if (!activity)
+    throw new Error(`Coaching activity not found: ${input.activityId}`);
+
+  deps.analytics.event("coaching.convert_manual.invoked");
+
+  const ns = namespaceSourceId(activity.profileId, activity.sourceId);
+  const existing = await deps.workouts.getBySourceId(activity.source, ns);
+  if (existing) return handleExistingManualWorkout(deps, activity, existing.id);
+  return createNewWorkout(deps, activity, ns);
 };

@@ -154,7 +154,7 @@ describe("convertAndAutoMatch", () => {
     // Arrange
     const activity = stubActivity();
     const existingWorkout: WorkoutRecord = {
-      id: "w-was-matched",
+      id: "w-converted-no-match",
       date: activity.date,
       sport: activity.sport,
       source: activity.source,
@@ -181,12 +181,12 @@ describe("convertAndAutoMatch", () => {
     );
 
     // Assert
-    expect(result.workoutId).toBe("w-was-matched");
+    expect(result.workoutId).toBe("w-converted-no-match");
     expect(result.created).toBe(false);
-    const healed = await matches.getByWorkoutId("p1", "w-was-matched");
+    const healed = await matches.getByWorkoutId("p1", "w-converted-no-match");
     expect(healed).toMatchObject({
       coachingActivityId: activity.id,
-      workoutId: "w-was-matched",
+      workoutId: "w-converted-no-match",
       source: "auto-conversion",
     });
   });

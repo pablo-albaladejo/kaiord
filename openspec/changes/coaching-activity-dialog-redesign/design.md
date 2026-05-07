@@ -143,13 +143,13 @@ A v10 upgrade fires once per browser. It scans the `coachingActivities` and `wor
 
 **Layer.** Adapter (Dexie). Pure data transformation — no application logic spills into the migration.
 
-**Risk:** if the migration is interrupted (browser closed mid-scan), Dexie's version flag advances anyway, so the migration won't re-run. Mitigation: scan logic re-runs harmlessly on the next session if any pairs are still unmatched (because we add an "and matches table count is short" check).
+**Risk:** if the migration is interrupted (browser closed mid-scan), Dexie's version flag advances anyway, so the migration won't re-run. Mitigation: every coaching-derived creation path (`convertAndAutoMatch`, `convertCoachingActivityWithAi`, `convertCoachingActivityManual`) calls the same `ensureSessionMatch` helper, which creates a missing match on every call. So any pairs left unmatched by the v10 cut-off get healed lazily on next user interaction with the activity. The dialog itself runs a per-open auto-heal as a third belt-and-braces layer.
 
 ### D9. Dialog renders 3 primary buttons in `no-workout` state
 
 When `matchState` resolves to "no workout exists for this activity":
 
-```
+```text
 [AI process]      ← primary, accent color
 [Edit manually]   ← secondary
 [Match existing]  ← secondary, opens MatchToPicker

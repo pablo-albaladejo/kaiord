@@ -5,7 +5,7 @@
 The system SHALL provide a use case `convertCoachingActivityWithAi(activityId, providerConfig, abortSignal)` that runs the AI pipeline synchronously and writes both the resulting workout AND its `SessionMatch` atomically. The use case:
 
 1. Reads the `CoachingActivityRecord` by id (rejects with `not-found` if missing).
-2. Reads the activity's `description`. If empty/undefined, builds the prompt as `"${activity.title} (${activity.sport.label})"`. Otherwise uses the description verbatim.
+2. Reads the activity's `description`. If empty/undefined, builds the prompt as `"${activity.title} (${activity.sport})"`. Otherwise uses the description verbatim.
 3. Computes `namespacedSourceId = ${activity.profileId}:${activity.sourceId}`.
 4. Calls `WorkoutRepository.getBySourceId(activity.source, namespacedSourceId)`. If a `WorkoutRecord` already exists, returns `{ ok: true, workoutId, created: false }` AND ensures a matching `SessionMatch` row exists (creates one silently if missing — handles legacy data per the Dexie v10 retro-fix invariant).
 5. Otherwise, calls `generateWorkoutKrd({ text, provider, sport })` with the abort signal piped through. The model produces a KRD object.
