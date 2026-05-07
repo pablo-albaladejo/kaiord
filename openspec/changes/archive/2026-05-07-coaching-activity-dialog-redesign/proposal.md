@@ -1,3 +1,5 @@
+> Completed: 2026-05-07
+
 ## Why
 
 Today, clicking a coaching activity card opens a dialog with one ambiguous "Convert to workout" button. Convert creates a RAW workout, navigates to the editor, which then shows "This workout has no structured data yet" — a dead end. The user has no obvious path to AI-process the description or to start manual KRD construction. The "Process with AI" affordance exists in `RawWorkoutDialog` but is unreachable from the coaching flow. Convert also fails to create a `session_match`, leaving the calendar with two cards (the activity and the new workout) for the same training session — visual duplication that compounds with every conversion.
