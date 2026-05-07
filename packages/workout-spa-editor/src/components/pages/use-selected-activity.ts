@@ -9,7 +9,7 @@
  * would freeze the original reference with `description: undefined` and
  * the dialog would stay on "Loading description…" forever.
  */
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import type { CoachingActivity } from "../../types/coaching-activity";
 
@@ -30,7 +30,9 @@ export const useSelectedActivity = (
     }
     return null;
   }, [id, byDay]);
-  const setSelectedActivity = (a: CoachingActivity | null): void =>
-    setId(a?.id ?? null);
+  const setSelectedActivity = useCallback(
+    (a: CoachingActivity | null): void => setId(a?.id ?? null),
+    []
+  );
   return { selectedActivity, setSelectedActivity };
 };
