@@ -6,9 +6,10 @@
  * standard editor with file upload / AI input.
  *
  * For coaching-derived workouts (`session_match` row exists with a
- * coaching source per design D4), renders a `CoachingSidebar` to the
- * right of the step editor so the user can read the original
- * prescription while building or refining the structured workout.
+ * coaching source per design D4), `EditorBody` renders a
+ * `CoachingSidebar` to the right of the step editor so the user can
+ * read the original prescription while building or refining the
+ * structured workout.
  */
 
 import { useSearch } from "wouter";
@@ -19,8 +20,9 @@ import { useDeleteCleanup } from "../../hooks/useDeleteCleanup";
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
-import { CoachingSidebar } from "../organisms/CoachingSidebar/CoachingSidebar";
 import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";
+import { DateBanner } from "./DateBanner";
+import { EditorBody } from "./EditorBody";
 import { EditorLoading, EditorNoData } from "./EditorLoadingState";
 import { EditorNewWorkout } from "./EditorNewWorkout";
 import { EditorWorkflowBar } from "./EditorWorkflowBar";
@@ -82,41 +84,5 @@ export default function EditorPage({ id }: EditorPageProps) {
         </EditorBody>
       )}
     </div>
-  );
-}
-
-function EditorBody({
-  sidebar,
-  children,
-}: {
-  sidebar: ReturnType<typeof useCoachingSidebar>;
-  children: React.ReactNode;
-}) {
-  if (!sidebar) return <>{children}</>;
-  return (
-    <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
-      <div className="flex-1">{children}</div>
-      <div className="lg:w-80 lg:flex-shrink-0">
-        <CoachingSidebar activity={sidebar.activity} />
-      </div>
-    </div>
-  );
-}
-
-function DateBanner({ date }: { date: string }) {
-  const parsed = new Date(date + "T12:00:00Z");
-  if (isNaN(parsed.getTime())) return null;
-
-  const formatted = parsed.toLocaleDateString("en-US", {
-    weekday: "long",
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  });
-
-  return (
-    <p data-testid="date-banner" className="text-sm text-muted-foreground">
-      Creating workout for {formatted}
-    </p>
   );
 }
