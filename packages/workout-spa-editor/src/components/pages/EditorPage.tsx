@@ -4,15 +4,23 @@
  * When `id` is provided, loads the workout from Dexie and shows
  * workflow actions (accept, push, re-push). Otherwise shows the
  * standard editor with file upload / AI input.
+ *
+ * For coaching-derived workouts (`session_match` row exists with a
+ * coaching source per design D4), renders a `CoachingSidebar` to the
+ * right of the step editor so the user can read the original
+ * prescription while building or refining the structured workout.
  */
 
 import { useSearch } from "wouter";
 
+import { useActiveProfileLive } from "../../hooks/use-active-profile-live";
 import { useAppHandlers } from "../../hooks/useAppHandlers";
 import { useDeleteCleanup } from "../../hooks/useDeleteCleanup";
 import { ROUTE_HEADING_ATTR } from "../../routing/constants";
 import { useWorkoutStore } from "../../store/workout-store";
 import type { Workout } from "../../types/krd";
+import { CoachingSidebar } from "../organisms/CoachingSidebar/CoachingSidebar";
+import { useCoachingSidebar } from "../organisms/CoachingSidebar/use-coaching-sidebar";
 import { EditorLoading, EditorNoData } from "./EditorLoadingState";
 import { EditorNewWorkout } from "./EditorNewWorkout";
 import { EditorWorkflowBar } from "./EditorWorkflowBar";
@@ -36,6 +44,8 @@ export default function EditorPage({ id }: EditorPageProps) {
 
   const { record, loading } = useWorkoutRecord(id);
   const { acceptWorkout, pushWorkout } = useEditorActions(record);
+  const profileId = useActiveProfileLive()?.id ?? null;
+  const sidebarData = useCoachingSidebar(profileId, id);
 
   const workout = currentWorkout?.extensions?.structured_workout as
     | Workout
@@ -60,15 +70,35 @@ export default function EditorPage({ id }: EditorPageProps) {
       )}
       {!id && <EditorNewWorkout workout={workout} />}
       {workout && currentWorkout && (
-        <WorkoutSection
-          workout={workout}
-          krd={currentWorkout}
-          selectedStepId={selectedStepId}
-          onStepSelect={handleStepSelect}
-          onStepReorder={reorderStep}
-          onReorderStepsInBlock={reorderStepsInBlock}
-        />
+        <EditorBody sidebar={sidebarData}>
+          <WorkoutSection
+            workout={workout}
+            krd={currentWorkout}
+            selectedStepId={selectedStepId}
+            onStepSelect={handleStepSelect}
+            onStepReorder={reorderStep}
+            onReorderStepsInBlock={reorderStepsInBlock}
+          />
+        </EditorBody>
       )}
+    </div>
+  );
+}
+
+function EditorBody({
+  sidebar,
+  children,
+}: {
+  sidebar: ReturnType<typeof useCoachingSidebar>;
+  children: React.ReactNode;
+}) {
+  if (!sidebar) return <>{children}</>;
+  return (
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-start">
+      <div className="flex-1">{children}</div>
+      <div className="lg:w-80 lg:flex-shrink-0">
+        <CoachingSidebar activity={sidebar.activity} />
+      </div>
     </div>
   );
 }
