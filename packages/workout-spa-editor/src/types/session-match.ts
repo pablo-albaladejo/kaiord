@@ -15,6 +15,7 @@ export const sessionMatchSourceSchema = z.enum([
   "manual",
   "auto-suggestion",
   "auto-conversion",
+  "auto-coaching-v10-migration",
 ]);
 
 export type SessionMatchSource = z.infer<typeof sessionMatchSourceSchema>;
