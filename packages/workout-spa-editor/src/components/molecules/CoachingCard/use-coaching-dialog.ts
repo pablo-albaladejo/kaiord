@@ -1,33 +1,42 @@
 /**
- * Hook backing CoachingActivityDialog: lazy description load + convert
- * + match/split actions.
+ * Hook backing CoachingActivityDialog: lazy description load, 3-state
+ * dispatch (no-workout / converted / matched per design D5), auto-heal
+ * for legacy converted-without-match rows (D8 belt-and-braces), AI/
+ * Manual creation handlers, and match/split actions.
  *
- * Captures `targetProfileId` on dialog open so a profile switch while
- * the dialog is open does NOT redirect any write to the wrong profile
- * (mirrors the `linkAccount` profile-switch-safe pattern). Match/split
- * handlers live in `use-coaching-dialog-actions.ts` so this orchestrator
- * stays under the function- and file-size lint caps.
+ * `dialogState` is the single source of truth for which UI to render —
+ * the JSX never branches on workout-existence directly.
  */
 
-import { useEffect, useState } from "react";
-
-import { useActiveProfileLive } from "../../../hooks/use-active-profile-live";
-import {
-  type ActivityMatchState,
-  useActivityMatchState,
-} from "../../../hooks/use-activity-match-state";
+import type { ActivityMatchState } from "../../../hooks/use-activity-match-state";
 import type { CoachingActivity } from "../../../types/coaching-activity";
+import type { UseCoachingAi } from "./use-coaching-ai-handler";
+import { useCoachingAi } from "./use-coaching-ai-handler";
+import { useCoachingAutoHeal } from "./use-coaching-auto-heal";
 import { useCoachingConvert } from "./use-coaching-convert";
 import { useCoachingDialogActions } from "./use-coaching-dialog-actions";
+import {
+  toMatchState,
+  useExpandActivityOnOpen,
+  useTargetProfileId,
+} from "./use-coaching-dialog-helpers";
+import type { CoachingDialogState } from "./use-coaching-dialog-state";
+import { useCoachingDialogState } from "./use-coaching-dialog-state";
+import type { UseCoachingManual } from "./use-coaching-manual-handler";
+import { useCoachingManual } from "./use-coaching-manual-handler";
+import { useCoachingDialogStateObserved } from "./use-coaching-state-observed";
 
 export type UseCoachingDialog = {
   error: string | null;
   converting: boolean;
   matchState: ActivityMatchState | undefined;
+  dialogState: CoachingDialogState | undefined;
   matching: boolean;
   splitting: boolean;
   pickerOpen: boolean;
   targetProfileId: string | null;
+  ai: UseCoachingAi;
+  manual: UseCoachingManual;
   handleConvert: () => Promise<void>;
   openPicker: () => void;
   closePicker: () => void;
@@ -40,44 +49,29 @@ export const useCoachingDialog = (
   onClose: () => void,
   expandActivity: (activity: CoachingActivity) => void
 ): UseCoachingDialog => {
-  const activeProfileId = useActiveProfileLive()?.id ?? null;
-  const [targetProfileId, setTargetProfileId] = useState<string | null>(null);
-
-  useEffect(() => {
-    if (!activity) {
-      setTargetProfileId(null);
-      return;
-    }
-    setTargetProfileId((prev) => prev ?? activeProfileId);
-  }, [activity, activeProfileId]);
-
-  useEffect(() => {
-    if (!activity || !activeProfileId) return;
-    if (activity.description !== undefined) return;
-    expandActivity(activity);
-  }, [activity, activeProfileId, expandActivity]);
-
-  const matchState = useActivityMatchState(
-    targetProfileId,
-    activity?.id ?? null
-  );
+  const targetProfileId = useTargetProfileId(activity);
+  useExpandActivityOnOpen(activity, expandActivity);
+  const dialogState = useCoachingDialogState(targetProfileId, activity);
+  const matchState = toMatchState(dialogState);
+  useCoachingAutoHeal(activity, targetProfileId, dialogState);
+  useCoachingDialogStateObserved(activity, dialogState);
   const actions = useCoachingDialogActions(
     activity,
     targetProfileId,
     matchState
   );
-  const { error, converting, handleConvert } = useCoachingConvert(
-    activity,
-    targetProfileId,
-    onClose
-  );
-
+  const ai = useCoachingAi(activity, targetProfileId, onClose);
+  const manual = useCoachingManual(activity, targetProfileId, onClose);
+  const convert = useCoachingConvert(activity, targetProfileId, onClose);
   return {
-    error,
-    converting,
+    error: convert.error,
+    converting: convert.converting,
     matchState,
+    dialogState,
     targetProfileId,
-    handleConvert,
+    ai,
+    manual,
+    handleConvert: convert.handleConvert,
     ...actions,
   };
 };
