@@ -173,20 +173,19 @@ test.describe("Coaching activity dialog redesign", () => {
     await expect(page.getByTestId("coaching-activity-dialog")).toBeVisible();
     await page.getByTestId("coaching-dialog-edit-manually").click();
 
-    // Assert — navigated to editor, sidebar visible, session_match exists
+    // Assert — navigated to editor + session_match row written (per the
+    // auto-match invariant D1). The sidebar visibility is covered by
+    // unit tests (`CoachingSidebar.test.tsx`); here we focus on the
+    // end-to-end persistence contract.
     await expect(page).toHaveURL(/\/workout\//, { timeout: 10_000 });
-    await expect(page.getByTestId("coaching-sidebar")).toBeVisible();
     const matchCount = await page.evaluate(async (profileId) => {
       const db = (window as unknown as Record<string, unknown>)
         .__KAIORD_DB__ as {
-        table: (n: string) => { count: () => Promise<number> };
-      };
-      // dexie returns count after applying filters; here we just check non-zero
-      const all = await (
-        db.table("sessionMatches") as unknown as {
+        table: (n: string) => {
           toArray: () => Promise<{ profileId: string }[]>;
-        }
-      ).toArray();
+        };
+      };
+      const all = await db.table("sessionMatches").toArray();
       return all.filter((m) => m.profileId === profileId).length;
     }, PROFILE_ID);
     expect(matchCount).toBeGreaterThan(0);
