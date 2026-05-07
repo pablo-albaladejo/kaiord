@@ -76,9 +76,7 @@ describe("formatCoachingDescription", () => {
 
     // Assert
     const calentamiento = result.find((p) =>
-      p.inlines.some(
-        (i) => i.kind === "strong" && i.value === "Calentamiento:"
-      )
+      p.inlines.some((i) => i.kind === "strong" && i.value === "Calentamiento:")
     );
     expect(calentamiento).toBeDefined();
     const parte = result.find((p) =>
