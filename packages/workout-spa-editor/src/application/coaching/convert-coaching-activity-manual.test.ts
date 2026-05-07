@@ -161,6 +161,7 @@ describe("convertCoachingActivityManual", () => {
     const stored = await deps.workouts.getById("w-legacy-raw");
     expect(stored?.krd).not.toBeNull();
     expect(stored?.state).toBe("structured");
+    expect(stored?.updatedAt).toBe(NOW);
   });
 
   it("should emit invoked + success analytics events", async () => {
