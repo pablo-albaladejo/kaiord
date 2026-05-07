@@ -1,5 +1,0 @@
----
-"@kaiord/train2go-bridge": minor
----
-
-Redesign the Train2Go bridge popup as an identity card sharing the same structural CSS as Garmin (coral accent `#f74464`, primary "Open editor" CTA + secondary "Open Train2Go" link). Drops the `Read This Week` button; auto-fetches on open with bounded per-phase timeouts (snapshot 1 s, ping 3 s, rollup 8 s) and a 5-minute `lastWeeklyRollup` TTL cache so rapid popup re-opens don't burn the 200 KiB `read-week` parse. Renders a one-line weekly rollup ("<N> sessions planned · <M> done · workload <X>") that auto-loads when the cache is stale; rollup-only failures preserve the connected state with a "Rollup unavailable — try again" line instead of dumping to the disconnected card. The status pill carries the user's name plus an optional coach sub-line — `parsePingJson` now opportunistically extracts `coachName` from `data.user.coach.name` / `data.user.trainer.name` / `coach_name` / `trainer_name` shapes (no new endpoint, no allowlist change). Refresh-icon header button bypasses the rollup TTL on click.
