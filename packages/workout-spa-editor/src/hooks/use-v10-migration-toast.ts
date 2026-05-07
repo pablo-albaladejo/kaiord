@@ -23,10 +23,8 @@ import { useToastContext } from "../contexts/ToastContext";
 // top-level SCREAMING_SNAKE_CASE constants with literal RHS. The
 // concrete count is surfaced via the analytics event payload, not
 // the toast title.
-const TOAST_V10_MIGRATED_SINGULAR =
-  "1 workout linked to coaching activities";
-const TOAST_V10_MIGRATED_PLURAL =
-  "Workouts linked to coaching activities";
+const TOAST_V10_MIGRATED_SINGULAR = "1 workout linked to coaching activities";
+const TOAST_V10_MIGRATED_PLURAL = "Workouts linked to coaching activities";
 
 export const useV10MigrationToast = (): void => {
   const analytics = useAnalytics();
