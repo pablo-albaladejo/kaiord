@@ -61,8 +61,13 @@ export const useCoachingAi = (
     setProcessing(true);
     const ctrl = new AbortController();
     abortRef.current = ctrl;
+    // The view-model `activity.id` is `${source}:${sourceId}`; the
+    // persistence record id (what `coaching.getById` keys on) is the
+    // composite `${profileId}:${source}:${sourceId}` — see
+    // `buildCoachingActivityId`. Reconstruct here so the use case can
+    // load the seeded row.
     const result = await runConvertWithAi({
-      activityId: activity.id,
+      activityId: `${profileId}:${activity.id}`,
       provider,
       abortSignal: ctrl.signal,
       persistence,

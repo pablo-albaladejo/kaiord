@@ -37,7 +37,7 @@ const seedActivity = async (
   persistence: ReturnType<typeof createInMemoryPersistence>
 ) => {
   const record: CoachingActivityRecord = {
-    id: activity.id,
+    id: `profile-1:${activity.id}`,
     profileId: "profile-1",
     source: "train2go",
     sourceId: "abc",
