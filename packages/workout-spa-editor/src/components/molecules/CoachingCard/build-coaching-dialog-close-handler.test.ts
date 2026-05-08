@@ -34,5 +34,4 @@ describe("buildCoachingDialogCloseHandler", () => {
     expect(cancelAi).toHaveBeenCalledTimes(1);
     expect(onClose).toHaveBeenCalledTimes(1);
   });
-
 });
