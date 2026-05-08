@@ -64,7 +64,7 @@ describe("convertCoachingActivityManual", () => {
     // Assert
     const match = await deps.sessionMatches.getByActivityId("p1", activity.id);
     expect(match?.workoutId).toBe("w-new");
-    expect(match?.source).toBe("auto-conversion");
+    expect(match?.source).toBe("auto-coaching");
   });
 
   it("should be idempotent and return the existing workout on re-call", async () => {

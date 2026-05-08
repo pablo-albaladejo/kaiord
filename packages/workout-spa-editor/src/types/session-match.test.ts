@@ -28,8 +28,8 @@ describe("sessionMatchSourceSchema", () => {
     expect(sessionMatchSourceSchema.parse("auto-suggestion")).toBe(
       "auto-suggestion"
     );
-    expect(sessionMatchSourceSchema.parse("auto-conversion")).toBe(
-      "auto-conversion"
+    expect(sessionMatchSourceSchema.parse("auto-coaching")).toBe(
+      "auto-coaching"
     );
   });
 
@@ -59,8 +59,8 @@ describe("sessionMatchSchema", () => {
       sessionMatchSchema.parse(baseRow({ source: "auto-suggestion" })).source
     ).toBe("auto-suggestion");
     expect(
-      sessionMatchSchema.parse(baseRow({ source: "auto-conversion" })).source
-    ).toBe("auto-conversion");
+      sessionMatchSchema.parse(baseRow({ source: "auto-coaching" })).source
+    ).toBe("auto-coaching");
   });
 
   it("should require non-empty id, profileId, coachingActivityId, workoutId", () => {
